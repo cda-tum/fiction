@@ -72,7 +72,7 @@ struct design_sidb_gates_params
         RANDOM
     };
     /**
-     * Parameter for the `is_operational` function.
+     * Parameters for the `is_operational` function.
      */
     is_operational_params operational_params{};
     /**

@@ -869,17 +869,17 @@ TEST_CASE("Test identity of two layouts", "[layout-utils]")
     {
         SECTION("identical layouts")
         {
-            CHECK(are_layouts_identical(lyt_first, lyt_second));
+            CHECK(are_cell_layouts_identical(lyt_first, lyt_second));
         }
         SECTION("different cell type")
         {
             lyt_second.assign_cell_type({5, 3}, sidb_cell_clk_lyt::cell_type::INPUT);
-            CHECK(!are_layouts_identical(lyt_first, lyt_second));
+            CHECK(!are_cell_layouts_identical(lyt_first, lyt_second));
         }
         SECTION("different number of cells")
         {
             lyt_second.assign_cell_type({5, 3}, sidb_cell_clk_lyt::cell_type::EMPTY);
-            CHECK(!are_layouts_identical(lyt_first, lyt_second));
+            CHECK(!are_cell_layouts_identical(lyt_first, lyt_second));
         }
     }
 
@@ -890,7 +890,7 @@ TEST_CASE("Test identity of two layouts", "[layout-utils]")
     {
         SECTION("identical layouts")
         {
-            CHECK(are_layouts_identical(cds_first, cds_second));
+            CHECK(are_cell_layouts_identical(cds_first, cds_second));
         }
         SECTION("different charge state")
         {
@@ -899,7 +899,7 @@ TEST_CASE("Test identity of two layouts", "[layout-utils]")
             CHECK(cds_first.num_negative_sidbs() == cds_second.num_negative_sidbs());
             CHECK(cds_first.num_positive_sidbs() == cds_second.num_positive_sidbs());
             CHECK(cds_first.num_neutral_sidbs() == cds_second.num_neutral_sidbs());
-            CHECK(!are_layouts_identical(cds_first, cds_second));
+            CHECK(!are_cell_layouts_identical(cds_first, cds_second));
         }
     }
 
@@ -915,19 +915,19 @@ TEST_CASE("Test identity of two layouts", "[layout-utils]")
 
         SECTION("identical layouts")
         {
-            CHECK(are_layouts_identical(defect_first, defect_second));
+            CHECK(are_cell_layouts_identical(defect_first, defect_second));
         }
         SECTION("different layouts")
         {
             SECTION("different number of defects")
             {
                 defect_second.assign_sidb_defect({1, 2}, sidb_defect{sidb_defect_type::NONE});
-                CHECK(!are_layouts_identical(defect_first, defect_second));
+                CHECK(!are_cell_layouts_identical(defect_first, defect_second));
             }
             SECTION("different defect type")
             {
                 defect_second.assign_sidb_defect({1, 2}, sidb_defect{sidb_defect_type::DB});
-                CHECK(!are_layouts_identical(defect_first, defect_second));
+                CHECK(!are_cell_layouts_identical(defect_first, defect_second));
             }
         }
     }

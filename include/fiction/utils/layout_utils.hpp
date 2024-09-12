@@ -5,7 +5,6 @@
 #ifndef FICTION_LAYOUT_UTILS_HPP
 #define FICTION_LAYOUT_UTILS_HPP
 
-#include "fiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp"
 #include "fiction/layouts/coordinates.hpp"
 #include "fiction/technology/cell_ports.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
@@ -693,13 +692,15 @@ template <typename CoordinateType>
  * properties such as the number of cells, the types of cells, defects (if applicable), and charge states (if
  * applicable). The comparison is done in a detailed manner depending on the specific layout type.
  *
+ * @Note The aspect ratios of the cell-level layouts are not compared.
+ *
  * @tparam Lyt The layout type. Must be a cell-level layout.
  * @param first_lyt The first layout to compare.
  * @param second_lyt The second layout to compare.
  * @return `true` if the layouts are identical, `false` otherwise.
  */
 template <typename Lyt>
-[[nodiscard]] inline bool are_layouts_identical(const Lyt& first_lyt, const Lyt& second_lyt) noexcept
+[[nodiscard]] inline bool are_cell_layouts_identical(const Lyt& first_lyt, const Lyt& second_lyt) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
 
@@ -716,8 +717,9 @@ template <typename Lyt>
             if (first_lyt.get_cell_type(c) != second_lyt.get_cell_type(c))
             {
                 different_cells = true;
-                return;
+                return false; // abort
             }
+            return true; // keep looping
         });
 
     if (different_cells)
@@ -740,8 +742,9 @@ template <typename Lyt>
                 if (first_lyt.get_sidb_defect(defect_old.first) != second_lyt.get_sidb_defect(defect_old.first))
                 {
                     different_defects = true;
-                    return;
+                    return false; // abort
                 }
+                return true; // keep looping
             });
 
         if (different_defects)
@@ -774,8 +777,9 @@ template <typename Lyt>
                 if (first_lyt.get_charge_state(c) != second_lyt.get_charge_state(c))
                 {
                     different_charge_state = true;
-                    return;
+                    return false; // abort
                 }
+                return true; // keep looping
             });
 
         if (different_charge_state)

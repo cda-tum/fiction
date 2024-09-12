@@ -42,15 +42,14 @@ inline void random_sidb_layout_generator(pybind11::module& m)
     namespace py = pybind11;
     using namespace pybind11::literals;
 
-    // todo update docu
     py::enum_<typename fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>::positive_charges>(
         m, "positive_charges", DOC(fiction_generate_random_sidb_layout_params_positive_charges))
         .value("ALLOWED",
-               fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>::positive_charges::ALLOWED)
+               fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>::positive_charges::ALLOWED, DOC(fiction_generate_random_sidb_layout_params_positive_charges_ALLOWED))
         .value("FORBIDDEN",
-               fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>::positive_charges::FORBIDDEN)
-        .value("CAN_OCCUR",
-               fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>::positive_charges::CAN_OCCUR);
+               fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>::positive_charges::FORBIDDEN, DOC(fiction_generate_random_sidb_layout_params_positive_charges_FORBIDDEN))
+        .value("MAY_OCCUR",
+               fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>::positive_charges::MAY_OCCUR, DOC(fiction_generate_random_sidb_layout_params_positive_charges_CAN_OCCUR));
 
     /**
      * Parameters.
@@ -78,8 +77,8 @@ inline void random_sidb_layout_generator(pybind11::module& m)
                        &fiction::generate_random_sidb_layout_params<
                            fiction::offset::ucoord_t>::maximal_attempts_for_multiple_layouts,
                        DOC(fiction_generate_random_sidb_layout_params_maximal_attempts_for_multiple_layouts));
-    // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
+    // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
     detail::random_layout_generator<py_sidb_100_lattice>(m);
     detail::random_layout_generator<py_sidb_111_lattice>(m);
 }

@@ -179,7 +179,7 @@ TEST_CASE("Random cube::coord_t layout generation", "[generate-random-sidb-layou
         const auto& first_lyt  = result_lyts.front();
         const auto& second_lyt = result_lyts.back();
 
-        CHECK(!are_layouts_identical(first_lyt, second_lyt));
+        CHECK(!are_cell_layouts_identical(first_lyt, second_lyt));
     }
 
     SECTION("Check all pairwise distances")
@@ -341,7 +341,7 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[generate-random-sidb-la
         const auto& first_lyt  = result_lyts.front();
         const auto& second_lyt = result_lyts.back();
 
-        CHECK(!are_layouts_identical(first_lyt, second_lyt));
+        CHECK(!are_cell_layouts_identical(first_lyt, second_lyt));
     }
 
     SECTION("Check correct use of skeleton layout when generating only one random layout")

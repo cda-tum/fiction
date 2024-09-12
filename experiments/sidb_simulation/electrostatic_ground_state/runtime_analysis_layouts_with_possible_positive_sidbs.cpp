@@ -43,7 +43,7 @@ int main()  // NOLINT
     auto random_layouts_params = generate_random_sidb_layout_params<cell<Lyt>>{
         {{0, 0}, {10, 10}},
         0,
-        generate_random_sidb_layout_params<cell<Lyt>>::positive_charges::CAN_OCCUR,
+        generate_random_sidb_layout_params<cell<Lyt>>::positive_charges::MAY_OCCUR,
         sim_params,
         static_cast<uint64_t>(10E6),
         10};
