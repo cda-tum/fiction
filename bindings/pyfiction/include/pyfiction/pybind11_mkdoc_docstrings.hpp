@@ -295,12 +295,14 @@ Returns:
     A cell-level layout that implements `lyt`'s gate types with
     building blocks defined in `GateLibrary`.)doc";
 
-static const char *__doc_fiction_are_layouts_identical =
+static const char *__doc_fiction_are_cell_layouts_identical =
 R"doc(This function checks whether the given layouts `first_lyt` and
 `second_lyt` are identical by comparing various properties such as the
 number of cells, the types of cells, defects (if applicable), and
 charge states (if applicable). The comparison is done in a detailed
 manner depending on the specific layout type.
+
+@Note The aspect ratios of the cell-level layouts are not compared.
 
 Template parameter ``Lyt``:
     The layout type. Must be a cell-level layout.
@@ -3514,7 +3516,7 @@ static const char *__doc_fiction_design_sidb_gates_params_design_sidb_gates_mode
 
 static const char *__doc_fiction_design_sidb_gates_params_number_of_sidbs = R"doc(Number of SiDBs placed in the canvas to create a working gate.)doc";
 
-static const char *__doc_fiction_design_sidb_gates_params_operational_params = R"doc(Parameter for the `is_operational` function.)doc";
+static const char *__doc_fiction_design_sidb_gates_params_operational_params = R"doc(Parameters for the `is_operational` function.)doc";
 
 static const char *__doc_fiction_design_sidb_gates_params_termination_cond =
 R"doc(The design process is terminated after a valid SiDB gate design is
@@ -10811,13 +10813,13 @@ static const char *__doc_fiction_generate_random_sidb_layout_params_positive_cha
 R"doc(Positive charges can occur (i.e. SiDBs can be placed right next to
 each other).)doc";
 
-static const char *__doc_fiction_generate_random_sidb_layout_params_positive_charges_CAN_OCCUR =
-R"doc(Positive charges can occur, which means that the
-`can_positive_charges_occur` function returns `true`.)doc";
-
 static const char *__doc_fiction_generate_random_sidb_layout_params_positive_charges_FORBIDDEN =
 R"doc(Positive charges are not allowed to occur (i.e. SiDBs need to be
 seperated by a few lattice points).)doc";
+
+static const char *__doc_fiction_generate_random_sidb_layout_params_positive_charges_MAY_OCCUR =
+R"doc(Positive charges can occur, which means that the
+`can_positive_charges_occur` function returns `true`.)doc";
 
 static const char *__doc_fiction_generate_random_sidb_layout_params_positive_sidbs =
 R"doc(If positively charged SiDBs should be prevented, SiDBs are not placed
