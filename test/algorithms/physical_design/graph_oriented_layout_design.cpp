@@ -25,6 +25,7 @@
 #include <array>
 #include <cstdint>
 #include <functional>
+#include <stdexcept>
 
 using namespace fiction;
 
