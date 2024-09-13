@@ -383,7 +383,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
         SECTION("flood_fill")
         {
             const auto op_domain = operational_domain_flood_fill(lat, std::vector<tt>{create_id_tt()}, 1,
-                                                                 op_domain_params, std::nullopt, &op_domain_stats);
+                                                                 op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct size
             CHECK(op_domain.operational_values.size() == 1);
@@ -405,8 +405,8 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 
                 SECTION("one random sample")
                 {
-                    const auto op_domain_3d = operational_domain_flood_fill(
-                        lat, std::vector<tt>{create_id_tt()}, 1, op_domain_params, std::nullopt, &op_domain_stats);
+                    const auto op_domain_3d = operational_domain_flood_fill(lat, std::vector<tt>{create_id_tt()}, 1,
+                                                                            op_domain_params, &op_domain_stats);
 
                     // check if the operational domain has the correct size
                     CHECK(op_domain_3d.operational_values.size() == 1);
@@ -423,9 +423,8 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
                 }
                 SECTION("no random sample but given parameter point")
                 {
-                    const auto op_domain_3d = operational_domain_flood_fill(
-                        lat, std::vector<tt>{create_id_tt()}, 0, op_domain_params,
-                        std::vector<parameter_point>{parameter_point({5.5, 5.0, -0.32})}, &op_domain_stats);
+                    const auto op_domain_3d = operational_domain_flood_fill(lat, std::vector<tt>{create_id_tt()}, 0,
+                                                                            op_domain_params, &op_domain_stats);
 
                     // check if the operational domain has the correct size
                     CHECK(op_domain_3d.operational_values.size() == 1);
@@ -511,7 +510,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
         SECTION("flood_fill")
         {
             const auto op_domain = operational_domain_flood_fill(lat, std::vector<tt>{create_id_tt()}, 1,
-                                                                 op_domain_params, std::nullopt, &op_domain_stats);
+                                                                 op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct size
             CHECK(op_domain.operational_values.size() == 100);
@@ -641,7 +640,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
         SECTION("flood_fill")
         {
             const auto op_domain = operational_domain_flood_fill(lat, std::vector<tt>{create_id_tt()}, 1,
-                                                                 op_domain_params, std::nullopt, &op_domain_stats);
+                                                                 op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct size
             CHECK(op_domain.operational_values.size() == 50);
@@ -663,8 +662,8 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 
                 SECTION("one random sample")
                 {
-                    const auto op_domain_3d = operational_domain_flood_fill(
-                        lat, std::vector<tt>{create_id_tt()}, 100, op_domain_params, std::nullopt, &op_domain_stats);
+                    const auto op_domain_3d = operational_domain_flood_fill(lat, std::vector<tt>{create_id_tt()}, 100,
+                                                                            op_domain_params, &op_domain_stats);
 
                     // check if the operational domain has the correct size
                     CHECK(op_domain_3d.operational_values.size() == 350);
@@ -678,28 +677,6 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
                     CHECK(op_domain_stats.num_evaluated_parameter_combinations == 350);
                     CHECK(op_domain_stats.num_operational_parameter_combinations == 350);
                     CHECK(op_domain_stats.num_non_operational_parameter_combinations == 0);
-                }
-                SECTION("no random samples, but given parameter points")
-                {
-                    const auto op_domain_3d =
-                        operational_domain_flood_fill(lat, std::vector<tt>{create_id_tt()}, 0, op_domain_params,
-                                                      std::vector<parameter_point>{parameter_point({5.1, 4.9, -0.32}),
-                                                                                   parameter_point({5.1, 4.8, -0.32})},
-                                                      &op_domain_stats);
-
-                    // check if the operational domain has the correct size
-                    CHECK(op_domain_3d.operational_values.size() == 350);
-
-                    // for the selected range, all samples should be within the parameters and operational
-                    check_op_domain_params_and_operational_status(op_domain_3d, op_domain_params,
-                                                                  operational_status::OPERATIONAL);
-
-                    CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
-                    CHECK(op_domain_stats.num_simulator_invocations == 700);
-                    CHECK(op_domain_stats.num_evaluated_parameter_combinations == 350);
-                    CHECK(op_domain_stats.num_operational_parameter_combinations == 350);
-                    CHECK(op_domain_stats.num_non_operational_parameter_combinations == 0);
-                    CHECK(op_domain_stats.operational_to_total_ratio == 1.0);
                 }
             }
         }
@@ -751,7 +728,6 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
             CHECK(op_domain_stats.num_evaluated_parameter_combinations == 100);
             CHECK(op_domain_stats.num_operational_parameter_combinations == 0);
             CHECK(op_domain_stats.num_non_operational_parameter_combinations == 100);
-            CHECK(op_domain_stats.operational_to_total_ratio == 0.0);
 
             SECTION("3-dimensional")
             {
@@ -774,7 +750,6 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
                 CHECK(op_domain_stats.num_evaluated_parameter_combinations == 500);
                 CHECK(op_domain_stats.num_operational_parameter_combinations == 0);
                 CHECK(op_domain_stats.num_non_operational_parameter_combinations == 500);
-                CHECK(op_domain_stats.operational_to_total_ratio == 0.0);
             }
         }
         SECTION("random_sampling")
@@ -821,7 +796,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
         SECTION("flood_fill")
         {
             const auto op_domain = operational_domain_flood_fill(lat, std::vector<tt>{create_id_tt()}, 25,
-                                                                 op_domain_params, std::nullopt, &op_domain_stats);
+                                                                 op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct maximum size
             CHECK(op_domain.operational_values.size() <= 100);
@@ -842,8 +817,8 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 
                 op_domain_params.sweep_dimensions.push_back(z_dimension);
 
-                const auto op_domain_3d = operational_domain_flood_fill(
-                    lat, std::vector<tt>{create_id_tt()}, 25, op_domain_params, std::nullopt, &op_domain_stats);
+                const auto op_domain_3d = operational_domain_flood_fill(lat, std::vector<tt>{create_id_tt()}, 25,
+                                                                        op_domain_params, &op_domain_stats);
 
                 // check if the operational domain has the correct maximum size
                 CHECK(op_domain_3d.operational_values.size() <= 500);
@@ -876,7 +851,6 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
             CHECK(op_domain_stats.num_evaluated_parameter_combinations <= 25);
             CHECK(op_domain_stats.num_operational_parameter_combinations == 0);
             CHECK(op_domain_stats.num_non_operational_parameter_combinations <= 25);
-            CHECK(op_domain_stats.operational_to_total_ratio == 0.0);
         }
     }
     SECTION("floating-point error")
@@ -894,7 +868,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
         SECTION("flood_fill")
         {
             const auto op_domain = operational_domain_flood_fill(lat, std::vector<tt>{create_id_tt()}, 10000,
-                                                                 op_domain_params, std::nullopt, &op_domain_stats);
+                                                                 op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct size
             CHECK(op_domain.operational_values.size() == 3);
@@ -954,7 +928,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
             SECTION("random sample to find operational parameter points")
             {
                 const auto op_domain = operational_domain_flood_fill(lat, std::vector<tt>{create_id_tt()}, 50,
-                                                                     op_domain_params, std::nullopt, &op_domain_stats);
+                                                                     op_domain_params, &op_domain_stats);
 
                 // check if the operational domain has the correct size
                 CHECK(op_domain.operational_values.size() <= 256);
@@ -967,24 +941,6 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
                 CHECK(op_domain_stats.num_evaluated_parameter_combinations <= 256);
                 CHECK(op_domain_stats.num_operational_parameter_combinations <= 80);
                 CHECK(op_domain_stats.num_non_operational_parameter_combinations <= 176);
-            }
-            SECTION("no random sample but given parameter point")
-            {
-                const auto op_domain = operational_domain_flood_fill(
-                    lat, std::vector<tt>{create_id_tt()}, 0, op_domain_params,
-                    std::vector<parameter_point>{parameter_point({4.25, 4.25})}, &op_domain_stats);
-
-                // check if the operational domain has the correct size
-                CHECK(op_domain.operational_values.size() == 125);
-
-                // for the selected range, all samples should be within the parameters
-                check_op_domain_params_and_operational_status(op_domain, op_domain_params, std::nullopt);
-
-                CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
-                CHECK(op_domain_stats.num_evaluated_parameter_combinations == 125);
-                CHECK(op_domain_stats.num_operational_parameter_combinations == 80);
-                CHECK_THAT(op_domain_stats.operational_to_total_ratio - 80.0 / 256.0,
-                           Catch::Matchers::WithinAbs(0.0, physical_constants::POP_STABILITY_ERR));
             }
         }
         SECTION("contour_tracing")
@@ -1079,8 +1035,8 @@ TEST_CASE("SiQAD's AND gate operational domain computation", "[operational-domai
     }
     SECTION("flood_fill")
     {
-        const auto op_domain = operational_domain_flood_fill(lat, std::vector<tt>{create_and_tt()}, 1, op_domain_params,
-                                                             std::nullopt, &op_domain_stats);
+        const auto op_domain =
+            operational_domain_flood_fill(lat, std::vector<tt>{create_and_tt()}, 1, op_domain_params, &op_domain_stats);
 
         // check if the operational domain has the correct size (10 steps in each dimension)
         CHECK(op_domain.operational_values.size() == 100);
@@ -1196,8 +1152,8 @@ TEST_CASE("SiQAD's AND gate operational domain computation, using cube coordinat
     }
     SECTION("flood_fill")
     {
-        const auto op_domain = operational_domain_flood_fill(lat, std::vector<tt>{create_and_tt()}, 1, op_domain_params,
-                                                             std::nullopt, &op_domain_stats);
+        const auto op_domain =
+            operational_domain_flood_fill(lat, std::vector<tt>{create_and_tt()}, 1, op_domain_params, &op_domain_stats);
 
         // check if the operational domain has the correct size (10 steps in each dimension)
         CHECK(op_domain.operational_values.size() == 100);
@@ -1285,7 +1241,7 @@ TEMPLATE_TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[operational-domain
         SECTION("one random sample")
         {
             const auto op_domain = operational_domain_flood_fill(layout, std::vector<tt>{create_and_tt()}, 1,
-                                                                 op_domain_params, std::nullopt, &op_domain_stats);
+                                                                 op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct size (10 steps in each dimension)
             CHECK(op_domain.operational_values.size() == 4);
@@ -1298,13 +1254,11 @@ TEMPLATE_TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[operational-domain
             CHECK(op_domain_stats.num_evaluated_parameter_combinations == 4);
             CHECK(op_domain_stats.num_operational_parameter_combinations == 4);
             CHECK(op_domain_stats.num_non_operational_parameter_combinations == 0);
-            CHECK(op_domain_stats.operational_to_total_ratio == 1.00);
         }
         SECTION("no random sample, but given operational parameter point")
         {
-            const auto op_domain = operational_domain_flood_fill(
-                layout, std::vector<tt>{create_and_tt()}, 0, op_domain_params,
-                std::vector<parameter_point>{parameter_point({5.6, 5.0})}, &op_domain_stats);
+            const auto op_domain = operational_domain_flood_fill(layout, std::vector<tt>{create_and_tt()}, 0,
+                                                                 op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct size (10 steps in each dimension)
             CHECK(op_domain.operational_values.size() == 4);

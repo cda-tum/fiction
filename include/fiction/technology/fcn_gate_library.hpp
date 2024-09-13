@@ -16,6 +16,7 @@
 
 #include <array>
 #include <initializer_list>
+#include <unordered_map>
 #include <memory>
 #include <vector>
 

@@ -252,6 +252,12 @@ Operational Domain Computation
         .. doxygenfunction:: fiction::operational_domain_flood_fill
         .. doxygenfunction:: fiction::operational_domain_contour_tracing
 
+        **Header:** ``fiction/algorithms/simulation/sidb/compute_operational_ratio_at_point.hpp``
+
+        .. doxygenstruct:: fiction::compute_operational_ratio_at_point_params
+           :members:
+        .. doxygenfunction:: fiction::compute_operational_ratio_at_point_params
+
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.operational_status
             :members:
@@ -277,6 +283,11 @@ Operational Domain Computation
         .. autofunction:: mnt.pyfiction.operational_domain_random_sampling
         .. autofunction:: mnt.pyfiction.operational_domain_flood_fill
         .. autofunction:: mnt.pyfiction.operational_domain_contour_tracing
+
+        .. autoclass:: mnt.pyfiction.compute_operational_ratio_at_point_params
+                :members:
+
+        .. autofunction:: mnt.pyfiction.compute_operational_ratio_at_point
 
 
 Determine Physically Valid Parameters

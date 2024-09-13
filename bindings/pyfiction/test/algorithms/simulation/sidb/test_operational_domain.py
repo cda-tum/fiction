@@ -23,7 +23,7 @@ class TestOperationalDomain(unittest.TestCase):
         self.assertGreater(stats_grid.num_operational_parameter_combinations, 0)
 
         stats_flood_fill = operational_domain_stats()
-        operational_domain_flood_fill(lyt, [create_xor_tt()], 100, params, None, stats_flood_fill)
+        operational_domain_flood_fill(lyt, [create_xor_tt()], 100, params, stats_flood_fill)
         self.assertGreater(stats_flood_fill.num_operational_parameter_combinations, 0)
 
         stats_flood_fill_given_parameter_points = operational_domain_stats()
@@ -41,7 +41,7 @@ class TestOperationalDomain(unittest.TestCase):
         self.assertGreater(stats_contour_tracing.num_operational_parameter_combinations, 0)
 
     def test_and_gate_111_lattice(self):
-        lyt = read_sqd_layout_111(dir_path + "/../../../resources/AND_mu_032_0.sqd")
+        lyt = read_sqd_layout_111(dir_path + "/../../../resources/AND_mu_032_111_surface.sqd")
 
         params = operational_domain_params()
 
@@ -56,7 +56,7 @@ class TestOperationalDomain(unittest.TestCase):
         self.assertGreater(stats_grid.num_operational_parameter_combinations, 0)
 
         stats_flood_fill = operational_domain_stats()
-        operational_domain_flood_fill(lyt, [create_and_tt()], 100, params, None, stats_flood_fill)
+        operational_domain_flood_fill(lyt, [create_and_tt()], 100, params, stats_flood_fill)
         self.assertGreater(stats_flood_fill.num_operational_parameter_combinations, 0)
 
         stats_random_sampling = operational_domain_stats()

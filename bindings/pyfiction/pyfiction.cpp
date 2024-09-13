@@ -35,6 +35,7 @@
 #include "pyfiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
 #include "pyfiction/algorithms/simulation/sidb/is_ground_state.hpp"
 #include "pyfiction/algorithms/simulation/sidb/is_operational.hpp"
+#include "pyfiction/algorithms/simulation/sidb/compute_operational_ratio_at_point.hpp"
 // #include "pyfiction/algorithms/simulation/sidb/maximum_defect_influence_position_and_distance.hpp"
 #include "pyfiction/algorithms/simulation/sidb/assess_physical_population_stability.hpp"
 #include "pyfiction/algorithms/simulation/sidb/check_simulation_results_for_equivalence.hpp"
@@ -149,6 +150,7 @@ PYBIND11_MODULE(pyfiction, m)
     pyfiction::check_simulation_results_for_equivalence(m);
     pyfiction::determine_physically_valid_parameters(m);
     pyfiction::determine_displacement_robustness_domain(m);
+    pyfiction::compute_operational_ratio(m);
     /**
      * Algorithms: Iterators
      */

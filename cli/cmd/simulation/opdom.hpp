@@ -300,7 +300,7 @@ class opdom_command : public command
                     {
                         op_domain =
                             fiction::operational_domain_flood_fill(*lyt_ptr, std::vector<fiction::tt>{*tt_ptr},
-                                                                   num_random_samples, params, std::nullopt, &stats);
+                                                                   num_random_samples, params, &stats);
                     }
                     else if (is_set("contour_tracing"))
                     {
