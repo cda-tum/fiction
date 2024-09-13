@@ -11024,6 +11024,12 @@ Parameter ``pst``:
     A pointer to a statistics object to record execution details.
     Defaults to nullptr.
 
+Parameter ``custom_cost_objective``:
+    A custom cost objective that is evaluated at every expansion of
+    the search space graph. Should be a function that can be
+    calculated based on the current partial layout and returns an
+    uint64_t that should be minimized.
+
 Returns:
     The smallest layout yielded by the graph-oriented layout design
     algorithm under the given parameters.)doc";
