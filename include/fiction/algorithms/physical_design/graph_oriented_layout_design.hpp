@@ -79,7 +79,6 @@ struct graph_oriented_layout_design_params
          */
         HIGHEST_EFFORT
     };
-
     /**
      * The effort mode used. Defaults to HIGH_EFFORT.
      */
