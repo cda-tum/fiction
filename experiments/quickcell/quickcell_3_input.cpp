@@ -18,9 +18,9 @@
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <cstdint>
+#include <cstdlib>
 #include <string>
 #include <vector>
-#include <cstdlib>
 
 using namespace fiction;
 
