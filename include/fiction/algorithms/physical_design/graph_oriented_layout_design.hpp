@@ -64,14 +64,12 @@ struct graph_oriented_layout_design_params
          * the optimal results.
          */
         HIGH_EFFICIENCY,
-
         /**
          * HIGH_EFFORT mode generates 12 search space graphs using various fanout substitution strategies, PI
          * placements, and other parameters. This wider exploration increases the chance of finding optimal layouts but
          * also extends runtime. When a solution is found in any graph, its cost is used to prune the remaining graphs.
          */
         HIGH_EFFORT,
-
         /**
          * HIGHEST_EFFORT mode builds upon HIGH_EFFORT by duplicating the 12 search space graphs for different cost
          * objectives. If the cost objective involves layout area, number of crossings, number of wire segments, or a
@@ -667,9 +665,7 @@ class graph_oriented_layout_design_impl
             pst{st},
             custom_cost_objective{custom},
             timeout{ps.timeout},
-            start{std::chrono::high_resolution_clock::now()},
-            num_search_space_graphs{calculate_num_search_space_graphs(ps.mode, ps.cost)},
-            ssg_vec(num_search_space_graphs)
+            start{std::chrono::high_resolution_clock::now()}
     {
         ntk.substitute_po_signals();
     }
@@ -682,6 +678,12 @@ class graph_oriented_layout_design_impl
     {
         // measure run time
         mockturtle::stopwatch stop{pst.time_total};
+
+        // calculate number of search space graphs
+        num_search_space_graphs = calculate_num_search_space_graphs(ps.mode, ps.cost);
+
+        // resize ssg_vec based on the new number of search space graphs
+        ssg_vec.resize(num_search_space_graphs);
 
         // initialize layout to keep track of current best solution
         Lyt best_lyt{{}, twoddwave_clocking<Lyt>()};
@@ -883,23 +885,23 @@ class graph_oriented_layout_design_impl
     /**
      * In high-efficiency mode, only 2 search space graphs are used
      */
-    const uint64_t num_search_space_graphs_high_efficiency = 2;
+    const uint64_t num_search_space_graphs_high_efficiency = 2u;
     /**
      * In high-effort mode, 12 search space graphs are used: 3 (possible PI locations) * 2 (fanout substitution
      * strategies) * 2 (topological orderings)
      */
-    const uint64_t num_search_space_graphs_high_effort = 12;
+    const uint64_t num_search_space_graphs_high_effort = 12u;
     /**
      * In highest-effort mode, 48 search space graphs are used.
      * This includes 12 search space graphs for each of the four base cost objectives layout area, number of wire
      * segments, number of wire crossings, and area-crossing product.
      */
-    const uint64_t num_search_space_graphs_highest_effort = 4 * num_search_space_graphs_high_effort;
+    const uint64_t num_search_space_graphs_highest_effort = 4u * num_search_space_graphs_high_effort;
     /**
      * In highest-effort mode with a custom cost function, 60 search space graphs are used (48 with the standard cost
      * objectives and 12 for the custom one).
      */
-    const uint64_t num_search_space_graphs_highest_effort_custom = 5 * num_search_space_graphs_high_effort;
+    const uint64_t num_search_space_graphs_highest_effort_custom = 5u * num_search_space_graphs_high_effort;
     /**
      * Determines the number of search space graphs to generate based on the selected effort mode and cost objective.
      *
@@ -907,7 +909,7 @@ class graph_oriented_layout_design_impl
      * @param cost The cost that specifies the optimization objective for the layout design.
      * @return The number of search space graphs to be generated.
      */
-    [[nodiscard]] std::uint32_t
+    [[nodiscard]] std::uint64_t
     calculate_num_search_space_graphs(graph_oriented_layout_design_params::effort_mode    mode,
                                       graph_oriented_layout_design_params::cost_objective cost) noexcept
     {
@@ -1851,7 +1853,7 @@ class graph_oriented_layout_design_impl
         };
 
         // PIs can either be place at top, bottom, or top and bottom
-        const uint64_t num_possible_pi_locations = 3;
+        const uint64_t num_possible_pi_locations = 3u;
 
         // helper function to assign networks and nodes
         const auto assign_networks_and_nodes = [&](uint64_t base_index, auto& breadth_co_to_ci, auto& breadth_ci_to_co,
@@ -2006,6 +2008,9 @@ class graph_oriented_layout_design_impl
  * @param ntk The network to be placed and routed.
  * @param ps The parameters for the A* priority routing algorithm. Defaults to an empty parameter set.
  * @param pst A pointer to a statistics object to record execution details. Defaults to nullptr.
+ * @param custom_cost_objective A custom cost objective that is evaluated at every expansion of the search space graph.
+ * Should be a function that can be calculated based on the current partial layout and returns an uint64_t that should
+ * be minimized.
  * @return The smallest layout yielded by the graph-oriented layout design algorithm under the given parameters.
  */
 template <typename Lyt, typename Ntk>

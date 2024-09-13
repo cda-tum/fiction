@@ -30,7 +30,7 @@ inline void graph_oriented_layout_design(pybind11::module& m)
     py::enum_<fiction::graph_oriented_layout_design_params::effort_mode>(
         m, "gold_effort_mode", DOC(fiction_graph_oriented_layout_design_params_effort_mode))
         .value("HIGH_EFFICIENCY", fiction::graph_oriented_layout_design_params::effort_mode::HIGH_EFFICIENCY,
-               DOC(fiction_graph_oriented_layout_design_params_effort_mode_LOW_EFFORT))
+               DOC(fiction_graph_oriented_layout_design_params_effort_mode_HIGH_EFFICIENCY))
         .value("HIGH_EFFORT", fiction::graph_oriented_layout_design_params::effort_mode::HIGH_EFFORT,
                DOC(fiction_graph_oriented_layout_design_params_effort_mode_HIGH_EFFORT))
         .value("HIGHEST_EFFORT", fiction::graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT,

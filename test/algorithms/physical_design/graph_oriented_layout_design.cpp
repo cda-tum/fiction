@@ -23,6 +23,7 @@
 #include <mockturtle/views/names_view.hpp>
 
 #include <array>
+#include <cstdint>
 #include <functional>
 
 using namespace fiction;
@@ -203,7 +204,7 @@ TEST_CASE("Custom cost objective", "[graph-oriented-layout-design]")
     graph_oriented_layout_design_stats stats{};
 
     graph_oriented_layout_design_params params{};
-    params.mode         = graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT;
+    params.mode         = graph_oriented_layout_design_params::effort_mode::HIGH_EFFORT;
     params.cost         = graph_oriented_layout_design_params::cost_objective::CUSTOM;
     params.return_first = true;
 
@@ -258,4 +259,19 @@ TEST_CASE("High fanin exception", "[graph-oriented-layout-design]")
     graph_oriented_layout_design_params params{};
 
     CHECK_THROWS_AS(graph_oriented_layout_design<gate_layout>(ntk, params, &stats), high_degree_fanin_exception);
+}
+
+TEST_CASE("No custom cost objective provided exception", "[graph-oriented-layout-design]")
+{
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+    const auto ntk    = blueprints::mux21_network<technology_network>();
+
+    graph_oriented_layout_design_stats stats{};
+
+    graph_oriented_layout_design_params params{};
+    params.mode         = graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT;
+    params.cost         = graph_oriented_layout_design_params::cost_objective::CUSTOM;
+    params.return_first = true;
+
+    CHECK_THROWS_AS(graph_oriented_layout_design<gate_layout>(ntk, params, &stats), std::invalid_argument);
 }

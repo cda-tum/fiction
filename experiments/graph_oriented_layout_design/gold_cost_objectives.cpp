@@ -21,6 +21,8 @@
 #include <cstdlib>
 #include <sstream>
 #include <string>
+#include <utility>
+#include <vector>
 
 template <typename Ntk>
 Ntk read_ntk(const std::string& name)
