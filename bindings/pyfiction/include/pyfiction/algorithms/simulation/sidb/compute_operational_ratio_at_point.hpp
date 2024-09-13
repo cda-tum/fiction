@@ -40,10 +40,12 @@ inline void compute_operational_ratio(pybind11::module& m)
     namespace py = pybind11;
     using namespace pybind11::literals;
 
-    py::class_<fiction::compute_operational_ratio_at_point_params>(m, "compute_operational_ratio_at_point_params", DOC(fiction_compute_operational_ratio_at_point_params))
+    py::class_<fiction::compute_operational_ratio_at_point_params>(
+        m, "compute_operational_ratio_at_point_params", DOC(fiction_compute_operational_ratio_at_point_params))
         .def(py::init<>())
         .def_readwrite("operational_domain_params",
-                       &fiction::compute_operational_ratio_at_point_params::operational_domain_params, DOC(fiction_compute_operational_ratio_at_point_params_operational_domain_params));
+                       &fiction::compute_operational_ratio_at_point_params::operational_domain_params,
+                       DOC(fiction_compute_operational_ratio_at_point_params_operational_domain_params));
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
