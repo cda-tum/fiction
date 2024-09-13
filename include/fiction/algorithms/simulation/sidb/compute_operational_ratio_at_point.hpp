@@ -20,7 +20,7 @@ namespace fiction
  */
 struct compute_operational_ratio_at_point_params
 {
-    operational_domain_params operational_domain_params{};
+    operational_domain_params op_domain_params{};
 };
 
 /**
