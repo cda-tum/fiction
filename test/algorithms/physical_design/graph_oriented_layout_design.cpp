@@ -222,6 +222,15 @@ TEST_CASE("Custom cost objective", "[graph-oriented-layout-design]")
 
     REQUIRE(layout.has_value());
     check_eq(ntk, *layout);
+
+    // high effort mode
+    params.mode = graph_oriented_layout_design_params::effort_mode::HIGH_EFFORT;
+
+    const auto layout_high_effort =
+        graph_oriented_layout_design<gate_layout>(ntk, params, &stats, custom_cost_objective);
+
+    REQUIRE(layout_high_effort.has_value());
+    check_eq(ntk, *layout_high_effort);
 }
 
 TEST_CASE("Name conservation after graph-oriented layout design", "[graph-oriented-layout-design]")
