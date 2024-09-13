@@ -762,9 +762,10 @@ class graph_oriented_layout_design_impl
             if (duration_ms >= timeout)
             {
                 // Terminate the algorithm if the specified timeout was set or a solution was found in low-effort mode
-                if (timeout_set || (ps.mode == graph_oriented_layout_design_params::effort_mode::HIGH_EFFICIENCY &&
-                                    (improve_area_solution || improve_wire_solution || improve_crossing_solution ||
-                                     improve_acp_solution || improve_custom_solution)))
+                if ((ps.mode == graph_oriented_layout_design_params::effort_mode::HIGH_EFFICIENCY &&
+                     (improve_area_solution || improve_wire_solution || improve_crossing_solution ||
+                      improve_acp_solution || improve_custom_solution)) ||
+                    timeout_set)
                 {
                     timeout_limit_reached = true;
                 }

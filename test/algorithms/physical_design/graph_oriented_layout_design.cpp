@@ -154,6 +154,7 @@ TEST_CASE("Different parameters", "[graph-oriented-layout-design]")
 
     // Timeout limit reached
     params.timeout     = 0;
+    params.mode        = graph_oriented_layout_design_params::effort_mode::HIGH_EFFICIENCY;
     const auto layout7 = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
 
     CHECK(!layout7.has_value());
@@ -161,6 +162,7 @@ TEST_CASE("Different parameters", "[graph-oriented-layout-design]")
     // Planar layout
     params.timeout     = 100000;
     params.planar      = true;
+    params.mode        = graph_oriented_layout_design_params::effort_mode::HIGH_EFFORT;
     const auto layout8 = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
 
     REQUIRE(layout8.has_value());
@@ -205,7 +207,7 @@ TEST_CASE("Custom cost objective", "[graph-oriented-layout-design]")
     graph_oriented_layout_design_stats stats{};
 
     graph_oriented_layout_design_params params{};
-    params.mode         = graph_oriented_layout_design_params::effort_mode::HIGH_EFFORT;
+    params.mode         = graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT;
     params.cost         = graph_oriented_layout_design_params::cost_objective::CUSTOM;
     params.return_first = true;
 
