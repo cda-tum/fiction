@@ -397,8 +397,8 @@ namespace fiction
  */
 [[nodiscard]] inline std::vector<kitty::dynamic_truth_table> create_half_adder_tt() noexcept
 {
-    static constexpr const char* truth_table_string1 = "1000";  // Output 1
-    static constexpr const char* truth_table_string2 = "0110";  // Output 2
+    static constexpr const char* truth_table_string1 = "0110";  // Output 1
+    static constexpr const char* truth_table_string2 = "1000";  // Output 2
 
     kitty::dynamic_truth_table table1{2};  // 2 input variables for Output 1
     kitty::dynamic_truth_table table2{2};  // 2 input variables for Output 2

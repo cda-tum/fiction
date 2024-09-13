@@ -13,9 +13,9 @@
 #include "fiction/types.hpp"
 #include "fiction/utils/truth_table_utils.hpp"
 #include "fiction_experiments.hpp"
-#include "mockturtle/utils/stopwatch.hpp"
 
 #include <fmt/format.h>
+#include <mockturtle/utils/stopwatch.hpp>
 
 #include <array>
 #include <cstdlib>
