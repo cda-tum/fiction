@@ -146,7 +146,7 @@ Lyt generate_random_sidb_layout(const Lyt&                                      
         attempt_counter += 1;
     }
 
-    if (params.positive_sidbs == generate_random_sidb_layout_params<coordinate<Lyt>>::positive_charges::CAN_OCCUR &&
+    if (params.positive_sidbs == generate_random_sidb_layout_params<coordinate<Lyt>>::positive_charges::MAY_OCCUR &&
         !can_positive_charges_occur(lyt, params.sim_params))
     {
         return generate_random_sidb_layout(lyt_skeleton, params);
