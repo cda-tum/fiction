@@ -5861,15 +5861,7 @@ Parameter ``planar``:
 Returns:
     A path from `src` to `dest` if one exists.)doc";
 
-static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_found_solution =
-R"doc(Checks if a solution has been found for the specified cost objective.
-
-Parameter ``cost``:
-    The cost objective used.
-
-Returns:
-    True if a solution was found for the given cost objective;
-    otherwise, false.)doc";
+static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_custom_cost_objective = R"doc(Custom cost objective.)doc";
 
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_get_possible_positions =
 R"doc(Retrieves the possible positions for a given node in the layout based
@@ -5998,32 +5990,32 @@ Parameter ``st``:
     The statistics object to record execution details.)doc";
 
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_improve_acp_solution =
-R"doc(Flag indicating if an initial solution has been found with the area-
+R"doc(Flag indicating that an initial solution has been found with the area-
 crossings product as cost objective. When set to `true`, subsequent
 search space graphs with the area-crossing product as cost objective
 can be pruned.)doc";
 
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_improve_area_solution =
-R"doc(Flag indicating if an initial solution has been found with the layout
-area as cost objective. When set to `true`, subsequent search space
-graphs with the layout area as cost objective can be pruned.)doc";
+R"doc(Flag indicating that an initial solution has been found with the
+layout area as cost objective. When set to `true`, subsequent search
+space graphs with the layout area as cost objective can be pruned.)doc";
 
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_improve_crossing_solution =
-R"doc(Flag indicating if an initial solution has been found with the number
-of crossings as cost objective. When set to `true`, subsequent search
-space graphs with the number of crossings as cost objective can be
-pruned.)doc";
+R"doc(Flag indicating that an initial solution has been found with the
+number of crossings as cost objective. When set to `true`, subsequent
+search space graphs with the number of crossings as cost objective can
+be pruned.)doc";
 
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_improve_custom_solution =
-R"doc(Flag indicating if an initial solution has been found with a custom
+R"doc(Flag indicating that an initial solution has been found with a custom
 cost objective. When set to `true`, subsequent search space graphs
 with a custom cost objective can be pruned.)doc";
 
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_improve_wire_solution =
-R"doc(Flag indicating if an initial solution has been found with the number
-of wire segments as cost objective. When set to `true`, subsequent
-search space graphs with the number of wire segments as cost objective
-can be pruned.)doc";
+R"doc(Flag indicating that an initial solution has been found with the
+number of wire segments as cost objective. When set to `true`,
+subsequent search space graphs with the number of wire segments as
+cost objective can be pruned.)doc";
 
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_initialize_layout =
 R"doc(Initializes the layout with minimum width
@@ -6044,6 +6036,24 @@ static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_ntk = 
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_num_evaluated_paths = R"doc(Count evaluated paths in the search space graphs.)doc";
 
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_num_search_space_graphs = R"doc(Number of search space graphs.)doc";
+
+static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_num_search_space_graphs_high_efficiency = R"doc(In high-efficiency mode, only 2 search space graphs are used)doc";
+
+static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_num_search_space_graphs_high_effort =
+R"doc(In high-effort mode, 12 search space graphs are used: 3 (possible PI
+locations) * 2 (fanout substitution strategies) * 2 (topological
+orderings))doc";
+
+static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_num_search_space_graphs_highest_effort =
+R"doc(In highest-effort mode, 48 search space graphs are used. This includes
+12 search space graphs for each of the four base cost objectives
+layout area, number of wire segments, number of wire crossings, and
+area-crossing product.)doc";
+
+static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_num_search_space_graphs_highest_effort_custom =
+R"doc(In highest-effort mode with a custom cost function, 60 search space
+graphs are used (48 with the standard cost objectives and 12 for the
+custom one).)doc";
 
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_place_and_route =
 R"doc(Executes a single placement step in the layout for the given network
@@ -10984,10 +10994,11 @@ based on where the first node in a topological sort of the logic
 network can be placed. Based on the position of this first node, a
 cost is assigned to each expansion based on the position of the placed
 node. The vertex with the lowest cost, which is the smallest layout
-w.r.t. area, is then chosen for the next expansion. This iterative
-process continues until a leaf node is found, which is a layout with
-all nodes placed. The algorithm then continues to backtrack through
-the search space graph to find other complete layouts with lower cost.
+w.r.t. the cost objective (e.g. area), is then chosen for the next
+expansion. This iterative process continues until a leaf node is
+found, which is a layout with all nodes placed. The algorithm then
+continues to backtrack through the search space graph to find other
+complete layouts with lower cost.
 
 Exclusively generates 2DDWave-clocked layouts.
 
@@ -11064,16 +11075,16 @@ space graphs are generated. For a custom cost objective, an additional
 provides the best guarantee of finding optimal solutions but
 significantly increases runtime.)doc";
 
+static const char *__doc_fiction_graph_oriented_layout_design_params_effort_mode_HIGH_EFFICIENCY =
+R"doc(HIGH_EFFICIENCY mode generates 2 search space graphs. This option
+minimizes runtime but may not always yield the optimal results.)doc";
+
 static const char *__doc_fiction_graph_oriented_layout_design_params_effort_mode_HIGH_EFFORT =
 R"doc(HIGH_EFFORT mode generates 12 search space graphs using various fanout
 substitution strategies, PI placements, and other parameters. This
 wider exploration increases the chance of finding optimal layouts but
 also extends runtime. When a solution is found in any graph, its cost
 is used to prune the remaining graphs.)doc";
-
-static const char *__doc_fiction_graph_oriented_layout_design_params_effort_mode_LOW_EFFORT =
-R"doc(LOW_EFFORT mode generates 2 search space graphs. This option minimizes
-runtime but may not always yield the optimal results.)doc";
 
 static const char *__doc_fiction_graph_oriented_layout_design_params_mode = R"doc(The effort mode used. Defaults to HIGH_EFFORT.)doc";
 
