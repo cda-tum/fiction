@@ -385,13 +385,13 @@ class critical_temperature_impl
      */
     critical_temperature_stats& stats;
     /**
-     * Critical temperature [K].
-     */
-    double critical_temperature;
-    /**
      * Iterator that iterates over all possible input states.
      */
     bdl_input_iterator<Lyt> bii;
+    /**
+     * Critical temperature [K].
+     */
+    double critical_temperature;
     /**
      * This function conducts physical simulation of the given layout (gate layout with certain input combination). The
      * simulation results are stored in the `sim_result_100` variable.

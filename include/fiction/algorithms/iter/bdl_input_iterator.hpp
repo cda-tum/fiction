@@ -9,7 +9,6 @@
 #include "fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp"
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/types.hpp"
 
 #include <algorithm>
 #include <cstdint>
@@ -379,13 +378,13 @@ class bdl_input_iterator
 
             if ((current_input_index & (uint64_t{1ull} << (num_inputs - 1 - i))) != 0ull)
             {
-                if (input_bdl_wires[static_cast<uint64_t>(i)].direction == bdl_wire_direction::NORTH_SOUTH)
+                if (input_bdl_wires[i].direction == bdl_wire_direction::NORTH_SOUTH)
                 {
                     // set input i to 1
                     layout.assign_cell_type(input_i.upper, technology<Lyt>::cell_type::EMPTY);
                     layout.assign_cell_type(input_i.lower, technology<Lyt>::cell_type::INPUT);
                 }
-                else if (input_bdl_wires[static_cast<uint64_t>(i)].direction == bdl_wire_direction::SOUTH_NORTH)
+                else if (input_bdl_wires[i].direction == bdl_wire_direction::SOUTH_NORTH)
                 {
                     // set input i to 1
                     layout.assign_cell_type(input_i.upper, technology<Lyt>::cell_type::INPUT);
@@ -397,13 +396,13 @@ class bdl_input_iterator
                 if (params.input_bdl_config ==
                     bdl_input_iterator_params::input_bdl_configuration::PERTURBER_DISTANCE_ENCODED)
                 {
-                    if (input_bdl_wires[static_cast<uint64_t>(i)].direction == bdl_wire_direction::NORTH_SOUTH)
+                    if (input_bdl_wires[i].direction == bdl_wire_direction::NORTH_SOUTH)
                     {
                         // set input i to 0
                         layout.assign_cell_type(input_i.upper, technology<Lyt>::cell_type::INPUT);
                         layout.assign_cell_type(input_i.lower, technology<Lyt>::cell_type::EMPTY);
                     }
-                    else if (input_bdl_wires[static_cast<uint64_t>(i)].direction == bdl_wire_direction::SOUTH_NORTH)
+                    else if (input_bdl_wires[i].direction == bdl_wire_direction::SOUTH_NORTH)
                     {
                         // set input i to 0
                         layout.assign_cell_type(input_i.upper, technology<Lyt>::cell_type::EMPTY);

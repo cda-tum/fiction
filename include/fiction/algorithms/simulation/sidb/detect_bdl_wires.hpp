@@ -22,7 +22,7 @@ namespace fiction
 /**
  * Possible directions of a BDL wire.
  */
-enum class bdl_wire_direction
+enum class bdl_wire_direction : std::uint8_t
 {
     /**
      * Defines the direction of the wire from north to south.
@@ -49,7 +49,7 @@ enum class bdl_wire_direction
 /**
  * An enumeration of the selection of different types of wires.
  */
-enum class bdl_wire_selection
+enum class bdl_wire_selection : std::uint8_t
 {
     /**
      * Select all BDL wires.
@@ -152,7 +152,6 @@ struct bdl_wire
         }
         return *this;
     }
-
     /**
      * Copy assignment operator.
      *

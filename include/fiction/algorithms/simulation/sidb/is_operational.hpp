@@ -29,7 +29,6 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
-#include <iterator>
 #include <optional>
 #include <set>
 #include <utility>
@@ -56,7 +55,7 @@ enum class operational_status : uint8_t
 /**
  * Condition which is used to decide if a layout is `operational` or `non-operational`.
  */
-enum class operational_condition
+enum class operational_condition : uint8_t
 {
     /**
      * Even if the I/O pins show kinks, the layout is still considered as `operational`.

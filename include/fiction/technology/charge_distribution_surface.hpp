@@ -37,7 +37,7 @@ namespace fiction
 /**
  * An enumeration of modes for the dependent cell.
  */
-enum class dependent_cell_mode
+enum class dependent_cell_mode : uint8_t
 {
     /**
      * The charge state of the dependent cell is not changed based on the local electrostatic potential at its position.
@@ -52,7 +52,7 @@ enum class dependent_cell_mode
 /**
  * An enumeration of modes for calculation of the electrostatic potential energy of a given charge distribution.
  */
-enum class energy_calculation
+enum class energy_calculation : uint8_t
 {
     /**
      * The electrostatic potential energy of a given charge distribution is not updated after it is changed.
@@ -67,7 +67,7 @@ enum class energy_calculation
 /**
  * An enumeration of modes for the charge distribution surface.
  */
-enum class cds_configuration
+enum class cds_configuration : uint8_t
 {
     /**
      * The charge distribution is exclusively used to store the charge states.
@@ -83,7 +83,7 @@ enum class cds_configuration
  * An enumeration of modes to decide if the previous charge distribution is used to simply the computation of the
  * properties of a new charge distribution.
  */
-enum class charge_distribution_history
+enum class charge_distribution_history : uint8_t
 {
     /**
      * The previous charge distribution is used.
@@ -99,7 +99,7 @@ enum class charge_distribution_history
 /**
  * An enumeration of modes to specifying if the charge index should be recomputed fully.
  */
-enum class charge_index_recomputation
+enum class charge_index_recomputation : uint8_t
 {
     /**
      * The charge index is recomputed from scratch.
@@ -116,7 +116,7 @@ enum class charge_index_recomputation
  * An enumeration of modes for handling the charge distribution when assigning a charge index to the charge distribution
  * surface.
  */
-enum class charge_distribution_mode
+enum class charge_distribution_mode : uint8_t
 {
     /**
      * The charge distribution is updated after the charge index is assigned to the charge distribution surface.
@@ -132,7 +132,7 @@ enum class charge_distribution_mode
 /**
  * An enumeration of modes for handling the charge index during charge state assignment.
  */
-enum class charge_index_mode
+enum class charge_index_mode : uint8_t
 {
     /**
      * The charge state is assigned to the cell and the charge index is updated.
@@ -2152,7 +2152,7 @@ charge_distribution_surface(const T&, const sidb_simulation_parameters&) -> char
 
 template <class T>
 charge_distribution_surface(const T&, const sidb_simulation_parameters&,
-                            const sidb_charge_state cs) -> charge_distribution_surface<T>;
+                            sidb_charge_state cs) -> charge_distribution_surface<T>;
 
 template <class T>
 charge_distribution_surface(const T&, const sidb_simulation_parameters&, sidb_charge_state cs,
