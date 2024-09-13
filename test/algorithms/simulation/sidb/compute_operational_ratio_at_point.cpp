@@ -88,8 +88,8 @@ TEST_CASE("BDL wire operational domain computation", "[compute-operational-to-wh
 
         const compute_operational_ratio_at_point_params op_ratio_params{op_domain_params};
 
-        const auto op_domain_ratio = compute_operational_ratio_at_point(
-            lat, std::vector<tt>{create_id_tt()}, op_ratio_params, parameter_point({4.25, 4.25}));
+        const auto op_domain_ratio = compute_operational_ratio_at_point(lat, std::vector<tt>{create_id_tt()},
+                                                                        op_ratio_params, parameter_point({4.25, 4.25}));
 
         CHECK_THAT(op_domain_ratio - 80.0 / 256.0,
                    Catch::Matchers::WithinAbs(0.0, physical_constants::POP_STABILITY_ERR));

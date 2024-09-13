@@ -43,8 +43,8 @@ struct compute_operational_ratio_at_point_params
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] double compute_operational_ratio_at_point(const Lyt& lyt, const std::vector<TT>& spec,
-                                                               const compute_operational_ratio_at_point_params& params,
-                                                               const parameter_point& pp) noexcept
+                                                        const compute_operational_ratio_at_point_params& params,
+                                                        const parameter_point&                           pp) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");

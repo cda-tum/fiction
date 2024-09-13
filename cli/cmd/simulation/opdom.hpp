@@ -298,9 +298,8 @@ class opdom_command : public command
                     }
                     else if (is_set("flood_fill"))
                     {
-                        op_domain =
-                            fiction::operational_domain_flood_fill(*lyt_ptr, std::vector<fiction::tt>{*tt_ptr},
-                                                                   num_random_samples, params, &stats);
+                        op_domain = fiction::operational_domain_flood_fill(*lyt_ptr, std::vector<fiction::tt>{*tt_ptr},
+                                                                           num_random_samples, params, &stats);
                     }
                     else if (is_set("contour_tracing"))
                     {
