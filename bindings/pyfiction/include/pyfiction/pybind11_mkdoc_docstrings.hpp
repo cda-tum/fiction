@@ -2536,7 +2536,7 @@ R"doc(Parameters for computing the ratio of operational parameter points
 around a specified parameter point to the total number of parameter
 points in the given parameter space.)doc";
 
-static const char *__doc_fiction_compute_operational_ratio_at_point_params_operational_domain_params = R"doc()doc";
+static const char *__doc_fiction_compute_operational_ratio_at_point_params_op_domain_params = R"doc()doc";
 
 static const char *__doc_fiction_convert_array =
 R"doc(Converts an array of size `N` and type `T` to an array of size `N` and
