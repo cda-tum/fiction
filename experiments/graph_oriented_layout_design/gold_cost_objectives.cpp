@@ -1,18 +1,18 @@
 //
 // Created by Simon Hofmann on 30.08.24.
 //
-#include "fiction/layouts/cartesian_layout.hpp"
-#include "fiction/layouts/clocked_layout.hpp"
-#include "fiction/layouts/gate_level_layout.hpp"
-#include "fiction/layouts/tile_based_layout.hpp"
-#include "fiction/networks/technology_network.hpp"
-#include "fiction/types.hpp"
 #include "fiction_experiments.hpp"
 
 #include <fiction/algorithms/physical_design/graph_oriented_layout_design.hpp>
 #include <fiction/algorithms/verification/equivalence_checking.hpp>
 #include <fiction/io/network_reader.hpp>
 #include <fiction/layouts/bounding_box.hpp>
+#include <fiction/layouts/cartesian_layout.hpp>
+#include <fiction/layouts/clocked_layout.hpp>
+#include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/tile_based_layout.hpp>
+#include <fiction/networks/technology_network.hpp>
+#include <fiction/types.hpp>
 
 #include <fmt/format.h>
 #include <mockturtle/utils/stopwatch.hpp>
@@ -63,28 +63,15 @@ int main()  // NOLINT
 
     for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
     {
-        for (uint64_t cost = 0; cost < 4; cost++)
+        for (const auto& cost_pair :
+             std::vector<std::pair<fiction::graph_oriented_layout_design_params::cost_objective, std::string>>{
+                 {fiction::graph_oriented_layout_design_params::cost_objective::AREA, "A"},
+                 {fiction::graph_oriented_layout_design_params::cost_objective::WIRES, "|W|"},
+                 {fiction::graph_oriented_layout_design_params::cost_objective::CROSSINGS, "|C|"},
+                 {fiction::graph_oriented_layout_design_params::cost_objective::ACP, "ACP"}})
         {
-            if (cost == 0)
-            {
-                graph_oriented_layout_design_params.cost =
-                    fiction::graph_oriented_layout_design_params::cost_objective::AREA;
-            }
-            else if (cost == 1)
-            {
-                graph_oriented_layout_design_params.cost =
-                    fiction::graph_oriented_layout_design_params::cost_objective::WIRES;
-            }
-            else if (cost == 2)
-            {
-                graph_oriented_layout_design_params.cost =
-                    fiction::graph_oriented_layout_design_params::cost_objective::CROSSINGS;
-            }
-            else
-            {
-                graph_oriented_layout_design_params.cost =
-                    fiction::graph_oriented_layout_design_params::cost_objective::ACP;
-            }
+            const auto& [cost, cost_name]            = cost_pair;
+            graph_oriented_layout_design_params.cost = cost;
 
             auto network = read_ntk<fiction::tec_nt>(benchmark);
 
@@ -115,23 +102,11 @@ int main()  // NOLINT
 
                 const auto num_wires =
                     gate_level_layout->num_wires() - gate_level_layout->num_pis() - gate_level_layout->num_pos();
-                const auto  num_crossings  = gate_level_layout->num_crossings();
-                std::string cost_objective = "A";
-                if (cost == 1)
-                {
-                    cost_objective = "|W|";
-                }
-                else if (cost == 2)
-                {
-                    cost_objective = "|C|";
-                }
-                else if (cost == 3)
-                {
-                    cost_objective = "ACP";
-                }
+                const auto num_crossings = gate_level_layout->num_crossings();
+
                 // log results
                 gold_cost_objectives_exp(
-                    benchmark, cost_objective, area, num_crossings, num_wires, area * (num_crossings + 1),
+                    benchmark, cost_name, area, num_crossings, num_wires, area * (num_crossings + 1),
                     mockturtle::to_seconds(graph_oriented_layout_design_stats.time_total), eq_result);
             }
 

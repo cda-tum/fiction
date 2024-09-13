@@ -101,6 +101,7 @@ void gate_level_layout(pybind11::module& m, const std::string& topology)
         .def("num_pos", &GateLyt::num_pos, DOC(fiction_gate_level_layout_num_pos))
         .def("num_gates", &GateLyt::num_gates, DOC(fiction_gate_level_layout_num_gates))
         .def("num_wires", &GateLyt::num_wires, DOC(fiction_gate_level_layout_num_wires))
+        .def("num_crossings", &GateLyt::num_crossings, DOC(fiction_gate_level_layout_num_crossings))
         .def("is_empty", &GateLyt::is_empty, DOC(fiction_gate_level_layout_is_empty))
 
         .def(

@@ -45,6 +45,36 @@ class TestGraphOrientedLayoutDesign(unittest.TestCase):
 
         self.assertNotEqual(equivalence_checking(network, layout), eq_type.NO)
 
+    def test_graph_oriented_layout_design_with_different_parameters(self):
+        network = read_technology_network(dir_path + "/../../resources/mux21.v")
+
+        params = graph_oriented_layout_design_params()
+        params.return_first = True
+        params.mode = gold_effort_mode.HIGH_EFFORT
+        params.timeout = 10000
+        params.verbose = True
+        params.num_vertex_expansions = 5
+        params.planar = False
+        params.cost = gold_cost_objective.WIRES
+
+        layout = graph_oriented_layout_design(network, params)
+
+        self.assertNotEqual(equivalence_checking(network, layout), eq_type.NO)
+
+    def test_graph_oriented_layout_design_with_custom_cost_function(self):
+        network = read_technology_network(dir_path + "/../../resources/mux21.v")
+
+        params = graph_oriented_layout_design_params()
+        params.return_first = True
+        params.mode = gold_effort_mode.HIGH_EFFORT
+        params.cost = gold_cost_objective.CUSTOM
+
+        def custom_cost_objective(layout):
+            return layout.num_wires() * 2 + layout.num_crossings()
+
+        layout = graph_oriented_layout_design(network, params, custom_cost_objective=custom_cost_objective)
+
+        self.assertNotEqual(equivalence_checking(network, layout), eq_type.NO)
 
 if __name__ == '__main__':
     unittest.main()

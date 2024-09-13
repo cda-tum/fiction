@@ -23,6 +23,7 @@
 #include <mockturtle/views/names_view.hpp>
 
 #include <array>
+#include <functional>
 
 using namespace fiction;
 
@@ -101,7 +102,7 @@ TEST_CASE("Different parameters", "[graph-oriented-layout-design]")
     graph_oriented_layout_design_params params{};
 
     // Low effort mode
-    params.mode = graph_oriented_layout_design_params::effort_mode::LOW_EFFORT;
+    params.mode = graph_oriented_layout_design_params::effort_mode::HIGH_EFFICIENCY;
     // Return first found layout
     params.return_first = true;
     const auto layout1  = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
@@ -181,8 +182,7 @@ TEST_CASE("Different cost objectives", "[graph-oriented-layout-design]")
         graph_oriented_layout_design_params::cost_objective::AREA,
         graph_oriented_layout_design_params::cost_objective::WIRES,
         graph_oriented_layout_design_params::cost_objective::CROSSINGS,
-        graph_oriented_layout_design_params::cost_objective::ACP,
-        graph_oriented_layout_design_params::cost_objective::CUSTOM};
+        graph_oriented_layout_design_params::cost_objective::ACP};
 
     // Loop over each cost objective
     for (const auto& cost : cost_objectives)
@@ -193,6 +193,31 @@ TEST_CASE("Different cost objectives", "[graph-oriented-layout-design]")
         REQUIRE(layout.has_value());
         check_eq(ntk, *layout);
     }
+}
+
+TEST_CASE("Custom cost objective", "[graph-oriented-layout-design]")
+{
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+    const auto ntk    = blueprints::mux21_network<technology_network>();
+
+    graph_oriented_layout_design_stats stats{};
+
+    graph_oriented_layout_design_params params{};
+    params.mode         = graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT;
+    params.cost         = graph_oriented_layout_design_params::cost_objective::CUSTOM;
+    params.return_first = true;
+
+    // Define a custom cost function
+    const std::function<uint64_t(const gate_layout&)> custom_cost_objective = [](const gate_layout& layout) -> uint64_t
+    {
+        // Example custom logic for calculating cost
+        return (layout.num_wires() * 2) + layout.num_crossings();
+    };
+
+    const auto layout = graph_oriented_layout_design<gate_layout>(ntk, params, &stats, custom_cost_objective);
+
+    REQUIRE(layout.has_value());
+    check_eq(ntk, *layout);
 }
 
 TEST_CASE("Name conservation after graph-oriented layout design", "[graph-oriented-layout-design]")

@@ -10,6 +10,7 @@
 
 #include <fiction/algorithms/physical_design/graph_oriented_layout_design.hpp>
 
+#include <pybind11/functional.h>  // Needed for std::function bindings
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
@@ -27,8 +28,8 @@ inline void graph_oriented_layout_design(pybind11::module& m)
     using namespace pybind11::literals;
 
     py::enum_<fiction::graph_oriented_layout_design_params::effort_mode>(
-        m, "effort_mode", DOC(fiction_graph_oriented_layout_design_params_effort_mode))
-        .value("LOW_EFFORT", fiction::graph_oriented_layout_design_params::effort_mode::LOW_EFFORT,
+        m, "gold_effort_mode", DOC(fiction_graph_oriented_layout_design_params_effort_mode))
+        .value("HIGH_EFFICIENCY", fiction::graph_oriented_layout_design_params::effort_mode::HIGH_EFFICIENCY,
                DOC(fiction_graph_oriented_layout_design_params_effort_mode_LOW_EFFORT))
         .value("HIGH_EFFORT", fiction::graph_oriented_layout_design_params::effort_mode::HIGH_EFFORT,
                DOC(fiction_graph_oriented_layout_design_params_effort_mode_HIGH_EFFORT))
@@ -38,7 +39,7 @@ inline void graph_oriented_layout_design(pybind11::module& m)
         ;
 
     py::enum_<fiction::graph_oriented_layout_design_params::cost_objective>(
-        m, "cost_objective", DOC(fiction_graph_oriented_layout_design_params_cost_objective))
+        m, "gold_cost_objective", DOC(fiction_graph_oriented_layout_design_params_cost_objective))
         .value("AREA", fiction::graph_oriented_layout_design_params::cost_objective::AREA,
                DOC(fiction_graph_oriented_layout_design_params_cost_objective_AREA))
         .value("WIRES", fiction::graph_oriented_layout_design_params::cost_objective::WIRES,
@@ -98,7 +99,7 @@ inline void graph_oriented_layout_design(pybind11::module& m)
     m.def("graph_oriented_layout_design",
           &fiction::graph_oriented_layout_design<py_cartesian_gate_layout, py_logic_network>, "network"_a,
           "parameters"_a = fiction::graph_oriented_layout_design_params{}, "statistics"_a = nullptr,
-          DOC(fiction_graph_oriented_layout_design));
+          "custom_cost_objective"_a = nullptr, DOC(fiction_graph_oriented_layout_design));
 }
 
 }  // namespace pyfiction
