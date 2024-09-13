@@ -99,18 +99,18 @@ int main(int argc, const char* argv[])  // NOLINT
 
     // specifies whether positively charged SiDBs are allowed ("ALLOWED"), forbidden ("FORBIDDEN") or can occur
     // ("MAY_OCCUR")
-    generate_random_sidb_layout_params<fiction::offset::ucoord_t>::positive_charges charges{};
+    generate_random_sidb_layout_params<offset::ucoord_t>::positive_charges charges{};
     if (charges_str == "ALLOWED")
     {
-        charges = generate_random_sidb_layout_params<fiction::offset::ucoord_t>::positive_charges::ALLOWED;
+        charges = generate_random_sidb_layout_params<offset::ucoord_t>::positive_charges::ALLOWED;
     }
     else if (charges_str == "MAY_OCCUR")
     {
-        charges = generate_random_sidb_layout_params<fiction::offset::ucoord_t>::positive_charges::MAY_OCCUR;
+        charges = generate_random_sidb_layout_params<offset::ucoord_t>::positive_charges::MAY_OCCUR;
     }
     else
     {
-        charges = generate_random_sidb_layout_params<fiction::offset::ucoord_t>::positive_charges::FORBIDDEN;
+        charges = generate_random_sidb_layout_params<offset::ucoord_t>::positive_charges::FORBIDDEN;
     }
 
     // sets the number of SiDBs for the first bunch of layouts
@@ -178,7 +178,7 @@ int main(int argc, const char* argv[])  // NOLINT
                     std::cout << "Folder already exists.\n";
                 }
 
-                const generate_random_sidb_layout_params<fiction::offset::ucoord_t> params{
+                const generate_random_sidb_layout_params<offset::ucoord_t> params{
                     {{nw_x, nw_y}, {se_x, se_y}},         number_of_placed_sidbs,      charges,
                     sidb_simulation_parameters{3, -0.32}, static_cast<uint64_t>(10E6), number_of_layouts};
                 const auto unique_lyts = generate_multiple_random_sidb_layouts(sidb_100_cell_clk_lyt{}, params);
