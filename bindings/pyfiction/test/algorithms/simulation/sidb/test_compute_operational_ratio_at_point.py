@@ -5,9 +5,7 @@ from mnt.pyfiction import *
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
-
 class TestComputeOperationalRatioAtPoint(unittest.TestCase):
-
     def test_and_gate_100_lattice(self):
         lyt = read_sqd_layout_100(dir_path + "/../../../resources/21_hex_inputsdbp_and_v19.sqd")
 
