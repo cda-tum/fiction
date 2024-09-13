@@ -1568,7 +1568,7 @@ class operational_domain_impl
         }
 
         stats.total_number_of_parameter_points =
-            std::accumulate(values.cbegin(), values.cend(), 1,
+            std::accumulate(values.cbegin(), values.cend(), static_cast<std::size_t>(1),
                             [](std::size_t product, const auto& val) { return product * val.size(); });
     }
 };
