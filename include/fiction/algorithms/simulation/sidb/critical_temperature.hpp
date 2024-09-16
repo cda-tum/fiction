@@ -143,9 +143,8 @@ class critical_temperature_impl
             layout{lyt},
             params{ps},
             stats{st},
-            bii(bdl_input_iterator<Lyt>{layout, params.input_bdl_iterator_params}),
-            critical_temperature{ps.max_temperature}
-
+            critical_temperature{ps.max_temperature},
+            bii(bdl_input_iterator<Lyt>{layout, params.input_bdl_iterator_params})
     {
         stats.simulation_parameters = params.simulation_parameters;
         stats.algorithm_name =

@@ -48,12 +48,12 @@ int main()  // NOLINT
     using cell_lyt = fiction::sidb_cell_clk_lyt_cube;
 
     fiction::design_sidb_gates_params<fiction::cell<cell_lyt>> design_gate_params{};
-    design_gate_params.simulation_parameters = fiction::sidb_simulation_parameters{2, -0.32};
+    design_gate_params.operational_params.simulation_parameters = fiction::sidb_simulation_parameters{2, -0.32};
     // needs to be changed if a different skeleton is used.
     design_gate_params.canvas = {{24, 17}, {34, 28}};
 
-    design_gate_params.number_of_sidbs = 3;
-    design_gate_params.sim_engine      = fiction::sidb_simulation_engine::QUICKEXACT;
+    design_gate_params.number_of_sidbs               = 3;
+    design_gate_params.operational_params.sim_engine = fiction::sidb_simulation_engine::QUICKEXACT;
     design_gate_params.termination_cond =
         fiction::design_sidb_gates_params<fiction::cell<cell_lyt>>::termination_condition::AFTER_FIRST_SOLUTION;
 
