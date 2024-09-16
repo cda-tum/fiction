@@ -853,3 +853,82 @@ TEST_CASE("Generate all cells in area spanned by two cells, using offset coordin
         CHECK(final_cell.z == 0);
     }
 }
+
+TEST_CASE("Test identity of two layouts", "[layout-utils]")
+{
+    sidb_cell_clk_lyt_siqad lyt_first{{5, 3}};
+
+    lyt_first.assign_cell_type({5, 3}, sidb_cell_clk_lyt::cell_type::NORMAL);
+    lyt_first.assign_cell_type({0, 0}, sidb_cell_clk_lyt::cell_type::INPUT);
+    lyt_first.assign_cell_type({1, 1}, sidb_cell_clk_lyt::cell_type::INPUT);
+    lyt_first.assign_cell_type({2, 2}, sidb_cell_clk_lyt::cell_type::OUTPUT);
+
+    auto lyt_second{lyt_first.clone()};
+
+    SECTION("cell-level layout")
+    {
+        SECTION("identical layouts")
+        {
+            CHECK(are_cell_layouts_identical(lyt_first, lyt_second));
+        }
+        SECTION("different cell type")
+        {
+            lyt_second.assign_cell_type({5, 3}, sidb_cell_clk_lyt::cell_type::INPUT);
+            CHECK(!are_cell_layouts_identical(lyt_first, lyt_second));
+        }
+        SECTION("different number of cells")
+        {
+            lyt_second.assign_cell_type({5, 3}, sidb_cell_clk_lyt::cell_type::EMPTY);
+            CHECK(!are_cell_layouts_identical(lyt_first, lyt_second));
+        }
+    }
+
+    charge_distribution_surface cds_first{lyt_first};
+    charge_distribution_surface cds_second{lyt_second};
+
+    SECTION("charge distribution surface")
+    {
+        SECTION("identical layouts")
+        {
+            CHECK(are_cell_layouts_identical(cds_first, cds_second));
+        }
+        SECTION("different charge state")
+        {
+            cds_first.assign_charge_state({0, 0}, sidb_charge_state::POSITIVE);
+            cds_second.assign_charge_state({5, 3}, sidb_charge_state::POSITIVE);
+            CHECK(cds_first.num_negative_sidbs() == cds_second.num_negative_sidbs());
+            CHECK(cds_first.num_positive_sidbs() == cds_second.num_positive_sidbs());
+            CHECK(cds_first.num_neutral_sidbs() == cds_second.num_neutral_sidbs());
+            CHECK(!are_cell_layouts_identical(cds_first, cds_second));
+        }
+    }
+
+    SECTION("SiDB defect surface on top of the charge distribution surface")
+    {
+        sidb_defect_surface defect_first{cds_first};
+        defect_first.assign_sidb_defect({1, 1}, sidb_defect{sidb_defect_type::UNKNOWN});
+        defect_first.assign_sidb_defect({1, 2}, sidb_defect{sidb_defect_type::SI_VACANCY});
+
+        sidb_defect_surface defect_second{cds_second};
+        defect_second.assign_sidb_defect({1, 1}, sidb_defect{sidb_defect_type::UNKNOWN});
+        defect_second.assign_sidb_defect({1, 2}, sidb_defect{sidb_defect_type::SI_VACANCY});
+
+        SECTION("identical layouts")
+        {
+            CHECK(are_cell_layouts_identical(defect_first, defect_second));
+        }
+        SECTION("different layouts")
+        {
+            SECTION("different number of defects")
+            {
+                defect_second.assign_sidb_defect({1, 2}, sidb_defect{sidb_defect_type::NONE});
+                CHECK(!are_cell_layouts_identical(defect_first, defect_second));
+            }
+            SECTION("different defect type")
+            {
+                defect_second.assign_sidb_defect({1, 2}, sidb_defect{sidb_defect_type::DB});
+                CHECK(!are_cell_layouts_identical(defect_first, defect_second));
+            }
+        }
+    }
+}
