@@ -256,7 +256,7 @@ Operational Domain Computation
 
         .. doxygenstruct:: fiction::compute_operational_ratio_at_point_params
            :members:
-        .. doxygenfunction:: fiction::compute_operational_ratio_at_point_params
+        .. doxygenfunction:: fiction::compute_operational_ratio_at_point
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.operational_status
