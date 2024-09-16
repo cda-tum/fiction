@@ -6666,9 +6666,9 @@ Parameter ``samples``:
     Maximum number of random samples to be taken before flood fill.
 
 Parameter ``given_parameter_point``:
-    Optional parameter point in the parameter space. If they lie
-    within the operational region, they are used as starting points
-    for flood fill.
+    Optional parameter point in the parameter space. If it lies within
+    the operational region, it is used as starting points for flood
+    fill.
 
 Returns:
     The (partial) operational domain of the layout.)doc";
@@ -13685,11 +13685,6 @@ Parameter ``samples``:
 
 Parameter ``params``:
     Operational domain computation parameters.
-
-Parameter ``given_parameter_points``:
-    Optional parameter points in the parameter space. If they lie
-    within the operational region, they are used as starting points
-    for flood fill.
 
 Parameter ``stats``:
     Operational domain computation statistics.
