@@ -173,9 +173,7 @@ struct bdl_wire
      * Destructor for bdl_wire.
      *
      */
-    ~bdl_wire() noexcept
-    {
-    }
+    ~bdl_wire() noexcept {}
     /**
      * Add a BDL pair to the wire.
      *
