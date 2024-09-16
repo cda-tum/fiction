@@ -170,6 +170,13 @@ struct bdl_wire
         return *this;
     }
     /**
+     * Destructor for bdl_wire.
+     *
+     */
+    ~bdl_wire() noexcept
+    {
+    }
+    /**
      * Add a BDL pair to the wire.
      *
      * @param pair The BDL pair to add.

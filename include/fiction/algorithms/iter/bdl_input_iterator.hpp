@@ -10,7 +10,6 @@
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/traits.hpp"
 
-#include <algorithm>
 #include <cstdint>
 #include <iterator>
 #include <vector>
