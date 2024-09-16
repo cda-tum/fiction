@@ -6,6 +6,7 @@
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
+#include <fiction/algorithms/iter/bdl_input_iterator.hpp>
 #include <fiction/algorithms/physical_design/design_sidb_gates.hpp>
 #include <fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp>
 #include <fiction/algorithms/simulation/sidb/is_operational.hpp>
@@ -13,7 +14,6 @@
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
-#include <fiction/algorithms/iter/bdl_input_iterator.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/sidb_defects.hpp>
 #include <fiction/technology/sidb_lattice.hpp>
@@ -156,7 +156,8 @@ TEST_CASE("Use SiQAD's AND gate skeleton to generate all possible AND gates", "[
     lyt.assign_cell_type({10, 9, 1}, sidb_technology::cell_type::NORMAL);
 
     design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
-        is_operational_params{sidb_simulation_parameters{2, -0.28}, sidb_simulation_engine::EXGS,
+        is_operational_params{sidb_simulation_parameters{2, -0.28},
+                              sidb_simulation_engine::EXGS,
                               {detect_bdl_wires_params{2.0}}},
         design_sidb_gates_params<
             cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,

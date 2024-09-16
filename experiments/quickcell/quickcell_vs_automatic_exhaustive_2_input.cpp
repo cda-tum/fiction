@@ -16,8 +16,8 @@
 #include <fmt/format.h>
 #include <mockturtle/utils/stopwatch.hpp>
 
-#include <cstdlib>
 #include <cstdint>
+#include <cstdlib>
 #include <iostream>
 #include <string>
 #include <vector>
