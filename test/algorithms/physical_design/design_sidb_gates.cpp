@@ -13,8 +13,8 @@
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
+#include <fiction/algorithms/iter/bdl_input_iterator.hpp>
 #include <fiction/technology/cell_technologies.hpp>
-#include <fiction/technology/sidb_defect_surface.hpp>
 #include <fiction/technology/sidb_defects.hpp>
 #include <fiction/technology/sidb_lattice.hpp>
 #include <fiction/traits.hpp>
@@ -157,7 +157,7 @@ TEST_CASE("Use SiQAD's AND gate skeleton to generate all possible AND gates", "[
 
     design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
         is_operational_params{sidb_simulation_parameters{2, -0.28}, sidb_simulation_engine::EXGS,
-                              detect_bdl_wires_params{2.0}},
+                              {detect_bdl_wires_params{2.0}}},
         design_sidb_gates_params<
             cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
         {{4, 4, 0}, {14, 5, 1}},

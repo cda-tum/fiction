@@ -396,7 +396,7 @@ TEST_CASE("Determine I/O wires of 111-AND gate", "[detect-bdl-wires]")
 {
     const auto lyt = blueprints::and_gate_111<sidb_111_cell_clk_lyt_siqad>();
 
-    detect_bdl_wires_params params{2.0};
+    const detect_bdl_wires_params params{2.0};
 
     SECTION("Determine all wires")
     {

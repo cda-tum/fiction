@@ -9,6 +9,8 @@
 #include <fiction/technology/sidb_lattice.hpp>
 #include <fiction/types.hpp>
 
+#include <optional>
+
 using namespace fiction;
 
 TEST_CASE("Empty layout BDL detection", "[detect-bdl-pairs]")
