@@ -9,13 +9,11 @@
 #include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/simulation/sidb/compute_operational_ratio_at_point.hpp>
-#include <fiction/algorithms/simulation/sidb/is_operational.hpp>
 
 #include <pybind11/operators.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include <vector>
 
 namespace pyfiction
 {

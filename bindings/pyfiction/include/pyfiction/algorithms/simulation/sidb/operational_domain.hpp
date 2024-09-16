@@ -135,7 +135,7 @@ inline void operational_domain(pybind11::module& m)
                       DOC(fiction_operational_domain_stats_num_non_operational_parameter_combinations))
         .def_readonly("total_number_of_parameter_points",
                       &fiction::operational_domain_stats::total_number_of_parameter_points,
-                      DOC(fiction_operational_domain_stats_operational_total_number_of_parameter_points))
+                      DOC(fiction_operational_domain_stats_total_number_of_parameter_points))
 
         ;
 
