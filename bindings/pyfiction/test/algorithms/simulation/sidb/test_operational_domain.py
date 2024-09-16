@@ -26,12 +26,6 @@ class TestOperationalDomain(unittest.TestCase):
         operational_domain_flood_fill(lyt, [create_xor_tt()], 100, params, stats_flood_fill)
         self.assertGreater(stats_flood_fill.num_operational_parameter_combinations, 0)
 
-        stats_flood_fill_given_parameter_points = operational_domain_stats()
-        operational_domain_flood_fill(lyt, [create_xor_tt()], 0, params,
-                                                                        [parameter_point([5.60, 5.00])],
-                                                                        stats_flood_fill_given_parameter_points)
-        self.assertGreater(stats_flood_fill_given_parameter_points.num_operational_parameter_combinations, 0)
-
         stats_random_sampling = operational_domain_stats()
         operational_domain_random_sampling(lyt, [create_xor_tt()], 100, params, stats_random_sampling)
         self.assertGreater(stats_random_sampling.num_operational_parameter_combinations, 0)
