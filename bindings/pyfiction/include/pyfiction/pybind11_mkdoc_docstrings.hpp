@@ -2515,7 +2515,7 @@ Parameter ``n``:
 Returns:
     Columnar clocking scheme.)doc";
 
-static const char *__doc_fiction_compute_operational_ratio_at_point =
+static const char *__doc_fiction_compute_operational_ratio =
 R"doc(Calculates the ratio of operational parameter points surrounding a
 specified parameter point to the total number of parameter points in
 the given parameter space. This function is useful for assessing how
@@ -2552,12 +2552,12 @@ Returns:
     The ratio of operational parameter points to the total number of
     parameter points in the parameter space.)doc";
 
-static const char *__doc_fiction_compute_operational_ratio_at_point_params =
+static const char *__doc_fiction_compute_operational_ratio_params =
 R"doc(Parameters for computing the ratio of operational parameter points
 around a specified parameter point to the total number of parameter
 points in the given parameter space.)doc";
 
-static const char *__doc_fiction_compute_operational_ratio_at_point_params_op_domain_params = R"doc()doc";
+static const char *__doc_fiction_compute_operational_ratio_params_op_domain_params = R"doc(Parameters for the operational domain computation.)doc";
 
 static const char *__doc_fiction_convert_array =
 R"doc(Converts an array of size `N` and type `T` to an array of size `N` and
@@ -6684,7 +6684,7 @@ Parameter ``samples``:
 
 Parameter ``given_parameter_point``:
     Optional parameter point in the parameter space. If it lies within
-    the operational region, it is used as starting points for flood
+    the operational region, it is used as a starting point for flood
     fill.
 
 Returns:
@@ -13859,7 +13859,7 @@ static const char *__doc_fiction_operational_domain_stats_num_operational_parame
 
 static const char *__doc_fiction_operational_domain_stats_num_simulator_invocations = R"doc(Number of simulator invocations.)doc";
 
-static const char *__doc_fiction_operational_domain_stats_total_number_of_parameter_points = R"doc(Total number of parameter point in the parameter space.)doc";
+static const char *__doc_fiction_operational_domain_stats_num_total_parameter_points = R"doc(Total number of parameter points in the parameter space.)doc";
 
 static const char *__doc_fiction_operational_domain_value_range =
 R"doc(A range of values for a dimension sweep. The range is defined by a
