@@ -26,8 +26,8 @@ void compute_operational_ratio(pybind11::module& m)
     namespace py = pybind11;
     using namespace pybind11::literals;
 
-    m.def("compute_operational_ratio", &fiction::compute_operational_ratio<Lyt, py_tt>, "lyt"_a,
-          "spec"_a, "pp"_a, "params"_a = fiction::operational_domain_params{},  DOC(fiction_compute_operational_ratio));
+    m.def("compute_operational_ratio", &fiction::compute_operational_ratio<Lyt, py_tt>, "lyt"_a, "spec"_a, "pp"_a,
+          "params"_a = fiction::operational_domain_params{}, DOC(fiction_compute_operational_ratio));
 }
 
 }  // namespace detail
@@ -37,11 +37,10 @@ inline void compute_operational_ratio(pybind11::module& m)
     namespace py = pybind11;
     using namespace pybind11::literals;
 
-    py::class_<fiction::compute_operational_ratio_params>(
-        m, "compute_operational_ratio_params", DOC(fiction_compute_operational_ratio_params))
+    py::class_<fiction::compute_operational_ratio_params>(m, "compute_operational_ratio_params",
+                                                          DOC(fiction_compute_operational_ratio_params))
         .def(py::init<>())
-        .def_readwrite("op_domain_params",
-                       &fiction::compute_operational_ratio_params::op_domain_params,
+        .def_readwrite("op_domain_params", &fiction::compute_operational_ratio_params::op_domain_params,
                        DOC(fiction_compute_operational_ratio_params_op_domain_params));
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!

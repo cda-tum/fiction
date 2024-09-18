@@ -532,7 +532,8 @@ class operational_domain_impl
      * @return The (partial) operational domain of the layout.
      */
     [[nodiscard]] operational_domain<parameter_point, operational_status>
-    flood_fill(const std::size_t samples, const std::optional<parameter_point>& given_parameter_point = std::nullopt) noexcept
+    flood_fill(const std::size_t                     samples,
+               const std::optional<parameter_point>& given_parameter_point = std::nullopt) noexcept
     {
         assert((num_dimensions == 2 || num_dimensions == 3) &&
                "Flood fill is only supported for two and three dimensions");
