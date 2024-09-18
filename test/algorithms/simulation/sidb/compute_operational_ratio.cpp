@@ -19,7 +19,7 @@
 
 using namespace fiction;
 
-TEST_CASE("BDL wire operational domain computation", "[compute-operational-to-whole-ratio-around-given-point]")
+TEST_CASE("BDL wire operational domain computation", "[compute-operational-ratio]")
 {
     using layout = sidb_cell_clk_lyt_siqad;
 
@@ -96,7 +96,7 @@ TEST_CASE("BDL wire operational domain computation", "[compute-operational-to-wh
     }
 }
 
-TEST_CASE("Bestagon AND gate", "[compute-operational-to-whole-ratio-around-given-point]")
+TEST_CASE("Bestagon AND gate", "[compute-operational-ratio]")
 {
     const auto lyt = blueprints::bestagon_and_gate<sidb_100_cell_clk_lyt_siqad>();
 
