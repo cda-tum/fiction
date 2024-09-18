@@ -16,12 +16,12 @@ class TestComputeOperationalRatioAtPoint(unittest.TestCase):
         params.sweep_dimensions = [operational_domain_value_range(sweep_parameter.EPSILON_R, 5.00, 6.00, 0.1),
                                    operational_domain_value_range(sweep_parameter.LAMBDA_TF, 5.00, 6.00, 0.1)]
 
-        ratio_params = compute_operational_ratio_at_point_params()
+        ratio_params = compute_operational_ratio_params()
         ratio_params.operational_domain_params = params
 
         self.assertEqual(ratio_params.operational_domain_params.simulation_parameters.base, 2)
 
-        operational_domain_ratio = compute_operational_ratio_at_point(lyt, [create_and_tt()], ratio_params, parameter_point([5.6, 5.0]))
+        operational_domain_ratio = compute_operational_ratio(lyt, [create_and_tt()],  parameter_point([5.6, 5.0]), ratio_params)
 
         self.assertAlmostEqual(operational_domain_ratio, 23/121, delta=10E-6)
 

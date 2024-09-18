@@ -43,7 +43,7 @@ class TestOperationalDomain(unittest.TestCase):
         params.simulation_parameters.base = 2
 
         params.sweep_dimensions = [operational_domain_value_range(sweep_parameter.EPSILON_R, 5.60, 5.64, 0.01),
-                                   operational_domain_value_range(sweep_parameter.LAMBDA_TF, 5.00, 5.01, 0.01)];
+                                   operational_domain_value_range(sweep_parameter.LAMBDA_TF, 5.00, 5.01, 0.01)]
 
         stats_grid = operational_domain_stats()
         operational_domain_grid_search(lyt, [create_and_tt()], params, stats_grid)
