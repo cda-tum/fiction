@@ -19,7 +19,7 @@ class TestComputeOperationalRatioAtPoint(unittest.TestCase):
         ratio_params = compute_operational_ratio_params()
         ratio_params.op_domain_params = params
 
-        self.assertEqual(ratio_params.operational_domain_params.simulation_parameters.base, 2)
+        self.assertEqual(ratio_params.op_domain_params.simulation_parameters.base, 2)
 
         operational_domain_ratio = compute_operational_ratio(lyt, [create_and_tt()],  parameter_point([5.6, 5.0]), ratio_params)
 
