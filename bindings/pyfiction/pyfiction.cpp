@@ -28,7 +28,7 @@
 #include "pyfiction/algorithms/simulation/logic_simulation.hpp"
 #include "pyfiction/algorithms/simulation/sidb/calculate_energy_and_state_type.hpp"
 #include "pyfiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp"
-#include "pyfiction/algorithms/simulation/sidb/compute_operational_ratio_at_point.hpp"
+#include "pyfiction/algorithms/simulation/sidb/compute_operational_ratio.hpp"
 #include "pyfiction/algorithms/simulation/sidb/critical_temperature.hpp"
 #include "pyfiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp"
 #include "pyfiction/algorithms/simulation/sidb/determine_physically_valid_parameters.hpp"

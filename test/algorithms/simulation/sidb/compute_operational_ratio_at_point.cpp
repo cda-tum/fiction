@@ -7,7 +7,7 @@
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
-#include <fiction/algorithms/simulation/sidb/compute_operational_ratio_at_point.hpp>
+#include <fiction/algorithms/simulation/sidb/compute_operational_ratio.hpp>
 #include <fiction/algorithms/simulation/sidb/operational_domain.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/technology/cell_technologies.hpp>

@@ -2,8 +2,8 @@
 // Created by Jan Drewniok on 09.09.24.
 //
 
-#ifndef FICTION_COMPUTE_OPERATIONAL_RATIO_AT_POINT_HPP
-#define FICTION_COMPUTE_OPERATIONAL_RATIO_AT_POINT_HPP
+#ifndef FICTION_COMPUTE_OPERATIONAL_RATIO_HPP
+#define FICTION_COMPUTE_OPERATIONAL_RATIO_HPP
 
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
 #include "fiction/algorithms/simulation/sidb/operational_domain.hpp"
@@ -18,8 +18,11 @@ namespace fiction
  * Parameters for computing the ratio of operational parameter points around a specified parameter point
  * to the total number of parameter points in the given parameter space.
  */
-struct compute_operational_ratio_at_point_params
+struct compute_operational_ratio_params
 {
+    /**
+     * Parameters for the operational domain computation.
+     */
     operational_domain_params op_domain_params{};
 };
 
@@ -42,9 +45,8 @@ struct compute_operational_ratio_at_point_params
  * @return The ratio of operational parameter points to the total number of parameter points in the parameter space.
  */
 template <typename Lyt, typename TT>
-[[nodiscard]] double compute_operational_ratio_at_point(const Lyt& lyt, const std::vector<TT>& spec,
-                                                        const compute_operational_ratio_at_point_params& params,
-                                                        const parameter_point&                           pp) noexcept
+[[nodiscard]] double compute_operational_ratio(const Lyt& lyt, const std::vector<TT>& spec, const parameter_point& pp,
+                                               const compute_operational_ratio_params& params = {}) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -59,9 +61,9 @@ template <typename Lyt, typename TT>
 
     // calculate the ratio of operational parameter pairs to the total number of parameter pairs
     return static_cast<double>(stats.num_operational_parameter_combinations) /
-           static_cast<double>(stats.total_number_of_parameter_points);
+           static_cast<double>(stats.num_total_parameter_points);
 }
 
 }  // namespace fiction
 
-#endif  // FICTION_COMPUTE_OPERATIONAL_RATIO_AT_POINT_HPP
+#endif  // FICTION_COMPUTE_OPERATIONAL_RATIO_HPP

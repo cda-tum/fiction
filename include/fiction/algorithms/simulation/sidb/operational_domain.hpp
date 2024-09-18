@@ -285,9 +285,9 @@ struct operational_domain_stats
      */
     std::size_t num_non_operational_parameter_combinations{0};
     /**
-     * Total number of parameter point in the parameter space.
+     * Total number of parameter points in the parameter space.
      */
-    std::size_t total_number_of_parameter_points{0};
+    std::size_t num_total_parameter_points{0};
 };
 
 namespace detail
@@ -528,11 +528,11 @@ class operational_domain_impl
      *
      * @param samples Maximum number of random samples to be taken before flood fill.
      * @param given_parameter_point Optional parameter point in the parameter space. If it lies within the
-     * operational region, it is used as starting points for flood fill.
+     * operational region, it is used as a starting point for flood fill.
      * @return The (partial) operational domain of the layout.
      */
     [[nodiscard]] operational_domain<parameter_point, operational_status>
-    flood_fill(const std::size_t samples, const std::optional<parameter_point>& given_parameter_point) noexcept
+    flood_fill(const std::size_t samples, const std::optional<parameter_point>& given_parameter_point = std::nullopt) noexcept
     {
         assert((num_dimensions == 2 || num_dimensions == 3) &&
                "Flood fill is only supported for two and three dimensions");
@@ -964,8 +964,8 @@ class operational_domain_impl
         for (auto d = 0u; d < num_dimensions; ++d)
         {
             // Ensure the parameter is within the valid range
-            const auto min_val = values[d].front();
-            const auto max_val = values[d].back();
+            [[maybe_unused]] const auto min_val = values[d].front();
+            [[maybe_unused]] const auto max_val = values[d].back();
 
             assert(pp.parameters[d] >= min_val && pp.parameters[d] <= max_val &&
                    "Parameter point is outside of the value range");
@@ -1567,7 +1567,7 @@ class operational_domain_impl
             }
         }
 
-        stats.total_number_of_parameter_points =
+        stats.num_total_parameter_points =
             std::accumulate(values.cbegin(), values.cend(), static_cast<std::size_t>(1),
                             [](std::size_t product, const auto& val) { return product * val.size(); });
     }
@@ -1727,7 +1727,7 @@ operational_domain_flood_fill(const Lyt& lyt, const std::vector<TT>& spec, const
     detail::operational_domain_impl<Lyt, TT, operational_domain<parameter_point, operational_status>> p{lyt, spec,
                                                                                                         params, st};
 
-    const auto result = p.flood_fill(samples, std::nullopt);
+    const auto result = p.flood_fill(samples);
 
     if (stats)
     {
