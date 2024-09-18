@@ -17,7 +17,7 @@ class TestComputeOperationalRatioAtPoint(unittest.TestCase):
                                    operational_domain_value_range(sweep_parameter.LAMBDA_TF, 5.00, 6.00, 0.1)]
 
         ratio_params = compute_operational_ratio_params()
-        ratio_params.operational_domain_params = params
+        ratio_params.op_domain_params = params
 
         self.assertEqual(ratio_params.operational_domain_params.simulation_parameters.base, 2)
 
