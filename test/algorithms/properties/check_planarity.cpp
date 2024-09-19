@@ -7,11 +7,9 @@
 #include <fiction/algorithms/properties/check_planarity.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/networks/views/extended_rank_view.hpp>
-
-#include <mockturtle/networks/aig.hpp>
-#include <mockturtle/traits.hpp>
-
 #include <vector>
+#include <mockturtle/traits.hpp>
+#include <mockturtle/networks/aig.hpp>
 
 using namespace fiction;
 

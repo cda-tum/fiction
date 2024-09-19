@@ -5,7 +5,6 @@
 #ifndef FICTION_NODE_DUPLICATION_PLANARIZATION_HPP
 #define FICTION_NODE_DUPLICATION_PLANARIZATION_HPP
 
-#include "fiction/algorithms/network_transformation/network_balancing.hpp"
 #include "fiction/algorithms/properties/check_planarity.hpp"
 #include "fiction/networks/views/extended_rank_view.hpp"
 #include "fiction/networks/virtual_pi_network.hpp"
@@ -17,9 +16,7 @@
 #include <cmath>
 #include <cstdint>
 #include <limits>
-#include <memory>
 #include <random>
-#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -212,6 +209,29 @@ class node_duplication_planarization_impl
                         node_pair_cur.fanin_pair = &node_pair_last;
                         node_pair_cur.delay      = node_pair_last.delay + 2;
                     }
+                    else if (node_pair_last.delay + 2 == node_pair_cur.delay)
+                    {
+                        // ToDo: If order doesnt matter, decide on a minimal crossing view (implement mincross.c from
+                        // graphviz)
+
+                        // this solves equal paths, if they are connected in the next layer via a fanout
+                        const auto fc0 = fanins(ntk, node_pair_last.pair.first);
+                        if (node_pair_last.fanin_pair != nullptr)
+                        {
+                            const auto fc1 = fanins(ntk, node_pair_last.fanin_pair->pair.second);
+                            for (const auto f0 : fc0.fanin_nodes)
+                            {
+                                for (const auto f1 : fc1.fanin_nodes)
+                                {
+                                    if (f0 == f1)
+                                    {
+                                        node_pair_cur.fanin_pair = &node_pair_last;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -236,11 +256,25 @@ class node_duplication_planarization_impl
      * @param node The node to be inserted.
      * @param vec The vector to insert the node into.
      */
-    void insert_if_not_first(const mockturtle::node<Ntk>& node, std::vector<mockturtle::node<Ntk>>& vec)
+    void insert_if_not_first(const mockturtle::node<Ntk>& node, std::vector<mockturtle::node<Ntk>>& vec,
+                             int& saturated_fanout_flag, int position)
     {
         if (vec.empty() || vec.front() != node)
         {
             vec.insert(vec.begin(), node);
+            saturated_fanout_flag = 0;
+        }
+        else if (position == 0)
+        {
+            if (saturated_fanout_flag == 1)
+            {
+                vec.insert(vec.begin(), node);
+                saturated_fanout_flag = 0;
+            }
+            else
+            {
+                saturated_fanout_flag = 1;
+            }
         }
     }
 
@@ -255,7 +289,8 @@ class node_duplication_planarization_impl
      */
     void compute_node_order_next_level(std::vector<mockturtle::node<Ntk>>& next_level)
     {
-        const auto& combinations = lvl_pairs.back();
+        int         saturated_fanout_flag = 0;
+        const auto& combinations          = lvl_pairs.back();
         // select the path with the least delay and follow it via fanin relations
         const auto minimum_it =
             std::min_element(combinations.cbegin(), combinations.cend(),
@@ -265,32 +300,32 @@ class node_duplication_planarization_impl
             const auto& min_combination = *minimum_it;
 
             // Insert the terminal node
-            insert_if_not_first(min_combination.pair.second, next_level);
+            insert_if_not_first(min_combination.pair.second, next_level, saturated_fanout_flag, 0);
 
             // insert middle_nodes
             for (const auto& node : min_combination.middle_nodes)
             {
-                insert_if_not_first(node, next_level);
+                insert_if_not_first(node, next_level, saturated_fanout_flag, 1);
             }
 
             // Insert the first node
-            insert_if_not_first(min_combination.pair.first, next_level);
+            insert_if_not_first(min_combination.pair.first, next_level, saturated_fanout_flag, 1);
 
             auto fanin_combination = minimum_it->fanin_pair;
 
             while (fanin_combination)
             {
                 // Insert the terminal node
-                insert_if_not_first(fanin_combination->pair.second, next_level);
+                insert_if_not_first(fanin_combination->pair.second, next_level, saturated_fanout_flag, 0);
 
                 // Insert middle_nodes
                 for (const auto& node : fanin_combination->middle_nodes)
                 {
-                    insert_if_not_first(node, next_level);
+                    insert_if_not_first(node, next_level, saturated_fanout_flag, 1);
                 }
 
                 // insert the first node
-                insert_if_not_first(fanin_combination->pair.first, next_level);
+                insert_if_not_first(fanin_combination->pair.first, next_level, saturated_fanout_flag, 1);
 
                 fanin_combination = fanin_combination->fanin_pair;
             }
@@ -323,16 +358,10 @@ class node_duplication_planarization_impl
         // ToDO: implement border_pis (if there is a choice ush pis to the borders (first or last rank))
         const bool border_pis = true;
 
-        std::unordered_map<typename Ntk::node, int> po_counts;
-
-        ntk.foreach_po([&po_counts](auto po) { po_counts[po]++; });
-
         std::vector<typename Ntk::node> pos{};
         pos.reserve(ntk.num_pos());
-        for (const auto& kv : po_counts)
-        {
-            pos.push_back(kv.first);
-        }
+
+        ntk.foreach_po([&pos](auto po) { pos.push_back(po); });
 
         // Randomize the PO order
         if (ps.random_output_order)
@@ -368,11 +397,6 @@ class node_duplication_planarization_impl
         // Process all other levels
         while (!v_level.empty() && !f_final_level)
         {
-            // ToDo: Fix the creation of the depth_view/rank_view
-            if (v_level.size() > 25000)
-            {
-                return std::nullopt;
-            }
             // Push the level to the network
             ntk_lvls.push_back(v_level);
             lvl_pairs.clear();

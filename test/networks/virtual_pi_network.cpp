@@ -5,9 +5,10 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 
+#include <fiction/networks/views/extended_rank_view.hpp>
+
 #include <fiction/algorithms/verification/virtual_miter.hpp>
 #include <fiction/networks/technology_network.hpp>
-#include <fiction/networks/views/extended_rank_view.hpp>
 #include <fiction/networks/virtual_pi_network.hpp>
 
 #include <mockturtle/algorithms/equivalence_checking.hpp>
@@ -117,7 +118,7 @@ TEST_CASE("Check equivalence of an extended_rank view", "[virtual-pi-view]")
     tec.create_po(f2_t);
     tec.create_po(f3_t);
 
-    auto ntk_r = extended_rank_view(vpi);
+    auto ntk_r     = extended_rank_view(vpi);
 
     mockturtle::equivalence_checking_stats st;
     const auto                             maybe_cec_m =

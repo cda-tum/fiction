@@ -90,7 +90,7 @@ TEST_CASE("Check modify ranks", "[extended-rank-view]")
 
     auto vpi_r = extended_rank_view(tec_balanced);
 
-    const std::vector<technology_network::node> nodes = {13, 10};
+    const std::vector<technology_network::node> nodes = {13, 10, 14};
     vpi_r.modify_rank(2, nodes);
 
     CHECK(vpi_r.check_validity() == 1);

@@ -309,6 +309,7 @@ class virtual_pi_network : public Ntk
                         old2new_v[nd].push_back(new_node);
                         continue;
                     }
+                    assert(false);
                 }
             }
         }
