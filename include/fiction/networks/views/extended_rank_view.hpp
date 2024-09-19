@@ -242,7 +242,7 @@ class extended_rank_view<Ntk, false> : public mockturtle::depth_view<Ntk>
     {
         auto& rank = ranks[level];
         assert(rank.size() == nodes.size());
-        rank       = nodes;
+        rank = nodes;
         std::for_each(rank.cbegin(), rank.cend(), [this, i = 0u](auto const& n) mutable { rank_pos[n] = i++; });
     }
 
