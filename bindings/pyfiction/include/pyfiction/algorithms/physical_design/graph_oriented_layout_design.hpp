@@ -10,6 +10,7 @@
 
 #include <fiction/algorithms/physical_design/graph_oriented_layout_design.hpp>
 
+#include <pybind11/functional.h>  // Needed for std::function bindings
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
@@ -26,6 +27,32 @@ inline void graph_oriented_layout_design(pybind11::module& m)
     namespace py = pybind11;
     using namespace pybind11::literals;
 
+    py::enum_<fiction::graph_oriented_layout_design_params::effort_mode>(
+        m, "gold_effort_mode", DOC(fiction_graph_oriented_layout_design_params_effort_mode))
+        .value("HIGH_EFFICIENCY", fiction::graph_oriented_layout_design_params::effort_mode::HIGH_EFFICIENCY,
+               DOC(fiction_graph_oriented_layout_design_params_effort_mode_HIGH_EFFICIENCY))
+        .value("HIGH_EFFORT", fiction::graph_oriented_layout_design_params::effort_mode::HIGH_EFFORT,
+               DOC(fiction_graph_oriented_layout_design_params_effort_mode_HIGH_EFFORT))
+        .value("HIGHEST_EFFORT", fiction::graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT,
+               DOC(fiction_graph_oriented_layout_design_params_effort_mode_HIGHEST_EFFORT))
+
+        ;
+
+    py::enum_<fiction::graph_oriented_layout_design_params::cost_objective>(
+        m, "gold_cost_objective", DOC(fiction_graph_oriented_layout_design_params_cost_objective))
+        .value("AREA", fiction::graph_oriented_layout_design_params::cost_objective::AREA,
+               DOC(fiction_graph_oriented_layout_design_params_cost_objective_AREA))
+        .value("WIRES", fiction::graph_oriented_layout_design_params::cost_objective::WIRES,
+               DOC(fiction_graph_oriented_layout_design_params_cost_objective_WIRES))
+        .value("CROSSINGS", fiction::graph_oriented_layout_design_params::cost_objective::CROSSINGS,
+               DOC(fiction_graph_oriented_layout_design_params_cost_objective_CROSSINGS))
+        .value("ACP", fiction::graph_oriented_layout_design_params::cost_objective::ACP,
+               DOC(fiction_graph_oriented_layout_design_params_cost_objective_ACP))
+        .value("CUSTOM", fiction::graph_oriented_layout_design_params::cost_objective::CUSTOM,
+               DOC(fiction_graph_oriented_layout_design_params_cost_objective_CUSTOM))
+
+        ;
+
     py::class_<fiction::graph_oriented_layout_design_params>(m, "graph_oriented_layout_design_params",
                                                              DOC(fiction_graph_oriented_layout_design_params))
         .def(py::init<>())
@@ -35,8 +62,10 @@ inline void graph_oriented_layout_design(pybind11::module& m)
                        DOC(fiction_graph_oriented_layout_design_params_num_vertex_expansions))
         .def_readwrite("verbose", &fiction::graph_oriented_layout_design_params::verbose,
                        DOC(fiction_graph_oriented_layout_design_params_verbose))
-        .def_readwrite("high_effort_mode", &fiction::graph_oriented_layout_design_params::high_effort_mode,
-                       DOC(fiction_graph_oriented_layout_design_params_high_effort_mode))
+        .def_readwrite("mode", &fiction::graph_oriented_layout_design_params::mode,
+                       DOC(fiction_graph_oriented_layout_design_params_mode))
+        .def_readwrite("cost", &fiction::graph_oriented_layout_design_params::cost,
+                       DOC(fiction_graph_oriented_layout_design_params_cost))
         .def_readwrite("return_first", &fiction::graph_oriented_layout_design_params::return_first,
                        DOC(fiction_graph_oriented_layout_design_params_return_first))
         .def_readwrite("planar", &fiction::graph_oriented_layout_design_params::planar,
@@ -64,13 +93,13 @@ inline void graph_oriented_layout_design(pybind11::module& m)
                       DOC(fiction_graph_oriented_layout_design_stats_num_gates))
         .def_readonly("num_wires", &fiction::graph_oriented_layout_design_stats::num_wires,
                       DOC(fiction_graph_oriented_layout_design_stats_num_wires))
-
-        ;
+        .def_readonly("num_crossings", &fiction::graph_oriented_layout_design_stats::num_crossings,
+                      DOC(fiction_graph_oriented_layout_design_stats_num_crossings));
 
     m.def("graph_oriented_layout_design",
           &fiction::graph_oriented_layout_design<py_cartesian_gate_layout, py_logic_network>, "network"_a,
           "parameters"_a = fiction::graph_oriented_layout_design_params{}, "statistics"_a = nullptr,
-          DOC(fiction_graph_oriented_layout_design));
+          "custom_cost_objective"_a = nullptr, DOC(fiction_graph_oriented_layout_design));
 }
 
 }  // namespace pyfiction

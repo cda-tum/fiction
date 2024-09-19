@@ -15,7 +15,6 @@
 #include <fiction/technology/cell_technologies.hpp>           // cell implementations
 #include <fiction/technology/sidb_bestagon_library.hpp>       // a pre-defined SiDB gate library
 #include <fiction/technology/technology_mapping_library.hpp>  // pre-defined gate types for technology mapping
-#include <fiction/traits.hpp>                                 // traits for type-checking
 #include <fiction/types.hpp>                                  // pre-defined types suitable for the FCN domain
 
 #include <fmt/format.h>                                        // output formatting
@@ -28,7 +27,6 @@
 #include <mockturtle/algorithms/node_resynthesis/xag_npn.hpp>  // NPN databases for cut rewriting of XAGs and AIGs
 #include <mockturtle/io/genlib_reader.hpp>                     // call-backs to read Genlib files into gate libraries
 #include <mockturtle/io/verilog_reader.hpp>                    // call-backs to read Verilog files into networks
-#include <mockturtle/networks/klut.hpp>                        // k-LUT network
 #include <mockturtle/networks/xag.hpp>                         // XOR-AND-inverter graphs
 #include <mockturtle/utils/tech_library.hpp>                   // technology library utils
 #include <mockturtle/views/depth_view.hpp>                     // to determine network levels

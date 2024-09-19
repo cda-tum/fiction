@@ -34,13 +34,32 @@ class gold_command : public command
             command(e, "Performs scalable placement and routing of the current logic network in store using the "
                        "Graph-Oriented Layout Design (GOLD) algorithm. GOLD generates close-to-optimal 2DDWave-clocked "
                        "FCN gate-level layouts in reasonable runtime. Its result quality is better than 'ortho' and "
-                       "its runtime behavior superior to 'exact' and 'onepass'.")
+                       "its runtime behavior superior to 'exact' and 'onepass'. Additionally, different cost "
+                       "objectives can be specified.")
     {
         add_option("--timeout,-t", ps.timeout, "Timeout in seconds");
         add_option("--num_vertex_expansions,-n", ps.num_vertex_expansions, "Number of vertex expansions during search",
                    true);
-        add_flag("--high_effort_mode,-e", ps.high_effort_mode,
-                 "Toggle high effort mode; increases runtime but might generate better results");
+        add_option(
+            "--effort_mode,-e", ps.mode,
+            "Specify the effort mode of the graph-oriented layout design algorithm. Possible values for the "
+            "effort mode:\n"
+            " - `0` (high_efficiency): Uses minimal computational resources, resulting in fewer search space graphs "
+            "and potentially lower quality solutions.\n"
+            " - `1` (high_effort): Uses more computational resources, creating more search space graphs to "
+            "improve the likelihood of finding optimal solutions.\n"
+            " - `2` (highest_effort): Uses the maximum computational resources, generating the most search "
+            "space graphs to ensure the highest chance of finding the best solution.",
+            true)
+            ->set_type_name("{high_efficiency=0, high_effort=1, highest_effort=2}");
+        add_option("--cost_objective,-c", ps.cost,
+                   "Specify the cost objective for the graph-oriented layout design algorithm."
+                   "Possible values for the cost objective:\n"
+                   " - `0` (area): Minimize the layout area.\n- `1` (wires): Minimize the number of wire segments.\n"
+                   " - `2` (crossings): Minimize the number of crossings.\n"
+                   " - `3` (acp): Minimize the area-crossing product (ACP), balancing area and crossings.",
+                   true)
+            ->set_type_name("{area=0, wires=1, crossings=2, acp=3}");
         add_flag("--return_first,-r", ps.return_first,
                  "Terminate on the first found layout; reduces runtime but might sacrifice result quality");
         add_flag("--planar,-p", ps.planar, "Enable planar layout generation");
@@ -90,6 +109,7 @@ class gold_command : public command
             {"runtime in seconds", mockturtle::to_seconds(st.time_total)},
             {"number of gates", st.num_gates},
             {"number of wires", st.num_wires},
+            {"number of crossings", st.num_crossings},
             {"layout", {{"x-size", st.x_size}, {"y-size", st.y_size}, {"area", st.x_size * st.y_size}}}};
     }
 

@@ -1,4 +1,4 @@
-.. _determine-clocking:
+.. _determine_clocking:
 
 Determine Clocking
 ------------------

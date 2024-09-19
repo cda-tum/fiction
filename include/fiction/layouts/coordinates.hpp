@@ -1080,7 +1080,7 @@ struct formatter<fiction::offset::ucoord_t>
     }
 
     template <typename FormatContext>
-    auto format(const fiction::offset::ucoord_t& c, FormatContext& ctx)
+    auto format(const fiction::offset::ucoord_t& c, FormatContext& ctx) const
     {
         return format_to(ctx.out(), "({},{},{})", c.x, c.y, c.z);
     }
@@ -1096,7 +1096,7 @@ struct formatter<fiction::cube::coord_t>
     }
 
     template <typename FormatContext>
-    auto format(const fiction::cube::coord_t& c, FormatContext& ctx)
+    auto format(const fiction::cube::coord_t& c, FormatContext& ctx) const
     {
         return format_to(ctx.out(), "({},{},{})", c.x, c.y, c.z);
     }
@@ -1112,7 +1112,7 @@ struct formatter<fiction::siqad::coord_t>
     }
 
     template <typename FormatContext>
-    auto format(const fiction::siqad::coord_t& c, FormatContext& ctx)
+    auto format(const fiction::siqad::coord_t& c, FormatContext& ctx) const
     {
         return format_to(ctx.out(), "({},{},{})", c.x, c.y, c.z);
     }

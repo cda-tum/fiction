@@ -5,11 +5,12 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
+#include "utils/blueprints/layout_blueprints.hpp"
+
 #include <fiction/algorithms/simulation/sidb/critical_temperature.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/charge_distribution_surface.hpp>
-#include <fiction/technology/sidb_lattice.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/truth_table_utils.hpp>
 
@@ -43,10 +44,11 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         params.iteration_steps       = 0;
         params.alpha                 = 0.0;
 
-        critical_temperature_gate_based<TestType>(lyt, std::vector<tt>{create_id_tt()}, params, &critical_stats);
+        const auto ct =
+            critical_temperature_gate_based<TestType>(lyt, std::vector<tt>{create_id_tt()}, params, &critical_stats);
 
         CHECK(critical_stats.num_valid_lyt == 0);
-        CHECK(critical_stats.critical_temperature == 0.0);
+        CHECK(ct == 0.0);
     }
 
     SECTION("No SiDB")
@@ -58,10 +60,10 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         params.iteration_steps       = 80;
         params.alpha                 = 0.7;
 
-        critical_temperature_gate_based<TestType>(lyt, std::vector<tt>{tt{}}, params, &critical_stats);
+        const auto ct = critical_temperature_gate_based<TestType>(lyt, std::vector<tt>{tt{}}, params, &critical_stats);
 
         CHECK(critical_stats.num_valid_lyt == 0);
-        CHECK(critical_stats.critical_temperature == 0.0);
+        CHECK(ct == 0.0);
     }
 
     SECTION("Not working diagonal wire where positively charged SiDBs can occur")
@@ -94,9 +96,9 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         params.iteration_steps       = 80;
         params.alpha                 = 0.7;
 
-        critical_temperature_gate_based(lyt, std::vector<tt>{create_id_tt()}, params, &critical_stats);
+        const auto ct = critical_temperature_gate_based(lyt, std::vector<tt>{create_id_tt()}, params, &critical_stats);
 
-        CHECK(critical_stats.critical_temperature == 0.0);
+        CHECK(ct == 0.0);
     }
 
     SECTION("four SiDBs with two valid charge distributions, QuickExact")
@@ -114,15 +116,15 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         params.iteration_steps       = 80;
         params.alpha                 = 0.7;
 
-        critical_temperature_non_gate_based(lyt, params, &critical_stats);
+        const auto ct = critical_temperature_non_gate_based(lyt, params, &critical_stats);
 
         CHECK(critical_stats.num_valid_lyt == 2);
         CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous),
                    Catch::Matchers::WithinAbs(std::numeric_limits<double>::infinity(), 0.01));
-        CHECK(critical_stats.critical_temperature == 350);
+        CHECK(ct == 350);
     }
 
-    SECTION("Y-shaped SiDB AND gate")
+    SECTION("Y-shaped SiQAD AND gate")
     {
         lyt.assign_cell_type({0, 0, 1}, sidb_technology::cell_type::INPUT);
         lyt.assign_cell_type({2, 1, 1}, sidb_technology::cell_type::INPUT);
@@ -150,11 +152,30 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         params.iteration_steps       = 80;
         params.alpha                 = 0.7;
 
-        critical_temperature_gate_based(lyt, std::vector<tt>{create_and_tt()}, params, &critical_stats);
+        const auto ct = critical_temperature_gate_based(lyt, std::vector<tt>{create_and_tt()}, params, &critical_stats);
 
         CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous),
                    Catch::Matchers::WithinAbs(std::numeric_limits<double>::infinity(), 0.01));
-        CHECK(critical_stats.critical_temperature == 350);
+        CHECK(ct == 350);
+    }
+
+    SECTION("Y-shaped SiQAD OR gate")
+    {
+        const auto lyt_or_gate = blueprints::siqad_or_gate<TestType>();
+
+        sim_params.mu_minus = -0.28;
+
+        params.simulation_parameters = sim_params;
+        params.engine                = critical_temperature_params::simulation_engine::EXACT;
+        params.input_bdl_iterator_params.input_bdl_config =
+            bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED;
+
+        const auto ct =
+            critical_temperature_gate_based(lyt_or_gate, std::vector<tt>{create_or_tt()}, params, &critical_stats);
+
+        CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous),
+                   Catch::Matchers::WithinAbs(std::numeric_limits<double>::infinity(), 0.01));
+        CHECK(ct == 400);
     }
 
     SECTION("Bestagon AND gate, QuickExact")
@@ -195,11 +216,11 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         params.iteration_steps       = 80;
         params.alpha                 = 0.7;
 
-        critical_temperature_gate_based(lyt, std::vector<tt>{create_and_tt()}, params, &critical_stats);
+        const auto ct = critical_temperature_gate_based(lyt, std::vector<tt>{create_and_tt()}, params, &critical_stats);
 
         CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous),
                    Catch::Matchers::WithinAbs(26.02, 0.01));
-        CHECK_THAT(std::abs(critical_stats.critical_temperature - 59.19), Catch::Matchers::WithinAbs(0.00, 0.01));
+        CHECK_THAT(std::abs(ct - 59.19), Catch::Matchers::WithinAbs(0.00, 0.01));
     }
 
     SECTION("Bestagon AND gate, QuickSim")
@@ -240,9 +261,9 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         params.iteration_steps       = 500;
         params.alpha                 = 0.6;
 
-        critical_temperature_gate_based(lyt, std::vector<tt>{create_and_tt()}, params, &critical_stats);
+        const auto ct = critical_temperature_gate_based(lyt, std::vector<tt>{create_and_tt()}, params, &critical_stats);
 
-        CHECK(critical_stats.critical_temperature > 0);
+        CHECK(ct > 0);
     }
 
     SECTION("Bestagon FO2 gate")
@@ -282,11 +303,12 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         params.iteration_steps       = 80;
         params.alpha                 = 0.7;
 
-        critical_temperature_gate_based(lyt, std::vector<tt>{create_fan_out_tt()}, params, &critical_stats);
+        const auto ct =
+            critical_temperature_gate_based(lyt, std::vector<tt>{create_fan_out_tt()}, params, &critical_stats);
 
         CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous - 0.56),
                    Catch::Matchers::WithinAbs(0.00, 0.01));
-        CHECK_THAT(std::abs(critical_stats.critical_temperature - 1.46), Catch::Matchers::WithinAbs(0.00, 0.01));
+        CHECK_THAT(std::abs(ct - 1.46), Catch::Matchers::WithinAbs(0.00, 0.01));
     }
 
     SECTION("OR gate")
@@ -322,9 +344,9 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         params.iteration_steps       = 80;
         params.alpha                 = 0.7;
 
-        critical_temperature_gate_based(lyt, std::vector<tt>{create_or_tt()}, params, &critical_stats);
+        const auto ct = critical_temperature_gate_based(lyt, std::vector<tt>{create_or_tt()}, params, &critical_stats);
 
-        CHECK(critical_stats.critical_temperature < 350);
+        CHECK(ct < 350);
     }
 
     SECTION("Not working diagonal Wire")
@@ -355,13 +377,13 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         params.iteration_steps       = 80;
         params.alpha                 = 0.7;
 
-        critical_temperature_gate_based(lyt, std::vector<tt>{create_id_tt()}, params, &critical_stats);
+        const auto ct = critical_temperature_gate_based(lyt, std::vector<tt>{create_id_tt()}, params, &critical_stats);
 
         CHECK(critical_stats.algorithm_name == "QuickExact");
 
         CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous),
                    Catch::Matchers::WithinAbs(305.95, 0.01));
-        CHECK_THAT(std::abs(critical_stats.critical_temperature), Catch::Matchers::WithinAbs(0.00, 0.01));
+        CHECK_THAT(std::abs(ct), Catch::Matchers::WithinAbs(0.00, 0.01));
     }
 
     SECTION("nine SiDBs, QuickSim, non-gate-based")
@@ -384,11 +406,11 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         params.iteration_steps       = 500;
         params.alpha                 = 0.6;
 
-        critical_temperature_non_gate_based(lyt, params, &critical_stats);
+        const auto ct = critical_temperature_non_gate_based(lyt, params, &critical_stats);
 
         CHECK(critical_stats.algorithm_name == "QuickSim");
 
-        CHECK_THAT(std::abs(critical_stats.critical_temperature), Catch::Matchers::WithinAbs(11.55, 0.01));
+        CHECK_THAT(std::abs(ct), Catch::Matchers::WithinAbs(11.55, 0.01));
     }
 }
 
@@ -416,12 +438,13 @@ TEMPLATE_TEST_CASE("Test critical_temperature function, using offset coordinates
         params.iteration_steps       = 0;
         params.alpha                 = 0.0;
 
-        critical_temperature_gate_based<TestType>(lyt, std::vector<tt>{create_id_tt()}, params, &critical_stats);
+        const auto ct =
+            critical_temperature_gate_based<TestType>(lyt, std::vector<tt>{create_id_tt()}, params, &critical_stats);
 
         CHECK(critical_stats.algorithm_name == "QuickSim");
 
         CHECK(critical_stats.num_valid_lyt == 0);
-        CHECK(critical_stats.critical_temperature == 0.0);
+        CHECK(ct == 0.0);
     }
 
     SECTION("One SiDB")
@@ -433,12 +456,12 @@ TEMPLATE_TEST_CASE("Test critical_temperature function, using offset coordinates
         params.iteration_steps       = 80;
         params.alpha                 = 0.7;
 
-        critical_temperature_gate_based<TestType>(lyt, std::vector<tt>{tt{}}, params, &critical_stats);
+        const auto ct = critical_temperature_gate_based<TestType>(lyt, std::vector<tt>{tt{}}, params, &critical_stats);
 
         CHECK(critical_stats.algorithm_name == "QuickExact");
 
         CHECK(critical_stats.num_valid_lyt == 0);
-        CHECK(critical_stats.critical_temperature == 0.0);
+        CHECK(ct == 0.0);
     }
 
     SECTION("Not working diagonal Wire where positively charged SiDBs can occur")
@@ -471,8 +494,9 @@ TEMPLATE_TEST_CASE("Test critical_temperature function, using offset coordinates
         params.iteration_steps       = 80;
         params.alpha                 = 0.7;
 
-        critical_temperature_gate_based(lyt, std::vector<tt>{create_id_tt()}, params, &critical_stats);
-        CHECK(critical_stats.critical_temperature == 0.0);
+        const auto ct = critical_temperature_gate_based(lyt, std::vector<tt>{create_id_tt()}, params, &critical_stats);
+
+        CHECK(ct == 0.0);
     }
 
     SECTION("four SiDBs with two valid charge distributions, QuickExact")
@@ -490,14 +514,14 @@ TEMPLATE_TEST_CASE("Test critical_temperature function, using offset coordinates
         params.iteration_steps       = 80;
         params.alpha                 = 0.7;
 
-        critical_temperature_non_gate_based(lyt, params, &critical_stats);
+        const auto ct = critical_temperature_non_gate_based(lyt, params, &critical_stats);
 
         CHECK(critical_stats.algorithm_name == "QuickExact");
 
         CHECK(critical_stats.num_valid_lyt == 2);
         CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous),
                    Catch::Matchers::WithinAbs(std::numeric_limits<double>::infinity(), 0.01));
-        CHECK(critical_stats.critical_temperature == 350);
+        CHECK(ct == 350);
     }
 
     SECTION("Y-shape SiDB AND gate")
@@ -527,17 +551,17 @@ TEMPLATE_TEST_CASE("Test critical_temperature function, using offset coordinates
         params.iteration_steps       = 80;
         params.alpha                 = 0.7;
 
-        critical_temperature_gate_based(lyt, std::vector<tt>{create_and_tt()}, params, &critical_stats);
+        const auto ct = critical_temperature_gate_based(lyt, std::vector<tt>{create_and_tt()}, params, &critical_stats);
 
         CHECK(critical_stats.algorithm_name == "QuickExact");
 
         CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous),
                    Catch::Matchers::WithinAbs(std::numeric_limits<double>::infinity(), 0.01));
-        CHECK(critical_stats.critical_temperature == 350);
+        CHECK(ct == 350);
     }
 }
 
-TEMPLATE_TEST_CASE("Critical temperature of Bestagon CX, QuickSim", "[critical-temperature], [quality]",
+TEMPLATE_TEST_CASE("Critical temperature of Bestagon CX, QuickExact", "[critical-temperature], [quality]",
                    sidb_100_cell_clk_lyt_siqad, cds_sidb_100_cell_clk_lyt_siqad)
 {
     TestType lyt{};
@@ -591,12 +615,56 @@ TEMPLATE_TEST_CASE("Critical temperature of Bestagon CX, QuickSim", "[critical-t
     params.engine                = critical_temperature_params::simulation_engine::EXACT;
     params.confidence_level      = 0.99;
     params.max_temperature       = 350;
-    params.iteration_steps       = 80;
-    params.alpha                 = 0.7;
 
-    critical_temperature_gate_based(lyt, std::vector<tt>{create_crossing_wire_tt()}, params, &critical_stats);
+    const auto ct = critical_temperature_gate_based(lyt, create_crossing_wire_tt(), params, &critical_stats);
 
     CHECK_THAT(std::fabs(critical_stats.energy_between_ground_state_and_first_erroneous - 0.32),
                Catch::Matchers::WithinAbs(0.00, 0.01));
-    CHECK_THAT(std::abs(critical_stats.critical_temperature - 0.85), Catch::Matchers::WithinAbs(0.00, 0.01));
+    CHECK_THAT(std::abs(ct - 0.85), Catch::Matchers::WithinAbs(0.00, 0.01));
+}
+
+TEMPLATE_TEST_CASE("Critical temperature of Bestagon double wire, QuickExact", "[critical-temperature], [quality]",
+                   sidb_100_cell_clk_lyt_siqad, cds_sidb_100_cell_clk_lyt_siqad)
+{
+    const auto lyt_double_wire_gate = blueprints::bestagon_double_wire<TestType>();
+
+    critical_temperature_params      params{};
+    const sidb_simulation_parameters sim_params{2, -0.32, 5.6, 5.0};
+
+    critical_temperature_stats critical_stats{};
+
+    params.simulation_parameters = sim_params;
+    params.engine                = critical_temperature_params::simulation_engine::EXACT;
+    params.confidence_level      = 0.99;
+    params.max_temperature       = 350;
+
+    const auto ct =
+        critical_temperature_gate_based(lyt_double_wire_gate, create_double_wire_tt(), params, &critical_stats);
+
+    CHECK_THAT(std::fabs(critical_stats.energy_between_ground_state_and_first_erroneous - 10.717),
+               Catch::Matchers::WithinAbs(0.00, 0.01));
+    CHECK_THAT(std::abs(ct - 24.18), Catch::Matchers::WithinAbs(0.00, 0.01));
+}
+
+TEMPLATE_TEST_CASE("Critical temperature of Bestagon half adder gate, QuickExact", "[critical-temperature], [quality]",
+                   sidb_100_cell_clk_lyt_siqad, cds_sidb_100_cell_clk_lyt_siqad)
+{
+    const auto lyt_half_adder_gate = blueprints::bestagon_ha<TestType>();
+
+    critical_temperature_params      params{};
+    const sidb_simulation_parameters sim_params{2, -0.32, 5.6, 5.0};
+
+    critical_temperature_stats critical_stats{};
+
+    params.simulation_parameters = sim_params;
+    params.engine                = critical_temperature_params::simulation_engine::EXACT;
+    params.confidence_level      = 0.99;
+    params.max_temperature       = 350;
+
+    const auto ct =
+        critical_temperature_gate_based(lyt_half_adder_gate, create_half_adder_tt(), params, &critical_stats);
+
+    CHECK_THAT(std::fabs(critical_stats.energy_between_ground_state_and_first_erroneous - 0.15),
+               Catch::Matchers::WithinAbs(0.00, 0.01));
+    CHECK_THAT(std::abs(ct - 0.40), Catch::Matchers::WithinAbs(0.00, 0.01));
 }

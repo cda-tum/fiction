@@ -99,8 +99,9 @@ class gate_level_layout : public ClockedLayout
         phmap::parallel_flat_hash_map<Node, Tile> node_tile_map{
             {{static_cast<Node>(0ull), const0}, {static_cast<Node>(1ull), const1}}};
 
-        uint32_t num_gates = 0ull;
-        uint32_t num_wires = 0ull;
+        uint32_t num_gates     = 0ull;
+        uint32_t num_wires     = 0ull;
+        uint32_t num_crossings = 0ull;
 
         uint32_t trav_id = 0ul;
 
@@ -556,6 +557,15 @@ class gate_level_layout : public ClockedLayout
         return strg->data.num_wires;
     }
     /**
+     * Returns the number of placed nodes in the layout that compute the identity function and cross other nodes.
+     *
+     * @return Number of crossings in the layout.
+     */
+    [[nodiscard]] auto num_crossings() const noexcept
+    {
+        return strg->data.num_crossings;
+    }
+    /**
      * Checks whether there are no gates or wires assigned to the layout's coordinates.
      *
      * @return `true` iff the layout is empty.
@@ -754,6 +764,12 @@ class gate_level_layout : public ClockedLayout
                 if (is_wire(n))
                 {
                     strg->data.num_wires--;
+
+                    // decrease crossing count
+                    if (ClockedLayout::is_crossing_layer(t) && !is_empty_tile(ClockedLayout::below(t)))
+                    {
+                        strg->data.num_crossings--;
+                    }
 
                     // find PO entry and remove it if present
                     if (const auto po_it =
@@ -1669,6 +1685,11 @@ class gate_level_layout : public ClockedLayout
             if (is_wire(n))
             {
                 strg->data.num_wires++;
+
+                if (ClockedLayout::is_crossing_layer(t) && !is_empty_tile(ClockedLayout::below(t)))
+                {
+                    strg->data.num_crossings++;
+                }
             }
             else  // is gate
             {

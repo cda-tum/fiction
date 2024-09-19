@@ -11,7 +11,6 @@
 #include "fiction/utils/layout_utils.hpp"
 #include "fiction/utils/math_utils.hpp"
 
-#include <fmt/format.h>
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <algorithm>
@@ -20,7 +19,6 @@
 #include <cstdlib>
 #include <limits>
 #include <mutex>
-#include <numeric>
 #include <random>
 #include <set>
 #include <thread>
@@ -50,7 +48,7 @@ struct displacement_robustness_domain
 
 /**
  * Parameters for the `determine_displacement_robustness_domain` and
- * `determine_propability_of_fabricating_operational_gate` algorithms.
+ * `determine_probability_of_fabricating_operational_gate` algorithms.
  *
  * @param CellType SiDB layout cell type.
  */
@@ -60,7 +58,7 @@ struct displacement_robustness_domain_params
     /**
      * Possible modes to determine the displacement robustness domain.
      */
-    enum class displacement_analysis_mode
+    enum class displacement_analysis_mode : uint8_t
     {
         /**
          * All possible displacements are analyzed.
@@ -75,7 +73,7 @@ struct displacement_robustness_domain_params
     /**
      * Specifies the allowed displacement range options for SiDB fabrication simulation.
      */
-    enum class dimer_displacement_policy
+    enum class dimer_displacement_policy : uint8_t
     {
         /**
          * In this mode, any displacement of SiDBs must remain within the boundaries
@@ -263,7 +261,7 @@ class displacement_robustness_domain_impl
      *        SiDBs have a slight displacement.
      * @return Probability of fabricating a working SiDB gate implementation.
      */
-    [[nodiscard]] double determine_propability_of_fabricating_operational_gate(double fabrication_error_rate)
+    [[nodiscard]] double determine_probability_of_fabricating_operational_gate(double fabrication_error_rate)
     {
         // The maximum error rate is 1.0.
         fabrication_error_rate = std::min(1.0, fabrication_error_rate);
@@ -346,7 +344,7 @@ class displacement_robustness_domain_impl
     /**
      * The logical specification of the layout.
      */
-    const std::vector<TT>& truth_table;
+    const std::vector<TT> truth_table;
     /**
      * Random device for obtaining seed for the random number generator.
      * Provides a source of quasi-non-deterministic pseudo-random numbers.
@@ -485,36 +483,6 @@ class displacement_robustness_domain_impl
         return all_possible_sidb_misplacements;
     }
     /**
-     * This is a helper function, which recursively generates combinations of SiDB displacements for all SiDBs
-     * based on the provided vector of displacement vectors.
-     *
-     * @param result The vector to store the generated combinations. The first element describes the SiDBs of the first
-     * displaced layout.
-     * @param current_combination The current combination being constructed.
-     * @param cell_index The current cell_index in the vector of displacement vectors.
-     */
-    void generate_all_possible_combinations_of_displacements(std::vector<std::vector<cell<Lyt>>>& result,
-                                                             std::vector<cell<Lyt>>&              current_combination,
-                                                             const std::size_t                    cell_index) noexcept
-    {
-        if (cell_index == all_possible_sidb_displacements.size())
-        {
-            result.push_back(current_combination);
-            return;
-        }
-
-        // Recursively generate combinations for each cell in the current displacement vector
-        for (const auto& c : all_possible_sidb_displacements[cell_index])
-        {
-            // Add current cell to the combination
-            current_combination.push_back(c);
-            // Recursively generate next combinations
-            generate_all_possible_combinations_of_displacements(result, current_combination, cell_index + 1);
-            // Backtrack: remove current cell to explore other combinations
-            current_combination.pop_back();
-        }
-    }
-    /**
      * This function generates all SiDB layouts with displacements based on the original layout.
      * It filters out layouts where two or more SiDBs would be on the same spot due to displacement.
      *
@@ -522,9 +490,7 @@ class displacement_robustness_domain_impl
      */
     [[nodiscard]] std::vector<Lyt> generate_valid_displaced_sidb_layouts() noexcept
     {
-        std::vector<std::vector<cell<Lyt>>> all_possible_sidb_displacement{};
-        std::vector<cell<Lyt>>              current_combination{};
-        generate_all_possible_combinations_of_displacements(all_possible_sidb_displacement, current_combination, 0);
+        auto all_possible_sidb_displacement = cartesian_combinations(all_possible_sidb_displacements);
 
         std::shuffle(all_possible_sidb_displacement.begin(), all_possible_sidb_displacement.end(), generator);
 
@@ -658,7 +624,7 @@ determine_displacement_robustness_domain(const Lyt& layout, const std::vector<TT
  * @return The probability of fabricating an operational SiDB layout.
  */
 template <typename Lyt, typename TT>
-[[nodiscard]] double determine_propability_of_fabricating_operational_gate(
+[[nodiscard]] double determine_probability_of_fabricating_operational_gate(
     const Lyt& layout, const std::vector<TT>& spec, const displacement_robustness_domain_params<cell<Lyt>>& params = {},
     const double fabrication_error_rate = 1.0)
 {
@@ -668,7 +634,7 @@ template <typename Lyt, typename TT>
     displacement_robustness_domain_stats                 st{};
     detail::displacement_robustness_domain_impl<Lyt, TT> p{layout, spec, params, st};
 
-    return p.determine_propability_of_fabricating_operational_gate(fabrication_error_rate);
+    return p.determine_probability_of_fabricating_operational_gate(fabrication_error_rate);
 }
 
 }  // namespace fiction

@@ -12,6 +12,7 @@
 #include <fiction/layouts/hexagonal_layout.hpp>
 
 #include <fmt/format.h>
+#include <fmt/ranges.h>
 #include <kitty/print.hpp>
 #include <mockturtle/io/write_dot.hpp>
 #include <mockturtle/traits.hpp>

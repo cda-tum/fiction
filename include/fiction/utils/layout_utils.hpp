@@ -477,6 +477,7 @@ template <typename LytDest, typename LytSrc>
                         lyt_surface.assign_sidb_defect(siqad::to_fiction_coord<coordinate<LytDest>>(cd.first),
                                                        lyt.get_sidb_defect(cd.first));
                     });
+
                 return lyt_surface;
             }
             else if constexpr (is_charge_distribution_surface_v<LytSrc> && !is_sidb_defect_surface_v<LytSrc>)
@@ -685,6 +686,110 @@ template <typename CoordinateType>
     }
 }
 #pragma GCC diagnostic pop
+
+/**
+ * This function checks whether the given layouts `first_lyt` and `second_lyt` are identical by comparing various
+ * properties such as the number of cells, the types of cells, defects (if applicable), and charge states (if
+ * applicable). The comparison is done in a detailed manner depending on the specific layout type.
+ *
+ * @Note The aspect ratios of the cell-level layouts are not compared.
+ *
+ * @tparam Lyt The layout type. Must be a cell-level layout.
+ * @param first_lyt The first layout to compare.
+ * @param second_lyt The second layout to compare.
+ * @return `true` if the layouts are identical, `false` otherwise.
+ */
+template <typename Lyt>
+[[nodiscard]] inline bool are_cell_layouts_identical(const Lyt& first_lyt, const Lyt& second_lyt) noexcept
+{
+    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+
+    if (first_lyt.num_cells() != second_lyt.num_cells())
+    {
+        return false;
+    }
+
+    bool different_cells = false;
+
+    first_lyt.foreach_cell(
+        [&first_lyt, &second_lyt, &different_cells](const auto& c)
+        {
+            if (first_lyt.get_cell_type(c) != second_lyt.get_cell_type(c))
+            {
+                different_cells = true;
+                return false;  // abort
+            }
+            return true;  // keep looping
+        });
+
+    if (different_cells)
+    {
+        return false;
+    }
+
+    if constexpr (is_sidb_defect_surface_v<Lyt>)
+    {
+        if (second_lyt.num_defects() != first_lyt.num_defects())
+        {
+            return false;
+        }
+
+        bool different_defects = false;
+
+        first_lyt.foreach_sidb_defect(
+            [&first_lyt, &second_lyt, &different_defects](const auto& defect_old)
+            {
+                if (first_lyt.get_sidb_defect(defect_old.first) != second_lyt.get_sidb_defect(defect_old.first))
+                {
+                    different_defects = true;
+                    return false;  // abort
+                }
+                return true;  // keep looping
+            });
+
+        if (different_defects)
+        {
+            return false;
+        }
+    }
+
+    if constexpr (is_charge_distribution_surface_v<Lyt>)
+    {
+        if (second_lyt.num_neutral_sidbs() != first_lyt.num_neutral_sidbs())
+        {
+            return false;
+        }
+
+        if (second_lyt.num_negative_sidbs() != first_lyt.num_negative_sidbs())
+        {
+            return false;
+        }
+
+        if (second_lyt.num_positive_sidbs() != first_lyt.num_positive_sidbs())
+        {
+            return false;
+        }
+
+        bool different_charge_state = false;
+        first_lyt.foreach_cell(
+            [&different_charge_state, &first_lyt, &second_lyt](const auto& c)
+            {
+                if (first_lyt.get_charge_state(c) != second_lyt.get_charge_state(c))
+                {
+                    different_charge_state = true;
+                    return false;  // abort
+                }
+                return true;  // keep looping
+            });
+
+        if (different_charge_state)
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
 
 }  // namespace fiction
 

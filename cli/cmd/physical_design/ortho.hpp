@@ -7,11 +7,15 @@
 
 #include <fiction/algorithms/physical_design/orthogonal.hpp>
 #include <fiction/traits.hpp>
+#include <fiction/types.hpp>
+#include <fiction/utils/network_utils.hpp>
 
 #include <alice/alice.hpp>
+#include <mockturtle/utils/stopwatch.hpp>
 #include <mockturtle/views/names_view.hpp>
 #include <nlohmann/json.hpp>
 
+#include <cstdint>
 #include <memory>
 
 namespace alice
@@ -109,6 +113,7 @@ class ortho_command : public command
             {"runtime in seconds", mockturtle::to_seconds(st.time_total)},
             {"number of gates", st.num_gates},
             {"number of wires", st.num_wires},
+            {"number of crossings", st.num_crossings},
             {"layout", {{"x-size", st.x_size}, {"y-size", st.y_size}, {"area", st.x_size * st.y_size}}}};
     }
 

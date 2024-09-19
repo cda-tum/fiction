@@ -6,6 +6,7 @@
 #define FICTION_HASH_HPP
 
 #include <array>
+#include <cstddef>
 #include <functional>
 #include <set>
 #include <utility>

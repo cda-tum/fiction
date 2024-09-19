@@ -8,6 +8,7 @@
 #include "fiction/algorithms/iter/bdl_input_iterator.hpp"
 #include "fiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp"
 #include "fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp"
+#include "fiction/algorithms/simulation/sidb/determine_groundstate_from_simulation_results.hpp"
 #include "fiction/algorithms/simulation/sidb/energy_distribution.hpp"
 #include "fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
 #include "fiction/algorithms/simulation/sidb/quickexact.hpp"
@@ -32,10 +33,11 @@
 
 namespace fiction
 {
+
 /**
  * Possible operational status of a layout.
  */
-enum class operational_status
+enum class operational_status : uint8_t
 {
     /**
      * The layout is operational.
@@ -46,6 +48,7 @@ enum class operational_status
      */
     NON_OPERATIONAL
 };
+
 /**
  * Parameters for the `is_operational` algorithm.
  */
@@ -60,9 +63,9 @@ struct is_operational_params
      */
     sidb_simulation_engine sim_engine{sidb_simulation_engine::QUICKEXACT};
     /**
-     * Parameters for the BDL pair detection algorithms.
+     * Parameters for the BDL input iterator.
      */
-    detect_bdl_pairs_params bdl_params{};
+    bdl_input_iterator_params input_bdl_iterator_params{};
 };
 
 namespace detail
@@ -93,8 +96,9 @@ class is_operational_impl
             layout{lyt},
             truth_table{tt},
             parameters{params},
-            output_bdl_pairs(detect_bdl_pairs(layout, sidb_technology::cell_type::OUTPUT, parameters.bdl_params)),
-            bii(bdl_input_iterator<Lyt>{layout, parameters.bdl_params})
+            output_bdl_pairs(detect_bdl_pairs(layout, sidb_technology::cell_type::OUTPUT,
+                                              parameters.input_bdl_iterator_params.bdl_pairs_params)),
+            bii(bdl_input_iterator<Lyt>{layout, parameters.input_bdl_iterator_params})
     {}
 
     /**
@@ -131,45 +135,39 @@ class is_operational_impl
                 return operational_status::NON_OPERATIONAL;
             }
 
-            // find the ground state, which is the charge distribution with the lowest energy
-            const auto ground_state = std::min_element(
-                simulation_results.charge_distributions.cbegin(), simulation_results.charge_distributions.cend(),
-                [](const auto& lhs, const auto& rhs) { return lhs.get_system_energy() < rhs.get_system_energy(); });
+            const auto ground_states = determine_groundstate_from_simulation_results(simulation_results);
 
-            // ground state is degenerate
-            if ((energy_distribution(simulation_results.charge_distributions).begin()->second) > 1)
+            for (const auto& gs : ground_states)
             {
-                return operational_status::NON_OPERATIONAL;
-            }
-
-            // fetch the charge states of the output BDL pair
-            for (auto output = 0u; output < output_bdl_pairs.size(); output++)
-            {
-                const auto charge_state_output_upper = ground_state->get_charge_state(output_bdl_pairs[output].upper);
-                const auto charge_state_output_lower = ground_state->get_charge_state(output_bdl_pairs[output].lower);
-
-                // if the output charge states are equal, the layout is not operational
-                if (charge_state_output_lower == charge_state_output_upper)
+                // fetch the charge states of the output BDL pair
+                for (auto output = 0u; output < output_bdl_pairs.size(); output++)
                 {
-                    return operational_status::NON_OPERATIONAL;
-                }
+                    const auto charge_state_output_upper = gs.get_charge_state(output_bdl_pairs[output].upper);
+                    const auto charge_state_output_lower = gs.get_charge_state(output_bdl_pairs[output].lower);
 
-                // if the expected output is 1, the expected charge states are (upper, lower) = (0, -1)
-                if (kitty::get_bit(truth_table[output], i))
-                {
-                    if (charge_state_output_upper != sidb_charge_state::NEUTRAL ||
-                        charge_state_output_lower != sidb_charge_state::NEGATIVE)
+                    // if the output charge states are equal, the layout is not operational
+                    if (charge_state_output_lower == charge_state_output_upper)
                     {
                         return operational_status::NON_OPERATIONAL;
                     }
-                }
-                // if the expected output is 0, the expected charge states are (upper, lower) = (-1, 0)
-                else
-                {
-                    if (charge_state_output_upper != sidb_charge_state::NEGATIVE ||
-                        charge_state_output_lower != sidb_charge_state::NEUTRAL)
+
+                    // if the expected output is 1, the expected charge states are (upper, lower) = (0, -1)
+                    if (kitty::get_bit(truth_table[output], i))
                     {
-                        return operational_status::NON_OPERATIONAL;
+                        if (charge_state_output_upper != sidb_charge_state::NEUTRAL ||
+                            charge_state_output_lower != sidb_charge_state::NEGATIVE)
+                        {
+                            return operational_status::NON_OPERATIONAL;
+                        }
+                    }
+                    // if the expected output is 0, the expected charge states are (upper, lower) = (-1, 0)
+                    else
+                    {
+                        if (charge_state_output_upper != sidb_charge_state::NEGATIVE ||
+                            charge_state_output_lower != sidb_charge_state::NEUTRAL)
+                        {
+                            return operational_status::NON_OPERATIONAL;
+                        }
                     }
                 }
             }
@@ -312,6 +310,7 @@ class is_operational_impl
     physical_simulation_of_layout(const bdl_input_iterator<Lyt>& bdl_iterator) noexcept
     {
         assert(parameters.simulation_parameters.base == 2 && "base number is set to 3");
+
         if (parameters.sim_engine == sidb_simulation_engine::EXGS)
         {
             // perform an exhaustive ground state simulation
@@ -383,7 +382,7 @@ is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational
  * @tparam TT Type of the truth table.
  * @param lyt The SiDB layout.
  * @param spec Vector of truth table specifications.
- * @param params Parameters to simualte if a input combination is operational.
+ * @param params Parameters to simulate if a input combination is operational.
  * @return The count of operational input combinations.
  */
 template <typename Lyt, typename TT>

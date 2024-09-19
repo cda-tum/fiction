@@ -46,7 +46,7 @@ struct design_sidb_gates_params
     /**
      * Selector for the different termination conditions for the SiDB gate design process.
      */
-    enum class termination_condition
+    enum class termination_condition : uint8_t
     {
         /**
          * The design process is terminated as soon as the first valid SiDB gate design is found.
@@ -60,7 +60,7 @@ struct design_sidb_gates_params
     /**
      * Selector for the available design approaches.
      */
-    enum class design_sidb_gates_mode
+    enum class design_sidb_gates_mode : uint8_t
     {
         /**
          * All gate layouts are designed exhaustively.
@@ -72,9 +72,9 @@ struct design_sidb_gates_params
         RANDOM
     };
     /**
-     * All Parameters for physical SiDB simulations.
+     * Parameters for the `is_operational` function.
      */
-    sidb_simulation_parameters simulation_parameters{};
+    is_operational_params operational_params{};
     /**
      * Gate design mode.
      */
@@ -87,10 +87,6 @@ struct design_sidb_gates_params
      * Number of SiDBs placed in the canvas to create a working gate.
      */
     std::size_t number_of_sidbs = 1;
-    /**
-     * The simulation engine to be used for the operational domain computation.
-     */
-    sidb_simulation_engine sim_engine{sidb_simulation_engine::QUICKEXACT};
     /**
      * The design process is terminated after a valid SiDB gate design is found.
      *
@@ -131,8 +127,6 @@ class design_sidb_gates_impl
      */
     [[nodiscard]] std::vector<Lyt> run_exhaustive_design() noexcept
     {
-        const is_operational_params params_is_operational{params.simulation_parameters, params.sim_engine};
-
         auto all_combinations = determine_all_combinations_of_distributing_k_entities_on_n_positions(
             params.number_of_sidbs, static_cast<std::size_t>(all_sidbs_in_canvas.size()));
         std::unordered_set<coordinate<Lyt>> sidbs_affected_by_defects = {};
@@ -151,9 +145,9 @@ class design_sidb_gates_impl
         std::shuffle(all_combinations.begin(), all_combinations.end(),
                      std::default_random_engine(std::random_device{}()));
 
-        const auto add_combination_to_layout_and_check_operation =
-            [this, &mutex_to_protect_designed_gate_layouts, &params_is_operational, &designed_gate_layouts,
-             &sidbs_affected_by_defects, &solution_found](const auto& combination) noexcept
+        const auto add_combination_to_layout_and_check_operation = [this, &mutex_to_protect_designed_gate_layouts,
+                                                                    &designed_gate_layouts, &sidbs_affected_by_defects,
+                                                                    &solution_found](const auto& combination) noexcept
         {
             for (const auto& comb : combination)
             {
@@ -164,7 +158,7 @@ class design_sidb_gates_impl
                     auto layout_with_added_cells = add_canvas_sidbs_to_skeleton_layout(comb);
 
                     if (const auto [status, sim_calls] =
-                            is_operational(layout_with_added_cells, truth_table, params_is_operational);
+                            is_operational(layout_with_added_cells, truth_table, params.operational_params);
                         status == operational_status::OPERATIONAL)
                     {
                         {
@@ -226,8 +220,6 @@ class design_sidb_gates_impl
     {
         std::vector<Lyt> randomly_designed_gate_layouts = {};
 
-        const is_operational_params params_is_operational{params.simulation_parameters, params.sim_engine};
-
         const generate_random_sidb_layout_params<cell<Lyt>> parameter_random_layout{
             params.canvas, params.number_of_sidbs,
             generate_random_sidb_layout_params<cell<Lyt>>::positive_charges::FORBIDDEN};
@@ -243,7 +235,7 @@ class design_sidb_gates_impl
         {
             threads.emplace_back(
                 [this, &gate_layout_is_found, &mutex_to_protect_designed_gate_layouts, &parameter_random_layout,
-                 &params_is_operational, &randomly_designed_gate_layouts]
+                 &randomly_designed_gate_layouts]
                 {
                     while (!gate_layout_is_found)
                     {
@@ -260,7 +252,7 @@ class design_sidb_gates_impl
                                 });
                         }
                         if (const auto [status, sim_calls] =
-                                is_operational(result_lyt, truth_table, params_is_operational);
+                                is_operational(result_lyt, truth_table, params.operational_params);
                             status == operational_status::OPERATIONAL)
                         {
                             const std::lock_guard lock{mutex_to_protect_designed_gate_layouts};
