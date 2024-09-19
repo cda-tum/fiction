@@ -49,12 +49,13 @@ Ntk read_ntk(const std::string& name)
 
 int main()  // NOLINT
 {
-    experiments::experiment<std::string, uint32_t, uint32_t, uint32_t, uint32_t, bool, bool, std::string> wiring_reduction_exp{
-        "planarization", "benchmark", "inputs", "outputs", "initial nodes", "nodes_after", "is_planar", "equivalent(ntk)", "equivalent(lyt)"};
+    experiments::experiment<std::string, uint32_t, uint32_t, uint32_t, uint32_t, bool, bool, std::string>
+        wiring_reduction_exp{"planarization", "benchmark", "inputs",          "outputs",        "initial nodes",
+                             "nodes_after",   "is_planar", "equivalent(ntk)", "equivalent(lyt)"};
 
-    static constexpr const uint64_t bench_select =
-        (fiction_experiments::par_gen); //fiction_experiments::iscas85 & ~
-        // fiction_experiments::trindade16 | fiction_experiments::fontes18 | fiction_experiments::epfl | fiction_experiments::iscas85
+    static constexpr const uint64_t bench_select = (fiction_experiments::par_gen);  // fiction_experiments::iscas85 & ~
+    // fiction_experiments::trindade16 | fiction_experiments::fontes18 | fiction_experiments::epfl |
+    // fiction_experiments::iscas85
     // static constexpr const uint64_t bench_select = (fiction_experiments::one_bit_add_maj);
 
     for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
@@ -78,10 +79,9 @@ int main()  // NOLINT
                 {
                     cont = true;
                     std::cout << "Pi is Po\n";
-
                 }
             });
-        if(cont)
+        if (cont)
         {
             continue;
         }
@@ -97,11 +97,12 @@ int main()  // NOLINT
 
         fiction::restore_names(benchmark_network, name);
 
-        using gate_lyt =
-            fiction::gate_level_layout<fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<>>>>;
+        using gate_lyt = fiction::gate_level_layout<
+            fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<>>>>;
 
         fiction::orthogonal_physical_design_stats stats{};
-        using gate_layout = fiction::gate_level_layout<fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<fiction::offset::ucoord_t>>>>;
+        using gate_layout = fiction::gate_level_layout<
+            fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<fiction::offset::ucoord_t>>>>;
         auto layout = fiction::orthogonal<gate_layout>(name, {}, &stats);
 
         fiction::equivalence_checking_stats eq_s_ortho{};
@@ -124,7 +125,8 @@ int main()  // NOLINT
 
         // log results
         wiring_reduction_exp(benchmark, benchmark_network.num_pis(), benchmark_network.num_pos(),
-                             benchmark_network.num_gates(), _b.num_gates(), is_planar, static_cast<bool>(cec_m), eq_result_ortho);
+                             benchmark_network.num_gates(), _b.num_gates(), is_planar, static_cast<bool>(cec_m),
+                             eq_result_ortho);
 
         wiring_reduction_exp.save();
         wiring_reduction_exp.table();
