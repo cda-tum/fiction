@@ -952,7 +952,7 @@ static const char *__doc_fiction_calculate_min_bbr_for_all_inputs_params_assess_
 R"doc(Parameters for the `assessing physical population stability`
 simulation)doc";
 
-static const char *__doc_fiction_calculate_min_bbr_for_all_inputs_params_detect_pair_params = R"doc(Parameters to identify the output pairs used to read the output.)doc";
+static const char *__doc_fiction_calculate_min_bbr_for_all_inputs_params_bdl_iterator_params = R"doc(Parameters for the input BDL iterator.)doc";
 
 static const char *__doc_fiction_can_positive_charges_occur =
 R"doc(This algorithm determines if positively charged SiDBs can occur in a
@@ -3269,8 +3269,6 @@ static const char *__doc_fiction_critical_temperature_stats_algorithm_name =
 R"doc(Name of the algorithm used to compute the physically valid charge
 distributions.)doc";
 
-static const char *__doc_fiction_critical_temperature_stats_critical_temperature = R"doc(*Critical Temperature* of the given layout (unit: K).)doc";
-
 static const char *__doc_fiction_critical_temperature_stats_duration = R"doc(The total runtime of the critical temperature computation.)doc";
 
 static const char *__doc_fiction_critical_temperature_stats_energy_between_ground_state_and_first_erroneous =
@@ -3759,12 +3757,12 @@ static const char *__doc_fiction_design_sidb_gates =
 R"doc(The *SiDB Gate Designer* designs SiDB gate implementations based on a
 specified Boolean function, a skeleton layout (can hold defects),
 canvas size, and a predetermined number of canvas SiDBs. Two different
-design modes are implemented: `exhaustive` and `random`.
+design modes are implemented: `exhaustive` and `random design`.
 
 The `exhaustive design` is composed of three steps: 1. In the initial
 step, all possible distributions of `number_of_sidbs` SiDBs within a
 given canvas are exhaustively determined. This ensures exhaustive
-coverage of every potential arrangement of `number_of_sidbs` SiDBs
+coverage of every potential arrangement of ``number_of_sidbs`` SiDBs
 across the canvas. 2. The calculated SiDB distributions are then
 incorporated into the skeleton, resulting in the generation of
 distinct SiDB layouts. 3. The generated SiDB layouts then undergo an
@@ -3795,80 +3793,8 @@ Parameter ``spec``:
 Parameter ``params``:
     Parameters for the *SiDB Gate Designer*.
 
-Parameter ``design_mode``:
-    The design mode to use.
-
-Parameter ``stats``:
-    The design statistics.
-
 Returns:
     A vector of designed SiDB gate layouts.)doc";
-
-static const char *__doc_fiction_design_sidb_gates_metric_driven_simulated_annealing =
-R"doc(This function designs SiDB gates to minimize the cost function
-:math:`\chi`, considering a layout skeleton, a set of truth tables,
-and specified parameters for gate design and simulated annealing.
-Currently, only the critical temperature and the operational domain
-are incorporated into the cost function.
-
-Template parameter ``Lyt``:
-    SiDB cell-level layout type.
-
-Template parameter ``TT``:
-    The type of the truth table specifying the gate behavior.
-
-Parameter ``skeleton``:
-    The layout skeleton used as the basis for gate design.
-
-Parameter ``spec``:
-    Expected Boolean function of the layout given as a multi-output
-    truth table.
-
-Parameter ``params``:
-    The parameters for gate design.
-
-Parameter ``sa_params``:
-    Parameters for simulated annealing.
-
-Parameter ``stats``:
-    Statistics for gate design.
-
-Returns:
-    A layout with SiDB gates designed to minimize the cost function.)doc";
-
-static const char *__doc_fiction_design_sidb_gates_metric_driven_simulated_annealing_params = R"doc(Parameters for Simulated Annealing-based gate design.)doc";
-
-static const char *__doc_fiction_design_sidb_gates_metric_driven_simulated_annealing_params_ct_params = R"doc(Parameters for simulating the Critical Temperature.)doc";
-
-static const char *__doc_fiction_design_sidb_gates_metric_driven_simulated_annealing_params_final_temperature = R"doc(Final temperature for Simulated Annealing.)doc";
-
-static const char *__doc_fiction_design_sidb_gates_metric_driven_simulated_annealing_params_initial_temperature = R"doc(Initial temperature for Simulated Annealing.)doc";
-
-static const char *__doc_fiction_design_sidb_gates_metric_driven_simulated_annealing_params_number_of_cycles = R"doc(Number of iterations per temperature in Simulated Annealing.)doc";
-
-static const char *__doc_fiction_design_sidb_gates_metric_driven_simulated_annealing_params_op_params = R"doc(Parameters for simulating the Operational Domain.)doc";
-
-static const char *__doc_fiction_design_sidb_gates_metric_driven_simulated_annealing_params_schedule = R"doc(Type of temperature schedule used in Simulated Annealing.)doc";
-
-static const char *__doc_fiction_design_sidb_gates_metric_driven_simulated_annealing_params_weight_non_operational =
-R"doc(Weight assigned to the non-operational behavior in the overall cost
-function. This weight affects the cost function when the design is
-non-operational.)doc";
-
-static const char *__doc_fiction_design_sidb_gates_metric_driven_simulated_annealing_params_weight_operational_domain =
-R"doc(Weight assigned to the operational domain in the overall cost
-function. A negative value indicates that this weight is not used.)doc";
-
-static const char *__doc_fiction_design_sidb_gates_metric_driven_simulated_annealing_params_weight_temperature =
-R"doc(Weight assigned to the critical temperature in the overall cost
-function. A negative value indicates that a high critical temperature
-is preferred.)doc";
-
-static const char *__doc_fiction_design_sidb_gates_mode = R"doc(Selector for the available design approaches.)doc";
-
-static const char *__doc_fiction_design_sidb_gates_mode_EXHAUSTIVE = R"doc(All gate layouts are designed exhaustively.)doc";
-
-static const char *__doc_fiction_design_sidb_gates_mode_RANDOM = R"doc(Gate layouts are designed randomly.)doc";
 
 static const char *__doc_fiction_design_sidb_gates_params =
 R"doc(This struct contains parameters and settings to design SiDB gates.
@@ -3878,9 +3804,13 @@ Template parameter ``CellType``:
 
 static const char *__doc_fiction_design_sidb_gates_params_canvas = R"doc(Canvas spanned by the northwest and southeast cell.)doc";
 
-static const char *__doc_fiction_design_sidb_gates_params_maximal_random_solutions =
-R"doc(The number of gate implementations found before the random design
-process is stopped.)doc";
+static const char *__doc_fiction_design_sidb_gates_params_design_mode = R"doc(Gate design mode.)doc";
+
+static const char *__doc_fiction_design_sidb_gates_params_design_sidb_gates_mode = R"doc(Selector for the available design approaches.)doc";
+
+static const char *__doc_fiction_design_sidb_gates_params_design_sidb_gates_mode_EXHAUSTIVE = R"doc(All gate layouts are designed exhaustively.)doc";
+
+static const char *__doc_fiction_design_sidb_gates_params_design_sidb_gates_mode_RANDOM = R"doc(Gate layouts are designed randomly.)doc";
 
 static const char *__doc_fiction_design_sidb_gates_params_number_of_sidbs = R"doc(Number of SiDBs placed in the canvas to create a working gate.)doc";
 
@@ -3904,12 +3834,6 @@ design is found.)doc";
 static const char *__doc_fiction_design_sidb_gates_params_termination_condition_ALL_COMBINATIONS_ENUMERATED =
 R"doc(The design process ends after all possible combinations of SiDBs
 within the canvas are enumerated.)doc";
-
-static const char *__doc_fiction_design_sidb_gates_stats = R"doc(Statistics for the design of SiDB gates.)doc";
-
-static const char *__doc_fiction_design_sidb_gates_stats_duration = R"doc(The total runtime of SiDB gate design process.)doc";
-
-static const char *__doc_fiction_design_sidb_gates_stats_gate_cost = R"doc(The cost value of the final gate designed with Simulated Annealing.)doc";
 
 static const char *__doc_fiction_detail_a_star_impl = R"doc()doc";
 
@@ -4806,10 +4730,6 @@ Parameter ``cell_indices``:
 Returns:
     A vector of cells corresponding to the given indices.)doc";
 
-static const char *__doc_fiction_detail_design_sidb_gates_impl_canvas_sidbs = R"doc(All SiDBs within the canvas.)doc";
-
-static const char *__doc_fiction_detail_design_sidb_gates_impl_canvas_sidbs_before_move = R"doc(Canvas SiDBs before move.)doc";
-
 static const char *__doc_fiction_detail_design_sidb_gates_impl_design_sidb_gates_impl =
 R"doc(This constructor initializes an instance of the *SiDB Gate Designer*
 implementation with the provided skeleton layout and configuration
@@ -4823,46 +4743,11 @@ Parameter ``spec``:
     truth table.
 
 Parameter ``ps``:
-    Parameters and settings for the gate designer.
-
-Parameter ``st``:
-    Statistics for the gate designer.)doc";
-
-static const char *__doc_fiction_detail_design_sidb_gates_impl_determine_canvas_sidbs =
-R"doc(This function iterates over each cell in the provided layout `lyt` and
-checks if the cell corresponds to a canvas SiDB. Canvas SiDBs are
-defined as SiDBs that are part of the canvas region. It populates a
-vector with the canvas SiDBs found in the layout and returns it.
-
-Parameter ``lyt``:
-    The layout from which canvas SiDBs are to be determined.
-
-Returns:
-    A vector containing the canvas SiDBs found in the layout.)doc";
-
-static const char *__doc_fiction_detail_design_sidb_gates_impl_generator = R"doc(A random-number generator.)doc";
-
-static const char *__doc_fiction_detail_design_sidb_gates_impl_move_sidb =
-R"doc(This function randomly selects a canvas cell from the layout `lyt` and
-a canvas SiDB to replace it with. It then moves the selected canvas
-SiDB to the randomly chosen canvas cell, updating the layout
-accordingly. If the randomly chosen canvas cell is not empty, the
-layout remains unchanged.
-
-Parameter ``lyt``:
-    The layout from which a canvas SiDB is to be moved.
-
-Returns:
-    The layout after the canvas SiDB has been moved, or the original
-    layout if the randomly chosen canvas cell was not empty.)doc";
+    Parameters and settings for the gate designer.)doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_num_threads = R"doc(Number of threads to be used for parallel execution.)doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_params = R"doc(Parameters for the *SiDB Gate Designer*.)doc";
-
-static const char *__doc_fiction_detail_design_sidb_gates_impl_random_canvas_cell_functor = R"doc()doc";
-
-static const char *__doc_fiction_detail_design_sidb_gates_impl_random_canvas_sidb_functor = R"doc()doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_run_exhaustive_design =
 R"doc(Design gates exhaustively and in parallel.
@@ -4874,20 +4759,6 @@ parameters. The design process is parallelized to improve performance.
 Returns:
     A vector of designed SiDB gate layouts.)doc";
 
-static const char *__doc_fiction_detail_design_sidb_gates_impl_run_metric_driven_design_process =
-R"doc(Design gates with Simulated Annealing.
-
-This function designs gates with Simulated Annealing. The cost
-function involves the critical temperature and the operational domain.
-The importance of the individual figures of merit can be adjusted by
-the weights.
-
-Parameter ``sa_params``:
-    Simulated Annealing parameters.
-
-Returns:
-    Designed SiDB gate with minimal cost.)doc";
-
 static const char *__doc_fiction_detail_design_sidb_gates_impl_run_random_design =
 R"doc(Design gates randomly and in parallel.
 
@@ -4898,27 +4769,10 @@ parameters. The design process is parallelized to improve performance.
 Returns:
     A vector of designed SiDB gate layouts.)doc";
 
-static const char *__doc_fiction_detail_design_sidb_gates_impl_sidb_moved_from_to =
-R"doc(Canvas SiDB was moved from one cell (first cell) to another cell
-(second cell).)doc";
-
 static const char *__doc_fiction_detail_design_sidb_gates_impl_skeleton_layout =
 R"doc(The skeleton layout serves as a starting layout to which SiDBs are
 added to create unique SiDB layouts and, if possible, working gates.
 It defines input and output wires.)doc";
-
-static const char *__doc_fiction_detail_design_sidb_gates_impl_skeleton_layout_with_canvas_sidbs =
-R"doc(This function adds SiDBs (given by indices) to the skeleton layout
-that is returned afterwards.
-
-Parameter ``cell_indices``:
-    A vector of indices of cells to be added to the skeleton layout.
-
-Returns:
-    A copy of the original layout (`skeleton_layout`) with SiDB cells
-    added at specified indices.)doc";
-
-static const char *__doc_fiction_detail_design_sidb_gates_impl_stats = R"doc(The statistics of the gate design.)doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_truth_table = R"doc(Truth table of the given gate.)doc";
 
@@ -7056,6 +6910,8 @@ static const char *__doc_fiction_detail_maximum_defect_influence_position_and_di
 
 static const char *__doc_fiction_detail_maximum_defect_influence_position_and_distance_impl_run = R"doc()doc";
 
+static const char *__doc_fiction_detail_maximum_defect_influence_position_and_distance_impl_stats = R"doc(The statistics of the maximum defect influence position.)doc";
+
 static const char *__doc_fiction_detail_nested_vector_hash =
 R"doc(This struct defines a hash function for a nested vector of layout
 tiles. It calculates a combined hash value for a vector of tiles based
@@ -7072,8 +6928,6 @@ Parameter ``vec``:
 
 Returns:
     A combined hash value for the vector of tiles.)doc";
-
-static const char *__doc_fiction_detail_maximum_defect_influence_position_and_distance_impl_stats = R"doc(The statistics of the maximum defect influence position.)doc";
 
 static const char *__doc_fiction_detail_network_balancing_impl = R"doc()doc";
 
@@ -7131,9 +6985,6 @@ Parameter ``samples``:
     Maximum number of random samples to be taken before contour
     tracing.
 
-Parameter ``initial_parameter``:
-    Optional initial point in the parameter space for contour tracing.
-
 Returns:
     The (partial) operational domain of the layout.)doc";
 
@@ -7182,6 +7033,11 @@ one pixel wide border around the domain.
 
 Parameter ``samples``:
     Maximum number of random samples to be taken before flood fill.
+
+Parameter ``given_parameter_point``:
+    Optional parameter point in the parameter space. If it lies within
+    the operational region, it is used as a starting point for flood
+    fill.
 
 Returns:
     The (partial) operational domain of the layout.)doc";
@@ -13576,7 +13432,7 @@ R"doc(Parameters for the
 `maximum_defect_influence_position_and_distance_of_sidb_gate`
 algorithm.)doc";
 
-static const char *__doc_fiction_maximum_defect_influence_position_and_distance_of_sidb_gate_params_bdl_pairs_params = R"doc(Parameters for the detection of BDL pairs.)doc";
+static const char *__doc_fiction_maximum_defect_influence_position_and_distance_of_sidb_gate_params_bdl_iterator_params = R"doc(Parameters for the input bDL iterator.)doc";
 
 static const char *__doc_fiction_maximum_defect_influence_position_and_distance_of_sidb_gate_params_defect_influence_params = R"doc(Parameters for the defect influence simulation.)doc";
 
@@ -14209,9 +14065,6 @@ Parameter ``samples``:
 Parameter ``params``:
     Operational domain computation parameters.
 
-Parameter ``initial_parameter_point``:
-    Optional initial point in the parameter space for contour tracing.
-
 Parameter ``stats``:
     Operational domain computation statistics.
 
@@ -14275,9 +14128,6 @@ Parameter ``samples``:
 
 Parameter ``params``:
     Operational domain computation parameters.
-
-Parameter ``initial_parameter_point``:
-    Optional initial point in the parameter space for flood fill.
 
 Parameter ``stats``:
     Operational domain computation statistics.
@@ -14440,11 +14290,6 @@ R"doc(A range of values for a dimension sweep. The range is defined by a
 minimum value, a maximum value and a step size.)doc";
 
 static const char *__doc_fiction_operational_domain_value_range_dimension = R"doc(The sweep parameter of the dimension.)doc";
-static const char *__doc_fiction_operational_domain_stats_percentual_operational_area =
-R"doc(The ratio of operational parameter pairs to all possible parameter
-pairs. Value is between 0 and 1.)doc";
-
-static const char *__doc_fiction_operational_domain_x_dimension = R"doc(X dimension sweep parameter.)doc";
 
 static const char *__doc_fiction_operational_domain_value_range_max = R"doc(The maximum value of the dimension sweep.)doc";
 
@@ -18014,7 +17859,7 @@ The operational status is a binary value represented by specified tags
 in `params` indicating whether the simulation parameters are within
 the operational domain or not.
 
-Parameter ``opdom``:
+Parameter ``defect_opdom``:
     The operational domain to be written. It contains a mapping from
     sets of simulation parameters (represented as a pair of sweep
     parameters for the X and Y dimensions) to their operational
@@ -18043,7 +17888,7 @@ The operational status is a binary value represented by specified tags
 in `params` indicating whether the simulation parameters are within
 the operational domain or not.
 
-Parameter ``opdom``:
+Parameter ``defect_opdom``:
     The operational domain to be written. It contains a mapping from
     sets of simulation parameters (represented as a pair of sweep
     parameters for the X and Y dimensions) to their operational
@@ -18059,13 +17904,15 @@ Parameter ``params``:
     `write_defect_operational_domain_params` object, which provides
     standard tags.)doc";
 
-static const char *__doc_fiction_write_defect_operational_domain_params = R"doc(Parameters for writing an operational domain to a CSV file.)doc";
+static const char *__doc_fiction_write_defect_operational_domain_params =
+R"doc(Parameters for writing a defect influence operational domain to a CSV
+file.)doc";
 
 static const char *__doc_fiction_write_defect_operational_domain_params_non_operational_tag =
-R"doc(The tag used to represent the non-operational value of a parameter
-set.)doc";
+R"doc(The tag used to represent the non-operational value of a defect
+position.)doc";
 
-static const char *__doc_fiction_write_defect_operational_domain_params_operational_tag = R"doc(The tag used to represent the operational value of a parameter set.)doc";
+static const char *__doc_fiction_write_defect_operational_domain_params_operational_tag = R"doc(The tag used to represent the operational value of a defect position.)doc";
 
 static const char *__doc_fiction_write_dot_layout =
 R"doc(! Writes layout in DOT format into output stream
