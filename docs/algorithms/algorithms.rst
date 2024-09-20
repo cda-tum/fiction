@@ -49,6 +49,7 @@ Physical Design
 
    exact.rst
    orthogonal.rst
+   graph_oriented_layout_design.rst
    one_pass_synthesis.rst
    color_routing.rst
    hexagonalization.rst
@@ -57,6 +58,7 @@ Physical Design
    determine_clocking.rst
    apply_gate_library.rst
    design_sidb_gates.rst
+   on_the_fly_circuit_design_on_defective_surface.rst
 
 
 Verification

@@ -31,7 +31,7 @@ namespace fiction
  * changes in the charge state of SiDBs, including transitions from neutral to negative, negative to neutral, neutral to
  * positive, and positive to neutral.
  */
-enum class transition_type
+enum class transition_type : uint8_t
 {
     /**
      * SiDB is neutrally charged, but is closest to being negatively charged.

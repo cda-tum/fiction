@@ -39,6 +39,7 @@ distributions of the SiDBs. Charge distribution surfaces are returned by the SiD
         .. doxygenenum:: fiction::energy_calculation
         .. doxygenenum:: fiction::charge_distribution_history
         .. doxygenenum:: fiction::charge_index_recomputation
+        .. doxygenenum:: fiction::charge_distribution_mode
         .. doxygenenum:: fiction::charge_index_mode
         .. doxygenclass:: fiction::charge_distribution_surface
            :members:
@@ -54,6 +55,16 @@ distributions of the SiDBs. Charge distribution surfaces are returned by the SiD
             :members:
         .. autoclass:: mnt.pyfiction.charge_distribution_surface_111
             :members:
+
+
+Is SiDB gate design deemed impossible
+-------------------------------------
+
+**Header:** ``fiction/technology/is_sidb_gate_design_impossible.hpp``
+
+.. doxygenstruct:: fiction::is_sidb_gate_design_impossible_params
+   :members:
+.. doxygenfunction:: fiction::is_sidb_gate_design_impossible
 
 
 Physical Constants

@@ -89,12 +89,12 @@ Engine Selectors
         **Header:** ``fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp``
 
         .. doxygenenum:: fiction::sidb_simulation_engine
-        .. doxygenenum:: fiction::exhaustive_sidb_simulation_engine
+        .. doxygenenum:: fiction::exact_sidb_simulation_engine
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.sidb_simulation_engine
             :members:
-        .. autoclass:: mnt.pyfiction.exhaustive_sidb_simulation_engine
+        .. autoclass:: mnt.pyfiction.exact_sidb_simulation_engine
             :members:
 
 
@@ -196,6 +196,7 @@ Time-to-Solution (TTS) Statistics
         .. doxygenstruct:: fiction::time_to_solution_stats
            :members:
         .. doxygenfunction:: fiction::time_to_solution
+        .. doxygenfunction:: fiction::time_to_solution_for_given_simulation_results
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.time_to_solution_params
@@ -203,6 +204,7 @@ Time-to-Solution (TTS) Statistics
         .. autoclass:: mnt.pyfiction.time_to_solution_stats
             :members:
         .. autofunction:: mnt.pyfiction.time_to_solution
+        .. autofunction:: mnt.pyfiction.time_to_solution_for_given_simulation_results
 
 
 Random SiDB Layout Generator
@@ -247,8 +249,8 @@ Operational Domain Computation
         .. doxygenenum:: fiction::sweep_parameter
         .. doxygenstruct:: fiction::operational_domain
            :members:
-        .. doxygenfunction:: fiction::find_parameter_point_with_tolerance
-        .. doxygenfunction:: fiction::find_key_with_tolerance
+        .. doxygenstruct:: fiction::operational_domain_value_range
+           :members:
         .. doxygenstruct:: fiction::operational_domain_params
            :members:
         .. doxygenstruct:: fiction::operational_domain_stats
@@ -272,6 +274,8 @@ Operational Domain Computation
         .. autoclass:: mnt.pyfiction.parameter_point
             :members:
         .. autoclass:: mnt.pyfiction.operational_domain
+            :members:
+        .. autoclass:: mnt.pyfiction.operational_domain_value_range
             :members:
         .. autoclass:: mnt.pyfiction.operational_domain_params
             :members:
@@ -309,7 +313,36 @@ Determine Physically Valid Parameters
         .. doxygenfunction:: fiction::determine_physically_valid_parameters
 
    .. tab:: Python
-        .. autofunction:: mnt.pyfiction.determine_physically_valid_parameters
+        .. autoclass:: mnt.pyfiction.determine_physically_valid_parameters
+
+
+Displacement Robustness Domain
+##############################
+
+.. tabs::
+    .. tab:: C++
+        **Header:** ``fiction/algorithms/simulation/sidb/determine_displacement_robustness.hpp``
+
+        .. doxygenstruct:: fiction::displacement_robustness_domain_params
+           :members:
+        .. doxygenstruct:: fiction::displacement_robustness_domain_stats
+           :members:
+        .. doxygenstruct:: fiction::displacement_robustness_domain
+           :members:
+        .. doxygenfunction:: fiction::determine_displacement_robustness_domain
+        .. doxygenfunction:: fiction::determine_probability_of_fabricating_operational_gate
+
+    .. tab:: Python
+        .. autoclass:: mnt.pyfiction.dimer_displacement_policy
+            :members:
+        .. autoclass:: mnt.pyfiction.displacement_analysis_mode
+            :members:
+        .. autofunction:: mnt.pyfiction.displacement_robustness_domain_params
+        .. autofunction:: mnt.pyfiction.displacement_robustness_domain_stats
+        .. autofunction:: mnt.pyfiction.displacement_robustness_domain_100
+        .. autofunction:: mnt.pyfiction.displacement_robustness_domain_111
+        .. autofunction:: mnt.pyfiction.determine_displacement_robustness_domain_100
+        .. autofunction:: mnt.pyfiction.determine_displacement_robustness_domain_111
 
 
 Utility Functions

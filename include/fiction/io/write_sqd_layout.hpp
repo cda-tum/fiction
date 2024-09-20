@@ -12,6 +12,7 @@
 
 #include <fmt/chrono.h>
 #include <fmt/format.h>
+#include <fmt/ranges.h>
 
 #include <cassert>
 #include <chrono>
@@ -19,7 +20,6 @@
 #include <fstream>
 #include <ostream>
 #include <sstream>
-#include <string>
 #include <string_view>
 #include <unordered_map>
 #include <vector>

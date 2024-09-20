@@ -22,6 +22,7 @@
 #include <mockturtle/views/topo_view.hpp>
 
 #include <algorithm>
+#include <cstdint>
 #include <optional>
 #include <set>
 #include <vector>
@@ -49,49 +50,20 @@ struct orthogonal_physical_design_stats
     mockturtle::stopwatch<>::duration time_total{0};
 
     uint64_t x_size{0ull}, y_size{0ull};
-    uint64_t num_gates{0ull}, num_wires{0ull};
+    uint64_t num_gates{0ull}, num_wires{0ull}, num_crossings{0ull};
 
     void report(std::ostream& out = std::cout) const
     {
-        out << fmt::format("[i] total time  = {:.2f} secs\n", mockturtle::to_seconds(time_total));
-        out << fmt::format("[i] layout size = {} × {}\n", x_size, y_size);
-        out << fmt::format("[i] num. gates  = {}\n", num_gates);
-        out << fmt::format("[i] num. wires  = {}\n", num_wires);
+        out << fmt::format("[i] total time      = {:.2f} secs\n", mockturtle::to_seconds(time_total));
+        out << fmt::format("[i] layout size     = {} × {}\n", x_size, y_size);
+        out << fmt::format("[i] num. gates      = {}\n", num_gates);
+        out << fmt::format("[i] num. wires      = {}\n", num_wires);
+        out << fmt::format("[i] num. crossings  = {}\n", num_crossings);
     }
 };
 
 namespace detail
 {
-
-/**
- * Determine siblings of the given node. A sibling is a node that shares the same fan-in with n.
- * @param n Node to consider.
- * @return Siblings of n.
- */
-template <typename Ntk>
-std::vector<mockturtle::node<Ntk>> siblings(const Ntk& ntk, const mockturtle::node<Ntk> n) noexcept
-{
-    std::vector<mockturtle::node<Ntk>> sibs{};
-    ntk.foreach_fanin(n,
-                      [&ntk, &sibs, &n](const auto& fi)
-                      {
-                          // skip constants
-                          if (const auto fin = ntk.get_node(fi); !ntk.is_constant(fin))
-                          {
-                              ntk.foreach_fanout(fin,
-                                                 [&ntk, &sibs, &n](const auto& fon)
-                                                 {
-                                                     // do not consider constants or n itself
-                                                     if (!ntk.is_constant(fon) && (fon != n))
-                                                     {
-                                                         sibs.push_back(fon);
-                                                     }
-                                                 });
-                          }
-                      });
-
-    return sibs;
-}
 
 template <typename Ntk>
 struct coloring_container
@@ -104,7 +76,7 @@ struct coloring_container
 
     out_of_place_edge_color_view<Ntk> color_ntk;
 
-    const uint32_t color_null = 0ul, color_east, color_south;
+    uint32_t color_null = 0ul, color_east, color_south;
 
     [[nodiscard]] uint32_t opposite_color(const uint32_t c) const noexcept
     {
@@ -649,10 +621,11 @@ class orthogonal_impl
         restore_names(ctn.color_ntk, layout, node2pos);
 
         // statistical information
-        pst.x_size    = layout.x() + 1;
-        pst.y_size    = layout.y() + 1;
-        pst.num_gates = layout.num_gates();
-        pst.num_wires = layout.num_wires();
+        pst.x_size        = layout.x() + 1;
+        pst.y_size        = layout.y() + 1;
+        pst.num_gates     = layout.num_gates();
+        pst.num_wires     = layout.num_wires();
+        pst.num_crossings = layout.num_crossings();
 
         return layout;
     }
@@ -707,7 +680,7 @@ Lyt orthogonal(const Ntk& ntk, orthogonal_physical_design_params ps = {},
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
     static_assert(mockturtle::is_network_type_v<Ntk>,
-                  "Ntk is not a network type");  // Ntk is being converted to a topology_network anyway, therefore,
+                  "Ntk is not a network type");  // Ntk is being converted to a technology_network anyway, therefore,
                                                  // this is the only relevant check here
 
     // check for input degree

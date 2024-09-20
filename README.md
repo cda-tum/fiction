@@ -196,6 +196,7 @@ Among these algorithms are
 - OGD-based [scalable placement and routing](https://dl.acm.org/citation.cfm?id=3287705)
 - SAT-based [one-pass synthesis](https://ieeexplore.ieee.org/document/9371573)
 - SAT-based [multi-path routing](https://dl.acm.org/doi/10.1145/3565478.3572539)
+- Graph-oriented [layout design](https://www.cda.cit.tum.de/files/eda/2024_ieee_nano_a_star_is_born.pdf)
 
 plus several path-finding algorithms that work on generic layouts:
 
@@ -335,7 +336,7 @@ by [MNT Bench](https://www.cda.cit.tum.de/mntbench/).
 
 ## Reference
 
-Since *fiction* is academic software, we would be thankful if you referred to it by citing the following publication:
+Since *fiction* is academic software, we would be thankful if you referred to it by citing the following publications:
 
 ```bibtex
 @misc{fiction,
@@ -346,6 +347,18 @@ Since *fiction* is academic software, we would be thankful if you referred to it
       note = {arXiv:1905.02477},
       year = {2019},
       month = {May}
+}
+```
+
+and
+
+```bibtex
+@inproceedings{mnt,
+    author = {Walter, Marcel and Drewniok, Jan and Hofmann, Simon and Hien, Benjamin and Wille, Robert},
+    title = {{The Munich Nanotech Toolkit (MNT)}},
+    booktitle = {IEEE International Conference on Nanotechnology (IEEE NANO)},
+    pages = {454--459},
+    year = {2024}
 }
 ```
 

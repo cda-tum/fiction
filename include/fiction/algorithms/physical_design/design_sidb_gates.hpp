@@ -13,6 +13,8 @@
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/technology/cell_technologies.hpp"
+#include "fiction/technology/sidb_defects.hpp"
+#include "fiction/technology/sidb_nm_distance.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/layout_utils.hpp"
 #include "fiction/utils/math_utils.hpp"
@@ -26,10 +28,10 @@
 #include <cassert>
 #include <cstdint>
 #include <cstdlib>
-#include <future>
 #include <mutex>
 #include <random>
 #include <thread>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -42,72 +44,37 @@ namespace fiction
 struct design_sidb_gates_metric_driven_simulated_annealing_params
 {
     /**
-     * Type of temperature schedule used in Simulated Annealing.
+     * Selector for the different termination conditions for the SiDB gate design process.
      */
-    temperature_schedule schedule{temperature_schedule::GEOMETRIC};
+    enum class termination_condition : uint8_t
+    {
+        /**
+         * The design process is terminated as soon as the first valid SiDB gate design is found.
+         */
+        AFTER_FIRST_SOLUTION,
+        /**
+         * The design process ends after all possible combinations of SiDBs within the canvas are enumerated.
+         */
+        ALL_COMBINATIONS_ENUMERATED
+    };
     /**
-     * Initial temperature for Simulated Annealing.
+     * Selector for the available design approaches.
      */
-    double initial_temperature{1000};
+    enum class design_sidb_gates_mode : uint8_t
+    {
+        /**
+         * All gate layouts are designed exhaustively.
+         */
+        EXHAUSTIVE,
+        /**
+         * Gate layouts are designed randomly.
+         */
+        RANDOM
+    };
     /**
-     * Final temperature for Simulated Annealing.
+     * Parameters for the `is_operational` function.
      */
-    double final_temperature{0.1};
-    /**
-     * Number of iterations per temperature in Simulated Annealing.
-     */
-    std::size_t number_of_cycles{10};
-    /**
-     * Parameters for simulating the Critical Temperature.
-     */
-    critical_temperature_params ct_params{};
-    /**
-     * Parameters for simulating the Operational Domain.
-     */
-    operational_domain_params op_params{};
-    /**
-     * Weight assigned to the critical temperature in the overall cost function.
-     * A negative value indicates that a high critical temperature is preferred.
-     */
-    double weight_temperature = -1.0;
-    /**
-     * Weight assigned to the operational domain in the overall cost function.
-     * A negative value indicates that this weight is not used.
-     */
-    double weight_operational_domain = -1.0;
-    /**
-     * Weight assigned to the non-operational behavior in the overall cost function.
-     * This weight affects the cost function when the design is non-operational.
-     */
-    double weight_non_operational = 10;
-};
-/**
- * Selector for the available design approaches.
- */
-enum class design_sidb_gates_mode
-{
-    /**
-     * All gate layouts are designed exhaustively.
-     */
-    EXHAUSTIVE,
-    /**
-     * Gate layouts are designed randomly.
-     */
-    RANDOM
-};
-/**
- * This struct contains parameters and settings to design SiDB gates.
- *
- * @tparam CellType Cell type.
- *
- */
-template <typename CellType>
-struct design_sidb_gates_params
-{
-    /**
-     * All Parameters for physical SiDB simulations.
-     */
-    sidb_simulation_parameters simulation_parameters{};
+    is_operational_params operational_params{};
     /**
      * Canvas spanned by the northwest and southeast cell.
      */
@@ -117,27 +84,11 @@ struct design_sidb_gates_params
      */
     std::size_t number_of_sidbs = 1;
     /**
-     * The simulation engine to be used for the operational domain computation.
+     * The design process is terminated after a valid SiDB gate design is found.
+     *
+     * @note This parameter has no effect unless the gate design is exhaustive.
      */
-    sidb_simulation_engine sim_engine{sidb_simulation_engine::QUICKEXACT};
-    /**
-     * The number of gate implementations found before the random design process is stopped.
-     */
-    std::size_t maximal_random_solutions = 1;
-};
-/**
- * Statistics for the design of SiDB gates.
- */
-struct design_sidb_gates_stats
-{
-    /**
-     * The total runtime of SiDB gate design process.
-     */
-    mockturtle::stopwatch<>::duration time_total{0};
-    /**
-     * The cost value of the final gate designed with Simulated Annealing.
-     */
-    double gate_cost{};
+    termination_condition termination_cond = termination_condition::ALL_COMBINATIONS_ENUMERATED;
 };
 
 namespace detail
@@ -152,14 +103,14 @@ class design_sidb_gates_impl
      * implementation with the provided skeleton layout and configuration parameters.
      *
      * @param skeleton The skeleton layout used as a basis for gate design.
-     * @param tt Expected Boolean function of the layout given as a multi-output truth table.
+     * @param spec Expected Boolean function of the layout given as a multi-output truth table.
      * @param ps Parameters and settings for the gate designer.
      * @param st Statistics for the gate designer.
      */
-    design_sidb_gates_impl(const Lyt& skeleton, const std::vector<TT>& tt,
-                           const design_sidb_gates_params<cell<Lyt>>& ps, design_sidb_gates_stats& st) :
+    design_sidb_gates_impl(const Lyt& skeleton, const std::vector<TT>& spec,
+                           const design_sidb_gates_params<cell<Lyt>>& ps) :
             skeleton_layout{skeleton},
-            truth_table{tt},
+            truth_table{spec},
             params{ps},
             stats{st},
             all_sidbs_in_canvas{all_coordinates_in_spanned_area(params.canvas.first, params.canvas.second)}
@@ -179,52 +130,87 @@ class design_sidb_gates_impl
      */
     [[nodiscard]] std::vector<Lyt> run_exhaustive_design() noexcept
     {
-        mockturtle::stopwatch       stop{stats.time_total};
-        const is_operational_params params_is_operational{params.simulation_parameters, params.sim_engine};
-
-        const auto all_combinations = determine_all_combinations_of_distributing_k_entities_on_n_positions(
+        auto all_combinations = determine_all_combinations_of_distributing_k_entities_on_n_positions(
             params.number_of_sidbs, static_cast<std::size_t>(all_sidbs_in_canvas.size()));
+        std::unordered_set<coordinate<Lyt>> sidbs_affected_by_defects = {};
 
-        std::vector<Lyt> designed_gate_layouts = {};
-
-        std::mutex mutex_to_protect_designer_gate_layouts;  // Mutex for protecting shared resources
-
-        const auto add_combination_to_layout_and_check_operation =
-            [this, &mutex_to_protect_designer_gate_layouts, &params_is_operational,
-             &designed_gate_layouts](const auto& combination) noexcept
+        // used to collect all SiDBs that are affected due to neutrally charged defects.
+        if constexpr (has_get_sidb_defect_v<Lyt>)
         {
-            if (!are_sidbs_too_close(combination))
+            sidbs_affected_by_defects = skeleton_layout.all_affected_sidbs(std::make_pair(0, 0));
+        }
+
+        std::vector<Lyt>  designed_gate_layouts = {};
+        std::mutex        mutex_to_protect_designed_gate_layouts;
+        std::atomic<bool> solution_found = false;
+
+        // Shuffle the combinations before dividing them among threads
+        std::shuffle(all_combinations.begin(), all_combinations.end(),
+                     std::default_random_engine(std::random_device{}()));
+
+        const auto add_combination_to_layout_and_check_operation = [this, &mutex_to_protect_designed_gate_layouts,
+                                                                    &designed_gate_layouts, &sidbs_affected_by_defects,
+                                                                    &solution_found](const auto& combination) noexcept
+        {
+            for (const auto& comb : combination)
             {
-                auto layout_with_added_cells = skeleton_layout_with_canvas_sidbs(combination);
-                if (const auto [status, sim_calls] =
-                        is_operational(layout_with_added_cells, truth_table, params_is_operational);
-                    status == operational_status::OPERATIONAL)
+                // if SiDBs are too close of the position are impossible due to closely placed neutrally charged defects
+                if (!are_sidbs_too_close(cell_indices_to_cell_vector(comb), sidbs_affected_by_defects))
                 {
-                    const std::lock_guard lock_vector{mutex_to_protect_designer_gate_layouts};  // Lock the mutex
-                    designed_gate_layouts.push_back(layout_with_added_cells);
+                    // canvas SiDBs are added to the skeleton
+                    auto layout_with_added_cells = add_canvas_sidbs_to_skeleton_layout(comb);
+
+                    if (const auto [status, sim_calls] =
+                            is_operational(layout_with_added_cells, truth_table, params.operational_params);
+                        status == operational_status::OPERATIONAL)
+                    {
+                        {
+                            const std::lock_guard lock_vector{mutex_to_protect_designed_gate_layouts};
+                            designed_gate_layouts.push_back(layout_with_added_cells);
+                        }
+
+                        solution_found = true;
+                    }
+
+                    if (solution_found &&
+                        (params.termination_cond ==
+                         design_sidb_gates_params<cell<Lyt>>::termination_condition::AFTER_FIRST_SOLUTION))
+                    {
+                        return;
+                    }
+
+                    continue;
                 }
             }
         };
 
-        std::vector<std::future<void>> futures{};
-        futures.reserve(all_combinations.size());
+        const auto chunk_size = all_combinations.size() / num_threads;
 
-        // Start asynchronous tasks to process combinations in parallel
-        for (const auto& combination : all_combinations)
+        std::vector<std::thread> threads{};
+        threads.reserve(num_threads);
+
+        for (auto i = 0u; i < num_threads; ++i)
         {
-            futures.emplace_back(
-                std::async(std::launch::async, add_combination_to_layout_and_check_operation, combination));
+            const std::size_t start = i * chunk_size;
+            const std::size_t end   = (i == num_threads - 1) ? all_combinations.size() : (i + 1) * chunk_size;
+
+            std::vector<std::vector<std::size_t>> chunk_combinations(
+                all_combinations.cbegin() + static_cast<int64_t>(start),
+                all_combinations.cbegin() + static_cast<int64_t>(end));
+
+            threads.emplace_back(add_combination_to_layout_and_check_operation, chunk_combinations);
         }
 
-        // Wait for all tasks to finish
-        for (auto& future : futures)
+        for (auto& thread : threads)
         {
-            future.wait();
+            if (thread.joinable())
+            {
+                thread.join();
+            }
         }
 
         return designed_gate_layouts;
     }
-
     /**
      * Design gates randomly and in parallel.
      *
@@ -238,32 +224,53 @@ class design_sidb_gates_impl
         mockturtle::stopwatch stop{stats.time_total};
         std::vector<Lyt>      randomly_designed_gate_layouts = {};
 
-        const is_operational_params params_is_operational{params.simulation_parameters, params.sim_engine};
-
-        const generate_random_sidb_layout_params<cell<Lyt>> parameter{
+        const generate_random_sidb_layout_params<cell<Lyt>> parameter_random_layout{
             params.canvas, params.number_of_sidbs,
             generate_random_sidb_layout_params<cell<Lyt>>::positive_charges::FORBIDDEN};
 
-        const std::size_t        num_threads = std::thread::hardware_concurrency();
         std::vector<std::thread> threads{};
         threads.reserve(num_threads);
-        std::mutex               mutex_to_protect_designed_gate_layouts{};
-        std::atomic<std::size_t> num_solutions_found(0);
+
+        std::mutex mutex_to_protect_designed_gate_layouts{};  // used to control access to shared resources
+
+        std::atomic<bool> gate_layout_is_found(false);
 
         for (uint64_t z = 0u; z < num_threads; z++)
         {
             threads.emplace_back(
-                [this, &num_solutions_found, &mutex_to_protect_designed_gate_layouts, &parameter,
-                 &params_is_operational, &randomly_designed_gate_layouts, target_num_solutions]
+                [this, &gate_layout_is_found, &mutex_to_protect_designed_gate_layouts, &parameter_random_layout,
+                 &randomly_designed_gate_layouts]
                 {
                     while (num_solutions_found < target_num_solutions)
                     {
-                        const auto result_lyt = generate_random_sidb_layout<Lyt>(skeleton_layout, parameter);
+                        auto result_lyt = generate_random_sidb_layout<Lyt>(skeleton_layout, parameter_random_layout);
+                        if constexpr (has_get_sidb_defect_v<Lyt>)
+                        {
+                            result_lyt.foreach_sidb_defect(
+                                [&result_lyt](const auto& cd)
+                                {
+                                    if (is_neutrally_charged_defect(cd.second))
+                                    {
+                                        result_lyt.assign_sidb_defect(cd.first, sidb_defect{sidb_defect_type::NONE});
+                                    }
+                                });
+                        }
                         if (const auto [status, sim_calls] =
-                                is_operational(result_lyt, truth_table, params_is_operational);
+                                is_operational(result_lyt, truth_table, params.operational_params);
                             status == operational_status::OPERATIONAL)
                         {
                             const std::lock_guard lock{mutex_to_protect_designed_gate_layouts};
+                            if constexpr (has_get_sidb_defect_v<Lyt>)
+                            {
+                                skeleton_layout.foreach_sidb_defect(
+                                    [&result_lyt](const auto& cd)
+                                    {
+                                        if (is_neutrally_charged_defect(cd.second))
+                                        {
+                                            result_lyt.assign_sidb_defect(cd.first, cd.second);
+                                        }
+                                    });
+                            }
                             randomly_designed_gate_layouts.push_back(result_lyt);
                             num_solutions_found++;
                         }
@@ -273,7 +280,10 @@ class design_sidb_gates_impl
 
         for (auto& thread : threads)
         {
-            thread.join();
+            if (thread.joinable())
+            {
+                thread.join();
+            }
         }
 
         return randomly_designed_gate_layouts;
@@ -368,7 +378,11 @@ class design_sidb_gates_impl
     /**
      * All cells within the canvas.
      */
-    const std::vector<typename Lyt::cell> all_sidbs_in_canvas;
+    std::vector<typename Lyt::cell> all_sidbs_in_canvas;
+    /**
+     * Number of threads to be used for parallel execution.
+     */
+    const std::size_t num_threads{std::thread::hardware_concurrency()};
     /**
      * All SiDBs within the canvas.
      */
@@ -449,21 +463,34 @@ class design_sidb_gates_impl
      * Checks if any SiDBs within the specified cell indices are located too closely together, with a distance of less
      * than 0.5 nanometers.
      *
-     * This function iterates through the provided cell indices and compares the distance between SiDBs. If it finds any
-     * pair of SiDBs within a distance of 0.5 nanometers, it returns `true` to indicate that SiDBs are too close;
-     * otherwise, it returns `false`.
+     * This function iterates over the provided cell indices and compares the distance between SiDBs. If it finds any
+     * pair of SiDBs within a distance of less than 0.5 nanometers, it returns `true` indicating that SiDBs are too
+     * close; otherwise, it returns `false`.
      *
-     * @param cell_indices A vector of cell indices to check for SiDB proximity.
+     * @param cells A vector of cells to check for proximity.
+     * @tparam affected_cells All SiDBs that are affected by atomic defects.
      * @return `true` if any SiDBs are too close; otherwise, `false`.
      */
-    [[nodiscard]] bool are_sidbs_too_close(const std::vector<std::size_t>& cell_indices) noexcept
+    [[nodiscard]] bool
+    are_sidbs_too_close(const std::vector<typename Lyt::cell>&        cells,
+                        const std::unordered_set<typename Lyt::cell>& affected_cells = {}) const noexcept
     {
-        for (std::size_t i = 0; i < cell_indices.size(); i++)
+        for (std::size_t i = 0; i < cells.size(); i++)
         {
-            for (std::size_t j = i + 1; j < cell_indices.size(); j++)
+            if constexpr (has_get_sidb_defect_v<Lyt>)
             {
-                if (sidb_nm_distance<Lyt>(Lyt{}, all_sidbs_in_canvas[cell_indices[i]],
-                                          all_sidbs_in_canvas[cell_indices[j]]) < 0.5)
+                if (skeleton_layout.get_sidb_defect(cells[i]).type != sidb_defect_type::NONE)
+                {
+                    return true;
+                }
+            }
+            if (affected_cells.count(cells[i]) > 0)
+            {
+                return true;
+            }
+            for (std::size_t j = i + 1; j < cells.size(); j++)
+            {
+                if (sidb_nm_distance<Lyt>(Lyt{}, cells[i], cells[j]) < 0.5)
                 {
                     return true;
                 }
@@ -478,7 +505,7 @@ class design_sidb_gates_impl
      * @param cell_indices A vector of indices of cells to be added to the skeleton layout.
      * @return A copy of the original layout (`skeleton_layout`) with SiDB cells added at specified indices.
      */
-    [[nodiscard]] Lyt skeleton_layout_with_canvas_sidbs(const std::vector<std::size_t>& cell_indices) noexcept
+    [[nodiscard]] Lyt add_canvas_sidbs_to_skeleton_layout(const std::vector<std::size_t>& cell_indices) const noexcept
     {
         Lyt lyt_copy{skeleton_layout.clone()};
 
@@ -494,7 +521,26 @@ class design_sidb_gates_impl
 
         return lyt_copy;
     }
+    /**
+     * Converts a vector of cell indices to a vector of corresponding cells in the layout.
+     *
+     * @param cell_indices Vector of cell indices to convert.
+     * @return A vector of cells corresponding to the given indices.
+     */
+    [[nodiscard]] std::vector<typename Lyt::cell>
+    cell_indices_to_cell_vector(const std::vector<std::size_t>& cell_indices) const noexcept
+    {
+        std::vector<typename Lyt::cell> cells{};
+        cells.reserve(cell_indices.size());
+        for (const auto index : cell_indices)
+        {
+            assert(index < all_sidbs_in_canvas.size() && "Cell index is out of range.");
+            cells.push_back(all_sidbs_in_canvas[index]);
+        }
+        return cells;
+    }
 };
+
 }  // namespace detail
 
 /**
@@ -600,16 +646,8 @@ template <typename Lyt, typename TT>
     assert(std::adjacent_find(spec.begin(), spec.end(),
                               [](const auto& a, const auto& b) { return a.num_vars() != b.num_vars(); }) == spec.end());
 
-    design_sidb_gates_stats                 st{};
-    detail::design_sidb_gates_impl<Lyt, TT> p{skeleton, spec, params, st};
-
-    const auto result = p.run_metric_driven_design_process(sa_params);
-
-    if (stats)
-    {
-        *stats = st;
-    }
-    return result;
+    detail::design_sidb_gates_impl<Lyt, TT> p_random{skeleton, spec, params};
+    return p.run_random_design();
 }
 
 }  // namespace fiction

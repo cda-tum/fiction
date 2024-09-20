@@ -1,4 +1,4 @@
-name: 🚨 • Clang-Tidy Review
+name: Clang-Tidy Review
 
 on:
   pull_request:
@@ -16,7 +16,7 @@ concurrency:
 jobs:
   clangtidy:
     runs-on: ubuntu-latest
-    name: Clang-Tidy
+    name: 🚨 Clang-Tidy
 
     steps:
       - name: Clone Repository

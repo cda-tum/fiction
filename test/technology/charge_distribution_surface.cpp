@@ -139,7 +139,7 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects", "[charge-d
         CHECK(charge_layout.get_charge_index_and_base().first == 0);
         charge_layout.increase_charge_index_by_one(dependent_cell_mode::FIXED, energy_calculation::UPDATE_ENERGY,
                                                    charge_distribution_history::NEGLECT,
-                                                   exhaustive_sidb_simulation_engine::EXGS);
+                                                   exact_sidb_simulation_engine::EXGS);
         CHECK(charge_layout.get_charge_index_and_base().first == 1);
         CHECK(charge_layout.get_charge_state_by_index(0) == sidb_charge_state::NEGATIVE);
         CHECK(charge_layout.get_charge_state_by_index(1) == sidb_charge_state::NEGATIVE);
@@ -156,7 +156,7 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects", "[charge-d
         CHECK(charge_layout_quickexact.get_charge_index_and_base().first == 0);
         charge_layout_quickexact.increase_charge_index_by_one(
             dependent_cell_mode::FIXED, energy_calculation::UPDATE_ENERGY, charge_distribution_history::NEGLECT,
-            exhaustive_sidb_simulation_engine::QUICKEXACT);
+            exact_sidb_simulation_engine::QUICKEXACT);
         CHECK(charge_layout_quickexact.get_charge_index_and_base().first == 1);
         CHECK(charge_layout_quickexact.get_charge_state_by_index(0) == sidb_charge_state::NEGATIVE);
         CHECK(charge_layout_quickexact.get_charge_state_by_index(1) == sidb_charge_state::NEGATIVE);
@@ -249,7 +249,7 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects", "[charge-d
         CHECK(charge_layout.get_system_energy() < system_energy_maximum);
 
         CHECK(charge_layout.get_charge_index_of_sub_layout() == 8);
-        charge_layout.reset_charge_index_sub_layout(exhaustive_sidb_simulation_engine::EXGS);
+        charge_layout.reset_charge_index_sub_layout(exact_sidb_simulation_engine::EXGS);
         CHECK(charge_layout.get_charge_index_of_sub_layout() == 0);
         CHECK(charge_layout.get_charge_state({6, 5}) == sidb_charge_state::NEGATIVE);
         CHECK(charge_layout.get_charge_state({7, 5}) == sidb_charge_state::NEGATIVE);
@@ -346,7 +346,7 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects", "[charge-d
 
         charge_layout.increase_charge_index_of_sub_layout_by_one(
             dependent_cell_mode::FIXED, energy_calculation::UPDATE_ENERGY, charge_distribution_history::NEGLECT,
-            exhaustive_sidb_simulation_engine::EXGS);
+            exact_sidb_simulation_engine::EXGS);
         CHECK(charge_layout.get_charge_index_of_sub_layout() == 3);
 
         // set the charge index to zero and thereby, all siDBs to negatively charged.

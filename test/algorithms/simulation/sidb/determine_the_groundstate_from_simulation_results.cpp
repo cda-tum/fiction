@@ -28,7 +28,7 @@ TEST_CASE("Determine the groundstate from simulation results", "[determine-the-g
         lyt.assign_cell_type({5, 5}, lattice::cell_type::NORMAL);
         lyt.assign_cell_type({5, 6}, lattice::cell_type::NORMAL);
 
-        const charge_distribution_surface cds1{lyt};
+        charge_distribution_surface cds1{lyt};
 
         charge_distribution_surface cds2{lyt};
         cds2.assign_all_charge_states(sidb_charge_state::NEUTRAL);
@@ -41,6 +41,10 @@ TEST_CASE("Determine the groundstate from simulation results", "[determine-the-g
         CHECK_THAT(cds2.get_system_energy(), Catch::Matchers::WithinAbs(0.0, 0.00001));
         CHECK(cds2.get_system_energy() < cds3.get_system_energy());
         CHECK(cds2.get_system_energy() < cds1.get_system_energy());
+
+        cds1.assign_charge_index(0, charge_distribution_mode::KEEP_CHARGE_DISTRIBUTION);
+        cds2.assign_charge_index(1, charge_distribution_mode::KEEP_CHARGE_DISTRIBUTION);
+        cds3.assign_charge_index(2, charge_distribution_mode::KEEP_CHARGE_DISTRIBUTION);
 
         sidb_simulation_result<lattice> results{};
         results.charge_distributions = {cds1, cds2, cds3};
@@ -71,7 +75,12 @@ TEST_CASE("Determine the groundstate from simulation results", "[determine-the-g
         cds3.update_after_charge_change();
 
         // copy cds2 to check for degeneracy.
-        const charge_distribution_surface cds4{cds2};
+        charge_distribution_surface cds4{cds2};
+
+        cds1.assign_charge_index(0, charge_distribution_mode::KEEP_CHARGE_DISTRIBUTION);
+        cds2.assign_charge_index(1, charge_distribution_mode::KEEP_CHARGE_DISTRIBUTION);
+        cds3.assign_charge_index(2, charge_distribution_mode::KEEP_CHARGE_DISTRIBUTION);
+        cds4.assign_charge_index(3, charge_distribution_mode::KEEP_CHARGE_DISTRIBUTION);
 
         CHECK_THAT(cds2.get_system_energy() - cds1.get_system_energy(), Catch::Matchers::WithinAbs(0.0, 0.00001));
 

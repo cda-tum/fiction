@@ -7,6 +7,7 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
 
+#include "pyfiction/algorithms/iter/bdl_input_iterator.hpp"
 #include "pyfiction/algorithms/network_transformation/fanout_substitution.hpp"
 #include "pyfiction/algorithms/network_transformation/network_balancing.hpp"
 #include "pyfiction/algorithms/network_transformation/technology_mapping.hpp"
@@ -18,6 +19,7 @@
 #include "pyfiction/algorithms/physical_design/color_routing.hpp"
 #include "pyfiction/algorithms/physical_design/design_sidb_gates.hpp"
 #include "pyfiction/algorithms/physical_design/exact.hpp"
+#include "pyfiction/algorithms/physical_design/graph_oriented_layout_design.hpp"
 #include "pyfiction/algorithms/physical_design/hexagonalization.hpp"
 #include "pyfiction/algorithms/physical_design/orthogonal.hpp"
 #include "pyfiction/algorithms/physical_design/post_layout_optimization.hpp"
@@ -38,6 +40,7 @@
 #include "pyfiction/algorithms/simulation/sidb/check_simulation_results_for_equivalence.hpp"
 #include "pyfiction/algorithms/simulation/sidb/convert_potential_to_distance.hpp"
 #include "pyfiction/algorithms/simulation/sidb/determine_groundstate_from_simulation_results.hpp"
+#include "pyfiction/algorithms/simulation/sidb/displacement_robustness_domain.hpp"
 #include "pyfiction/algorithms/simulation/sidb/minimum_energy.hpp"
 #include "pyfiction/algorithms/simulation/sidb/occupation_probability_of_excited_states.hpp"
 #include "pyfiction/algorithms/simulation/sidb/operational_domain.hpp"
@@ -103,6 +106,11 @@ PYBIND11_MODULE(pyfiction, m)
     pyfiction::siqad_coordinate(m);
     pyfiction::coordinate_utility(m);
     /**
+     * Logic
+     */
+    pyfiction::logic_networks(m);
+    pyfiction::truth_tables(m);
+    /**
      * Layouts
      */
     pyfiction::cartesian_layout(m);
@@ -140,11 +148,11 @@ PYBIND11_MODULE(pyfiction, m)
     pyfiction::determine_groundstate_from_simulation_results(m);
     pyfiction::check_simulation_results_for_equivalence(m);
     pyfiction::determine_physically_valid_parameters(m);
+    pyfiction::determine_displacement_robustness_domain(m);
     /**
-     * Logic
+     * Algorithms: Iterators
      */
-    pyfiction::logic_networks(m);
-    pyfiction::truth_tables(m);
+    pyfiction::bdl_input_iterator(m);
     /**
      * Algorithms: Network Transformation
      */
@@ -163,6 +171,7 @@ PYBIND11_MODULE(pyfiction, m)
      */
     pyfiction::exact(m);
     pyfiction::orthogonal(m);
+    pyfiction::graph_oriented_layout_design(m);
     pyfiction::apply_gate_library(m);
     pyfiction::color_routing(m);
     pyfiction::hexagonalization(m);

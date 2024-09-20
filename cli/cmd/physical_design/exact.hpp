@@ -101,8 +101,11 @@ class exact_command : public command
             }
         }
 
-        // convert timeout entered in seconds to milliseconds
-        ps.timeout *= 1000;
+        if (is_set("timeout"))
+        {
+            // convert timeout entered in seconds to milliseconds
+            ps.timeout *= 1000;
+        }
 
         // target technology constraints
         if (this->is_set("topolinano"))
@@ -156,6 +159,7 @@ class exact_command : public command
             {"runtime in seconds", mockturtle::to_seconds(st.time_total)},
             {"number of gates", st.num_gates},
             {"number of wires", st.num_wires},
+            {"number of crossings", st.num_crossings},
             {"layout", {{"x-size", st.x_size}, {"y-size", st.y_size}, {"area", st.x_size * st.y_size}}}};
     }
 
