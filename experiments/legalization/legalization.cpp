@@ -49,7 +49,8 @@ Ntk read_ntk(const std::string& name)
 
 int main()  // NOLINT
 {
-    experiments::experiment<std::string, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, bool, bool, bool>
+    experiments::experiment<std::string, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, bool, bool,
+                            bool>
         wiring_reduction_exp{"planarization", "benchmark",       "inputs",         "virt_inputs",
                              "outputs",       "initial nodes",   "nodes buffered", "nodes planarized",
                              "is_planar",     "equivalent(ntk)", "equivalent(lyt)"};
@@ -58,6 +59,7 @@ int main()  // NOLINT
     for (const auto& entry :
          std::filesystem::directory_iterator("/home/benjamin/Documents/Repositories/working/fiction/benchmarks/IWLS93"))
     {
+        continue;
         fmt::print("[i] processing {}\n", entry.path().filename().string());
 
         /*if ( "sqrt8ml.v" != entry.path().filename().string())
@@ -68,15 +70,15 @@ int main()  // NOLINT
         {
             continue;
         }*/
-        if ("C432.v" == entry.path().filename().string())
+        if ( "C432.v" == entry.path().filename().string())
         {
             continue;
         }
-        if ("ex4p.v" == entry.path().filename().string())
+        if ( "ex4p.v" == entry.path().filename().string())
         {
             continue;
         }
-        if ("apex1.v" == entry.path().filename().string())
+        if ( "apex1.v" == entry.path().filename().string())
         {
             continue;
         }
@@ -142,7 +144,7 @@ int main()  // NOLINT
         }
 
         const auto planarized_b = fiction::node_duplication_planarization<fiction::technology_network>(_b);
-        const auto is_planar    = fiction::check_planarity(planarized_b);
+        const auto is_planar = fiction::check_planarity(planarized_b);
         if (planarized_b.size() > 20000)
         {
             continue;
@@ -167,13 +169,13 @@ int main()  // NOLINT
         fiction::gate_level_drvs(layout, ps_d, &st_d);
 
         const auto miter = mockturtle::miter<mockturtle::klut_network>(planarized_b, layout);
-        bool       eq;
+        bool eq;
         if (miter)
         {
             mockturtle::equivalence_checking_stats st;
 
             const auto ce = mockturtle::equivalence_checking(*miter, {}, &st);
-            eq            = ce.value();
+            eq = ce.value();
         }
         wiring_reduction_exp(entry.path().filename().string(), benchmark_network.num_pis(),
                              planarized_b.num_virtual_pis(), benchmark_network.num_pos(), benchmark_network.num_gates(),
@@ -222,12 +224,11 @@ int main()  // NOLINT
     fiction::debug::write_dot_network(_b, "t_b");
     fiction::debug::write_dot_network(planarized_b, "network_b");*/
 
-    static constexpr const uint64_t bench_select = (fiction_experiments::fontes18);  // fiction_experiments::iscas85 & ~
+    static constexpr const uint64_t bench_select = (fiction_experiments::iscas85);  // fiction_experiments::iscas85 & ~
     // fiction_experiments::trindade16 | fiction_experiments::fontes18 | fiction_experiments::epfl |
     // fiction_experiments::iscas85 static constexpr const uint64_t bench_select =
     for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
     {
-        continue;
         const auto benchmark_network = read_ntk<fiction::tec_nt>(benchmark);
 
         fiction::network_balancing_params ps;
@@ -241,9 +242,10 @@ int main()  // NOLINT
                 {
                     cont = true;
                     std::cout << "Pi is Po\n";
+
                 }
             });
-        if (cont)
+        if(cont)
         {
             continue;
         }
@@ -251,7 +253,7 @@ int main()  // NOLINT
         const auto _b = fiction::network_balancing<fiction::technology_network>(
             fiction::fanout_substitution<fiction::technology_network>(benchmark_network), ps);
 
-        if (_b.size() > 15000)
+        if (_b.size() > 10000)
         {
             /*wiring_reduction_exp(benchmark, benchmark_network.num_pis(), 0, benchmark_network.num_pos(),
                                  benchmark_network.num_gates(), _b.num_gates(), _b.num_gates(), 0, 0, "TEST");
@@ -264,11 +266,10 @@ int main()  // NOLINT
 
         const auto is_planar = fiction::check_planarity(planarized_b);
 
-        if (planarized_b.size() > 30000)
+        if (planarized_b.size() > 20000)
         {
-            wiring_reduction_exp(benchmark, benchmark_network.num_pis(), planarized_b.num_virtual_pis(),
-                                 benchmark_network.num_pos(), benchmark_network.num_gates(), _b.num_gates(),
-                                 planarized_b.num_gates(), is_planar, 0, 0);
+            wiring_reduction_exp(benchmark, benchmark_network.num_pis(), planarized_b.num_virtual_pis(), benchmark_network.num_pos(),
+                                 benchmark_network.num_gates(), _b.num_gates(), planarized_b.num_gates(), is_planar, 0, 0);
             wiring_reduction_exp.save();
             wiring_reduction_exp.table();
             continue;
@@ -284,15 +285,14 @@ int main()  // NOLINT
 
         fiction::restore_names(benchmark_network, name);
 
-        using gate_lyt = fiction::gate_level_layout<
-            fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<>>>>;
+        using gate_lyt =
+            fiction::gate_level_layout<fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<>>>>;
 
         fiction::orthogonal_physical_design_stats stats{};
-        using gate_layout = fiction::gate_level_layout<
-            fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<fiction::offset::ucoord_t>>>>;
-        auto start  = std::chrono::high_resolution_clock::now();
+        using gate_layout = fiction::gate_level_layout<fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<fiction::offset::ucoord_t>>>>;
+        auto start = std::chrono::high_resolution_clock::now();
         auto layout = fiction::orthogonal<gate_layout>(planarized_b, {}, &stats);
-        auto stop   = std::chrono::high_resolution_clock::now();
+        auto stop = std::chrono::high_resolution_clock::now();
 
         std::chrono::duration<double> elapsed = stop - start;
 
@@ -320,13 +320,13 @@ int main()  // NOLINT
                                                                                          "NO";*/
 
         const auto miter = mockturtle::miter<mockturtle::klut_network>(planarized_b, layout);
-        bool       eq;
+        bool eq;
         if (miter)
         {
             mockturtle::equivalence_checking_stats st;
 
             const auto ce = mockturtle::equivalence_checking(*miter, {}, &st);
-            eq            = ce.value();
+            eq = ce.value();
         }
 
         // fiction::debug::write_dot_layout(layout);
@@ -334,9 +334,8 @@ int main()  // NOLINT
         fiction::debug::write_dot_network(planarized_b, "ntk_p");*/
 
         // log results
-        wiring_reduction_exp(benchmark, benchmark_network.num_pis(), planarized_b.num_virtual_pis(),
-                             benchmark_network.num_pos(), benchmark_network.num_gates(), _b.num_gates(),
-                             planarized_b.num_gates(), is_planar, cec_m.value(), eq);
+        wiring_reduction_exp(benchmark, benchmark_network.num_pis(), planarized_b.num_virtual_pis(), benchmark_network.num_pos(),
+                             benchmark_network.num_gates(), _b.num_gates(), planarized_b.num_gates(), is_planar, cec_m.value(), eq);
 
         wiring_reduction_exp.save();
         wiring_reduction_exp.table();
