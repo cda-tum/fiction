@@ -40,7 +40,7 @@ class TestIsOperational(unittest.TestCase):
         self.assertEqual(op_status, operational_status.NON_OPERATIONAL)
 
     def test_and_gate_111_lattice_11_input_pattern(self):
-        lyt = read_sqd_layout_111(dir_path + "/../../../resources/AND_mu_032_0.sqd")
+        lyt = read_sqd_layout_111(dir_path + "/../../../resources/AND_mu_032_111_surface.sqd")
 
         params = is_operational_params()
         params.simulation_parameters = sidb_simulation_parameters(2, -0.32)
@@ -58,7 +58,7 @@ class TestIsOperational(unittest.TestCase):
         self.assertEqual(op_status, operational_status.NON_OPERATIONAL)
 
     def test_and_gate_111_lattice_operational_input_pattern(self):
-        lyt = read_sqd_layout_111(dir_path + "/../../../resources/AND_mu_032_0.sqd")
+        lyt = read_sqd_layout_111(dir_path + "/../../../resources/AND_mu_032_111_surface.sqd")
 
         params = is_operational_params()
         params.simulation_parameters = sidb_simulation_parameters(2, -0.30)

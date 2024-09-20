@@ -284,6 +284,10 @@ struct operational_domain_stats
      * Number of parameter combinations, for which the layout is non-operational.
      */
     std::size_t num_non_operational_parameter_combinations{0};
+    /**
+     * Total number of parameter points in the parameter space.
+     */
+    std::size_t num_total_parameter_points{0};
 };
 
 namespace detail
@@ -523,16 +527,25 @@ class operational_domain_impl
      * border around the domain.
      *
      * @param samples Maximum number of random samples to be taken before flood fill.
+     * @param given_parameter_point Optional parameter point in the parameter space. If it lies within the
+     * operational region, it is used as a starting point for flood fill.
      * @return The (partial) operational domain of the layout.
      */
-    [[nodiscard]] operational_domain<parameter_point, operational_status> flood_fill(const std::size_t samples) noexcept
+    [[nodiscard]] operational_domain<parameter_point, operational_status>
+    flood_fill(const std::size_t                     samples,
+               const std::optional<parameter_point>& given_parameter_point = std::nullopt) noexcept
     {
         assert((num_dimensions == 2 || num_dimensions == 3) &&
                "Flood fill is only supported for two and three dimensions");
 
         mockturtle::stopwatch stop{stats.time_total};
 
-        const auto step_point_samples = generate_random_step_points(samples);
+        auto step_point_samples = generate_random_step_points(samples);
+
+        if (given_parameter_point.has_value())
+        {
+            step_point_samples.push_back(to_step_point(given_parameter_point.value()));
+        }
 
         simulate_operational_status_in_parallel(step_point_samples);
 
@@ -951,9 +964,14 @@ class operational_domain_impl
 
         for (auto d = 0u; d < num_dimensions; ++d)
         {
-            const auto it = std::lower_bound(values[d].cbegin(), values[d].cend(), pp.parameters[d]);
+            // Ensure the parameter is within the valid range
+            [[maybe_unused]] const auto min_val = values[d].front();
+            [[maybe_unused]] const auto max_val = values[d].back();
 
-            assert(it != values[d].cend() && "parameter point is outside of the value range");
+            assert(pp.parameters[d] >= min_val && pp.parameters[d] <= max_val &&
+                   "Parameter point is outside of the value range");
+
+            const auto it = std::lower_bound(values[d].cbegin(), values[d].cend(), pp.parameters[d]);
 
             const auto dis = std::distance(values[d].cbegin(), it);
 
@@ -1549,6 +1567,10 @@ class operational_domain_impl
                 ++stats.num_non_operational_parameter_combinations;
             }
         }
+
+        stats.num_total_parameter_points =
+            std::accumulate(values.cbegin(), values.cend(), static_cast<std::size_t>(1),
+                            [](std::size_t product, const auto& val) { return product * val.size(); });
     }
 };
 
