@@ -67,3 +67,6 @@ venv/
 *.tar.*
 *.7z
 *.rar
+
+# Jupyter notebook
+*.ipynb
