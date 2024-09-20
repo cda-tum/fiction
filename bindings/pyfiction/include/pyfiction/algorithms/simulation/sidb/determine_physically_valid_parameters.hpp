@@ -26,7 +26,7 @@ void determine_physically_valid_parameters(pybind11::module& m)
     using namespace pybind11::literals;
 
     m.def("determine_physically_valid_parameters", &fiction::determine_physically_valid_parameters<Lyt>, "cds"_a,
-          "params"_a = fiction::operational_domain_params{});
+          "params"_a = fiction::operational_domain_params{}, DOC(fiction_determine_physically_valid_parameters));
 }
 
 }  // namespace detail
@@ -38,7 +38,6 @@ inline void determine_physically_valid_parameters(pybind11::module& m)
 
     py::class_<fiction::operational_domain<fiction::parameter_point, uint64_t>>(m, "physically_valid_parameters_domain",
                                                                                 DOC(fiction_operational_domain))
-        // todo add docu
         .def(py::init<>())
         .def_readwrite("dimensions", &fiction::operational_domain<fiction::parameter_point, uint64_t>::dimensions)
 

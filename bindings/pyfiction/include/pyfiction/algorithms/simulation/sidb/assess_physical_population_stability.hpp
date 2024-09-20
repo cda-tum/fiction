@@ -41,7 +41,6 @@ void assess_physical_population_stability(pybind11::module& m, const std::string
         .def_readwrite("system_energy", &fiction::population_stability_information<Lyt>::system_energy,
                        DOC(fiction_population_stability_information_system_energy));
 
-    // TODO add docu.
     m.def(fmt::format("assess_physical_population_stability{}", lattice).c_str(),
           &fiction::assess_physical_population_stability<Lyt>, "lyt"_a,
           "params"_a = fiction::assess_physical_population_stability_params{},
