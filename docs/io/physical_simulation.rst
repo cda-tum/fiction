@@ -158,6 +158,19 @@ SiDB Operational Domain
         .. autofunction:: mnt.pyfiction.write_operational_domain
 
 
+SiDB Defect Influence Operational Domain
+########################################
+
+.. tabs::
+    .. tab:: C++
+        **Header:** ``fiction/io/write_defect_influence_operational_domain.hpp``
+
+        .. doxygenstruct:: fiction::write_defect_influence_operational_domain_params
+           :members:
+        .. doxygenfunction:: fiction::write_defect_influence_operational_domain(const operational_domain<parameter_point, operational_status>& opdom, std::ostream& os, const write_defect_influence_operational_domain_params& params = {})
+        .. doxygenfunction:: fiction::write_defect_influence_operational_domain(const operational_domain<parameter_point, operational_status>& opdom, const std::string_view& filename, const write_defect_influence_operational_domain_params& params = {})
+
+
 Technology-independent Gate-level Layouts
 #########################################
 

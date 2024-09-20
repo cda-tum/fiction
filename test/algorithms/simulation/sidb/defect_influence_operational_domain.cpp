@@ -61,7 +61,7 @@ TEST_CASE("novel designed AND Gate influence distance function which fails again
 
     lyt.assign_cell_type({36, 19, 0}, sidb_technology::cell_type::NORMAL);
 
-    const auto cube_lyt = convert_to_fiction_coordinates<sidb_cell_clk_lyt_cube>(lyt);
+    const auto cube_lyt = convert_layout_to_fiction_coordinates<sidb_cell_clk_lyt_cube>(lyt);
 
     const sidb_defect sidb_defect{sidb_defect_type::SI_VACANCY, -1, 10.6, 5.9};
     const maximum_defect_influence_position_and_distance_params sim_params{sidb_defect,

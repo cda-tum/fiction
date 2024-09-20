@@ -5,7 +5,7 @@ from mnt.pyfiction import *
 
 class TestDesignSiDBGates(unittest.TestCase):
 
-    def test_siqad_and_gate_skeleton(self):
+    def test_siqad_and_gate_skeleton_100(self):
         layout = sidb_100_lattice((20, 20))
 
         layout.assign_cell_type((0, 1), sidb_technology.cell_type.INPUT)
@@ -38,7 +38,7 @@ class TestDesignSiDBGates(unittest.TestCase):
         self.assertEqual(params.canvas[0], (4, 8, 0))
         self.assertEqual(params.canvas[1], (14, 11))
 
-        designed_gates = design_sidb_gates(layout, [create_and_tt()], params, design_sidb_gates_mode.EXHAUSTIVE)
+        designed_gates = design_sidb_gates(layout, [create_and_tt()], params)
 
         self.assertEqual(len(designed_gates), 23)
 

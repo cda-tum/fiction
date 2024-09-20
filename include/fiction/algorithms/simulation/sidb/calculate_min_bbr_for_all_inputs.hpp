@@ -28,9 +28,9 @@ struct calculate_min_bbr_for_all_inputs_params
      */
     assess_physical_population_stability_params assess_population_stability_params{};
     /**
-     * Parameters to identify the output pairs used to read the output.
+     * Parameters for the input BDL iterator.
      */
-    detect_bdl_pairs_params detect_pair_params{};
+    bdl_input_iterator_params bdl_iterator_params{};
 };
 /**
  * Calculates the minimum potential required to induce charge changes in an SiDB layout for all input combinations.
@@ -67,9 +67,9 @@ template <typename Lyt, typename TT>
     assert(std::adjacent_find(spec.begin(), spec.end(),
                               [](const auto& a, const auto& b) { return a.num_vars() != b.num_vars(); }) == spec.end());
 
-    bdl_input_iterator<Lyt> bii{lyt, params.detect_pair_params};
+    bdl_input_iterator<Lyt> bii{lyt, params.bdl_iterator_params};
 
-    assert(bii.get_number_of_inputs() == spec.front().num_bits() / 2 &&
+    assert(bii.num_input_pairs() == spec.front().num_bits() / 2 &&
            "Number of truth table dimensions and input BDL pairs does not match");
 
     double minimal_pop_stability_for_all_inputs = std::numeric_limits<double>::infinity();

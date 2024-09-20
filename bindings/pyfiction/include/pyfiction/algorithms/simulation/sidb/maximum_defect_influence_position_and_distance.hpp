@@ -26,7 +26,7 @@ void maximum_defect_influence_distance(pybind11::module& m)
 
     m.def("maximum_defect_influence_position_and_distance",
           &fiction::maximum_defect_influence_position_and_distance<Lyt>, "lyt"_a,
-          "params"_a = fiction::maximum_defect_influence_distance_params{},
+          "params"_a = fiction::maximum_defect_influence_position_and_distance_params{},
           DOC(fiction_maximum_defect_influence_position_and_distance));
 }
 
@@ -36,16 +36,12 @@ inline void maximum_defect_influence_distance(pybind11::module& m)
 {
     namespace py = pybind11;
 
-    py::class_<fiction::maximum_defect_influence_distance_params>(m, "maximum_defect_influence_distance_params",
-                                                                  DOC(fiction_maximum_defect_influence_distance_params))
+    py::class_<fiction::maximum_defect_influence_distance_params>(m, "maximum_defect_influence_distance_params")
         .def(py::init<>())
-        .def_readwrite("defect", &fiction::maximum_defect_influence_distance_params::defect,
-                       DOC(fiction_maximum_defect_influence_distance_params_defect))
-        .def_readwrite("sim_params", &fiction::maximum_defect_influence_distance_params::simulation_parameters,
-                       DOC(fiction_maximum_defect_influence_distance_params_sim_params))
+        .def_readwrite("defect", &fiction::maximum_defect_influence_distance_params::defect)
+        .def_readwrite("sim_params", &fiction::maximum_defect_influence_distance_params::simulation_parameters)
         .def_readwrite("additional_scanning_area",
-                       &fiction::maximum_defect_influence_distance_params::additional_scanning_area,
-                       DOC(fiction_maximum_defect_influence_distance_params_additional_scanning_area))
+                       &fiction::maximum_defect_influence_distance_params::additional_scanning_area)
 
         ;
 

@@ -246,7 +246,7 @@ class defect_influence_operational_domain_impl
     void determine_nw_se_cells() noexcept
     {
         // bounding box around the given layout to have north-west and south-east cells.
-        const auto                              siqad_layout = convert_to_siqad_coordinates(layout);
+        const auto                              siqad_layout = convert_layout_to_siqad_coordinates(layout);
         bounding_box_2d<decltype(siqad_layout)> bb{siqad_layout};
 
         auto nw = fiction::siqad::to_fiction_coord<cube::coord_t>(bb.get_min());  // north-west cell
@@ -591,7 +591,7 @@ defect_influence_operational_domain_grid_search(const Lyt& lyt, const std::vecto
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
-    static_assert(has_cube_coord_v<Lyt> || has_siqad_coord_v<Lyt>, "Lyt is not based on cube coordinates");
+    static_assert(has_cube_coord_v<Lyt>);
 
     defect_influence_operational_domain_stats                 st{};
     detail::defect_influence_operational_domain_impl<Lyt, TT> p{lyt, spec, params, st};

@@ -9,7 +9,6 @@
 #include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/iter/bdl_input_iterator.hpp>
-#include <fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp>
 
 #include <fmt/format.h>
 #include <pybind11/pybind11.h>

@@ -27,9 +27,9 @@ struct maximum_defect_influence_position_and_distance_of_sidb_gate_params
      */
     maximum_defect_influence_position_and_distance_params defect_influence_params{};
     /**
-     * Parameters for the detection of BDL pairs.
+     * Parameters for the input bDL iterator.
      */
-    detect_bdl_pairs_params bdl_pairs_params{};
+    bdl_input_iterator_params bdl_iterator_params{};
 };
 
 /**
@@ -66,7 +66,7 @@ template <typename Lyt, typename TT>
     assert(std::adjacent_find(spec.begin(), spec.end(),
                               [](const auto& a, const auto& b) { return a.num_vars() != b.num_vars(); }) == spec.end());
 
-    bdl_input_iterator<Lyt> bii{lyt, params.bdl_pairs_params};
+    bdl_input_iterator<Lyt> bii{lyt, params.bdl_iterator_params};
     double                  maximum_defect_influence_distance = 0.0;
     cell<Lyt>               defect_cell{};
     // number of different input combinations

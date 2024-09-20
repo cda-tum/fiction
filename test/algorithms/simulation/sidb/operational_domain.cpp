@@ -381,7 +381,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
         SECTION("flood_fill")
         {
             const auto op_domain = operational_domain_flood_fill(lat, std::vector<tt>{create_id_tt()}, 1,
-                                                                 op_domain_params, std::nullopt, &op_domain_stats);
+                                                                 op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct size
             CHECK(op_domain.operational_values.size() == 1);
@@ -421,7 +421,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
         SECTION("contour_tracing")
         {
             const auto op_domain = operational_domain_contour_tracing(lat, std::vector<tt>{create_id_tt()}, 1,
-                                                                      op_domain_params, std::nullopt, &op_domain_stats);
+                                                                      op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct size
             CHECK(op_domain.operational_values.size() == 1);
@@ -487,7 +487,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
         SECTION("flood_fill")
         {
             const auto op_domain = operational_domain_flood_fill(lat, std::vector<tt>{create_id_tt()}, 1,
-                                                                 op_domain_params, std::nullopt, &op_domain_stats);
+                                                                 op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct size
             CHECK(op_domain.operational_values.size() == 100);
@@ -504,7 +504,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
         SECTION("contour_tracing")
         {
             const auto op_domain = operational_domain_contour_tracing(lat, std::vector<tt>{create_id_tt()}, 1,
-                                                                      op_domain_params, std::nullopt, &op_domain_stats);
+                                                                      op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct size
             CHECK(op_domain.operational_values.size() <= 100);
@@ -520,7 +520,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
         }
     }
 
-    SECTION("operational area, different amount of steps in x and y direction")
+    SECTION("operational area, different number of steps in x- and y-direction")
     {
         // set x-dimension
         op_domain_params.sweep_dimensions[0].min  = 5.1;
@@ -617,7 +617,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
         SECTION("flood_fill")
         {
             const auto op_domain = operational_domain_flood_fill(lat, std::vector<tt>{create_id_tt()}, 1,
-                                                                 op_domain_params, std::nullopt, &op_domain_stats);
+                                                                 op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct size
             CHECK(op_domain.operational_values.size() == 50);
@@ -657,7 +657,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
         SECTION("contour_tracing")
         {
             const auto op_domain = operational_domain_contour_tracing(lat, std::vector<tt>{create_id_tt()}, 1,
-                                                                      op_domain_params, std::nullopt, &op_domain_stats);
+                                                                      op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct size
             CHECK(op_domain.operational_values.size() <= 50);
@@ -770,7 +770,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
         SECTION("flood_fill")
         {
             const auto op_domain = operational_domain_flood_fill(lat, std::vector<tt>{create_id_tt()}, 25,
-                                                                 op_domain_params, std::nullopt, &op_domain_stats);
+                                                                 op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct maximum size
             CHECK(op_domain.operational_values.size() <= 100);
@@ -811,7 +811,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
         SECTION("contour_tracing")
         {
             const auto op_domain = operational_domain_contour_tracing(lat, std::vector<tt>{create_id_tt()}, 25,
-                                                                      op_domain_params, std::nullopt, &op_domain_stats);
+                                                                      op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct maximum size
             CHECK(op_domain.operational_values.size() <= 25);
@@ -842,7 +842,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
         SECTION("flood_fill")
         {
             const auto op_domain = operational_domain_flood_fill(lat, std::vector<tt>{create_id_tt()}, 10000,
-                                                                 op_domain_params, std::nullopt, &op_domain_stats);
+                                                                 op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct size
             CHECK(op_domain.operational_values.size() == 3);
@@ -900,7 +900,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
         SECTION("flood_fill")
         {
             const auto op_domain = operational_domain_flood_fill(lat, std::vector<tt>{create_id_tt()}, 50,
-                                                                 op_domain_params, std::nullopt, &op_domain_stats);
+                                                                 op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct size
             CHECK(op_domain.operational_values.size() <= 256);
@@ -917,7 +917,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
         SECTION("contour_tracing")
         {
             const auto op_domain = operational_domain_contour_tracing(lat, std::vector<tt>{create_id_tt()}, 50,
-                                                                      op_domain_params, std::nullopt, &op_domain_stats);
+                                                                      op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct size (max 10 steps in each dimension)
             CHECK(op_domain.operational_values.size() <= 256);
@@ -1007,10 +1007,7 @@ TEST_CASE("SiQAD's AND gate operational domain computation", "[operational-domai
     SECTION("flood_fill")
     {
         const auto op_domain =
-            operational_domain_flood_fill(lat, std::vector<tt>{create_and_tt()}, 1, op_domain_params,
-                                          parameter_point{op_domain_params.simulation_parameters.epsilon_r,
-                                                          op_domain_params.simulation_parameters.lambda_tf},
-                                          &op_domain_stats);
+            operational_domain_flood_fill(lat, std::vector<tt>{create_and_tt()}, 1, op_domain_params, &op_domain_stats);
 
         // check if the operational domain has the correct size (10 steps in each dimension)
         CHECK(op_domain.operational_values.size() == 100);
@@ -1027,7 +1024,7 @@ TEST_CASE("SiQAD's AND gate operational domain computation", "[operational-domai
     SECTION("contour_tracing")
     {
         const auto op_domain = operational_domain_contour_tracing(lat, std::vector<tt>{create_and_tt()}, 1,
-                                                                  op_domain_params, std::nullopt, &op_domain_stats);
+                                                                  op_domain_params, &op_domain_stats);
 
         // check if the operational domain has the correct size (max 10 steps in each dimension)
         CHECK(op_domain.operational_values.size() <= 100);
@@ -1127,10 +1124,7 @@ TEST_CASE("SiQAD's AND gate operational domain computation, using cube coordinat
     SECTION("flood_fill")
     {
         const auto op_domain =
-            operational_domain_flood_fill(lat, std::vector<tt>{create_and_tt()}, 1, op_domain_params,
-                                          parameter_point{op_domain_params.simulation_parameters.epsilon_r,
-                                                          op_domain_params.simulation_parameters.lambda_tf},
-                                          &op_domain_stats);
+            operational_domain_flood_fill(lat, std::vector<tt>{create_and_tt()}, 1, op_domain_params, &op_domain_stats);
 
         // check if the operational domain has the correct size (10 steps in each dimension)
         CHECK(op_domain.operational_values.size() == 100);
@@ -1146,11 +1140,8 @@ TEST_CASE("SiQAD's AND gate operational domain computation, using cube coordinat
     }
     SECTION("contour_tracing")
     {
-        const auto op_domain =
-            operational_domain_contour_tracing(lat, std::vector<tt>{create_and_tt()}, 1, op_domain_params,
-                                               parameter_point{op_domain_params.simulation_parameters.epsilon_r,
-                                                               op_domain_params.simulation_parameters.lambda_tf},
-                                               &op_domain_stats);
+        const auto op_domain = operational_domain_contour_tracing(lat, std::vector<tt>{create_and_tt()}, 1,
+                                                                  op_domain_params, &op_domain_stats);
 
         // check if the operational domain has the correct size (max 10 steps in each dimension)
         CHECK(op_domain.operational_values.size() <= 100);
@@ -1218,11 +1209,8 @@ TEMPLATE_TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[operational-domain
     }
     SECTION("flood_fill")
     {
-        const auto op_domain =
-            operational_domain_flood_fill(layout, std::vector<tt>{create_and_tt()}, 1, op_domain_params,
-                                          parameter_point{op_domain_params.simulation_parameters.epsilon_r,
-                                                          op_domain_params.simulation_parameters.lambda_tf},
-                                          &op_domain_stats);
+        const auto op_domain = operational_domain_flood_fill(layout, std::vector<tt>{create_and_tt()}, 1,
+                                                             op_domain_params, &op_domain_stats);
 
         // check if the operational domain has the correct size (10 steps in each dimension)
         CHECK(op_domain.operational_values.size() == 4);
@@ -1239,7 +1227,7 @@ TEMPLATE_TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[operational-domain
     SECTION("contour_tracing")
     {
         const auto op_domain = operational_domain_contour_tracing(layout, std::vector<tt>{create_and_tt()}, 1,
-                                                                  op_domain_params, std::nullopt, &op_domain_stats);
+                                                                  op_domain_params, &op_domain_stats);
 
         // check if the operational domain has the correct size (max 10 steps in each dimension)
         CHECK(op_domain.operational_values.size() <= 4);

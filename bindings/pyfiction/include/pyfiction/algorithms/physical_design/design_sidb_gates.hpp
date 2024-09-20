@@ -6,7 +6,6 @@
 #define PYFICTION_DESIGN_SIDB_GATES_HPP
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/physical_design/design_sidb_gates.hpp>
 #include <fiction/types.hpp>
@@ -37,13 +36,12 @@ inline void design_sidb_gates(pybind11::module& m)
     /**
      * Design approach selector type.
      */
+     // todo update docstrings
     pybind11::enum_<typename fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::design_sidb_gates_mode>(
-        m, "design_sidb_gates_mode", DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode))
+        m, "design_sidb_gates_mode")
         .value("EXHAUSTIVE",
-               fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::design_sidb_gates_mode::EXHAUSTIVE,
-               DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode_EXHAUSTIVE))
-        .value("RANDOM", fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::design_sidb_gates_mode::RANDOM,
-               DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode_RANDOM));
+               fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::design_sidb_gates_mode::EXHAUSTIVE)
+        .value("RANDOM", fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::design_sidb_gates_mode::RANDOM);
 
     /**
      * Parameters.
@@ -54,8 +52,7 @@ inline void design_sidb_gates(pybind11::module& m)
         .def_readwrite("operational_params",
                        &fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::operational_params,
                        DOC(fiction_design_sidb_gates_params_operational_params))
-        .def_readwrite("design_mode", &fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::design_mode,
-                       DOC(fiction_design_sidb_gates_params_design_mode))
+        .def_readwrite("design_mode", &fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::design_mode)
         .def_readwrite("canvas", &fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::canvas,
                        DOC(fiction_design_sidb_gates_params_canvas))
         .def_readwrite("number_of_sidbs",
