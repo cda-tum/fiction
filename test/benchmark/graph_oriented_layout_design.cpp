@@ -48,7 +48,7 @@ TEST_CASE("Benchmark Graph-Oriented Layout Design", "[benchmark]")
         return graph_oriented_layout_design<gate_layout>(ntk, params);
     };
 
-    ntk             = blueprints::parity_network<mockturtle::aig_network>();
+    ntk                 = blueprints::parity_network<mockturtle::aig_network>();
     params.return_first = true;
     params.mode         = graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT;
     BENCHMARK("graph_oriented_layout_design: single-threading")
