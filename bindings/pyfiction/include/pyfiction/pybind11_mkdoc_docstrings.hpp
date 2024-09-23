@@ -4376,6 +4376,16 @@ Returns:
 
 static const char *__doc_fiction_detail_critical_temperature_impl_stats = R"doc(Statistics.)doc";
 
+static const char *__doc_fiction_detail_delete_virtual_pis_impl = R"doc()doc";
+
+static const char *__doc_fiction_detail_delete_virtual_pis_impl_delete_virtual_pis_impl = R"doc()doc";
+
+static const char *__doc_fiction_detail_delete_virtual_pis_impl_ntk = R"doc()doc";
+
+static const char *__doc_fiction_detail_delete_virtual_pis_impl_ntk_topo = R"doc()doc";
+
+static const char *__doc_fiction_detail_delete_virtual_pis_impl_run = R"doc()doc";
+
 static const char *__doc_fiction_detail_delete_wires =
 R"doc(This function deletes wires from the provided
 `wiring_reduction_layout` based on the specified coordinates and
@@ -13327,10 +13337,11 @@ shortest x-y path in the H-graph for every level in the network. An
 H-graph describes edge relations between two levels in a network, with
 one level assumed as fixed, starting at the Primary Outputs (POs). By
 finding the shortest path from the source (x) to the sink (y) in this
-H-graph, an optimal solution for the NDCE problem is found. The
-function constructs an H-graph that captures edge relations between
-two levels within the graph and computes the shortest x-y paths on the
-H-graph, traversing from the POs towards the Primary Inputs (PIs).
+H-graph, an optimal solution for the NDCE problem for each level is
+found. The function constructs an H-graph that captures edge relations
+between two levels within the graph and computes the shortest x-y
+paths on the H-graph, traversing from the POs towards the Primary
+Inputs (PIs).
 
 Returns:
     A view of the planarized virtual_pi_network created in the format
@@ -13346,19 +13357,21 @@ Parameter ``ntk_src``:
     Source network to be utilized for the planarization.
 
 Parameter ``ps``:
-    Node duplication parameters used in the computation.
-
-Throws:
-    std::runtime_error if input network not balanced, if no node
-    combinations are found or if the created network is non-planar.)doc";
+    Node duplication parameters used in the computation.)doc";
 
 static const char *__doc_fiction_node_duplication_planarization_params = R"doc(Parameters for the node duplication algorithm.)doc";
 
-static const char *__doc_fiction_node_duplication_planarization_params_random_output_order =
+static const char *__doc_fiction_node_duplication_planarization_params_output_order =
 R"doc(The output order determines the starting layer for this algorithm. If
 this option is turned off, the output order remains the same as in the
 provided network. If it is turned on, the outputs are ordered
 randomly.)doc";
+
+static const char *__doc_fiction_node_duplication_planarization_params_output_order_KEEP_PO_ORDER = R"doc(Keep the PO order from the input network.)doc";
+
+static const char *__doc_fiction_node_duplication_planarization_params_output_order_RANDOM_PO_ORDER = R"doc(Randomize the PO order.)doc";
+
+static const char *__doc_fiction_node_duplication_planarization_params_po_order = R"doc()doc";
 
 static const char *__doc_fiction_normalize_layout_coordinates =
 R"doc(A new layout is constructed and returned that is equivalent to the
@@ -17674,20 +17687,16 @@ PIs.
 Returns:
     The real size of the virtual_pi_network as a uint32_t.)doc";
 
-static const char *__doc_fiction_virtual_pi_network_v_storage = R"doc(Shared pointer if the virtual PI storage.)doc";
+static const char *__doc_fiction_virtual_pi_network_v_storage = R"doc(Shared pointer of the virtual PI storage.)doc";
 
 static const char *__doc_fiction_virtual_pi_network_virtual_pi_network =
 R"doc(Default constructor for the `virtual_pi_network` class. Initializes
-`_storage` as a shared pointer.)doc";
+`v_storage` as a shared pointer.)doc";
 
-static const char *__doc_fiction_virtual_pi_network_virtual_pi_network_2 = R"doc(Copy constructor for the `virtual_pi_network` class.)doc";
-
-static const char *__doc_fiction_virtual_pi_network_virtual_pi_network_3 =
+static const char *__doc_fiction_virtual_pi_network_virtual_pi_network_2 =
 R"doc(Constructor for the `virtual_pi_network` class that takes a network as
-input. Unlike other network types a virtual_pi_network can be created
-on top of any network. It initializes the base class `Ntk` with a
-clone of the provided network and creates a shared pointer to a
-`virtual_storage` object.
+input. It adds the functionalities of the `virtual_pi_network` class
+on top of the network.
 
 Template parameter ``Ntk``:
     Network type.
@@ -17695,13 +17704,26 @@ Template parameter ``Ntk``:
 Parameter ``ntk``:
     Input network.)doc";
 
-static const char *__doc_fiction_virtual_pi_network_virtual_pi_network_4 = R"doc()doc";
+static const char *__doc_fiction_virtual_pi_network_virtual_pi_network_3 =
+R"doc(Constructor for the `virtual_pi_network` class that takes a network
+and a shared pointer to a `virtual_storage` object. THis is used for
+cloning.
 
-static const char *__doc_fiction_virtual_storage = R"doc()doc";
+Template parameter ``Ntk``:
+    Network type.
 
-static const char *__doc_fiction_virtual_storage_map_virt_to_real_pi = R"doc(Map from virtual_pis to real_pis.)doc";
+Parameter ``ntk``:
+    Input network.
 
-static const char *__doc_fiction_virtual_storage_virtual_inputs = R"doc(Shared pointer vector storage for virtual_inputs.)doc";
+Parameter ``s``:
+    Shared pointer to the `virtual_storage` object to be used by this
+    `virtual_pi_network`.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_virtual_storage = R"doc()doc";
+
+static const char *__doc_fiction_virtual_pi_network_virtual_storage_map_virt_to_real_pi = R"doc(Map from virtual_pis to real_pis.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_virtual_storage_virtual_inputs = R"doc(Vector storing virtual_inputs.)doc";
 
 static const char *__doc_fiction_volume =
 R"doc(Computes the volume of a given coordinate assuming its origin is (0,
