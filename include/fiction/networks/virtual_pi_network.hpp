@@ -16,7 +16,6 @@
 #include <cstdint>
 #include <cstdlib>
 #include <memory>
-#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -24,20 +23,6 @@
 
 namespace fiction
 {
-
-template <typename Ntk>
-struct virtual_storage
-{
-    /**
-     * Shared pointer vector storage for virtual_inputs.
-     */
-    std::vector<typename Ntk::node> virtual_inputs;
-    /**
-     * Map from virtual_pis to real_pis.
-     */
-    phmap::parallel_flat_hash_map<typename Ntk::node, typename Ntk::node> map_virt_to_real_pi;
-};
-
 /* Network with additional "virtual" PIs.
  *
  * "Virtual" PIs (Primary Inputs) are used to manage the duplication of PIs in the network. Each "real" PI can have
@@ -45,6 +30,8 @@ struct virtual_storage
  * A "virtual" PI can be created by duplicating a "real" PI.
  * To keep track of this relationship, there is a mapping of each "virtual" PI to its corresponding "real" PI in the
  * network.
+ *
+ * @tparam Ntk Network type.
  */
 template <typename Ntk>
 class virtual_pi_network : public Ntk
@@ -54,37 +41,77 @@ class virtual_pi_network : public Ntk
     using node    = typename Ntk::node;
     using signal  = typename Ntk::signal;
 
-  public:
+    struct virtual_storage
+    {
+        /**
+         * Vector storing virtual_inputs.
+         */
+        std::vector<node> virtual_inputs{};
+        /**
+         * Map from virtual_pis to real_pis.
+         */
+        phmap::parallel_flat_hash_map<node, node> map_virt_to_real_pi{};
+    };
+
+    using v_strg = std::shared_ptr<virtual_storage>;
+
     /**
      * Default constructor for the `virtual_pi_network` class.
-     * Initializes `_storage` as a shared pointer.
+     * Initializes `v_storage` as a shared pointer.
      */
-    virtual_pi_network() : Ntk(), v_storage(std::make_shared<virtual_storage<Ntk>>()) {}
+    virtual_pi_network() : Ntk(), v_storage(std::make_shared<virtual_storage>())
+    {
+        static_assert(mockturtle::has_create_pi_v<Ntk>, "NtkSrc does not implement the create_pi function");
+        static_assert(mockturtle::has_clone_v<Ntk>, "NtkSrc does not implement the clone function");
+        static_assert(mockturtle::has_size_v<Ntk>, "NtkSrc does not implement the size function");
+        static_assert(mockturtle::has_get_node_v<Ntk>, "NtkSrc does not implement the get_node function");
+        static_assert(mockturtle::has_is_pi_v<Ntk>, "NtkSrc does not implement the is_pi function");
+        static_assert(mockturtle::has_is_ci_v<Ntk>, "NtkSrc does not implement the is_ci function");
+        static_assert(mockturtle::has_num_pis_v<Ntk>, "NtkSrc does not implement the num_pis function");
+        static_assert(mockturtle::has_num_cis_v<Ntk>, "NtkSrc does not implement the num_cis function");
+        static_assert(mockturtle::has_get_node_v<Ntk>, "NtkSrc does not implement the get_node function");
+    }
 
     /**
-     * Copy constructor for the `virtual_pi_network` class.
-     */
-    explicit virtual_pi_network(std::shared_ptr<storage> s) :
-            Ntk(std::move(s)),
-            v_storage(std::make_shared<virtual_storage<Ntk>>())
-    {}
-
-    /**
-     * Constructor for the `virtual_pi_network` class that takes a network as input.
-     * Unlike other network types a virtual_pi_network can be created on top of any network.
-     * It initializes the base class `Ntk` with a clone of the provided network and creates a shared pointer
-     * to a `virtual_storage` object.
+     * Constructor for the `virtual_pi_network` class that takes a network as input. It adds the functionalities of
+     * the `virtual_pi_network` class on top of the network.
      *
      * @tparam Ntk Network type.
      * @param ntk Input network.
      */
-    explicit virtual_pi_network(const Ntk& ntk) : Ntk(ntk.clone()), v_storage(std::make_shared<virtual_storage<Ntk>>())
-    {}
+    explicit virtual_pi_network(const Ntk& ntk) : Ntk(ntk.clone()), v_storage(std::make_shared<virtual_storage>())
+    {
+        static_assert(mockturtle::has_create_pi_v<Ntk>, "NtkSrc does not implement the create_pi function");
+        static_assert(mockturtle::has_clone_v<Ntk>, "NtkSrc does not implement the clone function");
+        static_assert(mockturtle::has_size_v<Ntk>, "NtkSrc does not implement the size function");
+        static_assert(mockturtle::has_get_node_v<Ntk>, "NtkSrc does not implement the get_node function");
+        static_assert(mockturtle::has_is_pi_v<Ntk>, "NtkSrc does not implement the is_pi function");
+        static_assert(mockturtle::has_is_ci_v<Ntk>, "NtkSrc does not implement the is_ci function");
+        static_assert(mockturtle::has_num_pis_v<Ntk>, "NtkSrc does not implement the num_pis function");
+        static_assert(mockturtle::has_num_cis_v<Ntk>, "NtkSrc does not implement the num_cis function");
+        static_assert(mockturtle::has_get_node_v<Ntk>, "NtkSrc does not implement the get_node function");
+    }
 
-    explicit virtual_pi_network(const Ntk& ntk, std::shared_ptr<virtual_storage<Ntk>> s) :
-            Ntk(ntk),
-            v_storage(std::move(s))
-    {}
+    /**
+     * Constructor for the `virtual_pi_network` class that takes a network and a shared pointer to a `virtual_storage`
+     * object. THis is used for cloning.
+     *
+     * @tparam Ntk Network type.
+     * @param ntk Input network.
+     * @param s Shared pointer to the `virtual_storage` object to be used by this `virtual_pi_network`.
+     */
+    explicit virtual_pi_network(const Ntk& ntk, std::shared_ptr<virtual_storage> s) : Ntk(ntk), v_storage(std::move(s))
+    {
+        static_assert(mockturtle::has_create_pi_v<Ntk>, "NtkSrc does not implement the create_pi function");
+        static_assert(mockturtle::has_clone_v<Ntk>, "NtkSrc does not implement the clone function");
+        static_assert(mockturtle::has_size_v<Ntk>, "NtkSrc does not implement the size function");
+        static_assert(mockturtle::has_get_node_v<Ntk>, "NtkSrc does not implement the get_node function");
+        static_assert(mockturtle::has_is_pi_v<Ntk>, "NtkSrc does not implement the is_pi function");
+        static_assert(mockturtle::has_is_ci_v<Ntk>, "NtkSrc does not implement the is_ci function");
+        static_assert(mockturtle::has_num_pis_v<Ntk>, "NtkSrc does not implement the num_pis function");
+        static_assert(mockturtle::has_num_cis_v<Ntk>, "NtkSrc does not implement the num_cis function");
+        static_assert(mockturtle::has_get_node_v<Ntk>, "NtkSrc does not implement the get_node function");
+    }
 
     /**
      * Clones the virtual_pi_network object.
@@ -95,7 +122,7 @@ class virtual_pi_network : public Ntk
             // Clone the network
             Ntk::clone(),
             // Create a new shared_ptr to virtual_storage using a copy of the current _storage
-            std::make_shared<virtual_storage<Ntk>>(*v_storage));
+            std::make_shared<virtual_storage>(*v_storage));
     }
 
     /**
@@ -121,7 +148,7 @@ class virtual_pi_network : public Ntk
      */
     signal create_virtual_pi(const signal& real_pi)
     {
-        signal s = Ntk::create_pi();
+        const signal s = Ntk::create_pi();
         v_storage->virtual_inputs.emplace_back(Ntk::get_node(s));
         v_storage->map_virt_to_real_pi.insert({Ntk::get_node(s), Ntk::get_node(real_pi)});
         return s;
@@ -220,7 +247,7 @@ class virtual_pi_network : public Ntk
      */
     [[nodiscard]] auto get_real_pi(const node& v_pi) const
     {
-        auto it = v_storage->map_virt_to_real_pi.find(v_pi);
+        const auto it = v_storage->map_virt_to_real_pi.find(v_pi);
 
         assert(it != v_storage->map_virt_to_real_pi.end() && "Error: node is not a virtual pi");
 
@@ -312,36 +339,13 @@ class virtual_pi_network : public Ntk
 
   private:
     /**
-     * Shared pointer if the virtual PI storage.
+     * Shared pointer of the virtual PI storage.
      */
-    std::shared_ptr<virtual_storage<Ntk>> v_storage;
+    v_strg v_storage;
 };
 
 namespace detail
 {
-
-template <class Ntk>
-std::pair<Ntk, mockturtle::node_map<mockturtle::signal<Ntk>, Ntk>> initialize_copy_virtual_pi_network(Ntk& src)
-{
-    static_assert(mockturtle::is_network_type_v<Ntk>, "NtkDest is not a network type");
-    static_assert(mockturtle::is_network_type_v<Ntk>, "NtkSrc is not a network type");
-
-    static_assert(mockturtle::has_get_constant_v<Ntk>, "NtkDest does not implement the get_constant method");
-    static_assert(mockturtle::has_create_pi_v<Ntk>, "NtkDest does not implement the create_pi method");
-    static_assert(mockturtle::has_get_constant_v<Ntk>, "NtkSrc does not implement the get_constant method");
-    static_assert(mockturtle::has_get_node_v<Ntk>, "NtkSrc does not implement the get_node method");
-    static_assert(has_foreach_real_pi_v<Ntk>, "NtkSrc does not implement the foreach_pi method");
-
-    mockturtle::node_map<mockturtle::signal<Ntk>, Ntk> old2new(src);
-    Ntk                                                dest;
-    old2new[src.get_constant(false)] = dest.get_constant(false);
-    if (src.get_node(src.get_constant(true)) != src.get_node(src.get_constant(false)))
-    {
-        old2new[src.get_constant(true)] = dest.get_constant(true);
-    }
-    src.foreach_real_pi([&](auto const& n) { old2new[n] = dest.create_pi(); });
-    return {dest, old2new};
-}
 
 template <typename Ntk>
 class delete_virtual_pis_impl
@@ -485,8 +489,31 @@ class delete_virtual_pis_impl
 
   private:
     using TopoNtkSrc = mockturtle::topo_view<Ntk>;
-    TopoNtkSrc ntk_topo;
     Ntk        ntk;
+    TopoNtkSrc ntk_topo;
+
+    [[nodiscard]] std::pair<Ntk, mockturtle::node_map<mockturtle::signal<Ntk>, Ntk>>
+    initialize_copy_virtual_pi_network(Ntk& src)
+    {
+        static_assert(mockturtle::is_network_type_v<Ntk>, "NtkDest is not a network type");
+        static_assert(mockturtle::is_network_type_v<Ntk>, "NtkSrc is not a network type");
+
+        static_assert(mockturtle::has_get_constant_v<Ntk>, "NtkDest does not implement the get_constant method");
+        static_assert(mockturtle::has_create_pi_v<Ntk>, "NtkDest does not implement the create_pi method");
+        static_assert(mockturtle::has_get_constant_v<Ntk>, "NtkSrc does not implement the get_constant method");
+        static_assert(mockturtle::has_get_node_v<Ntk>, "NtkSrc does not implement the get_node method");
+        static_assert(has_foreach_real_pi_v<Ntk>, "NtkSrc does not implement the foreach_pi method");
+
+        mockturtle::node_map<mockturtle::signal<Ntk>, Ntk> old2new(src);
+        Ntk                                                dest;
+        old2new[src.get_constant(false)] = dest.get_constant(false);
+        if (src.get_node(src.get_constant(true)) != src.get_node(src.get_constant(false)))
+        {
+            old2new[src.get_constant(true)] = dest.get_constant(true);
+        }
+        src.foreach_real_pi([&](auto const& n) { old2new[n] = dest.create_pi(); });
+        return {dest, old2new};
+    }
 };
 }  // namespace detail
 
