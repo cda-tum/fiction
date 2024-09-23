@@ -39,11 +39,11 @@ TEST_CASE("Check planarity aig", "[check-planarity]")
 
     extended_rank_view tec_r(aig);
 
-    const std::vector<mockturtle::aig_network::node> nodes_rank0{1, 2, 3};
+    const std::vector<mockturtle::aig_network::node> nodes_rank0{1, 2, 3, 6};
     const std::vector<mockturtle::aig_network::node> nodes_rank1{4, 5};
 
     tec_r.modify_rank(0, nodes_rank0);
-    tec_r.modify_rank(0, nodes_rank0);
+    tec_r.modify_rank(1, nodes_rank1);
 
     const bool planar = check_planarity(tec_r);
 
@@ -74,7 +74,7 @@ TEST_CASE("Check planarity technology network", "[check-planarity]")
     const std::vector<technology_network::node> nodes_rank1{5, 6};
 
     tec_r.modify_rank(0, nodes_rank0);
-    tec_r.modify_rank(0, nodes_rank0);
+    tec_r.modify_rank(1, nodes_rank1);
 
     const bool planar = check_planarity(tec_r);
 
@@ -105,7 +105,7 @@ TEST_CASE("Check non-planarity technology network", "[check-planarity]")
     const std::vector<technology_network::node> nodes_rank1{5, 6};
 
     tec_r.modify_rank(0, nodes_rank0);
-    tec_r.modify_rank(0, nodes_rank0);
+    tec_r.modify_rank(1, nodes_rank1);
 
     const bool planar = check_planarity(tec_r);
 
