@@ -90,6 +90,203 @@ struct node_pair
 };
 
 /**
+ * Variant of the mockturtle::initialize_copy_network. This function helps with creating new networks from old
+ * networks. In the mockturtle/original version `old2new` is used to map nodes from the old network to nodes in the new
+ * network in a one to one relation. This variant allows old nodes to map to multiple nodes in order to represent
+ * relations to dulicated nodes.
+
+ * A map (old2new) is created where old nodes from source network are mapped to new nodes in destination network.
+ * A destination network is created as a virtual_pi_network<NtkSrc>.
+ *
+ * @tparam NtkSrc Type of the source network.
+ * @param src The source network.
+ *
+ * @return A pair of the destination network and a node map from the source to the destination network.
+ */
+template <typename NtkSrc>
+std::pair<virtual_pi_network<NtkSrc>,
+          mockturtle::node_map<std::vector<mockturtle::signal<virtual_pi_network<NtkSrc>>>, NtkSrc>>
+initialize_copy_network_virtual(NtkSrc const& src)
+{
+    static_assert(mockturtle::is_network_type_v<virtual_pi_network<NtkSrc>>, "NtkDest is not a network type");
+    static_assert(mockturtle::is_network_type_v<NtkSrc>, "NtkSrc is not a network type");
+
+    static_assert(mockturtle::has_get_constant_v<virtual_pi_network<NtkSrc>>,
+                  "NtkDest does not implement the get_constant method");
+    static_assert(mockturtle::has_create_pi_v<virtual_pi_network<NtkSrc>>,
+                  "NtkDest does not implement the create_pi method");
+    static_assert(mockturtle::has_is_pi_v<virtual_pi_network<NtkSrc>>, "NtkDest does not implement the is_pi method");
+    static_assert(mockturtle::has_create_not_v<virtual_pi_network<NtkSrc>>,
+                  "NtkDest does not implement the create_not method");
+    static_assert(mockturtle::has_get_constant_v<NtkSrc>, "NtkSrc does not implement the get_constant method");
+    static_assert(mockturtle::has_get_node_v<NtkSrc>, "NtkSrc does not implement the get_node method");
+    static_assert(mockturtle::has_foreach_pi_v<NtkSrc>, "NtkSrc does not implement the foreach_pi method");
+    static_assert(mockturtle::has_foreach_po_v<NtkSrc>, "NtkSrc does not implement the foreach_po method");
+    static_assert(mockturtle::has_is_complemented_v<NtkSrc>, "NtkSrc does not implement the is_complemented method");
+    static_assert(mockturtle::has_foreach_fanin_v<NtkSrc>, "NtkSrc does not implement the foreach_fanin method");
+
+    mockturtle::node_map<std::vector<mockturtle::signal<virtual_pi_network<NtkSrc>>>, NtkSrc> old2new(src);
+    virtual_pi_network<NtkSrc>                                                                dest;
+
+    old2new[src.get_constant(false)].push_back(dest.get_constant(false));
+    if (src.get_node(src.get_constant(true)) != src.get_node(src.get_constant(false)))
+    {
+        old2new[src.get_constant(true)].push_back(dest.get_constant(true));
+    }
+    src.foreach_pi([&](auto const& n) { old2new[n].push_back(dest.create_pi()); });
+    return {dest, old2new};
+}
+
+/**
+ * Constructs a planar `virtual_pi_network` based on the `ntk_lvls` array, which holds the ranks of the duplicated nodes
+ * for each level in the new network. This function creates new nodes for the duplicated ones and restores their fanin
+ * relations using the `gather_fanin_signals` function.
+ *
+ * For duplicated PIs (Primary Inputs), virtual PIs are created, and the original PI is stored in a map.
+ *
+ * The auxiliary function `gather_fanin_signals` collects fanin data for a node and matches it in the
+ * `virtual_pi_network`.
+ *
+ * Example: For a level (2, 3, 2, 4, 2), new nodes are created for duplications (e.g., 2) and stored in the `old2new_v`
+ * node_map. This map is used by `gather_fanin_signals` to establish the correct fanin relations.
+ *
+ * @tparam Ntk Network type.
+ * @param ntk Source network to be utilized for the creation of the virtual_pi_network.
+ * @param ntk_lvls Levels of nodes in the source network.
+ * @param ntk_lvls_new Levels of newly created nodes in the virtual_pi_network.
+ */
+template <typename Ntk>
+virtual_pi_network<Ntk>
+create_virtual_pi_ntk_from_duplicated_nodes(Ntk& ntk, std::vector<std::vector<mockturtle::node<Ntk>>>& ntk_lvls,
+                                            std::vector<std::vector<mockturtle::node<Ntk>>>& ntk_lvls_new)
+{
+    std::unordered_map<mockturtle::node<Ntk>, bool> node_status;
+    ntk_lvls_new.resize(ntk_lvls.size());
+
+    auto  init_v     = initialize_copy_network_virtual(ntk);
+    auto& ntk_dest_v = init_v.first;
+    auto& old2new_v  = init_v.second;
+
+    /**
+     * The function gather_fanin_signals collects the fanin data for node n from the original ntk.
+     * For each node n there are the possible fanin candidates old2new_v[fn], which are the original node and all
+     * the nodes which are duplicates of this node.
+     *
+     * lvl[edge_it] gives the current iterator at where the edge can be connected. To get the right signal,
+     * all nodes at old2new[n] need to be viewed. Match lvl[edge_it] against all entries in old2new[n],
+     * then try lvl[edge_it+1] then try lvl[edge_it+2].
+     *
+     * @param n Variable to process.
+     * @param lvl Level to process.
+     * @param edge_it Iterator for edge.
+     * @return Vector of fanins in the virtual_pi_network connected to the processed node.
+     */
+    const auto gather_fanin_signals = [&](const auto& n, const auto& lvl, std::size_t& edge_it)
+    {
+        std::vector<typename Ntk::signal> children{};
+        const auto                        edge_it_int      = edge_it;
+        int                               first_fi_edge_it = -1;
+
+        ntk.foreach_fanin(n,
+                          [&](const auto& f)
+                          {
+                              const auto fn           = ntk.get_node(f);
+                              auto       tgt_signal_v = old2new_v[fn];
+
+                              assert(edge_it_int < lvl.size());
+
+                              bool break_loop = false;
+                              for (const auto& possible_node : tgt_signal_v)
+                              {
+                                  const auto it = ntk.fanin_size(n) + 1;
+                                  if (ntk.fanin_size(n) == children.size())
+                                  {
+                                      break;
+                                  }
+                                  for (std::size_t i = 0; i < it; i++)
+                                  {
+                                      if (edge_it_int + i < lvl.size() && lvl[edge_it_int + i] == possible_node &&
+                                          ntk_dest_v.fanout_size(possible_node) < 2)
+                                      {
+                                          if (first_fi_edge_it != -1)
+                                          {
+                                              if (!ntk.is_maj(n))
+                                              {
+                                                  assert(edge_it_int + i == first_fi_edge_it + 1 ||
+                                                         edge_it_int + i == first_fi_edge_it - 1);
+                                              }
+                                          }
+                                          children.emplace_back(possible_node);
+                                          first_fi_edge_it = static_cast<int>(edge_it_int + i);
+                                          if (edge_it_int + i > edge_it)
+                                          {
+                                              edge_it = edge_it_int + i;
+                                          }
+                                          break_loop = true;
+                                          break;
+                                      }
+                                  }
+                                  if (break_loop)
+                                  {
+                                      break;
+                                  }
+                              }
+                          });
+        return children;
+    };
+
+    std::size_t edge_it = 0;
+    for (std::size_t i = ntk_lvls.size(); i-- > 0;)
+    {
+        edge_it             = 0;
+        const auto& lvl     = ntk_lvls[i];
+        auto&       lvl_new = ntk_lvls_new[i];
+        for (const auto& nd : lvl)
+        {
+            if (ntk.is_pi(nd))
+            {
+                if (node_status[nd])
+                {
+                    const auto& new_node = ntk_dest_v.create_virtual_pi(nd);
+                    lvl_new.push_back(new_node);
+                    old2new_v[nd].push_back(new_node);
+                }
+                else
+                {
+                    lvl_new.push_back(nd);
+                    node_status[nd] = true;
+                }
+            }
+            else
+            {
+                const auto children = gather_fanin_signals(nd, ntk_lvls_new[i + 1], edge_it);
+                assert(!children.empty() && "The node has to have children");
+
+                const auto& new_node = ntk_dest_v.create_node(children, ntk.node_function(nd));
+                lvl_new.push_back(new_node);
+                old2new_v[nd].push_back(new_node);
+            }
+        }
+    }
+
+    ntk.foreach_po(
+        [&ntk, &ntk_dest_v, &old2new_v](const auto& po)
+        {
+            const auto tgt_signal_v = old2new_v[ntk.get_node(po)];
+            // POs do not get duplicated since the algorithm starts at the POs and duplicates other nodes according
+            // to their order
+            assert(tgt_signal_v.size() == 1 && "Multiple nodes mapped to PO");
+            const auto tgt_signal = tgt_signal_v[0];
+
+            const auto tgt_po = ntk.is_complemented(po) ? ntk_dest_v.create_not(tgt_signal) : tgt_signal;
+
+            ntk_dest_v.create_po(tgt_po);
+        });
+
+    return ntk_dest_v;
+}
+
+/**
  * Calculates pairs of nodes from a given vector of nodes.
  *
  * This function takes a vector of nodes and returns a vector of node pairs. Each node pair consists of two nodes from
@@ -430,7 +627,7 @@ class node_duplication_planarization_impl
         }
 
         // create virtual pi network
-        return virtual_pi_network(ntk, ntk_lvls, ntk_lvls_new);
+        return create_virtual_pi_ntk_from_duplicated_nodes(ntk, ntk_lvls, ntk_lvls_new);
     }
 
   private:
