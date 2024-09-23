@@ -47,9 +47,8 @@ TEST_CASE("Benchmark Graph-Oriented Layout Design", "[benchmark]")
 
         return graph_oriented_layout_design<gate_layout>(ntk, params);
     };
-    * /
 
-        ntk             = blueprints::parity_network<mockturtle::aig_network>();
+    ntk             = blueprints::parity_network<mockturtle::aig_network>();
     params.return_first = true;
     params.mode         = graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT;
     BENCHMARK("graph_oriented_layout_design: single-threading")
@@ -65,7 +64,6 @@ TEST_CASE("Benchmark Graph-Oriented Layout Design", "[benchmark]")
 }
 
 //  Mac M1, Sonoma 14.6.1, Apple clang version 15.0.0 (23.09.24)
-
 // -------------------------------------------------------------------------------
 // Benchmark Graph-Oriented Layout Design
 // -------------------------------------------------------------------------------
