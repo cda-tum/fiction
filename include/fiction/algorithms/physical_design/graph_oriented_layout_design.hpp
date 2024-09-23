@@ -32,8 +32,10 @@
 #include <cstddef>
 #include <cstdint>
 #include <functional>
+#include <future>
 #include <iostream>
 #include <limits>
+#include <mutex>
 #include <optional>
 #include <queue>
 #include <stdexcept>
@@ -136,6 +138,23 @@ struct graph_oriented_layout_design_params
      * The cost objective used. Defaults to AREA
      */
     cost_objective cost = AREA;
+    /**
+     * BETA feature:
+     * Flag to enable or disable multithreading during the execution of the layout design algorithm.
+     *
+     * When set to `true`, the algorithm will utilize multiple threads to process different search space graphs in
+     * parallel, improving performance by distributing the workload across available CPU cores. If set to `false`, the
+     * algorithm will run sequentially in a single thread.
+     *
+     * Only recommended for HIGH_EFFORT and HIGHEST_EFFORT modes and complex networks (>100 nodes).
+     *
+     * Enabling multithreading can significantly speed up the algorithm, especially when using multiple search space
+     * graphs and dealing with complex networks, by concurrently expanding them. However, it may introduce additional
+     * overhead for thread synchronization and can increase memory usage.
+     *
+     * Default value: `false`
+     */
+    bool enable_multithreading = false;
     /**
      * Verbosity.
      */
@@ -664,7 +683,8 @@ class graph_oriented_layout_design_impl
             pst{st},
             custom_cost_objective{custom},
             timeout{ps.timeout},
-            start{std::chrono::high_resolution_clock::now()}
+            start{std::chrono::high_resolution_clock::now()},
+            num_search_space_graphs{0}
     {
         ntk.substitute_po_signals();
     }
@@ -698,45 +718,116 @@ class graph_oriented_layout_design_impl
         {
             timeout = 10000u;
         }
-        bool timeout_limit_reached = false;
 
-        // main A* loop
+        // main loop
         while (!timeout_limit_reached)
         {
-            for (auto& ssg : ssg_vec)
+            // if multithreading is enabled
+            if (ps.enable_multithreading)
             {
-                if (ssg.frontier_flag)
+                // mutex to protect shared resources (if necessary)
+                std::mutex                                   mtx;
+                std::vector<std::future<std::optional<Lyt>>> futures;
+
+                // process `ssg_vec` in parallel using std::async
+                for (auto& ssg : ssg_vec)
                 {
-                    num_evaluated_paths++;
-                    const auto expansion = expand(ssg);
-                    if (expansion.second)
-                    {
-                        best_lyt = *expansion.second;
-                        restore_names(ssg.network, best_lyt);
-
-                        // statistical information
-                        pst.x_size        = best_lyt.x() + 1;
-                        pst.y_size        = best_lyt.y() + 1;
-                        pst.num_gates     = best_lyt.num_gates();
-                        pst.num_wires     = best_lyt.num_wires();
-                        pst.num_crossings = best_lyt.num_crossings();
-
-                        if (ps.return_first)
+                    futures.emplace_back(std::async(
+                        std::launch::async,
+                        [&]() -> std::optional<Lyt>  // return std::optional<layout>
                         {
-                            return best_lyt;
-                        }
+                            if (ssg.frontier_flag)
+                            {
+                                num_evaluated_paths++;
+
+                                const auto expansion = expand(ssg);
+                                if (expansion.second)
+                                {
+                                    const std::lock_guard<std::mutex> lock(mtx);  // protect access to shared data
+                                    best_lyt = *expansion.second;
+                                    restore_names(ssg.network, best_lyt);
+
+                                    // statistical information
+                                    pst.x_size        = best_lyt.x() + 1;
+                                    pst.y_size        = best_lyt.y() + 1;
+                                    pst.num_gates     = best_lyt.num_gates();
+                                    pst.num_wires     = best_lyt.num_wires();
+                                    pst.num_crossings = best_lyt.num_crossings();
+
+                                    if (ps.return_first)
+                                    {
+                                        return best_lyt;  // return the layout if ps.return_first is true
+                                    }
+                                }
+
+                                // update costs and frontier
+                                for (const auto& [next, cost] : expansion.first)
+                                {
+                                    if (ssg.cost_so_far.find(next) == ssg.cost_so_far.cend() ||
+                                        cost < ssg.cost_so_far[next])
+                                    {
+                                        ssg.cost_so_far[next] = cost;
+                                        double priority       = cost;
+                                        ssg.frontier.put(next, priority);
+                                    }
+                                }
+                            }
+                            return std::nullopt;  // return no layout found
+                        }));
+                }
+
+                // Check the futures for the result
+                for (auto& future : futures)
+                {
+                    auto result = future.get();  // blocking wait to get the result from the future
+                    if (result)
+                    {
+                        return *result;  // return the first found layout if ps.return_first is true
                     }
-                    for (const auto& [next, cost] : expansion.first)
+                }
+            }
+            else
+            {
+                // single-threaded version
+                for (auto& ssg : ssg_vec)
+                {
+                    if (ssg.frontier_flag)
                     {
-                        if (ssg.cost_so_far.find(next) == ssg.cost_so_far.cend() || cost < ssg.cost_so_far[next])
+                        num_evaluated_paths++;
+
+                        const auto expansion = expand(ssg);
+                        if (expansion.second)
                         {
-                            ssg.cost_so_far[next] = cost;
-                            double priority       = cost;
-                            ssg.frontier.put(next, priority);
+                            best_lyt = *expansion.second;
+                            restore_names(ssg.network, best_lyt);
+
+                            // statistical information
+                            pst.x_size        = best_lyt.x() + 1;
+                            pst.y_size        = best_lyt.y() + 1;
+                            pst.num_gates     = best_lyt.num_gates();
+                            pst.num_wires     = best_lyt.num_wires();
+                            pst.num_crossings = best_lyt.num_crossings();
+
+                            if (ps.return_first)
+                            {
+                                return best_lyt;  // return the layout if ps.return_first is true
+                            }
+                        }
+
+                        for (const auto& [next, cost] : expansion.first)
+                        {
+                            if (ssg.cost_so_far.find(next) == ssg.cost_so_far.cend() || cost < ssg.cost_so_far[next])
+                            {
+                                ssg.cost_so_far[next] = cost;
+                                double priority       = cost;
+                                ssg.frontier.put(next, priority);
+                            }
                         }
                     }
                 }
             }
+
+            // update current_vertex and frontier_flag (non-parallel for now)
             for (auto& ssg : ssg_vec)
             {
                 if (ssg.frontier_flag)
@@ -752,6 +843,7 @@ class graph_oriented_layout_design_impl
                 }
             }
 
+            // check if timeout is reached or solution found
             timeout_limit_reached =
                 std::none_of(ssg_vec.cbegin(), ssg_vec.cend(), [](const auto& ssg) { return ssg.frontier_flag; });
 
@@ -761,7 +853,7 @@ class graph_oriented_layout_design_impl
 
             if (duration_ms >= timeout)
             {
-                // Terminate the algorithm if the specified timeout was set or a solution was found in low-effort mode
+                // terminate the algorithm if the specified timeout was set or a solution was found in low-effort mode
                 if ((ps.mode == graph_oriented_layout_design_params::effort_mode::HIGH_EFFICIENCY &&
                      (improve_area_solution || improve_wire_solution || improve_crossing_solution ||
                       improve_acp_solution || improve_custom_solution)) ||
@@ -806,6 +898,10 @@ class graph_oriented_layout_design_impl
      * Timeout limit (in ms).
      */
     uint64_t timeout;
+    /**
+     * Timeout limit reached.
+     */
+    bool timeout_limit_reached = false;
     /**
      * Start time.
      */

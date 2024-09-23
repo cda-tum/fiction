@@ -373,6 +373,77 @@ mockturtle::names_view<Ntk> multi_output_network()
 
     return ntk;
 }
+
+template <typename Ntk>
+mockturtle::names_view<Ntk> parity_network()
+{
+    mockturtle::names_view<Ntk> ntk{};
+
+    const auto pi00 = ntk.create_pi("pi00");
+    const auto pi01 = ntk.create_pi("pi01");
+    const auto pi02 = ntk.create_pi("pi02");
+    const auto pi03 = ntk.create_pi("pi03");
+    const auto pi04 = ntk.create_pi("pi04");
+    const auto pi05 = ntk.create_pi("pi05");
+    const auto pi06 = ntk.create_pi("pi06");
+    const auto pi07 = ntk.create_pi("pi07");
+    const auto pi08 = ntk.create_pi("pi08");
+    const auto pi09 = ntk.create_pi("pi09");
+    const auto pi10 = ntk.create_pi("pi10");
+    const auto pi11 = ntk.create_pi("pi11");
+    const auto pi12 = ntk.create_pi("pi12");
+    const auto pi13 = ntk.create_pi("pi13");
+    const auto pi14 = ntk.create_pi("pi14");
+    const auto pi15 = ntk.create_pi("pi15");
+
+    const auto new_n18_ = ntk.create_and(pi14, ntk.create_not(pi15));
+    const auto new_n19_ = ntk.create_and(ntk.create_not(pi14), pi15);
+    const auto new_n20_ = ntk.create_and(ntk.create_not(new_n18_), ntk.create_not(new_n19_));
+    const auto new_n21_ = ntk.create_and(pi12, ntk.create_not(pi13));
+    const auto new_n22_ = ntk.create_and(ntk.create_not(pi12), pi13);
+    const auto new_n23_ = ntk.create_and(ntk.create_not(new_n21_), ntk.create_not(new_n22_));
+    const auto new_n24_ = ntk.create_and(new_n20_, ntk.create_not(new_n23_));
+    const auto new_n25_ = ntk.create_and(ntk.create_not(new_n20_), new_n23_);
+    const auto new_n26_ = ntk.create_and(ntk.create_not(new_n24_), ntk.create_not(new_n25_));
+    const auto new_n27_ = ntk.create_and(pi10, ntk.create_not(pi11));
+    const auto new_n28_ = ntk.create_and(ntk.create_not(pi10), pi11);
+    const auto new_n29_ = ntk.create_and(ntk.create_not(new_n27_), ntk.create_not(new_n28_));
+    const auto new_n30_ = ntk.create_and(pi08, ntk.create_not(pi09));
+    const auto new_n31_ = ntk.create_and(ntk.create_not(pi08), pi09);
+    const auto new_n32_ = ntk.create_and(ntk.create_not(new_n30_), ntk.create_not(new_n31_));
+    const auto new_n33_ = ntk.create_and(new_n29_, ntk.create_not(new_n32_));
+    const auto new_n34_ = ntk.create_and(ntk.create_not(new_n29_), new_n32_);
+    const auto new_n35_ = ntk.create_and(ntk.create_not(new_n33_), ntk.create_not(new_n34_));
+    const auto new_n36_ = ntk.create_and(new_n26_, ntk.create_not(new_n35_));
+    const auto new_n37_ = ntk.create_and(ntk.create_not(new_n26_), new_n35_);
+    const auto new_n38_ = ntk.create_and(ntk.create_not(new_n36_), ntk.create_not(new_n37_));
+    const auto new_n39_ = ntk.create_and(pi06, ntk.create_not(pi07));
+    const auto new_n40_ = ntk.create_and(ntk.create_not(pi06), pi07);
+    const auto new_n41_ = ntk.create_and(ntk.create_not(new_n39_), ntk.create_not(new_n40_));
+    const auto new_n42_ = ntk.create_and(pi04, ntk.create_not(pi05));
+    const auto new_n43_ = ntk.create_and(ntk.create_not(pi04), pi05);
+    const auto new_n44_ = ntk.create_and(ntk.create_not(new_n42_), ntk.create_not(new_n43_));
+    const auto new_n45_ = ntk.create_and(new_n41_, ntk.create_not(new_n44_));
+    const auto new_n46_ = ntk.create_and(ntk.create_not(new_n41_), new_n44_);
+    const auto new_n47_ = ntk.create_and(ntk.create_not(new_n45_), ntk.create_not(new_n46_));
+    const auto new_n48_ = ntk.create_and(pi02, ntk.create_not(pi03));
+    const auto new_n49_ = ntk.create_and(ntk.create_not(pi02), pi03);
+    const auto new_n50_ = ntk.create_and(ntk.create_not(new_n48_), ntk.create_not(new_n49_));
+    const auto new_n51_ = ntk.create_and(pi00, ntk.create_not(pi01));
+    const auto new_n52_ = ntk.create_and(ntk.create_not(pi00), pi01);
+    const auto new_n53_ = ntk.create_and(ntk.create_not(new_n51_), ntk.create_not(new_n52_));
+    const auto new_n54_ = ntk.create_and(new_n50_, ntk.create_not(new_n53_));
+    const auto new_n55_ = ntk.create_and(ntk.create_not(new_n50_), new_n53_);
+    const auto new_n56_ = ntk.create_and(ntk.create_not(new_n54_), ntk.create_not(new_n55_));
+    const auto new_n57_ = ntk.create_and(new_n47_, ntk.create_not(new_n56_));
+    const auto new_n58_ = ntk.create_and(ntk.create_not(new_n47_), new_n56_);
+    const auto new_n59_ = ntk.create_and(ntk.create_not(new_n57_), ntk.create_not(new_n58_));
+    const auto new_n60_ = ntk.create_and(new_n38_, ntk.create_not(new_n59_));
+    const auto new_n61_ = ntk.create_and(ntk.create_not(new_n38_), new_n59_);
+    ntk.create_po(ntk.create_or(new_n60_, new_n61_), "po0");
+
+    return ntk;
+}
 }  // namespace blueprints
 
 #endif  // FICTION_NETWORK_BLUEPRINTS_HPP

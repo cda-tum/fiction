@@ -170,6 +170,25 @@ TEST_CASE("Different parameters", "[graph-oriented-layout-design]")
     CHECK(layout8->z() == 0);
 }
 
+TEST_CASE("Multithreading", "[graph-oriented-layout-design]")
+{
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+    const auto ntk    = blueprints::mux21_network<technology_network>();
+
+    graph_oriented_layout_design_stats stats{};
+
+    graph_oriented_layout_design_params params{};
+
+    // High efficiency mode
+    params.mode = graph_oriented_layout_design_params::effort_mode::HIGH_EFFICIENCY;
+    // Enable multithreading
+    params.enable_multithreading = true;
+    const auto layout            = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
+
+    REQUIRE(layout.has_value());
+    check_eq(ntk, *layout);
+}
+
 TEST_CASE("Different cost objectives", "[graph-oriented-layout-design]")
 {
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;

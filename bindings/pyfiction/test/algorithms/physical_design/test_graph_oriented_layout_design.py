@@ -56,6 +56,7 @@ class TestGraphOrientedLayoutDesign(unittest.TestCase):
         params.num_vertex_expansions = 5
         params.planar = False
         params.cost = gold_cost_objective.WIRES
+        params.enable_multithreading = False
 
         layout = graph_oriented_layout_design(network, params)
 
