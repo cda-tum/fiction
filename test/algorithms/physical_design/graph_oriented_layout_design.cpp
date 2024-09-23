@@ -179,14 +179,23 @@ TEST_CASE("Multithreading", "[graph-oriented-layout-design]")
 
     graph_oriented_layout_design_params params{};
 
-    // High efficiency mode
-    params.mode = graph_oriented_layout_design_params::effort_mode::HIGH_EFFICIENCY;
+    // Highest effort mode
+    params.mode = graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT;
     // Enable multithreading
     params.enable_multithreading = true;
-    const auto layout            = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
+    const auto layout1            = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
 
-    REQUIRE(layout.has_value());
-    check_eq(ntk, *layout);
+    REQUIRE(layout1.has_value());
+    check_eq(ntk, *layout1);
+
+    // High efficiency mode
+    params.mode = graph_oriented_layout_design_params::effort_mode::HIGH_EFFICIENCY;
+    // Return first found layout
+    params.return_first = true;
+    const auto layout2            = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
+
+    REQUIRE(layout2.has_value());
+    check_eq(ntk, *layout2);
 }
 
 TEST_CASE("Different cost objectives", "[graph-oriented-layout-design]")
