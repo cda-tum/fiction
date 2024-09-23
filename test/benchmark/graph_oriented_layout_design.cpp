@@ -27,7 +27,6 @@ TEST_CASE("Benchmark Graph-Oriented Layout Design", "[benchmark]")
     auto ntk    = blueprints::mux21_network<mockturtle::aig_network>();
     auto params = fiction::graph_oriented_layout_design_params{};
 
-
     BENCHMARK("graph_oriented_layout_design: high effiency")
     {
         params.mode = graph_oriented_layout_design_params::effort_mode::HIGH_EFFICIENCY;
@@ -47,9 +46,10 @@ TEST_CASE("Benchmark Graph-Oriented Layout Design", "[benchmark]")
         params.mode = graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT;
 
         return graph_oriented_layout_design<gate_layout>(ntk, params);
-    };*/
+    };
+    * /
 
-    ntk                 = blueprints::parity_network<mockturtle::aig_network>();
+        ntk             = blueprints::parity_network<mockturtle::aig_network>();
     params.return_first = true;
     params.mode         = graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT;
     BENCHMARK("graph_oriented_layout_design: single-threading")
