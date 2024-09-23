@@ -360,14 +360,14 @@ class node_duplication_planarization_impl
         // ToDO: implement border_pis (if there is a choice ush pis to the borders (first or last rank))
         const bool border_pis = true;
 
-        std::unordered_map<typename Ntk::node, int> po_counts;
-        ntk.foreach_po([&po_counts](auto po) { po_counts[po]++; });
-        std::vector<typename Ntk::node> pos{};
+        std::vector<mockturtle::node<Ntk>> pos{};
         pos.reserve(ntk.num_pos());
-        for (const auto& kv : po_counts)
-        {
-            pos.push_back(kv.first);
-        }
+        ntk.foreach_po([&pos](auto po)
+                       {
+                           if(std::find(pos.begin(), pos.end(), po) == pos.end()) {
+                               pos.push_back(po);
+                           }
+                       });
 
         // Randomize the PO order
         if (ps.random_output_order)
