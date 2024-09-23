@@ -52,7 +52,8 @@ int main()  // NOLINT
     // needs to be changed if a different skeleton is used.
     design_gate_params.canvas = {{24, 17}, {34, 28}};
 
-    design_gate_params.number_of_sidbs = 3;
+    design_gate_params.number_of_sidbs               = 3;
+    design_gate_params.operational_params.sim_engine = fiction::sidb_simulation_engine::QUICKEXACT;
     design_gate_params.termination_cond =
         fiction::design_sidb_gates_params<fiction::cell<cell_lyt>>::termination_condition::AFTER_FIRST_SOLUTION;
 

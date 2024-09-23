@@ -141,7 +141,7 @@ enum class charge_index_mode : uint8_t
     /**
      * The charge state is assigned to the cell but the old charge index is kept.
      */
-    KEEP_CHARGE_INDEX
+    KEEP_CHARGE_INDEX,
 };
 
 /**
@@ -1902,10 +1902,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         std::sort(strg->sidb_order.begin(), strg->sidb_order.end());
         this->foreach_cell([this, &cs](const auto&) { strg->cell_charge.push_back(cs); });
 
-        assert((((this->num_cells() < 41) && (strg->simulation_parameters.base == 3)) ||
-                ((strg->simulation_parameters.base == 2) && (this->num_cells() < 64))) &&
-               "number of SiDBs is too large");
-
+        strg->max_charge_index = static_cast<uint64_t>(
+            std::pow(static_cast<double>(strg->simulation_parameters.base), this->num_cells()) - 1);
         this->charge_distribution_to_index();
         strg->max_charge_index = static_cast<uint64_t>(
             std::pow(static_cast<double>(strg->simulation_parameters.base), this->num_cells()) - 1);

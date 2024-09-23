@@ -22,6 +22,7 @@
 #include <cstdlib>
 #include <exception>
 #include <iostream>
+#include <optional>
 #include <stdexcept>
 #include <string>
 #include <type_traits>

@@ -86,7 +86,7 @@ struct design_sidb_gates_params
         RANDOM
     };
     /**
-     * Parameters to check if the designed gate is operational or non-operational.
+     * Parameters for the `is_operational` function.
      */
     is_operational_params operational_params{};
     /**

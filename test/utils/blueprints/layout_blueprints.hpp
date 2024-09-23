@@ -870,7 +870,7 @@ Lyt bestagon_and_gate() noexcept
  * titled \"Unlocking Flexible Silicon Dangling Bond Logic Designs on Alternative Silicon Orientations\" by
  * Samuel Sze Hang Ng, Jan Drewniok, Marcel Walter, Jacob Retallick, Robert Wille, and Konrad Walus.
  *
- * (https://github.com/samuelngsh/si-111-paper-supplementary/blob/main/bestagon-111-gates/gates/AND_mu_032_0.sqd)
+ * (https://github.com/samuelngsh/si-111-paper-supplementary/blob/main/bestagon-111-gates/gates/AND_mu_032_111_surface.sqd)
  */
 template <typename Lyt>
 Lyt and_gate_111() noexcept

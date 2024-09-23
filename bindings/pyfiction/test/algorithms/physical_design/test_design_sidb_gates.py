@@ -27,11 +27,11 @@ class TestDesignSiDBGates(unittest.TestCase):
 
         params = design_sidb_gates_params()
         params.operational_params.simulation_parameters.base = 2
-        params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
         params.operational_params.simulation_parameters.mu_minus = -0.28
-        params.design_mode = design_sidb_gates_mode.AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER
+        params.design_mode = design_sidb_gates_mode.EXHAUSTIVE
         params.canvas = [(4, 8), (14, 11)]
         params.number_of_sidbs = 1
+        params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
 
         self.assertEqual(params.operational_params.simulation_parameters.mu_minus, -0.28)
         self.assertEqual(params.number_of_sidbs, 1)
@@ -127,9 +127,10 @@ class TestDesignSiDBGates(unittest.TestCase):
         params = design_sidb_gates_params()
         params.operational_params.simulation_parameters.base = 2
         params.operational_params.simulation_parameters.mu_minus = -0.32
-        params.design_mode = design_sidb_gates_mode.QUICKCELL
+        params.design_mode = design_sidb_gates_mode.EXHAUSTIVE
         params.canvas = [(10, 22), (14, 34)]
         params.number_of_sidbs = 3
+        params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
 
         self.assertEqual(params.operational_params.simulation_parameters.mu_minus, -0.32)
         self.assertEqual(params.number_of_sidbs, 3)

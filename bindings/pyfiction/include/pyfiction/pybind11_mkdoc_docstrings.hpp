@@ -296,6 +296,27 @@ Returns:
     A cell-level layout that implements `lyt`'s gate types with
     building blocks defined in `GateLibrary`.)doc";
 
+static const char *__doc_fiction_are_cell_layouts_identical =
+R"doc(This function checks whether the given layouts `first_lyt` and
+`second_lyt` are identical by comparing various properties such as the
+number of cells, the types of cells, defects (if applicable), and
+charge states (if applicable). The comparison is done in a detailed
+manner depending on the specific layout type.
+
+@Note The aspect ratios of the cell-level layouts are not compared.
+
+Template parameter ``Lyt``:
+    The layout type. Must be a cell-level layout.
+
+Parameter ``first_lyt``:
+    The first layout to compare.
+
+Parameter ``second_lyt``:
+    The second layout to compare.
+
+Returns:
+    `true` if the layouts are identical, `false` otherwise.)doc";
+
 static const char *__doc_fiction_area =
 R"doc(Computes the area of a given coordinate assuming its origin is (0, 0,
 0). Calculates :math:`(|x| + 1) \cdot (|y| + 1)` by default. The
@@ -2720,6 +2741,50 @@ Parameter ``n``:
 Returns:
     Columnar clocking scheme.)doc";
 
+static const char *__doc_fiction_compute_operational_ratio =
+R"doc(Calculates the ratio of operational parameter points surrounding a
+specified parameter point to the total number of parameter points in
+the given parameter space. This function is useful for assessing how
+robust a gate design is to variations in its parameters.
+
+A ratio close to 1 indicates that the gate is robust, meaning it
+functions correctly across a broad range of parameter values. A ratio
+close to 0 indicates that the gate is highly sensitive to parameter
+variations and may fail to operate correctly.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Template parameter ``TT``:
+    Truth table type.
+
+Parameter ``lyt``:
+    The SiDB layout for which to compute the ratio of operational
+    parameter points surrounding a specified parameter point to the
+    total number of parameter points.
+
+Parameter ``spec``:
+    The expected Boolean function of the layout, provided as a multi-
+    output truth table.
+
+Parameter ``params``:
+    Parameters.
+
+Parameter ``pp``:
+    The specific parameter point around which the operational ratio is
+    computed.
+
+Returns:
+    The ratio of operational parameter points to the total number of
+    parameter points in the parameter space.)doc";
+
+static const char *__doc_fiction_compute_operational_ratio_params =
+R"doc(Parameters for computing the ratio of operational parameter points
+around a specified parameter point to the total number of parameter
+points in the given parameter space.)doc";
+
+static const char *__doc_fiction_compute_operational_ratio_params_op_domain_params = R"doc(Parameters for the operational domain computation.)doc";
+
 static const char *__doc_fiction_convert_array =
 R"doc(Converts an array of size `N` and type `T` to an array of size `N` and
 type `ElementType` by applying `static_cast` at compile time.
@@ -3726,9 +3791,7 @@ static const char *__doc_fiction_design_sidb_gates_params_design_sidb_gates_mode
 
 static const char *__doc_fiction_design_sidb_gates_params_number_of_sidbs = R"doc(Number of SiDBs placed in the canvas to create a working gate.)doc";
 
-static const char *__doc_fiction_design_sidb_gates_params_operational_params =
-R"doc(Parameters to check if the designed gate is operational or non-
-operational.)doc";
+static const char *__doc_fiction_design_sidb_gates_params_operational_params = R"doc(Parameters for the `is_operational` function.)doc";
 
 static const char *__doc_fiction_design_sidb_gates_params_termination_cond =
 R"doc(The design process is terminated after a valid SiDB gate design is
@@ -7247,6 +7310,11 @@ one pixel wide border around the domain.
 
 Parameter ``samples``:
     Maximum number of random samples to be taken before flood fill.
+
+Parameter ``given_parameter_point``:
+    Optional parameter point in the parameter space. If it lies within
+    the operational region, it is used as a starting point for flood
+    fill.
 
 Returns:
     The (partial) operational domain of the layout.)doc";
@@ -11528,10 +11596,6 @@ be difficult or even impossible to find several unique (given by
 number_of_unique_generated_layouts) layouts. Therefore, this parameter
 sets a limit for the maximum number of tries.)doc";
 
-static const char *__doc_fiction_generate_random_sidb_layout_params_minimal_spacing =
-R"doc(If positively charged SiDBs should be prevented, SiDBs are not placed
-closer than this value (Euclidean distance of two cells).)doc";
-
 static const char *__doc_fiction_generate_random_sidb_layout_params_number_of_sidbs = R"doc(Number of SiDBs that are placed on the layout.)doc";
 
 static const char *__doc_fiction_generate_random_sidb_layout_params_number_of_unique_generated_layouts = R"doc(The desired number of unique layouts to be generated.)doc";
@@ -11548,9 +11612,15 @@ static const char *__doc_fiction_generate_random_sidb_layout_params_positive_cha
 R"doc(Positive charges are not allowed to occur (i.e. SiDBs need to be
 seperated by a few lattice points).)doc";
 
+static const char *__doc_fiction_generate_random_sidb_layout_params_positive_charges_MAY_OCCUR =
+R"doc(Positive charges can occur, which means that the
+`can_positive_charges_occur` function returns `true`.)doc";
+
 static const char *__doc_fiction_generate_random_sidb_layout_params_positive_sidbs =
 R"doc(If positively charged SiDBs should be prevented, SiDBs are not placed
 closer than the minimal_spacing.)doc";
+
+static const char *__doc_fiction_generate_random_sidb_layout_params_sim_params = R"doc(Simulation parameters.)doc";
 
 static const char *__doc_fiction_geometric_temperature_schedule =
 R"doc(A logarithmically decreasing temperature schedule. The temperature is
@@ -14462,6 +14532,8 @@ operational.)doc";
 static const char *__doc_fiction_operational_domain_stats_num_operational_parameter_combinations = R"doc(Number of parameter combinations, for which the layout is operational.)doc";
 
 static const char *__doc_fiction_operational_domain_stats_num_simulator_invocations = R"doc(Number of simulator invocations.)doc";
+
+static const char *__doc_fiction_operational_domain_stats_num_total_parameter_points = R"doc(Total number of parameter points in the parameter space.)doc";
 
 static const char *__doc_fiction_operational_domain_value_range =
 R"doc(A range of values for a dimension sweep. The range is defined by a

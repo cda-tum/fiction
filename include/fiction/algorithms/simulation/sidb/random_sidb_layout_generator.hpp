@@ -6,8 +6,11 @@
 #define FICTION_RANDOM_SIDB_LAYOUT_GENERATOR_HPP
 
 #include "fiction/algorithms/path_finding/distance.hpp"
+#include "fiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp"
+#include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/technology/sidb_defects.hpp"
 #include "fiction/traits.hpp"
+#include "fiction/utils/execution_utils.hpp"
 #include "fiction/utils/layout_utils.hpp"
 
 #include <cstdint>
@@ -37,7 +40,11 @@ struct generate_random_sidb_layout_params
         /**
          * Positive charges are not allowed to occur (i.e. SiDBs need to be seperated by a few lattice points).
          */
-        FORBIDDEN
+        FORBIDDEN,
+        /**
+         * Positive charges can occur, which means that the `can_positive_charges_occur` function returns `true`.
+         */
+        MAY_OCCUR
     };
     /**
      * Two coordinates that span the region where SiDBs may be placed (order is not important). The first coordinate is
@@ -53,10 +60,9 @@ struct generate_random_sidb_layout_params
      */
     positive_charges positive_sidbs = positive_charges::ALLOWED;
     /**
-     * If positively charged SiDBs should be prevented, SiDBs are not placed closer than this value (Euclidean distance
-     * of two cells).
+     * Simulation parameters.
      */
-    double minimal_spacing = 2.0;
+    sidb_simulation_parameters sim_params{};
     /**
      * Maximum number of steps to place the specified number of SiDBs. Example: If the area, where SiDBs can be placed,
      * is small and many SiDBs are to be placed, several tries are required to generate a layout with no positively
@@ -109,24 +115,9 @@ Lyt generate_random_sidb_layout(const Lyt&                                      
     // stops if either all SiDBs are placed or the maximum number of attempts was performed
     while (lyt.num_cells() < number_of_sidbs_of_final_layout && attempt_counter < params.maximal_attempts)
     {
-        // random coordinate within given area
+        // random coordinate within the area specified by two coordinates
         const auto random_coord = random_coordinate(params.coordinate_pair.first, params.coordinate_pair.second);
-        bool       next_to_neutral_defect              = false;
-        bool       constraint_violation_positive_sidbs = false;
-
-        if (params.positive_sidbs == generate_random_sidb_layout_params<coordinate<Lyt>>::positive_charges::FORBIDDEN)
-        {
-            // checks if the new coordinate is not closer than 2 cells (Euclidean distance) to an already
-            // placed SiDB
-            lyt.foreach_cell(
-                [&lyt, &random_coord, &constraint_violation_positive_sidbs, &params](const auto& c1)
-                {
-                    if (euclidean_distance<Lyt>(lyt, c1, random_coord) < params.minimal_spacing)
-                    {
-                        constraint_violation_positive_sidbs = true;
-                    }
-                });
-        }
+        bool       next_to_neutral_defect = false;
 
         if (sidbs_affected_by_defects.count(random_coord) > 0)
         {
@@ -142,17 +133,28 @@ Lyt generate_random_sidb_layout(const Lyt&                                      
 
         // if the constraints that no positive SiDBs occur and the cell is not yet occupied by a defect are satisfied,
         // the SiDB is added to the layout
-        if (!constraint_violation_positive_sidbs && !random_cell_is_identical_wih_defect && !next_to_neutral_defect)
+        if (!random_cell_is_identical_wih_defect && !next_to_neutral_defect)
         {
-            lyt.assign_cell_type(random_coord, technology<Lyt>::cell_type::LOGIC);
+            lyt.assign_cell_type(random_coord, technology<Lyt>::cell_type::NORMAL);
+
+            if (params.positive_sidbs ==
+                    generate_random_sidb_layout_params<coordinate<Lyt>>::positive_charges::FORBIDDEN &&
+                can_positive_charges_occur(lyt, params.sim_params))
+            {
+                lyt.assign_cell_type(random_coord, technology<Lyt>::cell_type::EMPTY);
+            }
         }
         attempt_counter += 1;
     }
 
-    if (lyt.num_cells() == number_of_sidbs_of_final_layout)
+    if (params.positive_sidbs == generate_random_sidb_layout_params<coordinate<Lyt>>::positive_charges::MAY_OCCUR &&
+        !can_positive_charges_occur(lyt, params.sim_params))
     {
-        return lyt;
+        return generate_random_sidb_layout(lyt_skeleton, params);
     }
+
+    return lyt;
+}
 
     // if not all SiDBs can be placed, the originally given skeleton layout is returned
     return lyt_skeleton;
@@ -188,30 +190,9 @@ generate_multiple_random_sidb_layouts(const Lyt&                                
         const auto random_lyt = generate_random_sidb_layout(lyt_skeleton, params);
 
         // indicates if a found SiDB layout is identical to an already found one.
-        bool identical_layout = false;
-        for (const auto& old_lyt : unique_lyts)
-        {
-            // checks if two layouts have an SiDB at the same position
-            uint64_t identical_cell_counter = 0;
-            old_lyt.foreach_cell(
-                [&identical_cell_counter, random_lyt](const auto& cell_old)
-                {
-                    random_lyt.foreach_cell(
-                        [&identical_cell_counter, &cell_old](const auto& cell_new)
-                        {
-                            if (cell_new == cell_old)
-                            {
-                                identical_cell_counter += 1;
-                            }
-                        });
-                });
-
-            // all cells are identical, so the new layout is a duplicate
-            if (identical_cell_counter == random_lyt.num_cells())
-            {
-                identical_layout = true;
-            }
-        }
+        const auto identical_layout =
+            std::any_of(FICTION_EXECUTION_POLICY_PAR unique_lyts.cbegin(), unique_lyts.cend(),
+                        [&](const auto& old_lyt) { return are_cell_layouts_identical(random_lyt, old_lyt); });
 
         // if the randomly generated SiDB layout is not identical to a previously generated one, it is added to the
         // collection of all unique SiDB layouts (unique_lyts)

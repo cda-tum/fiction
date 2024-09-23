@@ -57,6 +57,12 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
 
     CHECK(lyt.num_cells() == 13);
 
+    design_sidb_gates_params<cell<siqad_layout>> params{
+        is_operational_params{sidb_simulation_parameters{2, -0.32}},
+        design_sidb_gates_params<cell<siqad_layout>>::design_sidb_gates_mode::EXHAUSTIVE,
+        {{10, 4, 0}, {10, 4, 0}},
+        1};
+
     SECTION("One cell in canvas")
     {
         const auto params = design_sidb_gates_params<cell<siqad_layout>>{
