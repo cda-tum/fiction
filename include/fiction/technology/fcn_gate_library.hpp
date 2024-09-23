@@ -17,6 +17,7 @@
 #include <array>
 #include <initializer_list>
 #include <memory>
+#include <unordered_map>
 #include <vector>
 
 namespace fiction

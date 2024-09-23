@@ -2,17 +2,18 @@
 // Created by Jan Drewniok on 17.05.24.
 //
 
-#include "fiction/algorithms/iter/bdl_input_iterator.hpp"
-#include "fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
-#include "fiction/algorithms/simulation/sidb/quickexact.hpp"
-#include "fiction/algorithms/simulation/sidb/quicksim.hpp"
-#include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
-#include "fiction/algorithms/simulation/sidb/time_to_solution.hpp"
-#include "fiction/io/read_sqd_layout.hpp"
-#include "fiction/layouts/coordinates.hpp"
-#include "fiction/types.hpp"
-#include "fiction/utils/truth_table_utils.hpp"
 #include "fiction_experiments.hpp"
+
+#include <fiction/algorithms/iter/bdl_input_iterator.hpp>
+#include <fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp>
+#include <fiction/algorithms/simulation/sidb/quickexact.hpp>
+#include <fiction/algorithms/simulation/sidb/quicksim.hpp>
+#include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
+#include <fiction/algorithms/simulation/sidb/time_to_solution.hpp>
+#include <fiction/io/read_sqd_layout.hpp>
+#include <fiction/layouts/coordinates.hpp>
+#include <fiction/types.hpp>
+#include <fiction/utils/truth_table_utils.hpp>
 
 #include <fmt/format.h>
 #include <mockturtle/utils/stopwatch.hpp>

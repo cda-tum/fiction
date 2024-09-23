@@ -248,6 +248,7 @@ TEST_CASE("Custom cost objective", "[graph-oriented-layout-design]")
     const auto layout_high_effort =
         graph_oriented_layout_design<gate_layout>(ntk, params, &stats, custom_cost_objective);
 
+
     REQUIRE(layout_high_effort.has_value());
     check_eq(ntk, *layout_high_effort);
 }

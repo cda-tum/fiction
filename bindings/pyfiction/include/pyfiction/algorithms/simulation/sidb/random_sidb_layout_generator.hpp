@@ -44,9 +44,15 @@ inline void random_sidb_layout_generator(pybind11::module& m)
 
     py::enum_<typename fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>::positive_charges>(
         m, "positive_charges", DOC(fiction_generate_random_sidb_layout_params_positive_charges))
-        .value("ON", fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>::positive_charges::ALLOWED)
-        .value("OFF",
-               fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>::positive_charges::FORBIDDEN);
+        .value("ALLOWED",
+               fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>::positive_charges::ALLOWED,
+               DOC(fiction_generate_random_sidb_layout_params_positive_charges_ALLOWED))
+        .value("FORBIDDEN",
+               fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>::positive_charges::FORBIDDEN,
+               DOC(fiction_generate_random_sidb_layout_params_positive_charges_FORBIDDEN))
+        .value("MAY_OCCUR",
+               fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>::positive_charges::MAY_OCCUR,
+               DOC(fiction_generate_random_sidb_layout_params_positive_charges_MAY_OCCUR));
 
     /**
      * Parameters.
@@ -63,9 +69,6 @@ inline void random_sidb_layout_generator(pybind11::module& m)
         .def_readwrite("positive_sidbs",
                        &fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>::positive_sidbs,
                        DOC(fiction_generate_random_sidb_layout_params_positive_sidbs))
-        .def_readwrite("minimal_spacing",
-                       &fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>::minimal_spacing,
-                       DOC(fiction_generate_random_sidb_layout_params_minimal_spacing))
         .def_readwrite("maximal_attempts",
                        &fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>::maximal_attempts,
                        DOC(fiction_generate_random_sidb_layout_params_maximal_attempts))
@@ -77,8 +80,8 @@ inline void random_sidb_layout_generator(pybind11::module& m)
                        &fiction::generate_random_sidb_layout_params<
                            fiction::offset::ucoord_t>::maximal_attempts_for_multiple_layouts,
                        DOC(fiction_generate_random_sidb_layout_params_maximal_attempts_for_multiple_layouts));
-    // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
+    // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
     detail::random_layout_generator<py_sidb_100_lattice>(m);
     detail::random_layout_generator<py_sidb_111_lattice>(m);
 }

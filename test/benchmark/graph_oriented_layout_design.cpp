@@ -27,7 +27,8 @@ TEST_CASE("Benchmark Graph-Oriented Layout Design", "[benchmark]")
     auto ntk    = blueprints::mux21_network<mockturtle::aig_network>();
     auto params = fiction::graph_oriented_layout_design_params{};
 
-    /*BENCHMARK("graph_oriented_layout_design: high effiency")
+
+    BENCHMARK("graph_oriented_layout_design: high effiency")
     {
         params.mode = graph_oriented_layout_design_params::effort_mode::HIGH_EFFICIENCY;
 

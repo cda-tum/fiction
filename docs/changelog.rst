@@ -11,6 +11,14 @@ Unreleased```
 Added
 #####
 - Experiments:
+    - Script to conduct 3-state physical simulation of SiDB layouts.
+
+Unreleased```
+-------------
+
+Added
+#####
+- Experiments:
     - Script to simulate the critical temperature of SiQAD and Bestagon gates
 - Algorithms:
     - Added support for different ways of implementing input information in SiDB technology to the BDL input iterator
