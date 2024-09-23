@@ -362,12 +362,14 @@ class node_duplication_planarization_impl
 
         std::vector<mockturtle::node<Ntk>> pos{};
         pos.reserve(ntk.num_pos());
-        ntk.foreach_po([&pos](auto po)
-                       {
-                           if(std::find(pos.begin(), pos.end(), po) == pos.end()) {
-                               pos.push_back(po);
-                           }
-                       });
+        ntk.foreach_po(
+            [&pos](auto po)
+            {
+                if (std::find(pos.begin(), pos.end(), po) == pos.end())
+                {
+                    pos.push_back(po);
+                }
+            });
 
         // Randomize the PO order
         if (ps.random_output_order)
