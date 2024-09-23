@@ -6139,6 +6139,8 @@ static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_start 
 
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_timeout = R"doc(Timeout limit (in ms).)doc";
 
+static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_timeout_limit_reached = R"doc(Timeout limit reached.)doc";
+
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_valid_layout =
 R"doc(Validates the given layout based on the nodes in the network and their
 mappings in the node dictionary. It checks if the placement of nodes
@@ -11091,6 +11093,27 @@ substitution strategies, PI placements, and other parameters. This
 wider exploration increases the chance of finding optimal layouts but
 also extends runtime. When a solution is found in any graph, its cost
 is used to prune the remaining graphs.)doc";
+
+static const char *__doc_fiction_graph_oriented_layout_design_params_enable_multithreading =
+R"doc(BETA feature: Flag to enable or disable multithreading during the
+execution of the layout design algorithm.
+
+When set to `true`, the algorithm will utilize multiple threads to
+process different search space graphs in parallel, improving
+performance by distributing the workload across available CPU cores.
+If set to `false`, the algorithm will run sequentially in a single
+thread.
+
+Only recommended for HIGH_EFFORT and HIGHEST_EFFORT modes and complex
+networks (>100 nodes).
+
+Enabling multithreading can significantly speed up the algorithm,
+especially when using multiple search space graphs and dealing with
+complex networks, by concurrently expanding them. However, it may
+introduce additional overhead for thread synchronization and can
+increase memory usage.
+
+Default value: `false`)doc";
 
 static const char *__doc_fiction_graph_oriented_layout_design_params_mode = R"doc(The effort mode used. Defaults to HIGH_EFFORT.)doc";
 
