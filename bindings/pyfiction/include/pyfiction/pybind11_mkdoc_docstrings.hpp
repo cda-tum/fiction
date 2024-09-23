@@ -2563,6 +2563,50 @@ Parameter ``n``:
 Returns:
     Columnar clocking scheme.)doc";
 
+static const char *__doc_fiction_compute_operational_ratio =
+R"doc(Calculates the ratio of operational parameter points surrounding a
+specified parameter point to the total number of parameter points in
+the given parameter space. This function is useful for assessing how
+robust a gate design is to variations in its parameters.
+
+A ratio close to 1 indicates that the gate is robust, meaning it
+functions correctly across a broad range of parameter values. A ratio
+close to 0 indicates that the gate is highly sensitive to parameter
+variations and may fail to operate correctly.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Template parameter ``TT``:
+    Truth table type.
+
+Parameter ``lyt``:
+    The SiDB layout for which to compute the ratio of operational
+    parameter points surrounding a specified parameter point to the
+    total number of parameter points.
+
+Parameter ``spec``:
+    The expected Boolean function of the layout, provided as a multi-
+    output truth table.
+
+Parameter ``params``:
+    Parameters.
+
+Parameter ``pp``:
+    The specific parameter point around which the operational ratio is
+    computed.
+
+Returns:
+    The ratio of operational parameter points to the total number of
+    parameter points in the parameter space.)doc";
+
+static const char *__doc_fiction_compute_operational_ratio_params =
+R"doc(Parameters for computing the ratio of operational parameter points
+around a specified parameter point to the total number of parameter
+points in the given parameter space.)doc";
+
+static const char *__doc_fiction_compute_operational_ratio_params_op_domain_params = R"doc(Parameters for the operational domain computation.)doc";
+
 static const char *__doc_fiction_convert_array =
 R"doc(Converts an array of size `N` and type `T` to an array of size `N` and
 type `ElementType` by applying `static_cast` at compile time.
@@ -6821,6 +6865,11 @@ one pixel wide border around the domain.
 
 Parameter ``samples``:
     Maximum number of random samples to be taken before flood fill.
+
+Parameter ``given_parameter_point``:
+    Optional parameter point in the parameter space. If it lies within
+    the operational region, it is used as a starting point for flood
+    fill.
 
 Returns:
     The (partial) operational domain of the layout.)doc";
@@ -14074,6 +14123,8 @@ operational.)doc";
 static const char *__doc_fiction_operational_domain_stats_num_operational_parameter_combinations = R"doc(Number of parameter combinations, for which the layout is operational.)doc";
 
 static const char *__doc_fiction_operational_domain_stats_num_simulator_invocations = R"doc(Number of simulator invocations.)doc";
+
+static const char *__doc_fiction_operational_domain_stats_num_total_parameter_points = R"doc(Total number of parameter points in the parameter space.)doc";
 
 static const char *__doc_fiction_operational_domain_value_range =
 R"doc(A range of values for a dimension sweep. The range is defined by a
