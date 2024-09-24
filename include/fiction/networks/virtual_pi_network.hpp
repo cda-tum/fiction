@@ -261,9 +261,9 @@ class virtual_pi_network : public Ntk
      * @param fn The function to be applied to each primary input.
      */
     template <typename Fn>
-    void foreach_real_pi(Fn&& fn)
+    void foreach_real_pi(Fn&& fn) const
     {
-        static_cast<Ntk*>(this)->foreach_pi(
+        static_cast<const Ntk*>(this)->foreach_pi(
             [&](const auto& i)
             {
                 if (!is_virtual_pi(i))
