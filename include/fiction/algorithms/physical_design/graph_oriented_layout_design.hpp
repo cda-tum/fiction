@@ -738,8 +738,6 @@ class graph_oriented_layout_design_impl
                         {
                             if (ssg.frontier_flag)
                             {
-                                num_evaluated_paths++;
-
                                 const auto expansion = expand(ssg);
                                 if (expansion.second)
                                 {
@@ -793,8 +791,6 @@ class graph_oriented_layout_design_impl
                 {
                     if (ssg.frontier_flag)
                     {
-                        num_evaluated_paths++;
-
                         const auto expansion = expand(ssg);
                         if (expansion.second)
                         {
@@ -915,69 +911,65 @@ class graph_oriented_layout_design_impl
      */
     std::vector<search_space_graph<ObstrLyt>> ssg_vec;
     /**
-     * Count evaluated paths in the search space graphs.
-     */
-    uint64_t num_evaluated_paths{0ul};
-    /**
      * Keep track of the maximum number of placed nodes.
      */
-    uint64_t max_placed_nodes{0ul};
+    std::atomic<uint64_t> max_placed_nodes{0ul};
     /**
      * The current best solution with respect to area, initialized to the maximum possible value.
      * This value will be updated as better solutions are found.
      */
-    uint64_t best_area_solution = std::numeric_limits<uint64_t>::max();
+    std::atomic<uint64_t> best_area_solution = std::numeric_limits<uint64_t>::max();
     /**
      * The current best solution with respect to the number of wire segments, initialized to the maximum possible value.
      * This value will be updated as better solutions are found.
      */
-    uint64_t best_wire_solution = std::numeric_limits<uint64_t>::max();
+    std::atomic<uint64_t> best_wire_solution = std::numeric_limits<uint64_t>::max();
     /**
      * The current best solution with respect to the number of crossings, initialized to the maximum possible
      * value. This value will be updated as better solutions are found.
      */
-    uint64_t best_crossing_solution = std::numeric_limits<uint64_t>::max();
+    std::atomic<uint64_t> best_crossing_solution = std::numeric_limits<uint64_t>::max();
     /**
      * The current best solution with respect to the area-crossing product (ACP), initialized to the maximum possible
      * value. This value will be updated as better solutions are found.
      */
-    uint64_t best_acp_solution = std::numeric_limits<uint64_t>::max();
+    std::atomic<uint64_t> best_acp_solution = std::numeric_limits<uint64_t>::max();
     /**
      * The current best solution with respect to a custom cost objective, initialized to the maximum possible value.
      * This value will be updated as better solutions are found.
      */
-    uint64_t best_custom_solution = std::numeric_limits<uint64_t>::max();
+    std::atomic<uint64_t> best_custom_solution = std::numeric_limits<uint64_t>::max();
     /**
      * Current best solution w.r.t. area after relocating POs.
      */
-    uint64_t best_optimized_solution{std::numeric_limits<uint64_t>::max()};
+    std::atomic<uint64_t> best_optimized_solution{std::numeric_limits<uint64_t>::max()};
     /**
      * Flag indicating that an initial solution has been found with the layout area as cost objective.
      * When set to `true`, subsequent search space graphs with the layout area as cost objective can be pruned.
      */
-    bool improve_area_solution = false;
+    std::atomic<bool> improve_area_solution = false;
     /**
      * Flag indicating that an initial solution has been found with the number of wire segments as cost objective.
      * When set to `true`, subsequent search space graphs with the number of wire segments as cost objective can be
      * pruned.
      */
-    bool improve_wire_solution = false;
+    std::atomic<bool> improve_wire_solution = false;
     /**
      * Flag indicating that an initial solution has been found with the number of crossings as cost objective.
      * When set to `true`, subsequent search space graphs with the number of crossings as cost objective can be pruned.
      */
-    bool improve_crossing_solution = false;
+    std::atomic<bool> improve_crossing_solution = false;
     /**
      * Flag indicating that an initial solution has been found with the area-crossings product as cost objective.
      * When set to `true`, subsequent search space graphs with the area-crossing product as cost objective can be
      * pruned.
      */
-    bool improve_acp_solution = false;
+    std::atomic<bool> improve_acp_solution = false;
     /**
      * Flag indicating that an initial solution has been found with a custom cost objective.
      * When set to `true`, subsequent search space graphs with a custom cost objective can be pruned.
      */
-    bool improve_custom_solution = false;
+    std::atomic<bool> improve_custom_solution = false;
     /**
      * In high-efficiency mode, only 2 search space graphs are used
      */
@@ -1547,7 +1539,10 @@ class graph_oriented_layout_design_impl
 
         // check if solution was found and update max_placed_nodes
         const auto found_solution = (place_info.current_node == ssg.nodes_to_place.size());
-        max_placed_nodes          = std::max(place_info.current_node, max_placed_nodes);
+        if (place_info.current_node > max_placed_nodes)
+        {
+            max_placed_nodes = place_info.current_node;
+        }
 
         return found_solution;
     }
@@ -1572,7 +1567,6 @@ class graph_oriented_layout_design_impl
 
         // output the elapsed time
         std::cout << fmt::format("[i]   Time taken:       {} s {} ms {} µs\n", sec, ms, us);
-        std::cout << fmt::format("[i]   Evaluated paths:  {}\n", num_evaluated_paths);
         std::cout << fmt::format("[i]   Layout dimension: {} × {} = {}\n", lyt.x() + 1, lyt.y() + 1, lyt.area());
         std::cout << fmt::format("[i]   #Wires: {}\n", lyt.num_wires() - lyt.num_pis() - lyt.num_pos());
         std::cout << fmt::format("[i]   #Crossings: {}\n", lyt.num_crossings());
@@ -1735,6 +1729,8 @@ class graph_oriented_layout_design_impl
             uint64_t cost         = 0ul;
             uint64_t desired_cost = 0ul;
 
+            if (found_solution)
+            {}
             bool     improve_solution = improve_custom_solution;
             uint64_t best_solution    = best_custom_solution;
 
