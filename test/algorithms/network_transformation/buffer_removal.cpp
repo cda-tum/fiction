@@ -9,7 +9,6 @@
 #include "fiction/algorithms/network_transformation/node_duplication_planarization.hpp"
 #include "fiction/algorithms/verification/virtual_miter.hpp"
 #include "fiction/networks/technology_network.hpp"
-#include "fiction/utils/debug/network_writer.hpp"
 
 #include <fiction/algorithms/network_transformation/buffer_removal.hpp>
 

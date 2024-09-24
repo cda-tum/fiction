@@ -23,43 +23,46 @@
 namespace fiction
 {
 
-template<class NtkDest, class NtkSrc>
-std::pair<NtkDest, mockturtle::node_map<mockturtle::signal<NtkDest>, NtkSrc>> initialize_copy_network_v( NtkSrc const& src )
+/**
+ * Initializes a copy of the source network like in mockturtle::initialize_copy_network. Additionally, this modification
+ * supports virtual PIs created via `virtual_pi_network.
+ *
+ * @tparam NtkDest The type of the destination network.
+ * @tparam NtkSrc The type of the source network.
+ * @param src The source network to be copied.
+ * @return A pair of the destination network and the node map.
+ */
+template <class NtkDest, class NtkSrc>
+std::pair<NtkDest, mockturtle::node_map<mockturtle::signal<NtkDest>, NtkSrc>>
+initialize_copy_network_v(NtkSrc const& src)
 {
-    static_assert( mockturtle::is_network_type_v<NtkDest>, "NtkDest is not a network type" );
-    static_assert( mockturtle::is_network_type_v<NtkSrc>, "NtkSrc is not a network type" );
+    static_assert(mockturtle::is_network_type_v<NtkDest>, "NtkDest is not a network type");
+    static_assert(mockturtle::is_network_type_v<NtkSrc>, "NtkSrc is not a network type");
 
-    static_assert( mockturtle::has_get_constant_v<NtkDest>, "NtkDest does not implement the get_constant method" );
-    static_assert( mockturtle::has_create_pi_v<NtkDest>, "NtkDest does not implement the create_pi method" );
-    static_assert( mockturtle::has_get_constant_v<NtkSrc>, "NtkSrc does not implement the get_constant method" );
-    static_assert( mockturtle::has_get_node_v<NtkSrc>, "NtkSrc does not implement the get_node method" );
-    static_assert( mockturtle::has_foreach_pi_v<NtkSrc>, "NtkSrc does not implement the foreach_pi method" );
+    static_assert(mockturtle::has_get_constant_v<NtkDest>, "NtkDest does not implement the get_constant method");
+    static_assert(mockturtle::has_create_pi_v<NtkDest>, "NtkDest does not implement the create_pi method");
+    static_assert(mockturtle::has_get_constant_v<NtkSrc>, "NtkSrc does not implement the get_constant method");
+    static_assert(mockturtle::has_get_node_v<NtkSrc>, "NtkSrc does not implement the get_node method");
+    static_assert(mockturtle::has_foreach_pi_v<NtkSrc>, "NtkSrc does not implement the foreach_pi method");
 
-    mockturtle::node_map<mockturtle::signal<NtkDest>, NtkSrc> old2new( src );
-    NtkDest dest;
-    old2new[src.get_constant( false )] = dest.get_constant( false );
-    if ( src.get_node( src.get_constant( true ) ) != src.get_node( src.get_constant( false ) ) )
+    mockturtle::node_map<mockturtle::signal<NtkDest>, NtkSrc> old2new(src);
+    NtkDest                                                   dest;
+    old2new[src.get_constant(false)] = dest.get_constant(false);
+    if (src.get_node(src.get_constant(true)) != src.get_node(src.get_constant(false)))
     {
-        old2new[src.get_constant( true )] = dest.get_constant( true );
+        old2new[src.get_constant(true)] = dest.get_constant(true);
     }
     if constexpr (fiction::has_foreach_real_pi_v<NtkSrc>)
     {
-        src.foreach_real_pi( [&]( auto const& n ) {
-                           old2new[n] = dest.create_pi();
-                       } );
-        src.foreach_virtual_pi( [&]( auto const& n ) {
-                                old2new[n] = dest.create_virtual_pi(src.get_real_pi(n));
-                            } );
+        src.foreach_real_pi([&](auto const& n) { old2new[n] = dest.create_pi(); });
+        src.foreach_virtual_pi([&](auto const& n) { old2new[n] = dest.create_virtual_pi(src.get_real_pi(n)); });
     }
     else
     {
-        src.foreach_pi( [&]( auto const& n ) {
-                           old2new[n] = dest.create_pi();
-                       } );
+        src.foreach_pi([&](auto const& n) { old2new[n] = dest.create_pi(); });
     }
 
-
-    return { dest, old2new };
+    return {dest, old2new};
 }
 
 namespace detail
@@ -85,7 +88,7 @@ class remove_buffer_impl
             const auto fn         = fc.fanin_nodes[0];
             const auto tgt_signal = old2new[fn];
 
-            // Recursive call: Traverse upstream if the fanin node is also a buffer
+            // Recursive call: Traverse if the fanin node is also a buffer
             return skip_buffer_chain_rec(fn, tgt_signal, old2new);
         }
 
@@ -133,7 +136,7 @@ class remove_buffer_impl
                 {
                     return true;
                 }
-
+                // the rest of the code is taken from `fiction::convert_network`.
                 auto children = gather_fanin_signals(g);
 
 #if (PROGRESS_BARS)
@@ -239,6 +242,13 @@ class remove_buffer_impl
 };
 }  // namespace detail
 
+/**
+ * Checks if a given logic network contains a buffer gate.
+ *
+ * @tparam Ntk The type of the logic network.
+ * @param ntk The logic network.
+ * @return true if the network contains a buffer gate, false otherwise.
+ */
 template <typename Ntk>
 bool constains_buffer(Ntk ntk)
 {
@@ -255,17 +265,15 @@ bool constains_buffer(Ntk ntk)
 }
 
 /**
- * Converts a logic network into an equivalent one of another type. Thereby, this function is very similar to
- * `mockturtle::cleanup_dangling`. However, it supports real buffer nodes used for fanouts and path balancing in
- * fiction.
+ * Removes buffer nodes in a network. The idea is the same as in mockturtle::remove_buffer_chains()`, but node deletion
+ * is not supported for `buffered_klut_networks`, and therefore, an approach similar to `fiction::convert_network` is
+ * chosen.
  *
- * @note If `NtkDest` and `NtkSrc` are of the same type, this function returns `ntk` cleaned using
- * `mockturtle::cleanup_dangling`.
+ * @note Fanout nodes are also flagged with `is_buf` in fiction, but not removed by this class.
  *
- * @tparam NtkDest Type of the returned logic network.
- * @tparam NtkSrc Type of the input logic network.
- * @param ntk The input logic network.
- * @return A logic network of type `NtkDest` that is logically equivalent to `ntk`.
+ * @tparam Ntk The network type.
+ * @param ntk The original network.
+ * @return The network with buffers removed.
  */
 template <typename Ntk>
 Ntk remove_buffer(const Ntk& ntk)
