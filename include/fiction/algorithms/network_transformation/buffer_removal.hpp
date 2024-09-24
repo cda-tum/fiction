@@ -23,43 +23,37 @@
 namespace fiction
 {
 
-template<class NtkDest, class NtkSrc>
-std::pair<NtkDest, mockturtle::node_map<mockturtle::signal<NtkDest>, NtkSrc>> initialize_copy_network_v( NtkSrc const& src )
+template <class NtkDest, class NtkSrc>
+std::pair<NtkDest, mockturtle::node_map<mockturtle::signal<NtkDest>, NtkSrc>>
+initialize_copy_network_v(NtkSrc const& src)
 {
-    static_assert( mockturtle::is_network_type_v<NtkDest>, "NtkDest is not a network type" );
-    static_assert( mockturtle::is_network_type_v<NtkSrc>, "NtkSrc is not a network type" );
+    static_assert(mockturtle::is_network_type_v<NtkDest>, "NtkDest is not a network type");
+    static_assert(mockturtle::is_network_type_v<NtkSrc>, "NtkSrc is not a network type");
 
-    static_assert( mockturtle::has_get_constant_v<NtkDest>, "NtkDest does not implement the get_constant method" );
-    static_assert( mockturtle::has_create_pi_v<NtkDest>, "NtkDest does not implement the create_pi method" );
-    static_assert( mockturtle::has_get_constant_v<NtkSrc>, "NtkSrc does not implement the get_constant method" );
-    static_assert( mockturtle::has_get_node_v<NtkSrc>, "NtkSrc does not implement the get_node method" );
-    static_assert( mockturtle::has_foreach_pi_v<NtkSrc>, "NtkSrc does not implement the foreach_pi method" );
+    static_assert(mockturtle::has_get_constant_v<NtkDest>, "NtkDest does not implement the get_constant method");
+    static_assert(mockturtle::has_create_pi_v<NtkDest>, "NtkDest does not implement the create_pi method");
+    static_assert(mockturtle::has_get_constant_v<NtkSrc>, "NtkSrc does not implement the get_constant method");
+    static_assert(mockturtle::has_get_node_v<NtkSrc>, "NtkSrc does not implement the get_node method");
+    static_assert(mockturtle::has_foreach_pi_v<NtkSrc>, "NtkSrc does not implement the foreach_pi method");
 
-    mockturtle::node_map<mockturtle::signal<NtkDest>, NtkSrc> old2new( src );
-    NtkDest dest;
-    old2new[src.get_constant( false )] = dest.get_constant( false );
-    if ( src.get_node( src.get_constant( true ) ) != src.get_node( src.get_constant( false ) ) )
+    mockturtle::node_map<mockturtle::signal<NtkDest>, NtkSrc> old2new(src);
+    NtkDest                                                   dest;
+    old2new[src.get_constant(false)] = dest.get_constant(false);
+    if (src.get_node(src.get_constant(true)) != src.get_node(src.get_constant(false)))
     {
-        old2new[src.get_constant( true )] = dest.get_constant( true );
+        old2new[src.get_constant(true)] = dest.get_constant(true);
     }
     if constexpr (fiction::has_foreach_real_pi_v<NtkSrc>)
     {
-        src.foreach_real_pi( [&]( auto const& n ) {
-                           old2new[n] = dest.create_pi();
-                       } );
-        src.foreach_virtual_pi( [&]( auto const& n ) {
-                                old2new[n] = dest.create_virtual_pi(src.get_real_pi(n));
-                            } );
+        src.foreach_real_pi([&](auto const& n) { old2new[n] = dest.create_pi(); });
+        src.foreach_virtual_pi([&](auto const& n) { old2new[n] = dest.create_virtual_pi(src.get_real_pi(n)); });
     }
     else
     {
-        src.foreach_pi( [&]( auto const& n ) {
-                           old2new[n] = dest.create_pi();
-                       } );
+        src.foreach_pi([&](auto const& n) { old2new[n] = dest.create_pi(); });
     }
 
-
-    return { dest, old2new };
+    return {dest, old2new};
 }
 
 namespace detail
