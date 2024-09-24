@@ -6094,8 +6094,6 @@ static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_max_pl
 
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_ntk = R"doc(The network to be placed and routed.)doc";
 
-static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_num_evaluated_paths = R"doc(Count evaluated paths in the search space graphs.)doc";
-
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_num_search_space_graphs = R"doc(Number of search space graphs.)doc";
 
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_num_search_space_graphs_high_efficiency = R"doc(In high-efficiency mode, only 2 search space graphs are used)doc";
