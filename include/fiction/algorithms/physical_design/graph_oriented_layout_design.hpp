@@ -1730,8 +1730,6 @@ class graph_oriented_layout_design_impl
             uint64_t cost         = 0ul;
             uint64_t desired_cost = 0ul;
 
-            if (found_solution)
-            {}
             bool     improve_solution = improve_custom_solution;
             uint64_t best_solution    = best_custom_solution;
 
