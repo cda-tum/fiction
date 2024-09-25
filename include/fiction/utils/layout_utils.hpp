@@ -16,8 +16,8 @@
 #include <algorithm>
 #include <cassert>
 #include <cstdint>
-#include <cstdlib>
 #include <cstdio>
+#include <cstdlib>
 #include <limits>
 #include <random>
 #include <type_traits>

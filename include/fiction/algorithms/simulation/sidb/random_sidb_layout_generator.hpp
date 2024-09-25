@@ -152,7 +152,6 @@ Lyt generate_random_sidb_layout(const Lyt&                                      
         return generate_random_sidb_layout(lyt_skeleton, params);
     }
 
-
     if (lyt.num_cells() == number_of_sidbs_of_final_layout)
     {
         return lyt;
