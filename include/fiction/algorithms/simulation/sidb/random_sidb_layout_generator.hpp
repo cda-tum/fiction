@@ -98,8 +98,6 @@ Lyt generate_random_sidb_layout(const Lyt&                                      
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
-    auto lyt = lyt_skeleton.clone();
-
     std::unordered_set<typename Lyt::coordinate> sidbs_affected_by_defects = {};
 
     if constexpr (has_get_sidb_defect_v<Lyt>)
@@ -107,8 +105,9 @@ Lyt generate_random_sidb_layout(const Lyt&                                      
         sidbs_affected_by_defects = lyt_skeleton.all_affected_sidbs(std::make_pair(0, 0));
     }
 
-    const uint64_t number_of_sidbs_of_final_layout = lyt.num_cells() + params.number_of_sidbs;
+    const uint64_t number_of_sidbs_of_final_layout = lyt_skeleton.num_cells() + params.number_of_sidbs;
 
+    Lyt lyt{lyt_skeleton.clone()};
     // counts the attempts to place the given number of SiDBs
     uint64_t attempt_counter = 0;
 
@@ -135,7 +134,7 @@ Lyt generate_random_sidb_layout(const Lyt&                                      
         // the SiDB is added to the layout
         if (!random_cell_is_identical_wih_defect && !next_to_neutral_defect)
         {
-            lyt.assign_cell_type(random_coord, technology<Lyt>::cell_type::NORMAL);
+            lyt.assign_cell_type(random_coord, technology<Lyt>::cell_type::LOGIC);
 
             if (params.positive_sidbs ==
                     generate_random_sidb_layout_params<coordinate<Lyt>>::positive_charges::FORBIDDEN &&
@@ -153,8 +152,11 @@ Lyt generate_random_sidb_layout(const Lyt&                                      
         return generate_random_sidb_layout(lyt_skeleton, params);
     }
 
-    return lyt;
-}
+
+    if (lyt.num_cells() == number_of_sidbs_of_final_layout)
+    {
+        return lyt;
+    }
 
     // if not all SiDBs can be placed, the originally given skeleton layout is returned
     return lyt_skeleton;

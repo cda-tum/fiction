@@ -281,9 +281,10 @@ class design_sidb_gates_impl
     {
         std::vector<Lyt> randomly_designed_gate_layouts = {};
 
+        // Allow positive charges here, as a layout that displays positive charges without inputs may not exhibit them once inputs are applied.
         const generate_random_sidb_layout_params<cell<Lyt>> parameter{
             params.canvas, params.number_of_sidbs,
-            generate_random_sidb_layout_params<cell<Lyt>>::positive_charges::FORBIDDEN};
+            generate_random_sidb_layout_params<cell<Lyt>>::positive_charges::ALLOWED};
 
         std::vector<std::thread> threads{};
         threads.reserve(num_threads);
