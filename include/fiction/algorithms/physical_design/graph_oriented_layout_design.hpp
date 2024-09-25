@@ -27,6 +27,7 @@
 #include <mockturtle/views/immutable_view.hpp>
 
 #include <array>
+#include <atomic>
 #include <cassert>
 #include <chrono>
 #include <cstddef>

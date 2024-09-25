@@ -63,7 +63,7 @@ TEST_CASE("Benchmark Graph-Oriented Layout Design", "[benchmark]")
     };
 }
 
-//  Mac M1, Sonoma 14.6.1, Apple clang version 15.0.0 (23.09.24)
+//  Mac M1, Sonoma 14.6.1, Apple clang version 15.0.0 (25.09.24)
 // -------------------------------------------------------------------------------
 // Benchmark Graph-Oriented Layout Design
 // -------------------------------------------------------------------------------
@@ -76,28 +76,28 @@ TEST_CASE("Benchmark Graph-Oriented Layout Design", "[benchmark]")
 // -------------------------------------------------------------------------------
 // graph_oriented_layout_design: high efficiency
 //
-//                                         149.819 ms    148.027 ms    151.769 ms
-//                                         9.54832 ms    8.51383 ms    10.8984 ms
+//                                         148.492 ms    146.396 ms    150.925 ms
+//                                         11.4994 ms    9.88837 ms    13.6356 ms
 //
 // graph_oriented_layout_design: high effort
 //
-//                                          1.29868 s     1.26809 s      1.3326 s
-//                                         164.453 ms    145.119 ms    192.831 ms
+//                                          1.23503 s     1.20168 s     1.27147 s
+//                                         178.104 ms    159.325 ms    202.161 ms
 //
 // graph_oriented_layout_design: highest effort
 //
-//                                          3.03282 s     2.90738 s     3.16135 s
-//                                         644.494 ms    580.832 ms     717.08 ms
+//                                           3.2585 s      3.0587 s     3.47545 s
+//                                          1.06581 s    963.829 ms     1.19622 s
 //
 // graph_oriented_layout_design: singlethreading
 //
-//                                          2.44054 s     2.42026 s     2.46167 s
-//                                         105.869 ms    94.1699 ms    121.157 ms
+//                                          2.49857 s     2.46866 s     2.52899 s
+//                                         152.931 ms     137.96 ms     170.69 ms
 //
 // graph_oriented_layout_design: multithreading
 //
-//                                          666.48 ms    654.382 ms    681.687 ms
-//                                         69.0098 ms    56.0641 ms     86.388 ms
+//                                         601.433 ms    593.498 ms    609.969 ms
+//                                         42.0223 ms    36.1444 ms    50.4232 ms
 //
 //
 // ===============================================================================
