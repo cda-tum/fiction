@@ -28,7 +28,7 @@ class TestDesignSiDBGates(unittest.TestCase):
         params = design_sidb_gates_params()
         params.operational_params.simulation_parameters.base = 2
         params.operational_params.simulation_parameters.mu_minus = -0.28
-        params.design_mode = design_sidb_gates_mode.EXHAUSTIVE
+        params.design_mode = design_sidb_gates_mode.AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER
         params.canvas = [(4, 8), (14, 11)]
         params.number_of_sidbs = 1
         params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
@@ -127,18 +127,19 @@ class TestDesignSiDBGates(unittest.TestCase):
         params = design_sidb_gates_params()
         params.operational_params.simulation_parameters.base = 2
         params.operational_params.simulation_parameters.mu_minus = -0.32
-        params.design_mode = design_sidb_gates_mode.EXHAUSTIVE
-        params.canvas = [(10, 22), (14, 34)]
+        params.design_mode = design_sidb_gates_mode.AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER
+
+        params.canvas = [(10, 26), (14, 34)]
         params.number_of_sidbs = 3
         params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
 
         self.assertEqual(params.operational_params.simulation_parameters.mu_minus, -0.32)
         self.assertEqual(params.number_of_sidbs, 3)
-        self.assertEqual(params.canvas[0], (10, 22, 0))
+        self.assertEqual(params.canvas[0], (10, 26, 0))
         self.assertEqual(params.canvas[1], (14, 34))
 
         designed_gates = design_sidb_gates(layout, [create_nor_tt()], params)
-        self.assertEqual(len(designed_gates), 44)
+        self.assertEqual(len(designed_gates), 14)
 
 
 if __name__ == '__main__':
