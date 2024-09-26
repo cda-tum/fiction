@@ -151,7 +151,7 @@ struct bdl_pair
 struct detect_bdl_pairs_params
 {
     /**
-     * The minimum distance between two dots to be considered a BDL pair. This is useful to prevent, e.g., SiDBs of
+     * The minimum distance between two SiDBs to be considered a BDL pair. This is useful to prevent, e.g., SiDBs of
      * atomic wires to be considered BDL pairs. (unit: nm).
      */
     double minimum_distance{0.75};
