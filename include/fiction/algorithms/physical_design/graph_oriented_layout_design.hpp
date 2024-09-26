@@ -727,58 +727,60 @@ class graph_oriented_layout_design_impl
             if (ps.enable_multithreading)
             {
                 // mutex to protect shared resources (if necessary)
-                std::mutex                                   mtx;
+                std::mutex                                   update_best_layout_mutex{};
                 std::vector<std::future<std::optional<Lyt>>> futures;
+                futures.reserve(ssg_vec.size());
 
                 // process `ssg_vec` in parallel using std::async
                 for (auto& ssg : ssg_vec)
                 {
-                    futures.emplace_back(std::async(
-                        std::launch::async,
-                        [&]() -> std::optional<Lyt>  // return std::optional<layout>
-                        {
-                            if (ssg.frontier_flag)
-                            {
-                                const auto expansion = expand(ssg);
-                                if (expansion.second)
-                                {
-                                    const std::lock_guard<std::mutex> lock(mtx);  // protect access to shared data
-                                    best_lyt = *expansion.second;
-                                    restore_names(ssg.network, best_lyt);
+                    futures.emplace_back(
+                        std::async(std::launch::async,
+                                   [&]() -> std::optional<Lyt>  // return std::optional<layout>
+                                   {
+                                       if (ssg.frontier_flag)
+                                       {
+                                           const auto expansion = expand(ssg);
+                                           if (expansion.second)
+                                           {
+                                               const std::lock_guard<std::mutex> lock(
+                                                   update_best_layout_mutex);  // protect access to shared data
+                                               best_lyt = *expansion.second;
+                                               restore_names(ssg.network, best_lyt);
 
-                                    // statistical information
-                                    pst.x_size        = best_lyt.x() + 1;
-                                    pst.y_size        = best_lyt.y() + 1;
-                                    pst.num_gates     = best_lyt.num_gates();
-                                    pst.num_wires     = best_lyt.num_wires();
-                                    pst.num_crossings = best_lyt.num_crossings();
+                                               // statistical information
+                                               pst.x_size        = best_lyt.x() + 1;
+                                               pst.y_size        = best_lyt.y() + 1;
+                                               pst.num_gates     = best_lyt.num_gates();
+                                               pst.num_wires     = best_lyt.num_wires();
+                                               pst.num_crossings = best_lyt.num_crossings();
 
-                                    if (ps.return_first)
-                                    {
-                                        return best_lyt;  // return the layout if ps.return_first is true
-                                    }
-                                }
+                                               if (ps.return_first)
+                                               {
+                                                   return best_lyt;  // return the layout if ps.return_first is true
+                                               }
+                                           }
 
-                                // update costs and frontier
-                                for (const auto& [next, cost] : expansion.first)
-                                {
-                                    if (ssg.cost_so_far.find(next) == ssg.cost_so_far.cend() ||
-                                        cost < ssg.cost_so_far[next])
-                                    {
-                                        ssg.cost_so_far[next] = cost;
-                                        double priority       = cost;
-                                        ssg.frontier.put(next, priority);
-                                    }
-                                }
-                            }
-                            return std::nullopt;  // return no layout found
-                        }));
+                                           // update costs and frontier
+                                           for (const auto& [next, cost] : expansion.first)
+                                           {
+                                               if (ssg.cost_so_far.find(next) == ssg.cost_so_far.cend() ||
+                                                   cost < ssg.cost_so_far[next])
+                                               {
+                                                   ssg.cost_so_far[next] = cost;
+                                                   double priority       = cost;
+                                                   ssg.frontier.put(next, priority);
+                                               }
+                                           }
+                                       }
+                                       return std::nullopt;  // return no layout found
+                                   }));
                 }
 
                 // Check the futures for the result
                 for (auto& future : futures)
                 {
-                    auto result = future.get();  // blocking wait to get the result from the future
+                    const auto result = future.get();  // blocking wait to get the result from the future
                     if (result)
                     {
                         return *result;  // return the first found layout if ps.return_first is true
