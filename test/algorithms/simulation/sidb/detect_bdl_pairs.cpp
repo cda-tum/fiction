@@ -333,7 +333,7 @@ TEST_CASE("Bestagon fan-out BDL detection", "[detect-bdl-pairs]")
 
     const sidb_100_cell_clk_lyt_siqad lat{lyt};
 
-    SECTION("Analyze different BDL pair types")
+    SECTION("Detect different BDL pair types")
     {
         const auto input_bdl_pairs  = detect_bdl_pairs(lat, sidb_technology::cell_type::INPUT);
         const auto output_bdl_pairs = detect_bdl_pairs(lat, sidb_technology::cell_type::OUTPUT);
