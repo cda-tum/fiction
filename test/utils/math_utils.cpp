@@ -6,7 +6,7 @@
 
 #include <fiction/utils/math_utils.hpp>
 
-#include <cstddef>
+#include <cstdint>
 #include <string>
 #include <vector>
 
