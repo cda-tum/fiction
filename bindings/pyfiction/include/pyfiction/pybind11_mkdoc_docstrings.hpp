@@ -8900,7 +8900,7 @@ apart and to improve performance of the matching algorithm. (unit:
 nm).)doc";
 
 static const char *__doc_fiction_detect_bdl_pairs_params_minimum_distance =
-R"doc(The minimum distance between two dots to be considered a BDL pair.
+R"doc(The minimum distance between two SiDBs to be considered a BDL pair.
 This is useful to prevent, e.g., SiDBs of atomic wires to be
 considered BDL pairs. (unit: nm).)doc";
 
