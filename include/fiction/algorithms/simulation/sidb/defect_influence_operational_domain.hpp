@@ -24,6 +24,7 @@
 #include <optional>
 #include <random>
 #include <vector>
+#include <future>
 
 namespace fiction
 {
@@ -104,17 +105,38 @@ class defect_influence_operational_domain_impl
     [[nodiscard]] defect_influence_operational_domain<Lyt> grid_search(const std::size_t& step_size) noexcept
     {
         mockturtle::stopwatch stop{stats.time_total};
-        const auto            all_possible_defect_positions = all_coordinates_in_spanned_area(nw_cell, se_cell);
+        const auto all_possible_defect_positions = all_coordinates_in_spanned_area(nw_cell, se_cell);
+        const std::size_t num_positions = all_possible_defect_positions.size();
 
-        // Iterate through all possible defect positions, but make sure that the position is distributed on a grid
-        // defined by `step_size'.
-        for (std::size_t i = 0; i < all_possible_defect_positions.size(); i += step_size)
-        {
-            if (static_cast<std::size_t>(std::abs(all_possible_defect_positions[i].x)) % step_size == 0 &&
-                static_cast<std::size_t>(std::abs(all_possible_defect_positions[i].y)) % step_size == 0)
+        const auto num_threads = std::thread::hardware_concurrency(); // Get the number of hardware threads
+
+        // Determine the chunk size (each thread will process a chunk of positions)
+        std::size_t chunk_size = (num_positions + num_threads - 1) / num_threads; // Distribute positions evenly
+
+        // Define a lambda function that processes a chunk of defect positions
+        auto process_chunk = [&](std::size_t start, std::size_t end) {
+            for (std::size_t i = start; i < end; i += step_size)
             {
-                is_defect_position_operational(all_possible_defect_positions[i]);
+                if (static_cast<std::size_t>(std::abs(all_possible_defect_positions[i].x)) % step_size == 0 &&
+                    static_cast<std::size_t>(std::abs(all_possible_defect_positions[i].y)) % step_size == 0)
+                {
+                    is_defect_position_operational(all_possible_defect_positions[i]);
+                }
             }
+        };
+
+        // Launch multiple threads to process the chunks
+        std::vector<std::future<void>> futures;
+        for (std::size_t start = 0; start < num_positions; start += chunk_size)
+        {
+            std::size_t end = std::min(start + chunk_size, num_positions); // Make sure the end doesn't exceed the array size
+            futures.emplace_back(std::async(std::launch::async, process_chunk, start, end));
+        }
+
+        // Wait for all threads to complete
+        for (auto& future : futures)
+        {
+            future.get(); // Ensure each thread finishes
         }
 
         log_stats();
@@ -197,7 +219,9 @@ class defect_influence_operational_domain_impl
                                             current_neighborhood.front() :
                                             next_clockwise_point(current_neighborhood, backtrack_point);
 
-            bool contour_goes_around_layout = false;
+            bool contour_goes_around_se_layout_corner = true;
+            bool contour_goes_around_ne_layout_corner = true;
+            bool contour_goes_around_nw_layout_corner = true;
 
             uint64_t counter = 0;
             while (next_point != contour_starting_point && counter < 100000)
@@ -206,7 +230,17 @@ class defect_influence_operational_domain_impl
                 // check if the contour goes around the layout.
                 if (next_point.x >= se_bb_layout.x && next_point.y >= se_bb_layout.y)
                 {
-                    contour_goes_around_layout = true;
+                    contour_goes_around_se_layout_corner = true;
+                }
+
+                if (next_point.x >= se_bb_layout.x && next_point.y <= nw_bb_layout.y)
+                {
+                    contour_goes_around_ne_layout_corner = true;
+                }
+
+                if (next_point.x <= nw_bb_layout.x && next_point.y <= nw_bb_layout.y)
+                {
+                    contour_goes_around_nw_layout_corner = true;
                 }
 
                 assert(layout.num_defects() == 0 && "more than one defect");
@@ -226,15 +260,17 @@ class defect_influence_operational_domain_impl
                 counter++;
             }
             number_of_random_start_positions++;
-            if (!contour_goes_around_layout)
-            {
-                continue;
-            }
-            log_stats();
-            return defect_operational_domain;
+//            if (!contour_goes_around_se_layout_corner || !contour_goes_around_ne_layout_corner || !contour_goes_around_nw_layout_corner)
+//            {
+//                if (number_of_random_start_positions == samples)
+//                {
+//                    stats = defect_influence_operational_domain_stats{};
+//                    defect_operational_domain = defect_influence_operational_domain<Lyt>{}; // return an empty domain
+//                }
+//                continue;
+//            }
         }
         log_stats();
-
         return defect_operational_domain;
     }
 
@@ -275,7 +311,7 @@ class defect_influence_operational_domain_impl
         std::random_device rd;
         std::mt19937       gen(rd());
         // Create a distribution for generating random numbers within the specified range
-        std::uniform_int_distribution<decltype(nw_bb_layout.y)> dist(nw_bb_layout.y, se_bb_layout.y);
+        std::uniform_int_distribution<decltype(nw_cell.y)> dist(nw_cell.y, se_cell.y);
         starting_point.y = dist(gen);
         layout.assign_sidb_defect(starting_point, params.defect_influence_params.defect);
         // determine the operational status
@@ -374,7 +410,7 @@ class defect_influence_operational_domain_impl
         previous_defect_position = starting_defect_position;
 
         // move towards the left border of the parameter range
-        for (auto x = starting_defect_position.x; x <= se_bb_layout.x; x++)
+        for (auto x = starting_defect_position.x; x <= se_cell.x; x++)
         {
             previous_defect_position = current_defect_position;
             current_defect_position  = {x, starting_defect_position.y};

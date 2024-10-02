@@ -23,16 +23,12 @@ using namespace fiction;
 
 int main()
 {
-    experiments::experiment<std::string, std::size_t, int64_t, int64_t, double, std::size_t, double, std::size_t, double,
-                            std::size_t>
+    experiments::experiment<std::string, std::size_t, std::size_t, std::size_t, std::size_t>
         simulation_exp{
-            "Benchmark",        "Gate Name",        "Num SiDBs",
-            "x_coord",          "y_coord",          "distance_grid_search",
-            "#samples_grid",    "distance_random",  "#samples_random",
-            "distance_contour", "#samples_contour",
+            "Benchmark",        "Gate Name",        "instance count",   "#samples_grid",          "#sample_contour",          "#unequal"
         };
 
-    static const std::string folder        = fmt::format("{}bestagon_gates_type_tags/", EXPERIMENTS_PATH);
+    static const std::string folder        = fmt::format("{}defect_avoidance_distance/fom_data/sqd/", EXPERIMENTS_PATH);
     static const std::string output_folder = fmt::format("{}defect_avoidance_distance/plots/", EXPERIMENTS_PATH);
 
     static const std::array<std::pair<std::string, std::vector<tt>>, 10> gates = {
@@ -42,10 +38,10 @@ int main()
         std::make_pair("xnor", std::vector<tt>{create_xnor_tt()}),
         std::make_pair("xor", std::vector<tt>{create_xor_tt()}),
         std::make_pair("or", std::vector<tt>{create_or_tt()}),
-        std::make_pair("wire", std::vector<tt>{create_id_tt()}),
-        std::make_pair("wire_diag", std::vector<tt>{create_id_tt()}),
-        std::make_pair("inv", std::vector<tt>{create_not_tt()}),
-        std::make_pair("inv_diag", std::vector<tt>{create_not_tt()})};
+        std::make_pair("ge", std::vector<tt>{create_ge_tt()}),
+        std::make_pair("gt", std::vector<tt>{create_gt_tt()}),
+        std::make_pair("le", std::vector<tt>{create_le_tt()}),
+        std::make_pair("lt", std::vector<tt>{create_lt_tt()})};
 
     const auto                  sidb_sim = sidb_simulation_parameters{2, -0.32, 5.6, 5.0};
     const is_operational_params is_op_params{sidb_sim};
@@ -60,16 +56,20 @@ int main()
     defect_params.defect_influence_params = max_defect_params;
     defect_params.operational_params      = is_op_params;
 
-    std::size_t total_number_samples = 0;
-
     for (const auto& [gate, truth_table] : gates)
     {
         // Create gate directory for plots
         std::string gate_folder = fmt::format("{}{}/", output_folder, gate);
         std::filesystem::create_directories(gate_folder);
 
+        std::size_t gate_counter = 0;
+        std::size_t unequal_counter = 0;
+        std::size_t sample_grid_counter = 0;
+        std::size_t sample_contour_counter = 0;
+
         for (const auto& file : std::filesystem::directory_iterator(fmt::format("{}{}", folder, gate)))
         {
+            gate_counter++;
             const auto layout = read_sqd_layout<sidb_100_cell_clk_lyt_cube>(file.path().string());
 
             defect_influence_operational_domain_stats grid_stats{};
@@ -104,15 +104,17 @@ int main()
             const auto csv_path_contour = fmt::format("{}{}_contour.csv", gate_folder, gate);
             write_defect_influence_operational_domain(op_defect_contour, csv_path_contour);
 
-            // Log the simulation results
-            simulation_exp(gate, layout.num_cells(), avoidance_grid.max_distance_postion_of_non_operational_defect.x,
-                           avoidance_grid.max_distance_postion_of_non_operational_defect.y,
-                           avoidance_grid.max_min_distance, grid_stats.num_evaluated_defect_positions,
-                           avoidance_random.max_min_distance, random_stats.num_evaluated_defect_positions,
-                           avoidance_contour.max_min_distance, contour_stats.num_evaluated_defect_positions);
-            simulation_exp.save();
-            simulation_exp.table();
+            sample_grid_counter += grid_stats.num_evaluated_defect_positions;
+            sample_contour_counter += contour_stats.num_evaluated_defect_positions;
+
+            if (std::abs(avoidance_grid.max_min_distance - avoidance_contour.max_min_distance) > 0.1)
+            {  // Log the simulation results
+               unequal_counter++;
+            }
         }
+        simulation_exp(gate, gate_counter, sample_grid_counter, sample_contour_counter, unequal_counter);
+        simulation_exp.save();
+        simulation_exp.table();
     }
     return EXIT_SUCCESS;
 }
