@@ -50,7 +50,7 @@ int main()
     max_defect_params.defect =
         sidb_defect{fiction::sidb_defect_type::UNKNOWN, -1, is_op_params.simulation_parameters.epsilon_r,
                     is_op_params.simulation_parameters.lambda_tf};
-    max_defect_params.additional_scanning_area = {50, 50};
+    max_defect_params.additional_scanning_area = {100, 100};
 
     defect_influence_operational_domain_params defect_params{};
     defect_params.defect_influence_params = max_defect_params;
