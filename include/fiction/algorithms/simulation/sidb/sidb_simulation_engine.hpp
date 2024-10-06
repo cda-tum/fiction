@@ -5,6 +5,10 @@
 #ifndef FICTION_SIDB_SIMULATION_ENGINE_HPP
 #define FICTION_SIDB_SIMULATION_ENGINE_HPP
 
+#include <phmap.h>
+
+#include <algorithm>
+#include <optional>
 #include <string>
 #include <type_traits>
 
@@ -72,7 +76,7 @@ enum class heuristic_sidb_simulation_engine
 /**
  * Returns the name of the given simulation engine.
  *
- * @tparam EngineType The type of the SiDB engine (exhaustive/heuristic/general).
+ * @tparam EngineType The type of the SiDB simulation engine (exhaustive/heuristic/general).
  * @param engine An SiDB simulation engine.
  * @return The name of the simulation engine as a string.
  */
@@ -117,6 +121,33 @@ template <typename EngineType>
     }
 
     return "unsupported simulation engine";
+}
+
+/**
+ * Returns a simulation engine by name.
+ *
+ * @param name Name of the desired SiDB simulation engine.
+ * @return SiDB simulation engine that matches the given `name`, or `std::nullopt` if no simulation engine by the given
+ * `name` exists.
+ */
+[[nodiscard]] inline std::optional<sidb_simulation_engine>
+get_sidb_simulation_engine(const std::string_view& name) noexcept
+{
+    static const phmap::flat_hash_map<std::string, sidb_simulation_engine> engine_lookup{
+        {"EXGS", sidb_simulation_engine::EXGS},
+        {"QUICKEXACT", sidb_simulation_engine::QUICKEXACT},
+        {"CLUSTERCOMPLETE", sidb_simulation_engine::CLUSTERCOMPLETE},
+        {"QUICKSIM", sidb_simulation_engine::QUICKSIM}};
+
+    std::string upper_name = name.data();
+    std::transform(upper_name.begin(), upper_name.end(), upper_name.begin(), ::toupper);
+
+    if (const auto it = engine_lookup.find(upper_name); it != engine_lookup.cend())
+    {
+        return it->second;
+    }
+
+    return std::nullopt;
 }
 
 }  // namespace fiction
