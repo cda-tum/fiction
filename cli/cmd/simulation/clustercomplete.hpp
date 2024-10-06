@@ -62,12 +62,11 @@ class clustercomplete_command : public command
                    "The limit on the number of overlapping witnesses (that determines the factorial scaling of the "
                    "sub-procedure) before Ground State Space skips validity witness partitioning",
                    true);
-        // TODO: Needs to be adapted since it was changed from a bool to an enum class.
-        //        add_flag("--report_gss_stats,-r", params.report_gss_stats,
-        //                 "When set, Ground State Space statistics are shown, which give an estimate for the
-        //                 ClusterComplete " "runtimes, and thus allow the user to configure the validity witness
-        //                 partitioning parameters that " "could benefit large simulation problems through more
-        //                 intensive pruning before starting a lengthy " "unfolding process");
+        add_flag("--report_gss_stats,-r",
+                 "When set, Ground State Space statistics are shown, which give an estimate for the ClusterComplete "
+                 "runtimes, and thus allow the user to configure the validity witness partitioning parameters that "
+                 "could benefit large simulation problems through more intensive pruning before starting a lengthy "
+                 "unfolding process");
     }
 
   protected:
@@ -121,6 +120,10 @@ class clustercomplete_command : public command
                 else
                 {
                     params.simulation_parameters = physical_params;
+
+                    params.report_gss_stats = is_set("report_gss_stats") ?
+                                                  fiction::ground_state_space_reporting::ENABLED :
+                                                  fiction::ground_state_space_reporting::DISABLED;
 
                     if constexpr (fiction::is_sidb_lattice_100_v<Lyt>)
                     {

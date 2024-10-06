@@ -89,7 +89,7 @@ struct clustercomplete_params
      */
     uint64_t available_threads = std::thread::hardware_concurrency();
     /**
-     * Option to decide if the *Ground State Space* statistics are reported to the  standard output. By default, this
+     * Option to decide if the *Ground State Space* statistics are reported to the standard output. By default, this
      * option is disabled.
      */
     ground_state_space_reporting report_gss_stats = ground_state_space_reporting::DISABLED;
