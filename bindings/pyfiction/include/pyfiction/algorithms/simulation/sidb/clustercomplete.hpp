@@ -41,9 +41,12 @@ inline void clustercomplete(pybind11::module& m)
      * Report *Ground State Space* stats.
      */
     // TODO: add docu
-    py::enum_<fiction::ground_state_space_reporting>(m, "ground_state_space_reporting")
-        .value("ENABLED", fiction::ground_state_space_reporting::ENABLED)
-        .value("DISABLED", fiction::ground_state_space_reporting::DISABLED);
+    py::enum_<fiction::ground_state_space_reporting>(m, "ground_state_space_reporting",
+                                                     DOC(fiction_ground_state_space_reporting))
+        .value("ENABLED", fiction::ground_state_space_reporting::ENABLED,
+               DOC(fiction_ground_state_space_reporting_ENABLED))
+        .value("DISABLED", fiction::ground_state_space_reporting::DISABLED,
+               DOC(fiction_ground_state_space_reporting_DISABLED));
 
     /**
      * ClusterComplete parameters.
@@ -80,4 +83,4 @@ inline void clustercomplete(pybind11::module& m)
 
 }  // namespace pyfiction
 
-#endif // PYFICTION_CLUSTERCOMPLETE_HPP
+#endif  // PYFICTION_CLUSTERCOMPLETE_HPP
