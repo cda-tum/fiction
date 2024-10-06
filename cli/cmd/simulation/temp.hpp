@@ -133,7 +133,15 @@ class temp_command : public command
                 }
                 else
                 {
-                    params.engine = get_sim_engine();
+                    const auto sim_engine = fiction::get_sidb_simulation_engine(sim_engine_str);
+
+                    if (!sim_engine.has_value())
+                    {
+                        env->out() << fmt::format("[e] {} is not a supported SiDB simulation engine\n", sim_engine_str);
+                        return;
+                    }
+
+                    params.engine = sim_engine.value();
 
                     params.simulation_parameters = physical_params;
 
@@ -206,25 +214,6 @@ class temp_command : public command
      * The simulation engine to use.
      */
     std::string sim_engine_str{"QuickExact"};
-    /**
-     * Convert the simulation engine string to the appropriate engine enum member. QuickExact is set as default.
-     *
-     * @return The `sidb_simulation_engine` member associated with the identifier.
-     */
-    [[nodiscard]] inline fiction::sidb_simulation_engine get_sim_engine() const noexcept
-    {
-        if (sim_engine_str == "ClusterComplete")
-        {
-            return fiction::sidb_simulation_engine::CLUSTERCOMPLETE;
-        }
-
-        if (sim_engine_str == "QuickSim")
-        {
-            return fiction::sidb_simulation_engine::QUICKSIM;
-        }
-
-        return fiction::sidb_simulation_engine::QUICKEXACT;
-    }
     /**
      * Logs the resulting information in a log file.
      *

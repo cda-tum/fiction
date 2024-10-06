@@ -227,7 +227,15 @@ class opdom_command : public command
                     return;
                 }
 
-                params.sim_engine = get_sim_engine();
+                const auto engine = fiction::get_sidb_simulation_engine(sim_engine_str);
+
+                if (!engine.has_value())
+                {
+                    env->out() << fmt::format("[e] {} is not a supported SiDB simulation engine\n", sim_engine_str);
+                    return;
+                }
+
+                params.sim_engine = engine.value();
 
                 params.simulation_parameters = simulation_params;
 
@@ -302,30 +310,6 @@ class opdom_command : public command
      * The operational domain.
      */
     fiction::operational_domain<> op_domain{};
-    /**
-     * Convert the simulation engine string to the appropriate engine enum member. QuickExact is set as default.
-     *
-     * @return The `sidb_simulation_engine` member associated with the identifier.
-     */
-    [[nodiscard]] inline fiction::sidb_simulation_engine get_sim_engine() const noexcept
-    {
-        if (sim_engine_str == "ClusterComplete")
-        {
-            return fiction::sidb_simulation_engine::CLUSTERCOMPLETE;
-        }
-
-        if (sim_engine_str == "QuickSim")
-        {
-            return fiction::sidb_simulation_engine::QUICKSIM;
-        }
-
-        if (sim_engine_str == "ExGS")
-        {
-            return fiction::sidb_simulation_engine::EXGS;
-        }
-
-        return fiction::sidb_simulation_engine::QUICKEXACT;
-    }
     /**
      * Writes the operational domain to the specified CSV file.
      */
