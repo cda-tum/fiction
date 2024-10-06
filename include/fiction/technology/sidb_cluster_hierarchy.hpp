@@ -274,7 +274,13 @@ using sidb_cluster_projector_state_ptr = std::unique_ptr<sidb_cluster_projector_
  */
 enum class bound_direction : uint8_t
 {
+    /**
+    * Lower bounds live in the set \f$(-\infty\f, \infty]\f$ and are ordered by >.
+    */
     LOWER = 0,
+    /**
+    * Upper bounds live in the set \f$[-\infty, \infty)\f$ and are ordered by <.
+    */
     UPPER
 };
 /**
