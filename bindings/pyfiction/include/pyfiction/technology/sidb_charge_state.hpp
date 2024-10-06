@@ -28,7 +28,7 @@ inline void sidb_charge_state(pybind11::module& m)
         ;
 
     m.attr("SIDB_CHARGE_STATES_BASE_2") = py::cast(fiction::SIDB_CHARGE_STATES_BASE_2);
-    m.attr("SIDB_CHARGE_STATES_BASE_3") = py::cast(fiction::SIDB_CHARGE_STATES_BASE_2);
+    m.attr("SIDB_CHARGE_STATES_BASE_3") = py::cast(fiction::SIDB_CHARGE_STATES_BASE_3);
 
     m.def("sidb_charge_states_for_base_number", &fiction::sidb_charge_states_for_base_number, "base"_a,
           DOC(fiction_sidb_charge_states_for_base_number));
