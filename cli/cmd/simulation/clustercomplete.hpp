@@ -215,31 +215,35 @@ class clustercomplete_command : public command
         {
             if (is_sidb_100_lattice)
             {
-                return nlohmann::json{
-                    {"Algorithm name", sim_result_100.algorithm_name},
-                    {"Simulation runtime", sim_result_100.simulation_runtime.count()},
-                    {"Physical parameters",
-                     {{"epsilon_r", sim_result_100.simulation_parameters.epsilon_r},
-                      {"lambda_tf", sim_result_100.simulation_parameters.lambda_tf},
-                      {"mu_minus", sim_result_100.simulation_parameters.mu_minus}}},
-                    {"Lowest state energy (eV)", min_energy},
-                    {"Number of stable states", sim_result_100.charge_distributions.size()},
-                    {"Iteration steps",
-                     std::any_cast<uint64_t>(sim_result_100.additional_simulation_parameters.at("iteration_steps"))},
-                    {"alpha", std::any_cast<double>(sim_result_100.additional_simulation_parameters.at("alpha"))}};
+                return nlohmann::json{{"Algorithm name", sim_result_100.algorithm_name},
+                                      {"Simulation runtime", sim_result_100.simulation_runtime.count()},
+                                      {"Physical parameters",
+                                       {{"epsilon_r", sim_result_100.simulation_parameters.epsilon_r},
+                                        {"lambda_tf", sim_result_100.simulation_parameters.lambda_tf},
+                                        {"mu_minus", sim_result_100.simulation_parameters.mu_minus}}},
+                                      {"Lowest state energy (eV)", min_energy},
+                                      {"Number of stable states", sim_result_100.charge_distributions.size()},
+                                      {"Validity witness partitioning limit",
+                                       std::any_cast<uint64_t>(sim_result_100.additional_simulation_parameters.at(
+                                           "validity_witness_partitioning_limit"))},
+                                      {"Number of overlapping witnesses limit",
+                                       std::any_cast<uint64_t>(sim_result_100.additional_simulation_parameters.at(
+                                           "num_overlapping_witnesses_limit"))}};
             }
-            return nlohmann::json{
-                {"Algorithm name", sim_result_111.algorithm_name},
-                {"Simulation runtime", sim_result_111.simulation_runtime.count()},
-                {"Physical parameters",
-                 {{"epsilon_r", sim_result_111.simulation_parameters.epsilon_r},
-                  {"lambda_tf", sim_result_111.simulation_parameters.lambda_tf},
-                  {"mu_minus", sim_result_111.simulation_parameters.mu_minus}}},
-                {"Lowest state energy (eV)", min_energy},
-                {"Number of stable states", sim_result_111.charge_distributions.size()},
-                {"Iteration steps",
-                 std::any_cast<uint64_t>(sim_result_111.additional_simulation_parameters.at("iteration_steps"))},
-                {"alpha", std::any_cast<double>(sim_result_111.additional_simulation_parameters.at("alpha"))}};
+            return nlohmann::json{{"Algorithm name", sim_result_111.algorithm_name},
+                                  {"Simulation runtime", sim_result_111.simulation_runtime.count()},
+                                  {"Physical parameters",
+                                   {{"epsilon_r", sim_result_111.simulation_parameters.epsilon_r},
+                                    {"lambda_tf", sim_result_111.simulation_parameters.lambda_tf},
+                                    {"mu_minus", sim_result_111.simulation_parameters.mu_minus}}},
+                                  {"Lowest state energy (eV)", min_energy},
+                                  {"Number of stable states", sim_result_111.charge_distributions.size()},
+                                  {"Validity witness partitioning limit",
+                                   std::any_cast<uint64_t>(sim_result_111.additional_simulation_parameters.at(
+                                       "validity_witness_partitioning_limit"))},
+                                  {"Number of overlapping witnesses limit",
+                                   std::any_cast<uint64_t>(sim_result_111.additional_simulation_parameters.at(
+                                       "num_overlapping_witnesses_limit"))}};
         }
         catch (...)
         {
