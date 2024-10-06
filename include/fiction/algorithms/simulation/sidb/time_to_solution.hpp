@@ -109,14 +109,12 @@ void time_to_solution(const Lyt& lyt, const quicksim_params& quicksim_params,
         st.algorithm      = sidb_simulation_engine_name(exhaustive_sidb_simulation_engine::QUICKEXACT);
         simulation_result = quickexact(lyt, params);
     }
-#if (FICTION_ALGLIB_ENABLED)
     else if (tts_params.engine == exhaustive_sidb_simulation_engine::CLUSTERCOMPLETE)
     {
         const clustercomplete_params<cell<Lyt>> params{quicksim_params.simulation_parameters};
         st.algorithm      = sidb_simulation_engine_name(exhaustive_sidb_simulation_engine::CLUSTERCOMPLETE);
         simulation_result = clustercomplete(lyt, params);
     }
-#endif  // FICTION_ALGLIB_ENABLED
     else
     {
         st.algorithm      = sidb_simulation_engine_name(exhaustive_sidb_simulation_engine::EXGS);

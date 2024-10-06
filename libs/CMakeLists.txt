@@ -97,28 +97,6 @@ if (FICTION_Z3)
 
 endif ()
 
-# Enable the usage of ALGLIB
-option(FICTION_ALGLIB "Find, include, and utilize ALGLIB by the ALGLIB project. It needs to be installed manually.")
-if (FICTION_ALGLIB)
-    message(STATUS "Usage of ALGLIB was enabled. Make sure that it is installed on your system!")
-
-    # Try to locate ALGLIB
-    find_package(ALGLIB)
-
-    if (ALGLIB_FOUND)
-        # Status update
-        message(STATUS "Found ALGLIB version: ${ALGLIB_VERSION}")
-
-        # Compile definition to guard include files
-        target_compile_definitions(libfiction INTERFACE FICTION_ALGLIB_ENABLED)
-        # Link ALGLIB
-        target_link_libraries(libfiction INTERFACE ALGLIB)
-
-    else ()
-        message(SEND_ERROR "ALGLIB could not be detected")
-    endif ()
-endif ()
-
 # If using GCC or Clang, find TBB if installed
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES ".*Clang")
     list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/") # include FindTBB.cmake
@@ -171,6 +149,11 @@ target_include_directories(libfiction SYSTEM INTERFACE combinations)
 add_subdirectory(graph-coloring EXCLUDE_FROM_ALL)
 target_include_directories(libfiction SYSTEM INTERFACE graph-coloring/Header)
 target_link_system_libraries(libfiction INTERFACE graph-coloring)
+
+# Include ALGLIB by the ALGLIB Project
+add_subdirectory(alglib EXCLUDE_FROM_ALL)
+target_include_directories(libfiction SYSTEM INTERFACE alglib/Header)
+target_link_system_libraries(libfiction INTERFACE alglib)
 
 # Include tinyXML2
 set(tinyxml2_BUILD_TESTING OFF)

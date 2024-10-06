@@ -112,7 +112,6 @@ TEST_CASE("Bestagon FO2 gate", "[is-operational]")
                   .first == operational_status::NON_OPERATIONAL);
     }
 
-#if (FICTION_ALGLIB_ENABLED)
     SECTION("using ClusterComplete")
     {
         CHECK(is_operational(
@@ -124,7 +123,6 @@ TEST_CASE("Bestagon FO2 gate", "[is-operational]")
                   is_operational_params{sidb_simulation_parameters{3, -0.30}, sidb_simulation_engine::CLUSTERCOMPLETE})
                   .first == operational_status::NON_OPERATIONAL);
     }
-#endif
 }
 
 TEST_CASE("Bestagon AND gate", "[is-operational]")

@@ -20,16 +20,6 @@ RUN python3 -m venv venv && \
 # Set the path to include the virtual environment
 ENV PATH="/app/venv/bin:$PATH"
 
-# Setup ALGLIB
-RUN git clone https://github.com/S-Dafarra/alglib-cmake.git && \
-    cd alglib-cmake && \
-    mkdir build && \
-    cd build && \
-    cmake .. && \
-    make && \
-    make install && \
-    cd ../..
-
 # Clone fiction's repository including submodules
 # RUN git clone --recursive https://github.com/cda-tum/fiction.git
 COPY . fiction/
@@ -45,7 +35,6 @@ RUN . venv/bin/activate \
       -DFICTION_BENCHMARK=OFF \
       -DFICTION_EXPERIMENTS=OFF \
       -DFICTION_Z3=ON \
-      -DFICTION_ALGLIB=ON \
       -DFICTION_ENABLE_MUGEN=OFF \
       -DFICTION_PROGRESS_BARS=ON \
       -DFICTION_WARNINGS_AS_ERRORS=OFF \

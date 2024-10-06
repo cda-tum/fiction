@@ -64,7 +64,6 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         CHECK(critical_stats.num_valid_lyt == 0);
         CHECK(critical_stats.critical_temperature == 0.0);
 
-#if (FICTION_ALGLIB_ENABLED)
         params.simulation_parameters = sim_params;
         params.engine                = sidb_simulation_engine::CLUSTERCOMPLETE;
 
@@ -72,7 +71,6 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
 
         CHECK(critical_stats.num_valid_lyt == 0);
         CHECK(critical_stats.critical_temperature == 0.0);
-#endif  // FICTION_ALGLIB_ENABLED
     }
 
     SECTION("Not working diagonal wire where positively charged SiDBs can occur")
@@ -109,13 +107,11 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
 
         CHECK(critical_stats.critical_temperature == 0.0);
 
-#if (FICTION_ALGLIB_ENABLED)
         params.engine = sidb_simulation_engine::CLUSTERCOMPLETE;
 
         critical_temperature_gate_based(lyt, std::vector<tt>{create_id_tt()}, params, &critical_stats);
 
         CHECK(critical_stats.critical_temperature == 0.0);
-#endif  // FICTION_ALGLIB_ENABLED
     }
 
     SECTION("four SiDBs with two valid charge distributions, QuickExact")
@@ -140,7 +136,6 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
                    Catch::Matchers::WithinAbs(std::numeric_limits<double>::infinity(), 0.01));
         CHECK(critical_stats.critical_temperature == 350);
 
-#if (FICTION_ALGLIB_ENABLED)
         params.engine = sidb_simulation_engine::CLUSTERCOMPLETE;
 
         critical_temperature_non_gate_based(lyt, params, &critical_stats);
@@ -149,7 +144,6 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous),
                    Catch::Matchers::WithinAbs(std::numeric_limits<double>::infinity(), 0.01));
         CHECK(critical_stats.critical_temperature == 350);
-#endif  // FICTION_ALGLIB_ENABLED
     }
 
     SECTION("Y-shaped SiDB AND gate")
@@ -186,7 +180,6 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
                    Catch::Matchers::WithinAbs(std::numeric_limits<double>::infinity(), 0.01));
         CHECK(critical_stats.critical_temperature == 350);
 
-#if (FICTION_ALGLIB_ENABLED)
         params.engine = sidb_simulation_engine::CLUSTERCOMPLETE;
 
         critical_temperature_gate_based(lyt, std::vector<tt>{create_and_tt()}, params, &critical_stats);
@@ -194,7 +187,6 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous),
                    Catch::Matchers::WithinAbs(std::numeric_limits<double>::infinity(), 0.01));
         CHECK(critical_stats.critical_temperature == 350);
-#endif  // FICTION_ALGLIB_ENABLED
     }
 
     SECTION("Bestagon AND gate, QuickExact")
@@ -241,7 +233,6 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
                    Catch::Matchers::WithinAbs(26.02, 0.01));
         CHECK_THAT(std::abs(critical_stats.critical_temperature - 59.19), Catch::Matchers::WithinAbs(0.00, 0.01));
 
-#if (FICTION_ALGLIB_ENABLED)
         params.engine = sidb_simulation_engine::CLUSTERCOMPLETE;
 
         critical_temperature_gate_based(lyt, std::vector<tt>{create_and_tt()}, params, &critical_stats);
@@ -249,7 +240,6 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous),
                    Catch::Matchers::WithinAbs(26.02, 0.01));
         CHECK_THAT(std::abs(critical_stats.critical_temperature - 59.19), Catch::Matchers::WithinAbs(0.00, 0.01));
-#endif  // FICTION_ALGLIB_ENABLED
     }
 
     SECTION("Bestagon AND gate, QuickSim")
@@ -294,13 +284,11 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
 
         CHECK(critical_stats.critical_temperature > 0);
 
-#if (FICTION_ALGLIB_ENABLED)
         params.engine = sidb_simulation_engine::CLUSTERCOMPLETE;
 
         critical_temperature_gate_based(lyt, std::vector<tt>{create_and_tt()}, params, &critical_stats);
 
         CHECK(critical_stats.critical_temperature > 0);
-#endif  // FICTION_ALGLIB_ENABLED
     }
 
     SECTION("Bestagon FO2 gate")
@@ -346,7 +334,6 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
                    Catch::Matchers::WithinAbs(0.00, 0.01));
         CHECK_THAT(std::abs(critical_stats.critical_temperature - 1.46), Catch::Matchers::WithinAbs(0.00, 0.01));
 
-#if (FICTION_ALGLIB_ENABLED)
         params.engine = sidb_simulation_engine::CLUSTERCOMPLETE;
 
         critical_temperature_gate_based(lyt, std::vector<tt>{create_fan_out_tt()}, params, &critical_stats);
@@ -354,7 +341,6 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous - 0.56),
                    Catch::Matchers::WithinAbs(0.00, 0.01));
         CHECK_THAT(std::abs(critical_stats.critical_temperature - 1.46), Catch::Matchers::WithinAbs(0.00, 0.01));
-#endif  // FICTION_ALGLIB_ENABLED
     }
 
     SECTION("Bestagon CX gate")
@@ -412,7 +398,6 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
                    Catch::Matchers::WithinAbs(0.00, 0.01));
         CHECK_THAT(std::abs(critical_stats.critical_temperature - 0.85), Catch::Matchers::WithinAbs(0.00, 0.01));
 
-#if (FICTION_ALGLIB_ENABLED)
         params.engine = sidb_simulation_engine::CLUSTERCOMPLETE;
 
         critical_temperature_gate_based(lyt, std::vector<tt>{create_crossing_wire_tt()}, params, &critical_stats);
@@ -420,7 +405,6 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         CHECK_THAT(std::fabs(critical_stats.energy_between_ground_state_and_first_erroneous - 0.32),
                    Catch::Matchers::WithinAbs(0.00, 0.01));
         CHECK_THAT(std::abs(critical_stats.critical_temperature - 0.85), Catch::Matchers::WithinAbs(0.00, 0.01));
-#endif  // FICTION_ALGLIB_ENABLED
     }
 
     SECTION("OR gate")
@@ -460,13 +444,11 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
 
         CHECK(critical_stats.critical_temperature < 350);
 
-#if (FICTION_ALGLIB_ENABLED)
         params.engine = sidb_simulation_engine::CLUSTERCOMPLETE;
 
         critical_temperature_gate_based(lyt, std::vector<tt>{create_or_tt()}, params, &critical_stats);
 
         CHECK(critical_stats.critical_temperature < 350);
-#endif  // FICTION_ALGLIB_ENABLED
     }
 
     SECTION("Not working diagonal Wire")
@@ -505,7 +487,6 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
                    Catch::Matchers::WithinAbs(305.95, 0.01));
         CHECK_THAT(std::abs(critical_stats.critical_temperature), Catch::Matchers::WithinAbs(0.00, 0.01));
 
-#if (FICTION_ALGLIB_ENABLED)
         params.engine = sidb_simulation_engine::CLUSTERCOMPLETE;
 
         critical_temperature_gate_based(lyt, std::vector<tt>{create_id_tt()}, params, &critical_stats);
@@ -515,7 +496,6 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous),
                    Catch::Matchers::WithinAbs(305.95, 0.01));
         CHECK_THAT(std::abs(critical_stats.critical_temperature), Catch::Matchers::WithinAbs(0.00, 0.01));
-#endif  // FICTION_ALGLIB_ENABLED
     }
 
     SECTION("nine SiDBs, QuickSim, non-gate-based")

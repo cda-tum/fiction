@@ -5,8 +5,6 @@
 #ifndef PYFICTION_CLUSTERCOMPLETE_HPP
 #define PYFICTION_CLUSTERCOMPLETE_HPP
 
-#if (FICTION_ALGLIB_ENABLED)
-
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
@@ -82,20 +80,4 @@ inline void clustercomplete(pybind11::module& m)
 
 }  // namespace pyfiction
 
-#else  // FICTION_ALGLIB_ENABLED
-
-#include <pybind11/pybind11.h>
-
-namespace pyfiction
-{
-
-/**
- * Disable ClusterComplete.
- */
-inline void clustercomplete([[maybe_unused]] pybind11::module& m) {}
-
-}  // namespace pyfiction
-
-#endif  // FICTION_ALGLIB_ENABLED
-
-#endif  // PYFICTION_CLUSTERCOMPLETE_HPP
+#endif // PYFICTION_CLUSTERCOMPLETE_HPP

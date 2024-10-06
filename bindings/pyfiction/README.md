@@ -23,13 +23,6 @@ z3=ON pip install .
 See [the documentation](https://fiction.readthedocs.io/en/latest/getting_started.html#enabling-dependent-functions) for
 more information on dependent functions.
 
-#### Bindings for *ClusterComplete*
-
-On Linux, the bindings can be installed from the PyPI repository which includes all dependent functionality, including
-*ClusterComplete*, which depends on ALGLIB. On Windows and macOS, these bindings can be enabled through a local
-installation using `alglib=ON`, similar as above. This may be enabled alongside `z3=ON` by separating the definitions
-with a space before the `pip` call.
-
 ### Building the bindings with CMake
 
 ```bash
@@ -107,7 +100,7 @@ pip install pybind11_mkdoc clang==14
 To generate the docstrings call
 
 ```bash
-python3 -m pybind11_mkdoc -o pybind11_mkdoc_docstrings.hpp -D FICTION_Z3_SOLVER -D FICTION_ALGLIB_ENABLED `find ./include/fiction -name "*.hpp" -print`
+python3 -m pybind11_mkdoc -o pybind11_mkdoc_docstrings.hpp -D FICTION_Z3_SOLVER `find ./include/fiction -name "*.hpp" -print`
 ```
 
 in *fiction*'s base directory.

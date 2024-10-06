@@ -41,7 +41,6 @@ concurrency:
 env:
   Z3_VERSION: 4.10.0
   ENABLE_Z3: 'ON'
-  ENABLE_ALGLIB: 'ON'
 
 jobs:
   build_wheels:
@@ -91,10 +90,6 @@ jobs:
         uses: pypa/cibuildwheel@v2.20.0
         env:
           CIBW_BEFORE_ALL_LINUX: >
-            echo "Setup ALGLIB" &&
-            git clone https://github.com/S-Dafarra/alglib-cmake.git &&
-            cd alglib-cmake && mkdir build && cd build &&
-            cmake .. && make -j4 && make install ;
             echo "Setup Z3" &&
             /opt/python/cp39-cp39/bin/pip install z3-solver==${{ env.Z3_VERSION }}
           CIBW_BUILD: ${{ matrix.python }}-*
@@ -141,21 +136,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - if: ${{env.ENABLE_ALGLIB == 'ON'}}
-        name: Setup ALGLIB
-        run: |
-          git clone https://github.com/S-Dafarra/alglib-cmake.git
-          cd alglib-cmake
-          mkdir build && cd build
-          cmake ..
-          make -j4
-          sudo make install
-
       - name: Build sdist
         run: pipx run build --sdist
 
       - name: Test sdist
-        run: z3=${{env.ENABLE_Z3}} alglib=${{env.ENABLE_ALGLIB}} pip install dist/*.tar.gz --verbose
+        run: z3=${{env.ENABLE_Z3}} pip install dist/*.tar.gz --verbose
 
       - name: Upload sdist as an artifact
         uses: actions/upload-artifact@v4

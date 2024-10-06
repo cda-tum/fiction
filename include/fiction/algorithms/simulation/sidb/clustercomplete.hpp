@@ -5,8 +5,6 @@
 #ifndef FICTION_CLUSTERCOMPLETE_HPP
 #define FICTION_CLUSTERCOMPLETE_HPP
 
-#if (FICTION_ALGLIB_ENABLED)
-
 #include "fiction/algorithms/simulation/sidb/ground_state_space.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "fiction/layouts/coordinates.hpp"
@@ -562,6 +560,5 @@ template <typename Lyt>
 
 }  // namespace fiction
 
-#endif  // FICTION_ALGLIB_ENABLED
 
 #endif  // FICTION_CLUSTERCOMPLETE_HPP

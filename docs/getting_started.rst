@@ -165,31 +165,6 @@ and some macOS versions due to issues with ``python-sat``. Mugen requires at lea
 
 Finally, before building *fiction*, pass ``-DFICTION_ENABLE_MUGEN=ON`` to the ``cmake`` call.
 
-ALGLIB-dependent ``ClusterComplete`` exact SiDB simulation
-##########################################################
-
-The :ref:`ClusterComplete <clustercomplete>` exact SiDB simulation algorithm relies on functionality offered by
-`ALGLIB <https://www.alglib.net>`_ by the ALGLIB Project.
-On Unix based systems, it can be installed by building and installing ALGLIB independently::
-
-    $ git clone https://github.com/S-Dafarra/alglib-cmake.git
-    $ cd alglib-cmake
-    $ mkdir build && cd build
-    $ cmake ..
-    $ make
-    $ [sudo] make install
-
-On Windows based systems, IDE build tool facilities such as Visual Studio or Xcode may be used::
-
-    $ git clone https://github.com/S-Dafarra/alglib-cmake.git
-    $ cd alglib-cmake
-    $ mkdir build && cd build
-    $ cmake ..
-    $ cmake --build . --target ALL_BUILD --config Release
-    $ cmake --build . --target INSTALL --config Release
-
-Finally, before building *fiction*, pass ``-DFICTION_ALGLIB=ON`` to the ``cmake`` call.
-
 Building experiments
 --------------------
 

@@ -103,15 +103,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
-      - name: Setup ALGLIB
-        run: |
-          git clone https://github.com/S-Dafarra/alglib-cmake.git
-          cd alglib-cmake
-          mkdir build && cd build
-          cmake ..
-          make
-          sudo make install
-
       # Initializes the CodeQL tools for scanning.
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3

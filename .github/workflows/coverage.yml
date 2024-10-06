@@ -86,15 +86,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
-      - name: Setup ALGLIB
-        run: |
-          git clone https://github.com/S-Dafarra/alglib-cmake.git
-          cd alglib-cmake
-          mkdir build && cd build
-          cmake ..
-          make
-          sudo make install
-
       - name: Create Build Environment
         run: cmake -E make_directory ${{github.workspace}}/build
 
@@ -110,7 +101,6 @@ jobs:
           -DFICTION_TEST=ON
           -DFICTION_BENCHMARK=OFF
           -DFICTION_Z3=ON
-          -DFICTION_ALGLIB=ON
           -DFICTION_ENABLE_MUGEN=ON
           -DFICTION_PROGRESS_BARS=OFF
           -DFICTION_WARNINGS_AS_ERRORS=OFF

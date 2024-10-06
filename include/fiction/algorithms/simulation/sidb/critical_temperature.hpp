@@ -229,7 +229,6 @@ class critical_temperature_impl
             // is used to provide 100 % accuracy for the Critical Temperature).
             simulation_results = quickexact(layout, qe_params);
         }
-#if (FICTION_ALGLIB_ENABLED)
         else if (params.engine == sidb_simulation_engine::CLUSTERCOMPLETE)
         {
             const clustercomplete_params<cell<Lyt>> cc_params{params.simulation_parameters};
@@ -238,7 +237,6 @@ class critical_temperature_impl
             // simulation is used to provide 100 % accuracy for the Critical Temperature).
             simulation_results = clustercomplete(layout, cc_params);
         }
-#endif  // FICTION_ALGLIB_ENABLED
         else if (params.engine == sidb_simulation_engine::QUICKSIM)
         {
             const quicksim_params qs_params{params.simulation_parameters, params.iteration_steps, params.alpha};
@@ -419,14 +417,12 @@ class critical_temperature_impl
             return quickexact(*bdl_iterator, qe_params);
         }
 
-#if (FICTION_ALGLIB_ENABLED)
         if (params.engine == sidb_simulation_engine::CLUSTERCOMPLETE)
         {
             // perform ClusterComplete simulation -- base 3 simulation is allowed
             const clustercomplete_params<cell<Lyt>> cc_params{params.simulation_parameters};
             return clustercomplete(*bdl_iterator, cc_params);
         }
-#endif  // FICTION_ALGLIB_ENABLED
         if (params.engine == sidb_simulation_engine::QUICKSIM)
         {
             assert(params.simulation_parameters.base == 2 && "base number has to be 2");
