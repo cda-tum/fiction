@@ -470,6 +470,25 @@ class clustercomplete_impl
 
         const uint64_t num_threads_to_use = std::min(std::max(num_threads, uint64_t{1}), top_level_multisets);
 
+        // skip multithreading setup when only one core is needed
+        if (num_threads_to_use == 1)
+        {
+            for (sidb_cluster_charge_state ccs : top_cluster->charge_space)
+            {
+                for (const sidb_charge_space_composition& composition : ccs.compositions)
+                {
+                    // convert charge space composition to clustering state
+                    sidb_clustering_state clustering_state =
+                        convert_composition_to_clustering_state(composition);
+
+                    // unfold
+                    add_physically_valid_charge_configurations(clustering_state);
+                }
+            }
+
+            return;
+        }
+
         // define the top cluster charge space ranges per thread
         std::vector<std::pair<uint64_t, uint64_t>> ranges{};
         ranges.reserve(num_threads_to_use);
