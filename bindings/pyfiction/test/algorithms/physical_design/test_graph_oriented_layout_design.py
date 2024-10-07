@@ -56,6 +56,7 @@ class TestGraphOrientedLayoutDesign(unittest.TestCase):
         params.num_vertex_expansions = 5
         params.planar = False
         params.cost = gold_cost_objective.WIRES
+        params.enable_multithreading = False
 
         layout = graph_oriented_layout_design(network, params)
 
@@ -73,6 +74,18 @@ class TestGraphOrientedLayoutDesign(unittest.TestCase):
             return layout.num_wires() * 2 + layout.num_crossings()
 
         layout = graph_oriented_layout_design(network, params, custom_cost_objective=custom_cost_objective)
+
+        self.assertNotEqual(equivalence_checking(network, layout), eq_type.NO)
+
+    def test_graph_oriented_layout_design_with_multithreading(self):
+        network = read_technology_network(dir_path + "/../../resources/mux21.v")
+
+        params = graph_oriented_layout_design_params()
+        params.return_first = True
+        params.mode = gold_effort_mode.HIGH_EFFORT
+        params.enable_multithreading = True
+
+        layout = graph_oriented_layout_design(network, params)
 
         self.assertNotEqual(equivalence_checking(network, layout), eq_type.NO)
 
