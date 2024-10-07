@@ -97,6 +97,21 @@ static bool verify_clustercomplete_result(const charge_distribution_surface<Lyt>
     return false;
 }
 
+template <typename Lyt>
+static bool verify_clustercomplete_result_by_charge_indices(const charge_distribution_surface<Lyt>&              qe_cds,
+                                          const std::vector<charge_distribution_surface<Lyt>>& cc_cdss) noexcept
+{
+    for (const auto& cc_cds : cc_cdss)
+    {
+        if (cc_cds.get_charge_index_and_base().first == qe_cds.get_charge_index_and_base().first)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 TEMPLATE_TEST_CASE("ClusterComplete simulation of a 4 DB layout with a positive charge", "[clustercomplete]",
                    sidb_cell_clk_lyt_siqad, charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
 
@@ -122,6 +137,7 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of a 4 DB layout with a positive 
         for (const charge_distribution_surface<TestType>& cds : qe_res.charge_distributions)
         {
             CHECK(verify_clustercomplete_result<TestType>(cds, cc_res.charge_distributions));
+            CHECK(verify_clustercomplete_result_by_charge_indices<TestType>(cds, cc_res.charge_distributions));
         }
     }
 
@@ -140,6 +156,7 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of a 4 DB layout with a positive 
         for (const charge_distribution_surface<TestType>& cds : qe_res.charge_distributions)
         {
             CHECK(verify_clustercomplete_result(cds, cc_res.charge_distributions));
+            CHECK(verify_clustercomplete_result_by_charge_indices<TestType>(cds, cc_res.charge_distributions));
         }
     }
 }

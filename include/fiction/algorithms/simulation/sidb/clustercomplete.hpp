@@ -297,6 +297,8 @@ class clustercomplete_impl
             return;
         }
 
+        charge_layout_copy.charge_distribution_to_index();
+
         // population stability is a given when this function is called; hence the charge distribution is physically
         // valid when configuration stability is met
         charge_layout_copy.declare_physically_valid();
