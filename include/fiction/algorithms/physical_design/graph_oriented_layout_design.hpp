@@ -145,13 +145,13 @@ struct graph_oriented_layout_design_params
      *
      * When set to `true`, the algorithm will utilize multiple threads to process different search space graphs in
      * parallel, improving performance by distributing the workload across available CPU cores. If set to `false`, the
-     * algorithm will run sequentially in a single thread.
+     * algorithm will run sequentially on a single thread.
      *
-     * Only recommended for HIGH_EFFORT and HIGHEST_EFFORT modes and complex networks (>100 nodes).
+     * Only recommended for `HIGH_EFFORT` and `HIGHEST_EFFORT` modes and complex networks (> 100 nodes).
      *
      * Enabling multithreading can significantly speed up the algorithm, especially when using multiple search space
      * graphs and dealing with complex networks, by concurrently expanding them. However, it may introduce additional
-     * overhead for thread synchronization and can increase memory usage.
+     * overhead for thread synchronization and can increase memory usage. It is therefore not recommended for small input networks.
      *
      * Default value: `false`
      */
@@ -728,7 +728,7 @@ class graph_oriented_layout_design_impl
             {
                 // mutex to protect shared resources (if necessary)
                 std::mutex                                   update_best_layout_mutex{};
-                std::vector<std::future<std::optional<Lyt>>> futures;
+                std::vector<std::future<std::optional<Lyt>>> futures{};
                 futures.reserve(ssg_vec.size());
 
                 // process `ssg_vec` in parallel using std::async
