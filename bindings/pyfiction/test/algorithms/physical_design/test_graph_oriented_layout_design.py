@@ -77,5 +77,17 @@ class TestGraphOrientedLayoutDesign(unittest.TestCase):
 
         self.assertNotEqual(equivalence_checking(network, layout), eq_type.NO)
 
+    def test_graph_oriented_layout_design_with_multithreading(self):
+        network = read_technology_network(dir_path + "/../../resources/mux21.v")
+
+        params = graph_oriented_layout_design_params()
+        params.return_first = True
+        params.mode = gold_effort_mode.HIGH_EFFORT
+        params.enable_multithreading = True
+
+        layout = graph_oriented_layout_design(network, params)
+
+        self.assertNotEqual(equivalence_checking(network, layout), eq_type.NO)
+
 if __name__ == '__main__':
     unittest.main()

@@ -727,7 +727,7 @@ class graph_oriented_layout_design_impl
             // if multithreading is enabled
             if (ps.enable_multithreading)
             {
-                // mutex to protect shared resources (if necessary)
+                // mutex to protect the best found layout and statistics
                 std::mutex                                   update_best_layout_mutex{};
                 std::vector<std::future<std::optional<Lyt>>> futures{};
                 futures.reserve(ssg_vec.size());
@@ -735,50 +735,28 @@ class graph_oriented_layout_design_impl
                 // process `ssg_vec` in parallel using std::async
                 for (auto& ssg : ssg_vec)
                 {
-                    futures.emplace_back(
-                        std::async(std::launch::async,
-                                   [&]() -> std::optional<Lyt>  // return std::optional<layout>
-                                   {
-                                       if (ssg.frontier_flag)
-                                       {
-                                           const auto expansion = expand(ssg);
-                                           if (expansion.second)
-                                           {
-                                               const std::lock_guard<std::mutex> lock(
-                                                   update_best_layout_mutex);  // protect access to shared data
-                                               best_lyt = *expansion.second;
-                                               restore_names(ssg.network, best_lyt);
+                    futures.emplace_back(std::async(std::launch::async,
+                                                    [&]() -> std::optional<Lyt>
+                                                    {
+                                                        auto result = process_ssg(ssg);
+                                                        if (result)
+                                                        {
+                                                            const std::lock_guard<std::mutex> lock(
+                                                                update_best_layout_mutex);
+                                                            best_lyt = *result;
+                                                            restore_names(ssg.network, best_lyt);
+                                                            update_stats(best_lyt);
 
-                                               // statistical information
-                                               pst.x_size        = best_lyt.x() + 1;
-                                               pst.y_size        = best_lyt.y() + 1;
-                                               pst.num_gates     = best_lyt.num_gates();
-                                               pst.num_wires     = best_lyt.num_wires();
-                                               pst.num_crossings = best_lyt.num_crossings();
-
-                                               if (ps.return_first)
-                                               {
-                                                   return best_lyt;  // return the layout if ps.return_first is true
-                                               }
-                                           }
-
-                                           // update costs and frontier
-                                           for (const auto& [next, cost] : expansion.first)
-                                           {
-                                               if (ssg.cost_so_far.find(next) == ssg.cost_so_far.cend() ||
-                                                   cost < ssg.cost_so_far[next])
-                                               {
-                                                   ssg.cost_so_far[next] = cost;
-                                                   double priority       = cost;
-                                                   ssg.frontier.put(next, priority);
-                                               }
-                                           }
-                                       }
-                                       return std::nullopt;  // return no layout found
-                                   }));
+                                                            if (ps.return_first)
+                                                            {
+                                                                return best_lyt;
+                                                            }
+                                                        }
+                                                        return std::nullopt;
+                                                    }));
                 }
 
-                // Check the futures for the result
+                // check the futures for the result
                 for (auto& future : futures)
                 {
                     const auto result = future.get();  // blocking wait to get the result from the future
@@ -793,35 +771,16 @@ class graph_oriented_layout_design_impl
                 // single-threaded version
                 for (auto& ssg : ssg_vec)
                 {
-                    if (ssg.frontier_flag)
+                    auto result = process_ssg(ssg);
+                    if (result)
                     {
-                        const auto expansion = expand(ssg);
-                        if (expansion.second)
+                        best_lyt = *result;
+                        restore_names(ssg.network, best_lyt);
+                        update_stats(best_lyt);
+
+                        if (ps.return_first)
                         {
-                            best_lyt = *expansion.second;
-                            restore_names(ssg.network, best_lyt);
-
-                            // statistical information
-                            pst.x_size        = best_lyt.x() + 1;
-                            pst.y_size        = best_lyt.y() + 1;
-                            pst.num_gates     = best_lyt.num_gates();
-                            pst.num_wires     = best_lyt.num_wires();
-                            pst.num_crossings = best_lyt.num_crossings();
-
-                            if (ps.return_first)
-                            {
-                                return best_lyt;  // return the layout if ps.return_first is true
-                            }
-                        }
-
-                        for (const auto& [next, cost] : expansion.first)
-                        {
-                            if (ssg.cost_so_far.find(next) == ssg.cost_so_far.cend() || cost < ssg.cost_so_far[next])
-                            {
-                                ssg.cost_so_far[next] = cost;
-                                double priority       = cost;
-                                ssg.frontier.put(next, priority);
-                            }
+                            return *result;
                         }
                     }
                 }
@@ -1014,6 +973,20 @@ class graph_oriented_layout_design_impl
         return (mode == graph_oriented_layout_design_params::effort_mode::HIGH_EFFORT) ?
                    num_search_space_graphs_high_effort :
                    num_search_space_graphs_high_efficiency;
+    }
+    /**
+     * This function updates statistical metrics.
+     *
+     * @param best_lyt The new best layout found.
+     */
+    void update_stats(const Lyt& best_lyt)
+    {
+        // Statistical information
+        pst.x_size        = best_lyt.x() + 1;
+        pst.y_size        = best_lyt.y() + 1;
+        pst.num_gates     = best_lyt.num_gates();
+        pst.num_wires     = best_lyt.num_wires();
+        pst.num_crossings = best_lyt.num_crossings();
     }
     /**
      * Checks if there is a path between the source and destination tiles in the given layout.
@@ -1890,6 +1863,35 @@ class graph_oriented_layout_design_impl
         }
 
         return generate_next_positions(possible_positions, layout, ssg);
+    }
+    /**
+     * This function performs an expansion step on the given SSG and updates the frontier and cost information.
+     *
+     * @param ssg The search space graph to process.
+     * @return An optional layout. Returns a layout if one is found during expansion; otherwise, std::nullopt.
+     */
+    std::optional<Lyt> process_ssg(search_space_graph<ObstrLyt>& ssg)
+    {
+        if (ssg.frontier_flag)
+        {
+            const auto expansion = expand(ssg);
+            if (expansion.second)
+            {
+                return expansion.second;
+            }
+
+            // Update costs and frontier
+            for (const auto& [next, cost] : expansion.first)
+            {
+                if (ssg.cost_so_far.find(next) == ssg.cost_so_far.cend() || cost < ssg.cost_so_far[next])
+                {
+                    ssg.cost_so_far[next] = cost;
+                    double priority       = cost;
+                    ssg.frontier.put(next, priority);
+                }
+            }
+        }
+        return std::nullopt;
     }
     /**
      * Initializes the allowed positions for primary inputs (PIs), the cost for each search space graph and the maximum
