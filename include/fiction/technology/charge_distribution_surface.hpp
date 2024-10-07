@@ -984,7 +984,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         return true;
     }
     /**
-     * The physically validity of the current charge distribution is evaluated and stored in the storage struct. A
+     * The physical validity of the current charge distribution is evaluated and stored in the storage struct. A
      * charge distribution is valid if the *Population Stability* and the *Configuration Stability* is fulfilled.
      */
     void validity_check() noexcept
@@ -993,15 +993,15 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         uint64_t   for_loop_counter                           = 0;
         const auto mu_p                                       = strg->simulation_parameters.mu_plus();
 
-        for (const auto& it : strg->local_pot)  // this for-loop checks if the "population stability" is fulfilled.
+        for (const auto& v : strg->local_pot)  // this for-loop checks if the "population stability" is fulfilled.
         {
             bool valid = (((strg->cell_charge[for_loop_counter] == sidb_charge_state::NEGATIVE) &&
-                           (-it + strg->simulation_parameters.mu_minus < physical_constants::POP_STABILITY_ERR)) ||
+                           (-v + strg->simulation_parameters.mu_minus < physical_constants::POP_STABILITY_ERR)) ||
                           ((strg->cell_charge[for_loop_counter] == sidb_charge_state::POSITIVE) &&
-                           (-it + mu_p > -physical_constants::POP_STABILITY_ERR)) ||
+                           (-v + mu_p > -physical_constants::POP_STABILITY_ERR)) ||
                           ((strg->cell_charge[for_loop_counter] == sidb_charge_state::NEUTRAL) &&
-                           (-it + strg->simulation_parameters.mu_minus > physical_constants::POP_STABILITY_ERR) &&
-                           (-it + mu_p < physical_constants::POP_STABILITY_ERR)));
+                           (-v + strg->simulation_parameters.mu_minus > -physical_constants::POP_STABILITY_ERR) &&
+                           (-v + mu_p < physical_constants::POP_STABILITY_ERR)));
             for_loop_counter += 1;
             if (!valid)
             {
