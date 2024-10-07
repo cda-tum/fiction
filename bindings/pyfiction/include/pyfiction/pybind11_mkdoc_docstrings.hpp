@@ -6200,6 +6200,12 @@ static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_timeou
 
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_timeout_limit_reached = R"doc(Timeout limit reached.)doc";
 
+static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_update_stats =
+R"doc(This function updates statistical metrics.
+
+Parameter ``best_lyt``:
+    The new best layout found.)doc";
+
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_valid_layout =
 R"doc(Validates the given layout based on the nodes in the network and their
 mappings in the node dictionary. It checks if the placement of nodes
