@@ -11167,17 +11167,18 @@ execution of the layout design algorithm.
 When set to `true`, the algorithm will utilize multiple threads to
 process different search space graphs in parallel, improving
 performance by distributing the workload across available CPU cores.
-If set to `false`, the algorithm will run sequentially in a single
+If set to `false`, the algorithm will run sequentially on a single
 thread.
 
-Only recommended for HIGH_EFFORT and HIGHEST_EFFORT modes and complex
-networks (>100 nodes).
+Only recommended for `HIGH_EFFORT` and `HIGHEST_EFFORT` modes and
+complex networks (> 100 nodes).
 
 Enabling multithreading can significantly speed up the algorithm,
 especially when using multiple search space graphs and dealing with
 complex networks, by concurrently expanding them. However, it may
 introduce additional overhead for thread synchronization and can
-increase memory usage.
+increase memory usage. It is therefore not recommended for small input
+networks.
 
 Default value: `false`)doc";
 
