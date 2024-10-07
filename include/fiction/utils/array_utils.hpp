@@ -26,8 +26,8 @@ constexpr std::array<T, sizeof...(Is)> create_array(T value, [[maybe_unused]] st
  * Based on https://stackoverflow.com/questions/57756557/initializing-a-stdarray-with-a-constant-value
  */
 template <typename ElementType, typename ArrayType, std::size_t... Is>
-constexpr auto convert_array(const ArrayType& a,
-                             [[maybe_unused]] std::index_sequence<Is...>) -> std::array<ElementType, sizeof...(Is)>
+constexpr auto convert_array(const ArrayType& a, [[maybe_unused]] std::index_sequence<Is...>)
+    -> std::array<ElementType, sizeof...(Is)>
 {
     return {{static_cast<ElementType>(a[Is])...}};
 }
@@ -36,9 +36,9 @@ constexpr auto convert_array(const ArrayType& a,
  * Based on https://stackoverflow.com/questions/57756557/initializing-a-stdarray-with-a-constant-value
  */
 template <typename ElementType, typename T, std::size_t N, std::size_t M, std::size_t... Is>
-constexpr auto
-convert_array_of_arrays(const std::array<std::array<T, M>, N>& a,
-                        [[maybe_unused]] std::index_sequence<Is...>) -> std::array<std::array<ElementType, M>, N>
+constexpr auto convert_array_of_arrays(const std::array<std::array<T, M>, N>& a,
+                                       [[maybe_unused]] std::index_sequence<Is...>)
+    -> std::array<std::array<ElementType, M>, N>
 {
     return {{detail::convert_array<ElementType>(a[Is], std::make_index_sequence<M>())...}};
 }

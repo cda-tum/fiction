@@ -1116,7 +1116,8 @@ class exact_impl
                                             {
                                                 layout.foreach_outgoing_clocked_zone(
                                                     t,
-                                                    [this, &t, &disj, &tgt, &ae](const auto& at) {
+                                                    [this, &t, &disj, &tgt, &ae](const auto& at)
+                                                    {
                                                         disj.push_back((get_tn(at, tgt) || get_te(at, ae)) &&
                                                                        get_tc(t, at));
                                                     });
@@ -1180,7 +1181,8 @@ class exact_impl
                                             {
                                                 layout.foreach_incoming_clocked_zone(
                                                     t,
-                                                    [this, &t, &disj, &src, &iae](const auto& iat) {
+                                                    [this, &t, &disj, &src, &iae](const auto& iat)
+                                                    {
                                                         disj.push_back((get_tn(iat, src) || get_te(iat, iae)) &&
                                                                        get_tc(iat, t));
                                                     });
@@ -1528,7 +1530,8 @@ class exact_impl
                 else
                 {
                     network.foreach_pi(
-                        [this, &restrict_2ddwave_entry_tiles](const auto& pi) {
+                        [this, &restrict_2ddwave_entry_tiles](const auto& pi)
+                        {
                             network.foreach_fanout(pi, [&restrict_2ddwave_entry_tiles](const auto& fn)
                                                    { restrict_2ddwave_entry_tiles(fn); });
                         });
@@ -1549,7 +1552,8 @@ class exact_impl
                 else
                 {
                     network.foreach_po(
-                        [this, &define_length](const auto& po) {
+                        [this, &define_length](const auto& po)
+                        {
                             network.foreach_fanin(po, [this, &define_length](const auto& fi)
                                                   { define_length(network.get_node(fi)); });
                         });
