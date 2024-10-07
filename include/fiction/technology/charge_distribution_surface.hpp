@@ -1323,7 +1323,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
         // check if all SiDBs are negatively charged
         this->foreach_cell(
-            [this]([[maybe_unused]] const auto& c) {
+            [this]([[maybe_unused]] const auto& c)
+            {
                 assert(this->get_charge_state(c) == sidb_charge_state::NEGATIVE &&
                        "All SiDBs have to be negatively charged");
             });
@@ -2103,8 +2104,8 @@ template <class T>
 charge_distribution_surface(const T&, const sidb_simulation_parameters&) -> charge_distribution_surface<T>;
 
 template <class T>
-charge_distribution_surface(const T&, const sidb_simulation_parameters&,
-                            sidb_charge_state cs) -> charge_distribution_surface<T>;
+charge_distribution_surface(const T&, const sidb_simulation_parameters&, sidb_charge_state cs)
+    -> charge_distribution_surface<T>;
 
 }  // namespace fiction
 
