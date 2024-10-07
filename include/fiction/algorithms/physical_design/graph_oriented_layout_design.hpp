@@ -151,7 +151,8 @@ struct graph_oriented_layout_design_params
      *
      * Enabling multithreading can significantly speed up the algorithm, especially when using multiple search space
      * graphs and dealing with complex networks, by concurrently expanding them. However, it may introduce additional
-     * overhead for thread synchronization and can increase memory usage. It is therefore not recommended for small input networks.
+     * overhead for thread synchronization and can increase memory usage. It is therefore not recommended for small
+     * input networks.
      *
      * Default value: `false`
      */
