@@ -348,7 +348,8 @@ auto convert_layout_to_siqad_coordinates(const Lyt& lyt) noexcept
         {
             sidb_defect_surface<decltype(lyt_new)> lyt_surface{lyt_new};
             lyt_orig.foreach_sidb_defect(
-                [&lyt_surface, &lyt_orig](const auto& cd) {
+                [&lyt_surface, &lyt_orig](const auto& cd)
+                {
                     lyt_surface.assign_sidb_defect(siqad::to_siqad_coord(cd.first), lyt_orig.get_sidb_defect(cd.first));
                 });
             return lyt_surface;
@@ -456,7 +457,8 @@ template <typename LytDest, typename LytSrc>
                 auto lyt_defect = sidb_defect_surface{lyt_new};
 
                 lyt.foreach_sidb_defect(
-                    [&lyt_defect](const auto& cd) {
+                    [&lyt_defect](const auto& cd)
+                    {
                         lyt_defect.assign_sidb_defect(siqad::to_fiction_coord<coordinate<LytDest>>(cd.first),
                                                       cd.second);
                     });
