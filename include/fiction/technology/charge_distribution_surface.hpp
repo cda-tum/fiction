@@ -1340,7 +1340,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
         // check if all SiDBs are negatively charged
         this->foreach_cell(
-            [this]([[maybe_unused]] const auto& c) {
+            [this]([[maybe_unused]] const auto& c)
+            {
                 assert(this->get_charge_state(c) == sidb_charge_state::NEGATIVE &&
                        "All SiDBs have to be negatively charged");
             });
