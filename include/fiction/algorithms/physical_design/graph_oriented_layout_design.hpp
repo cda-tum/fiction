@@ -27,13 +27,16 @@
 #include <mockturtle/views/immutable_view.hpp>
 
 #include <array>
+#include <atomic>
 #include <cassert>
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
+#include <future>
 #include <iostream>
 #include <limits>
+#include <mutex>
 #include <optional>
 #include <queue>
 #include <stdexcept>
@@ -136,6 +139,24 @@ struct graph_oriented_layout_design_params
      * The cost objective used. Defaults to AREA
      */
     cost_objective cost = AREA;
+    /**
+     * BETA feature:
+     * Flag to enable or disable multithreading during the execution of the layout design algorithm.
+     *
+     * When set to `true`, the algorithm will utilize multiple threads to process different search space graphs in
+     * parallel, improving performance by distributing the workload across available CPU cores. If set to `false`, the
+     * algorithm will run sequentially on a single thread.
+     *
+     * Only recommended for `HIGH_EFFORT` and `HIGHEST_EFFORT` modes and complex networks (> 100 nodes).
+     *
+     * Enabling multithreading can significantly speed up the algorithm, especially when using multiple search space
+     * graphs and dealing with complex networks, by concurrently expanding them. However, it may introduce additional
+     * overhead for thread synchronization and can increase memory usage. It is therefore not recommended for small
+     * input networks.
+     *
+     * Default value: `false`
+     */
+    bool enable_multithreading = false;
     /**
      * Verbosity.
      */
@@ -664,7 +685,8 @@ class graph_oriented_layout_design_impl
             pst{st},
             custom_cost_objective{custom},
             timeout{ps.timeout},
-            start{std::chrono::high_resolution_clock::now()}
+            start{std::chrono::high_resolution_clock::now()},
+            num_search_space_graphs{0}
     {
         ntk.substitute_po_signals();
     }
@@ -698,45 +720,73 @@ class graph_oriented_layout_design_impl
         {
             timeout = 10000u;
         }
-        bool timeout_limit_reached = false;
 
-        // main A* loop
+        // main loop
         while (!timeout_limit_reached)
         {
-            for (auto& ssg : ssg_vec)
+            // if multithreading is enabled
+            if (ps.enable_multithreading)
             {
-                if (ssg.frontier_flag)
-                {
-                    num_evaluated_paths++;
-                    const auto expansion = expand(ssg);
-                    if (expansion.second)
-                    {
-                        best_lyt = *expansion.second;
-                        restore_names(ssg.network, best_lyt);
+                // mutex to protect the best found layout and statistics
+                std::mutex                                   update_best_layout_mutex{};
+                std::vector<std::future<std::optional<Lyt>>> futures{};
+                futures.reserve(ssg_vec.size());
 
-                        // statistical information
-                        pst.x_size        = best_lyt.x() + 1;
-                        pst.y_size        = best_lyt.y() + 1;
-                        pst.num_gates     = best_lyt.num_gates();
-                        pst.num_wires     = best_lyt.num_wires();
-                        pst.num_crossings = best_lyt.num_crossings();
+                // process `ssg_vec` in parallel using std::async
+                for (auto& ssg : ssg_vec)
+                {
+                    futures.emplace_back(std::async(std::launch::async,
+                                                    [&]() -> std::optional<Lyt>
+                                                    {
+                                                        auto result = process_ssg(ssg);
+                                                        if (result)
+                                                        {
+                                                            const std::lock_guard<std::mutex> lock(
+                                                                update_best_layout_mutex);
+                                                            best_lyt = *result;
+                                                            restore_names(ssg.network, best_lyt);
+                                                            update_stats(best_lyt);
+
+                                                            if (ps.return_first)
+                                                            {
+                                                                return best_lyt;
+                                                            }
+                                                        }
+                                                        return std::nullopt;
+                                                    }));
+                }
+
+                // check the futures for the result
+                for (auto& future : futures)
+                {
+                    const auto result = future.get();  // blocking wait to get the result from the future
+                    if (result)
+                    {
+                        return *result;  // return the first found layout if ps.return_first is true
+                    }
+                }
+            }
+            else
+            {
+                // single-threaded version
+                for (auto& ssg : ssg_vec)
+                {
+                    auto result = process_ssg(ssg);
+                    if (result)
+                    {
+                        best_lyt = *result;
+                        restore_names(ssg.network, best_lyt);
+                        update_stats(best_lyt);
 
                         if (ps.return_first)
                         {
-                            return best_lyt;
-                        }
-                    }
-                    for (const auto& [next, cost] : expansion.first)
-                    {
-                        if (ssg.cost_so_far.find(next) == ssg.cost_so_far.cend() || cost < ssg.cost_so_far[next])
-                        {
-                            ssg.cost_so_far[next] = cost;
-                            double priority       = cost;
-                            ssg.frontier.put(next, priority);
+                            return *result;
                         }
                     }
                 }
             }
+
+            // update current_vertex and frontier_flag (non-parallel for now)
             for (auto& ssg : ssg_vec)
             {
                 if (ssg.frontier_flag)
@@ -752,6 +802,7 @@ class graph_oriented_layout_design_impl
                 }
             }
 
+            // check if timeout is reached or solution found
             timeout_limit_reached =
                 std::none_of(ssg_vec.cbegin(), ssg_vec.cend(), [](const auto& ssg) { return ssg.frontier_flag; });
 
@@ -761,7 +812,7 @@ class graph_oriented_layout_design_impl
 
             if (duration_ms >= timeout)
             {
-                // Terminate the algorithm if the specified timeout was set or a solution was found in low-effort mode
+                // terminate the algorithm if the specified timeout was set or a solution was found in low-effort mode
                 if ((ps.mode == graph_oriented_layout_design_params::effort_mode::HIGH_EFFICIENCY &&
                      (improve_area_solution || improve_wire_solution || improve_crossing_solution ||
                       improve_acp_solution || improve_custom_solution)) ||
@@ -807,6 +858,10 @@ class graph_oriented_layout_design_impl
      */
     uint64_t timeout;
     /**
+     * Timeout limit reached.
+     */
+    bool timeout_limit_reached = false;
+    /**
      * Start time.
      */
     std::chrono::time_point<std::chrono::high_resolution_clock> start;
@@ -819,69 +874,65 @@ class graph_oriented_layout_design_impl
      */
     std::vector<search_space_graph<ObstrLyt>> ssg_vec;
     /**
-     * Count evaluated paths in the search space graphs.
-     */
-    uint64_t num_evaluated_paths{0ul};
-    /**
      * Keep track of the maximum number of placed nodes.
      */
-    uint64_t max_placed_nodes{0ul};
+    std::atomic<uint64_t> max_placed_nodes{0ul};
     /**
      * The current best solution with respect to area, initialized to the maximum possible value.
      * This value will be updated as better solutions are found.
      */
-    uint64_t best_area_solution = std::numeric_limits<uint64_t>::max();
+    std::atomic<uint64_t> best_area_solution = std::numeric_limits<uint64_t>::max();
     /**
      * The current best solution with respect to the number of wire segments, initialized to the maximum possible value.
      * This value will be updated as better solutions are found.
      */
-    uint64_t best_wire_solution = std::numeric_limits<uint64_t>::max();
+    std::atomic<uint64_t> best_wire_solution = std::numeric_limits<uint64_t>::max();
     /**
      * The current best solution with respect to the number of crossings, initialized to the maximum possible
      * value. This value will be updated as better solutions are found.
      */
-    uint64_t best_crossing_solution = std::numeric_limits<uint64_t>::max();
+    std::atomic<uint64_t> best_crossing_solution = std::numeric_limits<uint64_t>::max();
     /**
      * The current best solution with respect to the area-crossing product (ACP), initialized to the maximum possible
      * value. This value will be updated as better solutions are found.
      */
-    uint64_t best_acp_solution = std::numeric_limits<uint64_t>::max();
+    std::atomic<uint64_t> best_acp_solution = std::numeric_limits<uint64_t>::max();
     /**
      * The current best solution with respect to a custom cost objective, initialized to the maximum possible value.
      * This value will be updated as better solutions are found.
      */
-    uint64_t best_custom_solution = std::numeric_limits<uint64_t>::max();
+    std::atomic<uint64_t> best_custom_solution = std::numeric_limits<uint64_t>::max();
     /**
      * Current best solution w.r.t. area after relocating POs.
      */
-    uint64_t best_optimized_solution{std::numeric_limits<uint64_t>::max()};
+    std::atomic<uint64_t> best_optimized_solution{std::numeric_limits<uint64_t>::max()};
     /**
      * Flag indicating that an initial solution has been found with the layout area as cost objective.
      * When set to `true`, subsequent search space graphs with the layout area as cost objective can be pruned.
      */
-    bool improve_area_solution = false;
+    std::atomic<bool> improve_area_solution = false;
     /**
      * Flag indicating that an initial solution has been found with the number of wire segments as cost objective.
      * When set to `true`, subsequent search space graphs with the number of wire segments as cost objective can be
      * pruned.
      */
-    bool improve_wire_solution = false;
+    std::atomic<bool> improve_wire_solution = false;
     /**
      * Flag indicating that an initial solution has been found with the number of crossings as cost objective.
      * When set to `true`, subsequent search space graphs with the number of crossings as cost objective can be pruned.
      */
-    bool improve_crossing_solution = false;
+    std::atomic<bool> improve_crossing_solution = false;
     /**
      * Flag indicating that an initial solution has been found with the area-crossings product as cost objective.
      * When set to `true`, subsequent search space graphs with the area-crossing product as cost objective can be
      * pruned.
      */
-    bool improve_acp_solution = false;
+    std::atomic<bool> improve_acp_solution = false;
     /**
      * Flag indicating that an initial solution has been found with a custom cost objective.
      * When set to `true`, subsequent search space graphs with a custom cost objective can be pruned.
      */
-    bool improve_custom_solution = false;
+    std::atomic<bool> improve_custom_solution = false;
     /**
      * In high-efficiency mode, only 2 search space graphs are used
      */
@@ -922,6 +973,20 @@ class graph_oriented_layout_design_impl
         return (mode == graph_oriented_layout_design_params::effort_mode::HIGH_EFFORT) ?
                    num_search_space_graphs_high_effort :
                    num_search_space_graphs_high_efficiency;
+    }
+    /**
+     * This function updates statistical metrics.
+     *
+     * @param best_lyt The new best layout found.
+     */
+    void update_stats(const Lyt& best_lyt)
+    {
+        // Statistical information
+        pst.x_size        = best_lyt.x() + 1;
+        pst.y_size        = best_lyt.y() + 1;
+        pst.num_gates     = best_lyt.num_gates();
+        pst.num_wires     = best_lyt.num_wires();
+        pst.num_crossings = best_lyt.num_crossings();
     }
     /**
      * Checks if there is a path between the source and destination tiles in the given layout.
@@ -1451,7 +1516,10 @@ class graph_oriented_layout_design_impl
 
         // check if solution was found and update max_placed_nodes
         const auto found_solution = (place_info.current_node == ssg.nodes_to_place.size());
-        max_placed_nodes          = std::max(place_info.current_node, max_placed_nodes);
+        if (place_info.current_node > max_placed_nodes)
+        {
+            max_placed_nodes = place_info.current_node;
+        }
 
         return found_solution;
     }
@@ -1476,7 +1544,6 @@ class graph_oriented_layout_design_impl
 
         // output the elapsed time
         std::cout << fmt::format("[i]   Time taken:       {} s {} ms {} µs\n", sec, ms, us);
-        std::cout << fmt::format("[i]   Evaluated paths:  {}\n", num_evaluated_paths);
         std::cout << fmt::format("[i]   Layout dimension: {} × {} = {}\n", lyt.x() + 1, lyt.y() + 1, lyt.area());
         std::cout << fmt::format("[i]   #Wires: {}\n", lyt.num_wires() - lyt.num_pis() - lyt.num_pos());
         std::cout << fmt::format("[i]   #Crossings: {}\n", lyt.num_crossings());
@@ -1796,6 +1863,35 @@ class graph_oriented_layout_design_impl
         }
 
         return generate_next_positions(possible_positions, layout, ssg);
+    }
+    /**
+     * This function performs an expansion step on the given SSG and updates the frontier and cost information.
+     *
+     * @param ssg The search space graph to process.
+     * @return An optional layout. Returns a layout if one is found during expansion; otherwise, std::nullopt.
+     */
+    std::optional<Lyt> process_ssg(search_space_graph<ObstrLyt>& ssg)
+    {
+        if (ssg.frontier_flag)
+        {
+            const auto expansion = expand(ssg);
+            if (expansion.second)
+            {
+                return expansion.second;
+            }
+
+            // Update costs and frontier
+            for (const auto& [next, cost] : expansion.first)
+            {
+                if (ssg.cost_so_far.find(next) == ssg.cost_so_far.cend() || cost < ssg.cost_so_far[next])
+                {
+                    ssg.cost_so_far[next] = cost;
+                    double priority       = cost;
+                    ssg.frontier.put(next, priority);
+                }
+            }
+        }
+        return std::nullopt;
     }
     /**
      * Initializes the allowed positions for primary inputs (PIs), the cost for each search space graph and the maximum

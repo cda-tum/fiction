@@ -164,7 +164,8 @@ void charge_distribution_surface_layout(pybind11::module& m, const std::string& 
             "increase_charge_index_by_one",
             [](py_cds& cds, fiction::dependent_cell_mode dependent_cell_fixed,
                fiction::energy_calculation          recompute_system_energy,
-               fiction::charge_distribution_history consider_history, fiction::exact_sidb_simulation_engine engine) {
+               fiction::charge_distribution_history consider_history, fiction::exact_sidb_simulation_engine engine)
+            {
                 return cds.increase_charge_index_by_one(dependent_cell_fixed, recompute_system_energy, consider_history,
                                                         engine);
             },

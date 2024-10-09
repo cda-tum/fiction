@@ -334,7 +334,8 @@ class mugen_handler
             [this, &scheme_graph](const auto& t)
             {
                 lyt.foreach_outgoing_clocked_zone(t,
-                                                  [&scheme_graph, &t](const auto& at) {
+                                                  [&scheme_graph, &t](const auto& at)
+                                                  {
                                                       scheme_graph.attr("add_virtual_edge")(scheme_graph,
                                                                                             py::make_tuple(t.x, t.y),
                                                                                             py::make_tuple(at.x, at.y));

@@ -108,7 +108,6 @@ class opdom_command : public command
                    "The simulation base, can be 2 or 3 (only ClusterComplete supports base 3 simulation)", true);
         add_option("--engine", sim_engine_str,
                    "The simulation engine to use {QuickExact [default], ClusterComplete, QuickSim, ExGS}", true);
-
     }
 
   protected:
