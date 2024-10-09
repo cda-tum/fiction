@@ -210,7 +210,7 @@ sidb_cluster_hierarchy(Lyt& lyt, sidb_cluster_hierarchy_linkage_method linkage_m
 struct sidb_cluster;
 using sidb_cluster_ptr = std::shared_ptr<sidb_cluster>;
 /**
- * A receptor state pairs the potential recepting cluster with the identifier of the SiDB.
+ * A receptor state pairs the potential receiving cluster with the identifier of the SiDB.
  */
 struct sidb_cluster_receptor_state
 {
