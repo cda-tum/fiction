@@ -1820,7 +1820,7 @@ TEMPLATE_TEST_CASE("Special test cases", "[clustercomplete]", (sidb_100_cell_clk
 
         const clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.32}};
 
-        const auto simulation_results  = clustercomplete<TestType>(lyt, params);
+        const auto simulation_results = clustercomplete<TestType>(lyt, params);
 
         CHECK(simulation_results.charge_distributions.size() == 2);
     }
