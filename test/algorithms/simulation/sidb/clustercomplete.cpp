@@ -98,8 +98,9 @@ static bool verify_clustercomplete_result(const charge_distribution_surface<Lyt>
 }
 
 template <typename Lyt>
-static bool verify_clustercomplete_result_by_charge_indices(const charge_distribution_surface<Lyt>&              qe_cds,
-                                          const std::vector<charge_distribution_surface<Lyt>>& cc_cdss) noexcept
+static bool
+verify_clustercomplete_result_by_charge_indices(const charge_distribution_surface<Lyt>&              qe_cds,
+                                                const std::vector<charge_distribution_surface<Lyt>>& cc_cdss) noexcept
 {
     for (const auto& cc_cds : cc_cdss)
     {
@@ -1808,28 +1809,21 @@ TEMPLATE_TEST_CASE("Special test cases", "[clustercomplete]", (sidb_100_cell_clk
         CHECK(simulation_results.charge_distributions.size() == 3);
     }
 
-    // Let's figure out what do with this. I think there should be two results, since {0, 1, 1} has a local potential
-    // of 0.3199995 when all other SiDBs are NEG, which is their only possible charge state. Without error bounds, this
-    // SiDB should be strictly NEG, but error bounds exist to relax bounds, not make them stricter. Therefore, also the
-    // NEUT charge state should be accepted since the range is then (0.32 - e, 0.91 + e) = (0.319999, 0.910001).
-    // (note that I use local potential values according to Vij = - ...)
-    //    SECTION("Test case 4")
-    //    {
-    //        TestType lyt{};
-    //
-    //        lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
-    //        lyt.assign_cell_type({0, 1, 1}, TestType::cell_type::NORMAL);
-    //        lyt.assign_cell_type({9, 3, 0}, TestType::cell_type::NORMAL);
-    //        lyt.assign_cell_type({2, 4, 0}, TestType::cell_type::NORMAL);
-    //
-    //        const clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.32}};
-    //        const quickexact_params<TestType>      paramsqe{sidb_simulation_parameters{3, -0.32}};
-    //
-    //        const auto simulation_results  = clustercomplete<TestType>(lyt, params);
-    //        const auto simulation_results2 = quickexact<TestType>(lyt, paramsqe);
-    //
-    //        CHECK(simulation_results.charge_distributions.size() == 1);
-    //    }
+    SECTION("Test case 4")
+    {
+        TestType lyt{};
+
+        lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({0, 1, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({9, 3, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({2, 4, 0}, TestType::cell_type::NORMAL);
+
+        const clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.32}};
+
+        const auto simulation_results  = clustercomplete<TestType>(lyt, params);
+
+        CHECK(simulation_results.charge_distributions.size() == 2);
+    }
 
     SECTION("Test case 5")
     {
@@ -1926,43 +1920,40 @@ TEMPLATE_TEST_CASE("Special test cases", "[clustercomplete]", (sidb_100_cell_clk
         CHECK(excitedstate.get_charge_state({24, 12, 0}) == sidb_charge_state::NEGATIVE);
     }
 
-    // Same as Test case 4.
-    //    SECTION("Test case 7")
-    //    {
-    //        TestType lyt{};
-    //
-    //        lyt.assign_cell_type({11, 1, 1}, TestType::cell_type::NORMAL);
-    //        lyt.assign_cell_type({15, 1, 1}, TestType::cell_type::NORMAL);
-    //        lyt.assign_cell_type({5, 2, 1}, TestType::cell_type::NORMAL);
-    //        lyt.assign_cell_type({17, 2, 1}, TestType::cell_type::NORMAL);
-    //        lyt.assign_cell_type({20, 3, 0}, TestType::cell_type::NORMAL);
-    //        lyt.assign_cell_type({13, 3, 1}, TestType::cell_type::NORMAL);
-    //        lyt.assign_cell_type({9, 4, 1}, TestType::cell_type::NORMAL);
-    //        lyt.assign_cell_type({2, 5, 1}, TestType::cell_type::NORMAL);
-    //        lyt.assign_cell_type({17, 5, 1}, TestType::cell_type::NORMAL);
-    //        lyt.assign_cell_type({2, 6, 1}, TestType::cell_type::NORMAL);
-    //        lyt.assign_cell_type({9, 6, 1}, TestType::cell_type::NORMAL);
-    //        lyt.assign_cell_type({10, 7, 0}, TestType::cell_type::NORMAL);
-    //        lyt.assign_cell_type({8, 7, 1}, TestType::cell_type::NORMAL);
-    //        lyt.assign_cell_type({17, 9, 0}, TestType::cell_type::NORMAL);
-    //        lyt.assign_cell_type({11, 9, 1}, TestType::cell_type::NORMAL);
-    //        lyt.assign_cell_type({12, 9, 1}, TestType::cell_type::NORMAL);
-    //        lyt.assign_cell_type({5, 10, 0}, TestType::cell_type::NORMAL);
-    //        lyt.assign_cell_type({5, 10, 1}, TestType::cell_type::NORMAL);
-    //        lyt.assign_cell_type({7, 11, 1}, TestType::cell_type::NORMAL);
-    //        lyt.assign_cell_type({13, 11, 1}, TestType::cell_type::NORMAL);
-    //
-    //        const sidb_simulation_parameters params{2, -0.32};
-    //
-    //        sidb_simulation_result<TestType> cc_res = clustercomplete(lyt,
-    //        clustercomplete_params<cell<TestType>>{params});
-    //
-    //        std::sort(cc_res.charge_distributions.begin(), cc_res.charge_distributions.end(),
-    //                  [](const auto& lhs, const auto& rhs) { return lhs.get_system_energy() < rhs.get_system_energy();
-    //                  });
-    //
-    //        REQUIRE(cc_res.charge_distributions.size() == 1);
-    //    }
+    SECTION("Test case 7")
+    {
+        TestType lyt{};
+
+        lyt.assign_cell_type({11, 1, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({15, 1, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({5, 2, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({17, 2, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({20, 3, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({13, 3, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({9, 4, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({2, 5, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({17, 5, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({2, 6, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({9, 6, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({10, 7, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({8, 7, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({17, 9, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({11, 9, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({12, 9, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({5, 10, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({5, 10, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({7, 11, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({13, 11, 1}, TestType::cell_type::NORMAL);
+
+        const sidb_simulation_parameters params{2, -0.32};
+
+        sidb_simulation_result<TestType> cc_res = clustercomplete(lyt, clustercomplete_params<cell<TestType>>{params});
+
+        std::sort(cc_res.charge_distributions.begin(), cc_res.charge_distributions.end(),
+                  [](const auto& lhs, const auto& rhs) { return lhs.get_system_energy() < rhs.get_system_energy(); });
+
+        CHECK(cc_res.charge_distributions.size() == 2);
+    }
 }
 
 TEMPLATE_TEST_CASE("ClusterComplete gate simulation of Si-111 surface", "[clustercomplete]",
@@ -2081,4 +2072,3 @@ TEMPLATE_TEST_CASE("ClusterComplete AND gate simulation of Si-111 surface", "[cl
         CHECK(ground_state.front().get_charge_state({23, 29, 1}) == sidb_charge_state::NEGATIVE);
     }
 }
-
