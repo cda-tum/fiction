@@ -38,8 +38,8 @@ int main()  // NOLINT
     uint64_t quickexact_non_equivalence_counter      = 0;
     uint64_t clustercomplete_non_equivalence_counter = 0;
 
-    const uint64_t num_threads_to_use =
-        std::min(std::max(uint64_t{std::thread::hardware_concurrency()}, uint64_t{1}), all_distributions.size());
+    const uint64_t num_threads_to_use = std::min(std::max(uint64_t{std::thread::hardware_concurrency()}, uint64_t{1}),
+                                                 uint64_t{all_distributions.size()});
 
     // define the top cluster charge space ranges per thread
     std::vector<std::pair<uint64_t, uint64_t>> ranges{};
