@@ -67,7 +67,7 @@ enum class exact_sidb_simulation_engine : uint8_t
 /**
  * Selector exclusively for heuristic SiDB simulation engines.
  */
-enum class heuristic_sidb_simulation_engine
+enum class heuristic_sidb_simulation_engine : uint8_t
 {
     /**
      * *QuickSim* is a heuristic simulation engine that only requires polynomial runtime.

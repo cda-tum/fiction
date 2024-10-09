@@ -47,7 +47,7 @@ struct critical_temperature_params
     /**
      * All parameters for physical SiDB simulations.
      */
-    sidb_simulation_parameters simulation_parameters{};
+    sidb_simulation_parameters simulation_parameters;
     /**
      * Simulation mode to determine the *Critical Temperature*.
      *
@@ -86,11 +86,11 @@ struct critical_temperature_stats
     /**
      * All parameters for physical SiDB simulations.
      */
-    sidb_simulation_parameters simulation_parameters{};
+    sidb_simulation_parameters simulation_parameters;
     /**
      * Name of the algorithm used to compute the physically valid charge distributions.
      */
-    std::string algorithm_name{};
+    std::string algorithm_name;
     /**
      * Number of physically valid charge configurations.
      */
