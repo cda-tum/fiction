@@ -135,6 +135,9 @@ class ground_state_space_impl
      * after which a merging of children to their direct parent is performed. This process repeats until the parent to
      * which the children are merged is the top cluster, the cluster containing all SiDBs in the layout. The Ground
      * State Space is the resulting hierarchical charge space structure.
+     *
+     * @return The results of the construction, which include the top cluster which parents all other clusters, and
+     * thereby contains the charge spaces of each cluster.
      */
     ground_state_space_results run() noexcept
     {
