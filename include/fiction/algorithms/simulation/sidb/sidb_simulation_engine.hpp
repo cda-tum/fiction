@@ -5,11 +5,10 @@
 #ifndef FICTION_SIDB_SIMULATION_ENGINE_HPP
 #define FICTION_SIDB_SIMULATION_ENGINE_HPP
 
-#include <cstdint>
-
 #include <phmap.h>
 
 #include <algorithm>
+#include <cstdint>
 #include <optional>
 #include <string>
 #include <string_view>

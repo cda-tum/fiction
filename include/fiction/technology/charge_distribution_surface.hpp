@@ -1757,7 +1757,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @param engine The simulation engine used.
      */
     void increase_charge_index_of_sub_layout_by_one(
-        const dependent_cell_mode          dependent_cell    = dependent_cell_mode::FIXED,
+        const dependent_cell_mode          dependent_cell          = dependent_cell_mode::FIXED,
         const energy_calculation           recompute_system_energy = energy_calculation::UPDATE_ENERGY,
         const charge_distribution_history  consider_history        = charge_distribution_history::NEGLECT,
         const exact_sidb_simulation_engine engine                  = exact_sidb_simulation_engine::QUICKEXACT) noexcept
@@ -2136,8 +2136,8 @@ template <class T>
 charge_distribution_surface(const T&, const sidb_simulation_parameters&) -> charge_distribution_surface<T>;
 
 template <class T>
-charge_distribution_surface(const T&, const sidb_simulation_parameters&,
-                            sidb_charge_state cs) -> charge_distribution_surface<T>;
+charge_distribution_surface(const T&, const sidb_simulation_parameters&, sidb_charge_state cs)
+    -> charge_distribution_surface<T>;
 
 }  // namespace fiction
 

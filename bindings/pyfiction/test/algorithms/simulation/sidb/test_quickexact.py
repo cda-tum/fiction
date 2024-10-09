@@ -2,6 +2,7 @@ from mnt.pyfiction import *
 import unittest
 import os
 
+
 class TestQuickExact(unittest.TestCase):
 
     def test_three_sidbs(self):

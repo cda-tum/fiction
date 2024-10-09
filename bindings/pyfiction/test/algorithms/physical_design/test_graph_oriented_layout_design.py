@@ -76,5 +76,6 @@ class TestGraphOrientedLayoutDesign(unittest.TestCase):
 
         self.assertNotEqual(equivalence_checking(network, layout), eq_type.NO)
 
+
 if __name__ == '__main__':
     unittest.main()

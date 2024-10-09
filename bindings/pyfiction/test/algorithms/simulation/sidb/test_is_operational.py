@@ -4,6 +4,7 @@ import os
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
+
 class TestIsOperational(unittest.TestCase):
 
     def test_is_operational(self):
@@ -69,6 +70,7 @@ class TestIsOperational(unittest.TestCase):
         self.assertEqual(len(operational_patterns), 2)
 
         self.assertEqual(operational_patterns, {0, 3})
+
 
 if __name__ == '__main__':
     unittest.main()

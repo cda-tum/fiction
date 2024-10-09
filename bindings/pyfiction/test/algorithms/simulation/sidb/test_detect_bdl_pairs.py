@@ -57,5 +57,6 @@ class TestDetectBDLPairs(unittest.TestCase):
         self.assertEqual(len(output_bdl_pairs), 0)
         self.assertEqual(len(normal_bdl_pairs), 2)
 
+
 if __name__ == '__main__':
     unittest.main()
