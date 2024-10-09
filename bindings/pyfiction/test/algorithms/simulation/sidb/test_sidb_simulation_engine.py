@@ -12,10 +12,10 @@ class TestSiDBSimulationEngine(unittest.TestCase):
         self.assertEqual(sidb_simulation_engine_name(sidb_simulation_engine.CLUSTERCOMPLETE), "ClusterComplete")
 
         self.assertEqual(
-            sidb_simulation_engine_name(exhaustive_sidb_simulation_engine.QUICKEXACT), "QuickExact")
-        self.assertEqual(sidb_simulation_engine_name(exhaustive_sidb_simulation_engine.EXGS), "ExGS")
+            sidb_simulation_engine_name(exact_sidb_simulation_engine.QUICKEXACT), "QuickExact")
+        self.assertEqual(sidb_simulation_engine_name(exact_sidb_simulation_engine.EXGS), "ExGS")
         self.assertEqual(
-            sidb_simulation_engine_name(exhaustive_sidb_simulation_engine.CLUSTERCOMPLETE), "ClusterComplete")
+            sidb_simulation_engine_name(exact_sidb_simulation_engine.CLUSTERCOMPLETE), "ClusterComplete")
 
         self.assertEqual(sidb_simulation_engine_name(heuristic_sidb_simulation_engine.QUICKSIM), "QuickSim")
 

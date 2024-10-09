@@ -353,7 +353,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
         for (const auto& c : strg->sidb_order)
         {
-            auto pos = sidb_nm_position<Lyt>(Lyt{}, c);
+            auto pos = sidb_nm_position<Lyt>(*this, c);
             positions.push_back(std::make_pair(pos.first, pos.second));
         }
 

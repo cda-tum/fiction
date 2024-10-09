@@ -169,7 +169,7 @@ TEST_CASE("Exact Cluster Simulation of 2 Bestagon NAND gates", "[clustercomplete
     gate_lyt.create_nand({}, {}, {2, 2});
 
     const sidb_cell_clk_lyt_siqad& cell_lyt{
-        convert_to_siqad_coordinates(apply_gate_library<sidb_cell_clk_lyt, sidb_bestagon_library>(gate_lyt))};
+        convert_layout_to_siqad_coordinates(apply_gate_library<sidb_cell_clk_lyt, sidb_bestagon_library>(gate_lyt))};
 
     SECTION("Base 2")
     {

@@ -87,12 +87,12 @@ template <typename EngineType>
 [[nodiscard]] inline std::string sidb_simulation_engine_name(const EngineType& engine) noexcept
 {
     static_assert(std::is_same_v<EngineType, sidb_simulation_engine> ||
-                      std::is_same_v<EngineType, exhaustive_sidb_simulation_engine> ||
+                      std::is_same_v<EngineType, exact_sidb_simulation_engine> ||
                       std::is_same_v<EngineType, heuristic_sidb_simulation_engine>,
                   "EngineType must be a SiDB simulation engine type");
 
     if constexpr (std::is_same_v<EngineType, sidb_simulation_engine> ||
-                  std::is_same_v<EngineType, exhaustive_sidb_simulation_engine>)
+                  std::is_same_v<EngineType, exact_sidb_simulation_engine>)
     {
         switch (engine)
         {

@@ -9363,17 +9363,6 @@ static const char *__doc_fiction_exact_physical_design_stats_x_size = R"doc()doc
 
 static const char *__doc_fiction_exact_physical_design_stats_y_size = R"doc()doc";
 
-static const char *__doc_fiction_exact_sidb_simulation_engine = R"doc(Selector exclusively for exact SiDB simulation engines.)doc";
-
-static const char *__doc_fiction_exact_sidb_simulation_engine_EXGS =
-R"doc(*Exhaustive Ground State Search* (EXGS) is an exact simulation engine
-that always has exponential runtime.)doc";
-
-static const char *__doc_fiction_exact_sidb_simulation_engine_QUICKEXACT =
-R"doc(*QuickExact* is also an exact simulation engine that requires
-exponential runtime, but it scales a lot better than ExGS due to its
-effective search-space pruning.)doc";
-
 static const char *__doc_fiction_exact_with_blacklist =
 R"doc(The same as `exact` but with a black list of tiles that are not
 allowed to be used to a specified set of Boolean functions and their
@@ -9437,9 +9426,9 @@ Parameter ``ps``:
 Returns:
     sidb_simulation_result is returned with all results.)doc";
 
-static const char *__doc_fiction_exhaustive_sidb_simulation_engine = R"doc(Selector exclusively for exhaustive SiDB simulation engines.)doc";
+static const char *__doc_fiction_exact_sidb_simulation_engine = R"doc(Selector exclusively for exhaustive SiDB simulation engines.)doc";
 
-static const char *__doc_fiction_exhaustive_sidb_simulation_engine_CLUSTERCOMPLETE =
+static const char *__doc_fiction_exact_sidb_simulation_engine_CLUSTERCOMPLETE =
 R"doc(*ClusterComplete* is a novel exact simulation engine that requires
 exponential runtime, though, depending on the simulation problem, it
 effectively reduces the base number by a real number, thus allowing
@@ -9448,11 +9437,11 @@ Inherent to the simulation methodology that does not depend on the
 simulation base, it simulates very effectively for either base number
 (2 or 3).)doc";
 
-static const char *__doc_fiction_exhaustive_sidb_simulation_engine_EXGS =
+static const char *__doc_fiction_exact_sidb_simulation_engine_EXGS =
 R"doc(*Exhaustive Ground State Search* (EXGS) is an exact simulation engine
 that always has exponential runtime.)doc";
 
-static const char *__doc_fiction_exhaustive_sidb_simulation_engine_QUICKEXACT =
+static const char *__doc_fiction_exact_sidb_simulation_engine_QUICKEXACT =
 R"doc(*QuickExact* is also an exact simulation engine that requires
 exponential runtime, but it scales a lot better than ExGS due to its
 effective search-space pruning.)doc";

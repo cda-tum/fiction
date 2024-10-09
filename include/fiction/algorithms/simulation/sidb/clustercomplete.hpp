@@ -197,7 +197,7 @@ class clustercomplete_impl
     initialize_charge_layout(const Lyt& lyt, const clustercomplete_params<cell<Lyt>>& params) noexcept
     {
         charge_distribution_surface<Lyt> cds{lyt};
-        cds.assign_simulation_parameters(params.simulation_parameters);
+        cds.assign_physical_parameters(params.simulation_parameters);
 
         // assign defects if applicable
         if constexpr (has_foreach_sidb_defect_v<Lyt>)

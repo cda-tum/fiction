@@ -217,7 +217,7 @@ TEST_CASE("Benchmark ClusterComplete", "[benchmark]")
 
     lyt.create_po(signal, "o", {(i + 1) / 2, i + 1});
 
-    const lattice cl{convert_to_siqad_coordinates(
+    const lattice cl{convert_layout_to_siqad_coordinates(
         apply_gate_library<sidb_100_cell_clk_lyt, sidb_bestagon_library, hex_odd_row_gate_clk_lyt>(lyt))};
 
     BENCHMARK("3 Segment Diagonal Bestagon Wire")

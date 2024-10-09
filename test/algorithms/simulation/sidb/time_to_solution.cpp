@@ -43,7 +43,7 @@ TEMPLATE_TEST_CASE("Basic time-to-solution test with varying layouts", "[time-to
         CHECK(tts_stat_quickexact.mean_single_runtime > 0.0);
 
         time_to_solution_stats        tts_stat_clustercomplete{};
-        const time_to_solution_params tts_params_clustercomplete{exhaustive_sidb_simulation_engine::CLUSTERCOMPLETE};
+        const time_to_solution_params tts_params_clustercomplete{exact_sidb_simulation_engine::CLUSTERCOMPLETE};
         time_to_solution<TestType>(lyt, quicksim_params, tts_params_clustercomplete, &tts_stat_clustercomplete);
 
         CHECK(tts_stat_clustercomplete.algorithm == "ClusterComplete");
@@ -101,7 +101,7 @@ TEMPLATE_TEST_CASE("Basic time-to-solution test with varying layouts", "[time-to
                    Catch::Matchers::WithinAbs(0.0, physical_constants::POP_STABILITY_ERR));
 
         time_to_solution_stats        tts_stat_clustercomplete{};
-        const time_to_solution_params tts_params_clustercomplete{exhaustive_sidb_simulation_engine::CLUSTERCOMPLETE};
+        const time_to_solution_params tts_params_clustercomplete{exact_sidb_simulation_engine::CLUSTERCOMPLETE};
         time_to_solution<TestType>(lyt, quicksim_params, tts_params_clustercomplete, &tts_stat_clustercomplete);
 
         REQUIRE(tts_stat_clustercomplete.acc == 100);

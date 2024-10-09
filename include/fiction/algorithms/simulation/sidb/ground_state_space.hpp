@@ -214,8 +214,8 @@ class ground_state_space_impl
         charge_distribution_surface<Lyt> cds_min{lyt};
         charge_distribution_surface<Lyt> cds_max{lyt};
 
-        cds_min.assign_simulation_parameters(simulation_parameters);
-        cds_max.assign_simulation_parameters(simulation_parameters);
+        cds_min.assign_physical_parameters(simulation_parameters);
+        cds_max.assign_physical_parameters(simulation_parameters);
 
         cds_min.assign_all_charge_states(simulation_parameters.base == 3 ? sidb_charge_state::POSITIVE :
                                                                            sidb_charge_state::NEUTRAL);

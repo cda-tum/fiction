@@ -80,7 +80,7 @@ class quickexact_impl
             params{parameter}
     {
         charge_lyt.assign_all_charge_states(sidb_charge_state::NEGATIVE);
-        charge_lyt.assign_simulation_parameters(parameter.simulation_parameters);
+        charge_lyt.assign_physical_parameters(parameter.simulation_parameters);
     }
 
     sidb_simulation_result<Lyt> run() noexcept
@@ -276,7 +276,7 @@ class quickexact_impl
         {
             charge_lyt.assign_base_number(2);
         }
-        charge_layout.assign_simulation_parameters(params.simulation_parameters);
+        charge_layout.assign_physical_parameters(params.simulation_parameters);
         charge_layout.assign_all_charge_states(sidb_charge_state::NEUTRAL);
         charge_layout.assign_dependent_cell(all_sidbs_in_lyt_without_negative_preassigned_ones[0]);
 

@@ -40,7 +40,7 @@ void normalize_layout_coordinates(pybind11::module& m)
 }
 
 template <typename Lyt>
-void convert_to_siqad_coordinates(pybind11::module& m)
+void convert_layout_to_siqad_coordinates(pybind11::module& m)
 {
     using namespace pybind11::literals;
 
@@ -74,7 +74,7 @@ inline void layout_utils(pybind11::module& m)
     detail::normalize_layout_coordinates<py_inml_layout>(m);
     detail::normalize_layout_coordinates<py_sidb_layout>(m);
 
-    detail::convert_to_siqad_coordinates<py_sidb_layout>(m);
+    detail::convert_layout_to_siqad_coordinates<py_sidb_layout>(m);
 
     detail::random_coordinate<py_cartesian_obstruction_layout>(m);
     detail::random_coordinate<py_cartesian_gate_layout>(m);
