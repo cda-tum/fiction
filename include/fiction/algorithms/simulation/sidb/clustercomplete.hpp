@@ -102,6 +102,12 @@ template <typename Lyt>
 class clustercomplete_impl
 {
   public:
+    /**
+     * Constructor.
+     *
+     * @param lyt Layout to simulate.
+     * @param params Parameter required for both the invocation of *Ground State Space*, and the simulation following.
+     */
     explicit clustercomplete_impl(const Lyt& lyt, const clustercomplete_params<cell<Lyt>>& params) noexcept :
             charge_layout{initialize_charge_layout(lyt, params)},
             real_placed_defects{charge_layout.get_defects()},
@@ -110,7 +116,13 @@ class clustercomplete_impl
                                  physical_constants::POP_STABILITY_ERR - params.simulation_parameters.mu_plus(),
                                  -physical_constants::POP_STABILITY_ERR - params.simulation_parameters.mu_plus()}
     {}
-
+    /**
+     * This function performs the *ClusterComplete* simulation; first executing the *Ground State Space* construction,
+     * then destructing the result into the set of all physically valid charge distributions that are returned.
+     *
+     * @param params Parameter required for both the invocation of *Ground State Space*, and the simulation following.
+     * @return Results of the exact simulation.
+     */
     [[nodiscard]] sidb_simulation_result<Lyt> run(const clustercomplete_params<cell<Lyt>>& params) noexcept
     {
         result.simulation_parameters = params.simulation_parameters;
@@ -207,31 +219,58 @@ class clustercomplete_impl
 
         return cds;
     }
-
+    /**
+     * Returns `true` if and only if the given potential bound closes out SiDB-.
+     *
+     * @param pot_bound Potential lower bound.
+     */
     [[nodiscard]] constexpr inline bool fail_onto_negative_charge(const double pot_bound) const noexcept
     {
         // V > e - mu-
         return pot_bound > mu_bounds_with_error.at(0);
     }
-
+    /**
+     * Returns `true` if and only if the given potential bound closes out SiDB+.
+     *
+     * @param pot_bound Potential upper bound.
+     */
     [[nodiscard]] constexpr inline bool fail_onto_positive_charge(const double pot_bound) const noexcept
     {
         // V < -e - mu+
         return pot_bound < mu_bounds_with_error.at(3);
     }
-
+    /**
+     * Returns `true` if and only if the given potential bound closes out SiDB0.
+     *
+     * @param pot_bound Potential upper bound.
+     */
     [[nodiscard]] constexpr inline bool ub_fail_onto_neutral_charge(const double pot_bound) const noexcept
     {
         // V < -e - mu-
         return pot_bound < mu_bounds_with_error.at(1);
     }
-
+    /**
+     * Returns `true` if and only if the given potential bound closes out SiDB0.
+     *
+     * @param pot_bound Potential lower bound.
+     */
     [[nodiscard]] constexpr inline bool lb_fail_onto_neutral_charge(const double pot_bound) const noexcept
     {
         // V > e - mu+
         return pot_bound > mu_bounds_with_error.at(2);
     }
-
+    /**
+     * This function performs an analysis that is crucial to the *ClusterComplete*'s efficiency: as the *Ground State
+     * Space* construct is broken down, combinations of multiset charge configurations are tried together in more detail
+     * than in the construction preceding this second phase of the simulation.
+     *
+     * @param clustering_state The clustering state that bundles a slice (i.e., a clustering) in the cluster hierarchy
+     * along with respective projection states (i.e., multiset charge configurations) together with a store of
+     * accumulated potential projection bounds onto all SiDBs in the layout, where this information is specific to the
+     * projection states in the clustering state.
+     * @return `false` if and only if a physically valid charge distribution cannot be extracted from the clustering
+     * state.
+     */
     [[nodiscard]] bool
     meets_population_stability_criterion(const sidb_clustering_state& clustering_state) const noexcept
     {
@@ -273,7 +312,14 @@ class clustercomplete_impl
 
         return true;
     }
-
+    /**
+     * This function handles performs the last analysis step before collecting a simulation result. In order to judge
+     * whether a population stable charge distribution is physically valid, the *configuration stability* needs to be
+     * tested. If this criterion passes, the charge distribution is added to the simulation results.
+     *
+     * @param clustering_state A clustering state consisting of only singleton clusters along with associated charge
+     * states that make up a charge distribution that conforms to the *population stability* criterion.
+     */
     void add_if_configuration_stability_is_met(const sidb_clustering_state& clustering_state) noexcept
     {
         charge_distribution_surface charge_layout_copy{charge_layout};
@@ -316,14 +362,23 @@ class clustercomplete_impl
             result.charge_distributions.emplace_back(charge_layout_copy);
         }
     }
-
+    /**
+     * Helper function for obtaining the stored lower or upper bound on the electrostatic potential that SiDBs in the
+     * given projector state--i.e., a cluster together with an associated multiset charge configuration--collectively
+     * project onto the given SiDB.
+     *
+     * @tparam bound Bound to obtain (lower/upper).
+     * @param pst Projector state.
+     * @param sidb_ix Receiving SiDB.
+     * @return The potential projection associated with this bound; i.e., an electrostatic potential (in V) associated
+     * with the given projector state.
+     */
     template <bound_direction bound>
     [[nodiscard]] static constexpr inline double get_projector_state_bound_pot(const sidb_cluster_projector_state& pst,
                                                                                const uint64_t sidb_ix) noexcept
     {
         return pst.cluster->pot_projs.at(sidb_ix).get_pot_proj_for_m_conf<bound>(pst.multiset_conf).pot_val;
     }
-
     /**
      * Enumeration for specifying operations on potential bounds.
      */
@@ -338,13 +393,19 @@ class clustercomplete_impl
          */
         SUBTRACT
     };
-
+    /**
+     * Before the parent projector state may be specialized to a specific composition of its children, first the
+     * projections of the parent must be subtracted. They are later added back after all compositions were handled.
+     * Depending on the potential bound update operation, either the subtraction of addition step is performed.
+     *
+     * @tparam op The potential bound update operation; either to perform the subtraction or the addition.
+     * @param parent_pst
+     * @param clustering_state
+     */
     template <potential_bound_update_operation op>
     void add_or_subtract_parent_potential(const sidb_cluster_projector_state& parent_pst,
                                           sidb_clustering_state&              clustering_state) const noexcept
     {
-        // before the parent projector state may be specialised to a specific composition of its children; first the
-        // projections of the parent must be subtracted, then they are added back after all compositions were handled
         for (uint64_t sidb_ix = 0; sidb_ix < charge_layout.num_cells(); ++sidb_ix)
         {
             if constexpr (op == potential_bound_update_operation::ADD)
@@ -361,7 +422,23 @@ class clustercomplete_impl
             }
         }
     }
-
+    /**
+     * This recursive function is the heart of the *ClusterComplete* destruction. The given clustering state is
+     * dissected at the largest cluster to each possible specialization of it, which then enters the recursive call with
+     * the clustering state modified to have a set of sibling children replacing their direct parent. For each
+     * specialization, appropriate updates are made to the potential bounds store that is part of the clustering state.
+     * After a specialization has been handled completely, i.e., when the recursive call for this specialization
+     * returns, the specialization to the potential bounds store is undone so that a new specialization may be applied.
+     *
+     * The two base cases to the recursion are as follows: (1) the charge distributions implied by the given clustering
+     * state do not meet the population stability, meaning that this branch of the search space may be pruned through
+     * terminating the recursion at this level, and, (2) the clustering state hold only singleton clusters and passes
+     * the population stability check. In the latter case, the configuration stability check is performed before the
+     * associated charge distribution is added to the simulation results.
+     *
+     * @param clustering_state A clustering state that holds a specific combination of multiset charge configurations as
+     * projector states of which the respectively associated clusters form a clustering in the cluster hierarchy.
+     */
     void add_physically_valid_charge_configurations(sidb_clustering_state& clustering_state) noexcept
     {
         // check for pruning
@@ -400,7 +477,7 @@ class clustercomplete_impl
         // pop
         clustering_state.proj_states.pop_back();
 
-        // un-apply max_pst, thereby making space for specialisation
+        // un-apply max_pst, thereby making space for specialization
         add_or_subtract_parent_potential<potential_bound_update_operation::SUBTRACT>(*max_pst, clustering_state);
 
         // specialise for all compositions of max_pst
@@ -424,7 +501,7 @@ class clustercomplete_impl
                 clustering_state.proj_states.pop_back();
             }
 
-            // undo specialisation such that the specialisation may consider a different children composition
+            // undo specialization such that the specialization may consider a different children composition
             clustering_state.pot_bounds -= max_pst_composition.pot_bounds;
         }
 
@@ -437,7 +514,13 @@ class clustercomplete_impl
         // swap back
         std::swap(clustering_state.proj_states.back(), clustering_state.proj_states[max_pst_ix]);
     }
-
+    /**
+     * This function converts between semantically equivalent datatypes, only converting projector states to unique
+     * pointers to projector states in order to enable the move-swap-pop procedure in the recursive function above.
+     *
+     * @param composition The charge space composition to convert to an equivalent clustering state.
+     * @return The clustering state that results from the conversion.
+     */
     [[nodiscard]] sidb_clustering_state
     convert_composition_to_clustering_state(const sidb_charge_space_composition& composition) const noexcept
     {
@@ -462,7 +545,16 @@ class clustercomplete_impl
 
         return clustering_state;
     }
-
+    /**
+     * After the *Ground State Space* construction was completed and the top cluster was returned, this function splits
+     * the charge space of the top cluster into sections for the individual threads to handle. Each are decomposed
+     * recursively to generate physically valid charge distributions that emerge from increasingly specializing multiset
+     * charge configurations.
+     *
+     * @param top_cluster The top cluster that is returned by the *Ground State Space construction; it contains the
+     * entire cluster hierarchy construct.
+     * @param num_threads The maximum number of threads to use in the destruction.
+     */
     void collect_physically_valid_charge_distributions(const sidb_cluster_ptr& top_cluster,
                                                        const uint64_t          num_threads) noexcept
     {
@@ -473,13 +565,12 @@ class clustercomplete_impl
         // skip multithreading setup when only one core is needed
         if (num_threads_to_use == 1)
         {
-            for (sidb_cluster_charge_state ccs : top_cluster->charge_space)
+            for (const sidb_cluster_charge_state& ccs : top_cluster->charge_space)
             {
                 for (const sidb_charge_space_composition& composition : ccs.compositions)
                 {
                     // convert charge space composition to clustering state
-                    sidb_clustering_state clustering_state =
-                        convert_composition_to_clustering_state(composition);
+                    sidb_clustering_state clustering_state = convert_composition_to_clustering_state(composition);
 
                     // unfold
                     add_physically_valid_charge_configurations(clustering_state);
@@ -580,6 +671,5 @@ template <typename Lyt>
 }
 
 }  // namespace fiction
-
 
 #endif  // FICTION_CLUSTERCOMPLETE_HPP
