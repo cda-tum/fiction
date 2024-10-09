@@ -33,7 +33,7 @@ defaults:
 
 env:
   BUILD_TYPE: Debug
-  Z3_VERSION: 4.10.0
+  Z3_VERSION: 4.13.0
 
 jobs:
   build_and_test:

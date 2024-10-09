@@ -15,12 +15,15 @@ using namespace fiction;
 
 TEST_CASE("Write empty operational domain", "[write-operational-domain]")
 {
-    operational_domain opdom{};
-
     std::ostringstream os{};
 
     SECTION("default sweep dimensions")
     {
+        operational_domain opdom{};
+
+        opdom.dimensions.push_back(sweep_parameter::EPSILON_R);
+        opdom.dimensions.push_back(sweep_parameter::LAMBDA_TF);
+
         static constexpr const char* expected = "epsilon_r,lambda_tf,operational status\n";
 
         write_operational_domain(opdom, os);
@@ -29,8 +32,10 @@ TEST_CASE("Write empty operational domain", "[write-operational-domain]")
     }
     SECTION("custom sweep dimensions")
     {
-        opdom.x_dimension = sweep_parameter::LAMBDA_TF;
-        opdom.y_dimension = sweep_parameter::MU_MINUS;
+        operational_domain opdom{};
+
+        opdom.dimensions.push_back(sweep_parameter::LAMBDA_TF);
+        opdom.dimensions.push_back(sweep_parameter::MU_MINUS);
 
         static constexpr const char* expected = "lambda_tf,mu_minus,operational status\n";
 
@@ -43,15 +48,18 @@ TEST_CASE("Write empty operational domain", "[write-operational-domain]")
 TEST_CASE("Write simple operational domain", "[write-operational-domain]")
 {
     operational_domain opdom{};
-    opdom.operational_values = {{{0, 0}, operational_status::OPERATIONAL},
-                                {{0, 1}, operational_status::NON_OPERATIONAL}};
+
+    opdom.dimensions.push_back(sweep_parameter::EPSILON_R);
+    opdom.dimensions.push_back(sweep_parameter::LAMBDA_TF);
+
+    opdom.operational_values = {{parameter_point{{0, 0}}, operational_status::OPERATIONAL},
+                                {parameter_point{{0, 1}}, operational_status::NON_OPERATIONAL}};
 
     std::ostringstream os{};
 
     SECTION("default operational tags")
     {
-        std::set<std::string> expected{"epsilon_r,lambda_tf,operational status", "0,0,operational",
-                                       "0,1,non-operational"};
+        std::set<std::string> expected{"epsilon_r,lambda_tf,operational status", "0,0,1", "0,1,0"};
 
         write_operational_domain(opdom, os);
         const auto os_str = os.str();
@@ -80,22 +88,44 @@ TEST_CASE("Write simple operational domain", "[write-operational-domain]")
             CHECK(expected.find(line) != expected.end());
         }
     }
+
+    SECTION("skip non-operational samples")
+    {
+        write_operational_domain_params params{};
+        params.writing_mode = write_operational_domain_params::sample_writing_mode::OPERATIONAL_ONLY;
+
+        std::set<std::string> expected{"epsilon_r,lambda_tf,operational status", "0,0,1"};
+
+        write_operational_domain(opdom, os, params);
+        const auto os_str = os.str();
+
+        std::istringstream is{os_str};
+
+        for (std::string line{}; std::getline(is, line);)
+        {
+            CHECK(expected.find(line) != expected.end());
+        }
+    }
 }
 
 TEST_CASE("Write operational domain with floating-point parameter values", "[write-operational-domain]")
 {
     operational_domain opdom{};
-    opdom.operational_values = {{{0.1, 0.2}, operational_status::OPERATIONAL},
-                                {{0.3, 0.4}, operational_status::NON_OPERATIONAL},
-                                {{1.2, 1.4}, operational_status::OPERATIONAL},
-                                {{2.4, 5.75}, operational_status::NON_OPERATIONAL}};
+
+    opdom.dimensions.push_back(sweep_parameter::EPSILON_R);
+    opdom.dimensions.push_back(sweep_parameter::LAMBDA_TF);
+
+    opdom.operational_values = {{parameter_point{{0.1, 0.2}}, operational_status::OPERATIONAL},
+                                {parameter_point{{0.3, 0.4}}, operational_status::NON_OPERATIONAL},
+                                {parameter_point{{1.2, 1.4}}, operational_status::OPERATIONAL},
+                                {parameter_point{{2.4, 5.75}}, operational_status::NON_OPERATIONAL}};
 
     std::ostringstream os{};
 
     SECTION("default operational tags")
     {
-        std::set<std::string> expected{"epsilon_r,lambda_tf,operational status", "0.1,0.2,operational",
-                                       "0.3,0.4,non-operational", "1.2,1.4,operational", "2.4,5.75,non-operational"};
+        std::set<std::string> expected{"epsilon_r,lambda_tf,operational status", "0.1,0.2,1", "0.3,0.4,0", "1.2,1.4,1",
+                                       "2.4,5.75,0"};
 
         write_operational_domain(opdom, os);
         const auto os_str = os.str();
@@ -109,10 +139,28 @@ TEST_CASE("Write operational domain with floating-point parameter values", "[wri
     }
     SECTION("custom operational tags")
     {
-        const write_operational_domain_params params = {"1", "0"};
+        const write_operational_domain_params params = {"operational", "non-operational"};
 
-        std::set<std::string> expected{"epsilon_r,lambda_tf,operational status", "0.1,0.2,1", "0.3,0.4,0", "1.2,1.4,1",
-                                       "2.4,5.75,0"};
+        std::set<std::string> expected{"epsilon_r,lambda_tf,operational status", "0.1,0.2,operational",
+                                       "0.3,0.4,non-operational", "1.2,1.4,operational", "2.4,5.75,non-operational"};
+
+        write_operational_domain(opdom, os, params);
+        const auto os_str = os.str();
+
+        std::istringstream is{os_str};
+
+        for (std::string line{}; std::getline(is, line);)
+        {
+            CHECK(expected.find(line) != expected.end());
+        }
+    }
+
+    SECTION("skip non-operational samples")
+    {
+        write_operational_domain_params params{};
+        params.writing_mode = write_operational_domain_params::sample_writing_mode::OPERATIONAL_ONLY;
+
+        std::set<std::string> expected{"epsilon_r,lambda_tf,operational status", "0.1,0.2,1", "1.2,1.4,1"};
 
         write_operational_domain(opdom, os, params);
         const auto os_str = os.str();

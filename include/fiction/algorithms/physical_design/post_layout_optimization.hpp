@@ -47,6 +47,11 @@ struct post_layout_optimization_params
      * Only optimize PO positions.
      */
     bool optimize_pos_only = false;
+    /**
+     * Disable the creation of crossings during optimization. If set to true, gates will only be relocated if a
+     * crossing-free wiring is found. Defaults to false.
+     */
+    bool planar_optimization = false;
 };
 
 /**
@@ -79,16 +84,37 @@ struct post_layout_optimization_stats
      */
     double_t area_improvement{0ull};
     /**
+     * Number of wire segments before the post-layout optimization process.
+     */
+    uint64_t num_wires_before{0ull};
+    /**
+     * Number of wire segments after the post-layout optimization process.
+     */
+    uint64_t num_wires_after{0ull};
+    /**
+     * Number of crossings before the post-layout optimization process.
+     */
+    uint64_t num_crossings_before{0ull};
+    /**
+     * Number of crossings after the post-layout optimization process.
+     */
+    uint64_t num_crossings_after{0ull};
+    /**
      * Reports the statistics to the given output stream.
      *
      * @param out Output stream.
      */
     void report(std::ostream& out = std::cout) const
     {
-        out << fmt::format("[i] total time                      = {:.2f} secs\n", mockturtle::to_seconds(time_total));
-        out << fmt::format("[i] layout size before optimization = {} × {}\n", x_size_before, y_size_before);
-        out << fmt::format("[i] layout size after optimization  = {} × {}\n", x_size_after, y_size_after);
-        out << fmt::format("[i] area reduction                  = {}%\n", area_improvement);
+        out << fmt::format("[i] total time                          = {:.2f} secs\n",
+                           mockturtle::to_seconds(time_total));
+        out << fmt::format("[i] layout size before optimization     = {} × {}\n", x_size_before, y_size_before);
+        out << fmt::format("[i] layout size after optimization      = {} × {}\n", x_size_after, y_size_after);
+        out << fmt::format("[i] area reduction                      = {}%\n", area_improvement);
+        out << fmt::format("[i] num. wires before optimization      = {}\n", num_wires_before);
+        out << fmt::format("[i] num. wires after optimization       = {}\n", num_wires_after);
+        out << fmt::format("[i] num. crossings before optimization  = {}\n", num_crossings_before);
+        out << fmt::format("[i] num. crossings after optimization   = {}\n", num_crossings_after);
     }
 };
 
@@ -376,17 +402,20 @@ template <typename Lyt>
  * @param lyt Reference to the layout.
  * @param start The starting coordinate of the path.
  * @param end The ending coordinate of the path.
+ * @param planar_optimization Only allow relocation if a crossing-free wiring can be found. Defaults to false.
  * @return The computed path as a sequence of coordinates in the layout.
  */
 template <typename Lyt>
-layout_coordinate_path<Lyt> get_path_and_obstruct(Lyt& lyt, const tile<Lyt>& start, const tile<Lyt>& end)
+layout_coordinate_path<Lyt> get_path_and_obstruct(Lyt& lyt, const tile<Lyt>& start, const tile<Lyt>& end,
+                                                  const bool planar_optimization = false)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
 
     using dist = twoddwave_distance_functor<Lyt, uint64_t>;
     using cost = unit_cost_functor<Lyt, uint8_t>;
-    static const a_star_params params{true};
+    static a_star_params params{};
+    params.crossings = !planar_optimization;
 
     layout_coordinate_path<Lyt> path = a_star<layout_coordinate_path<Lyt>>(lyt, {start, end}, dist(), cost(), params);
 
@@ -412,11 +441,12 @@ layout_coordinate_path<Lyt> get_path_and_obstruct(Lyt& lyt, const tile<Lyt>& sta
  * @tparam Lyt Cartesian obstruction gate-level layout type.
  * @param lyt 2DDWave-clocked cartesian obstruction gate-level layout.
  * @param old_pos Old position of the gate to be moved.
+ * @param planar_optimization Only allow relocation if a crossing-free wiring can be found. Defaults to false.
  * @return `true` if the gate was moved successfully, `false` otherwise.
  */
 template <typename Lyt>
 bool improve_gate_location(Lyt& lyt, const tile<Lyt>& old_pos, const tile<Lyt>& max_non_po,
-                           const uint64_t max_gate_relocations) noexcept
+                           const uint64_t max_gate_relocations, const bool planar_optimization = false) noexcept
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
@@ -546,22 +576,26 @@ bool improve_gate_location(Lyt& lyt, const tile<Lyt>& old_pos, const tile<Lyt>& 
                     // get paths for fanins and fanouts
                     if (!fanins.empty())
                     {
-                        new_path_from_fanin_1_to_gate = get_path_and_obstruct(lyt, fanins[0], new_pos);
+                        new_path_from_fanin_1_to_gate =
+                            get_path_and_obstruct(lyt, fanins[0], new_pos, planar_optimization);
                     }
 
                     if (fanins.size() == 2)
                     {
-                        new_path_from_fanin_2_to_gate = get_path_and_obstruct(lyt, fanins[1], new_pos);
+                        new_path_from_fanin_2_to_gate =
+                            get_path_and_obstruct(lyt, fanins[1], new_pos, planar_optimization);
                     }
 
                     if (!fanouts.empty())
                     {
-                        new_path_from_gate_to_fanout_1 = get_path_and_obstruct(lyt, new_pos, fanouts[0]);
+                        new_path_from_gate_to_fanout_1 =
+                            get_path_and_obstruct(lyt, new_pos, fanouts[0], planar_optimization);
                     }
 
                     if (fanouts.size() == 2)
                     {
-                        new_path_from_gate_to_fanout_2 = get_path_and_obstruct(lyt, new_pos, fanouts[1]);
+                        new_path_from_gate_to_fanout_2 =
+                            get_path_and_obstruct(lyt, new_pos, fanouts[1], planar_optimization);
                     }
 
                     // if possible routing was found, it will be applied
@@ -893,8 +927,10 @@ class post_layout_optimization_impl
         static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
 
         const mockturtle::stopwatch stop{pst.time_total};
-        pst.x_size_before = plyt.x() + 1;
-        pst.y_size_before = plyt.y() + 1;
+        pst.x_size_before        = plyt.x() + 1;
+        pst.y_size_before        = plyt.y() + 1;
+        pst.num_wires_before     = plyt.num_wires() - plyt.num_pis() - plyt.num_pos();
+        pst.num_crossings_before = plyt.num_crossings();
 
         uint64_t max_gate_relocations = ps.max_gate_relocations.value_or((plyt.x() + 1) * (plyt.y() + 1));
 
@@ -955,7 +991,8 @@ class post_layout_optimization_impl
                 {
                     if (!ps.optimize_pos_only || (ps.optimize_pos_only && layout.is_po_tile(gate_tile)))
                     {
-                        if (detail::improve_gate_location(layout, gate_tile, max_non_po, max_gate_relocations))
+                        if (detail::improve_gate_location(layout, gate_tile, max_non_po, max_gate_relocations,
+                                                          ps.planar_optimization))
                         {
                             moved_at_least_one_gate = true;
                         }
@@ -980,6 +1017,9 @@ class post_layout_optimization_impl
             static_cast<double_t>(area_before - area_after) / static_cast<double_t>(area_before) * 100.0;
         area_percentage_difference = std::round(area_percentage_difference * 100) / 100;
         pst.area_improvement       = area_percentage_difference;
+
+        pst.num_wires_after     = plyt.num_wires() - plyt.num_pis() - plyt.num_pos();
+        pst.num_crossings_after = plyt.num_crossings();
     }
 
   private:
@@ -1000,10 +1040,11 @@ class post_layout_optimization_impl
 
 /**
  * A post-layout optimization algorithm as originally proposed in \"Post-Layout Optimization for Field-coupled
- * Nanotechnologies\" by S. Hofmann, M. Walter, and R. Wille in NANOARCH 2023. It can be used to reduce the area of a
- * given sub-optimal Cartesian gate-level layout created by heuristics or machine learning. This optimization utilizes
- * the distinct characteristics of the 2DDWave clocking scheme, which only allows information flow from top to bottom
- * and left to right, therefore only aforementioned clocking scheme is supported.
+ * Nanotechnologies\" by S. Hofmann, M. Walter, and R. Wille in NANOARCH 2023
+ * (https://dl.acm.org/doi/10.1145/3611315.3633247). It can be used to reduce the area of a given sub-optimal Cartesian
+ * gate-level layout created by heuristics or machine learning. This optimization utilizes the distinct characteristics
+ * of the 2DDWave clocking scheme, which only allows information flow from top to bottom and left to right, therefore
+ * only aforementioned clocking scheme is supported.
  *
  * To reduce the layout area, first, gates are moved up and to the left as far as possible, including rerouting. This
  * creates more compact layouts by freeing up space to the right and bottom, as all gates were moved to the top left

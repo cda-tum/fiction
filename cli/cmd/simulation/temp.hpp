@@ -74,22 +74,23 @@ class temp_command : public command
     {
         // reset statistics
         stats = {};
+        ct    = 0.0;
 
         if (params.confidence_level <= 0 || params.confidence_level > 1)
         {
-            env->out() << "[e] confidence_level must be in (0, 1]\n";
+            env->out() << "[e] confidence_level must be in (0, 1]" << std::endl;
             reset_params();
             return;
         }
         if (physical_params.epsilon_r <= 0)
         {
-            env->out() << "[e] epsilon_r must be positive\n";
+            env->out() << "[e] epsilon_r must be positive" << std::endl;
             reset_params();
             return;
         }
         if (physical_params.lambda_tf <= 0)
         {
-            env->out() << "[e] lambda_tf must be positive\n";
+            env->out() << "[e] lambda_tf must be positive" << std::endl;
             reset_params();
             return;
         }
@@ -99,7 +100,7 @@ class temp_command : public command
         // error case: empty cell layout store
         if (cs.empty())
         {
-            env->out() << "[w] no cell layout in store\n";
+            env->out() << "[w] no cell layout in store" << std::endl;
             reset_params();
             return;
         }
@@ -111,7 +112,7 @@ class temp_command : public command
         {
             if (ts.empty())
             {
-                env->out() << "[w] no truth table in store\n";
+                env->out() << "[w] no truth table in store" << std::endl;
                 reset_params();
                 return;
             }
@@ -128,8 +129,9 @@ class temp_command : public command
                 if constexpr (fiction::is_charge_distribution_surface_v<Lyt>)
                 {
                     env->out() << fmt::format(
-                        "[w] {} already possesses a charge distribution; no simulation is conducted\n",
-                        get_name(lyt_ptr));
+                                      "[w] {} already possesses a charge distribution; no simulation is conducted",
+                                      get_name(lyt_ptr))
+                               << std::endl;
                 }
                 else
                 {
@@ -150,45 +152,47 @@ class temp_command : public command
                         if (lyt_ptr->num_pis() == 0 || lyt_ptr->num_pos() == 0)
                         {
                             env->out() << fmt::format("[e] {} requires primary input and output cells to simulate its "
-                                                      "Boolean function\n",
-                                                      get_name(lyt_ptr));
+                                                      "Boolean function",
+                                                      get_name(lyt_ptr))
+                                       << std::endl;
                             return;
                         }
 
                         const auto tt_ptr = ts.current();
 
-                        fiction::critical_temperature_gate_based(*lyt_ptr, std::vector<fiction::tt>{*tt_ptr}, params,
-                                                                 &stats);
+                        ct = fiction::critical_temperature_gate_based(*lyt_ptr, std::vector<fiction::tt>{*tt_ptr},
+                                                                      params, &stats);
                     }
                     else
                     {
-                        fiction::critical_temperature_non_gate_based(*lyt_ptr, params, &stats);
+                        ct = fiction::critical_temperature_non_gate_based(*lyt_ptr, params, &stats);
                     }
 
                     if (stats.num_valid_lyt == 0)
                     {
-                        env->out() << fmt::format("[e] ground state of {} could not be determined\n",
-                                                  get_name(lyt_ptr));
+                        env->out() << fmt::format("[e] ground state of {} could not be determined", get_name(lyt_ptr))
+                                   << std::endl;
                     }
                     else
                     {
-                        env->out() << fmt::format("[i] critical temperature of {} is {}{} K\n", get_name(lyt_ptr),
-                                                  (stats.critical_temperature == params.max_temperature ? "> " : ""),
-                                                  stats.critical_temperature);
+                        env->out() << fmt::format("[i] critical temperature of {} is {}{} K", get_name(lyt_ptr),
+                                                  (ct == params.max_temperature ? "> " : ""), ct)
+                                   << std::endl;
 
                         if (stats.num_valid_lyt > 1)
                         {
                             env->out() << fmt::format(
-                                "[i] energy between the ground state and the first erroneous is {} meV\n",
-                                fiction::round_to_n_decimal_places(
-                                    stats.energy_between_ground_state_and_first_erroneous, 2));
+                                              "[i] energy between the ground state and the first erroneous is {} meV",
+                                              fiction::round_to_n_decimal_places(
+                                                  stats.energy_between_ground_state_and_first_erroneous, 2))
+                                       << std::endl;
                         }
                     }
                 }
             }
             else
             {
-                env->out() << fmt::format("[e] {} is not an SiDB layout\n", get_name(lyt_ptr));
+                env->out() << fmt::format("[e] {} is not an SiDB layout", get_name(lyt_ptr)) << std::endl;
             }
         };
 
@@ -211,6 +215,10 @@ class temp_command : public command
      */
     fiction::critical_temperature_stats stats{};
     /**
+     * Critical temperature.
+     */
+    double ct = 0.0;
+    /**
      * The simulation engine to use.
      */
     std::string sim_engine_str{"QuickExact"};
@@ -227,7 +235,7 @@ class temp_command : public command
                                 {"epsilon_r", stats.simulation_parameters.epsilon_r},
                                 {"lambda_tf", stats.simulation_parameters.lambda_tf},
                                 {"mu_minus", stats.simulation_parameters.mu_minus}}},
-                              {"Critical temperature", stats.critical_temperature},
+                              {"Critical temperature", ct},
                               {"Number of stable states", stats.num_valid_lyt},
                               {"Energy difference between ground state and first erroneous state",
                                stats.energy_between_ground_state_and_first_erroneous}};

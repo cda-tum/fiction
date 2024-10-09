@@ -45,13 +45,18 @@ inline void sidb_simulation_engine(pybind11::module& m)
 
         ;
 
-    py::enum_<fiction::exhaustive_sidb_simulation_engine>(m, "exhaustive_sidb_simulation_engine",
+    py::enum_<fiction::exact_sidb_simulation_engine>(m, "exact_sidb_simulation_engine",
+                                                     DOC(fiction_exact_sidb_simulation_engine))
+        .value("EXGS", fiction::exact_sidb_simulation_engine::EXGS, DOC(fiction_exact_sidb_simulation_engine_EXGS))
+        .value("QUICKEXACT", fiction::exact_sidb_simulation_engine::QUICKEXACT,
+               DOC(fiction_exact_sidb_simulation_engine_QUICKEXACT))
+    py::enum_<fiction::exact_sidb_simulation_engine>(m, "exhaustive_sidb_simulation_engine",
                                                           DOC(fiction_exhaustive_sidb_simulation_engine))
-        .value("EXGS", fiction::exhaustive_sidb_simulation_engine::EXGS,
+        .value("EXGS", fiction::exact_sidb_simulation_engine::EXGS,
                DOC(fiction_exhaustive_sidb_simulation_engine_EXGS))
-        .value("QUICKEXACT", fiction::exhaustive_sidb_simulation_engine::QUICKEXACT,
+        .value("QUICKEXACT", fiction::exact_sidb_simulation_engine::QUICKEXACT,
                DOC(fiction_exhaustive_sidb_simulation_engine_QUICKEXACT))
-        .value("CLUSTERCOMPLETE", fiction::exhaustive_sidb_simulation_engine::CLUSTERCOMPLETE,
+        .value("CLUSTERCOMPLETE", fiction::exact_sidb_simulation_engine::CLUSTERCOMPLETE,
                DOC(fiction_exhaustive_sidb_simulation_engine_CLUSTERCOMPLETE))
 
         ;
@@ -64,7 +69,7 @@ inline void sidb_simulation_engine(pybind11::module& m)
         ;
 
     detail::sidb_simulation_engine_name<fiction::sidb_simulation_engine>(m);
-    detail::sidb_simulation_engine_name<fiction::exhaustive_sidb_simulation_engine>(m);
+    detail::sidb_simulation_engine_name<fiction::exact_sidb_simulation_engine>(m);
     detail::sidb_simulation_engine_name<fiction::heuristic_sidb_simulation_engine>(m);
 }
 

@@ -19,6 +19,20 @@
 
 using namespace fiction;
 
+TEST_CASE("SiQAD OR gate", "[is-operational]")
+{
+    const auto layout_or_gate = blueprints::siqad_or_gate<sidb_cell_clk_lyt_siqad>();
+
+    const sidb_100_cell_clk_lyt_siqad lat{layout_or_gate};
+
+    CHECK(is_operational(lat, std::vector<tt>{create_or_tt()},
+                         is_operational_params{sidb_simulation_parameters{2, -0.30}})
+              .first == operational_status::OPERATIONAL);
+    CHECK(
+        is_operational(lat, std::vector<tt>{create_or_tt()}, is_operational_params{sidb_simulation_parameters{2, -0.1}})
+            .first == operational_status::NON_OPERATIONAL);
+}
+
 TEST_CASE("SiQAD's AND gate with input BDL pairs of different size", "[is-operational]")
 {
     using layout = sidb_cell_clk_lyt_siqad;
@@ -296,5 +310,41 @@ TEST_CASE("is operational check for Bestagon CX gate", "[is-operational], [quali
     CHECK(
         is_operational(lat, create_crossing_wire_tt(),
                        is_operational_params{sidb_simulation_parameters{2, -0.30}, sidb_simulation_engine::QUICKEXACT})
+            .first == operational_status::NON_OPERATIONAL);
+}
+
+TEST_CASE("is operational check for Bestagon double wire", "[is-operational], [quality]")
+{
+    const auto lyt = blueprints::bestagon_double_wire<sidb_cell_clk_lyt_siqad>();
+
+    CHECK(lyt.num_cells() == 30);
+
+    const sidb_100_cell_clk_lyt_siqad lat{lyt};
+
+    CHECK(
+        is_operational(lat, create_double_wire_tt(),
+                       is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT})
+            .first == operational_status::OPERATIONAL);
+    CHECK(
+        is_operational(lat, create_double_wire_tt(),
+                       is_operational_params{sidb_simulation_parameters{2, -0.30}, sidb_simulation_engine::QUICKEXACT})
+            .first == operational_status::NON_OPERATIONAL);
+}
+
+TEST_CASE("is operational check for Bestagon half adder", "[is-operational], [quality]")
+{
+    const auto lyt = blueprints::bestagon_ha<sidb_cell_clk_lyt_siqad>();
+
+    CHECK(lyt.num_cells() == 26);
+
+    const sidb_100_cell_clk_lyt_siqad lat{lyt};
+
+    CHECK(
+        is_operational(lat, create_half_adder_tt(),
+                       is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT})
+            .first == operational_status::OPERATIONAL);
+    CHECK(
+        is_operational(lat, create_half_adder_tt(),
+                       is_operational_params{sidb_simulation_parameters{2, -0.25}, sidb_simulation_engine::QUICKEXACT})
             .first == operational_status::NON_OPERATIONAL);
 }

@@ -4,6 +4,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "fiction/layouts/coordinates.hpp"
 #include "utils/blueprints/layout_blueprints.hpp"
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
@@ -25,8 +26,6 @@
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/tech_library.hpp>
-
-#include <type_traits>
 
 using namespace fiction;
 

@@ -27,6 +27,8 @@ namespace fiction
 
 /**
  * This struct stores the parameters for the *QuickExact* algorithm.
+ *
+ * @tparam CellType Cell type.
  */
 template <typename CellType = siqad::coord_t>
 struct quickexact_params
@@ -34,7 +36,7 @@ struct quickexact_params
     /**
      * Modes to use for the *QuickExact* algorithm.
      */
-    enum class automatic_base_number_detection
+    enum class automatic_base_number_detection : uint8_t
     {
         /**
          * Simulation is conducted with the required base number (i.e., if positively charged SiDBs can occur, three
@@ -170,9 +172,9 @@ class quickexact_impl
                     }
 
                     charge_lyt.increase_charge_index_by_one(
-                        dependent_cell_mode::VARIABLE);  // "Variable" allows that the charge state of the dependent
-                                                         // cell is automatically changed based on the new charge
-                                                         // distribution.
+                        dependent_cell_mode::VARIABLE);  // `dependent_cell_mode::VARIABLE` allows that the charge state
+                                                         // of the dependent cell is automatically changed based on the
+                                                         // new charge distribution.
                 }
 
                 if (charge_lyt.is_physically_valid())
@@ -240,7 +242,7 @@ class quickexact_impl
     /**
      * Base number required for the correct physical simulation.
      */
-    enum class required_simulation_base_number
+    enum class required_simulation_base_number : uint8_t
     {
         /**
          * Two state simulation (i.e., negative and neutral) is sufficient.
@@ -293,8 +295,8 @@ class quickexact_impl
         }
 
         // Update all local potentials, system energy, and physical validity. The flag is set to
-        // `VARIABLE` to allow the dependent cell to change its charge state based on the N-1 SiDBs to
-        // fulfill the local population stability at its position.
+        // `dependent_cell_mode::VARIABLE` to allow the dependent cell to change its charge state based on the N-1 SiDBs
+        // to fulfill the local population stability at its position.
         charge_layout.update_after_charge_change(dependent_cell_mode::VARIABLE);
 
         if constexpr (has_get_sidb_defect_v<Lyt>)
@@ -405,9 +407,9 @@ class quickexact_impl
                 charge_layout.increase_charge_index_of_sub_layout_by_one(
                     dependent_cell_mode::VARIABLE, energy_calculation::KEEP_OLD_ENERGY_VALUE,
                     charge_distribution_history::CONSIDER,
-                    exhaustive_sidb_simulation_engine::QUICKEXACT);  // "false" allows that the charge state of the
-                                                                     // dependent cell is automatically changed based on
-                                                                     // the new charge distribution.
+                    exact_sidb_simulation_engine::QUICKEXACT);  // `dependent_cell_mode::VARIABLE` allows that the
+                                                                // charge state of the dependent cell is automatically
+                                                                // changed based on the new charge distribution.
             }
 
             if (charge_layout.is_physically_valid())
@@ -432,9 +434,9 @@ class quickexact_impl
             charge_layout.increase_charge_index_by_one(
                 dependent_cell_mode::VARIABLE, energy_calculation::KEEP_OLD_ENERGY_VALUE,
                 charge_distribution_history::NEGLECT,
-                exhaustive_sidb_simulation_engine::QUICKEXACT);  // "false" allows that the charge state of the
-                                                                 // dependent cell is automatically changed based on the
-                                                                 // new charge distribution.
+                exact_sidb_simulation_engine::QUICKEXACT);  // `dependent_cell_mode::VARIABLE` allows that the charge
+                                                            // state of the dependent cell is automatically changed
+                                                            // based on the new charge distribution.
         }
 
         // charge configurations of the sublayout are iterated
@@ -456,7 +458,7 @@ class quickexact_impl
 
             charge_layout.increase_charge_index_of_sub_layout_by_one(
                 dependent_cell_mode::VARIABLE, energy_calculation::KEEP_OLD_ENERGY_VALUE,
-                charge_distribution_history::CONSIDER, exhaustive_sidb_simulation_engine::QUICKEXACT);
+                charge_distribution_history::CONSIDER, exact_sidb_simulation_engine::QUICKEXACT);
         }
 
         if (charge_layout.is_physically_valid())
@@ -499,7 +501,7 @@ class quickexact_impl
                 {
                     const auto& [cell, defect] = cd;
 
-                    if (defect.type != sidb_defect_type::NONE)
+                    if (defect.type != sidb_defect_type::NONE && is_charged_defect_type(cd.second))
                     {
                         charge_lyt.add_sidb_defect_to_potential_landscape(cell, layout.get_sidb_defect(cell));
                     }

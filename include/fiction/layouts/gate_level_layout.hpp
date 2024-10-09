@@ -99,8 +99,9 @@ class gate_level_layout : public ClockedLayout
         phmap::parallel_flat_hash_map<Node, Tile> node_tile_map{
             {{static_cast<Node>(0ull), const0}, {static_cast<Node>(1ull), const1}}};
 
-        uint32_t num_gates = 0ull;
-        uint32_t num_wires = 0ull;
+        uint32_t num_gates     = 0ull;
+        uint32_t num_wires     = 0ull;
+        uint32_t num_crossings = 0ull;
 
         uint32_t trav_id = 0ul;
 
@@ -556,6 +557,15 @@ class gate_level_layout : public ClockedLayout
         return strg->data.num_wires;
     }
     /**
+     * Returns the number of placed nodes in the layout that compute the identity function and cross other nodes.
+     *
+     * @return Number of crossings in the layout.
+     */
+    [[nodiscard]] auto num_crossings() const noexcept
+    {
+        return strg->data.num_crossings;
+    }
+    /**
      * Checks whether there are no gates or wires assigned to the layout's coordinates.
      *
      * @return `true` iff the layout is empty.
@@ -755,6 +765,12 @@ class gate_level_layout : public ClockedLayout
                 {
                     strg->data.num_wires--;
 
+                    // decrease crossing count
+                    if (ClockedLayout::is_crossing_layer(t) && !is_empty_tile(ClockedLayout::below(t)))
+                    {
+                        strg->data.num_crossings--;
+                    }
+
                     // find PO entry and remove it if present
                     if (const auto po_it =
                             std::find_if(strg->outputs.cbegin(), strg->outputs.cend(),
@@ -871,6 +887,26 @@ class gate_level_layout : public ClockedLayout
     [[nodiscard]] bool is_maj(const node n) const noexcept
     {
         return strg->nodes[n].data[1].h1 == 10;
+    }
+
+    [[nodiscard]] bool is_lt(const node n) const noexcept
+    {
+        return strg->nodes[n].data[1].h1 == 11;
+    }
+
+    [[nodiscard]] bool is_gt(const node n) const noexcept
+    {
+        return strg->nodes[n].data[1].h1 == 12;
+    }
+
+    [[nodiscard]] bool is_ge(const node n) const noexcept
+    {
+        return strg->nodes[n].data[1].h1 == 13;
+    }
+
+    [[nodiscard]] bool is_le(const node n) const noexcept
+    {
+        return strg->nodes[n].data[1].h1 == 14;
     }
     /**
      * Returns whether `n` is a wire and has multiple outputs, thereby, acting as a fanout gate. Note that a fanout will
@@ -1621,13 +1657,18 @@ class gate_level_layout : public ClockedLayout
             strg->data.fn_cache.insert(tt);
         };
 
-        static constexpr const uint64_t lit_not = 0x1, lit_and = 0x8, lit_or = 0xe, lit_xor = 0x6, lit_maj = 0xe8;
+        static constexpr const uint64_t lit_not = 0x1, lit_and = 0x8, lit_or = 0xe, lit_xor = 0x6, lit_maj = 0xe8,
+                                        lit_lt = 0x2, lit_gt = 0x4, lit_ge = 0x13, lit_le = 0x11;
 
         create_and_cache(lit_not, 1);  // since NOT is not normal, its complement, i.e., the identity, is stored
         create_and_cache(lit_and, 2);
         create_and_cache(lit_or, 2);
         create_and_cache(lit_xor, 2);
         create_and_cache(lit_maj, 3);
+        create_and_cache(lit_lt, 2);
+        create_and_cache(lit_gt, 2);
+        create_and_cache(lit_ge, 2);
+        create_and_cache(lit_le, 2);
     }
 
     void assign_node(const tile& t, const node n)
@@ -1644,6 +1685,11 @@ class gate_level_layout : public ClockedLayout
             if (is_wire(n))
             {
                 strg->data.num_wires++;
+
+                if (ClockedLayout::is_crossing_layer(t) && !is_empty_tile(ClockedLayout::below(t)))
+                {
+                    strg->data.num_crossings++;
+                }
             }
             else  // is gate
             {

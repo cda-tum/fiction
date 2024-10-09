@@ -9,7 +9,6 @@
 
 #include "fiction/algorithms/iter/aspect_ratio_iterator.hpp"
 #include "fiction/algorithms/network_transformation/fanout_substitution.hpp"
-#include "fiction/io/print_layout.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/technology/cell_ports.hpp"
 #include "fiction/technology/sidb_surface_analysis.hpp"
@@ -41,8 +40,10 @@
 #include <cassert>
 #include <chrono>
 #include <cstdint>
+#include <cstdlib>
 #include <functional>
 #include <future>
+#include <limits>
 #include <memory>
 #include <mutex>
 #include <optional>
@@ -155,16 +156,17 @@ struct exact_physical_design_stats
     mockturtle::stopwatch<>::duration time_total{0};
 
     uint64_t x_size{0ull}, y_size{0ull};
-    uint64_t num_gates{0ull}, num_wires{0ull};
+    uint64_t num_gates{0ull}, num_wires{0ull}, num_crossings{0ull};
 
     uint32_t num_aspect_ratios{0ul};
 
     void report(std::ostream& out = std::cout) const
     {
-        out << fmt::format("[i] total time  = {:.2f} secs\n", mockturtle::to_seconds(time_total));
-        out << fmt::format("[i] layout size = {} × {}\n", x_size, y_size);
-        out << fmt::format("[i] num. gates  = {}\n", num_gates);
-        out << fmt::format("[i] num. wires  = {}\n", num_wires);
+        out << fmt::format("[i] total time      = {:.2f} secs\n", mockturtle::to_seconds(time_total));
+        out << fmt::format("[i] layout size     = {} × {}\n", x_size, y_size);
+        out << fmt::format("[i] num. gates      = {}\n", num_gates);
+        out << fmt::format("[i] num. wires      = {}\n", num_wires);
+        out << fmt::format("[i] num. crossings  = {}\n", num_crossings);
     }
 };
 
@@ -2962,7 +2964,7 @@ class exact_impl
      */
     [[nodiscard]] std::optional<Lyt> run_asynchronously()
     {
-        std::cout << "You have called an unstable beta feature that might crash." << std::endl;
+        std::cout << "You have called an unstable beta feature that might crash.\n";
 
         Lyt layout{{}, scheme};
 
@@ -3032,10 +3034,11 @@ class exact_impl
         if (result_aspect_ratio.has_value())
         {
             // statistical information
-            pst.x_size    = layout.x() + 1;
-            pst.y_size    = layout.y() + 1;
-            pst.num_gates = layout.num_gates();
-            pst.num_wires = layout.num_wires();
+            pst.x_size        = layout.x() + 1;
+            pst.y_size        = layout.y() + 1;
+            pst.num_gates     = layout.num_gates();
+            pst.num_wires     = layout.num_wires();
+            pst.num_crossings = layout.num_crossings();
 
             return layout;
         }
@@ -3087,10 +3090,11 @@ class exact_impl
                 if (sat)
                 {
                     // statistical information
-                    pst.x_size    = layout.x() + 1;
-                    pst.y_size    = layout.y() + 1;
-                    pst.num_gates = layout.num_gates();
-                    pst.num_wires = layout.num_wires();
+                    pst.x_size        = layout.x() + 1;
+                    pst.y_size        = layout.y() + 1;
+                    pst.num_gates     = layout.num_gates();
+                    pst.num_wires     = layout.num_wires();
+                    pst.num_crossings = layout.num_crossings();
 
                     return layout;
                 }
@@ -3193,7 +3197,7 @@ std::optional<Lyt> exact(const Ntk& ntk, const exact_physical_design_params& ps 
     {
         if (ps.synchronization_elements)
         {
-            std::cout << "[w] Lyt does not support synchronization elements; not using them" << std::endl;
+            std::cout << "[w] Lyt does not support synchronization elements; not using them\n";
         }
     }
 
@@ -3247,7 +3251,7 @@ std::optional<Lyt> exact_with_blacklist(const Ntk& ntk, const surface_black_list
         throw unsupported_clocking_scheme_exception();
     }
     // check for input degree
-    else if (has_high_degree_fanin_nodes(ntk, clocking_scheme->max_in_degree))
+    if (has_high_degree_fanin_nodes(ntk, clocking_scheme->max_in_degree))
     {
         throw high_degree_fanin_exception();
     }
@@ -3257,15 +3261,14 @@ std::optional<Lyt> exact_with_blacklist(const Ntk& ntk, const surface_black_list
         if (ps.straight_inverters)
         {
             std::cout << "[w] Lyt does not implement the foreach_adjacent_opposite_tiles function; straight inverters "
-                         "cannot be guaranteed"
-                      << std::endl;
+                         "cannot be guaranteed\n";
         }
     }
     if constexpr (!fiction::has_synchronization_elements_v<Lyt>)
     {
         if (ps.synchronization_elements)
         {
-            std::cout << "[w] Lyt does not support synchronization elements; not using them" << std::endl;
+            std::cout << "[w] Lyt does not support synchronization elements; not using them\n";
         }
     }
 

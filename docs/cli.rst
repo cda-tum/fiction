@@ -75,8 +75,8 @@ Truth tables
 ############
 
 The ``truth_table`` store (``-t``) can hold logic descriptions in binary format as implemented in the ``kitty`` library
-by Mathias Soeken. These can either be loaded via command ``tt`` by specifying a bit/hex string or a Boolean expression,
-or be obtained by :ref:`simulating<command simulate>` a ``network`` or ``gate_layout`` via command
+by Mathias Soeken. These can either be loaded via command ``tt`` by specifying a bit/hex string (``-t``) or a Boolean
+expression (``-e``), or be obtained by :ref:`simulating<command simulate>` a ``network`` or ``gate_layout`` via command
 ``simulate``. Generating a ``truth_table`` from an expression uses the following syntax (from the
 `kitty documentation <https://libkitty.readthedocs.io/en/latest/reference.html#_CPPv4I0EN5kitty22create_from_expressionEbR2TTRKNSt6stringE>`_):
 
@@ -87,7 +87,7 @@ if-then-else, or ``!{!a!b}`` to describe the application of De Morgan's law to `
 fit the largest variable in the expression, e.g., if ``c`` is the largest variable, then the truth table has at least
 three variables.
 
-Alternatively, ``tt 0110`` or ``tt 0xaffe`` generate a ``truth_table`` from bit/hex strings.
+For example, ``tt -t 0110`` and ``tt -t 0xaffe`` generate a ``truth_table`` from bit and hex strings, respectively.
 
 Logic synthesis
 ###############
@@ -192,6 +192,20 @@ FCN circuit implementation of some specification under the provided parameters. 
 
 The possible parameters are similar to the ones used for ``exact``. See ``onepass -h`` for a full list.
 
+Graph-oriented layout design (``gold``)
+#######################################
+
+Generates gate-level layouts from logic network specifications by spanning a search space graph where each placement event can be represented as a search space vertex characterized by a partial layout at that instance. Edges between a partial layout ``a`` and ``b`` exist iff a can be transformed into ``b`` via a single placement event. Similar to navigating through a maze, A*-search can be employed to discover a path from the starting vertex (the empty layout) to the exit of the maze (a layout with all gates placed). This approach is scalable but requires that the input network is restricted to a 3-graph. At the same time, the output layout will always be 2DDWave-clocked and is not always optimal. For more information, see
+`the paper <https://www.cda.cit.tum.de/files/eda/2024_ieee_nano_a_star_is_born.pdf>`_.
+
+Possible parameters:
+
+- Timeout (``-t``), in seconds.
+- Number of expansions (``-n``) for each vertex in the search space graph, defaults to 4.
+- High effort mode (``-e``), should be set if more runtime is available to find layouts with even less area, not set by default.
+- Return first (``-r``), to return the first found layout, not set by default.
+- Planar (``-p``), should be set to create layouts without crossings, not set by default.
+
 Hexagonalization (``hex``)
 ##########################
 
@@ -211,6 +225,7 @@ Possible parameters:
 
 - Number of maximum gate relocations (``-m``), should be set to 1 for layouts with more than 100000 tiles, defaults to the number of tiles in the layout.
 - Wiring reduction only (``-w``), should be set for layouts with more than 20000000 tiles, not set by default.
+- Planar optimization (``-p``), should be set if during optimization, gates should only be relocated if the new wiring contains no crossings, not set by default.
 
 Design rule checking (``check``)
 --------------------------------
@@ -391,8 +406,9 @@ processed by other tools.
 The parameter space to sweep over can be specified by the user via the flags
 - ``--x_sweep``
 - ``--y_sweep``
+- ``--z_sweep``
 which have to be either ``epsilon_r``, ``lambda_tf``, or ``mu_minus``. The default is ``epsilon_r`` for ``--x_sweep`` and
-``lambda_tf`` for ``--y_sweep``.
+``lambda_tf`` for ``--y_sweep``, with ``--z_sweep`` being an optional third sweep dimension.
 
 Additionally, min, max, and step size values can be specified for each parameter using the flags
 - ``--x_min``
@@ -401,7 +417,12 @@ Additionally, min, max, and step size values can be specified for each parameter
 - ``--y_min``
 - ``--y_max``
 - ``--y_step``
-respectively. The default values are 1, 10, and 0.1 on both axis, for min, max, and step, respectively.
+- ``--z_min``
+- ``--z_max``
+- ``--z_step``
+respectively. The default values are 1, 10, and 0.1 on x and y axis, for min, max, and step, respectively. The z axis
+is not used by default. However, if ``--z_sweep`` is specified, the default values are -0.5, -0.1, and 0.025 for min, max,
+and step, respectively, assuming z to be used for ``mu_minus``.
 
 By default, grid search is applied to explore the operational domain. The algorithm can be changed by specifying one of
 the following options:

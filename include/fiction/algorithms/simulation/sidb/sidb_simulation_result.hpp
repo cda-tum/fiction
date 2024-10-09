@@ -22,7 +22,7 @@ namespace fiction
  * the total simulation runtime, the charge distributions determined by the algorithm, the physical parameters used in
  * the simulation, and (optional) algorithm-specific named simulation parameters.
  *
- * @tparam Lyt Cell-level layout type.
+ * @tparam Lyt SiDB cell-level layout type.
  */
 template <typename Lyt>
 struct sidb_simulation_result

@@ -30,8 +30,8 @@ namespace fiction
  * @tparam Lyt The charge distribution surface type.
  * @param cds The charge distribution surface for which physical parameters are to be determined.
  * @param params Operational domain parameters.
- * @return Physically valid parameters with the corresponding excited state number of the given cds for each parameter
- * point.
+ * @return Physically valid parameters with the corresponding excited state number of the given charge distribution
+ * surface for each parameter point.
  */
 template <typename Lyt>
 [[nodiscard]] operational_domain<parameter_point, uint64_t>
@@ -41,9 +41,10 @@ determine_physically_valid_parameters(Lyt& cds, const operational_domain_params&
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(is_charge_distribution_surface_v<Lyt>, "Lyt is not a charge distribution surface");
 
-    operational_domain_stats                                                                          st{};
-    detail::operational_domain_impl<Lyt, tt, operational_domain<parameter_point, operational_status>> p{cds, params,
-                                                                                                        st};
+    operational_domain_stats st{};
+
+    using op_domain = operational_domain<parameter_point, operational_status>;
+    detail::operational_domain_impl<Lyt, tt, op_domain> p{cds, params, st};
 
     const auto result = p.grid_search_for_physically_valid_parameters(cds);
 

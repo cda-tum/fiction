@@ -23,6 +23,8 @@
 #include <cstdlib>
 #include <exception>
 #include <iostream>
+#include <optional>
+#include <stdexcept>
 #include <string>
 #include <type_traits>
 #include <variant>
@@ -31,7 +33,26 @@
 namespace alice
 {
 /**
+ * Executes operational domain computation for the current SiDB cell-level layout in store. The operational domain is a
+ * set of simulation parameter values for which a given SiDB layout is logically operational. This means that a layout
+ * is deemed operational if the layout's ground state corresponds with a given Boolean function at the layout's outputs
+ * for all possible input combinations.
  *
+ * The computation comes in different flavors:
+ * - Grid search: Evaluates all possible parameter combinations within the specified ranges.
+ * - Random sampling: Evaluates a specified number of random parameter combinations.
+ * - Flood fill: Evaluates a specified number of random parameter combinations and then performs a flood fill to find
+ *  the operational domain.
+ *  - Contour tracing: Evaluates a specified number of random parameter combinations and then performs contour tracing
+ *  to find the edges of the operational domain.
+ *
+ * The operational domain is written to a CSV file, which can be used for further analysis or visualization.
+ *
+ * For more information, see algorithms/simulation/sidb/operational_domain.hpp.
+ *
+ * BUG: Currently, the manual parameter reset (which is necessary due to an alice issue) triggers a different alice
+ * problem: data is not read from the CLI properly after the manual reset. This causes error messages to be displayed
+ * only once even if the same misconfigured command is executed twice in a row.
  */
 class opdom_command : public command
 {
@@ -54,29 +75,40 @@ class opdom_command : public command
         add_option("--flood_fill,-f", num_random_samples,
                    "Use flood fill instead of grid search with this many initial random samples");
         add_option("--contour_tracing,-c", num_random_samples,
-                   "Use contour tracing instead of grid search with up to this many random "
-                   "samples");
+                   "Use contour tracing instead of grid search with this many random samples");
 
         add_option("filename", filename, "CSV filename to write the operational domain to")->required();
+        add_flag(
+            "--omit_non_op_samples,-o", omit_non_operational_samples,
+            "Omit non-operational samples in the CSV file to reduce file size and increase visibility in 3D plots");
 
         add_option("--epsilon_r,-e", simulation_params.epsilon_r, "Electric permittivity of the substrate (unit-less)",
                    true);
         add_option("--lambda_tf,-l", simulation_params.lambda_tf, "Thomas-Fermi screening distance (unit: nm)", true);
         add_option("--mu_minus,-m", simulation_params.mu_minus, "Energy transition level (0/-) (unit: eV)", true);
 
-        add_option("--x_sweep", x_sweep, "Sweep parameter of the x dimension [epsilon_r, lambda_tf, mu_minus]", true);
-        add_option("--y_sweep", y_sweep, "Sweep parameter of the y dimension [epsilon_r, lambda_tf, mu_minus]", true);
+        add_option("--x_sweep,-x", x_sweep, "Sweep parameter of the x dimension [epsilon_r, lambda_tf, mu_minus]",
+                   true);
+        add_option("--y_sweep,-y", y_sweep, "Sweep parameter of the y dimension [epsilon_r, lambda_tf, mu_minus]",
+                   true);
+        add_option("--z_sweep,-z", z_sweep,
+                   "Sweep parameter of the z dimension (optional) [epsilon_r, lambda_tf, mu_minus]");
 
-        add_option("--x_min", params.x_min, "Minimum value of the x dimension sweep", true);
-        add_option("--x_max", params.x_max, "Maximum value of the x dimension sweep", true);
-        add_option("--x_step", params.x_step, "Step size of the x dimension sweep", true);
-        add_option("--y_min", params.y_min, "Minimum value of the y dimension sweep", true);
-        add_option("--y_max", params.y_max, "Maximum value of the y dimension sweep", true);
-        add_option("--y_step", params.y_step, "Step size of the y dimension sweep", true);
+        add_option("--x_min", sweep_dimensions[0].min, "Minimum value of the x dimension sweep", true);
+        add_option("--x_max", sweep_dimensions[0].max, "Maximum value of the x dimension sweep", true);
+        add_option("--x_step", sweep_dimensions[0].step, "Step size of the x dimension sweep", true);
+        add_option("--y_min", sweep_dimensions[1].min, "Minimum value of the y dimension sweep", true);
+        add_option("--y_max", sweep_dimensions[1].max, "Maximum value of the y dimension sweep", true);
+        add_option("--y_step", sweep_dimensions[1].step, "Step size of the y dimension sweep", true);
+        add_option("--z_min", sweep_dimensions[2].min, "Minimum value of the z dimension sweep");
+        add_option("--z_max", sweep_dimensions[2].max, "Maximum value of the z dimension sweep");
+        add_option("--z_step", sweep_dimensions[2].step, "Step size of the z dimension sweep");
+
         add_option("--base", simulation_params.base,
                    "The simulation base, can be 2 or 3 (only ClusterComplete supports base 3 simulation)", true);
         add_option("--engine", sim_engine_str,
                    "The simulation engine to use {QuickExact [default], ClusterComplete, QuickSim, ExGS}", true);
+
     }
 
   protected:
@@ -89,49 +121,12 @@ class opdom_command : public command
         op_domain = {};
         stats     = {};
 
-        if (simulation_params.epsilon_r <= 0)
-        {
-            env->out() << "[e] epsilon_r must be positive\n";
-            reset_params();
-            return;
-        }
-        if (simulation_params.lambda_tf <= 0)
-        {
-            env->out() << "[e] lambda_tf must be positive\n";
-            reset_params();
-            return;
-        }
-
-        // check for valid x and y parameter bounds
-        if (params.x_min >= params.x_max)
-        {
-            env->out() << "[e] x_min must be smaller than x_max\n";
-            reset_params();
-            return;
-        }
-        if (params.y_min >= params.y_max)
-        {
-            env->out() << "[e] y_min must be smaller than y_max\n";
-            reset_params();
-            return;
-        }
-
-        // make sure that at most one algorithm is selected
-        const std::array algorithm_selections = {is_set("random_sampling"), is_set("flood_fill"),
-                                                 is_set("contour_tracing")};
-        if (std::count(algorithm_selections.cbegin(), algorithm_selections.cend(), true) > 1)
-        {
-            env->out() << "[e] only one algorithm can be selected at a time\n";
-            reset_params();
-            return;
-        }
-
         auto& cs = store<fiction::cell_layout_t>();
 
         // error case: empty cell layout store
         if (cs.empty())
         {
-            env->out() << "[w] no cell layout in store\n";
+            env->out() << "[w] no cell layout in store" << std::endl;
             reset_params();
             return;
         }
@@ -141,41 +136,86 @@ class opdom_command : public command
         // error case: empty truth table store
         if (ts.empty())
         {
-            env->out() << "[w] no truth table in store\n";
+            env->out() << "[w] no truth table in store" << std::endl;
             reset_params();
             return;
         }
 
-        // default sweep parameters
-        if (x_sweep.empty() && y_sweep.empty())
+        if (simulation_params.epsilon_r <= 0)
         {
-            x_sweep = "epsilon_r";
-            y_sweep = "lambda_tf";
+            env->out() << "[e] epsilon_r must be positive" << std::endl;
+            reset_params();
+            return;
         }
-        else
+        if (simulation_params.lambda_tf <= 0)
         {
-            // overwrite x and y sweep with their respective lower-case string representations
-            std::transform(x_sweep.begin(), x_sweep.end(), x_sweep.begin(), ::tolower);
-            std::transform(y_sweep.begin(), y_sweep.end(), y_sweep.begin(), ::tolower);
+            env->out() << "[e] lambda_tf must be positive" << std::endl;
+            reset_params();
+            return;
+        }
 
-            static constexpr const std::array valid_sweep_params = {"epsilon_r", "lambda_tf", "mu_minus"};
+        // make sure that at most one algorithm is selected
+        const std::array algorithm_selections = {is_set("random_sampling"), is_set("flood_fill"),
+                                                 is_set("contour_tracing")};
+        if (std::count(algorithm_selections.cbegin(), algorithm_selections.cend(), true) > 1)
+        {
+            env->out() << "[e] only one algorithm can be selected at a time" << std::endl;
+            reset_params();
+            return;
+        }
 
-            // check if x sweep parameter is valid
-            if (std::find(valid_sweep_params.cbegin(), valid_sweep_params.cend(), x_sweep) == valid_sweep_params.cend())
+        // make sure that z is not set if y is not, and that y is not set if x is not
+        if (is_set("z_sweep") && !is_set("y_sweep"))
+        {
+            env->out() << "[e] z sweep parameter cannot be set if y sweep parameter is not set" << std::endl;
+            reset_params();
+            return;
+        }
+        if (is_set("y_sweep") && !is_set("x_sweep"))
+        {
+            env->out() << "[e] y sweep parameter cannot be set if x sweep parameter is not set" << std::endl;
+            reset_params();
+            return;
+        }
+
+        // overwrite the sweeps with their respective lower-case string representations
+        std::transform(x_sweep.begin(), x_sweep.end(), x_sweep.begin(), ::tolower);
+        std::transform(y_sweep.begin(), y_sweep.end(), y_sweep.begin(), ::tolower);
+        std::transform(z_sweep.begin(), z_sweep.end(), z_sweep.begin(), ::tolower);
+
+        static constexpr const std::array valid_sweep_params = {"epsilon_r", "lambda_tf", "mu_minus"};
+
+        // check if x sweep parameter is valid
+        if (std::find(valid_sweep_params.cbegin(), valid_sweep_params.cend(), x_sweep) == valid_sweep_params.cend())
+        {
+            env->out() << "[e] invalid x sweep parameter \"" << x_sweep
+                       << "\". Has to be one of [epsilon_r, lambda_tf, "
+                          "mu_minus]"
+                       << std::endl;
+            reset_params();
+            return;
+        }
+
+        // check if y sweep parameter is valid
+        if (std::find(valid_sweep_params.cbegin(), valid_sweep_params.cend(), y_sweep) == valid_sweep_params.cend())
+        {
+            env->out() << "[e] invalid y sweep parameter \"" << y_sweep
+                       << "\". Has to be one of [epsilon_r, lambda_tf, "
+                          "mu_minus]"
+                       << std::endl;
+            reset_params();
+            return;
+        }
+
+        // check if z sweep parameter is valid if set
+        if (is_set("z_sweep"))
+        {
+            if (std::find(valid_sweep_params.cbegin(), valid_sweep_params.cend(), z_sweep) == valid_sweep_params.cend())
             {
-                env->out() << "[e] invalid x sweep parameter \"" << x_sweep
+                env->out() << "[e] invalid z sweep parameter \"" << z_sweep
                            << "\". Has to be one of [epsilon_r, lambda_tf, "
-                              "mu_minus]\n";
-                reset_params();
-                return;
-            }
-
-            // check if y sweep parameter is valid
-            if (std::find(valid_sweep_params.cbegin(), valid_sweep_params.cend(), y_sweep) == valid_sweep_params.cend())
-            {
-                env->out() << "[e] invalid y sweep parameter \"" << y_sweep
-                           << "\". Has to be one of [epsilon_r, lambda_tf, "
-                              "mu_minus]\n";
+                              "mu_minus]"
+                           << std::endl;
                 reset_params();
                 return;
             }
@@ -184,29 +224,51 @@ class opdom_command : public command
         // assign x sweep parameters
         if (x_sweep == "epsilon_r")
         {
-            params.x_dimension = fiction::sweep_parameter::EPSILON_R;
+            sweep_dimensions[0].dimension = fiction::sweep_parameter::EPSILON_R;
         }
         else if (x_sweep == "lambda_tf")
         {
-            params.x_dimension = fiction::sweep_parameter::LAMBDA_TF;
+            sweep_dimensions[0].dimension = fiction::sweep_parameter::LAMBDA_TF;
         }
         else if (x_sweep == "mu_minus")
         {
-            params.x_dimension = fiction::sweep_parameter::MU_MINUS;
+            sweep_dimensions[0].dimension = fiction::sweep_parameter::MU_MINUS;
         }
 
         // assign y sweep parameters
         if (y_sweep == "epsilon_r")
         {
-            params.y_dimension = fiction::sweep_parameter::EPSILON_R;
+            sweep_dimensions[1].dimension = fiction::sweep_parameter::EPSILON_R;
         }
         else if (y_sweep == "lambda_tf")
         {
-            params.y_dimension = fiction::sweep_parameter::LAMBDA_TF;
+            sweep_dimensions[1].dimension = fiction::sweep_parameter::LAMBDA_TF;
         }
         else if (y_sweep == "mu_minus")
         {
-            params.y_dimension = fiction::sweep_parameter::MU_MINUS;
+            sweep_dimensions[1].dimension = fiction::sweep_parameter::MU_MINUS;
+        }
+
+        if (is_set("z_sweep"))
+        {
+            // assign z sweep parameters
+            if (z_sweep == "epsilon_r")
+            {
+                sweep_dimensions[2].dimension = fiction::sweep_parameter::EPSILON_R;
+            }
+            else if (z_sweep == "lambda_tf")
+            {
+                sweep_dimensions[2].dimension = fiction::sweep_parameter::LAMBDA_TF;
+            }
+            else if (z_sweep == "mu_minus")
+            {
+                sweep_dimensions[2].dimension = fiction::sweep_parameter::MU_MINUS;
+            }
+        }
+        else
+        {
+            // remove z sweep parameter if not set
+            sweep_dimensions.pop_back();
         }
 
         const auto get_name = [](auto&& lyt_ptr) -> std::string { return fiction::get_name(*lyt_ptr); };
@@ -221,11 +283,17 @@ class opdom_command : public command
             {
                 if (lyt_ptr->num_pis() == 0 || lyt_ptr->num_pos() == 0)
                 {
-                    env->out() << fmt::format("[e] {} requires primary input and output cells to simulate its "
-                                              "Boolean function\n",
-                                              get_name(lyt_ptr));
+                    env->out() << fmt::format("[e] '{}' requires primary input and output cells to simulate its "
+                                              "Boolean function",
+                                              get_name(lyt_ptr))
+                               << std::endl;
+                    reset_params();
                     return;
                 }
+
+                // set parameters
+                params.simulation_parameters = simulation_params;
+                params.sweep_dimensions      = sweep_dimensions;
 
                 const auto engine = fiction::get_sidb_simulation_engine(sim_engine_str);
 
@@ -237,32 +305,47 @@ class opdom_command : public command
 
                 params.sim_engine = engine.value();
 
-                params.simulation_parameters = simulation_params;
-
-                if (is_set("random_sampling"))
+                try
                 {
-                    op_domain = fiction::operational_domain_random_sampling(*lyt_ptr, std::vector<fiction::tt>{*tt_ptr},
-                                                                            num_random_samples, params, &stats);
+                    if (is_set("random_sampling"))
+                    {
+                        op_domain = fiction::operational_domain_random_sampling(
+                            *lyt_ptr, std::vector<fiction::tt>{*tt_ptr}, num_random_samples, params, &stats);
+                    }
+                    else if (is_set("flood_fill"))
+                    {
+                        op_domain = fiction::operational_domain_flood_fill(*lyt_ptr, std::vector<fiction::tt>{*tt_ptr},
+                                                                           num_random_samples, params, &stats);
+                    }
+                    else if (is_set("contour_tracing"))
+                    {
+                        op_domain = fiction::operational_domain_contour_tracing(
+                            *lyt_ptr, std::vector<fiction::tt>{*tt_ptr}, num_random_samples, params, &stats);
+                    }
+                    else
+                    {
+                        op_domain = fiction::operational_domain_grid_search(*lyt_ptr, std::vector<fiction::tt>{*tt_ptr},
+                                                                            params, &stats);
+                    }
                 }
-                else if (is_set("flood_fill"))
+                catch (std::invalid_argument& e)
                 {
-                    op_domain = fiction::operational_domain_flood_fill(*lyt_ptr, std::vector<fiction::tt>{*tt_ptr},
-                                                                       num_random_samples, params, &stats);
+                    env->out() << fmt::format("[e] {}", e.what()) << std::endl;
+                    reset_params();
+                    return;
                 }
-                else if (is_set("contour_tracing"))
+                catch (...)
                 {
-                    op_domain = fiction::operational_domain_contour_tracing(*lyt_ptr, std::vector<fiction::tt>{*tt_ptr},
-                                                                            num_random_samples, params, &stats);
-                }
-                else
-                {
-                    op_domain = fiction::operational_domain_grid_search(*lyt_ptr, std::vector<fiction::tt>{*tt_ptr},
-                                                                        params, &stats);
+                    env->out() << "[e] an unknown error occurred during operational domain computation" << std::endl;
+                    reset_params();
+                    return;
                 }
             }
             else
             {
-                env->out() << fmt::format("[e] {} is not an SiDB layout\n", get_name(lyt_ptr));
+                env->out() << fmt::format("[e] {} is not an SiDB layout", get_name(lyt_ptr)) << std::endl;
+                reset_params();
+                return;
             }
         };
 
@@ -275,9 +358,16 @@ class opdom_command : public command
 
   private:
     /**
-     * Physical parameters for the simulation.
+     * Default physical parameters for the simulation.
      */
     fiction::sidb_simulation_parameters simulation_params{2, -0.32, 5.6, 5.0};
+    /**
+     * Default value ranges for sweeping.
+     */
+    std::vector<fiction::operational_domain_value_range> sweep_dimensions{
+        {fiction::sweep_parameter::EPSILON_R, 1.0, 10.0, 0.1},
+        {fiction::sweep_parameter::LAMBDA_TF, 1.0, 10.0, 0.1},
+        {fiction::sweep_parameter::MU_MINUS, -0.50, -0.10, 0.025}};
     /**
      * Operational domain parameters.
      */
@@ -293,11 +383,15 @@ class opdom_command : public command
     /**
      * User input for the x dimension sweep parameter.
      */
-    std::string x_sweep{};
+    std::string x_sweep{"epsilon_r"};
     /**
      * User input for the y dimension sweep parameter.
      */
-    std::string y_sweep{};
+    std::string y_sweep{"lambda_tf"};
+    /**
+     * User input for the z dimension sweep parameter.
+     */
+    std::string z_sweep{};
     /**
      * The simulation engine to use.
      */
@@ -307,15 +401,34 @@ class opdom_command : public command
      */
     std::string filename{};
     /**
+     * Flag to omit non-operational samples.
+     */
+    bool omit_non_operational_samples = false;
+    /**
      * The operational domain.
      */
     fiction::operational_domain<> op_domain{};
     /**
      * Writes the operational domain to the specified CSV file.
      */
-    void write_op_domain() const
+    void write_op_domain()
     {
-        static const fiction::write_operational_domain_params write_opdom_params{"1", "0"};
+        // if the operational domain call was unsuccessful, do not attempt writing anything
+        if (op_domain.operational_values.empty())
+        {
+            reset_params();
+            return;
+        }
+
+        // set up parameters
+        fiction::write_operational_domain_params write_opdom_params{};
+        write_opdom_params.non_operational_tag = "0";
+        write_opdom_params.operational_tag     = "1";
+        write_opdom_params.writing_mode =
+            omit_non_operational_samples ?
+                fiction::write_operational_domain_params::sample_writing_mode::OPERATIONAL_ONLY :
+                fiction::write_operational_domain_params::sample_writing_mode::ALL_SAMPLES;
+
         try
         {
             fiction::write_operational_domain(op_domain, filename, write_opdom_params);
@@ -323,6 +436,14 @@ class opdom_command : public command
         catch (const std::exception& e)
         {
             env->out() << fmt::format("[e] {}", e.what()) << std::endl;
+            reset_params();
+            return;
+        }
+        catch (...)
+        {
+            env->out() << "[e] an unknown error occurred while writing the operational domain data" << std::endl;
+            reset_params();
+            return;
         }
     }
     /**
@@ -346,10 +467,18 @@ class opdom_command : public command
     void reset_params()
     {
         simulation_params = fiction::sidb_simulation_parameters{2, -0.32, 5.6, 5.0};
-        params            = {};
-        x_sweep           = {};
-        y_sweep           = {};
-        filename          = {};
+        sweep_dimensions  = std::vector<fiction::operational_domain_value_range>{
+            {fiction::sweep_parameter::EPSILON_R, 1.0, 10.0, 0.1},
+            {fiction::sweep_parameter::LAMBDA_TF, 1.0, 10.0, 0.1},
+            {fiction::sweep_parameter::MU_MINUS, -0.50, -0.10, 0.025}};
+        params = {};
+
+        x_sweep  = "epsilon_r";
+        y_sweep  = "lambda_tf";
+        z_sweep  = "";
+        filename = "";
+
+        omit_non_operational_samples = false;
     }
 };
 

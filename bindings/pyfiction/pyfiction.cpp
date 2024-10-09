@@ -7,6 +7,7 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
 
+#include "pyfiction/algorithms/iter/bdl_input_iterator.hpp"
 #include "pyfiction/algorithms/network_transformation/fanout_substitution.hpp"
 #include "pyfiction/algorithms/network_transformation/network_balancing.hpp"
 #include "pyfiction/algorithms/network_transformation/technology_mapping.hpp"
@@ -27,6 +28,7 @@
 #include "pyfiction/algorithms/simulation/logic_simulation.hpp"
 #include "pyfiction/algorithms/simulation/sidb/calculate_energy_and_state_type.hpp"
 #include "pyfiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp"
+#include "pyfiction/algorithms/simulation/sidb/compute_operational_ratio.hpp"
 #include "pyfiction/algorithms/simulation/sidb/critical_temperature.hpp"
 #include "pyfiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp"
 #include "pyfiction/algorithms/simulation/sidb/determine_physically_valid_parameters.hpp"
@@ -106,6 +108,11 @@ PYBIND11_MODULE(pyfiction, m)
     pyfiction::siqad_coordinate(m);
     pyfiction::coordinate_utility(m);
     /**
+     * Logic
+     */
+    pyfiction::logic_networks(m);
+    pyfiction::truth_tables(m);
+    /**
      * Layouts
      */
     pyfiction::cartesian_layout(m);
@@ -145,11 +152,11 @@ PYBIND11_MODULE(pyfiction, m)
     pyfiction::check_simulation_results_for_equivalence(m);
     pyfiction::determine_physically_valid_parameters(m);
     pyfiction::determine_displacement_robustness_domain(m);
+    pyfiction::compute_operational_ratio(m);
     /**
-     * Logic
+     * Algorithms: Iterators
      */
-    pyfiction::logic_networks(m);
-    pyfiction::truth_tables(m);
+    pyfiction::bdl_input_iterator(m);
     /**
      * Algorithms: Network Transformation
      */

@@ -15,7 +15,7 @@ WORKDIR /app
 RUN python3 -m venv venv && \
     . venv/bin/activate && \
     pip install --upgrade pip setuptools && \
-    pip install z3-solver==4.10.0
+    pip install z3-solver==4.13.0
 
 # Set the path to include the virtual environment
 ENV PATH="/app/venv/bin:$PATH"
