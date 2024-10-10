@@ -22,4 +22,4 @@
 	branch = mnt
 [submodule "libs/alglib-cmake"]
 	path = libs/alglib-cmake
-	url = https://github.com/wlambooy/alglib-cmake
+	url = https://github.com/wlambooy/alglib-cmake.git
