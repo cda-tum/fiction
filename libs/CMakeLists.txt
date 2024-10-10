@@ -152,7 +152,7 @@ target_link_system_libraries(libfiction INTERFACE graph-coloring)
 
 # Include ALGLIB by the ALGLIB Project
 add_subdirectory(alglib-cmake EXCLUDE_FROM_ALL)
-target_include_directories(libfiction SYSTEM INTERFACE alglib-cmake/src/cpp/src/headers)
+target_include_directories(libfiction SYSTEM INTERFACE alglib-cmake/src/alglib-cpp/src/headers)
 target_link_system_libraries(libfiction INTERFACE ALGLIB)
 
 # Include tinyXML2
