@@ -22,6 +22,7 @@
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/views/names_view.hpp>
 
+#include <chrono>
 #include <cstdint>
 #include <vector>
 
