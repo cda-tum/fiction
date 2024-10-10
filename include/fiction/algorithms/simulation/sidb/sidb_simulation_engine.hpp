@@ -90,39 +90,29 @@ template <typename EngineType>
                       std::is_same_v<EngineType, heuristic_sidb_simulation_engine>,
                   "EngineType must be a SiDB simulation engine type");
 
-    if constexpr (std::is_same_v<EngineType, sidb_simulation_engine> ||
-                  std::is_same_v<EngineType, exact_sidb_simulation_engine>)
+    switch (engine)
     {
-        switch (engine)
+        case EngineType::EXGS:
         {
-            case EngineType::EXGS:
-            {
-                return "ExGS";
-            }
-            case EngineType::QUICKEXACT:
-            {
-                return "QuickExact";
-            }
-            case EngineType::CLUSTERCOMPLETE:
-            {
-                return "ClusterComplete";
-            }
+            return "ExGS";
+        }
+        case EngineType::QUICKEXACT:
+        {
+            return "QuickExact";
+        }
+        case EngineType::CLUSTERCOMPLETE:
+        {
+            return "ClusterComplete";
+        }
+        case EngineType::QUICKSIM:
+        {
+            return "QuickSim";
+        }
+        default:
+        {
+            return "unsupported simulation engine";
         }
     }
-
-    if constexpr (std::is_same_v<EngineType, sidb_simulation_engine> ||
-                  std::is_same_v<EngineType, heuristic_sidb_simulation_engine>)
-    {
-        switch (engine)
-        {
-            case EngineType::QUICKSIM:
-            {
-                return "QuickSim";
-            }
-        }
-    }
-
-    return "unsupported simulation engine";
 }
 
 /**
