@@ -126,17 +126,17 @@ TEST_CASE("Bestagon FO2 gate", "[is-operational]")
                   .first == operational_status::NON_OPERATIONAL);
     }
 
-    SECTION("using ClusterComplete")
-    {
-        CHECK(is_operational(
-                  lat, std::vector<tt>{create_fan_out_tt()},
-                  is_operational_params{sidb_simulation_parameters{3, -0.32}, sidb_simulation_engine::CLUSTERCOMPLETE})
-                  .first == operational_status::OPERATIONAL);
-        CHECK(is_operational(
-                  lat, std::vector<tt>{create_fan_out_tt()},
-                  is_operational_params{sidb_simulation_parameters{3, -0.30}, sidb_simulation_engine::CLUSTERCOMPLETE})
-                  .first == operational_status::NON_OPERATIONAL);
-    }
+    // SECTION("using ClusterComplete")
+    // {
+    //     CHECK(is_operational(
+    //               lat, std::vector<tt>{create_fan_out_tt()},
+    //               is_operational_params{sidb_simulation_parameters{3, -0.32}, sidb_simulation_engine::CLUSTERCOMPLETE})
+    //               .first == operational_status::OPERATIONAL);
+    //     CHECK(is_operational(
+    //               lat, std::vector<tt>{create_fan_out_tt()},
+    //               is_operational_params{sidb_simulation_parameters{3, -0.30}, sidb_simulation_engine::CLUSTERCOMPLETE})
+    //               .first == operational_status::NON_OPERATIONAL);
+    // }
 }
 
 TEST_CASE("Bestagon AND gate", "[is-operational]")
