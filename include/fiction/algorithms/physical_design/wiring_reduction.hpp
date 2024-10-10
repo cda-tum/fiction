@@ -1130,14 +1130,12 @@ class wiring_reduction_impl
                     // update the remaining timeout after processing the path
                     update_timeout();
 
-                    if (timeout_limit_reached)
+                    if (!timeout_limit_reached)
                     {
-                        break;
+                        // get the next possible path for wire deletion
+                        possible_path = get_path(wiring_reduction_lyt, {0, 0},
+                                                 {wiring_reduction_lyt.x(), wiring_reduction_lyt.y()});
                     }
-
-                    // get the next possible path for wire deletion
-                    possible_path =
-                        get_path(wiring_reduction_lyt, {0, 0}, {wiring_reduction_lyt.x(), wiring_reduction_lyt.y()});
                 }
 
                 if (!to_delete.empty())

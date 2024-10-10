@@ -62,7 +62,7 @@ class TestWiringReduction(unittest.TestCase):
         params.timeout = 1000000
 
         stats = wiring_reduction_stats()
-        wiring_reduction(layout, stats)
+        wiring_reduction(layout, params, stats)
 
         self.assertEqual(equivalence_checking(network, layout), eq_type.STRONG)
         self.assertGreater(stats.time_total.total_seconds(), 0)

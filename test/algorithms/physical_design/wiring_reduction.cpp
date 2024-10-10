@@ -26,9 +26,8 @@ void check_layout_equiv(const Ntk& ntk)
 {
     const auto layout = orthogonal<Lyt>(ntk, {});
 
-    wiring_reduction_stats  stats{};
-    wiring_reduction_params params{};
-    wiring_reduction<Lyt>(layout, params, &stats);
+    wiring_reduction_stats stats{};
+    wiring_reduction<Lyt>(layout, {}, &stats);
 
     check_eq(ntk, layout);
 
@@ -106,15 +105,13 @@ TEST_CASE("Layout equivalence", "[wiring_reduction]")
         using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<>>>>;
 
         const auto layout_corner_case_1 = blueprints::optimization_layout_corner_case_outputs_1<gate_layout>();
-        wiring_reduction_stats  stats_corner_case_1{};
-        wiring_reduction_params params_corner_case_1{};
-        wiring_reduction<gate_layout>(layout_corner_case_1, params_corner_case_1, &stats_corner_case_1);
+        wiring_reduction_stats stats_corner_case_1{};
+        wiring_reduction<gate_layout>(layout_corner_case_1, {}, &stats_corner_case_1);
         check_eq(blueprints::optimization_layout_corner_case_outputs_1<gate_layout>(), layout_corner_case_1);
 
         const auto layout_corner_case_2 = blueprints::optimization_layout_corner_case_outputs_2<gate_layout>();
-        wiring_reduction_stats  stats_corner_case_2{};
-        wiring_reduction_params params_corner_case_2{};
-        wiring_reduction<gate_layout>(layout_corner_case_2, params_corner_case_2, &stats_corner_case_2);
+        wiring_reduction_stats stats_corner_case_2{};
+        wiring_reduction<gate_layout>(layout_corner_case_2, {}, &stats_corner_case_2);
         check_eq(blueprints::optimization_layout_corner_case_outputs_2<gate_layout>(), layout_corner_case_2);
     }
 
@@ -159,11 +156,9 @@ TEST_CASE("Wrong clocking scheme", "[wiring_reduction]")
     {
         CHECK_NOTHROW(detail::create_wiring_reduction_layout(obstr_lyt, 1, 1, detail::search_direction::HORIZONTAL));
 
-        wiring_reduction_stats  stats_wrong_clocking_scheme{};
-        wiring_reduction_params params_wrong_clocking_scheme{};
+        wiring_reduction_stats stats_wrong_clocking_scheme{};
 
-        CHECK_NOTHROW(
-            wiring_reduction<gate_layout>(obstr_lyt, params_wrong_clocking_scheme, &stats_wrong_clocking_scheme));
+        CHECK_NOTHROW(wiring_reduction<gate_layout>(obstr_lyt, {}, &stats_wrong_clocking_scheme));
     }
 }
 

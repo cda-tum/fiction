@@ -66,7 +66,6 @@ int main()  // NOLINT
     // stats for SMT-based physical design
     fiction::orthogonal_physical_design_stats orthogonal_stats{};
     fiction::wiring_reduction_stats           wiring_reduction_stats{};
-    fiction::wiring_reduction_params          wiring_reduction_params{};
 
     static constexpr const uint64_t bench_select =
         (fiction_experiments::trindade16 | fiction_experiments::fontes18) & ~fiction_experiments::clpl;
@@ -91,7 +90,7 @@ int main()  // NOLINT
         const auto area_before_wiring_reduction   = width_before_wiring_reduction * height_before_wiring_reduction;
 
         // perform post-layout optimization
-        fiction::wiring_reduction<gate_lyt>(gate_level_layout, wiring_reduction_params, &wiring_reduction_stats);
+        fiction::wiring_reduction<gate_lyt>(gate_level_layout, {}, &wiring_reduction_stats);
 
         //  compute critical path and throughput
         const auto cp_tp_stats_after = fiction::critical_path_length_and_throughput(gate_level_layout);

@@ -446,8 +446,8 @@ layout_coordinate_path<Lyt> get_path_and_obstruct(Lyt& lyt, const tile<Lyt>& sta
  *
  * @return Remaining time in milliseconds before timeout, or `0` if timeout has been reached.
  */
-uint64_t update_timeout(const std::chrono::high_resolution_clock::time_point start, const uint64_t timeout,
-                        bool& timeout_limit_reached)
+inline uint64_t update_timeout(const std::chrono::high_resolution_clock::time_point start, const uint64_t timeout,
+                               bool& timeout_limit_reached) noexcept
 {
     const auto current_time = std::chrono::high_resolution_clock::now();
     const auto elapsed_ms =
@@ -1057,24 +1057,23 @@ class post_layout_optimization_impl
                 // attempt to relocate each gate tile
                 for (auto& gate_tile : gate_tiles)
                 {
-                    if (timeout_limit_reached)
+                    if (!timeout_limit_reached)
                     {
-                        break;
-                    }
-
-                    bool should_optimize =
-                        !ps.optimize_pos_only || (ps.optimize_pos_only && layout.is_po_tile(gate_tile));
-                    if (should_optimize)
-                    {
-                        if (detail::improve_gate_location(layout, gate_tile, max_non_po, max_gate_relocations, start,
-                                                          ps.timeout, timeout_limit_reached, ps.planar_optimization))
+                        bool should_optimize =
+                            !ps.optimize_pos_only || (ps.optimize_pos_only && layout.is_po_tile(gate_tile));
+                        if (should_optimize)
                         {
-                            moved_at_least_one_gate = true;
+                            if (detail::improve_gate_location(layout, gate_tile, max_non_po, max_gate_relocations,
+                                                              start, ps.timeout, timeout_limit_reached,
+                                                              ps.planar_optimization))
+                            {
+                                moved_at_least_one_gate = true;
+                            }
                         }
-                    }
 
-                    // update the remaining timeout after each relocation attempt
-                    update_timeout(start, ps.timeout, timeout_limit_reached);
+                        // update the remaining timeout after each relocation attempt
+                        update_timeout(start, ps.timeout, timeout_limit_reached);
+                    }
                 }
 
                 // resize the layout to fit within the new bounding box after relocations

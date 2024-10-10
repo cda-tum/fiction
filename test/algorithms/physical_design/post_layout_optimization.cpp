@@ -270,8 +270,12 @@ TEST_CASE("Optimization steps", "[post_layout_optimization]")
     const coordinate<gate_layout> old_pos_1 = {2, 0};
     const coordinate<gate_layout> new_pos_1 = {1, 0};
 
-    const auto moved_gate_1 =
-        detail::improve_gate_location(obstr_lyt, old_pos_1, {2, 2}, (obstr_lyt.x() + 1) * (obstr_lyt.y() + 1));
+    const auto start                 = std::chrono::high_resolution_clock::now();
+    const auto timeout               = 100000;
+    auto       timeout_limit_reached = false;
+
+    const auto moved_gate_1 = detail::improve_gate_location(
+        obstr_lyt, old_pos_1, {2, 2}, (obstr_lyt.x() + 1) * (obstr_lyt.y() + 1), start, timeout, timeout_limit_reached);
     // I I→=
     // ↓   ↓
     // = ▢ =
@@ -289,8 +293,8 @@ TEST_CASE("Optimization steps", "[post_layout_optimization]")
     const coordinate<gate_layout> old_pos_2 = {0, 2};
     const coordinate<gate_layout> new_pos_2 = {0, 1};
 
-    const auto moved_gate_2 =
-        detail::improve_gate_location(obstr_lyt, old_pos_2, {2, 2}, (obstr_lyt.x() + 1) * (obstr_lyt.y() + 1));
+    const auto moved_gate_2 = detail::improve_gate_location(
+        obstr_lyt, old_pos_2, {2, 2}, (obstr_lyt.x() + 1) * (obstr_lyt.y() + 1), start, timeout, timeout_limit_reached);
     // I I→=
     // ↓   ↓
     // F→= =
@@ -308,8 +312,8 @@ TEST_CASE("Optimization steps", "[post_layout_optimization]")
     const coordinate<gate_layout> old_pos_3 = {2, 2};
     const coordinate<gate_layout> new_pos_3 = {1, 1};
 
-    const auto moved_gate_3 =
-        detail::improve_gate_location(obstr_lyt, old_pos_3, {2, 2}, (obstr_lyt.x() + 1) * (obstr_lyt.y() + 1));
+    const auto moved_gate_3 = detail::improve_gate_location(
+        obstr_lyt, old_pos_3, {2, 2}, (obstr_lyt.x() + 1) * (obstr_lyt.y() + 1), start, timeout, timeout_limit_reached);
     // I I ▢
     // ↓ ↓
     // F→&→=
@@ -327,8 +331,8 @@ TEST_CASE("Optimization steps", "[post_layout_optimization]")
     const coordinate<gate_layout> old_pos_4 = {0, 3};
     const coordinate<gate_layout> new_pos_4 = {0, 2};
 
-    const auto moved_gate_4 =
-        detail::improve_gate_location(obstr_lyt, old_pos_4, {1, 1}, (obstr_lyt.x() + 1) * (obstr_lyt.y() + 1));
+    const auto moved_gate_4 = detail::improve_gate_location(
+        obstr_lyt, old_pos_4, {1, 1}, (obstr_lyt.x() + 1) * (obstr_lyt.y() + 1), start, timeout, timeout_limit_reached);
     // I I ▢
     // ↓ ↓
     // F→&→=
@@ -346,8 +350,8 @@ TEST_CASE("Optimization steps", "[post_layout_optimization]")
     const coordinate<gate_layout> old_pos_5 = {2, 3};
     const coordinate<gate_layout> new_pos_5 = {1, 2};
 
-    const auto moved_gate_5 =
-        detail::improve_gate_location(obstr_lyt, old_pos_5, {1, 1}, (obstr_lyt.x() + 1) * (obstr_lyt.y() + 1));
+    const auto moved_gate_5 = detail::improve_gate_location(
+        obstr_lyt, old_pos_5, {1, 1}, (obstr_lyt.x() + 1) * (obstr_lyt.y() + 1), start, timeout, timeout_limit_reached);
     // I I ▢
     // ↓ ↓
     // F→& ▢
@@ -382,10 +386,14 @@ TEST_CASE("Wrong clocking scheme", "[post_layout_optimization]")
 
     SECTION("Call functions")
     {
-        const coordinate<gate_layout> old_pos_1 = {2, 0};
+        const coordinate<gate_layout> old_pos_1             = {2, 0};
+        const auto                    start                 = std::chrono::high_resolution_clock::now();
+        const auto                    timeout               = 100000;
+        auto                          timeout_limit_reached = false;
 
         const auto moved_gate_1 =
-            detail::improve_gate_location(obstr_lyt, old_pos_1, {0, 0}, (obstr_lyt.x() + 1) * (obstr_lyt.y() + 1));
+            detail::improve_gate_location(obstr_lyt, old_pos_1, {0, 0}, (obstr_lyt.x() + 1) * (obstr_lyt.y() + 1),
+                                          start, timeout, timeout_limit_reached);
 
         CHECK_FALSE(moved_gate_1);
 
