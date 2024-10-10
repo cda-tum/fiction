@@ -2,6 +2,7 @@ from mnt.pyfiction import *
 import unittest
 import math
 
+
 class TestTimeToSolution(unittest.TestCase):
 
     def test_one_sidb_100_lattice(self):
@@ -91,6 +92,7 @@ class TestTimeToSolution(unittest.TestCase):
             tts_calculated = (st.mean_single_runtime * math.log(1.0 - 0.997) /
                               math.log(1.0 - st.acc / 100))
             self.assertAlmostEqual(st.time_to_solution - tts_calculated, 0.0, delta=1e-6)
+
 
 if __name__ == '__main__':
     unittest.main()

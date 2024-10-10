@@ -2,6 +2,7 @@ import unittest
 
 from mnt.pyfiction import *
 
+
 class TestObstructionLayout(unittest.TestCase):
 
     def test_obstruction_layout_clocking_inheritance(self):
@@ -78,6 +79,7 @@ class TestObstructionLayout(unittest.TestCase):
             self.assertTrue(layout.is_obstructed_connection((2, 0), (2, 1)))
             self.assertTrue(layout.is_obstructed_connection((2, 1), (2, 2)))
             self.assertTrue(layout.is_obstructed_connection((3, 2), (4, 2)))
+
 
 class TestCartesianObstructionLayout(unittest.TestCase):
 
@@ -339,7 +341,6 @@ class TestHexagonalObstructionLayout(unittest.TestCase):
 
         drv_params = gate_level_drv_params()
         self.assertEqual(gate_level_drvs(layout, drv_params, False), (0, 0))
-
 
 
 if __name__ == '__main__':

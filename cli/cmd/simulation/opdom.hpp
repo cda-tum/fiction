@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <array>
 #include <cctype>
+#include <cstdint>
 #include <cstdlib>
 #include <exception>
 #include <iostream>
@@ -102,6 +103,11 @@ class opdom_command : public command
         add_option("--z_min", sweep_dimensions[2].min, "Minimum value of the z dimension sweep");
         add_option("--z_max", sweep_dimensions[2].max, "Maximum value of the z dimension sweep");
         add_option("--z_step", sweep_dimensions[2].step, "Step size of the z dimension sweep");
+
+        add_option("--base", simulation_params.base,
+                   "The simulation base, can be 2 or 3 (only ClusterComplete supports base 3 simulation)", true);
+        add_option("--engine", sim_engine_str,
+                   "The simulation engine to use {QuickExact [default], ClusterComplete, QuickSim, ExGS}", true);
     }
 
   protected:
@@ -286,8 +292,17 @@ class opdom_command : public command
 
                 // set parameters
                 params.simulation_parameters = simulation_params;
-                params.sim_engine            = fiction::sidb_simulation_engine::QUICKEXACT;
                 params.sweep_dimensions      = sweep_dimensions;
+
+                const auto engine = fiction::get_sidb_simulation_engine(sim_engine_str);
+
+                if (!engine.has_value())
+                {
+                    env->out() << fmt::format("[e] {} is not a supported SiDB simulation engine\n", sim_engine_str);
+                    return;
+                }
+
+                params.sim_engine = engine.value();
 
                 try
                 {
@@ -377,6 +392,10 @@ class opdom_command : public command
      */
     std::string z_sweep{};
     /**
+     * The simulation engine to use.
+     */
+    std::string sim_engine_str{"QuickExact"};
+    /**
      * CSV filename to write the operational domain to.
      */
     std::string filename{};
@@ -388,7 +407,6 @@ class opdom_command : public command
      * The operational domain.
      */
     fiction::operational_domain<> op_domain{};
-
     /**
      * Writes the operational domain to the specified CSV file.
      */
@@ -435,7 +453,7 @@ class opdom_command : public command
     [[nodiscard]] nlohmann::json log() const override
     {
         return nlohmann::json{
-            {"Algorithm name", "QuickExact"},
+            {"Algorithm name", sidb_simulation_engine_name(params.sim_engine)},
             {"Runtime in seconds", mockturtle::to_seconds(stats.time_total)},
             {"Number of simulator invocations", stats.num_simulator_invocations},
             {"Number of evaluated parameter combinations", stats.num_evaluated_parameter_combinations},
