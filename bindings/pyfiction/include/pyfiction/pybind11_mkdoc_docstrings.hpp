@@ -6293,6 +6293,16 @@ Parameter ``lyt``:
 Parameter ``old_pos``:
     Old position of the gate to be moved.
 
+Parameter ``start``:
+    The start time in milliseconds.
+
+Parameter ``timeout``:
+    The timeout limit in milliseconds.
+
+Parameter ``timeout_limit_reached``:
+    Reference to a boolean flag that is set to `true` if the timeout
+    is reached.
+
 Parameter ``planar_optimization``:
     Only allow relocation if a crossing-free wiring can be found.
     Defaults to false.
@@ -7155,6 +7165,10 @@ static const char *__doc_fiction_detail_post_layout_optimization_impl_pst = R"do
 
 static const char *__doc_fiction_detail_post_layout_optimization_impl_run = R"doc()doc";
 
+static const char *__doc_fiction_detail_post_layout_optimization_impl_start = R"doc(Start time.)doc";
+
+static const char *__doc_fiction_detail_post_layout_optimization_impl_timeout_limit_reached = R"doc(Timeout limit reached.)doc";
+
 static const char *__doc_fiction_detail_priority_queue =
 R"doc(A priority queue class for managing elements with associated
 priorities. The elements are stored in a priority queue, with the
@@ -7777,6 +7791,25 @@ Constructs topological view on another network.)doc";
 
 static const char *__doc_fiction_detail_topo_view_co_to_ci_update_topo = R"doc()doc";
 
+static const char *__doc_fiction_detail_update_timeout =
+R"doc(Calculates the elapsed milliseconds since the `start` time, sets the
+`timeout_limit_reached` flag if the timeout is exceeded, and returns
+the remaining time.
+
+Parameter ``start``:
+    The start time in milliseconds.
+
+Parameter ``timeout``:
+    The timeout limit in milliseconds.
+
+Parameter ``timeout_limit_reached``:
+    Reference to a boolean flag that is set to `true` if the timeout
+    is reached.
+
+Returns:
+    Remaining time in milliseconds before timeout, or `0` if timeout
+    has been reached.)doc";
+
 static const char *__doc_fiction_detail_update_to_delete_list =
 R"doc(Update the to-delete list based on a possible path in a
 wiring_reduction_layout.
@@ -7823,9 +7856,15 @@ static const char *__doc_fiction_detail_wiring_reduction_impl = R"doc()doc";
 
 static const char *__doc_fiction_detail_wiring_reduction_impl_plyt = R"doc(The 2DDWave-clocked layout whose wiring is to be reduced.)doc";
 
+static const char *__doc_fiction_detail_wiring_reduction_impl_ps = R"doc(Wiring reduction parameters.)doc";
+
 static const char *__doc_fiction_detail_wiring_reduction_impl_pst = R"doc(Statistics about the wiring_reduction process.)doc";
 
 static const char *__doc_fiction_detail_wiring_reduction_impl_run = R"doc()doc";
+
+static const char *__doc_fiction_detail_wiring_reduction_impl_start = R"doc(Start time.)doc";
+
+static const char *__doc_fiction_detail_wiring_reduction_impl_timeout_limit_reached = R"doc(Timeout limit reached.)doc";
 
 static const char *__doc_fiction_detail_wiring_reduction_impl_wiring_reduction_impl = R"doc()doc";
 
@@ -14621,6 +14660,14 @@ R"doc(Disable the creation of crossings during optimization. If set to true,
 gates will only be relocated if a crossing-free wiring is found.
 Defaults to false.)doc";
 
+static const char *__doc_fiction_post_layout_optimization_params_timeout =
+R"doc(Timeout limit (in ms). Specifies the maximum allowed time in
+milliseconds for the optimization process. For large layouts, the
+actual execution time may slightly exceed this limit because it's
+impractical to check the timeout at every algorithm step and the
+functional correctness has to be ensured by completing essential
+algorithm steps.)doc";
+
 static const char *__doc_fiction_post_layout_optimization_stats =
 R"doc(This struct stores statistics about the post-layout optimization
 process.)doc";
@@ -17626,9 +17673,21 @@ Template parameter ``Lyt``:
 Parameter ``lyt``:
     The 2DDWave-clocked layout whose wiring is to be reduced.
 
+Parameter ``ps``:
+    Parameters.
+
 Parameter ``pst``:
-    Pointer to a `wiring_reduction_stats` object to record runtime
-    statistics.)doc";
+    Statistics.)doc";
+
+static const char *__doc_fiction_wiring_reduction_params = R"doc(Parameters for the wiring reduction algorithm.)doc";
+
+static const char *__doc_fiction_wiring_reduction_params_timeout =
+R"doc(Timeout limit (in ms). Specifies the maximum allowed time in
+milliseconds for the optimization process. For large layouts, the
+actual execution time may slightly exceed this limit because it's
+impractical to check the timeout at every algorithm step and the
+functional correctness has to be ensured by completing essential
+algorithm steps.)doc";
 
 static const char *__doc_fiction_wiring_reduction_stats = R"doc(This struct stores statistics about the wiring reduction process.)doc";
 
