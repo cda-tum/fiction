@@ -95,14 +95,14 @@ class read_sqd_layout_impl
             throw sqd_parsing_error("Error parsing SQD file: no element 'lat_vec'");
         }
 
-        const auto* const name = lat_vec_element->FirstChildElement("name");
-
         std::string lattice_orientation = "Si(100) 2x1";
 
-        if (name != nullptr)
+        if (const auto* const name = lat_vec_element->FirstChildElement("name"); name != nullptr)
         {
-            const auto* const text = name->GetText();
-            lattice_orientation    = std::string{text};
+            if (const auto* const text = name->GetText(); text != nullptr)
+            {
+                lattice_orientation = text;
+            }
         }
 
         parse_lat_type(lattice_orientation);
@@ -419,7 +419,7 @@ class read_sqd_layout_impl
  * Reads a cell-level SiDB layout from an sqd file provided as an input stream. The format is used by SiQAD
  * (https://github.com/siqad/siqad).
  *
- * If The provided cell-level layout type can represent SiDB defects, they will be parsed from the sqd file as well.
+ * If the provided cell-level layout type can represent SiDB defects, they will be parsed from the sqd file as well.
  *
  * May throw an `sqd_parsing_exception` if the sqd file is malformed.
  *

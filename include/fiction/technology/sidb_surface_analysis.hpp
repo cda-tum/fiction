@@ -48,7 +48,7 @@ using surface_black_list =
  *
  * @tparam GateLibrary FCN gate library type to fetch the gate descriptions from.
  * @tparam GateLyt Gate-level layout type that specifies the tiling of the SiDB surface.
- * @tparam CellLyt Cell-level layout type that is underlying to the SiDB surface.
+ * @tparam CellLyt SiDB cell-level layout type that is underlying to the SiDB surface.
  * @param gate_lyt Gate-level layout instance that specifies the aspect ratio.
  * @param sidb_defect_surface SiDB surface that instantiates the defects.
  * @param charged_defect_spacing_overwrite Override the default influence distance of charged atomic defects on SiDBs
@@ -65,6 +65,7 @@ template <typename GateLibrary, typename GateLyt, typename CellLyt>
 {
     static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt is not a gate-level layout");
     static_assert(is_cell_level_layout_v<CellLyt>, "CellLyt is not a cell-level layout");
+    static_assert(has_sidb_technology_v<CellLyt>, "CellLyt is not an SiDB layout");
     static_assert(std::is_same_v<technology<CellLyt>, sidb_technology>, "CellLyt is not an SiDB layout");
 
     static_assert(has_get_functional_implementations_v<GateLibrary>,

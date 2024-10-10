@@ -273,7 +273,7 @@ void print_cell_level_layout(std::ostream& os, const Lyt& layout, const bool io_
     // empty layout
     if (layout.num_cells() == 0ul)
     {
-        os << "[i] empty layout" << std::endl;
+        os << "[i] empty layout\n";
         return;
     }
 

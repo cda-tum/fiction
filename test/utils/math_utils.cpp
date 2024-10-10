@@ -6,12 +6,13 @@
 
 #include <fiction/utils/math_utils.hpp>
 
-#include <cstddef>
+#include <cstdint>
+#include <string>
 #include <vector>
 
 using namespace fiction;
 
-TEST_CASE("round_to_n_decimal_places should round an input number to n decimal places", "[round_to_n_decimal_places]")
+TEST_CASE("round_to_n_decimal_places should round an input number to n decimal places", "[round-to-n-decimal-places]")
 {
     SECTION("int64_t")
     {
@@ -53,7 +54,7 @@ TEST_CASE("round_to_n_decimal_places should round an input number to n decimal p
 }
 
 TEMPLATE_TEST_CASE("integral_abs should compute the absolute value of a number of different integral types",
-                   "[integral_abs]", int8_t, int16_t, int32_t, int64_t, uint8_t, uint16_t, uint32_t, uint64_t)
+                   "[integral-abs]", int8_t, int16_t, int32_t, int64_t, uint8_t, uint16_t, uint32_t, uint64_t)
 {
     const auto x = static_cast<TestType>(-42);
 
@@ -187,7 +188,7 @@ TEST_CASE("Test the determination of all combinations of distributing k entities
     {
         const std::size_t                           k = 0;
         const std::size_t                           n = 0;
-        const std::vector<std::vector<std::size_t>> expected{{}};
+        const std::vector<std::vector<std::size_t>> expected{};
 
         auto result = determine_all_combinations_of_distributing_k_entities_on_n_positions(k, n);
 
@@ -232,7 +233,7 @@ TEST_CASE("Test the determination of all combinations of distributing k entities
     {
         const std::size_t                           k = 0;
         const std::size_t                           n = 5;
-        const std::vector<std::vector<std::size_t>> expected{{}};
+        const std::vector<std::vector<std::size_t>> expected{};
 
         auto result = determine_all_combinations_of_distributing_k_entities_on_n_positions(k, n);
 
@@ -260,4 +261,32 @@ TEST_CASE("Test the determination of all combinations of distributing k entities
 
         REQUIRE(result == expected);
     }
+}
+
+TEST_CASE("Zero entities", "[determine-all-combinations-of-distributing-k-entities-on-n-positions]")
+{
+    const auto result = determine_all_combinations_of_distributing_k_entities_on_n_positions(0, 5);
+    REQUIRE(result.empty());
+}
+
+TEST_CASE("More entities than positions", "[determine-all-combinations-of-distributing-k-entities-on-n-positions]")
+{
+    const auto result = determine_all_combinations_of_distributing_k_entities_on_n_positions(5, 3);
+    REQUIRE(result.empty());
+}
+
+TEST_CASE("Equal entities and positions", "[determine-all-combinations-of-distributing-k-entities-on-n-positions]")
+{
+    const auto result = determine_all_combinations_of_distributing_k_entities_on_n_positions(3, 3);
+    REQUIRE(result.size() == 1);
+    REQUIRE(result[0] == std::vector<std::size_t>{0, 1, 2});
+}
+
+TEST_CASE("Less entities than positions", "[determine-all-combinations-of-distributing-k-entities-on-n-positions]")
+{
+    const auto result = determine_all_combinations_of_distributing_k_entities_on_n_positions(2, 3);
+    REQUIRE(result.size() == 3);
+    REQUIRE(result[0] == std::vector<std::size_t>{0, 1});
+    REQUIRE(result[1] == std::vector<std::size_t>{0, 2});
+    REQUIRE(result[2] == std::vector<std::size_t>{1, 2});
 }

@@ -107,14 +107,10 @@ inline void operational_domain(pybind11::module& m)
     py::class_<fiction::operational_domain_params>(m, "operational_domain_params",
                                                    DOC(fiction_operational_domain_params))
         .def(py::init<>())
-        .def_readwrite("simulation_parameters", &fiction::operational_domain_params::simulation_parameters,
-                       DOC(fiction_operational_domain_params_simulation_parameters))
-        .def_readwrite("sim_engine", &fiction::operational_domain_params::sim_engine,
-                       DOC(fiction_operational_domain_params_sim_engine))
+        .def_readwrite("operational_params", &fiction::operational_domain_params::operational_params,
+                       DOC(fiction_operational_domain_params_operational_params))
         .def_readwrite("sweep_dimensions", &fiction::operational_domain_params::sweep_dimensions,
                        DOC(fiction_operational_domain_params_sweep_dimensions))
-        .def_readwrite("bdl_params", &fiction::operational_domain_params::bdl_params,
-                       DOC(fiction_operational_domain_params_bdl_params))
 
         ;
 

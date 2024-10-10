@@ -25,7 +25,7 @@ namespace fiction
 /**
  * This struct stores the parameters to design an SiDB circuit on a defective surface.
  *
- * @tparam CellLyt Cell-level layout type.
+ * @tparam CellLyt SiDB cell-level layout type.
  */
 template <typename CellLyt>
 struct on_the_fly_circuit_design_params
@@ -166,7 +166,7 @@ class on_the_fly_circuit_design_impl
  * (https://ieeexplore.ieee.org/abstract/document/10628962).
  *
  * @tparam Ntk The type of the input network.
- * @tparam CellLyt Cell-level layout type.
+ * @tparam CellLyt SiDB cell-level layout type.
  * @tparam GateLyt Gate-level layout type.
  * @param ntk The input network to be mapped onto the defective surface.
  * @param lattice_tiling The lattice tiling used for the circuit design.

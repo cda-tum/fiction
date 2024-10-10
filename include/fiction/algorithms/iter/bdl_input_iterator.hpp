@@ -6,9 +6,9 @@
 #define FICTION_BDL_INPUT_ITERATOR_HPP
 
 #include "fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp"
+#include "fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp"
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/types.hpp"
 
 #include <cstdint>
 #include <iterator>
@@ -45,13 +45,13 @@ struct bdl_input_iterator_params
         PERTURBER_ABSENCE_ENCODED
     };
     /**
+     * Parameters to detect BDL wires.
+     */
+    detect_bdl_wires_params bdl_wire_params{};
+    /**
      * The `input_bdl_config` member allows selection between different modes for handling input BDLs.
      */
     input_bdl_configuration input_bdl_config{input_bdl_configuration::PERTURBER_DISTANCE_ENCODED};
-    /**
-     * Parameters to detect BDL pairs.
-     */
-    detect_bdl_pairs_params bdl_pairs_params{};
 };
 
 /**
@@ -81,12 +81,35 @@ class bdl_input_iterator
     explicit bdl_input_iterator(const Lyt&                       lyt,
                                 const bdl_input_iterator_params& params = bdl_input_iterator_params{}) noexcept :
             layout{lyt.clone()},
-            input_pairs{detect_bdl_pairs<Lyt>(layout, sidb_technology::cell_type::INPUT, params.bdl_pairs_params)},
+            input_pairs{
+                detect_bdl_pairs<Lyt>(lyt, sidb_technology::cell_type::INPUT, params.bdl_wire_params.bdl_pairs_params)},
+            input_bdl_wires{detect_bdl_wires<Lyt>(lyt, params.bdl_wire_params, bdl_wire_selection::INPUT)},
+            num_inputs{static_cast<uint8_t>(input_pairs.size())},
             params{params}
     {
         static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
         static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+        set_all_inputs();
+    }
 
+    /**
+     * Constructor with pre-detected input wires and directions. It alters the layout to set the first input state,
+     * which assigns binary `0` to all input BDL pairs.
+     *
+     * @param lyt The SiDB BDL layout to iterate over.
+     * @param params Parameters for the BDL input iterator.
+     * @param input_wires Pre-detected input BDL wires.
+     */
+    explicit bdl_input_iterator(const Lyt& lyt, const bdl_input_iterator_params& params,
+                                const std::vector<bdl_wire<cell<Lyt>>>& input_wires) noexcept :
+            layout{lyt.clone()},
+            input_pairs{
+                detect_bdl_pairs<Lyt>(lyt, sidb_technology::cell_type::INPUT, params.bdl_wire_params.bdl_pairs_params)},
+            input_bdl_wires{input_wires},
+            num_inputs{static_cast<uint8_t>(input_pairs.size())}
+    {
+        static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+        static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
         set_all_inputs();
     }
     /**
@@ -325,6 +348,14 @@ class bdl_input_iterator
      */
     const std::vector<bdl_pair<cell<Lyt>>> input_pairs;
     /**
+     * The detected input BDL wires.
+     */
+    const std::vector<bdl_wire<cell<Lyt>>> input_bdl_wires;
+    /**
+     * The amount of input BDL pairs.
+     */
+    const uint8_t num_inputs;
+    /**
      * The current input index. There are \f$2^n\f$ possible input states for an \f$n\f$-input BDL layout.
      */
     uint64_t current_input_index{0ull};
@@ -332,7 +363,6 @@ class bdl_input_iterator
      * Parameters for the BDL input iterator.
      */
     const bdl_input_iterator_params params;
-
     /**
      * Sets all input cells of the layout according to the current input index. The input index is interpreted as a
      * binary number, where the \f$i\f$-th bit represents the input state of the \f$i\f$-th input BDL pair. If the bit
@@ -341,24 +371,42 @@ class bdl_input_iterator
      */
     void set_all_inputs() noexcept
     {
-        for (uint64_t i = 0; i < input_pairs.size(); ++i)
+        for (uint64_t i = num_inputs - 1; i < num_inputs; --i)
         {
             const auto& input_i = input_pairs[i];
 
-            if ((current_input_index & (uint64_t{1ull} << i)) != 0ull)
+            if ((current_input_index & (uint64_t{1ull} << (num_inputs - 1 - i))) != 0ull)
             {
-                // set input i to 1
-                layout.assign_cell_type(input_i.upper, technology<Lyt>::cell_type::EMPTY);
-                layout.assign_cell_type(input_i.lower, technology<Lyt>::cell_type::INPUT);
+                if (input_bdl_wires[i].direction == bdl_wire_direction::NORTH_SOUTH)
+                {
+                    // set input i to 1
+                    layout.assign_cell_type(input_i.upper, technology<Lyt>::cell_type::EMPTY);
+                    layout.assign_cell_type(input_i.lower, technology<Lyt>::cell_type::INPUT);
+                }
+                else if (input_bdl_wires[i].direction == bdl_wire_direction::SOUTH_NORTH)
+                {
+                    // set input i to 1
+                    layout.assign_cell_type(input_i.upper, technology<Lyt>::cell_type::INPUT);
+                    layout.assign_cell_type(input_i.lower, technology<Lyt>::cell_type::EMPTY);
+                }
             }
             else
             {
                 if (params.input_bdl_config ==
                     bdl_input_iterator_params::input_bdl_configuration::PERTURBER_DISTANCE_ENCODED)
                 {
-                    // set input i to 0
-                    layout.assign_cell_type(input_i.upper, technology<Lyt>::cell_type::INPUT);
-                    layout.assign_cell_type(input_i.lower, technology<Lyt>::cell_type::EMPTY);
+                    if (input_bdl_wires[i].direction == bdl_wire_direction::NORTH_SOUTH)
+                    {
+                        // set input i to 0
+                        layout.assign_cell_type(input_i.upper, technology<Lyt>::cell_type::INPUT);
+                        layout.assign_cell_type(input_i.lower, technology<Lyt>::cell_type::EMPTY);
+                    }
+                    else if (input_bdl_wires[i].direction == bdl_wire_direction::SOUTH_NORTH)
+                    {
+                        // set input i to 0
+                        layout.assign_cell_type(input_i.upper, technology<Lyt>::cell_type::EMPTY);
+                        layout.assign_cell_type(input_i.lower, technology<Lyt>::cell_type::INPUT);
+                    }
                 }
                 else
                 {
