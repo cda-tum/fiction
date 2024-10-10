@@ -22,8 +22,11 @@
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <algorithm>
+#include <chrono>
 #include <cmath>
 #include <cstdint>
+#include <iostream>
+#include <limits>
 #include <optional>
 #include <ostream>
 #include <unordered_set>
@@ -52,6 +55,12 @@ struct post_layout_optimization_params
      * crossing-free wiring is found. Defaults to false.
      */
     bool planar_optimization = false;
+    /**
+     * Timeout limit (in ms). Specifies the maximum allowed time in milliseconds for the optimization process. For large
+     * layouts, the actual execution time may slightly exceed this limit because it's impractical to check the timeout
+     * at every algorithm step and the functional correctness has to be ensured by completing essential algorithm steps.
+     */
+    uint64_t timeout = std::numeric_limits<uint64_t>::max();
 };
 
 /**
@@ -428,6 +437,25 @@ layout_coordinate_path<Lyt> get_path_and_obstruct(Lyt& lyt, const tile<Lyt>& sta
     return path;
 }
 /**
+ * Calculates the elapsed milliseconds since the `start` time, sets the `timeout_limit_reached` flag
+ * if the timeout is exceeded, and returns the remaining time.
+ *
+ * @param start The start time in milliseconds.
+ * @param timeout The timeout limit in milliseconds.
+ * @param timeout_limit_reached Reference to a boolean flag that is set to `true` if the timeout is reached.
+ *
+ * @return Remaining time in milliseconds before timeout, or `0` if timeout has been reached.
+ */
+uint64_t update_timeout(const std::chrono::high_resolution_clock::time_point start, const uint64_t timeout,
+                        bool& timeout_limit_reached)
+{
+    const auto current_time = std::chrono::high_resolution_clock::now();
+    const auto elapsed_ms =
+        static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(current_time - start).count());
+    timeout_limit_reached = (elapsed_ms >= timeout);
+    return timeout_limit_reached ? 0 : timeout - elapsed_ms;
+};
+/**
  * Utility function that moves gates to new coordinates and checks if routing is possible.
  * This includes:
  *
@@ -441,12 +469,17 @@ layout_coordinate_path<Lyt> get_path_and_obstruct(Lyt& lyt, const tile<Lyt>& sta
  * @tparam Lyt Cartesian obstruction gate-level layout type.
  * @param lyt 2DDWave-clocked cartesian obstruction gate-level layout.
  * @param old_pos Old position of the gate to be moved.
+ * @param start The start time in milliseconds.
+ * @param timeout The timeout limit in milliseconds.
+ * @param timeout_limit_reached Reference to a boolean flag that is set to `true` if the timeout is reached.
  * @param planar_optimization Only allow relocation if a crossing-free wiring can be found. Defaults to false.
  * @return `true` if the gate was moved successfully, `false` otherwise.
  */
 template <typename Lyt>
 bool improve_gate_location(Lyt& lyt, const tile<Lyt>& old_pos, const tile<Lyt>& max_non_po,
-                           const uint64_t max_gate_relocations, const bool planar_optimization = false) noexcept
+                           const uint64_t                                       max_gate_relocations,
+                           const std::chrono::high_resolution_clock::time_point start, const uint64_t timeout,
+                           bool& timeout_limit_reached, const bool planar_optimization = false) noexcept
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
@@ -547,11 +580,13 @@ bool improve_gate_location(Lyt& lyt, const tile<Lyt>& old_pos, const tile<Lyt>& 
         {
             const uint64_t y = k - x;
 
-            if (moved_gate || ((num_gate_relocations >= max_gate_relocations) && !lyt.is_po_tile(current_pos)))
+            if (moved_gate || ((num_gate_relocations >= max_gate_relocations) && !lyt.is_po_tile(current_pos)) ||
+                timeout_limit_reached)
             {
                 break;
             }
 
+            update_timeout(start, timeout, timeout_limit_reached);
             // only check better positions
             if (lyt.y() >= y && y >= min_y && lyt.x() >= x && x >= min_x && ((x + y) <= max_diagonal) &&
                 (((x + y) < max_diagonal) || (y <= max_y)) &&
@@ -918,7 +953,8 @@ class post_layout_optimization_impl
                                   post_layout_optimization_stats& st) :
             plyt{lyt},
             ps{p},
-            pst{st}
+            pst{st},
+            start{std::chrono::high_resolution_clock::now()}
     {}
 
     void run()
@@ -926,47 +962,74 @@ class post_layout_optimization_impl
         static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
         static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
 
+        // start the stopwatch to measure total optimization time
         const mockturtle::stopwatch stop{pst.time_total};
+
+        // record initial layout statistics
         pst.x_size_before        = plyt.x() + 1;
         pst.y_size_before        = plyt.y() + 1;
         pst.num_wires_before     = plyt.num_wires() - plyt.num_pis() - plyt.num_pos();
         pst.num_crossings_before = plyt.num_crossings();
 
+        // determine the maximum number of gate relocations
         uint64_t max_gate_relocations = ps.max_gate_relocations.value_or((plyt.x() + 1) * (plyt.y() + 1));
 
-        // optimization
-        auto layout                  = obstruction_layout<Lyt>(plyt);
+        // create an obstruction layout based on the original layout
+        auto layout = obstruction_layout<Lyt>(plyt);
+
+        // initialize flags to control the optimization loop
         bool moved_at_least_one_gate = true;
         bool reduced_wiring          = true;
+        timeout_limit_reached        = false;
 
         if (max_gate_relocations == 0)
         {
-            fiction::wiring_reduction_stats wiring_reduction_stats{};
-            fiction::wiring_reduction(layout, &wiring_reduction_stats);
+            // perform wiring reduction only when no gate relocations are allowed
+            fiction::wiring_reduction_stats  wiring_reduction_stats{};
+            fiction::wiring_reduction_params wiring_reduction_params{};
+
+            // Update the remaining timeout
+            uint64_t remaining_time         = update_timeout(start, ps.timeout, timeout_limit_reached);
+            wiring_reduction_params.timeout = remaining_time;
+
+            if (!timeout_limit_reached)
+            {
+                fiction::wiring_reduction(layout, wiring_reduction_params, &wiring_reduction_stats);
+            }
         }
         else
         {
-            while (moved_at_least_one_gate || reduced_wiring)
+            // iteratively optimize the layout until no more improvements can be made or timeout is reached
+            while ((moved_at_least_one_gate || reduced_wiring) && !timeout_limit_reached)
             {
                 reduced_wiring = false;
-                fiction::wiring_reduction_stats wiring_reduction_stats{};
-                if (moved_at_least_one_gate && !ps.optimize_pos_only)
+
+                // update the remaining timeout
+                fiction::wiring_reduction_params wiring_reduction_params{};
+                uint64_t remaining_time         = update_timeout(start, ps.timeout, timeout_limit_reached);
+                wiring_reduction_params.timeout = remaining_time;
+
+                if (moved_at_least_one_gate && !ps.optimize_pos_only && !timeout_limit_reached)
                 {
-                    fiction::wiring_reduction(layout, &wiring_reduction_stats);
-                    if ((wiring_reduction_stats.area_improvement != 0ull) ||
-                        (wiring_reduction_stats.wiring_improvement != 0ull))
+                    fiction::wiring_reduction_stats wiring_reduction_stats{};
+                    fiction::wiring_reduction(layout, wiring_reduction_params, &wiring_reduction_stats);
+
+                    // check if wiring reduction made any improvements
+                    if (wiring_reduction_stats.area_improvement != 0ull ||
+                        wiring_reduction_stats.wiring_improvement != 0ull)
                     {
                         reduced_wiring = true;
                     }
                 }
 
-                std::vector<tile<Lyt>> gate_tiles{};
+                // gather all relevant gate tiles for relocation
+                std::vector<tile<Lyt>> gate_tiles;
                 gate_tiles.reserve(layout.num_gates() + layout.num_pis() - layout.num_pos());
                 layout.foreach_node(
                     [&layout, &gate_tiles](const auto& node)
                     {
-                        if (const tile<Lyt> tile = layout.get_tile(node);
-                            (layout.is_gate(node) && !layout.is_wire(node)) || layout.is_fanout(node) ||
+                        const tile<Lyt> tile = layout.get_tile(node);
+                        if ((layout.is_gate(node) && !layout.is_wire(node)) || layout.is_fanout(node) ||
                             layout.is_pi_tile(tile) || layout.is_po_tile(tile))
                         {
                             layout.obstruct_coordinate({tile.x, tile.y, 1});
@@ -974,6 +1037,7 @@ class post_layout_optimization_impl
                         }
                     });
 
+                // sort the gate tiles using the custom comparator
                 std::sort(gate_tiles.begin(), gate_tiles.end(), detail::compare_gate_tiles<Lyt>);
 
                 tile<Lyt> max_non_po{0, 0};
@@ -986,37 +1050,59 @@ class post_layout_optimization_impl
                         max_non_po.y = std::max(max_non_po.y, gate_tile.y);
                     }
                 }
+
+                // reset the gate movement flag
                 moved_at_least_one_gate = false;
+
+                // attempt to relocate each gate tile
                 for (auto& gate_tile : gate_tiles)
                 {
-                    if (!ps.optimize_pos_only || (ps.optimize_pos_only && layout.is_po_tile(gate_tile)))
+                    if (timeout_limit_reached)
                     {
-                        if (detail::improve_gate_location(layout, gate_tile, max_non_po, max_gate_relocations,
-                                                          ps.planar_optimization))
+                        break;
+                    }
+
+                    bool should_optimize =
+                        !ps.optimize_pos_only || (ps.optimize_pos_only && layout.is_po_tile(gate_tile));
+                    if (should_optimize)
+                    {
+                        if (detail::improve_gate_location(layout, gate_tile, max_non_po, max_gate_relocations, start,
+                                                          ps.timeout, timeout_limit_reached, ps.planar_optimization))
                         {
                             moved_at_least_one_gate = true;
                         }
                     }
+
+                    // update the remaining timeout after each relocation attempt
+                    update_timeout(start, ps.timeout, timeout_limit_reached);
                 }
-                // calculate bounding box
+
+                // resize the layout to fit within the new bounding box after relocations
                 const auto bounding_box = bounding_box_2d(layout);
                 layout.resize({bounding_box.get_max().x, bounding_box.get_max().y, layout.z()});
             }
         }
-        detail::optimize_output_positions(layout);
 
-        // calculate bounding box
-        const auto bounding_box = bounding_box_2d(layout);
-        layout.resize({bounding_box.get_max().x, bounding_box.get_max().y, layout.z()});
+        // if the optimization did not time out, optimize the output positions
+        if (!timeout_limit_reached)
+        {
+            detail::optimize_output_positions(layout);
+        }
 
-        pst.x_size_after           = layout.x() + 1;
-        pst.y_size_after           = layout.y() + 1;
+        // final bounding box calculation and layout resizing
+        const auto final_bounding_box = bounding_box_2d(layout);
+        layout.resize({final_bounding_box.get_max().x, final_bounding_box.get_max().y, layout.z()});
+
+        // update final layout statistics
+        pst.x_size_after = layout.x() + 1;
+        pst.y_size_after = layout.y() + 1;
+
         const uint64_t area_before = pst.x_size_before * pst.y_size_before;
         const uint64_t area_after  = pst.x_size_after * pst.y_size_after;
-        double_t       area_percentage_difference =
-            static_cast<double_t>(area_before - area_after) / static_cast<double_t>(area_before) * 100.0;
-        area_percentage_difference = std::round(area_percentage_difference * 100) / 100;
-        pst.area_improvement       = area_percentage_difference;
+
+        double area_percentage_difference =
+            static_cast<double>(area_before - area_after) / static_cast<double>(area_before) * 100.0;
+        pst.area_improvement = std::round(area_percentage_difference * 100) / 100.0;
 
         pst.num_wires_after     = plyt.num_wires() - plyt.num_pis() - plyt.num_pos();
         pst.num_crossings_after = plyt.num_crossings();
@@ -1035,6 +1121,14 @@ class post_layout_optimization_impl
      * Statistics about the post-layout optimization process.
      */
     post_layout_optimization_stats& pst;
+    /**
+     * Timeout limit reached.
+     */
+    bool timeout_limit_reached = false;
+    /**
+     * Start time.
+     */
+    std::chrono::time_point<std::chrono::high_resolution_clock> start;
 };
 }  // namespace detail
 

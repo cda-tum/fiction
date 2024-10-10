@@ -223,6 +223,7 @@ For more information, see `this paper <https://dl.acm.org/doi/10.1145/3611315.36
 
 Possible parameters:
 
+- Timeout (``-t``), in seconds.
 - Number of maximum gate relocations (``-m``), should be set to 1 for layouts with more than 100000 tiles, defaults to the number of tiles in the layout.
 - Wiring reduction only (``-w``), should be set for layouts with more than 20000000 tiles, not set by default.
 - Planar optimization (``-p``), should be set if during optimization, gates should only be relocated if the new wiring contains no crossings, not set by default.

@@ -158,6 +158,35 @@ TEST_CASE("Layout equivalence", "[post_layout_optimization]")
         check_eq(blueprints::mux21_network<technology_network>(), layout);
     }
 
+    SECTION("Timeout")
+    {
+        using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<>>>>;
+
+        const auto layout = orthogonal<gate_layout>(blueprints::mux21_network<technology_network>(), {});
+
+        post_layout_optimization_stats  stats{};
+        post_layout_optimization_params params{};
+        params.timeout = 1000000;
+        post_layout_optimization<gate_layout>(layout, params, &stats);
+
+        check_eq(blueprints::mux21_network<technology_network>(), layout);
+    }
+
+    SECTION("Timeout exceeded")
+    {
+        using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<>>>>;
+
+        const auto layout = orthogonal<gate_layout>(blueprints::mux21_network<technology_network>(), {});
+
+        post_layout_optimization_stats  stats{};
+        post_layout_optimization_params params{};
+        params.timeout = 0;
+        post_layout_optimization<gate_layout>(layout, params, &stats);
+
+        check_eq(blueprints::mux21_network<technology_network>(), layout);
+        CHECK(stats.area_improvement == 0);
+    }
+
     SECTION("Planar optimization with planar layout")
     {
         using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<>>>>;
