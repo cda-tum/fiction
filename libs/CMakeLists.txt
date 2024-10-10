@@ -150,10 +150,17 @@ add_subdirectory(graph-coloring EXCLUDE_FROM_ALL)
 target_include_directories(libfiction SYSTEM INTERFACE graph-coloring/Header)
 target_link_system_libraries(libfiction INTERFACE graph-coloring)
 
-# Include ALGLIB by the ALGLIB Project
-add_subdirectory(alglib-cmake EXCLUDE_FROM_ALL)
-target_include_directories(libfiction SYSTEM INTERFACE alglib-cmake/src/cpp/src/headers)
-target_link_system_libraries(libfiction INTERFACE ALGLIB)
+# Enable the usage of ALGLIB by the ALGLIB Project
+option(FICTION_ALGLIB "Automatically download, include, and utilize ALGLIB by the ALGLIB project.")
+if (FICTION_ALGLIB)
+    # Compile definition to guard include files
+    target_compile_definitions(libfiction INTERFACE FICTION_ALGLIB_ENABLED)
+
+    # Download, include and link ALGLIB
+    add_subdirectory(alglib-cmake EXCLUDE_FROM_ALL)
+    target_include_directories(libfiction SYSTEM INTERFACE alglib-cmake/src/cpp/src/headers)
+    target_link_system_libraries(libfiction INTERFACE ALGLIB)
+endif ()
 
 # Include tinyXML2
 set(tinyxml2_BUILD_TESTING OFF)

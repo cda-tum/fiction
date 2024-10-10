@@ -41,6 +41,7 @@ concurrency:
 env:
   Z3_VERSION: 4.13.0
   ENABLE_Z3: 'ON'
+  ENABLE_ALGLIB: 'ON'
 
 jobs:
   build_wheels:
@@ -140,7 +141,7 @@ jobs:
         run: pipx run build --sdist
 
       - name: Test sdist
-        run: z3=${{env.ENABLE_Z3}} pip install dist/*.tar.gz --verbose
+        run: z3=${{env.ENABLE_Z3}} alglib=${{env.ENABLE_ALGLIB}} pip install dist/*.tar.gz --verbose
 
       - name: Upload sdist as an artifact
         uses: actions/upload-artifact@v4

@@ -2,6 +2,8 @@
 // Created by Willem Lambooy on 29.02.2024.
 //
 
+#if (FICTION_ALGLIB_ENABLED)
+
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
@@ -1956,6 +1958,16 @@ TEMPLATE_TEST_CASE("Special test cases", "[clustercomplete]", (sidb_100_cell_clk
     }
 }
 
+#else  // FICTION_ALGLIB_ENABLED
+
+#include <catch2/catch_test_macros.hpp>
+
+TEST_CASE("ClusterComplete", "[clustercomplete]")
+{
+    CHECK(true);  // workaround for empty test case
+}
+
+#endif  // FICTION_ALGLIB_ENABLED
 TEMPLATE_TEST_CASE("ClusterComplete gate simulation of Si-111 surface", "[clustercomplete]",
                    (sidb_111_cell_clk_lyt_siqad), (cds_sidb_111_cell_clk_lyt_siqad))
 {

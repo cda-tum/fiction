@@ -39,6 +39,7 @@ jobs:
           -m pybind11_mkdoc
           -o ${{ github.workspace }}/bindings/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp
           -D FICTION_Z3_SOLVER
+          -D FICTION_ALGLIB_ENABLED
           `find ${{ github.workspace }}/include/fiction -name "*.hpp" -print`
 
       - name: Upload docstrings as an artifact

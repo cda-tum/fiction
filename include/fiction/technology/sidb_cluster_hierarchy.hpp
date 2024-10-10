@@ -5,6 +5,8 @@
 #ifndef FICTION_SIDB_CLUSTER_HIERARCHY_HPP
 #define FICTION_SIDB_CLUSTER_HIERARCHY_HPP
 
+#if (FICTION_ALGLIB_ENABLED)
+
 /**
  * Uncomment this line to switch to STL containers, which are slower than their respective analogues from the
  * Parallel-Hashmap library by Gregory Popovitch, but may be inspected with ease in a debugger.
@@ -1149,3 +1151,5 @@ static sidb_cluster_ptr to_sidb_cluster(const sidb_binary_cluster_hierarchy_node
 }  // namespace fiction
 
 #endif  // FICTION_ALGLIB_ENABLED
+
+#endif  // FICTION_SIDB_CLUSTER_HIERARCHY_HPP

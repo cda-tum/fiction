@@ -77,11 +77,13 @@ TEST_CASE("Benchmark simulators", "[benchmark]")
         return quicksim<lattice>(lyt, quicksim_params);
     };
 
+#if (FICTION_ALGLIB_ENABLED)
     BENCHMARK("ClusterComplete")
     {
         const clustercomplete_params<cell<lattice>> sim_params{sidb_simulation_parameters{3, -0.32}};
         return clustercomplete<lattice>(lyt, sim_params);
     };
+#endif  // FICTION_ALGLIB_ENABLED
 }
 //      Mac M1, Ventura 13.0, Apple clang version 14.0.0 (24.07.24)
 //
@@ -201,6 +203,7 @@ TEST_CASE("Benchmark simulators", "[benchmark]")
 //                            17.2877 ms    17.0146 ms    17.5923 ms
 //                            1.46908 ms    1.29383 ms    1.70859 ms
 
+#if (FICTION_ALGLIB_ENABLED)
 TEST_CASE("Benchmark ClusterComplete", "[benchmark]")
 {
     // number of non-terminating segments of a diagonal wire
@@ -226,6 +229,7 @@ TEST_CASE("Benchmark ClusterComplete", "[benchmark]")
         return clustercomplete<lattice>(cl, sim_params);
     };
 }
+#endif  // FICTION_ALGLIB_ENABLED
 //  Intel Core i6700HQ (8 cores @ 2.60 GHz), Ubuntu 22.04.2 LTS, Ubuntu clang version 14.0.0 (13.04.24)
 
 //    before "Add and subtract parent potential only once"

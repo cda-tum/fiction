@@ -5,6 +5,8 @@
 #ifndef FICTION_CMD_CLUSTERCOMPLETE_HPP
 #define FICTION_CMD_CLUSTERCOMPLETE_HPP
 
+#if (FICTION_ALGLIB_ENABLED)
+
 #include <fiction/algorithms/simulation/sidb/clustercomplete.hpp>
 #include <fiction/algorithms/simulation/sidb/minimum_energy.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
@@ -270,5 +272,7 @@ using ccsim_command = clustercomplete_command;
 ALICE_ADD_COMMAND(clustercomplete, "Simulation")
 
 }  // namespace alice
+
+#endif  // FICTION_ALGLIB_ENABLED
 
 #endif  // FICTION_CMD_CLUSTERCOMPLETE_HPP

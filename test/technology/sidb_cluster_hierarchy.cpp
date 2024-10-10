@@ -2,6 +2,8 @@
 // Created by Willem Lambooy on 04.02.2024.
 //
 
+#if (FICTION_ALGLIB_ENABLED)
+
 #include <catch2/catch_template_test_macros.hpp>
 
 #include <fiction/technology/charge_distribution_surface.hpp>
@@ -46,37 +48,20 @@ TEMPLATE_TEST_CASE("SiDB cluster hierarchy of a Y-shape SiDB OR gate with input 
         REQUIRE(h.sub.at(1) != nullptr);
         REQUIRE(h.sub.at(0)->c.size() == 3);
         REQUIRE(h.sub.at(1)->c.size() == 5);
-#ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
-        CHECK(h.sub.at(0)->c == std::set<uint64_t>{5, 6, 7});
-        CHECK(h.sub.at(1)->c == std::set<uint64_t>{0, 1, 2, 3, 4});
-#else
         CHECK(h.sub.at(0)->c == phmap::flat_hash_set<uint64_t>{5, 6, 7});
         CHECK(h.sub.at(1)->c == phmap::flat_hash_set<uint64_t>{0, 1, 2, 3, 4});
-#endif
         REQUIRE(h.sub.at(0)->sub.at(0) != nullptr);
         REQUIRE(h.sub.at(0)->sub.at(1) != nullptr);
         REQUIRE(h.sub.at(1)->sub.at(0) != nullptr);
         REQUIRE(h.sub.at(1)->sub.at(1) != nullptr);
-#ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
-        CHECK(h.sub.at(0)->sub.at(0)->c == std::set<uint64_t>{7});
-        CHECK(h.sub.at(0)->sub.at(1)->c == std::set<uint64_t>{5, 6});
-        CHECK(h.sub.at(1)->sub.at(0)->c == std::set<uint64_t>{1, 3});
-        CHECK(h.sub.at(1)->sub.at(1)->c == std::set<uint64_t>{0, 2, 4});
-#else
         CHECK(h.sub.at(0)->sub.at(0)->c == phmap::flat_hash_set<uint64_t>{7});
         CHECK(h.sub.at(0)->sub.at(1)->c == phmap::flat_hash_set<uint64_t>{5, 6});
         CHECK(h.sub.at(1)->sub.at(0)->c == phmap::flat_hash_set<uint64_t>{1, 3});
         CHECK(h.sub.at(1)->sub.at(1)->c == phmap::flat_hash_set<uint64_t>{0, 2, 4});
-#endif
         REQUIRE(h.sub.at(1)->sub.at(1)->sub.at(0) != nullptr);
         REQUIRE(h.sub.at(1)->sub.at(1)->sub.at(1) != nullptr);
-#ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
-        CHECK(h.sub.at(1)->sub.at(1)->sub.at(0)->c == std::set<uint64_t>{4});
-        CHECK(h.sub.at(1)->sub.at(1)->sub.at(1)->c == std::set<uint64_t>{0, 2});
-#else
         CHECK(h.sub.at(1)->sub.at(1)->sub.at(0)->c == phmap::flat_hash_set<uint64_t>{4});
         CHECK(h.sub.at(1)->sub.at(1)->sub.at(1)->c == phmap::flat_hash_set<uint64_t>{0, 2});
-#endif
     }
 }
 
@@ -127,3 +112,14 @@ TEMPLATE_TEST_CASE("SiDB cluster hierarchy of an 8 DB layout with separated grou
     CHECK(h.sub.at(1)->sub.at(1)->c == phmap::flat_hash_set<uint64_t>{6, 7});
 #endif
 }
+
+#else  // FICTION_ALGLIB_ENABLED
+
+#include <catch2/catch_test_macros.hpp>
+
+TEST_CASE("SiDB Cluster Hierarchy", "[sidb-cluster-hierarchy]")
+{
+    CHECK(true);  // workaround for empty test case
+}
+
+#endif  // FICTION_ALGLIB_ENABLED

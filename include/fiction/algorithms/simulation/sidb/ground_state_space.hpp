@@ -5,6 +5,8 @@
 #ifndef FICTION_GROUND_STATE_SPACE_HPP
 #define FICTION_GROUND_STATE_SPACE_HPP
 
+#if (FICTION_ALGLIB_ENABLED)
+
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/technology/physical_constants.hpp"
@@ -1191,5 +1193,7 @@ template <typename Lyt>
 }
 
 }  // namespace fiction
+
+#endif  // FICTION_ALGLIB_ENABLED
 
 #endif  // FICTION_GROUND_STATE_SPACE_HPP
