@@ -9,16 +9,20 @@
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/cell_technologies.hpp>
+#include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/layout_utils.hpp>
 #include <fiction/utils/math_utils.hpp>
 
 #include <fmt/format.h>
 
+#include <algorithm>
 #include <cstdint>
 #include <iostream>
 #include <mutex>
 #include <thread>
+#include <utility>
+#include <vector>
 
 using namespace fiction;
 
@@ -76,23 +80,22 @@ int main()  // NOLINT
                         lyt.assign_cell_type(all_cells_in_region[idx], sidb_technology::cell_type::NORMAL);
                     }
 
-                    clustercomplete_params<fiction::cell<sidb_100_cell_clk_lyt>> cc_params{params};
+                    clustercomplete_params<cell<sidb_100_cell_clk_lyt>> cc_params{params};
                     cc_params.available_threads = 1;
 
-                    auto result_exgs = exhaustive_ground_state_simulation(lyt, params);
-                    auto result_quickexact =
-                        quickexact(lyt, quickexact_params<fiction::cell<sidb_100_cell_clk_lyt>>{params});
+                    auto result_exgs       = exhaustive_ground_state_simulation(lyt, params);
+                    auto result_quickexact = quickexact(lyt, quickexact_params<cell<sidb_100_cell_clk_lyt>>{params});
                     auto result_clustercomplete = clustercomplete(lyt, cc_params);
 
                     if (!check_simulation_results_for_equivalence(result_exgs, result_quickexact))
                     {
-                        std::lock_guard lock{mutex_qe};
+                        const std::lock_guard lock{mutex_qe};
                         quickexact_non_equivalence_counter++;
                     }
 
                     if (!check_simulation_results_for_equivalence(result_exgs, result_clustercomplete))
                     {
-                        std::lock_guard lock{mutex_cc};
+                        const std::lock_guard lock{mutex_cc};
                         clustercomplete_non_equivalence_counter++;
                     }
                 }

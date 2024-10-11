@@ -6,6 +6,7 @@
 #define FICTION_CMD_TEMP_HPP
 
 #include <fiction/algorithms/simulation/sidb/critical_temperature.hpp>
+#include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/math_utils.hpp>
