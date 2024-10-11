@@ -175,7 +175,7 @@ class clustercomplete_impl
     /**
      * Mutex to protect the simulation results.
      */
-    std::mutex mutex_to_protect_the_simulation_results{};
+    std::mutex mutex_to_protect_the_simulation_results;
     /**
      * The base layout, along with the map of placed defects, that are used to create charge distribution surface
      * copies.
@@ -377,7 +377,7 @@ class clustercomplete_impl
      */
     template <bound_direction bound>
     [[nodiscard]] static constexpr double get_projector_state_bound_pot(const sidb_cluster_projector_state& pst,
-                                                                               const uint64_t sidb_ix) noexcept
+                                                                        const uint64_t sidb_ix) noexcept
     {
         return pst.cluster->pot_projs.at(sidb_ix).get_pot_proj_for_m_conf<bound>(pst.multiset_conf).pot_val;
     }
