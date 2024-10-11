@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <iostream>
+#include <iterator>
 #include <mutex>
 #include <thread>
 #include <utility>
