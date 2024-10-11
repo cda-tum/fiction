@@ -64,7 +64,7 @@ build-frontend = "pip"
 manylinux-x86_64-image = "manylinux_2_28"
 
 [tool.cibuildwheel.linux]
-environment = { Z3_ROOT = "/opt/python/cp39-cp39/lib/python3.9/site-packages/z3", z3 = "ON", alglib = "ON" }
+environment = { Z3_ROOT = "/opt/python/cp39-cp39/lib/python3.9/site-packages/z3", z3 = "ON", ALGLIB_DIR = "libs/alglib-cmake/src/cpp/src", alglib = "ON" }
 
 [tool.cibuildwheel.macos]
 archs = "x86_64"
