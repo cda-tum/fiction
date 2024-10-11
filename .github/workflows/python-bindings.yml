@@ -59,7 +59,7 @@ jobs:
           - os: windows-2019
             z3_platform: windows
             architecture: x64
-            alglib: 'OFF'
+            alglib: 'ON'
 
     name: 🐍 on ${{matrix.os}} with Python ${{matrix.python_version}}
     runs-on: ${{matrix.os}}
