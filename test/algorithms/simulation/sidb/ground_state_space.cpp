@@ -157,10 +157,11 @@ TEMPLATE_TEST_CASE("Ground State Space construction of a 7 DB layout", "[ground-
 
         for (uint64_t sidb_ix = 0; sidb_ix < 7; ++sidb_ix)
         {
-            CHECK_THAT(gss_res.top_cluster->charge_space.cbegin()
-                    ->compositions.cbegin()
-                    ->pot_bounds.get<bound_direction::LOWER>(sidb_ix) -
+            CHECK_THAT(
                 gss_res.top_cluster->charge_space.cbegin()
+                        ->compositions.cbegin()
+                        ->pot_bounds.get<bound_direction::LOWER>(sidb_ix) -
+                    gss_res.top_cluster->charge_space.cbegin()
                         ->compositions.cbegin()
                         ->proj_states.cbegin()
                         ->cluster->pot_projs.at(sidb_ix)
@@ -177,12 +178,13 @@ TEMPLATE_TEST_CASE("Ground State Space construction of a 7 DB layout", "[ground-
                                 gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin(),
                                 1)
                                 ->multiset_conf)
-                        .pot_val, Catch::Matchers::WithinAbs(0.0, std::numeric_limits<double>::epsilon()));
+                        .pot_val,
+                Catch::Matchers::WithinAbs(0.0, std::numeric_limits<double>::epsilon()));
             CHECK_THAT(
                 gss_res.top_cluster->charge_space.cbegin()
-                    ->compositions.cbegin()
-                    ->pot_bounds.get<bound_direction::UPPER>(sidb_ix) -
-                gss_res.top_cluster->charge_space.cbegin()
+                        ->compositions.cbegin()
+                        ->pot_bounds.get<bound_direction::UPPER>(sidb_ix) -
+                    gss_res.top_cluster->charge_space.cbegin()
                         ->compositions.cbegin()
                         ->proj_states.cbegin()
                         ->cluster->pot_projs.at(sidb_ix)
@@ -199,7 +201,8 @@ TEMPLATE_TEST_CASE("Ground State Space construction of a 7 DB layout", "[ground-
                                 gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin(),
                                 1)
                                 ->multiset_conf)
-                        .pot_val, Catch::Matchers::WithinAbs(0.0, std::numeric_limits<double>::epsilon()));
+                        .pot_val,
+                Catch::Matchers::WithinAbs(0.0, std::numeric_limits<double>::epsilon()));
         }
     }
     else
@@ -226,9 +229,9 @@ TEMPLATE_TEST_CASE("Ground State Space construction of a 7 DB layout", "[ground-
         {
             CHECK_THAT(
                 gss_res.top_cluster->charge_space.cbegin()
-                    ->compositions.cbegin()
-                    ->pot_bounds.get<bound_direction::LOWER>(sidb_ix) -
-                gss_res.top_cluster->charge_space.cbegin()
+                        ->compositions.cbegin()
+                        ->pot_bounds.get<bound_direction::LOWER>(sidb_ix) -
+                    gss_res.top_cluster->charge_space.cbegin()
                         ->compositions.cbegin()
                         ->proj_states.cbegin()
                         ->cluster->pot_projs.at(sidb_ix)
@@ -245,12 +248,13 @@ TEMPLATE_TEST_CASE("Ground State Space construction of a 7 DB layout", "[ground-
                                 gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin(),
                                 1)
                                 ->multiset_conf)
-                        .pot_val, Catch::Matchers::WithinAbs(0.0, std::numeric_limits<double>::epsilon()));
+                        .pot_val,
+                Catch::Matchers::WithinAbs(0.0, std::numeric_limits<double>::epsilon()));
             CHECK_THAT(
                 gss_res.top_cluster->charge_space.cbegin()
-                    ->compositions.cbegin()
-                    ->pot_bounds.get<bound_direction::UPPER>(sidb_ix) -
-                gss_res.top_cluster->charge_space.cbegin()
+                        ->compositions.cbegin()
+                        ->pot_bounds.get<bound_direction::UPPER>(sidb_ix) -
+                    gss_res.top_cluster->charge_space.cbegin()
                         ->compositions.cbegin()
                         ->proj_states.cbegin()
                         ->cluster->pot_projs.at(sidb_ix)
@@ -267,7 +271,8 @@ TEMPLATE_TEST_CASE("Ground State Space construction of a 7 DB layout", "[ground-
                                 gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin(),
                                 1)
                                 ->multiset_conf)
-                        .pot_val, Catch::Matchers::WithinAbs(0.0, std::numeric_limits<double>::epsilon()));
+                        .pot_val,
+                Catch::Matchers::WithinAbs(0.0, std::numeric_limits<double>::epsilon()));
         }
     }
 }
