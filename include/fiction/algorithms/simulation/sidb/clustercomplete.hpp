@@ -62,7 +62,7 @@ struct clustercomplete_params
     /**
      * Physical simulation parameters.
      */
-    sidb_simulation_parameters simulation_parameters{};
+    sidb_simulation_parameters simulation_parameters;
     /**
      * Local external electrostatic potentials (e.g., locally applied electrodes).
      */
