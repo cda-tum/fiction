@@ -90,7 +90,7 @@ jobs:
 
       - if: runner.os == 'Windows'
         name: Update pywin32
-        run: pip install --upgrade pywin32
+        run: python -m pip install --upgrade pywin32
 
       - name: Setup Z3 Solver
         id: z3
