@@ -88,6 +88,10 @@ jobs:
         name: Setup mold
         uses: rui314/setup-mold@v1
 
+      - if: runner.os == 'Windows'
+        name: Update pywin32
+        run: pip install --upgrade pywin32
+
       - name: Setup Z3 Solver
         id: z3
         uses: cda-tum/setup-z3@v1
