@@ -59,7 +59,7 @@ jobs:
           - os: windows-2019
             z3_platform: windows
             architecture: x64
-            alglib: 'ON'
+            alglib: 'OFF'
 
     name: 🐍 on ${{matrix.os}} with Python ${{matrix.python_version}}
     runs-on: ${{matrix.os}}
@@ -87,10 +87,6 @@ jobs:
       - if: runner.os == 'Linux'
         name: Setup mold
         uses: rui314/setup-mold@v1
-
-      - if: runner.os == 'Windows'
-        name: Update pywin32
-        run: python -m pip install --upgrade pywin32
 
       - name: Setup Z3 Solver
         id: z3
