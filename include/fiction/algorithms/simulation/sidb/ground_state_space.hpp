@@ -167,7 +167,7 @@ class ground_state_space_impl
      *
      * @param pot_bound Potential lower bound.
      */
-    [[nodiscard]] constexpr inline bool fail_onto_negative_charge(const double pot_bound) const noexcept
+    [[nodiscard]] constexpr bool fail_onto_negative_charge(const double pot_bound) const noexcept
     {
         // V > e - mu-
         return pot_bound > mu_bounds_with_error.at(0);
@@ -177,7 +177,7 @@ class ground_state_space_impl
      *
      * @param pot_bound Potential upper bound.
      */
-    [[nodiscard]] constexpr inline bool fail_onto_positive_charge(const double pot_bound) const noexcept
+    [[nodiscard]] constexpr bool fail_onto_positive_charge(const double pot_bound) const noexcept
     {
         // V < -e - mu+
         return pot_bound < mu_bounds_with_error.at(3);
@@ -187,7 +187,7 @@ class ground_state_space_impl
      *
      * @param pot_bound Potential upper bound.
      */
-    [[nodiscard]] constexpr inline bool ub_fail_onto_neutral_charge(const double pot_bound) const noexcept
+    [[nodiscard]] constexpr bool ub_fail_onto_neutral_charge(const double pot_bound) const noexcept
     {
         // V < -e - mu-
         return pot_bound < mu_bounds_with_error.at(1);
@@ -197,7 +197,7 @@ class ground_state_space_impl
      *
      * @param pot_bound Potential lower bound.
      */
-    [[nodiscard]] constexpr inline bool lb_fail_onto_neutral_charge(const double pot_bound) const noexcept
+    [[nodiscard]] constexpr bool lb_fail_onto_neutral_charge(const double pot_bound) const noexcept
     {
         // V > e - mu+
         return pot_bound > mu_bounds_with_error.at(2);
