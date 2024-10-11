@@ -226,7 +226,7 @@ class clustercomplete_impl
      *
      * @param pot_bound Potential lower bound.
      */
-    [[nodiscard]] constexpr inline bool fail_onto_negative_charge(const double pot_bound) const noexcept
+    [[nodiscard]] constexpr bool fail_onto_negative_charge(const double pot_bound) const noexcept
     {
         // V > e - mu-
         return pot_bound > mu_bounds_with_error.at(0);
@@ -236,7 +236,7 @@ class clustercomplete_impl
      *
      * @param pot_bound Potential upper bound.
      */
-    [[nodiscard]] constexpr inline bool fail_onto_positive_charge(const double pot_bound) const noexcept
+    [[nodiscard]] constexpr bool fail_onto_positive_charge(const double pot_bound) const noexcept
     {
         // V < -e - mu+
         return pot_bound < mu_bounds_with_error.at(3);
@@ -246,7 +246,7 @@ class clustercomplete_impl
      *
      * @param pot_bound Potential upper bound.
      */
-    [[nodiscard]] constexpr inline bool ub_fail_onto_neutral_charge(const double pot_bound) const noexcept
+    [[nodiscard]] constexpr bool ub_fail_onto_neutral_charge(const double pot_bound) const noexcept
     {
         // V < -e - mu-
         return pot_bound < mu_bounds_with_error.at(1);
@@ -256,7 +256,7 @@ class clustercomplete_impl
      *
      * @param pot_bound Potential lower bound.
      */
-    [[nodiscard]] constexpr inline bool lb_fail_onto_neutral_charge(const double pot_bound) const noexcept
+    [[nodiscard]] constexpr bool lb_fail_onto_neutral_charge(const double pot_bound) const noexcept
     {
         // V > e - mu+
         return pot_bound > mu_bounds_with_error.at(2);
@@ -376,7 +376,7 @@ class clustercomplete_impl
      * with the given projector state.
      */
     template <bound_direction bound>
-    [[nodiscard]] static constexpr inline double get_projector_state_bound_pot(const sidb_cluster_projector_state& pst,
+    [[nodiscard]] static constexpr double get_projector_state_bound_pot(const sidb_cluster_projector_state& pst,
                                                                                const uint64_t sidb_ix) noexcept
     {
         return pst.cluster->pot_projs.at(sidb_ix).get_pot_proj_for_m_conf<bound>(pst.multiset_conf).pot_val;
