@@ -5,11 +5,11 @@
 #include "experiments.hpp"
 #include "fiction/algorithms/network_transformation/fanout_substitution.hpp"
 #include "fiction/algorithms/properties/check_planarity_balanced.hpp"
-#include "fiction/layouts/clocked_layout.hpp"
 #include "fiction/layouts/cartesian_layout.hpp"
-#include "fiction/layouts/tile_based_layout.hpp"
-#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/clocked_layout.hpp"
 #include "fiction/layouts/coordinates.hpp"
+#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/tile_based_layout.hpp"
 #include "fiction_experiments.hpp"
 
 #include <fiction/algorithms/network_transformation/network_balancing.hpp>
@@ -48,7 +48,8 @@ Ntk read_ntk(const std::string& name)
 
 int main()  // NOLINT
 {
-    experiments::experiment<std::string, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t, bool, bool, bool>
+    experiments::experiment<std::string, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t, std::uint32_t,
+                            std::uint32_t, bool, bool, bool>
         wiring_reduction_exp{"planarization", "benchmark",       "inputs",         "virt_inputs",
                              "outputs",       "initial nodes",   "nodes buffered", "nodes planarized",
                              "is_planar",     "equivalent(ntk)", "equivalent(lyt)"};
@@ -128,12 +129,12 @@ int main()  // NOLINT
         auto layout = fiction::orthogonal<gate_layout>(planarized_b, {}, &stats);
 
         const fiction::gate_level_drv_params ps_d{};
-        fiction::gate_level_drv_stats  st_d{};
+        fiction::gate_level_drv_stats        st_d{};
 
         fiction::gate_level_drvs(layout, ps_d, &st_d);
 
         const auto miter = mockturtle::miter<mockturtle::klut_network>(planarized_b, layout);
-        bool       eq = false;
+        bool       eq    = false;
         if (miter)
         {
             mockturtle::equivalence_checking_stats st_o;
@@ -148,7 +149,8 @@ int main()  // NOLINT
         wiring_reduction_exp.table();
     }
 
-    static constexpr const std::uint64_t bench_select = (fiction_experiments::trindade16 | fiction_experiments::fontes18);
+    static constexpr const std::uint64_t bench_select =
+        (fiction_experiments::trindade16 | fiction_experiments::fontes18);
     for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
     {
         const auto benchmark_network = read_ntk<fiction::tec_nt>(benchmark);
@@ -190,7 +192,7 @@ int main()  // NOLINT
         fiction::gate_level_drvs(layout, ps_d, &st_d);
 
         const auto miter = mockturtle::miter<mockturtle::klut_network>(planarized_b, layout);
-        bool       eq = false;
+        bool       eq    = false;
         if (miter)
         {
             mockturtle::equivalence_checking_stats st_o;
