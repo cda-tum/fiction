@@ -5,7 +5,7 @@
 #ifndef FICTION_NODE_DUPLICATION_PLANARIZATION_HPP
 #define FICTION_NODE_DUPLICATION_PLANARIZATION_HPP
 
-#include "fiction/algorithms/properties/check_planarity.hpp"
+#include "fiction/algorithms/properties/check_planarity_balanced.hpp"
 #include "fiction/networks/views/extended_rank_view.hpp"
 #include "fiction/networks/virtual_pi_network.hpp"
 

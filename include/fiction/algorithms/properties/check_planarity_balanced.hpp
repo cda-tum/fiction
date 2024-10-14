@@ -2,8 +2,8 @@
 // Created by benjamin on 17.07.24.
 //
 
-#ifndef FICTION_CHECK_PLANARITY_HPP
-#define FICTION_CHECK_PLANARITY_HPP
+#ifndef FICTION_CHECK_PLANARITY_BALANCED_HPP
+#define FICTION_CHECK_PLANARITY_BALANCED_HPP
 
 #include "fiction/algorithms/network_transformation/network_balancing.hpp"
 
@@ -119,4 +119,4 @@ template <typename Ntk>
 
 }  // namespace fiction
 
-#endif  // FICTION_CHECK_PLANARITY_HPP
+#endif  // FICTION_CHECK_PLANARITY_BALANCED_HPP

@@ -4,7 +4,7 @@
 
 #include "experiments.hpp"
 #include "fiction/algorithms/network_transformation/fanout_substitution.hpp"
-#include "fiction/algorithms/properties/check_planarity.hpp"
+#include "fiction/algorithms/properties/check_planarity_balanced.hpp"
 #include "fiction/utils/debug/network_writer.hpp"
 #include "fiction_experiments.hpp"
 

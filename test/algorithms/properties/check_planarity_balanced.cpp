@@ -4,7 +4,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include <fiction/algorithms/properties/check_planarity.hpp>
+#include <fiction/algorithms/properties/check_planarity_balanced.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/networks/views/extended_rank_view.hpp>
 
