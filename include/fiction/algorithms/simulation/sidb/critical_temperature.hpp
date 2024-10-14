@@ -8,11 +8,13 @@
 #include "fiction/algorithms/iter/bdl_input_iterator.hpp"
 #include "fiction/algorithms/simulation/sidb/calculate_energy_and_state_type.hpp"
 #include "fiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp"
+#include "fiction/algorithms/simulation/sidb/clustercomplete.hpp"
 #include "fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp"
 #include "fiction/algorithms/simulation/sidb/energy_distribution.hpp"
 #include "fiction/algorithms/simulation/sidb/occupation_probability_of_excited_states.hpp"
 #include "fiction/algorithms/simulation/sidb/quickexact.hpp"
 #include "fiction/algorithms/simulation/sidb/quicksim.hpp"
+#include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "fiction/technology/cell_technologies.hpp"
@@ -43,28 +45,15 @@ namespace fiction
 struct critical_temperature_params
 {
     /**
-     * An enumeration of simulation modes (exact vs. approximate) to use for the *Critical Temperature* Simulation.
-     */
-    enum class simulation_engine : uint8_t
-    {
-        /**
-         * This simulation engine computes *Critical Temperature* values with 100 % accuracy.
-         */
-        EXACT,
-        /**
-         * This simulation engine quickly calculates the *Critical Temperature*. However, there may be deviations from
-         * the exact *Critical Temperature*. This mode is recommended for larger layouts (> 40 SiDBs).
-         */
-        APPROXIMATE
-    };
-    /**
      * All parameters for physical SiDB simulations.
      */
     sidb_simulation_parameters simulation_parameters{};
     /**
      * Simulation mode to determine the *Critical Temperature*.
+     *
+     * @note Base 3 critical temperature simulation is experimental and only supported with *ClusterComplete*.
      */
-    simulation_engine engine = simulation_engine::EXACT;
+    sidb_simulation_engine engine = sidb_simulation_engine::QUICKEXACT;
     /**
      * Probability threshold for ground state population. The temperature at which the simulation finds the ground state
      * to be populated with a probability of less than the given percentage, is determined to be the critical
@@ -80,11 +69,11 @@ struct critical_temperature_params
      */
     bdl_input_iterator_params input_bdl_iterator_params{};
     /**
-     * Number of iteration steps for the *QuickSim* algorithm (only applicable if engine == APPROXIMATE).
+     * Number of iteration steps for the *QuickSim* algorithm (only applicable if engine == QUICKSIM).
      */
     uint64_t iteration_steps{80};
     /**
-     * Alpha parameter for the *QuickSim* algorithm (only applicable if engine == APPROXIMATE).
+     * Alpha parameter for the *QuickSim* algorithm (only applicable if engine == QUICKSIM).
      */
     double alpha{0.7};
 };
@@ -147,8 +136,7 @@ class critical_temperature_impl
             bii(bdl_input_iterator<Lyt>{layout, params.input_bdl_iterator_params})
     {
         stats.simulation_parameters = params.simulation_parameters;
-        stats.algorithm_name =
-            (params.engine == critical_temperature_params::simulation_engine::EXACT) ? "QuickExact" : "QuickSim";
+        stats.algorithm_name        = sidb_simulation_engine_name(params.engine);
     }
 
     /**
@@ -222,7 +210,7 @@ class critical_temperature_impl
     {
         sidb_simulation_result<Lyt> simulation_results{};
 
-        if (params.engine == critical_temperature_params::simulation_engine::EXACT)
+        if (params.engine == sidb_simulation_engine::QUICKEXACT)
         {
             const quickexact_params<cell<Lyt>> qe_params{
                 params.simulation_parameters, quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF};
@@ -231,13 +219,27 @@ class critical_temperature_impl
             // is used to provide 100 % accuracy for the Critical Temperature).
             simulation_results = quickexact(layout, qe_params);
         }
-        else
+#if (FICTION_ALGLIB_ENABLED)
+        else if (params.engine == sidb_simulation_engine::CLUSTERCOMPLETE)
+        {
+            const clustercomplete_params<cell<Lyt>> cc_params{params.simulation_parameters};
+
+            // All physically valid charge configurations are determined for the given layout (`ClusterComplete`
+            // simulation is used to provide 100 % accuracy for the Critical Temperature).
+            simulation_results = clustercomplete(layout, cc_params);
+        }
+#endif  // FICTION_ALGLIB_ENABLED
+        else if (params.engine == sidb_simulation_engine::QUICKSIM)
         {
             const quicksim_params qs_params{params.simulation_parameters, params.iteration_steps, params.alpha};
 
             // All physically valid charge configurations are determined for the given layout (probabilistic ground
             // state simulation is used).
             simulation_results = quicksim(layout, qs_params);
+        }
+        else
+        {
+            assert(false && "unsupported simulation engine");
         }
 
         // The number of physically valid charge configurations is stored.
@@ -401,19 +403,29 @@ class critical_temperature_impl
     [[nodiscard]] sidb_simulation_result<Lyt>
     physical_simulation_of_layout(const bdl_input_iterator<Lyt>& bdl_iterator) noexcept
     {
-        assert(params.simulation_parameters.base == 2 && "base number has to be 2");
-
-        if (params.engine == critical_temperature_params::simulation_engine::EXACT)
+        if (params.engine == sidb_simulation_engine::QUICKEXACT)
         {
-            // perform exact simulation
+            assert(params.simulation_parameters.base == 2 && "base number has to be 2");
+
+            // perform QuickExact simulation
             const quickexact_params<cell<Lyt>> qe_params{
                 params.simulation_parameters,
                 fiction::quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF};
             return quickexact(*bdl_iterator, qe_params);
         }
 
-        if (params.engine == critical_temperature_params::simulation_engine::APPROXIMATE)
+#if (FICTION_ALGLIB_ENABLED)
+        if (params.engine == sidb_simulation_engine::CLUSTERCOMPLETE)
         {
+            // perform ClusterComplete simulation -- base 3 simulation is allowed
+            const clustercomplete_params<cell<Lyt>> cc_params{params.simulation_parameters};
+            return clustercomplete(*bdl_iterator, cc_params);
+        }
+#endif  // FICTION_ALGLIB_ENABLED
+        if (params.engine == sidb_simulation_engine::QUICKSIM)
+        {
+            assert(params.simulation_parameters.base == 2 && "base number has to be 2");
+
             const quicksim_params qs_params{params.simulation_parameters, params.iteration_steps, params.alpha};
             return quicksim(*bdl_iterator, qs_params);
         }

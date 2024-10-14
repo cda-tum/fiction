@@ -52,7 +52,7 @@ inline void quickexact(pybind11::module& m)
         .def(py::init<>())
         .def_readwrite("simulation_parameters",
                        &fiction::quickexact_params<fiction::offset::ucoord_t>::simulation_parameters,
-                       DOC(fiction_quickexact_params))
+                       DOC(fiction_quickexact_params_simulation_parameters))
         .def_readwrite("base_number_detection",
                        &fiction::quickexact_params<fiction::offset::ucoord_t>::base_number_detection,
                        DOC(fiction_quickexact_params_base_number_detection))

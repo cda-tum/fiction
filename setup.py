@@ -30,6 +30,13 @@ class CMakeBuild(build_ext):
         with open(".env", "w") as env_file:
             env_file.write(f"z3={z3}")
 
+        # check if ALGLIB should be used. If no argument is given, pyfiction does not depend on ALGLIB by default.
+        alglib = os.environ.get("alglib", "OFF")
+
+        # store environment variable
+        with open(".env", "w") as env_file:
+            env_file.write(f"alglib={alglib}")
+
         cmake_args = ['-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + extdir,
                       '-DPYTHON_EXECUTABLE=' + sys.executable,
                       '-DMOCKTURTLE_EXAMPLES=OFF',
@@ -43,6 +50,7 @@ class CMakeBuild(build_ext):
                       '-DFICTION_ENABLE_UNITY_BUILD=ON',
                       '-DFICTION_PYTHON_BINDINGS=ON',
                       f'-DFICTION_Z3={z3}',
+                      f'-DFICTION_ALGLIB={alglib}',
                       ]
 
         if "Z3_ROOT" in os.environ:

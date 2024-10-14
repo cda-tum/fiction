@@ -39,6 +39,7 @@
 // #include "pyfiction/algorithms/simulation/sidb/maximum_defect_influence_position_and_distance.hpp"
 #include "pyfiction/algorithms/simulation/sidb/assess_physical_population_stability.hpp"
 #include "pyfiction/algorithms/simulation/sidb/check_simulation_results_for_equivalence.hpp"
+#include "pyfiction/algorithms/simulation/sidb/clustercomplete.hpp"
 #include "pyfiction/algorithms/simulation/sidb/convert_potential_to_distance.hpp"
 #include "pyfiction/algorithms/simulation/sidb/determine_groundstate_from_simulation_results.hpp"
 #include "pyfiction/algorithms/simulation/sidb/displacement_robustness_domain.hpp"
@@ -138,6 +139,7 @@ PYBIND11_MODULE(pyfiction, m)
     pyfiction::exhaustive_ground_state_simulation(m);
     pyfiction::quicksim(m);
     pyfiction::quickexact(m);
+    pyfiction::clustercomplete(m);
     pyfiction::is_ground_state(m);
     pyfiction::minimum_energy(m);
     pyfiction::energy_distribution(m);

@@ -41,13 +41,13 @@ concurrency:
 env:
   Z3_VERSION: 4.13.0
   ENABLE_Z3: 'ON'
+  ENABLE_ALGLIB: 'ON'
 
 jobs:
   build_wheels:
     name: 🎡 Wheels for ${{ matrix.python }} on ${{ matrix.config.os }} (${{ matrix.config.arch }})
     runs-on: ${{ matrix.config.os }}
     strategy:
-      fail-fast: false
       matrix:
         config:
           - { os: ubuntu-22.04, arch: x64 }
@@ -90,7 +90,9 @@ jobs:
       - name: Build wheel
         uses: pypa/cibuildwheel@v2.21.3
         env:
-          CIBW_BEFORE_ALL_LINUX: /opt/python/cp39-cp39/bin/pip install z3-solver==${{ env.Z3_VERSION }}
+          CIBW_BEFORE_ALL_LINUX: >
+            echo "Setup Z3" &&
+            /opt/python/cp39-cp39/bin/pip install z3-solver==${{ env.Z3_VERSION }}
           CIBW_BUILD: ${{ matrix.python }}-*
           CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET=10.15
           CIBW_TEST_EXTRAS: test
@@ -127,7 +129,8 @@ jobs:
           python-version: '3.10'
           cache: 'pip'
 
-      - name: Setup Z3 Solver
+      - if: ${{env.ENABLE_Z3 == 'ON'}}
+        name: Setup Z3 Solver
         uses: cda-tum/setup-z3@v1
         with:
           version: ${{ env.Z3_VERSION }}
@@ -138,7 +141,7 @@ jobs:
         run: pipx run build --sdist
 
       - name: Test sdist
-        run: z3=${{env.ENABLE_Z3}} pip install dist/*.tar.gz --verbose
+        run: z3=${{env.ENABLE_Z3}} alglib=${{env.ENABLE_ALGLIB}} pip install dist/*.tar.gz --verbose
 
       - name: Upload sdist as an artifact
         uses: actions/upload-artifact@v4

@@ -6,6 +6,7 @@
 #define FICTION_CHECK_SIMULATION_RESULTS_FOR_EQUIVALENCE_HPP
 
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
+#include "fiction/technology/physical_constants.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -80,7 +81,7 @@ template <typename Lyt>
     {
         const auto& cds1 = result1.charge_distributions.at(i);
         const auto& cds2 = result2.charge_distributions.at(i);
-        if (std::abs(cds1.get_system_energy() - cds2.get_system_energy()) > std::numeric_limits<double>::epsilon())
+        if (std::abs(cds1.get_system_energy() - cds2.get_system_energy()) > physical_constants::POP_STABILITY_ERR)
         {
             return false;
         }

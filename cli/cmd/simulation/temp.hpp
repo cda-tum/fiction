@@ -6,6 +6,7 @@
 #define FICTION_CMD_TEMP_HPP
 
 #include <fiction/algorithms/simulation/sidb/critical_temperature.hpp>
+#include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/math_utils.hpp>
@@ -58,6 +59,12 @@ class temp_command : public command
                    true);
         add_option("--lambda_tf,-l", physical_params.lambda_tf, "Thomas-Fermi screening distance (unit: nm)", true);
         add_option("--mu_minus,-m", physical_params.mu_minus, "Energy transition level (0/-) (unit: eV)", true);
+        add_option("--base", physical_params.base,
+                   "The simulation base, can be 2 or 3, though base 3 critical temperature simulation is experimental "
+                   "(only ClusterComplete supports base 3 simulation)",
+                   true);
+        add_option("--engine", sim_engine_str,
+                   "The simulation engine to use {QuickExact [default], ClusterComplete, QuickSim}", true);
     }
 
   protected:
@@ -129,6 +136,16 @@ class temp_command : public command
                 }
                 else
                 {
+                    const auto sim_engine = fiction::get_sidb_simulation_engine(sim_engine_str);
+
+                    if (!sim_engine.has_value())
+                    {
+                        env->out() << fmt::format("[e] {} is not a supported SiDB simulation engine\n", sim_engine_str);
+                        return;
+                    }
+
+                    params.engine = sim_engine.value();
+
                     params.simulation_parameters = physical_params;
 
                     if (is_set("gate_based"))
@@ -202,7 +219,10 @@ class temp_command : public command
      * Critical temperature.
      */
     double ct = 0.0;
-
+    /**
+     * The simulation engine to use.
+     */
+    std::string sim_engine_str{"QuickExact"};
     /**
      * Logs the resulting information in a log file.
      *
