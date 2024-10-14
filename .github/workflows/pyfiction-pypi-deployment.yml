@@ -88,7 +88,7 @@ jobs:
         run: echo "CIBW_ARCHS_MACOS=arm64" >> $GITHUB_ENV
 
       - name: Build wheel
-        uses: pypa/cibuildwheel@v2.21.2
+        uses: pypa/cibuildwheel@v2.21.3
         env:
           CIBW_BEFORE_ALL_LINUX: /opt/python/cp39-cp39/bin/pip install z3-solver==${{ env.Z3_VERSION }}
           CIBW_BUILD: ${{ matrix.python }}-*
