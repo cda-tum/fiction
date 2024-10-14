@@ -5,18 +5,18 @@
 #ifndef FICTION_NODE_DUPLICATION_PLANARIZATION_HPP
 #define FICTION_NODE_DUPLICATION_PLANARIZATION_HPP
 
-#include "fiction/algorithms/properties/check_planarity_balanced.hpp"
 #include "fiction/networks/views/extended_rank_view.hpp"
 #include "fiction/networks/virtual_pi_network.hpp"
 
 #include <mockturtle/traits.hpp>
+#include <mockturtle/utils/node_map.hpp>
 
 #include <algorithm>
 #include <cassert>
 #include <cmath>
+#include <cstddef>
 #include <cstdint>
 #include <limits>
-#include <optional>
 #include <random>
 #include <unordered_map>
 #include <utility>
@@ -94,9 +94,9 @@ struct node_pair
      * @param node2 The second node of the fanin-edged node.
      * @param delayValue The delay value for the node.
      */
-    node_pair(mockturtle::node<Ntk> node1, mockturtle::node<Ntk> node2, uint64_t delayValue) :
+    node_pair(mockturtle::node<Ntk> node1, mockturtle::node<Ntk> node2, uint64_t delay_value) :
             pair(node1, node2),
-            delay(delayValue),
+            delay(delay_value),
             fanin_pair(nullptr)
     {}
 };
