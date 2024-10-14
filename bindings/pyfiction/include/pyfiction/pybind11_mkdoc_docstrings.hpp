@@ -3756,44 +3756,6 @@ Parameter ``c``:
 Parameter ``g_val``:
     New g-value for c.)doc";
 
-static const char *__doc_fiction_detail_add_fanin_to_route =
-R"doc(This helper function is used to add a fanin coordinate to the
-appropriate route based on whether it belongs to the the route from
-the first or second fanin to the gate.
-
-Template parameter ``Lyt``:
-    Cartesian gate-level layout type.
-
-Parameter ``fanin``:
-    The fanin coordinate to be added to the route.
-
-Parameter ``is_first_fanin``:
-    A boolean indicating whether this is part of the route from the
-    first fanin to the gate.
-
-Parameter ``ffd``:
-    Reference to the fanin_fanout_data structure containing the
-    routes.)doc";
-
-static const char *__doc_fiction_detail_add_fanout_to_route =
-R"doc(This helper function is used to add a fanout coordinate to the
-appropriate route based on whether it belongs to the the route from
-the gate to the first or second fanout.
-
-Template parameter ``Lyt``:
-    Cartesian gate-level layout type.
-
-Parameter ``fanout``:
-    The fanout coordinate to be added to the route.
-
-Parameter ``is_first_fanout``:
-    A boolean indicating whether it belongs to the route from the gate
-    to the first fanout.
-
-Parameter ``ffd``:
-    Reference to the fanin_fanout_data structure containing the
-    routes.)doc";
-
 static const char *__doc_fiction_detail_add_obstructions =
 R"doc(Add obstructions to the layout.
 
@@ -5507,19 +5469,6 @@ Returns:
     An iterator to the found parameter point in the map, or
     `map.cend()` if not found.)doc";
 
-static const char *__doc_fiction_detail_fix_wires =
-R"doc(Utility function to move wires that cross over empty tiles down one
-layer. This can happen if the wiring of a gate is deleted.
-
-Template parameter ``Lyt``:
-    Cartesian gate-level layout type.
-
-Parameter ``lyt``:
-    Gate-level layout.
-
-Parameter ``deleted_coords``:
-    Tiles that got deleted.)doc";
-
 static const char *__doc_fiction_detail_gate_level_drvs_impl = R"doc()doc";
 
 static const char *__doc_fiction_detail_gate_level_drvs_impl_border_io_check =
@@ -5754,25 +5703,6 @@ static const char *__doc_fiction_detail_generate_edge_intersection_graph_impl_ps
 
 static const char *__doc_fiction_detail_generate_edge_intersection_graph_impl_run = R"doc()doc";
 
-static const char *__doc_fiction_detail_get_fanin_and_fanouts =
-R"doc(Utility function to trace back fanins and fanouts of a gate. Based on
-the gate to be moved, this function returns the location of the fanins
-and fanouts, as well as the wiring in between them. Additionally, all
-wire tiles between fanins and the gate, as well as between the gate
-and fanouts are collected for deletion.
-
-Template parameter ``Lyt``:
-    Cartesian gate-level layout type.
-
-Parameter ``lyt``:
-    Cartesian Gate-level layout.
-
-Parameter ``op``:
-    coordinate of the gate to be moved.
-
-Returns:
-    fanin and fanout gates, wires to be deleted and old routing paths.)doc";
-
 static const char *__doc_fiction_detail_get_offset =
 R"doc(Utility function to calculate the offset that has to be subtracted
 from any x-coordinate on the hexagonal layout.
@@ -5818,30 +5748,6 @@ Parameter ``start``:
 
 Parameter ``end``:
     The ending coordinate of the path.
-
-Returns:
-    The computed path as a sequence of coordinates in the layout.)doc";
-
-static const char *__doc_fiction_detail_get_path_and_obstruct =
-R"doc(This helper function computes a path between two coordinates using the
-A* algorithm. It then obstructs the tiles along the path in the given
-layout.
-
-Template parameter ``Lyt``:
-    Cartesian gate-level layout type.
-
-Parameter ``lyt``:
-    Reference to the layout.
-
-Parameter ``start``:
-    The starting coordinate of the path.
-
-Parameter ``end``:
-    The ending coordinate of the path.
-
-Parameter ``planar_optimization``:
-    Only allow relocation if a crossing-free wiring can be found.
-    Defaults to false.
 
 Returns:
     The computed path as a sequence of coordinates in the layout.)doc";
@@ -6271,44 +6177,6 @@ Parameter ``place_info``:
 
 Parameter ``ssg``:
     The search space graph.)doc";
-
-static const char *__doc_fiction_detail_improve_gate_location =
-R"doc(Utility function that moves gates to new coordinates and checks if
-routing is possible. This includes:
-
-- removing the old wiring between fanins, the gate and fanouts -
-updating the incoming signals - determining coordinates that would
-improve the layout - testing all those coordinates by moving the gate
-to each one and checking if a new wiring can be found - if a new
-coordinate is found and wiring is possible, it is applied and incoming
-signals are updated - if no better coordinate is found, the old wiring
-is restored
-
-Template parameter ``Lyt``:
-    Cartesian obstruction gate-level layout type.
-
-Parameter ``lyt``:
-    2DDWave-clocked cartesian obstruction gate-level layout.
-
-Parameter ``old_pos``:
-    Old position of the gate to be moved.
-
-Parameter ``start``:
-    The start time in milliseconds.
-
-Parameter ``timeout``:
-    The timeout limit in milliseconds.
-
-Parameter ``timeout_limit_reached``:
-    Reference to a boolean flag that is set to `true` if the timeout
-    is reached.
-
-Parameter ``planar_optimization``:
-    Only allow relocation if a crossing-free wiring can be found.
-    Defaults to false.
-
-Returns:
-    `true` if the gate was moved successfully, `false` otherwise.)doc";
 
 static const char *__doc_fiction_detail_is_balanced_impl = R"doc()doc";
 
@@ -7155,6 +7023,106 @@ static const char *__doc_fiction_detail_placement_info_node2pos = R"doc(Mapping 
 
 static const char *__doc_fiction_detail_post_layout_optimization_impl = R"doc()doc";
 
+static const char *__doc_fiction_detail_post_layout_optimization_impl_add_fanin_to_route =
+R"doc(This helper function is used to add a fanin coordinate to the
+appropriate route based on whether it belongs to the the route from
+the first or second fanin to the gate.
+
+Parameter ``fanin``:
+    The fanin coordinate to be added to the route.
+
+Parameter ``is_first_fanin``:
+    A boolean indicating whether this is part of the route from the
+    first fanin to the gate.
+
+Parameter ``ffd``:
+    Reference to the fanin_fanout_data structure containing the
+    routes.)doc";
+
+static const char *__doc_fiction_detail_post_layout_optimization_impl_add_fanout_to_route =
+R"doc(This helper function is used to add a fanout coordinate to the
+appropriate route based on whether it belongs to the the route from
+the gate to the first or second fanout.
+
+Parameter ``fanout``:
+    The fanout coordinate to be added to the route.
+
+Parameter ``is_first_fanout``:
+    A boolean indicating whether it belongs to the route from the gate
+    to the first fanout.
+
+Parameter ``ffd``:
+    Reference to the fanin_fanout_data structure containing the
+    routes.)doc";
+
+static const char *__doc_fiction_detail_post_layout_optimization_impl_fix_wires =
+R"doc(Utility function to move wires that cross over empty tiles down one
+layer. This can happen if the wiring of a gate is deleted.
+
+Parameter ``lyt``:
+    Gate-level layout.
+
+Parameter ``deleted_coords``:
+    Tiles that got deleted.)doc";
+
+static const char *__doc_fiction_detail_post_layout_optimization_impl_get_fanin_and_fanouts =
+R"doc(Utility function to trace back fanins and fanouts of a gate. Based on
+the gate to be moved, this function returns the location of the fanins
+and fanouts, as well as the wiring in between them. Additionally, all
+wire tiles between fanins and the gate, as well as between the gate
+and fanouts are collected for deletion.
+
+Parameter ``lyt``:
+    Cartesian Gate-level layout.
+
+Parameter ``op``:
+    coordinate of the gate to be moved.
+
+Returns:
+    fanin and fanout gates, wires to be deleted and old routing paths.)doc";
+
+static const char *__doc_fiction_detail_post_layout_optimization_impl_get_path_and_obstruct =
+R"doc(This helper function computes a path between two coordinates using the
+A* algorithm. It then obstructs the tiles along the path in the given
+layout.
+
+Parameter ``lyt``:
+    Reference to the layout.
+
+Parameter ``start_tile``:
+    The starting coordinate of the path.
+
+Parameter ``end_tile``:
+    The ending coordinate of the path.
+
+Returns:
+    The computed path as a sequence of coordinates in the layout.)doc";
+
+static const char *__doc_fiction_detail_post_layout_optimization_impl_improve_gate_location =
+R"doc(Utility function that moves gates to new coordinates and checks if
+routing is possible. This includes:
+
+- removing the old wiring between fanins, the gate and fanouts -
+updating the incoming signals - determining coordinates that would
+improve the layout - testing all those coordinates by moving the gate
+to each one and checking if a new wiring can be found - if a new
+coordinate is found and wiring is possible, it is applied and incoming
+signals are updated - if no better coordinate is found, the old wiring
+is restored
+
+Parameter ``lyt``:
+    2DDWave-clocked cartesian obstruction gate-level layout.
+
+Parameter ``old_pos``:
+    Old position of the gate to be moved.
+
+Returns:
+    `true` if the gate was moved successfully, `false` otherwise.)doc";
+
+static const char *__doc_fiction_detail_post_layout_optimization_impl_max_gate_relocations = R"doc(Maximum number of relocations to try for each gate.)doc";
+
+static const char *__doc_fiction_detail_post_layout_optimization_impl_max_non_po = R"doc(Maximum coordinate of all gates that are not POs.)doc";
+
 static const char *__doc_fiction_detail_post_layout_optimization_impl_plyt = R"doc(2DDWave-clocked Cartesian gate-level layout to optimize.)doc";
 
 static const char *__doc_fiction_detail_post_layout_optimization_impl_post_layout_optimization_impl = R"doc()doc";
@@ -7168,6 +7136,15 @@ static const char *__doc_fiction_detail_post_layout_optimization_impl_run = R"do
 static const char *__doc_fiction_detail_post_layout_optimization_impl_start = R"doc(Start time.)doc";
 
 static const char *__doc_fiction_detail_post_layout_optimization_impl_timeout_limit_reached = R"doc(Timeout limit reached.)doc";
+
+static const char *__doc_fiction_detail_post_layout_optimization_impl_update_timeout =
+R"doc(Calculates the elapsed milliseconds since the `start` time, sets the
+`timeout_limit_reached` flag if the timeout is exceeded, and returns
+the remaining time.
+
+Returns:
+    Remaining time in milliseconds before timeout, or `0` if timeout
+    has been reached.)doc";
 
 static const char *__doc_fiction_detail_priority_queue =
 R"doc(A priority queue class for managing elements with associated
@@ -7790,25 +7767,6 @@ R"doc(! Default constructor.
 Constructs topological view on another network.)doc";
 
 static const char *__doc_fiction_detail_topo_view_co_to_ci_update_topo = R"doc()doc";
-
-static const char *__doc_fiction_detail_update_timeout =
-R"doc(Calculates the elapsed milliseconds since the `start` time, sets the
-`timeout_limit_reached` flag if the timeout is exceeded, and returns
-the remaining time.
-
-Parameter ``start``:
-    The start time in milliseconds.
-
-Parameter ``timeout``:
-    The timeout limit in milliseconds.
-
-Parameter ``timeout_limit_reached``:
-    Reference to a boolean flag that is set to `true` if the timeout
-    is reached.
-
-Returns:
-    Remaining time in milliseconds before timeout, or `0` if timeout
-    has been reached.)doc";
 
 static const char *__doc_fiction_detail_update_to_delete_list =
 R"doc(Update the to-delete list based on a possible path in a
