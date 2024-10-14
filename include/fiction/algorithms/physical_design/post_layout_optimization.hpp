@@ -399,9 +399,8 @@ class post_layout_optimization_impl
             fiction::wiring_reduction_stats  wiring_reduction_stats{};
             fiction::wiring_reduction_params wiring_reduction_params{};
 
-            // Update the remaining timeout
-            uint64_t remaining_time         = update_timeout();
-            wiring_reduction_params.timeout = remaining_time;
+            // update the remaining timeout
+            wiring_reduction_params.timeout = update_timeout();
 
             if (!timeout_limit_reached)
             {
@@ -417,8 +416,7 @@ class post_layout_optimization_impl
 
                 // update the remaining timeout
                 fiction::wiring_reduction_params wiring_reduction_params{};
-                uint64_t                         remaining_time = update_timeout();
-                wiring_reduction_params.timeout                 = remaining_time;
+                wiring_reduction_params.timeout = update_timeout();
 
                 if (moved_at_least_one_gate && !ps.optimize_pos_only && !timeout_limit_reached)
                 {
@@ -612,14 +610,9 @@ class post_layout_optimization_impl
      */
     void add_fanin_to_route(const tile<ObstrLyt>& fanin, bool is_first_fanin, fanin_fanout_data<ObstrLyt>& ffd) noexcept
     {
-        if (is_first_fanin)
-        {
-            ffd.route_fanin_1_to_gate.insert(ffd.route_fanin_1_to_gate.cbegin(), fanin);
-        }
-        else
-        {
-            ffd.route_fanin_2_to_gate.insert(ffd.route_fanin_2_to_gate.cbegin(), fanin);
-        }
+        auto& target_route = is_first_fanin ? ffd.route_fanin_1_to_gate : ffd.route_fanin_2_to_gate;
+
+        target_route.insert(target_route.cbegin(), fanin);
     }
     /**
      * This helper function is used to add a fanout coordinate to the appropriate route
@@ -632,14 +625,9 @@ class post_layout_optimization_impl
     void add_fanout_to_route(const tile<ObstrLyt>& fanout, bool is_first_fanout,
                              fanin_fanout_data<ObstrLyt>& ffd) noexcept
     {
-        if (is_first_fanout)
-        {
-            ffd.route_gate_to_fanout_1.push_back(fanout);
-        }
-        else
-        {
-            ffd.route_gate_to_fanout_2.push_back(fanout);
-        }
+        auto& target_route = is_first_fanout ? ffd.route_gate_to_fanout_1 : ffd.route_gate_to_fanout_2;
+
+        target_route.push_back(fanout);
     }
     /**
      * Utility function to trace back fanins and fanouts of a gate. Based on the gate to be moved, this function returns

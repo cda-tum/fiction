@@ -1078,7 +1078,8 @@ class wiring_reduction_impl
         bool found_wires = true;
 
         // lambda to update the timeout status and calculate remaining time
-        auto update_timeout = [&]() -> void
+        auto update_timeout = [start = this->start, &ps = this->ps,
+                               &timeout_limit_reached = this->timeout_limit_reached]() -> void
         {
             const auto current_time = std::chrono::high_resolution_clock::now();
             const auto elapsed_ms   = static_cast<uint64_t>(
