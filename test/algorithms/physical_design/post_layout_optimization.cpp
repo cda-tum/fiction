@@ -17,14 +17,11 @@
 #include <fiction/layouts/obstruction_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/networks/technology_network.hpp>
-#include <fiction/utils/routing_utils.hpp>
 
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/views/names_view.hpp>
 
-#include <chrono>
 #include <cstdint>
-#include <vector>
 
 using namespace fiction;
 

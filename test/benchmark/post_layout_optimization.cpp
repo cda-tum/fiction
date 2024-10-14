@@ -14,9 +14,7 @@
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
-#include <fiction/traits.hpp>
 
-#include <bill/sat/interface/common.hpp>
 #include <mockturtle/networks/aig.hpp>
 
 using namespace fiction;
@@ -31,14 +29,14 @@ TEST_CASE("Benchmark Post-Layout Optimization", "[benchmark]")
 
     BENCHMARK("post_layout_optimization: full optimization")
     {
-        return post_layout_optimization<gate_layout>(layout.clone());
+        post_layout_optimization<gate_layout>(layout.clone());
     };
 
     params.max_gate_relocations = 0;
 
     BENCHMARK("post_layout_optimization: wiring reduction only")
     {
-        return post_layout_optimization<gate_layout>(layout.clone(), params);
+        post_layout_optimization<gate_layout>(layout.clone(), params);
     };
 }
 

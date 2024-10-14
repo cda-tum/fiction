@@ -62,8 +62,9 @@ int main()  // NOLINT
     fiction::post_layout_optimization_stats   post_layout_optimization_stats{};
     fiction::post_layout_optimization_params  post_layout_optimization_params{};
     // post_layout_optimization_params.max_gate_relocations = 1;
+    post_layout_optimization_params.timeout = 1000;
 
-    static constexpr const uint64_t bench_select = fiction_experiments::trindade16 | fiction_experiments::fontes18;
+    static constexpr const uint64_t bench_select = fiction_experiments::iscas85;
 
     for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
     {
