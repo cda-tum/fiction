@@ -51,7 +51,7 @@ int main()
     max_defect_params.defect =
         sidb_defect{fiction::sidb_defect_type::UNKNOWN, -1, is_op_params.simulation_parameters.epsilon_r,
                     is_op_params.simulation_parameters.lambda_tf};
-    max_defect_params.additional_scanning_area = {50, 50};
+    max_defect_params.additional_scanning_area = {100, 100};
 
     defect_influence_operational_domain_params defect_params{};
     defect_params.defect_influence_params = max_defect_params;
@@ -94,7 +94,7 @@ int main()
 
             defect_influence_operational_domain_stats contour_stats{};
             const auto op_defect_contour = defect_influence_operational_domain_contour_tracing(
-                gate_lyt, truth_table, 1, defect_params, &contour_stats);
+                gate_lyt, truth_table, 100, defect_params, &contour_stats);
             const auto avoidance_contour = defect_avoidance_distance(gate_lyt, op_defect_contour);
 
             const auto csv_path_contour = fmt::format("{}{}_contour.csv", gate_folder, gate);

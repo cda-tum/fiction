@@ -32,8 +32,6 @@ int main()
     static const std::string output_folder = fmt::format("{}defect_avoidance_distance/plots/", EXPERIMENTS_PATH);
 
     static const std::array<std::pair<std::string, std::vector<tt>>, 10> gates = {
-        std::make_pair("and", std::vector<tt>{create_and_tt()}),
-        std::make_pair("nand", std::vector<tt>{create_nand_tt()}),
         std::make_pair("nor", std::vector<tt>{create_nor_tt()}),
         std::make_pair("xnor", std::vector<tt>{create_xnor_tt()}),
         std::make_pair("xor", std::vector<tt>{create_xor_tt()}),
@@ -67,10 +65,23 @@ int main()
         std::size_t sample_grid_counter = 0;
         std::size_t sample_contour_counter = 0;
 
+        bool start_with_new_boolean_function = false;
+
         for (const auto& file : std::filesystem::directory_iterator(fmt::format("{}{}", folder, gate)))
         {
-            gate_counter++;
+            if (gate_counter == 100)
+            {
+                start_with_new_boolean_function = true;
+                break;
+            }
             const auto layout = read_sqd_layout<sidb_100_cell_clk_lyt_cube>(file.path().string());
+
+            if (layout.num_cells() != 22)
+            {
+                continue;
+            }
+            gate_counter++;
+            std::cout << gate_counter << std::endl;
 
             defect_influence_operational_domain_stats grid_stats{};
             const auto                                op_defect_grid =
@@ -88,13 +99,6 @@ int main()
 
             const auto avoidance_grid = defect_avoidance_distance(layout, op_defect_grid);
 
-            defect_influence_operational_domain_stats random_stats{};
-            const auto op_defect_random = defect_influence_operational_domain_random_sampling(
-                layout, truth_table, 100, defect_params, &random_stats);
-            const auto avoidance_random = defect_avoidance_distance(layout, op_defect_random);
-
-            const auto csv_path_random = fmt::format("{}{}_random.csv", gate_folder, gate);
-            write_defect_influence_operational_domain(op_defect_random, csv_path_random);
 
             defect_influence_operational_domain_stats contour_stats{};
             const auto op_defect_contour = defect_influence_operational_domain_contour_tracing(
@@ -110,11 +114,16 @@ int main()
             if (std::abs(avoidance_grid.max_min_distance - avoidance_contour.max_min_distance) > 0.1)
             {  // Log the simulation results
                unequal_counter++;
+               std::cout << file.path().string() << std::endl;
             }
         }
         simulation_exp(gate, gate_counter, sample_grid_counter, sample_contour_counter, unequal_counter);
         simulation_exp.save();
         simulation_exp.table();
+        if (start_with_new_boolean_function)
+        {
+            continue;
+        }
     }
     return EXIT_SUCCESS;
 }
