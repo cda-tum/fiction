@@ -1284,6 +1284,51 @@ template <class Ntk>
 inline constexpr bool has_is_and_xor_v = has_is_and_xor<Ntk>::value;
 #pragma endregion
 
+#pragma region has_foreach_real_pi
+template<class Ntk, class = void>
+struct has_foreach_real_pi : std::false_type
+{
+};
+
+template<class Ntk>
+struct has_foreach_real_pi<Ntk, std::void_t<decltype( std::declval<Ntk>().foreach_real_pi( std::declval<void( typename Ntk::node_type )>() ) )>> : std::true_type
+{
+};
+
+template<class Ntk>
+inline constexpr bool has_foreach_real_pi_v = has_foreach_real_pi<Ntk>::value;
+#pragma endregion
+
+#pragma region has_get_real_pi
+template<class Ntk, class = void>
+struct has_get_real_pi : std::false_type
+{
+};
+
+template<class Ntk>
+struct has_get_real_pi<Ntk, std::void_t<decltype( std::declval<Ntk>().get_real_pi( std::declval<typename Ntk::node_type>() ) )>>: std::true_type
+{
+};
+
+template<class Ntk>
+inline constexpr bool has_get_real_pi_v = has_get_real_pi<Ntk>::value;
+#pragma endregion
+
+#pragma region has_num_real_pis
+template<class Ntk, class = void>
+struct has_num_real_pis : std::false_type
+{
+};
+
+template<class Ntk>
+struct has_num_real_pis<Ntk, std::void_t<decltype( std::declval<Ntk>().num_real_pis() )>>: std::true_type
+{
+};
+
+template<class Ntk>
+inline constexpr bool has_num_real_pis_v = has_num_real_pis<Ntk>::value;
+#pragma endregion
+
 }  // namespace fiction
 
 #endif  // FICTION_TRAITS_HPP
