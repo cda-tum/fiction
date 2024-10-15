@@ -17559,7 +17559,7 @@ Parameter ``ntk``:
 
 static const char *__doc_fiction_virtual_pi_network_virtual_pi_network_3 =
 R"doc(Constructor for the `virtual_pi_network` class that takes a network
-and a shared pointer to a `virtual_storage` object. THis is used for
+and a shared pointer to a `virtual_storage` object. This is used for
 cloning.
 
 Template parameter ``Ntk``:
