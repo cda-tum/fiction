@@ -11,7 +11,9 @@
 #include <mockturtle/algorithms/equivalence_checking.hpp>
 #include <mockturtle/algorithms/miter.hpp>
 #include <mockturtle/networks/aig.hpp>
+#include <mockturtle/networks/mig.hpp>
 #include <mockturtle/networks/xag.hpp>
+#include <mockturtle/networks/xmg.hpp>
 
 using namespace fiction;
 
@@ -36,9 +38,9 @@ TEST_CASE("Copy technology network and size consistency", "[virtual-pi-view]")
     vpi.create_po(f2);
     vpi.create_po(f3);
 
-    // virtual_pi_network is a deep copy. THe original network won't be affected by any changes after the copy
+    // virtual_pi_network is a deep copy. The original network won't be affected by any changes after the copy
     CHECK(tec.size() == 5);
-    // This is the size disregarding virtual PIs. So this would correspond to the size in a normal technology_network
+    // This is the size disregarding virtual PIs. So this corresponds to the size in a normal technology_network
     CHECK(vpi.real_size() == 7);
     // This is the size with the virtual PIs
     CHECK(vpi.size() == 9);
@@ -71,9 +73,9 @@ TEMPLATE_TEST_CASE("Copy networks and size consistency", "[virtual-pi-view]", mo
     vpi.create_po(f2);
     vpi.create_po(f3);
 
-    // virtual_pi_network is a deep copy. THe original network won't be affected by any changes after the copy
+    // virtual_pi_network is a deep copy. The original network won't be affected by any changes after the copy
     CHECK(ntk.size() == 4);
-    // This is the size disregarding virtual PIs. So this would correspond to the size in a normal technology_network
+    // This is the size disregarding virtual PIs. So this corresponds to the size in a normal technology_network
     CHECK(vpi.real_size() == 6);
     // This is the size with the virtual PIs
     CHECK(vpi.size() == 8);
@@ -86,7 +88,7 @@ TEMPLATE_TEST_CASE("Copy networks and size consistency", "[virtual-pi-view]", mo
 }
 
 TEMPLATE_TEST_CASE("Remove PIs and check equivalence", "[virtual-pi-view]", mockturtle::aig_network,
-                   mockturtle::xag_network)
+                   mockturtle::xag_network, mockturtle::xmg_network, mockturtle::mig_network)
 {
     TestType                     tec{};
     virtual_pi_network<TestType> vpi{};
@@ -117,8 +119,8 @@ TEMPLATE_TEST_CASE("Remove PIs and check equivalence", "[virtual-pi-view]", mock
     tec.create_po(f3_t);
 
     auto non_virt = delete_virtual_pis(vpi);
-    /*When creating the AIG, the nodes will be hashed. Since all AND
-    nodes are the same, only one node will be created.*/
+    /*When creating the AIG, the nodes will be hashed. Since all AND nodes are the same, only one node will be
+     * created.*/
     CHECK(non_virt.size() == vpi.size() - vpi.num_virtual_pis() - 2);
 
     CHECK(non_virt.real_size() == non_virt.size());

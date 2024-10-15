@@ -95,7 +95,7 @@ class virtual_pi_network : public Ntk
 
     /**
      * Constructor for the `virtual_pi_network` class that takes a network and a shared pointer to a `virtual_storage`
-     * object. THis is used for cloning.
+     * object. This is used for cloning.
      *
      * @tparam Ntk Network type.
      * @param ntk Input network.
