@@ -9,6 +9,7 @@
 
 #include <mockturtle/networks/detail/foreach.hpp>
 #include <mockturtle/traits.hpp>
+#include <mockturtle/utils/node_map.hpp>
 #include <mockturtle/views/topo_view.hpp>
 
 #include <algorithm>
@@ -484,7 +485,7 @@ class delete_virtual_pis_impl
         // restore signal names if applicable
         fiction::restore_names(ntk, ntk_dest, old2new);
 
-        return ntk_dest;  // ntk_dest
+        return ntk_dest;
     }
 
   private:

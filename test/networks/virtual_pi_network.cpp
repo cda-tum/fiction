@@ -117,9 +117,9 @@ TEMPLATE_TEST_CASE("Remove PIs and check equivalence", "[virtual-pi-view]", mock
     tec.create_po(f3_t);
 
     auto non_virt = delete_virtual_pis(vpi);
-    CHECK(non_virt.size() ==
-          vpi.size() - vpi.num_virtual_pis() - 2);  // When creating the AIG, the nodes will be hashed. Since all AND
-                                                    // nodes are the same, only one node will be created.
+    /*When creating the AIG, the nodes will be hashed. Since all AND
+    nodes are the same, only one node will be created.*/
+    CHECK(non_virt.size() == vpi.size() - vpi.num_virtual_pis() - 2);
 
     CHECK(non_virt.real_size() == non_virt.size());
 
