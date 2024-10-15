@@ -3489,6 +3489,20 @@ Returns:
     A pair of uint16_t values representing the number of horizontal
     and vertical SiDBs affected by the given defect type.)doc";
 
+static const char *__doc_fiction_delete_virtual_pis =
+R"doc(Deletes virtual primary inputs from a network. This can mainly be used
+for equivalence checking. If the network does not have any virtual PIs
+stored, the network is returned.
+
+Template parameter ``Ntk``:
+    The type of network.
+
+Parameter ``ntk``:
+    The input network.
+
+Returns:
+    The resulting network after virtual primary inputs are deleted.)doc";
+
 static const char *__doc_fiction_dependent_cell_mode = R"doc(An enumeration of modes for the dependent cell.)doc";
 
 static const char *__doc_fiction_dependent_cell_mode_FIXED =
@@ -4313,6 +4327,16 @@ Returns:
     Simulation results.)doc";
 
 static const char *__doc_fiction_detail_critical_temperature_impl_stats = R"doc(Statistics.)doc";
+
+static const char *__doc_fiction_detail_delete_virtual_pis_impl = R"doc()doc";
+
+static const char *__doc_fiction_detail_delete_virtual_pis_impl_delete_virtual_pis_impl = R"doc()doc";
+
+static const char *__doc_fiction_detail_delete_virtual_pis_impl_ntk = R"doc()doc";
+
+static const char *__doc_fiction_detail_delete_virtual_pis_impl_ntk_topo = R"doc()doc";
+
+static const char *__doc_fiction_detail_delete_virtual_pis_impl_run = R"doc()doc";
 
 static const char *__doc_fiction_detail_delete_wires =
 R"doc(This function deletes wires from the provided
@@ -11510,6 +11534,8 @@ static const char *__doc_fiction_has_foreach_incoming_clocked_zone = R"doc()doc"
 
 static const char *__doc_fiction_has_foreach_outgoing_clocked_zone = R"doc()doc";
 
+static const char *__doc_fiction_has_foreach_real_pi = R"doc()doc";
+
 static const char *__doc_fiction_has_foreach_sidb_defect = R"doc()doc";
 
 static const char *__doc_fiction_has_foreach_tile = R"doc()doc";
@@ -11521,6 +11547,8 @@ static const char *__doc_fiction_has_get_functional_implementations = R"doc()doc
 static const char *__doc_fiction_has_get_gate_ports = R"doc()doc";
 
 static const char *__doc_fiction_has_get_layout_name = R"doc()doc";
+
+static const char *__doc_fiction_has_get_real_pi = R"doc()doc";
 
 static const char *__doc_fiction_has_get_sidb_defect = R"doc()doc";
 
@@ -11617,6 +11645,8 @@ static const char *__doc_fiction_has_north = R"doc()doc";
 static const char *__doc_fiction_has_north_east = R"doc()doc";
 
 static const char *__doc_fiction_has_north_west = R"doc()doc";
+
+static const char *__doc_fiction_has_num_real_pis = R"doc()doc";
 
 static const char *__doc_fiction_has_ordinal_operations = R"doc()doc";
 
@@ -17372,6 +17402,181 @@ Template parameter ``Color``:
 static const char *__doc_fiction_vertical_shift_cartesian =
 R"doc(\verbatim +-------+ | | | +-------+ | | | +-------+ | | | +-------+
 \endverbatim)doc";
+
+static const char *__doc_fiction_virtual_pi_network = R"doc()doc";
+
+static const char *__doc_fiction_virtual_pi_network_clone = R"doc(Clones the virtual_pi_network object.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_create_virtual_pi =
+R"doc(Create a virtual PI, which is a mapping to a real PI.
+
+This function creates a virtual PI mapping to a real PI in the
+network. It adds a PI to the underlying network, but marks it as
+virtual and stores a mapping to a real PI.
+
+Parameter ``real_pi``:
+    The node representing the real PI in the network.
+
+Returns:
+    The signal of the newly created virtual PI.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_foreach_real_ci =
+R"doc(Iterates over the virtual CIs of the circuit and applies a given
+function.
+
+Template parameter ``Fn``:
+    The type of the function to be applied.
+
+Parameter ``fn``:
+    The function to be applied.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_foreach_real_pi =
+R"doc(Iterates over the real PIs of the circuit and applies a given
+function.
+
+Template parameter ``Fn``:
+    The type of the function.
+
+Parameter ``fn``:
+    The function to be applied to each primary input.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_foreach_virtual_ci =
+R"doc(Iterates over the virtual CIs of the circuit and applies a given
+function.
+
+Template parameter ``Fn``:
+    The type of the function.
+
+Parameter ``fn``:
+    The function to be applied to each primary input.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_foreach_virtual_pi =
+R"doc(Iterates over the virtual PIs of the circuit and applies a given
+function.
+
+Template parameter ``Fn``:
+    The type of the function.
+
+Parameter ``fn``:
+    The function to be applied to each primary input.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_get_real_pi =
+R"doc(Get the real PI associated with a virtual PI node.
+
+Parameter ``v_pi``:
+    The virtual pi node to retrieve the real pi for.
+
+Returns:
+    The real pi associated with the virtual pi node.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_is_real_ci =
+R"doc(Check if a given node is a real CI in the virtual_pi_network.
+
+Parameter ``n``:
+    The node to check.
+
+Returns:
+    True if the node is a real CI, false otherwise.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_is_real_pi =
+R"doc(Check if a given node is a real PI. Real PIs are created with
+create_pi().
+
+Parameter ``n``:
+    The node to check.
+
+Returns:
+    True if the node is a real PI, false otherwise.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_is_virtual_ci =
+R"doc(Check if a given node is a virtual CI in the virtual_pi_network.
+
+Parameter ``n``:
+    The node to check.
+
+Returns:
+    True if the node is a virtual CI, false otherwise.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_is_virtual_pi =
+R"doc(Check if a given node is a virtual PI. Virtual PIs are created with
+create_virtual_pi().
+
+Parameter ``n``:
+    The node to check.
+
+Returns:
+    True if the node is a virtual PI, false otherwise.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_num_real_cis =
+R"doc(Get the number of real CIs in the virtual_pi_network.
+
+Returns:
+    The number of real CIs as a uint32_t.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_num_real_pis =
+R"doc(Get the number of real PIs in the virtual_pi_network.
+
+Returns:
+    The number of real PIs as a uint32_t.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_num_virtual_cis =
+R"doc(Get the number of virtual CIs in the virtual_pi_network.
+
+Returns:
+    The number of virtual CIs as a uint32_t.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_num_virtual_pis =
+R"doc(Get the number of virtual PIs in the virtual_pi_network.
+
+Returns:
+    The number of virtual PIs as a uint32_t.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_real_size =
+R"doc(Calculate the real size of the virtual_pi_network.
+
+The real size of the network is considered the size without virtual
+PIs.
+
+Returns:
+    The real size of the virtual_pi_network as a uint32_t.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_v_storage = R"doc(Shared pointer of the virtual PI storage.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_virtual_pi_network =
+R"doc(Default constructor for the `virtual_pi_network` class. Initializes
+`v_storage` as a shared pointer.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_virtual_pi_network_2 =
+R"doc(Constructor for the `virtual_pi_network` class that takes a network as
+input. It adds the functionalities of the `virtual_pi_network` class
+on top of the network.
+
+Template parameter ``Ntk``:
+    Network type.
+
+Parameter ``ntk``:
+    Input network.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_virtual_pi_network_3 =
+R"doc(Constructor for the `virtual_pi_network` class that takes a network
+and a shared pointer to a `virtual_storage` object. THis is used for
+cloning.
+
+Template parameter ``Ntk``:
+    Network type.
+
+Parameter ``ntk``:
+    Input network.
+
+Parameter ``s``:
+    Shared pointer to the `virtual_storage` object to be used by this
+    `virtual_pi_network`.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_virtual_storage = R"doc()doc";
+
+static const char *__doc_fiction_virtual_pi_network_virtual_storage_map_virt_to_real_pi = R"doc(Map from virtual_pis to real_pis.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_virtual_storage_virtual_inputs = R"doc(Vector storing virtual_inputs.)doc";
 
 static const char *__doc_fiction_volume =
 R"doc(Computes the volume of a given coordinate assuming its origin is (0,
