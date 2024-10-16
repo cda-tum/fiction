@@ -17547,17 +17547,6 @@ R"doc(Default constructor for the `virtual_pi_network` class. Initializes
 `v_storage` as a shared pointer.)doc";
 
 static const char *__doc_fiction_virtual_pi_network_virtual_pi_network_2 =
-R"doc(Constructor for the `virtual_pi_network` class that takes a network as
-input. It adds the functionalities of the `virtual_pi_network` class
-on top of the network.
-
-Template parameter ``Ntk``:
-    Network type.
-
-Parameter ``ntk``:
-    Input network.)doc";
-
-static const char *__doc_fiction_virtual_pi_network_virtual_pi_network_3 =
 R"doc(Constructor for the `virtual_pi_network` class that takes a network
 and a shared pointer to a `virtual_storage` object. This is used for
 cloning.
