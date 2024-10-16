@@ -49,6 +49,7 @@ class optimize_command : public command
                  "layouts, the resulting layout will also be planar. If the layout already contains crossings, the "
                  "optimized layout will have the same number of crossings or less.");
         add_flag("--verbose,-v", "Be verbose");
+        add_option("--timeout,-t", ps.timeout, "Timeout in seconds");
     }
 
   protected:
@@ -60,6 +61,7 @@ class optimize_command : public command
      * Parameters.
      */
     fiction::post_layout_optimization_params ps{};
+    fiction::wiring_reduction_params         psw{};
     /**
      * Statistics.
      */
@@ -94,6 +96,13 @@ class optimize_command : public command
             return;
         }
 
+        if (is_set("timeout"))
+        {
+            // convert timeout entered in seconds to milliseconds
+            ps.timeout *= 1000;
+            psw.timeout = ps.timeout;
+        }
+
         const auto apply_optimization = [&](auto&& lyt_ptr)
         {
             using Lyt = typename std::decay_t<decltype(lyt_ptr)>::element_type;
@@ -104,7 +113,7 @@ class optimize_command : public command
             {
                 if (is_set("wiring_reduction_only"))
                 {
-                    fiction::wiring_reduction(lyt_copy, &stw);
+                    fiction::wiring_reduction(lyt_copy, psw, &stw);
                     if (is_set("verbose"))
                     {
                         stw.report(env->out());

@@ -19,11 +19,15 @@ spaces upward and subsequently reconnecting them. This iterative process continu
     .. tab:: C++
         **Header:** ``fiction/algorithms/physical_design/wiring_reduction.hpp``
 
+        .. doxygenstruct:: fiction::wiring_reduction_params
+           :members:
         .. doxygenstruct:: fiction::wiring_reduction_stats
            :members:
         .. doxygenfunction:: fiction::wiring_reduction
 
     .. tab:: Python
+        .. autoclass:: mnt.pyfiction.wiring_reduction_params
+            :members:
         .. autoclass:: mnt.pyfiction.wiring_reduction_stats
             :members:
         .. autofunction:: mnt.pyfiction.wiring_reduction
