@@ -763,8 +763,7 @@ class post_layout_optimization_impl
         static a_star_params params{};
         params.crossings = !ps.planar_optimization;
 
-        const auto path =
-            a_star<layout_coordinate_path<ObstrLyt>>(lyt, {start_tile, end_tile}, dist(), cost(), params);
+        const auto path = a_star<layout_coordinate_path<ObstrLyt>>(lyt, {start_tile, end_tile}, dist(), cost(), params);
 
         // obstruct the tiles along the computed path.
         for (const auto& tile : path)

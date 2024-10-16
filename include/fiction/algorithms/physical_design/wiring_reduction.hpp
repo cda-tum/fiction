@@ -1079,7 +1079,7 @@ class wiring_reduction_impl
 
         // lambda to update the timeout status and calculate remaining time
         const auto update_timeout = [start = this->start, &ps = this->ps,
-                               &timeout_limit_reached = this->timeout_limit_reached]() noexcept -> void
+                                     &timeout_limit_reached = this->timeout_limit_reached]() noexcept -> void
         {
             const auto current_time = std::chrono::high_resolution_clock::now();
             const auto elapsed_ms   = static_cast<uint64_t>(
