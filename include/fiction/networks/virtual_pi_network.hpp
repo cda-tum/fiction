@@ -26,9 +26,9 @@ namespace fiction
 {
 /* Network with additional "virtual" PIs.
  *
- * "Virtual" PIs (Primary Inputs) are used to manage the duplication of PIs in the network. Each "real" PI can have
- * an arbitrary number of "virtual" PIs, which are copies of the original "real" PI.
- * A "virtual" PI can be created by duplicating a "real" PI.
+ * "Virtual" PIs are used to manage the duplication of PIs in the network.
+ * Each "real" PI can have an arbitrary number of "virtual" PIs, which are copies of the original "real" PI.
+ * A "virtual" PI can be created by passing a "real" PI to `create_virtual_pi`.
  * To keep track of this relationship, there is a mapping of each "virtual" PI to its corresponding "real" PI in the
  * network.
  *
@@ -51,7 +51,7 @@ class virtual_pi_network : public Ntk
         /**
          * Map from virtual_pis to real_pis.
          */
-        phmap::parallel_flat_hash_map<node, node> map_virt_to_real_pi{};
+        phmap::parallel_flat_hash_map<node, node> map_virtual_to_real_pi{};
     };
 
     using v_strg = std::shared_ptr<virtual_storage>;
@@ -151,7 +151,7 @@ class virtual_pi_network : public Ntk
     {
         const signal s = Ntk::create_pi();
         v_storage->virtual_inputs.emplace_back(Ntk::get_node(s));
-        v_storage->map_virt_to_real_pi.insert({Ntk::get_node(s), Ntk::get_node(real_pi)});
+        v_storage->map_virtual_to_real_pi.insert({Ntk::get_node(s), Ntk::get_node(real_pi)});
         return s;
     }
 
@@ -248,9 +248,9 @@ class virtual_pi_network : public Ntk
      */
     [[nodiscard]] auto get_real_pi(const node& v_pi) const
     {
-        const auto it = v_storage->map_virt_to_real_pi.find(v_pi);
+        const auto it = v_storage->map_virtual_to_real_pi.find(v_pi);
 
-        assert(it != v_storage->map_virt_to_real_pi.end() && "Error: node is not a virtual pi");
+        assert(it != v_storage->map_virtual_to_real_pi.end() && "Error: node is not a virtual pi");
 
         return it->second;
     }
@@ -322,11 +322,11 @@ class virtual_pi_network : public Ntk
      *
      * This function removes the virtual input nodes from the network by substituting them with their corresponding
      * real input nodes. It then performs a cleanup to remove any dangling PIs..
-     * Finally, it clears the virtual_inputs and map_virt_to_real_pi data structures in the _storage object.
+     * Finally, it clears the virtual_inputs and map_virtual_to_real_pi data structures in the _storage object.
      */
     /*void remove_virtual_input_nodes()
     {
-        for (const auto& map_item : v_storage->map_virt_to_real_pi)
+        for (const auto& map_item : v_storage->map_virtual_to_real_pi)
         {
             Ntk::substitute_node(map_item.first, map_item.second);
         }
@@ -335,7 +335,7 @@ class virtual_pi_network : public Ntk
 
         // Clear virtual_inputs after using it
         v_storage->virtual_inputs.clear();
-        v_storage->map_virt_to_real_pi.clear();
+        v_storage->map_virtual_to_real_pi.clear();
     }*/
 
   private:
