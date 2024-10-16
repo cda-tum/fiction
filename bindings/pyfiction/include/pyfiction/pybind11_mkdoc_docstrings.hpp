@@ -7055,12 +7055,51 @@ Parameter ``ffd``:
     Reference to the fanin_fanout_data structure containing the
     routes.)doc";
 
+static const char *__doc_fiction_detail_post_layout_optimization_impl_check_new_position =
+R"doc(Attempts to relocate a gate to a new position within the layout and
+updates routing connections accordingly.
+
+Parameter ``lyt``:
+    Obstructed gate-level layout being optimized.
+
+Parameter ``new_pos``:
+    The target tile position to which the gate is to be relocated.
+
+Parameter ``num_gate_relocations``:
+    Reference to a counter tracking the number of gate relocations
+    performed.
+
+Parameter ``current_pos``:
+    Reference to the current position of the gate being relocated.
+    This will be updated upon successful relocation.
+
+Parameter ``fanins``:
+    Vector containing the tile positions of all fan-in connections to
+    the gate.
+
+Parameter ``fanouts``:
+    Vector containing the tile positions of all fan-out connections
+    from the gate.
+
+Parameter ``moved_gate``:
+    Reference to a boolean flag that will be set to `true` if the gate
+    is successfully moved.
+
+Parameter ``old_pos``:
+    The original tile position of the gate before the relocation
+    attempt.
+
+Returns:
+    `true` if the gate was successfully relocated to `new_pos` and all
+    routing paths were established. `false` if the relocation resulted
+    in no movement (i.e., `new_pos` is the same as `old_pos`).)doc";
+
 static const char *__doc_fiction_detail_post_layout_optimization_impl_fix_wires =
 R"doc(Utility function to move wires that cross over empty tiles down one
 layer. This can happen if the wiring of a gate is deleted.
 
 Parameter ``lyt``:
-    Gate-level layout.
+    Obstructed gate-level layout.
 
 Parameter ``deleted_coords``:
     Tiles that got deleted.)doc";
@@ -7073,7 +7112,7 @@ wire tiles between fanins and the gate, as well as between the gate
 and fanouts are collected for deletion.
 
 Parameter ``lyt``:
-    Cartesian Gate-level layout.
+    Obstructed gate-level layout.
 
 Parameter ``op``:
     coordinate of the gate to be moved.
@@ -7087,7 +7126,7 @@ A* algorithm. It then obstructs the tiles along the path in the given
 layout.
 
 Parameter ``lyt``:
-    Reference to the layout.
+    Obstructed gate-level layout.
 
 Parameter ``start_tile``:
     The starting coordinate of the path.
@@ -7111,7 +7150,7 @@ signals are updated - if no better coordinate is found, the old wiring
 is restored
 
 Parameter ``lyt``:
-    2DDWave-clocked cartesian obstruction gate-level layout.
+    Obstructed gate-level layout.
 
 Parameter ``old_pos``:
     Old position of the gate to be moved.
@@ -7131,6 +7170,42 @@ static const char *__doc_fiction_detail_post_layout_optimization_impl_ps = R"doc
 
 static const char *__doc_fiction_detail_post_layout_optimization_impl_pst = R"doc(Statistics about the post-layout optimization process.)doc";
 
+static const char *__doc_fiction_detail_post_layout_optimization_impl_restore_original_wiring =
+R"doc(Restores the original wiring if relocation of a gate fails.
+
+This function moves the gate back to its original position and
+reinstates the previous wiring paths between the gate and its fan-
+in/fan-out connections. It also updates the obstructions in the layout
+accordingly.
+
+Parameter ``lyt``:
+    Obstructed gate-level layout.
+
+Parameter ``old_path_from_fanin_1_to_gate``:
+    The original routing path from the first fan-in to the gate (if
+    exists).
+
+Parameter ``old_path_from_fanin_2_to_gate``:
+    The original routing path from the second fan-in to the gate (if
+    exists).
+
+Parameter ``old_path_from_gate_to_fanout_1``:
+    The original routing path from the gate to the first fan-out (if
+    exists).
+
+Parameter ``old_path_from_gate_to_fanout_2``:
+    The original routing path from the gate to the second fan-out (if
+    exists).
+
+Parameter ``current_pos``:
+    Current position of the gate after relocation attempt.
+
+Parameter ``old_pos``:
+    Original position of the gate before relocation attempt.
+
+Parameter ``fanouts``:
+    Vector of fanout tiles connected to the gate.)doc";
+
 static const char *__doc_fiction_detail_post_layout_optimization_impl_run = R"doc()doc";
 
 static const char *__doc_fiction_detail_post_layout_optimization_impl_start = R"doc(Start time.)doc";
@@ -7145,6 +7220,10 @@ the remaining time.
 Returns:
     Remaining time in milliseconds before timeout, or `0` if timeout
     has been reached.)doc";
+
+static const char *__doc_fiction_detail_post_layout_optimization_impl_wiring_reduction_params = R"doc(Wiring reduction parameters.)doc";
+
+static const char *__doc_fiction_detail_post_layout_optimization_impl_wiring_reduction_stats = R"doc(Wiring reduction stats.)doc";
 
 static const char *__doc_fiction_detail_priority_queue =
 R"doc(A priority queue class for managing elements with associated
