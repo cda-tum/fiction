@@ -845,10 +845,9 @@ class post_layout_optimization_impl
                 new_path_from_gate_to_fanout_2 = get_path_and_obstruct(lyt, new_pos, fanouts[1]);
             }
 
-            // if possible routing was found, it will be applied
-d!fanins.empty()
+            if (!(!fanins.empty() && new_path_from_fanin_1_to_gate.empty()) &&
                 !(fanins.size() == 2 && new_path_from_fanin_2_to_gate.empty()) &&
-&!fanouts.empty()
+                !(!fanouts.empty() && new_path_from_gate_to_fanout_1.empty()) &&
                 !(fanouts.size() == 2 && new_path_from_gate_to_fanout_2.empty()))
 {
     for (const auto& path : {new_path_from_fanin_1_to_gate, new_path_from_fanin_2_to_gate,
