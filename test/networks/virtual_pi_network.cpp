@@ -14,8 +14,32 @@
 #include <mockturtle/networks/mig.hpp>
 #include <mockturtle/networks/xag.hpp>
 #include <mockturtle/networks/xmg.hpp>
+#include <mockturtle/views/names_view.hpp>
 
 using namespace fiction;
+
+TEST_CASE("Check name conservation", "[virtual-pi-view]")
+{
+    virtual_pi_network<mockturtle::names_view<technology_network>> vpi{};
+
+    const auto a  = vpi.create_pi();
+    const auto b  = vpi.create_pi();
+    const auto f1 = vpi.create_and(a, b);
+    const auto c  = vpi.create_virtual_pi(a);
+    const auto d  = vpi.create_virtual_pi(b);
+    const auto f2 = vpi.create_and(b, c);
+    const auto f3 = vpi.create_or(a, d);
+
+    vpi.create_po(f1);
+    vpi.create_po(f2);
+    vpi.create_po(f3);
+
+    vpi.set_network_name("vpi");
+
+    const auto non_vpi = delete_virtual_pis(vpi);
+    // network name
+    CHECK(non_vpi.get_network_name() == "vpi");
+}
 
 TEST_CASE("Copy technology network and size consistency", "[virtual-pi-view]")
 {
@@ -55,9 +79,10 @@ TEMPLATE_TEST_CASE("Copy networks and size consistency", "[virtual-pi-view]", mo
                    mockturtle::xag_network, mockturtle::mig_network, mockturtle::xmg_network)
 {
     virtual_pi_network<TestType> vpi{};
-    const auto                   a  = vpi.create_pi();
-    const auto                   b  = vpi.create_pi();
-    const auto                   f1 = vpi.create_and(a, b);
+
+    const auto a  = vpi.create_pi();
+    const auto b  = vpi.create_pi();
+    const auto f1 = vpi.create_and(a, b);
     // create virtual PIs
     const auto c  = vpi.create_virtual_pi(a);
     const auto d  = vpi.create_virtual_pi(b);
@@ -86,6 +111,7 @@ TEMPLATE_TEST_CASE("Copy networks and size consistency", "[virtual-pi-view]", mo
 TEST_CASE("Remove PIs and check equivalence technology_network", "[virtual-pi-view]")
 {
     technology_network tec{};
+
     const auto x1 = tec.create_pi();
     const auto x2 = tec.create_pi();
     const auto x3 = tec.create_pi();
@@ -99,12 +125,13 @@ TEST_CASE("Remove PIs and check equivalence technology_network", "[virtual-pi-vi
     tec.create_po(f3);
 
     virtual_pi_network<technology_network> vpi{};
-    const auto a = vpi.create_pi();
-    const auto b = vpi.create_pi();
-    const auto c = vpi.create_pi();
-    const auto d = vpi.create_pi();
+
+    const auto a   = vpi.create_pi();
+    const auto b   = vpi.create_pi();
+    const auto c   = vpi.create_pi();
+    const auto d   = vpi.create_pi();
     const auto d_v = vpi.create_virtual_pi(d);
-    const auto e = vpi.create_pi();
+    const auto e   = vpi.create_pi();
     const auto f7  = vpi.create_not(b);
     const auto f8  = vpi.create_and(a, b);
     const auto f9  = vpi.create_and(c, d);
@@ -119,7 +146,7 @@ TEST_CASE("Remove PIs and check equivalence technology_network", "[virtual-pi-vi
     // delete virtualPIs
     auto non_virt = delete_virtual_pis(vpi);
     CHECK(non_virt.size() == vpi.size() - vpi.num_virtual_pis());
-    //check equivalence
+    // check equivalence
     mockturtle::equivalence_checking_stats st;
     const auto                             maybe_cec_m =
         mockturtle::equivalence_checking(*mockturtle::miter<technology_network>(tec, non_virt), {}, &st);
@@ -138,9 +165,10 @@ TEST_CASE("Remove PIs and check equivalence technology_network", "[virtual-pi-vi
 TEMPLATE_TEST_CASE("Remove PIs and check equivalence", "[virtual-pi-view]", mockturtle::aig_network,
                    mockturtle::xag_network, mockturtle::mig_network, mockturtle::xmg_network)
 {
-    TestType                     tec{};
-    const auto a_t = tec.create_pi();
-    const auto b_t = tec.create_pi();
+    TestType tec{};
+
+    const auto a_t  = tec.create_pi();
+    const auto b_t  = tec.create_pi();
     const auto f1_t = tec.create_and(a_t, b_t);
     const auto f2_t = tec.create_and(b_t, a_t);
     const auto f3_t = tec.create_and(a_t, b_t);
@@ -149,10 +177,11 @@ TEMPLATE_TEST_CASE("Remove PIs and check equivalence", "[virtual-pi-view]", mock
     tec.create_po(f3_t);
 
     virtual_pi_network<TestType> vpi{};
-    const auto a = vpi.create_pi();
-    const auto b = vpi.create_pi();
-    const auto c = vpi.create_virtual_pi(a);
-    const auto d = vpi.create_virtual_pi(b);
+
+    const auto a  = vpi.create_pi();
+    const auto b  = vpi.create_pi();
+    const auto c  = vpi.create_virtual_pi(a);
+    const auto d  = vpi.create_virtual_pi(b);
     const auto f1 = vpi.create_and(a, b);
     const auto f2 = vpi.create_and(b, c);
     const auto f3 = vpi.create_and(a, d);
@@ -160,9 +189,9 @@ TEMPLATE_TEST_CASE("Remove PIs and check equivalence", "[virtual-pi-view]", mock
     vpi.create_po(f2);
     vpi.create_po(f3);
 
+    /*When creating the AIG, the nodes will be hashed. Since all AND nodes get mapped to the same two PIs after deleting
+     * the virtual PIs, only one node will be created.*/
     auto non_virt = delete_virtual_pis(vpi);
-    /*When creating the AIG, the nodes will be hashed. Since all AND nodes get mapped to the same two PIs, only one node
-     * will be created.*/
     // check size consistency
     CHECK(non_virt.size() == vpi.size() - vpi.num_virtual_pis() - 2);
     CHECK(non_virt.real_size() == non_virt.size());
