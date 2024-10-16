@@ -17574,7 +17574,7 @@ Parameter ``s``:
 
 static const char *__doc_fiction_virtual_pi_network_virtual_storage = R"doc()doc";
 
-static const char *__doc_fiction_virtual_pi_network_virtual_storage_map_virt_to_real_pi = R"doc(Map from virtual_pis to real_pis.)doc";
+static const char *__doc_fiction_virtual_pi_network_virtual_storage_map_virtual_to_real_pi = R"doc(Map from virtual_pis to real_pis.)doc";
 
 static const char *__doc_fiction_virtual_pi_network_virtual_storage_virtual_inputs = R"doc(Vector storing virtual_inputs.)doc";
 
