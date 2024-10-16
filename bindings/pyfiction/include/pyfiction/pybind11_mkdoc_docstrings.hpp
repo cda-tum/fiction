@@ -11634,6 +11634,10 @@ static const char *__doc_fiction_has_is_outgoing_clocked = R"doc()doc";
 
 static const char *__doc_fiction_has_is_po = R"doc()doc";
 
+static const char *__doc_fiction_has_is_real_pi = R"doc()doc";
+
+static const char *__doc_fiction_has_is_virtual_pi = R"doc()doc";
+
 static const char *__doc_fiction_has_is_wire_tile = R"doc()doc";
 
 static const char *__doc_fiction_has_is_xnor = R"doc()doc";
@@ -11647,6 +11651,8 @@ static const char *__doc_fiction_has_north_east = R"doc()doc";
 static const char *__doc_fiction_has_north_west = R"doc()doc";
 
 static const char *__doc_fiction_has_num_real_pis = R"doc()doc";
+
+static const char *__doc_fiction_has_num_virtual_pis = R"doc()doc";
 
 static const char *__doc_fiction_has_ordinal_operations = R"doc()doc";
 
@@ -17410,9 +17416,8 @@ static const char *__doc_fiction_virtual_pi_network_clone = R"doc(Clones the vir
 static const char *__doc_fiction_virtual_pi_network_create_virtual_pi =
 R"doc(Create a virtual PI, which is a mapping to a real PI.
 
-This function creates a virtual PI mapping to a real PI in the
-network. It adds a PI to the underlying network, but marks it as
-virtual and stores a mapping to a real PI.
+This function adds a PI to the parent network, but marks it as virtual
+and stores a mapping to a real PI.
 
 Parameter ``real_pi``:
     The node representing the real PI in the network.
@@ -17435,30 +17440,30 @@ R"doc(Iterates over the real PIs of the circuit and applies a given
 function.
 
 Template parameter ``Fn``:
-    The type of the function.
+    The type of the function to be applied.
 
 Parameter ``fn``:
-    The function to be applied to each primary input.)doc";
+    The function to be applied.)doc";
 
 static const char *__doc_fiction_virtual_pi_network_foreach_virtual_ci =
 R"doc(Iterates over the virtual CIs of the circuit and applies a given
 function.
 
 Template parameter ``Fn``:
-    The type of the function.
+    The type of the function to be applied.
 
 Parameter ``fn``:
-    The function to be applied to each primary input.)doc";
+    The function to be applied.)doc";
 
 static const char *__doc_fiction_virtual_pi_network_foreach_virtual_pi =
 R"doc(Iterates over the virtual PIs of the circuit and applies a given
 function.
 
 Template parameter ``Fn``:
-    The type of the function.
+    The type of the function to be applied.
 
 Parameter ``fn``:
-    The function to be applied to each primary input.)doc";
+    The function to be applied.)doc";
 
 static const char *__doc_fiction_virtual_pi_network_get_real_pi =
 R"doc(Get the real PI associated with a virtual PI node.
