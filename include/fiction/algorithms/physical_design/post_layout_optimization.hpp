@@ -846,9 +846,9 @@ class post_layout_optimization_impl
             }
 
             // if possible routing was found, it will be applied
-            if (!(fanins.size() > 0 && new_path_from_fanin_1_to_gate.empty()) &&
+d!fanins.empty()
                 !(fanins.size() == 2 && new_path_from_fanin_2_to_gate.empty()) &&
-                !(fanouts.size() > 0 && new_path_from_gate_to_fanout_1.empty()) &&
+&!fanouts.empty()
                 !(fanouts.size() == 2 && new_path_from_gate_to_fanout_2.empty()))
             {
                 for (const auto& path : {new_path_from_fanin_1_to_gate, new_path_from_fanin_2_to_gate,
