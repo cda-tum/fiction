@@ -432,10 +432,10 @@ class post_layout_optimization_impl
                 }
 
                 // gather all relevant gate tiles for relocation
-                std::vector<tile<Lyt>> gate_tiles;
+                std::vector<tile<Lyt>> gate_tiles{};
                 gate_tiles.reserve(layout.num_gates() + layout.num_pis() - layout.num_pos());
                 layout.foreach_node(
-                    [&layout, &gate_tiles](const auto& node)
+                    [&layout, &gate_tiles](const auto& node) noexcept
                     {
                         const tile<Lyt> tile = layout.get_tile(node);
                         if ((layout.is_gate(node) && !layout.is_wire(node)) || layout.is_fanout(node) ||
@@ -464,7 +464,7 @@ class post_layout_optimization_impl
                 moved_at_least_one_gate = false;
 
                 // attempt to relocate each gate tile
-                for (auto& gate_tile : gate_tiles)
+                for (const auto& gate_tile : gate_tiles)
                 {
                     if (!timeout_limit_reached)
                     {
@@ -763,7 +763,7 @@ class post_layout_optimization_impl
         static a_star_params params{};
         params.crossings = !ps.planar_optimization;
 
-        layout_coordinate_path<ObstrLyt> path =
+        const auto path =
             a_star<layout_coordinate_path<ObstrLyt>>(lyt, {start_tile, end_tile}, dist(), cost(), params);
 
         // obstruct the tiles along the computed path.
@@ -1093,6 +1093,7 @@ class post_layout_optimization_impl
         return true;
     }
 };
+
 }  // namespace detail
 
 /**
