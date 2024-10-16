@@ -74,26 +74,6 @@ class virtual_pi_network : public Ntk
     }
 
     /**
-     * Constructor for the `virtual_pi_network` class that takes a network as input. It adds the functionalities of
-     * the `virtual_pi_network` class on top of the network.
-     *
-     * @tparam Ntk Network type.
-     * @param ntk Input network.
-     */
-    explicit virtual_pi_network(const Ntk& ntk) : Ntk(ntk.clone()), v_storage(std::make_shared<virtual_storage>())
-    {
-        static_assert(mockturtle::has_create_pi_v<Ntk>, "NtkSrc does not implement the create_pi function");
-        static_assert(mockturtle::has_clone_v<Ntk>, "NtkSrc does not implement the clone function");
-        static_assert(mockturtle::has_size_v<Ntk>, "NtkSrc does not implement the size function");
-        static_assert(mockturtle::has_get_node_v<Ntk>, "NtkSrc does not implement the get_node function");
-        static_assert(mockturtle::has_is_pi_v<Ntk>, "NtkSrc does not implement the is_pi function");
-        static_assert(mockturtle::has_is_ci_v<Ntk>, "NtkSrc does not implement the is_ci function");
-        static_assert(mockturtle::has_num_pis_v<Ntk>, "NtkSrc does not implement the num_pis function");
-        static_assert(mockturtle::has_num_cis_v<Ntk>, "NtkSrc does not implement the num_cis function");
-        static_assert(mockturtle::has_get_node_v<Ntk>, "NtkSrc does not implement the get_node function");
-    }
-
-    /**
      * Constructor for the `virtual_pi_network` class that takes a network and a shared pointer to a `virtual_storage`
      * object. This is used for cloning.
      *
