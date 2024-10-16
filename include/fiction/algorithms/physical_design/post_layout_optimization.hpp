@@ -849,72 +849,72 @@ class post_layout_optimization_impl
                 !(fanins.size() == 2 && new_path_from_fanin_2_to_gate.empty()) &&
                 !(!fanouts.empty() && new_path_from_gate_to_fanout_1.empty()) &&
                 !(fanouts.size() == 2 && new_path_from_gate_to_fanout_2.empty()))
-{
-    for (const auto& path : {new_path_from_fanin_1_to_gate, new_path_from_fanin_2_to_gate,
-                             new_path_from_gate_to_fanout_1, new_path_from_gate_to_fanout_2})
-    {
-        if (!path.empty())
-        {
-            route_path(lyt, path);
-            for (const auto& tile : path)
             {
-                lyt.obstruct_coordinate(tile);
+                for (const auto& path : {new_path_from_fanin_1_to_gate, new_path_from_fanin_2_to_gate,
+                                         new_path_from_gate_to_fanout_1, new_path_from_gate_to_fanout_2})
+                {
+                    if (!path.empty())
+                    {
+                        route_path(lyt, path);
+                        for (const auto& tile : path)
+                        {
+                            lyt.obstruct_coordinate(tile);
+                        }
+                    }
+                }
+
+                moved_gate = true;
+
+                // update children based on number of fanins
+                if (fanins.size() == 2)
+                {
+                    lyt.move_node(lyt.get_node(new_pos), new_pos,
+                                  {
+                                      lyt.make_signal(lyt.get_node(new_path_from_fanin_1_to_gate.end()[-2])),
+                                      lyt.make_signal(lyt.get_node(new_path_from_fanin_2_to_gate.end()[-2])),
+                                  });
+                }
+                else if (fanins.size() == 1)
+                {
+                    lyt.move_node(lyt.get_node(new_pos), new_pos,
+                                  {lyt.make_signal(lyt.get_node(new_path_from_fanin_1_to_gate.end()[-2]))});
+                }
+
+                // update children of fanouts
+                for (const auto& fanout : fanouts)
+                {
+                    std::vector<mockturtle::signal<ObstrLyt>> signals{};
+                    signals.reserve(lyt.fanin_size(lyt.get_node(fanout)));
+
+                    lyt.foreach_fanin(lyt.get_node(fanout),
+                                      [&lyt, &signals](const auto& i)
+                                      {
+                                          auto fout = static_cast<tile<ObstrLyt>>(i);
+                                          signals.push_back(lyt.make_signal(lyt.get_node(fout)));
+                                      });
+
+                    lyt.move_node(lyt.get_node(fanout), fanout, signals);
+                }
+
+                if (new_pos == old_pos)
+                {
+                    return false;
+                }
             }
-        }
-    }
+            // if no routing was found, remove added obstructions
+            else
+            {
+                for (const auto& path : {new_path_from_fanin_1_to_gate, new_path_from_fanin_2_to_gate,
+                                         new_path_from_gate_to_fanout_1, new_path_from_gate_to_fanout_2})
+                {
+                    for (const auto& tile : path)
+                    {
+                        lyt.clear_obstructed_coordinate(tile);
+                    }
+                }
+            }
 
-    moved_gate = true;
-
-    // update children based on number of fanins
-    if (fanins.size() == 2)
-    {
-        lyt.move_node(lyt.get_node(new_pos), new_pos,
-                      {
-                          lyt.make_signal(lyt.get_node(new_path_from_fanin_1_to_gate.end()[-2])),
-                          lyt.make_signal(lyt.get_node(new_path_from_fanin_2_to_gate.end()[-2])),
-                      });
-    }
-    else if (fanins.size() == 1)
-    {
-        lyt.move_node(lyt.get_node(new_pos), new_pos,
-                      {lyt.make_signal(lyt.get_node(new_path_from_fanin_1_to_gate.end()[-2]))});
-    }
-
-    // update children of fanouts
-    for (const auto& fanout : fanouts)
-    {
-        std::vector<mockturtle::signal<ObstrLyt>> signals{};
-        signals.reserve(lyt.fanin_size(lyt.get_node(fanout)));
-
-        lyt.foreach_fanin(lyt.get_node(fanout),
-                          [&lyt, &signals](const auto& i)
-                          {
-                              auto fout = static_cast<tile<ObstrLyt>>(i);
-                              signals.push_back(lyt.make_signal(lyt.get_node(fout)));
-                          });
-
-        lyt.move_node(lyt.get_node(fanout), fanout, signals);
-    }
-
-    if (new_pos == old_pos)
-    {
-        return false;
-    }
-}
-// if no routing was found, remove added obstructions
-else
-{
-    for (const auto& path : {new_path_from_fanin_1_to_gate, new_path_from_fanin_2_to_gate,
-                             new_path_from_gate_to_fanout_1, new_path_from_gate_to_fanout_2})
-    {
-        for (const auto& tile : path)
-        {
-            lyt.clear_obstructed_coordinate(tile);
-        }
-    }
-}
-
-current_pos = new_pos;
+            current_pos = new_pos;
         }
         return true;
     }
