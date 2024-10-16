@@ -20,6 +20,7 @@
 
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
+#include <phmap.h>
 
 #include <algorithm>
 #include <chrono>
@@ -395,10 +396,6 @@ class post_layout_optimization_impl
 
         if (max_gate_relocations == 0)
         {
-            // perform wiring reduction only when no gate relocations are allowed
-            fiction::wiring_reduction_stats  wiring_reduction_stats{};
-            fiction::wiring_reduction_params wiring_reduction_params{};
-
             // update the remaining timeout
             wiring_reduction_params.timeout = update_timeout();
 
@@ -415,12 +412,10 @@ class post_layout_optimization_impl
                 reduced_wiring = false;
 
                 // update the remaining timeout
-                fiction::wiring_reduction_params wiring_reduction_params{};
                 wiring_reduction_params.timeout = update_timeout();
 
                 if (moved_at_least_one_gate && !ps.optimize_pos_only && !timeout_limit_reached)
                 {
-                    fiction::wiring_reduction_stats wiring_reduction_stats{};
                     fiction::wiring_reduction(layout, wiring_reduction_params, &wiring_reduction_stats);
 
                     // check if wiring reduction made any improvements
@@ -437,12 +432,12 @@ class post_layout_optimization_impl
                 layout.foreach_node(
                     [&layout, &gate_tiles](const auto& node) noexcept
                     {
-                        const tile<Lyt> tile = layout.get_tile(node);
-                        if ((layout.is_gate(node) && !layout.is_wire(node)) || layout.is_fanout(node) ||
-                            layout.is_pi_tile(tile) || layout.is_po_tile(tile))
+                        if (const tile<Lyt> gate_tile = layout.get_tile(node);
+                            (layout.is_gate(node) && !layout.is_wire(node)) || layout.is_fanout(node) ||
+                            layout.is_pi_tile(gate_tile) || layout.is_po_tile(gate_tile))
                         {
-                            layout.obstruct_coordinate({tile.x, tile.y, 1});
-                            gate_tiles.emplace_back(tile);
+                            layout.obstruct_coordinate({gate_tile.x, gate_tile.y, 1});
+                            gate_tiles.emplace_back(gate_tile);
                         }
                     });
 
@@ -468,9 +463,7 @@ class post_layout_optimization_impl
                 {
                     if (!timeout_limit_reached)
                     {
-                        bool should_optimize =
-                            !ps.optimize_pos_only || (ps.optimize_pos_only && layout.is_po_tile(gate_tile));
-                        if (should_optimize)
+                        if (!ps.optimize_pos_only || (ps.optimize_pos_only && layout.is_po_tile(gate_tile)))
                         {
                             if (improve_gate_location(layout, gate_tile))
                             {
@@ -532,6 +525,10 @@ class post_layout_optimization_impl
      */
     post_layout_optimization_stats& pst;
     /**
+     * Start time.
+     */
+    std::chrono::time_point<std::chrono::high_resolution_clock> start;
+    /**
      * Maximum number of relocations to try for each gate.
      */
     std::optional<uint64_t> max_gate_relocations = std::nullopt;
@@ -544,19 +541,23 @@ class post_layout_optimization_impl
      */
     bool timeout_limit_reached = false;
     /**
-     * Start time.
+     * Wiring reduction parameters.
      */
-    std::chrono::time_point<std::chrono::high_resolution_clock> start;
+    fiction::wiring_reduction_params wiring_reduction_params{};
+    /**
+     * Wiring reduction stats.
+     */
+    fiction::wiring_reduction_stats wiring_reduction_stats{};
     /**
      * Utility function to move wires that cross over empty tiles down one layer. This can happen if the wiring of a
      * gate is deleted.
      *
-     * @param lyt Gate-level layout.
+     * @param lyt Obstructed gate-level layout.
      * @param deleted_coords Tiles that got deleted.
      */
     void fix_wires(ObstrLyt& lyt, const std::vector<tile<ObstrLyt>>& deleted_coords) noexcept
     {
-        std::unordered_set<tile<ObstrLyt>> moved_tiles{};
+        phmap::parallel_flat_hash_set<tile<ObstrLyt>> moved_tiles{};
         moved_tiles.reserve(deleted_coords.size());
         for (const auto& tile : deleted_coords)
         {
@@ -634,7 +635,7 @@ class post_layout_optimization_impl
      * the location of the fanins and fanouts, as well as the wiring in between them. Additionally, all wire tiles
      * between fanins and the gate, as well as between the gate and fanouts are collected for deletion.
      *
-     * @param lyt Cartesian Gate-level layout.
+     * @param lyt Obstructed gate-level layout.
      * @param op coordinate of the gate to be moved.
      * @return fanin and fanout gates, wires to be deleted and old routing paths.
      */
@@ -648,9 +649,9 @@ class post_layout_optimization_impl
         auto fanout1 = tile<ObstrLyt>{};
         auto fanout2 = tile<ObstrLyt>{};
 
-        std::unordered_set<tile<ObstrLyt>> fanins_set{};
+        phmap::parallel_flat_hash_set<tile<ObstrLyt>> fanins_set{};
         fanins_set.reserve(lyt.num_wires() + lyt.num_gates() - 2);
-        std::unordered_set<tile<ObstrLyt>> fanouts_set{};
+        phmap::parallel_flat_hash_set<tile<ObstrLyt>> fanouts_set{};
         fanouts_set.reserve(lyt.num_wires() + lyt.num_gates() - 2);
 
         lyt.foreach_fanin(lyt.get_node(op),
@@ -750,7 +751,7 @@ class post_layout_optimization_impl
      * This helper function computes a path between two coordinates using the A* algorithm.
      * It then obstructs the tiles along the path in the given layout.
      *
-     * @param lyt Reference to the layout.
+     * @param lyt Obstructed gate-level layout.
      * @param start_tile The starting coordinate of the path.
      * @param end_tile The ending coordinate of the path.
      * @return The computed path as a sequence of coordinates in the layout.
@@ -760,10 +761,11 @@ class post_layout_optimization_impl
     {
         using dist = twoddwave_distance_functor<ObstrLyt, uint64_t>;
         using cost = unit_cost_functor<ObstrLyt, uint8_t>;
-        static a_star_params params{};
-        params.crossings = !ps.planar_optimization;
+        static a_star_params astar_params{};
+        astar_params.crossings = !ps.planar_optimization;
 
-        const auto path = a_star<layout_coordinate_path<ObstrLyt>>(lyt, {start_tile, end_tile}, dist(), cost(), params);
+        const auto path =
+            a_star<layout_coordinate_path<ObstrLyt>>(lyt, {start_tile, end_tile}, dist(), cost(), astar_params);
 
         // obstruct the tiles along the computed path.
         for (const auto& tile : path)
@@ -786,7 +788,210 @@ class post_layout_optimization_impl
             static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(current_time - start).count());
         timeout_limit_reached = (elapsed_ms >= ps.timeout);
         return timeout_limit_reached ? 0 : ps.timeout - elapsed_ms;
-    };
+    }
+    /**
+     * Attempts to relocate a gate to a new position within the layout and updates routing connections accordingly.
+     *
+     * @param lyt                  Obstructed gate-level layout being optimized.
+     * @param new_pos              The target tile position to which the gate is to be relocated.
+     * @param num_gate_relocations Reference to a counter tracking the number of gate relocations performed.
+     * @param current_pos          Reference to the current position of the gate being relocated. This will be updated
+     * upon successful relocation.
+     * @param fanins               Vector containing the tile positions of all fan-in connections to the gate.
+     * @param fanouts              Vector containing the tile positions of all fan-out connections from the gate.
+     * @param moved_gate           Reference to a boolean flag that will be set to `true` if the gate is successfully
+     * moved.
+     * @param old_pos              The original tile position of the gate before the relocation attempt.
+     *
+     * @return `true` if the gate was successfully relocated to `new_pos` and all routing paths were established.
+     *         `false` if the relocation resulted in no movement (i.e., `new_pos` is the same as `old_pos`).
+     */
+    bool check_new_position(ObstrLyt& lyt, const tile<ObstrLyt>& new_pos, uint64_t& num_gate_relocations,
+                            tile<ObstrLyt>& current_pos, const std::vector<tile<Lyt>>& fanins,
+                            const std::vector<tile<Lyt>>& fanouts, bool& moved_gate,
+                            const tile<ObstrLyt>& old_pos) noexcept
+    {
+        if (lyt.is_empty_tile(new_pos) && lyt.is_empty_tile({new_pos.x, new_pos.y, 1}))
+        {
+            num_gate_relocations++;
+            // move gate to new positions and update obstructions
+            lyt.move_node(lyt.get_node(current_pos), new_pos, {});
+            lyt.obstruct_coordinate(new_pos);
+            lyt.obstruct_coordinate({new_pos.x, new_pos.y, 1});
+            lyt.clear_obstructed_coordinate(current_pos);
+            lyt.clear_obstructed_coordinate({current_pos.x, current_pos.y, 1});
+
+            // get paths for fanins and fanouts
+            layout_coordinate_path<ObstrLyt> new_path_from_fanin_1_to_gate, new_path_from_fanin_2_to_gate,
+                new_path_from_gate_to_fanout_1, new_path_from_gate_to_fanout_2;
+            // get paths for fanins and fanouts
+            if (!fanins.empty())
+            {
+                new_path_from_fanin_1_to_gate = get_path_and_obstruct(lyt, fanins[0], new_pos);
+            }
+
+            if (fanins.size() == 2)
+            {
+                new_path_from_fanin_2_to_gate = get_path_and_obstruct(lyt, fanins[1], new_pos);
+            }
+
+            if (!fanouts.empty())
+            {
+                new_path_from_gate_to_fanout_1 = get_path_and_obstruct(lyt, new_pos, fanouts[0]);
+            }
+
+            if (fanouts.size() == 2)
+            {
+                new_path_from_gate_to_fanout_2 = get_path_and_obstruct(lyt, new_pos, fanouts[1]);
+            }
+
+            // if possible routing was found, it will be applied
+            if (!(fanins.size() > 0 && new_path_from_fanin_1_to_gate.empty()) &&
+                !(fanins.size() == 2 && new_path_from_fanin_2_to_gate.empty()) &&
+                !(fanouts.size() > 0 && new_path_from_gate_to_fanout_1.empty()) &&
+                !(fanouts.size() == 2 && new_path_from_gate_to_fanout_2.empty()))
+            {
+                for (const auto& path : {new_path_from_fanin_1_to_gate, new_path_from_fanin_2_to_gate,
+                                         new_path_from_gate_to_fanout_1, new_path_from_gate_to_fanout_2})
+                {
+                    if (!path.empty())
+                    {
+                        route_path(lyt, path);
+                        for (const auto& tile : path)
+                        {
+                            lyt.obstruct_coordinate(tile);
+                        }
+                    }
+                }
+
+                moved_gate = true;
+
+                // update children based on number of fanins
+                if (fanins.size() == 2)
+                {
+                    lyt.move_node(lyt.get_node(new_pos), new_pos,
+                                  {
+                                      lyt.make_signal(lyt.get_node(new_path_from_fanin_1_to_gate.end()[-2])),
+                                      lyt.make_signal(lyt.get_node(new_path_from_fanin_2_to_gate.end()[-2])),
+                                  });
+                }
+                else if (fanins.size() == 1)
+                {
+                    lyt.move_node(lyt.get_node(new_pos), new_pos,
+                                  {lyt.make_signal(lyt.get_node(new_path_from_fanin_1_to_gate.end()[-2]))});
+                }
+
+                // update children of fanouts
+                for (const auto& fanout : fanouts)
+                {
+                    std::vector<mockturtle::signal<ObstrLyt>> signals{};
+                    signals.reserve(lyt.fanin_size(lyt.get_node(fanout)));
+
+                    lyt.foreach_fanin(lyt.get_node(fanout),
+                                      [&lyt, &signals](const auto& i)
+                                      {
+                                          auto fout = static_cast<tile<ObstrLyt>>(i);
+                                          signals.push_back(lyt.make_signal(lyt.get_node(fout)));
+                                      });
+
+                    lyt.move_node(lyt.get_node(fanout), fanout, signals);
+                }
+
+                if (new_pos == old_pos)
+                {
+                    return false;
+                }
+            }
+            // if no routing was found, remove added obstructions
+            else
+            {
+                for (const auto& path : {new_path_from_fanin_1_to_gate, new_path_from_fanin_2_to_gate,
+                                         new_path_from_gate_to_fanout_1, new_path_from_gate_to_fanout_2})
+                {
+                    for (const auto& tile : path)
+                    {
+                        lyt.clear_obstructed_coordinate(tile);
+                    }
+                }
+            }
+
+            current_pos = new_pos;
+        }
+        return true;
+    }
+    /**
+     * Restores the original wiring if relocation of a gate fails.
+     *
+     * This function moves the gate back to its original position and reinstates the previous wiring paths
+     * between the gate and its fan-in/fan-out connections. It also updates the obstructions in the layout
+     * accordingly.
+     *
+     * @param lyt Obstructed gate-level layout.
+     * @param old_path_from_fanin_1_to_gate The original routing path from the first fan-in to the gate (if exists).
+     * @param old_path_from_fanin_2_to_gate The original routing path from the second fan-in to the gate (if exists).
+     * @param old_path_from_gate_to_fanout_1 The original routing path from the gate to the first fan-out (if exists).
+     * @param old_path_from_gate_to_fanout_2 The original routing path from the gate to the second fan-out (if exists).
+     * @param current_pos Current position of the gate after relocation attempt.
+     * @param old_pos Original position of the gate before relocation attempt.
+     * @param fanouts Vector of fanout tiles connected to the gate.
+     */
+    void restore_original_wiring(ObstrLyt& lyt, const layout_coordinate_path<ObstrLyt> old_path_from_fanin_1_to_gate,
+                                 const layout_coordinate_path<ObstrLyt> old_path_from_fanin_2_to_gate,
+                                 const layout_coordinate_path<ObstrLyt> old_path_from_gate_to_fanout_1,
+                                 const layout_coordinate_path<ObstrLyt> old_path_from_gate_to_fanout_2,
+                                 const tile<ObstrLyt>& current_pos, const tile<ObstrLyt>& old_pos,
+                                 const std::vector<tile<Lyt>> fanouts) noexcept
+    {
+        lyt.move_node(lyt.get_node(current_pos), old_pos, {});
+
+        for (const auto& r : {old_path_from_fanin_1_to_gate, old_path_from_fanin_2_to_gate,
+                              old_path_from_gate_to_fanout_1, old_path_from_gate_to_fanout_2})
+        {
+            if (!r.empty())
+            {
+                route_path<ObstrLyt, layout_coordinate_path<ObstrLyt>>(lyt, r);
+            }
+            for (const auto& t : r)
+            {
+                lyt.obstruct_coordinate(t);
+            }
+        }
+
+        // update obstructions
+        lyt.clear_obstructed_coordinate(current_pos);
+        lyt.clear_obstructed_coordinate({current_pos.x, current_pos.y, 1});
+        lyt.obstruct_coordinate(old_pos);
+        lyt.obstruct_coordinate({old_pos.x, old_pos.y, 1});
+
+        // update children on old position
+        std::vector<mockturtle::signal<ObstrLyt>> signals{};
+        signals.reserve(lyt.fanin_size(lyt.get_node(old_pos)));
+
+        lyt.foreach_fanin(lyt.get_node(old_pos),
+                          [&lyt, &signals](const auto& i)
+                          {
+                              auto fanin = static_cast<tile<ObstrLyt>>(i);
+                              signals.push_back(lyt.make_signal(lyt.get_node(fanin)));
+                          });
+
+        lyt.move_node(lyt.get_node(old_pos), old_pos, signals);
+
+        // update children of fanouts
+        for (const auto& fanout : fanouts)
+        {
+            std::vector<mockturtle::signal<ObstrLyt>> fout_signals{};
+            fout_signals.reserve(lyt.fanin_size(lyt.get_node(fanout)));
+
+            lyt.foreach_fanin(lyt.get_node(fanout),
+                              [&lyt, &fout_signals](const auto& i)
+                              {
+                                  auto fout = static_cast<tile<ObstrLyt>>(i);
+                                  fout_signals.push_back(lyt.make_signal(lyt.get_node(fout)));
+                              });
+
+            lyt.move_node(lyt.get_node(fanout), fanout, fout_signals);
+        }
+    }
     /**
      * Utility function that moves gates to new coordinates and checks if routing is possible.
      * This includes:
@@ -798,7 +1003,7 @@ class post_layout_optimization_impl
      * - if a new coordinate is found and wiring is possible, it is applied and incoming signals are updated
      * - if no better coordinate is found, the old wiring is restored
      *
-     * @param lyt 2DDWave-clocked cartesian obstruction gate-level layout.
+     * @param lyt Obstructed gate-level layout.
      * @param old_pos Old position of the gate to be moved.
      * @return `true` if the gate was moved successfully, `false` otherwise.
      */
@@ -918,112 +1123,10 @@ class post_layout_optimization_impl
                                                       ((x + y) == static_cast<uint64_t>(old_pos.x + old_pos.y)))))
                 {
                     new_pos = tile<ObstrLyt>{x, y};
-                    if (lyt.is_empty_tile(new_pos) && lyt.is_empty_tile({new_pos.x, new_pos.y, 1}))
+                    if (!check_new_position(lyt, new_pos, num_gate_relocations, current_pos, fanins, fanouts,
+                                            moved_gate, old_pos))
                     {
-                        num_gate_relocations++;
-                        // move gate to new positions and update obstructions
-                        lyt.move_node(lyt.get_node(current_pos), new_pos, {});
-                        lyt.obstruct_coordinate(new_pos);
-                        lyt.obstruct_coordinate({new_pos.x, new_pos.y, 1});
-                        lyt.clear_obstructed_coordinate(current_pos);
-                        lyt.clear_obstructed_coordinate({current_pos.x, current_pos.y, 1});
-
-                        // get paths for fanins and fanouts
-                        layout_coordinate_path<ObstrLyt> new_path_from_fanin_1_to_gate, new_path_from_fanin_2_to_gate,
-                            new_path_from_gate_to_fanout_1, new_path_from_gate_to_fanout_2;
-                        // get paths for fanins and fanouts
-                        if (!fanins.empty())
-                        {
-                            new_path_from_fanin_1_to_gate = get_path_and_obstruct(lyt, fanins[0], new_pos);
-                        }
-
-                        if (fanins.size() == 2)
-                        {
-                            new_path_from_fanin_2_to_gate = get_path_and_obstruct(lyt, fanins[1], new_pos);
-                        }
-
-                        if (!fanouts.empty())
-                        {
-                            new_path_from_gate_to_fanout_1 = get_path_and_obstruct(lyt, new_pos, fanouts[0]);
-                        }
-
-                        if (fanouts.size() == 2)
-                        {
-                            new_path_from_gate_to_fanout_2 = get_path_and_obstruct(lyt, new_pos, fanouts[1]);
-                        }
-
-                        // if possible routing was found, it will be applied
-                        if (!(fanins.size() > 0 && new_path_from_fanin_1_to_gate.empty()) &&
-                            !(fanins.size() == 2 && new_path_from_fanin_2_to_gate.empty()) &&
-                            !(fanouts.size() > 0 && new_path_from_gate_to_fanout_1.empty()) &&
-                            !(fanouts.size() == 2 && new_path_from_gate_to_fanout_2.empty()))
-                        {
-                            for (const auto& path : {new_path_from_fanin_1_to_gate, new_path_from_fanin_2_to_gate,
-                                                     new_path_from_gate_to_fanout_1, new_path_from_gate_to_fanout_2})
-                            {
-                                if (!path.empty())
-                                {
-                                    route_path(lyt, path);
-                                    for (const auto& tile : path)
-                                    {
-                                        lyt.obstruct_coordinate(tile);
-                                    }
-                                }
-                            }
-
-                            moved_gate = true;
-
-                            // update children based on number of fanins
-                            if (fanins.size() == 2)
-                            {
-                                lyt.move_node(
-                                    lyt.get_node(new_pos), new_pos,
-                                    {
-                                        lyt.make_signal(lyt.get_node(new_path_from_fanin_1_to_gate.end()[-2])),
-                                        lyt.make_signal(lyt.get_node(new_path_from_fanin_2_to_gate.end()[-2])),
-                                    });
-                            }
-                            else if (fanins.size() == 1)
-                            {
-                                lyt.move_node(lyt.get_node(new_pos), new_pos,
-                                              {lyt.make_signal(lyt.get_node(new_path_from_fanin_1_to_gate.end()[-2]))});
-                            }
-
-                            // update children of fanouts
-                            for (const auto& fanout : fanouts)
-                            {
-                                std::vector<mockturtle::signal<ObstrLyt>> signals{};
-                                signals.reserve(lyt.fanin_size(lyt.get_node(fanout)));
-
-                                lyt.foreach_fanin(lyt.get_node(fanout),
-                                                  [&lyt, &signals](const auto& i)
-                                                  {
-                                                      auto fout = static_cast<tile<ObstrLyt>>(i);
-                                                      signals.push_back(lyt.make_signal(lyt.get_node(fout)));
-                                                  });
-
-                                lyt.move_node(lyt.get_node(fanout), fanout, signals);
-                            }
-
-                            if (new_pos == old_pos)
-                            {
-                                return false;
-                            }
-                        }
-                        // if no routing was found, remove added obstructions
-                        else
-                        {
-                            for (const auto& path : {new_path_from_fanin_1_to_gate, new_path_from_fanin_2_to_gate,
-                                                     new_path_from_gate_to_fanout_1, new_path_from_gate_to_fanout_2})
-                            {
-                                for (const auto& tile : path)
-                                {
-                                    lyt.clear_obstructed_coordinate(tile);
-                                }
-                            }
-                        }
-
-                        current_pos = new_pos;
+                        return false;
                     }
                 }
             }
@@ -1037,55 +1140,9 @@ class post_layout_optimization_impl
         // if no better coordinate was found, restore old wiring
         if (!moved_gate)
         {
-            lyt.move_node(lyt.get_node(current_pos), old_pos, {});
-
-            for (const auto& r : {old_path_from_fanin_1_to_gate, old_path_from_fanin_2_to_gate,
-                                  old_path_from_gate_to_fanout_1, old_path_from_gate_to_fanout_2})
-            {
-                if (!r.empty())
-                {
-                    route_path<ObstrLyt, layout_coordinate_path<ObstrLyt>>(lyt, r);
-                }
-                for (const auto& t : r)
-                {
-                    lyt.obstruct_coordinate(t);
-                }
-            }
-
-            // update obstructions
-            lyt.clear_obstructed_coordinate(current_pos);
-            lyt.clear_obstructed_coordinate({current_pos.x, current_pos.y, 1});
-            lyt.obstruct_coordinate(old_pos);
-            lyt.obstruct_coordinate({old_pos.x, old_pos.y, 1});
-
-            // update children on old position
-            std::vector<mockturtle::signal<ObstrLyt>> signals{};
-            signals.reserve(lyt.fanin_size(lyt.get_node(old_pos)));
-
-            lyt.foreach_fanin(lyt.get_node(old_pos),
-                              [&lyt, &signals](const auto& i)
-                              {
-                                  auto fanin = static_cast<tile<ObstrLyt>>(i);
-                                  signals.push_back(lyt.make_signal(lyt.get_node(fanin)));
-                              });
-
-            lyt.move_node(lyt.get_node(old_pos), old_pos, signals);
-
-            // update children of fanouts
-            for (const auto& fanout : fanouts)
-            {
-                std::vector<mockturtle::signal<ObstrLyt>> fout_signals{};
-                fout_signals.reserve(lyt.fanin_size(lyt.get_node(fanout)));
-
-                lyt.foreach_fanin(lyt.get_node(fanout),
-                                  [&lyt, &fout_signals](const auto& i)
-                                  {
-                                      auto fout = static_cast<tile<ObstrLyt>>(i);
-                                      fout_signals.push_back(lyt.make_signal(lyt.get_node(fout)));
-                                  });
-
-                lyt.move_node(lyt.get_node(fanout), fanout, fout_signals);
-            }
+            restore_original_wiring(lyt, old_path_from_fanin_1_to_gate, old_path_from_fanin_2_to_gate,
+                                    old_path_from_gate_to_fanout_1, old_path_from_gate_to_fanout_2, current_pos,
+                                    old_pos, fanouts);
             return false;
         }
 
