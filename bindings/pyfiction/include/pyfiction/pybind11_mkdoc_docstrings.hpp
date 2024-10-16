@@ -6166,8 +6166,6 @@ static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_max_pl
 
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_ntk = R"doc(The network to be placed and routed.)doc";
 
-static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_num_evaluated_paths = R"doc(Count evaluated paths in the search space graphs.)doc";
-
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_num_search_space_graphs = R"doc(Number of search space graphs.)doc";
 
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_num_search_space_graphs_high_efficiency = R"doc(In high-efficiency mode, only 2 search space graphs are used)doc";
@@ -6271,6 +6269,14 @@ static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_ssg_ve
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_start = R"doc(Start time.)doc";
 
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_timeout = R"doc(Timeout limit (in ms).)doc";
+
+static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_timeout_limit_reached = R"doc(Timeout limit reached.)doc";
+
+static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_update_stats =
+R"doc(This function updates statistical metrics.
+
+Parameter ``best_lyt``:
+    The new best layout found.)doc";
 
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_valid_layout =
 R"doc(Validates the given layout based on the nodes in the network and their
@@ -11290,6 +11296,28 @@ substitution strategies, PI placements, and other parameters. This
 wider exploration increases the chance of finding optimal layouts but
 also extends runtime. When a solution is found in any graph, its cost
 is used to prune the remaining graphs.)doc";
+
+static const char *__doc_fiction_graph_oriented_layout_design_params_enable_multithreading =
+R"doc(BETA feature: Flag to enable or disable multithreading during the
+execution of the layout design algorithm.
+
+When set to `true`, the algorithm will utilize multiple threads to
+process different search space graphs in parallel, improving
+performance by distributing the workload across available CPU cores.
+If set to `false`, the algorithm will run sequentially on a single
+thread.
+
+Only recommended for `HIGH_EFFORT` and `HIGHEST_EFFORT` modes and
+complex networks (> 100 nodes).
+
+Enabling multithreading can significantly speed up the algorithm,
+especially when using multiple search space graphs and dealing with
+complex networks, by concurrently expanding them. However, it may
+introduce additional overhead for thread synchronization and can
+increase memory usage. It is therefore not recommended for small input
+networks.
+
+Default value: `false`)doc";
 
 static const char *__doc_fiction_graph_oriented_layout_design_params_mode = R"doc(The effort mode used. Defaults to HIGH_EFFORT.)doc";
 

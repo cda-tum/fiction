@@ -70,8 +70,8 @@ inline void graph_oriented_layout_design(pybind11::module& m)
                        DOC(fiction_graph_oriented_layout_design_params_return_first))
         .def_readwrite("planar", &fiction::graph_oriented_layout_design_params::planar,
                        DOC(fiction_graph_oriented_layout_design_params_planar))
-
-        ;
+        .def_readwrite("enable_multithreading", &fiction::graph_oriented_layout_design_params::enable_multithreading,
+                       DOC(fiction_graph_oriented_layout_design_params_enable_multithreading));
 
     py::class_<fiction::graph_oriented_layout_design_stats>(m, "graph_oriented_layout_design_stats",
                                                             DOC(fiction_graph_oriented_layout_design_stats))

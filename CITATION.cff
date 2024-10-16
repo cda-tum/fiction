@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Walter"
+  given-names: "Marcel"
+  orcid: "0000-0001-5660-9518"
+- family-names: "Drewniok"
+  given-names: "Jan"
+  orcid: "0000-0002-7545-159X"
+- family-names: "Hofmann"
+  given-names: "Simon"
+  orcid: "0009-0003-8575-9998"
+- family-names: "Hien"
+  given-names: "Benjamin"
+  orcid: "0000-0002-6878-8063"
+- family-names: "Wille"
+  given-names: "Robert"
+  orcid: "0000-0002-4993-7860"
+title: "The Munich Nanotech Toolkit (MNT)"
+version: 0.6.4
+doi: 10.1109/NANO61778.2024.10628747
+url: "https://github.com/cda-tum/fiction"

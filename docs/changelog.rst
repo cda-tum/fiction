@@ -5,16 +5,8 @@ All notable changes to this project will be documented in this file.
 
 The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`_.
 
-Unreleased```
--------------
-
-Added
-#####
-- Experiments:
-    - Script to conduct 3-state physical simulation of SiDB layouts.
-
-Unreleased```
--------------
+Unreleased
+----------
 
 Added
 #####
@@ -22,6 +14,7 @@ Added
     - Script to simulate the critical temperature of SiQAD and Bestagon gates
 - Algorithms:
     - Added support for different ways of implementing input information in SiDB technology to the BDL input iterator
+
 
 v0.6.4 - 2024-08-30
 -------------------
@@ -43,6 +36,7 @@ Fixed
 - Fixed a few oversights in the RTD documentation of SiDB simulation functionality
 - Fixed several typos and docstrings in the codebase
 - Addressed some ``clang-tidy`` warnings
+
 
 v0.6.3 - 2024-08-22
 -------------------
