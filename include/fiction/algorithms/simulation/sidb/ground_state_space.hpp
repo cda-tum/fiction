@@ -120,7 +120,7 @@ class ground_state_space_impl
      * Constructor. Invokes the algorithm with the given parameters on the given layout.
      *
      * @param lyt Layout to construct the *Ground State Space* of.
-     * @param params The parameters that *Ground State Space* will use throughout the construction.
+     * @param parameters The parameters that *Ground State Space* will use throughout the construction.
      */
     explicit ground_state_space_impl(const Lyt& lyt, const ground_state_space_params parameters) noexcept :
             params{parameters},
