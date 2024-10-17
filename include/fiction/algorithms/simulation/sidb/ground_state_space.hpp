@@ -1098,7 +1098,10 @@ class ground_state_space_impl
 
         clustering.emplace(min_parent);
 
-        update_charge_spaces(min_parent->uid);
+        if (update_charge_spaces(min_parent->uid))
+        {
+            move_up_hierarchy();
+        }
     }
     /**
      * This function computes the maximum size of the charge space of the top cluster. Comparing this number with the
