@@ -268,7 +268,8 @@ class virtual_pi_network : public Ntk
     template <typename Fn>
     void foreach_virtual_pi(Fn&& fn) const
     {
-        mockturtle::detail::foreach_element(v_storage->virtual_inputs.cbegin(), v_storage->virtual_inputs.cend(), std::forward<Fn>(fn));
+        mockturtle::detail::foreach_element(v_storage->virtual_inputs.cbegin(), v_storage->virtual_inputs.cend(),
+                                            std::forward<Fn>(fn));
     }
 
     /**
@@ -299,7 +300,8 @@ class virtual_pi_network : public Ntk
     template <typename Fn>
     void foreach_virtual_ci(Fn&& fn) const
     {
-        mockturtle::detail::foreach_element(v_storage->virtual_inputs.cbegin(), v_storage->virtual_inputs.cend(), std::forward<Fn>(fn));
+        mockturtle::detail::foreach_element(v_storage->virtual_inputs.cbegin(), v_storage->virtual_inputs.cend(),
+                                            std::forward<Fn>(fn));
     }
 
   private:
