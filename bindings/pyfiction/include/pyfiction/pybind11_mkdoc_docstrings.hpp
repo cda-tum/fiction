@@ -566,6 +566,18 @@ static const char *__doc_fiction_bdl_input_iterator_current_input_index =
 R"doc(The current input index. There are :math:`2^n` possible input states
 for an :math:`n`-input BDL layout.)doc";
 
+static const char *__doc_fiction_bdl_input_iterator_determine_end_bdls_of_wires =
+R"doc(This function iterates through each wire in `input_bdl_wires`,
+identifies the starting BDL pair of type `INPUT`, and then finds the
+BDL pair within the same wire that has the maximum distance from the
+starting pair. The resulting end BDL pairs are stored in
+`end_bdls_of_wires`.
+
+@note Assumes that `input_bdl_wires` and `end_bdls_of_wires` are
+accessible within the scope.)doc";
+
+static const char *__doc_fiction_bdl_input_iterator_end_bdls_of_wires = R"doc()doc";
+
 static const char *__doc_fiction_bdl_input_iterator_input_bdl_wires = R"doc(The detected input BDL wires.)doc";
 
 static const char *__doc_fiction_bdl_input_iterator_input_pairs = R"doc(The detected input BDL pairs.)doc";
@@ -886,6 +898,10 @@ Returns:
     `true` if this BDL pair is not equal to the other, `false`
     otherwise.)doc";
 
+static const char *__doc_fiction_bdl_pair_same_x_coordinate = R"doc()doc";
+
+static const char *__doc_fiction_bdl_pair_same_y_coordinate = R"doc()doc";
+
 static const char *__doc_fiction_bdl_pair_type =
 R"doc(The type of the SiDBs in the pair. BDL SiDBs must be of the same type.
 They can either be normal, input, or output SiDBs.)doc";
@@ -913,6 +929,8 @@ static const char *__doc_fiction_bdl_wire_bdl_wire_2 =
 R"doc(Constructor to initialize the BDL wire with a given vector of BDL
 pairs.
 
+Also updates the start and end BDL pairs based on the given vector.
+
 Parameter ``p``:
     The vector of BDL pairs to initialize the wire with.)doc";
 
@@ -928,33 +946,15 @@ Parameter ``other``:
 static const char *__doc_fiction_bdl_wire_bdl_wire_4 =
 R"doc(Move constructor.
 
-Transfers ownership of the BDL pairs and direction from another
-`bdl_wire` object.
+Transfers ownership of the BDL pairs, direction, and start/end pairs
+from another `bdl_wire` object.
 
 Parameter ``other``:
     The `bdl_wire` object to move from.)doc";
 
-static const char *__doc_fiction_bdl_wire_direction = R"doc(Possible directions of a BDL wire.)doc";
+static const char *__doc_fiction_bdl_wire_direction = R"doc(Direction of the BDL wire.)doc";
 
-static const char *__doc_fiction_bdl_wire_direction_2 = R"doc(Direction of the BDL wire.)doc";
-
-static const char *__doc_fiction_bdl_wire_direction_NORTH_SOUTH =
-R"doc(Defines the direction of the wire from north to south. The starting
-point is defined by the position of input cells, or the ending point
-is defined by the position of output cells.
-
-@note A wire running from west to east is interpreted as north-south
-direction.)doc";
-
-static const char *__doc_fiction_bdl_wire_direction_NO_DIRECTION = R"doc(A wire without input or output cells does not exhibit a direction.)doc";
-
-static const char *__doc_fiction_bdl_wire_direction_SOUTH_NORTH =
-R"doc(Defines the direction of the wire from south to north. The starting
-point is defined by the position of input cells, or the ending point
-is defined by the position of output cells.
-
-@note A wire running from east to west is interpreted as south-north
-direction.)doc";
+static const char *__doc_fiction_bdl_wire_end_bdl_pair_wire = R"doc(Ending BDL pair of the wire.)doc";
 
 static const char *__doc_fiction_bdl_wire_erase_bdl_pair =
 R"doc(Erase a specific BDL pair from the wire.
@@ -979,8 +979,8 @@ Returns:
 static const char *__doc_fiction_bdl_wire_operator_assign =
 R"doc(Move assignment operator.
 
-Transfers ownership of the BDL pairs and direction from another
-`bdl_wire` object.
+Transfers ownership of the BDL pairs, direction, and start/end pairs
+from another `bdl_wire` object.
 
 Parameter ``other``:
     The `bdl_wire` object to move from.
@@ -991,7 +991,8 @@ Returns:
 static const char *__doc_fiction_bdl_wire_operator_assign_2 =
 R"doc(Copy assignment operator.
 
-Copies the content of another `bdl_wire` object.
+Copies the content of another `bdl_wire` object, including start and
+end pairs.
 
 Parameter ``other``:
     The `bdl_wire` object to copy from.
@@ -1008,6 +1009,8 @@ static const char *__doc_fiction_bdl_wire_selection_ALL = R"doc(Select all BDL w
 static const char *__doc_fiction_bdl_wire_selection_INPUT = R"doc(Select only BDL wires that start with input cells.)doc";
 
 static const char *__doc_fiction_bdl_wire_selection_OUTPUT = R"doc(Select only BDL wires that end with output cells.)doc";
+
+static const char *__doc_fiction_bdl_wire_start_bdl_pair_wire = R"doc(Starting BDL pair of the wire.)doc";
 
 static const char *__doc_fiction_bdl_wire_update_direction = R"doc(Update the direction of the wire based on the current BDL pairs.)doc";
 
@@ -1814,7 +1817,7 @@ static const char *__doc_fiction_cds_configuration_CHARGE_LOCATION_AND_ELECTROST
 R"doc(In addition to the location of the charge states, the electrostatic
 computation is conducted and stored.)doc";
 
-static const char *__doc_fiction_cds_configuration_ONLY_CHARGE_LOCATION =
+static const char *__doc_fiction_cds_configuration_CHARGE_LOCATION_ONLY =
 R"doc(The charge distribution is exclusively used to store the charge
 states.)doc";
 
@@ -3783,7 +3786,7 @@ static const char *__doc_fiction_design_sidb_gates_params_design_mode = R"doc(Ga
 
 static const char *__doc_fiction_design_sidb_gates_params_design_sidb_gates_mode = R"doc(Selector for the available design approaches.)doc";
 
-static const char *__doc_fiction_design_sidb_gates_params_design_sidb_gates_mode_AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER = R"doc(Gates are designed by using the *AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER*.)doc";
+static const char *__doc_fiction_design_sidb_gates_params_design_sidb_gates_mode_AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER = R"doc(Gates are designed by using the *Automatic Exhaustive Gate Designer*.)doc";
 
 static const char *__doc_fiction_design_sidb_gates_params_design_sidb_gates_mode_QUICKCELL = R"doc(Gates are designed by using *QuickCell*.)doc";
 
@@ -4859,7 +4862,21 @@ Returns:
 
 static const char *__doc_fiction_detail_detect_bdl_wires_impl_bdl_wires = R"doc(All detected BDL wires.)doc";
 
-static const char *__doc_fiction_detail_detect_bdl_wires_impl_detect_bdl_wires = R"doc(Function to detect BDL wires.)doc";
+static const char *__doc_fiction_detail_detect_bdl_wires_impl_detect_bdl_wires =
+R"doc(This function operates in two main phases:
+
+1. **Aggregation**: It first collects all BDL pairs of the specified
+types.
+
+2. **Wire Detection**: The function then iterates through the
+collected BDL pairs: - For each initial BDL pair, it searches for
+neighboring BDL pairs located above or below. - If a neighboring BDL
+pair is found, it is added to the current wire. - This process repeats
+until no additional neighboring BDL pairs can be found.
+
+Once a wire is fully constructed, all BDL pairs belonging to that wire
+are removed from the initial collection. The function then proceeds to
+detect the next wire using any remaining BDL pairs.)doc";
 
 static const char *__doc_fiction_detail_detect_bdl_wires_impl_detect_bdl_wires_impl = R"doc()doc";
 
@@ -4874,6 +4891,10 @@ any other value, it returns all the wires.
 The function also ensures that all selected wires of the same type
 have the same length. If wires of different lengths are found, an
 assertion is triggered.
+
+Parameter ``selection``:
+    The type of wires to filter by, specified by the
+    `bdl_wire_selection` enum.
 
 Returns:
     A vector of filtered `bdl_wire` objects based on the current
@@ -4952,8 +4973,6 @@ Returns:
 static const char *__doc_fiction_detail_detect_bdl_wires_impl_lyt = R"doc(SiDB cell-level layout.)doc";
 
 static const char *__doc_fiction_detail_detect_bdl_wires_impl_params = R"doc(Parameters for detecting BDL wires.)doc";
-
-static const char *__doc_fiction_detail_detect_bdl_wires_impl_selection = R"doc(Selection which BDl wires are detected.)doc";
 
 static const char *__doc_fiction_detail_determine_clocking_impl = R"doc()doc";
 
@@ -14264,13 +14283,13 @@ static const char *__doc_fiction_operational_condition =
 R"doc(Condition which is used to decide if a layout is `operational` or
 `non-operational`.)doc";
 
-static const char *__doc_fiction_operational_condition_ALLOWING_KINKS =
-R"doc(Even if the I/O pins show kinks, the layout is still considered as
-`operational`.)doc";
-
-static const char *__doc_fiction_operational_condition_FORBIDDING_KINKS =
+static const char *__doc_fiction_operational_condition_REJECT_KINKS =
 R"doc(The I/O pins are not allowed to show kinks. If kinks exist, the layout
 is considered as `non-operational`.)doc";
+
+static const char *__doc_fiction_operational_condition_TOLERATE_KINKS =
+R"doc(Even if the I/O pins show kinks, the layout is still considered as
+`operational`.)doc";
 
 static const char *__doc_fiction_operational_domain =
 R"doc(An operational domain is a set of simulation parameter values for
@@ -14895,6 +14914,8 @@ tile. Useful, when no exact port locations within a tile are needed.)doc";
 static const char *__doc_fiction_port_direction_cardinal = R"doc(Cardinal direction.)doc";
 
 static const char *__doc_fiction_port_direction_cardinal_EAST = R"doc()doc";
+
+static const char *__doc_fiction_port_direction_cardinal_NONE = R"doc()doc";
 
 static const char *__doc_fiction_port_direction_cardinal_NORTH = R"doc()doc";
 
