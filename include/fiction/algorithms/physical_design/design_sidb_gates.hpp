@@ -77,7 +77,7 @@ struct design_sidb_gates_params
          */
         QUICKCELL,
         /**
-         * Gates are designed by using the *AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER*.
+         * Gates are designed by using the *Automatic Exhaustive Gate Designer*.
          */
         AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
         /**
@@ -166,7 +166,9 @@ class design_sidb_gates_impl
             number_of_input_wires{input_bdl_wires.size()},
             number_of_output_wires{output_bdl_wires.size()},
             all_canvas_layouts{determine_all_possible_canvas_layouts()}
-    {}
+    {
+        stats.sim_engine = params.operational_params.sim_engine;
+    }
 
     /**
      * Design gates by using the *Automatic Exhaustive Gate Desginer*. This algorithm was proposed in \"Minimal
@@ -467,11 +469,11 @@ class design_sidb_gates_impl
     /**
      * Input BDL wires.
      */
-    const std::vector<bdl_wire<cell<Lyt>>> input_bdl_wires;
+    const std::vector<bdl_wire<Lyt>> input_bdl_wires;
     /**
      * Output BDL wires.
      */
-    const std::vector<bdl_wire<cell<Lyt>>> output_bdl_wires;
+    const std::vector<bdl_wire<Lyt>> output_bdl_wires;
     /**
      * Number of input BDL wires.
      */
@@ -507,7 +509,7 @@ class design_sidb_gates_impl
 
         for (auto i = 0u; i < number_of_input_wires; i++)
         {
-            if (input_bdl_wires[number_of_input_wires - 1 - i].direction == bdl_wire_direction::NORTH_SOUTH)
+            if (input_bdl_wires[number_of_input_wires - 1 - i].direction.dir == port_direction::SOUTH)
             {
                 if ((current_input_index & (uint64_t{1ull} << i)) != 0ull)
                 {
@@ -538,7 +540,7 @@ class design_sidb_gates_impl
                     }
                 }
             }
-            else if (input_bdl_wires[number_of_input_wires - 1 - i].direction == bdl_wire_direction::SOUTH_NORTH)
+            else if (input_bdl_wires[number_of_input_wires - 1 - i].direction.dir == port_direction::NORTH)
             {
                 if ((current_input_index & (uint64_t{1ull} << i)) != 0ull)
                 {
@@ -593,7 +595,7 @@ class design_sidb_gates_impl
     {
         for (auto i = 0u; i < number_of_output_wires; i++)
         {
-            if (output_bdl_wires[i].direction == bdl_wire_direction::NORTH_SOUTH)
+            if (output_bdl_wires[i].direction.dir == port_direction::SOUTH)
             {
                 if ((output_wire_index & (uint64_t{1ull} << i)) != 0ull)
                 {
@@ -616,7 +618,7 @@ class design_sidb_gates_impl
                     }
                 }
             }
-            else if (output_bdl_wires[i].direction == bdl_wire_direction::SOUTH_NORTH)
+            else if (output_bdl_wires[i].direction.dir == port_direction::NORTH)
             {
                 if ((output_wire_index & (uint64_t{1ull} << i)) != 0ull)
                 {
@@ -674,7 +676,7 @@ class design_sidb_gates_impl
     {
         for (auto i = 0u; i < number_of_output_wires; i++)
         {
-            if (output_bdl_wires[i].direction == bdl_wire_direction::NORTH_SOUTH)
+            if (output_bdl_wires[i].direction.dir == port_direction::SOUTH)
             {
                 if (kitty::get_bit(truth_table[i], input_index))
                 {
@@ -697,7 +699,7 @@ class design_sidb_gates_impl
                     }
                 }
             }
-            else if (output_bdl_wires[i].direction == bdl_wire_direction::SOUTH_NORTH)
+            else if (output_bdl_wires[i].direction.dir == port_direction::NORTH)
             {
                 if (kitty::get_bit(truth_table[i], input_index))
                 {
@@ -845,7 +847,7 @@ class design_sidb_gates_impl
     {
         charge_distribution_surface<Lyt> cds_canvas{canvas_lyt, params.operational_params.simulation_parameters,
                                                     sidb_charge_state::NEGATIVE,
-                                                    cds_configuration::ONLY_CHARGE_LOCATION};
+                                                    cds_configuration::CHARGE_LOCATION_ONLY};
 
         cds_canvas.assign_dependent_cell(dependent_cell);
 

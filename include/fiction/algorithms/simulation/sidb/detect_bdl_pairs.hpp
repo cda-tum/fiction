@@ -63,7 +63,7 @@ struct bdl_pair
      * @param other The other BDL pair to compare with.
      * @return `true` if this BDL pair is equal to the other, `false` otherwise.
      */
-    [[nodiscard]] bool operator==(const bdl_pair<CellType>& other) const noexcept
+    [[nodiscard]] constexpr bool operator==(const bdl_pair<CellType>& other) const noexcept
     {
         return type == other.type && upper == other.upper && lower == other.lower;
     }
@@ -73,7 +73,7 @@ struct bdl_pair
      * @param other The other BDL pair to compare with.
      * @return `true` if this BDL pair is not equal to the other, `false` otherwise.
      */
-    [[nodiscard]] bool operator!=(const bdl_pair<CellType>& other) const noexcept
+    [[nodiscard]] constexpr bool operator!=(const bdl_pair<CellType>& other) const noexcept
     {
         return !(*this == other);
     }
@@ -83,7 +83,7 @@ struct bdl_pair
      * @param other The other BDL pair to compare with.
      * @return `true` if this BDL pair is less than the other, `false` otherwise.
      */
-    [[nodiscard]] bool operator<(const bdl_pair<CellType>& other) const noexcept
+    [[nodiscard]] constexpr bool operator<(const bdl_pair<CellType>& other) const noexcept
     {
         if (upper != other.upper)
         {
@@ -98,7 +98,7 @@ struct bdl_pair
      * @param other The other BDL pair to compare with.
      * @return `true` if this BDL pair is less than or equal to the other, `false` otherwise.
      */
-    [[nodiscard]] bool operator<=(const bdl_pair<CellType>& other) const noexcept
+    [[nodiscard]] constexpr bool operator<=(const bdl_pair<CellType>& other) const noexcept
     {
         return (*this < other) || (*this == other);
     }
@@ -108,7 +108,7 @@ struct bdl_pair
      * @param other The other BDL pair to compare with.
      * @return `true` if this BDL pair is greater than the other, `false` otherwise.
      */
-    [[nodiscard]] bool operator>(const bdl_pair<CellType>& other) const
+    [[nodiscard]] constexpr bool operator>(const bdl_pair<CellType>& other) const
     {
         return !(*this <= other);
     }
@@ -118,7 +118,7 @@ struct bdl_pair
      * @param other The other BDL pair to compare with.
      * @return `true` if this BDL pair is greater than or equal to the other, otherwise `false`.
      */
-    [[nodiscard]] bool operator>=(const bdl_pair<CellType>& other) const noexcept
+    [[nodiscard]] constexpr bool operator>=(const bdl_pair<CellType>& other) const noexcept
     {
         return !(*this < other);
     }
@@ -128,7 +128,7 @@ struct bdl_pair
      * @param other The other BDL pair to compare with.
      * @return `true` if the `upper` and `lower` attributes are equal, otherwise `false`.
      */
-    [[nodiscard]] bool equal_ignore_type(const bdl_pair<CellType>& other) const noexcept
+    [[nodiscard]] constexpr bool equal_ignore_type(const bdl_pair<CellType>& other) const noexcept
     {
         return upper == other.upper && lower == other.lower;
     }
@@ -139,9 +139,23 @@ struct bdl_pair
      * @param other The other BDL pair to compare with.
      * @return `true` if the `upper` and `lower` attributes are not equal, otherwise `false`.
      */
-    [[nodiscard]] bool not_equal_ignore_type(const bdl_pair<CellType>& other) const noexcept
+    [[nodiscard]] constexpr bool not_equal_ignore_type(const bdl_pair<CellType>& other) const noexcept
     {
         return !equal_ignore_type(other);
+    }
+
+    /**
+     */
+    [[nodiscard]] constexpr bool same_y_coordinate(const bdl_pair<CellType>& other) const noexcept
+    {
+        return upper.y == other.upper.y && lower.y == other.lower.y;
+    }
+
+    /**
+     */
+    [[nodiscard]] constexpr bool same_x_coordinate(const bdl_pair<CellType>& other) const noexcept
+    {
+        return upper.x == other.upper.x && lower.x == other.lower.x;
     }
 };
 

@@ -94,7 +94,8 @@ struct port_direction
         SOUTH,
         SOUTH_WEST,
         WEST,
-        NORTH_WEST
+        NORTH_WEST,
+        NONE
     };
     /**
      * Default constructor.

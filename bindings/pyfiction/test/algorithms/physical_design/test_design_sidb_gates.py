@@ -79,7 +79,7 @@ class TestDesignSiDBGates(unittest.TestCase):
         params.canvas = [(10, 22), (14, 34)]
         params.number_of_sidbs = 3
         params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
-        params.operational_params.op_condition = operational_condition.FORBIDDING_KINKS
+        params.operational_params.op_condition = operational_condition.REJECT_KINKS
 
         self.assertEqual(params.operational_params.simulation_parameters.mu_minus, -0.32)
         self.assertEqual(params.number_of_sidbs, 3)
@@ -89,8 +89,8 @@ class TestDesignSiDBGates(unittest.TestCase):
         designed_gates = design_sidb_gates(layout, [create_nor_tt()], params)
         self.assertEqual(len(designed_gates), 44)
 
-        # allowing kink states
-        params.operational_params.op_condition = operational_condition.ALLOWING_KINKS
+        # tolerate kink states
+        params.operational_params.op_condition = operational_condition.TOLERATE_KINKS
         designed_gates = design_sidb_gates(layout, [create_nor_tt()], params)
         self.assertEqual(len(designed_gates), 175)
 

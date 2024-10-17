@@ -29,7 +29,7 @@ void detect_bdl_pairs(pybind11::module& m)
 {
     using namespace pybind11::literals;
 
-    m.def("detect_bdl_pairs", &fiction::detect_bdl_pairs<Lyt>, "lyt"_a, "type"_a = nullptr,
+    m.def("detect_bdl_pairs", &fiction::detect_bdl_pairs<Lyt>, "lyt"_a, "type"_a = std::nullopt,
           "params"_a = fiction::detect_bdl_pairs_params{}, DOC(fiction_detect_bdl_pairs));
 }
 

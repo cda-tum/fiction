@@ -72,7 +72,7 @@ enum class cds_configuration : uint8_t
     /**
      * The charge distribution is exclusively used to store the charge states.
      */
-    ONLY_CHARGE_LOCATION,
+    CHARGE_LOCATION_ONLY,
     /**
      * In addition to the location of the charge states, the electrostatic computation is conducted and stored.
      */

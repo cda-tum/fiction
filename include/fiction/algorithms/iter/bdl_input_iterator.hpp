@@ -83,8 +83,9 @@ class bdl_input_iterator
             layout{lyt.clone()},
             input_pairs{
                 detect_bdl_pairs<Lyt>(lyt, sidb_technology::cell_type::INPUT, params.bdl_wire_params.bdl_pairs_params)},
-            input_bdl_wires{detect_bdl_wires<Lyt>(lyt, params.bdl_wire_params, bdl_wire_selection::INPUT)},
             num_inputs{static_cast<uint8_t>(input_pairs.size())},
+            input_bdl_wires{detect_bdl_wires<Lyt>(lyt, params.bdl_wire_params, bdl_wire_selection::INPUT)},
+            end_bdls_of_wires{determine_end_bdls_of_wires()},
             params{params}
     {
         static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
@@ -101,12 +102,14 @@ class bdl_input_iterator
      * @param input_wires Pre-detected input BDL wires.
      */
     explicit bdl_input_iterator(const Lyt& lyt, const bdl_input_iterator_params& params,
-                                const std::vector<bdl_wire<cell<Lyt>>>& input_wires) noexcept :
+                                const std::vector<bdl_wire<Lyt>>& input_wires) noexcept :
             layout{lyt.clone()},
             input_pairs{
                 detect_bdl_pairs<Lyt>(lyt, sidb_technology::cell_type::INPUT, params.bdl_wire_params.bdl_pairs_params)},
+            num_inputs{static_cast<uint8_t>(input_pairs.size())},
             input_bdl_wires{input_wires},
-            num_inputs{static_cast<uint8_t>(input_pairs.size())}
+            end_bdls_of_wires{determine_end_bdls_of_wires()},
+            params{params}
     {
         static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
         static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -350,7 +353,9 @@ class bdl_input_iterator
     /**
      * The detected input BDL wires.
      */
-    const std::vector<bdl_wire<cell<Lyt>>> input_bdl_wires;
+    const std::vector<bdl_wire<Lyt>> input_bdl_wires;
+
+    const std::vector<bdl_pair<cell<Lyt>>> end_bdls_of_wires;
     /**
      * The amount of input BDL pairs.
      */
@@ -363,6 +368,52 @@ class bdl_input_iterator
      * Parameters for the BDL input iterator.
      */
     const bdl_input_iterator_params params;
+
+    /**
+     * This function iterates through each wire in `input_bdl_wires`, identifies the starting BDL pair
+     * of type `INPUT`, and then finds the BDL pair within the same wire that has the maximum distance
+     * from the starting pair. The resulting end BDL pairs are stored in `end_bdls_of_wires`.
+     *
+     * @note Assumes that `input_bdl_wires` and `end_bdls_of_wires` are accessible within the scope.
+     */
+   [[nodiscard]] std::vector<bdl_pair<cell<Lyt>>> determine_end_bdls_of_wires() noexcept
+    {
+        std::vector<bdl_pair<cell<Lyt>>> end_bdls{};
+        end_bdls.reserve(input_bdl_wires.size());
+
+        // Iterate through each wire in the input collection
+        for (const auto& wire : input_bdl_wires)
+        {
+            // Find the first BDL pair in the wire with type INPUT
+            auto start_bdl_it = std::find_if(wire.pairs.cbegin(), wire.pairs.cend(), [](const bdl_pair<cell<Lyt>>& bdl)
+                                             { return bdl.type == sidb_technology::cell_type::INPUT; });
+
+            // If no INPUT type BDL pair is found, skip this wire
+            if (start_bdl_it == wire.pairs.cend())
+            {
+                continue;
+            }
+
+            const bdl_pair<cell<Lyt>>& start_bdl_pair = *start_bdl_it;
+
+            // Find the BDL pair with the maximum distance from the start BDL pair
+            const auto max_bdl_it = std::max_element(wire.pairs.cbegin(), wire.pairs.cend(),
+                                               [&](const bdl_pair<cell<Lyt>>& a, const bdl_pair<cell<Lyt>>& b) -> bool
+                                               {
+                                                   double distance_a = sidb_nm_distance(Lyt{}, start_bdl_pair.upper, a.upper);
+                                                   double distance_b = sidb_nm_distance(Lyt{}, start_bdl_pair.upper, b.upper);
+                                                   return distance_a < distance_b;
+                                               });
+
+            // If a valid BDL pair is found, add it to the end BDLs collection
+            if (max_bdl_it != wire.pairs.cend())
+            {
+                end_bdls.emplace_back(*max_bdl_it);
+            }
+        }
+
+        return end_bdls;
+    }
     /**
      * Sets all input cells of the layout according to the current input index. The input index is interpreted as a
      * binary number, where the \f$i\f$-th bit represents the input state of the \f$i\f$-th input BDL pair. If the bit
@@ -377,17 +428,21 @@ class bdl_input_iterator
 
             if ((current_input_index & (uint64_t{1ull} << (num_inputs - 1 - i))) != 0ull)
             {
-                if (input_bdl_wires[i].direction == bdl_wire_direction::NORTH_SOUTH)
+                const auto distance_between_end_bdl_and_upper_input =
+                    sidb_nm_distance(Lyt{}, input_i.upper, end_bdls_of_wires[i].upper);
+                const auto distance_between_end_bdl_and_lower_input =
+                    sidb_nm_distance(Lyt{}, input_i.lower, end_bdls_of_wires[i].upper);
+
+                if (distance_between_end_bdl_and_upper_input < distance_between_end_bdl_and_lower_input)
                 {
-                    // set input i to 1
-                    layout.assign_cell_type(input_i.upper, technology<Lyt>::cell_type::EMPTY);
-                    layout.assign_cell_type(input_i.lower, technology<Lyt>::cell_type::INPUT);
-                }
-                else if (input_bdl_wires[i].direction == bdl_wire_direction::SOUTH_NORTH)
-                {
-                    // set input i to 1
-                    layout.assign_cell_type(input_i.upper, technology<Lyt>::cell_type::INPUT);
                     layout.assign_cell_type(input_i.lower, technology<Lyt>::cell_type::EMPTY);
+                    layout.assign_cell_type(input_i.upper, technology<Lyt>::cell_type::INPUT);
+                }
+
+                else
+                {
+                    layout.assign_cell_type(input_i.lower, technology<Lyt>::cell_type::INPUT);
+                    layout.assign_cell_type(input_i.upper, technology<Lyt>::cell_type::EMPTY);
                 }
             }
             else
@@ -395,24 +450,28 @@ class bdl_input_iterator
                 if (params.input_bdl_config ==
                     bdl_input_iterator_params::input_bdl_configuration::PERTURBER_DISTANCE_ENCODED)
                 {
-                    if (input_bdl_wires[i].direction == bdl_wire_direction::NORTH_SOUTH)
+                    const auto distance_between_end_bdl_and_upper_input =
+                        sidb_nm_distance(Lyt{}, input_i.upper, end_bdls_of_wires[i].upper);
+                    const auto distance_between_end_bdl_and_lower_input =
+                        sidb_nm_distance(Lyt{}, input_i.lower, end_bdls_of_wires[i].upper);
+
+                    if (distance_between_end_bdl_and_upper_input < distance_between_end_bdl_and_lower_input)
                     {
-                        // set input i to 0
-                        layout.assign_cell_type(input_i.upper, technology<Lyt>::cell_type::INPUT);
-                        layout.assign_cell_type(input_i.lower, technology<Lyt>::cell_type::EMPTY);
-                    }
-                    else if (input_bdl_wires[i].direction == bdl_wire_direction::SOUTH_NORTH)
-                    {
-                        // set input i to 0
-                        layout.assign_cell_type(input_i.upper, technology<Lyt>::cell_type::EMPTY);
                         layout.assign_cell_type(input_i.lower, technology<Lyt>::cell_type::INPUT);
+                        layout.assign_cell_type(input_i.upper, technology<Lyt>::cell_type::EMPTY);
+                    }
+
+                    else
+                    {
+                        layout.assign_cell_type(input_i.lower, technology<Lyt>::cell_type::EMPTY);
+                        layout.assign_cell_type(input_i.upper, technology<Lyt>::cell_type::INPUT);
                     }
                 }
                 else
                 {
-                    // set input i to 0
-                    layout.assign_cell_type(input_i.upper, technology<Lyt>::cell_type::EMPTY);
-                    layout.assign_cell_type(input_i.lower, technology<Lyt>::cell_type::EMPTY);
+                        // set input i to 0
+                        layout.assign_cell_type(input_i.upper, technology<Lyt>::cell_type::EMPTY);
+                        layout.assign_cell_type(input_i.lower, technology<Lyt>::cell_type::EMPTY);
                 }
             }
         }

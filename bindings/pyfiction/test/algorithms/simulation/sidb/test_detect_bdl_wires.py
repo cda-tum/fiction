@@ -34,9 +34,9 @@ class TestDetectBDLWires(unittest.TestCase):
 
         params = detect_bdl_wires_params()
 
-        all_bdl_wires = detect_bdl_wires(lyt, params, bdl_wire_selection.ALL)
-        output_bdl_wires = detect_bdl_wires(lyt, params, bdl_wire_selection.OUTPUT)
-        input_bdl_wires = detect_bdl_wires(lyt, params, bdl_wire_selection.INPUT)
+        all_bdl_wires = detect_bdl_wires_100(lyt, params, bdl_wire_selection.ALL)
+        output_bdl_wires = detect_bdl_wires_100(lyt, params, bdl_wire_selection.OUTPUT)
+        input_bdl_wires = detect_bdl_wires_100(lyt, params, bdl_wire_selection.INPUT)
 
         self.assertEqual(len(all_bdl_wires), 3)
         self.assertEqual(len(output_bdl_wires), 2)

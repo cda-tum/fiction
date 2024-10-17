@@ -60,11 +60,11 @@ enum class operational_condition : uint8_t
     /**
      * Even if the I/O pins show kinks, the layout is still considered as `operational`.
      */
-    ALLOWING_KINKS,
+    TOLERATE_KINKS,
     /**
      * The I/O pins are not allowed to show kinks. If kinks exist, the layout is considered as `non-operational`.
      */
-    FORBIDDING_KINKS
+    REJECT_KINKS
 };
 
 /**
@@ -87,7 +87,7 @@ struct is_operational_params
     /**
      * Condition which is used to decide if a layout is `operational` or `non-operational`.
      */
-    operational_condition op_condition = operational_condition::ALLOWING_KINKS;
+    operational_condition op_condition = operational_condition::TOLERATE_KINKS;
 };
 
 namespace detail
@@ -137,8 +137,7 @@ class is_operational_impl
      * @param input_bdl_wire_direction Optional BDL input wire directions of lyt.
      */
     is_operational_impl(const Lyt& lyt, const std::vector<TT>& tt, const is_operational_params& params,
-                        const std::vector<bdl_wire<cell<Lyt>>>& input_wires,
-                        const std::vector<bdl_wire<cell<Lyt>>>& output_wires) :
+                        const std::vector<bdl_wire<Lyt>>& input_wires, const std::vector<bdl_wire<Lyt>>& output_wires) :
             layout{lyt},
             truth_table{tt},
             parameters{params},
@@ -217,7 +216,7 @@ class is_operational_impl
                     }
                 }
 
-                if (parameters.op_condition == operational_condition::FORBIDDING_KINKS)
+                if (parameters.op_condition == operational_condition::REJECT_KINKS)
                 {
                     if (check_existence_of_kinks_in_input_wires(gs, i) ||
                         check_existence_of_kinks_in_output_wires(gs, i))
@@ -350,11 +349,11 @@ class is_operational_impl
     /**
      * Input BDL wires.
      */
-    std::vector<bdl_wire<cell<Lyt>>> input_bdl_wires;
+    std::vector<bdl_wire<Lyt>> input_bdl_wires;
     /**
      * Output BDL wires.
      */
-    std::vector<bdl_wire<cell<Lyt>>> output_bdl_wires;
+    std::vector<bdl_wire<Lyt>> output_bdl_wires;
     /**
      * Number of simulator invocations.
      */
@@ -414,7 +413,7 @@ class is_operational_impl
     {
         for (auto i = 0u; i < input_bdl_wires.size(); i++)
         {
-            if (input_bdl_wires[input_bdl_wires.size() - 1 - i].direction == bdl_wire_direction::NORTH_SOUTH)
+            if (input_bdl_wires[input_bdl_wires.size() - 1 - i].direction.dir == port_direction::SOUTH)
             {
                 if ((current_input_index & (uint64_t{1ull} << i)) != 0ull)
                 {
@@ -447,7 +446,7 @@ class is_operational_impl
                     }
                 }
             }
-            else if (input_bdl_wires[input_bdl_wires.size() - 1 - i].direction == bdl_wire_direction::SOUTH_NORTH)
+            else if (input_bdl_wires[input_bdl_wires.size() - 1 - i].direction.dir == port_direction::NORTH)
             {
                 if ((current_input_index & (uint64_t{1ull} << i)) != 0ull)
                 {
@@ -530,10 +529,10 @@ class is_operational_impl
      * @return `true` if `0` is encoded, `false` otherwise.
      */
     [[nodiscard]] bool encodes_bit_zero(const charge_distribution_surface<Lyt>& ground_state,
-                                        const bdl_pair<cell<Lyt>>&              bdl,
-                                        const bdl_wire_direction                direction) const noexcept
+                                        const bdl_pair<cell<Lyt>>& bdl, const port_direction direction) const noexcept
     {
-        if (direction == bdl_wire_direction::NORTH_SOUTH || direction == bdl_wire_direction::NO_DIRECTION)
+        if (direction.dir == port_direction::SOUTH || direction.dir == port_direction::EAST ||
+            direction.dir == port_direction::NONE)
         {
             return static_cast<bool>((ground_state.get_charge_state(bdl.upper) == sidb_charge_state::NEGATIVE) &&
                                      (ground_state.get_charge_state(bdl.lower) == sidb_charge_state::NEUTRAL));
@@ -551,10 +550,10 @@ class is_operational_impl
      * @return `true` if `1` is encoded, `false` otherwise.
      */
     [[nodiscard]] bool encodes_bit_one(const charge_distribution_surface<Lyt>& ground_state,
-                                       const bdl_pair<cell<Lyt>>&              bdl,
-                                       const bdl_wire_direction                direction) const noexcept
+                                       const bdl_pair<cell<Lyt>>& bdl, const port_direction direction) const noexcept
     {
-        if (direction == bdl_wire_direction::NORTH_SOUTH || direction == bdl_wire_direction::NO_DIRECTION)
+        if (direction.dir == port_direction::SOUTH || direction.dir == port_direction::EAST ||
+            direction.dir == port_direction::NONE)
         {
             return static_cast<bool>((ground_state.get_charge_state(bdl.upper) == sidb_charge_state::NEUTRAL) &&
                                      (ground_state.get_charge_state(bdl.lower) == sidb_charge_state::NEGATIVE));
@@ -565,7 +564,7 @@ class is_operational_impl
     }
 };
 
-};  // namespace detail
+}  // namespace detail
 
 /**
  * Determine the operational status of an SiDB layout.
@@ -588,8 +587,8 @@ class is_operational_impl
 template <typename Lyt, typename TT>
 [[nodiscard]] std::pair<operational_status, std::size_t>
 is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params = {},
-               const std::optional<std::vector<bdl_wire<cell<Lyt>>>>& input_bdl_wire  = std::nullopt,
-               const std::optional<std::vector<bdl_wire<cell<Lyt>>>>& output_bdl_wire = std::nullopt)
+               const std::optional<std::vector<bdl_wire<Lyt>>>& input_bdl_wire  = std::nullopt,
+               const std::optional<std::vector<bdl_wire<Lyt>>>& output_bdl_wire = std::nullopt)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");

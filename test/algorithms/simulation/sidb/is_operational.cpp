@@ -33,7 +33,7 @@ TEST_CASE("SiQAD OR gate", "[is-operational]")
                                     bdl_input_iterator_params{
                                         detect_bdl_wires_params{1.5},
                                         bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED},
-                                    operational_condition::FORBIDDING_KINKS})
+                                    operational_condition::REJECT_KINKS})
               .first == operational_status::NON_OPERATIONAL);
 
     CHECK(is_operational(
@@ -42,7 +42,7 @@ TEST_CASE("SiQAD OR gate", "[is-operational]")
                                     bdl_input_iterator_params{
                                         detect_bdl_wires_params{1.5},
                                         bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED},
-                                    operational_condition::ALLOWING_KINKS})
+                                    operational_condition::TOLERATE_KINKS})
               .first == operational_status::OPERATIONAL);
 }
 
@@ -235,7 +235,7 @@ TEST_CASE("AND gate with bestagon structure and kink state at right input wire f
         CHECK(is_operational(lyt, std::vector<tt>{create_and_tt()},
                              is_operational_params{sidb_simulation_parameters{2, -0.32},
                                                    sidb_simulation_engine::QUICKEXACT, bdl_input_iterator_params{},
-                                                   operational_condition::FORBIDDING_KINKS})
+                                                   operational_condition::REJECT_KINKS})
                   .first == operational_status::NON_OPERATIONAL);
     }
 }
@@ -246,7 +246,7 @@ TEST_CASE("flipped CX bestagon gate", "[is-operational]")
 
     CHECK(is_operational(lyt, create_crossing_wire_tt(),
                          is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
-                                               bdl_input_iterator_params{}, operational_condition::FORBIDDING_KINKS})
+                                               bdl_input_iterator_params{}, operational_condition::REJECT_KINKS})
               .first == operational_status::OPERATIONAL);
 }
 
@@ -311,6 +311,7 @@ TEST_CASE("is operational check for Bestagon CX gate", "[is-operational], [quali
                   is_operational_params{sidb_simulation_parameters{2, -0.30}, sidb_simulation_engine::QUICKEXACT})
                   .first == operational_status::NON_OPERATIONAL);
     }
+
     SECTION("using predetermined wires")
     {
         const auto input_bdl_wires  = detect_bdl_wires(lat, detect_bdl_wires_params{}, bdl_wire_selection::INPUT);
@@ -363,4 +364,36 @@ TEST_CASE("is operational check for Bestagon half adder", "[is-operational], [qu
         is_operational(lat, create_half_adder_tt(),
                        is_operational_params{sidb_simulation_parameters{2, -0.25}, sidb_simulation_engine::QUICKEXACT})
             .first == operational_status::NON_OPERATIONAL);
+}
+
+TEST_CASE("BDL wire", "[is-operational]")
+{
+    using layout = sidb_cell_clk_lyt_siqad;
+
+    layout lyt{{24, 0}, "BDL wire"};
+
+    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({3, 0, 0}, sidb_technology::cell_type::INPUT);
+
+    lyt.assign_cell_type({6, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 0, 0}, sidb_technology::cell_type::NORMAL);
+
+    lyt.assign_cell_type({12, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 0, 0}, sidb_technology::cell_type::NORMAL);
+
+    lyt.assign_cell_type({18, 0, 0}, sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({20, 0, 0}, sidb_technology::cell_type::OUTPUT);
+
+    // output perturber
+    lyt.assign_cell_type({24, 0, 0}, sidb_technology::cell_type::NORMAL);
+
+    const sidb_100_cell_clk_lyt_siqad lat{lyt};
+
+    sidb_simulation_parameters sim_params{};
+
+    sim_params.base = 2;
+
+    const is_operational_params params{sim_params};
+
+    CHECK(is_operational(lyt, std::vector<tt>{create_id_tt()}, params).first == operational_status::OPERATIONAL);
 }
