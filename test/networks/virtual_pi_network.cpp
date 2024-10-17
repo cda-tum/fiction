@@ -212,18 +212,36 @@ TEST_CASE("Remove PIs and check equivalence technology_network", "[virtual-pi-vi
     auto non_vpi = delete_virtual_pis(vpi);
     CHECK(non_vpi.size() == vpi.size() - vpi.num_virtual_pis());
     // check equivalence
+    auto maybe_miter = mockturtle::miter<technology_network>(tec, non_vpi);
+    if (!maybe_miter.has_value())
+    {
+        CHECK(false);
+        return;
+    }
     mockturtle::equivalence_checking_stats st;
-    const auto                             maybe_cec_m =
-        mockturtle::equivalence_checking(*mockturtle::miter<technology_network>(tec, non_vpi), {}, &st);
-    REQUIRE(maybe_cec_m.has_value());
-    CHECK(*maybe_cec_m == 1);
+    const auto                             maybe_cec_m = mockturtle::equivalence_checking(*maybe_miter, {}, &st);
+    if (!maybe_cec_m.has_value())
+    {
+        CHECK(false);
+        return;
+    }
+    CHECK(maybe_cec_m.value() == 1);
     // check cloning
     const auto clone         = vpi.clone();
     auto       non_vpi_clone = delete_virtual_pis(clone);
     // check equivalence
-    const auto maybe_cec_c =
-        mockturtle::equivalence_checking(*mockturtle::miter<technology_network>(tec, non_vpi_clone), {}, &st);
-    REQUIRE(maybe_cec_c.has_value());
+    maybe_miter = mockturtle::miter<technology_network>(tec, non_vpi);
+    if (!maybe_miter.has_value())
+    {
+        CHECK(false);
+        return;
+    }
+    const auto maybe_cec_c = mockturtle::equivalence_checking(*maybe_miter, {}, &st);
+    if (!maybe_cec_c.has_value())
+    {
+        CHECK(false);
+        return;
+    }
     CHECK(maybe_cec_c.value() == 1);
 }
 
@@ -261,17 +279,35 @@ TEMPLATE_TEST_CASE("Remove PIs and check equivalence", "[virtual-pi-view]", mock
     CHECK(non_vpi.size() == vpi.size() - vpi.num_virtual_pis() - 2);
     CHECK(non_vpi.real_size() == non_vpi.size());
     // check equivalence
+    auto maybe_miter = mockturtle::miter<technology_network>(tec, non_vpi);
+    if (!maybe_miter.has_value())
+    {
+        CHECK(false);
+        return;
+    }
     mockturtle::equivalence_checking_stats st;
-    const auto                             maybe_cec_m =
-        mockturtle::equivalence_checking(*mockturtle::miter<technology_network>(tec, non_vpi), {}, &st);
-    REQUIRE(maybe_cec_m.has_value());
-    CHECK(*maybe_cec_m == 1);
+    const auto                             maybe_cec_m = mockturtle::equivalence_checking(*maybe_miter, {}, &st);
+    if (!maybe_cec_m.has_value())
+    {
+        CHECK(false);
+        return;
+    }
+    CHECK(maybe_cec_m.value() == 1);
     // check cloning
     const auto clone         = vpi.clone();
     auto       non_vpi_clone = delete_virtual_pis(clone);
     // check equivalence
-    const auto maybe_cec_c =
-        mockturtle::equivalence_checking(*mockturtle::miter<technology_network>(tec, non_vpi_clone), {}, &st);
-    REQUIRE(maybe_cec_c.has_value());
+    maybe_miter = mockturtle::miter<technology_network>(tec, non_vpi_clone);
+    if (!maybe_miter.has_value())
+    {
+        CHECK(false);
+        return;
+    }
+    const auto maybe_cec_c = mockturtle::equivalence_checking(*maybe_miter, {}, &st);
+    if (!maybe_cec_c.has_value())
+    {
+        CHECK(false);
+        return;
+    }
     CHECK(maybe_cec_c.value() == 1);
 }
