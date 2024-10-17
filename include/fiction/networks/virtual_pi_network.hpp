@@ -22,6 +22,10 @@
 
 #include <parallel_hashmap/phmap.h>
 
+#if (PROGRESS_BARS)
+#include <mockturtle/utils/progress_bar.hpp>
+#endif
+
 namespace fiction
 {
 /* Network with additional "virtual" PIs.
@@ -246,11 +250,11 @@ class virtual_pi_network : public Ntk
     void foreach_real_pi(Fn&& fn) const
     {
         static_cast<const Ntk*>(this)->foreach_pi(
-            [&](const auto& i)
+            [this, &fn](const auto& i)
             {
                 if (!is_virtual_pi(i))
                 {
-                    std::forward<Fn>(fn)(i);
+                    fn(i);
                 }
             });
     }
@@ -277,11 +281,11 @@ class virtual_pi_network : public Ntk
     void foreach_real_ci(Fn&& fn)
     {
         static_cast<Ntk*>(this)->foreach_ci(
-            [&](const auto& i)
+            [this, &fn](const auto& i)
             {
                 if (!is_virtual_ci(i))
                 {
-                    std::forward<Fn>(fn)(i);
+                    fn(i);
                 }
             });
     }
