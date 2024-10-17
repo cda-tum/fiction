@@ -250,11 +250,11 @@ class virtual_pi_network : public Ntk
     void foreach_real_pi(Fn&& fn) const
     {
         static_cast<const Ntk*>(this)->foreach_pi(
-            [this, &fn](const auto& i)
+            [this, fn = std::forward<Fn>(fn)](const auto& i)
             {
                 if (!is_virtual_pi(i))
                 {
-                    fn(i);
+                    std::invoke(fn, i);
                 }
             });
     }
@@ -268,7 +268,7 @@ class virtual_pi_network : public Ntk
     template <typename Fn>
     void foreach_virtual_pi(Fn&& fn) const
     {
-        mockturtle::detail::foreach_element(v_storage->virtual_inputs.cbegin(), v_storage->virtual_inputs.cend(), fn);
+        mockturtle::detail::foreach_element(v_storage->virtual_inputs.cbegin(), v_storage->virtual_inputs.cend(), std::forward<Fn>(fn));
     }
 
     /**
@@ -280,12 +280,12 @@ class virtual_pi_network : public Ntk
     template <typename Fn>
     void foreach_real_ci(Fn&& fn)
     {
-        static_cast<Ntk*>(this)->foreach_ci(
-            [this, &fn](const auto& i)
+        static_cast<const Ntk*>(this)->foreach_ci(
+            [this, fn = std::forward<Fn>(fn)](const auto& i)
             {
                 if (!is_virtual_ci(i))
                 {
-                    fn(i);
+                    std::invoke(fn, i);
                 }
             });
     }
@@ -299,7 +299,7 @@ class virtual_pi_network : public Ntk
     template <typename Fn>
     void foreach_virtual_ci(Fn&& fn) const
     {
-        mockturtle::detail::foreach_element(v_storage->virtual_inputs.cbegin(), v_storage->virtual_inputs.cend(), fn);
+        mockturtle::detail::foreach_element(v_storage->virtual_inputs.cbegin(), v_storage->virtual_inputs.cend(), std::forward<Fn>(fn));
     }
 
   private:
