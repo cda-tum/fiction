@@ -12,6 +12,7 @@
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/sidb_defect_surface.hpp>
 #include <fiction/technology/sidb_defects.hpp>
+#include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/layout_utils.hpp>
 
@@ -19,7 +20,7 @@
 
 using namespace fiction;
 
-TEST_CASE("Random cube::coord_t layout generation", "[generate-random-sidb-layout]")
+TEST_CASE("Random cube::coord_t layout generation", "[random-sidb-layout-generator]")
 {
     SECTION("empty parameters")
     {
@@ -201,7 +202,7 @@ TEST_CASE("Random cube::coord_t layout generation", "[generate-random-sidb-layou
     }
 }
 
-TEST_CASE("Random offset::ucoord_t layout generation", "[generate-random-sidb-layout]")
+TEST_CASE("Random offset::ucoord_t layout generation", "[random-sidb-layout-generator]")
 {
     SECTION("empty parameters")
     {
@@ -380,7 +381,7 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[generate-random-sidb-la
     }
 }
 
-TEST_CASE("Random siqad::coord_t layout generation", "[generate-random-sidb-layout]")
+TEST_CASE("Random siqad::coord_t layout generation", "[random-sidb-layout-generator]")
 {
     SECTION("empty parameters")
     {
@@ -520,7 +521,7 @@ TEST_CASE("Random siqad::coord_t layout generation", "[generate-random-sidb-layo
     }
 }
 
-TEMPLATE_TEST_CASE("Random siqad::coord_t layout generation with defects", "[generate-random-sidb-layout]",
+TEMPLATE_TEST_CASE("Random siqad::coord_t layout generation with defects", "[random-sidb-layout-generator]",
                    sidb_defect_cell_clk_lyt_siqad, sidb_defect_surface<sidb_111_cell_clk_lyt_siqad>)
 {
     SECTION("given two identical coordinates")
@@ -579,7 +580,7 @@ TEMPLATE_TEST_CASE("Random siqad::coord_t layout generation with defects", "[gen
         CHECK(result_lyt.num_cells() == 1);
         CHECK(result_lyt.num_defects() == 2);
 
-        CHECK(result_lyt.get_cell_type({2, 1, 1}) == TestType::technology::cell_type::NORMAL);
+        CHECK(result_lyt.get_cell_type({2, 1, 1}) == TestType::technology::cell_type::LOGIC);
         CHECK(result_lyt.get_sidb_defect({3, 1, 1}) == sidb_defect{sidb_defect_type::DB, -1, 5.6, 5});
         CHECK(result_lyt.get_sidb_defect({4, 1, 1}) == sidb_defect{sidb_defect_type::SINGLE_DIHYDRIDE, 1, 7.6, 7});
     }
@@ -617,7 +618,7 @@ TEMPLATE_TEST_CASE("Random siqad::coord_t layout generation with defects", "[gen
     }
 }
 
-TEST_CASE("Random cube::coord_t layout generation with defects", "[generate-random-sidb-layout]")
+TEST_CASE("Random cube::coord_t layout generation with defects", "[random-sidb-layout-generator]")
 {
     using lyt = sidb_defect_cell_clk_lyt_cube;
 
