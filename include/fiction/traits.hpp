@@ -1284,6 +1284,89 @@ template <class Ntk>
 inline constexpr bool has_is_and_xor_v = has_is_and_xor<Ntk>::value;
 #pragma endregion
 
+#pragma region has_foreach_pi
+template <class Ntk, class = void>
+struct has_foreach_real_pi : std::false_type
+{};
+
+template <class Ntk>
+struct has_foreach_real_pi<Ntk, std::void_t<decltype(std::declval<Ntk>().foreach_real_pi(
+                                    std::declval<void(mockturtle::node<Ntk>, uint32_t)>()))>> : std::true_type
+{};
+
+template <class Ntk>
+inline constexpr bool has_foreach_real_pi_v = has_foreach_real_pi<Ntk>::value;
+#pragma endregion
+
+#pragma region has_index_to_node
+template <class Ntk, class = void>
+struct has_get_real_pi : std::false_type
+{};
+
+template <class Ntk>
+struct has_get_real_pi<Ntk, std::void_t<decltype(std::declval<Ntk>().get_real_pi(mockturtle::node<Ntk>()))>>
+        : std::true_type
+{};
+
+template <class Ntk>
+inline constexpr bool has_get_real_pi_v = has_get_real_pi<Ntk>::value;
+#pragma endregion
+
+#pragma region has_num_real_pis
+template <class Ntk, class = void>
+struct has_num_real_pis : std::false_type
+{};
+
+template <class Ntk>
+struct has_num_real_pis<Ntk, std::void_t<decltype(std::declval<Ntk>().num_real_pis())>> : std::true_type
+{};
+
+template <class Ntk>
+inline constexpr bool has_num_real_pis_v = has_num_real_pis<Ntk>::value;
+#pragma endregion
+
+#pragma region has_num_virtual_pis
+template <class Ntk, class = void>
+struct has_num_virtual_pis : std::false_type
+{};
+
+template <class Ntk>
+struct has_num_virtual_pis<Ntk, std::void_t<decltype(std::declval<Ntk>().num_virtual_pis())>> : std::true_type
+{};
+
+template <class Ntk>
+inline constexpr bool has_num_virtual_pis_v = has_num_virtual_pis<Ntk>::value;
+#pragma endregion
+
+#pragma region has_is_virtual_pi
+template <class Ntk, class = void>
+struct has_is_virtual_pi : std::false_type
+{};
+
+template <class Ntk>
+struct has_is_virtual_pi<
+    Ntk, std::void_t<decltype(std::declval<Ntk>().is_virtual_pi(std::declval<mockturtle::node<Ntk>>()))>>
+        : std::true_type
+{};
+
+template <class Ntk>
+inline constexpr bool has_is_virtual_pi_v = has_is_virtual_pi<Ntk>::value;
+#pragma endregion
+
+#pragma region has_is_real_pi
+template <class Ntk, class = void>
+struct has_is_real_pi : std::false_type
+{};
+
+template <class Ntk>
+struct has_is_real_pi<Ntk, std::void_t<decltype(std::declval<Ntk>().is_real_pi(std::declval<mockturtle::node<Ntk>>()))>>
+        : std::true_type
+{};
+
+template <class Ntk>
+inline constexpr bool has_is_real_pi_v = has_is_real_pi<Ntk>::value;
+#pragma endregion
+
 }  // namespace fiction
 
 #endif  // FICTION_TRAITS_HPP
