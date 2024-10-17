@@ -366,7 +366,7 @@ TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shaped SiDB OR gate with input 01
     lyt.assign_cell_type({10, 8, 1}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({16, 1, 0}, TestType::cell_type::NORMAL);
 
-    const sidb_simulation_parameters       params{2, -0.28};
+    const sidb_simulation_parameters params{2, -0.28};
 
     quicksim_params quicksim_params{params};
 
@@ -652,7 +652,7 @@ TEMPLATE_TEST_CASE("QuickSim simulation of an layout comprising of 13 SiDBs, all
 
     lyt.assign_cell_type({30, 15, 0}, TestType::cell_type::NORMAL);
 
-    const sidb_simulation_parameters       params{2, -0.32};
+    const sidb_simulation_parameters params{2, -0.32};
 
     quicksim_params quicksim_params{params};
 

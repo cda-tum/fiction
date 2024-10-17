@@ -360,7 +360,6 @@ TEST_CASE("Determine I/O wires of Bestagon CROSSING gate", "[detect-bdl-wires]")
         CHECK(output_wire_first.pairs[1] == bdl_pair{sidb_technology::cell_type::OUTPUT, cell<decltype(lyt)>{8, 17, 0},
                                                      cell<decltype(lyt)>{6, 18, 0}});
 
-
         const auto& output_wire_second = all_output_bdl_wires[1];
         CHECK(output_wire_second.pairs.size() == 2);
         CHECK(output_wire_second.pairs[0] == bdl_pair{sidb_technology::cell_type::NORMAL,
@@ -390,8 +389,6 @@ TEST_CASE("Determine I/O wires of Bestagon CROSSING gate", "[detect-bdl-wires]")
                                                      cell<decltype(lyt)>{30, 3, 0}});
         CHECK(input_wire_second.pairs[2] == bdl_pair{sidb_technology::cell_type::NORMAL, cell<decltype(lyt)>{26, 4, 0},
                                                      cell<decltype(lyt)>{24, 5, 0}});
-
-
 
         CHECK(input_wire_first.direction.dir == port_direction::cardinal::SOUTH);
     }
@@ -580,14 +577,16 @@ TEMPLATE_TEST_CASE("special cases", "[detect-bdl-wires]", sidb_cell_clk_lyt_siqa
         CHECK(wire.direction.dir == port_direction::cardinal::NORTH);
         CHECK(wire.pairs.size() == 4);
         CHECK(wire.pairs[0] == bdl_pair{sidb_technology::cell_type::NORMAL, cell<decltype(lyt)>{18, -1, 1},
-                                                 cell<decltype(lyt)>{20, -1, 1}});
+                                        cell<decltype(lyt)>{20, -1, 1}});
         CHECK(wire.pairs[1] ==
               bdl_pair{sidb_technology::cell_type::INPUT, cell<decltype(lyt)>{0, 0, 0}, cell<decltype(lyt)>{2, 0, 0}});
         CHECK(wire.pairs[2] == bdl_pair{sidb_technology::cell_type::NORMAL, cell<decltype(lyt)>{12, 0, 1},
-                                                 cell<decltype(lyt)>{14, 0, 1}});
+                                        cell<decltype(lyt)>{14, 0, 1}});
         CHECK(wire.pairs[3] ==
               bdl_pair{sidb_technology::cell_type::NORMAL, cell<decltype(lyt)>{6, 1, 0}, cell<decltype(lyt)>{8, 1, 0}});
-        CHECK(wire.start_bdl_pair_wire ==  bdl_pair{sidb_technology::cell_type::INPUT, cell<decltype(lyt)>{0, 0, 0}, cell<decltype(lyt)>{2, 0, 0}});
-        CHECK(wire.end_bdl_pair_wire ==  bdl_pair{sidb_technology::cell_type::NORMAL, cell<decltype(lyt)>{18, -1, 1}, cell<decltype(lyt)>{20, -1, 1}});
+        CHECK(wire.start_bdl_pair_wire ==
+              bdl_pair{sidb_technology::cell_type::INPUT, cell<decltype(lyt)>{0, 0, 0}, cell<decltype(lyt)>{2, 0, 0}});
+        CHECK(wire.end_bdl_pair_wire == bdl_pair{sidb_technology::cell_type::NORMAL, cell<decltype(lyt)>{18, -1, 1},
+                                                 cell<decltype(lyt)>{20, -1, 1}});
     }
 }

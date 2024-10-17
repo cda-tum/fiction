@@ -7,9 +7,9 @@
 
 #include "fiction/algorithms/path_finding/distance.hpp"
 #include "fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp"
+#include "fiction/technology/cell_ports.hpp"
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/technology/cell_ports.hpp"
 
 #include <algorithm>
 #include <cassert>
@@ -101,9 +101,10 @@ struct bdl_wire
      */
     explicit bdl_wire(const std::vector<bdl_pair<cell<Lyt>>>& p) noexcept : pairs(p)
     {
-        if (!pairs.empty()) {
+        if (!pairs.empty())
+        {
             start_bdl_pair_wire = pairs.front();
-            end_bdl_pair_wire = pairs.back();
+            end_bdl_pair_wire   = pairs.back();
         }
         update_direction();
     }

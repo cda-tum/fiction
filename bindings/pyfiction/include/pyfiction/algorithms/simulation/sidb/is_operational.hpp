@@ -27,8 +27,8 @@ void is_operational(pybind11::module& m)
     using namespace pybind11::literals;
 
     m.def("is_operational", &fiction::is_operational<Lyt, py_tt>, "lyt"_a, "spec"_a,
-          "params"_a = fiction::is_operational_params{}, "input_bdl_wire"_a = std::nullopt, "output_bdl_wire"_a = std::nullopt,
-          DOC(fiction_is_operational));
+          "params"_a = fiction::is_operational_params{}, "input_bdl_wire"_a = std::nullopt,
+          "output_bdl_wire"_a = std::nullopt, DOC(fiction_is_operational));
 
     m.def("operational_input_patterns", &fiction::operational_input_patterns<Lyt, py_tt>, "lyt"_a, "spec"_a,
           "params"_a = fiction::is_operational_params{}, DOC(fiction_operational_input_patterns));

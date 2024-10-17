@@ -376,7 +376,7 @@ class bdl_input_iterator
      *
      * @note Assumes that `input_bdl_wires` and `end_bdls_of_wires` are accessible within the scope.
      */
-   [[nodiscard]] std::vector<bdl_pair<cell<Lyt>>> determine_end_bdls_of_wires() noexcept
+    [[nodiscard]] std::vector<bdl_pair<cell<Lyt>>> determine_end_bdls_of_wires() noexcept
     {
         std::vector<bdl_pair<cell<Lyt>>> end_bdls{};
         end_bdls.reserve(input_bdl_wires.size());
@@ -397,13 +397,14 @@ class bdl_input_iterator
             const bdl_pair<cell<Lyt>>& start_bdl_pair = *start_bdl_it;
 
             // Find the BDL pair with the maximum distance from the start BDL pair
-            const auto max_bdl_it = std::max_element(wire.pairs.cbegin(), wire.pairs.cend(),
-                                               [&](const bdl_pair<cell<Lyt>>& a, const bdl_pair<cell<Lyt>>& b) -> bool
-                                               {
-                                                   double distance_a = sidb_nm_distance(Lyt{}, start_bdl_pair.upper, a.upper);
-                                                   double distance_b = sidb_nm_distance(Lyt{}, start_bdl_pair.upper, b.upper);
-                                                   return distance_a < distance_b;
-                                               });
+            const auto max_bdl_it =
+                std::max_element(wire.pairs.cbegin(), wire.pairs.cend(),
+                                 [&](const bdl_pair<cell<Lyt>>& a, const bdl_pair<cell<Lyt>>& b) -> bool
+                                 {
+                                     double distance_a = sidb_nm_distance(Lyt{}, start_bdl_pair.upper, a.upper);
+                                     double distance_b = sidb_nm_distance(Lyt{}, start_bdl_pair.upper, b.upper);
+                                     return distance_a < distance_b;
+                                 });
 
             // If a valid BDL pair is found, add it to the end BDLs collection
             if (max_bdl_it != wire.pairs.cend())
@@ -469,9 +470,9 @@ class bdl_input_iterator
                 }
                 else
                 {
-                        // set input i to 0
-                        layout.assign_cell_type(input_i.upper, technology<Lyt>::cell_type::EMPTY);
-                        layout.assign_cell_type(input_i.lower, technology<Lyt>::cell_type::EMPTY);
+                    // set input i to 0
+                    layout.assign_cell_type(input_i.upper, technology<Lyt>::cell_type::EMPTY);
+                    layout.assign_cell_type(input_i.lower, technology<Lyt>::cell_type::EMPTY);
                 }
             }
         }
