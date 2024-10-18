@@ -18,6 +18,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <cstdint>
 
 using namespace fiction;
 
@@ -35,8 +36,16 @@ int main()
     static const std::string folder        = fmt::format("{}bestagon_gates_type_tags/", EXPERIMENTS_PATH);
     static const std::string output_folder = fmt::format("{}defect_avoidance_distance/plots/", EXPERIMENTS_PATH);
 
-    static const std::array<std::pair<std::string, std::vector<tt>>, 10> gates = {
-        std::make_pair("nor", std::vector<tt>{create_nor_tt()})};
+    static const std::array<std::pair<std::string, std::vector<tt>>, 9> gates = {
+        std::make_pair("and", std::vector<tt>{create_and_tt()}),
+        std::make_pair("xor", std::vector<tt>{create_xor_tt()}),
+        std::make_pair("or", std::vector<tt>{create_or_tt()}),
+        std::make_pair("xnor", std::vector<tt>{create_xnor_tt()}),
+        std::make_pair("fo2", std::vector<tt>{create_fan_out_tt()}),
+        std::make_pair("nor", std::vector<tt>{create_nor_tt()}),
+        std::make_pair("nand", std::vector<tt>{create_nand_tt()}),
+        std::make_pair("inv", std::vector<tt>{create_not_tt()}),
+        std::make_pair("wire", std::vector<tt>{create_id_tt()})};
 
     const auto                  sidb_sim = sidb_simulation_parameters{2, -0.32, 5.6, 5.0};
     const is_operational_params is_op_params{sidb_sim};
@@ -50,8 +59,6 @@ int main()
     defect_influence_operational_domain_params defect_params{};
     defect_params.defect_influence_params = max_defect_params;
     defect_params.operational_params      = is_op_params;
-
-    std::size_t total_number_samples = 0;
 
     for (const auto& [gate, truth_table] : gates)
     {
@@ -89,7 +96,7 @@ int main()
 
             defect_influence_operational_domain_stats contour_stats{};
             const auto op_defect_contour = defect_influence_operational_domain_contour_tracing(
-                layout, truth_table, 5, defect_params, &contour_stats);
+                layout, truth_table, 20, defect_params, &contour_stats);
             const auto avoidance_contour = defect_avoidance_distance(layout, op_defect_contour);
 
             const auto csv_path_contour = fmt::format("{}{}_contour.csv", gate_folder, gate);

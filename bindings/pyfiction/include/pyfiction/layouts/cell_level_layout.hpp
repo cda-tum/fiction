@@ -74,14 +74,14 @@ void fcn_technology_cell_level_layout(pybind11::module& m)
     }
     // NOTE: more technologies go here
 
-    using py_cartesian_technology_cell_layout = py_cartesian_cell_layout<Technology>;
+    using py_cartesian_technology_cell_layout = py_cartesian_cell_layout<Technology, py_cartesian_clocked_layout>;
 
     /**
      * Cell-level clocked Cartesian layout.
      */
     py::class_<
         py_cartesian_technology_cell_layout,
-        fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<fiction::offset::ucoord_t>>>>(
+        py_cartesian_clocked_layout>(
         m, fmt::format("{}_layout", tech_name).c_str(), DOC(fiction_cell_level_layout))
         .def(py::init<>())
         .def(py::init<const fiction::aspect_ratio<py_cartesian_technology_cell_layout>&>(), "dimension"_a,

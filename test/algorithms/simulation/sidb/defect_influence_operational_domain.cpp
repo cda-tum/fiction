@@ -17,6 +17,8 @@
 #include <fiction/types.hpp>
 #include <fiction/utils/layout_utils.hpp>
 #include <fiction/utils/truth_table_utils.hpp>
+#include <fiction/io/write_defect_influence_operational_domain.hpp>
+#include <fiction/io/write_sqd_layout.hpp>
 
 #include <vector>
 
@@ -61,6 +63,8 @@ TEST_CASE("novel designed AND Gate influence distance function which fails again
 
     lyt.assign_cell_type({36, 19, 0}, sidb_technology::cell_type::NORMAL);
 
+    write_sqd_layout(lyt, "/Users/jandrewniok/CLionProjects/fiction_fork/experiments/defect_avoidance_distance/plots/and/and.sqd");
+
     const auto cube_lyt = convert_layout_to_fiction_coordinates<sidb_cell_clk_lyt_cube>(lyt);
 
     const sidb_defect sidb_defect{sidb_defect_type::SI_VACANCY, -1, 10.6, 5.9};
@@ -71,28 +75,32 @@ TEST_CASE("novel designed AND Gate influence distance function which fails again
 
     SECTION("Grid Search")
     {
-        params.defect_influence_params.additional_scanning_area = {10, 10};
+        params.defect_influence_params.additional_scanning_area = {20, 20};
         defect_influence_operational_domain_stats stats{};
         const auto defect_influence_domain = defect_influence_operational_domain_grid_search(
-            cube_lyt, std::vector<tt>{create_or_tt()}, 5, params, &stats);
+            cube_lyt, std::vector<tt>{create_or_tt()}, 1, params, &stats);
         CHECK_THAT(defect_avoidance_distance(cube_lyt, defect_influence_domain).max_min_distance,
-                   Catch::Matchers::WithinAbs(11.6138152646, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(12.579477930, physical_constants::POP_STABILITY_ERR));
+        write_defect_influence_operational_domain(defect_influence_domain, "/Users/jandrewniok/CLionProjects/fiction_fork/experiments/defect_avoidance_distance/plots/and/and_grid.csv");
     }
     SECTION("Random Sampling")
     {
-        params.defect_influence_params.additional_scanning_area = {0, 0};
+        params.defect_influence_params.additional_scanning_area = {20, 20};
         defect_influence_operational_domain_stats stats{};
         const auto defect_influence_domain = defect_influence_operational_domain_random_sampling(
             cube_lyt, std::vector<tt>{create_or_tt()}, 100, params, &stats);
         CHECK(defect_influence_domain.operational_values.size() == 100);
-        CHECK(defect_avoidance_distance(cube_lyt, defect_influence_domain).max_min_distance < 11.61);
+        CHECK(defect_avoidance_distance(cube_lyt, defect_influence_domain).max_min_distance >= 12.579477930);
+        write_defect_influence_operational_domain(defect_influence_domain, "/Users/jandrewniok/CLionProjects/fiction_fork/experiments/defect_avoidance_distance/plots/and/and_random.csv");
     }
     SECTION("Contour Tracing")
     {
         params.defect_influence_params.additional_scanning_area = {20, 20};
         defect_influence_operational_domain_stats stats{};
         const auto defect_influence_domain = defect_influence_operational_domain_contour_tracing(
-            cube_lyt, std::vector<tt>{create_or_tt()}, 30, params, &stats);
-        CHECK(defect_avoidance_distance(cube_lyt, defect_influence_domain).max_min_distance > 11.61);
+            cube_lyt, std::vector<tt>{create_or_tt()}, 5, params, &stats);
+        CHECK_THAT(defect_avoidance_distance(cube_lyt, defect_influence_domain).max_min_distance,
+                   Catch::Matchers::WithinAbs(12.579477930, physical_constants::POP_STABILITY_ERR));
+        write_defect_influence_operational_domain(defect_influence_domain, "/Users/jandrewniok/CLionProjects/fiction_fork/experiments/defect_avoidance_distance/plots/and/and_contour.csv");
     }
 }

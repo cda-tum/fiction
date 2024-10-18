@@ -48,7 +48,7 @@ inline void determine_physically_valid_parameters(pybind11::module& m)
             {
                 try
                 {
-                    return domain.get_value(pp);
+                    return domain.get_value(pp).value();
                 }
                 catch (const std::out_of_range& e)
                 {

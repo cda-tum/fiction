@@ -31,15 +31,16 @@ int main()
     static const std::string folder        = fmt::format("{}defect_avoidance_distance/fom_data/sqd/", EXPERIMENTS_PATH);
     static const std::string output_folder = fmt::format("{}defect_avoidance_distance/plots/", EXPERIMENTS_PATH);
 
-    static const std::array<std::pair<std::string, std::vector<tt>>, 10> gates = {
-        std::make_pair("nor", std::vector<tt>{create_nor_tt()}),
-        std::make_pair("xnor", std::vector<tt>{create_xnor_tt()}),
+    static const std::array<std::pair<std::string, std::vector<tt>>, 9> gates = {
+        std::make_pair("and", std::vector<tt>{create_and_tt()}),
         std::make_pair("xor", std::vector<tt>{create_xor_tt()}),
         std::make_pair("or", std::vector<tt>{create_or_tt()}),
-        std::make_pair("ge", std::vector<tt>{create_ge_tt()}),
-        std::make_pair("gt", std::vector<tt>{create_gt_tt()}),
-        std::make_pair("le", std::vector<tt>{create_le_tt()}),
-        std::make_pair("lt", std::vector<tt>{create_lt_tt()})};
+        std::make_pair("xnor", std::vector<tt>{create_xnor_tt()}),
+        std::make_pair("fo2", std::vector<tt>{create_fan_out_tt()}),
+        std::make_pair("nor", std::vector<tt>{create_nor_tt()}),
+        std::make_pair("nand", std::vector<tt>{create_nand_tt()}),
+        std::make_pair("inv", std::vector<tt>{create_not_tt()}),
+        std::make_pair("wire", std::vector<tt>{create_id_tt()})};
 
     const auto                  sidb_sim = sidb_simulation_parameters{2, -0.32, 5.6, 5.0};
     const is_operational_params is_op_params{sidb_sim};

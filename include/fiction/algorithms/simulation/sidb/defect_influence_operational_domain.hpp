@@ -17,14 +17,17 @@
 #include <kitty/traits.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 
+#include <algorithm>
 #include <atomic>
 #include <cassert>
 #include <cstdint>
 #include <cstdlib>
+#include <future>
 #include <optional>
 #include <random>
+#include <thread>
+#include <unordered_set>
 #include <vector>
-#include <future>
 
 namespace fiction
 {
@@ -102,19 +105,29 @@ class defect_influence_operational_domain_impl
         determine_nw_se_cells();
     }
 
+    /**
+     * This function divides the search space (defined by `nw_cell` and `se_cell`) into chunks, each processed by a
+     * different thread. The search checks if defect positions in the grid are operational based on a given step size.
+     * Each thread processes a chunk of positions in parallel to improve performance.
+     *
+     * @param step_size The step size used to sample defect positions in the grid. Only positions with x and y
+     * coordinates divisible by `step_size` will be checked for being operational.
+     * @return A `defect_influence_operational_domain<Lyt>` object representing the operational domain of the defects.
+     */
     [[nodiscard]] defect_influence_operational_domain<Lyt> grid_search(const std::size_t& step_size) noexcept
     {
         mockturtle::stopwatch stop{stats.time_total};
-        const auto all_possible_defect_positions = all_coordinates_in_spanned_area(nw_cell, se_cell);
-        const std::size_t num_positions = all_possible_defect_positions.size();
+        const auto            all_possible_defect_positions = all_coordinates_in_spanned_area(nw_cell, se_cell);
+        const std::size_t     num_positions                 = all_possible_defect_positions.size();
 
-        const auto num_threads = std::thread::hardware_concurrency(); // Get the number of hardware threads
+        const auto num_threads = std::thread::hardware_concurrency();  // Get the number of hardware threads
 
         // Determine the chunk size (each thread will process a chunk of positions)
-        std::size_t chunk_size = (num_positions + num_threads - 1) / num_threads; // Distribute positions evenly
+        std::size_t chunk_size = (num_positions + num_threads - 1) / num_threads;  // Distribute positions evenly
 
         // Define a lambda function that processes a chunk of defect positions
-        auto process_chunk = [&](std::size_t start, std::size_t end) {
+        auto process_chunk = [&](std::size_t start, std::size_t end)
+        {
             for (std::size_t i = start; i < end; i += step_size)
             {
                 if (static_cast<std::size_t>(std::abs(all_possible_defect_positions[i].x)) % step_size == 0 &&
@@ -126,17 +139,18 @@ class defect_influence_operational_domain_impl
         };
 
         // Launch multiple threads to process the chunks
-        std::vector<std::future<void>> futures;
+        std::vector<std::future<void>> futures{};
+
         for (std::size_t start = 0; start < num_positions; start += chunk_size)
         {
-            std::size_t end = std::min(start + chunk_size, num_positions); // Make sure the end doesn't exceed the array size
+            std::size_t end = std::min(start + chunk_size, num_positions);
             futures.emplace_back(std::async(std::launch::async, process_chunk, start, end));
         }
 
         // Wait for all threads to complete
         for (auto& future : futures)
         {
-            future.get(); // Ensure each thread finishes
+            future.get();  // Ensure each thread finishes
         }
 
         log_stats();
@@ -144,26 +158,67 @@ class defect_influence_operational_domain_impl
         return defect_operational_domain;
     }
 
+    /**
+     * This function performs random sampling of defect positions from a grid area (spanned by `nw_cell` and `se_cell`).
+     * The positions are shuffled and divided into chunks, which are processed by different threads to check if each
+     * defect position is operational. Each thread handles a subset of the defect positions to improve performance.
+     *
+     * @param samples The number of positions to sample. The actual number of iterations will be the smaller of
+     *                the total number of positions or the `samples` value.
+     * @return A `defect_influence_operational_domain<Lyt>` object representing the operational domain of the defects.
+     *         The return value is marked [[nodiscard]], meaning it must be used by the caller.
+     */
     [[nodiscard]] defect_influence_operational_domain<Lyt> random_sampling(const std::size_t samples) noexcept
     {
-        mockturtle::stopwatch stop{stats.time_total};
-        auto                  all_possible_defect_positions = all_coordinates_in_spanned_area(nw_cell, se_cell);
+        mockturtle::stopwatch stop{stats.time_total};  // Start the stopwatch for performance measurement
 
+        // Get all possible defect positions within the grid spanned by nw_cell and se_cell
+        auto all_possible_defect_positions = all_coordinates_in_spanned_area(nw_cell, se_cell);
+
+        // Initialize random number generator
         std::random_device rd;
         std::mt19937       gen(rd());
 
         // Shuffle the vector using std::shuffle
         std::shuffle(all_possible_defect_positions.begin(), all_possible_defect_positions.end(), gen);
 
+        // Determine how many positions to sample (use the smaller of samples or the total number of positions)
         const auto min_iterations = std::min(all_possible_defect_positions.size(), samples);
 
-        for (auto i = 0u; i < min_iterations; ++i)
+        // Get the number of hardware threads available
+        const auto num_threads = std::thread::hardware_concurrency();
+
+        // Calculate the chunk size for each thread to process
+        std::size_t chunk_size = (min_iterations + num_threads - 1) / num_threads;
+
+        // Define the lambda function that processes a chunk of sampled defect positions
+        auto process_chunk = [&](std::size_t start, std::size_t end)
         {
-            is_defect_position_operational(all_possible_defect_positions[i]);
+            for (std::size_t i = start; i < end; ++i)
+            {
+                is_defect_position_operational(all_possible_defect_positions[i]);
+            }
+        };
+
+        // Create a vector to hold futures for the threads
+        std::vector<std::future<void>> futures{};
+
+        // Launch threads to process chunks of defect positions in parallel
+        for (std::size_t start = 0; start < min_iterations; start += chunk_size)
+        {
+            std::size_t end = std::min(start + chunk_size, min_iterations);
+            futures.emplace_back(std::async(std::launch::async, process_chunk, start, end));
         }
 
-        log_stats();
+        // Wait for all threads to complete their execution
+        for (auto& future : futures)
+        {
+            future.get();  // Block until the thread completes
+        }
 
+        log_stats();  // Log the statistics after processing
+
+        // Return the computed operational domain
         return defect_operational_domain;
     }
 
@@ -185,8 +240,9 @@ class defect_influence_operational_domain_impl
             return neighborhood.front();
         };
 
-        std::size_t number_of_random_start_positions = 0;
-        while (number_of_random_start_positions < samples)
+        std::unordered_set<cell<Lyt>> starting_points{};
+
+        while (starting_points.size() < samples)
         {
             // first, perform random sampling to find an operational starting point
             const auto operational_starting_point = find_operational_defect_position_at_left_side();
@@ -197,10 +253,17 @@ class defect_influence_operational_domain_impl
                 return defect_operational_domain;
             }
 
+            // check if the starting point has already been sampled
+            if (starting_points.find(*operational_starting_point) != starting_points.cend())
+            {
+                continue;
+            }
+
+            // add operatioal starting point to the set of starting points
+            starting_points.insert(*operational_starting_point);
+
             // the layout hs to be defect-free.
             assert(layout.num_defects() == 0 && "An atomic defect is added");
-
-            number_of_random_start_positions++;
 
             // find an operational point on the contour starting from the randomly determined starting point
             const auto contour_starting_point =
@@ -219,29 +282,10 @@ class defect_influence_operational_domain_impl
                                             current_neighborhood.front() :
                                             next_clockwise_point(current_neighborhood, backtrack_point);
 
-            bool contour_goes_around_se_layout_corner = true;
-            bool contour_goes_around_ne_layout_corner = true;
-            bool contour_goes_around_nw_layout_corner = true;
-
             uint64_t counter = 0;
             while (next_point != contour_starting_point && counter < 100000)
             {
                 const auto operational_status = is_defect_position_operational(next_point);
-                // check if the contour goes around the layout.
-                if (next_point.x >= se_bb_layout.x && next_point.y >= se_bb_layout.y)
-                {
-                    contour_goes_around_se_layout_corner = true;
-                }
-
-                if (next_point.x >= se_bb_layout.x && next_point.y <= nw_bb_layout.y)
-                {
-                    contour_goes_around_ne_layout_corner = true;
-                }
-
-                if (next_point.x <= nw_bb_layout.x && next_point.y <= nw_bb_layout.y)
-                {
-                    contour_goes_around_nw_layout_corner = true;
-                }
 
                 assert(layout.num_defects() == 0 && "more than one defect");
 
@@ -259,18 +303,9 @@ class defect_influence_operational_domain_impl
                 next_point           = next_clockwise_point(current_neighborhood, backtrack_point);
                 counter++;
             }
-            number_of_random_start_positions++;
-//            if (!contour_goes_around_se_layout_corner || !contour_goes_around_ne_layout_corner || !contour_goes_around_nw_layout_corner)
-//            {
-//                if (number_of_random_start_positions == samples)
-//                {
-//                    stats = defect_influence_operational_domain_stats{};
-//                    defect_operational_domain = defect_influence_operational_domain<Lyt>{}; // return an empty domain
-//                }
-//                continue;
-//            }
         }
         log_stats();
+
         return defect_operational_domain;
     }
 
@@ -690,13 +725,12 @@ defect_influence_operational_domain_random_sampling(const Lyt& lyt, const std::v
  * to be in the same order as the inputs of the truth table.
  *
  * This algorithm uses contour tracing to identify operational defect locations within the SiDB gate layout.
- * It starts by searching for defect locations on the left side of the bounding box, with an additional distance
- * of the SiDB gate where the SiDB gate remains operational. The y-coordinate for these positions is chosen
- * randomly. The number of samples is determined by the `samples` parameter.
+ * It starts by searching for defect locations on the left side (bounding_box + additional scanning area). The
+ * y-coordinate for these positions is chosen randomly. The number of samples is determined by the `samples` parameter.
  *
  * Then the algorithm moves each defect position to the right, searching for the last operational defect position. This
  * position is selected as the starting point for the contour trace. The contour tracing process checks whether the
- * contour includes the SiDB layout. If it does not, the next random sample point is is selected as the starting point
+ * contour includes the SiDB layout. If it does not, the next random sample point is selected as the starting point
  * and the process is repeated.
  *
  * @Note This algorithm is an approximation to determine the defect influence operational domain. Therefore, it

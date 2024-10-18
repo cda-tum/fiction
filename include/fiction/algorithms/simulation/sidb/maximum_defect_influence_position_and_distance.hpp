@@ -273,7 +273,7 @@ class maximum_defect_influence_position_and_distance_impl
  * defect can still affect the layout's ground state, potentially altering its behavior, such as gate functionality.
  *
  * @param lyt The SiDB cell-level layout for which the influence distance is being determined.
- * @param sim_params Parameters used to calculate the defect's maximum influence distance.
+ * @param params Parameters used to calculate the defect's maximum influence distance.
  * @param pst Statistics of the maximum defect influence distance.
  * @return Pair with the first element describing the position with maximum distance to the layout where a placed defect
  * can still affect the ground state of the layout. The second entry describes the distance of the defect from the
@@ -281,7 +281,7 @@ class maximum_defect_influence_position_and_distance_impl
  */
 template <typename Lyt>
 std::pair<typename Lyt::cell, double> maximum_defect_influence_position_and_distance(
-    const Lyt& lyt, const maximum_defect_influence_position_and_distance_params& sim_params = {},
+    const Lyt& lyt, const maximum_defect_influence_position_and_distance_params& params = {},
     maximum_defect_influence_position_and_distance_stats* pst = nullptr)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
@@ -291,7 +291,7 @@ std::pair<typename Lyt::cell, double> maximum_defect_influence_position_and_dist
 
     maximum_defect_influence_position_and_distance_stats st{};
 
-    detail::maximum_defect_influence_position_and_distance_impl<Lyt> p{lyt, sim_params, st};
+    detail::maximum_defect_influence_position_and_distance_impl<Lyt> p{lyt, params, st};
 
     const auto result = p.run();
 

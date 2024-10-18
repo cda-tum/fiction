@@ -45,6 +45,10 @@ using py_siqad_coordinate  = fiction::siqad::coord_t;
  */
 using py_cartesian_layout = fiction::cartesian_layout<py_offset_coordinate>;
 /**
+ * Cartesian layout based on cube coordinates.
+ */
+using py_cartesian_layout_cube = fiction::cartesian_layout<py_cube_coordinate>;
+/**
  * Shifted Cartesian layout.
  */
 using py_shifted_cartesian_layout =
@@ -57,6 +61,10 @@ using py_hexagonal_layout = fiction::hexagonal_layout<py_offset_coordinate, fict
  * Cartesian clocked layout.
  */
 using py_cartesian_clocked_layout = fiction::clocked_layout<fiction::tile_based_layout<py_cartesian_layout>>;
+/**
+ * Cartesian clocked layout based on cube coordinate.
+ */
+using py_cartesian_clocked_layout_cube = fiction::clocked_layout<fiction::tile_based_layout<py_cartesian_layout_cube>>;
 /**
  * Shifted Cartesian clocked layout.
  */
@@ -93,34 +101,47 @@ using py_hexagonal_obstruction_layout = fiction::obstruction_layout<py_hexagonal
 /**
  * Cartesian cell layout.
  */
-template <typename Technology>
-using py_cartesian_cell_layout = fiction::cell_level_layout<Technology, py_cartesian_clocked_layout>;
+template <typename Technology, typename Lyt = py_cartesian_clocked_layout>
+using py_cartesian_cell_layout = fiction::cell_level_layout<Technology, Lyt>;
 /**
  * QCA cell layout.
  */
-using py_qca_layout = py_cartesian_cell_layout<fiction::qca_technology>;
+using py_qca_layout = py_cartesian_cell_layout<fiction::qca_technology, py_cartesian_clocked_layout>;
 /**
  * iNML cell layout.
  */
-using py_inml_layout = py_cartesian_cell_layout<fiction::inml_technology>;
+using py_inml_layout = py_cartesian_cell_layout<fiction::inml_technology, py_cartesian_clocked_layout>;
 /**
  * SiDB cell layout.
  */
-using py_sidb_layout = py_cartesian_cell_layout<fiction::sidb_technology>;
+using py_sidb_layout = py_cartesian_cell_layout<fiction::sidb_technology, py_cartesian_clocked_layout>;
+/**
+ * SiDB cell layout.
+ */
+using py_sidb_layout_cube = py_cartesian_cell_layout<fiction::sidb_technology, py_cartesian_clocked_layout_cube>;
 
 /**
  * SiDB lattice layout.
  */
-template <typename LatticeOrientation>
-using py_sidb_lattice = fiction::sidb_lattice<LatticeOrientation, py_sidb_layout>;
+template <typename LatticeOrientation, typename Lyt = py_sidb_layout>
+using py_sidb_lattice = fiction::sidb_lattice<LatticeOrientation, Lyt>;
 /**
  * SiDB cell layout (with specified H-Si(100)-2x1 lattice orientation).
  */
-using py_sidb_100_lattice = py_sidb_lattice<fiction::sidb_100_lattice>;
+using py_sidb_100_lattice = py_sidb_lattice<fiction::sidb_100_lattice, py_sidb_layout>;
 /**
  * SiDB cell layout (with specified H-Si(111)-1x1 lattice orientation).
  */
-using py_sidb_111_lattice = py_sidb_lattice<fiction::sidb_111_lattice>;
+using py_sidb_111_lattice = py_sidb_lattice<fiction::sidb_111_lattice, py_sidb_layout>;
+
+/**
+ * SiDB cell layout (with specified H-Si(100)-2x1 lattice orientation).
+ */
+using py_sidb_100_lattice_cube = py_sidb_lattice<fiction::sidb_100_lattice, py_sidb_layout_cube>;
+/**
+ * SiDB cell layout (with specified H-Si(111)-1x1 lattice orientation).
+ */
+using py_sidb_111_lattice_cube = py_sidb_lattice<fiction::sidb_111_lattice, py_sidb_layout_cube>;
 
 /**
  * Charge distribution surface. This is a special SiDB cell-level layout that is used for the SiDB simulation
@@ -132,6 +153,9 @@ using py_charge_distribution_surface_layout = fiction::charge_distribution_surfa
 
 using py_charge_distribution_surface = fiction::charge_distribution_surface<py_sidb_layout>;
 
+
+using py_charge_distribution_surface_cube = fiction::charge_distribution_surface<py_sidb_layout_cube>;
+
 /**
  * Charge distribution surface with underlying H-Si(100)-2x1 lattice.
  */
@@ -140,6 +164,15 @@ using py_charge_distribution_surface_100 = py_charge_distribution_surface_layout
  * Charge distribution surface with underlying H-Si(111)-1x1 lattice.
  */
 using py_charge_distribution_surface_111 = py_charge_distribution_surface_layout<py_sidb_111_lattice>;
+
+/**
+ * Charge distribution surface with underlying H-Si(100)-2x1 lattice based on cube coordinates.
+ */
+using py_charge_distribution_surface_100_cube = py_charge_distribution_surface_layout<py_sidb_100_lattice_cube>;
+/**
+ * Charge distribution surface with underlying H-Si(111)-1x1 lattice based on cube coordinates.
+ */
+using py_charge_distribution_surface_111_cube = py_charge_distribution_surface_layout<py_sidb_111_lattice_cube>;
 
 }  // namespace pyfiction
 
