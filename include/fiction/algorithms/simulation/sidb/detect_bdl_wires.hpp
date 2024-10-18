@@ -152,10 +152,10 @@ struct bdl_wire
         if (this != &other)
         {
             pairs               = std::move(other.pairs);
-            port           = other.port;
+            port                = other.port;
             first_bdl_pair_wire = std::move(other.first_bdl_pair_wire);
             last_bdl_pair_wire  = std::move(other.last_bdl_pair_wire);
-            other.port.dir = port_direction::NONE;  // Reset the port of the moved-from object
+            other.port.dir      = port_direction::NONE;  // Reset the port of the moved-from object
         }
         return *this;
     }
@@ -173,7 +173,7 @@ struct bdl_wire
         if (this != &other)
         {
             pairs               = other.pairs;
-            port           = other.port;
+            port                = other.port;
             first_bdl_pair_wire = other.first_bdl_pair_wire;
             last_bdl_pair_wire  = other.last_bdl_pair_wire;
         }
@@ -307,7 +307,7 @@ struct bdl_wire
                 const auto distance = euclidean_distance(Lyt{}, pair.lower, first_bdl_pair_wire.lower);
                 if (distance > max_distance)
                 {
-                    max_distance      = distance;
+                    max_distance       = distance;
                     last_bdl_pair_wire = pair;
                 };
             }
@@ -537,7 +537,7 @@ class detect_bdl_wires_impl
                          {
                              return sidb_nm_distance<Lyt>(Lyt{}, given_bdl.lower, bdl.upper) < inter_bdl_distance ||
                                     (sidb_nm_distance<Lyt>(Lyt{}, given_bdl.upper, bdl.lower) < inter_bdl_distance &&
-                                        !given_bdl.equal_ignore_type(bdl) && given_bdl > bdl);
+                                     !given_bdl.equal_ignore_type(bdl) && given_bdl > bdl);
                          });
 
         if (it != bdl_pairs.cend())
@@ -574,7 +574,7 @@ class detect_bdl_wires_impl
                          {
                              return sidb_nm_distance<Lyt>(Lyt{}, given_bdl.lower, bdl.upper) < inter_bdl_distance ||
                                     (sidb_nm_distance<Lyt>(Lyt{}, given_bdl.upper, bdl.lower) < inter_bdl_distance &&
-                                        given_bdl.not_equal_ignore_type(bdl) && given_bdl < bdl);
+                                     given_bdl.not_equal_ignore_type(bdl) && given_bdl < bdl);
                          });
 
         if (it != bdl_pairs.cend())

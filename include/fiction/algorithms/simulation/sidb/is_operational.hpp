@@ -17,11 +17,11 @@
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
+#include "fiction/technology/cell_ports.hpp"
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/technology/cell_ports.hpp"
 
 #include <kitty/bit_operations.hpp>
 #include <kitty/traits.hpp>
@@ -424,8 +424,7 @@ class is_operational_impl
                         {
                             continue;
                         }
-                        if (!encodes_bit_one(ground_state, bdl,
-                                             input_bdl_wires[input_bdl_wires.size() - 1 - i].port))
+                        if (!encodes_bit_one(ground_state, bdl, input_bdl_wires[input_bdl_wires.size() - 1 - i].port))
                         {
                             return true;
                         }
@@ -439,8 +438,7 @@ class is_operational_impl
                         {
                             continue;
                         }
-                        if (!encodes_bit_zero(ground_state, bdl,
-                                              input_bdl_wires[input_bdl_wires.size() - 1 - i].port))
+                        if (!encodes_bit_zero(ground_state, bdl, input_bdl_wires[input_bdl_wires.size() - 1 - i].port))
                         {
                             return true;
                         }
@@ -457,8 +455,7 @@ class is_operational_impl
                         {
                             continue;
                         }
-                        if (!encodes_bit_one(ground_state, bdl,
-                                             input_bdl_wires[input_bdl_wires.size() - 1 - i].port))
+                        if (!encodes_bit_one(ground_state, bdl, input_bdl_wires[input_bdl_wires.size() - 1 - i].port))
                         {
                             return true;
                         }
@@ -472,8 +469,7 @@ class is_operational_impl
                         {
                             continue;
                         }
-                        if (!encodes_bit_zero(ground_state, bdl,
-                                              input_bdl_wires[input_bdl_wires.size() - 1 - i].port))
+                        if (!encodes_bit_zero(ground_state, bdl, input_bdl_wires[input_bdl_wires.size() - 1 - i].port))
                         {
                             return true;
                         }
@@ -532,8 +528,7 @@ class is_operational_impl
     [[nodiscard]] bool encodes_bit_zero(const charge_distribution_surface<Lyt>& ground_state,
                                         const bdl_pair<cell<Lyt>>& bdl, const port_direction port) const noexcept
     {
-        if (port.dir == port_direction::SOUTH || port.dir == port_direction::EAST ||
-            port.dir == port_direction::NONE)
+        if (port.dir == port_direction::SOUTH || port.dir == port_direction::EAST || port.dir == port_direction::NONE)
         {
             return static_cast<bool>((ground_state.get_charge_state(bdl.upper) == sidb_charge_state::NEGATIVE) &&
                                      (ground_state.get_charge_state(bdl.lower) == sidb_charge_state::NEUTRAL));
@@ -553,8 +548,7 @@ class is_operational_impl
     [[nodiscard]] bool encodes_bit_one(const charge_distribution_surface<Lyt>& ground_state,
                                        const bdl_pair<cell<Lyt>>& bdl, const port_direction port) const noexcept
     {
-        if (port.dir == port_direction::SOUTH || port.dir == port_direction::EAST ||
-            port.dir == port_direction::NONE)
+        if (port.dir == port_direction::SOUTH || port.dir == port_direction::EAST || port.dir == port_direction::NONE)
         {
             return static_cast<bool>((ground_state.get_charge_state(bdl.upper) == sidb_charge_state::NEUTRAL) &&
                                      (ground_state.get_charge_state(bdl.lower) == sidb_charge_state::NEGATIVE));
