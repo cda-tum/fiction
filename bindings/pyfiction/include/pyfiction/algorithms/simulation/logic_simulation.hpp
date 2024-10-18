@@ -49,7 +49,8 @@ void logic_simulation(pybind11::module& m, const std::string& type_name)
             const auto store_po_names = [&po_names](const NtkOrLyt& ntk_or_lyt)
             {
                 ntk_or_lyt.foreach_po(
-                    [&ntk_or_lyt, &po_names]([[maybe_unused]] const auto& po, auto i) {
+                    [&ntk_or_lyt, &po_names]([[maybe_unused]] const auto& po, auto i)
+                    {
                         po_names.emplace_back(ntk_or_lyt.has_output_name(i) ? ntk_or_lyt.get_output_name(i) :
                                                                               fmt::format("po{}", i));
                     });

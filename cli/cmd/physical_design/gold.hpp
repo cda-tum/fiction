@@ -63,6 +63,7 @@ class gold_command : public command
         add_flag("--return_first,-r", ps.return_first,
                  "Terminate on the first found layout; reduces runtime but might sacrifice result quality");
         add_flag("--planar,-p", ps.planar, "Enable planar layout generation");
+        add_flag("--multithreading,-m", ps.enable_multithreading, "Enable multithreading (beta feature)");
         add_flag("--verbose,-v", ps.verbose, "Be verbose");
     }
 
