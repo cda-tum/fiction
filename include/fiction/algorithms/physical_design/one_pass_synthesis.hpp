@@ -165,7 +165,7 @@ class mugen_handler
      * Standard constructor.
      *
      * @param spec The Boolean functions to synthesize.
-     * @param lyt Reference to an empty layout that serves as a floor plan for S&P&R by Mugen.
+     * @param sketch Reference to an empty layout that serves as a floor plan for S&P&R by Mugen.
      * @param p The configurations to respect in the SAT instance generation process.
      */
     mugen_handler(const std::vector<TT>& spec, Lyt& sketch, one_pass_synthesis_params p) :
