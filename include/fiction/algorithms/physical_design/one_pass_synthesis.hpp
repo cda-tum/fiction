@@ -9,13 +9,14 @@
 
 #include "fiction/algorithms/iter/aspect_ratio_iterator.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
-#include "fiction/layouts/coordinates.hpp"
+#include "fiction/traits.hpp"
 #include "fiction/utils/name_utils.hpp"
 #include "utils/mugen_info.hpp"
 
 #include <kitty/dynamic_truth_table.hpp>
 #include <kitty/print.hpp>
 #include <mockturtle/algorithms/simulation.hpp>
+#include <mockturtle/traits.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 
 #if (PROGRESS_BARS)
@@ -23,16 +24,19 @@
 #endif
 
 #include <algorithm>
+#include <cassert>
 #include <chrono>
+#include <cstddef>
+#include <cstdint>
 #include <exception>
-#include <functional>
 #include <iostream>
 #include <iterator>
 #include <limits>
 #include <map>
-#include <memory>
 #include <optional>
+#include <string>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 
 // pybind11 has quite some warnings in its code; let's silence them a little
@@ -45,7 +49,10 @@
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #pragma GCC diagnostic ignored "-Wrange-loop-analysis"
 #pragma warning(push, 0)  // MSVC
+#include <pybind11/cast.h>
 #include <pybind11/embed.h>
+#include <pybind11/eval.h>
+#include <pybind11/pytypes.h>
 #pragma GCC diagnostic pop  // GCC
 #pragma warning(pop)        // MSVC
 
