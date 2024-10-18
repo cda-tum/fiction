@@ -41,7 +41,7 @@ env:
 jobs:
   analyze:
     name: Analyze ${{ matrix.language }}
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     permissions:
       actions: read
       contents: read
@@ -51,7 +51,7 @@ jobs:
       fail-fast: false
       matrix:
         language: [ 'cpp', 'python' ]
-        compiler: [ clang++-11 ]
+        compiler: [ clang++-17 ]
         build_type: [ Debug ]
 
     steps:
