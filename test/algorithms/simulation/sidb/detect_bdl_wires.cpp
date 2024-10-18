@@ -126,7 +126,7 @@ TEST_CASE("Output BDL wire from west to east", "[detect-bdl-wires]")
     REQUIRE(output_bdl_wire.first_bdl_pair_wire.has_value());
     REQUIRE(output_bdl_wire.last_bdl_pair_wire.has_value());
     CHECK(output_bdl_wire.first_bdl_pair_wire.value() ==
-          bdl_pair{sidb_technology::cell_type::INPUT, cell<decltype(lyt)>{0, 0, 0}, cell<decltype(lyt)>{2, 0, 0}});
+          bdl_pair{sidb_technology::cell_type::NORMAL, cell<decltype(lyt)>{0, 0, 0}, cell<decltype(lyt)>{2, 0, 0}});
     CHECK(output_bdl_wire.last_bdl_pair_wire.value() ==
           bdl_pair{sidb_technology::cell_type::OUTPUT, cell<decltype(lyt)>{18, 0, 0}, cell<decltype(lyt)>{20, 0, 0}});
 }
