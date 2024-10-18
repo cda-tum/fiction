@@ -576,7 +576,7 @@ starting pair. The resulting end BDL pairs are stored in
 @note Assumes that `input_bdl_wires` and `end_bdls_of_wires` are
 accessible within the scope.)doc";
 
-static const char *__doc_fiction_bdl_input_iterator_end_bdls_of_wires = R"doc()doc";
+static const char *__doc_fiction_bdl_input_iterator_end_bdls_of_wires = R"doc(End BDL pairs of each BDL wire.)doc";
 
 static const char *__doc_fiction_bdl_input_iterator_input_bdl_wires = R"doc(The detected input BDL wires.)doc";
 
@@ -826,6 +826,30 @@ Returns:
     `true` if the `upper` and `lower` attributes are equal, otherwise
     `false`.)doc";
 
+static const char *__doc_fiction_bdl_pair_has_same_x_coordinate =
+R"doc(Checks if the `upper` and `lower` SiDBs in this BDL pair have the same
+x-coordinate as the corresponding SiDBs in the other BDL pair.
+
+Parameter ``other``:
+    The other BDL pair to compare with.
+
+Returns:
+    `true` if both the `upper` and `lower` SiDBs in this pair have the
+    same x-coordinate as the corresponding SiDBs in the other pair,
+    otherwise `false`.)doc";
+
+static const char *__doc_fiction_bdl_pair_has_same_y_coordinate =
+R"doc(Checks if the `upper` and `lower` SiDBs in this BDL pair have the same
+y-coordinate as the corresponding SiDBs in the other BDL pair.
+
+Parameter ``other``:
+    The other BDL pair to compare with.
+
+Returns:
+    `true` if both the `upper` and `lower` SiDBs in this pair have the
+    same y-coordinate as the corresponding SiDBs in the other pair,
+    otherwise `false`.)doc";
+
 static const char *__doc_fiction_bdl_pair_lower =
 R"doc(The lower SiDB of the pair. Upper and lower are defined relative to
 each other via the `operator<` overload.)doc";
@@ -898,10 +922,6 @@ Returns:
     `true` if this BDL pair is not equal to the other, `false`
     otherwise.)doc";
 
-static const char *__doc_fiction_bdl_pair_same_x_coordinate = R"doc()doc";
-
-static const char *__doc_fiction_bdl_pair_same_y_coordinate = R"doc()doc";
-
 static const char *__doc_fiction_bdl_pair_type =
 R"doc(The type of the SiDBs in the pair. BDL SiDBs must be of the same type.
 They can either be normal, input, or output SiDBs.)doc";
@@ -946,15 +966,11 @@ Parameter ``other``:
 static const char *__doc_fiction_bdl_wire_bdl_wire_4 =
 R"doc(Move constructor.
 
-Transfers ownership of the BDL pairs, direction, and start/end pairs
-from another `bdl_wire` object.
+Transfers ownership of the BDL pairs, port, and start/end pairs from
+another `bdl_wire` object.
 
 Parameter ``other``:
     The `bdl_wire` object to move from.)doc";
-
-static const char *__doc_fiction_bdl_wire_direction = R"doc(Direction of the BDL wire.)doc";
-
-static const char *__doc_fiction_bdl_wire_end_bdl_pair_wire = R"doc(Ending BDL pair of the wire.)doc";
 
 static const char *__doc_fiction_bdl_wire_erase_bdl_pair =
 R"doc(Erase a specific BDL pair from the wire.
@@ -976,11 +992,15 @@ Returns:
     Optional containing the first BDL pair with the specified type
     `t`, or `std::nullopt` if no such BDL pair is found.)doc";
 
+static const char *__doc_fiction_bdl_wire_first_bdl_pair_wire = R"doc(Starting BDL pair of the wire.)doc";
+
+static const char *__doc_fiction_bdl_wire_last_bdl_pair_wire = R"doc(Ending BDL pair of the wire.)doc";
+
 static const char *__doc_fiction_bdl_wire_operator_assign =
 R"doc(Move assignment operator.
 
-Transfers ownership of the BDL pairs, direction, and start/end pairs
-from another `bdl_wire` object.
+Transfers ownership of the BDL pairs, port, and start/end pairs from
+another `bdl_wire` object.
 
 Parameter ``other``:
     The `bdl_wire` object to move from.
@@ -1002,6 +1022,8 @@ Returns:
 
 static const char *__doc_fiction_bdl_wire_pairs = R"doc(Vector of BDL pairs representing the wire.)doc";
 
+static const char *__doc_fiction_bdl_wire_port = R"doc(Port of the BDL wire.)doc";
+
 static const char *__doc_fiction_bdl_wire_selection = R"doc(An enumeration of the selection of different types of wires.)doc";
 
 static const char *__doc_fiction_bdl_wire_selection_ALL = R"doc(Select all BDL wires.)doc";
@@ -1010,9 +1032,7 @@ static const char *__doc_fiction_bdl_wire_selection_INPUT = R"doc(Select only BD
 
 static const char *__doc_fiction_bdl_wire_selection_OUTPUT = R"doc(Select only BDL wires that end with output cells.)doc";
 
-static const char *__doc_fiction_bdl_wire_start_bdl_pair_wire = R"doc(Starting BDL pair of the wire.)doc";
-
-static const char *__doc_fiction_bdl_wire_update_direction = R"doc(Update the direction of the wire based on the current BDL pairs.)doc";
+static const char *__doc_fiction_bdl_wire_update_direction = R"doc(Update the port of the wire based on the current BDL pairs.)doc";
 
 static const char *__doc_fiction_binomial_coefficient =
 R"doc(Calculates the binomial coefficient :math:`\binom{n}{k}`.
@@ -4766,19 +4786,18 @@ Returns:
 static const char *__doc_fiction_detail_design_sidb_gates_impl_set_charge_distribution_of_input_wires_based_on_input_pattern =
 R"doc(This function assigns the charge states of the input wires in the
 layout according to the provided input pattern index. It performs the
-following steps: - For `NORTH-SOUTH` direction wires, if the
-corresponding bit in the input pattern is set, assigns `NEUTRAL`
-charge to the upper part and `NEGATIVE` charge to the lower part of
-the BDLs of the wire. - For `NORTH-SOUTH` direction wires, if the
-corresponding bit in the input pattern is not set, assigns `NEGATIVE`
-charge to the upper part and `NEUTRAL` charge to the lower part of the
-BDLs of the wire. - For `SOUTH-NORTH` direction wires, if the
-corresponding bit in the input pattern is set, assigns `NEGATIVE`
-charge to the upper part and `NEUTRAL` charge to the lower part of the
-BDLs of the wire. - For `SOUTH-NORTH` direction wires, if the
-corresponding bit in the input pattern is not set, assigns `NEUTRAL`
-charge to the upper part and `NEGATIVE` charge to the lower part of
-the BDLs of the wire.
+following steps: - For `NORTH-SOUTH` port wires, if the corresponding
+bit in the input pattern is set, assigns `NEUTRAL` charge to the upper
+part and `NEGATIVE` charge to the lower part of the BDLs of the wire.
+- For `NORTH-SOUTH` port wires, if the corresponding bit in the input
+pattern is not set, assigns `NEGATIVE` charge to the upper part and
+`NEUTRAL` charge to the lower part of the BDLs of the wire. - For
+`SOUTH-NORTH` port wires, if the corresponding bit in the input
+pattern is set, assigns `NEGATIVE` charge to the upper part and
+`NEUTRAL` charge to the lower part of the BDLs of the wire. - For
+`SOUTH-NORTH` port wires, if the corresponding bit in the input
+pattern is not set, assigns `NEUTRAL` charge to the upper part and
+`NEGATIVE` charge to the lower part of the BDLs of the wire.
 
 Parameter ``layout``:
     The charge distribution surface layout to be modified.
@@ -4789,19 +4808,18 @@ Parameter ``current_input_index``:
 static const char *__doc_fiction_detail_design_sidb_gates_impl_set_charge_distribution_of_output_wires_based_on_output_index =
 R"doc(This function assigns the charge states of the input wires in the
 layout according to the provided input pattern index. It performs the
-following steps: - For `NORTH-SOUTH` direction wires, if the
-corresponding bit in the input pattern is set, assigns `NEUTRAL`
-charge to the upper part and `NEGATIVE` charge to the lower part of
-the BDLs of the wire. - For `NORTH-SOUTH` direction wires, if the
-corresponding bit in the input pattern is not set, assigns `NEGATIVE`
-charge to the upper part and `NEUTRAL` charge to the lower part of the
-BDLs of the wire. - For `SOUTH-NORTH` direction wires, if the
-corresponding bit in the input pattern is set, assigns `NEGATIVE`
-charge to the upper part and `NEUTRAL` charge to the lower part of the
-BDLs of the wire. - For `SOUTH-NORTH` direction wires, if the
-corresponding bit in the input pattern is not set, assigns `NEUTRAL`
-charge to the upper part and `NEGATIVE` charge to the lower part of
-the BDLs of the wire.
+following steps: - For `NORTH-SOUTH` port wires, if the corresponding
+bit in the input pattern is set, assigns `NEUTRAL` charge to the upper
+part and `NEGATIVE` charge to the lower part of the BDLs of the wire.
+- For `NORTH-SOUTH` port wires, if the corresponding bit in the input
+pattern is not set, assigns `NEGATIVE` charge to the upper part and
+`NEUTRAL` charge to the lower part of the BDLs of the wire. - For
+`SOUTH-NORTH` port wires, if the corresponding bit in the input
+pattern is set, assigns `NEGATIVE` charge to the upper part and
+`NEUTRAL` charge to the lower part of the BDLs of the wire. - For
+`SOUTH-NORTH` port wires, if the corresponding bit in the input
+pattern is not set, assigns `NEUTRAL` charge to the upper part and
+`NEGATIVE` charge to the lower part of the BDLs of the wire.
 
 Parameter ``layout``:
     The charge distribution surface layout to be modified.
@@ -14913,23 +14931,23 @@ tile. Useful, when no exact port locations within a tile are needed.)doc";
 
 static const char *__doc_fiction_port_direction_cardinal = R"doc(Cardinal direction.)doc";
 
-static const char *__doc_fiction_port_direction_cardinal_EAST = R"doc()doc";
+static const char *__doc_fiction_port_direction_cardinal_EAST = R"doc(East direction.)doc";
 
-static const char *__doc_fiction_port_direction_cardinal_NONE = R"doc()doc";
+static const char *__doc_fiction_port_direction_cardinal_NONE = R"doc(None direction.)doc";
 
-static const char *__doc_fiction_port_direction_cardinal_NORTH = R"doc()doc";
+static const char *__doc_fiction_port_direction_cardinal_NORTH = R"doc(North direction.)doc";
 
-static const char *__doc_fiction_port_direction_cardinal_NORTH_EAST = R"doc()doc";
+static const char *__doc_fiction_port_direction_cardinal_NORTH_EAST = R"doc(North-East direction.)doc";
 
-static const char *__doc_fiction_port_direction_cardinal_NORTH_WEST = R"doc()doc";
+static const char *__doc_fiction_port_direction_cardinal_NORTH_WEST = R"doc(North-West direction.)doc";
 
-static const char *__doc_fiction_port_direction_cardinal_SOUTH = R"doc()doc";
+static const char *__doc_fiction_port_direction_cardinal_SOUTH = R"doc(South direction.)doc";
 
-static const char *__doc_fiction_port_direction_cardinal_SOUTH_EAST = R"doc()doc";
+static const char *__doc_fiction_port_direction_cardinal_SOUTH_EAST = R"doc(South-East direction.)doc";
 
-static const char *__doc_fiction_port_direction_cardinal_SOUTH_WEST = R"doc()doc";
+static const char *__doc_fiction_port_direction_cardinal_SOUTH_WEST = R"doc(South-West direction.)doc";
 
-static const char *__doc_fiction_port_direction_cardinal_WEST = R"doc()doc";
+static const char *__doc_fiction_port_direction_cardinal_WEST = R"doc(West direction.)doc";
 
 static const char *__doc_fiction_port_direction_dir = R"doc(Direction.)doc";
 
