@@ -1,5 +1,4 @@
 #include "fiction/algorithms/simulation/sidb/defect_avoidance_distance.hpp"
-
 #include "fiction/algorithms/simulation/sidb/defect_influence_operational_domain.hpp"
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
 #include "fiction/algorithms/simulation/sidb/maximum_defect_influence_position_and_distance.hpp"
@@ -23,10 +22,8 @@ using namespace fiction;
 
 int main()
 {
-    experiments::experiment<std::string, std::size_t, std::size_t, std::size_t, std::size_t>
-        simulation_exp{
-            "Benchmark",        "Gate Name",        "instance count",   "#samples_grid",          "#sample_contour",          "#unequal"
-        };
+    experiments::experiment<std::string, std::size_t, std::size_t, std::size_t, std::size_t> simulation_exp{
+        "Benchmark", "Gate Name", "instance count", "#samples_grid", "#sample_contour", "#unequal"};
 
     static const std::string folder        = fmt::format("{}defect_avoidance_distance/fom_data/sqd/", EXPERIMENTS_PATH);
     static const std::string output_folder = fmt::format("{}defect_avoidance_distance/plots/", EXPERIMENTS_PATH);
@@ -61,9 +58,9 @@ int main()
         std::string gate_folder = fmt::format("{}{}/", output_folder, gate);
         std::filesystem::create_directories(gate_folder);
 
-        std::size_t gate_counter = 0;
-        std::size_t unequal_counter = 0;
-        std::size_t sample_grid_counter = 0;
+        std::size_t gate_counter           = 0;
+        std::size_t unequal_counter        = 0;
+        std::size_t sample_grid_counter    = 0;
         std::size_t sample_contour_counter = 0;
 
         bool start_with_new_boolean_function = false;
@@ -100,7 +97,6 @@ int main()
 
             const auto avoidance_grid = defect_avoidance_distance(layout, op_defect_grid);
 
-
             defect_influence_operational_domain_stats contour_stats{};
             const auto op_defect_contour = defect_influence_operational_domain_contour_tracing(
                 layout, truth_table, 100, defect_params, &contour_stats);
@@ -114,8 +110,8 @@ int main()
 
             if (std::abs(avoidance_grid.max_min_distance - avoidance_contour.max_min_distance) > 0.1)
             {  // Log the simulation results
-               unequal_counter++;
-               std::cout << file.path().string() << std::endl;
+                unequal_counter++;
+                std::cout << file.path().string() << std::endl;
             }
         }
         simulation_exp(gate, gate_counter, sample_grid_counter, sample_contour_counter, unequal_counter);

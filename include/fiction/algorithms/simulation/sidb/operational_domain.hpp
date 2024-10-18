@@ -1018,8 +1018,7 @@ class operational_domain_impl
      */
     [[nodiscard]] inline std::optional<operational_status> has_already_been_sampled(const step_point& sp) const noexcept
     {
-        if (const auto v = contains_key(op_domain.operational_values, to_parameter_point(sp));
-            v.has_value())
+        if (const auto v = contains_key(op_domain.operational_values, to_parameter_point(sp)); v.has_value())
         {
             return v.value();
         }

@@ -13,7 +13,6 @@
 #include "fiction/technology/sidb_defects.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/execution_utils.hpp"
-#include "fiction/traits.hpp"
 #include "fiction/utils/layout_utils.hpp"
 
 #include <mockturtle/utils/stopwatch.hpp>
@@ -280,9 +279,10 @@ class maximum_defect_influence_position_and_distance_impl
  * layout.
  */
 template <typename Lyt>
-std::pair<typename Lyt::cell, double> maximum_defect_influence_position_and_distance(
-    const Lyt& lyt, const maximum_defect_influence_position_and_distance_params& params = {},
-    maximum_defect_influence_position_and_distance_stats* pst = nullptr)
+std::pair<typename Lyt::cell, double>
+maximum_defect_influence_position_and_distance(const Lyt&                                                   lyt,
+                                               const maximum_defect_influence_position_and_distance_params& params = {},
+                                               maximum_defect_influence_position_and_distance_stats* pst = nullptr)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");

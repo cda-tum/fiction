@@ -39,8 +39,10 @@ inline void design_sidb_gates(pybind11::module& m)
     pybind11::enum_<typename fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::design_sidb_gates_mode>(
         m, "design_sidb_gates_mode", DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode))
         .value("EXHAUSTIVE",
-               fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::design_sidb_gates_mode::EXHAUSTIVE, DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode_EXHAUSTIVE))
-        .value("RANDOM", fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::design_sidb_gates_mode::RANDOM, DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode_RANDOM));
+               fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::design_sidb_gates_mode::EXHAUSTIVE,
+               DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode_EXHAUSTIVE))
+        .value("RANDOM", fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::design_sidb_gates_mode::RANDOM,
+               DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode_RANDOM));
 
     /**
      * Parameters.

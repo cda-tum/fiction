@@ -153,7 +153,6 @@ using py_charge_distribution_surface_layout = fiction::charge_distribution_surfa
 
 using py_charge_distribution_surface = fiction::charge_distribution_surface<py_sidb_layout>;
 
-
 using py_charge_distribution_surface_cube = fiction::charge_distribution_surface<py_sidb_layout_cube>;
 
 /**
