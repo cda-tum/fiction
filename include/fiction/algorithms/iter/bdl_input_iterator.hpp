@@ -341,7 +341,7 @@ class bdl_input_iterator
      */
     void set_all_inputs() noexcept
     {
-        for (uint64_t i = 0; i < input_pairs.size(); ++i)
+        for (uint64_t i = input_pairs.size(); i-- > 0;)
         {
             const auto& input_i = input_pairs[i];
 
