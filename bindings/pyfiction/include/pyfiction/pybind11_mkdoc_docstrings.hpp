@@ -571,9 +571,9 @@ R"doc(This function iterates through each wire in `input_bdl_wires`,
 identifies the starting BDL pair of type `INPUT`, and then finds the
 BDL pair within the same wire that has the maximum distance from the
 starting pair. The resulting end BDL pairs are stored in
-`end_bdls_of_wires`.
+`last_bdl_for_each_wire`.
 
-@note Assumes that `input_bdl_wires` and `end_bdls_of_wires` are
+@note Assumes that `input_bdl_wires` and `last_bdl_for_each_wire` are
 accessible within the scope.)doc";
 
 static const char *__doc_fiction_bdl_input_iterator_end_bdls_of_wires = R"doc(End BDL pairs of each BDL wire.)doc";

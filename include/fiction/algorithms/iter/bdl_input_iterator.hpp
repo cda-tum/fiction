@@ -85,7 +85,7 @@ class bdl_input_iterator
                 detect_bdl_pairs<Lyt>(lyt, sidb_technology::cell_type::INPUT, params.bdl_wire_params.bdl_pairs_params)},
             num_inputs{static_cast<uint8_t>(input_pairs.size())},
             input_bdl_wires{detect_bdl_wires<Lyt>(lyt, params.bdl_wire_params, bdl_wire_selection::INPUT)},
-            end_bdls_of_wires{determine_end_bdls_of_wires()},
+            last_bdl_for_each_wire{determine_last_bdl_for_each_wire()},
             params{params}
     {
         static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
@@ -108,7 +108,7 @@ class bdl_input_iterator
                 detect_bdl_pairs<Lyt>(lyt, sidb_technology::cell_type::INPUT, params.bdl_wire_params.bdl_pairs_params)},
             num_inputs{static_cast<uint8_t>(input_pairs.size())},
             input_bdl_wires{input_wires},
-            end_bdls_of_wires{determine_end_bdls_of_wires()},
+            last_bdl_for_each_wire{determine_last_bdl_for_each_wire()},
             params{params}
     {
         static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
@@ -359,9 +359,9 @@ class bdl_input_iterator
      */
     const std::vector<bdl_wire<Lyt>> input_bdl_wires;
     /**
-     * End BDL pairs of each BDL wire.
+     * Last BDL pairs for each BDL wire.
      */
-    const std::vector<bdl_pair<cell<Lyt>>> end_bdls_of_wires;
+    const std::vector<bdl_pair<cell<Lyt>>> last_bdl_for_each_wire;
     /**
      * The current input index. There are \f$2^n\f$ possible input states for an \f$n\f$-input BDL layout.
      */
@@ -372,13 +372,13 @@ class bdl_input_iterator
     const bdl_input_iterator_params params;
 
     /**
-     * This function iterates through each wire in `input_bdl_wires`, identifies the starting BDL pair
+     * This function iterates through each wire in `input_bdl_wires`, identifies the first BDL pair
      * of type `INPUT`, and then finds the BDL pair within the same wire that has the maximum distance
-     * from the starting pair. The resulting end BDL pairs are stored in `end_bdls_of_wires`.
+     * from the starting pair. The resulting last BDL pairs are stored in `last_bdl_for_each_wire`.
      *
-     * @note Assumes that `input_bdl_wires` and `end_bdls_of_wires` are accessible within the scope.
+     * @note Assumes that `input_bdl_wires` and `last_bdl_for_each_wire` are accessible within the scope.
      */
-    [[nodiscard]] std::vector<bdl_pair<cell<Lyt>>> determine_end_bdls_of_wires() noexcept
+    [[nodiscard]] std::vector<bdl_pair<cell<Lyt>>> determine_last_bdl_for_each_wire() noexcept
     {
         std::vector<bdl_pair<cell<Lyt>>> end_bdls{};
         end_bdls.reserve(input_bdl_wires.size());
@@ -432,9 +432,9 @@ class bdl_input_iterator
             if ((current_input_index & (uint64_t{1ull} << (num_inputs - 1 - i))) != 0ull)
             {
                 const auto distance_between_end_bdl_and_upper_input =
-                    sidb_nm_distance(Lyt{}, input_i.upper, end_bdls_of_wires[i].upper);
+                    sidb_nm_distance(Lyt{}, input_i.upper, last_bdl_for_each_wire[i].upper);
                 const auto distance_between_end_bdl_and_lower_input =
-                    sidb_nm_distance(Lyt{}, input_i.lower, end_bdls_of_wires[i].upper);
+                    sidb_nm_distance(Lyt{}, input_i.lower, last_bdl_for_each_wire[i].upper);
 
                 if (distance_between_end_bdl_and_upper_input < distance_between_end_bdl_and_lower_input)
                 {
@@ -454,9 +454,9 @@ class bdl_input_iterator
                     bdl_input_iterator_params::input_bdl_configuration::PERTURBER_DISTANCE_ENCODED)
                 {
                     const auto distance_between_end_bdl_and_upper_input =
-                        sidb_nm_distance(Lyt{}, input_i.upper, end_bdls_of_wires[i].upper);
+                        sidb_nm_distance(Lyt{}, input_i.upper, last_bdl_for_each_wire[i].upper);
                     const auto distance_between_end_bdl_and_lower_input =
-                        sidb_nm_distance(Lyt{}, input_i.lower, end_bdls_of_wires[i].upper);
+                        sidb_nm_distance(Lyt{}, input_i.lower, last_bdl_for_each_wire[i].upper);
 
                     if (distance_between_end_bdl_and_upper_input < distance_between_end_bdl_and_lower_input)
                     {

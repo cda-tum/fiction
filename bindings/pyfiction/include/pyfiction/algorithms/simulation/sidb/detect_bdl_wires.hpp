@@ -45,7 +45,7 @@ void detect_bdl_wires(pybind11::module& m, const std::string_view& suffix = "")
         .def(py::init<std::vector<fiction::bdl_pair<fiction::offset::ucoord_t>>>(), "p"_a,
              DOC(fiction_bdl_wire_bdl_wire_2))
         .def_readwrite("pairs", &bdl_wire_t::pairs, DOC(fiction_bdl_wire_pairs))
-        .def_readwrite("direction", &bdl_wire_t::port, DOC(fiction_bdl_wire_direction))
+        .def_readwrite("direction", &bdl_wire_t::port, DOC(fiction_bdl_wire_port))
         .def_readwrite("first_bdl_pair_wire", &bdl_wire_t::first_bdl_pair_wire,
                        DOC(fiction_bdl_wire_first_bdl_pair_wire))
         .def_readwrite("last_bdl_pair_wire", &bdl_wire_t::last_bdl_pair_wire, DOC(fiction_bdl_wire_last_bdl_pair_wire));
