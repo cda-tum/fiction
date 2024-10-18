@@ -785,10 +785,23 @@ class one_pass_synthesis_impl
                     update_timeout(handler, pst.time_total);
                 }
             }
-            // timeout reached
+            catch (const pybind11::error_already_set& e)
+            {
+                // timeout reached
+                if (e.matches(PyExc_TimeoutError))
+                {
+                    return std::nullopt;
+                }
+
+                // unexpected error
+                std::cout << "[e] something unexpected happened in Python; this needs investigation" << std::endl;
+                throw;
+            }
+            // unexpected exception
             catch (...)
             {
-                return std::nullopt;
+                std::cout << "[e] something unexpected happened; this needs investigation" << std::endl;
+                throw;
             }
         }
 
