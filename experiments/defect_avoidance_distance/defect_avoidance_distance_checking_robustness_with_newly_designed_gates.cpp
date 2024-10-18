@@ -6,8 +6,8 @@
 #include "fiction/io/read_sqd_layout.hpp"
 #include "fiction/io/write_defect_influence_operational_domain.hpp"
 #include "fiction/io/write_sqd_layout.hpp"
-#include "fiction/types.hpp"
 #include "fiction/traits.hpp"
+#include "fiction/types.hpp"
 #include "fiction/utils/truth_table_utils.hpp"
 #include "fiction_experiments.hpp"
 

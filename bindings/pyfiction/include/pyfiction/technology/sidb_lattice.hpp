@@ -47,41 +47,39 @@ void sidb_lattice_cell_level_layout(pybind11::module& m)
      */
     if constexpr (fiction::has_cube_coord_v<LayoutType> && fiction::is_sidb_lattice_100_v<LatticeOrientation>)
     {
-        py::class_<py_sidb_lattice, LayoutType>(m, "sidb_100_lattice_cube",
-                                                DOC(fiction_cell_level_layout), py::module_local())
+        py::class_<py_sidb_lattice, LayoutType>(m, "sidb_100_lattice_cube", DOC(fiction_cell_level_layout),
+                                                py::module_local())
             .def(py::init<>())  // Default constructor
             .def(py::init<const fiction::aspect_ratio<LayoutType>&, const std::string&>(), "dimension"_a, "name"_a = "",
                  DOC(fiction_sidb_lattice));
     }
     else if constexpr (fiction::has_cube_coord_v<LayoutType> && fiction::is_sidb_lattice_111_v<LatticeOrientation>)
     {
-        py::class_<py_sidb_lattice, LayoutType>(m, "sidb_111_lattice_cube",
-                                                DOC(fiction_cell_level_layout), py::module_local())
+        py::class_<py_sidb_lattice, LayoutType>(m, "sidb_111_lattice_cube", DOC(fiction_cell_level_layout),
+                                                py::module_local())
             .def(py::init<>())  // Default constructor
             .def(py::init<const fiction::aspect_ratio<LayoutType>&, const std::string&>(), "dimension"_a, "name"_a = "",
                  DOC(fiction_sidb_lattice));
     }
     else if constexpr (!fiction::has_cube_coord_v<LayoutType> && fiction::is_sidb_lattice_100_v<LatticeOrientation>)
     {
-        py::class_<py_sidb_lattice, LayoutType>(m, "sidb_100_lattice",
-                                                DOC(fiction_cell_level_layout), py::module_local())
+        py::class_<py_sidb_lattice, LayoutType>(m, "sidb_100_lattice", DOC(fiction_cell_level_layout),
+                                                py::module_local())
             .def(py::init<>())  // Default constructor
             .def(py::init<const fiction::aspect_ratio<LayoutType>&, const std::string&>(), "dimension"_a, "name"_a = "",
                  DOC(fiction_sidb_lattice));
     }
     else if constexpr (!fiction::has_cube_coord_v<LayoutType> && fiction::is_sidb_lattice_111_v<LatticeOrientation>)
     {
-        py::class_<py_sidb_lattice, LayoutType>(m, "sidb_111_lattice",
-                                                DOC(fiction_cell_level_layout), py::module_local())
+        py::class_<py_sidb_lattice, LayoutType>(m, "sidb_111_lattice", DOC(fiction_cell_level_layout),
+                                                py::module_local())
             .def(py::init<>())  // Default constructor
             .def(py::init<const fiction::aspect_ratio<LayoutType>&, const std::string&>(), "dimension"_a, "name"_a = "",
                  DOC(fiction_sidb_lattice));
     }
 }
 
-
 }  // namespace detail
-
 
 inline void sidb_lattices_100_cube(pybind11::module& m)
 {
@@ -100,7 +98,6 @@ inline void sidb_lattices_100(pybind11::module& m)
     // Bind the regular 100 and 111 SiDB lattices
     detail::sidb_lattice_cell_level_layout<fiction::sidb_100_lattice, py_sidb_layout>(m);
 }
-
 
 inline void sidb_lattices_111_cube(pybind11::module& m)
 {

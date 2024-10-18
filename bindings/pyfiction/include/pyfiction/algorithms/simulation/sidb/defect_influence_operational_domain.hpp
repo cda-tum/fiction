@@ -29,15 +29,18 @@ void defect_influence_operational_domain_detail(pybind11::module& m)
 
     m.def("defect_influence_operational_domain_grid_search",
           &fiction::defect_influence_operational_domain_grid_search<Lyt, py_tt>, "lyt"_a, "spec"_a, "step_size"_a,
-          "params"_a = fiction::defect_influence_operational_domain_params{}, "stats"_a = nullptr, DOC(fiction_defect_influence_operational_domain_grid_search));
+          "params"_a = fiction::defect_influence_operational_domain_params{}, "stats"_a = nullptr,
+          DOC(fiction_defect_influence_operational_domain_grid_search));
 
     m.def("defect_influence_operational_domain_random_sampling",
           &fiction::defect_influence_operational_domain_random_sampling<Lyt, py_tt>, "lyt"_a, "spec"_a, "samples"_a,
-          "params"_a = fiction::defect_influence_operational_domain_params{}, "stats"_a = nullptr, DOC(fiction_defect_influence_operational_domain_random_sampling));
+          "params"_a = fiction::defect_influence_operational_domain_params{}, "stats"_a = nullptr,
+          DOC(fiction_defect_influence_operational_domain_random_sampling));
 
     m.def("defect_influence_operational_contour_tracing",
           &fiction::defect_influence_operational_domain_contour_tracing<Lyt, py_tt>, "lyt"_a, "spec"_a, "samples"_a,
-          "params"_a = fiction::defect_influence_operational_domain_params{}, "stats"_a = nullptr, DOC(fiction_defect_influence_operational_domain_contour_tracing));
+          "params"_a = fiction::defect_influence_operational_domain_params{}, "stats"_a = nullptr,
+          DOC(fiction_defect_influence_operational_domain_contour_tracing));
 }
 
 }  // namespace detail

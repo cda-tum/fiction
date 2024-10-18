@@ -13,19 +13,19 @@
 #include <fmt/format.h>
 
 #include <array>
+#include <cstdint>
 #include <cstdlib>
 #include <filesystem>
 #include <string>
 #include <utility>
 #include <vector>
-#include <cstdint>
 
 using namespace fiction;
 
 int main()
 {
-    experiments::experiment<std::string, std::size_t, int64_t, int64_t, double, std::size_t, double, std::size_t, double,
-                            std::size_t>
+    experiments::experiment<std::string, std::size_t, int64_t, int64_t, double, std::size_t, double, std::size_t,
+                            double, std::size_t>
         simulation_exp{
             "Benchmark",        "Gate Name",        "Num SiDBs",
             "x_coord",          "y_coord",          "distance_grid_search",
