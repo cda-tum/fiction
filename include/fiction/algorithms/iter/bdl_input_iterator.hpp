@@ -351,15 +351,17 @@ class bdl_input_iterator
      */
     const std::vector<bdl_pair<cell<Lyt>>> input_pairs;
     /**
-     * The detected input BDL wires.
-     */
-    const std::vector<bdl_wire<Lyt>> input_bdl_wires;
-
-    const std::vector<bdl_pair<cell<Lyt>>> end_bdls_of_wires;
-    /**
      * The amount of input BDL pairs.
      */
     const uint8_t num_inputs;
+    /**
+     * The detected input BDL wires.
+     */
+    const std::vector<bdl_wire<Lyt>> input_bdl_wires;
+    /**
+     * End BDL pairs of each BDL wire.
+     */
+    const std::vector<bdl_pair<cell<Lyt>>> end_bdls_of_wires;
     /**
      * The current input index. There are \f$2^n\f$ possible input states for an \f$n\f$-input BDL layout.
      */
@@ -394,7 +396,7 @@ class bdl_input_iterator
                 continue;
             }
 
-            const bdl_pair<cell<Lyt>>& start_bdl_pair = *start_bdl_it;
+            const auto& start_bdl_pair = *start_bdl_it;
 
             // Find the BDL pair with the maximum distance from the start BDL pair
             const auto max_bdl_it =

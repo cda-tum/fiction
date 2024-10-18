@@ -21,6 +21,7 @@
 #include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/traits.hpp"
+#include "fiction/technology/cell_ports.hpp"
 
 #include <kitty/bit_operations.hpp>
 #include <kitty/traits.hpp>
@@ -201,7 +202,7 @@ class is_operational_impl
                     // if the expected output is 1, the expected charge states are (upper, lower) = (0, -1)
                     if (kitty::get_bit(truth_table[output], i))
                     {
-                        if (!encodes_bit_one(gs, output_bdl_pairs[output], output_bdl_wires[output].direction))
+                        if (!encodes_bit_one(gs, output_bdl_pairs[output], output_bdl_wires[output].port))
                         {
                             return operational_status::NON_OPERATIONAL;
                         }
@@ -209,7 +210,7 @@ class is_operational_impl
                     // if the expected output is 0, the expected charge states are (upper, lower) = (-1, 0)
                     else
                     {
-                        if (!encodes_bit_zero(gs, output_bdl_pairs[output], output_bdl_wires[output].direction))
+                        if (!encodes_bit_zero(gs, output_bdl_pairs[output], output_bdl_wires[output].port))
                         {
                             return operational_status::NON_OPERATIONAL;
                         }
@@ -291,7 +292,7 @@ class is_operational_impl
                 // if the expected output is 1, the expected charge states are (upper, lower) = (0, -1)
                 if (kitty::get_bit(truth_table[output], i))
                 {
-                    if (!encodes_bit_one(*ground_state, output_bdl_pairs[output], output_bdl_wires[output].direction))
+                    if (!encodes_bit_one(*ground_state, output_bdl_pairs[output], output_bdl_wires[output].port))
                     {
                         correct_output = false;
                     }
@@ -299,7 +300,7 @@ class is_operational_impl
                 // if the expected output is 0, the expected charge states are (upper, lower) = (-1, 0)
                 else
                 {
-                    if (!encodes_bit_zero(*ground_state, output_bdl_pairs[output], output_bdl_wires[output].direction))
+                    if (!encodes_bit_zero(*ground_state, output_bdl_pairs[output], output_bdl_wires[output].port))
                     {
                         correct_output = false;
                     }
@@ -413,7 +414,7 @@ class is_operational_impl
     {
         for (auto i = 0u; i < input_bdl_wires.size(); i++)
         {
-            if (input_bdl_wires[input_bdl_wires.size() - 1 - i].direction.dir == port_direction::SOUTH)
+            if (input_bdl_wires[input_bdl_wires.size() - 1 - i].port.dir == port_direction::SOUTH)
             {
                 if ((current_input_index & (uint64_t{1ull} << i)) != 0ull)
                 {
@@ -424,7 +425,7 @@ class is_operational_impl
                             continue;
                         }
                         if (!encodes_bit_one(ground_state, bdl,
-                                             input_bdl_wires[input_bdl_wires.size() - 1 - i].direction))
+                                             input_bdl_wires[input_bdl_wires.size() - 1 - i].port))
                         {
                             return true;
                         }
@@ -439,14 +440,14 @@ class is_operational_impl
                             continue;
                         }
                         if (!encodes_bit_zero(ground_state, bdl,
-                                              input_bdl_wires[input_bdl_wires.size() - 1 - i].direction))
+                                              input_bdl_wires[input_bdl_wires.size() - 1 - i].port))
                         {
                             return true;
                         }
                     }
                 }
             }
-            else if (input_bdl_wires[input_bdl_wires.size() - 1 - i].direction.dir == port_direction::NORTH)
+            else if (input_bdl_wires[input_bdl_wires.size() - 1 - i].port.dir == port_direction::NORTH)
             {
                 if ((current_input_index & (uint64_t{1ull} << i)) != 0ull)
                 {
@@ -457,7 +458,7 @@ class is_operational_impl
                             continue;
                         }
                         if (!encodes_bit_one(ground_state, bdl,
-                                             input_bdl_wires[input_bdl_wires.size() - 1 - i].direction))
+                                             input_bdl_wires[input_bdl_wires.size() - 1 - i].port))
                         {
                             return true;
                         }
@@ -472,7 +473,7 @@ class is_operational_impl
                             continue;
                         }
                         if (!encodes_bit_zero(ground_state, bdl,
-                                              input_bdl_wires[input_bdl_wires.size() - 1 - i].direction))
+                                              input_bdl_wires[input_bdl_wires.size() - 1 - i].port))
                         {
                             return true;
                         }
@@ -503,14 +504,14 @@ class is_operational_impl
             {
                 if (kitty::get_bit(truth_table[i], current_input_index))
                 {
-                    if (!encodes_bit_one(ground_state, bdl, output_bdl_wires[i].direction))
+                    if (!encodes_bit_one(ground_state, bdl, output_bdl_wires[i].port))
                     {
                         return true;
                     }
                 }
                 else
                 {
-                    if (!encodes_bit_zero(ground_state, bdl, output_bdl_wires[i].direction))
+                    if (!encodes_bit_zero(ground_state, bdl, output_bdl_wires[i].port))
                     {
                         return true;
                     }
@@ -529,10 +530,10 @@ class is_operational_impl
      * @return `true` if `0` is encoded, `false` otherwise.
      */
     [[nodiscard]] bool encodes_bit_zero(const charge_distribution_surface<Lyt>& ground_state,
-                                        const bdl_pair<cell<Lyt>>& bdl, const port_direction direction) const noexcept
+                                        const bdl_pair<cell<Lyt>>& bdl, const port_direction port) const noexcept
     {
-        if (direction.dir == port_direction::SOUTH || direction.dir == port_direction::EAST ||
-            direction.dir == port_direction::NONE)
+        if (port.dir == port_direction::SOUTH || port.dir == port_direction::EAST ||
+            port.dir == port_direction::NONE)
         {
             return static_cast<bool>((ground_state.get_charge_state(bdl.upper) == sidb_charge_state::NEGATIVE) &&
                                      (ground_state.get_charge_state(bdl.lower) == sidb_charge_state::NEUTRAL));
@@ -550,10 +551,10 @@ class is_operational_impl
      * @return `true` if `1` is encoded, `false` otherwise.
      */
     [[nodiscard]] bool encodes_bit_one(const charge_distribution_surface<Lyt>& ground_state,
-                                       const bdl_pair<cell<Lyt>>& bdl, const port_direction direction) const noexcept
+                                       const bdl_pair<cell<Lyt>>& bdl, const port_direction port) const noexcept
     {
-        if (direction.dir == port_direction::SOUTH || direction.dir == port_direction::EAST ||
-            direction.dir == port_direction::NONE)
+        if (port.dir == port_direction::SOUTH || port.dir == port_direction::EAST ||
+            port.dir == port_direction::NONE)
         {
             return static_cast<bool>((ground_state.get_charge_state(bdl.upper) == sidb_charge_state::NEUTRAL) &&
                                      (ground_state.get_charge_state(bdl.lower) == sidb_charge_state::NEGATIVE));

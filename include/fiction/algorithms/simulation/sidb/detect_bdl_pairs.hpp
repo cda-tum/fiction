@@ -145,15 +145,27 @@ struct bdl_pair
     }
 
     /**
+     * Checks if the `upper` and `lower` SiDBs in this BDL pair have the same y-coordinate
+     * as the corresponding SiDBs in the other BDL pair.
+     *
+     * @param other The other BDL pair to compare with.
+     * @return `true` if both the `upper` and `lower` SiDBs in this pair have the same y-coordinate
+     *         as the corresponding SiDBs in the other pair, otherwise `false`.
      */
-    [[nodiscard]] constexpr bool same_y_coordinate(const bdl_pair<CellType>& other) const noexcept
+    [[nodiscard]] constexpr bool has_same_y_coordinate(const bdl_pair<CellType>& other) const noexcept
     {
         return upper.y == other.upper.y && lower.y == other.lower.y;
     }
 
     /**
+     * Checks if the `upper` and `lower` SiDBs in this BDL pair have the same x-coordinate
+     * as the corresponding SiDBs in the other BDL pair.
+     *
+     * @param other The other BDL pair to compare with.
+     * @return `true` if both the `upper` and `lower` SiDBs in this pair have the same x-coordinate
+     *         as the corresponding SiDBs in the other pair, otherwise `false`.
      */
-    [[nodiscard]] constexpr bool same_x_coordinate(const bdl_pair<CellType>& other) const noexcept
+    [[nodiscard]] constexpr bool has_same_x_coordinate(const bdl_pair<CellType>& other) const noexcept
     {
         return upper.x == other.upper.x && lower.x == other.lower.x;
     }

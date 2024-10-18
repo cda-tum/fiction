@@ -18,6 +18,7 @@
 #include "fiction/traits.hpp"
 #include "fiction/utils/layout_utils.hpp"
 #include "fiction/utils/math_utils.hpp"
+#include "fiction/technology/cell_ports.hpp"
 
 #include <fmt/format.h>
 #include <kitty/dynamic_truth_table.hpp>
@@ -489,13 +490,13 @@ class design_sidb_gates_impl
     /**
      * This function assigns the charge states of the input wires in the layout according to the provided input pattern
      * index. It performs the following steps:
-     * - For `NORTH-SOUTH` direction wires, if the corresponding bit in the input pattern is set, assigns `NEUTRAL`
+     * - For `NORTH-SOUTH` port wires, if the corresponding bit in the input pattern is set, assigns `NEUTRAL`
      * charge to the upper part and `NEGATIVE` charge to the lower part of the BDLs of the wire.
-     * - For `NORTH-SOUTH` direction wires, if the corresponding bit in the input pattern is not set, assigns `NEGATIVE`
+     * - For `NORTH-SOUTH` port wires, if the corresponding bit in the input pattern is not set, assigns `NEGATIVE`
      *   charge to the upper part and `NEUTRAL` charge to the lower part of the BDLs of the wire.
-     * - For `SOUTH-NORTH` direction wires, if the corresponding bit in the input pattern is set, assigns `NEGATIVE`
+     * - For `SOUTH-NORTH` port wires, if the corresponding bit in the input pattern is set, assigns `NEGATIVE`
      * charge to the upper part and `NEUTRAL` charge to the lower part of the BDLs of the wire.
-     * - For `SOUTH-NORTH` direction wires, if the corresponding bit in the input pattern is not set, assigns `NEUTRAL`
+     * - For `SOUTH-NORTH` port wires, if the corresponding bit in the input pattern is not set, assigns `NEUTRAL`
      *   charge to the upper part and `NEGATIVE` charge to the lower part of the BDLs of the wire.
      *
      * @param layout The charge distribution surface layout to be modified.
@@ -509,7 +510,7 @@ class design_sidb_gates_impl
 
         for (auto i = 0u; i < number_of_input_wires; i++)
         {
-            if (input_bdl_wires[number_of_input_wires - 1 - i].direction.dir == port_direction::SOUTH)
+            if (input_bdl_wires[number_of_input_wires - 1 - i].port.dir == port_direction::SOUTH)
             {
                 if ((current_input_index & (uint64_t{1ull} << i)) != 0ull)
                 {
@@ -540,7 +541,7 @@ class design_sidb_gates_impl
                     }
                 }
             }
-            else if (input_bdl_wires[number_of_input_wires - 1 - i].direction.dir == port_direction::NORTH)
+            else if (input_bdl_wires[number_of_input_wires - 1 - i].port.dir == port_direction::NORTH)
             {
                 if ((current_input_index & (uint64_t{1ull} << i)) != 0ull)
                 {
@@ -577,13 +578,13 @@ class design_sidb_gates_impl
     /**
      * This function assigns the charge states of the input wires in the layout according to the provided input pattern
      * index. It performs the following steps:
-     *    - For `NORTH-SOUTH` direction wires, if the corresponding bit in the input pattern is set, assigns `NEUTRAL`
+     *    - For `NORTH-SOUTH` port wires, if the corresponding bit in the input pattern is set, assigns `NEUTRAL`
      * charge to the upper part and `NEGATIVE` charge to the lower part of the BDLs of the wire.
-     *    - For `NORTH-SOUTH` direction wires, if the corresponding bit in the input pattern is not set, assigns
+     *    - For `NORTH-SOUTH` port wires, if the corresponding bit in the input pattern is not set, assigns
      * `NEGATIVE` charge to the upper part and `NEUTRAL` charge to the lower part of the BDLs of the wire.
-     *    - For `SOUTH-NORTH` direction wires, if the corresponding bit in the input pattern is set, assigns `NEGATIVE`
+     *    - For `SOUTH-NORTH` port wires, if the corresponding bit in the input pattern is set, assigns `NEGATIVE`
      * charge to the upper part and `NEUTRAL` charge to the lower part of the BDLs of the wire.
-     *    - For `SOUTH-NORTH` direction wires, if the corresponding bit in the input pattern is not set, assigns
+     *    - For `SOUTH-NORTH` port wires, if the corresponding bit in the input pattern is not set, assigns
      * `NEUTRAL` charge to the upper part and `NEGATIVE` charge to the lower part of the BDLs of the wire.
      *
      * @param layout The charge distribution surface layout to be modified.
@@ -595,7 +596,7 @@ class design_sidb_gates_impl
     {
         for (auto i = 0u; i < number_of_output_wires; i++)
         {
-            if (output_bdl_wires[i].direction.dir == port_direction::SOUTH)
+            if (output_bdl_wires[i].port.dir == port_direction::SOUTH)
             {
                 if ((output_wire_index & (uint64_t{1ull} << i)) != 0ull)
                 {
@@ -618,7 +619,7 @@ class design_sidb_gates_impl
                     }
                 }
             }
-            else if (output_bdl_wires[i].direction.dir == port_direction::NORTH)
+            else if (output_bdl_wires[i].port.dir == port_direction::NORTH)
             {
                 if ((output_wire_index & (uint64_t{1ull} << i)) != 0ull)
                 {
@@ -676,7 +677,7 @@ class design_sidb_gates_impl
     {
         for (auto i = 0u; i < number_of_output_wires; i++)
         {
-            if (output_bdl_wires[i].direction.dir == port_direction::SOUTH)
+            if (output_bdl_wires[i].port.dir == port_direction::SOUTH)
             {
                 if (kitty::get_bit(truth_table[i], input_index))
                 {
@@ -699,7 +700,7 @@ class design_sidb_gates_impl
                     }
                 }
             }
-            else if (output_bdl_wires[i].direction.dir == port_direction::NORTH)
+            else if (output_bdl_wires[i].port.dir == port_direction::NORTH)
             {
                 if (kitty::get_bit(truth_table[i], input_index))
                 {
