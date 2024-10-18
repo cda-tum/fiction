@@ -38,7 +38,7 @@ void detect_bdl_wires(pybind11::module& m, const std::string& lattice = "")
                        DOC(fiction_bdl_wire_first_bdl_pair_wire))
         .def_readwrite("last_bdl_pair_wire", &bdl_wire_t::last_bdl_pair_wire, DOC(fiction_bdl_wire_last_bdl_pair_wire));
 
-    m.def(fmt::format("detect_bdl_wires{}", lattice).c_str(), &fiction::detect_bdl_wires<Lyt>, "lyt"_a,
+    m.def(fmt::format("detect_bdl_wires_{}", lattice).c_str(), &fiction::detect_bdl_wires<Lyt>, "lyt"_a,
           "params"_a = fiction::detect_bdl_wires_params{}, "wire_selection"_a = fiction::bdl_wire_selection::ALL,
           DOC(fiction_detect_bdl_wires));
 }
