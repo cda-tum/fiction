@@ -31,10 +31,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
-defaults:
-    run:
-      shell: bash
-
 env:
   Z3_VERSION: 4.13.0
 
@@ -89,13 +85,13 @@ jobs:
           python-version: '3.10.x'
           cache: 'pip'
 
+      - name: Setup mold
+        uses: rui314/setup-mold@v1
+
       - name: Install pip packages
         uses: BSFishy/pip-action@v1
         with:
           requirements: ${{github.workspace}}/libs/mugen/requirements.txt
-
-      - name: Setup mold
-        uses: rui314/setup-mold@v1
 
       - name: Setup Z3 Solver
         id: z3
@@ -114,17 +110,17 @@ jobs:
           languages: ${{ matrix.language }}
           config-file: .github/codeql-config.yml
 
-      - name: Create Build Environment
-        if: matrix.language == 'cpp'
-        run: cmake -E make_directory ${{ github.workspace }}/build
+      - if: matrix.language == 'cpp'
+        name: Create Build Environment
+        run: cmake -E make_directory ${{github.workspace}}/build
 
-      - name: Configure CMake
-        if: matrix.language == 'cpp'
-        working-directory: ${{ github.workspace }}/build
+      - if: matrix.language == 'cpp'
+        name: Configure CMake
+        working-directory: ${{github.workspace}}/build
         run: >
-          cmake ${{github.workspace}} ${{matrix.cppstandard}}
+          cmake ${{github.workspace}}
           -DCMAKE_CXX_COMPILER=${{matrix.compiler}}
-          -DCMAKE_BUILD_TYPE=Debug
+          -DCMAKE_BUILD_TYPE=${{matrix.build_type}}
           -DFICTION_ENABLE_UNITY_BUILD=ON
           -DFICTION_ENABLE_PCH=ON
           -DFICTION_CLI=OFF
@@ -137,11 +133,10 @@ jobs:
           -DFICTION_WARNINGS_AS_ERRORS=OFF
           -DMOCKTURTLE_EXAMPLES=OFF
 
-      - name: Build fiction
-        if: matrix.language == 'cpp'
-        working-directory: ${{ github.workspace }}/build
+      - if: matrix.language == 'cpp'
+        name: Build fiction
+        working-directory: ${{github.workspace}}/build
         run: cmake --build . --config ${{matrix.build_type}} -j4
-
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
