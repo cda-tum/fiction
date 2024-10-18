@@ -566,21 +566,21 @@ static const char *__doc_fiction_bdl_input_iterator_current_input_index =
 R"doc(The current input index. There are :math:`2^n` possible input states
 for an :math:`n`-input BDL layout.)doc";
 
-static const char *__doc_fiction_bdl_input_iterator_determine_end_bdls_of_wires =
+static const char *__doc_fiction_bdl_input_iterator_determine_last_bdl_for_each_wire =
 R"doc(This function iterates through each wire in `input_bdl_wires`,
-identifies the starting BDL pair of type `INPUT`, and then finds the
-BDL pair within the same wire that has the maximum distance from the
-starting pair. The resulting end BDL pairs are stored in
+identifies the first BDL pair of type `INPUT`, and then finds the BDL
+pair within the same wire that has the maximum distance from the
+starting pair. The resulting last BDL pairs are stored in
 `last_bdl_for_each_wire`.
 
 @note Assumes that `input_bdl_wires` and `last_bdl_for_each_wire` are
 accessible within the scope.)doc";
 
-static const char *__doc_fiction_bdl_input_iterator_end_bdls_of_wires = R"doc(End BDL pairs of each BDL wire.)doc";
-
 static const char *__doc_fiction_bdl_input_iterator_input_bdl_wires = R"doc(The detected input BDL wires.)doc";
 
 static const char *__doc_fiction_bdl_input_iterator_input_pairs = R"doc(The detected input BDL pairs.)doc";
+
+static const char *__doc_fiction_bdl_input_iterator_last_bdl_for_each_wire = R"doc(Last BDL pairs for each BDL wire.)doc";
 
 static const char *__doc_fiction_bdl_input_iterator_layout = R"doc(The layout to iterate over.)doc";
 

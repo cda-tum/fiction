@@ -18,7 +18,6 @@
 #include <optional>
 #include <set>
 #include <vector>
-#include <optional>
 
 namespace fiction
 {
