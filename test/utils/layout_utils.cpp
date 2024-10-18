@@ -756,6 +756,36 @@ TEST_CASE("Generate all cells in area spanned by two cells, using siqad coordina
         CHECK(final_cell.y == 5);
         CHECK(final_cell.z == 1);
     }
+
+    SECTION("north-south and south-west cells are given, positive coordinates")
+    {
+        const auto all_area_cells = all_coordinates_in_spanned_area<siqad::coord_t>({10, 0}, {0, 11, 1});
+        REQUIRE(all_area_cells.size() == 264);
+        const auto first_cell = all_area_cells.front();
+        CHECK(first_cell.x == 0);
+        CHECK(first_cell.y == 0);
+        CHECK(first_cell.z == 0);
+
+        const auto final_cell = all_area_cells.back();
+        CHECK(final_cell.x == 10);
+        CHECK(final_cell.y == 11);
+        CHECK(final_cell.z == 1);
+    }
+
+    SECTION("north-south and south-west cells are given, negative coordinates")
+    {
+        const auto all_area_cells = all_coordinates_in_spanned_area<siqad::coord_t>({-10, 0}, {0, -11, 1});
+        REQUIRE(all_area_cells.size() == 242);
+        const auto first_cell = all_area_cells.front();
+        CHECK(first_cell.x == -10);
+        CHECK(first_cell.y == -11);
+        CHECK(first_cell.z == 1);
+
+        const auto final_cell = all_area_cells.back();
+        CHECK(final_cell.x == 0);
+        CHECK(final_cell.y == 0);
+        CHECK(final_cell.z == 0);
+    }
 }
 
 TEST_CASE("Generate all cells in area spanned by two cells, using cube coordinates", "[layout-utils]")
@@ -802,6 +832,36 @@ TEST_CASE("Generate all cells in area spanned by two cells, using cube coordinat
         const auto final_cell = all_area_cells.back();
         CHECK(final_cell.x == 10);
         CHECK(final_cell.y == 11);
+        CHECK(final_cell.z == 0);
+    }
+
+    SECTION("north-south and south-west cells are given, positive coordinates")
+    {
+        const auto all_area_cells = all_coordinates_in_spanned_area<cube::coord_t>({10, 0}, {0, 11});
+        REQUIRE(all_area_cells.size() == 132);
+        const auto first_cell = all_area_cells.front();
+        CHECK(first_cell.x == 0);
+        CHECK(first_cell.y == 0);
+        CHECK(first_cell.z == 0);
+
+        const auto final_cell = all_area_cells.back();
+        CHECK(final_cell.x == 10);
+        CHECK(final_cell.y == 11);
+        CHECK(final_cell.z == 0);
+    }
+
+    SECTION("north-south and south-west cells are given, negative coordinates")
+    {
+        const auto all_area_cells = all_coordinates_in_spanned_area<cube::coord_t>({-10, 0}, {0, -11});
+        REQUIRE(all_area_cells.size() == 132);
+        const auto first_cell = all_area_cells.front();
+        CHECK(first_cell.x == -10);
+        CHECK(first_cell.y == -11);
+        CHECK(first_cell.z == 0);
+
+        const auto final_cell = all_area_cells.back();
+        CHECK(final_cell.x == 0);
+        CHECK(final_cell.y == 0);
         CHECK(final_cell.z == 0);
     }
 }

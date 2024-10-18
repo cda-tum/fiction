@@ -181,6 +181,7 @@ class displacement_robustness_domain_impl
     displacement_robustness_domain<Lyt> determine_robustness_domain() noexcept
     {
         mockturtle::stopwatch stop{stats.time_total};
+
         all_possible_sidb_displacements = calculate_all_possible_displacements_for_each_sidb();
 
         auto layouts = generate_valid_displaced_sidb_layouts();
@@ -209,7 +210,6 @@ class displacement_robustness_domain_impl
 
         const std::size_t num_threads = std::min(static_cast<std::size_t>(std::thread::hardware_concurrency()),
                                                  static_cast<std::size_t>(layouts.size()));
-
         // calculate the size of each slice
         const auto slice_size = (layouts.size() + num_threads - 1) / num_threads;
 

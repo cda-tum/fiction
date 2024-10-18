@@ -86,7 +86,7 @@ struct generate_random_sidb_layout_params
  * Generates a random layout of SiDBs by adding them to the provided layout skeleton.
  * The layout skeleton serves as the starting layout to which SiDBs are added to create the final layout.
  *
- * @tparam Lyt Cell-level SiDB layout type.
+ * @tparam Lyt SiDB cell-level SiDB layout type.
  * @param lyt_skeleton A layout to which random cells are added to create the final layout.
  * @param params The parameters for generating the random layout.
  * @return A randomly-generated layout of SiDBs.
@@ -134,7 +134,7 @@ Lyt generate_random_sidb_layout(const Lyt&                                      
         // the SiDB is added to the layout
         if (!random_cell_is_identical_wih_defect && !next_to_neutral_defect)
         {
-            lyt.assign_cell_type(random_coord, technology<Lyt>::cell_type::NORMAL);
+            lyt.assign_cell_type(random_coord, technology<Lyt>::cell_type::LOGIC);
 
             if (params.positive_sidbs ==
                     generate_random_sidb_layout_params<coordinate<Lyt>>::positive_charges::FORBIDDEN &&
@@ -152,14 +152,20 @@ Lyt generate_random_sidb_layout(const Lyt&                                      
         return generate_random_sidb_layout(lyt_skeleton, params);
     }
 
-    return lyt;
+    if (lyt.num_cells() == number_of_sidbs_of_final_layout)
+    {
+        return lyt;
+    }
+
+    // if not all SiDBs can be placed, the originally given skeleton layout is returned
+    return lyt_skeleton;
 }
 
 /**
  * Generates multiple unique random SiDB layouts by adding them to the provided layout skeleton.
  * The layout skeleton serves as the starting layout to which SiDBs are added to create unique SiDB layouts.
  *
- * @tparam Lyt Cell-level SiDB layout type.
+ * @tparam Lyt SiDB cell-level SiDB layout type.
  * @param lyt_skeleton A layout to which random SiDBs are added to create unique layouts.
  * @param params The parameters for generating the random SiDB layouts.
  * @return A vector containing the unique randomly generated SiDB layouts.

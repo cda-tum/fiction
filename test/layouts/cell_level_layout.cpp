@@ -108,6 +108,7 @@ TEST_CASE("Cell technology", "[cell-level-layout]")
         CHECK(sidb_technology::is_normal_cell(sidb_technology::cell_type::NORMAL));
         CHECK(sidb_technology::is_input_cell(sidb_technology::cell_type::INPUT));
         CHECK(sidb_technology::is_output_cell(sidb_technology::cell_type::OUTPUT));
+        CHECK(sidb_technology::is_logic_cell(sidb_technology::cell_type::LOGIC));
 
         CHECK(sidb_technology::is_normal_cell_mode(sidb_technology::cell_mode{}));
 
