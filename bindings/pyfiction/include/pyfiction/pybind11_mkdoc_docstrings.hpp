@@ -3604,17 +3604,16 @@ the same order as the inputs of the truth table.
 
 This algorithm uses contour tracing to identify operational defect
 locations within the SiDB gate layout. It starts by searching for
-defect locations on the left side of the bounding box, with an
-additional distance of the SiDB gate where the SiDB gate remains
-operational. The y-coordinate for these positions is chosen randomly.
-The number of samples is determined by the `samples` parameter.
+defect locations on the left side (bounding_box + additional scanning
+area). The y-coordinate for these positions is chosen randomly. The
+number of samples is determined by the `samples` parameter.
 
 Then the algorithm moves each defect position to the right, searching
 for the last operational defect position. This position is selected as
 the starting point for the contour trace. The contour tracing process
 checks whether the contour includes the SiDB layout. If it does not,
-the next random sample point is is selected as the starting point and
-the process is repeated.
+the next random sample point is selected as the starting point and the
+process is repeated.
 
 @Note This algorithm is an approximation to determine the defect
 influence operational domain. Therefore, it is recommended to analyze
@@ -4396,9 +4395,9 @@ static const char *__doc_fiction_detail_connect_and_place = R"doc()doc";
 
 static const char *__doc_fiction_detail_connect_and_place_2 = R"doc()doc";
 
-static const char *__doc_fiction_detail_contains_parameter_point = R"doc(Forward-declaration for `operational_domain`.)doc";
+static const char *__doc_fiction_detail_contains_key = R"doc(Forward-declaration for `operational_domain`.)doc";
 
-static const char *__doc_fiction_detail_contains_parameter_point_2 =
+static const char *__doc_fiction_detail_contains_key_2 =
 R"doc(This function checks for the containment of a parameter point,
 specified by `key`, in the provided map `map`. If the parameter point
 is found in the map, the associated `MapType::value_type` is returned.
@@ -4607,7 +4606,21 @@ the layout. It does so by selecting a defect position with the
 leftmost x-coordinate and a randomly selected y-coordinate limited the
 layout's bounding box.)doc";
 
-static const char *__doc_fiction_detail_defect_influence_operational_domain_impl_grid_search = R"doc()doc";
+static const char *__doc_fiction_detail_defect_influence_operational_domain_impl_grid_search =
+R"doc(This function divides the search space (defined by `nw_cell` and
+`se_cell`) into chunks, each processed by a different thread. The
+search checks if defect positions in the grid are operational based on
+a given step size. Each thread processes a chunk of positions in
+parallel to improve performance.
+
+Parameter ``step_size``:
+    The step size used to sample defect positions in the grid. Only
+    positions with x and y coordinates divisible by `step_size` will
+    be checked for being operational.
+
+Returns:
+    A `defect_influence_operational_domain<Lyt>` object representing
+    the operational domain of the defects.)doc";
 
 static const char *__doc_fiction_detail_defect_influence_operational_domain_impl_has_already_been_sampled =
 R"doc(This function verifies whether the layout has already been analyzed
@@ -4654,7 +4667,22 @@ static const char *__doc_fiction_detail_defect_influence_operational_domain_impl
 
 static const char *__doc_fiction_detail_defect_influence_operational_domain_impl_previous_defect_position = R"doc(The previous defect position.)doc";
 
-static const char *__doc_fiction_detail_defect_influence_operational_domain_impl_random_sampling = R"doc()doc";
+static const char *__doc_fiction_detail_defect_influence_operational_domain_impl_random_sampling =
+R"doc(This function performs random sampling of defect positions from a grid
+area (spanned by `nw_cell` and `se_cell`). The positions are shuffled
+and divided into chunks, which are processed by different threads to
+check if each defect position is operational. Each thread handles a
+subset of the defect positions to improve performance.
+
+Parameter ``samples``:
+    The number of positions to sample. The actual number of iterations
+    will be the smaller of the total number of positions or the
+    `samples` value.
+
+Returns:
+    A `defect_influence_operational_domain<Lyt>` object representing
+    the operational domain of the defects. The return value is marked
+    [[nodiscard]], meaning it must be used by the caller.)doc";
 
 static const char *__doc_fiction_detail_defect_influence_operational_domain_impl_se_bb_layout = R"doc(The south-east bounding box of the layout.)doc";
 
@@ -13409,7 +13437,7 @@ Parameter ``lyt``:
     The SiDB cell-level layout for which the influence distance is
     being determined.
 
-Parameter ``sim_params``:
+Parameter ``params``:
     Parameters used to calculate the defect's maximum influence
     distance.
 
@@ -14164,13 +14192,13 @@ Returns:
     The (partial) operational domain of the layout.)doc";
 
 static const char *__doc_fiction_operational_domain_get_value =
-R"doc(This function retrieves the value associated with the provided
-parameter point from the operational domain. If the parameter point is
-found in the domain, its corresponding value is returned. Otherwise,
-`std::out_of_range` is thrown.
+R"doc(This function retrieves the value associated with the provided key
+from the operational domain. If the key is found in the domain, its
+corresponding value is returned. Otherwise, `std::nullopt` is
+returned.
 
-Parameter ``pp``:
-    The parameter point to look up.
+Parameter ``key``:
+    The key to look up.
 
 Returns:
     The value associated with the parameter point.)doc";
