@@ -18,6 +18,7 @@
 #include <optional>
 #include <set>
 #include <vector>
+#include <optional>
 
 namespace fiction
 {
@@ -77,12 +78,12 @@ struct bdl_wire
     /**
      * Starting BDL pair of the wire.
      */
-    bdl_pair<cell<Lyt>> first_bdl_pair_wire{};
+    std::optional<bdl_pair<cell<Lyt>>> first_bdl_pair_wire{};
 
     /**
      * Ending BDL pair of the wire.
      */
-    bdl_pair<cell<Lyt>> last_bdl_pair_wire{};
+    std::optional<bdl_pair<cell<Lyt>>> last_bdl_pair_wire{};
 
     /**
      * Default constructor for an empty BDL wire.
@@ -264,22 +265,22 @@ struct bdl_wire
         // input and output cells are present
         if (input_exists && output_exists)
         {
-            first_bdl_pair_wire = find_bdl_pair_by_type(sidb_technology::cell_type::INPUT).value();
-            last_bdl_pair_wire  = find_bdl_pair_by_type(sidb_technology::cell_type::OUTPUT).value();
+            first_bdl_pair_wire = find_bdl_pair_by_type(sidb_technology::cell_type::INPUT);
+            last_bdl_pair_wire  = find_bdl_pair_by_type(sidb_technology::cell_type::OUTPUT);
 
             // determine the port of the wire based on the position of input and output BDL pairs
-            if (first_bdl_pair_wire < last_bdl_pair_wire)
+            if (first_bdl_pair_wire.value() < last_bdl_pair_wire)
             {
                 port.dir = port_direction::SOUTH;
 
-                if (first_bdl_pair_wire.lower.y == last_bdl_pair_wire.lower.y ||
-                    first_bdl_pair_wire.upper.y == last_bdl_pair_wire.upper.y)
+                if (first_bdl_pair_wire.value().lower.y == last_bdl_pair_wire.value().lower.y ||
+                    first_bdl_pair_wire.value().upper.y == last_bdl_pair_wire.value().upper.y)
                 {
                     port.dir = port_direction::EAST;
                 }
             }
             // if the input BDL pair is at the same position as the output BDL pair, the wire has no port
-            else if (first_bdl_pair_wire.equal_ignore_type(last_bdl_pair_wire))
+            else if (first_bdl_pair_wire.value().equal_ignore_type(last_bdl_pair_wire.value()))
             {
                 assert(false && "input and output BDL pairs are at the same position");
                 port.dir = port_direction::NONE;
@@ -288,8 +289,8 @@ struct bdl_wire
             {
                 port.dir = port_direction::NORTH;
 
-                if (first_bdl_pair_wire.lower.y == last_bdl_pair_wire.lower.y &&
-                    first_bdl_pair_wire.upper.y == last_bdl_pair_wire.upper.y)
+                if (first_bdl_pair_wire.value().lower.y == last_bdl_pair_wire.value().lower.y &&
+                    first_bdl_pair_wire.value().upper.y == last_bdl_pair_wire.value().upper.y)
                 {
                     port.dir = port_direction::WEST;
                 }
@@ -304,7 +305,7 @@ struct bdl_wire
 
             for (const auto& pair : pairs)
             {
-                const auto distance = euclidean_distance(Lyt{}, pair.lower, first_bdl_pair_wire.lower);
+                const auto distance = euclidean_distance(Lyt{}, pair.lower, first_bdl_pair_wire.value().lower);
                 if (distance > max_distance)
                 {
                     max_distance       = distance;
@@ -314,19 +315,19 @@ struct bdl_wire
 
             // BDL pairs can be above or below the input and final BDL pairs, but the input and output BDL pairs are on
             // the same y-coordinate --> EAST
-            if (first_bdl_pair_wire.lower.x < last_bdl_pair_wire.lower.x &&
-                first_bdl_pair_wire.has_same_y_coordinate(last_bdl_pair_wire))
+            if (first_bdl_pair_wire.value().lower.x < last_bdl_pair_wire.value().lower.x &&
+                first_bdl_pair_wire.value().has_same_y_coordinate(last_bdl_pair_wire.value()))
             {
                 port.dir = port_direction::EAST;
             }
             // Lower cell of the input BDL pair is below the lower cell of the final BDL pair --> SOUTH
-            else if (first_bdl_pair_wire.lower.y > last_bdl_pair_wire.lower.y)
+            else if (first_bdl_pair_wire.value().lower.y > last_bdl_pair_wire.value().lower.y)
             {
                 port.dir = port_direction::NORTH;
             }
             // the input BDL pair is to the right of the final BDL pair --> EAST
-            else if (first_bdl_pair_wire.lower.x > last_bdl_pair_wire.lower.x &&
-                     first_bdl_pair_wire.has_same_y_coordinate(last_bdl_pair_wire))
+            else if (first_bdl_pair_wire.value().lower.x > last_bdl_pair_wire.value().lower.x &&
+                     first_bdl_pair_wire.value().has_same_y_coordinate(last_bdl_pair_wire.value()))
             {
                 port.dir = port_direction::WEST;
             }
@@ -344,7 +345,7 @@ struct bdl_wire
 
             for (const auto& pair : pairs)
             {
-                const auto distance = euclidean_distance(Lyt{}, pair.lower, last_bdl_pair_wire.upper);
+                const auto distance = euclidean_distance(Lyt{}, pair.lower, last_bdl_pair_wire.value().upper);
                 if (distance > max_distance)
                 {
                     max_distance        = distance;
@@ -354,19 +355,19 @@ struct bdl_wire
 
             // BDL pairs can be above or below the input and final BDL pairs, but the input and output BDL pairs are on
             // the same y-coordinate --> EAST
-            if (last_bdl_pair_wire.lower.x < first_bdl_pair_wire.lower.x &&
-                last_bdl_pair_wire.has_same_y_coordinate(first_bdl_pair_wire))
+            if (last_bdl_pair_wire.value().lower.x < first_bdl_pair_wire.value().lower.x &&
+                last_bdl_pair_wire.value().has_same_y_coordinate(first_bdl_pair_wire.value()))
             {
                 port.dir = port_direction::WEST;
             }
             // Lower cell of the input BDL pair is below the lower cell of the final BDL pair --> SOUTH
-            else if (last_bdl_pair_wire.lower.y > first_bdl_pair_wire.lower.y)
+            else if (last_bdl_pair_wire.value().lower.y > first_bdl_pair_wire.value().lower.y)
             {
                 port.dir = port_direction::SOUTH;
             }
             // the input BDL pair is to the right of the final BDL pair --> EAST
-            else if (last_bdl_pair_wire.lower.x > first_bdl_pair_wire.lower.x &&
-                     last_bdl_pair_wire.has_same_y_coordinate(first_bdl_pair_wire))
+            else if (last_bdl_pair_wire.value().lower.x > first_bdl_pair_wire.value().lower.x &&
+                     last_bdl_pair_wire.value().has_same_y_coordinate(first_bdl_pair_wire.value()))
             {
                 port.dir = port_direction::EAST;
             }
