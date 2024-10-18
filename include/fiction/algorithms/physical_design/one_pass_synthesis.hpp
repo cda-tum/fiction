@@ -370,8 +370,7 @@ class mugen_handler
         // set up the iterator to skip the PIs
         auto pi_it_end = nodes.begin();
         // use std::advance because there is no 'operator+' overload
-        std::advance(pi_it_end,
-                     static_cast<typename std::iterator_traits<decltype(pi_it_end)>::difference_type>(num_pis + 1));
+        std::advance(pi_it_end, static_cast<std::iterator_traits<decltype(pi_it_end)>::difference_type>(num_pis));
 
         return pi_it_end;
     }
