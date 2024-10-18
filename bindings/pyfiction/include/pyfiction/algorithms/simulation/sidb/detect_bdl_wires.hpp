@@ -12,35 +12,23 @@
 #include <pybind11/stl.h>
 
 #include <string>
-#include <string_view>
 #include <vector>
 
 namespace pyfiction
 {
 
-// todo update documentation
-
 namespace detail
 {
 
-/**
- * @tparam Lyt The lattice type.
- * @param m The pybind11 module.
- * @param suffix The suffix to append to the class and function names to distinguish between different lattice types.
- */
 template <typename Lyt>
-void detect_bdl_wires(pybind11::module& m, const std::string_view& suffix = "")
+void detect_bdl_wires(pybind11::module& m, const std::string& lattice = "")
 {
     using namespace pybind11::literals;
     namespace py = pybind11;
 
     using bdl_wire_t = fiction::bdl_wire<Lyt>;
 
-    // Construct the class name based on the suffix
-    const auto class_name = "bdl_wire_" + std::string(suffix);
-
-    // Register the bdl_wire class with the appropriate suffix
-    py::class_<bdl_wire_t>(m, class_name.c_str(), DOC(fiction_bdl_wire))
+    py::class_<bdl_wire_t>(m, fmt::format("bdl_wire_{}", lattice).c_str(), DOC(fiction_bdl_wire))
         .def(py::init<>(), DOC(fiction_bdl_wire_bdl_wire))
         .def(py::init<std::vector<fiction::bdl_pair<fiction::offset::ucoord_t>>>(), "p"_a,
              DOC(fiction_bdl_wire_bdl_wire_2))
@@ -50,10 +38,7 @@ void detect_bdl_wires(pybind11::module& m, const std::string_view& suffix = "")
                        DOC(fiction_bdl_wire_first_bdl_pair_wire))
         .def_readwrite("last_bdl_pair_wire", &bdl_wire_t::last_bdl_pair_wire, DOC(fiction_bdl_wire_last_bdl_pair_wire));
 
-    // Register the detect_bdl_wires function with a unique name based on the suffix
-    std::string func_name = "detect_bdl_wires" + std::string(suffix);
-
-    m.def(func_name.c_str(), &fiction::detect_bdl_wires<Lyt>, "lyt"_a, "params"_a = fiction::detect_bdl_wires_params{},
+    m.def(fmt::format("detect_bdl_wires{}", lattice).c_str(), &fiction::detect_bdl_wires<Lyt>, "lyt"_a, "params"_a = fiction::detect_bdl_wires_params{},
           "wire_selection"_a = fiction::bdl_wire_selection::ALL, DOC(fiction_detect_bdl_wires));
 }
 

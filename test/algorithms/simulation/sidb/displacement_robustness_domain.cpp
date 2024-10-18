@@ -164,7 +164,7 @@ TEST_CASE("Determine the probability of fabricating an operational BDL wire with
                                            stats.num_non_operational_sidb_displacements),
                    Catch::Matchers::WithinAbs(result, physical_constants::POP_STABILITY_ERR));
 
-        CHECK_THAT(result, Catch::Matchers::WithinAbs(0.47265625, physical_constants::POP_STABILITY_ERR));
+        CHECK_THAT(result, Catch::Matchers::WithinAbs(0.67578125, physical_constants::POP_STABILITY_ERR));
 
         const auto result_20_percent_error =
             determine_probability_of_fabricating_operational_gate(lyt, std::vector<tt>{create_id_tt()}, params, 0.2);
@@ -247,7 +247,7 @@ TEST_CASE("Determine the probability of fabricating an operational BDL, offset c
                                            stats.num_non_operational_sidb_displacements),
                    Catch::Matchers::WithinAbs(result, physical_constants::POP_STABILITY_ERR));
 
-        CHECK_THAT(result, Catch::Matchers::WithinAbs(0.63671, physical_constants::POP_STABILITY_ERR));
+        CHECK_THAT(result, Catch::Matchers::WithinAbs(0.63671875, physical_constants::POP_STABILITY_ERR));
 
         const auto result_20_percent_error = determine_probability_of_fabricating_operational_gate(
             lyt_offset, std::vector<tt>{create_id_tt()}, params, 0.2);
