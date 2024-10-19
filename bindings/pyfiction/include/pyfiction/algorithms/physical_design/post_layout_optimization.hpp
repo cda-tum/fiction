@@ -32,8 +32,8 @@ inline void post_layout_optimization(pybind11::module& m)
                        DOC(fiction_post_layout_optimization_params_optimize_pos_only))
         .def_readwrite("planar_optimization", &fiction::post_layout_optimization_params::planar_optimization,
                        DOC(fiction_post_layout_optimization_params_planar_optimization))
-
-        ;
+        .def_readwrite("timeout", &fiction::post_layout_optimization_params::timeout,
+                       DOC(fiction_post_layout_optimization_params_timeout));
 
     py::class_<fiction::post_layout_optimization_stats>(m, "post_layout_optimization_stats",
                                                         DOC(fiction_post_layout_optimization_stats))
