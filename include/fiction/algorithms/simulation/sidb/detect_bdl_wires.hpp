@@ -75,14 +75,14 @@ struct bdl_wire
     port_direction port{port_direction::NONE};
 
     /**
-     * Starting BDL pair of the wire.
+     * First BDL pair of the wire.
      */
-    std::optional<bdl_pair<cell<Lyt>>> first_bdl_pair_wire{};
+    std::optional<bdl_pair<cell<Lyt>>> first_bdl_pair{};
 
     /**
-     * Ending BDL pair of the wire.
+     * Last BDL pair of the wire.
      */
-    std::optional<bdl_pair<cell<Lyt>>> last_bdl_pair_wire{};
+    std::optional<bdl_pair<cell<Lyt>>> last_bdl_pair{};
 
     /**
      * Default constructor for an empty BDL wire.
@@ -103,8 +103,8 @@ struct bdl_wire
     {
         if (!pairs.empty())
         {
-            first_bdl_pair_wire = pairs.front();
-            last_bdl_pair_wire  = pairs.back();
+            first_bdl_pair      = pairs.front();
+            last_bdl_pair       = pairs.back();
         }
         update_direction();
     }
@@ -119,8 +119,8 @@ struct bdl_wire
     bdl_wire(const bdl_wire& other) noexcept :
             pairs(other.pairs),
             port(other.port),
-            first_bdl_pair_wire(other.first_bdl_pair_wire),
-            last_bdl_pair_wire(other.last_bdl_pair_wire)
+            first_bdl_pair(other.first_bdl_pair),
+            last_bdl_pair(other.last_bdl_pair)
     {}
 
     /**
@@ -133,8 +133,8 @@ struct bdl_wire
     bdl_wire(bdl_wire&& other) noexcept :
             pairs(std::move(other.pairs)),
             port(other.port),
-            first_bdl_pair_wire(std::move(other.first_bdl_pair_wire)),
-            last_bdl_pair_wire(std::move(other.last_bdl_pair_wire))
+            first_bdl_pair(std::move(other.first_bdl_pair)),
+            last_bdl_pair(std::move(other.last_bdl_pair))
     {
         other.port.dir = port_direction::NONE;  // Reset the port of the moved-from object
     }
@@ -153,8 +153,8 @@ struct bdl_wire
         {
             pairs               = std::move(other.pairs);
             port                = other.port;
-            first_bdl_pair_wire = std::move(other.first_bdl_pair_wire);
-            last_bdl_pair_wire  = std::move(other.last_bdl_pair_wire);
+            first_bdl_pair      = std::move(other.first_bdl_pair);
+            last_bdl_pair       = std::move(other.last_bdl_pair);
             other.port.dir      = port_direction::NONE;  // Reset the port of the moved-from object
         }
         return *this;
@@ -174,8 +174,8 @@ struct bdl_wire
         {
             pairs               = other.pairs;
             port                = other.port;
-            first_bdl_pair_wire = other.first_bdl_pair_wire;
-            last_bdl_pair_wire  = other.last_bdl_pair_wire;
+            first_bdl_pair      = other.first_bdl_pair;
+            last_bdl_pair       = other.last_bdl_pair;
         }
         return *this;
     }
@@ -264,22 +264,22 @@ struct bdl_wire
         // input and output cells are present
         if (input_exists && output_exists)
         {
-            first_bdl_pair_wire = find_bdl_pair_by_type(sidb_technology::cell_type::INPUT);
-            last_bdl_pair_wire  = find_bdl_pair_by_type(sidb_technology::cell_type::OUTPUT);
+            first_bdl_pair      = find_bdl_pair_by_type(sidb_technology::cell_type::INPUT);
+            last_bdl_pair       = find_bdl_pair_by_type(sidb_technology::cell_type::OUTPUT);
 
             // determine the port of the wire based on the position of input and output BDL pairs
-            if (first_bdl_pair_wire.value() < last_bdl_pair_wire)
+            if (first_bdl_pair.value() < last_bdl_pair)
             {
                 port.dir = port_direction::SOUTH;
 
-                if (first_bdl_pair_wire.value().lower.y == last_bdl_pair_wire.value().lower.y ||
-                    first_bdl_pair_wire.value().upper.y == last_bdl_pair_wire.value().upper.y)
+                if (first_bdl_pair.value().lower.y == last_bdl_pair.value().lower.y ||
+                    first_bdl_pair.value().upper.y == last_bdl_pair.value().upper.y)
                 {
                     port.dir = port_direction::EAST;
                 }
             }
             // if the input BDL pair is at the same position as the output BDL pair, the wire has no port
-            else if (first_bdl_pair_wire.value().equal_ignore_type(last_bdl_pair_wire.value()))
+            else if (first_bdl_pair.value().equal_ignore_type(last_bdl_pair.value()))
             {
                 assert(false && "input and output BDL pairs are at the same position");
                 port.dir = port_direction::NONE;
@@ -288,8 +288,8 @@ struct bdl_wire
             {
                 port.dir = port_direction::NORTH;
 
-                if (first_bdl_pair_wire.value().lower.y == last_bdl_pair_wire.value().lower.y &&
-                    first_bdl_pair_wire.value().upper.y == last_bdl_pair_wire.value().upper.y)
+                if (first_bdl_pair.value().lower.y == last_bdl_pair.value().lower.y &&
+                    first_bdl_pair.value().upper.y == last_bdl_pair.value().upper.y)
                 {
                     port.dir = port_direction::WEST;
                 }
@@ -298,35 +298,35 @@ struct bdl_wire
         // only input cells are present
         else if (input_exists)
         {
-            first_bdl_pair_wire = find_bdl_pair_by_type(sidb_technology::cell_type::INPUT).value();
+            first_bdl_pair = find_bdl_pair_by_type(sidb_technology::cell_type::INPUT).value();
 
             auto max_distance = 0.0;
 
             for (const auto& pair : pairs)
             {
-                const auto distance = euclidean_distance(Lyt{}, pair.lower, first_bdl_pair_wire.value().lower);
+                const auto distance = euclidean_distance(Lyt{}, pair.lower, first_bdl_pair.value().lower);
                 if (distance > max_distance)
                 {
                     max_distance       = distance;
-                    last_bdl_pair_wire = pair;
+                    last_bdl_pair      = pair;
                 };
             }
 
             // BDL pairs can be above or below the input and final BDL pairs, but the input and output BDL pairs are on
             // the same y-coordinate --> EAST
-            if (first_bdl_pair_wire.value().lower.x < last_bdl_pair_wire.value().lower.x &&
-                first_bdl_pair_wire.value().has_same_y_coordinate(last_bdl_pair_wire.value()))
+            if (first_bdl_pair.value().lower.x < last_bdl_pair.value().lower.x &&
+                first_bdl_pair.value().has_same_y_coordinate(last_bdl_pair.value()))
             {
                 port.dir = port_direction::EAST;
             }
             // Lower cell of the input BDL pair is below the lower cell of the final BDL pair --> SOUTH
-            else if (first_bdl_pair_wire.value().lower.y > last_bdl_pair_wire.value().lower.y)
+            else if (first_bdl_pair.value().lower.y > last_bdl_pair.value().lower.y)
             {
                 port.dir = port_direction::NORTH;
             }
             // the input BDL pair is to the right of the final BDL pair --> EAST
-            else if (first_bdl_pair_wire.value().lower.x > last_bdl_pair_wire.value().lower.x &&
-                     first_bdl_pair_wire.value().has_same_y_coordinate(last_bdl_pair_wire.value()))
+            else if (first_bdl_pair.value().lower.x > last_bdl_pair.value().lower.x &&
+                     first_bdl_pair.value().has_same_y_coordinate(last_bdl_pair.value()))
             {
                 port.dir = port_direction::WEST;
             }
@@ -338,35 +338,35 @@ struct bdl_wire
         // only output cells are present
         else
         {
-            last_bdl_pair_wire = find_bdl_pair_by_type(sidb_technology::cell_type::OUTPUT).value();
+            last_bdl_pair = find_bdl_pair_by_type(sidb_technology::cell_type::OUTPUT).value();
 
             auto max_distance = 0.0;
 
             for (const auto& pair : pairs)
             {
-                const auto distance = euclidean_distance(Lyt{}, pair.lower, last_bdl_pair_wire.value().upper);
+                const auto distance = euclidean_distance(Lyt{}, pair.lower, last_bdl_pair.value().upper);
                 if (distance > max_distance)
                 {
                     max_distance        = distance;
-                    first_bdl_pair_wire = pair;
+                    first_bdl_pair      = pair;
                 };
             }
 
             // BDL pairs can be above or below the input and final BDL pairs, but the input and output BDL pairs are on
             // the same y-coordinate --> EAST
-            if (last_bdl_pair_wire.value().lower.x < first_bdl_pair_wire.value().lower.x &&
-                last_bdl_pair_wire.value().has_same_y_coordinate(first_bdl_pair_wire.value()))
+            if (last_bdl_pair.value().lower.x < first_bdl_pair.value().lower.x &&
+                last_bdl_pair.value().has_same_y_coordinate(first_bdl_pair.value()))
             {
                 port.dir = port_direction::WEST;
             }
             // Lower cell of the input BDL pair is below the lower cell of the final BDL pair --> SOUTH
-            else if (last_bdl_pair_wire.value().lower.y > first_bdl_pair_wire.value().lower.y)
+            else if (last_bdl_pair.value().lower.y > first_bdl_pair.value().lower.y)
             {
                 port.dir = port_direction::SOUTH;
             }
             // the input BDL pair is to the right of the final BDL pair --> EAST
-            else if (last_bdl_pair_wire.value().lower.x > first_bdl_pair_wire.value().lower.x &&
-                     last_bdl_pair_wire.value().has_same_y_coordinate(first_bdl_pair_wire.value()))
+            else if (last_bdl_pair.value().lower.x > first_bdl_pair.value().lower.x &&
+                     last_bdl_pair.value().has_same_y_coordinate(first_bdl_pair.value()))
             {
                 port.dir = port_direction::EAST;
             }
