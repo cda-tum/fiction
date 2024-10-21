@@ -283,7 +283,7 @@ class write_sqd_sim_result_impl
  *
  * This overload uses an output stream to write into.
  *
- * @tparam Lyt Cell-level SiDB layout type.
+ * @tparam Lyt SiDB cell-level SiDB layout type.
  * @param sim_result The simulation result to write.
  * @param os The output stream to write into.
  */
@@ -304,13 +304,16 @@ void write_sqd_sim_result(const sidb_simulation_result<Lyt>& sim_result, std::os
  *
  * This overload uses a file name to create and write into.
  *
- * @tparam Lyt Cell-level SiDB layout type.
+ * @tparam Lyt SiDB cell-level SiDB layout type.
  * @param sim_result The simulation result to write.
  * @param filename The file name to create and write into. Should preferably use the `.xml` extension.
  */
 template <typename Lyt>
 void write_sqd_sim_result(const sidb_simulation_result<Lyt>& sim_result, const std::string_view& filename)
 {
+    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(has_sidb_technology_v<Lyt>, "Lyt must be an SiDB layout");
+
     std::ofstream os{filename.data(), std::ofstream::out};
 
     if (!os.is_open())

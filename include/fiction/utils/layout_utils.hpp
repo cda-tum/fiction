@@ -17,6 +17,7 @@
 #include <cassert>
 #include <cstdint>
 #include <cstdio>
+#include <cstdlib>
 #include <limits>
 #include <random>
 #include <type_traits>
@@ -244,7 +245,7 @@ template <typename Lyt>
  * are normalized, i.e., start at `(0, 0)` and are all positive. To this end, all existing coordinates are shifted by an
  * x and y offset.
  *
- * @tparam Lyt Cell-level layout type.
+ * @tparam Lyt SiDB cell-level layout type.
  * @param lyt The layout which is to be normalized.
  * @return New normalized equivalent layout.
  */
@@ -254,8 +255,8 @@ Lyt normalize_layout_coordinates(const Lyt& lyt) noexcept
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
 
-    auto x_offset = std::numeric_limits<int32_t>::max();
-    auto y_offset = std::numeric_limits<int32_t>::max();
+    auto x_offset = std::numeric_limits<decltype(lyt.x())>::max();
+    auto y_offset = std::numeric_limits<decltype(lyt.y())>::max();
 
     lyt.foreach_cell(
         [&x_offset, &y_offset](const auto& c)
@@ -296,16 +297,16 @@ Lyt normalize_layout_coordinates(const Lyt& lyt) noexcept
  * Converts the coordinates of a given cell-level layout (cds and defect surface can be layered on top) to SiQAD
  * coordinates. A new equivalent layout based on SiQAD coordinates is returned.
  *
- * @tparam Lyt Cell-level layout type based on fiction coordinates, e.g., `offset::ucoord_t` or `cube::coord_t`.
+ * @tparam Lyt SiDB cell-level layout type based on fiction coordinates, e.g., `offset::ucoord_t` or `cube::coord_t`.
  * @param lyt The layout that is to be converted to a new layout based on SiQAD coordinates.
  * @return A new equivalent layout based on SiQAD coordinates.
  */
-template <typename LytSrc>
-auto convert_layout_to_siqad_coordinates(const LytSrc& lyt) noexcept
+template <typename Lyt>
+auto convert_layout_to_siqad_coordinates(const Lyt& lyt) noexcept
 {
-    static_assert(is_cartesian_layout_v<LytSrc>, "LytSrc is not a Cartesian layout");
-    static_assert(is_cell_level_layout_v<LytSrc>, "LytSrc is not a cell-level layout");
-    static_assert(has_sidb_technology_v<LytSrc>, "LytSrc is not an SiDB layout");
+    static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
+    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
     auto process_layout = [](auto& lyt_orig, auto lyt_new)
     {
@@ -322,7 +323,7 @@ auto convert_layout_to_siqad_coordinates(const LytSrc& lyt) noexcept
                 lyt_new.assign_cell_name(siqad::to_siqad_coord(c), lyt_orig.get_cell_name(c));
             });
 
-        if constexpr (is_charge_distribution_surface_v<LytSrc> && is_sidb_defect_surface_v<LytSrc>)
+        if constexpr (is_charge_distribution_surface_v<Lyt> && is_sidb_defect_surface_v<Lyt>)
         {
             auto lyt_defect = sidb_defect_surface{lyt_new};
 
@@ -343,7 +344,7 @@ auto convert_layout_to_siqad_coordinates(const LytSrc& lyt) noexcept
 
             return lyt_cds_defect;
         }
-        else if constexpr (is_sidb_defect_surface_v<LytSrc> && !is_charge_distribution_surface_v<LytSrc>)
+        else if constexpr (is_sidb_defect_surface_v<Lyt> && !is_charge_distribution_surface_v<Lyt>)
         {
             sidb_defect_surface<decltype(lyt_new)> lyt_surface{lyt_new};
             lyt_orig.foreach_sidb_defect(
@@ -353,7 +354,7 @@ auto convert_layout_to_siqad_coordinates(const LytSrc& lyt) noexcept
                 });
             return lyt_surface;
         }
-        else if constexpr (is_charge_distribution_surface_v<LytSrc> && !is_sidb_defect_surface_v<LytSrc>)
+        else if constexpr (is_charge_distribution_surface_v<Lyt> && !is_sidb_defect_surface_v<Lyt>)
         {
             charge_distribution_surface<decltype(lyt_new)> lyt_new_cds{lyt_new};
 
@@ -374,13 +375,13 @@ auto convert_layout_to_siqad_coordinates(const LytSrc& lyt) noexcept
         }
     };
 
-    if constexpr (!is_sidb_lattice_v<LytSrc>)
+    if constexpr (!is_sidb_lattice_v<Lyt>)
     {
         return process_layout(lyt, sidb_cell_clk_lyt_siqad{});
     }
     else
     {
-        return process_layout(lyt, sidb_lattice<lattice_orientation<LytSrc>, sidb_cell_clk_lyt_siqad>{});
+        return process_layout(lyt, sidb_lattice<lattice_orientation<Lyt>, sidb_cell_clk_lyt_siqad>{});
     }
 }
 /**
@@ -605,87 +606,89 @@ CoordinateType random_coordinate(CoordinateType coordinate1, CoordinateType coor
         return {dist_x(generator), dist_y(generator), dist_z(generator)};
     }
 }
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wconversion"
 /**
  * Generates a vector of all coordinates within an area spanned by two coordinates.
  *
- * This function calculates and returns a vector of all coordinates that span the area
- * between the northwest (cell_nw) and southeast (cell_se) cells, inclusive.
- * The cells are generated in a top-down, left-to-right fashion within the specified area.
+ * This function calculates and returns a list of all coordinates within a rectangular area defined by two corner
+ * coordinates, inclusive of the boundaries. The coordinates are generated in a top-to-bottom, left-to-right order,
+ * covering the entire area between the two specified corners.
  *
  * @tparam CoordinateType Coordinate Type.
- * @param cell_nw The northwest cell defining the starting point of the area.
- * @param cell_se The southeast cell defining the ending point of the area.
+ * @param cell_first_corner The cell defining the first corner of the area.
+ * @param cell_second_corner The cell defining the second corner of the area.
  * @return A vector containing all cells within the specified area.
  */
 template <typename CoordinateType>
-[[nodiscard]] inline std::vector<CoordinateType> all_coordinates_in_spanned_area(CoordinateType coord_nw,
-                                                                                 CoordinateType coord_se) noexcept
+[[nodiscard]] inline std::vector<CoordinateType>
+all_coordinates_in_spanned_area(const CoordinateType& cell_first_corner,
+                                const CoordinateType& cell_second_corner) noexcept
 {
-    if (coord_nw > coord_se)
-    {
-        std::swap(coord_nw, coord_se);
-    }
-
     // for SiQAD coordinates
     if constexpr (std::is_same_v<CoordinateType, siqad::coord_t>)
     {
-        const auto c1_cube          = siqad::to_fiction_coord<cube::coord_t>(coord_nw);
-        const auto c2_cube          = siqad::to_fiction_coord<cube::coord_t>(coord_se);
-        const auto total_cell_count = static_cast<uint64_t>(std::abs(c1_cube.x - c2_cube.x) + 1) *
-                                      static_cast<uint64_t>(std::abs(c1_cube.y - c2_cube.y) + 1);
+        auto cell_first_corner_cube  = siqad::to_fiction_coord<cube::coord_t>(cell_first_corner);
+        auto cell_second_corner_cube = siqad::to_fiction_coord<cube::coord_t>(cell_second_corner);
+
+        cube::coord_t nw_cell{std::min(cell_first_corner_cube.x, cell_second_corner_cube.x),
+                              std::min(cell_first_corner_cube.y, cell_second_corner_cube.y)};
+        cube::coord_t se_cell{std::max(cell_first_corner_cube.x, cell_second_corner_cube.x),
+                              std::max(cell_first_corner_cube.y, cell_second_corner_cube.y)};
+
+        const auto total_cell_count = static_cast<uint64_t>(std::abs(nw_cell.x - se_cell.x) + 1) *
+                                      static_cast<uint64_t>(std::abs(nw_cell.y - se_cell.y) + 1);
 
         std::vector<CoordinateType> all_cells{};
         all_cells.reserve(total_cell_count);
 
-        auto current_cell = c1_cube;
+        auto current_cell = nw_cell;
 
         // collect all cells in the area (spanned by the nw `north-west` and se `south-east` cell) going from top to
         // down from left to right.
-        while (current_cell <= c2_cube)
+        while (current_cell <= se_cell)
         {
-            const auto current_cell_siqad = siqad::to_siqad_coord(current_cell);
-
-            all_cells.push_back(current_cell_siqad);
-
-            if (current_cell.x < coord_se.x)
+            all_cells.push_back(siqad::to_siqad_coord(current_cell));
+            if (current_cell.x < se_cell.x)
             {
                 current_cell.x += 1;
             }
             else
             {
-                current_cell.x = coord_nw.x;
+                current_cell.x = nw_cell.x;
                 current_cell.y += 1;
             }
         }
 
         return all_cells;
     }
-    else  // for cube and offset coordinates
+    // for cube and offset coordinates
+    else
     {
-        const auto total_cell_count =
-            static_cast<uint64_t>(std::abs(static_cast<int64_t>(coord_nw.x) - static_cast<int64_t>(coord_se.x)) + 1) *
-            static_cast<uint64_t>(std::abs(static_cast<int64_t>(coord_nw.y) - static_cast<int64_t>(coord_se.y)) + 1);
+        CoordinateType nw_cell{std::min(cell_first_corner.x, cell_second_corner.x),
+                               std::min(cell_first_corner.y, cell_second_corner.y)};
+        CoordinateType se_cell{std::max(cell_first_corner.x, cell_second_corner.x),
+                               std::max(cell_first_corner.y, cell_second_corner.y)};
 
+        const auto total_cell_count =
+            static_cast<uint64_t>(std::abs(static_cast<int64_t>(nw_cell.x) - static_cast<int64_t>(se_cell.x)) + 1) *
+            static_cast<uint64_t>(std::abs(static_cast<int64_t>(nw_cell.y) - static_cast<int64_t>(se_cell.y)) + 1);
         std::vector<CoordinateType> all_cells{};
         all_cells.reserve(total_cell_count);
 
-        auto current_cell = coord_nw;
+        auto current_cell = nw_cell;
 
         // collect all cells in the area (spanned by the nw `north-west` and se `south-east` cell) going from top to
-        // bottom from left to right.
-        while (current_cell <= coord_se)
+        // down from left to right.
+        while (current_cell <= se_cell)
         {
             all_cells.push_back(current_cell);
 
-            if (current_cell.x < coord_se.x)
+            if (current_cell.x < se_cell.x)
             {
                 current_cell.x += 1;
             }
             else
             {
-                current_cell.x = coord_nw.x;
+                current_cell.x = nw_cell.x;
                 current_cell.y += 1;
             }
         }
@@ -693,7 +696,6 @@ template <typename CoordinateType>
         return all_cells;
     }
 }
-#pragma GCC diagnostic pop
 
 /**
  * This function checks whether the given layouts `first_lyt` and `second_lyt` are identical by comparing various

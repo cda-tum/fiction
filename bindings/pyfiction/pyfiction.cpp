@@ -31,6 +31,7 @@
 #include "pyfiction/algorithms/simulation/sidb/compute_operational_ratio.hpp"
 #include "pyfiction/algorithms/simulation/sidb/critical_temperature.hpp"
 #include "pyfiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp"
+#include "pyfiction/algorithms/simulation/sidb/detect_bdl_wires.hpp"
 #include "pyfiction/algorithms/simulation/sidb/determine_physically_valid_parameters.hpp"
 #include "pyfiction/algorithms/simulation/sidb/energy_distribution.hpp"
 #include "pyfiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
@@ -132,6 +133,7 @@ PYBIND11_MODULE(pyfiction, m)
     pyfiction::assess_physical_population_stability(m);
     pyfiction::convert_potential_to_distance(m);
     pyfiction::detect_bdl_pairs(m);
+    pyfiction::detect_bdl_wires(m);
     pyfiction::is_operational(m);
     pyfiction::operational_domain(m);
     //    pyfiction::maximum_defect_influence_distance(m);
