@@ -96,8 +96,8 @@ TEST_CASE("BDL wire without I/O BDL pairs", "[detect-bdl-wires]")
     const auto all_bdl_wires = detect_bdl_wires(lyt);
     REQUIRE(all_bdl_wires.size() == 1);
     CHECK(all_bdl_wires[0].port.dir == port_direction::cardinal::NONE);
-    CHECK(!all_bdl_wires.front().first_bdl_pair_wire.has_value());
-    CHECK(!all_bdl_wires.front().last_bdl_pair_wire.has_value());
+    CHECK(!all_bdl_wires.front().first_bdl_pair.has_value());
+    CHECK(!all_bdl_wires.front().last_bdl_pair.has_value());
 }
 
 TEST_CASE("Output BDL wire from west to east", "[detect-bdl-wires]")
@@ -121,13 +121,13 @@ TEST_CASE("Output BDL wire from west to east", "[detect-bdl-wires]")
 
     const auto output_bdl_wires = detect_bdl_wires(lyt, detect_bdl_wires_params{}, bdl_wire_selection::OUTPUT);
     REQUIRE(output_bdl_wires.size() == 1);
-    const auto output_bdl_wire = output_bdl_wires.front();
+    const auto& output_bdl_wire = output_bdl_wires.front();
     CHECK(output_bdl_wire.port.dir == port_direction::cardinal::EAST);
-    REQUIRE(output_bdl_wire.first_bdl_pair_wire.has_value());
-    REQUIRE(output_bdl_wire.last_bdl_pair_wire.has_value());
-    CHECK(output_bdl_wire.first_bdl_pair_wire.value() ==
+    REQUIRE(output_bdl_wire.first_bdl_pair.has_value());
+    REQUIRE(output_bdl_wire.last_bdl_pair.has_value());
+    CHECK(output_bdl_wire.first_bdl_pair.value() ==
           bdl_pair{sidb_technology::cell_type::NORMAL, cell<decltype(lyt)>{0, 0, 0}, cell<decltype(lyt)>{2, 0, 0}});
-    CHECK(output_bdl_wire.last_bdl_pair_wire.value() ==
+    CHECK(output_bdl_wire.last_bdl_pair.value() ==
           bdl_pair{sidb_technology::cell_type::OUTPUT, cell<decltype(lyt)>{18, 0, 0}, cell<decltype(lyt)>{20, 0, 0}});
 }
 
@@ -154,22 +154,22 @@ TEST_CASE("BDL wire from west to east", "[detect-bdl-wires]")
     REQUIRE(input_bdl_wires.size() == 1);
     const auto& input_bdl_wire = input_bdl_wires.front();
     CHECK(input_bdl_wire.port.dir == port_direction::cardinal::EAST);
-    REQUIRE(input_bdl_wire.first_bdl_pair_wire.has_value());
-    REQUIRE(input_bdl_wire.last_bdl_pair_wire.has_value());
-    CHECK(input_bdl_wire.first_bdl_pair_wire.value() ==
+    REQUIRE(input_bdl_wire.first_bdl_pair.has_value());
+    REQUIRE(input_bdl_wire.last_bdl_pair.has_value());
+    CHECK(input_bdl_wire.first_bdl_pair.value() ==
           bdl_pair{sidb_technology::cell_type::INPUT, cell<decltype(lyt)>{0, 0, 0}, cell<decltype(lyt)>{2, 0, 0}});
-    CHECK(input_bdl_wire.last_bdl_pair_wire.value() ==
+    CHECK(input_bdl_wire.last_bdl_pair.value() ==
           bdl_pair{sidb_technology::cell_type::OUTPUT, cell<decltype(lyt)>{18, 0, 0}, cell<decltype(lyt)>{20, 0, 0}});
 
     const auto output_bdl_wires = detect_bdl_wires(lyt, detect_bdl_wires_params{}, bdl_wire_selection::OUTPUT);
     REQUIRE(output_bdl_wires.size() == 1);
     const auto& output_bdl_wire = output_bdl_wires.front();
     CHECK(output_bdl_wire.port.dir == port_direction::cardinal::EAST);
-    REQUIRE(output_bdl_wire.first_bdl_pair_wire.has_value());
-    REQUIRE(output_bdl_wire.last_bdl_pair_wire.has_value());
-    CHECK(output_bdl_wire.first_bdl_pair_wire.value() ==
+    REQUIRE(output_bdl_wire.first_bdl_pair.has_value());
+    REQUIRE(output_bdl_wire.last_bdl_pair.has_value());
+    CHECK(output_bdl_wire.first_bdl_pair.value() ==
           bdl_pair{sidb_technology::cell_type::INPUT, cell<decltype(lyt)>{0, 0, 0}, cell<decltype(lyt)>{2, 0, 0}});
-    CHECK(output_bdl_wire.last_bdl_pair_wire.value() ==
+    CHECK(output_bdl_wire.last_bdl_pair.value() ==
           bdl_pair{sidb_technology::cell_type::OUTPUT, cell<decltype(lyt)>{18, 0, 0}, cell<decltype(lyt)>{20, 0, 0}});
 }
 
@@ -195,11 +195,11 @@ TEST_CASE("BDL wire bottom to up", "[detect-bdl-wires]")
     REQUIRE(all_bdl_wires.size() == 1);
     CHECK(all_bdl_wires[0].port.dir == port_direction::cardinal::NORTH);
 
-    REQUIRE(all_bdl_wires.front().first_bdl_pair_wire.has_value());
-    REQUIRE(all_bdl_wires.front().last_bdl_pair_wire.has_value());
-    CHECK(all_bdl_wires.front().first_bdl_pair_wire.value() ==
+    REQUIRE(all_bdl_wires.front().first_bdl_pair.has_value());
+    REQUIRE(all_bdl_wires.front().last_bdl_pair.has_value());
+    CHECK(all_bdl_wires.front().first_bdl_pair.value() ==
           bdl_pair{sidb_technology::cell_type::INPUT, cell<decltype(lyt)>{0, 18, 0}, cell<decltype(lyt)>{0, 19, 0}});
-    CHECK(all_bdl_wires.front().last_bdl_pair_wire.value() ==
+    CHECK(all_bdl_wires.front().last_bdl_pair.value() ==
           bdl_pair{sidb_technology::cell_type::OUTPUT, cell<decltype(lyt)>{0, 0, 0}, cell<decltype(lyt)>{0, 1, 0}});
 }
 
@@ -636,11 +636,11 @@ TEMPLATE_TEST_CASE("special cases", "[detect-bdl-wires]", sidb_cell_clk_lyt_siqa
                                         cell<decltype(lyt)>{14, 0, 1}});
         CHECK(wire.pairs[3] ==
               bdl_pair{sidb_technology::cell_type::NORMAL, cell<decltype(lyt)>{6, 1, 0}, cell<decltype(lyt)>{8, 1, 0}});
-        REQUIRE(wire.first_bdl_pair_wire.has_value());
-        REQUIRE(wire.last_bdl_pair_wire.has_value());
-        CHECK(wire.first_bdl_pair_wire ==
+        REQUIRE(wire.first_bdl_pair.has_value());
+        REQUIRE(wire.last_bdl_pair.has_value());
+        CHECK(wire.first_bdl_pair ==
               bdl_pair{sidb_technology::cell_type::INPUT, cell<decltype(lyt)>{0, 0, 0}, cell<decltype(lyt)>{2, 0, 0}});
-        CHECK(wire.last_bdl_pair_wire == bdl_pair{sidb_technology::cell_type::NORMAL, cell<decltype(lyt)>{18, -1, 1},
+        CHECK(wire.last_bdl_pair == bdl_pair{sidb_technology::cell_type::NORMAL, cell<decltype(lyt)>{18, -1, 1},
                                                   cell<decltype(lyt)>{20, -1, 1}});
     }
 }

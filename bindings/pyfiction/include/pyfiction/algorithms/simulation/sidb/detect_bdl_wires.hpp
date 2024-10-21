@@ -45,7 +45,7 @@ void detect_bdl_wires(pybind11::module& m, const std::string& lattice = "")
 }  // namespace detail
 
 /**
- * @brief Registers all `bdl_wire` classes, enums, and related functions with the pybind11 module.
+ * Registers all `bdl_wire` classes, enums, and related functions with the pybind11 module.
  *
  * @param m The pybind11 module.
  */
