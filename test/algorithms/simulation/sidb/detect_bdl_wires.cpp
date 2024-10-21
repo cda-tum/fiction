@@ -641,6 +641,6 @@ TEMPLATE_TEST_CASE("special cases", "[detect-bdl-wires]", sidb_cell_clk_lyt_siqa
         CHECK(wire.first_bdl_pair ==
               bdl_pair{sidb_technology::cell_type::INPUT, cell<decltype(lyt)>{0, 0, 0}, cell<decltype(lyt)>{2, 0, 0}});
         CHECK(wire.last_bdl_pair == bdl_pair{sidb_technology::cell_type::NORMAL, cell<decltype(lyt)>{18, -1, 1},
-                                                  cell<decltype(lyt)>{20, -1, 1}});
+                                             cell<decltype(lyt)>{20, -1, 1}});
     }
 }
