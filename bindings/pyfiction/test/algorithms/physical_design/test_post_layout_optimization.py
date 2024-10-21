@@ -57,6 +57,7 @@ class TestPostLayoutOptimiztaion(unittest.TestCase):
 
         params = post_layout_optimization_params()
         params.max_gate_relocations = 1
+        params.timeout = 1000000
 
         stats = post_layout_optimization_stats()
         post_layout_optimization(layout, params, statistics=stats)
