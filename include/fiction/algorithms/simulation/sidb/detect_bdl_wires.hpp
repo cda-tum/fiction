@@ -103,8 +103,8 @@ struct bdl_wire
     {
         if (!pairs.empty())
         {
-            first_bdl_pair      = pairs.front();
-            last_bdl_pair       = pairs.back();
+            first_bdl_pair = pairs.front();
+            last_bdl_pair  = pairs.back();
         }
         update_direction();
     }
@@ -151,11 +151,11 @@ struct bdl_wire
     {
         if (this != &other)
         {
-            pairs               = std::move(other.pairs);
-            port                = other.port;
-            first_bdl_pair      = std::move(other.first_bdl_pair);
-            last_bdl_pair       = std::move(other.last_bdl_pair);
-            other.port.dir      = port_direction::NONE;  // Reset the port of the moved-from object
+            pairs          = std::move(other.pairs);
+            port           = other.port;
+            first_bdl_pair = std::move(other.first_bdl_pair);
+            last_bdl_pair  = std::move(other.last_bdl_pair);
+            other.port.dir = port_direction::NONE;  // Reset the port of the moved-from object
         }
         return *this;
     }
@@ -172,10 +172,10 @@ struct bdl_wire
     {
         if (this != &other)
         {
-            pairs               = other.pairs;
-            port                = other.port;
-            first_bdl_pair      = other.first_bdl_pair;
-            last_bdl_pair       = other.last_bdl_pair;
+            pairs          = other.pairs;
+            port           = other.port;
+            first_bdl_pair = other.first_bdl_pair;
+            last_bdl_pair  = other.last_bdl_pair;
         }
         return *this;
     }
@@ -264,8 +264,8 @@ struct bdl_wire
         // input and output cells are present
         if (input_exists && output_exists)
         {
-            first_bdl_pair      = find_bdl_pair_by_type(sidb_technology::cell_type::INPUT);
-            last_bdl_pair       = find_bdl_pair_by_type(sidb_technology::cell_type::OUTPUT);
+            first_bdl_pair = find_bdl_pair_by_type(sidb_technology::cell_type::INPUT);
+            last_bdl_pair  = find_bdl_pair_by_type(sidb_technology::cell_type::OUTPUT);
 
             // determine the port of the wire based on the position of input and output BDL pairs
             if (first_bdl_pair.value() < last_bdl_pair)
@@ -307,8 +307,8 @@ struct bdl_wire
                 const auto distance = euclidean_distance(Lyt{}, pair.lower, first_bdl_pair.value().lower);
                 if (distance > max_distance)
                 {
-                    max_distance       = distance;
-                    last_bdl_pair      = pair;
+                    max_distance  = distance;
+                    last_bdl_pair = pair;
                 };
             }
 
@@ -347,8 +347,8 @@ struct bdl_wire
                 const auto distance = euclidean_distance(Lyt{}, pair.lower, last_bdl_pair.value().upper);
                 if (distance > max_distance)
                 {
-                    max_distance        = distance;
-                    first_bdl_pair      = pair;
+                    max_distance   = distance;
+                    first_bdl_pair = pair;
                 };
             }
 
