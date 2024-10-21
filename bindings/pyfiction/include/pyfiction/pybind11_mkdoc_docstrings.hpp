@@ -992,9 +992,9 @@ Returns:
     Optional containing the first BDL pair with the specified type
     `t`, or `std::nullopt` if no such BDL pair is found.)doc";
 
-static const char *__doc_fiction_bdl_wire_first_bdl_pair_wire = R"doc(Starting BDL pair of the wire.)doc";
+static const char *__doc_fiction_bdl_wire_first_bdl_pair = R"doc(First BDL pair of the wire.)doc";
 
-static const char *__doc_fiction_bdl_wire_last_bdl_pair_wire = R"doc(Ending BDL pair of the wire.)doc";
+static const char *__doc_fiction_bdl_wire_last_bdl_pair = R"doc(Last BDL pair of the wire.)doc";
 
 static const char *__doc_fiction_bdl_wire_operator_assign =
 R"doc(Move assignment operator.
