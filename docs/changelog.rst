@@ -15,7 +15,7 @@ Added
 - Algorithms:
     - Physical Design:
         - QuickCell algorithm for automatic standard cell design in silicon dangling bond logic
-        - Added an option to GOLD to specify discretionary cost objectives 
+        - Added an option to GOLD to specify discretionary cost objectives
         - Added a flag to GOLD to enable multi-threading
         - Added a timeout option to post-layout optimization
     - Simulation:
