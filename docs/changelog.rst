@@ -17,7 +17,17 @@ Added
         - Added an option to specify discretionary cost objectives to GOLD
         - Added a flag to enable multi-threading to GOLD
         - Added a timeout option to post-layout optimization
-    - Added support for different ways of implementing input information in SiDB technology to the BDL input iterator
+    - Simulation:
+        - QuickCell algorithm for the automatic design of standard cells
+        - Added support for different ways of implementing input information in SiDB technology to the BDL input iterator
+        - Extended BDL input iterator to support different SiDB input representations
+- Documentation:
+    - Added a ``CITATION.cff`` file
+    - Added documentation on our latest papers from IEEE-NANO
+
+Fixed
+#####
+- Addressed some ``clang-tidy`` warnings
 
 
 v0.6.4 - 2024-08-30
