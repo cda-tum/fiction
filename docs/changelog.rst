@@ -18,7 +18,7 @@ Added
         - Added a flag to enable multi-threading to GOLD
         - Added a timeout option to post-layout optimization
     - Simulation:
-        - QuickCell algorithm for the automatic design of standard cells
+        - QuickCell algorithm for automatic standard cell design in silicon dangling bond logic
         - Added support for different ways of implementing input information in SiDB technology to the BDL input iterator
         - Extended BDL input iterator to support different SiDB input representations
 - Documentation:
