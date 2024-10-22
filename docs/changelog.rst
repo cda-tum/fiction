@@ -13,6 +13,10 @@ Added
 - Experiments:
     - Script to simulate the critical temperature of SiQAD and Bestagon gates
 - Algorithms:
+    - Physical Design:
+        - Added an option to specify discretionary cost objectives to GOLD
+        - Added a flag to enable multi-threading to GOLD
+        - Added a timeout option to post-layout optimization
     - Added support for different ways of implementing input information in SiDB technology to the BDL input iterator
 
 
