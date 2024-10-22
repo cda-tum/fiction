@@ -14,11 +14,11 @@ Added
     - Script to simulate the critical temperature of SiQAD and Bestagon gates
 - Algorithms:
     - Physical Design:
+        - QuickCell algorithm for automatic standard cell design in silicon dangling bond logic
         - Added an option to specify discretionary cost objectives to GOLD
         - Added a flag to enable multi-threading to GOLD
         - Added a timeout option to post-layout optimization
     - Simulation:
-        - QuickCell algorithm for automatic standard cell design in silicon dangling bond logic
         - Added support for different ways of implementing input information in SiDB technology to the BDL input iterator
         - Extended BDL input iterator to support different SiDB input representations
 - Documentation:
