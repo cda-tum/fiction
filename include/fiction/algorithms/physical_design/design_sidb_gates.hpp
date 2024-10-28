@@ -218,7 +218,7 @@ class design_sidb_gates_impl
             // canvas SiDBs are added to the skeleton
             const auto layout_with_added_cells = skeleton_layout_with_canvas_sidbs(combination);
 
-            if (const auto [status, sim_calls] =
+            if (const auto [status, aux_stats] =
                     is_operational(layout_with_added_cells, truth_table, params.operational_params,
                                    std::optional{input_bdl_wires}, std::optional{output_bdl_wires});
                 status == operational_status::OPERATIONAL)

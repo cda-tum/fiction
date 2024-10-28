@@ -27,23 +27,49 @@ TEST_CASE("SiQAD OR gate", "[is-operational]")
 
     const sidb_100_cell_clk_lyt_siqad lat{layout_or_gate};
 
-    CHECK(is_operational(
-              lat, std::vector<tt>{create_or_tt()},
-              is_operational_params{sidb_simulation_parameters{2, -0.28}, sidb_simulation_engine::QUICKEXACT,
-                                    bdl_input_iterator_params{
-                                        detect_bdl_wires_params{1.5},
-                                        bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED},
-                                    operational_condition::REJECT_KINKS})
-              .first == operational_status::NON_OPERATIONAL);
+    SECTION("Reject kinks and keep simulation results")
+    {
 
-    CHECK(is_operational(
-              lat, std::vector<tt>{create_or_tt()},
-              is_operational_params{sidb_simulation_parameters{2, -0.28}, sidb_simulation_engine::QUICKEXACT,
-                                    bdl_input_iterator_params{
-                                        detect_bdl_wires_params{1.5},
-                                        bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED},
-                                    operational_condition::TOLERATE_KINKS})
-              .first == operational_status::OPERATIONAL);
+        const auto p_no = is_operational(
+            lat, std::vector<tt>{create_or_tt()},
+            is_operational_params{sidb_simulation_parameters{2, -0.28}, sidb_simulation_engine::QUICKEXACT,
+                                  bdl_input_iterator_params{
+                                      detect_bdl_wires_params{1.5},
+                                      bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED},
+                                  operational_condition::REJECT_KINKS,
+                                  is_operational_params::simulation_results_mode::KEEP_SIMULATION_RESULTS});
+        CHECK(p_no.first == operational_status::NON_OPERATIONAL);
+        CHECK(!p_no.second.simulation_results.has_value());
+    }
+
+    SECTION("Tolerate kinks and keep simulation results")
+    {
+        const auto p_o = is_operational(
+            lat, std::vector<tt>{create_or_tt()},
+            is_operational_params{sidb_simulation_parameters{2, -0.28}, sidb_simulation_engine::QUICKEXACT,
+                                  bdl_input_iterator_params{
+                                      detect_bdl_wires_params{1.5},
+                                      bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED},
+                                  operational_condition::TOLERATE_KINKS,
+                                  is_operational_params::simulation_results_mode::KEEP_SIMULATION_RESULTS});
+        CHECK(p_o.first == operational_status::OPERATIONAL);
+        REQUIRE(p_o.second.simulation_results.has_value());
+        CHECK(p_o.second.simulation_results.value().size() == 4);
+    }
+
+    SECTION("Tolerate kinks and discard simulation results")
+    {
+        const auto p_o2 = is_operational(
+            lat, std::vector<tt>{create_or_tt()},
+            is_operational_params{sidb_simulation_parameters{2, -0.28}, sidb_simulation_engine::QUICKEXACT,
+                                  bdl_input_iterator_params{
+                                      detect_bdl_wires_params{1.5},
+                                      bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED},
+                                  operational_condition::TOLERATE_KINKS,
+                                  is_operational_params::simulation_results_mode::DISCARD_SIMULATION_RESULTS});
+        CHECK(p_o2.first == operational_status::OPERATIONAL);
+        CHECK(!p_o2.second.simulation_results.has_value());
+    }
 }
 
 TEST_CASE("SiQAD's AND gate with input BDL pairs of different size", "[is-operational]")

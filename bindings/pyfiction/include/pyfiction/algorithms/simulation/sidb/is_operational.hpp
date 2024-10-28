@@ -22,7 +22,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void is_operational(pybind11::module& m)
+void is_operational(pybind11::module& m, const std::string& lattice = "")
 {
     using namespace pybind11::literals;
 
@@ -32,6 +32,15 @@ void is_operational(pybind11::module& m)
 
     m.def("operational_input_patterns", &fiction::operational_input_patterns<Lyt, py_tt>, "lyt"_a, "spec"_a,
           "params"_a = fiction::is_operational_params{}, DOC(fiction_operational_input_patterns));
+
+    pybind11::class_<fiction::operational_status_assessment_stats<Lyt>>(
+        m, fmt::format("sidb_simulation_result{}", lattice).c_str(), DOC(fiction_operational_status_assessment_stats))
+        .def(pybind11::init<>())
+        .def_readwrite("simulation_results", &fiction::operational_status_assessment_stats<Lyt>::simulation_results,
+                       DOC(fiction_operational_status_assessment_stats_simulation_results))
+        .def_readwrite("number_of_simulator_invocations",
+                       &fiction::operational_status_assessment_stats<Lyt>::number_of_simulator_invocations,
+                       DOC(fiction_operational_status_assessment_stats_number_of_simulator_invocations));
 }
 
 }  // namespace detail
@@ -51,6 +60,15 @@ inline void is_operational(pybind11::module& m)
         .value("REJECT_KINKS", fiction::operational_condition::REJECT_KINKS,
                DOC(fiction_operational_condition_REJECT_KINKS));
 
+    py::enum_<typename fiction::is_operational_params::simulation_results_mode>(
+        m, "simulation_results_mode", DOC(fiction_is_operational_params_simulation_results_mode))
+        .value("KEEP_SIMULATION_RESULTS",
+               fiction::is_operational_params::simulation_results_mode::KEEP_SIMULATION_RESULTS,
+               DOC(fiction_is_operational_params_simulation_results_mode_KEEP_SIMULATION_RESULTS))
+        .value("DISCARD_SIMULATION_RESULTS",
+               fiction::is_operational_params::simulation_results_mode::DISCARD_SIMULATION_RESULTS,
+               DOC(fiction_is_operational_params_simulation_results_mode_DISCARD_SIMULATION_RESULTS));
+
     py::class_<fiction::is_operational_params>(m, "is_operational_params", DOC(fiction_is_operational_params))
         .def(py::init<>())
         .def_readwrite("simulation_parameters", &fiction::is_operational_params::simulation_parameters,
@@ -63,8 +81,8 @@ inline void is_operational(pybind11::module& m)
                        DOC(fiction_is_operational_params_op_condition));
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
-    detail::is_operational<py_sidb_100_lattice>(m);
-    detail::is_operational<py_sidb_111_lattice>(m);
+    detail::is_operational<py_sidb_100_lattice>(m, "_100");
+    detail::is_operational<py_sidb_111_lattice>(m, "_111");
 }
 
 }  // namespace pyfiction
