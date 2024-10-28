@@ -225,16 +225,19 @@ class design_sidb_gates_impl
             {
                 {
                     const std::lock_guard lock_vector{mutex_to_protect_designed_gate_layouts};
+
+                    // ensure only one designed gate is returned when AFTER_FIRST_SOLUTION is the termination condition
+                    if (params.termination_cond ==
+                                design_sidb_gates_params<cell<Lyt>>::termination_condition::AFTER_FIRST_SOLUTION &&
+                            solution_found)
+                    {
+                        return;
+                    }
+
                     designed_gate_layouts.push_back(layout_with_added_cells);
                 }
 
                 solution_found = true;
-            }
-
-            if (solution_found && (params.termination_cond ==
-                                   design_sidb_gates_params<cell<Lyt>>::termination_condition::AFTER_FIRST_SOLUTION))
-            {
-                return;
             }
         };
 
@@ -250,13 +253,21 @@ class design_sidb_gates_impl
         for (std::size_t i = 0; i < number_of_used_threads; ++i)
         {
             threads.emplace_back(
-                [i, chunk_size, &all_combinations, &add_combination_to_layout_and_check_operation]()
+                [this, i, chunk_size, &all_combinations, &add_combination_to_layout_and_check_operation,
+                 &solution_found]()
                 {
                     const std::size_t start_index = i * chunk_size;
                     const std::size_t end_index   = std::min(start_index + chunk_size, all_combinations.size());
 
                     for (std::size_t j = start_index; j < end_index; ++j)
                     {
+                        if (params.termination_cond ==
+                                design_sidb_gates_params<cell<Lyt>>::termination_condition::AFTER_FIRST_SOLUTION &&
+                            solution_found)
+                        {
+                            return;
+                        }
+
                         add_combination_to_layout_and_check_operation(all_combinations[j]);
                     }
                 });
