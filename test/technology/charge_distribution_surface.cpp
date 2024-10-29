@@ -1332,6 +1332,8 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects, part one", 
         charge_layout.add_sidb_defect_to_potential_landscape(
             {5, 6}, sidb_defect{sidb_defect_type::UNKNOWN, 0, charge_layout.get_simulation_params().epsilon_r,
                                 charge_layout.get_simulation_params().lambda_tf});
+
+        REQUIRE(charge_layout.get_local_potential({5, 4}).has_value());
         CHECK_THAT(charge_layout.get_local_potential({5, 4}).value(),
                    Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
     }
@@ -1920,6 +1922,11 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects, part two", 
         CHECK(charge_layout.get_charge_state({0, 0, 0}) == sidb_charge_state::NEGATIVE);
         CHECK(charge_layout.get_charge_state({3, 0, 0}) == sidb_charge_state::NEGATIVE);
         CHECK(charge_layout.get_charge_state({5, 0, 0}) == sidb_charge_state::NEGATIVE);
+
+        REQUIRE(charge_layout.get_local_potential({0, 0, 0}).has_value());
+        REQUIRE(charge_layout.get_local_potential({3, 0, 0}).has_value());
+        REQUIRE(charge_layout.get_local_potential({5, 0, 0}).has_value());
+
         const auto loc_one_wo_defect   = charge_layout.get_local_potential({0, 0, 0}).value();
         const auto loc_two_wo_defect   = charge_layout.get_local_potential({3, 0, 0}).value();
         const auto loc_three_wo_defect = charge_layout.get_local_potential({5, 0, 0}).value();
@@ -1927,6 +1934,11 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects, part two", 
         charge_layout.add_sidb_defect_to_potential_landscape(
             {-4, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -1, charge_layout.get_simulation_params().epsilon_r,
                                     charge_layout.get_simulation_params().lambda_tf});
+
+        REQUIRE(charge_layout.get_local_potential({0, 0, 0}).has_value());
+        REQUIRE(charge_layout.get_local_potential({3, 0, 0}).has_value());
+        REQUIRE(charge_layout.get_local_potential({5, 0, 0}).has_value());
+
         const auto loc_one_w_negative_defect   = charge_layout.get_local_potential({0, 0, 0}).value();
         const auto loc_two_w_negative_defect   = charge_layout.get_local_potential({3, 0, 0}).value();
         const auto loc_three_w_negative_defect = charge_layout.get_local_potential({5, 0, 0}).value();
@@ -1940,6 +1952,11 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects, part two", 
         charge_layout.add_sidb_defect_to_potential_landscape(
             {-4, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, 0, charge_layout.get_simulation_params().epsilon_r,
                                     charge_layout.get_simulation_params().lambda_tf});
+
+        REQUIRE(charge_layout.get_local_potential({0, 0, 0}).has_value());
+        REQUIRE(charge_layout.get_local_potential({3, 0, 0}).has_value());
+        REQUIRE(charge_layout.get_local_potential({5, 0, 0}).has_value());
+
         const auto loc_one_w_neutral_defect   = charge_layout.get_local_potential({0, 0, 0}).value();
         const auto loc_two_w_neutral_defect   = charge_layout.get_local_potential({3, 0, 0}).value();
         const auto loc_three_w_neutral_defect = charge_layout.get_local_potential({5, 0, 0}).value();
@@ -1947,6 +1964,10 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects, part two", 
         charge_layout.add_sidb_defect_to_potential_landscape(
             {-4, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, 1, charge_layout.get_simulation_params().epsilon_r,
                                     charge_layout.get_simulation_params().lambda_tf});
+
+        REQUIRE(charge_layout.get_local_potential({0, 0, 0}).has_value());
+        REQUIRE(charge_layout.get_local_potential({3, 0, 0}).has_value());
+        REQUIRE(charge_layout.get_local_potential({5, 0, 0}).has_value());
         const auto loc_one_w_positive_defect   = charge_layout.get_local_potential({0, 0, 0}).value();
         const auto loc_two_w_positive_defect   = charge_layout.get_local_potential({3, 0, 0}).value();
         const auto loc_three_w_positive_defect = charge_layout.get_local_potential({5, 0, 0}).value();
