@@ -400,16 +400,27 @@ TEST_CASE("Design NOR Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
 
     SECTION("Exhaustive Generation, allowing kinks")
     {
-        const design_sidb_gates_params<cell<sidb_111_cell_clk_lyt_siqad>> params{
+        design_sidb_gates_params<cell<sidb_111_cell_clk_lyt_siqad>> params{
             is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT},
             design_sidb_gates_params<
                 cell<sidb_111_cell_clk_lyt_siqad>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
             {{10, 13, 0}, {14, 17, 0}},
             3};
 
-        const auto found_gate_layouts = design_sidb_gates(lyt, std::vector<tt>{create_nor_tt()}, params);
-        REQUIRE(found_gate_layouts.size() == 14);
-        CHECK(found_gate_layouts.front().num_cells() == lyt.num_cells() + 3);
+        SECTION("all design")
+        {
+            const auto found_gate_layouts = design_sidb_gates(lyt, std::vector<tt>{create_nor_tt()}, params);
+            REQUIRE(found_gate_layouts.size() == 14);
+            CHECK(found_gate_layouts.front().num_cells() == lyt.num_cells() + 3);
+        }
+        SECTION("terminate after first solution is found")
+        {
+            params.termination_condition =
+                design_sidb_gates_params<cell<cell<sidb_111_cell_clk_lyt_siqad>>>::termination_condition::AFTER_FIRST_SOLUTION;
+            const auto found_gate_layouts = design_sidb_gates(lyt, std::vector<tt>{create_nor_tt()}, params);
+            REQUIRE(found_gate_layouts.size() <= std::thread::hardware_concurrency());
+            CHECK(found_gate_layouts.front().num_cells() == lyt.num_cells() + 3);
+        }
     }
 
     SECTION("Exhaustive Generation, forbidding kinks")

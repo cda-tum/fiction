@@ -536,7 +536,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     void add_sidb_defect_to_potential_landscape(const typename Lyt::cell& c, const sidb_defect& defect) noexcept
     {
         // check if defect is not placed on SiDB position
-        if (std::find(strg->sidb_order.cbegin(), strg->sidb_order.cend(), c) == strg->sidb_order.end())
+        if (std::find(strg->sidb_order.cbegin(), strg->sidb_order.cend(), c) == strg->sidb_order.end() && is_charged_defect_type(defect))
         {
             // check if defect was not added yet.
             if (strg->defects.find(c) == strg->defects.end())
