@@ -250,7 +250,8 @@ class design_sidb_gates_impl
         for (std::size_t i = 0; i < number_of_used_threads; ++i)
         {
             threads.emplace_back(
-                [i, chunk_size, &all_combinations, &add_combination_to_layout_and_check_operation, &solution_found, this]()
+                [i, chunk_size, &all_combinations, &add_combination_to_layout_and_check_operation, &solution_found,
+                 this]()
                 {
                     const std::size_t start_index = i * chunk_size;
                     const std::size_t end_index   = std::min(start_index + chunk_size, all_combinations.size());

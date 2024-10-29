@@ -888,7 +888,7 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects", "[charge-d
         lyt_new.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
 
         const charge_distribution_surface charge_layout_new{lyt_new, params};
-        const auto                  negative_sidbs = charge_layout_new.negative_sidb_detection();
+        const auto                        negative_sidbs = charge_layout_new.negative_sidb_detection();
         REQUIRE(negative_sidbs.size() == 1);
     }
 
