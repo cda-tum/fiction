@@ -415,8 +415,8 @@ TEST_CASE("Design NOR Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
         }
         SECTION("terminate after first solution is found")
         {
-            params.termination_condition =
-                design_sidb_gates_params<cell<cell<sidb_111_cell_clk_lyt_siqad>>>::termination_condition::AFTER_FIRST_SOLUTION;
+            params.termination_cond =
+                design_sidb_gates_params<cell<sidb_111_cell_clk_lyt_siqad>>::termination_condition::AFTER_FIRST_SOLUTION;
             const auto found_gate_layouts = design_sidb_gates(lyt, std::vector<tt>{create_nor_tt()}, params);
             REQUIRE(found_gate_layouts.size() <= std::thread::hardware_concurrency());
             CHECK(found_gate_layouts.front().num_cells() == lyt.num_cells() + 3);
