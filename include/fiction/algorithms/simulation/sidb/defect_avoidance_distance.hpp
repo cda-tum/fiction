@@ -44,7 +44,7 @@ struct defect_avoidance_distance_result
  */
 template <typename Lyt>
 [[nodiscard]] defect_avoidance_distance_result<cell<Lyt>>
-defect_avoidance_distance(const Lyt& lyt, const defect_influence_operational_domain<Lyt>& defect_opdomain) noexcept
+defect_avoidance_distance(const Lyt& lyt, const defect_operational_domain<Lyt>& defect_opdomain) noexcept
 {
     double    max_distance         = 0;
     cell<Lyt> max_distance_postion = {};

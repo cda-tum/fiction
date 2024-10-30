@@ -11,11 +11,13 @@
 #include <algorithm>
 #include <cassert>
 #include <cmath>
+#include <cstdint>
 #include <cstdlib>
 #include <random>
 #include <thread>
 #include <type_traits>
 #include <utility>
+#include <vector>
 
 namespace fiction
 {
@@ -43,7 +45,7 @@ constexpr auto geometric_temperature_schedule(const double t) noexcept
 /**
  * Available temperature schedule types.
  */
-enum class temperature_schedule
+enum class temperature_schedule : uint8_t
 {
     /**
      * Linearly decreasing temperature schedule.
@@ -198,7 +200,7 @@ multi_simulated_annealing(const double init_temp, const double final_temp, const
     assert(std::isfinite(final_temp) && "final_temp must be a finite number");
 
     std::vector<std::pair<state_t, cost_t>> results(instances);
-    std::vector<std::thread>                threads;
+    std::vector<std::thread>                threads{};
     threads.reserve(instances);
 
     // Function to perform simulated annealing and store the result in the results vector

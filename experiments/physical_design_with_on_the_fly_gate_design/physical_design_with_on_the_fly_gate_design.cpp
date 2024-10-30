@@ -34,6 +34,7 @@
 #include <cassert>
 #include <cstdlib>
 #include <string>
+#include <cstdint>
 
 // This script conducts defect-aware placement and routing with defect-aware on-the-fly SiDB gate design. Thereby, SiDB
 // circuits can be designed in the presence of atomic defects.

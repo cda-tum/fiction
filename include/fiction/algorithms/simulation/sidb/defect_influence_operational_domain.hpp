@@ -33,9 +33,9 @@
 namespace fiction
 {
 /**
- * Parameters to determine the defect influence operational domain.
+ * Parameters to determine the defect operational domain.
  */
-struct defect_influence_operational_domain_params
+struct defect_operational_domain_params
 {
     /**
      * Parameters to simulate the influence of the atomic defect.
@@ -51,20 +51,20 @@ struct defect_influence_operational_domain_params
  * information indicating whether the SiDB layout remains logically operational. Logically operational implies that the
  * layout's ground state aligns with a designated Boolean function at the layout's outputs for all feasible input
  * combinations. This implementation assumes the presence of \f$ n \f$ BDL input wires and a single BDL output wire for
- * a given layout. Any algorithm for computing the defect influence operational domain iterates through all \f$ 2^n \f$
+ * a given layout. Any algorithm for computing the defect operational domain iterates through all \f$ 2^n \f$
  * input combinations, evaluating the layout's output behavior based on the specified Boolean function. The layout is
  * classified as operational for a particular defect position only if its output behavior is correct across all
  * input combinations.
  */
 template <typename Lyt>
-struct defect_influence_operational_domain
+struct defect_operational_domain
 {
     locked_parallel_flat_hash_map<typename Lyt::cell, operational_status> operational_values{};
 };
 /**
  * Statistics.
  */
-struct defect_influence_operational_domain_stats
+struct defect_operational_domain_stats
 {
     /**
      * The total runtime of the operational domain computation.
@@ -92,12 +92,12 @@ namespace detail
 {
 
 template <typename Lyt, typename TT>
-class defect_influence_operational_domain_impl
+class defect_operational_domain_impl
 {
   public:
-    defect_influence_operational_domain_impl(const Lyt& lyt, const std::vector<TT>& tt,
-                                             const defect_influence_operational_domain_params& ps,
-                                             defect_influence_operational_domain_stats&        st) :
+    defect_operational_domain_impl(const Lyt& lyt, const std::vector<TT>& tt,
+                                             const defect_operational_domain_params& ps,
+                                             defect_operational_domain_stats&        st) :
             layout{lyt},
             truth_table{tt},
             params{ps},
@@ -115,7 +115,7 @@ class defect_influence_operational_domain_impl
      * coordinates divisible by `step_size` will be checked for being operational.
      * @return A `defect_influence_operational_domain<Lyt>` object representing the operational domain of the defects.
      */
-    [[nodiscard]] defect_influence_operational_domain<Lyt> grid_search(const std::size_t& step_size) noexcept
+    [[nodiscard]] defect_operational_domain<Lyt> grid_search(const std::size_t& step_size) noexcept
     {
         mockturtle::stopwatch stop{stats.time_total};
         const auto            all_possible_defect_positions = all_coordinates_in_spanned_area(nw_cell, se_cell);
@@ -166,10 +166,10 @@ class defect_influence_operational_domain_impl
      *
      * @param samples The number of positions to sample. The actual number of iterations will be the smaller of
      *                the total number of positions or the `samples` value.
-     * @return A `defect_influence_operational_domain<Lyt>` object representing the operational domain of the defects.
+     * @return A `defect_operational_domain<Lyt>` object representing the operational domain of the defects.
      *         The return value is marked [[nodiscard]], meaning it must be used by the caller.
      */
-    [[nodiscard]] defect_influence_operational_domain<Lyt> random_sampling(const std::size_t samples) noexcept
+    [[nodiscard]] defect_operational_domain<Lyt> random_sampling(const std::size_t samples) noexcept
     {
         mockturtle::stopwatch stop{stats.time_total};  // Start the stopwatch for performance measurement
 
@@ -223,7 +223,7 @@ class defect_influence_operational_domain_impl
         return defect_operational_domain;
     }
 
-    [[nodiscard]] defect_influence_operational_domain<Lyt> contour_tracing(const std::size_t samples) noexcept
+    [[nodiscard]] defect_operational_domain<Lyt> contour_tracing(const std::size_t samples) noexcept
     {
         mockturtle::stopwatch stop{stats.time_total};
 
@@ -593,7 +593,7 @@ class defect_influence_operational_domain_impl
     /**
      * The parameters for the operational domain computation.
      */
-    const defect_influence_operational_domain_params& params;
+    const defect_operational_domain_params& params;
     /**
      * North-west cell.
      */
@@ -621,11 +621,11 @@ class defect_influence_operational_domain_impl
     /**
      * The operational domain of the layout.
      */
-    defect_influence_operational_domain<Lyt> defect_operational_domain{};
+    defect_operational_domain<Lyt> defect_operational_domain{};
     /**
      * The statistics of the operational domain computation.
      */
-    defect_influence_operational_domain_stats& stats;
+    defect_operational_domain_stats& stats;
     /**
      * Number of simulator invocations.
      */
@@ -639,36 +639,35 @@ class defect_influence_operational_domain_impl
 }  // namespace detail
 
 /**
- * Computes the defect influence operational domain of the given SiDB layout. The defect influence
- * operational domain is the set of all defect positions for which the layout is logically operational. Logical
+ * Computes the defect operational domain of the given SiDB layout. The defect operational domain is the set of all defect positions for which the layout is logically operational. Logical
  * operation is defined as the layout implementing the given truth table.
  *
- * This algorithm uses a grid search to determine the defect influence operational domain. The grid search is performed
+ * This algorithm uses a grid search to determine the defect operational domain. The grid search is performed
  * by exhaustively sweeping all possible atomic defect positions in x and y dimensions.
  *
  * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT Truth table type.
- * @param lyt Layout to compute the defect influence operational domain for.
+ * @param lyt Layout to compute the defect operational domain for.
  * @param spec Expected Boolean function of the layout given as a multi-output truth table.
  * @param step_size The parameter specifying the interval between consecutive defect positions to be evaluated.
- * @param params Defect influence operational domain computation parameters.
+ * @param params Defect operational domain computation parameters.
  * @param stats Statistics.
- * @return The defect influence operational domain of the layout.
+ * @return The defect operational domain of the layout.
  */
 template <typename Lyt, typename TT>
-defect_influence_operational_domain<Lyt>
-defect_influence_operational_domain_grid_search(const Lyt& lyt, const std::vector<TT>& spec,
+defect_operational_domain<Lyt>
+defect_operational_domain_grid_search(const Lyt& lyt, const std::vector<TT>& spec,
                                                 const std::size_t                                 step_size = 1,
-                                                const defect_influence_operational_domain_params& params    = {},
-                                                defect_influence_operational_domain_stats*        stats     = nullptr)
+                                                const defect_operational_domain_params& params    = {},
+                                                defect_operational_domain_stats*        stats     = nullptr)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
     static_assert(has_cube_coord_v<Lyt>);
 
-    defect_influence_operational_domain_stats                 st{};
-    detail::defect_influence_operational_domain_impl<Lyt, TT> p{lyt, spec, params, st};
+    defect_operational_domain_stats                 st{};
+    detail::defect_operational_domain_impl<Lyt, TT> p{lyt, spec, params, st};
 
     const auto result = p.grid_search(step_size);
 
@@ -680,36 +679,35 @@ defect_influence_operational_domain_grid_search(const Lyt& lyt, const std::vecto
     return result;
 }
 /**
- * Computes the `defect influence operational domain` of the given SiDB cell-level layout. The defect influence
- * operational domain is the set of all defect positions for which the layout is logically operational. Logical
+ * Computes the `defect operational domain` of the given SiDB cell-level layout. The defect operational domain is the set of all defect positions for which the layout is logically operational. Logical
  * operation is defined as the layout implementing the given truth table. The input BDL pairs of the layout are assumed
  * to be in the same order as the inputs of the truth table.
  *
- * This algorithm uses random sampling to find a part of the defect influence operational domain that might not be
+ * This algorithm uses random sampling to find a part of the defect operational domain that might not be
  * complete. It performs a total of `samples` uniformly-distributed random samples within the specified area.
  *
  * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT Truth table type.
- * @param lyt Layout to compute the defect influence operational domain for.
+ * @param lyt Layout to compute the defect operational domain for.
  * @param spec Expected Boolean function of the layout given as a multi-output truth table.
  * @param samples Number of random samples to perform.
- * @param params Defect influence operational domain computation parameters.
+ * @param params Defect operational domain computation parameters.
  * @param stats Statistics.
- * @return The (partial) defect influence operational domain of the layout.
+ * @return The (partial) defect operational domain of the layout.
  */
 template <typename Lyt, typename TT>
-defect_influence_operational_domain<Lyt>
-defect_influence_operational_domain_random_sampling(const Lyt& lyt, const std::vector<TT>& spec, std::size_t samples,
-                                                    const defect_influence_operational_domain_params& params = {},
-                                                    defect_influence_operational_domain_stats*        stats  = nullptr)
+defect_operational_domain<Lyt>
+defect_operational_domain_random_sampling(const Lyt& lyt, const std::vector<TT>& spec, std::size_t samples,
+                                                    const defect_operational_domain_params& params = {},
+                                                    defect_operational_domain_stats*        stats  = nullptr)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
     static_assert(has_cube_coord_v<Lyt>, "Lyt is not based on cube coordinates");
 
-    defect_influence_operational_domain_stats                 st{};
-    detail::defect_influence_operational_domain_impl<Lyt, TT> p{lyt, spec, params, st};
+    defect_operational_domain_stats                 st{};
+    detail::defect_operational_domain_impl<Lyt, TT> p{lyt, spec, params, st};
 
     const auto result = p.random_sampling(samples);
 
@@ -722,7 +720,7 @@ defect_influence_operational_domain_random_sampling(const Lyt& lyt, const std::v
 }
 
 /**
- * Computes the defect influence operational domain of the given SiDB cell-level layout. The defect influence
+ * Computes the defect operational domain of the given SiDB cell-level layout. The defect
  * operational domain is the set of all defect positions for which the layout is logically operational. Logical
  * operation is defined as the layout implementing the given truth table. The input BDL pairs of the layout are assumed
  * to be in the same order as the inputs of the truth table.
@@ -736,32 +734,28 @@ defect_influence_operational_domain_random_sampling(const Lyt& lyt, const std::v
  * contour includes the SiDB layout. If it does not, the next random sample point is selected as the starting point
  * and the process is repeated.
  *
- * @Note This algorithm is an approximation to determine the defect influence operational domain. Therefore, it
- * is recommended to analyze the result afterwards to assess whether the contour reflects the desired contour.
- *
  * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT Truth table type.
- * @param lyt Layout to compute the defect influence operational domain for.
+ * @param lyt Layout to compute the defect operational domain for.
  * @param spec Expected Boolean function of the layout given as a multi-output truth table.
  * @param samples Number of samples to perform.
- * @param params Defect influence operational domain computation parameters.
+ * @param params Defect operational domain computation parameters.
  * @param stats Operational domain computation statistics.
- * @return The (partial) defect influence operational domain of the layout.
+ * @return The (partial) defect operational domain of the layout.
  */
 template <typename Lyt, typename TT>
-defect_influence_operational_domain<Lyt>
-defect_influence_operational_domain_contour_tracing(const Lyt& lyt, const std::vector<TT>& spec,
-                                                    const std::size_t                                 samples,
-                                                    const defect_influence_operational_domain_params& params = {},
-                                                    defect_influence_operational_domain_stats*        stats  = nullptr)
+defect_operational_domain<Lyt>
+defect_operational_domain_quicktrace(const Lyt& lyt, const std::vector<TT>& spec, const std::size_t samples,
+                                          const defect_operational_domain_params& params = {},
+                                          defect_operational_domain_stats*        stats  = nullptr)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
     static_assert(has_cube_coord_v<Lyt>, "Lyt is not based on cube coordinates");
 
-    defect_influence_operational_domain_stats                 st{};
-    detail::defect_influence_operational_domain_impl<Lyt, TT> p{lyt, spec, params, st};
+    defect_operational_domain_stats                 st{};
+    detail::defect_operational_domain_impl<Lyt, TT> p{lyt, spec, params, st};
 
     const auto result = p.contour_tracing(samples);
 

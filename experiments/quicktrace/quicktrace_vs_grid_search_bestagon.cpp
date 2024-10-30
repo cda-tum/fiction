@@ -9,6 +9,7 @@
 #include "fiction/types.hpp"
 #include "fiction/utils/truth_table_utils.hpp"
 #include "fiction_experiments.hpp"
+#include "fiction/technology/sidb_defects.hpp"
 
 #include <fmt/format.h>
 
@@ -34,7 +35,7 @@ int main()
         };
 
     static const std::string folder        = fmt::format("{}bestagon_gates_type_tags/", EXPERIMENTS_PATH);
-    static const std::string output_folder = fmt::format("{}defect_avoidance_distance/plots/", EXPERIMENTS_PATH);
+    static const std::string output_folder = fmt::format("{}quicktrace/plots/", EXPERIMENTS_PATH);
 
     static const std::array<std::pair<std::string, std::vector<tt>>, 9> gates = {
         std::make_pair("and", std::vector<tt>{create_and_tt()}),
@@ -51,12 +52,15 @@ int main()
     const is_operational_params is_op_params{sidb_sim};
 
     maximum_defect_influence_position_and_distance_params max_defect_params{};
-    max_defect_params.defect =
-        sidb_defect{fiction::sidb_defect_type::UNKNOWN, -1, is_op_params.simulation_parameters.epsilon_r,
-                    is_op_params.simulation_parameters.lambda_tf};
     max_defect_params.additional_scanning_area = {50, 50};
 
-    defect_influence_operational_domain_params defect_params{};
+    // for this experiment we use a stray SiDB defect
+    const auto stray_db = fiction::sidb_defect{fiction::sidb_defect_type::DB, -1, 4.1, 1.8};
+    // const auto si_vacancy = fiction::sidb_defect{fiction::sidb_defect_type::SI_VACANCY, -1, 10.6, 5.9};
+
+    max_defect_params.defect = stray_db;
+
+    defect_operational_domain_params defect_params{};
     defect_params.defect_influence_params = max_defect_params;
     defect_params.operational_params      = is_op_params;
 
@@ -70,9 +74,9 @@ int main()
         {
             const auto layout = read_sqd_layout<sidb_100_cell_clk_lyt_cube>(file.path().string());
 
-            defect_influence_operational_domain_stats grid_stats{};
+            defect_operational_domain_stats           grid_stats{};
             const auto                                op_defect_grid =
-                defect_influence_operational_domain_grid_search(layout, truth_table, 1, defect_params, &grid_stats);
+                defect_operational_domain_grid_search(layout, truth_table, 1, defect_params, &grid_stats);
 
             // Define file paths for the CSV and SQD
             const auto csv_path = fmt::format("{}{}_grid.csv", gate_folder, gate);
@@ -86,17 +90,17 @@ int main()
 
             const auto avoidance_grid = defect_avoidance_distance(layout, op_defect_grid);
 
-            defect_influence_operational_domain_stats random_stats{};
-            const auto op_defect_random = defect_influence_operational_domain_random_sampling(
+            defect_operational_domain_stats random_stats{};
+            const auto op_defect_random = defect_operational_domain_random_sampling(
                 layout, truth_table, 100, defect_params, &random_stats);
             const auto avoidance_random = defect_avoidance_distance(layout, op_defect_random);
 
             const auto csv_path_random = fmt::format("{}{}_random.csv", gate_folder, gate);
             write_defect_influence_operational_domain(op_defect_random, csv_path_random);
 
-            defect_influence_operational_domain_stats contour_stats{};
-            const auto op_defect_contour = defect_influence_operational_domain_contour_tracing(
-                layout, truth_table, 20, defect_params, &contour_stats);
+            defect_operational_domain_stats contour_stats{};
+            const auto op_defect_contour =
+                defect_operational_domain_quicktrace(layout, truth_table, 20, defect_params, &contour_stats);
             const auto avoidance_contour = defect_avoidance_distance(layout, op_defect_contour);
 
             const auto csv_path_contour = fmt::format("{}{}_contour.csv", gate_folder, gate);
