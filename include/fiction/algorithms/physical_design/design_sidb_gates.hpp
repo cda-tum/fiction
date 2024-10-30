@@ -199,8 +199,7 @@ class design_sidb_gates_impl
      * This function adds each cell combination to the given skeleton, and determines whether the layout is operational
      * based on the specified parameters. The design process is parallelized to improve performance.
      *
-     * @return A vector of designed SiDB gate layouts, along with simulation results when the post-design process is set
-     * to `post_design_mode::PREFER_ENERGETICALLY_ISOLATED_GROUND_STATES`.
+     * @return A vector of designed SiDB gate layouts.
      */
     [[nodiscard]] std::vector<Lyt> run_automatic_exhaustive_gate_designer() const noexcept
     {
@@ -257,14 +256,6 @@ class design_sidb_gates_impl
                 {
                     const std::lock_guard lock_vector{mutex_to_protect_designed_gate_layouts};
 
-                    // ensure only one designed gate is returned when AFTER_FIRST_SOLUTION is the termination condition
-                    if (params.termination_cond ==
-                            design_sidb_gates_params<cell<Lyt>>::termination_condition::AFTER_FIRST_SOLUTION &&
-                        solution_found)
-                    {
-                        return;
-                    }
-
                     designed_gate_layouts.emplace_back(layout_with_added_cells);
 
                     if (sim_results_per_input_for_each_gate_design.has_value())
@@ -298,13 +289,12 @@ class design_sidb_gates_impl
 
                     for (std::size_t j = start_index; j < end_index; ++j)
                     {
-                        if (params.termination_cond ==
-                                design_sidb_gates_params<cell<Lyt>>::termination_condition::AFTER_FIRST_SOLUTION &&
-                            solution_found)
+                        if (solution_found &&
+                            (params.termination_cond ==
+                             design_sidb_gates_params<cell<Lyt>>::termination_condition::AFTER_FIRST_SOLUTION))
                         {
                             return;
                         }
-
                         add_combination_to_layout_and_check_operation(all_combinations[j]);
                     }
                 });
@@ -803,7 +793,8 @@ class design_sidb_gates_impl
         while (cds_canvas.get_charge_index_and_base().first <= cds_canvas.get_max_charge_index())
         {
             cds_canvas.foreach_cell(
-                [&](const auto& c) {
+                [&](const auto& c)
+                {
                     cds_layout.assign_charge_state(c, cds_canvas.get_charge_state(c),
                                                    charge_index_mode::KEEP_CHARGE_INDEX);
                 });
@@ -1109,7 +1100,7 @@ class design_sidb_gates_impl
      * This function makes sure that the underlying parameters for `is_operational` allow simulation results to be used
      * when the given parameter set indicates the use for it.
      *
-     * @params Parameters and settings for the gate designer.
+     * @param Parameters and settings for the gate designer.
      * @return Parameters and settings for the gate designer for which the simulation results retention of the
      * underlying parameter for operational status assessment is set accordingly.
      */
