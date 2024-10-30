@@ -80,12 +80,10 @@ TEST_CASE("novel designed AND Gate influence distance function which fails again
         defect_influence_operational_domain_stats stats{};
         const auto defect_influence_domain = defect_influence_operational_domain_grid_search(
             cube_lyt, std::vector<tt>{create_or_tt()}, 1, params, &stats);
-        CHECK_THAT(defect_avoidance_distance(cube_lyt, defect_influence_domain).max_min_distance,
+        CHECK_THAT(defect_avoidance_distance(cube_lyt, defect_influence_domain).minimum_defect_clearance,
                    Catch::Matchers::WithinAbs(12.579477930, physical_constants::POP_STABILITY_ERR));
-        write_defect_influence_operational_domain(defect_influence_domain,
-                                                  "/Users/jandrewniok/CLionProjects/fiction_fork/experiments/"
-                                                  "defect_avoidance_distance/plots/and/and_grid.csv");
     }
+
     SECTION("Random Sampling")
     {
         params.defect_influence_params.additional_scanning_area = {20, 20};
@@ -93,21 +91,16 @@ TEST_CASE("novel designed AND Gate influence distance function which fails again
         const auto defect_influence_domain = defect_influence_operational_domain_random_sampling(
             cube_lyt, std::vector<tt>{create_or_tt()}, 100, params, &stats);
         CHECK(defect_influence_domain.operational_values.size() == 100);
-        CHECK(defect_avoidance_distance(cube_lyt, defect_influence_domain).max_min_distance >= 12.579477930);
-        write_defect_influence_operational_domain(defect_influence_domain,
-                                                  "/Users/jandrewniok/CLionProjects/fiction_fork/experiments/"
-                                                  "defect_avoidance_distance/plots/and/and_random.csv");
+        CHECK(defect_avoidance_distance(cube_lyt, defect_influence_domain).minimum_defect_clearance <= 12.579477930);
     }
+
     SECTION("Contour Tracing")
     {
         params.defect_influence_params.additional_scanning_area = {20, 20};
         defect_influence_operational_domain_stats stats{};
         const auto defect_influence_domain = defect_influence_operational_domain_contour_tracing(
             cube_lyt, std::vector<tt>{create_or_tt()}, 5, params, &stats);
-        CHECK_THAT(defect_avoidance_distance(cube_lyt, defect_influence_domain).max_min_distance,
+        CHECK_THAT(defect_avoidance_distance(cube_lyt, defect_influence_domain).minimum_defect_clearance,
                    Catch::Matchers::WithinAbs(12.579477930, physical_constants::POP_STABILITY_ERR));
-        write_defect_influence_operational_domain(defect_influence_domain,
-                                                  "/Users/jandrewniok/CLionProjects/fiction_fork/experiments/"
-                                                  "defect_avoidance_distance/plots/and/and_contour.csv");
     }
 }

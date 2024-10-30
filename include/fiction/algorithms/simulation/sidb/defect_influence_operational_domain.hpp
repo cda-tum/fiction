@@ -11,6 +11,7 @@
 #include "fiction/layouts/coordinates.hpp"
 #include "fiction/technology/sidb_defect_surface.hpp"
 #include "fiction/technology/sidb_defects.hpp"
+#include "fiction/traits.hpp"
 #include "fiction/utils/layout_utils.hpp"
 #include "fiction/utils/phmap_utils.hpp"
 
@@ -242,8 +243,12 @@ class defect_influence_operational_domain_impl
 
         std::unordered_set<cell<Lyt>> starting_points{};
 
-        while (starting_points.size() < samples)
+        std::size_t sample_counter = 0;
+
+        while (sample_counter < samples)
         {
+            sample_counter++;
+
             // first, perform random sampling to find an operational starting point
             const auto operational_starting_point = find_operational_defect_position_at_left_side();
 
@@ -282,8 +287,7 @@ class defect_influence_operational_domain_impl
                                             current_neighborhood.front() :
                                             next_clockwise_point(current_neighborhood, backtrack_point);
 
-            uint64_t counter = 0;
-            while (next_point != contour_starting_point && counter < 100000)
+            while (next_point != contour_starting_point)
             {
                 const auto operational_status = is_defect_position_operational(next_point);
 
@@ -301,7 +305,6 @@ class defect_influence_operational_domain_impl
 
                 current_neighborhood = moore_neighborhood(current_contour_point);
                 next_point           = next_clockwise_point(current_neighborhood, backtrack_point);
-                counter++;
             }
         }
         log_stats();

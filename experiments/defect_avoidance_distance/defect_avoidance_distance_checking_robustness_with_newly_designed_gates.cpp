@@ -100,21 +100,21 @@ int main()
             const auto csv_path_contour = fmt::format("{}{}_contour.csv", gate_folder, gate);
             write_defect_influence_operational_domain(op_defect_contour, csv_path_contour);
             //
-            //            simulation_exp(gate, avoidance_grid.max_min_distance,
+            //            simulation_exp(gate, avoidance_grid.minimum_defect_clearance,
             //            grid_stats.num_evaluated_defect_positions,
-            //                           avoidance_random.max_min_distance, random_stats.num_evaluated_defect_positions,
-            //                           avoidance_contour.max_min_distance,
+            //                           avoidance_random.minimum_defect_clearance, random_stats.num_evaluated_defect_positions,
+            //                           avoidance_contour.minimum_defect_clearance,
             //                           contour_stats.num_evaluated_defect_positions);
             //            simulation_exp.save();
             //            simulation_exp.table();
 
-            if (std::abs(avoidance_grid.max_min_distance - avoidance_contour.max_min_distance) > 0.1)
+            if (std::abs(avoidance_grid.minimum_defect_clearance - avoidance_contour.minimum_defect_clearance) > 0.1)
             {  // Log the simulation results
                 write_sqd_layout(gate_lyt, sqd_path);
                 write_defect_influence_operational_domain(op_defect_contour, csv_path_contour);
-                simulation_exp(gate, avoidance_grid.max_min_distance, grid_stats.num_evaluated_defect_positions,
-                               avoidance_random.max_min_distance, random_stats.num_evaluated_defect_positions,
-                               avoidance_contour.max_min_distance, contour_stats.num_evaluated_defect_positions);
+                simulation_exp(gate, avoidance_grid.minimum_defect_clearance, grid_stats.num_evaluated_defect_positions,
+                               avoidance_random.minimum_defect_clearance, random_stats.num_evaluated_defect_positions,
+                               avoidance_contour.minimum_defect_clearance, contour_stats.num_evaluated_defect_positions);
                 simulation_exp.save();
                 simulation_exp.table();
             }

@@ -105,9 +105,9 @@ int main()
             // Log the simulation results
             simulation_exp(gate, layout.num_cells(), avoidance_grid.max_distance_postion_of_non_operational_defect.x,
                            avoidance_grid.max_distance_postion_of_non_operational_defect.y,
-                           avoidance_grid.max_min_distance, grid_stats.num_evaluated_defect_positions,
-                           avoidance_random.max_min_distance, random_stats.num_evaluated_defect_positions,
-                           avoidance_contour.max_min_distance, contour_stats.num_evaluated_defect_positions);
+                           avoidance_grid.minimum_defect_clearance, grid_stats.num_evaluated_defect_positions,
+                           avoidance_random.minimum_defect_clearance, random_stats.num_evaluated_defect_positions,
+                           avoidance_contour.minimum_defect_clearance, contour_stats.num_evaluated_defect_positions);
             simulation_exp.save();
             simulation_exp.table();
         }

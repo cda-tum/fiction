@@ -23,13 +23,13 @@ template <typename CellType>
 struct defect_avoidance_distance_result
 {
     /**
-     * Maximum position at which the placement of a SiDB defect still causes the gate to fail.
+     * position with maximum distance to the SiDB layout at which the placement of an SiDB defect still causes the gate to fail.
      */
     CellType max_distance_postion_of_non_operational_defect{};
     /**
-     * Minimum distance between a SiDB of the gate and the defect at the maximum distance that causes the gate to fail.
+     * Minimum distance between an SiDB of the gate and the defect at the maximum distance that causes the gate to fail.
      */
-    double max_min_distance{};
+    double minimum_defect_clearance{};
 };
 /**
  * Calculates the defect avoidance distance of a given gate layout by a given atomic defect. This means that a defect

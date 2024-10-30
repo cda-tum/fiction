@@ -108,7 +108,7 @@ int main()
             sample_grid_counter += grid_stats.num_evaluated_defect_positions;
             sample_contour_counter += contour_stats.num_evaluated_defect_positions;
 
-            if (std::abs(avoidance_grid.max_min_distance - avoidance_contour.max_min_distance) > 0.1)
+            if (std::abs(avoidance_grid.minimum_defect_clearance - avoidance_contour.minimum_defect_clearance) > 0.1)
             {  // Log the simulation results
                 unequal_counter++;
                 std::cout << file.path().string() << std::endl;
