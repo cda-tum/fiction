@@ -158,6 +158,25 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
         CHECK(mockturtle::to_seconds(stats.time_total) > 0.0);
         CHECK(stats.sim_engine == sidb_simulation_engine::QUICKSIM);
     }
+    SECTION("Four cells in canvas, design all gates with one SiDB in the canvas and sort by ground state isolation")
+    {
+        const auto params = design_sidb_gates_params<cell<siqad_layout>>{
+            is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT},
+            design_sidb_gates_params<cell<siqad_layout>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
+            {{10, 4, 0}, {13, 4, 0}},
+            1,
+            design_sidb_gates_params<cell<siqad_layout>>::termination_condition::ALL_COMBINATIONS_ENUMERATED,
+            design_sidb_gates_params<
+                cell<siqad_layout>>::post_design_mode::PREFER_ENERGETICALLY_ISOLATED_GROUND_STATES};
+
+        const auto found_gate_layouts = design_sidb_gates(lyt, std::vector<tt>{create_xnor_tt()}, params);
+
+        REQUIRE(found_gate_layouts.size() == 4);
+        CHECK(found_gate_layouts[0].get_cell_type({11, 4, 0}) == siqad_layout::technology::LOGIC);
+        CHECK(found_gate_layouts[1].get_cell_type({13, 4, 0}) == siqad_layout::technology::LOGIC);
+        CHECK(found_gate_layouts[2].get_cell_type({10, 4, 0}) == siqad_layout::technology::LOGIC);
+        CHECK(found_gate_layouts[3].get_cell_type({12, 4, 0}) == siqad_layout::technology::LOGIC);
+    }
 }
 
 TEST_CASE("Use SiQAD's AND gate skeleton to generate all possible AND gates", "[design-sidb-gates]")
