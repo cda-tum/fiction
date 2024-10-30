@@ -5,15 +5,29 @@ All notable changes to this project will be documented in this file.
 
 The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`_.
 
-Unreleased
-----------
+v0.6.5 - 2024-10-22
+-------------------
 
 Added
 #####
 - Experiments:
     - Script to simulate the critical temperature of SiQAD and Bestagon gates
 - Algorithms:
-    - Added support for different ways of implementing input information in SiDB technology to the BDL input iterator
+    - Physical Design:
+        - QuickCell algorithm for automatic standard cell design in silicon dangling bond logic
+        - Added an option to GOLD to specify discretionary cost objectives
+        - Added a flag to GOLD to enable multi-threading
+        - Added a timeout option to post-layout optimization
+    - Simulation:
+        - Added support for different ways of implementing input information in SiDB technology to the BDL input iterator
+        - Extended BDL input iterator to support different SiDB input representations
+- Documentation:
+    - Added a ``CITATION.cff`` file
+    - Added documentation on our latest papers from IEEE-NANO
+
+Fixed
+#####
+- Addressed some ``clang-tidy`` warnings
 
 
 v0.6.4 - 2024-08-30

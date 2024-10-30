@@ -5,7 +5,6 @@
 #ifndef FICTION_OPERATIONAL_DOMAIN_HPP
 #define FICTION_OPERATIONAL_DOMAIN_HPP
 
-#include "fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp"
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
 #include "fiction/algorithms/simulation/sidb/quickexact.hpp"
 #include "fiction/algorithms/simulation/sidb/quicksim.hpp"
@@ -218,14 +217,9 @@ struct operational_domain_value_range
 struct operational_domain_params
 {
     /**
-     * The simulation parameters for the operational domain computation. Most parameters will be kept constant across
-     * sweeps, but the sweep parameters are adjusted in each simulation step and thus overwritten in this object.
+     * The parameters used to determine if a layout is operational or non-operational.
      */
-    sidb_simulation_parameters simulation_parameters{};
-    /**
-     * The simulation engine to be used for the operational domain computation.
-     */
-    sidb_simulation_engine sim_engine{sidb_simulation_engine::QUICKEXACT};
+    is_operational_params operational_params{};
     /**
      * The dimensions to sweep over together with their value ranges, ordered by priority. The first dimension is the x
      * dimension, the second dimension is the y dimension, etc.
@@ -233,11 +227,6 @@ struct operational_domain_params
     std::vector<operational_domain_value_range> sweep_dimensions{
         operational_domain_value_range{sweep_parameter::EPSILON_R, 1.0, 10.0, 0.1},
         operational_domain_value_range{sweep_parameter::LAMBDA_TF, 1.0, 10.0, 0.1}};
-    /**
-     * The parameters for the BDL pair detection, which is necessary during the operational domain computation to
-     * detect input and output BDL pairs.
-     */
-    detect_bdl_pairs_params bdl_params{};
 };
 /**
  * Statistics for the operational domain computation. The statistics are used across the different operational domain
@@ -363,7 +352,9 @@ class operational_domain_impl
             truth_table{tt},
             params{ps},
             stats{st},
-            output_bdl_pairs{detect_bdl_pairs<Lyt>(layout, sidb_technology::cell_type::OUTPUT, params.bdl_params)},
+            output_bdl_pairs{detect_bdl_pairs<Lyt>(
+                layout, sidb_technology::cell_type::OUTPUT,
+                ps.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)},
             num_dimensions{params.sweep_dimensions.size()}
     {
         op_domain.dimensions.reserve(num_dimensions);
@@ -744,7 +735,7 @@ class operational_domain_impl
             }
         }
 
-        sidb_simulation_parameters simulation_parameters = params.simulation_parameters;
+        sidb_simulation_parameters simulation_parameters = params.operational_params.simulation_parameters;
 
         for (const auto& [param_point, status] : op_domain.operational_values)
         {
@@ -762,7 +753,7 @@ class operational_domain_impl
 
                 auto sim_results = sidb_simulation_result<Lyt>{};
 
-                if (params.sim_engine == sidb_simulation_engine::QUICKEXACT)
+                if (params.operational_params.sim_engine == sidb_simulation_engine::QUICKEXACT)
                 {
                     // perform an exact ground state simulation
                     sim_results =
@@ -770,12 +761,12 @@ class operational_domain_impl
                                             simulation_parameters,
                                             quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF});
                 }
-                else if (params.sim_engine == sidb_simulation_engine::EXGS)
+                else if (params.operational_params.sim_engine == sidb_simulation_engine::EXGS)
                 {
                     // perform an exhaustive ground state simulation
                     sim_results = exhaustive_ground_state_simulation(lyt, simulation_parameters);
                 }
-                else if (params.sim_engine == sidb_simulation_engine::QUICKSIM)
+                else if (params.operational_params.sim_engine == sidb_simulation_engine::QUICKSIM)
                 {
                     // perform a heuristic simulation
                     const quicksim_params qs_params{simulation_parameters, 500, 0.6};
@@ -816,7 +807,7 @@ class operational_domain_impl
     /**
      * The parameters for the operational domain computation.
      */
-    const operational_domain_params& params;
+    operational_domain_params params;
     /**
      * The statistics of the operational domain computation.
      */
@@ -1062,15 +1053,17 @@ class operational_domain_impl
 
         ++num_evaluated_parameter_combinations;
 
-        sidb_simulation_parameters sim_params = params.simulation_parameters;
+        sidb_simulation_parameters sim_params = params.operational_params.simulation_parameters;
 
         for (auto d = 0u; d < num_dimensions; ++d)
         {
             set_dimension_value(sim_params, values[d][sp.step_values[d]], d);
         }
 
-        const auto& [status, sim_calls] =
-            is_operational(layout, truth_table, is_operational_params{sim_params, params.sim_engine});
+        auto op_params_set_dimension_values                  = params.operational_params;
+        op_params_set_dimension_values.simulation_parameters = sim_params;
+
+        const auto& [status, sim_calls] = is_operational(layout, truth_table, op_params_set_dimension_values);
 
         num_simulator_invocations += sim_calls;
 
@@ -1117,7 +1110,7 @@ class operational_domain_impl
         // increment the number of evaluated parameter combinations
         ++num_evaluated_parameter_combinations;
 
-        sidb_simulation_parameters sim_params = params.simulation_parameters;
+        sidb_simulation_parameters sim_params = params.operational_params.simulation_parameters;
 
         for (auto d = 0u; d < num_dimensions; ++d)
         {

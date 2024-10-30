@@ -33,6 +33,7 @@ class TestCellTechnology(unittest.TestCase):
         self.assertEqual(str(sidb.cell_type.NORMAL), "cell_type.NORMAL")
         self.assertEqual(str(sidb.cell_type.INPUT), "cell_type.INPUT")
         self.assertEqual(str(sidb.cell_type.OUTPUT), "cell_type.OUTPUT")
+        self.assertEqual(str(sidb.cell_type.LOGIC), "cell_type.LOGIC")
 
 
 class TestQCACellLevelLayout(unittest.TestCase):

@@ -10,8 +10,8 @@ class TestComputeOperationalRatioAtPoint(unittest.TestCase):
         lyt = read_sqd_layout_100(dir_path + "/../../../resources/21_hex_inputsdbp_and_v19.sqd")
 
         params = operational_domain_params()
-        params.sim_engine = sidb_simulation_engine.QUICKEXACT
-        params.simulation_parameters.base = 2
+        params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
+        params.operational_params.simulation_parameters.base = 2
 
         params.sweep_dimensions = [operational_domain_value_range(sweep_parameter.EPSILON_R, 5.00, 6.00, 0.1),
                                    operational_domain_value_range(sweep_parameter.LAMBDA_TF, 5.00, 6.00, 0.1)]
@@ -19,7 +19,7 @@ class TestComputeOperationalRatioAtPoint(unittest.TestCase):
         ratio_params = compute_operational_ratio_params()
         ratio_params.op_domain_params = params
 
-        self.assertEqual(ratio_params.op_domain_params.simulation_parameters.base, 2)
+        self.assertEqual(ratio_params.op_domain_params.operational_params.simulation_parameters.base, 2)
 
         operational_domain_ratio = compute_operational_ratio(lyt, [create_and_tt()],  parameter_point([5.6, 5.0]), ratio_params)
 

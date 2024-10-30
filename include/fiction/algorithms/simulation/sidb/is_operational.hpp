@@ -8,6 +8,7 @@
 #include "fiction/algorithms/iter/bdl_input_iterator.hpp"
 #include "fiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp"
 #include "fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp"
+#include "fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp"
 #include "fiction/algorithms/simulation/sidb/determine_groundstate_from_simulation_results.hpp"
 #include "fiction/algorithms/simulation/sidb/energy_distribution.hpp"
 #include "fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
@@ -16,7 +17,9 @@
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
+#include "fiction/technology/cell_ports.hpp"
 #include "fiction/technology/cell_technologies.hpp"
+#include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/traits.hpp"
 
@@ -27,6 +30,7 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
+#include <optional>
 #include <set>
 #include <utility>
 #include <vector>
@@ -50,6 +54,21 @@ enum class operational_status : uint8_t
 };
 
 /**
+ * Condition which is used to decide if a layout is `operational` or `non-operational`.
+ */
+enum class operational_condition : uint8_t
+{
+    /**
+     * Even if the I/O pins show kinks, the layout is still considered as `operational`.
+     */
+    TOLERATE_KINKS,
+    /**
+     * The I/O pins are not allowed to show kinks. If kinks exist, the layout is considered as `non-operational`.
+     */
+    REJECT_KINKS
+};
+
+/**
  * Parameters for the `is_operational` algorithm.
  */
 struct is_operational_params
@@ -66,6 +85,10 @@ struct is_operational_params
      * Parameters for the BDL input iterator.
      */
     bdl_input_iterator_params input_bdl_iterator_params{};
+    /**
+     * Condition which is used to decide if a layout is `operational` or `non-operational`.
+     */
+    operational_condition op_condition = operational_condition::TOLERATE_KINKS;
 };
 
 namespace detail
@@ -96,9 +119,34 @@ class is_operational_impl
             layout{lyt},
             truth_table{tt},
             parameters{params},
+            output_bdl_pairs(detect_bdl_pairs(lyt, sidb_technology::cell_type::OUTPUT,
+                                              params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)),
+            bii(bdl_input_iterator<Lyt>{lyt, params.input_bdl_iterator_params}),
+            input_bdl_wires{
+                detect_bdl_wires(lyt, params.input_bdl_iterator_params.bdl_wire_params, bdl_wire_selection::INPUT)},
+            output_bdl_wires{
+                detect_bdl_wires(lyt, params.input_bdl_iterator_params.bdl_wire_params, bdl_wire_selection::OUTPUT)}
+    {}
+    /**
+     * Constructor to initialize the algorithm with a layout and parameters.
+     *
+     * @param lyt The SiDB cell-level layout to be checked.
+     * @param spec Expected Boolean function of the layout given as a multi-output truth table.
+     * @param params Parameters for the `is_operational` algorithm.
+     * @param input_bdl_wire Optional BDL input wires of lyt.
+     * @param output_bdl_wire Optional BDL output wires of lyt.
+     * @param input_bdl_wire_direction Optional BDL input wire directions of lyt.
+     */
+    is_operational_impl(const Lyt& lyt, const std::vector<TT>& tt, const is_operational_params& params,
+                        const std::vector<bdl_wire<Lyt>>& input_wires, const std::vector<bdl_wire<Lyt>>& output_wires) :
+            layout{lyt},
+            truth_table{tt},
+            parameters{params},
             output_bdl_pairs(detect_bdl_pairs(layout, sidb_technology::cell_type::OUTPUT,
-                                              parameters.input_bdl_iterator_params.bdl_pairs_params)),
-            bii(bdl_input_iterator<Lyt>{layout, parameters.input_bdl_iterator_params})
+                                              params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)),
+            bii{bdl_input_iterator<Lyt>{layout, params.input_bdl_iterator_params, input_wires}},
+            input_bdl_wires{input_wires},
+            output_bdl_wires{output_wires}
     {}
 
     /**
@@ -154,8 +202,7 @@ class is_operational_impl
                     // if the expected output is 1, the expected charge states are (upper, lower) = (0, -1)
                     if (kitty::get_bit(truth_table[output], i))
                     {
-                        if (charge_state_output_upper != sidb_charge_state::NEUTRAL ||
-                            charge_state_output_lower != sidb_charge_state::NEGATIVE)
+                        if (!encodes_bit_one(gs, output_bdl_pairs[output], output_bdl_wires[output].port))
                         {
                             return operational_status::NON_OPERATIONAL;
                         }
@@ -163,11 +210,19 @@ class is_operational_impl
                     // if the expected output is 0, the expected charge states are (upper, lower) = (-1, 0)
                     else
                     {
-                        if (charge_state_output_upper != sidb_charge_state::NEGATIVE ||
-                            charge_state_output_lower != sidb_charge_state::NEUTRAL)
+                        if (!encodes_bit_zero(gs, output_bdl_pairs[output], output_bdl_wires[output].port))
                         {
                             return operational_status::NON_OPERATIONAL;
                         }
+                    }
+                }
+
+                if (parameters.op_condition == operational_condition::REJECT_KINKS)
+                {
+                    if (check_existence_of_kinks_in_input_wires(gs, i) ||
+                        check_existence_of_kinks_in_output_wires(gs, i))
+                    {
+                        return operational_status::NON_OPERATIONAL;
                     }
                 }
             }
@@ -215,7 +270,7 @@ class is_operational_impl
                 [](const auto& lhs, const auto& rhs) { return lhs.get_system_energy() < rhs.get_system_energy(); });
 
             // ground state is degenerate
-            if ((energy_distribution(simulation_results.charge_distributions).begin()->second) > 1)
+            if ((energy_distribution(simulation_results.charge_distributions).cbegin()->second) > 1)
             {
                 continue;
             }
@@ -224,8 +279,8 @@ class is_operational_impl
             // fetch the charge states of the output BDL pair
             for (auto output = 0u; output < output_bdl_pairs.size(); output++)
             {
-                auto charge_state_output_upper = ground_state->get_charge_state(output_bdl_pairs[output].upper);
-                auto charge_state_output_lower = ground_state->get_charge_state(output_bdl_pairs[output].lower);
+                const auto charge_state_output_upper = ground_state->get_charge_state(output_bdl_pairs[output].upper);
+                const auto charge_state_output_lower = ground_state->get_charge_state(output_bdl_pairs[output].lower);
 
                 // if the output charge states are equal, the layout is not operational
                 if (charge_state_output_lower == charge_state_output_upper)
@@ -237,8 +292,7 @@ class is_operational_impl
                 // if the expected output is 1, the expected charge states are (upper, lower) = (0, -1)
                 if (kitty::get_bit(truth_table[output], i))
                 {
-                    if (charge_state_output_lower != sidb_charge_state::NEGATIVE ||
-                        charge_state_output_upper != sidb_charge_state::NEUTRAL)
+                    if (!encodes_bit_one(*ground_state, output_bdl_pairs[output], output_bdl_wires[output].port))
                     {
                         correct_output = false;
                     }
@@ -246,13 +300,13 @@ class is_operational_impl
                 // if the expected output is 0, the expected charge states are (upper, lower) = (-1, 0)
                 else
                 {
-                    if (charge_state_output_lower != sidb_charge_state::NEUTRAL ||
-                        charge_state_output_upper != sidb_charge_state::NEGATIVE)
+                    if (!encodes_bit_zero(*ground_state, output_bdl_pairs[output], output_bdl_wires[output].port))
                     {
                         correct_output = false;
                     }
                 }
             }
+
             if (correct_output)
             {
                 operational_inputs.insert(i);
@@ -280,8 +334,7 @@ class is_operational_impl
     /**
      * The specification of the layout.
      */
-    const std::vector<TT>&
-        truth_table;  // TODO implement the matching of multi-input truth table inputs and BDL pair ordering
+    const std::vector<TT>& truth_table{};
     /**
      * Parameters for the `is_operational` algorithm.
      */
@@ -294,6 +347,14 @@ class is_operational_impl
      * Iterator that iterates over all possible input states.
      */
     bdl_input_iterator<Lyt> bii;
+    /**
+     * Input BDL wires.
+     */
+    std::vector<bdl_wire<Lyt>> input_bdl_wires;
+    /**
+     * Output BDL wires.
+     */
+    std::vector<bdl_wire<Lyt>> output_bdl_wires;
     /**
      * Number of simulator invocations.
      */
@@ -317,11 +378,14 @@ class is_operational_impl
             // perform an exhaustive ground state simulation
             return exhaustive_ground_state_simulation(*bdl_iterator, parameters.simulation_parameters);
         }
-        if (parameters.sim_engine == sidb_simulation_engine::QUICKSIM)
+        if constexpr (!is_sidb_defect_surface_v<Lyt>)
         {
-            // perform a heuristic simulation
-            const quicksim_params qs_params{parameters.simulation_parameters, 500, 0.6};
-            return quicksim(*bdl_iterator, qs_params);
+            if (parameters.sim_engine == sidb_simulation_engine::QUICKSIM)
+            {
+                // perform a heuristic simulation
+                const quicksim_params qs_params{parameters.simulation_parameters, 500, 0.6};
+                return quicksim(*bdl_iterator, qs_params);
+            }
         }
         if (parameters.sim_engine == sidb_simulation_engine::QUICKEXACT)
         {
@@ -335,6 +399,164 @@ class is_operational_impl
         assert(false && "unsupported simulation engine");
 
         return sidb_simulation_result<Lyt>{};
+    }
+    /**
+     * This function iterates through the input wires and evaluates their charge states against the expected
+     * states derived from the input pattern. A kink is considered to exist if an input wire's charge state does not
+     * match the expected value (i.e., bit one or bit zero) for the given input index.
+     *
+     * @tparam Lyt SiDB cell-level layout type
+     * @param ground_state The ground state charge distribution surface.
+     * @param current_input_index The current input index used to retrieve the expected output from the truth table.
+     * @return `true` if any input wire contains a kink (i.e., an unexpected charge state), `false` otherwise.
+     */
+    [[nodiscard]] bool check_existence_of_kinks_in_input_wires(const charge_distribution_surface<Lyt>& ground_state,
+                                                               const uint64_t current_input_index) const noexcept
+    {
+        for (auto i = 0u; i < input_bdl_wires.size(); i++)
+        {
+            if (input_bdl_wires[input_bdl_wires.size() - 1 - i].port.dir == port_direction::SOUTH)
+            {
+                if ((current_input_index & (uint64_t{1ull} << i)) != 0ull)
+                {
+                    for (const auto& bdl : input_bdl_wires[input_bdl_wires.size() - 1 - i].pairs)
+                    {
+                        if (bdl.type == sidb_technology::INPUT)
+                        {
+                            continue;
+                        }
+                        if (!encodes_bit_one(ground_state, bdl, input_bdl_wires[input_bdl_wires.size() - 1 - i].port))
+                        {
+                            return true;
+                        }
+                    }
+                }
+                else
+                {
+                    for (const auto& bdl : input_bdl_wires[input_bdl_wires.size() - 1 - i].pairs)
+                    {
+                        if (bdl.type == sidb_technology::INPUT)
+                        {
+                            continue;
+                        }
+                        if (!encodes_bit_zero(ground_state, bdl, input_bdl_wires[input_bdl_wires.size() - 1 - i].port))
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+            else if (input_bdl_wires[input_bdl_wires.size() - 1 - i].port.dir == port_direction::NORTH)
+            {
+                if ((current_input_index & (uint64_t{1ull} << i)) != 0ull)
+                {
+                    for (const auto& bdl : input_bdl_wires[input_bdl_wires.size() - 1 - i].pairs)
+                    {
+                        if (bdl.type == sidb_technology::INPUT)
+                        {
+                            continue;
+                        }
+                        if (!encodes_bit_one(ground_state, bdl, input_bdl_wires[input_bdl_wires.size() - 1 - i].port))
+                        {
+                            return true;
+                        }
+                    }
+                }
+                else
+                {
+                    for (const auto& bdl : input_bdl_wires[input_bdl_wires.size() - 1 - i].pairs)
+                    {
+                        if (bdl.type == sidb_technology::INPUT)
+                        {
+                            continue;
+                        }
+                        if (!encodes_bit_zero(ground_state, bdl, input_bdl_wires[input_bdl_wires.size() - 1 - i].port))
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * This function iterates through the output wires and evaluates their charge states against the expected
+     * states derived from the truth table. A kink is considered to exist if an output wire's charge state does not
+     * match the expected value (i.e., bit one or bit zero) for the given input index.
+     *
+     * @tparam Lyt SiDB cell-level layout type
+     * @param ground_state The ground state charge distribution surface.
+     * @param current_input_index The current input index used to retrieve the expected output from the truth table.
+     * @return `true` if any output wire contains a kink (i.e., an unexpected charge state), `false` otherwise.
+     */
+    [[nodiscard]] bool check_existence_of_kinks_in_output_wires(const charge_distribution_surface<Lyt>& ground_state,
+                                                                const uint64_t current_input_index) const noexcept
+    {
+        for (auto i = 0u; i < output_bdl_wires.size(); i++)
+        {
+            for (const auto& bdl : output_bdl_wires[i].pairs)
+            {
+                if (kitty::get_bit(truth_table[i], current_input_index))
+                {
+                    if (!encodes_bit_one(ground_state, bdl, output_bdl_wires[i].port))
+                    {
+                        return true;
+                    }
+                }
+                else
+                {
+                    if (!encodes_bit_zero(ground_state, bdl, output_bdl_wires[i].port))
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * This function returns `true` if `0` is encoded in the charge state of the given BDL pair. `false` otherwise.
+     *
+     * @tparam Lyt SiDB cell-level layout type.
+     * @param ground_state The ground state charge distribution surface.
+     * @param bdl BDL pair to be evaluated.
+     * @return `true` if `0` is encoded, `false` otherwise.
+     */
+    [[nodiscard]] bool encodes_bit_zero(const charge_distribution_surface<Lyt>& ground_state,
+                                        const bdl_pair<cell<Lyt>>& bdl, const port_direction port) const noexcept
+    {
+        if (port.dir == port_direction::SOUTH || port.dir == port_direction::EAST || port.dir == port_direction::NONE)
+        {
+            return static_cast<bool>((ground_state.get_charge_state(bdl.upper) == sidb_charge_state::NEGATIVE) &&
+                                     (ground_state.get_charge_state(bdl.lower) == sidb_charge_state::NEUTRAL));
+        }
+        return static_cast<bool>((ground_state.get_charge_state(bdl.upper) == sidb_charge_state::NEUTRAL) &&
+                                 (ground_state.get_charge_state(bdl.lower) == sidb_charge_state::NEGATIVE));
+    }
+
+    /**
+     * This function returns `true` if `1` is encoded in the charge state of the given BDL pair. `false` otherwise.
+     *
+     * @tparam Lyt SiDB cell-level layout type.
+     * @param ground_state The ground state charge distribution surface.
+     * @param bdl BDL pair to be evaluated.
+     * @return `true` if `1` is encoded, `false` otherwise.
+     */
+    [[nodiscard]] bool encodes_bit_one(const charge_distribution_surface<Lyt>& ground_state,
+                                       const bdl_pair<cell<Lyt>>& bdl, const port_direction port) const noexcept
+    {
+        if (port.dir == port_direction::SOUTH || port.dir == port_direction::EAST || port.dir == port_direction::NONE)
+        {
+            return static_cast<bool>((ground_state.get_charge_state(bdl.upper) == sidb_charge_state::NEUTRAL) &&
+                                     (ground_state.get_charge_state(bdl.lower) == sidb_charge_state::NEGATIVE));
+        }
+
+        return static_cast<bool>((ground_state.get_charge_state(bdl.upper) == sidb_charge_state::NEGATIVE) &&
+                                 (ground_state.get_charge_state(bdl.lower) == sidb_charge_state::NEUTRAL));
     }
 };
 
@@ -352,12 +574,17 @@ class is_operational_impl
  * @param lyt The SiDB cell-level layout to be checked.
  * @param spec Expected Boolean function of the layout given as a multi-output truth table.
  * @param params Parameters for the `is_operational` algorithm.
+ * @param input_bdl_wire Optional BDL input wires of lyt.
+ * @param output_bdl_wire Optional BDL output wires of lyt.
+ * @param input_bdl_wire_direction Optional BDL input wire directions of lyt.
  * @return A pair containing the operational status of the gate layout (either `OPERATIONAL` or `NON_OPERATIONAL`) and
  * the number of input combinations tested.
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] std::pair<operational_status, std::size_t>
-is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params = {}) noexcept
+is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params = {},
+               const std::optional<std::vector<bdl_wire<Lyt>>>& input_bdl_wire  = std::nullopt,
+               const std::optional<std::vector<bdl_wire<Lyt>>>& output_bdl_wire = std::nullopt)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -370,6 +597,13 @@ is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational
     // all elements in tts must have the same number of variables
     assert(std::adjacent_find(spec.cbegin(), spec.cend(), [](const auto& a, const auto& b)
                               { return a.num_vars() != b.num_vars(); }) == spec.cend());
+
+    if (input_bdl_wire.has_value() && output_bdl_wire.has_value())
+    {
+        detail::is_operational_impl<Lyt, TT> p{lyt, spec, params, input_bdl_wire.value(), output_bdl_wire.value()};
+
+        return {p.run(), p.get_number_of_simulator_invocations()};
+    }
 
     detail::is_operational_impl<Lyt, TT> p{lyt, spec, params};
 
@@ -399,8 +633,8 @@ template <typename Lyt, typename TT>
 
     assert(!spec.empty());
     // all elements in tts must have the same number of variables
-    assert(std::adjacent_find(spec.begin(), spec.end(),
-                              [](const auto& a, const auto& b) { return a.num_vars() != b.num_vars(); }) == spec.end());
+    assert(std::adjacent_find(spec.cbegin(), spec.cend(), [](const auto& a, const auto& b)
+                              { return a.num_vars() != b.num_vars(); }) == spec.cend());
 
     detail::is_operational_impl<Lyt, TT> p{lyt, spec, params};
 

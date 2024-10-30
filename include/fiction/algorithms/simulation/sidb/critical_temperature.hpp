@@ -8,7 +8,7 @@
 #include "fiction/algorithms/iter/bdl_input_iterator.hpp"
 #include "fiction/algorithms/simulation/sidb/calculate_energy_and_state_type.hpp"
 #include "fiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp"
-#include "fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp"
+#include "fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp"
 #include "fiction/algorithms/simulation/sidb/energy_distribution.hpp"
 #include "fiction/algorithms/simulation/sidb/occupation_probability_of_excited_states.hpp"
 #include "fiction/algorithms/simulation/sidb/quickexact.hpp"
@@ -78,7 +78,7 @@ struct critical_temperature_params
     /**
      * Parameters for the BDL input iterator.
      */
-    bdl_input_iterator_params input_bdl_iterator_params{};
+    bdl_input_iterator_params input_iterator_params{};
     /**
      * Number of iteration steps for the *QuickSim* algorithm (only applicable if engine == APPROXIMATE).
      */
@@ -147,8 +147,9 @@ class critical_temperature_impl
             layout{lyt},
             params{ps},
             stats{st},
-            critical_temperature{ps.max_temperature},
-            bii(bdl_input_iterator<Lyt>{layout, params.input_bdl_iterator_params})
+            bii(bdl_input_iterator<Lyt>{layout, params.input_iterator_params}),
+            critical_temperature{ps.max_temperature}
+
     {
         stats.simulation_parameters = params.simulation_parameters;
         stats.algorithm_name =
@@ -173,8 +174,9 @@ class critical_temperature_impl
 
         if (layout.num_cells() > 1)
         {
-            const auto output_bdl_pairs = detect_bdl_pairs(layout, sidb_technology::cell_type::OUTPUT,
-                                                           params.input_bdl_iterator_params.bdl_pairs_params);
+            const auto output_bdl_pairs =
+                detect_bdl_pairs(layout, sidb_technology::cell_type::OUTPUT,
+                                 params.input_iterator_params.bdl_wire_params.bdl_pairs_params);
 
             // number of different input combinations
             for (auto i = 0u; i < spec.front().num_bits(); ++i, ++bii)
@@ -392,13 +394,13 @@ class critical_temperature_impl
      */
     critical_temperature_stats& stats;
     /**
-     * Critical temperature [K].
-     */
-    double critical_temperature;
-    /**
      * Iterator that iterates over all possible input states.
      */
     bdl_input_iterator<Lyt> bii;
+    /**
+     * Critical temperature [K].
+     */
+    double critical_temperature;
     /**
      * This function conducts physical simulation of the given layout (gate layout with certain input combination). The
      * simulation results are stored in the `sim_result_100` variable.

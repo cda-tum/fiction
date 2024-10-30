@@ -102,6 +102,12 @@ determine_all_combinations_of_distributing_k_entities_on_n_positions(const std::
     }
 
     std::vector<std::vector<std::size_t>> all_combinations{};
+
+    if (k == 0)
+    {
+        return all_combinations;
+    }
+
     all_combinations.reserve(binomial_coefficient(n, k));
 
     std::vector<std::size_t> numbers(n);
