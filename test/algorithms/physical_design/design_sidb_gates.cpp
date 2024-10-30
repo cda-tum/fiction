@@ -385,10 +385,8 @@ TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
         CHECK(found_gate_layouts_quickcell.front().num_defects() == 1);
         CHECK(found_gate_layouts_quickcell.front().num_cells() == lyt.num_cells() + 2);
 
-        found_gate_layouts_quickcell.front().foreach_cell(
-            [](const auto& cell) {
-                CHECK(cell != siqad::coord_t{16, 10, 0});
-            });
+        found_gate_layouts_quickcell.front().foreach_cell([](const auto& cell)
+                                                          { CHECK(cell != siqad::coord_t{16, 10, 0}); });
     }
 }
 
