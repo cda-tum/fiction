@@ -793,8 +793,7 @@ class design_sidb_gates_impl
         while (cds_canvas.get_charge_index_and_base().first <= cds_canvas.get_max_charge_index())
         {
             cds_canvas.foreach_cell(
-                [&](const auto& c)
-                {
+                [&](const auto& c) {
                     cds_layout.assign_charge_state(c, cds_canvas.get_charge_state(c),
                                                    charge_index_mode::KEEP_CHARGE_INDEX);
                 });
@@ -1121,9 +1120,9 @@ class design_sidb_gates_impl
     }
 
     /**
-     * Performs a sorting operation on the designed gate layouts, preferring those for which the energetic gap between
-     * the ground state and the first excited state is larger. For each designed gate layout, the minimum energetic gap
-     * is taken over each input.
+     * Performs a sorting operation on the designed gate layouts, putting those in front for which the energetic gap
+     * between the ground state and the first excited state is larger. For each designed gate layout, the minimum
+     * energetic gap is taken over each input.
      *
      * @param designed_gate_layouts A vector of designed gate layouts to sort in place.
      * @param sim_results_per_input_for_each_gate_design The simulation results for each input of each designed gate
@@ -1160,7 +1159,7 @@ class design_sidb_gates_impl
             [&](const std::vector<charge_distribution_surface<Lyt>>& sim_res) noexcept
         {
             return sim_res.size() == 1 ? std::numeric_limits<double>::infinity() :
-                                  sim_res.at(1).get_system_energy() - sim_res.at(0).get_system_energy();
+                                         sim_res.at(1).get_system_energy() - sim_res.at(0).get_system_energy();
         };
 
         const auto minimum_ground_state_isolation_for_all_inputs =
@@ -1172,12 +1171,45 @@ class design_sidb_gates_impl
                                     { return get_ground_state_isolation(lhs) < get_ground_state_isolation(rhs); });
         };
 
+        const auto average_ground_state_isolation_for_all_inputs =
+            [&get_ground_state_isolation](
+                const std::vector<std::vector<charge_distribution_surface<Lyt>>>& res_per_input) noexcept
+        {
+            uint64_t count = 0;
+
+            double accumulated_ground_state_isolation = 0.0;
+
+            for (const auto& sim_res : res_per_input)
+            {
+                if (sim_res.size() == 1)
+                {
+                    continue;
+                }
+
+                accumulated_ground_state_isolation += get_ground_state_isolation(sim_res);
+
+                ++count;
+            }
+
+            return accumulated_ground_state_isolation / static_cast<double>(count);
+        };
+
         // sort the pairs by minimum ground state isolation for each input
         std::sort(pairs.begin(), pairs.end(),
-                  [&minimum_ground_state_isolation_for_all_inputs](const auto& lhs, const auto& rhs) noexcept
+                  [&minimum_ground_state_isolation_for_all_inputs,
+                   &average_ground_state_isolation_for_all_inputs](const auto& lhs, const auto& rhs) noexcept
                   {
-                      return minimum_ground_state_isolation_for_all_inputs(lhs.second) <
-                             minimum_ground_state_isolation_for_all_inputs(rhs.second);
+                      const double diff = minimum_ground_state_isolation_for_all_inputs(lhs.second) -
+                                          minimum_ground_state_isolation_for_all_inputs(rhs.second);
+
+                      // when minima are equal, take the average
+                      if (std::abs(diff) < std::numeric_limits<double>::epsilon())
+                      {
+                          return average_ground_state_isolation_for_all_inputs(lhs.second) >
+                                 average_ground_state_isolation_for_all_inputs(rhs.second);
+                      }
+
+                      return diff > 0.0;
                   });
 
         // put the designed gate layouts back in the sorted order
