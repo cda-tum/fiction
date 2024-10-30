@@ -4847,10 +4847,10 @@ Returns:
     added at specified indices.)doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_sort_designed_gate_layouts_by_ground_state_isolation =
-R"doc(Performs a sorting operation on the designed gate layouts, preferring
-those for which the energetic gap between the ground state and the
-first excited state is larger. For each designed gate layout, the
-minimum energetic gap is taken over each input.
+R"doc(Performs a sorting operation on the designed gate layouts, putting
+those in front for which the energetic gap between the ground state
+and the first excited state is larger. For each designed gate layout,
+the minimum energetic gap is taken over each input.
 
 Parameter ``designed_gate_layouts``:
     A vector of designed gate layouts to sort in place.
