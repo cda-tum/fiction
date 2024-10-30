@@ -3828,7 +3828,7 @@ Returns:
     A pair of uint16_t values representing the number of horizontal
     and vertical SiDBs affected by the given defect type.)doc";
 
-static const char *__doc_fiction_defect_influence_operational_domain =
+static const char *__doc_fiction_defect_operational_domain =
 R"doc(A defect operational domain defines the positions where a specific
 atomic defect may exist along with corresponding information
 indicating whether the SiDB layout remains logically operational.
@@ -3836,20 +3836,64 @@ Logically operational implies that the layout's ground state aligns
 with a designated Boolean function at the layout's outputs for all
 feasible input combinations. This implementation assumes the presence
 of :math:` n ` BDL input wires and a single BDL output wire for a
-given layout. Any algorithm for computing the defect influence
-operational domain iterates through all :math:` 2^n ` input
-combinations, evaluating the layout's output behavior based on the
-specified Boolean function. The layout is classified as operational
-for a particular defect position only if its output behavior is
-correct across all input combinations.)doc";
+given layout. Any algorithm for computing the defect operational
+domain iterates through all :math:` 2^n ` input combinations,
+evaluating the layout's output behavior based on the specified Boolean
+function. The layout is classified as operational for a particular
+defect position only if its output behavior is correct across all
+input combinations.)doc";
 
-static const char *__doc_fiction_defect_influence_operational_domain_contour_tracing =
-R"doc(Computes the defect influence operational domain of the given SiDB
-cell-level layout. The defect influence operational domain is the set
-of all defect positions for which the layout is logically operational.
-Logical operation is defined as the layout implementing the given
-truth table. The input BDL pairs of the layout are assumed to be in
-the same order as the inputs of the truth table.
+static const char *__doc_fiction_defect_operational_domain_grid_search =
+R"doc(Computes the defect operational domain of the given SiDB layout. The
+defect operational domain is the set of all defect positions for which
+the layout is logically operational. Logical operation is defined as
+the layout implementing the given truth table.
+
+This algorithm uses a grid search to determine the defect operational
+domain. The grid search is performed by exhaustively sweeping all
+possible atomic defect positions in x and y dimensions.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Template parameter ``TT``:
+    Truth table type.
+
+Parameter ``lyt``:
+    Layout to compute the defect operational domain for.
+
+Parameter ``spec``:
+    Expected Boolean function of the layout given as a multi-output
+    truth table.
+
+Parameter ``step_size``:
+    The parameter specifying the interval between consecutive defect
+    positions to be evaluated.
+
+Parameter ``params``:
+    Defect operational domain computation parameters.
+
+Parameter ``stats``:
+    Statistics.
+
+Returns:
+    The defect operational domain of the layout.)doc";
+
+static const char *__doc_fiction_defect_operational_domain_operational_values = R"doc()doc";
+
+static const char *__doc_fiction_defect_operational_domain_params = R"doc(Parameters to determine the defect operational domain.)doc";
+
+static const char *__doc_fiction_defect_operational_domain_params_defect_influence_params = R"doc(Parameters to simulate the influence of the atomic defect.)doc";
+
+static const char *__doc_fiction_defect_operational_domain_params_operational_params = R"doc(Parameters for the `is_operational` algorithm.)doc";
+
+static const char *__doc_fiction_defect_operational_domain_quicktrace =
+R"doc(Computes the defect operational domain of the given SiDB cell-level
+layout. The defect operational domain is the set of all defect
+positions for which the layout is logically operational. Logical
+operation is defined as the layout implementing the given truth table.
+The input BDL pairs of the layout are assumed to be in the same order
+as the inputs of the truth table.
 
 This algorithm uses contour tracing to identify operational defect
 locations within the SiDB gate layout. It starts by searching for
@@ -3864,11 +3908,6 @@ checks whether the contour includes the SiDB layout. If it does not,
 the next random sample point is selected as the starting point and the
 process is repeated.
 
-@Note This algorithm is an approximation to determine the defect
-influence operational domain. Therefore, it is recommended to analyze
-the result afterwards to assess whether the contour reflects the
-desired contour.
-
 Template parameter ``Lyt``:
     SiDB cell-level layout type.
 
@@ -3876,7 +3915,7 @@ Template parameter ``TT``:
     Truth table type.
 
 Parameter ``lyt``:
-    Layout to compute the defect influence operational domain for.
+    Layout to compute the defect operational domain for.
 
 Parameter ``spec``:
     Expected Boolean function of the layout given as a multi-output
@@ -3886,71 +3925,26 @@ Parameter ``samples``:
     Number of samples to perform.
 
 Parameter ``params``:
-    Defect influence operational domain computation parameters.
+    Defect operational domain computation parameters.
 
 Parameter ``stats``:
     Operational domain computation statistics.
 
 Returns:
-    The (partial) defect influence operational domain of the layout.)doc";
+    The (partial) defect operational domain of the layout.)doc";
 
-static const char *__doc_fiction_defect_influence_operational_domain_grid_search =
-R"doc(Computes the defect influence operational domain of the given SiDB
-layout. The defect influence operational domain is the set of all
-defect positions for which the layout is logically operational.
-Logical operation is defined as the layout implementing the given
-truth table.
-
-This algorithm uses a grid search to determine the defect influence
-operational domain. The grid search is performed by exhaustively
-sweeping all possible atomic defect positions in x and y dimensions.
-
-Template parameter ``Lyt``:
-    SiDB cell-level layout type.
-
-Template parameter ``TT``:
-    Truth table type.
-
-Parameter ``lyt``:
-    Layout to compute the defect influence operational domain for.
-
-Parameter ``spec``:
-    Expected Boolean function of the layout given as a multi-output
-    truth table.
-
-Parameter ``step_size``:
-    The parameter specifying the interval between consecutive defect
-    positions to be evaluated.
-
-Parameter ``params``:
-    Defect influence operational domain computation parameters.
-
-Parameter ``stats``:
-    Statistics.
-
-Returns:
-    The defect influence operational domain of the layout.)doc";
-
-static const char *__doc_fiction_defect_influence_operational_domain_operational_values = R"doc()doc";
-
-static const char *__doc_fiction_defect_influence_operational_domain_params = R"doc(Parameters to determine the defect influence operational domain.)doc";
-
-static const char *__doc_fiction_defect_influence_operational_domain_params_defect_influence_params = R"doc(Parameters to simulate the influence of the atomic defect.)doc";
-
-static const char *__doc_fiction_defect_influence_operational_domain_params_operational_params = R"doc(Parameters for the `is_operational` algorithm.)doc";
-
-static const char *__doc_fiction_defect_influence_operational_domain_random_sampling =
-R"doc(Computes the `defect influence operational domain` of the given SiDB
-cell-level layout. The defect influence operational domain is the set
-of all defect positions for which the layout is logically operational.
-Logical operation is defined as the layout implementing the given
-truth table. The input BDL pairs of the layout are assumed to be in
-the same order as the inputs of the truth table.
+static const char *__doc_fiction_defect_operational_domain_random_sampling =
+R"doc(Computes the `defect operational domain` of the given SiDB cell-level
+layout. The defect operational domain is the set of all defect
+positions for which the layout is logically operational. Logical
+operation is defined as the layout implementing the given truth table.
+The input BDL pairs of the layout are assumed to be in the same order
+as the inputs of the truth table.
 
 This algorithm uses random sampling to find a part of the defect
-influence operational domain that might not be complete. It performs a
-total of `samples` uniformly-distributed random samples within the
-specified area.
+operational domain that might not be complete. It performs a total of
+`samples` uniformly-distributed random samples within the specified
+area.
 
 Template parameter ``Lyt``:
     SiDB cell-level layout type.
@@ -3959,7 +3953,7 @@ Template parameter ``TT``:
     Truth table type.
 
 Parameter ``lyt``:
-    Layout to compute the defect influence operational domain for.
+    Layout to compute the defect operational domain for.
 
 Parameter ``spec``:
     Expected Boolean function of the layout given as a multi-output
@@ -3969,27 +3963,27 @@ Parameter ``samples``:
     Number of random samples to perform.
 
 Parameter ``params``:
-    Defect influence operational domain computation parameters.
+    Defect operational domain computation parameters.
 
 Parameter ``stats``:
     Statistics.
 
 Returns:
-    The (partial) defect influence operational domain of the layout.)doc";
+    The (partial) defect operational domain of the layout.)doc";
 
-static const char *__doc_fiction_defect_influence_operational_domain_stats = R"doc(Statistics.)doc";
+static const char *__doc_fiction_defect_operational_domain_stats = R"doc(Statistics.)doc";
 
-static const char *__doc_fiction_defect_influence_operational_domain_stats_duration = R"doc(The total runtime of the operational domain computation.)doc";
+static const char *__doc_fiction_defect_operational_domain_stats_duration = R"doc(The total runtime of the operational domain computation.)doc";
 
-static const char *__doc_fiction_defect_influence_operational_domain_stats_num_evaluated_defect_positions = R"doc(Number of evaluated parameter combinations.)doc";
+static const char *__doc_fiction_defect_operational_domain_stats_num_evaluated_defect_positions = R"doc(Number of evaluated parameter combinations.)doc";
 
-static const char *__doc_fiction_defect_influence_operational_domain_stats_num_non_operational_defect_positions =
+static const char *__doc_fiction_defect_operational_domain_stats_num_non_operational_defect_positions =
 R"doc(Number of parameter combinations, for which the layout is non-
 operational.)doc";
 
-static const char *__doc_fiction_defect_influence_operational_domain_stats_num_operational_defect_positions = R"doc(Number of parameter combinations, for which the layout is operational.)doc";
+static const char *__doc_fiction_defect_operational_domain_stats_num_operational_defect_positions = R"doc(Number of parameter combinations, for which the layout is operational.)doc";
 
-static const char *__doc_fiction_defect_influence_operational_domain_stats_num_simulator_invocations = R"doc(Number of simulator invocations.)doc";
+static const char *__doc_fiction_defect_operational_domain_stats_num_simulator_invocations = R"doc(Number of simulator invocations.)doc";
 
 static const char *__doc_fiction_dependent_cell_mode = R"doc(An enumeration of modes for the dependent cell.)doc";
 
@@ -4807,21 +4801,21 @@ Returns:
 
 static const char *__doc_fiction_detail_critical_temperature_impl_stats = R"doc(Statistics.)doc";
 
-static const char *__doc_fiction_detail_defect_influence_operational_domain_impl = R"doc()doc";
+static const char *__doc_fiction_detail_defect_operational_domain_impl = R"doc()doc";
 
-static const char *__doc_fiction_detail_defect_influence_operational_domain_impl_contour_tracing = R"doc()doc";
+static const char *__doc_fiction_detail_defect_operational_domain_impl_contour_tracing = R"doc()doc";
 
-static const char *__doc_fiction_detail_defect_influence_operational_domain_impl_current_defect_position = R"doc(The current defect position.)doc";
+static const char *__doc_fiction_detail_defect_operational_domain_impl_current_defect_position = R"doc(The current defect position.)doc";
 
-static const char *__doc_fiction_detail_defect_influence_operational_domain_impl_defect_influence_operational_domain_impl = R"doc()doc";
+static const char *__doc_fiction_detail_defect_operational_domain_impl_defect_operational_domain = R"doc(The operational domain of the layout.)doc";
 
-static const char *__doc_fiction_detail_defect_influence_operational_domain_impl_defect_operational_domain = R"doc(The operational domain of the layout.)doc";
+static const char *__doc_fiction_detail_defect_operational_domain_impl_defect_operational_domain_impl = R"doc()doc";
 
-static const char *__doc_fiction_detail_defect_influence_operational_domain_impl_determine_nw_se_cells =
+static const char *__doc_fiction_detail_defect_operational_domain_impl_determine_nw_se_cells =
 R"doc(This function determines the northwest and southeast cells based on
 the gate layout and the additional scan area specified.)doc";
 
-static const char *__doc_fiction_detail_defect_influence_operational_domain_impl_find_last_operational_defect_position_moving_right =
+static const char *__doc_fiction_detail_defect_operational_domain_impl_find_last_operational_defect_position_moving_right =
 R"doc(This function identifies the most recent operational defect position
 while traversing from left to right towards the SiDB gate.
 
@@ -4832,13 +4826,13 @@ Parameter ``starting_defect_position``:
 Returns:
     The last operational defect position.)doc";
 
-static const char *__doc_fiction_detail_defect_influence_operational_domain_impl_find_operational_defect_position_at_left_side =
+static const char *__doc_fiction_detail_defect_operational_domain_impl_find_operational_defect_position_at_left_side =
 R"doc(This function aims to identify an operational defect position within
 the layout. It does so by selecting a defect position with the
 leftmost x-coordinate and a randomly selected y-coordinate limited the
 layout's bounding box.)doc";
 
-static const char *__doc_fiction_detail_defect_influence_operational_domain_impl_grid_search =
+static const char *__doc_fiction_detail_defect_operational_domain_impl_grid_search =
 R"doc(This function divides the search space (defined by `nw_cell` and
 `se_cell`) into chunks, each processed by a different thread. The
 search checks if defect positions in the grid are operational based on
@@ -4854,27 +4848,27 @@ Returns:
     A `defect_influence_operational_domain<Lyt>` object representing
     the operational domain of the defects.)doc";
 
-static const char *__doc_fiction_detail_defect_influence_operational_domain_impl_has_already_been_sampled =
+static const char *__doc_fiction_detail_defect_operational_domain_impl_has_already_been_sampled =
 R"doc(This function verifies whether the layout has already been analyzed
 for the specified defect position `c`.
 
 Parameter ``c``:
     Position of the defect.)doc";
 
-static const char *__doc_fiction_detail_defect_influence_operational_domain_impl_is_defect_position_operational =
+static const char *__doc_fiction_detail_defect_operational_domain_impl_is_defect_position_operational =
 R"doc(This function evaluates the operational status of the SiDB gate when a
 defect is placed at position `c`.
 
 Parameter ``c``:
     Position of the defect.)doc";
 
-static const char *__doc_fiction_detail_defect_influence_operational_domain_impl_layout = R"doc(The SiDB cell-level layout to investigate.)doc";
+static const char *__doc_fiction_detail_defect_operational_domain_impl_layout = R"doc(The SiDB cell-level layout to investigate.)doc";
 
-static const char *__doc_fiction_detail_defect_influence_operational_domain_impl_log_stats =
+static const char *__doc_fiction_detail_defect_operational_domain_impl_log_stats =
 R"doc(Helper function that writes the the statistics of the defect
 operational domain computation to the statistics object.)doc";
 
-static const char *__doc_fiction_detail_defect_influence_operational_domain_impl_moore_neighborhood =
+static const char *__doc_fiction_detail_defect_operational_domain_impl_moore_neighborhood =
 R"doc(Computes the Moore neighborhood of a given cell within the SiDB
 layout. The Moore neighborhood consists of the eight cells surrounding
 the central cell in horizontal, vertical, and diagonal directions.
@@ -4887,19 +4881,19 @@ Returns:
     empty. If a cell is outside the layout boundaries or occupied, it
     is not included in the result.)doc";
 
-static const char *__doc_fiction_detail_defect_influence_operational_domain_impl_num_evaluated_defect_positions = R"doc(Number of evaluated defect positions.)doc";
+static const char *__doc_fiction_detail_defect_operational_domain_impl_num_evaluated_defect_positions = R"doc(Number of evaluated defect positions.)doc";
 
-static const char *__doc_fiction_detail_defect_influence_operational_domain_impl_num_simulator_invocations = R"doc(Number of simulator invocations.)doc";
+static const char *__doc_fiction_detail_defect_operational_domain_impl_num_simulator_invocations = R"doc(Number of simulator invocations.)doc";
 
-static const char *__doc_fiction_detail_defect_influence_operational_domain_impl_nw_bb_layout = R"doc(The north-west bounding box of the layout.)doc";
+static const char *__doc_fiction_detail_defect_operational_domain_impl_nw_bb_layout = R"doc(The north-west bounding box of the layout.)doc";
 
-static const char *__doc_fiction_detail_defect_influence_operational_domain_impl_nw_cell = R"doc(North-west cell.)doc";
+static const char *__doc_fiction_detail_defect_operational_domain_impl_nw_cell = R"doc(North-west cell.)doc";
 
-static const char *__doc_fiction_detail_defect_influence_operational_domain_impl_params = R"doc(The parameters for the operational domain computation.)doc";
+static const char *__doc_fiction_detail_defect_operational_domain_impl_params = R"doc(The parameters for the operational domain computation.)doc";
 
-static const char *__doc_fiction_detail_defect_influence_operational_domain_impl_previous_defect_position = R"doc(The previous defect position.)doc";
+static const char *__doc_fiction_detail_defect_operational_domain_impl_previous_defect_position = R"doc(The previous defect position.)doc";
 
-static const char *__doc_fiction_detail_defect_influence_operational_domain_impl_random_sampling =
+static const char *__doc_fiction_detail_defect_operational_domain_impl_random_sampling =
 R"doc(This function performs random sampling of defect positions from a grid
 area (spanned by `nw_cell` and `se_cell`). The positions are shuffled
 and divided into chunks, which are processed by different threads to
@@ -4912,17 +4906,17 @@ Parameter ``samples``:
     `samples` value.
 
 Returns:
-    A `defect_influence_operational_domain<Lyt>` object representing
-    the operational domain of the defects. The return value is marked
+    A `defect_operational_domain<Lyt>` object representing the
+    operational domain of the defects. The return value is marked
     [[nodiscard]], meaning it must be used by the caller.)doc";
 
-static const char *__doc_fiction_detail_defect_influence_operational_domain_impl_se_bb_layout = R"doc(The south-east bounding box of the layout.)doc";
+static const char *__doc_fiction_detail_defect_operational_domain_impl_se_bb_layout = R"doc(The south-east bounding box of the layout.)doc";
 
-static const char *__doc_fiction_detail_defect_influence_operational_domain_impl_se_cell = R"doc(South-east cell.)doc";
+static const char *__doc_fiction_detail_defect_operational_domain_impl_se_cell = R"doc(South-east cell.)doc";
 
-static const char *__doc_fiction_detail_defect_influence_operational_domain_impl_stats = R"doc(The statistics of the operational domain computation.)doc";
+static const char *__doc_fiction_detail_defect_operational_domain_impl_stats = R"doc(The statistics of the operational domain computation.)doc";
 
-static const char *__doc_fiction_detail_defect_influence_operational_domain_impl_truth_table = R"doc(The specification of the layout.)doc";
+static const char *__doc_fiction_detail_defect_operational_domain_impl_truth_table = R"doc(The specification of the layout.)doc";
 
 static const char *__doc_fiction_detail_delete_wires =
 R"doc(This function deletes wires from the provided
