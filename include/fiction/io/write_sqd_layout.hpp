@@ -258,7 +258,7 @@ class write_sqd_layout_impl
                         type == sidb_technology::cell_type::NORMAL ? "" :
                         type == sidb_technology::cell_type::INPUT  ? fmt::format(siqad::DOT_TYPE, "input") :
                         type == sidb_technology::cell_type::OUTPUT ? fmt::format(siqad::DOT_TYPE, "output") :
-                        type == sidb_technology::cell_type::LOGIC ? fmt::format(siqad::DOT_TYPE, "logic") :
+                        type == sidb_technology::cell_type::LOGIC  ? fmt::format(siqad::DOT_TYPE, "logic") :
                                                                      "";
 
                     if constexpr (has_siqad_coord_v<Lyt>)
