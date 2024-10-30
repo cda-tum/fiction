@@ -3799,11 +3799,11 @@ R"doc(Results of the defect avoidance distance calculation.
 Template parameter ``CellType``:)doc";
 
 static const char *__doc_fiction_defect_avoidance_distance_result_max_distance_postion_of_non_operational_defect =
-R"doc(Maximum position at which the placement of a SiDB defect still causes
-the gate to fail.)doc";
+R"doc(position with maximum distance to the SiDB layout at which the
+placement of an SiDB defect still causes the gate to fail.)doc";
 
-static const char *__doc_fiction_defect_avoidance_distance_result_max_min_distance =
-R"doc(Minimum distance between a SiDB of the gate and the defect at the
+static const char *__doc_fiction_defect_avoidance_distance_result_minimum_defect_clearance =
+R"doc(Minimum distance between an SiDB of the gate and the defect at the
 maximum distance that causes the gate to fail.)doc";
 
 static const char *__doc_fiction_defect_extent =
