@@ -23,7 +23,8 @@ template <typename CellType>
 struct defect_avoidance_distance_result
 {
     /**
-     * position with maximum distance to the SiDB layout at which the placement of an SiDB defect still causes the gate to fail.
+     * position with maximum distance to the SiDB layout at which the placement of an SiDB defect still causes the gate
+     * to fail.
      */
     CellType max_distance_postion_of_non_operational_defect{};
     /**

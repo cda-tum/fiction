@@ -133,7 +133,7 @@ TEST_CASE("Bestagon CROSSING gate", "[is-operational]")
 TEST_CASE("Bestagon AND gate", "[is-operational]")
 {
     const auto lyt = blueprints::bestagon_and<sidb_cell_clk_lyt_siqad>();
-    using layout = sidb_defect_cell_clk_lyt_siqad;
+    using layout   = sidb_defect_cell_clk_lyt_siqad;
 
     layout lyt{};
 

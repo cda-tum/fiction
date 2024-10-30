@@ -102,7 +102,8 @@ int main()
             //
             //            simulation_exp(gate, avoidance_grid.minimum_defect_clearance,
             //            grid_stats.num_evaluated_defect_positions,
-            //                           avoidance_random.minimum_defect_clearance, random_stats.num_evaluated_defect_positions,
+            //                           avoidance_random.minimum_defect_clearance,
+            //                           random_stats.num_evaluated_defect_positions,
             //                           avoidance_contour.minimum_defect_clearance,
             //                           contour_stats.num_evaluated_defect_positions);
             //            simulation_exp.save();
@@ -114,7 +115,8 @@ int main()
                 write_defect_influence_operational_domain(op_defect_contour, csv_path_contour);
                 simulation_exp(gate, avoidance_grid.minimum_defect_clearance, grid_stats.num_evaluated_defect_positions,
                                avoidance_random.minimum_defect_clearance, random_stats.num_evaluated_defect_positions,
-                               avoidance_contour.minimum_defect_clearance, contour_stats.num_evaluated_defect_positions);
+                               avoidance_contour.minimum_defect_clearance,
+                               contour_stats.num_evaluated_defect_positions);
                 simulation_exp.save();
                 simulation_exp.table();
             }
