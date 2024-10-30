@@ -459,10 +459,9 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
             for (auto& cell : row)
             {
                 const auto cell_type = lyt.get_cell_type(all_coordinates_in_the_spanned_area[counter]);
-                cell                 = (cell_type == Lyt::technology::cell_type::NORMAL ||
-                        cell_type == Lyt::technology::cell_type::OUTPUT) ?
-                                           'x' :
-                                           ' ';
+                cell = (cell_type == Lyt::technology::cell_type::NORMAL ||
+                        cell_type == Lyt::technology::cell_type::OUTPUT) ? 'x' :
+                                       (cell_type == Lyt::technology::cell_type::LOGIC) ? 'l' : ' ';
                 counter++;
             }
         }

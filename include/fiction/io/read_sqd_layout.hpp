@@ -295,6 +295,10 @@ class read_sqd_layout_impl
         {
             return sidb_technology::cell_type::NORMAL;
         }
+        if (std::string{type} == "logic")
+        {
+            return sidb_technology::cell_type::LOGIC;
+        }
 
         throw sqd_parsing_error("Error parsing SQD file: invalid dot type");
     }
