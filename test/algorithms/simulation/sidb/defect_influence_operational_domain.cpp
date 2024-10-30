@@ -63,23 +63,21 @@ TEST_CASE("novel designed AND Gate influence distance function which fails again
 
     lyt.assign_cell_type({36, 19, 0}, sidb_technology::cell_type::NORMAL);
 
-    write_sqd_layout(
-        lyt, "/Users/jandrewniok/CLionProjects/fiction_fork/experiments/quicktrace/plots/and/and.sqd");
+    write_sqd_layout(lyt, "/Users/jandrewniok/CLionProjects/fiction_fork/experiments/quicktrace/plots/and/and.sqd");
 
     const auto cube_lyt = convert_layout_to_fiction_coordinates<sidb_cell_clk_lyt_cube>(lyt);
 
     const sidb_defect sidb_defect{sidb_defect_type::SI_VACANCY, -1, 10.6, 5.9};
     const maximum_defect_influence_position_and_distance_params sim_params{sidb_defect,
                                                                            sidb_simulation_parameters{2, -0.32}};
-    defect_operational_domain_params params{sim_params,
-                                                      is_operational_params{sim_params.simulation_parameters}};
+    defect_operational_domain_params params{sim_params, is_operational_params{sim_params.simulation_parameters}};
 
     SECTION("Grid Search")
     {
         params.defect_influence_params.additional_scanning_area = {20, 20};
         defect_operational_domain_stats stats{};
-        const auto defect_influence_domain = defect_operational_domain_grid_search(
-            cube_lyt, std::vector<tt>{create_or_tt()}, 1, params, &stats);
+        const auto                      defect_influence_domain =
+            defect_operational_domain_grid_search(cube_lyt, std::vector<tt>{create_or_tt()}, 1, params, &stats);
         CHECK_THAT(defect_avoidance_distance(cube_lyt, defect_influence_domain).minimum_defect_clearance,
                    Catch::Matchers::WithinAbs(12.579477930, physical_constants::POP_STABILITY_ERR));
     }
@@ -88,8 +86,8 @@ TEST_CASE("novel designed AND Gate influence distance function which fails again
     {
         params.defect_influence_params.additional_scanning_area = {20, 20};
         defect_operational_domain_stats stats{};
-        const auto defect_influence_domain = defect_operational_domain_random_sampling(
-            cube_lyt, std::vector<tt>{create_or_tt()}, 100, params, &stats);
+        const auto                      defect_influence_domain =
+            defect_operational_domain_random_sampling(cube_lyt, std::vector<tt>{create_or_tt()}, 100, params, &stats);
         CHECK(defect_influence_domain.operational_values.size() == 100);
         CHECK(defect_avoidance_distance(cube_lyt, defect_influence_domain).minimum_defect_clearance <= 12.579477930);
     }
@@ -98,7 +96,7 @@ TEST_CASE("novel designed AND Gate influence distance function which fails again
     {
         params.defect_influence_params.additional_scanning_area = {20, 20};
         defect_operational_domain_stats stats{};
-        const auto defect_influence_domain =
+        const auto                      defect_influence_domain =
             defect_operational_domain_quicktrace(cube_lyt, std::vector<tt>{create_or_tt()}, 5, params, &stats);
         CHECK_THAT(defect_avoidance_distance(cube_lyt, defect_influence_domain).minimum_defect_clearance,
                    Catch::Matchers::WithinAbs(12.579477930, physical_constants::POP_STABILITY_ERR));

@@ -81,14 +81,14 @@ int main()
         for (const auto& gate_lyt : exhaustive_design)
         {
             // using grid search to find the minimum defect clearance
-            defect_operational_domain_stats           grid_stats{};
-            const auto                                op_defect_grid =
+            defect_operational_domain_stats grid_stats{};
+            const auto                      op_defect_grid =
                 defect_influence_operational_domain_grid_search(gate_lyt, truth_table, 1, defect_params, &grid_stats);
             const auto avoidance_grid = defect_avoidance_distance(gate_lyt, op_defect_grid);
 
             // using QuickTrace to find the minimum clearance
             defect_operational_domain_stats contour_stats{};
-            const auto op_defect_contour =
+            const auto                      op_defect_contour =
                 defect_operational_domain_quicktrace(gate_lyt, truth_table, 100, defect_params, &contour_stats);
             const auto avoidance_contour = defect_avoidance_distance(gate_lyt, op_defect_contour);
 

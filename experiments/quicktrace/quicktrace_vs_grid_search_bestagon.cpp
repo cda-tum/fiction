@@ -1,15 +1,14 @@
 #include "fiction/algorithms/simulation/sidb/defect_avoidance_distance.hpp"
-
 #include "fiction/algorithms/simulation/sidb/defect_influence_operational_domain.hpp"
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
 #include "fiction/algorithms/simulation/sidb/maximum_defect_influence_position_and_distance.hpp"
 #include "fiction/io/read_sqd_layout.hpp"
 #include "fiction/io/write_defect_influence_operational_domain.hpp"
 #include "fiction/io/write_sqd_layout.hpp"
+#include "fiction/technology/sidb_defects.hpp"
 #include "fiction/types.hpp"
 #include "fiction/utils/truth_table_utils.hpp"
 #include "fiction_experiments.hpp"
-#include "fiction/technology/sidb_defects.hpp"
 
 #include <fmt/format.h>
 
@@ -74,8 +73,8 @@ int main()
         {
             const auto layout = read_sqd_layout<sidb_100_cell_clk_lyt_cube>(file.path().string());
 
-            defect_operational_domain_stats           grid_stats{};
-            const auto                                op_defect_grid =
+            defect_operational_domain_stats grid_stats{};
+            const auto                      op_defect_grid =
                 defect_operational_domain_grid_search(layout, truth_table, 1, defect_params, &grid_stats);
 
             // Define file paths for the CSV and SQD
@@ -91,15 +90,15 @@ int main()
             const auto avoidance_grid = defect_avoidance_distance(layout, op_defect_grid);
 
             defect_operational_domain_stats random_stats{};
-            const auto op_defect_random = defect_operational_domain_random_sampling(
-                layout, truth_table, 100, defect_params, &random_stats);
+            const auto                      op_defect_random =
+                defect_operational_domain_random_sampling(layout, truth_table, 100, defect_params, &random_stats);
             const auto avoidance_random = defect_avoidance_distance(layout, op_defect_random);
 
             const auto csv_path_random = fmt::format("{}{}_random.csv", gate_folder, gate);
             write_defect_influence_operational_domain(op_defect_random, csv_path_random);
 
             defect_operational_domain_stats contour_stats{};
-            const auto op_defect_contour =
+            const auto                      op_defect_contour =
                 defect_operational_domain_quicktrace(layout, truth_table, 20, defect_params, &contour_stats);
             const auto avoidance_contour = defect_avoidance_distance(layout, op_defect_contour);
 

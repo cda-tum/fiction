@@ -96,8 +96,7 @@ class defect_operational_domain_impl
 {
   public:
     defect_operational_domain_impl(const Lyt& lyt, const std::vector<TT>& tt,
-                                             const defect_operational_domain_params& ps,
-                                             defect_operational_domain_stats&        st) :
+                                   const defect_operational_domain_params& ps, defect_operational_domain_stats& st) :
             layout{lyt},
             truth_table{tt},
             params{ps},
@@ -639,8 +638,9 @@ class defect_operational_domain_impl
 }  // namespace detail
 
 /**
- * Computes the defect operational domain of the given SiDB layout. The defect operational domain is the set of all defect positions for which the layout is logically operational. Logical
- * operation is defined as the layout implementing the given truth table.
+ * Computes the defect operational domain of the given SiDB layout. The defect operational domain is the set of all
+ * defect positions for which the layout is logically operational. Logical operation is defined as the layout
+ * implementing the given truth table.
  *
  * This algorithm uses a grid search to determine the defect operational domain. The grid search is performed
  * by exhaustively sweeping all possible atomic defect positions in x and y dimensions.
@@ -656,10 +656,9 @@ class defect_operational_domain_impl
  */
 template <typename Lyt, typename TT>
 defect_operational_domain<Lyt>
-defect_operational_domain_grid_search(const Lyt& lyt, const std::vector<TT>& spec,
-                                                const std::size_t                                 step_size = 1,
-                                                const defect_operational_domain_params& params    = {},
-                                                defect_operational_domain_stats*        stats     = nullptr)
+defect_operational_domain_grid_search(const Lyt& lyt, const std::vector<TT>& spec, const std::size_t step_size = 1,
+                                      const defect_operational_domain_params& params = {},
+                                      defect_operational_domain_stats*        stats  = nullptr)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -679,9 +678,10 @@ defect_operational_domain_grid_search(const Lyt& lyt, const std::vector<TT>& spe
     return result;
 }
 /**
- * Computes the `defect operational domain` of the given SiDB cell-level layout. The defect operational domain is the set of all defect positions for which the layout is logically operational. Logical
- * operation is defined as the layout implementing the given truth table. The input BDL pairs of the layout are assumed
- * to be in the same order as the inputs of the truth table.
+ * Computes the `defect operational domain` of the given SiDB cell-level layout. The defect operational domain is the
+ * set of all defect positions for which the layout is logically operational. Logical operation is defined as the layout
+ * implementing the given truth table. The input BDL pairs of the layout are assumed to be in the same order as the
+ * inputs of the truth table.
  *
  * This algorithm uses random sampling to find a part of the defect operational domain that might not be
  * complete. It performs a total of `samples` uniformly-distributed random samples within the specified area.
@@ -698,8 +698,8 @@ defect_operational_domain_grid_search(const Lyt& lyt, const std::vector<TT>& spe
 template <typename Lyt, typename TT>
 defect_operational_domain<Lyt>
 defect_operational_domain_random_sampling(const Lyt& lyt, const std::vector<TT>& spec, std::size_t samples,
-                                                    const defect_operational_domain_params& params = {},
-                                                    defect_operational_domain_stats*        stats  = nullptr)
+                                          const defect_operational_domain_params& params = {},
+                                          defect_operational_domain_stats*        stats  = nullptr)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -744,10 +744,10 @@ defect_operational_domain_random_sampling(const Lyt& lyt, const std::vector<TT>&
  * @return The (partial) defect operational domain of the layout.
  */
 template <typename Lyt, typename TT>
-defect_operational_domain<Lyt>
-defect_operational_domain_quicktrace(const Lyt& lyt, const std::vector<TT>& spec, const std::size_t samples,
-                                          const defect_operational_domain_params& params = {},
-                                          defect_operational_domain_stats*        stats  = nullptr)
+defect_operational_domain<Lyt> defect_operational_domain_quicktrace(const Lyt& lyt, const std::vector<TT>& spec,
+                                                                    const std::size_t                       samples,
+                                                                    const defect_operational_domain_params& params = {},
+                                                                    defect_operational_domain_stats* stats = nullptr)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
