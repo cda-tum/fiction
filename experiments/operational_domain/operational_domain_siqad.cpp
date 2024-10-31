@@ -75,7 +75,7 @@ int main()  // NOLINT
     write_op_domain_params.operational_tag     = "1";
     write_op_domain_params.writing_mode        = write_operational_domain_params::sample_writing_mode::ALL_SAMPLES;
 
-    static const std::string folder = fmt::format("{}siqad_gates_type_tags/", EXPERIMENTS_PATH);
+    static const std::string folder = fmt::format("{}sidb_gate_libraries/siqad_gates/", EXPERIMENTS_PATH);
 
     static const std::array<std::pair<std::string, std::vector<tt>>, 5> gates = {
         std::make_pair("and", std::vector<tt>{create_and_tt()}),

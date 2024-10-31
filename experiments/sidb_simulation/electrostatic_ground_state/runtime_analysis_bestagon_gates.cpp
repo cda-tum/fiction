@@ -39,7 +39,7 @@ int main()  // NOLINT
         "QuickSim Single Runtime [s]",
         "Total QuickSim TTS [s]"};
 
-    static const std::string folder = fmt::format("{}bestagon_gates_type_tags/", EXPERIMENTS_PATH);
+    static const std::string folder = fmt::format("{}sidb_gate_libraries/bestagon_gates/", EXPERIMENTS_PATH);
 
     static const std::array<std::pair<std::string, std::vector<tt>>, 12> gates = {
         std::make_pair("hourglass", create_crossing_wire_tt()),

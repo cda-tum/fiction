@@ -30,7 +30,7 @@ int main()  // NOLINT
         "E_{g,err} [meV]",
     };
 
-    static const std::string folder = fmt::format("{}siqad_gates_type_tags/", EXPERIMENTS_PATH);
+    static const std::string folder = fmt::format("{}sidb_gate_libraries/siqad_gates/", EXPERIMENTS_PATH);
 
     static const std::array<std::pair<std::string, std::vector<tt>>, 5> gates = {
         std::make_pair("and", std::vector<tt>{create_and_tt()}),
