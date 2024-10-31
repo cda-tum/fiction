@@ -107,13 +107,7 @@ int main()  // NOLINT
 
     for (const auto& [gate, truth_table] : gates)
     {
-        for (const auto& file : std::filesystem::directory_iterator(fmt::format("{}{}", folder, gate)))
-        {
-            const auto& benchmark = file.path();
-
-            std::cout << benchmark << std::endl;
-
-            auto lyt = read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(benchmark.string(), gate);
+            auto lyt = read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}/{}.sqd", folder, gate), gate);
 
             // operational domain stats
             operational_domain_stats op_domain_stats_gs{};
@@ -167,7 +161,7 @@ int main()  // NOLINT
 
             opdomain_exp(
                 // Benchmark
-                benchmark.string(), lyt.num_cells(),
+                gate, lyt.num_cells(),
 
                 // Grid Search
                 op_domain_stats_gs.num_evaluated_parameter_combinations, operational_percentage_gs,
@@ -182,7 +176,6 @@ int main()  // NOLINT
                 op_domain_stats_ff.num_simulator_invocations, mockturtle::to_seconds(op_domain_stats_ff.time_total)
 
             );
-        }
 
         opdomain_exp.save();
         opdomain_exp.table();
