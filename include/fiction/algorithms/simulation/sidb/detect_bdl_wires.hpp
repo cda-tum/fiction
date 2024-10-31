@@ -59,7 +59,7 @@ struct detect_bdl_wires_params
 /**
  * This struct encapsulates a vector of `bdl_pair` objects, representing the pairs of SiDBs in the BDL wire.
  *
- * @tparam CellType Cell type.
+ * @tparam Lyt SiDB cell-level layout type.
  */
 template <typename Lyt>
 struct bdl_wire
@@ -68,27 +68,26 @@ struct bdl_wire
      * Vector of BDL pairs representing the wire.
      */
     std::vector<bdl_pair<cell<Lyt>>> pairs{};
-
     /**
      * Port of the BDL wire.
      */
     port_direction port{port_direction::NONE};
-
     /**
      * First BDL pair of the wire.
      */
     std::optional<bdl_pair<cell<Lyt>>> first_bdl_pair{};
-
     /**
      * Last BDL pair of the wire.
      */
     std::optional<bdl_pair<cell<Lyt>>> last_bdl_pair{};
-
     /**
      * Default constructor for an empty BDL wire.
      */
     bdl_wire() noexcept
     {
+        static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+        static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+
         update_direction();
     }
 
@@ -101,6 +100,9 @@ struct bdl_wire
      */
     explicit bdl_wire(const std::vector<bdl_pair<cell<Lyt>>>& p) noexcept : pairs(p)
     {
+        static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+        static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+
         if (!pairs.empty())
         {
             first_bdl_pair = pairs.front();
@@ -121,7 +123,10 @@ struct bdl_wire
             port(other.port),
             first_bdl_pair(other.first_bdl_pair),
             last_bdl_pair(other.last_bdl_pair)
-    {}
+    {
+        static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+        static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    }
 
     /**
      * Move constructor.
@@ -136,6 +141,9 @@ struct bdl_wire
             first_bdl_pair(std::move(other.first_bdl_pair)),
             last_bdl_pair(std::move(other.last_bdl_pair))
     {
+        static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+        static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+
         other.port.dir = port_direction::NONE;  // Reset the port of the moved-from object
     }
 
@@ -157,6 +165,7 @@ struct bdl_wire
             last_bdl_pair  = std::move(other.last_bdl_pair);
             other.port.dir = port_direction::NONE;  // Reset the port of the moved-from object
         }
+
         return *this;
     }
 
@@ -627,8 +636,6 @@ class detect_bdl_wires_impl
      * Aggregates BDL pairs of specified types into a set.
      *
      * @tparam Lyt SiDB cell-level layout type.
-     * @param lyt Layout type used for detection.
-     * @param params Parameters containing BDL pairs.
      * @return A set of BDL pairs containing all pairs of the specified types.
      */
     [[nodiscard]] std::set<bdl_pair<cell<Lyt>>> aggregate_bdl_pairs() const noexcept
