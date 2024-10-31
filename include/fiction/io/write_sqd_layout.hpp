@@ -260,22 +260,22 @@ class write_sqd_layout_impl
 
                     switch (type)
                     {
-                        case sidb_technology::cell_type::NORMAL:
+                        case (sidb_technology::cell_type::NORMAL):
                         {
                             type_str = "";
                             break;
                         }
-                        case sidb_technology::cell_type::INPUT:
+                        case (sidb_technology::cell_type::INPUT):
                         {
                             type_str = fmt::format(siqad::DOT_TYPE, "input");
                             break;
                         }
-                        case sidb_technology::cell_type::OUTPUT:
+                        case (sidb_technology::cell_type::OUTPUT):
                         {
                             type_str = fmt::format(siqad::DOT_TYPE, "output");
                             break;
                         }
-                        case sidb_technology::cell_type::LOGIC:
+                        case (sidb_technology::cell_type::LOGIC):
                         {
                             type_str = fmt::format(siqad::DOT_TYPE, "logic");
                             break;
