@@ -934,8 +934,8 @@ static const char *__doc_fiction_bdl_wire =
 R"doc(This struct encapsulates a vector of `bdl_pair` objects, representing
 the pairs of SiDBs in the BDL wire.
 
-Template parameter ``CellType``:
-    Cell type.)doc";
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.)doc";
 
 static const char *__doc_fiction_bdl_wire_add_bdl_pair =
 R"doc(Add a BDL pair to the wire.
@@ -4830,12 +4830,6 @@ R"doc(Aggregates BDL pairs of specified types into a set.
 
 Template parameter ``Lyt``:
     SiDB cell-level layout type.
-
-Parameter ``lyt``:
-    Layout type used for detection.
-
-Parameter ``params``:
-    Parameters containing BDL pairs.
 
 Returns:
     A set of BDL pairs containing all pairs of the specified types.)doc";
