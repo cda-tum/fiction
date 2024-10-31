@@ -21,7 +21,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void detect_bdl_wires(pybind11::module& m, const std::string& lattice = "")
+void detect_bdl_wires(pybind11::module& m, const std::string& lattice)
 {
     using namespace pybind11::literals;
     namespace py = pybind11;
