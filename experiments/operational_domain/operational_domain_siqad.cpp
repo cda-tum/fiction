@@ -103,91 +103,91 @@ int main()  // NOLINT
 
     for (const auto& [gate, truth_table] : gates)
     {
-            const auto lyt = read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}/{}.sqd", folder, gate), gate);
+        const auto lyt = read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}/{}.sqd", folder, gate), gate);
 
-            // operational domain stats
-            operational_domain_stats op_domain_stats_gs{};
-            operational_domain_stats op_domain_stats_rs{};
-            operational_domain_stats op_domain_stats_ff{};
-            operational_domain_stats op_domain_stats_ct{};
+        // operational domain stats
+        operational_domain_stats op_domain_stats_gs{};
+        operational_domain_stats op_domain_stats_rs{};
+        operational_domain_stats op_domain_stats_ff{};
+        operational_domain_stats op_domain_stats_ct{};
 
-            // compute the operational domains
-            const auto op_domain_gs =
-                operational_domain_grid_search(lyt, truth_table, op_domain_params, &op_domain_stats_gs);
-            const auto op_domain_rs =
-                operational_domain_random_sampling(lyt, truth_table, 2500, op_domain_params, &op_domain_stats_rs);
-            const auto op_domain_ff =
-                operational_domain_flood_fill(lyt, truth_table, 250, op_domain_params, &op_domain_stats_ff);
-            const auto op_domain_ct =
-                operational_domain_contour_tracing(lyt, truth_table, 100, op_domain_params, &op_domain_stats_ct);
+        // compute the operational domains
+        const auto op_domain_gs =
+            operational_domain_grid_search(lyt, truth_table, op_domain_params, &op_domain_stats_gs);
+        const auto op_domain_rs =
+            operational_domain_random_sampling(lyt, truth_table, 2500, op_domain_params, &op_domain_stats_rs);
+        const auto op_domain_ff =
+            operational_domain_flood_fill(lyt, truth_table, 250, op_domain_params, &op_domain_stats_ff);
+        const auto op_domain_ct =
+            operational_domain_contour_tracing(lyt, truth_table, 100, op_domain_params, &op_domain_stats_ct);
 
-            // write the operational domains to a CSV file
-            write_operational_domain(op_domain_gs,
-                                     fmt::format("{}operational_domain_grid_search_siqad_{}.csv", folder, gate),
-                                     write_op_domain_params);
-            write_operational_domain(op_domain_rs,
-                                     fmt::format("{}operational_domain_random_sampling_siqad_{}.csv", folder, gate),
-                                     write_op_domain_params);
-            write_operational_domain(op_domain_ff,
-                                     fmt::format("{}operational_domain_flood_fill_siqad_{}.csv", folder, gate),
-                                     write_op_domain_params);
-            write_operational_domain(op_domain_ct,
-                                     fmt::format("{}operational_domain_contour_tracing_siqad_{}.csv", folder, gate),
-                                     write_op_domain_params);
+        // write the operational domains to a CSV file
+        write_operational_domain(op_domain_gs,
+                                 fmt::format("{}operational_domain_grid_search_siqad_{}.csv", folder, gate),
+                                 write_op_domain_params);
+        write_operational_domain(op_domain_rs,
+                                 fmt::format("{}operational_domain_random_sampling_siqad_{}.csv", folder, gate),
+                                 write_op_domain_params);
+        write_operational_domain(op_domain_ff,
+                                 fmt::format("{}operational_domain_flood_fill_siqad_{}.csv", folder, gate),
+                                 write_op_domain_params);
+        write_operational_domain(op_domain_ct,
+                                 fmt::format("{}operational_domain_contour_tracing_siqad_{}.csv", folder, gate),
+                                 write_op_domain_params);
 
-            // update the total number of samples
-            total_samples_gs += op_domain_stats_gs.num_evaluated_parameter_combinations;
-            total_samples_rs += op_domain_stats_rs.num_evaluated_parameter_combinations;
-            total_samples_ff += op_domain_stats_ff.num_evaluated_parameter_combinations;
-            total_samples_ct += op_domain_stats_ct.num_evaluated_parameter_combinations;
+        // update the total number of samples
+        total_samples_gs += op_domain_stats_gs.num_evaluated_parameter_combinations;
+        total_samples_rs += op_domain_stats_rs.num_evaluated_parameter_combinations;
+        total_samples_ff += op_domain_stats_ff.num_evaluated_parameter_combinations;
+        total_samples_ct += op_domain_stats_ct.num_evaluated_parameter_combinations;
 
-            // update the total number of simulator calls
-            total_sim_calls_gs += op_domain_stats_gs.num_simulator_invocations;
-            total_sim_calls_rs += op_domain_stats_rs.num_simulator_invocations;
-            total_sim_calls_ff += op_domain_stats_ff.num_simulator_invocations;
-            total_sim_calls_ct += op_domain_stats_ct.num_simulator_invocations;
+        // update the total number of simulator calls
+        total_sim_calls_gs += op_domain_stats_gs.num_simulator_invocations;
+        total_sim_calls_rs += op_domain_stats_rs.num_simulator_invocations;
+        total_sim_calls_ff += op_domain_stats_ff.num_simulator_invocations;
+        total_sim_calls_ct += op_domain_stats_ct.num_simulator_invocations;
 
-            // update the total runtime
-            total_runtime_gs += mockturtle::to_seconds(op_domain_stats_gs.time_total);
-            total_runtime_rs += mockturtle::to_seconds(op_domain_stats_rs.time_total);
-            total_runtime_ff += mockturtle::to_seconds(op_domain_stats_ff.time_total);
-            total_runtime_ct += mockturtle::to_seconds(op_domain_stats_ct.time_total);
+        // update the total runtime
+        total_runtime_gs += mockturtle::to_seconds(op_domain_stats_gs.time_total);
+        total_runtime_rs += mockturtle::to_seconds(op_domain_stats_rs.time_total);
+        total_runtime_ff += mockturtle::to_seconds(op_domain_stats_ff.time_total);
+        total_runtime_ct += mockturtle::to_seconds(op_domain_stats_ct.time_total);
 
-            // compute the operational percentages
-            const auto operational_percentage_gs =
-                static_cast<double>(op_domain_stats_gs.num_operational_parameter_combinations) /
-                static_cast<double>(op_domain_stats_gs.num_evaluated_parameter_combinations);
-            const auto operational_percentage_rs =
-                static_cast<double>(op_domain_stats_rs.num_operational_parameter_combinations) /
-                static_cast<double>(op_domain_stats_rs.num_evaluated_parameter_combinations);
-            const auto operational_percentage_ff =
-                static_cast<double>(op_domain_stats_ff.num_operational_parameter_combinations) /
-                static_cast<double>(op_domain_stats_ff.num_evaluated_parameter_combinations);
-            const auto operational_percentage_ct =
-                static_cast<double>(op_domain_stats_ct.num_operational_parameter_combinations) /
-                static_cast<double>(op_domain_stats_ct.num_evaluated_parameter_combinations);
+        // compute the operational percentages
+        const auto operational_percentage_gs =
+            static_cast<double>(op_domain_stats_gs.num_operational_parameter_combinations) /
+            static_cast<double>(op_domain_stats_gs.num_evaluated_parameter_combinations);
+        const auto operational_percentage_rs =
+            static_cast<double>(op_domain_stats_rs.num_operational_parameter_combinations) /
+            static_cast<double>(op_domain_stats_rs.num_evaluated_parameter_combinations);
+        const auto operational_percentage_ff =
+            static_cast<double>(op_domain_stats_ff.num_operational_parameter_combinations) /
+            static_cast<double>(op_domain_stats_ff.num_evaluated_parameter_combinations);
+        const auto operational_percentage_ct =
+            static_cast<double>(op_domain_stats_ct.num_operational_parameter_combinations) /
+            static_cast<double>(op_domain_stats_ct.num_evaluated_parameter_combinations);
 
-            opdomain_exp(
-                // Benchmark
-                gate, lyt.num_cells(),
+        opdomain_exp(
+            // Benchmark
+            gate, lyt.num_cells(),
 
-                // Grid Search
-                op_domain_stats_gs.num_evaluated_parameter_combinations, operational_percentage_gs,
-                op_domain_stats_gs.num_simulator_invocations, mockturtle::to_seconds(op_domain_stats_gs.time_total),
+            // Grid Search
+            op_domain_stats_gs.num_evaluated_parameter_combinations, operational_percentage_gs,
+            op_domain_stats_gs.num_simulator_invocations, mockturtle::to_seconds(op_domain_stats_gs.time_total),
 
-                // Random Sampling
-                op_domain_stats_rs.num_evaluated_parameter_combinations, operational_percentage_rs,
-                op_domain_stats_rs.num_simulator_invocations, mockturtle::to_seconds(op_domain_stats_rs.time_total),
+            // Random Sampling
+            op_domain_stats_rs.num_evaluated_parameter_combinations, operational_percentage_rs,
+            op_domain_stats_rs.num_simulator_invocations, mockturtle::to_seconds(op_domain_stats_rs.time_total),
 
-                // Flood Fill
-                op_domain_stats_ff.num_evaluated_parameter_combinations, operational_percentage_ff,
-                op_domain_stats_ff.num_simulator_invocations, mockturtle::to_seconds(op_domain_stats_ff.time_total),
+            // Flood Fill
+            op_domain_stats_ff.num_evaluated_parameter_combinations, operational_percentage_ff,
+            op_domain_stats_ff.num_simulator_invocations, mockturtle::to_seconds(op_domain_stats_ff.time_total),
 
-                // Contour Tracing
-                op_domain_stats_ct.num_evaluated_parameter_combinations, operational_percentage_ct,
-                op_domain_stats_ct.num_simulator_invocations, mockturtle::to_seconds(op_domain_stats_ct.time_total)
+            // Contour Tracing
+            op_domain_stats_ct.num_evaluated_parameter_combinations, operational_percentage_ct,
+            op_domain_stats_ct.num_simulator_invocations, mockturtle::to_seconds(op_domain_stats_ct.time_total)
 
-            );
+        );
 
         opdomain_exp.save();
         // opdomain_exp.table();
