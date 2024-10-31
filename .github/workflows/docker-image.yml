@@ -92,7 +92,7 @@ jobs:
         uses: actions/attest-build-provenance@v1
         with:
           subject-name: |
-            docker.io/${{ secrets.DOCKER_USERNAME }}/fiction:${{ github.event.release.tag_name }}
-            ghcr.io/${{ github.repository }}:${{ github.event.release.tag_name }}
+            docker.io/${{ secrets.DOCKER_USERNAME }}/fiction:${{ github.event.release.tag_name || 'latest' }}
+            ghcr.io/${{ github.repository }}:${{ github.event.release.tag_name || 'latest' }}
           subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true
