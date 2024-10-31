@@ -123,12 +123,14 @@
             <dbdot>
                 <layer_id>3</layer_id>
                 <latcoord n="10" m="5" l="0"/>
+                <type>logic</type>
                 <physloc x="38.4" y="38.4"/>
                 <color>#ffc8c8c8</color>
             </dbdot>
             <dbdot>
                 <layer_id>3</layer_id>
                 <latcoord n="10" m="6" l="0"/>
+                <type>logic</type>
                 <physloc x="38.4" y="46.08"/>
                 <color>#ffc8c8c8</color>
             </dbdot>
