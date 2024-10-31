@@ -26,6 +26,9 @@ on:
       - '.dockerignore'
       - '!bindings/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp'
   merge_group:
+  workflow_dispatch:
+  release:
+    types: [ published ]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
@@ -33,7 +36,7 @@ concurrency:
 
 jobs:
   build:
-    name: 🐳 Build Docker image
+    name: 🐳 Build and publish Docker image
     runs-on: ubuntu-latest
 
     steps:
@@ -41,5 +44,36 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Build the Docker image
-        run: docker build --build-arg NUMBER_OF_JOBS=4 . --file Dockerfile --tag fiction:$(date +%s)
+      - name: Log in to Docker Hub
+#        if: github.event_name == 'release' && github.event.action == 'published'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Extract metadata (tags, labels) for Docker
+#        if: github.event_name == 'release' && github.event.action == 'published'
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ secrets.DOCKER_USERNAME }}/fiction
+          tags: |
+            ${{ github.event.release.tag_name }}
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ github.workspace }}
+          file: Dockerfile
+          push: ${{ github.event_name == 'release' && github.event.action == 'published' }}
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/fiction:${{ github.event.release.tag_name || 'latest' }}
+          labels: ${{ steps.meta.outputs.labels || '' }}
+
+      - name: Generate artifact attestation
+#        if: github.event_name == 'release' && github.event.action == 'published'
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-name: ${{ secrets.DOCKER_USERNAME }}/fiction:${{ github.event.release.tag_name }}
+          subject-digest: ${{ steps.push.outputs.digest }}
+          push-to-registry: true
