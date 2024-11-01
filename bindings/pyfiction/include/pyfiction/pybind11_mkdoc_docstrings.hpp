@@ -4805,7 +4805,7 @@ static const char *__doc_fiction_detail_defect_operational_domain_impl = R"doc()
 
 static const char *__doc_fiction_detail_defect_operational_domain_impl_current_defect_position = R"doc(The current defect position.)doc";
 
-static const char *__doc_fiction_detail_defect_operational_domain_impl_defect_operational_domain = R"doc(The operational domain of the layout.)doc";
+static const char *__doc_fiction_detail_defect_operational_domain_impl_defect_op_domain = R"doc(The operational domain of the layout.)doc";
 
 static const char *__doc_fiction_detail_defect_operational_domain_impl_defect_operational_domain_impl = R"doc()doc";
 
