@@ -1326,7 +1326,6 @@ Lyt two_input_one_output_bestagon_skeleton() noexcept
     return lyt;
 };
 
-
 template <typename Lyt>
 Lyt bestagon_xor() noexcept
 {

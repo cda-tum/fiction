@@ -32,8 +32,8 @@ void read_sqd_layout(pybind11::module& m, std::string lattice_orientation, std::
     Lyt (*read_sqd_layout_function_pointer)(const std::string_view&, const std::string_view&) =
         &fiction::read_sqd_layout<Lyt>;
 
-    m.def(fmt::format("read_sqd_layout_{}{}", lattice_orientation, coordinate_type).c_str(), read_sqd_layout_function_pointer, "filename"_a, "name"_a = "",
-                  DOC(fiction_read_sqd_layout_3));
+    m.def(fmt::format("read_sqd_layout_{}{}", lattice_orientation, coordinate_type).c_str(),
+          read_sqd_layout_function_pointer, "filename"_a, "name"_a = "", DOC(fiction_read_sqd_layout_3));
 }
 
 }  // namespace detail

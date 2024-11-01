@@ -53,9 +53,9 @@ inline void determine_physically_valid_parameters(pybind11::module& m)
                 {
                     return result.value();
                 }
-                                    // If no value is present, raise a Python ValueError
-                throw py::value_error("Invalid parameter point: no excited state number available for the provided parameter.");
-
+                // If no value is present, raise a Python ValueError
+                throw py::value_error(
+                    "Invalid parameter point: no excited state number available for the provided parameter.");
             },
             "pp"_a);
 

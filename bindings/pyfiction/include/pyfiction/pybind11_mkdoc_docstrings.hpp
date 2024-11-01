@@ -4803,8 +4803,6 @@ static const char *__doc_fiction_detail_critical_temperature_impl_stats = R"doc(
 
 static const char *__doc_fiction_detail_defect_operational_domain_impl = R"doc()doc";
 
-static const char *__doc_fiction_detail_defect_operational_domain_impl_contour_tracing = R"doc()doc";
-
 static const char *__doc_fiction_detail_defect_operational_domain_impl_current_defect_position = R"doc(The current defect position.)doc";
 
 static const char *__doc_fiction_detail_defect_operational_domain_impl_defect_operational_domain = R"doc(The operational domain of the layout.)doc";
@@ -4892,6 +4890,8 @@ static const char *__doc_fiction_detail_defect_operational_domain_impl_nw_cell =
 static const char *__doc_fiction_detail_defect_operational_domain_impl_params = R"doc(The parameters for the operational domain computation.)doc";
 
 static const char *__doc_fiction_detail_defect_operational_domain_impl_previous_defect_position = R"doc(The previous defect position.)doc";
+
+static const char *__doc_fiction_detail_defect_operational_domain_impl_quicktrace = R"doc()doc";
 
 static const char *__doc_fiction_detail_defect_operational_domain_impl_random_sampling =
 R"doc(This function performs random sampling of defect positions from a grid

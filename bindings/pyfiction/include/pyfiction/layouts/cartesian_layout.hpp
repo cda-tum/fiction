@@ -143,7 +143,7 @@ inline void cartesian_layout_impl(pybind11::module& m)
         ;
 }
 
-};
+};  // namespace detail
 
 inline void cartesian_layout(pybind11::module& m)
 {
@@ -151,8 +151,6 @@ inline void cartesian_layout(pybind11::module& m)
     detail::cartesian_layout_impl<py_cartesian_layout_cube>(m);
 }
 
-
-
-}// namespace pyfiction
+}  // namespace pyfiction
 
 #endif  // PYFICTION_CARTESIAN_LAYOUT_HPP
