@@ -88,19 +88,16 @@ void fcn_technology_cell_layout(pybind11::module& m, std::string coordinate_name
      * Cell-level clocked Cartesian layout.
      */
 
-    py::class_<CellLyt, ClockedLyt>(
-        m, fmt::format("{}_layout{}", tech_name, coordinate_name).c_str(), DOC(fiction_cell_level_layout))
+    py::class_<CellLyt, ClockedLyt>(m, fmt::format("{}_layout{}", tech_name, coordinate_name).c_str(),
+                                    DOC(fiction_cell_level_layout))
         .def(py::init<>())
         .def(py::init<const fiction::aspect_ratio<CellLyt>&>(), "dimension"_a,
              DOC(fiction_cell_level_layout_cell_level_layout))
         .def(py::init(
-                 [](const fiction::aspect_ratio<CellLyt>& dimension,
-                    const std::string&                                                scheme_name,
+                 [](const fiction::aspect_ratio<CellLyt>& dimension, const std::string& scheme_name,
                     const std::string& layout_name) -> CellLyt
                  {
-                     if (const auto scheme =
-                             fiction::get_clocking_scheme<CellLyt>(scheme_name);
-                         scheme.has_value())
+                     if (const auto scheme = fiction::get_clocking_scheme<CellLyt>(scheme_name); scheme.has_value())
                      {
                          return CellLyt{dimension, *scheme, layout_name};
                      }
@@ -112,18 +109,13 @@ void fcn_technology_cell_layout(pybind11::module& m, std::string coordinate_name
 
         .def("assign_cell_type", &CellLyt::assign_cell_type, "c"_a, "ct"_a,
              DOC(fiction_cell_level_layout_assign_cell_type))
-        .def("get_cell_type", &CellLyt::get_cell_type, "c"_a,
-             DOC(fiction_cell_level_layout_get_cell_type))
-        .def("is_empty_cell", &CellLyt::is_empty_cell, "c"_a,
-             DOC(fiction_cell_level_layout_is_empty_cell))
+        .def("get_cell_type", &CellLyt::get_cell_type, "c"_a, DOC(fiction_cell_level_layout_get_cell_type))
+        .def("is_empty_cell", &CellLyt::is_empty_cell, "c"_a, DOC(fiction_cell_level_layout_is_empty_cell))
         .def("assign_cell_name", &CellLyt::assign_cell_name, "c"_a, "n"_a,
              DOC(fiction_cell_level_layout_assign_cell_name))
-        .def("get_cell_name", &CellLyt::get_cell_name, "c"_a,
-             DOC(fiction_cell_level_layout_get_cell_name))
-        .def("set_layout_name", &CellLyt::set_layout_name, "name"_a,
-             DOC(fiction_cell_level_layout_set_layout_name))
-        .def("get_layout_name", &CellLyt::get_layout_name,
-             DOC(fiction_cell_level_layout_get_layout_name))
+        .def("get_cell_name", &CellLyt::get_cell_name, "c"_a, DOC(fiction_cell_level_layout_get_cell_name))
+        .def("set_layout_name", &CellLyt::set_layout_name, "name"_a, DOC(fiction_cell_level_layout_set_layout_name))
+        .def("get_layout_name", &CellLyt::get_layout_name, DOC(fiction_cell_level_layout_get_layout_name))
         .def("num_cells", &CellLyt::num_cells, DOC(fiction_cell_level_layout_num_cells))
         .def("is_empty", &CellLyt::is_empty, DOC(fiction_cell_level_layout_is_empty))
         .def("num_pis", &CellLyt::num_pis, DOC(fiction_cell_level_layout_num_pis))
@@ -179,8 +171,7 @@ void fcn_technology_cell_layout(pybind11::module& m, std::string coordinate_name
                  }
 
                  return stream.str();
-             })
-        ;
+             });
 }
 
 }  // namespace detail
@@ -191,10 +182,11 @@ inline void cell_level_layouts(pybind11::module& m)
     detail::fcn_technology_cells<fiction::inml_technology>(m);
     detail::fcn_technology_cells<fiction::sidb_technology>(m);
 
-    detail::fcn_technology_cell_layout<fiction::qca_technology, py_cartesian_clocked_layout,py_qca_layout>(m);
-    detail::fcn_technology_cell_layout<fiction::inml_technology, py_cartesian_clocked_layout,py_inml_layout>(m);
+    detail::fcn_technology_cell_layout<fiction::qca_technology, py_cartesian_clocked_layout, py_qca_layout>(m);
+    detail::fcn_technology_cell_layout<fiction::inml_technology, py_cartesian_clocked_layout, py_inml_layout>(m);
     detail::fcn_technology_cell_layout<fiction::sidb_technology, py_cartesian_clocked_layout, py_sidb_layout>(m);
-    detail::fcn_technology_cell_layout<fiction::sidb_technology, py_cartesian_clocked_layout_cube, py_sidb_layout_cube>(m, "cube");
+    detail::fcn_technology_cell_layout<fiction::sidb_technology, py_cartesian_clocked_layout_cube, py_sidb_layout_cube>(
+        m, "cube");
 }
 
 }  // namespace pyfiction

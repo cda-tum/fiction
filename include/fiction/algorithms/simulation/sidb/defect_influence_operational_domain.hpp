@@ -289,7 +289,7 @@ class defect_operational_domain_impl
             std::size_t counter = 0;
             while (next_point != contour_starting_point && counter < 1000)
             {
-                counter ++; // avoid infinite loops
+                counter++;  // avoid infinite loops
 
                 const auto operational_status = is_defect_position_operational(next_point);
 

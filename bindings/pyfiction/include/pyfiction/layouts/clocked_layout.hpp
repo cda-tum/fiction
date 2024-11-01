@@ -33,7 +33,8 @@ void clocked_layout(pybind11::module& m, const std::string& topology, const std:
     /**
      * Clocked Cartesian layout.
      */
-    py::class_<ClockedLyt, LytBase>(m, fmt::format("clocked_{}_layout{}", topology, coordinate_type).c_str(), DOC(fiction_clocked_layout))
+    py::class_<ClockedLyt, LytBase>(m, fmt::format("clocked_{}_layout{}", topology, coordinate_type).c_str(),
+                                    DOC(fiction_clocked_layout))
         .def(py::init<>())
         .def(py::init<const fiction::aspect_ratio<ClockedLyt>&>(), "dimension"_a,
              DOC(fiction_clocked_layout_clocked_layout))

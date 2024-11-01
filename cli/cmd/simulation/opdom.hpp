@@ -150,8 +150,7 @@ class opdom_command : public command
         }
 
         // make sure that at most one algorithm is selected
-        const std::array algorithm_selections = {is_set("random_sampling"), is_set("flood_fill"),
-                                                 is_set("quicktrace")};
+        const std::array algorithm_selections = {is_set("random_sampling"), is_set("flood_fill"), is_set("quicktrace")};
         if (std::count(algorithm_selections.cbegin(), algorithm_selections.cend(), true) > 1)
         {
             env->out() << "[e] only one algorithm can be selected at a time" << std::endl;
