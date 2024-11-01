@@ -155,7 +155,7 @@ class defect_operational_domain_impl
 
         log_stats();
 
-        return defect_operational_domain;
+        return defect_op_domain;
     }
 
     /**
@@ -219,7 +219,7 @@ class defect_operational_domain_impl
         log_stats();  // Log the statistics after processing
 
         // Return the computed operational domain
-        return defect_operational_domain;
+        return defect_op_domain;
     }
 
     [[nodiscard]] defect_operational_domain<Lyt> quicktrace(const std::size_t samples) noexcept
@@ -254,7 +254,7 @@ class defect_operational_domain_impl
             // if no operational point was found within the specified number of samples, return
             if (!operational_starting_point.has_value())
             {
-                return defect_operational_domain;
+                return defect_op_domain;
             }
 
             // check if the starting point has already been sampled
@@ -287,9 +287,11 @@ class defect_operational_domain_impl
                                             next_clockwise_point(current_neighborhood, backtrack_point);
 
             std::size_t counter = 0;
-            while (next_point != contour_starting_point && counter < 1000)
+            while (next_point != contour_starting_point && counter < 100)
             {
-                counter ++; // avoid infinite loops
+                counter++; // avoid infinite loops
+
+                std::cout << counter << std::endl;
 
                 const auto operational_status = is_defect_position_operational(next_point);
 
@@ -311,7 +313,7 @@ class defect_operational_domain_impl
         }
         log_stats();
 
-        return defect_operational_domain;
+        return defect_op_domain;
     }
 
   private:
@@ -383,14 +385,14 @@ class defect_operational_domain_impl
 
         const auto operational = [this, &c]()
         {
-            defect_operational_domain.operational_values[c] = operational_status::OPERATIONAL;
+            defect_op_domain.operational_values[c] = operational_status::OPERATIONAL;
 
             return operational_status::OPERATIONAL;
         };
 
         const auto non_operational = [this, &c]()
         {
-            defect_operational_domain.operational_values[c] = operational_status::NON_OPERATIONAL;
+            defect_op_domain.operational_values[c] = operational_status::NON_OPERATIONAL;
 
             return operational_status::NON_OPERATIONAL;
         };
@@ -425,8 +427,8 @@ class defect_operational_domain_impl
     [[nodiscard]] inline std::optional<operational_status>
     has_already_been_sampled(const typename Lyt::cell& c) const noexcept
     {
-        if (const auto it = defect_operational_domain.operational_values.find(c);
-            it != defect_operational_domain.operational_values.cend())
+        if (const auto it = defect_op_domain.operational_values.find(c);
+            it != defect_op_domain.operational_values.cend())
         {
             return it->second;
         }
@@ -482,7 +484,7 @@ class defect_operational_domain_impl
         stats.num_simulator_invocations      = num_simulator_invocations;
         stats.num_evaluated_defect_positions = num_evaluated_defect_positions;
 
-        for (const auto& [param_point, status] : defect_operational_domain.operational_values)
+        for (const auto& [param_point, status] : defect_op_domain.operational_values)
         {
             if (status == operational_status::OPERATIONAL)
             {
@@ -623,7 +625,7 @@ class defect_operational_domain_impl
     /**
      * The operational domain of the layout.
      */
-    defect_operational_domain<Lyt> defect_operational_domain{};
+    defect_operational_domain<Lyt> defect_op_domain{};
     /**
      * The statistics of the operational domain computation.
      */
