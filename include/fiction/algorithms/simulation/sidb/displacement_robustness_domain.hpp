@@ -374,8 +374,8 @@ class displacement_robustness_domain_impl
             {
                 if constexpr (has_siqad_coord_v<Lyt>)
                 {
-                    auto new_pos_se = siqad::to_fiction_coord<cube::coord_t>(c);
-                    auto new_pos_nw = siqad::to_fiction_coord<cube::coord_t>(c);
+                    auto new_pos_se = fiction::siqad::to_fiction_coord<cube::coord_t>(c);
+                    auto new_pos_nw = fiction::siqad::to_fiction_coord<cube::coord_t>(c);
                     // the cell c is not a fixed cell, i.e., displacement is considered.
 
                     if (params.fixed_sidbs.find(c) == params.fixed_sidbs.cend())
