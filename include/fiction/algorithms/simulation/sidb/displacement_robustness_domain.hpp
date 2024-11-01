@@ -387,10 +387,12 @@ class displacement_robustness_domain_impl
                                                        cell<Lyt>>::dimer_displacement_policy::STAY_ON_ORIGINAL_DIMER &&
                             params.displacement_variations.second > 0)
                         {
-                            new_pos_nw.y =
-                                fiction::siqad::to_fiction_coord<fiction::cube::coord_t>(fiction::siqad::coord_t{c.x, c.y, 0}).y;
-                            new_pos_se.y =
-                                fiction::siqad::to_fiction_coord<fiction::cube::coord_t>(fiction::siqad::coord_t{c.x, c.y, 1}).y;
+                            new_pos_nw.y = fiction::siqad::to_fiction_coord<fiction::cube::coord_t>(
+                                               fiction::siqad::coord_t{c.x, c.y, 0})
+                                               .y;
+                            new_pos_se.y = fiction::siqad::to_fiction_coord<fiction::cube::coord_t>(
+                                               fiction::siqad::coord_t{c.x, c.y, 1})
+                                               .y;
                         }
                         else
                         {
