@@ -106,11 +106,13 @@ void gate_level_layout(pybind11::module& m, const std::string& topology)
 
         .def(
             "fanin_size", [](const GateLyt& layout, const uint64_t node)
-            { return layout.template fanin_size<true>(node); }, "n"_a, DOC(fiction_gate_level_layout_fanin_size))
+            { return layout.template fanin_size<true>(static_cast<typename GateLyt::node>(node)); }, "n"_a,
+            DOC(fiction_gate_level_layout_fanin_size))
 
         .def(
             "fanout_size", [](const GateLyt& layout, const uint64_t node)
-            { return layout.template fanout_size<true>(node); }, "n"_a, DOC(fiction_gate_level_layout_fanout_size))
+            { return layout.template fanout_size<true>(static_cast<typename GateLyt::node>(node)); }, "n"_a,
+            DOC(fiction_gate_level_layout_fanout_size))
 
         .def(
             "get_node", [](const GateLyt& layout, const py_offset_coordinate& coordinate)

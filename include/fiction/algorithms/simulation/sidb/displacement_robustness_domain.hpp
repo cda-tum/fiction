@@ -355,6 +355,9 @@ class displacement_robustness_domain_impl
      * Generates high-quality pseudo-random numbers using a random seed from 'rd'.
      */
     std::mt19937 generator;
+// data types cannot properly be converted to bit field types
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wconversion"
     /**
      * This function calculates all permitted displacements for each SiDB based on the specified allowed displacements.
      *
@@ -371,8 +374,8 @@ class displacement_robustness_domain_impl
             {
                 if constexpr (has_siqad_coord_v<Lyt>)
                 {
-                    auto new_pos_se = fiction::siqad::to_fiction_coord<cube::coord_t>(c);
-                    auto new_pos_nw = fiction::siqad::to_fiction_coord<cube::coord_t>(c);
+                    auto new_pos_se = siqad::to_fiction_coord<cube::coord_t>(c);
+                    auto new_pos_nw = siqad::to_fiction_coord<cube::coord_t>(c);
                     // the cell c is not a fixed cell, i.e., displacement is considered.
 
                     if (params.fixed_sidbs.find(c) == params.fixed_sidbs.cend())
@@ -384,10 +387,8 @@ class displacement_robustness_domain_impl
                                                        cell<Lyt>>::dimer_displacement_policy::STAY_ON_ORIGINAL_DIMER &&
                             params.displacement_variations.second > 0)
                         {
-                            new_pos_nw.y =
-                                fiction::siqad::to_fiction_coord<cube::coord_t>(fiction::siqad::coord_t{c.x, c.y, 0}).y;
-                            new_pos_se.y =
-                                fiction::siqad::to_fiction_coord<cube::coord_t>(fiction::siqad::coord_t{c.x, c.y, 1}).y;
+                            new_pos_nw.y = siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{c.x, c.y, 0}).y;
+                            new_pos_se.y = siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{c.x, c.y, 1}).y;
                         }
                         else
                         {
@@ -397,7 +398,7 @@ class displacement_robustness_domain_impl
                     }
 
                     const auto all_coord = all_coordinates_in_spanned_area<cell<Lyt>>(
-                        fiction::siqad::to_siqad_coord(new_pos_nw), fiction::siqad::to_siqad_coord(new_pos_se));
+                        siqad::to_siqad_coord(new_pos_nw), siqad::to_siqad_coord(new_pos_se));
                     all_possible_sidb_misplacements.push_back(all_coord);
                 }
 
@@ -438,14 +439,14 @@ class displacement_robustness_domain_impl
                                                        cell<Lyt>>::dimer_displacement_policy::STAY_ON_ORIGINAL_DIMER &&
                             params.displacement_variations.second > 0)
                         {
-                            auto new_pos_se_siqad = fiction::siqad::to_siqad_coord(c);
-                            auto new_pos_nw_siqad = fiction::siqad::to_siqad_coord(c);
+                            auto new_pos_se_siqad = siqad::to_siqad_coord(c);
+                            auto new_pos_nw_siqad = siqad::to_siqad_coord(c);
 
                             new_pos_se_siqad.z = 0;
                             new_pos_nw_siqad.z = 1;
 
-                            new_pos_nw = fiction::siqad::to_fiction_coord<cell<Lyt>>(new_pos_nw_siqad);
-                            new_pos_se = fiction::siqad::to_fiction_coord<cell<Lyt>>(new_pos_se_siqad);
+                            new_pos_nw = siqad::to_fiction_coord<cell<Lyt>>(new_pos_nw_siqad);
+                            new_pos_se = siqad::to_fiction_coord<cell<Lyt>>(new_pos_se_siqad);
                         }
 
                         else
@@ -482,6 +483,7 @@ class displacement_robustness_domain_impl
 
         return all_possible_sidb_misplacements;
     }
+#pragma GCC diagnostic pop
     /**
      * This function generates all SiDB layouts with displacements based on the original layout.
      * It filters out layouts where two or more SiDBs would be on the same spot due to displacement.
@@ -578,7 +580,7 @@ class displacement_robustness_domain_impl
  *
  * @tparam Lyt The SiDB cell-level layout type.
  * @tparam TT Truth table type.
- * @param truth_table_spec Vector of truth table specifications.
+ * @param spec Vector of truth table specifications.
  * @param params Parameters for the displacement robustness computation.
  * @param stats Statistics related to the displacement robustness computation.
  * @return The displacement robustness domain of the SiDB layout.
