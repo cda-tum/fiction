@@ -90,9 +90,10 @@ jobs:
           labels: ${{ steps.meta.outputs.labels || '' }}
 
       - name: Push README as DockerHub project description
+#        if: github.event_name == 'release' && github.event.action == 'published'
         uses: peter-evans/dockerhub-description@v4
         with:
-          username: ${{ env.DOCKERHUB_USERNAME }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
           repository: ${{ env.DOCKER_USERNAME }}/fiction
           short-description: ${{ steps.meta.outputs.labels.description || '' }}
