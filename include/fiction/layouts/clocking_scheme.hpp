@@ -18,7 +18,6 @@
 #include <optional>
 #include <string>
 #include <string_view>
-#include <type_traits>
 #include <utility>
 
 namespace fiction
@@ -172,12 +171,19 @@ inline constexpr const char* BANCS         = "BANCS";
 
 }  // namespace clock_name
 
-enum class num_clks
+enum class num_clks : uint8_t
 {
+    /**
+     * Three clocks.
+     */
     THREE,
+    /**
+     * Four clocks.
+     */
     FOUR
 };
-
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-conversion"
 /**
  * Returns an irregular clocking that maps every coordinate to the standard clock. It is intended to be overridden.
  *
@@ -704,6 +710,7 @@ static auto bancs_clocking() noexcept
 
     // clang-format on
 }
+#pragma GCC diagnostic pop
 /**
  * Returns a smart pointer to the given scheme.
  *

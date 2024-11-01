@@ -76,17 +76,17 @@ class bdl_input_iterator
      * BDL pairs.
      *
      * @param lyt The SiDB BDL layout to iterate over.
-     * @param params Parameters for the BDL input iterator.
+     * @param ps Parameters for the BDL input iterator.
      */
     explicit bdl_input_iterator(const Lyt&                       lyt,
-                                const bdl_input_iterator_params& params = bdl_input_iterator_params{}) noexcept :
+                                const bdl_input_iterator_params& ps = bdl_input_iterator_params{}) noexcept :
             layout{lyt.clone()},
             input_pairs{
-                detect_bdl_pairs<Lyt>(lyt, sidb_technology::cell_type::INPUT, params.bdl_wire_params.bdl_pairs_params)},
+                detect_bdl_pairs<Lyt>(lyt, sidb_technology::cell_type::INPUT, ps.bdl_wire_params.bdl_pairs_params)},
             num_inputs{static_cast<uint8_t>(input_pairs.size())},
-            input_bdl_wires{detect_bdl_wires<Lyt>(lyt, params.bdl_wire_params, bdl_wire_selection::INPUT)},
+            input_bdl_wires{detect_bdl_wires<Lyt>(lyt, ps.bdl_wire_params, bdl_wire_selection::INPUT)},
             last_bdl_for_each_wire{determine_last_bdl_for_each_wire()},
-            params{params}
+            params{ps}
     {
         static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
         static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -98,18 +98,18 @@ class bdl_input_iterator
      * which assigns binary `0` to all input BDL pairs.
      *
      * @param lyt The SiDB BDL layout to iterate over.
-     * @param params Parameters for the BDL input iterator.
+     * @param ps Parameters for the BDL input iterator.
      * @param input_wires Pre-detected input BDL wires.
      */
-    explicit bdl_input_iterator(const Lyt& lyt, const bdl_input_iterator_params& params,
+    explicit bdl_input_iterator(const Lyt& lyt, const bdl_input_iterator_params& ps,
                                 const std::vector<bdl_wire<Lyt>>& input_wires) noexcept :
             layout{lyt.clone()},
             input_pairs{
-                detect_bdl_pairs<Lyt>(lyt, sidb_technology::cell_type::INPUT, params.bdl_wire_params.bdl_pairs_params)},
+                detect_bdl_pairs<Lyt>(lyt, sidb_technology::cell_type::INPUT, ps.bdl_wire_params.bdl_pairs_params)},
             num_inputs{static_cast<uint8_t>(input_pairs.size())},
             input_bdl_wires{input_wires},
             last_bdl_for_each_wire{determine_last_bdl_for_each_wire()},
-            params{params}
+            params{ps}
     {
         static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
         static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");

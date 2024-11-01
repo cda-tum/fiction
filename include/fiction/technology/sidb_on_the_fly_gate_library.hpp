@@ -687,7 +687,7 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
         }
 
         return p;
-    };
+    }
 
     // clang-format off
 

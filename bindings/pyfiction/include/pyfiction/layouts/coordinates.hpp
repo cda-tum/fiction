@@ -14,7 +14,14 @@
 #include <pybind11/pybind11.h>
 
 #include <cstdint>
-#include <exception>
+#include <stdexcept>
+
+// data types cannot properly be converted to bit field types
+#pragma GCC diagnostic push
+#ifndef __clang__
+#pragma GCC diagnostic ignored "-Wuseless-cast"
+#endif
+#pragma GCC diagnostic ignored "-Wconversion"
 
 namespace pyfiction
 {
@@ -221,5 +228,7 @@ inline void coordinate_utility(pybind11::module& m)
 }
 
 }  // namespace pyfiction
+
+#pragma GCC diagnostic pop
 
 #endif  // PYFICTION_COORDINATES_HPP

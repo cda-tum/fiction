@@ -545,7 +545,7 @@ state, which assigns binary `0` to all input BDL pairs.
 Parameter ``lyt``:
     The SiDB BDL layout to iterate over.
 
-Parameter ``params``:
+Parameter ``ps``:
     Parameters for the BDL input iterator.)doc";
 
 static const char *__doc_fiction_bdl_input_iterator_bdl_input_iterator_2 =
@@ -556,7 +556,7 @@ all input BDL pairs.
 Parameter ``lyt``:
     The SiDB BDL layout to iterate over.
 
-Parameter ``params``:
+Parameter ``ps``:
     Parameters for the BDL input iterator.
 
 Parameter ``input_wires``:
@@ -934,8 +934,8 @@ static const char *__doc_fiction_bdl_wire =
 R"doc(This struct encapsulates a vector of `bdl_pair` objects, representing
 the pairs of SiDBs in the BDL wire.
 
-Template parameter ``CellType``:
-    Cell type.)doc";
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.)doc";
 
 static const char *__doc_fiction_bdl_wire_add_bdl_pair =
 R"doc(Add a BDL pair to the wire.
@@ -4380,8 +4380,8 @@ based on their corresponding positions and types. Optionally, it
 performs post-layout optimization and sets the layout name if certain
 conditions are met.
 
-Template parameter ``Type``:
-    of the Parameters used for the SiDB on-the-fly gate library.
+Template parameter ``Params``:
+    Type of the Parameters used for the SiDB on-the-fly gate library.
 
 Parameter ``params``:
     Parameters used for the SiDB on-the-fly gate library.
@@ -5203,12 +5203,6 @@ R"doc(Aggregates BDL pairs of specified types into a set.
 Template parameter ``Lyt``:
     SiDB cell-level layout type.
 
-Parameter ``lyt``:
-    Layout type used for detection.
-
-Parameter ``params``:
-    Parameters containing BDL pairs.
-
 Returns:
     A set of BDL pairs containing all pairs of the specified types.)doc";
 
@@ -5322,7 +5316,7 @@ Returns:
     A `std::optional` containing the first BDL pair that meets the
     criteria, or `std::nullopt` if no such pair is found.)doc";
 
-static const char *__doc_fiction_detail_detect_bdl_wires_impl_lyt = R"doc(SiDB cell-level layout.)doc";
+static const char *__doc_fiction_detail_detect_bdl_wires_impl_layout = R"doc(SiDB cell-level layout.)doc";
 
 static const char *__doc_fiction_detail_detect_bdl_wires_impl_params = R"doc(Parameters for detecting BDL wires.)doc";
 
@@ -9513,7 +9507,7 @@ Template parameter ``Lyt``:
 Template parameter ``TT``:
     Truth table type.
 
-Parameter ``truth_table_spec``:
+Parameter ``spec``:
     Vector of truth table specifications.
 
 Parameter ``params``:
@@ -14454,9 +14448,9 @@ Returns:
 
 static const char *__doc_fiction_num_clks = R"doc()doc";
 
-static const char *__doc_fiction_num_clks_FOUR = R"doc()doc";
+static const char *__doc_fiction_num_clks_FOUR = R"doc(Four clocks.)doc";
 
-static const char *__doc_fiction_num_clks_THREE = R"doc()doc";
+static const char *__doc_fiction_num_clks_THREE = R"doc(Three clocks.)doc";
 
 static const char *__doc_fiction_num_constant_fanins =
 R"doc(Computes the number of constant fanin nodes of some network node `n`.
