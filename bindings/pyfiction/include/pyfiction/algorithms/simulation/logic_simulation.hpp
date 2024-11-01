@@ -46,22 +46,23 @@ void logic_simulation(pybind11::module& m, const std::string& type_name)
             std::vector<std::string> po_names;
             po_names.reserve(ntk_or_lyt.num_pos());
 
-            const auto store_po_names = [&po_names](const NtkOrLyt& ntk_or_lyt)
+            const auto store_po_names = [&po_names](const NtkOrLyt& network_or_layout)
             {
-                ntk_or_lyt.foreach_po(
-                    [&ntk_or_lyt, &po_names]([[maybe_unused]] const auto& po, auto i)
+                network_or_layout.foreach_po(
+                    [&network_or_layout, &po_names]([[maybe_unused]] const auto& po, auto i)
                     {
-                        po_names.emplace_back(ntk_or_lyt.has_output_name(i) ? ntk_or_lyt.get_output_name(i) :
-                                                                              fmt::format("po{}", i));
+                        po_names.emplace_back(network_or_layout.has_output_name(i) ?
+                                                  network_or_layout.get_output_name(i) :
+                                                  fmt::format("po{}", i));
                     });
             };
 
-            const auto simulate = [&tables](const NtkOrLyt& ntk_or_lyt)
+            const auto simulate = [&tables](const NtkOrLyt& network_or_layout)
             {
                 tables = mockturtle::simulate<py_tt>(
-                    ntk_or_lyt,
+                    network_or_layout,
                     // NOLINTNEXTLINE
-                    mockturtle::default_simulator<py_tt>{static_cast<unsigned>(ntk_or_lyt.num_pis())});
+                    mockturtle::default_simulator<py_tt>{static_cast<unsigned>(network_or_layout.num_pis())});
             };
 
             store_po_names(ntk_or_lyt);

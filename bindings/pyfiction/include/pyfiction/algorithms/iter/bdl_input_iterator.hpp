@@ -9,7 +9,6 @@
 #include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/iter/bdl_input_iterator.hpp>
-#include <fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp>
 
 #include <fmt/format.h>
 #include <pybind11/pybind11.h>
@@ -36,7 +35,7 @@ void bdl_input_iterator(pybind11::module& m, const std::string& lattice)
              "params"_a = fiction::bdl_input_iterator_params{}, DOC(fiction_bdl_input_iterator_bdl_input_iterator))
         .def(
             "__next__",
-            [](fiction::bdl_input_iterator<Lyt>& self) -> Lyt&
+            [](fiction::bdl_input_iterator<Lyt>& self) -> Lyt
             {
                 if (self >= ((1ull << self.num_input_pairs()) - 1))
                 {
@@ -49,48 +48,48 @@ void bdl_input_iterator(pybind11::module& m, const std::string& lattice)
             },
             DOC(fiction_bdl_input_iterator_operator_mul))
         .def(
-            "__eq__", [](const fiction::bdl_input_iterator<Lyt>& self, const uint64_t m) -> bool { return self == m; },
+            "__eq__", [](const fiction::bdl_input_iterator<Lyt>& self, const uint64_t n) -> bool { return self == n; },
             "m"_a, DOC(fiction_bdl_input_iterator_operator_eq))
         .def(
-            "__ne__", [](const fiction::bdl_input_iterator<Lyt>& self, const uint64_t m) -> bool { return self != m; },
+            "__ne__", [](const fiction::bdl_input_iterator<Lyt>& self, const uint64_t n) -> bool { return self != n; },
             "m"_a, DOC(fiction_bdl_input_iterator_operator_ne))
         .def(
-            "__lt__", [](const fiction::bdl_input_iterator<Lyt>& self, const uint64_t m) -> bool { return self < m; },
+            "__lt__", [](const fiction::bdl_input_iterator<Lyt>& self, const uint64_t n) -> bool { return self < n; },
             "m"_a, DOC(fiction_bdl_input_iterator_operator_lt))
         .def(
-            "__le__", [](const fiction::bdl_input_iterator<Lyt>& self, const uint64_t m) -> bool { return self <= m; },
+            "__le__", [](const fiction::bdl_input_iterator<Lyt>& self, const uint64_t n) -> bool { return self <= n; },
             "m"_a, DOC(fiction_bdl_input_iterator_operator_le))
         .def(
-            "__gt__", [](const fiction::bdl_input_iterator<Lyt>& self, const uint64_t m) -> bool { return self > m; },
+            "__gt__", [](const fiction::bdl_input_iterator<Lyt>& self, const uint64_t n) -> bool { return self > n; },
             "m"_a, DOC(fiction_bdl_input_iterator_operator_gt))
         .def(
-            "__ge__", [](const fiction::bdl_input_iterator<Lyt>& self, const uint64_t m) -> bool { return self >= m; },
+            "__ge__", [](const fiction::bdl_input_iterator<Lyt>& self, const uint64_t n) -> bool { return self >= n; },
             "m"_a, DOC(fiction_bdl_input_iterator_operator_ge))
         .def(
-            "__add__", [](const fiction::bdl_input_iterator<Lyt>& self, const int m) -> fiction::bdl_input_iterator<Lyt>
-            { return self + m; }, "m"_a, DOC(fiction_bdl_input_iterator_operator_add))
+            "__add__", [](const fiction::bdl_input_iterator<Lyt>& self, const int n) -> fiction::bdl_input_iterator<Lyt>
+            { return self + n; }, "m"_a, DOC(fiction_bdl_input_iterator_operator_add))
         .def(
             "__iadd__",
-            [](fiction::bdl_input_iterator<Lyt>& self, const int m) -> fiction::bdl_input_iterator<Lyt>&
+            [](fiction::bdl_input_iterator<Lyt>& self, const int n) -> fiction::bdl_input_iterator<Lyt>&
             {
-                self += m;
+                self += n;
                 return self;
             },
             "m"_a, DOC(fiction_bdl_input_iterator_operator_iadd))
         .def(
-            "__sub__", [](const fiction::bdl_input_iterator<Lyt>& self, const int m) { return self - m; }, "m"_a,
+            "__sub__", [](const fiction::bdl_input_iterator<Lyt>& self, const int n) { return self - n; }, "m"_a,
             DOC(fiction_bdl_input_iterator_operator_sub))
         .def(
             "__isub__",
-            [](fiction::bdl_input_iterator<Lyt>& self, const int m) -> fiction::bdl_input_iterator<Lyt>&
+            [](fiction::bdl_input_iterator<Lyt>& self, const int n) -> fiction::bdl_input_iterator<Lyt>&
             {
-                self -= m;
+                self -= n;
                 return self;
             },
             "m"_a, DOC(fiction_bdl_input_iterator_operator_isub))
         .def(
-            "__getitem__", [](const fiction::bdl_input_iterator<Lyt>& self, int m) -> fiction::bdl_input_iterator<Lyt>
-            { return self[m]; }, "m"_a, DOC(fiction_bdl_input_iterator_operator_array))
+            "__getitem__", [](const fiction::bdl_input_iterator<Lyt>& self, int n) -> fiction::bdl_input_iterator<Lyt>
+            { return self[n]; }, "m"_a, DOC(fiction_bdl_input_iterator_operator_array))
 
         .def("num_input_pairs", &fiction::bdl_input_iterator<Lyt>::num_input_pairs)
         .def("get_layout", [](const fiction::bdl_input_iterator<Lyt>& self) -> const Lyt& { return *self; })

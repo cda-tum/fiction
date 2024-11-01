@@ -394,13 +394,11 @@ template <typename Lyt>
 class detect_bdl_wires_impl
 {
   public:
-    detect_bdl_wires_impl(const Lyt& lyt, const detect_bdl_wires_params& params) : lyt{lyt}, params{params}
+    detect_bdl_wires_impl(const Lyt& lyt, const detect_bdl_wires_params& ps) : layout{lyt}, params{ps}
     {
         detect_bdl_wires();
     }
-
     /**
-     *
      * This function operates in two main phases:
      *
      * 1. **Aggregation**: It first collects all BDL pairs of the specified types.
@@ -510,7 +508,7 @@ class detect_bdl_wires_impl
     /**
      * SiDB cell-level layout.
      */
-    const Lyt& lyt;
+    const Lyt& layout;
     /**
      * Parameters for detecting BDL wires.
      */
@@ -641,9 +639,9 @@ class detect_bdl_wires_impl
     [[nodiscard]] std::set<bdl_pair<cell<Lyt>>> aggregate_bdl_pairs() const noexcept
     {
         // Collect BDL pairs of each type
-        const auto all_input_bdls  = detect_bdl_pairs(lyt, Lyt::cell_type::INPUT, params.bdl_pairs_params);
-        const auto all_output_bdls = detect_bdl_pairs(lyt, Lyt::cell_type::OUTPUT, params.bdl_pairs_params);
-        const auto all_normal_bdls = detect_bdl_pairs(lyt, Lyt::cell_type::NORMAL, params.bdl_pairs_params);
+        const auto all_input_bdls  = detect_bdl_pairs(layout, Lyt::cell_type::INPUT, params.bdl_pairs_params);
+        const auto all_output_bdls = detect_bdl_pairs(layout, Lyt::cell_type::OUTPUT, params.bdl_pairs_params);
+        const auto all_normal_bdls = detect_bdl_pairs(layout, Lyt::cell_type::NORMAL, params.bdl_pairs_params);
 
         std::set<bdl_pair<cell<Lyt>>> bdl_pairs{};
 

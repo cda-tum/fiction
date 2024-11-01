@@ -606,6 +606,9 @@ CoordinateType random_coordinate(CoordinateType coordinate1, CoordinateType coor
         return {dist_x(generator), dist_y(generator), dist_z(generator)};
     }
 }
+// data types cannot properly be converted to bit field types
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wconversion"
 /**
  * Generates a vector of all coordinates within an area spanned by two coordinates.
  *
@@ -696,7 +699,7 @@ all_coordinates_in_spanned_area(const CoordinateType& cell_first_corner,
         return all_cells;
     }
 }
-
+#pragma GCC diagnostic pop
 /**
  * This function checks whether the given layouts `first_lyt` and `second_lyt` are identical by comparing various
  * properties such as the number of cells, the types of cells, defects (if applicable), and charge states (if
