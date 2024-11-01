@@ -73,7 +73,7 @@ jobs:
             ${{ secrets.DOCKER_USERNAME }}/fiction
             ghcr.io/${{ github.repository }}
           tags: |
-            ${{ github.event.release.tag_name || 'latest' }}
+            ${{ github.event.release.tag_name || 'dev' }}
 
       - name: Build and push Docker image
         id: push
@@ -86,13 +86,18 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels || '' }}
 
-      # Generate artifact attestation
       - name: Generate artifact attestation for DockerHub
 #        if: github.event_name == 'release' && github.event.action == 'published'
         uses: actions/attest-build-provenance@v1
         with:
-          subject-name: |
-            docker.io/${{ secrets.DOCKER_USERNAME }}/fiction:${{ github.event.release.tag_name || 'latest' }}
-            ghcr.io/${{ github.repository }}:${{ github.event.release.tag_name || 'latest' }}
+          subject-name: docker.io/${{ secrets.DOCKER_USERNAME }}/fiction:${{ github.event.release.tag_name || 'dev' }}
+          subject-digest: ${{ steps.push.outputs.digest }}
+          push-to-registry: true
+
+      - name: Generate artifact attestation for GitHub Packages
+#        if: github.event_name == 'release' && github.event.action == 'published'
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-name: ghcr.io/${{ github.repository }}:${{ github.event.release.tag_name || 'dev' }}
           subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true
