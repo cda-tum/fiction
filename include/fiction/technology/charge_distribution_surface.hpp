@@ -149,7 +149,7 @@ enum class charge_index_mode : uint8_t
  * SiDBs' charge states.
  *
  * @tparam Lyt SiDB cell-level layout type.
- * @tparam has_sidb_charge_distribution Automatically determines whether a charge distribution interface is already
+ * @tparam has_charge_distribution_interface Automatically determines whether a charge distribution interface is already
  * present.
  */
 template <typename Lyt, bool has_charge_distribution_interface =
@@ -1412,9 +1412,10 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      */
     [[nodiscard]] std::size_t num_negative_sidbs() const noexcept
     {
-        uint64_t count_negative_sidbs = 0;
+        uint64_t count_negative_sidbs = 0u;
         this->foreach_cell([this, &count_negative_sidbs](const auto& c)
-                           { count_negative_sidbs += (get_charge_state(c) == sidb_charge_state::NEGATIVE) ? 1 : 0; });
+                           { count_negative_sidbs += (get_charge_state(c) == sidb_charge_state::NEGATIVE) ? 1u : 0u; });
+
         return count_negative_sidbs;
     }
     /**
@@ -1426,7 +1427,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     {
         std::size_t count_neutral_sidbs = 0;
         this->foreach_cell([this, &count_neutral_sidbs](const auto& c)
-                           { count_neutral_sidbs += (get_charge_state(c) == sidb_charge_state::NEUTRAL) ? 1 : 0; });
+                           { count_neutral_sidbs += (get_charge_state(c) == sidb_charge_state::NEUTRAL) ? 1u : 0u; });
+
         return count_neutral_sidbs;
     }
     /**
@@ -1436,9 +1438,10 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      */
     [[nodiscard]] std::size_t num_positive_sidbs() const noexcept
     {
-        std::size_t count_positive_sidbs = 0;
+        std::size_t count_positive_sidbs = 0u;
         this->foreach_cell([this, &count_positive_sidbs](const auto& c)
-                           { count_positive_sidbs += (get_charge_state(c) == sidb_charge_state::POSITIVE) ? 1 : 0; });
+                           { count_positive_sidbs += (get_charge_state(c) == sidb_charge_state::POSITIVE) ? 1u : 0u; });
+
         return count_positive_sidbs;
     }
     /**

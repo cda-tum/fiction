@@ -382,7 +382,7 @@ class gate_level_layout : public ClockedLayout
     {
         if (index < num_pis())
         {
-            strg->data.node_names[strg->inputs[index]] = name;
+            strg->data.node_names[static_cast<node>(strg->inputs[index])] = name;
         }
     }
 

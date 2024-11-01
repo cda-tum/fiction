@@ -176,8 +176,8 @@ TEST_CASE("Read multi-dot SQD layout", "[sqd]")
 
     SECTION("SiQAD coordinates")
     {
-        using sqd_layout  = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>;
-        const auto layout = read_sqd_layout<sidb_lattice<sidb_100_lattice, sqd_layout>>(layout_stream);
+        using siqad_layout = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>;
+        const auto layout  = read_sqd_layout<sidb_lattice<sidb_100_lattice, siqad_layout>>(layout_stream);
 
         CHECK(layout.x() == 2);
         CHECK(layout.y() == 2);
