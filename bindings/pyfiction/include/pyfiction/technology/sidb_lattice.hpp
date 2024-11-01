@@ -30,7 +30,7 @@ namespace detail
  * @tparam LayoutType The layout type (e.g., py_sidb_layout for regular layouts, py_sidb_layout_cube for cube layouts).
  */
 template <typename LatticeOrientation, typename LayoutType>
-void sidb_lattice_cell_level_layout(pybind11::module& m)
+void sidb_lattice_cell_level_layout(pybind11::module& m, std::string lattice_name = "", std::string coordinate_tye = "")
 {
     namespace py = pybind11;
     using namespace py::literals;
@@ -39,71 +39,25 @@ void sidb_lattice_cell_level_layout(pybind11::module& m)
     auto orientation = std::string{fiction::sidb_lattice_name<LatticeOrientation>};
     std::transform(orientation.begin(), orientation.end(), orientation.begin(), ::tolower);
 
-    // Define the type alias for the specific SiDB lattice layout being bound
-    using py_sidb_lattice = fiction::sidb_lattice<LatticeOrientation, LayoutType>;
-
-    /**
-     * SiDB lattice.
-     */
-    if constexpr (fiction::has_cube_coord_v<LayoutType> && fiction::is_sidb_lattice_100_v<LatticeOrientation>)
-    {
-        py::class_<py_sidb_lattice, LayoutType>(m, "sidb_100_lattice_cube", DOC(fiction_cell_level_layout),
+    py::class_<LatticeOrientation, LayoutType>(m, fmt::format("sidb_{}_lattice{}", lattice_name, coordinate_tye).c_str(), DOC(fiction_cell_level_layout),
                                                 py::module_local())
             .def(py::init<>())  // Default constructor
             .def(py::init<const fiction::aspect_ratio<LayoutType>&, const std::string&>(), "dimension"_a, "name"_a = "",
                  DOC(fiction_sidb_lattice));
-    }
-    else if constexpr (fiction::has_cube_coord_v<LayoutType> && fiction::is_sidb_lattice_111_v<LatticeOrientation>)
-    {
-        py::class_<py_sidb_lattice, LayoutType>(m, "sidb_111_lattice_cube", DOC(fiction_cell_level_layout),
-                                                py::module_local())
-            .def(py::init<>())  // Default constructor
-            .def(py::init<const fiction::aspect_ratio<LayoutType>&, const std::string&>(), "dimension"_a, "name"_a = "",
-                 DOC(fiction_sidb_lattice));
-    }
-    else if constexpr (!fiction::has_cube_coord_v<LayoutType> && fiction::is_sidb_lattice_100_v<LatticeOrientation>)
-    {
-        py::class_<py_sidb_lattice, LayoutType>(m, "sidb_100_lattice", DOC(fiction_cell_level_layout),
-                                                py::module_local())
-            .def(py::init<>())  // Default constructor
-            .def(py::init<const fiction::aspect_ratio<LayoutType>&, const std::string&>(), "dimension"_a, "name"_a = "",
-                 DOC(fiction_sidb_lattice));
-    }
-    else if constexpr (!fiction::has_cube_coord_v<LayoutType> && fiction::is_sidb_lattice_111_v<LatticeOrientation>)
-    {
-        py::class_<py_sidb_lattice, LayoutType>(m, "sidb_111_lattice", DOC(fiction_cell_level_layout),
-                                                py::module_local())
-            .def(py::init<>())  // Default constructor
-            .def(py::init<const fiction::aspect_ratio<LayoutType>&, const std::string&>(), "dimension"_a, "name"_a = "",
-                 DOC(fiction_sidb_lattice));
-    }
 }
 
 }  // namespace detail
 
-inline void sidb_lattices_100_cube(pybind11::module& m)
-{
-    // Bind the cube-coordinate 100 and 111 SiDB lattices
-    detail::sidb_lattice_cell_level_layout<fiction::sidb_100_lattice, py_sidb_layout_cube>(m);
-}
 
-inline void sidb_lattices_111(pybind11::module& m)
-{
-
-    detail::sidb_lattice_cell_level_layout<fiction::sidb_111_lattice, py_sidb_layout>(m);
-}
-
-inline void sidb_lattices_100(pybind11::module& m)
+inline void sidb_lattice(pybind11::module& m)
 {
     // Bind the regular 100 and 111 SiDB lattices
-    detail::sidb_lattice_cell_level_layout<fiction::sidb_100_lattice, py_sidb_layout>(m);
+    detail::sidb_lattice_cell_level_layout<py_sidb_100_lattice, py_sidb_layout>(m, "100");
+    detail::sidb_lattice_cell_level_layout<py_sidb_100_lattice_cube, py_sidb_layout_cube>(m, "100", "_cube");
+    detail::sidb_lattice_cell_level_layout<py_sidb_111_lattice, py_sidb_layout>(m, "111");
+    detail::sidb_lattice_cell_level_layout<py_sidb_111_lattice_cube, py_sidb_layout_cube>(m, "111", "_cube");
 }
 
-inline void sidb_lattices_111_cube(pybind11::module& m)
-{
-    // Bind the regular 100 and 111 SiDB lattices
-    detail::sidb_lattice_cell_level_layout<fiction::sidb_111_lattice, py_sidb_layout_cube>(m);
-}
 
 }  // namespace pyfiction
 

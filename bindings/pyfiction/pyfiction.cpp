@@ -34,6 +34,7 @@
 #include "pyfiction/algorithms/simulation/sidb/convert_potential_to_distance.hpp"
 #include "pyfiction/algorithms/simulation/sidb/critical_temperature.hpp"
 #include "pyfiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp"
+#include "pyfiction/algorithms/simulation/sidb/defect_operational_domain.hpp"
 #include "pyfiction/algorithms/simulation/sidb/detect_bdl_wires.hpp"
 #include "pyfiction/algorithms/simulation/sidb/determine_groundstate_from_simulation_results.hpp"
 #include "pyfiction/algorithms/simulation/sidb/determine_physically_valid_parameters.hpp"
@@ -136,8 +137,8 @@ PYBIND11_MODULE(pyfiction, m)
     pyfiction::detect_bdl_wires(m);
     pyfiction::is_operational(m);
     pyfiction::operational_domain(m);
-    // pyfiction::defect_influence_operational_domain(m);
-    // pyfiction::maximum_defect_influence_distance(m);
+    pyfiction::defect_influence_operational_domain(m);
+    pyfiction::maximum_defect_influence_distance(m);
     pyfiction::exhaustive_ground_state_simulation(m);
     pyfiction::quicksim(m);
     pyfiction::quickexact(m);
@@ -200,14 +201,11 @@ PYBIND11_MODULE(pyfiction, m)
     pyfiction::sidb_charge_state(m);
     pyfiction::sidb_nm_position(m);
     pyfiction::sidb_nm_distance(m);
-    pyfiction::sidb_lattices_100(m);
-    // pyfiction::sidb_lattices_100_cube(m);
-    pyfiction::sidb_lattices_111(m);
-    // pyfiction::sidb_lattices_111_cube(m);
+    pyfiction::sidb_lattice(m);
     pyfiction::charge_distribution_surfaces(m);
-    /**
-     * Input/Output
-     */
+    //    /**
+    //     * Input/Output
+    //     */
     pyfiction::write_dot_layout(m);
     pyfiction::write_fgl_layout(m);
     pyfiction::write_qca_layout(m);
@@ -221,10 +219,7 @@ PYBIND11_MODULE(pyfiction, m)
     pyfiction::write_operational_domain(m);
     pyfiction::read_fgl_layout(m);
     pyfiction::read_fqca_layout(m);
-    pyfiction::read_sqd_layout_100(m);
-    pyfiction::read_sqd_layout_111(m);
-    pyfiction::read_sqd_layout_100_cube(m);
-    pyfiction::read_sqd_layout_111_cube(m);
+    pyfiction::read_sqd_layout(m);
 
     /**
      * Utils

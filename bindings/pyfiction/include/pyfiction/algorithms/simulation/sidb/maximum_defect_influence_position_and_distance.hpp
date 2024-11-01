@@ -43,9 +43,7 @@ inline void maximum_defect_influence_distance(pybind11::module& m)
         .def_readwrite("sim_params",
                        &fiction::maximum_defect_influence_position_and_distance_params::simulation_parameters)
         .def_readwrite("additional_scanning_area",
-                       &fiction::maximum_defect_influence_position_and_distance_params::additional_scanning_area)
-
-        ;
+                       &fiction::maximum_defect_influence_position_and_distance_params::additional_scanning_area);
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 

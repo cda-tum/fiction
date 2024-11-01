@@ -303,8 +303,9 @@ void validate_sweep_parameters(const operational_domain_params& params)
 template <typename MapType>
 std::optional<typename MapType::mapped_type> contains_key(const MapType& map, const typename MapType::key_type& key)
 {
-    auto it = map.find(key);
-    if (it != map.end())
+    const auto it = map.find(key);
+
+    if (it != map.cend())
     {
         return it->second;
     }

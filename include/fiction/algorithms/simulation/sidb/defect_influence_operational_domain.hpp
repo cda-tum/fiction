@@ -222,7 +222,7 @@ class defect_operational_domain_impl
         return defect_operational_domain;
     }
 
-    [[nodiscard]] defect_operational_domain<Lyt> contour_tracing(const std::size_t samples) noexcept
+    [[nodiscard]] defect_operational_domain<Lyt> quicktrace(const std::size_t samples) noexcept
     {
         mockturtle::stopwatch stop{stats.time_total};
 
@@ -286,8 +286,11 @@ class defect_operational_domain_impl
                                             current_neighborhood.front() :
                                             next_clockwise_point(current_neighborhood, backtrack_point);
 
-            while (next_point != contour_starting_point)
+            std::size_t counter = 0;
+            while (next_point != contour_starting_point && counter < 1000)
             {
+                counter ++; // avoid infinite loops
+
                 const auto operational_status = is_defect_position_operational(next_point);
 
                 assert(layout.num_defects() == 0 && "more than one defect");
@@ -757,7 +760,7 @@ defect_operational_domain<Lyt> defect_operational_domain_quicktrace(const Lyt& l
     defect_operational_domain_stats                 st{};
     detail::defect_operational_domain_impl<Lyt, TT> p{lyt, spec, params, st};
 
-    const auto result = p.contour_tracing(samples);
+    const auto result = p.quicktrace(samples);
 
     if (stats)
     {

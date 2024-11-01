@@ -25,7 +25,7 @@ namespace detail
 {
 
 template <typename LytBase, typename ClockedLyt>
-void clocked_layout(pybind11::module& m, const std::string& topology)
+void clocked_layout(pybind11::module& m, const std::string& topology, const std::string& coordinate_type = "")
 {
     namespace py = pybind11;
     using namespace pybind11::literals;
@@ -33,7 +33,7 @@ void clocked_layout(pybind11::module& m, const std::string& topology)
     /**
      * Clocked Cartesian layout.
      */
-    py::class_<ClockedLyt, LytBase>(m, fmt::format("clocked_{}_layout", topology).c_str(), DOC(fiction_clocked_layout))
+    py::class_<ClockedLyt, LytBase>(m, fmt::format("clocked_{}_layout{}", topology, coordinate_type).c_str(), DOC(fiction_clocked_layout))
         .def(py::init<>())
         .def(py::init<const fiction::aspect_ratio<ClockedLyt>&>(), "dimension"_a,
              DOC(fiction_clocked_layout_clocked_layout))
@@ -89,6 +89,7 @@ void clocked_layout(pybind11::module& m, const std::string& topology)
 void clocked_layouts(pybind11::module& m)
 {
     detail::clocked_layout<py_cartesian_layout, py_cartesian_clocked_layout>(m, "cartesian");
+    detail::clocked_layout<py_cartesian_layout_cube, py_cartesian_clocked_layout_cube>(m, "cartesian", "cube");
     detail::clocked_layout<py_shifted_cartesian_layout, py_shifted_cartesian_clocked_layout>(m, "shifted_cartesian");
     detail::clocked_layout<py_hexagonal_layout, py_hexagonal_clocked_layout>(m, "hexagonal");
 }

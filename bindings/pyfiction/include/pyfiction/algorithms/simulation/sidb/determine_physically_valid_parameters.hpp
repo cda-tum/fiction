@@ -46,14 +46,16 @@ inline void determine_physically_valid_parameters(pybind11::module& m)
             [](const fiction::operational_domain<fiction::parameter_point, uint64_t>& domain,
                const fiction::parameter_point&                                        pp)
             {
-                try
+                auto result = domain.get_value(pp);
+
+                // Check if the result has a value
+                if (result.has_value())
                 {
-                    return domain.get_value(pp).value();
+                    return result.value();
                 }
-                catch (const std::out_of_range& e)
-                {
-                    throw py::value_error(e.what());
-                }
+                                    // If no value is present, raise a Python ValueError
+                throw py::value_error("Invalid parameter point: no excited state number available for the provided parameter.");
+
             },
             "pp"_a);
 
