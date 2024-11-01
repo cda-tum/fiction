@@ -289,7 +289,7 @@ class defect_operational_domain_impl
             std::size_t counter = 0;
             while (next_point != contour_starting_point && counter < 100)
             {
-                counter++; // avoid infinite loops
+                counter++;  // avoid infinite loops
 
                 std::cout << counter << std::endl;
 
