@@ -15,8 +15,8 @@
 #include <pybind11/stl.h>
 
 #include <cstdint>
-#include <vector>
 #include <string>
+#include <vector>
 
 namespace pyfiction
 {
