@@ -1122,6 +1122,25 @@ static const char *__doc_fiction_bounding_box_2d_x_size = R"doc(The horizontal s
 
 static const char *__doc_fiction_bounding_box_2d_y_size = R"doc(The vertical size of the bounding box in layout coordinates.)doc";
 
+static const char *__doc_fiction_calculate_defect_clearance =
+R"doc(Calculates the defect clearance of a given gate layout by a given
+atomic defect. This means that a defect must be further away than this
+distance for the SiDB gate to be operational. This function requires
+both the defect operational domain and the layout as input.
+
+Template parameter ``Lyt``:
+    Type representing the SiDB cell-level layout.
+
+Parameter ``lyt``:
+    The cell-level layout for which the defect operational domain was
+    computed.
+
+Parameter ``defect_opdomain``:
+    The defect operational domain associated with the layout.
+
+Returns:
+    The maximum minimum defect influence distance.)doc";
+
 static const char *__doc_fiction_calculate_energy_and_state_type =
 R"doc(This function takes in an SiDB energy distribution. For each charge
 distribution, the state type is determined (i.e. erroneous,
@@ -3774,35 +3793,16 @@ static const char *__doc_fiction_debug_write_dot_layout = R"doc()doc";
 
 static const char *__doc_fiction_debug_write_dot_network = R"doc()doc";
 
-static const char *__doc_fiction_defect_avoidance_distance =
-R"doc(Calculates the defect avoidance distance of a given gate layout by a
-given atomic defect. This means that a defect must be further away
-than this distance for the SiDB gate to be operational. This function
-requires both the defect operational domain and the layout as input.
-
-Template parameter ``Lyt``:
-    Type representing the SiDB cell-level layout.
-
-Parameter ``lyt``:
-    The cell-level layout for which the defect operational domain was
-    computed.
-
-Parameter ``defect_opdomain``:
-    The defect operational domain associated with the layout.
-
-Returns:
-    The maximum minimum defect influence distance.)doc";
-
-static const char *__doc_fiction_defect_avoidance_distance_result =
-R"doc(Results of the defect avoidance distance calculation.
+static const char *__doc_fiction_defect_clearance_result =
+R"doc(Results of the defect clearance calculation.
 
 Template parameter ``CellType``:)doc";
 
-static const char *__doc_fiction_defect_avoidance_distance_result_max_distance_postion_of_non_operational_defect =
-R"doc(position with maximum distance to the SiDB layout at which the
+static const char *__doc_fiction_defect_clearance_result_max_distance_postion_of_non_operational_defect =
+R"doc(Position with maximum distance to the SiDB layout at which the
 placement of an SiDB defect still causes the gate to fail.)doc";
 
-static const char *__doc_fiction_defect_avoidance_distance_result_minimum_defect_clearance =
+static const char *__doc_fiction_defect_clearance_result_minimum_defect_clearance =
 R"doc(Minimum distance between an SiDB of the gate and the defect at the
 maximum distance that causes the gate to fail.)doc";
 
