@@ -4822,7 +4822,8 @@ Parameter ``starting_defect_position``:
     towards the right is conducted while maintaining gate operability.
 
 Returns:
-    The last operational defect position.)doc";
+    The last operational defect position. If no non-operational defect
+    is found, std::nullopt is returned.)doc";
 
 static const char *__doc_fiction_detail_defect_operational_domain_impl_find_operational_defect_position_at_left_side =
 R"doc(This function aims to identify an operational defect position within
