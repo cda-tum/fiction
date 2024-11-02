@@ -302,7 +302,7 @@ class write_sqd_layout_impl
                 {
                     const auto type = this->lyt.get_cell_type(c);
 
-                    auto color = siqad::NORMAL_COLOR;
+                    const auto *color = siqad::NORMAL_COLOR;
 
                     switch (type)
                     {
