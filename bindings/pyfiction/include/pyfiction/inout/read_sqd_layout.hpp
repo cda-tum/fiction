@@ -13,6 +13,7 @@
 #include <pybind11/pybind11.h>
 
 #include <string_view>
+#include <string>
 
 namespace pyfiction
 {

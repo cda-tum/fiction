@@ -77,7 +77,7 @@ struct population_stability_information
      * required to conduct a charge change as a distance in nanometer. This is possible since the electrostatic
      * potential is connected to the distance.
      */
-    std::unordered_map<transition_type, double> distance_corresponding_to_potential{};
+    std::unordered_map<transition_type, double> distance_corresponding_to_potential;
     /**
      * Total electrostatic energy (unit: eV) of given charge distribution.
      */

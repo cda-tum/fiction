@@ -21,7 +21,6 @@
 #include <algorithm>
 #include <atomic>
 #include <cassert>
-#include <cstdint>
 #include <cstdlib>
 #include <future>
 #include <optional>
@@ -426,7 +425,7 @@ class defect_operational_domain_impl
      *
      * @param c Position of the defect.
      */
-    [[nodiscard]] inline std::optional<operational_status>
+    [[nodiscard]] std::optional<operational_status>
     has_already_been_sampled(const typename Lyt::cell& c) const noexcept
     {
         if (const auto it = defect_op_domain.operational_values.find(c);

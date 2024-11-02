@@ -87,12 +87,12 @@ int main()
             // Write the SQD layout
             write_sqd_layout(layout, sqd_path);
 
-            const auto avoidance_grid = defect_avoidance_distance(layout, op_defect_grid);
+            const auto avoidance_grid = calculate_defect_clearance(layout, op_defect_grid);
 
             defect_operational_domain_stats random_stats{};
             const auto                      op_defect_random =
                 defect_operational_domain_random_sampling(layout, truth_table, 100, defect_params, &random_stats);
-            const auto avoidance_random = defect_avoidance_distance(layout, op_defect_random);
+            const auto avoidance_random = calculate_defect_clearance(layout, op_defect_random);
 
             const auto csv_path_random = fmt::format("{}{}_random.csv", gate_folder, gate);
             write_defect_influence_operational_domain(op_defect_random, csv_path_random);
@@ -100,7 +100,7 @@ int main()
             defect_operational_domain_stats contour_stats{};
             const auto                      op_defect_contour =
                 defect_operational_domain_quicktrace(layout, truth_table, 20, defect_params, &contour_stats);
-            const auto avoidance_contour = defect_avoidance_distance(layout, op_defect_contour);
+            const auto avoidance_contour = calculate_defect_clearance(layout, op_defect_contour);
 
             const auto csv_path_contour = fmt::format("{}{}_contour.csv", gate_folder, gate);
             write_defect_influence_operational_domain(op_defect_contour, csv_path_contour);

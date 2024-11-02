@@ -4,8 +4,7 @@
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
 #include "fiction/algorithms/simulation/sidb/maximum_defect_influence_position_and_distance.hpp"
 #include "fiction/io/read_sqd_layout.hpp"
-#include "fiction/io/write_defect_influence_operational_domain.hpp"
-#include "fiction/io/write_sqd_layout.hpp"
+#include "fiction/technology/sidb_defects.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 #include "fiction/utils/truth_table_utils.hpp"
@@ -25,7 +24,7 @@ using namespace fiction;
 int main()
 {
     experiments::experiment<std::string, std::size_t, std::size_t> simulation_exp{"Benchmark", "Gate Name", "samples",
-                                                                                  "wrong output quicktrace"};
+                                                                                  "wrong output of quicktrace"};
 
     static const std::string folder        = fmt::format("{}bestagon_gates_type_tags/", EXPERIMENTS_PATH);
     static const std::string output_folder = fmt::format("{}quicktrace/plots/", EXPERIMENTS_PATH);
@@ -73,7 +72,7 @@ int main()
         const auto exhaustive_design = design_sidb_gates(lyt, truth_table, params_2_in_1_out);
 
         // Create gate directory for plots
-        std::string gate_folder = fmt::format("{}{}/", output_folder, gate);
+        const std::string gate_folder = fmt::format("{}{}/", output_folder, gate);
         std::filesystem::create_directories(gate_folder);
 
         std::size_t counter_for_wrong_output_of_quicktrace = 0;
@@ -83,14 +82,14 @@ int main()
             // using grid search to find the minimum defect clearance
             defect_operational_domain_stats grid_stats{};
             const auto                      op_defect_grid =
-                defect_influence_operational_domain_grid_search(gate_lyt, truth_table, 1, defect_params, &grid_stats);
-            const auto avoidance_grid = defect_avoidance_distance(gate_lyt, op_defect_grid);
+                defect_operational_domain_grid_search(gate_lyt, truth_table, 1, defect_params, &grid_stats);
+            const auto avoidance_grid = calculate_defect_clearance(gate_lyt, op_defect_grid);
 
             // using QuickTrace to find the minimum clearance
             defect_operational_domain_stats contour_stats{};
             const auto                      op_defect_contour =
                 defect_operational_domain_quicktrace(gate_lyt, truth_table, 100, defect_params, &contour_stats);
-            const auto avoidance_contour = defect_avoidance_distance(gate_lyt, op_defect_contour);
+            const auto avoidance_contour = calculate_defect_clearance(gate_lyt, op_defect_contour);
 
             // check if QuickTrace and grid search give the same result
             if (std::abs(avoidance_grid.minimum_defect_clearance - avoidance_contour.minimum_defect_clearance) >

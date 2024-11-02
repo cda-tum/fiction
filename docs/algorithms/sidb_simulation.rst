@@ -305,17 +305,36 @@ Operational Domain Computation
 Defect Influence Operational Domain
 ###################################
 
-**Header:** ``fiction/algorithms/simulation/sidb/defect_influence_operational_domain.hpp``
+.. tabs::
+    .. tab:: C++
+        **Header:** ``fiction/algorithms/simulation/sidb/defect_influence_operational_domain.hpp``
 
-.. doxygenstruct:: fiction::defect_operational_domain_params
-   :members:
-.. doxygenstruct:: fiction::defect_influence_operational_domain
-   :members:
-.. doxygenstruct:: fiction::defect_operational_domain_stats
-   :members:
-.. doxygenfunction:: fiction::defect_influence_operational_domain_grid_search
-.. doxygenfunction:: fiction::defect_influence_operational_domain_random_sampling
-.. doxygenfunction:: fiction::defect_operational_domain_quicktrace
+        .. doxygenstruct:: fiction::defect_operational_domain_params
+           :members:
+        .. doxygenstruct:: fiction::defect_influence_operational_domain
+           :members:
+        .. doxygenstruct:: fiction::defect_operational_domain_stats
+           :members:
+        .. doxygenfunction:: fiction::defect_influence_operational_domain_grid_search
+        .. doxygenfunction:: fiction::defect_influence_operational_domain_random_sampling
+        .. doxygenfunction:: fiction::defect_operational_domain_quicktrace
+
+    .. tab:: Python
+        .. autoclass:: mnt.pyfiction.defect_operational_domain_params
+            :members:
+        .. autoclass:: mnt.pyfiction.defect_influence_operational_domain_100
+            :members:
+        .. autoclass:: mnt.pyfiction.defect_influence_operational_domain_100_cube
+            :members:
+        .. autoclass:: mnt.pyfiction.defect_influence_operational_domain_111
+            :members:
+        .. autoclass:: mnt.pyfiction.defect_influence_operational_domain_111_cube
+            :members:
+        .. autoclass:: mnt.pyfiction.defect_operational_domain_stats
+            :members:
+        .. autofunction:: mnt.pyfiction.defect_influence_operational_domain_grid_search
+        .. autofunction:: mnt.pyfiction.defect_influence_operational_domain_random_sampling
+        .. autofunction:: mnt.pyfiction.defect_operational_domain_quicktrace
 
 Determine Physically Valid Parameters
 #####################################
@@ -326,7 +345,7 @@ Determine Physically Valid Parameters
 
         .. doxygenfunction:: fiction::determine_physically_valid_parameters
 
-   .. tab:: Python
+    .. tab:: Python
         .. autoclass:: mnt.pyfiction.determine_physically_valid_parameters
 
 
@@ -499,8 +518,8 @@ Convert Potential to Distance
 Maximum Minimum Defect Influence Distance
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-**Header:** ``fiction/algorithms/simulation/sidb/defect_avoidance_distance.hpp``
+**Header:** ``fiction/algorithms/simulation/sidb/calculate_defect_clearance.hpp``
 
-.. doxygenstruct:: fiction::defect_avoidance_distance_result
+.. doxygenstruct:: fiction::defect_clearance_result
    :members:
-.. doxygenfunction:: fiction::defect_avoidance_distance
+.. doxygenfunction:: fiction::calculate_defect_clearance

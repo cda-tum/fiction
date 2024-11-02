@@ -16,6 +16,7 @@
 
 #include <cstdint>
 #include <vector>
+#include <string>
 
 namespace pyfiction
 {
@@ -29,7 +30,7 @@ inline void cartesian_layout_impl(pybind11::module& m)
     namespace py = pybind11;
     using namespace pybind11::literals;
 
-    std::string coordinate_type;
+    std::string coordinate_type = "";
     /**
      * Cartesian layout.
      */

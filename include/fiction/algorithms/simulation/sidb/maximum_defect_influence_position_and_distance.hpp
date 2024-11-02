@@ -179,7 +179,7 @@ class maximum_defect_influence_position_and_distance_impl
         static const std::size_t num_threads = std::thread::hardware_concurrency();
 
         // calculate the size of each slice
-        const auto slice_size = (defect_cells.size() + -1) / num_threads;
+        const auto slice_size = (defect_cells.size() - 1) / num_threads;
 
         std::vector<std::thread> threads{};
         threads.reserve(num_threads);

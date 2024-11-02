@@ -15,15 +15,15 @@
 namespace fiction
 {
 /**
- * Results of the defect avoidance distance calculation.
+ * Results of the defect clearance calculation.
  *
  * @tparam CellType
  */
 template <typename CellType>
-struct defect_avoidance_distance_result
+struct defect_clearance_result
 {
     /**
-     * position with maximum distance to the SiDB layout at which the placement of an SiDB defect still causes the gate
+     * Position with maximum distance to the SiDB layout at which the placement of an SiDB defect still causes the gate
      * to fail.
      */
     CellType max_distance_postion_of_non_operational_defect{};
@@ -33,7 +33,7 @@ struct defect_avoidance_distance_result
     double minimum_defect_clearance{};
 };
 /**
- * Calculates the defect avoidance distance of a given gate layout by a given atomic defect. This means that a defect
+ * Calculates the defect clearance of a given gate layout by a given atomic defect. This means that a defect
  * must be further away than this distance for the SiDB gate to be operational. This function requires both the defect
  * operational domain and the layout as input.
  *
@@ -43,8 +43,8 @@ struct defect_avoidance_distance_result
  * @return The maximum minimum defect influence distance.
  */
 template <typename Lyt>
-[[nodiscard]] defect_avoidance_distance_result<cell<Lyt>>
-defect_avoidance_distance(const Lyt& lyt, const defect_operational_domain<Lyt>& defect_opdomain) noexcept
+[[nodiscard]] defect_clearance_result<cell<Lyt>>
+calculate_defect_clearance(const Lyt& lyt, const defect_operational_domain<Lyt>& defect_opdomain) noexcept
 {
     double    max_distance         = 0;
     cell<Lyt> max_distance_postion = {};
@@ -76,7 +76,7 @@ defect_avoidance_distance(const Lyt& lyt, const defect_operational_domain<Lyt>& 
         }
     }
 
-    return defect_avoidance_distance_result<cell<Lyt>>{max_distance_postion, max_distance};
+    return defect_clearance_result<cell<Lyt>>{max_distance_postion, max_distance};
 }
 
 }  // namespace fiction

@@ -23,6 +23,7 @@
 #include <fmt/format.h>
 #include <kitty/bit_operations.hpp>
 #include <kitty/dynamic_truth_table.hpp>
+#include <mockturtle/utils/stopwatch.hpp>
 
 #include <cassert>
 #include <cmath>
@@ -271,7 +272,7 @@ class critical_temperature_impl
         std::vector<double> temp_values{};  // unit: K
 
         // Calculate the number of iterations as an integer
-        uint64_t num_iterations = static_cast<uint64_t>(std::round(params.max_temperature * 100));
+        const auto num_iterations = static_cast<uint64_t>(std::round(params.max_temperature * 100));
         // Reserve space for the vector
         temp_values.reserve(num_iterations);
         for (uint64_t i = 1; i <= num_iterations; i++)
