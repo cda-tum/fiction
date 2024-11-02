@@ -306,17 +306,17 @@ class write_sqd_layout_impl
 
                     switch (type)
                     {
-                        case (qca_technology::is_input_cell(type)):
+                        case (type == qca_technology::cell_type::INPUT):
                         {
                             color = siqad::INPUT_COLOR;
                             break;
                         }
-                        case (qca_technology::is_output_cell(type)):
+                        case (type == qca_technology::cell_type::OUTPUT):
                         {
                             color = siqad::OUTPUT_COLOR;
                             break;
                         }
-                        case (qca_technology::is_constant_cell(type)):
+                        case (type == qca_technology::cell_type::CONST_0 || type == qca_technology::cell_type::CONST_1):
                         {
                             siqad::CONST_COLOR;
                             break;
