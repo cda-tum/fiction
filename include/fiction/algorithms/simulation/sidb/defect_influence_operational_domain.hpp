@@ -270,8 +270,15 @@ class defect_operational_domain_impl
             assert(layout.num_defects() == 0 && "An atomic defect is added");
 
             // find an operational point on the contour starting from the randomly determined starting point
-            const auto contour_starting_point =
+            const auto contour_starting_p =
                 find_last_operational_defect_position_moving_right(*operational_starting_point);
+
+            if (!contour_starting_p.has_value())
+            {
+                continue;
+            }
+
+            const auto contour_starting_point = *contour_starting_p;
 
             // the layout hs to be defect-free.
             assert(layout.num_defects() == 0 && "An atomic defect is added");
@@ -286,13 +293,8 @@ class defect_operational_domain_impl
                                             current_neighborhood.front() :
                                             next_clockwise_point(current_neighborhood, backtrack_point);
 
-            std::size_t counter = 0;
-            while (next_point != contour_starting_point && counter < 100)
+            while (next_point != contour_starting_point)
             {
-                counter++;  // avoid infinite loops
-
-                std::cout << counter << std::endl;
-
                 const auto operational_status = is_defect_position_operational(next_point);
 
                 assert(layout.num_defects() == 0 && "more than one defect");
@@ -442,9 +444,9 @@ class defect_operational_domain_impl
      *
      * @param starting_defect_position The starting position of the defect, from which the traversal towards the right
      * is conducted while maintaining gate operability.
-     * @return The last operational defect position.
+     * @return The last operational defect position. If no non-operational defect is found, std::nullopt is returned.
      */
-    [[nodiscard]] typename Lyt::cell
+    [[nodiscard]] std::optional<typename Lyt::cell>
     find_last_operational_defect_position_moving_right(const typename Lyt::cell& starting_defect_position) noexcept
     {
         auto latest_operational_defect_position = starting_defect_position;
@@ -471,6 +473,11 @@ class defect_operational_domain_impl
             {
                 return previous_defect_position;
             }
+        }
+
+        if (current_defect_position == latest_operational_defect_position)
+        {
+            return std::nullopt;
         }
 
         return latest_operational_defect_position;
