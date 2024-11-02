@@ -280,11 +280,6 @@ class write_sqd_layout_impl
                             type_str = fmt::format(siqad::DOT_TYPE, "logic");
                             break;
                         }
-                        default:
-                        {
-                            type_str = "";
-                            break;
-                        }
                     }
 
                     if constexpr (has_siqad_coord_v<Lyt>)
@@ -307,10 +302,26 @@ class write_sqd_layout_impl
                 {
                     const auto type = this->lyt.get_cell_type(c);
 
-                    const auto color = qca_technology::is_input_cell(type)    ? siqad::INPUT_COLOR :
-                                       qca_technology::is_output_cell(type)   ? siqad::OUTPUT_COLOR :
-                                       qca_technology::is_constant_cell(type) ? siqad::CONST_COLOR :
-                                                                                siqad::NORMAL_COLOR;
+                    auto color = siqad::NORMAL_COLOR;
+
+                    switch (type)
+                    {
+                        case (qca_technology::is_input_cell(type)):
+                        {
+                            color = siqad::INPUT_COLOR;
+                            break;
+                        }
+                        case (qca_technology::is_output_cell(type)):
+                        {
+                            color = siqad::OUTPUT_COLOR;
+                            break;
+                        }
+                        case (qca_technology::is_constant_cell(type)):
+                        {
+                            siqad::CONST_COLOR;
+                            break;
+                        }
+                    }
 
                     if (!qca_technology::is_const_1_cell(type))
                     {
