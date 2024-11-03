@@ -226,7 +226,7 @@ class maximum_defect_influence_position_and_distance_impl
     /**
      * Parameters used for the simulation.
      */
-    maximum_defect_influence_position_and_distance_params params{};
+    maximum_defect_influence_position_and_distance_params params;
     /**
      * The statistics of the maximum defect influence position.
      */

@@ -2,20 +2,20 @@
 // Created by Jan Drewniok on 26.06.23.
 //
 
-#include <catch2/catch_template_test_macros.hpp>
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
-#include <fiction/algorithms/path_finding/distance.hpp>
 #include <fiction/algorithms/simulation/sidb/maximum_defect_influence_position_and_distance_of_sidb_gate.hpp>
-#include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
-#include <fiction/technology/physical_constants.hpp>
 #include <fiction/technology/sidb_defects.hpp>
-#include <fiction/utils/layout_utils.hpp>
-#include <fiction/utils/math_utils.hpp>
+#include <fiction/types.hpp>
 #include <fiction/utils/truth_table_utils.hpp>
+
+#include <cmath>
+#include <vector>
 
 using namespace fiction;
 
