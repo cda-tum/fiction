@@ -1,9 +1,9 @@
 #include "fiction/algorithms/simulation/sidb/defect_avoidance_distance.hpp"
-#include "fiction/algorithms/simulation/sidb/defect_influence_operational_domain.hpp"
+#include "fiction/algorithms/simulation/sidb/defect_operational_domain.hpp"
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
 #include "fiction/algorithms/simulation/sidb/maximum_defect_influence_position_and_distance.hpp"
 #include "fiction/io/read_sqd_layout.hpp"
-#include "fiction/io/write_defect_influence_operational_domain.hpp"
+#include "fiction/io/write_defect_operational_domain.hpp"
 #include "fiction/io/write_sqd_layout.hpp"
 #include "fiction/technology/sidb_defects.hpp"
 #include "fiction/types.hpp"
@@ -82,7 +82,7 @@ int main()
             const auto sqd_path = fmt::format("{}/{}.sqd", gate_folder, gate);
 
             // Write the CSV file
-            write_defect_influence_operational_domain(op_defect_grid, csv_path);
+            write_defect_operational_domain(op_defect_grid, csv_path);
 
             // Write the SQD layout
             write_sqd_layout(layout, sqd_path);
@@ -95,7 +95,7 @@ int main()
             const auto avoidance_random = calculate_defect_clearance(layout, op_defect_random);
 
             const auto csv_path_random = fmt::format("{}{}_random.csv", gate_folder, gate);
-            write_defect_influence_operational_domain(op_defect_random, csv_path_random);
+            write_defect_operational_domain(op_defect_random, csv_path_random);
 
             defect_operational_domain_stats contour_stats{};
             const auto                      op_defect_contour =
@@ -103,7 +103,7 @@ int main()
             const auto avoidance_contour = calculate_defect_clearance(layout, op_defect_contour);
 
             const auto csv_path_contour = fmt::format("{}{}_contour.csv", gate_folder, gate);
-            write_defect_influence_operational_domain(op_defect_contour, csv_path_contour);
+            write_defect_operational_domain(op_defect_contour, csv_path_contour);
 
             // Log the simulation results
             simulation_exp(gate, layout.num_cells(), avoidance_grid.max_distance_postion_of_non_operational_defect.x,

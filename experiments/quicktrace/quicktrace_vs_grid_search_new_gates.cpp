@@ -1,6 +1,6 @@
 #include "fiction/algorithms/physical_design/design_sidb_gates.hpp"
 #include "fiction/algorithms/simulation/sidb/defect_avoidance_distance.hpp"
-#include "fiction/algorithms/simulation/sidb/defect_influence_operational_domain.hpp"
+#include "fiction/algorithms/simulation/sidb/defect_operational_domain.hpp"
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
 #include "fiction/algorithms/simulation/sidb/maximum_defect_influence_position_and_distance.hpp"
 #include "fiction/io/read_sqd_layout.hpp"

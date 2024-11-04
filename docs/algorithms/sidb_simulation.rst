@@ -307,11 +307,11 @@ Defect Influence Operational Domain
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/algorithms/simulation/sidb/defect_influence_operational_domain.hpp``
+        **Header:** ``fiction/algorithms/simulation/sidb/defect_operational_domain.hpp``
 
         .. doxygenstruct:: fiction::defect_operational_domain_params
            :members:
-        .. doxygenstruct:: fiction::defect_influence_operational_domain
+        .. doxygenstruct:: fiction::defect_operational_domain
            :members:
         .. doxygenstruct:: fiction::defect_operational_domain_stats
            :members:

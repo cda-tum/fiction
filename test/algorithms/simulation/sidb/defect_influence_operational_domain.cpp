@@ -8,7 +8,7 @@
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/algorithms/simulation/sidb/defect_avoidance_distance.hpp>
-#include <fiction/algorithms/simulation/sidb/defect_influence_operational_domain.hpp>
+#include <fiction/algorithms/simulation/sidb/defect_operational_domain.hpp>
 #include <fiction/algorithms/simulation/sidb/is_operational.hpp>
 #include <fiction/algorithms/simulation/sidb/maximum_defect_influence_position_and_distance.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>

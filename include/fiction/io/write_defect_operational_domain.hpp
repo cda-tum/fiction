@@ -5,7 +5,7 @@
 #ifndef FICTION_WRITE_DEFECT_OPERATIONAL_DOMAIN_HPP
 #define FICTION_WRITE_DEFECT_OPERATIONAL_DOMAIN_HPP
 
-#include "fiction/algorithms/simulation/sidb/defect_influence_operational_domain.hpp"
+#include "fiction/algorithms/simulation/sidb/defect_operational_domain.hpp"
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
 #include "fiction/io/csv_writer.hpp"
 
@@ -17,7 +17,7 @@ namespace fiction
 {
 
 /**
- * Parameters for writing a defect influence operational domain to a CSV file.
+ * Parameters for writing a defect operational domain to a CSV file.
  */
 struct write_defect_operational_domain_params
 {
@@ -49,7 +49,7 @@ struct write_defect_operational_domain_params
  * empty `write_defect_operational_domain_params` object, which provides standard tags.
  */
 template <typename Lyt>
-inline void write_defect_influence_operational_domain(const defect_operational_domain<Lyt>&         defect_opdom,
+inline void write_defect_operational_domain(const defect_operational_domain<Lyt>&         defect_opdom,
                                                       std::ostream&                                 os,
                                                       const write_defect_operational_domain_params& params = {})
 {
@@ -82,7 +82,7 @@ inline void write_defect_influence_operational_domain(const defect_operational_d
  * empty `write_defect_operational_domain_params` object, which provides standard tags.
  */
 template <typename Lyt>
-inline void write_defect_influence_operational_domain(const defect_operational_domain<Lyt>&         defect_opdom,
+inline void write_defect_operational_domain(const defect_operational_domain<Lyt>&         defect_opdom,
                                                       const std::string_view&                       filename,
                                                       const write_defect_operational_domain_params& params = {})
 {
@@ -93,7 +93,7 @@ inline void write_defect_influence_operational_domain(const defect_operational_d
         throw std::ofstream::failure("could not open file");
     }
 
-    write_defect_influence_operational_domain(defect_opdom, os, params);
+    write_defect_operational_domain(defect_opdom, os, params);
     os.close();
 }
 

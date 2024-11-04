@@ -2,8 +2,8 @@
 // Created by Jan Drewniok on 28.12.23.
 //
 
-#ifndef FICTION_DEFECT_INFLUENCE_OPERATIONAL_DOMAIN_HPP
-#define FICTION_DEFECT_INFLUENCE_OPERATIONAL_DOMAIN_HPP
+#ifndef FICTION_DEFECT_OPERATIONAL_DOMAIN_HPP
+#define FICTION_DEFECT_OPERATIONAL_DOMAIN_HPP
 
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
 #include "fiction/algorithms/simulation/sidb/maximum_defect_influence_position_and_distance.hpp"
@@ -111,7 +111,7 @@ class defect_operational_domain_impl
      *
      * @param step_size The step size used to sample defect positions in the grid. Only positions with x and y
      * coordinates divisible by `step_size` will be checked for being operational.
-     * @return A `defect_influence_operational_domain<Lyt>` object representing the operational domain of the defects.
+     * @return A `defect_operational_domain<Lyt>` object representing the operational domain of the defects.
      */
     [[nodiscard]] defect_operational_domain<Lyt> grid_search(const std::size_t& step_size) noexcept
     {
@@ -779,4 +779,4 @@ defect_operational_domain<Lyt> defect_operational_domain_quicktrace(const Lyt& l
 
 }  // namespace fiction
 
-#endif  // FICTION_DEFECT_INFLUENCE_OPERATIONAL_DOMAIN_HPP
+#endif  // FICTION_DEFECT_OPERATIONAL_DOMAIN_HPP

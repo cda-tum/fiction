@@ -2,13 +2,13 @@
 // Created by Jan Drewniok 18.10.2024
 //
 
-#ifndef PYFICTION_DEFECT_INFLUENCE_OPERATIONAL_DOMAIN_HPP
-#define PYFICTION_DEFECT_INFLUENCE_OPERATIONAL_DOMAIN_HPP
+#ifndef PYFICTION_DEFECT_OPERATIONAL_DOMAIN_HPP
+#define PYFICTION_DEFECT_OPERATIONAL_DOMAIN_HPP
 
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
-#include <fiction/algorithms/simulation/sidb/defect_influence_operational_domain.hpp>
+#include <fiction/algorithms/simulation/sidb/defect_operational_domain.hpp>
 
 #include <pybind11/operators.h>
 #include <pybind11/pybind11.h>
@@ -21,7 +21,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void defect_influence_operational_domain_detail(pybind11::module& m)
+void defect_operational_domain_detail(pybind11::module& m)
 {
     using namespace pybind11::literals;
 
@@ -40,7 +40,7 @@ void defect_influence_operational_domain_detail(pybind11::module& m)
 
 }  // namespace detail
 
-inline void defect_influence_operational_domain(pybind11::module& m)
+inline void defect_operational_domain(pybind11::module& m)
 {
     namespace py = pybind11;
     using namespace pybind11::literals;
@@ -83,10 +83,10 @@ inline void defect_influence_operational_domain(pybind11::module& m)
                       DOC(fiction_defect_operational_domain_stats_num_non_operational_defect_positions));
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
-    detail::defect_influence_operational_domain_detail<py_sidb_100_lattice_cube>(m);
-    detail::defect_influence_operational_domain_detail<py_sidb_111_lattice_cube>(m);
+    detail::defect_operational_domain_detail<py_sidb_100_lattice_cube>(m);
+    detail::defect_operational_domain_detail<py_sidb_111_lattice_cube>(m);
 }
 
 }  // namespace pyfiction
 
-#endif  // PYFICTION_DEFECT_INFLUENCE_OPERATIONAL_DOMAIN_HPP
+#endif  // PYFICTION_DEFECT_OPERATIONAL_DOMAIN_HPP

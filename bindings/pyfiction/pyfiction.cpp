@@ -137,7 +137,7 @@ PYBIND11_MODULE(pyfiction, m)
     pyfiction::detect_bdl_wires(m);
     pyfiction::is_operational(m);
     pyfiction::operational_domain(m);
-    pyfiction::defect_influence_operational_domain(m);
+    pyfiction::defect_operational_domain(m);
     pyfiction::maximum_defect_influence_distance(m);
     pyfiction::exhaustive_ground_state_simulation(m);
     pyfiction::quicksim(m);

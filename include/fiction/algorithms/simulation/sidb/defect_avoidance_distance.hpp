@@ -5,7 +5,7 @@
 #ifndef FICTION_DEFECT_AVOIDANCE_DISTANCE_HPP
 #define FICTION_DEFECT_AVOIDANCE_DISTANCE_HPP
 
-#include "fiction/algorithms/simulation/sidb/defect_influence_operational_domain.hpp"
+#include "fiction/algorithms/simulation/sidb/defect_operational_domain.hpp"
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
 #include "fiction/technology/sidb_nm_distance.hpp"
 #include "fiction/traits.hpp"

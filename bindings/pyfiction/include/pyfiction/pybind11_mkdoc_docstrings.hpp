@@ -4844,7 +4844,7 @@ Parameter ``step_size``:
     be checked for being operational.
 
 Returns:
-    A `defect_influence_operational_domain<Lyt>` object representing
+    A `defect_operational_domain<Lyt>` object representing
     the operational domain of the defects.)doc";
 
 static const char *__doc_fiction_detail_defect_operational_domain_impl_has_already_been_sampled =
