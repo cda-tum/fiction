@@ -30,7 +30,7 @@
             <role>Overlay</role>
             <zoffset>0</zoffset>
             <zheight>0</zheight>
-            <visible>0</visible>
+            <visible>1</visible>
             <active>0</active>
         </layer_prop>
         <layer_prop>
