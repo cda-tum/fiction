@@ -20,14 +20,17 @@ class TestDefectOperationalDomain(unittest.TestCase):
 
         stats_grid = defect_operational_domain_stats()
         _ = defect_operational_domain_grid_search(lyt, [create_xor_tt()], 6, params, stats_grid)
+        print(stats_grid.num_operational_defect_positions)
         self.assertGreater(stats_grid.num_operational_defect_positions, 0)
 
         stats_random = defect_operational_domain_stats()
         _ = defect_operational_domain_random_sampling(lyt, [create_xor_tt()], 100, params, stats_random)
+        print(stats_random.num_operational_defect_positions)
         self.assertGreater(stats_random.num_operational_defect_positions, 0)
 
         stats_quicktrace = defect_operational_domain_stats()
         _ = defect_operational_domain_quicktrace(lyt, [create_xor_tt()], 3, params, stats_quicktrace)
+        print(stats_quicktrace.num_operational_defect_positions)
         self.assertGreater(stats_quicktrace.num_operational_defect_positions, 0)
 
 if __name__ == '__main__':
