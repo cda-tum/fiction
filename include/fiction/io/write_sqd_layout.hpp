@@ -280,6 +280,13 @@ class write_sqd_layout_impl
                             type_str = fmt::format(siqad::DOT_TYPE, "logic");
                             break;
                         }
+                            // LCOV_EXCL_START
+                        case (sidb_technology::cell_type::EMPTY):
+                        {
+                            // this case can never happen; it exists to comfort the compilers
+                            break;
+                        }
+                            // LCOV_EXCL_STOP
                     }
 
                     if constexpr (has_siqad_coord_v<Lyt>)
