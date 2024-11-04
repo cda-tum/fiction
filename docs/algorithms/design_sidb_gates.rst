@@ -12,7 +12,6 @@ SiDB Gate Designer
         .. doxygenstruct:: fiction::design_sidb_gates_params
            :members:
         .. doxygenfunction:: fiction::design_sidb_gates
-        .. doxygenfunction:: fiction::design_sidb_gates_metric_driven_simulated_annealing
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.design_sidb_gates_stats
