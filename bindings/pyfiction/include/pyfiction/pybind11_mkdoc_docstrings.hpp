@@ -4844,8 +4844,8 @@ Parameter ``step_size``:
     be checked for being operational.
 
 Returns:
-    A `defect_operational_domain<Lyt>` object representing
-    the operational domain of the defects.)doc";
+    A `defect_operational_domain<Lyt>` object representing the
+    operational domain of the defects.)doc";
 
 static const char *__doc_fiction_detail_defect_operational_domain_impl_has_already_been_sampled =
 R"doc(This function verifies whether the layout has already been analyzed
@@ -18708,7 +18708,7 @@ static const char *__doc_fiction_wiring_reduction_stats_y_size_after = R"doc(Lay
 
 static const char *__doc_fiction_wiring_reduction_stats_y_size_before = R"doc(Layout height before the wiring reduction process.)doc";
 
-static const char *__doc_fiction_write_defect_influence_operational_domain =
+static const char *__doc_fiction_write_defect_operational_domain =
 R"doc(Writes a CSV representation of an operational domain to the specified
 output stream. The data are written as rows, each corresponding to one
 set of simulation parameters and their corresponding operational
@@ -18738,7 +18738,7 @@ Parameter ``params``:
     `write_defect_operational_domain_params` object, which provides
     standard tags.)doc";
 
-static const char *__doc_fiction_write_defect_influence_operational_domain_2 =
+static const char *__doc_fiction_write_defect_operational_domain_2 =
 R"doc(Writes a CSV representation of an operational domain to the specified
 file. The data are written as rows, each corresponding to one set of
 simulation parameters and their corresponding operational status.
@@ -18767,9 +18767,7 @@ Parameter ``params``:
     `write_defect_operational_domain_params` object, which provides
     standard tags.)doc";
 
-static const char *__doc_fiction_write_defect_operational_domain_params =
-R"doc(Parameters for writing a defect influence operational domain to a CSV
-file.)doc";
+static const char *__doc_fiction_write_defect_operational_domain_params = R"doc(Parameters for writing a defect operational domain to a CSV file.)doc";
 
 static const char *__doc_fiction_write_defect_operational_domain_params_non_operational_tag =
 R"doc(The tag used to represent the non-operational value of a defect
