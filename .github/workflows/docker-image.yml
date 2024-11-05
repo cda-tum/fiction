@@ -111,6 +111,6 @@ jobs:
 #        if: github.event_name == 'release' && github.event.action == 'published'
         uses: actions/attest-build-provenance@v1
         with:
-          subject-name: ghcr.io/${{ github.repository }}:${{ github.event.release.tag_name || 'dev' }}
+          subject-name: ghcr.io/${{ github.repository }}
           subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true
