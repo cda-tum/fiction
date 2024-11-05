@@ -22,6 +22,7 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
+#include <cstdint>
 
 namespace fiction
 {
@@ -511,7 +512,7 @@ class write_qca_layout_svg_impl
                     {
                         cell_descriptions << fmt::format(
                             desc_col.first, desc_col.second,
-                            svg::STARTING_OFFSET_TILE_X + svg::STARTING_OFFSET_CELL_X + c.x * svg::CELL_DISTANCE,
+                            svg::STARTING_OFFSET_TILE_X + svg::STARTING_OFFSET_CELL_X + (c.x * svg::CELL_DISTANCE),
                             svg::STARTING_OFFSET_TILE_Y + svg::STARTING_OFFSET_CELL_Y + c.y * svg::CELL_DISTANCE);
                     }
                 }
