@@ -93,8 +93,8 @@ jobs:
 #        if: github.event_name == 'release' && github.event.action == 'published'
         uses: peter-evans/dockerhub-description@v4
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
           repository: ${{ env.DOCKER_USERNAME }}/fiction
           short-description: ${{ steps.meta.outputs.labels.description || '' }}
           readme-filepath: ${{ github.workspace }}/README.md
