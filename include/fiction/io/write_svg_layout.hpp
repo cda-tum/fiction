@@ -13,6 +13,7 @@
 
 #include <array>
 #include <cmath>
+#include <cstdint>
 #include <exception>
 #include <iostream>
 #include <sstream>
@@ -22,7 +23,6 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
-#include <cstdint>
 
 namespace fiction
 {

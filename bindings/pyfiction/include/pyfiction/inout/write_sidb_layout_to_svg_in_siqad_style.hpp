@@ -22,7 +22,7 @@ namespace detail
 template <typename Lyt>
 inline void write_sidb_layout_to_svg_in_siqad_style_impl(pybind11::module& m)
 {
-       using namespace pybind11::literals;
+    using namespace pybind11::literals;
 
     void (*write_sidb_layout_svg_in_siqad_style_pointer)(const Lyt&, const std::string_view&,
                                                          const fiction::write_sidb_layout_svg_in_siqad_style_params&) =
