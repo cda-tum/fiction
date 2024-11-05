@@ -47,6 +47,7 @@
 #include "pyfiction/algorithms/simulation/sidb/occupation_probability_of_excited_states.hpp"
 #include "pyfiction/algorithms/simulation/sidb/operational_domain.hpp"
 #include "pyfiction/algorithms/simulation/sidb/quickexact.hpp"
+#include "pyfiction/inout/write_sidb_layout_to_svg_in_siqad_style.hpp"
 #include "pyfiction/algorithms/simulation/sidb/quicksim.hpp"
 #include "pyfiction/algorithms/simulation/sidb/random_sidb_layout_generator.hpp"
 #include "pyfiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
@@ -64,11 +65,11 @@
 // #include "pyfiction/inout/write_location_and_ground_state.hpp"
 #include "pyfiction/inout/write_operational_domain.hpp"
 #include "pyfiction/inout/write_qca_layout.hpp"
+#include "pyfiction/inout/write_qca_layout_svg.hpp"
 #include "pyfiction/inout/write_qcc_layout.hpp"
 #include "pyfiction/inout/write_qll_layout.hpp"
 #include "pyfiction/inout/write_sqd_layout.hpp"
 #include "pyfiction/inout/write_sqd_sim_result.hpp"
-#include "pyfiction/inout/write_svg_layout.hpp"
 #include "pyfiction/layouts/cartesian_layout.hpp"
 #include "pyfiction/layouts/cell_level_layout.hpp"
 #include "pyfiction/layouts/clocked_layout.hpp"
@@ -215,6 +216,7 @@ PYBIND11_MODULE(pyfiction, m)
     pyfiction::write_sqd_sim_result(m);
     // pyfiction::write_location_and_ground_state(m);
     pyfiction::write_operational_domain(m);
+    pyfiction::write_sidb_layout_to_svg_in_siqad_style(m);
     pyfiction::read_fgl_layout(m);
     pyfiction::read_fqca_layout(m);
     pyfiction::read_sqd_layout_100(m);
