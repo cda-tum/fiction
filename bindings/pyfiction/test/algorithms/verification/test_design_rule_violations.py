@@ -48,10 +48,32 @@ class TestDesignRuleViolations(unittest.TestCase):
 
         pyfiction.color_routing(layout, [((2, 3), (2, 5))])
 
-        warnings, drvs = pyfiction.gate_level_drvs(layout)
+        warnings, drvs, output = pyfiction.gate_level_drvs(layout)
 
         self.assertEqual(0, warnings)
         self.assertEqual(0, drvs)
+
+        report = """
+        [i] Topology:
+        [i] [✓] all nodes are properly placed
+        [i] [✓] all placed nodes are alive
+        [i] [✓] all tiles are adjacently connected
+        [i] [✓] all occupied tiles are properly connected
+        [i] [✓] all wire crossings cross over other wires only
+        
+        [i] Clocking:
+        [i] [✓] all connected tiles are properly clocked
+        
+        [i] I/O ports:
+        [i] [✓] all I/O are properly specified
+        [i] [✓] all I/O ports are assigned to a non-empty tile
+        [i] [✓] all I/O ports are realized by designated pins
+        [i] [✓] all I/O ports are located at the layout's borders
+        
+        [i] DRVs: 0, Warnings: 0
+        """
+
+        self.assertEqual(output, report)
 
 
 if __name__ == "__main__":
