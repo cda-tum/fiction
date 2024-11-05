@@ -68,6 +68,11 @@ jobs:
           python-version: '3.13.x'
           cache: 'pip'
 
+      - name: Setup gcovr
+        uses: BSFishy/pip-action@v1
+        with:
+          packages: gcovr
+
       - name: Setup mold
         uses: rui314/setup-mold@v1
 
