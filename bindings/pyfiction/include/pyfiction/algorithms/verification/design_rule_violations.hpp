@@ -10,8 +10,8 @@
 
 #include <fiction/algorithms/verification/design_rule_violations.hpp>
 
-#include <pybind11/pybind11.h>
 #include <pybind11/iostream.h>
+#include <pybind11/pybind11.h>
 
 namespace pyfiction
 {
@@ -27,12 +27,11 @@ void gate_level_drvs(pybind11::module& m)
 
     m.def(
         "gate_level_drvs",
-        [](const Lyt& lyt, fiction::gate_level_drv_params params = {},
-           const bool print_report = false) -> py::tuple
+        [](const Lyt& lyt, fiction::gate_level_drv_params params = {}, const bool print_report = false) -> py::tuple
         {
             std::string output;  // Declare output
 
-            py::object string_io = py::module_::import("io").attr("StringIO")();
+            py::object                  string_io = py::module_::import("io").attr("StringIO")();
             py::scoped_ostream_redirect redirect(std::cout, string_io);
 
             fiction::gate_level_drv_stats stats{};

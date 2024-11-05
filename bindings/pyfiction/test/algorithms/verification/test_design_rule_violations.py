@@ -60,16 +60,16 @@ class TestDesignRuleViolations(unittest.TestCase):
         [i] [✓] all tiles are adjacently connected
         [i] [✓] all occupied tiles are properly connected
         [i] [✓] all wire crossings cross over other wires only
-        
+
         [i] Clocking:
         [i] [✓] all connected tiles are properly clocked
-        
+
         [i] I/O ports:
         [i] [✓] all I/O are properly specified
         [i] [✓] all I/O ports are assigned to a non-empty tile
         [i] [✓] all I/O ports are realized by designated pins
         [i] [✓] all I/O ports are located at the layout's borders
-        
+
         [i] DRVs: 0, Warnings: 0
         """
 
