@@ -29,7 +29,7 @@ void gate_level_drvs(pybind11::module& m)
         "gate_level_drvs",
         [](const Lyt& lyt, fiction::gate_level_drv_params params = {}, const bool print_report = false) -> py::tuple
         {
-            std::string output;  // Declare output
+            std::string output;
 
             py::object                  string_io = py::module_::import("io").attr("StringIO")();
             py::scoped_ostream_redirect redirect(std::cout, string_io);
