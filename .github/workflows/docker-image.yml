@@ -107,6 +107,18 @@ jobs:
           subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true
 
+      - name: Verify GHCR Image Exists
+        run: |
+          for i in {1..5}; do
+            if curl -s -o /dev/null -w "%{http_code}" https://ghcr.io/v2/${{ github.repository }}/manifests/${{ steps.push.outputs.digest }} | grep -q 200; then
+             echo "Image exists on GHCR"
+             break
+            else
+             echo "Waiting for image to be available on GHCR..."
+             sleep 5
+            fi
+          done
+
       - name: Generate artifact attestation for GitHub Packages
 #        if: github.event_name == 'release' && github.event.action == 'published'
         uses: actions/attest-build-provenance@v1
