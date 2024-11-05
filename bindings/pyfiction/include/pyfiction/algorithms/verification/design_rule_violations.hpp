@@ -10,7 +10,6 @@
 
 #include <fiction/algorithms/verification/design_rule_violations.hpp>
 
-#include <pybind11/iostream.h>
 #include <pybind11/pybind11.h>
 
 namespace pyfiction
@@ -23,28 +22,25 @@ template <typename Lyt>
 void gate_level_drvs(pybind11::module& m)
 {
     using namespace pybind11::literals;
-    namespace py = pybind11;
 
     m.def(
         "gate_level_drvs",
-        [](const Lyt& lyt, fiction::gate_level_drv_params params = {}, const bool print_report = false) -> py::tuple
+        [](const Lyt& lyt, fiction::gate_level_drv_params params = {},
+           const bool print_report = false) -> std::pair<std::size_t, std::size_t>
         {
-            std::string output;
-
-            py::object                  string_io = py::module_::import("io").attr("StringIO")();
-            py::scoped_ostream_redirect redirect(std::cout, string_io);
+            std::ostringstream report_stream{};
+            params.out = &report_stream;
 
             fiction::gate_level_drv_stats stats{};
-            fiction::gate_level_drvs(lyt, params, &stats);
 
-            output = py::str(string_io.attr("getvalue")()).cast<std::string>();
+            fiction::gate_level_drvs(lyt, params, &stats);
 
             if (print_report)
             {
-                py::print(output);
+                pybind11::print(report_stream.str());
             }
 
-            return py::make_tuple(stats.warnings, stats.drvs, output);
+            return {stats.warnings, stats.drvs};
         },
         "layout"_a, "params"_a = fiction::gate_level_drv_params{}, "print_report"_a = false,
         DOC(fiction_gate_level_drvs));
