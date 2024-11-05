@@ -44,9 +44,6 @@ jobs:
       attestations: write
       id-token: write
 
-    env:
-      DOCKER_USERNAME: mawalter
-
     steps:
       - uses: actions/checkout@v4
         with:
@@ -56,7 +53,7 @@ jobs:
 #        if: github.event_name == 'release' && github.event.action == 'published'
         uses: docker/login-action@v3
         with:
-          username: ${{ env.DOCKER_USERNAME }}
+          username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Log in to GitHub Container Registry
@@ -73,7 +70,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: |
-            ${{ env.DOCKER_USERNAME }}/fiction
+            ${{ secrets.DOCKER_USERNAME }}/fiction
             ghcr.io/${{ github.repository }}
           tags: |
             ${{ github.event.release.tag_name || 'dev' }}
@@ -95,7 +92,7 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-          repository: ${{ env.DOCKER_USERNAME }}/fiction
+          repository: ${{ secrets.DOCKER_USERNAME }}/fiction
           short-description: ${{ steps.meta.outputs.labels.description || '' }}
           readme-filepath: ${{ github.workspace }}/README.md
 
@@ -103,6 +100,6 @@ jobs:
 #        if: github.event_name == 'release' && github.event.action == 'published'
         uses: actions/attest-build-provenance@v1
         with:
-          subject-name: docker.io/${{ env.DOCKER_USERNAME }}/fiction
+          subject-name: docker.io/${{ secrets.DOCKER_USERNAME }}/fiction
           subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true
