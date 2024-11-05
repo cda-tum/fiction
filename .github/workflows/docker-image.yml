@@ -99,30 +99,10 @@ jobs:
           short-description: ${{ steps.meta.outputs.labels.description || '' }}
           readme-filepath: ${{ github.workspace }}/README.md
 
-      - name: Generate artifact attestation for DockerHub
+      - name: Generate artifact attestation
 #        if: github.event_name == 'release' && github.event.action == 'published'
         uses: actions/attest-build-provenance@v1
         with:
           subject-name: docker.io/${{ env.DOCKER_USERNAME }}/fiction
-          subject-digest: ${{ steps.push.outputs.digest }}
-          push-to-registry: true
-
-      - name: Verify GHCR Image Exists
-        run: |
-          for i in {1..5}; do
-            if curl -s -o /dev/null -w "%{http_code}" https://ghcr.io/v2/${{ github.repository }}/manifests/${{ steps.push.outputs.digest }} | grep -q 200; then
-             echo "Image exists on GHCR"
-             break
-            else
-             echo "Waiting for image to be available on GHCR..."
-             sleep 5
-            fi
-          done
-
-      - name: Generate artifact attestation for GitHub Packages
-#        if: github.event_name == 'release' && github.event.action == 'published'
-        uses: actions/attest-build-provenance@v1
-        with:
-          subject-name: ghcr.io/${{ github.repository }}
           subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true
