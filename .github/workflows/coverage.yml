@@ -47,7 +47,10 @@ jobs:
 
     steps:
       - name: Install the Compiler
-        run: sudo apt-get update && sudo apt-get install -yq ${{matrix.compiler}}
+        run: sudo apt-get update && sudo apt-get install -yq ${{matrix.compiler}} gcov-12 lcov
+
+      - name: Set GCOV Path
+        run: echo "::set-env name=GCOV::/usr/bin/gcov-12"
 
       - name: Clone Repository
         uses: actions/checkout@v4
@@ -117,10 +120,17 @@ jobs:
         run: ctest -C $BUILD_TYPE --verbose --output-on-failure --repeat until-pass:3 --parallel 4
 
       - name: Setup and run lcov
+        env:
+          # Set the path to the gcov executable
+          GCOV: /usr/bin/gcov-12
         run: |
-          sudo apt-get install lcov
+          # Capture coverage data
           lcov -t "result" -o lcov.info -c -d ${{github.workspace}}/build/
+
+          # Filter coverage data for relevant paths
           lcov -e lcov.info "${{github.workspace}}/include*" -o lcov_filtered.info
+
+          # Display filtered coverage data summary
           lcov -l lcov_filtered.info
 
       - name: Upload report to Codecov
