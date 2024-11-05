@@ -50,14 +50,14 @@ jobs:
           submodules: recursive
 
       - name: Log in to Docker Hub
-#        if: github.event_name == 'release' && github.event.action == 'published'
+        if: github.event_name == 'release' && github.event.action == 'published'
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Log in to GitHub Container Registry
-#        if: github.event_name == 'release' && github.event.action == 'published'
+        if: github.event_name == 'release' && github.event.action == 'published'
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -65,7 +65,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Extract metadata (tags, labels) for Docker
-#        if: github.event_name == 'release' && github.event.action == 'published'
+        if: github.event_name == 'release' && github.event.action == 'published'
         id: meta
         uses: docker/metadata-action@v5
         with:
@@ -81,13 +81,12 @@ jobs:
         with:
           context: ${{ github.workspace }}
           file: Dockerfile
-#          push: ${{ github.event_name == 'release' && github.event.action == 'published' }}
-          push: true
+          push: ${{ github.event_name == 'release' && github.event.action == 'published' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels || '' }}
 
       - name: Push README as DockerHub project description
-#        if: github.event_name == 'release' && github.event.action == 'published'
+        if: github.event_name == 'release' && github.event.action == 'published'
         uses: peter-evans/dockerhub-description@v4
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
@@ -97,7 +96,7 @@ jobs:
           readme-filepath: ${{ github.workspace }}/README.md
 
       - name: Generate artifact attestation
-#        if: github.event_name == 'release' && github.event.action == 'published'
+        if: github.event_name == 'release' && github.event.action == 'published'
         uses: actions/attest-build-provenance@v1
         with:
           subject-name: docker.io/${{ secrets.DOCKER_USERNAME }}/fiction
