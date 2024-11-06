@@ -122,10 +122,10 @@ class defect_operational_domain_impl
         const auto num_threads = std::thread::hardware_concurrency();  // Get the number of hardware threads
 
         // Determine the chunk size (each thread will process a chunk of positions)
-        std::size_t chunk_size = (num_positions + num_threads - 1) / num_threads;  // Distribute positions evenly
+        const std::size_t chunk_size = (num_positions + num_threads - 1) / num_threads;  // Distribute positions evenly
 
         // Define a lambda function that processes a chunk of defect positions
-        auto process_chunk = [&](std::size_t start, std::size_t end)
+        auto process_chunk = [&](const std::size_t& start, const std::size_t& end)
         {
             for (std::size_t i = start; i < end; i += step_size)
             {
