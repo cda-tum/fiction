@@ -1,7 +1,6 @@
 import unittest
 import os
 from mnt.pyfiction import *
-from lxml import etree
 
 class TestWriteSidbLayoutToSvgInSiqadLayout(unittest.TestCase):
 
