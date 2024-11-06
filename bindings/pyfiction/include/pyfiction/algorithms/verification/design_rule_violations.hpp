@@ -28,15 +28,17 @@ void gate_level_drvs(pybind11::module& m)
         [](const Lyt& lyt, fiction::gate_level_drv_params params = {},
            const bool print_report = false) -> std::pair<std::size_t, std::size_t>
         {
-            std::ostringstream null_stream{};
-            if (!print_report)
-            {
-                params.out = &null_stream;
-            }
+            std::ostringstream report_stream{};
+            params.out = &report_stream;
 
             fiction::gate_level_drv_stats stats{};
 
             fiction::gate_level_drvs(lyt, params, &stats);
+
+            if (print_report)
+            {
+                pybind11::print(report_stream.str());
+            }
 
             return {stats.warnings, stats.drvs};
         },
