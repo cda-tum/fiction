@@ -165,25 +165,6 @@ Temperature Behavior
         .. autofunction:: mnt.pyfiction.calculate_energy_and_state_type
 
 
-Maximum Defect Influence Distance
-#################################
-
-**Header:** ``fiction/algorithms/simulation/sidb/maximum_defect_influence_position_and_distance.hpp``
-
-.. doxygenstruct:: fiction::maximum_defect_influence_position_and_distance_params
-   :members:
-.. doxygenstruct:: fiction::maximum_defect_influence_position_and_distance_stats
-   :members:
-.. doxygenfunction:: fiction::maximum_defect_influence_position_and_distance
-
-
-**Header:** ``fiction/algorithms/simulation/sidb/maximum_defect_influence_position_and_distance_of_sidb_gate.hpp``
-
-.. doxygenstruct:: fiction::maximum_defect_influence_position_and_distance_of_sidb_gate_params
-   :members:
-.. doxygenfunction:: fiction::maximum_defect_influence_position_and_distance_of_sidb_gate
-
-
 Time-to-Solution (TTS) Statistics
 #################################
 
