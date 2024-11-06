@@ -119,7 +119,7 @@ class defect_operational_domain_impl
         const auto            all_possible_defect_positions = all_coordinates_in_spanned_area(nw_cell, se_cell);
         const std::size_t     num_positions                 = all_possible_defect_positions.size();
 
-        const auto num_threads = 1;  // Get the number of hardware threads
+        const auto num_threads = std::thread::hardware_concurrency();  // Get the number of hardware threads
 
         // Determine the chunk size (each thread will process a chunk of positions)
         std::size_t chunk_size = (num_positions + num_threads - 1) / num_threads;  // Distribute positions evenly
@@ -137,19 +137,19 @@ class defect_operational_domain_impl
             }
         };
 
-        // Launch multiple threads to process the chunks
-        std::vector<std::future<void>> futures{};
+        std::vector<std::thread> threads{};
+        threads.reserve(num_threads);
 
         for (std::size_t start = 0; start < num_positions; start += chunk_size)
         {
             std::size_t end = std::min(start + chunk_size, num_positions);
-            futures.emplace_back(std::async(std::launch::async, process_chunk, start, end));
+            threads.emplace_back(process_chunk, start, end);
         }
 
         // Wait for all threads to complete
-        for (auto& future : futures)
+        for (auto& thread : threads)
         {
-            future.get();  // Ensure each thread finishes
+            thread.join();  // Ensure each thread finishes
         }
 
         log_stats();

@@ -59,9 +59,11 @@
 #include "pyfiction/inout/read_fgl_layout.hpp"
 #include "pyfiction/inout/read_fqca_layout.hpp"
 #include "pyfiction/inout/read_sqd_layout.hpp"
+#include "pyfiction/inout/write_defect_operational_domain.hpp"
 #include "pyfiction/inout/write_dot_layout.hpp"
 #include "pyfiction/inout/write_fgl_layout.hpp"
 #include "pyfiction/inout/write_fqca_layout.hpp"
+#include "pyfiction/inout/write_defect_operational_domain.hpp"
 // #include "pyfiction/inout/write_location_and_ground_state.hpp"
 #include "pyfiction/inout/write_operational_domain.hpp"
 #include "pyfiction/inout/write_qca_layout.hpp"
@@ -217,6 +219,7 @@ PYBIND11_MODULE(pyfiction, m)
     pyfiction::write_sqd_sim_result(m);
     // pyfiction::write_location_and_ground_state(m);
     pyfiction::write_operational_domain(m);
+    pyfiction::write_defect_operational_domain(m);
     pyfiction::read_fgl_layout(m);
     pyfiction::read_fqca_layout(m);
     pyfiction::read_sqd_layout(m);

@@ -45,12 +45,6 @@ inline void defect_operational_domain(pybind11::module& m)
     namespace py = pybind11;
     using namespace pybind11::literals;
 
-    py::class_<fiction::defect_operational_domain<py_sidb_100_lattice>>(m, "defect_operational_domain_100")
-        .def(py::init<>());
-
-    py::class_<fiction::defect_operational_domain<py_sidb_111_lattice>>(m, "defect_operational_domain_111")
-        .def(py::init<>());
-
     py::class_<fiction::defect_operational_domain<py_sidb_100_lattice_cube>>(m, "defect_operational_domain_100_cube")
         .def(py::init<>());
 
