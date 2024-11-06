@@ -119,7 +119,7 @@ class defect_operational_domain_impl
         const auto            all_possible_defect_positions = all_coordinates_in_spanned_area(nw_cell, se_cell);
         const std::size_t     num_positions                 = all_possible_defect_positions.size();
 
-        const auto num_threads = std::thread::hardware_concurrency();  // Get the number of hardware threads
+        const auto num_threads = 1;  // Get the number of hardware threads
 
         // Determine the chunk size (each thread will process a chunk of positions)
         std::size_t chunk_size = (num_positions + num_threads - 1) / num_threads;  // Distribute positions evenly
