@@ -142,14 +142,17 @@ class defect_operational_domain_impl
 
         for (std::size_t start = 0; start < num_positions; start += chunk_size)
         {
-            std::size_t end = std::min(start + chunk_size, num_positions);
+            const std::size_t end = std::min(start + chunk_size, num_positions);
             threads.emplace_back(process_chunk, start, end);
         }
 
         // Wait for all threads to complete
         for (auto& thread : threads)
         {
-            thread.join();  // Ensure each thread finishes
+            if (thread.joinable())
+            {
+                thread.join();
+            }
         }
 
         log_stats();
