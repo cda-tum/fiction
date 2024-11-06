@@ -10,6 +10,7 @@ class TestWriteSidbLayoutToSvgInSiqadLayout(unittest.TestCase):
         dir_path = os.path.dirname(os.path.realpath(__file__))
         original_svg_path = os.path.join(dir_path, "../resources/cell_level_layout_dark_mode.svg")
 
+
         # Read the original SVG file
         with open(original_svg_path, 'rb') as f:
             original_svg_content = f.read()

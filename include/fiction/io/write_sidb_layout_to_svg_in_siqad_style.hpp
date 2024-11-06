@@ -174,15 +174,17 @@ class write_sidb_layout_svg_impl
     {
         if (ps.cmode == color_mode::BRIGHT)
         {
-            background_color    = svg::BACKGROUND_COLOR_BRIGHT;
-            sidb_dot            = svg::SIDB_DOT_BRIGHT_MODE;
-            sidb_dot_line_color = svg::SIDB_DOT_LINE_COLOR_BRIGHT_MODE;
+            // fiction namespace is needed to avoid windows and linux conflict
+            background_color    = fiction::svg::BACKGROUND_COLOR_BRIGHT;
+            sidb_dot            = fiction::svg::SIDB_DOT_BRIGHT_MODE;
+            sidb_dot_line_color = fiction::svg::SIDB_DOT_LINE_COLOR_BRIGHT_MODE;
         }
         else
         {
-            background_color    = svg::BACKGROUND_COLOR_DARK;
-            sidb_dot            = svg::SIDB_DOT_DARK_MODE;
-            sidb_dot_line_color = svg::SIDB_DOT_LINE_COLOR_DARK_MODE;
+            // fiction namespace is needed to avoid windows and linux conflict
+            background_color    = fiction::svg::BACKGROUND_COLOR_DARK;
+            sidb_dot            = fiction::svg::SIDB_DOT_DARK_MODE;
+            sidb_dot_line_color = fiction::svg::SIDB_DOT_LINE_COLOR_DARK_MODE;
         }
     }
 
