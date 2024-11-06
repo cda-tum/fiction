@@ -213,14 +213,14 @@ class write_sidb_layout_svg_impl
             {
                 case (sidb_charge_state::POSITIVE):
                 {
-                    fill_color   = svg::POSITIVE_COLOR;
-                    border_color = svg::POSITIVE_COLOR;
+                    fill_color   = fiction::svg::POSITIVE_COLOR;
+                    border_color = fiction::svg::POSITIVE_COLOR;
                     break;
                 }
                 case (sidb_charge_state::NEGATIVE):
                 {
-                    fill_color   = svg::NEGATIVE_COLOR;
-                    border_color = svg::NEGATIVE_COLOR;
+                    fill_color   = fiction::svg::NEGATIVE_COLOR;
+                    border_color = fiction::svg::NEGATIVE_COLOR;
                     break;
                 }
                 case (sidb_charge_state::NEUTRAL):
@@ -230,7 +230,7 @@ class write_sidb_layout_svg_impl
                 }
                 default:
                 {
-                    border_color = svg::NEUTRAL_COLOR;
+                    border_color = fiction::svg::NEUTRAL_COLOR;
                     fill_opacity = 0.0;
                     break;
                 }
@@ -251,7 +251,7 @@ class write_sidb_layout_svg_impl
 
         // Prepare the formatted PATH_DEFINITION with the sizes
         const std::string formatted_path_definition =
-            fmt::format(svg::PATH_DEFINITION_TEMPLATE, ps.lattice_point_size, ps.sidb_size);
+            fmt::format(fiction::svg::PATH_DEFINITION_TEMPLATE, ps.lattice_point_size, ps.sidb_size);
 
         // Compute the bounding box of the layout
         const auto bb        = bounding_box_2d{lyt};
@@ -270,7 +270,7 @@ class write_sidb_layout_svg_impl
 
             const auto nm_pos = sidb_nm_position(lyt, shifted_coord);
 
-            svg_content << generate_lattice_point(nm_pos.first * 10, nm_pos.second * 10, svg::SI_LATTICE);
+            svg_content << generate_lattice_point(nm_pos.first * 10, nm_pos.second * 10, fiction::svg::SI_LATTICE);
         }
 
         std::vector<cell<Lyt>> all_cells{};
@@ -320,7 +320,7 @@ class write_sidb_layout_svg_impl
                         viewbox_width, viewbox_height, background_color);
 
         // Generate the final SVG content
-        os << fmt::format(svg::HEADER_TEMPLATE, FICTION_VERSION, FICTION_REPO, viewbox_x, viewbox_y, viewbox_width,
+        os << fmt::format(fiction::svg::HEADER_TEMPLATE, FICTION_VERSION, FICTION_REPO, viewbox_x, viewbox_y, viewbox_width,
                           viewbox_height, formatted_path_definition, background_rect, svg_content.str());
     }
 };
