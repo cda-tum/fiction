@@ -320,8 +320,8 @@ class write_sidb_layout_svg_impl
                         viewbox_width, viewbox_height, background_color);
 
         // Generate the final SVG content
-        os << fmt::format(fiction::svg::HEADER_TEMPLATE, FICTION_VERSION, FICTION_REPO, viewbox_x, viewbox_y, viewbox_width,
-                          viewbox_height, formatted_path_definition, background_rect, svg_content.str());
+        os << fmt::format(fiction::svg::HEADER_TEMPLATE, FICTION_VERSION, FICTION_REPO, viewbox_x, viewbox_y,
+                          viewbox_width, viewbox_height, formatted_path_definition, background_rect, svg_content.str());
     }
 };
 
