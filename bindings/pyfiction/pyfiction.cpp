@@ -63,7 +63,6 @@
 #include "pyfiction/inout/write_dot_layout.hpp"
 #include "pyfiction/inout/write_fgl_layout.hpp"
 #include "pyfiction/inout/write_fqca_layout.hpp"
-#include "pyfiction/inout/write_defect_operational_domain.hpp"
 // #include "pyfiction/inout/write_location_and_ground_state.hpp"
 #include "pyfiction/inout/write_operational_domain.hpp"
 #include "pyfiction/inout/write_qca_layout.hpp"

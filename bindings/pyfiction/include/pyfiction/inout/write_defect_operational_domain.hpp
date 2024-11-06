@@ -32,7 +32,7 @@ inline void write_defect_operational_domain_impl(pybind11::module& m)
           "params"_a = fiction::write_defect_operational_domain_params{});
 }
 
-}
+}  // namespace detail
 
 inline void write_defect_operational_domain(pybind11::module& m)
 {
