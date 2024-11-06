@@ -1,28 +1,44 @@
-FROM ubuntu:latest
+FROM ubuntu:24.04
 
 # Optional argument to run the "make" command in parallel with the specified NUMBER_OF_JOBS
 ARG NUMBER_OF_JOBS=4
 
-# Configure apt and install packages
-RUN apt-get -y update && \
-    apt-get -y upgrade && \
-    apt-get -y install make cmake gcc g++ mold git python3 python3-dev python3-pip python3-venv libreadline-dev xdg-utils libtbb-dev
+# Metadata labels
+LABEL maintainer="Marcel Walter <marcel.walter@tum.de>"
+LABEL organization="Chair for Design Automation, Technical University of Munich"
+LABEL description="Docker image for fiction, an open-source design automation framework for Field-coupled Nanotechnologies."
+LABEL license="MIT"
+LABEL url="https://www.cda.cit.tum.de/research/nanotech/"
+LABEL vcs-url="https://github.com/cda-tum/fiction"
 
-# Set up a working directory
+
+# Configure apt and install required packages
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    make cmake gcc g++ ccache mold git python3 python3-dev python3-pip python3-venv libreadline-dev xdg-utils libtbb-dev && \
+    rm -rf /var/lib/apt/lists/*
+
+# Set up a non-root user for security and create a working directory
+RUN useradd -m appuser && mkdir -p /app && chown -R appuser:appuser /app
 WORKDIR /app
 
-# Create a Python virtual environment and activate it
+# Switch to non-root user
+USER appuser
+
+# Create a Python virtual environment and install necessary Python packages
 RUN python3 -m venv venv && \
     . venv/bin/activate && \
-    pip install --upgrade pip setuptools && \
-    pip install z3-solver==4.13.0
+    pip install --upgrade --no-cache-dir pip setuptools && \
+    pip install --no-cache-dir z3-solver==4.13.0
 
-# Set the path to include the virtual environment
+# Add the virtual environment to the PATH
 ENV PATH="/app/venv/bin:$PATH"
 
-# Clone fiction's repository including submodules
+# Clone fiction's repository including submodules (in case a local copy is not available)
 # RUN git clone --recursive https://github.com/cda-tum/fiction.git
-COPY . fiction/
+
+# Copy the local fiction repository to the container (preferred for development and CI)
+COPY --chown=appuser:appuser . fiction/
 
 # Build fiction
 RUN . venv/bin/activate \
@@ -32,7 +48,6 @@ RUN . venv/bin/activate \
       -DFICTION_ENABLE_PCH=ON \
       -DFICTION_CLI=ON \
       -DFICTION_TEST=OFF \
-      -DFICTION_BENCHMARK=OFF \
       -DFICTION_EXPERIMENTS=OFF \
       -DFICTION_Z3=ON \
       -DFICTION_ENABLE_MUGEN=OFF \
@@ -43,5 +58,6 @@ RUN . venv/bin/activate \
     && cmake --build fiction/build --config Release -j${NUMBER_OF_JOBS}
 
 
+WORKDIR /app/fiction
 # Automatically start fiction when started in interactive mode
-CMD ["./fiction/build/cli/fiction"]
+CMD ["build/cli/fiction"]
