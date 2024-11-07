@@ -42,6 +42,9 @@ TEST_CASE("novel designed AND Gate influence distance function which fails again
             defect_operational_domain_grid_search(cube_lyt, std::vector<tt>{create_and_tt()}, 3, params, &stats);
         CHECK(calculate_defect_clearance(cube_lyt, defect_influence_domain).minimum_defect_clearance <=
               6.2126117696183147);
+        CHECK(stats.num_evaluated_defect_positions == 676);
+        CHECK(stats.num_operational_defect_positions == 527);
+        CHECK(stats.num_non_operational_defect_positions == 149);
     }
 
     SECTION("Random Sampling")

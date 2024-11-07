@@ -119,34 +119,42 @@ class defect_operational_domain_impl
         const auto            all_possible_defect_positions = all_coordinates_in_spanned_area(nw_cell, se_cell);
         const std::size_t     num_positions                 = all_possible_defect_positions.size();
 
-        const auto num_threads = 1;  // Get the number of hardware threads
+        const auto num_threads = std::thread::hardware_concurrency();  // Get the number of hardware threads
 
-        // Determine the chunk size (each thread will process a chunk of positions)
-        const std::size_t chunk_size = (num_positions + num_threads - 1) / num_threads;  // Distribute positions evenly
-
-        // Define a lambda function that processes a chunk of defect positions
-        auto process_chunk = [&](const std::size_t& start, const std::size_t& end)
-        {
-            for (std::size_t i = start; i < end; i += step_size)
-            {
-                if (static_cast<std::size_t>(std::abs(all_possible_defect_positions[i].x)) % step_size == 0 &&
-                    static_cast<std::size_t>(std::abs(all_possible_defect_positions[i].y)) % step_size == 0)
-                {
-                    is_defect_position_operational(all_possible_defect_positions[i]);
-                }
-            }
-        };
+        // calculate the size of each slice
+        const auto slice_size = (num_positions + num_threads - 1) / num_threads;
 
         std::vector<std::thread> threads{};
         threads.reserve(num_threads);
 
-        for (std::size_t start = 0; start < num_positions; start += chunk_size)
+        // launch threads, each with its own slice of random step points
+        for (auto i = 0ul; i < num_threads; ++i)
         {
-            const std::size_t end = std::min(start + chunk_size, num_positions);
-            threads.emplace_back(process_chunk, start, end);
+            const auto start = i * slice_size;
+            const auto end   = std::min(start + slice_size, num_positions);
+
+            if (start >= end)
+            {
+                break;  // no more work to distribute
+            }
+
+            threads.emplace_back(
+                [this, start, end, &all_possible_defect_positions, &step_size]
+                {
+                    for (auto i = start; i < end; ++i)
+                    {
+                        // this ensures that the defects are evenly distributed in a grid-like pattern
+                        if (static_cast<std::size_t>(std::abs(all_possible_defect_positions[i].x)) % step_size ==
+                                0 &&
+                            static_cast<std::size_t>(std::abs(all_possible_defect_positions[i].y)) % step_size ==
+                                0)
+                        {
+                            is_defect_position_operational(all_possible_defect_positions[i]);
+                        }
+                    }
+                });
         }
 
-        // Wait for all threads to complete
         for (auto& thread : threads)
         {
             if (thread.joinable())
@@ -489,8 +497,8 @@ class defect_operational_domain_impl
      */
     void log_stats() const noexcept
     {
-        stats.num_simulator_invocations      = num_simulator_invocations;
-        stats.num_evaluated_defect_positions = num_evaluated_defect_positions;
+        stats.num_simulator_invocations      = num_simulator_invocations.load();
+        stats.num_evaluated_defect_positions = num_evaluated_defect_positions.load();
 
         for (const auto& [param_point, status] : defect_op_domain.operational_values)
         {
