@@ -1,5 +1,4 @@
 import unittest
-import os
 from mnt.pyfiction import *
 
 def normalize_svg(svg: str) -> str:

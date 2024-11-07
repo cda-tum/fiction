@@ -98,11 +98,11 @@ enum class color_mode : uint8_t
 struct write_sidb_layout_svg_in_siqad_style_params
 {
     /**
-     * Size of the lattice points in SVG units.
+     * Size of the H-Si lattice points in SVG units.
      */
     double lattice_point_size = 0.3;
     /**
-     * Size of the SiDB dots in SVG units.
+     * Size of the SiDB in SVG units.
      */
     double sidb_size = 0.9;
     /**
@@ -199,8 +199,7 @@ class write_sidb_layout_svg_impl
     /**
      * Generates an SVG string representing an SiDB.
      */
-    [[nodiscard]] std::string
-    generate_sidb_dot(double x, double y, const std::optional<sidb_charge_state>& charge_state = std::nullopt) const
+    [[nodiscard]] std::string generate_sidb(const double x, const double y, const std::optional<sidb_charge_state>& charge_state = std::nullopt) const
     {
         std::string fill_color   = sidb_dot;
         std::string border_color = sidb_dot_line_color;
@@ -265,6 +264,7 @@ class write_sidb_layout_svg_impl
         {
             // Shift coordinates for alignment
             auto shifted_coord = coord;
+
             shifted_coord.x += 1;
             shifted_coord.y += 2;
 
@@ -292,12 +292,12 @@ class write_sidb_layout_svg_impl
             {
                 // If the layout has charge distribution information
                 const auto charge_state = lyt.get_charge_state(cell);
-                svg_content << generate_sidb_dot(nm_pos.first * 10, nm_pos.second * 10, charge_state);
+                svg_content << generate_sidb(nm_pos.first * 10, nm_pos.second * 10, charge_state);
             }
             else
             {
                 // Default SiDB dot without charge state
-                svg_content << generate_sidb_dot(nm_pos.first * 10, nm_pos.second * 10);
+                svg_content << generate_sidb(nm_pos.first * 10, nm_pos.second * 10);
             }
         };
 
