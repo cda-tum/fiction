@@ -128,9 +128,9 @@ class defect_operational_domain_impl
         threads.reserve(num_threads);
 
         // launch threads, each with its own slice of random step points
-        for (auto i = 0ul; i < num_threads; ++i)
+        for (auto t = 0ul; t < num_threads; ++t)
         {
-            const auto start = i * slice_size;
+            const auto start = t * slice_size;
             const auto end   = std::min(start + slice_size, num_positions);
 
             if (start >= end)
