@@ -199,7 +199,8 @@ class write_sidb_layout_svg_impl
     /**
      * Generates an SVG string representing an SiDB.
      */
-    [[nodiscard]] std::string generate_sidb(const double x, const double y, const std::optional<sidb_charge_state>& charge_state = std::nullopt) const
+    [[nodiscard]] std::string generate_sidb(const double x, const double y,
+                                            const std::optional<sidb_charge_state>& charge_state = std::nullopt) const
     {
         std::string fill_color   = sidb_dot;
         std::string border_color = sidb_dot_line_color;
