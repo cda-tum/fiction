@@ -1044,21 +1044,6 @@ class post_layout_optimization_impl
             }
         }
 
-        // if gate is a PI and directly connected to its fanout, no improvement is possible
-        if (lyt.is_pi_tile(old_pos))
-        {
-            for (const auto& fanout : fanouts)
-            {
-                for (const auto& outgoing_tile : lyt.outgoing_data_flow(old_pos))
-                {
-                    if (outgoing_tile == fanout)
-                    {
-                        return false;
-                    }
-                }
-            }
-        }
-
         // remove wiring
         for (const auto& tile : to_clear)
         {
