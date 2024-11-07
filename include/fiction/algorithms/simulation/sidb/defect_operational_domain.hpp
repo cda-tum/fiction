@@ -144,10 +144,8 @@ class defect_operational_domain_impl
                     for (auto i = start; i < end; ++i)
                     {
                         // this ensures that the defects are evenly distributed in a grid-like pattern
-                        if (static_cast<std::size_t>(std::abs(all_possible_defect_positions[i].x)) % step_size ==
-                                0 &&
-                            static_cast<std::size_t>(std::abs(all_possible_defect_positions[i].y)) % step_size ==
-                                0)
+                        if (static_cast<std::size_t>(std::abs(all_possible_defect_positions[i].x)) % step_size == 0 &&
+                            static_cast<std::size_t>(std::abs(all_possible_defect_positions[i].y)) % step_size == 0)
                         {
                             is_defect_position_operational(all_possible_defect_positions[i]);
                         }
