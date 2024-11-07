@@ -70,3 +70,8 @@ SVG Images
         .. autoclass:: mnt.pyfiction.write_qca_layout_svg_params
             :members:
         .. autofunction:: mnt.pyfiction.write_qca_layout_svg
+
+        .. autoclass:: mnt.pyfiction.write_sidb_layout_svg_in_siqad_style_params
+            :members:
+        .. autofunction:: mnt.pyfiction.write_sidb_layout_to_svg_in_siqad_style
+        .. autofunction:: mnt.pyfiction.write_sidb_layout_to_svg_and_return_as_string
