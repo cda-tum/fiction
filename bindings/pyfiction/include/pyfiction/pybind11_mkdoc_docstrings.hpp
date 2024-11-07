@@ -2649,9 +2649,9 @@ static const char *__doc_fiction_clocking_scheme_regular = R"doc(Defines the clo
 
 static const char *__doc_fiction_color_mode = R"doc(Enumeration to specify the color mode for the SVG output.)doc";
 
-static const char *__doc_fiction_color_mode_BRIGHT = R"doc(Bright (white) background.)doc";
-
 static const char *__doc_fiction_color_mode_DARK = R"doc(Dark background.)doc";
+
+static const char *__doc_fiction_color_mode_LIGHT = R"doc(Light background.)doc";
 
 static const char *__doc_fiction_color_routing =
 R"doc(A multi-path signal routing approach based on coloring of edge
@@ -18698,6 +18698,26 @@ static const char *__doc_fiction_write_sidb_layout_svg_in_siqad_style_params_cmo
 static const char *__doc_fiction_write_sidb_layout_svg_in_siqad_style_params_lattice_point_size = R"doc(Size of the lattice points in SVG units.)doc";
 
 static const char *__doc_fiction_write_sidb_layout_svg_in_siqad_style_params_sidb_size = R"doc(Size of the SiDB dots in SVG units.)doc";
+
+static const char *__doc_fiction_write_sidb_layout_to_svg_and_return_as_string =
+R"doc(This function creates an SVG representation of the given SiDB layout
+and returns the result as a string. The SVG is generated according to
+SiQAD style parameters and is suitable for visualization.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Parameter ``lyt``:
+    The input layout to be converted to an SVG string.
+
+Parameter ``ps``:
+    Optional parameters to customize the SVG generation process.
+    Defaults to an instance of
+    `write_sidb_layout_svg_in_siqad_style_params`.
+
+Returns:
+    A string containing the SVG representation of the provided SiDB
+    layout.)doc";
 
 static const char *__doc_fiction_write_sidb_layout_to_svg_in_siqad_style =
 R"doc(Writes an SVG representation of a cell-level SiDB layout into an
