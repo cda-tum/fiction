@@ -7,7 +7,7 @@ submodules:
 build:
   os: ubuntu-22.04
   tools:
-    python: '3.13.x'
+    python: '3.8.x'
   apt_packages:
     - cmake
   jobs:
