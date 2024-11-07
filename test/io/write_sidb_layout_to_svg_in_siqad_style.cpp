@@ -17,10 +17,19 @@
 #include <fmt/format.h>
 
 #include <sstream>
+#include <algorithm>
 #include <string>
 
 using namespace fiction;
 
+/**
+ * This function takes an SVG string as input and returns a new string with all
+ * whitespace characters removed. The purpose is to create a compact representation
+ * of the SVG content, which can be useful for comparisons, optimizations, or transmission.
+ *
+ * @param svg The input SVG string to be normalized.
+ * @return A string with all whitespace characters removed.
+ */
 auto normalize_svg = [](const std::string& svg) noexcept
 {
     std::string result = svg;
@@ -248,7 +257,7 @@ TEMPLATE_TEST_CASE("Generate SIDB layout in SVG for cell-level layout and charge
             std::stringstream os_bright_cds;
 
             write_sidb_layout_svg_in_siqad_style_params params{};
-            params.cmode = color_mode::BRIGHT;
+            params.cmode = color_mode::LIGHT;
             write_sidb_layout_to_svg_in_siqad_style(layout, os_bright_cds, params);
 
             // Retrieve the SVG content
@@ -295,7 +304,7 @@ TEMPLATE_TEST_CASE("Generate SIDB layout in SVG for cell-level layout and charge
             std::stringstream os_bright_cds;
 
             write_sidb_layout_svg_in_siqad_style_params params{};
-            params.cmode = color_mode::BRIGHT;
+            params.cmode = color_mode::LIGHT;
             write_sidb_layout_to_svg_in_siqad_style(cds, os_bright_cds, params);
 
             // Retrieve the SVG content

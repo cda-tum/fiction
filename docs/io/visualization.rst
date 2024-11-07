@@ -62,6 +62,7 @@ SVG Images
                                                  const write_sidb_layout_svg_in_siqad_style_params& ps = {})
         .. doxygenfunction:: fiction::write_sidb_layout_to_svg_in_siqad_style(const Lyt& lyt, const std::string_view& filename,
                                              const write_sidb_layout_svg_in_siqad_style_params& ps = {})
+        .. doxygenclass:: fiction::write_sidb_layout_to_svg_and_return_as_string(const Lyt& lyt, const write_sidb_layout_svg_in_siqad_style_params& ps = {})
 
         .. doxygenclass:: fiction::unsupported_cell_type_exception
 

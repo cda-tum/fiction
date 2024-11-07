@@ -88,9 +88,9 @@ enum class color_mode : uint8_t
      */
     DARK,
     /**
-     * Bright (white) background.
+     * Light background.
      */
-    BRIGHT
+    LIGHT
 };
 /**
  * Parameters for writing SiDB layouts in SVG format.
@@ -172,7 +172,7 @@ class write_sidb_layout_svg_impl
      */
     void set_colors() noexcept
     {
-        if (ps.cmode == color_mode::BRIGHT)
+        if (ps.cmode == color_mode::LIGHT)
         {
             // fiction namespace is needed to avoid windows and linux conflict
             background_color    = fiction::svg::BACKGROUND_COLOR_BRIGHT;
@@ -376,6 +376,34 @@ void write_sidb_layout_to_svg_in_siqad_style(const Lyt& lyt, const std::string_v
 
     write_sidb_layout_to_svg_in_siqad_style(lyt, os, ps);
     os.close();
+}
+/**
+ * This function creates an SVG representation of the given SiDB layout and returns the
+ * result as a string. The SVG is generated according to SiQAD style parameters and is
+ * suitable for visualization.
+ *
+ * @tparam Lyt SiDB cell-level layout type.
+ * @param lyt The input layout to be converted to an SVG string.
+ * @param ps Optional parameters to customize the SVG generation process.
+ *           Defaults to an instance of `write_sidb_layout_svg_in_siqad_style_params`.
+ * @return A string containing the SVG representation of the provided SiDB layout.
+ *
+ */
+template <typename Lyt>
+std::string write_sidb_layout_to_svg_and_return_as_string(const Lyt&                                         lyt,
+                                                          const write_sidb_layout_svg_in_siqad_style_params& ps = {})
+{
+    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(has_sidb_technology_v<Lyt>, "Lyt must be a SiDB layout");
+    static_assert(!is_sidb_defect_surface_v<Lyt>, "SiDB defects are not supported");
+
+    // Redirect output to a string stream
+    std::ostringstream                      os;
+    detail::write_sidb_layout_svg_impl<Lyt> p{lyt, os, ps};
+    p.run();
+
+    // Return the generated SVG as a string
+    return os.str();
 }
 
 }  // namespace fiction

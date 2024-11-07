@@ -13,6 +13,7 @@
 #include <pybind11/pybind11.h>
 
 #include <string_view>
+#include <ostream>
 
 namespace pyfiction
 {
@@ -29,7 +30,10 @@ inline void write_sidb_layout_to_svg_in_siqad_style_impl(pybind11::module& m)
         &fiction::write_sidb_layout_to_svg_in_siqad_style<Lyt>;
 
     m.def("write_sidb_layout_svg_in_siqad_style", write_sidb_layout_svg_in_siqad_style_pointer, "layout"_a,
-          "filename"_a, "params"_a = fiction::write_sidb_layout_svg_in_siqad_style_params{});
+          "filename"_a, "ps"_a = fiction::write_sidb_layout_svg_in_siqad_style_params{});
+
+    m.def("write_sidb_layout_to_svg_and_return_as_string", fiction::write_sidb_layout_to_svg_and_return_as_string<Lyt>,
+          "layout"_a, "ps"_a = fiction::write_sidb_layout_svg_in_siqad_style_params{});
 }
 
 }  // namespace detail
@@ -40,7 +44,7 @@ void write_sidb_layout_to_svg_in_siqad_style(pybind11::module& m)
     using namespace pybind11::literals;
 
     py::enum_<fiction::color_mode>(m, "color_mode")
-        .value("BRIGHT", fiction::color_mode::BRIGHT)
+        .value("LIGHT", fiction::color_mode::LIGHT)
         .value("DARK", fiction::color_mode::DARK);
 
     py::class_<fiction::write_sidb_layout_svg_in_siqad_style_params>(m, "write_sidb_layout_svg_in_siqad_style_params")
@@ -49,6 +53,10 @@ void write_sidb_layout_to_svg_in_siqad_style(pybind11::module& m)
         .def_readwrite("sidb_size", &fiction::write_sidb_layout_svg_in_siqad_style_params::sidb_size)
         .def_readwrite("border_width", &fiction::write_sidb_layout_svg_in_siqad_style_params::border_width)
         .def_readwrite("cmode", &fiction::write_sidb_layout_svg_in_siqad_style_params::cmode);
+
+    detail::write_sidb_layout_to_svg_in_siqad_style_impl<py_charge_distribution_surface_100>(m);
+    detail::write_sidb_layout_to_svg_in_siqad_style_impl<py_charge_distribution_surface_100>(m);
+    detail::write_sidb_layout_to_svg_in_siqad_style_impl<py_charge_distribution_surface>(m);
 
     detail::write_sidb_layout_to_svg_in_siqad_style_impl<py_sidb_111_lattice>(m);
     detail::write_sidb_layout_to_svg_in_siqad_style_impl<py_sidb_100_lattice>(m);
