@@ -402,7 +402,7 @@ By default, grid search is applied to explore the operational domain. The algori
 the following options:
 - ``--random_sampling``/``-r``
 - ``--flood_fill``/``-f``
-- ``--quicktrace``/``-c``
+- ``--contour_tracing``/``-c``
 each of which start from a set of random samples, whose number has to be passed as an argument to the flag.
 
 See ``opdom -h`` for a full list of arguments.
