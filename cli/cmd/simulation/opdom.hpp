@@ -73,7 +73,7 @@ class opdom_command : public command
                    "Use random sampling instead of grid search with this many random samples");
         add_option("--flood_fill,-f", num_random_samples,
                    "Use flood fill instead of grid search with this many initial random samples");
-        add_option("--quicktrace,-c", num_random_samples,
+        add_option("--contour_tracing,-c", num_random_samples,
                    "Use contour tracing instead of grid search with this many random samples");
 
         add_option("filename", filename, "CSV filename to write the operational domain to")->required();
@@ -150,7 +150,7 @@ class opdom_command : public command
         }
 
         // make sure that at most one algorithm is selected
-        const std::array algorithm_selections = {is_set("random_sampling"), is_set("flood_fill"), is_set("quicktrace")};
+        const std::array algorithm_selections = {is_set("random_sampling"), is_set("flood_fill"), is_set("contour_tracing")};
         if (std::count(algorithm_selections.cbegin(), algorithm_selections.cend(), true) > 1)
         {
             env->out() << "[e] only one algorithm can be selected at a time" << std::endl;
@@ -302,7 +302,7 @@ class opdom_command : public command
                         op_domain = fiction::operational_domain_flood_fill(*lyt_ptr, std::vector<fiction::tt>{*tt_ptr},
                                                                            num_random_samples, params, &stats);
                     }
-                    else if (is_set("quicktrace"))
+                    else if (is_set("contour_tracing"))
                     {
                         op_domain = fiction::operational_domain_contour_tracing(
                             *lyt_ptr, std::vector<fiction::tt>{*tt_ptr}, num_random_samples, params, &stats);
