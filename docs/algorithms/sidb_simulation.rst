@@ -283,7 +283,7 @@ Operational Domain Computation
         .. autofunction:: mnt.pyfiction.compute_operational_ratio
 
 
-Defect Influence Operational Domain
+Defect Operational Domain
 ###################################
 
 .. tabs::
@@ -296,25 +296,23 @@ Defect Influence Operational Domain
            :members:
         .. doxygenstruct:: fiction::defect_operational_domain_stats
            :members:
-        .. doxygenfunction:: fiction::defect_influence_operational_domain_grid_search
-        .. doxygenfunction:: fiction::defect_influence_operational_domain_random_sampling
+        .. doxygenfunction:: fiction::defect_operational_domain_grid_search
+        .. doxygenfunction:: fiction::defect_operational_domain_random_sampling
         .. doxygenfunction:: fiction::defect_operational_domain_quicktrace
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.defect_operational_domain_params
             :members:
-        .. autoclass:: mnt.pyfiction.defect_influence_operational_domain_100
+        .. autoclass:: mnt.pyfiction.defect_operational_domain_100
             :members:
-        .. autoclass:: mnt.pyfiction.defect_influence_operational_domain_100_cube
+        .. autoclass:: mnt.pyfiction.defect_operational_domain_100_cube
             :members:
-        .. autoclass:: mnt.pyfiction.defect_influence_operational_domain_111
-            :members:
-        .. autoclass:: mnt.pyfiction.defect_influence_operational_domain_111_cube
+        .. autoclass:: mnt.pyfiction.defect_operational_domain_111_cube
             :members:
         .. autoclass:: mnt.pyfiction.defect_operational_domain_stats
             :members:
-        .. autofunction:: mnt.pyfiction.defect_influence_operational_domain_grid_search
-        .. autofunction:: mnt.pyfiction.defect_influence_operational_domain_random_sampling
+        .. autofunction:: mnt.pyfiction.defect_operational_domain_grid_search
+        .. autofunction:: mnt.pyfiction.defect_operational_domain_random_sampling
         .. autofunction:: mnt.pyfiction.defect_operational_domain_quicktrace
 
 Determine Physically Valid Parameters
