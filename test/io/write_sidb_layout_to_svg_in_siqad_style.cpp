@@ -30,7 +30,7 @@ using namespace fiction;
  * @param svg The input SVG string to be normalized.
  * @return A string with all whitespace characters removed.
  */
-auto normalize_svg = [](const std::string& svg) noexcept
+auto normalize_svg = [](const std::string& svg) const noexcept
 {
     std::string result = svg;
 
