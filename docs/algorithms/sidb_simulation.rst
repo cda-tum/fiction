@@ -165,6 +165,16 @@ Temperature Behavior
         .. autofunction:: mnt.pyfiction.calculate_energy_and_state_type
 
 
+Maximum Defect Influence Distance
+#################################
+
+**Header:** ``fiction/algorithms/simulation/sidb/maximum_defect_influence_position_and_distance.hpp``
+
+.. doxygenstruct:: fiction::maximum_defect_influence_distance_params
+   :members:
+.. doxygenfunction:: fiction::maximum_defect_influence_position_and_distance
+
+
 Time-to-Solution (TTS) Statistics
 #################################
 
@@ -283,38 +293,6 @@ Operational Domain Computation
         .. autofunction:: mnt.pyfiction.compute_operational_ratio
 
 
-Defect Operational Domain
-###################################
-
-.. tabs::
-    .. tab:: C++
-        **Header:** ``fiction/algorithms/simulation/sidb/defect_operational_domain.hpp``
-
-        .. doxygenstruct:: fiction::defect_operational_domain_params
-           :members:
-        .. doxygenstruct:: fiction::defect_operational_domain
-           :members:
-        .. doxygenstruct:: fiction::defect_operational_domain_stats
-           :members:
-        .. doxygenfunction:: fiction::defect_operational_domain_grid_search
-        .. doxygenfunction:: fiction::defect_operational_domain_random_sampling
-        .. doxygenfunction:: fiction::defect_operational_domain_quicktrace
-
-    .. tab:: Python
-        .. autoclass:: mnt.pyfiction.defect_operational_domain_params
-            :members:
-        .. autoclass:: mnt.pyfiction.defect_operational_domain_100
-            :members:
-        .. autoclass:: mnt.pyfiction.defect_operational_domain_100_cube
-            :members:
-        .. autoclass:: mnt.pyfiction.defect_operational_domain_111_cube
-            :members:
-        .. autoclass:: mnt.pyfiction.defect_operational_domain_stats
-            :members:
-        .. autofunction:: mnt.pyfiction.defect_operational_domain_grid_search
-        .. autofunction:: mnt.pyfiction.defect_operational_domain_random_sampling
-        .. autofunction:: mnt.pyfiction.defect_operational_domain_quicktrace
-
 Determine Physically Valid Parameters
 #####################################
 
@@ -324,7 +302,7 @@ Determine Physically Valid Parameters
 
         .. doxygenfunction:: fiction::determine_physically_valid_parameters
 
-    .. tab:: Python
+   .. tab:: Python
         .. autoclass:: mnt.pyfiction.determine_physically_valid_parameters
 
 
@@ -463,7 +441,6 @@ Assess Population Stability
            :members:
         .. doxygenfunction:: fiction::assess_physical_population_stability
 
-
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.transition_type
             :members:
@@ -472,13 +449,6 @@ Assess Population Stability
         .. autoclass:: mnt.pyfiction.assess_physical_population_stability_params
             :members:
         .. autofunction:: mnt.pyfiction.assess_physical_population_stability
-
-
-        **Header:** ``fiction/algorithms/simulation/sidb/calculate_min_bbr.hpp``
-
-        .. doxygenstruct:: fiction::calculate_min_bbr_for_all_inputs_params
-           :members:
-        .. doxygenfunction:: fiction::calculate_min_bbr_for_all_inputs
 
 
 Convert Potential to Distance
@@ -492,13 +462,3 @@ Convert Potential to Distance
 
     .. tab:: Python
         .. autofunction:: mnt.pyfiction.convert_potential_to_distance
-
-
-Maximum Minimum Defect Influence Distance
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-**Header:** ``fiction/algorithms/simulation/sidb/calculate_defect_clearance.hpp``
-
-.. doxygenstruct:: fiction::defect_clearance_result
-   :members:
-.. doxygenfunction:: fiction::calculate_defect_clearance
