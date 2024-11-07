@@ -167,8 +167,8 @@ SiDB Defect Operational Domain
 
         .. doxygenstruct:: fiction::write_defect_operational_domain_params
            :members:
-        .. doxygenfunction:: fiction::write_defect_operational_domain(const operational_domain<parameter_point, operational_status>& opdom, std::ostream& os, const write_defect_operational_domain_params& params = {})
-        .. doxygenfunction:: fiction::write_defect_operational_domain(const operational_domain<parameter_point, operational_status>& opdom, const std::string_view& filename, const write_defect_operational_domain_params& params = {})
+        .. doxygenfunction:: fiction::write_defect_operational_domain(const defect_operational_domain<Lyt>& defect_opdom, std::ostream& os, const write_defect_operational_domain_params& params = {})
+        .. doxygenfunction:: fiction::write_defect_operational_domain(const defect_operational_domain<Lyt>& defect_opdom, const std::string_view& filename, const write_defect_operational_domain_params& params = {}
 
 
 Technology-independent Gate-level Layouts
