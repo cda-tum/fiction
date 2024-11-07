@@ -8898,7 +8898,7 @@ static const char *__doc_fiction_detail_write_sidb_layout_svg_impl_background_co
 
 static const char *__doc_fiction_detail_write_sidb_layout_svg_impl_generate_lattice_point = R"doc(Generates an SVG string representing an H-Si lattice point.)doc";
 
-static const char *__doc_fiction_detail_write_sidb_layout_svg_impl_generate_sidb_dot = R"doc(Generates an SVG string representing an SiDB.)doc";
+static const char *__doc_fiction_detail_write_sidb_layout_svg_impl_generate_sidb = R"doc(Generates an SVG string representing an SiDB.)doc";
 
 static const char *__doc_fiction_detail_write_sidb_layout_svg_impl_generate_svg = R"doc(Generates the SVG layout with both H-Si lattice points and SiDBs.)doc";
 
@@ -18695,9 +18695,9 @@ static const char *__doc_fiction_write_sidb_layout_svg_in_siqad_style_params_bor
 
 static const char *__doc_fiction_write_sidb_layout_svg_in_siqad_style_params_cmode = R"doc(The color mode for the SVG output.)doc";
 
-static const char *__doc_fiction_write_sidb_layout_svg_in_siqad_style_params_lattice_point_size = R"doc(Size of the lattice points in SVG units.)doc";
+static const char *__doc_fiction_write_sidb_layout_svg_in_siqad_style_params_lattice_point_size = R"doc(Size of the H-Si lattice points in SVG units.)doc";
 
-static const char *__doc_fiction_write_sidb_layout_svg_in_siqad_style_params_sidb_size = R"doc(Size of the SiDB dots in SVG units.)doc";
+static const char *__doc_fiction_write_sidb_layout_svg_in_siqad_style_params_sidb_size = R"doc(Size of the SiDB in SVG units.)doc";
 
 static const char *__doc_fiction_write_sidb_layout_to_svg_and_return_as_string =
 R"doc(This function creates an SVG representation of the given SiDB layout
