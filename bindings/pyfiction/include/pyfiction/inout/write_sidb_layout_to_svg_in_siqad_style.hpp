@@ -12,8 +12,8 @@
 
 #include <pybind11/pybind11.h>
 
-#include <string_view>
 #include <ostream>
+#include <string_view>
 
 namespace pyfiction
 {

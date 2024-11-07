@@ -16,8 +16,8 @@
 
 #include <fmt/format.h>
 
-#include <sstream>
 #include <algorithm>
+#include <sstream>
 #include <string>
 
 using namespace fiction;
