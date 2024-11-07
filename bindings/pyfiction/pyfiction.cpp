@@ -95,7 +95,7 @@
 
 #include <pybind11/pybind11.h>
 
-PYBIND11_MODULE(pyfiction, m)
+PYBIND11_MODULE(pyfiction, m, pybind11::mod_gil_not_used())
 {
     // docstring
     m.doc() = "Python bindings for fiction, a framework for Design Automation for Field-coupled Nanotechnologies";
