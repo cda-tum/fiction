@@ -38,7 +38,7 @@ cell_level_dark_mode = """<?xml version="1.0" encoding="UTF-8" standalone="no"?>
             </cc:Work>
         </rdf:RDF>
     </metadata>
-    
+
 <defs>
     <!-- lattice point -->
     <circle id="lattice_point" cx="0" cy="0" r="0.3"/>

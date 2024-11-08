@@ -175,16 +175,16 @@ class write_sidb_layout_svg_impl
         if (ps.color_background == color_mode::LIGHT)
         {
             // fiction namespace is needed to avoid windows and linux conflict
-            background_color    = fiction::svg::BACKGROUND_COLOR_BRIGHT;
-            sidb_color          = fiction::svg::SIDB_DOT_BRIGHT_MODE;
-            sidb_edge_color     = fiction::svg::SIDB_DOT_LINE_COLOR_BRIGHT_MODE;
+            background_color = fiction::svg::BACKGROUND_COLOR_BRIGHT;
+            sidb_color       = fiction::svg::SIDB_DOT_BRIGHT_MODE;
+            sidb_edge_color  = fiction::svg::SIDB_DOT_LINE_COLOR_BRIGHT_MODE;
         }
         else
         {
             // fiction namespace is needed to avoid windows and linux conflict
-            background_color    = fiction::svg::BACKGROUND_COLOR_DARK;
-            sidb_color          = fiction::svg::SIDB_DOT_DARK_MODE;
-            sidb_edge_color     = fiction::svg::SIDB_DOT_LINE_COLOR_DARK_MODE;
+            background_color = fiction::svg::BACKGROUND_COLOR_DARK;
+            sidb_color       = fiction::svg::SIDB_DOT_DARK_MODE;
+            sidb_edge_color  = fiction::svg::SIDB_DOT_LINE_COLOR_DARK_MODE;
         }
     }
 
