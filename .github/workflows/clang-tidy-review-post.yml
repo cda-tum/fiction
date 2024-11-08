@@ -41,7 +41,7 @@ jobs:
       # Posts the comments
       - name: Post review comments
         id: post-review
-        uses: ZedThree/clang-tidy-review/post@v0.19.0
+        uses: ZedThree/clang-tidy-review/post@v0.20.0
 
       # If there are any comments, fail the check
       - if: steps.post-review.outputs.total_comments > 0
