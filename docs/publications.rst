@@ -207,7 +207,7 @@ Furthermore, if you use any of the design automation algorithms, please consider
           year = {2024}
         }
 
-    `Wiring reduction experiment script <https://github.com/cda-tum/fiction/tree/main/experiments/post_layout_optimization>`_
+    `Wiring reduction experiment script <https://github.com/cda-tum/fiction/tree/main/experiments/wiring_reduction>`_
 
 * :ref:`Graph-oriented layout design <graph_oriented_layout_design>` (``gold``):
 
