@@ -8,6 +8,11 @@ The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`
 Unreleased
 ----------
 
+Added
+#####
+- Documentation:
+    - Added wiring reduction paper to publication list
+
 Fixed
 #####
 - Adapted ``post-layout optimization`` and ``wiring reduction`` to handle layouts with PIs not placed at the borders
