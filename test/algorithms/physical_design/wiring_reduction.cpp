@@ -113,6 +113,11 @@ TEST_CASE("Layout equivalence", "[wiring_reduction]")
         wiring_reduction_stats stats_corner_case_2{};
         wiring_reduction<gate_layout>(layout_corner_case_2, {}, &stats_corner_case_2);
         check_eq(blueprints::optimization_layout_corner_case_outputs_2<gate_layout>(), layout_corner_case_2);
+
+        const auto             layout_corner_case_3 = blueprints::optimization_layout_corner_case_inputs<gate_layout>();
+        wiring_reduction_stats stats_corner_case_3{};
+        wiring_reduction<gate_layout>(layout_corner_case_3, {}, &stats_corner_case_3);
+        check_eq(blueprints::optimization_layout_corner_case_inputs<gate_layout>(), layout_corner_case_3);
     }
 
     SECTION("Timeout")
