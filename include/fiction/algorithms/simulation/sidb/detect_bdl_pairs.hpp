@@ -11,6 +11,8 @@
 
 #include <algorithm>
 #include <cassert>
+#include <iterator>
+#include <optional>
 #include <unordered_set>
 #include <vector>
 
@@ -29,15 +31,15 @@ struct bdl_pair
      * The type of the SiDBs in the pair. BDL SiDBs must be of the same type. They can either be normal, input, or
      * output SiDBs.
      */
-    const sidb_technology::cell_type type{};
+    sidb_technology::cell_type type{};
     /**
      * The upper SiDB of the pair. Upper and lower are defined relative to each other via the `operator<` overload.
      */
-    const CellType upper{};
+    CellType upper{};
     /**
      * The lower SiDB of the pair. Upper and lower are defined relative to each other via the `operator<` overload.
      */
-    const CellType lower{};
+    CellType lower{};
     /**
      * Standard constructor for empty BDL pairs.
      */
@@ -54,6 +56,119 @@ struct bdl_pair
             upper{u},
             lower{l}
     {}
+
+    /**
+     * Equality operator.
+     *
+     * @param other The other BDL pair to compare with.
+     * @return `true` if this BDL pair is equal to the other, `false` otherwise.
+     */
+    [[nodiscard]] constexpr bool operator==(const bdl_pair<CellType>& other) const noexcept
+    {
+        return type == other.type && upper == other.upper && lower == other.lower;
+    }
+    /**
+     * Inequality operator.
+     *
+     * @param other The other BDL pair to compare with.
+     * @return `true` if this BDL pair is not equal to the other, `false` otherwise.
+     */
+    [[nodiscard]] constexpr bool operator!=(const bdl_pair<CellType>& other) const noexcept
+    {
+        return !(*this == other);
+    }
+    /**
+     * Less than operator.
+     *
+     * @param other The other BDL pair to compare with.
+     * @return `true` if this BDL pair is less than the other, `false` otherwise.
+     */
+    [[nodiscard]] constexpr bool operator<(const bdl_pair<CellType>& other) const noexcept
+    {
+        if (upper != other.upper)
+        {
+            return upper < other.upper;
+        }
+        return lower < other.lower;
+    }
+
+    /**
+     * Less than or equal to operator.
+     *
+     * @param other The other BDL pair to compare with.
+     * @return `true` if this BDL pair is less than or equal to the other, `false` otherwise.
+     */
+    [[nodiscard]] constexpr bool operator<=(const bdl_pair<CellType>& other) const noexcept
+    {
+        return (*this < other) || (*this == other);
+    }
+    /**
+     * Greater than operator.
+     *
+     * @param other The other BDL pair to compare with.
+     * @return `true` if this BDL pair is greater than the other, `false` otherwise.
+     */
+    [[nodiscard]] constexpr bool operator>(const bdl_pair<CellType>& other) const
+    {
+        return !(*this <= other);
+    }
+    /**
+     * Greater-than-or-equal-to operator.
+     *
+     * @param other The other BDL pair to compare with.
+     * @return `true` if this BDL pair is greater than or equal to the other, otherwise `false`.
+     */
+    [[nodiscard]] constexpr bool operator>=(const bdl_pair<CellType>& other) const noexcept
+    {
+        return !(*this < other);
+    }
+    /**
+     * Equality check ignoring type.
+     *
+     * @param other The other BDL pair to compare with.
+     * @return `true` if the `upper` and `lower` attributes are equal, otherwise `false`.
+     */
+    [[nodiscard]] constexpr bool equal_ignore_type(const bdl_pair<CellType>& other) const noexcept
+    {
+        return upper == other.upper && lower == other.lower;
+    }
+
+    /**
+     * Inequality check ignoring type.
+     *
+     * @param other The other BDL pair to compare with.
+     * @return `true` if the `upper` and `lower` attributes are not equal, otherwise `false`.
+     */
+    [[nodiscard]] constexpr bool not_equal_ignore_type(const bdl_pair<CellType>& other) const noexcept
+    {
+        return !equal_ignore_type(other);
+    }
+
+    /**
+     * Checks if the `upper` and `lower` SiDBs in this BDL pair have the same y-coordinate
+     * as the corresponding SiDBs in the other BDL pair.
+     *
+     * @param other The other BDL pair to compare with.
+     * @return `true` if both the `upper` and `lower` SiDBs in this pair have the same y-coordinate
+     *         as the corresponding SiDBs in the other pair, otherwise `false`.
+     */
+    [[nodiscard]] constexpr bool has_same_y_coordinate(const bdl_pair<CellType>& other) const noexcept
+    {
+        return upper.y == other.upper.y && lower.y == other.lower.y;
+    }
+
+    /**
+     * Checks if the `upper` and `lower` SiDBs in this BDL pair have the same x-coordinate
+     * as the corresponding SiDBs in the other BDL pair.
+     *
+     * @param other The other BDL pair to compare with.
+     * @return `true` if both the `upper` and `lower` SiDBs in this pair have the same x-coordinate
+     *         as the corresponding SiDBs in the other pair, otherwise `false`.
+     */
+    [[nodiscard]] constexpr bool has_same_x_coordinate(const bdl_pair<CellType>& other) const noexcept
+    {
+        return upper.x == other.upper.x && lower.x == other.lower.x;
+    }
 };
 
 /**
@@ -62,7 +177,7 @@ struct bdl_pair
 struct detect_bdl_pairs_params
 {
     /**
-     * The minimum distance between two dots to be considered a BDL pair. This is useful to prevent, e.g., SiDBs of
+     * The minimum distance between two SiDBs to be considered a BDL pair. This is useful to prevent, e.g., SiDBs of
      * atomic wires to be considered BDL pairs. (unit: nm).
      */
     double minimum_distance{0.75};
@@ -82,13 +197,16 @@ struct detect_bdl_pairs_params
  *
  * @tparam Lyt SiDB cell-level layout type.
  * @param lyt The layout to detect BDL pairs in.
- * @param type The type of the SiDBs to detect BDL pairs for, e.g., `INPUT`, `OUTPUT`, `NORMAL`.
+ * @param type Optional parameter to specify the SiDB type for which BDL pairs should be detected.
+ *             If omitted, the function will detect BDL pairs for all types. Valid types include
+ *             `INPUT`, `OUTPUT`, `NORMAL`, among others.
  * @param params Parameters for the BDL pair detection algorithm.
  * @return A vector of BDL pairs.
  */
 template <typename Lyt>
-std::vector<bdl_pair<cell<Lyt>>> detect_bdl_pairs(const Lyt& lyt, const typename technology<Lyt>::cell_type type,
-                                                  const detect_bdl_pairs_params& params = {}) noexcept
+std::vector<bdl_pair<cell<Lyt>>>
+detect_bdl_pairs(const Lyt& lyt, const std::optional<typename technology<Lyt>::cell_type>& type = std::nullopt,
+                 const detect_bdl_pairs_params& params = {}) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -101,7 +219,7 @@ std::vector<bdl_pair<cell<Lyt>>> detect_bdl_pairs(const Lyt& lyt, const typename
      * then sorting them. The smallest distances are then used to pair up the dots. The function takes a vector of dots
      * as input.
      */
-    const auto pair_up_dots = [&params, &type,
+    const auto pair_up_dots = [&params,
                                &lyt](const std::vector<cell<Lyt>>& dots) noexcept -> std::vector<bdl_pair<cell<Lyt>>>
     {
         /**
@@ -204,11 +322,13 @@ std::vector<bdl_pair<cell<Lyt>>> detect_bdl_pairs(const Lyt& lyt, const typename
             // a BDL pair has been detected (swap SiDBs if necessary)
             if (potential_bdl_pair.sidb1 > potential_bdl_pair.sidb2)
             {
-                bdl_pairs.emplace_back(type, potential_bdl_pair.sidb2, potential_bdl_pair.sidb1);
+                bdl_pairs.emplace_back(lyt.get_cell_type(potential_bdl_pair.sidb1), potential_bdl_pair.sidb2,
+                                       potential_bdl_pair.sidb1);
             }
             else
             {
-                bdl_pairs.emplace_back(type, potential_bdl_pair.sidb1, potential_bdl_pair.sidb2);
+                bdl_pairs.emplace_back(lyt.get_cell_type(potential_bdl_pair.sidb1), potential_bdl_pair.sidb1,
+                                       potential_bdl_pair.sidb2);
             }
 
             // mark the dots as paired
@@ -216,41 +336,65 @@ std::vector<bdl_pair<cell<Lyt>>> detect_bdl_pairs(const Lyt& lyt, const typename
             paired_dots.insert(potential_bdl_pair.sidb2);
         }
 
+        // Sort the vector of BDL pairs using the less than operator for BDL pairs
+        std::sort(bdl_pairs.begin(), bdl_pairs.end());
+
         return bdl_pairs;
     };
 
     // collect all dots of the given type
     std::vector<cell<Lyt>> dots_of_given_type{};
-    switch (type)
+
+    if (type.has_value())
     {
-        case (technology<Lyt>::cell_type::INPUT):
+        switch (type.value())
         {
-            dots_of_given_type.reserve(lyt.num_pis());
-            lyt.foreach_pi([&dots_of_given_type](const auto& pi) { dots_of_given_type.push_back(pi); });
+            case (technology<Lyt>::cell_type::INPUT):
+            {
+                dots_of_given_type.reserve(lyt.num_pis());
+                lyt.foreach_pi([&dots_of_given_type](const auto& pi) { dots_of_given_type.push_back(pi); });
 
-            break;
-        }
-        case (technology<Lyt>::cell_type::OUTPUT):
-        {
-            dots_of_given_type.reserve(lyt.num_pos());
-            lyt.foreach_po([&dots_of_given_type](const auto& po) { dots_of_given_type.push_back(po); });
+                break;
+            }
+            case (technology<Lyt>::cell_type::OUTPUT):
+            {
+                dots_of_given_type.reserve(lyt.num_pos());
+                lyt.foreach_po([&dots_of_given_type](const auto& po) { dots_of_given_type.push_back(po); });
 
-            break;
-        }
-        default:
-        {
-            dots_of_given_type.reserve(lyt.num_cells());
-            lyt.foreach_cell(
-                [&lyt, &type, &dots_of_given_type](const auto& c)
-                {
-                    if (lyt.get_cell_type(c) == type)
+                break;
+            }
+            default:
+            {
+                dots_of_given_type.reserve(lyt.num_cells());
+                lyt.foreach_cell(
+                    [&lyt, &type, &dots_of_given_type](const auto& c)
                     {
-                        dots_of_given_type.push_back(c);
-                    }
-                });
+                        if (lyt.get_cell_type(c) == type)
+                        {
+                            dots_of_given_type.push_back(c);
+                        }
+                    });
 
-            break;
+                break;
+            }
         }
+    }
+
+    // in case no type is given, detect BDL pairs for all types
+    else
+    {
+        const auto input_bdl   = detect_bdl_pairs(lyt, technology<Lyt>::cell_type::INPUT, params);
+        const auto output_bdls = detect_bdl_pairs(lyt, technology<Lyt>::cell_type::OUTPUT, params);
+        const auto normal_bdls = detect_bdl_pairs(lyt, technology<Lyt>::cell_type::NORMAL, params);
+
+        std::vector<bdl_pair<cell<Lyt>>> all_bdls{};
+        all_bdls.reserve(input_bdl.size() + output_bdls.size() + normal_bdls.size());
+
+        std::copy(input_bdl.cbegin(), input_bdl.cend(), std::back_inserter(all_bdls));
+        std::copy(output_bdls.cbegin(), output_bdls.cend(), std::back_inserter(all_bdls));
+        std::copy(normal_bdls.cbegin(), normal_bdls.cend(), std::back_inserter(all_bdls));
+
+        return all_bdls;
     }
 
     // pair up dots and return the detected BDL pairs

@@ -1,69 +1,81 @@
 # Prerequisites
-*.d
+**/*.d
 
 # Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
+**/*.slo
+**/*.lo
+**/*.o
+**/*.obj
 
 # Precompiled Headers
-*.gch
-*.pch
+**/*.gch
+**/*.pch
 
 # Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
+**/*.so
+**/*.dylib
+**/*.dll
 
 # Fortran module files
-*.mod
-*.smod
+**/*.mod
+**/*.smod
 
 # Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
+**/*.lai
+**/*.la
+**/*.a
+**/*.lib
 
 # Executables
-*.exe
-*.out
-*.app
+**/*.exe
+**/*.out
+**/*.app
 
 # LaTeX files
-*.aux
-*.log
-*.pdf
-*.synctex.gz
+**/*.aux
+**/*.log
+**/*.pdf
+**/*.synctex.gz
 
 # Doxygen files
-*.bak
+**/*.bak
 
 # Build directories
-cmake-build-*
-build/
+**/*cmake-build-*
+**/build/
 
 # IDE files
-*.directory
-*.idea
-*.vs
+**/*.directory
+**/*.idea
+**/*.vs
+**/*.vscode
 
 # Experiment files
-*.json
-*.csv
+**/*.json
+**/*.csv
+**/*.html
+**/*.dot
+
+# Documentation files
+**/*.ans
 
 # Coverage files
-lcov.info
+**/lcov.info
 
 # Python
-__pycache__
-venv/
-*.egg-info
-*.env
+**/__pycache__
+**/venv/
+**/dist/
+**/*.ipynb_checkpoints/
+**/*.ipynb
+**/*.egg-info
+**/*.env
 
 # Archive files
-*.zip
-*.tar.*
-*.7z
-*.rar
+**/*.zip
+**/*.tar.*
+**/*.7z
+**/*.rar
+
+# Git files
+**/.git

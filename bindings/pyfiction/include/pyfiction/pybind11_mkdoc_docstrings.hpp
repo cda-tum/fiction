@@ -164,19 +164,20 @@ static const char *__doc_fiction_all_coordinates_in_spanned_area =
 R"doc(Generates a vector of all coordinates within an area spanned by two
 coordinates.
 
-This function calculates and returns a vector of all coordinates that
-span the area between the northwest (cell_nw) and southeast (cell_se)
-cells, inclusive. The cells are generated in a top-down, left-to-right
-fashion within the specified area.
+This function calculates and returns a list of all coordinates within
+a rectangular area defined by two corner coordinates, inclusive of the
+boundaries. The coordinates are generated in a top-to-bottom, left-to-
+right order, covering the entire area between the two specified
+corners.
 
 Template parameter ``CoordinateType``:
     Coordinate Type.
 
-Parameter ``cell_nw``:
-    The northwest cell defining the starting point of the area.
+Parameter ``cell_first_corner``:
+    The cell defining the first corner of the area.
 
-Parameter ``cell_se``:
-    The southeast cell defining the ending point of the area.
+Parameter ``cell_second_corner``:
+    The cell defining the second corner of the area.
 
 Returns:
     A vector containing all cells within the specified area.)doc";
@@ -544,14 +545,42 @@ state, which assigns binary `0` to all input BDL pairs.
 Parameter ``lyt``:
     The SiDB BDL layout to iterate over.
 
-Parameter ``params``:
+Parameter ``ps``:
     Parameters for the BDL input iterator.)doc";
+
+static const char *__doc_fiction_bdl_input_iterator_bdl_input_iterator_2 =
+R"doc(Constructor with pre-detected input wires and directions. It alters
+the layout to set the first input state, which assigns binary `0` to
+all input BDL pairs.
+
+Parameter ``lyt``:
+    The SiDB BDL layout to iterate over.
+
+Parameter ``ps``:
+    Parameters for the BDL input iterator.
+
+Parameter ``input_wires``:
+    Pre-detected input BDL wires.)doc";
 
 static const char *__doc_fiction_bdl_input_iterator_current_input_index =
 R"doc(The current input index. There are :math:`2^n` possible input states
 for an :math:`n`-input BDL layout.)doc";
 
+static const char *__doc_fiction_bdl_input_iterator_determine_last_bdl_for_each_wire =
+R"doc(This function iterates through each wire in `input_bdl_wires`,
+identifies the first BDL pair of type `INPUT`, and then finds the BDL
+pair within the same wire that has the maximum distance from the
+starting pair. The resulting last BDL pairs are stored in
+`last_bdl_for_each_wire`.
+
+@note Assumes that `input_bdl_wires` and `last_bdl_for_each_wire` are
+accessible within the scope.)doc";
+
+static const char *__doc_fiction_bdl_input_iterator_input_bdl_wires = R"doc(The detected input BDL wires.)doc";
+
 static const char *__doc_fiction_bdl_input_iterator_input_pairs = R"doc(The detected input BDL pairs.)doc";
+
+static const char *__doc_fiction_bdl_input_iterator_last_bdl_for_each_wire = R"doc(Last BDL pairs for each BDL wire.)doc";
 
 static const char *__doc_fiction_bdl_input_iterator_layout = R"doc(The layout to iterate over.)doc";
 
@@ -561,6 +590,8 @@ layout.
 
 Returns:
     The number of input BDL pairs.)doc";
+
+static const char *__doc_fiction_bdl_input_iterator_num_inputs = R"doc(The amount of input BDL pairs.)doc";
 
 static const char *__doc_fiction_bdl_input_iterator_operator_add =
 R"doc(Addition operator. Computes the input state of the current iterator
@@ -728,7 +759,7 @@ static const char *__doc_fiction_bdl_input_iterator_params = R"doc(Parameters fo
 
 static const char *__doc_fiction_bdl_input_iterator_params_2 = R"doc(Parameters for the BDL input iterator.)doc";
 
-static const char *__doc_fiction_bdl_input_iterator_params_bdl_pairs_params = R"doc(Parameters to detect BDL pairs.)doc";
+static const char *__doc_fiction_bdl_input_iterator_params_bdl_wire_params = R"doc(Parameters to detect BDL wires.)doc";
 
 static const char *__doc_fiction_bdl_input_iterator_params_input_bdl_config =
 R"doc(The `input_bdl_config` member allows selection between different modes
@@ -785,9 +816,111 @@ Parameter ``u``:
 Parameter ``l``:
     The lower SiDB of the pair.)doc";
 
+static const char *__doc_fiction_bdl_pair_equal_ignore_type =
+R"doc(Equality check ignoring type.
+
+Parameter ``other``:
+    The other BDL pair to compare with.
+
+Returns:
+    `true` if the `upper` and `lower` attributes are equal, otherwise
+    `false`.)doc";
+
+static const char *__doc_fiction_bdl_pair_has_same_x_coordinate =
+R"doc(Checks if the `upper` and `lower` SiDBs in this BDL pair have the same
+x-coordinate as the corresponding SiDBs in the other BDL pair.
+
+Parameter ``other``:
+    The other BDL pair to compare with.
+
+Returns:
+    `true` if both the `upper` and `lower` SiDBs in this pair have the
+    same x-coordinate as the corresponding SiDBs in the other pair,
+    otherwise `false`.)doc";
+
+static const char *__doc_fiction_bdl_pair_has_same_y_coordinate =
+R"doc(Checks if the `upper` and `lower` SiDBs in this BDL pair have the same
+y-coordinate as the corresponding SiDBs in the other BDL pair.
+
+Parameter ``other``:
+    The other BDL pair to compare with.
+
+Returns:
+    `true` if both the `upper` and `lower` SiDBs in this pair have the
+    same y-coordinate as the corresponding SiDBs in the other pair,
+    otherwise `false`.)doc";
+
 static const char *__doc_fiction_bdl_pair_lower =
 R"doc(The lower SiDB of the pair. Upper and lower are defined relative to
 each other via the `operator<` overload.)doc";
+
+static const char *__doc_fiction_bdl_pair_not_equal_ignore_type =
+R"doc(Inequality check ignoring type.
+
+Parameter ``other``:
+    The other BDL pair to compare with.
+
+Returns:
+    `true` if the `upper` and `lower` attributes are not equal,
+    otherwise `false`.)doc";
+
+static const char *__doc_fiction_bdl_pair_operator_eq =
+R"doc(Equality operator.
+
+Parameter ``other``:
+    The other BDL pair to compare with.
+
+Returns:
+    `true` if this BDL pair is equal to the other, `false` otherwise.)doc";
+
+static const char *__doc_fiction_bdl_pair_operator_ge =
+R"doc(Greater-than-or-equal-to operator.
+
+Parameter ``other``:
+    The other BDL pair to compare with.
+
+Returns:
+    `true` if this BDL pair is greater than or equal to the other,
+    otherwise `false`.)doc";
+
+static const char *__doc_fiction_bdl_pair_operator_gt =
+R"doc(Greater than operator.
+
+Parameter ``other``:
+    The other BDL pair to compare with.
+
+Returns:
+    `true` if this BDL pair is greater than the other, `false`
+    otherwise.)doc";
+
+static const char *__doc_fiction_bdl_pair_operator_le =
+R"doc(Less than or equal to operator.
+
+Parameter ``other``:
+    The other BDL pair to compare with.
+
+Returns:
+    `true` if this BDL pair is less than or equal to the other,
+    `false` otherwise.)doc";
+
+static const char *__doc_fiction_bdl_pair_operator_lt =
+R"doc(Less than operator.
+
+Parameter ``other``:
+    The other BDL pair to compare with.
+
+Returns:
+    `true` if this BDL pair is less than the other, `false` otherwise.)doc";
+
+static const char *__doc_fiction_bdl_pair_operator_ne =
+R"doc(Inequality operator.
+
+Parameter ``other``:
+    The other BDL pair to compare with.
+
+Returns:
+    `true` if this BDL pair is not equal to the other, `false`
+    otherwise.)doc";
 
 static const char *__doc_fiction_bdl_pair_type =
 R"doc(The type of the SiDBs in the pair. BDL SiDBs must be of the same type.
@@ -796,6 +929,110 @@ They can either be normal, input, or output SiDBs.)doc";
 static const char *__doc_fiction_bdl_pair_upper =
 R"doc(The upper SiDB of the pair. Upper and lower are defined relative to
 each other via the `operator<` overload.)doc";
+
+static const char *__doc_fiction_bdl_wire =
+R"doc(This struct encapsulates a vector of `bdl_pair` objects, representing
+the pairs of SiDBs in the BDL wire.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.)doc";
+
+static const char *__doc_fiction_bdl_wire_add_bdl_pair =
+R"doc(Add a BDL pair to the wire.
+
+Parameter ``pair``:
+    The BDL pair to add.)doc";
+
+static const char *__doc_fiction_bdl_wire_bdl_wire = R"doc(Default constructor for an empty BDL wire.)doc";
+
+static const char *__doc_fiction_bdl_wire_bdl_wire_2 =
+R"doc(Constructor to initialize the BDL wire with a given vector of BDL
+pairs.
+
+Also updates the start and end BDL pairs based on the given vector.
+
+Parameter ``p``:
+    The vector of BDL pairs to initialize the wire with.)doc";
+
+static const char *__doc_fiction_bdl_wire_bdl_wire_3 =
+R"doc(Copy constructor.
+
+Creates a new `bdl_wire` object as a copy of another `bdl_wire`
+object.
+
+Parameter ``other``:
+    The `bdl_wire` object to copy from.)doc";
+
+static const char *__doc_fiction_bdl_wire_bdl_wire_4 =
+R"doc(Move constructor.
+
+Transfers ownership of the BDL pairs, port, and start/end pairs from
+another `bdl_wire` object.
+
+Parameter ``other``:
+    The `bdl_wire` object to move from.)doc";
+
+static const char *__doc_fiction_bdl_wire_erase_bdl_pair =
+R"doc(Erase a specific BDL pair from the wire.
+
+Parameter ``pair``:
+    The BDL pair to remove. The pair is compared using the equality
+    operator (operator==).)doc";
+
+static const char *__doc_fiction_bdl_wire_find_bdl_pair_by_type =
+R"doc(Find the first Binary-dot Logic (BDL) pair of a specified type in the
+wire.
+
+Parameter ``t``:
+    Type of BDL pair to search for
+    (`sidb_technology::cell_type::INPUT`,
+    `sidb_technology::cell_type::OUTPUT`, etc.).
+
+Returns:
+    Optional containing the first BDL pair with the specified type
+    `t`, or `std::nullopt` if no such BDL pair is found.)doc";
+
+static const char *__doc_fiction_bdl_wire_first_bdl_pair = R"doc(First BDL pair of the wire.)doc";
+
+static const char *__doc_fiction_bdl_wire_last_bdl_pair = R"doc(Last BDL pair of the wire.)doc";
+
+static const char *__doc_fiction_bdl_wire_operator_assign =
+R"doc(Move assignment operator.
+
+Transfers ownership of the BDL pairs, port, and start/end pairs from
+another `bdl_wire` object.
+
+Parameter ``other``:
+    The `bdl_wire` object to move from.
+
+Returns:
+    A reference to the updated object.)doc";
+
+static const char *__doc_fiction_bdl_wire_operator_assign_2 =
+R"doc(Copy assignment operator.
+
+Copies the content of another `bdl_wire` object, including start and
+end pairs.
+
+Parameter ``other``:
+    The `bdl_wire` object to copy from.
+
+Returns:
+    A reference to the updated object.)doc";
+
+static const char *__doc_fiction_bdl_wire_pairs = R"doc(Vector of BDL pairs representing the wire.)doc";
+
+static const char *__doc_fiction_bdl_wire_port = R"doc(Port of the BDL wire.)doc";
+
+static const char *__doc_fiction_bdl_wire_selection = R"doc(An enumeration of the selection of different types of wires.)doc";
+
+static const char *__doc_fiction_bdl_wire_selection_ALL = R"doc(Select all BDL wires.)doc";
+
+static const char *__doc_fiction_bdl_wire_selection_INPUT = R"doc(Select only BDL wires that start with input cells.)doc";
+
+static const char *__doc_fiction_bdl_wire_selection_OUTPUT = R"doc(Select only BDL wires that end with output cells.)doc";
+
+static const char *__doc_fiction_bdl_wire_update_direction = R"doc(Update the port of the wire based on the current BDL pairs.)doc";
 
 static const char *__doc_fiction_binomial_coefficient =
 R"doc(Calculates the binomial coefficient :math:`\binom{n}{k}`.
@@ -1594,6 +1831,16 @@ that still belongs to the layout.
 Returns:
     z-dimension.)doc";
 
+static const char *__doc_fiction_cds_configuration = R"doc(An enumeration of modes for the charge distribution surface.)doc";
+
+static const char *__doc_fiction_cds_configuration_CHARGE_LOCATION_AND_ELECTROSTATIC =
+R"doc(In addition to the location of the charge states, the electrostatic
+computation is conducted and stored.)doc";
+
+static const char *__doc_fiction_cds_configuration_CHARGE_LOCATION_ONLY =
+R"doc(The charge distribution is exclusively used to store the charge
+states.)doc";
+
 static const char *__doc_fiction_cell_level_layout =
 R"doc(A layout type to layer on top of a clocked layout that allows the
 assignment of individual cells to clock zones in accordance with an
@@ -1986,6 +2233,8 @@ static const char *__doc_fiction_charge_distribution_surface_2 = R"doc()doc";
 static const char *__doc_fiction_charge_distribution_surface_3 = R"doc()doc";
 
 static const char *__doc_fiction_charge_distribution_surface_4 = R"doc()doc";
+
+static const char *__doc_fiction_charge_distribution_surface_5 = R"doc()doc";
 
 static const char *__doc_fiction_charge_distribution_surface_charge_distribution_surface = R"doc()doc";
 
@@ -2628,7 +2877,7 @@ surface can be layered on top) to SiQAD coordinates. A new equivalent
 layout based on SiQAD coordinates is returned.
 
 Template parameter ``Lyt``:
-    Cell-level layout type based on fiction coordinates, e.g.,
+    SiDB cell-level layout type based on fiction coordinates, e.g.,
     `offset::ucoord_t` or `cube::coord_t`.
 
 Parameter ``lyt``:
@@ -3181,7 +3430,7 @@ probability of erroneous calculations of the gate.)doc";
 
 static const char *__doc_fiction_critical_temperature_params_engine = R"doc(Simulation mode to determine the *Critical Temperature*.)doc";
 
-static const char *__doc_fiction_critical_temperature_params_input_bdl_iterator_params = R"doc(Parameters for the BDL input iterator.)doc";
+static const char *__doc_fiction_critical_temperature_params_input_iterator_params = R"doc(Parameters for the BDL input iterator.)doc";
 
 static const char *__doc_fiction_critical_temperature_params_iteration_steps =
 R"doc(Number of iteration steps for the *QuickSim* algorithm (only
@@ -3544,7 +3793,7 @@ Template parameter ``TT``:
     The type of the truth table specifying the gate behavior.
 
 Parameter ``skeleton``:
-    The skeleton layout used as a starting point for gate design.
+    The skeleton layout used for gate design.
 
 Parameter ``spec``:
     Expected Boolean function of the layout given as a multi-output
@@ -3552,6 +3801,9 @@ Parameter ``spec``:
 
 Parameter ``params``:
     Parameters for the *SiDB Gate Designer*.
+
+Parameter ``stats``:
+    Statistics.
 
 Returns:
     A vector of designed SiDB gate layouts.)doc";
@@ -3568,7 +3820,9 @@ static const char *__doc_fiction_design_sidb_gates_params_design_mode = R"doc(Ga
 
 static const char *__doc_fiction_design_sidb_gates_params_design_sidb_gates_mode = R"doc(Selector for the available design approaches.)doc";
 
-static const char *__doc_fiction_design_sidb_gates_params_design_sidb_gates_mode_EXHAUSTIVE = R"doc(All gate layouts are designed exhaustively.)doc";
+static const char *__doc_fiction_design_sidb_gates_params_design_sidb_gates_mode_AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER = R"doc(Gates are designed by using the *Automatic Exhaustive Gate Designer*.)doc";
+
+static const char *__doc_fiction_design_sidb_gates_params_design_sidb_gates_mode_QUICKCELL = R"doc(Gates are designed by using *QuickCell*.)doc";
 
 static const char *__doc_fiction_design_sidb_gates_params_design_sidb_gates_mode_RANDOM = R"doc(Gate layouts are designed randomly.)doc";
 
@@ -3594,6 +3848,22 @@ design is found.)doc";
 static const char *__doc_fiction_design_sidb_gates_params_termination_condition_ALL_COMBINATIONS_ENUMERATED =
 R"doc(The design process ends after all possible combinations of SiDBs
 within the canvas are enumerated.)doc";
+
+static const char *__doc_fiction_design_sidb_gates_stats = R"doc(Statistics for the design of SiDB gates.)doc";
+
+static const char *__doc_fiction_design_sidb_gates_stats_duration = R"doc(The total runtime of SiDB gate design process.)doc";
+
+static const char *__doc_fiction_design_sidb_gates_stats_report =
+R"doc(This function outputs the total time taken for the SiDB gate design
+process to the provided output stream. If no output stream is
+provided, it defaults to standard output (`std::cout`).
+
+Parameter ``out``:
+    The output stream to which the report will be written.)doc";
+
+static const char *__doc_fiction_design_sidb_gates_stats_sim_engine =
+R"doc(The simulation engine to be used for the operational domain
+computation.)doc";
 
 static const char *__doc_fiction_detail_a_star_impl = R"doc()doc";
 
@@ -3719,44 +3989,6 @@ Parameter ``c``:
 
 Parameter ``g_val``:
     New g-value for c.)doc";
-
-static const char *__doc_fiction_detail_add_fanin_to_route =
-R"doc(This helper function is used to add a fanin coordinate to the
-appropriate route based on whether it belongs to the the route from
-the first or second fanin to the gate.
-
-Template parameter ``Lyt``:
-    Cartesian gate-level layout type.
-
-Parameter ``fanin``:
-    The fanin coordinate to be added to the route.
-
-Parameter ``is_first_fanin``:
-    A boolean indicating whether this is part of the route from the
-    first fanin to the gate.
-
-Parameter ``ffd``:
-    Reference to the fanin_fanout_data structure containing the
-    routes.)doc";
-
-static const char *__doc_fiction_detail_add_fanout_to_route =
-R"doc(This helper function is used to add a fanout coordinate to the
-appropriate route based on whether it belongs to the the route from
-the gate to the first or second fanout.
-
-Template parameter ``Lyt``:
-    Cartesian gate-level layout type.
-
-Parameter ``fanout``:
-    The fanout coordinate to be added to the route.
-
-Parameter ``is_first_fanout``:
-    A boolean indicating whether it belongs to the route from the gate
-    to the first fanout.
-
-Parameter ``ffd``:
-    Reference to the fanin_fanout_data structure containing the
-    routes.)doc";
 
 static const char *__doc_fiction_detail_add_obstructions =
 R"doc(Add obstructions to the layout.
@@ -3915,8 +4147,8 @@ based on their corresponding positions and types. Optionally, it
 performs post-layout optimization and sets the layout name if certain
 conditions are met.
 
-Template parameter ``Type``:
-    of the Parameters used for the SiDB on-the-fly gate library.
+Template parameter ``Params``:
+    Type of the Parameters used for the SiDB on-the-fly gate library.
 
 Parameter ``params``:
     Parameters used for the SiDB on-the-fly gate library.
@@ -4363,46 +4595,18 @@ Parameter ``to_delete``:
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl = R"doc()doc";
 
-static const char *__doc_fiction_detail_design_sidb_gates_impl_add_canvas_sidbs_to_skeleton_layout =
-R"doc(This function adds SiDBs (given by indices) to the skeleton layout
-that is returned afterwards.
+static const char *__doc_fiction_detail_design_sidb_gates_impl_all_canvas_layouts = R"doc(All Canvas SiDB layout (without I/O pins).)doc";
+
+static const char *__doc_fiction_detail_design_sidb_gates_impl_all_sidbs_in_canvas = R"doc(All cells within the canvas.)doc";
+
+static const char *__doc_fiction_detail_design_sidb_gates_impl_convert_canvas_cell_indices_to_layout =
+R"doc(This function generates canvas SiDb layouts.
 
 Parameter ``cell_indices``:
     A vector of indices of cells to be added to the skeleton layout.
 
 Returns:
-    A copy of the original layout (`skeleton_layout`) with SiDB cells
-    added at specified indices.)doc";
-
-static const char *__doc_fiction_detail_design_sidb_gates_impl_all_sidbs_in_canvas = R"doc(All cells within the canvas.)doc";
-
-static const char *__doc_fiction_detail_design_sidb_gates_impl_are_sidbs_too_close =
-R"doc(Checks if any SiDBs within the specified cell indices are located too
-closely together, with a distance of less than 0.5 nanometers.
-
-This function iterates over the provided cell indices and compares the
-distance between SiDBs. If it finds any pair of SiDBs within a
-distance of less than 0.5 nanometers, it returns `true` indicating
-that SiDBs are too close; otherwise, it returns `false`.
-
-Parameter ``cells``:
-    A vector of cells to check for proximity.
-
-Template parameter ``affected_cells``:
-    All SiDBs that are affected by atomic defects.
-
-Returns:
-    `true` if any SiDBs are too close; otherwise, `false`.)doc";
-
-static const char *__doc_fiction_detail_design_sidb_gates_impl_cell_indices_to_cell_vector =
-R"doc(Converts a vector of cell indices to a vector of corresponding cells
-in the layout.
-
-Parameter ``cell_indices``:
-    Vector of cell indices to convert.
-
-Returns:
-    A vector of cells corresponding to the given indices.)doc";
+    An SiDB cell-level layout consisting of canvas SidBs.)doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_design_sidb_gates_impl =
 R"doc(This constructor initializes an instance of the *SiDB Gate Designer*
@@ -4417,18 +4621,140 @@ Parameter ``spec``:
     truth table.
 
 Parameter ``ps``:
-    Parameters and settings for the gate designer.)doc";
+    Parameters and settings for the gate designer.
+
+Parameter ``st``:
+    Statistics for the gate design process.)doc";
+
+static const char *__doc_fiction_detail_design_sidb_gates_impl_determine_all_possible_canvas_layouts =
+R"doc(This function calculates all combinations of distributing a given
+number of SiDBs across a specified number of positions in the canvas.
+Each combination is then used to create a gate layout candidate.
+
+Returns:
+    A vector containing all possible gate layouts generated from the
+    combinations.)doc";
+
+static const char *__doc_fiction_detail_design_sidb_gates_impl_determine_output_index_of_output =
+R"doc(This function calculates the output index for a given input index by
+evaluating the truth table.
+
+Parameter ``current_input_index``:
+    The index representing the current input pattern.
+
+Returns:
+    The output index derived from the truth table for the given input
+    index.)doc";
+
+static const char *__doc_fiction_detail_design_sidb_gates_impl_input_bdl_wires = R"doc(Input BDL wires.)doc";
+
+static const char *__doc_fiction_detail_design_sidb_gates_impl_is_io_signal_unstable =
+R"doc(This function iterates through various input patterns and output wire
+indices to determine if any configuration results in a physically
+valid layout with energy below the given energy value, indicating I/O
+signal instability.
+
+Parameter ``cds_layout``:
+    The charge distribution surface layout to be modified and checked.
+
+Parameter ``cds_canvas``:
+    The charge distribution of the canvas SiDBs.
+
+Parameter ``max_input_pattern_index``:
+    The maximum index for input pattern
+
+Parameter ``input_pattern``:
+    The specific input pattern for which the stability check is
+    conducted.
+
+Parameter ``logical_correct_output_pattern``:
+    The expected correct output pattern for the given input.
+
+Parameter ``minimal_energy_of_physically_valid_layout``:
+    The minimum energy threshold below which the layout is considered
+    unstable.
+
+Returns:
+    `true` if the I/O signal is unstable, `false` otherwise.)doc";
+
+static const char *__doc_fiction_detail_design_sidb_gates_impl_is_physical_validity_feasible =
+R"doc(This function determines if there is a charge distribution of the
+canvas SiDBs for which the charge distribution of the whole layout is
+physically valid.
+
+Parameter ``cds_layout``:
+    The charge distribution surface layout to be evaluated.
+
+Parameter ``cds_canvas``:
+    The charge distribution surface of the canvas SiDBs. All possible
+    configurations are enumerated
+
+Returns:
+    The minimum energy value if a physically valid configuration is
+    found, `std::nullopt` otherwise.)doc";
+
+static const char *__doc_fiction_detail_design_sidb_gates_impl_layout_can_be_pruned =
+R"doc(This function evaluates whether the given layout can be discarded
+since it cannot implement the given Boolean function. The pruning is
+subdivided into three single pruning steps: (1) discarding SiDB
+layouts with potentially positively charged SiDBs, (2) utilizing an
+efficient method to identify and discard SiDB layouts that do not
+satisfy physical model constraints under the I/O pin conditions
+required for the desired Boolean function, and (3) detecting I/O
+signal instability.
+
+Parameter ``current_layout``:
+    The layout being evaluated for pruning.
+
+Parameter ``canvas_lyt``:
+    The canvas layout comprising of the canvas SiDBs.
+
+Parameter ``dependent_cell``:
+    A dependent-cell of the canvas SiDBs.
+
+Returns:
+    `true` if the current layout can be pruned. `false` otherwise,
+    which means that the layout is a candidate to be a valid gate
+    implementation. Physical simulation is required as a second step
+    to conduct the final validation.)doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_num_threads = R"doc(Number of threads to be used for parallel execution.)doc";
 
+static const char *__doc_fiction_detail_design_sidb_gates_impl_number_of_input_wires = R"doc(Number of input BDL wires.)doc";
+
+static const char *__doc_fiction_detail_design_sidb_gates_impl_number_of_output_wires = R"doc(Number of output BDL wires.)doc";
+
+static const char *__doc_fiction_detail_design_sidb_gates_impl_output_bdl_wires = R"doc(Output BDL wires.)doc";
+
 static const char *__doc_fiction_detail_design_sidb_gates_impl_params = R"doc(Parameters for the *SiDB Gate Designer*.)doc";
 
-static const char *__doc_fiction_detail_design_sidb_gates_impl_run_exhaustive_design =
-R"doc(Design gates exhaustively and in parallel.
+static const char *__doc_fiction_detail_design_sidb_gates_impl_run_automatic_exhaustive_gate_designer =
+R"doc(Design gates by using the *Automatic Exhaustive Gate Desginer*. This
+algorithm was proposed in \"Minimal Design of SiDB Gates: An Optimal
+Basis for Circuits Based on Silicon Dangling Bonds\" by J. Drewniok,
+M. Walter, and R. Wille in NANOARCH 2023
+(https://dl.acm.org/doi/10.1145/3611315.3633241).
 
 This function adds each cell combination to the given skeleton, and
 determines whether the layout is operational based on the specified
 parameters. The design process is parallelized to improve performance.
+
+Returns:
+    A vector of designed SiDB gate layouts.)doc";
+
+static const char *__doc_fiction_detail_design_sidb_gates_impl_run_pruning =
+R"doc(This function processes each layout to determine if it represents a
+valid gate implementation or if it can be pruned by using three
+distinct physically-informed pruning steps. It leverages multi-
+threading to accelerate the evaluation and ensures thread-safe access
+to shared resources.
+
+Returns:
+    A vector containing the valid gate candidates that were not
+    pruned.)doc";
+
+static const char *__doc_fiction_detail_design_sidb_gates_impl_run_quickcell =
+R"doc(Design Standard Cells/gates by using the *QuickCell* algorithm.
 
 Returns:
     A vector of designed SiDB gate layouts.)doc";
@@ -4443,12 +4769,208 @@ parameters. The design process is parallelized to improve performance.
 Returns:
     A vector of designed SiDB gate layouts.)doc";
 
+static const char *__doc_fiction_detail_design_sidb_gates_impl_set_charge_distribution_of_input_wires_based_on_input_pattern =
+R"doc(This function assigns the charge states of the input wires in the
+layout according to the provided input pattern index. It performs the
+following steps: - For `NORTH-SOUTH` port wires, if the corresponding
+bit in the input pattern is set, assigns `NEUTRAL` charge to the upper
+part and `NEGATIVE` charge to the lower part of the BDLs of the wire.
+- For `NORTH-SOUTH` port wires, if the corresponding bit in the input
+pattern is not set, assigns `NEGATIVE` charge to the upper part and
+`NEUTRAL` charge to the lower part of the BDLs of the wire. - For
+`SOUTH-NORTH` port wires, if the corresponding bit in the input
+pattern is set, assigns `NEGATIVE` charge to the upper part and
+`NEUTRAL` charge to the lower part of the BDLs of the wire. - For
+`SOUTH-NORTH` port wires, if the corresponding bit in the input
+pattern is not set, assigns `NEUTRAL` charge to the upper part and
+`NEGATIVE` charge to the lower part of the BDLs of the wire.
+
+Parameter ``layout``:
+    The charge distribution surface layout to be modified.
+
+Parameter ``current_input_index``:
+    The index representing the current input pattern.)doc";
+
+static const char *__doc_fiction_detail_design_sidb_gates_impl_set_charge_distribution_of_output_wires_based_on_output_index =
+R"doc(This function assigns the charge states of the input wires in the
+layout according to the provided input pattern index. It performs the
+following steps: - For `NORTH-SOUTH` port wires, if the corresponding
+bit in the input pattern is set, assigns `NEUTRAL` charge to the upper
+part and `NEGATIVE` charge to the lower part of the BDLs of the wire.
+- For `NORTH-SOUTH` port wires, if the corresponding bit in the input
+pattern is not set, assigns `NEGATIVE` charge to the upper part and
+`NEUTRAL` charge to the lower part of the BDLs of the wire. - For
+`SOUTH-NORTH` port wires, if the corresponding bit in the input
+pattern is set, assigns `NEGATIVE` charge to the upper part and
+`NEUTRAL` charge to the lower part of the BDLs of the wire. - For
+`SOUTH-NORTH` port wires, if the corresponding bit in the input
+pattern is not set, assigns `NEUTRAL` charge to the upper part and
+`NEGATIVE` charge to the lower part of the BDLs of the wire.
+
+Parameter ``layout``:
+    The charge distribution surface layout to be modified.
+
+Parameter ``current_input_index``:
+    The index representing the current input pattern.
+
+Returns:
+    void)doc";
+
+static const char *__doc_fiction_detail_design_sidb_gates_impl_set_charge_distribution_of_output_wires_based_on_truth_table =
+R"doc(This function assigns the charge states of the output wires in the
+layout according to the values in the truth table for the provided
+input pattern index.
+
+Parameter ``layout``:
+    The charge distribution surface layout to be modified.
+
+Parameter ``input_index``:
+    The index representing the current input pattern.)doc";
+
 static const char *__doc_fiction_detail_design_sidb_gates_impl_skeleton_layout =
 R"doc(The skeleton layout serves as a starting layout to which SiDBs are
 added to create unique SiDB layouts and, if possible, working gates.
 It defines input and output wires.)doc";
 
+static const char *__doc_fiction_detail_design_sidb_gates_impl_skeleton_layout_with_canvas_sidbs =
+R"doc(This function adds SiDBs (given by indices) to the skeleton layout
+that is returned afterwards.
+
+Parameter ``cell_indices``:
+    A vector of indices of cells to be added to the skeleton layout.
+
+Returns:
+    A copy of the original layout (`skeleton_layout`) with SiDB cells
+    added at specified indices.)doc";
+
+static const char *__doc_fiction_detail_design_sidb_gates_impl_stats = R"doc(The statistics of the gate design.)doc";
+
 static const char *__doc_fiction_detail_design_sidb_gates_impl_truth_table = R"doc(Truth table of the given gate.)doc";
+
+static const char *__doc_fiction_detail_detect_bdl_wires_impl = R"doc()doc";
+
+static const char *__doc_fiction_detail_detect_bdl_wires_impl_aggregate_bdl_pairs =
+R"doc(Aggregates BDL pairs of specified types into a set.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Returns:
+    A set of BDL pairs containing all pairs of the specified types.)doc";
+
+static const char *__doc_fiction_detail_detect_bdl_wires_impl_bdl_wires = R"doc(All detected BDL wires.)doc";
+
+static const char *__doc_fiction_detail_detect_bdl_wires_impl_detect_bdl_wires =
+R"doc(This function operates in two main phases:
+
+1. **Aggregation**: It first collects all BDL pairs of the specified
+types.
+
+2. **Wire Detection**: The function then iterates through the
+collected BDL pairs: - For each initial BDL pair, it searches for
+neighboring BDL pairs located above or below. - If a neighboring BDL
+pair is found, it is added to the current wire. - This process repeats
+until no additional neighboring BDL pairs can be found.
+
+Once a wire is fully constructed, all BDL pairs belonging to that wire
+are removed from the initial collection. The function then proceeds to
+detect the next wire using any remaining BDL pairs.)doc";
+
+static const char *__doc_fiction_detail_detect_bdl_wires_impl_detect_bdl_wires_impl = R"doc()doc";
+
+static const char *__doc_fiction_detail_detect_bdl_wires_impl_filter_wires =
+R"doc(This function filters the wires from the `bdl_wires` collection based
+on the current `selection`. If `selection` is set to
+`bdl_wire_selection::INPUT`, it returns all wires containing an input
+cell. If `selection` is set to `bdl_wire_selection::OUTPUT`, it
+returns all wires containing an output cell. If `selection` is set to
+any other value, it returns all the wires.
+
+The function also ensures that all selected wires of the same type
+have the same length. If wires of different lengths are found, an
+assertion is triggered.
+
+Parameter ``selection``:
+    The type of wires to filter by, specified by the
+    `bdl_wire_selection` enum.
+
+Returns:
+    A vector of filtered `bdl_wire` objects based on the current
+    selection. If no wires match the selection criteria, an empty
+    vector is returned.)doc";
+
+static const char *__doc_fiction_detail_detect_bdl_wires_impl_filter_wires_by_type =
+R"doc(This function scans through the `bdl_wires` and selects those
+containing a cell of the specified type. It also checks that all
+selected wires have the same length and triggers an assertion if wires
+of different lengths are found.
+
+Parameter ``type``:
+    The type of the cell to filter by.
+
+Returns:
+    A vector of `bdl_wire` objects containing cells of the specified
+    type. If no such wires are found, an empty vector is returned.)doc";
+
+static const char *__doc_fiction_detail_detect_bdl_wires_impl_find_bdl_neighbor_above =
+R"doc(This function searches for the first Binary-dot Logic (BDL) pair in a
+given set of BDL pairs that is above a specified BDL pair. The
+function returns the first BDL pair that meets the following criteria:
+- The distance between the upper SiDB of the given BDL pair and the
+lower SiDB of the candidate BDL pair is less than the specified inter-
+BDL distance. - The candidate BDL pair is not equal to the given BDL
+pair (ignoring the type of SiDBs). - The y-coordinate of the upper
+SiDB of the given BDL pair is less than the y-coordinate of the lower
+SiDB of the candidate BDL pair.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Parameter ``given_bdl``:
+    The BDL pair to find a neighbor for.
+
+Parameter ``bdl_pairs``:
+    A set of BDL pairs to search within.
+
+Parameter ``inter_bdl_distance``:
+    The maximum allowable distance between the lower SiDB of the given
+    BDL pair and the upper SiDB of the potential neighbor BDL pair.
+
+Returns:
+    A std::optional containing the first BDL pair that meets the
+    criteria, or std::nullopt if no such pair is found.)doc";
+
+static const char *__doc_fiction_detail_detect_bdl_wires_impl_find_bdl_neighbor_below =
+R"doc(This function searches for the first Binary-dot Logic (BDL) pair in a
+given set of BDL pairs that is below a specified BDL pair. The
+function returns the first BDL pair that meets the following criteria:
+- The distance between the lower SiDB of the given BDL pair and the
+upper SiDB of the candidate BDL pair is less than the specified inter-
+BDL distance. - The candidate BDL pair is not equal to the given BDL
+pair (ignoring the type of SiDBs). - The y-coordinate of the lower
+SiDB of the given BDL pair is less than the y-coordinate of the upper
+SiDB of the candidate BDL pair.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Parameter ``given_bdl``:
+    The BDL pair to find a neighbor for.
+
+Parameter ``bdl_pairs``:
+    A set of BDL pairs to search within.
+
+Parameter ``inter_bdl_distance``:
+    The maximum allowable distance between the lower SiDB of the given
+    BDL pair and the upper SiDB of the potential neighbor BDL pair.
+
+Returns:
+    A `std::optional` containing the first BDL pair that meets the
+    criteria, or `std::nullopt` if no such pair is found.)doc";
+
+static const char *__doc_fiction_detail_detect_bdl_wires_impl_layout = R"doc(SiDB cell-level layout.)doc";
+
+static const char *__doc_fiction_detail_detect_bdl_wires_impl_params = R"doc(Parameters for detecting BDL wires.)doc";
 
 static const char *__doc_fiction_detail_determine_clocking_impl = R"doc()doc";
 
@@ -5481,19 +6003,6 @@ Returns:
     An iterator to the found parameter point in the map, or
     `map.cend()` if not found.)doc";
 
-static const char *__doc_fiction_detail_fix_wires =
-R"doc(Utility function to move wires that cross over empty tiles down one
-layer. This can happen if the wiring of a gate is deleted.
-
-Template parameter ``Lyt``:
-    Cartesian gate-level layout type.
-
-Parameter ``lyt``:
-    Gate-level layout.
-
-Parameter ``deleted_coords``:
-    Tiles that got deleted.)doc";
-
 static const char *__doc_fiction_detail_gate_level_drvs_impl = R"doc()doc";
 
 static const char *__doc_fiction_detail_gate_level_drvs_impl_border_io_check =
@@ -5728,25 +6237,6 @@ static const char *__doc_fiction_detail_generate_edge_intersection_graph_impl_ps
 
 static const char *__doc_fiction_detail_generate_edge_intersection_graph_impl_run = R"doc()doc";
 
-static const char *__doc_fiction_detail_get_fanin_and_fanouts =
-R"doc(Utility function to trace back fanins and fanouts of a gate. Based on
-the gate to be moved, this function returns the location of the fanins
-and fanouts, as well as the wiring in between them. Additionally, all
-wire tiles between fanins and the gate, as well as between the gate
-and fanouts are collected for deletion.
-
-Template parameter ``Lyt``:
-    Cartesian gate-level layout type.
-
-Parameter ``lyt``:
-    Cartesian Gate-level layout.
-
-Parameter ``op``:
-    coordinate of the gate to be moved.
-
-Returns:
-    fanin and fanout gates, wires to be deleted and old routing paths.)doc";
-
 static const char *__doc_fiction_detail_get_offset =
 R"doc(Utility function to calculate the offset that has to be subtracted
 from any x-coordinate on the hexagonal layout.
@@ -5792,30 +6282,6 @@ Parameter ``start``:
 
 Parameter ``end``:
     The ending coordinate of the path.
-
-Returns:
-    The computed path as a sequence of coordinates in the layout.)doc";
-
-static const char *__doc_fiction_detail_get_path_and_obstruct =
-R"doc(This helper function computes a path between two coordinates using the
-A* algorithm. It then obstructs the tiles along the path in the given
-layout.
-
-Template parameter ``Lyt``:
-    Cartesian gate-level layout type.
-
-Parameter ``lyt``:
-    Reference to the layout.
-
-Parameter ``start``:
-    The starting coordinate of the path.
-
-Parameter ``end``:
-    The ending coordinate of the path.
-
-Parameter ``planar_optimization``:
-    Only allow relocation if a crossing-free wiring can be found.
-    Defaults to false.
 
 Returns:
     The computed path as a sequence of coordinates in the layout.)doc";
@@ -6246,34 +6712,6 @@ Parameter ``place_info``:
 Parameter ``ssg``:
     The search space graph.)doc";
 
-static const char *__doc_fiction_detail_improve_gate_location =
-R"doc(Utility function that moves gates to new coordinates and checks if
-routing is possible. This includes:
-
-- removing the old wiring between fanins, the gate and fanouts -
-updating the incoming signals - determining coordinates that would
-improve the layout - testing all those coordinates by moving the gate
-to each one and checking if a new wiring can be found - if a new
-coordinate is found and wiring is possible, it is applied and incoming
-signals are updated - if no better coordinate is found, the old wiring
-is restored
-
-Template parameter ``Lyt``:
-    Cartesian obstruction gate-level layout type.
-
-Parameter ``lyt``:
-    2DDWave-clocked cartesian obstruction gate-level layout.
-
-Parameter ``old_pos``:
-    Old position of the gate to be moved.
-
-Parameter ``planar_optimization``:
-    Only allow relocation if a crossing-free wiring can be found.
-    Defaults to false.
-
-Returns:
-    `true` if the gate was moved successfully, `false` otherwise.)doc";
-
 static const char *__doc_fiction_detail_is_balanced_impl = R"doc()doc";
 
 static const char *__doc_fiction_detail_is_balanced_impl_balanced = R"doc()doc";
@@ -6322,6 +6760,48 @@ Template parameter ``TT``:
 
 static const char *__doc_fiction_detail_is_operational_impl_bii = R"doc(Iterator that iterates over all possible input states.)doc";
 
+static const char *__doc_fiction_detail_is_operational_impl_check_existence_of_kinks_in_input_wires =
+R"doc(This function iterates through the input wires and evaluates their
+charge states against the expected states derived from the input
+pattern. A kink is considered to exist if an input wire's charge state
+does not match the expected value (i.e., bit one or bit zero) for the
+given input index.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type
+
+Parameter ``ground_state``:
+    The ground state charge distribution surface.
+
+Parameter ``current_input_index``:
+    The current input index used to retrieve the expected output from
+    the truth table.
+
+Returns:
+    `true` if any input wire contains a kink (i.e., an unexpected
+    charge state), `false` otherwise.)doc";
+
+static const char *__doc_fiction_detail_is_operational_impl_check_existence_of_kinks_in_output_wires =
+R"doc(This function iterates through the output wires and evaluates their
+charge states against the expected states derived from the truth
+table. A kink is considered to exist if an output wire's charge state
+does not match the expected value (i.e., bit one or bit zero) for the
+given input index.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type
+
+Parameter ``ground_state``:
+    The ground state charge distribution surface.
+
+Parameter ``current_input_index``:
+    The current input index used to retrieve the expected output from
+    the truth table.
+
+Returns:
+    `true` if any output wire contains a kink (i.e., an unexpected
+    charge state), `false` otherwise.)doc";
+
 static const char *__doc_fiction_detail_is_operational_impl_determine_operational_input_patterns =
 R"doc(Determines the input combinations yielding the correct output.
 
@@ -6329,11 +6809,45 @@ Returns:
     All inputs (e.g. 2-input Boolean function: 00 ^= 0; 10 ^= 2) for
     which the correct output is computed.)doc";
 
+static const char *__doc_fiction_detail_is_operational_impl_encodes_bit_one =
+R"doc(This function returns `true` if `1` is encoded in the charge state of
+the given BDL pair. `false` otherwise.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Parameter ``ground_state``:
+    The ground state charge distribution surface.
+
+Parameter ``bdl``:
+    BDL pair to be evaluated.
+
+Returns:
+    `true` if `1` is encoded, `false` otherwise.)doc";
+
+static const char *__doc_fiction_detail_is_operational_impl_encodes_bit_zero =
+R"doc(This function returns `true` if `0` is encoded in the charge state of
+the given BDL pair. `false` otherwise.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Parameter ``ground_state``:
+    The ground state charge distribution surface.
+
+Parameter ``bdl``:
+    BDL pair to be evaluated.
+
+Returns:
+    `true` if `0` is encoded, `false` otherwise.)doc";
+
 static const char *__doc_fiction_detail_is_operational_impl_get_number_of_simulator_invocations =
 R"doc(Returns the total number of simulator invocations.
 
 Returns:
     The number of simulator invocations.)doc";
+
+static const char *__doc_fiction_detail_is_operational_impl_input_bdl_wires = R"doc(Input BDL wires.)doc";
 
 static const char *__doc_fiction_detail_is_operational_impl_is_operational_impl =
 R"doc(Constructor to initialize the algorithm with a layout and parameters.
@@ -6348,9 +6862,33 @@ Parameter ``spec``:
 Parameter ``params``:
     Parameters for the `is_operational` algorithm.)doc";
 
+static const char *__doc_fiction_detail_is_operational_impl_is_operational_impl_2 =
+R"doc(Constructor to initialize the algorithm with a layout and parameters.
+
+Parameter ``lyt``:
+    The SiDB cell-level layout to be checked.
+
+Parameter ``spec``:
+    Expected Boolean function of the layout given as a multi-output
+    truth table.
+
+Parameter ``params``:
+    Parameters for the `is_operational` algorithm.
+
+Parameter ``input_bdl_wire``:
+    Optional BDL input wires of lyt.
+
+Parameter ``output_bdl_wire``:
+    Optional BDL output wires of lyt.
+
+Parameter ``input_bdl_wire_direction``:
+    Optional BDL input wire directions of lyt.)doc";
+
 static const char *__doc_fiction_detail_is_operational_impl_layout = R"doc(SiDB cell-level layout.)doc";
 
 static const char *__doc_fiction_detail_is_operational_impl_output_bdl_pairs = R"doc(Output BDL pairs.)doc";
+
+static const char *__doc_fiction_detail_is_operational_impl_output_bdl_wires = R"doc(Output BDL wires.)doc";
 
 static const char *__doc_fiction_detail_is_operational_impl_parameters = R"doc(Parameters for the `is_operational` algorithm.)doc";
 
@@ -7119,6 +7657,145 @@ static const char *__doc_fiction_detail_placement_info_node2pos = R"doc(Mapping 
 
 static const char *__doc_fiction_detail_post_layout_optimization_impl = R"doc()doc";
 
+static const char *__doc_fiction_detail_post_layout_optimization_impl_add_fanin_to_route =
+R"doc(This helper function is used to add a fanin coordinate to the
+appropriate route based on whether it belongs to the the route from
+the first or second fanin to the gate.
+
+Parameter ``fanin``:
+    The fanin coordinate to be added to the route.
+
+Parameter ``is_first_fanin``:
+    A boolean indicating whether this is part of the route from the
+    first fanin to the gate.
+
+Parameter ``ffd``:
+    Reference to the fanin_fanout_data structure containing the
+    routes.)doc";
+
+static const char *__doc_fiction_detail_post_layout_optimization_impl_add_fanout_to_route =
+R"doc(This helper function is used to add a fanout coordinate to the
+appropriate route based on whether it belongs to the the route from
+the gate to the first or second fanout.
+
+Parameter ``fanout``:
+    The fanout coordinate to be added to the route.
+
+Parameter ``is_first_fanout``:
+    A boolean indicating whether it belongs to the route from the gate
+    to the first fanout.
+
+Parameter ``ffd``:
+    Reference to the fanin_fanout_data structure containing the
+    routes.)doc";
+
+static const char *__doc_fiction_detail_post_layout_optimization_impl_check_new_position =
+R"doc(Attempts to relocate a gate to a new position within the layout and
+updates routing connections accordingly.
+
+Parameter ``lyt``:
+    Obstructed gate-level layout being optimized.
+
+Parameter ``new_pos``:
+    The target tile position to which the gate is to be relocated.
+
+Parameter ``num_gate_relocations``:
+    Reference to a counter tracking the number of gate relocations
+    performed.
+
+Parameter ``current_pos``:
+    Reference to the current position of the gate being relocated.
+    This will be updated upon successful relocation.
+
+Parameter ``fanins``:
+    Vector containing the tile positions of all fan-in connections to
+    the gate.
+
+Parameter ``fanouts``:
+    Vector containing the tile positions of all fan-out connections
+    from the gate.
+
+Parameter ``moved_gate``:
+    Reference to a boolean flag that will be set to `true` if the gate
+    is successfully moved.
+
+Parameter ``old_pos``:
+    The original tile position of the gate before the relocation
+    attempt.
+
+Returns:
+    `true` if the gate was successfully relocated to `new_pos` and all
+    routing paths were established. `false` if the relocation resulted
+    in no movement (i.e., `new_pos` is the same as `old_pos`).)doc";
+
+static const char *__doc_fiction_detail_post_layout_optimization_impl_fix_wires =
+R"doc(Utility function to move wires that cross over empty tiles down one
+layer. This can happen if the wiring of a gate is deleted.
+
+Parameter ``lyt``:
+    Obstructed gate-level layout.
+
+Parameter ``deleted_coords``:
+    Tiles that got deleted.)doc";
+
+static const char *__doc_fiction_detail_post_layout_optimization_impl_get_fanin_and_fanouts =
+R"doc(Utility function to trace back fanins and fanouts of a gate. Based on
+the gate to be moved, this function returns the location of the fanins
+and fanouts, as well as the wiring in between them. Additionally, all
+wire tiles between fanins and the gate, as well as between the gate
+and fanouts are collected for deletion.
+
+Parameter ``lyt``:
+    Obstructed gate-level layout.
+
+Parameter ``op``:
+    coordinate of the gate to be moved.
+
+Returns:
+    fanin and fanout gates, wires to be deleted and old routing paths.)doc";
+
+static const char *__doc_fiction_detail_post_layout_optimization_impl_get_path_and_obstruct =
+R"doc(This helper function computes a path between two coordinates using the
+A* algorithm. It then obstructs the tiles along the path in the given
+layout.
+
+Parameter ``lyt``:
+    Obstructed gate-level layout.
+
+Parameter ``start_tile``:
+    The starting coordinate of the path.
+
+Parameter ``end_tile``:
+    The ending coordinate of the path.
+
+Returns:
+    The computed path as a sequence of coordinates in the layout.)doc";
+
+static const char *__doc_fiction_detail_post_layout_optimization_impl_improve_gate_location =
+R"doc(Utility function that moves gates to new coordinates and checks if
+routing is possible. This includes:
+
+- removing the old wiring between fanins, the gate and fanouts -
+updating the incoming signals - determining coordinates that would
+improve the layout - testing all those coordinates by moving the gate
+to each one and checking if a new wiring can be found - if a new
+coordinate is found and wiring is possible, it is applied and incoming
+signals are updated - if no better coordinate is found, the old wiring
+is restored
+
+Parameter ``lyt``:
+    Obstructed gate-level layout.
+
+Parameter ``old_pos``:
+    Old position of the gate to be moved.
+
+Returns:
+    `true` if the gate was moved successfully, `false` otherwise.)doc";
+
+static const char *__doc_fiction_detail_post_layout_optimization_impl_max_gate_relocations = R"doc(Maximum number of relocations to try for each gate.)doc";
+
+static const char *__doc_fiction_detail_post_layout_optimization_impl_max_non_po = R"doc(Maximum coordinate of all gates that are not POs.)doc";
+
 static const char *__doc_fiction_detail_post_layout_optimization_impl_plyt = R"doc(2DDWave-clocked Cartesian gate-level layout to optimize.)doc";
 
 static const char *__doc_fiction_detail_post_layout_optimization_impl_post_layout_optimization_impl = R"doc()doc";
@@ -7127,7 +7804,60 @@ static const char *__doc_fiction_detail_post_layout_optimization_impl_ps = R"doc
 
 static const char *__doc_fiction_detail_post_layout_optimization_impl_pst = R"doc(Statistics about the post-layout optimization process.)doc";
 
+static const char *__doc_fiction_detail_post_layout_optimization_impl_restore_original_wiring =
+R"doc(Restores the original wiring if relocation of a gate fails.
+
+This function moves the gate back to its original position and
+reinstates the previous wiring paths between the gate and its fan-
+in/fan-out connections. It also updates the obstructions in the layout
+accordingly.
+
+Parameter ``lyt``:
+    Obstructed gate-level layout.
+
+Parameter ``old_path_from_fanin_1_to_gate``:
+    The original routing path from the first fan-in to the gate (if
+    exists).
+
+Parameter ``old_path_from_fanin_2_to_gate``:
+    The original routing path from the second fan-in to the gate (if
+    exists).
+
+Parameter ``old_path_from_gate_to_fanout_1``:
+    The original routing path from the gate to the first fan-out (if
+    exists).
+
+Parameter ``old_path_from_gate_to_fanout_2``:
+    The original routing path from the gate to the second fan-out (if
+    exists).
+
+Parameter ``current_pos``:
+    Current position of the gate after relocation attempt.
+
+Parameter ``old_pos``:
+    Original position of the gate before relocation attempt.
+
+Parameter ``fanouts``:
+    Vector of fanout tiles connected to the gate.)doc";
+
 static const char *__doc_fiction_detail_post_layout_optimization_impl_run = R"doc()doc";
+
+static const char *__doc_fiction_detail_post_layout_optimization_impl_start = R"doc(Start time.)doc";
+
+static const char *__doc_fiction_detail_post_layout_optimization_impl_timeout_limit_reached = R"doc(Timeout limit reached.)doc";
+
+static const char *__doc_fiction_detail_post_layout_optimization_impl_update_timeout =
+R"doc(Calculates the elapsed milliseconds since the `start` time, sets the
+`timeout_limit_reached` flag if the timeout is exceeded, and returns
+the remaining time.
+
+Returns:
+    Remaining time in milliseconds before timeout, or `0` if timeout
+    has been reached.)doc";
+
+static const char *__doc_fiction_detail_post_layout_optimization_impl_wiring_reduction_params = R"doc(Wiring reduction parameters.)doc";
+
+static const char *__doc_fiction_detail_post_layout_optimization_impl_wiring_reduction_stats = R"doc(Wiring reduction stats.)doc";
 
 static const char *__doc_fiction_detail_priority_queue =
 R"doc(A priority queue class for managing elements with associated
@@ -7239,8 +7969,6 @@ R"doc(All SiDBs that are pre-assigned to be negatively charged in a
 physically valid layout.)doc";
 
 static const char *__doc_fiction_detail_quickexact_impl_quickexact_impl = R"doc()doc";
-
-static const char *__doc_fiction_detail_quickexact_impl_real_placed_defects = R"doc(Collection of defects that are placed in addition to the SiDBs.)doc";
 
 static const char *__doc_fiction_detail_quickexact_impl_required_simulation_base_number = R"doc(Base number required for the correct physical simulation.)doc";
 
@@ -7797,9 +8525,15 @@ static const char *__doc_fiction_detail_wiring_reduction_impl = R"doc()doc";
 
 static const char *__doc_fiction_detail_wiring_reduction_impl_plyt = R"doc(The 2DDWave-clocked layout whose wiring is to be reduced.)doc";
 
+static const char *__doc_fiction_detail_wiring_reduction_impl_ps = R"doc(Wiring reduction parameters.)doc";
+
 static const char *__doc_fiction_detail_wiring_reduction_impl_pst = R"doc(Statistics about the wiring_reduction process.)doc";
 
 static const char *__doc_fiction_detail_wiring_reduction_impl_run = R"doc()doc";
+
+static const char *__doc_fiction_detail_wiring_reduction_impl_start = R"doc(Start time.)doc";
+
+static const char *__doc_fiction_detail_wiring_reduction_impl_timeout_limit_reached = R"doc(Timeout limit reached.)doc";
 
 static const char *__doc_fiction_detail_wiring_reduction_impl_wiring_reduction_impl = R"doc()doc";
 
@@ -8283,8 +9017,10 @@ Parameter ``lyt``:
     The layout to detect BDL pairs in.
 
 Parameter ``type``:
-    The type of the SiDBs to detect BDL pairs for, e.g., `INPUT`,
-    `OUTPUT`, `NORMAL`.
+    Optional parameter to specify the SiDB type for which BDL pairs
+    should be detected. If omitted, the function will detect BDL pairs
+    for all types. Valid types include `INPUT`, `OUTPUT`, `NORMAL`,
+    among others.
 
 Parameter ``params``:
     Parameters for the BDL pair detection algorithm.
@@ -8301,9 +9037,40 @@ apart and to improve performance of the matching algorithm. (unit:
 nm).)doc";
 
 static const char *__doc_fiction_detect_bdl_pairs_params_minimum_distance =
-R"doc(The minimum distance between two dots to be considered a BDL pair.
+R"doc(The minimum distance between two SiDBs to be considered a BDL pair.
 This is useful to prevent, e.g., SiDBs of atomic wires to be
 considered BDL pairs. (unit: nm).)doc";
+
+static const char *__doc_fiction_detect_bdl_wires =
+R"doc(This function identifies BDL wires in a given SiDB cell-level layout
+by detecting BDL pairs and linking them based on their spatial
+relationships. The function supports selection of different types of
+wires, such as input wires, output wires, or all wires.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Parameter ``lyt``:
+    The SiDB layout to detect BDL wires in.
+
+Parameter ``params``:
+    Parameters used for detecting BDL wires.
+
+Parameter ``wire_selection``:
+    The type of wires to detect, specified by the `bdl_wire_selection`
+    enum. Default is `bdl_wire_selection::ALL`.
+
+Returns:
+    A vector of BDL wires, where each wire is represented as a vector
+    of BDL pairs.)doc";
+
+static const char *__doc_fiction_detect_bdl_wires_params = R"doc(This struct encapsulates parameters used for detecting BDL wires.)doc";
+
+static const char *__doc_fiction_detect_bdl_wires_params_bdl_pairs_params = R"doc(Parameters for the `detect_bdl_pairs` algorithm.)doc";
+
+static const char *__doc_fiction_detect_bdl_wires_params_threshold_bdl_interdistance =
+R"doc(A distance threshold, which is used to determine if two pairs of BDLs
+are part of the same wire. (unit: nm).)doc";
 
 static const char *__doc_fiction_determine_all_combinations_of_distributing_k_entities_on_n_positions =
 R"doc(This function generates all possible combinations of distributing k
@@ -8390,7 +9157,7 @@ Template parameter ``Lyt``:
 Template parameter ``TT``:
     Truth table type.
 
-Parameter ``truth_table_spec``:
+Parameter ``spec``:
     Vector of truth table specifications.
 
 Parameter ``params``:
@@ -8802,7 +9569,7 @@ energy values for equality, the comparison uses a tolerance specified
 by `physical_constants::POP_STABILITY_ERR`.
 
 Template parameter ``Lyt``:
-    Cell-level layout type.
+    SiDB cell-level layout type.
 
 Parameter ``input_vec``:
     A vector of `charge_distribution_surface` objects for which
@@ -9243,7 +10010,7 @@ replaced by *QuickExact* due to the much better runtimes and more
 functionality.
 
 Template parameter ``Lyt``:
-    Cell-level layout type.
+    SiDB cell-level layout type.
 
 Parameter ``lyt``:
     The layout to simulate.
@@ -10914,7 +11681,7 @@ provided layout skeleton. The layout skeleton serves as the starting
 layout to which SiDBs are added to create unique SiDB layouts.
 
 Template parameter ``Lyt``:
-    Cell-level SiDB layout type.
+    SiDB cell-level SiDB layout type.
 
 Parameter ``lyt_skeleton``:
     A layout to which random SiDBs are added to create unique layouts.
@@ -10931,7 +11698,7 @@ layout skeleton. The layout skeleton serves as the starting layout to
 which SiDBs are added to create the final layout.
 
 Template parameter ``Lyt``:
-    Cell-level SiDB layout type.
+    SiDB cell-level SiDB layout type.
 
 Parameter ``lyt_skeleton``:
     A layout to which random cells are added to create the final
@@ -12862,6 +13629,15 @@ Parameter ``spec``:
 Parameter ``params``:
     Parameters for the `is_operational` algorithm.
 
+Parameter ``input_bdl_wire``:
+    Optional BDL input wires of lyt.
+
+Parameter ``output_bdl_wire``:
+    Optional BDL output wires of lyt.
+
+Parameter ``input_bdl_wire_direction``:
+    Optional BDL input wire directions of lyt.
+
 Returns:
     A pair containing the operational status of the gate layout
     (either `OPERATIONAL` or `NON_OPERATIONAL`) and the number of
@@ -12870,6 +13646,10 @@ Returns:
 static const char *__doc_fiction_is_operational_params = R"doc(Parameters for the `is_operational` algorithm.)doc";
 
 static const char *__doc_fiction_is_operational_params_input_bdl_iterator_params = R"doc(Parameters for the BDL input iterator.)doc";
+
+static const char *__doc_fiction_is_operational_params_op_condition =
+R"doc(Condition which is used to decide if a layout is `operational` or
+`non-operational`.)doc";
 
 static const char *__doc_fiction_is_operational_params_sim_engine =
 R"doc(The simulation engine to be used for the operational domain
@@ -12923,7 +13703,7 @@ static const char *__doc_fiction_is_sidb_gate_design_impossible_params =
 R"doc(This struct contains parameters to determine if SiDB gate design is
 impossible.)doc";
 
-static const char *__doc_fiction_is_sidb_gate_design_impossible_params_input_bdl_iterator_params = R"doc(Parameters for the BDL input iterator.)doc";
+static const char *__doc_fiction_is_sidb_gate_design_impossible_params_bdl_iterator_params = R"doc(Parameters used for the BDL input iterator.)doc";
 
 static const char *__doc_fiction_is_sidb_gate_design_impossible_params_simulation_params = R"doc(All parameters for physical SiDB simulations.)doc";
 
@@ -13255,7 +14035,7 @@ i.e., start at `(0, 0)` and are all positive. To this end, all
 existing coordinates are shifted by an x and y offset.
 
 Template parameter ``Lyt``:
-    Cell-level layout type.
+    SiDB cell-level layout type.
 
 Parameter ``lyt``:
     The layout which is to be normalized.
@@ -13281,9 +14061,9 @@ Returns:
 
 static const char *__doc_fiction_num_clks = R"doc()doc";
 
-static const char *__doc_fiction_num_clks_FOUR = R"doc()doc";
+static const char *__doc_fiction_num_clks_FOUR = R"doc(Four clocks.)doc";
 
-static const char *__doc_fiction_num_clks_THREE = R"doc()doc";
+static const char *__doc_fiction_num_clks_THREE = R"doc(Three clocks.)doc";
 
 static const char *__doc_fiction_num_constant_fanins =
 R"doc(Computes the number of constant fanin nodes of some network node `n`.
@@ -13568,7 +14348,7 @@ Template parameter ``Ntk``:
     The type of the input network.
 
 Template parameter ``CellLyt``:
-    Cell-level layout type.
+    SiDB cell-level layout type.
 
 Template parameter ``GateLyt``:
     Gate-level layout type.
@@ -13596,7 +14376,7 @@ R"doc(This struct stores the parameters to design an SiDB circuit on a
 defective surface.
 
 Template parameter ``CellLyt``:
-    Cell-level layout type.)doc";
+    SiDB cell-level layout type.)doc";
 
 static const char *__doc_fiction_on_the_fly_circuit_design_params_exact_design_parameters = R"doc(Parameters for the *exact* placement and routing algorithm.)doc";
 
@@ -13622,6 +14402,18 @@ Parameter ``n``:
 
 Returns:
     Irregular clocking scheme.)doc";
+
+static const char *__doc_fiction_operational_condition =
+R"doc(Condition which is used to decide if a layout is `operational` or
+`non-operational`.)doc";
+
+static const char *__doc_fiction_operational_condition_REJECT_KINKS =
+R"doc(The I/O pins are not allowed to show kinks. If kinks exist, the layout
+is considered as `non-operational`.)doc";
+
+static const char *__doc_fiction_operational_condition_TOLERATE_KINKS =
+R"doc(Even if the I/O pins show kinks, the layout is still considered as
+`operational`.)doc";
 
 static const char *__doc_fiction_operational_domain =
 R"doc(An operational domain is a set of simulation parameter values for
@@ -13841,20 +14633,9 @@ static const char *__doc_fiction_operational_domain_params =
 R"doc(Parameters for the operational domain computation. The parameters are
 used across the different operational domain computation algorithms.)doc";
 
-static const char *__doc_fiction_operational_domain_params_bdl_params =
-R"doc(The parameters for the BDL pair detection, which is necessary during
-the operational domain computation to detect input and output BDL
-pairs.)doc";
-
-static const char *__doc_fiction_operational_domain_params_sim_engine =
-R"doc(The simulation engine to be used for the operational domain
-computation.)doc";
-
-static const char *__doc_fiction_operational_domain_params_simulation_parameters =
-R"doc(The simulation parameters for the operational domain computation. Most
-parameters will be kept constant across sweeps, but the sweep
-parameters are adjusted in each simulation step and thus overwritten
-in this object.)doc";
+static const char *__doc_fiction_operational_domain_params_operational_params =
+R"doc(The parameters used to determine if a layout is operational or non-
+operational.)doc";
 
 static const char *__doc_fiction_operational_domain_params_sweep_dimensions =
 R"doc(The dimensions to sweep over together with their value ranges, ordered
@@ -14256,21 +15037,23 @@ tile. Useful, when no exact port locations within a tile are needed.)doc";
 
 static const char *__doc_fiction_port_direction_cardinal = R"doc(Cardinal direction.)doc";
 
-static const char *__doc_fiction_port_direction_cardinal_EAST = R"doc()doc";
+static const char *__doc_fiction_port_direction_cardinal_EAST = R"doc(East direction.)doc";
 
-static const char *__doc_fiction_port_direction_cardinal_NORTH = R"doc()doc";
+static const char *__doc_fiction_port_direction_cardinal_NONE = R"doc(None direction.)doc";
 
-static const char *__doc_fiction_port_direction_cardinal_NORTH_EAST = R"doc()doc";
+static const char *__doc_fiction_port_direction_cardinal_NORTH = R"doc(North direction.)doc";
 
-static const char *__doc_fiction_port_direction_cardinal_NORTH_WEST = R"doc()doc";
+static const char *__doc_fiction_port_direction_cardinal_NORTH_EAST = R"doc(North-East direction.)doc";
 
-static const char *__doc_fiction_port_direction_cardinal_SOUTH = R"doc()doc";
+static const char *__doc_fiction_port_direction_cardinal_NORTH_WEST = R"doc(North-West direction.)doc";
 
-static const char *__doc_fiction_port_direction_cardinal_SOUTH_EAST = R"doc()doc";
+static const char *__doc_fiction_port_direction_cardinal_SOUTH = R"doc(South direction.)doc";
 
-static const char *__doc_fiction_port_direction_cardinal_SOUTH_WEST = R"doc()doc";
+static const char *__doc_fiction_port_direction_cardinal_SOUTH_EAST = R"doc(South-East direction.)doc";
 
-static const char *__doc_fiction_port_direction_cardinal_WEST = R"doc()doc";
+static const char *__doc_fiction_port_direction_cardinal_SOUTH_WEST = R"doc(South-West direction.)doc";
+
+static const char *__doc_fiction_port_direction_cardinal_WEST = R"doc(West direction.)doc";
 
 static const char *__doc_fiction_port_direction_dir = R"doc(Direction.)doc";
 
@@ -14440,6 +15223,14 @@ static const char *__doc_fiction_post_layout_optimization_params_planar_optimiza
 R"doc(Disable the creation of crossings during optimization. If set to true,
 gates will only be relocated if a crossing-free wiring is found.
 Defaults to false.)doc";
+
+static const char *__doc_fiction_post_layout_optimization_params_timeout =
+R"doc(Timeout limit (in ms). Specifies the maximum allowed time in
+milliseconds for the optimization process. For large layouts, the
+actual execution time may slightly exceed this limit because it's
+impractical to check the timeout at every algorithm step and the
+functional correctness has to be ensured by completing essential
+algorithm steps.)doc";
 
 static const char *__doc_fiction_post_layout_optimization_stats =
 R"doc(This struct stores statistics about the post-layout optimization
@@ -14786,6 +15577,8 @@ energy) of a given (already initialized) charge distribution layout.
 Depending on the simulation parameters, the ground state is found with
 a certain probability after one run.
 
+@note *QuickSim* currently does not support atomic defect simulation.
+
 Template parameter ``Lyt``:
     SiDB cell-level layout type.
 
@@ -15055,7 +15848,7 @@ static const char *__doc_fiction_read_sqd_layout =
 R"doc(Reads a cell-level SiDB layout from an sqd file provided as an input
 stream. The format is used by SiQAD (https://github.com/siqad/siqad).
 
-If The provided cell-level layout type can represent SiDB defects,
+If the provided cell-level layout type can represent SiDB defects,
 they will be parsed from the sqd file as well.
 
 May throw an `sqd_parsing_exception` if the sqd file is malformed.
@@ -16079,7 +16872,8 @@ Template parameter ``GateLyt``:
     surface.
 
 Template parameter ``CellLyt``:
-    Cell-level layout type that is underlying to the SiDB surface.
+    SiDB cell-level layout type that is underlying to the SiDB
+    surface.
 
 Parameter ``gate_lyt``:
     Gate-level layout instance that specifies the aspect ratio.
@@ -16110,6 +16904,8 @@ static const char *__doc_fiction_sidb_technology_cell_mark_EMPTY = R"doc()doc";
 
 static const char *__doc_fiction_sidb_technology_cell_mark_INPUT = R"doc()doc";
 
+static const char *__doc_fiction_sidb_technology_cell_mark_LOGIC = R"doc()doc";
+
 static const char *__doc_fiction_sidb_technology_cell_mark_OUTPUT = R"doc()doc";
 
 static const char *__doc_fiction_sidb_technology_cell_mode = R"doc(SiDB cells do not have modes.)doc";
@@ -16120,6 +16916,8 @@ static const char *__doc_fiction_sidb_technology_cell_type_EMPTY = R"doc(Symbol 
 
 static const char *__doc_fiction_sidb_technology_cell_type_INPUT = R"doc(Symbol used for input SiDB cells.)doc";
 
+static const char *__doc_fiction_sidb_technology_cell_type_LOGIC = R"doc(Symbol used for logic SiDB cells (e.g. canvas SiDBs).)doc";
+
 static const char *__doc_fiction_sidb_technology_cell_type_NORMAL = R"doc(Symbol used for normal SiDB cells.)doc";
 
 static const char *__doc_fiction_sidb_technology_cell_type_OUTPUT = R"doc(Symbol used for output SiDB cells.)doc";
@@ -16127,6 +16925,8 @@ static const char *__doc_fiction_sidb_technology_cell_type_OUTPUT = R"doc(Symbol
 static const char *__doc_fiction_sidb_technology_is_empty_cell = R"doc()doc";
 
 static const char *__doc_fiction_sidb_technology_is_input_cell = R"doc()doc";
+
+static const char *__doc_fiction_sidb_technology_is_logic_cell = R"doc()doc";
 
 static const char *__doc_fiction_sidb_technology_is_normal_cell = R"doc()doc";
 
@@ -17609,9 +18409,21 @@ Template parameter ``Lyt``:
 Parameter ``lyt``:
     The 2DDWave-clocked layout whose wiring is to be reduced.
 
+Parameter ``ps``:
+    Parameters.
+
 Parameter ``pst``:
-    Pointer to a `wiring_reduction_stats` object to record runtime
-    statistics.)doc";
+    Statistics.)doc";
+
+static const char *__doc_fiction_wiring_reduction_params = R"doc(Parameters for the wiring reduction algorithm.)doc";
+
+static const char *__doc_fiction_wiring_reduction_params_timeout =
+R"doc(Timeout limit (in ms). Specifies the maximum allowed time in
+milliseconds for the optimization process. For large layouts, the
+actual execution time may slightly exceed this limit because it's
+impractical to check the timeout at every algorithm step and the
+functional correctness has to be ensured by completing essential
+algorithm steps.)doc";
 
 static const char *__doc_fiction_wiring_reduction_stats = R"doc(This struct stores statistics about the wiring reduction process.)doc";
 
@@ -17748,7 +18560,7 @@ charge distribution of the ground state(s) to a file.
 This overload uses an output stream to write into.
 
 Template parameter ``Lyt``:
-    Cell-level SiDB layout type.
+    SiDB cell-level SiDB layout type.
 
 Parameter ``sim_result``:
     The simulation result to write.
@@ -17763,7 +18575,7 @@ charge distribution of the ground state(s) to a file.
 This overload uses a file name to create and write into.
 
 Template parameter ``Lyt``:
-    Cell-level SiDB layout type.
+    SiDB cell-level SiDB layout type.
 
 Template parameter ``sim_result``:
     The simulation result to write.
@@ -18091,7 +18903,7 @@ technology platform.
 This overload uses an output stream to write into.
 
 Template parameter ``Lyt``:
-    Cell-level SiDB layout type.
+    SiDB cell-level SiDB layout type.
 
 Parameter ``sim_result``:
     The simulation result to write.
@@ -18107,7 +18919,7 @@ technology platform.
 This overload uses a file name to create and write into.
 
 Template parameter ``Lyt``:
-    Cell-level SiDB layout type.
+    SiDB cell-level SiDB layout type.
 
 Parameter ``sim_result``:
     The simulation result to write.

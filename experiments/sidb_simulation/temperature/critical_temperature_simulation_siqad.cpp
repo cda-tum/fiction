@@ -30,7 +30,7 @@ int main()  // NOLINT
         "E_{g,err} [meV]",
     };
 
-    static const std::string folder = fmt::format("{}siqad_gates_type_tags/", EXPERIMENTS_PATH);
+    static const std::string folder = fmt::format("{}sidb_gate_libraries/siqad_gates/", EXPERIMENTS_PATH);
 
     static const std::array<std::pair<std::string, std::vector<tt>>, 5> gates = {
         std::make_pair("and", std::vector<tt>{create_and_tt()}),
@@ -45,23 +45,20 @@ int main()  // NOLINT
     // Quantum Dot Circuits\" by Samuel Sze Hang Ng, Jacob Retallick, Hsi Nien Chiu, Robert Lupoiu, Lucian Livadaru,
     // Taleana Huff, Mohammad Rashidi, Wyatt Vine, Thomas Dienel, Robert A. Wolkow, and Konrad Walus in IEEE
     // TRANSACTIONS ON NANOTECHNOLOGY, Volume 19, 2020. (https://ieeexplore.ieee.org/abstract/document/8963859)
-    ct_params.input_bdl_iterator_params.input_bdl_config =
+    ct_params.input_iterator_params.input_bdl_config =
         bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED;
 
     for (const auto& [gate, truth_table] : gates)
     {
-        for (const auto& file : std::filesystem::directory_iterator(fmt::format("{}{}", folder, gate)))
-        {
-            const auto layout = read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(file.path().string());
+        const auto layout = read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}/{}.sqd", folder, gate));
 
-            critical_temperature_stats ct_stats{};
-            const auto                 ct =
-                critical_temperature_gate_based<sidb_100_cell_clk_lyt_siqad>(layout, truth_table, ct_params, &ct_stats);
+        critical_temperature_stats ct_stats{};
+        const auto                 ct =
+            critical_temperature_gate_based<sidb_100_cell_clk_lyt_siqad>(layout, truth_table, ct_params, &ct_stats);
 
-            simulation_exp(gate, ct, ct_stats.energy_between_ground_state_and_first_erroneous);
-            simulation_exp.save();
-            simulation_exp.table();
-        }
+        simulation_exp(gate, ct, ct_stats.energy_between_ground_state_and_first_erroneous);
+        simulation_exp.save();
+        simulation_exp.table();
     }
     return EXIT_SUCCESS;
 }

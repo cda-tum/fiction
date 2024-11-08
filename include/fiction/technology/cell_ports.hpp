@@ -87,14 +87,42 @@ struct port_direction
      */
     enum cardinal : uint8_t
     {
+        /**
+         * North direction.
+         */
         NORTH = 0,
+        /**
+         * North-East direction.
+         */
         NORTH_EAST,
+        /**
+         * East direction.
+         */
         EAST,
+        /**
+         * South-East direction.
+         */
         SOUTH_EAST,
+        /**
+         * South direction.
+         */
         SOUTH,
+        /**
+         * South-West direction.
+         */
         SOUTH_WEST,
+        /**
+         * West direction.
+         */
         WEST,
-        NORTH_WEST
+        /**
+         * North-West direction.
+         */
+        NORTH_WEST,
+        /**
+         * None direction.
+         */
+        NONE
     };
     /**
      * Default constructor.

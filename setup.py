@@ -100,7 +100,7 @@ with open(README_PATH, encoding="utf8") as readme_file:
 
 setup(
     name='mnt.pyfiction',
-    version='0.6.4',
+    version='0.6.5',
     author='Marcel Walter',
     author_email='marcel.walter@tum.de',
     description='Design Automation for Field-coupled Nanotechnologies',

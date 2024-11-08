@@ -196,6 +196,19 @@ Furthermore, if you use any of the design automation algorithms, please consider
 
     `Post-layout optimization experiment script <https://github.com/cda-tum/fiction/tree/main/experiments/post_layout_optimization>`_
 
+* :ref:`Wiring reduction <wiring_reduction>` (``wiring_reduction``):
+
+    .. code-block:: tex
+
+        @inproceedings{hofmann2024wiring,
+          title = {{Late Breaking Results: Wiring Reduction for Field-coupled Nanotechnologies}},
+          author = {Hofmann, Simon and Walter, Marcel and Wille, Robert},
+          booktitle={Design Automation Conference (DAC)},
+          year = {2024}
+        }
+
+    `Wiring reduction experiment script <https://github.com/cda-tum/fiction/tree/main/experiments/wiring_reduction>`_
+
 * :ref:`Graph-oriented layout design <graph_oriented_layout_design>` (``gold``):
 
     .. code-block:: tex

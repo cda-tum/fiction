@@ -81,10 +81,12 @@ class opdom_command : public command
             "--omit_non_op_samples,-o", omit_non_operational_samples,
             "Omit non-operational samples in the CSV file to reduce file size and increase visibility in 3D plots");
 
-        add_option("--epsilon_r,-e", simulation_params.epsilon_r, "Electric permittivity of the substrate (unit-less)",
-                   true);
-        add_option("--lambda_tf,-l", simulation_params.lambda_tf, "Thomas-Fermi screening distance (unit: nm)", true);
-        add_option("--mu_minus,-m", simulation_params.mu_minus, "Energy transition level (0/-) (unit: eV)", true);
+        add_option("--epsilon_r,-e", params.operational_params.simulation_parameters.epsilon_r,
+                   "Electric permittivity of the substrate (unit-less)", true);
+        add_option("--lambda_tf,-l", params.operational_params.simulation_parameters.lambda_tf,
+                   "Thomas-Fermi screening distance (unit: nm)", true);
+        add_option("--mu_minus,-m", params.operational_params.simulation_parameters.mu_minus,
+                   "Energy transition level (0/-) (unit: eV)", true);
 
         add_option("--x_sweep,-x", x_sweep, "Sweep parameter of the x dimension [epsilon_r, lambda_tf, mu_minus]",
                    true);
@@ -134,13 +136,13 @@ class opdom_command : public command
             return;
         }
 
-        if (simulation_params.epsilon_r <= 0)
+        if (params.operational_params.simulation_parameters.epsilon_r <= 0)
         {
             env->out() << "[e] epsilon_r must be positive" << std::endl;
             reset_params();
             return;
         }
-        if (simulation_params.lambda_tf <= 0)
+        if (params.operational_params.simulation_parameters.lambda_tf <= 0)
         {
             env->out() << "[e] lambda_tf must be positive" << std::endl;
             reset_params();
@@ -285,9 +287,9 @@ class opdom_command : public command
                 }
 
                 // set parameters
-                params.simulation_parameters = simulation_params;
-                params.sim_engine            = fiction::sidb_simulation_engine::QUICKEXACT;
-                params.sweep_dimensions      = sweep_dimensions;
+                params.operational_params.simulation_parameters = simulation_params;
+                params.operational_params.sim_engine            = fiction::sidb_simulation_engine::QUICKEXACT;
+                params.sweep_dimensions                         = sweep_dimensions;
 
                 try
                 {

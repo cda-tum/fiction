@@ -73,20 +73,20 @@ TEMPLATE_TEST_CASE("Single SiDB QuickSim simulation", "[quicksim]", (sidb_100_ce
 }
 
 template <typename Lyt>
-void check_for_absence_of_positive_charges(const sidb_simulation_result<Lyt>& stats) noexcept
+void check_for_absence_of_positive_charges(const sidb_simulation_result<Lyt>& simulation_results) noexcept
 {
-    REQUIRE(!stats.charge_distributions.empty());
+    REQUIRE(!simulation_results.charge_distributions.empty());
 
-    for (const auto& lyt : stats.charge_distributions)
+    for (const auto& lyt : simulation_results.charge_distributions)
     {
         CHECK(!lyt.charge_exists(sidb_charge_state::POSITIVE));
     }
 }
 
 template <typename Lyt>
-void check_for_runtime_measurement(const sidb_simulation_result<Lyt>& stats) noexcept
+void check_for_runtime_measurement(const sidb_simulation_result<Lyt>& simulation_results) noexcept
 {
-    CHECK(stats.simulation_runtime.count() > 0);
+    CHECK(simulation_results.simulation_runtime.count() > 0);
 }
 
 TEMPLATE_TEST_CASE("QuickSim simulation of several SiDBs with varying thread counts", "[quicksim]",
@@ -184,11 +184,11 @@ TEMPLATE_TEST_CASE("QuickSim simulation of an SiDB layout comprising of 10 SiDBs
 
     REQUIRE(quicksim_params.simulation_parameters.mu_minus == -0.32);
 
-    const auto check_charge_configuration = [](const sidb_simulation_result<TestType>& stats) noexcept
+    const auto check_charge_configuration = [](const sidb_simulation_result<TestType>& simulation_results) noexcept
     {
-        REQUIRE(!stats.charge_distributions.empty());
+        REQUIRE(!simulation_results.charge_distributions.empty());
 
-        const auto& charge_lyt_first = stats.charge_distributions.front();
+        const auto& charge_lyt_first = simulation_results.charge_distributions.front();
 
         CHECK(charge_lyt_first.get_charge_state({-13, -1, 1}) == sidb_charge_state::NEGATIVE);
 
@@ -282,11 +282,11 @@ TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shaped SiDB arrangement with vary
 
     REQUIRE(quicksim_params.simulation_parameters.mu_minus == -0.32);
 
-    const auto check_charge_configuration = [](const sidb_simulation_result<TestType>& stats) noexcept
+    const auto check_charge_configuration = [](const sidb_simulation_result<TestType>& simulation_results) noexcept
     {
-        REQUIRE(!stats.charge_distributions.empty());
+        REQUIRE(!simulation_results.charge_distributions.empty());
 
-        const auto& charge_lyt_first = stats.charge_distributions.front();
+        const auto& charge_lyt_first = simulation_results.charge_distributions.front();
 
         CHECK(charge_lyt_first.get_charge_state({-11, -2, 0}) == sidb_charge_state::NEGATIVE);
         CHECK(charge_lyt_first.get_charge_state({-10, -1, 0}) == sidb_charge_state::NEUTRAL);
@@ -366,18 +366,17 @@ TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shaped SiDB OR gate with input 01
     lyt.assign_cell_type({10, 8, 1}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({16, 1, 0}, TestType::cell_type::NORMAL);
 
-    const sidb_simulation_result<TestType> quicksim_stats{};
-    const sidb_simulation_parameters       params{2, -0.28};
+    const sidb_simulation_parameters params{2, -0.28};
 
     quicksim_params quicksim_params{params};
 
     REQUIRE(quicksim_params.simulation_parameters.mu_minus == -0.28);
 
-    const auto check_charge_configuration = [](const sidb_simulation_result<TestType>& stats) noexcept
+    const auto check_charge_configuration = [](const sidb_simulation_result<TestType>& sim_results) noexcept
     {
-        REQUIRE(!stats.charge_distributions.empty());
+        REQUIRE(!sim_results.charge_distributions.empty());
 
-        const auto& charge_lyt_first = stats.charge_distributions.front();
+        const auto& charge_lyt_first = sim_results.charge_distributions.front();
 
         CHECK(charge_lyt_first.get_charge_state({12, 3, 0}) == sidb_charge_state::NEGATIVE);
         CHECK(charge_lyt_first.get_charge_state({10, 8, 1}) == sidb_charge_state::NEGATIVE);
@@ -555,13 +554,13 @@ TEMPLATE_TEST_CASE("QuickSim simulation of an layout comprising of 13 SiDBs", "[
     REQUIRE(quicksim_params.simulation_parameters.mu_minus == -0.32);
 
     // lambda function to check charge configurations
-    const auto check_charge_configuration = [](const sidb_simulation_result<TestType>& stats) noexcept
+    const auto check_charge_configuration = [](const sidb_simulation_result<TestType>& sim_results) noexcept
     {
-        REQUIRE(!stats.charge_distributions.empty());
+        REQUIRE(!sim_results.charge_distributions.empty());
 
-        REQUIRE(!energy_distribution(stats.charge_distributions).empty());
+        REQUIRE(!energy_distribution(sim_results.charge_distributions).empty());
 
-        const auto& charge_lyt_first = stats.charge_distributions.front();
+        const auto& charge_lyt_first = sim_results.charge_distributions.front();
 
         charge_lyt_first.foreach_cell(
             [&](const auto& cell)
@@ -653,20 +652,19 @@ TEMPLATE_TEST_CASE("QuickSim simulation of an layout comprising of 13 SiDBs, all
 
     lyt.assign_cell_type({30, 15, 0}, TestType::cell_type::NORMAL);
 
-    const sidb_simulation_result<TestType> quicksim_stats{};
-    const sidb_simulation_parameters       params{2, -0.32};
+    const sidb_simulation_parameters params{2, -0.32};
 
     quicksim_params quicksim_params{params};
 
     REQUIRE(quicksim_params.simulation_parameters.mu_minus == -0.32);
 
-    const auto check_charge_configuration = [](const sidb_simulation_result<TestType>& stats) noexcept
+    const auto check_charge_configuration = [](const sidb_simulation_result<TestType>& simulation_results) noexcept
     {
-        REQUIRE(!stats.charge_distributions.empty());
+        REQUIRE(!simulation_results.charge_distributions.empty());
 
-        REQUIRE(!energy_distribution(stats.charge_distributions).empty());
+        REQUIRE(!energy_distribution(simulation_results.charge_distributions).empty());
 
-        const auto& charge_lyt_first = stats.charge_distributions.front();
+        const auto& charge_lyt_first = simulation_results.charge_distributions.front();
 
         charge_lyt_first.foreach_cell(
             [&](const auto& cell) { CHECK(charge_lyt_first.get_charge_state(cell) == sidb_charge_state::NEGATIVE); });
@@ -908,11 +906,11 @@ TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shaped SiDB arrangement with vary
 
     REQUIRE(quicksim_params.simulation_parameters.mu_minus == -0.32);
 
-    const auto check_charge_configuration = [](const sidb_simulation_result<TestType>& stats) noexcept
+    const auto check_charge_configuration = [](const sidb_simulation_result<TestType>& simulation_results) noexcept
     {
-        REQUIRE(!stats.charge_distributions.empty());
+        REQUIRE(!simulation_results.charge_distributions.empty());
 
-        const auto& charge_lyt_first = stats.charge_distributions.front();
+        const auto& charge_lyt_first = simulation_results.charge_distributions.front();
 
         CHECK(charge_lyt_first.get_charge_state(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{-11, -2, 0})) ==
               sidb_charge_state::NEGATIVE);
