@@ -79,6 +79,12 @@ jobs:
       - name: Setup TBB
         run: brew install tbb
 
+      - name: Setup XCode version
+        if: matrix.os == 'macos-13'
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: "^14.2"
+
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
