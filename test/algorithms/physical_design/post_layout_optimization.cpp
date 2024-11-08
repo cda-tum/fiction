@@ -123,6 +123,14 @@ TEST_CASE("Layout equivalence", "[post_layout_optimization]")
             post_layout_optimization<gate_layout>(layout_corner_case_2, {}, &stats_corner_case_2);
             check_eq(blueprints::optimization_layout_corner_case_outputs_2<gate_layout>(), layout_corner_case_2);
         }
+
+        SECTION("optimization_layout_corner_case_inputs")
+        {
+            const auto layout_corner_case_3 = blueprints::optimization_layout_corner_case_inputs<gate_layout>();
+            post_layout_optimization_stats stats_corner_case_3{};
+            post_layout_optimization<gate_layout>(layout_corner_case_3, {}, &stats_corner_case_3);
+            check_eq(blueprints::optimization_layout_corner_case_inputs<gate_layout>(), layout_corner_case_3);
+        }
     }
 
     SECTION("Maximum gate relocations")

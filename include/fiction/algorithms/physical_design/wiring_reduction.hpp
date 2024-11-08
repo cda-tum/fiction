@@ -1037,12 +1037,10 @@ void delete_wires(Lyt& lyt, WiringReductionLyt& wiring_reduction_layout,
     }
 
     // calculate bounding box for optimized layout size
-    const auto bounding_box            = bounding_box_2d(lyt);
-    const auto optimized_layout_width  = bounding_box.get_x_size();
-    const auto optimized_layout_height = bounding_box.get_y_size();
+    const auto bounding_box = bounding_box_2d(lyt);
 
     // resize the layout to the optimized size
-    lyt.resize({optimized_layout_width, optimized_layout_height, lyt.z()});
+    lyt.resize({bounding_box.get_max().x, bounding_box.get_max().y, lyt.z()});
 }
 
 template <typename Lyt>
