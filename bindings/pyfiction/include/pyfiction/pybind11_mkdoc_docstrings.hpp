@@ -8912,9 +8912,9 @@ static const char *__doc_fiction_detail_write_sidb_layout_svg_impl_run = R"doc(R
 
 static const char *__doc_fiction_detail_write_sidb_layout_svg_impl_set_colors = R"doc(Sets the colors based on the color mode.)doc";
 
-static const char *__doc_fiction_detail_write_sidb_layout_svg_impl_sidb_dot = R"doc(The color of the SiDB dots without charge information.)doc";
+static const char *__doc_fiction_detail_write_sidb_layout_svg_impl_sidb_color = R"doc(The color of the SiDB without charge information.)doc";
 
-static const char *__doc_fiction_detail_write_sidb_layout_svg_impl_sidb_dot_line_color = R"doc(The edge color of the SiDB without charge information.)doc";
+static const char *__doc_fiction_detail_write_sidb_layout_svg_impl_sidb_edge_color = R"doc(The edge color of the SiDB without charge information.)doc";
 
 static const char *__doc_fiction_detail_write_sidb_layout_svg_impl_write_sidb_layout_svg_impl = R"doc(Constructor.)doc";
 
@@ -18691,11 +18691,11 @@ Parameter ``ps``:
 
 static const char *__doc_fiction_write_sidb_layout_svg_in_siqad_style_params = R"doc(Parameters for writing SiDB layouts in SVG format.)doc";
 
-static const char *__doc_fiction_write_sidb_layout_svg_in_siqad_style_params_border_width = R"doc(Border width of the SiDB.)doc";
-
-static const char *__doc_fiction_write_sidb_layout_svg_in_siqad_style_params_cmode = R"doc(The color mode for the SVG output.)doc";
+static const char *__doc_fiction_write_sidb_layout_svg_in_siqad_style_params_color_background = R"doc(The color mode of the background for the SVG output.)doc";
 
 static const char *__doc_fiction_write_sidb_layout_svg_in_siqad_style_params_lattice_point_size = R"doc(Size of the H-Si lattice points in SVG units.)doc";
+
+static const char *__doc_fiction_write_sidb_layout_svg_in_siqad_style_params_sidb_edge_width = R"doc(Edge width of the SiDB.)doc";
 
 static const char *__doc_fiction_write_sidb_layout_svg_in_siqad_style_params_sidb_size = R"doc(Size of the SiDB in SVG units.)doc";
 
