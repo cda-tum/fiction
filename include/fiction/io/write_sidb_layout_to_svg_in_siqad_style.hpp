@@ -72,7 +72,7 @@ static constexpr const char* PATH_DEFINITION_TEMPLATE = R"(
     <!-- lattice point -->
     <circle id="lattice_point" cx="0" cy="0" r="{0}"/>
     <!-- SiDB -->
-    <circle id="sidb_dot" cx="0" cy="0" r="{1}"/>
+    <circle id="sidb_color" cx="0" cy="0" r="{1}"/>
 </defs>
 )";
 
@@ -106,13 +106,13 @@ struct write_sidb_layout_svg_in_siqad_style_params
      */
     double sidb_size = 0.9;
     /**
-     * Border width of the SiDB.
+     * Edge width of the SiDB.
      */
-    double border_width = 0.3;
+    double sidb_edge_width = 0.3;
     /**
-     * The color mode for the SVG output.
+     * The color mode of the background for the SVG output.
      */
-    color_mode cmode = color_mode::DARK;
+    color_mode color_background = color_mode::DARK;
 };
 
 namespace detail
@@ -160,31 +160,31 @@ class write_sidb_layout_svg_impl
      */
     std::string background_color;
     /**
-     * The color of the SiDB dots without charge information.
+     * The color of the SiDB without charge information.
      */
-    std::string sidb_dot;
+    std::string sidb_color;
     /**
      * The edge color of the SiDB without charge information.
      */
-    std::string sidb_dot_line_color;
+    std::string sidb_edge_color;
     /**
      * Sets the colors based on the color mode.
      */
     void set_colors() noexcept
     {
-        if (ps.cmode == color_mode::LIGHT)
+        if (ps.color_background == color_mode::LIGHT)
         {
             // fiction namespace is needed to avoid windows and linux conflict
             background_color    = fiction::svg::BACKGROUND_COLOR_BRIGHT;
-            sidb_dot            = fiction::svg::SIDB_DOT_BRIGHT_MODE;
-            sidb_dot_line_color = fiction::svg::SIDB_DOT_LINE_COLOR_BRIGHT_MODE;
+            sidb_color          = fiction::svg::SIDB_DOT_BRIGHT_MODE;
+            sidb_edge_color     = fiction::svg::SIDB_DOT_LINE_COLOR_BRIGHT_MODE;
         }
         else
         {
             // fiction namespace is needed to avoid windows and linux conflict
             background_color    = fiction::svg::BACKGROUND_COLOR_DARK;
-            sidb_dot            = fiction::svg::SIDB_DOT_DARK_MODE;
-            sidb_dot_line_color = fiction::svg::SIDB_DOT_LINE_COLOR_DARK_MODE;
+            sidb_color          = fiction::svg::SIDB_DOT_DARK_MODE;
+            sidb_edge_color     = fiction::svg::SIDB_DOT_LINE_COLOR_DARK_MODE;
         }
     }
 
@@ -202,8 +202,8 @@ class write_sidb_layout_svg_impl
     [[nodiscard]] std::string generate_sidb(const double x, const double y,
                                             const std::optional<sidb_charge_state>& charge_state = std::nullopt) const
     {
-        std::string fill_color   = sidb_dot;
-        std::string border_color = sidb_dot_line_color;
+        std::string fill_color   = sidb_color;
+        std::string border_color = sidb_edge_color;
 
         auto fill_opacity = 1.0;
 
@@ -238,8 +238,8 @@ class write_sidb_layout_svg_impl
         }
 
         return fmt::format(
-            R"(<use xlink:href="#sidb_dot" x="{0}" y="{1}" style="fill:{2}; fill-opacity:{3}; stroke:{4}; stroke-width:{5};"/>)",
-            x, y, fill_color, fill_opacity, border_color, ps.border_width);
+            R"(<use xlink:href="#sidb_color" x="{0}" y="{1}" style="fill:{2}; fill-opacity:{3}; stroke:{4}; stroke-width:{5};"/>)",
+            x, y, fill_color, fill_opacity, border_color, ps.sidb_edge_width);
     }
 
     /**
@@ -284,6 +284,8 @@ class write_sidb_layout_svg_impl
         {
             // Shift coordinates for alignment
             auto shifted_cell = cell;
+
+            // shift for padding
             shifted_cell.x += 1;
             shifted_cell.y += 2;
 
@@ -303,6 +305,9 @@ class write_sidb_layout_svg_impl
         };
 
         auto shifted_max = max_coord;
+
+        // shift for padding
+
         shifted_max.x += 2;
         shifted_max.y += 3;
 

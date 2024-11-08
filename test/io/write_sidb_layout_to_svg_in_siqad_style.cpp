@@ -65,12 +65,12 @@ const std::string EXPECTED_SVG_LIGHT_CELL_LEVEL = fmt::format(R"(<?xml version="
     <!-- lattice point -->
     <circle id="lattice_point" cx="0" cy="0" r="0.3"/>
     <!-- SiDB -->
-    <circle id="sidb_dot" cx="0" cy="0" r="0.9"/>
+    <circle id="sidb_color" cx="0" cy="0" r="0.9"/>
 </defs>
  <!-- PATH_DEFINITION placeholder -->
     <rect x="0" y="0" width="19.2" height="23.04" style="fill:#ffffff;"/> <!-- Background rectangle placeholder -->
     <g>
-        <use xlink:href="#lattice_point" x="3.84" y="7.68" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="7.68" y="7.68" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="11.52" y="7.68" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="15.36" y="7.68" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="3.84" y="9.93" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="7.68" y="9.93" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="11.52" y="9.93" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="15.36" y="9.93" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="3.84" y="15.36" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="7.68" y="15.36" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="11.52" y="15.36" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="15.36" y="15.36" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="3.84" y="17.61" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="7.68" y="17.61" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="11.52" y="17.61" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="15.36" y="17.61" style="fill:#6e7175;"/><use xlink:href="#sidb_dot" x="3.84" y="7.68" style="fill:#ffffff; fill-opacity:1; stroke:#C8C8C8; stroke-width:0.3;"/><use xlink:href="#sidb_dot" x="7.68" y="7.68" style="fill:#ffffff; fill-opacity:1; stroke:#C8C8C8; stroke-width:0.3;"/><use xlink:href="#sidb_dot" x="7.68" y="9.93" style="fill:#ffffff; fill-opacity:1; stroke:#C8C8C8; stroke-width:0.3;"/><use xlink:href="#sidb_dot" x="15.36" y="17.61" style="fill:#ffffff; fill-opacity:1; stroke:#C8C8C8; stroke-width:0.3;"/> <!-- SVG content placeholder -->
+        <use xlink:href="#lattice_point" x="3.84" y="7.68" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="7.68" y="7.68" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="11.52" y="7.68" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="15.36" y="7.68" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="3.84" y="9.93" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="7.68" y="9.93" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="11.52" y="9.93" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="15.36" y="9.93" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="3.84" y="15.36" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="7.68" y="15.36" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="11.52" y="15.36" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="15.36" y="15.36" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="3.84" y="17.61" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="7.68" y="17.61" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="11.52" y="17.61" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="15.36" y="17.61" style="fill:#6e7175;"/><use xlink:href="#sidb_color" x="3.84" y="7.68" style="fill:#ffffff; fill-opacity:1; stroke:#C8C8C8; stroke-width:0.3;"/><use xlink:href="#sidb_color" x="7.68" y="7.68" style="fill:#ffffff; fill-opacity:1; stroke:#C8C8C8; stroke-width:0.3;"/><use xlink:href="#sidb_color" x="7.68" y="9.93" style="fill:#ffffff; fill-opacity:1; stroke:#C8C8C8; stroke-width:0.3;"/><use xlink:href="#sidb_color" x="15.36" y="17.61" style="fill:#ffffff; fill-opacity:1; stroke:#C8C8C8; stroke-width:0.3;"/> <!-- SVG content placeholder -->
     </g>
 </svg>)",
                                                               FICTION_VERSION, FICTION_REPO);
@@ -101,12 +101,12 @@ const std::string EXPECTED_SVG_LIGHT_CELL_LEVEL_111 =
     <!-- lattice point -->
     <circle id="lattice_point" cx="0" cy="0" r="0.3"/>
     <!-- SiDB -->
-    <circle id="sidb_dot" cx="0" cy="0" r="0.9"/>
+    <circle id="sidb_color" cx="0" cy="0" r="0.9"/>
 </defs>
  <!-- PATH_DEFINITION placeholder -->
     <rect x="0" y="0" width="33.25" height="11.52" style="fill:#ffffff;"/> <!-- Background rectangle placeholder -->
     <g>
-        <use xlink:href="#lattice_point" x="6.65" y="3.84" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="13.3" y="3.84" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="19.950000000000003" y="3.84" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="26.6" y="3.84" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="9.9755" y="5.76" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="16.625500000000002" y="5.76" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="23.2755" y="5.76" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="29.9255" y="5.76" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="6.65" y="7.68" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="13.3" y="7.68" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="19.950000000000003" y="7.68" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="26.6" y="7.68" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="9.9755" y="9.6" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="16.625500000000002" y="9.6" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="23.2755" y="9.6" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="29.9255" y="9.6" style="fill:#6e7175;"/><use xlink:href="#sidb_dot" x="6.65" y="3.84" style="fill:#ffffff; fill-opacity:1; stroke:#C8C8C8; stroke-width:0.3;"/><use xlink:href="#sidb_dot" x="13.3" y="3.84" style="fill:#ffffff; fill-opacity:1; stroke:#C8C8C8; stroke-width:0.3;"/><use xlink:href="#sidb_dot" x="16.625500000000002" y="5.76" style="fill:#ffffff; fill-opacity:1; stroke:#C8C8C8; stroke-width:0.3;"/><use xlink:href="#sidb_dot" x="29.9255" y="9.6" style="fill:#ffffff; fill-opacity:1; stroke:#C8C8C8; stroke-width:0.3;"/> <!-- SVG content placeholder -->
+        <use xlink:href="#lattice_point" x="6.65" y="3.84" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="13.3" y="3.84" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="19.950000000000003" y="3.84" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="26.6" y="3.84" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="9.9755" y="5.76" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="16.625500000000002" y="5.76" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="23.2755" y="5.76" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="29.9255" y="5.76" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="6.65" y="7.68" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="13.3" y="7.68" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="19.950000000000003" y="7.68" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="26.6" y="7.68" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="9.9755" y="9.6" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="16.625500000000002" y="9.6" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="23.2755" y="9.6" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="29.9255" y="9.6" style="fill:#6e7175;"/><use xlink:href="#sidb_color" x="6.65" y="3.84" style="fill:#ffffff; fill-opacity:1; stroke:#C8C8C8; stroke-width:0.3;"/><use xlink:href="#sidb_color" x="13.3" y="3.84" style="fill:#ffffff; fill-opacity:1; stroke:#C8C8C8; stroke-width:0.3;"/><use xlink:href="#sidb_color" x="16.625500000000002" y="5.76" style="fill:#ffffff; fill-opacity:1; stroke:#C8C8C8; stroke-width:0.3;"/><use xlink:href="#sidb_color" x="29.9255" y="9.6" style="fill:#ffffff; fill-opacity:1; stroke:#C8C8C8; stroke-width:0.3;"/> <!-- SVG content placeholder -->
     </g>
 </svg>)",
                 FICTION_VERSION, FICTION_REPO);
@@ -136,7 +136,7 @@ const std::string EXPECTED_SVG_DARK_CELL_LEVEL = fmt::format(R"(<?xml version="1
                 <!-- lattice point -->
                 <circle id="lattice_point" cx="0" cy="0" r="0.3"/>
                 <!-- SiDB -->
-                <circle id="sidb_dot" cx="0" cy="0" r="0.9"/>
+                <circle id="sidb_color" cx="0" cy="0" r="0.9"/>
             </defs>
              <!-- PATH_DEFINITION placeholder -->
                 <rect x="0" y="0" width="19.2" height="23.04" style="fill:#25323D;"/> <!-- Background rectangle placeholder -->
@@ -157,10 +157,10 @@ const std::string EXPECTED_SVG_DARK_CELL_LEVEL = fmt::format(R"(<?xml version="1
             <use xlink:href="#lattice_point" x="7.68" y="17.61" style="fill:#6e7175;"/>
             <use xlink:href="#lattice_point" x="11.52" y="17.61" style="fill:#6e7175;"/>
             <use xlink:href="#lattice_point" x="15.36" y="17.61" style="fill:#6e7175;"/>
-            <use xlink:href="#sidb_dot" x="3.84" y="7.68" style="fill:#C8C8C8; fill-opacity:1; stroke:#ffffff; stroke-width:0.3;"/>
-            <use xlink:href="#sidb_dot" x="7.68" y="7.68" style="fill:#C8C8C8; fill-opacity:1; stroke:#ffffff; stroke-width:0.3;"/>
-            <use xlink:href="#sidb_dot" x="7.68" y="9.93" style="fill:#C8C8C8; fill-opacity:1; stroke:#ffffff; stroke-width:0.3;"/>
-            <use xlink:href="#sidb_dot" x="15.36" y="17.61" style="fill:#C8C8C8; fill-opacity:1; stroke:#ffffff; stroke-width:0.3;"/> <!-- SVG content placeholder -->
+            <use xlink:href="#sidb_color" x="3.84" y="7.68" style="fill:#C8C8C8; fill-opacity:1; stroke:#ffffff; stroke-width:0.3;"/>
+            <use xlink:href="#sidb_color" x="7.68" y="7.68" style="fill:#C8C8C8; fill-opacity:1; stroke:#ffffff; stroke-width:0.3;"/>
+            <use xlink:href="#sidb_color" x="7.68" y="9.93" style="fill:#C8C8C8; fill-opacity:1; stroke:#ffffff; stroke-width:0.3;"/>
+            <use xlink:href="#sidb_color" x="15.36" y="17.61" style="fill:#C8C8C8; fill-opacity:1; stroke:#ffffff; stroke-width:0.3;"/> <!-- SVG content placeholder -->
                 </g>
             </svg>)",
                                                              FICTION_VERSION, FICTION_REPO);
@@ -191,12 +191,12 @@ const std::string EXPECTED_SVG_DARK_CELL_LEVEL_111 =
     <!-- lattice point -->
     <circle id="lattice_point" cx="0" cy="0" r="0.3"/>
     <!-- SiDB -->
-    <circle id="sidb_dot" cx="0" cy="0" r="0.9"/>
+    <circle id="sidb_color" cx="0" cy="0" r="0.9"/>
 </defs>
  <!-- PATH_DEFINITION placeholder -->
     <rect x="0" y="0" width="33.25" height="11.52" style="fill:#25323D;"/> <!-- Background rectangle placeholder -->
     <g>
-        <use xlink:href="#lattice_point" x="6.65" y="3.84" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="13.3" y="3.84" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="19.950000000000003" y="3.84" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="26.6" y="3.84" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="9.9755" y="5.76" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="16.625500000000002" y="5.76" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="23.2755" y="5.76" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="29.9255" y="5.76" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="6.65" y="7.68" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="13.3" y="7.68" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="19.950000000000003" y="7.68" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="26.6" y="7.68" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="9.9755" y="9.6" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="16.625500000000002" y="9.6" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="23.2755" y="9.6" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="29.9255" y="9.6" style="fill:#6e7175;"/><use xlink:href="#sidb_dot" x="6.65" y="3.84" style="fill:#C8C8C8; fill-opacity:1; stroke:#ffffff; stroke-width:0.3;"/><use xlink:href="#sidb_dot" x="13.3" y="3.84" style="fill:#C8C8C8; fill-opacity:1; stroke:#ffffff; stroke-width:0.3;"/><use xlink:href="#sidb_dot" x="16.625500000000002" y="5.76" style="fill:#C8C8C8; fill-opacity:1; stroke:#ffffff; stroke-width:0.3;"/><use xlink:href="#sidb_dot" x="29.9255" y="9.6" style="fill:#C8C8C8; fill-opacity:1; stroke:#ffffff; stroke-width:0.3;"/> <!-- SVG content placeholder -->
+        <use xlink:href="#lattice_point" x="6.65" y="3.84" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="13.3" y="3.84" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="19.950000000000003" y="3.84" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="26.6" y="3.84" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="9.9755" y="5.76" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="16.625500000000002" y="5.76" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="23.2755" y="5.76" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="29.9255" y="5.76" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="6.65" y="7.68" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="13.3" y="7.68" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="19.950000000000003" y="7.68" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="26.6" y="7.68" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="9.9755" y="9.6" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="16.625500000000002" y="9.6" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="23.2755" y="9.6" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="29.9255" y="9.6" style="fill:#6e7175;"/><use xlink:href="#sidb_color" x="6.65" y="3.84" style="fill:#C8C8C8; fill-opacity:1; stroke:#ffffff; stroke-width:0.3;"/><use xlink:href="#sidb_color" x="13.3" y="3.84" style="fill:#C8C8C8; fill-opacity:1; stroke:#ffffff; stroke-width:0.3;"/><use xlink:href="#sidb_color" x="16.625500000000002" y="5.76" style="fill:#C8C8C8; fill-opacity:1; stroke:#ffffff; stroke-width:0.3;"/><use xlink:href="#sidb_color" x="29.9255" y="9.6" style="fill:#C8C8C8; fill-opacity:1; stroke:#ffffff; stroke-width:0.3;"/> <!-- SVG content placeholder -->
     </g>
 </svg>)",
                 FICTION_VERSION, FICTION_REPO);
@@ -227,7 +227,7 @@ const std::string EXPECTED_SVG_LIGHT_CHARGE_DISTRIBUTION =
     <!-- lattice point -->
     <circle id="lattice_point" cx="0" cy="0" r="0.3"/>
     <!-- SiDB -->
-    <circle id="sidb_dot" cx="0" cy="0" r="0.9"/>
+    <circle id="sidb_color" cx="0" cy="0" r="0.9"/>
 </defs>
  <!-- PATH_DEFINITION placeholder -->
     <rect x="0" y="0" width="19.2" height="23.04" style="fill:#ffffff;"/> <!-- Background rectangle placeholder -->
@@ -248,10 +248,10 @@ const std::string EXPECTED_SVG_LIGHT_CHARGE_DISTRIBUTION =
 <use xlink:href="#lattice_point" x="7.68" y="17.61" style="fill:#6e7175;"/>
 <use xlink:href="#lattice_point" x="11.52" y="17.61" style="fill:#6e7175;"/>
 <use xlink:href="#lattice_point" x="15.36" y="17.61" style="fill:#6e7175;"/>
-<use xlink:href="#sidb_dot" x="3.84" y="7.68" style="fill:#E34857; fill-opacity:1; stroke:#E34857; stroke-width:0.3;"/>
-<use xlink:href="#sidb_dot" x="7.68" y="7.68" style="fill:#ffffff; fill-opacity:0; stroke:#C8C8C8; stroke-width:0.3;"/>
-<use xlink:href="#sidb_dot" x="7.68" y="9.93" style="fill:#00ADAE; fill-opacity:1; stroke:#00ADAE; stroke-width:0.3;"/>
-<use xlink:href="#sidb_dot" x="15.36" y="17.61" style="fill:#ffffff; fill-opacity:0; stroke:#C8C8C8; stroke-width:0.3;"/> <!-- SVG content placeholder -->
+<use xlink:href="#sidb_color" x="3.84" y="7.68" style="fill:#E34857; fill-opacity:1; stroke:#E34857; stroke-width:0.3;"/>
+<use xlink:href="#sidb_color" x="7.68" y="7.68" style="fill:#ffffff; fill-opacity:0; stroke:#C8C8C8; stroke-width:0.3;"/>
+<use xlink:href="#sidb_color" x="7.68" y="9.93" style="fill:#00ADAE; fill-opacity:1; stroke:#00ADAE; stroke-width:0.3;"/>
+<use xlink:href="#sidb_color" x="15.36" y="17.61" style="fill:#ffffff; fill-opacity:0; stroke:#C8C8C8; stroke-width:0.3;"/> <!-- SVG content placeholder -->
     </g>
 </svg>)",
                 FICTION_VERSION, FICTION_REPO);
@@ -282,7 +282,7 @@ const std::string EXPECTED_SVG_DARK_CHARGE_DISTRIBUTION =
     <!-- lattice point -->
     <circle id="lattice_point" cx="0" cy="0" r="0.3"/>
     <!-- SiDB -->
-    <circle id="sidb_dot" cx="0" cy="0" r="0.9"/>
+    <circle id="sidb_color" cx="0" cy="0" r="0.9"/>
 </defs>
  <!-- PATH_DEFINITION placeholder -->
     <rect x="0" y="0" width="19.2" height="23.04" style="fill:#25323D;"/> <!-- Background rectangle placeholder -->
@@ -303,10 +303,10 @@ const std::string EXPECTED_SVG_DARK_CHARGE_DISTRIBUTION =
 <use xlink:href="#lattice_point" x="7.68" y="17.61" style="fill:#6e7175;"/>
 <use xlink:href="#lattice_point" x="11.52" y="17.61" style="fill:#6e7175;"/>
 <use xlink:href="#lattice_point" x="15.36" y="17.61" style="fill:#6e7175;"/>
-<use xlink:href="#sidb_dot" x="3.84" y="7.68" style="fill:#E34857; fill-opacity:1; stroke:#E34857; stroke-width:0.3;"/>
-<use xlink:href="#sidb_dot" x="7.68" y="7.68" style="fill:#C8C8C8; fill-opacity:0; stroke:#ffffff; stroke-width:0.3;"/>
-<use xlink:href="#sidb_dot" x="7.68" y="9.93" style="fill:#00ADAE; fill-opacity:1; stroke:#00ADAE; stroke-width:0.3;"/>
-<use xlink:href="#sidb_dot" x="15.36" y="17.61" style="fill:#C8C8C8; fill-opacity:0; stroke:#ffffff; stroke-width:0.3;"/> <!-- SVG content placeholder -->
+<use xlink:href="#sidb_color" x="3.84" y="7.68" style="fill:#E34857; fill-opacity:1; stroke:#E34857; stroke-width:0.3;"/>
+<use xlink:href="#sidb_color" x="7.68" y="7.68" style="fill:#C8C8C8; fill-opacity:0; stroke:#ffffff; stroke-width:0.3;"/>
+<use xlink:href="#sidb_color" x="7.68" y="9.93" style="fill:#00ADAE; fill-opacity:1; stroke:#00ADAE; stroke-width:0.3;"/>
+<use xlink:href="#sidb_color" x="15.36" y="17.61" style="fill:#C8C8C8; fill-opacity:0; stroke:#ffffff; stroke-width:0.3;"/> <!-- SVG content placeholder -->
     </g>
 </svg>)",
                 FICTION_VERSION, FICTION_REPO);
@@ -329,7 +329,7 @@ TEMPLATE_TEST_CASE("Generate SiDB layout in SVG for cell-level layout and charge
             std::stringstream os_light_cds;
 
             write_sidb_layout_svg_in_siqad_style_params params{};
-            params.cmode = color_mode::LIGHT;
+            params.color_background = color_mode::LIGHT;
             write_sidb_layout_to_svg_in_siqad_style(layout, os_light_cds, params);
 
             // Retrieve the SVG content
@@ -348,7 +348,7 @@ TEMPLATE_TEST_CASE("Generate SiDB layout in SVG for cell-level layout and charge
             std::stringstream os_light_cds;
 
             write_sidb_layout_svg_in_siqad_style_params params{};
-            params.cmode = color_mode::DARK;
+            params.color_background = color_mode::DARK;
             write_sidb_layout_to_svg_in_siqad_style(layout, os_light_cds, params);
 
             // Retrieve the SVG content
@@ -376,7 +376,7 @@ TEMPLATE_TEST_CASE("Generate SiDB layout in SVG for cell-level layout and charge
             std::stringstream os_light_cds;
 
             write_sidb_layout_svg_in_siqad_style_params params{};
-            params.cmode = color_mode::LIGHT;
+            params.color_background = color_mode::LIGHT;
             write_sidb_layout_to_svg_in_siqad_style(cds, os_light_cds, params);
 
             // Retrieve the SVG content
@@ -396,7 +396,7 @@ TEMPLATE_TEST_CASE("Generate SiDB layout in SVG for cell-level layout and charge
             std::stringstream os_light_cds;
 
             write_sidb_layout_svg_in_siqad_style_params params{};
-            params.cmode = color_mode::DARK;
+            params.color_background = color_mode::DARK;
             write_sidb_layout_to_svg_in_siqad_style(cds, os_light_cds, params);
 
             // Retrieve the SVG content
@@ -430,7 +430,7 @@ TEMPLATE_TEST_CASE(
             std::stringstream os_light_cds;
 
             write_sidb_layout_svg_in_siqad_style_params params{};
-            params.cmode = color_mode::LIGHT;
+            params.color_background = color_mode::LIGHT;
             write_sidb_layout_to_svg_in_siqad_style(layout, os_light_cds, params);
 
             // Retrieve the SVG content
@@ -449,7 +449,7 @@ TEMPLATE_TEST_CASE(
             std::stringstream os_light_cds;
 
             write_sidb_layout_svg_in_siqad_style_params params{};
-            params.cmode = color_mode::DARK;
+            params.color_background = color_mode::DARK;
             write_sidb_layout_to_svg_in_siqad_style(layout, os_light_cds, params);
 
             // Retrieve the SVG content

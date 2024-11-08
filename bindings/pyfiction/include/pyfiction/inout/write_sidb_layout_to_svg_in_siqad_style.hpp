@@ -51,8 +51,8 @@ void write_sidb_layout_to_svg_in_siqad_style(pybind11::module& m)
         .def(py::init<>())
         .def_readwrite("lattice_point_size", &fiction::write_sidb_layout_svg_in_siqad_style_params::lattice_point_size)
         .def_readwrite("sidb_size", &fiction::write_sidb_layout_svg_in_siqad_style_params::sidb_size)
-        .def_readwrite("border_width", &fiction::write_sidb_layout_svg_in_siqad_style_params::border_width)
-        .def_readwrite("cmode", &fiction::write_sidb_layout_svg_in_siqad_style_params::cmode);
+        .def_readwrite("sidb_edge_width", &fiction::write_sidb_layout_svg_in_siqad_style_params::sidb_edge_width)
+        .def_readwrite("color_background", &fiction::write_sidb_layout_svg_in_siqad_style_params::color_background);
 
     detail::write_sidb_layout_to_svg_in_siqad_style_impl<py_charge_distribution_surface_100>(m);
     detail::write_sidb_layout_to_svg_in_siqad_style_impl<py_charge_distribution_surface_100>(m);
