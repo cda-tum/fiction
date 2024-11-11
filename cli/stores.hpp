@@ -8,8 +8,8 @@
 #include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>
 #include <fiction/io/dot_drawers.hpp>
 #include <fiction/io/print_layout.hpp>
-#include <fiction/io/write_svg_layout.hpp>
 #include <fiction/io/write_sidb_layout_svg.hpp>
+#include <fiction/io/write_svg_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
