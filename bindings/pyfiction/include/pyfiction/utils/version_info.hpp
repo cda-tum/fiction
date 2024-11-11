@@ -16,12 +16,10 @@ using namespace pybind11::literals;
 
 inline void version_info(pybind11::module& m)
 {
-    m.attr("FICTION_VERSION") = fiction::FICTION_VERSION;
-    m.attr("FICTION_REPO")    = fiction::FICTION_REPO;
-    m.attr("COMPILED_DATE")   = fiction::COMPILED_DATE;
-    m.attr("COMPILED_TIME")   = fiction::COMPILED_TIME;
-
-    m.doc() = "Python bindings for the fiction project version information.";
+    m.attr("__version__") = fiction::FICTION_VERSION;
+    m.attr("__repo__") = fiction::FICTION_REPO;
+    m.attr("__compiled_date__") = fiction::COMPILED_DATE;
+    m.attr("__compiled_time__") = fiction::COMPILED_TIME;
 }
 
 }  // namespace pyfiction
