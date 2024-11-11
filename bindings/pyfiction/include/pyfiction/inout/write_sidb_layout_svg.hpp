@@ -53,7 +53,7 @@ inline void write_sidb_layout_svg_impl(pybind11::module& m)
 
 }  // namespace detail
 
-void write_sidb_layout_to_svg_in_siqad_style(pybind11::module& m)
+void write_sidb_layout_svg(pybind11::module& m)
 {
     namespace py = pybind11;
     using namespace pybind11::literals;

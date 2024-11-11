@@ -5,19 +5,13 @@
 #ifndef PYFICTION_VERSION_INFO_HPP
 #define PYFICTION_VERSION_INFO_HPP
 
-#include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
-
-#include <fiction/io/write_qca_layout.hpp>
+#include <fiction/utils/version_info.hpp.in>
 
 #include <pybind11/pybind11.h>
-
-#include <string_view>
 
 namespace pyfiction
 {
 
-namespace py = pybind11;
 using namespace pybind11::literals;
 
 inline void version_info(pybind11::module& m)
@@ -27,7 +21,7 @@ inline void version_info(pybind11::module& m)
     m.attr("COMPILED_DATE")   = fiction::COMPILED_DATE;
     m.attr("COMPILED_TIME")   = fiction::COMPILED_TIME;
 
-    m.doc() = "Python bindings for the Fiction project version information.";
+    m.doc() = "Python bindings for the fiction project version information.";
 }
 
 }  // namespace pyfiction

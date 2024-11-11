@@ -217,7 +217,7 @@ PYBIND11_MODULE(pyfiction, m, pybind11::mod_gil_not_used())
     pyfiction::write_sqd_sim_result(m);
     // pyfiction::write_location_and_ground_state(m);
     pyfiction::write_operational_domain(m);
-    pyfiction::write_sidb_layout_to_svg_in_siqad_style(m);
+    pyfiction::write_sidb_layout_svg(m);
     pyfiction::read_fgl_layout(m);
     pyfiction::read_fqca_layout(m);
     pyfiction::read_sqd_layout_100(m);
