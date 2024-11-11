@@ -45,7 +45,7 @@ inline void write_sidb_layout_svg_impl(pybind11::module& m)
             fiction::write_sidb_layout_svg(layout, oss, params);  // Write to the stream
             return oss.str();                                     // Return the string content
         },
-        "layout"_a, "ps"_a = fiction::write_sidb_layout_svg_params{});
+        "layout"_a, "ps"_a = fiction::write_sidb_layout_svg_params{}, DOC(fiction_write_sidb_layout_svg));
 }
 
 }  // namespace detail
@@ -55,16 +55,21 @@ void write_sidb_layout_svg(pybind11::module& m)
     namespace py = pybind11;
     using namespace pybind11::literals;
 
-    py::enum_<fiction::color_mode>(m, "color_mode")
-        .value("LIGHT", fiction::color_mode::LIGHT)
-        .value("DARK", fiction::color_mode::DARK);
+    py::enum_<fiction::color_mode>(m, "color_mode", DOC(fiction_color_mode))
+        .value("LIGHT", fiction::color_mode::LIGHT, DOC(fiction_color_mode_LIGHT))
+        .value("DARK", fiction::color_mode::DARK, DOC(fiction_color_mode_DARK));
 
-    py::class_<fiction::write_sidb_layout_svg_params>(m, "write_sidb_layout_svg_params")
+    py::class_<fiction::write_sidb_layout_svg_params>(m, "write_sidb_layout_svg_params",
+                                                      DOC(fiction_write_sidb_layout_svg_params))
         .def(py::init<>())
-        .def_readwrite("lattice_point_size", &fiction::write_sidb_layout_svg_params::lattice_point_size)
-        .def_readwrite("sidb_size", &fiction::write_sidb_layout_svg_params::sidb_size)
-        .def_readwrite("sidb_border_width", &fiction::write_sidb_layout_svg_params::sidb_border_width)
-        .def_readwrite("color_background", &fiction::write_sidb_layout_svg_params::color_background);
+        .def_readwrite("lattice_point_size", &fiction::write_sidb_layout_svg_params::lattice_point_size,
+                       DOC(fiction_write_sidb_layout_svg_params_lattice_point_size))
+        .def_readwrite("sidb_size", &fiction::write_sidb_layout_svg_params::sidb_size,
+                       DOC(fiction_write_sidb_layout_svg_params_sidb_size))
+        .def_readwrite("sidb_border_width", &fiction::write_sidb_layout_svg_params::sidb_border_width,
+                       DOC(fiction_write_sidb_layout_svg_params_sidb_border_width))
+        .def_readwrite("color_background", &fiction::write_sidb_layout_svg_params::color_background,
+                       DOC(fiction_write_sidb_layout_svg_params_color_background));
 
     detail::write_sidb_layout_svg_impl<py_charge_distribution_surface_100>(m);
     detail::write_sidb_layout_svg_impl<py_charge_distribution_surface_100>(m);
