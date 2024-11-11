@@ -2649,9 +2649,9 @@ static const char *__doc_fiction_clocking_scheme_regular = R"doc(Defines the clo
 
 static const char *__doc_fiction_color_mode = R"doc(Enumeration to specify the color mode for the SVG output.)doc";
 
-static const char *__doc_fiction_color_mode_DARK = R"doc(Dark background.)doc";
+static const char *__doc_fiction_color_mode_DARK = R"doc(Dark mode.)doc";
 
-static const char *__doc_fiction_color_mode_LIGHT = R"doc(Light background.)doc";
+static const char *__doc_fiction_color_mode_LIGHT = R"doc(Light mode.)doc";
 
 static const char *__doc_fiction_color_routing =
 R"doc(A multi-path signal routing approach based on coloring of edge
@@ -8896,9 +8896,35 @@ static const char *__doc_fiction_detail_write_sidb_layout_svg_impl = R"doc()doc"
 
 static const char *__doc_fiction_detail_write_sidb_layout_svg_impl_background_color = R"doc(The color mode for the SVG output.)doc";
 
-static const char *__doc_fiction_detail_write_sidb_layout_svg_impl_generate_lattice_point = R"doc(Generates an SVG string representing an H-Si lattice point.)doc";
+static const char *__doc_fiction_detail_write_sidb_layout_svg_impl_generate_lattice_point =
+R"doc(Generates an SVG string representing an H-Si lattice point.
 
-static const char *__doc_fiction_detail_write_sidb_layout_svg_impl_generate_sidb = R"doc(Generates an SVG string representing an SiDB.)doc";
+Parameter ``x``:
+    The x-coordinate of the lattice point.
+
+Parameter ``y``:
+    The y-coordinate of the lattice point.
+
+Parameter ``fill_color``:
+    The fill color of the lattice point.
+
+Returns:
+    The SVG string representing the lattice point.)doc";
+
+static const char *__doc_fiction_detail_write_sidb_layout_svg_impl_generate_sidb =
+R"doc(Generates an SVG string representing an SiDB.
+
+Parameter ``x``:
+    The x-coordinate of the SiDB.
+
+Parameter ``y``:
+    The y-coordinate of the SiDB.
+
+Parameter ``charge_state``:
+    The charge state of the SiDB.
+
+Returns:
+    The SVG string representing the SiDB.)doc";
 
 static const char *__doc_fiction_detail_write_sidb_layout_svg_impl_generate_svg = R"doc(Generates the SVG layout with both H-Si lattice points and SiDBs.)doc";
 
@@ -18689,39 +18715,11 @@ Parameter ``filename``:
 Parameter ``ps``:
     Parameters.)doc";
 
-static const char *__doc_fiction_write_sidb_layout_svg_in_siqad_style_params = R"doc(Parameters for writing SiDB layouts in SVG format.)doc";
-
-static const char *__doc_fiction_write_sidb_layout_svg_in_siqad_style_params_color_background = R"doc(The color mode of the background for the SVG output.)doc";
-
-static const char *__doc_fiction_write_sidb_layout_svg_in_siqad_style_params_lattice_point_size = R"doc(Size of the H-Si lattice points in SVG units.)doc";
-
-static const char *__doc_fiction_write_sidb_layout_svg_in_siqad_style_params_sidb_edge_width = R"doc(Edge width of the SiDB.)doc";
-
-static const char *__doc_fiction_write_sidb_layout_svg_in_siqad_style_params_sidb_size = R"doc(Size of the SiDB in SVG units.)doc";
-
-static const char *__doc_fiction_write_sidb_layout_to_svg_and_return_as_string =
-R"doc(This function creates an SVG representation of the given SiDB layout
-and returns the result as a string. The SVG is generated according to
-SiQAD style parameters and is suitable for visualization.
-
-Template parameter ``Lyt``:
-    SiDB cell-level layout type.
-
-Parameter ``lyt``:
-    The input layout to be converted to an SVG string.
-
-Parameter ``ps``:
-    Optional parameters to customize the SVG generation process.
-    Defaults to an instance of
-    `write_sidb_layout_svg_params`.
-
-Returns:
-    A string containing the SVG representation of the provided SiDB
-    layout.)doc";
-
-static const char *__doc_fiction_write_sidb_layout_to_svg_in_siqad_style =
-R"doc(Writes an SVG representation of a cell-level SiDB layout into an
+static const char *__doc_fiction_write_sidb_layout_svg =
+R"doc(Writes an SVG representation of an SiDB cell-level SiDB layout into an
 output stream.
+
+@note SiDB defects are not supported yet.
 
 Template parameter ``Lyt``:
     SiDB cell-level layout type.
@@ -18733,12 +18731,13 @@ Parameter ``os``:
     The output stream to write into.
 
 Parameter ``ps``:
-    Parameters.
+    Parameters.)doc";
 
-@note SiDB defects are not supported yet.)doc";
+static const char *__doc_fiction_write_sidb_layout_svg_2 =
+R"doc(Writes an SVG representation of an SiDB cell-level SiDB layout into a
+file.
 
-static const char *__doc_fiction_write_sidb_layout_to_svg_in_siqad_style_2 =
-R"doc(Writes an SVG representation of a cell-level SiDB layout into a file.
+@note SiDB defects are not supported yet.
 
 Template parameter ``Lyt``:
     SiDB cell-level layout type.
@@ -18750,9 +18749,17 @@ Parameter ``filename``:
     The file name to create and write into.
 
 Parameter ``ps``:
-    Parameters.
+    Parameters.)doc";
 
-@note SiDB defects are not supported yet.)doc";
+static const char *__doc_fiction_write_sidb_layout_svg_params = R"doc(Parameters for writing SiDB layouts to SVG format.)doc";
+
+static const char *__doc_fiction_write_sidb_layout_svg_params_color_background = R"doc(The color mode of the background for the SVG output.)doc";
+
+static const char *__doc_fiction_write_sidb_layout_svg_params_lattice_point_size = R"doc(Size of the H-Si lattice points in SVG units.)doc";
+
+static const char *__doc_fiction_write_sidb_layout_svg_params_sidb_border_width = R"doc(Border width of the SiDB.)doc";
+
+static const char *__doc_fiction_write_sidb_layout_svg_params_sidb_size = R"doc(Size of the SiDB in SVG units.)doc";
 
 static const char *__doc_fiction_write_sqd_layout =
 R"doc(Writes a cell-level SiDB or QCA layout to an sqd file that is used by
