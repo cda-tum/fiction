@@ -18713,7 +18713,7 @@ Parameter ``lyt``:
 Parameter ``ps``:
     Optional parameters to customize the SVG generation process.
     Defaults to an instance of
-    `write_sidb_layout_svg_in_siqad_style_params`.
+    `write_sidb_layout_svg_params`.
 
 Returns:
     A string containing the SVG representation of the provided SiDB

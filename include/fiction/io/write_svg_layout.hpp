@@ -15,6 +15,7 @@
 #include <cmath>
 #include <cstdint>
 #include <exception>
+#include <fstream>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -501,9 +502,9 @@ class write_qca_layout_svg_impl
                             cell_descriptions
                                 << fmt::format(desc_col.first, desc_col.second,
                                                svg::STARTING_OFFSET_TILE_X + svg::STARTING_OFFSET_LATCH_CELL_X +
-                                                   c.x * svg::CELL_DISTANCE,
+                                                   (c.x * svg::CELL_DISTANCE),
                                                svg::STARTING_OFFSET_TILE_Y + svg::STARTING_OFFSET_LATCH_CELL_Y +
-                                                   c.y * svg::CELL_DISTANCE);
+                                                   (c.y * svg::CELL_DISTANCE));
 
                             is_sync_elem = true;
                         }
@@ -513,13 +514,13 @@ class write_qca_layout_svg_impl
                         cell_descriptions << fmt::format(
                             desc_col.first, desc_col.second,
                             svg::STARTING_OFFSET_TILE_X + svg::STARTING_OFFSET_CELL_X + (c.x * svg::CELL_DISTANCE),
-                            svg::STARTING_OFFSET_TILE_Y + svg::STARTING_OFFSET_CELL_Y + c.y * svg::CELL_DISTANCE);
+                            svg::STARTING_OFFSET_TILE_Y + svg::STARTING_OFFSET_CELL_Y + (c.y * svg::CELL_DISTANCE));
                     }
                 }
             });
 
-        const double viewbox_x = 2 * svg::VIEWBOX_DISTANCE + static_cast<double>(lyt.x() + 1) * svg::CELL_DISTANCE;
-        const double viewbox_y = 2 * svg::VIEWBOX_DISTANCE + static_cast<double>(lyt.y() + 1) * svg::CELL_DISTANCE;
+        const double viewbox_x = (2 * svg::VIEWBOX_DISTANCE) + (static_cast<double>(lyt.x() + 1) * svg::CELL_DISTANCE);
+        const double viewbox_y = (2 * svg::VIEWBOX_DISTANCE) + (static_cast<double>(lyt.y() + 1) * svg::CELL_DISTANCE);
 
         os << fmt::format(svg::HEADER, FICTION_VERSION, FICTION_REPO, viewbox_x, viewbox_y, cell_descriptions.str());
     }
@@ -608,8 +609,8 @@ class write_qca_layout_svg_impl
                         {
                             coord_to_latch_cells[tile_coords] = current_cells.append(
                                 fmt::format(desc_col.first, desc_col.second,
-                                            svg::STARTING_OFFSET_LATCH_CELL_X + in_tile.x * svg::CELL_DISTANCE,
-                                            svg::STARTING_OFFSET_LATCH_CELL_Y + in_tile.y * svg::CELL_DISTANCE));
+                                            svg::STARTING_OFFSET_LATCH_CELL_X + (in_tile.x * svg::CELL_DISTANCE),
+                                            svg::STARTING_OFFSET_LATCH_CELL_Y + (in_tile.y * svg::CELL_DISTANCE)));
 
                             is_sync_elem = true;
                         }
@@ -619,8 +620,8 @@ class write_qca_layout_svg_impl
                     {
                         coord_to_cells[tile_coords] = current_cells.append(
                             fmt::format(desc_col.first, desc_col.second,
-                                        svg::STARTING_OFFSET_CELL_X + in_tile.x * svg::CELL_DISTANCE,
-                                        svg::STARTING_OFFSET_CELL_Y + in_tile.y * svg::CELL_DISTANCE));
+                                        svg::STARTING_OFFSET_CELL_X + (in_tile.x * svg::CELL_DISTANCE),
+                                        svg::STARTING_OFFSET_CELL_Y + (in_tile.y * svg::CELL_DISTANCE)));
                     }
                 }
             });
@@ -675,8 +676,8 @@ class write_qca_layout_svg_impl
 
             const auto cell_descriptions = coord_to_cells[coord];
 
-            const double x_pos = svg::STARTING_OFFSET_TILE_X + coord.x * svg::TILE_DISTANCE;
-            const double y_pos = svg::STARTING_OFFSET_TILE_Y + coord.y * svg::TILE_DISTANCE;
+            const double x_pos = svg::STARTING_OFFSET_TILE_X + (coord.x * svg::TILE_DISTANCE);
+            const double y_pos = svg::STARTING_OFFSET_TILE_Y + (coord.y * svg::TILE_DISTANCE);
 
             const auto c_descr =
                 fmt::format(descr, x_pos, y_pos, tile_colors[czone], cell_descriptions,
@@ -691,12 +692,12 @@ class write_qca_layout_svg_impl
             for (const auto& [coord, ldscr] : coord_to_latch_tile)
             {
                 const auto [descr, czone_up, latch_delay] = ldscr;
-                const auto czone_lo                       = czone_up + latch_delay % lyt.num_clocks();
+                const auto czone_lo                       = czone_up + (latch_delay % lyt.num_clocks());
 
                 const auto cell_descriptions = coord_to_latch_cells[coord];
 
-                const double x_pos = svg::STARTING_OFFSET_LATCH_X + coord.x * svg::TILE_DISTANCE;
-                const double y_pos = svg::STARTING_OFFSET_LATCH_Y + coord.y * svg::TILE_DISTANCE;
+                const double x_pos = svg::STARTING_OFFSET_LATCH_X + (coord.x * svg::TILE_DISTANCE);
+                const double y_pos = svg::STARTING_OFFSET_LATCH_Y + (coord.y * svg::TILE_DISTANCE);
 
                 const auto t_descr =
                     fmt::format(descr, x_pos, y_pos, tile_colors[czone_lo], tile_colors[czone_up], cell_descriptions,
@@ -709,8 +710,8 @@ class write_qca_layout_svg_impl
 
         const coordinate<Lyt> length = {(lyt.x() + 1) / lyt.get_tile_size_x(), (lyt.y() + 1) / lyt.get_tile_size_y()};
 
-        const double viewbox_x = 2 * svg::VIEWBOX_DISTANCE + length.x * svg::TILE_DISTANCE;
-        const double viewbox_y = 2 * svg::VIEWBOX_DISTANCE + length.y * svg::TILE_DISTANCE;
+        const double viewbox_x = (2 * svg::VIEWBOX_DISTANCE) + (length.x * svg::TILE_DISTANCE);
+        const double viewbox_y = (2 * svg::VIEWBOX_DISTANCE) + (length.y * svg::TILE_DISTANCE);
 
         os << fmt::format(svg::HEADER, FICTION_VERSION, FICTION_REPO, viewbox_x, viewbox_y, tile_descriptions.str());
     }

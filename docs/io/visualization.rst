@@ -50,28 +50,25 @@ SVG Images
 
         .. doxygenclass:: fiction::unsupported_cell_type_exception
 
-        **Header:** ``fiction/io/write_sidb_layout_to_svg_in_siqad_style.hpp``
+        **Header:** ``fiction/io/write_sidb_layout_svg.hpp``
 
         .. doxygenstruct:: fiction::color_mode
            :members:
 
-        .. doxygenstruct:: fiction::write_sidb_layout_svg_in_siqad_style_params
+        .. doxygenstruct:: fiction::write_sidb_layout_svg_params
            :members:
 
-        .. doxygenfunction:: fiction::write_sidb_layout_to_svg_in_siqad_style(const Lyt& lyt, std::ostream& os,
-                                                 const write_sidb_layout_svg_in_siqad_style_params& ps = {})
-        .. doxygenfunction:: fiction::write_sidb_layout_to_svg_in_siqad_style(const Lyt& lyt, const std::string_view& filename,
-                                             const write_sidb_layout_svg_in_siqad_style_params& ps = {})
-        .. doxygenclass:: fiction::write_sidb_layout_to_svg_and_return_as_string(const Lyt& lyt, const write_sidb_layout_svg_in_siqad_style_params& ps = {})
-
-        .. doxygenclass:: fiction::unsupported_cell_type_exception
+        .. doxygenfunction:: fiction::write_sidb_layout_svg(const Lyt& lyt, std::ostream& os,
+                                                 const write_sidb_layout_svg_params& ps = {})
+        .. doxygenfunction:: fiction::write_sidb_layout_svg(const Lyt& lyt, const std::string_view& filename,
+                                             const write_sidb_layout_svg_params& ps = {})
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.write_qca_layout_svg_params
             :members:
         .. autofunction:: mnt.pyfiction.write_qca_layout_svg
 
-        .. autoclass:: mnt.pyfiction.write_sidb_layout_svg_in_siqad_style_params
+        .. autoclass:: mnt.pyfiction.write_sidb_layout_svg_params
             :members:
-        .. autofunction:: mnt.pyfiction.write_sidb_layout_to_svg_in_siqad_style
-        .. autofunction:: mnt.pyfiction.write_sidb_layout_to_svg_and_return_as_string
+        .. autofunction:: mnt.pyfiction.write_sidb_layout_svg
+        .. autofunction:: mnt.pyfiction.write_sidb_layout_svg_and_return_as_string

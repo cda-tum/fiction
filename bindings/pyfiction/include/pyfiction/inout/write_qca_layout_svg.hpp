@@ -26,7 +26,9 @@ inline void write_svg_layout(pybind11::module& m)
                                                      DOC(fiction_write_qca_layout_svg_params))
         .def(py::init<>())
         .def_readwrite("simple", &fiction::write_qca_layout_svg_params::simple,
-                       DOC(fiction_write_qca_layout_svg_params_simple));
+                       DOC(fiction_write_qca_layout_svg_params_simple))
+
+        ;
 
     void (*write_svg_layout_function_pointer)(const py_qca_layout&, const std::string_view&,
                                               const fiction::write_qca_layout_svg_params&) =
