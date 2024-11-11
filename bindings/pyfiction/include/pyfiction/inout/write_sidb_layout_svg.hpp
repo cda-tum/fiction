@@ -32,12 +32,9 @@ inline void write_sidb_layout_svg_impl(pybind11::module& m)
                                           const fiction::write_sidb_layout_svg_params&) =
         &fiction::write_sidb_layout_svg<Lyt>;
 
-    void (*write_sidb_layout_svg_pointer_stream)(
-        const Lyt&, std::ostream&, const fiction::write_sidb_layout_svg_params&) = &fiction::write_sidb_layout_svg<Lyt>;
-
     // Register the original function to write to a file
     m.def("write_sidb_layout_svg", write_sidb_layout_svg_pointer, "layout"_a, "filename"_a,
-          "ps"_a = fiction::write_sidb_layout_svg_params{});
+          "ps"_a = fiction::write_sidb_layout_svg_params{}, DOC(fiction_write_sidb_layout_svg));
 
     // Register the function to return an SVG as a string
     m.def(
