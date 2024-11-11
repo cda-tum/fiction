@@ -75,7 +75,7 @@ inline std::string EXPECTED_SVG_LIGHT_CELL_LEVEL = fmt::format(R"(<?xml version=
         <use xlink:href="#lattice_point" x="3.84" y="7.68" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="7.68" y="7.68" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="11.52" y="7.68" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="15.36" y="7.68" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="3.84" y="9.93" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="7.68" y="9.93" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="11.52" y="9.93" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="15.36" y="9.93" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="3.84" y="15.36" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="7.68" y="15.36" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="11.52" y="15.36" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="15.36" y="15.36" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="3.84" y="17.61" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="7.68" y="17.61" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="11.52" y="17.61" style="fill:#6e7175;"/><use xlink:href="#lattice_point" x="15.36" y="17.61" style="fill:#6e7175;"/><use xlink:href="#sidb_color" x="3.84" y="7.68" style="fill:#ffffff; fill-opacity:1; stroke:#C8C8C8; stroke-width:0.3;"/><use xlink:href="#sidb_color" x="7.68" y="7.68" style="fill:#ffffff; fill-opacity:1; stroke:#C8C8C8; stroke-width:0.3;"/><use xlink:href="#sidb_color" x="7.68" y="9.93" style="fill:#ffffff; fill-opacity:1; stroke:#C8C8C8; stroke-width:0.3;"/><use xlink:href="#sidb_color" x="15.36" y="17.61" style="fill:#ffffff; fill-opacity:1; stroke:#C8C8C8; stroke-width:0.3;"/> <!-- SVG content placeholder -->
     </g>
 </svg>)",
-                                                              FICTION_VERSION, FICTION_REPO);
+                                                               FICTION_VERSION, FICTION_REPO);
 
 inline std::string EXPECTED_SVG_LIGHT_CELL_LEVEL_111 =
     fmt::format(R"(<?xml version="1.0" encoding="UTF-8" standalone="no"?>
@@ -314,8 +314,8 @@ const std::string EXPECTED_SVG_DARK_CHARGE_DISTRIBUTION =
                 FICTION_VERSION, FICTION_REPO);
 
 TEMPLATE_TEST_CASE("Generate SiDB layout in SVG for cell-level layout and charge distribution surface",
-                   "[write-sidb-layout-svg]", sidb_cell_clk_lyt_cube, sidb_100_cell_clk_lyt_cube,
-                   sidb_100_cell_clk_lyt, sidb_cell_clk_lyt)
+                   "[write-sidb-layout-svg]", sidb_cell_clk_lyt_cube, sidb_100_cell_clk_lyt_cube, sidb_100_cell_clk_lyt,
+                   sidb_cell_clk_lyt)
 {
     TestType layout{{4, 4}};
 

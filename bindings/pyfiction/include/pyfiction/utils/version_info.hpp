@@ -20,7 +20,6 @@ namespace pyfiction
 namespace py = pybind11;
 using namespace pybind11::literals;
 
-
 inline void version_info(pybind11::module& m)
 {
     m.attr("FICTION_VERSION") = fiction::FICTION_VERSION;

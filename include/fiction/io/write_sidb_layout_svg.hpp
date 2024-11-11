@@ -125,8 +125,7 @@ class write_sidb_layout_svg_impl
     /**
      * Constructor.
      */
-    write_sidb_layout_svg_impl(const Lyt& layout, std::ostream& stream,
-                               const write_sidb_layout_svg_params& p = {}) :
+    write_sidb_layout_svg_impl(const Lyt& layout, std::ostream& stream, const write_sidb_layout_svg_params& p = {}) :
             lyt{layout},
             os{stream},
             ps{p}
@@ -197,7 +196,8 @@ class write_sidb_layout_svg_impl
      *
      * @return The SVG string representing the lattice point.
      */
-    [[nodiscard]] std::string generate_lattice_point(const double x, const double y, const std::string& fill_color) const noexcept
+    [[nodiscard]] std::string generate_lattice_point(const double x, const double y,
+                                                     const std::string& fill_color) const noexcept
     {
         return fmt::format(R"(<use xlink:href="#lattice_point" x="{0}" y="{1}" style="fill:{2};"/>)", x, y, fill_color);
     }
@@ -356,8 +356,7 @@ class write_sidb_layout_svg_impl
  * @param ps Parameters.
  */
 template <typename Lyt>
-void write_sidb_layout_svg(const Lyt& lyt, std::ostream& os,
-                                             const write_sidb_layout_svg_params& ps = {})
+void write_sidb_layout_svg(const Lyt& lyt, std::ostream& os, const write_sidb_layout_svg_params& ps = {})
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt must be a SiDB layout");
@@ -379,7 +378,7 @@ void write_sidb_layout_svg(const Lyt& lyt, std::ostream& os,
  */
 template <typename Lyt>
 void write_sidb_layout_svg(const Lyt& lyt, const std::string_view& filename,
-                                             const write_sidb_layout_svg_params& ps = {})
+                           const write_sidb_layout_svg_params& ps = {})
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt must be a SiDB layout");
