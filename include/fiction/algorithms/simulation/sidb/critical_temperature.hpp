@@ -45,7 +45,7 @@ namespace fiction
 struct critical_temperature_params
 {
     /**
-     * The parameters used to determine if a layout is operational or non-operational.
+     * The parameters used to determine if a layout is `operational` or `non-operational`.
      */
     is_operational_params operational_params{};
     /**
