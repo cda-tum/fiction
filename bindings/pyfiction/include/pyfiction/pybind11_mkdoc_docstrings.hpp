@@ -1149,6 +1149,15 @@ Parameter ``spec``:
 Parameter ``input_index``:
     The index of the current input configuration.
 
+Parameter ``input_wires``:
+    Optional input wires.
+
+Parameter ``output_wires``:
+    Optional output wires.
+
+Parameter ``params``:
+    Optional parameters for `is_operational`.
+
 Returns:
     Electrostatic potential energy of all charge distributions with
     state type.)doc";
@@ -3428,10 +3437,6 @@ probability of less than the given percentage, is determined to be the
 critical temperature. For gate-based simulation, this is the
 probability of erroneous calculations of the gate.)doc";
 
-static const char *__doc_fiction_critical_temperature_params_engine = R"doc(Simulation mode to determine the *Critical Temperature*.)doc";
-
-static const char *__doc_fiction_critical_temperature_params_input_iterator_params = R"doc(Parameters for the BDL input iterator.)doc";
-
 static const char *__doc_fiction_critical_temperature_params_iteration_steps =
 R"doc(Number of iteration steps for the *QuickSim* algorithm (only
 applicable if engine == APPROXIMATE).)doc";
@@ -3440,21 +3445,9 @@ static const char *__doc_fiction_critical_temperature_params_max_temperature =
 R"doc(Maximum simulation temperature beyond which no simulation will be
 conducted (~ 126 °C by default) (unit: K).)doc";
 
-static const char *__doc_fiction_critical_temperature_params_simulation_engine =
-R"doc(An enumeration of simulation modes (exact vs. approximate) to use for
-the *Critical Temperature* Simulation.)doc";
-
-static const char *__doc_fiction_critical_temperature_params_simulation_engine_APPROXIMATE =
-R"doc(This simulation engine quickly calculates the *Critical Temperature*.
-However, there may be deviations from the exact *Critical
-Temperature*. This mode is recommended for larger layouts (> 40
-SiDBs).)doc";
-
-static const char *__doc_fiction_critical_temperature_params_simulation_engine_EXACT =
-R"doc(This simulation engine computes *Critical Temperature* values with 100
-% accuracy.)doc";
-
-static const char *__doc_fiction_critical_temperature_params_simulation_parameters = R"doc(All parameters for physical SiDB simulations.)doc";
+static const char *__doc_fiction_critical_temperature_params_operational_params =
+R"doc(The parameters used to determine if a layout is operational or non-
+operational.)doc";
 
 static const char *__doc_fiction_critical_temperature_stats = R"doc(This struct stores the result of the temperature simulation.)doc";
 
@@ -6825,6 +6818,20 @@ Returns:
 
 static const char *__doc_fiction_detail_is_operational_impl_input_bdl_wires = R"doc(Input BDL wires.)doc";
 
+static const char *__doc_fiction_detail_is_operational_impl_is_given_cds_operational_for_pattern =
+R"doc(Determines if the given charge distribution fulfills the correct logic
+based on the provided charge index and truth table.
+
+Parameter ``given_cds``:
+    The charge distribution surface to be checked.
+
+Parameter ``charge_index``:
+    Charge index represented by the position of perturbers.
+
+Returns:
+    Operational status indicating if the layout is `operational` or
+    `non-operational`.)doc";
+
 static const char *__doc_fiction_detail_is_operational_impl_is_operational_impl =
 R"doc(Constructor to initialize the algorithm with a layout and parameters.
 
@@ -6844,7 +6851,7 @@ R"doc(Constructor to initialize the algorithm with a layout and parameters.
 Parameter ``lyt``:
     The SiDB cell-level layout to be checked.
 
-Parameter ``spec``:
+Parameter ``tt``:
     Expected Boolean function of the layout given as a multi-output
     truth table.
 
@@ -6852,13 +6859,10 @@ Parameter ``params``:
     Parameters for the `is_operational` algorithm.
 
 Parameter ``input_bdl_wire``:
-    Optional BDL input wires of lyt.
+    BDL input wires of lyt.
 
 Parameter ``output_bdl_wire``:
-    Optional BDL output wires of lyt.
-
-Parameter ``input_bdl_wire_direction``:
-    Optional BDL input wire directions of lyt.)doc";
+    BDL output wires of lyt.)doc";
 
 static const char *__doc_fiction_detail_is_operational_impl_layout = R"doc(SiDB cell-level layout.)doc";
 
@@ -9492,6 +9496,41 @@ Parameter ``target``:
 Returns:
     Distance between source and target according to the stored
     distance map.)doc";
+
+static const char *__doc_fiction_does_charge_distribution_match_logic_for_input_pattern =
+R"doc(This function checks if a charge distribution encodes the correct
+logic for a specified input pattern based on a provided specification
+(truth table).
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Template parameter ``TT``:
+    The type of the truth table specifying the gate behavior.
+
+Parameter ``cds``:
+    Charge distribution surface, containing charge state information
+    for each SiDB.
+
+Parameter ``params``:
+    The parameters used to determine if a layout is operational or
+    non-operational.
+
+Parameter ``spec``:
+    Truth table specification.
+
+Parameter ``input_pattern``:
+    The specific input pattern.
+
+Parameter ``input_bdl_wire``:
+    Vector of input BDL wires.
+
+Parameter ``output_bdl_wire``:
+    Vector of output BDL wires.
+
+Returns:
+    The operational status indicating if the charge distribution
+    matches the logic for the given input pattern.)doc";
 
 static const char *__doc_fiction_edge_color_view_drawer =
 R"doc(A DOT drawer for networks with colored edges. Node colors represent

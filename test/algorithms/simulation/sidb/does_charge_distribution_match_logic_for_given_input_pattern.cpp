@@ -39,10 +39,9 @@ TEST_CASE("Bestagon FO2 gate", "[does-charge-distribution-match-logic-for-given-
 
         REQUIRE(!gs.empty());
 
-            CHECK(does_charge_distribution_match_logic_for_input_pattern<sidb_cell_clk_lyt_siqad>(
-                      gs.front(), is_operational_params{}, std::vector<tt>{create_fan_out_tt()}, 2, input_wires,
-                      output_wires) == operational_status::OPERATIONAL);
-
+        CHECK(does_charge_distribution_match_logic_for_input_pattern<sidb_cell_clk_lyt_siqad>(
+                  gs.front(), is_operational_params{}, std::vector<tt>{create_fan_out_tt()}, 2, input_wires,
+                  output_wires) == operational_status::OPERATIONAL);
     }
 
     SECTION("Index is 1, which means that the left input is set to zero and the right input is set to one.")
