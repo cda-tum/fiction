@@ -458,8 +458,8 @@ TEMPLATE_TEST_CASE("Test critical_temperature function, using offset coordinates
 {
     TestType lyt{};
 
-    critical_temperature_params      params{};
-    sidb_simulation_parameters sim_params{2, -0.32, 5.6, 5.0};
+    critical_temperature_params params{};
+    sidb_simulation_parameters  sim_params{2, -0.32, 5.6, 5.0};
 
     critical_temperature_stats critical_stats{};
 

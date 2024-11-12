@@ -2,8 +2,8 @@
 // Created by Jan Drewniok on 12.08.23.
 //
 
-#include <catch2/catch_test_macros.hpp>
 #include <catch2/catch_template_test_macros.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 #include <fiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
@@ -115,8 +115,8 @@ TEST_CASE("Y-shapedd SiDB OR gate with input 01, using cube coordinates", "[can-
     }
 }
 
-TEMPLATE_TEST_CASE("Y-shapedd SiDB OR gate with input 01, using offset coordinates", "[can-positive-charges-occur]", sidb_100_cell_clk_lyt,
-                   cds_sidb_100_cell_clk_lyt)
+TEMPLATE_TEST_CASE("Y-shapedd SiDB OR gate with input 01, using offset coordinates", "[can-positive-charges-occur]",
+                   sidb_100_cell_clk_lyt, cds_sidb_100_cell_clk_lyt)
 {
     TestType lyt{};
 

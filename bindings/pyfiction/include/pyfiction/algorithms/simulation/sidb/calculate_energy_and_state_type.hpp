@@ -27,7 +27,8 @@ void calculate_energy_and_state_type(pybind11::module& m)
     using namespace pybind11::literals;
 
     m.def("calculate_energy_and_state_type", &fiction::calculate_energy_and_state_type<Lyt, py_tt>,
-          "energy_distribution"_a, "valid_charge_distributions"_a, "output_bdl_pairs"_a, "spec"_a, "input_index"_a, "input_wires"_a = std::nullopt, "output_wires"_a = std::nullopt, "params"_a = std::nullopt,
+          "energy_distribution"_a, "valid_charge_distributions"_a, "output_bdl_pairs"_a, "spec"_a, "input_index"_a,
+          "input_wires"_a = std::nullopt, "output_wires"_a = std::nullopt, "params"_a = std::nullopt,
           DOC(fiction_calculate_energy_and_state_type));
 }
 
