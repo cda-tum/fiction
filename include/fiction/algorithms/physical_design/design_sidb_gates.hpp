@@ -793,7 +793,8 @@ class design_sidb_gates_impl
         while (cds_canvas.get_charge_index_and_base().first <= cds_canvas.get_max_charge_index())
         {
             cds_canvas.foreach_cell(
-                [&](const auto& c) {
+                [&](const auto& c)
+                {
                     cds_layout.assign_charge_state(c, cds_canvas.get_charge_state(c),
                                                    charge_index_mode::KEEP_CHARGE_INDEX);
                 });
@@ -1166,12 +1167,9 @@ class design_sidb_gates_impl
             [&get_ground_state_isolation](
                 const std::vector<std::vector<charge_distribution_surface<Lyt>>>& res_per_input) noexcept
         {
-            std::vector<double> ground_state_isolations{};
-
-            std::transform(res_per_input.cbegin(), res_per_input.cend(), ground_state_isolations.begin(),
-                           get_ground_state_isolation);
-
-            return *std::min_element(ground_state_isolations.cbegin(), ground_state_isolations.cend());
+            return *std::min_element(res_per_input.cbegin(), res_per_input.cend(),
+                                     [&get_ground_state_isolation](const auto& lhs, const auto& rhs) noexcept
+                                     { return get_ground_state_isolation(lhs) < get_ground_state_isolation(rhs); });
         };
 
         const auto average_ground_state_isolation_for_all_inputs =
