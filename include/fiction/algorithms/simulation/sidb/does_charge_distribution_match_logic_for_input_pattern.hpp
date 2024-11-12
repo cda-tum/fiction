@@ -24,10 +24,10 @@ namespace fiction
  * based on a provided truth table.
  *
  * @tparam Lyt SiDB cell-level layout type.
-* @tparam TT Truth table type.
+ * @tparam TT Truth table type.
  * @param cds Charge distribution surface, containing charge state information for each SiDB.
  * @param params The parameters used to determine if a layout is `operational` or `non-operational`.
-* @param spec Expected Boolean function of the layout given as a multi-output truth table.
+ * @param spec Expected Boolean function of the layout given as a multi-output truth table.
  * @param input_pattern The specific input pattern.
  * @param input_bdl_wire Vector of input BDL wires.
  * @param output_bdl_wire Vector of output BDL wires.
