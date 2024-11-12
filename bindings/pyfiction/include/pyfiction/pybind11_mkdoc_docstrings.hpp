@@ -3446,8 +3446,8 @@ R"doc(Maximum simulation temperature beyond which no simulation will be
 conducted (~ 126 °C by default) (unit: K).)doc";
 
 static const char *__doc_fiction_critical_temperature_params_operational_params =
-R"doc(The parameters used to determine if a layout is operational or non-
-operational.)doc";
+R"doc(The parameters used to determine if a layout is `operational` or `non-
+operational`.)doc";
 
 static const char *__doc_fiction_critical_temperature_stats = R"doc(This struct stores the result of the temperature simulation.)doc";
 
@@ -9499,25 +9499,25 @@ Returns:
 
 static const char *__doc_fiction_does_charge_distribution_match_logic_for_input_pattern =
 R"doc(This function checks if a charge distribution encodes the correct
-logic for a specified input pattern based on a provided specification
-(truth table).
+logic for a specified input pattern based on a provided truth table.
 
 Template parameter ``Lyt``:
     SiDB cell-level layout type.
 
 Template parameter ``TT``:
-    The type of the truth table specifying the gate behavior.
+    Truth table type.
 
 Parameter ``cds``:
     Charge distribution surface, containing charge state information
     for each SiDB.
 
 Parameter ``params``:
-    The parameters used to determine if a layout is operational or
-    non-operational.
+    The parameters used to determine if a layout is `operational` or
+    `non-operational`.
 
 Parameter ``spec``:
-    Truth table specification.
+    Expected Boolean function of the layout given as a multi-output
+    truth table.
 
 Parameter ``input_pattern``:
     The specific input pattern.
