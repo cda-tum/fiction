@@ -259,6 +259,10 @@ Operational Domain Computation
            :members:
         .. doxygenfunction:: fiction::compute_operational_ratio
 
+        **Header:** ``fiction/algorithms/simulation/sidb/does_charge_distribution_match_logic_for_input_pattern.hpp``
+
+        .. doxygenfunction:: fiction::operational_status does_charge_distribution_match_logic_for_input_pattern
+
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.operational_status
             :members:

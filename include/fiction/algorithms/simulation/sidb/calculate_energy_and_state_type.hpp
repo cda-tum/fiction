@@ -6,7 +6,10 @@
 #define FICTION_CALCULATE_ENERGY_AND_STATE_TYPE_HPP
 
 #include "fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp"
+#include "fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp"
+#include "fiction/algorithms/simulation/sidb/does_charge_distribution_match_logic_for_input_pattern.hpp"
 #include "fiction/algorithms/simulation/sidb/energy_distribution.hpp"
+#include "fiction/algorithms/simulation/sidb/is_operational.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/technology/physical_constants.hpp"
 #include "fiction/traits.hpp"
@@ -18,6 +21,7 @@
 #include <cassert>
 #include <cmath>
 #include <cstdint>
+#include <optional>
 #include <utility>
 #include <vector>
 
@@ -41,6 +45,9 @@ using sidb_energy_and_state_type = std::vector<std::pair<double, bool>>;
  * @param output_bdl_pairs Output BDL pairs.
  * @param spec Expected Boolean function of the layout given as a multi-output truth table.
  * @param input_index The index of the current input configuration.
+ * @param input_wires Optional input wires.
+ * @param output_wires Optional output wires.
+ * @param params Optional parameters for `is_operational`.
  * @return Electrostatic potential energy of all charge distributions with state type.
  */
 template <typename Lyt, typename TT>
@@ -48,7 +55,10 @@ template <typename Lyt, typename TT>
 calculate_energy_and_state_type(const sidb_energy_distribution&                      energy_distribution,
                                 const std::vector<charge_distribution_surface<Lyt>>& valid_charge_distributions,
                                 const std::vector<bdl_pair<cell<Lyt>>>& output_bdl_pairs, const std::vector<TT>& spec,
-                                const uint64_t input_index) noexcept
+                                const uint64_t                                   input_index,
+                                const std::optional<std::vector<bdl_wire<Lyt>>>& input_wires  = std::nullopt,
+                                const std::optional<std::vector<bdl_wire<Lyt>>>& output_wires = std::nullopt,
+                                const std::optional<is_operational_params>&      params       = std::nullopt) noexcept
 
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
@@ -73,12 +83,24 @@ calculate_energy_and_state_type(const sidb_energy_distribution&                 
             {
                 bool correct_output = true;
 
-                for (auto i = 0u; i < output_bdl_pairs.size(); i++)
+                if (input_wires.has_value() && output_wires.has_value() && params.has_value())
                 {
-                    if (static_cast<bool>(-charge_state_to_sign(valid_layout.get_charge_state(
-                            output_bdl_pairs[i].lower))) != kitty::get_bit(spec[i], input_index))
+                    const auto operational_status = does_charge_distribution_match_logic_for_input_pattern(
+                        valid_layout, params.value(), spec, input_index, input_wires.value(), output_wires.value());
+                    if (operational_status == operational_status::NON_OPERATIONAL)
                     {
                         correct_output = false;
+                    }
+                }
+                else
+                {
+                    for (auto i = 0u; i < output_bdl_pairs.size(); i++)
+                    {
+                        if (static_cast<bool>(-charge_state_to_sign(valid_layout.get_charge_state(
+                                output_bdl_pairs[i].lower))) != kitty::get_bit(spec[i], input_index))
+                        {
+                            correct_output = false;
+                        }
                     }
                 }
                 // The output SiDB matches the truth table entry. Hence, state is called transparent.

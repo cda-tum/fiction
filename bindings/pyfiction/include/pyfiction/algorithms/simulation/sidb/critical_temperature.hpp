@@ -42,16 +42,6 @@ inline void critical_temperature(pybind11::module& m)
     namespace py = pybind11;
 
     /**
-     * Simulation engine.
-     */
-    py::enum_<fiction::critical_temperature_params::simulation_engine>(
-        m, "simulation_engine", DOC(fiction_critical_temperature_params_simulation_engine))
-        .value("EXACT", fiction::critical_temperature_params::simulation_engine::EXACT,
-               DOC(fiction_critical_temperature_params_simulation_engine_EXACT))
-        .value("APPROXIMATE", fiction::critical_temperature_params::simulation_engine::APPROXIMATE,
-               DOC(fiction_critical_temperature_params_simulation_engine_APPROXIMATE));
-
-    /**
      * Critical temperature statistics.
      */
     py::class_<fiction::critical_temperature_stats>(m, "critical_temperature_stats",
@@ -81,16 +71,12 @@ inline void critical_temperature(pybind11::module& m)
     py::class_<fiction::critical_temperature_params>(m, "critical_temperature_params",
                                                      DOC(fiction_critical_temperature_params))
         .def(py::init<>())
-        .def_readwrite("simulation_parameters", &fiction::critical_temperature_params::simulation_parameters,
+        .def_readwrite("operational_params", &fiction::critical_temperature_params::operational_params,
                        DOC(fiction_critical_temperature_params))
-        .def_readwrite("engine", &fiction::critical_temperature_params::engine,
-                       DOC(fiction_critical_temperature_params_engine))
         .def_readwrite("confidence_level", &fiction::critical_temperature_params::confidence_level,
                        DOC(fiction_critical_temperature_params_confidence_level))
         .def_readwrite("max_temperature", &fiction::critical_temperature_params::max_temperature,
-                       DOC(fiction_critical_temperature_params_max_temperature))
-        .def_readwrite("input_iterator_params", &fiction::critical_temperature_params::input_iterator_params,
-                       DOC(fiction_critical_temperature_params_input_iterator_params));
+                       DOC(fiction_critical_temperature_params_max_temperature));
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 

@@ -1,0 +1,71 @@
+//
+// Created by Jan Drewniok on 12.11.24.
+//
+
+#include "utils/blueprints/layout_blueprints.hpp"
+
+#include <fiction/algorithms/iter/bdl_input_iterator.hpp>
+#include <fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp>
+#include <fiction/algorithms/simulation/sidb/determine_groundstate_from_simulation_results.hpp>
+#include <fiction/algorithms/simulation/sidb/does_charge_distribution_match_logic_for_input_pattern.hpp>
+#include <fiction/algorithms/simulation/sidb/is_operational.hpp>
+#include <fiction/algorithms/simulation/sidb/quickexact.hpp>
+#include <fiction/traits.hpp>
+#include <fiction/types.hpp>
+#include <fiction/utils/truth_table_utils.hpp>
+
+#include <vector>
+
+using namespace fiction;
+
+TEST_CASE("Bestagon FO2 gate", "[does-charge-distribution-match-logic-for-given-input-pattern]")
+{
+    const auto lyt = blueprints::bestagon_fo2<sidb_cell_clk_lyt_siqad>();
+
+    const auto input_wires  = detect_bdl_wires(lyt, detect_bdl_wires_params{}, bdl_wire_selection::INPUT);
+    const auto output_wires = detect_bdl_wires(lyt, detect_bdl_wires_params{}, bdl_wire_selection::OUTPUT);
+
+    auto bii = bdl_input_iterator<sidb_cell_clk_lyt_siqad>{lyt};
+
+    const quickexact_params<cell<sidb_cell_clk_lyt_siqad>> params{sidb_simulation_parameters{2, -0.32}};
+
+    SECTION("The index is 2, which means that the left input is set to one and the right input is set to zero.")
+    {
+        bii = 2;
+
+        const auto simulation_results = quickexact<sidb_cell_clk_lyt_siqad>(*bii, params);
+
+        const auto gs = determine_groundstate_from_simulation_results(simulation_results);
+
+        REQUIRE(!gs.empty());
+
+            CHECK(does_charge_distribution_match_logic_for_input_pattern<sidb_cell_clk_lyt_siqad>(
+                      gs.front(), is_operational_params{}, std::vector<tt>{create_fan_out_tt()}, 2, input_wires,
+                      output_wires) == operational_status::OPERATIONAL);
+
+    }
+
+    SECTION("Index is 1, which means that the left input is set to zero and the right input is set to one.")
+    {
+        bii = 1;
+
+        const auto simulation_results = quickexact<sidb_cell_clk_lyt_siqad>(*bii, params);
+
+        const auto gs = determine_groundstate_from_simulation_results(simulation_results);
+
+        REQUIRE(!gs.empty());
+
+        SECTION("Correct index")
+        {
+            CHECK(does_charge_distribution_match_logic_for_input_pattern<sidb_cell_clk_lyt_siqad>(
+                      gs.front(), is_operational_params{}, std::vector<tt>{create_fan_out_tt()}, 1, input_wires,
+                      output_wires) == operational_status::OPERATIONAL);
+        }
+        SECTION("Wrong input index")
+        {
+            CHECK(does_charge_distribution_match_logic_for_input_pattern<sidb_cell_clk_lyt_siqad>(
+                      gs.front(), is_operational_params{}, std::vector<tt>{create_fan_out_tt()}, 2, input_wires,
+                      output_wires) == operational_status::NON_OPERATIONAL);
+        }
+    }
+}
