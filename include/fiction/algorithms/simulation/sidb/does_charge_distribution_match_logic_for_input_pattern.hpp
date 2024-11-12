@@ -21,13 +21,13 @@ namespace fiction
 
 /**
  * This function checks if a charge distribution encodes the correct logic for a specified input pattern
- * based on a provided specification (truth table).
+ * based on a provided truth table.
  *
  * @tparam Lyt SiDB cell-level layout type.
- * @tparam TT The type of the truth table specifying the gate behavior.
+* @tparam TT Truth table type.
  * @param cds Charge distribution surface, containing charge state information for each SiDB.
- * @param params The parameters used to determine if a layout is operational or non-operational.
- * @param spec Truth table specification.
+ * @param params The parameters used to determine if a layout is `operational` or `non-operational`.
+* @param spec Expected Boolean function of the layout given as a multi-output truth table.
  * @param input_pattern The specific input pattern.
  * @param input_bdl_wire Vector of input BDL wires.
  * @param output_bdl_wire Vector of output BDL wires.
