@@ -113,6 +113,7 @@ class clustercomplete_impl
      */
     explicit clustercomplete_impl(const Lyt& lyt, const clustercomplete_params<cell<Lyt>>& params) noexcept :
             charge_layout{initialize_charge_layout(lyt, params)},
+            available_threads{params.available_threads},
             real_placed_defects{charge_layout.get_defects()},
             mu_bounds_with_error{physical_constants::POP_STABILITY_ERR - params.simulation_parameters.mu_minus,
                                  -physical_constants::POP_STABILITY_ERR - params.simulation_parameters.mu_minus,
@@ -158,7 +159,17 @@ class clustercomplete_impl
 
             if (!gss_stats.top_cluster->charge_space.empty())
             {
-                collect_physically_valid_charge_distributions(gss_stats.top_cluster, params.available_threads);
+                for (const sidb_cluster_charge_state& ccs : gss_stats.top_cluster->charge_space)
+                {
+                    for (const sidb_charge_space_composition& composition : ccs.compositions)
+                    {
+                        // convert charge space composition to clustering state
+                        sidb_clustering_state clustering_state = convert_composition_to_clustering_state(composition);
+
+                        // unfold
+                        add_physically_valid_charge_configurations(clustering_state);
+                    }
+                }
             }
         }
 
@@ -173,6 +184,14 @@ class clustercomplete_impl
      * Simulation results.
      */
     sidb_simulation_result<Lyt> result{};
+    /**
+     * Number of available threads.
+     */
+    uint64_t available_threads{};
+    /**
+     * Mutex to protect the number of available threads.
+     */
+    std::mutex mutex_to_protect_the_available_threads;
     /**
      * Mutex to protect the simulation results.
      */
@@ -366,6 +385,21 @@ class clustercomplete_impl
         }
     }
     /**
+     * This function is used to occupy a number of threads in a thread-safe way.
+     *
+     * @param max_required_threads The maximum number of available threads that should be taken.
+     * @return The number of threads that were taken.
+     */
+    [[nodiscard]] uint64_t take_available_threads(const uint64_t max_required_threads)
+    {
+        const std::lock_guard lock{mutex_to_protect_the_available_threads};
+
+        const uint64_t num_threads_to_take = std::min(std::max(available_threads, uint64_t{1}), max_required_threads);
+        available_threads -= num_threads_to_take;
+
+        return num_threads_to_take;
+    }
+    /**
      * Helper function for obtaining the stored lower or upper bound on the electrostatic potential that SiDBs in the
      * given projector state--i.e., a cluster together with an associated multiset charge configuration--collectively
      * project onto the given SiDB.
@@ -483,39 +517,90 @@ class clustercomplete_impl
         // un-apply max_pst, thereby making space for specialization
         add_or_subtract_parent_potential<potential_bound_update_operation::SUBTRACT>(*max_pst, clustering_state);
 
-        // specialise for all compositions of max_pst
-        for (const sidb_charge_space_composition& max_pst_composition : get_projector_state_compositions(*max_pst))
+        const std::vector<sidb_charge_space_composition>& unfolded_max_cluster =
+            get_projector_state_compositions(*max_pst);
+
+        const uint64_t num_threads_to_use = take_available_threads(unfolded_max_cluster.size());
+
+        // define the top cluster charge space ranges per thread
+        std::vector<std::pair<uint64_t, uint64_t>> ranges{};
+        ranges.reserve(num_threads_to_use);
+
+        const uint64_t chunk_size = std::max(unfolded_max_cluster.size() / num_threads_to_use, uint64_t{1});
+        uint64_t       start      = 0;
+        uint64_t       end        = chunk_size - 1;
+
+        for (uint64_t i = 0; i < num_threads_to_use; ++i)
         {
-            // specialise parent to a specific composition of its children
-            clustering_state.pot_bounds += max_pst_composition.pot_bounds;
-
-            for (const sidb_cluster_projector_state& child_pst : max_pst_composition.proj_states)
-            {
-                // move child projector state in clustering state
-                clustering_state.proj_states.emplace_back(std::make_unique<sidb_cluster_projector_state>(child_pst));
-            }
-
-            // recurse with specialised composition
-            add_physically_valid_charge_configurations(clustering_state);
-
-            for (uint64_t i = 0; i < max_pst_composition.proj_states.size(); ++i)
-            {
-                // handled child projector state --- remove
-                clustering_state.proj_states.pop_back();
-            }
-
-            // undo specialization such that the specialization may consider a different children composition
-            clustering_state.pot_bounds -= max_pst_composition.pot_bounds;
+            ranges.emplace_back(start, end);
+            start = end + 1;
+            end   = i == num_threads_to_use - 2 ? unfolded_max_cluster.size() - 1 : start + chunk_size - 1;
         }
 
-        // apply max_pst back
-        add_or_subtract_parent_potential<potential_bound_update_operation::ADD>(*max_pst, clustering_state);
+        std::vector<std::thread> threads{};
+        threads.reserve(num_threads_to_use);
 
-        // move back
-        clustering_state.proj_states.emplace_back(std::move(max_pst));
+        // the threads each consider a range of the top cluster charge space
+        for (const auto& [range_start, range_end] : ranges)
+        {
+            threads.emplace_back(
+                [&, start = range_start, end = range_end]
+                {
+                    // specialise for all compositions of max_pst
+                    for (uint64_t ix = start; ix <= end; ++ix)
+                    {
+                        const sidb_charge_space_composition& max_pst_composition =
+                            *std::next(unfolded_max_cluster.cbegin(), static_cast<int64_t>(ix));
 
-        // swap back
-        std::swap(clustering_state.proj_states.back(), clustering_state.proj_states[max_pst_ix]);
+                        // specialise parent to a specific composition of its children
+                        clustering_state.pot_bounds += max_pst_composition.pot_bounds;
+
+                        for (const sidb_cluster_projector_state& child_pst : max_pst_composition.proj_states)
+                        {
+                            // move child projector state in clustering state
+                            clustering_state.proj_states.emplace_back(
+                                std::make_unique<sidb_cluster_projector_state>(child_pst));
+                        }
+
+                        // recurse with specialised composition
+                        add_physically_valid_charge_configurations(clustering_state);
+
+                        for (uint64_t i = 0; i < max_pst_composition.proj_states.size(); ++i)
+                        {
+                            // handled child projector state --- remove
+                            clustering_state.proj_states.pop_back();
+                        }
+
+                        // undo specialization such that the specialization may consider a different children
+                        // composition
+                        clustering_state.pot_bounds -= max_pst_composition.pot_bounds;
+                    }
+
+                    // apply max_pst back
+                    add_or_subtract_parent_potential<potential_bound_update_operation::ADD>(*max_pst, clustering_state);
+
+                    // move back
+                    clustering_state.proj_states.emplace_back(std::move(max_pst));
+
+                    // swap back
+                    std::swap(clustering_state.proj_states.back(), clustering_state.proj_states[max_pst_ix]);
+                });
+        }
+
+        // wait for all threads to complete
+        for (auto& thread : threads)
+        {
+            if (thread.joinable())
+            {
+                thread.join();
+            }
+        }
+
+        {
+            const std::lock_guard lock(mutex_to_protect_the_available_threads);
+
+            available_threads++;
+        }
     }
     /**
      * This function converts between semantically equivalent datatypes, only converting projector states to unique
@@ -547,92 +632,6 @@ class clustercomplete_impl
         }
 
         return clustering_state;
-    }
-    /**
-     * After the *Ground State Space* construction was completed and the top cluster was returned, this function splits
-     * the charge space of the top cluster into sections for the individual threads to handle. Each are decomposed
-     * recursively to generate physically valid charge distributions that emerge from increasingly specializing multiset
-     * charge configurations.
-     *
-     * @param top_cluster The top cluster that is returned by the *Ground State Space construction; it contains the
-     * entire cluster hierarchy construct.
-     * @param num_threads The maximum number of threads to use in the destruction.
-     */
-    void collect_physically_valid_charge_distributions(const sidb_cluster_ptr& top_cluster,
-                                                       const uint64_t          num_threads) noexcept
-    {
-        const uint64_t top_level_multisets = top_cluster->charge_space.size();
-
-        const uint64_t num_threads_to_use = std::min(std::max(num_threads, uint64_t{1}), top_level_multisets);
-
-        // skip multithreading setup when only one core is needed
-        if (num_threads_to_use == 1)
-        {
-            for (const sidb_cluster_charge_state& ccs : top_cluster->charge_space)
-            {
-                for (const sidb_charge_space_composition& composition : ccs.compositions)
-                {
-                    // convert charge space composition to clustering state
-                    sidb_clustering_state clustering_state = convert_composition_to_clustering_state(composition);
-
-                    // unfold
-                    add_physically_valid_charge_configurations(clustering_state);
-                }
-            }
-
-            return;
-        }
-
-        // define the top cluster charge space ranges per thread
-        std::vector<std::pair<uint64_t, uint64_t>> ranges{};
-        ranges.reserve(num_threads_to_use);
-
-        const uint64_t chunk_size = std::max(top_level_multisets / num_threads_to_use, uint64_t{1});
-        uint64_t       start      = 0;
-        uint64_t       end        = chunk_size - 1;
-
-        for (uint64_t i = 0; i < num_threads_to_use; ++i)
-        {
-            ranges.emplace_back(start, end);
-            start = end + 1;
-            end   = i == num_threads_to_use - 2 ? top_level_multisets - 1 : start + chunk_size - 1;
-        }
-
-        std::vector<std::thread> threads{};
-        threads.reserve(num_threads_to_use);
-
-        // the threads each consider a range of the top cluster charge space
-        for (const auto& [range_start, range_end] : ranges)
-        {
-            threads.emplace_back(
-                [&, start = range_start, end = range_end]
-                {
-                    // iterate over all multiset charge configurations in the assigned range
-                    for (uint64_t ix = start; ix <= end; ++ix)
-                    {
-                        // iterate over all cluster charge assignments in the multiset charge configuration
-                        for (const sidb_charge_space_composition& composition :
-                             std::next(top_cluster->charge_space.cbegin(), static_cast<int64_t>(ix))->compositions)
-                        {
-                            // convert charge space composition to clustering state
-                            sidb_clustering_state clustering_state =
-                                convert_composition_to_clustering_state(composition);
-
-                            // unfold
-                            add_physically_valid_charge_configurations(clustering_state);
-                        }
-                    }
-                });
-        }
-
-        // wait for all threads to complete
-        for (auto& thread : threads)
-        {
-            if (thread.joinable())
-            {
-                thread.join();
-            }
-        }
     }
 };
 
