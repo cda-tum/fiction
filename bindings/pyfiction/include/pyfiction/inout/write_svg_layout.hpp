@@ -20,7 +20,7 @@ namespace pyfiction
 namespace detail
 {
 template <typename Lyt>
-inline void write_svg_layout_impl(pybind11::module& m)
+inline void write_sidb_layout_svg_impl(pybind11::module& m)
 {
     using namespace pybind11::literals;
 
@@ -43,6 +43,13 @@ inline void write_svg_layout_impl(pybind11::module& m)
             return oss.str();                                     // Return the string content
         },
         "layout"_a, "ps"_a = fiction::write_sidb_layout_svg_params{}, DOC(fiction_write_sidb_layout_svg));
+}
+
+
+template <typename Lyt>
+inline void write_qca_layout_svg_impl(pybind11::module& m)
+{
+    using namespace pybind11::literals;
 
     // QCA plot
     void (*write_qca_layout_svg_pointer)(const py_qca_layout&, const std::string_view&,
@@ -60,9 +67,9 @@ void write_svg_layout(pybind11::module& m)
     namespace py = pybind11;
     using namespace pybind11::literals;
 
-    py::enum_<fiction::color_mode>(m, "color_mode", DOC(fiction_color_mode))
-        .value("LIGHT", fiction::color_mode::LIGHT, DOC(fiction_color_mode_LIGHT))
-        .value("DARK", fiction::color_mode::DARK, DOC(fiction_color_mode_DARK));
+    py::enum_<fiction::write_sidb_layout_svg_params::color_mode>(m, "color_mode", DOC(fiction_color_mode))
+        .value("LIGHT", fiction::write_sidb_layout_svg_params::color_mode::LIGHT, DOC(fiction_color_mode_LIGHT))
+        .value("DARK", fiction::write_sidb_layout_svg_params::color_mode::DARK, DOC(fiction_color_mode_DARK));
 
     py::class_<fiction::write_sidb_layout_svg_params>(m, "write_sidb_layout_svg_params",
                                                       DOC(fiction_write_sidb_layout_svg_params))
@@ -83,13 +90,14 @@ void write_svg_layout(pybind11::module& m)
                        DOC(fiction_write_qca_layout_svg_params_simple));
     ;
 
-    detail::write_svg_layout_impl<py_charge_distribution_surface_100>(m);
-    detail::write_svg_layout_impl<py_charge_distribution_surface_100>(m);
-    detail::write_svg_layout_impl<py_charge_distribution_surface>(m);
+    detail::write_sidb_layout_svg_impl<py_charge_distribution_surface_111>(m);
+    detail::write_sidb_layout_svg_impl<py_charge_distribution_surface_100>(m);
+    detail::write_sidb_layout_svg_impl<py_charge_distribution_surface>(m);
 
-    detail::write_svg_layout_impl<py_sidb_111_lattice>(m);
-    detail::write_svg_layout_impl<py_sidb_100_lattice>(m);
-    detail::write_svg_layout_impl<py_sidb_layout>(m);
+    detail::write_sidb_layout_svg_impl<py_sidb_111_lattice>(m);
+    detail::write_sidb_layout_svg_impl<py_sidb_100_lattice>(m);
+    detail::write_sidb_layout_svg_impl<py_sidb_layout>(m);
+    detail::write_qca_layout_svg_impl<py_sidb_layout>(m);
 }
 
 }  // namespace pyfiction

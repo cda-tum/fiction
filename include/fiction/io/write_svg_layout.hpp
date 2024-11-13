@@ -44,24 +44,24 @@ struct write_qca_layout_svg_params
 };
 
 /**
- * Enumeration to specify the color mode for the SVG output.
- */
-enum class color_mode : uint8_t
-{
-    /**
-     * Dark mode.
-     */
-    DARK,
-    /**
-     * Light mode.
-     */
-    LIGHT
-};
-/**
  * Parameters for writing SiDB layouts to SVG format.
  */
 struct write_sidb_layout_svg_params
 {
+    /**
+ * Enumeration to specify the color mode for the SVG output.
+     */
+    enum class color_mode : uint8_t
+    {
+        /**
+     * Dark mode.
+         */
+        DARK,
+        /**
+     * Light mode.
+         */
+        LIGHT
+    };
     /**
      * Size of the H-Si lattice points in SVG units.
      */
@@ -80,20 +80,6 @@ struct write_sidb_layout_svg_params
     color_mode color_background = color_mode::DARK;
 };
 
-/**
- * Parameters for writing SVG layouts.
- */
-struct write_svg_layout_params
-{
-    /**
-     * Parameters for writing SVG QCA layouts.
-     */
-    write_qca_layout_svg_params qca_params;
-    /**
-     * Parameters for writing SiDB layouts to SVG format.
-     */
-    write_sidb_layout_svg_params sidb_params;
-};
 
 template <typename Coordinate>
 class unsupported_cell_type_exception : public std::exception
@@ -498,7 +484,7 @@ class write_sidb_layout_svg_impl
      */
     void set_colors() noexcept
     {
-        if (ps.color_background == color_mode::LIGHT)
+        if (ps.color_background == write_sidb_layout_svg_params::color_mode::LIGHT)
         {
             // fiction namespace is needed to avoid windows and linux conflict
             background_color = fiction::detail::svg::BACKGROUND_COLOR_BRIGHT;
@@ -1186,66 +1172,6 @@ void write_sidb_layout_svg(const Lyt& lyt, const std::string_view& filename,
     }
 
     write_sidb_layout_svg(lyt, os, ps);
-    os.close();
-}
-
-/**
- * Writes an SVG representation of an cell-level layout into an output stream.
- *
- * @tparam Lyt cell-level layout type.
- * @param lyt The layout to be written.
- * @param os The output stream to write into.
- * @param ps Parameters.
- */
-template <typename Lyt>
-void write_svg_layout(const Lyt& lyt, std::ostream& os, const write_svg_layout_params& ps = {})
-{
-    if constexpr (has_qca_technology_v<Lyt>)
-    {
-        write_qca_layout_svg(lyt, os, ps.qca_params);
-    }
-    else if constexpr (has_sidb_technology_v<Lyt>)
-    {
-        write_sidb_layout_svg(lyt, os, ps.sidb_params);
-    }
-    else
-    {
-        throw std::invalid_argument("Unknown layout type");
-    }
-}
-
-/**
- * Writes an SVG representation of an cell-level layout into a file.
- *
- * @note SiDB defects are not supported yet.
- *
- * @tparam Lyt Cell-level layout type.
- * @param lyt The layout to be written.
- * @param filename The file name to create and write into.
- * @param ps Parameters.
- */
-template <typename Lyt>
-void write_svg_layout(const Lyt& lyt, const std::string_view& filename, const write_svg_layout_params& ps = {})
-{
-    std::ofstream os{filename.data(), std::ofstream::out};
-
-    if (!os.is_open())
-    {
-        throw std::ofstream::failure("Could not open file");
-    }
-
-    if constexpr (has_qca_technology_v<Lyt>)
-    {
-        write_qca_layout_svg(lyt, os, ps.qca_params);
-    }
-    else if constexpr (has_sidb_technology_v<Lyt>)
-    {
-        write_sidb_layout_svg(lyt, os, ps.sidb_params);
-    }
-    else
-    {
-        throw std::invalid_argument("Unknown layout type");
-    }
     os.close();
 }
 
