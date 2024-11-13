@@ -88,8 +88,7 @@ void fcn_technology_cell_layout(pybind11::module& m)
      * Cell-level clocked Cartesian layout.
      */
 
-    py::class_<CellLyt, ClockedLyt>(m, fmt::format("{}_layout", tech_name).c_str(),
-                                    DOC(fiction_cell_level_layout))
+    py::class_<CellLyt, ClockedLyt>(m, fmt::format("{}_layout", tech_name).c_str(), DOC(fiction_cell_level_layout))
         .def(py::init<>())
         .def(py::init<const fiction::aspect_ratio<CellLyt>&>(), "dimension"_a,
              DOC(fiction_cell_level_layout_cell_level_layout))
@@ -173,7 +172,6 @@ void fcn_technology_cell_layout(pybind11::module& m)
                  return stream.str();
              });
 }
-
 
 template <typename Technology, typename ClockedLyt, typename CellLyt>
 void fcn_technology_cell_layout_cube(pybind11::module& m)
@@ -285,8 +283,8 @@ inline void cell_level_layouts(pybind11::module& m)
     detail::fcn_technology_cell_layout<fiction::qca_technology, py_cartesian_clocked_layout, py_qca_layout>(m);
     detail::fcn_technology_cell_layout<fiction::inml_technology, py_cartesian_clocked_layout, py_inml_layout>(m);
     detail::fcn_technology_cell_layout<fiction::sidb_technology, py_cartesian_clocked_layout, py_sidb_layout>(m);
-    detail::fcn_technology_cell_layout_cube<fiction::sidb_technology, py_cartesian_clocked_layout_cube, py_sidb_layout_cube>(
-        m);
+    detail::fcn_technology_cell_layout_cube<fiction::sidb_technology, py_cartesian_clocked_layout_cube,
+                                            py_sidb_layout_cube>(m);
 }
 
 }  // namespace pyfiction
