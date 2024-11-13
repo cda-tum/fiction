@@ -66,9 +66,12 @@ void write_svg_layout(pybind11::module& m)
     namespace py = pybind11;
     using namespace pybind11::literals;
 
-    py::enum_<fiction::write_sidb_layout_svg_params::color_mode>(m, "color_mode", DOC(fiction_color_mode))
-        .value("LIGHT", fiction::write_sidb_layout_svg_params::color_mode::LIGHT, DOC(fiction_color_mode_LIGHT))
-        .value("DARK", fiction::write_sidb_layout_svg_params::color_mode::DARK, DOC(fiction_color_mode_DARK));
+    py::enum_<fiction::write_sidb_layout_svg_params::color_mode>(m, "color_mode",
+                                                                 DOC(fiction_write_sidb_layout_svg_params_color_mode))
+        .value("LIGHT", fiction::write_sidb_layout_svg_params::color_mode::LIGHT,
+               DOC(fiction_write_sidb_layout_svg_params_color_mode_LIGHT))
+        .value("DARK", fiction::write_sidb_layout_svg_params::color_mode::DARK,
+               DOC(fiction_write_sidb_layout_svg_params_color_mode_DARK));
 
     py::class_<fiction::write_sidb_layout_svg_params>(m, "write_sidb_layout_svg_params",
                                                       DOC(fiction_write_sidb_layout_svg_params))
