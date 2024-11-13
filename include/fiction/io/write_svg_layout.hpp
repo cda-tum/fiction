@@ -49,16 +49,16 @@ struct write_qca_layout_svg_params
 struct write_sidb_layout_svg_params
 {
     /**
- * Enumeration to specify the color mode for the SVG output.
+     * Enumeration to specify the color mode for the SVG output.
      */
     enum class color_mode : uint8_t
     {
         /**
-     * Dark mode.
+         * Dark mode.
          */
         DARK,
         /**
-     * Light mode.
+         * Light mode.
          */
         LIGHT
     };
@@ -79,7 +79,6 @@ struct write_sidb_layout_svg_params
      */
     color_mode color_background = color_mode::DARK;
 };
-
 
 template <typename Coordinate>
 class unsupported_cell_type_exception : public std::exception

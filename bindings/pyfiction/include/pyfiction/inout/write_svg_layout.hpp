@@ -45,7 +45,6 @@ inline void write_sidb_layout_svg_impl(pybind11::module& m)
         "layout"_a, "ps"_a = fiction::write_sidb_layout_svg_params{}, DOC(fiction_write_sidb_layout_svg));
 }
 
-
 template <typename Lyt>
 inline void write_qca_layout_svg_impl(pybind11::module& m)
 {
