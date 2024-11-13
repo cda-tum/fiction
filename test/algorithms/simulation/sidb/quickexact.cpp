@@ -1355,6 +1355,8 @@ TEMPLATE_TEST_CASE("QuickExact simulation of a Y-shaped SiDB OR gate with input 
     }
 }
 
+// to save runtime in the CI, this test is only run in RELEASE mode
+#ifdef RELEASE_BUILD
 TEMPLATE_TEST_CASE("QuickExact simulation of a Y-shaped SiDB OR gate with input 01", "[quickexact], [quality]",
                    sidb_100_cell_clk_lyt_siqad, cds_sidb_100_cell_clk_lyt_siqad)
 {
@@ -2091,3 +2093,4 @@ TEMPLATE_TEST_CASE("QuickExact AND gate simulation of Si-111 surface", "[quickex
         CHECK(ground_state.front().get_charge_state({23, 29, 1}) == sidb_charge_state::NEGATIVE);
     }
 }
+#endif

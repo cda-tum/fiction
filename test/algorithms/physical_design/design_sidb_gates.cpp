@@ -406,13 +406,16 @@ TEST_CASE("Design NOR Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
                 cell<sidb_111_cell_clk_lyt_siqad>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
             {{10, 13, 0}, {14, 17, 0}},
             3};
-
+        // to save runtime in the CI, this test is only run in RELEASE mode
+        #ifdef RELEASE_BUILD
         SECTION("all design")
         {
             const auto found_gate_layouts = design_sidb_gates(lyt, std::vector<tt>{create_nor_tt()}, params);
             REQUIRE(found_gate_layouts.size() == 14);
             CHECK(found_gate_layouts.front().num_cells() == lyt.num_cells() + 3);
         }
+        #endif
+
         SECTION("terminate after first solution is found")
         {
             params.termination_cond = design_sidb_gates_params<
@@ -422,7 +425,8 @@ TEST_CASE("Design NOR Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
             CHECK(found_gate_layouts.front().num_cells() == lyt.num_cells() + 3);
         }
     }
-
+    // to save runtime in the CI, this test is only run in RELEASE mode
+    #ifdef RELEASE_BUILD
     SECTION("Exhaustive Generation, forbidding kinks")
     {
         const design_sidb_gates_params<cell<sidb_111_cell_clk_lyt_siqad>> params{
@@ -437,6 +441,7 @@ TEST_CASE("Design NOR Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
         REQUIRE(found_gate_layouts.size() == 3);
         CHECK(found_gate_layouts.front().num_cells() == lyt.num_cells() + 3);
     }
+    #endif
 
     SECTION("Exhaustive Generation, QuickCell")
     {
@@ -467,6 +472,8 @@ TEST_CASE("Design NOR Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
     }
 }
 
+// to save runtime in the CI, this test is only run in RELEASE mode
+#ifdef RELEASE_BUILD
 TEST_CASE("Design Bestagon shaped CX gate with QuickCell", "[design-sidb-gates]")
 {
     const auto lyt = blueprints::two_input_two_output_bestagon_skeleton<sidb_100_cell_clk_lyt_siqad>();
@@ -526,3 +533,4 @@ TEST_CASE("Design AND gate with input left and output top-right with QuickCell (
               operational_status::OPERATIONAL);
     }
 }
+#endif
