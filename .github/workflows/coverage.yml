@@ -124,7 +124,7 @@ jobs:
       - name: Setup and run lcov
         run: |
           # Set gcov version matching the compiler version
-          gcovr --gcov-executable gcov-12
+          gcovr --gcov-executable gcov-12 --gcov-ignore-parse-errors negative_hits.warn
 
           # Capture coverage data
           lcov -t "result" -o lcov.info -c -d ${{github.workspace}}/build/
