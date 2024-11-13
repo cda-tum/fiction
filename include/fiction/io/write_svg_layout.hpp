@@ -7,9 +7,9 @@
 
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/layouts/coordinates.hpp"
+#include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/traits.hpp"
 #include "utils/version_info.hpp"
-#include "fiction/technology/sidb_charge_state.hpp"
 
 #include <fmt/format.h>
 
@@ -86,11 +86,11 @@ struct write_sidb_layout_svg_params
 struct write_svg_layout_params
 {
     /**
- * Parameters for writing SVG QCA layouts.
+     * Parameters for writing SVG QCA layouts.
      */
     write_qca_layout_svg_params qca_params;
     /**
- * Parameters for writing SiDB layouts to SVG format.
+     * Parameters for writing SiDB layouts to SVG format.
      */
     write_sidb_layout_svg_params sidb_params;
 };
@@ -1213,7 +1213,6 @@ void write_svg_layout(const Lyt& lyt, std::ostream& os, const write_svg_layout_p
         throw std::invalid_argument("Unknown layout type");
     }
 }
-
 
 /**
  * Writes an SVG representation of an cell-level layout into a file.
