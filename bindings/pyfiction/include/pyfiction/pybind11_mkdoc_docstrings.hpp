@@ -18833,15 +18833,44 @@ Parameter ``filename``:
     The file name to create and write into. Should preferably use the
     `.xml` extension.)doc";
 
-static const char *__doc_fiction_write_svg_layout = R"doc()doc";
+static const char *__doc_fiction_write_svg_layout =
+R"doc(Writes an SVG representation of an cell-level layout into an output
+stream.
 
-static const char *__doc_fiction_write_svg_layout_2 = R"doc()doc";
+Template parameter ``Lyt``:
+    cell-level layout type.
 
-static const char *__doc_fiction_write_svg_layout_params = R"doc()doc";
+Parameter ``lyt``:
+    The layout to be written.
 
-static const char *__doc_fiction_write_svg_layout_params_qca_params = R"doc()doc";
+Parameter ``os``:
+    The output stream to write into.
 
-static const char *__doc_fiction_write_svg_layout_params_sidb_params = R"doc()doc";
+Parameter ``ps``:
+    Parameters.)doc";
+
+static const char *__doc_fiction_write_svg_layout_2 =
+R"doc(Writes an SVG representation of an cell-level layout into a file.
+
+@note SiDB defects are not supported yet.
+
+Template parameter ``Lyt``:
+    Cell-level layout type.
+
+Parameter ``lyt``:
+    The layout to be written.
+
+Parameter ``filename``:
+    The file name to create and write into.
+
+Parameter ``ps``:
+    Parameters.)doc";
+
+static const char *__doc_fiction_write_svg_layout_params = R"doc(Parameters for writing SVG layouts.)doc";
+
+static const char *__doc_fiction_write_svg_layout_params_qca_params = R"doc(Parameters for writing SVG QCA layouts.)doc";
+
+static const char *__doc_fiction_write_svg_layout_params_sidb_params = R"doc(Parameters for writing SiDB layouts to SVG format.)doc";
 
 static const char *__doc_fiction_yen_k_shortest_paths =
 R"doc(Yen's algorithm for finding up to :math:`k` shortest paths without
