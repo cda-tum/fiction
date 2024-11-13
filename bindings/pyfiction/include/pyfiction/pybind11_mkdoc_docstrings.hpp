@@ -2647,12 +2647,6 @@ Parameter ``cn``:
 
 static const char *__doc_fiction_clocking_scheme_regular = R"doc(Defines the clocking as regular and well-defined by the scheme.)doc";
 
-static const char *__doc_fiction_color_mode = R"doc(Enumeration to specify the color mode for the SVG output.)doc";
-
-static const char *__doc_fiction_color_mode_DARK = R"doc(Dark mode.)doc";
-
-static const char *__doc_fiction_color_mode_LIGHT = R"doc(Light mode.)doc";
-
 static const char *__doc_fiction_color_routing =
 R"doc(A multi-path signal routing approach based on coloring of edge
 intersection graphs as originally proposed in \"Efficient Multi-Path
@@ -18755,6 +18749,12 @@ static const char *__doc_fiction_write_sidb_layout_svg_params = R"doc(Parameters
 
 static const char *__doc_fiction_write_sidb_layout_svg_params_color_background = R"doc(The color mode of the background for the SVG output.)doc";
 
+static const char *__doc_fiction_write_sidb_layout_svg_params_color_mode = R"doc(Enumeration to specify the color mode for the SVG output.)doc";
+
+static const char *__doc_fiction_write_sidb_layout_svg_params_color_mode_DARK = R"doc(Dark mode.)doc";
+
+static const char *__doc_fiction_write_sidb_layout_svg_params_color_mode_LIGHT = R"doc(Light mode.)doc";
+
 static const char *__doc_fiction_write_sidb_layout_svg_params_lattice_point_size = R"doc(Size of the H-Si lattice points in SVG units.)doc";
 
 static const char *__doc_fiction_write_sidb_layout_svg_params_sidb_border_width = R"doc(Border width of the SiDB.)doc";
@@ -18832,45 +18832,6 @@ Parameter ``sim_result``:
 Parameter ``filename``:
     The file name to create and write into. Should preferably use the
     `.xml` extension.)doc";
-
-static const char *__doc_fiction_write_svg_layout =
-R"doc(Writes an SVG representation of an cell-level layout into an output
-stream.
-
-Template parameter ``Lyt``:
-    cell-level layout type.
-
-Parameter ``lyt``:
-    The layout to be written.
-
-Parameter ``os``:
-    The output stream to write into.
-
-Parameter ``ps``:
-    Parameters.)doc";
-
-static const char *__doc_fiction_write_svg_layout_2 =
-R"doc(Writes an SVG representation of an cell-level layout into a file.
-
-@note SiDB defects are not supported yet.
-
-Template parameter ``Lyt``:
-    Cell-level layout type.
-
-Parameter ``lyt``:
-    The layout to be written.
-
-Parameter ``filename``:
-    The file name to create and write into.
-
-Parameter ``ps``:
-    Parameters.)doc";
-
-static const char *__doc_fiction_write_svg_layout_params = R"doc(Parameters for writing SVG layouts.)doc";
-
-static const char *__doc_fiction_write_svg_layout_params_qca_params = R"doc(Parameters for writing SVG QCA layouts.)doc";
-
-static const char *__doc_fiction_write_svg_layout_params_sidb_params = R"doc(Parameters for writing SiDB layouts to SVG format.)doc";
 
 static const char *__doc_fiction_yen_k_shortest_paths =
 R"doc(Yen's algorithm for finding up to :math:`k` shortest paths without
