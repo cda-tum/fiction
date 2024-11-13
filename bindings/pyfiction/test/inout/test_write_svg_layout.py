@@ -156,7 +156,7 @@ cds_light_mode = """<?xml version="1.0" encoding="UTF-8" standalone="no"?>
     </g>
 </svg>"""
 
-class TestWriteSidbLayoutToSvgInSiqadLayout(unittest.TestCase):
+class TestWriteSvgLayout(unittest.TestCase):
 
     def test_write_sidb_cell_level_layout_to_svg(self):
 
@@ -170,12 +170,12 @@ class TestWriteSidbLayoutToSvgInSiqadLayout(unittest.TestCase):
         params = write_sidb_layout_svg_params()
 
         params.color_background = color_mode.DARK
-        generated_svg_cell_level_dark_mode = write_sidb_layout_svg_and_return_as_string(sidb_layout, params)
+        generated_svg_cell_level_dark_mode = write_sidb_layout_svg_to_string(sidb_layout, params)
         #print(generated_svg_cell_level_dark_mode)
         self.assertEqual(normalize_svg(generated_svg_cell_level_dark_mode), normalize_svg(cell_level_dark_mode))
 
         params.color_background = color_mode.LIGHT
-        generated_svg_cell_level_light_mode = write_sidb_layout_svg_and_return_as_string(sidb_layout, params)
+        generated_svg_cell_level_light_mode = write_sidb_layout_svg_to_string(sidb_layout, params)
         print(cell_level_light_mode)
         self.assertEqual(normalize_svg(generated_svg_cell_level_light_mode), normalize_svg(cell_level_light_mode))
 
@@ -197,11 +197,11 @@ class TestWriteSidbLayoutToSvgInSiqadLayout(unittest.TestCase):
         params = write_sidb_layout_svg_params()
 
         params.color_background = color_mode.DARK
-        generated_svg_cds_dark_mode = write_sidb_layout_svg_and_return_as_string(cds, params)
+        generated_svg_cds_dark_mode = write_sidb_layout_svg_to_string(cds, params)
         self.assertEqual(normalize_svg(generated_svg_cds_dark_mode), normalize_svg(cds_dark_mode))
 
         params.color_background = color_mode.LIGHT
-        generated_svg_cds_light_mode = write_sidb_layout_svg_and_return_as_string(cds, params)
+        generated_svg_cds_light_mode = write_sidb_layout_svg_to_string(cds, params)
         self.assertEqual(normalize_svg(generated_svg_cds_light_mode), normalize_svg(cds_light_mode))
 
 if __name__ == '__main__':

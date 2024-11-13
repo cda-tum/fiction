@@ -8,7 +8,6 @@
 #include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>
 #include <fiction/io/dot_drawers.hpp>
 #include <fiction/io/print_layout.hpp>
-#include <fiction/io/write_sidb_layout_svg.hpp>
 #include <fiction/io/write_svg_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/traits.hpp>
@@ -469,7 +468,7 @@ void show<fiction::cell_layout_t>(std::ostream& os, const fiction::cell_layout_t
                                           lyt_ptr->get_layout_name())
                            << std::endl;
         }
-        else if constexpr (!std::is_same_v<fiction::coordinate<Lyt>, fiction::offset::ucoord_t>)
+        else if constexpr (fiction::has_qca_technology_v<Lyt> && !fiction::is_offset_ucoord_v<Lyt>)
         {
             cmd.env->out() << fmt::format("[e] {} is not a Cartesian layout", lyt_ptr->get_layout_name()) << std::endl;
         }
