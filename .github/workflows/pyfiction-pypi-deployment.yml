@@ -92,7 +92,9 @@ jobs:
         env:
           CIBW_BEFORE_ALL_LINUX: /opt/python/cp39-cp39/bin/pip install z3-solver==${{ env.Z3_VERSION }}
           CIBW_BUILD: ${{ matrix.python }}-*
-          CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET=10.15
+          CIBW_ENVIRONMENT_MACOS: |
+            MACOSX_DEPLOYMENT_TARGET=11.0
+            SYSTEM_VERSION_COMPAT=0
           CIBW_TEST_EXTRAS: test
           CIBW_TEST_COMMAND: 'python -m unittest discover --start-directory {project} --verbose'
 
@@ -124,7 +126,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: '3.13.x'
           cache: 'pip'
 
       - name: Setup Z3 Solver

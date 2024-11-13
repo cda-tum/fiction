@@ -536,6 +536,20 @@ GateLyt optimization_layout_corner_case_outputs_2() noexcept
 }
 
 template <typename GateLyt>
+GateLyt optimization_layout_corner_case_inputs() noexcept
+{
+    GateLyt layout{{3, 2, 0}, fiction::twoddwave_clocking<GateLyt>()};
+
+    const auto x1 = layout.create_pi("x1", {2, 1});
+    const auto x2 = layout.create_pi("x2", {1, 2});
+
+    const auto and1 = layout.create_and(x1, x2, {2, 2});
+    layout.create_po(and1, "f1", {3, 2});
+
+    return layout;
+}
+
+template <typename GateLyt>
 GateLyt planar_unoptimized_layout() noexcept
 {
     GateLyt layout{{4, 4, 0}, fiction::twoddwave_clocking<GateLyt>()};
