@@ -77,6 +77,9 @@ void gate_level_layout(pybind11::module& m, const std::string& topology)
         .def("set_output_name", &GateLyt::set_output_name, "index"_a, "name"_a,
              DOC(fiction_gate_level_layout_set_output_name))
         .def("get_output_name", &GateLyt::get_output_name, "index"_a, DOC(fiction_gate_level_layout_get_output_name))
+        .def(
+            "get_name", [](const GateLyt& layout, const typename GateLyt::signal& signal)
+            { return layout.get_name(signal); }, "s"_a, DOC(fiction_gate_level_layout_get_name))
 
         .def("create_buf", &GateLyt::create_buf, "a"_a, "t"_a = fiction::tile<GateLyt>{},
              DOC(fiction_gate_level_layout_create_buf))
