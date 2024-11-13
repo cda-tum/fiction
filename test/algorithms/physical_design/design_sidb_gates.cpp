@@ -407,7 +407,7 @@ TEST_CASE("Design NOR Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
             {{10, 13, 0}, {14, 17, 0}},
             3};
         // to save runtime in the CI, this test is only run in RELEASE mode
-        #ifdef RELEASE_BUILD
+        #ifdef NDEBUG
         SECTION("all design")
         {
             const auto found_gate_layouts = design_sidb_gates(lyt, std::vector<tt>{create_nor_tt()}, params);
@@ -426,7 +426,7 @@ TEST_CASE("Design NOR Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
         }
     }
     // to save runtime in the CI, this test is only run in RELEASE mode
-    #ifdef RELEASE_BUILD
+    #ifdef NDEBUG
     SECTION("Exhaustive Generation, forbidding kinks")
     {
         const design_sidb_gates_params<cell<sidb_111_cell_clk_lyt_siqad>> params{
@@ -473,7 +473,7 @@ TEST_CASE("Design NOR Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
 }
 
 // to save runtime in the CI, this test is only run in RELEASE mode
-#ifdef RELEASE_BUILD
+#ifdef NDEBUG
 TEST_CASE("Design Bestagon shaped CX gate with QuickCell", "[design-sidb-gates]")
 {
     const auto lyt = blueprints::two_input_two_output_bestagon_skeleton<sidb_100_cell_clk_lyt_siqad>();

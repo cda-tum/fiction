@@ -15,18 +15,6 @@ endif()
 # compiling with PCH enabled
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Defines a macro based on the build type, allowing conditional compilation
-# in C++ code based on whether the build configuration is Debug or Release.
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-  # When the build type is Debug, defines a macro DEBUG_BUILD.
-  # This macro can be used in the source code to enable debug-specific code or logging.
-  add_compile_definitions(DEBUG_BUILD)
-elseif (CMAKE_BUILD_TYPE STREQUAL "Release")
-  # When the build type is Release, defines a macro RELEASE_BUILD.
-  # This macro can be used in the source code to disable debug code or optimize for release.
-  add_compile_definitions(RELEASE_BUILD)
-endif()
-
 # Set the project name and version
 project(
   fiction

@@ -273,7 +273,7 @@ TEST_CASE("BDL wire", "[is-operational]")
 }
 
 // to save runtime in the CI, this test is only run in RELEASE mode
-#ifdef RELEASE_BUILD
+#ifdef NDEBUG
 TEST_CASE("flipped CX bestagon gate", "[is-operational]")
 {
     const auto lyt = blueprints::crossing_bestagon_shape_input_down_output_up<sidb_cell_clk_lyt_siqad>();

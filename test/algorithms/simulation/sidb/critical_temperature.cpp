@@ -563,7 +563,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function, using offset coordinates
 }
 
 // to save runtime in the CI, this test is only run in RELEASE mode
-#ifdef RELEASE_BUILD
+#ifdef NDEBUG
 TEMPLATE_TEST_CASE("Critical temperature of Bestagon CX, QuickExact", "[critical-temperature], [quality]",
                    sidb_100_cell_clk_lyt_siqad, cds_sidb_100_cell_clk_lyt_siqad)
 {
