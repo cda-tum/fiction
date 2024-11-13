@@ -5,10 +5,10 @@
 #ifndef FICTION_WRITE_SVG_LAYOUT_HPP
 #define FICTION_WRITE_SVG_LAYOUT_HPP
 
+#include "fiction/layouts/bounding_box.hpp"
 #include "fiction/layouts/coordinates.hpp"
 #include "fiction/traits.hpp"
 #include "utils/version_info.hpp"
-#include "fiction/layouts/bounding_box.hpp"
 
 #include <fmt/format.h>
 
@@ -18,16 +18,15 @@
 #include <exception>
 #include <fstream>
 #include <iostream>
+#include <optional>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <tuple>
 #include <unordered_map>
 #include <utility>
 #include <vector>
-#include <stdexcept>
-#include <optional>
-
 
 namespace fiction
 {
@@ -42,7 +41,6 @@ struct write_qca_layout_svg_params
      */
     bool simple = false;
 };
-
 
 /**
  * Enumeration to specify the color mode for the SVG output.
@@ -80,7 +78,6 @@ struct write_sidb_layout_svg_params
      */
     color_mode color_background = color_mode::DARK;
 };
-
 
 struct write_svg_layout_params
 {
@@ -612,7 +609,8 @@ class write_sidb_layout_svg_impl
 
             const auto nm_pos = sidb_nm_position(lyt, shifted_coord);
 
-            svg_content << generate_lattice_point(nm_pos.first * 10, nm_pos.second * 10, fiction::detail::svg::SI_LATTICE);
+            svg_content << generate_lattice_point(nm_pos.first * 10, nm_pos.second * 10,
+                                                  fiction::detail::svg::SI_LATTICE);
         }
 
         std::vector<cell<Lyt>> all_cells{};
@@ -1185,23 +1183,22 @@ void write_sidb_layout_svg(const Lyt& lyt, const std::string_view& filename,
 template <typename Lyt>
 void write_svg_layout(const Lyt& lyt, std::ostream& os, const write_svg_layout_params& ps = {})
 {
-        if constexpr (has_qca_technology_v<Lyt>)
-        {
-                write_qca_layout_svg(lyt, os, ps.qca_params);
-        }
-        else if constexpr (has_sidb_technology_v<Lyt>)
-        {
-                write_sidb_layout_svg(lyt, os, ps.sidb_params);
-        }
-        else
-        {
-                throw std::invalid_argument("Unknown layout type");
-        }
+    if constexpr (has_qca_technology_v<Lyt>)
+    {
+        write_qca_layout_svg(lyt, os, ps.qca_params);
+    }
+    else if constexpr (has_sidb_technology_v<Lyt>)
+    {
+        write_sidb_layout_svg(lyt, os, ps.sidb_params);
+    }
+    else
+    {
+        throw std::invalid_argument("Unknown layout type");
+    }
 }
 
 template <typename Lyt>
-void write_svg_layout(const Lyt& lyt, const std::string_view& filename,
-                           const write_svg_layout_params& ps = {})
+void write_svg_layout(const Lyt& lyt, const std::string_view& filename, const write_svg_layout_params& ps = {})
 {
     std::ofstream os{filename.data(), std::ofstream::out};
 

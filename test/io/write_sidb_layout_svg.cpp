@@ -414,8 +414,9 @@ TEMPLATE_TEST_CASE("Generate SiDB layout in SVG for cell-level layout and charge
     }
 };
 
-TEMPLATE_TEST_CASE("Generate SiDB layout in SiQAD coordinates in SVG for cell-level layout and charge distribution surface",
-                   "[write-sidb-layout-svg]", sidb_cell_clk_lyt_siqad, sidb_100_cell_clk_lyt_siqad)
+TEMPLATE_TEST_CASE(
+    "Generate SiDB layout in SiQAD coordinates in SVG for cell-level layout and charge distribution surface",
+    "[write-sidb-layout-svg]", sidb_cell_clk_lyt_siqad, sidb_100_cell_clk_lyt_siqad)
 {
     TestType layout{{4, 4}};
 
@@ -514,10 +515,8 @@ TEMPLATE_TEST_CASE("Generate SiDB layout in SiQAD coordinates in SVG for cell-le
     }
 };
 
-
-TEMPLATE_TEST_CASE(
-    "Generate SiDB layout on the H-Si(111)-1x1 surface in SVG for cell-level layout",
-    "[write-sidb-layout-svg]", sidb_111_cell_clk_lyt_cube, sidb_111_cell_clk_lyt)
+TEMPLATE_TEST_CASE("Generate SiDB layout on the H-Si(111)-1x1 surface in SVG for cell-level layout",
+                   "[write-sidb-layout-svg]", sidb_111_cell_clk_lyt_cube, sidb_111_cell_clk_lyt)
 {
     TestType layout{{4, 4}};
 
@@ -583,4 +582,3 @@ TEMPLATE_TEST_CASE(
         }
     }
 };
-

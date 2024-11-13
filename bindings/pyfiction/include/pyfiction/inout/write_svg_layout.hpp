@@ -44,10 +44,9 @@ inline void write_svg_layout_impl(pybind11::module& m)
         },
         "layout"_a, "ps"_a = fiction::write_sidb_layout_svg_params{}, DOC(fiction_write_sidb_layout_svg));
 
-
     // QCA plot
     void (*write_qca_layout_svg_pointer)(const py_qca_layout&, const std::string_view&,
-                                              const fiction::write_qca_layout_svg_params&) =
+                                         const fiction::write_qca_layout_svg_params&) =
         &fiction::write_qca_layout_svg<py_qca_layout>;
 
     m.def("write_qca_layout_svg", write_qca_layout_svg_pointer, "layout"_a, "filename"_a,
@@ -55,7 +54,6 @@ inline void write_svg_layout_impl(pybind11::module& m)
 }
 
 }  // namespace detail
-
 
 void write_svg_layout(pybind11::module& m)
 {
