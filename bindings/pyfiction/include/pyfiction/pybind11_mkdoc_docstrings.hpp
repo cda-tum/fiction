@@ -18833,6 +18833,16 @@ Parameter ``filename``:
     The file name to create and write into. Should preferably use the
     `.xml` extension.)doc";
 
+static const char *__doc_fiction_write_svg_layout = R"doc()doc";
+
+static const char *__doc_fiction_write_svg_layout_2 = R"doc()doc";
+
+static const char *__doc_fiction_write_svg_layout_params = R"doc()doc";
+
+static const char *__doc_fiction_write_svg_layout_params_qca_params = R"doc()doc";
+
+static const char *__doc_fiction_write_svg_layout_params_sidb_params = R"doc()doc";
+
 static const char *__doc_fiction_yen_k_shortest_paths =
 R"doc(Yen's algorithm for finding up to :math:`k` shortest paths without
 loops from a source to a target coordinate. If :math:`k` is larger
