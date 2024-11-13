@@ -1167,7 +1167,7 @@ class design_sidb_gates_impl
                 const std::vector<std::vector<charge_distribution_surface<Lyt>>>& res_per_input) noexcept
         {
             std::vector<double> ground_state_isolations{};
-            std::transform(res_per_input.cbegin(), res_per_input.cend(), ground_state_isolations.begin(),
+            std::transform(res_per_input.cbegin(), res_per_input.cend(), std::back_inserter(ground_state_isolations),
                            get_ground_state_isolation);
             return *std::min_element(ground_state_isolations.cbegin(), ground_state_isolations.cend());
         };
