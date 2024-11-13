@@ -9,6 +9,7 @@
 #include "fiction/layouts/coordinates.hpp"
 #include "fiction/traits.hpp"
 #include "utils/version_info.hpp"
+#include "fiction/technology/sidb_charge_state.hpp"
 
 #include <fmt/format.h>
 
@@ -79,10 +80,18 @@ struct write_sidb_layout_svg_params
     color_mode color_background = color_mode::DARK;
 };
 
+/**
+ * Parameters for writing SVG layouts.
+ */
 struct write_svg_layout_params
 {
+    /**
+ * Parameters for writing SVG QCA layouts.
+     */
     write_qca_layout_svg_params qca_params;
-
+    /**
+ * Parameters for writing SiDB layouts to SVG format.
+     */
     write_sidb_layout_svg_params sidb_params;
 };
 
@@ -1180,6 +1189,14 @@ void write_sidb_layout_svg(const Lyt& lyt, const std::string_view& filename,
     os.close();
 }
 
+/**
+ * Writes an SVG representation of an cell-level layout into an output stream.
+ *
+ * @tparam Lyt cell-level layout type.
+ * @param lyt The layout to be written.
+ * @param os The output stream to write into.
+ * @param ps Parameters.
+ */
 template <typename Lyt>
 void write_svg_layout(const Lyt& lyt, std::ostream& os, const write_svg_layout_params& ps = {})
 {
@@ -1197,6 +1214,17 @@ void write_svg_layout(const Lyt& lyt, std::ostream& os, const write_svg_layout_p
     }
 }
 
+
+/**
+ * Writes an SVG representation of an cell-level layout into a file.
+ *
+ * @note SiDB defects are not supported yet.
+ *
+ * @tparam Lyt Cell-level layout type.
+ * @param lyt The layout to be written.
+ * @param filename The file name to create and write into.
+ * @param ps Parameters.
+ */
 template <typename Lyt>
 void write_svg_layout(const Lyt& lyt, const std::string_view& filename, const write_svg_layout_params& ps = {})
 {

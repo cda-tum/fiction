@@ -570,10 +570,12 @@ TEMPLATE_TEST_CASE("Generate SiDB layout on the H-Si(111)-1x1 surface in SVG for
                 // use general function
                 write_svg_layout_params svg_params{};
                 svg_params.sidb_params = params;
-                write_svg_layout(layout, os_light_cds, svg_params);
+                write_svg_layout(layout, os_light_cds_general, svg_params);
+
+                const auto generated_svg_general = os_light_cds_general.str();
 
                 // Normalize both SVG strings
-                const auto normalized_generated_svg_general = normalize_svg(generated_svg);
+                const auto normalized_generated_svg_general = normalize_svg(generated_svg_general);
                 const auto normalized_expected_svg_general  = normalize_svg(EXPECTED_SVG_DARK_CELL_LEVEL_111);
 
                 // Perform the comparison
