@@ -20,6 +20,7 @@
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/physical_constants.hpp"
 #include "fiction/traits.hpp"
+#include "fiction/types.hpp"
 #include "fiction/utils/math_utils.hpp"
 
 #include <fmt/format.h>
@@ -195,7 +196,7 @@ class critical_temperature_impl
                 }
 
                 // performs physical simulation of a given SiDB layout at a given input combination
-                const auto sim_result = physical_simulation_of_layout(bii);
+                const auto sim_result = physical_simulation_of_bdl_iterator(bii);
 
                 if (sim_result.charge_distributions.empty())
                 {
@@ -211,14 +212,14 @@ class critical_temperature_impl
 
                 if (params.operational_params.op_condition == operational_condition::REJECT_KINKS)
                 {
-                    energy_state_type = calculate_energy_and_state_type<Lyt>(
-                        distribution, sim_result.charge_distributions, output_bdl_pairs, spec, i, input_bdl_wires,
-                        output_bdl_wires, params.operational_params);
+                    energy_state_type = calculate_energy_and_state_type_with_kinks_rejected<Lyt>(
+                        distribution, sim_result.charge_distributions, spec, i, std::pair<bdl_wires<Lyt>, bdl_wires<Lyt>>{input_bdl_wires,
+                        output_bdl_wires});
                 }
                 else
                 {
                     // A label that indicates whether the state still fulfills the logic.
-                    energy_state_type = calculate_energy_and_state_type<Lyt>(
+                    energy_state_type = calculate_energy_and_state_type_with_kinks_accepted<Lyt>(
                         distribution, sim_result.charge_distributions, output_bdl_pairs, spec, i);
                 }
 
@@ -426,7 +427,7 @@ class critical_temperature_impl
      * @return Simulation results.
      */
     [[nodiscard]] sidb_simulation_result<Lyt>
-    physical_simulation_of_layout(const bdl_input_iterator<Lyt>& bdl_iterator) noexcept
+    physical_simulation_of_bdl_iterator(const bdl_input_iterator<Lyt>& bdl_iterator) noexcept
     {
         assert(params.operational_params.simulation_parameters.base == 2 && "base number has to be 2");
 

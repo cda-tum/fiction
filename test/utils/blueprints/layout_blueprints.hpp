@@ -936,6 +936,8 @@ Lyt and_gate_111_mirrored_on_the_x_axis() noexcept
     static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(fiction::is_sidb_lattice_111_v<Lyt>, "Lyt should have 111 as lattice orientation");
+    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
+
 
     Lyt lyt{};
 

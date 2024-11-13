@@ -20,6 +20,7 @@
 #include "fiction/technology/sidb_defect_surface.hpp"
 #include "fiction/technology/sidb_lattice.hpp"
 #include "fiction/technology/sidb_lattice_orientations.hpp"
+#include "fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp"
 
 #include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/io/write_dot.hpp>
@@ -48,6 +49,9 @@ using tt_ptr = std::shared_ptr<tt>;
 
 // using truth_table_t = std:variant<tt_ptr>;
 using truth_table_t = tt_ptr;
+
+template <typename Lyt>
+using bdl_wires = std::vector<bdl_wire<Lyt>>;
 
 /**
  * Logic networks.
