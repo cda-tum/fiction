@@ -938,7 +938,6 @@ Lyt and_gate_111_mirrored_on_the_x_axis() noexcept
     static_assert(fiction::is_sidb_lattice_111_v<Lyt>, "Lyt should have 111 as lattice orientation");
     static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
 
-
     Lyt lyt{};
 
     lyt.assign_cell_type({0, 0, 0}, Lyt::cell_type::INPUT);

@@ -15,8 +15,8 @@
 #include <algorithm>
 #include <cassert>
 #include <cstdint>
-#include <vector>
 #include <utility>
+#include <vector>
 
 namespace fiction
 {

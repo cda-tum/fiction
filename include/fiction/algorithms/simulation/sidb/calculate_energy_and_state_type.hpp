@@ -47,11 +47,11 @@ using sidb_energy_and_state_type = std::vector<std::pair<double, bool>>;
  * @return Electrostatic potential energy of all charge distributions with state type.
  */
 template <typename Lyt, typename TT>
-[[nodiscard]] sidb_energy_and_state_type
-calculate_energy_and_state_type_with_kinks_accepted(const sidb_energy_distribution&                      energy_distribution,
-                                const std::vector<charge_distribution_surface<Lyt>>& valid_charge_distributions,
-                                const std::vector<bdl_pair<cell<Lyt>>>& output_bdl_pairs, const std::vector<TT>& spec,
-                                const uint64_t input_index) noexcept
+[[nodiscard]] sidb_energy_and_state_type calculate_energy_and_state_type_with_kinks_accepted(
+    const sidb_energy_distribution&                      energy_distribution,
+    const std::vector<charge_distribution_surface<Lyt>>& valid_charge_distributions,
+    const std::vector<bdl_pair<cell<Lyt>>>& output_bdl_pairs, const std::vector<TT>& spec,
+    const uint64_t input_index) noexcept
 
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
@@ -111,8 +111,8 @@ calculate_energy_and_state_type_with_kinks_accepted(const sidb_energy_distributi
 template <typename Lyt, typename TT>
 [[nodiscard]] sidb_energy_and_state_type calculate_energy_and_state_type_with_kinks_rejected(
     const sidb_energy_distribution&                      energy_distribution,
-    const std::vector<charge_distribution_surface<Lyt>>& valid_charge_distributions, const std::vector<TT>& spec, const uint64_t input_index,
-    const std::pair<bdl_wires<Lyt>, bdl_wires<Lyt>>& input_and_output_wires) noexcept
+    const std::vector<charge_distribution_surface<Lyt>>& valid_charge_distributions, const std::vector<TT>& spec,
+    const uint64_t input_index, const std::pair<bdl_wires<Lyt>, bdl_wires<Lyt>>& input_and_output_wires) noexcept
 
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");

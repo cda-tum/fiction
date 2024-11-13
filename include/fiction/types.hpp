@@ -5,6 +5,7 @@
 #ifndef FICTION_TYPES_HPP
 #define FICTION_TYPES_HPP
 
+#include "fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp"
 #include "fiction/layouts/cartesian_layout.hpp"
 #include "fiction/layouts/cell_level_layout.hpp"
 #include "fiction/layouts/clocked_layout.hpp"
@@ -20,7 +21,6 @@
 #include "fiction/technology/sidb_defect_surface.hpp"
 #include "fiction/technology/sidb_lattice.hpp"
 #include "fiction/technology/sidb_lattice_orientations.hpp"
-#include "fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp"
 
 #include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/io/write_dot.hpp>
