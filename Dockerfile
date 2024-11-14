@@ -3,13 +3,16 @@ FROM ubuntu:24.04
 # Optional argument to run the "make" command in parallel with the specified NUMBER_OF_JOBS
 ARG NUMBER_OF_JOBS=4
 
-# Metadata labels
-LABEL maintainer="Marcel Walter <marcel.walter@tum.de>"
-LABEL organization="Chair for Design Automation, Technical University of Munich"
-LABEL description="Docker image for fiction, an open-source design automation framework for Field-coupled Nanotechnologies."
-LABEL license="MIT"
-LABEL url="https://www.cda.cit.tum.de/research/nanotech/"
-LABEL vcs-url="https://github.com/cda-tum/fiction"
+# Unified metadata labels for DockerHub and the Open Container Initiative (OCI)
+LABEL maintainer="Marcel Walter <marcel.walter@tum.de>" \
+      org.opencontainers.image.title="fiction" \
+      org.opencontainers.image.description="Docker image for fiction, an open-source design automation framework for Field-coupled Nanotechnologies." \
+      org.opencontainers.image.authors="Marcel Walter <marcel.walter@tum.de>, Jan Drewniok <jan.drewniok@tum.de>, Simon Hofmann <simon.t.hofmann@tum.de>, Benjamin Hien <benjamin.hien@tum.de>, Willem Lambooy <willem.lambooy@tum.de>" \
+      org.opencontainers.image.url="https://www.cda.cit.tum.de/research/nanotech/" \
+      org.opencontainers.image.source="https://github.com/cda-tum/fiction" \
+      org.opencontainers.image.documentation="https://fiction.readthedocs.io/" \
+      org.opencontainers.image.licenses="MIT" \
+      org.opencontainers.image.vendor="Chair for Design Automation, Technical University of Munich (TUM)"
 
 
 # Configure apt and install required packages
