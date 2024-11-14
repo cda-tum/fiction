@@ -33,7 +33,7 @@ void calculate_energy_and_state_type(pybind11::module& m)
 
     m.def("calculate_energy_and_state_type_with_kinks_rejected",
           &fiction::calculate_energy_and_state_type_with_kinks_rejected<Lyt, py_tt>, "energy_distribution"_a,
-          "valid_charge_distributions"_a, "spec"_a, "input_index"_a, "input_and_output_wires"_a,
+          "valid_charge_distributions"_a, "spec"_a, "input_index"_a, "input_bdl_wires"_a, "output_bdl_wires"_a,
           DOC(fiction_calculate_energy_and_state_type_with_kinks_rejected));
 }
 

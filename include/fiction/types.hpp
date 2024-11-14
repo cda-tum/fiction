@@ -50,9 +50,6 @@ using tt_ptr = std::shared_ptr<tt>;
 // using truth_table_t = std:variant<tt_ptr>;
 using truth_table_t = tt_ptr;
 
-template <typename Lyt>
-using bdl_wires = std::vector<bdl_wire<Lyt>>;
-
 /**
  * Logic networks.
  */

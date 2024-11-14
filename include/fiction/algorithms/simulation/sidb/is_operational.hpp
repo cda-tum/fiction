@@ -134,18 +134,19 @@ class is_operational_impl
      * @param lyt The SiDB cell-level layout to be checked.
      * @param tt Expected Boolean function of the layout given as a multi-output truth table.
      * @param params Parameters for the `is_operational` algorithm.
-     * @param input_and_output_bdl_wire BDL input and output wires of lyt.
+     * @param input_wires BDL input wires of lyt.
+     * @param output_wires BDL output wires of lyt.
      */
     is_operational_impl(const Lyt& lyt, const std::vector<TT>& tt, const is_operational_params& params,
-                        const std::pair<bdl_wires<Lyt>, bdl_wires<Lyt>>& input_and_output_bdl_wire) :
+                        const std::vector<bdl_wire<Lyt>>& input_wires, const std::vector<bdl_wire<Lyt>>& output_wires) :
             layout{lyt},
             truth_table{tt},
             parameters{params},
             output_bdl_pairs(detect_bdl_pairs(layout, sidb_technology::cell_type::OUTPUT,
                                               params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)),
-            bii{bdl_input_iterator<Lyt>{layout, params.input_bdl_iterator_params, input_and_output_bdl_wire.first}},
-            input_bdl_wires{input_and_output_bdl_wire.first},
-            output_bdl_wires{input_and_output_bdl_wire.second}
+            bii{bdl_input_iterator<Lyt>{layout, params.input_bdl_iterator_params, input_wires}},
+            input_bdl_wires{input_wires},
+            output_bdl_wires{output_wires}
     {}
 
     /**
@@ -186,7 +187,7 @@ class is_operational_impl
 
             for (const auto& gs : ground_states)
             {
-                const auto op_status = is_given_cds_operational_for_pattern(gs, i);
+                const auto op_status = verifiy_logic_match_of_cds(gs, i);
                 if (op_status == operational_status::NON_OPERATIONAL)
                 {
                     return operational_status::NON_OPERATIONAL;
@@ -203,7 +204,7 @@ class is_operational_impl
      *
      * Example:
      * In the ground state charge distribution of an AND gate, kinks are rejected for the gate to be considered
-     * operational. Given an input pattern of `1`, this function will:
+     * operational. Given an input pattern of `01`, this function will:
      * - Verify that the left input wire encodes `0`.
      * - Verify that the right input wire encodes `1`.
      * - Verify that the output wire encodes `0`.
@@ -214,8 +215,7 @@ class is_operational_impl
      * @param input_pattern Input pattern represented by the position of perturbers.
      * @return Operational status indicating if the layout is `operational` or `non-operational`.
      */
-    [[nodiscard]] operational_status
-    is_given_cds_operational_for_pattern(const charge_distribution_surface<Lyt>& given_cds,
+    [[nodiscard]] operational_status verifiy_logic_match_of_cds(const charge_distribution_surface<Lyt>& given_cds,
                                          const uint64_t                          input_pattern) noexcept
     {
         assert(!output_bdl_pairs.empty() && "No output cell provided.");
@@ -643,7 +643,7 @@ is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational
     if (input_bdl_wire.has_value() && output_bdl_wire.has_value())
     {
         detail::is_operational_impl<Lyt, TT> p{lyt, spec, params,
-                                               std::make_pair(input_bdl_wire.value(), output_bdl_wire.value())};
+                                               input_bdl_wire.value(), output_bdl_wire.value()};
 
         return {p.run(), p.get_number_of_simulator_invocations()};
     }

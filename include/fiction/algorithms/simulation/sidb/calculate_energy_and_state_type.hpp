@@ -6,13 +6,13 @@
 #define FICTION_CALCULATE_ENERGY_AND_STATE_TYPE_HPP
 
 #include "fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp"
-#include "fiction/algorithms/simulation/sidb/does_cds_match_logic_for_input_pattern.hpp"
+#include "fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp"
 #include "fiction/algorithms/simulation/sidb/energy_distribution.hpp"
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
+#include "fiction/algorithms/simulation/sidb/verify_logic_match.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/technology/physical_constants.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/types.hpp"
 #include "fiction/utils/math_utils.hpp"
 
 #include <kitty/bit_operations.hpp>
@@ -105,14 +105,15 @@ template <typename Lyt, typename TT>
  * @param output_bdl_pairs Output BDL pairs.
  * @param spec Expected Boolean function of the layout given as a multi-output truth table.
  * @param input_index The index of the current input configuration.
- * @param input_and_output_wires Input and output BDL wires.
+ * @param input_bdl_wires Input BDL wires.
+ * @param output_bdl_wires Output BDL wires.
  * @return Electrostatic potential energy of all charge distributions with state type.
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] sidb_energy_and_state_type calculate_energy_and_state_type_with_kinks_rejected(
     const sidb_energy_distribution&                      energy_distribution,
     const std::vector<charge_distribution_surface<Lyt>>& valid_charge_distributions, const std::vector<TT>& spec,
-    const uint64_t input_index, const std::pair<bdl_wires<Lyt>, bdl_wires<Lyt>>& input_and_output_wires) noexcept
+    const uint64_t input_index, const std::vector<bdl_wire<Lyt>>& input_bdl_wires, std::vector<bdl_wire<Lyt>>& output_bdl_wires) noexcept
 
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
@@ -137,8 +138,8 @@ template <typename Lyt, typename TT>
                 is_operational_params params{};
                 params.op_condition = operational_condition::REJECT_KINKS;
 
-                const auto operational_status = does_cds_match_logic_for_input_pattern(
-                    valid_layout, params, spec, input_index, input_and_output_wires);
+                const auto operational_status =
+                    verify_logic_match(valid_layout, params, spec, input_index, input_bdl_wires, output_bdl_wires);
                 if (operational_status == operational_status::NON_OPERATIONAL)
                 {
                     correct_output = false;

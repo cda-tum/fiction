@@ -214,7 +214,7 @@ class critical_temperature_impl
                 {
                     energy_state_type = calculate_energy_and_state_type_with_kinks_rejected<Lyt>(
                         distribution, sim_result.charge_distributions, spec, i,
-                        std::pair<bdl_wires<Lyt>, bdl_wires<Lyt>>{input_bdl_wires, output_bdl_wires});
+                        input_bdl_wires, output_bdl_wires);
                 }
                 else
                 {

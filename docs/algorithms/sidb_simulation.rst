@@ -261,9 +261,9 @@ Operational Domain Computation
            :members:
         .. doxygenfunction:: fiction::compute_operational_ratio
 
-        **Header:** ``fiction/algorithms/simulation/sidb/does_cds_match_logic_for_input_pattern.hpp``
+        **Header:** ``fiction/algorithms/simulation/sidb/verify_logic_match.hpp``
 
-        .. doxygenfunction:: fiction::does_cds_match_logic_for_input_pattern
+        .. doxygenfunction:: fiction::verify_logic_match
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.operational_status
