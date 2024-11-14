@@ -65,6 +65,10 @@ class TestCartesianGateLevelLayout(unittest.TestCase):
             self.assertEqual(layout.make_signal(3), x2)
             self.assertEqual(layout.make_signal(4), x3)
             self.assertEqual(layout.make_signal(5), x4)
+            self.assertEqual(layout.get_name(x1), "x1")
+            self.assertEqual(layout.get_name(x2), "x2")
+            self.assertEqual(layout.get_name(x3), "x3")
+            self.assertEqual(layout.get_name(x4), "x4")
 
             # POs
             pos = layout.pos()
@@ -77,6 +81,8 @@ class TestCartesianGateLevelLayout(unittest.TestCase):
             self.assertEqual(layout.get_tile(12), offset_coordinate(f2))
             self.assertEqual(layout.make_signal(11), f1)
             self.assertEqual(layout.make_signal(12), f2)
+            self.assertEqual(layout.get_name(f1), "f1")
+            self.assertEqual(layout.get_name(f2), "f2")
 
             # gates
             gates = layout.gates()
