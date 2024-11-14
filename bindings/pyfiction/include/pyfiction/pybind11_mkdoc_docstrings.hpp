@@ -1182,8 +1182,11 @@ Parameter ``spec``:
 Parameter ``input_index``:
     The index of the current input configuration.
 
-Parameter ``input_and_output_wires``:
-    Input and output BDL wires.
+Parameter ``input_bdl_wires``:
+    Input BDL wires.
+
+Parameter ``output_bdl_wires``:
+    Output BDL wires.
 
 Returns:
     Electrostatic potential energy of all charge distributions with
@@ -6845,28 +6848,6 @@ Returns:
 
 static const char *__doc_fiction_detail_is_operational_impl_input_bdl_wires = R"doc(Input BDL wires.)doc";
 
-static const char *__doc_fiction_detail_is_operational_impl_is_given_cds_operational_for_pattern =
-R"doc(Checks if the given charge distribution correctly encodes the expected
-logic for the given input pattern, based on a provided truth table.
-
-Example: In the ground state charge distribution of an AND gate, kinks
-are rejected for the gate to be considered operational. Given an input
-pattern of `1`, this function will: - Verify that the left input wire
-encodes `0`. - Verify that the right input wire encodes `1`. - Verify
-that the output wire encodes `0`. Determines if the given charge
-distribution fulfills the correct logic based on the provided charge
-index and truth table.
-
-Parameter ``given_cds``:
-    The charge distribution surface to be checked for operation.
-
-Parameter ``input_pattern``:
-    Input pattern represented by the position of perturbers.
-
-Returns:
-    Operational status indicating if the layout is `operational` or
-    `non-operational`.)doc";
-
 static const char *__doc_fiction_detail_is_operational_impl_is_operational_impl =
 R"doc(Constructor to initialize the algorithm with a layout and parameters.
 
@@ -6893,8 +6874,11 @@ Parameter ``tt``:
 Parameter ``params``:
     Parameters for the `is_operational` algorithm.
 
-Parameter ``input_and_output_bdl_wire``:
-    BDL input and output wires of lyt.)doc";
+Parameter ``input_wires``:
+    BDL input wires of lyt.
+
+Parameter ``output_wires``:
+    BDL output wires of lyt.)doc";
 
 static const char *__doc_fiction_detail_is_operational_impl_layout = R"doc(SiDB cell-level layout.)doc";
 
@@ -6930,6 +6914,28 @@ Returns:
 static const char *__doc_fiction_detail_is_operational_impl_simulator_invocations = R"doc(Number of simulator invocations.)doc";
 
 static const char *__doc_fiction_detail_is_operational_impl_truth_table = R"doc(The specification of the layout.)doc";
+
+static const char *__doc_fiction_detail_is_operational_impl_verifiy_logic_match_of_cds =
+R"doc(Checks if the given charge distribution correctly encodes the expected
+logic for the given input pattern, based on a provided truth table.
+
+Example: In the ground state charge distribution of an AND gate, kinks
+are rejected for the gate to be considered operational. Given an input
+pattern of `01`, this function will: - Verify that the left input wire
+encodes `0`. - Verify that the right input wire encodes `1`. - Verify
+that the output wire encodes `0`. Determines if the given charge
+distribution fulfills the correct logic based on the provided charge
+index and truth table.
+
+Parameter ``given_cds``:
+    The charge distribution surface to be checked for operation.
+
+Parameter ``input_pattern``:
+    Input pattern represented by the position of perturbers.
+
+Returns:
+    Operational status indicating if the layout is `operational` or
+    `non-operational`.)doc";
 
 static const char *__doc_fiction_detail_jump_point_search_impl = R"doc()doc";
 
@@ -9528,47 +9534,6 @@ Parameter ``target``:
 Returns:
     Distance between source and target according to the stored
     distance map.)doc";
-
-static const char *__doc_fiction_does_cds_match_logic_for_input_pattern =
-R"doc(Checks if a given charge distribution correctly encodes the expected
-logic for a specified input pattern, based on a provided truth table.
-
-@note Kinks are rejected.
-
-Example: In the ground state charge distribution of an AND gate, kinks
-are rejected for the gate to be considered operational. Given an input
-pattern of `1`, this function will: - Verify that the left input wire
-encodes `0`. - Verify that the right input wire encodes `1`. - Verify
-that the output wire encodes `0`.
-
-Template parameter ``Lyt``:
-    SiDB cell-level layout type.
-
-Template parameter ``TT``:
-    Truth table type.
-
-Parameter ``cds``:
-    Charge distribution surface, containing charge state information
-    for each SiDB.
-
-Parameter ``params``:
-    The parameters used to determine if a layout is `operational` or
-    `non-operational`.
-
-Parameter ``spec``:
-    Expected Boolean function of the layout given as a multi-output
-    truth table.
-
-Parameter ``input_pattern``:
-    The specific input pattern of the given charge distribution
-    surface.
-
-Parameter ``input_and_output_bdl_wire``:
-    Pair of input and output BDL wires.
-
-Returns:
-    The operational status indicating if the charge distribution
-    matches the logic for the given input pattern.)doc";
 
 static const char *__doc_fiction_edge_color_view_drawer =
 R"doc(A DOT drawer for networks with colored edges. Node colors represent
@@ -18235,6 +18200,50 @@ Template parameter ``Lyt``:
 
 Returns:
     USE clocking scheme.)doc";
+
+static const char *__doc_fiction_verify_logic_match =
+R"doc(Checks if a given charge distribution correctly encodes the expected
+logic for a specified input pattern, based on a provided truth table.
+
+@note Kinks are rejected.
+
+Example: In the ground state charge distribution of an AND gate, kinks
+are rejected for the gate to be considered operational. Given an input
+pattern of `01`, this function will: - Verify that the left input wire
+encodes `0`. - Verify that the right input wire encodes `1`. - Verify
+that the output wire encodes `0`.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Template parameter ``TT``:
+    Truth table type.
+
+Parameter ``cds``:
+    Charge distribution surface, containing charge state information
+    for each SiDB.
+
+Parameter ``params``:
+    The parameters used to determine if a layout is `operational` or
+    `non-operational`.
+
+Parameter ``spec``:
+    Expected Boolean function of the layout given as a multi-output
+    truth table.
+
+Parameter ``input_pattern``:
+    The specific input pattern of the given charge distribution
+    surface.
+
+Parameter ``input_wires``:
+    Input BDL wires.
+
+Parameter ``output_wires``:
+    Output BDL wires.
+
+Returns:
+    The operational status indicating if the charge distribution
+    matches the logic for the given input pattern.)doc";
 
 static const char *__doc_fiction_vertex_coloring =
 R"doc(A vertex coloring is simply a hash map from vertex IDs to Color types
