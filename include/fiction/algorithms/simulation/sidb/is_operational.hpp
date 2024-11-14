@@ -216,7 +216,7 @@ class is_operational_impl
      * @return Operational status indicating if the layout is `operational` or `non-operational`.
      */
     [[nodiscard]] operational_status verifiy_logic_match_of_cds(const charge_distribution_surface<Lyt>& given_cds,
-                                         const uint64_t                          input_pattern) noexcept
+                                                                const uint64_t input_pattern) noexcept
     {
         assert(!output_bdl_pairs.empty() && "No output cell provided.");
         assert((truth_table.size() == output_bdl_pairs.size()) &&
@@ -642,8 +642,7 @@ is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational
 
     if (input_bdl_wire.has_value() && output_bdl_wire.has_value())
     {
-        detail::is_operational_impl<Lyt, TT> p{lyt, spec, params,
-                                               input_bdl_wire.value(), output_bdl_wire.value()};
+        detail::is_operational_impl<Lyt, TT> p{lyt, spec, params, input_bdl_wire.value(), output_bdl_wire.value()};
 
         return {p.run(), p.get_number_of_simulator_invocations()};
     }

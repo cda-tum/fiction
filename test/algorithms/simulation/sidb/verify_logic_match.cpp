@@ -39,9 +39,9 @@ TEST_CASE("Bestagon FO2 gate", "[does-charge-distribution-match-logic-for-given-
 
         REQUIRE(!gs.empty());
 
-        CHECK(verify_logic_match<sidb_cell_clk_lyt_siqad>(
-                  gs.front(), is_operational_params{}, std::vector<tt>{create_fan_out_tt()}, 2,
-                  input_wires, output_wires) == operational_status::OPERATIONAL);
+        CHECK(verify_logic_match<sidb_cell_clk_lyt_siqad>(gs.front(), is_operational_params{},
+                                                          std::vector<tt>{create_fan_out_tt()}, 2, input_wires,
+                                                          output_wires) == operational_status::OPERATIONAL);
     }
 
     SECTION("Index is 1, which means that the left input is set to zero and the right input is set to one.")
@@ -56,15 +56,15 @@ TEST_CASE("Bestagon FO2 gate", "[does-charge-distribution-match-logic-for-given-
 
         SECTION("Correct index")
         {
-            CHECK(verify_logic_match<sidb_cell_clk_lyt_siqad>(
-                      gs.front(), is_operational_params{}, std::vector<tt>{create_fan_out_tt()}, 1,
-                      input_wires, output_wires) == operational_status::OPERATIONAL);
+            CHECK(verify_logic_match<sidb_cell_clk_lyt_siqad>(gs.front(), is_operational_params{},
+                                                              std::vector<tt>{create_fan_out_tt()}, 1, input_wires,
+                                                              output_wires) == operational_status::OPERATIONAL);
         }
         SECTION("Wrong input index")
         {
-            CHECK(verify_logic_match<sidb_cell_clk_lyt_siqad>(
-                      gs.front(), is_operational_params{}, std::vector<tt>{create_fan_out_tt()}, 2,
-                      input_wires, output_wires) == operational_status::NON_OPERATIONAL);
+            CHECK(verify_logic_match<sidb_cell_clk_lyt_siqad>(gs.front(), is_operational_params{},
+                                                              std::vector<tt>{create_fan_out_tt()}, 2, input_wires,
+                                                              output_wires) == operational_status::NON_OPERATIONAL);
         }
     }
 }
@@ -94,9 +94,9 @@ TEST_CASE("AND gate mirrored on the x-axis on the H-Si 111 surface",
 
         REQUIRE(!gs.empty());
 
-        CHECK(verify_logic_match<sidb_111_cell_clk_lyt_siqad>(
-                  gs.front(), is_operational_params{}, std::vector<tt>{create_and_tt()}, 2,
-                  input_wires, output_wires) == operational_status::OPERATIONAL);
+        CHECK(verify_logic_match<sidb_111_cell_clk_lyt_siqad>(gs.front(), is_operational_params{},
+                                                              std::vector<tt>{create_and_tt()}, 2, input_wires,
+                                                              output_wires) == operational_status::OPERATIONAL);
     }
 
     SECTION("Index is 1, which means that the left input is set to zero and the right input is set to one.")
@@ -114,15 +114,15 @@ TEST_CASE("AND gate mirrored on the x-axis on the H-Si 111 surface",
 
         SECTION("Correct index")
         {
-            CHECK(verify_logic_match<sidb_111_cell_clk_lyt_siqad>(
-                      gs.front(), op_params, std::vector<tt>{create_and_tt()}, 1, input_wires, output_wires) ==
-                  operational_status::OPERATIONAL);
+            CHECK(verify_logic_match<sidb_111_cell_clk_lyt_siqad>(gs.front(), op_params,
+                                                                  std::vector<tt>{create_and_tt()}, 1, input_wires,
+                                                                  output_wires) == operational_status::OPERATIONAL);
         }
         SECTION("Wrong input index")
         {
-            CHECK(verify_logic_match<sidb_111_cell_clk_lyt_siqad>(
-                      gs.front(), op_params, std::vector<tt>{create_and_tt()}, 2, input_wires, output_wires) ==
-                  operational_status::NON_OPERATIONAL);
+            CHECK(verify_logic_match<sidb_111_cell_clk_lyt_siqad>(gs.front(), op_params,
+                                                                  std::vector<tt>{create_and_tt()}, 2, input_wires,
+                                                                  output_wires) == operational_status::NON_OPERATIONAL);
         }
     }
 }
