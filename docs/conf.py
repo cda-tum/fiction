@@ -43,8 +43,8 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'fiction'
-copyright = '2018-2023: Marcel Walter. 2023-present: Chair for Design Automation, Technical University of Munich'
-author = 'Marcel Walter, Jan Drewniok, Simon Hofmann, Benjamin Hien'
+copyright = '2018-2023: Marcel Walter. 2023-present: Chair for Design Automation, Technical University of Munich (TUM)'
+author = 'Marcel Walter, Jan Drewniok, Simon Hofmann, Benjamin Hien, Willem Lambooy'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
