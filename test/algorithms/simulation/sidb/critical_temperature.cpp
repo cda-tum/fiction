@@ -594,6 +594,8 @@ TEMPLATE_TEST_CASE("Test critical_temperature function, using offset coordinates
     }
 }
 
+// to save runtime in the CI, this test is only run in RELEASE mode
+#ifdef NDEBUG
 TEMPLATE_TEST_CASE("Critical temperature of Bestagon CX, QuickExact", "[critical-temperature], [quality]",
                    sidb_100_cell_clk_lyt_siqad, cds_sidb_100_cell_clk_lyt_siqad)
 {
@@ -728,3 +730,4 @@ TEMPLATE_TEST_CASE("Critical temperature of Bestagon half adder gate, QuickExact
         CHECK_THAT(std::abs(ct - 0.40), Catch::Matchers::WithinAbs(0.00, 0.01));
     }
 }
+#endif
