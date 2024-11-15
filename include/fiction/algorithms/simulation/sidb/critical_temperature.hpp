@@ -20,7 +20,6 @@
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/physical_constants.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/types.hpp"
 #include "fiction/utils/math_utils.hpp"
 
 #include <fmt/format.h>

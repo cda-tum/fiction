@@ -22,7 +22,6 @@
 #include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/types.hpp"
 
 #include <kitty/bit_operations.hpp>
 #include <kitty/traits.hpp>
