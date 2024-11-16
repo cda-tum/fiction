@@ -16,7 +16,8 @@ authors = [
     { name = "Marcel Walter", email = "marcel.walter@tum.de" },
     { name = "Jan Drewniok", email = "jan.drewniok@tum.de" },
     { name = "Simon Hofmann", email = "simon.t.hofmann@tum.de" },
-    { name = "Benjamin Hien", email = "benjamin.hien@tum.de" }
+    { name = "Benjamin Hien", email = "benjamin.hien@tum.de" },
+    { name = "Willem Lambooy", email = "willem.lambooy@tum.de" }
 ]
 keywords = ["MNT", "fiction", "nanotechnology", "FCN", "QCA", "NML", "SiDB", "design automation", "placement", "routing", "clocking", "simulation"]
 license = { file = "LICENSE.txt" }
