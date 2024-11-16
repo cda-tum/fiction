@@ -1122,10 +1122,11 @@ static const char *__doc_fiction_bounding_box_2d_x_size = R"doc(The horizontal s
 
 static const char *__doc_fiction_bounding_box_2d_y_size = R"doc(The vertical size of the bounding box in layout coordinates.)doc";
 
-static const char *__doc_fiction_calculate_energy_and_state_type =
+static const char *__doc_fiction_calculate_energy_and_state_type_with_kinks_accepted =
 R"doc(This function takes in an SiDB energy distribution. For each charge
 distribution, the state type is determined (i.e. erroneous,
-transparent).
+transparent) while kinks are accepted, meaning a state with kinks is
+considered transparent.
 
 Template parameter ``Lyt``:
     SiDB cell-level layout type.
@@ -1148,6 +1149,44 @@ Parameter ``spec``:
 
 Parameter ``input_index``:
     The index of the current input configuration.
+
+Returns:
+    Electrostatic potential energy of all charge distributions with
+    state type.)doc";
+
+static const char *__doc_fiction_calculate_energy_and_state_type_with_kinks_rejected =
+R"doc(This function takes in an SiDB energy distribution. For each charge
+distribution, the state type is determined (i.e. erroneous,
+transparent) while kinks are rejected, meaning a state with kinks is
+considered erroneous.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Template parameter ``TT``:
+    The type of the truth table specifying the gate behavior.
+
+Parameter ``energy_distribution``:
+    Energy distribution.
+
+Parameter ``valid_charge_distributions``:
+    Physically valid charge distributions.
+
+Parameter ``output_bdl_pairs``:
+    Output BDL pairs.
+
+Parameter ``spec``:
+    Expected Boolean function of the layout given as a multi-output
+    truth table.
+
+Parameter ``input_index``:
+    The index of the current input configuration.
+
+Parameter ``input_bdl_wires``:
+    Input BDL wires.
+
+Parameter ``output_bdl_wires``:
+    Output BDL wires.
 
 Returns:
     Electrostatic potential energy of all charge distributions with
@@ -3428,10 +3467,6 @@ probability of less than the given percentage, is determined to be the
 critical temperature. For gate-based simulation, this is the
 probability of erroneous calculations of the gate.)doc";
 
-static const char *__doc_fiction_critical_temperature_params_engine = R"doc(Simulation mode to determine the *Critical Temperature*.)doc";
-
-static const char *__doc_fiction_critical_temperature_params_input_iterator_params = R"doc(Parameters for the BDL input iterator.)doc";
-
 static const char *__doc_fiction_critical_temperature_params_iteration_steps =
 R"doc(Number of iteration steps for the *QuickSim* algorithm (only
 applicable if engine == APPROXIMATE).)doc";
@@ -3440,21 +3475,9 @@ static const char *__doc_fiction_critical_temperature_params_max_temperature =
 R"doc(Maximum simulation temperature beyond which no simulation will be
 conducted (~ 126 °C by default) (unit: K).)doc";
 
-static const char *__doc_fiction_critical_temperature_params_simulation_engine =
-R"doc(An enumeration of simulation modes (exact vs. approximate) to use for
-the *Critical Temperature* Simulation.)doc";
-
-static const char *__doc_fiction_critical_temperature_params_simulation_engine_APPROXIMATE =
-R"doc(This simulation engine quickly calculates the *Critical Temperature*.
-However, there may be deviations from the exact *Critical
-Temperature*. This mode is recommended for larger layouts (> 40
-SiDBs).)doc";
-
-static const char *__doc_fiction_critical_temperature_params_simulation_engine_EXACT =
-R"doc(This simulation engine computes *Critical Temperature* values with 100
-% accuracy.)doc";
-
-static const char *__doc_fiction_critical_temperature_params_simulation_parameters = R"doc(All parameters for physical SiDB simulations.)doc";
+static const char *__doc_fiction_critical_temperature_params_operational_params =
+R"doc(The parameters used to determine if a layout is `operational` or `non-
+operational`.)doc";
 
 static const char *__doc_fiction_critical_temperature_stats = R"doc(This struct stores the result of the temperature simulation.)doc";
 
@@ -4531,7 +4554,7 @@ given Boolean function.)doc";
 
 static const char *__doc_fiction_detail_critical_temperature_impl_params = R"doc(Parameters for the critical_temperature algorithm.)doc";
 
-static const char *__doc_fiction_detail_critical_temperature_impl_physical_simulation_of_layout =
+static const char *__doc_fiction_detail_critical_temperature_impl_physical_simulation_of_bdl_iterator =
 R"doc(This function conducts physical simulation of the given layout (gate
 layout with certain input combination). The simulation results are
 stored in the `sim_result_100` variable.
@@ -6844,21 +6867,18 @@ R"doc(Constructor to initialize the algorithm with a layout and parameters.
 Parameter ``lyt``:
     The SiDB cell-level layout to be checked.
 
-Parameter ``spec``:
+Parameter ``tt``:
     Expected Boolean function of the layout given as a multi-output
     truth table.
 
 Parameter ``params``:
     Parameters for the `is_operational` algorithm.
 
-Parameter ``input_bdl_wire``:
-    Optional BDL input wires of lyt.
+Parameter ``input_wires``:
+    BDL input wires of lyt.
 
-Parameter ``output_bdl_wire``:
-    Optional BDL output wires of lyt.
-
-Parameter ``input_bdl_wire_direction``:
-    Optional BDL input wire directions of lyt.)doc";
+Parameter ``output_wires``:
+    BDL output wires of lyt.)doc";
 
 static const char *__doc_fiction_detail_is_operational_impl_layout = R"doc(SiDB cell-level layout.)doc";
 
@@ -6894,6 +6914,28 @@ Returns:
 static const char *__doc_fiction_detail_is_operational_impl_simulator_invocations = R"doc(Number of simulator invocations.)doc";
 
 static const char *__doc_fiction_detail_is_operational_impl_truth_table = R"doc(The specification of the layout.)doc";
+
+static const char *__doc_fiction_detail_is_operational_impl_verifiy_logic_match_of_cds =
+R"doc(Checks if the given charge distribution correctly encodes the expected
+logic for the given input pattern, based on a provided truth table.
+
+Example: In the ground state charge distribution of an AND gate, kinks
+are rejected for the gate to be considered operational. Given an input
+pattern of `01`, this function will: - Verify that the left input wire
+encodes `0`. - Verify that the right input wire encodes `1`. - Verify
+that the output wire encodes `0`. Determines if the given charge
+distribution fulfills the correct logic based on the provided charge
+index and truth table.
+
+Parameter ``given_cds``:
+    The charge distribution surface to be checked for operation.
+
+Parameter ``input_pattern``:
+    Input pattern represented by the position of perturbers.
+
+Returns:
+    Operational status indicating if the layout is `operational` or
+    `non-operational`.)doc";
 
 static const char *__doc_fiction_detail_jump_point_search_impl = R"doc()doc";
 
@@ -18210,6 +18252,50 @@ Template parameter ``Lyt``:
 
 Returns:
     USE clocking scheme.)doc";
+
+static const char *__doc_fiction_verify_logic_match =
+R"doc(Checks if a given charge distribution correctly encodes the expected
+logic for a specified input pattern, based on a provided truth table.
+
+@note Kinks are rejected.
+
+Example: In the ground state charge distribution of an AND gate, kinks
+are rejected for the gate to be considered operational. Given an input
+pattern of `01`, this function will: - Verify that the left input wire
+encodes `0`. - Verify that the right input wire encodes `1`. - Verify
+that the output wire encodes `0`.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Template parameter ``TT``:
+    Truth table type.
+
+Parameter ``cds``:
+    Charge distribution surface, containing charge state information
+    for each SiDB.
+
+Parameter ``params``:
+    The parameters used to determine if a layout is `operational` or
+    `non-operational`.
+
+Parameter ``spec``:
+    Expected Boolean function of the layout given as a multi-output
+    truth table.
+
+Parameter ``input_pattern``:
+    The specific input pattern of the given charge distribution
+    surface.
+
+Parameter ``input_wires``:
+    Input BDL wires.
+
+Parameter ``output_wires``:
+    Output BDL wires.
+
+Returns:
+    The operational status indicating if the charge distribution
+    matches the logic for the given input pattern.)doc";
 
 static const char *__doc_fiction_vertex_coloring =
 R"doc(A vertex coloring is simply a hash map from vertex IDs to Color types

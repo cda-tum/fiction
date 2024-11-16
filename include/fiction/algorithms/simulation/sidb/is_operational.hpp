@@ -131,11 +131,10 @@ class is_operational_impl
      * Constructor to initialize the algorithm with a layout and parameters.
      *
      * @param lyt The SiDB cell-level layout to be checked.
-     * @param spec Expected Boolean function of the layout given as a multi-output truth table.
+     * @param tt Expected Boolean function of the layout given as a multi-output truth table.
      * @param params Parameters for the `is_operational` algorithm.
-     * @param input_bdl_wire Optional BDL input wires of lyt.
-     * @param output_bdl_wire Optional BDL output wires of lyt.
-     * @param input_bdl_wire_direction Optional BDL input wire directions of lyt.
+     * @param input_wires BDL input wires of lyt.
+     * @param output_wires BDL output wires of lyt.
      */
     is_operational_impl(const Lyt& lyt, const std::vector<TT>& tt, const is_operational_params& params,
                         const std::vector<bdl_wire<Lyt>>& input_wires, const std::vector<bdl_wire<Lyt>>& output_wires) :
@@ -187,43 +186,82 @@ class is_operational_impl
 
             for (const auto& gs : ground_states)
             {
-                // fetch the charge states of the output BDL pair
-                for (auto output = 0u; output < output_bdl_pairs.size(); output++)
+                const auto op_status = verifiy_logic_match_of_cds(gs, i);
+                if (op_status == operational_status::NON_OPERATIONAL)
                 {
-                    const auto charge_state_output_upper = gs.get_charge_state(output_bdl_pairs[output].upper);
-                    const auto charge_state_output_lower = gs.get_charge_state(output_bdl_pairs[output].lower);
-
-                    // if the output charge states are equal, the layout is not operational
-                    if (charge_state_output_lower == charge_state_output_upper)
-                    {
-                        return operational_status::NON_OPERATIONAL;
-                    }
-
-                    // if the expected output is 1, the expected charge states are (upper, lower) = (0, -1)
-                    if (kitty::get_bit(truth_table[output], i))
-                    {
-                        if (!encodes_bit_one(gs, output_bdl_pairs[output], output_bdl_wires[output].port))
-                        {
-                            return operational_status::NON_OPERATIONAL;
-                        }
-                    }
-                    // if the expected output is 0, the expected charge states are (upper, lower) = (-1, 0)
-                    else
-                    {
-                        if (!encodes_bit_zero(gs, output_bdl_pairs[output], output_bdl_wires[output].port))
-                        {
-                            return operational_status::NON_OPERATIONAL;
-                        }
-                    }
+                    return operational_status::NON_OPERATIONAL;
                 }
+            }
+        }
 
-                if (parameters.op_condition == operational_condition::REJECT_KINKS)
+        // if we made it here, the layout is operational
+        return operational_status::OPERATIONAL;
+    }
+    /**
+     * Checks if the given charge distribution correctly encodes the expected logic for the given input pattern,
+     * based on a provided truth table.
+     *
+     * Example:
+     * In the ground state charge distribution of an AND gate, kinks are rejected for the gate to be considered
+     * operational. Given an input pattern of `01`, this function will:
+     * - Verify that the left input wire encodes `0`.
+     * - Verify that the right input wire encodes `1`.
+     * - Verify that the output wire encodes `0`.
+     * Determines if the given charge distribution fulfills the correct logic based on the provided charge index and
+     * truth table.
+     *
+     * @param given_cds The charge distribution surface to be checked for operation.
+     * @param input_pattern Input pattern represented by the position of perturbers.
+     * @return Operational status indicating if the layout is `operational` or `non-operational`.
+     */
+    [[nodiscard]] operational_status verifiy_logic_match_of_cds(const charge_distribution_surface<Lyt>& given_cds,
+                                                                const uint64_t input_pattern) noexcept
+    {
+        assert(!output_bdl_pairs.empty() && "No output cell provided.");
+        assert((truth_table.size() == output_bdl_pairs.size()) &&
+               "Number of truth tables and output BDL pairs does not match");
+
+        // if positively charged SiDBs can occur, the SiDB layout is considered as non-operational
+        if (can_positive_charges_occur(given_cds, parameters.simulation_parameters))
+        {
+            return operational_status::NON_OPERATIONAL;
+        }
+
+        // fetch the charge states of the output BDL pair
+        for (auto output = 0u; output < output_bdl_pairs.size(); output++)
+        {
+            const auto charge_state_output_upper = given_cds.get_charge_state(output_bdl_pairs[output].upper);
+            const auto charge_state_output_lower = given_cds.get_charge_state(output_bdl_pairs[output].lower);
+
+            // if the output charge states are equal, the layout is not operational
+            if (charge_state_output_lower == charge_state_output_upper)
+            {
+                return operational_status::NON_OPERATIONAL;
+            }
+
+            // if the expected output is 1, the expected charge states are (upper, lower) = (0, -1)
+            if (kitty::get_bit(truth_table[output], input_pattern))
+            {
+                if (!encodes_bit_one(given_cds, output_bdl_pairs[output], output_bdl_wires[output].port))
                 {
-                    if (check_existence_of_kinks_in_input_wires(gs, i) ||
-                        check_existence_of_kinks_in_output_wires(gs, i))
-                    {
-                        return operational_status::NON_OPERATIONAL;
-                    }
+                    return operational_status::NON_OPERATIONAL;
+                }
+            }
+            // if the expected output is 0, the expected charge states are (upper, lower) = (-1, 0)
+            else
+            {
+                if (!encodes_bit_zero(given_cds, output_bdl_pairs[output], output_bdl_wires[output].port))
+                {
+                    return operational_status::NON_OPERATIONAL;
+                }
+            }
+
+            if (parameters.op_condition == operational_condition::REJECT_KINKS)
+            {
+                if (check_existence_of_kinks_in_input_wires(given_cds, input_pattern) ||
+                    check_existence_of_kinks_in_output_wires(given_cds, input_pattern))
+                {
+                    return operational_status::NON_OPERATIONAL;
                 }
             }
         }
@@ -330,7 +368,11 @@ class is_operational_impl
     /**
      * SiDB cell-level layout.
      */
-    const Lyt& layout;
+    const Lyt layout;
+    /**
+     * SiDB charge distribution surface.
+     */
+    // const charge_distribution_surface<Lyt> cds;
     /**
      * The specification of the layout.
      */

@@ -186,8 +186,7 @@ TEST_CASE("Not working diagonal Wire", "[is-operational]")
             .first == operational_status::NON_OPERATIONAL);
 }
 
-TEMPLATE_TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[is-operational]", sidb_111_cell_clk_lyt_siqad,
-                   cds_sidb_111_cell_clk_lyt_siqad)
+TEMPLATE_TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[is-operational]", sidb_111_cell_clk_lyt_siqad)
 {
     const auto lyt = blueprints::and_gate_111<TestType>();
 
