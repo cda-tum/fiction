@@ -61,6 +61,7 @@
 #include "pyfiction/inout/write_dot_layout.hpp"
 #include "pyfiction/inout/write_fgl_layout.hpp"
 #include "pyfiction/inout/write_fqca_layout.hpp"
+#include "pyfiction/inout/write_svg_layout.hpp"
 // #include "pyfiction/inout/write_location_and_ground_state.hpp"
 #include "pyfiction/inout/write_operational_domain.hpp"
 #include "pyfiction/inout/write_qca_layout.hpp"
@@ -92,6 +93,7 @@
 #include "pyfiction/utils/placement_utils.hpp"
 #include "pyfiction/utils/routing_utils.hpp"
 #include "pyfiction/utils/truth_table_utils.hpp"
+#include "pyfiction/utils/version_info.hpp"
 
 #include <pybind11/pybind11.h>
 
@@ -228,6 +230,7 @@ PYBIND11_MODULE(pyfiction, m, pybind11::mod_gil_not_used())
     pyfiction::network_utils(m);
     pyfiction::placement_utils(m);
     pyfiction::truth_table_utils(m);
+    pyfiction::version_info(m);
 }
 
 #pragma GCC diagnostic pop
