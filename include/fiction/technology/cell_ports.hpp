@@ -283,7 +283,7 @@ struct formatter<fiction::port_position>
     template <typename FormatContext>
     auto format(const fiction::port_position& p, FormatContext& ctx) const
     {
-        return format_to(ctx.out(), "({},{})", p.x, p.y);
+        return format_to(ctx.out(), runtime("({},{})"), p.x, p.y);
     }
 };
 // make port_direction compatible with fmt::format
@@ -299,15 +299,17 @@ struct formatter<fiction::port_direction>
     template <typename FormatContext>
     auto format(const fiction::port_direction& p, FormatContext& ctx) const
     {
-        return format_to(ctx.out(), p.dir == fiction::port_direction::NORTH      ? "N" :
-                                    p.dir == fiction::port_direction::NORTH_EAST ? "NE" :
-                                    p.dir == fiction::port_direction::EAST       ? "E" :
-                                    p.dir == fiction::port_direction::SOUTH_EAST ? "SE" :
-                                    p.dir == fiction::port_direction::SOUTH      ? "S" :
-                                    p.dir == fiction::port_direction::SOUTH_WEST ? "SW" :
-                                    p.dir == fiction::port_direction::WEST       ? "W" :
-                                    p.dir == fiction::port_direction::NORTH_WEST ? "NW" :
-                                                                                   "?");
+        const auto dir = p.dir == fiction::port_direction::NORTH      ? "N" :
+                         p.dir == fiction::port_direction::NORTH_EAST ? "NE" :
+                         p.dir == fiction::port_direction::EAST       ? "E" :
+                         p.dir == fiction::port_direction::SOUTH_EAST ? "SE" :
+                         p.dir == fiction::port_direction::SOUTH      ? "S" :
+                         p.dir == fiction::port_direction::SOUTH_WEST ? "SW" :
+                         p.dir == fiction::port_direction::WEST       ? "W" :
+                         p.dir == fiction::port_direction::NORTH_WEST ? "NW" :
+                                                                        "?";
+
+        return format_to(ctx.out(), runtime(dir));
     }
 };
 // make port_list compatible with fmt::format
@@ -323,7 +325,7 @@ struct formatter<fiction::port_list<PortType>>
     template <typename FormatContext>
     auto format(const fiction::port_list<PortType>& pl, FormatContext& ctx) const
     {
-        return format_to(ctx.out(), "inp: {}, out: {}", join(pl.inp, ", "), join(pl.out, ", "));
+        return format_to(ctx.out(), runtime("inp: {}, out: {}"), join(pl.inp, ", "), join(pl.out, ", "));
     }
 };
 }  // namespace fmt
