@@ -299,17 +299,53 @@ struct formatter<fiction::port_direction>
     template <typename FormatContext>
     auto format(const fiction::port_direction& p, FormatContext& ctx) const
     {
-        const auto dir = p.dir == fiction::port_direction::NORTH      ? "N" :
-                         p.dir == fiction::port_direction::NORTH_EAST ? "NE" :
-                         p.dir == fiction::port_direction::EAST       ? "E" :
-                         p.dir == fiction::port_direction::SOUTH_EAST ? "SE" :
-                         p.dir == fiction::port_direction::SOUTH      ? "S" :
-                         p.dir == fiction::port_direction::SOUTH_WEST ? "SW" :
-                         p.dir == fiction::port_direction::WEST       ? "W" :
-                         p.dir == fiction::port_direction::NORTH_WEST ? "NW" :
-                                                                        "?";
+        const auto* dir = "?";
 
-        return format_to(ctx.out(), runtime(dir));
+        switch (p.dir)
+        {
+            case fiction::port_direction::NORTH:
+            {
+                dir = "N";
+                break;
+            }
+            case fiction::port_direction::NORTH_EAST:
+            {
+                dir = "NE";
+                break;
+            }
+            case fiction::port_direction::EAST:
+            {
+                dir = "E";
+                break;
+            }
+            case fiction::port_direction::SOUTH_EAST:
+            {
+                dir = "SE";
+                break;
+            }
+            case fiction::port_direction::SOUTH:
+            {
+                dir = "S";
+                break;
+            }
+            case fiction::port_direction::SOUTH_WEST:
+            {
+                dir = "SW";
+                break;
+            }
+            case fiction::port_direction::WEST:
+            {
+                dir = "W";
+                break;
+            }
+            case fiction::port_direction::NORTH_WEST:
+            {
+                dir = "NW";
+                break;
+            }
+        }
+
+        return format_to(ctx.out(), dir);
     }
 };
 // make port_list compatible with fmt::format
