@@ -41,10 +41,7 @@ int main()  // NOLINT
 
     const auto truth_tables = std::vector<std::vector<tt>>{
         std::vector<tt>{create_and_tt()}, std::vector<tt>{create_nand_tt()}, std::vector<tt>{create_or_tt()},
-        std::vector<tt>{create_nor_tt()}, std::vector<tt>{create_xor_tt()},  std::vector<tt>{create_xnor_tt()},
-        std::vector<tt>{create_lt_tt()},  std::vector<tt>{create_gt_tt()},   std::vector<tt>{create_le_tt()},
-        std::vector<tt>{create_ge_tt()},  create_crossing_wire_tt(),         create_half_adder_tt(),
-        create_double_wire_tt()};
+        std::vector<tt>{create_nor_tt()}, std::vector<tt>{create_xor_tt()},  std::vector<tt>{create_xnor_tt()}};
 
     static const std::vector<std::string> gate_names = {"and", "nand", "or", "nor", "xor", "xnor",     "lt",
                                                         "gt",  "le",   "ge", "cx",  "ha",  "hourglass"};
@@ -102,14 +99,12 @@ int main()  // NOLINT
                                                             &stats_automatic_exhaustive_design);
         }
 
-        std::cout << mockturtle::to_seconds(stats_automatic_exhaustive_design.time_total) << '\n';
-
         std::vector<sidb_100_cell_clk_lyt_siqad> quickcell_design{};
         design_sidb_gates_stats                  stats_quickcell{};
 
         params_2_in_1_out.design_mode =
             design_sidb_gates_params<fiction::cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::QUICKCELL;
-        ;
+
         params_2_in_2_out.design_mode =
             design_sidb_gates_params<fiction::cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::QUICKCELL;
 
