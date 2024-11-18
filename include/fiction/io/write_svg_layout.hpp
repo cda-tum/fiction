@@ -851,7 +851,7 @@ class write_qca_layout_svg_impl
                         if (lyt.is_synchronization_element(c))
                         {
                             cell_descriptions
-                                << fmt::format(desc_col.first, desc_col.second,
+                                << fmt::format(fmt::runtime(desc_col.first), desc_col.second,
                                                svg::STARTING_OFFSET_TILE_X + svg::STARTING_OFFSET_LATCH_CELL_X +
                                                    (c.x * svg::CELL_DISTANCE),
                                                svg::STARTING_OFFSET_TILE_Y + svg::STARTING_OFFSET_LATCH_CELL_Y +
@@ -863,7 +863,7 @@ class write_qca_layout_svg_impl
                     if (!is_sync_elem)
                     {
                         cell_descriptions << fmt::format(
-                            desc_col.first, desc_col.second,
+                            fmt::runtime(desc_col.first), desc_col.second,
                             svg::STARTING_OFFSET_TILE_X + svg::STARTING_OFFSET_CELL_X + (c.x * svg::CELL_DISTANCE),
                             svg::STARTING_OFFSET_TILE_Y + svg::STARTING_OFFSET_CELL_Y + (c.y * svg::CELL_DISTANCE));
                     }
@@ -959,7 +959,7 @@ class write_qca_layout_svg_impl
                         if (const auto latch_delay = lyt.get_synchronization_element(c); latch_delay > 0)
                         {
                             coord_to_latch_cells[tile_coords] = current_cells.append(
-                                fmt::format(desc_col.first, desc_col.second,
+                                fmt::format(fmt::runtime(desc_col.first), desc_col.second,
                                             svg::STARTING_OFFSET_LATCH_CELL_X + (in_tile.x * svg::CELL_DISTANCE),
                                             svg::STARTING_OFFSET_LATCH_CELL_Y + (in_tile.y * svg::CELL_DISTANCE)));
 
@@ -970,7 +970,7 @@ class write_qca_layout_svg_impl
                     if (!is_sync_elem)
                     {
                         coord_to_cells[tile_coords] = current_cells.append(
-                            fmt::format(desc_col.first, desc_col.second,
+                            fmt::format(fmt::runtime(desc_col.first), desc_col.second,
                                         svg::STARTING_OFFSET_CELL_X + (in_tile.x * svg::CELL_DISTANCE),
                                         svg::STARTING_OFFSET_CELL_Y + (in_tile.y * svg::CELL_DISTANCE)));
                     }
@@ -1031,7 +1031,7 @@ class write_qca_layout_svg_impl
             const double y_pos = svg::STARTING_OFFSET_TILE_Y + (coord.y * svg::TILE_DISTANCE);
 
             const auto c_descr =
-                fmt::format(descr, x_pos, y_pos, tile_colors[czone], cell_descriptions,
+                fmt::format(fmt::runtime(descr), x_pos, y_pos, tile_colors[czone], cell_descriptions,
                             ps.simple ? "" : text_colors[czone], ps.simple ? "" : std::to_string(czone + 1));
 
             tile_descriptions << c_descr;
@@ -1051,8 +1051,8 @@ class write_qca_layout_svg_impl
                 const double y_pos = svg::STARTING_OFFSET_LATCH_Y + (coord.y * svg::TILE_DISTANCE);
 
                 const auto t_descr =
-                    fmt::format(descr, x_pos, y_pos, tile_colors[czone_lo], tile_colors[czone_up], cell_descriptions,
-                                text_colors[czone_up], ps.simple ? "" : std::to_string(czone_up + 1),
+                    fmt::format(fmt::runtime(descr), x_pos, y_pos, tile_colors[czone_lo], tile_colors[czone_up],
+                                cell_descriptions, text_colors[czone_up], ps.simple ? "" : std::to_string(czone_up + 1),
                                 text_colors[czone_lo], ps.simple ? "" : std::to_string(czone_lo + 1));
 
                 tile_descriptions << t_descr;
