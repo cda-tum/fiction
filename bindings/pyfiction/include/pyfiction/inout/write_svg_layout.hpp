@@ -31,7 +31,7 @@ inline void write_sidb_layout_svg_impl(pybind11::module& m)
 
     // SiDB plot
     m.def("write_sidb_layout_svg", write_sidb_layout_svg_pointer, "layout"_a, "filename"_a,
-          "ps"_a = fiction::write_sidb_layout_svg_params{});
+          "ps"_a = fiction::write_sidb_layout_svg_params{}, DOC(fiction_write_sidb_layout_svg));
 
     // Register the function to return an SVG as a string
     m.def(
@@ -42,7 +42,7 @@ inline void write_sidb_layout_svg_impl(pybind11::module& m)
             fiction::write_sidb_layout_svg(layout, oss, params);  // Write to the stream
             return oss.str();                                     // Return the string content
         },
-        "layout"_a, "ps"_a = fiction::write_sidb_layout_svg_params{});
+        "layout"_a, "ps"_a = fiction::write_sidb_layout_svg_params{}, DOC(fiction_write_sidb_layout_svg));
 }
 
 template <typename Lyt>
@@ -56,7 +56,7 @@ inline void write_qca_layout_svg_impl(pybind11::module& m)
         &fiction::write_qca_layout_svg<py_qca_layout>;
 
     m.def("write_qca_layout_svg", write_qca_layout_svg_pointer, "layout"_a, "filename"_a,
-          "params"_a = fiction::write_qca_layout_svg_params{});
+          "params"_a = fiction::write_qca_layout_svg_params{}, DOC(fiction_write_qca_layout_svg));
 }
 
 }  // namespace detail
