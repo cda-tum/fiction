@@ -53,16 +53,16 @@ enum class operational_status : uint8_t
 };
 
 /**
- * Condition which is used to decide if a layout is `operational` or `non-operational`.
+ * Condition which is used to decide if a layout is operational or non-operational.
  */
 enum class operational_condition : uint8_t
 {
     /**
-     * Even if the I/O pins show kinks, the layout is still considered as `operational`.
+     * Even if the I/O pins show kinks, the layout is still considered as operational.
      */
     TOLERATE_KINKS,
     /**
-     * The I/O pins are not allowed to show kinks. If kinks exist, the layout is considered as `non-operational`.
+     * The I/O pins are not allowed to show kinks. If kinks exist, the layout is considered as non-operational.
      */
     REJECT_KINKS
 };
@@ -85,13 +85,29 @@ struct is_operational_params
      */
     bdl_input_iterator_params input_bdl_iterator_params{};
     /**
-     * Condition which is used to decide if a layout is `operational` or `non-operational`.
+     * Condition which is used to decide if a layout is operational or non-operational.
      */
     operational_condition op_condition = operational_condition::TOLERATE_KINKS;
 };
 
 namespace detail
 {
+
+/**
+ * Reason why a layout is non-operational.
+ */
+enum class reason_for_non_operational : uint8_t
+{
+    /**
+     * The layout is non-operational due to kinks.
+     */
+    KINKS,
+    /**
+     * The layout is non-operational due to a logic mismatch.
+     */
+    LOGIC_MISMATCH
+};
+
 /**
  * Implementation of the `is_operational` algorithm for a given gate layout.
  *
@@ -101,7 +117,7 @@ namespace detail
  * to expected outputs from a truth table.
  *
  * @tparam Lyt SiDB cell-level layout type.
- * @tparam TT The type of the truth table specifying the gate behavior.
+ * @tparam TT Type of the truth table.
  */
 template <typename Lyt, typename TT>
 class is_operational_impl
@@ -225,12 +241,12 @@ class is_operational_impl
      *
      * @param given_cds The charge distribution surface to be checked for operation.
      * @param input_pattern Input pattern represented by the position of perturbers.
-     * @return Operational status indicating if the layout is `operational` or `non-operational`.
+     * @return Operational status indicating if the layout is operational or non-operational.
      */
     [[nodiscard]] operational_status verifiy_logic_match_of_cds(const charge_distribution_surface<Lyt>& given_cds,
                                                                 const uint64_t input_pattern) noexcept
     {
-        non_operational_due_to_kinks = false;
+        auto non_operational_reason = reason_for_non_operational::LOGIC_MISMATCH;
 
         assert(!output_bdl_pairs.empty() && "No output cell provided.");
         assert((truth_table.size() == output_bdl_pairs.size()) &&
@@ -276,12 +292,12 @@ class is_operational_impl
                 if (check_existence_of_kinks_in_input_wires(given_cds, input_pattern) ||
                     check_existence_of_kinks_in_output_wires(given_cds, input_pattern))
                 {
-                    non_operational_due_to_kinks = true;
+                    non_operational_reason = reason_for_non_operational::KINKS;
                 }
             }
         }
 
-        if (non_operational_due_to_kinks)
+        if (non_operational_reason == reason_for_non_operational::KINKS)
         {
             return operational_status::NON_OPERATIONAL;
         }
@@ -290,25 +306,25 @@ class is_operational_impl
         return operational_status::OPERATIONAL;
     }
     /**
-     * Determines the input combinations yielding the `non-operational` status due
-     * to kinks. `True` indicates that the layout is `non-operational` due to kinks, `false` otherwise.
-     *
-     * @return Set of pairs where the first element is the input pattern (e.g. 2-input Boolean function: 00 ^= 0;
-     * 10 ^= 2) for which the wrong output is computed. The second entry indicates the information if the
-     * `non-operational` status is due to kinks. `True` indicates that the layout is `non-operational` due to kinks,
-     * `false` otherwise.
+     * Determines the input combinations yielding the non-operational status due
+     * to kinks. `True` indicates that the layout is non-operational due to kinks, `false` otherwise.
      *
      * @note "Non-operational due to kinks" refers to the operational status being exclusively caused to be
      * `NON_OPERATIONAL` due to kinks.
+     *
+     * @return Set of pairs where the first element is the input pattern (e.g. 2-input Boolean function: 00 ^= 0;
+     * 10 ^= 2) for which the wrong output is computed. The second entry indicates the information why the layout is
+     * non-operational for the given input pattern.
      */
-    [[nodiscard]] std::set<std::pair<uint64_t, bool>>
-    determine_non_operational_input_patterns_and_op_status_due_kinks() noexcept
+    [[nodiscard]] std::set<std::pair<uint64_t, reason_for_non_operational>>
+    determine_non_operational_input_patterns_and_non_operational_reason() noexcept
     {
         assert(!output_bdl_pairs.empty() && "No output cell provided.");
         assert((truth_table.size() == output_bdl_pairs.size()) &&
                "Number of truth tables and output BDL pairs does not match");
 
-        std::set<std::pair<uint64_t, bool>> non_operational_inputs_and_op_status_due_to_kinks{};
+        std::set<std::pair<uint64_t, detail::reason_for_non_operational>>
+            non_operational_inputs_and_status_if_due_to_kinks{};
 
         // number of different input combinations
         for (auto i = 0u; i < truth_table.front().num_bits(); ++i, ++bii)
@@ -337,13 +353,13 @@ class is_operational_impl
                 const auto op_status = verifiy_logic_match_of_cds(gs, i);
                 if (op_status == operational_status::NON_OPERATIONAL)
                 {
-                    non_operational_inputs_and_op_status_due_to_kinks.insert({i, non_operational_due_to_kinks});
+                    non_operational_inputs_and_status_if_due_to_kinks.insert({i, reason_for_non_operational::KINKS});
                 }
             }
         }
 
         // if we made it here, the layout is operational
-        return non_operational_inputs_and_op_status_due_to_kinks;
+        return non_operational_inputs_and_status_if_due_to_kinks;
     }
     /**
      * Returns the total number of simulator invocations.
@@ -356,13 +372,13 @@ class is_operational_impl
     }
 
     /**
-     * Returns whether the layout is `non-operational` due to kinks.
+     * Returns whether the layout is non-operational due to kinks.
      *
-     * @return `true` if the layout is `non-operational` due to kinks, `false` otherwise.
+     * @return `true` if the layout is non-operational due to kinks, `false` otherwise.
      */
-    [[nodiscard]] bool is_non_operational_due_to_kinks() const noexcept
+    [[nodiscard]] reason_for_non_operational get_reason_for_non_operational() const noexcept
     {
-        return non_operational_due_to_kinks;
+        return reason_for_non_operational;
     }
 
   private:
@@ -399,12 +415,12 @@ class is_operational_impl
      */
     std::size_t simulator_invocations{0};
     /**
-     * Indicates whether the layout is `non-operational` due to kinks.
+     * Indicates the reason why layout is non-operational.
      */
-    bool non_operational_due_to_kinks = false;
+    reason_for_non_operational reason_for_non_operational = reason_for_non_operational::LOGIC_MISMATCH;
     /**
-     * This function conducts physical simulation of the given layout (gate layout with certain input combination). The
-     * simulation results are stored in the `sim_result` variable.
+     * This function conducts physical simulation of the given layout (gate layout with certain input combination).
+     * The simulation results are stored in the `sim_result` variable.
      *
      * @param bdl_iterator A reference to a BDL input iterator representing the gate layout at a given input
      * combination. The simulation is performed based on the configuration represented by the iterator.
@@ -612,7 +628,7 @@ class is_operational_impl
  * combinations.
  *
  * @tparam Lyt SiDB cell-level layout type.
- * @tparam TT The type of the truth table specifying the layout behavior.
+ * @tparam TT Type of the truth table.
  * @param lyt The SiDB cell-level layout to be checked.
  * @param spec Expected Boolean function of the layout given as a multi-output truth table.
  * @param params Parameters for the `is_operational` algorithm.
@@ -635,7 +651,7 @@ is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational
     assert(lyt.num_pos() > 0 && "lyt needs output cells");
 
     assert(!spec.empty());
-    // all elements in tts must have the same number of variables
+    // all elements in spec must have the same number of variables
     assert(std::adjacent_find(spec.cbegin(), spec.cend(), [](const auto& a, const auto& b)
                               { return a.num_vars() != b.num_vars(); }) == spec.cend());
 
@@ -651,7 +667,7 @@ is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational
     return {p.run(), p.get_number_of_simulator_invocations()};
 }
 /**
- * This function determines the input combinations for which the layout is `operational`.
+ * This function determines the input combinations for which the layout is operational.
  *
  * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT Type of the truth table.
@@ -672,7 +688,7 @@ template <typename Lyt, typename TT>
     assert(lyt.num_pos() > 0 && "skeleton needs output cells");
 
     assert(!spec.empty());
-    // all elements in tts must have the same number of variables
+    // all elements in spec must have the same number of variables
     assert(std::adjacent_find(spec.cbegin(), spec.cend(), [](const auto& a, const auto& b)
                               { return a.num_vars() != b.num_vars(); }) == spec.cend());
 
@@ -686,11 +702,12 @@ template <typename Lyt, typename TT>
         input_patterns.insert(i);
     }
 
-    const auto non_op_patterns_and_op_status = p.determine_non_operational_input_patterns_and_op_status_due_kinks();
+    const auto non_op_patterns_and_non_op_reason =
+        p.determine_non_operational_input_patterns_and_non_operational_reason();
 
-    for (const auto& pattern : non_op_patterns_and_op_status)
+    for (const auto& [input_pattern, _] : non_op_patterns_and_non_op_reason)
     {
-        input_patterns.erase(pattern.first);
+        input_patterns.erase(input_pattern);
     }
 
     return input_patterns;
@@ -699,15 +716,15 @@ template <typename Lyt, typename TT>
 /**
  * This function determines the input combinations for which the SiDB layout are non-operational due to kinks.
  *
- * @tparam Lyt Type of the cell-level layout.
+ * @note "Non-operational due to kinks" refers to the operational status being exclusively caused to be
+ * `NON_OPERATIONAL` due to kinks.
+ *
+ * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT Type of the truth table.
  * @param lyt The SiDB layout.
  * @param spec Vector of truth table specifications.
  * @param params Parameters for the `is_operational` algorithm.
  * @return The non-operational input combinations due to kinks.
- *
- * @note "Non-operational due to kinks" refers to the operational status being exclusively caused to be
- * `NON_OPERATIONAL` due to kinks.
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] std::set<uint64_t>
@@ -733,13 +750,14 @@ non_operational_input_patterns_due_to_kinks(const Lyt& lyt, const std::vector<TT
 
     std::set<uint64_t> non_op_patterns_due_to_kinks{};
 
-    const auto non_op_patterns = p.determine_non_operational_input_patterns_and_op_status_due_kinks();
+    const auto input_patterns_and_non_op_reason =
+        p.determine_non_operational_input_patterns_and_non_operational_reason();
 
-    for (const auto& pattern_and_non_op_kinks : non_op_patterns)
+    for (const auto& [input_pattern, status] : input_patterns_and_non_op_reason)
     {
-        if (pattern_and_non_op_kinks.second)
+        if (status == detail::reason_for_non_operational::KINKS)
         {
-            non_op_patterns_due_to_kinks.insert(pattern_and_non_op_kinks.first);
+            non_op_patterns_due_to_kinks.insert(input_pattern);
         }
     }
 
@@ -747,27 +765,26 @@ non_operational_input_patterns_due_to_kinks(const Lyt& lyt, const std::vector<TT
 }
 
 /**
- * Determines if the layout is `non-operational` due to kinks.
+ * Determines if the layout is non-operational due to kinks.
+ *
+ * @note "Non-operational due to kinks" refers to the operational status being exclusively caused to be
+ * `NON_OPERATIONAL` due to kinks.
  *
  * @tparam Lyt SiDB cell-level layout type.
- * @tparam TT The type of the truth table specifying the layout behavior.
+ * @tparam TT Type of the truth table.
  * @param lyt The SiDB cell-level layout to be checked.
  * @param spec Expected Boolean function of the layout given as a multi-output truth table.
  * @param params Parameters for the `is_operational` algorithm.
  * @param input_bdl_wire Optional BDL input wires of lyt.
  * @param output_bdl_wire Optional BDL output wires of lyt.
- * @return Bool that indicates whether the layout is `non-operational due to kinks. `true` if the layout is not usable
+ * @return Bool that indicates whether the layout is non-operational due to kinks. `true` if the layout is not usable
  * due to kinks, `false` otherwise.
- *
- * @note "Non-operational due to kinks" refers to the operational status being exclusively caused to be
- * `NON_OPERATIONAL` due to kinks.
- *
  */
 template <typename Lyt, typename TT>
-[[nodiscard]] bool
-is_non_operational_due_to_kinks(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params = {},
-                                const std::optional<std::vector<bdl_wire<Lyt>>>& input_bdl_wire  = std::nullopt,
-                                const std::optional<std::vector<bdl_wire<Lyt>>>& output_bdl_wire = std::nullopt)
+[[nodiscard]] bool is_non_operational_due_to_kinks(
+    const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params = {},
+    const std::optional<std::vector<bdl_wire<Lyt>>>& input_bdl_wire  = std::nullopt,
+    const std::optional<std::vector<bdl_wire<Lyt>>>& output_bdl_wire = std::nullopt) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -777,7 +794,7 @@ is_non_operational_due_to_kinks(const Lyt& lyt, const std::vector<TT>& spec, con
     assert(lyt.num_pos() > 0 && "lyt needs output cells");
 
     assert(!spec.empty());
-    // all elements in tts must have the same number of variables
+    // all elements in spec must have the same number of variables
     assert(std::adjacent_find(spec.cbegin(), spec.cend(), [](const auto& a, const auto& b)
                               { return a.num_vars() != b.num_vars(); }) == spec.cend());
 
@@ -791,14 +808,14 @@ is_non_operational_due_to_kinks(const Lyt& lyt, const std::vector<TT>& spec, con
 
         const auto op_status = p.run();
 
-        return static_cast<bool>(op_status != operational_status::OPERATIONAL);
+        return op_status != operational_status::OPERATIONAL;
     }
 
     detail::is_operational_impl<Lyt, TT> p{lyt, spec, params_with_rejecting_kinks};
 
     const auto op_status = p.run();
 
-    return static_cast<bool>(op_status != operational_status::OPERATIONAL);
+    return op_status != operational_status::OPERATIONAL;
 }
 
 }  // namespace fiction
