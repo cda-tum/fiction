@@ -590,15 +590,15 @@ class write_sidb_layout_svg_impl
             // Shift coordinates for alignment
             auto shifted_coord = coord;
 
-            shifted_coord.x += 1;
+            shifted_coord.x += static_cast<decltype(shifted_coord.x)>(1);
 
             if constexpr (has_siqad_coord_v<Lyt>)
             {
-                shifted_coord.y += 1;
+                shifted_coord.y += static_cast<decltype(shifted_coord.y)>(1);
             }
             else
             {
-                shifted_coord.y += 2;
+                shifted_coord.y += static_cast<decltype(shifted_coord.y)>(2);
             }
 
             const auto nm_pos = sidb_nm_position(lyt, shifted_coord);
@@ -619,15 +619,15 @@ class write_sidb_layout_svg_impl
             auto shifted_cell = cell;
 
             // shift for padding
-            shifted_cell.x += 1;
+            shifted_cell.x += static_cast<decltype(shifted_cell.x)>(1);
 
             if constexpr (has_siqad_coord_v<Lyt>)
             {
-                shifted_cell.y += 1;
+                shifted_cell.y += static_cast<decltype(shifted_cell.y)>(1);
             }
             else
             {
-                shifted_cell.y += 2;
+                shifted_cell.y += static_cast<decltype(shifted_cell.y)>(2);
             }
 
             const auto nm_pos = sidb_nm_position(lyt, shifted_cell);
@@ -649,25 +649,25 @@ class write_sidb_layout_svg_impl
 
         // shift for padding
 
-        shifted_max.x += 2;
+        shifted_max.x += static_cast<decltype(shifted_max.x)>(2);
 
         if constexpr (has_siqad_coord_v<Lyt>)
         {
             if (shifted_max.z == 1)
             {
-                shifted_max.y += 2;
+                shifted_max.y += static_cast<decltype(shifted_max.y)>(2);
                 shifted_max.z = 0;
             }
             else
             {
-                shifted_max.y += 1;
+                shifted_max.y += static_cast<decltype(shifted_max.y)>(1);
                 shifted_max.z = 1;
             }
         }
 
         else
         {
-            shifted_max.y += 3;
+            shifted_max.y += static_cast<decltype(shifted_max.y)>(3);
         }
 
         // Compute viewBox dimensions
