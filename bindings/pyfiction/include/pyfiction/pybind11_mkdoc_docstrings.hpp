@@ -13707,9 +13707,7 @@ Parameter ``output_bdl_wire``:
 Returns:
     Bool that indicates whether the layout is non-operational due to
     kinks. `true` if the layout is not usable due to kinks, `false`
-    otherwise.
-
-@note This means that)doc";
+    otherwise.)doc";
 
 static const char *__doc_fiction_is_operational =
 R"doc(Determine the operational status of an SiDB layout.
