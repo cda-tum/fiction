@@ -6802,18 +6802,19 @@ Returns:
     charge state), `false` otherwise.)doc";
 
 static const char *__doc_fiction_detail_is_operational_impl_determine_non_operational_input_patterns_and_op_status_due_kinks =
-R"doc(Determines the input combinations yielding the wrong output and the
-information if non-operational status is due to kinks. `True`
-indicates that the layout is non-operational due to kinks, `false`
-otherwise.
+R"doc(Determines the input combinations yielding the non-operational status
+due to kinks. `True` indicates that the layout is non-operational due
+to kinks, `false` otherwise.
 
 Returns:
-    Set of pairs where the first element is a the the input paattern
-    (e.g. 2-input Boolean function: 00 ^= 0; 10 ^= 2) for which the
-    wrong output is computed. The second entry indicates the
-    information if the non-operational status is due to kinks. `True`
-    indicates that the layout is non-operational due to kinks, `false`
-    otherwise.)doc";
+    Set of pairs where the first element is the input pattern (e.g.
+    2-input Boolean function: 00 ^= 0; 10 ^= 2) for which the wrong
+    output is computed. The second entry indicates the information if
+    the non-operational status is due to kinks. `True` indicates that
+    the layout is non-operational due to kinks, `false` otherwise.
+
+@note Returns the status "non-operational due to kinks" only if the
+operational status is exclusively caused by kinks.)doc";
 
 static const char *__doc_fiction_detail_is_operational_impl_encodes_bit_one =
 R"doc(This function returns `true` if `1` is encoded in the charge state of
@@ -13707,7 +13708,10 @@ Parameter ``output_bdl_wire``:
 Returns:
     Bool that indicates whether the layout is non-operational due to
     kinks. `true` if the layout is not usable due to kinks, `false`
-    otherwise.)doc";
+    otherwise.
+
+@note "Non-operational due to kinks" refers to the operational status
+being exclusively caused by kinks.)doc";
 
 static const char *__doc_fiction_is_operational =
 R"doc(Determine the operational status of an SiDB layout.
@@ -14150,7 +14154,10 @@ Parameter ``params``:
     Parameters to simulate if a input combination is operational.
 
 Returns:
-    The non-operational input combinations due to kinks.)doc";
+    The non-operational input combinations due to kinks.
+
+@note "Non-operational due to kinks" refers to the operational status
+being exclusively caused by kinks.)doc";
 
 static const char *__doc_fiction_normalize_layout_coordinates =
 R"doc(A new layout is constructed and returned that is equivalent to the
