@@ -16,7 +16,8 @@
 using namespace fiction;
 
 TEMPLATE_TEST_CASE("Cell-level layout traits", "[cell-level-layout]", qca_cell_clk_lyt, stacked_qca_cell_clk_lyt,
-                   inml_cell_clk_lyt, sidb_100_cell_clk_lyt, sidb_111_cell_clk_lyt, sidb_111_cell_clk_lyt_siqad, sidb_111_cell_clk_lyt_cube)
+                   inml_cell_clk_lyt, sidb_100_cell_clk_lyt, sidb_111_cell_clk_lyt, sidb_111_cell_clk_lyt_siqad,
+                   sidb_111_cell_clk_lyt_cube)
 {
     CHECK(is_cell_level_layout_v<TestType>);
     CHECK(has_foreach_cell_v<TestType>);

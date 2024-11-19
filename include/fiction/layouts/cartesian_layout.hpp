@@ -286,7 +286,7 @@ class cartesian_layout
         {
             swc.d = 1;
         }
-        else if (c.x > static_cast< decltype(c.x)>(0) && c.y < y())
+        else if (c.x > static_cast<decltype(c.x)>(0) && c.y < y())
         {
             --swc.x;
             ++swc.y;
@@ -382,8 +382,7 @@ class cartesian_layout
      * @param c2 Coordinate to test for its location in relation to `c1`.
      * @return `true` iff `c2` is directly north of `c1`.
      */
-    [[nodiscard]] constexpr bool is_north_of(const CoordinateType& c1,
-                                             const CoordinateType& c2) const noexcept
+    [[nodiscard]] constexpr bool is_north_of(const CoordinateType& c1, const CoordinateType& c2) const noexcept
     {
         return c1 != c2 && north(c1) == c2;
     }
@@ -416,8 +415,7 @@ class cartesian_layout
      * @param c2 Coordinate to test for its location in relation to `c1`.
      * @return `true` iff `c2` is directly west of `c1`.
      */
-    [[nodiscard]] constexpr bool is_west_of(const CoordinateType& c1,
-                                            const CoordinateType& c2) const noexcept
+    [[nodiscard]] constexpr bool is_west_of(const CoordinateType& c1, const CoordinateType& c2) const noexcept
     {
         return c1 != c2 && west(c1) == c2;
     }
@@ -440,8 +438,7 @@ class cartesian_layout
      * @param c2 Coordinate to test for its location in relation to `c1`.
      * @return `true` iff `c2` is either directly north, east, south, or west of `c1` or `c1`'s elevations.
      */
-    [[nodiscard]] bool is_adjacent_elevation_of(const CoordinateType& c1,
-                                                const CoordinateType& c2) const noexcept
+    [[nodiscard]] bool is_adjacent_elevation_of(const CoordinateType& c1, const CoordinateType& c2) const noexcept
     {
         return is_adjacent_of(c1, c2) || is_adjacent_of(above(c1), c2) || is_adjacent_of(below(c1), c2);
     }
@@ -474,8 +471,7 @@ class cartesian_layout
      * @param c2 Coordinate to test for its location in relation to `c1`.
      * @return `true` iff `c2` is somewhere north of `c1`.
      */
-    [[nodiscard]] constexpr bool is_northwards_of(const CoordinateType& c1,
-                                                  const CoordinateType& c2) const noexcept
+    [[nodiscard]] constexpr bool is_northwards_of(const CoordinateType& c1, const CoordinateType& c2) const noexcept
     {
         return (c1.z == c2.z) && (c1.y > c2.y) && (c1.x == c2.x);
     }
@@ -486,8 +482,7 @@ class cartesian_layout
      * @param c2 Coordinate to test for its location in relation to `c1`.
      * @return `true` iff `c2` is somewhere east of `c1`.
      */
-    [[nodiscard]] constexpr bool is_eastwards_of(const CoordinateType& c1,
-                                                 const CoordinateType& c2) const noexcept
+    [[nodiscard]] constexpr bool is_eastwards_of(const CoordinateType& c1, const CoordinateType& c2) const noexcept
     {
         return (c1.z == c2.z) && (c1.y == c2.y) && (c1.x < c2.x);
     }
@@ -498,8 +493,7 @@ class cartesian_layout
      * @param c2 Coordinate to test for its location in relation to `c1`.
      * @return `true` iff `c2` is somewhere south of `c1`.
      */
-    [[nodiscard]] constexpr bool is_southwards_of(const CoordinateType& c1,
-                                                  const CoordinateType& c2) const noexcept
+    [[nodiscard]] constexpr bool is_southwards_of(const CoordinateType& c1, const CoordinateType& c2) const noexcept
     {
         return (c1.z == c2.z) && (c1.y < c2.y) && (c1.x == c2.x);
     }
@@ -510,8 +504,7 @@ class cartesian_layout
      * @param c2 Coordinate to test for its location in relation to `c1`.
      * @return `true` iff `c2` is somewhere west of `c1`.
      */
-    [[nodiscard]] constexpr bool is_westwards_of(const CoordinateType& c1,
-                                                 const CoordinateType& c2) const noexcept
+    [[nodiscard]] constexpr bool is_westwards_of(const CoordinateType& c1, const CoordinateType& c2) const noexcept
     {
         return (c1.z == c2.z) && (c1.y == c2.y) && (c1.x > c2.x);
     }
@@ -673,8 +666,7 @@ class cartesian_layout
      * @param stop Last coordinate (exclusive) to include in the range of all coordinates.
      */
     template <typename Fn>
-    void foreach_coordinate(Fn&& fn, const CoordinateType& start = {},
-                            const CoordinateType& stop = {}) const
+    void foreach_coordinate(Fn&& fn, const CoordinateType& start = {}, const CoordinateType& stop = {}) const
     {
         mockturtle::detail::foreach_element(
             coord_iterator{strg->dimension, start.is_dead() ? CoordinateType{0, 0} : start},
@@ -689,16 +681,14 @@ class cartesian_layout
      * @return An iterator range from `start` to `stop`. If they are not provided, the first/last coordinate in the
      * ground layer is used as a default.
      */
-    [[nodiscard]] auto ground_coordinates(const CoordinateType& start = {},
-                                          const CoordinateType& stop  = {}) const
+    [[nodiscard]] auto ground_coordinates(const CoordinateType& start = {}, const CoordinateType& stop = {}) const
     {
         assert(start.z == 0 && stop.z == 0);
 
         const auto ground_layer = aspect_ratio{x(), y(), 0};
 
-        return range_t{
-            std::make_pair(coord_iterator{ground_layer, start.is_dead() ? CoordinateType{0, 0} : start},
-                           coord_iterator{ground_layer, stop.is_dead() ? ground_layer.get_dead() : stop})};
+        return range_t{std::make_pair(coord_iterator{ground_layer, start.is_dead() ? CoordinateType{0, 0} : start},
+                                      coord_iterator{ground_layer, stop.is_dead() ? ground_layer.get_dead() : stop})};
     }
     /**
      * Applies a function to all coordinates accessible in the layout's ground layer between `start` and `stop`. The
@@ -710,8 +700,7 @@ class cartesian_layout
      * @param stop Last coordinate (exclusive) to include in the range of all ground coordinates.
      */
     template <typename Fn>
-    void foreach_ground_coordinate(Fn&& fn, const CoordinateType& start = {},
-                                   const CoordinateType& stop = {}) const
+    void foreach_ground_coordinate(Fn&& fn, const CoordinateType& start = {}, const CoordinateType& stop = {}) const
     {
         assert(start.z == 0 && stop.z == 0);
 
