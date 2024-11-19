@@ -6848,6 +6848,8 @@ Returns:
 
 static const char *__doc_fiction_detail_is_operational_impl_input_bdl_wires = R"doc(Input BDL wires.)doc";
 
+static const char *__doc_fiction_detail_is_operational_impl_is_non_operational_due_to_kinks = R"doc(TODO)doc";
+
 static const char *__doc_fiction_detail_is_operational_impl_is_operational_impl =
 R"doc(Constructor to initialize the algorithm with a layout and parameters.
 
@@ -6881,6 +6883,8 @@ Parameter ``output_wires``:
     BDL output wires of lyt.)doc";
 
 static const char *__doc_fiction_detail_is_operational_impl_layout = R"doc(SiDB cell-level layout.)doc";
+
+static const char *__doc_fiction_detail_is_operational_impl_non_operational_due_to_kinks = R"doc(Indicates whether the layout is non-operational due to kinks.)doc";
 
 static const char *__doc_fiction_detail_is_operational_impl_output_bdl_pairs = R"doc(Output BDL pairs.)doc";
 
@@ -13663,6 +13667,36 @@ Parameter ``defect``:
 Returns:
     `true` iff `defect` has a neutral charge value.)doc";
 
+static const char *__doc_fiction_is_non_operational_due_to_kinks =
+R"doc(Determines if the layout is non-operational due to kinks.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Template parameter ``TT``:
+    The type of the truth table specifying the layout behavior.
+
+Parameter ``lyt``:
+    The SiDB cell-level layout to be checked.
+
+Parameter ``spec``:
+    Expected Boolean function of the layout given as a multi-output
+    truth table.
+
+Parameter ``params``:
+    Parameters for the `is_operational` algorithm.
+
+Parameter ``input_bdl_wire``:
+    Optional BDL input wires of lyt.
+
+Parameter ``output_bdl_wire``:
+    Optional BDL output wires of lyt.
+
+Returns:
+    A pair where the first entry indicates whether the layout is non-
+    operational due to kinks, and the second entry specifies the
+    operational status of the layout.)doc";
+
 static const char *__doc_fiction_is_operational =
 R"doc(Determine the operational status of an SiDB layout.
 
@@ -13692,9 +13726,6 @@ Parameter ``input_bdl_wire``:
 
 Parameter ``output_bdl_wire``:
     Optional BDL output wires of lyt.
-
-Parameter ``input_bdl_wire_direction``:
-    Optional BDL input wire directions of lyt.
 
 Returns:
     A pair containing the operational status of the gate layout
