@@ -366,9 +366,11 @@ class is_operational_impl
     }
 
     /**
-     * TODO
+     * Returns whether the layout is non-operational due to kinks.
+     *
+     * @return True if the layout is non-operational due to kinks, false otherwise.
      */
-    [[nodiscard]] std::size_t is_non_operational_due_to_kinks() const noexcept
+    [[nodiscard]] bool is_non_operational_due_to_kinks() const noexcept
     {
         return non_operational_due_to_kinks;
     }
