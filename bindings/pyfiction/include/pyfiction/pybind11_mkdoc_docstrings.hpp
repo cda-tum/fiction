@@ -14135,9 +14135,8 @@ Parameter ``rfun``:
     The actual parsing function.)doc";
 
 static const char *__doc_fiction_non_operational_input_patterns_due_to_kinks =
-R"doc(This function determines the input combinations for which the SiDB-
-based logic, represented by the provided layout (`lyt`) and truth
-table specifications (`spec`), are non-operational due to kinks.
+R"doc(This function determines the input combinations for which the SiDB
+layout are non-operational due to kinks.
 
 Template parameter ``Lyt``:
     Type of the cell-level layout.
@@ -14152,7 +14151,7 @@ Parameter ``spec``:
     Vector of truth table specifications.
 
 Parameter ``params``:
-    Parameters to simulate if a input combination is operational.
+    Parameters for the `is_operational` algorithm.
 
 Returns:
     The non-operational input combinations due to kinks.
@@ -14851,12 +14850,11 @@ static const char *__doc_fiction_operational_domain_value_range_min = R"doc(The 
 static const char *__doc_fiction_operational_domain_value_range_step = R"doc(The step size of the dimension sweep.)doc";
 
 static const char *__doc_fiction_operational_input_patterns =
-R"doc(This function determines the input combinations for which the SiDB-
-based logic, represented by the provided layout (`lyt`) and truth
-table specifications (`spec`), produces the correct output.
+R"doc(This function determines the input combinations for which the layout
+is `operational`.
 
 Template parameter ``Lyt``:
-    Type of the cell-level layout.
+    SiDB cell-level layout type.
 
 Template parameter ``TT``:
     Type of the truth table.
