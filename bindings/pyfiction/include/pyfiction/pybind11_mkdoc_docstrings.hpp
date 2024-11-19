@@ -6848,7 +6848,12 @@ Returns:
 
 static const char *__doc_fiction_detail_is_operational_impl_input_bdl_wires = R"doc(Input BDL wires.)doc";
 
-static const char *__doc_fiction_detail_is_operational_impl_is_non_operational_due_to_kinks = R"doc(TODO)doc";
+static const char *__doc_fiction_detail_is_operational_impl_is_non_operational_due_to_kinks =
+R"doc(Returns whether the layout is non-operational due to kinks.
+
+Returns:
+    `true` if the layout is non-operational due to kinks, `false`
+    otherwise.)doc";
 
 static const char *__doc_fiction_detail_is_operational_impl_is_operational_impl =
 R"doc(Constructor to initialize the algorithm with a layout and parameters.
