@@ -1122,6 +1122,25 @@ static const char *__doc_fiction_bounding_box_2d_x_size = R"doc(The horizontal s
 
 static const char *__doc_fiction_bounding_box_2d_y_size = R"doc(The vertical size of the bounding box in layout coordinates.)doc";
 
+static const char *__doc_fiction_calculate_defect_clearance =
+R"doc(Calculates the defect clearance of a given gate layout by a given
+atomic defect. This means that a defect must be further away than this
+distance for the SiDB gate to be operational. This function requires
+both the defect operational domain and the layout as input.
+
+Template parameter ``Lyt``:
+    Type representing the SiDB cell-level layout.
+
+Parameter ``lyt``:
+    The cell-level layout for which the defect operational domain was
+    computed.
+
+Parameter ``defect_opdomain``:
+    The defect operational domain associated with the layout.
+
+Returns:
+    The maximum minimum defect influence distance.)doc";
+
 static const char *__doc_fiction_calculate_energy_and_state_type_with_kinks_accepted =
 R"doc(This function takes in an SiDB energy distribution. For each charge
 distribution, the state type is determined (i.e. erroneous,
