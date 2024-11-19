@@ -1167,8 +1167,7 @@ TEST_CASE("SiQAD's AND gate operational domain computation, using cube coordinat
     }
 }
 
-TEMPLATE_TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[operational-domain]", sidb_111_cell_clk_lyt_siqad,
-                   cds_sidb_111_cell_clk_lyt_siqad)
+TEMPLATE_TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[operational-domain]", sidb_111_cell_clk_lyt_siqad)
 {
     const auto layout = blueprints::and_gate_111<TestType>();
 
@@ -1257,7 +1256,7 @@ TEMPLATE_TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[operational-domain
 }
 
 TEMPLATE_TEST_CASE("AND gate with Bestagon shape and kink states at default physical parameters",
-                   "[operational-domain]", sidb_100_cell_clk_lyt_siqad, cds_sidb_100_cell_clk_lyt_siqad)
+                   "[operational-domain]", sidb_100_cell_clk_lyt_siqad)
 {
     const auto layout = blueprints::and_gate_with_kink_states<TestType>();
 

@@ -149,7 +149,8 @@ Temperature Behavior
         **Header:** ``fiction/algorithms/simulation/sidb/calculate_energy_and_state_type.hpp``
 
         .. doxygentypedef:: fiction::sidb_energy_and_state_type
-        .. doxygenfunction:: fiction::calculate_energy_and_state_type
+        .. doxygenfunction:: fiction::calculate_energy_and_state_type_with_kinks_accepted
+        .. doxygenfunction:: fiction::calculate_energy_and_state_type_with_kinks_rejected
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.simulation_engine
@@ -162,7 +163,8 @@ Temperature Behavior
         .. autofunction:: mnt.pyfiction.occupation_probability_gate_based
         .. autofunction:: mnt.pyfiction.occupation_probability_non_gate_based
 
-        .. autofunction:: mnt.pyfiction.calculate_energy_and_state_type
+        .. autofunction:: mnt.pyfiction.calculate_energy_and_state_type_with_kinks_accepted
+        .. autofunction:: mnt.pyfiction.calculate_energy_and_state_type_with_kinks_rejected
 
 
 Maximum Defect Influence Distance
@@ -258,6 +260,10 @@ Operational Domain Computation
         .. doxygenstruct:: fiction::compute_operational_ratio_params
            :members:
         .. doxygenfunction:: fiction::compute_operational_ratio
+
+        **Header:** ``fiction/algorithms/simulation/sidb/verify_logic_match.hpp``
+
+        .. doxygenfunction:: fiction::verify_logic_match
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.operational_status
