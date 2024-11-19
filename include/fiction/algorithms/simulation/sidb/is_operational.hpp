@@ -290,13 +290,16 @@ class is_operational_impl
         return operational_status::OPERATIONAL;
     }
     /**
-     * Determines the input combinations yielding the wrong output and the information if non-operational status is due
+     * Determines the input combinations yielding the non-operational status due
      * to kinks. `True` indicates that the layout is non-operational due to kinks, `false` otherwise.
      *
      * @return Set of pairs where the first element is the input pattern (e.g. 2-input Boolean function: 00 ^= 0;
      * 10 ^= 2) for which the wrong output is computed. The second entry indicates the information if the
      * non-operational status is due to kinks. `True` indicates that the layout is non-operational due to kinks, `false`
      * otherwise.
+     *
+     * @note Returns the status "non-operational due to kinks" only if the operational status
+     * is exclusively caused by kinks.
      */
     [[nodiscard]] std::set<std::pair<uint64_t, bool>>
     determine_non_operational_input_patterns_and_op_status_due_kinks() noexcept
@@ -704,6 +707,8 @@ template <typename Lyt, typename TT>
  * @param spec Vector of truth table specifications.
  * @param params Parameters to simulate if a input combination is operational.
  * @return The non-operational input combinations due to kinks.
+ *
+ * @note "Non-operational due to kinks" refers to the operational status being exclusively caused by kinks.
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] std::set<uint64_t>
@@ -754,6 +759,8 @@ non_operational_input_patterns_due_to_kinks(const Lyt& lyt, const std::vector<TT
  * @param output_bdl_wire Optional BDL output wires of lyt.
  * @return Bool that indicates whether the layout is non-operational due to kinks. `true` if the layout is not usable
  * due to kinks, `false` otherwise.
+ *
+ * @note "Non-operational due to kinks" refers to the operational status being exclusively caused by kinks.
  *
  */
 template <typename Lyt, typename TT>
