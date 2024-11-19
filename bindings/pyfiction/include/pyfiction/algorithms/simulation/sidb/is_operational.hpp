@@ -36,6 +36,11 @@ void is_operational(pybind11::module& m)
     m.def("is_non_operational_due_to_kinks", &fiction::is_non_operational_due_to_kinks<Lyt, py_tt>, "lyt"_a, "spec"_a,
           "params"_a = fiction::is_operational_params{}, "input_bdl_wire"_a = std::nullopt,
           "output_bdl_wire"_a = std::nullopt, DOC(fiction_is_non_operational_due_to_kinks));
+
+    // todo update docu
+    m.def("non_operational_input_patterns_due_to_kinks",
+          &fiction::non_operational_input_patterns_due_to_kinks<Lyt, py_tt>, "lyt"_a, "spec"_a,
+          "params"_a = fiction::is_operational_params{});
 }
 
 }  // namespace detail
