@@ -36,6 +36,18 @@ TEST_CASE("SiQAD OR gate", "[is-operational]")
                                     operational_condition::REJECT_KINKS})
               .first == operational_status::NON_OPERATIONAL);
 
+    const auto non_operational_due_to_kinks = is_non_operational_due_to_kinks(
+        lat, std::vector<tt>{create_or_tt()},
+        is_operational_params{
+            sidb_simulation_parameters{2, -0.28}, sidb_simulation_engine::QUICKEXACT,
+            bdl_input_iterator_params{detect_bdl_wires_params{1.5},
+                                      bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED},
+            operational_condition::REJECT_KINKS});
+
+    CHECK(non_operational_due_to_kinks.first == true);
+
+    CHECK(non_operational_due_to_kinks.second == operational_status::NON_OPERATIONAL);
+
     CHECK(is_operational(
               lat, std::vector<tt>{create_or_tt()},
               is_operational_params{sidb_simulation_parameters{2, -0.28}, sidb_simulation_engine::QUICKEXACT,
@@ -281,6 +293,15 @@ TEST_CASE("flipped CX bestagon gate", "[is-operational]")
                          is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
                                                bdl_input_iterator_params{}, operational_condition::REJECT_KINKS})
               .first == operational_status::OPERATIONAL);
+
+    const auto non_operational_due_to_kinks = is_non_operational_due_to_kinks(
+        lyt, create_crossing_wire_tt(),
+        is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
+                              bdl_input_iterator_params{}, operational_condition::REJECT_KINKS});
+
+    CHECK(non_operational_due_to_kinks.first == false);
+
+    CHECK(non_operational_due_to_kinks.second == operational_status::OPERATIONAL);
 }
 
 TEST_CASE("is operational check for Bestagon CX gate", "[is-operational], [quality]")

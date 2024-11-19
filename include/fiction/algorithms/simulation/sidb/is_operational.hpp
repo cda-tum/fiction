@@ -261,6 +261,7 @@ class is_operational_impl
                 if (check_existence_of_kinks_in_input_wires(given_cds, input_pattern) ||
                     check_existence_of_kinks_in_output_wires(given_cds, input_pattern))
                 {
+                    non_operational_due_to_kinks = true;
                     return operational_status::NON_OPERATIONAL;
                 }
             }
@@ -364,15 +365,19 @@ class is_operational_impl
         return simulator_invocations;
     }
 
+    /**
+     * TODO
+     */
+    [[nodiscard]] std::size_t is_non_operational_due_to_kinks() const noexcept
+    {
+        return non_operational_due_to_kinks;
+    }
+
   private:
     /**
      * SiDB cell-level layout.
      */
     const Lyt layout;
-    /**
-     * SiDB charge distribution surface.
-     */
-    // const charge_distribution_surface<Lyt> cds;
     /**
      * The specification of the layout.
      */
@@ -401,6 +406,10 @@ class is_operational_impl
      * Number of simulator invocations.
      */
     std::size_t simulator_invocations{0};
+    /**
+     * Indicates whether the layout is non-operational due to kinks.
+     */
+    bool non_operational_due_to_kinks = false;
     /**
      * This function conducts physical simulation of the given layout (gate layout with certain input combination). The
      * simulation results are stored in the `sim_result` variable.
@@ -617,7 +626,6 @@ class is_operational_impl
  * @param params Parameters for the `is_operational` algorithm.
  * @param input_bdl_wire Optional BDL input wires of lyt.
  * @param output_bdl_wire Optional BDL output wires of lyt.
- * @param input_bdl_wire_direction Optional BDL input wire directions of lyt.
  * @return A pair containing the operational status of the gate layout (either `OPERATIONAL` or `NON_OPERATIONAL`) and
  * the number of input combinations tested.
  */
@@ -680,6 +688,57 @@ template <typename Lyt, typename TT>
     detail::is_operational_impl<Lyt, TT> p{lyt, spec, params};
 
     return p.determine_operational_input_patterns();
+}
+
+/**
+ * Determines if the layout is non-operational due to kinks.
+ *
+ * @tparam Lyt SiDB cell-level layout type.
+ * @tparam TT The type of the truth table specifying the layout behavior.
+ * @param lyt The SiDB cell-level layout to be checked.
+ * @param spec Expected Boolean function of the layout given as a multi-output truth table.
+ * @param params Parameters for the `is_operational` algorithm.
+ * @param input_bdl_wire Optional BDL input wires of lyt.
+ * @param output_bdl_wire Optional BDL output wires of lyt.
+ * @return A pair where the first entry indicates whether the layout is non-operational due to kinks, and the second
+ * entry specifies the operational status of the layout.
+ */
+template <typename Lyt, typename TT>
+[[nodiscard]] std::pair<bool, operational_status>
+is_non_operational_due_to_kinks(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params = {},
+                                const std::optional<std::vector<bdl_wire<Lyt>>>& input_bdl_wire  = std::nullopt,
+                                const std::optional<std::vector<bdl_wire<Lyt>>>& output_bdl_wire = std::nullopt)
+{
+    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
+
+    assert(lyt.num_pis() > 0 && "lyt needs input cells");
+    assert(lyt.num_pos() > 0 && "lyt needs output cells");
+
+    assert(!spec.empty());
+    // all elements in tts must have the same number of variables
+    assert(std::adjacent_find(spec.cbegin(), spec.cend(), [](const auto& a, const auto& b)
+                              { return a.num_vars() != b.num_vars(); }) == spec.cend());
+
+    is_operational_params params_with_rejecting_kinks = params;
+    params_with_rejecting_kinks.op_condition          = operational_condition::REJECT_KINKS;
+
+    if (input_bdl_wire.has_value() && output_bdl_wire.has_value())
+    {
+        detail::is_operational_impl<Lyt, TT> p{lyt, spec, params_with_rejecting_kinks, input_bdl_wire.value(),
+                                               output_bdl_wire.value()};
+
+        const auto op_status = p.run();
+
+        return {p.is_non_operational_due_to_kinks(), op_status};
+    }
+
+    detail::is_operational_impl<Lyt, TT> p{lyt, spec, params_with_rejecting_kinks};
+
+    const auto op_status = p.run();
+
+    return {p.is_non_operational_due_to_kinks(), op_status};
 }
 
 }  // namespace fiction
