@@ -295,8 +295,8 @@ class is_operational_impl
      *
      * @return Set of pairs where the first element is the input pattern (e.g. 2-input Boolean function: 00 ^= 0;
      * 10 ^= 2) for which the wrong output is computed. The second entry indicates the information if the
-     * `non-operational` status is due to kinks. `True` indicates that the layout is `non-operational` due to kinks, `false`
-     * otherwise.
+     * `non-operational` status is due to kinks. `True` indicates that the layout is `non-operational` due to kinks,
+     * `false` otherwise.
      *
      * @note "Non-operational due to kinks" refers to the operational status being exclusively caused to be
      * `NON_OPERATIONAL` due to kinks.
