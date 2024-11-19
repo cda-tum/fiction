@@ -651,10 +651,9 @@ is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational
     return {p.run(), p.get_number_of_simulator_invocations()};
 }
 /**
- * This function determines the input combinations for which the SiDB-based logic, represented by the
- * provided layout (`lyt`) and truth table specifications (`spec`), produces the correct output.
+ * This function determines the input combinations for which the layout is `operational`.
  *
- * @tparam Lyt Type of the cell-level layout.
+ * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT Type of the truth table.
  * @param lyt The SiDB layout.
  * @param spec Vector of truth table specifications.
@@ -698,14 +697,13 @@ template <typename Lyt, typename TT>
 }
 
 /**
- * This function determines the input combinations for which the SiDB-based logic, represented by the
- * provided layout (`lyt`) and truth table specifications (`spec`), are non-operational due to kinks.
+ * This function determines the input combinations for which the SiDB layout are non-operational due to kinks.
  *
  * @tparam Lyt Type of the cell-level layout.
  * @tparam TT Type of the truth table.
  * @param lyt The SiDB layout.
  * @param spec Vector of truth table specifications.
- * @param params Parameters to simulate if a input combination is operational.
+ * @param params Parameters for the `is_operational` algorithm.
  * @return The non-operational input combinations due to kinks.
  *
  * @note "Non-operational due to kinks" refers to the operational status being exclusively caused to be
