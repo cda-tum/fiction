@@ -368,7 +368,7 @@ class is_operational_impl
     /**
      * Returns whether the layout is non-operational due to kinks.
      *
-     * @return True if the layout is non-operational due to kinks, false otherwise.
+     * @return `true` if the layout is non-operational due to kinks, `false` otherwise.
      */
     [[nodiscard]] bool is_non_operational_due_to_kinks() const noexcept
     {
