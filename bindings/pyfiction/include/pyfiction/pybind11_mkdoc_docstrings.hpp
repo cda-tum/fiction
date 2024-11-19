@@ -7838,7 +7838,7 @@ exactly one output BDL pair.
 Parameter ``lyt``:
     SiDB cell-level lyt to be evaluated.
 
-Parameter ``spec``:
+Parameter ``tt``:
     Expected Boolean function of the lyt given as a multi-output truth
     table.
 
