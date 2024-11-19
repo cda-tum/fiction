@@ -344,7 +344,7 @@ class operational_domain_impl
      * have exactly one output BDL pair.
      *
      * @param lyt SiDB cell-level lyt to be evaluated.
-     * @param spec Expected Boolean function of the lyt given as a multi-output truth table.
+     * @param tt Expected Boolean function of the lyt given as a multi-output truth table.
      * @param ps Parameters for the operational domain computation.
      * @param st Statistics of the process.
      */
