@@ -1293,7 +1293,7 @@ Cartesian grid. Its faces are organized in the following way:
 +-------+-------+-------+-------+ | | | | | | (0,2) | (1,2) | (2,2) |
 (3,2) | | | | | | +-------+-------+-------+-------+ \endverbatim
 
-Template parameter ``OffsetCoordinateType``:
+Template parameter ``CoordinateType``:
     The coordinate implementation to be used.)doc";
 
 static const char *__doc_fiction_cartesian_layout_above =
@@ -1387,7 +1387,7 @@ static const char *__doc_fiction_cartesian_layout_coord =
 R"doc(Creates and returns a coordinate in the layout from the given x-, y-,
 and z-values.
 
-@note This function is equivalent to calling `OffsetCoordinateType(x,
+@note This function is equivalent to calling `CoordinateType(x,
 y, z)`.
 
 Template parameter ``X``:
@@ -1409,7 +1409,7 @@ Parameter ``z``:
     z-value.
 
 Returns:
-    A coordinate in the layout of type `OffsetCoordinateType`.)doc";
+    A coordinate in the layout of type `CoordinateType`.)doc";
 
 static const char *__doc_fiction_cartesian_layout_coordinates =
 R"doc(Returns a range of all coordinates accessible in the layout between
@@ -8939,7 +8939,7 @@ on a Cartesian coordinate system. It inherits from the
 `cartesian_layout` class and extends it with specific behavior for
 finding excess wiring.
 
-Template parameter ``OffsetCoordinateType``:
+Template parameter ``CoordinateType``:
     The type of coordinates used in the layout. Defaults to
     `offset::ucoord_t` if not explicitly provided.)doc";
 
@@ -12908,7 +12908,7 @@ coordinates make the most sense here.
 https://www.redblobgames.com/grids/hexagons/ is a wonderful resource
 on the topic.
 
-Template parameter ``OffsetCoordinateType``:
+Template parameter ``CoordinateType``:
     The coordinate implementation to be used. Offset coordinates are
     required.
 
@@ -12996,7 +12996,7 @@ static const char *__doc_fiction_hexagonal_layout_coord =
 R"doc(Creates and returns a coordinate in the layout from the given x-, y-,
 and z-values.
 
-@note This function is equivalent to calling `OffsetCoordinateType(x,
+@note This function is equivalent to calling `CoordinateType(x,
 y, z)`.
 
 Template parameter ``X``:
@@ -13018,7 +13018,7 @@ Parameter ``z``:
     z-value.
 
 Returns:
-    A coordinate in the layout of type `OffsetCoordinateType`.)doc";
+    A coordinate in the layout of type `CoordinateType`.)doc";
 
 static const char *__doc_fiction_hexagonal_layout_coordinates =
 R"doc(Returns a range of all coordinates accessible in the layout between
@@ -16806,7 +16806,7 @@ accordingly: odd_row_cartesian and even_row_cartesian for horizontal
 shifts and odd_column_cartesian and even_column_cartesian for vertical
 shifts. All are sketched in ASCII above.
 
-Template parameter ``OffsetCoordinateType``:
+Template parameter ``CoordinateType``:
     The coordinate implementation to be used. Offset coordinates are
     required.
 

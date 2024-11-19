@@ -113,7 +113,7 @@ inline void cartesian_layout_impl(pybind11::module& m)
             [](const CartesianLyt& lyt)
             {
                 std::vector<fiction::coordinate<CartesianLyt>> coords{};
-                coords.reserve(lyt.area() * (lyt.z() + 1));
+                coords.reserve(lyt.area() * (static_cast<uint64_t>(lyt.z() + 1)));
                 lyt.foreach_coordinate([&coords](const auto& c) { coords.push_back(c); });
                 return coords;
             },
