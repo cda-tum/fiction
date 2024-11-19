@@ -188,11 +188,13 @@ class is_operational_impl
             for (const auto& gs : ground_states)
             {
                 const auto op_status = verifiy_logic_match_of_cds(gs, i);
-                if (op_status == operational_status::NON_OPERATIONAL && parameters.op_condition == operational_condition::TOLERATE_KINKS)
+                if (op_status == operational_status::NON_OPERATIONAL &&
+                    parameters.op_condition == operational_condition::TOLERATE_KINKS)
                 {
                     return operational_status::NON_OPERATIONAL;
                 }
-                if (op_status == operational_status::NON_OPERATIONAL && parameters.op_condition == operational_condition::REJECT_KINKS)
+                if (op_status == operational_status::NON_OPERATIONAL &&
+                    parameters.op_condition == operational_condition::REJECT_KINKS)
                 {
                     at_least_one_non_operational_due_to_kinks = true;
                     continue;
@@ -296,7 +298,8 @@ class is_operational_impl
      * non-operational status is due to kinks. `True` indicates that the layout is non-operational due to kinks, `false`
      * otherwise.
      */
-    [[nodiscard]] std::set<std::pair<uint64_t, bool>> determine_non_operational_input_patterns_and_op_status_due_kinks() noexcept
+    [[nodiscard]] std::set<std::pair<uint64_t, bool>>
+    determine_non_operational_input_patterns_and_op_status_due_kinks() noexcept
     {
         assert(!output_bdl_pairs.empty() && "No output cell provided.");
         assert((truth_table.size() == output_bdl_pairs.size()) &&
