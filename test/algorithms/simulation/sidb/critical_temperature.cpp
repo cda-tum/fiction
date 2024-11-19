@@ -380,10 +380,10 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         lyt.assign_cell_type({2, 19, 0}, sidb_technology::cell_type::NORMAL);
         lyt.assign_cell_type({36, 19, 0}, sidb_technology::cell_type::NORMAL);
 
-        params.confidence_level      = 0.99;
-        params.max_temperature       = 350;
-        params.iteration_steps       = 80;
-        params.alpha                 = 0.7;
+        params.confidence_level = 0.99;
+        params.max_temperature  = 350;
+        params.iteration_steps  = 80;
+        params.alpha            = 0.7;
 
         const auto ct =
             critical_temperature_gate_based(lyt, std::vector<tt>{create_crossing_wire_tt()}, params, &critical_stats);
