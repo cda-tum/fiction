@@ -755,7 +755,6 @@ non_operational_input_patterns_due_to_kinks(const Lyt& lyt, const std::vector<TT
  * @return Bool that indicates whether the layout is non-operational due to kinks. `true` if the layout is not usable
  * due to kinks, `false` otherwise.
  *
- * @note This means that
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] bool
