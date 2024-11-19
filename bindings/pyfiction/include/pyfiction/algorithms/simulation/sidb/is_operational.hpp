@@ -35,7 +35,7 @@ void is_operational(pybind11::module& m)
 
     // todo update doc
     m.def("is_non_operational_due_to_kinks", &fiction::is_non_operational_due_to_kinks<Lyt, py_tt>, "lyt"_a, "spec"_a,
-          "params"_a = fiction::is_operational_params{},  "input_bdl_wire"_a = std::nullopt,
+          "params"_a = fiction::is_operational_params{}, "input_bdl_wire"_a = std::nullopt,
           "output_bdl_wire"_a = std::nullopt);
 }
 
