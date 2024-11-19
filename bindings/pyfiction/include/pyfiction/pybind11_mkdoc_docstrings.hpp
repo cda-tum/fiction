@@ -6802,19 +6802,20 @@ Returns:
     charge state), `false` otherwise.)doc";
 
 static const char *__doc_fiction_detail_is_operational_impl_determine_non_operational_input_patterns_and_op_status_due_kinks =
-R"doc(Determines the input combinations yielding the non-operational status
-due to kinks. `True` indicates that the layout is non-operational due
-to kinks, `false` otherwise.
+R"doc(Determines the input combinations yielding the `non-operational`
+status due to kinks. `True` indicates that the layout is `non-
+operational` due to kinks, `false` otherwise.
 
 Returns:
     Set of pairs where the first element is the input pattern (e.g.
     2-input Boolean function: 00 ^= 0; 10 ^= 2) for which the wrong
     output is computed. The second entry indicates the information if
-    the non-operational status is due to kinks. `True` indicates that
-    the layout is non-operational due to kinks, `false` otherwise.
+    the `non-operational` status is due to kinks. `True` indicates
+    that the layout is `non-operational` due to kinks, `false`
+    otherwise.
 
-@note Returns the status "non-operational due to kinks" only if the
-operational status is exclusively caused by kinks.)doc";
+@note "Non-operational due to kinks" refers to the operational status
+being exclusively caused to be `NON_OPERATIONAL` due to kinks.)doc";
 
 static const char *__doc_fiction_detail_is_operational_impl_encodes_bit_one =
 R"doc(This function returns `true` if `1` is encoded in the charge state of
@@ -6857,10 +6858,10 @@ Returns:
 static const char *__doc_fiction_detail_is_operational_impl_input_bdl_wires = R"doc(Input BDL wires.)doc";
 
 static const char *__doc_fiction_detail_is_operational_impl_is_non_operational_due_to_kinks =
-R"doc(Returns whether the layout is non-operational due to kinks.
+R"doc(Returns whether the layout is `non-operational` due to kinks.
 
 Returns:
-    `true` if the layout is non-operational due to kinks, `false`
+    `true` if the layout is `non-operational` due to kinks, `false`
     otherwise.)doc";
 
 static const char *__doc_fiction_detail_is_operational_impl_is_operational_impl =
@@ -6897,7 +6898,7 @@ Parameter ``output_wires``:
 
 static const char *__doc_fiction_detail_is_operational_impl_layout = R"doc(SiDB cell-level layout.)doc";
 
-static const char *__doc_fiction_detail_is_operational_impl_non_operational_due_to_kinks = R"doc(Indicates whether the layout is non-operational due to kinks.)doc";
+static const char *__doc_fiction_detail_is_operational_impl_non_operational_due_to_kinks = R"doc(Indicates whether the layout is `non-operational` due to kinks.)doc";
 
 static const char *__doc_fiction_detail_is_operational_impl_output_bdl_pairs = R"doc(Output BDL pairs.)doc";
 
@@ -13681,7 +13682,7 @@ Returns:
     `true` iff `defect` has a neutral charge value.)doc";
 
 static const char *__doc_fiction_is_non_operational_due_to_kinks =
-R"doc(Determines if the layout is non-operational due to kinks.
+R"doc(Determines if the layout is `non-operational` due to kinks.
 
 Template parameter ``Lyt``:
     SiDB cell-level layout type.
@@ -13706,12 +13707,12 @@ Parameter ``output_bdl_wire``:
     Optional BDL output wires of lyt.
 
 Returns:
-    Bool that indicates whether the layout is non-operational due to
+    Bool that indicates whether the layout is `non-operational due to
     kinks. `true` if the layout is not usable due to kinks, `false`
     otherwise.
 
 @note "Non-operational due to kinks" refers to the operational status
-being exclusively caused by kinks.)doc";
+being exclusively caused to be `NON_OPERATIONAL` due to kinks.)doc";
 
 static const char *__doc_fiction_is_operational =
 R"doc(Determine the operational status of an SiDB layout.
@@ -14157,7 +14158,7 @@ Returns:
     The non-operational input combinations due to kinks.
 
 @note "Non-operational due to kinks" refers to the operational status
-being exclusively caused by kinks.)doc";
+being exclusively caused to be `NON_OPERATIONAL` due to kinks.)doc";
 
 static const char *__doc_fiction_normalize_layout_coordinates =
 R"doc(A new layout is constructed and returned that is equivalent to the
