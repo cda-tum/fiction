@@ -380,8 +380,6 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         lyt.assign_cell_type({2, 19, 0}, sidb_technology::cell_type::NORMAL);
         lyt.assign_cell_type({36, 19, 0}, sidb_technology::cell_type::NORMAL);
 
-        params.simulation_parameters = sim_params;
-        params.engine                = critical_temperature_params::simulation_engine::EXACT;
         params.confidence_level      = 0.99;
         params.max_temperature       = 350;
         params.iteration_steps       = 80;
