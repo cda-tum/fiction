@@ -1387,8 +1387,8 @@ static const char *__doc_fiction_cartesian_layout_coord =
 R"doc(Creates and returns a coordinate in the layout from the given x-, y-,
 and z-values.
 
-@note This function is equivalent to calling `CoordinateType(x,
-y, z)`.
+@note This function is equivalent to calling `CoordinateType(x, y,
+z)`.
 
 Template parameter ``X``:
     x-type.
@@ -8939,7 +8939,7 @@ on a Cartesian coordinate system. It inherits from the
 `cartesian_layout` class and extends it with specific behavior for
 finding excess wiring.
 
-Template parameter ``CoordinateType``:
+Template parameter ``OffsetCoordinateType``:
     The type of coordinates used in the layout. Defaults to
     `offset::ucoord_t` if not explicitly provided.)doc";
 
@@ -12908,7 +12908,7 @@ coordinates make the most sense here.
 https://www.redblobgames.com/grids/hexagons/ is a wonderful resource
 on the topic.
 
-Template parameter ``CoordinateType``:
+Template parameter ``OffsetCoordinateType``:
     The coordinate implementation to be used. Offset coordinates are
     required.
 
@@ -12996,8 +12996,8 @@ static const char *__doc_fiction_hexagonal_layout_coord =
 R"doc(Creates and returns a coordinate in the layout from the given x-, y-,
 and z-values.
 
-@note This function is equivalent to calling `CoordinateType(x,
-y, z)`.
+@note This function is equivalent to calling `CoordinateType(x, y,
+z)`.
 
 Template parameter ``X``:
     x-type.
@@ -16806,7 +16806,7 @@ accordingly: odd_row_cartesian and even_row_cartesian for horizontal
 shifts and odd_column_cartesian and even_column_cartesian for vertical
 shifts. All are sketched in ASCII above.
 
-Template parameter ``CoordinateType``:
+Template parameter ``OffsetCoordinateType``:
     The coordinate implementation to be used. Offset coordinates are
     required.
 
