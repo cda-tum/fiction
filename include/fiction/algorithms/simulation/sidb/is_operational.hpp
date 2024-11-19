@@ -371,16 +371,6 @@ class is_operational_impl
         return simulator_invocations;
     }
 
-    /**
-     * Returns whether the layout is non-operational due to kinks.
-     *
-     * @return `true` if the layout is non-operational due to kinks, `false` otherwise.
-     */
-    [[nodiscard]] reason_for_non_operational get_reason_for_non_operational() const noexcept
-    {
-        return reason_for_non_operational;
-    }
-
   private:
     /**
      * SiDB cell-level layout.
