@@ -6810,10 +6810,11 @@ to kinks, `false` otherwise.
 being exclusively caused to be `NON_OPERATIONAL` due to kinks.
 
 Returns:
-    Set of pairs where the first element is the input pattern (e.g.
-    2-input Boolean function: 00 ^= 0; 10 ^= 2) for which the wrong
-    output is computed. The second entry indicates the information why
-    the layout is non-operational for the given input pattern.)doc";
+    Vector of pairs where the first element of the pair is the input
+    pattern (e.g. 2-input Boolean function: 00 ^= 0; 10 ^= 2) for
+    which the layout is non-operational. The second entry indicates
+    the information why the layout is non-operational
+    (`reason_for_non_operational`) for the given input pattern.)doc";
 
 static const char *__doc_fiction_detail_is_operational_impl_encodes_bit_one =
 R"doc(This function returns `true` if `1` is encoded in the charge state of
@@ -6852,13 +6853,6 @@ R"doc(Returns the total number of simulator invocations.
 
 Returns:
     The number of simulator invocations.)doc";
-
-static const char *__doc_fiction_detail_is_operational_impl_get_reason_for_non_operational =
-R"doc(Returns whether the layout is non-operational due to kinks.
-
-Returns:
-    `true` if the layout is non-operational due to kinks, `false`
-    otherwise.)doc";
 
 static const char *__doc_fiction_detail_is_operational_impl_input_bdl_wires = R"doc(Input BDL wires.)doc";
 
@@ -13686,7 +13680,9 @@ Returns:
     `true` iff `defect` has a neutral charge value.)doc";
 
 static const char *__doc_fiction_is_non_operational_due_to_kinks =
-R"doc(Determines if the layout is non-operational due to kinks.
+R"doc(This function determines if the layout is only considered as non-
+operational because of kinks. This means that the layout would be
+considered as operational, if kinks were accepted.
 
 @note "Non-operational due to kinks" refers to the operational status
 being exclusively caused to be `NON_OPERATIONAL` due to kinks.
@@ -14139,8 +14135,9 @@ Parameter ``rfun``:
     The actual parsing function.)doc";
 
 static const char *__doc_fiction_non_operational_input_patterns_due_to_kinks =
-R"doc(This function determines the input combinations for which the SiDB
-layout are non-operational due to kinks.
+R"doc(This function determines all input combinations for which the SiDB
+layout are non-operational due to kinks. This means that the layout is
+operational if kinks would be accepted.
 
 @note "Non-operational due to kinks" refers to the operational status
 being exclusively caused to be `NON_OPERATIONAL` due to kinks.
