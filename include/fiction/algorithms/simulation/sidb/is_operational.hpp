@@ -312,18 +312,18 @@ class is_operational_impl
      * @note "Non-operational due to kinks" refers to the operational status being exclusively caused to be
      * `NON_OPERATIONAL` due to kinks.
      *
-     * @return Set of pairs where the first element is the input pattern (e.g. 2-input Boolean function: 00 ^= 0;
-     * 10 ^= 2) for which the wrong output is computed. The second entry indicates the information why the layout is
-     * non-operational for the given input pattern.
+     * @return Vector of pairs where the first element of the pair is the input pattern (e.g. 2-input Boolean function:
+     * 00 ^= 0; 10 ^= 2) for which the layout is non-operational. The second entry indicates the information why the
+     * layout is non-operational (`reason_for_non_operational`) for the given input pattern.
      */
-    [[nodiscard]] std::set<std::pair<uint64_t, reason_for_non_operational>>
+    [[nodiscard]] std::vector<std::pair<uint64_t, reason_for_non_operational>>
     determine_non_operational_input_patterns_and_non_operational_reason() noexcept
     {
         assert(!output_bdl_pairs.empty() && "No output cell provided.");
         assert((truth_table.size() == output_bdl_pairs.size()) &&
                "Number of truth tables and output BDL pairs does not match");
 
-        std::set<std::pair<uint64_t, detail::reason_for_non_operational>>
+        std::vector<std::pair<uint64_t, detail::reason_for_non_operational>>
             non_operational_inputs_and_status_if_due_to_kinks{};
 
         // number of different input combinations
@@ -353,7 +353,8 @@ class is_operational_impl
                 const auto op_status = verifiy_logic_match_of_cds(gs, i);
                 if (op_status == operational_status::NON_OPERATIONAL)
                 {
-                    non_operational_inputs_and_status_if_due_to_kinks.insert({i, reason_for_non_operational::KINKS});
+                    non_operational_inputs_and_status_if_due_to_kinks.emplace_back(i,
+                                                                                   reason_for_non_operational::KINKS);
                 }
             }
         }
@@ -704,7 +705,8 @@ template <typename Lyt, typename TT>
 }
 
 /**
- * This function determines the input combinations for which the SiDB layout are non-operational due to kinks.
+ * This function determines all input combinations for which the SiDB layout are non-operational due to kinks. This
+ * means that the layout is operational if kinks would be accepted.
  *
  * @note "Non-operational due to kinks" refers to the operational status being exclusively caused to be
  * `NON_OPERATIONAL` due to kinks.
@@ -755,7 +757,8 @@ non_operational_input_patterns_due_to_kinks(const Lyt& lyt, const std::vector<TT
 }
 
 /**
- * Determines if the layout is non-operational due to kinks.
+ * This function determines if the layout is only considered as non-operational because of kinks. This means that
+ * the layout would be considered as operational, if kinks were accepted.
  *
  * @note "Non-operational due to kinks" refers to the operational status being exclusively caused to be
  * `NON_OPERATIONAL` due to kinks.
