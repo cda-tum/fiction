@@ -178,7 +178,7 @@ PYBIND11_MODULE(pyfiction, m, pybind11::mod_gil_not_used())
     /**
      * Algorithms: Physical Design
      */
-    // pyfiction::exact(m);
+    pyfiction::exact(m);
     pyfiction::orthogonal(m);
     pyfiction::graph_oriented_layout_design(m);
     pyfiction::apply_gate_library(m);

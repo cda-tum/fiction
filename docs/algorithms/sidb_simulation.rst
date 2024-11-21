@@ -153,7 +153,8 @@ Temperature Behavior
         .. doxygenfunction:: fiction::calculate_energy_and_state_type_with_kinks_rejected
 
     .. tab:: Python
-        .. autoclass:: mnt.pyfiction.simulation_engine
+
+        .. autoclass:: mnt.pyfiction.critical_temperature_stats
             :members:
         .. autoclass:: mnt.pyfiction.critical_temperature_params
             :members:
@@ -450,11 +451,14 @@ Assess Population Stability
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.transition_type
             :members:
-        .. autoclass:: mnt.pyfiction.population_stability_information
+        .. autoclass:: mnt.pyfiction.population_stability_information_100
+            :members:
+       .. autoclass:: mnt.pyfiction.population_stability_information_111
             :members:
         .. autoclass:: mnt.pyfiction.assess_physical_population_stability_params
             :members:
-        .. autofunction:: mnt.pyfiction.assess_physical_population_stability
+        .. autofunction:: mnt.pyfiction.assess_physical_population_stability_100
+        .. autofunction:: mnt.pyfiction.assess_physical_population_stability_111
 
 
 Convert Potential to Distance
