@@ -6909,8 +6909,6 @@ Parameter ``bdl_iterator``:
 Returns:
     Simulation results.)doc";
 
-static const char *__doc_fiction_detail_is_operational_impl_reason_for_non_operational = R"doc(Indicates the reason why layout is non-operational.)doc";
-
 static const char *__doc_fiction_detail_is_operational_impl_run =
 R"doc(Run the `is_operational` algorithm.
 
