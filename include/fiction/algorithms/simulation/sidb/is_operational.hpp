@@ -406,10 +406,6 @@ class is_operational_impl
      */
     std::size_t simulator_invocations{0};
     /**
-     * Indicates the reason why layout is non-operational.
-     */
-    reason_for_non_operational reason_for_non_operational = reason_for_non_operational::LOGIC_MISMATCH;
-    /**
      * This function conducts physical simulation of the given layout (gate layout with certain input combination).
      * The simulation results are stored in the `sim_result` variable.
      *
