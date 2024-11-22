@@ -134,7 +134,7 @@ PYBIND11_MODULE(pyfiction, m, pybind11::mod_gil_not_used())
     pyfiction::sidb_simulation_parameters(m);
     pyfiction::sidb_simulation_result(m);
     pyfiction::can_positive_charges_occur(m);
-    //pyfiction::assess_physical_population_stability(m);
+    // pyfiction::assess_physical_population_stability(m);
     pyfiction::convert_potential_to_distance(m);
     pyfiction::detect_bdl_pairs(m);
     pyfiction::detect_bdl_wires(m);
