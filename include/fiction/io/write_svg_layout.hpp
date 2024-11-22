@@ -63,7 +63,7 @@ struct write_sidb_layout_svg_params
         LIGHT
     };
     /**
-     * Enumeration to specify if the SiDB lattice is plotted in addition to SiDBs.
+     * Enumeration to specify if the H-Si lattice is plotted in addition to SiDBs.
      */
     enum class sidb_lattice_mode : uint8_t
     {
