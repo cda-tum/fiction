@@ -417,8 +417,6 @@ TEMPLATE_TEST_CASE("Generate SiDB layout in SVG for cell-level layout and charge
             // Retrieve the SVG content
             const auto generated_svg = os_light_cds.str();
 
-            std::cout << generated_svg << std::endl;
-
             // Normalize both SVG strings
             const auto normalized_generated_svg = normalize_svg(generated_svg);
             const auto normalized_expected_svg  = normalize_svg(EXPECTED_SVG_DARK_CELL_LEVEL_HIDE_LATTICE);
