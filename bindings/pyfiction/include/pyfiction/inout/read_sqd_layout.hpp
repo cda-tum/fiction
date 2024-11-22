@@ -27,8 +27,6 @@ void read_sqd_layout(pybind11::module& m, std::string lattice_orientation, std::
     namespace py = pybind11;
     using namespace py::literals;
 
-    py::register_exception<fiction::sqd_parsing_error>(m, "sqd_parsing_error", PyExc_RuntimeError);
-
     // Common function pointer for all cases
     Lyt (*read_sqd_layout_function_pointer)(const std::string_view&, const std::string_view&) =
         &fiction::read_sqd_layout<Lyt>;
@@ -41,6 +39,9 @@ void read_sqd_layout(pybind11::module& m, std::string lattice_orientation, std::
 
 inline void read_sqd_layout(pybind11::module& m)
 {
+    namespace py = pybind11;
+    py::register_exception<fiction::sqd_parsing_error>(m, "sqd_parsing_error", PyExc_RuntimeError);
+
     detail::read_sqd_layout<py_sidb_100_lattice>(m, "100", "");
     detail::read_sqd_layout<py_sidb_111_lattice>(m, "111", "");
     detail::read_sqd_layout<py_sidb_100_lattice_cube>(m, "100", "_cube");

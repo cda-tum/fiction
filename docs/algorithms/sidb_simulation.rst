@@ -453,7 +453,7 @@ Assess Population Stability
             :members:
         .. autoclass:: mnt.pyfiction.population_stability_information_100
             :members:
-       .. autoclass:: mnt.pyfiction.population_stability_information_111
+        .. autoclass:: mnt.pyfiction.population_stability_information_111
             :members:
         .. autoclass:: mnt.pyfiction.assess_physical_population_stability_params
             :members:
