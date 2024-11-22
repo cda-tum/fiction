@@ -18848,8 +18848,8 @@ static const char *__doc_fiction_write_sidb_layout_svg_params_lattice_point_size
 static const char *__doc_fiction_write_sidb_layout_svg_params_sidb_border_width = R"doc(Border width of the SiDB.)doc";
 
 static const char *__doc_fiction_write_sidb_layout_svg_params_sidb_lattice_mode =
-R"doc(Enumeration to specify if the SiDB lattice is plottet in addition to
-the SiDBs.)doc";
+R"doc(Enumeration to specify if the H-Si lattice is plotted in addition to
+SiDBs.)doc";
 
 static const char *__doc_fiction_write_sidb_layout_svg_params_sidb_lattice_mode_HIDE_LATTICE = R"doc(Lattice is hidden. Only SiDBs are shown.)doc";
 
