@@ -18841,9 +18841,19 @@ static const char *__doc_fiction_write_sidb_layout_svg_params_color_mode_DARK = 
 
 static const char *__doc_fiction_write_sidb_layout_svg_params_color_mode_LIGHT = R"doc(Light mode.)doc";
 
+static const char *__doc_fiction_write_sidb_layout_svg_params_lattice_mode = R"doc(The lattice mode of the SiDB layout.)doc";
+
 static const char *__doc_fiction_write_sidb_layout_svg_params_lattice_point_size = R"doc(Size of the H-Si lattice points in SVG units.)doc";
 
 static const char *__doc_fiction_write_sidb_layout_svg_params_sidb_border_width = R"doc(Border width of the SiDB.)doc";
+
+static const char *__doc_fiction_write_sidb_layout_svg_params_sidb_lattice_mode =
+R"doc(Enumeration to specify if the H-Si lattice is plotted in addition to
+SiDBs.)doc";
+
+static const char *__doc_fiction_write_sidb_layout_svg_params_sidb_lattice_mode_HIDE_LATTICE = R"doc(Lattice is hidden. Only SiDBs are shown.)doc";
+
+static const char *__doc_fiction_write_sidb_layout_svg_params_sidb_lattice_mode_SHOW_LATTICE = R"doc(Lattice is shown.)doc";
 
 static const char *__doc_fiction_write_sidb_layout_svg_params_sidb_size = R"doc(Size of the SiDB in SVG units.)doc";
 
