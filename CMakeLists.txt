@@ -6,8 +6,8 @@ cmake_minimum_required(VERSION 3.21)
 
 # Only set the CMAKE_CXX_STANDARD if it is not set by someone else
 if(NOT DEFINED CMAKE_CXX_STANDARD)
-  # Set C++ standard; at least C++17 is required
-  set(CMAKE_CXX_STANDARD 17)
+  # Set C++ standard; at least C++20 is required
+  set(CMAKE_CXX_STANDARD 20)
 endif()
 
 # strongly encouraged to enable this globally to avoid conflicts between
