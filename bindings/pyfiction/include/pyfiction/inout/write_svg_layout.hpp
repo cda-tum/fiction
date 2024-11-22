@@ -75,9 +75,9 @@ void write_svg_layout(pybind11::module& m)
 
     py::enum_<fiction::write_sidb_layout_svg_params::sidb_lattice_mode>(
         m, "sidb_lattice_mode", DOC(fiction_write_sidb_layout_svg_params_sidb_lattice_mode))
-        .value("LIGHT", fiction::write_sidb_layout_svg_params::sidb_lattice_mode::SHOW_LATTICE,
+        .value("SHOW_LATTICE", fiction::write_sidb_layout_svg_params::sidb_lattice_mode::SHOW_LATTICE,
                DOC(fiction_write_sidb_layout_svg_params_sidb_lattice_mode_SHOW_LATTICE))
-        .value("DARK", fiction::write_sidb_layout_svg_params::sidb_lattice_mode::HIDE_LATTICE,
+        .value("SHOW_LATTICE", fiction::write_sidb_layout_svg_params::sidb_lattice_mode::HIDE_LATTICE,
                DOC(fiction_write_sidb_layout_svg_params_sidb_lattice_mode_HIDE_LATTICE));
 
     py::class_<fiction::write_sidb_layout_svg_params>(m, "write_sidb_layout_svg_params",
