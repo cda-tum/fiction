@@ -405,7 +405,7 @@ TEMPLATE_TEST_CASE("Generate SiDB layout in SVG for cell-level layout and charge
             REQUIRE(normalized_generated_svg == normalized_expected_svg);
         }
 
-        SECTION("dark mode and hidden lattice points")
+        SECTION("dark mode and hidden lattice")
         {
             std::stringstream os_light_cds;
 
