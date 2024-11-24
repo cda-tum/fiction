@@ -1085,9 +1085,9 @@ class operational_domain_impl
         auto op_params_set_dimension_values                  = params.operational_params;
         op_params_set_dimension_values.simulation_parameters = sim_params;
 
-        const auto& [status, sim_calls] = is_operational(layout, truth_table, op_params_set_dimension_values);
+        const auto& [status, aux_stats] = is_operational(layout, truth_table, op_params_set_dimension_values);
 
-        num_simulator_invocations += sim_calls;
+        num_simulator_invocations += aux_stats.number_of_simulator_invocations;
 
         if (status == operational_status::NON_OPERATIONAL)
         {
