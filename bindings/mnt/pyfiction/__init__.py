@@ -8,7 +8,7 @@ import os
 import sys
 from pathlib import Path
 
-if sys.platform == "win32" and sys.version_info > (3, 8, 0) and "Z3_ROOT" in os.environ:
+if sys.platform == "win32" and "Z3_ROOT" in os.environ:
     lib_path = Path(os.environ["Z3_ROOT"]) / "lib"
     if lib_path.exists():
         os.add_dll_directory(str(lib_path))
@@ -73,12 +73,12 @@ from .pyfiction import (
     design_sidb_gates_params,
     design_sidb_gates,
 
-    # technology_constraints,
-    # exact_params,
-    # exact_stats,
-    # exact_cartesian,
-    # exact_shifted_cartesian,
-    # exact_hexagonal,
+    technology_constraints,
+    exact_params,
+    exact_stats,
+    exact_cartesian,
+    exact_shifted_cartesian,
+    exact_hexagonal,
 
     gold_effort_mode,
     gold_cost_objective,
@@ -453,12 +453,12 @@ __all__ = [
     "design_sidb_gates_params",
     "design_sidb_gates",
 
-    # "technology_constraints",
-    # "exact_params",
-    # "exact_stats",
-    # "exact_cartesian",
-    # "exact_shifted_cartesian",
-    # "exact_hexagonal",
+    "technology_constraints",
+    "exact_params",
+    "exact_stats",
+    "exact_cartesian",
+    "exact_shifted_cartesian",
+    "exact_hexagonal",
 
     "gold_effort_mode",
     "gold_cost_objective",
