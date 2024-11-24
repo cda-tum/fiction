@@ -36,18 +36,18 @@ TEST_CASE("SiQAD OR gate", "[is-operational]")
                                     operational_condition::REJECT_KINKS})
               .first == operational_status::NON_OPERATIONAL);
 
-    // determine if layout is non-operational due to kinks.
-    const auto non_operational_due_to_kinks = is_kink_induced_non_operational(
+    // determine if kinks induce layout to become non-operational.
+    const auto kink_induced_non_operational = is_kink_induced_non_operational(
         lat, std::vector<tt>{create_or_tt()},
         is_operational_params{
             sidb_simulation_parameters{2, -0.28}, sidb_simulation_engine::QUICKEXACT,
             bdl_input_iterator_params{detect_bdl_wires_params{1.5},
                                       bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED},
             operational_condition::REJECT_KINKS});
-    CHECK(non_operational_due_to_kinks);
+    CHECK(kink_induced_non_operational);
 
-    // determine input patterns that are non-operational due to kinks.
-    const auto non_operational_input_pattern_due_to_kinks = kink_induced_non_operational_input_patterns(
+    // determine input patterns for which kinks induce layout to become non-operational.
+    const auto kink_induced_non_operational_input_pattern = kink_induced_non_operational_input_patterns(
         lat, std::vector<tt>{create_or_tt()},
         is_operational_params{
             sidb_simulation_parameters{2, -0.28}, sidb_simulation_engine::QUICKEXACT,
@@ -55,7 +55,7 @@ TEST_CASE("SiQAD OR gate", "[is-operational]")
                                       bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED},
             operational_condition::REJECT_KINKS});
 
-    CHECK(non_operational_input_pattern_due_to_kinks.size() == 1);
+    CHECK(kink_induced_non_operational_input_pattern.size() == 1);
 
     CHECK(is_operational(
               lat, std::vector<tt>{create_or_tt()},
@@ -303,19 +303,19 @@ TEST_CASE("flipped CX bestagon gate", "[is-operational]")
                                                bdl_input_iterator_params{}, operational_condition::REJECT_KINKS})
               .first == operational_status::OPERATIONAL);
 
-    const auto non_operational_input_pattern_due_to_kinks = kink_induced_non_operational_input_patterns(
+    const auto kink_induced_non_operational_input_pattern = kink_induced_non_operational_input_patterns(
         lyt, create_crossing_wire_tt(),
         is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
                               bdl_input_iterator_params{}, operational_condition::REJECT_KINKS});
 
-    CHECK(non_operational_input_pattern_due_to_kinks.empty());
+    CHECK(kink_induced_non_operational_input_pattern.empty());
 
-    const auto non_operational_due_to_kinks = is_kink_induced_non_operational(
+    const auto kink_induced_non_operational = is_kink_induced_non_operational(
         lyt, create_crossing_wire_tt(),
         is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
                               bdl_input_iterator_params{}, operational_condition::REJECT_KINKS});
 
-    CHECK(!non_operational_due_to_kinks);
+    CHECK(!kink_induced_non_operational);
 }
 
 TEST_CASE("is operational check for Bestagon CX gate", "[is-operational], [quality]")
