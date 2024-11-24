@@ -5,7 +5,6 @@ import os
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 class TestIsOperational(unittest.TestCase):
-
     def test_is_operational(self):
         lyt = sidb_100_lattice()
 
@@ -64,7 +63,7 @@ class TestIsOperational(unittest.TestCase):
         params = is_operational_params()
         params.simulation_parameters = sidb_simulation_parameters(2, -0.32)
 
-        result = is_non_operational_due_to_kinks(lyt, [create_and_tt()], params)
+        result = is_kink_induced_non_operational(lyt, [create_and_tt()], params)
 
         self.assertTrue(result)
 
@@ -75,7 +74,7 @@ class TestIsOperational(unittest.TestCase):
         params = is_operational_params()
         params.simulation_parameters = sidb_simulation_parameters(2, -0.32)
 
-        non_operational_pattern_kinks = non_operational_input_patterns_due_to_kinks(lyt, [create_and_tt()], params)
+        non_operational_pattern_kinks = kink_induced_non_operational_input_patterns(lyt, [create_and_tt()], params)
 
         self.assertEqual(non_operational_pattern_kinks, {1, 2})
 
