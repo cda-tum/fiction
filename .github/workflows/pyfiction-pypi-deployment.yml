@@ -120,32 +120,17 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
-      - name: Setup ccache
-        uses: hendrikmuhs/ccache-action@v1.2
+      - name: Install the latest version of uv
+        uses: astral-sh/setup-uv@v3
         with:
-          key: 'ubuntu-latest-pyfiction'
-          variant: ccache
-          save: true
-          max-size: 10G
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.13.x'
-          cache: 'pip'
-
-      - name: Setup Z3 Solver
-        uses: cda-tum/setup-z3@v1
-        with:
-          version: ${{ env.Z3_VERSION }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          version: "latest"
+          enable-cache: true
 
       - name: Build sdist
-        run: pipx run build --sdist
+        run: uv build --sdist
 
-      - name: Test sdist
-        run: z3=${{env.ENABLE_Z3}} pip install dist/*.tar.gz --verbose
+      - name: Check metadata
+        run: uvx twine check dist/*
 
       - name: Upload sdist as an artifact
         uses: actions/upload-artifact@v4
