@@ -10,13 +10,37 @@ Unreleased
 
 Added
 #####
+- Algorithms:
+    - Simulation:
+        - Kink control option for critical temperature simulation of SiDB layouts
+- Python bindings:
+    - Support for Python 3.13 (including GIL-free multi-threading)
+- I/O:
+    - SVG drawer for SiDB layouts
+- Experiments:
+    - Ship the SiQAD and Bestagon gate libraries als SQD files
 - Documentation:
     - Added wiring reduction paper to publication list
+    - Added Willem Lambooy to the authors list
+- Continuous integration:
+    - Several improvements to the Docker workflow including publishing images to DockerHub
+
+Changed
+#######
+- Continuous integration:
+    - Exclude long-running tests from the Debug CI workflows
 
 Fixed
 #####
 - Adapted ``post-layout optimization`` and ``wiring reduction`` to handle layouts with PIs not placed at the borders
-
+- Fix neutral defect handling in CDS and correct gate design termination condition
+- Enforce runtime evaluation of dynamic formatting strings to fix consteval contexts
+- Microsoft logo in CI badge by replacing the logo slug with a base64 encoding of the SVG image
+- Remove explicit XCode version setup for macOS 13 CIs
+- Adjusted PyPI deployment target for macOS
+- Several bugs resulting from the new cell_type::LOGIC in the SiDB technology
+- Several compiler and linter warnings
+- Documentation for BDL wire detection
 
 v0.6.5 - 2024-10-22
 -------------------
