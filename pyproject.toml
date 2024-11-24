@@ -47,7 +47,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-test = ["python-dotenv==0.21.1"]
+test = []
 docs = [
     "setuptools-scm>=8.1",
     "sphinx==8.1.3",
