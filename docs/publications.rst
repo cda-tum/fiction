@@ -242,7 +242,7 @@ Furthermore, if you use any of the design automation algorithms, please consider
     .. code-block:: tex
 
         @inproceedings{walter2024defectaware,
-          title={{Towards Atomic Defect-Aware Physical Design of Silicon Dangling Bond Logic on the H -Si $(100)-2\times 1$ Surface}},
+          title={{Towards Atomic Defect-Aware Physical Design of Silicon Dangling Bond Logic on the H-Si(100)-$2\times1$ Surface}},
           author={Walter, Marcel and Croshaw, Jeremiah and Hang Ng, Samuel Sze and Walus, Konrad and Wolkow, Robert and Wille, Robert},
           booktitle={Design, Automation and Test in Europe Conference \& Exhibition (DATE)},
           pages={1--2},
