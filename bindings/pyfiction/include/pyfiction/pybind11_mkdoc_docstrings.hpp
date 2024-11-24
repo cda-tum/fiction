@@ -6801,19 +6801,15 @@ Returns:
     `true` if any output wire contains a kink (i.e., an unexpected
     charge state), `false` otherwise.)doc";
 
-static const char *__doc_fiction_detail_is_operational_impl_determine_non_operational_input_patterns_and_non_operational_reason =
-R"doc(Determines the input combinations yielding the non-operational status
-due to kinks. `True` indicates that the layout is non-operational due
-to kinks, `false` otherwise.
-
-@note "Non-operational due to kinks" refers to the operational status
-being exclusively caused to be `NON_OPERATIONAL` due to kinks.
+static const char *__doc_fiction_detail_is_operational_impl_determine_non_operational_input_patterns_and_non_operationality_reason =
+R"doc(Determines the input combinations for which the layout is non-
+operational and the reason why the layout is non-operational.
 
 Returns:
     Vector of pairs where the first element of the pair is the input
     pattern (e.g. 2-input Boolean function: 00 ^= 0; 10 ^= 2) for
     which the layout is non-operational. The second entry indicates
-    the information why the layout is non-operational
+    the reason why the layout is non-operational
     (`non_operationality_reason`) for the given input pattern.)doc";
 
 static const char *__doc_fiction_detail_is_operational_impl_encodes_bit_one =
@@ -7195,6 +7191,12 @@ static const char *__doc_fiction_detail_new_gate_location_DEST = R"doc(Check if 
 static const char *__doc_fiction_detail_new_gate_location_NONE = R"doc(Do not check any tiles.)doc";
 
 static const char *__doc_fiction_detail_new_gate_location_SRC = R"doc(Check if the source tile is empty.)doc";
+
+static const char *__doc_fiction_detail_non_operationality_reason = R"doc(Reason why a layout is non-operational.)doc";
+
+static const char *__doc_fiction_detail_non_operationality_reason_KINKS = R"doc(Kinks induced the layout to become non-operational.)doc";
+
+static const char *__doc_fiction_detail_non_operationality_reason_LOGIC_MISMATCH = R"doc(The layout is non-operational due to a logic mismatch.)doc";
 
 static const char *__doc_fiction_detail_on_the_fly_circuit_design_impl = R"doc()doc";
 
@@ -8208,12 +8210,6 @@ the layout
 Parameter ``cell``:
     The cell to challenge the stored maximum position of a cell in the
     layout against.)doc";
-
-static const char *__doc_fiction_detail_reason_for_non_operational = R"doc(Reason why a layout is non-operational.)doc";
-
-static const char *__doc_fiction_detail_reason_for_non_operational_KINKS = R"doc(The layout is non-operational due to kinks.)doc";
-
-static const char *__doc_fiction_detail_reason_for_non_operational_LOGIC_MISMATCH = R"doc(The layout is non-operational due to a logic mismatch.)doc";
 
 static const char *__doc_fiction_detail_recursively_paint_edges = R"doc()doc";
 
@@ -13627,6 +13623,41 @@ Returns:
 
 static const char *__doc_fiction_is_hexagonal_layout = R"doc()doc";
 
+static const char *__doc_fiction_is_kink_induced_non_operational =
+R"doc(This function determines if the layout is only considered as non-
+operational because of kinks. This means that the layout would be
+considered as operational, if kinks were accepted.
+
+@note "Kink induced non-operational" refers to the operational status
+being exclusively caused to be `NON_OPERATIONAL` due to kinks.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Template parameter ``TT``:
+    Type of the truth table.
+
+Parameter ``lyt``:
+    The SiDB cell-level layout to be checked.
+
+Parameter ``spec``:
+    Expected Boolean function of the layout given as a multi-output
+    truth table.
+
+Parameter ``params``:
+    Parameters for the `is_operational` algorithm.
+
+Parameter ``input_bdl_wire``:
+    Optional BDL input wires of lyt.
+
+Parameter ``output_bdl_wire``:
+    Optional BDL output wires of lyt.
+
+Returns:
+    Bool that indicates whether kinks induce the layout to become non-
+    operational. `true` if the layout is non-operational due to kinks,
+    `false` otherwise.)doc";
+
 static const char *__doc_fiction_is_linear_scheme =
 R"doc(Checks whether a given clocking scheme is registered as a cycle-free
 one. These currently are
@@ -13676,41 +13707,6 @@ Parameter ``defect``:
 
 Returns:
     `true` iff `defect` has a neutral charge value.)doc";
-
-static const char *__doc_fiction_is_non_operational_due_to_kinks =
-R"doc(This function determines if the layout is only considered as non-
-operational because of kinks. This means that the layout would be
-considered as operational, if kinks were accepted.
-
-@note "Non-operational due to kinks" refers to the operational status
-being exclusively caused to be `NON_OPERATIONAL` due to kinks.
-
-Template parameter ``Lyt``:
-    SiDB cell-level layout type.
-
-Template parameter ``TT``:
-    Type of the truth table.
-
-Parameter ``lyt``:
-    The SiDB cell-level layout to be checked.
-
-Parameter ``spec``:
-    Expected Boolean function of the layout given as a multi-output
-    truth table.
-
-Parameter ``params``:
-    Parameters for the `is_operational` algorithm.
-
-Parameter ``input_bdl_wire``:
-    Optional BDL input wires of lyt.
-
-Parameter ``output_bdl_wire``:
-    Optional BDL output wires of lyt.
-
-Returns:
-    Bool that indicates whether the layout is non-operational due to
-    kinks. `true` if the layout is not usable due to kinks, `false`
-    otherwise.)doc";
 
 static const char *__doc_fiction_is_operational =
 R"doc(Determine the operational status of an SiDB layout.
@@ -13891,6 +13887,33 @@ Parameter ``dist_fn``:
 Returns:
     The shortest loop-less path in `layout` from `objective.source` to
     `objective.target`.)doc";
+
+static const char *__doc_fiction_kink_induced_non_operational_input_patterns =
+R"doc(This function determines all input combinations for which kinks induce
+the SiDB layout to become non-operational. This means that the layout
+is operational if kinks would be accepted.
+
+@note "kink induced non-operational" refers to the operational status
+being exclusively caused to be `NON_OPERATIONAL` by kinks.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Template parameter ``TT``:
+    Type of the truth table.
+
+Parameter ``lyt``:
+    The SiDB layout.
+
+Parameter ``spec``:
+    Vector of truth table specifications.
+
+Parameter ``params``:
+    Parameters for the `is_operational` algorithm.
+
+Returns:
+    The input combinations where kinks induce the SiDB layout to
+    become non-operational.)doc";
 
 static const char *__doc_fiction_layout_coordinate_path =
 R"doc(A path in a layout defined as an ordered sequence of coordinates.
@@ -14131,32 +14154,6 @@ Parameter ``file``:
 
 Parameter ``rfun``:
     The actual parsing function.)doc";
-
-static const char *__doc_fiction_non_operational_input_patterns_due_to_kinks =
-R"doc(This function determines all input combinations for which the SiDB
-layout are non-operational due to kinks. This means that the layout is
-operational if kinks would be accepted.
-
-@note "Non-operational due to kinks" refers to the operational status
-being exclusively caused to be `NON_OPERATIONAL` due to kinks.
-
-Template parameter ``Lyt``:
-    SiDB cell-level layout type.
-
-Template parameter ``TT``:
-    Type of the truth table.
-
-Parameter ``lyt``:
-    The SiDB layout.
-
-Parameter ``spec``:
-    Vector of truth table specifications.
-
-Parameter ``params``:
-    Parameters for the `is_operational` algorithm.
-
-Returns:
-    The non-operational input combinations due to kinks.)doc";
 
 static const char *__doc_fiction_normalize_layout_coordinates =
 R"doc(A new layout is constructed and returned that is equivalent to the
