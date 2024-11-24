@@ -1,5 +1,7 @@
 import unittest
-from mnt.pyfiction import *
+from mnt.pyfiction import (sidb_100_lattice, charge_distribution_surface_100, sidb_technology, detect_bdl_wires_params,
+                           detect_bdl_wires_100, bdl_wire_selection)
+
 
 class TestDetectBDLWires(unittest.TestCase):
 

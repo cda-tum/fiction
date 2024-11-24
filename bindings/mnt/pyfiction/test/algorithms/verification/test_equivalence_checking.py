@@ -1,4 +1,4 @@
-from mnt.pyfiction import *
+from mnt.pyfiction import (read_technology_network, equivalence_checking_stats, equivalence_checking, eq_type)
 import unittest
 import os
 

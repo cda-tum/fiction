@@ -1,4 +1,5 @@
-from mnt.pyfiction import *
+from mnt.pyfiction import (read_technology_network, orthogonal, equivalence_checking, eq_type, orthogonal_stats,
+                           orthogonal_params)
 import unittest
 import os
 

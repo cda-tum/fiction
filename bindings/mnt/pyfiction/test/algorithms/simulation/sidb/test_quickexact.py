@@ -1,6 +1,9 @@
-from mnt.pyfiction import *
+from mnt.pyfiction import (sidb_100_lattice, sidb_111_lattice, sidb_technology, quickexact, quickexact_params,
+                           automatic_base_number_detection, charge_distribution_surface_100,
+                           charge_distribution_surface_111, determine_groundstate_from_simulation_results,
+                           sidb_charge_state)
 import unittest
-import os
+
 
 class TestQuickExact(unittest.TestCase):
 

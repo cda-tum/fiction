@@ -1,11 +1,10 @@
-from mnt.pyfiction import *
-from dotenv import load_dotenv
+from mnt.pyfiction import (read_technology_network, orthogonal, apply_qca_one_library, exact_params, exact_hexagonal,
+                           apply_bestagon_library, technology_constraints, exact_shifted_cartesian,
+                           apply_topolinano_library)
 import unittest
 import os
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
-load_dotenv()
-z3 = os.environ.get("z3", "OFF")
 
 
 class TestApplyGateLibrary(unittest.TestCase):
@@ -16,7 +15,6 @@ class TestApplyGateLibrary(unittest.TestCase):
 
         cell_layout = apply_qca_one_library(layout)
 
-    @unittest.skipIf(z3 == "OFF", "Z3 not enabled")
     def test_apply_bestagon_library(self):
         network = read_technology_network(dir_path + "/../../resources/mux21.v")
 
@@ -29,7 +27,6 @@ class TestApplyGateLibrary(unittest.TestCase):
 
         cell_layout = apply_bestagon_library(layout)
 
-    @unittest.skipIf(z3 == "OFF", "Z3 not enabled")
     def test_apply_topolinano_library(self):
         network = read_technology_network(dir_path + "/../../resources/mux21.v")
 

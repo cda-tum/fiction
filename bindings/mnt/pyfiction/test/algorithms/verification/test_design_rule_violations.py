@@ -1,11 +1,11 @@
 import unittest
-from mnt import pyfiction
+from mnt.pyfiction import (cartesian_gate_layout, color_routing, gate_level_drvs)
 
 
 class TestDesignRuleViolations(unittest.TestCase):
     def test_drvs(self):
         # Create empty layout
-        layout = pyfiction.cartesian_gate_layout((2, 5, 0), "2DDWave")
+        layout = cartesian_gate_layout((2, 5, 0), "2DDWave")
 
         # Create 2:1 MUX
 
@@ -46,9 +46,9 @@ class TestDesignRuleViolations(unittest.TestCase):
 
         layout.move_node(layout.get_node((2, 4)), (2, 5))
 
-        pyfiction.color_routing(layout, [((2, 3), (2, 5))])
+        color_routing(layout, [((2, 3), (2, 5))])
 
-        warnings, drvs = pyfiction.gate_level_drvs(layout)
+        warnings, drvs = gate_level_drvs(layout)
 
         self.assertEqual(0, warnings)
         self.assertEqual(0, drvs)

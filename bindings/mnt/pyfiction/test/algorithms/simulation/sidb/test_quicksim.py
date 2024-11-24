@@ -1,6 +1,7 @@
-from mnt.pyfiction import *
+from mnt.pyfiction import (sidb_100_lattice, sidb_technology, quicksim_params, sidb_simulation_parameters,
+                           charge_distribution_surface, quicksim, sidb_charge_state, sidb_111_lattice,
+                           charge_distribution_surface_111, determine_groundstate_from_simulation_results)
 import unittest
-import os
 
 
 class TestQuicksim(unittest.TestCase):

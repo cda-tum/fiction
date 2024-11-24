@@ -1,6 +1,5 @@
-from mnt.pyfiction import *
+from mnt.pyfiction import (sidb_layout, sidb_nm_position, sidb_100_lattice, sidb_111_lattice)
 import unittest
-import os
 
 
 class TestSiDBNmPosition(unittest.TestCase):

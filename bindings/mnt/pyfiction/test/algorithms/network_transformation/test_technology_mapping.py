@@ -1,4 +1,6 @@
-from mnt.pyfiction import *
+from mnt.pyfiction import (read_technology_network, technology_mapping, equivalence_checking, eq_type, and_or_not,
+                           and_or_not_maj, all_standard_2_input_functions, all_standard_3_input_functions,
+                           all_supported_standard_functions, technology_mapping_stats)
 import unittest
 import os
 

@@ -1,4 +1,6 @@
-from mnt.pyfiction import *
+from mnt.pyfiction import (read_technology_network, graph_oriented_layout_design_stats, graph_oriented_layout_design,
+                           graph_oriented_layout_design_params, eq_type, equivalence_checking, gold_cost_objective,
+                           gold_effort_mode)
 import unittest
 import os
 
@@ -88,6 +90,7 @@ class TestGraphOrientedLayoutDesign(unittest.TestCase):
         layout = graph_oriented_layout_design(network, params)
 
         self.assertNotEqual(equivalence_checking(network, layout), eq_type.NO)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,4 +1,4 @@
-from mnt.pyfiction import *
+from mnt.pyfiction import sidb_100_lattice, bdl_input_iterator_100, sidb_technology
 import unittest
 
 

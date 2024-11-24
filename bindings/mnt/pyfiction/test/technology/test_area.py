@@ -1,5 +1,5 @@
 import unittest
-from mnt.pyfiction import *
+from mnt.pyfiction import (qca_layout, inml_layout, sidb_layout, area)
 
 
 class TestArea(unittest.TestCase):

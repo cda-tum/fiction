@@ -1,6 +1,10 @@
 import unittest
 
-from mnt.pyfiction import *
+from mnt.pyfiction import (cartesian_obstruction_layout, cartesian_gate_layout, shifted_cartesian_obstruction_layout,
+                           shifted_cartesian_gate_layout, hexagonal_gate_layout, hexagonal_obstruction_layout,
+                           offset_coordinate, critical_path_length_and_throughput, gate_level_drvs,
+                           gate_level_drv_params)
+
 
 class TestObstructionLayout(unittest.TestCase):
 
@@ -78,6 +82,7 @@ class TestObstructionLayout(unittest.TestCase):
             self.assertTrue(layout.is_obstructed_connection((2, 0), (2, 1)))
             self.assertTrue(layout.is_obstructed_connection((2, 1), (2, 2)))
             self.assertTrue(layout.is_obstructed_connection((3, 2), (4, 2)))
+
 
 class TestCartesianObstructionLayout(unittest.TestCase):
 
@@ -339,7 +344,6 @@ class TestHexagonalObstructionLayout(unittest.TestCase):
 
         drv_params = gate_level_drv_params()
         self.assertEqual(gate_level_drvs(layout, drv_params, False), (0, 0))
-
 
 
 if __name__ == '__main__':

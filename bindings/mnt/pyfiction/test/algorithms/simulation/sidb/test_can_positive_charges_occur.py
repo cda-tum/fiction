@@ -1,6 +1,7 @@
 import unittest
 
-from mnt.pyfiction import *
+from mnt.pyfiction import (sidb_100_lattice, sidb_technology, can_positive_charges_occur, sidb_simulation_parameters,
+                           sidb_111_lattice)
 
 
 class TestCanPositiveChargesOccur(unittest.TestCase):

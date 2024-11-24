@@ -1,6 +1,10 @@
 import unittest
 
-from mnt.pyfiction import *
+from mnt.pyfiction import (cartesian_layout, shifted_cartesian_layout, hexagonal_layout, a_star, offset_coordinate,
+                           clocked_cartesian_layout, cartesian_gate_layout, shifted_cartesian_gate_layout,
+                           clocked_shifted_cartesian_layout, hexagonal_gate_layout, clocked_hexagonal_layout,
+                           cartesian_obstruction_layout, shifted_cartesian_obstruction_layout,
+                           hexagonal_obstruction_layout, a_star_params, a_star_distance)
 
 
 class TestAStar(unittest.TestCase):

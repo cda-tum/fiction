@@ -1,4 +1,4 @@
-from mnt.pyfiction import *
+from mnt.pyfiction import (hexagonal_layout)
 import unittest
 
 

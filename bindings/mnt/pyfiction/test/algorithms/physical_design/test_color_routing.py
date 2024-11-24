@@ -1,6 +1,7 @@
 import unittest
 
-from mnt.pyfiction import *
+from mnt.pyfiction import (cartesian_gate_layout, hexagonal_gate_layout, offset_coordinate, color_routing,
+                           color_routing_params)
 
 
 class TestColorRouting(unittest.TestCase):

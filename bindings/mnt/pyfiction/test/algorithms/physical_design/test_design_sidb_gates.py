@@ -1,6 +1,8 @@
 import unittest
 
-from mnt.pyfiction import *
+from mnt.pyfiction import (sidb_100_lattice, sidb_technology, design_sidb_gates_params, design_sidb_gates_mode,
+                           sidb_simulation_engine, design_sidb_gates, create_and_tt, sidb_111_lattice,
+                           operational_condition, create_nor_tt)
 
 
 class TestDesignSiDBGates(unittest.TestCase):
@@ -41,7 +43,6 @@ class TestDesignSiDBGates(unittest.TestCase):
         designed_gates = design_sidb_gates(layout, [create_and_tt()], params)
 
         self.assertEqual(len(designed_gates), 23)
-
 
     def test_nor_gate_111(self):
         layout = sidb_111_lattice((30, 30))
@@ -93,7 +94,6 @@ class TestDesignSiDBGates(unittest.TestCase):
         params.operational_params.op_condition = operational_condition.TOLERATE_KINKS
         designed_gates = design_sidb_gates(layout, [create_nor_tt()], params)
         self.assertEqual(len(designed_gates), 175)
-
 
     def test_nor_gate_111_quickcell(self):
         layout = sidb_111_lattice((30, 30))

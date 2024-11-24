@@ -1,4 +1,4 @@
-from mnt.pyfiction import *
+from mnt.pyfiction import (sidb_100_lattice, sidb_technology, sidb_111_lattice)
 import unittest
 
 

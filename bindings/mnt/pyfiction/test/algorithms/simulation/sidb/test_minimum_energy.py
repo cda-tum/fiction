@@ -1,6 +1,8 @@
 import unittest
 
-from mnt.pyfiction import *
+from mnt.pyfiction import (sidb_100_lattice, sidb_technology, charge_distribution_surface_100,
+                           sidb_simulation_parameters, sidb_charge_state, minimum_energy, sidb_111_lattice,
+                           charge_distribution_surface_111)
 
 
 class TestMinimumEnergy(unittest.TestCase):

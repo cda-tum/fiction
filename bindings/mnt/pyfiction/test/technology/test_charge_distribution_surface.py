@@ -1,6 +1,6 @@
-from mnt.pyfiction import *
+from mnt.pyfiction import (sidb_layout, sidb_technology, charge_distribution_surface, offset_coordinate,
+                           sidb_charge_state, sidb_111_lattice, charge_distribution_surface_111, charge_index_mode)
 import unittest
-import os
 
 
 class TestChargeDistributionSurface(unittest.TestCase):

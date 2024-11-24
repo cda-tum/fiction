@@ -1,5 +1,5 @@
 import unittest
-from mnt.pyfiction import *
+from mnt.pyfiction import (cartesian_gate_layout, route_path, a_star)
 
 
 class TestRoutePath(unittest.TestCase):

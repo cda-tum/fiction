@@ -1,4 +1,4 @@
-from mnt.pyfiction import *
+from mnt.pyfiction import (shifted_cartesian_layout)
 import unittest
 
 

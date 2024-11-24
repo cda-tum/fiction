@@ -1,4 +1,5 @@
-from mnt.pyfiction import *
+from mnt.pyfiction import (read_technology_network, orthogonal, equivalence_checking, eq_type, wiring_reduction,
+                           wiring_reduction_params, wiring_reduction_stats)
 import unittest
 import os
 

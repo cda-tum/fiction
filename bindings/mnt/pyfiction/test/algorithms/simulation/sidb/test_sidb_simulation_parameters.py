@@ -1,6 +1,5 @@
-from mnt.pyfiction import *
+from mnt.pyfiction import (sidb_simulation_parameters)
 import unittest
-import os
 
 
 class TestSiDBSimulationParameters(unittest.TestCase):

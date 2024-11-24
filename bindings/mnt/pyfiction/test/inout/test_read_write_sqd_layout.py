@@ -1,4 +1,4 @@
-from mnt.pyfiction import *
+from mnt.pyfiction import (read_sqd_layout_100)
 import unittest
 import os
 

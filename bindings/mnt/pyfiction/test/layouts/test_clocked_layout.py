@@ -1,4 +1,4 @@
-from mnt.pyfiction import *
+from mnt.pyfiction import (clocked_cartesian_layout, clocked_shifted_cartesian_layout, clocked_hexagonal_layout)
 import unittest
 
 

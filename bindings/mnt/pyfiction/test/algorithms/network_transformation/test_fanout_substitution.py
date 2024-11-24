@@ -1,4 +1,5 @@
-from mnt.pyfiction import *
+from mnt.pyfiction import (read_technology_network, is_fanout_substituted, fanout_substitution,
+                           fanout_substitution_params, substitution_strategy)
 import unittest
 import os
 
