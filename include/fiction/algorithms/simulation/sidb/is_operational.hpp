@@ -350,7 +350,8 @@ class is_operational_impl
                 const auto op_status = verifiy_logic_match_of_cds(gs, i);
                 if (op_status == operational_status::NON_OPERATIONAL)
                 {
-                    non_operational_input_pattern_and_non_operationality_reason.emplace_back(i, non_operationality_reason::KINKS);
+                    non_operational_input_pattern_and_non_operationality_reason.emplace_back(
+                        i, non_operationality_reason::KINKS);
                 }
             }
         }
@@ -697,8 +698,8 @@ template <typename Lyt, typename TT>
 }
 
 /**
- * This function determines all input combinations for which kinks induce the SiDB layout to become non-operational. This
- * means that the layout is operational if kinks would be accepted.
+ * This function determines all input combinations for which kinks induce the SiDB layout to become non-operational.
+ * This means that the layout is operational if kinks would be accepted.
  *
  * @note "kink induced non-operational" refers to the operational status being exclusively caused to be
  * `NON_OPERATIONAL` by kinks.
@@ -762,8 +763,8 @@ kink_induced_non_operational_input_patterns(const Lyt& lyt, const std::vector<TT
  * @param params Parameters for the `is_operational` algorithm.
  * @param input_bdl_wire Optional BDL input wires of lyt.
  * @param output_bdl_wire Optional BDL output wires of lyt.
- * @return Bool that indicates whether kinks induce the layout to become non-operational. `true` if the layout is non-operational
- * due to kinks, `false` otherwise.
+ * @return Bool that indicates whether kinks induce the layout to become non-operational. `true` if the layout is
+ * non-operational due to kinks, `false` otherwise.
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] bool is_kink_induced_non_operational(
