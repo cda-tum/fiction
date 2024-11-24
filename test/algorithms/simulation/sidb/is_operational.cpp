@@ -37,7 +37,7 @@ TEST_CASE("SiQAD OR gate", "[is-operational]")
               .first == operational_status::NON_OPERATIONAL);
 
     // determine if layout is non-operational due to kinks.
-    const auto non_operational_due_to_kinks = is_non_operational_due_to_kinks(
+    const auto non_operational_due_to_kinks = is_kink_induced_non_operational(
         lat, std::vector<tt>{create_or_tt()},
         is_operational_params{
             sidb_simulation_parameters{2, -0.28}, sidb_simulation_engine::QUICKEXACT,
@@ -47,7 +47,7 @@ TEST_CASE("SiQAD OR gate", "[is-operational]")
     CHECK(non_operational_due_to_kinks);
 
     // determine input patterns that are non-operational due to kinks.
-    const auto non_operational_input_pattern_due_to_kinks = non_operational_input_patterns_due_to_kinks(
+    const auto non_operational_input_pattern_due_to_kinks = kink_induced_non_operational_input_patterns(
         lat, std::vector<tt>{create_or_tt()},
         is_operational_params{
             sidb_simulation_parameters{2, -0.28}, sidb_simulation_engine::QUICKEXACT,

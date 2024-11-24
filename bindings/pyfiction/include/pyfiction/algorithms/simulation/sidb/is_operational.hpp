@@ -33,12 +33,12 @@ void is_operational(pybind11::module& m)
     m.def("operational_input_patterns", &fiction::operational_input_patterns<Lyt, py_tt>, "lyt"_a, "spec"_a,
           "params"_a = fiction::is_operational_params{}, DOC(fiction_operational_input_patterns));
 
-    m.def("is_non_operational_due_to_kinks", &fiction::is_non_operational_due_to_kinks<Lyt, py_tt>, "lyt"_a, "spec"_a,
+    m.def("is_kink_induced_non_operational", &fiction::is_kink_induced_non_operational<Lyt, py_tt>, "lyt"_a, "spec"_a,
           "params"_a = fiction::is_operational_params{}, "input_bdl_wire"_a = std::nullopt,
           "output_bdl_wire"_a = std::nullopt, DOC(fiction_is_non_operational_due_to_kinks));
 
-    m.def("non_operational_input_patterns_due_to_kinks",
-          &fiction::non_operational_input_patterns_due_to_kinks<Lyt, py_tt>, "lyt"_a, "spec"_a,
+    m.def("kink_induced_non_operational_input_patterns",
+          &fiction::kink_induced_non_operational_input_patterns<Lyt, py_tt>, "lyt"_a, "spec"_a,
           "params"_a = fiction::is_operational_params{}, DOC(fiction_non_operational_input_patterns_due_to_kinks));
 }
 

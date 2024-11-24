@@ -6814,7 +6814,7 @@ Returns:
     pattern (e.g. 2-input Boolean function: 00 ^= 0; 10 ^= 2) for
     which the layout is non-operational. The second entry indicates
     the information why the layout is non-operational
-    (`reason_for_non_operational`) for the given input pattern.)doc";
+    (`non_operationality_reason`) for the given input pattern.)doc";
 
 static const char *__doc_fiction_detail_is_operational_impl_encodes_bit_one =
 R"doc(This function returns `true` if `1` is encoded in the charge state of
