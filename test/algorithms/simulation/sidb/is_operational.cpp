@@ -15,7 +15,10 @@
 #include <fiction/utils/truth_table_utils.hpp>
 
 #include <cstdint>
+// to save runtime in the CI, this test is only run in RELEASE mode
+#ifdef NDEBUG
 #include <optional>
+#endif
 #include <set>
 #include <vector>
 
@@ -240,7 +243,7 @@ TEMPLATE_TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[is-operational]", 
     }
 }
 
-TEST_CASE("AND gate with bestagon structure and kink state at right input wire for input 01", "[is-operational]")
+TEST_CASE("AND gate with bestagon structure and kink state on right input wire for input 01 and left input wire for input 10", "[is-operational]")
 {
     const auto lyt = blueprints::and_gate_with_kink_states<sidb_cell_clk_lyt_siqad>();
 
@@ -257,6 +260,23 @@ TEST_CASE("AND gate with bestagon structure and kink state at right input wire f
                                                    sidb_simulation_engine::QUICKEXACT, bdl_input_iterator_params{},
                                                    operational_condition::REJECT_KINKS})
                   .first == operational_status::NON_OPERATIONAL);
+    }
+    SECTION("check if is_kink_induced_non_operational return true")
+    {
+        // check if the function works correctly even if the parameter is wrong (kinks are accepted).
+        CHECK(is_kink_induced_non_operational(
+            lyt, std::vector<tt>{create_and_tt()},
+            is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
+                                  bdl_input_iterator_params{}, operational_condition::TOLERATE_KINKS}));
+    }
+
+    SECTION("check input patterns for which kinks induce the layout to become non-operational")
+    {
+        CHECK(kink_induced_non_operational_input_patterns(
+                  lyt, std::vector<tt>{create_and_tt()},
+                  is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
+                                        bdl_input_iterator_params{}, operational_condition::TOLERATE_KINKS}) ==
+              std::set<uint64_t>{1, 2});
     }
 }
 
