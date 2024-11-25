@@ -141,7 +141,6 @@ build = "cp3*"
 archs = "auto64"
 skip = "*-musllinux*"
 test-command = "python -c \"from mnt import pyfiction\""
-environment = { z3 = "ON" }
 build-frontend = "build[uv]"
 free-threaded-support = true
 manylinux-x86_64-image = "manylinux_2_28"

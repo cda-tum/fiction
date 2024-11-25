@@ -38,7 +38,6 @@ defaults:
 
 env:
   Z3_VERSION: 4.13.0
-  ENABLE_Z3: 'ON'
 
 jobs:
   build_and_test:
@@ -95,9 +94,15 @@ jobs:
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
+      - name: Install the latest version of uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+          enable-cache: true
+
       - name: Build pyfiction
         working-directory: ${{github.workspace}}
-        run: z3=${{env.ENABLE_Z3}} pip install '.[test]'
+        run: uv pip install .
 
       - name: Test
         working-directory: ${{github.workspace}}
