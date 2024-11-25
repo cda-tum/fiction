@@ -253,7 +253,9 @@ TEMPLATE_TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[is-operational]", 
     }
 }
 
-TEST_CASE("AND gate with bestagon structure and kink state on right input wire for input 01 and left input wire for input 10", "[is-operational]")
+TEST_CASE(
+    "AND gate with bestagon structure and kink state on right input wire for input 01 and left input wire for input 10",
+    "[is-operational]")
 {
     const auto lyt = blueprints::and_gate_with_kink_states<sidb_cell_clk_lyt_siqad>();
 
