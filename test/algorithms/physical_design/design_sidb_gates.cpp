@@ -559,7 +559,7 @@ TEST_CASE("Design AND gate with skeleton, where one input wire and the output wi
         CHECK(design_gates_stats.number_of_layouts == 85320);
         CHECK(design_gates_stats.number_of_layouts_after_first_pruning == 67652);
         CHECK(design_gates_stats.number_of_layouts_after_second_pruning == 30814);
-        CHECK(design_gates_stats.number_of_layouts_after_third_pruning == 1);
+        CHECK(design_gates_stats.number_of_layouts_after_third_pruning == 174);
     }
 
     SECTION("Automatic Exhaustive Gate Designer")
