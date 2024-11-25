@@ -17,7 +17,6 @@ set_property(TARGET pyfiction PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 if (MSVC)
     target_compile_options(pyfiction PRIVATE /utf-8)
-    add_definitions(-D_WIN32_WINNT=0x0A00)
     add_definitions(-DUNICODE -D_UNICODE)
 endif ()
 
