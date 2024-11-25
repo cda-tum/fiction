@@ -182,7 +182,7 @@ class is_operational_impl
         assert((truth_table.size() == output_bdl_pairs.size()) &&
                "Number of truth tables and output BDL pairs does not match");
 
-        bool at_least_one_kink_induced_layout_to_non_operational = false;
+        bool at_least_one_layout_is_kink_induced_non_operational = false;
 
         // number of different input combinations
         for (auto i = 0u; i < truth_table.front().num_bits(); ++i, ++bii)
@@ -217,13 +217,13 @@ class is_operational_impl
                 if (op_status == operational_status::NON_OPERATIONAL &&
                     non_op_reason == non_operationality_reason::KINKS)
                 {
-                    at_least_one_kink_induced_layout_to_non_operational = true;
+                    at_least_one_layout_is_kink_induced_non_operational = true;
                     continue;
                 }
             }
         }
 
-        if (at_least_one_kink_induced_layout_to_non_operational)
+        if (at_least_one_layout_is_kink_induced_non_operational)
         {
             return {operational_status::NON_OPERATIONAL, non_operationality_reason::KINKS};
         }
