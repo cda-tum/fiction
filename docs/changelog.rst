@@ -18,6 +18,7 @@ Added
 - I/O:
     - SVG drawer for SiDB layouts
 - Experiments:
+    - Added information about how many layouts remain after each of QuickCell's pruning steps.
     - Ship the SiQAD and Bestagon gate libraries als SQD files
 - Documentation:
     - Added wiring reduction paper to publication list
