@@ -916,9 +916,6 @@ class design_sidb_gates_impl
             set_charge_distribution_of_input_wires_based_on_input_pattern(cds_layout, i);
             set_charge_distribution_of_output_wires_based_on_truth_table(cds_layout, i);
 
-            // std::cout << "Input pattern: " << i << std::endl;
-            // print_sidb_layout(std::cout, cds_layout);
-
             const auto physical_validity = is_physical_validity_feasible(cds_layout, cds_canvas);
 
             if (physical_validity.has_value())
