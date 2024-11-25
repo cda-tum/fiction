@@ -1545,6 +1545,51 @@ Lyt bestagon_ha() noexcept
     return lyt;
 };
 
+/**
+ * This layout represents a 2-input-1-output skeleton, where one input and output wire have a port direction to the west.
+ */
+template <typename Lyt>
+Lyt two_input_one_output_skeleton_west_west() noexcept
+{
+    static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
+
+    Lyt lyt{};
+
+    // input wires
+    lyt.assign_cell_type({4, 9, 1}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({1, 9, 1}, Lyt::cell_type::INPUT);
+
+    lyt.assign_cell_type({14, 0, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({16, 1, 0}, Lyt::cell_type::INPUT);
+
+    lyt.assign_cell_type({26, 4, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({28, 5, 0}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({19, 9, 1}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({16, 9, 1}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({11, 9, 1}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 9, 1}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({36, 9, 1}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({39, 9, 1}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({44, 9, 1}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({47, 9, 1}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({22, 3, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({20, 2, 0}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({52, 9, 1}, Lyt::cell_type::OUTPUT);
+    lyt.assign_cell_type({55, 9, 1}, Lyt::cell_type::OUTPUT);
+
+    lyt.assign_cell_type({60, 9, 1}, Lyt::cell_type::NORMAL);
+
+    return lyt;
+};
+
 }  // namespace blueprints
 
 #endif  // FICTION_LAYOUT_BLUEPRINTS_HPP

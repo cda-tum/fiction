@@ -124,6 +124,23 @@ struct design_sidb_gates_stats
      */
     sidb_simulation_engine sim_engine{sidb_simulation_engine::QUICKEXACT};
     /**
+     * The number of all possible layouts.
+     */
+    std::size_t number_of_layouts{0};
+    /**
+     * The number of layouts that remain after first pruning (discarding layouts with potential positive SiDBs).
+     */
+    std::size_t number_of_layouts_after_first_pruning{0};
+    /**
+     * The number of layouts that remain after second pruning (discarding layouts that fail to satisfy the physical
+     * model).
+     */
+    std::size_t number_of_layouts_after_second_pruning{0};
+    /**
+     * The number of layouts that remain after third pruning (discarding layouts with unstable I/O signals).
+     */
+    std::size_t number_of_layouts_after_third_pruning{0};
+    /**
      * This function outputs the total time taken for the SiDB gate design process to the provided output stream.
      * If no output stream is provided, it defaults to standard output (`std::cout`).
      *
@@ -168,7 +185,8 @@ class design_sidb_gates_impl
             number_of_output_wires{output_bdl_wires.size()},
             all_canvas_layouts{determine_all_possible_canvas_layouts()}
     {
-        stats.sim_engine = params.operational_params.sim_engine;
+        stats.number_of_layouts = all_canvas_layouts.size();
+        stats.sim_engine        = params.operational_params.sim_engine;
     }
 
     /**
@@ -366,10 +384,17 @@ class design_sidb_gates_impl
      *
      * @return A vector of designed SiDB gate layouts.
      */
-    [[nodiscard]] std::vector<Lyt> run_quickcell() const noexcept
+    [[nodiscard]] std::vector<Lyt> run_quickcell() noexcept
     {
         mockturtle::stopwatch stop{stats.time_total};
         const auto            gate_candidates = run_pruning();
+
+        stats.number_of_layouts_after_first_pruning =
+            all_canvas_layouts.size() - number_of_discarded_layouts_at_first_pruning;
+        stats.number_of_layouts_after_second_pruning =
+            stats.number_of_layouts_after_first_pruning - number_of_discarded_layouts_at_second_pruning;
+        stats.number_of_layouts_after_third_pruning =
+            stats.number_of_layouts_after_second_pruning - number_of_discarded_layouts_at_third_pruning;
 
         std::vector<Lyt> gate_layouts{};
         gate_layouts.reserve(gate_candidates.size());
@@ -495,6 +520,18 @@ class design_sidb_gates_impl
      */
     const std::vector<Lyt> all_canvas_layouts{};
     /**
+     * Number of discarded layouts at first pruning.
+     */
+    std::atomic<std::size_t> number_of_discarded_layouts_at_first_pruning{0};
+    /**
+     * Number of discarded layouts at second pruning.
+     */
+    std::atomic<std::size_t> number_of_discarded_layouts_at_second_pruning{0};
+    /**
+     * Number of discarded layouts at third pruning.
+     */
+    std::atomic<std::size_t> number_of_discarded_layouts_at_third_pruning{0};
+    /**
      * This function assigns the charge states of the input wires in the layout according to the provided input pattern
      * index. It performs the following steps:
      * - For `NORTH-SOUTH` port wires, if the corresponding bit in the input pattern is set, assigns `NEUTRAL`
@@ -517,7 +554,8 @@ class design_sidb_gates_impl
 
         for (auto i = 0u; i < number_of_input_wires; i++)
         {
-            if (input_bdl_wires[number_of_input_wires - 1 - i].port.dir == port_direction::SOUTH)
+            if (input_bdl_wires[number_of_input_wires - 1 - i].port.dir == port_direction::SOUTH ||
+                input_bdl_wires[number_of_input_wires - 1 - i].port.dir == port_direction::EAST)
             {
                 if ((current_input_index & (uint64_t{1ull} << i)) != 0ull)
                 {
@@ -548,7 +586,7 @@ class design_sidb_gates_impl
                     }
                 }
             }
-            else if (input_bdl_wires[number_of_input_wires - 1 - i].port.dir == port_direction::NORTH)
+            else
             {
                 if ((current_input_index & (uint64_t{1ull} << i)) != 0ull)
                 {
@@ -603,7 +641,8 @@ class design_sidb_gates_impl
     {
         for (auto i = 0u; i < number_of_output_wires; i++)
         {
-            if (output_bdl_wires[i].port.dir == port_direction::SOUTH)
+            if (output_bdl_wires[i].port.dir == port_direction::SOUTH ||
+                output_bdl_wires[i].port.dir == port_direction::EAST)
             {
                 if ((output_wire_index & (uint64_t{1ull} << i)) != 0ull)
                 {
@@ -626,7 +665,7 @@ class design_sidb_gates_impl
                     }
                 }
             }
-            else if (output_bdl_wires[i].port.dir == port_direction::NORTH)
+            else
             {
                 if ((output_wire_index & (uint64_t{1ull} << i)) != 0ull)
                 {
@@ -684,7 +723,8 @@ class design_sidb_gates_impl
     {
         for (auto i = 0u; i < number_of_output_wires; i++)
         {
-            if (output_bdl_wires[i].port.dir == port_direction::SOUTH)
+            if (output_bdl_wires[i].port.dir == port_direction::SOUTH ||
+                output_bdl_wires[i].port.dir == port_direction::EAST)
             {
                 if (kitty::get_bit(truth_table[i], input_index))
                 {
@@ -707,7 +747,7 @@ class design_sidb_gates_impl
                     }
                 }
             }
-            else if (output_bdl_wires[i].port.dir == port_direction::NORTH)
+            else
             {
                 if (kitty::get_bit(truth_table[i], input_index))
                 {
@@ -754,8 +794,7 @@ class design_sidb_gates_impl
         while (cds_canvas.get_charge_index_and_base().first <= cds_canvas.get_max_charge_index())
         {
             cds_canvas.foreach_cell(
-                [&](const auto& c)
-                {
+                [&](const auto& c) {
                     cds_layout.assign_charge_state(c, cds_canvas.get_charge_state(c),
                                                    charge_index_mode::KEEP_CHARGE_INDEX);
                 });
@@ -851,7 +890,7 @@ class design_sidb_gates_impl
      * validation.
      */
     [[nodiscard]] bool layout_can_be_pruned(const Lyt& current_layout, const Lyt& canvas_lyt,
-                                            const cell<Lyt>& dependent_cell) const noexcept
+                                            const cell<Lyt>& dependent_cell) noexcept
     {
         charge_distribution_surface<Lyt> cds_canvas{canvas_lyt, params.operational_params.simulation_parameters,
                                                     sidb_charge_state::NEGATIVE,
@@ -868,12 +907,16 @@ class design_sidb_gates_impl
 
             if (can_positive_charges_occur(cds_layout, params.operational_params.simulation_parameters))
             {
+                number_of_discarded_layouts_at_first_pruning++;
                 return true;
             }
 
             cds_layout.assign_dependent_cell(dependent_cell);
             set_charge_distribution_of_input_wires_based_on_input_pattern(cds_layout, i);
             set_charge_distribution_of_output_wires_based_on_truth_table(cds_layout, i);
+
+            // std::cout << "Input pattern: " << i << std::endl;
+            // print_sidb_layout(std::cout, cds_layout);
 
             const auto physical_validity = is_physical_validity_feasible(cds_layout, cds_canvas);
 
@@ -883,11 +926,13 @@ class design_sidb_gates_impl
                 if (is_io_signal_unstable(cds_layout, cds_canvas, truth_table.front().num_bits(), i, output_index,
                                           physical_validity.value()))
                 {
+                    number_of_discarded_layouts_at_third_pruning++;
                     return true;
                 };
             }
             else
             {
+                number_of_discarded_layouts_at_second_pruning++;
                 return true;
             }
         }
@@ -902,7 +947,7 @@ class design_sidb_gates_impl
      *
      * @return A vector containing the valid gate candidates that were not pruned.
      */
-    [[nodiscard]] std::vector<Lyt> run_pruning() const noexcept
+    [[nodiscard]] std::vector<Lyt> run_pruning() noexcept
     {
         std::vector<Lyt> gate_candidate = {};
 

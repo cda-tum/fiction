@@ -454,73 +454,26 @@ class is_operational_impl
     [[nodiscard]] bool check_existence_of_kinks_in_input_wires(const charge_distribution_surface<Lyt>& ground_state,
                                                                const uint64_t current_input_index) const noexcept
     {
-        for (auto i = 0u; i < input_bdl_wires.size(); i++)
-        {
-            if (input_bdl_wires[input_bdl_wires.size() - 1 - i].port.dir == port_direction::SOUTH)
-            {
-                if ((current_input_index & (uint64_t{1ull} << i)) != 0ull)
-                {
-                    for (const auto& bdl : input_bdl_wires[input_bdl_wires.size() - 1 - i].pairs)
-                    {
-                        if (bdl.type == sidb_technology::INPUT)
-                        {
-                            continue;
-                        }
-                        if (!encodes_bit_one(ground_state, bdl, input_bdl_wires[input_bdl_wires.size() - 1 - i].port))
-                        {
-                            return true;
-                        }
-                    }
-                }
-                else
-                {
-                    for (const auto& bdl : input_bdl_wires[input_bdl_wires.size() - 1 - i].pairs)
-                    {
-                        if (bdl.type == sidb_technology::INPUT)
-                        {
-                            continue;
-                        }
-                        if (!encodes_bit_zero(ground_state, bdl, input_bdl_wires[input_bdl_wires.size() - 1 - i].port))
-                        {
-                            return true;
-                        }
-                    }
-                }
-            }
-            else if (input_bdl_wires[input_bdl_wires.size() - 1 - i].port.dir == port_direction::NORTH)
-            {
-                if ((current_input_index & (uint64_t{1ull} << i)) != 0ull)
-                {
-                    for (const auto& bdl : input_bdl_wires[input_bdl_wires.size() - 1 - i].pairs)
-                    {
-                        if (bdl.type == sidb_technology::INPUT)
-                        {
-                            continue;
-                        }
-                        if (!encodes_bit_one(ground_state, bdl, input_bdl_wires[input_bdl_wires.size() - 1 - i].port))
-                        {
-                            return true;
-                        }
-                    }
-                }
-                else
-                {
-                    for (const auto& bdl : input_bdl_wires[input_bdl_wires.size() - 1 - i].pairs)
-                    {
-                        if (bdl.type == sidb_technology::INPUT)
-                        {
-                            continue;
-                        }
-                        if (!encodes_bit_zero(ground_state, bdl, input_bdl_wires[input_bdl_wires.size() - 1 - i].port))
-                        {
-                            return true;
-                        }
-                    }
-                }
-            }
-        }
+        return std::any_of(input_bdl_wires.rbegin(), input_bdl_wires.rend(),
+                           [&, i = 0u](const auto& wire) mutable
+                           {
+                               const auto current_bit_set = (current_input_index & (uint64_t{1ull} << i++)) != 0ull;
+                               return std::any_of(wire.pairs.cbegin(), wire.pairs.cend(),
+                                                  [&](const auto& bdl)
+                                                  {
+                                                      if (bdl.type == sidb_technology::INPUT)
+                                                      {
+                                                          return false;  // Skip processing for input type.
+                                                      }
 
-        return false;
+                                                      if (current_bit_set)
+                                                      {
+                                                          return !encodes_bit_one(ground_state, bdl, wire.port);
+                                                      }
+
+                                                      return !encodes_bit_zero(ground_state, bdl, wire.port);
+                                                  });
+                           });
     }
 
     /**
