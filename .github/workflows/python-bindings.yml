@@ -108,4 +108,4 @@ jobs:
 
       - name: Test
         working-directory: ${{github.workspace}}
-        run: python -m unittest discover --verbose
+        run: python -m unittest discover -s bindings/mnt/pyfiction/test/ --verbose
