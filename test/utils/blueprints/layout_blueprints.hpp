@@ -1546,7 +1546,8 @@ Lyt bestagon_ha() noexcept
 };
 
 /**
- * This layout represents a 2-input-1-output skeleton, where one input and output wire have a port direction to the west.
+ * This layout represents a 2-input-1-output skeleton, where one input and output wire have a port direction to the
+ * west.
  */
 template <typename Lyt>
 Lyt two_input_one_output_skeleton_west_west() noexcept
