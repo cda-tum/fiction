@@ -29,8 +29,19 @@ using namespace fiction;
 
 int main()  // NOLINT
 {
-    experiments::experiment<std::string, uint64_t, double> simulation_exp{"benchmark", "gate", "#Gates (QuickCell)",
-                                                                          "runtime (QuickCell) [s]"};
+    experiments::experiment<std::string, uint64_t, uint64_t, double, uint64_t, double, uint64_t, double, uint64_t,
+                            double>
+        simulation_exp{"benchmark",
+                       "gate",                     // std::string
+                       "#Total Layouts",           // uint64_t
+                       "#Gates (QuickCell)",       // uint64_t
+                       "runtime (QuickCell) [s]",  // double
+                       "#Lp1",                     // uint64_t
+                       "#Lp1/N [%]",               // double
+                       "#Lp2",                     // uint64_t
+                       "#Lp2/N [%]",               // double
+                       "#Lp3",                     // uint64_t
+                       "#Lp3/N [%]"};              // double
 
     const auto truth_tables = std::vector<std::vector<tt>>{
         std::vector<tt>{create_and3_tt()},   std::vector<tt>{create_xor_and_tt()}, std::vector<tt>{create_or_and_tt()},
@@ -59,8 +70,6 @@ int main()  // NOLINT
         {{22, 6, 0}, {32, 12, 0}},
         4};
 
-    double sum_quickcell_runtime = 0;
-
     for (auto i = 0u; i < truth_tables.size(); i++)
     {
         const auto& table = truth_tables[i];
@@ -79,17 +88,22 @@ int main()  // NOLINT
 
         const auto runtime_quickcell = mockturtle::to_seconds(stats_quickcell.time_total);
 
-        sum_quickcell_runtime += runtime_quickcell;
-
         const auto final_number_of_gates = quickcell_design.size();
 
-        simulation_exp(gate_names[i], final_number_of_gates, runtime_quickcell);
+        simulation_exp(gate_names[i], stats_quickcell.number_of_layouts, final_number_of_gates, runtime_quickcell,
+                       stats_quickcell.number_of_layouts_after_first_pruning,
+                       100.0 * static_cast<double>(stats_quickcell.number_of_layouts_after_first_pruning) /
+                           static_cast<double>(stats_quickcell.number_of_layouts),
+                       stats_quickcell.number_of_layouts_after_second_pruning,
+                       100.0 * static_cast<double>(stats_quickcell.number_of_layouts_after_second_pruning) /
+                           static_cast<double>(stats_quickcell.number_of_layouts),
+                       stats_quickcell.number_of_layouts_after_third_pruning,
+                       100.0 * static_cast<double>(stats_quickcell.number_of_layouts_after_third_pruning) /
+                           static_cast<double>(stats_quickcell.number_of_layouts));
 
         simulation_exp.save();
         simulation_exp.table();
     }
-
-    simulation_exp("", 0, sum_quickcell_runtime);
 
     simulation_exp.save();
     simulation_exp.table();
