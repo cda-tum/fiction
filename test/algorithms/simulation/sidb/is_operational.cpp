@@ -354,9 +354,9 @@ TEST_CASE("is operational check for Bestagon CX gate", "[is-operational], [quali
                   std::optional{input_bdl_wires}, std::optional{output_bdl_wires})
                   .first == operational_status::NON_OPERATIONAL);
         CHECK(!is_kink_induced_non_operational(
-                  lat, create_crossing_wire_tt(),
-                  is_operational_params{sidb_simulation_parameters{2, -0.30}, sidb_simulation_engine::QUICKEXACT},
-                  std::optional{input_bdl_wires}, std::optional{output_bdl_wires}));
+            lat, create_crossing_wire_tt(),
+            is_operational_params{sidb_simulation_parameters{2, -0.30}, sidb_simulation_engine::QUICKEXACT},
+            std::optional{input_bdl_wires}, std::optional{output_bdl_wires}));
     }
 }
 
