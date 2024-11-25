@@ -27,23 +27,21 @@ TEST_CASE("SiQAD OR gate", "[is-operational]")
 
     const sidb_100_cell_clk_lyt_siqad lat{layout_or_gate};
 
+    auto op_params =  is_operational_params{sidb_simulation_parameters{2, -0.28}, sidb_simulation_engine::QUICKEXACT,
+                          bdl_input_iterator_params{
+                              detect_bdl_wires_params{1.5},
+                              bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED},
+                          operational_condition::REJECT_KINKS};
+
     CHECK(is_operational(
               lat, std::vector<tt>{create_or_tt()},
-              is_operational_params{sidb_simulation_parameters{2, -0.28}, sidb_simulation_engine::QUICKEXACT,
-                                    bdl_input_iterator_params{
-                                        detect_bdl_wires_params{1.5},
-                                        bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED},
-                                    operational_condition::REJECT_KINKS})
+              op_params)
               .first == operational_status::NON_OPERATIONAL);
 
     // determine if kinks induce layout to become non-operational.
     const auto kink_induced_non_operational = is_kink_induced_non_operational(
         lat, std::vector<tt>{create_or_tt()},
-        is_operational_params{
-            sidb_simulation_parameters{2, -0.28}, sidb_simulation_engine::QUICKEXACT,
-            bdl_input_iterator_params{detect_bdl_wires_params{1.5},
-                                      bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED},
-            operational_condition::REJECT_KINKS});
+        op_params);
     CHECK(kink_induced_non_operational);
 
     const auto input_wires  = detect_bdl_wires(lat, detect_bdl_wires_params{1.5});
@@ -52,32 +50,20 @@ TEST_CASE("SiQAD OR gate", "[is-operational]")
     // determine if kinks induce layout to become non-operational.
     const auto kink_induced_non_operational_predefined_wires = is_kink_induced_non_operational(
         lat, std::vector<tt>{create_or_tt()},
-        is_operational_params{
-            sidb_simulation_parameters{2, -0.28}, sidb_simulation_engine::QUICKEXACT,
-            bdl_input_iterator_params{detect_bdl_wires_params{1.5},
-                                      bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED},
-            operational_condition::REJECT_KINKS},
+        op_params,
         std::optional{input_wires}, std::optional{output_wires});
     CHECK(kink_induced_non_operational_predefined_wires);
 
     // determine input patterns for which kinks induce layout to become non-operational.
     const auto kink_induced_non_operational_input_pattern = kink_induced_non_operational_input_patterns(
         lat, std::vector<tt>{create_or_tt()},
-        is_operational_params{
-            sidb_simulation_parameters{2, -0.28}, sidb_simulation_engine::QUICKEXACT,
-            bdl_input_iterator_params{detect_bdl_wires_params{1.5},
-                                      bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED},
-            operational_condition::REJECT_KINKS});
+        op_params);
 
     CHECK(kink_induced_non_operational_input_pattern.size() == 1);
 
+    op_params.op_condition = operational_condition::TOLERATE_KINKS;
     CHECK(is_operational(
-              lat, std::vector<tt>{create_or_tt()},
-              is_operational_params{sidb_simulation_parameters{2, -0.28}, sidb_simulation_engine::QUICKEXACT,
-                                    bdl_input_iterator_params{
-                                        detect_bdl_wires_params{1.5},
-                                        bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED},
-                                    operational_condition::TOLERATE_KINKS})
+              lat, std::vector<tt>{create_or_tt()},op_params)
               .first == operational_status::OPERATIONAL);
 }
 
@@ -255,7 +241,7 @@ TEMPLATE_TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[is-operational]", 
 }
 
 TEST_CASE(
-    "AND gate with bestagon structure and kink state on right input wire for input 01 and left input wire for input 10",
+    "AND gate with Bestagon structure and kink state on right input wire for input 01 and left input wire for input 10",
     "[is-operational]")
 {
     const auto lyt = blueprints::and_gate_with_kink_states<sidb_cell_clk_lyt_siqad>();
@@ -274,7 +260,7 @@ TEST_CASE(
                                                    operational_condition::REJECT_KINKS})
                   .first == operational_status::NON_OPERATIONAL);
     }
-    SECTION("check if is_kink_induced_non_operational return true")
+    SECTION("check if is_kink_induced_non_operational returns true")
     {
         // check if the function works correctly even if the parameter is wrong (kinks are accepted).
         CHECK(is_kink_induced_non_operational(

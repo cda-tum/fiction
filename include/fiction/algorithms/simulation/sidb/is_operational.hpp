@@ -103,11 +103,11 @@ enum class non_operationality_reason : uint8_t
      */
     KINKS,
     /**
-     * The layout is non-operational due to a logic mismatch.
+     * The layout is non-operational because of logic mismatch.
      */
     LOGIC_MISMATCH,
     /**
-     * No reason for non-operational was found.
+     * No reason for non-operationality could be determined.
      */
     NONE,
 };
@@ -182,7 +182,7 @@ class is_operational_impl
         assert((truth_table.size() == output_bdl_pairs.size()) &&
                "Number of truth tables and output BDL pairs does not match");
 
-        bool at_least_one_kink_induced_non_operational = false;
+        bool at_least_one_kink_induced_layout_to_non_operational = false;
 
         // number of different input combinations
         for (auto i = 0u; i < truth_table.front().num_bits(); ++i, ++bii)
@@ -217,13 +217,13 @@ class is_operational_impl
                 if (op_status == operational_status::NON_OPERATIONAL &&
                     non_op_reason == non_operationality_reason::KINKS)
                 {
-                    at_least_one_kink_induced_non_operational = true;
+                    at_least_one_kink_induced_layout_to_non_operational = true;
                     continue;
                 }
             }
         }
 
-        if (at_least_one_kink_induced_non_operational)
+        if (at_least_one_kink_induced_layout_to_non_operational)
         {
             return {operational_status::NON_OPERATIONAL, non_operationality_reason::KINKS};
         }
@@ -705,13 +705,12 @@ template <typename Lyt, typename TT>
 
     return input_patterns;
 }
-
 /**
  * This function determines all input combinations for which kinks induce the SiDB layout to become non-operational.
  * This means that the layout is operational if kinks would be accepted.
  *
- * @note "kink induced non-operational" refers to the operational status being exclusively caused to be
- * `NON_OPERATIONAL` by kinks.
+ * @note "Kink induced non-operational" refers to the non-operational status being exclusively caused by kinks with an
+ * otherwise correct logic match.
  *
  * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT Type of the truth table.
@@ -757,13 +756,12 @@ kink_induced_non_operational_input_patterns(const Lyt& lyt, const std::vector<TT
 
     return kink_induced_non_op_patterns;
 }
-
 /**
  * This function determines if the layout is only considered as non-operational because of kinks. This means that
  * the layout would be considered as operational, if kinks were accepted.
  *
- * @note "Kink induced non-operational" refers to the operational status being exclusively caused to be
- * `NON_OPERATIONAL` due to kinks.
+ * @note "Kink induced non-operational" refers to the non-operational status being exclusively caused by kinks with an
+ * otherwise correct logic match.
  *
  * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT Type of the truth table.
