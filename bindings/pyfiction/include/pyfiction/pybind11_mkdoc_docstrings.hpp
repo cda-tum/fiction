@@ -6912,14 +6912,15 @@ This function executes the operational status checking algorithm for
 the gate layout and parameters provided during initialization.
 
 Returns:
-    The operational status of the gate layout (either `OPERATIONAL` or
-    `NON_OPERATIONAL`).)doc";
+    Pair with the first element indicating the operational status
+    (either `OPERATIONAL` or `NON_OPERATIONAL`) and the second element
+    indicating the reason if it is non-operational.)doc";
 
 static const char *__doc_fiction_detail_is_operational_impl_simulator_invocations = R"doc(Number of simulator invocations.)doc";
 
 static const char *__doc_fiction_detail_is_operational_impl_truth_table = R"doc(The specification of the layout.)doc";
 
-static const char *__doc_fiction_detail_is_operational_impl_verifiy_logic_match_of_cds =
+static const char *__doc_fiction_detail_is_operational_impl_verify_logic_match_of_cds =
 R"doc(Checks if the given charge distribution correctly encodes the expected
 logic for the given input pattern, based on a provided truth table.
 
@@ -6938,8 +6939,9 @@ Parameter ``input_pattern``:
     Input pattern represented by the position of perturbers.
 
 Returns:
-    Operational status indicating if the layout is operational or non-
-    operational.)doc";
+    Pair with the first element indicating the operational status
+    (either `OPERATIONAL` or `NON_OPERATIONAL`) and the second element
+    indicating the reason if it is non-operational.)doc";
 
 static const char *__doc_fiction_detail_jump_point_search_impl = R"doc()doc";
 
@@ -7196,7 +7198,9 @@ static const char *__doc_fiction_detail_non_operationality_reason = R"doc(Reason
 
 static const char *__doc_fiction_detail_non_operationality_reason_KINKS = R"doc(Kinks induced the layout to become non-operational.)doc";
 
-static const char *__doc_fiction_detail_non_operationality_reason_LOGIC_MISMATCH = R"doc(The layout is non-operational due to a logic mismatch.)doc";
+static const char *__doc_fiction_detail_non_operationality_reason_LOGIC_MISMATCH = R"doc(The layout is non-operational because of logic mismatch.)doc";
+
+static const char *__doc_fiction_detail_non_operationality_reason_NONE = R"doc(No reason for non-operationality could be determined.)doc";
 
 static const char *__doc_fiction_detail_on_the_fly_circuit_design_impl = R"doc()doc";
 
@@ -13628,8 +13632,9 @@ R"doc(This function determines if the layout is only considered as non-
 operational because of kinks. This means that the layout would be
 considered as operational, if kinks were accepted.
 
-@note "Kink induced non-operational" refers to the operational status
-being exclusively caused to be `NON_OPERATIONAL` due to kinks.
+@note "Kink induced non-operational" refers to the non-operational
+status being exclusively caused by kinks with an otherwise correct
+logic match.
 
 Template parameter ``Lyt``:
     SiDB cell-level layout type.
@@ -13893,8 +13898,9 @@ R"doc(This function determines all input combinations for which kinks induce
 the SiDB layout to become non-operational. This means that the layout
 is operational if kinks would be accepted.
 
-@note "kink induced non-operational" refers to the operational status
-being exclusively caused to be `NON_OPERATIONAL` by kinks.
+@note "Kink induced non-operational" refers to the non-operational
+status being exclusively caused by kinks with an otherwise correct
+logic match.
 
 Template parameter ``Lyt``:
     SiDB cell-level layout type.
