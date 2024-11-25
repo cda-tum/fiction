@@ -102,7 +102,9 @@ jobs:
 
       - name: Build pyfiction
         working-directory: ${{github.workspace}}
-        run: uv pip install .
+        run: |
+          uv venv
+          uv pip install .
 
       - name: Test
         working-directory: ${{github.workspace}}
