@@ -15,10 +15,7 @@
 #include <fiction/utils/truth_table_utils.hpp>
 
 #include <cstdint>
-// to save runtime in the CI, this test is only run in RELEASE mode
-#ifdef NDEBUG
 #include <optional>
-#endif
 #include <set>
 #include <vector>
 
@@ -48,6 +45,19 @@ TEST_CASE("SiQAD OR gate", "[is-operational]")
                                       bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED},
             operational_condition::REJECT_KINKS});
     CHECK(kink_induced_non_operational);
+
+    const auto input_wires = detect_bdl_wires(lat, detect_bdl_wires_params{1.5});
+    const auto output_wires = detect_bdl_wires(lat, detect_bdl_wires_params{1.5});
+
+    // determine if kinks induce layout to become non-operational.
+    const auto kink_induced_non_operational_predefined_wires = is_kink_induced_non_operational(
+        lat, std::vector<tt>{create_or_tt()},
+        is_operational_params{
+            sidb_simulation_parameters{2, -0.28}, sidb_simulation_engine::QUICKEXACT,
+            bdl_input_iterator_params{detect_bdl_wires_params{1.5},
+                                      bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED},
+            operational_condition::REJECT_KINKS}, std::optional{input_wires}, std::optional{output_wires});
+    CHECK(kink_induced_non_operational_predefined_wires);
 
     // determine input patterns for which kinks induce layout to become non-operational.
     const auto kink_induced_non_operational_input_pattern = kink_induced_non_operational_input_patterns(
