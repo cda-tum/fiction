@@ -32,6 +32,7 @@ Changed
 
 Fixed
 #####
+- Fixed a bug in the gate design when using skeletons with I/O wires facing east.
 - Adapted ``post-layout optimization`` and ``wiring reduction`` to handle layouts with PIs not placed at the borders
 - Fix neutral defect handling in CDS and correct gate design termination condition
 - Enforce runtime evaluation of dynamic formatting strings to fix consteval contexts
