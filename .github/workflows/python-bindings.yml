@@ -40,45 +40,26 @@ env:
   Z3_VERSION: 4.13.0
 
 jobs:
-  build_and_test:
+  python-tests:
+    name: 🐍 ${{ matrix.runs-on }}
+    runs-on: ${{ matrix.runs-on }}
     strategy:
+      fail-fast: false
       matrix:
-        os: [ ubuntu-22.04, macos-14, windows-2019 ]
-        python_version: [ '3.8.x', '3.13.x' ]
-        include:
-          - os: ubuntu-22.04
-            z3_platform: linux
-            architecture: x64
-            toolset: v142
-          - os: macos-14
-            z3_platform: macOS
-            architecture: arm64
-          - os: windows-2019
-            z3_platform: windows
-            architecture: x64
-
-    name: 🐍 on ${{matrix.os}} with Python ${{matrix.python_version}}
-    runs-on: ${{matrix.os}}
-
+        runs-on: [ ubuntu-latest, macos-13, macos-14, windows-latest ]
     steps:
       - name: Clone Repository
         uses: actions/checkout@v4
         with:
           submodules: recursive
+          fetch-depth: 0
 
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
-          key: '${{matrix.os}}-pyfiction'
-          variant: ccache
+          key: "${{matrix.runs-on}}-pyfiction"
           save: true
           max-size: 10G
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{matrix.python_version}}
-          cache: 'pip'
 
       - if: runner.os == 'Linux'
         name: Setup mold
@@ -100,12 +81,8 @@ jobs:
           version: "latest"
           enable-cache: true
 
-      - name: Build pyfiction
-        working-directory: ${{github.workspace}}
-        run: |
-          uv venv
-          uv pip install .
+      - name: Setup nox
+        uses: wntrblm/nox@2024.10.09
 
-      - name: Test
-        working-directory: ${{github.workspace}}
-        run: python -m unittest discover -s bindings/mnt/pyfiction/test/ --verbose
+      - name: 🐍 Test
+        run: nox -s tests --verbose

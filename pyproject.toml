@@ -47,7 +47,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-test = []
+test = ["pytest>=7.2", "mnt.pyfiction"]
 docs = [
     "setuptools-scm>=8.1",
     "sphinx==8.1.3; python_version >= '3.10'",
@@ -133,6 +133,14 @@ if.abi-flags = "t"
 if.platform-system = "win32"
 inherit.cmake.define = "append"
 cmake.define.DISABLE_GIL = "1"
+
+
+[tool.pytest.ini_options]
+minversion = "7.2"
+testpaths = ["bindings/mnt/pyfiction/test/"]
+addopts = ["-ra", "--strict-markers", "--strict-config", "--showlocals"]
+log_cli_level = "INFO"
+xfail_strict = true
 
 
 [tool.cibuildwheel]
