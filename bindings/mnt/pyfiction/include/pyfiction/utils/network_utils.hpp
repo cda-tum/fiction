@@ -24,10 +24,10 @@ namespace detail
 template <typename Ntk>
 void has_high_degree_fanin_nodes(pybind11::module& m)
 {
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
-    m.def("has_high_degree_fanin_nodes", &fiction::has_high_degree_fanin_nodes<Ntk>, "ntk"_a, "threshold"_a = 2,
-          DOC(fiction_has_high_degree_fanin_nodes));
+    m.def("has_high_degree_fanin_nodes", &fiction::has_high_degree_fanin_nodes<Ntk>, py::arg("ntk"),
+          py::arg("threshold") = 2, DOC(fiction_has_high_degree_fanin_nodes));
 }
 
 }  // namespace detail

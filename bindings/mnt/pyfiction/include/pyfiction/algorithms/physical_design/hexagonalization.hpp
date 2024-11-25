@@ -21,11 +21,11 @@ namespace detail
 template <typename Lyt>
 void hexagonalization(pybind11::module& m)
 {
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
     m.def(
         "hexagonalization", [](const Lyt& lyt) -> py_hexagonal_gate_layout
-        { return fiction::hexagonalization<py_hexagonal_gate_layout, Lyt>(lyt); }, "layout"_a,
+        { return fiction::hexagonalization<py_hexagonal_gate_layout, Lyt>(lyt); }, py::arg("layout"),
         DOC(fiction_hexagonalization));
 }
 

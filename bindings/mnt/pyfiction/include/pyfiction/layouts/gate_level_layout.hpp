@@ -29,11 +29,11 @@ template <typename LytBase, typename GateLyt>
 void gate_level_layout(pybind11::module& m, const std::string& topology)
 {
     namespace py = pybind11;
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
     py::class_<GateLyt, LytBase>(m, fmt::format("{}_gate_layout", topology).c_str(), DOC(fiction_gate_level_layout))
         .def(py::init<>())
-        .def(py::init<const fiction::aspect_ratio<GateLyt>&>(), "dimension"_a,
+        .def(py::init<const fiction::aspect_ratio<GateLyt>&>(), py::arg("dimension"),
              DOC(fiction_gate_level_layout_gate_level_layout))
         .def(py::init(
                  [](const fiction::aspect_ratio<GateLyt>& dimension, const std::string& scheme_name,
@@ -46,17 +46,17 @@ void gate_level_layout(pybind11::module& m, const std::string& topology)
 
                      throw std::runtime_error("Given name does not refer to a supported clocking scheme");
                  }),
-             "dimension"_a, "clocking_scheme"_a = "2DDWave", "layout_name"_a = "",
+             py::arg("dimension"), py::arg("clocking_scheme") = "2DDWave", py::arg("layout_name") = "",
              DOC(fiction_gate_level_layout_gate_level_layout_2))
 
-        .def("create_pi", &GateLyt::create_pi, "name"_a = std::string{}, "t"_a = fiction::tile<GateLyt>{},
+        .def("create_pi", &GateLyt::create_pi, py::arg("name") = std::string{}, py::arg("t") = fiction::tile<GateLyt>{},
              DOC(fiction_gate_level_layout_create_pi))
-        .def("create_po", &GateLyt::create_po, "s"_a, "name"_a = std::string{}, "t"_a = fiction::tile<GateLyt>{},
-             DOC(fiction_gate_level_layout_create_po))
-        .def("is_pi", &GateLyt::is_pi, "n"_a, DOC(fiction_gate_level_layout_is_pi))
-        .def("is_po", &GateLyt::is_po, "n"_a, DOC(fiction_gate_level_layout_is_po))
-        .def("is_pi_tile", &GateLyt::is_pi_tile, "t"_a, DOC(fiction_gate_level_layout_is_pi_tile))
-        .def("is_po_tile", &GateLyt::is_po_tile, "t"_a, DOC(fiction_gate_level_layout_is_po_tile))
+        .def("create_po", &GateLyt::create_po, py::arg("s"), py::arg("name") = std::string{},
+             py::arg("t") = fiction::tile<GateLyt>{}, DOC(fiction_gate_level_layout_create_po))
+        .def("is_pi", &GateLyt::is_pi, py::arg("n"), DOC(fiction_gate_level_layout_is_pi))
+        .def("is_po", &GateLyt::is_po, py::arg("n"), DOC(fiction_gate_level_layout_is_po))
+        .def("is_pi_tile", &GateLyt::is_pi_tile, py::arg("t"), DOC(fiction_gate_level_layout_is_pi_tile))
+        .def("is_po_tile", &GateLyt::is_po_tile, py::arg("t"), DOC(fiction_gate_level_layout_is_po_tile))
 
         .def("is_inv", &GateLyt::is_inv, DOC(fiction_gate_level_layout_is_inv))
         .def("is_and", &GateLyt::is_and, DOC(fiction_gate_level_layout_is_and))
@@ -69,36 +69,39 @@ void gate_level_layout(pybind11::module& m, const std::string& topology)
         .def("is_fanout", &GateLyt::is_fanout, DOC(fiction_gate_level_layout_is_fanout))
         .def("is_wire", &GateLyt::is_wire, DOC(fiction_gate_level_layout_is_wire))
 
-        .def("set_layout_name", &GateLyt::set_layout_name, "name"_a, DOC(fiction_gate_level_layout_set_layout_name))
+        .def("set_layout_name", &GateLyt::set_layout_name, py::arg("name"),
+             DOC(fiction_gate_level_layout_set_layout_name))
         .def("get_layout_name", &GateLyt::get_layout_name, DOC(fiction_gate_level_layout_get_layout_name))
-        .def("set_input_name", &GateLyt::set_input_name, "index"_a, "name"_a,
+        .def("set_input_name", &GateLyt::set_input_name, py::arg("index"), py::arg("name"),
              DOC(fiction_gate_level_layout_set_input_name))
-        .def("get_input_name", &GateLyt::get_input_name, "index"_a, DOC(fiction_gate_level_layout_get_input_name))
-        .def("set_output_name", &GateLyt::set_output_name, "index"_a, "name"_a,
+        .def("get_input_name", &GateLyt::get_input_name, py::arg("index"),
+             DOC(fiction_gate_level_layout_get_input_name))
+        .def("set_output_name", &GateLyt::set_output_name, py::arg("index"), py::arg("name"),
              DOC(fiction_gate_level_layout_set_output_name))
-        .def("get_output_name", &GateLyt::get_output_name, "index"_a, DOC(fiction_gate_level_layout_get_output_name))
+        .def("get_output_name", &GateLyt::get_output_name, py::arg("index"),
+             DOC(fiction_gate_level_layout_get_output_name))
         .def(
             "get_name", [](const GateLyt& layout, const typename GateLyt::signal& signal)
-            { return layout.get_name(signal); }, "s"_a, DOC(fiction_gate_level_layout_get_name))
+            { return layout.get_name(signal); }, py::arg("s"), DOC(fiction_gate_level_layout_get_name))
 
-        .def("create_buf", &GateLyt::create_buf, "a"_a, "t"_a = fiction::tile<GateLyt>{},
+        .def("create_buf", &GateLyt::create_buf, py::arg("a"), py::arg("t") = fiction::tile<GateLyt>{},
              DOC(fiction_gate_level_layout_create_buf))
-        .def("create_not", &GateLyt::create_not, "a"_a, "t"_a = fiction::tile<GateLyt>{},
+        .def("create_not", &GateLyt::create_not, py::arg("a"), py::arg("t") = fiction::tile<GateLyt>{},
              DOC(fiction_gate_level_layout_create_not))
-        .def("create_and", &GateLyt::create_and, "a"_a, "b"_a, "t"_a = fiction::tile<GateLyt>{},
+        .def("create_and", &GateLyt::create_and, py::arg("a"), py::arg("b"), py::arg("t") = fiction::tile<GateLyt>{},
              DOC(fiction_gate_level_layout_create_and))
-        .def("create_nand", &GateLyt::create_nand, "a"_a, "b"_a, "t"_a = fiction::tile<GateLyt>{},
+        .def("create_nand", &GateLyt::create_nand, py::arg("a"), py::arg("b"), py::arg("t") = fiction::tile<GateLyt>{},
              DOC(fiction_gate_level_layout_create_nand))
-        .def("create_or", &GateLyt::create_or, "a"_a, "b"_a, "t"_a = fiction::tile<GateLyt>{},
+        .def("create_or", &GateLyt::create_or, py::arg("a"), py::arg("b"), py::arg("t") = fiction::tile<GateLyt>{},
              DOC(fiction_gate_level_layout_create_or))
-        .def("create_nor", &GateLyt::create_nor, "a"_a, "b"_a, "t"_a = fiction::tile<GateLyt>{},
+        .def("create_nor", &GateLyt::create_nor, py::arg("a"), py::arg("b"), py::arg("t") = fiction::tile<GateLyt>{},
              DOC(fiction_gate_level_layout_create_nor))
-        .def("create_xor", &GateLyt::create_xor, "a"_a, "b"_a, "t"_a = fiction::tile<GateLyt>{},
+        .def("create_xor", &GateLyt::create_xor, py::arg("a"), py::arg("b"), py::arg("t") = fiction::tile<GateLyt>{},
              DOC(fiction_gate_level_layout_create_xor))
-        .def("create_xnor", &GateLyt::create_xnor, "a"_a, "b"_a, "t"_a = fiction::tile<GateLyt>{},
+        .def("create_xnor", &GateLyt::create_xnor, py::arg("a"), py::arg("b"), py::arg("t") = fiction::tile<GateLyt>{},
              DOC(fiction_gate_level_layout_create_xnor))
-        .def("create_maj", &GateLyt::create_maj, "a"_a, "b"_a, "c"_a, "t"_a = fiction::tile<GateLyt>{},
-             DOC(fiction_gate_level_layout_create_maj))
+        .def("create_maj", &GateLyt::create_maj, py::arg("a"), py::arg("b"), py::arg("c"),
+             py::arg("t") = fiction::tile<GateLyt>{}, DOC(fiction_gate_level_layout_create_maj))
 
         .def("num_pis", &GateLyt::num_pis, DOC(fiction_gate_level_layout_num_pis))
         .def("num_pos", &GateLyt::num_pos, DOC(fiction_gate_level_layout_num_pos))
@@ -109,28 +112,28 @@ void gate_level_layout(pybind11::module& m, const std::string& topology)
 
         .def(
             "fanin_size", [](const GateLyt& layout, const uint64_t node)
-            { return layout.template fanin_size<true>(static_cast<typename GateLyt::node>(node)); }, "n"_a,
+            { return layout.template fanin_size<true>(static_cast<typename GateLyt::node>(node)); }, py::arg("n"),
             DOC(fiction_gate_level_layout_fanin_size))
 
         .def(
             "fanout_size", [](const GateLyt& layout, const uint64_t node)
-            { return layout.template fanout_size<true>(static_cast<typename GateLyt::node>(node)); }, "n"_a,
+            { return layout.template fanout_size<true>(static_cast<typename GateLyt::node>(node)); }, py::arg("n"),
             DOC(fiction_gate_level_layout_fanout_size))
 
         .def(
             "get_node", [](const GateLyt& layout, const py_offset_coordinate& coordinate)
-            { return layout.get_node(coordinate); }, "t"_a, DOC(fiction_gate_level_layout_get_node))
-        .def("get_tile", &GateLyt::get_tile, "n"_a, DOC(fiction_gate_level_layout_get_tile))
-        .def("make_signal", &GateLyt::make_signal, "n"_a, DOC(fiction_gate_level_layout_make_signal))
+            { return layout.get_node(coordinate); }, py::arg("t"), DOC(fiction_gate_level_layout_get_node))
+        .def("get_tile", &GateLyt::get_tile, py::arg("n"), DOC(fiction_gate_level_layout_get_tile))
+        .def("make_signal", &GateLyt::make_signal, py::arg("n"), DOC(fiction_gate_level_layout_make_signal))
 
-        .def("move_node", &GateLyt::move_node, "n"_a, "t"_a, "new_children"_a = std::vector<py_offset_coordinate>{},
-             DOC(fiction_gate_level_layout_move_node))
+        .def("move_node", &GateLyt::move_node, py::arg("n"), py::arg("t"),
+             py::arg("new_children") = std::vector<py_offset_coordinate>{}, DOC(fiction_gate_level_layout_move_node))
 
-        .def("clear_tile", &GateLyt::clear_tile, "t"_a, DOC(fiction_gate_level_layout_clear_tile))
+        .def("clear_tile", &GateLyt::clear_tile, py::arg("t"), DOC(fiction_gate_level_layout_clear_tile))
 
-        .def("is_gate_tile", &GateLyt::is_gate_tile, "t"_a, DOC(fiction_gate_level_layout_is_gate_tile))
-        .def("is_wire_tile", &GateLyt::is_wire_tile, "t"_a, DOC(fiction_gate_level_layout_is_wire_tile))
-        .def("is_empty_tile", &GateLyt::is_empty_tile, "t"_a, DOC(fiction_gate_level_layout_is_empty_tile))
+        .def("is_gate_tile", &GateLyt::is_gate_tile, py::arg("t"), DOC(fiction_gate_level_layout_is_gate_tile))
+        .def("is_wire_tile", &GateLyt::is_wire_tile, py::arg("t"), DOC(fiction_gate_level_layout_is_wire_tile))
+        .def("is_empty_tile", &GateLyt::is_empty_tile, py::arg("t"), DOC(fiction_gate_level_layout_is_empty_tile))
 
         .def("pis",
              [](const GateLyt& lyt)
@@ -167,112 +170,112 @@ void gate_level_layout(pybind11::module& m, const std::string& topology)
 
         .def(
             "fanins", [](const GateLyt& layout, const fiction::tile<GateLyt>& tile)
-            { return layout.template incoming_data_flow<true>(tile); }, "t"_a)
+            { return layout.template incoming_data_flow<true>(tile); }, py::arg("t"))
 
         .def(
             "fanouts", [](const GateLyt& layout, const fiction::tile<GateLyt>& tile)
-            { return layout.template outgoing_data_flow<true>(tile); }, "t"_a)
+            { return layout.template outgoing_data_flow<true>(tile); }, py::arg("t"))
 
         .def(
             "is_incoming_signal",
             [](const GateLyt& layout, const fiction::tile<GateLyt>& tile, const typename GateLyt::signal& signal)
-            { return layout.template is_incoming_signal<true>(tile, signal); }, "t"_a, "s"_a,
+            { return layout.template is_incoming_signal<true>(tile, signal); }, py::arg("t"), py::arg("s"),
             DOC(fiction_gate_level_layout_is_incoming_signal))
 
         .def(
             "has_no_incoming_signal", [](const GateLyt& layout, const fiction::tile<GateLyt>& tile)
-            { return layout.template has_no_incoming_signal<true>(tile); }, "t"_a,
+            { return layout.template has_no_incoming_signal<true>(tile); }, py::arg("t"),
             DOC(fiction_gate_level_layout_has_no_incoming_signal))
 
         .def(
             "has_northern_incoming_signal", [](const GateLyt& layout, const fiction::tile<GateLyt>& tile)
-            { return layout.template has_northern_incoming_signal<true>(tile); }, "t"_a,
+            { return layout.template has_northern_incoming_signal<true>(tile); }, py::arg("t"),
             DOC(fiction_gate_level_layout_has_northern_incoming_signal))
 
         .def(
             "has_north_eastern_incoming_signal", [](const GateLyt& layout, const fiction::tile<GateLyt>& tile)
-            { return layout.template has_north_eastern_incoming_signal<true>(tile); }, "t"_a,
+            { return layout.template has_north_eastern_incoming_signal<true>(tile); }, py::arg("t"),
             DOC(fiction_gate_level_layout_has_north_eastern_incoming_signal))
 
         .def(
             "has_eastern_incoming_signal", [](const GateLyt& layout, const fiction::tile<GateLyt>& tile)
-            { return layout.template has_eastern_incoming_signal<true>(tile); }, "t"_a,
+            { return layout.template has_eastern_incoming_signal<true>(tile); }, py::arg("t"),
             DOC(fiction_gate_level_layout_has_eastern_incoming_signal))
 
         .def(
             "has_south_eastern_incoming_signal", [](const GateLyt& layout, const fiction::tile<GateLyt>& tile)
-            { return layout.template has_south_eastern_incoming_signal<true>(tile); }, "t"_a,
+            { return layout.template has_south_eastern_incoming_signal<true>(tile); }, py::arg("t"),
             DOC(fiction_gate_level_layout_has_south_eastern_incoming_signal))
 
         .def(
             "has_southern_incoming_signal", [](const GateLyt& layout, const fiction::tile<GateLyt>& tile)
-            { return layout.template has_southern_incoming_signal<true>(tile); }, "t"_a,
+            { return layout.template has_southern_incoming_signal<true>(tile); }, py::arg("t"),
             DOC(fiction_gate_level_layout_has_southern_incoming_signal))
 
         .def(
             "has_south_western_incoming_signal", [](const GateLyt& layout, const fiction::tile<GateLyt>& tile)
-            { return layout.template has_south_western_incoming_signal<true>(tile); }, "t"_a,
+            { return layout.template has_south_western_incoming_signal<true>(tile); }, py::arg("t"),
             DOC(fiction_gate_level_layout_has_south_western_incoming_signal))
 
         .def(
             "has_western_incoming_signal", [](const GateLyt& layout, const fiction::tile<GateLyt>& tile)
-            { return layout.template has_western_incoming_signal<true>(tile); }, "t"_a,
+            { return layout.template has_western_incoming_signal<true>(tile); }, py::arg("t"),
             DOC(fiction_gate_level_layout_has_western_incoming_signal))
 
         .def(
             "has_north_western_incoming_signal", [](const GateLyt& layout, const fiction::tile<GateLyt>& tile)
-            { return layout.template has_north_western_incoming_signal<true>(tile); }, "t"_a,
+            { return layout.template has_north_western_incoming_signal<true>(tile); }, py::arg("t"),
             DOC(fiction_gate_level_layout_has_north_western_incoming_signal))
 
         .def(
             "is_outgoing_signal",
             [](const GateLyt& layout, const fiction::tile<GateLyt>& tile, const typename GateLyt::signal& signal)
-            { return layout.template is_outgoing_signal<true>(tile, signal); }, "t"_a, "s"_a,
+            { return layout.template is_outgoing_signal<true>(tile, signal); }, py::arg("t"), py::arg("s"),
             DOC(fiction_gate_level_layout_is_outgoing_signal))
 
         .def(
             "has_no_outgoing_signal", [](const GateLyt& layout, const fiction::tile<GateLyt>& tile)
-            { return layout.template has_no_outgoing_signal<true>(tile); }, "t"_a,
+            { return layout.template has_no_outgoing_signal<true>(tile); }, py::arg("t"),
             DOC(fiction_gate_level_layout_has_no_outgoing_signal))
 
         .def(
             "has_northern_outgoing_signal", [](const GateLyt& layout, const fiction::tile<GateLyt>& tile)
-            { return layout.template has_northern_outgoing_signal<true>(tile); }, "t"_a,
+            { return layout.template has_northern_outgoing_signal<true>(tile); }, py::arg("t"),
             DOC(fiction_gate_level_layout_has_northern_outgoing_signal))
 
         .def(
             "has_north_eastern_outgoing_signal", [](const GateLyt& layout, const fiction::tile<GateLyt>& tile)
-            { return layout.template has_north_eastern_outgoing_signal<true>(tile); }, "t"_a,
+            { return layout.template has_north_eastern_outgoing_signal<true>(tile); }, py::arg("t"),
             DOC(fiction_gate_level_layout_has_north_eastern_outgoing_signal))
 
         .def(
             "has_eastern_outgoing_signal", [](const GateLyt& layout, const fiction::tile<GateLyt>& tile)
-            { return layout.template has_eastern_outgoing_signal<true>(tile); }, "t"_a,
+            { return layout.template has_eastern_outgoing_signal<true>(tile); }, py::arg("t"),
             DOC(fiction_gate_level_layout_has_eastern_outgoing_signal))
 
         .def(
             "has_south_eastern_outgoing_signal", [](const GateLyt& layout, const fiction::tile<GateLyt>& tile)
-            { return layout.template has_south_eastern_outgoing_signal<true>(tile); }, "t"_a,
+            { return layout.template has_south_eastern_outgoing_signal<true>(tile); }, py::arg("t"),
             DOC(fiction_gate_level_layout_has_south_eastern_outgoing_signal))
 
         .def(
             "has_southern_outgoing_signal", [](const GateLyt& layout, const fiction::tile<GateLyt>& tile)
-            { return layout.template has_southern_outgoing_signal<true>(tile); }, "t"_a,
+            { return layout.template has_southern_outgoing_signal<true>(tile); }, py::arg("t"),
             DOC(fiction_gate_level_layout_has_southern_outgoing_signal))
 
         .def(
             "has_south_western_outgoing_signal", [](const GateLyt& layout, const fiction::tile<GateLyt>& tile)
-            { return layout.template has_south_western_outgoing_signal<true>(tile); }, "t"_a,
+            { return layout.template has_south_western_outgoing_signal<true>(tile); }, py::arg("t"),
             DOC(fiction_gate_level_layout_has_south_western_outgoing_signal))
 
         .def(
             "has_western_outgoing_signal", [](const GateLyt& layout, const fiction::tile<GateLyt>& tile)
-            { return layout.template has_western_outgoing_signal<true>(tile); }, "t"_a,
+            { return layout.template has_western_outgoing_signal<true>(tile); }, py::arg("t"),
             DOC(fiction_gate_level_layout_has_western_outgoing_signal))
 
         .def(
             "has_north_western_outgoing_signal", [](const GateLyt& layout, const fiction::tile<GateLyt>& tile)
-            { return layout.template has_north_western_outgoing_signal<true>(tile); }, "t"_a,
+            { return layout.template has_north_western_outgoing_signal<true>(tile); }, py::arg("t"),
             DOC(fiction_gate_level_layout_has_north_western_outgoing_signal))
 
         .def(
@@ -283,7 +286,7 @@ void gate_level_layout(pybind11::module& m, const std::string& topology)
                 return std::make_pair(bb.get_min(), bb.get_max());
             },
             DOC(fiction_bounding_box_2d_overridden))
-        .def("is_dead", &GateLyt::is_dead, "n"_a, DOC(fiction_gate_level_layout_is_dead))
+        .def("is_dead", &GateLyt::is_dead, py::arg("n"), DOC(fiction_gate_level_layout_is_dead))
         .def("__repr__",
              [](const GateLyt& lyt) -> std::string
              {

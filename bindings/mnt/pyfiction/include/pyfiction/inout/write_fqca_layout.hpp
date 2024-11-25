@@ -23,14 +23,14 @@ namespace detail
 template <typename Lyt>
 void write_fqca_layout(pybind11::module& m)
 {
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
     void (*write_fqca_layout_function_pointer)(const Lyt&, const std::string_view&,
                                                const fiction::write_fqca_layout_params) =
         &fiction::write_fqca_layout<Lyt>;
 
-    m.def("write_fqca_layout", write_fqca_layout_function_pointer, "layout"_a, "filename"_a,
-          "params"_a = fiction::write_fqca_layout_params{}, DOC(fiction_write_fqca_layout));
+    m.def("write_fqca_layout", write_fqca_layout_function_pointer, py::arg("layout"), py::arg("filename"),
+          py::arg("params") = fiction::write_fqca_layout_params{}, DOC(fiction_write_fqca_layout));
 }
 
 }  // namespace detail

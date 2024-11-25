@@ -21,7 +21,7 @@ namespace detail
 template <typename Lyt>
 void gate_level_drvs(pybind11::module& m)
 {
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
     m.def(
         "gate_level_drvs",
@@ -42,7 +42,7 @@ void gate_level_drvs(pybind11::module& m)
 
             return {stats.warnings, stats.drvs};
         },
-        "layout"_a, "params"_a = fiction::gate_level_drv_params{}, "print_report"_a = false,
+        py::arg("layout"), py::arg("params") = fiction::gate_level_drv_params{}, py::arg("print_report") = false,
         DOC(fiction_gate_level_drvs));
 }
 

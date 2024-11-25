@@ -26,23 +26,23 @@ namespace detail
 template <typename Lyt>
 void operational_domain(pybind11::module& m)
 {
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
-    m.def("operational_domain_grid_search", &fiction::operational_domain_grid_search<Lyt, py_tt>, "lyt"_a, "spec"_a,
-          "params"_a = fiction::operational_domain_params{}, "stats"_a = nullptr,
+    m.def("operational_domain_grid_search", &fiction::operational_domain_grid_search<Lyt, py_tt>, py::arg("lyt"),
+          py::arg("spec"), py::arg("params") = fiction::operational_domain_params{}, py::arg("stats") = nullptr,
           DOC(fiction_operational_domain_grid_search));
 
-    m.def("operational_domain_random_sampling", &fiction::operational_domain_random_sampling<Lyt, py_tt>, "lyt"_a,
-          "spec"_a, "samples"_a, "params"_a = fiction::operational_domain_params{}, "stats"_a = nullptr,
-          DOC(fiction_operational_domain_random_sampling));
+    m.def("operational_domain_random_sampling", &fiction::operational_domain_random_sampling<Lyt, py_tt>,
+          py::arg("lyt"), py::arg("spec"), py::arg("samples"), py::arg("params") = fiction::operational_domain_params{},
+          py::arg("stats") = nullptr, DOC(fiction_operational_domain_random_sampling));
 
-    m.def("operational_domain_flood_fill", &fiction::operational_domain_flood_fill<Lyt, py_tt>, "lyt"_a, "spec"_a,
-          "samples"_a, "params"_a = fiction::operational_domain_params{}, "stats"_a = nullptr,
-          DOC(fiction_operational_domain_flood_fill));
+    m.def("operational_domain_flood_fill", &fiction::operational_domain_flood_fill<Lyt, py_tt>, py::arg("lyt"),
+          py::arg("spec"), py::arg("samples"), py::arg("params") = fiction::operational_domain_params{},
+          py::arg("stats") = nullptr, DOC(fiction_operational_domain_flood_fill));
 
-    m.def("operational_domain_contour_tracing", &fiction::operational_domain_contour_tracing<Lyt, py_tt>, "lyt"_a,
-          "spec"_a, "samples"_a, "params"_a = fiction::operational_domain_params{}, "stats"_a = nullptr,
-          DOC(fiction_operational_domain_contour_tracing));
+    m.def("operational_domain_contour_tracing", &fiction::operational_domain_contour_tracing<Lyt, py_tt>,
+          py::arg("lyt"), py::arg("spec"), py::arg("samples"), py::arg("params") = fiction::operational_domain_params{},
+          py::arg("stats") = nullptr, DOC(fiction_operational_domain_contour_tracing));
 }
 
 }  // namespace detail
@@ -50,15 +50,15 @@ void operational_domain(pybind11::module& m)
 inline void operational_domain(pybind11::module& m)
 {
     namespace py = pybind11;
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
     py::class_<fiction::parameter_point>(m, "parameter_point", DOC(fiction_parameter_point))
         .def(py::init<>(), DOC(fiction_parameter_point_parameter_point))
-        .def(py::init<const std::vector<double>>(), "values"_a, DOC(fiction_parameter_point_parameter_point_2))
+        .def(py::init<const std::vector<double>>(), py::arg("values"), DOC(fiction_parameter_point_parameter_point_2))
         .def_readwrite("parameters", &fiction::parameter_point::parameters, DOC(fiction_parameter_point))
 
-        .def(py::self == py::self, "other"_a, DOC(fiction_parameter_point_operator_eq))
-        .def(py::self != py::self, "other"_a, DOC(fiction_parameter_point_operator_ne))
+        .def(py::self == py::self, py::arg("other"), DOC(fiction_parameter_point_operator_eq))
+        .def(py::self != py::self, py::arg("other"), DOC(fiction_parameter_point_operator_ne))
 
         .def("__hash__",
              [](const fiction::parameter_point& self) { return std::hash<fiction::parameter_point>{}(self); })
@@ -84,15 +84,16 @@ inline void operational_domain(pybind11::module& m)
             DOC(fiction_operational_domain_operational_values))
 
         .def("get_value",
-             &fiction::operational_domain<fiction::parameter_point, fiction::operational_status>::get_value, "point"_a,
-             DOC(fiction_operational_domain_get_value))
+             &fiction::operational_domain<fiction::parameter_point, fiction::operational_status>::get_value,
+             py::arg("point"), DOC(fiction_operational_domain_get_value))
 
         ;
 
     py::class_<fiction::operational_domain_value_range>(m, "operational_domain_value_range",
                                                         DOC(fiction_operational_domain_value_range))
-        .def(py::init<fiction::sweep_parameter>(), "dimension"_a)
-        .def(py::init<fiction::sweep_parameter, double, double, double>(), "dimension"_a, "min"_a, "max"_a, "step"_a)
+        .def(py::init<fiction::sweep_parameter>(), py::arg("dimension"))
+        .def(py::init<fiction::sweep_parameter, double, double, double>(), py::arg("dimension"), py::arg("min"),
+             py::arg("max"), py::arg("step"))
         .def_readwrite("dimension", &fiction::operational_domain_value_range::dimension,
                        DOC(fiction_operational_domain_value_range_dimension))
         .def_readwrite("min", &fiction::operational_domain_value_range::min,

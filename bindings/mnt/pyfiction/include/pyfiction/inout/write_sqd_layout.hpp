@@ -22,11 +22,11 @@ namespace detail
 template <typename Lyt>
 inline void write_sqd_layout(pybind11::module& m)
 {
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
     void (*write_sqd_layout_function_pointer)(const Lyt&, const std::string_view&) = &fiction::write_sqd_layout<Lyt>;
 
-    m.def("write_sqd_layout", write_sqd_layout_function_pointer, "layout"_a, "filename"_a,
+    m.def("write_sqd_layout", write_sqd_layout_function_pointer, py::arg("layout"), py::arg("filename"),
           DOC(fiction_write_sqd_layout));
 }
 }  // namespace detail

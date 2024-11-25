@@ -22,12 +22,12 @@ namespace pyfiction
 inline void sidb_simulation_parameters(pybind11::module& m)
 {
     namespace py = pybind11;
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
     py::class_<fiction::sidb_simulation_parameters>(m, "sidb_simulation_parameters",
                                                     DOC(fiction_sidb_simulation_parameters))
-        .def(py::init<const uint8_t, const double, const double, const double>(), "base_number"_a = 3,
-             "mu_minus"_a = -0.32, "relative_permittivity"_a = 5.6, "screening_distance"_a = 5.0,
+        .def(py::init<const uint8_t, const double, const double, const double>(), py::arg("base_number") = 3,
+             py::arg("mu_minus") = -0.32, py::arg("relative_permittivity") = 5.6, py::arg("screening_distance") = 5.0,
              DOC(fiction_sidb_simulation_parameters_sidb_simulation_parameters))
         .def(py::init<>())
         .def_readwrite("epsilon_r", &fiction::sidb_simulation_parameters::epsilon_r,

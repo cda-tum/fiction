@@ -22,10 +22,10 @@ namespace detail
 template <typename Lyt>
 void determine_groundstate_from_simulation_results(pybind11::module& m)
 {
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
     m.def("determine_groundstate_from_simulation_results", &fiction::determine_groundstate_from_simulation_results<Lyt>,
-          "simulation_results"_a, DOC(fiction_determine_groundstate_from_simulation_results));
+          py::arg("simulation_results"), DOC(fiction_determine_groundstate_from_simulation_results));
 }
 
 }  // namespace detail

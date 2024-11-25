@@ -23,11 +23,11 @@ namespace detail
 template <typename Lyt>
 void write_qll_layout(pybind11::module& m)
 {
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
     void (*write_qll_layout_function_pointer)(const Lyt&, const std::string_view&) = &fiction::write_qll_layout<Lyt>;
 
-    m.def("write_qll_layout", write_qll_layout_function_pointer, "layout"_a, "filename"_a,
+    m.def("write_qll_layout", write_qll_layout_function_pointer, py::arg("layout"), py::arg("filename"),
           DOC(fiction_write_qll_layout));
 }
 

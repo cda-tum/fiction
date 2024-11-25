@@ -34,7 +34,7 @@ template <typename Ntk>
 void network(pybind11::module& m, const std::string& network_name)
 {
     namespace py = pybind11;
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
     /**
      * Network node.
@@ -100,56 +100,56 @@ void network(pybind11::module& m, const std::string& network_name)
                 ntk.foreach_fanin(n, [&fanins](const auto& f) { fanins.push_back(f); });
                 return fanins;
             },
-            "n"_a)
+            py::arg("n"))
 
-        .def("is_constant", &Ntk::is_constant, "n"_a)
-        .def("is_pi", &Ntk::is_pi, "n"_a)
-        .def("is_po", &Ntk::is_po, "n"_a)
+        .def("is_constant", &Ntk::is_constant, py::arg("n"))
+        .def("is_pi", &Ntk::is_pi, py::arg("n"))
+        .def("is_po", &Ntk::is_po, py::arg("n"))
 
         // for some reason, the is_* functions need redefinition to match with Ntk
         .def(
-            "is_buf", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_buf(n); }, "n"_a,
+            "is_buf", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_buf(n); }, py::arg("n"),
             DOC(fiction_technology_network_is_buf))
         .def(
-            "is_fanout", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_fanout(n); }, "n"_a,
+            "is_fanout", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_fanout(n); }, py::arg("n"),
             DOC(fiction_technology_network_is_fanout))
         .def(
-            "is_inv", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_inv(n); }, "n"_a,
+            "is_inv", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_inv(n); }, py::arg("n"),
             DOC(fiction_technology_network_is_inv))
         .def(
-            "is_and", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_and(n); }, "n"_a,
+            "is_and", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_and(n); }, py::arg("n"),
             DOC(fiction_technology_network_is_and))
         .def(
-            "is_or", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_or(n); }, "n"_a,
+            "is_or", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_or(n); }, py::arg("n"),
             DOC(fiction_technology_network_is_or))
         .def(
-            "is_xor", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_xor(n); }, "n"_a,
+            "is_xor", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_xor(n); }, py::arg("n"),
             DOC(fiction_technology_network_is_xor))
         .def(
-            "is_maj", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_maj(n); }, "n"_a,
+            "is_maj", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_maj(n); }, py::arg("n"),
             DOC(fiction_technology_network_is_maj))
         .def(
-            "is_nand", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_nand(n); }, "n"_a,
+            "is_nand", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_nand(n); }, py::arg("n"),
             DOC(fiction_technology_network_is_nand))
         .def(
-            "is_nor", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_nor(n); }, "n"_a,
+            "is_nor", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_nor(n); }, py::arg("n"),
             DOC(fiction_technology_network_is_nor))
         .def(
-            "is_xnor", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_xnor(n); }, "n"_a,
+            "is_xnor", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_xnor(n); }, py::arg("n"),
             DOC(fiction_technology_network_is_xnor))
         .def(
-            "has_name", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.has_name(n); }, "n"_a)
+            "has_name", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.has_name(n); }, py::arg("n"))
         .def(
-            "get_name", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.get_name(n); }, "n"_a)
+            "get_name", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.get_name(n); }, py::arg("n"))
         .def(
             "has_output_name", [](const Ntk& ntk, const uint32_t index) { return ntk.has_output_name(index); },
-            "index"_a)
+            py::arg("index"))
         .def(
             "get_output_name", [](const Ntk& ntk, const uint32_t index) { return ntk.get_output_name(index); },
-            "index"_a)
+            py::arg("index"))
         .def(
-            "po_index", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.po_index(n); }, "n"_a)
-        .def("po_at", [](const Ntk& ntk, const uint32_t index) { return ntk.po_at(index); }, "index"_a);
+            "po_index", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.po_index(n); }, py::arg("n"))
+        .def("po_at", [](const Ntk& ntk, const uint32_t index) { return ntk.po_at(index); }, py::arg("index"));
 
     /**
      * Network parsing function.
@@ -169,7 +169,7 @@ void network(pybind11::module& m, const std::string& network_name)
 
             throw std::runtime_error("Could not parse specification file");
         },
-        "filename"_a);
+        py::arg("filename"));
 }
 
 }  // namespace detail

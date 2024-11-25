@@ -23,23 +23,23 @@ namespace detail
 template <typename Lyt>
 void detect_bdl_wires(pybind11::module& m, const std::string& lattice)
 {
-    using namespace pybind11::literals;
+    namespace py = pybind11;
     namespace py = pybind11;
 
     using bdl_wire_t = fiction::bdl_wire<Lyt>;
 
     py::class_<bdl_wire_t>(m, fmt::format("bdl_wire_{}", lattice).c_str(), DOC(fiction_bdl_wire))
         .def(py::init<>(), DOC(fiction_bdl_wire_bdl_wire))
-        .def(py::init<std::vector<fiction::bdl_pair<fiction::offset::ucoord_t>>>(), "p"_a,
+        .def(py::init<std::vector<fiction::bdl_pair<fiction::offset::ucoord_t>>>(), py::arg("p"),
              DOC(fiction_bdl_wire_bdl_wire_2))
         .def_readwrite("pairs", &bdl_wire_t::pairs, DOC(fiction_bdl_wire_pairs))
         .def_readwrite("direction", &bdl_wire_t::port, DOC(fiction_bdl_wire_port))
         .def_readwrite("first_bdl_pair", &bdl_wire_t::first_bdl_pair, DOC(fiction_bdl_wire_first_bdl_pair))
         .def_readwrite("last_bdl_pair", &bdl_wire_t::last_bdl_pair, DOC(fiction_bdl_wire_last_bdl_pair));
 
-    m.def(fmt::format("detect_bdl_wires_{}", lattice).c_str(), &fiction::detect_bdl_wires<Lyt>, "lyt"_a,
-          "params"_a = fiction::detect_bdl_wires_params{}, "wire_selection"_a = fiction::bdl_wire_selection::ALL,
-          DOC(fiction_detect_bdl_wires));
+    m.def(fmt::format("detect_bdl_wires_{}", lattice).c_str(), &fiction::detect_bdl_wires<Lyt>, py::arg("lyt"),
+          py::arg("params")         = fiction::detect_bdl_wires_params{},
+          py::arg("wire_selection") = fiction::bdl_wire_selection::ALL, DOC(fiction_detect_bdl_wires));
 }
 
 }  // namespace detail
@@ -52,7 +52,7 @@ void detect_bdl_wires(pybind11::module& m, const std::string& lattice)
 inline void detect_bdl_wires(pybind11::module& m)
 {
     namespace py = pybind11;
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
     // Enum for wire selection options
     py::enum_<fiction::bdl_wire_selection>(m, "bdl_wire_selection", DOC(fiction_bdl_wire_selection))

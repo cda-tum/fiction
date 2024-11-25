@@ -27,10 +27,10 @@ namespace detail
 template <typename Lyt>
 void detect_bdl_pairs(pybind11::module& m)
 {
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
-    m.def("detect_bdl_pairs", &fiction::detect_bdl_pairs<Lyt>, "lyt"_a, "type"_a = std::nullopt,
-          "params"_a = fiction::detect_bdl_pairs_params{}, DOC(fiction_detect_bdl_pairs));
+    m.def("detect_bdl_pairs", &fiction::detect_bdl_pairs<Lyt>, py::arg("lyt"), py::arg("type") = std::nullopt,
+          py::arg("params") = fiction::detect_bdl_pairs_params{}, DOC(fiction_detect_bdl_pairs));
 }
 
 }  // namespace detail
@@ -38,12 +38,12 @@ void detect_bdl_pairs(pybind11::module& m)
 inline void detect_bdl_pairs(pybind11::module& m)
 {
     namespace py = pybind11;
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
     py::class_<fiction::bdl_pair<fiction::offset::ucoord_t>>(m, "bdl_pair", DOC(fiction_bdl_pair))
         .def(py::init<>(), DOC(fiction_bdl_pair_bdl_pair))
         .def(py::init<fiction::sidb_technology::cell_type, fiction::offset::ucoord_t, fiction::offset::ucoord_t>(),
-             "t"_a, "u"_a, "l"_a, DOC(fiction_bdl_pair_bdl_pair_2))
+             py::arg("t"), py::arg("u"), py::arg("l"), DOC(fiction_bdl_pair_bdl_pair_2))
         .def_readonly("type", &fiction::bdl_pair<fiction::offset::ucoord_t>::type, DOC(fiction_bdl_pair_type))
         .def_readonly("upper", &fiction::bdl_pair<fiction::offset::ucoord_t>::upper, DOC(fiction_bdl_pair_upper))
         .def_readonly("lower", &fiction::bdl_pair<fiction::offset::ucoord_t>::lower, DOC(fiction_bdl_pair_lower));

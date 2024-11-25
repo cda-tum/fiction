@@ -24,14 +24,15 @@ namespace detail
 template <typename Lyt>
 void random_layout_generator(pybind11::module& m)
 {
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
-    m.def("generate_random_sidb_layout", &fiction::generate_random_sidb_layout<Lyt>, "lyt_skeleton"_a,
-          "params"_a = fiction::generate_random_sidb_layout_params<fiction::cell<Lyt>>{},
+    m.def("generate_random_sidb_layout", &fiction::generate_random_sidb_layout<Lyt>, py::arg("lyt_skeleton"),
+          py::arg("params") = fiction::generate_random_sidb_layout_params<fiction::cell<Lyt>>{},
           DOC(fiction_generate_random_sidb_layout));
 
     m.def("generate_multiple_random_sidb_layouts", &fiction::generate_multiple_random_sidb_layouts<Lyt>,
-          "lyt_skeleton"_a, "params"_a = fiction::generate_random_sidb_layout_params<fiction::cell<Lyt>>{},
+          py::arg("lyt_skeleton"),
+          py::arg("params") = fiction::generate_random_sidb_layout_params<fiction::cell<Lyt>>{},
           DOC(fiction_generate_multiple_random_sidb_layouts));
 }
 
@@ -40,7 +41,7 @@ void random_layout_generator(pybind11::module& m)
 inline void random_sidb_layout_generator(pybind11::module& m)
 {
     namespace py = pybind11;
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
     py::enum_<typename fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>::positive_charges>(
         m, "positive_charges", DOC(fiction_generate_random_sidb_layout_params_positive_charges))

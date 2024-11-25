@@ -26,7 +26,7 @@ template <typename Lyt>
 void sidb_simulation_result(pybind11::module& m, const std::string& lattice = "")
 {
     namespace py = pybind11;
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
     py::class_<fiction::sidb_simulation_result<Lyt>>(m, fmt::format("sidb_simulation_result{}", lattice).c_str(),
                                                      DOC(fiction_sidb_simulation_result))

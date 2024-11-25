@@ -17,7 +17,7 @@ namespace pyfiction
 inline void sidb_charge_state(pybind11::module& m)
 {
     namespace py = pybind11;
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
     py::enum_<fiction::sidb_charge_state>(m, "sidb_charge_state", DOC(fiction_sidb_charge_state))
         .value("NEGATIVE", fiction::sidb_charge_state::NEGATIVE, DOC(fiction_sidb_charge_state_NEGATIVE))
@@ -27,9 +27,9 @@ inline void sidb_charge_state(pybind11::module& m)
 
         ;
 
-    m.def("charge_state_to_sign", &fiction::charge_state_to_sign, "cs"_a, DOC(fiction_charge_state_to_sign));
-    m.def("sign_to_charge_state", &fiction::sign_to_charge_state, "sg"_a, DOC(fiction_sign_to_charge_state));
-    m.def("charge_configuration_to_string", &fiction::charge_configuration_to_string, "cc"_a,
+    m.def("charge_state_to_sign", &fiction::charge_state_to_sign, py::arg("cs"), DOC(fiction_charge_state_to_sign));
+    m.def("sign_to_charge_state", &fiction::sign_to_charge_state, py::arg("sg"), DOC(fiction_sign_to_charge_state));
+    m.def("charge_configuration_to_string", &fiction::charge_configuration_to_string, py::arg("cc"),
           DOC(fiction_charge_configuration_to_string));
 }
 

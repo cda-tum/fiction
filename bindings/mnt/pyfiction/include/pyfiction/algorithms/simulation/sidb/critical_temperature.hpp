@@ -24,14 +24,14 @@ namespace detail
 template <typename Lyt>
 void critical_temperature(pybind11::module& m)
 {
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
-    m.def("critical_temperature_gate_based", &fiction::critical_temperature_gate_based<Lyt, py_tt>, "lyt"_a, "spec"_a,
-          "params"_a = fiction::critical_temperature_params{}, "stats"_a = nullptr,
+    m.def("critical_temperature_gate_based", &fiction::critical_temperature_gate_based<Lyt, py_tt>, py::arg("lyt"),
+          py::arg("spec"), py::arg("params") = fiction::critical_temperature_params{}, py::arg("stats") = nullptr,
           DOC(fiction_critical_temperature_gate_based));
 
-    m.def("critical_temperature_non_gate_based", &fiction::critical_temperature_non_gate_based<Lyt>, "lyt"_a,
-          "params"_a = fiction::critical_temperature_params{}, "stats"_a = nullptr,
+    m.def("critical_temperature_non_gate_based", &fiction::critical_temperature_non_gate_based<Lyt>, py::arg("lyt"),
+          py::arg("params") = fiction::critical_temperature_params{}, py::arg("stats") = nullptr,
           DOC(fiction_critical_temperature_non_gate_based));
 }
 

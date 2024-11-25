@@ -22,9 +22,10 @@ namespace detail
 template <typename Lyt>
 void sidb_nm_position(pybind11::module& m)
 {
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
-    m.def("sidb_nm_position", &fiction::sidb_nm_position<Lyt>, "lyt"_a, "c"_a, DOC(fiction_sidb_nm_position));
+    m.def("sidb_nm_position", &fiction::sidb_nm_position<Lyt>, py::arg("lyt"), py::arg("c"),
+          DOC(fiction_sidb_nm_position));
 }
 
 }  // namespace detail

@@ -25,7 +25,7 @@ namespace pyfiction
 inline void graph_oriented_layout_design(pybind11::module& m)
 {
     namespace py = pybind11;
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
     py::enum_<fiction::graph_oriented_layout_design_params::effort_mode>(
         m, "gold_effort_mode", DOC(fiction_graph_oriented_layout_design_params_effort_mode))
@@ -97,9 +97,9 @@ inline void graph_oriented_layout_design(pybind11::module& m)
                       DOC(fiction_graph_oriented_layout_design_stats_num_crossings));
 
     m.def("graph_oriented_layout_design",
-          &fiction::graph_oriented_layout_design<py_cartesian_gate_layout, py_logic_network>, "network"_a,
-          "parameters"_a = fiction::graph_oriented_layout_design_params{}, "statistics"_a = nullptr,
-          "custom_cost_objective"_a = nullptr, DOC(fiction_graph_oriented_layout_design));
+          &fiction::graph_oriented_layout_design<py_cartesian_gate_layout, py_logic_network>, py::arg("network"),
+          py::arg("parameters") = fiction::graph_oriented_layout_design_params{}, py::arg("statistics") = nullptr,
+          py::arg("custom_cost_objective") = nullptr, DOC(fiction_graph_oriented_layout_design));
 }
 
 }  // namespace pyfiction

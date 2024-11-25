@@ -26,7 +26,7 @@ namespace pyfiction
 inline void exact(pybind11::module& m)
 {
     namespace py = pybind11;
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
     py::enum_<fiction::technology_constraints>(m, "technology_constraints", DOC(fiction_technology_constraints))
         .value("NONE", fiction::technology_constraints::NONE, DOC(fiction_technology_constraints_NONE))
@@ -93,14 +93,17 @@ inline void exact(pybind11::module& m)
 
         ;
 
-    m.def("exact_cartesian", &fiction::exact<py_cartesian_gate_layout, py_logic_network>, "network"_a,
-          "parameters"_a = fiction::exact_physical_design_params{}, "statistics"_a = nullptr, DOC(fiction_exact));
+    m.def("exact_cartesian", &fiction::exact<py_cartesian_gate_layout, py_logic_network>, py::arg("network"),
+          py::arg("parameters") = fiction::exact_physical_design_params{}, py::arg("statistics") = nullptr,
+          DOC(fiction_exact));
 
-    m.def("exact_shifted_cartesian", &fiction::exact<py_shifted_cartesian_gate_layout, py_logic_network>, "network"_a,
-          "parameters"_a = fiction::exact_physical_design_params{}, "statistics"_a = nullptr);
+    m.def("exact_shifted_cartesian", &fiction::exact<py_shifted_cartesian_gate_layout, py_logic_network>,
+          py::arg("network"), py::arg("parameters") = fiction::exact_physical_design_params{},
+          py::arg("statistics") = nullptr);
 
-    m.def("exact_hexagonal", &fiction::exact<py_hexagonal_gate_layout, py_logic_network>, "network"_a,
-          "parameters"_a = fiction::exact_physical_design_params{}, "statistics"_a = nullptr, DOC(fiction_exact));
+    m.def("exact_hexagonal", &fiction::exact<py_hexagonal_gate_layout, py_logic_network>, py::arg("network"),
+          py::arg("parameters") = fiction::exact_physical_design_params{}, py::arg("statistics") = nullptr,
+          DOC(fiction_exact));
 }
 
 }  // namespace pyfiction

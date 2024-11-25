@@ -23,12 +23,12 @@ namespace detail
 template <typename Lyt>
 void read_fqca_layout(pybind11::module& m)
 {
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
     Lyt (*read_fqca_layout_function_pointer)(const std::string_view&, const std::string_view&) =
         &fiction::read_fqca_layout<Lyt>;
 
-    m.def("read_fqca_layout", read_fqca_layout_function_pointer, "filename"_a, "layout_name"_a = "",
+    m.def("read_fqca_layout", read_fqca_layout_function_pointer, py::arg("filename"), py::arg("layout_name") = "",
           DOC(fiction_read_fqca_layout));
 }
 

@@ -24,7 +24,7 @@ namespace detail
 template <typename Lyt>
 void color_routing(pybind11::module& m)
 {
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
     m.def(
         "color_routing",
@@ -41,7 +41,8 @@ void color_routing(pybind11::module& m)
 
             return fiction::color_routing(lyt, objs, params);
         },
-        "layout"_a, "objectives"_a, "params"_a = fiction::color_routing_params{}, DOC(fiction_color_routing));
+        py::arg("layout"), py::arg("objectives"), py::arg("params") = fiction::color_routing_params{},
+        DOC(fiction_color_routing));
 }
 
 }  // namespace detail

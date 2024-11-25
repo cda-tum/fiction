@@ -23,10 +23,10 @@ template <typename Lyt>
 void assess_physical_population_stability(pybind11::module& m)
 {
     namespace py = pybind11;
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
-    m.def("assess_physical_population_stability", &fiction::assess_physical_population_stability<Lyt>, "lyt"_a,
-          "params"_a = fiction::assess_physical_population_stability_params{},
+    m.def("assess_physical_population_stability", &fiction::assess_physical_population_stability<Lyt>, py::arg("lyt"),
+          py::arg("params") = fiction::assess_physical_population_stability_params{},
           DOC(fiction_assess_physical_population_stability));
 }
 

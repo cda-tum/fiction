@@ -24,17 +24,17 @@ namespace detail
 template <typename NtkOrLyt>
 void get_name(pybind11::module& m)
 {
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
-    m.def("get_name", &fiction::get_name<NtkOrLyt>, "ntk_or_lyt"_a, DOC(fiction_get_name));
+    m.def("get_name", &fiction::get_name<NtkOrLyt>, py::arg("ntk_or_lyt"), DOC(fiction_get_name));
 }
 
 template <typename NtkOrLyt>
 void set_name(pybind11::module& m)
 {
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
-    m.def("set_name", &fiction::set_name<NtkOrLyt>, "ntk_or_lyt"_a, "name"_a, DOC(fiction_set_name));
+    m.def("set_name", &fiction::set_name<NtkOrLyt>, py::arg("ntk_or_lyt"), py::arg("name"), DOC(fiction_set_name));
 }
 
 }  // namespace detail

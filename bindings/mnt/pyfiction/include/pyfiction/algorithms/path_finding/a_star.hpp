@@ -24,7 +24,7 @@ namespace detail
 template <typename Lyt>
 void a_star(pybind11::module& m)
 {
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
     m.def(
         "a_star",
@@ -36,10 +36,11 @@ void a_star(pybind11::module& m)
                                                                            fiction::manhattan_distance_functor<Lyt>(),
                                                                            fiction::unit_cost_functor<Lyt>(), params));
         },
-        "layout"_a, "source"_a, "target"_a, "params"_a = fiction::a_star_params{}, DOC(fiction_a_star));
+        py::arg("layout"), py::arg("source"), py::arg("target"), py::arg("params") = fiction::a_star_params{},
+        DOC(fiction_a_star));
 
-    m.def("a_star_distance", &fiction::a_star_distance<Lyt, double>, "layout"_a, "source"_a, "target"_a,
-          DOC(fiction_a_star_distance));
+    m.def("a_star_distance", &fiction::a_star_distance<Lyt, double>, py::arg("layout"), py::arg("source"),
+          py::arg("target"), DOC(fiction_a_star_distance));
 }
 
 }  // namespace detail

@@ -22,13 +22,14 @@ namespace detail
 template <typename Lyt>
 void time_to_solution(pybind11::module& m)
 {
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
-    m.def("time_to_solution", &fiction::time_to_solution<Lyt>, "lyt"_a, "quickim_params"_a,
-          "tts_params"_a = fiction::time_to_solution_params{}, "ps"_a = nullptr, DOC(fiction_time_to_solution));
+    m.def("time_to_solution", &fiction::time_to_solution<Lyt>, py::arg("lyt"), py::arg("quickim_params"),
+          py::arg("tts_params") = fiction::time_to_solution_params{}, py::arg("ps") = nullptr,
+          DOC(fiction_time_to_solution));
     m.def("time_to_solution_for_given_simulation_results", &fiction::time_to_solution_for_given_simulation_results<Lyt>,
-          "results_exact"_a, "results_heuristic"_a, "confidence_level"_a = 0.997, "ps"_a = nullptr,
-          DOC(fiction_time_to_solution_for_given_simulation_results));
+          py::arg("results_exact"), py::arg("results_heuristic"), py::arg("confidence_level") = 0.997,
+          py::arg("ps") = nullptr, DOC(fiction_time_to_solution_for_given_simulation_results));
 }
 
 }  // namespace detail

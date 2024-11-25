@@ -19,11 +19,12 @@ namespace pyfiction
 
 inline void write_qcc_layout(pybind11::module& m)
 {
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
     m.def(
-        "write_qcc_layout", [](const py_inml_layout& lyt, const std::string_view& filename)
-        { fiction::write_qcc_layout(lyt, filename); }, "layout"_a, "filename"_a, DOC(fiction_write_qcc_layout));
+        "write_qcc_layout",
+        [](const py_inml_layout& lyt, const std::string_view& filename) { fiction::write_qcc_layout(lyt, filename); },
+        py::arg("layout"), py::arg("filename"), DOC(fiction_write_qcc_layout));
 }
 
 }  // namespace pyfiction

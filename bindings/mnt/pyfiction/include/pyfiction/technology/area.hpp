@@ -22,7 +22,7 @@ namespace detail
 template <typename Lyt>
 void area(pybind11::module& m)
 {
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
     using tech = fiction::technology<Lyt>;
 
@@ -37,8 +37,8 @@ void area(pybind11::module& m)
 
             return stats.area;
         },
-        "layout"_a, "width"_a = tech::CELL_WIDTH, "height"_a = tech::CELL_HEIGHT, "hspace"_a = tech::CELL_HSPACE,
-        "vspace"_a = tech::CELL_VSPACE, DOC(fiction_area));
+        py::arg("layout"), py::arg("width") = tech::CELL_WIDTH, py::arg("height") = tech::CELL_HEIGHT,
+        py::arg("hspace") = tech::CELL_HSPACE, py::arg("vspace") = tech::CELL_VSPACE, DOC(fiction_area));
 }
 
 }  // namespace detail

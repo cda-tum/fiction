@@ -24,7 +24,6 @@ template <typename Lyt>
 void read_sqd_layout(pybind11::module& m)
 {
     namespace py = pybind11;
-    using namespace py::literals;
 
     py::register_exception<fiction::sqd_parsing_error>(m, "sqd_parsing_error", PyExc_RuntimeError);
 
@@ -33,12 +32,12 @@ void read_sqd_layout(pybind11::module& m)
 
     if constexpr (fiction::is_sidb_lattice_100_v<Lyt>)
     {
-        m.def("read_sqd_layout_100", read_sqd_layout_function_pointer, "filename"_a, "layout_name"_a = "",
+        m.def("read_sqd_layout_100", read_sqd_layout_function_pointer, py::arg("filename"), py::arg("layout_name") = "",
               DOC(fiction_read_sqd_layout_3));
     }
     else
     {
-        m.def("read_sqd_layout_111", read_sqd_layout_function_pointer, "filename"_a, "layout_name"_a = "",
+        m.def("read_sqd_layout_111", read_sqd_layout_function_pointer, py::arg("filename"), py::arg("layout_name") = "",
               DOC(fiction_read_sqd_layout_3));
     }
 }

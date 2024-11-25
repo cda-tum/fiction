@@ -27,12 +27,12 @@ template <typename Lyt>
 void bdl_input_iterator(pybind11::module& m, const std::string& lattice)
 {
     namespace py = pybind11;
-    using namespace py::literals;
 
     py::class_<fiction::bdl_input_iterator<Lyt>>(m, fmt::format("bdl_input_iterator_{}", lattice).c_str(),
                                                  DOC(fiction_bdl_input_iterator))
-        .def(py::init<const Lyt&, const fiction::bdl_input_iterator_params&>(), "lyt"_a,
-             "params"_a = fiction::bdl_input_iterator_params{}, DOC(fiction_bdl_input_iterator_bdl_input_iterator))
+        .def(py::init<const Lyt&, const fiction::bdl_input_iterator_params&>(), py::arg("lyt"),
+             py::arg("params") = fiction::bdl_input_iterator_params{},
+             DOC(fiction_bdl_input_iterator_bdl_input_iterator))
         .def(
             "__next__",
             [](fiction::bdl_input_iterator<Lyt>& self) -> Lyt
@@ -49,25 +49,25 @@ void bdl_input_iterator(pybind11::module& m, const std::string& lattice)
             DOC(fiction_bdl_input_iterator_operator_mul))
         .def(
             "__eq__", [](const fiction::bdl_input_iterator<Lyt>& self, const uint64_t n) -> bool { return self == n; },
-            "m"_a, DOC(fiction_bdl_input_iterator_operator_eq))
+            py::arg("m"), DOC(fiction_bdl_input_iterator_operator_eq))
         .def(
             "__ne__", [](const fiction::bdl_input_iterator<Lyt>& self, const uint64_t n) -> bool { return self != n; },
-            "m"_a, DOC(fiction_bdl_input_iterator_operator_ne))
+            py::arg("m"), DOC(fiction_bdl_input_iterator_operator_ne))
         .def(
             "__lt__", [](const fiction::bdl_input_iterator<Lyt>& self, const uint64_t n) -> bool { return self < n; },
-            "m"_a, DOC(fiction_bdl_input_iterator_operator_lt))
+            py::arg("m"), DOC(fiction_bdl_input_iterator_operator_lt))
         .def(
             "__le__", [](const fiction::bdl_input_iterator<Lyt>& self, const uint64_t n) -> bool { return self <= n; },
-            "m"_a, DOC(fiction_bdl_input_iterator_operator_le))
+            py::arg("m"), DOC(fiction_bdl_input_iterator_operator_le))
         .def(
             "__gt__", [](const fiction::bdl_input_iterator<Lyt>& self, const uint64_t n) -> bool { return self > n; },
-            "m"_a, DOC(fiction_bdl_input_iterator_operator_gt))
+            py::arg("m"), DOC(fiction_bdl_input_iterator_operator_gt))
         .def(
             "__ge__", [](const fiction::bdl_input_iterator<Lyt>& self, const uint64_t n) -> bool { return self >= n; },
-            "m"_a, DOC(fiction_bdl_input_iterator_operator_ge))
+            py::arg("m"), DOC(fiction_bdl_input_iterator_operator_ge))
         .def(
             "__add__", [](const fiction::bdl_input_iterator<Lyt>& self, const int n) -> fiction::bdl_input_iterator<Lyt>
-            { return self + n; }, "m"_a, DOC(fiction_bdl_input_iterator_operator_add))
+            { return self + n; }, py::arg("m"), DOC(fiction_bdl_input_iterator_operator_add))
         .def(
             "__iadd__",
             [](fiction::bdl_input_iterator<Lyt>& self, const int n) -> fiction::bdl_input_iterator<Lyt>&
@@ -75,9 +75,9 @@ void bdl_input_iterator(pybind11::module& m, const std::string& lattice)
                 self += n;
                 return self;
             },
-            "m"_a, DOC(fiction_bdl_input_iterator_operator_iadd))
+            py::arg("m"), DOC(fiction_bdl_input_iterator_operator_iadd))
         .def(
-            "__sub__", [](const fiction::bdl_input_iterator<Lyt>& self, const int n) { return self - n; }, "m"_a,
+            "__sub__", [](const fiction::bdl_input_iterator<Lyt>& self, const int n) { return self - n; }, py::arg("m"),
             DOC(fiction_bdl_input_iterator_operator_sub))
         .def(
             "__isub__",
@@ -86,10 +86,10 @@ void bdl_input_iterator(pybind11::module& m, const std::string& lattice)
                 self -= n;
                 return self;
             },
-            "m"_a, DOC(fiction_bdl_input_iterator_operator_isub))
+            py::arg("m"), DOC(fiction_bdl_input_iterator_operator_isub))
         .def(
             "__getitem__", [](const fiction::bdl_input_iterator<Lyt>& self, int n) -> fiction::bdl_input_iterator<Lyt>
-            { return self[n]; }, "m"_a, DOC(fiction_bdl_input_iterator_operator_array))
+            { return self[n]; }, py::arg("m"), DOC(fiction_bdl_input_iterator_operator_array))
 
         .def("num_input_pairs", &fiction::bdl_input_iterator<Lyt>::num_input_pairs)
         .def("get_layout", [](const fiction::bdl_input_iterator<Lyt>& self) -> const Lyt& { return *self; })
@@ -102,7 +102,6 @@ void bdl_input_iterator(pybind11::module& m, const std::string& lattice)
 inline void bdl_input_iterator(pybind11::module& m)
 {
     namespace py = pybind11;
-    using namespace py::literals;
 
     /**
      * Input BDL configuration

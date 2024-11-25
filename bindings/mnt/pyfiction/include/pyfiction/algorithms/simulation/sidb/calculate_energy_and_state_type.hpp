@@ -24,17 +24,17 @@ namespace detail
 template <typename Lyt>
 void calculate_energy_and_state_type(pybind11::module& m)
 {
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
     m.def("calculate_energy_and_state_type_with_kinks_accepted",
-          &fiction::calculate_energy_and_state_type_with_kinks_accepted<Lyt, py_tt>, "energy_distribution"_a,
-          "valid_charge_distributions"_a, "output_bdl_pairs"_a, "spec"_a, "input_index"_a,
+          &fiction::calculate_energy_and_state_type_with_kinks_accepted<Lyt, py_tt>, py::arg("energy_distribution"),
+          py::arg("valid_charge_distributions"), py::arg("output_bdl_pairs"), py::arg("spec"), py::arg("input_index"),
           DOC(fiction_calculate_energy_and_state_type_with_kinks_accepted));
 
     m.def("calculate_energy_and_state_type_with_kinks_rejected",
-          &fiction::calculate_energy_and_state_type_with_kinks_rejected<Lyt, py_tt>, "energy_distribution"_a,
-          "valid_charge_distributions"_a, "spec"_a, "input_index"_a, "input_bdl_wires"_a, "output_bdl_wires"_a,
-          DOC(fiction_calculate_energy_and_state_type_with_kinks_rejected));
+          &fiction::calculate_energy_and_state_type_with_kinks_rejected<Lyt, py_tt>, py::arg("energy_distribution"),
+          py::arg("valid_charge_distributions"), py::arg("spec"), py::arg("input_index"), py::arg("input_bdl_wires"),
+          py::arg("output_bdl_wires"), DOC(fiction_calculate_energy_and_state_type_with_kinks_rejected));
 }
 
 }  // namespace detail

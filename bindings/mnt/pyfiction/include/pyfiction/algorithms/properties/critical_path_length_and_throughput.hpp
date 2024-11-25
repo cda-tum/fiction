@@ -23,7 +23,7 @@ namespace detail
 template <typename Lyt>
 void critical_path_length_and_throughput(pybind11::module& m)
 {
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
     m.def(
         "critical_path_length_and_throughput",
@@ -33,7 +33,7 @@ void critical_path_length_and_throughput(pybind11::module& m)
 
             return {result.critical_path_length, result.throughput};
         },
-        "layout"_a, DOC(fiction_critical_path_length_and_throughput));
+        py::arg("layout"), DOC(fiction_critical_path_length_and_throughput));
 }
 
 }  // namespace detail

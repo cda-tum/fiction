@@ -24,10 +24,11 @@ template <typename Lyt>
 void compute_operational_ratio(pybind11::module& m)
 {
     namespace py = pybind11;
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
-    m.def("compute_operational_ratio", &fiction::compute_operational_ratio<Lyt, py_tt>, "lyt"_a, "spec"_a, "pp"_a,
-          "params"_a = fiction::operational_domain_params{}, DOC(fiction_compute_operational_ratio));
+    m.def("compute_operational_ratio", &fiction::compute_operational_ratio<Lyt, py_tt>, py::arg("lyt"), py::arg("spec"),
+          py::arg("pp"), py::arg("params") = fiction::operational_domain_params{},
+          DOC(fiction_compute_operational_ratio));
 }
 
 }  // namespace detail
@@ -35,7 +36,7 @@ void compute_operational_ratio(pybind11::module& m)
 inline void compute_operational_ratio(pybind11::module& m)
 {
     namespace py = pybind11;
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
     py::class_<fiction::compute_operational_ratio_params>(m, "compute_operational_ratio_params",
                                                           DOC(fiction_compute_operational_ratio_params))

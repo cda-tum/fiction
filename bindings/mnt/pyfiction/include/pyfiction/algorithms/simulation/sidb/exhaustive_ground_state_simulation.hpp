@@ -24,10 +24,10 @@ namespace detail
 template <typename Lyt>
 void exhaustive_ground_state_simulation(pybind11::module& m)
 {
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
-    m.def("exhaustive_ground_state_simulation", &fiction::exhaustive_ground_state_simulation<Lyt>, "lyt"_a,
-          "params"_a = fiction::sidb_simulation_parameters{}, DOC(fiction_exhaustive_ground_state_simulation));
+    m.def("exhaustive_ground_state_simulation", &fiction::exhaustive_ground_state_simulation<Lyt>, py::arg("lyt"),
+          py::arg("params") = fiction::sidb_simulation_parameters{}, DOC(fiction_exhaustive_ground_state_simulation));
 }
 
 }  // namespace detail

@@ -23,10 +23,10 @@ namespace detail
 template <typename Lyt>
 void determine_physically_valid_parameters(pybind11::module& m)
 {
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
-    m.def("determine_physically_valid_parameters", &fiction::determine_physically_valid_parameters<Lyt>, "cds"_a,
-          "params"_a = fiction::operational_domain_params{});
+    m.def("determine_physically_valid_parameters", &fiction::determine_physically_valid_parameters<Lyt>, py::arg("cds"),
+          py::arg("params") = fiction::operational_domain_params{});
 }
 
 }  // namespace detail
@@ -34,7 +34,7 @@ void determine_physically_valid_parameters(pybind11::module& m)
 inline void determine_physically_valid_parameters(pybind11::module& m)
 {
     namespace py = pybind11;
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
     py::class_<fiction::operational_domain<fiction::parameter_point, uint64_t>>(m, "physically_valid_parameters_domain",
                                                                                 DOC(fiction_operational_domain))
@@ -56,7 +56,7 @@ inline void determine_physically_valid_parameters(pybind11::module& m)
                     throw py::value_error(e.what());
                 }
             },
-            "pp"_a);
+            py::arg("pp"));
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
     detail::determine_physically_valid_parameters<py_charge_distribution_surface_100>(m);

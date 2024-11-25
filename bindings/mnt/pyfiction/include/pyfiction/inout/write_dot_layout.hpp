@@ -25,7 +25,7 @@ namespace detail
 template <typename Lyt>
 void write_dot_layout(pybind11::module& m)
 {
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
     m.def(
         "write_dot_layout",
@@ -40,18 +40,18 @@ void write_dot_layout(pybind11::module& m)
                 fiction::write_dot_layout<Lyt, fiction::gate_layout_hexagonal_drawer<Lyt>>(lyt, filename);
             }
         },
-        "layout"_a, "filename"_a, DOC(fiction_write_dot_layout));
+        py::arg("layout"), py::arg("filename"), DOC(fiction_write_dot_layout));
 }
 
 template <typename Ntk>
 void write_dot_network(pybind11::module& m)
 {
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
     m.def(
         "write_dot_network", [](const Ntk& ntk, const std::string_view& filename)
-        { mockturtle::write_dot(ntk, filename.data(), fiction::technology_dot_drawer<Ntk>{}); }, "network"_a,
-        "filename"_a);
+        { mockturtle::write_dot(ntk, filename.data(), fiction::technology_dot_drawer<Ntk>{}); }, py::arg("network"),
+        py::arg("filename"));
 }
 
 }  // namespace detail

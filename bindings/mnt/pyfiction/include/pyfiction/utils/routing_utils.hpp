@@ -26,16 +26,16 @@ namespace detail
 template <typename Lyt>
 void is_crossable_wire(pybind11::module& m)
 {
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
-    m.def("is_crossable_wire", &fiction::is_crossable_wire<Lyt>, "lyt"_a, "src"_a, "successor"_a,
+    m.def("is_crossable_wire", &fiction::is_crossable_wire<Lyt>, py::arg("lyt"), py::arg("src"), py::arg("successor"),
           DOC(fiction_is_crossable_wire));
 }
 
 template <typename Lyt>
 void route_path(pybind11::module& m)
 {
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
     m.def(
         "route_path",
@@ -47,13 +47,13 @@ void route_path(pybind11::module& m)
 
             fiction::route_path(lyt, converted_path);
         },
-        "layout"_a, "path"_a, DOC(fiction_route_path));
+        py::arg("layout"), py::arg("path"), DOC(fiction_route_path));
 }
 
 template <typename Lyt>
 void extract_routing_objectives(pybind11::module& m)
 {
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
     m.def(
         "extract_routing_objectives",
@@ -68,15 +68,15 @@ void extract_routing_objectives(pybind11::module& m)
 
             return converted_objectives;
         },
-        "layout"_a, DOC(fiction_extract_routing_objectives));
+        py::arg("layout"), DOC(fiction_extract_routing_objectives));
 }
 
 template <typename Lyt>
 void clear_routing(pybind11::module& m)
 {
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
-    m.def("clear_routing", &fiction::clear_routing<Lyt>, "lyt"_a, DOC(fiction_clear_routing));
+    m.def("clear_routing", &fiction::clear_routing<Lyt>, py::arg("lyt"), DOC(fiction_clear_routing));
 }
 
 }  // namespace detail

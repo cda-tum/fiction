@@ -24,10 +24,10 @@ namespace detail
 template <typename Lyt>
 void can_positive_charges_occur(pybind11::module& m)
 {
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
-    m.def("can_positive_charges_occur", &fiction::can_positive_charges_occur<Lyt>, "lyt"_a, "sim_params"_a,
-          DOC(fiction_can_positive_charges_occur));
+    m.def("can_positive_charges_occur", &fiction::can_positive_charges_occur<Lyt>, py::arg("lyt"),
+          py::arg("sim_params"), DOC(fiction_can_positive_charges_occur));
 }
 
 }  // namespace detail

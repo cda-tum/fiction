@@ -22,13 +22,13 @@ namespace detail
 template <typename Ntk>
 void fanout_substitution(pybind11::module& m)
 {
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
-    m.def("fanout_substitution", &fiction::fanout_substitution<py_logic_network, Ntk>, "network"_a,
-          "params"_a = fiction::fanout_substitution_params{}, DOC(fiction_fanout_substitution));
+    m.def("fanout_substitution", &fiction::fanout_substitution<py_logic_network, Ntk>, py::arg("network"),
+          py::arg("params") = fiction::fanout_substitution_params{}, DOC(fiction_fanout_substitution));
 
-    m.def("is_fanout_substituted", &fiction::is_fanout_substituted<Ntk>, "network"_a,
-          "params"_a = fiction::fanout_substitution_params{}, DOC(fiction_is_fanout_substituted));
+    m.def("is_fanout_substituted", &fiction::is_fanout_substituted<Ntk>, py::arg("network"),
+          py::arg("params") = fiction::fanout_substitution_params{}, DOC(fiction_is_fanout_substituted));
 }
 
 }  // namespace detail

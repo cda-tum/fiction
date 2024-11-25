@@ -22,9 +22,10 @@ namespace detail
 template <typename Lyt>
 void energy_distribution(pybind11::module& m)
 {
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
-    m.def("energy_distribution", &fiction::energy_distribution<Lyt>, "input_vec"_a, DOC(fiction_energy_distribution));
+    m.def("energy_distribution", &fiction::energy_distribution<Lyt>, py::arg("input_vec"),
+          DOC(fiction_energy_distribution));
 }
 
 }  // namespace detail

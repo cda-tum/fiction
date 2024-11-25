@@ -22,11 +22,11 @@ namespace detail
 template <typename Lyt>
 void maximum_defect_influence_distance(pybind11::module& m)
 {
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
     m.def("maximum_defect_influence_position_and_distance",
-          &fiction::maximum_defect_influence_position_and_distance<Lyt>, "lyt"_a,
-          "params"_a = fiction::maximum_defect_influence_distance_params{},
+          &fiction::maximum_defect_influence_position_and_distance<Lyt>, py::arg("lyt"),
+          py::arg("params") = fiction::maximum_defect_influence_distance_params{},
           DOC(fiction_maximum_defect_influence_position_and_distance));
 }
 

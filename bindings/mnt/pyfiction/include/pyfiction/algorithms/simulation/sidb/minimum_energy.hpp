@@ -25,11 +25,11 @@ namespace detail
 template <typename Lyt>
 void minimum_energy(pybind11::module& m)
 {
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
     m.def(
         "minimum_energy", [](const std::vector<Lyt>& layouts) -> double
-        { return fiction::minimum_energy(layouts.cbegin(), layouts.cend()); }, "layouts"_a,
+        { return fiction::minimum_energy(layouts.cbegin(), layouts.cend()); }, py::arg("layouts"),
         DOC(fiction_minimum_energy));
 }
 

@@ -22,7 +22,7 @@ namespace detail
 template <typename Spec, typename Impl>
 void equivalence_checking(pybind11::module& m)
 {
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
     m.def(
         "equivalence_checking",
@@ -38,7 +38,8 @@ void equivalence_checking(pybind11::module& m)
 
             return stats.eq;
         },
-        "specification"_a, "implementation"_a, "statistics"_a = nullptr, DOC(fiction_equivalence_checking));
+        py::arg("specification"), py::arg("implementation"), py::arg("statistics") = nullptr,
+        DOC(fiction_equivalence_checking));
 }
 
 }  // namespace detail

@@ -23,10 +23,10 @@ namespace detail
 template <typename Lyt>
 void quickexact(pybind11::module& m)
 {
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
-    m.def("quickexact", &fiction::quickexact<Lyt>, "lyt"_a,
-          "params"_a = fiction::quickexact_params<fiction::offset::ucoord_t>{}, DOC(fiction_quickexact));
+    m.def("quickexact", &fiction::quickexact<Lyt>, py::arg("lyt"),
+          py::arg("params") = fiction::quickexact_params<fiction::offset::ucoord_t>{}, DOC(fiction_quickexact));
 }
 
 }  // namespace detail
@@ -35,7 +35,7 @@ inline void quickexact(pybind11::module& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
     namespace py = pybind11;
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
     py::enum_<typename fiction::quickexact_params<fiction::offset::ucoord_t>::automatic_base_number_detection>(
         m, "automatic_base_number_detection", DOC(fiction_quickexact_params_automatic_base_number_detection))

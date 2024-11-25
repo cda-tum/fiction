@@ -21,7 +21,7 @@ namespace pyfiction
 inline void post_layout_optimization(pybind11::module& m)
 {
     namespace py = pybind11;
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
     py::class_<fiction::post_layout_optimization_params>(m, "post_layout_optimization_params",
                                                          DOC(fiction_post_layout_optimization_params))
@@ -70,8 +70,8 @@ inline void post_layout_optimization(pybind11::module& m)
 
         ;
 
-    m.def("post_layout_optimization", &fiction::post_layout_optimization<py_cartesian_gate_layout>, "layout"_a,
-          "parameters"_a = fiction::post_layout_optimization_params{}, "statistics"_a = nullptr,
+    m.def("post_layout_optimization", &fiction::post_layout_optimization<py_cartesian_gate_layout>, py::arg("layout"),
+          py::arg("parameters") = fiction::post_layout_optimization_params{}, py::arg("statistics") = nullptr,
           DOC(fiction_post_layout_optimization));
 }
 

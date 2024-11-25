@@ -21,14 +21,14 @@ namespace detail
 
 void occupation_probability_of_excited_states(pybind11::module& m)
 {
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
-    m.def("occupation_probability_gate_based", &fiction::occupation_probability_gate_based, "energy_and_state_type"_a,
-          "temperature"_a, DOC(fiction_occupation_probability_gate_based));
+    m.def("occupation_probability_gate_based", &fiction::occupation_probability_gate_based,
+          py::arg("energy_and_state_type"), py::arg("temperature"), DOC(fiction_occupation_probability_gate_based));
 
     m.def("occupation_probability_non_gate_based", &fiction::occupation_probability_non_gate_based,
-          "energy_distribution"_a,
-          "temperature"_a);  // TODO DOC(fiction_occupation_probability_non_gate_based)
+          py::arg("energy_distribution"),
+          py::arg("temperature"));  // TODO DOC(fiction_occupation_probability_non_gate_based)
 }
 
 }  // namespace detail

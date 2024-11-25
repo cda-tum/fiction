@@ -22,7 +22,7 @@ namespace detail
 template <typename Lyt>
 inline void write_sidb_layout_svg_impl(pybind11::module& m)
 {
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
     // Pointers to the original functions
     void (*write_sidb_layout_svg_pointer)(const Lyt&, const std::string_view&,
@@ -30,8 +30,8 @@ inline void write_sidb_layout_svg_impl(pybind11::module& m)
         &fiction::write_sidb_layout_svg<Lyt>;
 
     // SiDB plot
-    m.def("write_sidb_layout_svg", write_sidb_layout_svg_pointer, "layout"_a, "filename"_a,
-          "ps"_a = fiction::write_sidb_layout_svg_params{}, DOC(fiction_write_sidb_layout_svg));
+    m.def("write_sidb_layout_svg", write_sidb_layout_svg_pointer, py::arg("layout"), py::arg("filename"),
+          py::arg("ps") = fiction::write_sidb_layout_svg_params{}, DOC(fiction_write_sidb_layout_svg));
 
     // Register the function to return an SVG as a string
     m.def(
@@ -42,21 +42,21 @@ inline void write_sidb_layout_svg_impl(pybind11::module& m)
             fiction::write_sidb_layout_svg(layout, oss, params);  // Write to the stream
             return oss.str();                                     // Return the string content
         },
-        "layout"_a, "ps"_a = fiction::write_sidb_layout_svg_params{}, DOC(fiction_write_sidb_layout_svg));
+        py::arg("layout"), py::arg("ps") = fiction::write_sidb_layout_svg_params{}, DOC(fiction_write_sidb_layout_svg));
 }
 
 template <typename Lyt>
 inline void write_qca_layout_svg_impl(pybind11::module& m)
 {
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
     // QCA plot
     void (*write_qca_layout_svg_pointer)(const py_qca_layout&, const std::string_view&,
                                          const fiction::write_qca_layout_svg_params&) =
         &fiction::write_qca_layout_svg<py_qca_layout>;
 
-    m.def("write_qca_layout_svg", write_qca_layout_svg_pointer, "layout"_a, "filename"_a,
-          "params"_a = fiction::write_qca_layout_svg_params{}, DOC(fiction_write_qca_layout_svg));
+    m.def("write_qca_layout_svg", write_qca_layout_svg_pointer, py::arg("layout"), py::arg("filename"),
+          py::arg("params") = fiction::write_qca_layout_svg_params{}, DOC(fiction_write_qca_layout_svg));
 }
 
 }  // namespace detail
@@ -64,7 +64,7 @@ inline void write_qca_layout_svg_impl(pybind11::module& m)
 void write_svg_layout(pybind11::module& m)
 {
     namespace py = pybind11;
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
     py::enum_<fiction::write_sidb_layout_svg_params::color_mode>(m, "color_mode",
                                                                  DOC(fiction_write_sidb_layout_svg_params_color_mode))

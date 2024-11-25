@@ -24,11 +24,12 @@ namespace detail
 template <typename Lyt>
 void write_sqd_sim_result(pybind11::module& m)
 {
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
     m.def(
         "write_sqd_sim_result", [](const fiction::sidb_simulation_result<Lyt>& lyt, const std::string_view& filename)
-        { fiction::write_sqd_sim_result(lyt, filename); }, "layout"_a, "filename"_a, DOC(fiction_write_sqd_sim_result));
+        { fiction::write_sqd_sim_result(lyt, filename); }, py::arg("layout"), py::arg("filename"),
+        DOC(fiction_write_sqd_sim_result));
 }
 
 }  // namespace detail

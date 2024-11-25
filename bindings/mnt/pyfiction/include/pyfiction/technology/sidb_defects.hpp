@@ -20,7 +20,6 @@ namespace pyfiction
 inline void sidb_defects(pybind11::module& m)
 {
     namespace py = pybind11;
-    using namespace py::literals;
 
     py::enum_<fiction::sidb_defect_type>(m, "sidb_defect_type", DOC(fiction_sidb_defect_type))
         .value("NONE", fiction::sidb_defect_type::NONE, DOC(fiction_sidb_defect_type_NONE))
@@ -44,31 +43,33 @@ inline void sidb_defects(pybind11::module& m)
 
     py::class_<fiction::sidb_defect>(m, "sidb_defect", DOC(fiction_sidb_defect))
         .def(py::init<const fiction::sidb_defect_type, const int64_t, const double, const double>(),
-             "defect_type"_a = fiction::sidb_defect_type::UNKNOWN, "electric_charge"_a = 0.0,
-             "relative_permittivity"_a = 0.0, "screening_distance"_a = 0.0)
+             py::arg("defect_type") = fiction::sidb_defect_type::UNKNOWN, py::arg("electric_charge") = 0.0,
+             py::arg("relative_permittivity") = 0.0, py::arg("screening_distance") = 0.0)
 
         .def_readonly("type", &fiction::sidb_defect::type, DOC(fiction_sidb_defect_type))
         .def_readonly("charge", &fiction::sidb_defect::charge, DOC(fiction_sidb_defect_charge))
         .def_readonly("epsilon_r", &fiction::sidb_defect::epsilon_r, DOC(fiction_sidb_defect_epsilon_r))
         .def_readonly("lambda_tf", &fiction::sidb_defect::lambda_tf, DOC(fiction_sidb_defect_lambda_tf))
 
-        .def(py::self == py::self, "rhs"_a, DOC(fiction_sidb_defect_operator_eq))
-        .def(py::self != py::self, "rhs"_a, DOC(fiction_sidb_defect_operator_ne))
+        .def(py::self == py::self, py::arg("rhs"), DOC(fiction_sidb_defect_operator_eq))
+        .def(py::self != py::self, py::arg("rhs"), DOC(fiction_sidb_defect_operator_ne))
 
         ;
 
-    m.def("is_charged_defect_type", &fiction::is_charged_defect_type, "defect"_a, DOC(fiction_is_charged_defect_type));
-    m.def("is_neutral_defect_type", &fiction::is_neutral_defect_type, "defect"_a, DOC(fiction_is_neutral_defect_type));
+    m.def("is_charged_defect_type", &fiction::is_charged_defect_type, py::arg("defect"),
+          DOC(fiction_is_charged_defect_type));
+    m.def("is_neutral_defect_type", &fiction::is_neutral_defect_type, py::arg("defect"),
+          DOC(fiction_is_neutral_defect_type));
 
-    m.def("is_positively_charged_defect", &fiction::is_positively_charged_defect, "defect"_a,
+    m.def("is_positively_charged_defect", &fiction::is_positively_charged_defect, py::arg("defect"),
           DOC(fiction_is_positively_charged_defect));
-    m.def("is_negatively_charged_defect", &fiction::is_negatively_charged_defect, "defect"_a,
+    m.def("is_negatively_charged_defect", &fiction::is_negatively_charged_defect, py::arg("defect"),
           DOC(fiction_is_negatively_charged_defect));
-    m.def("is_neutrally_charged_defect", &fiction::is_neutrally_charged_defect, "defect"_a,
+    m.def("is_neutrally_charged_defect", &fiction::is_neutrally_charged_defect, py::arg("defect"),
           DOC(fiction_is_neutrally_charged_defect));
 
-    m.def("defect_extent", &fiction::defect_extent, "defect"_a, "charged_defect_spacing_overwrite"_a,
-          "neutral_defect_spacing_overwrite"_a, DOC(fiction_defect_extent));
+    m.def("defect_extent", &fiction::defect_extent, py::arg("defect"), py::arg("charged_defect_spacing_overwrite"),
+          py::arg("neutral_defect_spacing_overwrite"), DOC(fiction_defect_extent));
 }
 
 }  // namespace pyfiction

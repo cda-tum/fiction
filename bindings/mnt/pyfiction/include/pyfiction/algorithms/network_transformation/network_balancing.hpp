@@ -21,13 +21,13 @@ namespace detail
 template <typename Ntk>
 void network_balancing(pybind11::module& m)
 {
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
-    m.def("network_balancing", &fiction::network_balancing<py_logic_network, Ntk>, "network"_a,
-          "params"_a = fiction::network_balancing_params{}, DOC(fiction_network_balancing));
+    m.def("network_balancing", &fiction::network_balancing<py_logic_network, Ntk>, py::arg("network"),
+          py::arg("params") = fiction::network_balancing_params{}, DOC(fiction_network_balancing));
 
-    m.def("is_balanced", &fiction::is_balanced<Ntk>, "network"_a, "params"_a = fiction::network_balancing_params{},
-          DOC(fiction_is_balanced));
+    m.def("is_balanced", &fiction::is_balanced<Ntk>, py::arg("network"),
+          py::arg("params") = fiction::network_balancing_params{}, DOC(fiction_is_balanced));
 }
 
 }  // namespace detail

@@ -32,7 +32,7 @@ template <typename Technology>
 void fcn_technology_cell_level_layout(pybind11::module& m)
 {
     namespace py = pybind11;
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
     // fetch technology name
     auto tech_name = std::string{fiction::tech_impl_name<Technology>};
@@ -84,7 +84,7 @@ void fcn_technology_cell_level_layout(pybind11::module& m)
         fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<fiction::offset::ucoord_t>>>>(
         m, fmt::format("{}_layout", tech_name).c_str(), DOC(fiction_cell_level_layout))
         .def(py::init<>())
-        .def(py::init<const fiction::aspect_ratio<py_cartesian_technology_cell_layout>&>(), "dimension"_a,
+        .def(py::init<const fiction::aspect_ratio<py_cartesian_technology_cell_layout>&>(), py::arg("dimension"),
              DOC(fiction_cell_level_layout_cell_level_layout))
         .def(py::init(
                  [](const fiction::aspect_ratio<py_cartesian_technology_cell_layout>& dimension,
@@ -100,20 +100,20 @@ void fcn_technology_cell_level_layout(pybind11::module& m)
 
                      throw std::runtime_error("Given name does not refer to a supported clocking scheme");
                  }),
-             "dimension"_a, "clocking_scheme"_a = "2DDWave", "layout_name"_a = "",
+             py::arg("dimension"), py::arg("clocking_scheme") = "2DDWave", py::arg("layout_name") = "",
              DOC(fiction_cell_level_layout_cell_level_layout_2))
 
-        .def("assign_cell_type", &py_cartesian_technology_cell_layout::assign_cell_type, "c"_a, "ct"_a,
+        .def("assign_cell_type", &py_cartesian_technology_cell_layout::assign_cell_type, py::arg("c"), py::arg("ct"),
              DOC(fiction_cell_level_layout_assign_cell_type))
-        .def("get_cell_type", &py_cartesian_technology_cell_layout::get_cell_type, "c"_a,
+        .def("get_cell_type", &py_cartesian_technology_cell_layout::get_cell_type, py::arg("c"),
              DOC(fiction_cell_level_layout_get_cell_type))
-        .def("is_empty_cell", &py_cartesian_technology_cell_layout::is_empty_cell, "c"_a,
+        .def("is_empty_cell", &py_cartesian_technology_cell_layout::is_empty_cell, py::arg("c"),
              DOC(fiction_cell_level_layout_is_empty_cell))
-        .def("assign_cell_name", &py_cartesian_technology_cell_layout::assign_cell_name, "c"_a, "n"_a,
+        .def("assign_cell_name", &py_cartesian_technology_cell_layout::assign_cell_name, py::arg("c"), py::arg("n"),
              DOC(fiction_cell_level_layout_assign_cell_name))
-        .def("get_cell_name", &py_cartesian_technology_cell_layout::get_cell_name, "c"_a,
+        .def("get_cell_name", &py_cartesian_technology_cell_layout::get_cell_name, py::arg("c"),
              DOC(fiction_cell_level_layout_get_cell_name))
-        .def("set_layout_name", &py_cartesian_technology_cell_layout::set_layout_name, "name"_a,
+        .def("set_layout_name", &py_cartesian_technology_cell_layout::set_layout_name, py::arg("name"),
              DOC(fiction_cell_level_layout_set_layout_name))
         .def("get_layout_name", &py_cartesian_technology_cell_layout::get_layout_name,
              DOC(fiction_cell_level_layout_get_layout_name))
@@ -121,8 +121,8 @@ void fcn_technology_cell_level_layout(pybind11::module& m)
         .def("is_empty", &py_cartesian_technology_cell_layout::is_empty, DOC(fiction_cell_level_layout_is_empty))
         .def("num_pis", &py_cartesian_technology_cell_layout::num_pis, DOC(fiction_cell_level_layout_num_pis))
         .def("num_pos", &py_cartesian_technology_cell_layout::num_pos, DOC(fiction_cell_level_layout_num_pos))
-        .def("is_pi", &py_cartesian_technology_cell_layout::is_pi, "c"_a, DOC(fiction_cell_level_layout_is_pi))
-        .def("is_po", &py_cartesian_technology_cell_layout::is_po, "c"_a, DOC(fiction_cell_level_layout_is_po))
+        .def("is_pi", &py_cartesian_technology_cell_layout::is_pi, py::arg("c"), DOC(fiction_cell_level_layout_is_pi))
+        .def("is_po", &py_cartesian_technology_cell_layout::is_po, py::arg("c"), DOC(fiction_cell_level_layout_is_po))
 
         .def("cells",
              [](const py_cartesian_technology_cell_layout& lyt)

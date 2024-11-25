@@ -21,18 +21,18 @@ namespace detail
 template <typename Lyt>
 void distance(pybind11::module& m)
 {
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
-    m.def("manhattan_distance", &fiction::manhattan_distance<Lyt>, "layout"_a, "source"_a, "target"_a,
-          DOC(fiction_manhattan_distance));
-    m.def("euclidean_distance", &fiction::euclidean_distance<Lyt>, "layout"_a, "source"_a, "target"_a,
-          DOC(fiction_euclidean_distance));
-    m.def("squared_euclidean_distance", &fiction::squared_euclidean_distance<Lyt>, "layout"_a, "source"_a, "target"_a,
-          DOC(fiction_squared_euclidean_distance));
-    m.def("twoddwave_distance", &fiction::twoddwave_distance<Lyt>, "layout"_a, "source"_a, "target"_a,
-          DOC(fiction_twoddwave_distance));
-    m.def("chebyshev_distance", &fiction::chebyshev_distance<Lyt>, "layout"_a, "source"_a, "target"_a,
-          DOC(fiction_chebyshev_distance));
+    m.def("manhattan_distance", &fiction::manhattan_distance<Lyt>, py::arg("layout"), py::arg("source"),
+          py::arg("target"), DOC(fiction_manhattan_distance));
+    m.def("euclidean_distance", &fiction::euclidean_distance<Lyt>, py::arg("layout"), py::arg("source"),
+          py::arg("target"), DOC(fiction_euclidean_distance));
+    m.def("squared_euclidean_distance", &fiction::squared_euclidean_distance<Lyt>, py::arg("layout"), py::arg("source"),
+          py::arg("target"), DOC(fiction_squared_euclidean_distance));
+    m.def("twoddwave_distance", &fiction::twoddwave_distance<Lyt>, py::arg("layout"), py::arg("source"),
+          py::arg("target"), DOC(fiction_twoddwave_distance));
+    m.def("chebyshev_distance", &fiction::chebyshev_distance<Lyt>, py::arg("layout"), py::arg("source"),
+          py::arg("target"), DOC(fiction_chebyshev_distance));
 }
 
 }  // namespace detail

@@ -12,7 +12,7 @@
 namespace pyfiction
 {
 
-using namespace pybind11::literals;
+namespace py = pybind11;
 
 inline void version_info(pybind11::module& m)
 {

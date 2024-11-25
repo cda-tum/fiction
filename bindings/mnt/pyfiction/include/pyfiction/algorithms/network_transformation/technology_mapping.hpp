@@ -22,10 +22,11 @@ namespace detail
 template <typename Ntk>
 void technology_mapping(pybind11::module& m)
 {
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
-    m.def("technology_mapping", &fiction::technology_mapping<Ntk>, "network"_a,
-          "params"_a = fiction::technology_mapping_params{}, "stats"_a = nullptr, DOC(fiction_technology_mapping));
+    m.def("technology_mapping", &fiction::technology_mapping<Ntk>, py::arg("network"),
+          py::arg("params") = fiction::technology_mapping_params{}, py::arg("stats") = nullptr,
+          DOC(fiction_technology_mapping));
 }
 
 }  // namespace detail

@@ -20,7 +20,7 @@ namespace pyfiction
 inline void write_qca_layout(pybind11::module& m)
 {
     namespace py = pybind11;
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
     py::class_<fiction::write_qca_layout_params>(m, "write_qca_layout_params", DOC(fiction_write_qca_layout_params))
         .def(py::init<>())
@@ -33,8 +33,8 @@ inline void write_qca_layout(pybind11::module& m)
                                               fiction::write_qca_layout_params) =
         &fiction::write_qca_layout<py_qca_layout>;
 
-    m.def("write_qca_layout", write_qca_layout_function_pointer, "layout"_a, "filename"_a,
-          "params"_a = fiction::write_qca_layout_params{}, DOC(fiction_write_qca_layout));
+    m.def("write_qca_layout", write_qca_layout_function_pointer, py::arg("layout"), py::arg("filename"),
+          py::arg("params") = fiction::write_qca_layout_params{}, DOC(fiction_write_qca_layout));
 }
 
 }  // namespace pyfiction

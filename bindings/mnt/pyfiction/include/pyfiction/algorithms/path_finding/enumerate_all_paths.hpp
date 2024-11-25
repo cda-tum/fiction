@@ -26,7 +26,7 @@ namespace detail
 template <typename Lyt>
 void enumerate_all_paths(pybind11::module& m)
 {
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
     m.def(
         "enumerate_all_paths",
@@ -46,8 +46,8 @@ void enumerate_all_paths(pybind11::module& m)
 
             return paths;
         },
-        "layout"_a, "source"_a, "target"_a, "params"_a = fiction::enumerate_all_paths_params{},
-        DOC(fiction_enumerate_all_paths));
+        py::arg("layout"), py::arg("source"), py::arg("target"),
+        py::arg("params") = fiction::enumerate_all_paths_params{}, DOC(fiction_enumerate_all_paths));
 }
 
 }  // namespace detail

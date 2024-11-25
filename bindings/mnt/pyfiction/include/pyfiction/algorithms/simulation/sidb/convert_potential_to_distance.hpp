@@ -18,10 +18,10 @@ namespace pyfiction
 
 inline void convert_potential_to_distance(pybind11::module& m)
 {
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
-    m.def("convert_potential_to_distance", &fiction::convert_potential_to_distance, "potential"_a, "params"_a,
-          "precision"_a, DOC(fiction_convert_potential_to_distance));
+    m.def("convert_potential_to_distance", &fiction::convert_potential_to_distance, py::arg("potential"),
+          py::arg("params"), py::arg("precision"), DOC(fiction_convert_potential_to_distance));
 }
 
 }  // namespace pyfiction

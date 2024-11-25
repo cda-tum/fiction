@@ -27,7 +27,7 @@ namespace detail
 template <typename Lyt>
 void yen_k_shortest_paths(pybind11::module& m)
 {
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
     m.def(
         "yen_k_shortest_paths",
@@ -47,8 +47,8 @@ void yen_k_shortest_paths(pybind11::module& m)
 
             return paths;
         },
-        "layout"_a, "source"_a, "target"_a, "k"_a, "params"_a = fiction::yen_k_shortest_paths_params{},
-        DOC(fiction_yen_k_shortest_paths));
+        py::arg("layout"), py::arg("source"), py::arg("target"), py::arg("k"),
+        py::arg("params") = fiction::yen_k_shortest_paths_params{}, DOC(fiction_yen_k_shortest_paths));
 }
 
 }  // namespace detail

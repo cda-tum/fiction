@@ -25,12 +25,12 @@ namespace detail
 template <typename Lyt>
 void write_location_and_ground_state(pybind11::module& m)
 {
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
     m.def(
         "write_location_and_ground_state",
         [](const fiction::sidb_simulation_result<Lyt>& sim_result, const std::string_view& filename)
-        { fiction::write_location_and_ground_state(sim_result, filename); }, "sim_result"_a, "filename"_a,
+        { fiction::write_location_and_ground_state(sim_result, filename); }, py::arg("sim_result"), py::arg("filename"),
         DOC(fiction_write_location_and_ground_state));
 }
 

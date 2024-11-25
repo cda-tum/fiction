@@ -22,10 +22,9 @@ template <typename Lyt>
 void design_sidb_gates(pybind11::module& m)
 {
     namespace py = pybind11;
-    using namespace py::literals;
 
-    m.def("design_sidb_gates", &fiction::design_sidb_gates<Lyt, py_tt>, "skeleton"_a, "spec"_a,
-          "params"_a = fiction::design_sidb_gates_params<fiction::cell<Lyt>>{}, "stats"_a = nullptr,
+    m.def("design_sidb_gates", &fiction::design_sidb_gates<Lyt, py_tt>, py::arg("skeleton"), py::arg("spec"),
+          py::arg("params") = fiction::design_sidb_gates_params<fiction::cell<Lyt>>{}, py::arg("stats") = nullptr,
           DOC(fiction_design_sidb_gates));
 }
 

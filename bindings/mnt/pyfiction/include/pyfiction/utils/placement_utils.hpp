@@ -25,39 +25,40 @@ namespace detail
 template <typename Lyt, typename Ntk>
 void reserve_input_nodes(pybind11::module& m)
 {
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
-    m.def("reserve_input_nodes", &fiction::reserve_input_nodes<Lyt, Ntk>, "lyt"_a, "ntk"_a);
+    m.def("reserve_input_nodes", &fiction::reserve_input_nodes<Lyt, Ntk>, py::arg("lyt"), py::arg("ntk"));
 }
 
 template <typename Lyt, typename Ntk>
 void place(pybind11::module& m)
 {
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
     m.def(
         "place", [](Lyt& lyt, const fiction::tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n)
-        { return fiction::place(lyt, t, ntk, n); }, "lyt"_a, "t"_a, "ntk"_a, "n"_a);  // TODO, DOC(fiction_place));
+        { return fiction::place(lyt, t, ntk, n); }, py::arg("lyt"), py::arg("t"), py::arg("ntk"),
+        py::arg("n"));  // TODO, DOC(fiction_place));
 
     m.def(
         "place",
         [](Lyt& lyt, const fiction::tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n,
            const mockturtle::signal<Lyt>& a) { return fiction::place(lyt, t, ntk, n, a); },
-        "lyt"_a, "t"_a, "ntk"_a, "n"_a, "a"_a);
+        py::arg("lyt"), py::arg("t"), py::arg("ntk"), py::arg("n"), py::arg("a"));
 
     m.def(
         "place",
         [](Lyt& lyt, const fiction::tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n,
            const mockturtle::signal<Lyt>& a, const mockturtle::signal<Lyt>& b,
            const std::optional<bool>& c = std::nullopt) { return fiction::place(lyt, t, ntk, n, a, b, c); },
-        "lyt"_a, "t"_a, "ntk"_a, "n"_a, "a"_a, "b"_a, "c"_a);
+        py::arg("lyt"), py::arg("t"), py::arg("ntk"), py::arg("n"), py::arg("a"), py::arg("b"), py::arg("c"));
 
     m.def(
         "place",
         [](Lyt& lyt, const fiction::tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n,
            const mockturtle::signal<Lyt>& a, const mockturtle::signal<Lyt>& b, const mockturtle::signal<Lyt>& c)
         { return fiction::place(lyt, t, ntk, n, a, b, c); },
-        "lyt"_a, "t"_a, "ntk"_a, "n"_a, "a"_a, "b"_a, "c"_a);
+        py::arg("lyt"), py::arg("t"), py::arg("ntk"), py::arg("n"), py::arg("a"), py::arg("b"), py::arg("c"));
 }
 
 }  // namespace detail

@@ -22,10 +22,10 @@ namespace detail
 template <typename Lyt>
 void is_ground_state(pybind11::module& m)
 {
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
-    m.def("is_ground_state", &fiction::is_ground_state<Lyt>, "heuristic_results"_a, "exhaustive_results"_a,
-          DOC(fiction_is_ground_state));
+    m.def("is_ground_state", &fiction::is_ground_state<Lyt>, py::arg("heuristic_results"),
+          py::arg("exhaustive_results"), DOC(fiction_is_ground_state));
 }
 
 }  // namespace detail

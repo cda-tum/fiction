@@ -18,7 +18,6 @@ namespace pyfiction
 inline void write_operational_domain(pybind11::module& m)
 {
     namespace py = pybind11;
-    using namespace py::literals;
 
     py::enum_<fiction::write_operational_domain_params::sample_writing_mode>(
         m, "sample_writing_mode", DOC(fiction_write_operational_domain_params_sample_writing_mode))
@@ -45,8 +44,8 @@ inline void write_operational_domain(pybind11::module& m)
         const fiction::operational_domain<fiction::parameter_point, fiction::operational_status>&,
         const std::string_view&, const fiction::write_operational_domain_params&) = &fiction::write_operational_domain;
 
-    m.def("write_operational_domain", write_operational_domain_pointer, "opdom"_a, "filename"_a,
-          "params"_a = fiction::write_operational_domain_params{}, DOC(fiction_write_operational_domain));
+    m.def("write_operational_domain", write_operational_domain_pointer, py::arg("opdom"), py::arg("filename"),
+          py::arg("params") = fiction::write_operational_domain_params{}, DOC(fiction_write_operational_domain));
 }
 
 }  // namespace pyfiction
