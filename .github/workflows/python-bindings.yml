@@ -70,10 +70,6 @@ jobs:
         uses: cda-tum/setup-z3@v1
         with:
           version: ${{env.Z3_VERSION}}
-          platform: ${{matrix.z3_platform}}
-          architecture: ${{matrix.architecture}}
-        env:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
       - name: Install the latest version of uv
         uses: astral-sh/setup-uv@v3
