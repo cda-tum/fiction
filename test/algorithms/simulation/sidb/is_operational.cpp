@@ -46,7 +46,7 @@ TEST_CASE("SiQAD OR gate", "[is-operational]")
             operational_condition::REJECT_KINKS});
     CHECK(kink_induced_non_operational);
 
-    const auto input_wires = detect_bdl_wires(lat, detect_bdl_wires_params{1.5});
+    const auto input_wires  = detect_bdl_wires(lat, detect_bdl_wires_params{1.5});
     const auto output_wires = detect_bdl_wires(lat, detect_bdl_wires_params{1.5});
 
     // determine if kinks induce layout to become non-operational.
@@ -56,7 +56,8 @@ TEST_CASE("SiQAD OR gate", "[is-operational]")
             sidb_simulation_parameters{2, -0.28}, sidb_simulation_engine::QUICKEXACT,
             bdl_input_iterator_params{detect_bdl_wires_params{1.5},
                                       bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED},
-            operational_condition::REJECT_KINKS}, std::optional{input_wires}, std::optional{output_wires});
+            operational_condition::REJECT_KINKS},
+        std::optional{input_wires}, std::optional{output_wires});
     CHECK(kink_induced_non_operational_predefined_wires);
 
     // determine input patterns for which kinks induce layout to become non-operational.
