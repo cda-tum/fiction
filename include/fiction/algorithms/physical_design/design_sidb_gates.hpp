@@ -390,11 +390,11 @@ class design_sidb_gates_impl
         const auto            gate_candidates = run_pruning();
 
         stats.number_of_layouts_after_first_pruning =
-            all_canvas_layouts.size() - number_of_discarded_layouts_at_first_pruning;
+            all_canvas_layouts.size() - number_of_discarded_layouts_at_first_pruning.load();
         stats.number_of_layouts_after_second_pruning =
-            stats.number_of_layouts_after_first_pruning - number_of_discarded_layouts_at_second_pruning;
+            stats.number_of_layouts_after_first_pruning - number_of_discarded_layouts_at_second_pruning.load();
         stats.number_of_layouts_after_third_pruning =
-            stats.number_of_layouts_after_second_pruning - number_of_discarded_layouts_at_third_pruning;
+            stats.number_of_layouts_after_second_pruning - number_of_discarded_layouts_at_third_pruning.load();
 
         std::vector<Lyt> gate_layouts{};
         gate_layouts.reserve(gate_candidates.size());
