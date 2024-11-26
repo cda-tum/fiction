@@ -12,6 +12,7 @@ Added
 #####
 - Algorithms:
     - Simulation:
+        - Added option to determine if kinks induce layout to become non-operational
         - Kink control option for critical temperature simulation of SiDB layouts
 - Python bindings:
     - Support for Python 3.13 (including GIL-free multi-threading)

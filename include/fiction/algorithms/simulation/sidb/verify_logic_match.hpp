@@ -60,7 +60,9 @@ template <typename Lyt, typename TT>
 
     detail::is_operational_impl<Lyt, TT> p{cds, spec, params, input_wires, output_wires};
 
-    return p.verifiy_logic_match_of_cds(cds, input_pattern);
+    const auto [op_status, _] = p.verify_logic_match_of_cds(cds, input_pattern);
+
+    return op_status;
 }
 
 }  // namespace fiction

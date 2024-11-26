@@ -235,6 +235,8 @@ Operational Domain Computation
            :members:
         .. doxygenfunction:: fiction::is_operational
         .. doxygenfunction:: fiction::operational_input_patterns
+        .. doxygenfunction:: fiction::is_kink_induced_non_operational
+        .. doxygenfunction:: fiction::kink_induced_non_operational_input_patterns
 
         **Header:** ``fiction/algorithms/simulation/sidb/operational_domain.hpp``
 
@@ -274,6 +276,8 @@ Operational Domain Computation
             :members:
         .. autofunction:: mnt.pyfiction.is_operational
         .. autofunction:: mnt.pyfiction.operational_input_patterns
+        .. autofunction:: mnt.pyfiction.is_kink_induced_non_operational
+        .. autofunction:: mnt.pyfiction.kink_induced_non_operational_input_patterns
 
         .. autoclass:: mnt.pyfiction.sweep_parameter
             :members:
