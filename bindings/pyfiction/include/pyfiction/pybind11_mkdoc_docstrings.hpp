@@ -3862,6 +3862,20 @@ static const char *__doc_fiction_design_sidb_gates_stats = R"doc(Statistics for 
 
 static const char *__doc_fiction_design_sidb_gates_stats_duration = R"doc(The total runtime of SiDB gate design process.)doc";
 
+static const char *__doc_fiction_design_sidb_gates_stats_number_of_layouts = R"doc(The number of all possible layouts.)doc";
+
+static const char *__doc_fiction_design_sidb_gates_stats_number_of_layouts_after_first_pruning =
+R"doc(The number of layouts that remain after first pruning (discarding
+layouts with potential positive SiDBs).)doc";
+
+static const char *__doc_fiction_design_sidb_gates_stats_number_of_layouts_after_second_pruning =
+R"doc(The number of layouts that remain after second pruning (discarding
+layouts that fail to satisfy the physical model).)doc";
+
+static const char *__doc_fiction_design_sidb_gates_stats_number_of_layouts_after_third_pruning =
+R"doc(The number of layouts that remain after third pruning (discarding
+layouts with unstable I/O signals).)doc";
+
 static const char *__doc_fiction_design_sidb_gates_stats_report =
 R"doc(This function outputs the total time taken for the SiDB gate design
 process to the provided output stream. If no output stream is
@@ -4718,6 +4732,12 @@ Returns:
     to conduct the final validation.)doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_num_threads = R"doc(Number of threads to be used for parallel execution.)doc";
+
+static const char *__doc_fiction_detail_design_sidb_gates_impl_number_of_discarded_layouts_at_first_pruning = R"doc(Number of discarded layouts at first pruning.)doc";
+
+static const char *__doc_fiction_detail_design_sidb_gates_impl_number_of_discarded_layouts_at_second_pruning = R"doc(Number of discarded layouts at second pruning.)doc";
+
+static const char *__doc_fiction_detail_design_sidb_gates_impl_number_of_discarded_layouts_at_third_pruning = R"doc(Number of discarded layouts at third pruning.)doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_number_of_input_wires = R"doc(Number of input BDL wires.)doc";
 
