@@ -3896,6 +3896,21 @@ static const char* __doc_fiction_design_sidb_gates_stats = R"doc(Statistics for 
 static const char* __doc_fiction_design_sidb_gates_stats_duration =
     R"doc(The total runtime of SiDB gate design process.)doc";
 
+static const char* __doc_fiction_design_sidb_gates_stats_number_of_layouts =
+    R"doc(The number of all possible layouts.)doc";
+
+static const char* __doc_fiction_design_sidb_gates_stats_number_of_layouts_after_first_pruning =
+    R"doc(The number of layouts that remain after first pruning (discarding
+layouts with potential positive SiDBs).)doc";
+
+static const char* __doc_fiction_design_sidb_gates_stats_number_of_layouts_after_second_pruning =
+    R"doc(The number of layouts that remain after second pruning (discarding
+layouts that fail to satisfy the physical model).)doc";
+
+static const char* __doc_fiction_design_sidb_gates_stats_number_of_layouts_after_third_pruning =
+    R"doc(The number of layouts that remain after third pruning (discarding
+layouts with unstable I/O signals).)doc";
+
 static const char* __doc_fiction_design_sidb_gates_stats_report =
     R"doc(This function outputs the total time taken for the SiDB gate design
 process to the provided output stream. If no output stream is
@@ -4768,6 +4783,15 @@ Returns:
 
 static const char* __doc_fiction_detail_design_sidb_gates_impl_num_threads =
     R"doc(Number of threads to be used for parallel execution.)doc";
+
+static const char* __doc_fiction_detail_design_sidb_gates_impl_number_of_discarded_layouts_at_first_pruning =
+    R"doc(Number of discarded layouts at first pruning.)doc";
+
+static const char* __doc_fiction_detail_design_sidb_gates_impl_number_of_discarded_layouts_at_second_pruning =
+    R"doc(Number of discarded layouts at second pruning.)doc";
+
+static const char* __doc_fiction_detail_design_sidb_gates_impl_number_of_discarded_layouts_at_third_pruning =
+    R"doc(Number of discarded layouts at third pruning.)doc";
 
 static const char* __doc_fiction_detail_design_sidb_gates_impl_number_of_input_wires =
     R"doc(Number of input BDL wires.)doc";
@@ -6852,7 +6876,7 @@ Template parameter ``Lyt``:
     SiDB cell-level layout type.
 
 Template parameter ``TT``:
-    The type of the truth table specifying the gate behavior.)doc";
+    Type of the truth table.)doc";
 
 static const char* __doc_fiction_detail_is_operational_impl_bii =
     R"doc(Iterator that iterates over all possible input states.)doc";
@@ -6899,12 +6923,17 @@ Returns:
     `true` if any output wire contains a kink (i.e., an unexpected
     charge state), `false` otherwise.)doc";
 
-static const char* __doc_fiction_detail_is_operational_impl_determine_operational_input_patterns =
-    R"doc(Determines the input combinations yielding the correct output.
+static const char*
+    __doc_fiction_detail_is_operational_impl_determine_non_operational_input_patterns_and_non_operationality_reason =
+        R"doc(Determines the input combinations for which the layout is non-
+operational and the reason why the layout is non-operational.
 
 Returns:
-    All inputs (e.g. 2-input Boolean function: 00 ^= 0; 10 ^= 2) for
-    which the correct output is computed.)doc";
+    Vector of pairs where the first element of the pair is the input
+    pattern (e.g. 2-input Boolean function: 00 ^= 0; 10 ^= 2) for
+    which the layout is non-operational. The second entry indicates
+    the reason why the layout is non-operational
+    (`non_operationality_reason`) for the given input pattern.)doc";
 
 static const char* __doc_fiction_detail_is_operational_impl_encodes_bit_one =
     R"doc(This function returns `true` if `1` is encoded in the charge state of
@@ -7007,15 +7036,16 @@ This function executes the operational status checking algorithm for
 the gate layout and parameters provided during initialization.
 
 Returns:
-    The operational status of the gate layout (either `OPERATIONAL` or
-    `NON_OPERATIONAL`).)doc";
+    Pair with the first element indicating the operational status
+    (either `OPERATIONAL` or `NON_OPERATIONAL`) and the second element
+    indicating the reason if it is non-operational.)doc";
 
 static const char* __doc_fiction_detail_is_operational_impl_simulator_invocations =
     R"doc(Number of simulator invocations.)doc";
 
 static const char* __doc_fiction_detail_is_operational_impl_truth_table = R"doc(The specification of the layout.)doc";
 
-static const char* __doc_fiction_detail_is_operational_impl_verifiy_logic_match_of_cds =
+static const char* __doc_fiction_detail_is_operational_impl_verify_logic_match_of_cds =
     R"doc(Checks if the given charge distribution correctly encodes the expected
 logic for the given input pattern, based on a provided truth table.
 
@@ -7034,8 +7064,9 @@ Parameter ``input_pattern``:
     Input pattern represented by the position of perturbers.
 
 Returns:
-    Operational status indicating if the layout is `operational` or
-    `non-operational`.)doc";
+    Pair with the first element indicating the operational status
+    (either `OPERATIONAL` or `NON_OPERATIONAL`) and the second element
+    indicating the reason if it is non-operational.)doc";
 
 static const char* __doc_fiction_detail_jump_point_search_impl = R"doc()doc";
 
@@ -7295,6 +7326,17 @@ static const char* __doc_fiction_detail_new_gate_location_DEST = R"doc(Check if 
 static const char* __doc_fiction_detail_new_gate_location_NONE = R"doc(Do not check any tiles.)doc";
 
 static const char* __doc_fiction_detail_new_gate_location_SRC = R"doc(Check if the source tile is empty.)doc";
+
+static const char* __doc_fiction_detail_non_operationality_reason = R"doc(Reason why a layout is non-operational.)doc";
+
+static const char* __doc_fiction_detail_non_operationality_reason_KINKS =
+    R"doc(Kinks induced the layout to become non-operational.)doc";
+
+static const char* __doc_fiction_detail_non_operationality_reason_LOGIC_MISMATCH =
+    R"doc(The layout is non-operational because of logic mismatch.)doc";
+
+static const char* __doc_fiction_detail_non_operationality_reason_NONE =
+    R"doc(No reason for non-operationality could be determined.)doc";
 
 static const char* __doc_fiction_detail_on_the_fly_circuit_design_impl = R"doc()doc";
 
@@ -13870,6 +13912,42 @@ Returns:
 
 static const char* __doc_fiction_is_hexagonal_layout = R"doc()doc";
 
+static const char* __doc_fiction_is_kink_induced_non_operational =
+    R"doc(This function determines if the layout is only considered as non-
+operational because of kinks. This means that the layout would be
+considered as operational, if kinks were accepted.
+
+@note "Kink induced non-operational" refers to the non-operational
+status being exclusively caused by kinks with an otherwise correct
+logic match.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Template parameter ``TT``:
+    Type of the truth table.
+
+Parameter ``lyt``:
+    The SiDB cell-level layout to be checked.
+
+Parameter ``spec``:
+    Expected Boolean function of the layout given as a multi-output
+    truth table.
+
+Parameter ``params``:
+    Parameters for the `is_operational` algorithm.
+
+Parameter ``input_bdl_wire``:
+    Optional BDL input wires of lyt.
+
+Parameter ``output_bdl_wire``:
+    Optional BDL output wires of lyt.
+
+Returns:
+    Bool that indicates whether kinks induce the layout to become non-
+    operational. `true` if the layout is non-operational due to kinks,
+    `false` otherwise.)doc";
+
 static const char* __doc_fiction_is_linear_scheme =
     R"doc(Checks whether a given clocking scheme is registered as a cycle-free
 one. These currently are
@@ -13932,7 +14010,7 @@ Template parameter ``Lyt``:
     SiDB cell-level layout type.
 
 Template parameter ``TT``:
-    The type of the truth table specifying the layout behavior.
+    Type of the truth table.
 
 Parameter ``lyt``:
     The SiDB cell-level layout to be checked.
@@ -13950,9 +14028,6 @@ Parameter ``input_bdl_wire``:
 Parameter ``output_bdl_wire``:
     Optional BDL output wires of lyt.
 
-Parameter ``input_bdl_wire_direction``:
-    Optional BDL input wire directions of lyt.
-
 Returns:
     A pair containing the operational status of the gate layout
     (either `OPERATIONAL` or `NON_OPERATIONAL`) and the number of
@@ -13964,8 +14039,8 @@ static const char* __doc_fiction_is_operational_params_input_bdl_iterator_params
     R"doc(Parameters for the BDL input iterator.)doc";
 
 static const char* __doc_fiction_is_operational_params_op_condition =
-    R"doc(Condition which is used to decide if a layout is `operational` or
-`non-operational`.)doc";
+    R"doc(Condition which is used to decide if a layout is operational or non-
+operational.)doc";
 
 static const char* __doc_fiction_is_operational_params_sim_engine =
     R"doc(The simulation engine to be used for the operational domain
@@ -14105,6 +14180,34 @@ Parameter ``dist_fn``:
 Returns:
     The shortest loop-less path in `layout` from `objective.source` to
     `objective.target`.)doc";
+
+static const char* __doc_fiction_kink_induced_non_operational_input_patterns =
+    R"doc(This function determines all input combinations for which kinks induce
+the SiDB layout to become non-operational. This means that the layout
+is operational if kinks would be accepted.
+
+@note "Kink induced non-operational" refers to the non-operational
+status being exclusively caused by kinks with an otherwise correct
+logic match.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Template parameter ``TT``:
+    Type of the truth table.
+
+Parameter ``lyt``:
+    The SiDB layout.
+
+Parameter ``spec``:
+    Vector of truth table specifications.
+
+Parameter ``params``:
+    Parameters for the `is_operational` algorithm.
+
+Returns:
+    The input combinations where kinks induce the SiDB layout to
+    become non-operational.)doc";
 
 static const char* __doc_fiction_layout_coordinate_path =
     R"doc(A path in a layout defined as an ordered sequence of coordinates.
@@ -14734,16 +14837,16 @@ Returns:
     Irregular clocking scheme.)doc";
 
 static const char* __doc_fiction_operational_condition =
-    R"doc(Condition which is used to decide if a layout is `operational` or
-`non-operational`.)doc";
+    R"doc(Condition which is used to decide if a layout is operational or non-
+operational.)doc";
 
 static const char* __doc_fiction_operational_condition_REJECT_KINKS =
     R"doc(The I/O pins are not allowed to show kinks. If kinks exist, the layout
-is considered as `non-operational`.)doc";
+is considered as non-operational.)doc";
 
 static const char* __doc_fiction_operational_condition_TOLERATE_KINKS =
     R"doc(Even if the I/O pins show kinks, the layout is still considered as
-`operational`.)doc";
+operational.)doc";
 
 static const char* __doc_fiction_operational_domain =
     R"doc(An operational domain is a set of simulation parameter values for
@@ -15057,12 +15160,11 @@ static const char* __doc_fiction_operational_domain_value_range_min =
 static const char* __doc_fiction_operational_domain_value_range_step = R"doc(The step size of the dimension sweep.)doc";
 
 static const char* __doc_fiction_operational_input_patterns =
-    R"doc(This function determines the input combinations for which the SiDB-
-based logic, represented by the provided layout (`lyt`) and truth
-table specifications (`spec`), produces the correct output.
+    R"doc(This function determines the input combinations for which the layout
+is operational.
 
 Template parameter ``Lyt``:
-    Type of the cell-level layout.
+    SiDB cell-level layout type.
 
 Template parameter ``TT``:
     Type of the truth table.
