@@ -28,6 +28,47 @@
 
 using namespace fiction;
 
+TEST_CASE("Design AND gate with skeleton, where one input wire and the output wire are orientated to the east.",
+          "[design-sidb-gates]")
+{
+    const auto lyt = blueprints::two_input_one_output_skeleton_west_west<sidb_100_cell_clk_lyt_siqad>();
+
+    design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
+        is_operational_params{sidb_simulation_parameters{2, -0.31}, sidb_simulation_engine::QUICKEXACT,
+                              bdl_input_iterator_params{}, operational_condition::REJECT_KINKS},
+        design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::QUICKCELL,
+        {{25, 6, 0}, {30, 8, 0}},
+        3};
+
+    SECTION("QuickCell")
+    {
+        design_sidb_gates_stats design_gates_stats{};
+        const auto              found_gate_layouts =
+            design_sidb_gates(lyt, std::vector<tt>{create_and_tt()}, params, &design_gates_stats);
+        REQUIRE(found_gate_layouts.size() == 20);
+        const auto& first_gate = found_gate_layouts.front();
+        CHECK(is_operational(first_gate, std::vector<tt>{create_and_tt()}, params.operational_params).first ==
+              operational_status::OPERATIONAL);
+
+        CHECK(design_gates_stats.number_of_layouts == 4060);
+        CHECK(design_gates_stats.number_of_layouts_after_first_pruning == 1301);
+        CHECK(design_gates_stats.number_of_layouts_after_second_pruning == 418);
+        CHECK(design_gates_stats.number_of_layouts_after_third_pruning == 21);
+    }
+
+    SECTION("Automatic Exhaustive Gate Designer")
+    {
+        params.design_mode = design_sidb_gates_params<
+            cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER;
+
+        const auto found_gate_layouts = design_sidb_gates(lyt, std::vector<tt>{create_and_tt()}, params);
+        REQUIRE(found_gate_layouts.size() == 20);
+        const auto& first_gate = found_gate_layouts.front();
+        CHECK(is_operational(first_gate, std::vector<tt>{create_and_tt()}, params.operational_params).first ==
+              operational_status::OPERATIONAL);
+    }
+}
+
 TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[design-sidb-gates]")
 {
     using offset_layout = sidb_100_cell_clk_lyt;
@@ -425,6 +466,7 @@ TEST_CASE("Design NOR Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
             CHECK(found_gate_layouts.front().num_cells() == lyt.num_cells() + 3);
         }
     }
+
 // to save runtime in the CI, this test is only run in RELEASE mode
 #ifdef NDEBUG
     SECTION("Exhaustive Generation, forbidding kinks")
@@ -534,44 +576,4 @@ TEST_CASE("Design AND gate with input left and output top-right with QuickCell (
     }
 }
 
-TEST_CASE("Design AND gate with skeleton, where one input wire and the output wire are orientated to the east.",
-          "[design-sidb-gates]")
-{
-    const auto lyt = blueprints::two_input_one_output_skeleton_west_west<sidb_100_cell_clk_lyt_siqad>();
-
-    design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
-        is_operational_params{sidb_simulation_parameters{2, -0.31}, sidb_simulation_engine::QUICKEXACT,
-                              bdl_input_iterator_params{}, operational_condition::REJECT_KINKS},
-        design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::QUICKCELL,
-        {{24, 6, 0}, {32, 10, 0}},
-        3};
-
-    SECTION("QuickCell")
-    {
-        design_sidb_gates_stats design_gates_stats{};
-        const auto              found_gate_layouts =
-            design_sidb_gates(lyt, std::vector<tt>{create_and_tt()}, params, &design_gates_stats);
-        REQUIRE(found_gate_layouts.size() == 157);
-        const auto& first_gate = found_gate_layouts.front();
-        CHECK(is_operational(first_gate, std::vector<tt>{create_and_tt()}, params.operational_params).first ==
-              operational_status::OPERATIONAL);
-
-        CHECK(design_gates_stats.number_of_layouts == 85320);
-        CHECK(design_gates_stats.number_of_layouts_after_first_pruning == 67652);
-        CHECK(design_gates_stats.number_of_layouts_after_second_pruning == 30814);
-        CHECK(design_gates_stats.number_of_layouts_after_third_pruning == 174);
-    }
-
-    SECTION("Automatic Exhaustive Gate Designer")
-    {
-        params.design_mode = design_sidb_gates_params<
-            cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER;
-
-        const auto found_gate_layouts = design_sidb_gates(lyt, std::vector<tt>{create_and_tt()}, params);
-        REQUIRE(found_gate_layouts.size() == 157);
-        const auto& first_gate = found_gate_layouts.front();
-        CHECK(is_operational(first_gate, std::vector<tt>{create_and_tt()}, params.operational_params).first ==
-              operational_status::OPERATIONAL);
-    }
-}
 #endif
