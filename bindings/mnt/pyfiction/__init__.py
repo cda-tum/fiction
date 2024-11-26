@@ -161,6 +161,8 @@ from .pyfiction import (
     is_operational_params,
     is_operational,
     operational_input_patterns,
+    is_kink_induced_non_operational,
+    kink_induced_non_operational_input_patterns,
 
     # maximum_defect_influence_distance_params,
     # maximum_defect_influence_position_and_distance,
@@ -541,6 +543,8 @@ __all__ = [
     "is_operational_params",
     "is_operational",
     "operational_input_patterns",
+    "is_kink_induced_non_operational",
+    "kink_induced_non_operational_input_patterns",
 
     # "maximum_defect_influence_distance_params",
     # "maximum_defect_influence_position_and_distance",

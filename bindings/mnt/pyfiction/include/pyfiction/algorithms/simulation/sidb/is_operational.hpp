@@ -13,7 +13,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include <string>
+#include <optional>
 
 namespace pyfiction
 {
@@ -33,6 +33,16 @@ void is_operational(pybind11::module& m)
     m.def("operational_input_patterns", &fiction::operational_input_patterns<Lyt, py_tt>, py::arg("lyt"),
           py::arg("spec"), py::arg("params") = fiction::is_operational_params{},
           DOC(fiction_operational_input_patterns));
+
+    m.def("is_kink_induced_non_operational", &fiction::is_kink_induced_non_operational<Lyt, py_tt>, py::arg("lyt"),
+          py::arg("spec"), py::arg("params") = fiction::is_operational_params{},
+          py::arg("input_bdl_wire") = std::nullopt, py::arg("output_bdl_wire") = std::nullopt,
+          DOC(fiction_is_kink_induced_non_operational));
+
+    m.def("kink_induced_non_operational_input_patterns",
+          &fiction::kink_induced_non_operational_input_patterns<Lyt, py_tt>, py::arg("lyt"), py::arg("spec"),
+          py::arg("params") = fiction::is_operational_params{},
+          DOC(fiction_kink_induced_non_operational_input_patterns));
 }
 
 }  // namespace detail

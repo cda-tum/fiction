@@ -5,13 +5,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`_.
 
-Unreleased
-----------
+v0.6.6 - 2024-11-26
+-------------------
 
 Added
 #####
 - Algorithms:
     - Simulation:
+        - Added option to determine if kinks induce layout to become non-operational
         - Kink control option for critical temperature simulation of SiDB layouts
 - Python bindings:
     - Support for Python 3.13 (including GIL-free multi-threading)
@@ -32,6 +33,7 @@ Changed
 
 Fixed
 #####
+- Fixed a bug in SiDB gate design when using skeletons with I/O wires facing east
 - Adapted ``post-layout optimization`` and ``wiring reduction`` to handle layouts with PIs not placed at the borders
 - Fix neutral defect handling in CDS and correct gate design termination condition
 - Enforce runtime evaluation of dynamic formatting strings to fix consteval contexts
