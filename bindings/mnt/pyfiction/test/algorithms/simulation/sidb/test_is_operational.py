@@ -1,6 +1,7 @@
 from mnt.pyfiction import (sidb_100_lattice, sidb_technology, is_operational, is_operational_params,
                            sidb_simulation_parameters, create_and_tt, operational_status, read_sqd_layout_100,
-                           operational_condition, read_sqd_layout_111, operational_input_patterns)
+                           operational_condition, read_sqd_layout_111, operational_input_patterns,
+                           kink_induced_non_operational_input_patterns, is_kink_induced_non_operational)
 import unittest
 import os
 
@@ -57,9 +58,7 @@ class TestIsOperational(unittest.TestCase):
 
         self.assertEqual(op_status, operational_status.NON_OPERATIONAL)
 
-
     def test_and_gate_non_operational_due_to_kinks(self):
-
         lyt = read_sqd_layout_100(dir_path + "/../../../resources/AND_mu_032_kinks.sqd")
 
         params = is_operational_params()
@@ -70,7 +69,6 @@ class TestIsOperational(unittest.TestCase):
         self.assertTrue(result)
 
     def test_and_gate_non_operational_input_patterns_due_to_kinks(self):
-
         lyt = read_sqd_layout_100(dir_path + "/../../../resources/AND_mu_032_kinks.sqd")
 
         params = is_operational_params()
