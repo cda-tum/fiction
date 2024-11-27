@@ -1,27 +1,89 @@
 # Python bindings for the *fiction* library
 
-This directory contains Python bindings for the *fiction* library generated
+This directory contains Python bindings for the *fiction* library built
 with [pybind11](https://github.com/pybind/pybind11).
 
 ## Installation
 
 The bindings can either be built and installed automatically with `pip` or built with `CMake` and installed manually.
 
+### Set up a virtual environment
+
+In order to set up a virtual environment on UNIX-like systems, you can use the following commands:
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+
+If you are using Windows, you can use the following commands instead:
+
+```batch
+python3 -m venv venv
+venv\Scripts\activate.bat
+```
+
+### Set up `nox`
+
+[`nox`](https://nox.thea.codes/en/stable/index.html) can be used to conveniently run many development tasks like
+testing the bindings on multiple Python installations.
+
+```bash
+(venv) $ pipx install nox
+```
+
+If you use macOS, then `nox` is in `brew`, use `brew install nox`.
+
+> [!NOTE]
+> If you do not have [`pipx`](https://pypa.github.io/pipx/) (pip for applications) installed, you can install it with:
+>```bash
+> (venv) $ pip install pipx
+> (venv) $ pipx ensurepath
+>```
+
+If you use macOS, then `pipx` is in `brew`, use `brew install pipx`.
+
+### Install `pre-commit`
+
+Install [`pre-commit`](https://pre-commit.com/) to automatically run a set of checks before each commit.
+
+```bash
+(venv) $ pipx install pre-commit
+(venv) $ pre-commit install
+```
+
+If you use macOS, then `pre-commit` is in `brew`, use `brew install pre-commit`.
+
+You can also run the checks manually:
+
+```bash
+(venv) $ pre-commit run --all-files
+```
+
+### Install Z3
+
+Make sure to have the SMT Solver [`Z3 >= 4.8.0`](https://github.com/Z3Prover/z3) installed. This can be accomplished in
+a multitude of ways:
+
+- Under Ubuntu 20.04 and newer: `sudo apt-get install libz3-dev`.
+- Under macOS: `brew install z3`.
+- Alternatively: `pip install z3-solver` in the virtual environment.
+- Download pre-built binaries from https://github.com/Z3Prover/z3/releases and copy the files to the respective system
+  directories.
+- Build Z3 from source and install it to the system.
+
 ### Building the bindings with `pip`
 
 ```bash
-pip install .
+(venv) $ pip install .
 ```
 
-If you want to include the functions dependent on the [Z3 Solver](https://github.com/Z3Prover/z3), set `z3=ON` before
-running `pip`:
+### Building the bindings with `uv` (faster)
 
 ```bash
-z3=ON pip install .
+(venv) $ pipx install uv
+(venv) $ uv pip install .
 ```
-
-See [the documentation](https://fiction.readthedocs.io/en/latest/getting_started.html#enabling-dependent-functions) for
-more information on dependent functions.
 
 ### Building the bindings with CMake
 
@@ -31,25 +93,16 @@ cd build
 cmake --build . -j4
 ```
 
-### Enabling and running tests
+### Running Python tests
 
-To run tests locally, build the binding with its dependencies using `pip`:
-
-```bash
-pip install '.[test]'
-```
-
-Alternatively, install the following dependency before the `cmake` call:
+A `nox` session is provided to conveniently run the Python tests.
 
 ```bash
-pip install python-dotenv==0.21.1
+(venv) $ nox -s tests
 ```
 
-To execute all tests, use the following command inside the package directory:
-
-```bash
- python -m unittest discover --verbose
-```
+This installs all dependencies for running the tests in an isolated environment, builds the Python package, and then
+runs the tests.
 
 ## Usage
 
@@ -74,7 +127,15 @@ functionality might not be available in Python or differ slightly in its syntax 
 
 Our goal is to expose as much of *fiction*'s library features in some way in `pyfiction` as well. Therefore, whenever a
 new feature is added to the C++ library, please also add the respective bindings here. To not duplicate
-docstrings and run out of sync, we use the `pybind11_mkdoc` tool to generate the documentation from the C++ docstrings.
+docstrings and run out of sync, we use the `pybind11_mkdoc` tool to automatically generate the documentation from the
+C++ docstrings.
+
+A few things must be noted when adding new bindings:
+- Do not use `""_a` literals in the bindings. Instead, use `py::arg` to specify the argument names.
+- Add new symbols to the `__init__.py` file's `import` and `__all__` statements.
+- Do not use `from mnt.pyfiction import *` in the Python code. Instead, use explicit imports like
+  `from mnt.pyfiction import cartesian_layout`. This speeds up the import process and helps narrow down the origin of a
+  failing test.
 
 ### Docstrings
 
