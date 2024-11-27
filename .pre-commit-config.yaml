@@ -11,7 +11,7 @@ ci:
   autoupdate_commit_msg: "⬆️ Bump pre-commit hooks"
   autofix_commit_msg: "🎨 Incorporated pre-commit fixes"
 
-exclude: "^libs/|^benchmarks/|bindings/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp"
+exclude: "^libs/|^benchmarks/|bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp"
 
 repos:
   # Standard hooks
