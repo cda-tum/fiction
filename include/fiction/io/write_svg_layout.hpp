@@ -63,6 +63,20 @@ struct write_sidb_layout_svg_params
         LIGHT
     };
     /**
+     * Enumeration to specify if the H-Si lattice is plotted in addition to SiDBs.
+     */
+    enum class sidb_lattice_mode : uint8_t
+    {
+        /**
+         * Lattice is hidden. Only SiDBs are shown.
+         */
+        HIDE_LATTICE,
+        /**
+         * Lattice is shown.
+         */
+        SHOW_LATTICE
+    };
+    /**
      * Size of the H-Si lattice points in SVG units.
      */
     double lattice_point_size = 0.3;
@@ -78,6 +92,10 @@ struct write_sidb_layout_svg_params
      * The color mode of the background for the SVG output.
      */
     color_mode color_background = color_mode::DARK;
+    /**
+     * The lattice mode of the SiDB layout.
+     */
+    sidb_lattice_mode lattice_mode = sidb_lattice_mode::SHOW_LATTICE;
 };
 
 template <typename Coordinate>
@@ -582,29 +600,32 @@ class write_sidb_layout_svg_impl
         const auto min_coord = bb.get_min();
         const auto max_coord = bb.get_max();
 
-        // Generate all lattice points
-        const auto all_coords = all_coordinates_in_spanned_area(min_coord, max_coord);
-
-        for (const auto& coord : all_coords)
+        if (ps.lattice_mode == write_sidb_layout_svg_params::sidb_lattice_mode::SHOW_LATTICE)
         {
-            // Shift coordinates for alignment
-            auto shifted_coord = coord;
+            // Generate all lattice points
+            const auto all_coords = all_coordinates_in_spanned_area(min_coord, max_coord);
 
-            shifted_coord.x += 1;
-
-            if constexpr (has_siqad_coord_v<Lyt>)
+            for (const auto& coord : all_coords)
             {
-                shifted_coord.y += 1;
-            }
-            else
-            {
-                shifted_coord.y += 2;
-            }
+                // Shift coordinates for alignment
+                auto shifted_coord = coord;
 
-            const auto nm_pos = sidb_nm_position(lyt, shifted_coord);
+                shifted_coord.x += 1;
 
-            svg_content << generate_lattice_point(nm_pos.first * 10, nm_pos.second * 10,
-                                                  fiction::detail::svg::SI_LATTICE);
+                if constexpr (has_siqad_coord_v<Lyt>)
+                {
+                    shifted_coord.y += 1;
+                }
+                else
+                {
+                    shifted_coord.y += 2;
+                }
+
+                const auto nm_pos = sidb_nm_position(lyt, shifted_coord);
+
+                svg_content << generate_lattice_point(nm_pos.first * 10, nm_pos.second * 10,
+                                                      fiction::detail::svg::SI_LATTICE);
+            }
         }
 
         std::vector<cell<Lyt>> all_cells{};
@@ -851,7 +872,7 @@ class write_qca_layout_svg_impl
                         if (lyt.is_synchronization_element(c))
                         {
                             cell_descriptions
-                                << fmt::format(desc_col.first, desc_col.second,
+                                << fmt::format(fmt::runtime(desc_col.first), desc_col.second,
                                                svg::STARTING_OFFSET_TILE_X + svg::STARTING_OFFSET_LATCH_CELL_X +
                                                    (c.x * svg::CELL_DISTANCE),
                                                svg::STARTING_OFFSET_TILE_Y + svg::STARTING_OFFSET_LATCH_CELL_Y +
@@ -863,7 +884,7 @@ class write_qca_layout_svg_impl
                     if (!is_sync_elem)
                     {
                         cell_descriptions << fmt::format(
-                            desc_col.first, desc_col.second,
+                            fmt::runtime(desc_col.first), desc_col.second,
                             svg::STARTING_OFFSET_TILE_X + svg::STARTING_OFFSET_CELL_X + (c.x * svg::CELL_DISTANCE),
                             svg::STARTING_OFFSET_TILE_Y + svg::STARTING_OFFSET_CELL_Y + (c.y * svg::CELL_DISTANCE));
                     }
@@ -959,7 +980,7 @@ class write_qca_layout_svg_impl
                         if (const auto latch_delay = lyt.get_synchronization_element(c); latch_delay > 0)
                         {
                             coord_to_latch_cells[tile_coords] = current_cells.append(
-                                fmt::format(desc_col.first, desc_col.second,
+                                fmt::format(fmt::runtime(desc_col.first), desc_col.second,
                                             svg::STARTING_OFFSET_LATCH_CELL_X + (in_tile.x * svg::CELL_DISTANCE),
                                             svg::STARTING_OFFSET_LATCH_CELL_Y + (in_tile.y * svg::CELL_DISTANCE)));
 
@@ -970,7 +991,7 @@ class write_qca_layout_svg_impl
                     if (!is_sync_elem)
                     {
                         coord_to_cells[tile_coords] = current_cells.append(
-                            fmt::format(desc_col.first, desc_col.second,
+                            fmt::format(fmt::runtime(desc_col.first), desc_col.second,
                                         svg::STARTING_OFFSET_CELL_X + (in_tile.x * svg::CELL_DISTANCE),
                                         svg::STARTING_OFFSET_CELL_Y + (in_tile.y * svg::CELL_DISTANCE)));
                     }
@@ -1031,7 +1052,7 @@ class write_qca_layout_svg_impl
             const double y_pos = svg::STARTING_OFFSET_TILE_Y + (coord.y * svg::TILE_DISTANCE);
 
             const auto c_descr =
-                fmt::format(descr, x_pos, y_pos, tile_colors[czone], cell_descriptions,
+                fmt::format(fmt::runtime(descr), x_pos, y_pos, tile_colors[czone], cell_descriptions,
                             ps.simple ? "" : text_colors[czone], ps.simple ? "" : std::to_string(czone + 1));
 
             tile_descriptions << c_descr;
@@ -1051,8 +1072,8 @@ class write_qca_layout_svg_impl
                 const double y_pos = svg::STARTING_OFFSET_LATCH_Y + (coord.y * svg::TILE_DISTANCE);
 
                 const auto t_descr =
-                    fmt::format(descr, x_pos, y_pos, tile_colors[czone_lo], tile_colors[czone_up], cell_descriptions,
-                                text_colors[czone_up], ps.simple ? "" : std::to_string(czone_up + 1),
+                    fmt::format(fmt::runtime(descr), x_pos, y_pos, tile_colors[czone_lo], tile_colors[czone_up],
+                                cell_descriptions, text_colors[czone_up], ps.simple ? "" : std::to_string(czone_up + 1),
                                 text_colors[czone_lo], ps.simple ? "" : std::to_string(czone_lo + 1));
 
                 tile_descriptions << t_descr;
