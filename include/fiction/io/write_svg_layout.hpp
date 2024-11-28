@@ -63,6 +63,20 @@ struct write_sidb_layout_svg_params
         LIGHT
     };
     /**
+     * Enumeration to specify if the H-Si lattice is plotted in addition to SiDBs.
+     */
+    enum class sidb_lattice_mode : uint8_t
+    {
+        /**
+         * Lattice is hidden. Only SiDBs are shown.
+         */
+        HIDE_LATTICE,
+        /**
+         * Lattice is shown.
+         */
+        SHOW_LATTICE
+    };
+    /**
      * Size of the H-Si lattice points in SVG units.
      */
     double lattice_point_size = 0.3;
@@ -78,6 +92,10 @@ struct write_sidb_layout_svg_params
      * The color mode of the background for the SVG output.
      */
     color_mode color_background = color_mode::DARK;
+    /**
+     * The lattice mode of the SiDB layout.
+     */
+    sidb_lattice_mode lattice_mode = sidb_lattice_mode::SHOW_LATTICE;
 };
 
 template <typename Coordinate>
@@ -582,13 +600,15 @@ class write_sidb_layout_svg_impl
         const auto min_coord = bb.get_min();
         const auto max_coord = bb.get_max();
 
-        // Generate all lattice points
-        const auto all_coords = all_coordinates_in_spanned_area(min_coord, max_coord);
-
-        for (const auto& coord : all_coords)
+        if (ps.lattice_mode == write_sidb_layout_svg_params::sidb_lattice_mode::SHOW_LATTICE)
         {
-            // Shift coordinates for alignment
-            auto shifted_coord = coord;
+            // Generate all lattice points
+            const auto all_coords = all_coordinates_in_spanned_area(min_coord, max_coord);
+
+            for (const auto& coord : all_coords)
+            {
+                // Shift coordinates for alignment
+                auto shifted_coord = coord;
 
             shifted_coord.x += static_cast<decltype(shifted_coord.x)>(1);
 
@@ -601,10 +621,11 @@ class write_sidb_layout_svg_impl
                 shifted_coord.y += static_cast<decltype(shifted_coord.y)>(2);
             }
 
-            const auto nm_pos = sidb_nm_position(lyt, shifted_coord);
+                const auto nm_pos = sidb_nm_position(lyt, shifted_coord);
 
-            svg_content << generate_lattice_point(nm_pos.first * 10, nm_pos.second * 10,
-                                                  fiction::detail::svg::SI_LATTICE);
+                svg_content << generate_lattice_point(nm_pos.first * 10, nm_pos.second * 10,
+                                                      fiction::detail::svg::SI_LATTICE);
+            }
         }
 
         std::vector<cell<Lyt>> all_cells{};
