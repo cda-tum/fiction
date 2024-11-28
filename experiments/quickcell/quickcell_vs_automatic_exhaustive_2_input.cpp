@@ -16,10 +16,11 @@
 #include <fmt/format.h>
 #include <mockturtle/utils/stopwatch.hpp>
 
+#include <array>
 #include <cstdint>
 #include <cstdlib>
-#include <iostream>
 #include <string>
+#include <utility>
 #include <vector>
 
 // This script uses the *Automatic Exhaustive Gate Designer* and *QuickCell* to design gate implementations for 2-input
@@ -47,18 +48,22 @@ int main()  // NOLINT
                        "#Lp3",                                 // uint64_t
                        "#Lp3/N [%]"};                          // double
 
-    const auto truth_tables =
-        std::vector<std::vector<tt>>{std::vector<tt>{create_id_tt()},  std::vector<tt>{create_not_tt()},
-                                     std::vector<tt>{create_and_tt()}, std::vector<tt>{create_nand_tt()},
-                                     std::vector<tt>{create_or_tt()},  std::vector<tt>{create_nor_tt()},
-                                     std::vector<tt>{create_xor_tt()}, std::vector<tt>{create_xnor_tt()},
-                                     std::vector<tt>{create_lt_tt()},  std::vector<tt>{create_gt_tt()},
-                                     std::vector<tt>{create_le_tt()},  std::vector<tt>{create_ge_tt()},
-                                     create_crossing_wire_tt(),        create_half_adder_tt(),
-                                     create_double_wire_tt()};
-
-    static const std::vector<std::string> gate_names = {"inv", "wire", "and", "nand", "or", "nor", "xor",      "xnor",
-                                                        "lt",  "gt",   "le",  "ge",   "cx", "ha",  "hourglass"};
+    const auto truth_tables_and_names = std::array<std::pair<std::vector<tt>, std::string>, 15>{
+        {{std::vector<tt>{create_id_tt()}, "inv"},
+         {std::vector<tt>{create_not_tt()}, "wire"},
+         {std::vector<tt>{create_and_tt()}, "and"},
+         {std::vector<tt>{create_nand_tt()}, "nand"},
+         {std::vector<tt>{create_or_tt()}, "or"},
+         {std::vector<tt>{create_nor_tt()}, "nor"},
+         {std::vector<tt>{create_xor_tt()}, "xor"},
+         {std::vector<tt>{create_xnor_tt()}, "xnor"},
+         {std::vector<tt>{create_lt_tt()}, "lt"},
+         {std::vector<tt>{create_gt_tt()}, "gt"},
+         {std::vector<tt>{create_le_tt()}, "le"},
+         {std::vector<tt>{create_ge_tt()}, "ge"},
+         {std::vector<tt>{create_crossing_wire_tt()}, "cx"},
+         {std::vector<tt>{create_half_adder_tt()}, "ha"},
+         {std::vector<tt>{create_double_wire_tt()}, "hourglass"}}};
 
     static const std::string folder = fmt::format("{}/gate_skeletons/skeleton_bestagons_with_tags", EXPERIMENTS_PATH);
 
@@ -98,10 +103,8 @@ int main()  // NOLINT
     double sum_exhaustive_runtime = 0;
     double sum_quickcell_runtime  = 0;
 
-    for (auto i = 0u; i < truth_tables.size(); i++)
+    for (const auto& [truth_table, gate_name] : truth_tables_and_names)
     {
-        const auto& table = truth_tables[i];
-
         design_sidb_gates_stats stats_automatic_exhaustive_design{};
 
         std::vector<sidb_100_cell_clk_lyt_siqad> automatic_exhaustive_design{};
@@ -117,21 +120,21 @@ int main()  // NOLINT
             fiction::cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER;
         params_1_in_1_out_straight.operational_params.op_condition = operational_condition::REJECT_KINKS;
 
-        if (gate_names[i] == "cx" || gate_names[i] == "ha" || gate_names[i] == "hourglass")
+        if (gate_name == "cx" || gate_name == "ha" || gate_name == "hourglass")
         {
-            automatic_exhaustive_design = design_sidb_gates(skeleton_two_input_two_output, table, params_2_in_2_out,
-                                                            &stats_automatic_exhaustive_design);
+            automatic_exhaustive_design = design_sidb_gates(skeleton_two_input_two_output, truth_table,
+                                                            params_2_in_2_out, &stats_automatic_exhaustive_design);
         }
-        else if (gate_names[i] == "wire" || gate_names[i] == "inv")
+        else if (gate_name == "wire" || gate_name == "inv")
         {
             automatic_exhaustive_design =
-                design_sidb_gates(skeleton_one_input_one_output_straight, table, params_1_in_1_out_straight,
+                design_sidb_gates(skeleton_one_input_one_output_straight, truth_table, params_1_in_1_out_straight,
                                   &stats_automatic_exhaustive_design);
         }
         else
         {
-            automatic_exhaustive_design = design_sidb_gates(skeleton_one_input_two_output, table, params_2_in_1_out,
-                                                            &stats_automatic_exhaustive_design);
+            automatic_exhaustive_design = design_sidb_gates(skeleton_one_input_two_output, truth_table,
+                                                            params_2_in_1_out, &stats_automatic_exhaustive_design);
         }
 
         std::vector<sidb_100_cell_clk_lyt_siqad> quickcell_design{};
@@ -146,20 +149,20 @@ int main()  // NOLINT
         params_1_in_1_out_straight.design_mode =
             design_sidb_gates_params<fiction::cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::QUICKCELL;
 
-        if (gate_names[i] == "cx" || gate_names[i] == "ha" || gate_names[i] == "hourglass")
+        if (gate_name == "cx" || gate_name == "ha" || gate_name == "hourglass")
         {
             quickcell_design =
-                design_sidb_gates(skeleton_two_input_two_output, table, params_2_in_2_out, &stats_quickcell);
+                design_sidb_gates(skeleton_two_input_two_output, truth_table, params_2_in_2_out, &stats_quickcell);
         }
-        else if (gate_names[i] == "wire" || gate_names[i] == "inv")
+        else if (gate_name == "wire" || gate_name == "inv")
         {
-            quickcell_design = design_sidb_gates(skeleton_one_input_one_output_straight, table,
+            quickcell_design = design_sidb_gates(skeleton_one_input_one_output_straight, truth_table,
                                                  params_1_in_1_out_straight, &stats_quickcell);
         }
         else
         {
             quickcell_design =
-                design_sidb_gates(skeleton_one_input_two_output, table, params_2_in_1_out, &stats_quickcell);
+                design_sidb_gates(skeleton_one_input_two_output, truth_table, params_2_in_1_out, &stats_quickcell);
         }
 
         const auto runtime_automatic_exhaustive_design =
@@ -173,7 +176,7 @@ int main()  // NOLINT
 
         const auto total_number_of_layout = stats_quickcell.number_of_layouts;
 
-        simulation_exp(gate_names[i], total_number_of_layout, runtime_automatic_exhaustive_design,
+        simulation_exp(gate_name, total_number_of_layout, runtime_automatic_exhaustive_design,
                        automatic_exhaustive_design.size(), quickcell_design.size(), runtime_quickcell, time_reduction,
                        stats_quickcell.number_of_layouts_after_first_pruning,
                        static_cast<double>(stats_quickcell.number_of_layouts_after_first_pruning) /

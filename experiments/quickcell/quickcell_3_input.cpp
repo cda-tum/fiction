@@ -17,9 +17,11 @@
 #include <fmt/format.h>
 #include <mockturtle/utils/stopwatch.hpp>
 
+#include <array>
 #include <cstdint>
 #include <cstdlib>
 #include <string>
+#include <utility>
 #include <vector>
 
 using namespace fiction;
@@ -43,14 +45,17 @@ int main()  // NOLINT
                        "#Lp3",                     // uint64_t
                        "#Lp3/N [%]"};              // double
 
-    const auto truth_tables = std::vector<std::vector<tt>>{
-        std::vector<tt>{create_and3_tt()},   std::vector<tt>{create_xor_and_tt()}, std::vector<tt>{create_or_and_tt()},
-        std::vector<tt>{create_onehot_tt()}, std::vector<tt>{create_maj_tt()},     std::vector<tt>{create_gamble_tt()},
-        std::vector<tt>{create_dot_tt()},    std::vector<tt>{create_ite_tt()},     std::vector<tt>{create_and_xor_tt()},
-        std::vector<tt>{create_xor3_tt()}};
-
-    static const std::vector<std::string> gate_names = {"and3",   "xor_and", "or_and", "onehot",  "maj",
-                                                        "gamble", "dot",     "ite",    "and_xor", "xor3"};
+    const auto truth_tables_and_names =
+        std::array<std::pair<std::vector<tt>, std::string>, 10>{{{std::vector<tt>{create_and3_tt()}, "and3"},
+                                                                 {std::vector<tt>{create_xor_and_tt()}, "xor_and"},
+                                                                 {std::vector<tt>{create_or_and_tt()}, "or_and"},
+                                                                 {std::vector<tt>{create_onehot_tt()}, "onehot"},
+                                                                 {std::vector<tt>{create_maj_tt()}, "maj"},
+                                                                 {std::vector<tt>{create_gamble_tt()}, "gamble"},
+                                                                 {std::vector<tt>{create_dot_tt()}, "dot"},
+                                                                 {std::vector<tt>{create_ite_tt()}, "ite"},
+                                                                 {std::vector<tt>{create_and_xor_tt()}, "and_xor"},
+                                                                 {std::vector<tt>{create_xor3_tt()}, "xor3"}}};
 
     static const std::string folder = fmt::format("{}/gate_skeletons/skeleton_3_input_1_output/", EXPERIMENTS_PATH);
 
@@ -70,27 +75,25 @@ int main()  // NOLINT
         {{22, 6, 0}, {32, 12, 0}},
         4};
 
-    for (auto i = 0u; i < truth_tables.size(); i++)
+    for (const auto& [truth_tables, gate_names] : truth_tables_and_names)
     {
-        const auto& table = truth_tables[i];
-
         std::vector<sidb_100_cell_clk_lyt_siqad> quickcell_design{};
         design_sidb_gates_stats                  stats_quickcell{};
 
-        if (gate_names[i] == "and3" || gate_names[i] == "gamble")
+        if (gate_names == "and3" || gate_names == "gamble")
         {
-            quickcell_design = design_sidb_gates(skeleton_one, table, params, &stats_quickcell);
+            quickcell_design = design_sidb_gates(skeleton_one, truth_tables, params, &stats_quickcell);
         }
         else
         {
-            quickcell_design = design_sidb_gates(skeleton_two, table, params, &stats_quickcell);
+            quickcell_design = design_sidb_gates(skeleton_two, truth_tables, params, &stats_quickcell);
         }
 
         const auto runtime_quickcell = mockturtle::to_seconds(stats_quickcell.time_total);
 
         const auto final_number_of_gates = quickcell_design.size();
 
-        simulation_exp(gate_names[i], stats_quickcell.number_of_layouts, final_number_of_gates, runtime_quickcell,
+        simulation_exp(gate_names, stats_quickcell.number_of_layouts, final_number_of_gates, runtime_quickcell,
                        stats_quickcell.number_of_layouts_after_first_pruning,
                        100.0 * static_cast<double>(stats_quickcell.number_of_layouts_after_first_pruning) /
                            static_cast<double>(stats_quickcell.number_of_layouts),
