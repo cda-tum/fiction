@@ -11,6 +11,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <compare>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -428,87 +429,11 @@ struct coord_t
         }
     }
     /**
-     * Compares against another coordinate for equality. Respects the dead indicator.
+     * Spaceship operator for automatically generating all six comparison operators.
      *
      * @param other Right-hand side coordinate.
-     * @return `true` iff both coordinates are identical.
      */
-    constexpr bool operator==(const coord_t& other) const noexcept
-    {
-        return d == other.d && z == other.z && y == other.y && x == other.x;
-    }
-    /**
-     * Compares against another coordinate for inequality. Respects the dead indicator.
-     *
-     * @param other Right-hand side coordinate.
-     * @return `true` iff both coordinates are not identical.
-     */
-    constexpr bool operator!=(const coord_t& other) const noexcept
-    {
-        return !(*this == other);
-    }
-    /**
-     * Determine whether this coordinate is "less than" another one. This is the case if z is smaller, or if z is equal
-     * but y is smaller, or if z and y are equal but x is smaller.
-     *
-     * @param other Right-hand side coordinate.
-     * @return `true` iff this coordinate is "less than" the other coordinate.
-     */
-    constexpr bool operator<(const coord_t& other) const noexcept
-    {
-        if (z < other.z)
-        {
-            return true;
-        }
-
-        if (z == other.z)
-        {
-            if (y < other.y)
-            {
-                return true;
-            }
-
-            if (y == other.y)
-            {
-                return x < other.x;
-            }
-        }
-
-        return false;
-    }
-    /**
-     * Determine whether this coordinate is "greater than" another one. This is the case if the other one is "less
-     * than".
-     *
-     * @param other Right-hand side coordinate.
-     * @return `true` iff this coordinate is "greater than" the other coordinate.
-     */
-    constexpr bool operator>(const coord_t& other) const noexcept
-    {
-        return other < *this;
-    }
-    /**
-     * Determine whether this coordinate is "less than or equal to" another one. This is the case if this one is not
-     * "greater than" the other.
-     *
-     * @param other Right-hand side coordinate.
-     * @return `true` iff this coordinate is "less than or equal to" the other coordinate.
-     */
-    constexpr bool operator<=(const coord_t& other) const noexcept
-    {
-        return !(*this > other);
-    }
-    /**
-     * Determine whether this coordinate is "greater than or equal to" another one. This is the case if this one is not
-     * "less than" the other.
-     *
-     * @param other Right-hand side coordinate.
-     * @return `true` iff this coordinate is "greater than or equal to" the other coordinate.
-     */
-    constexpr bool operator>=(const coord_t& other) const noexcept
-    {
-        return !(*this < other);
-    }
+    constexpr std::strong_ordering operator<=>(const coord_t& other) const noexcept = default;
     /**
      * Adds another coordinate to this one and returns the result. Does not modify this coordinate.
      *
