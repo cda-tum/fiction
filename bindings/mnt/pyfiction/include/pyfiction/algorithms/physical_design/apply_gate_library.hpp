@@ -32,8 +32,7 @@ void apply_fcn_gate_library(pybind11::module& m, const std::string& lib_name)
 {
     namespace py = pybind11;
 
-    using py_cartesian_technology_cell_layout =
-        py_cartesian_cell_layout<fiction::technology<GateLibrary>, py_cartesian_clocked_layout>;
+    using py_cartesian_technology_cell_layout = py_cartesian_cell_layout<fiction::technology<GateLibrary>>;
 
     m.def(fmt::format("apply_{}_library", lib_name).c_str(),
           &fiction::apply_gate_library<py_cartesian_technology_cell_layout, GateLibrary, GateLyt>, py::arg("layout"),
