@@ -30,6 +30,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <optional>
+#include <ranges>
 #include <set>
 #include <utility>
 #include <vector>
@@ -642,11 +643,10 @@ template <typename Lyt, typename TT>
 
     std::set<uint64_t> input_patterns{};
 
-    // all possible input patterns
-    for (auto i = 0u; i < spec.front().num_bits(); ++i)
-    {
-        input_patterns.insert(i);
-    }
+    // generate all possible input patterns
+    const auto input_range = std::views::iota(0ul, spec.front().num_bits());
+    // insert the range into the container
+    input_patterns.insert(std::cbegin(input_range), std::cend(input_range));
 
     const auto non_op_patterns_and_non_op_reason =
         p.determine_non_operational_input_patterns_and_non_operationality_reason();

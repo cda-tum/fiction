@@ -36,6 +36,7 @@
 #include <optional>
 #include <queue>
 #include <random>
+#include <ranges>
 #include <sstream>
 #include <stdexcept>
 #include <thread>
@@ -547,25 +548,12 @@ class operational_domain_impl
         // a utility function that adds the adjacent points to the queue for further evaluation
         const auto queue_next_points = [this, &queue](const step_point& sp)
         {
-            if (num_dimensions == 2)
+            const auto neighbors = (num_dimensions == 2) ? moore_neighborhood_2d(sp) : moore_neighborhood_3d(sp);
+
+            for (const auto& m :
+                 neighbors | std::views::filter([this](const auto& point) { return !has_already_been_sampled(point); }))
             {
-                for (const auto& m : moore_neighborhood_2d(sp))
-                {
-                    if (!has_already_been_sampled(m))
-                    {
-                        queue.push(m);
-                    }
-                }
-            }
-            else  // num_dimensions == 3
-            {
-                for (const auto& m : moore_neighborhood_3d(sp))
-                {
-                    if (!has_already_been_sampled(m))
-                    {
-                        queue.push(m);
-                    }
-                }
+                queue.push(m);
             }
         };
 
@@ -963,7 +951,7 @@ class operational_domain_impl
             assert(pp.parameters[d] >= min_val && pp.parameters[d] <= max_val &&
                    "Parameter point is outside of the value range");
 
-            const auto it = std::lower_bound(values[d].cbegin(), values[d].cend(), pp.parameters[d]);
+            const auto it = std::ranges::lower_bound(values[d], pp.parameters[d]);
 
             const auto dis = std::distance(values[d].cbegin(), it);
 
