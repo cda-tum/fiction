@@ -96,12 +96,14 @@ int main()  // NOLINT
     mockturtle::tech_library<2> gate_lib{gates};
 
     // parameters for SMT-based physical design
-    fiction::exact_physical_design_params exact_params{};
-    exact_params.scheme        = "Row";
-    exact_params.crossings     = true;
-    exact_params.border_io     = true;
-    exact_params.desynchronize = true;
-    exact_params.timeout       = 3'600'000;  // 1h in ms
+    fiction::exact_physical_design_params exact_params{
+        .scheme        = "Row",
+        .crossings     = true,
+        .border_io     = true,
+        .desynchronize = true,
+        .timeout       = 3'600'000  // 1h in ms
+    };
+
     fiction::exact_physical_design_stats exact_stats{};
 
     static constexpr const uint64_t bench_select = fiction_experiments::all & ~fiction_experiments::b1_r2 &
