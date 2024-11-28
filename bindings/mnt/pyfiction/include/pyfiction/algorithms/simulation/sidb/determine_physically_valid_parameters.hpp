@@ -27,15 +27,15 @@ void determine_physically_valid_parameters(pybind11::module& m)
 {
     namespace py = pybind11;
 
-    m.def("determine_physically_valid_parameters", &fiction::determine_physically_valid_parameters<Lyt>, py::arfs("cds"),
-          py::args("params") = fiction::operational_domain_params{}, DOC(fiction_determine_physically_valid_parameters));
+    m.def("determine_physically_valid_parameters", &fiction::determine_physically_valid_parameters<Lyt>, py::arg("cds"),
+          py::args("params") = fiction::operational_domain_params{},
+          DOC(fiction_determine_physically_valid_parameters));
 }
 
 }  // namespace detail
 
 inline void determine_physically_valid_parameters(pybind11::module& m)
 {
-    namespace py = pybind11;
     namespace py = pybind11;
 
     py::class_<fiction::operational_domain<fiction::parameter_point, uint64_t>>(m, "physically_valid_parameters_domain",
