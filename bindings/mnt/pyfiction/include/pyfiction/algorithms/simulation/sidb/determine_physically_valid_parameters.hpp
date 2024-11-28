@@ -28,7 +28,8 @@ void determine_physically_valid_parameters(pybind11::module& m)
     namespace py = pybind11;
 
     m.def("determine_physically_valid_parameters", &fiction::determine_physically_valid_parameters<Lyt>, "cds"_a,
-          py::args("params") = fiction::operational_domain_params{}, DOC(fiction_determine_physically_valid_parameters));
+          py::args("params") = fiction::operational_domain_params{},
+          DOC(fiction_determine_physically_valid_parameters));
 }
 
 }  // namespace detail

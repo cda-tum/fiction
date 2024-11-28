@@ -610,16 +610,16 @@ class write_sidb_layout_svg_impl
                 // Shift coordinates for alignment
                 auto shifted_coord = coord;
 
-            shifted_coord.x += static_cast<decltype(shifted_coord.x)>(1);
+                shifted_coord.x += static_cast<decltype(shifted_coord.x)>(1);
 
-            if constexpr (has_siqad_coord_v<Lyt>)
-            {
-                shifted_coord.y += static_cast<decltype(shifted_coord.y)>(1);
-            }
-            else
-            {
-                shifted_coord.y += static_cast<decltype(shifted_coord.y)>(2);
-            }
+                if constexpr (has_siqad_coord_v<Lyt>)
+                {
+                    shifted_coord.y += static_cast<decltype(shifted_coord.y)>(1);
+                }
+                else
+                {
+                    shifted_coord.y += static_cast<decltype(shifted_coord.y)>(2);
+                }
 
                 const auto nm_pos = sidb_nm_position(lyt, shifted_coord);
 
