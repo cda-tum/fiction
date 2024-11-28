@@ -6,11 +6,12 @@
 #define FICTION_DISTANCE_MAP_HPP
 
 #include "fiction/algorithms/path_finding/distance.hpp"
+#include "fiction/concepts.hpp"
 #include "fiction/traits.hpp"
 
 #include <phmap.h>
 
-#include <cstdint>
+#include <concepts>
 #include <functional>
 #include <utility>
 #include <vector>
@@ -50,12 +51,11 @@ using sparse_distance_map = phmap::parallel_flat_hash_map<std::pair<coordinate<L
  * @param dist_fn Distance functor to apply to all pairs of coordinates in `lyt`.
  * @return Fully initialized `distance_map` for `lyt`.
  */
-template <typename Lyt, typename Dist>
+template <coordinate_layout_c Lyt, typename Dist>
+    requires(std::integral<Dist> || std::floating_point<Dist>)
 [[nodiscard]] distance_map<Dist> initialize_distance_map(const Lyt&                         lyt,
                                                          const distance_functor<Lyt, Dist>& dist_fn) noexcept
 {
-    static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
-
     // initialize distance map
     distance_map<Dist> dist_map(lyt.area(), std::vector<Dist>(lyt.area(), Dist{}));
 

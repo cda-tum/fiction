@@ -5,10 +5,12 @@
 #ifndef FICTION_DISTANCE_HPP
 #define FICTION_DISTANCE_HPP
 
+#include "fiction/concepts.hpp"
 #include "fiction/traits.hpp"
 
 #include <algorithm>
 #include <cmath>
+#include <concepts>
 #include <cstdint>
 #include <functional>
 #include <limits>
@@ -29,13 +31,10 @@ namespace fiction
  * @param target Target coordinate.
  * @return Manhattan distance between `source` and `target`.
  */
-template <typename Lyt, typename Dist = uint64_t>
+template <coordinate_layout_c Lyt, std::integral Dist = uint64_t>
 [[nodiscard]] constexpr Dist manhattan_distance([[maybe_unused]] const Lyt& lyt, const coordinate<Lyt>& source,
                                                 const coordinate<Lyt>& target) noexcept
 {
-    static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
-    static_assert(std::is_integral_v<Dist>, "Dist is not an integral type");
-
     return static_cast<Dist>(std::abs(static_cast<int64_t>(source.x) - static_cast<int64_t>(target.x)) +
                              std::abs(static_cast<int64_t>(source.y) - static_cast<int64_t>(target.y)));
 }
@@ -51,13 +50,10 @@ template <typename Lyt, typename Dist = uint64_t>
  * @param target Target coordinate.
  * @return Euclidean distance between `source` and `target`.
  */
-template <typename Lyt, typename Dist = double>
+template <coordinate_layout_c Lyt, std::floating_point Dist = double>
 [[nodiscard]] constexpr Dist euclidean_distance([[maybe_unused]] const Lyt& lyt, const coordinate<Lyt>& source,
                                                 const coordinate<Lyt>& target) noexcept
 {
-    static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
-    static_assert(std::is_floating_point_v<Dist>, "Dist is not a floating-point type");
-
     const auto x = static_cast<double>(source.x) - static_cast<double>(target.x);
     const auto y = static_cast<double>(source.y) - static_cast<double>(target.y);
 
