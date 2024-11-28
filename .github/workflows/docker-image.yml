@@ -12,7 +12,7 @@ on:
       - '.github/workflows/docker-image.yml'
       - 'Dockerfile'
       - '.dockerignore'
-      - '!bindings/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp'
+      - '!bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp'
   pull_request:
     branches: [ 'main' ]
     paths:
@@ -24,7 +24,7 @@ on:
       - '.github/workflows/docker-image.yml'
       - 'Dockerfile'
       - '.dockerignore'
-      - '!bindings/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp'
+      - '!bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp'
   merge_group:
   workflow_dispatch:
   release:

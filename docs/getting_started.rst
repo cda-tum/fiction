@@ -21,7 +21,8 @@ them automatically. Should the repository have been cloned before, the commands:
 
   git submodule update --init --recursive
 
-will fetch the latest version of all external modules used. Additionally, only ``CMake`` and a C++17 compiler are required.
+will fetch the latest version of all external modules used. Additionally, only ``CMake`` and a C++17 compiler are
+required for the C++ part. If you want to work with the Python bindings, you need a Python 3.8+ installation.
 
 At the time of writing, for parallel STL algorithms to work when using GCC, the TBB library (``libtbb-dev`` on Ubuntu) is
 needed. It is an optional dependency that can be installed for a performance boost in certain scenarios. For your
@@ -29,7 +30,7 @@ preferred compiler, see the current implementation state of `P0024R2 <https://en
 
 On Ubuntu, all required and optional dependencies can be installed via::
 
-  sudo apt-get install build-essential cmake libreadline-dev libtbb-dev
+  sudo apt-get install build-essential cmake Python3 libreadline-dev libtbb-dev
 
 
 .. _cli:
@@ -39,18 +40,22 @@ Using *fiction* as a stand-alone CLI tool
 
 It is possible to compile *fiction* as a stand-alone CLI tool. For auto-completion in the CLI, it is recommended but not
 required to install the ``libreadline-dev`` package (see above).
-The build system CMake can be invoked from the command line as follows::
+The build system CMake can be invoked from the command line as follows:
 
-  cmake . -B build
-  cd build
-  cmake --build . -j4
+.. code-block:: console
+
+  $ cmake . -B build
+  $ cd build
+  $ cmake --build . -j4
 
 Several options can be toggled during the build. For a more interactive interface, please refer to ``ccmake`` for a
 full list of supported customizations.
 
-The CLI tool can then be run using::
+The CLI tool can then be run using:
 
-  cli/fiction
+.. code-block:: console
+
+  $ cli/fiction
 
 
 Here is an example of running *fiction* to perform a full physical design flow on a QCA circuit layout that can
@@ -75,7 +80,9 @@ Using *fiction* as a header-only library
 All data types and algorithms provided by *fiction* can be used independently to build custom projects. The following
 snippets illustrate how *fiction* can be included and linked against your project. Assume, the project
 is called *fanfiction*. Clone *fiction* within the project folder ``fanfiction/`` and add the following lines of code
-to your ``CMakeLists.txt``::
+to your ``CMakeLists.txt``:
+
+.. code-block:: cmake
 
     add_subdirectory(fiction/)
     target_link_libraries(fanfiction libfiction)
@@ -107,9 +114,29 @@ Python Bindings
 ---------------
 
 The Python bindings can be installed via ``pip`` from `PyPI <https://pypi.org/project/mnt.pyfiction/>`_ where we publish
-wheels for every new release::
+wheels for every new release:
 
-  pip install mnt.pyfiction
+.. code-block:: console
+
+  (venv) $ pip install mnt.pyfiction
+
+In most practical cases (under 64-bit Linux, macOS incl. Apple Silicon, and Windows), this requires no compilation and
+merely downloads and installs a platform-specific pre-built wheel.
+
+.. note::
+    In order to set up a virtual environment on UNIX-like systems, you can use the following commands:
+
+    .. code-block:: console
+
+        $ python3 -m venv venv
+        $ source venv/bin/activate
+
+    If you are using Windows, you can use the following commands instead:
+
+    .. code-block:: console
+
+        $ python3 -m venv venv
+        $ venv\Scripts\activate.bat
 
 You can then import the bindings in your Python project:
 
@@ -156,9 +183,11 @@ SAT-based ``onepass`` synthesis
 
 The :ref:`one-pass synthesis algorithm <onepass>` is embedded via the Python3 script
 `Mugen <https://github.com/whaaswijk/mugen>`_ by Winston Haaswijk using `pybind11 <https://github.com/pybind/pybind11>`_.
-It has some further Python dependencies that can be installed via ``pip3``::
+It has some further Python dependencies that can be installed via ``pip3``:
 
-    pip install -r libs/mugen/requirements.txt
+.. code-block:: console
+
+    (venv) $ pip install -r libs/mugen/requirements.txt
 
 The Python integration is experimental and may cause issues on some systems. It is currently not available on Windows
 and some macOS versions due to issues with ``python-sat``. Mugen requires at least Python 3.7!
@@ -188,22 +217,26 @@ include the desired header files to get started:
    }
 
 
-Each file can be built individually via CMake::
+Each file can be built individually via CMake:
 
-  cmake . -B build -DFICTION_EXPERIMENTS=ON
-  cd build
-  cmake --build . -j4
+.. code-block:: console
+
+  $ cmake . -B build -DFICTION_EXPERIMENTS=ON
+  $ cd build
+  $ cmake --build . -j4
 
 
 Building tests
 --------------
 
-Unit tests can be built with CMake via a respective flag on the command line and executed via ``ctest``::
+Unit tests can be built with CMake via a respective flag on the command line and executed via ``ctest``:
 
-  cmake . -B build -DFICTION_TEST=ON
-  cd build
-  cmake --build . -j4
-  ctest
+.. code-block:: console
+
+  $ cmake . -B build -DFICTION_TEST=ON
+  $ cd build
+  $ cmake --build . -j4
+  $ ctest
 
 
 
@@ -213,11 +246,13 @@ Building code benchmarks
 Using ``Catch2``'s micro-benchmarking feature, you can compile and run code tests that evaluate the performance of
 certain code constructs. The ``test/benchmark`` folder provides a selection of benchmarks we were running to evaluate
 the performance of our code during development. Any ``*.cpp`` file that is placed in that folder is automatically
-linked against *fiction* and compiled as a stand-alone binary using the following commands::
+linked against *fiction* and compiled as a stand-alone binary using the following commands:
 
-  cmake . -B build -DFICTION_BENCHMARK=ON
-  cd build
-  cmake --build . -j4
+.. code-block:: console
+
+  $ cmake . -B build -DFICTION_BENCHMARK=ON
+  $ cd build
+  $ cmake --build . -j4
 
 
 Noteworthy CMake options
