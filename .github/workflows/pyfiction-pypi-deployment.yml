@@ -98,13 +98,13 @@ jobs:
         uses: rui314/setup-mold@v1
 
       - name: Install the latest version of uv
-        uses: astral-sh/setup-uv@v3
+        uses: astral-sh/setup-uv@v4
         with:
           version: "latest"
           enable-cache: true
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.21
+        uses: pypa/cibuildwheel@v2.22
 
       - name: Upload wheel as an artifact
         uses: actions/upload-artifact@v4
@@ -124,7 +124,7 @@ jobs:
           fetch-depth: 0
 
       - name: Install the latest version of uv
-        uses: astral-sh/setup-uv@v3
+        uses: astral-sh/setup-uv@v4
         with:
           version: "latest"
           enable-cache: true
