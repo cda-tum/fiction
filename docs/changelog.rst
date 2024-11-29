@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`_.
 
+Unreleased
+----------
+
+Added
+#####
+- Experiments:
+    - Added information about how many layouts remain after each of QuickCell's pruning steps.
+
 v0.6.6 - 2024-11-26
 -------------------
 
