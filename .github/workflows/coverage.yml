@@ -10,7 +10,7 @@ on:
       - '**/CMakeLists.txt'
       - 'libs/**'
       - '.github/workflows/coverage.yml'
-      - '!bindings/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp'
+      - '!bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp'
   pull_request:
     branches: [ 'main' ]
     paths:
@@ -20,7 +20,7 @@ on:
       - '**/CMakeLists.txt'
       - 'libs/**'
       - '.github/workflows/coverage.yml'
-      - '!bindings/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp'
+      - '!bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp'
   merge_group:
 
 concurrency:
@@ -136,7 +136,7 @@ jobs:
           lcov -l lcov_filtered.info
 
       - name: Upload report to Codecov
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
           files: ${{github.workspace}}/lcov_filtered.info
           fail_ci_if_error: true

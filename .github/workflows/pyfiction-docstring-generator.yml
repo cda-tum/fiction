@@ -37,20 +37,20 @@ jobs:
         run: >
           python3
           -m pybind11_mkdoc
-          -o ${{ github.workspace }}/bindings/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp
+          -o ${{ github.workspace }}/bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp
           -D FICTION_Z3_SOLVER
           `find ${{ github.workspace }}/include/fiction -name "*.hpp" -print`
 
       - name: Upload docstrings as an artifact
         uses: actions/upload-artifact@v4
         with:
-          path: ${{ github.workspace }}/bindings/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp
+          path: ${{ github.workspace }}/bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp
           overwrite: true
 
       - name: Commit docstrings
         uses: EndBug/add-and-commit@v9
         with:
-          add: 'bindings/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp'
+          add: 'bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp'
           commit: '--signoff'
           message: ':memo: Update pyfiction docstrings'
           author_name: GitHub Actions

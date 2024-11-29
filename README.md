@@ -2,7 +2,7 @@
 
 [![Ubuntu CI](https://img.shields.io/github/actions/workflow/status/cda-tum/fiction/ubuntu.yml?label=Ubuntu&logo=ubuntu&style=flat-square)](https://github.com/cda-tum/fiction/actions/workflows/ubuntu.yml)
 [![macOS CI](https://img.shields.io/github/actions/workflow/status/cda-tum/fiction/macos.yml?label=macOS&logo=apple&style=flat-square)](https://github.com/cda-tum/fiction/actions/workflows/macos.yml)
-[![Windows CI](https://img.shields.io/github/actions/workflow/status/cda-tum/fiction/windows.yml?label=Windows&logo=windows&style=flat-square)](https://github.com/cda-tum/fiction/actions/workflows/windows.yml)
+[![Windows CI](https://img.shields.io/github/actions/workflow/status/cda-tum/fiction/windows.yml?label=Windows&logo=data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB2ZXJzaW9uPSIxLjEiIHZpZXdCb3g9IjAgMCAyMyAyMyIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KIDxwYXRoIGQ9Ik0xIDFoMTB2MTBIMXoiIGZpbGw9IiNmMzUzMjUiLz4KIDxwYXRoIGQ9Ik0xMiAxaDEwdjEwSDEyeiIgZmlsbD0iIzgxYmMwNiIvPgogPHBhdGggZD0iTTEgMTJoMTB2MTBIMXoiIGZpbGw9IiMwNWE2ZjAiLz4KIDxwYXRoIGQ9Ik0xMiAxMmgxMHYxMEgxMnoiIGZpbGw9IiNmZmJhMDgiLz4KPC9zdmc+Cg==&style=flat-square)](https://github.com/cda-tum/fiction/actions/workflows/windows.yml)
 [![Python Bindings](https://img.shields.io/github/actions/workflow/status/cda-tum/fiction/python-bindings.yml?label=Bindings&logo=python&style=flat-square)](https://github.com/cda-tum/fiction/actions/workflows/python-bindings.yml)
 [![Docker Image](https://img.shields.io/github/actions/workflow/status/cda-tum/fiction/docker-image.yml?label=Docker&logo=docker&style=flat-square)](https://github.com/cda-tum/fiction/actions/workflows/docker-image.yml)
 [![CodeQL](https://img.shields.io/github/actions/workflow/status/cda-tum/fiction/codeql-analysis.yml?label=CodeQL&logo=github&style=flat-square)](https://github.com/cda-tum/fiction/actions/workflows/codeql-analysis.yml)
@@ -15,7 +15,7 @@
 
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/_static/mnt_light.svg" width="60%">
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/mnt_light.svg" width="60%">
     <img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/mnt_dark.svg" width="60%">
   </picture>
 </p>

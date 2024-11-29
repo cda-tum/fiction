@@ -5,6 +5,7 @@
 #ifndef FICTION_OPERATIONAL_DOMAIN_HPP
 #define FICTION_OPERATIONAL_DOMAIN_HPP
 
+#include "fiction/algorithms/simulation/sidb/energy_distribution.hpp"
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
 #include "fiction/algorithms/simulation/sidb/quickexact.hpp"
 #include "fiction/algorithms/simulation/sidb/quicksim.hpp"

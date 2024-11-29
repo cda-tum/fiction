@@ -536,6 +536,20 @@ GateLyt optimization_layout_corner_case_outputs_2() noexcept
 }
 
 template <typename GateLyt>
+GateLyt optimization_layout_corner_case_inputs() noexcept
+{
+    GateLyt layout{{3, 2, 0}, fiction::twoddwave_clocking<GateLyt>()};
+
+    const auto x1 = layout.create_pi("x1", {2, 1});
+    const auto x2 = layout.create_pi("x2", {1, 2});
+
+    const auto and1 = layout.create_and(x1, x2, {2, 2});
+    layout.create_po(and1, "f1", {3, 2});
+
+    return layout;
+}
+
+template <typename GateLyt>
 GateLyt planar_unoptimized_layout() noexcept
 {
     GateLyt layout{{4, 4, 0}, fiction::twoddwave_clocking<GateLyt>()};
@@ -922,6 +936,7 @@ Lyt and_gate_111_mirrored_on_the_x_axis() noexcept
     static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(fiction::is_sidb_lattice_111_v<Lyt>, "Lyt should have 111 as lattice orientation");
+    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
 
     Lyt lyt{};
 
@@ -1526,6 +1541,52 @@ Lyt bestagon_ha() noexcept
 
     lyt.assign_cell_type({2, 19, 0}, Lyt::cell_type::NORMAL);
     lyt.assign_cell_type({36, 19, 0}, Lyt::cell_type::NORMAL);
+
+    return lyt;
+};
+
+/**
+ * This layout represents a 2-input-1-output skeleton, where one input and output wire have a port direction to the
+ * west.
+ */
+template <typename Lyt>
+Lyt two_input_one_output_skeleton_west_west() noexcept
+{
+    static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
+
+    Lyt lyt{};
+
+    // input wires
+    lyt.assign_cell_type({4, 9, 1}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({1, 9, 1}, Lyt::cell_type::INPUT);
+
+    lyt.assign_cell_type({14, 0, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({16, 1, 0}, Lyt::cell_type::INPUT);
+
+    lyt.assign_cell_type({26, 4, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({28, 5, 0}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({19, 9, 1}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({16, 9, 1}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({11, 9, 1}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 9, 1}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({36, 9, 1}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({39, 9, 1}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({44, 9, 1}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({47, 9, 1}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({22, 3, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({20, 2, 0}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({52, 9, 1}, Lyt::cell_type::OUTPUT);
+    lyt.assign_cell_type({55, 9, 1}, Lyt::cell_type::OUTPUT);
+
+    lyt.assign_cell_type({60, 9, 1}, Lyt::cell_type::NORMAL);
 
     return lyt;
 };

@@ -11,7 +11,7 @@ on:
       - '**/*.py'
       - 'libs/**'
       - '.github/workflows/codeql-analysis.yml'
-      - '!bindings/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp'
+      - '!bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp'
   pull_request:
     branches: [ 'main' ]
     paths:
@@ -22,7 +22,7 @@ on:
       - '**/*.py'
       - 'libs/**'
       - '.github/workflows/codeql-analysis.yml'
-      - '!bindings/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp'
+      - '!bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp'
   merge_group:
   schedule:
     - cron: '30 5 * * 6'

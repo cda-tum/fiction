@@ -45,7 +45,7 @@ int main()  // NOLINT
     // Quantum Dot Circuits\" by Samuel Sze Hang Ng, Jacob Retallick, Hsi Nien Chiu, Robert Lupoiu, Lucian Livadaru,
     // Taleana Huff, Mohammad Rashidi, Wyatt Vine, Thomas Dienel, Robert A. Wolkow, and Konrad Walus in IEEE
     // TRANSACTIONS ON NANOTECHNOLOGY, Volume 19, 2020. (https://ieeexplore.ieee.org/abstract/document/8963859)
-    ct_params.input_iterator_params.input_bdl_config =
+    ct_params.operational_params.input_bdl_iterator_params.input_bdl_config =
         bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED;
 
     for (const auto& [gate, truth_table] : gates)

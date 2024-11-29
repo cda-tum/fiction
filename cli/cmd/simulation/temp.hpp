@@ -129,7 +129,7 @@ class temp_command : public command
                 }
                 else
                 {
-                    params.simulation_parameters = physical_params;
+                    params.operational_params.simulation_parameters = physical_params;
 
                     if (is_set("gate_based"))
                     {

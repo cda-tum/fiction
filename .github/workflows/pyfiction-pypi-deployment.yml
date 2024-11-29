@@ -34,13 +34,17 @@ on:
     types:
       - completed
 
+permissions:
+  attestations: write
+  contents: read
+  id-token: write
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
 env:
   Z3_VERSION: 4.13.0
-  ENABLE_Z3: 'ON'
 
 jobs:
   build_wheels:
@@ -54,12 +58,15 @@ jobs:
           - { os: macos-13, arch: x64 }
           - { os: macos-14, arch: arm64 }
           - { os: windows-2019, arch: x64 }
-        python: ['cp38', 'cp39', 'cp310', 'cp311', 'cp312', 'cp313']
+        python: [ 'cp38', 'cp39', 'cp310', 'cp311', 'cp312', 'cp313' ]
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
           fetch-depth: 0
+
+      - name: Set up MSVC development environment (Windows only)
+        uses: ilammy/msvc-dev-cmd@v1
 
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1.2
@@ -79,22 +86,25 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: "${{matrix.config.os}}-pyfiction"
+          save: true
+          max-size: 10G
+
       - if: runner.os == 'Linux'
         name: Setup mold
         uses: rui314/setup-mold@v1
 
-      - if: ${{ matrix.config.arch == 'arm64' }}
-        name: Set Architecture to arm64 if necessary
-        run: echo "CIBW_ARCHS_MACOS=arm64" >> $GITHUB_ENV
+      - name: Install the latest version of uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
+          enable-cache: true
 
-      - name: Build wheel
-        uses: pypa/cibuildwheel@v2.21.3
-        env:
-          CIBW_BEFORE_ALL_LINUX: /opt/python/cp39-cp39/bin/pip install z3-solver==${{ env.Z3_VERSION }}
-          CIBW_BUILD: ${{ matrix.python }}-*
-          CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET=10.15
-          CIBW_TEST_EXTRAS: test
-          CIBW_TEST_COMMAND: 'python -m unittest discover --start-directory {project} --verbose'
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v2.22
 
       - name: Upload wheel as an artifact
         uses: actions/upload-artifact@v4
@@ -113,32 +123,17 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
-      - name: Setup ccache
-        uses: hendrikmuhs/ccache-action@v1.2
+      - name: Install the latest version of uv
+        uses: astral-sh/setup-uv@v4
         with:
-          key: 'ubuntu-latest-pyfiction'
-          variant: ccache
-          save: true
-          max-size: 10G
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-          cache: 'pip'
-
-      - name: Setup Z3 Solver
-        uses: cda-tum/setup-z3@v1
-        with:
-          version: ${{ env.Z3_VERSION }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          version: "latest"
+          enable-cache: true
 
       - name: Build sdist
-        run: pipx run build --sdist
+        run: uv build --sdist
 
-      - name: Test sdist
-        run: z3=${{env.ENABLE_Z3}} pip install dist/*.tar.gz --verbose
+      - name: Check metadata
+        run: uvx twine check dist/*
 
       - name: Upload sdist as an artifact
         uses: actions/upload-artifact@v4
@@ -160,9 +155,15 @@ jobs:
           path: dist
           merge-multiple: true
 
+      - name: Generate artifact attestation for sdist and wheel(s)
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-path: "dist/*"
+
       - name: Deploy to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           password: ${{ secrets.PYPI_DEPLOY_TOKEN }}
+          attestations: true
           skip-existing: true
           verbose: true

@@ -1,0 +1,38 @@
+//
+// Created by marcel on 19.09.23.
+//
+
+#ifndef PYFICTION_SIDB_CHARGE_STATE_HPP
+#define PYFICTION_SIDB_CHARGE_STATE_HPP
+
+#include "pyfiction/documentation.hpp"
+
+#include <fiction/technology/sidb_charge_state.hpp>
+
+#include <pybind11/pybind11.h>
+
+namespace pyfiction
+{
+
+inline void sidb_charge_state(pybind11::module& m)
+{
+    namespace py = pybind11;
+    namespace py = pybind11;
+
+    py::enum_<fiction::sidb_charge_state>(m, "sidb_charge_state", DOC(fiction_sidb_charge_state))
+        .value("NEGATIVE", fiction::sidb_charge_state::NEGATIVE, DOC(fiction_sidb_charge_state_NEGATIVE))
+        .value("NEUTRAL", fiction::sidb_charge_state::NEUTRAL, DOC(fiction_sidb_charge_state_NEUTRAL))
+        .value("POSITIVE", fiction::sidb_charge_state::POSITIVE, DOC(fiction_sidb_charge_state_POSITIVE))
+        .value("NONE", fiction::sidb_charge_state::NONE, DOC(fiction_sidb_charge_state_NONE))
+
+        ;
+
+    m.def("charge_state_to_sign", &fiction::charge_state_to_sign, py::arg("cs"), DOC(fiction_charge_state_to_sign));
+    m.def("sign_to_charge_state", &fiction::sign_to_charge_state, py::arg("sg"), DOC(fiction_sign_to_charge_state));
+    m.def("charge_configuration_to_string", &fiction::charge_configuration_to_string, py::arg("cc"),
+          DOC(fiction_charge_configuration_to_string));
+}
+
+}  // namespace pyfiction
+
+#endif  // PYFICTION_SIDB_CHARGE_STATE_HPP
