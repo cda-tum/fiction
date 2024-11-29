@@ -1,8 +1,7 @@
 import unittest
 
 from mnt.pyfiction import (sidb_100_lattice, sidb_technology, assess_physical_population_stability_params,
-                           assess_physical_population_stability, sidb_111_lattice)
-
+                           assess_physical_population_stability_100, assess_physical_population_stability_111, sidb_111_lattice, population_stability_information_100, population_stability_information_111)
 
 class TestAssessPhysicalPopulationStability(unittest.TestCase):
 

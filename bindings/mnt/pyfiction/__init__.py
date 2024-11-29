@@ -106,9 +106,12 @@ from .pyfiction import (
     ## simulation
     ### sidb
     transition_type,
-    population_stability_information,
+    population_stability_information_100,
+    population_stability_information_111,
     assess_physical_population_stability_params,
-    assess_physical_population_stability,
+    assess_physical_population_stability_100,
+    assess_physical_population_stability_111,
+
 
     calculate_energy_and_state_type_with_kinks_accepted,
     calculate_energy_and_state_type_with_kinks_rejected,
@@ -488,7 +491,8 @@ __all__ = [
     ## simulation
     ### sidb
     "transition_type",
-    "population_stability_information",
+    "population_stability_information_100",
+    "population_stability_information_111",
     "assess_physical_population_stability_params",
     "assess_physical_population_stability",
 
