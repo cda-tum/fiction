@@ -24,24 +24,24 @@
 #include <utility>
 #include <vector>
 
-// This script designs all gate implementations for 2-input Boolean functions using *QuickCell* and a 16.896 x 16.896 nm rectangular skeleton.
+// This script designs all gate implementations for 2-input Boolean functions using *QuickCell* and a 16.896 x 16.896 nm
+// rectangular skeleton.
 
 using namespace fiction;
 
 int main()  // NOLINT
 {
-    experiments::experiment<std::string, uint64_t, double, uint64_t, double, uint64_t, double,
-                            uint64_t, double>
+    experiments::experiment<std::string, uint64_t, double, uint64_t, double, uint64_t, double, uint64_t, double>
         simulation_exp{"benchmark",
-                       "gate",                                 // std::string
-                       "#Gates (QuickCell)",                   // uint64_t
-                       "runtime (QuickCell) [s]",    // double
-                       "#Lp1",                                 // uint64_t
-                       "#Lp1/N [%]",                           // double
-                       "#Lp2",                                 // uint64_t
-                       "#Lp2/N [%]",                           // double
-                       "#Lp3",                                 // uint64_t
-                       "#Lp3/N [%]"};                          // double
+                       "gate",                     // std::string
+                       "#Gates (QuickCell)",       // uint64_t
+                       "runtime (QuickCell) [s]",  // double
+                       "#Lp1",                     // uint64_t
+                       "#Lp1/N [%]",               // double
+                       "#Lp2",                     // uint64_t
+                       "#Lp2/N [%]",               // double
+                       "#Lp3",                     // uint64_t
+                       "#Lp3/N [%]"};              // double
 
     const auto truth_tables_and_names = std::array<std::pair<std::vector<tt>, std::string>, 22>{
         {{std::vector<tt>{create_not_tt()}, "inv_1i_top_1o_right"},
@@ -83,11 +83,11 @@ int main()  // NOLINT
     const auto rectangular_1i_left_1o_right =
         read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}/{}", folder, "rectangular_1i_left_1o_right.sqd"));
 
-    const auto rectangular_1i_top_2o_right_down =
-        read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}/{}", folder, "rectangular_1i_top_2o_right_down.sqd"));
+    const auto rectangular_1i_top_2o_right_down = read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(
+        fmt::format("{}/{}", folder, "rectangular_1i_top_2o_right_down.sqd"));
 
-    const auto rectangular_1i_top_2o_left_right =
-        read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}/{}", folder, "rectangular_1i_top_2o_left_right.sqd"));
+    const auto rectangular_1i_top_2o_left_right = read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(
+        fmt::format("{}/{}", folder, "rectangular_1i_top_2o_left_right.sqd"));
 
     const auto num_canvas_sidbs = 3;
 
@@ -103,10 +103,11 @@ int main()  // NOLINT
         std::vector<sidb_100_cell_clk_lyt_siqad> quickcell_design{};
         design_sidb_gates_stats                  stats_quickcell{};
 
-        if (gate_name == "cx_2i_top_left_2o_down_right" || gate_name == "ha_2i_top_left_2o_down_right" || gate_name == "hourglass_2i_top_left_2o_down_right")
+        if (gate_name == "cx_2i_top_left_2o_down_right" || gate_name == "ha_2i_top_left_2o_down_right" ||
+            gate_name == "hourglass_2i_top_left_2o_down_right")
         {
             params.number_of_sidbs = 4;
-            params.canvas         = {{17, 8, 0}, {27, 14, 0}};
+            params.canvas          = {{17, 8, 0}, {27, 14, 0}};
             quickcell_design =
                 design_sidb_gates(rectangular_2i_top_left_2o_down_right, truth_table, params, &stats_quickcell);
             params.number_of_sidbs = num_canvas_sidbs;
@@ -126,20 +127,17 @@ int main()  // NOLINT
 
         else if (gate_name == "wire_1i_top_1o_right" || gate_name == "inv_1i_top_1o_right")
         {
-            quickcell_design =
-                design_sidb_gates(rectangular_1i_top_1o_right, truth_table, params, &stats_quickcell);
+            quickcell_design = design_sidb_gates(rectangular_1i_top_1o_right, truth_table, params, &stats_quickcell);
         }
 
         else if (gate_name == "wire_1i_top_1o_down" || gate_name == "inv_1i_top_1o_down")
         {
-            quickcell_design =
-                design_sidb_gates(rectangular_1i_top_1o_down, truth_table, params, &stats_quickcell);
+            quickcell_design = design_sidb_gates(rectangular_1i_top_1o_down, truth_table, params, &stats_quickcell);
         }
 
         else if (gate_name == "wire_1i_left_1o_right" || gate_name == "inv_1i_left_1o_right")
         {
-            quickcell_design =
-                design_sidb_gates(rectangular_1i_left_1o_right, truth_table, params, &stats_quickcell);
+            quickcell_design = design_sidb_gates(rectangular_1i_left_1o_right, truth_table, params, &stats_quickcell);
         }
 
         else
