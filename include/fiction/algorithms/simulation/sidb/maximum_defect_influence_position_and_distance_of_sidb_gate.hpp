@@ -10,8 +10,8 @@
 #include "fiction/traits.hpp"
 
 #include <cassert>
-#include <utility>
 #include <cmath>
+#include <utility>
 
 namespace fiction
 {
@@ -36,9 +36,9 @@ struct maximum_defect_influence_position_and_distance_of_sidb_gate_params
  * of an SiDB gate layout. It iterates over all input combinations and finds the defect position at maximum position
  * that affects the gate's ground state.
  *
- * @Note The `maximum defect influence distance` describes the maximum distance at which a defect influences the ground state. It does
- * not check when the successful operation starts to fail, since a change in the ground state can still lead to an
- * operational gate.
+ * @Note The `maximum defect influence distance` describes the maximum distance at which a defect influences the ground
+ * state. It does not check when the successful operation starts to fail, since a change in the ground state can still
+ * lead to an operational gate.
  *
  * @tparam Lyt SiDB cell-level layout type.
  * @param lyt Layout to compute the maximum defect influence position and distance for.
@@ -47,8 +47,7 @@ struct maximum_defect_influence_position_and_distance_of_sidb_gate_params
  */
 template <typename Lyt>
 [[nodiscard]] std::pair<typename Lyt::cell, double> maximum_defect_influence_position_and_distance_of_sidb_gate(
-    const Lyt& lyt,
-    const maximum_defect_influence_position_and_distance_of_sidb_gate_params& params = {}) noexcept
+    const Lyt& lyt, const maximum_defect_influence_position_and_distance_of_sidb_gate_params& params = {}) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -63,7 +62,7 @@ template <typename Lyt>
     cell<Lyt>               defect_cell{};
 
     // number of different input combinations
-    for (auto i = 0u; i < std::pow(2,lyt.num_pis()); ++i, ++bii)
+    for (auto i = 0u; i < std::pow(2, lyt.num_pis()); ++i, ++bii)
     {
         maximum_defect_influence_position_and_distance_stats stats_defect{};
         const auto                                           influence_cell_distance =

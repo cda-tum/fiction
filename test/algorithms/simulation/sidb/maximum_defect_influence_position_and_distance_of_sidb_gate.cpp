@@ -29,11 +29,11 @@ TEST_CASE("Test influence distance function for Gate")
         maximum_defect_influence_position_and_distance_of_sidb_gate_params{
             {sidb_defect{sidb_defect_type::UNKNOWN, 1, 9.7, 2.1}, sidb_simulation_parameters{2}}}};
 
-    const auto cell_distance_vacancy = maximum_defect_influence_position_and_distance_of_sidb_gate(
-        lyt, defect_avoidance_params_vacancy);
+    const auto cell_distance_vacancy =
+        maximum_defect_influence_position_and_distance_of_sidb_gate(lyt, defect_avoidance_params_vacancy);
 
-    const auto cell_distance_arsenic = maximum_defect_influence_position_and_distance_of_sidb_gate(
-        lyt, defect_avoidance_params_arsenic);
+    const auto cell_distance_arsenic =
+        maximum_defect_influence_position_and_distance_of_sidb_gate(lyt, defect_avoidance_params_arsenic);
 
     CHECK(cell_distance_vacancy.first == siqad::coord_t{-4, 3, 1});
     CHECK(cell_distance_arsenic.first == siqad::coord_t{3, 6, 0});

@@ -29,21 +29,24 @@ TEST_CASE("Single SiDB", "[calculate-min-bbr-for-all-inputs]")
 
     SECTION("Minimal potential required to conduct a charge change from neutral to negative")
     {
-        const auto min_potential = calculate_min_bbr_for_all_inputs(lyt, std::vector<tt>{create_and_tt()}, params, transition_type::NEUTRAL_TO_NEGATIVE);
+        const auto min_potential = calculate_min_bbr_for_all_inputs(lyt, std::vector<tt>{create_and_tt()}, params,
+                                                                    transition_type::NEUTRAL_TO_NEGATIVE);
 
         CHECK_THAT(min_potential, Catch::Matchers::WithinAbs(0.020652, physical_constants::POP_STABILITY_ERR));
     }
 
     SECTION("Minimal potential required to conduct a charge change from negative to neutral")
     {
-        const auto min_potential = calculate_min_bbr_for_all_inputs(lyt, std::vector<tt>{create_and_tt()}, params, transition_type::NEGATIVE_TO_NEUTRAL);
+        const auto min_potential = calculate_min_bbr_for_all_inputs(lyt, std::vector<tt>{create_and_tt()}, params,
+                                                                    transition_type::NEGATIVE_TO_NEUTRAL);
 
         CHECK_THAT(min_potential, Catch::Matchers::WithinAbs(0.087417, physical_constants::POP_STABILITY_ERR));
     }
 
     SECTION("Minimal potential required to conduct a charge change from positive to neutral")
     {
-        const auto min_potential = calculate_min_bbr_for_all_inputs(lyt, std::vector<tt>{create_and_tt()}, params, transition_type::NEUTRAL_TO_POSITIVE);
+        const auto min_potential = calculate_min_bbr_for_all_inputs(lyt, std::vector<tt>{create_and_tt()}, params,
+                                                                    transition_type::NEUTRAL_TO_POSITIVE);
 
         CHECK_THAT(min_potential, Catch::Matchers::WithinAbs(0.413859, physical_constants::POP_STABILITY_ERR));
     }

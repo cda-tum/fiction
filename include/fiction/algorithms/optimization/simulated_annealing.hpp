@@ -107,7 +107,7 @@ simulated_annealing(const State& init_state, const double init_temp, const doubl
 
             if (new_cost < best_cost)
             {
-                best_state = new_state;
+                best_state    = new_state;
                 best_cost     = new_cost;
                 current_state = std::move(new_state);
                 current_cost  = std::move(new_cost);
