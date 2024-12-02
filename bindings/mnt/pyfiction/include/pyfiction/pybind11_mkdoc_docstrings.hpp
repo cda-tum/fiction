@@ -1129,11 +1129,10 @@ distance for the SiDB gate to be operational. This function requires
 both the defect operational domain and the layout as input.
 
 Template parameter ``Lyt``:
-    Type representing the SiDB cell-level layout.
+    SiDB cell-level layout type.
 
 Parameter ``lyt``:
-    The cell-level layout for which the defect operational domain was
-    computed.
+    The cell-level layout for which the defect clearance is computed.
 
 Parameter ``defect_opdomain``:
     The defect operational domain associated with the layout.
@@ -1212,17 +1211,19 @@ Returns:
     state type.)doc";
 
 static const char *__doc_fiction_calculate_min_bbr_for_all_inputs =
-R"doc(Calculates the minimum potential required to induce charge changes in
-an SiDB layout for all input combinations.
+R"doc(Calculates the minimum electrostatic potential (a.k.a. band bending
+resilience) required to induce a charge change in an SiDB layout among
+all input combinations.
 
 Template parameter ``Lyt``:
-    Type representing the SiDB cell-level layout.
+    SiDB cell-level layout type.
 
 Template parameter ``TT``:
-    Type representing the truth table.
+    Truth table type.
 
 Parameter ``lyt``:
-    The SiDB layout object.
+    Layout for which the minimum band bending resilience is
+    calculated.
 
 Parameter ``spec``:
     Expected Boolean function of the layout, provided as a multi-
@@ -1231,9 +1232,10 @@ Parameter ``spec``:
 Parameter ``params``:
     Parameters for assessing physical population stability.
 
-Parameter ``charge_state_change``:
-    Optional parameter indicating the direction of the considered
-    charge state change (default is 1).
+Parameter ``transition_type``:
+    The optional type of charge transition to consider. This can be
+    used if one is only interested in a specific type of charge
+    transition.
 
 Returns:
     The minimum potential required for charge change across all input
@@ -3487,7 +3489,7 @@ Template parameter ``Lyt``:
     SiDB cell-level layout type.
 
 Template parameter ``TT``:
-    The type of the truth table specifying the gate behavior.
+    Type of the truth table.
 
 Parameter ``lyt``:
     The layout to simulate.
@@ -3821,13 +3823,13 @@ R"doc(Results of the defect clearance calculation.
 
 Template parameter ``CellType``:)doc";
 
+static const char *__doc_fiction_defect_clearance_result_defect_clearance_distance =
+R"doc(The maximum of the minimum distances between any SiDB in the gate and
+the defect responsible for gate failure.)doc";
+
 static const char *__doc_fiction_defect_clearance_result_max_distance_postion_of_non_operational_defect =
 R"doc(Position with maximum distance to the SiDB layout at which the
 placement of an SiDB defect still causes the gate to fail.)doc";
-
-static const char *__doc_fiction_defect_clearance_result_minimum_defect_clearance =
-R"doc(Minimum distance between an SiDB of the gate and the defect at the
-maximum distance that causes the gate to fail.)doc";
 
 static const char *__doc_fiction_defect_extent =
 R"doc(Returns the extent of a defect as a pair of SiDB distances in the
@@ -3862,9 +3864,7 @@ of :math:` n ` BDL input wires and a single BDL output wire for a
 given layout. Any algorithm for computing the defect operational
 domain iterates through all :math:` 2^n ` input combinations,
 evaluating the layout's output behavior based on the specified Boolean
-function. The layout is classified as operational for a particular
-defect position only if its output behavior is correct across all
-input combinations.)doc";
+function.)doc";
 
 static const char *__doc_fiction_defect_operational_domain_grid_search =
 R"doc(Computes the defect operational domain of the given SiDB layout. The
@@ -4785,8 +4785,7 @@ static const char *__doc_fiction_detail_critical_temperature_impl_gate_based_sim
 R"doc(*Gate-based Critical Temperature* Simulation of a SiDB layout for a
 given Boolean function.
 
-Template parameter ``TT``:
-    The type of the truth table specifying the gate behavior.
+tparam TT Type of the truth table.
 
 Parameter ``spec``:
     Expected Boolean function of the layout given as a multi-output
@@ -14388,18 +14387,18 @@ Template parameter ``Dist``:
 static const char *__doc_fiction_manhattan_distance_functor_manhattan_distance_functor = R"doc()doc";
 
 static const char *__doc_fiction_maximum_defect_influence_position_and_distance =
-R"doc(Calculates the maximum distance at which a given defect can influence
-the layout's ground state.
-
-This function simulates the influence of defects on a SiDB cell-level
+R"doc(This function simulates the influence of defects on a SiDB cell-level
 layout. It computes the maximum influence distance, defined as the
 minimum distance between any SiDB cell and the given defect, at which
 the defect can still affect the layout's ground state, potentially
 altering its behavior, such as gate functionality.
 
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
 Parameter ``lyt``:
-    The SiDB cell-level layout for which the influence distance is
-    being determined.
+    The SiDB cell-level layout for which the influence position and
+    distance is being determined.
 
 Parameter ``params``:
     Parameters used to calculate the defect's maximum influence
@@ -14420,24 +14419,17 @@ of a defect on the ground state of an SiDB gate layout. It iterates
 over all input combinations and finds the defect position at maximum
 position that affects the gate's ground state.
 
-@Note The `defect influence distance` describes the distance at which
-an defect influences the ground state. It does not check when the
-successful operation starts to fail, since a change in the ground
-state can still lead to an operational gate.
+@Note The `maximum defect influence distance` describes the maximum
+distance at which a defect influences the ground state. It does not
+check when the successful operation starts to fail, since a change in
+the ground state can still lead to an operational gate.
 
 Template parameter ``Lyt``:
-    Lyt SiDB cell-level layout type.
-
-Template parameter ``TT``:
-    Truth table type.
+    SiDB cell-level layout type.
 
 Parameter ``lyt``:
     Layout to compute the maximum defect influence position and
     distance for.
-
-Parameter ``spec``:
-    Expected Boolean function of the layout given as a multi-output
-    truth table.
 
 Parameter ``params``:
     Parameters for the defect influence simulation and BDL pair
@@ -14452,7 +14444,7 @@ R"doc(Parameters for the
 `maximum_defect_influence_position_and_distance_of_sidb_gate`
 algorithm.)doc";
 
-static const char *__doc_fiction_maximum_defect_influence_position_and_distance_of_sidb_gate_params_bdl_iterator_params = R"doc(Parameters for the input bDL iterator.)doc";
+static const char *__doc_fiction_maximum_defect_influence_position_and_distance_of_sidb_gate_params_bdl_iterator_params = R"doc(Parameters for the input BDL iterator.)doc";
 
 static const char *__doc_fiction_maximum_defect_influence_position_and_distance_of_sidb_gate_params_defect_influence_params = R"doc(Parameters for the defect influence simulation.)doc";
 
@@ -18417,12 +18409,6 @@ already point to a buffer.)doc";
 static const char *__doc_fiction_technology_network_technology_network = R"doc()doc";
 
 static const char *__doc_fiction_technology_network_technology_network_2 = R"doc()doc";
-
-static const char *__doc_fiction_temperature_schedule = R"doc(Available temperature schedule types.)doc";
-
-static const char *__doc_fiction_temperature_schedule_GEOMETRIC = R"doc(Logarithmically decreasing temperature schedule.)doc";
-
-static const char *__doc_fiction_temperature_schedule_LINEAR = R"doc(Linearly decreasing temperature schedule.)doc";
 
 static const char *__doc_fiction_tile_based_layout =
 R"doc(This class provides a tile-based naming scheme for coordinate-based

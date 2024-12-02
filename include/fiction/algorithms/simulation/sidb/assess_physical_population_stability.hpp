@@ -307,8 +307,8 @@ class assess_physical_population_stability_impl
                     .at(transition_type::NEUTRAL_TO_NEGATIVE)
                     .second)
             {
-                updated_pop_stability_information
-                    .transition_from_to_with_cell_and_required_pot.at(transition_type::NEUTRAL_TO_NEGATIVE) = {
+                updated_pop_stability_information.transition_from_to_with_cell_and_required_pot.at(
+                    transition_type::NEUTRAL_TO_NEGATIVE) = {
                     c, required_potential_to_conduct_transition_neutral_to_negative};
             }
         }

@@ -1648,7 +1648,7 @@ Lyt two_input_one_output_skeleton_west_west() noexcept
     return lyt;
 };
 
-}
+}  // namespace blueprints
 
 // namespace blueprints
 
