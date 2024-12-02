@@ -261,7 +261,7 @@ class clustercomplete_impl
         {
             const sidb_cluster_projector_state  parent;
             const sidb_charge_space_composition composition;
-            uint64_t available_work_to_steal;
+            uint64_t                            available_work_to_steal;
         };
 
         std::mutex mutex_to_protect_this_queue;
