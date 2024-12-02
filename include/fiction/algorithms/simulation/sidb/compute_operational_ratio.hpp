@@ -60,7 +60,8 @@ template <typename Lyt, typename TT>
     const auto op_domain = p.flood_fill(0, pp);
 
     // calculate the ratio of operational parameter pairs to the total number of parameter pairs
-    return 0.0;
+    return static_cast<double>(stats.num_operational_parameter_combinations) /
+           static_cast<double>(stats.num_total_parameter_points);
 }
 
 }  // namespace fiction
