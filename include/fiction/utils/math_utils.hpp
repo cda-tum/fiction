@@ -6,6 +6,7 @@
 #define FICTION_MATH_UTILS_HPP
 
 #include <cmath>
+#include <concepts>
 #include <cstdint>
 #include <cstdlib>
 #include <numeric>
@@ -40,11 +41,9 @@ template <typename T>
  * @param n The number to take the absolute value of.
  * @return |n|.
  */
-template <typename T>
+template <std::integral T>
 [[nodiscard]] inline T integral_abs(const T n) noexcept
 {
-    static_assert(std::is_integral_v<T>, "T is not an integral number type");
-
     if constexpr (std::is_unsigned_v<T>)
     {
         return n;
