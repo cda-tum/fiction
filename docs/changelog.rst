@@ -11,6 +11,7 @@ Unreleased
 Added
 #####
 - Experiments:
+    - Added rectangular skeletons and a script for designing a gate library.
     - Added information about how many layouts remain after each of QuickCell's pruning steps.
 
 v0.6.6 - 2024-11-26
