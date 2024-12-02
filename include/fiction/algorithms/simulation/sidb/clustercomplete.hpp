@@ -675,7 +675,7 @@ class clustercomplete_impl
 
                         // if (available_threads == threads_to_use - 1)
                         // {
-                            cond_var.notify_all();
+                        cond_var.notify_all();
                         // }
                     }
                 });
