@@ -70,6 +70,7 @@
 #include "pyfiction/inout/write_sqd_layout.hpp"
 #include "pyfiction/inout/write_sqd_sim_result.hpp"
 #include "pyfiction/inout/write_svg_layout.hpp"
+#include "pyfiction/layouts/CellLevelLayout.hpp"
 #include "pyfiction/layouts/cartesian_layout.hpp"
 #include "pyfiction/layouts/cell_level_layout.hpp"
 #include "pyfiction/layouts/clocked_layout.hpp"
@@ -123,6 +124,7 @@ PYBIND11_MODULE(pyfiction, m, pybind11::mod_gil_not_used())
     pyfiction::clocked_layouts(m);
     pyfiction::gate_level_layouts(m);
     pyfiction::cell_level_layouts(m);
+    pyfiction::cell_level_layout(m);
     pyfiction::obstruction_layouts(m);
     /**
      * Algorithms: Simulation

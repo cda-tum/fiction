@@ -271,6 +271,7 @@ from .pyfiction import (
     # Layouts
     cartesian_layout,
 
+    CellLevelLayout,
     qca_technology,
     inml_technology,
     sidb_technology,
@@ -656,6 +657,7 @@ __all__ = [
     "qca_technology",
     "inml_technology",
     "sidb_technology",
+    "CellLevelLayout",
     "qca_layout",
     "inml_layout",
     "sidb_layout",
