@@ -51,9 +51,7 @@ struct defect_operational_domain_params
  * layout's ground state aligns with a designated Boolean function at the layout's outputs for all feasible input
  * combinations. This implementation assumes the presence of \f$ n \f$ BDL input wires and a single BDL output wire for
  * a given layout. Any algorithm for computing the defect operational domain iterates through all \f$ 2^n \f$
- * input combinations, evaluating the layout's output behavior based on the specified Boolean function. The layout is
- * classified as operational for a particular defect position only if its output behavior is correct across all
- * input combinations.
+ * input combinations, evaluating the layout's output behavior based on the specified Boolean function.
  */
 template <typename Lyt>
 struct defect_operational_domain

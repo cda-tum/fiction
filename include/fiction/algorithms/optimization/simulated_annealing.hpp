@@ -42,20 +42,6 @@ constexpr auto geometric_temperature_schedule(const double t) noexcept
 {
     return t * 0.99;
 }
-/**
- * Available temperature schedule types.
- */
-enum class temperature_schedule : uint8_t
-{
-    /**
-     * Linearly decreasing temperature schedule.
-     */
-    LINEAR,
-    /**
-     * Logarithmically decreasing temperature schedule.
-     */
-    GEOMETRIC
-};
 
 /**
  * Simulated Annealing (SA) is a probabilistic optimization algorithm that is used to find a local minimum of a given
@@ -121,14 +107,7 @@ simulated_annealing(const State& init_state, const double init_temp, const doubl
 
             if (new_cost < best_cost)
             {
-                if constexpr (is_cell_level_layout_v<State>)
-                {
-                    best_state = new_state.clone();
-                }
-                else
-                {
-                    best_state = new_state;
-                }
+                best_state = new_state;
                 best_cost     = new_cost;
                 current_state = std::move(new_state);
                 current_cost  = std::move(new_cost);
@@ -158,7 +137,6 @@ simulated_annealing(const State& init_state, const double init_temp, const doubl
 
     return {best_state, best_cost};
 }
-
 /**
  * This variation of Simulated Annealing (SA) does not start from just one provided initial state, but generates a
  * number of random initial states using a provided random state generator. SA as specified above is then run on all
@@ -209,7 +187,7 @@ multi_simulated_annealing(const double init_temp, const double final_temp, const
     { results[index] = simulated_annealing(rand_state(), init_temp, final_temp, cycles, cost, schedule, next); };
 
     // Start threads
-    for (std::size_t i = 0; i < instances; ++i)
+    for (std::size_t i = 0; i < instances; i++)
     {
         threads.emplace_back(perform_simulated_annealing, i);
     }

@@ -8,6 +8,7 @@
 #include "fiction/algorithms/simulation/sidb/minimum_energy.hpp"
 #include "fiction/algorithms/simulation/sidb/quickexact.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
+#include "fiction/algorithms/simulation/sidb/determine_groundstate_from_simulation_results.hpp"
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/technology/sidb_defect_surface.hpp"
 #include "fiction/technology/sidb_defects.hpp"
@@ -91,6 +92,11 @@ class maximum_defect_influence_position_and_distance_impl
 
     std::pair<typename Lyt::cell, double> run() noexcept
     {
+        if (layout.is_empty())
+        {
+            return {{}, 0.0};
+        }
+
         const quickexact_params<cell<Lyt>> params_defect{
             params.simulation_parameters, quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF};
         mockturtle::stopwatch stop{stats.time_total};
@@ -102,20 +108,9 @@ class maximum_defect_influence_position_and_distance_impl
 
         const auto simulation_results = quickexact(layout, params_defect);
 
-        const auto min_energy = minimum_energy(simulation_results.charge_distributions.cbegin(),
-                                               simulation_results.charge_distributions.cend());
+        const auto gs = determine_groundstate_from_simulation_results(simulation_results).front();
 
-        uint64_t charge_index_layout = 0;
-
-        for (auto& lyt_result : simulation_results.charge_distributions)
-        {
-            if (std::fabs(round_to_n_decimal_places(lyt_result.get_system_energy(), 6) -
-                          round_to_n_decimal_places(min_energy, 6)) < std::numeric_limits<double>::epsilon())
-            {
-                lyt_result.charge_distribution_to_index_general();
-                charge_index_layout = lyt_result.get_charge_index_and_base().first;
-            }
-        }
+        const auto charge_index_of_ground_state = gs.get_charge_index_and_base().first;
 
         // simulate the impact of the defect at a given position on the ground state of the SiDB layout
         const auto process_defect = [&](const cell<Lyt>& defect_pos) noexcept
@@ -150,10 +145,10 @@ class maximum_defect_influence_position_and_distance_impl
                 }
 
                 // defect changes the ground state, i.e., the charge index is changed compared to the charge
-                // distribution without placed defect.
-                if (charge_index_defect_layout != charge_index_layout)
+                // distribution without a placed defect.
+                if (charge_index_defect_layout != charge_index_of_ground_state)
                 {
-                    auto distance = std::numeric_limits<double>::max();
+                    auto distance = std::numeric_limits<double>::infinity();
                     layout.foreach_cell(
                         [this, &defect_pos, &distance](const auto& cell)
                         {
@@ -226,7 +221,7 @@ class maximum_defect_influence_position_and_distance_impl
     /**
      * Parameters used for the simulation.
      */
-    maximum_defect_influence_position_and_distance_params params;
+    const maximum_defect_influence_position_and_distance_params& params;
     /**
      * The statistics of the maximum defect influence position.
      */
@@ -265,13 +260,12 @@ class maximum_defect_influence_position_and_distance_impl
 }  // namespace detail
 
 /**
- * Calculates the maximum distance at which a given defect can influence the layout's ground state.
- *
  * This function simulates the influence of defects on a SiDB cell-level layout. It computes the
  * maximum influence distance, defined as the minimum distance between any SiDB cell and the given defect, at which the
  * defect can still affect the layout's ground state, potentially altering its behavior, such as gate functionality.
  *
- * @param lyt The SiDB cell-level layout for which the influence distance is being determined.
+ * @tparam Lyt SiDB cell-level layout type.
+ * @param lyt The SiDB cell-level layout for which the influence position and distance is being determined.
  * @param params Parameters used to calculate the defect's maximum influence distance.
  * @param pst Statistics of the maximum defect influence distance.
  * @return Pair with the first element describing the position with maximum distance to the layout where a placed defect

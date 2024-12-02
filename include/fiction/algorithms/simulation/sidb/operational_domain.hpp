@@ -388,7 +388,7 @@ class operational_domain_impl
             for (const auto i : indices[d])
             {
                 values[d].push_back(params.sweep_dimensions[d].min +
-                                    static_cast<double>(i) * params.sweep_dimensions[d].step);
+                                    (static_cast<double>(i) * params.sweep_dimensions[d].step));
             }
         }
     }
@@ -436,7 +436,7 @@ class operational_domain_impl
             for (const auto i : indices[d])
             {
                 values[d].push_back(params.sweep_dimensions[d].min +
-                                    static_cast<double>(i) * params.sweep_dimensions[d].step);
+                                    (static_cast<double>(i) * params.sweep_dimensions[d].step));
             }
         }
     }
@@ -853,7 +853,7 @@ class operational_domain_impl
     /**
      * Number of available hardware threads.
      */
-    const std::size_t num_threads{std::thread::hardware_concurrency()};
+    const std::size_t num_threads{1};
     /**
      * A step point represents a point in the x and y dimension from 0 to the maximum number of steps. A step point does
      * not hold the actual parameter values, but the step values in the x and y dimension, respectively.
@@ -1203,34 +1203,13 @@ class operational_domain_impl
         threads.reserve(num_threads);
 
         // launch threads, each with its own slice of random step points
-        for (auto i = 0ul; i < num_threads; ++i)
+        const auto start = slice_size;
+        const auto end   = std::min(start + slice_size, step_points.size());
+
+        for (auto it = step_points.cbegin() + static_cast<int64_t>(start);
+             it != step_points.cbegin() + static_cast<int64_t>(end); ++it)
         {
-            const auto start = i * slice_size;
-            const auto end   = std::min(start + slice_size, step_points.size());
-
-            if (start >= end)
-            {
-                break;  // no more work to distribute
-            }
-
-            threads.emplace_back(
-                [this, start, end, &step_points]
-                {
-                    for (auto it = step_points.cbegin() + static_cast<int64_t>(start);
-                         it != step_points.cbegin() + static_cast<int64_t>(end); ++it)
-                    {
-                        is_step_point_operational(*it);
-                    }
-                });
-        }
-
-        // wait for all threads to complete
-        for (auto& thread : threads)
-        {
-            if (thread.joinable())
-            {
-                thread.join();
-            }
+            is_step_point_operational(*it);
         }
     }
     /**

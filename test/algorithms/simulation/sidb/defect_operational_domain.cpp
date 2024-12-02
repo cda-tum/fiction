@@ -7,7 +7,7 @@
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
-#include <fiction/algorithms/simulation/sidb/defect_avoidance_distance.hpp>
+#include <fiction/algorithms/simulation/sidb/calculate_defect_clearance.hpp>
 #include <fiction/algorithms/simulation/sidb/defect_operational_domain.hpp>
 #include <fiction/algorithms/simulation/sidb/is_operational.hpp>
 #include <fiction/algorithms/simulation/sidb/maximum_defect_influence_position_and_distance.hpp>
@@ -40,7 +40,7 @@ TEST_CASE("novel designed AND Gate influence distance function which fails again
         defect_operational_domain_stats stats{};
         const auto                      defect_influence_domain =
             defect_operational_domain_grid_search(cube_lyt, std::vector<tt>{create_and_tt()}, 3, params, &stats);
-        CHECK(calculate_defect_clearance(cube_lyt, defect_influence_domain).minimum_defect_clearance <=
+        CHECK(calculate_defect_clearance(cube_lyt, defect_influence_domain).defect_clearance_distance <=
               6.2126117696183147);
         CHECK(stats.num_evaluated_defect_positions == 676);
         CHECK(stats.num_operational_defect_positions == 527);
@@ -54,7 +54,7 @@ TEST_CASE("novel designed AND Gate influence distance function which fails again
         const auto                      defect_influence_domain =
             defect_operational_domain_random_sampling(cube_lyt, std::vector<tt>{create_and_tt()}, 100, params, &stats);
         CHECK(defect_influence_domain.operational_values.size() == 100);
-        CHECK(calculate_defect_clearance(cube_lyt, defect_influence_domain).minimum_defect_clearance <= 12.579477930);
+        CHECK(calculate_defect_clearance(cube_lyt, defect_influence_domain).defect_clearance_distance <= 12.579477930);
     }
 
     SECTION("QuickTrace")
@@ -64,7 +64,7 @@ TEST_CASE("novel designed AND Gate influence distance function which fails again
         defect_operational_domain_stats stats{};
         const auto                      defect_influence_domain =
             defect_operational_domain_quicktrace(cube_lyt, std::vector<tt>{create_and_tt()}, 5, params, &stats);
-        CHECK_THAT(calculate_defect_clearance(cube_lyt, defect_influence_domain).minimum_defect_clearance,
+        CHECK_THAT(calculate_defect_clearance(cube_lyt, defect_influence_domain).defect_clearance_distance,
                    Catch::Matchers::WithinAbs(6.21261176961831474, physical_constants::POP_STABILITY_ERR));
     }
 }

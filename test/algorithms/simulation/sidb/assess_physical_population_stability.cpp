@@ -322,6 +322,9 @@ TEST_CASE("Bestagon CX gate input 11", "[assess-physical-population-stability], 
         CHECK(population_stability_detail.transition_from_to_with_cell_and_required_pot
                   .at(transition_type::NEUTRAL_TO_NEGATIVE)
                   .second < 0.01);
+        CHECK(population_stability_detail.transition_from_to_with_cell_and_required_pot
+                  .at(transition_type::NEUTRAL_TO_POSITIVE)
+                  .second < 0.5);
         REQUIRE_THAT(
             population_stability_detail.distance_corresponding_to_potential.at(transition_type::NEUTRAL_TO_NEGATIVE),
             Catch::Matchers::WithinAbs(6.88, 1e-5));

@@ -1603,64 +1603,6 @@ Lyt bestagon_ha() noexcept
 };
 
 /**
- * This layout represents the Crossing, as proposed in the paper
- * titled \"Hexagons are the Bestagons: Design Automation for Silicon Dangling Bond Logic\" authored by
- * Marcel Walter, Samuel Sze Hang Ng, Konrad Walus, and Robert Wille.
- *
- * (https://github.com/cda-tum/mnt-bestagon-library/blob/main/bestagon-gates/2i2o_cx/22_hex_inputsdbp_cx_try2_v0.sqd)
- *
- * @tparam Lyt SiDB cell-level layout type based on SiQAD-coordinates.
- */
-template <typename Lyt>
-Lyt bestagon_crossing_gate() noexcept
-{
-    static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD-coordinates");
-
-    Lyt lyt{};
-
-    lyt.assign_cell_type({36, 1, 0}, Lyt::cell_type::INPUT);
-    lyt.assign_cell_type({2, 1, 0}, Lyt::cell_type::INPUT);
-
-    lyt.assign_cell_type({6, 2, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({20, 12, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 3, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 5, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 11, 1}, Lyt::cell_type::NORMAL);
-
-    lyt.assign_cell_type({12, 4, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 15, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({26, 4, 0}, Lyt::cell_type::NORMAL);
-
-    lyt.assign_cell_type({14, 9, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 15, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({12, 16, 0}, Lyt::cell_type::NORMAL);
-
-    lyt.assign_cell_type({18, 9, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({26, 16, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 13, 1}, Lyt::cell_type::NORMAL);
-
-    lyt.assign_cell_type({24, 5, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({30, 3, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({16, 13, 1}, Lyt::cell_type::NORMAL);
-
-    lyt.assign_cell_type({32, 2, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({20, 8, 0}, Lyt::cell_type::NORMAL);
-
-    lyt.assign_cell_type({30, 17, 0}, Lyt::cell_type::OUTPUT);
-    lyt.assign_cell_type({6, 18, 0}, Lyt::cell_type::OUTPUT);
-
-    lyt.assign_cell_type({32, 18, 0}, Lyt::cell_type::OUTPUT);
-    lyt.assign_cell_type({8, 17, 0}, Lyt::cell_type::OUTPUT);
-
-    lyt.assign_cell_type({2, 19, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({36, 19, 0}, Lyt::cell_type::NORMAL);
-
-    return lyt;
-};
-
-/**
  * This layout represents a 2-input-1-output skeleton, where one input and output wire have a port direction to the
  * west.
  */
@@ -1706,6 +1648,8 @@ Lyt two_input_one_output_skeleton_west_west() noexcept
     return lyt;
 };
 
-}  // namespace blueprints
+}
+
+// namespace blueprints
 
 #endif  // FICTION_LAYOUT_BLUEPRINTS_HPP

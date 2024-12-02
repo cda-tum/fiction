@@ -1,5 +1,5 @@
 #include "fiction/algorithms/physical_design/design_sidb_gates.hpp"
-#include "fiction/algorithms/simulation/sidb/defect_avoidance_distance.hpp"
+#include "fiction/algorithms/simulation/sidb/calculate_defect_clearance.hpp"
 #include "fiction/algorithms/simulation/sidb/defect_operational_domain.hpp"
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
 #include "fiction/algorithms/simulation/sidb/maximum_defect_influence_position_and_distance.hpp"
@@ -92,7 +92,7 @@ int main()
             const auto avoidance_contour = calculate_defect_clearance(gate_lyt, op_defect_contour);
 
             // check if QuickTrace and grid search give the same result
-            if (std::abs(avoidance_grid.minimum_defect_clearance - avoidance_contour.minimum_defect_clearance) >
+            if (std::abs(avoidance_grid.defect_clearance_distance - avoidance_contour.defect_clearance_distance) >
                     10E-6 &&
                 avoidance_grid.max_distance_postion_of_non_operational_defect !=
                     avoidance_contour.max_distance_postion_of_non_operational_defect)

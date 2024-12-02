@@ -2,8 +2,8 @@
 // Created by Jan Drewniok on 07.02.24.
 //
 
-#ifndef FICTION_DEFECT_AVOIDANCE_DISTANCE_HPP
-#define FICTION_DEFECT_AVOIDANCE_DISTANCE_HPP
+#ifndef FICTION_CALCULATE_DEFECT_CLEARANCE_HPP
+#define FICTION_CALCULATE_DEFECT_CLEARANCE_HPP
 
 #include "fiction/algorithms/simulation/sidb/defect_operational_domain.hpp"
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
@@ -28,17 +28,18 @@ struct defect_clearance_result
      */
     CellType max_distance_postion_of_non_operational_defect{};
     /**
-     * Minimum distance between an SiDB of the gate and the defect at the maximum distance that causes the gate to fail.
+     * The maximum of the minimum distances between any SiDB in the gate and the defect responsible for gate
+     * failure.
      */
-    double minimum_defect_clearance{};
+    double defect_clearance_distance{};
 };
 /**
  * Calculates the defect clearance of a given gate layout by a given atomic defect. This means that a defect
  * must be further away than this distance for the SiDB gate to be operational. This function requires both the defect
  * operational domain and the layout as input.
  *
- * @tparam Lyt Type representing the SiDB cell-level layout.
- * @param lyt The cell-level layout for which the defect operational domain was computed.
+ * @tparam Lyt SiDB cell-level layout type.
+ * @param lyt The cell-level layout for which the defect clearance is computed.
  * @param defect_opdomain The defect operational domain associated with the layout.
  * @return The maximum minimum defect influence distance.
  */
@@ -81,4 +82,4 @@ calculate_defect_clearance(const Lyt& lyt, const defect_operational_domain<Lyt>&
 
 }  // namespace fiction
 
-#endif  // FICTION_DEFECT_AVOIDANCE_DISTANCE_HPP
+#endif  // FICTION_CALCULATE_DEFECT_CLEARANCE_HPP

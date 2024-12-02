@@ -22,7 +22,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void assess_physical_population_stability(pybind11::module& m, const std::string& lattice = "")
+void assess_physical_population_stability(pybind11::module& m, const std::string& lattice)
 {
     namespace py = pybind11;
 

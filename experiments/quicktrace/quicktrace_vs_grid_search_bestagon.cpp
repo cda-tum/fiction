@@ -1,4 +1,4 @@
-#include "fiction/algorithms/simulation/sidb/defect_avoidance_distance.hpp"
+#include "fiction/algorithms/simulation/sidb/calculate_defect_clearance.hpp"
 #include "fiction/algorithms/simulation/sidb/defect_operational_domain.hpp"
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
 #include "fiction/algorithms/simulation/sidb/maximum_defect_influence_position_and_distance.hpp"
@@ -108,9 +108,9 @@ int main()
             // Log the simulation results
             simulation_exp(gate, layout.num_cells(), avoidance_grid.max_distance_postion_of_non_operational_defect.x,
                            avoidance_grid.max_distance_postion_of_non_operational_defect.y,
-                           avoidance_grid.minimum_defect_clearance, grid_stats.num_evaluated_defect_positions,
-                           avoidance_random.minimum_defect_clearance, random_stats.num_evaluated_defect_positions,
-                           avoidance_contour.minimum_defect_clearance, contour_stats.num_evaluated_defect_positions);
+                           avoidance_grid.defect_clearance_distance, grid_stats.num_evaluated_defect_positions,
+                           avoidance_random.defect_clearance_distance, random_stats.num_evaluated_defect_positions,
+                           avoidance_contour.defect_clearance_distance, contour_stats.num_evaluated_defect_positions);
             simulation_exp.save();
             simulation_exp.table();
         }

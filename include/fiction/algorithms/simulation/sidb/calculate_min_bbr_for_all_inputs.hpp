@@ -10,7 +10,6 @@
 #include "fiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp"
 
 #include <cassert>
-#include <cstdint>
 #include <limits>
 #include <optional>
 #include <vector>
@@ -32,31 +31,27 @@ struct calculate_min_bbr_for_all_inputs_params
     bdl_input_iterator_params bdl_iterator_params{};
 };
 /**
- * Calculates the minimum potential required to induce charge changes in an SiDB layout for all input combinations.
+ * Calculates the minimum electrostatic potential (a.k.a. band bending resilience) required to induce a charge change in
+ * an SiDB layout among all input combinations.
  *
- * @tparam Lyt Type representing the SiDB cell-level layout.
- * @tparam TT Type representing the truth table.
- * @param lyt The SiDB layout object.
+ * @tparam Lyt SiDB cell-level layout type.
+ * @tparam TT Truth table type.
+ * @param lyt Layout for which the minimum band bending resilience is calculated.
  * @param spec Expected Boolean function of the layout, provided as a multi-output truth table.
  * @param params Parameters for assessing physical population stability.
- * @param charge_state_change Optional parameter indicating the direction of the considered charge state change (default
- * is 1).
+ * @param transition_type The optional type of charge transition to consider. This can be used if one is only interested
+ * in a specific type of charge transition.
  * @return The minimum potential required for charge change across all input combinations.
  */
 template <typename Lyt, typename TT>
-[[nodiscard]] double calculate_min_bbr_for_all_inputs(const Lyt& lyt, const std::vector<TT>& spec,
-                                                      const calculate_min_bbr_for_all_inputs_params& params = {},
-                                                      const std::optional<int8_t> charge_state_change       = 1)
+[[nodiscard]] double calculate_min_bbr_for_all_inputs(
+    const Lyt& lyt, const std::vector<TT>& spec, const calculate_min_bbr_for_all_inputs_params& params = {},
+    const std::optional<transition_type> transition_type = transition_type::NEGATIVE_TO_NEUTRAL)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(!has_offset_ucoord_v<Lyt>, "Lyt should not be based on offset coordinates");
     static_assert(!is_charge_distribution_surface_v<Lyt>, "Lyt cannot be a charge distribution surface");
-
-    if (can_positive_charges_occur(lyt, params.assess_population_stability_params.simulation_parameters))
-    {
-        return 0.0;
-    }
 
     assert(lyt.num_pis() > 0 && "skeleton needs input cells");
     assert(lyt.num_pos() > 0 && "skeleton needs output cells");
@@ -68,9 +63,6 @@ template <typename Lyt, typename TT>
 
     bdl_input_iterator<Lyt> bii{lyt, params.bdl_iterator_params};
 
-    assert(bii.num_input_pairs() == spec.front().num_bits() / 2 &&
-           "Number of truth table dimensions and input BDL pairs does not match");
-
     double minimal_pop_stability_for_all_inputs = std::numeric_limits<double>::infinity();
     // number of different input combinations
     for (auto i = 0u; i < spec.front().num_bits(); ++i, ++bii)
@@ -81,29 +73,15 @@ template <typename Lyt, typename TT>
         {
             const auto ground_state_stability_for_given_input = pop_stability.front();
 
-            if (charge_state_change.has_value())
+            if (transition_type.has_value())
             {
-                if (charge_state_change.value() == 1)
+                const auto potential_required_for_considered_transition =
+                    ground_state_stability_for_given_input.transition_from_to_with_cell_and_required_pot
+                        .at(transition_type.value())
+                        .second;
+                if (potential_required_for_considered_transition < minimal_pop_stability_for_all_inputs)
                 {
-                    const auto potential_negative_to_neutral =
-                        ground_state_stability_for_given_input.transition_from_to_with_cell_and_required_pot
-                            .at(transition_type::NEGATIVE_TO_NEUTRAL)
-                            .second;
-                    if (potential_negative_to_neutral < minimal_pop_stability_for_all_inputs)
-                    {
-                        minimal_pop_stability_for_all_inputs = potential_negative_to_neutral;
-                    }
-                }
-                if (charge_state_change.value() == -1)
-                {
-                    const auto potential_neutral_to_negative =
-                        ground_state_stability_for_given_input.transition_from_to_with_cell_and_required_pot
-                            .at(transition_type::NEUTRAL_TO_NEGATIVE)
-                            .second;
-                    if (potential_neutral_to_negative < minimal_pop_stability_for_all_inputs)
-                    {
-                        minimal_pop_stability_for_all_inputs = potential_neutral_to_negative;
-                    }
+                    minimal_pop_stability_for_all_inputs = potential_required_for_considered_transition;
                 }
             }
         }

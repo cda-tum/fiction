@@ -23,8 +23,6 @@
 #include "fiction/utils/math_utils.hpp"
 
 #include <fmt/format.h>
-#include <kitty/bit_operations.hpp>
-#include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <cassert>
@@ -158,7 +156,8 @@ class critical_temperature_impl
     /**
      * *Gate-based Critical Temperature* Simulation of a SiDB layout for a given Boolean function.
      *
-     * @tparam TT The type of the truth table specifying the gate behavior.
+
+     * tparam TT Type of the truth table.
      * @param spec Expected Boolean function of the layout given as a multi-output truth table.
      */
     template <typename TT>
@@ -170,6 +169,9 @@ class critical_temperature_impl
             critical_temperature = 0.0;
             return;
         }
+
+        assert(layout.num_pis() > 0 && "gate needs input cells");
+        assert(layout.num_pos() > 0 && "gate needs output cells");
 
         if (layout.num_cells() > 1)
         {
@@ -478,7 +480,7 @@ class critical_temperature_impl
  * \f$\eta \in [0,1]\f$.
  *
  * @tparam Lyt SiDB cell-level layout type.
- * @tparam TT The type of the truth table specifying the gate behavior.
+ * @tparam TT Type of the truth table.
  * @param lyt The layout to simulate.
  * @param spec Expected Boolean function of the layout given as a multi-output truth table.
  * @param params Simulation and physical parameters.
@@ -495,8 +497,8 @@ double critical_temperature_gate_based(const Lyt& lyt, const std::vector<TT>& sp
 
     assert(!spec.empty());
     // all elements in tts must have the same number of variables
-    assert(std::adjacent_find(spec.cbegin(), spec.cend(), [](const auto& a, const auto& b)
-                              { return a.num_vars() != b.num_vars(); }) == spec.cend());
+    assert(std::adjacent_find(spec.begin(), spec.end(),
+                              [](const auto& a, const auto& b) { return a.num_vars() != b.num_vars(); }) == spec.end());
 
     critical_temperature_stats st{};
 

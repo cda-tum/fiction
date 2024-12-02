@@ -68,7 +68,7 @@ inline void design_sidb_gates(pybind11::module& m)
         .def_readwrite("operational_params",
                        &fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::operational_params,
                        DOC(fiction_design_sidb_gates_params_operational_params))
-        .def_readwrite("design_mode", &fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::design_mode)
+        .def_readwrite("design_mode", &fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::design_mode, DOC(fiction_design_sidb_gates_params_design_mode))
         .def_readwrite("canvas", &fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::canvas,
                        DOC(fiction_design_sidb_gates_params_canvas))
         .def_readwrite("number_of_sidbs",

@@ -20,7 +20,7 @@ using namespace fiction;
 
 using layout = sidb_cell_clk_lyt_siqad;
 
-TEST_CASE("Single SiDB", "[assess-physical-population-stability-sidb-gate]")
+TEST_CASE("Single SiDB", "[calculate-min-bbr-for-all-inputs]")
 {
     const auto lyt = blueprints::bestagon_and_gate<layout>();
 
@@ -29,15 +29,22 @@ TEST_CASE("Single SiDB", "[assess-physical-population-stability-sidb-gate]")
 
     SECTION("Minimal potential required to conduct a charge change from neutral to negative")
     {
-        const auto min_potential = calculate_min_bbr_for_all_inputs(lyt, std::vector<tt>{create_and_tt()}, params, -1);
+        const auto min_potential = calculate_min_bbr_for_all_inputs(lyt, std::vector<tt>{create_and_tt()}, params, transition_type::NEUTRAL_TO_NEGATIVE);
 
         CHECK_THAT(min_potential, Catch::Matchers::WithinAbs(0.020652, physical_constants::POP_STABILITY_ERR));
     }
 
     SECTION("Minimal potential required to conduct a charge change from negative to neutral")
     {
-        const auto min_potential = calculate_min_bbr_for_all_inputs(lyt, std::vector<tt>{create_and_tt()}, params, 1);
+        const auto min_potential = calculate_min_bbr_for_all_inputs(lyt, std::vector<tt>{create_and_tt()}, params, transition_type::NEGATIVE_TO_NEUTRAL);
 
         CHECK_THAT(min_potential, Catch::Matchers::WithinAbs(0.087417, physical_constants::POP_STABILITY_ERR));
+    }
+
+    SECTION("Minimal potential required to conduct a charge change from positive to neutral")
+    {
+        const auto min_potential = calculate_min_bbr_for_all_inputs(lyt, std::vector<tt>{create_and_tt()}, params, transition_type::NEUTRAL_TO_POSITIVE);
+
+        CHECK_THAT(min_potential, Catch::Matchers::WithinAbs(0.413859, physical_constants::POP_STABILITY_ERR));
     }
 }

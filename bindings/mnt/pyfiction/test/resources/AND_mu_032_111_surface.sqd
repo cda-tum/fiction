@@ -71,7 +71,7 @@
             <dbdot>
                 <layer_id>2</layer_id>
                 <latcoord n="10" m="18" l="0"/>
-
+                <type>logic</type>
                 <color>#ffc8c8c8</color>
             </dbdot>
             <dbdot>
@@ -119,13 +119,13 @@
             <dbdot>
                 <layer_id>2</layer_id>
                 <latcoord n="13" m="17" l="0"/>
-
+                <type>logic</type>
                 <color>#ffc8c8c8</color>
             </dbdot>
             <dbdot>
                 <layer_id>2</layer_id>
                 <latcoord n="16" m="18" l="0"/>
-
+                <type>logic</type>
                 <color>#ffc8c8c8</color>
             </dbdot>
             <dbdot>
