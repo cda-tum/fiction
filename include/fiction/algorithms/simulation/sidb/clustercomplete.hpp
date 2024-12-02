@@ -4,7 +4,6 @@
 
 #ifndef FICTION_CLUSTERCOMPLETE_HPP
 #define FICTION_CLUSTERCOMPLETE_HPP
-#include "../../../../../bindings/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp"
 
 #if (FICTION_ALGLIB_ENABLED)
 
@@ -15,19 +14,17 @@
 #include "fiction/technology/physical_constants.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/technology/sidb_cluster_hierarchy.hpp"
-#include "fiction/technology/sidb_defect_surface.hpp"
 #include "fiction/technology/sidb_defects.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/utils/hash.hpp"
 
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <algorithm>
 #include <array>
+#include <condition_variable>
 #include <cstdint>
 #include <iterator>
 #include <memory>
-#include <condition_variable>
 #include <mutex>
 #include <thread>
 #include <unordered_map>
@@ -114,8 +111,9 @@ class clustercomplete_impl
      * @param params Parameter required for both the invocation of *Ground State Space*, and the simulation following.
      */
     explicit clustercomplete_impl(const Lyt& lyt, const clustercomplete_params<cell<Lyt>>& params) noexcept :
-            charge_layout{initialize_charge_layout(lyt, params)},
             available_threads{params.available_threads - 1},
+            threads_to_use{available_threads},
+            charge_layout{initialize_charge_layout(lyt, params)},
             real_placed_defects{charge_layout.get_defects()},
             mu_bounds_with_error{physical_constants::POP_STABILITY_ERR - params.simulation_parameters.mu_minus,
                                  -physical_constants::POP_STABILITY_ERR - params.simulation_parameters.mu_minus,
@@ -155,6 +153,8 @@ class clustercomplete_impl
             gss_stats.report();
         }
 
+        std::cout << "running with " << available_threads + 1 << " threads" << std::endl;
+
         mockturtle::stopwatch<>::duration time_counter{};
         {
             const mockturtle::stopwatch stop{time_counter};
@@ -182,14 +182,28 @@ class clustercomplete_impl
                 sidb_clustering_state clustering_state{};
                 clustering_state.pot_bounds.initialise_complete_potential_bounds(charge_layout.num_cells());
 
-                const uint64_t threads_to_use = available_threads;
-
                 enumerate_compositions(clustering_state, top_cluster_charge_space_to_unfold);
 
                 {
+                    // std::cout << "checking" << std::endl;
                     std::unique_lock<std::mutex> lock(mutex_to_protect_the_available_threads);
-                    cond_var.wait(lock, [&]{ return available_threads == threads_to_use;});
+
+                    // available_threads++;
+
+                    cond_var.wait(lock, [&] { return available_threads == threads_to_use; });
+                    // std::cout << available_threads << std::endl;
                 }
+
+                // std::cout << "where are we" << std::endl;
+
+                // // wait for all threads to complete
+                // for (auto& thread : threads)
+                // {
+                //     if (thread.joinable())
+                //     {
+                //         thread.join();
+                //     }
+                // }
             }
         }
 
@@ -207,7 +221,8 @@ class clustercomplete_impl
     /**
      * Number of available threads.
      */
-    uint64_t available_threads{};
+    uint64_t                available_threads{};
+    uint64_t                threads_to_use{};
     std::condition_variable cond_var;
     /**
      * Mutex to protect the number of available threads.
@@ -273,8 +288,8 @@ class clustercomplete_impl
      * @return The potential projection value associated with this bound; i.e., an electrostatic potential (in V),
      */
     template <bound_direction bound>
-    static constexpr inline double get_projector_state_bound(const sidb_cluster_projector_state& pst,
-                                                             const uint64_t                      sidb_ix) noexcept
+    static constexpr double get_projector_state_bound(const sidb_cluster_projector_state& pst,
+                                                      const uint64_t                      sidb_ix) noexcept
     {
         return pst.cluster->pot_projs.at(sidb_ix).get_pot_proj_for_m_conf<bound>(pst.multiset_conf).pot_val;
     }
@@ -627,16 +642,11 @@ class clustercomplete_impl
         uint64_t       start      = 0;
         uint64_t       end        = chunk_size - 1;
 
-        std::vector<sidb_clustering_state> clustering_state_copies{};
-        clustering_state_copies.reserve(supporting_threads);
-
         for (uint64_t i = 0; i < supporting_threads; ++i)
         {
             ranges.emplace_back(start, end);
             start = end + 1;
             end   = i == supporting_threads - 1 ? compositions.size() - 1 : start + chunk_size - 1;
-
-            clustering_state_copies.emplace_back(clustering_state.copy(charge_layout.num_cells()));
         }
 
         ranges.emplace_back(start, end);
@@ -648,12 +658,13 @@ class clustercomplete_impl
         {
             threads.emplace_back(
                 [&, start = ranges.at(i).first, end = ranges.at(i).second,
-                 &clustering_state_copy = clustering_state_copies.at(i)]
+                 clustering_state_copy =
+                     std::make_unique<sidb_clustering_state>(clustering_state.copy(charge_layout.num_cells()))]
                 {
                     // specialise for all compositions
                     for (uint64_t ix = start; ix <= end; ++ix)
                     {
-                        unfold_composition(clustering_state_copy,
+                        unfold_composition(*clustering_state_copy,
                                            *std::next(compositions.cbegin(), static_cast<int64_t>(ix)));
                     }
 
@@ -661,9 +672,12 @@ class clustercomplete_impl
                         const std::lock_guard lock(mutex_to_protect_the_available_threads);
 
                         available_threads++;
-                    }
 
-                    cond_var.notify_all();
+                        // if (available_threads == threads_to_use - 1)
+                        // {
+                            cond_var.notify_all();
+                        // }
+                    }
                 });
 
             threads.back().detach();
@@ -674,17 +688,7 @@ class clustercomplete_impl
             unfold_composition(clustering_state, *std::next(compositions.cbegin(), static_cast<int64_t>(ix)));
         }
 
-        // if (b)
-        // {
-        //     // wait for all threads to complete
-        //     for (auto& thread : threads)
-        //     {
-        //         if (thread.joinable())
-        //         {
-        //             thread.join();
-        //         }
-        //     }
-        // }
+        cond_var.notify_all();
     }
     /**
      * This function converts between semantically equivalent datatypes, only converting projector states to unique
