@@ -23,9 +23,11 @@
 #include <array>
 #include <condition_variable>
 #include <cstdint>
+#include <deque>
 #include <iterator>
 #include <memory>
 #include <mutex>
+#include <queue>
 #include <thread>
 #include <unordered_map>
 #include <utility>
@@ -184,26 +186,6 @@ class clustercomplete_impl
 
                 enumerate_compositions(clustering_state, top_cluster_charge_space_to_unfold);
 
-                {
-                    // std::cout << "checking" << std::endl;
-                    std::unique_lock<std::mutex> lock(mutex_to_protect_the_available_threads);
-
-                    // available_threads++;
-
-                    cond_var.wait(lock, [&] { return available_threads == threads_to_use; });
-                    // std::cout << available_threads << std::endl;
-                }
-
-                // std::cout << "where are we" << std::endl;
-
-                // // wait for all threads to complete
-                // for (auto& thread : threads)
-                // {
-                //     if (thread.joinable())
-                //     {
-                //         thread.join();
-                //     }
-                // }
             }
         }
 
@@ -223,11 +205,6 @@ class clustercomplete_impl
      */
     uint64_t                available_threads{};
     uint64_t                threads_to_use{};
-    std::condition_variable cond_var;
-    /**
-     * Mutex to protect the number of available threads.
-     */
-    std::mutex mutex_to_protect_the_available_threads;
     /**
      * Mutex to protect the simulation results.
      */
@@ -277,6 +254,27 @@ class clustercomplete_impl
 
         return cds;
     }
+
+    struct worker_queue
+    {
+        struct mole
+        {
+            const sidb_cluster_projector_state  parent;
+            const sidb_charge_space_composition composition;
+            uint64_t available_work_to_steal;
+        };
+
+        std::mutex mutex_to_protect_this_queue;
+
+        std::deque<sidb_charge_space_composition> queue;
+
+        sidb_clustering_state clustering_state_for_thieves;
+
+        std::queue<mole> thief_informants;
+
+        uint64_t work_left_to_steal_before_requiring_new_mole;
+    };
+
     /**
      * Helper function for obtaining the stored lower or upper bound on the electrostatic potential that SiDBs in the
      * given projector state--i.e., a cluster together with an associated multiset charge configuration--collectively
@@ -667,17 +665,6 @@ class clustercomplete_impl
                         unfold_composition(*clustering_state_copy,
                                            *std::next(compositions.cbegin(), static_cast<int64_t>(ix)));
                     }
-
-                    {
-                        const std::lock_guard lock(mutex_to_protect_the_available_threads);
-
-                        available_threads++;
-
-                        // if (available_threads == threads_to_use - 1)
-                        // {
-                        cond_var.notify_all();
-                        // }
-                    }
                 });
 
             threads.back().detach();
@@ -687,8 +674,6 @@ class clustercomplete_impl
         {
             unfold_composition(clustering_state, *std::next(compositions.cbegin(), static_cast<int64_t>(ix)));
         }
-
-        cond_var.notify_all();
     }
     /**
      * This function converts between semantically equivalent datatypes, only converting projector states to unique
