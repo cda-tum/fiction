@@ -78,23 +78,23 @@ class TestIsOperational(unittest.TestCase):
 
         self.assertEqual(non_operational_pattern_kinks, {1, 2})
 
-    # def test_and_gate_111_lattice_11_input_pattern(self):
-    #     lyt = read_sqd_layout_111(dir_path + "/../../../resources/AND_mu_032_111_surface.sqd")
-    #
-    #     params = is_operational_params()
-    #     params.simulation_parameters = sidb_simulation_parameters(2, -0.32)
-    #
-    #     [op_status, evaluated_input_combinations] = is_operational(lyt, [create_and_tt()], params)
-    #
-    #     self.assertEqual(op_status, operational_status.OPERATIONAL)
-    #
-    #     params.simulation_parameters = sidb_simulation_parameters(2, -0.1)
-    #
-    #     self.assertEqual(params.simulation_parameters.mu_minus, -0.1)
-    #
-    #     [op_status, evaluated_input_combinations] = is_operational(lyt, [create_and_tt()], params)
-    #
-    #     self.assertEqual(op_status, operational_status.NON_OPERATIONAL)
+    def test_and_gate_111_lattice_11_input_pattern(self):
+        lyt = read_sqd_layout_111(dir_path + "/../../../resources/AND_mu_032_111_surface.sqd")
+
+        params = is_operational_params()
+        params.simulation_parameters = sidb_simulation_parameters(2, -0.32)
+
+        [op_status, evaluated_input_combinations] = is_operational(lyt, [create_and_tt()], params)
+
+        self.assertEqual(op_status, operational_status.OPERATIONAL)
+
+        params.simulation_parameters = sidb_simulation_parameters(2, -0.1)
+
+        self.assertEqual(params.simulation_parameters.mu_minus, -0.1)
+
+        [op_status, evaluated_input_combinations] = is_operational(lyt, [create_and_tt()], params)
+
+        self.assertEqual(op_status, operational_status.NON_OPERATIONAL)
 
     def test_and_gate_111_lattice_operational_input_pattern(self):
         lyt = read_sqd_layout_111(dir_path + "/../../../resources/AND_mu_032_111_surface.sqd")
