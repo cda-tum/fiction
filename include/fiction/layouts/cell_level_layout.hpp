@@ -225,6 +225,22 @@ class cell_level_layout : public ClockedLayout
         }
     }
     /**
+     * Returns `true` if the given cell_type `type` exists. `false` otherwise.
+     */
+    [[nodiscard]] bool has_cell_type(const cell_type& type) const noexcept
+    {
+        // Iterate over each pair in the map and check if any value matches `value`
+        for (const auto& [key, val] : strg->cell_type_map)
+        {
+            if (val == type)
+            {
+                return true; // Value found
+            }
+        }
+
+        return false; // Value not found
+    }
+    /**
      * Returns the cell mode assigned to cell position `c`. If no cell mode is assigned, the default mode is returned.
      *
      * @param c Cell position whose assigned cell mode is desired.

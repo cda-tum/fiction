@@ -219,8 +219,7 @@ PYBIND11_MODULE(pyfiction, m, pybind11::mod_gil_not_used())
     pyfiction::write_operational_domain(m);
     pyfiction::read_fgl_layout(m);
     pyfiction::read_fqca_layout(m);
-    pyfiction::read_sqd_layout_100(m);
-    pyfiction::read_sqd_layout_111(m);
+    pyfiction::read_sqd_layout(m);
     /**
      * Utils
      */

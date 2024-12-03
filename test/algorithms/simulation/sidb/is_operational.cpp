@@ -31,7 +31,7 @@ TEST_CASE("SiQAD OR gate", "[is-operational]")
         sidb_simulation_parameters{2, -0.28}, sidb_simulation_engine::QUICKEXACT,
         bdl_input_iterator_params{detect_bdl_wires_params{1.5},
                                   bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED},
-        operational_condition::REJECT_KINKS};
+        is_operational_params::operational_condition::REJECT_KINKS};
 
     CHECK(is_operational(lat, std::vector<tt>{create_or_tt()}, op_params).first == operational_status::NON_OPERATIONAL);
 
@@ -54,7 +54,7 @@ TEST_CASE("SiQAD OR gate", "[is-operational]")
 
     CHECK(kink_induced_non_operational_input_pattern.size() == 1);
 
-    op_params.op_condition = operational_condition::TOLERATE_KINKS;
+    op_params.op_condition = is_operational_params::operational_condition::TOLERATE_KINKS;
     CHECK(is_operational(lat, std::vector<tt>{create_or_tt()}, op_params).first == operational_status::OPERATIONAL);
 }
 
@@ -248,7 +248,7 @@ TEST_CASE(
         CHECK(is_operational(lyt, std::vector<tt>{create_and_tt()},
                              is_operational_params{sidb_simulation_parameters{2, -0.32},
                                                    sidb_simulation_engine::QUICKEXACT, bdl_input_iterator_params{},
-                                                   operational_condition::REJECT_KINKS})
+                                                   is_operational_params::operational_condition::REJECT_KINKS})
                   .first == operational_status::NON_OPERATIONAL);
     }
     SECTION("check if is_kink_induced_non_operational returns true")
@@ -257,7 +257,7 @@ TEST_CASE(
         CHECK(is_kink_induced_non_operational(
             lyt, std::vector<tt>{create_and_tt()},
             is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
-                                  bdl_input_iterator_params{}, operational_condition::TOLERATE_KINKS}));
+                                  bdl_input_iterator_params{}, is_operational_params::operational_condition::TOLERATE_KINKS}));
     }
 
     SECTION("check input patterns for which kinks induce the layout to become non-operational")
@@ -265,7 +265,7 @@ TEST_CASE(
         CHECK(kink_induced_non_operational_input_patterns(
                   lyt, std::vector<tt>{create_and_tt()},
                   is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
-                                        bdl_input_iterator_params{}, operational_condition::TOLERATE_KINKS}) ==
+                                        bdl_input_iterator_params{}, is_operational_params::operational_condition::TOLERATE_KINKS}) ==
               std::set<uint64_t>{1, 2});
     }
 }

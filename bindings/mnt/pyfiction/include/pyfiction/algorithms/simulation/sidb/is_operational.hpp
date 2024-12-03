@@ -28,7 +28,7 @@ void is_operational(pybind11::module& m)
 
     m.def("is_operational", &fiction::is_operational<Lyt, py_tt>, py::arg("lyt"), py::arg("spec"),
           py::arg("params") = fiction::is_operational_params{}, py::arg("input_bdl_wire") = std::nullopt,
-          py::arg("output_bdl_wire") = std::nullopt, DOC(fiction_is_operational));
+          py::arg("output_bdl_wire") = std::nullopt, py::arg("canvas_lyt") = std::nullopt, DOC(fiction_is_operational));
 
     m.def("operational_input_patterns", &fiction::operational_input_patterns<Lyt, py_tt>, py::arg("lyt"),
           py::arg("spec"), py::arg("params") = fiction::is_operational_params{},
@@ -56,10 +56,10 @@ inline void is_operational(pybind11::module& m)
         .value("NON_OPERATIONAL", fiction::operational_status::NON_OPERATIONAL,
                DOC(fiction_operational_status_NON_OPERATIONAL));
 
-    py::enum_<fiction::operational_condition>(m, "operational_condition", DOC(fiction_operational_condition))
-        .value("TOLERATE_KINKS", fiction::operational_condition::TOLERATE_KINKS,
+    py::enum_<fiction::is_operational_params::operational_condition>(m, "operational_condition", DOC(fiction_operational_condition))
+        .value("TOLERATE_KINKS", fiction::is_operational_params::operational_condition::TOLERATE_KINKS,
                DOC(fiction_operational_condition_TOLERATE_KINKS))
-        .value("REJECT_KINKS", fiction::operational_condition::REJECT_KINKS,
+        .value("REJECT_KINKS", fiction::is_operational_params::operational_condition::REJECT_KINKS,
                DOC(fiction_operational_condition_REJECT_KINKS));
 
     py::class_<fiction::is_operational_params>(m, "is_operational_params", DOC(fiction_is_operational_params))

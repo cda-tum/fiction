@@ -5,6 +5,7 @@
 #ifndef FICTION_OPERATIONAL_DOMAIN_HPP
 #define FICTION_OPERATIONAL_DOMAIN_HPP
 
+#include "fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp"
 #include "fiction/algorithms/simulation/sidb/energy_distribution.hpp"
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
 #include "fiction/algorithms/simulation/sidb/quickexact.hpp"
@@ -18,6 +19,7 @@
 #include "fiction/utils/hash.hpp"
 #include "fiction/utils/math_utils.hpp"
 #include "fiction/utils/phmap_utils.hpp"
+#include "fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp"
 
 #include <btree.h>
 #include <fmt/format.h>
@@ -377,8 +379,27 @@ class operational_domain_impl
             output_bdl_pairs{detect_bdl_pairs<Lyt>(
                 layout, sidb_technology::cell_type::OUTPUT,
                 ps.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)},
-            num_dimensions{params.sweep_dimensions.size()}
+            num_dimensions{params.sweep_dimensions.size()},
+            input_bdl_wires{detect_bdl_wires(lyt, params.operational_params.input_bdl_iterator_params.bdl_wire_params,
+                                             bdl_wire_selection::INPUT)},
+            output_bdl_wires{detect_bdl_wires(lyt, params.operational_params.input_bdl_iterator_params.bdl_wire_params,
+                                              bdl_wire_selection::OUTPUT)}
     {
+        if (lyt.has_cell_type(technology<Lyt>::cell_type::LOGIC))
+        {
+            lyt.foreach_cell(
+                [&](const auto& c)
+                {
+                    if (lyt.get_cell_type(c) == technology<Lyt>::cell_type::LOGIC)
+                    {
+                        canvas_lyt.assign_cell_type(c, technology<Lyt>::cell_type::NORMAL);
+                    }
+                });
+        }
+        else
+        {
+            assert(true && "canvas_lyt is empty");
+        }
         op_domain.dimensions.reserve(num_dimensions);
 
         indices.reserve(num_dimensions);
@@ -408,7 +429,7 @@ class operational_domain_impl
             for (const auto i : indices[d])
             {
                 values[d].push_back(params.sweep_dimensions[d].min +
-                                    static_cast<double>(i) * params.sweep_dimensions[d].step);
+                                    (static_cast<double>(i) * params.sweep_dimensions[d].step));
             }
         }
     }
@@ -456,7 +477,7 @@ class operational_domain_impl
             for (const auto i : indices[d])
             {
                 values[d].push_back(params.sweep_dimensions[d].min +
-                                    static_cast<double>(i) * params.sweep_dimensions[d].step);
+                                    (static_cast<double>(i) * params.sweep_dimensions[d].step));
             }
         }
     }
@@ -851,6 +872,10 @@ class operational_domain_impl
      */
     std::vector<std::vector<double>> values;
     /**
+     * Layout consisting of all canvas SiDBs.
+     */
+    Lyt canvas_lyt{};
+    /**
      * The operational domain of the layout.
      */
     OpDomain op_domain{};
@@ -874,6 +899,14 @@ class operational_domain_impl
      * Number of available hardware threads.
      */
     const std::size_t num_threads{std::thread::hardware_concurrency()};
+    /**
+     * Input BDL wires.
+     */
+    const std::vector<bdl_wire<Lyt>> input_bdl_wires;
+    /**
+     * Output BDL wires.
+     */
+    const std::vector<bdl_wire<Lyt>> output_bdl_wires;
     /**
      * A step point represents a point in the x and y dimension from 0 to the maximum number of steps. A step point does
      * not hold the actual parameter values, but the step values in the x and y dimension, respectively.
@@ -1086,7 +1119,9 @@ class operational_domain_impl
         auto op_params_set_dimension_values                  = params.operational_params;
         op_params_set_dimension_values.simulation_parameters = sim_params;
 
-        const auto& [status, sim_calls] = is_operational(layout, truth_table, op_params_set_dimension_values);
+        const auto& [status, sim_calls] =
+            is_operational(layout, truth_table, op_params_set_dimension_values, std::optional{input_bdl_wires},
+                           std::optional{output_bdl_wires}, std::optional{canvas_lyt});
 
         num_simulator_invocations += sim_calls;
 

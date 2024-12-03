@@ -228,7 +228,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         }
         SECTION("Kinks are not allowed")
         {
-            params.operational_params.op_condition = operational_condition::REJECT_KINKS;
+            params.operational_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
             const auto ct =
                 critical_temperature_gate_based(lyt, std::vector<tt>{create_and_tt()}, params, &critical_stats);
             CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous),
@@ -328,7 +328,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         }
         SECTION("Kinks are not allowed")
         {
-            params.operational_params.op_condition = operational_condition::REJECT_KINKS;
+            params.operational_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
             const auto ct =
                 critical_temperature_gate_based(lyt, std::vector<tt>{create_fan_out_tt()}, params, &critical_stats);
 
@@ -380,7 +380,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         }
         SECTION("Kinks are not allowed")
         {
-            params.operational_params.op_condition = operational_condition::REJECT_KINKS;
+            params.operational_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
             const auto ct =
                 critical_temperature_gate_based(lyt, std::vector<tt>{create_or_tt()}, params, &critical_stats);
 

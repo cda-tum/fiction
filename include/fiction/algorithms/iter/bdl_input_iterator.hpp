@@ -340,7 +340,13 @@ class bdl_input_iterator
     {
         return input_pairs.size();
     }
-
+    /**
+     * Returns the current input index.
+     */
+    [[nodiscard]] uint64_t get_current_input_index() const noexcept
+    {
+        return current_input_index;
+    }
   private:
     /**
      * The layout to iterate over.

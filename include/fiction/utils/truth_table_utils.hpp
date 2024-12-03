@@ -5,9 +5,11 @@
 #ifndef FICTION_TRUTH_TABLE_UTILS_HPP
 #define FICTION_TRUTH_TABLE_UTILS_HPP
 
+#include <kitty/bit_operations.hpp>
 #include <kitty/constructors.hpp>
 #include <kitty/dynamic_truth_table.hpp>
 
+#include <bitset>
 #include <cstdint>
 #include <vector>
 
@@ -407,6 +409,24 @@ namespace fiction
     kitty::create_from_binary_string(table2, truth_table_string2);
 
     return std::vector<kitty::dynamic_truth_table>{table1, table2};
+}
+
+/**
+ * This function calculates the output index for a given input index by evaluating the truth table.
+ *
+ * @param truth_table The truth table to evaluate.
+ * @param current_input_index The index representing the current input pattern.
+ * @return The output index derived from the truth table for the given input index.
+ */
+[[nodiscard]] uint64_t determine_output_index_of_output(const std::vector<kitty::dynamic_truth_table>& truth_table,
+                                                        const uint64_t current_input_index) noexcept
+{
+    std::bitset<64> bits{};
+    for (auto i = 0u; i < truth_table.size(); i++)
+    {
+        bits[i] = kitty::get_bit(truth_table[i], current_input_index);
+    }
+    return bits.to_ulong();
 }
 
 // NOLINTEND(*-pointer-arithmetic)
