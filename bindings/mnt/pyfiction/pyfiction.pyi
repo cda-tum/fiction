@@ -1465,8 +1465,6 @@ def technology_mapping(network: technology_network,
 
 ## path finding
 
-from typing import overload, Union
-
 
 @overload
 def manhattan_distance(layout: Union[cartesian_layout, shifted_cartesian_layout], source: offset_coordinate,
@@ -1531,7 +1529,7 @@ def a_star(
         ],
         source: offset_coordinate,
         target: offset_coordinate,
-        params: a_star_params
+        params: Optional[a_star_params] = a_star_params()
 ) -> List[offset_coordinate]: ...
 
 
@@ -1544,7 +1542,7 @@ def a_star(
         ],
         source: cube_coordinate,
         target: cube_coordinate,
-        params: a_star_params
+        params: Optional[a_star_params] = a_star_params()
 ) -> List[cube_coordinate]: ...
 
 
@@ -1566,7 +1564,7 @@ def enumerate_all_paths(
         ],
         source: offset_coordinate,
         target: offset_coordinate,
-        params: enumerate_all_paths_params
+        params: Optional[enumerate_all_paths_params] = enumerate_all_paths_params()
 ) -> List[List[offset_coordinate]]: ...
 
 
@@ -1579,7 +1577,7 @@ def enumerate_all_paths(
         ],
         source: cube_coordinate,
         target: cube_coordinate,
-        params: enumerate_all_paths_params
+        params: Optional[enumerate_all_paths_params] = enumerate_all_paths_params()
 ) -> List[List[cube_coordinate]]: ...
 
 
@@ -1602,7 +1600,7 @@ def yen_k_shortest_paths(
         source: offset_coordinate,
         target: offset_coordinate,
         k: int,
-        params: yen_k_shortest_paths_params
+        params: Optional[yen_k_shortest_paths_params] = yen_k_shortest_paths_params()
 ) -> List[List[offset_coordinate]]: ...
 
 
@@ -1616,5 +1614,5 @@ def yen_k_shortest_paths(
         source: cube_coordinate,
         target: cube_coordinate,
         k: int,
-        params: yen_k_shortest_paths_params
+        params: Optional[yen_k_shortest_paths_params] = yen_k_shortest_paths_params()
 ) -> List[List[cube_coordinate]]: ...
