@@ -1,11 +1,12 @@
-from mnt.pyfiction import (
-    sidb_layout,
-    offset_coordinate,
-    sidb_technology,
-    charge_distribution_surface,
-    sidb_charge_state,
-)
 import unittest
+
+from mnt.pyfiction import (
+    charge_distribution_surface,
+    offset_coordinate,
+    sidb_charge_state,
+    sidb_layout,
+    sidb_technology,
+)
 
 
 class TestCalculateEnergyAndStateType(unittest.TestCase):

@@ -2,19 +2,19 @@ import os
 import unittest
 
 from mnt.pyfiction import (
-    sidb_100_lattice,
-    sidb_technology,
-    critical_temperature_gate_based,
-    critical_temperature_stats,
-    critical_temperature_params,
-    critical_temperature_non_gate_based,
     charge_distribution_surface_100,
-    sidb_simulation_engine,
-    sidb_111_lattice,
     charge_distribution_surface_111,
-    read_sqd_layout_100,
-    create_xor_tt,
     create_not_tt,
+    create_xor_tt,
+    critical_temperature_gate_based,
+    critical_temperature_non_gate_based,
+    critical_temperature_params,
+    critical_temperature_stats,
+    read_sqd_layout_100,
+    sidb_100_lattice,
+    sidb_111_lattice,
+    sidb_simulation_engine,
+    sidb_technology,
 )
 
 dir_path = os.path.dirname(os.path.realpath(__file__))

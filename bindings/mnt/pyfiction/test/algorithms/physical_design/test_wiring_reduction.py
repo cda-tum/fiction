@@ -1,14 +1,15 @@
+import os
+import unittest
+
 from mnt.pyfiction import (
-    read_technology_network,
-    orthogonal,
-    equivalence_checking,
     eq_type,
+    equivalence_checking,
+    orthogonal,
+    read_technology_network,
     wiring_reduction,
     wiring_reduction_params,
     wiring_reduction_stats,
 )
-import unittest
-import os
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 

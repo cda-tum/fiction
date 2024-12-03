@@ -1,15 +1,16 @@
+import os
+import unittest
+
 from mnt.pyfiction import (
-    read_technology_network,
-    graph_oriented_layout_design_stats,
-    graph_oriented_layout_design,
-    graph_oriented_layout_design_params,
     eq_type,
     equivalence_checking,
     gold_cost_objective,
     gold_effort_mode,
+    graph_oriented_layout_design,
+    graph_oriented_layout_design_params,
+    graph_oriented_layout_design_stats,
+    read_technology_network,
 )
-import unittest
-import os
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 

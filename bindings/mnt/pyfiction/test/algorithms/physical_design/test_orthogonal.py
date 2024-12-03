@@ -1,13 +1,14 @@
-from mnt.pyfiction import (
-    read_technology_network,
-    orthogonal,
-    equivalence_checking,
-    eq_type,
-    orthogonal_stats,
-    orthogonal_params,
-)
-import unittest
 import os
+import unittest
+
+from mnt.pyfiction import (
+    eq_type,
+    equivalence_checking,
+    orthogonal,
+    orthogonal_params,
+    orthogonal_stats,
+    read_technology_network,
+)
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 

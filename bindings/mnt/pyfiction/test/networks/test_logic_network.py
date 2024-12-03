@@ -1,6 +1,7 @@
-from mnt.pyfiction import read_technology_network
-import unittest
 import os
+import unittest
+
+from mnt.pyfiction import read_technology_network
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -10,7 +11,7 @@ class TestLogicNetwork(unittest.TestCase):
         network = read_technology_network(dir_path + "/../resources/mux21.v")
 
         self.assertEqual(network.size(), 10)
-        self.assertEqual(network.nodes(), [i for i in range(10)])
+        self.assertEqual(network.nodes(), list(range(10)))
         self.assertEqual(network.num_gates(), 5)
         self.assertEqual(network.gates(), [5, 6, 7, 8, 9])
         self.assertTrue(network.is_inv(5))

@@ -1,20 +1,21 @@
+import os
+import unittest
+
 from mnt.pyfiction import (
-    sidb_100_lattice,
-    sidb_technology,
+    create_and_tt,
+    is_kink_induced_non_operational,
     is_operational,
     is_operational_params,
-    sidb_simulation_parameters,
-    create_and_tt,
+    kink_induced_non_operational_input_patterns,
+    operational_condition,
+    operational_input_patterns,
     operational_status,
     read_sqd_layout_100,
-    operational_condition,
     read_sqd_layout_111,
-    operational_input_patterns,
-    kink_induced_non_operational_input_patterns,
-    is_kink_induced_non_operational,
+    sidb_100_lattice,
+    sidb_simulation_parameters,
+    sidb_technology,
 )
-import unittest
-import os
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 

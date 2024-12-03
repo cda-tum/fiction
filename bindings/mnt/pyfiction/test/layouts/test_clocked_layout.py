@@ -1,5 +1,6 @@
-from mnt.pyfiction import clocked_cartesian_layout, clocked_shifted_cartesian_layout, clocked_hexagonal_layout
 import unittest
+
+from mnt.pyfiction import clocked_cartesian_layout, clocked_hexagonal_layout, clocked_shifted_cartesian_layout
 
 
 class TestClockedLayout(unittest.TestCase):

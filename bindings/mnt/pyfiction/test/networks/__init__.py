@@ -1,7 +1,7 @@
-from os.path import dirname, basename, isfile, join
 import glob
 import os
 import sys
+from os.path import basename, dirname, isfile, join
 from pathlib import Path
 
 if sys.platform == "win32" and "Z3_ROOT" in os.environ:

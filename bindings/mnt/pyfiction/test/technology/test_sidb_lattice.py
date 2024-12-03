@@ -1,5 +1,6 @@
-from mnt.pyfiction import sidb_100_lattice, sidb_technology, sidb_111_lattice
 import unittest
+
+from mnt.pyfiction import sidb_100_lattice, sidb_111_lattice, sidb_technology
 
 
 class TestSiDBLattice(unittest.TestCase):

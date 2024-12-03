@@ -1,5 +1,6 @@
-from mnt.pyfiction import qca_technology, inml_technology, sidb_technology, qca_layout
 import unittest
+
+from mnt.pyfiction import inml_technology, qca_layout, qca_technology, sidb_technology
 
 
 class TestCellTechnology(unittest.TestCase):

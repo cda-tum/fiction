@@ -1,15 +1,16 @@
+import unittest
+
 from mnt.pyfiction import (
-    sidb_100_lattice,
-    sidb_technology,
-    sidb_simulation_parameters,
     charge_distribution_surface_100,
-    exhaustive_ground_state_simulation,
-    sidb_charge_state,
-    sidb_111_lattice,
     charge_distribution_surface_111,
     determine_groundstate_from_simulation_results,
+    exhaustive_ground_state_simulation,
+    sidb_100_lattice,
+    sidb_111_lattice,
+    sidb_charge_state,
+    sidb_simulation_parameters,
+    sidb_technology,
 )
-import unittest
 
 
 class TestExhaustiveGroundStateSimulation(unittest.TestCase):

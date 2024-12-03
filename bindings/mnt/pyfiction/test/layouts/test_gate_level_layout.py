@@ -1,13 +1,14 @@
+import unittest
+
 from mnt.pyfiction import (
     cartesian_gate_layout,
-    shifted_cartesian_gate_layout,
-    hexagonal_gate_layout,
-    offset_coordinate,
     critical_path_length_and_throughput,
     gate_level_drv_params,
     gate_level_drvs,
+    hexagonal_gate_layout,
+    offset_coordinate,
+    shifted_cartesian_gate_layout,
 )
-import unittest
 
 
 class TestCartesianGateLevelLayout(unittest.TestCase):

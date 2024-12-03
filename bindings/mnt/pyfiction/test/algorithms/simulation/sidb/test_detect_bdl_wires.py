@@ -1,11 +1,12 @@
 import unittest
+
 from mnt.pyfiction import (
-    sidb_100_lattice,
-    charge_distribution_surface_100,
-    sidb_technology,
-    detect_bdl_wires_params,
-    detect_bdl_wires_100,
     bdl_wire_selection,
+    charge_distribution_surface_100,
+    detect_bdl_wires_100,
+    detect_bdl_wires_params,
+    sidb_100_lattice,
+    sidb_technology,
 )
 
 

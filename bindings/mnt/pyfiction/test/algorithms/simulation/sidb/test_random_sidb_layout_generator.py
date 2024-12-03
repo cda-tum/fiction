@@ -1,10 +1,11 @@
+import unittest
+
 from mnt.pyfiction import (
     generate_random_sidb_layout,
     generate_random_sidb_layout_params,
     sidb_100_lattice,
     sidb_111_lattice,
 )
-import unittest
 
 
 class TestRandomSiDBLayoutGenerator(unittest.TestCase):

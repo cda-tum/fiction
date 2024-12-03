@@ -1,14 +1,15 @@
+import os
+import unittest
+
 from mnt.pyfiction import (
-    read_technology_network,
-    exact_cartesian,
-    equivalence_checking,
     eq_type,
+    equivalence_checking,
+    exact_cartesian,
+    exact_hexagonal,
     exact_params,
     exact_stats,
-    exact_hexagonal,
+    read_technology_network,
 )
-import unittest
-import os
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 

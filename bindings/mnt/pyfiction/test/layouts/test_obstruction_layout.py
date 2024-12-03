@@ -1,16 +1,16 @@
 import unittest
 
 from mnt.pyfiction import (
-    cartesian_obstruction_layout,
     cartesian_gate_layout,
-    shifted_cartesian_obstruction_layout,
-    shifted_cartesian_gate_layout,
+    cartesian_obstruction_layout,
+    critical_path_length_and_throughput,
+    gate_level_drv_params,
+    gate_level_drvs,
     hexagonal_gate_layout,
     hexagonal_obstruction_layout,
     offset_coordinate,
-    critical_path_length_and_throughput,
-    gate_level_drvs,
-    gate_level_drv_params,
+    shifted_cartesian_gate_layout,
+    shifted_cartesian_obstruction_layout,
 )
 
 

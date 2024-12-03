@@ -1,13 +1,14 @@
+import unittest
+
 from mnt.pyfiction import (
+    charge_distribution_surface_100,
+    charge_distribution_surface_111,
+    detect_bdl_pairs,
+    detect_bdl_pairs_params,
     sidb_100_lattice,
     sidb_111_lattice,
-    charge_distribution_surface_111,
-    charge_distribution_surface_100,
     sidb_technology,
-    detect_bdl_pairs_params,
-    detect_bdl_pairs,
 )
-import unittest
 
 
 class TestDetectBDLPairs(unittest.TestCase):

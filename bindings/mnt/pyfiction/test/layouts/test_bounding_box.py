@@ -1,19 +1,20 @@
+import os
+import unittest
+
 from mnt.pyfiction import (
     cartesian_gate_layout,
-    shifted_cartesian_gate_layout,
-    hexagonal_gate_layout,
     cartesian_obstruction_layout,
-    shifted_cartesian_obstruction_layout,
+    hexagonal_gate_layout,
     hexagonal_obstruction_layout,
-    read_technology_network,
-    orthogonal_params,
-    orthogonal,
-    qca_layout,
-    sidb_layout,
     inml_layout,
+    orthogonal,
+    orthogonal_params,
+    qca_layout,
+    read_technology_network,
+    shifted_cartesian_gate_layout,
+    shifted_cartesian_obstruction_layout,
+    sidb_layout,
 )
-import unittest
-import os
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 

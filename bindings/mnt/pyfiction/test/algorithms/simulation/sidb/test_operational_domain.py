@@ -2,19 +2,19 @@ import os
 import unittest
 
 from mnt.pyfiction import (
-    read_sqd_layout_100,
-    operational_domain_params,
-    sidb_simulation_engine,
-    operational_domain_value_range,
-    sweep_parameter,
-    operational_domain_stats,
-    operational_domain_grid_search,
-    create_xor_tt,
-    operational_domain_flood_fill,
-    operational_domain_random_sampling,
-    operational_domain_contour_tracing,
-    read_sqd_layout_111,
     create_and_tt,
+    create_xor_tt,
+    operational_domain_contour_tracing,
+    operational_domain_flood_fill,
+    operational_domain_grid_search,
+    operational_domain_params,
+    operational_domain_random_sampling,
+    operational_domain_stats,
+    operational_domain_value_range,
+    read_sqd_layout_100,
+    read_sqd_layout_111,
+    sidb_simulation_engine,
+    sweep_parameter,
 )
 
 dir_path = os.path.dirname(os.path.realpath(__file__))

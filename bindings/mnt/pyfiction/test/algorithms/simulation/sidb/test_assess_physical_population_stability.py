@@ -1,11 +1,11 @@
 import unittest
 
 from mnt.pyfiction import (
-    sidb_100_lattice,
-    sidb_technology,
-    assess_physical_population_stability_params,
     assess_physical_population_stability,
+    assess_physical_population_stability_params,
+    sidb_100_lattice,
     sidb_111_lattice,
+    sidb_technology,
 )
 
 

@@ -1,17 +1,18 @@
-from mnt.pyfiction import (
-    cartesian_layout,
-    shifted_cartesian_layout,
-    hexagonal_layout,
-    enumerate_all_paths,
-    offset_coordinate,
-    clocked_cartesian_layout,
-    cartesian_gate_layout,
-    clocked_shifted_cartesian_layout,
-    shifted_cartesian_gate_layout,
-    clocked_hexagonal_layout,
-    hexagonal_gate_layout,
-)
 import unittest
+
+from mnt.pyfiction import (
+    cartesian_gate_layout,
+    cartesian_layout,
+    clocked_cartesian_layout,
+    clocked_hexagonal_layout,
+    clocked_shifted_cartesian_layout,
+    enumerate_all_paths,
+    hexagonal_gate_layout,
+    hexagonal_layout,
+    offset_coordinate,
+    shifted_cartesian_gate_layout,
+    shifted_cartesian_layout,
+)
 
 
 class TestEnumerateAllPaths(unittest.TestCase):

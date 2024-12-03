@@ -1,17 +1,18 @@
+import os
+import unittest
+
 from mnt.pyfiction import (
-    read_technology_network,
-    technology_mapping,
-    equivalence_checking,
-    eq_type,
-    and_or_not,
-    and_or_not_maj,
     all_standard_2_input_functions,
     all_standard_3_input_functions,
     all_supported_standard_functions,
+    and_or_not,
+    and_or_not_maj,
+    eq_type,
+    equivalence_checking,
+    read_technology_network,
+    technology_mapping,
     technology_mapping_stats,
 )
-import unittest
-import os
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 

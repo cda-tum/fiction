@@ -1,17 +1,18 @@
-from mnt.pyfiction import (
-    read_technology_network,
-    orthogonal,
-    write_fgl_layout,
-    read_cartesian_fgl_layout,
-    equivalence_checking,
-    eq_type,
-    hexagonalization,
-    read_hexagonal_fgl_layout,
-    shifted_cartesian_gate_layout,
-    read_shifted_cartesian_fgl_layout,
-)
-import unittest
 import os
+import unittest
+
+from mnt.pyfiction import (
+    eq_type,
+    equivalence_checking,
+    hexagonalization,
+    orthogonal,
+    read_cartesian_fgl_layout,
+    read_hexagonal_fgl_layout,
+    read_shifted_cartesian_fgl_layout,
+    read_technology_network,
+    shifted_cartesian_gate_layout,
+    write_fgl_layout,
+)
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -39,7 +40,7 @@ class TestReadWriteFglLayout(unittest.TestCase):
             os.remove("mux21_hexagonal.fgl")
             os.remove("empty_shifted_cartesian.fgl")
         except OSError as e:
-            print("Error: %s - %s." % (e.filename, e.strerror))
+            print(f"Error: {e.filename} - {e.strerror}.")
 
 
 if __name__ == "__main__":

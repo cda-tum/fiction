@@ -1,12 +1,13 @@
+import os
+import unittest
+
 from mnt.pyfiction import (
-    read_technology_network,
-    is_fanout_substituted,
     fanout_substitution,
     fanout_substitution_params,
+    is_fanout_substituted,
+    read_technology_network,
     substitution_strategy,
 )
-import unittest
-import os
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 

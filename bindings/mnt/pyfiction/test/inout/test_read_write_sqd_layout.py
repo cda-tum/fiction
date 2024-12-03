@@ -1,6 +1,7 @@
-from mnt.pyfiction import read_sqd_layout_100
-import unittest
 import os
+import unittest
+
+from mnt.pyfiction import read_sqd_layout_100
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 

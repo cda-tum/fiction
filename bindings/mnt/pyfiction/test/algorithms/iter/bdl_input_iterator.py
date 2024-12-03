@@ -1,5 +1,6 @@
-from mnt.pyfiction import sidb_100_lattice, bdl_input_iterator_100, sidb_technology
 import unittest
+
+from mnt.pyfiction import bdl_input_iterator_100, sidb_100_lattice, sidb_technology
 
 
 class TestBDLInputIterator(unittest.TestCase):

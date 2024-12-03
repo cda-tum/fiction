@@ -1,16 +1,17 @@
-from mnt.pyfiction import (
-    read_technology_network,
-    orthogonal,
-    apply_qca_one_library,
-    exact_params,
-    exact_hexagonal,
-    apply_bestagon_library,
-    technology_constraints,
-    exact_shifted_cartesian,
-    apply_topolinano_library,
-)
-import unittest
 import os
+import unittest
+
+from mnt.pyfiction import (
+    apply_bestagon_library,
+    apply_qca_one_library,
+    apply_topolinano_library,
+    exact_hexagonal,
+    exact_params,
+    exact_shifted_cartesian,
+    orthogonal,
+    read_technology_network,
+    technology_constraints,
+)
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 

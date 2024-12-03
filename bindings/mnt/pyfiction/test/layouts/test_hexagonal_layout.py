@@ -1,5 +1,6 @@
-from mnt.pyfiction import hexagonal_layout
 import unittest
+
+from mnt.pyfiction import hexagonal_layout
 
 
 class TestHexagonalLayout(unittest.TestCase):

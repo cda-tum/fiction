@@ -1,5 +1,6 @@
-from mnt.pyfiction import shifted_cartesian_layout
 import unittest
+
+from mnt.pyfiction import shifted_cartesian_layout
 
 
 class TestShiftedCartesianLayout(unittest.TestCase):

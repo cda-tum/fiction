@@ -1,10 +1,10 @@
-from os.path import dirname, basename, isfile, join
 import glob
 import os
 import sys
+from os.path import basename, dirname, isfile, join
 from pathlib import Path
 
-if sys.platform == "win32" and sys.version_info > (3, 8, 0) and "Z3_ROOT" in os.environ:
+if sys.platform == "win32" and "Z3_ROOT" in os.environ:
     lib_path = Path(os.environ["Z3_ROOT"]) / "lib"
     if lib_path.exists():
         os.add_dll_directory(str(lib_path))

@@ -1,23 +1,24 @@
+import math
+import unittest
+
 from mnt.pyfiction import (
-    sidb_111_lattice,
-    sidb_100_lattice,
-    sidb_technology,
-    quicksim_params,
-    sidb_simulation_parameters,
-    time_to_solution_params,
-    time_to_solution,
-    exact_sidb_simulation_engine,
-    time_to_solution_stats,
+    automatic_base_number_detection,
     charge_distribution_surface_100,
     charge_distribution_surface_111,
-    quicksim,
-    quickexact_params,
-    automatic_base_number_detection,
+    exact_sidb_simulation_engine,
     quickexact,
+    quickexact_params,
+    quicksim,
+    quicksim_params,
+    sidb_100_lattice,
+    sidb_111_lattice,
+    sidb_simulation_parameters,
+    sidb_technology,
+    time_to_solution,
     time_to_solution_for_given_simulation_results,
+    time_to_solution_params,
+    time_to_solution_stats,
 )
-import unittest
-import math
 
 
 class TestTimeToSolution(unittest.TestCase):
@@ -77,11 +78,8 @@ class TestTimeToSolution(unittest.TestCase):
         quicksim_params_inst.simulation_parameters = params
 
         number_of_repetitions = 100
-        simulation_results_quicksim = []
-
         # Run the QuickSim simulations
-        for _ in range(number_of_repetitions):
-            simulation_results_quicksim.append(quicksim(layout, quicksim_params_inst))
+        simulation_results_quicksim = [quicksim(layout, quicksim_params_inst) for _ in range(number_of_repetitions)]
 
         quickexact_params_inst = quickexact_params()
         quickexact_params_inst.simulation_parameters = params

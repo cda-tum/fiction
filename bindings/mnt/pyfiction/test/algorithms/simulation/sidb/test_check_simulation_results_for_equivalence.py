@@ -1,14 +1,15 @@
+import unittest
+
 from mnt.pyfiction import (
+    charge_distribution_surface_100,
+    charge_distribution_surface_111,
+    check_simulation_results_for_equivalence,
     sidb_100_lattice,
     sidb_111_lattice,
-    sidb_technology,
     sidb_simulation_result_100,
-    charge_distribution_surface_100,
-    check_simulation_results_for_equivalence,
     sidb_simulation_result_111,
-    charge_distribution_surface_111,
+    sidb_technology,
 )
-import unittest
 
 
 class TestCheckSimulationResultsForEquivalence(unittest.TestCase):

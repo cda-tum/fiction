@@ -1,5 +1,6 @@
-from mnt.pyfiction import cartesian_layout
 import unittest
+
+from mnt.pyfiction import cartesian_layout
 
 
 class TestCartesianLayout(unittest.TestCase):

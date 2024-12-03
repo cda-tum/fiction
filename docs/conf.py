@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #
 # fiction documentation build configuration file
 #
@@ -20,9 +18,12 @@
 
 import os
 import subprocess
+import xml.etree.ElementTree as ET
+from typing import ClassVar
+
 from docutils import nodes
 from docutils.parsers.rst import Directive
-import xml.etree.ElementTree as ET
+from sphinx.application import Sphinx
 
 # -- General configuration ------------------------------------------------
 
@@ -187,10 +188,10 @@ breathe_default_project = "fiction"
 class DocOverviewTableDirective(Directive):
     has_content = True
     required_arguments = 1
-    option_spec = {"column": str}
+    option_spec: ClassVar = {"column": str}
 
-    def run(self):
-        doc = ET.parse("doxyxml/xml/{}.xml".format(self.arguments[0]))
+    def run(self) -> list:
+        doc = ET.parse(f"doxyxml/xml/{self.arguments[0]}.xml")
 
         table = nodes.table()
         tgroup = nodes.tgroup(cols=2)
@@ -207,7 +208,7 @@ class DocOverviewTableDirective(Directive):
         # rows
         tbody = nodes.tbody()
         for target in self.content:
-            for elem in doc.findall("./compounddef/sectiondef/memberdef/[name='%s']" % target):
+            for elem in doc.findall(f"./compounddef/sectiondef/memberdef/[name='{target}']"):
                 ref = nodes.reference("", target, internal=True)
                 ref["refuri"] = "#{}".format(elem.attrib["id"])
 
@@ -224,7 +225,7 @@ class DocOverviewTableDirective(Directive):
         return [table]
 
 
-def setup(app):
+def setup(app: Sphinx) -> None:
     app.add_directive("doc_overview_table", DocOverviewTableDirective)
 
 

@@ -1,13 +1,13 @@
 import unittest
 
 from mnt.pyfiction import (
-    sidb_100_lattice,
-    sidb_technology,
     charge_distribution_surface_100,
+    charge_distribution_surface_111,
     determine_physically_valid_parameters,
     parameter_point,
+    sidb_100_lattice,
     sidb_111_lattice,
-    charge_distribution_surface_111,
+    sidb_technology,
 )
 
 

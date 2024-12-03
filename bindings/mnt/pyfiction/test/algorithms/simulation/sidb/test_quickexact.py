@@ -1,16 +1,17 @@
+import unittest
+
 from mnt.pyfiction import (
-    sidb_100_lattice,
-    sidb_111_lattice,
-    sidb_technology,
-    quickexact,
-    quickexact_params,
     automatic_base_number_detection,
     charge_distribution_surface_100,
     charge_distribution_surface_111,
     determine_groundstate_from_simulation_results,
+    quickexact,
+    quickexact_params,
+    sidb_100_lattice,
+    sidb_111_lattice,
     sidb_charge_state,
+    sidb_technology,
 )
-import unittest
 
 
 class TestQuickExact(unittest.TestCase):

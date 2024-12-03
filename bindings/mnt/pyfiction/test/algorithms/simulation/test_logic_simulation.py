@@ -1,6 +1,7 @@
-from mnt.pyfiction import read_technology_network, simulate, exact_params, exact_cartesian
-import unittest
 import os
+import unittest
+
+from mnt.pyfiction import exact_cartesian, exact_params, read_technology_network, simulate
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
