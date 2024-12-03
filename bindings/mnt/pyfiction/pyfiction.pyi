@@ -416,7 +416,7 @@ class hexagonal_layout:
 
     def is_within_bounds(self, c: cube_coordinate) -> bool: ...
 
-    def cube_coordinates(self) -> List[cube_coordinate]: ...
+    def coordinates(self) -> List[cube_coordinate]: ...
 
     def ground_coordinates(self) -> List[cube_coordinate]: ...
 
@@ -1365,3 +1365,59 @@ class dynamic_truth_table:
     def num_blocks(self) -> int: ...
 
     def num_bits(self) -> int: ...
+
+
+# Algorithms
+
+## path finding
+
+class a_star_params:
+    def __init__(self): ...
+
+    crossings: bool
+
+
+@overload
+def a_star(layout: cartesian_obstruction_layout, source: offset_coordinate, target: offset_coordinate,
+           params: a_star_params) -> List[offset_coordinate]: ...
+
+
+@overload
+def a_star(layout: cartesian_gate_layout, source: offset_coordinate, target: offset_coordinate,
+           params: a_star_params) -> List[offset_coordinate]: ...
+
+
+@overload
+def a_star(layout: cartesian_layout, source: offset_coordinate, target: offset_coordinate, params: a_star_params) -> \
+        List[offset_coordinate]: ...
+
+
+@overload
+def a_star(layout: shifted_cartesian_obstruction_layout, source: offset_coordinate, target: offset_coordinate,
+           params: a_star_params) -> List[offset_coordinate]: ...
+
+
+@overload
+def a_star(layout: shifted_cartesian_gate_layout, source: offset_coordinate, target: offset_coordinate,
+           params: a_star_params) -> List[offset_coordinate]: ...
+
+
+@overload
+def a_star(layout: shifted_cartesian_layout, source: offset_coordinate, target: offset_coordinate,
+           params: a_star_params) -> \
+        List[offset_coordinate]: ...
+
+
+@overload
+def a_star(layout: hexagonal_obstruction_layout, source: cube_coordinate, target: cube_coordinate,
+           params: a_star_params) -> List[cube_coordinate]: ...
+
+
+@overload
+def a_star(layout: hexagonal_gate_layout, source: cube_coordinate, target: cube_coordinate,
+           params: a_star_params) -> List[cube_coordinate]: ...
+
+
+@overload
+def a_star(layout: hexagonal_layout, source: cube_coordinate, target: cube_coordinate, params: a_star_params) -> \
+        List[cube_coordinate]: ...
