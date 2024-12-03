@@ -1371,6 +1371,54 @@ class dynamic_truth_table:
 
 ## path finding
 
+from typing import overload, Union
+
+
+@overload
+def manhattan_distance(layout: Union[cartesian_layout, shifted_cartesian_layout], source: offset_coordinate,
+                       target: offset_coordinate) -> int: ...
+
+
+@overload
+def manhattan_distance(layout: hexagonal_layout, source: cube_coordinate, target: cube_coordinate) -> int: ...
+
+
+@overload
+def euclidean_distance(layout: Union[cartesian_layout, shifted_cartesian_layout], source: offset_coordinate,
+                       target: offset_coordinate) -> float: ...
+
+
+@overload
+def euclidean_distance(layout: hexagonal_layout, source: cube_coordinate, target: cube_coordinate) -> float: ...
+
+
+@overload
+def squared_euclidean_distance(layout: Union[cartesian_layout, shifted_cartesian_layout], source: offset_coordinate,
+                               target: offset_coordinate) -> float: ...
+
+
+@overload
+def squared_euclidean_distance(layout: hexagonal_layout, source: cube_coordinate, target: cube_coordinate) -> float: ...
+
+
+@overload
+def twoddwave_distance(layout: Union[cartesian_layout, shifted_cartesian_layout], source: offset_coordinate,
+                       target: offset_coordinate) -> int: ...
+
+
+@overload
+def twoddwave_distance(layout: hexagonal_layout, source: cube_coordinate, target: cube_coordinate) -> int: ...
+
+
+@overload
+def chebyshev_distance(layout: Union[cartesian_layout, shifted_cartesian_layout], source: offset_coordinate,
+                       target: offset_coordinate) -> int: ...
+
+
+@overload
+def chebyshev_distance(layout: hexagonal_layout, source: cube_coordinate, target: cube_coordinate) -> int: ...
+
+
 class a_star_params:
     def __init__(self): ...
 
