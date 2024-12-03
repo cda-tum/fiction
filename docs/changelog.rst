@@ -10,6 +10,9 @@ Unreleased
 
 Added
 #####
+- Algorithms:
+    - Simulation:
+        - Added option to determine efficiently if a layout is non-operational by using QuickCell's pruning strategies.
 - Experiments:
     - Added information about how many layouts remain after each of QuickCell's pruning steps.
 
