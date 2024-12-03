@@ -175,3 +175,15 @@ environment = { MACOSX_DEPLOYMENT_TARGET = "11.0" }
 
 [tool.uv]
 reinstall-package = ["mnt.pyfiction"]
+
+
+[tool.mypy]
+files = ["bindings/mnt/pyfiction", "noxfile.py"]
+mypy_path = ["$MYPY_CONFIG_FILE_DIR/bindings"]
+python_version = "3.8"
+warn_unused_configs = true
+enable_error_code = ["ignore-without-code", "redundant-expr", "truthy-bool"]
+strict = true
+disallow_untyped_defs = false
+explicit_package_bases = true
+warn_unreachable = true

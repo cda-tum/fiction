@@ -16,7 +16,7 @@ if sys.platform == "win32" and "Z3_ROOT" in os.environ:
     if bin_path.exists():
         os.add_dll_directory(str(bin_path))
 
-from .pyfiction import (
+from .pyfiction import (  # type: ignore[import-not-found]
     # Algorithms
     ## iter
     input_bdl_configuration,

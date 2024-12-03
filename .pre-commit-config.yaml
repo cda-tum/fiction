@@ -52,6 +52,17 @@ repos:
         types_or: [c++, c]
         args: ["-style=file"]
 
+  # Check static types with mypy
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.13.0
+    hooks:
+      - id: mypy
+        files: ^(bindings/mnt/pyfiction|noxfile.py)
+        args: []
+        additional_dependencies:
+          - nox
+          - pytest
+
   # Format configuration files with prettier
   - repo: https://github.com/rbubley/mirrors-prettier
     rev: v3.3.3
