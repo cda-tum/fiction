@@ -1369,6 +1369,100 @@ class dynamic_truth_table:
 
 # Algorithms
 
+## network transformation
+
+
+class substitution_strategy:
+    BREADTH: int
+    DEPTH: int
+
+
+class fanout_substitution_params:
+    def __init__(self) -> None: ...
+
+    strategy: substitution_strategy
+    degree: Optional[int]
+    threshold: Optional[int]
+
+
+def fanout_substitution(network: technology_network,
+                        params: Optional[
+                            fanout_substitution_params] = fanout_substitution_params()) -> technology_network: ...
+
+
+def is_fanout_substituted(network: technology_network,
+                          params: Optional[fanout_substitution_params] = fanout_substitution_params()) -> bool: ...
+
+
+class network_balancing_params:
+    def __init__(self) -> None: ...
+
+    unify_outputs: bool
+
+
+def network_balancing(network: technology_network,
+                      params: Optional[
+                          network_balancing_params] = network_balancing_params()) -> technology_network: ...
+
+
+def is_balanced(network: technology_network,
+                params: Optional[network_balancing_params] = network_balancing_params()) -> bool: ...
+
+
+from typing import Optional, List
+
+
+class technology_mapping_params:
+    def __init__(self) -> None: ...
+
+    decay: Optional[float]
+    inv: Optional[bool]
+    and2: Optional[bool]
+    nand2: Optional[bool]
+    or2: Optional[bool]
+    nor2: Optional[bool]
+    xor2: Optional[bool]
+    xnor2: Optional[bool]
+    and3: Optional[bool]
+    xor_and: Optional[bool]
+    or_and: Optional[bool]
+    onehot: Optional[bool]
+    maj3: Optional[bool]
+    gamble: Optional[bool]
+    dot: Optional[bool]
+    mux: Optional[bool]
+    and_xor: Optional[bool]
+
+
+class technology_mapping_stats:
+
+    def __init__(self) -> None: ...
+
+    def report(self) -> str: ...
+
+    def __repr__(self) -> str: ...
+
+
+def and_or_not() -> technology_mapping_params: ...
+
+
+def and_or_not_maj() -> technology_mapping_params: ...
+
+
+def all_standard_2_input_functions() -> technology_mapping_params: ...
+
+
+def all_standard_3_input_functions() -> technology_mapping_params: ...
+
+
+def all_supported_standard_functions() -> technology_mapping_params: ...
+
+
+def technology_mapping(network: technology_network,
+                       params: Optional[technology_mapping_params] = technology_mapping_params(),
+                       stats: Optional[technology_mapping_stats] = None) -> technology_network: ...
+
+
 ## path finding
 
 from typing import overload, Union
