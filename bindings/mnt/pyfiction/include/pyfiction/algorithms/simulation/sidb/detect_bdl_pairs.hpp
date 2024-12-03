@@ -38,7 +38,6 @@ void detect_bdl_pairs(pybind11::module& m)
 inline void detect_bdl_pairs(pybind11::module& m)
 {
     namespace py = pybind11;
-    namespace py = pybind11;
 
     py::class_<fiction::bdl_pair<fiction::offset::ucoord_t>>(m, "bdl_pair", DOC(fiction_bdl_pair))
         .def(py::init<>(), DOC(fiction_bdl_pair_bdl_pair))

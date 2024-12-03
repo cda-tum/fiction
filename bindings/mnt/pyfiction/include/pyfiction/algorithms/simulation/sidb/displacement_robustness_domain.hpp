@@ -25,7 +25,6 @@ void determine_displacement_robustness_domain(pybind11::module& m, const std::st
 {
 
     namespace py = pybind11;
-    namespace py = pybind11;
 
     py::class_<fiction::displacement_robustness_domain<Lyt>>(
         m, fmt::format("displacement_robustness_domain{}", lattice).c_str())
@@ -41,7 +40,6 @@ void determine_displacement_robustness_domain(pybind11::module& m, const std::st
 
 inline void determine_displacement_robustness_domain(pybind11::module& m)
 {
-    namespace py = pybind11;
     namespace py = pybind11;
 
     py::enum_<fiction::displacement_robustness_domain_params<fiction::offset::ucoord_t>::dimer_displacement_policy>(
