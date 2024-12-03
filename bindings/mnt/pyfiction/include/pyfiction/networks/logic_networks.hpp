@@ -148,7 +148,10 @@ void network(pybind11::module& m, const std::string& network_name)
             py::arg("index"))
         .def(
             "po_index", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.po_index(n); }, py::arg("n"))
-        .def("po_at", [](const Ntk& ntk, const uint32_t index) { return ntk.po_at(index); }, py::arg("index"));
+        .def(
+            "po_at", [](const Ntk& ntk, const uint32_t index) { return ntk.po_at(index); }, py::arg("index"))
+
+        ;
 
     /**
      * Network parsing function.
