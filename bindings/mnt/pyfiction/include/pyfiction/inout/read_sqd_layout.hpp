@@ -29,7 +29,7 @@ void read_sqd_layout_100(pybind11::module& m)
         &fiction::read_sqd_layout<Lyt>;
 
     m.def("read_sqd_layout_100", read_sqd_layout_function_pointer, py::arg("filename"), py::arg("layout_name") = "",
-              DOC(fiction_read_sqd_layout_3));
+          DOC(fiction_read_sqd_layout_3));
 }
 
 template <typename Lyt>
@@ -41,7 +41,7 @@ void read_sqd_layout_111(pybind11::module& m)
         &fiction::read_sqd_layout<Lyt>;
 
     m.def("read_sqd_layout_111", read_sqd_layout_function_pointer, py::arg("filename"), py::arg("layout_name") = "",
-              DOC(fiction_read_sqd_layout_3));
+          DOC(fiction_read_sqd_layout_3));
 }
 
 }  // namespace detail

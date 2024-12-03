@@ -347,6 +347,7 @@ class bdl_input_iterator
     {
         return current_input_index;
     }
+
   private:
     /**
      * The layout to iterate over.
