@@ -56,9 +56,9 @@ inline void is_operational(pybind11::module& m)
         .value("NON_OPERATIONAL", fiction::operational_status::NON_OPERATIONAL,
                DOC(fiction_operational_status_NON_OPERATIONAL));
 
-    py::enum_<fiction::is_operational_params::operational_condition>(m, "operational_condition", DOC(fiction_operational_condition))
-        .value("TOLERATE_KINKS", fiction::is_operational_params::operational_condition::TOLERATE_KINKS, DOC(fition_operational_condition_TOLERATE_KINKS))
-        .value("REJECT_KINKS", fiction::is_operational_params::operational_condition::REJECT_KINKS, DOC(fiction_operational_condition_REJECT_KINKS));
+    py::enum_<fiction::is_operational_params::operational_condition>(m, "operational_condition")
+        .value("TOLERATE_KINKS", fiction::is_operational_params::operational_condition::TOLERATE_KINKS)
+        .value("REJECT_KINKS", fiction::is_operational_params::operational_condition::REJECT_KINKS);
 
     py::class_<fiction::is_operational_params>(m, "is_operational_params", DOC(fiction_is_operational_params))
         .def(py::init<>())
@@ -69,7 +69,10 @@ inline void is_operational(pybind11::module& m)
         .def_readwrite("input_bdl_iterator_params", &fiction::is_operational_params::input_bdl_iterator_params,
                        DOC(fiction_is_operational_params_input_bdl_iterator_params))
         .def_readwrite("op_condition", &fiction::is_operational_params::op_condition,
-                       DOC(fiction_is_operational_params_op_condition));
+                       DOC(fiction_is_operational_params_op_condition))
+        .def_readwrite("mode_to_analyse_operational_status",
+                       &fiction::is_operational_params::mode_to_analyse_operational_status,
+                       DOC(fiction_is_operational_params_mode_to_analyse_operational_status));
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
     detail::is_operational<py_sidb_100_lattice>(m);
