@@ -257,9 +257,9 @@ class is_operational_impl
      * validation.
      */
     template <typename ChargeLyt>
-    [[nodiscard]] std::pair<bool, pruning_reason>
-    can_layout_be_pruned(const uint64_t input_pattern, ChargeLyt& cds_canvas, cell<Lyt>& dependent_cell,
-                         const is_operational_params& params) noexcept
+    [[nodiscard]] std::pair<bool, pruning_reason> can_layout_be_pruned(const uint64_t input_pattern,
+                                                                       ChargeLyt& cds_canvas, cell<Lyt>& dependent_cell,
+                                                                       const is_operational_params& params) noexcept
     {
         static_assert(is_charge_distribution_surface_v<ChargeLyt>, "ChargeLyt is not a charge distribution surface");
 
@@ -575,7 +575,8 @@ class is_operational_impl
         while (cds_canvas.get_charge_index_and_base().first <= cds_canvas.get_max_charge_index())
         {
             cds_canvas.foreach_cell(
-                [&](const auto& c) {
+                [&](const auto& c)
+                {
                     cds_layout.assign_charge_state(c, cds_canvas.get_charge_state(c),
                                                    charge_index_mode::KEEP_CHARGE_INDEX);
                 });
@@ -725,9 +726,9 @@ class is_operational_impl
                     for (const auto& bdl : output_bdl_wires[i].pairs)
                     {
                         cds.assign_charge_state(bdl.upper, sidb_charge_state::NEUTRAL,
-                                                   charge_index_mode::KEEP_CHARGE_INDEX);
+                                                charge_index_mode::KEEP_CHARGE_INDEX);
                         cds.assign_charge_state(bdl.lower, sidb_charge_state::NEGATIVE,
-                                                   charge_index_mode::KEEP_CHARGE_INDEX);
+                                                charge_index_mode::KEEP_CHARGE_INDEX);
                     }
                 }
                 else
@@ -735,9 +736,9 @@ class is_operational_impl
                     for (const auto& bdl : output_bdl_wires[i].pairs)
                     {
                         cds.assign_charge_state(bdl.upper, sidb_charge_state::NEGATIVE,
-                                                   charge_index_mode::KEEP_CHARGE_INDEX);
+                                                charge_index_mode::KEEP_CHARGE_INDEX);
                         cds.assign_charge_state(bdl.lower, sidb_charge_state::NEUTRAL,
-                                                   charge_index_mode::KEEP_CHARGE_INDEX);
+                                                charge_index_mode::KEEP_CHARGE_INDEX);
                     }
                 }
             }
@@ -752,9 +753,9 @@ class is_operational_impl
                             continue;
                         }
                         cds.assign_charge_state(bdl.upper, sidb_charge_state::NEGATIVE,
-                                                   charge_index_mode::KEEP_CHARGE_INDEX);
+                                                charge_index_mode::KEEP_CHARGE_INDEX);
                         cds.assign_charge_state(bdl.lower, sidb_charge_state::NEUTRAL,
-                                                   charge_index_mode::KEEP_CHARGE_INDEX);
+                                                charge_index_mode::KEEP_CHARGE_INDEX);
                     }
                 }
                 else
@@ -762,9 +763,9 @@ class is_operational_impl
                     for (const auto& bdl : output_bdl_wires[i].pairs)
                     {
                         cds.assign_charge_state(bdl.upper, sidb_charge_state::NEUTRAL,
-                                                   charge_index_mode::KEEP_CHARGE_INDEX);
+                                                charge_index_mode::KEEP_CHARGE_INDEX);
                         cds.assign_charge_state(bdl.lower, sidb_charge_state::NEGATIVE,
-                                                   charge_index_mode::KEEP_CHARGE_INDEX);
+                                                charge_index_mode::KEEP_CHARGE_INDEX);
                     }
                 }
             }
@@ -791,9 +792,9 @@ class is_operational_impl
                     for (const auto& bdl : output_bdl_wires[i].pairs)
                     {
                         cds.assign_charge_state(bdl.upper, sidb_charge_state::NEUTRAL,
-                                                   charge_index_mode::KEEP_CHARGE_INDEX);
+                                                charge_index_mode::KEEP_CHARGE_INDEX);
                         cds.assign_charge_state(bdl.lower, sidb_charge_state::NEGATIVE,
-                                                   charge_index_mode::KEEP_CHARGE_INDEX);
+                                                charge_index_mode::KEEP_CHARGE_INDEX);
                     }
                 }
                 else
@@ -801,9 +802,9 @@ class is_operational_impl
                     for (const auto& bdl : output_bdl_wires[i].pairs)
                     {
                         cds.assign_charge_state(bdl.upper, sidb_charge_state::NEGATIVE,
-                                                   charge_index_mode::KEEP_CHARGE_INDEX);
+                                                charge_index_mode::KEEP_CHARGE_INDEX);
                         cds.assign_charge_state(bdl.lower, sidb_charge_state::NEUTRAL,
-                                                   charge_index_mode::KEEP_CHARGE_INDEX);
+                                                charge_index_mode::KEEP_CHARGE_INDEX);
                     }
                 }
             }
@@ -814,9 +815,9 @@ class is_operational_impl
                     for (const auto& bdl : output_bdl_wires[i].pairs)
                     {
                         cds.assign_charge_state(bdl.upper, sidb_charge_state::NEGATIVE,
-                                                   charge_index_mode::KEEP_CHARGE_INDEX);
+                                                charge_index_mode::KEEP_CHARGE_INDEX);
                         cds.assign_charge_state(bdl.lower, sidb_charge_state::NEUTRAL,
-                                                   charge_index_mode::KEEP_CHARGE_INDEX);
+                                                charge_index_mode::KEEP_CHARGE_INDEX);
                     }
                 }
                 else
@@ -824,9 +825,9 @@ class is_operational_impl
                     for (const auto& bdl : output_bdl_wires[i].pairs)
                     {
                         cds.assign_charge_state(bdl.upper, sidb_charge_state::NEUTRAL,
-                                                   charge_index_mode::KEEP_CHARGE_INDEX);
+                                                charge_index_mode::KEEP_CHARGE_INDEX);
                         cds.assign_charge_state(bdl.lower, sidb_charge_state::NEGATIVE,
-                                                   charge_index_mode::KEEP_CHARGE_INDEX);
+                                                charge_index_mode::KEEP_CHARGE_INDEX);
                     }
                 }
             }

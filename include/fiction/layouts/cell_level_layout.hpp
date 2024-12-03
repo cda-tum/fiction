@@ -234,11 +234,11 @@ class cell_level_layout : public ClockedLayout
         {
             if (val == type)
             {
-                return true; // Value found
+                return true;  // Value found
             }
         }
 
-        return false; // Value not found
+        return false;  // Value not found
     }
     /**
      * Returns the cell mode assigned to cell position `c`. If no cell mode is assigned, the default mode is returned.

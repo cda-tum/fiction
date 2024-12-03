@@ -366,7 +366,8 @@ TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
     {
         const design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
             is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
-                                  bdl_input_iterator_params{}, is_operational_params::operational_condition::TOLERATE_KINKS},
+                                  bdl_input_iterator_params{},
+                                  is_operational_params::operational_condition::TOLERATE_KINKS},
             design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::RANDOM,
             {{14, 6, 0}, {24, 12, 0}},
             3};
@@ -382,7 +383,8 @@ TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
 
         design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
             is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
-                                  bdl_input_iterator_params{}, is_operational_params::operational_condition::REJECT_KINKS},
+                                  bdl_input_iterator_params{},
+                                  is_operational_params::operational_condition::REJECT_KINKS},
             design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::RANDOM,
             {{18, 8, 1}, {22, 12, 0}},
             2};

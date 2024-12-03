@@ -5,6 +5,7 @@
 #ifndef FICTION_OPERATIONAL_DOMAIN_HPP
 #define FICTION_OPERATIONAL_DOMAIN_HPP
 
+#include "fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp"
 #include "fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp"
 #include "fiction/algorithms/simulation/sidb/energy_distribution.hpp"
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
@@ -19,7 +20,6 @@
 #include "fiction/utils/hash.hpp"
 #include "fiction/utils/math_utils.hpp"
 #include "fiction/utils/phmap_utils.hpp"
-#include "fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp"
 
 #include <btree.h>
 #include <fmt/format.h>
