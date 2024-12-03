@@ -84,7 +84,7 @@ class maximum_defect_influence_position_and_distance_impl
         const Lyt& lyt, maximum_defect_influence_position_and_distance_params sim_params,
         maximum_defect_influence_position_and_distance_stats& st) :
             layout{lyt},
-            params{std::move(sim_params)},
+            params{sim_params},
             stats{st}
     {
         collect_all_defect_cells();

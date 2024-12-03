@@ -7,7 +7,6 @@
 
 #include "fiction/algorithms/iter/bdl_input_iterator.hpp"
 #include "fiction/algorithms/simulation/sidb/assess_physical_population_stability.hpp"
-#include "fiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp"
 
 #include <cassert>
 #include <limits>
