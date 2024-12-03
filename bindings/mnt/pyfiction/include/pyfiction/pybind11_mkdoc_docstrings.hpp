@@ -6712,7 +6712,7 @@ Returns:
     implementation. Physical simulation is required as a second step
     to conduct the final validation.)doc";
 
-static const char *__doc_fiction_detail_is_operational_impl_canvas_lyt = R"doc()doc";
+static const char *__doc_fiction_detail_is_operational_impl_canvas_lyt = R"doc(Layout consisting of all canvas SiDBs.)doc";
 
 static const char *__doc_fiction_detail_is_operational_impl_check_existence_of_kinks_in_input_wires =
 R"doc(This function iterates through the input wires and evaluates their
