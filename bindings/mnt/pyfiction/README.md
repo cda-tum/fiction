@@ -1,6 +1,6 @@
-# Python bindings for the *fiction* library
+# Python bindings for the _fiction_ library
 
-This directory contains Python bindings for the *fiction* library built
+This directory contains Python bindings for the _fiction_ library built
 with [pybind11](https://github.com/pybind/pybind11).
 
 ## Installation
@@ -36,10 +36,11 @@ If you use macOS, then `nox` is in `brew`, use `brew install nox`.
 
 > [!NOTE]
 > If you do not have [`pipx`](https://pypa.github.io/pipx/) (pip for applications) installed, you can install it with:
->```bash
+>
+> ```bash
 > (venv) $ pip install pipx
 > (venv) $ pipx ensurepath
->```
+> ```
 
 If you use macOS, then `pipx` is in `brew`, use `brew install pipx`.
 
@@ -125,12 +126,13 @@ help(pyfiction.cartesian_layout)
 We try to keep the bindings as close to the C++ API as possible. However, due to language differences, some
 functionality might not be available in Python or differ slightly in its syntax compared to its C++ counterpart.
 
-Our goal is to expose as much of *fiction*'s library features in some way in `pyfiction` as well. Therefore, whenever a
+Our goal is to expose as much of _fiction_'s library features in some way in `pyfiction` as well. Therefore, whenever a
 new feature is added to the C++ library, please also add the respective bindings here. To not duplicate
 docstrings and run out of sync, we use the `pybind11_mkdoc` tool to automatically generate the documentation from the
 C++ docstrings.
 
 A few things must be noted when adding new bindings:
+
 - Do not use `""_a` literals in the bindings. Instead, use `py::arg` to specify the argument names.
 - Add new symbols to the `__init__.py` file's `import` and `__all__` statements.
 - Do not use `from mnt.pyfiction import *` in the Python code. Instead, use explicit imports like
@@ -164,4 +166,4 @@ To generate the docstrings call
 python3 -m pybind11_mkdoc -o pybind11_mkdoc_docstrings.hpp -D FICTION_Z3_SOLVER `find ./include/fiction -name "*.hpp" -print`
 ```
 
-in *fiction*'s base directory.
+in _fiction_'s base directory.

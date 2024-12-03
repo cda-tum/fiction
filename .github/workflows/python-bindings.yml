@@ -2,29 +2,29 @@ name: 🐍 • CI
 
 on:
   push:
-    branches: [ 'main' ]
+    branches: ["main"]
     paths:
-      - 'bindings/pyfiction/**'
-      - '**/*.py'
-      - '**/*.hpp'
-      - '**/*.cpp'
-      - '**/*.cmake'
-      - '**/CMakeLists.txt'
-      - 'libs/**'
-      - '.github/workflows/python-bindings.yml'
+      - "bindings/pyfiction/**"
+      - "**/*.py"
+      - "**/*.hpp"
+      - "**/*.cpp"
+      - "**/*.cmake"
+      - "**/CMakeLists.txt"
+      - "libs/**"
+      - ".github/workflows/python-bindings.yml"
   pull_request:
-    branches: [ 'main' ]
+    branches: ["main"]
     paths:
-      - 'bindings/pyfiction/**'
-      - '**/*.py'
-      - '**/*.hpp'
-      - '**/*.cpp'
-      - '**/*.cmake'
-      - '**/CMakeLists.txt'
-      - 'libs/**'
-      - '.github/workflows/python-bindings.yml'
+      - "bindings/pyfiction/**"
+      - "**/*.py"
+      - "**/*.hpp"
+      - "**/*.cpp"
+      - "**/*.cmake"
+      - "**/CMakeLists.txt"
+      - "libs/**"
+      - ".github/workflows/python-bindings.yml"
   workflow_run:
-    workflows: [ "pyfiction Docstring Generator" ]
+    workflows: ["pyfiction Docstring Generator"]
     types:
       - completed
 
@@ -46,7 +46,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        runs-on: [ ubuntu-latest, macos-13, macos-14, windows-latest ]
+        runs-on: [ubuntu-latest, macos-13, macos-14, windows-latest]
     steps:
       - name: Clone Repository
         uses: actions/checkout@v4
