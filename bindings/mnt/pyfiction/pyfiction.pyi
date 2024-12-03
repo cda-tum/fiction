@@ -1616,3 +1616,18 @@ def yen_k_shortest_paths(
         k: int,
         params: Optional[yen_k_shortest_paths_params] = yen_k_shortest_paths_params()
 ) -> List[List[cube_coordinate]]: ...
+
+
+# Technology
+
+@overload
+def area(layout: qca_layout, width: int = 18, height: int = 18, hspace: int = 2, vspace: int = 2) -> float: ...
+
+
+@overload
+def area(layout: inml_layout, width: int = 50, height: int = 100, hspace: int = 10, vspace: int = 25) -> float: ...
+
+
+@overload
+def area(layout: sidb_layout, width: float = 0.0, height: float = 0.0, hspace: float = 0.384,
+         vspace: float = 0.384) -> float: ...
