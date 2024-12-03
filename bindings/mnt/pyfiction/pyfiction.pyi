@@ -1378,46 +1378,29 @@ class a_star_params:
 
 
 @overload
-def a_star(layout: cartesian_obstruction_layout, source: offset_coordinate, target: offset_coordinate,
-           params: a_star_params) -> List[offset_coordinate]: ...
+def a_star(
+        layout: Union[
+            cartesian_obstruction_layout,
+            cartesian_gate_layout,
+            cartesian_layout,
+            shifted_cartesian_obstruction_layout,
+            shifted_cartesian_gate_layout,
+            shifted_cartesian_layout
+        ],
+        source: offset_coordinate,
+        target: offset_coordinate,
+        params: a_star_params
+) -> List[offset_coordinate]: ...
 
 
 @overload
-def a_star(layout: cartesian_gate_layout, source: offset_coordinate, target: offset_coordinate,
-           params: a_star_params) -> List[offset_coordinate]: ...
-
-
-@overload
-def a_star(layout: cartesian_layout, source: offset_coordinate, target: offset_coordinate, params: a_star_params) -> \
-        List[offset_coordinate]: ...
-
-
-@overload
-def a_star(layout: shifted_cartesian_obstruction_layout, source: offset_coordinate, target: offset_coordinate,
-           params: a_star_params) -> List[offset_coordinate]: ...
-
-
-@overload
-def a_star(layout: shifted_cartesian_gate_layout, source: offset_coordinate, target: offset_coordinate,
-           params: a_star_params) -> List[offset_coordinate]: ...
-
-
-@overload
-def a_star(layout: shifted_cartesian_layout, source: offset_coordinate, target: offset_coordinate,
-           params: a_star_params) -> \
-        List[offset_coordinate]: ...
-
-
-@overload
-def a_star(layout: hexagonal_obstruction_layout, source: cube_coordinate, target: cube_coordinate,
-           params: a_star_params) -> List[cube_coordinate]: ...
-
-
-@overload
-def a_star(layout: hexagonal_gate_layout, source: cube_coordinate, target: cube_coordinate,
-           params: a_star_params) -> List[cube_coordinate]: ...
-
-
-@overload
-def a_star(layout: hexagonal_layout, source: cube_coordinate, target: cube_coordinate, params: a_star_params) -> \
-        List[cube_coordinate]: ...
+def a_star(
+        layout: Union[
+            hexagonal_obstruction_layout,
+            hexagonal_gate_layout,
+            hexagonal_layout
+        ],
+        source: cube_coordinate,
+        target: cube_coordinate,
+        params: a_star_params
+) -> List[cube_coordinate]: ...
