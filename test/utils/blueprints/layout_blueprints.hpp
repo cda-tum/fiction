@@ -536,6 +536,20 @@ GateLyt optimization_layout_corner_case_outputs_2() noexcept
 }
 
 template <typename GateLyt>
+GateLyt optimization_layout_corner_case_inputs() noexcept
+{
+    GateLyt layout{{3, 2, 0}, fiction::twoddwave_clocking<GateLyt>()};
+
+    const auto x1 = layout.create_pi("x1", {2, 1});
+    const auto x2 = layout.create_pi("x2", {1, 2});
+
+    const auto and1 = layout.create_and(x1, x2, {2, 2});
+    layout.create_po(and1, "f1", {3, 2});
+
+    return layout;
+}
+
+template <typename GateLyt>
 GateLyt planar_unoptimized_layout() noexcept
 {
     GateLyt layout{{4, 4, 0}, fiction::twoddwave_clocking<GateLyt>()};
@@ -900,10 +914,10 @@ Lyt and_gate_111() noexcept
     lyt.assign_cell_type({9, 9, 1}, Lyt::cell_type::NORMAL);
     lyt.assign_cell_type({15, 9, 1}, Lyt::cell_type::NORMAL);
 
-    lyt.assign_cell_type({13, 17, 0}, Lyt::cell_type::NORMAL);
-
-    lyt.assign_cell_type({16, 18, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({10, 18, 0}, Lyt::cell_type::NORMAL);
+    // canvas SiDBs
+    lyt.assign_cell_type({13, 17, 0}, Lyt::cell_type::LOGIC);
+    lyt.assign_cell_type({16, 18, 0}, Lyt::cell_type::LOGIC);
+    lyt.assign_cell_type({10, 18, 0}, Lyt::cell_type::LOGIC);
 
     lyt.assign_cell_type({15, 21, 1}, Lyt::cell_type::NORMAL);
     lyt.assign_cell_type({17, 23, 0}, Lyt::cell_type::NORMAL);
@@ -912,6 +926,494 @@ Lyt and_gate_111() noexcept
     lyt.assign_cell_type({21, 27, 0}, Lyt::cell_type::OUTPUT);
 
     lyt.assign_cell_type({23, 29, 1}, Lyt::cell_type::NORMAL);
+
+    return lyt;
+};
+
+template <typename Lyt>
+Lyt and_gate_111_mirrored_on_the_x_axis() noexcept
+{
+    static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(fiction::is_sidb_lattice_111_v<Lyt>, "Lyt should have 111 as lattice orientation");
+    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
+
+    Lyt lyt{};
+
+    lyt.assign_cell_type({0, 0, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({1, -2, 1}, Lyt::cell_type::INPUT);
+
+    lyt.assign_cell_type({25, 0, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({23, -2, 1}, Lyt::cell_type::INPUT);
+
+    lyt.assign_cell_type({4, -4, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({21, -4, 0}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({5, -6, 1}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({19, -6, 1}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({17, -8, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({8, -8, 0}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({9, -10, 1}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({15, -10, 1}, Lyt::cell_type::NORMAL);
+
+    // canvas SiDBs
+    lyt.assign_cell_type({13, -17, 0}, Lyt::cell_type::LOGIC);
+    lyt.assign_cell_type({16, -18, 0}, Lyt::cell_type::LOGIC);
+    lyt.assign_cell_type({10, -18, 0}, Lyt::cell_type::LOGIC);
+
+    lyt.assign_cell_type({15, -22, 1}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({17, -23, 0}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({19, -26, 1}, Lyt::cell_type::OUTPUT);
+    lyt.assign_cell_type({21, -27, 0}, Lyt::cell_type::OUTPUT);
+
+    lyt.assign_cell_type({23, -30, 1}, Lyt::cell_type::NORMAL);
+
+    return lyt;
+};
+/**
+ * This layout represents a crossing gate, as proposed in the paper titled \"Hexagons are the Bestagons: Design
+ * Automation for Silicon Dangling Bond Logic\" authored by Marcel Walter, Samuel Sze Hang Ng, Konrad Walus, and Robert
+ * Wille.
+ *
+ * (https://github.com/cda-tum/mnt-bestagon-library)
+ */
+template <typename Lyt>
+Lyt bestagon_crossing() noexcept
+{
+    static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+
+    Lyt lyt{};
+
+    lyt.assign_cell_type({0, 0, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({38, 0, 0}, Lyt::cell_type::INPUT);
+
+    lyt.assign_cell_type({36, 1, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({2, 1, 0}, Lyt::cell_type::INPUT);
+
+    lyt.assign_cell_type({6, 2, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({32, 2, 0}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({8, 3, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({30, 3, 0}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({14, 5, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 5, 0}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({12, 4, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({26, 4, 0}, Lyt::cell_type::NORMAL);
+
+    // canvas SiDBs
+    lyt.assign_cell_type({20, 8, 0}, Lyt::cell_type::LOGIC);
+    lyt.assign_cell_type({14, 9, 0}, Lyt::cell_type::LOGIC);
+    lyt.assign_cell_type({18, 9, 0}, Lyt::cell_type::LOGIC);
+    lyt.assign_cell_type({14, 11, 1}, Lyt::cell_type::LOGIC);
+    lyt.assign_cell_type({20, 12, 0}, Lyt::cell_type::LOGIC);
+    lyt.assign_cell_type({24, 13, 1}, Lyt::cell_type::LOGIC);
+    lyt.assign_cell_type({16, 13, 1}, Lyt::cell_type::LOGIC);
+
+    lyt.assign_cell_type({14, 15, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 15, 0}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({12, 16, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({26, 16, 0}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({8, 17, 0}, Lyt::cell_type::OUTPUT);
+    lyt.assign_cell_type({30, 17, 0}, Lyt::cell_type::OUTPUT);
+
+    lyt.assign_cell_type({6, 18, 0}, Lyt::cell_type::OUTPUT);
+    lyt.assign_cell_type({32, 18, 0}, Lyt::cell_type::OUTPUT);
+
+    lyt.assign_cell_type({2, 19, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({36, 19, 0}, Lyt::cell_type::NORMAL);
+
+    return lyt;
+};
+
+template <typename Lyt>
+Lyt crossing_bestagon_shape_input_down_output_up() noexcept
+{
+    static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+
+    Lyt lyt{};
+
+    // input wires
+    lyt.assign_cell_type({36, 1, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({2, 1, 0}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({6, 2, 0}, Lyt::cell_type::OUTPUT);
+    lyt.assign_cell_type({32, 2, 0}, Lyt::cell_type::OUTPUT);
+
+    lyt.assign_cell_type({8, 3, 0}, Lyt::cell_type::OUTPUT);
+    lyt.assign_cell_type({30, 3, 0}, Lyt::cell_type::OUTPUT);
+
+    lyt.assign_cell_type({14, 5, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 5, 0}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({12, 4, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({26, 4, 0}, Lyt::cell_type::NORMAL);
+
+    // canvas SiDBs
+    lyt.assign_cell_type({19, 7, 0}, Lyt::cell_type::LOGIC);
+    lyt.assign_cell_type({16, 10, 1}, Lyt::cell_type::LOGIC);
+    lyt.assign_cell_type({17, 12, 0}, Lyt::cell_type::LOGIC);
+
+    // output wires
+    lyt.assign_cell_type({14, 15, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 15, 0}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({12, 16, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({26, 16, 0}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({8, 17, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({30, 17, 0}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({6, 18, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({32, 18, 0}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({2, 19, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({36, 19, 0}, Lyt::cell_type::INPUT);
+
+    lyt.assign_cell_type({0, 20, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({38, 20, 0}, Lyt::cell_type::INPUT);
+
+    return lyt;
+};
+
+/**
+ * This layout represents an AND gate, as proposed in the paper titled \"Hexagons are the Bestagons: Design
+ * Automation for Silicon Dangling Bond Logic\" authored by Marcel Walter, Samuel Sze Hang Ng, Konrad Walus, and Robert
+ * Wille.
+ *
+ * (https://github.com/cda-tum/mnt-bestagon-library)
+ */
+template <typename Lyt>
+Lyt bestagon_and() noexcept
+{
+    static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+
+    Lyt lyt{};
+
+    lyt.assign_cell_type({0, 0, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({38, 0, 0}, Lyt::cell_type::INPUT);
+
+    lyt.assign_cell_type({2, 1, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({36, 1, 0}, Lyt::cell_type::INPUT);
+
+    lyt.assign_cell_type({32, 2, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 2, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({30, 3, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 3, 0}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({26, 4, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 4, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 5, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 5, 0}, Lyt::cell_type::NORMAL);
+
+    // canvas SiDBs
+    lyt.assign_cell_type({19, 8, 0}, Lyt::cell_type::LOGIC);
+    lyt.assign_cell_type({23, 9, 0}, Lyt::cell_type::LOGIC);
+    lyt.assign_cell_type({18, 9, 0}, Lyt::cell_type::LOGIC);
+    lyt.assign_cell_type({18, 11, 1}, Lyt::cell_type::LOGIC);
+
+    lyt.assign_cell_type({19, 13, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({20, 14, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 15, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({26, 16, 0}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({30, 17, 0}, Lyt::cell_type::OUTPUT);
+    lyt.assign_cell_type({32, 18, 0}, Lyt::cell_type::OUTPUT);
+
+    lyt.assign_cell_type({36, 19, 0}, Lyt::cell_type::NORMAL);
+
+    return lyt;
+};
+
+/**
+ * This layout represents a FO2 gate, as proposed in the paper titled \"Hexagons are the Bestagons: Design
+ * Automation for Silicon Dangling Bond Logic\" authored by Marcel Walter, Samuel Sze Hang Ng, Konrad Walus, and Robert
+ * Wille.
+ *
+ * (https://github.com/cda-tum/mnt-bestagon-library)
+ */
+template <typename Lyt>
+Lyt bestagon_fo2() noexcept
+{
+    static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+
+    Lyt lyt{};
+
+    lyt.assign_cell_type({0, 0, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({2, 1, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({12, 4, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 2, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 3, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({19, 7, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 5, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({18, 6, 0}, Lyt::cell_type::NORMAL);
+
+    // canvas SiDBs
+    lyt.assign_cell_type({21, 11, 1}, Lyt::cell_type::LOGIC);
+    lyt.assign_cell_type({17, 11, 0}, Lyt::cell_type::LOGIC);
+    lyt.assign_cell_type({18, 13, 0}, Lyt::cell_type::LOGIC);
+
+    lyt.assign_cell_type({24, 15, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({26, 16, 0}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({12, 16, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 15, 0}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({8, 17, 0}, Lyt::cell_type::OUTPUT);
+    lyt.assign_cell_type({6, 18, 0}, Lyt::cell_type::OUTPUT);
+
+    lyt.assign_cell_type({30, 17, 0}, Lyt::cell_type::OUTPUT);
+    lyt.assign_cell_type({32, 18, 0}, Lyt::cell_type::OUTPUT);
+
+    lyt.assign_cell_type({36, 19, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({2, 19, 0}, Lyt::cell_type::NORMAL);
+
+    return lyt;
+};
+
+/**
+ * This layout represents an 2-input-2-output Bestagon skeleton, as proposed in the paper titled \"Hexagons are the
+ * Bestagons: Design Automation for Silicon Dangling Bond Logic\" authored by Marcel Walter, Samuel Sze Hang Ng, Konrad
+ * Walus, and Robert Wille.
+ *
+ * (https://github.com/cda-tum/mnt-bestagon-library)
+ */
+template <typename Lyt>
+Lyt two_input_two_output_bestagon_skeleton() noexcept
+{
+    static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+
+    Lyt lyt{};
+
+    // input wires
+    lyt.assign_cell_type({0, 0, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({38, 0, 0}, Lyt::cell_type::INPUT);
+
+    lyt.assign_cell_type({36, 1, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({2, 1, 0}, Lyt::cell_type::INPUT);
+
+    lyt.assign_cell_type({6, 2, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({32, 2, 0}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({8, 3, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({30, 3, 0}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({14, 5, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 5, 0}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({12, 4, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({26, 4, 0}, Lyt::cell_type::NORMAL);
+
+    // output wires
+    lyt.assign_cell_type({14, 15, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 15, 0}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({12, 16, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({26, 16, 0}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({8, 17, 0}, Lyt::cell_type::OUTPUT);
+    lyt.assign_cell_type({30, 17, 0}, Lyt::cell_type::OUTPUT);
+
+    lyt.assign_cell_type({6, 18, 0}, Lyt::cell_type::OUTPUT);
+    lyt.assign_cell_type({32, 18, 0}, Lyt::cell_type::OUTPUT);
+
+    lyt.assign_cell_type({2, 19, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({36, 19, 0}, Lyt::cell_type::NORMAL);
+
+    return lyt;
+};
+
+/**
+ * This layout represents an 2-input-2-output Bestagon skeleton with output at the top and input at the bottom.
+ *
+ * (https://github.com/cda-tum/mnt-bestagon-library)
+ */
+template <typename Lyt>
+Lyt two_input_two_output_bestagon_skeleton_input_down_output_up() noexcept
+{
+    static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+
+    Lyt lyt{};
+
+    // input wires
+    lyt.assign_cell_type({36, 1, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({2, 1, 0}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({6, 2, 0}, Lyt::cell_type::OUTPUT);
+    lyt.assign_cell_type({32, 2, 0}, Lyt::cell_type::OUTPUT);
+
+    lyt.assign_cell_type({8, 3, 0}, Lyt::cell_type::OUTPUT);
+    lyt.assign_cell_type({30, 3, 0}, Lyt::cell_type::OUTPUT);
+
+    lyt.assign_cell_type({14, 5, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 5, 0}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({12, 4, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({26, 4, 0}, Lyt::cell_type::NORMAL);
+
+    // output wires
+    lyt.assign_cell_type({14, 15, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 15, 0}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({12, 16, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({26, 16, 0}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({8, 17, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({30, 17, 0}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({6, 18, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({32, 18, 0}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({2, 19, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({36, 19, 0}, Lyt::cell_type::INPUT);
+
+    lyt.assign_cell_type({0, 20, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({38, 20, 0}, Lyt::cell_type::INPUT);
+
+    return lyt;
+};
+
+/**
+ * This layout represents an 2-input-1-output Bestagon skeleton, as proposed in the paper titled \"Hexagons are the
+ * Bestagons: Design Automation for Silicon Dangling Bond Logic\" authored by Marcel Walter, Samuel Sze Hang Ng, Konrad
+ * Walus, and Robert Wille.
+ *
+ * (https://github.com/cda-tum/mnt-bestagon-library)
+ */
+template <typename Lyt>
+Lyt two_input_one_output_bestagon_skeleton() noexcept
+{
+    static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+
+    Lyt lyt{};
+
+    // input wires
+    lyt.assign_cell_type({0, 0, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({38, 0, 0}, Lyt::cell_type::INPUT);
+
+    lyt.assign_cell_type({2, 1, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({36, 1, 0}, Lyt::cell_type::INPUT);
+
+    lyt.assign_cell_type({32, 2, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 2, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({30, 3, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 3, 0}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({26, 4, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 4, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 5, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 5, 0}, Lyt::cell_type::NORMAL);
+
+    // output wire
+    lyt.assign_cell_type({19, 13, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({20, 14, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 15, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({26, 16, 0}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({30, 17, 0}, Lyt::cell_type::OUTPUT);
+    lyt.assign_cell_type({32, 18, 0}, Lyt::cell_type::OUTPUT);
+
+    lyt.assign_cell_type({36, 19, 0}, Lyt::cell_type::NORMAL);
+
+    return lyt;
+};
+
+/**
+ * This layout represents an AND gate with the typical Bestagon skeleton. However, it shows kinks in the I/O pins for
+ * certain input pattern.
+ */
+template <typename Lyt>
+Lyt and_gate_with_kink_states() noexcept
+{
+    static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+
+    Lyt lyt{};
+
+    // input wires
+    lyt.assign_cell_type({0, 0, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({38, 0, 0}, Lyt::cell_type::INPUT);
+
+    lyt.assign_cell_type({2, 1, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({36, 1, 0}, Lyt::cell_type::INPUT);
+
+    lyt.assign_cell_type({32, 2, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 2, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({30, 3, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 3, 0}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({26, 4, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 4, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 5, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 5, 0}, Lyt::cell_type::NORMAL);
+
+    // canvas SiDBs
+    lyt.assign_cell_type({19, 7, 0}, Lyt::cell_type::LOGIC);
+    lyt.assign_cell_type({17, 11, 0}, Lyt::cell_type::LOGIC);
+    lyt.assign_cell_type({21, 10, 0}, Lyt::cell_type::LOGIC);
+
+    // output wire
+    lyt.assign_cell_type({19, 13, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({20, 14, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 15, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({26, 16, 0}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({30, 17, 0}, Lyt::cell_type::OUTPUT);
+    lyt.assign_cell_type({32, 18, 0}, Lyt::cell_type::OUTPUT);
+
+    lyt.assign_cell_type({36, 19, 0}, Lyt::cell_type::NORMAL);
+
+    return lyt;
+};
+
+/**
+ * This layout represents an SiDB skeleton with a Bestagon shape.
+ * The layout features input on the left side and output on the right-top.
+ */
+template <typename Lyt>
+Lyt two_input_left_one_output_right_top_skeleton() noexcept
+{
+    static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+
+    Lyt lyt{};
+
+    // first input wire
+    lyt.assign_cell_type({0, 0, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({2, 1, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({6, 2, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 3, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 4, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 5, 0}, Lyt::cell_type::NORMAL);
+
+    // second input wire
+    lyt.assign_cell_type({0, 15, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({2, 14, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({6, 13, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 12, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 11, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 10, 0}, Lyt::cell_type::NORMAL);
+
+    // output wire
+    lyt.assign_cell_type({26, 5, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({28, 4, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({32, 3, 0}, Lyt::cell_type::OUTPUT);
+    lyt.assign_cell_type({34, 2, 0}, Lyt::cell_type::OUTPUT);
+
+    lyt.assign_cell_type({38, 1, 0}, Lyt::cell_type::NORMAL);
 
     return lyt;
 };
@@ -1039,6 +1541,52 @@ Lyt bestagon_ha() noexcept
 
     lyt.assign_cell_type({2, 19, 0}, Lyt::cell_type::NORMAL);
     lyt.assign_cell_type({36, 19, 0}, Lyt::cell_type::NORMAL);
+
+    return lyt;
+};
+
+/**
+ * This layout represents a 2-input-1-output skeleton, where one input and output wire have a port direction to the
+ * west.
+ */
+template <typename Lyt>
+Lyt two_input_one_output_skeleton_west_west() noexcept
+{
+    static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
+
+    Lyt lyt{};
+
+    // input wires
+    lyt.assign_cell_type({4, 9, 1}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({1, 9, 1}, Lyt::cell_type::INPUT);
+
+    lyt.assign_cell_type({14, 0, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({16, 1, 0}, Lyt::cell_type::INPUT);
+
+    lyt.assign_cell_type({26, 4, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({28, 5, 0}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({19, 9, 1}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({16, 9, 1}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({11, 9, 1}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 9, 1}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({36, 9, 1}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({39, 9, 1}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({44, 9, 1}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({47, 9, 1}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({22, 3, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({20, 2, 0}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({52, 9, 1}, Lyt::cell_type::OUTPUT);
+    lyt.assign_cell_type({55, 9, 1}, Lyt::cell_type::OUTPUT);
+
+    lyt.assign_cell_type({60, 9, 1}, Lyt::cell_type::NORMAL);
 
     return lyt;
 };

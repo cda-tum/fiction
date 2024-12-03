@@ -304,7 +304,11 @@ struct sidb_technology
         /**
          * Symbol used for output SiDB cells.
          */
-        OUTPUT = 'o'
+        OUTPUT = 'o',
+        /**
+         * Symbol used for logic SiDB cells (e.g. canvas SiDBs).
+         */
+        LOGIC = 'l'
     };
 
     /**
@@ -319,7 +323,8 @@ struct sidb_technology
     {
         EMPTY  = cell_type::EMPTY,
         INPUT  = cell_type::INPUT,
-        OUTPUT = cell_type::OUTPUT
+        OUTPUT = cell_type::OUTPUT,
+        LOGIC  = cell_type::LOGIC
     };
 
     [[nodiscard]] static constexpr bool is_empty_cell(const cell_type& c) noexcept
@@ -340,6 +345,11 @@ struct sidb_technology
     [[nodiscard]] static constexpr bool is_output_cell(const cell_type& c) noexcept
     {
         return c == OUTPUT;
+    }
+
+    [[nodiscard]] static constexpr bool is_logic_cell(const cell_type& c) noexcept
+    {
+        return c == LOGIC;
     }
 
     [[nodiscard]] static constexpr bool is_normal_cell_mode([[maybe_unused]] const cell_mode& m) noexcept

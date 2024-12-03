@@ -9,13 +9,14 @@
 
 #include "fiction/algorithms/iter/aspect_ratio_iterator.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
-#include "fiction/layouts/coordinates.hpp"
+#include "fiction/traits.hpp"
 #include "fiction/utils/name_utils.hpp"
 #include "utils/mugen_info.hpp"
 
 #include <kitty/dynamic_truth_table.hpp>
 #include <kitty/print.hpp>
 #include <mockturtle/algorithms/simulation.hpp>
+#include <mockturtle/traits.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 
 #if (PROGRESS_BARS)
@@ -23,16 +24,19 @@
 #endif
 
 #include <algorithm>
+#include <cassert>
 #include <chrono>
+#include <cstddef>
+#include <cstdint>
 #include <exception>
-#include <functional>
 #include <iostream>
 #include <iterator>
 #include <limits>
 #include <map>
-#include <memory>
 #include <optional>
+#include <string>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 
 // pybind11 has quite some warnings in its code; let's silence them a little
@@ -45,7 +49,10 @@
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #pragma GCC diagnostic ignored "-Wrange-loop-analysis"
 #pragma warning(push, 0)  // MSVC
+#include <pybind11/cast.h>
 #include <pybind11/embed.h>
+#include <pybind11/eval.h>
+#include <pybind11/pytypes.h>
 #pragma GCC diagnostic pop  // GCC
 #pragma warning(pop)        // MSVC
 
@@ -158,7 +165,7 @@ class mugen_handler
      * Standard constructor.
      *
      * @param spec The Boolean functions to synthesize.
-     * @param lyt Reference to an empty layout that serves as a floor plan for S&P&R by Mugen.
+     * @param sketch Reference to an empty layout that serves as a floor plan for S&P&R by Mugen.
      * @param p The configurations to respect in the SAT instance generation process.
      */
     mugen_handler(const std::vector<TT>& spec, Lyt& sketch, one_pass_synthesis_params p) :
@@ -363,8 +370,7 @@ class mugen_handler
         // set up the iterator to skip the PIs
         auto pi_it_end = nodes.begin();
         // use std::advance because there is no 'operator+' overload
-        std::advance(pi_it_end,
-                     static_cast<typename std::iterator_traits<decltype(pi_it_end)>::difference_type>(num_pis + 1));
+        std::advance(pi_it_end, static_cast<std::iterator_traits<decltype(pi_it_end)>::difference_type>(num_pis));
 
         return pi_it_end;
     }
@@ -779,10 +785,23 @@ class one_pass_synthesis_impl
                     update_timeout(handler, pst.time_total);
                 }
             }
-            // timeout reached
+            catch (const pybind11::error_already_set& e)
+            {
+                // timeout reached
+                if (e.matches(PyExc_TimeoutError))
+                {
+                    return std::nullopt;
+                }
+
+                // unexpected error
+                std::cout << "[e] something unexpected happened in Python; this needs investigation" << std::endl;
+                throw;
+            }
+            // unexpected exception
             catch (...)
             {
-                return std::nullopt;
+                std::cout << "[e] something unexpected happened; this needs investigation" << std::endl;
+                throw;
             }
         }
 

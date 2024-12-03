@@ -149,7 +149,8 @@ Temperature Behavior
         **Header:** ``fiction/algorithms/simulation/sidb/calculate_energy_and_state_type.hpp``
 
         .. doxygentypedef:: fiction::sidb_energy_and_state_type
-        .. doxygenfunction:: fiction::calculate_energy_and_state_type
+        .. doxygenfunction:: fiction::calculate_energy_and_state_type_with_kinks_accepted
+        .. doxygenfunction:: fiction::calculate_energy_and_state_type_with_kinks_rejected
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.simulation_engine
@@ -162,7 +163,8 @@ Temperature Behavior
         .. autofunction:: mnt.pyfiction.occupation_probability_gate_based
         .. autofunction:: mnt.pyfiction.occupation_probability_non_gate_based
 
-        .. autofunction:: mnt.pyfiction.calculate_energy_and_state_type
+        .. autofunction:: mnt.pyfiction.calculate_energy_and_state_type_with_kinks_accepted
+        .. autofunction:: mnt.pyfiction.calculate_energy_and_state_type_with_kinks_rejected
 
 
 Maximum Defect Influence Distance
@@ -228,10 +230,13 @@ Operational Domain Computation
         **Header:** ``fiction/algorithms/simulation/sidb/is_operational.hpp``
 
         .. doxygenenum:: fiction::operational_status
+        .. doxygenenum:: fiction::operational_condition
         .. doxygenstruct:: fiction::is_operational_params
            :members:
         .. doxygenfunction:: fiction::is_operational
         .. doxygenfunction:: fiction::operational_input_patterns
+        .. doxygenfunction:: fiction::is_kink_induced_non_operational
+        .. doxygenfunction:: fiction::kink_induced_non_operational_input_patterns
 
         **Header:** ``fiction/algorithms/simulation/sidb/operational_domain.hpp``
 
@@ -258,13 +263,21 @@ Operational Domain Computation
            :members:
         .. doxygenfunction:: fiction::compute_operational_ratio
 
+        **Header:** ``fiction/algorithms/simulation/sidb/verify_logic_match.hpp``
+
+        .. doxygenfunction:: fiction::verify_logic_match
+
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.operational_status
+            :members:
+        .. autoclass:: mnt.pyfiction.operational_condition
             :members:
         .. autoclass:: mnt.pyfiction.is_operational_params
             :members:
         .. autofunction:: mnt.pyfiction.is_operational
         .. autofunction:: mnt.pyfiction.operational_input_patterns
+        .. autofunction:: mnt.pyfiction.is_kink_induced_non_operational
+        .. autofunction:: mnt.pyfiction.kink_induced_non_operational_input_patterns
 
         .. autoclass:: mnt.pyfiction.sweep_parameter
             :members:
@@ -310,6 +323,8 @@ Displacement Robustness Domain
     .. tab:: C++
         **Header:** ``fiction/algorithms/simulation/sidb/determine_displacement_robustness.hpp``
 
+        .. doxygenstruct:: fiction::displacement_robustness_domain
+           :members:
         .. doxygenstruct:: fiction::displacement_robustness_domain_params
            :members:
         .. doxygenstruct:: fiction::displacement_robustness_domain_stats
@@ -373,6 +388,7 @@ Charge Detection
     .. tab:: Python
         .. autofunction:: mnt.pyfiction.can_positive_charges_occur
 
+
 Binary-dot Logic (BDL) Pair Detection
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -392,6 +408,33 @@ Binary-dot Logic (BDL) Pair Detection
         .. autoclass:: mnt.pyfiction.detect_bdl_pairs_params
             :members:
         .. autofunction:: mnt.pyfiction.detect_bdl_pairs
+
+
+Binary-dot Logic (BDL) Wire Detection
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. tabs::
+    .. tab:: C++
+        **Header:** ``fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp``
+
+        .. doxygenenum:: fiction::bdl_wire_selection
+        .. doxygenstruct:: fiction::detect_bdl_wires_params
+           :members:
+        .. doxygenstruct:: fiction::bdl_wire
+           :members:
+        .. doxygenfunction:: fiction::detect_bdl_wires
+
+    .. tab:: Python
+        .. autoclass:: mnt.pyfiction.bdl_wire_selection
+            :members:
+        .. autoclass:: mnt.pyfiction.detect_bdl_wires_params
+            :members:
+        .. autoclass:: mnt.pyfiction.bdl_wire_100
+            :members:
+        .. autoclass:: mnt.pyfiction.bdl_wire_111
+            :members:
+        .. autofunction:: mnt.pyfiction.detect_bdl_wires_100
+        .. autofunction:: mnt.pyfiction.detect_bdl_wires_111
 
 
 Assess Population Stability
@@ -416,6 +459,7 @@ Assess Population Stability
         .. autoclass:: mnt.pyfiction.assess_physical_population_stability_params
             :members:
         .. autofunction:: mnt.pyfiction.assess_physical_population_stability
+
 
 Convert Potential to Distance
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

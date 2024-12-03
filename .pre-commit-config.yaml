@@ -11,7 +11,7 @@ ci:
   autoupdate_commit_msg: "⬆️ Bump pre-commit hooks"
   autofix_commit_msg: "🎨 Incorporated pre-commit fixes"
 
-exclude: "^libs/|^benchmarks/|bindings/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp"
+exclude: "^libs/|^benchmarks/|bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp"
 
 repos:
   # Standard hooks
@@ -46,7 +46,7 @@ repos:
 
   # clang-format the C++ part of the code base
   - repo: https://github.com/pre-commit/mirrors-clang-format
-    rev: v19.1.1
+    rev: v19.1.4
     hooks:
       - id: clang-format
         types_or: [ c++, c ]

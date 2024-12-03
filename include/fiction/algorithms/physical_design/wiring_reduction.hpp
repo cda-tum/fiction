@@ -19,16 +19,31 @@
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 
+#include <chrono>
 #include <cmath>
 #include <cstdint>
 #include <functional>
 #include <iostream>
+#include <limits>
 #include <ostream>
 #include <utility>
 #include <vector>
 
 namespace fiction
 {
+
+/**
+ * Parameters for the wiring reduction algorithm.
+ */
+struct wiring_reduction_params
+{
+    /**
+     * Timeout limit (in ms). Specifies the maximum allowed time in milliseconds for the optimization process. For large
+     * layouts, the actual execution time may slightly exceed this limit because it's impractical to check the timeout
+     * at every algorithm step and the functional correctness has to be ensured by completing essential algorithm steps.
+     */
+    uint64_t timeout = std::numeric_limits<uint64_t>::max();
+};
 
 /**
  * This struct stores statistics about the wiring reduction process.
@@ -1022,19 +1037,22 @@ void delete_wires(Lyt& lyt, WiringReductionLyt& wiring_reduction_layout,
     }
 
     // calculate bounding box for optimized layout size
-    const auto bounding_box            = bounding_box_2d(lyt);
-    const auto optimized_layout_width  = bounding_box.get_x_size();
-    const auto optimized_layout_height = bounding_box.get_y_size();
+    const auto bounding_box = bounding_box_2d(lyt);
 
     // resize the layout to the optimized size
-    lyt.resize({optimized_layout_width, optimized_layout_height, lyt.z()});
+    lyt.resize({bounding_box.get_max().x, bounding_box.get_max().y, lyt.z()});
 }
 
 template <typename Lyt>
 class wiring_reduction_impl
 {
   public:
-    wiring_reduction_impl(const Lyt& lyt, wiring_reduction_stats& st) : plyt{lyt}, pst{st} {}
+    wiring_reduction_impl(const Lyt& lyt, const wiring_reduction_params& p, wiring_reduction_stats& st) :
+            plyt{lyt},
+            ps{p},
+            pst{st},
+            start{std::chrono::high_resolution_clock::now()}
+    {}
 
     void run()
     {
@@ -1044,54 +1062,97 @@ class wiring_reduction_impl
         // measure run time
         mockturtle::stopwatch stop{pst.time_total};
 
+        // record initial layout statistics
         pst.num_wires_before = plyt.num_wires() - plyt.num_pis() - plyt.num_pos();
         pst.x_size_before    = plyt.x() + 1;
         pst.y_size_before    = plyt.y() + 1;
 
+        // create an obstruction layout based on the original layout
         auto layout = obstruction_layout<Lyt>(plyt);
 
+        // initialize the list of wires to delete
         layout_coordinate_path<wiring_reduction_layout_type<coordinate<Lyt>>> to_delete = {};
 
         bool found_wires = true;
 
-        // perform wiring reduction iteratively until no further wires can be deleted
-        while (found_wires)
+        // lambda to update the timeout status and calculate remaining time
+        const auto update_timeout = [start = this->start, &ps = this->ps,
+                                     &timeout_limit_reached = this->timeout_limit_reached]() noexcept -> void
         {
-            // continue until no further wires can be deleted
+            const auto current_time = std::chrono::high_resolution_clock::now();
+            const auto elapsed_ms   = static_cast<uint64_t>(
+                std::chrono::duration_cast<std::chrono::milliseconds>(current_time - start).count());
+            timeout_limit_reached = (elapsed_ms >= ps.timeout);
+        };
+
+        // perform wiring reduction iteratively until no further wires can be deleted
+        while (found_wires && !timeout_limit_reached)
+        {
             found_wires = false;
 
             for (const auto direction : {search_direction::HORIZONTAL, search_direction::VERTICAL})
             {
+                // update the remaining timeout
+                update_timeout();
+
+                if (timeout_limit_reached)
+                {
+                    break;
+                }
+
+                // create wiring reduction layout for the current direction
                 auto wiring_reduction_lyt = create_wiring_reduction_layout<Lyt>(layout, 1, 1, direction);
                 add_obstructions(wiring_reduction_lyt);
-                to_delete = {};
 
-                // get the initial possible path
+                // update the remaining timeout
+                update_timeout();
+
+                if (timeout_limit_reached)
+                {
+                    break;
+                }
+
+                // reset the list of wires to delete
+                to_delete.clear();
+
+                // get the initial possible path for wire deletion
                 auto possible_path =
                     get_path(wiring_reduction_lyt, {0, 0}, {wiring_reduction_lyt.x(), wiring_reduction_lyt.y()});
 
-                // iterate while there is a possible path
-                while (!possible_path.empty())
+                // iterate while there is a possible path and timeout not reached
+                while (!possible_path.empty() && !timeout_limit_reached)
                 {
+                    // update the list of wires to delete based on the current path
                     update_to_delete_list<Lyt, wiring_reduction_layout_type<coordinate<Lyt>>>(wiring_reduction_lyt,
                                                                                               possible_path, to_delete);
 
-                    // update possible_path for the next iteration
-                    possible_path =
-                        get_path(wiring_reduction_lyt, {0, 0}, {wiring_reduction_lyt.x(), wiring_reduction_lyt.y()});
+                    // update the remaining timeout after processing the path
+                    update_timeout();
+
+                    if (!timeout_limit_reached)
+                    {
+                        // get the next possible path for wire deletion
+                        possible_path = get_path(wiring_reduction_lyt, {0, 0},
+                                                 {wiring_reduction_lyt.x(), wiring_reduction_lyt.y()});
+                    }
                 }
 
                 if (!to_delete.empty())
                 {
-                    // calculate offset matrix and delete wires based on to-delete list
+                    // delete the identified wires from the layout
                     delete_wires(layout, wiring_reduction_lyt, to_delete);
                     found_wires = true;
                 }
             }
         }
 
-        pst.x_size_after = plyt.x() + 1;
-        pst.y_size_after = plyt.y() + 1;
+        // calculate the final bounding box and resize the layout accordingly
+        const auto bounding_box = bounding_box_2d(layout);
+        layout.resize({bounding_box.get_max().x, bounding_box.get_max().y, layout.z()});
+
+        // update final layout statistics
+        pst.x_size_after = layout.x() + 1;
+        pst.y_size_after = layout.y() + 1;
 
         const uint64_t area_before = pst.x_size_before * pst.y_size_before;
         const uint64_t area_after  = pst.x_size_after * pst.y_size_after;
@@ -1099,15 +1160,17 @@ class wiring_reduction_impl
         double area_percentage_difference =
             static_cast<double>(area_before - area_after) / static_cast<double>(area_before) * 100.0;
 
-        area_percentage_difference = std::round(area_percentage_difference * 100) / 100;
+        // round the area improvement to two decimal places
+        area_percentage_difference = std::round(area_percentage_difference * 100.0) / 100.0;
 
         pst.area_improvement = area_percentage_difference;
-        pst.num_wires_after  = plyt.num_wires() - plyt.num_pis() - plyt.num_pos();
+        pst.num_wires_after  = layout.num_wires() - layout.num_pis() - layout.num_pos();
 
         double wiring_percentage_difference = static_cast<double>(pst.num_wires_before - pst.num_wires_after) /
                                               static_cast<double>(pst.num_wires_before) * 100.0;
 
-        wiring_percentage_difference = std::round(wiring_percentage_difference * 100) / 100;
+        // round the wiring improvement to two decimal places
+        wiring_percentage_difference = std::round(wiring_percentage_difference * 100.0) / 100.0;
         pst.wiring_improvement       = wiring_percentage_difference;
     }
 
@@ -1117,9 +1180,21 @@ class wiring_reduction_impl
      */
     const Lyt& plyt;
     /**
+     * Wiring reduction parameters.
+     */
+    wiring_reduction_params ps;
+    /**
      * Statistics about the wiring_reduction process.
      */
     wiring_reduction_stats& pst;
+    /**
+     * Timeout limit reached.
+     */
+    bool timeout_limit_reached = false;
+    /**
+     * Start time.
+     */
+    std::chrono::time_point<std::chrono::high_resolution_clock> start;
 };
 }  // namespace detail
 
@@ -1136,10 +1211,11 @@ class wiring_reduction_impl
  *
  * @tparam Lyt Cartesian gate-level layout type.
  * @param lyt The 2DDWave-clocked layout whose wiring is to be reduced.
- * @param pst Pointer to a `wiring_reduction_stats` object to record runtime statistics.
+ * @param ps Parameters.
+ * @param pst Statistics.
  */
 template <typename Lyt>
-void wiring_reduction(const Lyt& lyt, wiring_reduction_stats* pst = nullptr) noexcept
+void wiring_reduction(const Lyt& lyt, wiring_reduction_params ps = {}, wiring_reduction_stats* pst = nullptr) noexcept
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
@@ -1153,7 +1229,7 @@ void wiring_reduction(const Lyt& lyt, wiring_reduction_stats* pst = nullptr) noe
 
     // initialize stats for runtime measurement
     wiring_reduction_stats             st{};
-    detail::wiring_reduction_impl<Lyt> p{lyt, st};
+    detail::wiring_reduction_impl<Lyt> p{lyt, ps, st};
 
     p.run();
 
