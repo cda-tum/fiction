@@ -921,7 +921,9 @@ class is_operational_impl
     const std::size_t number_of_output_wires;
 
     const std::size_t number_of_input_wires;
-
+    /**
+     * Layout consisting of all canvas SiDBs.
+     */
     Lyt canvas_lyt{};
     /**
      * This function conducts physical simulation of the given layout (gate layout with certain input combination).
@@ -1118,8 +1120,6 @@ is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational
     {
         if (canvas_lyt.has_value())
         {
-            assert(canvas_lyt.value().is_empty() && "canvas_lyt is empty");
-
             detail::is_operational_impl<Lyt, TT> p{
                 lyt, spec, params, input_bdl_wire.value(), output_bdl_wire.value(), canvas_lyt.value()};
 
