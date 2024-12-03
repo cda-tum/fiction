@@ -1618,6 +1618,24 @@ def yen_k_shortest_paths(
 ) -> List[List[cube_coordinate]]: ...
 
 
+# physical design
+
+def apply_qca_one_library(layout: cartesian_gate_layout) -> qca_layout: ...
+
+
+def apply_topolinano_library(layout: shifted_cartesian_gate_layout) -> inml_layout: ...
+
+
+def apply_bestagon_library(layout: hexagonal_gate_layout) -> sidb_layout: ...
+
+
+# properties
+
+def critical_path_length_and_throughput(
+        layout: Union[cartesian_gate_layout, shifted_cartesian_gate_layout, hexagonal_gate_layout]) -> Tuple[
+    int, int]: ...
+
+
 # Technology
 
 @overload
