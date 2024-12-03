@@ -1,4 +1,4 @@
-from mnt.pyfiction import (offset_coordinate, cube_coordinate, siqad_coordinate)
+from mnt.pyfiction import (offset_coordinate, cube_coordinate, siqad_coordinate, area, volume)
 import unittest
 
 
@@ -32,6 +32,10 @@ class TestCoordinates(unittest.TestCase):
 
         self.assertEqual(offset_coordinate(3, 2, 1).__repr__(), "(3,2,1)")
 
+        self.assertEqual(area(offset_coordinate(3, 2)), 12)
+        self.assertEqual(area(offset_coordinate(3, 2, 1)), 12)
+        self.assertEqual(volume(offset_coordinate(3, 2, 1)), 24)
+
     def test_signed_cube_coordinates(self):
         cube_coordinate((1, 0))
         cube_coordinate((1, 0, 0))
@@ -60,6 +64,10 @@ class TestCoordinates(unittest.TestCase):
 
         self.assertEqual(cube_coordinate(3, 2, 1).__repr__(), "(3,2,1)")
 
+        self.assertEqual(area(cube_coordinate(3, 2)), 12)
+        self.assertEqual(area(cube_coordinate(3, 2, 1)), 12)
+        self.assertEqual(volume(cube_coordinate(3, 2, 1)), 24)
+
     def test_signed_siqad_coordinates(self):
         siqad_coordinate((1, 0))
         siqad_coordinate((1, 0, 0))
@@ -87,6 +95,9 @@ class TestCoordinates(unittest.TestCase):
         self.assertTrue(t2 == t1)
 
         self.assertEqual(siqad_coordinate(3, 2, 1).__repr__(), "(3,2,1)")
+
+        self.assertEqual(area(siqad_coordinate(3, 2, 1)), 24)
+        self.assertEqual(volume(siqad_coordinate(3, 2, 1)), 24)
 
 
 if __name__ == '__main__':
