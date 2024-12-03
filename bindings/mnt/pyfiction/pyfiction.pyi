@@ -1452,3 +1452,38 @@ def a_star(
         target: cube_coordinate,
         params: a_star_params
 ) -> List[cube_coordinate]: ...
+
+
+class enumerate_all_paths_params:
+    def __init__(self): ...
+
+    crossings: bool
+
+
+@overload
+def enumerate_all_paths(
+        layout: Union[
+            cartesian_obstruction_layout,
+            cartesian_gate_layout,
+            cartesian_layout,
+            shifted_cartesian_obstruction_layout,
+            shifted_cartesian_gate_layout,
+            shifted_cartesian_layout
+        ],
+        source: offset_coordinate,
+        target: offset_coordinate,
+        params: a_star_params
+) -> List[List[offset_coordinate]]: ...
+
+
+@overload
+def enumerate_all_paths(
+        layout: Union[
+            hexagonal_obstruction_layout,
+            hexagonal_gate_layout,
+            hexagonal_layout
+        ],
+        source: cube_coordinate,
+        target: cube_coordinate,
+        params: a_star_params
+) -> List[List[cube_coordinate]]: ...
