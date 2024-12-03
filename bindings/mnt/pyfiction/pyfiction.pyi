@@ -1472,7 +1472,7 @@ def enumerate_all_paths(
         ],
         source: offset_coordinate,
         target: offset_coordinate,
-        params: a_star_params
+        params: enumerate_all_paths_params
 ) -> List[List[offset_coordinate]]: ...
 
 
@@ -1485,5 +1485,42 @@ def enumerate_all_paths(
         ],
         source: cube_coordinate,
         target: cube_coordinate,
-        params: a_star_params
+        params: enumerate_all_paths_params
+) -> List[List[cube_coordinate]]: ...
+
+
+class yen_k_shortest_paths_params:
+    def __init__(self): ...
+
+    astar_params: a_star_params
+
+
+@overload
+def yen_k_shortest_paths(
+        layout: Union[
+            cartesian_obstruction_layout,
+            cartesian_gate_layout,
+            cartesian_layout,
+            shifted_cartesian_obstruction_layout,
+            shifted_cartesian_gate_layout,
+            shifted_cartesian_layout
+        ],
+        source: offset_coordinate,
+        target: offset_coordinate,
+        k: int,
+        params: yen_k_shortest_paths_params
+) -> List[List[offset_coordinate]]: ...
+
+
+@overload
+def yen_k_shortest_paths(
+        layout: Union[
+            hexagonal_obstruction_layout,
+            hexagonal_gate_layout,
+            hexagonal_layout
+        ],
+        source: cube_coordinate,
+        target: cube_coordinate,
+        k: int,
+        params: yen_k_shortest_paths_params
 ) -> List[List[cube_coordinate]]: ...
