@@ -145,12 +145,13 @@ TEST_CASE("Write multi-dot SQD layout with differing dot types", "[sqd]")
 {
     using sidb_layout = sidb_cell_clk_lyt;
 
-    sidb_layout layout{{4, 4}};
+    sidb_layout layout{{4, 6}};
     layout.assign_cell_type({0, 0}, sidb_technology::cell_type::INPUT);
     layout.assign_cell_type({1, 1}, sidb_technology::cell_type::OUTPUT);
     layout.assign_cell_type({0, 2}, sidb_technology::cell_type::NORMAL);
     layout.assign_cell_type({0, 3}, sidb_technology::cell_type::OUTPUT);
     layout.assign_cell_type({4, 4}, sidb_technology::cell_type::INPUT);
+    layout.assign_cell_type({4, 6}, sidb_technology::cell_type::LOGIC);
 
     std::stringstream layout_stream{};
 

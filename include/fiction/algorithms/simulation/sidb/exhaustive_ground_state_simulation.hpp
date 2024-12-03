@@ -26,7 +26,7 @@ namespace fiction
  * @note This was the first exact simulation approach. However, it is replaced by *QuickExact* due to the much
  * better runtimes and more functionality.
  *
- * @tparam Lyt Cell-level layout type.
+ * @tparam Lyt SiDB cell-level layout type.
  * @param lyt The layout to simulate.
  * @param params Simulation parameters.
  * @param ps Simulation statistics.

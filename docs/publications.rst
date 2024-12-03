@@ -196,6 +196,19 @@ Furthermore, if you use any of the design automation algorithms, please consider
 
     `Post-layout optimization experiment script <https://github.com/cda-tum/fiction/tree/main/experiments/post_layout_optimization>`_
 
+* :ref:`Wiring reduction <wiring_reduction>` (``wiring_reduction``):
+
+    .. code-block:: tex
+
+        @inproceedings{hofmann2024wiring,
+          title = {{Late Breaking Results: Wiring Reduction for Field-coupled Nanotechnologies}},
+          author = {Hofmann, Simon and Walter, Marcel and Wille, Robert},
+          booktitle={Design Automation Conference (DAC)},
+          year = {2024}
+        }
+
+    `Wiring reduction experiment script <https://github.com/cda-tum/fiction/tree/main/experiments/wiring_reduction>`_
+
 * :ref:`Graph-oriented layout design <graph_oriented_layout_design>` (``gold``):
 
     .. code-block:: tex
@@ -223,6 +236,20 @@ Furthermore, if you use any of the design automation algorithms, please consider
         }
 
     `Clock number assignment experiment script <https://github.com/cda-tum/fiction/tree/main/experiments/clock_number_assignment>`_
+
+* :ref:`Towards Defect-Aware Physical Design of Silicon Dangling Bond Logic`:
+
+    .. code-block:: tex
+
+        @inproceedings{walter2024defectaware,
+          title={{Towards Atomic Defect-Aware Physical Design of Silicon Dangling Bond Logic on the H-Si(100)-$2\times1$ Surface}},
+          author={Walter, Marcel and Croshaw, Jeremiah and Hang Ng, Samuel Sze and Walus, Konrad and Wolkow, Robert and Wille, Robert},
+          booktitle={Design, Automation and Test in Europe Conference \& Exhibition (DATE)},
+          pages={1--2},
+          year={2024}
+        }
+
+    `Towards defect-aware physical design of silicon dangling bond logic experiment script <https://github.com/cda-tum/fiction/tree/main/experiments/defect_aware_physical_design>`_
 
 * :ref:`On-the-fly Defect-Aware Design of Circuits <on_the_fly_design>`:
 
