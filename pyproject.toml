@@ -197,45 +197,45 @@ unsafe-fixes = true
 
 [tool.ruff.lint]
 extend-select = [
-#    "A", # flake8-builtins
-#    "ANN", # flake8-annotations
-#    "ARG", # flake8-unused-arguments
-#    "ASYNC", # flake8-async
-#    "B", "B904", # flake8-bugbear
-#    "C4", # flake8-comprehensions
-#    "D", # pydocstyle
-#    "EM", # flake8-errmsg
-#    "EXE", # flake8-executable
-#    "FA", # flake8-future-annotations
-#    "FLY", # flynt
-#    "FURB", # refurb
-#    "I", # isort
-#    "ICN", # flake8-import-conventions
-#    "ISC", # flake8-implicit-str-concat
-#    "LOG", # flake8-logging-format
-#    "N", # flake8-naming
-#    "NPY", # numpy
-#    "PERF", # perflint
-#    "PGH", # pygrep-hooks
-#    "PIE", # flake8-pie
-#    #    "PL", # pylint
-#    "PT", # flake8-pytest-style
-#    "PTH", # flake8-use-pathlib
-#    "PYI", # flake8-pyi
-#    "Q", # flake8-quotes
-#    "RET", # flake8-return
-#    "RSE", # flake8-raise
-#    "RUF", # Ruff-specific
-#    #    "S", # flake8-bandit
-#    "SLF", # flake8-self
-#    "SLOT", # flake8-slots
-#    "SIM", # flake8-simplify
-#    "T20", # flake8-print
-#    "TCH", # flake8-type-checking
-#    "TID251", # flake8-tidy-imports.banned-api
-#    "TRY", # tryceratops
-#    "UP", # pyupgrade
-#    "YTT", # flake8-2020
+    "A", # flake8-builtins
+    "ANN", # flake8-annotations
+    "ARG", # flake8-unused-arguments
+    "ASYNC", # flake8-async
+    "B", "B904", # flake8-bugbear
+    "C4", # flake8-comprehensions
+    # "D", # pydocstyle
+    "EM", # flake8-errmsg
+    "EXE", # flake8-executable
+    "FA", # flake8-future-annotations
+    "FLY", # flynt
+    "FURB", # refurb
+    "I", # isort
+    "ICN", # flake8-import-conventions
+    "ISC", # flake8-implicit-str-concat
+    "LOG", # flake8-logging-format
+    # "N", # flake8-naming
+    "NPY", # numpy
+    "PERF", # perflint
+    "PGH", # pygrep-hooks
+    "PIE", # flake8-pie
+    # "PL", # pylint
+    # "PT", # flake8-pytest-style
+    # "PTH", # flake8-use-pathlib
+    "PYI", # flake8-pyi
+    "Q", # flake8-quotes
+    "RET", # flake8-return
+    "RSE", # flake8-raise
+    "RUF", # Ruff-specific
+    # "S", # flake8-bandit
+    "SLF", # flake8-self
+    "SLOT", # flake8-slots
+    "SIM", # flake8-simplify
+    "T20", # flake8-print
+    "TCH", # flake8-type-checking
+    "TID251", # flake8-tidy-imports.banned-api
+    "TRY", # tryceratops
+    "UP", # pyupgrade
+    "YTT", # flake8-2020
 ]
 
 ignore = [
@@ -249,7 +249,7 @@ ignore = [
 
 [tool.ruff.lint.per-file-ignores]
 "bindings/mnt/pyfiction/test/**" = ["T20", "ANN", "D"]
-"docs/**" = ["T20"]
+"docs/**" = ["T20", "A"]
 "noxfile.py" = ["T20", "TID251"]
 "*.pyi" = ["D418", "PYI021"]  # pydocstyle
 "*.ipynb" = [
