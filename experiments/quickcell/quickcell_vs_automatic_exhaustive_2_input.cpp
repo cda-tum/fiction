@@ -118,7 +118,7 @@ int main()  // NOLINT
 
         params_1_in_1_out_straight.design_mode = design_sidb_gates_params<
             fiction::cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER;
-        params_1_in_1_out_straight.operational_params.op_condition = operational_condition::REJECT_KINKS;
+        params_1_in_1_out_straight.operational_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
 
         if (gate_name == "cx" || gate_name == "ha" || gate_name == "hourglass")
         {
