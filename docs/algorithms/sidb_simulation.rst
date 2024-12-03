@@ -230,7 +230,6 @@ Operational Domain Computation
         **Header:** ``fiction/algorithms/simulation/sidb/is_operational.hpp``
 
         .. doxygenenum:: fiction::operational_status
-        .. doxygenenum:: fiction::operational_condition
         .. doxygenstruct:: fiction::is_operational_params
            :members:
         .. doxygenfunction:: fiction::is_operational
