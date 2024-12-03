@@ -13,4 +13,4 @@ if sys.platform == "win32" and sys.version_info > (3, 8, 0) and "Z3_ROOT" in os.
         os.add_dll_directory(str(bin_path))
 
 modules = glob.glob(join(dirname(__file__), "*.py"))
-__all__ = [basename(f)[:-3] for f in modules if isfile(f) and not f.endswith('__init__.py')]
+__all__ = [basename(f)[:-3] for f in modules if isfile(f) and not f.endswith("__init__.py")]

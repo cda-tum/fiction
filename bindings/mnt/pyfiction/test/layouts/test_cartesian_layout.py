@@ -1,9 +1,8 @@
-from mnt.pyfiction import (cartesian_layout)
+from mnt.pyfiction import cartesian_layout
 import unittest
 
 
 class TestCartesianLayout(unittest.TestCase):
-
     def test_coordinate_iteration(self):
         layout = cartesian_layout((9, 9, 1))
 
@@ -20,5 +19,5 @@ class TestCartesianLayout(unittest.TestCase):
             self.assertIn(t, [(1, 2), (2, 1), (3, 2), (2, 3)])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

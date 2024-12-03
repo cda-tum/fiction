@@ -1,11 +1,19 @@
-from mnt.pyfiction import (sidb_100_lattice, sidb_technology, quicksim_params, sidb_simulation_parameters,
-                           charge_distribution_surface, quicksim, sidb_charge_state, sidb_111_lattice,
-                           charge_distribution_surface_111, determine_groundstate_from_simulation_results)
+from mnt.pyfiction import (
+    sidb_100_lattice,
+    sidb_technology,
+    quicksim_params,
+    sidb_simulation_parameters,
+    charge_distribution_surface,
+    quicksim,
+    sidb_charge_state,
+    sidb_111_lattice,
+    charge_distribution_surface_111,
+    determine_groundstate_from_simulation_results,
+)
 import unittest
 
 
 class TestQuicksim(unittest.TestCase):
-
     def test_perturber_and_sidb_pair(self):
         layout = sidb_100_lattice((10, 10))
         layout.assign_cell_type((0, 1), sidb_technology.cell_type.NORMAL)
@@ -27,7 +35,7 @@ class TestQuicksim(unittest.TestCase):
         self.assertEqual(params_one.alpha, 0.4)
         self.assertEqual(params_one.number_threads, 1)
 
-        cds = charge_distribution_surface(layout)
+        charge_distribution_surface(layout)
 
         result = quicksim(layout, params)
 
@@ -56,7 +64,7 @@ class TestQuicksim(unittest.TestCase):
         self.assertEqual(params.alpha, 0.7)
         self.assertEqual(params.simulation_parameters.mu_minus, -0.32)
 
-        cds = charge_distribution_surface_111(layout)
+        charge_distribution_surface_111(layout)
 
         result = quicksim(layout, params)
 
@@ -72,5 +80,5 @@ class TestQuicksim(unittest.TestCase):
         self.assertEqual(groundstate[0].get_charge_state((3, 0)), sidb_charge_state.NEGATIVE)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

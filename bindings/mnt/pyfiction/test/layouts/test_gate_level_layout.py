@@ -1,17 +1,22 @@
-from mnt.pyfiction import (cartesian_gate_layout, shifted_cartesian_gate_layout, hexagonal_gate_layout,
-                           offset_coordinate, critical_path_length_and_throughput, gate_level_drv_params,
-                           gate_level_drvs)
+from mnt.pyfiction import (
+    cartesian_gate_layout,
+    shifted_cartesian_gate_layout,
+    hexagonal_gate_layout,
+    offset_coordinate,
+    critical_path_length_and_throughput,
+    gate_level_drv_params,
+    gate_level_drvs,
+)
 import unittest
 
 
 class TestCartesianGateLevelLayout(unittest.TestCase):
-
     def test_gate_level_layout_inheritance(self):
-
-        for layout in [cartesian_gate_layout((2, 2, 0), "2DDWave", "Layout"),
-                       shifted_cartesian_gate_layout((2, 2, 0), "2DDWave", "Layout"),
-                       hexagonal_gate_layout((2, 2, 0), "2DDWave", "Layout")]:
-
+        for layout in [
+            cartesian_gate_layout((2, 2, 0), "2DDWave", "Layout"),
+            shifted_cartesian_gate_layout((2, 2, 0), "2DDWave", "Layout"),
+            hexagonal_gate_layout((2, 2, 0), "2DDWave", "Layout"),
+        ]:
             self.assertEqual(layout.incoming_clocked_zones((0, 0)), [])
             self.assertEqual(layout.outgoing_clocked_zones((2, 2)), [])
 
@@ -22,10 +27,11 @@ class TestCartesianGateLevelLayout(unittest.TestCase):
                 self.assertIn(icz, [layout.coord(1, 2), layout.coord(2, 1)])
 
     def test_gate_level_layout_iteration(self):
-
-        for layout in [cartesian_gate_layout((3, 3, 1), "2DDWave", "Layout"),
-                       shifted_cartesian_gate_layout((3, 3, 1), "2DDWave", "Layout"),
-                       hexagonal_gate_layout((3, 3, 1), "2DDWave", "Layout")]:
+        for layout in [
+            cartesian_gate_layout((3, 3, 1), "2DDWave", "Layout"),
+            shifted_cartesian_gate_layout((3, 3, 1), "2DDWave", "Layout"),
+            hexagonal_gate_layout((3, 3, 1), "2DDWave", "Layout"),
+        ]:
             self.assertTrue(layout.is_empty())
 
             # layout creation
@@ -158,10 +164,11 @@ class TestCartesianGateLevelLayout(unittest.TestCase):
             self.assertEqual(gate_level_drvs(layout, drv_params, False), (0, 0))
 
     def test_gate_level_layout_gate_types(self):
-
-        for layout in [cartesian_gate_layout((2, 8, 0), "2DDWave", "Layout"),
-                       shifted_cartesian_gate_layout((2, 8, 0), "2DDWave", "Layout"),
-                       hexagonal_gate_layout((2, 8, 0), "2DDWave", "Layout")]:
+        for layout in [
+            cartesian_gate_layout((2, 8, 0), "2DDWave", "Layout"),
+            shifted_cartesian_gate_layout((2, 8, 0), "2DDWave", "Layout"),
+            hexagonal_gate_layout((2, 8, 0), "2DDWave", "Layout"),
+        ]:
             self.assertTrue(layout.is_empty())
 
             # layout creation
@@ -186,8 +193,8 @@ class TestCartesianGateLevelLayout(unittest.TestCase):
             buf = layout.create_buf(fanout, (2, 7))
 
             # pos
-            f1 = layout.create_po(fanout, "f1", (1, 8))
-            f2 = layout.create_po(buf, "f2", (2, 8))
+            layout.create_po(fanout, "f1", (1, 8))
+            layout.create_po(buf, "f2", (2, 8))
 
             # check gate type
             # pis
@@ -214,9 +221,11 @@ class TestCartesianGateLevelLayout(unittest.TestCase):
             self.assertTrue(layout.is_po(layout.get_node((1, 8))))
             self.assertTrue(layout.is_po(layout.get_node((2, 8))))
 
-        for layout in [cartesian_gate_layout((2, 2, 0), "RES", "Layout"),
-                       shifted_cartesian_gate_layout((2, 2, 0), "RES", "Layout"),
-                       hexagonal_gate_layout((2, 2, 0), "RES", "Layout")]:
+        for layout in [
+            cartesian_gate_layout((2, 2, 0), "RES", "Layout"),
+            shifted_cartesian_gate_layout((2, 2, 0), "RES", "Layout"),
+            hexagonal_gate_layout((2, 2, 0), "RES", "Layout"),
+        ]:
             self.assertTrue(layout.is_empty())
 
             # pis
@@ -228,7 +237,7 @@ class TestCartesianGateLevelLayout(unittest.TestCase):
             maj = layout.create_maj(x1, x2, x3, (1, 1))
 
             # po
-            f1 = layout.create_po(maj, "f1", (1, 2))
+            layout.create_po(maj, "f1", (1, 2))
 
             # check gate type
             # pis
@@ -243,5 +252,5 @@ class TestCartesianGateLevelLayout(unittest.TestCase):
             self.assertTrue(layout.is_po(layout.get_node((1, 2))))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

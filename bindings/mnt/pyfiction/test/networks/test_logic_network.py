@@ -1,4 +1,4 @@
-from mnt.pyfiction import (read_technology_network)
+from mnt.pyfiction import read_technology_network
 import unittest
 import os
 
@@ -6,7 +6,6 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
 class TestLogicNetwork(unittest.TestCase):
-
     def test_read_technology_network(self):
         network = read_technology_network(dir_path + "/../resources/mux21.v")
 
@@ -78,5 +77,5 @@ class TestLogicNetwork(unittest.TestCase):
             self.assertFalse(network.is_nor(i))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -1,9 +1,8 @@
-from mnt.pyfiction import (offset_coordinate, cube_coordinate, siqad_coordinate)
+from mnt.pyfiction import offset_coordinate, cube_coordinate, siqad_coordinate
 import unittest
 
 
 class TestCoordinates(unittest.TestCase):
-
     def test_unsigned_offset_coordinates(self):
         offset_coordinate((1, 0))
         offset_coordinate((1, 0, 0))
@@ -89,5 +88,5 @@ class TestCoordinates(unittest.TestCase):
         self.assertEqual(siqad_coordinate(3, 2, 1).__repr__(), "(3,2,1)")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

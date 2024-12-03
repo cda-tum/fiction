@@ -1,4 +1,4 @@
-from mnt.pyfiction import (read_technology_network, equivalence_checking_stats, equivalence_checking, eq_type)
+from mnt.pyfiction import read_technology_network, equivalence_checking_stats, equivalence_checking, eq_type
 import unittest
 import os
 
@@ -18,5 +18,5 @@ class TestEquivalenceChecking(unittest.TestCase):
         self.assertEqual(stats.counter_example, [True, False])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

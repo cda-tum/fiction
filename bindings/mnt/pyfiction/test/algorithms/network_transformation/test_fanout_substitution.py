@@ -1,5 +1,10 @@
-from mnt.pyfiction import (read_technology_network, is_fanout_substituted, fanout_substitution,
-                           fanout_substitution_params, substitution_strategy)
+from mnt.pyfiction import (
+    read_technology_network,
+    is_fanout_substituted,
+    fanout_substitution,
+    fanout_substitution_params,
+    substitution_strategy,
+)
 import unittest
 import os
 
@@ -38,5 +43,5 @@ class TestFanoutSubstitution(unittest.TestCase):
         self.assertFalse(is_fanout_substituted(substituted_threshold, breadth_params))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

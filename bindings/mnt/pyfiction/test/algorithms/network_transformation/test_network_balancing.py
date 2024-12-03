@@ -23,5 +23,5 @@ class TestNetworkBalancing(unittest.TestCase):
         self.assertTrue(is_balanced(balanced_unify, unify_params))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -1,11 +1,15 @@
 import unittest
 
-from mnt.pyfiction import (sidb_100_lattice, sidb_technology, assess_physical_population_stability_params,
-                           assess_physical_population_stability, sidb_111_lattice)
+from mnt.pyfiction import (
+    sidb_100_lattice,
+    sidb_technology,
+    assess_physical_population_stability_params,
+    assess_physical_population_stability,
+    sidb_111_lattice,
+)
 
 
 class TestAssessPhysicalPopulationStability(unittest.TestCase):
-
     def test_three_DBs_100_lattice(self):
         layout = sidb_100_lattice((2, 3))
         layout.assign_cell_type((0, 1), sidb_technology.cell_type.NORMAL)
@@ -39,5 +43,5 @@ class TestAssessPhysicalPopulationStability(unittest.TestCase):
         self.assertEqual(len(result), 2)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

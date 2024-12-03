@@ -1,13 +1,20 @@
 import unittest
 
-from mnt.pyfiction import (sidb_100_lattice, sidb_technology, displacement_analysis_mode,
-                           displacement_robustness_domain_params, sidb_simulation_parameters, offset_coordinate,
-                           dimer_displacement_policy, displacement_robustness_domain_stats, create_and_tt,
-                           determine_displacement_robustness_domain_100)
+from mnt.pyfiction import (
+    sidb_100_lattice,
+    sidb_technology,
+    displacement_analysis_mode,
+    displacement_robustness_domain_params,
+    sidb_simulation_parameters,
+    offset_coordinate,
+    dimer_displacement_policy,
+    displacement_robustness_domain_stats,
+    create_and_tt,
+    determine_displacement_robustness_domain_100,
+)
 
 
 class TestDisplacementRobustnessDomain(unittest.TestCase):
-
     def test_siqad_and_gate_100_lattice(self):
         layout = sidb_100_lattice((10, 10))
 
@@ -37,9 +44,17 @@ class TestDisplacementRobustnessDomain(unittest.TestCase):
         params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance = 0.2
 
         # only offset_coordinate(4, 5) and offset_coordinate(10,12) are affected by displacement
-        params.fixed_sidbs = {offset_coordinate(0, 1), offset_coordinate(2, 3), offset_coordinate(20, 1),
-                              offset_coordinate(18, 3), offset_coordinate(4, 5), offset_coordinate(14, 7),
-                              offset_coordinate(16, 5), offset_coordinate(10, 14), offset_coordinate(10, 19)}
+        params.fixed_sidbs = {
+            offset_coordinate(0, 1),
+            offset_coordinate(2, 3),
+            offset_coordinate(20, 1),
+            offset_coordinate(18, 3),
+            offset_coordinate(4, 5),
+            offset_coordinate(14, 7),
+            offset_coordinate(16, 5),
+            offset_coordinate(10, 14),
+            offset_coordinate(10, 19),
+        }
 
         params.percentage_of_analyzed_displaced_layouts = 0.1
         params.dimer_policy = dimer_displacement_policy.ALLOW_OTHER_DIMER
@@ -52,5 +67,5 @@ class TestDisplacementRobustnessDomain(unittest.TestCase):
         self.assertEqual(stats.num_non_operational_sidb_displacements + stats.num_operational_sidb_displacements, 8)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

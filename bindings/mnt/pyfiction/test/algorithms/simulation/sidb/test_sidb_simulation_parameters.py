@@ -1,9 +1,8 @@
-from mnt.pyfiction import (sidb_simulation_parameters)
+from mnt.pyfiction import sidb_simulation_parameters
 import unittest
 
 
 class TestSiDBSimulationParameters(unittest.TestCase):
-
     def test_initialization(self):
         params = sidb_simulation_parameters()
 
@@ -14,8 +13,7 @@ class TestSiDBSimulationParameters(unittest.TestCase):
         self.assertEqual(params.base, 3)
 
     def test_custom_initialization(self):
-        params = sidb_simulation_parameters(
-            2, -0.4, 7.1, 10.0)
+        params = sidb_simulation_parameters(2, -0.4, 7.1, 10.0)
 
         # Check if it is initialized correctly.
         self.assertEqual(params.epsilon_r, 7.1)
@@ -24,5 +22,5 @@ class TestSiDBSimulationParameters(unittest.TestCase):
         self.assertEqual(params.base, 2)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

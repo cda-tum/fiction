@@ -1,14 +1,26 @@
-from mnt.pyfiction import (sidb_111_lattice, sidb_100_lattice, sidb_technology, quicksim_params,
-                           sidb_simulation_parameters, time_to_solution_params, time_to_solution,
-                           exact_sidb_simulation_engine, time_to_solution_stats, charge_distribution_surface_100,
-                           charge_distribution_surface_111, quicksim, quickexact_params,
-                           automatic_base_number_detection, quickexact, time_to_solution_for_given_simulation_results)
+from mnt.pyfiction import (
+    sidb_111_lattice,
+    sidb_100_lattice,
+    sidb_technology,
+    quicksim_params,
+    sidb_simulation_parameters,
+    time_to_solution_params,
+    time_to_solution,
+    exact_sidb_simulation_engine,
+    time_to_solution_stats,
+    charge_distribution_surface_100,
+    charge_distribution_surface_111,
+    quicksim,
+    quickexact_params,
+    automatic_base_number_detection,
+    quickexact,
+    time_to_solution_for_given_simulation_results,
+)
 import unittest
 import math
 
 
 class TestTimeToSolution(unittest.TestCase):
-
     def test_one_sidb_100_lattice(self):
         layout = sidb_100_lattice((0, 0))
         layout.assign_cell_type((0, 0), sidb_technology.cell_type.NORMAL)
@@ -83,7 +95,8 @@ class TestTimeToSolution(unittest.TestCase):
         # Calculate time-to-solution using the simulation results
         st = time_to_solution_stats()
         time_to_solution_for_given_simulation_results(
-            simulation_results_quickexact, simulation_results_quicksim, 0.997, st)
+            simulation_results_quickexact, simulation_results_quicksim, 0.997, st
+        )
 
         self.assertGreater(st.time_to_solution, 0.0)
         self.assertGreater(st.mean_single_runtime, 0.0)
@@ -93,10 +106,9 @@ class TestTimeToSolution(unittest.TestCase):
             self.assertAlmostEqual(st.time_to_solution - tts_calculated, 0.0, delta=1e-6)
         elif st.acc != 0.0:
             # To avoid division by zero, ensure st.acc is not 1.0
-            tts_calculated = (st.mean_single_runtime * math.log(1.0 - 0.997) /
-                              math.log(1.0 - st.acc / 100))
+            tts_calculated = st.mean_single_runtime * math.log(1.0 - 0.997) / math.log(1.0 - st.acc / 100)
             self.assertAlmostEqual(st.time_to_solution - tts_calculated, 0.0, delta=1e-6)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

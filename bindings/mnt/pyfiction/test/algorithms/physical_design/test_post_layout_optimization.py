@@ -1,5 +1,12 @@
-from mnt.pyfiction import (read_technology_network, orthogonal, equivalence_checking, eq_type, post_layout_optimization,
-                           post_layout_optimization_params, post_layout_optimization_stats)
+from mnt.pyfiction import (
+    read_technology_network,
+    orthogonal,
+    equivalence_checking,
+    eq_type,
+    post_layout_optimization,
+    post_layout_optimization_params,
+    post_layout_optimization_stats,
+)
 import unittest
 import os
 
@@ -7,7 +14,6 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
 class TestPostLayoutOptimiztaion(unittest.TestCase):
-
     def test_post_layout_optimization_default(self):
         network = read_technology_network(dir_path + "/../../resources/mux21.v")
 
@@ -72,5 +78,5 @@ class TestPostLayoutOptimiztaion(unittest.TestCase):
         self.assertEqual(stats.area_improvement, 50.0)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -1,9 +1,8 @@
-from mnt.pyfiction import (hexagonal_layout)
+from mnt.pyfiction import hexagonal_layout
 import unittest
 
 
 class TestHexagonalLayout(unittest.TestCase):
-
     def test_coordinate_iteration(self):
         layout = hexagonal_layout((9, 9, 1))
 
@@ -20,5 +19,5 @@ class TestHexagonalLayout(unittest.TestCase):
             self.assertIn(t, [(2, 1), (3, 1), (3, 2), (3, 3), (2, 3), (1, 2), (2, 1)])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -53,8 +53,9 @@ class TestBDLInputIterator(unittest.TestCase):
 
         bii = bdl_input_iterator_100(layout)
 
-        self.assertEqual(bii.get_layout().num_cells(),
-                         7)  # 2 inputs (1 already deleted for input pattern 0), 4 normal, 2 outputs
+        self.assertEqual(
+            bii.get_layout().num_cells(), 7
+        )  # 2 inputs (1 already deleted for input pattern 0), 4 normal, 2 outputs
         self.assertEqual(bii.num_input_pairs(), 1)
         self.assertEqual(bii, 0)
 
@@ -108,7 +109,7 @@ class TestBDLInputIterator(unittest.TestCase):
 
         bii = bdl_input_iterator_100(layout)
 
-        for (index, bii_iterator) in enumerate(bii):
+        for index, bii_iterator in enumerate(bii):
             lyt = bii_iterator.get_layout()
             if index == 0:
                 self.assertEqual(lyt.get_cell_type((0, 0, 0)), sidb_technology.cell_type.INPUT)
@@ -144,7 +145,7 @@ class TestBDLInputIterator(unittest.TestCase):
 
         bii = bdl_input_iterator_100(layout)
 
-        for (index, bii_iterator) in enumerate(bii):
+        for index, bii_iterator in enumerate(bii):
             lyt = bii_iterator.get_layout()
             if index == 0:
                 self.assertEqual(lyt.get_cell_type((0, 0, 1)), sidb_technology.cell_type.INPUT)
@@ -178,5 +179,5 @@ class TestBDLInputIterator(unittest.TestCase):
                 break
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

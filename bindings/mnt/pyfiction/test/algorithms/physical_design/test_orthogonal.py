@@ -1,5 +1,11 @@
-from mnt.pyfiction import (read_technology_network, orthogonal, equivalence_checking, eq_type, orthogonal_stats,
-                           orthogonal_params)
+from mnt.pyfiction import (
+    read_technology_network,
+    orthogonal,
+    equivalence_checking,
+    eq_type,
+    orthogonal_stats,
+    orthogonal_params,
+)
 import unittest
 import os
 
@@ -7,7 +13,6 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
 class TestOrthogonalPhysicalDesign(unittest.TestCase):
-
     def test_orthogonal_default(self):
         network = read_technology_network(dir_path + "/../../resources/mux21.v")
         layout = orthogonal(network)
@@ -32,5 +37,5 @@ class TestOrthogonalPhysicalDesign(unittest.TestCase):
         self.assertEqual(equivalence_checking(network, layout), eq_type.STRONG)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

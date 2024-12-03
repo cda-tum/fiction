@@ -1,4 +1,4 @@
-from mnt.pyfiction import (read_technology_network, simulate, exact_params, exact_cartesian)
+from mnt.pyfiction import read_technology_network, simulate, exact_params, exact_cartesian
 import unittest
 import os
 
@@ -6,7 +6,6 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
 class TestLogicSimulation(unittest.TestCase):
-
     def test_logic_simulation(self):
         xor2_net = read_technology_network(dir_path + "/../../resources/xor2.v")
         xnor2_net = read_technology_network(dir_path + "/../../resources/xnor2.v")
@@ -24,5 +23,5 @@ class TestLogicSimulation(unittest.TestCase):
         self.assertEqual(xor_lyt_sim["out"], [False, True, True, False])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

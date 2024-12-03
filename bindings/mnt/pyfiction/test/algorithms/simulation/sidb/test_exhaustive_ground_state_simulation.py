@@ -1,12 +1,18 @@
-from mnt.pyfiction import (sidb_100_lattice, sidb_technology, sidb_simulation_parameters,
-                           charge_distribution_surface_100, exhaustive_ground_state_simulation, sidb_charge_state,
-                           sidb_111_lattice, charge_distribution_surface_111,
-                           determine_groundstate_from_simulation_results)
+from mnt.pyfiction import (
+    sidb_100_lattice,
+    sidb_technology,
+    sidb_simulation_parameters,
+    charge_distribution_surface_100,
+    exhaustive_ground_state_simulation,
+    sidb_charge_state,
+    sidb_111_lattice,
+    charge_distribution_surface_111,
+    determine_groundstate_from_simulation_results,
+)
 import unittest
 
 
 class TestExhaustiveGroundStateSimulation(unittest.TestCase):
-
     def test_perturber_and_sidb_pair(self):
         layout = sidb_100_lattice((10, 10))
         layout.assign_cell_type((0, 1), sidb_technology.cell_type.NORMAL)
@@ -15,7 +21,7 @@ class TestExhaustiveGroundStateSimulation(unittest.TestCase):
 
         params = sidb_simulation_parameters()
 
-        cds = charge_distribution_surface_100(layout)
+        charge_distribution_surface_100(layout)
 
         result = exhaustive_ground_state_simulation(layout, params)
 
@@ -57,5 +63,5 @@ class TestExhaustiveGroundStateSimulation(unittest.TestCase):
         self.assertEqual(groundstate[0].get_charge_state((3, 0)), sidb_charge_state.NEGATIVE)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

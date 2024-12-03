@@ -1,9 +1,8 @@
-from mnt.pyfiction import (sidb_100_lattice, sidb_technology, sidb_111_lattice)
+from mnt.pyfiction import sidb_100_lattice, sidb_technology, sidb_111_lattice
 import unittest
 
 
 class TestSiDBLattice(unittest.TestCase):
-
     def test_qca_cell_layout_inheritance(self):
         layout = sidb_100_lattice((9, 9))
 
@@ -156,5 +155,5 @@ class TestSiDBLattice(unittest.TestCase):
         self.assertFalse(layout.is_empty_cell((4, 2)))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

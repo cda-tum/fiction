@@ -1,12 +1,20 @@
 import unittest
 
-from mnt.pyfiction import (sidb_100_lattice, sidb_technology, design_sidb_gates_params, design_sidb_gates_mode,
-                           sidb_simulation_engine, design_sidb_gates, create_and_tt, sidb_111_lattice,
-                           operational_condition, create_nor_tt)
+from mnt.pyfiction import (
+    sidb_100_lattice,
+    sidb_technology,
+    design_sidb_gates_params,
+    design_sidb_gates_mode,
+    sidb_simulation_engine,
+    design_sidb_gates,
+    create_and_tt,
+    sidb_111_lattice,
+    operational_condition,
+    create_nor_tt,
+)
 
 
 class TestDesignSiDBGates(unittest.TestCase):
-
     def test_siqad_and_gate_skeleton_100(self):
         layout = sidb_100_lattice((20, 20))
 
@@ -142,5 +150,5 @@ class TestDesignSiDBGates(unittest.TestCase):
         self.assertEqual(len(designed_gates), 14)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

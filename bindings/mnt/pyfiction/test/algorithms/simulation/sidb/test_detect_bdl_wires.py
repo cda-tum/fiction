@@ -1,10 +1,15 @@
 import unittest
-from mnt.pyfiction import (sidb_100_lattice, charge_distribution_surface_100, sidb_technology, detect_bdl_wires_params,
-                           detect_bdl_wires_100, bdl_wire_selection)
+from mnt.pyfiction import (
+    sidb_100_lattice,
+    charge_distribution_surface_100,
+    sidb_technology,
+    detect_bdl_wires_params,
+    detect_bdl_wires_100,
+    bdl_wire_selection,
+)
 
 
 class TestDetectBDLWires(unittest.TestCase):
-
     def test_detect_bdl_wires_100_lattice(self):
         lyt = sidb_100_lattice((7, 0))
 
@@ -45,5 +50,5 @@ class TestDetectBDLWires(unittest.TestCase):
         self.assertEqual(len(input_bdl_wires), 1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

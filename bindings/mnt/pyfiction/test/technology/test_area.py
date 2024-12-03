@@ -1,5 +1,5 @@
 import unittest
-from mnt.pyfiction import (qca_layout, inml_layout, sidb_layout, area)
+from mnt.pyfiction import qca_layout, inml_layout, sidb_layout, area
 
 
 class TestArea(unittest.TestCase):
@@ -16,5 +16,5 @@ class TestArea(unittest.TestCase):
         self.assertAlmostEqual(area(lyt), 2.359296)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
