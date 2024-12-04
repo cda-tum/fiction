@@ -89,7 +89,11 @@ class maximum_defect_influence_position_and_distance_impl
     {
         collect_all_defect_cells();
     }
-
+    /**
+     * Determines the maximum defect influence position and distance for the given layout.
+     *
+     * @return A pair containing the maximum defect influence position and the corresponding distance.
+     */
     std::pair<typename Lyt::cell, double> run() noexcept
     {
         if (layout.is_empty())
@@ -221,7 +225,7 @@ class maximum_defect_influence_position_and_distance_impl
     /**
      * Parameters used for the simulation.
      */
-    const maximum_defect_influence_position_and_distance_params& params;
+    const maximum_defect_influence_position_and_distance_params params;
     /**
      * The statistics of the maximum defect influence position.
      */
