@@ -5,7 +5,6 @@
 #ifndef PYFICTION_LOGIC_SIMULATION_HPP
 #define PYFICTION_LOGIC_SIMULATION_HPP
 
-#include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/utils/name_utils.hpp>
@@ -16,6 +15,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
+#include <cassert>
 #include <string>
 #include <unordered_map>
 #include <vector>

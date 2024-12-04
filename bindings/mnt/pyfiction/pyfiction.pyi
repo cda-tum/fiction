@@ -1,4 +1,4 @@
-from typing import overload, Union, List, Optional, Tuple
+from typing import overload, Dict, Union, List, Optional, Tuple
 from enum import Enum
 
 
@@ -1759,6 +1759,22 @@ def critical_path_length_and_throughput(
         layout: Union[cartesian_gate_layout, shifted_cartesian_gate_layout, hexagonal_gate_layout]) -> Tuple[
     int, int]: ...
 
+
+## simulation
+
+### logic
+
+
+@overload
+def simulate(network: technology_network) -> Dict[str, List[bool]]: ...
+
+
+@overload
+def simulate(layout: Union[cartesian_gate_layout, shifted_cartesian_gate_layout, hexagonal_gate_layout]) -> Dict[
+    str, List[bool]]: ...
+
+
+### sidb
 
 # Technology
 
