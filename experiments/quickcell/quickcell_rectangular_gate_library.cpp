@@ -89,7 +89,7 @@ int main()  // NOLINT
     const auto rectangular_1i_top_2o_left_right = read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(
         fmt::format("{}/{}", folder, "rectangular_1i_top_2o_left_right.sqd"));
 
-    constexpr auto num_canvas_sidbs = 3u;
+    constexpr auto num_canvas_sidbs                  = 3u;
     constexpr auto num_canvas_sidbs_2_input_2_output = 4u;
 
     design_sidb_gates_params<fiction::cell<sidb_100_cell_clk_lyt_siqad>> params{
