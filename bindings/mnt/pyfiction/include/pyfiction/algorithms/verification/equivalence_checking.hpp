@@ -72,10 +72,6 @@ inline void equivalence_checking(pybind11::module& m)
                       DOC(fiction_equivalence_checking_stats_counter_example))
         .def_readonly("runtime", &fiction::equivalence_checking_stats::runtime,
                       DOC(fiction_equivalence_checking_stats_duration))
-        .def_readonly("spec_drv_stats", &fiction::equivalence_checking_stats::spec_drv_stats,
-                      DOC(fiction_equivalence_checking_stats_spec_drv_stats))
-        .def_readonly("impl_drv_stats", &fiction::equivalence_checking_stats::impl_drv_stats,
-                      DOC(fiction_equivalence_checking_stats_impl_drv_stats))
 
         ;
 

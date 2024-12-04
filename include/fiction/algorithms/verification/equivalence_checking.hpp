@@ -8,15 +8,14 @@
 #include "fiction/algorithms/properties/critical_path_length_and_throughput.hpp"
 #include "fiction/algorithms/verification/design_rule_violations.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/utils/name_utils.hpp"
 
-#include <fmt/format.h>
 #include <mockturtle/algorithms/equivalence_checking.hpp>
 #include <mockturtle/algorithms/miter.hpp>
 #include <mockturtle/networks/klut.hpp>
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 
+#include <cstdint>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -27,7 +26,7 @@ namespace fiction
 /**
  * The different equivalence types possible.
  */
-enum class eq_type
+enum class eq_type : uint8_t
 {
     /**
      * `Spec` and `Impl` are logically not equivalent OR `Impl` has DRVs.

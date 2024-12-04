@@ -1776,6 +1776,58 @@ def simulate(layout: Union[cartesian_gate_layout, shifted_cartesian_gate_layout,
 
 ### sidb
 
+## verification
+
+class gate_level_drv_params:
+
+    def __init__(self) -> None: ...
+
+    unplaced_nodes: bool
+    placed_dead_nodes: bool
+    non_adjacent_connections: bool
+    missing_connections: bool
+    crossing_gates: bool
+    clocked_data_flow: bool
+    has_io: bool
+    empty_io: bool
+    io_pins: bool
+    border_io: bool
+
+
+def gate_level_drvs(
+        layout: Union[cartesian_gate_layout, shifted_cartesian_gate_layout, hexagonal_gate_layout],
+        params: Optional[gate_level_drv_params] = gate_level_drv_params(),
+        print_report: Optional[bool] = False
+) -> Tuple[int, int]: ...
+
+
+class eq_type(Enum):
+    NO = ...
+    WEAK = ...
+    STRONG = ...
+
+
+class equivalence_checking_stats:
+
+    def __init__(self) -> None: ...
+
+    eq: eq_type
+    tp_spec: int
+    tp_impl: int
+    tp_diff: int
+    counter_example: List[bool]
+    runtime: float
+
+
+def equivalence_checking(
+        specification: Union[
+            technology_network, cartesian_gate_layout, shifted_cartesian_gate_layout, hexagonal_gate_layout],
+        implementation: Union[
+            technology_network, cartesian_gate_layout, shifted_cartesian_gate_layout, hexagonal_gate_layout],
+        statistics: Optional[equivalence_checking_stats] = None
+) -> eq_type: ...
+
+
 # Technology
 
 @overload
