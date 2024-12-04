@@ -7542,7 +7542,13 @@ static const char *__doc_fiction_detail_maximum_defect_influence_position_and_di
 
 static const char *__doc_fiction_detail_maximum_defect_influence_position_and_distance_impl_params = R"doc(Parameters used for the simulation.)doc";
 
-static const char *__doc_fiction_detail_maximum_defect_influence_position_and_distance_impl_run = R"doc()doc";
+static const char *__doc_fiction_detail_maximum_defect_influence_position_and_distance_impl_run =
+R"doc(Determines the maximum defect influence position and distance for the
+given layout.
+
+Returns:
+    A pair containing the maximum defect influence position and the
+    corresponding distance.)doc";
 
 static const char *__doc_fiction_detail_maximum_defect_influence_position_and_distance_impl_stats = R"doc(The statistics of the maximum defect influence position.)doc";
 
