@@ -1,7 +1,6 @@
-from mnt.pyfiction import (offset_coordinate, cube_coordinate, siqad_coordinate, area, volume)
 import unittest
 
-from mnt.pyfiction import cube_coordinate, offset_coordinate, siqad_coordinate
+from mnt.pyfiction import area, cube_coordinate, offset_coordinate, siqad_coordinate, volume
 
 
 class TestCoordinates(unittest.TestCase):
