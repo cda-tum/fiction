@@ -89,7 +89,8 @@ int main()  // NOLINT
     const auto rectangular_1i_top_2o_left_right = read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(
         fmt::format("{}/{}", folder, "rectangular_1i_top_2o_left_right.sqd"));
 
-    const auto num_canvas_sidbs = 3;
+    constexpr auto num_canvas_sidbs = 3u;
+    constexpr auto num_canvas_sidbs_2_input_2_output = 4u;
 
     design_sidb_gates_params<fiction::cell<sidb_100_cell_clk_lyt_siqad>> params{
         is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
@@ -106,48 +107,54 @@ int main()  // NOLINT
         if (gate_name == "cx_2i_top_left_2o_down_right" || gate_name == "ha_2i_top_left_2o_down_right" ||
             gate_name == "hourglass_2i_top_left_2o_down_right")
         {
-            params.number_of_sidbs = 4;
+            params.number_of_sidbs = num_canvas_sidbs_2_input_2_output;
             params.canvas          = {{17, 8, 0}, {27, 14, 0}};
             quickcell_design =
                 design_sidb_gates(rectangular_2i_top_left_2o_down_right, truth_table, params, &stats_quickcell);
-            params.number_of_sidbs = num_canvas_sidbs;
-        }
-
-        else if (gate_name == "fo2_1i_top_2o_left_right")
-        {
-            quickcell_design =
-                design_sidb_gates(rectangular_1i_top_2o_left_right, truth_table, params, &stats_quickcell);
-        }
-
-        else if (gate_name == "fo2_1i_top_2o_right_down")
-        {
-            quickcell_design =
-                design_sidb_gates(rectangular_1i_top_2o_right_down, truth_table, params, &stats_quickcell);
-        }
-
-        else if (gate_name == "wire_1i_top_1o_right" || gate_name == "inv_1i_top_1o_right")
-        {
-            quickcell_design = design_sidb_gates(rectangular_1i_top_1o_right, truth_table, params, &stats_quickcell);
-        }
-
-        else if (gate_name == "wire_1i_top_1o_down" || gate_name == "inv_1i_top_1o_down")
-        {
-            quickcell_design = design_sidb_gates(rectangular_1i_top_1o_down, truth_table, params, &stats_quickcell);
-        }
-
-        else if (gate_name == "wire_1i_left_1o_right" || gate_name == "inv_1i_left_1o_right")
-        {
-            quickcell_design = design_sidb_gates(rectangular_1i_left_1o_right, truth_table, params, &stats_quickcell);
         }
 
         else
         {
-            quickcell_design =
-                design_sidb_gates(rectangular_2i_top_left_1o_right, truth_table, params, &stats_quickcell);
+            params.number_of_sidbs = num_canvas_sidbs;
+
+            if (gate_name == "fo2_1i_top_2o_left_right")
+            {
+                quickcell_design =
+                    design_sidb_gates(rectangular_1i_top_2o_left_right, truth_table, params, &stats_quickcell);
+            }
+
+            else if (gate_name == "fo2_1i_top_2o_right_down")
+            {
+                quickcell_design =
+                    design_sidb_gates(rectangular_1i_top_2o_right_down, truth_table, params, &stats_quickcell);
+            }
+
+            else if (gate_name == "wire_1i_top_1o_right" || gate_name == "inv_1i_top_1o_right")
+            {
+                quickcell_design =
+                    design_sidb_gates(rectangular_1i_top_1o_right, truth_table, params, &stats_quickcell);
+            }
+
+            else if (gate_name == "wire_1i_top_1o_down" || gate_name == "inv_1i_top_1o_down")
+            {
+                quickcell_design = design_sidb_gates(rectangular_1i_top_1o_down, truth_table, params, &stats_quickcell);
+            }
+
+            else if (gate_name == "wire_1i_left_1o_right" || gate_name == "inv_1i_left_1o_right")
+            {
+                quickcell_design =
+                    design_sidb_gates(rectangular_1i_left_1o_right, truth_table, params, &stats_quickcell);
+            }
+
+            else
+            {
+                quickcell_design =
+                    design_sidb_gates(rectangular_2i_top_left_1o_right, truth_table, params, &stats_quickcell);
+            }
         }
 
         // Write the layout to a file
-        // write_sqd_layout(quickcell_design.front(), fmt::format("{}/{}", folder, gate_name + ".sqd"));
+        write_sqd_layout(quickcell_design.front(), fmt::format("{}/{}", folder, gate_name + ".sqd"));
 
         const auto runtime_quickcell = mockturtle::to_seconds(stats_quickcell.time_total);
 
