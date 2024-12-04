@@ -1,9 +1,10 @@
 from mnt.pyfiction import (offset_coordinate, cube_coordinate, siqad_coordinate, area, volume)
 import unittest
 
+from mnt.pyfiction import cube_coordinate, offset_coordinate, siqad_coordinate
+
 
 class TestCoordinates(unittest.TestCase):
-
     def test_unsigned_offset_coordinates(self):
         offset_coordinate((1, 0))
         offset_coordinate((1, 0, 0))
@@ -100,5 +101,5 @@ class TestCoordinates(unittest.TestCase):
         self.assertEqual(volume(siqad_coordinate(3, 2, 1)), 24)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
