@@ -13,7 +13,6 @@
 #include "fiction/technology/sidb_defect_surface.hpp"
 #include "fiction/technology/sidb_defects.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/utils/execution_utils.hpp"
 #include "fiction/utils/layout_utils.hpp"
 
 #include <mockturtle/utils/stopwatch.hpp>
