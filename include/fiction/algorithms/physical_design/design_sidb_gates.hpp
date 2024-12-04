@@ -605,62 +605,6 @@ class design_sidb_gates_impl
             }
         }
     }
-
-    /**
-     * This function determines if there is a charge distribution of the canvas SiDBs for which the charge distribution
-     * of the whole layout is physically valid.
-     *
-     * @param cds_layout The charge distribution surface layout to be evaluated.
-     * @param cds_canvas The charge distribution surface of the canvas SiDBs. All possible configurations are enumerated
-     * @return The minimum energy value if a physically valid configuration is found, `std::nullopt`
-     * otherwise.
-     */
-    [[nodiscard]] std::optional<double>
-    is_physical_validity_feasible(charge_distribution_surface<Lyt>& cds_layout,
-                                  charge_distribution_surface<Lyt>& cds_canvas) const noexcept
-    {
-        auto min_energy = std::numeric_limits<double>::infinity();
-
-        uint64_t canvas_charge_index = 0;
-        cds_canvas.assign_charge_index(canvas_charge_index);
-
-        while (cds_canvas.get_charge_index_and_base().first <= cds_canvas.get_max_charge_index())
-        {
-            cds_canvas.foreach_cell(
-                [&](const auto& c)
-                {
-                    cds_layout.assign_charge_state(c, cds_canvas.get_charge_state(c),
-                                                   charge_index_mode::KEEP_CHARGE_INDEX);
-                });
-            cds_layout.update_after_charge_change(dependent_cell_mode::VARIABLE,
-                                                  energy_calculation::KEEP_OLD_ENERGY_VALUE);
-
-            if (cds_layout.is_physically_valid())
-            {
-                cds_layout.recompute_system_energy();
-                if (cds_layout.get_system_energy() + physical_constants::POP_STABILITY_ERR < min_energy)
-                {
-                    min_energy = cds_layout.get_system_energy();
-                }
-            }
-
-            if (cds_canvas.get_charge_index_and_base().first == cds_canvas.get_max_charge_index())
-            {
-                break;
-            }
-
-            canvas_charge_index++;
-            cds_canvas.assign_charge_index(canvas_charge_index);
-        }
-
-        if (min_energy < std::numeric_limits<double>::infinity())
-        {
-            return min_energy;
-        }
-
-        return std::nullopt;
-    }
-
     /**
      * This function processes each layout to determine if it represents a valid gate implementation or if it can be
      * pruned by using three distinct physically-informed pruning steps. It leverages multi-threading to accelerate the
@@ -685,6 +629,7 @@ class design_sidb_gates_impl
             auto current_layout = skeleton_layout.clone();
 
             cell<Lyt> dependent_cell{};
+
             canvas_lyt.foreach_cell(
                 [&](const auto& c)
                 {
@@ -706,8 +651,8 @@ class design_sidb_gates_impl
 
             for (auto i = 0u; i < truth_table.front().num_bits(); ++i, ++bii)
             {
-                const auto [can_layout_be_pruned, applied_pruning] = is_operational_impl.can_layout_be_pruned(
-                    bii.get_current_input_index(), cds_canvas, dependent_cell, params.operational_params);
+                const auto [can_layout_be_pruned, applied_pruning] = is_operational_impl.can_layout_be_discarded(
+                    bii.get_current_input_index(), cds_canvas, dependent_cell);
                 if (can_layout_be_pruned)
                 {
                     switch (applied_pruning)
@@ -774,7 +719,6 @@ class design_sidb_gates_impl
 
         return gate_candidate;
     }
-
     /**
      * This function calculates all combinations of distributing a given number of SiDBs across a specified number of
      * positions in the canvas. Each combination is then used to create a gate layout candidate.
@@ -802,7 +746,6 @@ class design_sidb_gates_impl
 
         return designed_gate_layouts;
     }
-
     /**
      * This function adds SiDBs (given by indices) to the skeleton layout that is returned afterwards.
      *
@@ -825,7 +768,6 @@ class design_sidb_gates_impl
 
         return lyt_copy;
     }
-
     /**
      * This function generates canvas SiDb layouts.
      *

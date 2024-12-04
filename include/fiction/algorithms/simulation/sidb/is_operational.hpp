@@ -194,7 +194,7 @@ class is_operational_impl
             number_of_input_wires{input_bdl_wires.size()}
     {}
     /**
-     * Constructor to initialize the algorithm with a layout and parameters.
+     * Constructor to initialize the algorithm with a layout, parameters, input and output wires.
      *
      * @param lyt The SiDB cell-level layout to be checked.
      * @param tt Expected Boolean function of the layout given as a multi-output truth table.
@@ -217,16 +217,15 @@ class is_operational_impl
     {}
 
     /**
-     * Constructor to initialize the algorithm with a layout and parameters.
+     * Constructor to initialize the algorithm with a layout, parameters, input and output wires, and a canvas layout.
      *
      * @param lyt The SiDB cell-level layout to be checked.
      * @param spec Expected Boolean function of the layout given as a multi-output truth table.
      * @param params Parameters for the `is_operational` algorithm.
-     * @param input_bdl_wire Optional BDL input wires of lyt.
-     * @param output_bdl_wire Optional BDL output wires of lyt.
-     * @param input_bdl_wire_direction Optional BDL input wire directions of lyt.
+     * @param input_wires BDL input wires of lyt.
+     * @param output_wires BDL output wires of lyt.
+     * @param c_lyt Canvas layout.
      */
-
     is_operational_impl(const Lyt& lyt, const std::vector<TT>& tt, const is_operational_params& params,
                         const std::vector<bdl_wire<Lyt>>& input_wires, const std::vector<bdl_wire<Lyt>>& output_wires,
                         const Lyt& c_lyt) :
@@ -250,17 +249,16 @@ class is_operational_impl
      * satisfy physical model constraints under the I/O pin conditions required for the desired Boolean function, and
      * (3) detecting I/O signal instability.
      *
-     * @param current_layout The layout being evaluated for pruning.
-     * @param canvas_lyt The canvas layout comprising of the canvas SiDBs.
+     * @tparam ChargeLyt The charge distribution surface layout type.
+     * @param input_pattern The current input pattern.
+     * @param cds_canvas The charge distribution of the canvas layout.
      * @param dependent_cell A dependent-cell of the canvas SiDBs.
-     * @return `true` if the current layout can be pruned. `false` otherwise, which means that the layout is a candidate
-     * to be a valid gate implementation. Physical simulation is required as a second step to conduct the final
-     * validation.
+     * @return Pair where the first entry is `true` if the current layout can be pruned. The second entry indicates the
+     * reason for pruning.
      */
     template <typename ChargeLyt>
-    [[nodiscard]] std::pair<bool, pruning_reason> can_layout_be_pruned(const uint64_t input_pattern,
-                                                                       ChargeLyt& cds_canvas, cell<Lyt>& dependent_cell,
-                                                                       const is_operational_params& params) noexcept
+    [[nodiscard]] std::pair<bool, pruning_reason>
+    can_layout_be_discarded(const uint64_t input_pattern, ChargeLyt& cds_canvas, cell<Lyt>& dependent_cell) noexcept
     {
         static_assert(is_charge_distribution_surface_v<ChargeLyt>, "ChargeLyt is not a charge distribution surface");
 
@@ -268,9 +266,9 @@ class is_operational_impl
 
         ChargeLyt cds_layout{*bii};
         cds_layout.assign_all_charge_states(sidb_charge_state::NEGATIVE);
-        cds_layout.assign_physical_parameters(params.simulation_parameters);
+        cds_layout.assign_physical_parameters(parameters.simulation_parameters);
 
-        if (can_positive_charges_occur(cds_layout, params.simulation_parameters))
+        if (can_positive_charges_occur(cds_layout, parameters.simulation_parameters))
         {
             return {true, pruning_reason::POTENTIAL_POSITIVE_CHARGES};
         }
@@ -338,7 +336,7 @@ class is_operational_impl
                     cds_canvas.assign_dependent_cell(dependent_cell);
                     cds_canvas.assign_physical_parameters(parameters.simulation_parameters);
 
-                    if (can_layout_be_pruned(bii.get_current_input_index(), cds_canvas, dependent_cell, parameters)
+                    if (can_layout_be_discarded(bii.get_current_input_index(), cds_canvas, dependent_cell)
                             .first)
                     {
                         return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
@@ -365,7 +363,7 @@ class is_operational_impl
                     cds_canvas.assign_dependent_cell(dependent_cell);
                     cds_canvas.assign_physical_parameters(parameters.simulation_parameters);
 
-                    if (can_layout_be_pruned(bii.get_current_input_index(), cds_canvas, dependent_cell, parameters)
+                    if (can_layout_be_discarded(bii.get_current_input_index(), cds_canvas, dependent_cell)
                             .first)
                     {
                         return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
