@@ -424,7 +424,7 @@ namespace fiction
     std::bitset<64> bits{};
     for (auto i = 0u; i < truth_table.size(); i++)
     {
-        bits[i] = kitty::get_bit(truth_table[i], current_input_index);
+        bits[i] = (kitty::get_bit(truth_table[i], current_input_index) != 0u);
     }
     return bits.to_ulong();
 }
