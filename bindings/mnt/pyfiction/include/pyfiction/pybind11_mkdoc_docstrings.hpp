@@ -4656,22 +4656,6 @@ Returns:
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_input_bdl_wires = R"doc(Input BDL wires.)doc";
 
-static const char *__doc_fiction_detail_design_sidb_gates_impl_is_physical_validity_feasible =
-R"doc(This function determines if there is a charge distribution of the
-canvas SiDBs for which the charge distribution of the whole layout is
-physically valid.
-
-Parameter ``cds_layout``:
-    The charge distribution surface layout to be evaluated.
-
-Parameter ``cds_canvas``:
-    The charge distribution surface of the canvas SiDBs. All possible
-    configurations are enumerated
-
-Returns:
-    The minimum energy value if a physically valid configuration is
-    found, `std::nullopt` otherwise.)doc";
-
 static const char *__doc_fiction_detail_design_sidb_gates_impl_num_threads = R"doc(Number of threads to be used for parallel execution.)doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_number_of_discarded_layouts_at_first_pruning = R"doc(Number of discarded layouts at first pruning.)doc";
@@ -6687,7 +6671,7 @@ Template parameter ``TT``:
 
 static const char *__doc_fiction_detail_is_operational_impl_bii = R"doc(Iterator that iterates over all possible input states.)doc";
 
-static const char *__doc_fiction_detail_is_operational_impl_can_layout_be_pruned =
+static const char *__doc_fiction_detail_is_operational_impl_can_layout_be_discarded =
 R"doc(This function evaluates whether the given layout can be discarded
 since it cannot implement the given Boolean function. The pruning is
 subdivided into three single pruning steps: (1) discarding SiDB
@@ -6697,20 +6681,21 @@ satisfy physical model constraints under the I/O pin conditions
 required for the desired Boolean function, and (3) detecting I/O
 signal instability.
 
-Parameter ``current_layout``:
-    The layout being evaluated for pruning.
+Template parameter ``ChargeLyt``:
+    The charge distribution surface layout type.
 
-Parameter ``canvas_lyt``:
-    The canvas layout comprising of the canvas SiDBs.
+Parameter ``input_pattern``:
+    The current input pattern.
+
+Parameter ``cds_canvas``:
+    The charge distribution of the canvas layout.
 
 Parameter ``dependent_cell``:
     A dependent-cell of the canvas SiDBs.
 
 Returns:
-    `true` if the current layout can be pruned. `false` otherwise,
-    which means that the layout is a candidate to be a valid gate
-    implementation. Physical simulation is required as a second step
-    to conduct the final validation.)doc";
+    Pair where the first entry is `true` if the current layout can be
+    pruned. The second entry indicates the reason for pruning.)doc";
 
 static const char *__doc_fiction_detail_is_operational_impl_canvas_lyt = R"doc(Layout consisting of all canvas SiDBs.)doc";
 
@@ -6850,7 +6835,8 @@ Parameter ``params``:
     Parameters for the `is_operational` algorithm.)doc";
 
 static const char *__doc_fiction_detail_is_operational_impl_is_operational_impl_2 =
-R"doc(Constructor to initialize the algorithm with a layout and parameters.
+R"doc(Constructor to initialize the algorithm with a layout, parameters,
+input and output wires.
 
 Parameter ``lyt``:
     The SiDB cell-level layout to be checked.
@@ -6869,7 +6855,8 @@ Parameter ``output_wires``:
     BDL output wires of lyt.)doc";
 
 static const char *__doc_fiction_detail_is_operational_impl_is_operational_impl_3 =
-R"doc(Constructor to initialize the algorithm with a layout and parameters.
+R"doc(Constructor to initialize the algorithm with a layout, parameters,
+input and output wires, and a canvas layout.
 
 Parameter ``lyt``:
     The SiDB cell-level layout to be checked.
@@ -6881,14 +6868,14 @@ Parameter ``spec``:
 Parameter ``params``:
     Parameters for the `is_operational` algorithm.
 
-Parameter ``input_bdl_wire``:
-    Optional BDL input wires of lyt.
+Parameter ``input_wires``:
+    BDL input wires of lyt.
 
-Parameter ``output_bdl_wire``:
-    Optional BDL output wires of lyt.
+Parameter ``output_wires``:
+    BDL output wires of lyt.
 
-Parameter ``input_bdl_wire_direction``:
-    Optional BDL input wire directions of lyt.)doc";
+Parameter ``c_lyt``:
+    Canvas layout.)doc";
 
 static const char *__doc_fiction_detail_is_operational_impl_is_physical_validity_feasible =
 R"doc(This function determines if there is a charge distribution of the
