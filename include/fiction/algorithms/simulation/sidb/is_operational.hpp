@@ -336,8 +336,7 @@ class is_operational_impl
                     cds_canvas.assign_dependent_cell(dependent_cell);
                     cds_canvas.assign_physical_parameters(parameters.simulation_parameters);
 
-                    if (can_layout_be_discarded(bii.get_current_input_index(), cds_canvas, dependent_cell)
-                            .first)
+                    if (can_layout_be_discarded(bii.get_current_input_index(), cds_canvas, dependent_cell).first)
                     {
                         return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
                     }
@@ -363,8 +362,7 @@ class is_operational_impl
                     cds_canvas.assign_dependent_cell(dependent_cell);
                     cds_canvas.assign_physical_parameters(parameters.simulation_parameters);
 
-                    if (can_layout_be_discarded(bii.get_current_input_index(), cds_canvas, dependent_cell)
-                            .first)
+                    if (can_layout_be_discarded(bii.get_current_input_index(), cds_canvas, dependent_cell).first)
                     {
                         return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
                     }
