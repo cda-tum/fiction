@@ -1960,9 +1960,6 @@ class sidb_simulation_parameters:
     ) -> None:
         ...
 
-    @overload
-    def __init__(self) -> None:  ...
-
     def k(self) -> float:
         ...
 
