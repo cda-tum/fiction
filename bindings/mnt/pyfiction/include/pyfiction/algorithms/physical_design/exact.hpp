@@ -13,7 +13,6 @@
 #include <fiction/algorithms/physical_design/exact.hpp>
 
 #include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
 
 #include <sstream>
 
@@ -38,6 +37,8 @@ inline void exact(pybind11::module& m)
         .def(py::init<>())
         .def_readwrite("scheme", &fiction::exact_physical_design_params::scheme,
                        DOC(fiction_exact_physical_design_params_scheme))
+        .def_readwrite("upper_bound_area", &fiction::exact_physical_design_params::upper_bound_area,
+                       DOC(fiction_exact_physical_design_params_upper_bound_area))
         .def_readwrite("upper_bound_x", &fiction::exact_physical_design_params::upper_bound_x,
                        DOC(fiction_exact_physical_design_params_upper_bound_x))
         .def_readwrite("upper_bound_y", &fiction::exact_physical_design_params::upper_bound_y,

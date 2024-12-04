@@ -25,7 +25,6 @@
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/node_map.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
-#include <mockturtle/views/color_view.hpp>
 #include <mockturtle/views/depth_view.hpp>
 #include <mockturtle/views/fanout_view.hpp>
 #include <mockturtle/views/topo_view.hpp>
@@ -36,19 +35,18 @@
 #include <z3++.h>
 
 #include <algorithm>
-#include <atomic>
 #include <cassert>
 #include <chrono>
 #include <cstdint>
 #include <cstdlib>
 #include <functional>
 #include <future>
+#include <iostream>
 #include <limits>
 #include <memory>
 #include <mutex>
 #include <optional>
 #include <string>
-#include <thread>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
@@ -940,7 +938,7 @@ class exact_impl
         /**
          * Constructs a series of expressions to evaluate how many tiles were occupied by a given edge. Therefore, all
          * te variables are translated to expressions of the form ite(te, 1, 0) which allows for applying z3::sum to
-         * them. This is a work around because no such api function for pseudo boolean exists.
+         * them. This is a workaround because no such api function for pseudo boolean exists.
          *
          * @param e Edge to consider.
          * @param ve Vector of expressions to extend.
@@ -958,7 +956,7 @@ class exact_impl
                     // an artificial latch variable counts as an extra 1 clock cycle (n clock phases)
                     if (has_synchronization_elements_v<Lyt> && params.synchronization_elements && !params.desynchronize)
                     {
-                        ve.push_back(z3::ite(get_te(t, e), get_tse(t) * num_phases + one, zero));
+                        ve.push_back(z3::ite(get_te(t, e), (get_tse(t) * num_phases) + one, zero));
                     }
                     else
                     {
@@ -2366,7 +2364,7 @@ class exact_impl
          */
         void black_list_gates()  // TODO take advantage of incremental solving
         {
-            const auto gather_black_list_expr = [this](const auto& port, const auto& t) noexcept
+            const auto gather_black_list_expr = [this](const auto& port, const auto& t)
             {
                 z3::expr_vector iop{*ctx};
 

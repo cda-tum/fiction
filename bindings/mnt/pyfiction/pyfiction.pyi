@@ -1438,7 +1438,7 @@ class technology_mapping_stats:
 
     def __init__(self) -> None: ...
 
-    def report(self) -> str: ...
+    def report(self) -> None: ...
 
     def __repr__(self) -> str: ...
 
@@ -1663,6 +1663,94 @@ def color_routing(
         objectives: List[Tuple[cube_coordinate, cube_coordinate]],
         params: Optional[color_routing_params] = color_routing_params()
 ) -> bool: ...
+
+
+class technology_constraints(Enum):
+    NONE: ...
+    TOPOLINANO: ...
+
+
+class exact_params:
+
+    def __init__(self) -> None: ...
+
+    scheme: str
+    upper_bound_area: int
+    upper_bound_x: int
+    upper_bound_y: int
+    fixed_size: bool
+    num_threads: int
+    crossings: bool
+    border_io: bool
+    straight_inverters: bool
+    desynchronize: bool
+    minimize_wires: bool
+    minimize_crossings: bool
+    timeout: int
+    technology_specifics: technology_constraints
+
+
+class exact_stats:
+    time_total: float
+    x_size: int
+    y_size: int
+    num_gates: int
+    num_wires: int
+    num_crossings: int
+    num_aspect_ratios: int
+
+    def __init__(self) -> None: ...
+
+    def report(self) -> str: ...
+
+    def __repr__(self) -> str: ...
+
+
+def exact_cartesian(
+        network: technology_network,
+        parameters: Optional[exact_params] = None,
+        statistics: Optional[exact_stats] = None
+) -> cartesian_gate_layout: ...
+
+
+def exact_shifted_cartesian(
+        network: technology_network,
+        parameters: Optional[exact_params] = None,
+        statistics: Optional[exact_stats] = None
+) -> shifted_cartesian_gate_layout: ...
+
+
+def exact_hexagonal(
+        network: technology_network,
+        parameters: Optional[exact_params] = None,
+        statistics: Optional[exact_stats] = None
+) -> hexagonal_gate_layout: ...
+
+
+class orthogonal_params:
+    def __init__(self) -> None: ...
+
+
+class orthogonal_stats:
+    time_total: float
+    x_size: int
+    y_size: int
+    num_gates: int
+    num_wires: int
+    num_crossings: int
+
+    def __init__(self) -> None: ...
+
+    def report(self) -> None: ...
+
+    def __repr__(self) -> str: ...
+
+
+def orthogonal(
+        network: technology_network,
+        parameters: Optional[orthogonal_params] = orthogonal_params(),
+        statistics: Optional[orthogonal_stats] = None
+) -> cartesian_gate_layout: ...
 
 
 # properties
