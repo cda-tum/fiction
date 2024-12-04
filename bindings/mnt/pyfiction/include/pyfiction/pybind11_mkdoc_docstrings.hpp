@@ -5906,8 +5906,8 @@ static const char *__doc_fiction_detail_exact_impl_smt_handler_tile_ite_counters
 R"doc(Constructs a series of expressions to evaluate how many tiles were
 occupied by a given edge. Therefore, all te variables are translated
 to expressions of the form ite(te, 1, 0) which allows for applying
-z3::sum to them. This is a work around because no such api function
-for pseudo boolean exists.
+z3::sum to them. This is a workaround because no such api function for
+pseudo boolean exists.
 
 Parameter ``e``:
     Edge to consider.
