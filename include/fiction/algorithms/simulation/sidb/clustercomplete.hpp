@@ -621,7 +621,7 @@ class clustercomplete_impl
 
             if (work_stealing_queue.thief_informants.back().available_work_to_steal == 0)
             {
-                work_stealing_queue.thief_informants.c.pop_back(); // todo
+                work_stealing_queue.thief_informants.c.pop_back();  // todo
 
                 return std::nullopt;
             }
@@ -775,7 +775,8 @@ class clustercomplete_impl
                 w.work_stealing_queue.queue.emplace_front(std::move(compositions.at(i)));
             }
 
-            w.work_stealing_queue.thief_informants.c.emplace_front(prev_max_pst_ix, prev_composition, compositions.size() - 1);
+            w.work_stealing_queue.thief_informants.c.emplace_front(prev_max_pst_ix, prev_composition,
+                                                                   compositions.size() - 1);
         }
 
         // unfold first composition
