@@ -576,7 +576,8 @@ class is_operational_impl
         while (cds_canvas.get_charge_index_and_base().first <= cds_canvas.get_max_charge_index())
         {
             cds_canvas.foreach_cell(
-                [&](const auto& c) {
+                [&](const auto& c)
+                {
                     cds_layout.assign_charge_state(c, cds_canvas.get_charge_state(c),
                                                    charge_index_mode::KEEP_CHARGE_INDEX);
                 });
