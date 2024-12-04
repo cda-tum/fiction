@@ -1008,6 +1008,55 @@ def exact_hexagonal(
     network: technology_network, parameters: exact_params | None = None, statistics: exact_stats | None = None
 ) -> hexagonal_gate_layout: ...
 
+class gold_effort_mode(Enum):
+    HIGH_EFFICIENCY = ...
+    HIGH_EFFORT = ...
+    HIGHEST_EFFORT = ...
+
+class gold_cost_objective(Enum):
+    AREA = ...
+    WIRES = ...
+    CROSSINGS = ...
+    ACP = ...
+    CUSTOM = ...
+
+class graph_oriented_layout_design_params:
+    def __init__(self) -> None: ...
+
+    timeout: int
+    num_vertex_expansions: int
+    verbose: bool
+    mode: gold_effort_mode
+    cost: gold_cost_objective
+    return_first: bool
+    planar: bool
+    enable_multithreading: bool
+
+class graph_oriented_layout_design_stats:
+    time_total: float
+    x_size: int
+    y_size: int
+    num_gates: int
+    num_wires: int
+    num_crossings: int
+
+    def __init__(self) -> None: ...
+    def report(self) -> str: ...
+
+def graph_oriented_layout_design(
+        network: technology_network, parameters: graph_oriented_layout_design_params | None = ..., statistics: graph_oriented_layout_design_stats | None = None
+) -> cartesian_gate_layout: ...
+
+class hexagonalization_stats:
+    time_total: float
+
+    def __init__(self) -> None: ...
+    def report(self) -> str: ...
+
+def hexagonalization(
+        layout: cartesian_gate_layout, statistics: hexagonalization_stats | None = None
+) -> hexagonal_gate_layout: ...
+
 class orthogonal_params:
     def __init__(self) -> None: ...
 
@@ -1023,16 +1072,65 @@ class orthogonal_stats:
     def report(self) -> None: ...
 
 def orthogonal(
-    network: technology_network, parameters: orthogonal_params | None = ..., statistics: orthogonal_stats | None = None
+        network: technology_network, parameters: orthogonal_params | None = ..., statistics: orthogonal_stats | None = None
 ) -> cartesian_gate_layout: ...
 
+class post_layout_optimization_params:
+    def __init__(self) -> None: ...
+
+    timeout: int
+    max_gate_relocations: int
+    optimize_pos_only: bool
+    planar_optimization: bool
+
+class post_layout_optimization_stats:
+    time_total: float
+    x_size_before: int
+    y_size_before: int
+    x_size_after: int
+    y_size_after: int
+    area_improvement: float
+    num_wires_before: int
+    num_wires_after: int
+    num_crossings_before: int
+    num_crossings_after: int
+
+    def __init__(self) -> None: ...
+    def report(self) -> str: ...
+
+def post_layout_optimization(
+        layout: cartesian_gate_layout, parameters: post_layout_optimization_params | None = ..., statistics: post_layout_optimization_stats | None = None
+) -> cartesian_gate_layout: ...
+
+class wiring_reduction_params:
+    def __init__(self) -> None: ...
+
+    timeout: int
+
+class wiring_reduction_stats:
+    time_total: float
+    x_size_before: int
+    y_size_before: int
+    x_size_after: int
+    y_size_after: int
+    num_wires_before: int
+    num_wires_after: int
+    area_improvement: float
+    wiring_improvement: float
+
+def __init__(self) -> None: ...
+    def report(self) -> str: ...
+
+def wiring_reduction(
+        layout: cartesian_gate_layout, parameters: wiring_reduction_params | None = ..., statistics: wiring_reduction_stats | None = None
+) -> cartesian_gate_layout: ...
 # properties
 
 def critical_path_length_and_throughput(
     layout: cartesian_gate_layout | shifted_cartesian_gate_layout | hexagonal_gate_layout,
 ) -> tuple[int, int]: ...
 
-# TODO design_sidb_gates, gold, hexagonalization, PLO, wiring reduction
+# TODO design_sidb_gates
 
 ## simulation
 
