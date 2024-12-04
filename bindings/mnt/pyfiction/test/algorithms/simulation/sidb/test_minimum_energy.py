@@ -1,12 +1,18 @@
 import unittest
 
-from mnt.pyfiction import (sidb_100_lattice, sidb_technology, charge_distribution_surface_100,
-                           sidb_simulation_parameters, sidb_charge_state, minimum_energy, sidb_111_lattice,
-                           charge_distribution_surface_111)
+from mnt.pyfiction import (
+    charge_distribution_surface_100,
+    charge_distribution_surface_111,
+    minimum_energy,
+    sidb_100_lattice,
+    sidb_111_lattice,
+    sidb_charge_state,
+    sidb_simulation_parameters,
+    sidb_technology,
+)
 
 
 class TestMinimumEnergy(unittest.TestCase):
-
     def test_three_DBs_100_lattice(self):
         layout = sidb_100_lattice((10, 10))
 
@@ -15,8 +21,9 @@ class TestMinimumEnergy(unittest.TestCase):
         layout.assign_cell_type((6, 1), sidb_technology.cell_type.NORMAL)
 
         cds1 = charge_distribution_surface_100(layout)  # all negative
-        cds2 = charge_distribution_surface_100(layout, sidb_simulation_parameters(),
-                                               sidb_charge_state.NEUTRAL)  # all neutral
+        cds2 = charge_distribution_surface_100(
+            layout, sidb_simulation_parameters(), sidb_charge_state.NEUTRAL
+        )  # all neutral
         cds3 = charge_distribution_surface_100(layout)
         cds3.assign_charge_state((6, 1), sidb_charge_state.NEUTRAL)  # only two SiDBs are negative
 
@@ -36,8 +43,9 @@ class TestMinimumEnergy(unittest.TestCase):
         layout.assign_cell_type((6, 1), sidb_technology.cell_type.NORMAL)
 
         cds1 = charge_distribution_surface_111(layout)  # all negative
-        cds2 = charge_distribution_surface_111(layout, sidb_simulation_parameters(),
-                                               sidb_charge_state.NEUTRAL)  # all neutral
+        cds2 = charge_distribution_surface_111(
+            layout, sidb_simulation_parameters(), sidb_charge_state.NEUTRAL
+        )  # all neutral
         cds3 = charge_distribution_surface_111(layout)
         cds3.assign_charge_state((6, 1), sidb_charge_state.NEUTRAL)  # only two SiDBs are negative
 
@@ -50,5 +58,5 @@ class TestMinimumEnergy(unittest.TestCase):
         self.assertLessEqual(result, 0)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

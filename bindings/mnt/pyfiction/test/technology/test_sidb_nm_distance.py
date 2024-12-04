@@ -1,6 +1,6 @@
-from mnt.pyfiction import (sidb_100_lattice, sidb_111_lattice, sidb_nm_distance_100, sidb_nm_distance_111)
 import unittest
-import os
+
+from mnt.pyfiction import sidb_100_lattice, sidb_111_lattice, sidb_nm_distance_100, sidb_nm_distance_111
 
 
 class TestSiDBNmDistance(unittest.TestCase):
@@ -29,5 +29,5 @@ class TestSiDBNmDistance(unittest.TestCase):
         self.assertAlmostEqual(sidb_nm_distance_111(layout_one, (0, 0), (0, 1)), 0.3839967)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

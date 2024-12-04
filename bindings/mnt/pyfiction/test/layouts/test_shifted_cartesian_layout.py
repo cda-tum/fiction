@@ -1,9 +1,9 @@
-from mnt.pyfiction import (shifted_cartesian_layout)
 import unittest
+
+from mnt.pyfiction import shifted_cartesian_layout
 
 
 class TestShiftedCartesianLayout(unittest.TestCase):
-
     def test_coordinate_iteration(self):
         layout = shifted_cartesian_layout((9, 9, 1))
 
@@ -20,5 +20,5 @@ class TestShiftedCartesianLayout(unittest.TestCase):
             self.assertIn(t, [(1, 1), (1, 2), (2, 1), (3, 1), (3, 2), (2, 3)])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

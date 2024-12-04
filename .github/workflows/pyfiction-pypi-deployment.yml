@@ -4,33 +4,33 @@ name: 🐍 • Packaging
 
 on:
   release:
-    types: [ published ]
+    types: [published]
   merge_group:
   push:
-    branches: [ 'main' ]
+    branches: ["main"]
     paths:
-      - 'bindings/pyfiction/**'
-      - '**/*.py'
-      - '**/*.hpp'
-      - '**/*.cpp'
-      - '**/*.cmake'
-      - '**/CMakeLists.txt'
-      - 'libs/**'
-      - '.github/workflows/pyfiction-pypi-deployment.yml'
+      - "bindings/pyfiction/**"
+      - "**/*.py"
+      - "**/*.hpp"
+      - "**/*.cpp"
+      - "**/*.cmake"
+      - "**/CMakeLists.txt"
+      - "libs/**"
+      - ".github/workflows/pyfiction-pypi-deployment.yml"
   pull_request:
-    branches: [ 'main' ]
+    branches: ["main"]
     paths:
-      - 'bindings/pyfiction/**'
-      - '**/*.py'
-      - '**/*.hpp'
-      - '**/*.cpp'
-      - '**/*.cmake'
-      - '**/CMakeLists.txt'
-      - 'libs/**'
-      - '.github/workflows/pyfiction-pypi-deployment.yml'
+      - "bindings/pyfiction/**"
+      - "**/*.py"
+      - "**/*.hpp"
+      - "**/*.cpp"
+      - "**/*.cmake"
+      - "**/CMakeLists.txt"
+      - "libs/**"
+      - ".github/workflows/pyfiction-pypi-deployment.yml"
   workflow_dispatch:
   workflow_run:
-    workflows: [ "pyfiction Docstring Generator" ]
+    workflows: ["pyfiction Docstring Generator"]
     types:
       - completed
 
@@ -83,7 +83,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        runs-on: [ ubuntu-latest, macos-13, macos-14, windows-latest ]
+        runs-on: [ubuntu-latest, macos-13, macos-14, windows-latest]
 
     steps:
       - uses: actions/checkout@v4
@@ -97,7 +97,7 @@ jobs:
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
-          key: '${{matrix.config.os}}-pyfiction'
+          key: "${{matrix.config.os}}-pyfiction"
           save: true
           max-size: 10G
 
@@ -129,7 +129,7 @@ jobs:
           overwrite: true
 
   publish_to_pypi:
-    needs: [ build_wheels, build_sdist ]
+    needs: [build_wheels, build_sdist]
     runs-on: ubuntu-latest
     name: 🚀 Publish to PyPI
     if: github.event_name == 'release' && github.event.action == 'published'
