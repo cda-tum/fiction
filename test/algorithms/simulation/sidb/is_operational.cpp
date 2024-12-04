@@ -312,20 +312,20 @@ TEST_CASE("flipped CX bestagon gate", "[is-operational]")
 
     CHECK(is_operational(lyt, create_crossing_wire_tt(),
                          is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
-                                               bdl_input_iterator_params{}, operational_condition::REJECT_KINKS})
+                                               bdl_input_iterator_params{}, is_operational_params::operational_condition::REJECT_KINKS})
               .first == operational_status::OPERATIONAL);
 
     const auto kink_induced_non_operational_input_pattern = kink_induced_non_operational_input_patterns(
         lyt, create_crossing_wire_tt(),
         is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
-                              bdl_input_iterator_params{}, operational_condition::REJECT_KINKS});
+                              bdl_input_iterator_params{}, is_operational_params::operational_condition::REJECT_KINKS});
 
     CHECK(kink_induced_non_operational_input_pattern.empty());
 
     const auto kink_induced_non_operational = is_kink_induced_non_operational(
         lyt, create_crossing_wire_tt(),
         is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
-                              bdl_input_iterator_params{}, operational_condition::REJECT_KINKS});
+                              bdl_input_iterator_params{}, is_operational_params::operational_condition::REJECT_KINKS});
 
     CHECK(!kink_induced_non_operational);
 }

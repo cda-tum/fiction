@@ -684,7 +684,7 @@ TEMPLATE_TEST_CASE("Critical temperature of Bestagon double wire, QuickExact", "
     }
     SECTION("Kinks are not allowed")
     {
-        params.operational_params.op_condition = operational_condition::REJECT_KINKS;
+        params.operational_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
         const auto ct =
             critical_temperature_gate_based(lyt_double_wire_gate, create_double_wire_tt(), params, &critical_stats);
 
@@ -720,7 +720,7 @@ TEMPLATE_TEST_CASE("Critical temperature of Bestagon half adder gate, QuickExact
     }
     SECTION("Kinks are not allowed")
     {
-        params.operational_params.op_condition = operational_condition::REJECT_KINKS;
+        params.operational_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
 
         const auto ct =
             critical_temperature_gate_based(lyt_half_adder_gate, create_half_adder_tt(), params, &critical_stats);
