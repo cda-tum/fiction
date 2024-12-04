@@ -1944,6 +1944,31 @@ def area(layout: sidb_layout, width: float = 0.0, height: float = 0.0, hspace: f
 
 # TODO all SiDB technology
 
+class sidb_simulation_parameters:
+
+    epsilon_r: float
+    lambda_tf: float
+    mu_minus: float
+    base: int
+
+    def __init__(
+            self,
+            base_number: int = 3,
+            mu_minus: float = -0.32,
+            relative_permittivity: float = 5.6,
+            screening_distance: float = 5.0
+    ) -> None:
+        ...
+
+    @overload
+    def __init__(self) -> None:  ...
+
+    def k(self) -> float:
+        ...
+
+    def mu_plus(self) -> float:
+        ...
+
 # Utils
 
 # TODO all utils
