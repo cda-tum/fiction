@@ -9,7 +9,6 @@
 #include "pyfiction/types.hpp"
 
 #include <fiction/io/write_fgl_layout.hpp>
-#include <fiction/traits.hpp>
 
 #include <pybind11/pybind11.h>
 

@@ -1760,6 +1760,8 @@ def critical_path_length_and_throughput(
     int, int]: ...
 
 
+# TODO design_sidb_gates, gold, hexagonalization, PLO, wiring reduction
+
 ## simulation
 
 ### logic
@@ -1775,6 +1777,8 @@ def simulate(layout: Union[cartesian_gate_layout, shifted_cartesian_gate_layout,
 
 
 ### sidb
+
+# TODO all SiDB simulation
 
 ## verification
 
@@ -1828,6 +1832,102 @@ def equivalence_checking(
 ) -> eq_type: ...
 
 
+# In/Out
+
+class fgl_parsing_error(RuntimeError): ...
+
+
+def read_cartesian_fgl_layout(filename: str, layout_name: str = "") -> cartesian_gate_layout: ...
+
+
+def read_shifted_cartesian_fgl_layout(filename: str, layout_name: str = "") -> shifted_cartesian_gate_layout: ...
+
+
+def read_hexagonal_fgl_layout(filename: str, layout_name: str = "") -> hexagonal_gate_layout: ...
+
+
+class unsupported_character_exception(Exception): ...
+
+
+class undefined_cell_label_exception(Exception): ...
+
+
+class unrecognized_cell_definition_exception(Exception): ...
+
+
+def read_fqca_layout(filename: str, layout_name: str = "") -> qca_layout: ...
+
+
+# TODO read_sqd_layout
+
+def write_dot_network(network: technology_network, filename: str) -> None: ...
+
+
+def write_dot_layout(layout: Union[cartesian_gate_layout, shifted_cartesian_gate_layout, hexagonal_gate_layout],
+                     filename: str) -> None: ...
+
+
+def write_fgl_layout(layout: Union[cartesian_gate_layout, shifted_cartesian_gate_layout, hexagonal_gate_layout],
+                     filename: str) -> None: ...
+
+
+class out_of_cell_names_exception(IndexError): ...
+
+
+class write_fqca_layout_params:
+    def __init__(self) -> None: ...
+
+    create_inter_layer_via_cells: bool
+
+
+def write_fqca_layout(
+        layout: Union[cartesian_gate_layout, shifted_cartesian_gate_layout, hexagonal_gate_layout],
+        filename: str,
+        params: Optional[write_fqca_layout_params] = write_fqca_layout_params()
+) -> None: ...
+
+
+# TODO write_operational_domain
+
+class write_qca_layout_params:
+
+    def __init__(self) -> None: ...
+
+    create_inter_layer_via_cells: bool
+
+
+def write_qca_layout(
+        layout: qca_layout,
+        filename: str,
+        params: Optional[write_qca_layout_params] = write_qca_layout_params()
+) -> None: ...
+
+
+def write_qcc_layout(
+        layout: inml_layout,
+        filename: str
+) -> None: ...
+
+
+def write_qll_layout(
+        layout: Union[qca_layout, inml_layout],
+        filename: str
+) -> None: ...
+
+
+def write_sqd_layout(
+        # layout: Union[sidb_111_lattice, sidb_100_lattice, sidb_layout], # TODO move to this layout spec as soon as lattices are added
+        layout: sidb_layout,
+        filename: str
+) -> None: ...
+
+
+def write_sqd_sim_result(
+        layout: sidb_layout,
+        filename: str
+) -> None: ...
+
+
 # Technology
 
 @overload
@@ -1841,3 +1941,9 @@ def area(layout: inml_layout, width: int = 50, height: int = 100, hspace: int = 
 @overload
 def area(layout: sidb_layout, width: float = 0.0, height: float = 0.0, hspace: float = 0.384,
          vspace: float = 0.384) -> float: ...
+
+# TODO all SiDB technology
+
+# Utils
+
+# TODO all utils

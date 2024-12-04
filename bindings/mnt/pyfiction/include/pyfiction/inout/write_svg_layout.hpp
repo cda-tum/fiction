@@ -61,7 +61,7 @@ inline void write_qca_layout_svg_impl(pybind11::module& m)
 
 }  // namespace detail
 
-void write_svg_layout(pybind11::module& m)
+inline void write_svg_layout(pybind11::module& m)
 {
     namespace py = pybind11;
 
