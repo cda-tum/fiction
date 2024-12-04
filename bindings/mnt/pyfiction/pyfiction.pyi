@@ -1629,6 +1629,42 @@ def apply_topolinano_library(layout: shifted_cartesian_gate_layout) -> inml_layo
 def apply_bestagon_library(layout: hexagonal_gate_layout) -> sidb_layout: ...
 
 
+class graph_coloring_engine(Enum):
+    MCS = ...
+    DSATUR = ...
+    LMXRLF = ...
+    TABUCOL = ...
+    SAT = ...
+
+
+class color_routing_params:
+    def __init__(self) -> None: ...
+
+    conduct_partial_routing: bool
+    crossings: bool
+    path_limit: Optional[int]
+    engine: graph_coloring_engine
+    partial_sat: bool
+
+
+@overload
+def color_routing(
+        layout: Union[
+            cartesian_obstruction_layout, cartesian_gate_layout, shifted_cartesian_obstruction_layout, shifted_cartesian_gate_layout],
+        objectives: List[Tuple[offset_coordinate, offset_coordinate]],
+        params: Optional[color_routing_params] = color_routing_params()
+) -> bool: ...
+
+
+@overload
+def color_routing(
+        layout: Union[
+            hexagonal_obstruction_layout, hexagonal_gate_layout],
+        objectives: List[Tuple[cube_coordinate, cube_coordinate]],
+        params: Optional[color_routing_params] = color_routing_params()
+) -> bool: ...
+
+
 # properties
 
 def critical_path_length_and_throughput(
