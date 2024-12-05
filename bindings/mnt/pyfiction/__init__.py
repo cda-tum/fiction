@@ -36,7 +36,6 @@ from .pyfiction import (  # type: ignore[import-not-found]
     apply_topolinano_library,
     # Technology
     area,
-    assess_physical_population_stability,
     assess_physical_population_stability_params,
     automatic_base_number_detection,
     bdl_input_iterator_100,
