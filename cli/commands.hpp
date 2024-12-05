@@ -23,6 +23,7 @@
 
 // logic synthesis commands
 #ifdef FICTION_LOGIC_SYNTHESIS_FLOW
+#include "cmd/logic/abc.hpp"
 #include "cmd/logic/akers.hpp"
 #include "cmd/logic/balance.hpp"
 #include "cmd/logic/fanouts.hpp"
