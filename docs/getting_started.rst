@@ -194,6 +194,18 @@ and some macOS versions due to issues with ``python-sat``. Mugen requires at lea
 
 Finally, before building *fiction*, pass ``-DFICTION_ENABLE_MUGEN=ON`` to the ``cmake`` call.
 
+.. _abc-cmake:
+
+ABC callback
+############
+
+`ABC <https://github.com/berkeley-abc/abc/>`_ by Alan Mishchenko can be used as a callback for logic synthesis and
+optimization from within the *fiction* CLI. It must be installed manually and can be enabled by passing
+``-DFICTION_ABC=ON`` to the ``cmake`` call. If ABC is not in your ``PATH```, you can specify the path to the folder
+where the ``abc`` binary is located by passing ``-DABC_ROOT=<path_to_abc_root>`` to the ``cmake`` call.
+
+For information on usage, see the :ref:`ABC callback <abc-cli>` section in the CLI documentation.
+
 
 Building experiments
 --------------------
