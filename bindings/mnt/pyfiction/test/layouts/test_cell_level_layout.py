@@ -1,9 +1,9 @@
-from mnt.pyfiction import (qca_technology, inml_technology, sidb_technology, qca_layout)
 import unittest
+
+from mnt.pyfiction import inml_technology, qca_layout, qca_technology, sidb_technology
 
 
 class TestCellTechnology(unittest.TestCase):
-
     def test_qca_technology(self):
         qca = qca_technology
 
@@ -37,7 +37,6 @@ class TestCellTechnology(unittest.TestCase):
 
 
 class TestQCACellLevelLayout(unittest.TestCase):
-
     def test_qca_cell_layout_inheritance(self):
         layout = qca_layout((9, 9, 1))
 
@@ -125,5 +124,5 @@ class TestQCACellLevelLayout(unittest.TestCase):
         self.assertFalse(layout.is_empty_cell((4, 2)))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

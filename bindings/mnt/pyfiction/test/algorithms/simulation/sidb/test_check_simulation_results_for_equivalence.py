@@ -1,11 +1,18 @@
-from mnt.pyfiction import (sidb_100_lattice, sidb_111_lattice, sidb_technology, sidb_simulation_result_100,
-                           charge_distribution_surface_100, check_simulation_results_for_equivalence,
-                           sidb_simulation_result_111, charge_distribution_surface_111)
 import unittest
+
+from mnt.pyfiction import (
+    charge_distribution_surface_100,
+    charge_distribution_surface_111,
+    check_simulation_results_for_equivalence,
+    sidb_100_lattice,
+    sidb_111_lattice,
+    sidb_simulation_result_100,
+    sidb_simulation_result_111,
+    sidb_technology,
+)
 
 
 class TestCheckSimulationResultsForEquivalence(unittest.TestCase):
-
     def test_cds_with_two_sidbs_100_lattice(self):
         # Use standard constructor.
         lattice_100 = sidb_100_lattice()
@@ -39,5 +46,5 @@ class TestCheckSimulationResultsForEquivalence(unittest.TestCase):
         self.assertTrue(equivalent)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
