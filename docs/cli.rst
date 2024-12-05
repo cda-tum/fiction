@@ -108,20 +108,20 @@ helpful for FCN gate libraries that do not support certain gate types.
 ABC Callback
 ------------
 
-    `ABC <https://github.com/berkeley-abc/abc/>`_ can be configured as a callback for logic synthesis and optimization from
-    within the CLI. The command ``abc -c "<command>"`` will launch ABC and execute the given command string. Internally, it will
-    first write *fiction*'s current network to a temporary AIGER file, have ABC parse this file as an AIG
-    using ``read <filename>; strash``, and then execute the given command string. Finally, ABC will write the result back to
-    the temporary file which will be read back into *fiction* as a new network.
+`ABC <https://github.com/berkeley-abc/abc/>`_ can be configured as a callback for logic synthesis and optimization from
+within the CLI. The command ``abc -c "<command>"`` will launch ABC and execute the given command string. Internally, it will
+first write *fiction*'s current network to a temporary AIGER file, have ABC parse this file as an AIG
+using ``read <filename>; strash``, and then execute the given command string. Finally, ABC will write the result back to
+the temporary file which will be read back into *fiction* as a new network.
 
-    .. note::
-       There are known limitations to this approach as an AIGER file is used for interfacing the two tools, which leads to
-       the decomposition of all gates into ANDs and inverters. Furthermore, ABC's `abc.rc` script for shortcuts to common
-       commands might not be included, leading to the absence of those abbreviations and scripts. The user is encouraged to
-       use the full command strings instead, e.g., ``balance; refactor; rewrite; resub`` instead of ``b; rf; rw; rs``.
+.. note::
+   There are known limitations to this approach as an AIGER file is used for interfacing the two tools, which leads to
+   the decomposition of all gates into ANDs and inverters. Furthermore, ABC's ``abc`` script for shortcuts to common
+   commands might not be included, leading to the absence of those abbreviations and scripts. The user is encouraged to
+   use the full command strings instead, e.g., ``balance; refactor; rewrite; resub`` instead of ``b; rf; rw; rs``.
 
-    .. note::
-        See :ref:`ABC <abc-cmake>` on how to enable ABC in the *fiction* CLI.
+.. note::
+    See :ref:`ABC <abc-cmake>` on how to enable ABC in the *fiction* CLI.
 
 
 Structural manipulation
