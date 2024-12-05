@@ -29,12 +29,13 @@ namespace pyfiction
 namespace detail
 {
 
-class py_cartesian_cell_layout : public fiction::clocked_layout<
-                                     fiction::tile_based_layout<fiction::cartesian_layout<fiction::offset::ucoord_t>>>
+class py_cartesian_cell_level_layout
+        : public fiction::clocked_layout<
+              fiction::tile_based_layout<fiction::cartesian_layout<fiction::offset::ucoord_t>>>
 {
   public:
     template <typename... Args>
-    py_cartesian_cell_layout(std::string technology, Args... args)
+    py_cartesian_cell_level_layout(std::string technology, Args... args)
     {
         std::transform(technology.begin(), technology.end(), technology.begin(), ::tolower);
 
@@ -67,12 +68,12 @@ inline void cell_level_layout(pybind11::module& m)
      * Cell-level clocked Cartesian layout.
      */
     py::class_<
-        py_cartesian_cell_layout,
+        py_cartesian_cell_level_layout,
         fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<fiction::offset::ucoord_t>>>>(
         m, "CellLevelLayout", DOC(fiction_cell_level_layout))
         .def(py::init<std::string>(), py::arg("technology"), DOC(fiction_cell_level_layout_cell_level_layout))
-        .def(py::init<std::string, const fiction::aspect_ratio<py_cartesian_cell_layout>&>(), py::arg("technology"),
-             py::arg("dimension"), DOC(fiction_cell_level_layout_cell_level_layout))
+        .def(py::init<std::string, const fiction::aspect_ratio<py_cartesian_cell_level_layout>&>(),
+             py::arg("technology"), py::arg("dimension"), DOC(fiction_cell_level_layout_cell_level_layout))
         // .def(py::init(
         //          [](const fiction::aspect_ratio<py_cartesian_cell_layout>& dimension,
         //             const std::string&                                                scheme_name,
@@ -113,7 +114,7 @@ inline void cell_level_layout(pybind11::module& m)
         // py::arg("c"), DOC(fiction_cell_level_layout_is_po))
         //
         .def("cells",
-             [](const py_cartesian_cell_layout& lyt)
+             [](const py_cartesian_cell_level_layout& lyt)
              {
                  const auto apply = [](const auto& cell_layout)
                  {
