@@ -4,7 +4,6 @@
 
 #ifndef FICTION_CLUSTERCOMPLETE_HPP
 #define FICTION_CLUSTERCOMPLETE_HPP
-#include "../../../../../libs/mockturtle/experiments/experiments.hpp"
 
 #if (FICTION_ALGLIB_ENABLED)
 
@@ -164,29 +163,41 @@ class clustercomplete_impl
 
             if (!gss_stats.top_cluster->charge_space.empty())
             {
-                initialize_worker_queues(gss_stats.top_cluster->charge_space);
+                initialize_worker_queues(gss_stats.top_cluster);
 
                 std::vector<std::thread> supporting_threads{};
-                supporting_threads.reserve(available_threads - 1);
+                supporting_threads.reserve(available_threads);
 
                 for (uint64_t i = 1; i < available_threads; ++i)
                 {
                     supporting_threads.emplace_back(
-                        [&]
+                        [&, ix = i]
                         {
-                            worker& w = workers.at(i);
+                            // std::cout << "starting thread " << ix << "..." << std::endl;
+
+                            worker& w = *workers->at(ix);
 
                             while (const std::optional<sidb_charge_space_composition>& work = w.obtain_work())
                             {
+                                // std::cout << "thread " << ix << " doing work..." << std::endl;
                                 unfold_composition(w, *work);
+                                // std::cout << "thread " << ix << " finished work" << std::endl;
                             }
+
+                            // std::cout << "thread " << ix << " stopped working" << std::endl;
                         });
                 }
 
-                while (const std::optional<sidb_charge_space_composition>& work = workers.front().obtain_work())
+                // std::cout << "starting thread 0..." << std::endl;
+
+                while (const std::optional<sidb_charge_space_composition>& work = workers->front()->obtain_work())
                 {
-                    unfold_composition(workers.front(), *work);
+                    // std::cout << "thread 0 doing work..." << std::endl;
+                    unfold_composition(*workers->front(), *work);
+                    // std::cout << "thread 0 finished work" << std::endl;
                 }
+
+                // std::cout << "thread 0 stopped working" << std::endl;
 
                 // wait for all threads to complete
                 for (auto& thread : supporting_threads)
@@ -379,6 +390,8 @@ class clustercomplete_impl
                 max_pst_ix       = ix;
             }
         }
+
+        return max_pst_ix;
     }
     /**
      * Helper function for obtaining the stored lower or upper bound on the electrostatic potential that SiDBs in the
@@ -468,8 +481,8 @@ class clustercomplete_impl
     }
 
     template <clustering_state_update_operation op>
-    void add_or_remove_composition(sidb_clustering_state&               clustering_state,
-                                   const sidb_charge_space_composition& composition) const noexcept
+    static void add_or_remove_composition(sidb_clustering_state&               clustering_state,
+                                          const sidb_charge_space_composition& composition) noexcept
     {
         if constexpr (op == clustering_state_update_operation::ADD)
         {
@@ -495,30 +508,15 @@ class clustercomplete_impl
 
     struct worker_queue
     {
-        struct mole
-        {
-            const uint64_t                      parent_ix;
-            const sidb_charge_space_composition composition;
-            uint64_t                            available_work_to_steal;
-        };
+        std::deque<std::pair<sidb_clustering_state, sidb_charge_space_composition>> queue{};
 
-        const clustercomplete_impl* cc_ptr{};
-
-        explicit worker_queue(const clustercomplete_impl* ptr) noexcept : cc_ptr{ptr} {}
-
-        std::deque<sidb_charge_space_composition> queue{};
-
-        sidb_clustering_state clustering_state_for_thieves{};
-
-        std::queue<mole> thief_informants{};
-
-        uint64_t work_left_to_steal_before_requiring_new_mole{0};
+        // uint64_t work_left_at_current_level{0};
 
         std::mutex mutex_to_protect_this_queue;
 
-        std::optional<sidb_charge_space_composition> get_from_this_queue() noexcept
+        std::optional<std::pair<sidb_clustering_state, sidb_charge_space_composition>> get_from_this_queue() noexcept
         {
-            std::lock_guard lock{mutex_to_protect_this_queue};
+            const std::lock_guard lock{mutex_to_protect_this_queue};
 
             if (queue.empty())
             {
@@ -529,73 +527,65 @@ class clustercomplete_impl
             std::optional work{std::move(queue.front())};
             queue.pop_front();
 
-            thief_informants.back().available_work_to_steal -= 1;  // todo
-
             return work;
         }
 
         // Attempt to steal work in non-blocking fashion
-        std::optional<std::pair<sidb_charge_space_composition, sidb_clustering_state>>
+        std::optional<std::pair<sidb_clustering_state, sidb_charge_space_composition>>
         try_steal_from_this_queue() noexcept
         {
-            if (!mutex_to_protect_this_queue.try_lock() || queue.empty())  // Non-blocking lock attempt
+            if (!mutex_to_protect_this_queue.try_lock())  // Non-blocking lock attempt
             {
                 return std::nullopt;
             }
 
-            // stealing goes from the back
-            sidb_charge_space_composition work = std::move(queue.back());
-            queue.pop_back();
-
-            --thief_informants.front().available_work_to_steal;
-
-            if (thief_informants.front().available_work_to_steal == 0)
+            if (queue.empty())
             {
-                mole thief_informant = std::move(thief_informants.front());
-                thief_informants.pop_front();
+                mutex_to_protect_this_queue.unlock();
 
-                work_left_to_steal_before_requiring_new_mole = thief_informants.front().available_work_to_steal;
-
-                add_or_remove_parent<clustering_state_update_operation::REMOVE>(clustering_state_for_thieves,
-                                                                                thief_informants.front().parent_ix);
-                add_or_remove_composition<clustering_state_update_operation::ADD>(clustering_state_for_thieves,
-                                                                                  thief_informants.front().composition);
+                return std::nullopt;
             }
 
-            sidb_clustering_state clustering_state_for_thieves_copy =
-                clustering_state_for_thieves.copy(cc_ptr->charge_layout.num_cells());
+            // stealing goes from the back
+            std::pair<sidb_clustering_state, sidb_charge_space_composition> work = std::move(queue.back());
+            queue.pop_back();
 
             mutex_to_protect_this_queue.unlock();
 
-            return std::optional<std::pair<sidb_charge_space_composition, sidb_clustering_state>>{
-                {std::move(work), std::move(clustering_state_for_thieves_copy)}};
+            return work;
         }
     };
 
     struct worker
     {
-        const clustercomplete_impl* cc_ptr;
-        const uint64_t              index;
-        worker_queue                work_stealing_queue;
-        sidb_clustering_state       clustering_state{};
+        const uint64_t                                               index;
+        worker_queue                                                 work_stealing_queue{};
+        sidb_clustering_state                                        clustering_state{};
+        const std::unique_ptr<std::vector<std::unique_ptr<worker>>>& all_workers;
 
-        explicit worker(const clustercomplete_impl* ptr, const uint64_t ix) noexcept :
-                cc_ptr{ptr},
+        explicit worker(const uint64_t ix, const uint64_t num_sidbs,
+                        const std::unique_ptr<std::vector<std::unique_ptr<worker>>>& workers) noexcept :
                 index{ix},
-                work_stealing_queue{ptr}
+                all_workers{workers}
         {
-            clustering_state.pot_bounds.initialise_complete_potential_bounds(charge_layout.num_cells());
+            clustering_state.pot_bounds.initialise_complete_potential_bounds(num_sidbs);
         }
 
         // nullopt -> terminate thread (todo: use global termination synchronization)
         std::optional<sidb_charge_space_composition> obtain_work() noexcept
         {
-            if (std::optional<sidb_charge_space_composition> work = work_stealing_queue.get_from_this_queue())
+            // std::cout << "thread " << index << " trying to look for own work" << std::endl;
+            if (std::optional<std::pair<sidb_clustering_state, sidb_charge_space_composition>> work =
+                    work_stealing_queue.get_from_this_queue())
             {
-                return work;
+                clustering_state = std::move(work->first);
+                // std::cout << "thread " << index << " took own work" << std::endl;
+                return work->second;
             }
 
-            for (uint64_t i = 0; i < cc_ptr->available_threads; ++i)
+            // std::cout << "thread " << index << " found no own work" << std::endl;
+
+            for (uint64_t i = 0; i < all_workers->size(); ++i)
             {
                 if (i == index)
                 {
@@ -603,36 +593,40 @@ class clustercomplete_impl
                     continue;
                 }
 
-                if (const auto& [stolen_work, new_clustering_state] =
-                        cc_ptr->workers.at(i).work_stealing_queue.try_steal_from_this_queue())
+                // std::cout << "thread " << index << " trying to steal work from thread " << i << std::endl;
+
+                if (std::optional<std::pair<sidb_clustering_state, sidb_charge_space_composition>> work =
+                        all_workers->at(i)->work_stealing_queue.try_steal_from_this_queue())
                 {
-                    clustering_state = new_clustering_state;  // todo move?
-                    return stolen_work;
+                    clustering_state = std::move(work->first);
+                    // std::cout << "thread " << index << " stole work from thread " << i << std::endl;
+                    return work->second;
                 }
             }
 
+            // std::cout << "thread " << index << " found no work" << std::endl;
             return std::nullopt;
         }
 
-        // nullopt -> backtrack
-        std::optional<sidb_charge_space_composition> obtain_work_from_current_level() noexcept
-        {
-            const std::lock_guard lock{work_stealing_queue.mutex_to_protect_this_queue};
-
-            if (work_stealing_queue.thief_informants.back().available_work_to_steal == 0)
-            {
-                work_stealing_queue.thief_informants.c.pop_back();  // todo
-
-                return std::nullopt;
-            }
-
-            --work_stealing_queue.thief_informants.back().available_work_to_steal;
-
-            sidb_charge_space_composition work = std::move(work_stealing_queue.queue.front());
-            work_stealing_queue.queue.pop_front();
-
-            return std::optional{std::move(work)};
-        }
+        // // nullopt -> backtrack
+        // std::optional<sidb_charge_space_composition> obtain_work_from_current_level() noexcept
+        // {
+        //     const std::lock_guard lock{work_stealing_queue.mutex_to_protect_this_queue};
+        //
+        //     if (work_stealing_queue.thief_informants.back().available_work_to_steal == 0)
+        //     {
+        //         work_stealing_queue.thief_informants.c.pop_back();  // todo
+        //
+        //         return std::nullopt;
+        //     }
+        //
+        //     --work_stealing_queue.thief_informants.back().available_work_to_steal;
+        //
+        //     sidb_charge_space_composition work = std::move(work_stealing_queue.queue.front());
+        //     work_stealing_queue.queue.pop_front();
+        //
+        //     return std::optional{std::move(work)};
+        // }
     };
     /**
      * Simulation results.
@@ -641,8 +635,9 @@ class clustercomplete_impl
     /**
      * Number of available threads.
      */
-    uint64_t            available_threads{};
-    std::vector<worker> workers;
+    const uint64_t                                              available_threads{};
+    std::unique_ptr<std::vector<std::unique_ptr<worker>>> workers =
+        std::make_unique<std::vector<std::unique_ptr<worker>>>();
     /**
      * Mutex to protect the simulation results.
      */
@@ -695,8 +690,10 @@ class clustercomplete_impl
 
     void initialize_worker_queues(const sidb_cluster_ptr& top_cluster) noexcept
     {
+        workers->reserve(available_threads);
+
         // the first worker gets the entire top cluster charge space in its work queue
-        worker first_worker{&this, 0};
+        workers->emplace_back(std::make_unique<worker>(0, charge_layout.num_cells(), workers));
 
         for (const sidb_cluster_charge_state& ccs : top_cluster->charge_space)
         {
@@ -711,17 +708,17 @@ class clustercomplete_impl
                           get_projector_state_bound<bound_direction::UPPER>(pst, sidb_ix));
             }
 
-            first_worker.work_stealing_queue.queue.emplace_front(sidb_charge_space_composition{{pst}, store});
+            sidb_clustering_state clustering_state{};
+            clustering_state.pot_bounds.initialise_complete_potential_bounds(charge_layout.num_cells());
+
+            workers->front()->work_stealing_queue.queue.emplace_front(std::move(clustering_state),
+                                                                      sidb_charge_space_composition{{pst}, store});
         }
-
-        workers.reserve(available_threads);
-
-        workers.emplace_back(std::move(first_worker));
 
         // initialize other workers as thieves
         for (uint64_t i = 1; i < available_threads; ++i)
         {
-            workers.emplace_back(i);
+            workers->emplace_back(std::make_unique<worker>(i, charge_layout.num_cells(), workers));
         }
     }
     /**
@@ -772,108 +769,36 @@ class clustercomplete_impl
             // add all composition except first to queue
             for (uint64_t i = 1; i < compositions.size(); ++i)
             {
-                w.work_stealing_queue.queue.emplace_front(std::move(compositions.at(i)));
+                w.work_stealing_queue.queue.emplace_front(w.clustering_state.copy(charge_layout.num_cells()),
+                                                          std::move(compositions.at(i)));
             }
-
-            w.work_stealing_queue.thief_informants.c.emplace_front(prev_max_pst_ix, prev_composition,
-                                                                   compositions.size() - 1);
         }
 
         // unfold first composition
         unfold_composition(w, compositions.front());
 
-        // unfold other compositions while there are ones left on this level to unfold
-        while (const std::optional<sidb_charge_space_composition>& composition = w.obtain_work_from_current_level())
-        {
-            unfold_composition(w, composition);
-        }
+        // // unfold other compositions while there are ones left on this level to unfold
+        // while (const std::optional<sidb_charge_space_composition>& composition = w.obtain_work_from_current_level())
+        // {
+        //     unfold_composition(w, composition);
+        // }
 
-        // apply max_pst back
-        add_or_remove_parent<clustering_state_update_operation::ADD>(w.clustering_state, max_pst_ix);
+        // // apply max_pst back
+        // add_or_remove_parent<clustering_state_update_operation::ADD>(w.clustering_state, max_pst_ix);
     }
 
     void unfold_composition(worker& w, const sidb_charge_space_composition& composition) noexcept
     {
         // specialise parent to a specific composition of its children
-        add_or_remove_composition<clustering_state_update_operation::ADD>(w, composition);
+        add_or_remove_composition<clustering_state_update_operation::ADD>(w.clustering_state, composition);
 
         // recurse with specialised composition
         add_physically_valid_charge_configurations(w);
 
-        // undo specialization such that the specialization may consider a different children composition
-        add_or_remove_composition<clustering_state_update_operation::REMOVE>(w, composition);
+        // // undo specialization such that the specialization may consider a different children composition
+        // add_or_remove_composition<clustering_state_update_operation::REMOVE>(w, composition);
     }
 
-    void enumerate_compositions(worker& w, const std::vector<sidb_charge_space_composition>& compositions) noexcept
-    {
-
-        // bool run_single_threaded = compositions.size() == 1;
-        //
-        // uint64_t supporting_threads = 0;
-        //
-        // if (!run_single_threaded)
-        // {
-        //     supporting_threads = take_available_threads(compositions.size() - 1);
-        //
-        //     if (supporting_threads == 0)
-        //     {
-        //         run_single_threaded = true;
-        //     }
-        // }
-        //
-        // if (run_single_threaded)
-        // {
-        //     for (const sidb_charge_space_composition& composition : compositions)
-        //     {
-        //         unfold_composition(clustering_state, composition);
-        //     }
-        //
-        //     return;
-        // }
-        //
-        // // define the enumeration ranges per thread
-        // std::vector<std::pair<uint64_t, uint64_t>> ranges{};
-        // ranges.reserve(supporting_threads + 1);
-        //
-        // const uint64_t chunk_size = std::max(compositions.size() / (supporting_threads + 1), uint64_t{1});
-        // uint64_t       start      = 0;
-        // uint64_t       end        = chunk_size - 1;
-        //
-        // for (uint64_t i = 0; i < supporting_threads; ++i)
-        // {
-        //     ranges.emplace_back(start, end);
-        //     start = end + 1;
-        //     end   = i == supporting_threads - 1 ? compositions.size() - 1 : start + chunk_size - 1;
-        // }
-        //
-        // ranges.emplace_back(start, end);
-        //
-        // std::vector<std::thread> threads{};
-        // threads.reserve(supporting_threads);
-        //
-        // for (uint64_t i = 0; i < supporting_threads; ++i)
-        // {
-        //     threads.emplace_back(
-        //         [&, start = ranges.at(i).first, end = ranges.at(i).second,
-        //          clustering_state_copy =
-        //              std::make_unique<sidb_clustering_state>(clustering_state.copy(charge_layout.num_cells()))]
-        //         {
-        //             // specialise for all compositions
-        //             for (uint64_t ix = start; ix <= end; ++ix)
-        //             {
-        //                 unfold_composition(*clustering_state_copy,
-        //                                    *std::next(compositions.cbegin(), static_cast<int64_t>(ix)));
-        //             }
-        //         });
-        //
-        //     threads.back().detach();
-        // }
-        //
-        // for (uint64_t ix = ranges.back().first; ix <= ranges.back().second; ++ix)
-        // {
-        //     unfold_composition(clustering_state, *std::next(compositions.cbegin(), static_cast<int64_t>(ix)));
-        // }
-    }
     /**
      * This function converts between semantically equivalent datatypes, only converting projector states to unique
      * pointers to projector states in order to enable the move-swap-pop procedure in the recursive function above.
