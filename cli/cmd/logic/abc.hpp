@@ -56,24 +56,32 @@ class abc_command : public command
             return;
         }
 
-        const auto fiction_network_path = write_current_network_to_temp_file();
-        const auto abc_network_path     = abc_output_temp_file();
-
-        std::cout << fmt::format("[i] Calling ABC with command: '{}'", abc_command_str) << std::endl;
-
-        // call the ABC binary
-        const auto abc_call = fmt::format("{} -c \"read {}; strash; {}; write_aiger {}\"", ABC,
-                                          fiction_network_path.string(), abc_command_str, abc_network_path.string());
-
-        if (const auto ret = std::system(abc_call.c_str()); ret != 0)
+        try
         {
-            env->out() << "[e] Failed to execute ABC command." << std::endl;
-            return;
+            const auto fiction_network_path = write_current_network_to_temp_file();
+            const auto abc_network_path     = abc_output_temp_file();
+
+            std::cout << fmt::format("[i] Calling ABC with command: '{}'", abc_command_str) << std::endl;
+
+            // call the ABC binary
+            const auto abc_call =
+                fmt::format("{} -c \"read {}; strash; {}; write_aiger {}\"", ABC, fiction_network_path.string(),
+                            abc_command_str, abc_network_path.string());
+
+            if (const auto ret = std::system(abc_call.c_str()); ret != 0)
+            {
+                env->out() << "[e] Failed to execute ABC command." << std::endl;
+                return;
+            }
+
+            fiction::network_reader<fiction::aig_ptr> reader{abc_network_path.string(), env->out()};
+
+            store<fiction::logic_network_t>().extend() = reader.get_networks().front();
         }
-
-        fiction::network_reader<fiction::aig_ptr> reader{abc_network_path.string(), env->out()};
-
-        store<fiction::logic_network_t>().extend() = reader.get_networks().front();
+        catch (const std::runtime_error& e)
+        {
+            env->out() << fmt::format("[e] {}", e.what()) << std::endl;
+        }
     }
 
   private:
@@ -88,6 +96,8 @@ class abc_command : public command
 
     /**
      * Get the temporary directory depending on the platform.
+     *
+     * @return Path to the temporary directory.
      */
     static std::filesystem::path get_temp_directory()
     {
@@ -112,7 +122,12 @@ class abc_command : public command
         return {"/tmp"};
 #endif
     }
-
+    /**
+     * Returns a path to "<temp>/fiction" where <temp> is the system's temporary directory. The "fiction" folder is
+     * created if it doesn't exist.
+     *
+     * @return Path to the "<temp>/fiction" directory.
+     */
     static std::filesystem::path get_temp_fiction_directory()
     {
         // get the temporary directory
@@ -137,7 +152,11 @@ class abc_command : public command
 
         return fiction_dir;
     }
-
+    /**
+     * Writes the current logic network in store to a temporary file in AIGER format and returns the path to the file.
+     *
+     * @return Path to a temporary AIGER file where the current network is stored.
+     */
     std::filesystem::path write_current_network_to_temp_file() const
     {
         const auto write = [](auto&& ntk_ptr) -> std::filesystem::path
@@ -151,7 +170,11 @@ class abc_command : public command
 
         return std::visit(write, store<fiction::logic_network_t>().current());
     }
-
+    /**
+     * Returns the path to the temporary file where ABC is supposed to write its output.
+     *
+     * @return Path to the temporary file where ABC is supposed to write its output.
+     */
     std::filesystem::path abc_output_temp_file() const
     {
         const auto get_name = [](auto&& ntk_ptr) -> std::string { return ntk_ptr->get_network_name(); };
