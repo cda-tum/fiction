@@ -22,7 +22,9 @@
 namespace alice
 {
 /**
- * ABC
+ * Callback command for ABC. Calls the ABC binary with a given command string and the current logic network in store.
+ *
+ * Internally, ABC performs a `read <filename>; strash; <command>; write_aiger <filename>` operation.
  */
 class abc_command : public command
 {
