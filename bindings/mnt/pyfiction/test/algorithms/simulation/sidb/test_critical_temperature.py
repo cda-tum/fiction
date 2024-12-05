@@ -1,16 +1,26 @@
 import os
 import unittest
 
-from mnt.pyfiction import (sidb_100_lattice, sidb_technology, critical_temperature_gate_based,
-                           critical_temperature_stats, critical_temperature_params, critical_temperature_non_gate_based,
-                           charge_distribution_surface_100, sidb_simulation_engine, sidb_111_lattice,
-                           charge_distribution_surface_111, read_sqd_layout_100, create_xor_tt, create_not_tt)
+from mnt.pyfiction import (
+    charge_distribution_surface_100,
+    charge_distribution_surface_111,
+    create_not_tt,
+    create_xor_tt,
+    critical_temperature_gate_based,
+    critical_temperature_non_gate_based,
+    critical_temperature_params,
+    critical_temperature_stats,
+    read_sqd_layout_100,
+    sidb_100_lattice,
+    sidb_111_lattice,
+    sidb_simulation_engine,
+    sidb_technology,
+)
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
 class TestCriticalTemperature(unittest.TestCase):
-
     def test_perturber_and_DB_pair_100(self):
         layout = sidb_100_lattice((10, 10))
         layout.assign_cell_type((0, 1), sidb_technology.cell_type.NORMAL)
@@ -67,8 +77,9 @@ class TestCriticalTemperature(unittest.TestCase):
         self.assertEqual(stats.algorithm_name, "QuickExact")
 
     def test_bestagon_inv(self):
-        layout = read_sqd_layout_100(dir_path + "/../../../resources/hex_11_inputsdbp_inv_straight_v0_manual.sqd",
-                                     "inverter_input_0")
+        layout = read_sqd_layout_100(
+            dir_path + "/../../../resources/hex_11_inputsdbp_inv_straight_v0_manual.sqd", "inverter_input_0"
+        )
 
         params = critical_temperature_params()
 
@@ -85,8 +96,9 @@ class TestCriticalTemperature(unittest.TestCase):
         self.assertGreater(stats.num_valid_lyt, 1)
 
     def test_bestagon_inv_with_different_mu(self):
-        layout = read_sqd_layout_100(dir_path + "/../../../resources/hex_11_inputsdbp_inv_straight_v0_manual.sqd",
-                                     "inverter_input_0")
+        layout = read_sqd_layout_100(
+            dir_path + "/../../../resources/hex_11_inputsdbp_inv_straight_v0_manual.sqd", "inverter_input_0"
+        )
 
         params = critical_temperature_params()
         params.operational_params.simulation_parameters.base = 2
@@ -104,5 +116,5 @@ class TestCriticalTemperature(unittest.TestCase):
         self.assertEqual(stats.algorithm_name, "QuickExact")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

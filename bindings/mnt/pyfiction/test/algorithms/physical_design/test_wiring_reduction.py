@@ -1,13 +1,20 @@
-from mnt.pyfiction import (read_technology_network, orthogonal, equivalence_checking, eq_type, wiring_reduction,
-                           wiring_reduction_params, wiring_reduction_stats)
-import unittest
 import os
+import unittest
+
+from mnt.pyfiction import (
+    eq_type,
+    equivalence_checking,
+    orthogonal,
+    read_technology_network,
+    wiring_reduction,
+    wiring_reduction_params,
+    wiring_reduction_stats,
+)
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
 class TestWiringReduction(unittest.TestCase):
-
     def test_wiring_reduction_default(self):
         network = read_technology_network(dir_path + "/../../resources/mux21.v")
 
@@ -77,5 +84,5 @@ class TestWiringReduction(unittest.TestCase):
         self.assertEqual(stats.area_improvement, 37.50)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

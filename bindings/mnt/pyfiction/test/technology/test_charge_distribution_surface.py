@@ -1,10 +1,18 @@
-from mnt.pyfiction import (sidb_layout, sidb_technology, charge_distribution_surface, offset_coordinate,
-                           sidb_charge_state, sidb_111_lattice, charge_distribution_surface_111, charge_index_mode)
 import unittest
+
+from mnt.pyfiction import (
+    charge_distribution_surface,
+    charge_distribution_surface_111,
+    charge_index_mode,
+    offset_coordinate,
+    sidb_111_lattice,
+    sidb_charge_state,
+    sidb_layout,
+    sidb_technology,
+)
 
 
 class TestChargeDistributionSurface(unittest.TestCase):
-
     def test_initialization(self):
         layout_one = sidb_layout((10, 10))
         layout_one.assign_cell_type((0, 1), sidb_technology.cell_type.NORMAL)
@@ -81,5 +89,5 @@ class TestChargeDistributionSurface(unittest.TestCase):
         self.assertEqual(charge_lyt.get_system_energy(), 0)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
