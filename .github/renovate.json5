@@ -34,7 +34,7 @@
         "submodules"
       ],
       commitMessagePrefix: "⬆\uFE0F\uD83D\uDC68\u200D\uD83D\uDCBB",
-      "groupName": "Update Submodules",
+      "groupName": "Submodules",
     },
     {
       matchManagers: [
@@ -44,7 +44,7 @@
         "github_actions"
       ],
       commitMessagePrefix: "⬆\uFE0F\uD83D\uDC68\u200D\uD83D\uDCBB",
-      "groupName": "Update GitHub Actions",
+      "groupName": "GitHub Actions",
     },
     {
       matchManagers: [
@@ -54,7 +54,7 @@
         "pre-commit"
       ],
       commitMessagePrefix: "⬆\uFE0F\uD83E\uDE9D",
-      "groupName": "Update Pre-Commit Hooks",
+      "groupName": "Pre-Commit Hooks",
     },
     {
       matchManagers: [
@@ -65,7 +65,7 @@
         "python"
       ],
       commitMessagePrefix: "⬆\uFE0F\uD83D\uDC0D",
-      "groupName": "Update Python Dependencies",
+      "groupName": "Python Dependencies",
     },
     {
       matchManagers: [
@@ -76,7 +76,7 @@
         "python"
       ],
       commitMessagePrefix: "⬆\uFE0F\uD83D\uDC0D",
-      "groupName": "Update Python Dependencies",
+      "groupName": "Python Dependencies",
     },
     {
       matchManagers: [
@@ -86,7 +86,7 @@
         "docker"
       ],
       commitMessagePrefix: "⬆\uD83D\uDC0B",
-      "groupName": "Update Dockerfile",
+      "groupName": "Dockerfile",
     },
     {
       "description": "Automerge patch updates",
