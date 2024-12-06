@@ -21,9 +21,6 @@
     // "automerge": true, disabled due to endless update loops caused by setuptools_scm
   },
   configMigration: true,
-  labels: [
-    "dependencies"
-  ],
   schedule: [
     "every weekend"
   ],
@@ -36,7 +33,8 @@
         "dependencies",
         "submodules"
       ],
-      commitMessagePrefix: "⬆\uFE0F\uD83D\uDC68\u200D\uD83D\uDCBB"
+      commitMessagePrefix: "⬆\uFE0F\uD83D\uDC68\u200D\uD83D\uDCBB",
+      "groupName": "Update Submodules",
     },
     {
       matchManagers: [
@@ -45,7 +43,8 @@
       addLabels: [
         "github_actions"
       ],
-      commitMessagePrefix: "⬆\uFE0F\uD83D\uDC68\u200D\uD83D\uDCBB"
+      commitMessagePrefix: "⬆\uFE0F\uD83D\uDC68\u200D\uD83D\uDCBB",
+      "groupName": "Update GitHub Actions",
     },
     {
       matchManagers: [
@@ -54,7 +53,8 @@
       addLabels: [
         "pre-commit"
       ],
-      commitMessagePrefix: "⬆\uFE0F\uD83E\uDE9D"
+      commitMessagePrefix: "⬆\uFE0F\uD83E\uDE9D",
+      "groupName": "Update Pre-Commit Hooks",
     },
     {
       matchManagers: [
@@ -64,7 +64,8 @@
         "dependencies",
         "python"
       ],
-      commitMessagePrefix: "⬆\uFE0F\uD83D\uDC0D"
+      commitMessagePrefix: "⬆\uFE0F\uD83D\uDC0D",
+      "groupName": "Update Python Dependencies",
     },
     {
       matchManagers: [
@@ -74,7 +75,8 @@
         "dependencies",
         "python"
       ],
-      commitMessagePrefix: "⬆\uFE0F\uD83D\uDC0D"
+      commitMessagePrefix: "⬆\uFE0F\uD83D\uDC0D",
+      "groupName": "Update Python Dependencies",
     },
     {
       matchManagers: [
@@ -83,7 +85,8 @@
       addLabels: [
         "docker"
       ],
-      commitMessagePrefix: "⬆\uD83D\uDC0B"
+      commitMessagePrefix: "⬆\uD83D\uDC0B",
+      "groupName": "Update Dockerfile",
     },
     {
       "description": "Automerge patch updates",
