@@ -1,0 +1,96 @@
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  extends: [
+    "config:recommended",
+    ":gitSignOff"
+  ],
+  prHourlyLimit: 10,
+  enabledManagers: [
+    "git-submodules",
+    "github-actions",
+    "pre-commit",
+    "pep621",
+    "pip_requirements",
+    "dockerfile",
+  ],
+  "pre-commit": {
+    enabled: true
+  },
+  lockFileMaintenance: {
+    "enabled": true
+    // "automerge": true, disabled due to endless update loops caused by setuptools_scm
+  },
+  configMigration: true,
+  labels: [
+    "dependencies"
+  ],
+  schedule: [
+    "every weekend"
+  ],
+  packageRules: [
+    {
+      matchManagers: [
+        "git-submodules"
+      ],
+      addLabels: [
+        "dependencies",
+        "submodules"
+      ],
+      commitMessagePrefix: "⬆\uFE0F\uD83D\uDC68\u200D\uD83D\uDCBB"
+    },
+    {
+      matchManagers: [
+        "github-actions"
+      ],
+      addLabels: [
+        "github_actions"
+      ],
+      commitMessagePrefix: "⬆\uFE0F\uD83D\uDC68\u200D\uD83D\uDCBB"
+    },
+    {
+      matchManagers: [
+        "pre-commit"
+      ],
+      addLabels: [
+        "pre-commit"
+      ],
+          commitMessagePrefix: "⬆\uFE0F\uD83E\uDE9D"
+    },
+    {
+      matchManagers: [
+        "pep621"
+      ],
+      addLabels: [
+        "dependencies",
+        "python"
+      ],
+      commitMessagePrefix: "⬆\uFE0F\uD83D\uDC0D"
+    },
+    {
+      matchManagers: [
+        "pip_requirements"
+      ],
+      addLabels: [
+        "dependencies",
+        "python"
+      ],
+      commitMessagePrefix: "⬆\uFE0F\uD83D\uDC0D"
+    },
+    {
+      matchManagers: [
+        "dockerfile"
+      ],
+      addLabels: [
+        "docker"
+      ],
+        commitMessagePrefix: "⬆\uD83D\uDC0B"
+    },
+    {
+      "description": "Automerge patch updates",
+      "matchUpdateTypes": [
+        "patch"
+      ],
+      "automerge": true
+    }
+  ]
+}
