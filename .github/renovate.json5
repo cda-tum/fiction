@@ -54,7 +54,7 @@
       addLabels: [
         "pre-commit"
       ],
-          commitMessagePrefix: "⬆\uFE0F\uD83E\uDE9D"
+      commitMessagePrefix: "⬆\uFE0F\uD83E\uDE9D"
     },
     {
       matchManagers: [
@@ -83,7 +83,7 @@
       addLabels: [
         "docker"
       ],
-        commitMessagePrefix: "⬆\uD83D\uDC0B"
+      commitMessagePrefix: "⬆\uD83D\uDC0B"
     },
     {
       "description": "Automerge patch updates",
