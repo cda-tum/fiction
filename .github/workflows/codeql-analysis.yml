@@ -2,30 +2,30 @@ name: 📝 • CodeQL
 
 on:
   push:
-    branches: [ 'main' ]
+    branches: ["main"]
     paths:
-      - '**/*.hpp'
-      - '**/*.cpp'
-      - '**/*.cmake'
-      - '**/CMakeLists.txt'
-      - '**/*.py'
-      - 'libs/**'
-      - '.github/workflows/codeql-analysis.yml'
-      - '!bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp'
+      - "**/*.hpp"
+      - "**/*.cpp"
+      - "**/*.cmake"
+      - "**/CMakeLists.txt"
+      - "**/*.py"
+      - "libs/**"
+      - ".github/workflows/codeql-analysis.yml"
+      - "!bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp"
   pull_request:
-    branches: [ 'main' ]
+    branches: ["main"]
     paths:
-      - '**/*.hpp'
-      - '**/*.cpp'
-      - '**/*.cmake'
-      - '**/CMakeLists.txt'
-      - '**/*.py'
-      - 'libs/**'
-      - '.github/workflows/codeql-analysis.yml'
-      - '!bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp'
+      - "**/*.hpp"
+      - "**/*.cpp"
+      - "**/*.cmake"
+      - "**/CMakeLists.txt"
+      - "**/*.py"
+      - "libs/**"
+      - ".github/workflows/codeql-analysis.yml"
+      - "!bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp"
   merge_group:
   schedule:
-    - cron: '30 5 * * 6'
+    - cron: "30 5 * * 6"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
@@ -46,9 +46,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: [ 'cpp', 'python' ]
-        compiler: [ clang++-17 ]
-        build_type: [ Debug ]
+        language: ["cpp", "python"]
+        compiler: [clang++-17]
+        build_type: [Debug]
 
     steps:
       - name: Free Disk Space (Ubuntu)
@@ -74,7 +74,7 @@ jobs:
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
-          key: '${{matrix.os}}-${{matrix.compiler}}'
+          key: "${{matrix.os}}-${{matrix.compiler}}"
           variant: ccache
           save: true
           max-size: 10G
@@ -82,8 +82,8 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.13.x'
-          cache: 'pip'
+          python-version: "3.13.x"
+          cache: "pip"
 
       - name: Setup mold
         uses: rui314/setup-mold@v1

@@ -1,4 +1,4 @@
-# *fiction* &ndash; Design Automation for Field-coupled Nanotechnologies
+# _fiction_ &ndash; Design Automation for Field-coupled Nanotechnologies
 
 [![Ubuntu CI](https://img.shields.io/github/actions/workflow/status/cda-tum/fiction/ubuntu.yml?label=Ubuntu&logo=ubuntu&style=flat-square)](https://github.com/cda-tum/fiction/actions/workflows/ubuntu.yml)
 [![macOS CI](https://img.shields.io/github/actions/workflow/status/cda-tum/fiction/macos.yml?label=macOS&logo=apple&style=flat-square)](https://github.com/cda-tum/fiction/actions/workflows/macos.yml)
@@ -23,22 +23,21 @@
 This code base provides a C++17 framework for **fi**eld-**c**oupled **t**echnology-**i**ndependent **o**pen
 **n**anocomputing developed as part of the _Munich Nanotech Toolkit_ (_MNT_) by the
 [Chair for Design Automation](https://www.cda.cit.tum.de/) at the [Technical University of Munich](https://www.tum.de/).
-Within *fiction*, algorithms for logic synthesis, placement, routing, clocking, verification, and simulation for
+Within _fiction_, algorithms for logic synthesis, placement, routing, clocking, verification, and simulation for
 [Field-coupled Nanocomputing (FCN)](https://www.springer.com/de/book/9783662437216) technologies are implemented.
 
 To this end, most physical design tasks can be performed on generic data structures that abstract from particular
 technology or cell design. Using an extensible set of gate libraries, technologies, and cell types, these can easily
 be compiled down to any desired FCN technology for physical simulation.
 
-For these use cases, *fiction* provides
+For these use cases, _fiction_ provides
 a [C++ header-only library](https://fiction.readthedocs.io/en/latest/getting_started.html#using-fiction-as-a-header-only-library)
 as well as [Python bindings](https://fiction.readthedocs.io/en/latest/getting_started.html#python-bindings)
 that provide data types and algorithms for recurring tasks, e.g., logic network and layout types on different
-abstraction levels, clocking schemes, gate libraries, design automation algorithms, etc. Additionally, *fiction* comes
+abstraction levels, clocking schemes, gate libraries, design automation algorithms, etc. Additionally, _fiction_ comes
 with an ABC-like
 [CLI tool](https://fiction.readthedocs.io/en/latest/getting_started.html#using-fiction-as-a-stand-alone-cli-tool)
 that allows quick access to its core functionality.
-
 
 <p align="center">
   <a href="https://fiction.readthedocs.io/en/latest/">
@@ -73,7 +72,7 @@ cmake --build . -j4
 cli/fiction
 ```
 
-> Here is an example of running *fiction* to perform a full physical design flow on a QCA circuit layout that can
+> Here is an example of running _fiction_ to perform a full physical design flow on a QCA circuit layout that can
 > afterward be simulated in QCADesigner:
 
 ![CLI example](https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/fiction_cli_example.gif)
@@ -117,8 +116,8 @@ the [documentation](https://fiction.readthedocs.io/en/latest/getting_started.htm
 
 ## Supported Technologies
 
-Physical design in *fiction* can be performed technology-independent. Only if resulted layouts are to be physically,
-simulated, a specific technology implementation is required. To this end, *fiction* supports various potential FCN
+Physical design in _fiction_ can be performed technology-independent. Only if resulted layouts are to be physically,
+simulated, a specific technology implementation is required. To this end, _fiction_ supports various potential FCN
 implementations together with gate libraries to compile gate-level layout abstractions down to the cell level.
 Additionally, output formats for external physical simulator engines are also supported.
 
@@ -171,20 +170,20 @@ Many thanks to Samuel Sze Hang Ng for his support!
 
 ## Implemented Design Automation Algorithms
 
-The *fiction* framework provides implementations of state-of-the-art design automation algorithms for FCN technologies.
+The _fiction_ framework provides implementations of state-of-the-art design automation algorithms for FCN technologies.
 These algorithms can be used in evaluation scripts to perform logic synthesis, physical design, layout verification, and
 physical simulation.
 
 ### Logic Synthesis
 
-For logic synthesis, *fiction* relies on the [mockturtle library](https://github.com/lsils/mockturtle) that offers a
+For logic synthesis, _fiction_ relies on the [mockturtle library](https://github.com/lsils/mockturtle) that offers a
 multitude of logic network types and optimization algorithms. Logic synthesis can be performed in external tools and
-resulting Verilog/AIGER/BLIF/... files can be parsed by *fiction*. Alternatively, since *mockturtle* is included in
-*fiction*, synthesis can be applied in the same evaluation script.
+resulting Verilog/AIGER/BLIF/... files can be parsed by _fiction_. Alternatively, since _mockturtle_ is included in
+_fiction_, synthesis can be applied in the same evaluation script.
 
 ### Physical Design
 
-For automatic FCN layout obtainment, *fiction* provides algorithms that
+For automatic FCN layout obtainment, _fiction_ provides algorithms that
 receive [mockturtle logic networks](https://mockturtle.readthedocs.io/en/latest/implementations.html) as input
 specification and output placed, routed, and clocked generic FCN circuits.
 
@@ -200,8 +199,8 @@ Among these algorithms are
 
 plus several path-finding algorithms that work on generic layouts:
 
-- shortest path via the [A* algorithm](https://ieeexplore.ieee.org/document/4082128)
-- *k* shortest paths via [Yen's algorithm](https://www.ams.org/journals/qam/1970-27-04/S0033-569X-1970-0253822-7/)
+- shortest path via the [A\* algorithm](https://ieeexplore.ieee.org/document/4082128)
+- _k_ shortest paths via [Yen's algorithm](https://www.ams.org/journals/qam/1970-27-04/S0033-569X-1970-0253822-7/)
 
 On top, there is a [hexagonalization algorithm](https://ieeexplore.ieee.org/document/10231278) to transform Cartesian
 layouts suitable for QCA into hexagonal layouts suitable for SiDBs,
@@ -224,36 +223,36 @@ using
 <img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/sidb_simulation.png" alt="SiDB simulation result" align="right" width="270"/>
 
 When a layout is compiled to the cell level via the application of a technology-dependent gate library, it can be
-simulated using a physical model. Currently, the following simulation algorithms are implemented in *fiction*:
+simulated using a physical model. Currently, the following simulation algorithms are implemented in _fiction_:
 
 - Silicon Dangling Bonds (SiDBs)
-    - Electrostatic Ground State Simulation
-        - [*QuickExact*](https://arxiv.org/abs/2308.04487)
-        - [*QuickSim*](https://ieeexplore.ieee.org/document/10231266)
-        - [Exhaustive *(ExGS)*](https://open.library.ubc.ca/soa/cIRcle/collections/ubctheses/24/items/1.0392909)
-    - [Critical Temperature Simulation](https://ieeexplore.ieee.org/document/10231259)
-    - [Operational Domain Computation](https://www.cda.cit.tum.de/files/eda/2023_nanoarch_reducing_the_complexity_of_operational_domain_computation_in_silicon_dangling_bond_logic.pdf)
+  - Electrostatic Ground State Simulation
+    - [_QuickExact_](https://arxiv.org/abs/2308.04487)
+    - [_QuickSim_](https://ieeexplore.ieee.org/document/10231266)
+    - [Exhaustive _(ExGS)_](https://open.library.ubc.ca/soa/cIRcle/collections/ubctheses/24/items/1.0392909)
+  - [Critical Temperature Simulation](https://ieeexplore.ieee.org/document/10231259)
+  - [Operational Domain Computation](https://www.cda.cit.tum.de/files/eda/2023_nanoarch_reducing_the_complexity_of_operational_domain_computation_in_silicon_dangling_bond_logic.pdf)
 
 ## Clocking Schemes
 
 Regular clocking schemes have been proposed in the FCN literature, which can be used as a floor plans for physical
 design. However, sometimes it can make sense to have more freedom and assign clock numbers on the fly. That is
-why *fiction* supports both
+why _fiction_ supports both
 [regular and irregular clocking schemes](https://fiction.readthedocs.io/en/latest/layouts/clocking_scheme.html)
 with variable amounts of clock numbers as QCA for instance uses four clock phases but iNML needs only three.
 
 Built-in schemes are
 
 |                                  [Columnar](https://ieeexplore.ieee.org/document/573740)                                  |                               [Row](https://ieeexplore.ieee.org/document/573740)                                |                                 [2DDWave](https://ieeexplore.ieee.org/document/1717097)                                 |
-|:-------------------------------------------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------------------------------:|
+| :-----------------------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------: | :---------------------------------------------------------------------------------------------------------------------: |
 | <img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/columnar.png" alt="Columnar" height="200"/> | <img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/row.png" alt="Row" height="200"/> | <img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/2ddwave.png" alt="2DDWave" height="200"/> |
 
 |                               [USE](https://ieeexplore.ieee.org/document/7219390)                               |                    [RES](https://www.tandfonline.com/doi/abs/10.1080/21681724.2019.1570551)                     |                   [ESR](https://link.springer.com/content/pdf/10.1007/s10470-020-01760-4.pdf)                   |
-|:---------------------------------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------------------------------------:|
+| :-------------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------: |
 | <img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/use.png" alt="USE" height="200"/> | <img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/res.png" alt="RES" height="200"/> | <img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/esr.png" alt="ESR" height="200"/> |
 
 |                [CFE](https://ietresearch.onlinelibrary.wiley.com/doi/10.1049/iet-cds.2019.0096)                 |     [Ripple](https://scholarworks.rit.edu/cgi/viewcontent.cgi?referer=&httpsredir=1&article=8266&context=theses)      |                                [BANCS](https://ieeexplore.ieee.org/document/8533251)                                |
-|:---------------------------------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------------------------------------------:|:-------------------------------------------------------------------------------------------------------------------:|
+| :-------------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------------------: |
 | <img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/cfe.png" alt="CFE" height="200"/> | <img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/ripple.png" alt="Ripple" height="200"/> | <img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/bancs.png" alt="BANCS" height="300"/> |
 
 plus the mentioned irregular open clocking that works via a clock map instead of a regular extrapolated cutout.
@@ -264,7 +263,7 @@ plus the mentioned irregular open clocking that works via a clock map instead of
 
 With many FCN technologies considered planar, wire crossings should be minimized if possible. However, there are some
 options in QCA where, using a second layer, crossings over short distances and co-planar rotated cells become possible.
-As both are just technical implementations of the same concept, *fiction* supports crossings as wires in a second grid
+As both are just technical implementations of the same concept, _fiction_ supports crossings as wires in a second grid
 layer in its data structures for all FCN technologies. They will also be represented as such in corresponding SVG and
 QCADesigner output. However, note that it is to be interpreted as the concept of crossings and could also be realized
 co-planar.
@@ -276,14 +275,14 @@ Wires are only allowed to cross other wires! Wires crossing gates is considered 
 <img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/io.png" alt="Input pin and cell output" align="right" width="200"/>
 
 In the literature, both are seen: having input cells (pins) directly located in the gate structure or using designated
-I/O elements that are located outside of gates. This distinction only makes sense on the gate level and *fiction*
+I/O elements that are located outside of gates. This distinction only makes sense on the gate level and _fiction_
 supports both approaches and offers usage in the implemented physical design algorithms.
 
 ## Multi Wires
 
 <img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/multi.png" alt="Multi wires" align="left" width="200"/>
 
-Gate-level abstraction has its limits. Often, chip area is wasted when only using a single wire per tile. In *fiction*,
+Gate-level abstraction has its limits. Often, chip area is wasted when only using a single wire per tile. In _fiction_,
 cell-level layouts allow for precise control over cell placement and can, thus, also create multiple wire segments per
 clock zone. Physical simulation can give an indication of whether the built structures are implementing the intended
 functionality.
@@ -293,7 +292,7 @@ functionality.
 <img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/se.png" alt="Synchronization element" align="right" width="150"/>
 
 A technology extension proposes to utilize the external clock signal generator in an unconventional way: by creating
-further asymmetric clock signals with extended *Hold* phases that are assigned to specific wire
+further asymmetric clock signals with extended _Hold_ phases that are assigned to specific wire
 tiles, [synchronization elements](https://ieeexplore.ieee.org/document/8626294) can be created that stall signals over
 multiple clock cycles. These artificial latches are able to feed information to any other clock number, but their usage
 reduces the overall throughput of the layout. In return, long wire detours for signal synchronization can be prevented.
@@ -327,16 +326,16 @@ Cell-level layouts:
 To objectively evaluate and compare software and design automation
 tools, [MNT Bench](https://www.cda.cit.tum.de/mntbench/) provides gate-level
 layouts for various gate libraries and clocking schemes, generated using the latest physical design and
-optimization algorithms, with *fiction* offering the corresponding read and write utilities to generate gate-level
-layouts from gate-level layout files (``.fgl``) and vice versa.
+optimization algorithms, with _fiction_ offering the corresponding read and write utilities to generate gate-level
+layouts from gate-level layout files (`.fgl`) and vice versa.
 
 Additionally, the [benchmarks](https://github.com/cda-tum/fiction/tree/main/benchmarks) folder contains the function
-descriptions of frequently used benchmark sets in Verilog format (``.v``) provided
+descriptions of frequently used benchmark sets in Verilog format (`.v`) provided
 by [MNT Bench](https://www.cda.cit.tum.de/mntbench/).
 
 ## Reference
 
-Since *fiction* is academic software, we would be thankful if you referred to it by citing the following publications:
+Since _fiction_ is academic software, we would be thankful if you referred to it by citing the following publications:
 
 ```bibtex
 @misc{fiction,
@@ -362,7 +361,7 @@ and
 }
 ```
 
-Additionally, many algorithms implemented in *fiction* have been published individually. For a full list of
+Additionally, many algorithms implemented in _fiction_ have been published individually. For a full list of
 publications, please refer to the [documentation](https://fiction.readthedocs.io/en/latest/publications.html).
 
 ## Acknowledgements

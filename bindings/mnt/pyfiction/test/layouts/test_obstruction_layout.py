@@ -1,20 +1,26 @@
 import unittest
 
-from mnt.pyfiction import (cartesian_obstruction_layout, cartesian_gate_layout, shifted_cartesian_obstruction_layout,
-                           shifted_cartesian_gate_layout, hexagonal_gate_layout, hexagonal_obstruction_layout,
-                           offset_coordinate, critical_path_length_and_throughput, gate_level_drvs,
-                           gate_level_drv_params)
+from mnt.pyfiction import (
+    cartesian_gate_layout,
+    cartesian_obstruction_layout,
+    critical_path_length_and_throughput,
+    gate_level_drv_params,
+    gate_level_drvs,
+    hexagonal_gate_layout,
+    hexagonal_obstruction_layout,
+    offset_coordinate,
+    shifted_cartesian_gate_layout,
+    shifted_cartesian_obstruction_layout,
+)
 
 
 class TestObstructionLayout(unittest.TestCase):
-
     def test_obstruction_layout_clocking_inheritance(self):
-
-        for layout in [cartesian_obstruction_layout(cartesian_gate_layout((2, 2, 0), "2DDWave", "Layout")),
-                       shifted_cartesian_obstruction_layout(shifted_cartesian_gate_layout((2, 2, 0), "2DDWave",
-                                                                                          "Layout")),
-                       hexagonal_obstruction_layout(hexagonal_gate_layout((2, 2, 0), "2DDWave", "Layout"))]:
-
+        for layout in [
+            cartesian_obstruction_layout(cartesian_gate_layout((2, 2, 0), "2DDWave", "Layout")),
+            shifted_cartesian_obstruction_layout(shifted_cartesian_gate_layout((2, 2, 0), "2DDWave", "Layout")),
+            hexagonal_obstruction_layout(hexagonal_gate_layout((2, 2, 0), "2DDWave", "Layout")),
+        ]:
             self.assertEqual(layout.incoming_clocked_zones((0, 0)), [])
             self.assertEqual(layout.outgoing_clocked_zones((2, 2)), [])
 
@@ -25,11 +31,11 @@ class TestObstructionLayout(unittest.TestCase):
                 self.assertIn(icz, [offset_coordinate(1, 2), offset_coordinate(2, 1)])
 
     def test_obstructed_coordinates(self):
-        for layout in [cartesian_obstruction_layout(cartesian_gate_layout((3, 3, 1), "2DDWave", "Layout")),
-                       shifted_cartesian_obstruction_layout(shifted_cartesian_gate_layout((3, 3, 1), "2DDWave",
-                                                                                          "Layout")),
-                       hexagonal_obstruction_layout(hexagonal_gate_layout((3, 3, 1), "2DDWave", "Layout"))]:
-
+        for layout in [
+            cartesian_obstruction_layout(cartesian_gate_layout((3, 3, 1), "2DDWave", "Layout")),
+            shifted_cartesian_obstruction_layout(shifted_cartesian_gate_layout((3, 3, 1), "2DDWave", "Layout")),
+            hexagonal_obstruction_layout(hexagonal_gate_layout((3, 3, 1), "2DDWave", "Layout")),
+        ]:
             for c in layout.coordinates():
                 self.assertFalse(layout.is_obstructed_coordinate(c))
 
@@ -42,11 +48,11 @@ class TestObstructionLayout(unittest.TestCase):
             self.assertTrue(layout.is_obstructed_coordinate((2, 2)))
 
     def test_obstructed_connections(self):
-        for layout in [cartesian_obstruction_layout(cartesian_gate_layout((3, 3, 1), "2DDWave", "Layout")),
-                       shifted_cartesian_obstruction_layout(shifted_cartesian_gate_layout((3, 3, 1), "2DDWave",
-                                                                                          "Layout")),
-                       hexagonal_obstruction_layout(hexagonal_gate_layout((3, 3, 1), "2DDWave", "Layout"))]:
-
+        for layout in [
+            cartesian_obstruction_layout(cartesian_gate_layout((3, 3, 1), "2DDWave", "Layout")),
+            shifted_cartesian_obstruction_layout(shifted_cartesian_gate_layout((3, 3, 1), "2DDWave", "Layout")),
+            hexagonal_obstruction_layout(hexagonal_gate_layout((3, 3, 1), "2DDWave", "Layout")),
+        ]:
             for c1 in layout.coordinates():
                 for c2 in layout.coordinates():
                     self.assertFalse(layout.is_obstructed_connection(c1, c2))
@@ -58,11 +64,11 @@ class TestObstructionLayout(unittest.TestCase):
             self.assertTrue(layout.is_obstructed_connection((1, 1), (2, 2)))
 
     def test_obstruction_via_gates(self):
-
-        for layout in [cartesian_obstruction_layout(cartesian_gate_layout((3, 3, 1), "2DDWave", "Layout")),
-                       shifted_cartesian_obstruction_layout(shifted_cartesian_gate_layout((3, 3, 1), "2DDWave",
-                                                                                          "Layout")),
-                       hexagonal_obstruction_layout(hexagonal_gate_layout((3, 3, 1), "2DDWave", "Layout"))]:
+        for layout in [
+            cartesian_obstruction_layout(cartesian_gate_layout((3, 3, 1), "2DDWave", "Layout")),
+            shifted_cartesian_obstruction_layout(shifted_cartesian_gate_layout((3, 3, 1), "2DDWave", "Layout")),
+            hexagonal_obstruction_layout(hexagonal_gate_layout((3, 3, 1), "2DDWave", "Layout")),
+        ]:
             x1 = layout.create_pi("x1", (0, 1))
             x2 = layout.create_pi("x2", (3, 2))
             x3 = layout.create_pi("x3", (2, 0))
@@ -85,7 +91,6 @@ class TestObstructionLayout(unittest.TestCase):
 
 
 class TestCartesianObstructionLayout(unittest.TestCase):
-
     def test_cartesian_obstruction_layout_gate_level_inheritance(self):
         layout = cartesian_obstruction_layout(cartesian_gate_layout((3, 3, 1), "2DDWave", "Layout"))
 
@@ -216,7 +221,6 @@ class TestCartesianObstructionLayout(unittest.TestCase):
 
 
 class TestHexagonalObstructionLayout(unittest.TestCase):
-
     def test_hexagonal_obstruction_layout_gate_level_inheritance(self):
         layout = hexagonal_obstruction_layout(hexagonal_gate_layout((3, 3, 1), "2DDWave", "Layout"))
 
@@ -346,5 +350,5 @@ class TestHexagonalObstructionLayout(unittest.TestCase):
         self.assertEqual(gate_level_drvs(layout, drv_params, False), (0, 0))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

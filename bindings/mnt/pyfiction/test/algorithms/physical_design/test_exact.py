@@ -1,13 +1,20 @@
-from mnt.pyfiction import (read_technology_network, exact_cartesian, equivalence_checking, eq_type, exact_params,
-                           exact_stats, exact_hexagonal)
-import unittest
 import os
+import unittest
+
+from mnt.pyfiction import (
+    eq_type,
+    equivalence_checking,
+    exact_cartesian,
+    exact_hexagonal,
+    exact_params,
+    exact_stats,
+    read_technology_network,
+)
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
 class TestExactCartesianPhysicalDesign(unittest.TestCase):
-
     def test_exact_default(self):
         network = read_technology_network(dir_path + "/../../resources/mux21.v")
         layout = exact_cartesian(network)
@@ -36,7 +43,6 @@ class TestExactCartesianPhysicalDesign(unittest.TestCase):
 
 
 class TestExactHexagonalPhysicalDesign(unittest.TestCase):
-
     def test_exact_default(self):
         network = read_technology_network(dir_path + "/../../resources/mux21.v")
         layout = exact_hexagonal(network)
@@ -64,5 +70,5 @@ class TestExactHexagonalPhysicalDesign(unittest.TestCase):
         self.assertEqual(equivalence_checking(network, layout), eq_type.STRONG)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
