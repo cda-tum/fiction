@@ -77,6 +77,7 @@ TEST_CASE("SiQAD OR gate", "[is-operational]")
         for (const auto& c : logic_cells)
         {
             canvas_lyt.assign_cell_type(c, sidb_technology::cell_type::NORMAL);
+            CHECK(canvas_lyt.get_cell_type(c) == sidb_technology::cell_type::NORMAL);
         }
         CHECK(is_operational(lat, std::vector<tt>{create_or_tt()}, op_params, input_wires, output_wires,
                              std::optional{canvas_lyt})
@@ -93,6 +94,7 @@ TEST_CASE("SiQAD OR gate", "[is-operational]")
                 if (lat.get_cell_type(c) == sidb_technology::LOGIC)
                 {
                     lat_copy.assign_cell_type(c, sidb_technology::cell_type::NORMAL);
+                    CHECK(lat_copy.get_cell_type(c) == sidb_technology::cell_type::NORMAL);
                 }
             });
 
