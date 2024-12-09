@@ -346,6 +346,15 @@ struct potential_bounds_store
 {
   public:
     /**
+     * Getter for the size of the potential bounds store, i.e., the number of SiDBs considered in this store.
+     *
+     * @return The size of the potential bounds store.
+     */
+    [[nodiscard]] constexpr inline uint64_t size() const noexcept
+    {
+        return store.size();
+    }
+    /**
      * Getter for a (partial) potential sum bound local to an SiDB.
      *
      * @tparam bound The potential bound to obtain.
@@ -492,28 +501,47 @@ struct sidb_clustering_state
     /**
      * Projector states associated with charge space elements that make up the clustering state.
      */
-    std::vector<sidb_cluster_projector_state_ptr> proj_states;
+    std::vector<sidb_cluster_projector_state_ptr> proj_states{};
     /**
      * Flattened (hierarchical) potential bounds specific to this clustering state.
      */
-    complete_potential_bounds_store pot_bounds;
+    complete_potential_bounds_store pot_bounds{};
     /**
-    * Copy fu
-*/
-    sidb_clustering_state copy(const uint64_t num_sidbs) const noexcept
+     * Default constructor.
+     *
+     * @param num_sidbs Number of SiDBs in the layout that the clustering state should consider.
+     */
+    explicit sidb_clustering_state(const uint64_t num_sidbs) noexcept
     {
-        sidb_clustering_state copy_clustering_state{};
-
-        for (const sidb_cluster_projector_state_ptr& pst : proj_states)
+        pot_bounds.initialise_complete_potential_bounds(num_sidbs);
+    }
+    /**
+     * Copy constructor.
+     *
+     * @param other Other clustering state to copy.
+     */
+    explicit sidb_clustering_state(const sidb_clustering_state& other) noexcept
+    {
+        for (const sidb_cluster_projector_state_ptr& pst : other.proj_states)
         {
-            copy_clustering_state.proj_states.emplace_back(std::make_unique<sidb_cluster_projector_state>(*pst));
+            proj_states.emplace_back(std::make_unique<sidb_cluster_projector_state>(*pst));
         }
 
-        copy_clustering_state.pot_bounds.initialise_complete_potential_bounds(num_sidbs);
-        copy_clustering_state.pot_bounds += pot_bounds;
-
-        return copy_clustering_state;
+        pot_bounds.initialise_complete_potential_bounds(other.pot_bounds.size());
+        pot_bounds += other.pot_bounds;
     }
+    /**
+     * Move constructor.
+     *
+     * @param other Other clustering state to move.
+     */
+    explicit sidb_clustering_state(sidb_clustering_state&& other) noexcept = default;
+    /**
+     * Move assignment operator.
+     *
+     * @param other Other clustering state to move.
+     */
+    sidb_clustering_state& operator=(sidb_clustering_state&& other) noexcept = default;
 };
 /**
  * A cluster charge state is a multiset charge configuration. We may compress it into a 64 bit unsigned integer by
