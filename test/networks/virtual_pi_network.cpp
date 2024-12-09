@@ -307,4 +307,3 @@ TEMPLATE_TEST_CASE("Remove PIs and check equivalence", "[virtual-pi-view]", mock
         }
     }
 }
-
