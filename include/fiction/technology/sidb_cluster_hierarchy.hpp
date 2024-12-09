@@ -350,7 +350,7 @@ struct potential_bounds_store
      *
      * @return The size of the potential bounds store.
      */
-    [[nodiscard]] constexpr inline uint64_t size() const noexcept
+    [[nodiscard]] constexpr inline uint64_t num_sidbs() const noexcept
     {
         return store.size();
     }
@@ -527,7 +527,7 @@ struct sidb_clustering_state
             proj_states.emplace_back(std::make_unique<sidb_cluster_projector_state>(*pst));
         }
 
-        pot_bounds.initialise_complete_potential_bounds(other.pot_bounds.size());
+        pot_bounds.initialise_complete_potential_bounds(other.pot_bounds.num_sidbs());
         pot_bounds += other.pot_bounds;
     }
     /**
