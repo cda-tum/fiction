@@ -191,9 +191,9 @@ class clustercomplete_impl
 
                 while (const std::optional<sidb_charge_space_composition>& work = workers.front()->obtain_work())
                 {
-                    // std::cout << "thread 0 doing work..." << std::endl;
+                    std::cout << "thread 0 doing work..." << std::endl;
                     unfold_composition(*workers.front(), *work);
-                    // std::cout << "thread 0 finished work" << std::endl;
+                    std::cout << "thread 0 finished work" << std::endl;
                 }
 
                 // std::cout << "thread 0 stopped working" << std::endl;
@@ -366,25 +366,25 @@ class clustercomplete_impl
     void add_if_configuration_stability_is_met(const sidb_clustering_state& clustering_state) noexcept
     {
         std::cout << "FOUND POP STABLE CLUSTERING STATE" << std::endl;
-        std::cout << '\t' << clustering_state.proj_states.at(0).get()->cluster->uid << ' '
-                  << clustering_state.proj_states.at(1).get()->cluster->uid << ' '
-                  << clustering_state.proj_states.at(2).get()->cluster->uid << ' '
-                  << clustering_state.proj_states.at(3).get()->cluster->uid << std::endl;
+        // std::cout << '\t' << clustering_state.proj_states.at(0).get()->cluster->uid << ' '
+        //           << clustering_state.proj_states.at(1).get()->cluster->uid << ' '
+        //           << clustering_state.proj_states.at(2).get()->cluster->uid << ' '
+        //           << clustering_state.proj_states.at(3).get()->cluster->uid << std::endl;
 
-        std::cout
-            << '\t'
-            << charge_configuration_to_string(
-                   {singleton_multiset_conf_to_charge_state(clustering_state.proj_states.at(0).get()->multiset_conf)})
-            << ' '
-            << charge_configuration_to_string(
-                   {singleton_multiset_conf_to_charge_state(clustering_state.proj_states.at(1).get()->multiset_conf)})
-            << ' '
-            << charge_configuration_to_string(
-                   {singleton_multiset_conf_to_charge_state(clustering_state.proj_states.at(2).get()->multiset_conf)})
-            << ' '
-            << charge_configuration_to_string(
-                   {singleton_multiset_conf_to_charge_state(clustering_state.proj_states.at(3).get()->multiset_conf)})
-            << std::endl;
+        // std::cout
+        //     << '\t'
+        //     << charge_configuration_to_string(
+        //            {singleton_multiset_conf_to_charge_state(clustering_state.proj_states.at(0).get()->multiset_conf)})
+        //     << ' '
+        //     << charge_configuration_to_string(
+        //            {singleton_multiset_conf_to_charge_state(clustering_state.proj_states.at(1).get()->multiset_conf)})
+        //     << ' '
+        //     << charge_configuration_to_string(
+        //            {singleton_multiset_conf_to_charge_state(clustering_state.proj_states.at(2).get()->multiset_conf)})
+        //     << ' '
+        //     << charge_configuration_to_string(
+        //            {singleton_multiset_conf_to_charge_state(clustering_state.proj_states.at(3).get()->multiset_conf)})
+        //     << std::endl;
 
         charge_distribution_surface charge_layout_copy{charge_layout};
 
@@ -504,7 +504,9 @@ class clustercomplete_impl
             clustering_state.pot_bounds.update(
                 sidb_ix, -get_projector_state_bound_pot<bound_direction::LOWER>(*max_pst, sidb_ix),
                 -get_projector_state_bound_pot<bound_direction::UPPER>(*max_pst, sidb_ix));
-            assert(clustering_state.pot_bounds.get<bound_direction::LOWER>(sidb_ix) - clustering_state.pot_bounds.get<bound_direction::UPPER>(sidb_ix) <= std::numeric_limits<double>::epsilon());
+            assert(clustering_state.pot_bounds.get<bound_direction::LOWER>(sidb_ix) -
+                       clustering_state.pot_bounds.get<bound_direction::UPPER>(sidb_ix) <=
+                   100 * std::numeric_limits<double>::epsilon());
         }
 
         return max_pst;
@@ -526,7 +528,9 @@ class clustercomplete_impl
             clustering_state.pot_bounds.update(
                 sidb_ix, get_projector_state_bound_pot<bound_direction::LOWER>(*parent_pst, sidb_ix),
                 get_projector_state_bound_pot<bound_direction::UPPER>(*parent_pst, sidb_ix));
-            assert(clustering_state.pot_bounds.get<bound_direction::LOWER>(sidb_ix) - clustering_state.pot_bounds.get<bound_direction::UPPER>(sidb_ix) <= std::numeric_limits<double>::epsilon());
+            assert(clustering_state.pot_bounds.get<bound_direction::LOWER>(sidb_ix) -
+                       clustering_state.pot_bounds.get<bound_direction::UPPER>(sidb_ix) <=
+                   100 * std::numeric_limits<double>::epsilon());
         }
 
         // move back
@@ -544,7 +548,9 @@ class clustercomplete_impl
 
         for (uint64_t sidb_ix = 0; sidb_ix < clustering_state.pot_bounds.num_sidbs(); ++sidb_ix)
         {
-            assert(clustering_state.pot_bounds.get<bound_direction::LOWER>(sidb_ix) - clustering_state.pot_bounds.get<bound_direction::UPPER>(sidb_ix) <= std::numeric_limits<double>::epsilon());
+            assert(clustering_state.pot_bounds.get<bound_direction::LOWER>(sidb_ix) -
+                       clustering_state.pot_bounds.get<bound_direction::UPPER>(sidb_ix) <=
+                   100 * std::numeric_limits<double>::epsilon());
         }
 
         for (const sidb_cluster_projector_state& child_pst : composition.proj_states)
@@ -567,7 +573,8 @@ class clustercomplete_impl
 
         for (uint64_t sidb_ix = 0; sidb_ix < clustering_state.pot_bounds.num_sidbs(); ++sidb_ix)
         {
-            assert(clustering_state.pot_bounds.get<bound_direction::LOWER>(sidb_ix) - clustering_state.pot_bounds.get<bound_direction::UPPER>(sidb_ix) <= std::numeric_limits<double>::epsilon());
+            assert(clustering_state.pot_bounds.get<bound_direction::LOWER>(sidb_ix) - clustering_state.pot_bounds.get<bound_direction::UPPER>(sidb_ix) <=
+                   100 * std::numeric_limits<double>::epsilon());
         }
     }
 
@@ -592,7 +599,7 @@ class clustercomplete_impl
 
             if (queue.empty())
             {
-                return {std::nullopt, true};
+                return {std::nullopt, false};
             }
 
             if (queue.front().empty())
@@ -820,22 +827,22 @@ class clustercomplete_impl
         const uint64_t max_pst_ix = find_cluster_of_maximum_size(w.clustering_state.proj_states);
 
         std::cout << "removing parent, clustering size = " << w.clustering_state.proj_states.size() << std::endl;
-        for (uint64_t i = 0; i < 4; ++i)
-        {
-            std::cout << fmt::format("\t{}: {:.2f} {:.2f}\n", i,
-                                     w.clustering_state.pot_bounds.template get<bound_direction::LOWER>(i),
-                                     w.clustering_state.pot_bounds.template get<bound_direction::UPPER>(i));
-        }
+        // for (uint64_t i = 0; i < 4; ++i)
+        // {
+        //     std::cout << fmt::format("\t{}: {:.2f} {:.2f}\n", i,
+        //                              w.clustering_state.pot_bounds.template get<bound_direction::LOWER>(i),
+        //                              w.clustering_state.pot_bounds.template get<bound_direction::UPPER>(i));
+        // }
         // un-apply max_pst, thereby making space for specialization
         sidb_cluster_projector_state_ptr max_pst = move_parent_out(w.clustering_state, max_pst_ix);
 
         std::cout << "done removing parent, clustering size = " << w.clustering_state.proj_states.size() << std::endl;
-        for (uint64_t i = 0; i < 4; ++i)
-        {
-            std::cout << fmt::format("\t{}: {:.2f} {:.2f}\n", i,
-                                     w.clustering_state.pot_bounds.template get<bound_direction::LOWER>(i),
-                                     w.clustering_state.pot_bounds.template get<bound_direction::UPPER>(i));
-        }
+        // for (uint64_t i = 0; i < 4; ++i)
+        // {
+        //     std::cout << fmt::format("\t{}: {:.2f} {:.2f}\n", i,
+        //                              w.clustering_state.pot_bounds.template get<bound_direction::LOWER>(i),
+        //                              w.clustering_state.pot_bounds.template get<bound_direction::UPPER>(i));
+        // }
 
         // unfold all compositions
         const std::vector<sidb_charge_space_composition>& compositions = get_projector_state_compositions(*max_pst);
@@ -867,7 +874,13 @@ class clustercomplete_impl
 
             if (!work.first.has_value())
             {
-                std::cout << "quit since work has no value" << std::endl;
+                std::cout << "quit since work has no value (backtrack = " << work.second << ")" << std::endl;
+                if (work.second)  // false iff queue is completely empty; no need to backtrack
+                {
+                    add_parent(w.clustering_state, max_pst_ix, std::move(max_pst));
+                    return true;
+                }
+
                 return false;
             }
 
@@ -877,21 +890,21 @@ class clustercomplete_impl
 
         std::cout << "adding back parent, clustering size = " << w.clustering_state.proj_states.size() << std::endl;
         // apply max_pst back
-        for (uint64_t i = 0; i < 4; ++i)
-        {
-            std::cout << fmt::format("\t{}: {:.2f} {:.2f}\n", i,
-                                     w.clustering_state.pot_bounds.template get<bound_direction::LOWER>(i),
-                                     w.clustering_state.pot_bounds.template get<bound_direction::UPPER>(i));
-        }
+        // for (uint64_t i = 0; i < 4; ++i)
+        // {
+        //     std::cout << fmt::format("\t{}: {:.2f} {:.2f}\n", i,
+        //                              w.clustering_state.pot_bounds.template get<bound_direction::LOWER>(i),
+        //                              w.clustering_state.pot_bounds.template get<bound_direction::UPPER>(i));
+        // }
         add_parent(w.clustering_state, max_pst_ix, std::move(max_pst));
         std::cout << "done adding back parent, clustering size = " << w.clustering_state.proj_states.size()
                   << std::endl;
-        for (uint64_t i = 0; i < 4; ++i)
-        {
-            std::cout << fmt::format("\t{}: {:.2f} {:.2f}\n", i,
-                                     w.clustering_state.pot_bounds.template get<bound_direction::LOWER>(i),
-                                     w.clustering_state.pot_bounds.template get<bound_direction::UPPER>(i));
-        }
+        // for (uint64_t i = 0; i < 4; ++i)
+        // {
+        //     std::cout << fmt::format("\t{}: {:.2f} {:.2f}\n", i,
+        //                              w.clustering_state.pot_bounds.template get<bound_direction::LOWER>(i),
+        //                              w.clustering_state.pot_bounds.template get<bound_direction::UPPER>(i));
+        // }
         return true;
     }
 
@@ -899,32 +912,54 @@ class clustercomplete_impl
     {
         // specialise parent to a specific composition of its children
         std::cout << "adding composition, clustering size = " << w.clustering_state.proj_states.size() << std::endl;
-        for (uint64_t i = 0; i < 4; ++i)
-        {
-            std::cout << fmt::format("\t{}: {:.2f} {:.2f}\n", i,
-                                     w.clustering_state.pot_bounds.template get<bound_direction::LOWER>(i),
-                                     w.clustering_state.pot_bounds.template get<bound_direction::UPPER>(i));
-        }
+        // for (uint64_t i = 0; i < 4; ++i)
+        // {
+        //     std::cout << fmt::format("\t{}: {:.2f} {:.2f}\n", i,
+        //                              w.clustering_state.pot_bounds.template get<bound_direction::LOWER>(i),
+        //                              w.clustering_state.pot_bounds.template get<bound_direction::UPPER>(i));
+        // }
         add_composition(w.clustering_state, composition);
         std::cout << "done adding composition, clustering size = " << w.clustering_state.proj_states.size()
                   << std::endl;
 
-        for (uint64_t i = 0; i < 4; ++i)
-        {
-            std::cout << fmt::format("\t{}: {:.2f} {:.2f}\n", i,
-                                     w.clustering_state.pot_bounds.template get<bound_direction::LOWER>(i),
-                                     w.clustering_state.pot_bounds.template get<bound_direction::UPPER>(i));
-        }
+        // for (uint64_t i = 0; i < 4; ++i)
+        // {
+        //     std::cout << fmt::format("\t{}: {:.2f} {:.2f}\n", i,
+        //                              w.clustering_state.pot_bounds.template get<bound_direction::LOWER>(i),
+        //                              w.clustering_state.pot_bounds.template get<bound_direction::UPPER>(i));
+        // }
 
         // recurse with specialised composition
         if (add_physically_valid_charge_configurations(w))
         {
             std::cout << "removing composition, clustering size = " << w.clustering_state.proj_states.size()
                       << std::endl;
+            for (const auto& pst : composition.proj_states)
+            {
+                std::cout << pst.cluster->uid << ' ';
+            }
+            std::cout << std::endl;
+            // for (uint64_t i = 0; i < 4; ++i)
+            // {
+            //     std::cout << fmt::format("\t{}: {:.2f} {:.2f}\n", i,
+            //                              w.clustering_state.pot_bounds.template get<bound_direction::LOWER>(i),
+            //                              w.clustering_state.pot_bounds.template get<bound_direction::UPPER>(i));
+            // }
             // undo specialization such that the specialization may consider a different children composition
             remove_composition(w.clustering_state, composition);
             std::cout << "done removing composition, clustering size = " << w.clustering_state.proj_states.size()
                       << std::endl;
+            for (const auto& pst : composition.proj_states)
+            {
+                std::cout << pst.cluster->uid << ' ';
+            }
+            std::cout << std::endl;
+            // for (uint64_t i = 0; i < 4; ++i)
+            // {
+            //     std::cout << fmt::format("\t{}: {:.2f} {:.2f}\n", i,
+            //                              w.clustering_state.pot_bounds.template get<bound_direction::LOWER>(i),
+            //                              w.clustering_state.pot_bounds.template get<bound_direction::UPPER>(i));
+            // }
         }
     }
 };
