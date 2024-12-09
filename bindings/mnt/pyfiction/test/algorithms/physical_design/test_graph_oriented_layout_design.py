@@ -1,14 +1,21 @@
-from mnt.pyfiction import (read_technology_network, graph_oriented_layout_design_stats, graph_oriented_layout_design,
-                           graph_oriented_layout_design_params, eq_type, equivalence_checking, gold_cost_objective,
-                           gold_effort_mode)
-import unittest
 import os
+import unittest
+
+from mnt.pyfiction import (
+    eq_type,
+    equivalence_checking,
+    gold_cost_objective,
+    gold_effort_mode,
+    graph_oriented_layout_design,
+    graph_oriented_layout_design_params,
+    graph_oriented_layout_design_stats,
+    read_technology_network,
+)
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
 class TestGraphOrientedLayoutDesign(unittest.TestCase):
-
     def test_graph_oriented_layout_design(self):
         network = read_technology_network(dir_path + "/../../resources/mux21.v")
 
@@ -92,5 +99,5 @@ class TestGraphOrientedLayoutDesign(unittest.TestCase):
         self.assertNotEqual(equivalence_checking(network, layout), eq_type.NO)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -1,6 +1,7 @@
-from mnt.pyfiction import read_technology_network, is_balanced, network_balancing, network_balancing_params
-import unittest
 import os
+import unittest
+
+from mnt.pyfiction import is_balanced, network_balancing, network_balancing_params, read_technology_network
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -23,5 +24,5 @@ class TestNetworkBalancing(unittest.TestCase):
         self.assertTrue(is_balanced(balanced_unify, unify_params))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

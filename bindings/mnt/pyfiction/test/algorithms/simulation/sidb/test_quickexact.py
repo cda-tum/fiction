@@ -1,12 +1,20 @@
-from mnt.pyfiction import (sidb_100_lattice, sidb_111_lattice, sidb_technology, quickexact, quickexact_params,
-                           automatic_base_number_detection, charge_distribution_surface_100,
-                           charge_distribution_surface_111, determine_groundstate_from_simulation_results,
-                           sidb_charge_state)
 import unittest
+
+from mnt.pyfiction import (
+    automatic_base_number_detection,
+    charge_distribution_surface_100,
+    charge_distribution_surface_111,
+    determine_groundstate_from_simulation_results,
+    quickexact,
+    quickexact_params,
+    sidb_100_lattice,
+    sidb_111_lattice,
+    sidb_charge_state,
+    sidb_technology,
+)
 
 
 class TestQuickExact(unittest.TestCase):
-
     def test_three_sidbs(self):
         layout = sidb_100_lattice((2, 1))
         layout.assign_cell_type((0, 0), sidb_technology.cell_type.NORMAL)
@@ -68,5 +76,5 @@ class TestQuickExact(unittest.TestCase):
         self.assertEqual(groundstate[0].get_charge_state((3, 0)), sidb_charge_state.NEGATIVE)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

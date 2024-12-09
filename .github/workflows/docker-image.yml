@@ -2,33 +2,33 @@ name: 🐳 • Docker Image
 
 on:
   push:
-    branches: [ 'main' ]
+    branches: ["main"]
     paths:
-      - '**/*.hpp'
-      - '**/*.cpp'
-      - '**/*.cmake'
-      - '**/CMakeLists.txt'
-      - 'libs/**'
-      - '.github/workflows/docker-image.yml'
-      - 'Dockerfile'
-      - '.dockerignore'
-      - '!bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp'
+      - "**/*.hpp"
+      - "**/*.cpp"
+      - "**/*.cmake"
+      - "**/CMakeLists.txt"
+      - "libs/**"
+      - ".github/workflows/docker-image.yml"
+      - "Dockerfile"
+      - ".dockerignore"
+      - "!bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp"
   pull_request:
-    branches: [ 'main' ]
+    branches: ["main"]
     paths:
-      - '**/*.hpp'
-      - '**/*.cpp'
-      - '**/*.cmake'
-      - '**/CMakeLists.txt'
-      - 'libs/**'
-      - '.github/workflows/docker-image.yml'
-      - 'Dockerfile'
-      - '.dockerignore'
-      - '!bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp'
+      - "**/*.hpp"
+      - "**/*.cpp"
+      - "**/*.cmake"
+      - "**/CMakeLists.txt"
+      - "libs/**"
+      - ".github/workflows/docker-image.yml"
+      - "Dockerfile"
+      - ".dockerignore"
+      - "!bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp"
   merge_group:
   workflow_dispatch:
   release:
-    types: [ published ]
+    types: [published]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
@@ -97,7 +97,7 @@ jobs:
 
       - name: Generate artifact attestation
         if: github.event_name == 'release' && github.event.action == 'published'
-        uses: actions/attest-build-provenance@v1
+        uses: actions/attest-build-provenance@v2
         with:
           subject-name: docker.io/${{ secrets.DOCKER_USERNAME }}/fiction
           subject-digest: ${{ steps.push.outputs.digest }}

@@ -1,5 +1,6 @@
 import unittest
-from mnt.pyfiction import (cartesian_gate_layout, route_path, a_star)
+
+from mnt.pyfiction import a_star, cartesian_gate_layout, route_path
 
 
 class TestRoutePath(unittest.TestCase):
@@ -11,7 +12,7 @@ class TestRoutePath(unittest.TestCase):
 
         route_path(lyt, [(0, 1), (1, 1), (2, 1), (3, 1), (4, 1)])
 
-        for (x, y) in [(0, 1), (1, 1), (2, 1), (3, 1), (4, 1)]:
+        for x, y in [(0, 1), (1, 1), (2, 1), (3, 1), (4, 1)]:
             self.assertTrue(lyt.is_wire_tile((x, y)))
 
     def test_empty_layout_a_star(self):
@@ -22,9 +23,9 @@ class TestRoutePath(unittest.TestCase):
 
         route_path(lyt, a_star(lyt, (0, 1), (4, 1)))
 
-        for (x, y) in [(0, 1), (1, 1), (2, 1), (3, 1), (4, 1)]:
+        for x, y in [(0, 1), (1, 1), (2, 1), (3, 1), (4, 1)]:
             self.assertTrue(lyt.is_wire_tile((x, y)))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
