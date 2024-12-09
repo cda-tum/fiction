@@ -5,6 +5,7 @@ from mnt.pyfiction import (
     bdl_wire_selection,
     create_and_tt,
     detect_bdl_wires_100,
+    detect_bdl_wires_params,
     is_kink_induced_non_operational,
     is_operational,
     is_operational_params,
@@ -57,8 +58,8 @@ class TestIsOperational(unittest.TestCase):
         self.assertEqual(op_status, operational_status.NON_OPERATIONAL)
 
         # pre-determined I/O pins
-        output_bdl_wires = detect_bdl_wires_100(lyt, params, bdl_wire_selection.OUTPUT)
-        input_bdl_wires = detect_bdl_wires_100(lyt, params, bdl_wire_selection.INPUT)
+        output_bdl_wires = detect_bdl_wires_100(lyt, params, detect_bdl_wires_params(), bdl_wire_selection.OUTPUT)
+        input_bdl_wires = detect_bdl_wires_100(lyt, params, detect_bdl_wires_params(), bdl_wire_selection.INPUT)
         [op_status, _evaluated_input_combinations] = is_operational(
             lyt, [create_and_tt()], params, input_bdl_wires, output_bdl_wires
         )
