@@ -576,7 +576,11 @@ starting pair. The resulting last BDL pairs are stored in
 @note Assumes that `input_bdl_wires` and `last_bdl_for_each_wire` are
 accessible within the scope.)doc";
 
-static const char *__doc_fiction_bdl_input_iterator_get_current_input_index = R"doc(Returns the current input index.)doc";
+static const char *__doc_fiction_bdl_input_iterator_get_current_input_index =
+R"doc(Returns the current input index.
+
+Returns:
+    The current input index.)doc";
 
 static const char *__doc_fiction_bdl_input_iterator_input_bdl_wires = R"doc(The detected input BDL wires.)doc";
 
@@ -2102,6 +2106,15 @@ Parameter ``c``:
 Returns:
     Cell type assigned to cell position `c`.)doc";
 
+static const char *__doc_fiction_cell_level_layout_get_cells_by_type =
+R"doc(Returns all cells of the given type.
+
+Parameter ``type``:
+    Type of cells to return.
+
+Returns:
+    All cells of the layout that have the given type.)doc";
+
 static const char *__doc_fiction_cell_level_layout_get_clock_number =
 R"doc(Returns the clock number of cell position `c` by accessing
 `ClockedLayout`'s underlying clocking scheme and respecting this
@@ -2136,10 +2149,6 @@ library.
 
 Returns:
     The clock zone size in cells in the y-dimension.)doc";
-
-static const char *__doc_fiction_cell_level_layout_has_cell_type =
-R"doc(Returns `true` if the given cell_type `type` exists. `false`
-otherwise.)doc";
 
 static const char *__doc_fiction_cell_level_layout_is_empty =
 R"doc(Checks whether there are no cells assigned to the layout's
@@ -6877,6 +6886,19 @@ Parameter ``output_wires``:
 Parameter ``c_lyt``:
     Canvas layout.)doc";
 
+static const char *__doc_fiction_detail_is_operational_impl_is_operational_impl_4 =
+R"doc(Constructor to initialize the algorithm with a layout and parameters.
+
+Parameter ``lyt``:
+    The SiDB cell-level layout to be checked.
+
+Parameter ``spec``:
+    Expected Boolean function of the layout given as a multi-output
+    truth table.
+
+Parameter ``params``:
+    Parameters for the `is_operational` algorithm.)doc";
+
 static const char *__doc_fiction_detail_is_operational_impl_is_physical_validity_feasible =
 R"doc(This function determines if there is a charge distribution of the
 canvas SiDBs for which the charge distribution of the whole layout is
@@ -7184,6 +7206,18 @@ Parameter ``c``:
 
 Parameter ``g_val``:
     New g-value for c.)doc";
+
+static const char *__doc_fiction_detail_layout_invalid_reason =
+R"doc(Reason why the layout is not a valid gate implementation for the given
+Boolean function.)doc";
+
+static const char *__doc_fiction_detail_layout_invalid_reason_IO_INSTABILITY = R"doc(I/O signal are instable.)doc";
+
+static const char *__doc_fiction_detail_layout_invalid_reason_NONE = R"doc(No reason for pruning could be determined.)doc";
+
+static const char *__doc_fiction_detail_layout_invalid_reason_PHYSICAL_INFEASIBILITY = R"doc(The layout is physically infeasible.)doc";
+
+static const char *__doc_fiction_detail_layout_invalid_reason_POTENTIAL_POSITIVE_CHARGES = R"doc(Positive SiDBs can potentially occur.)doc";
 
 static const char *__doc_fiction_detail_maximum_defect_influence_position_and_distance_impl =
 R"doc(A class for simulating the maximum influence distance of defects
@@ -7997,16 +8031,6 @@ Parameter ``item``:
 
 Parameter ``priority``:
     The priority of the element.)doc";
-
-static const char *__doc_fiction_detail_pruning_reason = R"doc(Reason why the layout is pruned.)doc";
-
-static const char *__doc_fiction_detail_pruning_reason_IO_INSTABILITY = R"doc(I/O signal are instable.)doc";
-
-static const char *__doc_fiction_detail_pruning_reason_NONE = R"doc(No reason for pruning could be determined.)doc";
-
-static const char *__doc_fiction_detail_pruning_reason_PHYSICAL_INFEASIBILITY = R"doc(The layout is physically infeasible.)doc";
-
-static const char *__doc_fiction_detail_pruning_reason_POTENTIAL_POSITIVE_CHARGES = R"doc(Positive SiDBs can potentially occur.)doc";
 
 static const char *__doc_fiction_detail_qca_energy_dissipation_impl = R"doc()doc";
 
@@ -9356,19 +9380,18 @@ Parameter ``simulation_results``:
 Returns:
     A vector of charge distributions with the minimal energy.)doc";
 
-static const char *__doc_fiction_determine_output_index_of_output =
-R"doc(This function calculates the output index for a given input index by
-evaluating the truth table.
+static const char *__doc_fiction_determine_output =
+R"doc(This function returns the output of the truth table for the given
+input index.
 
-Parameter ``truth_table``:
-    The truth table to evaluate.
+Parameter ``truth_tables``:
+    The truth tables to evaluate.
 
 Parameter ``current_input_index``:
     The index representing the current input pattern.
 
 Returns:
-    The output index derived from the truth table for the given input
-    index.)doc";
+    The output of the truth tables for the given input index.)doc";
 
 static const char *__doc_fiction_determine_physically_valid_parameters =
 R"doc(This function computes the parameters necessary for ensuring the
@@ -13751,11 +13774,44 @@ Parameter ``spec``:
 Parameter ``params``:
     Parameters for the `is_operational` algorithm.
 
+Returns:
+    Bool that indicates whether kinks induce the layout to become non-
+    operational. `true` if the layout is non-operational due to kinks,
+    `false` otherwise.)doc";
+
+static const char *__doc_fiction_is_kink_induced_non_operational_2 =
+R"doc(This function determines if the layout is only considered as non-
+operational because of kinks. This means that the layout would be
+considered as operational, if kinks were accepted.
+
+@note "Kink induced non-operational" refers to the non-operational
+status being exclusively caused by kinks with an otherwise correct
+logic match.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Template parameter ``TT``:
+    Type of the truth table.
+
+Parameter ``lyt``:
+    The SiDB cell-level layout to be checked.
+
+Parameter ``spec``:
+    Expected Boolean function of the layout given as a multi-output
+    truth table.
+
+Parameter ``params``:
+    Parameters for the `is_operational` algorithm.
+
 Parameter ``input_bdl_wire``:
     Optional BDL input wires of lyt.
 
 Parameter ``output_bdl_wire``:
     Optional BDL output wires of lyt.
+
+Parameter ``canvas_lyt``:
+    Optional canvas layout.
 
 Returns:
     Bool that indicates whether kinks induce the layout to become non-
@@ -13836,11 +13892,43 @@ Parameter ``spec``:
 Parameter ``params``:
     Parameters for the `is_operational` algorithm.
 
+Returns:
+    A pair containing the operational status of the gate layout
+    (either `OPERATIONAL` or `NON_OPERATIONAL`) and the number of
+    input combinations tested.)doc";
+
+static const char *__doc_fiction_is_operational_2 =
+R"doc(Determine the operational status of an SiDB layout.
+
+This function checks the operational status of a given gate layout
+using the `is_operational` algorithm. It determines whether the gate
+layout is operational and returns the correct result for all
+:math:`2^n` input combinations.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Template parameter ``TT``:
+    Type of the truth table.
+
+Parameter ``lyt``:
+    The SiDB cell-level layout to be checked.
+
+Parameter ``spec``:
+    Expected Boolean function of the layout given as a multi-output
+    truth table.
+
+Parameter ``params``:
+    Parameters for the `is_operational` algorithm.
+
 Parameter ``input_bdl_wire``:
     Optional BDL input wires of lyt.
 
 Parameter ``output_bdl_wire``:
     Optional BDL output wires of lyt.
+
+Parameter ``canvas_lyt``:
+    Optional canvas layout.
 
 Returns:
     A pair containing the operational status of the gate layout
@@ -13851,14 +13939,15 @@ static const char *__doc_fiction_is_operational_params = R"doc(Parameters for th
 
 static const char *__doc_fiction_is_operational_params_analyis_mode = R"doc(Mode to determine if the layout is operational or non-operational.)doc";
 
-static const char *__doc_fiction_is_operational_params_analyis_mode_DEFAULT =
-R"doc(This setting conducts physical simulation and checks afterwards if the
-correct logic is encoded in the charge distribution.)doc";
-
-static const char *__doc_fiction_is_operational_params_analyis_mode_HIGH_EFFICIENT_MODE =
+static const char *__doc_fiction_is_operational_params_analyis_mode_PRUNE_BEFORE_SIMULATION =
 R"doc(Before a physical simulation is conducted, the algorithm checks if
 pruning strategies can determine that the layout is `non-operational`.
-This does only provide runtime benefits if kinks are accepted.)doc";
+This only provides any runtime benefits if kinks are accepted.)doc";
+
+static const char *__doc_fiction_is_operational_params_analyis_mode_SIMULATION_ONLY =
+R"doc(This setting does not apply any pruning strategies to determine if the
+layout is operational. Instead, it relies solely on physical
+simulation to make this determination.)doc";
 
 static const char *__doc_fiction_is_operational_params_input_bdl_iterator_params = R"doc(Parameters for the BDL input iterator.)doc";
 
@@ -14040,6 +14129,43 @@ Parameter ``spec``:
 
 Parameter ``params``:
     Parameters for the `is_operational` algorithm.
+
+Returns:
+    The input combinations where kinks induce the SiDB layout to
+    become non-operational.)doc";
+
+static const char *__doc_fiction_kink_induced_non_operational_input_patterns_2 =
+R"doc(This function determines all input combinations for which kinks induce
+the SiDB layout to become non-operational. This means that the layout
+is operational if kinks would be accepted.
+
+@note "Kink induced non-operational" refers to the non-operational
+status being exclusively caused by kinks with an otherwise correct
+logic match.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Template parameter ``TT``:
+    Type of the truth table.
+
+Parameter ``lyt``:
+    The SiDB layout.
+
+Parameter ``spec``:
+    Vector of truth table specifications.
+
+Parameter ``params``:
+    Parameters for the `is_operational` algorithm.
+
+Parameter ``input_bdl_wire``:
+    Optional BDL input wires of lyt.
+
+Parameter ``output_bdl_wire``:
+    Optional BDL output wires of lyt.
+
+Parameter ``canvas_lyt``:
+    Optional canvas layout.
 
 Returns:
     The input combinations where kinks induce the SiDB layout to
@@ -14981,6 +15107,37 @@ Parameter ``spec``:
 
 Parameter ``params``:
     Parameters to simulate if a input combination is operational.
+
+Returns:
+    The count of operational input combinations.)doc";
+
+static const char *__doc_fiction_operational_input_patterns_2 =
+R"doc(This function determines the input combinations for which the layout
+is operational.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Template parameter ``TT``:
+    Type of the truth table.
+
+Parameter ``lyt``:
+    The SiDB layout.
+
+Parameter ``spec``:
+    Vector of truth table specifications.
+
+Parameter ``params``:
+    Parameters to simulate if a input combination is operational.
+
+Parameter ``input_bdl_wire``:
+    Optional BDL input wires of lyt.
+
+Parameter ``output_bdl_wire``:
+    Optional BDL output wires of lyt.
+
+Parameter ``canvas_lyt``:
+    Optional canvas layout.
 
 Returns:
     The count of operational input combinations.)doc";
