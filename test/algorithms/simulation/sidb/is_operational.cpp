@@ -15,6 +15,7 @@
 #include <fiction/utils/truth_table_utils.hpp>
 
 #include <cstdint>
+#include <optional>
 #include <set>
 #include <vector>
 
@@ -77,11 +78,12 @@ TEST_CASE("SiQAD OR gate", "[is-operational]")
         {
             canvas_lyt.assign_cell_type(c, sidb_technology::cell_type::NORMAL);
         }
-        CHECK(is_operational(lat, std::vector<tt>{create_or_tt()}, op_params, input_wires, output_wires).first ==
-              operational_status::NON_OPERATIONAL);
+        CHECK(is_operational(lat, std::vector<tt>{create_or_tt()}, op_params, input_wires, output_wires,
+                             std::optional{canvas_lyt})
+                  .first == operational_status::NON_OPERATIONAL);
     }
 
-    SECTION("pre-determined I/O pins and no canvas layout and no logic cells")
+    SECTION("pre-determined I/O pins, but no canvas layout and no logic cells provided")
     {
         auto lat_copy = lat.clone();
 
@@ -96,7 +98,7 @@ TEST_CASE("SiQAD OR gate", "[is-operational]")
 
         CHECK(lat.get_cells_by_type(sidb_technology::cell_type::LOGIC).empty());
 
-        CHECK(is_operational(lat, std::vector<tt>{create_or_tt()}, op_params, input_wires, output_wires).first ==
+        CHECK(is_operational(lat_copy, std::vector<tt>{create_or_tt()}, op_params, input_wires, output_wires).first ==
               operational_status::NON_OPERATIONAL);
     }
 
