@@ -81,15 +81,15 @@ struct is_operational_params
     enum class analyis_mode : uint8_t
     {
         /**
-         * Before a physical simulation is conducted, the algorithm checks if pruning strategies can determine that the
-         * layout is `non-operational`. This does only provide runtime benefits if kinks are accepted.
+         * This setting does not apply any pruning strategies to determine if the layout is operational.
+         * Instead, it relies solely on physical simulation to make this determination.
          */
-        HIGH_EFFICIENT_MODE,
+        SIMULATION_ONLY,
         /**
-         * This setting conducts physical simulation and checks afterwards if the correct logic is encoded in the charge
-         * distribution.
+         * Before a physical simulation is conducted, the algorithm checks if pruning strategies can determine that the
+         * layout is `non-operational`. This only provides any runtime benefits if kinks are accepted.
          */
-        DEFAULT
+        PRUNE_BEFORE_SIMULATION
     };
     /**
      * The simulation parameters for the physical simulation of the ground state.
@@ -110,7 +110,7 @@ struct is_operational_params
     /**
      * Mode to determine if the layout is operational or non-operational.
      */
-    analyis_mode mode_to_analyse_operational_status = analyis_mode::DEFAULT;
+    analyis_mode mode_to_analyse_operational_status = analyis_mode::SIMULATION_ONLY;
 };
 
 namespace detail
@@ -135,9 +135,9 @@ enum class non_operationality_reason : uint8_t
     NONE,
 };
 /**
- * Reason why the layout is pruned.
+ * Reason why the layout is not a valid gate implementation for the given Boolean function.
  */
-enum class pruning_reason : uint8_t
+enum class layout_invalid_reason : uint8_t
 {
     /**
      * Positive SiDBs can potentially occur.
@@ -243,6 +243,30 @@ class is_operational_impl
     {}
 
     /**
+     * Constructor to initialize the algorithm with a layout and parameters.
+     *
+     * @param lyt The SiDB cell-level layout to be checked.
+     * @param spec Expected Boolean function of the layout given as a multi-output truth table.
+     * @param params Parameters for the `is_operational` algorithm.
+     */
+    is_operational_impl(const Lyt& lyt, const std::vector<TT>& tt, const is_operational_params& params,
+                        const Lyt& c_lyt) :
+            layout{lyt},
+            truth_table{tt},
+            parameters{params},
+            output_bdl_pairs(detect_bdl_pairs(lyt, sidb_technology::cell_type::OUTPUT,
+                                              params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)),
+            bii(bdl_input_iterator<Lyt>{lyt, params.input_bdl_iterator_params}),
+            input_bdl_wires{
+                detect_bdl_wires(lyt, params.input_bdl_iterator_params.bdl_wire_params, bdl_wire_selection::INPUT)},
+            output_bdl_wires{
+                detect_bdl_wires(lyt, params.input_bdl_iterator_params.bdl_wire_params, bdl_wire_selection::OUTPUT)},
+            number_of_output_wires{output_bdl_wires.size()},
+            number_of_input_wires{input_bdl_wires.size()},
+            canvas_lyt{c_lyt}
+    {}
+
+    /**
      * This function evaluates whether the given layout can be discarded since it cannot implement the given Boolean
      * function. The pruning is subdivided into three single pruning steps: (1) discarding SiDB layouts with potentially
      * positively charged SiDBs, (2) utilizing an efficient method to identify and discard SiDB layouts that do not
@@ -257,7 +281,7 @@ class is_operational_impl
      * reason for pruning.
      */
     template <typename ChargeLyt>
-    [[nodiscard]] std::pair<bool, pruning_reason>
+    [[nodiscard]] std::pair<bool, layout_invalid_reason>
     can_layout_be_discarded(const uint64_t input_pattern, ChargeLyt& cds_canvas, cell<Lyt>& dependent_cell) noexcept
     {
         static_assert(is_charge_distribution_surface_v<ChargeLyt>, "ChargeLyt is not a charge distribution surface");
@@ -270,7 +294,7 @@ class is_operational_impl
 
         if (can_positive_charges_occur(cds_layout, parameters.simulation_parameters))
         {
-            return {true, pruning_reason::POTENTIAL_POSITIVE_CHARGES};
+            return {true, layout_invalid_reason::POTENTIAL_POSITIVE_CHARGES};
         }
 
         cds_layout.assign_dependent_cell(dependent_cell);
@@ -284,15 +308,15 @@ class is_operational_impl
 
         if (physical_validity.has_value())
         {
-            const auto output_index = determine_output_index_of_output(truth_table, input_index);
+            const auto output_index = determine_output(truth_table, input_index);
             if (is_io_signal_unstable(cds_layout, cds_canvas, truth_table.front().num_bits(), input_index, output_index,
                                       physical_validity.value()))
             {
-                return {true, pruning_reason::IO_INSTABILITY};
+                return {true, layout_invalid_reason::IO_INSTABILITY};
             };
-            return {false, pruning_reason::NONE};
+            return {false, layout_invalid_reason::NONE};
         }
-        return {true, pruning_reason::PHYSICAL_INFEASIBILITY};
+        return {true, layout_invalid_reason::PHYSICAL_INFEASIBILITY};
     }
 
     /**
@@ -312,6 +336,8 @@ class is_operational_impl
 
         bool at_least_one_layout_is_kink_induced_non_operational = false;
 
+        bool canvas_layout_could_be_determined = true;
+
         // number of different input combinations
         for (auto i = 0u; i < truth_table.front().num_bits(); ++i, ++bii)
         {
@@ -323,9 +349,12 @@ class is_operational_impl
                 return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
             }
 
+            const auto logic_cells = layout.get_cells_by_type(technology<Lyt>::cell_type::LOGIC);
+
             if (parameters.op_condition == is_operational_params::operational_condition::REJECT_KINKS &&
                 parameters.mode_to_analyse_operational_status ==
-                    is_operational_params::analyis_mode::HIGH_EFFICIENT_MODE)
+                    is_operational_params::analyis_mode::PRUNE_BEFORE_SIMULATION &&
+                canvas_layout_could_be_determined)
             {
                 if (!canvas_lyt.is_empty())
                 {
@@ -341,21 +370,18 @@ class is_operational_impl
                         return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
                     }
                 }
-                else if (layout.has_cell_type(technology<Lyt>::cell_type::LOGIC))
+
+                else if (!logic_cells.empty())
                 {
                     Lyt c_layout{};
 
                     cell<Lyt> dependent_cell{};
 
-                    layout.foreach_cell(
-                        [&](const auto& c)
-                        {
-                            if (layout.get_cell_type(c) == sidb_technology::cell_type::LOGIC)
-                            {
-                                c_layout.assign_cell_type(c, Lyt::technology::cell_type::LOGIC);
-                                dependent_cell = c;
-                            }
-                        });
+                    for (const auto& c : logic_cells)
+                    {
+                        c_layout.assign_cell_type(c, Lyt::technology::cell_type::NORMAL);
+                        dependent_cell = c;
+                    }
 
                     charge_distribution_surface<Lyt> cds_canvas{c_layout};
 
@@ -366,6 +392,11 @@ class is_operational_impl
                     {
                         return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
                     }
+                }
+
+                else
+                {
+                    canvas_layout_could_be_determined = false;
                 }
             }
 
@@ -378,7 +409,8 @@ class is_operational_impl
                 return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
             }
 
-            if (parameters.mode_to_analyse_operational_status == is_operational_params::analyis_mode::DEFAULT)
+            if (parameters.mode_to_analyse_operational_status == is_operational_params::analyis_mode::SIMULATION_ONLY ||
+                !canvas_layout_could_be_determined)
             {
                 const auto ground_states = determine_groundstate_from_simulation_results(simulation_results);
 
@@ -391,7 +423,8 @@ class is_operational_impl
                         return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
                     }
                     if (op_status == operational_status::NON_OPERATIONAL &&
-                        non_op_reason == non_operationality_reason::KINKS)
+                        non_op_reason == non_operationality_reason::KINKS &&
+                        parameters.op_condition == is_operational_params::operational_condition::REJECT_KINKS)
                     {
                         at_least_one_layout_is_kink_induced_non_operational = true;
                         continue;
@@ -1089,17 +1122,12 @@ class is_operational_impl
  * @param lyt The SiDB cell-level layout to be checked.
  * @param spec Expected Boolean function of the layout given as a multi-output truth table.
  * @param params Parameters for the `is_operational` algorithm.
- * @param input_bdl_wire Optional BDL input wires of lyt.
- * @param output_bdl_wire Optional BDL output wires of lyt.
  * @return A pair containing the operational status of the gate layout (either `OPERATIONAL` or `NON_OPERATIONAL`) and
  * the number of input combinations tested.
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] std::pair<operational_status, std::size_t>
-is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params = {},
-               const std::optional<std::vector<bdl_wire<Lyt>>>& input_bdl_wire  = std::nullopt,
-               const std::optional<std::vector<bdl_wire<Lyt>>>& output_bdl_wire = std::nullopt,
-               const std::optional<Lyt>&                        canvas_lyt      = std::nullopt) noexcept
+is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params = {}) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -1113,44 +1141,77 @@ is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational
     assert(std::adjacent_find(spec.cbegin(), spec.cend(), [](const auto& a, const auto& b)
                               { return a.num_vars() != b.num_vars(); }) == spec.cend());
 
-    if (input_bdl_wire.has_value() && output_bdl_wire.has_value())
+    detail::is_operational_impl<Lyt, TT> p{lyt, spec, params};
+
+    const auto [status, _] = p.run();
+
+    return {status, p.get_number_of_simulator_invocations()};
+}
+
+/**
+ * Determine the operational status of an SiDB layout.
+ *
+ * This function checks the operational status of a given gate layout using the `is_operational` algorithm. It
+ * determines whether the gate layout is operational and returns the correct result for all \f$2^n\f$ input
+ * combinations.
+ *
+ * @tparam Lyt SiDB cell-level layout type.
+ * @tparam TT Type of the truth table.
+ * @param lyt The SiDB cell-level layout to be checked.
+ * @param spec Expected Boolean function of the layout given as a multi-output truth table.
+ * @param params Parameters for the `is_operational` algorithm.
+ * @param input_bdl_wire Optional BDL input wires of lyt.
+ * @param output_bdl_wire Optional BDL output wires of lyt.
+ * @param canvas_lyt Optional canvas layout.
+ * @return A pair containing the operational status of the gate layout (either `OPERATIONAL` or `NON_OPERATIONAL`) and
+ * the number of input combinations tested.
+ */
+template <typename Lyt, typename TT>
+[[nodiscard]] std::pair<operational_status, std::size_t>
+is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params,
+               const std::vector<bdl_wire<Lyt>>& input_bdl_wire, const std::vector<bdl_wire<Lyt>>& output_bdl_wire,
+               const std::optional<Lyt>& canvas_lyt = std::nullopt) noexcept
+{
+    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
+
+    assert(lyt.num_pis() > 0 && "lyt needs input cells");
+    assert(lyt.num_pos() > 0 && "lyt needs output cells");
+
+    assert(!spec.empty());
+    // all elements in spec must have the same number of variables
+    assert(std::adjacent_find(spec.cbegin(), spec.cend(), [](const auto& a, const auto& b)
+                              { return a.num_vars() != b.num_vars(); }) == spec.cend());
+
+    if (canvas_lyt.has_value())
     {
-        if (canvas_lyt.has_value())
-        {
-            detail::is_operational_impl<Lyt, TT> p{
-                lyt, spec, params, input_bdl_wire.value(), output_bdl_wire.value(), canvas_lyt.value()};
-
-            const auto [status, _] = p.run();
-
-            return {status, p.get_number_of_simulator_invocations()};
-        }
-        if (lyt.has_cell_type(technology<Lyt>::cell_type::LOGIC))
-        {
-            Lyt c_lyt{};
-
-            lyt.foreach_cell(
-                [&](const auto& c)
-                {
-                    if (lyt.get_cell_type(c) == technology<Lyt>::cell_type::LOGIC)
-                    {
-                        c_lyt.assign_cell_type(c, technology<Lyt>::cell_type::NORMAL);
-                    }
-                });
-            detail::is_operational_impl<Lyt, TT> p{lyt,  spec, params, input_bdl_wire.value(), output_bdl_wire.value(),
-                                                   c_lyt};
-
-            const auto [status, _] = p.run();
-
-            return {status, p.get_number_of_simulator_invocations()};
-        }
-        detail::is_operational_impl<Lyt, TT> p{lyt, spec, params, input_bdl_wire.value(), output_bdl_wire.value()};
+        detail::is_operational_impl<Lyt, TT> p{lyt, spec, params, input_bdl_wire, output_bdl_wire, canvas_lyt.value()};
 
         const auto [status, _] = p.run();
 
         return {status, p.get_number_of_simulator_invocations()};
     }
 
-    detail::is_operational_impl<Lyt, TT> p{lyt, spec, params};
+    const auto logic_cells = lyt.get_cells_by_type(technology<Lyt>::cell_type::LOGIC);
+
+    if (!logic_cells.empty())
+    {
+        Lyt c_lyt{};
+
+        for (const auto& c : logic_cells)
+        {
+            c_lyt.assign_cell_type(c, technology<Lyt>::cell_type::LOGIC);
+        }
+
+        detail::is_operational_impl<Lyt, TT> p{lyt, spec, params, input_bdl_wire, output_bdl_wire, c_lyt};
+
+        const auto [status, _] = p.run();
+
+        return {status, p.get_number_of_simulator_invocations()};
+    }
+
+    detail::is_operational_impl<Lyt, TT> p{lyt, spec, params, input_bdl_wire, output_bdl_wire};
 
     const auto [status, _] = p.run();
 
@@ -1202,6 +1263,82 @@ template <typename Lyt, typename TT>
 
     return input_patterns;
 }
+/**
+ * This function determines the input combinations for which the layout is operational.
+ *
+ * @tparam Lyt SiDB cell-level layout type.
+ * @tparam TT Type of the truth table.
+ * @param lyt The SiDB layout.
+ * @param spec Vector of truth table specifications.
+ * @param params Parameters to simulate if a input combination is operational.
+ * @param input_bdl_wire Optional BDL input wires of lyt.
+ * @param output_bdl_wire Optional BDL output wires of lyt.
+ * @param canvas_lyt Optional canvas layout.
+ * @return The count of operational input combinations.
+ */
+template <typename Lyt, typename TT>
+[[nodiscard]] std::set<uint64_t>
+operational_input_patterns(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params,
+                           const std::vector<bdl_wire<Lyt>>& input_bdl_wire,
+                           const std::vector<bdl_wire<Lyt>>& output_bdl_wire,
+                           const std::optional<Lyt>&         canvas_lyt = std::nullopt) noexcept
+{
+    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
+
+    assert(lyt.num_pis() > 0 && "skeleton needs input cells");
+    assert(lyt.num_pos() > 0 && "skeleton needs output cells");
+
+    assert(!spec.empty());
+    // all elements in spec must have the same number of variables
+    assert(std::adjacent_find(spec.cbegin(), spec.cend(), [](const auto& a, const auto& b)
+                              { return a.num_vars() != b.num_vars(); }) == spec.cend());
+
+    if (canvas_lyt.has_value())
+    {
+        detail::is_operational_impl<Lyt, TT> p{lyt, spec, params, input_bdl_wire, output_bdl_wire, canvas_lyt.value()};
+
+        std::set<uint64_t> input_patterns{};
+
+        // all possible input patterns
+        for (auto i = 0u; i < spec.front().num_bits(); ++i)
+        {
+            input_patterns.insert(i);
+        }
+
+        const auto non_op_patterns_and_non_op_reason =
+            p.determine_non_operational_input_patterns_and_non_operationality_reason();
+
+        for (const auto& [input_pattern, _] : non_op_patterns_and_non_op_reason)
+        {
+            input_patterns.erase(input_pattern);
+        }
+
+        return input_patterns;
+    }
+
+    detail::is_operational_impl<Lyt, TT> p{lyt, spec, params, input_bdl_wire, output_bdl_wire};
+
+    std::set<uint64_t> input_patterns{};
+
+    // all possible input patterns
+    for (auto i = 0u; i < spec.front().num_bits(); ++i)
+    {
+        input_patterns.insert(i);
+    }
+
+    const auto non_op_patterns_and_non_op_reason =
+        p.determine_non_operational_input_patterns_and_non_operationality_reason();
+
+    for (const auto& [input_pattern, _] : non_op_patterns_and_non_op_reason)
+    {
+        input_patterns.erase(input_pattern);
+    }
+
+    return input_patterns;
+}
+
 /**
  * This function determines all input combinations for which kinks induce the SiDB layout to become non-operational.
  * This means that the layout is operational if kinks would be accepted.
@@ -1255,6 +1392,83 @@ kink_induced_non_operational_input_patterns(const Lyt& lyt, const std::vector<TT
     return kink_induced_non_op_patterns;
 }
 /**
+ * This function determines all input combinations for which kinks induce the SiDB layout to become non-operational.
+ * This means that the layout is operational if kinks would be accepted.
+ *
+ * @note "Kink induced non-operational" refers to the non-operational status being exclusively caused by kinks with an
+ * otherwise correct logic match.
+ *
+ * @tparam Lyt SiDB cell-level layout type.
+ * @tparam TT Type of the truth table.
+ * @param lyt The SiDB layout.
+ * @param spec Vector of truth table specifications.
+ * @param params Parameters for the `is_operational` algorithm.
+ * @param input_bdl_wire Optional BDL input wires of lyt.
+ * @param output_bdl_wire Optional BDL output wires of lyt.
+ * @param canvas_lyt Optional canvas layout.
+ * @return The input combinations where kinks induce the SiDB layout to become non-operational.
+ */
+template <typename Lyt, typename TT>
+[[nodiscard]] std::set<uint64_t> kink_induced_non_operational_input_patterns(
+    const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params,
+    const std::vector<bdl_wire<Lyt>>& input_bdl_wire, const std::vector<bdl_wire<Lyt>>& output_bdl_wire,
+    const std::optional<Lyt>& canvas_lyt = std::nullopt) noexcept
+{
+    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
+
+    assert(lyt.num_pis() > 0 && "skeleton needs input cells");
+    assert(lyt.num_pos() > 0 && "skeleton needs output cells");
+
+    assert(!spec.empty());
+    // all elements in tts must have the same number of variables
+    assert(std::adjacent_find(spec.cbegin(), spec.cend(), [](const auto& a, const auto& b)
+                              { return a.num_vars() != b.num_vars(); }) == spec.cend());
+
+    is_operational_params params_with_rejecting_kinks = params;
+
+    params_with_rejecting_kinks.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
+
+    if (canvas_lyt.has_value())
+    {
+        detail::is_operational_impl<Lyt, TT> p{
+            lyt, spec, params_with_rejecting_kinks, input_bdl_wire, output_bdl_wire, canvas_lyt.value()};
+
+        std::set<uint64_t> kink_induced_non_op_patterns{};
+
+        const auto input_patterns_and_non_op_reason =
+            p.determine_non_operational_input_patterns_and_non_operationality_reason();
+
+        for (const auto& [input_pattern, status] : input_patterns_and_non_op_reason)
+        {
+            if (status == detail::non_operationality_reason::KINKS)
+            {
+                kink_induced_non_op_patterns.insert(input_pattern);
+            }
+        }
+
+        return kink_induced_non_op_patterns;
+    }
+
+    detail::is_operational_impl<Lyt, TT> p{lyt, spec, params_with_rejecting_kinks, input_bdl_wire, output_bdl_wire};
+
+    std::set<uint64_t> kink_induced_non_op_patterns{};
+
+    const auto input_patterns_and_non_op_reason =
+        p.determine_non_operational_input_patterns_and_non_operationality_reason();
+
+    for (const auto& [input_pattern, status] : input_patterns_and_non_op_reason)
+    {
+        if (status == detail::non_operationality_reason::KINKS)
+        {
+            kink_induced_non_op_patterns.insert(input_pattern);
+        }
+    }
+
+    return kink_induced_non_op_patterns;
+}
+/**
  * This function determines if the layout is only considered as non-operational because of kinks. This means that
  * the layout would be considered as operational, if kinks were accepted.
  *
@@ -1266,16 +1480,12 @@ kink_induced_non_operational_input_patterns(const Lyt& lyt, const std::vector<TT
  * @param lyt The SiDB cell-level layout to be checked.
  * @param spec Expected Boolean function of the layout given as a multi-output truth table.
  * @param params Parameters for the `is_operational` algorithm.
- * @param input_bdl_wire Optional BDL input wires of lyt.
- * @param output_bdl_wire Optional BDL output wires of lyt.
  * @return Bool that indicates whether kinks induce the layout to become non-operational. `true` if the layout is
  * non-operational due to kinks, `false` otherwise.
  */
 template <typename Lyt, typename TT>
-[[nodiscard]] bool is_kink_induced_non_operational(
-    const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params = {},
-    const std::optional<std::vector<bdl_wire<Lyt>>>& input_bdl_wire  = std::nullopt,
-    const std::optional<std::vector<bdl_wire<Lyt>>>& output_bdl_wire = std::nullopt) noexcept
+[[nodiscard]] bool is_kink_induced_non_operational(const Lyt& lyt, const std::vector<TT>& spec,
+                                                   const is_operational_params& params = {}) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -1292,10 +1502,58 @@ template <typename Lyt, typename TT>
     is_operational_params params_with_rejecting_kinks = params;
     params_with_rejecting_kinks.op_condition          = is_operational_params::operational_condition::REJECT_KINKS;
 
-    if (input_bdl_wire.has_value() && output_bdl_wire.has_value())
+    detail::is_operational_impl<Lyt, TT> p{lyt, spec, params_with_rejecting_kinks};
+
+    const auto [op_status, non_op_reason] = p.run();
+
+    return op_status == operational_status::NON_OPERATIONAL &&
+           non_op_reason == detail::non_operationality_reason::KINKS;
+}
+
+/**
+ * This function determines if the layout is only considered as non-operational because of kinks. This means that
+ * the layout would be considered as operational, if kinks were accepted.
+ *
+ * @note "Kink induced non-operational" refers to the non-operational status being exclusively caused by kinks with an
+ * otherwise correct logic match.
+ *
+ * @tparam Lyt SiDB cell-level layout type.
+ * @tparam TT Type of the truth table.
+ * @param lyt The SiDB cell-level layout to be checked.
+ * @param spec Expected Boolean function of the layout given as a multi-output truth table.
+ * @param params Parameters for the `is_operational` algorithm.
+ * @param input_bdl_wire Optional BDL input wires of lyt.
+ * @param output_bdl_wire Optional BDL output wires of lyt.
+ * @param canvas_lyt Optional canvas layout.
+ * @return Bool that indicates whether kinks induce the layout to become non-operational. `true` if the layout is
+ * non-operational due to kinks, `false` otherwise.
+ */
+template <typename Lyt, typename TT>
+[[nodiscard]] bool is_kink_induced_non_operational(const Lyt& lyt, const std::vector<TT>& spec,
+                                                   const is_operational_params&      params,
+                                                   const std::vector<bdl_wire<Lyt>>& input_bdl_wire,
+                                                   const std::vector<bdl_wire<Lyt>>& output_bdl_wire,
+                                                   const std::optional<Lyt>&         canvas_lyt = std::nullopt) noexcept
+{
+    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
+
+    assert(lyt.num_pis() > 0 && "lyt needs input cells");
+    assert(lyt.num_pos() > 0 && "lyt needs output cells");
+
+    assert(!spec.empty());
+    // all elements in spec must have the same number of variables
+    assert(std::adjacent_find(spec.cbegin(), spec.cend(), [](const auto& a, const auto& b)
+                              { return a.num_vars() != b.num_vars(); }) == spec.cend());
+
+    is_operational_params params_with_rejecting_kinks = params;
+    params_with_rejecting_kinks.op_condition          = is_operational_params::operational_condition::REJECT_KINKS;
+
+    if (canvas_lyt.has_value())
     {
-        detail::is_operational_impl<Lyt, TT> p{lyt, spec, params_with_rejecting_kinks, input_bdl_wire.value(),
-                                               output_bdl_wire.value()};
+        detail::is_operational_impl<Lyt, TT> p{
+            lyt, spec, params_with_rejecting_kinks, input_bdl_wire, output_bdl_wire, canvas_lyt.value()};
 
         const auto [op_status, non_op_reason] = p.run();
 
@@ -1303,7 +1561,7 @@ template <typename Lyt, typename TT>
                non_op_reason == detail::non_operationality_reason::KINKS;
     }
 
-    detail::is_operational_impl<Lyt, TT> p{lyt, spec, params_with_rejecting_kinks};
+    detail::is_operational_impl<Lyt, TT> p{lyt, spec, params_with_rejecting_kinks, input_bdl_wire, output_bdl_wire};
 
     const auto [op_status, non_op_reason] = p.run();
 

@@ -385,21 +385,16 @@ class operational_domain_impl
             output_bdl_wires{detect_bdl_wires(lyt, params.operational_params.input_bdl_iterator_params.bdl_wire_params,
                                               bdl_wire_selection::OUTPUT)}
     {
-        if (lyt.has_cell_type(technology<Lyt>::cell_type::LOGIC))
+        const auto logic_cells = lyt.get_cells_by_type(technology<Lyt>::cell_type::LOGIC);
+
+        if (logic_cells.size() > 0)
         {
-            lyt.foreach_cell(
-                [&](const auto& c)
-                {
-                    if (lyt.get_cell_type(c) == technology<Lyt>::cell_type::LOGIC)
-                    {
-                        canvas_lyt.assign_cell_type(c, technology<Lyt>::cell_type::NORMAL);
-                    }
-                });
+            for (const auto& c : logic_cells)
+            {
+                canvas_lyt.assign_cell_type(c, technology<Lyt>::cell_type::NORMAL);
+            }
         }
-        else
-        {
-            assert(true && "canvas_lyt is empty");
-        }
+
         op_domain.dimensions.reserve(num_dimensions);
 
         indices.reserve(num_dimensions);
@@ -1119,9 +1114,8 @@ class operational_domain_impl
         auto op_params_set_dimension_values                  = params.operational_params;
         op_params_set_dimension_values.simulation_parameters = sim_params;
 
-        const auto& [status, sim_calls] =
-            is_operational(layout, truth_table, op_params_set_dimension_values, std::optional{input_bdl_wires},
-                           std::optional{output_bdl_wires}, std::optional{canvas_lyt});
+        const auto& [status, sim_calls] = is_operational(layout, truth_table, op_params_set_dimension_values,
+                                                         input_bdl_wires, output_bdl_wires, std::optional{canvas_lyt});
 
         num_simulator_invocations += sim_calls;
 
@@ -1823,7 +1817,6 @@ operational_domain_contour_tracing(const Lyt& lyt, const std::vector<TT>& spec, 
     operational_domain_stats                                                                          st{};
     detail::operational_domain_impl<Lyt, TT, operational_domain<parameter_point, operational_status>> p{lyt, spec,
                                                                                                         params, st};
-
     const auto result = p.contour_tracing(samples);
 
     if (stats)

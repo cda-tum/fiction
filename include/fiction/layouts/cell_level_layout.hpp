@@ -6,7 +6,6 @@
 #define FICTION_CELL_LEVEL_LAYOUT_HPP
 
 #include "fiction/layouts/clocking_scheme.hpp"
-#include "fiction/technology/cell_technologies.hpp"
 #include "fiction/traits.hpp"
 
 #include <mockturtle/networks/detail/foreach.hpp>
@@ -17,6 +16,7 @@
 #include <string>
 #include <string_view>
 #include <utility>
+#include <vector>
 
 namespace fiction
 {
@@ -196,6 +196,30 @@ class cell_level_layout : public ClockedLayout
 
         return Technology::cell_type::EMPTY;
     }
+
+    /**
+     * Returns all cells of the given type.
+     *
+     * @param type Type of cells to return.
+     * @return All cells of the layout that have the given type.
+     */
+    [[nodiscard]] std::vector<cell> get_cells_by_type(const typename Technology::cell_type type) const noexcept
+    {
+        std::vector<cell> cells;
+        cells.reserve(num_cells());
+
+        foreach_cell(
+            [&cells, &type, this](const auto& c)
+            {
+                const auto c_type = get_cell_type(c);
+                if (c_type == type)
+                {
+                    cells.push_back(c);
+                }
+            });
+
+        return cells;
+    }
     /**
      * Returns `true` if no cell type is assigned to cell position `c` or if the empty type was assigned.
      *
@@ -223,22 +247,6 @@ class cell_level_layout : public ClockedLayout
         {
             strg->cell_mode_map[c] = m;
         }
-    }
-    /**
-     * Returns `true` if the given cell_type `type` exists. `false` otherwise.
-     */
-    [[nodiscard]] bool has_cell_type(const cell_type& type) const noexcept
-    {
-        // Iterate over each pair in the map and check if any value matches `value`
-        for (const auto& [key, val] : strg->cell_type_map)
-        {
-            if (val == type)
-            {
-                return true;  // Value found
-            }
-        }
-
-        return false;  // Value not found
     }
     /**
      * Returns the cell mode assigned to cell position `c`. If no cell mode is assigned, the default mode is returned.

@@ -342,6 +342,8 @@ class bdl_input_iterator
     }
     /**
      * Returns the current input index.
+     *
+     * @return The current input index.
      */
     [[nodiscard]] uint64_t get_current_input_index() const noexcept
     {

@@ -412,19 +412,19 @@ namespace fiction
 }
 
 /**
- * This function calculates the output index for a given input index by evaluating the truth table.
+ * This function returns the output of the truth table for the given input index.
  *
- * @param truth_table The truth table to evaluate.
+ * @param truth_tables The truth tables to evaluate.
  * @param current_input_index The index representing the current input pattern.
- * @return The output index derived from the truth table for the given input index.
+ * @return The output of the truth tables for the given input index.
  */
-[[nodiscard]] uint64_t determine_output_index_of_output(const std::vector<kitty::dynamic_truth_table>& truth_table,
-                                                        const uint64_t current_input_index) noexcept
+[[nodiscard]] inline uint64_t determine_output(const std::vector<kitty::dynamic_truth_table>& truth_tables,
+                                               const uint64_t current_input_index) noexcept
 {
     std::bitset<64> bits{};
-    for (auto i = 0u; i < truth_table.size(); i++)
+    for (auto i = 0u; i < truth_tables.size(); i++)
     {
-        bits[i] = (kitty::get_bit(truth_table[i], current_input_index) != 0u);
+        bits[i] = (kitty::get_bit(truth_tables[i], current_input_index) != 0u);
     }
     return bits.to_ulong();
 }

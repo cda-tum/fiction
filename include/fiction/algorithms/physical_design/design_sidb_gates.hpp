@@ -236,9 +236,8 @@ class design_sidb_gates_impl
             // canvas SiDBs are added to the skeleton
             const auto layout_with_added_cells = skeleton_layout_with_canvas_sidbs(combination);
 
-            if (const auto [status, sim_calls] =
-                    is_operational(layout_with_added_cells, truth_table, params.operational_params,
-                                   std::optional{input_bdl_wires}, std::optional{output_bdl_wires});
+            if (const auto [status, sim_calls] = is_operational(
+                    layout_with_added_cells, truth_table, params.operational_params, input_bdl_wires, output_bdl_wires);
                 status == operational_status::OPERATIONAL)
             {
                 {
@@ -342,9 +341,8 @@ class design_sidb_gates_impl
                                     }
                                 });
                         }
-                        if (const auto [status, sim_calls] =
-                                is_operational(result_lyt, truth_table, params.operational_params,
-                                               std::optional{input_bdl_wires}, std::optional{output_bdl_wires});
+                        if (const auto [status, sim_calls] = is_operational(
+                                result_lyt, truth_table, params.operational_params, input_bdl_wires, output_bdl_wires);
                             status == operational_status::OPERATIONAL)
                         {
                             const std::lock_guard lock{mutex_to_protect_designed_gate_layouts};
@@ -426,9 +424,8 @@ class design_sidb_gates_impl
             {
                 return;
             }
-            if (const auto [status, sim_calls] =
-                    is_operational(candidate, truth_table, params.operational_params, std::optional{input_bdl_wires},
-                                   std::optional{output_bdl_wires});
+            if (const auto [status, sim_calls] = is_operational(candidate, truth_table, params.operational_params,
+                                                                input_bdl_wires, output_bdl_wires);
                 status == operational_status::OPERATIONAL)
             {
                 // Lock and update shared resources
@@ -657,17 +654,17 @@ class design_sidb_gates_impl
                 {
                     switch (applied_pruning)
                     {
-                        case detail::pruning_reason::POTENTIAL_POSITIVE_CHARGES:
+                        case detail::layout_invalid_reason::POTENTIAL_POSITIVE_CHARGES:
                         {
                             number_of_discarded_layouts_at_first_pruning++;
                             break;
                         }
-                        case detail::pruning_reason::PHYSICAL_INFEASIBILITY:
+                        case detail::layout_invalid_reason::PHYSICAL_INFEASIBILITY:
                         {
                             number_of_discarded_layouts_at_second_pruning++;
                             break;
                         }
-                        case detail::pruning_reason::IO_INSTABILITY:
+                        case detail::layout_invalid_reason::IO_INSTABILITY:
                         {
                             number_of_discarded_layouts_at_third_pruning++;
                             break;

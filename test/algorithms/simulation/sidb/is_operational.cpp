@@ -15,7 +15,6 @@
 #include <fiction/utils/truth_table_utils.hpp>
 
 #include <cstdint>
-#include <optional>
 #include <set>
 #include <vector>
 
@@ -31,31 +30,93 @@ TEST_CASE("SiQAD OR gate", "[is-operational]")
         sidb_simulation_parameters{2, -0.28}, sidb_simulation_engine::QUICKEXACT,
         bdl_input_iterator_params{detect_bdl_wires_params{1.5},
                                   bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED},
-        is_operational_params::operational_condition::REJECT_KINKS};
+        is_operational_params::operational_condition::TOLERATE_KINKS};
 
-    CHECK(is_operational(lat, std::vector<tt>{create_or_tt()}, op_params).first == operational_status::NON_OPERATIONAL);
+    SECTION("determine if layout is operational, tolerate kinks")
+    {
+        CHECK(is_operational(lat, std::vector<tt>{create_or_tt()}, op_params).first == operational_status::OPERATIONAL);
+    }
 
-    // determine if kinks induce layout to become non-operational.
-    const auto kink_induced_non_operational =
-        is_kink_induced_non_operational(lat, std::vector<tt>{create_or_tt()}, op_params);
-    CHECK(kink_induced_non_operational);
+    // from now on, we will reject kinks
+    op_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
+
+    SECTION("determine if layout is operational, accept kinks")
+    {
+        CHECK(is_operational(lat, std::vector<tt>{create_or_tt()}, op_params).first ==
+              operational_status::NON_OPERATIONAL);
+    }
+
+    SECTION("determine if kinks induce layout to become non-operational")
+    {
+        const auto kink_induced_non_operational =
+            is_kink_induced_non_operational(lat, std::vector<tt>{create_or_tt()}, op_params);
+        CHECK(kink_induced_non_operational);
+    }
 
     const auto input_wires  = detect_bdl_wires(lat, detect_bdl_wires_params{1.5});
     const auto output_wires = detect_bdl_wires(lat, detect_bdl_wires_params{1.5});
 
-    // determine if kinks induce layout to become non-operational.
-    const auto kink_induced_non_operational_predefined_wires = is_kink_induced_non_operational(
-        lat, std::vector<tt>{create_or_tt()}, op_params, std::optional{input_wires}, std::optional{output_wires});
-    CHECK(kink_induced_non_operational_predefined_wires);
+    SECTION("use pre-determined I/O pins")
+    {
+        CHECK(is_operational(lat, std::vector<tt>{create_or_tt()}, op_params, input_wires, output_wires).first ==
+              operational_status::NON_OPERATIONAL);
+    }
 
-    // determine input patterns for which kinks induce layout to become non-operational.
-    const auto kink_induced_non_operational_input_pattern =
-        kink_induced_non_operational_input_patterns(lat, std::vector<tt>{create_or_tt()}, op_params);
+    SECTION("pre-determined I/O pins, but no canvas layout")
+    {
+        op_params.mode_to_analyse_operational_status = is_operational_params::analyis_mode::PRUNE_BEFORE_SIMULATION;
+        CHECK(is_operational(lat, std::vector<tt>{create_or_tt()}, op_params, input_wires, output_wires).first ==
+              operational_status::NON_OPERATIONAL);
+    }
 
-    CHECK(kink_induced_non_operational_input_pattern.size() == 1);
+    SECTION("pre-determined I/O pins and canvas layout")
+    {
+        sidb_100_cell_clk_lyt_siqad canvas_lyt{};
+        const auto                  logic_cells = lat.get_cells_by_type(sidb_technology::cell_type::LOGIC);
+        for (const auto& c : logic_cells)
+        {
+            canvas_lyt.assign_cell_type(c, sidb_technology::cell_type::NORMAL);
+        }
+        CHECK(is_operational(lat, std::vector<tt>{create_or_tt()}, op_params, input_wires, output_wires).first ==
+              operational_status::NON_OPERATIONAL);
+    }
 
-    op_params.op_condition = is_operational_params::operational_condition::TOLERATE_KINKS;
-    CHECK(is_operational(lat, std::vector<tt>{create_or_tt()}, op_params).first == operational_status::OPERATIONAL);
+    SECTION("pre-determined I/O pins and no canvas layout and no logic cells")
+    {
+        auto lat_copy = lat.clone();
+
+        lat.foreach_cell(
+            [&lat, &lat_copy](const auto& c)
+            {
+                if (lat.get_cell_type(c) == sidb_technology::LOGIC)
+                {
+                    lat_copy.assign_cell_type(c, sidb_technology::cell_type::NORMAL);
+                }
+            });
+
+        CHECK(lat.get_cells_by_type(sidb_technology::cell_type::LOGIC).empty());
+
+        CHECK(is_operational(lat, std::vector<tt>{create_or_tt()}, op_params, input_wires, output_wires).first ==
+              operational_status::NON_OPERATIONAL);
+    }
+
+    SECTION("determine if kinks induce layout to become non-operational")
+    {
+        const auto kink_induced_non_operational_predefined_wires =
+            is_kink_induced_non_operational(lat, std::vector<tt>{create_or_tt()}, op_params, input_wires, output_wires);
+        CHECK(kink_induced_non_operational_predefined_wires);
+    }
+
+    SECTION("determine input patterns for which kinks induce layout to become non-operational")
+    {
+        const auto kink_induced_non_operational_input_pattern =
+            kink_induced_non_operational_input_patterns(lat, std::vector<tt>{create_or_tt()}, op_params);
+
+        CHECK(kink_induced_non_operational_input_pattern.size() == 1);
+
+        op_params.op_condition = is_operational_params::operational_condition::TOLERATE_KINKS;
+        CHECK(is_operational(lat, std::vector<tt>{create_or_tt()}, op_params).first == operational_status::OPERATIONAL);
+    }
 }
 
 TEST_CASE("SiQAD's AND gate with input BDL pairs of different size", "[is-operational]")
@@ -144,7 +205,7 @@ TEST_CASE("Bestagon AND gate", "[is-operational]")
 
     CHECK(lyt.num_cells() == 23);
 
-    SECTION("Check operation for different values of mu")
+    SECTION("check operation for different values of mu")
     {
         CHECK(is_operational(
                   lyt, std::vector<tt>{create_and_tt()},
@@ -155,7 +216,7 @@ TEST_CASE("Bestagon AND gate", "[is-operational]")
                   is_operational_params{sidb_simulation_parameters{2, -0.30}, sidb_simulation_engine::QUICKEXACT})
                   .first == operational_status::NON_OPERATIONAL);
     }
-    SECTION("Count the number of non-operational input combinations, accepting kinks")
+    SECTION("count the number of non-operational input combinations, accepting kinks")
     {
         const auto op_inputs = operational_input_patterns(
             lyt, std::vector<tt>{create_and_tt()},
@@ -202,7 +263,7 @@ TEMPLATE_TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[is-operational]", 
 {
     const auto lyt = blueprints::and_gate_111<TestType>();
 
-    SECTION("Check operation for different values of mu")
+    SECTION("check operation for different values of mu")
     {
         const auto op_inputs = operational_input_patterns(
             lyt, std::vector<tt>{create_and_tt()},
@@ -210,7 +271,7 @@ TEMPLATE_TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[is-operational]", 
         CHECK(op_inputs.size() == 4);
         CHECK(op_inputs == std::set<uint64_t>{0, 1, 2, 3});
     }
-    SECTION("Count the number of non-operational input combinations")
+    SECTION("count the number of non-operational input combinations")
     {
         const auto op_inputs = operational_input_patterns(
             lyt, std::vector<tt>{create_and_tt()},
@@ -219,7 +280,7 @@ TEMPLATE_TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[is-operational]", 
         CHECK(op_inputs == std::set<uint64_t>{0, 3});
     }
 
-    SECTION("Verify the operational status of the AND gate, which is mirrored on the x-axis. Note that the input BDL "
+    SECTION("verify the operational status of the AND gate, which is mirrored on the x-axis. Note that the input BDL "
             "pairs are located at the bottom, while the output BDL pairs are at the top.")
     {
         const auto lyt_mirrored_x = blueprints::and_gate_111_mirrored_on_the_x_axis<TestType>();
@@ -243,7 +304,7 @@ TEST_CASE(
                              is_operational_params{sidb_simulation_parameters{2, -0.32}})
                   .first == operational_status::OPERATIONAL);
     }
-    SECTION("Forbid kink states")
+    SECTION("forbid kink states")
     {
         CHECK(is_operational(lyt, std::vector<tt>{create_and_tt()},
                              is_operational_params{sidb_simulation_parameters{2, -0.32},
@@ -359,17 +420,17 @@ TEST_CASE("is operational check for Bestagon CX gate", "[is-operational], [quali
         CHECK(is_operational(
                   lat, create_crossing_wire_tt(),
                   is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT},
-                  std::optional{input_bdl_wires}, std::optional{output_bdl_wires})
+                  input_bdl_wires, output_bdl_wires)
                   .first == operational_status::OPERATIONAL);
         CHECK(is_operational(
                   lat, create_crossing_wire_tt(),
                   is_operational_params{sidb_simulation_parameters{2, -0.30}, sidb_simulation_engine::QUICKEXACT},
-                  std::optional{input_bdl_wires}, std::optional{output_bdl_wires})
+                  input_bdl_wires, output_bdl_wires)
                   .first == operational_status::NON_OPERATIONAL);
         CHECK(!is_kink_induced_non_operational(
             lat, create_crossing_wire_tt(),
             is_operational_params{sidb_simulation_parameters{2, -0.30}, sidb_simulation_engine::QUICKEXACT},
-            std::optional{input_bdl_wires}, std::optional{output_bdl_wires}));
+            input_bdl_wires, output_bdl_wires));
     }
 }
 
