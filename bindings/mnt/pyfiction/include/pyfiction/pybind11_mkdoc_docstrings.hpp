@@ -10152,6 +10152,32 @@ Parameter ``ps``:
 Returns:
     sidb_simulation_result is returned with all results.)doc";
 
+static const char *__doc_fiction_extended_rank_view =
+R"doc(@class extended_rank_view<Ntk, true>
+
+If already a rank_interface exists only the depth_view constructor
+gets called.
+
+Template parameter ``Ntk``:
+    The network type.)doc";
+
+static const char *__doc_fiction_extended_rank_view_2 =
+R"doc(Deduction guide for `extended_rank_view'
+
+Template parameter ``T``:
+    Network type deduced from the construction context of
+    `extended_rank_view`.)doc";
+
+static const char *__doc_fiction_extended_rank_view_3 =
+R"doc(Deduction guide for `extended_rank_view` with two constructor
+arguments
+
+Template parameter ``T``:
+    Network type deduced from the construction context of
+    `extended_rank_view`.)doc";
+
+static const char *__doc_fiction_extended_rank_view_extended_rank_view = R"doc()doc";
+
 static const char *__doc_fiction_extract_routing_objectives =
 R"doc(Extracts all routing objectives from the given layout. To this end,
 all routing paths in the layout are traversed, starting at each PI.
@@ -12396,6 +12422,8 @@ Returns:
     Iterator of the current iterator minus the given integer.)doc";
 
 static const char *__doc_fiction_gray_code_iterator_start_number = R"doc(Start number of the iteration.)doc";
+
+static const char *__doc_fiction_handle_virtual_pis = R"doc()doc";
 
 static const char *__doc_fiction_has_above = R"doc()doc";
 
@@ -18440,6 +18468,25 @@ Template parameter ``Color``:
 static const char *__doc_fiction_vertical_shift_cartesian =
 R"doc(\verbatim +-------+ | | | +-------+ | | | +-------+ | | | +-------+
 \endverbatim)doc";
+
+static const char *__doc_fiction_virtual_miter =
+R"doc(This method combines two networks into a combinational miter, similar
+to a mockturtle::miter. Either of the input networks may include
+virtual inputs (duplicated PIs). During the construction of the
+virtual miter, duplicated PIs are removed, and all edges connected to
+them are remapped to their corresponding original PIs. This ensures
+that the number of PIs in the miter networks is consistent when the
+networks are equivalent.
+
+The resulting miter has the same number of inputs as the input
+networks and a single primary output. This output represents the OR of
+the XORs of all primary output pairs. In other words, the miter
+outputs 1 for any input assignment where the primary outputs of the
+two input networks differ.
+
+The input networks may have different types. The method returns an
+`optional`, which is `nullopt` if the two input networks have
+mismatched numbers of primary inputs or primary outputs.)doc";
 
 static const char *__doc_fiction_virtual_pi_network = R"doc()doc";
 
