@@ -232,24 +232,14 @@ Operational Domain Computation
         .. doxygenenum:: fiction::operational_status
         .. doxygenstruct:: fiction::is_operational_params
            :members:
-        .. doxygenfunction:: fiction::is_operational
-        .. doxygenfunction:: fiction::operational_input_patterns(const Lyt& lyt, const std::vector<TT>& spec,
-                                                            const is_operational_params& params = {})
-        .. doxygenfunction:: fiction::operational_input_patterns(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params,
-                           const std::vector<bdl_wire<Lyt>>& input_bdl_wire,
-                           const std::vector<bdl_wire<Lyt>>& output_bdl_wire,
-                           const std::optional<Lyt>&         canvas_lyt = std::nullopt)
-        .. doxygenfunction:: fiction::is_kink_induced_non_operational(const Lyt& lyt, const std::vector<TT>& spec,
-                                                   const is_operational_params& params = {})
-        .. doxygenfunction:: fiction::is_kink_induced_non_operational(const Lyt& lyt, const std::vector<TT>& spec,
-                                                   const is_operational_params&      params,
-                                                   const std::vector<bdl_wire<Lyt>>& input_bdl_wire,
-                                                   const std::vector<bdl_wire<Lyt>>& output_bdl_wire,
-                                                   const std::optional<Lyt>&         canvas_lyt = std::nullopt)
-        .. doxygenfunction:: fiction::kink_induced_non_operational_input_patterns(const Lyt& lyt, const std::vector<TT>& spec,
-                                            const is_operational_params& params = {})
-        .. doxygenfunction:: fiction::fiction::kink_induced_non_operational_input_patterns(const Lyt& lyt, const std::vector<TT>& spec,
-                                            const is_operational_params& params = {})
+        .. doxygenfunction:: fiction::is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params = {})
+        .. doxygenfunction:: fiction::is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params, const std::vector<bdl_wire<Lyt>>& input_bdl_wire, const std::vector<bdl_wire<Lyt>>& output_bdl_wire, const std::optional<Lyt>& canvas_lyt = std::nullopt)
+        .. doxygenfunction:: fiction::operational_input_patterns(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params = {})
+        .. doxygenfunction:: fiction::operational_input_patterns(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params, const std::vector<bdl_wire<Lyt>>& input_bdl_wire, const std::vector<bdl_wire<Lyt>>& output_bdl_wire, const std::optional<Lyt>& canvas_lyt = std::nullopt)
+        .. doxygenfunction:: fiction::is_kink_induced_non_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params = {})
+        .. doxygenfunction:: fiction::is_kink_induced_non_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params, const std::vector<bdl_wire<Lyt>>& input_bdl_wire, const std::vector<bdl_wire<Lyt>>& output_bdl_wire, const std::optional<Lyt>& canvas_lyt = std::nullopt)
+        .. doxygenfunction:: fiction::kink_induced_non_operational_input_patterns(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params = {})
+        .. doxygenfunction:: fiction::kink_induced_non_operational_input_patterns(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params = {})
 
         **Header:** ``fiction/algorithms/simulation/sidb/operational_domain.hpp``
 
