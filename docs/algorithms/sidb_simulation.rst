@@ -233,9 +233,22 @@ Operational Domain Computation
         .. doxygenstruct:: fiction::is_operational_params
            :members:
         .. doxygenfunction:: fiction::is_operational
-        .. doxygenfunction:: fiction::operational_input_patterns
-        .. doxygenfunction:: fiction::is_kink_induced_non_operational
-        .. doxygenfunction:: fiction::kink_induced_non_operational_input_patterns
+        .. doxygenfunction:: fiction::operational_input_patterns(const Lyt& lyt, const std::vector<TT>& spec,
+                                                            const is_operational_params& params = {})
+        .. doxygenfunction:: fiction::operational_input_patterns(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params,
+                           const std::vector<bdl_wire<Lyt>>& input_bdl_wire,
+                           const std::vector<bdl_wire<Lyt>>& output_bdl_wire,
+                           const std::optional<Lyt>&         canvas_lyt = std::nullopt)
+        .. doxygenfunction:: fiction::is_kink_induced_non_operational(const Lyt& lyt, const std::vector<TT>& spec,
+                                                   const is_operational_params& params = {})
+        .. doxygenfunction:: fiction::is_kink_induced_non_operational(const Lyt& lyt, const std::vector<TT>& spec,
+                                                   const is_operational_params&      params,
+                                                   const std::vector<bdl_wire<Lyt>>& input_bdl_wire,
+                                                   const std::vector<bdl_wire<Lyt>>& output_bdl_wire,
+                                                   const std::optional<Lyt>&         canvas_lyt = std::nullopt)
+        .. doxygenfunction:: fiction::kink_induced_non_operational_input_patterns(const Lyt& lyt, const std::vector<TT>& spec,
+                                            const is_operational_params& params = {})
+        .. doxygenfunction:: fiction::kink_induced_non_operational_input_patterns(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params, const std::vector<bdl_wire<Lyt>>& input_bdl_wire, const std::vector<bdl_wire<Lyt>>& output_bdl_wire, const std::optional<Lyt>& canvas_lyt = std::nullopt)
 
         **Header:** ``fiction/algorithms/simulation/sidb/operational_domain.hpp``
 
@@ -388,86 +401,67 @@ Charge Detection
         .. autofunction:: mnt.pyfiction.can_positive_charges_occur
 
 
-Binary-dot Logic (BDL) Pair Detection
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Binary-dot Logic (BDL)
+Pair Detection ^ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. tabs::
-    .. tab:: C++
-        **Header:** ``fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp``
+                                                        ..tabs::..tab::C++** Header : ** ``fiction /
+                         algorithms / simulation / sidb /
+                         detect_bdl_pairs
+                             .hpp``
 
-        .. doxygenstruct:: fiction::bdl_pair
-           :members:
-        .. doxygenstruct:: fiction::detect_bdl_pairs_params
-           :members:
-        .. doxygenfunction:: fiction::detect_bdl_pairs
+                             ..doxygenstruct::fiction::bdl_pair : members
+        :..doxygenstruct::fiction::detect_bdl_pairs_params : members
+        :..doxygenfunction::fiction::detect_bdl_pairs
 
-    .. tab:: Python
-        .. autoclass:: mnt.pyfiction.bdl_pair
-            :members:
-        .. autoclass:: mnt.pyfiction.detect_bdl_pairs_params
-            :members:
-        .. autofunction:: mnt.pyfiction.detect_bdl_pairs
+                             ..tab::Python..autoclass::mnt.pyfiction.bdl_pair : members
+        :..autoclass::mnt.pyfiction.detect_bdl_pairs_params : members :..autofunction::mnt.pyfiction.detect_bdl_pairs
 
+                                                                           Binary -
+                     dot                                                   Logic(BDL)
+Wire                                                                       Detection ^
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Binary-dot Logic (BDL) Wire Detection
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                                           ..tabs::..tab::C++** Header : ** ``fiction /
+        algorithms / simulation / sidb /
+        detect_bdl_wires
+            .hpp``
 
-.. tabs::
-    .. tab:: C++
-        **Header:** ``fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp``
+            ..doxygenenum::fiction::bdl_wire_selection..doxygenstruct::fiction::detect_bdl_wires_params : members
+        :..doxygenstruct::fiction::bdl_wire : members
+        :..doxygenfunction::fiction::detect_bdl_wires
 
-        .. doxygenenum:: fiction::bdl_wire_selection
-        .. doxygenstruct:: fiction::detect_bdl_wires_params
-           :members:
-        .. doxygenstruct:: fiction::bdl_wire
-           :members:
-        .. doxygenfunction:: fiction::detect_bdl_wires
+            ..tab::Python..autoclass::mnt.pyfiction.bdl_wire_selection : members
+        :..autoclass::mnt.pyfiction.detect_bdl_wires_params : members
+        :..autoclass::mnt.pyfiction.bdl_wire_100 : members :..autoclass::mnt.pyfiction.bdl_wire_111 : members
+        :..autofunction::mnt.pyfiction.detect_bdl_wires_100..autofunction::mnt.pyfiction.detect_bdl_wires_111
 
-    .. tab:: Python
-        .. autoclass:: mnt.pyfiction.bdl_wire_selection
-            :members:
-        .. autoclass:: mnt.pyfiction.detect_bdl_wires_params
-            :members:
-        .. autoclass:: mnt.pyfiction.bdl_wire_100
-            :members:
-        .. autoclass:: mnt.pyfiction.bdl_wire_111
-            :members:
-        .. autofunction:: mnt.pyfiction.detect_bdl_wires_100
-        .. autofunction:: mnt.pyfiction.detect_bdl_wires_111
+             Assess Population Stability ^
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+                                 ..tabs::..tab::C++** Header : ** ``fiction /
+        algorithms / simulation / sidb /
+        assess_physical_population_stability
+            .hpp``
 
-Assess Population Stability
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+            ..doxygenenum::fiction::transition_type.
+            .doxygenstruct::fiction::population_stability_information : members
+        :..doxygenstruct::fiction::assess_physical_population_stability_params : members
+        :..doxygenfunction::fiction::assess_physical_population_stability
 
-.. tabs::
-    .. tab:: C++
-        **Header:** ``fiction/algorithms/simulation/sidb/assess_physical_population_stability.hpp``
+            ..tab::Python..autoclass::mnt.pyfiction.transition_type : members
+        :..autoclass::mnt.pyfiction.population_stability_information : members
+        :..autoclass::mnt.pyfiction.assess_physical_population_stability_params : members
+        :..autofunction::mnt.pyfiction.assess_physical_population_stability
 
-        .. doxygenenum:: fiction::transition_type
-        .. doxygenstruct:: fiction::population_stability_information
-           :members:
-        .. doxygenstruct:: fiction::assess_physical_population_stability_params
-           :members:
-        .. doxygenfunction:: fiction::assess_physical_population_stability
+             Convert Potential to Distance ^
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-    .. tab:: Python
-        .. autoclass:: mnt.pyfiction.transition_type
-            :members:
-        .. autoclass:: mnt.pyfiction.population_stability_information
-            :members:
-        .. autoclass:: mnt.pyfiction.assess_physical_population_stability_params
-            :members:
-        .. autofunction:: mnt.pyfiction.assess_physical_population_stability
+                                   ..tabs::..tab::C++** Header : ** ``fiction /
+        algorithms / simulation / sidb /
+        convert_potential_to_distance
+            .hpp``
 
+            .
+            .doxygenfunction::fiction::convert_potential_to_distance
 
-Convert Potential to Distance
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. tabs::
-    .. tab:: C++
-        **Header:** ``fiction/algorithms/simulation/sidb/convert_potential_to_distance.hpp``
-
-        .. doxygenfunction:: fiction::convert_potential_to_distance
-
-    .. tab:: Python
-        .. autofunction:: mnt.pyfiction.convert_potential_to_distance
+            ..tab::Python..autofunction::mnt.pyfiction.convert_potential_to_distance
