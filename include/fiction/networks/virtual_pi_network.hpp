@@ -411,6 +411,8 @@ class delete_virtual_pis_impl
                     old2new[g] = ntk_dest.create_node(children, ntk.node_function(g));
                     return true;
                 }
+
+                return true;
             });
 
         ntk.foreach_po(
