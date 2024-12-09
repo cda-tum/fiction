@@ -4,33 +4,33 @@ name: 🐍 • Packaging
 
 on:
   release:
-    types: [ published ]
+    types: [published]
   merge_group:
   push:
-    branches: [ 'main' ]
+    branches: ["main"]
     paths:
-      - 'bindings/pyfiction/**'
-      - '**/*.py'
-      - '**/*.hpp'
-      - '**/*.cpp'
-      - '**/*.cmake'
-      - '**/CMakeLists.txt'
-      - 'libs/**'
-      - '.github/workflows/pyfiction-pypi-deployment.yml'
+      - "bindings/pyfiction/**"
+      - "**/*.py"
+      - "**/*.hpp"
+      - "**/*.cpp"
+      - "**/*.cmake"
+      - "**/CMakeLists.txt"
+      - "libs/**"
+      - ".github/workflows/pyfiction-pypi-deployment.yml"
   pull_request:
-    branches: [ 'main' ]
+    branches: ["main"]
     paths:
-      - 'bindings/pyfiction/**'
-      - '**/*.py'
-      - '**/*.hpp'
-      - '**/*.cpp'
-      - '**/*.cmake'
-      - '**/CMakeLists.txt'
-      - 'libs/**'
-      - '.github/workflows/pyfiction-pypi-deployment.yml'
+      - "bindings/pyfiction/**"
+      - "**/*.py"
+      - "**/*.hpp"
+      - "**/*.cpp"
+      - "**/*.cmake"
+      - "**/CMakeLists.txt"
+      - "libs/**"
+      - ".github/workflows/pyfiction-pypi-deployment.yml"
   workflow_dispatch:
   workflow_run:
-    workflows: [ "pyfiction Docstring Generator" ]
+    workflows: ["pyfiction Docstring Generator"]
     types:
       - completed
 
@@ -47,72 +47,6 @@ env:
   Z3_VERSION: 4.13.0
 
 jobs:
-  build_wheels:
-    name: 🎡 Wheels for ${{ matrix.python }} on ${{ matrix.config.os }} (${{ matrix.config.arch }})
-    runs-on: ${{ matrix.config.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        config:
-          - { os: ubuntu-22.04, arch: x64 }
-          - { os: macos-13, arch: x64 }
-          - { os: macos-14, arch: arm64 }
-          - { os: windows-2019, arch: x64 }
-        python: [ 'cp38', 'cp39', 'cp310', 'cp311', 'cp312', 'cp313' ]
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          fetch-depth: 0
-
-      - name: Set up MSVC development environment (Windows only)
-        uses: ilammy/msvc-dev-cmd@v1
-
-      - name: Setup ccache
-        uses: hendrikmuhs/ccache-action@v1.2
-        with:
-          key: '${{matrix.config.os}}-pyfiction'
-          variant: ccache
-          save: true
-          max-size: 10G
-
-      # on Linux, the action does not work because it can't install to the manylinux container
-      - if: runner.os != 'Linux'
-        name: Install Z3
-        uses: cda-tum/setup-z3@v1
-        with:
-          version: ${{ env.Z3_VERSION }}
-          architecture: ${{ matrix.config.arch }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Setup ccache
-        uses: hendrikmuhs/ccache-action@v1.2
-        with:
-          key: "${{matrix.config.os}}-pyfiction"
-          save: true
-          max-size: 10G
-
-      - if: runner.os == 'Linux'
-        name: Setup mold
-        uses: rui314/setup-mold@v1
-
-      - name: Install the latest version of uv
-        uses: astral-sh/setup-uv@v4
-        with:
-          version: "latest"
-          enable-cache: true
-
-      - name: Build wheels
-        uses: pypa/cibuildwheel@v2.22
-
-      - name: Upload wheel as an artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: cibw-wheels-${{ matrix.config.os }}-${{ matrix.config.arch }}-${{ matrix.python }}
-          path: ./wheelhouse/*.whl
-          overwrite: true
-
   build_sdist:
     name: 📦 Build Source Distribution
     runs-on: ubuntu-latest
@@ -142,8 +76,60 @@ jobs:
           path: dist/*.tar.gz
           overwrite: true
 
+  build_wheels:
+    name: 🛞 Wheels for ${{ matrix.runs-on }}
+    runs-on: ${{ matrix.runs-on }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        runs-on: [ubuntu-latest, macos-13, macos-14, windows-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Set up MSVC development environment (Windows only)
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: "${{matrix.config.os}}-pyfiction"
+          save: true
+          max-size: 10G
+
+      # on Linux, the action does not work because it can't install to the manylinux container
+      - if: runner.os != 'Linux'
+        name: Install Z3
+        uses: cda-tum/setup-z3@v1
+        with:
+          version: ${{ env.Z3_VERSION }}
+
+      - if: runner.os == 'Linux'
+        name: Setup mold
+        uses: rui314/setup-mold@v1
+
+      - name: Install the latest version of uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
+          enable-cache: true
+
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v2.22
+
+      - name: Upload wheel as an artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cibw-wheels-${{ matrix.config.os }}-${{ matrix.config.arch }}-${{ matrix.python }}
+          path: ./wheelhouse/*.whl
+          overwrite: true
+
   publish_to_pypi:
-    needs: [ build_wheels, build_sdist ]
+    needs: [build_wheels, build_sdist]
     runs-on: ubuntu-latest
     name: 🚀 Publish to PyPI
     if: github.event_name == 'release' && github.event.action == 'published'
@@ -156,7 +142,7 @@ jobs:
           merge-multiple: true
 
       - name: Generate artifact attestation for sdist and wheel(s)
-        uses: actions/attest-build-provenance@v1
+        uses: actions/attest-build-provenance@v2
         with:
           subject-path: "dist/*"
 

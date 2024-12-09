@@ -1,13 +1,20 @@
 import unittest
 
-from mnt.pyfiction import (cartesian_gate_layout, hexagonal_gate_layout, offset_coordinate, color_routing,
-                           color_routing_params)
+from mnt.pyfiction import (
+    cartesian_gate_layout,
+    color_routing,
+    color_routing_params,
+    hexagonal_gate_layout,
+    offset_coordinate,
+)
 
 
 class TestColorRouting(unittest.TestCase):
     def test_routing(self):
-        for lyt in [cartesian_gate_layout((4, 4), "2DDWave", "Layout"),
-                    hexagonal_gate_layout((4, 4), "2DDWave", "Layout")]:
+        for lyt in [
+            cartesian_gate_layout((4, 4), "2DDWave", "Layout"),
+            hexagonal_gate_layout((4, 4), "2DDWave", "Layout"),
+        ]:
             x1 = lyt.create_pi("x1", offset_coordinate(0, 0))
             x2 = lyt.create_pi("x2", offset_coordinate(0, 1))
 
@@ -41,5 +48,5 @@ class TestColorRouting(unittest.TestCase):
         self.assertTrue(success)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

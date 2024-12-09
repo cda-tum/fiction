@@ -3,8 +3,8 @@ name: 🐍 • Docstring Generator
 on:
   push:
     paths:
-      - '**/*.hpp'
-      - '.github/workflows/pyfiction-docstring-generator.yml'
+      - "**/*.hpp"
+      - ".github/workflows/pyfiction-docstring-generator.yml"
   workflow_dispatch:
 
 jobs:
@@ -22,7 +22,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.13.x"
-          cache: 'pip'
+          cache: "pip"
 
       - name: Install pybind11_mkdoc and clang
         working-directory: ${{ github.workspace }}
@@ -50,8 +50,8 @@ jobs:
       - name: Commit docstrings
         uses: EndBug/add-and-commit@v9
         with:
-          add: 'bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp'
-          commit: '--signoff'
-          message: ':memo: Update pyfiction docstrings'
+          add: "bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp"
+          commit: "--signoff"
+          message: ":memo: Update pyfiction docstrings"
           author_name: GitHub Actions
           author_email: actions@github.com

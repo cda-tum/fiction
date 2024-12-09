@@ -1,10 +1,14 @@
-from mnt.pyfiction import (generate_random_sidb_layout, generate_random_sidb_layout_params, sidb_100_lattice,
-                           sidb_111_lattice)
 import unittest
+
+from mnt.pyfiction import (
+    generate_random_sidb_layout,
+    generate_random_sidb_layout_params,
+    sidb_100_lattice,
+    sidb_111_lattice,
+)
 
 
 class TestRandomSiDBLayoutGenerator(unittest.TestCase):
-
     def test_area_with_one_sidb_100_lattice(self):
         params = generate_random_sidb_layout_params()
         params.number_of_sidbs = 1
@@ -34,5 +38,5 @@ class TestRandomSiDBLayoutGenerator(unittest.TestCase):
         self.assertEqual(cell.y, 10)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

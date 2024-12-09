@@ -15,7 +15,7 @@ constexpr const char* MUGEN_PATH = "@CMAKE_CURRENT_SOURCE_DIR@/mugen/";
 /**
  * Version of python-sat required to work.
  */
-constexpr const char* REQUIRED_PYSAT_VERSION = "0.1.6.dev6";
+constexpr const char* REQUIRED_PYSAT_VERSION = "0.1.6.dev16";
 
 }  // namespace fiction
 
