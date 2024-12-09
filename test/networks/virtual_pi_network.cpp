@@ -27,6 +27,10 @@ TEST_CASE("Check name conservation", "[virtual-pi-view]")
     const auto a  = vpi.create_pi();
     const auto b  = vpi.create_pi();
     const auto f1 = vpi.create_and(a, b);
+    // delete_virtual_pis returns the ntk unchanged if no virtual PIs are present.
+    const auto test_del = delete_virtual_pis(vpi);
+    CHECK(test_del.num_virtual_pis() == 0);
+    // continue ntk creation
     const auto c  = vpi.create_virtual_pi(a);
     const auto d  = vpi.create_virtual_pi(b);
     const auto f2 = vpi.create_and(b, c);
@@ -216,14 +220,12 @@ TEST_CASE("Remove PIs and check equivalence technology_network", "[virtual-pi-vi
     if (!maybe_miter.has_value())
     {
         CHECK(false);
-        return;
     }
     mockturtle::equivalence_checking_stats st;
     const auto                             maybe_cec_m = mockturtle::equivalence_checking(*maybe_miter, {}, &st);
     if (!maybe_cec_m.has_value())
     {
         CHECK(false);
-        return;
     }
     CHECK(maybe_cec_m.value() == 1);
     // check cloning
@@ -234,13 +236,11 @@ TEST_CASE("Remove PIs and check equivalence technology_network", "[virtual-pi-vi
     if (!maybe_miter.has_value())
     {
         CHECK(false);
-        return;
     }
     const auto maybe_cec_c = mockturtle::equivalence_checking(*maybe_miter, {}, &st);
     if (!maybe_cec_c.has_value())
     {
         CHECK(false);
-        return;
     }
     CHECK(maybe_cec_c.value() == 1);
 }
@@ -283,14 +283,12 @@ TEMPLATE_TEST_CASE("Remove PIs and check equivalence", "[virtual-pi-view]", mock
     if (!maybe_miter.has_value())
     {
         CHECK(false);
-        return;
     }
     mockturtle::equivalence_checking_stats st;
     const auto                             maybe_cec_m = mockturtle::equivalence_checking(*maybe_miter, {}, &st);
     if (!maybe_cec_m.has_value())
     {
         CHECK(false);
-        return;
     }
     CHECK(maybe_cec_m.value() == 1);
     // check cloning
@@ -301,13 +299,11 @@ TEMPLATE_TEST_CASE("Remove PIs and check equivalence", "[virtual-pi-view]", mock
     if (!maybe_miter.has_value())
     {
         CHECK(false);
-        return;
     }
     const auto maybe_cec_c = mockturtle::equivalence_checking(*maybe_miter, {}, &st);
     if (!maybe_cec_c.has_value())
     {
         CHECK(false);
-        return;
     }
     CHECK(maybe_cec_c.value() == 1);
 }

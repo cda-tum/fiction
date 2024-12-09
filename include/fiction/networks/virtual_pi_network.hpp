@@ -279,7 +279,7 @@ class virtual_pi_network : public Ntk
      * @param fn The function to be applied.
      */
     template <typename Fn>
-    void foreach_real_ci(Fn&& fn)
+    void foreach_real_ci(Fn&& fn) const
     {
         static_cast<const Ntk*>(this)->foreach_ci(
             [this, fn = std::forward<Fn>(fn)](const auto& i)
@@ -398,30 +398,6 @@ class delete_virtual_pis_impl
                         return true;
                     }
                 }
-                if constexpr (mockturtle::has_is_nary_and_v<Ntk> && mockturtle::has_create_nary_and_v<Ntk>)
-                {
-                    if (ntk.is_nary_and(g))
-                    {
-                        old2new[g] = ntk_dest.create_nary_and(children);
-                        return true;
-                    }
-                }
-                if constexpr (mockturtle::has_is_nary_or_v<Ntk> && mockturtle::has_create_nary_or_v<Ntk>)
-                {
-                    if (ntk.is_nary_or(g))
-                    {
-                        old2new[g] = ntk_dest.create_nary_or(children);
-                        return true;
-                    }
-                }
-                if constexpr (mockturtle::has_is_nary_xor_v<Ntk> && mockturtle::has_create_nary_xor_v<Ntk>)
-                {
-                    if (ntk.is_nary_xor(g))
-                    {
-                        old2new[g] = ntk_dest.create_nary_xor(children);
-                        return true;
-                    }
-                }
                 if constexpr (fiction::has_is_buf_v<Ntk> && mockturtle::has_create_buf_v<Ntk>)
                 {
                     if (ntk.is_buf(g))
@@ -435,8 +411,6 @@ class delete_virtual_pis_impl
                     old2new[g] = ntk_dest.create_node(children, ntk.node_function(g));
                     return true;
                 }
-
-                return true;
             });
 
         ntk.foreach_po(
