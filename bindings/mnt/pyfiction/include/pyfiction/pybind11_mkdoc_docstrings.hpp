@@ -1123,9 +1123,9 @@ static const char *__doc_fiction_bounding_box_2d_x_size = R"doc(The horizontal s
 static const char *__doc_fiction_bounding_box_2d_y_size = R"doc(The vertical size of the bounding box in layout coordinates.)doc";
 
 static const char *__doc_fiction_calculate_defect_clearance =
-R"doc(Calculates the defect clearance of a given gate layout by a given
+R"doc(Calculates the defect clearance of a given SiDB layout for a given
 atomic defect. This means that a defect must be further away than this
-distance for the SiDB gate to be operational. This function requires
+distance for the SiDB layout to be operational. This function requires
 both the defect operational domain and the layout as input.
 
 Template parameter ``Lyt``:
@@ -3821,7 +3821,8 @@ static const char *__doc_fiction_debug_write_dot_network = R"doc()doc";
 static const char *__doc_fiction_defect_clearance_result =
 R"doc(Results of the defect clearance calculation.
 
-Template parameter ``CellType``:)doc";
+Template parameter ``CellType``:
+    Cell type of the layout.)doc";
 
 static const char *__doc_fiction_defect_clearance_result_defect_clearance_distance =
 R"doc(The maximum of the minimum distances between any SiDB in the gate and
@@ -18516,7 +18517,7 @@ reference.)doc";
 static const char *__doc_fiction_time_to_solution_params_repetitions =
 R"doc(Number of iterations of the heuristic algorithm used to determine the
 simulation accuracy (`repetitions = 100` means that accuracy is
-precise to 1%).)doc";
+precise to 1 %).)doc";
 
 static const char *__doc_fiction_time_to_solution_stats =
 R"doc(This struct stores the time-to-solution, the simulation accuracy and
