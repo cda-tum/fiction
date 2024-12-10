@@ -18,10 +18,6 @@
 
 #include <parallel_hashmap/phmap.h>
 
-#if (PROGRESS_BARS)
-#include <mockturtle/utils/progress_bar.hpp>
-#endif
-
 namespace fiction
 {
 /* Network with additional "virtual" PIs.

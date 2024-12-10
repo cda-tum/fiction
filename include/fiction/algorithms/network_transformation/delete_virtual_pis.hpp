@@ -12,6 +12,7 @@
 #include <mockturtle/views/topo_view.hpp>
 
 #include <cassert>
+#include <cstdint>
 #include <cstdlib>
 #include <utility>
 #include <vector>
