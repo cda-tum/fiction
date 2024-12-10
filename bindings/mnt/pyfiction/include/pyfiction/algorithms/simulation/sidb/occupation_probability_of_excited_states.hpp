@@ -18,7 +18,7 @@ namespace pyfiction
 namespace detail
 {
 
-void occupation_probability_of_excited_states(pybind11::module& m)
+inline void occupation_probability_of_excited_states(pybind11::module& m)
 {
     namespace py = pybind11;
 

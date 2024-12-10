@@ -11,7 +11,8 @@
 #include <fiction/algorithms/simulation/sidb/time_to_solution.hpp>
 
 #include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
+
+#include <sstream>
 
 namespace pyfiction
 {

@@ -12,11 +12,10 @@
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/traits.hpp>
 
-#include <fmt/format.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include <string>
+#include <optional>
 
 namespace pyfiction
 {
@@ -29,7 +28,7 @@ void detect_bdl_pairs(pybind11::module& m)
 {
     namespace py = pybind11;
 
-    m.def("detect_bdl_pairs", &fiction::detect_bdl_pairs<Lyt>, py::arg("lyt"), py::arg("type") = std::nullopt,
+    m.def("detect_bdl_pairs", &fiction::detect_bdl_pairs<Lyt>, py::arg("lyt"), py::arg("cell_type") = std::nullopt,
           py::arg("params") = fiction::detect_bdl_pairs_params{}, DOC(fiction_detect_bdl_pairs));
 }
 
