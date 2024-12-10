@@ -5,9 +5,9 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 
+#include <fiction/algorithms/network_transformation/delete_virtual_pis.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/networks/virtual_pi_network.hpp>
-#include <fiction/algorithms/network_transformation/delete_virtual_pis.hpp>
 
 #include <mockturtle/algorithms/equivalence_checking.hpp>
 #include <mockturtle/algorithms/miter.hpp>
