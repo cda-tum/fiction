@@ -168,14 +168,40 @@ Temperature Behavior
         .. autofunction:: mnt.pyfiction.calculate_energy_and_state_type_with_kinks_rejected
 
 
-Maximum Defect Influence Distance
-#################################
+Atomic-Defect Analysis
+######################
+
+Maximum Defect Influence Position and Distance
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 **Header:** ``fiction/algorithms/simulation/sidb/maximum_defect_influence_position_and_distance.hpp``
 
-.. doxygenstruct:: fiction::maximum_defect_influence_distance_params
+.. doxygenstruct:: fiction::maximum_defect_influence_position_and_distance_params
    :members:
 .. doxygenfunction:: fiction::maximum_defect_influence_position_and_distance
+
+
+**Header:** ``fiction/algorithms/simulation/sidb/maximum_defect_influence_position_and_distance_od_sidb_gate.hpp``
+
+.. doxygenstruct:: fiction::maximum_defect_influence_position_and_distance_of_sidb_gate_params
+   :members:
+.. doxygenfunction:: fiction::maximum_defect_influence_position_and_distance_of_sidb_gate
+
+
+Defect Operational Domain
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**Header:** ``fiction/algorithms/simulation/sidb/defect_operational_domain.hpp``
+
+.. doxygenstruct:: fiction::defect_operational_domain_params
+   :members:
+.. doxygenstruct:: fiction::defect_operational_domain
+   :members:
+
+.. doxygenstruct:: fiction::defect_operational_domain_stats
+.. doxygenfunction:: fiction::defect_operational_domain_grid_search
+.. doxygenfunction:: fiction::defect_operational_domain_random_sampling
+.. doxygenfunction:: fiction::defect_operational_domain_quicktrace
 
 
 Time-to-Solution (TTS) Statistics
