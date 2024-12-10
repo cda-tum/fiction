@@ -387,7 +387,7 @@ class operational_domain_impl
     {
         const auto logic_cells = lyt.get_cells_by_type(technology<Lyt>::cell_type::LOGIC);
 
-        if (logic_cells.size() > 0)
+        if (!logic_cells.empty())
         {
             for (const auto& c : logic_cells)
             {

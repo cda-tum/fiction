@@ -189,7 +189,7 @@ class cell_level_layout : public ClockedLayout
      */
     [[nodiscard]] cell_type get_cell_type(const cell& c) const noexcept
     {
-        if (auto it = strg->cell_type_map.find(c); it != strg->cell_type_map.cend())
+        if (const auto it = strg->cell_type_map.find(c); it != strg->cell_type_map.cend())
         {
             return it->second;
         }
