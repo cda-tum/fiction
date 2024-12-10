@@ -15,8 +15,7 @@
 #include <pybind11/stl.h>
 
 #include <cstdint>
-
-#include << stdexcept>
+#include <stdexcept>
 
 namespace pyfiction
 {
