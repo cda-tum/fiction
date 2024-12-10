@@ -1,6 +1,8 @@
 from enum import Enum
 from typing import Any, Callable, overload
 
+from typing_extensions import Self
+
 # Layouts
 
 class offset_coordinate:
@@ -302,7 +304,7 @@ class cartesian_gate_layout(clocked_cartesian_layout):
     def __init__(self, dimension: offset_coordinate) -> None: ...
     @overload
     def __init__(
-            self, dimension: offset_coordinate, clocking_scheme: str = "2DDWave", layout_name: str = ""
+        self, dimension: offset_coordinate, clocking_scheme: str = "2DDWave", layout_name: str = ""
     ) -> None: ...
     def create_pi(self, name: str = "", t: offset_coordinate | None = None) -> None: ...
     def create_po(self, s: int, name: str = "", t: offset_coordinate | None = None) -> None: ...
@@ -321,7 +323,6 @@ class cartesian_gate_layout(clocked_cartesian_layout):
     def is_fanout(self) -> bool: ...
     def is_wire(self) -> bool: ...
     def set_layout_name(self, name: str) -> None: ...
-
     def set_name(self, name: str) -> None: ...
     def get_layout_name(self) -> str: ...
     def set_input_name(self, index: int, name: str) -> None: ...
@@ -390,7 +391,7 @@ class shifted_cartesian_gate_layout(clocked_shifted_cartesian_layout):
     def __init__(self, dimension: offset_coordinate) -> None: ...
     @overload
     def __init__(
-            self, dimension: offset_coordinate, clocking_scheme: str = "2DDWave", layout_name: str = ""
+        self, dimension: offset_coordinate, clocking_scheme: str = "2DDWave", layout_name: str = ""
     ) -> None: ...
     def create_pi(self, name: str = "", t: offset_coordinate | None = None) -> None: ...
     def create_po(self, s: int, name: str = "", t: offset_coordinate | None = None) -> None: ...
@@ -631,7 +632,7 @@ class qca_layout(clocked_cartesian_layout):
     def __init__(self, dimension: offset_coordinate) -> None: ...
     @overload
     def __init__(
-            self, dimension: offset_coordinate, clocking_scheme: str = "2DDWave", layout_name: str = ""
+        self, dimension: offset_coordinate, clocking_scheme: str = "2DDWave", layout_name: str = ""
     ) -> None: ...
     def assign_cell_type(self, c: offset_coordinate, ct: qca_technology.cell_type) -> None: ...
     def get_cell_type(self, c: offset_coordinate) -> qca_technology.cell_type: ...
@@ -658,7 +659,7 @@ class inml_layout(clocked_cartesian_layout):
     def __init__(self, dimension: offset_coordinate) -> None: ...
     @overload
     def __init__(
-            self, dimension: offset_coordinate, clocking_scheme: str = "2DDWave", layout_name: str = ""
+        self, dimension: offset_coordinate, clocking_scheme: str = "2DDWave", layout_name: str = ""
     ) -> None: ...
     def assign_cell_type(self, c: offset_coordinate, ct: inml_technology.cell_type) -> None: ...
     def get_cell_type(self, c: offset_coordinate) -> inml_technology.cell_type: ...
@@ -685,7 +686,7 @@ class sidb_layout(clocked_cartesian_layout):
     def __init__(self, dimension: offset_coordinate) -> None: ...
     @overload
     def __init__(
-            self, dimension: offset_coordinate, clocking_scheme: str = "2DDWave", layout_name: str = ""
+        self, dimension: offset_coordinate, clocking_scheme: str = "2DDWave", layout_name: str = ""
     ) -> None: ...
     def assign_cell_type(self, c: offset_coordinate, ct: sidb_technology.cell_type) -> None: ...
     def get_cell_type(self, c: offset_coordinate) -> sidb_technology.cell_type: ...
@@ -774,7 +775,7 @@ class fanout_substitution_params:
     threshold: int | None
 
 def fanout_substitution(
-        network: technology_network, params: fanout_substitution_params | None = ...
+    network: technology_network, params: fanout_substitution_params | None = ...
 ) -> technology_network: ...
 def is_fanout_substituted(network: technology_network, params: fanout_substitution_params | None = ...) -> bool: ...
 
@@ -784,7 +785,7 @@ class network_balancing_params:
     unify_outputs: bool
 
 def network_balancing(
-        network: technology_network, params: network_balancing_params | None = ...
+    network: technology_network, params: network_balancing_params | None = ...
 ) -> technology_network: ...
 def is_balanced(network: technology_network, params: network_balancing_params | None = ...) -> bool: ...
 
@@ -819,40 +820,40 @@ def all_standard_2_input_functions() -> technology_mapping_params: ...
 def all_standard_3_input_functions() -> technology_mapping_params: ...
 def all_supported_standard_functions() -> technology_mapping_params: ...
 def technology_mapping(
-        network: technology_network,
-        params: technology_mapping_params | None = ...,
-        stats: technology_mapping_stats | None = None,
+    network: technology_network,
+    params: technology_mapping_params | None = ...,
+    stats: technology_mapping_stats | None = None,
 ) -> technology_network: ...
 
 ## path finding
 
 @overload
 def manhattan_distance(
-        layout: cartesian_layout | shifted_cartesian_layout, source: offset_coordinate, target: offset_coordinate
+    layout: cartesian_layout | shifted_cartesian_layout, source: offset_coordinate, target: offset_coordinate
 ) -> int: ...
 @overload
 def manhattan_distance(layout: hexagonal_layout, source: cube_coordinate, target: cube_coordinate) -> int: ...
 @overload
 def euclidean_distance(
-        layout: cartesian_layout | shifted_cartesian_layout, source: offset_coordinate, target: offset_coordinate
+    layout: cartesian_layout | shifted_cartesian_layout, source: offset_coordinate, target: offset_coordinate
 ) -> float: ...
 @overload
 def euclidean_distance(layout: hexagonal_layout, source: cube_coordinate, target: cube_coordinate) -> float: ...
 @overload
 def squared_euclidean_distance(
-        layout: cartesian_layout | shifted_cartesian_layout, source: offset_coordinate, target: offset_coordinate
+    layout: cartesian_layout | shifted_cartesian_layout, source: offset_coordinate, target: offset_coordinate
 ) -> float: ...
 @overload
 def squared_euclidean_distance(layout: hexagonal_layout, source: cube_coordinate, target: cube_coordinate) -> float: ...
 @overload
 def twoddwave_distance(
-        layout: cartesian_layout | shifted_cartesian_layout, source: offset_coordinate, target: offset_coordinate
+    layout: cartesian_layout | shifted_cartesian_layout, source: offset_coordinate, target: offset_coordinate
 ) -> int: ...
 @overload
 def twoddwave_distance(layout: hexagonal_layout, source: cube_coordinate, target: cube_coordinate) -> int: ...
 @overload
 def chebyshev_distance(
-        layout: cartesian_layout | shifted_cartesian_layout, source: offset_coordinate, target: offset_coordinate
+    layout: cartesian_layout | shifted_cartesian_layout, source: offset_coordinate, target: offset_coordinate
 ) -> int: ...
 @overload
 def chebyshev_distance(layout: hexagonal_layout, source: cube_coordinate, target: cube_coordinate) -> int: ...
@@ -864,22 +865,22 @@ class a_star_params:
 
 @overload
 def a_star(
-        layout: cartesian_obstruction_layout
-                | cartesian_gate_layout
-                | cartesian_layout
-                | shifted_cartesian_obstruction_layout
-                | shifted_cartesian_gate_layout
-                | shifted_cartesian_layout,
-        source: offset_coordinate,
-        target: offset_coordinate,
-        params: a_star_params | None = ...,
+    layout: cartesian_obstruction_layout
+    | cartesian_gate_layout
+    | cartesian_layout
+    | shifted_cartesian_obstruction_layout
+    | shifted_cartesian_gate_layout
+    | shifted_cartesian_layout,
+    source: offset_coordinate,
+    target: offset_coordinate,
+    params: a_star_params | None = ...,
 ) -> list[offset_coordinate]: ...
 @overload
 def a_star(
-        layout: hexagonal_obstruction_layout | hexagonal_gate_layout | hexagonal_layout,
-        source: cube_coordinate,
-        target: cube_coordinate,
-        params: a_star_params | None = ...,
+    layout: hexagonal_obstruction_layout | hexagonal_gate_layout | hexagonal_layout,
+    source: cube_coordinate,
+    target: cube_coordinate,
+    params: a_star_params | None = ...,
 ) -> list[cube_coordinate]: ...
 
 class enumerate_all_paths_params:
@@ -889,22 +890,22 @@ class enumerate_all_paths_params:
 
 @overload
 def enumerate_all_paths(
-        layout: cartesian_obstruction_layout
-                | cartesian_gate_layout
-                | cartesian_layout
-                | shifted_cartesian_obstruction_layout
-                | shifted_cartesian_gate_layout
-                | shifted_cartesian_layout,
-        source: offset_coordinate,
-        target: offset_coordinate,
-        params: enumerate_all_paths_params | None = ...,
+    layout: cartesian_obstruction_layout
+    | cartesian_gate_layout
+    | cartesian_layout
+    | shifted_cartesian_obstruction_layout
+    | shifted_cartesian_gate_layout
+    | shifted_cartesian_layout,
+    source: offset_coordinate,
+    target: offset_coordinate,
+    params: enumerate_all_paths_params | None = ...,
 ) -> list[list[offset_coordinate]]: ...
 @overload
 def enumerate_all_paths(
-        layout: hexagonal_obstruction_layout | hexagonal_gate_layout | hexagonal_layout,
-        source: cube_coordinate,
-        target: cube_coordinate,
-        params: enumerate_all_paths_params | None = ...,
+    layout: hexagonal_obstruction_layout | hexagonal_gate_layout | hexagonal_layout,
+    source: cube_coordinate,
+    target: cube_coordinate,
+    params: enumerate_all_paths_params | None = ...,
 ) -> list[list[cube_coordinate]]: ...
 
 class yen_k_shortest_paths_params:
@@ -914,24 +915,24 @@ class yen_k_shortest_paths_params:
 
 @overload
 def yen_k_shortest_paths(
-        layout: cartesian_obstruction_layout
-                | cartesian_gate_layout
-                | cartesian_layout
-                | shifted_cartesian_obstruction_layout
-                | shifted_cartesian_gate_layout
-                | shifted_cartesian_layout,
-        source: offset_coordinate,
-        target: offset_coordinate,
-        k: int,
-        params: yen_k_shortest_paths_params | None = ...,
+    layout: cartesian_obstruction_layout
+    | cartesian_gate_layout
+    | cartesian_layout
+    | shifted_cartesian_obstruction_layout
+    | shifted_cartesian_gate_layout
+    | shifted_cartesian_layout,
+    source: offset_coordinate,
+    target: offset_coordinate,
+    k: int,
+    params: yen_k_shortest_paths_params | None = ...,
 ) -> list[list[offset_coordinate]]: ...
 @overload
 def yen_k_shortest_paths(
-        layout: hexagonal_obstruction_layout | hexagonal_gate_layout | hexagonal_layout,
-        source: cube_coordinate,
-        target: cube_coordinate,
-        k: int,
-        params: yen_k_shortest_paths_params | None = ...,
+    layout: hexagonal_obstruction_layout | hexagonal_gate_layout | hexagonal_layout,
+    source: cube_coordinate,
+    target: cube_coordinate,
+    k: int,
+    params: yen_k_shortest_paths_params | None = ...,
 ) -> list[list[cube_coordinate]]: ...
 
 # physical design
@@ -958,18 +959,18 @@ class color_routing_params:
 
 @overload
 def color_routing(
-        layout: cartesian_obstruction_layout
-                | cartesian_gate_layout
-                | shifted_cartesian_obstruction_layout
-                | shifted_cartesian_gate_layout,
-        objectives: list[tuple[offset_coordinate, offset_coordinate]],
-        params: color_routing_params | None = ...,
+    layout: cartesian_obstruction_layout
+    | cartesian_gate_layout
+    | shifted_cartesian_obstruction_layout
+    | shifted_cartesian_gate_layout,
+    objectives: list[tuple[offset_coordinate, offset_coordinate]],
+    params: color_routing_params | None = ...,
 ) -> bool: ...
 @overload
 def color_routing(
-        layout: hexagonal_obstruction_layout | hexagonal_gate_layout,
-        objectives: list[tuple[cube_coordinate, cube_coordinate]],
-        params: color_routing_params | None = ...,
+    layout: hexagonal_obstruction_layout | hexagonal_gate_layout,
+    objectives: list[tuple[cube_coordinate, cube_coordinate]],
+    params: color_routing_params | None = ...,
 ) -> bool: ...
 
 class technology_constraints(Enum):
@@ -1007,13 +1008,13 @@ class exact_stats:
     def report(self) -> str: ...
 
 def exact_cartesian(
-        network: technology_network, parameters: exact_params | None = None, statistics: exact_stats | None = None
+    network: technology_network, parameters: exact_params | None = None, statistics: exact_stats | None = None
 ) -> cartesian_gate_layout: ...
 def exact_shifted_cartesian(
-        network: technology_network, parameters: exact_params | None = None, statistics: exact_stats | None = None
+    network: technology_network, parameters: exact_params | None = None, statistics: exact_stats | None = None
 ) -> shifted_cartesian_gate_layout: ...
 def exact_hexagonal(
-        network: technology_network, parameters: exact_params | None = None, statistics: exact_stats | None = None
+    network: technology_network, parameters: exact_params | None = None, statistics: exact_stats | None = None
 ) -> hexagonal_gate_layout: ...
 
 class gold_effort_mode(Enum):
@@ -1052,9 +1053,9 @@ class graph_oriented_layout_design_stats:
     def report(self) -> str: ...
 
 def graph_oriented_layout_design(
-        network: technology_network,
-        parameters: graph_oriented_layout_design_params | None = ...,
-        statistics: graph_oriented_layout_design_stats | None = None,
+    network: technology_network,
+    parameters: graph_oriented_layout_design_params | None = ...,
+    statistics: graph_oriented_layout_design_stats | None = None,
 ) -> cartesian_gate_layout: ...
 
 class hexagonalization_stats:
@@ -1064,7 +1065,7 @@ class hexagonalization_stats:
     def report(self) -> str: ...
 
 def hexagonalization(
-        layout: cartesian_gate_layout, statistics: hexagonalization_stats | None = None
+    layout: cartesian_gate_layout, statistics: hexagonalization_stats | None = None
 ) -> hexagonal_gate_layout: ...
 
 class orthogonal_params:
@@ -1082,8 +1083,7 @@ class orthogonal_stats:
     def report(self) -> None: ...
 
 def orthogonal(
-        network: technology_network, parameters: orthogonal_params | None = ...,
-        statistics: orthogonal_stats | None = None
+    network: technology_network, parameters: orthogonal_params | None = ..., statistics: orthogonal_stats | None = None
 ) -> cartesian_gate_layout: ...
 
 class post_layout_optimization_params:
@@ -1110,9 +1110,9 @@ class post_layout_optimization_stats:
     def report(self) -> str: ...
 
 def post_layout_optimization(
-        layout: cartesian_gate_layout,
-        parameters: post_layout_optimization_params | None = ...,
-        statistics: post_layout_optimization_stats | None = None,
+    layout: cartesian_gate_layout,
+    parameters: post_layout_optimization_params | None = ...,
+    statistics: post_layout_optimization_stats | None = None,
 ) -> cartesian_gate_layout: ...
 
 class wiring_reduction_params:
@@ -1135,24 +1135,21 @@ class wiring_reduction_stats:
     def report(self) -> str: ...
 
 def wiring_reduction(
-        layout: cartesian_gate_layout,
-        parameters: wiring_reduction_params | None = ...,
-        statistics: wiring_reduction_stats | None = None,
+    layout: cartesian_gate_layout,
+    parameters: wiring_reduction_params | None = ...,
+    statistics: wiring_reduction_stats | None = None,
 ) -> cartesian_gate_layout: ...
-
-
 def clear_routing(
-        lyt: cartesian_obstruction_layout
-             | cartesian_gate_layout
-             | shifted_cartesian_layout
-             | shifted_cartesian_gate_layout
-             | hexagonal_obstruction_layout
-             | hexagonal_gate_layout,
+    lyt: cartesian_obstruction_layout
+    | cartesian_gate_layout
+    | shifted_cartesian_layout
+    | shifted_cartesian_gate_layout
+    | hexagonal_obstruction_layout
+    | hexagonal_gate_layout,
 ) -> None: ...
 def critical_path_length_and_throughput(
-        layout: cartesian_gate_layout | shifted_cartesian_gate_layout | hexagonal_gate_layout,
+    layout: cartesian_gate_layout | shifted_cartesian_gate_layout | hexagonal_gate_layout,
 ) -> tuple[int, int]: ...
-
 
 # SidB Logic Design
 
@@ -1173,10 +1170,10 @@ class design_sidb_gates_params:
     number_of_sidbs: int
 
 def design_sidb_gates(
-        skeleton: sidb_100_lattice | sidb_111_lattice,
-        spec: [[int, int], int],
-        params: design_sidb_gates_params = ...,
-        stats: design_sidb_gates_stats | None = None,
+    skeleton: sidb_100_lattice | sidb_111_lattice,
+    spec: [[int, int], int],
+    params: design_sidb_gates_params = ...,
+    stats: design_sidb_gates_stats | None = None,
 ) -> list[sidb_100_lattice | sidb_111_lattice]: ...
 
 ## simulation
@@ -1187,7 +1184,7 @@ def design_sidb_gates(
 def simulate(network: technology_network) -> dict[str, list[bool]]: ...
 @overload
 def simulate(
-        layout: cartesian_gate_layout | shifted_cartesian_gate_layout | hexagonal_gate_layout,
+    layout: cartesian_gate_layout | shifted_cartesian_gate_layout | hexagonal_gate_layout,
 ) -> dict[str, list[bool]]: ...
 
 ## verification
@@ -1207,9 +1204,9 @@ class gate_level_drv_params:
     border_io: bool
 
 def gate_level_drvs(
-        layout: cartesian_gate_layout | shifted_cartesian_gate_layout | hexagonal_gate_layout,
-        params: gate_level_drv_params | None = ...,
-        print_report: bool | None = False,
+    layout: cartesian_gate_layout | shifted_cartesian_gate_layout | hexagonal_gate_layout,
+    params: gate_level_drv_params | None = ...,
+    print_report: bool | None = False,
 ) -> tuple[int, int]: ...
 
 class eq_type(Enum):
@@ -1228,9 +1225,9 @@ class equivalence_checking_stats:
     runtime: float
 
 def equivalence_checking(
-        specification: technology_network | cartesian_gate_layout | shifted_cartesian_gate_layout | hexagonal_gate_layout,
-        implementation: technology_network | cartesian_gate_layout | shifted_cartesian_gate_layout | hexagonal_gate_layout,
-        statistics: equivalence_checking_stats | None = None,
+    specification: technology_network | cartesian_gate_layout | shifted_cartesian_gate_layout | hexagonal_gate_layout,
+    implementation: technology_network | cartesian_gate_layout | shifted_cartesian_gate_layout | hexagonal_gate_layout,
+    statistics: equivalence_checking_stats | None = None,
 ) -> eq_type: ...
 
 # In/Out
@@ -1247,20 +1244,16 @@ class unrecognized_cell_definition_exception(Exception): ...
 
 def read_fqca_layout(filename: str, layout_name: str = "") -> qca_layout: ...
 
-
 class sqd_parsing_error(RuntimeError): ...
 
-
 def read_sqd_layout_100(filename: str, layout_name: str = "") -> sidb_100_lattice: ...
-
-
 def read_sqd_layout_111(filename: str, layout_name: str = "") -> sidb_111_lattice: ...
 def write_dot_network(network: technology_network, filename: str) -> None: ...
 def write_dot_layout(
-        layout: cartesian_gate_layout | shifted_cartesian_gate_layout | hexagonal_gate_layout, filename: str
+    layout: cartesian_gate_layout | shifted_cartesian_gate_layout | hexagonal_gate_layout, filename: str
 ) -> None: ...
 def write_fgl_layout(
-        layout: cartesian_gate_layout | shifted_cartesian_gate_layout | hexagonal_gate_layout, filename: str
+    layout: cartesian_gate_layout | shifted_cartesian_gate_layout | hexagonal_gate_layout, filename: str
 ) -> None: ...
 
 class out_of_cell_names_exception(IndexError): ...
@@ -1271,16 +1264,14 @@ class write_fqca_layout_params:
     create_inter_layer_via_cells: bool
 
 def write_fqca_layout(
-        layout: cartesian_gate_layout | shifted_cartesian_gate_layout | hexagonal_gate_layout,
-        filename: str,
-        params: write_fqca_layout_params | None = ...,
+    layout: cartesian_gate_layout | shifted_cartesian_gate_layout | hexagonal_gate_layout,
+    filename: str,
+    params: write_fqca_layout_params | None = ...,
 ) -> None: ...
-
 
 class sample_writing_mode(Enum):
     ALL_SAMPLES: ...
     OPERATIONAL_ONLY: ...
-
 
 class write_operational_domain_params:
     def __init__(self) -> None:
@@ -1288,11 +1279,9 @@ class write_operational_domain_params:
         self.non_operational_tag: str
         self.writing_mode: sample_writing_mode
 
-
 def write_operational_domain(
-        opdom: operational_domain, filename: str, params: write_operational_domain_params | None = None
+    opdom: operational_domain, filename: str, params: write_operational_domain_params | None = None
 ) -> None: ...
-
 
 class color_mode(Enum):
     """Enumeration for color modes in the SVG layout."""
@@ -1300,11 +1289,9 @@ class color_mode(Enum):
     LIGHT: int  # Light mode for the layout colors
     DARK: int  # Dark mode for the layout colors
 
-
 class sidb_lattice_mode(Enum):
     SHOW_LATTICE: ...
     HIDE_LATTICE: ...
-
 
 class write_sidb_layout_svg_params:
     def __init__(self) -> None:
@@ -1315,22 +1302,15 @@ class write_sidb_layout_svg_params:
         self.color_mode: color_mode
         self.lattice_mode: sidb_lattice_mode
 
-
 class write_qca_layout_svg_params:
     def __init__(self) -> None: ...
 
-
 def write_sidb_layout_svg(
-        layout: sidb_100_lattice | sidb_111_lattice | sidb_layout, filename: str,
-        params: write_sidb_layout_svg_params = ...
+    layout: sidb_100_lattice | sidb_111_lattice | sidb_layout, filename: str, params: write_sidb_layout_svg_params = ...
 ) -> None: ...
-
-
 def write_sidb_layout_svg_to_string(
-        layout: sidb_100_lattice | sidb_111_lattice | sidb_layout, params: write_sidb_layout_svg_params = ...
+    layout: sidb_100_lattice | sidb_111_lattice | sidb_layout, params: write_sidb_layout_svg_params = ...
 ) -> str: ...
-
-
 def write_qca_layout_svg(layout: sidb_layout, filename: str, params: write_sidb_layout_svg_params = ...) -> None: ...
 
 class write_qca_layout_params:
@@ -1338,13 +1318,12 @@ class write_qca_layout_params:
 
     create_inter_layer_via_cells: bool
 
-
 def write_qca_layout(layout: qca_layout, filename: str, params: write_qca_layout_params = ...) -> None: ...
 def write_qcc_layout(layout: inml_layout, filename: str) -> None: ...
 def write_qll_layout(layout: qca_layout | inml_layout, filename: str) -> None: ...
 def write_sqd_layout(
-        layout: sidb_111_lattice | sidb_100_lattice | sidb_layout,
-        filename: str,
+    layout: sidb_111_lattice | sidb_100_lattice | sidb_layout,
+    filename: str,
 ) -> None: ...
 def write_sqd_sim_result(layout: sidb_layout, filename: str) -> None: ...
 
@@ -1356,9 +1335,8 @@ def area(layout: qca_layout, width: int = 18, height: int = 18, hspace: int = 2,
 def area(layout: inml_layout, width: int = 50, height: int = 100, hspace: int = 10, vspace: int = 25) -> float: ...
 @overload
 def area(
-        layout: sidb_layout, width: float = 0.0, height: float = 0.0, hspace: float = 0.384, vspace: float = 0.384
+    layout: sidb_layout, width: float = 0.0, height: float = 0.0, hspace: float = 0.384, vspace: float = 0.384
 ) -> float: ...
-
 
 # SiDB Technology
 
@@ -1384,9 +1362,9 @@ class bdl_input_iterator:
     def __gt__(self, n: int) -> bool: ...
     def __ge__(self, n: int) -> bool: ...
     def __add__(self, n: int) -> bdl_input_iterator: ...
-    def __iadd__(self, n: int) -> bdl_input_iterator: ...
+    def __iadd__(self, n: int) -> Self: ...
     def __sub__(self, n: int) -> bdl_input_iterator: ...
-    def __isub__(self, n: int) -> bdl_input_iterator: ...
+    def __isub__(self, n: int) -> Self: ...
     def __getitem__(self, n: int) -> bdl_input_iterator: ...
     def num_input_pairs(self) -> int: ...
     def get_layout(self) -> object: ...
@@ -1407,9 +1385,9 @@ class detect_bdl_pairs_params:
         self.maximum_distance: float
 
 def detect_bdl_pairs(
-        lyt: sidb_100_lattice | sidb_111_lattice,
-        type: sidb_technology.cell_type | None = None,
-        params: detect_bdl_pairs_params = ...,
+    lyt: sidb_100_lattice | sidb_111_lattice,
+    type: sidb_technology.cell_type | None = None,
+    params: detect_bdl_pairs_params = ...,
 ) -> list[bdl_pair]: ...
 
 class sidb_defect_type(Enum):
@@ -1430,11 +1408,11 @@ class sidb_defect_type(Enum):
 
 class sidb_defect:
     def __init__(
-            self,
-            defect_type: sidb_defect_type = ...,
-            electric_charge: int = 0,
-            relative_permittivity: float = 0.0,
-            screening_distance: float = 0.0,
+        self,
+        defect_type: sidb_defect_type = ...,
+        electric_charge: int = 0,
+        relative_permittivity: float = 0.0,
+        screening_distance: float = 0.0,
     ) -> None:
         def __eq__(self, rhs: sidb_defect) -> bool: ...
         def __ne__(self, rhs: sidb_defect) -> bool: ...
@@ -1450,9 +1428,9 @@ def is_positively_charged_defect(defect: sidb_defect_type) -> bool: ...
 def is_negatively_charged_defect(defect: sidb_defect_type) -> bool: ...
 def is_neutrally_charged_defect(defect: sidb_defect_type) -> bool: ...
 def defect_extent(
-        defect: sidb_defect_type,
-        charged_defect_spacing_overwrite: float | None = None,
-        neutral_defect_spacing_overwrite: float | None = None,
+    defect: sidb_defect_type,
+    charged_defect_spacing_overwrite: float | None = None,
+    neutral_defect_spacing_overwrite: float | None = None,
 ) -> float: ...
 
 class sidb_charge_state(Enum):
@@ -1499,10 +1477,10 @@ class charge_distribution_surface_100(sidb_100_lattice):
     def __init__(self, params: sidb_simulation_parameters = ..., cs: sidb_charge_state = ...) -> None: ...
     @overload
     def __init__(
-            self,
-            lyt: charge_distribution_surface_100,
-            params: sidb_simulation_parameters = ...,
-            cs: sidb_charge_state = ...,
+        self,
+        lyt: charge_distribution_surface_100,
+        params: sidb_simulation_parameters = ...,
+        cs: sidb_charge_state = ...,
     ) -> None: ...
     @overload
     def __init__(self, lyt: charge_distribution_surface_100) -> None: ...
@@ -1513,7 +1491,7 @@ class charge_distribution_surface_100(sidb_100_lattice):
     def charge_exists(self, cs: sidb_charge_state) -> bool: ...
     def cell_to_index(self, c: offset_coordinate) -> int: ...
     def assign_charge_state(
-            self, c: offset_coordinate, cs: sidb_charge_state, index_mode: charge_index_mode = ...
+        self, c: offset_coordinate, cs: sidb_charge_state, index_mode: charge_index_mode = ...
     ) -> None: ...
     def assign_charge_by_cell_index(self, i: int, cs: sidb_charge_state) -> None: ...
     def assign_all_charge_states(self, cs: sidb_charge_state) -> None: ...
@@ -1522,7 +1500,7 @@ class charge_distribution_surface_100(sidb_100_lattice):
     def add_sidb_defect_to_potential_landscape(self, c: sidb_charge_state, defect: sidb_defect) -> None: ...
     def erase_defect(self, c: offset_coordinate) -> None: ...
     def assign_charge_state_by_cell_index(
-            self, index: int, cs: sidb_charge_state, index_mode: charge_index_mode = ...
+        self, index: int, cs: sidb_charge_state, index_mode: charge_index_mode = ...
     ) -> None: ...
     def get_charge_state(self, c: offset_coordinate) -> sidb_charge_state: ...
     def get_charge_state_by_index(self, index: int) -> sidb_charge_state: ...
@@ -1542,10 +1520,10 @@ class charge_distribution_surface_100(sidb_100_lattice):
     def recompute_system_energy(self) -> None: ...
     def get_system_energy(self) -> float: ...
     def update_after_charge_change(
-            self,
-            dep_cell: dependent_cell_mode = ...,
-            energy_calculation_mode: energy_calculation = ...,
-            history_mode: charge_distribution_history = ...,
+        self,
+        dep_cell: dependent_cell_mode = ...,
+        energy_calculation_mode: energy_calculation = ...,
+        history_mode: charge_distribution_history = ...,
     ) -> None: ...
     def validity_check(self) -> bool: ...
     def is_physically_valid(self) -> bool: ...
@@ -1553,17 +1531,17 @@ class charge_distribution_surface_100(sidb_100_lattice):
     def charge_distribution_to_index(self) -> int: ...
     def get_charge_index_and_base(self) -> tuple[int, int]: ...
     def increase_charge_index_by_one(
-            self,
-            dependent_cell_fixed: dependent_cell_mode = ...,
-            recompute_system_energy: energy_calculation = ...,
-            consider_history: charge_distribution_history = ...,
-            engine: exact_sidb_simulation_engine = ...,
+        self,
+        dependent_cell_fixed: dependent_cell_mode = ...,
+        recompute_system_energy: energy_calculation = ...,
+        consider_history: charge_distribution_history = ...,
+        engine: exact_sidb_simulation_engine = ...,
     ) -> None: ...
     def get_max_charge_index(self) -> int: ...
     def assign_charge_index(self, charge_index: int, cdc: offset_coordinate) -> None: ...
     def adjacent_search(self, alpha: float, negative_indices: list[int]) -> None: ...
     def assign_global_external_potential(
-            self, potential_value: float, dependent_cell: dependent_cell_mode = ...
+        self, potential_value: float, dependent_cell: dependent_cell_mode = ...
     ) -> None: ...
     def is_three_state_simulation_required(self) -> bool: ...
     def get_positive_candidates(self) -> list[int]: ...
@@ -1574,7 +1552,7 @@ class charge_distribution_surface_100(sidb_100_lattice):
     def index_to_two_state_cell(self, index: int) -> offset_coordinate: ...
     def chargeless_potential_at_given_distance(self, distance: float) -> float: ...
     def chargeless_potential_generated_by_defect_at_given_distance(
-            self, distance: float, defect: sidb_defect
+        self, distance: float, defect: sidb_defect
     ) -> float: ...
     def assign_local_external_potential(self, external_potential: float) -> None: ...
     def get_local_external_potentials(self) -> list[float]: ...
@@ -1584,19 +1562,19 @@ class charge_distribution_surface_100(sidb_100_lattice):
     def get_charge_index_of_sub_layout(self) -> int: ...
     def charge_index_gray_code_to_charge_distribution(self, new_gray_code: int, old_gray_code: int) -> None: ...
     def increase_charge_index_of_sub_layout_by_one(
-            self,
-            dependent_cell_fixed: dependent_cell_mode = ...,
-            recompute_system_energy: energy_calculation = ...,
-            consider_history: charge_distribution_history = ...,
-            engine: exact_sidb_simulation_engine = ...,
+        self,
+        dependent_cell_fixed: dependent_cell_mode = ...,
+        recompute_system_energy: energy_calculation = ...,
+        consider_history: charge_distribution_history = ...,
+        engine: exact_sidb_simulation_engine = ...,
     ) -> None: ...
     def assign_charge_index_by_gray_code(
-            self,
-            current_gray_code: int,
-            previous_gray_code: int,
-            dependent_cell: dependent_cell_mode = ...,
-            energy_calc_mode: energy_calculation = ...,
-            history_mode: charge_distribution_history = ...,
+        self,
+        current_gray_code: int,
+        previous_gray_code: int,
+        dependent_cell: dependent_cell_mode = ...,
+        energy_calc_mode: energy_calculation = ...,
+        history_mode: charge_distribution_history = ...,
     ) -> None: ...
     def reset_charge_index_sub_layout(self) -> None: ...
     def get_max_charge_index_sub_layout(self) -> int: ...
@@ -1613,10 +1591,10 @@ class charge_distribution_surface_111(sidb_111_lattice):
     def __init__(self, params: sidb_simulation_parameters = ..., cs: sidb_charge_state = ...) -> None: ...
     @overload
     def __init__(
-            self,
-            lyt: charge_distribution_surface_100,
-            params: sidb_simulation_parameters = ...,
-            cs: sidb_charge_state = ...,
+        self,
+        lyt: charge_distribution_surface_100,
+        params: sidb_simulation_parameters = ...,
+        cs: sidb_charge_state = ...,
     ) -> None: ...
     @overload
     def __init__(self, lyt: charge_distribution_surface_100) -> None: ...
@@ -1627,7 +1605,7 @@ class charge_distribution_surface_111(sidb_111_lattice):
     def charge_exists(self, cs: sidb_charge_state) -> bool: ...
     def cell_to_index(self, c: offset_coordinate) -> int: ...
     def assign_charge_state(
-            self, c: offset_coordinate, cs: sidb_charge_state, index_mode: charge_index_mode = ...
+        self, c: offset_coordinate, cs: sidb_charge_state, index_mode: charge_index_mode = ...
     ) -> None: ...
     def assign_charge_by_cell_index(self, i: int, cs: sidb_charge_state) -> None: ...
     def assign_all_charge_states(self, cs: sidb_charge_state) -> None: ...
@@ -1636,7 +1614,7 @@ class charge_distribution_surface_111(sidb_111_lattice):
     def add_sidb_defect_to_potential_landscape(self, c: sidb_charge_state, defect: sidb_defect) -> None: ...
     def erase_defect(self, c: offset_coordinate) -> None: ...
     def assign_charge_state_by_cell_index(
-            self, index: int, cs: sidb_charge_state, index_mode: charge_index_mode = ...
+        self, index: int, cs: sidb_charge_state, index_mode: charge_index_mode = ...
     ) -> None: ...
     def get_charge_state(self, c: offset_coordinate) -> sidb_charge_state: ...
     def get_charge_state_by_index(self, index: int) -> sidb_charge_state: ...
@@ -1656,10 +1634,10 @@ class charge_distribution_surface_111(sidb_111_lattice):
     def recompute_system_energy(self) -> None: ...
     def get_system_energy(self) -> float: ...
     def update_after_charge_change(
-            self,
-            dep_cell: dependent_cell_mode = ...,
-            energy_calculation_mode: energy_calculation = ...,
-            history_mode: charge_distribution_history = ...,
+        self,
+        dep_cell: dependent_cell_mode = ...,
+        energy_calculation_mode: energy_calculation = ...,
+        history_mode: charge_distribution_history = ...,
     ) -> None: ...
     def validity_check(self) -> bool: ...
     def is_physically_valid(self) -> bool: ...
@@ -1667,17 +1645,17 @@ class charge_distribution_surface_111(sidb_111_lattice):
     def charge_distribution_to_index(self) -> int: ...
     def get_charge_index_and_base(self) -> tuple[int, int]: ...
     def increase_charge_index_by_one(
-            self,
-            dependent_cell_fixed: dependent_cell_mode = ...,
-            recompute_system_energy: energy_calculation = ...,
-            consider_history: charge_distribution_history = ...,
-            engine: exact_sidb_simulation_engine = ...,
+        self,
+        dependent_cell_fixed: dependent_cell_mode = ...,
+        recompute_system_energy: energy_calculation = ...,
+        consider_history: charge_distribution_history = ...,
+        engine: exact_sidb_simulation_engine = ...,
     ) -> None: ...
     def get_max_charge_index(self) -> int: ...
     def assign_charge_index(self, charge_index: int, cdc: offset_coordinate) -> None: ...
     def adjacent_search(self, alpha: float, negative_indices: list[int]) -> None: ...
     def assign_global_external_potential(
-            self, potential_value: float, dependent_cell: dependent_cell_mode = ...
+        self, potential_value: float, dependent_cell: dependent_cell_mode = ...
     ) -> None: ...
     def is_three_state_simulation_required(self) -> bool: ...
     def get_positive_candidates(self) -> list[int]: ...
@@ -1688,7 +1666,7 @@ class charge_distribution_surface_111(sidb_111_lattice):
     def index_to_two_state_cell(self, index: int) -> offset_coordinate: ...
     def chargeless_potential_at_given_distance(self, distance: float) -> float: ...
     def chargeless_potential_generated_by_defect_at_given_distance(
-            self, distance: float, defect: sidb_defect
+        self, distance: float, defect: sidb_defect
     ) -> float: ...
     def assign_local_external_potential(self, external_potential: float) -> None: ...
     def get_local_external_potentials(self) -> list[float]: ...
@@ -1698,19 +1676,19 @@ class charge_distribution_surface_111(sidb_111_lattice):
     def get_charge_index_of_sub_layout(self) -> int: ...
     def charge_index_gray_code_to_charge_distribution(self, new_gray_code: int, old_gray_code: int) -> None: ...
     def increase_charge_index_of_sub_layout_by_one(
-            self,
-            dependent_cell_fixed: dependent_cell_mode = ...,
-            recompute_system_energy: energy_calculation = ...,
-            consider_history: charge_distribution_history = ...,
-            engine: exact_sidb_simulation_engine = ...,
+        self,
+        dependent_cell_fixed: dependent_cell_mode = ...,
+        recompute_system_energy: energy_calculation = ...,
+        consider_history: charge_distribution_history = ...,
+        engine: exact_sidb_simulation_engine = ...,
     ) -> None: ...
     def assign_charge_index_by_gray_code(
-            self,
-            current_gray_code: int,
-            previous_gray_code: int,
-            dependent_cell: dependent_cell_mode = ...,
-            energy_calc_mode: energy_calculation = ...,
-            history_mode: charge_distribution_history = ...,
+        self,
+        current_gray_code: int,
+        previous_gray_code: int,
+        dependent_cell: dependent_cell_mode = ...,
+        energy_calc_mode: energy_calculation = ...,
+        history_mode: charge_distribution_history = ...,
     ) -> None: ...
     def reset_charge_index_sub_layout(self) -> None: ...
     def get_max_charge_index_sub_layout(self) -> int: ...
@@ -1727,10 +1705,10 @@ class charge_distribution_surface(sidb_layout):
     def __init__(self, params: sidb_simulation_parameters = ..., cs: sidb_charge_state = ...) -> None: ...
     @overload
     def __init__(
-            self,
-            lyt: charge_distribution_surface_100,
-            params: sidb_simulation_parameters = ...,
-            cs: sidb_charge_state = ...,
+        self,
+        lyt: charge_distribution_surface_100,
+        params: sidb_simulation_parameters = ...,
+        cs: sidb_charge_state = ...,
     ) -> None: ...
     @overload
     def __init__(self, lyt: charge_distribution_surface_100) -> None: ...
@@ -1741,7 +1719,7 @@ class charge_distribution_surface(sidb_layout):
     def charge_exists(self, cs: sidb_charge_state) -> bool: ...
     def cell_to_index(self, c: offset_coordinate) -> int: ...
     def assign_charge_state(
-            self, c: offset_coordinate, cs: sidb_charge_state, index_mode: charge_index_mode = ...
+        self, c: offset_coordinate, cs: sidb_charge_state, index_mode: charge_index_mode = ...
     ) -> None: ...
     def assign_charge_by_cell_index(self, i: int, cs: sidb_charge_state) -> None: ...
     def assign_all_charge_states(self, cs: sidb_charge_state) -> None: ...
@@ -1750,7 +1728,7 @@ class charge_distribution_surface(sidb_layout):
     def add_sidb_defect_to_potential_landscape(self, c: sidb_charge_state, defect: sidb_defect) -> None: ...
     def erase_defect(self, c: offset_coordinate) -> None: ...
     def assign_charge_state_by_cell_index(
-            self, index: int, cs: sidb_charge_state, index_mode: charge_index_mode = ...
+        self, index: int, cs: sidb_charge_state, index_mode: charge_index_mode = ...
     ) -> None: ...
     def get_charge_state(self, c: offset_coordinate) -> sidb_charge_state: ...
     def get_charge_state_by_index(self, index: int) -> sidb_charge_state: ...
@@ -1770,10 +1748,10 @@ class charge_distribution_surface(sidb_layout):
     def recompute_system_energy(self) -> None: ...
     def get_system_energy(self) -> float: ...
     def update_after_charge_change(
-            self,
-            dep_cell: dependent_cell_mode = ...,
-            energy_calculation_mode: energy_calculation = ...,
-            history_mode: charge_distribution_history = ...,
+        self,
+        dep_cell: dependent_cell_mode = ...,
+        energy_calculation_mode: energy_calculation = ...,
+        history_mode: charge_distribution_history = ...,
     ) -> None: ...
     def validity_check(self) -> bool: ...
     def is_physically_valid(self) -> bool: ...
@@ -1781,17 +1759,17 @@ class charge_distribution_surface(sidb_layout):
     def charge_distribution_to_index(self) -> int: ...
     def get_charge_index_and_base(self) -> tuple[int, int]: ...
     def increase_charge_index_by_one(
-            self,
-            dependent_cell_fixed: dependent_cell_mode = ...,
-            recompute_system_energy: energy_calculation = ...,
-            consider_history: charge_distribution_history = ...,
-            engine: exact_sidb_simulation_engine = ...,
+        self,
+        dependent_cell_fixed: dependent_cell_mode = ...,
+        recompute_system_energy: energy_calculation = ...,
+        consider_history: charge_distribution_history = ...,
+        engine: exact_sidb_simulation_engine = ...,
     ) -> None: ...
     def get_max_charge_index(self) -> int: ...
     def assign_charge_index(self, charge_index: int, cdc: offset_coordinate) -> None: ...
     def adjacent_search(self, alpha: float, negative_indices: list[int]) -> None: ...
     def assign_global_external_potential(
-            self, potential_value: float, dependent_cell: dependent_cell_mode = ...
+        self, potential_value: float, dependent_cell: dependent_cell_mode = ...
     ) -> None: ...
     def is_three_state_simulation_required(self) -> bool: ...
     def get_positive_candidates(self) -> list[int]: ...
@@ -1802,7 +1780,7 @@ class charge_distribution_surface(sidb_layout):
     def index_to_two_state_cell(self, index: int) -> offset_coordinate: ...
     def chargeless_potential_at_given_distance(self, distance: float) -> float: ...
     def chargeless_potential_generated_by_defect_at_given_distance(
-            self, distance: float, defect: sidb_defect
+        self, distance: float, defect: sidb_defect
     ) -> float: ...
     def assign_local_external_potential(self, external_potential: float) -> None: ...
     def get_local_external_potentials(self) -> list[float]: ...
@@ -1812,19 +1790,19 @@ class charge_distribution_surface(sidb_layout):
     def get_charge_index_of_sub_layout(self) -> int: ...
     def charge_index_gray_code_to_charge_distribution(self, new_gray_code: int, old_gray_code: int) -> None: ...
     def increase_charge_index_of_sub_layout_by_one(
-            self,
-            dependent_cell_fixed: dependent_cell_mode = ...,
-            recompute_system_energy: energy_calculation = ...,
-            consider_history: charge_distribution_history = ...,
-            engine: exact_sidb_simulation_engine = ...,
+        self,
+        dependent_cell_fixed: dependent_cell_mode = ...,
+        recompute_system_energy: energy_calculation = ...,
+        consider_history: charge_distribution_history = ...,
+        engine: exact_sidb_simulation_engine = ...,
     ) -> None: ...
     def assign_charge_index_by_gray_code(
-            self,
-            current_gray_code: int,
-            previous_gray_code: int,
-            dependent_cell: dependent_cell_mode = ...,
-            energy_calc_mode: energy_calculation = ...,
-            history_mode: charge_distribution_history = ...,
+        self,
+        current_gray_code: int,
+        previous_gray_code: int,
+        dependent_cell: dependent_cell_mode = ...,
+        energy_calc_mode: energy_calculation = ...,
+        history_mode: charge_distribution_history = ...,
     ) -> None: ...
     def reset_charge_index_sub_layout(self) -> None: ...
     def get_max_charge_index_sub_layout(self) -> int: ...
@@ -1837,20 +1815,16 @@ class charge_distribution_surface(sidb_layout):
     def is_within_bounds(self, c: tuple[int, int, int]) -> bool: ...
     def bounding_box_2d(self) -> tuple[tuple[int, int], tuple[int, int]]: ...
 
-
 class sidb_simulation_parameters:
     def __init__(self) -> None: ...
 
-
 @overload
 def exhaustive_ground_state_simulation(
-        lyt: sidb_100_lattice, params: sidb_simulation_parameters = ...
+    lyt: sidb_100_lattice, params: sidb_simulation_parameters = ...
 ) -> sidb_simulation_result_100: ...
-
-
 @overload
 def exhaustive_ground_state_simulation(
-        lyt: sidb_111_lattice, params: sidb_simulation_parameters = ...
+    lyt: sidb_111_lattice, params: sidb_simulation_parameters = ...
 ) -> sidb_simulation_result_111: ...
 
 class sidb_simulation_engine(Enum):
@@ -1864,21 +1838,18 @@ class exact_sidb_simulation_engine(Enum):
 
 @overload
 def sidb_nm_position(
-        lyt: charge_distribution_surface | sidb_layout | sidb_100_lattice | sidb_111_lattice,
-        c: sidb_technology.cell_type
+    lyt: charge_distribution_surface | sidb_layout | sidb_100_lattice | sidb_111_lattice, c: sidb_technology.cell_type
 ) -> None: ...
 def sidb_nm_distance_111(lyt: sidb_111_lattice, c: sidb_technology.cell_type) -> None: ...
-
-
 def sidb_nm_distance_100(lyt: sidb_100_lattice, c: sidb_technology.cell_type) -> None: ...
 
 class sidb_simulation_parameters:
     def __init__(
-            self,
-            base_number: int = 3,
-            mu_minus: float = -0.32,
-            relative_permittivity: float = 5.6,
-            screening_distance: float = 5.0,
+        self,
+        base_number: int = 3,
+        mu_minus: float = -0.32,
+        relative_permittivity: float = 5.6,
+        screening_distance: float = 5.0,
     ) -> None: ...
     def k(self) -> float: ...
     def mu_plus(self) -> float: ...
@@ -1910,10 +1881,10 @@ class assess_physical_population_stability_params:
     precision_for_distance_corresponding_to_potential: float
 
 def assess_physical_population_stability_100(
-        lyt: sidb_100_lattice, params: assess_physical_population_stability_params = ...
+    lyt: sidb_100_lattice, params: assess_physical_population_stability_params = ...
 ) -> list[population_stability_information]: ...
 def assess_physical_population_stability_111(
-        lyt: sidb_100_lattice, params: assess_physical_population_stability_params = ...
+    lyt: sidb_100_lattice, params: assess_physical_population_stability_params = ...
 ) -> list[population_stability_information]: ...
 def energy_distribution(input_vec: list[charge_distribution_surface]) -> dict[float, int]: ...
 
@@ -1945,10 +1916,10 @@ class detect_bdl_wires_params:
     bdl_pairs_params: object
 
 def detect_bdl_wires_100(
-        lyt: sidb_100_lattice, params: detect_bdl_wires_params = ..., wire_selection: bdl_wire_selection = ...
+    lyt: sidb_100_lattice, params: detect_bdl_wires_params = ..., wire_selection: bdl_wire_selection = ...
 ) -> list[bdl_wire_100]: ...
 def detect_bdl_wires_111(
-        lyt: sidb_111_lattice, params: detect_bdl_wires_params = ..., wire_selection: bdl_wire_selection = ...
+    lyt: sidb_111_lattice, params: detect_bdl_wires_params = ..., wire_selection: bdl_wire_selection = ...
 ) -> list[bdl_wire_111]: ...
 
 # Enums
@@ -1973,43 +1944,43 @@ class is_operational_params:
 
 @overload
 def is_operational(
-        lyt: sidb_100_lattice,
-        spec: object,
-        params: is_operational_params = ...,
-        input_bdl_wire: bdl_wire_100 | None = None,
-        output_bdl_wire: bdl_wire_100 | None = None,
+    lyt: sidb_100_lattice,
+    spec: object,
+    params: is_operational_params = ...,
+    input_bdl_wire: bdl_wire_100 | None = None,
+    output_bdl_wire: bdl_wire_100 | None = None,
 ) -> operational_status: ...
 @overload
 def is_operational(
-        lyt: sidb_100_lattice,
-        spec: object,
-        params: is_operational_params = ...,
-        input_bdl_wire: bdl_wire_111 | None = None,
-        output_bdl_wire: bdl_wire_111 | None = None,
+    lyt: sidb_100_lattice,
+    spec: object,
+    params: is_operational_params = ...,
+    input_bdl_wire: bdl_wire_111 | None = None,
+    output_bdl_wire: bdl_wire_111 | None = None,
 ) -> operational_status: ...
 @overload
 def operational_input_patterns(
-        lyt: sidb_100_lattice,
-        spec: object,  # Type depends on the specification
-        params: is_operational_params = ...,
+    lyt: sidb_100_lattice,
+    spec: object,  # Type depends on the specification
+    params: is_operational_params = ...,
 ) -> list[int]: ...
 @overload
 def operational_input_patterns(
-        lyt: sidb_111_lattice,
-        spec: object,  # Type depends on the specification
-        params: is_operational_params = ...,
+    lyt: sidb_111_lattice,
+    spec: object,  # Type depends on the specification
+    params: is_operational_params = ...,
 ) -> list[int]: ...
 def is_kink_induced_non_operational(
-        lyt: sidb_100_lattice | sidb_111_lattice,
-        spec: object,
-        params: is_operational_params = ...,
-        input_bdl_wire: object | None = None,
-        output_bdl_wire: object | None = None,
+    lyt: sidb_100_lattice | sidb_111_lattice,
+    spec: object,
+    params: is_operational_params = ...,
+    input_bdl_wire: object | None = None,
+    output_bdl_wire: object | None = None,
 ) -> operational_status: ...
 def kink_induced_non_operational_input_patterns(
-        lyt: sidb_100_lattice | sidb_111_lattice,
-        spec: object,
-        params: is_operational_params = ...,
+    lyt: sidb_100_lattice | sidb_111_lattice,
+    spec: object,
+    params: is_operational_params = ...,
 ) -> object: ...
 
 # QuickExact
@@ -2052,15 +2023,15 @@ class critical_temperature_params:
     max_temperature: float
 
 def critical_temperature_gate_based(
-        lyt: sidb_100_lattice | sidb_111_lattice,
-        spec: dict,
-        params: critical_temperature_params | None = ...,
-        stats: critical_temperature_stats | None = ...,
+    lyt: sidb_100_lattice | sidb_111_lattice,
+    spec: dict,
+    params: critical_temperature_params | None = ...,
+    stats: critical_temperature_stats | None = ...,
 ) -> float | None: ...
 def critical_temperature_non_gate_based(
-        lyt: sidb_100_lattice | sidb_111_lattice,
-        params: critical_temperature_params | None = ...,
-        stats: critical_temperature_stats | None = ...,
+    lyt: sidb_100_lattice | sidb_111_lattice,
+    params: critical_temperature_params | None = ...,
+    stats: critical_temperature_stats | None = ...,
 ) -> float | None: ...
 
 class parameter_point:
@@ -2078,8 +2049,7 @@ class sweep_parameter(Enum):
 
 class operational_domain_value_range:
     def __init__(
-            self, dimension: sweep_parameter, min: float | None = None, max: float | None = None,
-            step: float | None = None
+        self, dimension: sweep_parameter, min: float | None = None, max: float | None = None, step: float | None = None
     ) -> None: ...
 
     dimension: sweep_parameter
@@ -2111,69 +2081,57 @@ class operational_domain:
 
 def get_value(self, point: parameter_point) -> str: ...
 def operational_domain_grid_search(
-        lyt: sidb_100_lattice | sidb_111_lattice,
-        spec: dict,
-        params: operational_domain_params | None = None,
-        stats: operational_domain_stats | None = None,
+    lyt: sidb_100_lattice | sidb_111_lattice,
+    spec: dict,
+    params: operational_domain_params | None = None,
+    stats: operational_domain_stats | None = None,
 ) -> operational_domain | None: ...
 def operational_domain_random_sampling(
-        lyt: sidb_100_lattice | sidb_111_lattice,
-        spec: dict,
-        samples: int,
-        params: operational_domain_params | None = None,
-        stats: operational_domain_stats | None = None,
+    lyt: sidb_100_lattice | sidb_111_lattice,
+    spec: dict,
+    samples: int,
+    params: operational_domain_params | None = None,
+    stats: operational_domain_stats | None = None,
 ) -> operational_domain | None: ...
 def operational_domain_flood_fill(
-        lyt: sidb_100_lattice | sidb_111_lattice,
-        spec: dict,
-        samples: int,
-        params: operational_domain_params | None = None,
-        stats: operational_domain_stats | None = None,
+    lyt: sidb_100_lattice | sidb_111_lattice,
+    spec: dict,
+    samples: int,
+    params: operational_domain_params | None = None,
+    stats: operational_domain_stats | None = None,
 ) -> operational_domain | None: ...
 def operational_domain_contour_tracing(
-        lyt: sidb_100_lattice | sidb_111_lattice,
-        spec: dict,
-        samples: int,
-        params: operational_domain_params | None = None,
-        stats: operational_domain_stats | None = None,
+    lyt: sidb_100_lattice | sidb_111_lattice,
+    spec: dict,
+    samples: int,
+    params: operational_domain_params | None = None,
+    stats: operational_domain_stats | None = None,
 ) -> operational_domain | None: ...
-
-
 def calculate_energy_and_state_type_with_kinks_accepted(
-        sidb_energy_distribution: ..., valid_charge_distributions: ..., output_bdl_pairs: ..., spec: ...,
-        input_index: ...
+    sidb_energy_distribution: ..., valid_charge_distributions: ..., output_bdl_pairs: ..., spec: ..., input_index: ...
 ) -> None: ...
-
-
 def calculate_energy_and_state_type_with_kinks_rejected(
-        energy_distribution: ...,
-        valid_charge_distributions: ...,
-        spec: ...,
-        input_index: ...,
-        input_bdl_wires: ...,
-        output_bdl_wires: ...,
+    energy_distribution: ...,
+    valid_charge_distributions: ...,
+    spec: ...,
+    input_index: ...,
+    input_bdl_wires: ...,
+    output_bdl_wires: ...,
 ) -> None: ...
-
-
 def can_positive_charges_occur(
-        lyt: sidb_100_lattice | sidb_111_lattice,
-        sim_params: sidb_simulation_parameters,
+    lyt: sidb_100_lattice | sidb_111_lattice,
+    sim_params: sidb_simulation_parameters,
 ) -> bool: ...
-
-
 @overload
 def check_simulation_results_for_equivalence(
-        result1: sidb_simulation_result_100,
-        result2: sidb_simulation_result_100,
+    result1: sidb_simulation_result_100,
+    result2: sidb_simulation_result_100,
 ) -> bool: ...
-
-
 @overload
 def check_simulation_results_for_equivalence(
-        result1: sidb_simulation_result_111,
-        result2: sidb_simulation_result_111,
+    result1: sidb_simulation_result_111,
+    result2: sidb_simulation_result_111,
 ) -> bool: ...
-
 
 class sidb_simulation_result_100:
     def __init__(self) -> None:
@@ -2189,7 +2147,6 @@ class sidb_simulation_result_100:
     simulation_parameters: sidb_simulation_parameters
     additional_simulation_parameters: dict[str, Any]
 
-
 class sidb_simulation_result_111:
     def __init__(self) -> None:
         self.algorithm_name: str
@@ -2204,13 +2161,11 @@ class sidb_simulation_result_111:
     simulation_parameters: sidb_simulation_parameters
     additional_simulation_parameters: dict[str, Any]
 
-
 class time_to_solution_params:
     def __init__(self) -> None:
         self.engine: str
         self.repetitions: int
         self.confidence_level: float
-
 
 class time_to_solution_stats:
     def __init__(self) -> None:
@@ -2222,46 +2177,36 @@ class time_to_solution_stats:
 
     def report(self, stream: str | None = None) -> None: ...
 
-
 def time_to_solution(
-        lyt: sidb_100_lattice | sidb_111_lattice,
-        quickim_params: quicksim_params,
-        tts_params: time_to_solution_params = ...,
-        ps: time_to_solution_stats | None = None,
+    lyt: sidb_100_lattice | sidb_111_lattice,
+    quickim_params: quicksim_params,
+    tts_params: time_to_solution_params = ...,
+    ps: time_to_solution_stats | None = None,
 ) -> time_to_solution_stats: ...
-
-
 def time_to_solution_for_given_simulation_results(
-        results_exact: sidb_simulation_result_100 | sidb_simulation_result_111,
-        results_heuristic: list[sidb_simulation_result_100 | sidb_simulation_result_111],
-        confidence_level: float = 0.997,
-        ps: time_to_solution_stats | None = None,
+    results_exact: sidb_simulation_result_100 | sidb_simulation_result_111,
+    results_heuristic: list[sidb_simulation_result_100 | sidb_simulation_result_111],
+    confidence_level: float = 0.997,
+    ps: time_to_solution_stats | None = None,
 ) -> time_to_solution_stats: ...
-
-
 @overload
 def is_ground_state(
-        heuristic_results: sidb_simulation_result_100,
-        exhaustive_results: sidb_simulation_result_100,
+    heuristic_results: sidb_simulation_result_100,
+    exhaustive_results: sidb_simulation_result_100,
 ) -> bool: ...
-
-
 @overload
 def is_ground_state(
-        heuristic_results: sidb_simulation_result_111,
-        exhaustive_results: sidb_simulation_result_111,
+    heuristic_results: sidb_simulation_result_111,
+    exhaustive_results: sidb_simulation_result_111,
 ) -> bool: ...
-
 
 class displacement_analysis_mode(Enum):
     EXHAUSTIVE = 0
     RANDOM = 1
 
-
 class dimer_displacement_policy(Enum):
     STAY_ON_ORIGINAL_DIMER = 0
     ALLOW_OTHER_DIMER = 1
-
 
 class displacement_robustness_domain_params:
     def __init__(self) -> None:
@@ -2272,91 +2217,66 @@ class displacement_robustness_domain_params:
         self.fixed_sidbs: list[siqad_coordinate | offset_coordinate]
         self.dimer_policy: dimer_displacement_policy
 
-
 class displacement_robustness_domain_stats:
     def __init__(self) -> None:
         self.time_total: float
         self.num_operational_sidb_displacements: int
         self.num_non_operational_sidb_displacements: int
 
-
 class displacement_robustness_domain_100:
     def __init__(self) -> None: ...
-
 
 class displacement_robustness_domain_111:
     def __init__(self) -> None: ...
 
-
 def determine_displacement_robustness_domain_100(
-        layout: sidb_100_lattice,
-        spec: ...,
-        params: displacement_robustness_domain_params,
-        stats: displacement_robustness_domain_stats | None = None,
+    layout: sidb_100_lattice,
+    spec: ...,
+    params: displacement_robustness_domain_params,
+    stats: displacement_robustness_domain_stats | None = None,
 ) -> None: ...
-
-
 def determine_displacement_robustness_domain_111(
-        layout: sidb_111_lattice,
-        spec: ...,
-        params: displacement_robustness_domain_params,
-        stats: displacement_robustness_domain_stats | None = None,
+    layout: sidb_111_lattice,
+    spec: ...,
+    params: displacement_robustness_domain_params,
+    stats: displacement_robustness_domain_stats | None = None,
 ) -> None: ...
-
-
 def occupation_probability_gate_based(energy_and_state_type: list[tuple[float, str]], temperature: float) -> float: ...
-
-
 def occupation_probability_non_gate_based(energy_distribution: list[float], temperature: float) -> float: ...
-
 
 class compute_operational_ratio_params:
     def __init__(self) -> None: ...
 
-
 def compute_operational_ratio(
-        lyt: sidb_100_lattice | sidb_111_lattice,
-        spec: ...,
-        pp: parameter_point,
-        params: compute_operational_ratio_params = ...,
+    lyt: sidb_100_lattice | sidb_111_lattice,
+    spec: ...,
+    pp: parameter_point,
+    params: compute_operational_ratio_params = ...,
 ) -> float: ...
-
-
 @overload
 def determine_groundstate_from_simulation_results(
-        simulation_results: sidb_simulation_result_100,
+    simulation_results: sidb_simulation_result_100,
 ) -> list[charge_distribution_surface_100]: ...
-
-
 @overload
 def determine_groundstate_from_simulation_results(
-        simulation_results: sidb_simulation_result_111,
+    simulation_results: sidb_simulation_result_111,
 ) -> list[charge_distribution_surface_111]: ...
-
-
 @overload
 def minimum_energy(layouts: list[charge_distribution_surface_100]) -> float: ...
-
-
 @overload
 def minimum_energy(layouts: list[charge_distribution_surface_111]) -> float: ...
 
-
 class physically_valid_parameters_domain:
     def __init__(self) -> None: ...
-
     def get_excited_state_number_for_parameter(self, pp: parameter_point) -> int: ...
 
-
 @overload
 def determine_physically_valid_parameters(
-        cds: charge_distribution_surface_100, params: operational_domain_params = ...
+    cds: charge_distribution_surface_100, params: operational_domain_params = ...
 ) -> physically_valid_parameters_domain: ...
-
-
 @overload
 def determine_physically_valid_parameters(
-        cds: charge_distribution_surface_111, params: operational_domain_params = ...
+    cds: charge_distribution_surface_111, params: operational_domain_params = ...
 ) -> physically_valid_parameters_domain: ...
 
 # Utils
@@ -2388,25 +2308,15 @@ def create_double_wire_tt() -> Callable[[int, int], int]: ...
 def create_crossing_wire_tt() -> Callable[[int, int], int]: ...
 def create_fan_out_tt() -> Callable[[int], int]: ...
 def create_half_adder_tt() -> Callable[[int, int], int]: ...
-
-
 @overload
 def random_coordinate(coordinate1: offset_coordinate, coordinate2: offset_coordinate) -> offset_coordinate: ...
-
-
 @overload
 def random_coordinate(coordinate1: cube_coordinate, coordinate2: cube_coordinate) -> cube_coordinate: ...
-
-
 @overload
 def random_coordinate(coordinate1: siqad_coordinate, coordinate2: siqad_coordinate) -> siqad_coordinate: ...
-
-
 def normalize_layout_coordinates(
-        lyt: sidb_100_lattice | sidb_111_lattice | sidb_layout | qca_layout | inml_layout,
+    lyt: sidb_100_lattice | sidb_111_lattice | sidb_layout | qca_layout | inml_layout,
 ) -> None: ...
-
-
 def convert_potential_to_distance(
-        potential: float, params: sidb_simulation_parameters = ..., precision: float = 2
+    potential: float, params: sidb_simulation_parameters = ..., precision: float = 2
 ) -> Any: ...
