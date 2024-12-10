@@ -68,7 +68,7 @@ inline void determine_displacement_robustness_domain(pybind11::module& m)
         .def_readwrite(
             "displacement_variations",
             &fiction::displacement_robustness_domain_params<fiction::offset::ucoord_t>::displacement_variations)
-        .def_readwrite("operational_params",
+        .def_readwrite("is_operational_params",
                        &fiction::displacement_robustness_domain_params<fiction::offset::ucoord_t>::operational_params)
         .def_readwrite("fixed_sidbs",
                        &fiction::displacement_robustness_domain_params<fiction::offset::ucoord_t>::fixed_sidbs)

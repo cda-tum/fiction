@@ -313,6 +313,8 @@ Determine Physically Valid Parameters
         .. doxygenfunction:: fiction::determine_physically_valid_parameters
 
    .. tab:: Python
+        .. autoclass:: mnt.pyfiction.physically_valid_parameters_domain
+            :members:
         .. autoclass:: mnt.pyfiction.determine_physically_valid_parameters
 
 

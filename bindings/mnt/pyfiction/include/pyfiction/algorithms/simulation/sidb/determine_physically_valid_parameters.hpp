@@ -14,11 +14,17 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
+#include <cstdint>
+
+#include << stdexcept>
+
 namespace pyfiction
 {
 
 namespace detail
 {
+
+// TODO update docu
 
 template <typename Lyt>
 void determine_physically_valid_parameters(pybind11::module& m)
@@ -35,12 +41,10 @@ inline void determine_physically_valid_parameters(pybind11::module& m)
 {
     namespace py = pybind11;
 
-    py::class_<fiction::operational_domain<fiction::parameter_point, uint64_t>>(m, "physically_valid_parameters_domain",
-                                                                                DOC(fiction_operational_domain))
-        // todo add docu
+    py::class_<fiction::operational_domain<fiction::parameter_point, uint64_t>>(
+        m, "physically_valid_parameters_domain", DOC(fiction_determine_physically_valid_parameters))
         .def(py::init<>())
         .def_readwrite("dimensions", &fiction::operational_domain<fiction::parameter_point, uint64_t>::dimensions)
-
         .def(
             "get_excited_state_number_for_parameter",
             [](const fiction::operational_domain<fiction::parameter_point, uint64_t>& domain,

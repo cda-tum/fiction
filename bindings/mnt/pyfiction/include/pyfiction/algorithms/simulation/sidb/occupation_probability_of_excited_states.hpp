@@ -6,7 +6,6 @@
 #define PYFICTION_OCCUPATION_PROBABILITY_OF_EXCITED_STATES_HPP
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/simulation/sidb/occupation_probability_of_excited_states.hpp>
 
