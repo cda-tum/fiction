@@ -17,7 +17,7 @@ namespace fiction
 /**
  * Results of the defect clearance calculation.
  *
- * @tparam CellType
+ * @tparam CellType Cell type of the layout.
  */
 template <typename CellType>
 struct defect_clearance_result
@@ -34,8 +34,8 @@ struct defect_clearance_result
     double defect_clearance_distance{};
 };
 /**
- * Calculates the defect clearance of a given gate layout by a given atomic defect. This means that a defect
- * must be further away than this distance for the SiDB gate to be operational. This function requires both the defect
+ * Calculates the defect clearance of a given SiDB layout for a given atomic defect. This means that a defect
+ * must be further away than this distance for the SiDB layout to be operational. This function requires both the defect
  * operational domain and the layout as input.
  *
  * @tparam Lyt SiDB cell-level layout type.
