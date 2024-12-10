@@ -5,8 +5,9 @@
 #ifndef FICTION_VIRTUAL_MITER_HPP
 #define FICTION_VIRTUAL_MITER_HPP
 
-#include <fiction/algorithms/network_transformation/delete_virtual_pis.hpp>
 #include "fiction/traits.hpp"
+
+#include <fiction/algorithms/network_transformation/delete_virtual_pis.hpp>
 
 #include <mockturtle/traits.hpp>
 
