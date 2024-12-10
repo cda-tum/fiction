@@ -204,6 +204,16 @@ Defect Operational Domain
 .. doxygenfunction:: fiction::defect_operational_domain_quicktrace
 
 
+Defect Clearance
+^^^^^^^^^^^^^^^^
+
+**Header:** ``fiction/algorithms/simulation/sidb/calculate_defect_clearance.hpp``
+
+.. doxygenstruct:: fiction::defect_clearance_result
+   :members:
+.. doxygenfunction:: fiction::calculate_defect_clearance
+
+
 Time-to-Solution (TTS) Statistics
 #################################
 
@@ -373,7 +383,6 @@ Displacement Robustness Domain
         .. autofunction:: mnt.pyfiction.determine_displacement_robustness_domain_100
         .. autofunction:: mnt.pyfiction.determine_displacement_robustness_domain_111
 
-
 Utility Functions
 #################
 
@@ -489,6 +498,16 @@ Assess Population Stability
             :members:
         .. autofunction:: mnt.pyfiction.assess_physical_population_stability_100
         .. autofunction:: mnt.pyfiction.assess_physical_population_stability_111
+
+
+Band-Bending Resilience
+^^^^^^^^^^^^^^^^^^^^^^^
+
+**Header:** ``fiction/algorithms/simulation/sidb/assess_physical_population_stability.hpp``
+
+.. doxygenstruct:: fiction::calculate_min_bbr_for_all_inputs_params
+   :members:
+.. doxygenstruct:: fiction::calculate_min_bbr_for_all_inputs
 
 
 Convert Potential to Distance
