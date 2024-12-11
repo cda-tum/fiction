@@ -85,8 +85,6 @@ class abc_command : public command
             const auto fiction_network_path = write_current_network_to_temp_file();
             const auto abc_network_path     = abc_output_temp_file();
 
-            std::cout << fmt::format("[i] Calling ABC with command: '{}'", abc_command_str) << std::endl;
-
             // call the ABC binary
             const auto abc_call =
                 fmt::format("{} -c \"read {}; strash; {}; write_aiger -s {}\"", ABC, fiction_network_path.string(),
@@ -167,11 +165,6 @@ class abc_command : public command
             {
                 throw std::runtime_error("Failed to create directory: " + fiction_dir.string());
             }
-            std::cout << "Created directory: " << fiction_dir << '\n';
-        }
-        else
-        {
-            std::cout << "Directory already exists: " << fiction_dir << '\n';
         }
 
         return fiction_dir;
