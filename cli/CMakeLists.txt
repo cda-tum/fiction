@@ -50,7 +50,7 @@ if (FICTION_LOGIC_SYNTHESIS_FLOW)
                 DOC "Path to the ABC executable"
         )
         if (ABC_BINARY)
-            message(STATUS "Found abc binary: ${ABC_BINARY}")
+            message(STATUS "Found ABC binary: ${ABC_BINARY}")
             target_compile_definitions(fiction PRIVATE FICTION_ABC)
             target_compile_definitions(fiction PRIVATE ABC_EXECUTABLE="${ABC_BINARY}")
         else ()

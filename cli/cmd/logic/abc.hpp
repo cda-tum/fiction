@@ -35,7 +35,14 @@ class abc_command : public command
      *
      * @param e alice::environment that specifies stores etc.
      */
-    explicit abc_command(const environment::ptr& e) : command(e, "ABC")
+    explicit abc_command(const environment::ptr& e) :
+            command(
+                e,
+                "ABC callback for logic synthesis and optimization. The command `abc -c \"<command>\"` will launch ABC "
+                "and execute the given command string. Internally, it writes the current AIG or XAG to a temporary "
+                "AIGER file, have ABC parse this file as an AIG using `read <filename>; strash`, and then execute the "
+                "given command string. Finally, ABC will write the result back to the temporary file using "
+                "`write_aiger -s <filename>`, which will be read back into the fiction CLI as a new AIG.")
     {
         add_option("--command,-c", abc_command_str, "Command to pass to ABC")->required();
     }
