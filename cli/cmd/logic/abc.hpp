@@ -45,6 +45,9 @@ class abc_command : public command
                 "`write_aiger -s <filename>`, which will be read back into the fiction CLI as a new AIG.")
     {
         add_option("--command,-c", abc_command_str, "Command to pass to ABC")->required();
+        add_flag("--dont_read,-r", "Do not read the network into ABC, only execute the command");
+        add_flag("--dont_strash,-s", "Do not strash the network before executing the command");
+        add_flag("--dont_write,-w", "Do not write the network back to the CLI after executing the command");
     }
 
   protected:
@@ -55,7 +58,7 @@ class abc_command : public command
     {
         if constexpr (ABC == nullptr)
         {
-            env->out() << "[e] ABC_EXECUTABLE environment variable is not set. Cannot launch ABC." << std::endl;
+            env->out() << "[e] `ABC_EXECUTABLE` environment variable is not set. Cannot launch ABC." << std::endl;
             return;
         }
 
@@ -92,10 +95,15 @@ class abc_command : public command
             const auto fiction_network_path = write_current_network_to_temp_file();
             const auto abc_network_path     = abc_output_temp_file();
 
+            const auto read_cmd =
+                fmt::format("{}", is_set("dont_read") ? "" : fmt::format("read {}; ", fiction_network_path.string()));
+            const auto strash_cmd = is_set("dont_strash") ? "" : "strash; ";
+            const auto write_cmd =
+                is_set("dont_write") ? "" : fmt::format("; write_aiger -s {}", abc_network_path.string());
+
             // call the ABC binary
             const auto abc_call =
-                fmt::format("{} -q \"read {}; strash; {}; write_aiger -s {}\"", ABC, fiction_network_path.string(),
-                            abc_command_str, abc_network_path.string());
+                fmt::format("{0} -q \"{1}{2}{3}{4}\"", ABC, read_cmd, strash_cmd, abc_command_str, write_cmd);
 
             if (const auto ret = std::system(abc_call.c_str()); ret != 0)
             {
@@ -107,7 +115,7 @@ class abc_command : public command
 
             store<fiction::logic_network_t>().extend() = reader.get_networks().front();
         }
-        catch (const std::runtime_error& e)
+        catch (const std::exception& e)
         {
             env->out() << fmt::format("[e] {}", e.what()) << std::endl;
         }

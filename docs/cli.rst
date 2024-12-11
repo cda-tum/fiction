@@ -114,6 +114,11 @@ first write *fiction*'s current network to a temporary AIGER file, have ABC pars
 using ``read <filename>; strash``, and then execute the given command string. Finally, ABC will write the result back to
 the temporary file which will be read back into *fiction* as a new network.
 
+The ABC command string construction can be customized to
+- omit the network read command in ABC (``--dont_read,-r``)
+- omit the network strash command in ABC (``--dont_strash,-s``)
+- omit the network write command in ABC (``--dont_write,-w``)
+
 .. note::
    There are known limitations to this approach as an AIGER file is used for interfacing the two tools, which leads to
    the decomposition of all gates into ANDs and inverters. Furthermore, ABC's ``abc`` script for shortcuts to common
