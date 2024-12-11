@@ -94,7 +94,7 @@ class abc_command : public command
 
             // call the ABC binary
             const auto abc_call =
-                fmt::format("{} -c \"read {}; strash; {}; write_aiger -s {}\"", ABC, fiction_network_path.string(),
+                fmt::format("{} -q \"read {}; strash; {}; write_aiger -s {}\"", ABC, fiction_network_path.string(),
                             abc_command_str, abc_network_path.string());
 
             if (const auto ret = std::system(abc_call.c_str()); ret != 0)
