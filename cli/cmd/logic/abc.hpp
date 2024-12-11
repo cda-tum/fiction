@@ -17,6 +17,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <string>
+#include <type_traits>
 #include <variant>
 
 namespace alice
@@ -51,10 +52,31 @@ class abc_command : public command
             return;
         }
 
+        const auto& s = store<fiction::logic_network_t>();
+
         // error case: empty logic network store
-        if (const auto& s = store<fiction::logic_network_t>(); s.empty())
+        if (s.empty())
         {
             env->out() << "[w] no logic network in store" << std::endl;
+            return;
+        }
+
+        constexpr auto is_tech_ntk = []([[maybe_unused]] auto&& ntk_ptr) -> bool
+        { return std::is_same_v<typename std::decay_t<decltype(ntk_ptr)>::element_type, fiction::tec_nt>; };
+
+        if (std::visit(is_tech_ntk, s.current()))
+        {
+            env->out() << "[w] ABC callback does not support technology networks. Use AIGs or XAGs instead."
+                       << std::endl;
+            return;
+        }
+
+        constexpr auto is_maj_ntk = []([[maybe_unused]] auto&& ntk_ptr) -> bool
+        { return std::is_same_v<typename std::decay_t<decltype(ntk_ptr)>::element_type, fiction::mig_nt>; };
+
+        if (std::visit(is_maj_ntk, s.current()))
+        {
+            env->out() << "[w] ABC callback does not support MIGs. Use AIGs or XAGs instead." << std::endl;
             return;
         }
 
