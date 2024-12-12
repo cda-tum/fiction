@@ -3958,7 +3958,7 @@ Returns:
     The (partial) defect operational domain of the layout.)doc";
 
 static const char *__doc_fiction_defect_operational_domain_random_sampling =
-R"doc(Computes the `defect operational domain` of the given SiDB cell-level
+R"doc(Computes the defect operational domain of the given SiDB cell-level
 layout. The defect operational domain is the set of all defect
 positions for which the layout is logically operational. Logical
 operation is defined as the layout implementing the given truth table.
@@ -3967,7 +3967,7 @@ as the inputs of the truth table.
 
 This algorithm uses random sampling to find a part of the defect
 operational domain that might not be complete. It performs a total of
-`samples` uniformly-distributed random samples within the specified
+samples uniformly-distributed random samples within the specified
 area.
 
 Template parameter ``Lyt``:
@@ -14394,10 +14394,10 @@ Template parameter ``Dist``:
 static const char *__doc_fiction_manhattan_distance_functor_manhattan_distance_functor = R"doc()doc";
 
 static const char *__doc_fiction_maximum_defect_influence_position_and_distance =
-R"doc(This function simulates the influence of defects on a SiDB cell-level
-layout. It computes the maximum influence distance, defined as the
-minimum distance between any SiDB cell and the given defect, at which
-the defect can still affect the layout's ground state, potentially
+R"doc(This function simulates the influence of defects on an SiDB layout. It
+computes the maximum influence distance, defined as the minimum
+distance between any SiDB cell and the given defect, at which the
+defect can still affect the layout's ground state, potentially
 altering its behavior, such as gate functionality.
 
 Template parameter ``Lyt``:
@@ -14422,14 +14422,14 @@ Returns:
 
 static const char *__doc_fiction_maximum_defect_influence_position_and_distance_of_sidb_gate =
 R"doc(This function calculates the maximum influence position and distance
-of a defect on the ground state of an SiDB gate layout. It iterates
-over all input combinations and finds the defect position at maximum
+of a defect on the ground state of an SiDB layout. It iterates over
+all input combinations and finds the defect position at maximum
 position that affects the gate's ground state.
 
-@Note The `maximum defect influence distance` describes the maximum
+@note The `maximum defect influence distance` describes the maximum
 distance at which a defect influences the ground state. It does not
-check when the successful operation starts to fail, since a change in
-the ground state can still lead to an operational gate.
+check when the layout gets non-operational, since a change in the
+ground state can still lead to an operational gate.
 
 Template parameter ``Lyt``:
     SiDB cell-level layout type.
@@ -14457,7 +14457,7 @@ static const char *__doc_fiction_maximum_defect_influence_position_and_distance_
 
 static const char *__doc_fiction_maximum_defect_influence_position_and_distance_params =
 R"doc(This struct stores the parameters for the
-maximum_defect_influence_position_and_distance algorithm.)doc";
+`maximum_defect_influence_position_and_distance` algorithm.)doc";
 
 static const char *__doc_fiction_maximum_defect_influence_position_and_distance_params_additional_scanning_area =
 R"doc(The pair describes the width and height of the area around the gate,
