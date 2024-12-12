@@ -86,6 +86,14 @@ struct is_operational_params
          */
         SIMULATION_ONLY,
         /**
+         * This setting does only apply pruning strategies to determine if the layout is non-operational. If the layout
+         * is passes all pruning strategies, it is considered operational.
+         *
+         * @note This is only an approximation. It may be possible that the layout is non-operational, but the pruning
+         * strategies do not detect it.
+         */
+        PRUNING_ONLY,
+        /**
          * Before a physical simulation is conducted, the algorithm checks if pruning strategies can determine that the
          * layout is `non-operational`. This only provides any runtime benefits if kinks are accepted.
          */
@@ -314,8 +322,10 @@ class is_operational_impl
             {
                 return {true, layout_invalid_reason::IO_INSTABILITY};
             };
+
             return {false, layout_invalid_reason::NONE};
         }
+
         return {true, layout_invalid_reason::PHYSICAL_INFEASIBILITY};
     }
 
@@ -336,8 +346,6 @@ class is_operational_impl
 
         bool at_least_one_layout_is_kink_induced_non_operational = false;
 
-        bool canvas_layout_could_be_determined = true;
-
         // number of different input combinations
         for (auto i = 0u; i < truth_table.front().num_bits(); ++i, ++bii)
         {
@@ -353,8 +361,7 @@ class is_operational_impl
 
             if (parameters.op_condition == is_operational_params::operational_condition::REJECT_KINKS &&
                 parameters.mode_to_analyse_operational_status ==
-                    is_operational_params::analyis_mode::PRUNE_BEFORE_SIMULATION &&
-                canvas_layout_could_be_determined)
+                    is_operational_params::analyis_mode::PRUNE_BEFORE_SIMULATION)
             {
                 if (!canvas_lyt.is_empty())
                 {
@@ -393,11 +400,11 @@ class is_operational_impl
                         return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
                     }
                 }
+            }
 
-                else
-                {
-                    canvas_layout_could_be_determined = false;
-                }
+            if (parameters.mode_to_analyse_operational_status == is_operational_params::analyis_mode::PRUNING_ONLY)
+            {
+                return {operational_status::OPERATIONAL, non_operationality_reason::NONE};
             }
 
             // performs physical simulation of a given SiDB layout at a given input combination
@@ -409,26 +416,22 @@ class is_operational_impl
                 return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
             }
 
-            if (parameters.mode_to_analyse_operational_status == is_operational_params::analyis_mode::SIMULATION_ONLY ||
-                !canvas_layout_could_be_determined)
-            {
-                const auto ground_states = determine_groundstate_from_simulation_results(simulation_results);
+            const auto ground_states = determine_groundstate_from_simulation_results(simulation_results);
 
-                for (const auto& gs : ground_states)
+            for (const auto& gs : ground_states)
+            {
+                const auto [op_status, non_op_reason] = verify_logic_match_of_cds(gs, i);
+                if (op_status == operational_status::NON_OPERATIONAL &&
+                    non_op_reason == non_operationality_reason::LOGIC_MISMATCH)
                 {
-                    const auto [op_status, non_op_reason] = verify_logic_match_of_cds(gs, i);
-                    if (op_status == operational_status::NON_OPERATIONAL &&
-                        non_op_reason == non_operationality_reason::LOGIC_MISMATCH)
-                    {
-                        return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
-                    }
-                    if (op_status == operational_status::NON_OPERATIONAL &&
-                        non_op_reason == non_operationality_reason::KINKS &&
-                        parameters.op_condition == is_operational_params::operational_condition::REJECT_KINKS)
-                    {
-                        at_least_one_layout_is_kink_induced_non_operational = true;
-                        continue;
-                    }
+                    return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
+                }
+                if (op_status == operational_status::NON_OPERATIONAL &&
+                    non_op_reason == non_operationality_reason::KINKS &&
+                    parameters.op_condition == is_operational_params::operational_condition::REJECT_KINKS)
+                {
+                    at_least_one_layout_is_kink_induced_non_operational = true;
+                    continue;
                 }
             }
         }

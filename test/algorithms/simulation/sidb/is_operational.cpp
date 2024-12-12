@@ -57,6 +57,14 @@ TEST_CASE("SiQAD OR gate", "[is-operational]")
     const auto input_wires  = detect_bdl_wires(lat, detect_bdl_wires_params{1.5});
     const auto output_wires = detect_bdl_wires(lat, detect_bdl_wires_params{1.5});
 
+    SECTION("do not pre-determined wires or canvas")
+    {
+        op_params.mode_to_analyse_operational_status = is_operational_params::analyis_mode::PRUNE_BEFORE_SIMULATION;
+        op_params.op_condition                       = is_operational_params::operational_condition::REJECT_KINKS;
+        CHECK(is_operational(lat, std::vector<tt>{create_or_tt()}, op_params).first ==
+              operational_status::NON_OPERATIONAL);
+    }
+
     SECTION("use pre-determined I/O pins")
     {
         CHECK(is_operational(lat, std::vector<tt>{create_or_tt()}, op_params, input_wires, output_wires).first ==
@@ -66,6 +74,7 @@ TEST_CASE("SiQAD OR gate", "[is-operational]")
     SECTION("pre-determined I/O pins, but no canvas layout")
     {
         op_params.mode_to_analyse_operational_status = is_operational_params::analyis_mode::PRUNE_BEFORE_SIMULATION;
+        op_params.op_condition                       = is_operational_params::operational_condition::REJECT_KINKS;
         CHECK(is_operational(lat, std::vector<tt>{create_or_tt()}, op_params, input_wires, output_wires).first ==
               operational_status::NON_OPERATIONAL);
     }
@@ -73,7 +82,7 @@ TEST_CASE("SiQAD OR gate", "[is-operational]")
     SECTION("pre-determined I/O pins and canvas layout")
     {
         op_params.mode_to_analyse_operational_status = is_operational_params::analyis_mode::PRUNE_BEFORE_SIMULATION;
-
+        op_params.op_condition                       = is_operational_params::operational_condition::REJECT_KINKS;
         sidb_100_cell_clk_lyt_siqad canvas_lyt{};
         const auto                  logic_cells = lat.get_cells_by_type(sidb_technology::cell_type::LOGIC);
         for (const auto& c : logic_cells)
@@ -369,6 +378,57 @@ TEST_CASE("BDL wire", "[is-operational]")
     const is_operational_params params{sim_params};
 
     CHECK(is_operational(lyt, std::vector<tt>{create_id_tt()}, params).first == operational_status::OPERATIONAL);
+}
+
+TEST_CASE("Special wire that cannot be pruned, but is non-operational when kinks are rejected", "[is-operational]")
+{
+    sidb_cell_clk_lyt_siqad lyt{};
+
+    // input wires
+    lyt.assign_cell_type({0, 0, 0}, sidb_cell_clk_lyt_siqad::cell_type::INPUT);
+    lyt.assign_cell_type({2, 1, 0}, sidb_cell_clk_lyt_siqad::cell_type::INPUT);
+
+    lyt.assign_cell_type({6, 2, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 3, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+
+    lyt.assign_cell_type({14, 5, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 4, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+
+    // canvas SiDBs
+    lyt.assign_cell_type({11, 7, 0}, sidb_cell_clk_lyt_siqad::cell_type::LOGIC);
+    lyt.assign_cell_type({13, 13, 0}, sidb_cell_clk_lyt_siqad::cell_type::LOGIC);
+
+    // output wires
+    lyt.assign_cell_type({14, 15, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 16, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+
+    lyt.assign_cell_type({8, 17, 0}, sidb_cell_clk_lyt_siqad::cell_type::OUTPUT);
+    lyt.assign_cell_type({6, 18, 0}, sidb_cell_clk_lyt_siqad::cell_type::OUTPUT);
+
+    lyt.assign_cell_type({2, 19, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+
+    sidb_simulation_parameters sim_params{};
+
+    sim_params.base = 2;
+
+    is_operational_params params{sim_params};
+
+    SECTION("Rejecting Kinks")
+    {
+        params.op_condition                       = is_operational_params::operational_condition::REJECT_KINKS;
+        params.mode_to_analyse_operational_status = is_operational_params::analyis_mode::PRUNE_BEFORE_SIMULATION;
+
+        CHECK(is_operational(lyt, std::vector<tt>{create_id_tt()}, params).first ==
+              operational_status::NON_OPERATIONAL);
+    }
+
+    SECTION("Only conducting pruning and tolerating kinks")
+    {
+        params.op_condition                       = is_operational_params::operational_condition::TOLERATE_KINKS;
+        params.mode_to_analyse_operational_status = is_operational_params::analyis_mode::PRUNING_ONLY;
+
+        CHECK(is_operational(lyt, std::vector<tt>{create_id_tt()}, params).first == operational_status::OPERATIONAL);
+    }
 }
 
 // to save runtime in the CI, this test is only run in RELEASE mode
