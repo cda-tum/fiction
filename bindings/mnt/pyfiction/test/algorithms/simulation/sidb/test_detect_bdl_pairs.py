@@ -1,10 +1,17 @@
-from mnt.pyfiction import (sidb_100_lattice, sidb_111_lattice, charge_distribution_surface_111,
-                           charge_distribution_surface_100, sidb_technology, detect_bdl_pairs_params, detect_bdl_pairs)
 import unittest
+
+from mnt.pyfiction import (
+    charge_distribution_surface_100,
+    charge_distribution_surface_111,
+    detect_bdl_pairs,
+    detect_bdl_pairs_params,
+    sidb_100_lattice,
+    sidb_111_lattice,
+    sidb_technology,
+)
 
 
 class TestDetectBDLPairs(unittest.TestCase):
-
     def test_detect_bdl_pairs_100_lattice(self):
         lyt = sidb_100_lattice((7, 0))
 
@@ -58,5 +65,5 @@ class TestDetectBDLPairs(unittest.TestCase):
         self.assertEqual(len(normal_bdl_pairs), 2)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
