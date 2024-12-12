@@ -854,10 +854,10 @@ Lyt bestagon_and_gate() noexcept
     lyt.assign_cell_type({38, 0, 0}, Lyt::cell_type::INPUT);
     lyt.assign_cell_type({0, 0, 0}, Lyt::cell_type::INPUT);
 
-    lyt.assign_cell_type({23, 9, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({18, 11, 1}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({18, 9, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({19, 8, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({23, 9, 0}, Lyt::cell_type::LOGIC);
+    lyt.assign_cell_type({18, 11, 1}, Lyt::cell_type::LOGIC);
+    lyt.assign_cell_type({18, 9, 0}, Lyt::cell_type::LOGIC);
+    lyt.assign_cell_type({19, 8, 0}, Lyt::cell_type::LOGIC);
 
     lyt.assign_cell_type({20, 14, 0}, Lyt::cell_type::NORMAL);
     lyt.assign_cell_type({19, 13, 0}, Lyt::cell_type::NORMAL);

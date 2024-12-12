@@ -91,7 +91,7 @@ TEST_CASE("BDL wire operational domain computation", "[compute-operational-ratio
         const auto op_domain_ratio = compute_operational_ratio(lat, std::vector<tt>{create_id_tt()},
                                                                parameter_point({4.25, 4.25}), op_ratio_params);
 
-        CHECK_THAT(op_domain_ratio - 80.0 / 256.0,
+        CHECK_THAT(op_domain_ratio - (80.0 / 256.0),
                    Catch::Matchers::WithinAbs(0.0, physical_constants::POP_STABILITY_ERR));
     }
 }
@@ -117,10 +117,10 @@ TEST_CASE("Bestagon AND gate", "[compute-operational-ratio]")
     op_domain_params.sweep_dimensions[1].max  = 6.0;
     op_domain_params.sweep_dimensions[1].step = 0.1;
 
+    const auto z_dimension = operational_domain_value_range{sweep_parameter::MU_MINUS, -0.32, -0.32, 0.01};
+
     SECTION("semi-operational domain")
     {
-        const auto z_dimension = operational_domain_value_range{sweep_parameter::MU_MINUS, -0.32, -0.32, 0.01};
-
         op_domain_params.sweep_dimensions.push_back(z_dimension);
 
         const compute_operational_ratio_params op_ratio_params{op_domain_params};
@@ -129,7 +129,39 @@ TEST_CASE("Bestagon AND gate", "[compute-operational-ratio]")
                                                                parameter_point({5.6, 5.0, -0.32}), op_ratio_params);
 
         // check if the operational domain has the correct size
-        CHECK_THAT(op_domain_ratio - 23.0 / 121.0,
+        CHECK_THAT(op_domain_ratio - (23.0 / 121.0),
                    Catch::Matchers::WithinAbs(0.0, physical_constants::POP_STABILITY_ERR));
+    }
+
+    SECTION("semi-operational domain, reject kinks")
+    {
+        op_domain_params.sweep_dimensions.push_back(z_dimension);
+        op_domain_params.operational_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
+
+        const compute_operational_ratio_params op_ratio_params{op_domain_params};
+
+        const auto op_domain_ratio = compute_operational_ratio(lyt, std::vector<tt>{create_and_tt()},
+                                                               parameter_point({5.6, 5.0, -0.32}), op_ratio_params);
+
+        // check if the operational domain has the correct size
+        CHECK_THAT(op_domain_ratio - (23.0 / 121.0),
+                   Catch::Matchers::WithinAbs(0.0, physical_constants::POP_STABILITY_ERR));
+    }
+
+    SECTION(
+        "semi-operational domain, reject kinks, only pruning is used to determine the operation status of the layout")
+    {
+        op_domain_params.sweep_dimensions.push_back(z_dimension);
+        op_domain_params.operational_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
+        op_domain_params.operational_params.mode_to_analyse_operational_status =
+            is_operational_params::analyis_mode::PRUNING_ONLY;
+
+        const compute_operational_ratio_params op_ratio_params{op_domain_params};
+
+        const auto op_domain_ratio = compute_operational_ratio(lyt, std::vector<tt>{create_and_tt()},
+                                                               parameter_point({5.6, 5.0, -0.32}), op_ratio_params);
+
+        // check if the operational domain has the correct size
+        CHECK(op_domain_ratio > (23.0 / 121.0));
     }
 }
