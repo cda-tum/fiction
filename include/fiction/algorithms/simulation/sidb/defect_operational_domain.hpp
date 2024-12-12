@@ -695,13 +695,13 @@ defect_operational_domain_grid_search(const Lyt& lyt, const std::vector<TT>& spe
     return result;
 }
 /**
- * Computes the `defect operational domain` of the given SiDB cell-level layout. The defect operational domain is the
+ * Computes the defect operational domain of the given SiDB cell-level layout. The defect operational domain is the
  * set of all defect positions for which the layout is logically operational. Logical operation is defined as the layout
  * implementing the given truth table. The input BDL pairs of the layout are assumed to be in the same order as the
  * inputs of the truth table.
  *
  * This algorithm uses random sampling to find a part of the defect operational domain that might not be
- * complete. It performs a total of `samples` uniformly-distributed random samples within the specified area.
+ * complete. It performs a total of samples uniformly-distributed random samples within the specified area.
  *
  * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT Truth table type.

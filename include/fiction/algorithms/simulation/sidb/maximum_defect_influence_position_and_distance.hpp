@@ -30,7 +30,7 @@
 namespace fiction
 {
 /**
- * This struct stores the parameters for the maximum_defect_influence_position_and_distance algorithm.
+ * This struct stores the parameters for the `maximum_defect_influence_position_and_distance` algorithm.
  */
 struct maximum_defect_influence_position_and_distance_params
 {
@@ -263,7 +263,7 @@ class maximum_defect_influence_position_and_distance_impl
 }  // namespace detail
 
 /**
- * This function simulates the influence of defects on a SiDB cell-level layout. It computes the
+ * This function simulates the influence of defects on an SiDB layout. It computes the
  * maximum influence distance, defined as the minimum distance between any SiDB cell and the given defect, at which the
  * defect can still affect the layout's ground state, potentially altering its behavior, such as gate functionality.
  *
