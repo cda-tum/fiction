@@ -212,31 +212,6 @@ void charge_distribution_surface_layout(pybind11::module& m, const std::string& 
         .def("get_sidb_order", &py_cds::get_sidb_order)
         .def("add_sidb", &py_cds::add_sidb, py::arg("cell"), py::arg("charge"))
 
-        .def("cells",
-             [](const py_cds& lyt)
-             {
-                 std::vector<fiction::coordinate<py_cds>> cells{};
-                 cells.reserve(lyt.num_cells());
-                 lyt.foreach_cell([&cells](const auto& c) { cells.push_back(c); });
-                 return cells;
-             })
-        .def("pis",
-             [](const py_cds& lyt)
-             {
-                 std::vector<fiction::coordinate<py_cds>> pis{};
-                 pis.reserve(lyt.num_pis());
-                 lyt.foreach_pi([&pis](const auto& c) { pis.push_back(c); });
-                 return pis;
-             })
-        .def("pos",
-             [](const py_cds& lyt)
-             {
-                 std::vector<fiction::coordinate<py_cds>> pos{};
-                 pos.reserve(lyt.num_pos());
-                 lyt.foreach_po([&pos](const auto& c) { pos.push_back(c); });
-                 return pos;
-             })
-
         .def(
             "is_within_bounds", [](const py_cds& lyt, const fiction::coordinate<py_cds>& c)
             { return lyt.is_within_bounds(c); }, py::arg("c"), DOC(fiction_cartesian_layout_is_within_bounds))
