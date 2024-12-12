@@ -669,10 +669,6 @@ class design_sidb_gates_impl
                             number_of_discarded_layouts_at_third_pruning++;
                             break;
                         }
-                        default:
-                        {
-                            break;
-                        }
                     }
                     return;
                 }

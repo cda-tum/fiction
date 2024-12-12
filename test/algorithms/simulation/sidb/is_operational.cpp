@@ -72,6 +72,8 @@ TEST_CASE("SiQAD OR gate", "[is-operational]")
 
     SECTION("pre-determined I/O pins and canvas layout")
     {
+        op_params.mode_to_analyse_operational_status = is_operational_params::analyis_mode::PRUNE_BEFORE_SIMULATION;
+
         sidb_100_cell_clk_lyt_siqad canvas_lyt{};
         const auto                  logic_cells = lat.get_cells_by_type(sidb_technology::cell_type::LOGIC);
         for (const auto& c : logic_cells)
