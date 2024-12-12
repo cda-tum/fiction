@@ -176,10 +176,10 @@ physical simulation.
 
 ### Logic Synthesis
 
-For logic synthesis, *fiction* utilizes [ABC](https://github.com/berkeley-abc/abc) and the [mockturtle library](https://github.com/lsils/mockturtle) that
+For logic synthesis, _fiction_ utilizes [ABC](https://github.com/berkeley-abc/abc) and the [mockturtle library](https://github.com/lsils/mockturtle) that
 offer a multitude of logic network types and optimization algorithms. Logic synthesis can be performed in external tools
-and resulting Verilog/AIGER/BLIF/... files can be parsed by *fiction*. Alternatively, since *mockturtle* is included in
-*fiction*, synthesis can be applied in the same evaluation script.
+and resulting Verilog/AIGER/BLIF/... files can be parsed by _fiction_. Alternatively, since _mockturtle_ is included in
+_fiction_, synthesis can be applied in the same evaluation script.
 
 ### Physical Design
 
