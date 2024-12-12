@@ -13944,6 +13944,15 @@ R"doc(Before a physical simulation is conducted, the algorithm checks if
 pruning strategies can determine that the layout is `non-operational`.
 This only provides any runtime benefits if kinks are accepted.)doc";
 
+static const char *__doc_fiction_is_operational_params_analyis_mode_PRUNING_ONLY =
+R"doc(This setting does only apply pruning strategies to determine if the
+layout is non-operational. If the layout is passes all pruning
+strategies, it is considered operational.
+
+@note This is only an approximation. It may be possible that the
+layout is non-operational, but the pruning strategies do not detect
+it.)doc";
+
 static const char *__doc_fiction_is_operational_params_analyis_mode_SIMULATION_ONLY =
 R"doc(This setting does not apply any pruning strategies to determine if the
 layout is operational. Instead, it relies solely on physical
