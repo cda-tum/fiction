@@ -346,22 +346,21 @@ class is_operational_impl
 
         bool at_least_one_layout_is_kink_induced_non_operational = false;
 
+        const auto logic_cells = layout.get_cells_by_type(technology<Lyt>::cell_type::LOGIC);
+
         // number of different input combinations
         for (auto i = 0u; i < truth_table.front().num_bits(); ++i, ++bii)
         {
-            ++simulator_invocations;
-
             // if positively charged SiDBs can occur, the SiDB layout is considered as non-operational
             if (can_positive_charges_occur(*bii, parameters.simulation_parameters))
             {
                 return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
             }
 
-            const auto logic_cells = layout.get_cells_by_type(technology<Lyt>::cell_type::LOGIC);
-
             if (parameters.op_condition == is_operational_params::operational_condition::REJECT_KINKS &&
-                parameters.mode_to_analyse_operational_status ==
-                    is_operational_params::analyis_mode::PRUNE_BEFORE_SIMULATION)
+                    parameters.mode_to_analyse_operational_status ==
+                        is_operational_params::analyis_mode::PRUNE_BEFORE_SIMULATION ||
+                parameters.mode_to_analyse_operational_status == is_operational_params::analyis_mode::PRUNING_ONLY)
             {
                 if (!canvas_lyt.is_empty())
                 {
@@ -401,39 +400,51 @@ class is_operational_impl
                     }
                 }
             }
+        }
 
-            // if the layout is not discarded during the three pruning steps, it is considered operational.
-            // This is only an approximation.
-            if (parameters.mode_to_analyse_operational_status == is_operational_params::analyis_mode::PRUNING_ONLY)
+        // if the layout is not discarded during the three pruning steps, it is considered operational.
+        // This is only an approximation.
+        if (parameters.mode_to_analyse_operational_status == is_operational_params::analyis_mode::PRUNING_ONLY)
+        {
+            return {operational_status::OPERATIONAL, non_operationality_reason::NONE};
+        }
+
+        if (parameters.mode_to_analyse_operational_status == is_operational_params::analyis_mode::SIMULATION_ONLY ||
+            parameters.mode_to_analyse_operational_status ==
+                is_operational_params::analyis_mode::PRUNE_BEFORE_SIMULATION ||
+            canvas_lyt.is_empty() || logic_cells.empty())
+        {
+            bii = 0;
+            // number of different input combinations
+            for (auto i = 0u; i < truth_table.front().num_bits(); ++i, ++bii)
             {
-                return {operational_status::OPERATIONAL, non_operationality_reason::NONE};
-            }
+                ++simulator_invocations;
+                // performs physical simulation of a given SiDB layout at a given input combination
+                const auto simulation_results = physical_simulation_of_layout(bii);
 
-            // performs physical simulation of a given SiDB layout at a given input combination
-            const auto simulation_results = physical_simulation_of_layout(bii);
-
-            // if no physically valid charge distributions were found, the layout is non-operational
-            if (simulation_results.charge_distributions.empty())
-            {
-                return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
-            }
-
-            const auto ground_states = determine_groundstate_from_simulation_results(simulation_results);
-
-            for (const auto& gs : ground_states)
-            {
-                const auto [op_status, non_op_reason] = verify_logic_match_of_cds(gs, i);
-                if (op_status == operational_status::NON_OPERATIONAL &&
-                    non_op_reason == non_operationality_reason::LOGIC_MISMATCH)
+                // if no physically valid charge distributions were found, the layout is non-operational
+                if (simulation_results.charge_distributions.empty())
                 {
                     return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
                 }
-                if (op_status == operational_status::NON_OPERATIONAL &&
-                    non_op_reason == non_operationality_reason::KINKS &&
-                    parameters.op_condition == is_operational_params::operational_condition::REJECT_KINKS)
+
+                const auto ground_states = determine_groundstate_from_simulation_results(simulation_results);
+
+                for (const auto& gs : ground_states)
                 {
-                    at_least_one_layout_is_kink_induced_non_operational = true;
-                    continue;
+                    const auto [op_status, non_op_reason] = verify_logic_match_of_cds(gs, i);
+                    if (op_status == operational_status::NON_OPERATIONAL &&
+                        non_op_reason == non_operationality_reason::LOGIC_MISMATCH)
+                    {
+                        return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
+                    }
+                    if (op_status == operational_status::NON_OPERATIONAL &&
+                        non_op_reason == non_operationality_reason::KINKS &&
+                        parameters.op_condition == is_operational_params::operational_condition::REJECT_KINKS)
+                    {
+                        at_least_one_layout_is_kink_induced_non_operational = true;
+                        continue;
+                    }
                 }
             }
         }

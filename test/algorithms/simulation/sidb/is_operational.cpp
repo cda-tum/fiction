@@ -175,6 +175,11 @@ TEST_CASE("Bestagon AND gate", "[is-operational]")
         CHECK(is_operational(lat, std::vector<tt>{create_and_tt()}, op_params, input_wires, output_wires,
                              std::optional{canvas_lyt})
                   .first == operational_status::OPERATIONAL);
+
+        op_params.simulation_parameters.mu_minus = -0.2;
+        CHECK(is_operational(lat, std::vector<tt>{create_and_tt()}, op_params, input_wires, output_wires,
+                             std::optional{canvas_lyt})
+                  .first == operational_status::NON_OPERATIONAL);
     }
 
     SECTION("pre-determined I/O pins, but no canvas layout and no logic cells provided")
