@@ -402,6 +402,8 @@ class is_operational_impl
                 }
             }
 
+            // if the layout is not discarded during the three pruning steps, it is considered operational.
+            // This is only an approximation.
             if (parameters.mode_to_analyse_operational_status == is_operational_params::analyis_mode::PRUNING_ONLY)
             {
                 return {operational_status::OPERATIONAL, non_operationality_reason::NONE};
