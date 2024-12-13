@@ -103,13 +103,12 @@ class defect_operational_domain_impl
     }
 
     /**
-     * This function divides the search space (defined by `nw_cell` and `se_cell`) into chunks, each processed by a
-     * different thread. The search checks if defect positions in the grid are operational based on a given step size.
-     * Each thread processes a chunk of positions in parallel to improve performance.
+     * This function checks for each position in the area (spanned by `nw_cell` and `se_cell`) if the existence of a
+     * defect leads to a operational or non-operational layout.
      *
      * @param step_size The step size used to sample defect positions in the grid. Only positions with x and y
      * coordinates divisible by `step_size` will be checked for being operational.
-     * @return A `defect_operational_domain<Lyt>` object representing the operational domain of the defects.
+     * @return The defect operational domain.
      */
     [[nodiscard]] defect_operational_domain<Lyt> grid_search(const std::size_t& step_size) noexcept
     {
@@ -165,14 +164,12 @@ class defect_operational_domain_impl
     }
 
     /**
-     * This function performs random sampling of defect positions from a grid area (spanned by `nw_cell` and `se_cell`).
-     * The positions are shuffled and divided into chunks, which are processed by different threads to check if each
-     * defect position is operational. Each thread handles a subset of the defect positions to improve performance.
+     * This function checks for a certain number of random positions (given by `samples`) in the area (spanned by
+     * `nw_cell` and `se_cell`) if the existence of a defect leads to a operational or non-operational layout.
      *
      * @param samples The number of positions to sample. The actual number of iterations will be the smaller of
      *                the total number of positions or the `samples` value.
-     * @return A `defect_operational_domain<Lyt>` object representing the operational domain of the defects.
-     *         The return value is marked [[nodiscard]], meaning it must be used by the caller.
+     * @return The defect operational domain.
      */
     [[nodiscard]] defect_operational_domain<Lyt> random_sampling(const std::size_t samples) noexcept
     {
@@ -228,6 +225,32 @@ class defect_operational_domain_impl
         return defect_op_domain;
     }
 
+    /**
+     * This function applies contour tracing to identify the boundary (contour) between operational and
+     * non-operational defect positions for a given SiDB layout.
+     *
+     * The algorithm leverages the concept of a screened Coulomb potential, where the electrostatic interaction weakens
+     * as distance increases. If a defect at a position p allows the SiDB layout to remain operational, then defects
+     * further from the layout are also likely to maintain operability. Conversely, defects closer to the layout may
+     * cause it to fail. This behavior allows for efficient contour tracing of the transition between operational and
+     * non-operational states.
+     *
+     * The process is as follows:
+     * 1. **Initialization**: Randomly select `samples` initial defect positions several nanometers away
+     *    from the layout where the layout is known to be operational.
+     * 2. **Contour Tracing**: For each position, perform a defect-aware physical simulation to identify adjacent
+     *    positions along the x-axis that change the operational state of the layout. This marks the starting
+     *    point of the contour.
+     * 3. **Contour Following**: Trace the contour of operational positions until the starting point is reached again,
+     *    thereby closing the contour.
+     * 4. **Repetition**: Repeat steps 1-3 for multiple initial heights to identify additional contours, since
+     *    multiple operational-to-non-operational boundaries may exist.
+     *
+     * @param samples The number of random initial positions used to identify and trace operational
+     *                and non-operational defect boundaries. Higher values increase the chance of capturing all
+     *                relevant contours but increase computation time.
+     * @return The defect operational domain.
+     */
     [[nodiscard]] defect_operational_domain<Lyt> quicktrace(const std::size_t samples) noexcept
     {
         mockturtle::stopwatch stop{stats.time_total};
@@ -326,8 +349,8 @@ class defect_operational_domain_impl
 
   private:
     /**
-     * This function determines the northwest and southeast cells based on the gate layout and the additional scan area
-     * specified.
+     * This function determines the northwest and southeast cells based on the layout layout and the additional scan
+     * area specified.
      */
     void determine_nw_se_cells() noexcept
     {
@@ -341,7 +364,7 @@ class defect_operational_domain_impl
         nw_bb_layout = nw;
         se_bb_layout = se;
 
-        // shift nw and se cell by the additional scanning area to cover an area that is larger than the gate area.
+        // shift nw and se cell by the additional scanning area to cover an area that is larger than the layout area.
         nw.x = nw.x - params.defect_influence_params.additional_scanning_area.first;
         nw.y = nw.y - params.defect_influence_params.additional_scanning_area.second;
 
@@ -378,7 +401,7 @@ class defect_operational_domain_impl
     }
 
     /**
-     * This function evaluates the operational status of the SiDB gate when a defect is placed at position `c`.
+     * This function evaluates the operational status of the SiDB layout when a defect is placed at position `c`.
      *
      * @param c Position of the defect.
      */
@@ -445,11 +468,11 @@ class defect_operational_domain_impl
 
     /**
      * This function identifies the most recent operational defect position while traversing from left to right towards
-     * the SiDB gate.
+     * the SiDB layout.
      *
      * @param starting_defect_position The starting position of the defect, from which the traversal towards the right
-     * is conducted while maintaining gate operability.
-     * @return The last operational defect position. If no non-operational defect is found, std::nullopt is returned.
+     * is conducted while maintaining layout operability.
+     * @return The last operational defect position. If no non-operational defect is found, `std::nullopt` is returned.
      */
     [[nodiscard]] std::optional<typename Lyt::cell>
     find_last_operational_defect_position_moving_right(const typename Lyt::cell& starting_defect_position) noexcept
@@ -742,7 +765,7 @@ defect_operational_domain_random_sampling(const Lyt& lyt, const std::vector<TT>&
  * operation is defined as the layout implementing the given truth table. The input BDL pairs of the layout are assumed
  * to be in the same order as the inputs of the truth table.
  *
- * This algorithm uses contour tracing to identify operational defect locations within the SiDB gate layout.
+ * This algorithm uses contour tracing to identify operational defect locations within the SiDB layout.
  * It starts by searching for defect locations on the left side (bounding_box + additional scanning area). The
  * y-coordinate for these positions is chosen randomly. The number of samples is determined by the `samples` parameter.
  *
