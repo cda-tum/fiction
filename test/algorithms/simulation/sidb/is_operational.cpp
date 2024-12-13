@@ -142,11 +142,19 @@ TEST_CASE("Bestagon AND gate", "[is-operational]")
     const auto input_wires  = detect_bdl_wires(lat, detect_bdl_wires_params{2.0}, bdl_wire_selection::INPUT);
     const auto output_wires = detect_bdl_wires(lat, detect_bdl_wires_params{2.0}, bdl_wire_selection::OUTPUT);
 
-    SECTION("do not pre-determined wires or canvas")
+    SECTION("without pre-determined wires or canvas")
     {
         op_params.mode_to_analyse_operational_status = is_operational_params::analyis_mode::PRUNE_BEFORE_SIMULATION;
         CHECK(is_operational(lat, std::vector<tt>{create_and_tt()}, op_params).first ==
               operational_status::OPERATIONAL);
+    }
+
+    SECTION("without pre-determined wires or canvas, non-operational")
+    {
+        op_params.simulation_parameters.mu_minus     = -0.2;
+        op_params.mode_to_analyse_operational_status = is_operational_params::analyis_mode::PRUNE_BEFORE_SIMULATION;
+        CHECK(is_operational(lat, std::vector<tt>{create_and_tt()}, op_params).first ==
+              operational_status::NON_OPERATIONAL);
     }
 
     SECTION("use pre-determined I/O pins")

@@ -348,6 +348,36 @@ class is_operational_impl
 
         const auto logic_cells = layout.get_cells_by_type(technology<Lyt>::cell_type::LOGIC);
 
+        charge_distribution_surface<Lyt> cds_canvas{canvas_lyt};
+
+        cell<Lyt> dependent_cell{};
+
+        if (!canvas_lyt.is_empty())
+        {
+            canvas_lyt.foreach_cell([&](const auto& c) { dependent_cell = c; });
+
+            cds_canvas.assign_dependent_cell(dependent_cell);
+            cds_canvas.assign_physical_parameters(parameters.simulation_parameters);
+        }
+
+        else if (!logic_cells.empty())
+        {
+            Lyt c_layout{};
+
+            for (const auto& c : logic_cells)
+            {
+                c_layout.assign_cell_type(c, Lyt::technology::cell_type::NORMAL);
+                dependent_cell = c;
+            }
+
+            charge_distribution_surface<Lyt> cds_canvas_copy{c_layout};
+
+            cds_canvas_copy.assign_dependent_cell(dependent_cell);
+            cds_canvas_copy.assign_physical_parameters(parameters.simulation_parameters);
+
+            cds_canvas = cds_canvas_copy;
+        }
+
         // number of different input combinations
         for (auto i = 0u; i < truth_table.front().num_bits(); ++i, ++bii)
         {
@@ -364,13 +394,6 @@ class is_operational_impl
             {
                 if (!canvas_lyt.is_empty())
                 {
-                    cell<Lyt> dependent_cell{};
-                    canvas_lyt.foreach_cell([&](const auto& c) { dependent_cell = c; });
-
-                    charge_distribution_surface<Lyt> cds_canvas{canvas_lyt};
-                    cds_canvas.assign_dependent_cell(dependent_cell);
-                    cds_canvas.assign_physical_parameters(parameters.simulation_parameters);
-
                     if (can_layout_be_discarded(bii.get_current_input_index(), cds_canvas, dependent_cell).first)
                     {
                         return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
@@ -379,21 +402,6 @@ class is_operational_impl
 
                 else if (!logic_cells.empty())
                 {
-                    Lyt c_layout{};
-
-                    cell<Lyt> dependent_cell{};
-
-                    for (const auto& c : logic_cells)
-                    {
-                        c_layout.assign_cell_type(c, Lyt::technology::cell_type::NORMAL);
-                        dependent_cell = c;
-                    }
-
-                    charge_distribution_surface<Lyt> cds_canvas{c_layout};
-
-                    cds_canvas.assign_dependent_cell(dependent_cell);
-                    cds_canvas.assign_physical_parameters(parameters.simulation_parameters);
-
                     if (can_layout_be_discarded(bii.get_current_input_index(), cds_canvas, dependent_cell).first)
                     {
                         return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};

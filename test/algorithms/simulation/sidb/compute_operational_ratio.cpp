@@ -96,6 +96,49 @@ TEST_CASE("BDL wire operational domain computation", "[compute-operational-ratio
     }
 }
 
+TEST_CASE("SiQAD OR gate", "[compute-operational-ratio]")
+{
+    const auto lyt = blueprints::siqad_or_gate<sidb_100_cell_clk_lyt_siqad>();
+
+    sidb_simulation_parameters sim_params{};
+    sim_params.base = 2;
+
+    operational_domain_params op_domain_params{};
+    op_domain_params.operational_params.simulation_parameters = sim_params;
+    op_domain_params.operational_params.input_bdl_iterator_params.input_bdl_config =
+        bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED;
+    op_domain_params.sweep_dimensions = {{sweep_parameter::EPSILON_R}, {sweep_parameter::LAMBDA_TF}};
+    op_domain_params.operational_params.mode_to_analyse_operational_status =
+        is_operational_params::analyis_mode::PRUNE_BEFORE_SIMULATION;
+    op_domain_params.operational_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
+
+    // set x-dimension
+    op_domain_params.sweep_dimensions[0].min  = 2.0;
+    op_domain_params.sweep_dimensions[0].max  = 10.0;
+    op_domain_params.sweep_dimensions[0].step = 0.1;
+
+    // set y-dimension
+    op_domain_params.sweep_dimensions[1].min  = 2.0;
+    op_domain_params.sweep_dimensions[1].max  = 10.0;
+    op_domain_params.sweep_dimensions[1].step = 0.1;
+
+    compute_operational_ratio_params op_ratio_params{op_domain_params};
+
+    // pruning and simulation to determine the operational status of the layout
+    const auto op_domain_ratio_pruning_and_simulation =
+        compute_operational_ratio(lyt, std::vector<tt>{create_or_tt()}, parameter_point({5.6, 5.0}), op_ratio_params);
+
+    // only pruning to determine the operational status of the layout
+    op_ratio_params.op_domain_params.operational_params.mode_to_analyse_operational_status =
+        is_operational_params::analyis_mode::PRUNING_ONLY;
+
+    const auto op_domain_ratio_only_pruning = compute_operational_ratio(
+        lyt, std::vector<tt>{create_and_tt()}, parameter_point({5.6, 5.0, -0.32}), op_ratio_params);
+
+    // check if the operational domain has the correct size
+    CHECK(op_domain_ratio_pruning_and_simulation < op_domain_ratio_only_pruning);
+}
+
 TEST_CASE("Bestagon AND gate", "[compute-operational-ratio]")
 {
     const auto lyt = blueprints::bestagon_and_gate<sidb_100_cell_clk_lyt_siqad>();
