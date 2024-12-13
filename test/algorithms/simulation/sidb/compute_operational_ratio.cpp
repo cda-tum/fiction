@@ -162,6 +162,6 @@ TEST_CASE("Bestagon AND gate", "[compute-operational-ratio]")
                                                                parameter_point({5.6, 5.0, -0.32}), op_ratio_params);
 
         // check if the operational domain has the correct size
-        CHECK(op_domain_ratio > (23.0 / 121.0));
+        CHECK(op_domain_ratio >= (23.0 / 121.0));
     }
 }

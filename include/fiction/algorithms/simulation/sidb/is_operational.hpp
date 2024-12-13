@@ -357,9 +357,9 @@ class is_operational_impl
                 return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
             }
 
-            if (parameters.op_condition == is_operational_params::operational_condition::REJECT_KINKS &&
-                    parameters.mode_to_analyse_operational_status ==
-                        is_operational_params::analyis_mode::PRUNE_BEFORE_SIMULATION ||
+            if ((parameters.op_condition == is_operational_params::operational_condition::REJECT_KINKS &&
+                 parameters.mode_to_analyse_operational_status ==
+                     is_operational_params::analyis_mode::PRUNE_BEFORE_SIMULATION) ||
                 parameters.mode_to_analyse_operational_status == is_operational_params::analyis_mode::PRUNING_ONLY)
             {
                 if (!canvas_lyt.is_empty())
