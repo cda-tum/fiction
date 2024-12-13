@@ -63,6 +63,21 @@ struct parameter_point
      * @param values Parameter values for each dimension.
      */
     explicit parameter_point(const std::vector<double>& values) : parameters(values) {}
+
+    /**
+     * Assignment operator.
+     *
+     * @param other The parameter point to be assigned.
+     * @return A reference to the assigned parameter point (*this).
+     */
+    parameter_point& operator=(const parameter_point& other) noexcept
+    {
+        if (this != &other)
+        {
+            parameters = other.parameters;
+        }
+        return *this;
+    }
     /**
      * Parameter values for each dimension.
      */
@@ -241,7 +256,7 @@ struct operational_domain_params
     /**
      * The parameters used to determine if a layout is operational or non-operational.
      */
-    is_operational_params operational_params{};
+    is_operational_params operational_params;
     /**
      * The dimensions to sweep over together with their value ranges, ordered by priority. The first dimension is the x
      * dimension, the second dimension is the y dimension, etc.
@@ -1556,7 +1571,7 @@ class operational_domain_impl
             const auto sp = queue.front();
             queue.pop();
 
-            // if the point is known to be non-operational continue with the next
+            // if the point is known to be non-operational, continue with the next
             if (const auto operational_status = has_already_been_sampled(sp); operational_status.has_value())
             {
                 if (operational_status.value() == operational_status::NON_OPERATIONAL)

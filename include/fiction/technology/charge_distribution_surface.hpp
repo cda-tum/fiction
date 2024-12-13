@@ -360,6 +360,16 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         return *this;
     }
     /**
+     * Clones the current charge distribution surface and returns a deep copy.
+     *
+     * @return A deep copy of the current charge_distribution_surface, preserving all its properties.
+     */
+    [[nodiscard]] charge_distribution_surface clone() const noexcept
+    {
+        charge_distribution_surface copy{Lyt::clone()};
+        return copy;
+    }
+    /**
      * This function returns the locations of all SiDBs in nm of the form `(x,y)`.
      *
      * @return Vector of SiDB nanometer positions (unit: nm).
