@@ -4601,9 +4601,9 @@ static const char *__doc_fiction_detail_delete_virtual_pis_impl = R"doc()doc";
 
 static const char *__doc_fiction_detail_delete_virtual_pis_impl_delete_virtual_pis_impl = R"doc()doc";
 
-static const char *__doc_fiction_detail_delete_virtual_pis_impl_ntk = R"doc()doc";
+static const char *__doc_fiction_detail_delete_virtual_pis_impl_ntk = R"doc(Network without virtual PIs.)doc";
 
-static const char *__doc_fiction_detail_delete_virtual_pis_impl_ntk_topo = R"doc()doc";
+static const char *__doc_fiction_detail_delete_virtual_pis_impl_ntk_topo = R"doc(Topological view of the input network.)doc";
 
 static const char *__doc_fiction_detail_delete_virtual_pis_impl_run = R"doc()doc";
 
@@ -10152,32 +10152,6 @@ Parameter ``ps``:
 Returns:
     sidb_simulation_result is returned with all results.)doc";
 
-static const char *__doc_fiction_extended_rank_view =
-R"doc(@class extended_rank_view<Ntk, true>
-
-If already a rank_interface exists only the depth_view constructor
-gets called.
-
-Template parameter ``Ntk``:
-    The network type.)doc";
-
-static const char *__doc_fiction_extended_rank_view_2 =
-R"doc(Deduction guide for `extended_rank_view'
-
-Template parameter ``T``:
-    Network type deduced from the construction context of
-    `extended_rank_view`.)doc";
-
-static const char *__doc_fiction_extended_rank_view_3 =
-R"doc(Deduction guide for `extended_rank_view` with two constructor
-arguments
-
-Template parameter ``T``:
-    Network type deduced from the construction context of
-    `extended_rank_view`.)doc";
-
-static const char *__doc_fiction_extended_rank_view_extended_rank_view = R"doc()doc";
-
 static const char *__doc_fiction_extract_routing_objectives =
 R"doc(Extracts all routing objectives from the given layout. To this end,
 all routing paths in the layout are traversed, starting at each PI.
@@ -12423,7 +12397,19 @@ Returns:
 
 static const char *__doc_fiction_gray_code_iterator_start_number = R"doc(Start number of the iteration.)doc";
 
-static const char *__doc_fiction_handle_virtual_pis = R"doc()doc";
+static const char *__doc_fiction_handle_virtual_pis =
+R"doc(Removes virtual primary inputs from a network if supported. Otherwise
+the input network is returned unmodified.
+
+Template parameter ``Ntk``:
+    The network type.
+
+Parameter ``network``:
+    The input network to process.
+
+Returns:
+    The network with virtual primary inputs removed, or the original
+    network if unsupported.)doc";
 
 static const char *__doc_fiction_has_above = R"doc()doc";
 
@@ -13903,6 +13889,8 @@ static const char *__doc_fiction_is_sidb_lattice_100 = R"doc()doc";
 static const char *__doc_fiction_is_sidb_lattice_111 = R"doc()doc";
 
 static const char *__doc_fiction_is_tile_based_layout = R"doc()doc";
+
+static const char *__doc_fiction_is_virtual_network_type = R"doc()doc";
 
 static const char *__doc_fiction_jump_point_search =
 R"doc(The Jump Point Search (JPS) path finding algorithm for shortest loop-
@@ -18470,27 +18458,45 @@ R"doc(\verbatim +-------+ | | | +-------+ | | | +-------+ | | | +-------+
 \endverbatim)doc";
 
 static const char *__doc_fiction_virtual_miter =
-R"doc(This method combines two networks into a combinational miter, similar
-to a mockturtle::miter. Either of the input networks may include
-virtual inputs (duplicated PIs). During the construction of the
-virtual miter, duplicated PIs are removed, and all edges connected to
-them are remapped to their corresponding original PIs. This ensures
-that the number of PIs in the miter networks is consistent when the
-networks are equivalent.
+R"doc(Combines two networks into a combinational miter, similar to
+`mockturtle::miter`. Either input network may include virtual primary
+inputs (PIs). Virtual PIs are removed during miter construction, and
+all edges connected to them are remapped to their corresponding
+original PIs, ensuring consistent PI counts when the networks are
+equivalent.
 
-The resulting miter has the same number of inputs as the input
-networks and a single primary output. This output represents the OR of
-the XORs of all primary output pairs. In other words, the miter
+The resulting miter connects two networks with the same number of
+inputs and produces a single primary output. This output represents
+the OR of the XORs of all primary output pairs. Thus, the miter
 outputs 1 for any input assignment where the primary outputs of the
-two input networks differ.
+two networks differ.
 
-The input networks may have different types. The method returns an
-`optional`, which is `nullopt` if the two input networks have
-mismatched numbers of primary inputs or primary outputs.)doc";
+The input networks may have different types. If the two input networks
+have mismatched numbers of primary inputs or outputs, the method
+returns `nullopt`.
+
+Template parameter ``NtkDest``:
+    The type of the resulting network.
+
+Template parameter ``NtkSource1``:
+    The type of the first input network.
+
+Template parameter ``NtkSource2``:
+    The type of the second input network.
+
+Parameter ``ntk1_in``:
+    The first input network.
+
+Parameter ``ntk2_in``:
+    The second input network.
+
+Returns:
+    An `optional` containing the virtual miter network if successful,
+    or `nullopt` if the networks are incompatible.)doc";
 
 static const char *__doc_fiction_virtual_pi_network = R"doc()doc";
 
-static const char *__doc_fiction_virtual_pi_network_clone = R"doc(Clones the virtual_pi_network object.)doc";
+static const char *__doc_fiction_virtual_pi_network_clone = R"doc(Clones the `virtual_pi_network` object.)doc";
 
 static const char *__doc_fiction_virtual_pi_network_create_virtual_pi =
 R"doc(Create a virtual PI, which is a mapping to a real PI.
@@ -18548,81 +18554,81 @@ static const char *__doc_fiction_virtual_pi_network_get_real_pi =
 R"doc(Get the real PI associated with a virtual PI node.
 
 Parameter ``v_pi``:
-    The virtual pi node to retrieve the real pi for.
+    The virtual pi node to retrieve the real PI for.
 
 Returns:
-    The real pi associated with the virtual pi node.)doc";
+    The real pi associated with the virtual PI node.)doc";
 
 static const char *__doc_fiction_virtual_pi_network_is_real_ci =
-R"doc(Check if a given node is a real CI in the virtual_pi_network.
+R"doc(Check if a given node is a real CI in the `virtual_pi_network`.
 
 Parameter ``n``:
     The node to check.
 
 Returns:
-    True if the node is a real CI, false otherwise.)doc";
+    `true` if the node is a real CI, `false` otherwise.)doc";
 
 static const char *__doc_fiction_virtual_pi_network_is_real_pi =
 R"doc(Check if a given node is a real PI. Real PIs are created with
-create_pi().
+`create_pi()`.
 
 Parameter ``n``:
     The node to check.
 
 Returns:
-    True if the node is a real PI, false otherwise.)doc";
+    `true` if the node is a real PI, `false` otherwise.)doc";
 
 static const char *__doc_fiction_virtual_pi_network_is_virtual_ci =
-R"doc(Check if a given node is a virtual CI in the virtual_pi_network.
+R"doc(Check if a given node is a virtual CI in the `virtual_pi_network`.
 
 Parameter ``n``:
     The node to check.
 
 Returns:
-    True if the node is a virtual CI, false otherwise.)doc";
+    `true` if the node is a virtual CI, `false` otherwise.)doc";
 
 static const char *__doc_fiction_virtual_pi_network_is_virtual_pi =
 R"doc(Check if a given node is a virtual PI. Virtual PIs are created with
-create_virtual_pi().
+`create_virtual_pi()`.
 
 Parameter ``n``:
     The node to check.
 
 Returns:
-    True if the node is a virtual PI, false otherwise.)doc";
+    `true` if the node is a virtual PI, `false` otherwise.)doc";
 
 static const char *__doc_fiction_virtual_pi_network_num_real_cis =
-R"doc(Get the number of real CIs in the virtual_pi_network.
+R"doc(Get the number of real CIs in the `virtual_pi_network`.
 
 Returns:
-    The number of real CIs as a uint32_t.)doc";
+    The number of real CIs as a `uint32_t`.)doc";
 
 static const char *__doc_fiction_virtual_pi_network_num_real_pis =
-R"doc(Get the number of real PIs in the virtual_pi_network.
+R"doc(Get the number of real PIs in the `virtual_pi_network`.
 
 Returns:
-    The number of real PIs as a uint32_t.)doc";
+    The number of real PIs as a `uint32_t`.)doc";
 
 static const char *__doc_fiction_virtual_pi_network_num_virtual_cis =
-R"doc(Get the number of virtual CIs in the virtual_pi_network.
+R"doc(Get the number of virtual CIs in the `virtual_pi_network`.
 
 Returns:
-    The number of virtual CIs as a uint32_t.)doc";
+    The number of virtual CIs as a `uint32_t`.)doc";
 
 static const char *__doc_fiction_virtual_pi_network_num_virtual_pis =
-R"doc(Get the number of virtual PIs in the virtual_pi_network.
+R"doc(Get the number of virtual PIs in the `virtual_pi_network`.
 
 Returns:
-    The number of virtual PIs as a uint32_t.)doc";
+    The number of virtual PIs as a `uint32_t`.)doc";
 
 static const char *__doc_fiction_virtual_pi_network_real_size =
-R"doc(Calculate the real size of the virtual_pi_network.
+R"doc(Calculate the real size of the virtual_pi_network`.
 
 The real size of the network is considered the size without virtual
 PIs.
 
 Returns:
-    The real size of the virtual_pi_network as a uint32_t.)doc";
+    The real size of the `virtual_pi_network` as a `uint32_t`.)doc";
 
 static const char *__doc_fiction_virtual_pi_network_v_storage = R"doc(Shared pointer of the virtual PI storage.)doc";
 

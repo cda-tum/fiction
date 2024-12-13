@@ -1367,6 +1367,21 @@ template <class Ntk>
 inline constexpr bool has_is_real_pi_v = has_is_real_pi<Ntk>::value;
 #pragma endregion
 
+#pragma region is_virtual_network_type
+template <class Ntk, class = void>
+struct is_virtual_network_type : std::false_type
+{};
+
+template <class Ntk>
+struct is_virtual_network_type<
+    Ntk, std::enable_if_t<Ntk::is_virtual_network_type, std::void_t<decltype(Ntk::is_virtual_network_type)>>>
+        : std::true_type
+{};
+
+template <class Ntk>
+inline constexpr bool is_virtual_network_type_v = is_virtual_network_type<Ntk>::value;
+#pragma endregion
+
 }  // namespace fiction
 
 #endif  // FICTION_TRAITS_HPP
