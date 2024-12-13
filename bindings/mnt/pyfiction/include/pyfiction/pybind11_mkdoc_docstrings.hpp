@@ -3920,10 +3920,10 @@ The input BDL pairs of the layout are assumed to be in the same order
 as the inputs of the truth table.
 
 This algorithm uses contour tracing to identify operational defect
-locations within the SiDB gate layout. It starts by searching for
-defect locations on the left side (bounding_box + additional scanning
-area). The y-coordinate for these positions is chosen randomly. The
-number of samples is determined by the `samples` parameter.
+locations within the SiDB layout. It starts by searching for defect
+locations on the left side (bounding_box + additional scanning area).
+The y-coordinate for these positions is chosen randomly. The number of
+samples is determined by the `samples` parameter.
 
 Then the algorithm moves each defect position to the right, searching
 for the last operational defect position. This position is selected as
@@ -4848,19 +4848,20 @@ static const char *__doc_fiction_detail_defect_operational_domain_impl_defect_op
 
 static const char *__doc_fiction_detail_defect_operational_domain_impl_determine_nw_se_cells =
 R"doc(This function determines the northwest and southeast cells based on
-the gate layout and the additional scan area specified.)doc";
+the layout layout and the additional scan area specified.)doc";
 
 static const char *__doc_fiction_detail_defect_operational_domain_impl_find_last_operational_defect_position_moving_right =
 R"doc(This function identifies the most recent operational defect position
-while traversing from left to right towards the SiDB gate.
+while traversing from left to right towards the SiDB layout.
 
 Parameter ``starting_defect_position``:
     The starting position of the defect, from which the traversal
-    towards the right is conducted while maintaining gate operability.
+    towards the right is conducted while maintaining layout
+    operability.
 
 Returns:
     The last operational defect position. If no non-operational defect
-    is found, std::nullopt is returned.)doc";
+    is found, `std::nullopt` is returned.)doc";
 
 static const char *__doc_fiction_detail_defect_operational_domain_impl_find_operational_defect_position_at_left_side =
 R"doc(This function aims to identify an operational defect position within
@@ -4869,11 +4870,9 @@ leftmost x-coordinate and a randomly selected y-coordinate limited the
 layout's bounding box.)doc";
 
 static const char *__doc_fiction_detail_defect_operational_domain_impl_grid_search =
-R"doc(This function divides the search space (defined by `nw_cell` and
-`se_cell`) into chunks, each processed by a different thread. The
-search checks if defect positions in the grid are operational based on
-a given step size. Each thread processes a chunk of positions in
-parallel to improve performance.
+R"doc(This function checks for each position in the area (spanned by
+`nw_cell` and `se_cell`) if the existence of a defect leads to a
+operational or non-operational layout.
 
 Parameter ``step_size``:
     The step size used to sample defect positions in the grid. Only
@@ -4881,8 +4880,7 @@ Parameter ``step_size``:
     be checked for being operational.
 
 Returns:
-    A `defect_operational_domain<Lyt>` object representing the
-    operational domain of the defects.)doc";
+    The defect operational domain.)doc";
 
 static const char *__doc_fiction_detail_defect_operational_domain_impl_has_already_been_sampled =
 R"doc(This function verifies whether the layout has already been analyzed
@@ -4892,8 +4890,8 @@ Parameter ``c``:
     Position of the defect.)doc";
 
 static const char *__doc_fiction_detail_defect_operational_domain_impl_is_defect_position_operational =
-R"doc(This function evaluates the operational status of the SiDB gate when a
-defect is placed at position `c`.
+R"doc(This function evaluates the operational status of the SiDB layout when
+a defect is placed at position `c`.
 
 Parameter ``c``:
     Position of the defect.)doc";
@@ -4929,14 +4927,45 @@ static const char *__doc_fiction_detail_defect_operational_domain_impl_params = 
 
 static const char *__doc_fiction_detail_defect_operational_domain_impl_previous_defect_position = R"doc(The previous defect position.)doc";
 
-static const char *__doc_fiction_detail_defect_operational_domain_impl_quicktrace = R"doc()doc";
+static const char *__doc_fiction_detail_defect_operational_domain_impl_quicktrace =
+R"doc(This function applies contour tracing to identify the boundary
+(contour) between operational and non-operational defect positions for
+a given SiDB layout.
+
+The algorithm leverages the concept of a screened Coulomb potential,
+where the electrostatic interaction weakens as distance increases. If
+a defect at a position p allows the SiDB layout to remain operational,
+then defects further from the layout are also likely to maintain
+operability. Conversely, defects closer to the layout may cause it to
+fail. This behavior allows for efficient contour tracing of the
+transition between operational and non-operational states.
+
+The process is as follows: 1. **Initialization**: Randomly select
+`samples` initial defect positions several nanometers away from the
+layout where the layout is known to be operational. 2. **Contour
+Tracing**: For each position, perform a defect-aware physical
+simulation to identify adjacent positions along the x-axis that change
+the operational state of the layout. This marks the starting point of
+the contour. 3. **Contour Following**: Trace the contour of
+operational positions until the starting point is reached again,
+thereby closing the contour. 4. **Repetition**: Repeat steps 1-3 for
+multiple initial heights to identify additional contours, since
+multiple operational-to-non-operational boundaries may exist.
+
+Parameter ``samples``:
+    The number of random initial positions used to identify and trace
+    operational and non-operational defect boundaries. Higher values
+    increase the chance of capturing all relevant contours but
+    increase computation time.
+
+Returns:
+    The defect operational domain.)doc";
 
 static const char *__doc_fiction_detail_defect_operational_domain_impl_random_sampling =
-R"doc(This function performs random sampling of defect positions from a grid
-area (spanned by `nw_cell` and `se_cell`). The positions are shuffled
-and divided into chunks, which are processed by different threads to
-check if each defect position is operational. Each thread handles a
-subset of the defect positions to improve performance.
+R"doc(This function checks for a certain number of random positions (given
+by `samples`) in the area (spanned by `nw_cell` and `se_cell`) if the
+existence of a defect leads to a operational or non-operational
+layout.
 
 Parameter ``samples``:
     The number of positions to sample. The actual number of iterations
@@ -4944,9 +4973,7 @@ Parameter ``samples``:
     `samples` value.
 
 Returns:
-    A `defect_operational_domain<Lyt>` object representing the
-    operational domain of the defects. The return value is marked
-    [[nodiscard]], meaning it must be used by the caller.)doc";
+    The defect operational domain.)doc";
 
 static const char *__doc_fiction_detail_defect_operational_domain_impl_se_bb_layout = R"doc(The south-east bounding box of the layout.)doc";
 
