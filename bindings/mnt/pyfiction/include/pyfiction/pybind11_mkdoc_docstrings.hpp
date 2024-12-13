@@ -15332,6 +15332,15 @@ Template parameter ``I``:
 Returns:
     The parameter value at the specified index.)doc";
 
+static const char *__doc_fiction_parameter_point_operator_assign =
+R"doc(Assignment operator.
+
+Parameter ``other``:
+    The parameter point to be assigned.
+
+Returns:
+    A reference to the assigned parameter point (*this).)doc";
+
 static const char *__doc_fiction_parameter_point_operator_eq =
 R"doc(Equality operator. Checks if this parameter point is equal to another
 point within a specified tolerance. The tolerance is defined by
