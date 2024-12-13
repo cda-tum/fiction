@@ -900,8 +900,8 @@ class is_operational_impl
      * considered unstable.
      * @return `true` if the I/O signal is unstable, `false` otherwise.
      */
-    [[nodiscard]] bool is_io_signal_unstable(charge_distribution_surface<Lyt>& cds_layout,
-                                             charge_distribution_surface<Lyt>& cds_canvas,
+    [[nodiscard]] bool is_io_signal_unstable(charge_distribution_surface<Lyt>&       cds_layout,
+                                             const charge_distribution_surface<Lyt>& cds_canvas,
                                              const uint64_t max_input_pattern_index, const uint64_t input_pattern,
                                              const uint64_t logical_correct_output_pattern,
                                              const double   minimal_energy_of_physically_valid_layout) const noexcept
