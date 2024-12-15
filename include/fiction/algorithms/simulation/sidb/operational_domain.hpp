@@ -63,21 +63,6 @@ struct parameter_point
      * @param values Parameter values for each dimension.
      */
     explicit parameter_point(const std::vector<double>& values) : parameters(values) {}
-
-    /**
-     * Assignment operator.
-     *
-     * @param other The parameter point to be assigned.
-     * @return A reference to the assigned parameter point (*this).
-     */
-    parameter_point& operator=(const parameter_point& other) noexcept
-    {
-        if (this != &other)
-        {
-            parameters = other.parameters;
-        }
-        return *this;
-    }
     /**
      * Parameter values for each dimension.
      */
