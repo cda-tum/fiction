@@ -54,8 +54,15 @@ TEST_CASE("SiQAD OR gate", "[is-operational]")
         CHECK(kink_induced_non_operational);
     }
 
-    const auto input_wires  = detect_bdl_wires(lat, detect_bdl_wires_params{1.5});
-    const auto output_wires = detect_bdl_wires(lat, detect_bdl_wires_params{1.5});
+    const auto input_wires  = detect_bdl_wires(lat, detect_bdl_wires_params{1.5}, bdl_wire_selection::INPUT);
+    const auto output_wires = detect_bdl_wires(lat, detect_bdl_wires_params{1.5}, bdl_wire_selection::OUTPUT);
+
+    REQUIRE(input_wires.size() == 2);
+
+    CHECK(input_wires[0].pairs.size() == 2);
+    CHECK(input_wires[1].pairs.size() == 2);
+
+    CHECK(output_wires.size() == 1);
 
     SECTION("use pre-determined I/O pins")
     {
@@ -73,13 +80,12 @@ TEST_CASE("SiQAD OR gate", "[is-operational]")
     SECTION("determine input patterns for which kinks induce layout to become non-operational")
     {
         const auto kink_induced_non_operational_input_pattern =
-            kink_induced_non_operational_input_patterns(lat, std::vector<tt>{create_and_tt()}, op_params);
+            kink_induced_non_operational_input_patterns(lat, std::vector<tt>{create_or_tt()}, op_params);
 
         CHECK(kink_induced_non_operational_input_pattern.size() == 1);
 
         op_params.op_condition = is_operational_params::operational_condition::TOLERATE_KINKS;
-        CHECK(is_operational(lat, std::vector<tt>{create_and_tt()}, op_params).first ==
-              operational_status::NON_OPERATIONAL);
+        CHECK(is_operational(lat, std::vector<tt>{create_or_tt()}, op_params).first == operational_status::OPERATIONAL);
     }
 }
 
@@ -135,7 +141,7 @@ TEST_CASE("Bestagon AND gate", "[is-operational]")
     SECTION("determine if kinks induce layout to become non-operational")
     {
         const auto kink_induced_non_operational =
-            is_kink_induced_non_operational(lat, std::vector<tt>{create_or_tt()}, op_params);
+            is_kink_induced_non_operational(lat, std::vector<tt>{create_and_tt()}, op_params);
         CHECK(!kink_induced_non_operational);
     }
 

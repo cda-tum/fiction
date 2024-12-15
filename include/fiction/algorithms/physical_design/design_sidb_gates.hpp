@@ -13,7 +13,6 @@
 #include "fiction/technology/cell_ports.hpp"
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
-#include "fiction/technology/physical_constants.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/technology/sidb_defects.hpp"
 #include "fiction/traits.hpp"
@@ -27,15 +26,11 @@
 
 #include <algorithm>
 #include <atomic>
-#include <bitset>
 #include <cassert>
-#include <cmath>
 #include <cstdint>
 #include <cstdlib>
 #include <iostream>
-#include <limits>
 #include <mutex>
-#include <optional>
 #include <random>
 #include <thread>
 #include <unordered_set>
@@ -256,7 +251,7 @@ class design_sidb_gates_impl
         };
 
         const std::size_t number_of_used_threads =
-            std::min(static_cast<std::size_t>(num_threads), all_combinations.size());
+            std::min(static_cast<std::size_t>(std::thread::hardware_concurrency()), all_combinations.size());
 
         const std::size_t chunk_size =
             (all_combinations.size() + number_of_used_threads - 1) / number_of_used_threads;  // Ceiling division
@@ -313,6 +308,9 @@ class design_sidb_gates_impl
         const generate_random_sidb_layout_params<cell<Lyt>> parameter{
             params.canvas, params.number_of_sidbs,
             generate_random_sidb_layout_params<cell<Lyt>>::positive_charges::ALLOWED};
+
+        const auto num_threads =
+            std::min(static_cast<std::size_t>(std::thread::hardware_concurrency()), all_canvas_layouts.size());
 
         std::vector<std::thread> threads{};
         threads.reserve(num_threads);
@@ -408,7 +406,9 @@ class design_sidb_gates_impl
 
         const std::size_t number_of_threads =
             std::min(static_cast<std::size_t>(std::thread::hardware_concurrency()), gate_candidates.size());
-        const std::size_t chunk_size = (gate_candidates.size() + num_threads - 1) / num_threads;  // Ceiling division
+
+        const std::size_t chunk_size =
+            (gate_candidates.size() + number_of_threads - 1) / number_of_threads;  // Ceiling division
 
         std::vector<std::thread> threads;
         threads.reserve(number_of_threads);
@@ -424,6 +424,11 @@ class design_sidb_gates_impl
             {
                 return;
             }
+
+            // pruning was already conducted above. Hence, SIMULATION_ONLY is chosen.
+            params.operational_params.mode_to_analyse_operational_status =
+                is_operational_params::analyis_mode::SIMULATION_ONLY;
+
             if (const auto [status, sim_calls] = is_operational(candidate, truth_table, params.operational_params,
                                                                 input_bdl_wires, output_bdl_wires);
                 status == operational_status::OPERATIONAL)
@@ -483,15 +488,11 @@ class design_sidb_gates_impl
     /**
      * Parameters for the *SiDB Gate Designer*.
      */
-    const design_sidb_gates_params<cell<Lyt>>& params;
+    design_sidb_gates_params<cell<Lyt>> params;
     /**
      * All cells within the canvas.
      */
     std::vector<typename Lyt::cell> all_sidbs_in_canvas;
-    /**
-     * Number of threads to be used for parallel execution.
-     */
-    const std::size_t num_threads{std::thread::hardware_concurrency()};
     /**
      * The statistics of the gate design.
      */
@@ -528,80 +529,6 @@ class design_sidb_gates_impl
      * Number of discarded layouts at third pruning.
      */
     std::atomic<std::size_t> number_of_discarded_layouts_at_third_pruning{0};
-    /**
-     * This function assigns the charge states of the input wires in the layout according to the provided input pattern
-     * index. It performs the following steps:
-     *    - For `NORTH-SOUTH` port wires, if the corresponding bit in the input pattern is set, assigns `NEUTRAL`
-     * charge to the upper part and `NEGATIVE` charge to the lower part of the BDLs of the wire.
-     *    - For `NORTH-SOUTH` port wires, if the corresponding bit in the input pattern is not set, assigns
-     * `NEGATIVE` charge to the upper part and `NEUTRAL` charge to the lower part of the BDLs of the wire.
-     *    - For `SOUTH-NORTH` port wires, if the corresponding bit in the input pattern is set, assigns `NEGATIVE`
-     * charge to the upper part and `NEUTRAL` charge to the lower part of the BDLs of the wire.
-     *    - For `SOUTH-NORTH` port wires, if the corresponding bit in the input pattern is not set, assigns
-     * `NEUTRAL` charge to the upper part and `NEGATIVE` charge to the lower part of the BDLs of the wire.
-     *
-     * @param layout The charge distribution surface layout to be modified.
-     * @param current_input_index The index representing the current input pattern.
-     * @return void
-     */
-    void set_charge_distribution_of_output_wires_based_on_output_index(charge_distribution_surface<Lyt>& layout,
-                                                                       const uint64_t output_wire_index) const noexcept
-    {
-        for (auto i = 0u; i < number_of_output_wires; i++)
-        {
-            if (output_bdl_wires[i].port.dir == port_direction::SOUTH ||
-                output_bdl_wires[i].port.dir == port_direction::EAST)
-            {
-                if ((output_wire_index & (uint64_t{1ull} << i)) != 0ull)
-                {
-                    for (const auto& bdl : output_bdl_wires[i].pairs)
-                    {
-                        layout.assign_charge_state(bdl.upper, sidb_charge_state::NEUTRAL,
-                                                   charge_index_mode::KEEP_CHARGE_INDEX);
-                        layout.assign_charge_state(bdl.lower, sidb_charge_state::NEGATIVE,
-                                                   charge_index_mode::KEEP_CHARGE_INDEX);
-                    }
-                }
-                else
-                {
-                    for (const auto& bdl : output_bdl_wires[i].pairs)
-                    {
-                        layout.assign_charge_state(bdl.upper, sidb_charge_state::NEGATIVE,
-                                                   charge_index_mode::KEEP_CHARGE_INDEX);
-                        layout.assign_charge_state(bdl.lower, sidb_charge_state::NEUTRAL,
-                                                   charge_index_mode::KEEP_CHARGE_INDEX);
-                    }
-                }
-            }
-            else
-            {
-                if ((output_wire_index & (uint64_t{1ull} << i)) != 0ull)
-                {
-                    for (const auto& bdl : output_bdl_wires[i].pairs)
-                    {
-                        if (bdl.type == sidb_technology::INPUT)
-                        {
-                            continue;
-                        }
-                        layout.assign_charge_state(bdl.upper, sidb_charge_state::NEGATIVE,
-                                                   charge_index_mode::KEEP_CHARGE_INDEX);
-                        layout.assign_charge_state(bdl.lower, sidb_charge_state::NEUTRAL,
-                                                   charge_index_mode::KEEP_CHARGE_INDEX);
-                    }
-                }
-                else
-                {
-                    for (const auto& bdl : output_bdl_wires[i].pairs)
-                    {
-                        layout.assign_charge_state(bdl.upper, sidb_charge_state::NEUTRAL,
-                                                   charge_index_mode::KEEP_CHARGE_INDEX);
-                        layout.assign_charge_state(bdl.lower, sidb_charge_state::NEGATIVE,
-                                                   charge_index_mode::KEEP_CHARGE_INDEX);
-                    }
-                }
-            }
-        }
-    }
     /**
      * This function processes each layout to determine if it represents a valid gate implementation or if it can be
      * pruned by using three distinct physically-informed pruning steps. It leverages multi-threading to accelerate the
@@ -644,12 +571,13 @@ class design_sidb_gates_impl
                                                input_bdl_wires};
 
             detail::is_operational_impl<Lyt, TT> is_operational_impl{
-                current_layout, truth_table, params.operational_params, input_bdl_wires, output_bdl_wires};
+                current_layout, truth_table, params.operational_params, input_bdl_wires, output_bdl_wires, canvas_lyt};
 
             for (auto i = 0u; i < truth_table.front().num_bits(); ++i, ++bii)
             {
                 const auto [can_layout_be_pruned, applied_pruning] = is_operational_impl.can_layout_be_discarded(
                     bii.get_current_input_index(), cds_canvas, dependent_cell);
+
                 if (can_layout_be_pruned)
                 {
                     switch (applied_pruning)
@@ -685,7 +613,7 @@ class design_sidb_gates_impl
         gate_candidate.reserve(all_canvas_layouts.size());
 
         const std::size_t number_of_threads =
-            std::min(static_cast<std::size_t>(num_threads), all_canvas_layouts.size());
+            std::min(static_cast<std::size_t>(std::thread::hardware_concurrency()), all_canvas_layouts.size());
         const std::size_t chunk_size = (all_canvas_layouts.size() + number_of_threads - 1) / number_of_threads;
 
         std::vector<std::thread> threads{};

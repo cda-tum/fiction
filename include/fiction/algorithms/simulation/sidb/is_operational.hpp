@@ -240,15 +240,19 @@ class is_operational_impl
             layout{lyt},
             truth_table{tt},
             parameters{params},
-            output_bdl_pairs(detect_bdl_pairs(layout, sidb_technology::cell_type::OUTPUT,
-                                              params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)),
             bii{bdl_input_iterator<Lyt>{layout, params.input_bdl_iterator_params, input_wires}},
             input_bdl_wires{input_wires},
             output_bdl_wires{output_wires},
             number_of_output_wires{output_bdl_wires.size()},
             number_of_input_wires{input_bdl_wires.size()},
             canvas_lyt{c_lyt}
-    {}
+    {
+        if (params.op_condition == is_operational_params::operational_condition::TOLERATE_KINKS)
+        {
+            output_bdl_pairs = detect_bdl_pairs(layout, sidb_technology::cell_type::OUTPUT,
+                                                params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params);
+        }
+    }
 
     /**
      * Constructor to initialize the algorithm with a layout and parameters.
@@ -340,39 +344,15 @@ class is_operational_impl
      */
     [[nodiscard]] std::pair<operational_status, non_operationality_reason> run() noexcept
     {
-        assert(!output_bdl_pairs.empty() && "No output cell provided.");
-        assert((truth_table.size() == output_bdl_pairs.size()) &&
-               "Number of truth tables and output BDL pairs does not match");
-
         bool at_least_one_layout_is_kink_induced_non_operational = false;
-
-        const auto logic_cells = layout.get_cells_by_type(technology<Lyt>::cell_type::LOGIC);
-
-        Lyt       c_layout{};
-        cell<Lyt> dependent_cell{};
 
         if (!canvas_lyt.is_empty())
         {
-            canvas_lyt.foreach_cell(
-                [&](const auto& c)
-                {
-                    dependent_cell = c;
-                    c_layout.assign_cell_type(c, Lyt::technology::cell_type::NORMAL);
-                });
-        }
+            charge_distribution_surface<Lyt> cds_canvas{canvas_lyt};
+            cell<Lyt>                        dependent_cell{};
 
-        if (!logic_cells.empty())
-        {
-            for (const auto& c : logic_cells)
-            {
-                c_layout.assign_cell_type(c, Lyt::technology::cell_type::NORMAL);
-                dependent_cell = c;
-            }
-        }
+            canvas_lyt.foreach_cell([&](const auto& c) { dependent_cell = c; });
 
-        if (!canvas_lyt.is_empty() || !logic_cells.empty())
-        {
-            charge_distribution_surface<Lyt> cds_canvas{c_layout};
             cds_canvas.assign_dependent_cell(dependent_cell);
             cds_canvas.assign_physical_parameters(parameters.simulation_parameters);
             // number of different input combinations
@@ -407,7 +387,7 @@ class is_operational_impl
         if (parameters.mode_to_analyse_operational_status == is_operational_params::analyis_mode::SIMULATION_ONLY ||
             parameters.mode_to_analyse_operational_status ==
                 is_operational_params::analyis_mode::PRUNE_BEFORE_SIMULATION ||
-            canvas_lyt.is_empty() || logic_cells.empty())
+            canvas_lyt.is_empty())
         {
             bii = 0;
             // number of different input combinations
@@ -481,52 +461,58 @@ class is_operational_impl
     {
         auto non_operational_reason = non_operationality_reason::LOGIC_MISMATCH;
 
-        assert(!output_bdl_pairs.empty() && "No output cell provided.");
-        assert((truth_table.size() == output_bdl_pairs.size()) &&
-               "Number of truth tables and output BDL pairs does not match");
-
         // if positively charged SiDBs can occur, the SiDB layout is considered as non-operational
         if (can_positive_charges_occur(given_cds, parameters.simulation_parameters))
         {
             return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
         }
 
-        // fetch the charge states of the output BDL pair
-        for (auto output = 0u; output < output_bdl_pairs.size(); output++)
+        if (parameters.op_condition == is_operational_params::operational_condition::TOLERATE_KINKS)
         {
-            const auto charge_state_output_upper = given_cds.get_charge_state(output_bdl_pairs[output].upper);
-            const auto charge_state_output_lower = given_cds.get_charge_state(output_bdl_pairs[output].lower);
+            assert(!output_bdl_pairs.empty() && "No output cell provided.");
 
-            // if the output charge states are equal, the layout is not operational
-            if (charge_state_output_lower == charge_state_output_upper)
+            // fetch the charge states of the output BDL pair
+            for (auto output = 0u; output < output_bdl_pairs.size(); output++)
             {
-                return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
-            }
+                const auto charge_state_output_upper = given_cds.get_charge_state(output_bdl_pairs[output].upper);
+                const auto charge_state_output_lower = given_cds.get_charge_state(output_bdl_pairs[output].lower);
 
-            // if the expected output is 1, the expected charge states are (upper, lower) = (0, -1)
-            if (kitty::get_bit(truth_table[output], input_pattern))
-            {
-                if (!encodes_bit_one(given_cds, output_bdl_pairs[output], output_bdl_wires[output].port))
+                // if the output charge states are equal, the layout is not operational
+                if (charge_state_output_lower == charge_state_output_upper)
                 {
                     return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
                 }
-            }
-            // if the expected output is 0, the expected charge states are (upper, lower) = (-1, 0)
-            else
-            {
-                if (!encodes_bit_zero(given_cds, output_bdl_pairs[output], output_bdl_wires[output].port))
-                {
-                    return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
-                }
-            }
 
-            if (parameters.op_condition == is_operational_params::operational_condition::REJECT_KINKS)
-            {
-                if (check_existence_of_kinks_in_input_wires(given_cds, input_pattern) ||
-                    check_existence_of_kinks_in_output_wires(given_cds, input_pattern))
+                // if the expected output is 1, the expected charge states are (upper, lower) = (0, -1)
+                if (kitty::get_bit(truth_table[output], input_pattern))
                 {
-                    non_operational_reason = non_operationality_reason::KINKS;
+                    if (!encodes_bit_one(given_cds, output_bdl_pairs[output], output_bdl_wires[output].port))
+                    {
+                        return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
+                    }
                 }
+                // if the expected output is 0, the expected charge states are (upper, lower) = (-1, 0)
+                else
+                {
+                    if (!encodes_bit_zero(given_cds, output_bdl_pairs[output], output_bdl_wires[output].port))
+                    {
+                        return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
+                    }
+                }
+            }
+        }
+
+        if (parameters.op_condition == is_operational_params::operational_condition::REJECT_KINKS)
+        {
+            assert(!input_bdl_wires.empty() && "No input wires provided.");
+            assert(!output_bdl_wires.empty() && "No output wires provided.");
+            assert((truth_table.size() == output_bdl_wires.size()) &&
+                   "Number of truth tables and output BDL wires does not match");
+
+            if (check_existence_of_kinks_in_input_wires(given_cds, input_pattern) ||
+                check_existence_of_kinks_in_output_wires(given_cds, input_pattern))
+            {
+                non_operational_reason = non_operationality_reason::KINKS;
             }
         }
 
@@ -549,8 +535,7 @@ class is_operational_impl
     [[nodiscard]] std::vector<std::pair<uint64_t, non_operationality_reason>>
     determine_non_operational_input_patterns_and_non_operationality_reason() noexcept
     {
-        assert(!output_bdl_pairs.empty() && "No output cell provided.");
-        assert((truth_table.size() == output_bdl_pairs.size()) &&
+        assert((truth_table.size() == output_bdl_wires.size()) &&
                "Number of truth tables and output BDL pairs does not match");
 
         std::vector<std::pair<uint64_t, detail::non_operationality_reason>>
