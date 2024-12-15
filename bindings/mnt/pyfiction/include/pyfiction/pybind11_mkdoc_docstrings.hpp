@@ -4665,8 +4665,6 @@ Returns:
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_input_bdl_wires = R"doc(Input BDL wires.)doc";
 
-static const char *__doc_fiction_detail_design_sidb_gates_impl_num_threads = R"doc(Number of threads to be used for parallel execution.)doc";
-
 static const char *__doc_fiction_detail_design_sidb_gates_impl_number_of_discarded_layouts_at_first_pruning = R"doc(Number of discarded layouts at first pruning.)doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_number_of_discarded_layouts_at_second_pruning = R"doc(Number of discarded layouts at second pruning.)doc";
@@ -4721,31 +4719,6 @@ parameters. The design process is parallelized to improve performance.
 
 Returns:
     A vector of designed SiDB gate layouts.)doc";
-
-static const char *__doc_fiction_detail_design_sidb_gates_impl_set_charge_distribution_of_output_wires_based_on_output_index =
-R"doc(This function assigns the charge states of the input wires in the
-layout according to the provided input pattern index. It performs the
-following steps: - For `NORTH-SOUTH` port wires, if the corresponding
-bit in the input pattern is set, assigns `NEUTRAL` charge to the upper
-part and `NEGATIVE` charge to the lower part of the BDLs of the wire.
-- For `NORTH-SOUTH` port wires, if the corresponding bit in the input
-pattern is not set, assigns `NEGATIVE` charge to the upper part and
-`NEUTRAL` charge to the lower part of the BDLs of the wire. - For
-`SOUTH-NORTH` port wires, if the corresponding bit in the input
-pattern is set, assigns `NEGATIVE` charge to the upper part and
-`NEUTRAL` charge to the lower part of the BDLs of the wire. - For
-`SOUTH-NORTH` port wires, if the corresponding bit in the input
-pattern is not set, assigns `NEUTRAL` charge to the upper part and
-`NEGATIVE` charge to the lower part of the BDLs of the wire.
-
-Parameter ``layout``:
-    The charge distribution surface layout to be modified.
-
-Parameter ``current_input_index``:
-    The index representing the current input pattern.
-
-Returns:
-    void)doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_skeleton_layout =
 R"doc(The skeleton layout serves as a starting layout to which SiDBs are
@@ -15331,15 +15304,6 @@ Template parameter ``I``:
 
 Returns:
     The parameter value at the specified index.)doc";
-
-static const char *__doc_fiction_parameter_point_operator_assign =
-R"doc(Assignment operator.
-
-Parameter ``other``:
-    The parameter point to be assigned.
-
-Returns:
-    A reference to the assigned parameter point (*this).)doc";
 
 static const char *__doc_fiction_parameter_point_operator_eq =
 R"doc(Equality operator. Checks if this parameter point is equal to another
