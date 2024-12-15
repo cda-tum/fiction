@@ -240,6 +240,8 @@ class is_operational_impl
             layout{lyt},
             truth_table{tt},
             parameters{params},
+            output_bdl_pairs(detect_bdl_pairs(lyt, sidb_technology::cell_type::OUTPUT,
+                                              params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)),
             bii{bdl_input_iterator<Lyt>{layout, params.input_bdl_iterator_params, input_wires}},
             input_bdl_wires{input_wires},
             output_bdl_wires{output_wires},
@@ -467,37 +469,34 @@ class is_operational_impl
             return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
         }
 
-        if (parameters.op_condition == is_operational_params::operational_condition::TOLERATE_KINKS)
+        assert(!output_bdl_pairs.empty() && "No output cell provided.");
+
+        // fetch the charge states of the output BDL pair
+        for (auto output = 0u; output < output_bdl_pairs.size(); output++)
         {
-            assert(!output_bdl_pairs.empty() && "No output cell provided.");
+            const auto charge_state_output_upper = given_cds.get_charge_state(output_bdl_pairs[output].upper);
+            const auto charge_state_output_lower = given_cds.get_charge_state(output_bdl_pairs[output].lower);
 
-            // fetch the charge states of the output BDL pair
-            for (auto output = 0u; output < output_bdl_pairs.size(); output++)
+            // if the output charge states are equal, the layout is not operational
+            if (charge_state_output_lower == charge_state_output_upper)
             {
-                const auto charge_state_output_upper = given_cds.get_charge_state(output_bdl_pairs[output].upper);
-                const auto charge_state_output_lower = given_cds.get_charge_state(output_bdl_pairs[output].lower);
+                return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
+            }
 
-                // if the output charge states are equal, the layout is not operational
-                if (charge_state_output_lower == charge_state_output_upper)
+            // if the expected output is 1, the expected charge states are (upper, lower) = (0, -1)
+            if (kitty::get_bit(truth_table[output], input_pattern))
+            {
+                if (!encodes_bit_one(given_cds, output_bdl_pairs[output], output_bdl_wires[output].port))
                 {
                     return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
                 }
-
-                // if the expected output is 1, the expected charge states are (upper, lower) = (0, -1)
-                if (kitty::get_bit(truth_table[output], input_pattern))
+            }
+            // if the expected output is 0, the expected charge states are (upper, lower) = (-1, 0)
+            else
+            {
+                if (!encodes_bit_zero(given_cds, output_bdl_pairs[output], output_bdl_wires[output].port))
                 {
-                    if (!encodes_bit_one(given_cds, output_bdl_pairs[output], output_bdl_wires[output].port))
-                    {
-                        return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
-                    }
-                }
-                // if the expected output is 0, the expected charge states are (upper, lower) = (-1, 0)
-                else
-                {
-                    if (!encodes_bit_zero(given_cds, output_bdl_pairs[output], output_bdl_wires[output].port))
-                    {
-                        return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
-                    }
+                    return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
                 }
             }
         }
