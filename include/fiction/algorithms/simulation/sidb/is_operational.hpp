@@ -630,12 +630,14 @@ class is_operational_impl
                 }
             }
 
-            if (canvas_charge_index < max_index)
+            if (canvas_charge_index == max_index)
             {
-                canvas_charge_index++;
-                cds_canvas_copy.assign_charge_index(canvas_charge_index,
-                                                    charge_distribution_mode::UPDATE_CHARGE_DISTRIBUTION);
+                break;
             }
+
+            canvas_charge_index++;
+            cds_canvas_copy.assign_charge_index(canvas_charge_index,
+                                                charge_distribution_mode::UPDATE_CHARGE_DISTRIBUTION);
         }
 
         if (min_energy < std::numeric_limits<double>::infinity())
