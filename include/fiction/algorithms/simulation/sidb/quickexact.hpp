@@ -104,7 +104,7 @@ class quickexact_impl
                     required_simulation_base_number::THREE :
                     required_simulation_base_number::TWO;
 
-            // If layout has at least two SiDBs, all SiDBs that have to be negatively charged are erased from the
+            // If the layout has at least two SiDBs, all SiDBs that have to be negatively charged are erased from the
             // layout.
             if (number_of_sidbs > 1)
             {
@@ -231,8 +231,7 @@ class quickexact_impl
      * This function initializes the charge layout with necessary parameters, and conducts
      * the physical simulation based on whether a three-state simulation is required.
      *
-     * @tparam ChargeLyt The type of Charge Layout.
-     * @tparam ChargeLyt The type representing the charge layout to simulate.
+     * @tparam ChargeLyt Type of the charge distribution surface.
      * @param base_number `THREE` if a three-state simulation is required, `TWO` otherwise.
      */
     template <typename ChargeLyt>
