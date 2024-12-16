@@ -34,7 +34,7 @@ int main()  // NOLINT
         "t in s (exact)",
         "num op approx",
         "t in s (approx)",
-        "num op exact / num op approx",
+        "num op approx / num op exact",
         "t in s (exact) / t in s (approx)"};
 
     // simulation parameters
@@ -106,8 +106,8 @@ int main()  // NOLINT
             // Approx (determine the operation status by pruning)
             op_domain_stats_approx.num_operational_parameter_combinations,
             mockturtle::to_seconds(op_domain_stats_approx.time_total),
-            static_cast<double>(op_domain_stats_gs_exact.num_operational_parameter_combinations) /
-                static_cast<double>(op_domain_stats_approx.num_operational_parameter_combinations),
+            static_cast<double>(op_domain_stats_approx.num_operational_parameter_combinations) /
+                static_cast<double>(op_domain_stats_gs_exact.num_operational_parameter_combinations),
             mockturtle::to_seconds(op_domain_stats_gs_exact.time_total) /
                 mockturtle::to_seconds(op_domain_stats_approx.time_total));
 
