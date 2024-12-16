@@ -139,6 +139,8 @@ TEST_CASE("SiQAD OR gate", "[compute-operational-ratio]")
     CHECK(op_domain_ratio_pruning_and_simulation < op_domain_ratio_only_pruning);
 }
 
+// to save runtime in the CI, this test is only run in RELEASE mode
+#ifdef NDEBUG
 TEST_CASE("Bestagon AND gate", "[compute-operational-ratio]")
 {
     const auto lyt = blueprints::bestagon_and_gate<sidb_100_cell_clk_lyt_siqad>();
@@ -208,3 +210,4 @@ TEST_CASE("Bestagon AND gate", "[compute-operational-ratio]")
         CHECK(op_domain_ratio >= (23.0 / 121.0));
     }
 }
+#endif
