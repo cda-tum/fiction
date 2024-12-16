@@ -8041,10 +8041,7 @@ and conducts the physical simulation based on whether a three-state
 simulation is required.
 
 Template parameter ``ChargeLyt``:
-    The type of Charge Layout.
-
-Template parameter ``ChargeLyt``:
-    The type representing the charge layout to simulate.
+    Type of the charge distribution surface.
 
 Parameter ``base_number``:
     `THREE` if a three-state simulation is required, `TWO` otherwise.)doc";
