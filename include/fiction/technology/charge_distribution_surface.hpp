@@ -367,6 +367,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     [[nodiscard]] charge_distribution_surface clone() const noexcept
     {
         charge_distribution_surface copy{Lyt::clone()};
+        copy.strg = std::make_shared<charge_distribution_storage>(*strg);
         return copy;
     }
     /**

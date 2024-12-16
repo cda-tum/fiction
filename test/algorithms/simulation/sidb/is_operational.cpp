@@ -574,6 +574,18 @@ TEST_CASE("is operational check for Bestagon CX gate", "[is-operational], [quali
             is_operational_params{sidb_simulation_parameters{2, -0.30}, sidb_simulation_engine::QUICKEXACT},
             input_bdl_wires, output_bdl_wires));
     }
+
+    SECTION("using predetermined wires and only applying pruning without simulation")
+    {
+        const auto input_bdl_wires  = detect_bdl_wires(lat, detect_bdl_wires_params{}, bdl_wire_selection::INPUT);
+        const auto output_bdl_wires = detect_bdl_wires(lat, detect_bdl_wires_params{}, bdl_wire_selection::OUTPUT);
+
+        auto op_params                               = is_operational_params{sidb_simulation_parameters{2, -0.32}};
+        op_params.mode_to_analyse_operational_status = is_operational_params::analyis_mode::PRUNING_ONLY;
+
+        CHECK(is_operational(lat, create_crossing_wire_tt(), op_params, input_bdl_wires, output_bdl_wires).first ==
+              operational_status::OPERATIONAL);
+    }
 }
 
 TEST_CASE("is operational check for Bestagon double wire", "[is-operational], [quality]")

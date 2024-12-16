@@ -60,7 +60,9 @@ int main()  // NOLINT
     static const std::string folder = fmt::format("{}sidb_gate_libraries/bestagon_gates/", EXPERIMENTS_PATH);
 
     const auto truth_tables_and_names =
-        std::array<std::pair<std::vector<tt>, std::string>, 15>{{{std::vector<tt>{create_and_tt()}, "and"},
+        std::array<std::pair<std::vector<tt>, std::string>, 11>{{{std::vector<tt>{create_id_tt()}, "wire"},
+                                                                 {std::vector<tt>{create_not_tt()}, "inv"},
+                                                                 {std::vector<tt>{create_and_tt()}, "and"},
                                                                  {std::vector<tt>{create_nand_tt()}, "nand"},
                                                                  {std::vector<tt>{create_or_tt()}, "or"},
                                                                  {std::vector<tt>{create_nor_tt()}, "nor"},
@@ -97,11 +99,11 @@ int main()  // NOLINT
             // Benchmark
             gate, lyt.num_cells(),
 
-            // Exact
+            // Exact (determine the operation status by simulation)
             op_domain_stats_gs_exact.num_operational_parameter_combinations,
             mockturtle::to_seconds(op_domain_stats_gs_exact.time_total),
 
-            // Approx
+            // Approx (determine the operation status by pruning)
             op_domain_stats_approx.num_operational_parameter_combinations,
             mockturtle::to_seconds(op_domain_stats_approx.time_total),
             static_cast<double>(op_domain_stats_gs_exact.num_operational_parameter_combinations) /

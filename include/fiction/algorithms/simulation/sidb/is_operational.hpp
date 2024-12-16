@@ -312,6 +312,7 @@ class is_operational_impl
         }
 
         cds_layout.assign_dependent_cell(dependent_cell);
+        cds_canvas.assign_dependent_cell(dependent_cell);
 
         const auto input_index = bii.get_current_input_index();
 
@@ -603,6 +604,7 @@ class is_operational_impl
         uint64_t canvas_charge_index = 0;
 
         charge_distribution_surface<Lyt> cds_canvas_copy{cds_canvas.clone()};
+        cds_canvas_copy.assign_base_number(2);
 
         cds_canvas_copy.assign_charge_index(0);
 
@@ -628,14 +630,12 @@ class is_operational_impl
                 }
             }
 
-            if (canvas_charge_index == max_index)
+            if (canvas_charge_index < max_index)
             {
-                break;
+                canvas_charge_index++;
+                cds_canvas_copy.assign_charge_index(canvas_charge_index,
+                                                    charge_distribution_mode::UPDATE_CHARGE_DISTRIBUTION);
             }
-
-            canvas_charge_index++;
-            cds_canvas_copy.assign_charge_index(canvas_charge_index,
-                                                charge_distribution_mode::UPDATE_CHARGE_DISTRIBUTION);
         }
 
         if (min_energy < std::numeric_limits<double>::infinity())
