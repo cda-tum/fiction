@@ -49,8 +49,8 @@ int main()  // NOLINT
                        "#Lp3/N [%]"};                          // double
 
     const auto truth_tables_and_names = std::array<std::pair<std::vector<tt>, std::string>, 15>{
-        {{std::vector<tt>{create_id_tt()}, "inv"},
-         {std::vector<tt>{create_not_tt()}, "wire"},
+        {{std::vector<tt>{create_not_tt()}, "inv"},
+         {std::vector<tt>{create_id_tt()}, "wire"},
          {std::vector<tt>{create_and_tt()}, "and"},
          {std::vector<tt>{create_nand_tt()}, "nand"},
          {std::vector<tt>{create_or_tt()}, "or"},
