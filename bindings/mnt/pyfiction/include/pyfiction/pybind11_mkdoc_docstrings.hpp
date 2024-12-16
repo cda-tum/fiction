@@ -8040,6 +8040,12 @@ R"doc(This function initializes the charge layout with necessary parameters,
 and conducts the physical simulation based on whether a three-state
 simulation is required.
 
+Template parameter ``ChargeLyt``:
+    The type of Charge Layout.
+
+Template parameter ``ChargeLyt``:
+    The type representing the charge layout to simulate.
+
 Parameter ``base_number``:
     `THREE` if a three-state simulation is required, `TWO` otherwise.)doc";
 
@@ -8094,12 +8100,18 @@ static const char *__doc_fiction_detail_quickexact_impl_three_state_simulation =
 R"doc(This function conducts 3-state physical simulation (negative, neutral,
 positive).
 
+Template parameter ``ChargeLyt``:
+    Type of the charge distribution surface.
+
 Parameter ``charge_layout``:
     Initialized charge layout.)doc";
 
 static const char *__doc_fiction_detail_quickexact_impl_two_state_simulation =
 R"doc(This function conducts 2-state physical simulation (negative,
 neutral).
+
+Template parameter ``ChargeLyt``:
+    Type of the charge distribution surface.
 
 Parameter ``charge_layout``:
     Initialized charge layout.)doc";
