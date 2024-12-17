@@ -101,8 +101,6 @@ struct clustercomplete_params
 namespace detail
 {
 
-std::mutex cout_mutex;
-
 template <typename Lyt>
 class clustercomplete_impl
 {
@@ -114,7 +112,7 @@ class clustercomplete_impl
      * @param params Parameter required for both the invocation of *Ground State Space*, and the simulation following.
      */
     explicit clustercomplete_impl(const Lyt& lyt, const clustercomplete_params<cell<Lyt>>& params) noexcept :
-            available_threads{2},  // std::max(uint64_t{1}, params.available_threads)},
+            available_threads{std::max(uint64_t{1}, params.available_threads)},
             charge_layout{initialize_charge_layout(lyt, params)},
             real_placed_defects{charge_layout.get_defects()},
             mu_bounds_with_error{physical_constants::POP_STABILITY_ERR - params.simulation_parameters.mu_minus,
@@ -155,7 +153,7 @@ class clustercomplete_impl
             gss_stats.report();
         }
 
-        std::cout << "\n\n\n\n\n\nrunning with " << available_threads << " threads" << std::endl;
+        std::cout << "running with " << available_threads << " threads" << std::endl;
 
         mockturtle::stopwatch<>::duration time_counter{};
         {
@@ -173,31 +171,19 @@ class clustercomplete_impl
                     supporting_threads.emplace_back(
                         [&, ix = i]
                         {
-                            // std::cout << "starting thread " << ix << "..." << std::endl;
-
                             worker& w = *workers.at(ix);
 
                             while (std::optional<sidb_charge_space_composition> work = w.obtain_work())
                             {
-                                // std::cout << "thread " << ix << " doing work..." << std::endl;
                                 unfold_composition(w, std::move(*work));
-                                // std::cout << "thread " << ix << " finished work" << std::endl;
                             }
-
-                            // std::cout << "thread " << ix << " stopped working" << std::endl;
                         });
                 }
 
-                // std::cout << "starting thread 0..." << std::endl;
-
                 while (std::optional<sidb_charge_space_composition> work = workers.front()->obtain_work())
                 {
-                    // std::cout << "thread 0 doing work..." << std::endl;
                     unfold_composition(*workers.front(), std::move(*work));
-                    // std::cout << "thread 0 finished work" << std::endl;
                 }
-
-                // std::cout << "thread 0 stopped working" << std::endl;
 
                 // wait for all threads to complete
                 for (auto& thread : supporting_threads)
@@ -527,19 +513,8 @@ class clustercomplete_impl
         clustering_state.pot_bounds -= composition.pot_bounds;
     }
 
-    void thread_safe_print2(const std::string& message)
-    {
-        std::lock_guard lock(cout_mutex);
-        std::cout << message << std::endl;
-    }
-
     struct worker_queue
     {
-        void thread_safe_print(const std::string& message)
-        {
-            std::lock_guard lock(cout_mutex);
-            std::cout << message << std::endl;
-        }
         struct mole
         {
             uint64_t                        parent_to_move_out_ix;
@@ -558,7 +533,7 @@ class clustercomplete_impl
                 clustering_state_for_thieves{num_sidbs_in_layout}
         {}
 
-        std::optional<std::pair<mole, bool>> get_informant(std::stringstream& ss) noexcept
+        std::optional<std::pair<mole, bool>> get_informant() noexcept
         {
             // const std::lock_guard lock{mutex_to_protect_the_informants};
 
@@ -569,109 +544,22 @@ class clustercomplete_impl
 
             std::pair<mole, bool> informant = std::move(thief_informants.front());
             thief_informants.pop_front();
-            ss << "THIEF POP FRONT (get informant)\n";
 
             return std::optional{std::move(informant)};
         }
 
-        void apply_informant(std::stringstream& ss) noexcept
+        void apply_informant() noexcept
         {
-            ss << "clustering state for thieves before:\n\t";
-            for (const auto& y : clustering_state_for_thieves.proj_states)
+            if (std::optional<std::pair<mole, bool>> informant = get_informant();
+                informant.has_value() && informant->first.composition.proj_states.size() > 1)
             {
-                for (const auto& yy : y->cluster->sidbs)
-                {
-                    ss << yy << ' ';
-                }
-                ss << "\t\t";
-            }
-            ss << "\n\t";
-            for (const auto& y : clustering_state_for_thieves.proj_states)
-            {
-                ss << fmt::format("{{ {} {} {} }}", y->get_count<sidb_charge_state::NEGATIVE>(),
-                                  y->get_count<sidb_charge_state::NEUTRAL>(),
-                                  y->get_count<sidb_charge_state::POSITIVE>())
-                   << '\t';
-            }
-            ss << '\n';
-            if (std::optional<std::pair<mole, bool>> informant = get_informant(ss))
-            {
-                if (informant->first.composition.proj_states.size() > 1)
-                {
-                    add_composition(clustering_state_for_thieves, informant->first.composition);
+                add_composition(clustering_state_for_thieves, informant->first.composition);
 
-                    ss << "popped informant: " << informant->first.parent_to_move_out_ix << "\n\tcomposition:\n\t\t";
-                    for (const auto& y : informant->first.composition.proj_states)
-                    {
-                        for (const auto& yy : y.cluster->sidbs)
-                        {
-                            ss << yy << ' ';
-                        }
-                        ss << "\t\t";
-                    }
-                    ss << "\n\t\t";
-                    for (const auto& y : informant->first.composition.proj_states)
-                    {
-                        ss << fmt::format("{{ {} {} {} }}", y.template get_count<sidb_charge_state::NEGATIVE>(),
-                                          y.template get_count<sidb_charge_state::NEUTRAL>(),
-                                          y.template get_count<sidb_charge_state::POSITIVE>())
-                           << '\t';
-                    }
-                    ss << '\n';
-                    // if (informant->first.parent_to_move_out_ix < clustering_state_for_thieves.proj_states.size())
-                    // {
-                    move_parent_out(clustering_state_for_thieves, informant->first.parent_to_move_out_ix);
-                    // }
-                    // else if (!clustering_state_for_thieves.proj_states.empty())
-                    // {
-                    //     // move out
-                    //     sidb_cluster_projector_state_ptr max_pst =
-                    //     std::move(clustering_state_for_thieves.proj_states.back());
-                    //
-                    //     // pop
-                    //     clustering_state_for_thieves.proj_states.pop_back();
-                    //
-                    //     // subtract parent potential from potential bounds store
-                    //     for (uint64_t sidb_ix = 0; sidb_ix < clustering_state_for_thieves.pot_bounds.num_sidbs();
-                    //     ++sidb_ix)
-                    //     {
-                    //         clustering_state_for_thieves.pot_bounds.update(
-                    //             sidb_ix, -get_projector_state_bound_pot<bound_direction::LOWER>(*max_pst, sidb_ix),
-                    //             -get_projector_state_bound_pot<bound_direction::UPPER>(*max_pst, sidb_ix));
-                    //     }
-                    // }
-                }
-                else
-                {
-                    // apply_informant(ss);
-                    // thief_informants.emplace_front(std::make_pair(std::move(informant->first), false));
-                }
+                move_parent_out(clustering_state_for_thieves, informant->first.parent_to_move_out_ix);
             }
-            else
-            {
-                ss << "No informant found.\n";
-            }
-            ss << "clustering state for thieves after:\n\t";
-            for (const auto& y : clustering_state_for_thieves.proj_states)
-            {
-                for (const auto& yy : y->cluster->sidbs)
-                {
-                    ss << yy << ' ';
-                }
-                ss << "\t\t";
-            }
-            ss << "\n\t";
-            for (const auto& y : clustering_state_for_thieves.proj_states)
-            {
-                ss << fmt::format("{{ {} {} {} }}", y->get_count<sidb_charge_state::NEGATIVE>(),
-                                  y->get_count<sidb_charge_state::NEUTRAL>(),
-                                  y->get_count<sidb_charge_state::POSITIVE>())
-                   << '\t';
-            }
-            ss << '\n';
         }
 
-        std::optional<sidb_charge_space_composition> get_last_composition(const uint64_t ix) noexcept
+        std::optional<sidb_charge_space_composition> get_last_composition() noexcept
         {
             // const std::lock_guard lock{mutex_to_protect_the_informants};
             const std::lock_guard lock{mutex_to_protect_this_queue};
@@ -683,116 +571,35 @@ class clustercomplete_impl
 
             if (queue.size() > 1 && queue.front().empty())
             {
-                thread_safe_print("Q POP FRONT (last composition)");
                 queue.pop_front();
             }
 
             sidb_charge_space_composition last_composition = std::move(thief_informants.back().first.composition);
             thief_informants.pop_back();
-            thread_safe_print("THIEF POP BACK (last composition)");
-
-
-            std::stringstream ss;
-            ss << "thread " << ix << " popped last informant with composition:\n\t\t";
-            for (const auto& y : last_composition.proj_states)
-            {
-                for (const auto& yy : y.cluster->sidbs)
-                {
-                    ss << yy << ' ';
-                }
-                ss << "\t\t";
-            }
-            ss << "\n\t\t";
-            for (const auto& y : last_composition.proj_states)
-            {
-                ss << fmt::format("{{ {} {} {} }}", y.template get_count<sidb_charge_state::NEGATIVE>(),
-                                  y.template get_count<sidb_charge_state::NEUTRAL>(),
-                                  y.template get_count<sidb_charge_state::POSITIVE>())
-                   << '\t';
-            }
-            ss << '\n';
-            ss << "all informants:\n";
-            for (const auto& m : thief_informants)
-            {
-                ss << "\tparent to move out: " << m.first.parent_to_move_out_ix << "\n\tcomposition:\n\t\t";
-                for (const auto& y : m.first.composition.proj_states)
-                {
-                    for (const auto& yy : y.cluster->sidbs)
-                    {
-                        ss << yy << ' ';
-                    }
-                    ss << "\t\t";
-                }
-                ss << "\n\t\t";
-                for (const auto& y : m.first.composition.proj_states)
-                {
-                    ss << fmt::format("{{ {} {} {} }}", y.template get_count<sidb_charge_state::NEGATIVE>(),
-                                      y.template get_count<sidb_charge_state::NEUTRAL>(),
-                                      y.template get_count<sidb_charge_state::POSITIVE>())
-                       << '\t';
-                }
-                ss << '\n';
-            }
-            thread_safe_print(ss.str());
 
             return std::optional{std::move(last_composition)};
         }
 
         // work, need to backtrack
-        std::pair<std::optional<sidb_charge_space_composition>, bool> get_from_this_queue(const uint64_t num, const bool b) noexcept
+        template <bool in_a_backtracking_flow>
+        std::pair<std::optional<sidb_charge_space_composition>, bool> get_from_this_queue() noexcept
         {
             const std::lock_guard lock{mutex_to_protect_this_queue};
 
-            std::stringstream ss{};
-
-            ss << "Queue " << num << " was requested for SELF-GET (" << b << ")\n";
-            uint64_t n = queue.size();
-            for (const auto& q : queue)
-            {
-                ss << "\tDepth " << n-- << ":\n";
-                for (const auto& x : q)
-                {
-                    ss << "\t\t";
-                    for (const auto& y : x.proj_states)
-                    {
-                        for (const auto& yy : y.cluster->sidbs)
-                        {
-                            ss << yy << ' ';
-                        }
-                        ss << "\t\t";
-                    }
-                    ss << "\n\t\t";
-                    for (const auto& y : x.proj_states)
-                    {
-                        ss << fmt::format("{{ {} {} {} }}", y.get_count<sidb_charge_state::NEGATIVE>(),
-                                          y.get_count<sidb_charge_state::NEUTRAL>(),
-                                          y.get_count<sidb_charge_state::POSITIVE>())
-                           << '\t';
-                    }
-                    ss << '\n';
-                }
-            }
-
-            thread_safe_print(ss.str());
-
             if (queue.empty())
             {
-                // thread_safe_print2("Q EMPTY");
                 return {std::nullopt, false};
             }
 
             if (queue.front().empty())
             {
-                if (b && queue.size() == 1)
+                if constexpr (!in_a_backtracking_flow)
                 {
-                    queue.pop_front();
-                    thread_safe_print("Q POP (very last one)");
+                    if (queue.size() == 1)
+                    {
+                        queue.pop_front();
+                    }
                 }
-                // queue.pop_front();
-
-                // thread_safe_print("POP FRONT (backtrack)");
-
-                // thread_safe_print2("Q POP & BACKTRACK");
 
                 return {std::nullopt, true};
             }
@@ -803,13 +610,6 @@ class clustercomplete_impl
 
             if (queue.front().empty())
             {
-                // if (b && queue.size() == 1)
-                // {
-                //     queue.pop_front();
-                //     thread_safe_print("Q POP (very last one2)");
-                // }
-                // queue.pop_front();
-
                 return {std::optional{std::move(work)}, true};
             }
 
@@ -818,50 +618,15 @@ class clustercomplete_impl
 
         // Attempt to steal work in non-blocking fashion
         std::variant<bool, std::pair<sidb_clustering_state, sidb_charge_space_composition>>
-        try_steal_from_this_queue(const uint64_t ix) noexcept
+        try_steal_from_this_queue() noexcept
         {
             if (!mutex_to_protect_this_queue.try_lock())  // Non-blocking lock attempt
             {
-                thread_safe_print("Queue " + std::to_string(ix) + " is locked");
                 return true;
             }
 
-            std::stringstream ss;
-
-            ss << "Queue " << ix << " was requested for STEAL\n";
-            uint64_t n = queue.size();
-            for (const auto& q : queue)
-            {
-                ss << "\tDepth " << n-- << ":\n";
-                for (const auto& x : q)
-                {
-                    ss << "\t\t";
-                    for (const auto& y : x.proj_states)
-                    {
-                        for (const auto& yy : y.cluster->sidbs)
-                        {
-                            ss << yy << ' ';
-                        }
-                        ss << "\t\t";
-                    }
-                    ss << "\n\t\t";
-                    for (const auto& y : x.proj_states)
-                    {
-                        ss << fmt::format("{{ {} {} {} }}", y.get_count<sidb_charge_state::NEGATIVE>(),
-                                          y.get_count<sidb_charge_state::NEUTRAL>(),
-                                          y.get_count<sidb_charge_state::POSITIVE>())
-                           << '\t';
-                    }
-                    ss << '\n';
-                }
-            }
-
-            // thread_safe_print(ss.str());
-
             if (queue.empty())
             {
-                ss << "Queue " << ix << " is empty";
-                thread_safe_print(ss.str());
                 mutex_to_protect_this_queue.unlock();
 
                 return false;
@@ -870,15 +635,12 @@ class clustercomplete_impl
             while (!thief_informants.empty() && queue.back().empty())
             {
                 queue.pop_back();
-                ss << "\nQ POP BACK (update)\n";
 
-                apply_informant(ss);
+                apply_informant();
             }
 
             if (queue.empty() || queue.back().empty())
             {
-                ss << "Queue " << ix << " is empty after popping";
-                thread_safe_print(ss.str());
                 mutex_to_protect_this_queue.unlock();
 
                 return false;
@@ -890,24 +652,12 @@ class clustercomplete_impl
 
             sidb_clustering_state stolen_clustering_state{clustering_state_for_thieves};  // make copy
 
-            ss << "found work to steal\n";
-
             if (queue.back().empty() && !thief_informants.empty())
             {
-                // if (queue.size() > 1 || (queue.size() == 1 && !thief_informants.empty()))
-                // {
-                    queue.pop_back();
-                    ss << "\nQ POP BACK (after steal)\n";
-                // }
-                //
-                // if (work.proj_states.size() > 1)
-                // {
-                    apply_informant(ss);
-                // }
-            }
+                queue.pop_back();
 
-            ss << "Queue " << ix << " yields work";
-            thread_safe_print(ss.str());
+                apply_informant();
+            }
 
             mutex_to_protect_this_queue.unlock();
 
@@ -929,46 +679,15 @@ class clustercomplete_impl
                 clustering_state{num_sidbs},
                 all_workers{workers}
         {}
-        void thread_safe_print(const std::string& message)
-        {
-            std::lock_guard lock(cout_mutex);
-            std::cout << message << std::endl;
-        }
+
         // nullopt -> terminate thread (todo: use global termination synchronization)
         std::optional<sidb_charge_space_composition> obtain_work() noexcept
         {
-            std::stringstream ss2{};
-            ss2 << "thread " + std::to_string(index) + " trying to look for own work\n";
-
-            ss2 << "\tclustering state:\n\t\t";
-            for (const auto& y : clustering_state.proj_states)
-            {
-                for (const auto& yy : y->cluster->sidbs)
-                {
-                    ss2 << yy << ' ';
-                }
-                ss2 << "\t\t";
-            }
-            ss2 << "\n\t\t";
-            for (const auto& y : clustering_state.proj_states)
-            {
-                ss2 << fmt::format("{{ {} {} {} }}", y->get_count<sidb_charge_state::NEGATIVE>(),
-                                   y->get_count<sidb_charge_state::NEUTRAL>(),
-                                   y->get_count<sidb_charge_state::POSITIVE>())
-                    << '\t';
-            }
-
-            thread_safe_print(ss2.str());
-
             if (std::optional<sidb_charge_space_composition> work =
-                    work_stealing_queue.get_from_this_queue(index, true).first)
+                    work_stealing_queue.template get_from_this_queue<true>().first)
             {
-                // clustering_state = std::move(work->first);
-                thread_safe_print("thread " + std::to_string(index) + " took own work");
                 return work;
             }
-
-            thread_safe_print("thread " + std::to_string(index) + " found no own work");
 
             bool encountered_locked_queue = true;
 
@@ -984,11 +703,8 @@ class clustercomplete_impl
                         continue;
                     }
 
-                    thread_safe_print("thread " + std::to_string(index) + " trying to steal work from thread " +
-                                      std::to_string(i));
-
                     std::variant<bool, std::pair<sidb_clustering_state, sidb_charge_space_composition>> work =
-                        all_workers.at(i)->work_stealing_queue.try_steal_from_this_queue(i);
+                        all_workers.at(i)->work_stealing_queue.try_steal_from_this_queue();
 
                     if (!std::holds_alternative<bool>(work))
                     {
@@ -998,60 +714,14 @@ class clustercomplete_impl
                         work_stealing_queue.thief_informants.clear();
                         work_stealing_queue.queue.clear();
                         work_stealing_queue.queue.emplace_front();
-                        uint64_t sum = 0;
-                        std::stringstream ss{};
-                        ss << "thread " + std::to_string(index) + " stole work from thread " + std::to_string(i) +
-                                  ":\n";
-                        ss << "\tclustering state:\n\t\t";
-                        for (const auto& y : clustering_state.proj_states)
-                        {
-                            for (const auto& yy : y->cluster->sidbs)
-                            {
-                                sum++;
-                                ss << yy << ' ';
-                            }
-                            ss << "\t\t";
-                        }
-                        ss << "\n\t\t";
-                        for (const auto& y : clustering_state.proj_states)
-                        {
-                            ss << fmt::format("{{ {} {} {} }}", y->get_count<sidb_charge_state::NEGATIVE>(),
-                                              y->get_count<sidb_charge_state::NEUTRAL>(),
-                                              y->get_count<sidb_charge_state::POSITIVE>())
-                               << '\t';
-                        }
-                        ss << "\n\tcomposition:\n\t\t";
-                        for (const auto& y :
-                             std::get<std::pair<sidb_clustering_state, sidb_charge_space_composition>>(work)
-                                 .second.proj_states)
-                        {
-                            for (const auto& yy : y.cluster->sidbs)
-                            {
-                                sum++;
-                                ss << yy << ' ';
-                            }
-                            ss << "\t\t";
-                        }
-                        ss << "\n\t\t";
-                        for (const auto& y :
-                             std::get<std::pair<sidb_clustering_state, sidb_charge_space_composition>>(work)
-                                 .second.proj_states)
-                        {
-                            ss << fmt::format("{{ {} {} {} }}", y.get_count<sidb_charge_state::NEGATIVE>(),
-                                              y.get_count<sidb_charge_state::NEUTRAL>(),
-                                              y.get_count<sidb_charge_state::POSITIVE>())
-                               << '\t';
-                        }
-                        thread_safe_print(ss.str());
-                        assert(sum == clustering_state.pot_bounds.num_sidbs());
+
                         return std::get<std::pair<sidb_clustering_state, sidb_charge_space_composition>>(work).second;
                     }
 
                     encountered_locked_queue |= std::get<bool>(work);
-                    }
+                }
             }
 
-            thread_safe_print("thread " + std::to_string(index) + " found no work");
             return std::nullopt;
         }
     };
@@ -1101,9 +771,6 @@ class clustercomplete_impl
         {
             const sidb_cluster_projector_state pst{top_cluster, static_cast<uint64_t>(ccs)};
 
-            // workers.front()->work_stealing_queue.clustering_state_for_thieves.proj_states.emplace_back(
-            //     std::make_unique<sidb_cluster_projector_state>(pst));
-
             complete_potential_bounds_store store{};
             store.initialise_complete_potential_bounds(charge_layout.num_cells());
 
@@ -1111,9 +778,6 @@ class clustercomplete_impl
             {
                 store.set(sidb_ix, get_projector_state_bound<bound_direction::LOWER>(pst, sidb_ix),
                           get_projector_state_bound<bound_direction::UPPER>(pst, sidb_ix));
-                // workers.front()->work_stealing_queue.clustering_state_for_thieves.pot_bounds.set(
-                //     sidb_ix, get_projector_state_bound<bound_direction::LOWER>(pst, sidb_ix),
-                //     get_projector_state_bound<bound_direction::UPPER>(pst, sidb_ix));
             }
 
             workers.front()->work_stealing_queue.queue.front().emplace_front(
@@ -1149,14 +813,12 @@ class clustercomplete_impl
         // check for pruning
         if (!meets_population_stability_criterion(w.clustering_state))
         {
-            thread_safe_print2("thread " + std::to_string(w.index) + " prune base case");
             return std::optional{std::move(composition)};
         }
 
         // check if all clusters are singletons
         if (w.clustering_state.proj_states.size() == charge_layout.num_cells())
         {
-            thread_safe_print2("thread " + std::to_string(w.index) + " stable base case");
             add_if_configuration_stability_is_met(w.clustering_state);
             return std::optional{std::move(composition)};
         }
@@ -1182,70 +844,12 @@ class clustercomplete_impl
                 w.work_stealing_queue.queue.front().emplace_front(std::move(compositions.at(i)));
             }
 
-            // if (composition.proj_states.size() != 1)
-            // {
             w.work_stealing_queue.thief_informants.emplace_back(
                 typename worker_queue::mole{max_pst_ix, std::move(composition)},
                 w.work_stealing_queue.thief_informants.empty());
-            // }
 
-            // if (w.work_stealing_queue.thief_informants.size() > 10)
-            // {
-            //     assert(false);
-            // }
-
-            std::stringstream ss;
-            ss << "thread " << w.index << " added informant, all informants:\n";
-            for (const auto& m : w.work_stealing_queue.thief_informants)
-            {
-                ss << "\tparent to move out: " << m.first.parent_to_move_out_ix << "\n\tcomposition:\n\t\t";
-                for (const auto& y : m.first.composition.proj_states)
-                {
-                    for (const auto& yy : y.cluster->sidbs)
-                    {
-                        ss << yy << ' ';
-                    }
-                    ss << "\t\t";
-                }
-                ss << "\n\t\t";
-                for (const auto& y : m.first.composition.proj_states)
-                {
-                    ss << fmt::format("{{ {} {} {} }}", y.template get_count<sidb_charge_state::NEGATIVE>(),
-                                      y.template get_count<sidb_charge_state::NEUTRAL>(),
-                                      y.template get_count<sidb_charge_state::POSITIVE>())
-                       << '\t';
-                }
-                ss << '\n';
-            }
-            ss << "\tqueue:\n";
-            uint64_t n = w.work_stealing_queue.queue.size();
-            for (const auto& q : w.work_stealing_queue.queue)
-            {
-                ss << "\tDepth " << n-- << ":\n";
-                for (const auto& x : q)
-                {
-                    ss << "\t\t";
-                    for (const auto& y : x.proj_states)
-                    {
-                        for (const auto& yy : y.cluster->sidbs)
-                        {
-                            ss << yy << ' ';
-                        }
-                        ss << "\t\t";
-                    }
-                    ss << "\n\t\t";
-                    for (const auto& y : x.proj_states)
-                    {
-                        ss << fmt::format("{{ {} {} {} }}", y.template get_count<sidb_charge_state::NEGATIVE>(),
-                                          y.template get_count<sidb_charge_state::NEUTRAL>(),
-                                          y.template get_count<sidb_charge_state::POSITIVE>())
-                           << '\t';
-                    }
-                    ss << '\n';
-                }
-            }
-            thread_safe_print2(ss.str());
-            assert(w.work_stealing_queue.queue.empty() || w.work_stealing_queue.queue.size() == w.work_stealing_queue.thief_informants.size() + 1);
+            assert(w.work_stealing_queue.queue.empty() ||
+                   w.work_stealing_queue.queue.size() == w.work_stealing_queue.thief_informants.size() + 1);
         }
 
         // unfold first composition
@@ -1255,43 +859,7 @@ class clustercomplete_impl
         std::pair<std::optional<sidb_charge_space_composition>, bool> work;
 
         do {
-            std::stringstream ss{};
-            ss << "thread " + std::to_string(w.index) + " looking for own work in a flow\n";
-            ss << "\tclustering state:\n\t\t";
-            for (const auto& y : w.clustering_state.proj_states)
-            {
-                for (const auto& yy : y->cluster->sidbs)
-                {
-                    ss << yy << ' ';
-                }
-                ss << "\t\t";
-            }
-            ss << "\n\t\t";
-            for (const auto& y : w.clustering_state.proj_states)
-            {
-                ss << fmt::format("{{ {} {} {} }}", y->template get_count<sidb_charge_state::NEGATIVE>(),
-                                  y->template get_count<sidb_charge_state::NEUTRAL>(),
-                                  y->template get_count<sidb_charge_state::POSITIVE>())
-                   << '\t';
-            }
-            ss << "\n\tunfolding composition:\n\t\t";
-            for (const auto& y : composition.proj_states)
-            {
-                for (const auto& yy : y.cluster->sidbs)
-                {
-                    ss << yy << ' ';
-                }
-                ss << "\t\t";
-            }
-            ss << "\n\t\t";
-            for (const auto& y : composition.proj_states)
-            {
-                ss << fmt::format("{{ {} {} {} }}", y.get_count<sidb_charge_state::NEGATIVE>(),
-                                  y.get_count<sidb_charge_state::NEUTRAL>(), y.get_count<sidb_charge_state::POSITIVE>())
-                   << '\t';
-            }
-            thread_safe_print2(ss.str());
-            if (work = w.work_stealing_queue.get_from_this_queue(w.index, false); work.first.has_value())
+            if (work = w.work_stealing_queue.template get_from_this_queue<false>(); work.first.has_value())
             {
                 unfold_composition(w, std::move(*work.first));
             }
@@ -1304,77 +872,11 @@ class clustercomplete_impl
         // apply max_pst back
         add_parent(w.clustering_state, max_pst_ix, std::move(max_pst));
 
-        return w.work_stealing_queue.get_last_composition(w.index);
+        return w.work_stealing_queue.get_last_composition();
     }
 
     void unfold_composition(worker& w, sidb_charge_space_composition&& composition) noexcept
     {
-        std::stringstream ss{};
-        ss << "thread " + std::to_string(w.index) + " doing work\n";
-        ss << "\tclustering state:\n\t\t";
-        for (const auto& y : w.clustering_state.proj_states)
-        {
-            for (const auto& yy : y->cluster->sidbs)
-            {
-                ss << yy << ' ';
-            }
-            ss << "\t\t";
-        }
-        ss << "\n\t\t";
-        for (const auto& y : w.clustering_state.proj_states)
-        {
-            ss << fmt::format("{{ {} {} {} }}", y->template get_count<sidb_charge_state::NEGATIVE>(),
-                              y->template get_count<sidb_charge_state::NEUTRAL>(),
-                              y->template get_count<sidb_charge_state::POSITIVE>())
-               << '\t';
-        }
-        ss << "\n\tunfolding composition:\n\t\t";
-        for (const auto& y : composition.proj_states)
-        {
-            for (const auto& yy : y.cluster->sidbs)
-            {
-                ss << yy << ' ';
-            }
-            ss << "\t\t";
-        }
-        ss << "\n\t\t";
-        for (const auto& y : composition.proj_states)
-        {
-            ss << fmt::format("{{ {} {} {} }}", y.get_count<sidb_charge_state::NEGATIVE>(),
-                              y.get_count<sidb_charge_state::NEUTRAL>(), y.get_count<sidb_charge_state::POSITIVE>())
-               << '\t';
-        }
-        {
-            const std::lock_guard lock{w.work_stealing_queue.mutex_to_protect_this_queue};
-            ss << "\n\tqueue:\n";
-            uint64_t n = w.work_stealing_queue.queue.size();
-            for (const auto& q : w.work_stealing_queue.queue)
-            {
-                ss << "\tDepth " << n-- << ":\n";
-                for (const auto& x : q)
-                {
-                    ss << "\t\t";
-                    for (const auto& y : x.proj_states)
-                    {
-                        for (const auto& yy : y.cluster->sidbs)
-                        {
-                            ss << yy << ' ';
-                        }
-                        ss << "\t\t";
-                    }
-                    ss << "\n\t\t";
-                    for (const auto& y : x.proj_states)
-                    {
-                        ss << fmt::format("{{ {} {} {} }}", y.template get_count<sidb_charge_state::NEGATIVE>(),
-                                          y.template get_count<sidb_charge_state::NEUTRAL>(),
-                                          y.template get_count<sidb_charge_state::POSITIVE>())
-                           << '\t';
-                    }
-                    ss << '\n';
-                }
-            }
-        }
-        thread_safe_print2(ss.str());
         // specialise parent to a specific composition of its children
         add_composition(w.clustering_state, composition);
 
