@@ -519,6 +519,49 @@ Template parameter ``Lyt``:
 Returns:
     BANCS clocking scheme.)doc";
 
+static const char *__doc_fiction_band_bending_resilience =
+R"doc(Calculates the band bending resilience. This is the minimum
+electrostatic potential required to induce a charge change in an SiDB
+layout among all possible input combinations which was proposed in
+\"Unifying Figures of Merit: A Versatile Cost Function for Silicon
+Dangling Bond Logic\" by J. Drewniok, M. Walter, S. S. H. Ng, K.
+Walus, and R. Wille in IEEE NANO 2024
+(https://ieeexplore.ieee.org/abstract/document/10628671).
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Template parameter ``TT``:
+    Truth table type.
+
+Parameter ``lyt``:
+    Layout for which the minimum band bending resilience is
+    calculated.
+
+Parameter ``spec``:
+    Expected Boolean function of the layout, provided as a multi-
+    output truth table.
+
+Parameter ``params``:
+    Parameters for assessing physical population stability.
+
+Parameter ``transition_type``:
+    The optional type of charge transition to consider. This can be
+    used if one is only interested in a specific type of charge
+    transition.
+
+Returns:
+    The minimum potential (in V) required for charge change across all
+    input combinations.)doc";
+
+static const char *__doc_fiction_band_bending_resilience_params =
+R"doc(This struct stores the parameters required to simulate the band
+bending resilience of an SiDB layout)doc";
+
+static const char *__doc_fiction_band_bending_resilience_params_assess_population_stability_params = R"doc(Parameters for the assessing physical population stability simulation)doc";
+
+static const char *__doc_fiction_band_bending_resilience_params_bdl_iterator_params = R"doc(Parameters for the input BDL iterator.)doc";
+
 static const char *__doc_fiction_bdl_input_iterator =
 R"doc(Iterator that iterates over all possible input states of a BDL layout.
 There are :math:`2^n` possible input states for an :math:`n`-input BDL
@@ -1124,9 +1167,8 @@ static const char *__doc_fiction_bounding_box_2d_y_size = R"doc(The vertical siz
 
 static const char *__doc_fiction_calculate_defect_clearance =
 R"doc(Calculates the defect clearance of a given SiDB layout for a given
-atomic defect. This means that a defect must be further away than this
-distance for the SiDB layout to be operational. This function requires
-both the defect operational domain and the layout as input.
+defect operational domain. This means that a defect must be further
+away than this distance for the SiDB layout to be operational.
 
 Template parameter ``Lyt``:
     SiDB cell-level layout type.
@@ -1135,7 +1177,7 @@ Parameter ``lyt``:
     The cell-level layout for which the defect clearance is computed.
 
 Parameter ``defect_opdomain``:
-    The defect operational domain associated with the layout.
+    The defect operational domain of the given layout.
 
 Returns:
     The maximum minimum defect influence distance.)doc";
@@ -1210,47 +1252,6 @@ Returns:
     Electrostatic potential energy of all charge distributions with
     state type.)doc";
 
-static const char *__doc_fiction_calculate_min_bbr_for_all_inputs =
-R"doc(Calculates the minimum electrostatic potential (a.k.a. band bending
-resilience) required to induce a charge change in an SiDB layout among
-all input combinations.
-
-Template parameter ``Lyt``:
-    SiDB cell-level layout type.
-
-Template parameter ``TT``:
-    Truth table type.
-
-Parameter ``lyt``:
-    Layout for which the minimum band bending resilience is
-    calculated.
-
-Parameter ``spec``:
-    Expected Boolean function of the layout, provided as a multi-
-    output truth table.
-
-Parameter ``params``:
-    Parameters for assessing physical population stability.
-
-Parameter ``transition_type``:
-    The optional type of charge transition to consider. This can be
-    used if one is only interested in a specific type of charge
-    transition.
-
-Returns:
-    The minimum potential required for charge change across all input
-    combinations.)doc";
-
-static const char *__doc_fiction_calculate_min_bbr_for_all_inputs_params =
-R"doc(This struct stores the parameters required to assess the population
-stability of an SiDB gate.)doc";
-
-static const char *__doc_fiction_calculate_min_bbr_for_all_inputs_params_assess_population_stability_params =
-R"doc(Parameters for the `assessing physical population stability`
-simulation)doc";
-
-static const char *__doc_fiction_calculate_min_bbr_for_all_inputs_params_bdl_iterator_params = R"doc(Parameters for the input BDL iterator.)doc";
-
 static const char *__doc_fiction_can_positive_charges_occur =
 R"doc(This algorithm determines if positively charged SiDBs can occur in a
 given SiDB cell-level layout due to strong electrostatic interaction.
@@ -1295,7 +1296,7 @@ Cartesian grid. Its faces are organized in the following way:
 +-------+-------+-------+-------+ | | | | | | (0,2) | (1,2) | (2,2) |
 (3,2) | | | | | | +-------+-------+-------+-------+ \endverbatim
 
-Template parameter ``CoordinateType``:
+Template parameter ``OffsetCoordinateType``:
     The coordinate implementation to be used.)doc";
 
 static const char *__doc_fiction_cartesian_layout_above =
@@ -1389,8 +1390,8 @@ static const char *__doc_fiction_cartesian_layout_coord =
 R"doc(Creates and returns a coordinate in the layout from the given x-, y-,
 and z-values.
 
-@note This function is equivalent to calling `CoordinateType(x, y,
-z)`.
+@note This function is equivalent to calling `OffsetCoordinateType(x,
+y, z)`.
 
 Template parameter ``X``:
     x-type.
@@ -1411,7 +1412,7 @@ Parameter ``z``:
     z-value.
 
 Returns:
-    A coordinate in the layout of type `CoordinateType`.)doc";
+    A coordinate in the layout of type `OffsetCoordinateType`.)doc";
 
 static const char *__doc_fiction_cartesian_layout_coordinates =
 R"doc(Returns a range of all coordinates accessible in the layout between
@@ -3854,6 +3855,80 @@ Returns:
     A pair of uint16_t values representing the number of horizontal
     and vertical SiDBs affected by the given defect type.)doc";
 
+static const char *__doc_fiction_defect_influence =
+R"doc(This function simulates the influence of defects on an SiDB layout. It
+computes the maximum influence distance, defined as the minimum
+distance between any SiDB cell and the given defect, at which the
+defect can still affect the layout's ground state, potentially
+altering its behavior, such as gate functionality.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Parameter ``lyt``:
+    The SiDB cell-level layout for which the influence position and
+    distance is being determined.
+
+Parameter ``params``:
+    Parameters used to calculate the defect's maximum influence
+    distance.
+
+Parameter ``pst``:
+    Statistics of the maximum defect influence distance.
+
+Returns:
+    Pair with the first element describing the position with maximum
+    distance to the layout where a placed defect can still affect the
+    ground state of the layout. The second entry describes the
+    distance of the defect from the layout.)doc";
+
+static const char *__doc_fiction_defect_influence_of_sidb_gate =
+R"doc(This function calculates the maximum influence position and distance
+of a defect on the ground state of an SiDB layout. It iterates over
+all input combinations and finds the defect position at maximum
+position that affects the gate's ground state.
+
+@note The "maximum defect influence distance" describes the maximum
+distance at which a defect influences the ground state. It does not
+check if the layout gets non-operational, since a change in the ground
+state can still lead to an operational gate.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Parameter ``lyt``:
+    Layout to compute the maximum defect influence position and
+    distance for.
+
+Parameter ``params``:
+    Parameters for the defect influence simulation and BDL pair
+    detection.
+
+Returns:
+    A pair containing the maximum influence defect position and its
+    distance from the layout/gate.)doc";
+
+static const char *__doc_fiction_defect_influence_of_sidb_gate_params = R"doc(Parameters for the `defect_influence_of_sidb_gate` algorithm.)doc";
+
+static const char *__doc_fiction_defect_influence_of_sidb_gate_params_bdl_iterator_params = R"doc(Parameters for the input BDL iterator.)doc";
+
+static const char *__doc_fiction_defect_influence_of_sidb_gate_params_defect_influence_params = R"doc(Parameters for the defect influence simulation.)doc";
+
+static const char *__doc_fiction_defect_influence_params =
+R"doc(This struct stores the parameters for the `defect_influence`
+algorithm.)doc";
+
+static const char *__doc_fiction_defect_influence_params_additional_scanning_area =
+R"doc(The pair describes the width and height of the area around the gate,
+which is also used to place defects.
+
+@note If SiQAD coordinates are used, the second entry describes the
+number of dimer rows.)doc";
+
+static const char *__doc_fiction_defect_influence_params_defect = R"doc(The defect to calculate the maximum defect influence distance for.)doc";
+
+static const char *__doc_fiction_defect_influence_params_simulation_parameters = R"doc(Physical simulation parameters.)doc";
+
 static const char *__doc_fiction_defect_operational_domain =
 R"doc(A defect operational domain defines the positions where a specific
 atomic defect may exist along with corresponding information
@@ -3903,7 +3978,9 @@ Parameter ``stats``:
 Returns:
     The defect operational domain of the layout.)doc";
 
-static const char *__doc_fiction_defect_operational_domain_operational_values = R"doc()doc";
+static const char *__doc_fiction_defect_operational_domain_operational_values =
+R"doc(This stores for each defect position the operational status of the
+layout.)doc";
 
 static const char *__doc_fiction_defect_operational_domain_params = R"doc(Parameters to determine the defect operational domain.)doc";
 
@@ -3925,12 +4002,12 @@ locations on the left side (bounding_box + additional scanning area).
 The y-coordinate for these positions is chosen randomly. The number of
 samples is determined by the `samples` parameter.
 
-Then the algorithm moves each defect position to the right, searching
-for the last operational defect position. This position is selected as
-the starting point for the contour trace. The contour tracing process
-checks whether the contour includes the SiDB layout. If it does not,
-the next random sample point is selected as the starting point and the
-process is repeated.
+Then, the algorithm moves each defect position to the right, searching
+for the operational defect position before finding the non-operational
+one. This position is selected as the starting point for the contour
+trace. The contour tracing process checks whether the contour includes
+the SiDB layout. If it does not, the next random sample point is
+selected as the starting point and the process is repeated.
 
 Template parameter ``Lyt``:
     SiDB cell-level layout type.
@@ -3967,7 +4044,7 @@ as the inputs of the truth table.
 
 This algorithm uses random sampling to find a part of the defect
 operational domain that might not be complete. It performs a total of
-samples uniformly-distributed random samples within the specified
+`samples uniformly-distributed random samples within the specified
 area.
 
 Template parameter ``Lyt``:
@@ -4662,19 +4739,19 @@ static const char *__doc_fiction_detail_connect_and_place_2 = R"doc()doc";
 static const char *__doc_fiction_detail_contains_key = R"doc(Forward-declaration for `operational_domain`.)doc";
 
 static const char *__doc_fiction_detail_contains_key_2 =
-R"doc(This function checks for the containment of a parameter point,
-specified by `key`, in the provided map `map`. If the parameter point
-is found in the map, the associated `MapType::value_type` is returned.
-Otherwise, `std::nullopt` is returned.
+R"doc(This function checks for the containment of a given key in a given
+map. If the key is found in the map, the associated
+`MapType::value_type` is returned. Otherwise, `std::nullopt` is
+returned.
 
 Template parameter ``MapType``:
-    The type of the map containing parameter points as keys.
+    The type of the map.
 
 Parameter ``map``:
     The map in which to search for `key`.
 
 Parameter ``key``:
-    The parameter point to search for in `map`.
+    The key to search for in `map`.
 
 Returns:
     The associated `MapType::value_type` of `key` in `map`, or
@@ -4848,7 +4925,9 @@ static const char *__doc_fiction_detail_defect_operational_domain_impl_defect_op
 
 static const char *__doc_fiction_detail_defect_operational_domain_impl_determine_nw_se_cells =
 R"doc(This function determines the northwest and southeast cells based on
-the layout layout and the additional scan area specified.)doc";
+the layout and the additional scan area specified.)doc";
+
+static const char *__doc_fiction_detail_defect_operational_domain_impl_dist = R"doc(Uniform distribution for the y-coordinate of the defect.)doc";
 
 static const char *__doc_fiction_detail_defect_operational_domain_impl_find_last_operational_defect_position_moving_right =
 R"doc(This function identifies the most recent operational defect position
@@ -4867,11 +4946,15 @@ static const char *__doc_fiction_detail_defect_operational_domain_impl_find_oper
 R"doc(This function aims to identify an operational defect position within
 the layout. It does so by selecting a defect position with the
 leftmost x-coordinate and a randomly selected y-coordinate limited the
-layout's bounding box.)doc";
+layout's bounding box.
+
+Returns:
+    The operational defect position. If no operational defect position
+    is found, `std::nullopt` is returned.)doc";
 
 static const char *__doc_fiction_detail_defect_operational_domain_impl_grid_search =
-R"doc(This function checks for each position in the area (spanned by
-`nw_cell` and `se_cell`) if the existence of a defect leads to a
+R"doc(This function simulates for each position in the area (spanned by
+`nw_cell` and `se_cell`) if the existence of a defect leads to an
 operational or non-operational layout.
 
 Parameter ``step_size``:
@@ -4919,7 +5002,9 @@ static const char *__doc_fiction_detail_defect_operational_domain_impl_num_evalu
 
 static const char *__doc_fiction_detail_defect_operational_domain_impl_num_simulator_invocations = R"doc(Number of simulator invocations.)doc";
 
-static const char *__doc_fiction_detail_defect_operational_domain_impl_nw_bb_layout = R"doc(The north-west bounding box of the layout.)doc";
+static const char *__doc_fiction_detail_defect_operational_domain_impl_num_threads = R"doc(Number of available hardware threads.)doc";
+
+static const char *__doc_fiction_detail_defect_operational_domain_impl_nw_bb_layout = R"doc(The north-west cell of the bounding box of the layout.)doc";
 
 static const char *__doc_fiction_detail_defect_operational_domain_impl_nw_cell = R"doc(North-west cell.)doc";
 
@@ -4964,18 +5049,18 @@ Returns:
 static const char *__doc_fiction_detail_defect_operational_domain_impl_random_sampling =
 R"doc(This function checks for a certain number of random positions (given
 by `samples`) in the area (spanned by `nw_cell` and `se_cell`) if the
-existence of a defect leads to a operational or non-operational
+existence of a defect leads to an operational or non-operational
 layout.
 
 Parameter ``samples``:
     The number of positions to sample. The actual number of iterations
-    will be the smaller of the total number of positions or the
-    `samples` value.
+    may be less than the total number of positions or the `samples`
+    value.
 
 Returns:
     The defect operational domain.)doc";
 
-static const char *__doc_fiction_detail_defect_operational_domain_impl_se_bb_layout = R"doc(The south-east bounding box of the layout.)doc";
+static const char *__doc_fiction_detail_defect_operational_domain_impl_se_bb_layout = R"doc(The south-east cell of the bounding box of the layout.)doc";
 
 static const char *__doc_fiction_detail_defect_operational_domain_impl_se_cell = R"doc(South-east cell.)doc";
 
@@ -13063,8 +13148,8 @@ static const char *__doc_fiction_hexagonal_layout_coord =
 R"doc(Creates and returns a coordinate in the layout from the given x-, y-,
 and z-values.
 
-@note This function is equivalent to calling `CoordinateType(x, y,
-z)`.
+@note This function is equivalent to calling `OffsetCoordinateType(x,
+y, z)`.
 
 Template parameter ``X``:
     x-type.
@@ -13085,7 +13170,7 @@ Parameter ``z``:
     z-value.
 
 Returns:
-    A coordinate in the layout of type `CoordinateType`.)doc";
+    A coordinate in the layout of type `OffsetCoordinateType`.)doc";
 
 static const char *__doc_fiction_hexagonal_layout_coordinates =
 R"doc(Returns a range of all coordinates accessible in the layout between
@@ -14420,83 +14505,6 @@ Template parameter ``Dist``:
 
 static const char *__doc_fiction_manhattan_distance_functor_manhattan_distance_functor = R"doc()doc";
 
-static const char *__doc_fiction_maximum_defect_influence_position_and_distance =
-R"doc(This function simulates the influence of defects on an SiDB layout. It
-computes the maximum influence distance, defined as the minimum
-distance between any SiDB cell and the given defect, at which the
-defect can still affect the layout's ground state, potentially
-altering its behavior, such as gate functionality.
-
-Template parameter ``Lyt``:
-    SiDB cell-level layout type.
-
-Parameter ``lyt``:
-    The SiDB cell-level layout for which the influence position and
-    distance is being determined.
-
-Parameter ``params``:
-    Parameters used to calculate the defect's maximum influence
-    distance.
-
-Parameter ``pst``:
-    Statistics of the maximum defect influence distance.
-
-Returns:
-    Pair with the first element describing the position with maximum
-    distance to the layout where a placed defect can still affect the
-    ground state of the layout. The second entry describes the
-    distance of the defect from the layout.)doc";
-
-static const char *__doc_fiction_maximum_defect_influence_position_and_distance_of_sidb_gate =
-R"doc(This function calculates the maximum influence position and distance
-of a defect on the ground state of an SiDB layout. It iterates over
-all input combinations and finds the defect position at maximum
-position that affects the gate's ground state.
-
-@note The `maximum defect influence distance` describes the maximum
-distance at which a defect influences the ground state. It does not
-check when the layout gets non-operational, since a change in the
-ground state can still lead to an operational gate.
-
-Template parameter ``Lyt``:
-    SiDB cell-level layout type.
-
-Parameter ``lyt``:
-    Layout to compute the maximum defect influence position and
-    distance for.
-
-Parameter ``params``:
-    Parameters for the defect influence simulation and BDL pair
-    detection.
-
-Returns:
-    A pair containing the maximum influence defect position and its
-    distance from the layout/gate.)doc";
-
-static const char *__doc_fiction_maximum_defect_influence_position_and_distance_of_sidb_gate_params =
-R"doc(Parameters for the
-`defect_influence_of_sidb_gate`
-algorithm.)doc";
-
-static const char *__doc_fiction_maximum_defect_influence_position_and_distance_of_sidb_gate_params_bdl_iterator_params = R"doc(Parameters for the input BDL iterator.)doc";
-
-static const char *__doc_fiction_maximum_defect_influence_position_and_distance_of_sidb_gate_params_defect_influence_params = R"doc(Parameters for the defect influence simulation.)doc";
-
-static const char *__doc_fiction_maximum_defect_influence_position_and_distance_params =
-R"doc(This struct stores the parameters for the
-`defect_influence` algorithm.)doc";
-
-static const char *__doc_fiction_maximum_defect_influence_position_and_distance_params_additional_scanning_area =
-R"doc(The pair describes the width and height of the area around the gate,
-which is also used to place defects.
-
-@note If SiQAD coordinates are used, the second entry describes the
-number of dimer rows.)doc";
-
-static const char *__doc_fiction_maximum_defect_influence_position_and_distance_params_defect = R"doc(The defect to calculate the maximum defect influence distance for.)doc";
-
-static const char *__doc_fiction_maximum_defect_influence_position_and_distance_params_simulation_parameters = R"doc(Physical simulation parameters.)doc";
-
 static const char *__doc_fiction_maximum_defect_influence_position_and_distance_stats = R"doc(Statistics for the maximum defect influence simulation.)doc";
 
 static const char *__doc_fiction_maximum_defect_influence_position_and_distance_stats_duration = R"doc(The total runtime of the maximum defect influence simulation.)doc";
@@ -15654,7 +15662,7 @@ potential is connected to the distance.)doc";
 
 static const char *__doc_fiction_population_stability_information_system_energy = R"doc(Total electrostatic energy (unit: eV) of given charge distribution.)doc";
 
-static const char *__doc_fiction_population_stability_information_transition_from_to_with_cell_and_required_pot =
+static const char *__doc_fiction_population_stability_information_transition_potentials =
 R"doc(This map collects all charge transition types, the corresponding
 critical cells and the required electrostatic potential (unit: V)
 required to conduct the transition.)doc";
