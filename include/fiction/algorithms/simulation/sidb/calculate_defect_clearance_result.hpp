@@ -2,8 +2,8 @@
 // Created by Jan Drewniok on 07.02.24.
 //
 
-#ifndef FICTION_CALCULATE_DEFECT_CLEARANCE_HPP
-#define FICTION_CALCULATE_DEFECT_CLEARANCE_HPP
+#ifndef FICTION_CALCULATE_DEFECT_CLEARANCE_RESULT_HPP
+#define FICTION_CALCULATE_DEFECT_CLEARANCE_RESULT_HPP
 
 #include "fiction/algorithms/simulation/sidb/defect_operational_domain.hpp"
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
@@ -34,13 +34,12 @@ struct defect_clearance_result
     double defect_clearance_distance{};
 };
 /**
- * Calculates the defect clearance of a given SiDB layout for a given atomic defect. This means that a defect
- * must be further away than this distance for the SiDB layout to be operational. This function requires both the defect
- * operational domain and the layout as input.
+ * Calculates the defect clearance of a given SiDB layout for a given defect operational domain. This means that a
+ * defect must be further away than this distance for the SiDB layout to be operational.
  *
  * @tparam Lyt SiDB cell-level layout type.
  * @param lyt The cell-level layout for which the defect clearance is computed.
- * @param defect_opdomain The defect operational domain associated with the layout.
+ * @param defect_opdomain The defect operational domain of the given layout.
  * @return The maximum minimum defect influence distance.
  */
 template <typename Lyt>
@@ -82,4 +81,4 @@ calculate_defect_clearance(const Lyt& lyt, const defect_operational_domain<Lyt>&
 
 }  // namespace fiction
 
-#endif  // FICTION_CALCULATE_DEFECT_CLEARANCE_HPP
+#endif  // FICTION_CALCULATE_DEFECT_CLEARANCE_RESULT_HPP

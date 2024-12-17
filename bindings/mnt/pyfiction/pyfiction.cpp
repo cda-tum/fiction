@@ -37,7 +37,7 @@
 #include "pyfiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
 #include "pyfiction/algorithms/simulation/sidb/is_ground_state.hpp"
 #include "pyfiction/algorithms/simulation/sidb/is_operational.hpp"
-// #include "pyfiction/algorithms/simulation/sidb/maximum_defect_influence_position_and_distance.hpp"
+// #include "pyfiction/algorithms/simulation/sidb/defect_influence.hpp"
 #include "pyfiction/algorithms/simulation/sidb/assess_physical_population_stability.hpp"
 #include "pyfiction/algorithms/simulation/sidb/check_simulation_results_for_equivalence.hpp"
 #include "pyfiction/algorithms/simulation/sidb/convert_potential_to_distance.hpp"

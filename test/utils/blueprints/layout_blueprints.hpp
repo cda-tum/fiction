@@ -740,10 +740,11 @@ CellLyt single_layer_inml_crosswire() noexcept
  *
  */
 template <typename Lyt>
-Lyt bdl_wire() noexcept
+[[nodiscard]] Lyt bdl_wire() noexcept
 {
     static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
 
     Lyt lyt{{24, 0}, "BDL wire"};
 
@@ -983,11 +984,11 @@ Lyt and_gate_111_mirrored_on_the_x_axis() noexcept
  * (https://github.com/cda-tum/mnt-bestagon-library)
  */
 template <typename Lyt>
-Lyt bestagon_crossing() noexcept
+[[nodiscard]] Lyt bestagon_crossing() noexcept
 {
     static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
 
     Lyt lyt{};
 
@@ -1041,7 +1042,7 @@ Lyt crossing_bestagon_shape_input_down_output_up() noexcept
 {
     static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
 
     Lyt lyt{};
 
@@ -1096,11 +1097,11 @@ Lyt crossing_bestagon_shape_input_down_output_up() noexcept
  * (https://github.com/cda-tum/mnt-bestagon-library)
  */
 template <typename Lyt>
-Lyt bestagon_and() noexcept
+[[nodiscard]] Lyt bestagon_and() noexcept
 {
     static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
 
     Lyt lyt{};
 
@@ -1151,7 +1152,7 @@ Lyt bestagon_fo2() noexcept
 {
     static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
 
     Lyt lyt{};
 
@@ -1195,11 +1196,11 @@ Lyt bestagon_fo2() noexcept
  * (https://github.com/cda-tum/mnt-bestagon-library)
  */
 template <typename Lyt>
-Lyt two_input_two_output_bestagon_skeleton() noexcept
+[[nodiscard]] Lyt two_input_two_output_bestagon_skeleton() noexcept
 {
     static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
 
     Lyt lyt{};
 
@@ -1247,11 +1248,11 @@ Lyt two_input_two_output_bestagon_skeleton() noexcept
  * (https://github.com/cda-tum/mnt-bestagon-library)
  */
 template <typename Lyt>
-Lyt two_input_two_output_bestagon_skeleton_input_down_output_up() noexcept
+[[nodiscard]] Lyt two_input_two_output_bestagon_skeleton_input_down_output_up() noexcept
 {
     static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
 
     Lyt lyt{};
 
@@ -1301,11 +1302,11 @@ Lyt two_input_two_output_bestagon_skeleton_input_down_output_up() noexcept
  * (https://github.com/cda-tum/mnt-bestagon-library)
  */
 template <typename Lyt>
-Lyt two_input_one_output_bestagon_skeleton() noexcept
+[[nodiscard]] Lyt two_input_one_output_bestagon_skeleton() noexcept
 {
     static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
 
     Lyt lyt{};
 
@@ -1341,11 +1342,11 @@ Lyt two_input_one_output_bestagon_skeleton() noexcept
 };
 
 template <typename Lyt>
-Lyt bestagon_xor() noexcept
+[[nodiscard]] Lyt bestagon_xor() noexcept
 {
     static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
 
     Lyt lyt{};
 
@@ -1391,11 +1392,11 @@ Lyt bestagon_xor() noexcept
  * certain input pattern.
  */
 template <typename Lyt>
-Lyt and_gate_with_kink_states() noexcept
+[[nodiscard]] Lyt and_gate_with_kink_states() noexcept
 {
     static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
 
     Lyt lyt{};
 
@@ -1444,7 +1445,7 @@ Lyt two_input_left_one_output_right_top_skeleton() noexcept
 {
     static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
 
     Lyt lyt{};
 
@@ -1550,7 +1551,7 @@ Lyt bestagon_double_wire() noexcept
  * (https://dl.acm.org/doi/10.1145/3489517.3530525)
  */
 template <typename Lyt>
-Lyt bestagon_ha() noexcept
+[[nodiscard]] Lyt bestagon_ha() noexcept
 {
     static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -1649,7 +1650,5 @@ Lyt two_input_one_output_skeleton_west_west() noexcept
 };
 
 }  // namespace blueprints
-
-// namespace blueprints
 
 #endif  // FICTION_LAYOUT_BLUEPRINTS_HPP

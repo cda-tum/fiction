@@ -5,8 +5,8 @@
 #ifndef FICTION_DEFECT_OPERATIONAL_DOMAIN_HPP
 #define FICTION_DEFECT_OPERATIONAL_DOMAIN_HPP
 
+#include "fiction/algorithms/simulation/sidb/defect_influence.hpp"
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
-#include "fiction/algorithms/simulation/sidb/maximum_defect_influence_position_and_distance.hpp"
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/layouts/coordinates.hpp"
 #include "fiction/technology/sidb_defect_surface.hpp"
@@ -22,7 +22,6 @@
 #include <atomic>
 #include <cassert>
 #include <cstdlib>
-#include <future>
 #include <optional>
 #include <random>
 #include <thread>
@@ -39,7 +38,7 @@ struct defect_operational_domain_params
     /**
      * Parameters to simulate the influence of the atomic defect.
      */
-    maximum_defect_influence_position_and_distance_params defect_influence_params{};
+    defect_influence_params defect_influence_params{};
     /**
      * Parameters for the `is_operational` algorithm.
      */
@@ -56,6 +55,9 @@ struct defect_operational_domain_params
 template <typename Lyt>
 struct defect_operational_domain
 {
+    /**
+     * This stores for each defect position the operational status of the layout.
+     */
     locked_parallel_flat_hash_map<typename Lyt::cell, operational_status> operational_values{};
 };
 /**
@@ -103,29 +105,29 @@ class defect_operational_domain_impl
     }
 
     /**
-     * This function checks for each position in the area (spanned by `nw_cell` and `se_cell`) if the existence of a
-     * defect leads to a operational or non-operational layout.
+     * This function simulates for each position in the area (spanned by `nw_cell` and `se_cell`) if the existence of a
+     * defect leads to an operational or non-operational layout.
      *
      * @param step_size The step size used to sample defect positions in the grid. Only positions with x and y
      * coordinates divisible by `step_size` will be checked for being operational.
      * @return The defect operational domain.
      */
-    [[nodiscard]] defect_operational_domain<Lyt> grid_search(const std::size_t& step_size) noexcept
+    [[nodiscard]] defect_operational_domain<Lyt> grid_search(const std::size_t step_size) noexcept
     {
         mockturtle::stopwatch stop{stats.time_total};
         const auto            all_possible_defect_positions = all_coordinates_in_spanned_area(nw_cell, se_cell);
         const std::size_t     num_positions                 = all_possible_defect_positions.size();
 
-        const auto num_threads = std::thread::hardware_concurrency();  // Get the number of hardware threads
+        const auto number_of_threads = std::min(num_threads, num_positions);
 
         // calculate the size of each slice
-        const auto slice_size = (num_positions + num_threads - 1) / num_threads;
+        const auto slice_size = (num_positions + number_of_threads - 1) / number_of_threads;
 
         std::vector<std::thread> threads{};
-        threads.reserve(num_threads);
+        threads.reserve(number_of_threads);
 
         // launch threads, each with its own slice of random step points
-        for (auto t = 0ul; t < num_threads; ++t)
+        for (auto t = 0ul; t < number_of_threads; ++t)
         {
             const auto start = t * slice_size;
             const auto end   = std::min(start + slice_size, num_positions);
@@ -165,15 +167,15 @@ class defect_operational_domain_impl
 
     /**
      * This function checks for a certain number of random positions (given by `samples`) in the area (spanned by
-     * `nw_cell` and `se_cell`) if the existence of a defect leads to a operational or non-operational layout.
+     * `nw_cell` and `se_cell`) if the existence of a defect leads to an operational or non-operational layout.
      *
-     * @param samples The number of positions to sample. The actual number of iterations will be the smaller of
-     *                the total number of positions or the `samples` value.
+     * @param samples The number of positions to sample. The actual number of iterations may be less than the total
+     * number of positions or the `samples` value.
      * @return The defect operational domain.
      */
     [[nodiscard]] defect_operational_domain<Lyt> random_sampling(const std::size_t samples) noexcept
     {
-        mockturtle::stopwatch stop{stats.time_total};  // Start the stopwatch for performance measurement
+        mockturtle::stopwatch stop{stats.time_total};
 
         // Get all possible defect positions within the grid spanned by nw_cell and se_cell
         auto all_possible_defect_positions = all_coordinates_in_spanned_area(nw_cell, se_cell);
@@ -188,35 +190,41 @@ class defect_operational_domain_impl
         // Determine how many positions to sample (use the smaller of samples or the total number of positions)
         const auto min_iterations = std::min(all_possible_defect_positions.size(), samples);
 
-        // Get the number of hardware threads available
-        const auto num_threads = std::thread::hardware_concurrency();
+        const auto number_of_threads = std::min(num_threads, min_iterations);
 
-        // Calculate the chunk size for each thread to process
-        std::size_t chunk_size = (min_iterations + num_threads - 1) / num_threads;
+        // calculate the size of each slice
+        const auto slice_size = (min_iterations + number_of_threads - 1) / number_of_threads;
 
-        // Define the lambda function that processes a chunk of sampled defect positions
-        auto process_chunk = [&](std::size_t start, std::size_t end)
+        std::vector<std::thread> threads{};
+        threads.reserve(number_of_threads);
+
+        // launch threads, each with its own slice of random step points
+        for (auto t = 0ul; t < number_of_threads; ++t)
         {
-            for (std::size_t i = start; i < end; ++i)
+            const auto start = t * slice_size;
+            const auto end   = std::min(start + slice_size, min_iterations);
+
+            if (start >= end)
             {
-                is_defect_position_operational(all_possible_defect_positions[i]);
+                break;  // no more work to distribute
             }
-        };
 
-        // Create a vector to hold futures for the threads
-        std::vector<std::future<void>> futures{};
-
-        // Launch threads to process chunks of defect positions in parallel
-        for (std::size_t start = 0; start < min_iterations; start += chunk_size)
-        {
-            std::size_t end = std::min(start + chunk_size, min_iterations);
-            futures.emplace_back(std::async(std::launch::async, process_chunk, start, end));
+            threads.emplace_back(
+                [this, start, end, &all_possible_defect_positions]
+                {
+                    for (auto i = start; i < end; ++i)
+                    {
+                        is_defect_position_operational(all_possible_defect_positions[i]);
+                    }
+                });
         }
 
-        // Wait for all threads to complete their execution
-        for (auto& future : futures)
+        for (auto& thread : threads)
         {
-            future.get();  // Block until the thread completes
+            if (thread.joinable())
+            {
+                thread.join();
+            }
         }
 
         log_stats();  // Log the statistics after processing
@@ -295,7 +303,7 @@ class defect_operational_domain_impl
             // add operatioal starting point to the set of starting points
             starting_points.insert(*operational_starting_point);
 
-            // the layout hs to be defect-free.
+            // the layout has to be defect-free.
             assert(layout.num_defects() == 0 && "An atomic defect is added");
 
             // find an operational point on the contour starting from the randomly determined starting point
@@ -349,17 +357,81 @@ class defect_operational_domain_impl
 
   private:
     /**
-     * This function determines the northwest and southeast cells based on the layout layout and the additional scan
+     * The SiDB cell-level layout to investigate.
+     */
+    sidb_defect_surface<Lyt> layout{};
+    /**
+     * The specification of the layout.
+     */
+    const std::vector<TT>& truth_table;
+    /**
+     * The parameters for the operational domain computation.
+     */
+    const defect_operational_domain_params& params;
+    /**
+     * North-west cell.
+     */
+    typename Lyt::cell nw_cell{};
+    /**
+     * The north-west cell of the bounding box of the layout.
+     */
+    typename Lyt::cell nw_bb_layout{};
+    /**
+     * South-east cell.
+     */
+    typename Lyt::cell se_cell{};
+    /**
+     * The south-east cell of the bounding box of the layout.
+     */
+    typename Lyt::cell se_bb_layout{};
+    /**
+     * The current defect position.
+     */
+    typename Lyt::cell current_defect_position{};
+    /**
+     * The previous defect position.
+     */
+    typename Lyt::cell previous_defect_position{};
+    /**
+     * The operational domain of the layout.
+     */
+    defect_operational_domain<Lyt> defect_op_domain{};
+    /**
+     * The statistics of the operational domain computation.
+     */
+    defect_operational_domain_stats& stats;
+    /**
+     * Random number generator.
+     */
+    inline static std::mt19937_64 generator{std::random_device{}()};
+    /**
+     * Uniform distribution for the y-coordinate of the defect.
+     */
+    std::uniform_int_distribution<decltype(nw_cell.y)> dist{nw_cell.y, se_cell.y};
+    /**
+     * Number of simulator invocations.
+     */
+    std::atomic<std::size_t> num_simulator_invocations{0};
+    /**
+     * Number of evaluated defect positions.
+     */
+    std::atomic<std::size_t> num_evaluated_defect_positions{0};
+    /**
+     * Number of available hardware threads.
+     */
+    const std::size_t num_threads{std::thread::hardware_concurrency()};
+    /**
+     * This function determines the northwest and southeast cells based on the layout and the additional scan
      * area specified.
      */
     void determine_nw_se_cells() noexcept
     {
         // bounding box around the given layout to have north-west and south-east cells.
-        const auto                              siqad_layout = convert_layout_to_siqad_coordinates(layout);
-        bounding_box_2d<decltype(siqad_layout)> bb{siqad_layout};
+        const auto      siqad_layout = convert_layout_to_siqad_coordinates(layout);
+        bounding_box_2d bb{layout};
 
-        auto nw = fiction::siqad::to_fiction_coord<cube::coord_t>(bb.get_min());  // north-west cell
-        auto se = fiction::siqad::to_fiction_coord<cube::coord_t>(bb.get_max());  // south-east cell
+        auto nw = bb.get_min();  // north-west cell
+        auto se = bb.get_max();  // south-east cell
 
         nw_bb_layout = nw;
         se_bb_layout = se;
@@ -377,17 +449,16 @@ class defect_operational_domain_impl
     /**
      * This function aims to identify an operational defect position within the layout. It does so by selecting a defect
      * position with the leftmost x-coordinate and a randomly selected y-coordinate limited the layout's bounding box.
+     *
+     * @return The operational defect position. If no operational defect position is found, `std::nullopt` is returned.
      */
     [[nodiscard]] std::optional<typename Lyt::cell> find_operational_defect_position_at_left_side() noexcept
     {
-        auto               starting_point = nw_cell;
-        std::random_device rd;
-        std::mt19937       gen(rd());
-        // Create a distribution for generating random numbers within the specified range
-        std::uniform_int_distribution<decltype(nw_cell.y)> dist(nw_cell.y, se_cell.y);
-        starting_point.y = dist(gen);
+        auto starting_point = nw_cell;
+
+        starting_point.y = dist(generator);
         layout.assign_sidb_defect(starting_point, params.defect_influence_params.defect);
-        // determine the operational status
+
         const auto operational_value = is_defect_position_operational(starting_point);
         layout.assign_sidb_defect(starting_point, sidb_defect{sidb_defect_type::NONE});
 
@@ -399,7 +470,6 @@ class defect_operational_domain_impl
 
         return std::nullopt;
     }
-
     /**
      * This function evaluates the operational status of the SiDB layout when a defect is placed at position `c`.
      *
@@ -449,7 +519,6 @@ class defect_operational_domain_impl
         // if we made it here, the layout is operational
         return operational();
     }
-
     /**
      * This function verifies whether the layout has already been analyzed for the specified defect position `c`.
      *
@@ -465,7 +534,6 @@ class defect_operational_domain_impl
 
         return std::nullopt;
     }
-
     /**
      * This function identifies the most recent operational defect position while traversing from left to right towards
      * the SiDB layout.
@@ -620,59 +688,7 @@ class defect_operational_domain_impl
         }
 
         return neighbors;
-    };
-    /**
-     * The SiDB cell-level layout to investigate.
-     */
-    sidb_defect_surface<Lyt> layout{};
-    /**
-     * The specification of the layout.
-     */
-    const std::vector<TT>& truth_table;
-    /**
-     * The parameters for the operational domain computation.
-     */
-    const defect_operational_domain_params& params;
-    /**
-     * North-west cell.
-     */
-    typename Lyt::cell nw_cell{};
-    /**
-     * The north-west bounding box of the layout.
-     */
-    typename Lyt::cell nw_bb_layout{};
-    /**
-     * South-east cell.
-     */
-    typename Lyt::cell se_cell{};
-    /**
-     * The south-east bounding box of the layout.
-     */
-    typename Lyt::cell se_bb_layout{};
-    /**
-     * The current defect position.
-     */
-    typename Lyt::cell current_defect_position{};
-    /**
-     * The previous defect position.
-     */
-    typename Lyt::cell previous_defect_position{};
-    /**
-     * The operational domain of the layout.
-     */
-    defect_operational_domain<Lyt> defect_op_domain{};
-    /**
-     * The statistics of the operational domain computation.
-     */
-    defect_operational_domain_stats& stats;
-    /**
-     * Number of simulator invocations.
-     */
-    std::atomic<std::size_t> num_simulator_invocations{0};
-    /**
-     * Number of evaluated defect positions.
-     */
-    std::atomic<std::size_t> num_evaluated_defect_positions{0};
+    }
 };
 
 }  // namespace detail
@@ -703,7 +719,7 @@ defect_operational_domain_grid_search(const Lyt& lyt, const std::vector<TT>& spe
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
-    static_assert(has_cube_coord_v<Lyt>);
+    static_assert(has_cube_coord_v<Lyt>, "Lyt is not based on cube coordinates");
 
     defect_operational_domain_stats                 st{};
     detail::defect_operational_domain_impl<Lyt, TT> p{lyt, spec, params, st};
@@ -724,7 +740,7 @@ defect_operational_domain_grid_search(const Lyt& lyt, const std::vector<TT>& spe
  * inputs of the truth table.
  *
  * This algorithm uses random sampling to find a part of the defect operational domain that might not be
- * complete. It performs a total of samples uniformly-distributed random samples within the specified area.
+ * complete. It performs a total of `samples uniformly-distributed random samples within the specified area.
  *
  * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT Truth table type.
@@ -769,10 +785,10 @@ defect_operational_domain_random_sampling(const Lyt& lyt, const std::vector<TT>&
  * It starts by searching for defect locations on the left side (bounding_box + additional scanning area). The
  * y-coordinate for these positions is chosen randomly. The number of samples is determined by the `samples` parameter.
  *
- * Then the algorithm moves each defect position to the right, searching for the last operational defect position. This
- * position is selected as the starting point for the contour trace. The contour tracing process checks whether the
- * contour includes the SiDB layout. If it does not, the next random sample point is selected as the starting point
- * and the process is repeated.
+ * Then, the algorithm moves each defect position to the right, searching for the operational defect position before
+ * finding the non-operational one. This position is selected as the starting point for the contour trace. The contour
+ * tracing process checks whether the contour includes the SiDB layout. If it does not, the next random sample point is
+ * selected as the starting point and the process is repeated.
  *
  * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT Truth table type.

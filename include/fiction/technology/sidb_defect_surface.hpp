@@ -146,18 +146,18 @@ class sidb_defect_surface<Lyt, false> : public Lyt
     /**
      * Moves an SiDB defect from one cell to another.
      *
-     * @param c Current Coordinate of the defect.
-     * @param new_c Position to move the defect to.
+     * @param source Source coordinate of the defect.
+     * @param target Target coordinate to move the defect to.
      */
-    void move_sidb_defect(const typename Lyt::coordinate& c, const typename Lyt::coordinate& new_c) noexcept
+    void move_sidb_defect(const typename Lyt::coordinate& source, const typename Lyt::coordinate& target) noexcept
     {
-        const auto defect = get_sidb_defect(c);
-        if (defect.type != sidb_defect_type::NONE)
+        if (const auto defect = get_sidb_defect(source); defect.type != sidb_defect_type::NONE)
         {
-            strg->defective_coordinates.insert({new_c, defect});
+            strg->defective_coordinates.insert({target, defect});
+
+            // delete defect at the old coordinate
+            strg->defective_coordinates.erase(source);
         }
-        // delete defect at the old coordinate
-        strg->defective_coordinates.erase(c);
     }
     /**
      * Returns the given coordinate's assigned defect type. If no defect type has been assigned, NONE is returned.

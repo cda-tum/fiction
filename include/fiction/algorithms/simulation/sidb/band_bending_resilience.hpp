@@ -2,8 +2,8 @@
 // Created by Jan Drewniok on 28.01.24.
 //
 
-#ifndef FICTION_CALCULATE_MIN_BBR_FOR_ALL_INPUTS_HPP
-#define FICTION_CALCULATE_MIN_BBR_FOR_ALL_INPUTS_HPP
+#ifndef FICTION_BAND_BENDING_RESILIENCE_HPP
+#define FICTION_BAND_BENDING_RESILIENCE_HPP
 
 #include "fiction/algorithms/iter/bdl_input_iterator.hpp"
 #include "fiction/algorithms/simulation/sidb/assess_physical_population_stability.hpp"
@@ -16,12 +16,12 @@
 namespace fiction
 {
 /**
- * This struct stores the parameters required to assess the population stability of an SiDB gate.
+ * This struct stores the parameters required to simulate the band bending resilience of an SiDB layout
  */
-struct calculate_min_bbr_for_all_inputs_params
+struct band_bending_resilience_params
 {
     /**
-     * Parameters for the `assessing physical population stability` simulation
+     * Parameters for the assessing physical population stability simulation
      */
     assess_physical_population_stability_params assess_population_stability_params{};
     /**
@@ -30,8 +30,10 @@ struct calculate_min_bbr_for_all_inputs_params
     bdl_input_iterator_params bdl_iterator_params{};
 };
 /**
- * Calculates the minimum electrostatic potential (a.k.a. band bending resilience) required to induce a charge change in
- * an SiDB layout among all input combinations.
+ * Calculates the band bending resilience. This is the minimum electrostatic potential required to induce a charge
+ * change in an SiDB layout among all possible input combinations which was proposed in \"Unifying Figures of Merit: A
+ * Versatile Cost Function for Silicon Dangling Bond Logic\" by J. Drewniok, M. Walter, S. S. H. Ng, K. Walus, and R.
+ * Wille in IEEE NANO 2024 (https://ieeexplore.ieee.org/abstract/document/10628671).
  *
  * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT Truth table type.
@@ -40,12 +42,12 @@ struct calculate_min_bbr_for_all_inputs_params
  * @param params Parameters for assessing physical population stability.
  * @param transition_type The optional type of charge transition to consider. This can be used if one is only interested
  * in a specific type of charge transition.
- * @return The minimum potential required for charge change across all input combinations.
+ * @return The minimum potential (in V) required for charge change across all input combinations.
  */
 template <typename Lyt, typename TT>
-[[nodiscard]] double calculate_min_bbr_for_all_inputs(
-    const Lyt& lyt, const std::vector<TT>& spec, const calculate_min_bbr_for_all_inputs_params& params = {},
-    const std::optional<transition_type> transition_type = transition_type::NEGATIVE_TO_NEUTRAL)
+[[nodiscard]] double
+band_bending_resilience(const Lyt& lyt, const std::vector<TT>& spec, const band_bending_resilience_params& params = {},
+                        const std::optional<transition_type> transition_type = std::nullopt) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -75,9 +77,7 @@ template <typename Lyt, typename TT>
             if (transition_type.has_value())
             {
                 const auto potential_required_for_considered_transition =
-                    ground_state_stability_for_given_input.transition_from_to_with_cell_and_required_pot
-                        .at(transition_type.value())
-                        .second;
+                    ground_state_stability_for_given_input.transition_potentials.at(transition_type.value()).second;
                 if (potential_required_for_considered_transition < minimal_pop_stability_for_all_inputs)
                 {
                     minimal_pop_stability_for_all_inputs = potential_required_for_considered_transition;
@@ -90,4 +90,4 @@ template <typename Lyt, typename TT>
 
 }  // namespace fiction
 
-#endif  // FICTION_CALCULATE_MIN_BBR_FOR_ALL_INPUTS_HPP
+#endif  // FICTION_BAND_BENDING_RESILIENCE_HPP

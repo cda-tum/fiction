@@ -292,26 +292,24 @@ void validate_sweep_parameters(const operational_domain_params& params)
     }
 }
 /**
- * This function checks for the containment of a parameter point, specified by `key`, in the provided map `map`. If the
- * parameter point is found in the map, the associated `MapType::value_type` is returned. Otherwise, `std::nullopt` is
- * returned.
+ * This function checks for the containment of a given key in a given map. If the key is found in the map, the
+ * associated `MapType::value_type` is returned. Otherwise, `std::nullopt` is returned.
  *
- * @tparam MapType The type of the map containing parameter points as keys.
+ * @tparam MapType The type of the map.
  * @param map The map in which to search for `key`.
- * @param key The parameter point to search for in `map`.
+ * @param key The key to search for in `map`.
  * @return The associated `MapType::value_type` of `key` in `map`, or `std::nullopt` if `key` is not contained in `map`.
  */
 template <typename MapType>
 std::optional<typename MapType::mapped_type> contains_key(const MapType& map, const typename MapType::key_type& key)
 {
-    const auto it = map.find(key);
+    std::optional<typename MapType::mapped_type> result;
 
-    if (it != map.cend())
-    {
-        return it->second;
-    }
-    return std::nullopt;  // If key not found, return std::nullopt
+    map.if_contains(key, [&result](const typename MapType::value_type& entry) { result = entry.second; });
+
+    return result;
 }
+
 /**
  * This function searches for a floating-point value specified by the `key` in the provided map `map`, applying a
  * tolerance specified by `fiction::physical_constants::POP_STABILITY_ERR`. Each key in the map is compared to the

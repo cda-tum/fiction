@@ -7,10 +7,10 @@
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
-#include <fiction/algorithms/simulation/sidb/calculate_defect_clearance.hpp>
+#include <fiction/algorithms/simulation/sidb/calculate_defect_clearance_result.hpp>
+#include <fiction/algorithms/simulation/sidb/defect_influence.hpp>
 #include <fiction/algorithms/simulation/sidb/defect_operational_domain.hpp>
 #include <fiction/algorithms/simulation/sidb/is_operational.hpp>
-#include <fiction/algorithms/simulation/sidb/maximum_defect_influence_position_and_distance.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/technology/physical_constants.hpp>
 #include <fiction/technology/sidb_defects.hpp>
@@ -29,9 +29,8 @@ TEST_CASE("novel designed AND Gate influence distance function which fails again
 
     const auto cube_lyt = convert_layout_to_fiction_coordinates<sidb_cell_clk_lyt_cube>(lyt);
 
-    const sidb_defect sidb_defect{sidb_defect_type::SI_VACANCY, -1, 10.6, 5.9};
-    const maximum_defect_influence_position_and_distance_params sim_params{sidb_defect,
-                                                                           sidb_simulation_parameters{2, -0.32}};
+    const sidb_defect                sidb_defect{sidb_defect_type::SI_VACANCY, -1, 10.6, 5.9};
+    const defect_influence_params    sim_params{sidb_defect, sidb_simulation_parameters{2, -0.32}};
     defect_operational_domain_params params{sim_params, is_operational_params{sim_params.simulation_parameters}};
 
     SECTION("Grid Search")

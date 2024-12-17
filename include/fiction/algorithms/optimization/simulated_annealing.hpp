@@ -182,8 +182,8 @@ multi_simulated_annealing(const double init_temp, const double final_temp, const
     threads.reserve(instances);
 
     // Function to perform simulated annealing and store the result in the results vector
-    auto perform_simulated_annealing =
-        [&results, &init_temp, &final_temp, &cycles, &rand_state, &cost, &schedule, &next](std::size_t index)
+    const auto perform_simulated_annealing =
+        [&results, &init_temp, &final_temp, &cycles, &rand_state, &cost, &schedule, &next](const std::size_t index)
     { results[index] = simulated_annealing(rand_state(), init_temp, final_temp, cycles, cost, schedule, next); };
 
     // Start threads

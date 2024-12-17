@@ -1,7 +1,7 @@
-#include "fiction/algorithms/simulation/sidb/calculate_defect_clearance.hpp"
+#include "fiction/algorithms/simulation/sidb/calculate_defect_clearance_result.hpp"
+#include "fiction/algorithms/simulation/sidb/defect_influence.hpp"
 #include "fiction/algorithms/simulation/sidb/defect_operational_domain.hpp"
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
-#include "fiction/algorithms/simulation/sidb/maximum_defect_influence_position_and_distance.hpp"
 #include "fiction/io/read_sqd_layout.hpp"
 #include "fiction/io/write_defect_operational_domain.hpp"
 #include "fiction/io/write_sqd_layout.hpp"
@@ -22,7 +22,7 @@
 
 using namespace fiction;
 
-int main()
+int main()  // NOLINT
 {
     experiments::experiment<std::string, std::size_t, int64_t, int64_t, double, std::size_t, double, std::size_t,
                             double, std::size_t>
@@ -50,7 +50,7 @@ int main()
     const auto                  sidb_sim = sidb_simulation_parameters{2, -0.32, 5.6, 5.0};
     const is_operational_params is_op_params{sidb_sim};
 
-    maximum_defect_influence_position_and_distance_params max_defect_params{};
+    defect_influence_params max_defect_params{};
     max_defect_params.additional_scanning_area = {50, 50};
 
     // for this experiment we use a stray SiDB defect

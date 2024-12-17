@@ -137,7 +137,7 @@ TEST_CASE("Error handling of operational domain algorithms", "[operational-domai
                                 std::invalid_argument);
             }
         }
-        SECTION("quicktrace")
+        SECTION("contour_tracing")
         {
             // contour tracing operates only on 2-dimensional parameter spaces
             for (const auto& params :
@@ -195,7 +195,7 @@ TEST_CASE("Error handling of operational domain algorithms", "[operational-domai
                     CHECK_THROWS_AS(operational_domain_flood_fill(lat, std::vector<tt>{create_id_tt()}, 1, params),
                                     std::invalid_argument);
                 }
-                SECTION("quicktrace")
+                SECTION("contour_tracing")
                 {
                     CHECK_THROWS_AS(operational_domain_contour_tracing(lat, std::vector<tt>{create_id_tt()}, 1, params),
                                     std::invalid_argument);
@@ -243,7 +243,7 @@ TEST_CASE("Error handling of operational domain algorithms", "[operational-domai
                     CHECK_THROWS_AS(operational_domain_flood_fill(lat, std::vector<tt>{create_id_tt()}, 1, params),
                                     std::invalid_argument);
                 }
-                SECTION("quicktrace")
+                SECTION("contour_tracing")
                 {
                     CHECK_THROWS_AS(operational_domain_contour_tracing(lat, std::vector<tt>{create_id_tt()}, 1, params),
                                     std::invalid_argument);
@@ -422,7 +422,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
                 }
             }
         }
-        SECTION("quicktrace")
+        SECTION("contour_tracing")
         {
             const auto op_domain = operational_domain_contour_tracing(lat, std::vector<tt>{create_id_tt()}, 1,
                                                                       op_domain_params, &op_domain_stats);
@@ -505,7 +505,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
             CHECK(op_domain_stats.num_operational_parameter_combinations == 100);
             CHECK(op_domain_stats.num_non_operational_parameter_combinations == 0);
         }
-        SECTION("quicktrace")
+        SECTION("contour_tracing")
         {
             const auto op_domain = operational_domain_contour_tracing(lat, std::vector<tt>{create_id_tt()}, 1,
                                                                       op_domain_params, &op_domain_stats);
@@ -661,7 +661,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
                 }
             }
         }
-        SECTION("quicktrace")
+        SECTION("contour_tracing")
         {
             const auto op_domain = operational_domain_contour_tracing(lat, std::vector<tt>{create_id_tt()}, 1,
                                                                       op_domain_params, &op_domain_stats);
@@ -815,7 +815,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
                 CHECK(op_domain_stats.num_non_operational_parameter_combinations <= 500);
             }
         }
-        SECTION("quicktrace")
+        SECTION("contour_tracing")
         {
             const auto op_domain = operational_domain_contour_tracing(lat, std::vector<tt>{create_id_tt()}, 25,
                                                                       op_domain_params, &op_domain_stats);
@@ -924,7 +924,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
                 CHECK(op_domain_stats.num_non_operational_parameter_combinations <= 176);
             }
         }
-        SECTION("quicktrace")
+        SECTION("contour_tracing")
         {
             const auto op_domain = operational_domain_contour_tracing(lat, std::vector<tt>{create_id_tt()}, 50,
                                                                       op_domain_params, &op_domain_stats);
@@ -1031,7 +1031,7 @@ TEST_CASE("SiQAD's AND gate operational domain computation", "[operational-domai
         CHECK(op_domain_stats.num_operational_parameter_combinations == 100);
         CHECK(op_domain_stats.num_non_operational_parameter_combinations == 0);
     }
-    SECTION("quicktrace")
+    SECTION("contour_tracing")
     {
         const auto op_domain = operational_domain_contour_tracing(lat, std::vector<tt>{create_and_tt()}, 1,
                                                                   op_domain_params, &op_domain_stats);
@@ -1148,7 +1148,7 @@ TEST_CASE("SiQAD's AND gate operational domain computation, using cube coordinat
         CHECK(op_domain_stats.num_operational_parameter_combinations == 100);
         CHECK(op_domain_stats.num_non_operational_parameter_combinations == 0);
     }
-    SECTION("quicktrace")
+    SECTION("contour_tracing")
     {
         const auto op_domain = operational_domain_contour_tracing(lat, std::vector<tt>{create_and_tt()}, 1,
                                                                   op_domain_params, &op_domain_stats);
@@ -1236,7 +1236,7 @@ TEMPLATE_TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[operational-domain
             CHECK(op_domain_stats.num_non_operational_parameter_combinations == 0);
         }
     }
-    SECTION("quicktrace")
+    SECTION("contour_tracing")
     {
         const auto op_domain = operational_domain_contour_tracing(layout, std::vector<tt>{create_and_tt()}, 1,
                                                                   op_domain_params, &op_domain_stats);

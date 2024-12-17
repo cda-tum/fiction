@@ -168,28 +168,85 @@ Temperature Behavior
         .. autofunction:: mnt.pyfiction.calculate_energy_and_state_type_with_kinks_rejected
 
 
-Atomic-Defect Analysis
-######################
+Fabrication Defects
+###################
 
-Maximum Defect Influence Position and Distance
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+A collection of tools to model defects that can occur during the fabrication process of FCN technologies.
 
-**Header:** ``fiction/algorithms/simulation/sidb/maximum_defect_influence_position_and_distance.hpp``
+SiDB Defect Types
+-----------------
 
-.. doxygenstruct:: fiction::maximum_defect_influence_position_and_distance_params
+.. tabs::
+    .. tab:: C++
+        **Header:** ``fiction/technology/sidb_defects.hpp``
+
+        .. doxygenenum:: fiction::sidb_defect_type
+
+        .. doxygenstruct:: fiction::sidb_defect
+           :members:
+
+        .. doxygenfunction:: fiction::is_charged_defect_type
+        .. doxygenfunction:: fiction::is_neutral_defect_type
+
+        .. doxygenfunction:: fiction::is_positively_charged_defect
+        .. doxygenfunction:: fiction::is_negatively_charged_defect
+        .. doxygenfunction:: fiction::is_neutrally_charged_defect
+
+        .. doxygenvariable:: fiction::SIDB_CHARGED_DEFECT_HORIZONTAL_SPACING
+        .. doxygenvariable:: fiction::SIDB_CHARGED_DEFECT_VERTICAL_SPACING
+        .. doxygenvariable:: fiction::SIDB_NEUTRAL_DEFECT_HORIZONTAL_SPACING
+        .. doxygenvariable:: fiction::SIDB_NEUTRAL_DEFECT_VERTICAL_SPACING
+
+        .. doxygenfunction:: fiction::defect_extent
+
+    .. tab:: Python
+        .. autoclass:: mnt.pyfiction.sidb_defect_type
+            :members:
+
+        .. autoclass:: mnt.pyfiction.sidb_defect
+            :members:
+
+        .. autofunction:: mnt.pyfiction.is_charged_defect_type
+        .. autofunction:: mnt.pyfiction.is_neutral_defect_type
+
+        .. autofunction:: mnt.pyfiction.is_positively_charged_defect
+        .. autofunction:: mnt.pyfiction.is_negatively_charged_defect
+        .. autofunction:: mnt.pyfiction.is_neutrally_charged_defect
+
+        .. autofunction:: mnt.pyfiction.defect_extent
+
+
+SiDB Defect Surface
+-------------------
+
+**Header:** ``fiction/technology/sidb_defect_surface.hpp``
+
+A layout type to layer on top of any SiDB cell-level layout. It implements an interface to store and access
+fabrication defects on the H-Si(100) 2x1 surface.
+
+.. doxygenclass:: fiction::sidb_defect_surface
    :members:
-.. doxygenfunction:: fiction::maximum_defect_influence_position_and_distance
-
-
-**Header:** ``fiction/algorithms/simulation/sidb/maximum_defect_influence_position_and_distance_od_sidb_gate.hpp``
-
-.. doxygenstruct:: fiction::maximum_defect_influence_position_and_distance_of_sidb_gate_params
+.. doxygenclass:: fiction::sidb_defect_surface< Lyt, true >
    :members:
-.. doxygenfunction:: fiction::maximum_defect_influence_position_and_distance_of_sidb_gate
+.. doxygenclass:: fiction::sidb_defect_surface< Lyt, false >
+   :members:
 
 
-Defect Operational Domain
-^^^^^^^^^^^^^^^^^^^^^^^^^
+SiDB Defect Analysis
+--------------------
+
+**Header:** ``fiction/technology/sidb_surface_analysis.hpp``
+
+.. doxygenfunction:: fiction::sidb_surface_analysis
+
+**Header:** ``fiction/algorithms/simulation/sidb/defect_influence.hpp``
+
+.. doxygenstruct:: fiction::defect_influence_params
+   :members:
+.. doxygenstruct:: fiction::defect_influence_of_sidb_gate
+   :members:
+.. doxygenfunction:: fiction::defect_influence
+.. doxygenfunction:: fiction::defect_influence_of_sidb_gate
 
 **Header:** ``fiction/algorithms/simulation/sidb/defect_operational_domain.hpp``
 
@@ -202,10 +259,6 @@ Defect Operational Domain
 .. doxygenfunction:: fiction::defect_operational_domain_grid_search
 .. doxygenfunction:: fiction::defect_operational_domain_random_sampling
 .. doxygenfunction:: fiction::defect_operational_domain_quicktrace
-
-
-Defect Clearance
-^^^^^^^^^^^^^^^^
 
 **Header:** ``fiction/algorithms/simulation/sidb/calculate_defect_clearance.hpp``
 
@@ -505,9 +558,9 @@ Band-Bending Resilience
 
 **Header:** ``fiction/algorithms/simulation/sidb/assess_physical_population_stability.hpp``
 
-.. doxygenstruct:: fiction::calculate_min_bbr_for_all_inputs_params
+.. doxygenstruct:: fiction::band_bending_resilience_params
    :members:
-.. doxygenstruct:: fiction::calculate_min_bbr_for_all_inputs
+.. doxygenstruct:: fiction::band_bending_resilience
 
 
 Convert Potential to Distance

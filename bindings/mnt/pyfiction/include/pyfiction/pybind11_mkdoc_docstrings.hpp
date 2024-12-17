@@ -14475,7 +14475,7 @@ Returns:
 
 static const char *__doc_fiction_maximum_defect_influence_position_and_distance_of_sidb_gate_params =
 R"doc(Parameters for the
-`maximum_defect_influence_position_and_distance_of_sidb_gate`
+`defect_influence_of_sidb_gate`
 algorithm.)doc";
 
 static const char *__doc_fiction_maximum_defect_influence_position_and_distance_of_sidb_gate_params_bdl_iterator_params = R"doc(Parameters for the input BDL iterator.)doc";
@@ -14484,7 +14484,7 @@ static const char *__doc_fiction_maximum_defect_influence_position_and_distance_
 
 static const char *__doc_fiction_maximum_defect_influence_position_and_distance_params =
 R"doc(This struct stores the parameters for the
-`maximum_defect_influence_position_and_distance` algorithm.)doc";
+`defect_influence` algorithm.)doc";
 
 static const char *__doc_fiction_maximum_defect_influence_position_and_distance_params_additional_scanning_area =
 R"doc(The pair describes the width and height of the area around the gate,

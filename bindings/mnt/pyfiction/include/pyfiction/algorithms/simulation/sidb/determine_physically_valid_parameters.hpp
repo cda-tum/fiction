@@ -47,7 +47,7 @@ inline void determine_physically_valid_parameters(pybind11::module& m)
             [](const fiction::operational_domain<fiction::parameter_point, uint64_t>& domain,
                const fiction::parameter_point&                                        pp)
             {
-                auto result = domain.get_value(pp);
+                const auto result = domain.get_value(pp);
 
                 // Check if the result has a value
                 if (result.has_value())

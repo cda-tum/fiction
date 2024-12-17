@@ -1,8 +1,8 @@
 #include "fiction/algorithms/physical_design/design_sidb_gates.hpp"
-#include "fiction/algorithms/simulation/sidb/calculate_defect_clearance.hpp"
+#include "fiction/algorithms/simulation/sidb/calculate_defect_clearance_result.hpp"
+#include "fiction/algorithms/simulation/sidb/defect_influence.hpp"
 #include "fiction/algorithms/simulation/sidb/defect_operational_domain.hpp"
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
-#include "fiction/algorithms/simulation/sidb/maximum_defect_influence_position_and_distance.hpp"
 #include "fiction/io/read_sqd_layout.hpp"
 #include "fiction/technology/sidb_defects.hpp"
 #include "fiction/traits.hpp"
@@ -21,7 +21,7 @@
 
 using namespace fiction;
 
-int main()
+int main()  // NOLINT
 {
     experiments::experiment<std::string, std::size_t, std::size_t> simulation_exp{"Benchmark", "Gate Name", "samples",
                                                                                   "wrong output of quicktrace"};
@@ -53,11 +53,10 @@ int main()
     const auto                  sidb_sim = sidb_simulation_parameters{2, -0.32, 5.6, 5.0};
     const is_operational_params is_op_params{sidb_sim};
 
-    maximum_defect_influence_position_and_distance_params max_defect_params{};
+    defect_influence_params max_defect_params{};
 
     // for this experiment we use a stray SiDB defect
     const auto stray_db = fiction::sidb_defect{fiction::sidb_defect_type::DB, -1, 4.1, 1.8};
-    // const auto si_vacancy = fiction::sidb_defect{fiction::sidb_defect_type::SI_VACANCY, -1, 10.6, 5.9};
 
     max_defect_params.defect = stray_db;
 

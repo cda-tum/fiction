@@ -213,7 +213,7 @@ class hexagonal_layout
     /**
      * Creates and returns a coordinate in the layout from the given x-, y-, and z-values.
      *
-     * @note This function is equivalent to calling `CoordinateType(x, y, z)`.
+     * @note This function is equivalent to calling `OffsetCoordinateType(x, y, z)`.
      *
      * @tparam X x-type.
      * @tparam Y y-type.
@@ -221,7 +221,7 @@ class hexagonal_layout
      * @param x x-value.
      * @param y y-value.
      * @param z z-value.
-     * @return A coordinate in the layout of type `CoordinateType`.
+     * @return A coordinate in the layout of type `OffsetCoordinateType`.
      */
     template <typename X, typename Y, typename Z = uint64_t>
     constexpr OffsetCoordinateType coord(const X x, const Y y, const Z z = 0ul) const noexcept
