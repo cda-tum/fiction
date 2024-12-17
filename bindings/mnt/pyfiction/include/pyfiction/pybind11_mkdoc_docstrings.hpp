@@ -6834,7 +6834,12 @@ Parameter ``input_wires``:
     BDL input wires of lyt.
 
 Parameter ``output_wires``:
-    BDL output wires of lyt.)doc";
+    BDL output wires of lyt.
+
+Parameter ``initialize_bii``:
+    If `true`, the BDL input iterator is initialized, `false`
+    otherwise. This parameter is only needed in special cases
+    (verify_logic_match.hpp).)doc";
 
 static const char *__doc_fiction_detail_is_operational_impl_is_operational_impl_3 =
 R"doc(Constructor to initialize the algorithm with a layout, parameters,
