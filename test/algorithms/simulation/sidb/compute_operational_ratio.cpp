@@ -111,6 +111,7 @@ TEST_CASE("SiQAD OR gate", "[compute-operational-ratio]")
     op_domain_params.operational_params.mode_to_analyse_operational_status =
         is_operational_params::analyis_mode::PRUNE_BEFORE_SIMULATION;
     op_domain_params.operational_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
+    op_domain_params.operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance = 1.5;
 
     // set x-dimension
     op_domain_params.sweep_dimensions[0].min  = 2.0;
