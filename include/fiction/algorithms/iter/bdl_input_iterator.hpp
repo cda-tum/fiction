@@ -112,8 +112,6 @@ class bdl_input_iterator
             last_bdl_for_each_wire{determine_last_bdl_for_each_wire()},
             params{ps}
     {
-        assert(num_inputs == input_wires.size() && "number of inputs and number of wires is different.");
-
         static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
         static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
         set_all_inputs();
@@ -437,6 +435,8 @@ class bdl_input_iterator
      */
     void set_all_inputs() noexcept
     {
+        assert(num_inputs == input_bdl_wires.size() && "number of inputs and number of wires is different.");
+
         for (uint64_t i = num_inputs - 1; i < num_inputs; --i)
         {
             const auto& input_i = input_pairs[i];

@@ -209,15 +209,19 @@ class is_operational_impl
      * @param params Parameters for the `is_operational` algorithm.
      * @param input_wires BDL input wires of lyt.
      * @param output_wires BDL output wires of lyt.
+     * @param initialize_bii If `true`, the BDL input iterator is initialized, `false` otherwise. This parameter is only
+     * needed in special cases (verify_logic_match.hpp).
      */
     is_operational_impl(const Lyt& lyt, const std::vector<TT>& tt, const is_operational_params& params,
-                        const std::vector<bdl_wire<Lyt>>& input_wires, const std::vector<bdl_wire<Lyt>>& output_wires) :
+                        const std::vector<bdl_wire<Lyt>>& input_wires, const std::vector<bdl_wire<Lyt>>& output_wires,
+                        const bool initialize_bii = true) :
             layout{lyt},
             truth_table{tt},
             parameters{params},
             output_bdl_pairs(detect_bdl_pairs(layout, sidb_technology::cell_type::OUTPUT,
                                               params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)),
-            bii{bdl_input_iterator<Lyt>{layout, params.input_bdl_iterator_params, input_wires}},
+            bii{initialize_bii ? bdl_input_iterator<Lyt>{layout, params.input_bdl_iterator_params, input_wires} :
+                                 bdl_input_iterator<Lyt>{Lyt{}}},
             input_bdl_wires{input_wires},
             output_bdl_wires{output_wires},
             number_of_output_wires{output_bdl_wires.size()},
