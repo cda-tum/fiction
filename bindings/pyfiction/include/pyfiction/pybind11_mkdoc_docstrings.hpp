@@ -908,6 +908,56 @@ static const char *__doc_fiction_bounding_box_2d_x_size = R"doc(The horizontal s
 
 static const char *__doc_fiction_bounding_box_2d_y_size = R"doc(The vertical size of the bounding box in layout coordinates.)doc";
 
+static const char *__doc_fiction_branching_signal_container =
+R"doc(A container class to help identify layout locations of branching nodes
+like fanouts. When a node from a network is to placed in a layout,
+fetching the node's fanins and looking for their locations in the
+layout does not work properly when branching nodes like fanouts are
+involved that got extended by wire nodes. This container solves that
+issue.
+
+Template parameter ``Lyt``:
+    Gate-level layout type.
+
+Template parameter ``Ntk``:
+    Logic network type.
+
+Template parameter ``fanout_size``:
+    Maximum fanout size possible in the layout and/or the network.)doc";
+
+static const char *__doc_fiction_branching_signal_container_branches = R"doc(Storage for all branches.)doc";
+
+static const char *__doc_fiction_branching_signal_container_branching_signal = R"doc(Branch type.)doc";
+
+static const char *__doc_fiction_branching_signal_container_branching_signal_branching_signal = R"doc()doc";
+
+static const char *__doc_fiction_branching_signal_container_branching_signal_lyt_signal = R"doc()doc";
+
+static const char *__doc_fiction_branching_signal_container_branching_signal_ntk_node = R"doc()doc";
+
+static const char *__doc_fiction_branching_signal_container_operator_array =
+R"doc(Accesses the branching container to find the location of a given node
+`n`. Returns the signal to that location if it was already stored or
+the default signal, otherwise.
+
+Parameter ``n``:
+    Node whose branching position is desired.
+
+Returns:
+    Signal to `n`'s layout location or the default signal if it wasn't
+    found.)doc";
+
+static const char *__doc_fiction_branching_signal_container_update_branch =
+R"doc(Updates the given node's branch by another layout signal, thereby,
+creating a new branch or updating the position of an existing one,
+e.g., if further wire segments were moving the head of the branch.
+
+Parameter ``ntk_node``:
+    Node whose branch is to be updated.
+
+Parameter ``lyt_signal``:
+    New signal pointing to the end of the branch.)doc";
+
 static const char *__doc_fiction_calculate_energy_and_state_type =
 R"doc(This function takes in an SiDB energy distribution. For each charge
 distribution, the state type is determined (i.e. erroneous,
@@ -2440,7 +2490,7 @@ The part of the *ClusterComplete* algorithm that is implemented in
 this file is the destructive phase of the procedure that employs the
 duality of construction and destruction, folding and unfolding. The
 phase preceding it is the key ingredient to the achieved efficiency:
-the *Ground State Space* algorithm, which constructs a minimised
+the *Ground State Space* algorithm, which constructs a minimized
 hierarchical search space of charge configurations that adhere to the
 critical population stability criterion. In particular, it generalizes
 physically informed space pruning that contributes to the capabilities
@@ -4158,6 +4208,8 @@ Returns:
 
 static const char *__doc_fiction_detail_clustercomplete_impl = R"doc()doc";
 
+static const char *__doc_fiction_detail_clustercomplete_impl_add_composition = R"doc()doc";
+
 static const char *__doc_fiction_detail_clustercomplete_impl_add_if_configuration_stability_is_met =
 R"doc(This function handles performs the last analysis step before
 collecting a simulation result. In order to judge whether a population
@@ -4170,19 +4222,18 @@ Parameter ``clustering_state``:
     with associated charge states that make up a charge distribution
     that conforms to the *population stability* criterion.)doc";
 
-static const char *__doc_fiction_detail_clustercomplete_impl_add_or_subtract_parent_potential =
+static const char *__doc_fiction_detail_clustercomplete_impl_add_parent =
 R"doc(Before the parent projector state may be specialized to a specific
 composition of its children, first the projections of the parent must
 be subtracted. They are later added back after all compositions were
 handled. Depending on the potential bound update operation, either the
 subtraction of addition step is performed.
 
-Template parameter ``op``:
-    The potential bound update operation; either to perform the
-    subtraction or the addition.
+Parameter ``clustering_state``:
+    todo
 
 Parameter ``parent_pst``:
-    $Parameter ``clustering_state``:)doc";
+    todo)doc";
 
 static const char *__doc_fiction_detail_clustercomplete_impl_add_physically_valid_charge_configurations =
 R"doc(This recursive function is the heart of the *ClusterComplete*
@@ -4205,11 +4256,20 @@ population stability check. In the latter case, the configuration
 stability check is performed before the associated charge distribution
 is added to the simulation results.
 
-Parameter ``clustering_state``:
-    A clustering state that holds a specific combination of multiset
-    charge configurations as projector states of which the
-    respectively associated clusters form a clustering in the cluster
-    hierarchy.)doc";
+Parameter ``w``:
+    The worker running on the current thread. It has a clustering
+    state that holds a specific combination of multiset charge
+    configurations as projector states of which the respectively
+    associated clusters form a clustering in the cluster hierarchy.
+
+Parameter ``composition``:
+    todo
+
+Returns:
+    `false` if and only if queue of this worker is found to be
+    completely empty and thus backtracking is not required.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_available_threads = R"doc(Number of available threads.)doc";
 
 static const char *__doc_fiction_detail_clustercomplete_impl_charge_layout =
 R"doc(The base layout, along with the map of placed defects, that are used
@@ -4225,33 +4285,7 @@ Parameter ``params``:
     Parameter required for both the invocation of *Ground State
     Space*, and the simulation following.)doc";
 
-static const char *__doc_fiction_detail_clustercomplete_impl_collect_physically_valid_charge_distributions =
-R"doc(After the *Ground State Space* construction was completed and the top
-cluster was returned, this function splits the charge space of the top
-cluster into sections for the individual threads to handle. Each are
-decomposed recursively to generate physically valid charge
-distributions that emerge from increasingly specializing multiset
-charge configurations.
-
-Parameter ``top_cluster``:
-    The top cluster that is returned by the *Ground State Space
-    construction; it contains the entire cluster hierarchy construct.
-
-Parameter ``num_threads``:
-    The maximum number of threads to use in the destruction.)doc";
-
-static const char *__doc_fiction_detail_clustercomplete_impl_convert_composition_to_clustering_state =
-R"doc(This function converts between semantically equivalent datatypes, only
-converting projector states to unique pointers to projector states in
-order to enable the move-swap-pop procedure in the recursive function
-above.
-
-Parameter ``composition``:
-    The charge space composition to convert to an equivalent
-    clustering state.
-
-Returns:
-    The clustering state that results from the conversion.)doc";
+static const char *__doc_fiction_detail_clustercomplete_impl_extract_work_from_top_cluster = R"doc()doc";
 
 static const char *__doc_fiction_detail_clustercomplete_impl_fail_onto_negative_charge =
 R"doc(Returns `true` if and only if the given potential bound closes out
@@ -4267,7 +4301,19 @@ SiDB+.
 Parameter ``pot_bound``:
     Potential upper bound.)doc";
 
-static const char *__doc_fiction_detail_clustercomplete_impl_get_projector_state_bound_pot =
+static const char *__doc_fiction_detail_clustercomplete_impl_find_cluster_of_maximum_size =
+R"doc(Finds the cluster of the maximum size in the clustering associated
+with the input.
+
+Parameter ``proj_states``:
+    A vector of projector states that forms a clustering when only the
+    respectively contained clusters are considered.
+
+Returns:
+    The index in this vector of the projector state that contains the
+    cluster of maximum size.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_get_projector_state_bound =
 R"doc(Helper function for obtaining the stored lower or upper bound on the
 electrostatic potential that SiDBs in the given projector state--i.e.,
 a cluster together with an associated multiset charge configuration--
@@ -4283,9 +4329,8 @@ Parameter ``sidb_ix``:
     Receiving SiDB.
 
 Returns:
-    The potential projection associated with this bound; i.e., an
-    electrostatic potential (in V) associated with the given projector
-    state.)doc";
+    The potential projection value associated with this bound; i.e.,
+    an electrostatic potential (in V),)doc";
 
 static const char *__doc_fiction_detail_clustercomplete_impl_initialize_charge_layout =
 R"doc(Function to initialize the charge layout.
@@ -4295,6 +4340,14 @@ Parameter ``lyt``:
 
 Parameter ``params``:
     Parameters for ClusterComplete.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_initialize_worker_queues =
+R"doc(Initializes the worker queues with work from the top cluster, dividing
+it evenly over the available threads.
+
+Parameter ``work_from_top_cluster``:
+    A vector containing all compositions of all charge space elements
+    of the top cluster.)doc";
 
 static const char *__doc_fiction_detail_clustercomplete_impl_lb_fail_onto_neutral_charge =
 R"doc(Returns `true` if and only if the given potential bound closes out
@@ -4328,13 +4381,9 @@ pruning.)doc";
 
 static const char *__doc_fiction_detail_clustercomplete_impl_mutex_to_protect_the_simulation_results = R"doc(Mutex to protect the simulation results.)doc";
 
-static const char *__doc_fiction_detail_clustercomplete_impl_potential_bound_update_operation = R"doc(Enumeration for specifying operations on potential bounds.)doc";
-
-static const char *__doc_fiction_detail_clustercomplete_impl_potential_bound_update_operation_ADD = R"doc(Potential bounds of the parent are added.)doc";
-
-static const char *__doc_fiction_detail_clustercomplete_impl_potential_bound_update_operation_SUBTRACT = R"doc(Potential bounds of the parent are subtracted.)doc";
-
 static const char *__doc_fiction_detail_clustercomplete_impl_real_placed_defects = R"doc(Atomic defects that are placed in the layout.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_remove_composition = R"doc()doc";
 
 static const char *__doc_fiction_detail_clustercomplete_impl_result = R"doc(Simulation results.)doc";
 
@@ -4351,12 +4400,111 @@ Parameter ``params``:
 Returns:
     Results of the exact simulation.)doc";
 
+static const char *__doc_fiction_detail_clustercomplete_impl_take_parent_out =
+R"doc(Before the parent projector state may be specialized to a specific
+composition of its children, first the projections of the parent must
+be subtracted. They are later added back after all compositions were
+handled. Depending on the potential bound update operation, either the
+subtraction of addition step is performed.
+
+Parameter ``clustering_state``:
+    todo
+
+Parameter ``parent_pst``:
+    todo)doc";
+
 static const char *__doc_fiction_detail_clustercomplete_impl_ub_fail_onto_neutral_charge =
 R"doc(Returns `true` if and only if the given potential bound closes out
 SiDB0.
 
 Parameter ``pot_bound``:
     Potential upper bound.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_unfold_all_compositions =
+R"doc(After a cluster in a clustering state was chosen to be unfolded next,
+the unfolding is performed through ensuring that all compositions of
+the multiset associated with the cluster in the clustering state are
+each unfolded. The current worker will always unfold the first
+composition, while putting the other compositions in its queue such
+that threads without work may steal those if the current worker is
+still working on this first composition.
+
+Parameter ``w``:
+    The worker running on the current thread.
+
+Parameter ``compositions``:
+    A vector containing all compositions to unfold.
+
+Parameter ``informant``:
+    For other workers to be able to unfold one of those compositions
+    that are not being unfolded yet, they need to obtain the right
+    clustering state. The informant adds to the required information
+    to dynamically update the clustering state for other workers
+    looking to steal work.
+
+Returns:
+    `false` if and only if the queue of this worker is found to be
+    completely empty and thus backtracking is not required.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_unfold_composition =
+R"doc(The clustering state of the current worker is specialized according to
+the given composition preceding the recursion. If there is still work
+left to do by this worker, backtracking is performed, for which also
+the aforementioned specialization needs to be undone.
+
+Parameter ``w``:
+    The worker running on the current thread.
+
+Parameter ``composition``:
+    The composition to unfold.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_worker = R"doc(Forward declaration of the worker struct.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_2 = R"doc(Forward declaration of the worker struct.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_all_workers = R"doc()doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_clustering_state = R"doc()doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_index = R"doc()doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_obtain_work = R"doc()doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue = R"doc()doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_add_to_queue = R"doc()doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_apply_informant = R"doc()doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_clustering_state_for_thieves = R"doc()doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_get_informant = R"doc()doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_get_last_composition = R"doc()doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_initialize_queue_after_stealing = R"doc()doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_mole = R"doc()doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_mole_composition = R"doc()doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_mole_parent_to_move_out_ix = R"doc()doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_mutex_to_protect_this_queue = R"doc()doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_queue = R"doc()doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_thief_informants = R"doc()doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_work_in_queue_count = R"doc()doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_worker_queue = R"doc()doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_work_stealing_queue = R"doc()doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_worker = R"doc()doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_workers = R"doc()doc";
 
 static const char *__doc_fiction_detail_color_routing_impl = R"doc()doc";
 
@@ -6706,7 +6854,7 @@ given layout.
 Parameter ``lyt``:
     Layout to construct the *Ground State Space* of.
 
-Parameter ``params``:
+Parameter ``parameters``:
     The parameters that *Ground State Space* will use throughout the
     construction.)doc";
 
@@ -6871,6 +7019,8 @@ Parameter ``composition``:
 
 Returns:
     `false` if and only if the given composition can be rejected.)doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_write_children_pot_bounds_to_complete_store = R"doc()doc";
 
 static const char *__doc_fiction_detail_improve_gate_location =
 R"doc(Utility function that moves gates to new coordinates and checks if
@@ -9915,6 +10065,20 @@ Parameter ``lyt``:
 
 Returns:
     List of all routing objectives in the given layout.)doc";
+
+static const char *__doc_fiction_fanin_container =
+R"doc(Container that stores fanins of a node in a network, including whether
+one of them is a constant.
+
+Note that this container assumes that each node has a maximum of one
+constant fanin.
+
+Template parameter ``Ntk``:
+    `mockturtle` network type.)doc";
+
+static const char *__doc_fiction_fanin_container_constant_fanin =
+R"doc(Has a value if a fanin node is constant. In that case, it represents
+the constant value.)doc";
 
 static const char *__doc_fiction_fanin_edge_container =
 R"doc(Container that stores fanin edges of a node in a network, including
@@ -15020,6 +15184,158 @@ static const char *__doc_fiction_path_set_add = R"doc()doc";
 static const char *__doc_fiction_path_set_contains = R"doc()doc";
 
 static const char *__doc_fiction_place =
+R"doc(Place 0-input gates.
+
+Template parameter ``Lyt``:
+    Gate-level layout type.
+
+Template parameter ``Ntk``:
+    Logic network type.
+
+Parameter ``lyt``:
+    Gate-level layout in which to place a 0-input gate.
+
+Parameter ``t``:
+    Tile in `lyt` to place the gate onto.
+
+Parameter ``ntk``:
+    Network whose node is to be placed.
+
+Parameter ``n``:
+    Node in `ntk` to place onto `t` in `lyt`.
+
+Returns:
+    Signal pointing to the placed gate in `lyt`.)doc";
+
+static const char *__doc_fiction_place_2 =
+R"doc(Place 1-input gates.
+
+Template parameter ``Lyt``:
+    Gate-level layout type.
+
+Template parameter ``Ntk``:
+    Logic network type.
+
+Parameter ``lyt``:
+    Gate-level layout in which to place a 1-input gate.
+
+Parameter ``t``:
+    Tile in `lyt` to place the gate onto.
+
+Parameter ``ntk``:
+    Network whose node is to be placed.
+
+Parameter ``n``:
+    Node in `ntk` to place onto `t` in `lyt`.
+
+Parameter ``a``:
+    Incoming signal to the newly placed gate in `lyt`.
+
+Returns:
+    Signal pointing to the placed gate in `lyt`.)doc";
+
+static const char *__doc_fiction_place_3 =
+R"doc(Place 2-input gates.
+
+Template parameter ``Lyt``:
+    Gate-level layout type.
+
+Template parameter ``Ntk``:
+    Logic network type.
+
+Parameter ``lyt``:
+    Gate-level layout in which to place a 2-input gate.
+
+Parameter ``t``:
+    Tile in `lyt` to place the gate onto.
+
+Parameter ``ntk``:
+    Network whose node is to be placed.
+
+Parameter ``n``:
+    Node in `ntk` to place onto `t` in `lyt`.
+
+Parameter ``a``:
+    First incoming signal to the newly placed gate in `lyt`.
+
+Parameter ``b``:
+    Second incoming signal to the newly placed gate in `lyt`.
+
+Parameter ``c``:
+    Third optional incoming constant value signal to the newly placed
+    gate in `lyt`. Might change the gate function when set, e.g., from
+    a MAJ to an AND if `c == false`.
+
+Returns:
+    Signal pointing to the placed gate in `lyt`.)doc";
+
+static const char *__doc_fiction_place_4 =
+R"doc(Place 3-input gates.
+
+Template parameter ``Lyt``:
+    Gate-level layout type.
+
+Template parameter ``Ntk``:
+    Logic network type.
+
+Parameter ``lyt``:
+    Gate-level layout in which to place a 3-input gate.
+
+Parameter ``t``:
+    Tile in `lyt` to place the gate onto.
+
+Parameter ``ntk``:
+    Network whose node is to be placed.
+
+Parameter ``n``:
+    Node in `ntk` to place onto `t` in `lyt`.
+
+Parameter ``a``:
+    First incoming signal to the newly placed gate in `lyt`.
+
+Parameter ``b``:
+    Second incoming signal to the newly placed gate in `lyt`.
+
+Parameter ``c``:
+    Third incoming signal to the newly placed gate in `lyt`.
+
+Returns:
+    Signal pointing to the placed gate in `lyt`.)doc";
+
+static const char *__doc_fiction_place_5 =
+R"doc(Place any gate from a network. This function automatically identifies
+the arity of the passed node and fetches its incoming signals from the
+given network and a provided `mockturtle::node_map`. This function
+does not update the `mockturtle::node_map`.
+
+Template parameter ``Lyt``:
+    Gate-level layout type.
+
+Template parameter ``Ntk``:
+    Logic network type.
+
+Parameter ``lyt``:
+    Gate-level layout in which to place any gate.
+
+Parameter ``t``:
+    Tile in `lyt` to place the gate onto.
+
+Parameter ``ntk``:
+    Network whose node is to be placed.
+
+Parameter ``n``:
+    Node in `ntk` to place onto `t` in `lyt`.
+
+Parameter ``node2pos``:
+    Mapping from network nodes to layout signals, i.e., a pointer to
+    their position in the layout. The map is used to fetch location of
+    the fanins. The `mockturtle::node_map` is not updated by this
+    function.
+
+Returns:
+    Signal to the newly placed gate in `lyt`.)doc";
+
+static const char *__doc_fiction_place_6 =
 R"doc(Place any gate from a network. This function automatically identifies
 the arity of the passed node and fetches its incoming signals from the
 given network and a provided branching_signal_container
@@ -15342,6 +15658,13 @@ to a complete potential bounds store only).
 
 Parameter ``num_sidbs``:
     The number of SiDBs in the layout that is simulated.)doc";
+
+static const char *__doc_fiction_potential_bounds_store_num_sidbs =
+R"doc(Getter for the size of the potential bounds store, i.e., the number of
+SiDBs considered in this store.
+
+Returns:
+    The size of the potential bounds store.)doc";
 
 static const char *__doc_fiction_potential_bounds_store_operator_iadd =
 R"doc(Add a complete potential bound store to this (also a complete
@@ -17080,6 +17403,12 @@ moved. Thereby, this is the essential type of the dynamic objects in
 *ClusterComplete*'s operation, which always represent information of
 the complete layout.)doc";
 
+static const char *__doc_fiction_sidb_clustering_state_operator_assign =
+R"doc(Move assignment operator.
+
+Parameter ``other``:
+    Other clustering state to move.)doc";
+
 static const char *__doc_fiction_sidb_clustering_state_pot_bounds =
 R"doc(Flattened (hierarchical) potential bounds specific to this clustering
 state.)doc";
@@ -17087,6 +17416,25 @@ state.)doc";
 static const char *__doc_fiction_sidb_clustering_state_proj_states =
 R"doc(Projector states associated with charge space elements that make up
 the clustering state.)doc";
+
+static const char *__doc_fiction_sidb_clustering_state_sidb_clustering_state =
+R"doc(Default constructor.
+
+Parameter ``num_sidbs``:
+    Number of SiDBs in the layout that the clustering state should
+    consider.)doc";
+
+static const char *__doc_fiction_sidb_clustering_state_sidb_clustering_state_2 =
+R"doc(Copy constructor.
+
+Parameter ``other``:
+    Other clustering state to copy.)doc";
+
+static const char *__doc_fiction_sidb_clustering_state_sidb_clustering_state_3 =
+R"doc(Move constructor.
+
+Parameter ``other``:
+    Other clustering state to move.)doc";
 
 static const char *__doc_fiction_sidb_defect =
 R"doc(In accordance with the paper mentioned above, the `sidb_defect` struct
@@ -19593,6 +19941,12 @@ static const char *__doc_fmt_formatter_format_2 = R"doc()doc";
 static const char *__doc_fmt_formatter_parse = R"doc()doc";
 
 static const char *__doc_fmt_formatter_parse_2 = R"doc()doc";
+
+static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_layouts_coordinates_hpp_1090_8 = R"doc()doc";
+
+static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_layouts_coordinates_hpp_1106_8 = R"doc()doc";
+
+static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_technology_cell_ports_hpp_263_8 = R"doc()doc";
 
 static const char *__doc_mockturtle_detail_foreach_element_if_transform = R"doc()doc";
 
