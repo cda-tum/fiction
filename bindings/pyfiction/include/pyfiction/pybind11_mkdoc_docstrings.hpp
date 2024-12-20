@@ -15652,8 +15652,8 @@ Parameter ``sidb_ix``:
 Returns:
     The potential bound for this SiDB.)doc";
 
-static const char *__doc_fiction_potential_bounds_store_initialise_complete_potential_bounds =
-R"doc(Initialise potential bounds for the given number of SiDBs (applicable
+static const char *__doc_fiction_potential_bounds_store_initialize_complete_potential_bounds =
+R"doc(Initialize potential bounds for the given number of SiDBs (applicable
 to a complete potential bounds store only).
 
 Parameter ``num_sidbs``:
@@ -17322,6 +17322,8 @@ R"doc(Every cluster carries a pointer to its parent. For the top cluster,
 this is `nullptr`.)doc";
 
 static const char *__doc_fiction_sidb_cluster_pot_projs = R"doc()doc";
+
+static const char *__doc_fiction_sidb_cluster_pot_projs_complete_store = R"doc()doc";
 
 static const char *__doc_fiction_sidb_cluster_projector_state =
 R"doc(A projector state pairs the potential projecting cluster with the
