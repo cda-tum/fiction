@@ -2,8 +2,8 @@
 // Created by Jan Drewniok on 10.11.23.
 //
 
-#ifndef FICTION_CONVERT_POTENTIAL_TO_DISTANCE_HPP
-#define FICTION_CONVERT_POTENTIAL_TO_DISTANCE_HPP
+#ifndef FICTION_POTENTIAL_TO_DISTANCE_CONVERSION_HPP
+#define FICTION_POTENTIAL_TO_DISTANCE_CONVERSION_HPP
 
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/technology/physical_constants.hpp"
@@ -59,4 +59,4 @@ convert_potential_to_distance(const double                      potential,
 
 }  // namespace fiction
 
-#endif  // FICTION_CONVERT_POTENTIAL_TO_DISTANCE_HPP
+#endif  // FICTION_POTENTIAL_TO_DISTANCE_CONVERSION_HPP

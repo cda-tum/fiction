@@ -8,7 +8,7 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
-#include <fiction/algorithms/simulation/sidb/compute_operational_ratio.hpp>
+#include <fiction/algorithms/simulation/sidb/operational_domain_ratio.hpp>
 
 #include <pybind11/operators.h>
 #include <pybind11/pybind11.h>

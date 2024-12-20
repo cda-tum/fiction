@@ -6,7 +6,7 @@
 #define FICTION_BAND_BENDING_RESILIENCE_HPP
 
 #include "fiction/algorithms/iter/bdl_input_iterator.hpp"
-#include "fiction/algorithms/simulation/sidb/assess_physical_population_stability.hpp"
+#include "fiction/algorithms/simulation/sidb/physical_population_stability.hpp"
 
 #include <cassert>
 #include <limits>
@@ -23,7 +23,7 @@ struct band_bending_resilience_params
     /**
      * Parameters for the assessing physical population stability simulation
      */
-    assess_physical_population_stability_params assess_population_stability_params{};
+    physical_population_stability_params assess_population_stability_params{};
     /**
      * Parameters for the input BDL iterator.
      */
@@ -68,8 +68,7 @@ band_bending_resilience(const Lyt& lyt, const std::vector<TT>& spec, const band_
     // number of different input combinations
     for (auto i = 0u; i < spec.front().num_bits(); ++i, ++bii)
     {
-        const auto pop_stability =
-            assess_physical_population_stability<Lyt>(lyt, params.assess_population_stability_params);
+        const auto pop_stability = physical_population_stability<Lyt>(lyt, params.assess_population_stability_params);
         if (!pop_stability.empty())
         {
             const auto ground_state_stability_for_given_input = pop_stability.front();

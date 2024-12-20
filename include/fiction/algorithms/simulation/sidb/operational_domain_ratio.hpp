@@ -2,8 +2,8 @@
 // Created by Jan Drewniok on 09.09.24.
 //
 
-#ifndef FICTION_COMPUTE_OPERATIONAL_RATIO_HPP
-#define FICTION_COMPUTE_OPERATIONAL_RATIO_HPP
+#ifndef FICTION_OPERATIONAL_DOMAIN_RATIO_HPP
+#define FICTION_OPERATIONAL_DOMAIN_RATIO_HPP
 
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
 #include "fiction/algorithms/simulation/sidb/operational_domain.hpp"
@@ -66,4 +66,4 @@ template <typename Lyt, typename TT>
 
 }  // namespace fiction
 
-#endif  // FICTION_COMPUTE_OPERATIONAL_RATIO_HPP
+#endif  // FICTION_OPERATIONAL_DOMAIN_RATIO_HPP

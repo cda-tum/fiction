@@ -6,8 +6,8 @@
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
-#include <fiction/algorithms/simulation/sidb/determine_physically_valid_parameters.hpp>
 #include <fiction/algorithms/simulation/sidb/operational_domain.hpp>
+#include <fiction/algorithms/simulation/sidb/physically_valid_parameters.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/technology/cell_technologies.hpp>
@@ -59,15 +59,15 @@ TEST_CASE("Determine physical parameters for CDS of SiQAD Y-shaped AND gate, 10 
         cds.assign_charge_state({6, 7, 1}, sidb_charge_state::NEGATIVE);
         cds.update_after_charge_change();
 
-        const auto valid_parameters = determine_physically_valid_parameters(cds, op_domain_params);
+        const auto valid_parameters = physically_valid_parameters(cds, op_domain_params);
         CHECK(valid_parameters.operational_values.size() == 43);
 
         op_domain_params.operational_params.sim_engine = sidb_simulation_engine::EXGS;
-        const auto valid_parameters_exgs               = determine_physically_valid_parameters(cds, op_domain_params);
+        const auto valid_parameters_exgs               = physically_valid_parameters(cds, op_domain_params);
         CHECK(valid_parameters_exgs.operational_values.size() == 43);
 
         op_domain_params.operational_params.sim_engine = sidb_simulation_engine::QUICKSIM;
-        const auto valid_parameters_quicksim           = determine_physically_valid_parameters(cds, op_domain_params);
+        const auto valid_parameters_quicksim           = physically_valid_parameters(cds, op_domain_params);
         CHECK(valid_parameters_quicksim.operational_values.size() == 43);
     }
 
@@ -83,7 +83,7 @@ TEST_CASE("Determine physical parameters for CDS of SiQAD Y-shaped AND gate, 10 
         cds.assign_charge_state({6, 7, 1}, sidb_charge_state::NEGATIVE);
         cds.update_after_charge_change();
 
-        const auto valid_parameters = determine_physically_valid_parameters(cds, op_domain_params);
+        const auto valid_parameters = physically_valid_parameters(cds, op_domain_params);
         CHECK(valid_parameters.operational_values.size() == 98);
 
         const auto p1 = detail::contains_key(valid_parameters.operational_values, parameter_point{{5.9, 5.5}});
@@ -157,7 +157,7 @@ TEST_CASE(
 
         cds.update_after_charge_change();
 
-        const auto valid_parameters = determine_physically_valid_parameters(cds, op_domain_params);
+        const auto valid_parameters = physically_valid_parameters(cds, op_domain_params);
         REQUIRE(valid_parameters.operational_values.size() == 100);
 
         const auto p1 = detail::contains_key(valid_parameters.operational_values, parameter_point{{5.6, 5.0}});
@@ -215,7 +215,7 @@ TEST_CASE(
 
         cds.update_after_charge_change();
 
-        const auto valid_parameters = determine_physically_valid_parameters(cds, op_domain_params);
+        const auto valid_parameters = physically_valid_parameters(cds, op_domain_params);
         REQUIRE(valid_parameters.operational_values.size() == 27);
         const auto p1 = detail::contains_key(valid_parameters.operational_values, parameter_point{{5.6, 5.0, -0.32}});
         REQUIRE(p1.has_value());

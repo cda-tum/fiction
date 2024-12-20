@@ -32,13 +32,12 @@
 #include "pyfiction/algorithms/simulation/sidb/critical_temperature.hpp"
 #include "pyfiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp"
 #include "pyfiction/algorithms/simulation/sidb/detect_bdl_wires.hpp"
-#include "pyfiction/algorithms/simulation/sidb/determine_physically_valid_parameters.hpp"
 #include "pyfiction/algorithms/simulation/sidb/energy_distribution.hpp"
 #include "pyfiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
 #include "pyfiction/algorithms/simulation/sidb/is_ground_state.hpp"
 #include "pyfiction/algorithms/simulation/sidb/is_operational.hpp"
+#include "pyfiction/algorithms/simulation/sidb/physically_valid_parameters.hpp"
 // #include "pyfiction/algorithms/simulation/sidb/defect_influence.hpp"
-#include "pyfiction/algorithms/simulation/sidb/assess_physical_population_stability.hpp"
 #include "pyfiction/algorithms/simulation/sidb/check_simulation_results_for_equivalence.hpp"
 #include "pyfiction/algorithms/simulation/sidb/convert_potential_to_distance.hpp"
 #include "pyfiction/algorithms/simulation/sidb/determine_groundstate_from_simulation_results.hpp"
@@ -46,6 +45,7 @@
 #include "pyfiction/algorithms/simulation/sidb/minimum_energy.hpp"
 #include "pyfiction/algorithms/simulation/sidb/occupation_probability_of_excited_states.hpp"
 #include "pyfiction/algorithms/simulation/sidb/operational_domain.hpp"
+#include "pyfiction/algorithms/simulation/sidb/physical_population_stability.hpp"
 #include "pyfiction/algorithms/simulation/sidb/quickexact.hpp"
 #include "pyfiction/algorithms/simulation/sidb/quicksim.hpp"
 #include "pyfiction/algorithms/simulation/sidb/random_sidb_layout_generator.hpp"
@@ -152,7 +152,7 @@ PYBIND11_MODULE(pyfiction, m, pybind11::mod_gil_not_used())
     pyfiction::time_to_solution(m);
     pyfiction::determine_groundstate_from_simulation_results(m);
     pyfiction::check_simulation_results_for_equivalence(m);
-    pyfiction::determine_physically_valid_parameters(m);
+    pyfiction::physically_valid_parameters(m);
     pyfiction::determine_displacement_robustness_domain(m);
     pyfiction::compute_operational_ratio(m);
     /**

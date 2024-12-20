@@ -1,209 +1,178 @@
 //
-// Created by Jan Drewniok on 21.06.23.
+// Created by Jan Drewniok on 28.12.23.
 //
 
 #ifndef FICTION_DEFECT_INFLUENCE_HPP
 #define FICTION_DEFECT_INFLUENCE_HPP
 
 #include "fiction/algorithms/iter/bdl_input_iterator.hpp"
-#include "fiction/algorithms/simulation/sidb/determine_groundstate_from_simulation_results.hpp"
-#include "fiction/algorithms/simulation/sidb/minimum_energy.hpp"
+#include "fiction/algorithms/simulation/sidb/is_operational.hpp"
 #include "fiction/algorithms/simulation/sidb/quickexact.hpp"
-#include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/technology/sidb_defect_surface.hpp"
 #include "fiction/technology/sidb_defects.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/layout_utils.hpp"
+#include "fiction/utils/phmap_utils.hpp"
 
+#include <kitty/traits.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <algorithm>
+#include <atomic>
 #include <cassert>
-#include <cmath>
 #include <cstdint>
 #include <cstdlib>
-#include <limits>
-#include <mutex>
+#include <optional>
+#include <random>
 #include <thread>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
 namespace fiction
 {
 /**
- * This struct stores the parameters for the `defect_influence` algorithm.
+ * Parameters to determine the defect influence.
+ *
+ * @tparam CellType Type of the cell.
  */
+template <typename CellType>
 struct defect_influence_params
 {
+    enum class influence_definition : uint8_t
+    {
+        /**
+         * Influence is considered as the ability to change the operational status of the layout.
+         */
+        OPERATIONALITY_CHANGE,
+        /**
+         * The influence is considered as the ability to change the ground state of the layout.
+         */
+        GROUND_STATE_CHANGE
+    };
     /**
      * The defect to calculate the maximum defect influence distance for.
      */
     sidb_defect defect{};
     /**
-     * Physical simulation parameters.
+     * Parameters for the `is_operational` algorithm.
      */
-    sidb_simulation_parameters simulation_parameters{};
+    is_operational_params operational_params{};
     /**
-     * The pair describes the width and height of the area around the gate, which is
-     * also used to place defects.
-     *
-     * @note If SiQAD coordinates are used, the second entry describes the number of dimer rows.
+     * Area which is considered around the layout for additional defect scanning.
+     * This describes the additional space around the bounding box of the layout.
      */
-    std::pair<int32_t, int32_t> additional_scanning_area{50, 6};
+    CellType additional_scanning_area{CellType{50, 6}};
+    /**
+     * The definition of influence.
+     */
+    influence_definition influence_def{influence_definition::OPERATIONALITY_CHANGE};
 };
 
 /**
- * Parameters for the `defect_influence_of_sidb_gate` algorithm.
+ * This defines whether the influence of a defect is present at a particular position
+ * in the layout. It can be used to classify positions as having an influence or not.
  */
-struct defect_influence_of_sidb_gate_params
+enum class defect_influence_status : uint8_t
 {
     /**
-     * Parameters for the defect influence simulation.
+     * This indicates that the defect is actively influencing the layout at this position.
+     * It implies that some form of impact, such as a change in operational status or
+     * ground state, is being caused by the defect at this position.
      */
-    defect_influence_params defect_influence_params{};
+    EXISTENT,
     /**
-     * Parameters for the input BDL iterator.
+     * This indicates that the defect does not influence the layout at this position.
+     * It implies that the layout remains unaffected by the defect at this location,
+     * meaning there is no change in operational status or ground state.
      */
-    bdl_input_iterator_params bdl_iterator_params{};
+    NON_EXISTENT
 };
-
 /**
- * Statistics for the maximum defect influence simulation.
+ * A defect influence domain defines for each defect position the influence of the defect on the layout.
+ * Depending on the chosen definition of influence, this can either mean the operational status
+ * or information on whether the ground state of the layout is changed due to the defect.
  */
-struct maximum_defect_influence_position_and_distance_stats
+template <typename Lyt>
+struct defect_influence_domain
 {
     /**
-     * The total runtime of the maximum defect influence simulation.
+     * This stores for each defect position the condition of the layout.
+     */
+    locked_parallel_flat_hash_map<typename Lyt::cell, defect_influence_status> influence_information{};
+};
+/**
+ * Statistics.
+ */
+struct defect_influence_stats
+{
+    /**
+     * The total runtime of the defect influence computation.
      */
     mockturtle::stopwatch<>::duration time_total{0};
+    /**
+     * Number of simulator invocations.
+     */
+    std::size_t num_simulator_invocations{0};
+    /**
+     * Number of evaluated parameter combinations.
+     */
+    std::size_t num_evaluated_defect_positions{0};
+    /**
+     * Number of parameter combinations, for which the layout gets influenced.
+     */
+    std::size_t num_influencing_defect_positions{0};
+    /**
+     * Number of parameter combinations, for which the layout is not influenced.
+     */
+    std::size_t num_non_influencing_defect_positions{0};
 };
 
 namespace detail
 {
-/**
- * A class for simulating the maximum influence distance of defects within an SiDB layout.
- *
- * This class is responsible for simulating the distance at which defects placed within an SiDB
- * layout still influence the ground state of the layout. It conducts simulations at various defect positions,
- * identifying the position that maximally impacts the layout and calculating the associated influence distance.
- *
- * The class provides a `run` method to initiate the simulation and compute the maximum influence
- * distance and corresponding defect position. It utilizes multithreading for efficient defect
- * position simulations.
- */
+
 template <typename Lyt>
-class maximum_defect_influence_position_and_distance_impl
+class defect_influence_impl
 {
   public:
-    maximum_defect_influence_position_and_distance_impl(const Lyt& lyt, defect_influence_params sim_params,
-                                                        maximum_defect_influence_position_and_distance_stats& st) :
+    defect_influence_impl(const Lyt& lyt, const defect_influence_params<cell<Lyt>>& ps, defect_influence_stats& st) :
             layout{lyt},
-            params{sim_params},
+            params{ps},
             stats{st}
     {
-        collect_all_defect_cells();
+        determine_nw_se_cells();
     }
+
     /**
-     * Determines the maximum defect influence position and distance for the given layout.
+     * This function simulates for each position in the area (spanned by `nw_cell` and `se_cell`) if the existence of a
+     * defect influences the layout.
      *
-     * @return A pair containing the maximum defect influence position and the corresponding distance.
+     * @param step_size The step size used to sample defect positions in the grid. Only positions with x and y
+     * coordinates divisible by `step_size` will be checked.
+     * @return The defect influence domain.
      */
-    std::pair<typename Lyt::cell, double> run() noexcept
+    template <typename TT = tt>
+    [[nodiscard]] defect_influence_domain<Lyt>
+    grid_search(const std::size_t step_size, const std::optional<std::vector<TT>>& spec = std::nullopt) noexcept
     {
-        if (layout.is_empty())
-        {
-            return {{}, 0.0};
-        }
-
-        const quickexact_params<cell<Lyt>> qe_params{
-            params.simulation_parameters, quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF};
-
         mockturtle::stopwatch stop{stats.time_total};
+        const auto            all_possible_defect_positions = all_coordinates_in_spanned_area(nw_cell, se_cell);
+        const std::size_t     num_positions                 = all_possible_defect_positions.size();
 
-        std::mutex mutex{};
-
-        double          avoidance_distance{0};
-        coordinate<Lyt> max_defect_position{};
-
-        const auto simulation_results = quickexact(layout, qe_params);
-
-        const auto gs = determine_groundstate_from_simulation_results(simulation_results).front();
-
-        const auto charge_index_of_ground_state = gs.get_charge_index_and_base().first;
-
-        // simulate the impact of the defect at a given position on the ground state of the SiDB layout
-        const auto process_defect = [this, &mutex, &avoidance_distance, &qe_params, &charge_index_of_ground_state,
-                                     &max_defect_position](const auto& defect_pos) noexcept
-        {
-            if (layout.get_cell_type(defect_pos) == Lyt::technology::cell_type::EMPTY)
-            {
-                sidb_defect_surface<Lyt> lyt_defect{};
-
-                layout.foreach_cell([this, &lyt_defect](const auto& cell)
-                                    { lyt_defect.assign_cell_type(cell, layout.get_cell_type(cell)); });
-
-                // assign defect to layout
-                lyt_defect.assign_sidb_defect(defect_pos, params.defect);
-                // conduct simulation with defect
-                auto simulation_result_defect = quickexact(lyt_defect, qe_params);
-
-                const auto min_energy_defect = minimum_energy(simulation_result_defect.charge_distributions.cbegin(),
-                                                              simulation_result_defect.charge_distributions.cend());
-
-                uint64_t charge_index_defect_layout = 0;
-
-                // get the charge index of the ground state
-                for (const auto& lyt_simulation_with_defect : simulation_result_defect.charge_distributions)
-                {
-                    if (std::fabs(round_to_n_decimal_places(lyt_simulation_with_defect.get_system_energy(), 6) -
-                                  round_to_n_decimal_places(min_energy_defect, 6)) <
-                        std::numeric_limits<double>::epsilon())
-                    {
-                        lyt_simulation_with_defect.charge_distribution_to_index_general();
-                        charge_index_defect_layout = lyt_simulation_with_defect.get_charge_index_and_base().first;
-                    }
-                }
-
-                // defect changes the ground state, i.e., the charge index is changed compared to the charge
-                // distribution without a placed defect.
-                if (charge_index_defect_layout != charge_index_of_ground_state)
-                {
-                    auto distance = std::numeric_limits<double>::infinity();
-                    layout.foreach_cell(
-                        [this, &defect_pos, &distance](const auto& cell)
-                        {
-                            if (sidb_nm_distance<Lyt>(layout, cell, defect_pos) < distance)
-                            {
-                                distance = sidb_nm_distance<Lyt>(layout, cell, defect_pos);
-                            }
-                        });
-
-                    {
-                        const std::lock_guard<std::mutex> lock{mutex};
-                        // the distance is larger than the current maximum one.
-                        if (distance > avoidance_distance)
-                        {
-                            max_defect_position = defect_pos;
-                            avoidance_distance  = distance;
-                        }
-                    }
-                }
-            }
-        };
-
-        static const std::size_t num_threads = std::thread::hardware_concurrency();
+        const auto number_of_threads = std::min(num_threads, num_positions);
 
         // calculate the size of each slice
-        const auto slice_size = (defect_cells.size() - 1) / num_threads;
+        const auto slice_size = (num_positions + number_of_threads - 1) / number_of_threads;
 
         std::vector<std::thread> threads{};
-        threads.reserve(num_threads);
+        threads.reserve(number_of_threads);
 
-        for (auto i = 0ul; i < num_threads; ++i)
+        // launch threads, each with its own slice of random step points
+        for (auto t = 0ul; t < number_of_threads; ++t)
         {
-            const auto start = i * slice_size;
-            const auto end   = std::min(start + slice_size, defect_cells.size());
+            const auto start = t * slice_size;
+            const auto end   = std::min(start + slice_size, num_positions);
 
             if (start >= end)
             {
@@ -211,17 +180,20 @@ class maximum_defect_influence_position_and_distance_impl
             }
 
             threads.emplace_back(
-                [this, start, end, &process_defect]
+                [this, start, end, &all_possible_defect_positions, &step_size, &spec]
                 {
-                    for (auto it = defect_cells.cbegin() + static_cast<int64_t>(start);
-                         it != defect_cells.cbegin() + static_cast<int64_t>(end); ++it)
+                    for (auto i = start; i < end; ++i)
                     {
-                        process_defect(*it);
+                        // this ensures that the defects are evenly distributed in a grid-like pattern
+                        if (static_cast<std::size_t>(std::abs(all_possible_defect_positions[i].x)) % step_size == 0 &&
+                            static_cast<std::size_t>(std::abs(all_possible_defect_positions[i].y)) % step_size == 0)
+                        {
+                            does_defect_influence(spec, all_possible_defect_positions[i]);
+                        }
                     }
                 });
         }
 
-        // wait for all threads to complete
         for (auto& thread : threads)
         {
             if (thread.joinable())
@@ -230,136 +202,874 @@ class maximum_defect_influence_position_and_distance_impl
             }
         }
 
-        return {max_defect_position, avoidance_distance};
+        log_stats();
+
+        return influence_domain;
+    }
+
+    /**
+     * This function checks for a certain number of random positions (given by `samples`) in the area (spanned by
+     * `nw_cell` and `se_cell`) if the existence of a defect leads to an influence of the layout.
+     *
+     * @param samples The number of positions to sample. The actual number of iterations may be less than the total
+     * number of positions or the `samples` value.
+     * @return The defect influence domain.
+     */
+    template <typename TT = tt>
+    [[nodiscard]] defect_influence_domain<Lyt>
+    random_sampling(const std::size_t samples, const std::optional<std::vector<TT>>& spec = std::nullopt) noexcept
+    {
+        mockturtle::stopwatch stop{stats.time_total};
+
+        // Get all possible defect positions within the grid spanned by nw_cell and se_cell
+        auto all_possible_defect_positions = all_coordinates_in_spanned_area(nw_cell, se_cell);
+
+        // Shuffle the vector using std::shuffle
+        std::shuffle(all_possible_defect_positions.begin(), all_possible_defect_positions.end(), generator);
+
+        // Determine how many positions to sample (use the smaller of samples or the total number of positions)
+        const auto min_iterations = std::min(all_possible_defect_positions.size(), samples);
+
+        const auto number_of_threads = std::min(num_threads, min_iterations);
+
+        // calculate the size of each slice
+        const auto slice_size = (min_iterations + number_of_threads - 1) / number_of_threads;
+
+        std::vector<std::thread> threads{};
+        threads.reserve(number_of_threads);
+
+        // launch threads, each with its own slice of random step points
+        for (auto t = 0ul; t < number_of_threads; ++t)
+        {
+            const auto start = t * slice_size;
+            const auto end   = std::min(start + slice_size, min_iterations);
+
+            if (start >= end)
+            {
+                break;  // no more work to distribute
+            }
+
+            threads.emplace_back(
+                [this, start, end, &all_possible_defect_positions, &spec]
+                {
+                    for (auto i = start; i < end; ++i)
+                    {
+                        does_defect_influence(spec, all_possible_defect_positions[i]);
+                    }
+                });
+        }
+
+        for (auto& thread : threads)
+        {
+            if (thread.joinable())
+            {
+                thread.join();
+            }
+        }
+
+        log_stats();  // Log the statistics after processing
+
+        // Return the computed defect influence domain
+        return influence_domain;
+    }
+
+    /**
+     * This function applies contour tracing to identify the boundary (contour) between influencing and
+     * non-influencing defect positions for a given SiDB layout.
+     *
+     * The algorithm leverages the concept of a screened Coulomb potential, where the electrostatic interaction weakens
+     * as distance increases. If a defect at a position p allows the SiDB layout to remain operational, then defects
+     * further from the layout are also likely to maintain operability. Conversely, defects closer to the layout may
+     * cause it to fail. This behavior allows for efficient contour tracing of the transition between operational and
+     * non-operational states.
+     *
+     * The process is as follows:
+     * 1. **Initialization**: Randomly select `samples` initial defect positions several nanometers away
+     *    from the layout where the layout is known to be operational.
+     * 2. **Contour Tracing**: For each position, perform a defect-aware physical simulation to identify adjacent
+     *    positions along the x-axis that change the operational state of the layout. This marks the starting
+     *    point of the contour.
+     * 3. **Contour Following**: Trace the contour of operational positions until the starting point is reached again,
+     *    thereby closing the contour.
+     * 4. **Repetition**: Repeat steps 1-3 for multiple initial heights to identify additional contours, since
+     *    multiple operational-to-non-operational boundaries may exist.
+     *
+     * @param samples The number of random initial positions used to identify and trace operational
+     *                and non-operational defect boundaries. Higher values increase the chance of capturing all
+     *                relevant contours but increase computation time.
+     * @return The defect operational domain.
+     */
+    template <typename TT = tt>
+    [[nodiscard]] defect_influence_domain<Lyt>
+    quicktrace(const std::size_t samples, const std::optional<std::vector<TT>>& spec = std::nullopt) noexcept
+    {
+        mockturtle::stopwatch stop{stats.time_total};
+
+        const auto next_clockwise_point = [](std::vector<typename Lyt::cell>& neighborhood,
+                                             const typename Lyt::cell&        backtrack) noexcept -> typename Lyt::cell
+        {
+            assert(std::find(neighborhood.cbegin(), neighborhood.cend(), backtrack) != neighborhood.cend() &&
+                   "The backtrack point must be part of the neighborhood");
+
+            while (neighborhood.back() != backtrack)
+            {
+                std::rotate(neighborhood.begin(), neighborhood.begin() + 1, neighborhood.end());
+            }
+
+            return neighborhood.front();
+        };
+
+        std::unordered_set<cell<Lyt>> starting_points{};
+
+        std::size_t sample_counter = 0;
+
+        while (sample_counter < samples)
+        {
+            sample_counter++;
+
+            // first, perform random sampling to find an operational starting point
+            const auto operational_starting_point = find_operational_defect_position_at_left_side(spec);
+
+            // if no operational point was found within the specified number of samples, return
+            if (!operational_starting_point.has_value())
+            {
+                return influence_domain;
+            }
+
+            // check if the starting point has already been sampled
+            if (starting_points.find(*operational_starting_point) != starting_points.cend())
+            {
+                continue;
+            }
+
+            // add an operational starting point to the set of starting points
+            starting_points.insert(*operational_starting_point);
+
+            // the layout has to be defect-free.
+            assert(layout.num_defects() == 0 && "An atomic defect is added");
+
+            // find an operational point on the contour starting from the randomly determined starting point
+            const auto contour_starting_p =
+                find_last_operational_defect_position_moving_right(spec, *operational_starting_point);
+
+            if (!contour_starting_p.has_value())
+            {
+                continue;
+            }
+
+            const auto contour_starting_point = *contour_starting_p;
+
+            // the layout hs to be defect-free.
+            assert(layout.num_defects() == 0 && "An atomic defect is added");
+
+            auto current_contour_point = contour_starting_point;
+            auto backtrack_point       = current_contour_point.x == nw_cell.x ?
+                                             current_contour_point :
+                                             typename Lyt::cell{current_contour_point.x - 1, current_contour_point.y};
+
+            auto current_neighborhood = moore_neighborhood(current_contour_point);
+
+            // if the backtrack point is not part of the neighborhood, continue with the next starting point
+            if (std::find(current_neighborhood.cbegin(), current_neighborhood.cend(), backtrack_point) ==
+                current_neighborhood.cend())
+            {
+                continue;
+            }
+
+            auto next_point = current_contour_point == backtrack_point ?
+                                  current_neighborhood.front() :
+                                  next_clockwise_point(current_neighborhood, backtrack_point);
+
+            while (next_point != contour_starting_point)
+            {
+                const auto defect_influence_status = does_defect_influence(spec, next_point);
+
+                assert(layout.num_defects() == 0 && "more than one defect");
+
+                if (defect_influence_status == defect_influence_status::EXISTENT || !layout.is_empty_cell(next_point))
+                {
+                    backtrack_point       = current_contour_point;
+                    current_contour_point = next_point;
+                }
+                else
+                {
+                    backtrack_point = next_point;
+                }
+
+                current_neighborhood = moore_neighborhood(current_contour_point);
+                next_point           = next_clockwise_point(current_neighborhood, backtrack_point);
+            }
+        }
+        log_stats();
+
+        return influence_domain;
     }
 
   private:
     /**
-     * SiDB cell-level layout to simulate.
+     * The SiDB cell-level layout to investigate.
      */
-    Lyt layout;
+    sidb_defect_surface<Lyt> layout{};
     /**
-     * Parameters used for the simulation.
+     * The parameters for the operational domain computation.
      */
-    const defect_influence_params params;
+    const defect_influence_params<cell<Lyt>>& params;
     /**
-     * The statistics of the maximum defect influence position.
+     * North-west cell.
      */
-    maximum_defect_influence_position_and_distance_stats& stats;
+    typename Lyt::cell nw_cell{};
     /**
-     * All allowed defect positions.
+     * The north-west cell of the bounding box of the layout.
      */
-    std::vector<typename Lyt::cell> defect_cells{};
+    typename Lyt::cell nw_bb_layout{};
     /**
-     * Collects all possible defect cell positions within a given layout while avoiding SiDB cells.
-     *
-     * This function calculates a bounding box around the provided layout, encompassing the area
-     * where defect cells can be placed. It then iterates through this bounding box, scanning from
-     * top to bottom and left to right, and identifies all valid positions for defect cells. A defect
-     * cell can only be placed in locations where there are no SiDB cells.
+     * South-east cell.
      */
-    void collect_all_defect_cells() noexcept
+    typename Lyt::cell se_cell{};
+    /**
+     * The south-east cell of the bounding box of the layout.
+     */
+    typename Lyt::cell se_bb_layout{};
+    /**
+     * The current defect position.
+     */
+    typename Lyt::cell current_defect_position{};
+    /**
+     * The previous defect position.
+     */
+    typename Lyt::cell previous_defect_position{};
+    /**
+     * The operational domain of the layout.
+     */
+    defect_influence_domain<Lyt> influence_domain{};
+    /**
+     * The statistics of the operational domain computation.
+     */
+    defect_influence_stats& stats;
+    /**
+     * Random number generator.
+     */
+    inline static std::mt19937_64 generator{std::random_device{}()};
+    /**
+     * Uniform distribution for the y-coordinate of the defect.
+     */
+    std::uniform_int_distribution<decltype(nw_cell.y)> dist{};
+    /**
+     * Number of simulator invocations.
+     */
+    std::atomic<std::size_t> num_simulator_invocations{0};
+    /**
+     * Number of evaluated defect positions.
+     */
+    std::atomic<std::size_t> num_evaluated_defect_positions{0};
+    /**
+     * Number of available hardware threads.
+     */
+    const std::size_t num_threads{std::thread::hardware_concurrency()};
+    /**
+     * This function determines the northwest and southeast cells based on the layout and the additional scan
+     * area specified.
+     */
+    void determine_nw_se_cells() noexcept
     {
         // bounding box around the given layout to have north-west and south-east cells.
-        bounding_box_2d<Lyt> bb{layout};
+        bounding_box_2d bb{layout};
 
         auto nw = bb.get_min();  // north-west cell
         auto se = bb.get_max();  // south-east cell
 
-        // shift nw and se cell by the additional scanning area to cover an area that is larger than the gate area.
-        nw.x = nw.x - params.additional_scanning_area.first;
-        nw.y = nw.y - params.additional_scanning_area.second;
+        nw_bb_layout = nw;
+        se_bb_layout = se;
 
-        se.x = se.x + params.additional_scanning_area.first;
-        se.y = se.y + params.additional_scanning_area.second;
+        // shift nw and se cell by the additional scanning area to cover an area that is larger than the layout area.
+        nw.x = nw.x - params.additional_scanning_area.x;
+        nw.y = nw.y - params.additional_scanning_area.y;
 
-        defect_cells = all_coordinates_in_spanned_area(nw, se);
+        se.x = se.x + params.additional_scanning_area.x;
+        se.y = se.y + params.additional_scanning_area.y;
+
+        nw_cell = nw;
+        se_cell = se;
+
+        dist = std::uniform_int_distribution<decltype(nw_cell.y)>{nw_cell.y, se_cell.y};
+    }
+    /**
+     * This function aims to identify an operational defect position within the layout. It does so by selecting a defect
+     * position with the leftmost x-coordinate and a randomly selected y-coordinate limited the layout's bounding box.
+     *
+     * @return The operational defect position. If no operational defect position is found, `std::nullopt` is returned.
+     */
+    template <typename TT>
+    [[nodiscard]] std::optional<typename Lyt::cell>
+    find_operational_defect_position_at_left_side(const std::optional<std::vector<TT>>& spec) noexcept
+    {
+        auto starting_point = nw_cell;
+
+        starting_point.y = dist(generator);
+
+        layout.assign_sidb_defect(starting_point, params.defect);
+
+        const auto operational_value = does_defect_influence(spec, starting_point);
+        layout.assign_sidb_defect(starting_point, sidb_defect{sidb_defect_type::NONE});
+
+        // if the parameter combination is operational, return its step values in x and y dimension
+        if (operational_value == defect_influence_status::NON_EXISTENT)
+        {
+            return starting_point;
+        }
+
+        return std::nullopt;
+    }
+    /**
+     * This function evaluates the operational status of the SiDB layout when a defect is placed at position `c`.
+     *
+     * @param c Position of the defect.
+     */
+    template <typename TT>
+    defect_influence_status does_defect_influence(const std::optional<std::vector<TT>>& spec,
+                                                  const typename Lyt::cell&             defect_cell) noexcept
+    {
+        // increment the number of evaluated parameter combinations
+        ++num_evaluated_defect_positions;
+
+        auto lyt_copy = layout.clone();
+
+        // if the point has already been sampled, return the stored operational status
+        if (const auto op_value = has_already_been_sampled(defect_cell); op_value.has_value())
+        {
+            return *op_value;
+        }
+
+        const auto non_influential = [this, &defect_cell]()
+        {
+            ++num_simulator_invocations;
+            influence_domain.influence_information[defect_cell] = defect_influence_status::NON_EXISTENT;
+
+            return defect_influence_status::NON_EXISTENT;
+        };
+
+        const auto influential = [this, &defect_cell]()
+        {
+            ++num_simulator_invocations;
+            influence_domain.influence_information[defect_cell] = defect_influence_status::EXISTENT;
+
+            return defect_influence_status::EXISTENT;
+        };
+
+        if (!lyt_copy.is_empty_cell(defect_cell))
+        {
+            return non_influential();
+        }
+
+        lyt_copy.assign_sidb_defect(defect_cell, params.defect);
+
+        if (spec.has_value())
+        {
+            if (params.influence_def == defect_influence_params<cell<Lyt>>::influence_definition::OPERATIONALITY_CHANGE)
+            {
+                const auto [status, result] = is_operational(lyt_copy, spec.value(), params.operational_params);
+                if (status == operational_status::OPERATIONAL)
+                {
+                    lyt_copy.assign_sidb_defect(defect_cell, sidb_defect{sidb_defect_type::NONE});
+                    return non_influential();
+                }
+                lyt_copy.assign_sidb_defect(defect_cell, sidb_defect{sidb_defect_type::NONE});
+                return influential();
+            }
+
+            if (params.influence_def == defect_influence_params<cell<Lyt>>::influence_definition::GROUND_STATE_CHANGE)
+            {
+                auto bii = bdl_input_iterator<Lyt>{lyt_copy, params.operational_params.input_bdl_iterator_params};
+
+                // number of different input combinations
+                for (auto i = 0u; i < spec.value().front().num_bits(); ++i, ++bii)
+                {
+                    ++num_simulator_invocations;
+                    if (does_defect_influence_groundstate(*bii, defect_cell) == defect_influence_status::EXISTENT)
+                    {
+                        return influential();
+                    }
+                }
+                return non_influential();
+            }
+        }
+
+        else
+        {
+            if (params.influence_def == defect_influence_params<cell<Lyt>>::influence_definition::GROUND_STATE_CHANGE)
+            {
+                if (does_defect_influence_groundstate(lyt_copy, defect_cell) == defect_influence_status::EXISTENT)
+                {
+                    lyt_copy.assign_sidb_defect(defect_cell, sidb_defect{sidb_defect_type::NONE});
+                    return influential();
+                }
+                return non_influential();
+            }
+
+            static_assert(true, "No truth table provided, but influence definition is not ground state change.");
+        }
+
+        return non_influential();
+    }
+
+    /**
+     *
+     */
+    [[nodiscard]] defect_influence_status
+    does_defect_influence_groundstate(const Lyt& lyt_without_defect, const typename Lyt::cell& defect_pos) noexcept
+    {
+        static_assert(!is_sidb_defect_surface_v<Lyt>, "Lyt should not be an SiDB defect surface");
+
+        if (layout.is_empty())
+        {
+            return defect_influence_status::EXISTENT;
+        }
+
+        const quickexact_params<cell<Lyt>> qe_params{
+            params.operational_params.simulation_parameters,
+            quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF};
+
+        mockturtle::stopwatch stop{stats.time_total};
+
+        const auto simulation_results = quickexact(lyt_without_defect, qe_params);
+
+        const auto ground_states = groundstate_from_simulation_results(simulation_results);
+
+        if (lyt_without_defect.get_cell_type(defect_pos) == Lyt::technology::cell_type::EMPTY)
+        {
+            sidb_defect_surface<Lyt> lyt_defect{lyt_without_defect};
+
+            lyt_defect.assign_sidb_defect(defect_pos, params.defect);
+
+            if (can_positive_charges_occur(lyt_defect, params.operational_params.simulation_parameters))
+            {
+                return defect_influence_status::EXISTENT;
+            }
+
+            // conduct simulation with defect
+            auto simulation_result_defect = quickexact(lyt_defect, qe_params);
+
+            const auto ground_states_defect = groundstate_from_simulation_results(simulation_result_defect);
+
+            if (ground_states.size() != ground_states_defect.size())
+            {
+                return defect_influence_status::EXISTENT;
+            }
+
+            for (const auto& gs_defect : ground_states_defect)
+            {
+                const auto same_ground_state_was_found = std::any_of(
+                    ground_states.cbegin(), ground_states.cend(), [&gs_defect](const auto& gs)
+                    { return gs.get_charge_index_and_base().first == gs_defect.get_charge_index_and_base().first; });
+
+                if (!same_ground_state_was_found)
+                {
+                    return defect_influence_status::EXISTENT;
+                }
+            }
+
+            return defect_influence_status::NON_EXISTENT;
+        }
+
+        // defect is placed on a non-empty cell
+        return defect_influence_status::NON_EXISTENT;
+    };
+    /**
+     * This function verifies whether the layout has already been analyzed for the specified defect position `c`.
+     *
+     * @param c Position of the defect.
+     */
+    [[nodiscard]] std::optional<defect_influence_status>
+    has_already_been_sampled(const typename Lyt::cell& c) const noexcept
+    {
+        if (const auto it = influence_domain.influence_information.find(c);
+            it != influence_domain.influence_information.cend())
+        {
+            return it->second;
+        }
+
+        return std::nullopt;
+    }
+    /**
+     * This function identifies the most recent operational defect position while traversing from left to right
+     * towards the SiDB layout.
+     *
+     * @param starting_defect_position The starting position of the defect, from which the traversal towards the
+     * right is conducted while maintaining layout operability.
+     * @return The last operational defect position. If no non-operational defect is found, `std::nullopt` is
+     * returned.
+     */
+    template <typename TT>
+    [[nodiscard]] std::optional<typename Lyt::cell>
+    find_last_operational_defect_position_moving_right(const std::optional<std::vector<TT>>& spec,
+                                                       const typename Lyt::cell& starting_defect_position) noexcept
+    {
+        auto latest_operational_defect_position = starting_defect_position;
+
+        previous_defect_position = starting_defect_position;
+
+        // move towards the left border of the parameter range
+        for (auto x = starting_defect_position.x; x <= se_cell.x; x++)
+        {
+            previous_defect_position = current_defect_position;
+            current_defect_position  = {x, starting_defect_position.y};
+
+            layout.assign_sidb_defect(current_defect_position, params.defect);
+
+            const auto influence_status = does_defect_influence(spec, current_defect_position);
+
+            layout.assign_sidb_defect(current_defect_position, sidb_defect{sidb_defect_type::NONE});
+
+            if (influence_status == defect_influence_status::NON_EXISTENT)
+            {
+                latest_operational_defect_position = current_defect_position;
+            }
+            else
+            {
+                return previous_defect_position;
+            }
+        }
+
+        if (current_defect_position == latest_operational_defect_position)
+        {
+            return std::nullopt;
+        }
+
+        return latest_operational_defect_position;
+    }
+    /**
+     * Helper function that writes the the statistics of the defect operational domain computation to the statistics
+     * object.
+     */
+    void log_stats() const noexcept
+    {
+        stats.num_simulator_invocations      = num_simulator_invocations.load();
+        stats.num_evaluated_defect_positions = num_evaluated_defect_positions.load();
+
+        for (const auto& [param_point, status] : influence_domain.influence_information)
+        {
+            if (status == defect_influence_status::EXISTENT)
+            {
+                ++stats.num_influencing_defect_positions;
+            }
+            else
+            {
+                ++stats.num_non_influencing_defect_positions;
+            }
+        }
+    }
+    /**
+     * Computes the Moore neighborhood of a given cell within the SiDB layout.
+     * The Moore neighborhood consists of the eight cells surrounding the central cell
+     * in horizontal, vertical, and diagonal directions.
+     *
+     * @param c The cell for which the Moore neighborhood is computed.
+     * @return A vector containing the cells in the Moore neighborhood that are empty.
+     *         If a cell is outside the layout boundaries or occupied, it is not included in the result.
+     */
+    [[nodiscard]] std::vector<typename Lyt::cell> moore_neighborhood(const typename Lyt::cell& c) const noexcept
+    {
+        std::vector<typename Lyt::cell> neighbors{};
+        neighbors.reserve(8);
+
+        const auto& moore = c;
+
+        const auto decr_x = (moore.x - 1 >= nw_cell.x) ? moore.x - 1 : moore.x;
+        const auto incr_x = (moore.x + 1 <= se_cell.x) ? moore.x + 1 : moore.x;
+        const auto decr_y = (moore.y - 1 >= nw_cell.y) ? moore.y - 1 : moore.y;
+        const auto incr_y = (moore.y + 1 <= se_cell.y) ? moore.y + 1 : moore.y;
+
+        // add neighbors in clockwise direction
+
+        // right
+        if (moore.x != incr_x)
+        {
+            if (layout.is_empty_cell({incr_x, moore.y}))
+            {
+                neighbors.emplace_back(incr_x, moore.y);
+            }
+        }
+        // lower-right
+        if (moore.x != incr_x && moore.y != decr_y)
+        {
+            if (layout.is_empty_cell({incr_x, decr_y}))
+            {
+                neighbors.emplace_back(incr_x, decr_y);
+            }
+        }
+        // down
+        if (moore.y != decr_y)
+        {
+            if (layout.is_empty_cell({moore.x, decr_y}))
+            {
+                neighbors.emplace_back(moore.x, decr_y);
+            }
+        }
+        // lower-left
+        if (moore.x != decr_x && moore.y != decr_y)
+        {
+            if (layout.is_empty_cell({decr_x, decr_y}))
+            {
+                neighbors.emplace_back(decr_x, decr_y);
+            }
+        }
+        // left
+        if (moore.x != decr_x)
+        {
+            if (layout.is_empty_cell({decr_x, moore.y}))
+            {
+                neighbors.emplace_back(decr_x, moore.y);
+            }
+        }
+        // upper-left
+        if (moore.x != decr_x && moore.y != incr_y)
+        {
+            if (layout.is_empty_cell({decr_x, incr_y}))
+            {
+                neighbors.emplace_back(decr_x, incr_y);
+            }
+        }
+        // up
+        if (moore.y != incr_y)
+        {
+            if (layout.is_empty_cell({moore.x, incr_y}))
+            {
+                neighbors.emplace_back(moore.x, incr_y);
+            }
+        }
+        // upper-right
+        if (moore.x != incr_x && moore.y != incr_y)
+        {
+            if (layout.is_empty_cell({incr_x, incr_y}))
+            {
+                neighbors.emplace_back(incr_x, incr_y);
+            }
+        }
+
+        return neighbors;
     }
 };
 
-}  // namespace detail
+};  // namespace detail
 
 /**
- * This function simulates the influence of defects on an SiDB layout. It computes the
- * maximum influence distance, defined as the minimum distance between any SiDB cell and the given defect, at which the
- * defect can still affect the layout's ground state, potentially altering its behavior, such as gate functionality.
+ * Computes the defect operational domain of the given SiDB layout. The defect operational domain is the set of all
+ * defect positions for which the layout is logically operational. Logical operation is defined as the layout
+ * implementing the given truth table.
+ *
+ * This algorithm uses a grid search to determine the defect operational domain. The grid search is performed
+ * by exhaustively sweeping all possible atomic defect positions in x and y dimensions.
  *
  * @tparam Lyt SiDB cell-level layout type.
- * @param lyt The SiDB cell-level layout for which the influence position and distance is being determined.
- * @param params Parameters used to calculate the defect's maximum influence distance.
- * @param pst Statistics of the maximum defect influence distance.
- * @return Pair with the first element describing the position with maximum distance to the layout where a placed defect
- * can still affect the ground state of the layout. The second entry describes the distance of the defect from the
- * layout.
+ * @tparam TT Truth table type.
+ * @param lyt Layout to compute the defect operational domain for.
+ * @param spec Expected Boolean function of the layout given as a multi-output truth table.
+ * @param step_size The parameter specifying the interval between consecutive defect positions to be evaluated.
+ * @param params Defect operational domain computation parameters.
+ * @param stats Statistics.
+ * @return The defect operational domain of the layout.
  */
-template <typename Lyt>
-std::pair<typename Lyt::cell, double>
-defect_influence(const Lyt& lyt, const defect_influence_params& params = {},
-                 maximum_defect_influence_position_and_distance_stats* pst = nullptr)
+template <typename Lyt, typename TT>
+[[nodiscard]] defect_influence_domain<Lyt>
+defect_influence_grid_search(const Lyt& lyt, const std::vector<TT>& spec,
+                             const defect_influence_params<cell<Lyt>>& params = {}, const std::size_t step_size = 1,
+                             defect_influence_stats* stats = nullptr)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(!has_offset_ucoord_v<Lyt>, "Lyt cannot be based on offset coordinates");
-    static_assert(!is_charge_distribution_surface_v<Lyt>, "Lyt cannot be a charge distribution surface");
+    static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
+    static_assert(has_cube_coord_v<Lyt>, "Lyt is not based on cube coordinates");
 
-    maximum_defect_influence_position_and_distance_stats st{};
+    defect_influence_stats             st{};
+    detail::defect_influence_impl<Lyt> p{lyt, params, st};
 
-    detail::maximum_defect_influence_position_and_distance_impl<Lyt> p{lyt, params, st};
+    const auto result = p.grid_search(step_size, std::optional{spec});
 
-    const auto result = p.run();
-
-    if (pst)
+    if (stats)
     {
-        *pst = st;
+        *stats = st;
     }
 
     return result;
 }
 
 /**
- * This function calculates the maximum influence position and distance of a defect on the ground state
- * of an SiDB layout. It iterates over all input combinations and finds the defect position at maximum position
- * that affects the gate's ground state.
- *
- * @note The "maximum defect influence distance" describes the maximum distance at which a defect influences the ground
- * state. It does not check if the layout gets non-operational, since a change in the ground state can still
- * lead to an operational gate.
- *
  * @tparam Lyt SiDB cell-level layout type.
- * @param lyt Layout to compute the maximum defect influence position and distance for.
- * @param params Parameters for the defect influence simulation and BDL pair detection.
- * @return A pair containing the maximum influence defect position and its distance from the layout/gate.
+ * @param lyt Layout to compute the defect operational domain for.
+ * @param step_size The parameter specifying the interval between consecutive defect positions to be evaluated.
+ * @param params Defect operational domain computation parameters.
+ * @param stats Statistics.
+ * @return The defect operational domain of the layout.
  */
 template <typename Lyt>
-[[nodiscard]] std::pair<typename Lyt::cell, double>
-defect_influence_of_sidb_gate(const Lyt& lyt, const defect_influence_of_sidb_gate_params& params = {}) noexcept
+[[nodiscard]] defect_influence_domain<Lyt>
+defect_influence_grid_search(const Lyt& lyt, const defect_influence_params<cell<Lyt>>& params = {},
+                             const std::size_t step_size = 1, defect_influence_stats* stats = nullptr)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(!has_offset_ucoord_v<Lyt>, "Lyt should not be based on offset coordinates");
-    static_assert(!is_charge_distribution_surface_v<Lyt>, "Lyt cannot be a charge distribution surface");
+    static_assert(has_cube_coord_v<Lyt>, "Lyt is not based on cube coordinates");
 
-    assert(lyt.num_pis() > 0 && "skeleton needs input cells");
-    assert(lyt.num_pos() > 0 && "skeleton needs output cells");
+    defect_influence_stats             st{};
+    detail::defect_influence_impl<Lyt> p{lyt, params, st};
 
-    bdl_input_iterator<Lyt> bii{lyt, params.bdl_iterator_params};
-    double                  maximum_defect_influence_distance = 0.0;
-    cell<Lyt>               defect_cell{};
+    const auto result = p.grid_search(step_size);
 
-    // number of different input combinations
-    for (auto i = 0u; i < std::pow(2, lyt.num_pis()); ++i, ++bii)
+    if (stats)
     {
-        maximum_defect_influence_position_and_distance_stats stats_defect{};
-        const auto influence_cell_distance = defect_influence(lyt, params.defect_influence_params, &stats_defect);
-
-        if (influence_cell_distance.second > maximum_defect_influence_distance)
-        {
-            maximum_defect_influence_distance = influence_cell_distance.second;
-            defect_cell                       = influence_cell_distance.first;
-        }
+        *stats = st;
     }
 
-    return {defect_cell, maximum_defect_influence_distance};
+    return result;
+}
+/**
+ * Computes the defect operational domain of the given SiDB cell-level layout. The defect operational domain is the
+ * set of all defect positions for which the layout is logically operational. Logical operation is defined as the layout
+ * implementing the given truth table. The input BDL pairs of the layout are assumed to be in the same order as the
+ * inputs of the truth table.
+ *
+ * This algorithm uses random sampling to find a part of the defect operational domain that might not be
+ * complete. It performs a total of `samples uniformly-distributed random samples within the specified area.
+ *
+ * @tparam Lyt SiDB cell-level layout type.
+ * @tparam TT Truth table type.
+ * @param lyt Layout to compute the defect operational domain for.
+ * @param spec Expected Boolean function of the layout given as a multi-output truth table.
+ * @param samples Number of random samples to perform.
+ * @param params Defect operational domain computation parameters.
+ * @param stats Statistics.
+ * @return The (partial) defect operational domain of the layout.
+ */
+template <typename Lyt, typename TT>
+[[nodiscard]] defect_influence_domain<Lyt>
+defect_influence_random_sampling(const Lyt& lyt, const std::vector<TT>& spec, std::size_t samples,
+                                 const defect_influence_params<cell<Lyt>>& params = {},
+                                 defect_influence_stats*                   stats  = nullptr)
+{
+    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
+    static_assert(has_cube_coord_v<Lyt>, "Lyt is not based on cube coordinates");
+
+    defect_influence_stats             st{};
+    detail::defect_influence_impl<Lyt> p{lyt, params, st};
+
+    const auto result = p.random_sampling(samples, std::optional{spec});
+
+    if (stats)
+    {
+        *stats = st;
+    }
+
+    return result;
+}
+
+/**
+ * @tparam Lyt SiDB cell-level layout type.
+ * @param lyt Layout to compute the defect influence domain for.
+ * @param samples Number of random samples to perform.
+ * @param params Defect influence domain computation parameters.
+ * @param stats Statistics.
+ * @return The (partial) defect influence domain of the layout.
+ */
+template <typename Lyt>
+[[nodiscard]] defect_influence_domain<Lyt>
+defect_influence_random_sampling(const Lyt& lyt, std::size_t samples,
+                                 const defect_influence_params<cell<Lyt>>& params = {},
+                                 defect_influence_stats*                   stats  = nullptr)
+{
+    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(has_cube_coord_v<Lyt>, "Lyt is not based on cube coordinates");
+
+    defect_influence_stats             st{};
+    detail::defect_influence_impl<Lyt> p{lyt, params, st};
+
+    const auto result = p.random_sampling(samples);
+
+    if (stats)
+    {
+        *stats = st;
+    }
+
+    return result;
+}
+
+/**
+ * Computes the defect influence domain of the given SiDB cell-level layout. The defect
+ * influence domain is the set of defect positions together with the information if the layout is influenced. This means
+ * depending on the definition that the layout changes its operationality status or its ground state.
+ *
+ * This algorithm uses contour tracing to identify non-influencing defect locations within the SiDB layout.
+ * It starts by searching for defect locations on the left side (bounding_box + additional scanning area). The
+ * y-coordinate for these positions is chosen randomly. The number of samples is determined by the `samples` parameter.
+ *
+ * Then, the algorithm moves each defect position to the right, searching for the influencing defect position before
+ * finding the non-influencing one. This position is selected as the starting point for the contour trace. The contour
+ * tracing process checks whether the contour includes the SiDB layout. If it does not, the next random sample point is
+ * selected as the starting point and the process is repeated.
+ *
+ * @tparam Lyt SiDB cell-level layout type.
+ * @tparam TT Truth table type.
+ * @param lyt Layout to compute the defect influence domain for.
+ * @param spec Expected Boolean function of the layout given as a multi-output truth table.
+ * @param samples Number of samples to perform.
+ * @param params Defect influence domain computation parameters.
+ * @param stats Defect influence computation statistics.
+ * @return The (partial) defect influence domain of the layout.
+ */
+template <typename Lyt, typename TT>
+[[nodiscard]] defect_influence_domain<Lyt>
+defect_influence_quicktrace(const Lyt& lyt, const std::vector<TT>& spec, const std::size_t samples,
+                            const defect_influence_params<cell<Lyt>>& params = {},
+                            defect_influence_stats*                   stats  = nullptr)
+{
+    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(has_cube_coord_v<Lyt>, "Lyt is not based on cube coordinates");
+
+    defect_influence_stats             st{};
+    detail::defect_influence_impl<Lyt> p{lyt, params, st};
+
+    const auto result = p.quicktrace(samples, std::optional{spec});
+
+    if (stats)
+    {
+        *stats = st;
+    }
+
+    return result;
+}
+
+/**
+ * @tparam Lyt SiDB cell-level layout type.
+ * @param lyt Layout to compute the defect influence domain for.
+ * @param samples Number of samples to perform.
+ * @param params Defect influence domain computation parameters.
+ * @param stats Defect influence computation statistics.
+ * @return The (partial) defect influence domain of the layout.
+ */
+template <typename Lyt>
+[[nodiscard]] defect_influence_domain<Lyt>
+defect_influence_quicktrace(const Lyt& lyt, const std::size_t samples,
+                            const defect_influence_params<cell<Lyt>>& params = {},
+                            defect_influence_stats*                   stats  = nullptr)
+{
+    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(has_cube_coord_v<Lyt>, "Lyt is not based on cube coordinates");
+
+    defect_influence_stats             st{};
+    detail::defect_influence_impl<Lyt> p{lyt, params, st};
+
+    const auto result = p.quicktrace(samples);
+
+    if (stats)
+    {
+        *stats = st;
+    }
+
+    return result;
 }
 
 }  // namespace fiction

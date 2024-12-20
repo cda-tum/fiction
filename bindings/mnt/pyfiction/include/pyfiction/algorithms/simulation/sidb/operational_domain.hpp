@@ -79,7 +79,7 @@ inline void operational_domain(pybind11::module& m)
                        &fiction::operational_domain<fiction::parameter_point, fiction::operational_status>::dimensions,
                        DOC(fiction_operational_domain_dimensions))
         .def_readwrite(
-            "operational_values",
+            "influence_information",
             &fiction::operational_domain<fiction::parameter_point, fiction::operational_status>::operational_values,
             DOC(fiction_operational_domain_operational_values))
 

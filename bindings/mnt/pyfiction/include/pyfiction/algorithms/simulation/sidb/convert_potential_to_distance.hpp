@@ -8,7 +8,7 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
-#include <fiction/algorithms/simulation/sidb/convert_potential_to_distance.hpp>
+#include <fiction/algorithms/simulation/sidb/potential_to_distance_conversion.hpp>
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>

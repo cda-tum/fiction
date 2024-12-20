@@ -8,7 +8,7 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
-#include <fiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp>
+#include <fiction/algorithms/simulation/sidb/positive_charge_existence_check.hpp>
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>

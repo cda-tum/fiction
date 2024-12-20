@@ -1,11 +1,11 @@
-#include "fiction/algorithms/simulation/sidb/calculate_defect_clearance_result.hpp"
+#include "fiction/algorithms/simulation/sidb/defect_clearance.hpp"
 #include "fiction/algorithms/simulation/sidb/defect_influence.hpp"
-#include "fiction/algorithms/simulation/sidb/defect_operational_domain.hpp"
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
 #include "fiction/io/read_sqd_layout.hpp"
-#include "fiction/io/write_defect_operational_domain.hpp"
+#include "fiction/io/write_defect_influence_domain.hpp"
 #include "fiction/io/write_sqd_layout.hpp"
 #include "fiction/technology/sidb_defects.hpp"
+#include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 #include "fiction/utils/truth_table_utils.hpp"
 #include "fiction_experiments.hpp"
@@ -50,18 +50,14 @@ int main()  // NOLINT
     const auto                  sidb_sim = sidb_simulation_parameters{2, -0.32, 5.6, 5.0};
     const is_operational_params is_op_params{sidb_sim};
 
-    defect_influence_params max_defect_params{};
-    max_defect_params.additional_scanning_area = {50, 50};
-
     // for this experiment we use a stray SiDB defect
     const auto stray_db = fiction::sidb_defect{fiction::sidb_defect_type::DB, -1, 4.1, 1.8};
     // const auto si_vacancy = fiction::sidb_defect{fiction::sidb_defect_type::SI_VACANCY, -1, 10.6, 5.9};
 
-    max_defect_params.defect = stray_db;
-
-    defect_operational_domain_params defect_params{};
-    defect_params.defect_influence_params = max_defect_params;
-    defect_params.operational_params      = is_op_params;
+    defect_influence_params<fiction::cell<sidb_100_cell_clk_lyt_cube>> params{};
+    params.additional_scanning_area = {50, 50};
+    params.defect                   = stray_db;
+    params.operational_params       = is_op_params;
 
     for (const auto& [gate, truth_table] : gates)
     {
@@ -73,9 +69,8 @@ int main()  // NOLINT
         {
             const auto layout = read_sqd_layout<sidb_100_cell_clk_lyt_cube>(file.path().string());
 
-            defect_operational_domain_stats grid_stats{};
-            const auto                      op_defect_grid =
-                defect_operational_domain_grid_search(layout, truth_table, 1, defect_params, &grid_stats);
+            defect_influence_stats grid_stats{};
+            const auto op_defect_grid = defect_influence_grid_search(layout, truth_table, params, 1, &grid_stats);
 
             // Define file paths for the CSV and SQD
             const auto csv_path = fmt::format("{}{}_grid.csv", gate_folder, gate);
@@ -89,25 +84,23 @@ int main()  // NOLINT
 
             const auto avoidance_grid = calculate_defect_clearance(layout, op_defect_grid);
 
-            defect_operational_domain_stats random_stats{};
-            const auto                      op_defect_random =
-                defect_operational_domain_random_sampling(layout, truth_table, 100, defect_params, &random_stats);
+            defect_influence_stats random_stats{};
+            const auto             op_defect_random =
+                defect_influence_random_sampling(layout, truth_table, 100, params, &random_stats);
             const auto avoidance_random = calculate_defect_clearance(layout, op_defect_random);
 
             const auto csv_path_random = fmt::format("{}{}_random.csv", gate_folder, gate);
             write_defect_operational_domain(op_defect_random, csv_path_random);
 
-            defect_operational_domain_stats contour_stats{};
-            const auto                      op_defect_contour =
-                defect_operational_domain_quicktrace(layout, truth_table, 20, defect_params, &contour_stats);
+            defect_influence_stats contour_stats{};
+            const auto op_defect_contour = defect_influence_quicktrace(layout, truth_table, 20, params, &contour_stats);
             const auto avoidance_contour = calculate_defect_clearance(layout, op_defect_contour);
 
             const auto csv_path_contour = fmt::format("{}{}_contour.csv", gate_folder, gate);
             write_defect_operational_domain(op_defect_contour, csv_path_contour);
 
             // Log the simulation results
-            simulation_exp(gate, layout.num_cells(), avoidance_grid.max_distance_postion_of_non_operational_defect.x,
-                           avoidance_grid.max_distance_postion_of_non_operational_defect.y,
+            simulation_exp(gate, layout.num_cells(), avoidance_grid.defect_position.x, avoidance_grid.defect_position.y,
                            avoidance_grid.defect_clearance_distance, grid_stats.num_evaluated_defect_positions,
                            avoidance_random.defect_clearance_distance, random_stats.num_evaluated_defect_positions,
                            avoidance_contour.defect_clearance_distance, contour_stats.num_evaluated_defect_positions);

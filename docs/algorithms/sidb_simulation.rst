@@ -239,26 +239,33 @@ SiDB Defect Analysis
 
 .. doxygenfunction:: fiction::sidb_surface_analysis
 
+
 **Header:** ``fiction/algorithms/simulation/sidb/defect_influence.hpp``
 
 .. doxygenstruct:: fiction::defect_influence_params
    :members:
-.. doxygenstruct:: fiction::defect_influence_of_sidb_gate
-   :members:
-.. doxygenfunction:: fiction::defect_influence
-.. doxygenfunction:: fiction::defect_influence_of_sidb_gate
-
-**Header:** ``fiction/algorithms/simulation/sidb/defect_operational_domain.hpp``
-
-.. doxygenstruct:: fiction::defect_operational_domain_params
-   :members:
-.. doxygenstruct:: fiction::defect_operational_domain
+.. doxygenenum:: fiction::defect_influence_status
+.. doxygenstruct:: fiction::defect_influence_domain
    :members:
 
-.. doxygenstruct:: fiction::defect_operational_domain_stats
-.. doxygenfunction:: fiction::defect_operational_domain_grid_search
-.. doxygenfunction:: fiction::defect_operational_domain_random_sampling
-.. doxygenfunction:: fiction::defect_operational_domain_quicktrace
+.. doxygenstruct:: fiction::defect_influence_stats
+.. doxygenfunction:: fiction::defect_influence_grid_search(const Lyt& lyt, const std::vector<TT>& spec,
+                             const defect_influence_params<cell<Lyt>>& params = {}, const std::size_t step_size = 1,
+                             defect_influence_stats* stats = nullptr)
+.. doxygenfunction:: fiction::defect_influence_grid_search(const Lyt& lyt, const defect_influence_params<cell<Lyt>>& params = {},
+                             const std::size_t step_size = 1, defect_influence_stats* stats = nullptr)
+.. doxygenfunction:: fiction::defect_influence_random_sampling(const Lyt& lyt, const std::vector<TT>& spec, std::size_t samples,
+                                 const defect_influence_params<cell<Lyt>>& params = {},
+                                 defect_influence_stats*                   stats  = nullptr)
+.. doxygenfunction:: fiction::defect_influence_random_sampling(const Lyt& lyt, std::size_t samples,
+                                 const defect_influence_params<cell<Lyt>>& params = {},
+                                 defect_influence_stats*                   stats  = nullptr)
+.. doxygenfunction:: fiction::defect_influence_quicktrace(const Lyt& lyt, const std::vector<TT>& spec, const std::size_t samples,
+                            const defect_influence_params<cell<Lyt>>& params = {},
+                            defect_influence_stats*                   stats  = nullptr)
+.. doxygenfunction:: fiction::defect_influence_quicktrace(const Lyt& lyt, const std::size_t samples,
+                            const defect_influence_params<cell<Lyt>>& params = {},
+                            defect_influence_stats*                   stats  = nullptr)
 
 **Header:** ``fiction/algorithms/simulation/sidb/calculate_defect_clearance.hpp``
 
@@ -457,12 +464,12 @@ Determine the Ground State from Simulation Results
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/algorithms/simulation/sidb/determine_groundstate_from_simulation_results.hpp``
+        **Header:** ``fiction/algorithms/simulation/sidb/groundstate_from_simulation_results.hpp``
 
-        .. doxygenfunction:: fiction::determine_groundstate_from_simulation_results
+        .. doxygenfunction:: fiction::groundstate_from_simulation_results
 
     .. tab:: Python
-        .. autofunction:: mnt.pyfiction.determine_groundstate_from_simulation_results
+        .. autofunction:: mnt.pyfiction.groundstate_from_simulation_results
 
 
 Charge Detection
@@ -531,14 +538,14 @@ Assess Population Stability
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/algorithms/simulation/sidb/assess_physical_population_stability.hpp``
+        **Header:** ``fiction/algorithms/simulation/sidb/physical_population_stability.hpp``
 
         .. doxygenenum:: fiction::transition_type
         .. doxygenstruct:: fiction::population_stability_information
            :members:
-        .. doxygenstruct:: fiction::assess_physical_population_stability_params
+        .. doxygenstruct:: fiction::physical_population_stability_params
            :members:
-        .. doxygenfunction:: fiction::assess_physical_population_stability
+        .. doxygenfunction:: fiction::physical_population_stability
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.transition_type
@@ -547,7 +554,7 @@ Assess Population Stability
             :members:
         .. autoclass:: mnt.pyfiction.population_stability_information_111
             :members:
-        .. autoclass:: mnt.pyfiction.assess_physical_population_stability_params
+        .. autoclass:: mnt.pyfiction.physical_population_stability_params
             :members:
         .. autofunction:: mnt.pyfiction.assess_physical_population_stability_100
         .. autofunction:: mnt.pyfiction.assess_physical_population_stability_111
@@ -556,7 +563,7 @@ Assess Population Stability
 Band-Bending Resilience
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-**Header:** ``fiction/algorithms/simulation/sidb/assess_physical_population_stability.hpp``
+**Header:** ``fiction/algorithms/simulation/sidb/physical_population_stability.hpp``
 
 .. doxygenstruct:: fiction::band_bending_resilience_params
    :members:

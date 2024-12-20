@@ -6,7 +6,7 @@
 
 #include <fiction/algorithms/iter/bdl_input_iterator.hpp>
 #include <fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp>
-#include <fiction/algorithms/simulation/sidb/determine_groundstate_from_simulation_results.hpp>
+#include <fiction/algorithms/simulation/sidb/groundstate_from_simulation_results.hpp>
 #include <fiction/algorithms/simulation/sidb/is_operational.hpp>
 #include <fiction/algorithms/simulation/sidb/quickexact.hpp>
 #include <fiction/algorithms/simulation/sidb/verify_logic_match.hpp>
@@ -35,7 +35,7 @@ TEST_CASE("Bestagon FO2 gate", "[does-charge-distribution-match-logic-for-given-
 
         const auto simulation_results = quickexact<sidb_cell_clk_lyt_siqad>(*bii, params);
 
-        const auto gs = determine_groundstate_from_simulation_results(simulation_results);
+        const auto gs = groundstate_from_simulation_results(simulation_results);
 
         REQUIRE(!gs.empty());
 
@@ -50,7 +50,7 @@ TEST_CASE("Bestagon FO2 gate", "[does-charge-distribution-match-logic-for-given-
 
         const auto simulation_results = quickexact<sidb_cell_clk_lyt_siqad>(*bii, params);
 
-        const auto gs = determine_groundstate_from_simulation_results(simulation_results);
+        const auto gs = groundstate_from_simulation_results(simulation_results);
 
         REQUIRE(!gs.empty());
 
@@ -90,7 +90,7 @@ TEST_CASE("AND gate mirrored on the x-axis on the H-Si 111 surface",
 
         const auto simulation_results = quickexact<sidb_111_cell_clk_lyt_siqad>(*bii, params);
 
-        const auto gs = determine_groundstate_from_simulation_results(simulation_results);
+        const auto gs = groundstate_from_simulation_results(simulation_results);
 
         REQUIRE(!gs.empty());
 
@@ -105,7 +105,7 @@ TEST_CASE("AND gate mirrored on the x-axis on the H-Si 111 surface",
 
         const auto simulation_results = quickexact<sidb_111_cell_clk_lyt_siqad>(*bii, params);
 
-        const auto gs = determine_groundstate_from_simulation_results(simulation_results);
+        const auto gs = groundstate_from_simulation_results(simulation_results);
 
         REQUIRE(!gs.empty());
 

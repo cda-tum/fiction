@@ -8,7 +8,7 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
-#include <fiction/algorithms/simulation/sidb/assess_physical_population_stability.hpp>
+#include <fiction/algorithms/simulation/sidb/physical_population_stability.hpp>
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
@@ -41,8 +41,8 @@ void assess_physical_population_stability(pybind11::module& m, const std::string
                        DOC(fiction_population_stability_information_system_energy));
 
     m.def(fmt::format("assess_physical_population_stability_{}", lattice).c_str(),
-          &fiction::assess_physical_population_stability<Lyt>, py::arg("lyt"),
-          py::arg("params") = fiction::assess_physical_population_stability_params{},
+          &fiction::physical_population_stability<Lyt>, py::arg("lyt"),
+          py::arg("params") = fiction::physical_population_stability_params{},
           DOC(fiction_assess_physical_population_stability));
 }
 
@@ -65,15 +65,14 @@ inline void assess_physical_population_stability(pybind11::module& m)
     /**
      * Parameters.
      */
-    py::class_<fiction::assess_physical_population_stability_params>(
-        m, "assess_physical_population_stability_params", DOC(fiction_assess_physical_population_stability_params))
+    py::class_<fiction::physical_population_stability_params>(m, "physical_population_stability_params",
+                                                              DOC(fiction_assess_physical_population_stability_params))
         .def(py::init<>())
-        .def_readwrite("simulation_parameters",
-                       &fiction::assess_physical_population_stability_params::simulation_parameters,
+        .def_readwrite("simulation_parameters", &fiction::physical_population_stability_params::simulation_parameters,
                        DOC(fiction_assess_physical_population_stability_params))
         .def_readwrite(
             "precision_for_distance_corresponding_to_potential",
-            &fiction::assess_physical_population_stability_params::precision_for_distance_corresponding_to_potential,
+            &fiction::physical_population_stability_params::precision_for_distance_corresponding_to_potential,
             DOC(fiction_assess_physical_population_stability_params_precision_for_distance_corresponding_to_potential));
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!

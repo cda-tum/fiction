@@ -2,11 +2,10 @@
 // Created by Jan Drewniok on 07.02.24.
 //
 
-#ifndef FICTION_CALCULATE_DEFECT_CLEARANCE_RESULT_HPP
-#define FICTION_CALCULATE_DEFECT_CLEARANCE_RESULT_HPP
+#ifndef FICTION_DEFECT_CLEARANCE_HPP
+#define FICTION_DEFECT_CLEARANCE_HPP
 
-#include "fiction/algorithms/simulation/sidb/defect_operational_domain.hpp"
-#include "fiction/algorithms/simulation/sidb/is_operational.hpp"
+#include "fiction/algorithms/simulation/sidb/defect_influence.hpp"
 #include "fiction/technology/sidb_nm_distance.hpp"
 #include "fiction/traits.hpp"
 
@@ -26,10 +25,10 @@ struct defect_clearance_result
      * Position with maximum distance to the SiDB layout at which the placement of an SiDB defect still causes the gate
      * to fail.
      */
-    CellType max_distance_postion_of_non_operational_defect{};
+    CellType defect_position{};
     /**
      * The maximum of the minimum distances between any SiDB in the gate and the defect responsible for gate
-     * failure.
+     * failure (unit: nm).
      */
     double defect_clearance_distance{};
 };
@@ -44,14 +43,14 @@ struct defect_clearance_result
  */
 template <typename Lyt>
 [[nodiscard]] defect_clearance_result<cell<Lyt>>
-calculate_defect_clearance(const Lyt& lyt, const defect_operational_domain<Lyt>& defect_opdomain) noexcept
+calculate_defect_clearance(const Lyt& lyt, const defect_influence_domain<Lyt>& defect_opdomain) noexcept
 {
     double    max_distance         = 0;
     cell<Lyt> max_distance_postion = {};
 
-    for (const auto& val : defect_opdomain.operational_values)
+    for (const auto& val : defect_opdomain.influence_information)
     {
-        if (val.second == operational_status::OPERATIONAL)
+        if (val.second == defect_influence_status::NON_EXISTENT)
         {
             continue;
         }
@@ -81,4 +80,4 @@ calculate_defect_clearance(const Lyt& lyt, const defect_operational_domain<Lyt>&
 
 }  // namespace fiction
 
-#endif  // FICTION_CALCULATE_DEFECT_CLEARANCE_RESULT_HPP
+#endif  // FICTION_DEFECT_CLEARANCE_HPP

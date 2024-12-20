@@ -2,14 +2,14 @@
 // Created by Jan Drewniok on 07.05.24.
 //
 
-#ifndef PYFICTION_DETERMINE_PHYSICALLY_VALID_PARAMETERS_HPP
-#define PYFICTION_DETERMINE_PHYSICALLY_VALID_PARAMETERS_HPP
+#ifndef PYFICTION_PHYSICALLY_VALID_PARAMETERS_HPP
+#define PYFICTION_PHYSICALLY_VALID_PARAMETERS_HPP
 
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
-#include <fiction/algorithms/simulation/sidb/determine_physically_valid_parameters.hpp>
 #include <fiction/algorithms/simulation/sidb/operational_domain.hpp>
+#include <fiction/algorithms/simulation/sidb/physically_valid_parameters.hpp>
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
@@ -23,17 +23,18 @@ namespace detail
 {
 
 template <typename Lyt>
-void determine_physically_valid_parameters(pybind11::module& m)
+void physically_valid_parameters(pybind11::module& m)
 {
     namespace py = pybind11;
 
-    m.def("determine_physically_valid_parameters", &fiction::determine_physically_valid_parameters<Lyt>, py::arg("cds"),
-          py::arg("params") = fiction::operational_domain_params{}, DOC(fiction_determine_physically_valid_parameters));
+    // TODO update docu
+    m.def("physically_valid_parameters", &fiction::physically_valid_parameters<Lyt>, py::arg("cds"),
+          py::arg("params") = fiction::operational_domain_params{});
 }
 
 }  // namespace detail
 
-inline void determine_physically_valid_parameters(pybind11::module& m)
+inline void physically_valid_parameters(pybind11::module& m)
 {
     namespace py = pybind11;
 
@@ -61,10 +62,10 @@ inline void determine_physically_valid_parameters(pybind11::module& m)
             py::arg("pp"));
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
-    detail::determine_physically_valid_parameters<py_charge_distribution_surface_100>(m);
-    detail::determine_physically_valid_parameters<py_charge_distribution_surface_111>(m);
+    detail::physically_valid_parameters<py_charge_distribution_surface_100>(m);
+    detail::physically_valid_parameters<py_charge_distribution_surface_111>(m);
 }
 
 }  // namespace pyfiction
 
-#endif  // FICTION_DETERMINE_PHYSICALLY_VALID_PARAMETERS_HPP
+#endif  // FICTION_PHYSICALLY_VALID_PARAMETERS_HPP

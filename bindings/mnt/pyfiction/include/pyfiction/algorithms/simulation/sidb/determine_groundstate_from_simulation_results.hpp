@@ -8,7 +8,7 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
-#include <fiction/algorithms/simulation/sidb/determine_groundstate_from_simulation_results.hpp>
+#include <fiction/algorithms/simulation/sidb/groundstate_from_simulation_results.hpp>
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
@@ -24,7 +24,7 @@ void determine_groundstate_from_simulation_results(pybind11::module& m)
 {
     namespace py = pybind11;
 
-    m.def("determine_groundstate_from_simulation_results", &fiction::determine_groundstate_from_simulation_results<Lyt>,
+    m.def("groundstate_from_simulation_results", &fiction::groundstate_from_simulation_results<Lyt>,
           py::arg("simulation_results"), DOC(fiction_determine_groundstate_from_simulation_results));
 }
 

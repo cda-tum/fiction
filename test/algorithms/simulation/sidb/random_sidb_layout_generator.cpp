@@ -5,7 +5,7 @@
 #include <catch2/catch_template_test_macros.hpp>
 
 #include <fiction/algorithms/path_finding/distance.hpp>
-#include <fiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp>
+#include <fiction/algorithms/simulation/sidb/positive_charge_existence_check.hpp>
 #include <fiction/algorithms/simulation/sidb/random_sidb_layout_generator.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>

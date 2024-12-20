@@ -32,7 +32,7 @@ void determine_displacement_robustness_domain(pybind11::module& m, const std::st
     py::class_<fiction::displacement_robustness_domain<Lyt>>(
         m, fmt::format("displacement_robustness_domain{}", lattice).c_str())
         .def(py::init<>())
-        .def_readwrite("operational_values", &fiction::displacement_robustness_domain<Lyt>::operational_values);
+        .def_readwrite("influence_information", &fiction::displacement_robustness_domain<Lyt>::operational_values);
 
     m.def(fmt::format("determine_displacement_robustness_domain{}", lattice).c_str(),
           &fiction::determine_displacement_robustness_domain<Lyt, py_tt>, py::arg("layout"), py::arg("spec"),

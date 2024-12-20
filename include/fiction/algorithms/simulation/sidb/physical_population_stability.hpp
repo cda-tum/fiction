@@ -2,10 +2,10 @@
 // Created by Jan Drewniok on 02.11.23.
 //
 
-#ifndef FICTION_ASSESS_PHYSICAL_POPULATION_STABILITY_HPP
-#define FICTION_ASSESS_PHYSICAL_POPULATION_STABILITY_HPP
+#ifndef FICTION_PHYSICAL_POPULATION_STABILITY_HPP
+#define FICTION_PHYSICAL_POPULATION_STABILITY_HPP
 
-#include "fiction/algorithms/simulation/sidb/convert_potential_to_distance.hpp"
+#include "fiction/algorithms/simulation/sidb/potential_to_distance_conversion.hpp"
 #include "fiction/algorithms/simulation/sidb/quickexact.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
@@ -84,9 +84,9 @@ struct population_stability_information
 };
 
 /**
- * This struct stores the parameters required to assess the population stability.
+ * This struct stores the parameters required to simulate the population stability.
  */
-struct assess_physical_population_stability_params
+struct physical_population_stability_params
 {
     /**
      * Parameters for the electrostatic potential.
@@ -102,30 +102,29 @@ struct assess_physical_population_stability_params
 namespace detail
 {
 /**
- * This class implements the population stability assessment for a given SiDB layout.
+ * This class implements the simulation of the population stability for a given SiDB layout.
  * It determines the minimum electrostatic potential required for charge state transitions within the layout and
  * identifies the corresponding critical SiDB along with the type of charge state transition.
  *
  * @tparam Lyt SiDB cell-level layout type.
  */
 template <typename Lyt>
-class assess_physical_population_stability_impl
+class physical_population_stability_impl
 {
   public:
     /**
-     * Constructor for assess_physical_population_stability_impl.
+     * Constructor for physical_population_stability_impl.
      *
      * @param lyt SiDB layout.
-     * @param parameters The simulation parameters used for the assessment.
+     * @param parameters The simulation parameters used.
      */
-    assess_physical_population_stability_impl(const Lyt&                                         lyt,
-                                              const assess_physical_population_stability_params& parameters) :
+    physical_population_stability_impl(const Lyt& lyt, const physical_population_stability_params& parameters) :
             layout{lyt},
             params{parameters}
     {}
 
     /**
-     * Runs a population stability assessment for a given SiDB layout using the provided simulation parameters.
+     * Runs a population stability simulation for a given SiDB layout using the provided simulation parameters.
      * This function determines the minimum electrostatic potential required for charge state transitions within the
      * layout and identifies the corresponding critical SiDB along with the type of charge state transition.
      *
@@ -241,9 +240,9 @@ class assess_physical_population_stability_impl
      */
     const Lyt& layout;
     /**
-     * Parameters required to assess the population stability.
+     * Parameters required to simulate the population stability.
      */
-    const assess_physical_population_stability_params& params;
+    const physical_population_stability_params& params;
 
     /**
      * This function checks if the absolute difference between the given local potential and
@@ -382,27 +381,27 @@ class assess_physical_population_stability_impl
 }  // namespace detail
 
 /**
- * This function assesses the population stability of each physically valid charge distributions of a given SiDB layout.
- * It determines the minimum absolute electrostatic potential required to induce a charge distribution transition.
- * The function also identifies the SiDB for which this is the case (critical SiDB) and the corresponding charge state
- * transition (i.e., the change from one charge state to another).
+ * This function simulates the population stability of each physically valid charge distributions of a given SiDB
+ * layout. It determines the minimum absolute electrostatic potential required to induce a charge distribution
+ * transition. The function also identifies the SiDB for which this is the case (critical SiDB) and the corresponding
+ * charge state transition (i.e., the change from one charge state to another).
  * @tparam Lyt SiDB cell-level layout type.
- * @param lyt The layout for which the population stability is assessed.
- * @param params Parameters used to assess the population stability.
+ * @param lyt The layout for which the population stability is simulated.
+ * @param params Parameters used to simulate the population stability.
  * @return A vector of population stability information for all physically valid charge distributions of the given SiDB
  * layout.
  */
 template <typename Lyt>
 [[nodiscard]] std::vector<population_stability_information<Lyt>>
-assess_physical_population_stability(const Lyt& lyt, const assess_physical_population_stability_params& params) noexcept
+physical_population_stability(const Lyt& lyt, const physical_population_stability_params& params) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
-    detail::assess_physical_population_stability_impl<Lyt> p{lyt, params};
+    detail::physical_population_stability_impl<Lyt> p{lyt, params};
     return p.run();
 }
 
 }  // namespace fiction
 
-#endif  // FICTION_ASSESS_PHYSICAL_POPULATION_STABILITY_HPP
+#endif  // FICTION_PHYSICAL_POPULATION_STABILITY_HPP

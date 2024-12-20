@@ -7,8 +7,8 @@
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
-#include <fiction/algorithms/simulation/sidb/assess_physical_population_stability.hpp>
 #include <fiction/algorithms/simulation/sidb/band_bending_resilience.hpp>
+#include <fiction/algorithms/simulation/sidb/physical_population_stability.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/technology/physical_constants.hpp>
 #include <fiction/types.hpp>
@@ -24,8 +24,8 @@ TEST_CASE("Single SiDB", "[calculate-min-bbr-for-all-inputs]")
 {
     const auto lyt = blueprints::bestagon_and_gate<layout>();
 
-    const auto params = band_bending_resilience_params{
-        assess_physical_population_stability_params{sidb_simulation_parameters{2, -0.32}, 2}};
+    const auto params =
+        band_bending_resilience_params{physical_population_stability_params{sidb_simulation_parameters{2, -0.32}, 2}};
 
     SECTION("Minimal potential required to conduct a charge change from neutral to negative")
     {

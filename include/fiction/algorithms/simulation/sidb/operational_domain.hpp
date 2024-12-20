@@ -188,6 +188,16 @@ struct operational_domain
     {
         return detail::contains_key(operational_values, key);
     }
+
+    void add_value(const Key& key, const Value& value)
+    {
+        operational_values.try_emplace(key, value);
+    }
+
+    [[nodiscard]] locked_parallel_flat_hash_map<Key, Value> get_domain() const
+    {
+        return operational_values;
+    }
 };
 /**
  * A range of values for a dimension sweep. The range is defined by a minimum value, a maximum value and a step size.
@@ -548,7 +558,7 @@ class operational_domain_impl
         };
 
         // add the neighbors of each operational point to the queue
-        for (const auto& [param_point, status] : op_domain.operational_values)
+        for (const auto& [param_point, status] : op_domain.get_domain())
         {
             if (status == operational_status::OPERATIONAL)
             {
@@ -623,9 +633,13 @@ class operational_domain_impl
         for (const auto& starting_point : step_point_samples)
         {
             // if the current starting point is non-operational, skip to the next one
-            if (op_domain.operational_values[to_parameter_point(starting_point)] == operational_status::NON_OPERATIONAL)
+            const auto domain_value = op_domain.get_value(to_parameter_point(starting_point));
+            if (domain_value.has_value())
             {
-                continue;
+                if (domain_value.value() == operational_status::NON_OPERATIONAL)
+                {
+                    continue;
+                }
             }
 
             // if the current step point has been inferred as operational, skip to the next one
@@ -1095,14 +1109,14 @@ class operational_domain_impl
 
         const auto operational = [this, &param_point]()
         {
-            op_domain.operational_values.try_emplace(param_point, operational_status::OPERATIONAL);
+            op_domain.add_value(param_point, operational_status::OPERATIONAL);
 
             return operational_status::OPERATIONAL;
         };
 
         const auto non_operational = [this, &param_point]()
         {
-            op_domain.operational_values.try_emplace(param_point, operational_status::NON_OPERATIONAL);
+            op_domain.add_value(param_point, operational_status::NON_OPERATIONAL);
 
             return operational_status::NON_OPERATIONAL;
         };
@@ -1527,7 +1541,7 @@ class operational_domain_impl
         stats.num_simulator_invocations            = num_simulator_invocations.load();
         stats.num_evaluated_parameter_combinations = num_evaluated_parameter_combinations.load();
 
-        for (const auto& [param_point, status] : op_domain.operational_values)
+        for (const auto& [param_point, status] : op_domain.get_domain())
         {
             if (status == operational_status::OPERATIONAL)
             {

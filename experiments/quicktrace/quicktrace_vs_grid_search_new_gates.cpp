@@ -1,7 +1,6 @@
 #include "fiction/algorithms/physical_design/design_sidb_gates.hpp"
-#include "fiction/algorithms/simulation/sidb/calculate_defect_clearance_result.hpp"
+#include "fiction/algorithms/simulation/sidb/defect_clearance.hpp"
 #include "fiction/algorithms/simulation/sidb/defect_influence.hpp"
-#include "fiction/algorithms/simulation/sidb/defect_operational_domain.hpp"
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
 #include "fiction/io/read_sqd_layout.hpp"
 #include "fiction/technology/sidb_defects.hpp"
@@ -62,7 +61,7 @@ int main()  // NOLINT
 
     max_defect_params.additional_scanning_area = {100, 100};
 
-    defect_operational_domain_params defect_params{};
+    defect_influence_params defect_params{};
     defect_params.defect_influence_params = max_defect_params;
     defect_params.operational_params      = is_op_params;
 
@@ -79,22 +78,21 @@ int main()  // NOLINT
         for (const auto& gate_lyt : exhaustive_design)
         {
             // using grid search to find the minimum defect clearance
-            defect_operational_domain_stats grid_stats{};
-            const auto                      op_defect_grid =
-                defect_operational_domain_grid_search(gate_lyt, truth_table, 1, defect_params, &grid_stats);
+            defect_influence_stats grid_stats{};
+            const auto             op_defect_grid =
+                defect_influence_grid_search(gate_lyt, truth_table, 1, defect_params, &grid_stats);
             const auto avoidance_grid = calculate_defect_clearance(gate_lyt, op_defect_grid);
 
             // using QuickTrace to find the minimum clearance
-            defect_operational_domain_stats contour_stats{};
-            const auto                      op_defect_contour =
-                defect_operational_domain_quicktrace(gate_lyt, truth_table, 100, defect_params, &contour_stats);
+            defect_influence_stats contour_stats{};
+            const auto             op_defect_contour =
+                defect_influence_quicktrace(gate_lyt, truth_table, 100, defect_params, &contour_stats);
             const auto avoidance_contour = calculate_defect_clearance(gate_lyt, op_defect_contour);
 
             // check if QuickTrace and grid search give the same result
             if (std::abs(avoidance_grid.defect_clearance_distance - avoidance_contour.defect_clearance_distance) >
                     10E-6 &&
-                avoidance_grid.max_distance_postion_of_non_operational_defect !=
-                    avoidance_contour.max_distance_postion_of_non_operational_defect)
+                avoidance_grid.defect_position != avoidance_contour.defect_position)
             {
                 counter_for_wrong_output_of_quicktrace++;
             }

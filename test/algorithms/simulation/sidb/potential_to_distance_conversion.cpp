@@ -5,7 +5,7 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
-#include <fiction/algorithms/simulation/sidb/convert_potential_to_distance.hpp>
+#include <fiction/algorithms/simulation/sidb/potential_to_distance_conversion.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 
 #include <cstdint>
@@ -13,7 +13,7 @@
 
 using namespace fiction;
 
-TEST_CASE("Conversion of potential to distance", "[convert-potential-to-distance]")
+TEST_CASE("Conversion of potential to distance", "[potential_to_distance_conversion]")
 {
     auto params = sidb_simulation_parameters{};
 

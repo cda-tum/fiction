@@ -2,8 +2,8 @@
 // Created by Jan Drewniok on 12.02.24.
 //
 
-#ifndef FICTION_DETERMINE_GROUNDSTATE_FROM_SIMULATION_RESULTS_HPP
-#define FICTION_DETERMINE_GROUNDSTATE_FROM_SIMULATION_RESULTS_HPP
+#ifndef FICTION_GROUNDSTATE_FROM_SIMULATION_RESULTS_HPP
+#define FICTION_GROUNDSTATE_FROM_SIMULATION_RESULTS_HPP
 
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
@@ -30,7 +30,7 @@ namespace fiction
  */
 template <typename Lyt>
 [[nodiscard]] std::vector<charge_distribution_surface<Lyt>>
-determine_groundstate_from_simulation_results(const sidb_simulation_result<Lyt>& simulation_results) noexcept
+groundstate_from_simulation_results(const sidb_simulation_result<Lyt>& simulation_results) noexcept
 {
     std::vector<charge_distribution_surface<Lyt>> groundstate_charge_distributions{};
     std::set<uint64_t>                            charge_indices{};
@@ -77,4 +77,4 @@ determine_groundstate_from_simulation_results(const sidb_simulation_result<Lyt>&
 
 }  // namespace fiction
 
-#endif  // FICTION_DETERMINE_GROUNDSTATE_FROM_SIMULATION_RESULTS_HPP
+#endif  // FICTION_GROUNDSTATE_FROM_SIMULATION_RESULTS_HPP

@@ -4529,7 +4529,7 @@ Template parameter ``Lyt``:
     SiDB cell-level layout type.)doc";
 
 static const char *__doc_fiction_detail_assess_physical_population_stability_impl_assess_physical_population_stability_impl =
-R"doc(Constructor for assess_physical_population_stability_impl.
+R"doc(Constructor for physical_population_stability_impl.
 
 Parameter ``lyt``:
     SiDB layout.
