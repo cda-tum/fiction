@@ -856,7 +856,9 @@ class clustercomplete_impl
      * @param w The worker running on the current thread. It has a clustering state that holds a specific combination of
      * multiset charge configurations as projector states of which the respectively associated clusters form a
      * clustering in the cluster hierarchy.
-     * @param composition todo
+     * @param composition To enable dynamic updates of the clustering states that thieves can assume, the composition
+     * that the current worker's clustering state is specialized to is to be stored in the worker's queue if further
+     * compositions are to be unfolded.
      * @return `false` if and only if queue of this worker is found to be completely empty and thus backtracking is
      * not required.
      */
