@@ -1221,7 +1221,7 @@ Returns:
     Electrostatic potential energy of all charge distributions with
     state type.)doc";
 
-static const char *__doc_fiction_can_positive_charges_occur =
+static const char *__doc_fiction_can_positive_charge_occur =
 R"doc(This algorithm determines if positively charged SiDBs can occur in a
 given SiDB cell-level layout due to strong electrostatic interaction.
 
@@ -9850,7 +9850,7 @@ from applying a displacement to a given SiDB layout.)doc";
 
 static const char *__doc_fiction_displacement_robustness_domain_params =
 R"doc(Parameters for the `determine_displacement_robustness_domain` and
-`probability_of_fabricating_operational_gate` algorithms.
+`determine_probability_of_fabricating_operational_gate` algorithms.
 
 Parameter ``CellType``:
     SiDB layout cell type.)doc";
