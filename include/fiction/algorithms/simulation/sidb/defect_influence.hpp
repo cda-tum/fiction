@@ -641,7 +641,7 @@ class defect_influence_impl
 
             lyt_defect.assign_sidb_defect(defect_pos, params.defect);
 
-            if (can_positive_charges_occur(lyt_defect, params.operational_params.simulation_parameters))
+            if (can_positive_charge_occur(lyt_defect, params.operational_params.simulation_parameters))
             {
                 return defect_influence_status::EXISTENT;
             }

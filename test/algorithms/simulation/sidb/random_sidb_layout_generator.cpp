@@ -5,7 +5,7 @@
 #include <catch2/catch_template_test_macros.hpp>
 
 #include <fiction/algorithms/path_finding/distance.hpp>
-#include <fiction/algorithms/simulation/sidb/positive_charge_existence_check.hpp>
+#include <fiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp>
 #include <fiction/algorithms/simulation/sidb/random_sidb_layout_generator.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
@@ -134,7 +134,7 @@ TEST_CASE("Random cube::coord_t layout generation", "[random-sidb-layout-generat
                 CHECK(cell.y <= 200);
             });
 
-        CHECK(!can_positive_charges_occur(result_lyt, sidb_simulation_parameters{}));
+        CHECK(!can_positive_charge_occur(result_lyt, sidb_simulation_parameters{}));
     }
 
     SECTION("given previous layouts")
@@ -196,7 +196,7 @@ TEST_CASE("Random cube::coord_t layout generation", "[random-sidb-layout-generat
 
         for (const auto& lyt : result_lyts)
         {
-            CHECK(!can_positive_charges_occur(lyt, sidb_simulation_parameters{}));
+            CHECK(!can_positive_charge_occur(lyt, sidb_simulation_parameters{}));
         }
     }
 }
@@ -300,7 +300,7 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[random-sidb-layout-gene
                 CHECK(cell.y <= 200);
             });
 
-        CHECK(!can_positive_charges_occur(result_lyt, sidb_simulation_parameters{}));
+        CHECK(!can_positive_charge_occur(result_lyt, sidb_simulation_parameters{}));
     }
 
     SECTION("given previous layouts")

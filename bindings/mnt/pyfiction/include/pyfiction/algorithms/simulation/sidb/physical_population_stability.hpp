@@ -2,8 +2,8 @@
 // Created by marcel on 21.11.23.
 //
 
-#ifndef PYFICTION_ASSESS_PHYSICAL_POPULATION_STABILITY_HPP
-#define PYFICTION_ASSESS_PHYSICAL_POPULATION_STABILITY_HPP
+#ifndef PYFICTION_PHYSICAL_POPULATION_STABILITY_HPP
+#define PYFICTION_PHYSICAL_POPULATION_STABILITY_HPP
 
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
@@ -22,7 +22,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void assess_physical_population_stability(pybind11::module& m, const std::string& lattice)
+void physical_population_stability(pybind11::module& m, const std::string& lattice)
 {
     namespace py = pybind11;
 
@@ -40,7 +40,7 @@ void assess_physical_population_stability(pybind11::module& m, const std::string
         .def_readwrite("system_energy", &fiction::population_stability_information<Lyt>::system_energy,
                        DOC(fiction_population_stability_information_system_energy));
 
-    m.def(fmt::format("assess_physical_population_stability_{}", lattice).c_str(),
+    m.def(fmt::format("physical_population_stability_{}", lattice).c_str(),
           &fiction::physical_population_stability<Lyt>, py::arg("lyt"),
           py::arg("params") = fiction::physical_population_stability_params{},
           DOC(fiction_assess_physical_population_stability));
@@ -48,7 +48,7 @@ void assess_physical_population_stability(pybind11::module& m, const std::string
 
 }  // namespace detail
 
-inline void assess_physical_population_stability(pybind11::module& m)
+inline void physical_population_stability(pybind11::module& m)
 {
     namespace py = pybind11;
 
@@ -77,10 +77,10 @@ inline void assess_physical_population_stability(pybind11::module& m)
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::assess_physical_population_stability<py_sidb_100_lattice>(m, "100");
-    detail::assess_physical_population_stability<py_sidb_111_lattice>(m, "111");
+    detail::physical_population_stability<py_sidb_100_lattice>(m, "100");
+    detail::physical_population_stability<py_sidb_111_lattice>(m, "111");
 }
 
 }  // namespace pyfiction
 
-#endif  // PYFICTION_ASSESS_PHYSICAL_POPULATION_STABILITY_HPP
+#endif  // PYFICTION_PHYSICAL_POPULATION_STABILITY_HPP

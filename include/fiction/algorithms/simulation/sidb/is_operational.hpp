@@ -6,11 +6,11 @@
 #define FICTION_IS_OPERATIONAL_HPP
 
 #include "fiction/algorithms/iter/bdl_input_iterator.hpp"
+#include "fiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp"
 #include "fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp"
 #include "fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp"
 #include "fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
 #include "fiction/algorithms/simulation/sidb/groundstate_from_simulation_results.hpp"
-#include "fiction/algorithms/simulation/sidb/positive_charge_existence_check.hpp"
 #include "fiction/algorithms/simulation/sidb/quickexact.hpp"
 #include "fiction/algorithms/simulation/sidb/quicksim.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
@@ -190,7 +190,7 @@ class is_operational_impl
             ++simulator_invocations;
 
             // if positively charged SiDBs can occur, the SiDB layout is considered as non-operational
-            if (can_positive_charges_occur(*bii, parameters.simulation_parameters))
+            if (can_positive_charge_occur(*bii, parameters.simulation_parameters))
             {
                 return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
             }
@@ -259,7 +259,7 @@ class is_operational_impl
                "Number of truth tables and output BDL pairs does not match");
 
         // if positively charged SiDBs can occur, the SiDB layout is considered as non-operational
-        if (can_positive_charges_occur(given_cds, parameters.simulation_parameters))
+        if (can_positive_charge_occur(given_cds, parameters.simulation_parameters))
         {
             return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
         }
@@ -335,7 +335,7 @@ class is_operational_impl
             ++simulator_invocations;
 
             // if positively charged SiDBs can occur, the SiDB layout is considered as non-operational
-            if (can_positive_charges_occur(*bii, parameters.simulation_parameters))
+            if (can_positive_charge_occur(*bii, parameters.simulation_parameters))
             {
                 continue;
             }

@@ -429,7 +429,7 @@ Displacement Robustness Domain
         .. doxygenstruct:: fiction::displacement_robustness_domain
            :members:
         .. doxygenfunction:: fiction::determine_displacement_robustness_domain
-        .. doxygenfunction:: fiction::determine_probability_of_fabricating_operational_gate
+        .. doxygenfunction:: fiction::probability_of_fabricating_operational_gate
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.dimer_displacement_policy
@@ -477,12 +477,12 @@ Charge Detection
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp``
+        **Header:** ``fiction/algorithms/simulation/sidb/can_positive_charge_occur.hpp``
 
-        .. doxygenfunction:: fiction::can_positive_charges_occur
+        .. doxygenfunction:: fiction::can_positive_charge_occur
 
     .. tab:: Python
-        .. autofunction:: mnt.pyfiction.can_positive_charges_occur
+        .. autofunction:: mnt.pyfiction.can_positive_charge_occur
 
 
 Binary-dot Logic (BDL) Pair Detection

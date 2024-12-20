@@ -906,7 +906,7 @@ class design_sidb_gates_impl
         {
             charge_distribution_surface cds_layout{*bii, params.operational_params.simulation_parameters};
 
-            if (can_positive_charges_occur(cds_layout, params.operational_params.simulation_parameters))
+            if (can_positive_charge_occur(cds_layout, params.operational_params.simulation_parameters))
             {
                 number_of_discarded_layouts_at_first_pruning++;
                 return true;

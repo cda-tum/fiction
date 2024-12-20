@@ -87,6 +87,14 @@ inline void operational_domain(pybind11::module& m)
              &fiction::operational_domain<fiction::parameter_point, fiction::operational_status>::get_value,
              py::arg("point"), DOC(fiction_operational_domain_get_value))
 
+        // todo update docu
+        .def("get_value",
+             &fiction::operational_domain<fiction::parameter_point, fiction::operational_status>::add_value,
+             py::arg("key"), py::arg("value"))
+
+        .def("get_domain",
+             &fiction::operational_domain<fiction::parameter_point, fiction::operational_status>::get_domain)
+
         ;
 
     py::class_<fiction::operational_domain_value_range>(m, "operational_domain_value_range",

@@ -2,8 +2,8 @@
 // Created by Jan Drewniok on 12.08.23.
 //
 
-#ifndef FICTION_POSITIVE_CHARGE_EXISTENCE_CHECK_HPP
-#define FICTION_POSITIVE_CHARGE_EXISTENCE_CHECK_HPP
+#ifndef FICTION_CAN_POSITIVE_CHARGES_OCCUR_HPP
+#define FICTION_CAN_POSITIVE_CHARGES_OCCUR_HPP
 
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
@@ -23,7 +23,7 @@ namespace fiction
  * @param sim_params Physical parameters used to determine whether positively charged SiDBs can occur.
  */
 template <typename Lyt>
-[[nodiscard]] bool can_positive_charges_occur(const Lyt& lyt, const sidb_simulation_parameters& sim_params) noexcept
+[[nodiscard]] bool can_positive_charge_occur(const Lyt& lyt, const sidb_simulation_parameters& sim_params) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -60,4 +60,4 @@ template <typename Lyt>
 
 }  // namespace fiction
 
-#endif  // FICTION_POSITIVE_CHARGE_EXISTENCE_CHECK_HPP
+#endif  // FICTION_CAN_POSITIVE_CHARGES_OCCUR_HPP

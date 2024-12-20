@@ -9850,7 +9850,7 @@ from applying a displacement to a given SiDB layout.)doc";
 
 static const char *__doc_fiction_displacement_robustness_domain_params =
 R"doc(Parameters for the `determine_displacement_robustness_domain` and
-`determine_probability_of_fabricating_operational_gate` algorithms.
+`probability_of_fabricating_operational_gate` algorithms.
 
 Parameter ``CellType``:
     SiDB layout cell type.)doc";
@@ -12234,7 +12234,7 @@ seperated by a few lattice points).)doc";
 
 static const char *__doc_fiction_generate_random_sidb_layout_params_positive_charges_MAY_OCCUR =
 R"doc(Positive charges can occur, which means that the
-`can_positive_charges_occur` function returns `true`.)doc";
+`can_positive_charge_occur` function returns `true`.)doc";
 
 static const char *__doc_fiction_generate_random_sidb_layout_params_positive_sidbs =
 R"doc(If positively charged SiDBs should be prevented, SiDBs are not placed

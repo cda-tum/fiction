@@ -2,8 +2,8 @@
 // Created by Jan Drewniok on 08.04.24.
 //
 
-#ifndef PYFICTION_DETERMINE_GROUNDSTATE_FROM_SIMULATION_RESULTS_HPP
-#define PYFICTION_DETERMINE_GROUNDSTATE_FROM_SIMULATION_RESULTS_HPP
+#ifndef PYFICTION_GROUNDSTATE_FROM_SIMULATION_RESULTS_HPP
+#define PYFICTION_GROUNDSTATE_FROM_SIMULATION_RESULTS_HPP
 
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
@@ -20,7 +20,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void determine_groundstate_from_simulation_results(pybind11::module& m)
+void groundstate_from_simulation_results(pybind11::module& m)
 {
     namespace py = pybind11;
 
@@ -30,14 +30,14 @@ void determine_groundstate_from_simulation_results(pybind11::module& m)
 
 }  // namespace detail
 
-inline void determine_groundstate_from_simulation_results(pybind11::module& m)
+inline void groundstate_from_simulation_results(pybind11::module& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::determine_groundstate_from_simulation_results<py_sidb_100_lattice>(m);
-    detail::determine_groundstate_from_simulation_results<py_sidb_111_lattice>(m);
+    detail::groundstate_from_simulation_results<py_sidb_100_lattice>(m);
+    detail::groundstate_from_simulation_results<py_sidb_111_lattice>(m);
 }
 
 }  // namespace pyfiction
 
-#endif  // PYFICTION_DETERMINE_GROUNDSTATE_FROM_SIMULATION_RESULTS_HPP
+#endif  // PYFICTION_GROUNDSTATE_FROM_SIMULATION_RESULTS_HPP

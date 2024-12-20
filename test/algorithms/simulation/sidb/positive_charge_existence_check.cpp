@@ -5,14 +5,14 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 
-#include <fiction/algorithms/simulation/sidb/positive_charge_existence_check.hpp>
+#include <fiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/types.hpp>
 
 using namespace fiction;
 
-TEST_CASE("One BDL pair with one perturber", "[positive_charge_existence_check]")
+TEST_CASE("One BDL pair with one perturber", "[can_positive_charge_occur]")
 {
     sidb_100_cell_clk_lyt_siqad lyt{};
 
@@ -23,23 +23,23 @@ TEST_CASE("One BDL pair with one perturber", "[positive_charge_existence_check]"
     SECTION("Default values")
     {
         const sidb_simulation_parameters params{2, -0.32};
-        CHECK(!can_positive_charges_occur(lyt, params));
+        CHECK(!can_positive_charge_occur(lyt, params));
     }
 
     SECTION("epsilon = 1, lambda = 1")
     {
         const sidb_simulation_parameters params{2, -0.32, 1, 1};
-        CHECK(can_positive_charges_occur(lyt, params));
+        CHECK(can_positive_charge_occur(lyt, params));
     }
 
     SECTION("epsilon = 1, lambda = 10")
     {
         const sidb_simulation_parameters params{2, -0.32, 1, 10};
-        CHECK(can_positive_charges_occur(lyt, params));
+        CHECK(can_positive_charge_occur(lyt, params));
     }
 }
 
-TEST_CASE("Y-shaped SiDB OR gate with input 01, using siqad coordinates", "[positive_charge_existence_check]")
+TEST_CASE("Y-shaped SiDB OR gate with input 01, using siqad coordinates", "[can_positive_charge_occur]")
 {
     sidb_100_cell_clk_lyt_siqad lyt{};
 
@@ -57,23 +57,23 @@ TEST_CASE("Y-shaped SiDB OR gate with input 01, using siqad coordinates", "[posi
     SECTION("Default values")
     {
         const sidb_simulation_parameters params{2, -0.32};
-        CHECK(!can_positive_charges_occur(lyt, params));
+        CHECK(!can_positive_charge_occur(lyt, params));
     }
 
     SECTION("epsilon = 1, lambda = 1")
     {
         const sidb_simulation_parameters params{2, -0.32, 1, 1};
-        CHECK(can_positive_charges_occur(lyt, params));
+        CHECK(can_positive_charge_occur(lyt, params));
     }
 
     SECTION("epsilon = 1, lambda = 10")
     {
         const sidb_simulation_parameters params{2, -0.32, 1, 10};
-        CHECK(can_positive_charges_occur(lyt, params));
+        CHECK(can_positive_charge_occur(lyt, params));
     }
 }
 
-TEST_CASE("Y-shapedd SiDB OR gate with input 01, using cube coordinates", "[positive_charge_existence_check]")
+TEST_CASE("Y-shapedd SiDB OR gate with input 01, using cube coordinates", "[can_positive_charge_occur]")
 {
     sidb_100_cell_clk_lyt_cube lyt{};
 
@@ -99,24 +99,24 @@ TEST_CASE("Y-shapedd SiDB OR gate with input 01, using cube coordinates", "[posi
     SECTION("Default values")
     {
         const sidb_simulation_parameters params{2, -0.32};
-        CHECK(!can_positive_charges_occur(lyt, params));
+        CHECK(!can_positive_charge_occur(lyt, params));
     }
 
     SECTION("epsilon = 1, lambda = 1")
     {
         const sidb_simulation_parameters params{2, -0.32, 1, 1};
-        CHECK(can_positive_charges_occur(lyt, params));
+        CHECK(can_positive_charge_occur(lyt, params));
     }
 
     SECTION("epsilon = 1, lambda = 10")
     {
         const sidb_simulation_parameters params{2, -0.32, 1, 10};
-        CHECK(can_positive_charges_occur(lyt, params));
+        CHECK(can_positive_charge_occur(lyt, params));
     }
 }
 
-TEMPLATE_TEST_CASE("Y-shapedd SiDB OR gate with input 01, using offset coordinates",
-                   "[positive_charge_existence_check]", sidb_100_cell_clk_lyt, cds_sidb_100_cell_clk_lyt)
+TEMPLATE_TEST_CASE("Y-shapedd SiDB OR gate with input 01, using offset coordinates", "[can_positive_charge_occur]",
+                   sidb_100_cell_clk_lyt, cds_sidb_100_cell_clk_lyt)
 {
     TestType lyt{};
 
@@ -142,18 +142,18 @@ TEMPLATE_TEST_CASE("Y-shapedd SiDB OR gate with input 01, using offset coordinat
     SECTION("Default values")
     {
         const sidb_simulation_parameters params{2, -0.32};
-        CHECK(!can_positive_charges_occur(lyt, params));
+        CHECK(!can_positive_charge_occur(lyt, params));
     }
 
     SECTION("epsilon = 1, lambda = 1")
     {
         const sidb_simulation_parameters params{2, -0.32, 1, 1};
-        CHECK(can_positive_charges_occur(lyt, params));
+        CHECK(can_positive_charge_occur(lyt, params));
     }
 
     SECTION("epsilon = 1, lambda = 10")
     {
         const sidb_simulation_parameters params{2, -0.32, 1, 10};
-        CHECK(can_positive_charges_occur(lyt, params));
+        CHECK(can_positive_charge_occur(lyt, params));
     }
 }
