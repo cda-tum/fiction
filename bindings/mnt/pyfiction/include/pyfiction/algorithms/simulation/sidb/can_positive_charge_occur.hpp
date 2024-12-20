@@ -27,7 +27,7 @@ void can_positive_charge_occur(pybind11::module& m)
     namespace py = pybind11;
 
     m.def("can_positive_charge_occur", &fiction::can_positive_charge_occur<Lyt>, py::arg("lyt"), py::arg("sim_params"),
-          DOC(fiction_can_positive_charges_occur));
+          DOC(fiction_can_positive_charge_occur));
 }
 
 }  // namespace detail

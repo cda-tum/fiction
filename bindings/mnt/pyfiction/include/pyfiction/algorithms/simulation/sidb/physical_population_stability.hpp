@@ -43,7 +43,7 @@ void physical_population_stability(pybind11::module& m, const std::string& latti
     m.def(fmt::format("physical_population_stability_{}", lattice).c_str(),
           &fiction::physical_population_stability<Lyt>, py::arg("lyt"),
           py::arg("params") = fiction::physical_population_stability_params{},
-          DOC(fiction_assess_physical_population_stability));
+          DOC(fiction_physical_population_stability));
 }
 
 }  // namespace detail
@@ -66,14 +66,14 @@ inline void physical_population_stability(pybind11::module& m)
      * Parameters.
      */
     py::class_<fiction::physical_population_stability_params>(m, "physical_population_stability_params",
-                                                              DOC(fiction_assess_physical_population_stability_params))
+                                                              DOC(fiction_physical_population_stability_params))
         .def(py::init<>())
         .def_readwrite("simulation_parameters", &fiction::physical_population_stability_params::simulation_parameters,
-                       DOC(fiction_assess_physical_population_stability_params))
+                       DOC(fiction_physical_population_stability_params))
         .def_readwrite(
             "precision_for_distance_corresponding_to_potential",
             &fiction::physical_population_stability_params::precision_for_distance_corresponding_to_potential,
-            DOC(fiction_assess_physical_population_stability_params_precision_for_distance_corresponding_to_potential));
+            DOC(fiction_physical_population_stability_params_precision_for_distance_corresponding_to_potential));
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
