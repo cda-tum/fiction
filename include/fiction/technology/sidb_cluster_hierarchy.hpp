@@ -11,7 +11,7 @@
  * Uncomment this line to switch to STL containers, which are slower than their respective analogues from the
  * Parallel-Hashmap library by Gregory Popovitch, but may be inspected with ease in a debugger.
  */
-#define DEBUG_SIDB_CLUSTER_HIERARCHY
+// #define DEBUG_SIDB_CLUSTER_HIERARCHY
 
 #include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
@@ -415,11 +415,11 @@ struct potential_bounds_store
         store[sidb_ix][static_cast<uint8_t>(bound_direction::UPPER)] += max_diff;
     }
     /**
-     * Initialise potential bounds for the given number of SiDBs (applicable to a complete potential bounds store only).
+     * Initialize potential bounds for the given number of SiDBs (applicable to a complete potential bounds store only).
      *
      * @param num_sidbs The number of SiDBs in the layout that is simulated.
      */
-    inline void initialise_complete_potential_bounds(const uint64_t num_sidbs) noexcept
+    inline void initialize_complete_potential_bounds(const uint64_t num_sidbs) noexcept
     {
         store.assign(num_sidbs, std::array<double, 2>{});
     }
@@ -513,21 +513,21 @@ struct sidb_clustering_state
      */
     explicit sidb_clustering_state(const uint64_t num_sidbs) noexcept
     {
-        pot_bounds.initialise_complete_potential_bounds(num_sidbs);
+        pot_bounds.initialize_complete_potential_bounds(num_sidbs);
     }
     /**
      * Copy constructor.
      *
      * @param other Other clustering state to copy.
      */
-    explicit sidb_clustering_state(const sidb_clustering_state& other) noexcept
+    sidb_clustering_state(const sidb_clustering_state& other) noexcept
     {
         for (const sidb_cluster_projector_state_ptr& pst : other.proj_states)
         {
             proj_states.emplace_back(std::make_unique<sidb_cluster_projector_state>(*pst));
         }
 
-        pot_bounds.initialise_complete_potential_bounds(other.pot_bounds.num_sidbs());
+        pot_bounds.initialize_complete_potential_bounds(other.pot_bounds.num_sidbs());
         pot_bounds += other.pot_bounds;
     }
     /**
@@ -535,7 +535,7 @@ struct sidb_clustering_state
      *
      * @param other Other clustering state to move.
      */
-    explicit sidb_clustering_state(sidb_clustering_state&& other) noexcept = default;
+    sidb_clustering_state(sidb_clustering_state&& other) noexcept = default;
     /**
      * Move assignment operator.
      *
@@ -584,7 +584,7 @@ struct sidb_cluster_charge_state
             pos_count{static_cast<decltype(pos_count)>(cs == sidb_charge_state::POSITIVE)},
             compositions{{{{singleton, static_cast<uint64_t>(*this)}}}}
     {
-        compositions.front().pot_bounds.initialise_complete_potential_bounds(total_num_sidbs);
+        compositions.front().pot_bounds.initialize_complete_potential_bounds(total_num_sidbs);
         compositions.front().pot_bounds.set(get_singleton_sidb_ix(singleton), loc_ext_pot, loc_ext_pot);
     }
     /**
@@ -967,11 +967,11 @@ struct sidb_cluster
     /**
      * The SiDBs contained by the cluster.
      */
-    std::vector<sidb_ix> sidbs{};
+    std::vector<sidb_ix> sidbs;
     /**
      * The SiDBs in the layout that are not contained by the cluster.
      */
-    std::vector<sidb_ix> external_sidbs{};
+    std::vector<sidb_ix> external_sidbs;
     /**
      * The set of children of a cluster is a clustering.
      */
@@ -979,7 +979,7 @@ struct sidb_cluster
     /**
      * Every cluster carries a pointer to its parent. For the top cluster, this is `nullptr`.
      */
-    std::weak_ptr<sidb_cluster> parent{};
+    std::weak_ptr<sidb_cluster> parent;
     /**
      * The bounds on the electrostatic potential sum of SiDBs external to this cluster, local to an SiDB in the cluster.
      */
@@ -989,14 +989,16 @@ struct sidb_cluster
      * configurations in the charge space.
      */
 #ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
-    std::map<sidb_ix, potential_projection_order> pot_projs{};
+    std::map<sidb_ix, potential_projection_order> pot_projs;
+    std::map<uint64_t, complete_potential_bounds_store> pot_projs_complete_store;
 #else
-    phmap::flat_hash_map<sidb_ix, potential_projection_order> pot_projs{};
+    phmap::flat_hash_map<sidb_ix, potential_projection_order> pot_projs;
+    phmap::flat_hash_map<uint64_t, complete_potential_bounds_store> pot_projs_complete_store;
 #endif
     /**
      * The charge state space of the cluster.
      */
-    sidb_cluster_charge_state_space charge_space{};
+    sidb_cluster_charge_state_space charge_space;
     /**
      * SiDB cluster hierarchy constructor.
      *
