@@ -74,15 +74,11 @@ int main()  // NOLINT
         for (const auto& gate_lyt : exhaustive_design)
         {
             // using grid search to find the minimum defect clearance
-            defect_influence_stats grid_stats{};
-            const auto             op_defect_grid =
-                defect_influence_grid_search(gate_lyt, truth_table, 1, defect_params, &grid_stats);
+            const auto op_defect_grid = defect_influence_grid_search(gate_lyt, truth_table, params, 1);
             const auto avoidance_grid = calculate_defect_clearance(gate_lyt, op_defect_grid);
 
             // using QuickTrace to find the minimum clearance
-            defect_influence_stats contour_stats{};
-            const auto             op_defect_contour =
-                defect_influence_quicktrace(gate_lyt, truth_table, 100, defect_params, &contour_stats);
+            const auto op_defect_contour = defect_influence_quicktrace(gate_lyt, truth_table, 100, params);
             const auto avoidance_contour = calculate_defect_clearance(gate_lyt, op_defect_contour);
 
             // check if QuickTrace and grid search give the same result
