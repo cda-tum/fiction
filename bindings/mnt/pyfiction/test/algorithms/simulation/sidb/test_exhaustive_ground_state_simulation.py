@@ -3,8 +3,8 @@ import unittest
 from mnt.pyfiction import (
     charge_distribution_surface_100,
     charge_distribution_surface_111,
-    determine_groundstate_from_simulation_results,
     exhaustive_ground_state_simulation,
+    groundstate_from_simulation_results,
     sidb_100_lattice,
     sidb_111_lattice,
     sidb_charge_state,
@@ -54,7 +54,7 @@ class TestExhaustiveGroundStateSimulation(unittest.TestCase):
 
         self.assertEqual(result.algorithm_name, "ExGS")
 
-        groundstate = determine_groundstate_from_simulation_results(result)
+        groundstate = groundstate_from_simulation_results(result)
 
         self.assertEqual(len(groundstate), 1)
 
