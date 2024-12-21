@@ -52,18 +52,14 @@ int main()  // NOLINT
     const auto                  sidb_sim = sidb_simulation_parameters{2, -0.32, 5.6, 5.0};
     const is_operational_params is_op_params{sidb_sim};
 
-    defect_influence_params max_defect_params{};
-
-    // for this experiment we use a stray SiDB defect
+    // for this experiment, we use a stray SiDB defect
     const auto stray_db = fiction::sidb_defect{fiction::sidb_defect_type::DB, -1, 4.1, 1.8};
+    // const auto si_vacancy = fiction::sidb_defect{fiction::sidb_defect_type::SI_VACANCY, -1, 10.6, 5.9};
 
-    max_defect_params.defect = stray_db;
-
-    max_defect_params.additional_scanning_area = {100, 100};
-
-    defect_influence_params defect_params{};
-    defect_params.defect_influence_params = max_defect_params;
-    defect_params.operational_params      = is_op_params;
+    defect_influence_params<fiction::cell<sidb_100_cell_clk_lyt_cube>> params{};
+    params.additional_scanning_area = {100, 1000};
+    params.defect                   = stray_db;
+    params.operational_params       = is_op_params;
 
     for (const auto& [gate, truth_table] : gates)
     {
