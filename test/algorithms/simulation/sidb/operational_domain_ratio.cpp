@@ -64,10 +64,10 @@ TEST_CASE("BDL wire operational domain computation", "[compute-operational-ratio
 
         op_domain_params.sweep_dimensions.push_back(z_dimension);
 
-        const compute_operational_ratio_params op_ratio_params{op_domain_params};
+        const operational_domain_ratio_params op_ratio_params{op_domain_params};
 
-        const auto op_domain_ratio = compute_operational_ratio(lat, std::vector<tt>{create_id_tt()},
-                                                               parameter_point({5.5, 5.0, -0.32}), op_ratio_params);
+        const auto op_domain_ratio = operational_domain_ratio(lat, std::vector<tt>{create_id_tt()},
+                                                              parameter_point({5.5, 5.0, -0.32}), op_ratio_params);
 
         // check if the operational domain has the correct size
         CHECK(op_domain_ratio == 1.0);
@@ -85,10 +85,10 @@ TEST_CASE("BDL wire operational domain computation", "[compute-operational-ratio
         op_domain_params.sweep_dimensions[1].max  = 4.25;
         op_domain_params.sweep_dimensions[1].step = 0.25;
 
-        const compute_operational_ratio_params op_ratio_params{op_domain_params};
+        const operational_domain_ratio_params op_ratio_params{op_domain_params};
 
-        const auto op_domain_ratio = compute_operational_ratio(lat, std::vector<tt>{create_id_tt()},
-                                                               parameter_point({4.25, 4.25}), op_ratio_params);
+        const auto op_domain_ratio = operational_domain_ratio(lat, std::vector<tt>{create_id_tt()},
+                                                              parameter_point({4.25, 4.25}), op_ratio_params);
 
         CHECK_THAT(op_domain_ratio - 80.0 / 256.0,
                    Catch::Matchers::WithinAbs(0.0, physical_constants::POP_STABILITY_ERR));
@@ -122,10 +122,10 @@ TEST_CASE("Bestagon AND gate", "[compute-operational-ratio]")
 
         op_domain_params.sweep_dimensions.push_back(z_dimension);
 
-        const compute_operational_ratio_params op_ratio_params{op_domain_params};
+        const operational_domain_ratio_params op_ratio_params{op_domain_params};
 
-        const auto op_domain_ratio = compute_operational_ratio(lyt, std::vector<tt>{create_and_tt()},
-                                                               parameter_point({5.6, 5.0, -0.32}), op_ratio_params);
+        const auto op_domain_ratio = operational_domain_ratio(lyt, std::vector<tt>{create_and_tt()},
+                                                              parameter_point({5.6, 5.0, -0.32}), op_ratio_params);
 
         // check if the operational domain has the correct size
         CHECK_THAT(op_domain_ratio - 23.0 / 121.0,

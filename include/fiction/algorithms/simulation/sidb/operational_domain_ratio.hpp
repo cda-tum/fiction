@@ -18,7 +18,7 @@ namespace fiction
  * Parameters for computing the ratio of operational parameter points around a specified parameter point
  * to the total number of parameter points in the given parameter space.
  */
-struct compute_operational_ratio_params
+struct operational_domain_ratio_params
 {
     /**
      * Parameters for the operational domain computation.
@@ -45,8 +45,8 @@ struct compute_operational_ratio_params
  * @return The ratio of operational parameter points to the total number of parameter points in the parameter space.
  */
 template <typename Lyt, typename TT>
-[[nodiscard]] double compute_operational_ratio(const Lyt& lyt, const std::vector<TT>& spec, const parameter_point& pp,
-                                               const compute_operational_ratio_params& params = {}) noexcept
+[[nodiscard]] double operational_domain_ratio(const Lyt& lyt, const std::vector<TT>& spec, const parameter_point& pp,
+                                              const operational_domain_ratio_params& params = {}) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");

@@ -167,113 +167,6 @@ Temperature Behavior
         .. autofunction:: mnt.pyfiction.calculate_energy_and_state_type_with_kinks_accepted
         .. autofunction:: mnt.pyfiction.calculate_energy_and_state_type_with_kinks_rejected
 
-
-Fabrication Defects
-###################
-
-A collection of tools to model defects that can occur during the fabrication process of FCN technologies.
-
-SiDB Defect Types
------------------
-
-.. tabs::
-    .. tab:: C++
-        **Header:** ``fiction/technology/sidb_defects.hpp``
-
-        .. doxygenenum:: fiction::sidb_defect_type
-
-        .. doxygenstruct:: fiction::sidb_defect
-           :members:
-
-        .. doxygenfunction:: fiction::is_charged_defect_type
-        .. doxygenfunction:: fiction::is_neutral_defect_type
-
-        .. doxygenfunction:: fiction::is_positively_charged_defect
-        .. doxygenfunction:: fiction::is_negatively_charged_defect
-        .. doxygenfunction:: fiction::is_neutrally_charged_defect
-
-        .. doxygenvariable:: fiction::SIDB_CHARGED_DEFECT_HORIZONTAL_SPACING
-        .. doxygenvariable:: fiction::SIDB_CHARGED_DEFECT_VERTICAL_SPACING
-        .. doxygenvariable:: fiction::SIDB_NEUTRAL_DEFECT_HORIZONTAL_SPACING
-        .. doxygenvariable:: fiction::SIDB_NEUTRAL_DEFECT_VERTICAL_SPACING
-
-        .. doxygenfunction:: fiction::defect_extent
-
-    .. tab:: Python
-        .. autoclass:: mnt.pyfiction.sidb_defect_type
-            :members:
-
-        .. autoclass:: mnt.pyfiction.sidb_defect
-            :members:
-
-        .. autofunction:: mnt.pyfiction.is_charged_defect_type
-        .. autofunction:: mnt.pyfiction.is_neutral_defect_type
-
-        .. autofunction:: mnt.pyfiction.is_positively_charged_defect
-        .. autofunction:: mnt.pyfiction.is_negatively_charged_defect
-        .. autofunction:: mnt.pyfiction.is_neutrally_charged_defect
-
-        .. autofunction:: mnt.pyfiction.defect_extent
-
-
-SiDB Defect Surface
--------------------
-
-**Header:** ``fiction/technology/sidb_defect_surface.hpp``
-
-A layout type to layer on top of any SiDB cell-level layout. It implements an interface to store and access
-fabrication defects on the H-Si(100) 2x1 surface.
-
-.. doxygenclass:: fiction::sidb_defect_surface
-   :members:
-.. doxygenclass:: fiction::sidb_defect_surface< Lyt, true >
-   :members:
-.. doxygenclass:: fiction::sidb_defect_surface< Lyt, false >
-   :members:
-
-
-SiDB Defect Analysis
---------------------
-
-**Header:** ``fiction/technology/sidb_surface_analysis.hpp``
-
-.. doxygenfunction:: fiction::sidb_surface_analysis
-
-
-**Header:** ``fiction/algorithms/simulation/sidb/defect_influence.hpp``
-
-.. doxygenstruct:: fiction::defect_influence_params
-   :members:
-.. doxygenenum:: fiction::defect_influence_status
-.. doxygenstruct:: fiction::defect_influence_domain
-   :members:
-
-.. doxygenstruct:: fiction::defect_influence_stats
-.. doxygenfunction:: fiction::defect_influence_grid_search(const Lyt& lyt, const std::vector<TT>& spec,
-                             const defect_influence_params<cell<Lyt>>& params = {}, const std::size_t step_size = 1,
-                             defect_influence_stats* stats = nullptr)
-.. doxygenfunction:: fiction::defect_influence_grid_search(const Lyt& lyt, const defect_influence_params<cell<Lyt>>& params = {},
-                             const std::size_t step_size = 1, defect_influence_stats* stats = nullptr)
-.. doxygenfunction:: fiction::defect_influence_random_sampling(const Lyt& lyt, const std::vector<TT>& spec, std::size_t samples,
-                                 const defect_influence_params<cell<Lyt>>& params = {},
-                                 defect_influence_stats*                   stats  = nullptr)
-.. doxygenfunction:: fiction::defect_influence_random_sampling(const Lyt& lyt, std::size_t samples,
-                                 const defect_influence_params<cell<Lyt>>& params = {},
-                                 defect_influence_stats*                   stats  = nullptr)
-.. doxygenfunction:: fiction::defect_influence_quicktrace(const Lyt& lyt, const std::vector<TT>& spec, const std::size_t samples,
-                            const defect_influence_params<cell<Lyt>>& params = {},
-                            defect_influence_stats*                   stats  = nullptr)
-.. doxygenfunction:: fiction::defect_influence_quicktrace(const Lyt& lyt, const std::size_t samples,
-                            const defect_influence_params<cell<Lyt>>& params = {},
-                            defect_influence_stats*                   stats  = nullptr)
-
-**Header:** ``fiction/algorithms/simulation/sidb/calculate_defect_clearance.hpp``
-
-.. doxygenstruct:: fiction::defect_clearance_result
-   :members:
-.. doxygenfunction:: fiction::calculate_defect_clearance
-
-
 Time-to-Solution (TTS) Statistics
 #################################
 
@@ -354,11 +247,11 @@ Operational Domain Computation
         .. doxygenfunction:: fiction::operational_domain_flood_fill
         .. doxygenfunction:: fiction::operational_domain_contour_tracing
 
-        **Header:** ``fiction/algorithms/simulation/sidb/compute_operational_ratio.hpp``
+        **Header:** ``fiction/algorithms/simulation/sidb/operational_domain_ratio.hpp``
 
-        .. doxygenstruct:: fiction::compute_operational_ratio_params
+        .. doxygenstruct:: fiction::operational_domain_ratio_params
            :members:
-        .. doxygenfunction:: fiction::compute_operational_ratio
+        .. doxygenfunction:: fiction::operational_domain_ratio
 
         **Header:** ``fiction/algorithms/simulation/sidb/verify_logic_match.hpp``
 
@@ -400,17 +293,17 @@ Operational Domain Computation
         .. autofunction:: mnt.pyfiction.compute_operational_ratio
 
 
-Determine Physically Valid Parameters
-#####################################
+Physically Valid Parameters
+###########################
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/algorithms/simulation/sidb/determine_physically_valid_parameters.hpp``
+        **Header:** ``fiction/algorithms/simulation/sidb/physically_valid_parameters.hpp``
 
-        .. doxygenfunction:: fiction::determine_physically_valid_parameters
+        .. doxygenfunction:: fiction::physically_valid_parameters
 
    .. tab:: Python
-        .. autoclass:: mnt.pyfiction.determine_physically_valid_parameters
+        .. autoclass:: mnt.pyfiction.physically_valid_parameters
 
 
 Displacement Robustness Domain
@@ -429,7 +322,7 @@ Displacement Robustness Domain
         .. doxygenstruct:: fiction::displacement_robustness_domain
            :members:
         .. doxygenfunction:: fiction::determine_displacement_robustness_domain
-        .. doxygenfunction:: fiction::probability_of_fabricating_operational_gate
+        .. doxygenfunction:: fiction::determine_probability_of_fabricating_operational_gate
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.dimer_displacement_policy
@@ -563,7 +456,7 @@ Assess Population Stability
 Band-Bending Resilience
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-**Header:** ``fiction/algorithms/simulation/sidb/physical_population_stability.hpp``
+**Header:** ``fiction/algorithms/simulation/sidb/band_bending_resilience.hpp``
 
 .. doxygenstruct:: fiction::band_bending_resilience_params
    :members:
@@ -581,3 +474,108 @@ Convert Potential to Distance
 
     .. tab:: Python
         .. autofunction:: mnt.pyfiction.convert_potential_to_distance
+
+
+Fabrication Defects
+###################
+
+A collection of tools to simulate defects that can occur during the fabrication process of FCN technologies.
+
+SiDB Defect Types
+-----------------
+
+.. tabs::
+    .. tab:: C++
+        **Header:** ``fiction/technology/sidb_defects.hpp``
+
+        .. doxygenenum:: fiction::sidb_defect_type
+
+        .. doxygenstruct:: fiction::sidb_defect
+           :members:
+
+        .. doxygenfunction:: fiction::is_charged_defect_type
+        .. doxygenfunction:: fiction::is_neutral_defect_type
+
+        .. doxygenfunction:: fiction::is_positively_charged_defect
+        .. doxygenfunction:: fiction::is_negatively_charged_defect
+        .. doxygenfunction:: fiction::is_neutrally_charged_defect
+
+        .. doxygenvariable:: fiction::SIDB_CHARGED_DEFECT_HORIZONTAL_SPACING
+        .. doxygenvariable:: fiction::SIDB_CHARGED_DEFECT_VERTICAL_SPACING
+        .. doxygenvariable:: fiction::SIDB_NEUTRAL_DEFECT_HORIZONTAL_SPACING
+        .. doxygenvariable:: fiction::SIDB_NEUTRAL_DEFECT_VERTICAL_SPACING
+
+        .. doxygenfunction:: fiction::defect_extent
+
+    .. tab:: Python
+        .. autoclass:: mnt.pyfiction.sidb_defect_type
+            :members:
+
+        .. autoclass:: mnt.pyfiction.sidb_defect
+            :members:
+
+        .. autofunction:: mnt.pyfiction.is_charged_defect_type
+        .. autofunction:: mnt.pyfiction.is_neutral_defect_type
+
+        .. autofunction:: mnt.pyfiction.is_positively_charged_defect
+        .. autofunction:: mnt.pyfiction.is_negatively_charged_defect
+        .. autofunction:: mnt.pyfiction.is_neutrally_charged_defect
+
+        .. autofunction:: mnt.pyfiction.defect_extent
+
+SiDB Defect Surface
+-------------------
+
+**Header:** ``fiction/technology/sidb_defect_surface.hpp``
+
+A layout type to layer on top of any SiDB cell-level layout. It implements an interface to store and access
+fabrication defects on the H-Si(100) 2x1 surface.
+
+.. doxygenclass:: fiction::sidb_defect_surface
+   :members:
+.. doxygenclass:: fiction::sidb_defect_surface< Lyt, true >
+   :members:
+.. doxygenclass:: fiction::sidb_defect_surface< Lyt, false >
+   :members:
+
+
+SiDB Defect Analysis
+--------------------
+
+**Header:** ``fiction/technology/sidb_surface_analysis.hpp``
+
+.. doxygenfunction:: fiction::sidb_surface_analysis
+
+
+**Header:** ``fiction/algorithms/simulation/sidb/defect_influence.hpp``
+
+.. doxygenstruct:: fiction::defect_influence_params
+   :members:
+.. doxygenenum:: fiction::defect_influence_status
+.. doxygenstruct:: fiction::defect_influence_domain
+   :members:
+
+.. doxygenstruct:: fiction::defect_influence_stats
+.. doxygenfunction:: fiction::defect_influence_grid_search(const Lyt& lyt, const std::vector<TT>& spec,
+                             const defect_influence_params<cell<Lyt>>& params = {}, const std::size_t step_size = 1,
+                             defect_influence_stats* stats = nullptr)
+.. doxygenfunction:: fiction::defect_influence_grid_search(const Lyt& lyt, const defect_influence_params<cell<Lyt>>& params = {},
+                             const std::size_t step_size = 1, defect_influence_stats* stats = nullptr)
+.. doxygenfunction:: fiction::defect_influence_random_sampling(const Lyt& lyt, const std::vector<TT>& spec, std::size_t samples,
+                                 const defect_influence_params<cell<Lyt>>& params = {},
+                                 defect_influence_stats*                   stats  = nullptr)
+.. doxygenfunction:: fiction::defect_influence_random_sampling(const Lyt& lyt, std::size_t samples,
+                                 const defect_influence_params<cell<Lyt>>& params = {},
+                                 defect_influence_stats*                   stats  = nullptr)
+.. doxygenfunction:: fiction::defect_influence_quicktrace(const Lyt& lyt, const std::vector<TT>& spec, const std::size_t samples,
+                            const defect_influence_params<cell<Lyt>>& params = {},
+                            defect_influence_stats*                   stats  = nullptr)
+.. doxygenfunction:: fiction::defect_influence_quicktrace(const Lyt& lyt, const std::size_t samples,
+                            const defect_influence_params<cell<Lyt>>& params = {},
+                            defect_influence_stats*                   stats  = nullptr)
+
+**Header:** ``fiction/algorithms/simulation/sidb/calculate_defect_clearance.hpp``
+
+.. doxygenstruct:: fiction::defect_clearance_result
+   :members:
+.. doxygenfunction:: fiction::calculate_defect_clearance

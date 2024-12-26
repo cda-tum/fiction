@@ -14,6 +14,7 @@
 #include "fiction/traits.hpp"
 #include "fiction/utils/layout_utils.hpp"
 #include "fiction/utils/phmap_utils.hpp"
+#include "fiction/utils/truth_table_utils.hpp"
 
 #include <kitty/traits.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
@@ -27,7 +28,6 @@
 #include <random>
 #include <thread>
 #include <unordered_set>
-#include <utility>
 #include <vector>
 
 namespace fiction
