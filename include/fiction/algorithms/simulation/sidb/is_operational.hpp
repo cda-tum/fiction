@@ -61,7 +61,7 @@ enum class operational_status : uint8_t
 struct is_operational_params
 {
     /**
-     * Condition which is used to decide if a layout is operational or non-operational.
+     * Condition to decide whether a layout is operational or non-operational.
      */
     enum class operational_condition : uint8_t
     {
@@ -76,28 +76,36 @@ struct is_operational_params
     };
 
     /**
-     * Mode to determine if the layout is operational or non-operational.
+     * Simulation method to determine if the layout is operational or non-operational. There are three possible modes:
+     *
+     * - `SIMULATION_ONLY`: This setting does not apply any filtering strategies to determine if the layout is
+     * operational. Instead, it relies solely on physical simulation to make this determination.
+     * - `FILTER_ONLY`: This setting does only apply filtering strategies to determine if the layout is non-operational.
+     * If the layout passes all filtering strategies, it is considered operational. This is only an approximation. It
+     * may be possible that the layout is non-operational, but the filtering strategies do not detect it.
+     * - `FILTER_BEFORE_SIMULATION`: Before a physical simulation is conducted, the algorithm checks if filtering
+     * strategies have detected whether the layout is non-operational. This only provides any runtime benefits if kinks
+     * are rejected.
      */
-    enum class analyis_mode : uint8_t
+    enum class operational_analysis_strategy : uint8_t
     {
         /**
-         * This setting does not apply any pruning strategies to determine if the layout is operational.
-         * Instead, it relies solely on physical simulation to make this determination.
+         * Do not apply filter strategies to determine whether the layout is operational.
+         * Instead, rely solely on physical simulation.
          */
         SIMULATION_ONLY,
         /**
-         * This setting does only apply pruning strategies to determine if the layout is non-operational. If the layout
-         * is passes all pruning strategies, it is considered operational.
+         * Apply filtering exclusively to determine whether the layout is non-operational. If the layout
+         * passes all filter steps, it is considered operational.
          *
-         * @note This is only an approximation. It may be possible that the layout is non-operational, but the pruning
-         * strategies do not detect it.
+         * @note This is an extremely fast approximation that may sometimes lead to false positives.
          */
-        PRUNING_ONLY,
+        FILTER_ONLY,
         /**
-         * Before a physical simulation is conducted, the algorithm checks if pruning strategies can determine that the
-         * layout is `non-operational`. This only provides any runtime benefits if kinks are accepted.
+         * Before a physical simulation is conducted, the algorithm checks if filter strategies can determine that the
+         * layout is non-operational. This only provides any runtime benefits if kinks are rejected.
          */
-        PRUNE_BEFORE_SIMULATION
+        FILTER_BEFORE_SIMULATION
     };
     /**
      * The simulation parameters for the physical simulation of the ground state.
@@ -112,13 +120,14 @@ struct is_operational_params
      */
     bdl_input_iterator_params input_bdl_iterator_params{};
     /**
-     * Condition which is used to decide if a layout is operational or non-operational.
+     * Condition to decide whether a layout is operational or non-operational.
      */
     operational_condition op_condition = operational_condition::TOLERATE_KINKS;
     /**
-     * Mode to determine if the layout is operational or non-operational.
+     * Strategy to determine whether a layout is operational or non-operational.
      */
-    analyis_mode mode_to_analyse_operational_status = analyis_mode::SIMULATION_ONLY;
+    operational_analysis_strategy strategy_to_analyze_operational_status =
+        operational_analysis_strategy::SIMULATION_ONLY;
 };
 
 namespace detail
@@ -145,24 +154,21 @@ enum class non_operationality_reason : uint8_t
 /**
  * Reason why the layout is not a valid gate implementation for the given Boolean function.
  */
-enum class layout_invalid_reason : uint8_t
+enum class layout_invalidity_reason : uint8_t
 {
     /**
      * Positive SiDBs can potentially occur.
      */
     POTENTIAL_POSITIVE_CHARGES,
     /**
-     * The layout is physically infeasible.
+     * The layout is physically infeasible, meaning no charge distribution of the canvas SiDBs satisfies the criteria
+     * for physical validity.
      */
     PHYSICAL_INFEASIBILITY,
     /**
-     * I/O signal are instable.
+     * I/O signals are unstable, indicating that an information flip results in a lower energy state.
      */
     IO_INSTABILITY,
-    /**
-     * No reason for pruning could be determined.
-     */
-    NONE
 };
 
 /**
@@ -258,6 +264,12 @@ class is_operational_impl
             output_bdl_pairs = detect_bdl_pairs(layout, sidb_technology::cell_type::OUTPUT,
                                                 params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params);
         }
+        canvas_lyt.foreach_cell(
+            [this](const auto& c)
+            {
+                dependent_cell = c;
+                return false;
+            });
     }
 
     /**
@@ -286,21 +298,20 @@ class is_operational_impl
 
     /**
      * This function evaluates whether the given layout can be discarded since it cannot implement the given Boolean
-     * function. The pruning is subdivided into three single pruning steps: (1) discarding SiDB layouts with potentially
-     * positively charged SiDBs, (2) utilizing an efficient method to identify and discard SiDB layouts that do not
-     * satisfy physical model constraints under the I/O pin conditions required for the desired Boolean function, and
-     * (3) detecting I/O signal instability.
+     * function. The filtering is subdivided into three single filtering steps: (1) discarding SiDB layouts with
+     * potentially positively charged SiDBs, (2) utilizing an efficient method to identify and discard SiDB layouts that
+     * do not satisfy physical model constraints under the I/O pin conditions required for the desired Boolean function,
+     * and (3) detecting I/O signal instability.
      *
      * @tparam ChargeLyt The charge distribution surface layout type.
      * @param input_pattern The current input pattern.
      * @param cds_canvas The charge distribution of the canvas layout.
      * @param dependent_cell A dependent-cell of the canvas SiDBs.
-     * @return Pair where the first entry is `true` if the current layout can be pruned. The second entry indicates the
-     * reason for pruning.
+     * @return An optional layout_invalidity_reason indicating the reason why the layout is non-operational.
      */
     template <typename ChargeLyt>
-    [[nodiscard]] std::pair<bool, layout_invalid_reason>
-    can_layout_be_discarded(const uint64_t input_pattern, ChargeLyt& cds_canvas, cell<Lyt>& dependent_cell) noexcept
+    [[nodiscard]] std::optional<layout_invalidity_reason> can_layout_be_discarded(const uint64_t input_pattern,
+                                                                                  ChargeLyt&     cds_canvas) noexcept
     {
         static_assert(is_charge_distribution_surface_v<ChargeLyt>, "ChargeLyt is not a charge distribution surface");
 
@@ -312,7 +323,7 @@ class is_operational_impl
 
         if (can_positive_charges_occur(cds_layout, parameters.simulation_parameters))
         {
-            return {true, layout_invalid_reason::POTENTIAL_POSITIVE_CHARGES};
+            return layout_invalidity_reason::POTENTIAL_POSITIVE_CHARGES;
         }
 
         cds_layout.assign_dependent_cell(dependent_cell);
@@ -320,24 +331,25 @@ class is_operational_impl
 
         const auto input_index = bii.get_current_input_index();
 
-        set_charge_distribution_of_input_wires_based_on_input_pattern(cds_layout, bii.get_current_input_index());
-        set_charge_distribution_of_output_wires_based_on_truth_table(cds_layout, input_index);
+        set_charge_distribution_of_input_pins(cds_layout, bii.get_current_input_index());
+        set_charge_distribution_of_output_pins(cds_layout, evaluate_output(truth_table, input_index));
 
-        const auto physical_validity = is_physical_validity_feasible(cds_layout, cds_canvas);
+        const auto physical_validity = is_physical_validity_feasible(cds_layout);
 
         if (physical_validity.has_value())
         {
-            const auto output_index = determine_output(truth_table, input_index);
-            if (is_io_signal_unstable(cds_layout, cds_canvas, truth_table.front().num_bits(), input_index, output_index,
+            const auto output_index = evaluate_output(truth_table, input_index);
+
+            if (is_io_signal_unstable(cds_layout, truth_table.front().num_bits(), input_index, output_index,
                                       physical_validity.value()))
             {
-                return {true, layout_invalid_reason::IO_INSTABILITY};
+                return layout_invalidity_reason::IO_INSTABILITY;
             };
 
-            return {false, layout_invalid_reason::NONE};
+            return std::nullopt;
         }
 
-        return {true, layout_invalid_reason::PHYSICAL_INFEASIBILITY};
+        return layout_invalidity_reason::PHYSICAL_INFEASIBILITY;
     }
 
     /**
@@ -356,27 +368,20 @@ class is_operational_impl
         if (!canvas_lyt.is_empty())
         {
             charge_distribution_surface<Lyt> cds_canvas{canvas_lyt};
-            cell<Lyt>                        dependent_cell{};
-
-            canvas_lyt.foreach_cell([&](const auto& c) { dependent_cell = c; });
 
             cds_canvas.assign_dependent_cell(dependent_cell);
             cds_canvas.assign_physical_parameters(parameters.simulation_parameters);
-            // number of different input combinations
-            for (auto i = 0u; i < truth_table.front().num_bits(); ++i, ++bii)
-            {
-                // if positively charged SiDBs can occur, the SiDB layout is considered as non-operational
-                if (can_positive_charges_occur(*bii, parameters.simulation_parameters))
-                {
-                    return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
-                }
 
-                if ((parameters.op_condition == is_operational_params::operational_condition::REJECT_KINKS &&
-                     parameters.mode_to_analyse_operational_status ==
-                         is_operational_params::analyis_mode::PRUNE_BEFORE_SIMULATION) ||
-                    parameters.mode_to_analyse_operational_status == is_operational_params::analyis_mode::PRUNING_ONLY)
+            if ((parameters.op_condition == is_operational_params::operational_condition::REJECT_KINKS &&
+                 parameters.strategy_to_analyze_operational_status ==
+                     is_operational_params::operational_analysis_strategy::FILTER_BEFORE_SIMULATION) ||
+                parameters.strategy_to_analyze_operational_status ==
+                    is_operational_params::operational_analysis_strategy::FILTER_ONLY)
+            {
+                // number of different input combinations
+                for (auto i = 0u; i < truth_table.front().num_bits(); ++i, ++bii)
                 {
-                    if (can_layout_be_discarded(bii.get_current_input_index(), cds_canvas, dependent_cell).first)
+                    if (can_layout_be_discarded(bii.get_current_input_index(), cds_canvas))
                     {
                         return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
                     }
@@ -384,16 +389,19 @@ class is_operational_impl
             }
         }
 
-        // if the layout is not discarded during the three pruning steps, it is considered operational.
+        // if the layout is not discarded during the three filtering steps, it is considered operational.
         // This is only an approximation.
-        if (parameters.mode_to_analyse_operational_status == is_operational_params::analyis_mode::PRUNING_ONLY)
+        if (parameters.strategy_to_analyze_operational_status ==
+                is_operational_params::operational_analysis_strategy::FILTER_ONLY &&
+            !canvas_lyt.is_empty())
         {
             return {operational_status::OPERATIONAL, non_operationality_reason::NONE};
         }
 
-        if (parameters.mode_to_analyse_operational_status == is_operational_params::analyis_mode::SIMULATION_ONLY ||
-            parameters.mode_to_analyse_operational_status ==
-                is_operational_params::analyis_mode::PRUNE_BEFORE_SIMULATION ||
+        if (parameters.strategy_to_analyze_operational_status ==
+                is_operational_params::operational_analysis_strategy::SIMULATION_ONLY ||
+            parameters.strategy_to_analyze_operational_status ==
+                is_operational_params::operational_analysis_strategy::FILTER_BEFORE_SIMULATION ||
             canvas_lyt.is_empty())
         {
             bii = 0;
@@ -511,7 +519,7 @@ class is_operational_impl
             assert(!input_bdl_wires.empty() && "No input wires provided.");
             assert(!output_bdl_wires.empty() && "No output wires provided.");
             assert((truth_table.size() == output_bdl_wires.size()) &&
-                   "Number of truth tables and output BDL wires does not match");
+                   "Number of truth tables and output BDL wires don't not match");
 
             if (check_existence_of_kinks_in_input_wires(given_cds, input_pattern) ||
                 check_existence_of_kinks_in_output_wires(given_cds, input_pattern))
@@ -595,29 +603,30 @@ class is_operational_impl
      * of the whole layout is physically valid.
      *
      * @param cds_layout The charge distribution surface layout to be evaluated.
-     * @param cds_canvas The charge distribution surface of the canvas SiDBs. All possible configurations are enumerated
      * @return The minimum energy value if a physically valid configuration is found, `std::nullopt`
      * otherwise.
      */
     [[nodiscard]] std::optional<double>
-    is_physical_validity_feasible(charge_distribution_surface<Lyt>&       cds_layout,
-                                  const charge_distribution_surface<Lyt>& cds_canvas) const noexcept
+    is_physical_validity_feasible(charge_distribution_surface<Lyt>& cds_layout) const noexcept
     {
         auto min_energy = std::numeric_limits<double>::infinity();
 
         uint64_t canvas_charge_index = 0;
 
-        charge_distribution_surface<Lyt> cds_canvas_copy{cds_canvas.clone()};
+        charge_distribution_surface<Lyt> cds_canvas_copy{canvas_lyt};
         cds_canvas_copy.assign_base_number(2);
-
-        cds_canvas_copy.assign_charge_index(0);
+        cds_canvas_copy.assign_charge_index(canvas_charge_index);
+        cds_canvas_copy.assign_dependent_cell(dependent_cell);
 
         const auto max_index = cds_canvas_copy.get_max_charge_index();
+
+        assert(max_index == (std::pow(2, cds_canvas_copy.num_cells() - 1) - 1) &&
+               "The maximum charge index is incorrect. Probably, the dependent cell is not set.");
 
         while (canvas_charge_index <= max_index)
         {
             cds_canvas_copy.foreach_cell(
-                [&](const auto& c)
+                [&cds_layout, &cds_canvas_copy](const auto& c)
                 {
                     cds_layout.assign_charge_state(c, cds_canvas_copy.get_charge_state(c),
                                                    charge_index_mode::KEEP_CHARGE_INDEX);
@@ -653,23 +662,14 @@ class is_operational_impl
     }
 
     /**
-     * This function assigns the charge states of the input wires in the layout according to the provided input pattern
-     * index. It performs the following steps:
-     * - For `NORTH-SOUTH` port wires, if the corresponding bit in the input pattern is set, assigns `NEUTRAL`
-     * charge to the upper part and `NEGATIVE` charge to the lower part of the BDLs of the wire.
-     * - For `NORTH-SOUTH` port wires, if the corresponding bit in the input pattern is not set, assigns `NEGATIVE`
-     *   charge to the upper part and `NEUTRAL` charge to the lower part of the BDLs of the wire.
-     * - For `SOUTH-NORTH` port wires, if the corresponding bit in the input pattern is set, assigns `NEGATIVE`
-     * charge to the upper part and `NEUTRAL` charge to the lower part of the BDLs of the wire.
-     * - For `SOUTH-NORTH` port wires, if the corresponding bit in the input pattern is not set, assigns `NEUTRAL`
-     *   charge to the upper part and `NEGATIVE` charge to the lower part of the BDLs of the wire.
+     * This function assigns the charge states of the input pins in the layout according to the input index provided.
+     * This means that when a zero is applied, each BDL pair in the wire is set to zero.
      *
      * @param cds The charge distribution surface layout to be modified.
      * @param current_input_index The index representing the current input pattern.
      */
-    void
-    set_charge_distribution_of_input_wires_based_on_input_pattern(charge_distribution_surface<Lyt>& cds,
-                                                                  const uint64_t current_input_index) const noexcept
+    void set_charge_distribution_of_input_pins(charge_distribution_surface<Lyt>& cds,
+                                               const uint64_t                    current_input_index) const noexcept
     {
         cds.assign_all_charge_states(sidb_charge_state::NEGATIVE, charge_index_mode::KEEP_CHARGE_INDEX);
 
@@ -742,22 +742,14 @@ class is_operational_impl
     }
 
     /**
-     * This function assigns the charge states of the input wires in the layout according to the provided input pattern
-     * index. It performs the following steps:
-     *    - For `NORTH-SOUTH` port wires, if the corresponding bit in the input pattern is set, assigns `NEUTRAL`
-     * charge to the upper part and `NEGATIVE` charge to the lower part of the BDLs of the wire.
-     *    - For `NORTH-SOUTH` port wires, if the corresponding bit in the input pattern is not set, assigns
-     * `NEGATIVE` charge to the upper part and `NEUTRAL` charge to the lower part of the BDLs of the wire.
-     *    - For `SOUTH-NORTH` port wires, if the corresponding bit in the input pattern is set, assigns `NEGATIVE`
-     * charge to the upper part and `NEUTRAL` charge to the lower part of the BDLs of the wire.
-     *    - For `SOUTH-NORTH` port wires, if the corresponding bit in the input pattern is not set, assigns
-     * `NEUTRAL` charge to the upper part and `NEGATIVE` charge to the lower part of the BDLs of the wire.
+     * This function assigns the charge states of the output pins in the layout according to the input index provided.
+     * This means that when a zero is applied, each BDL pair in the wire is set to zero.
      *
      * @param cds The charge distribution surface layout to be modified.
      * @param output_wire_index The index representing the current input pattern of the output wire.
      */
-    void set_charge_distribution_of_output_wires_based_on_output_index(charge_distribution_surface<Lyt>& cds,
-                                                                       const uint64_t output_wire_index) const noexcept
+    void set_charge_distribution_of_output_pins(charge_distribution_surface<Lyt>& cds,
+                                                const uint64_t                    output_wire_index) const noexcept
     {
         for (auto i = 0u; i < number_of_output_wires; i++)
         {
@@ -768,6 +760,33 @@ class is_operational_impl
                 {
                     for (const auto& bdl : output_bdl_wires[i].pairs)
                     {
+                        cds.assign_charge_state(bdl.upper, sidb_charge_state::NEUTRAL,
+                                                charge_index_mode::KEEP_CHARGE_INDEX);
+                        cds.assign_charge_state(bdl.lower, sidb_charge_state::NEGATIVE,
+                                                charge_index_mode::KEEP_CHARGE_INDEX);
+                    }
+                }
+                else
+                {
+                    for (const auto& bdl : output_bdl_wires[i].pairs)
+                    {
+                        cds.assign_charge_state(bdl.upper, sidb_charge_state::NEGATIVE,
+                                                charge_index_mode::KEEP_CHARGE_INDEX);
+                        cds.assign_charge_state(bdl.lower, sidb_charge_state::NEUTRAL,
+                                                charge_index_mode::KEEP_CHARGE_INDEX);
+                    }
+                }
+            }
+            else if (output_bdl_wires[i].port.dir == port_direction::NONE)
+            {
+                if ((output_wire_index & (uint64_t{1ull} << i)) != 0ull)
+                {
+                    for (const auto& bdl : output_bdl_wires[i].pairs)
+                    {
+                        if (bdl.type == sidb_technology::INPUT)
+                        {
+                            continue;
+                        }
                         cds.assign_charge_state(bdl.upper, sidb_charge_state::NEUTRAL,
                                                 charge_index_mode::KEEP_CHARGE_INDEX);
                         cds.assign_charge_state(bdl.lower, sidb_charge_state::NEGATIVE,
@@ -814,75 +833,11 @@ class is_operational_impl
             }
         }
     }
-
-    /**
-     * This function assigns the charge states of the output wires in the layout according to the values in the truth
-     * table for the provided input pattern index.
-     *
-     * @param cds The charge distribution surface layout to be modified.
-     * @param input_index The index representing the current input pattern.
-     */
-    void set_charge_distribution_of_output_wires_based_on_truth_table(charge_distribution_surface<Lyt>& cds,
-                                                                      const uint64_t input_index) const noexcept
-    {
-        for (auto i = 0u; i < number_of_output_wires; i++)
-        {
-            if (output_bdl_wires[i].port.dir == port_direction::SOUTH ||
-                output_bdl_wires[i].port.dir == port_direction::EAST)
-            {
-                if (kitty::get_bit(truth_table[i], input_index))
-                {
-                    for (const auto& bdl : output_bdl_wires[i].pairs)
-                    {
-                        cds.assign_charge_state(bdl.upper, sidb_charge_state::NEUTRAL,
-                                                charge_index_mode::KEEP_CHARGE_INDEX);
-                        cds.assign_charge_state(bdl.lower, sidb_charge_state::NEGATIVE,
-                                                charge_index_mode::KEEP_CHARGE_INDEX);
-                    }
-                }
-                else
-                {
-                    for (const auto& bdl : output_bdl_wires[i].pairs)
-                    {
-                        cds.assign_charge_state(bdl.upper, sidb_charge_state::NEGATIVE,
-                                                charge_index_mode::KEEP_CHARGE_INDEX);
-                        cds.assign_charge_state(bdl.lower, sidb_charge_state::NEUTRAL,
-                                                charge_index_mode::KEEP_CHARGE_INDEX);
-                    }
-                }
-            }
-            else
-            {
-                if (kitty::get_bit(truth_table[i], input_index))
-                {
-                    for (const auto& bdl : output_bdl_wires[i].pairs)
-                    {
-                        cds.assign_charge_state(bdl.upper, sidb_charge_state::NEGATIVE,
-                                                charge_index_mode::KEEP_CHARGE_INDEX);
-                        cds.assign_charge_state(bdl.lower, sidb_charge_state::NEUTRAL,
-                                                charge_index_mode::KEEP_CHARGE_INDEX);
-                    }
-                }
-                else
-                {
-                    for (const auto& bdl : output_bdl_wires[i].pairs)
-                    {
-                        cds.assign_charge_state(bdl.upper, sidb_charge_state::NEUTRAL,
-                                                charge_index_mode::KEEP_CHARGE_INDEX);
-                        cds.assign_charge_state(bdl.lower, sidb_charge_state::NEGATIVE,
-                                                charge_index_mode::KEEP_CHARGE_INDEX);
-                    }
-                }
-            }
-        }
-    }
-
     /**
      * This function iterates through various input patterns and output wire indices to determine if any configuration
      * results in a physically valid layout with energy below the given energy value, indicating I/O signal instability.
      *
      * @param cds_layout The charge distribution surface layout to be modified and checked.
-     * @param cds_canvas The charge distribution of the canvas SiDBs.
      * @param max_input_pattern_index The maximum index for input pattern
      * @param input_pattern The specific input pattern for which the stability check is conducted.
      * @param logical_correct_output_pattern The expected correct output pattern for the given input.
@@ -890,8 +845,7 @@ class is_operational_impl
      * considered unstable.
      * @return `true` if the I/O signal is unstable, `false` otherwise.
      */
-    [[nodiscard]] bool is_io_signal_unstable(charge_distribution_surface<Lyt>&       cds_layout,
-                                             const charge_distribution_surface<Lyt>& cds_canvas,
+    [[nodiscard]] bool is_io_signal_unstable(charge_distribution_surface<Lyt>& cds_layout,
                                              const uint64_t max_input_pattern_index, const uint64_t input_pattern,
                                              const uint64_t logical_correct_output_pattern,
                                              const double   minimal_energy_of_physically_valid_layout) const noexcept
@@ -906,10 +860,10 @@ class is_operational_impl
                     continue;
                 }
 
-                set_charge_distribution_of_input_wires_based_on_input_pattern(cds_layout, kink_states_input);
-                set_charge_distribution_of_output_wires_based_on_output_index(cds_layout, output_wire_index);
+                set_charge_distribution_of_input_pins(cds_layout, kink_states_input);
+                set_charge_distribution_of_output_pins(cds_layout, output_wire_index);
 
-                const auto physical_validity = is_physical_validity_feasible(cds_layout, cds_canvas);
+                const auto physical_validity = is_physical_validity_feasible(cds_layout);
 
                 if (physical_validity.has_value())
                 {
@@ -962,12 +916,18 @@ class is_operational_impl
      * Number of output BDL wires.
      */
     const std::size_t number_of_output_wires;
-
+    /**
+     * Number of input BDL wires.
+     */
     const std::size_t number_of_input_wires;
     /**
      * Layout consisting of all canvas SiDBs.
      */
     Lyt canvas_lyt{};
+    /**
+     * Dependent cell of the canvas SiDBs.
+     */
+    cell<Lyt> dependent_cell{};
     /**
      * This function conducts physical simulation of the given layout (gate layout with certain input combination).
      * The simulation results are stored in the `sim_result` variable.

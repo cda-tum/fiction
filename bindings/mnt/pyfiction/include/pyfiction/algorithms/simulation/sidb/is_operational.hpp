@@ -111,8 +111,8 @@ inline void is_operational(pybind11::module& m)
                        DOC(fiction_is_operational_params_input_bdl_iterator_params))
         .def_readwrite("op_condition", &fiction::is_operational_params::op_condition,
                        DOC(fiction_is_operational_params_op_condition))
-        .def_readwrite("mode_to_analyse_operational_status",
-                       &fiction::is_operational_params::mode_to_analyse_operational_status,
+        .def_readwrite("strategy_to_analyze_operational_status",
+                       &fiction::is_operational_params::strategy_to_analyze_operational_status,
                        DOC(fiction_is_operational_params_mode_to_analyse_operational_status));
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!

@@ -1286,7 +1286,7 @@ TEMPLATE_TEST_CASE("AND gate with Bestagon shape and kink states at default phys
         CHECK(op_domain_stats.num_non_operational_parameter_combinations == 33);
     }
 
-    SECTION("grid_search, forbid kinks")
+    SECTION("grid_search, reject kinks")
     {
         op_domain_params.operational_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
 
@@ -1302,7 +1302,7 @@ TEMPLATE_TEST_CASE("AND gate with Bestagon shape and kink states at default phys
     }
 }
 
-TEMPLATE_TEST_CASE("Grid search to determine the operational domain. The operation status is determined by physical "
+TEMPLATE_TEST_CASE("Grid search to determine the operational domain. The operational status is determined by physical "
                    "simulation and the efficient but approximate method of pruning only.",
                    "[operational-domain]", sidb_100_cell_clk_lyt_siqad)
 {
@@ -1321,7 +1321,7 @@ TEMPLATE_TEST_CASE("Grid search to determine the operational domain. The operati
 
     operational_domain_stats op_domain_stats{};
 
-    SECTION("grid search, determine operation status with physical simulation")
+    SECTION("grid search, determine operational status with physical simulation")
     {
         const auto op_domain = operational_domain_grid_search(layout, std::vector<tt>{create_and_tt()},
                                                               op_domain_params, &op_domain_stats);
@@ -1334,10 +1334,10 @@ TEMPLATE_TEST_CASE("Grid search to determine the operational domain. The operati
         CHECK(op_domain_stats.num_non_operational_parameter_combinations == 31);
     }
 
-    SECTION("grid search, determine operation status with only pruning")
+    SECTION("grid search, determine operational status with only pruning")
     {
-        op_domain_params.operational_params.mode_to_analyse_operational_status =
-            is_operational_params::analyis_mode::PRUNING_ONLY;
+        op_domain_params.operational_params.strategy_to_analyze_operational_status =
+            is_operational_params::operational_analysis_strategy::FILTER_ONLY;
 
         const auto op_domain = operational_domain_grid_search(layout, std::vector<tt>{create_and_tt()},
                                                               op_domain_params, &op_domain_stats);

@@ -103,7 +103,7 @@ struct displacement_robustness_domain_params
      */
     std::pair<uint64_t, uint64_t> displacement_variations = {1, 0};
     /**
-     * Parameters to check the operation status of the SiDB layout.
+     * Parameters to check the operational status of the SiDB layout.
      */
     is_operational_params operational_params{};
     /**

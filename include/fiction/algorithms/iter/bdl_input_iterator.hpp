@@ -435,7 +435,7 @@ class bdl_input_iterator
      */
     void set_all_inputs() noexcept
     {
-        assert(num_inputs == input_bdl_wires.size() && "number of inputs and number of wires is different.");
+        assert(num_inputs == input_bdl_wires.size() && "number of inputs and number of wires don't match");
 
         for (uint64_t i = num_inputs - 1; i < num_inputs; --i)
         {

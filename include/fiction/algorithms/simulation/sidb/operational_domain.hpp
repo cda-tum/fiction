@@ -241,7 +241,7 @@ struct operational_domain_params
     /**
      * The parameters used to determine if a layout is operational or non-operational.
      */
-    is_operational_params operational_params;
+    is_operational_params operational_params{};
     /**
      * The dimensions to sweep over together with their value ranges, ordered by priority. The first dimension is the x
      * dimension, the second dimension is the y dimension, etc.
@@ -387,12 +387,16 @@ class operational_domain_impl
     {
         const auto logic_cells = lyt.get_cells_by_type(technology<Lyt>::cell_type::LOGIC);
 
-        if (!logic_cells.empty())
+        if (params.operational_params.strategy_to_analyze_operational_status ==
+            is_operational_params::operational_analysis_strategy::FILTER_ONLY)
         {
-            for (const auto& c : logic_cells)
-            {
-                canvas_lyt.assign_cell_type(c, technology<Lyt>::cell_type::NORMAL);
-            }
+            assert(logic_cells.size() > 0 && "No logic cells found in the layout");
+        }
+
+        // the canvas layout is created which is defined by the logic cells.
+        for (const auto& c : logic_cells)
+        {
+            canvas_lyt.assign_cell_type(c, technology<Lyt>::cell_type::NORMAL);
         }
 
         op_domain.dimensions.reserve(num_dimensions);
@@ -867,7 +871,7 @@ class operational_domain_impl
      */
     std::vector<std::vector<double>> values;
     /**
-     * Layout consisting of all canvas SiDBs.
+     * This layout consists of the canvas cells of the layout.
      */
     Lyt canvas_lyt{};
     /**

@@ -96,20 +96,21 @@ TEST_CASE("BDL wire operational domain computation", "[compute-operational-ratio
     }
 }
 
-TEST_CASE("SiQAD OR gate", "[compute-operational-ratio]")
+TEST_CASE("SiQAD AND gate", "[compute-operational-ratio]")
 {
-    const auto lyt = blueprints::siqad_or_gate<sidb_100_cell_clk_lyt_siqad>();
+    const auto lyt = blueprints::siqad_nand_gate<sidb_100_cell_clk_lyt_siqad>();
 
     sidb_simulation_parameters sim_params{};
-    sim_params.base = 2;
+    sim_params.base     = 2;
+    sim_params.mu_minus = -0.28;
 
     operational_domain_params op_domain_params{};
     op_domain_params.operational_params.simulation_parameters = sim_params;
     op_domain_params.operational_params.input_bdl_iterator_params.input_bdl_config =
         bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED;
     op_domain_params.sweep_dimensions = {{sweep_parameter::EPSILON_R}, {sweep_parameter::LAMBDA_TF}};
-    op_domain_params.operational_params.mode_to_analyse_operational_status =
-        is_operational_params::analyis_mode::PRUNE_BEFORE_SIMULATION;
+    op_domain_params.operational_params.strategy_to_analyze_operational_status =
+        is_operational_params::operational_analysis_strategy::FILTER_BEFORE_SIMULATION;
     op_domain_params.operational_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
     op_domain_params.operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance = 1.5;
 
@@ -126,18 +127,21 @@ TEST_CASE("SiQAD OR gate", "[compute-operational-ratio]")
     compute_operational_ratio_params op_ratio_params{op_domain_params};
 
     // pruning and simulation to determine the operational status of the layout
-    const auto op_domain_ratio_pruning_and_simulation =
-        compute_operational_ratio(lyt, std::vector<tt>{create_or_tt()}, parameter_point({5.6, 5.0}), op_ratio_params);
+    const auto op_domain_ratio_pruning_and_simulation = compute_operational_ratio(
+        lyt, std::vector<tt>{create_nand_tt()}, parameter_point({5.6, 5.0, -0.28}), op_ratio_params);
 
     // only pruning to determine the operational status of the layout
-    op_ratio_params.op_domain_params.operational_params.mode_to_analyse_operational_status =
-        is_operational_params::analyis_mode::PRUNING_ONLY;
+    op_ratio_params.op_domain_params.operational_params.strategy_to_analyze_operational_status =
+        is_operational_params::operational_analysis_strategy::FILTER_ONLY;
 
     const auto op_domain_ratio_only_pruning = compute_operational_ratio(
-        lyt, std::vector<tt>{create_and_tt()}, parameter_point({5.6, 5.0, -0.32}), op_ratio_params);
+        lyt, std::vector<tt>{create_nand_tt()}, parameter_point({5.6, 5.0, -0.28}), op_ratio_params);
 
-    // check if the operational domain has the correct size
-    CHECK(op_domain_ratio_pruning_and_simulation < op_domain_ratio_only_pruning);
+    CHECK_THAT(op_domain_ratio_pruning_and_simulation,
+               Catch::Matchers::WithinAbs(0.11918914799573235, physical_constants::POP_STABILITY_ERR));
+
+    CHECK_THAT(op_domain_ratio_only_pruning,
+               Catch::Matchers::WithinAbs(0.11918914799573235, physical_constants::POP_STABILITY_ERR));
 }
 
 // to save runtime in the CI, this test is only run in RELEASE mode
@@ -195,12 +199,12 @@ TEST_CASE("Bestagon AND gate", "[compute-operational-ratio]")
     }
 
     SECTION(
-        "semi-operational domain, reject kinks, only pruning is used to determine the operation status of the layout")
+        "semi-operational domain, reject kinks, only pruning is used to determine the operational status of the layout")
     {
         op_domain_params.sweep_dimensions.push_back(z_dimension);
         op_domain_params.operational_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
-        op_domain_params.operational_params.mode_to_analyse_operational_status =
-            is_operational_params::analyis_mode::PRUNING_ONLY;
+        op_domain_params.operational_params.strategy_to_analyze_operational_status =
+            is_operational_params::operational_analysis_strategy::FILTER_ONLY;
 
         const compute_operational_ratio_params op_ratio_params{op_domain_params};
 

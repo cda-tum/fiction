@@ -250,16 +250,14 @@ class design_sidb_gates_impl
             }
         };
 
-        const std::size_t number_of_used_threads =
-            std::min(static_cast<std::size_t>(std::thread::hardware_concurrency()), all_combinations.size());
+        const std::size_t num_threads = std::min(number_of_threads, all_combinations.size());
 
-        const std::size_t chunk_size =
-            (all_combinations.size() + number_of_used_threads - 1) / number_of_used_threads;  // Ceiling division
+        const std::size_t chunk_size = (all_combinations.size() + num_threads - 1) / num_threads;  // Ceiling division
 
         std::vector<std::thread> threads{};
-        threads.reserve(number_of_used_threads);
+        threads.reserve(num_threads);
 
-        for (std::size_t i = 0; i < number_of_used_threads; ++i)
+        for (std::size_t i = 0; i < num_threads; ++i)
         {
             threads.emplace_back(
                 [i, chunk_size, &all_combinations, &add_combination_to_layout_and_check_operation, &solution_found,
@@ -309,8 +307,7 @@ class design_sidb_gates_impl
             params.canvas, params.number_of_sidbs,
             generate_random_sidb_layout_params<cell<Lyt>>::positive_charges::ALLOWED};
 
-        const auto num_threads =
-            std::min(static_cast<std::size_t>(std::thread::hardware_concurrency()), all_canvas_layouts.size());
+        const auto num_threads = std::min(number_of_threads, all_canvas_layouts.size());
 
         std::vector<std::thread> threads{};
         threads.reserve(num_threads);
@@ -404,14 +401,12 @@ class design_sidb_gates_impl
 
         gate_layouts.reserve(gate_candidates.size());
 
-        const std::size_t number_of_threads =
-            std::min(static_cast<std::size_t>(std::thread::hardware_concurrency()), gate_candidates.size());
+        const std::size_t num_threads = std::min(number_of_threads, gate_candidates.size());
 
-        const std::size_t chunk_size =
-            (gate_candidates.size() + number_of_threads - 1) / number_of_threads;  // Ceiling division
+        const std::size_t chunk_size = (gate_candidates.size() + num_threads - 1) / num_threads;  // Ceiling division
 
         std::vector<std::thread> threads;
-        threads.reserve(number_of_threads);
+        threads.reserve(num_threads);
 
         std::atomic<bool> gate_design_found = false;
 
@@ -426,8 +421,8 @@ class design_sidb_gates_impl
             }
 
             // pruning was already conducted above. Hence, SIMULATION_ONLY is chosen.
-            params.operational_params.mode_to_analyse_operational_status =
-                is_operational_params::analyis_mode::SIMULATION_ONLY;
+            params.operational_params.strategy_to_analyze_operational_status =
+                is_operational_params::operational_analysis_strategy::SIMULATION_ONLY;
 
             if (const auto [status, sim_calls] = is_operational(candidate, truth_table, params.operational_params,
                                                                 input_bdl_wires, output_bdl_wires);
@@ -442,7 +437,7 @@ class design_sidb_gates_impl
             }
         };
 
-        for (std::size_t i = 0; i < number_of_threads; ++i)
+        for (std::size_t i = 0; i < num_threads; ++i)
         {
             threads.emplace_back(
                 [this, i, chunk_size, &gate_candidates, &check_operational_status, &gate_design_found]()
@@ -530,6 +525,10 @@ class design_sidb_gates_impl
      */
     std::atomic<std::size_t> number_of_discarded_layouts_at_third_pruning{0};
     /**
+     * Number of threads to be used for the design process.
+     */
+    std::size_t number_of_threads{std::thread::hardware_concurrency()};
+    /**
      * This function processes each layout to determine if it represents a valid gate implementation or if it can be
      * pruned by using three distinct physically-informed pruning steps. It leverages multi-threading to accelerate the
      * evaluation and ensures thread-safe access to shared resources.
@@ -555,7 +554,7 @@ class design_sidb_gates_impl
             cell<Lyt> dependent_cell{};
 
             canvas_lyt.foreach_cell(
-                [&](const auto& c)
+                [&current_layout, &dependent_cell](const auto& c)
                 {
                     current_layout.assign_cell_type(c, Lyt::technology::cell_type::LOGIC);
                     dependent_cell = c;
@@ -575,24 +574,24 @@ class design_sidb_gates_impl
 
             for (auto i = 0u; i < truth_table.front().num_bits(); ++i, ++bii)
             {
-                const auto [can_layout_be_pruned, applied_pruning] = is_operational_impl.can_layout_be_discarded(
-                    bii.get_current_input_index(), cds_canvas, dependent_cell);
+                const auto reason_for_filtering =
+                    is_operational_impl.can_layout_be_discarded(bii.get_current_input_index(), cds_canvas);
 
-                if (can_layout_be_pruned)
+                if (reason_for_filtering.has_value())
                 {
-                    switch (applied_pruning)
+                    switch (reason_for_filtering.value())
                     {
-                        case detail::layout_invalid_reason::POTENTIAL_POSITIVE_CHARGES:
+                        case detail::layout_invalidity_reason::POTENTIAL_POSITIVE_CHARGES:
                         {
                             number_of_discarded_layouts_at_first_pruning++;
                             break;
                         }
-                        case detail::layout_invalid_reason::PHYSICAL_INFEASIBILITY:
+                        case detail::layout_invalidity_reason::PHYSICAL_INFEASIBILITY:
                         {
                             number_of_discarded_layouts_at_second_pruning++;
                             break;
                         }
-                        case detail::layout_invalid_reason::IO_INSTABILITY:
+                        case detail::layout_invalidity_reason::IO_INSTABILITY:
                         {
                             number_of_discarded_layouts_at_third_pruning++;
                             break;
@@ -612,14 +611,13 @@ class design_sidb_gates_impl
 
         gate_candidate.reserve(all_canvas_layouts.size());
 
-        const std::size_t number_of_threads =
-            std::min(static_cast<std::size_t>(std::thread::hardware_concurrency()), all_canvas_layouts.size());
-        const std::size_t chunk_size = (all_canvas_layouts.size() + number_of_threads - 1) / number_of_threads;
+        const std::size_t num_threads = std::min(number_of_threads, all_canvas_layouts.size());
+        const std::size_t chunk_size  = (all_canvas_layouts.size() + num_threads - 1) / num_threads;
 
         std::vector<std::thread> threads{};
-        threads.reserve(number_of_threads);
+        threads.reserve(num_threads);
 
-        for (std::size_t i = 0; i < number_of_threads; ++i)
+        for (std::size_t i = 0; i < num_threads; ++i)
         {
             threads.emplace_back(
                 [i, chunk_size, this, &conduct_pruning_steps]()
@@ -720,7 +718,7 @@ class design_sidb_gates_impl
 
         // the skeleton can already exhibit some canvas SiDBs (partially filled canvas)
         skeleton_layout.foreach_cell(
-            [&](const auto& c)
+            [this, &lyt](const auto& c)
             {
                 if (skeleton_layout.get_cell_type(c) == sidb_technology::cell_type::LOGIC)
                 {
