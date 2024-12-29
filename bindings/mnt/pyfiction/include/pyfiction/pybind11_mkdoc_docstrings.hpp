@@ -4675,6 +4675,8 @@ static const char *__doc_fiction_detail_design_sidb_gates_impl_number_of_input_w
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_number_of_output_wires = R"doc(Number of output BDL wires.)doc";
 
+static const char *__doc_fiction_detail_design_sidb_gates_impl_number_of_threads = R"doc(Number of threads to be used for the design process.)doc";
+
 static const char *__doc_fiction_detail_design_sidb_gates_impl_output_bdl_wires = R"doc(Output BDL wires.)doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_params = R"doc(Parameters for the *SiDB Gate Designer*.)doc";
@@ -6655,8 +6657,8 @@ static const char *__doc_fiction_detail_is_operational_impl_bii = R"doc(Iterator
 
 static const char *__doc_fiction_detail_is_operational_impl_can_layout_be_discarded =
 R"doc(This function evaluates whether the given layout can be discarded
-since it cannot implement the given Boolean function. The pruning is
-subdivided into three single pruning steps: (1) discarding SiDB
+since it cannot implement the given Boolean function. The filtering is
+subdivided into three single filtering steps: (1) discarding SiDB
 layouts with potentially positively charged SiDBs, (2) utilizing an
 efficient method to identify and discard SiDB layouts that do not
 satisfy physical model constraints under the I/O pin conditions
@@ -6676,8 +6678,8 @@ Parameter ``dependent_cell``:
     A dependent-cell of the canvas SiDBs.
 
 Returns:
-    Pair where the first entry is `true` if the current layout can be
-    pruned. The second entry indicates the reason for pruning.)doc";
+    An optional layout_invalidity_reason indicating the reason why the
+    layout is non-operational.)doc";
 
 static const char *__doc_fiction_detail_is_operational_impl_canvas_lyt = R"doc(Layout consisting of all canvas SiDBs.)doc";
 
@@ -6722,6 +6724,8 @@ Parameter ``current_input_index``:
 Returns:
     `true` if any output wire contains a kink (i.e., an unexpected
     charge state), `false` otherwise.)doc";
+
+static const char *__doc_fiction_detail_is_operational_impl_dependent_cell = R"doc(Dependent cell of the canvas SiDBs.)doc";
 
 static const char *__doc_fiction_detail_is_operational_impl_determine_non_operational_input_patterns_and_non_operationality_reason =
 R"doc(Determines the input combinations for which the layout is non-
@@ -6782,9 +6786,6 @@ signal instability.
 
 Parameter ``cds_layout``:
     The charge distribution surface layout to be modified and checked.
-
-Parameter ``cds_canvas``:
-    The charge distribution of the canvas SiDBs.
 
 Parameter ``max_input_pattern_index``:
     The maximum index for input pattern
@@ -6885,17 +6886,13 @@ physically valid.
 Parameter ``cds_layout``:
     The charge distribution surface layout to be evaluated.
 
-Parameter ``cds_canvas``:
-    The charge distribution surface of the canvas SiDBs. All possible
-    configurations are enumerated
-
 Returns:
     The minimum energy value if a physically valid configuration is
     found, `std::nullopt` otherwise.)doc";
 
 static const char *__doc_fiction_detail_is_operational_impl_layout = R"doc(SiDB cell-level layout.)doc";
 
-static const char *__doc_fiction_detail_is_operational_impl_number_of_input_wires = R"doc()doc";
+static const char *__doc_fiction_detail_is_operational_impl_number_of_input_wires = R"doc(Number of input BDL wires.)doc";
 
 static const char *__doc_fiction_detail_is_operational_impl_number_of_output_wires = R"doc(Number of output BDL wires.)doc";
 
@@ -6929,21 +6926,10 @@ Returns:
     (either `OPERATIONAL` or `NON_OPERATIONAL`) and the second element
     indicating the reason if it is non-operational.)doc";
 
-static const char *__doc_fiction_detail_is_operational_impl_set_charge_distribution_of_input_wires_based_on_input_pattern =
-R"doc(This function assigns the charge states of the input wires in the
-layout according to the provided input pattern index. It performs the
-following steps: - For `NORTH-SOUTH` port wires, if the corresponding
-bit in the input pattern is set, assigns `NEUTRAL` charge to the upper
-part and `NEGATIVE` charge to the lower part of the BDLs of the wire.
-- For `NORTH-SOUTH` port wires, if the corresponding bit in the input
-pattern is not set, assigns `NEGATIVE` charge to the upper part and
-`NEUTRAL` charge to the lower part of the BDLs of the wire. - For
-`SOUTH-NORTH` port wires, if the corresponding bit in the input
-pattern is set, assigns `NEGATIVE` charge to the upper part and
-`NEUTRAL` charge to the lower part of the BDLs of the wire. - For
-`SOUTH-NORTH` port wires, if the corresponding bit in the input
-pattern is not set, assigns `NEUTRAL` charge to the upper part and
-`NEGATIVE` charge to the lower part of the BDLs of the wire.
+static const char *__doc_fiction_detail_is_operational_impl_set_charge_distribution_of_input_pins =
+R"doc(This function assigns the charge states of the input pins in the
+layout according to the input index provided. This means that when a
+zero is applied, each BDL pair in the wire is set to zero.
 
 Parameter ``cds``:
     The charge distribution surface layout to be modified.
@@ -6951,21 +6937,10 @@ Parameter ``cds``:
 Parameter ``current_input_index``:
     The index representing the current input pattern.)doc";
 
-static const char *__doc_fiction_detail_is_operational_impl_set_charge_distribution_of_output_wires_based_on_output_index =
-R"doc(This function assigns the charge states of the input wires in the
-layout according to the provided input pattern index. It performs the
-following steps: - For `NORTH-SOUTH` port wires, if the corresponding
-bit in the input pattern is set, assigns `NEUTRAL` charge to the upper
-part and `NEGATIVE` charge to the lower part of the BDLs of the wire.
-- For `NORTH-SOUTH` port wires, if the corresponding bit in the input
-pattern is not set, assigns `NEGATIVE` charge to the upper part and
-`NEUTRAL` charge to the lower part of the BDLs of the wire. - For
-`SOUTH-NORTH` port wires, if the corresponding bit in the input
-pattern is set, assigns `NEGATIVE` charge to the upper part and
-`NEUTRAL` charge to the lower part of the BDLs of the wire. - For
-`SOUTH-NORTH` port wires, if the corresponding bit in the input
-pattern is not set, assigns `NEUTRAL` charge to the upper part and
-`NEGATIVE` charge to the lower part of the BDLs of the wire.
+static const char *__doc_fiction_detail_is_operational_impl_set_charge_distribution_of_output_pins =
+R"doc(This function assigns the charge states of the output pins in the
+layout according to the input index provided. This means that when a
+zero is applied, each BDL pair in the wire is set to zero.
 
 Parameter ``cds``:
     The charge distribution surface layout to be modified.
@@ -6973,17 +6948,6 @@ Parameter ``cds``:
 Parameter ``output_wire_index``:
     The index representing the current input pattern of the output
     wire.)doc";
-
-static const char *__doc_fiction_detail_is_operational_impl_set_charge_distribution_of_output_wires_based_on_truth_table =
-R"doc(This function assigns the charge states of the output wires in the
-layout according to the values in the truth table for the provided
-input pattern index.
-
-Parameter ``cds``:
-    The charge distribution surface layout to be modified.
-
-Parameter ``input_index``:
-    The index representing the current input pattern.)doc";
 
 static const char *__doc_fiction_detail_is_operational_impl_simulator_invocations = R"doc(Number of simulator invocations.)doc";
 
@@ -7185,17 +7149,19 @@ Parameter ``c``:
 Parameter ``g_val``:
     New g-value for c.)doc";
 
-static const char *__doc_fiction_detail_layout_invalid_reason =
+static const char *__doc_fiction_detail_layout_invalidity_reason =
 R"doc(Reason why the layout is not a valid gate implementation for the given
 Boolean function.)doc";
 
-static const char *__doc_fiction_detail_layout_invalid_reason_IO_INSTABILITY = R"doc(I/O signal are instable.)doc";
+static const char *__doc_fiction_detail_layout_invalidity_reason_IO_INSTABILITY =
+R"doc(I/O signals are unstable, indicating that an information flip results
+in a lower energy state.)doc";
 
-static const char *__doc_fiction_detail_layout_invalid_reason_NONE = R"doc(No reason for pruning could be determined.)doc";
+static const char *__doc_fiction_detail_layout_invalidity_reason_PHYSICAL_INFEASIBILITY =
+R"doc(The layout is physically infeasible, meaning no charge distribution of
+the canvas SiDBs satisfies the criteria for physical validity.)doc";
 
-static const char *__doc_fiction_detail_layout_invalid_reason_PHYSICAL_INFEASIBILITY = R"doc(The layout is physically infeasible.)doc";
-
-static const char *__doc_fiction_detail_layout_invalid_reason_POTENTIAL_POSITIVE_CHARGES = R"doc(Positive SiDBs can potentially occur.)doc";
+static const char *__doc_fiction_detail_layout_invalidity_reason_POTENTIAL_POSITIVE_CHARGES = R"doc(Positive SiDBs can potentially occur.)doc";
 
 static const char *__doc_fiction_detail_maximum_defect_influence_position_and_distance_impl =
 R"doc(A class for simulating the maximum influence distance of defects
@@ -7299,7 +7265,7 @@ static const char *__doc_fiction_detail_on_the_fly_circuit_design_impl_stats = R
 
 static const char *__doc_fiction_detail_operational_domain_impl = R"doc()doc";
 
-static const char *__doc_fiction_detail_operational_domain_impl_canvas_lyt = R"doc(Layout consisting of all canvas SiDBs.)doc";
+static const char *__doc_fiction_detail_operational_domain_impl_canvas_lyt = R"doc(This layout consists of the canvas cells of the layout.)doc";
 
 static const char *__doc_fiction_detail_operational_domain_impl_contour_tracing =
 R"doc(Performs contour tracing to determine the operational domain. The
@@ -9355,19 +9321,6 @@ Parameter ``simulation_results``:
 Returns:
     A vector of charge distributions with the minimal energy.)doc";
 
-static const char *__doc_fiction_determine_output =
-R"doc(This function returns the output of the truth table for the given
-input index.
-
-Parameter ``truth_tables``:
-    The truth tables to evaluate.
-
-Parameter ``current_input_index``:
-    The index representing the current input pattern.
-
-Returns:
-    The output of the truth tables for the given input index.)doc";
-
 static const char *__doc_fiction_determine_physically_valid_parameters =
 R"doc(This function computes the parameters necessary for ensuring the
 physical validity of a given charge distribution and determines the
@@ -9590,7 +9543,7 @@ displacement in the y-direction.)doc";
 
 static const char *__doc_fiction_displacement_robustness_domain_params_fixed_sidbs = R"doc(SiDBs in the given layout which shall not be affected by variations.)doc";
 
-static const char *__doc_fiction_displacement_robustness_domain_params_operational_params = R"doc(Parameters to check the operation status of the SiDB layout.)doc";
+static const char *__doc_fiction_displacement_robustness_domain_params_operational_params = R"doc(Parameters to check the operational status of the SiDB layout.)doc";
 
 static const char *__doc_fiction_displacement_robustness_domain_params_percentage_of_analyzed_displaced_layouts =
 R"doc(This parameter defines the percentage of all possible displaced SiDB
@@ -9943,6 +9896,19 @@ Template parameter ``Dist``:
     Floating-point distance type.)doc";
 
 static const char *__doc_fiction_euclidean_distance_functor_euclidean_distance_functor = R"doc()doc";
+
+static const char *__doc_fiction_evaluate_output =
+R"doc(This function evaluates the given multi-output truth table at the
+given input index.
+
+Parameter ``truth_tables``:
+    The truth tables to evaluate.
+
+Parameter ``current_input_index``:
+    The index representing the current input pattern.
+
+Returns:
+    The output of the truth tables for the given input index.)doc";
 
 static const char *__doc_fiction_even_column_cartesian =
 R"doc(\verbatim +-------+ +-------+ | | | | +-------+ (1,0) +-------+ (3,0)
@@ -13912,37 +13878,48 @@ Returns:
 
 static const char *__doc_fiction_is_operational_params = R"doc(Parameters for the `is_operational` algorithm.)doc";
 
-static const char *__doc_fiction_is_operational_params_analyis_mode = R"doc(Mode to determine if the layout is operational or non-operational.)doc";
-
-static const char *__doc_fiction_is_operational_params_analyis_mode_PRUNE_BEFORE_SIMULATION =
-R"doc(Before a physical simulation is conducted, the algorithm checks if
-pruning strategies can determine that the layout is `non-operational`.
-This only provides any runtime benefits if kinks are accepted.)doc";
-
-static const char *__doc_fiction_is_operational_params_analyis_mode_PRUNING_ONLY =
-R"doc(This setting does only apply pruning strategies to determine if the
-layout is non-operational. If the layout is passes all pruning
-strategies, it is considered operational.
-
-@note This is only an approximation. It may be possible that the
-layout is non-operational, but the pruning strategies do not detect
-it.)doc";
-
-static const char *__doc_fiction_is_operational_params_analyis_mode_SIMULATION_ONLY =
-R"doc(This setting does not apply any pruning strategies to determine if the
-layout is operational. Instead, it relies solely on physical
-simulation to make this determination.)doc";
-
 static const char *__doc_fiction_is_operational_params_input_bdl_iterator_params = R"doc(Parameters for the BDL input iterator.)doc";
 
-static const char *__doc_fiction_is_operational_params_mode_to_analyse_operational_status = R"doc(Mode to determine if the layout is operational or non-operational.)doc";
-
 static const char *__doc_fiction_is_operational_params_op_condition =
-R"doc(Condition which is used to decide if a layout is operational or non-
+R"doc(Condition to decide whether a layout is operational or non-
 operational.)doc";
 
+static const char *__doc_fiction_is_operational_params_operational_analysis_strategy =
+R"doc(Simulation method to determine if the layout is operational or non-
+operational. There are three possible modes:
+
+- `SIMULATION_ONLY`: This setting does not apply any filtering
+strategies to determine if the layout is operational. Instead, it
+relies solely on physical simulation to make this determination. -
+`FILTER_ONLY`: This setting does only apply filtering strategies to
+determine if the layout is non-operational. If the layout passes all
+filtering strategies, it is considered operational. This is only an
+approximation. It may be possible that the layout is non-operational,
+but the filtering strategies do not detect it. -
+`FILTER_BEFORE_SIMULATION`: Before a physical simulation is conducted,
+the algorithm checks if filtering strategies have detected whether the
+layout is non-operational. This only provides any runtime benefits if
+kinks are rejected.)doc";
+
+static const char *__doc_fiction_is_operational_params_operational_analysis_strategy_FILTER_BEFORE_SIMULATION =
+R"doc(Before a physical simulation is conducted, the algorithm checks if
+filter strategies can determine that the layout is non-operational.
+This only provides any runtime benefits if kinks are rejected.)doc";
+
+static const char *__doc_fiction_is_operational_params_operational_analysis_strategy_FILTER_ONLY =
+R"doc(Apply filtering exclusively to determine whether the layout is non-
+operational. If the layout passes all filter steps, it is considered
+operational.
+
+@note This is an extremely fast approximation that may sometimes lead
+to false positives.)doc";
+
+static const char *__doc_fiction_is_operational_params_operational_analysis_strategy_SIMULATION_ONLY =
+R"doc(Do not apply filter strategies to determine whether the layout is
+operational. Instead, rely solely on physical simulation.)doc";
+
 static const char *__doc_fiction_is_operational_params_operational_condition =
-R"doc(Condition which is used to decide if a layout is operational or non-
+R"doc(Condition to decide whether a layout is operational or non-
 operational.)doc";
 
 static const char *__doc_fiction_is_operational_params_operational_condition_REJECT_KINKS =
@@ -13960,6 +13937,10 @@ computation.)doc";
 static const char *__doc_fiction_is_operational_params_simulation_parameters =
 R"doc(The simulation parameters for the physical simulation of the ground
 state.)doc";
+
+static const char *__doc_fiction_is_operational_params_strategy_to_analyze_operational_status =
+R"doc(Strategy to determine whether a layout is operational or non-
+operational.)doc";
 
 static const char *__doc_fiction_is_positively_charged_defect =
 R"doc(Checks whether the given defect has a positive charge value assigned
