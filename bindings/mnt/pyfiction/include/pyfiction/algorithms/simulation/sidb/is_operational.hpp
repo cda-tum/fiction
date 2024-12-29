@@ -113,7 +113,7 @@ inline void is_operational(pybind11::module& m)
                        DOC(fiction_is_operational_params_op_condition))
         .def_readwrite("strategy_to_analyze_operational_status",
                        &fiction::is_operational_params::strategy_to_analyze_operational_status,
-                       DOC(fiction_is_operational_params_mode_to_analyse_operational_status));
+                       DOC(fiction_is_operational_params_strategy_to_analyze_operational_status));
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
     detail::is_operational<py_sidb_100_lattice>(m);
