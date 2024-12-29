@@ -14,6 +14,7 @@ Added
     - Simulation:
         - Added option to determine efficiently if a layout is non-operational by using QuickCell's pruning strategies.
 - Experiments:
+    - Added rectangular SiDB gate skeletons and a script for designing a corresponding library.
     - Added information about how many layouts remain after each of QuickCell's pruning steps.
 
 v0.6.6 - 2024-11-26
