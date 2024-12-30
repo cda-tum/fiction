@@ -18956,7 +18956,7 @@ Parameter ``os``:
 Parameter ``params``:
     The parameters used for writing, including the influential and
     non-influential tags. Defaults to an empty
-    `write_defect_operational_domain_params` object, which provides
+    `write_defect_influence_domain_params` object, which provides
     standard tags.)doc";
 
 static const char *__doc_fiction_write_defect_operational_domain_2 =
@@ -18980,7 +18980,7 @@ Parameter ``filename``:
 Parameter ``params``:
     The parameters used for writing, including the influential and
     non-influential tags. Defaults to an empty
-    `write_defect_operational_domain_params` object, which provides
+    `write_defect_influence_domain_params` object, which provides
     standard tags.)doc";
 
 static const char *__doc_fiction_write_defect_operational_domain_params = R"doc(Parameters for writing a defect influence domain to a CSV file.)doc";

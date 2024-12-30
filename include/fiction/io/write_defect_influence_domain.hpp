@@ -18,7 +18,7 @@ namespace fiction
 /**
  * Parameters for writing a defect influence domain to a CSV file.
  */
-struct write_defect_operational_domain_params
+struct write_defect_influence_domain_params
 {
     /**
      * The tag used to represent the influential value of a defect position.
@@ -31,7 +31,7 @@ struct write_defect_operational_domain_params
 };
 
 /**
- * Writes a CSV representation of an operational domain to the specified output stream. The data are written
+ * Writes a CSV representation of an defect influence domain to the specified output stream. The data are written
  * as rows, each corresponding to one set of simulation parameters and their corresponding influence status.
  *
  * The output CSV format is as follows:
@@ -42,11 +42,11 @@ struct write_defect_operational_domain_params
  * parameters (represented as a pair of sweep parameters for the X and Y dimensions) to their influence status.
  * @param os The output stream where the CSV representation of the defect influence domain is written to.
  * @param params The parameters used for writing, including the influential and non-influential tags. Defaults to an
- * empty `write_defect_operational_domain_params` object, which provides standard tags.
+ * empty `write_defect_influence_domain_params` object, which provides standard tags.
  */
 template <typename Lyt>
-inline void write_defect_operational_domain(const defect_influence_domain<Lyt>& defect_infdom, std::ostream& os,
-                                            const write_defect_operational_domain_params& params = {})
+inline void write_defect_influence_domain(const defect_influence_domain<Lyt>& defect_infdom, std::ostream& os,
+                                          const write_defect_influence_domain_params& params = {})
 {
     csv_writer writer{os};
 
@@ -60,7 +60,7 @@ inline void write_defect_operational_domain(const defect_influence_domain<Lyt>& 
     }
 }
 /**
- * Writes a CSV representation of an operational domain to the specified file. The data are written
+ * Writes a CSV representation of an defect influence domain to the specified file. The data are written
  * as rows, each corresponding to one set of simulation parameters and their corresponding influence status.
  *
  * The output CSV format is as follows:
@@ -69,14 +69,14 @@ inline void write_defect_operational_domain(const defect_influence_domain<Lyt>& 
  *
  * @param defect_infdom The defect influence domain to be written. It contains a mapping from sets of simulation
  * parameters (represented as a pair of sweep parameters for the X and Y dimensions) to their influence status.
- * @param filename The filename where the CSV representation of the operational domain is written to.
+ * @param filename The filename where the CSV representation of the defect influence domain is written to.
  * @param params The parameters used for writing, including the influential and non-influential tags. Defaults to an
- * empty `write_defect_operational_domain_params` object, which provides standard tags.
+ * empty `write_defect_influence_domain_params` object, which provides standard tags.
  */
 template <typename Lyt>
-inline void write_defect_operational_domain(const defect_influence_domain<Lyt>&           defect_opdom,
-                                            const std::string_view&                       filename,
-                                            const write_defect_operational_domain_params& params = {})
+inline void write_defect_influence_domain(const defect_influence_domain<Lyt>&         defect_infdom,
+                                          const std::string_view&                     filename,
+                                          const write_defect_influence_domain_params& params = {})
 {
     std::ofstream os{filename.data(), std::ofstream::out};
 
@@ -85,7 +85,7 @@ inline void write_defect_operational_domain(const defect_influence_domain<Lyt>& 
         throw std::ofstream::failure("could not open file");
     }
 
-    write_defect_operational_domain(defect_opdom, os, params);
+    write_defect_influence_domain(defect_infdom, os, params);
     os.close();
 }
 

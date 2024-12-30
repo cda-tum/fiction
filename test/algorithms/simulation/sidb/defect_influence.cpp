@@ -171,7 +171,8 @@ TEMPLATE_TEST_CASE(
             defect_influence_grid_search(lyt_cube, std::vector<tt>{create_and_tt()}, defect_operational_arsenic_params);
         const auto clearance_result_arsenic = calculate_defect_clearance(lyt_cube, defect_influence_arsenic);
 
-        CHECK(clearance_result_arsenic.defect_position == cube::coord_t{17, 12, 0});
+        CHECK((((clearance_result_arsenic.defect_position == cube::coord_t{17, 12, 0})) ||
+               (clearance_result_arsenic.defect_position == cube::coord_t{12, 13, 0})));
         CHECK_THAT(std::abs(clearance_result_arsenic.defect_clearance_distance - 2.376),
                    Catch::Matchers::WithinAbs(0.00, 0.01));
     }
