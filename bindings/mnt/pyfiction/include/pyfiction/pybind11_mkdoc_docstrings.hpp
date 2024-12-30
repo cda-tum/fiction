@@ -2832,50 +2832,6 @@ Parameter ``n``:
 Returns:
     Columnar clocking scheme.)doc";
 
-static const char *__doc_fiction_compute_operational_ratio =
-R"doc(Calculates the ratio of operational parameter points surrounding a
-specified parameter point to the total number of parameter points in
-the given parameter space. This function is useful for assessing how
-robust a gate design is to variations in its parameters.
-
-A ratio close to 1 indicates that the gate is robust, meaning it
-functions correctly across a broad range of parameter values. A ratio
-close to 0 indicates that the gate is highly sensitive to parameter
-variations and may fail to operate correctly.
-
-Template parameter ``Lyt``:
-    SiDB cell-level layout type.
-
-Template parameter ``TT``:
-    Truth table type.
-
-Parameter ``lyt``:
-    The SiDB layout for which to compute the ratio of operational
-    parameter points surrounding a specified parameter point to the
-    total number of parameter points.
-
-Parameter ``spec``:
-    The expected Boolean function of the layout, provided as a multi-
-    output truth table.
-
-Parameter ``params``:
-    Parameters.
-
-Parameter ``pp``:
-    The specific parameter point around which the operational ratio is
-    computed.
-
-Returns:
-    The ratio of operational parameter points to the total number of
-    parameter points in the parameter space.)doc";
-
-static const char *__doc_fiction_compute_operational_ratio_params =
-R"doc(Parameters for computing the ratio of operational parameter points
-around a specified parameter point to the total number of parameter
-points in the given parameter space.)doc";
-
-static const char *__doc_fiction_compute_operational_ratio_params_op_domain_params = R"doc(Parameters for the operational domain computation.)doc";
-
 static const char *__doc_fiction_convert_array =
 R"doc(Converts an array of size `N` and type `T` to an array of size `N` and
 type `ElementType` by applying `static_cast` at compile time.
@@ -15226,6 +15182,50 @@ Parameter ``stats``:
 Returns:
     The (partial) operational domain of the layout.)doc";
 
+static const char *__doc_fiction_operational_domain_ratio =
+R"doc(Calculates the ratio of operational parameter points surrounding a
+specified parameter point to the total number of parameter points in
+the given parameter space. This function is useful for assessing how
+robust a gate design is to variations in its parameters.
+
+A ratio close to 1 indicates that the gate is robust, meaning it
+functions correctly across a broad range of parameter values. A ratio
+close to 0 indicates that the gate is highly sensitive to parameter
+variations and may fail to operate correctly.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Template parameter ``TT``:
+    Truth table type.
+
+Parameter ``lyt``:
+    The SiDB layout for which to compute the ratio of operational
+    parameter points surrounding a specified parameter point to the
+    total number of parameter points.
+
+Parameter ``spec``:
+    The expected Boolean function of the layout, provided as a multi-
+    output truth table.
+
+Parameter ``params``:
+    Parameters.
+
+Parameter ``pp``:
+    The specific parameter point around which the operational ratio is
+    computed.
+
+Returns:
+    The ratio of operational parameter points to the total number of
+    parameter points in the parameter space.)doc";
+
+static const char *__doc_fiction_operational_domain_ratio_params =
+R"doc(Parameters for computing the ratio of operational parameter points
+around a specified parameter point to the total number of parameter
+points in the given parameter space.)doc";
+
+static const char *__doc_fiction_operational_domain_ratio_params_op_domain_params = R"doc(Parameters for the operational domain computation.)doc";
+
 static const char *__doc_fiction_operational_domain_stats =
 R"doc(Statistics for the operational domain computation. The statistics are
 used across the different operational domain computation algorithms.)doc";
@@ -18935,10 +18935,11 @@ static const char *__doc_fiction_wiring_reduction_stats_y_size_after = R"doc(Lay
 
 static const char *__doc_fiction_wiring_reduction_stats_y_size_before = R"doc(Layout height before the wiring reduction process.)doc";
 
-static const char *__doc_fiction_write_defect_operational_domain =
-R"doc(Writes a CSV representation of an operational domain to the specified
-output stream. The data are written as rows, each corresponding to one
-set of simulation parameters and their corresponding influence status.
+static const char *__doc_fiction_write_defect_influence_domain =
+R"doc(Writes a CSV representation of an defect influence domain to the
+specified output stream. The data are written as rows, each
+corresponding to one set of simulation parameters and their
+corresponding influence status.
 
 The output CSV format is as follows: X_DIMENSION, Y_DIMENSION,
 Influence STATUS ... subsequent rows for each set of simulation
@@ -18959,10 +18960,11 @@ Parameter ``params``:
     `write_defect_influence_domain_params` object, which provides
     standard tags.)doc";
 
-static const char *__doc_fiction_write_defect_operational_domain_2 =
-R"doc(Writes a CSV representation of an operational domain to the specified
-file. The data are written as rows, each corresponding to one set of
-simulation parameters and their corresponding influence status.
+static const char *__doc_fiction_write_defect_influence_domain_2 =
+R"doc(Writes a CSV representation of an defect influence domain to the
+specified file. The data are written as rows, each corresponding to
+one set of simulation parameters and their corresponding influence
+status.
 
 The output CSV format is as follows: X_DIMENSION, Y_DIMENSION,
 Influence STATUS ... subsequent rows for each set of simulation
@@ -18974,7 +18976,7 @@ Parameter ``defect_infdom``:
     parameters for the X and Y dimensions) to their influence status.
 
 Parameter ``filename``:
-    The filename where the CSV representation of the operational
+    The filename where the CSV representation of the defect influence
     domain is written to.
 
 Parameter ``params``:
@@ -18983,11 +18985,11 @@ Parameter ``params``:
     `write_defect_influence_domain_params` object, which provides
     standard tags.)doc";
 
-static const char *__doc_fiction_write_defect_operational_domain_params = R"doc(Parameters for writing a defect influence domain to a CSV file.)doc";
+static const char *__doc_fiction_write_defect_influence_domain_params = R"doc(Parameters for writing a defect influence domain to a CSV file.)doc";
 
-static const char *__doc_fiction_write_defect_operational_domain_params_influential_tag = R"doc(The tag used to represent the influential value of a defect position.)doc";
+static const char *__doc_fiction_write_defect_influence_domain_params_influential_tag = R"doc(The tag used to represent the influential value of a defect position.)doc";
 
-static const char *__doc_fiction_write_defect_operational_domain_params_non_influential_tag =
+static const char *__doc_fiction_write_defect_influence_domain_params_non_influential_tag =
 R"doc(The tag used to represent the non-influential value of a defect
 position.)doc";
 
