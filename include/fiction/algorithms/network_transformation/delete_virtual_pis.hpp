@@ -33,13 +33,10 @@ class delete_virtual_pis_impl
   public:
     explicit delete_virtual_pis_impl(const Ntk& ntk_src) : ntk{ntk_src}, ntk_topo{ntk_src} {}
 
-    [[nodiscard]] auto run() -> decltype(std::declval<Ntk>().clone())
+    Ntk run()
     {
-        auto  init         = initialize_copy_virtual_pi_network(ntk);
-        auto& ntk_dest_ref = init.first;
-        // Cloning resolves runtime issues (in debug mode) with views due to add_event, but might return a different
-        // network type. Deleting virtual_pis should only be used for equivalence checking.
-        auto  ntk_dest = ntk_dest_ref.clone();
+        auto  init     = initialize_copy_virtual_pi_network(ntk);
+        auto& ntk_dest = init.first;
         auto& old2new  = init.second;
 
         const auto gather_fanin_signals = [this, &ntk_dest, &old2new](const auto& n)
@@ -157,6 +154,18 @@ class delete_virtual_pis_impl
      */
     TopoNtkSrc ntk_topo;
 
+    /**
+     * Initialize a network without virtual primary inputs by copying the given network.
+     *
+     * This function takes a network `src` and returns a new network `dest` without virtual primary inputs.
+     * It creates a map `old2new` to associate the signals from the old network to the corresponding signals in the new
+     * network.
+     *
+     * @tparam Ntk The type of the network.
+     * @param src The source network to be copied.
+     * @return A pair containing the new network without virtual primary inputs and the signal mapping from old to new
+     * network.
+     */
     [[nodiscard]] std::pair<Ntk, mockturtle::node_map<mockturtle::signal<Ntk>, Ntk>>
     initialize_copy_virtual_pi_network(const Ntk& src)
     {
@@ -182,15 +191,16 @@ class delete_virtual_pis_impl
 }  // namespace detail
 
 /**
- * Deletes virtual primary inputs from a network. This can mainly be used for equivalence checking.
- * If the network does not have any virtual PIs stored, the network is returned.
+ * Deletes virtual primary inputs from a network and maps all signals connected to virtual PIs back to the corresponding
+ * real PI. The main use is equivalence checking. If the network does not have any virtual PIs stored, the
+ * network is returned.
  *
  * @tparam Ntk The type of network.
  * @param ntk The input network.
  * @return The resulting network after virtual primary inputs are deleted.
  */
 template <typename Ntk>
-[[nodiscard]] auto delete_virtual_pis(const Ntk& ntk) noexcept -> decltype(std::declval<Ntk>().clone())
+Ntk delete_virtual_pis(const Ntk& ntk) noexcept
 {
     static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
     static_assert(mockturtle::has_clone_v<Ntk>, "Ntk does not implement the clone constructor");
@@ -211,7 +221,7 @@ template <typename Ntk>
     // to match the return type the network has to be cloned.
     if (ntk.num_virtual_pis() == 0)
     {
-        return ntk.clone();
+        return ntk;
     }
 
     detail::delete_virtual_pis_impl<Ntk> p{ntk};

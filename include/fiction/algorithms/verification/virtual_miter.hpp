@@ -26,7 +26,7 @@ namespace fiction
  * @return The network with virtual primary inputs removed, or the original network if unsupported.
  */
 template <typename Ntk>
-[[nodiscard]] auto handle_virtual_pis(const Ntk& network)
+Ntk handle_virtual_pis(const Ntk& network)
 {
     if constexpr (has_num_virtual_pis_v<Ntk>)
     {
@@ -76,8 +76,8 @@ template <typename NtkDest, typename NtkSrc1, typename NtkSrc2>
     static_assert(mockturtle::has_create_nary_or_v<NtkDest>, "NtkDest does not implement the create_nary_or method");
 
     // handle (delete and remap) virtual primary inputs
-    const auto ntk1 = handle_virtual_pis(ntk1_in);
-    const auto ntk2 = handle_virtual_pis(ntk2_in);
+    const NtkSrc1 ntk1 = handle_virtual_pis(ntk1_in);
+    const NtkSrc2 ntk2 = handle_virtual_pis(ntk2_in);
 
     /* both networks must have same number of inputs and outputs */
     if ((ntk1.num_pis() != ntk2.num_pis()) || (ntk1.num_pos() != ntk2.num_pos()))

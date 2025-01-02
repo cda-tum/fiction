@@ -3762,9 +3762,10 @@ Returns:
     and vertical SiDBs affected by the given defect type.)doc";
 
 static const char *__doc_fiction_delete_virtual_pis =
-R"doc(Deletes virtual primary inputs from a network. This can mainly be used
-for equivalence checking. If the network does not have any virtual PIs
-stored, the network is returned.
+R"doc(Deletes virtual primary inputs from a network and maps all signals
+connected to virtual PIs back to the corresponding real PI. The main
+use is equivalence checking. If the network does not have any virtual
+PIs stored, the network is returned.
 
 Template parameter ``Ntk``:
     The type of network.
@@ -3784,6 +3785,40 @@ local electrostatic potential at its position.)doc";
 static const char *__doc_fiction_dependent_cell_mode_VARIABLE =
 R"doc(The charge state of the dependent cell is changed based on the local
 electrostatic potential at its position.)doc";
+
+static const char *__doc_fiction_depth_view =
+R"doc(A specialization of `depth_view` for networks where
+`has_depth_interface` is `true`. When this condition is met,
+constructing a new depth view is unnecessary.
+
+Template parameter ``Ntk``:
+    The type of the network.
+
+Template parameter ``NodeCostFn``:
+    A function to compute the costs associated with nodes.)doc";
+
+static const char *__doc_fiction_depth_view_2 =
+R"doc(Deduction guide for `fiction::depth_view'.
+
+Template parameter ``T``:
+    Network type deduced from the construction context of
+    `fiction::depth_view`.)doc";
+
+static const char *__doc_fiction_depth_view_3 =
+R"doc(Deduction guide for `fiction::depth_view` with two constructor
+arguments
+
+Template parameter ``T``:
+    Network type deduced from the construction context of
+    `fiction::depth_view`.)doc";
+
+static const char *__doc_fiction_depth_view_depth_view = R"doc()doc";
+
+static const char *__doc_fiction_depth_view_params = R"doc(Parameters for depth view.)doc";
+
+static const char *__doc_fiction_depth_view_params_count_complements = R"doc(Take complemented edges into account for depth computation.)doc";
+
+static const char *__doc_fiction_depth_view_params_pi_cost = R"doc(Whether PIs have costs.)doc";
 
 static const char *__doc_fiction_design_sidb_gates =
 R"doc(The *SiDB Gate Designer* designs SiDB gate implementations based on a
@@ -10152,6 +10187,32 @@ Parameter ``ps``:
 Returns:
     sidb_simulation_result is returned with all results.)doc";
 
+static const char *__doc_fiction_extended_rank_view =
+R"doc(@class extended_rank_view<Ntk, true>
+
+If already a rank_interface exists only the depth_view constructor
+gets called.
+
+Template parameter ``Ntk``:
+    The network type.)doc";
+
+static const char *__doc_fiction_extended_rank_view_2 =
+R"doc(Deduction guide for `extended_rank_view'.
+
+Template parameter ``T``:
+    Network type deduced from the construction context of
+    `extended_rank_view`.)doc";
+
+static const char *__doc_fiction_extended_rank_view_3 =
+R"doc(Deduction guide for `extended_rank_view` with two constructor
+arguments.
+
+Template parameter ``T``:
+    Network type deduced from the construction context of
+    `extended_rank_view`.)doc";
+
+static const char *__doc_fiction_extended_rank_view_extended_rank_view = R"doc()doc";
+
 static const char *__doc_fiction_extract_routing_objectives =
 R"doc(Extracts all routing objectives from the given layout. To this end,
 all routing paths in the layout are traversed, starting at each PI.
@@ -12576,6 +12637,8 @@ static const char *__doc_fiction_has_south_east = R"doc()doc";
 static const char *__doc_fiction_has_south_west = R"doc()doc";
 
 static const char *__doc_fiction_has_synchronization_elements = R"doc()doc";
+
+static const char *__doc_fiction_has_update_ranks = R"doc()doc";
 
 static const char *__doc_fiction_has_west = R"doc()doc";
 
