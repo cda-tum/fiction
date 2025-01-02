@@ -420,9 +420,9 @@ class design_sidb_gates_impl
                 return;
             }
 
-            // pruning was already conducted above. Hence, SIMULATION_ONLY is chosen.
+            // pruning was already conducted above. Hence, SIMULATION_BASED is chosen.
             params.operational_params.strategy_to_analyze_operational_status =
-                is_operational_params::operational_analysis_strategy::SIMULATION_ONLY;
+                is_operational_params::operational_analysis_strategy::SIMULATION_BASED;
 
             if (const auto [status, sim_calls] = is_operational(candidate, truth_table, params.operational_params,
                                                                 input_bdl_wires, output_bdl_wires);

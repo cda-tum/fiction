@@ -99,7 +99,7 @@ TEST_CASE("SiQAD NAND gate", "[is-operational]")
         bdl_input_iterator_params{detect_bdl_wires_params{1.5},
                                   bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED},
         is_operational_params::operational_condition::REJECT_KINKS,
-        is_operational_params::operational_analysis_strategy::FILTER_BEFORE_SIMULATION};
+        is_operational_params::operational_analysis_strategy::FILTER_THEN_SIMULATION};
 
     SECTION("Pruning and simulation")
     {
@@ -109,7 +109,7 @@ TEST_CASE("SiQAD NAND gate", "[is-operational]")
     SECTION("only pruning")
     {
         op_params.strategy_to_analyze_operational_status =
-            is_operational_params::operational_analysis_strategy::FILTER_ONLY;
+            is_operational_params::operational_analysis_strategy::FILTER_BASED;
         CHECK(is_operational(lat, std::vector<tt>{create_nand_tt()}, op_params).first ==
               operational_status::OPERATIONAL);
     }
@@ -191,7 +191,7 @@ TEST_CASE("Bestagon AND gate", "[is-operational]")
     SECTION("without pre-determined wires or canvas")
     {
         op_params.strategy_to_analyze_operational_status =
-            is_operational_params::operational_analysis_strategy::FILTER_BEFORE_SIMULATION;
+            is_operational_params::operational_analysis_strategy::FILTER_THEN_SIMULATION;
         CHECK(is_operational(lat, std::vector<tt>{create_and_tt()}, op_params).first ==
               operational_status::OPERATIONAL);
     }
@@ -200,7 +200,7 @@ TEST_CASE("Bestagon AND gate", "[is-operational]")
     {
         op_params.simulation_parameters.mu_minus = -0.2;
         op_params.strategy_to_analyze_operational_status =
-            is_operational_params::operational_analysis_strategy::FILTER_BEFORE_SIMULATION;
+            is_operational_params::operational_analysis_strategy::FILTER_THEN_SIMULATION;
         CHECK(is_operational(lat, std::vector<tt>{create_and_tt()}, op_params).first ==
               operational_status::NON_OPERATIONAL);
     }
@@ -214,7 +214,7 @@ TEST_CASE("Bestagon AND gate", "[is-operational]")
     SECTION("pre-determined I/O pins, but no canvas layout")
     {
         op_params.strategy_to_analyze_operational_status =
-            is_operational_params::operational_analysis_strategy::FILTER_BEFORE_SIMULATION;
+            is_operational_params::operational_analysis_strategy::FILTER_THEN_SIMULATION;
         CHECK(is_operational(lat, std::vector<tt>{create_and_tt()}, op_params, input_wires, output_wires).first ==
               operational_status::OPERATIONAL);
     }
@@ -222,7 +222,7 @@ TEST_CASE("Bestagon AND gate", "[is-operational]")
     SECTION("pre-determined I/O pins and canvas layout")
     {
         op_params.strategy_to_analyze_operational_status =
-            is_operational_params::operational_analysis_strategy::FILTER_BEFORE_SIMULATION;
+            is_operational_params::operational_analysis_strategy::FILTER_THEN_SIMULATION;
         sidb_100_cell_clk_lyt_siqad canvas_lyt{};
         const auto                  logic_cells = lat.get_cells_by_type(sidb_technology::cell_type::LOGIC);
         for (const auto& c : logic_cells)
@@ -537,7 +537,7 @@ TEST_CASE("Special wire that cannot be pruned, but is non-operational when kinks
     {
         params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
         params.strategy_to_analyze_operational_status =
-            is_operational_params::operational_analysis_strategy::FILTER_BEFORE_SIMULATION;
+            is_operational_params::operational_analysis_strategy::FILTER_THEN_SIMULATION;
 
         CHECK(is_operational(lyt, std::vector<tt>{create_id_tt()}, params).first ==
               operational_status::NON_OPERATIONAL);
@@ -547,7 +547,7 @@ TEST_CASE("Special wire that cannot be pruned, but is non-operational when kinks
     {
         params.op_condition = is_operational_params::operational_condition::TOLERATE_KINKS;
         params.strategy_to_analyze_operational_status =
-            is_operational_params::operational_analysis_strategy::FILTER_ONLY;
+            is_operational_params::operational_analysis_strategy::FILTER_BASED;
 
         CHECK(is_operational(lyt, std::vector<tt>{create_id_tt()}, params).first ==
               operational_status::NON_OPERATIONAL);
@@ -629,7 +629,7 @@ TEST_CASE("is operational check for Bestagon CX gate", "[is-operational], [quali
 
         auto op_params = is_operational_params{sidb_simulation_parameters{2, -0.32}};
         op_params.strategy_to_analyze_operational_status =
-            is_operational_params::operational_analysis_strategy::FILTER_ONLY;
+            is_operational_params::operational_analysis_strategy::FILTER_BASED;
 
         CHECK(is_operational(lat, create_crossing_wire_tt(), op_params, input_bdl_wires, output_bdl_wires).first ==
               operational_status::OPERATIONAL);

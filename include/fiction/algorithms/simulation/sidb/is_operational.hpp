@@ -78,12 +78,13 @@ struct is_operational_params
     /**
      * Simulation method to determine if the layout is operational or non-operational. There are three possible modes:
      *
-     * - `SIMULATION_ONLY`: This setting does not apply any filtering strategies to determine if the layout is
+     * - `SIMULATION_BASED`: This setting does not apply any filtering strategies to determine if the layout is
      * operational. Instead, it relies solely on physical simulation to make this determination.
-     * - `FILTER_ONLY`: This setting does only apply filtering strategies to determine if the layout is non-operational.
-     * If the layout passes all filtering strategies, it is considered operational. This is only an approximation. It
-     * may be possible that the layout is non-operational, but the filtering strategies do not detect it.
-     * - `FILTER_BEFORE_SIMULATION`: Before a physical simulation is conducted, the algorithm checks if filtering
+     * - `FILTER_BASED`: This setting does only apply filtering strategies to determine if the layout is
+     * non-operational. If the layout passes all filtering strategies, it is considered operational. This is only an
+     * approximation. It may be possible that the layout is non-operational, but the filtering strategies do not detect
+     * it.
+     * - `FILTER_THEN_SIMULATION`: Before a physical simulation is conducted, the algorithm checks if filtering
      * strategies have detected whether the layout is non-operational. This only provides any runtime benefits if kinks
      * are rejected.
      */
@@ -93,19 +94,19 @@ struct is_operational_params
          * Do not apply filter strategies to determine whether the layout is operational.
          * Instead, rely solely on physical simulation.
          */
-        SIMULATION_ONLY,
+        SIMULATION_BASED,
         /**
          * Apply filtering exclusively to determine whether the layout is non-operational. If the layout
          * passes all filter steps, it is considered operational.
          *
          * @note This is an extremely fast approximation that may sometimes lead to false positives.
          */
-        FILTER_ONLY,
+        FILTER_BASED,
         /**
          * Before a physical simulation is conducted, the algorithm checks if filter strategies can determine that the
          * layout is non-operational. This only provides any runtime benefits if kinks are rejected.
          */
-        FILTER_BEFORE_SIMULATION
+        FILTER_THEN_SIMULATION
     };
     /**
      * The simulation parameters for the physical simulation of the ground state.
@@ -127,7 +128,7 @@ struct is_operational_params
      * Strategy to determine whether a layout is operational or non-operational.
      */
     operational_analysis_strategy strategy_to_analyze_operational_status =
-        operational_analysis_strategy::SIMULATION_ONLY;
+        operational_analysis_strategy::SIMULATION_BASED;
 };
 
 namespace detail
@@ -172,10 +173,10 @@ enum class layout_invalidity_reason : uint8_t
 };
 
 /**
- * Implementation of the `is_operational` algorithm for a given gate layout.
+ * Implementation of the `is_operational` algorithm for a given SiDB layout.
  *
  * This class provides an implementation of the `is_operational` algorithm for
- * a specified gate layout and parameters. It checks whether the gate layout is operational
+ * a specified SiDB layout and parameters. It checks whether the SiDB layout is operational
  * by simulating its behavior for different input combinations and comparing the results
  * to expected outputs from a truth table.
  *
@@ -355,7 +356,7 @@ class is_operational_impl
     /**
      * Run the `is_operational` algorithm.
      *
-     * This function executes the operational status checking algorithm for the gate layout
+     * This function executes the operational status checking algorithm for the given SiDB layout
      * and parameters provided during initialization.
      *
      * @return Pair with the first element indicating the operational status (either `OPERATIONAL` or `NON_OPERATIONAL`)
@@ -374,9 +375,9 @@ class is_operational_impl
 
             if ((parameters.op_condition == is_operational_params::operational_condition::REJECT_KINKS &&
                  parameters.strategy_to_analyze_operational_status ==
-                     is_operational_params::operational_analysis_strategy::FILTER_BEFORE_SIMULATION) ||
+                     is_operational_params::operational_analysis_strategy::FILTER_THEN_SIMULATION) ||
                 parameters.strategy_to_analyze_operational_status ==
-                    is_operational_params::operational_analysis_strategy::FILTER_ONLY)
+                    is_operational_params::operational_analysis_strategy::FILTER_BASED)
             {
                 // number of different input combinations
                 for (auto i = 0u; i < truth_table.front().num_bits(); ++i, ++bii)
@@ -392,16 +393,16 @@ class is_operational_impl
         // if the layout is not discarded during the three filtering steps, it is considered operational.
         // This is only an approximation.
         if (parameters.strategy_to_analyze_operational_status ==
-                is_operational_params::operational_analysis_strategy::FILTER_ONLY &&
+                is_operational_params::operational_analysis_strategy::FILTER_BASED &&
             !canvas_lyt.is_empty())
         {
             return {operational_status::OPERATIONAL, non_operationality_reason::NONE};
         }
 
         if (parameters.strategy_to_analyze_operational_status ==
-                is_operational_params::operational_analysis_strategy::SIMULATION_ONLY ||
+                is_operational_params::operational_analysis_strategy::SIMULATION_BASED ||
             parameters.strategy_to_analyze_operational_status ==
-                is_operational_params::operational_analysis_strategy::FILTER_BEFORE_SIMULATION ||
+                is_operational_params::operational_analysis_strategy::FILTER_THEN_SIMULATION ||
             canvas_lyt.is_empty())
         {
             bii = 0;
@@ -929,11 +930,11 @@ class is_operational_impl
      */
     cell<Lyt> dependent_cell{};
     /**
-     * This function conducts physical simulation of the given layout (gate layout with certain input combination).
+     * This function conducts physical simulation of the given SiDB layout.
      * The simulation results are stored in the `sim_result` variable.
      *
-     * @param bdl_iterator A reference to a BDL input iterator representing the gate layout at a given input
-     * combination. The simulation is performed based on the configuration represented by the iterator.
+     * @param bdl_iterator BDL input iterator representing the SiDB layout with a given input
+     * combination.
      * @return Simulation results.
      */
     [[nodiscard]] sidb_simulation_result<Lyt>
@@ -1086,8 +1087,8 @@ class is_operational_impl
 /**
  * Determine the operational status of an SiDB layout.
  *
- * This function checks the operational status of a given gate layout using the `is_operational` algorithm. It
- * determines whether the gate layout is operational and returns the correct result for all \f$2^n\f$ input
+ * This function checks the operational status of a given SiDB layout using the `is_operational` algorithm. It
+ * determines whether the SiDB layout is operational and returns the correct result for all \f$2^n\f$ input
  * combinations.
  *
  * @tparam Lyt SiDB cell-level layout type.
@@ -1095,7 +1096,7 @@ class is_operational_impl
  * @param lyt The SiDB cell-level layout to be checked.
  * @param spec Expected Boolean function of the layout given as a multi-output truth table.
  * @param params Parameters for the `is_operational` algorithm.
- * @return A pair containing the operational status of the gate layout (either `OPERATIONAL` or `NON_OPERATIONAL`) and
+ * @return A pair containing the operational status of the SiDB layout (either `OPERATIONAL` or `NON_OPERATIONAL`) and
  * the number of input combinations tested.
  */
 template <typename Lyt, typename TT>
@@ -1124,8 +1125,8 @@ is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational
 /**
  * Determine the operational status of an SiDB layout.
  *
- * This function checks the operational status of a given gate layout using the `is_operational` algorithm. It
- * determines whether the gate layout is operational and returns the correct result for all \f$2^n\f$ input
+ * This function checks the operational status of a given SiDB layout using the `is_operational` algorithm. It
+ * determines whether the SiDB layout is operational and returns the correct result for all \f$2^n\f$ input
  * combinations.
  *
  * @tparam Lyt SiDB cell-level layout type.
@@ -1136,7 +1137,7 @@ is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational
  * @param input_bdl_wire Optional BDL input wires of lyt.
  * @param output_bdl_wire Optional BDL output wires of lyt.
  * @param canvas_lyt Optional canvas layout.
- * @return A pair containing the operational status of the gate layout (either `OPERATIONAL` or `NON_OPERATIONAL`) and
+ * @return A pair containing the operational status of the SiDB layout (either `OPERATIONAL` or `NON_OPERATIONAL`) and
  * the number of input combinations tested.
  */
 template <typename Lyt, typename TT>

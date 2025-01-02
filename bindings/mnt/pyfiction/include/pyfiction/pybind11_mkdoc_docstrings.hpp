@@ -13888,15 +13888,15 @@ static const char *__doc_fiction_is_operational_params_operational_analysis_stra
 R"doc(Simulation method to determine if the layout is operational or non-
 operational. There are three possible modes:
 
-- `SIMULATION_ONLY`: This setting does not apply any filtering
+- `SIMULATION_BASED`: This setting does not apply any filtering
 strategies to determine if the layout is operational. Instead, it
 relies solely on physical simulation to make this determination. -
-`FILTER_ONLY`: This setting does only apply filtering strategies to
+`FILTER_BASED`: This setting does only apply filtering strategies to
 determine if the layout is non-operational. If the layout passes all
 filtering strategies, it is considered operational. This is only an
 approximation. It may be possible that the layout is non-operational,
 but the filtering strategies do not detect it. -
-`FILTER_BEFORE_SIMULATION`: Before a physical simulation is conducted,
+`FILTER_THEN_SIMULATION`: Before a physical simulation is conducted,
 the algorithm checks if filtering strategies have detected whether the
 layout is non-operational. This only provides any runtime benefits if
 kinks are rejected.)doc";
