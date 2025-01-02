@@ -482,7 +482,7 @@ Fabrication Defects
 A collection of tools to simulate defects that can occur during the fabrication process of FCN technologies.
 
 SiDB Defect Types
------------------
+^^^^^^^^^^^^^^^^^
 
 .. tabs::
     .. tab:: C++
@@ -524,7 +524,7 @@ SiDB Defect Types
         .. autofunction:: mnt.pyfiction.defect_extent
 
 SiDB Defect Surface
--------------------
+^^^^^^^^^^^^^^^^^^
 
 **Header:** ``fiction/technology/sidb_defect_surface.hpp``
 
@@ -540,7 +540,7 @@ fabrication defects on the H-Si(100) 2x1 surface.
 
 
 SiDB Defect Analysis
---------------------
+^^^^^^^^^^^^^^^^^^^^
 
 **Header:** ``fiction/technology/sidb_surface_analysis.hpp``
 
@@ -556,23 +556,12 @@ SiDB Defect Analysis
    :members:
 
 .. doxygenstruct:: fiction::defect_influence_stats
-.. doxygenfunction:: fiction::defect_influence_grid_search(const Lyt& lyt, const std::vector<TT>& spec,
-                             const defect_influence_params<cell<Lyt>>& params = {}, const std::size_t step_size = 1,
-                             defect_influence_stats* stats = nullptr)
-.. doxygenfunction:: fiction::defect_influence_grid_search(const Lyt& lyt, const defect_influence_params<cell<Lyt>>& params = {},
-                             const std::size_t step_size = 1, defect_influence_stats* stats = nullptr)
-.. doxygenfunction:: fiction::defect_influence_random_sampling(const Lyt& lyt, const std::vector<TT>& spec, std::size_t samples,
-                                 const defect_influence_params<cell<Lyt>>& params = {},
-                                 defect_influence_stats*                   stats  = nullptr)
-.. doxygenfunction:: fiction::defect_influence_random_sampling(const Lyt& lyt, std::size_t samples,
-                                 const defect_influence_params<cell<Lyt>>& params = {},
-                                 defect_influence_stats*                   stats  = nullptr)
-.. doxygenfunction:: fiction::defect_influence_quicktrace(const Lyt& lyt, const std::vector<TT>& spec, const std::size_t samples,
-                            const defect_influence_params<cell<Lyt>>& params = {},
-                            defect_influence_stats*                   stats  = nullptr)
-.. doxygenfunction:: fiction::defect_influence_quicktrace(const Lyt& lyt, const std::size_t samples,
-                            const defect_influence_params<cell<Lyt>>& params = {},
-                            defect_influence_stats*                   stats  = nullptr)
+.. doxygenfunction:: fiction::defect_influence_grid_search(const Lyt& lyt, const std::vector<TT>& spec, const defect_influence_params<cell<Lyt>>& params = {}, const std::size_t step_size = 1, defect_influence_stats* stats = nullptr)
+.. doxygenfunction:: fiction::defect_influence_grid_search(const Lyt& lyt, const defect_influence_params<cell<Lyt>>& params = {}, const std::size_t step_size = 1, defect_influence_stats* stats = nullptr)
+.. doxygenfunction:: fiction::defect_influence_random_sampling(const Lyt& lyt, const std::vector<TT>& spec, std::size_t samples, const defect_influence_params<cell<Lyt>>& params = {}, defect_influence_stats*                   stats  = nullptr)
+.. doxygenfunction:: fiction::defect_influence_random_sampling(const Lyt& lyt, std::size_t samples, const defect_influence_params<cell<Lyt>>& params = {}, defect_influence_stats*                   stats  = nullptr)
+.. doxygenfunction:: fiction::defect_influence_quicktrace(const Lyt& lyt, const std::vector<TT>& spec, const std::size_t samples, const defect_influence_params<cell<Lyt>>& params = {}, defect_influence_stats*                   stats  = nullptr)
+.. doxygenfunction:: fiction::defect_influence_quicktrace(const Lyt& lyt, const std::size_t samples, const defect_influence_params<cell<Lyt>>& params = {}, defect_influence_stats*                   stats  = nullptr)
 
 **Header:** ``fiction/algorithms/simulation/sidb/calculate_defect_clearance.hpp``
 
