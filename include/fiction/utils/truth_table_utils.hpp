@@ -10,6 +10,7 @@
 #include <kitty/dynamic_truth_table.hpp>
 
 #include <bitset>
+#include <cassert>
 #include <cstdint>
 #include <vector>
 
@@ -421,6 +422,8 @@ namespace fiction
 [[nodiscard]] inline uint64_t evaluate_output(const std::vector<kitty::dynamic_truth_table>& truth_tables,
                                               const uint64_t current_input_index) noexcept
 {
+    assert(truth_tables.size() <= 64 && "Number of truth tables exceeds 64");
+
     std::bitset<64> bits{};
     for (auto i = 0u; i < truth_tables.size(); i++)
     {
