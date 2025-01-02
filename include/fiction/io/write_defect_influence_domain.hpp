@@ -55,8 +55,8 @@ inline void write_defect_influence_domain(const defect_influence_domain<Lyt>& de
     for (const auto& [sim_param, op_val] : defect_infdom.influence_information)
     {
         writer.write_line(sim_param.x, sim_param.y,
-                          op_val == defect_influence_status::EXISTENT ? params.influential_tag :
-                                                                        params.non_influential_tag);
+                          op_val == defect_influence_status::INFLUENTIAL ? params.influential_tag :
+                                                                           params.non_influential_tag);
     }
 }
 /**

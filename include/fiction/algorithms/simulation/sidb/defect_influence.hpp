@@ -84,13 +84,13 @@ enum class defect_influence_status : uint8_t
      * It implies that some form of impact, such as a change in operational status or
      * ground state, is being caused by the defect at this position.
      */
-    EXISTENT,
+    INFLUENTIAL,
     /**
      * This indicates that the defect does not influence the layout at this position.
      * It implies that the layout remains unaffected by the defect at this location,
      * meaning there is no change in the operational status or the ground state.
      */
-    NON_EXISTENT
+    NON_INFLUENTIAL
 };
 /**
  * A defect influence domain defines for each defect position the influence of the defect on the layout.
@@ -390,7 +390,8 @@ class defect_influence_impl
 
                 assert(layout.num_defects() == 0 && "more than one defect");
 
-                if (defect_influence_status == defect_influence_status::EXISTENT || !layout.is_empty_cell(next_point))
+                if (defect_influence_status == defect_influence_status::INFLUENTIAL ||
+                    !layout.is_empty_cell(next_point))
                 {
                     backtrack_point       = current_contour_point;
                     current_contour_point = next_point;
@@ -518,7 +519,7 @@ class defect_influence_impl
         const auto influence_status = is_defect_influential(spec, starting_point);
         layout.assign_sidb_defect(starting_point, sidb_defect{sidb_defect_type::NONE});
 
-        if (influence_status == defect_influence_status::NON_EXISTENT)
+        if (influence_status == defect_influence_status::NON_INFLUENTIAL)
         {
             return starting_point;
         }
@@ -548,17 +549,17 @@ class defect_influence_impl
         const auto non_influential = [this, &defect_cell]()
         {
             ++num_simulator_invocations;
-            influence_domain.influence_information[defect_cell] = defect_influence_status::NON_EXISTENT;
+            influence_domain.influence_information[defect_cell] = defect_influence_status::NON_INFLUENTIAL;
 
-            return defect_influence_status::NON_EXISTENT;
+            return defect_influence_status::NON_INFLUENTIAL;
         };
 
         const auto influential = [this, &defect_cell]()
         {
             ++num_simulator_invocations;
-            influence_domain.influence_information[defect_cell] = defect_influence_status::EXISTENT;
+            influence_domain.influence_information[defect_cell] = defect_influence_status::INFLUENTIAL;
 
-            return defect_influence_status::EXISTENT;
+            return defect_influence_status::INFLUENTIAL;
         };
 
         if (!lyt_copy.is_empty_cell(defect_cell))
@@ -590,7 +591,7 @@ class defect_influence_impl
                 for (auto i = 0u; i < spec.value().front().num_bits(); ++i, ++bii)
                 {
                     ++num_simulator_invocations;
-                    if (does_defect_influence_groundstate(*bii, defect_cell) == defect_influence_status::EXISTENT)
+                    if (does_defect_influence_groundstate(*bii, defect_cell) == defect_influence_status::INFLUENTIAL)
                     {
                         return influential();
                     }
@@ -603,7 +604,7 @@ class defect_influence_impl
         {
             if (params.influence_def == defect_influence_params<cell<Lyt>>::influence_definition::GROUND_STATE_CHANGE)
             {
-                if (does_defect_influence_groundstate(lyt_copy, defect_cell) == defect_influence_status::EXISTENT)
+                if (does_defect_influence_groundstate(lyt_copy, defect_cell) == defect_influence_status::INFLUENTIAL)
                 {
                     lyt_copy.assign_sidb_defect(defect_cell, sidb_defect{sidb_defect_type::NONE});
                     return influential();
@@ -631,7 +632,7 @@ class defect_influence_impl
 
         if (layout.is_empty())
         {
-            return defect_influence_status::EXISTENT;
+            return defect_influence_status::INFLUENTIAL;
         }
 
         const quickexact_params<cell<Lyt>> qe_params{
@@ -652,7 +653,7 @@ class defect_influence_impl
 
             if (can_positive_charge_occur(lyt_defect, params.operational_params.simulation_parameters))
             {
-                return defect_influence_status::EXISTENT;
+                return defect_influence_status::INFLUENTIAL;
             }
 
             // conduct simulation with defect
@@ -662,7 +663,7 @@ class defect_influence_impl
 
             if (ground_states.size() != ground_states_defect.size())
             {
-                return defect_influence_status::EXISTENT;
+                return defect_influence_status::INFLUENTIAL;
             }
 
             for (const auto& gs_defect : ground_states_defect)
@@ -673,15 +674,15 @@ class defect_influence_impl
 
                 if (!same_ground_state_was_found)
                 {
-                    return defect_influence_status::EXISTENT;
+                    return defect_influence_status::INFLUENTIAL;
                 }
             }
 
-            return defect_influence_status::NON_EXISTENT;
+            return defect_influence_status::NON_INFLUENTIAL;
         }
 
         // defect is placed on a non-empty cell
-        return defect_influence_status::NON_EXISTENT;
+        return defect_influence_status::NON_INFLUENTIAL;
     };
     /**
      * This function verifies whether the layout has already been analyzed for the specified defect position `c`.
@@ -730,7 +731,7 @@ class defect_influence_impl
 
             layout.assign_sidb_defect(current_defect_position, sidb_defect{sidb_defect_type::NONE});
 
-            if (influence_status == defect_influence_status::NON_EXISTENT)
+            if (influence_status == defect_influence_status::NON_INFLUENTIAL)
             {
                 latest_non_influential_defect_position = current_defect_position;
             }
@@ -758,7 +759,7 @@ class defect_influence_impl
 
         for (const auto& [param_point, status] : influence_domain.influence_information)
         {
-            if (status == defect_influence_status::EXISTENT)
+            if (status == defect_influence_status::INFLUENTIAL)
             {
                 ++stats.num_influencing_defect_positions;
             }

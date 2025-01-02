@@ -50,7 +50,7 @@ calculate_defect_clearance(const Lyt& lyt, const defect_influence_domain<Lyt>& d
 
     for (const auto& val : defect_inf_domain.influence_information)
     {
-        if (val.second == defect_influence_status::NON_EXISTENT)
+        if (val.second == defect_influence_status::NON_INFLUENTIAL)
         {
             continue;
         }
