@@ -37,7 +37,7 @@ struct band_bending_resilience_params
  *
  * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT Truth table type.
- * @param lyt Layout for which the minimum band bending resilience is calculated.
+ * @param lyt Layout for which the band bending resilience is calculated.
  * @param spec Expected Boolean function of the layout, provided as a multi-output truth table.
  * @param params Parameters for assessing physical population stability.
  * @param transition_type The optional type of charge transition to consider. This can be used if one is only interested

@@ -33,13 +33,14 @@ struct defect_clearance_result
     double defect_clearance_distance{};
 };
 /**
- * Calculates the defect clearance of a given SiDB layout for a given defect influence domain. This means that a
- * defect must be further away than this distance for the SiDB layout to be operational.
+ * Computes the defect clearance for a given SiDB layout based on a defect influence domain. The defect clearance is
+ * the maximum distance at which a defect can influence the layout. It calculates the minimum distance from each SiDB to
+ * any influential defect position.
  *
  * @tparam Lyt SiDB cell-level layout type.
- * @param lyt The cell-level layout for which the defect clearance is computed.
- * @param defect_inf_domain The defect influence domain of the given layout.
- * @return The defect clearance result.
+ * @param lyt SiDB layout for which the defect clearance is computed.
+ * @param defect_inf_domain Defect influence domain of the given SiDB layout.
+ * @return Defect clearance result.
  */
 template <typename Lyt>
 [[nodiscard]] defect_clearance_result<cell<Lyt>>
