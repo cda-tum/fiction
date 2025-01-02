@@ -5,12 +5,12 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 
-#include <fiction/traits.hpp>
 #include <fiction/algorithms/network_transformation/network_balancing.hpp>
 #include <fiction/algorithms/verification/virtual_miter.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/networks/views/extended_rank_view.hpp>
 #include <fiction/networks/virtual_pi_network.hpp>
+#include <fiction/traits.hpp>
 
 #include <mockturtle/algorithms/equivalence_checking.hpp>
 #include <mockturtle/networks/aig.hpp>
@@ -81,11 +81,11 @@ TEST_CASE("Constructors", "[extended-rank-view]")
     tec_r.create_po(a1_r);
     tec_r.update_ranks();
 
-    const auto tec_r_cpy(tec_r);
-    const auto tec_r_eq     = tec_r;
-    const auto tec_r_create = extended_rank_view(tec);
-    const std::vector<std::vector<mockturtle::node<technology_network>>> ranks = {{2, 3}, {4}};
-    const auto tec_r_vector = extended_rank_view(tec, ranks);
+    const auto                                                           tec_r_cpy(tec_r);
+    const auto                                                           tec_r_eq     = tec_r;
+    const auto                                                           tec_r_create = extended_rank_view(tec);
+    const std::vector<std::vector<mockturtle::node<technology_network>>> ranks        = {{2, 3}, {4}};
+    const auto                                                           tec_r_vector = extended_rank_view(tec, ranks);
     CHECK(tec_r_vector.rank_position(2) == tec_r.rank_position(2));
     CHECK(tec_r_vector.rank_position(3) == tec_r.rank_position(3));
     CHECK(tec_r_vector.rank_position(4) == tec_r.rank_position(4));

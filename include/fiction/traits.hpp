@@ -1383,17 +1383,15 @@ inline constexpr bool is_virtual_network_type_v = is_virtual_network_type<Ntk>::
 #pragma endregion
 
 #pragma region has_update_ranks
-template<class Ntk, class = void>
+template <class Ntk, class = void>
 struct has_update_ranks : std::false_type
-{
-};
+{};
 
-template<class Ntk>
-struct has_update_ranks<Ntk, std::void_t<decltype( std::declval<Ntk>().update_ranks() )>> : std::true_type
-{
-};
+template <class Ntk>
+struct has_update_ranks<Ntk, std::void_t<decltype(std::declval<Ntk>().update_ranks())>> : std::true_type
+{};
 
-template<class Ntk>
+template <class Ntk>
 inline constexpr bool has_update_ranks_v = has_update_ranks<Ntk>::value;
 #pragma endregion
 
