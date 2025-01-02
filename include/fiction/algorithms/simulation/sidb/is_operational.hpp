@@ -974,7 +974,6 @@ class is_operational_impl
      * states derived from the input pattern. A kink is considered to exist if an input wire's charge state does not
      * match the expected value (i.e., bit one or bit zero) for the given input index.
      *
-     * @tparam Lyt SiDB cell-level layout type
      * @param ground_state The ground state charge distribution surface.
      * @param current_input_index The current input index used to retrieve the expected output from the truth table.
      * @return `true` if any input wire contains a kink (i.e., an unexpected charge state), `false` otherwise.
@@ -1009,7 +1008,6 @@ class is_operational_impl
      * states derived from the truth table. A kink is considered to exist if an output wire's charge state does not
      * match the expected value (i.e., bit one or bit zero) for the given input index.
      *
-     * @tparam Lyt SiDB cell-level layout type
      * @param ground_state The ground state charge distribution surface.
      * @param current_input_index The current input index used to retrieve the expected output from the truth table.
      * @return `true` if any output wire contains a kink (i.e., an unexpected charge state), `false` otherwise.
@@ -1043,7 +1041,6 @@ class is_operational_impl
     /**
      * This function returns `true` if `0` is encoded in the charge state of the given BDL pair. `false` otherwise.
      *
-     * @tparam Lyt SiDB cell-level layout type.
      * @param ground_state The ground state charge distribution surface.
      * @param bdl BDL pair to be evaluated.
      * @return `true` if `0` is encoded, `false` otherwise.
@@ -1063,7 +1060,6 @@ class is_operational_impl
     /**
      * This function returns `true` if `1` is encoded in the charge state of the given BDL pair. `false` otherwise.
      *
-     * @tparam Lyt SiDB cell-level layout type.
      * @param ground_state The ground state charge distribution surface.
      * @param bdl BDL pair to be evaluated.
      * @return `true` if `1` is encoded, `false` otherwise.
