@@ -504,8 +504,7 @@ Template parameter ``TT``:
     Truth table type.
 
 Parameter ``lyt``:
-    Layout for which the minimum band bending resilience is
-    calculated.
+    Layout for which the band bending resilience is calculated.
 
 Parameter ``spec``:
     Expected Boolean function of the layout, provided as a multi-
@@ -1135,21 +1134,22 @@ static const char *__doc_fiction_bounding_box_2d_x_size = R"doc(The horizontal s
 static const char *__doc_fiction_bounding_box_2d_y_size = R"doc(The vertical size of the bounding box in layout coordinates.)doc";
 
 static const char *__doc_fiction_calculate_defect_clearance =
-R"doc(Calculates the defect clearance of a given SiDB layout for a given
-defect influence domain. This means that a defect must be further away
-than this distance for the SiDB layout to be operational.
+R"doc(Computes the defect clearance for a given SiDB layout based on a
+defect influence domain. The defect clearance is the maximum distance
+at which a defect can influence the layout. It calculates the minimum
+distance from each SiDB to any influential defect position.
 
 Template parameter ``Lyt``:
     SiDB cell-level layout type.
 
 Parameter ``lyt``:
-    The cell-level layout for which the defect clearance is computed.
+    SiDB layout for which the defect clearance is computed.
 
 Parameter ``defect_inf_domain``:
-    The defect influence domain of the given layout.
+    Defect influence domain of the given SiDB layout.
 
 Returns:
-    The defect clearance result.)doc";
+    Defect clearance result.)doc";
 
 static const char *__doc_fiction_calculate_energy_and_state_type_with_kinks_accepted =
 R"doc(This function takes in an SiDB energy distribution. For each charge
