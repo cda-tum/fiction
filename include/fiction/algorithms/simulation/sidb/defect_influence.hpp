@@ -533,8 +533,8 @@ class defect_influence_impl
      * @param defect_cell Defect position to be investigated.
      */
     template <typename TT>
-    [[nodiscard]] defect_influence_status is_defect_influential(const std::optional<std::vector<TT>>& spec,
-                                                                const typename Lyt::cell& defect_cell) noexcept
+    defect_influence_status is_defect_influential(const std::optional<std::vector<TT>>& spec,
+                                                  const typename Lyt::cell&             defect_cell) noexcept
     {
         // increment the number of evaluated parameter combinations
         ++num_evaluated_defect_positions;
