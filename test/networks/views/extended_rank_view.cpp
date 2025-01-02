@@ -5,6 +5,7 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 
+#include <fiction/traits.hpp>
 #include <fiction/algorithms/network_transformation/network_balancing.hpp>
 #include <fiction/algorithms/verification/virtual_miter.hpp>
 #include <fiction/networks/technology_network.hpp>
@@ -78,14 +79,19 @@ TEST_CASE("Constructors", "[extended-rank-view]")
     const auto x2_r = tec_r.create_pi();
     const auto a1_r = tec_r.create_and(x1_r, x2_r);
     tec_r.create_po(a1_r);
+    tec_r.update_ranks();
 
     const auto tec_r_cpy(tec_r);
     const auto tec_r_eq     = tec_r;
     const auto tec_r_create = extended_rank_view(tec);
-    const auto tec_r_return = extended_rank_view(tec);
+    const std::vector<std::vector<mockturtle::node<technology_network>>> ranks = {{2, 3}, {4}};
+    const auto tec_r_vector = extended_rank_view(tec, ranks);
+    CHECK(tec_r_vector.rank_position(2) == tec_r.rank_position(2));
+    CHECK(tec_r_vector.rank_position(3) == tec_r.rank_position(3));
+    CHECK(tec_r_vector.rank_position(4) == tec_r.rank_position(4));
 
     CHECK(tec_r_create.check_validity() == 1);
-    CHECK(tec_r_return.check_validity() == 1);
+    CHECK(tec_r_vector.check_validity() == 1);
     CHECK(tec_r.check_validity() == 1);
     CHECK(tec_r_cpy.check_validity() == 1);
     CHECK(tec_r_eq.check_validity() == 1);
@@ -99,6 +105,8 @@ TEST_CASE("Foreach", "[extended-rank-view]")
     const auto x2_r = tec_r.create_pi();
     const auto a1_r = tec_r.create_and(x1_r, x2_r);
     tec_r.create_po(a1_r);
+    CHECK(has_update_ranks_v<decltype(tec_r)>);
+    tec_r.update_ranks();
 
     std::vector<mockturtle::node<technology_network>> pis{};
     std::vector<mockturtle::node<technology_network>> cis{};
@@ -106,15 +114,19 @@ TEST_CASE("Foreach", "[extended-rank-view]")
 
     tec_r.foreach_ci([&cis](const auto& n) { cis.push_back(n); });
     CHECK(pis == cis);
+
     cis.clear();
     tec_r.foreach_node_in_rank(0, [&cis](const auto& n) { cis.push_back(n); });
     CHECK(pis == cis);
+
     std::vector<mockturtle::node<technology_network>> node_vector{};
     tec_r.foreach_node([&node_vector](const auto& n) { node_vector.push_back(n); });
     CHECK(node_vector.size() == tec_r.size() - 2);
+
     pis.clear();
     tec_r.foreach_gate_in_rank(0, [&pis](const auto& n) { pis.push_back(n); });
     CHECK(pis.empty());
+
     node_vector.clear();
     tec_r.foreach_gate([&node_vector](const auto& n) { node_vector.push_back(n); });
     CHECK(node_vector.size() == tec_r.num_gates());
@@ -239,9 +251,6 @@ TEST_CASE("Check equivalence checking for virtual PIs", "[extended-rank-view]")
     const auto a = vpi.create_pi();
     const auto b = vpi.create_pi();
 
-    const auto a_t = tec.create_pi();
-    const auto b_t = tec.create_pi();
-
     const auto c = vpi.create_virtual_pi(a);
     const auto d = vpi.create_virtual_pi(b);
 
@@ -249,26 +258,26 @@ TEST_CASE("Check equivalence checking for virtual PIs", "[extended-rank-view]")
     const auto f2 = vpi.create_and(b, c);
     const auto f3 = vpi.create_or(a, d);
 
-    const auto f1_t = tec.create_and(a_t, b);
-    const auto f2_t = tec.create_and(b_t, a_t);
-    const auto f3_t = tec.create_or(a_t, b_t);
-
     vpi.create_po(f1);
     vpi.create_po(f2);
     vpi.create_po(f3);
+
+    const auto a_t = tec.create_pi();
+    const auto b_t = tec.create_pi();
+
+    const auto f1_t = tec.create_and(a_t, b_t);
+    const auto f2_t = tec.create_and(b_t, a_t);
+    const auto f3_t = tec.create_or(a_t, b_t);
 
     tec.create_po(f1_t);
     tec.create_po(f2_t);
     tec.create_po(f3_t);
 
-    network_balancing_params ps;
-    ps.unify_outputs = true;
-
     auto vpi_r = extended_rank_view(vpi);
 
     mockturtle::equivalence_checking_stats st;
     const auto                             maybe_cec_m =
-        mockturtle::equivalence_checking(*fiction::virtual_miter<technology_network>(tec, vpi_r), {}, &st);
+        mockturtle::equivalence_checking(*fiction::virtual_miter<technology_network>(tec, vpi), {}, &st);
     REQUIRE(maybe_cec_m.has_value());
     const bool cec_m = *maybe_cec_m;
     CHECK(cec_m == 1);

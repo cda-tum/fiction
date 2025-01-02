@@ -7,6 +7,8 @@
 
 #include <fiction/algorithms/network_transformation/delete_virtual_pis.hpp>
 #include <fiction/networks/technology_network.hpp>
+#include <fiction/networks/views/depth_view.hpp>
+#include <fiction/networks/views/extended_rank_view.hpp>
 #include <fiction/networks/virtual_pi_network.hpp>
 
 #include <mockturtle/algorithms/equivalence_checking.hpp>
@@ -15,9 +17,7 @@
 #include <mockturtle/networks/mig.hpp>
 #include <mockturtle/networks/xag.hpp>
 #include <mockturtle/networks/xmg.hpp>
-#include <mockturtle/traits.hpp>
 #include <mockturtle/views/names_view.hpp>
-#include <mockturtle/views/rank_view.hpp>
 
 using namespace fiction;
 
@@ -50,20 +50,39 @@ TEST_CASE("Check name conservation", "[delete-virtual-pis]")
     CHECK(non_vpi.get_network_name() == "vpi");
 }
 
-TEST_CASE("Discard views after virtual PI removal", "[delete-virtual-pis]")
+TEST_CASE("Delete Virtual PIs with depth view", "[delete-virtual-pis]")
 {
-    virtual_pi_network<mockturtle::names_view<technology_network>> vpi{};
+    fiction::depth_view<virtual_pi_network<technology_network>> tec_d;
 
-    const auto a  = vpi.create_pi();
-    const auto b  = vpi.create_pi();
-    const auto f1 = vpi.create_and(a, b);
-    vpi.create_po(f1);
+    const auto x1_r = tec_d.create_pi();
+    const auto x2_r = tec_d.create_virtual_pi(x1_r);
+    const auto a1_r = tec_d.create_and(x1_r, x2_r);
+    tec_d.create_po(a1_r);
+    tec_d.update_levels();
+    auto del = delete_virtual_pis(tec_d);
+    del.update_levels();
 
-    auto vpi_r = mockturtle::rank_view(vpi);
-    CHECK(mockturtle::has_rank_position_v<decltype(vpi_r)>);
-    // delete_virtual_pis returns the ntk unchanged if no virtual PIs are present.
-    const auto test_del = delete_virtual_pis(vpi_r);
-    CHECK(!mockturtle::has_rank_position_v<decltype(test_del)>);
+    CHECK(tec_d.level(4) == 1);
+    CHECK(tec_d.depth() == 1);
+    CHECK(del.depth() == tec_d.depth());
+}
+
+TEST_CASE("Delete Virtual PIs with extended rank view", "[delete-virtual-pis]")
+{
+    fiction::extended_rank_view<virtual_pi_network<technology_network>> tec_d;
+
+    const auto x1_r = tec_d.create_pi();
+    const auto x2_r = tec_d.create_virtual_pi(x1_r);
+    const auto a1_r = tec_d.create_and(x1_r, x2_r);
+    tec_d.create_po(a1_r);
+    tec_d.update_ranks();
+    auto del = delete_virtual_pis(tec_d);
+    del.update_ranks();
+
+    CHECK(tec_d.level(4) == 1);
+    CHECK(tec_d.depth() == 1);
+    CHECK(del.depth() == tec_d.depth());
+    CHECK(del.rank_position(3) == 0);
 }
 
 TEST_CASE("Remove PIs and check equivalence technology_network", "[delete-virtual-pis]")
