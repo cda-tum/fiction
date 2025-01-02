@@ -27,28 +27,28 @@ struct defect_clearance_result
      */
     CellType defect_position{};
     /**
-     * The maximum of the minimum distances between any SiDB in the gate and the defect responsible for gate
+     * The maximum of the minimum distances between any SiDB of the layout and the defect responsible for gate
      * failure (unit: nm).
      */
     double defect_clearance_distance{};
 };
 /**
- * Calculates the defect clearance of a given SiDB layout for a given defect operational domain. This means that a
+ * Calculates the defect clearance of a given SiDB layout for a given defect influence domain. This means that a
  * defect must be further away than this distance for the SiDB layout to be operational.
  *
  * @tparam Lyt SiDB cell-level layout type.
  * @param lyt The cell-level layout for which the defect clearance is computed.
- * @param defect_opdomain The defect operational domain of the given layout.
- * @return The maximum minimum defect influence distance.
+ * @param defect_inf_domain The defect influence domain of the given layout.
+ * @return The defect clearance result.
  */
 template <typename Lyt>
 [[nodiscard]] defect_clearance_result<cell<Lyt>>
-calculate_defect_clearance(const Lyt& lyt, const defect_influence_domain<Lyt>& defect_opdomain) noexcept
+calculate_defect_clearance(const Lyt& lyt, const defect_influence_domain<Lyt>& defect_inf_domain) noexcept
 {
     double    max_distance         = 0;
     cell<Lyt> max_distance_postion = {};
 
-    for (const auto& val : defect_opdomain.influence_information)
+    for (const auto& val : defect_inf_domain.influence_information)
     {
         if (val.second == defect_influence_status::NON_EXISTENT)
         {

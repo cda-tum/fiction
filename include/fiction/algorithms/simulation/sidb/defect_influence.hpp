@@ -12,9 +12,9 @@
 #include "fiction/technology/sidb_defect_surface.hpp"
 #include "fiction/technology/sidb_defects.hpp"
 #include "fiction/traits.hpp"
+#include "fiction/types.hpp"
 #include "fiction/utils/layout_utils.hpp"
 #include "fiction/utils/phmap_utils.hpp"
-#include "fiction/utils/truth_table_utils.hpp"
 
 #include <kitty/traits.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
@@ -40,6 +40,9 @@ namespace fiction
 template <typename CellType>
 struct defect_influence_params
 {
+    /**
+     * Definition of defect influence.
+     */
     enum class influence_definition : uint8_t
     {
         /**
@@ -47,12 +50,12 @@ struct defect_influence_params
          */
         OPERATIONALITY_CHANGE,
         /**
-         * The influence is considered as the ability to change the ground state of the layout.
+         * Influence is considered as the ability to change the ground state of the layout.
          */
         GROUND_STATE_CHANGE
     };
     /**
-     * The defect to calculate the maximum defect influence distance for.
+     * The defect to calculate the defect influence for.
      */
     sidb_defect defect{};
     /**
@@ -60,18 +63,18 @@ struct defect_influence_params
      */
     is_operational_params operational_params{};
     /**
-     * Area which is considered around the layout for additional defect scanning.
-     * This describes the additional space around the bounding box of the layout.
+     * Area around the layout for additional defect scanning. This describes the additional space around the bounding
+     * box of the layout.
      */
-    CellType additional_scanning_area{CellType{50, 6}};
+    CellType additional_scanning_area{50, 6};
     /**
-     * The definition of influence.
+     * Definition of defect influence.
      */
     influence_definition influence_def{influence_definition::OPERATIONALITY_CHANGE};
 };
 
 /**
- * This defines whether the influence of a defect is present at a particular position
+ * Defines whether the influence of a defect is present at a particular position
  * in the layout. It can be used to classify positions as having an influence or not.
  */
 enum class defect_influence_status : uint8_t
@@ -85,14 +88,14 @@ enum class defect_influence_status : uint8_t
     /**
      * This indicates that the defect does not influence the layout at this position.
      * It implies that the layout remains unaffected by the defect at this location,
-     * meaning there is no change in operational status or ground state.
+     * meaning there is no change in the operational status or the ground state.
      */
     NON_EXISTENT
 };
 /**
  * A defect influence domain defines for each defect position the influence of the defect on the layout.
- * Depending on the chosen definition of influence, this can either mean the operational status
- * or information on whether the ground state of the layout is changed due to the defect.
+ * Depending on the chosen definition of influence, this can either mean that the operational status
+ * or the ground state of the layout is changed due to the presence of the defect.
  */
 template <typename Lyt>
 struct defect_influence_domain
@@ -145,7 +148,7 @@ class defect_influence_impl
     }
 
     /**
-     * This function simulates for each position in the area (spanned by `nw_cell` and `se_cell`) if the existence of a
+     * Simulates for each position in the area (spanned by `nw_cell` and `se_cell`) if the existence of a
      * defect influences the layout.
      *
      * @param step_size The step size used to sample defect positions in the grid. Only positions with x and y
@@ -188,7 +191,7 @@ class defect_influence_impl
                         if (static_cast<std::size_t>(std::abs(all_possible_defect_positions[i].x)) % step_size == 0 &&
                             static_cast<std::size_t>(std::abs(all_possible_defect_positions[i].y)) % step_size == 0)
                         {
-                            does_defect_influence(spec, all_possible_defect_positions[i]);
+                            is_defect_influential(spec, all_possible_defect_positions[i]);
                         }
                     }
                 });
@@ -208,11 +211,12 @@ class defect_influence_impl
     }
 
     /**
-     * This function checks for a certain number of random positions (given by `samples`) in the area (spanned by
+     * Checks for a certain number of random positions (given by `samples`) in the area (spanned by
      * `nw_cell` and `se_cell`) if the existence of a defect leads to an influence of the layout.
      *
      * @param samples The number of positions to sample. The actual number of iterations may be less than the total
      * number of positions or the `samples` value.
+     * @param spec The optional truth table to be used for the simulation.
      * @return The defect influence domain.
      */
     template <typename TT = tt>
@@ -254,7 +258,7 @@ class defect_influence_impl
                 {
                     for (auto i = start; i < end; ++i)
                     {
-                        does_defect_influence(spec, all_possible_defect_positions[i]);
+                        is_defect_influential(spec, all_possible_defect_positions[i]);
                     }
                 });
         }
@@ -274,30 +278,30 @@ class defect_influence_impl
     }
 
     /**
-     * This function applies contour tracing to identify the boundary (contour) between influencing and
+     * Applies contour tracing to identify the boundary (contour) between influencing and
      * non-influencing defect positions for a given SiDB layout.
      *
      * The algorithm leverages the concept of a screened Coulomb potential, where the electrostatic interaction weakens
-     * as distance increases. If a defect at a position p allows the SiDB layout to remain operational, then defects
-     * further from the layout are also likely to maintain operability. Conversely, defects closer to the layout may
-     * cause it to fail. This behavior allows for efficient contour tracing of the transition between operational and
-     * non-operational states.
+     * as distance increases. If a defect at position `p` causes the SiDB layout to be non-influential, then defects
+     * further away from the layout are also likely to have no influence on the layout's functionality or performance.
+     * Conversely, defects closer to the layout may cause it to fail. This behavior allows for efficient contour tracing
+     * of the transition between influential and non-influential states.
      *
      * The process is as follows:
      * 1. **Initialization**: Randomly select `samples` initial defect positions several nanometers away
-     *    from the layout where the layout is known to be operational.
+     *    from the layout where they are unlikely to influence the layout.
      * 2. **Contour Tracing**: For each position, perform a defect-aware physical simulation to identify adjacent
-     *    positions along the x-axis that change the operational state of the layout. This marks the starting
-     *    point of the contour.
-     * 3. **Contour Following**: Trace the contour of operational positions until the starting point is reached again,
-     *    thereby closing the contour.
-     * 4. **Repetition**: Repeat steps 1-3 for multiple initial heights to identify additional contours, since
-     *    multiple operational-to-non-operational boundaries may exist.
+     *    positions along the x-axis that influence the layout.
+     * 3. **Contour Following**: Trace the contour of non-influential positions until the starting point is reached
+     * again, thereby closing the contour.
+     * 4. **Repetition**: Repeat steps 1-3 for multiple initial heights to identify additional contours, since multiple
+     * influential-to-non-influential contours may exist. This process helps to detect all relevant transitions in the
+     * layout.
      *
-     * @param samples The number of random initial positions used to identify and trace operational
-     *                and non-operational defect boundaries. Higher values increase the chance of capturing all
-     *                relevant contours but increase computation time.
-     * @return The defect operational domain.
+     * @param samples The number of random initial positions used to identify and trace contours. Higher values increase
+     * the chance of capturing all relevant contours but increase computation time.
+     * @param spec The optional truth table to be used for the simulation.
+     * @return The defect influence domain.
      */
     template <typename TT = tt>
     [[nodiscard]] defect_influence_domain<Lyt>
@@ -328,7 +332,7 @@ class defect_influence_impl
             sample_counter++;
 
             // first, perform random sampling to find an operational starting point
-            const auto operational_starting_point = find_operational_defect_position_at_left_side(spec);
+            const auto operational_starting_point = find_non_influential_defect_position_at_left_side(spec);
 
             // if no operational point was found within the specified number of samples, return
             if (!operational_starting_point.has_value())
@@ -350,7 +354,7 @@ class defect_influence_impl
 
             // find an operational point on the contour starting from the randomly determined starting point
             const auto contour_starting_p =
-                find_last_operational_defect_position_moving_right(spec, *operational_starting_point);
+                find_last_non_influential_defect_position_moving_right(spec, *operational_starting_point);
 
             if (!contour_starting_p.has_value())
             {
@@ -382,7 +386,7 @@ class defect_influence_impl
 
             while (next_point != contour_starting_point)
             {
-                const auto defect_influence_status = does_defect_influence(spec, next_point);
+                const auto defect_influence_status = is_defect_influential(spec, next_point);
 
                 assert(layout.num_defects() == 0 && "more than one defect");
 
@@ -411,7 +415,7 @@ class defect_influence_impl
      */
     sidb_defect_surface<Lyt> layout{};
     /**
-     * The parameters for the operational domain computation.
+     * The parameters for the defect influence domain computation.
      */
     const defect_influence_params<cell<Lyt>>& params;
     /**
@@ -439,11 +443,11 @@ class defect_influence_impl
      */
     typename Lyt::cell previous_defect_position{};
     /**
-     * The operational domain of the layout.
+     * The defect influence domain of the layout.
      */
     defect_influence_domain<Lyt> influence_domain{};
     /**
-     * The statistics of the operational domain computation.
+     * The statistics of the defect influence domain computation.
      */
     defect_influence_stats& stats;
     /**
@@ -494,14 +498,16 @@ class defect_influence_impl
         dist = std::uniform_int_distribution<decltype(nw_cell.y)>{nw_cell.y, se_cell.y};
     }
     /**
-     * This function aims to identify an operational defect position within the layout. It does so by selecting a defect
+     * This function aims to identify an influential defect position within the layout. It does so by selecting a defect
      * position with the leftmost x-coordinate and a randomly selected y-coordinate limited the layout's bounding box.
      *
-     * @return The operational defect position. If no operational defect position is found, `std::nullopt` is returned.
+     * @param spec The optional truth table to be used for the simulation.
+     * @return Defect position which does not influence the SiDB layout. If no non-influential defect position is found,
+     * `std::nullopt` is returned.
      */
     template <typename TT>
     [[nodiscard]] std::optional<typename Lyt::cell>
-    find_operational_defect_position_at_left_side(const std::optional<std::vector<TT>>& spec) noexcept
+    find_non_influential_defect_position_at_left_side(const std::optional<std::vector<TT>>& spec) noexcept
     {
         auto starting_point = nw_cell;
 
@@ -509,11 +515,10 @@ class defect_influence_impl
 
         layout.assign_sidb_defect(starting_point, params.defect);
 
-        const auto operational_value = does_defect_influence(spec, starting_point);
+        const auto influence_status = is_defect_influential(spec, starting_point);
         layout.assign_sidb_defect(starting_point, sidb_defect{sidb_defect_type::NONE});
 
-        // if the parameter combination is operational, return its step values in x and y dimension
-        if (operational_value == defect_influence_status::NON_EXISTENT)
+        if (influence_status == defect_influence_status::NON_EXISTENT)
         {
             return starting_point;
         }
@@ -521,20 +526,20 @@ class defect_influence_impl
         return std::nullopt;
     }
     /**
-     * This function evaluates the operational status of the SiDB layout when a defect is placed at position `c`.
+     * This function evaluates if the defect at position `c` influences the layout.
      *
-     * @param c Position of the defect.
+     * @param spec The optional truth table to be used for the simulation.
+     * @param defect_cell Defect position to be investigated.
      */
     template <typename TT>
-    defect_influence_status does_defect_influence(const std::optional<std::vector<TT>>& spec,
-                                                  const typename Lyt::cell&             defect_cell) noexcept
+    [[nodiscard]] defect_influence_status is_defect_influential(const std::optional<std::vector<TT>>& spec,
+                                                                const typename Lyt::cell& defect_cell) noexcept
     {
         // increment the number of evaluated parameter combinations
         ++num_evaluated_defect_positions;
 
         auto lyt_copy = layout.clone();
 
-        // if the point has already been sampled, return the stored operational status
         if (const auto op_value = has_already_been_sampled(defect_cell); op_value.has_value())
         {
             return *op_value;
@@ -613,7 +618,11 @@ class defect_influence_impl
     }
 
     /**
+     * This function checks if the defect at position `defect_pos` influences the ground state of the layout.
      *
+     * @param lyt_without_defect Layout without the defect.
+     * @param defect_pos Position of the defect.
+     * @return The influence status of the defect.
      */
     [[nodiscard]] defect_influence_status
     does_defect_influence_groundstate(const Lyt& lyt_without_defect, const typename Lyt::cell& defect_pos) noexcept
@@ -691,20 +700,21 @@ class defect_influence_impl
         return std::nullopt;
     }
     /**
-     * This function identifies the most recent operational defect position while traversing from left to right
+     * This function identifies the most recent non-influential defect position while traversing from left to right
      * towards the SiDB layout.
      *
+     * @param spec The optional truth table to be used for the simulation.
      * @param starting_defect_position The starting position of the defect, from which the traversal towards the
-     * right is conducted while maintaining layout operability.
-     * @return The last operational defect position. If no non-operational defect is found, `std::nullopt` is
-     * returned.
+     * right is conducted until an influential defect is found.
+     * @return The last non-influential defect position. If no non-influential defect position is found, `std::nullopt`
+     * is returned.
      */
     template <typename TT>
     [[nodiscard]] std::optional<typename Lyt::cell>
-    find_last_operational_defect_position_moving_right(const std::optional<std::vector<TT>>& spec,
-                                                       const typename Lyt::cell& starting_defect_position) noexcept
+    find_last_non_influential_defect_position_moving_right(const std::optional<std::vector<TT>>& spec,
+                                                           const typename Lyt::cell& starting_defect_position) noexcept
     {
-        auto latest_operational_defect_position = starting_defect_position;
+        auto latest_non_influential_defect_position = starting_defect_position;
 
         previous_defect_position = starting_defect_position;
 
@@ -716,13 +726,13 @@ class defect_influence_impl
 
             layout.assign_sidb_defect(current_defect_position, params.defect);
 
-            const auto influence_status = does_defect_influence(spec, current_defect_position);
+            const auto influence_status = is_defect_influential(spec, current_defect_position);
 
             layout.assign_sidb_defect(current_defect_position, sidb_defect{sidb_defect_type::NONE});
 
             if (influence_status == defect_influence_status::NON_EXISTENT)
             {
-                latest_operational_defect_position = current_defect_position;
+                latest_non_influential_defect_position = current_defect_position;
             }
             else
             {
@@ -730,15 +740,15 @@ class defect_influence_impl
             }
         }
 
-        if (current_defect_position == latest_operational_defect_position)
+        if (current_defect_position == latest_non_influential_defect_position)
         {
             return std::nullopt;
         }
 
-        return latest_operational_defect_position;
+        return latest_non_influential_defect_position;
     }
     /**
-     * Helper function that writes the the statistics of the defect operational domain computation to the statistics
+     * Helper function that writes the the statistics of the defect influence domain computation to the statistics
      * object.
      */
     void log_stats() const noexcept
@@ -853,21 +863,17 @@ class defect_influence_impl
 };  // namespace detail
 
 /**
- * Computes the defect operational domain of the given SiDB layout. The defect operational domain is the set of all
- * defect positions for which the layout is logically operational. Logical operation is defined as the layout
- * implementing the given truth table.
- *
- * This algorithm uses a grid search to determine the defect operational domain. The grid search is performed
+ * This algorithm uses a grid search to determine the defect influence domain. The grid search is performed
  * by exhaustively sweeping all possible atomic defect positions in x and y dimensions.
  *
  * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT Truth table type.
- * @param lyt Layout to compute the defect operational domain for.
+ * @param lyt Layout to compute the defect influence domain for.
  * @param spec Expected Boolean function of the layout given as a multi-output truth table.
  * @param step_size The parameter specifying the interval between consecutive defect positions to be evaluated.
- * @param params Defect operational domain computation parameters.
+ * @param params Defect influence domain computation parameters.
  * @param stats Statistics.
- * @return The defect operational domain of the layout.
+ * @return The defect influence domain of the layout.
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] defect_influence_domain<Lyt>
@@ -894,12 +900,15 @@ defect_influence_grid_search(const Lyt& lyt, const std::vector<TT>& spec,
 }
 
 /**
+ * This algorithm uses a grid search to determine the defect influence domain. The grid search is performed
+ * by exhaustively sweeping all possible atomic defect positions in x and y dimensions.
+ *
  * @tparam Lyt SiDB cell-level layout type.
- * @param lyt Layout to compute the defect operational domain for.
+ * @param lyt Layout to compute the defect influence domain for.
  * @param step_size The parameter specifying the interval between consecutive defect positions to be evaluated.
- * @param params Defect operational domain computation parameters.
+ * @param params Defect influence domain computation parameters.
  * @param stats Statistics.
- * @return The defect operational domain of the layout.
+ * @return The defect influence domain of the layout.
  */
 template <typename Lyt>
 [[nodiscard]] defect_influence_domain<Lyt>
@@ -923,22 +932,17 @@ defect_influence_grid_search(const Lyt& lyt, const defect_influence_params<cell<
     return result;
 }
 /**
- * Computes the defect operational domain of the given SiDB cell-level layout. The defect operational domain is the
- * set of all defect positions for which the layout is logically operational. Logical operation is defined as the layout
- * implementing the given truth table. The input BDL pairs of the layout are assumed to be in the same order as the
- * inputs of the truth table.
- *
- * This algorithm uses random sampling to find a part of the defect operational domain that might not be
+ * This algorithm uses random sampling to find a part of the defect influence domain that might not be
  * complete. It performs a total of `samples uniformly-distributed random samples within the specified area.
  *
  * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT Truth table type.
- * @param lyt Layout to compute the defect operational domain for.
+ * @param lyt Layout to compute the defect influence domain for.
  * @param spec Expected Boolean function of the layout given as a multi-output truth table.
  * @param samples Number of random samples to perform.
- * @param params Defect operational domain computation parameters.
+ * @param params Defect influence domain computation parameters.
  * @param stats Statistics.
- * @return The (partial) defect operational domain of the layout.
+ * @return The (partial) defect influence domain of the layout.
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] defect_influence_domain<Lyt>
@@ -965,6 +969,9 @@ defect_influence_random_sampling(const Lyt& lyt, const std::vector<TT>& spec, st
 }
 
 /**
+ * This algorithm uses random sampling to find a part of the defect influence domain that might not be
+ * complete. It performs a total of `samples uniformly-distributed random samples within the specified area.
+ *
  * @tparam Lyt SiDB cell-level layout type.
  * @param lyt Layout to compute the defect influence domain for.
  * @param samples Number of random samples to perform.
@@ -996,18 +1003,30 @@ defect_influence_random_sampling(const Lyt& lyt, std::size_t samples,
 }
 
 /**
- * Computes the defect influence domain of the given SiDB cell-level layout. The defect
- * influence domain is the set of defect positions together with the information if the layout is influenced. This means
- * depending on the definition that the layout changes its operationality status or its ground state.
+ * Applies contour tracing to identify the boundary (contour) between influencing and
+ * non-influencing defect positions for a given SiDB layout.
  *
- * This algorithm uses contour tracing to identify non-influencing defect locations within the SiDB layout.
- * It starts by searching for defect locations on the left side (bounding_box + additional scanning area). The
- * y-coordinate for these positions is chosen randomly. The number of samples is determined by the `samples` parameter.
+ * The algorithm leverages the concept of a screened Coulomb potential, where the electrostatic interaction weakens
+ * as distance increases. If a defect at position `p` causes the SiDB layout to be non-influential, then defects
+ * further away from the layout are also likely to have no influence on the layout's functionality or performance.
+ * Conversely, defects closer to the layout may cause it to fail. This behavior allows for efficient contour tracing
+ * of the transition between influential and non-influential states.
  *
- * Then, the algorithm moves each defect position to the right, searching for the influencing defect position before
- * finding the non-influencing one. This position is selected as the starting point for the contour trace. The contour
- * tracing process checks whether the contour includes the SiDB layout. If it does not, the next random sample point is
- * selected as the starting point and the process is repeated.
+ * The process is as follows:
+ * 1. **Initialization**: Randomly select `samples` initial defect positions several nanometers away
+ *    from the layout where they are unlikely to influence the layout.
+ * 2. **Contour Tracing**: For each position, perform a defect-aware physical simulation to identify adjacent
+ *    positions along the x-axis that influence the layout.
+ * 3. **Contour Following**: Trace the contour of non-influential positions until the starting point is reached
+ * again, thereby closing the contour.
+ * 4. **Repetition**: Repeat steps 1-3 for multiple initial heights to identify additional contours, since multiple
+ * influential-to-non-influential contours may exist. This process helps to detect all relevant transitions in the
+ * layout.
+ * This algorithm uses contour tracing to identify the transition between influencing and non-influencing defect
+ * positions of the SiDB layout. It starts by searching for defect locations on the left side (bounding_box + additional
+ * scanning area). The y-coordinate for these positions is chosen randomly. The number of samples is determined by the
+ * `samples` parameter. Then, the algorithm moves each defect position to the right, searching for the first last
+ * non-influencing defect position.
  *
  * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT Truth table type.
@@ -1042,6 +1061,26 @@ defect_influence_quicktrace(const Lyt& lyt, const std::vector<TT>& spec, const s
 }
 
 /**
+ * Applies contour tracing to identify the boundary (contour) between influencing and
+ * non-influencing defect positions for a given SiDB layout.
+ *
+ * The algorithm leverages the concept of a screened Coulomb potential, where the electrostatic interaction weakens
+ * as distance increases. If a defect at position `p` causes the SiDB layout to be non-influential, then defects
+ * further away from the layout are also likely to have no influence on the layout's functionality or performance.
+ * Conversely, defects closer to the layout may cause it to fail. This behavior allows for efficient contour tracing
+ * of the transition between influential and non-influential states.
+ *
+ * The process is as follows:
+ * 1. **Initialization**: Randomly select `samples` initial defect positions several nanometers away
+ *    from the layout where they are unlikely to influence the layout.
+ * 2. **Contour Tracing**: For each position, perform a defect-aware physical simulation to identify adjacent
+ *    positions along the x-axis that influence the layout.
+ * 3. **Contour Following**: Trace the contour of non-influential positions until the starting point is reached
+ * again, thereby closing the contour.
+ * 4. **Repetition**: Repeat steps 1-3 for multiple initial heights to identify additional contours, since multiple
+ * influential-to-non-influential contours may exist. This process helps to detect all relevant transitions in the
+ * layout.
+ *
  * @tparam Lyt SiDB cell-level layout type.
  * @param lyt Layout to compute the defect influence domain for.
  * @param samples Number of samples to perform.
