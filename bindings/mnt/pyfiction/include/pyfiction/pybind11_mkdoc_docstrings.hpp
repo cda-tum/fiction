@@ -6690,9 +6690,6 @@ pattern. A kink is considered to exist if an input wire's charge state
 does not match the expected value (i.e., bit one or bit zero) for the
 given input index.
 
-Template parameter ``Lyt``:
-    SiDB cell-level layout type
-
 Parameter ``ground_state``:
     The ground state charge distribution surface.
 
@@ -6710,9 +6707,6 @@ charge states against the expected states derived from the truth
 table. A kink is considered to exist if an output wire's charge state
 does not match the expected value (i.e., bit one or bit zero) for the
 given input index.
-
-Template parameter ``Lyt``:
-    SiDB cell-level layout type
 
 Parameter ``ground_state``:
     The ground state charge distribution surface.
@@ -6742,9 +6736,6 @@ static const char *__doc_fiction_detail_is_operational_impl_encodes_bit_one =
 R"doc(This function returns `true` if `1` is encoded in the charge state of
 the given BDL pair. `false` otherwise.
 
-Template parameter ``Lyt``:
-    SiDB cell-level layout type.
-
 Parameter ``ground_state``:
     The ground state charge distribution surface.
 
@@ -6757,9 +6748,6 @@ Returns:
 static const char *__doc_fiction_detail_is_operational_impl_encodes_bit_zero =
 R"doc(This function returns `true` if `0` is encoded in the charge state of
 the given BDL pair. `false` otherwise.
-
-Template parameter ``Lyt``:
-    SiDB cell-level layout type.
 
 Parameter ``ground_state``:
     The ground state charge distribution surface.
