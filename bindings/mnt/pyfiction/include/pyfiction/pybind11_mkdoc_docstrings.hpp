@@ -4049,13 +4049,13 @@ R"doc(Defines whether the influence of a defect is present at a particular
 position in the layout. It can be used to classify positions as having
 an influence or not.)doc";
 
-static const char *__doc_fiction_defect_influence_status_EXISTENT =
+static const char *__doc_fiction_defect_influence_status_INFLUENTIAL =
 R"doc(This indicates that the defect is actively influencing the layout at
 this position. It implies that some form of impact, such as a change
 in operational status or ground state, is being caused by the defect
 at this position.)doc";
 
-static const char *__doc_fiction_defect_influence_status_NON_EXISTENT =
+static const char *__doc_fiction_defect_influence_status_NON_INFLUENTIAL =
 R"doc(This indicates that the defect does not influence the layout at this
 position. It implies that the layout remains unaffected by the defect
 at this location, meaning there is no change in the operational status
