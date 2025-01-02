@@ -620,7 +620,7 @@ class is_operational_impl
 
         const auto max_index = cds_canvas_copy.get_max_charge_index();
 
-        assert(max_index == (std::pow(2, cds_canvas_copy.num_cells() - 1) - 1) &&
+        assert(max_index == static_cast<uint64_t>(std::pow(2, cds_canvas_copy.num_cells() - 1) - 1) &&
                "The maximum charge index is incorrect. Probably, the dependent cell is not set.");
 
         while (canvas_charge_index <= max_index)
