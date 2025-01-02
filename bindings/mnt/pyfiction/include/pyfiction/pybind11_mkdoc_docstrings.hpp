@@ -6638,12 +6638,12 @@ static const char *__doc_fiction_detail_is_fanout_substituted_impl_run = R"doc()
 static const char *__doc_fiction_detail_is_fanout_substituted_impl_substituted = R"doc()doc";
 
 static const char *__doc_fiction_detail_is_operational_impl =
-R"doc(Implementation of the `is_operational` algorithm for a given gate
+R"doc(Implementation of the `is_operational` algorithm for a given SiDB
 layout.
 
 This class provides an implementation of the `is_operational`
-algorithm for a specified gate layout and parameters. It checks
-whether the gate layout is operational by simulating its behavior for
+algorithm for a specified SiDB layout and parameters. It checks
+whether the SiDB layout is operational by simulating its behavior for
 different input combinations and comparing the results to expected
 outputs from a truth table.
 
@@ -6903,14 +6903,12 @@ static const char *__doc_fiction_detail_is_operational_impl_output_bdl_wires = R
 static const char *__doc_fiction_detail_is_operational_impl_parameters = R"doc(Parameters for the `is_operational` algorithm.)doc";
 
 static const char *__doc_fiction_detail_is_operational_impl_physical_simulation_of_layout =
-R"doc(This function conducts physical simulation of the given layout (gate
-layout with certain input combination). The simulation results are
-stored in the `sim_result` variable.
+R"doc(This function conducts physical simulation of the given SiDB layout.
+The simulation results are stored in the `sim_result` variable.
 
 Parameter ``bdl_iterator``:
-    A reference to a BDL input iterator representing the gate layout
-    at a given input combination. The simulation is performed based on
-    the configuration represented by the iterator.
+    BDL input iterator representing the SiDB layout with a given input
+    combination.
 
 Returns:
     Simulation results.)doc";
@@ -6919,7 +6917,7 @@ static const char *__doc_fiction_detail_is_operational_impl_run =
 R"doc(Run the `is_operational` algorithm.
 
 This function executes the operational status checking algorithm for
-the gate layout and parameters provided during initialization.
+the given SiDB layout and parameters provided during initialization.
 
 Returns:
     Pair with the first element indicating the operational status
@@ -13812,8 +13810,8 @@ Returns:
 static const char *__doc_fiction_is_operational =
 R"doc(Determine the operational status of an SiDB layout.
 
-This function checks the operational status of a given gate layout
-using the `is_operational` algorithm. It determines whether the gate
+This function checks the operational status of a given SiDB layout
+using the `is_operational` algorithm. It determines whether the SiDB
 layout is operational and returns the correct result for all
 :math:`2^n` input combinations.
 
@@ -13834,15 +13832,15 @@ Parameter ``params``:
     Parameters for the `is_operational` algorithm.
 
 Returns:
-    A pair containing the operational status of the gate layout
+    A pair containing the operational status of the SiDB layout
     (either `OPERATIONAL` or `NON_OPERATIONAL`) and the number of
     input combinations tested.)doc";
 
 static const char *__doc_fiction_is_operational_2 =
 R"doc(Determine the operational status of an SiDB layout.
 
-This function checks the operational status of a given gate layout
-using the `is_operational` algorithm. It determines whether the gate
+This function checks the operational status of a given SiDB layout
+using the `is_operational` algorithm. It determines whether the SiDB
 layout is operational and returns the correct result for all
 :math:`2^n` input combinations.
 
@@ -13872,7 +13870,7 @@ Parameter ``canvas_lyt``:
     Optional canvas layout.
 
 Returns:
-    A pair containing the operational status of the gate layout
+    A pair containing the operational status of the SiDB layout
     (either `OPERATIONAL` or `NON_OPERATIONAL`) and the number of
     input combinations tested.)doc";
 
@@ -13901,12 +13899,7 @@ the algorithm checks if filtering strategies have detected whether the
 layout is non-operational. This only provides any runtime benefits if
 kinks are rejected.)doc";
 
-static const char *__doc_fiction_is_operational_params_operational_analysis_strategy_FILTER_BEFORE_SIMULATION =
-R"doc(Before a physical simulation is conducted, the algorithm checks if
-filter strategies can determine that the layout is non-operational.
-This only provides any runtime benefits if kinks are rejected.)doc";
-
-static const char *__doc_fiction_is_operational_params_operational_analysis_strategy_FILTER_ONLY =
+static const char *__doc_fiction_is_operational_params_operational_analysis_strategy_FILTER_BASED =
 R"doc(Apply filtering exclusively to determine whether the layout is non-
 operational. If the layout passes all filter steps, it is considered
 operational.
@@ -13914,7 +13907,12 @@ operational.
 @note This is an extremely fast approximation that may sometimes lead
 to false positives.)doc";
 
-static const char *__doc_fiction_is_operational_params_operational_analysis_strategy_SIMULATION_ONLY =
+static const char *__doc_fiction_is_operational_params_operational_analysis_strategy_FILTER_THEN_SIMULATION =
+R"doc(Before a physical simulation is conducted, the algorithm checks if
+filter strategies can determine that the layout is non-operational.
+This only provides any runtime benefits if kinks are rejected.)doc";
+
+static const char *__doc_fiction_is_operational_params_operational_analysis_strategy_SIMULATION_BASED =
 R"doc(Do not apply filter strategies to determine whether the layout is
 operational. Instead, rely solely on physical simulation.)doc";
 
