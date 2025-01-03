@@ -30,7 +30,16 @@ Ntk handle_virtual_pis(const Ntk& network)
 {
     if constexpr (has_num_virtual_pis_v<Ntk>)
     {
-        return delete_virtual_pis(network);
+        Ntk return_ntk = delete_virtual_pis(network);
+        if constexpr (has_update_ranks_v<Ntk>)
+        {
+            return_ntk.update_ranks();
+        }
+        else if constexpr (mockturtle::has_update_levels_v<Ntk>)
+        {
+            return_ntk.update_levels();
+        }
+        return return_ntk;
     }
     else
     {

@@ -277,7 +277,7 @@ TEST_CASE("Check equivalence checking for virtual PIs", "[extended-rank-view]")
 
     mockturtle::equivalence_checking_stats st;
     const auto                             maybe_cec_m =
-        mockturtle::equivalence_checking(*fiction::virtual_miter<technology_network>(tec, vpi), {}, &st);
+        mockturtle::equivalence_checking(*fiction::virtual_miter<technology_network>(tec, vpi_r), {}, &st);
     REQUIRE(maybe_cec_m.has_value());
     const bool cec_m = *maybe_cec_m;
     CHECK(cec_m == 1);
