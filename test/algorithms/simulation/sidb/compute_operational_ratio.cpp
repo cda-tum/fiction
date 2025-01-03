@@ -69,7 +69,7 @@ TEST_CASE("BDL wire operational domain computation", "[compute-operational-ratio
         const auto op_domain_ratio = compute_operational_ratio(lat, std::vector<tt>{create_id_tt()},
                                                                parameter_point({5.5, 5.0, -0.32}), op_ratio_params);
 
-        // check if the operational domain has the correct size
+        // check if the operational domain has the correct size (1.0)
         CHECK_THAT(op_domain_ratio - 1.0, Catch::Matchers::WithinAbs(0.0, physical_constants::POP_STABILITY_ERR));
     }
 
