@@ -449,11 +449,11 @@ class extended_rank_view<Ntk, false> : public fiction::depth_view<Ntk>
     /**
      * The nodes stored in an rank array.
      */
-    std::vector<std::vector<node>>       ranks;
+    std::vector<std::vector<node>> ranks;
     /**
      * The maximum rank width in the network.
      */
-    uint32_t                             max_rank_width;
+    uint32_t max_rank_width;
 
     /**
      * Inserts a node into the rank and updates the rank position, ranks, and max rank width accordingly.
