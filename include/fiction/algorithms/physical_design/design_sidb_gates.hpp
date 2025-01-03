@@ -115,6 +115,10 @@ struct design_sidb_gates_stats
      */
     mockturtle::stopwatch<>::duration time_total{0};
     /**
+     * The runtime of the pruning process.
+     */
+    mockturtle::stopwatch<>::duration pruning_total{0};
+    /**
      * The simulation engine to be used for the operational domain computation.
      */
     sidb_simulation_engine sim_engine{sidb_simulation_engine::QUICKEXACT};
@@ -380,7 +384,14 @@ class design_sidb_gates_impl
     [[nodiscard]] std::vector<Lyt> run_quickcell() noexcept
     {
         mockturtle::stopwatch stop{stats.time_total};
-        const auto            gate_candidates = run_pruning();
+
+        std::vector<Lyt> gate_candidates{};
+        gate_candidates.reserve(all_canvas_layouts.size());
+
+        {
+            mockturtle::stopwatch stop_pruning{stats.pruning_total};
+            gate_candidates = run_pruning();
+        }
 
         stats.number_of_layouts_after_first_pruning =
             all_canvas_layouts.size() - number_of_discarded_layouts_at_first_pruning.load();

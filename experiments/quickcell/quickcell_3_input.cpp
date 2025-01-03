@@ -32,18 +32,21 @@ using namespace fiction;
 int main()  // NOLINT
 {
     experiments::experiment<std::string, uint64_t, uint64_t, double, uint64_t, double, uint64_t, double, uint64_t,
-                            double>
-        simulation_exp{"benchmark",
-                       "gate",                     // std::string
-                       "#Total Layouts",           // uint64_t
-                       "#Gates (QuickCell)",       // uint64_t
-                       "runtime (QuickCell) [s]",  // double
-                       "#Lp1",                     // uint64_t
-                       "#Lp1/N [%]",               // double
-                       "#Lp2",                     // uint64_t
-                       "#Lp2/N [%]",               // double
-                       "#Lp3",                     // uint64_t
-                       "#Lp3/N [%]"};              // double
+                            double, double>
+        simulation_exp{
+            "benchmark",
+            "gate",                     // std::string
+            "#Total Layouts",           // uint64_t
+            "#Gates (QuickCell)",       // uint64_t
+            "runtime (QuickCell) [s]",  // double
+            "#Lp1",                     // uint64_t
+            "#Lp1/N [%]",               // double
+            "#Lp2",                     // uint64_t
+            "#Lp2/N [%]",               // double
+            "#Lp3",                     // uint64_t
+            "#Lp3/N [%]",
+            "t_pruning [s]"  // double
+        };
 
     const auto truth_tables_and_names =
         std::array<std::pair<std::vector<tt>, std::string>, 10>{{{std::vector<tt>{create_and3_tt()}, "and3"},
@@ -102,7 +105,8 @@ int main()  // NOLINT
                            static_cast<double>(stats_quickcell.number_of_layouts),
                        stats_quickcell.number_of_layouts_after_third_pruning,
                        100.0 * static_cast<double>(stats_quickcell.number_of_layouts_after_third_pruning) /
-                           static_cast<double>(stats_quickcell.number_of_layouts));
+                           static_cast<double>(stats_quickcell.number_of_layouts),
+                       mockturtle::to_seconds(stats_quickcell.pruning_total));
 
         simulation_exp.save();
         simulation_exp.table();

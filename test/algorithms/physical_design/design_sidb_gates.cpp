@@ -20,6 +20,7 @@
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/layout_utils.hpp>
+#include <fiction/utils/truth_table_utils.hpp>
 
 #include <mockturtle/utils/stopwatch.hpp>
 
@@ -54,6 +55,7 @@ TEST_CASE("Design AND gate with skeleton, where one input wire and the output wi
         CHECK(design_gates_stats.number_of_layouts_after_first_pruning == 167);
         CHECK(design_gates_stats.number_of_layouts_after_second_pruning == 46);
         CHECK(design_gates_stats.number_of_layouts_after_third_pruning == 11);
+        CHECK(design_gates_stats.time_total.count() > 0);
     }
 
     SECTION("Automatic Exhaustive Gate Designer")

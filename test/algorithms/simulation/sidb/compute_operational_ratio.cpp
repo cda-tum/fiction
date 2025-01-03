@@ -109,7 +109,7 @@ TEST_CASE("SiQAD AND gate", "[compute-operational-ratio]")
         bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED;
     op_domain_params.sweep_dimensions = {{sweep_parameter::EPSILON_R}, {sweep_parameter::LAMBDA_TF}};
     op_domain_params.operational_params.strategy_to_analyze_operational_status =
-        is_operational_params::operational_analysis_strategy::FILTER_BEFORE_SIMULATION;
+        is_operational_params::operational_analysis_strategy::FILTER_THEN_SIMULATION;
     op_domain_params.operational_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
     op_domain_params.operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance = 1.5;
 
@@ -131,7 +131,7 @@ TEST_CASE("SiQAD AND gate", "[compute-operational-ratio]")
 
     // only pruning to determine the operational status of the layout
     op_ratio_params.op_domain_params.operational_params.strategy_to_analyze_operational_status =
-        is_operational_params::operational_analysis_strategy::FILTER_ONLY;
+        is_operational_params::operational_analysis_strategy::FILTER_BASED;
 
     const auto op_domain_ratio_only_pruning = compute_operational_ratio(
         lyt, std::vector<tt>{create_nand_tt()}, parameter_point({5.6, 5.0, -0.28}), op_ratio_params);

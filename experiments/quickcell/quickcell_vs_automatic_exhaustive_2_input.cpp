@@ -32,7 +32,7 @@ using namespace fiction;
 int main()  // NOLINT
 {
     experiments::experiment<std::string, uint64_t, double, uint64_t, uint64_t, double, double, uint64_t, double,
-                            uint64_t, double, uint64_t, double>
+                            uint64_t, double, uint64_t, double, double>
         simulation_exp{"benchmark",
                        "gate",                                 // std::string
                        "#Total Layouts",                       // uint64_t
@@ -46,7 +46,8 @@ int main()  // NOLINT
                        "#Lp2",                                 // uint64_t
                        "#Lp2/N [%]",                           // double
                        "#Lp3",                                 // uint64_t
-                       "#Lp3/N [%]"};                          // double
+                       "#Lp3/N [%]",                           // double
+                       "t_pruning [s]"};                       // double
 
     const auto truth_tables_and_names = std::array<std::pair<std::vector<tt>, std::string>, 15>{
         {{std::vector<tt>{create_not_tt()}, "inv"},
@@ -187,7 +188,8 @@ int main()  // NOLINT
                            static_cast<double>(total_number_of_layout) * 100,
                        stats_quickcell.number_of_layouts_after_third_pruning,
                        static_cast<double>(stats_quickcell.number_of_layouts_after_third_pruning) /
-                           static_cast<double>(total_number_of_layout) * 100);
+                           static_cast<double>(total_number_of_layout) * 100,
+                       mockturtle::to_seconds(stats_quickcell.pruning_total));
 
         simulation_exp.save();
         simulation_exp.table();
@@ -196,7 +198,7 @@ int main()  // NOLINT
     const auto total_time_reduction = sum_exhaustive_runtime / sum_quickcell_runtime;
 
     simulation_exp("", 0, sum_exhaustive_runtime, 0, 0, sum_quickcell_runtime, total_time_reduction, 0, 0.0, 0, 0.0, 0,
-                   0.0);
+                   0.0, 0.0);
 
     simulation_exp.save();
     simulation_exp.table();
