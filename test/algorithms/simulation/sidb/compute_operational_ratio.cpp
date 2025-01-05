@@ -203,7 +203,7 @@ TEST_CASE("Bestagon AND gate", "[compute-operational-ratio]")
         op_domain_params.sweep_dimensions.push_back(z_dimension);
         op_domain_params.operational_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
         op_domain_params.operational_params.strategy_to_analyze_operational_status =
-            is_operational_params::operational_analysis_strategy::FILTER_ONLY;
+            is_operational_params::operational_analysis_strategy::FILTER_BASED;
 
         const compute_operational_ratio_params op_ratio_params{op_domain_params};
 
