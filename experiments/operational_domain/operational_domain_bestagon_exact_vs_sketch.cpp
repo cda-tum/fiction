@@ -24,10 +24,15 @@
 
 using namespace fiction;
 
+// This script compares the exact operational domain computation of Bestagon gates with an approximate algorithm. The
+// exact method employs a grid search approach, while the approximate algorithm estimates the operational domain by
+// identifying non-operational parameter points through filtering strategies. For the remaining parameter points, the
+// algorithm assumes an operational status, resulting in an approximation referred to as the operational domain sketch.
+
 int main()  // NOLINT
 {
     experiments::experiment<std::string, uint64_t, uint64_t, double, uint64_t, double, double, double> opdomain_exp{
-        "Operational Domain Bestagon",
+        "Operational Domain Bestagon Exact vs Sketch",
         "Name",
         "#SiDBs",  // Benchmark
         "num op exact",
