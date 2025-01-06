@@ -32,10 +32,10 @@ int main()  // NOLINT
         "#SiDBs",  // Benchmark
         "num op exact",
         "t in s (exact)",
-        "num op approx",
-        "t in s (approx)",
-        "num op approx / num op exact",
-        "t in s (exact) / t in s (approx)"};
+        "num op sketch",
+        "t in s (sketch)",
+        "num op sketch / num op exact",
+        "t in s (exact) / t in s (sketch)"};
 
     // simulation parameters
     sidb_simulation_parameters sim_params{};
@@ -78,7 +78,7 @@ int main()  // NOLINT
 
         // operational domain stats
         operational_domain_stats op_domain_stats_gs_exact{};
-        operational_domain_stats op_domain_stats_approx{};
+        operational_domain_stats op_domain_stats_sketch{};
 
         op_domain_params.operational_params.strategy_to_analyze_operational_status =
             is_operational_params::operational_analysis_strategy::SIMULATION_BASED;
@@ -89,27 +89,27 @@ int main()  // NOLINT
         op_domain_params.operational_params.strategy_to_analyze_operational_status =
             is_operational_params::operational_analysis_strategy::FILTER_BASED;
 
-        const auto op_domain_gs_approx =
-            operational_domain_grid_search(lyt, truth_table, op_domain_params, &op_domain_stats_approx);
+        const auto op_domain_gs_sketch =
+            operational_domain_grid_search(lyt, truth_table, op_domain_params, &op_domain_stats_sketch);
 
         write_operational_domain(op_domain_gs_exact, fmt::format("{}/exact_{}.csv", folder, gate));
-        write_operational_domain(op_domain_gs_approx, fmt::format("{}/approx_{}.csv", folder, gate));
+        write_operational_domain(op_domain_gs_sketch, fmt::format("{}/sketch_{}.csv", folder, gate));
 
         opdomain_exp(
             // Benchmark
             gate, lyt.num_cells(),
 
-            // Exact (determine the operation status by simulation)
+            // Exact Operational Domain (determine the operation status by simulation)
             op_domain_stats_gs_exact.num_operational_parameter_combinations,
             mockturtle::to_seconds(op_domain_stats_gs_exact.time_total),
 
-            // Approx (determine the operation status by pruning)
-            op_domain_stats_approx.num_operational_parameter_combinations,
-            mockturtle::to_seconds(op_domain_stats_approx.time_total),
-            static_cast<double>(op_domain_stats_approx.num_operational_parameter_combinations) /
+            // Operational Domain Sketch (determine the operation status by pruning)
+            op_domain_stats_sketch.num_operational_parameter_combinations,
+            mockturtle::to_seconds(op_domain_stats_sketch.time_total),
+            static_cast<double>(op_domain_stats_sketch.num_operational_parameter_combinations) /
                 static_cast<double>(op_domain_stats_gs_exact.num_operational_parameter_combinations),
             mockturtle::to_seconds(op_domain_stats_gs_exact.time_total) /
-                mockturtle::to_seconds(op_domain_stats_approx.time_total));
+                mockturtle::to_seconds(op_domain_stats_sketch.time_total));
 
         opdomain_exp.save();
         opdomain_exp.table();
