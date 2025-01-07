@@ -38,7 +38,7 @@ jobs:
   build_and_test:
     strategy:
       matrix:
-        os: [macos-13, macos-14, macos-15-xlarge] # macOS versions to test on
+        os: ["macos-13", "macos-14", "macos-15-xlarge"] # macOS versions to test on
         compiler: [clang++, g++-12, g++-13, g++-14] # Compilers to test with
         architecture: [x64, arm64] # Architectures to test
         include:
