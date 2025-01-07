@@ -1122,6 +1122,57 @@ static const char *__doc_fiction_bounding_box_2d_x_size = R"doc(The horizontal s
 
 static const char *__doc_fiction_bounding_box_2d_y_size = R"doc(The vertical size of the bounding box in layout coordinates.)doc";
 
+static const char *__doc_fiction_branching_signal_container =
+    R"doc(A container class to help identify layout locations of branching nodes
+like fanouts. When a node from a network is to placed in a layout,
+fetching the node's fanins and looking for their locations in the
+layout does not work properly when branching nodes like fanouts are
+involved that got extended by wire nodes. This container solves that
+issue.
+
+Template parameter ``Lyt``:
+    Gate-level layout type.
+
+Template parameter ``Ntk``:
+    Logic network type.
+
+Template parameter ``fanout_size``:
+    Maximum fanout size possible in the layout and/or the network.)doc";
+
+static const char *__doc_fiction_branching_signal_container_branches = R"doc(Storage for all branches.)doc";
+
+static const char *__doc_fiction_branching_signal_container_branching_signal = R"doc(Branch type.)doc";
+
+static const char *__doc_fiction_branching_signal_container_branching_signal_branching_signal = R"doc()doc";
+
+static const char *__doc_fiction_branching_signal_container_branching_signal_lyt_signal = R"doc()doc";
+
+static const char *__doc_fiction_branching_signal_container_branching_signal_ntk_node = R"doc()doc";
+
+static const char *__doc_fiction_branching_signal_container_operator_array =
+    R"doc(Accesses the branching container to find the location of a given node
+`n`. Returns the signal to that location if it was already stored or
+the default signal, otherwise.
+
+Parameter ``n``:
+    Node whose branching position is desired.
+
+Returns:
+    Signal to `n`'s layout location or the default signal if it wasn't
+    found.)doc";
+
+static const char *__doc_fiction_branching_signal_container_update_branch =
+    R"doc(Updates the given node's branch by another layout signal, thereby,
+creating a new branch or updating the position of an existing one,
+e.g., if further wire segments were moving the head of the branch.
+
+Parameter ``ntk_node``:
+    Node whose branch is to be updated.
+
+Parameter ``lyt_signal``:
+    New signal pointing to the end of the branch.)doc";
+
+
 static const char *__doc_fiction_calculate_energy_and_state_type_with_kinks_accepted =
 R"doc(This function takes in an SiDB energy distribution. For each charge
 distribution, the state type is determined (i.e. erroneous,
@@ -10151,6 +10202,20 @@ Parameter ``lyt``:
 
 Returns:
     List of all routing objectives in the given layout.)doc";
+
+static const char *__doc_fiction_fanin_container =
+    R"doc(Container that stores fanins of a node in a network, including whether
+one of them is a constant.
+
+Note that this container assumes that each node has a maximum of one
+constant fanin.
+
+Template parameter ``Ntk``:
+    `mockturtle` network type.)doc";
+
+static const char *__doc_fiction_fanin_container_constant_fanin =
+    R"doc(Has a value if a fanin node is constant. In that case, it represents
+the constant value.)doc";
 
 static const char *__doc_fiction_fanin_edge_container =
 R"doc(Container that stores fanin edges of a node in a network, including
