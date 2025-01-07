@@ -1123,7 +1123,7 @@ static const char *__doc_fiction_bounding_box_2d_x_size = R"doc(The horizontal s
 static const char *__doc_fiction_bounding_box_2d_y_size = R"doc(The vertical size of the bounding box in layout coordinates.)doc";
 
 static const char *__doc_fiction_branching_signal_container =
-    R"doc(A container class to help identify layout locations of branching nodes
+R"doc(A container class to help identify layout locations of branching nodes
 like fanouts. When a node from a network is to placed in a layout,
 fetching the node's fanins and looking for their locations in the
 layout does not work properly when branching nodes like fanouts are
@@ -1150,7 +1150,7 @@ static const char *__doc_fiction_branching_signal_container_branching_signal_lyt
 static const char *__doc_fiction_branching_signal_container_branching_signal_ntk_node = R"doc()doc";
 
 static const char *__doc_fiction_branching_signal_container_operator_array =
-    R"doc(Accesses the branching container to find the location of a given node
+R"doc(Accesses the branching container to find the location of a given node
 `n`. Returns the signal to that location if it was already stored or
 the default signal, otherwise.
 
@@ -1162,7 +1162,7 @@ Returns:
     found.)doc";
 
 static const char *__doc_fiction_branching_signal_container_update_branch =
-    R"doc(Updates the given node's branch by another layout signal, thereby,
+R"doc(Updates the given node's branch by another layout signal, thereby,
 creating a new branch or updating the position of an existing one,
 e.g., if further wire segments were moving the head of the branch.
 
@@ -10203,7 +10203,7 @@ Returns:
     List of all routing objectives in the given layout.)doc";
 
 static const char *__doc_fiction_fanin_container =
-    R"doc(Container that stores fanins of a node in a network, including whether
+R"doc(Container that stores fanins of a node in a network, including whether
 one of them is a constant.
 
 Note that this container assumes that each node has a maximum of one
@@ -10213,7 +10213,7 @@ Template parameter ``Ntk``:
     `mockturtle` network type.)doc";
 
 static const char *__doc_fiction_fanin_container_constant_fanin =
-    R"doc(Has a value if a fanin node is constant. In that case, it represents
+R"doc(Has a value if a fanin node is constant. In that case, it represents
 the constant value.)doc";
 
 static const char *__doc_fiction_fanin_edge_container =
@@ -15189,6 +15189,158 @@ static const char *__doc_fiction_path_set_add = R"doc()doc";
 static const char *__doc_fiction_path_set_contains = R"doc()doc";
 
 static const char *__doc_fiction_place =
+R"doc(Place 0-input gates.
+
+Template parameter ``Lyt``:
+    Gate-level layout type.
+
+Template parameter ``Ntk``:
+    Logic network type.
+
+Parameter ``lyt``:
+    Gate-level layout in which to place a 0-input gate.
+
+Parameter ``t``:
+    Tile in `lyt` to place the gate onto.
+
+Parameter ``ntk``:
+    Network whose node is to be placed.
+
+Parameter ``n``:
+    Node in `ntk` to place onto `t` in `lyt`.
+
+Returns:
+    Signal pointing to the placed gate in `lyt`.)doc";
+
+static const char *__doc_fiction_place_2 =
+R"doc(Place 1-input gates.
+
+Template parameter ``Lyt``:
+    Gate-level layout type.
+
+Template parameter ``Ntk``:
+    Logic network type.
+
+Parameter ``lyt``:
+    Gate-level layout in which to place a 1-input gate.
+
+Parameter ``t``:
+    Tile in `lyt` to place the gate onto.
+
+Parameter ``ntk``:
+    Network whose node is to be placed.
+
+Parameter ``n``:
+    Node in `ntk` to place onto `t` in `lyt`.
+
+Parameter ``a``:
+    Incoming signal to the newly placed gate in `lyt`.
+
+Returns:
+    Signal pointing to the placed gate in `lyt`.)doc";
+
+static const char *__doc_fiction_place_3 =
+R"doc(Place 2-input gates.
+
+Template parameter ``Lyt``:
+    Gate-level layout type.
+
+Template parameter ``Ntk``:
+    Logic network type.
+
+Parameter ``lyt``:
+    Gate-level layout in which to place a 2-input gate.
+
+Parameter ``t``:
+    Tile in `lyt` to place the gate onto.
+
+Parameter ``ntk``:
+    Network whose node is to be placed.
+
+Parameter ``n``:
+    Node in `ntk` to place onto `t` in `lyt`.
+
+Parameter ``a``:
+    First incoming signal to the newly placed gate in `lyt`.
+
+Parameter ``b``:
+    Second incoming signal to the newly placed gate in `lyt`.
+
+Parameter ``c``:
+    Third optional incoming constant value signal to the newly placed
+    gate in `lyt`. Might change the gate function when set, e.g., from
+    a MAJ to an AND if `c == false`.
+
+Returns:
+    Signal pointing to the placed gate in `lyt`.)doc";
+
+static const char *__doc_fiction_place_4 =
+R"doc(Place 3-input gates.
+
+Template parameter ``Lyt``:
+    Gate-level layout type.
+
+Template parameter ``Ntk``:
+    Logic network type.
+
+Parameter ``lyt``:
+    Gate-level layout in which to place a 3-input gate.
+
+Parameter ``t``:
+    Tile in `lyt` to place the gate onto.
+
+Parameter ``ntk``:
+    Network whose node is to be placed.
+
+Parameter ``n``:
+    Node in `ntk` to place onto `t` in `lyt`.
+
+Parameter ``a``:
+    First incoming signal to the newly placed gate in `lyt`.
+
+Parameter ``b``:
+    Second incoming signal to the newly placed gate in `lyt`.
+
+Parameter ``c``:
+    Third incoming signal to the newly placed gate in `lyt`.
+
+Returns:
+    Signal pointing to the placed gate in `lyt`.)doc";
+
+static const char *__doc_fiction_place_5 =
+R"doc(Place any gate from a network. This function automatically identifies
+the arity of the passed node and fetches its incoming signals from the
+given network and a provided `mockturtle::node_map`. This function
+does not update the `mockturtle::node_map`.
+
+Template parameter ``Lyt``:
+    Gate-level layout type.
+
+Template parameter ``Ntk``:
+    Logic network type.
+
+Parameter ``lyt``:
+    Gate-level layout in which to place any gate.
+
+Parameter ``t``:
+    Tile in `lyt` to place the gate onto.
+
+Parameter ``ntk``:
+    Network whose node is to be placed.
+
+Parameter ``n``:
+    Node in `ntk` to place onto `t` in `lyt`.
+
+Parameter ``node2pos``:
+    Mapping from network nodes to layout signals, i.e., a pointer to
+    their position in the layout. The map is used to fetch location of
+    the fanins. The `mockturtle::node_map` is not updated by this
+    function.
+
+Returns:
+    Signal to the newly placed gate in `lyt`.)doc";
+
+static const char *__doc_fiction_place_6 =
 R"doc(Place any gate from a network. This function automatically identifies
 the arity of the passed node and fetches its incoming signals from the
 given network and a provided branching_signal_container
@@ -19170,6 +19322,12 @@ static const char *__doc_fmt_formatter_format_2 = R"doc()doc";
 static const char *__doc_fmt_formatter_parse = R"doc()doc";
 
 static const char *__doc_fmt_formatter_parse_2 = R"doc()doc";
+
+static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_layouts_coordinates_hpp_1090_8 = R"doc()doc";
+
+static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_layouts_coordinates_hpp_1106_8 = R"doc()doc";
+
+static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_technology_cell_ports_hpp_291_8 = R"doc()doc";
 
 static const char *__doc_mockturtle_detail_foreach_element_if_transform = R"doc()doc";
 
