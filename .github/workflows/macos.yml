@@ -68,8 +68,8 @@ jobs:
           - os: macos-15
             compiler: g++-13
 
-    name: 🍎 ${{matrix.os}} with ${{matrix.compiler}}
-    runs-on: ${{matrix.os}}
+    name: 🍎 ${{ matrix.os }} with ${{ matrix.compiler }}
+    runs-on: ${{ matrix.os }}
 
     steps:
       - name: Clone Repository
