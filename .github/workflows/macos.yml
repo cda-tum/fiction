@@ -41,24 +41,8 @@ jobs:
     runs-on: macos-15
     strategy:
       matrix:
-        compiler: [clang++, g++-12, g++-13, g++-14]
+        compiler: [clang++, g++-14]
         architecture: [arm64]
-        include:
-          - os: macos-15
-            architecture: arm64
-          - compiler: clang++
-            ccompiler: clang
-          - compiler: g++-12
-            ccompiler: gcc-12
-          - compiler: g++-13
-            ccompiler: gcc-13
-          - compiler: g++-14
-            ccompiler: gcc-14
-        exclude:
-          - os: macos-15
-            compiler: g++-12
-          - os: macos-15
-            compiler: g++-13
       fail-fast: false
 
     steps:
