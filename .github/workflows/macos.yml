@@ -35,43 +35,15 @@ env:
   Z3_VERSION: 4.13.0
 
 jobs:
-  build_and_test:
-    name: 🍎 ${{ matrix.os }} with ${{ matrix.compiler }} and ${{ matrix.architecture }}
-    runs-on: ${{ matrix.os }}
-
+  # macOS 15 job
+  build_and_test_macos_15:
+    name: 🍎 macOS 15 with ${{ matrix.compiler }} and ${{ matrix.architecture }}
+    runs-on: macos-15
     strategy:
       matrix:
-        os: [macos-13, macos-14, macos-15] # macOS versions to test on
-        compiler: [clang++, g++-12, g++-13, g++-14] # Compilers to test with
-        architecture: [x64, arm64] # Architectures to test on
-
-        include:
-          - os: macos-13
-            architecture: x64
-          - os: macos-14
-            architecture: arm64
-          - os: macos-15
-            architecture: arm64
-          - compiler: clang++
-            ccompiler: clang
-          - compiler: g++-12
-            ccompiler: gcc-12
-          - compiler: g++-13
-            ccompiler: gcc-13
-          - compiler: g++-14
-            ccompiler: gcc-14
-
-        exclude:
-          - os: macos-13
-            compiler: g++-13
-          - os: macos-14
-            compiler: g++-12
-          - os: macos-14
-            compiler: g++-13
-          - os: macos-15
-            compiler: g++-12
-          - os: macos-15
-            compiler: g++-13
+        compiler: [clang++, g++-12, g++-13, g++-14]
+        architecture: [x64, arm64]
+      fail-fast: false
 
     steps:
       - name: Clone Repository
@@ -84,7 +56,112 @@ jobs:
         with:
           python-version: "3.13.x"
 
-      # Setup TBB for parallel STL algorithms via Homebrew
+      - name: Setup TBB
+        run: brew install tbb
+
+      - name: Setup XCode version
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: "^14.2"
+
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: "${{matrix.os}}-${{matrix.compiler}}"
+          variant: ccache
+          save: true
+          max-size: 10G
+
+      - name: Setup Z3 Solver
+        id: z3
+        uses: cda-tum/setup-z3@v1
+        with:
+          version: ${{env.Z3_VERSION}}
+          platform: macOS
+          architecture: ${{matrix.architecture}}
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+      # Build and test pipeline for Debug mode
+      - name: Create Build Environment (Debug)
+        run: cmake -E make_directory build_debug
+
+      - name: Configure CMake (Debug)
+        working-directory: ${{github.workspace}}/build_debug
+        run: >
+          cmake ${{github.workspace}}
+          -DCMAKE_CXX_COMPILER=${{matrix.compiler}}
+          -DCMAKE_BUILD_TYPE=Debug
+          -DFICTION_ENABLE_UNITY_BUILD=ON
+          -DFICTION_ENABLE_PCH=ON
+          -DFICTION_CLI=ON
+          -DFICTION_TEST=ON
+          -DFICTION_BENCHMARK=OFF
+          -DFICTION_EXPERIMENTS=ON
+          -DFICTION_Z3=ON
+          -DFICTION_PROGRESS_BARS=OFF
+          -DFICTION_WARNINGS_AS_ERRORS=OFF
+          -DMOCKTURTLE_EXAMPLES=OFF
+
+      - name: Build (Debug)
+        working-directory: ${{github.workspace}}/build_debug
+        run: cmake --build . --config Debug -j4 # all macOS runners provide at least 3 cores
+
+      - name: Test (Debug)
+        working-directory: ${{github.workspace}}/build_debug
+        run: ctest -C Debug --verbose --output-on-failure --repeat until-pass:3 --parallel 4
+
+      # Build and test pipeline for Release mode
+      - name: Create Build Environment (Release)
+        run: cmake -E make_directory build_release
+
+      - name: Configure CMake (Release)
+        working-directory: ${{github.workspace}}/build_release
+        run: >
+          cmake ${{github.workspace}}
+          -DCMAKE_CXX_COMPILER=${{matrix.compiler}}
+          -DCMAKE_BUILD_TYPE=Release
+          -DFICTION_ENABLE_UNITY_BUILD=ON
+          -DFICTION_ENABLE_PCH=ON
+          -DFICTION_CLI=ON
+          -DFICTION_TEST=ON
+          -DFICTION_BENCHMARK=OFF
+          -DFICTION_EXPERIMENTS=ON
+          -DFICTION_Z3=ON
+          -DFICTION_PROGRESS_BARS=OFF
+          -DFICTION_WARNINGS_AS_ERRORS=OFF
+          -DMOCKTURTLE_EXAMPLES=OFF
+
+      - name: Build (Release)
+        working-directory: ${{github.workspace}}/build_release
+        run: cmake --build . --config Release -j4 # all macOS runners provide at least 3 cores
+
+      - name: Test (Release)
+        working-directory: ${{github.workspace}}/build_release
+        run: ctest -C Release --verbose --output-on-failure --repeat until-pass:3 --parallel 4
+
+  # macOS 13 and macOS 14 job (shared matrix for these versions)
+  build_and_test_other_macos:
+    name: 🍎 ${{ matrix.os }} with ${{ matrix.compiler }} and ${{ matrix.architecture }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-13, macos-14]
+        compiler: [clang++, g++-12, g++-13, g++-14]
+        architecture: [x64, arm64]
+      fail-fast: false
+
+    steps:
+      - name: Clone Repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13.x"
+
       - name: Setup TBB
         run: brew install tbb
 
@@ -113,9 +190,8 @@ jobs:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
       # Build and test pipeline for Debug mode
-
       - name: Create Build Environment (Debug)
-        run: cmake -E make_directory ${{github.workspace}}/build_debug
+        run: cmake -E make_directory build_debug
 
       - name: Configure CMake (Debug)
         working-directory: ${{github.workspace}}/build_debug
@@ -140,12 +216,11 @@ jobs:
 
       - name: Test (Debug)
         working-directory: ${{github.workspace}}/build_debug
-        run: ctest -C Debug --verbose --output-on-failure --repeat until-pass:3 --parallel 4 --exclude-regex "quality"
+        run: ctest -C Debug --verbose --output-on-failure --repeat until-pass:3 --parallel 4
 
       # Build and test pipeline for Release mode
-
       - name: Create Build Environment (Release)
-        run: cmake -E make_directory ${{github.workspace}}/build_release
+        run: cmake -E make_directory build_release
 
       - name: Configure CMake (Release)
         working-directory: ${{github.workspace}}/build_release
