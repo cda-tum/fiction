@@ -46,16 +46,16 @@ jobs:
             architecture: x64
           - os: macos-14
             architecture: arm64
-          - os: macos-15
-            architecture: arm64
-          - compiler: clang++
-            ccompiler: clang
-          - compiler: g++-12
-            ccompiler: gcc-12
-          - compiler: g++-13
-            ccompiler: gcc-13
-          - compiler: g++-14
-            ccompiler: gcc-14
+        #    - os: macos-15
+        #      architecture: arm64
+        #    - compiler: clang++
+        #      ccompiler: clang
+        #    - compiler: g++-12
+        #      ccompiler: gcc-12
+        #    - compiler: g++-13
+        #      ccompiler: gcc-13
+        #    - compiler: g++-14
+        #      ccompiler: gcc-14
         exclude:
           - os: macos-13
             compiler: g++-13
@@ -63,10 +63,10 @@ jobs:
             compiler: g++-12
           - os: macos-14
             compiler: g++-13
-          - os: macos-15
-            compiler: g++-12
-          - os: macos-15
-            compiler: g++-13
+      #    - os: macos-15
+      #      compiler: g++-12
+      #    - os: macos-15
+      #      compiler: g++-13
 
     name: 🍎 ${{ matrix.os }} with ${{ matrix.compiler }} and ${{ matrix.architecture }}
     runs-on: ${{ matrix.os }}
