@@ -38,14 +38,14 @@ jobs:
   build_and_test:
     strategy:
       matrix:
-        os: [macos-13, macos-14, macos-15]
+        os: [macos-13, macos-14, macos-15-xlarge]
         compiler: [g++-12, g++-13, g++-14, clang++]
         include:
           - os: macos-13
             architecture: x64
           - os: macos-14
             architecture: arm64
-          - os: macos-15
+          - os: macos-15-xlarge
             architecture: arm64
           - compiler: clang++
             ccompiler: clang
@@ -63,9 +63,9 @@ jobs:
             compiler: g++-12
           - os: macos-14
             compiler: g++-13
-          - os: macos-15
+          - os: macos-15-xlarge
             compiler: g++-12
-          - os: macos-15
+          - os: macos-15-xlarge
             compiler: g++-13
 
     name: 🍎 ${{ matrix.os }} with ${{ matrix.compiler }}
