@@ -4,6 +4,7 @@
 
 #ifndef FICTION_CLUSTERCOMPLETE_HPP
 #define FICTION_CLUSTERCOMPLETE_HPP
+#include "../../../../../bindings/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp"
 
 #if (FICTION_ALGLIB_ENABLED)
 
@@ -26,6 +27,7 @@
 #include <memory>
 #include <mutex>
 #include <optional>
+#include <random>
 #include <thread>
 #include <unordered_map>
 #include <utility>
@@ -161,8 +163,10 @@ class clustercomplete_impl
 
             if (!gss_stats.top_cluster->charge_space.empty())
             {
+                // initialization
                 initialize_worker_queues(extract_work_from_top_cluster(gss_stats.top_cluster));
 
+                // set up threads
                 std::vector<std::thread> supporting_threads{};
                 supporting_threads.reserve(available_threads);
 
@@ -173,17 +177,16 @@ class clustercomplete_impl
                         {
                             worker& w = *workers.at(ix);
 
-                            while (
-                                const std::optional<std::reference_wrapper<const sidb_charge_space_composition>>& work =
-                                    w.obtain_work())
+                            // keep unfolding on this thread until no more work exists
+                            while (const std::optional<work_t>& work = w.obtain_work())
                             {
                                 unfold_composition(w, work->get());
                             }
                         });
                 }
 
-                while (const std::optional<std::reference_wrapper<const sidb_charge_space_composition>>& work =
-                           workers.front()->obtain_work())
+                // keep unfolding on the main thread until no more work exists
+                while (const std::optional<work_t>& work = workers.front()->obtain_work())
                 {
                     unfold_composition(*workers.front(), work->get());
                 }
@@ -217,7 +220,10 @@ class clustercomplete_impl
     /**
      * Number of available threads.
      */
-    const uint64_t                       available_threads{};
+    const uint64_t available_threads{};
+    /**
+     * Vector containing all workers.
+     */
     std::vector<std::unique_ptr<worker>> workers{};
     /**
      * Mutex to protect the simulation results.
@@ -422,11 +428,12 @@ class clustercomplete_impl
     }
     /**
      * Before the parent projector state may be specialized to a specific composition of its children, first the
-     * projections of the parent must be subtracted. They are later added back after all compositions were handled.
-     * Depending on the potential bound update operation, either the subtraction of addition step is performed.
+     * projections of the parent must be subtracted. The parent projector state is moved out and returned.
      *
-     * @param clustering_state todo
-     * @param parent_pst todo
+     * @param clustering_state The clustering state from which the parent projector state should be taken out.
+     * @param parent_pst_ix The index of the parent projector state in the given clustering state that should be taken
+     * out.
+     * @return The parent projector state that was taken out of the given clustering state.
      */
     static sidb_cluster_projector_state_ptr take_parent_out(sidb_clustering_state& clustering_state,
                                                             const uint64_t         parent_pst_ix) noexcept
@@ -446,12 +453,15 @@ class clustercomplete_impl
         return parent_pst;
     }
     /**
-     * Before the parent projector state may be specialized to a specific composition of its children, first the
-     * projections of the parent must be subtracted. They are later added back after all compositions were handled.
-     * Depending on the potential bound update operation, either the subtraction of addition step is performed.
+     * After all specializations have been tried, the clustering state needs to un-specialize in order for other
+     * specializations to take place later. This action undoes the action performed by the function above, adding the
+     * given parent projector state and putting it back at the given index.
      *
-     * @param clustering_state todo
-     * @param parent_pst todo
+     * @param clustering_state Clustering state to which the parent projector state should be added.
+     * @param parent_pst_ix The index in the vector of projector states in the given clustering state at which the added
+     * parent projector state should be placed.
+     * @param parent_pst The parent projector state that needs to be added back to the given clustering state at the
+     * given index.
      */
     static void add_parent(sidb_clustering_state& clustering_state, const uint64_t parent_pst_ix,
                            sidb_cluster_projector_state_ptr parent_pst) noexcept
@@ -465,7 +475,13 @@ class clustercomplete_impl
         // swap back
         std::swap(clustering_state.proj_states.back(), clustering_state.proj_states[parent_pst_ix]);
     }
-
+    /**
+     * A composition is added to the given clustering state, i.e., the projector states in the composition are added to
+     * the clustering state and the potential bounds store is updated accordingly.
+     *
+     * @param clustering_state Clustering state to which the given composition should be added.
+     * @param composition The composition that needs to be added to the given clustering state.
+     */
     static void add_composition(sidb_clustering_state&               clustering_state,
                                 const sidb_charge_space_composition& composition) noexcept
     {
@@ -478,6 +494,13 @@ class clustercomplete_impl
             clustering_state.proj_states.emplace_back(std::make_unique<sidb_cluster_projector_state>(child_pst));
         }
     }
+    /**
+     * A composition is removed from the given clustering state, i.e., the projector states in the compositions are
+     * removed from the clustering state and the potential bounds store is updated accordingly.
+     *
+     * @param clustering_state Clustering state from which the given composition should be removed.
+     * @param composition The composition that needs to be removed from the given clustering state.
+     */
     static void remove_composition(sidb_clustering_state&               clustering_state,
                                    const sidb_charge_space_composition& composition) noexcept
     {
@@ -489,27 +512,74 @@ class clustercomplete_impl
 
         clustering_state.pot_bounds -= composition.pot_bounds;
     }
-
+    /**
+     * A work item is a constant reference to SiDB charge space composition.
+     */
+    using work_t = std::reference_wrapper<const sidb_charge_space_composition>;
+    /**
+     * A worker queue contains a double-layer queue of work items, a clustering state for thieves that want to steal
+     * from the lowest layer of the queue, along with a queue of moles that tell how to transition this clustering state
+     * for thieves to facilitate stealing from one layer to the next.
+     */
     struct worker_queue
     {
+        /**
+         * A mole contains information on how to transition from one clustering state to a subsequent one.
+         */
         struct mole
         {
-            uint64_t                             parent_to_move_out_ix;
+            /**
+             * The index of the cluster in the clustering state that is the selected parent cluster to unfold next. It
+             * needs to be taken out in a clustering state transition.
+             */
+            uint64_t parent_to_move_out_ix;
+            /**
+             * The composition of the previously selected parent that fills the gap made by previously taking out this
+             * selected parent. In a clustering state transition, first the composition is added (filling the gap made
+             * by the previously selected parent), then the currently selected parent is taken out according to the
+             * `parent_to_move_out_ix` above. This way, a work item may be unfolded as it fills the gap made by taking
+             * out the currently selected parent. Thus, this work item becomes the `composition` value of the next mole
+             * in line.
+             */
             const sidb_charge_space_composition& composition;
         };
-
-        sidb_clustering_state             clustering_state_for_thieves;
-        std::deque<std::pair<mole, bool>> thief_informants{};
-
-        std::deque<std::deque<std::reference_wrapper<const sidb_charge_space_composition>>> queue;
-        uint64_t                                                                            work_in_queue_count{0};
-
+        /**
+         * The clustering state for thieves, which enables thieves to join in and steal work from the bottom of the
+         * queue, while the owner of this queue will take items from the top of the queue.
+         */
+        sidb_clustering_state clustering_state_for_thieves;
+        /**
+         * The queue of moles. For each transition between layers of the double layer work queue below, there is an
+         * associated mole which informs how the transition takes place. This way, the clustering state for thieves can
+         * be dynamically updated through forward-tracking (opposite of backtracking).
+         */
+        std::deque<mole> thief_informants{};
+        /**
+         * Double layer queue of work items. Each layer corresponds with a clustering state that needs to be used to
+         * unfold the items in that layer. The clustering states of subsequent layers are each one informant application
+         * apart.
+         */
+        std::deque<std::deque<work_t>> queue;
+        /**
+         * Counter to keep track of the total amount of work in the double-layer work queue.
+         */
+        uint64_t work_in_queue_count{0};
+        /**
+         * Mutex used to protect shared resources in this queue.
+         */
         std::mutex mutex_to_protect_this_queue;
-
+        /**
+         * Standard constructor.
+         *
+         * @param num_sidbs_in_layout The number of SiDBs in the layout to simulate. Required for initializing
+         * clustering states.
+         */
         explicit worker_queue(const uint64_t num_sidbs_in_layout) noexcept :
                 clustering_state_for_thieves{num_sidbs_in_layout}
         {}
-
+        /**
+         * Initializes this queue with stolen work. The work itself is kept on the stack.
+         */
         void initialize_queue_after_stealing(const sidb_clustering_state& clustering_state) noexcept
         {
             const std::lock_guard lock(mutex_to_protect_this_queue);
@@ -523,52 +593,46 @@ class clustercomplete_impl
 
             work_in_queue_count = 0;
         }
-
-        std::optional<std::pair<mole, bool>> get_informant() noexcept
-        {
-            if (thief_informants.empty())
-            {
-                return std::nullopt;
-            }
-
-            std::pair<mole, bool> informant = std::move(thief_informants.front());
-            thief_informants.pop_front();
-
-            return std::optional{std::move(informant)};
-        }
-
+        /**
+         * A mole is popped from the queue which says which composition to add to the clustering state for thieves, and
+         * which cluster is selected for the subsequent unfolding, which should then be taken out.
+         */
         void apply_informant() noexcept
         {
-            if (std::optional<std::pair<mole, bool>> informant = get_informant();
-                informant.has_value() && informant->first.composition.proj_states.size() > 1)
-            {
-                add_composition(clustering_state_for_thieves, informant->first.composition);
+            mole informant = std::move(thief_informants.front());
+            thief_informants.pop_front();
 
-                take_parent_out(clustering_state_for_thieves, informant->first.parent_to_move_out_ix);
-            }
+            add_composition(clustering_state_for_thieves, informant.composition);
+
+            take_parent_out(clustering_state_for_thieves, informant.parent_to_move_out_ix);
         }
-
-        bool get_last_composition() noexcept
+        /**
+         * Called during backtracking to descend to the previous layer of the queue, along with popping the unnecessary
+         * mole.
+         */
+        void pop_last_layer() noexcept
         {
             const std::lock_guard lock{mutex_to_protect_this_queue};
 
             if (thief_informants.empty())
             {
-                return false;
+                return;
             }
 
-            if (queue.size() > 1 && queue.front().empty())
-            {
-                queue.pop_front();
-            }
+            queue.pop_front();
 
             thief_informants.pop_back();
-
-            return true;
         }
-
-        void add_to_queue(const std::vector<sidb_charge_space_composition>& compositions,
-                          const typename worker_queue::mole&                informant) noexcept
+        /**
+         * Adds a vector of work items to the queue, along with adding an informant that allows for a dynamic update of
+         * the clustering state for thieves to assume one of the work items that are added to the queue.
+         *
+         * @param compositions Vector of work items.
+         * @param informant A mole providing the required information to update the clustering state for thieves to
+         * enable forward-tracking. The mole says which composition to add to the clustering state, and which cluster is
+         * selected for the subsequent unfolding.
+         */
+        void add_to_queue(const std::vector<sidb_charge_space_composition>& compositions, mole&& informant) noexcept
         {
             const std::lock_guard lock{mutex_to_protect_this_queue};
 
@@ -583,104 +647,121 @@ class clustercomplete_impl
             work_in_queue_count += compositions.size() - 1;
 
             // add informant
-            thief_informants.emplace_back(std::move(informant), thief_informants.empty());
+            thief_informants.emplace_back(std::move(informant));
 
-            assert(w.work_stealing_queue.queue.empty() ||
-                   w.work_stealing_queue.queue.size() == w.work_stealing_queue.thief_informants.size() + 1);
+            assert(queue.empty() || queue.size() == thief_informants.size() + 1);
         }
-
-        // work, need to backtrack
-        template <bool in_a_backtracking_flow>
-        std::pair<std::optional<std::reference_wrapper<const sidb_charge_space_composition>>, bool>
-        get_from_this_queue() noexcept
+        /**
+         * Own work is obtained in a blocking fashion. If there is no more work in the queue, `false` is returned to
+         * indicate no backtracking is necessary, since there is no follow-up work item to backtrack towards.
+         *
+         * @return Either work if there is work left to do on the current level---i.e., for the current clustering state
+         * of the worker that calls this function---or `true` if this not the case and backtracking is required in order
+         * to do more work that is in this queue, or `false` when there is no more such work and thus backtracking can
+         * be skipped.
+         */
+        std::variant<work_t, bool> get_from_this_queue() noexcept
         {
             const std::lock_guard lock{mutex_to_protect_this_queue};
 
             if (work_in_queue_count == 0)
             {
-                return {std::nullopt, false};
+                // no more work, no need to backtrack
+                return false;
             }
 
             if (queue.front().empty())
             {
-                if constexpr (!in_a_backtracking_flow)
-                {
-                    if (queue.size() == 1)
-                    {
-                        queue.pop_front();
-                    }
-                }
-
-                return {std::nullopt, true};
+                // there is work, but not on this level anymore so backtracking is required
+                return true;
             }
 
             // obtaining own work goes from the front
-            std::reference_wrapper<const sidb_charge_space_composition> work = queue.front().front();
+            work_t work = queue.front().front();
             queue.front().pop_front();
 
             --work_in_queue_count;
 
-            if (queue.front().empty())
+            return work;
+        }
+        /**
+         * Attempt to steal work from this queue in a non-blocking fashion. When a lock is acquired, forward-tracking is
+         * applied to dynamically update the clustering state for thieves to where it can be copied for a thief that
+         * steals the last work item in this queue.
+         *
+         * @return Either `true` when the queue is locked, `false` when there is no work in this queue, or a pair of a
+         * copy of the updated (forward-tracked) clustering state for thieves along with the corresponding work item.
+         */
+        std::variant<bool, std::pair<sidb_clustering_state, work_t>> try_steal_from_this_queue() noexcept
+        {
+            const std::unique_lock lock{mutex_to_protect_this_queue, std::try_to_lock};
+
+            if (!lock.owns_lock())
             {
-                return {std::optional{work}, true};
+                // non-blocking lock attempt failed
+                return true;
             }
 
-            return {std::optional{work}, false};
-        }
+            // acquired lock
 
-        void clean_queue() noexcept
-        {
+            if (work_in_queue_count == 0)
+            {
+                // nothing to steal
+                return false;
+            }
+
+            // apply forward-tracking (opposite of backtracking) to update the clustering state for thieves such that it
+            // enables the next available work to be stolen
             while (!thief_informants.empty() && queue.back().empty())
             {
                 queue.pop_back();
 
                 apply_informant();
             }
-        }
-
-        // Attempt to steal work in non-blocking fashion
-        std::variant<bool,
-                     std::pair<sidb_clustering_state, std::reference_wrapper<const sidb_charge_space_composition>>>
-        try_steal_from_this_queue() noexcept
-        {
-            const std::unique_lock lock{mutex_to_protect_this_queue, std::try_to_lock};
-
-            if (!lock.owns_lock())  // Non-blocking lock attempt failed
-            {
-                return true;
-            }
-
-            if (queue.empty())
-            {
-                return false;
-            }
-
-            clean_queue();
-
-            if (queue.empty() || queue.back().empty())
-            {
-                return false;
-            }
 
             // stealing goes from the back
-            const std::reference_wrapper<const sidb_charge_space_composition>& work = queue.back().back();
+            work_t work = queue.back().back();
             queue.back().pop_back();
 
             --work_in_queue_count;
 
-            sidb_clustering_state stolen_clustering_state{clustering_state_for_thieves};  // make copy
+            // make copy
+            sidb_clustering_state stolen_clustering_state{clustering_state_for_thieves};
 
             return std::pair{std::move(stolen_clustering_state), work};
         }
     };
-
+    /**
+     * Each thread has a unique worker object with its own dynamic state and queue of work that it generated. When it
+     * has no work of its own, it will steal work from another worker.
+     */
     struct worker
     {
-        const uint64_t                              index;
-        worker_queue                                work_stealing_queue;
-        sidb_clustering_state                       clustering_state;
+        /**
+         * Worker index in the vector of all workers.
+         */
+        const uint64_t index;
+        /**
+         * This worker's queue where work can be obtained from either by this worker or by others (work stealing).
+         */
+        worker_queue work_stealing_queue;
+        /**
+         * This worker's current state, consisting of a clustering where each cluster has an assigned multiset charge
+         * configuration, and a store containing lower and upper bounds on the local potential for each SiDB under this
+         * multiset charge configuration assignment.
+         */
+        sidb_clustering_state clustering_state;
+        /**
+         * The vector of all workers where this worker is at `ix`.
+         */
         const std::vector<std::unique_ptr<worker>>& all_workers;
-
+        /**
+         * Standard constructor.
+         *
+         * @param ix Worker index in the vector of all workers.
+         * @param num_sidbs The number of SiDBs in the layout to simulate.
+         * @param workers The vector of all workers where this worker is at `ix`.
+         */
         explicit worker(const uint64_t ix, const uint64_t num_sidbs,
                         const std::vector<std::unique_ptr<worker>>& workers) noexcept :
                 index{ix},
@@ -688,16 +769,21 @@ class clustercomplete_impl
                 clustering_state{num_sidbs},
                 all_workers{workers}
         {}
-
-        // nullopt -> terminate thread (todo: use global termination synchronization)
-        std::optional<std::reference_wrapper<const sidb_charge_space_composition>> obtain_work() noexcept
+        /**
+         * Obtains work for this worker, either from their own queue, or else from another worker's queue (work
+         * stealing).
+         *
+         * @return Either nothing, when no work was found and this thread can thus terminate, or that was obtained.
+         */
+        std::optional<work_t> obtain_work() noexcept
         {
-            if (const std::optional<std::reference_wrapper<const sidb_charge_space_composition>> work =
-                    work_stealing_queue.template get_from_this_queue<true>().first)
+            if (const std::variant<work_t, bool>& work = work_stealing_queue.get_from_this_queue();
+                std::holds_alternative<work_t>(work))
             {
-                return work;
+                return std::get<work_t>(work);
             }
 
+            // no own work found, look for work until all threads have no work in their queue and are not busy
             bool encountered_locked_queue = true;
 
             while (encountered_locked_queue)
@@ -712,28 +798,23 @@ class clustercomplete_impl
                         continue;
                     }
 
-                    std::variant<bool, std::pair<sidb_clustering_state,
-                                                 std::reference_wrapper<const sidb_charge_space_composition>>>
-                        work = all_workers.at(i)->work_stealing_queue.try_steal_from_this_queue();
+                    std::variant<bool, std::pair<sidb_clustering_state, work_t>> work =
+                        all_workers.at(i)->work_stealing_queue.try_steal_from_this_queue();
 
                     if (!std::holds_alternative<bool>(work))
                     {
-                        clustering_state = std::move(
-                            std::get<std::pair<sidb_clustering_state,
-                                               std::reference_wrapper<const sidb_charge_space_composition>>>(work)
-                                .first);
+                        clustering_state = std::move(std::get<std::pair<sidb_clustering_state, work_t>>(work).first);
 
                         work_stealing_queue.initialize_queue_after_stealing(clustering_state);
 
-                        return std::get<std::pair<sidb_clustering_state,
-                                                  std::reference_wrapper<const sidb_charge_space_composition>>>(work)
-                            .second;
+                        return std::get<std::pair<sidb_clustering_state, work_t>>(work).second;
                     }
 
                     encountered_locked_queue |= std::get<bool>(work);
                 }
             }
 
+            // no more work -> terminate thread
             return std::nullopt;
         }
     };
@@ -767,11 +848,16 @@ class clustercomplete_impl
 
         return cds;
     }
-
-    static std::vector<std::reference_wrapper<const sidb_charge_space_composition>>
-    extract_work_from_top_cluster(const sidb_cluster_ptr& top_cluster) noexcept
+    /**
+     * Work in the form of compositions of charge space elements of the top cluster are extracted into a vector and
+     * shuffled at random before being returned.
+     *
+     * @param top_cluster The top cluster that is returned by running the *Ground State Space* construction.
+     * @return A vector containing all work contained by the top cluster in random order.
+     */
+    static std::vector<work_t> extract_work_from_top_cluster(const sidb_cluster_ptr& top_cluster) noexcept
     {
-        std::vector<std::reference_wrapper<const sidb_charge_space_composition>> work_from_top_cluster{};
+        std::vector<work_t> work_from_top_cluster{};
 
         for (const sidb_cluster_charge_state& ccs : top_cluster->charge_space)
         {
@@ -781,7 +867,8 @@ class clustercomplete_impl
             }
         }
 
-        std::shuffle(work_from_top_cluster.begin(), work_from_top_cluster.end(), std::mt19937_64{});
+        std::shuffle(work_from_top_cluster.begin(), work_from_top_cluster.end(),
+                     std::mt19937_64{std::random_device{}()});
 
         return work_from_top_cluster;
     }
@@ -791,8 +878,7 @@ class clustercomplete_impl
      * @param work_from_top_cluster A vector containing all compositions of all charge space elements of the top
      * cluster.
      */
-    void initialize_worker_queues(
-        const std::vector<std::reference_wrapper<const sidb_charge_space_composition>>& work_from_top_cluster) noexcept
+    void initialize_worker_queues(const std::vector<work_t>& work_from_top_cluster) noexcept
     {
         const uint64_t num_threads_with_initial_work = std::min(available_threads, work_from_top_cluster.size());
 
@@ -822,12 +908,13 @@ class clustercomplete_impl
 
             const auto& [i_start, i_end] = ranges.at(i);
 
+            // fill queue with work
             for (uint64_t work_ix = i_start; work_ix <= i_end; ++work_ix)
             {
                 w->work_stealing_queue.queue.front().emplace_front(work_from_top_cluster.at(work_ix));
             }
 
-            w->work_stealing_queue.work_in_queue_count = end - start + 1;
+            w->work_stealing_queue.work_in_queue_count = w->work_stealing_queue.queue.front().size();
 
             workers.emplace_back(std::move(w));
         }
@@ -894,7 +981,7 @@ class clustercomplete_impl
         // apply max_pst back
         add_parent(w.clustering_state, max_pst_ix, std::move(max_pst));
 
-        w.work_stealing_queue.get_last_composition();
+        w.work_stealing_queue.pop_last_layer();
 
         return true;
     }
@@ -913,31 +1000,28 @@ class clustercomplete_impl
      * not required.
      */
     bool unfold_all_compositions(worker& w, const std::vector<sidb_charge_space_composition>& compositions,
-                                 const typename worker_queue::mole& informant) noexcept
+                                 typename worker_queue::mole&& informant) noexcept
     {
-        w.work_stealing_queue.add_to_queue(compositions, informant);
+        w.work_stealing_queue.add_to_queue(compositions, std::move(informant));
 
         // unfold first composition
         unfold_composition(w, compositions.front());
 
         // unfold other compositions while there are ones left on this level to unfold
-        std::pair<std::optional<std::reference_wrapper<const sidb_charge_space_composition>>, bool> work;
+        std::variant<work_t, bool> work = w.work_stealing_queue.get_from_this_queue();
 
-        do {
-            if (work = w.work_stealing_queue.template get_from_this_queue<false>(); work.first.has_value())
+        while (std::holds_alternative<work_t>(work))
+        {
+            if (!unfold_composition(w, std::get<work_t>(work).get()))
             {
-                if (!unfold_composition(w, work.first->get()))
-                {
-                    return false;
-                }
-            }
-            else if (!work.second)  // false here iff queue is completely empty; no need to backtrack
-            {
+                // continue walking the back up the stack without backtracking
                 return false;
             }
-        } while (!work.second);
 
-        return true;
+            work = w.work_stealing_queue.get_from_this_queue();
+        }
+
+        return std::get<bool>(work);
     }
     /**
      * The clustering state of the current worker is specialized according to the given composition preceding the
