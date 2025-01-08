@@ -4263,7 +4263,10 @@ Parameter ``w``:
     associated clusters form a clustering in the cluster hierarchy.
 
 Parameter ``composition``:
-    todo
+    To enable dynamic updates of the clustering states that thieves
+    can assume, the composition that the current worker's clustering
+    state is specialized to is to be stored in the worker's queue if
+    further compositions are to be unfolded.
 
 Returns:
     `false` if and only if queue of this worker is found to be
