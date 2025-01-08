@@ -4208,7 +4208,17 @@ Returns:
 
 static const char *__doc_fiction_detail_clustercomplete_impl = R"doc()doc";
 
-static const char *__doc_fiction_detail_clustercomplete_impl_add_composition = R"doc()doc";
+static const char *__doc_fiction_detail_clustercomplete_impl_add_composition =
+R"doc(A composition is added to the given clustering state, i.e., the
+projector states in the composition are added to the clustering state
+and the potential bounds store is updated accordingly.
+
+Parameter ``clustering_state``:
+    Clustering state to which the given composition should be added.
+
+Parameter ``composition``:
+    The composition that needs to be added to the given clustering
+    state.)doc";
 
 static const char *__doc_fiction_detail_clustercomplete_impl_add_if_configuration_stability_is_met =
 R"doc(This function handles performs the last analysis step before
@@ -4223,17 +4233,24 @@ Parameter ``clustering_state``:
     that conforms to the *population stability* criterion.)doc";
 
 static const char *__doc_fiction_detail_clustercomplete_impl_add_parent =
-R"doc(Before the parent projector state may be specialized to a specific
-composition of its children, first the projections of the parent must
-be subtracted. They are later added back after all compositions were
-handled. Depending on the potential bound update operation, either the
-subtraction of addition step is performed.
+R"doc(After all specializations have been tried, the clustering state needs
+to un-specialize in order for other specializations to take place
+later. This action undoes the action performed by the function above,
+adding the given parent projector state and putting it back at the
+given index.
 
 Parameter ``clustering_state``:
-    todo
+    Clustering state to which the parent projector state should be
+    added.
+
+Parameter ``parent_pst_ix``:
+    The index in the vector of projector states in the given
+    clustering state at which the added parent projector state should
+    be placed.
 
 Parameter ``parent_pst``:
-    todo)doc";
+    The parent projector state that needs to be added back to the
+    given clustering state at the given index.)doc";
 
 static const char *__doc_fiction_detail_clustercomplete_impl_add_physically_valid_charge_configurations =
 R"doc(This recursive function is the heart of the *ClusterComplete*
@@ -4288,7 +4305,18 @@ Parameter ``params``:
     Parameter required for both the invocation of *Ground State
     Space*, and the simulation following.)doc";
 
-static const char *__doc_fiction_detail_clustercomplete_impl_extract_work_from_top_cluster = R"doc()doc";
+static const char *__doc_fiction_detail_clustercomplete_impl_extract_work_from_top_cluster =
+R"doc(Work in the form of compositions of charge space elements of the top
+cluster are extracted into a vector and shuffled at random before
+being returned.
+
+Parameter ``top_cluster``:
+    The top cluster that is returned by running the *Ground State
+    Space* construction.
+
+Returns:
+    A vector containing all work contained by the top cluster in
+    random order.)doc";
 
 static const char *__doc_fiction_detail_clustercomplete_impl_fail_onto_negative_charge =
 R"doc(Returns `true` if and only if the given potential bound closes out
@@ -4386,7 +4414,18 @@ static const char *__doc_fiction_detail_clustercomplete_impl_mutex_to_protect_th
 
 static const char *__doc_fiction_detail_clustercomplete_impl_real_placed_defects = R"doc(Atomic defects that are placed in the layout.)doc";
 
-static const char *__doc_fiction_detail_clustercomplete_impl_remove_composition = R"doc()doc";
+static const char *__doc_fiction_detail_clustercomplete_impl_remove_composition =
+R"doc(A composition is removed from the given clustering state, i.e., the
+projector states in the compositions are removed from the clustering
+state and the potential bounds store is updated accordingly.
+
+Parameter ``clustering_state``:
+    Clustering state from which the given composition should be
+    removed.
+
+Parameter ``composition``:
+    The composition that needs to be removed from the given clustering
+    state.)doc";
 
 static const char *__doc_fiction_detail_clustercomplete_impl_result = R"doc(Simulation results.)doc";
 
@@ -4406,15 +4445,19 @@ Returns:
 static const char *__doc_fiction_detail_clustercomplete_impl_take_parent_out =
 R"doc(Before the parent projector state may be specialized to a specific
 composition of its children, first the projections of the parent must
-be subtracted. They are later added back after all compositions were
-handled. Depending on the potential bound update operation, either the
-subtraction of addition step is performed.
+be subtracted. The parent projector state is moved out and returned.
 
 Parameter ``clustering_state``:
-    todo
+    The clustering state from which the parent projector state should
+    be taken out.
 
-Parameter ``parent_pst``:
-    todo)doc";
+Parameter ``parent_pst_ix``:
+    The index of the parent projector state in the given clustering
+    state that should be taken out.
+
+Returns:
+    The parent projector state that was taken out of the given
+    clustering state.)doc";
 
 static const char *__doc_fiction_detail_clustercomplete_impl_ub_fail_onto_neutral_charge =
 R"doc(Returns `true` if and only if the given potential bound closes out
@@ -4465,49 +4508,150 @@ static const char *__doc_fiction_detail_clustercomplete_impl_worker = R"doc(Forw
 
 static const char *__doc_fiction_detail_clustercomplete_impl_worker_2 = R"doc(Forward declaration of the worker struct.)doc";
 
-static const char *__doc_fiction_detail_clustercomplete_impl_worker_all_workers = R"doc()doc";
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_all_workers = R"doc(The vector of all workers where this worker is at `ix`.)doc";
 
-static const char *__doc_fiction_detail_clustercomplete_impl_worker_clustering_state = R"doc()doc";
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_clustering_state =
+R"doc(This worker's current state, consisting of a clustering where each
+cluster has an assigned multiset charge configuration, and a store
+containing lower and upper bounds on the local potential for each SiDB
+under this multiset charge configuration assignment.)doc";
 
-static const char *__doc_fiction_detail_clustercomplete_impl_worker_index = R"doc()doc";
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_index = R"doc(Worker index in the vector of all workers.)doc";
 
-static const char *__doc_fiction_detail_clustercomplete_impl_worker_obtain_work = R"doc()doc";
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_obtain_work =
+R"doc(Obtains work for this worker, either from their own queue, or else
+from another worker's queue (work stealing).
 
-static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue = R"doc()doc";
+Returns:
+    Either nothing, when no work was found and this thread can thus
+    terminate, or that was obtained.)doc";
 
-static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_add_to_queue = R"doc()doc";
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue =
+R"doc(A worker queue contains a double-layer queue of work items, a
+clustering state for thieves that want to steal from the lowest layer
+of the queue, along with a queue of moles that tell how to transition
+this clustering state for thieves to facilitate stealing from one
+layer to the next.)doc";
 
-static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_apply_informant = R"doc()doc";
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_add_to_queue =
+R"doc(Adds a vector of work items to the queue, along with adding an
+informant that allows for a dynamic update of the clustering state for
+thieves to assume one of the work items that are added to the queue.
 
-static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_clustering_state_for_thieves = R"doc()doc";
+Parameter ``compositions``:
+    Vector of work items.
 
-static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_get_informant = R"doc()doc";
+Parameter ``informant``:
+    A mole providing the required information to update the clustering
+    state for thieves to enable forward-tracking. The mole says which
+    composition to add to the clustering state, and which cluster is
+    selected for the subsequent unfolding.)doc";
 
-static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_get_last_composition = R"doc()doc";
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_apply_informant =
+R"doc(A mole is popped from the queue which says which composition to add to
+the clustering state for thieves, and which cluster is selected for
+the subsequent unfolding, which should then be taken out.)doc";
 
-static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_initialize_queue_after_stealing = R"doc()doc";
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_clustering_state_for_thieves =
+R"doc(The clustering state for thieves, which enables thieves to join in and
+steal work from the bottom of the queue, while the owner of this queue
+will take items from the top of the queue.)doc";
 
-static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_mole = R"doc()doc";
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_get_from_this_queue =
+R"doc(Own work is obtained in a blocking fashion. If there is no more work
+in the queue, `false` is returned to indicate no backtracking is
+necessary, since there is no follow-up work item to backtrack towards.
 
-static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_mole_composition = R"doc()doc";
+Returns:
+    Either work if there is work left to do on the current level---
+    i.e., for the current clustering state of the worker that calls
+    this function---or `true` if this not the case and backtracking is
+    required in order to do more work that is in this queue, or
+    `false` when there is no more such work and thus backtracking can
+    be skipped.)doc";
 
-static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_mole_parent_to_move_out_ix = R"doc()doc";
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_initialize_queue_after_stealing =
+R"doc(Initializes this queue with stolen work. The work itself is kept on
+the stack.)doc";
 
-static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_mutex_to_protect_this_queue = R"doc()doc";
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_mole =
+R"doc(A mole contains information on how to transition from one clustering
+state to a subsequent one.)doc";
 
-static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_queue = R"doc()doc";
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_mole_composition =
+R"doc(The composition of the previously selected parent that fills the gap
+made by previously taking out this selected parent. In a clustering
+state transition, first the composition is added (filling the gap made
+by the previously selected parent), then the currently selected parent
+is taken out according to the `parent_to_move_out_ix` above. This way,
+a work item may be unfolded as it fills the gap made by taking out the
+currently selected parent. Thus, this work item becomes the
+`composition` value of the next mole in line.)doc";
 
-static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_thief_informants = R"doc()doc";
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_mole_parent_to_move_out_ix =
+R"doc(The index of the cluster in the clustering state that is the selected
+parent cluster to unfold next. It needs to be taken out in a
+clustering state transition.)doc";
 
-static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_work_in_queue_count = R"doc()doc";
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_mutex_to_protect_this_queue = R"doc(Mutex used to protect shared resources in this queue.)doc";
 
-static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_worker_queue = R"doc()doc";
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_pop_last_layer =
+R"doc(Called during backtracking to descend to the previous layer of the
+queue, along with popping the unnecessary mole.)doc";
 
-static const char *__doc_fiction_detail_clustercomplete_impl_worker_work_stealing_queue = R"doc()doc";
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_queue =
+R"doc(Double layer queue of work items. Each layer corresponds with a
+clustering state that needs to be used to unfold the items in that
+layer. The clustering states of subsequent layers are each one
+informant application apart.)doc";
 
-static const char *__doc_fiction_detail_clustercomplete_impl_worker_worker = R"doc()doc";
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_thief_informants =
+R"doc(The queue of moles. For each transition between layers of the double
+layer work queue below, there is an associated mole which informs how
+the transition takes place. This way, the clustering state for thieves
+can be dynamically updated through forward-tracking (opposite of
+backtracking).)doc";
 
-static const char *__doc_fiction_detail_clustercomplete_impl_workers = R"doc()doc";
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_try_steal_from_this_queue =
+R"doc(Attempt to steal work from this queue in a non-blocking fashion. When
+a lock is acquired, forward-tracking is applied to dynamically update
+the clustering state for thieves to where it can be copied for a thief
+that steals the last work item in this queue.
+
+Returns:
+    Either `true` when the queue is locked, `false` when there is no
+    work in this queue, or a pair of a copy of the updated (forward-
+    tracked) clustering state for thieves along with the corresponding
+    work item.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_work_in_queue_count =
+R"doc(Counter to keep track of the total amount of work in the double-layer
+work queue.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_worker_queue =
+R"doc(Standard constructor.
+
+Parameter ``num_sidbs_in_layout``:
+    The number of SiDBs in the layout to simulate. Required for
+    initializing clustering states.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_work_stealing_queue =
+R"doc(This worker's queue where work can be obtained from either by this
+worker or by others (work stealing).)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_worker =
+R"doc(Standard constructor.
+
+Parameter ``ix``:
+    Worker index in the vector of all workers.
+
+Parameter ``num_sidbs``:
+    The number of SiDBs in the layout to simulate.
+
+Parameter ``workers``:
+    The vector of all workers where this worker is at `ix`.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_workers = R"doc(Vector containing all workers.)doc";
 
 static const char *__doc_fiction_detail_color_routing_impl = R"doc()doc";
 
