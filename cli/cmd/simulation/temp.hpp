@@ -144,9 +144,9 @@ class temp_command : public command
                         return;
                     }
 
-                    params.engine = sim_engine.value();
+                    params.operational_params.sim_engine = sim_engine.value();
 
-                    params.simulation_parameters = physical_params;
+                    params.operational_params.simulation_parameters = physical_params;
 
                     if (is_set("gate_based"))
                     {

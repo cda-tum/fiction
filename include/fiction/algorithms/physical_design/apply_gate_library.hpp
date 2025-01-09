@@ -5,19 +5,15 @@
 #ifndef FICTION_APPLY_GATE_LIBRARY_HPP
 #define FICTION_APPLY_GATE_LIBRARY_HPP
 
-#include "fiction/technology/fcn_gate_library.hpp"
-#include "fiction/technology/inml_topolinano_library.hpp"
-#include "fiction/technology/qca_one_library.hpp"
-#include "fiction/technology/sidb_bestagon_library.hpp"
 #include "fiction/technology/sidb_on_the_fly_gate_library.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/layout_utils.hpp"
 #include "fiction/utils/name_utils.hpp"
 
-#include <cstdint>
-
 #if (PROGRESS_BARS)
 #include <mockturtle/utils/progress_bar.hpp>
+
+#include <cstdint>
 #endif
 #include <mockturtle/traits.hpp>
 
@@ -29,6 +25,7 @@
 #pragma GCC diagnostic ignored "-Wuseless-cast"
 #endif
 #pragma GCC diagnostic ignored "-Wconversion"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
 
 namespace fiction
 {
@@ -121,7 +118,7 @@ class apply_gate_library_impl
      * gate-level layout and maps gates to cell implementations based on their corresponding positions and types.
      * Optionally, it performs post-layout optimization and sets the layout name if certain conditions are met.
      *
-     * @tparam Type of the Parameters used for the SiDB on-the-fly gate library.
+     * @tparam Params Type of the Parameters used for the SiDB on-the-fly gate library.
      * @param params Parameters used for the SiDB on-the-fly gate library.
      * @return A `CellLyt` object representing the generated cell layout.
      */

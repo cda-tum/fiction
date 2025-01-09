@@ -20,6 +20,7 @@
 #include <fstream>
 #include <ostream>
 #include <sstream>
+#include <string>
 #include <string_view>
 #include <unordered_map>
 #include <vector>
@@ -254,11 +255,39 @@ class write_sqd_layout_impl
                 if constexpr (has_sidb_technology_v<Lyt>)
                 {
                     const auto type = this->lyt.get_cell_type(c);
-                    const auto type_str =
-                        type == sidb_technology::cell_type::NORMAL ? "" :
-                        type == sidb_technology::cell_type::INPUT  ? fmt::format(siqad::DOT_TYPE, "input") :
-                        type == sidb_technology::cell_type::OUTPUT ? fmt::format(siqad::DOT_TYPE, "output") :
-                                                                     "";
+
+                    std::string type_str;
+
+                    switch (type)
+                    {
+                        case (sidb_technology::cell_type::NORMAL):
+                        {
+                            type_str = "";
+                            break;
+                        }
+                        case (sidb_technology::cell_type::INPUT):
+                        {
+                            type_str = fmt::format(siqad::DOT_TYPE, "input");
+                            break;
+                        }
+                        case (sidb_technology::cell_type::OUTPUT):
+                        {
+                            type_str = fmt::format(siqad::DOT_TYPE, "output");
+                            break;
+                        }
+                        case (sidb_technology::cell_type::LOGIC):
+                        {
+                            type_str = fmt::format(siqad::DOT_TYPE, "logic");
+                            break;
+                        }
+                            // LCOV_EXCL_START
+                        case (sidb_technology::cell_type::EMPTY):
+                        {
+                            // this case can never happen; it exists to comfort the compilers
+                            break;
+                        }
+                            // LCOV_EXCL_STOP
+                    }
 
                     if constexpr (has_siqad_coord_v<Lyt>)
                     {
@@ -280,10 +309,27 @@ class write_sqd_layout_impl
                 {
                     const auto type = this->lyt.get_cell_type(c);
 
-                    const auto color = qca_technology::is_input_cell(type)    ? siqad::INPUT_COLOR :
-                                       qca_technology::is_output_cell(type)   ? siqad::OUTPUT_COLOR :
-                                       qca_technology::is_constant_cell(type) ? siqad::CONST_COLOR :
-                                                                                siqad::NORMAL_COLOR;
+                    const auto* color = siqad::NORMAL_COLOR;
+
+                    switch (type)
+                    {
+                        case (qca_technology::cell_type::INPUT):
+                        {
+                            color = siqad::INPUT_COLOR;
+                            break;
+                        }
+                        case (qca_technology::cell_type::OUTPUT):
+                        {
+                            color = siqad::OUTPUT_COLOR;
+                            break;
+                        }
+                        case (qca_technology::cell_type::CONST_0):
+                        case (qca_technology::cell_type::CONST_1):
+                        {
+                            color = siqad::CONST_COLOR;
+                            break;
+                        }
+                    }
 
                     if (!qca_technology::is_const_1_cell(type))
                     {

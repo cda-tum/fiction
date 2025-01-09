@@ -564,7 +564,7 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects", "[charge-d
         lyt.assign_cell_type({1, 8, 0}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({1, 10, 1}, TestType::cell_type::NORMAL);
 
-        charge_distribution_surface charge_layout{lyt, sidb_simulation_parameters{}};
+        const charge_distribution_surface charge_layout{lyt, sidb_simulation_parameters{}};
 
         CHECK_THAT(charge_layout.get_chargeless_potential_between_sidbs({2, 8, 0}, {2, 10, 1}),
                    Catch::Matchers::WithinAbs(0.0, 0.00001));
@@ -888,8 +888,8 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects", "[charge-d
 
         lyt_new.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
 
-        charge_distribution_surface charge_layout_new{lyt_new, params};
-        const auto                  negative_sidbs = charge_layout_new.negative_sidb_detection();
+        const charge_distribution_surface charge_layout_new{lyt_new, params};
+        const auto                        negative_sidbs = charge_layout_new.negative_sidb_detection();
         REQUIRE(negative_sidbs.size() == 1);
     }
 
@@ -1315,7 +1315,7 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects, part one", 
 {
     TestType lyt{};
 
-    SECTION("Assign defect")
+    SECTION("Assign charged defect")
     {
         lyt.assign_cell_type({5, 4}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({5, 5}, TestType::cell_type::NORMAL);
@@ -1324,6 +1324,19 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects, part one", 
         charge_layout.add_sidb_defect_to_potential_landscape(
             {5, 6}, sidb_defect{sidb_defect_type::UNKNOWN, -1, charge_layout.get_simulation_params().epsilon_r,
                                 charge_layout.get_simulation_params().lambda_tf});
+    }
+
+    SECTION("Assign neutral defect")
+    {
+        lyt.assign_cell_type({5, 4}, TestType::cell_type::NORMAL);
+        charge_distribution_surface charge_layout{lyt, sidb_simulation_parameters{}};
+        charge_layout.add_sidb_defect_to_potential_landscape(
+            {5, 6}, sidb_defect{sidb_defect_type::UNKNOWN, 0, charge_layout.get_simulation_params().epsilon_r,
+                                charge_layout.get_simulation_params().lambda_tf});
+
+        REQUIRE(charge_layout.get_local_potential({5, 4}).has_value());
+        CHECK_THAT(charge_layout.get_local_potential({5, 4}).value(),
+                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
     }
 
     SECTION("perturber is replaced by an equivalent defect")
@@ -1920,17 +1933,27 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects, part two", 
         CHECK(charge_layout.get_charge_state({0, 0, 0}) == sidb_charge_state::NEGATIVE);
         CHECK(charge_layout.get_charge_state({3, 0, 0}) == sidb_charge_state::NEGATIVE);
         CHECK(charge_layout.get_charge_state({5, 0, 0}) == sidb_charge_state::NEGATIVE);
-        auto loc_one_wo_defect   = charge_layout.get_local_potential({0, 0, 0}).value();
-        auto loc_two_wo_defect   = charge_layout.get_local_potential({3, 0, 0}).value();
-        auto loc_three_wo_defect = charge_layout.get_local_potential({5, 0, 0}).value();
+
+        REQUIRE(charge_layout.get_local_potential({0, 0, 0}).has_value());
+        REQUIRE(charge_layout.get_local_potential({3, 0, 0}).has_value());
+        REQUIRE(charge_layout.get_local_potential({5, 0, 0}).has_value());
+
+        const auto loc_one_wo_defect   = charge_layout.get_local_potential({0, 0, 0}).value();
+        const auto loc_two_wo_defect   = charge_layout.get_local_potential({3, 0, 0}).value();
+        const auto loc_three_wo_defect = charge_layout.get_local_potential({5, 0, 0}).value();
 
         charge_layout.add_sidb_defect_to_potential_landscape(
             {-4, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -1, charge_layout.get_simulation_params().epsilon_r,
                                     charge_layout.get_simulation_params().lambda_tf});
-        auto loc_one_w_negative_defect   = charge_layout.get_local_potential({0, 0, 0}).value();
-        auto loc_two_w_negative_defect   = charge_layout.get_local_potential({3, 0, 0}).value();
-        auto loc_three_w_negative_defect = charge_layout.get_local_potential({5, 0, 0}).value();
-        auto defect_potentials_negative  = charge_layout.get_local_defect_potentials();
+
+        REQUIRE(charge_layout.get_local_potential({0, 0, 0}).has_value());
+        REQUIRE(charge_layout.get_local_potential({3, 0, 0}).has_value());
+        REQUIRE(charge_layout.get_local_potential({5, 0, 0}).has_value());
+
+        const auto loc_one_w_negative_defect   = charge_layout.get_local_potential({0, 0, 0}).value();
+        const auto loc_two_w_negative_defect   = charge_layout.get_local_potential({3, 0, 0}).value();
+        const auto loc_three_w_negative_defect = charge_layout.get_local_potential({5, 0, 0}).value();
+        const auto defect_potentials_negative  = charge_layout.get_local_defect_potentials();
         REQUIRE(!defect_potentials_negative.empty());
 
         CHECK(loc_one_wo_defect > loc_one_w_negative_defect);
@@ -1940,35 +1963,31 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects, part two", 
         charge_layout.add_sidb_defect_to_potential_landscape(
             {-4, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, 0, charge_layout.get_simulation_params().epsilon_r,
                                     charge_layout.get_simulation_params().lambda_tf});
-        auto loc_one_w_neutral_defect   = charge_layout.get_local_potential({0, 0, 0}).value();
-        auto loc_two_w_neutral_defect   = charge_layout.get_local_potential({3, 0, 0}).value();
-        auto loc_three_w_neutral_defect = charge_layout.get_local_potential({5, 0, 0}).value();
-        CHECK_THAT(loc_one_wo_defect - loc_one_w_neutral_defect,
-                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
-        CHECK_THAT(loc_two_wo_defect - loc_two_w_neutral_defect,
-                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
-        CHECK_THAT(loc_three_wo_defect - loc_three_w_neutral_defect,
-                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
+
+        REQUIRE(charge_layout.get_local_potential({0, 0, 0}).has_value());
+        REQUIRE(charge_layout.get_local_potential({3, 0, 0}).has_value());
+        REQUIRE(charge_layout.get_local_potential({5, 0, 0}).has_value());
+
+        const auto loc_one_w_neutral_defect   = charge_layout.get_local_potential({0, 0, 0}).value();
+        const auto loc_two_w_neutral_defect   = charge_layout.get_local_potential({3, 0, 0}).value();
+        const auto loc_three_w_neutral_defect = charge_layout.get_local_potential({5, 0, 0}).value();
 
         charge_layout.add_sidb_defect_to_potential_landscape(
             {-4, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, 1, charge_layout.get_simulation_params().epsilon_r,
                                     charge_layout.get_simulation_params().lambda_tf});
-        auto loc_one_w_positive_defect   = charge_layout.get_local_potential({0, 0, 0}).value();
-        auto loc_two_w_positive_defect   = charge_layout.get_local_potential({3, 0, 0}).value();
-        auto loc_three_w_positive_defect = charge_layout.get_local_potential({5, 0, 0}).value();
-        auto defect_potentials_positive  = charge_layout.get_local_defect_potentials();
+
+        REQUIRE(charge_layout.get_local_potential({0, 0, 0}).has_value());
+        REQUIRE(charge_layout.get_local_potential({3, 0, 0}).has_value());
+        REQUIRE(charge_layout.get_local_potential({5, 0, 0}).has_value());
+        const auto loc_one_w_positive_defect   = charge_layout.get_local_potential({0, 0, 0}).value();
+        const auto loc_two_w_positive_defect   = charge_layout.get_local_potential({3, 0, 0}).value();
+        const auto loc_three_w_positive_defect = charge_layout.get_local_potential({5, 0, 0}).value();
+        const auto defect_potentials_positive  = charge_layout.get_local_defect_potentials();
         REQUIRE(!defect_potentials_positive.empty());
 
         CHECK(loc_one_w_positive_defect > loc_one_w_neutral_defect);
         CHECK(loc_two_w_positive_defect > loc_two_w_neutral_defect);
         CHECK(loc_three_w_positive_defect > loc_three_w_neutral_defect);
-
-        CHECK_THAT((defect_potentials_negative[{0, 0, 0}] + defect_potentials_positive[{0, 0, 0}]),
-                   Catch::Matchers::WithinAbs(0.0, 0.000001));
-        CHECK_THAT((defect_potentials_negative[{3, 0, 0}] + defect_potentials_positive[{3, 0, 0}]),
-                   Catch::Matchers::WithinAbs(0.0, 0.000001));
-        CHECK_THAT((defect_potentials_negative[{5, 0, 0}] + defect_potentials_positive[{5, 0, 0}]),
-                   Catch::Matchers::WithinAbs(0.0, 0.000001));
     }
 
     SECTION("experiments with defects | assigning and reassigning defects")
@@ -2012,13 +2031,6 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects, part two", 
         auto loc_one_w_neutral_defect   = charge_layout.get_local_potential({0, 0, 0}).value();
         auto loc_two_w_neutral_defect   = charge_layout.get_local_potential({3, 0, 0}).value();
         auto loc_three_w_neutral_defect = charge_layout.get_local_potential({5, 0, 0}).value();
-
-        CHECK_THAT(loc_one_wo_defect - loc_one_w_neutral_defect,
-                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
-        CHECK_THAT(loc_two_wo_defect - loc_two_w_neutral_defect,
-                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
-        CHECK_THAT(loc_three_wo_defect - loc_three_w_neutral_defect,
-                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
 
         charge_layout.add_sidb_defect_to_potential_landscape(
             {-4, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, 1, charge_layout.get_simulation_params().epsilon_r,

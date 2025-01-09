@@ -11,9 +11,71 @@ Unreleased
 Added
 #####
 - Experiments:
+    - Added rectangular SiDB gate skeletons and a script for designing a corresponding library.
+    - Added information about how many layouts remain after each of QuickCell's pruning steps.
+
+v0.6.6 - 2024-11-26
+-------------------
+
+Added
+#####
+- Algorithms:
+    - Simulation:
+        - Added option to determine if kinks induce layout to become non-operational
+        - Kink control option for critical temperature simulation of SiDB layouts
+- Python bindings:
+    - Support for Python 3.13 (including GIL-free multi-threading)
+- I/O:
+    - SVG drawer for SiDB layouts
+- Experiments:
+    - Ship the SiQAD and Bestagon gate libraries als SQD files
+- Documentation:
+    - Added wiring reduction paper to publication list
+    - Added Willem Lambooy to the authors list
+- Continuous integration:
+    - Several improvements to the Docker workflow including publishing images to DockerHub
+
+Changed
+#######
+- Continuous integration:
+    - Exclude long-running tests from the Debug CI workflows
+
+Fixed
+#####
+- Fixed a bug in SiDB gate design when using skeletons with I/O wires facing east
+- Adapted ``post-layout optimization`` and ``wiring reduction`` to handle layouts with PIs not placed at the borders
+- Fix neutral defect handling in CDS and correct gate design termination condition
+- Enforce runtime evaluation of dynamic formatting strings to fix consteval contexts
+- Microsoft logo in CI badge by replacing the logo slug with a base64 encoding of the SVG image
+- Remove explicit XCode version setup for macOS 13 CIs
+- Adjusted PyPI deployment target for macOS
+- Several bugs resulting from the new cell_type::LOGIC in the SiDB technology
+- Several compiler and linter warnings
+- Documentation for BDL wire detection
+
+v0.6.5 - 2024-10-22
+-------------------
+
+Added
+#####
+- Experiments:
     - Script to simulate the critical temperature of SiQAD and Bestagon gates
 - Algorithms:
-    - Added support for different ways of implementing input information in SiDB technology to the BDL input iterator
+    - Physical Design:
+        - QuickCell algorithm for automatic standard cell design in silicon dangling bond logic
+        - Added an option to GOLD to specify discretionary cost objectives
+        - Added a flag to GOLD to enable multi-threading
+        - Added a timeout option to post-layout optimization
+    - Simulation:
+        - Added support for different ways of implementing input information in SiDB technology to the BDL input iterator
+        - Extended BDL input iterator to support different SiDB input representations
+- Documentation:
+    - Added a ``CITATION.cff`` file
+    - Added documentation on our latest papers from IEEE-NANO
+
+Fixed
+#####
+- Addressed some ``clang-tidy`` warnings
 
 
 v0.6.4 - 2024-08-30

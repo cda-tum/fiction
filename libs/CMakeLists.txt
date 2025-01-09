@@ -62,7 +62,7 @@ if (NOT WIN32)
 endif ()
 
 # Enable the usage of Z3
-option(FICTION_Z3 "Find, include, and utilize the Z3 solver by Microsoft Research. It needs to be installed manually.")
+option(FICTION_Z3 "Find, include, and utilize the Z3 solver by Microsoft Research. It needs to be installed manually." OFF)
 if (FICTION_Z3)
     message(STATUS "Usage of the Z3 solver was enabled. Make sure that it is installed on your system!")
     list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/") # include FindZ3.cmake

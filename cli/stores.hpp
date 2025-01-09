@@ -462,11 +462,13 @@ void show<fiction::cell_layout_t>(std::ostream& os, const fiction::cell_layout_t
     {
         using Lyt = typename std::decay_t<decltype(lyt_ptr)>::element_type;
 
-        if constexpr (!fiction::has_qca_technology_v<Lyt>)
+        if constexpr (!fiction::has_qca_technology_v<Lyt> && !fiction::has_sidb_technology_v<Lyt>)
         {
-            cmd.env->out() << fmt::format("[e] {} is not a QCA layout", lyt_ptr->get_layout_name()) << std::endl;
+            cmd.env->out() << fmt::format("[e] {} is neither a QCA layout nor an SiDB layout",
+                                          lyt_ptr->get_layout_name())
+                           << std::endl;
         }
-        else if constexpr (!std::is_same_v<fiction::coordinate<Lyt>, fiction::offset::ucoord_t>)
+        else if constexpr (fiction::has_qca_technology_v<Lyt> && !fiction::has_offset_ucoord_v<Lyt>)
         {
             cmd.env->out() << fmt::format("[e] {} is not a Cartesian layout", lyt_ptr->get_layout_name()) << std::endl;
         }
@@ -474,7 +476,14 @@ void show<fiction::cell_layout_t>(std::ostream& os, const fiction::cell_layout_t
         {
             try
             {
-                fiction::write_qca_layout_svg(*lyt_ptr, os, {cmd.is_set("simple")});
+                if constexpr (fiction::has_qca_technology_v<Lyt>)
+                {
+                    fiction::write_qca_layout_svg(*lyt_ptr, os, {cmd.is_set("simple")});
+                }
+                else if constexpr (fiction::has_sidb_technology_v<Lyt>)
+                {
+                    fiction::write_sidb_layout_svg(*lyt_ptr, os, {});
+                }
             }
             catch (const fiction::unsupported_cell_type_exception<fiction::coordinate<Lyt>>& e)
             {

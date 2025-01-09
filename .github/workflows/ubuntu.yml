@@ -2,25 +2,25 @@ name: 🐧 • CI
 
 on:
   push:
-    branches: [ 'main' ]
+    branches: ["main"]
     paths:
-      - '**/*.hpp'
-      - '**/*.cpp'
-      - '**/*.cmake'
-      - '**/CMakeLists.txt'
-      - 'libs/**'
-      - '.github/workflows/ubuntu.yml'
-      - '!bindings/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp'
+      - "**/*.hpp"
+      - "**/*.cpp"
+      - "**/*.cmake"
+      - "**/CMakeLists.txt"
+      - "libs/**"
+      - ".github/workflows/ubuntu.yml"
+      - "!bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp"
   pull_request:
-    branches: [ 'main' ]
+    branches: ["main"]
     paths:
-      - '**/*.hpp'
-      - '**/*.cpp'
-      - '**/*.cmake'
-      - '**/CMakeLists.txt'
-      - 'libs/**'
-      - '.github/workflows/ubuntu.yml'
-      - '!bindings/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp'
+      - "**/*.hpp"
+      - "**/*.cpp"
+      - "**/*.cmake"
+      - "**/CMakeLists.txt"
+      - "libs/**"
+      - ".github/workflows/ubuntu.yml"
+      - "!bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp"
   merge_group:
 
 concurrency:
@@ -38,8 +38,8 @@ jobs:
   build_and_test:
     strategy:
       matrix:
-        os: [ ubuntu-22.04, ubuntu-24.04 ]
-        compiler: [ g++-11, g++-12, g++-13, clang++-14, clang++-15, clang++-16 ]
+        os: [ubuntu-22.04, ubuntu-24.04]
+        compiler: [g++-11, g++-12, g++-13, clang++-14, clang++-15, clang++-16]
         exclude:
           - os: ubuntu-22.04
             compiler: g++-13
@@ -76,7 +76,7 @@ jobs:
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
-          key: '${{matrix.os}}-${{matrix.compiler}}'
+          key: "${{matrix.os}}-${{matrix.compiler}}"
           variant: ccache
           save: true
           max-size: 10G
@@ -84,8 +84,8 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10.x'
-          cache: 'pip'
+          python-version: "3.13.x"
+          cache: "pip"
 
       - name: Install pip packages
         uses: BSFishy/pip-action@v1
@@ -104,7 +104,6 @@ jobs:
           architecture: x64
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-
 
       # Build and test pipeline for Debug mode
 
@@ -137,7 +136,6 @@ jobs:
       - name: Test (Debug)
         working-directory: ${{github.workspace}}/build_debug
         run: ctest -C Debug --verbose --output-on-failure --repeat until-pass:3 --parallel 4 --exclude-regex "quality"
-
 
       # Build and test pipeline for Release mode
 

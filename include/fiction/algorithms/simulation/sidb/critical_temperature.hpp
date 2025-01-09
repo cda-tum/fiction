@@ -9,8 +9,9 @@
 #include "fiction/algorithms/simulation/sidb/calculate_energy_and_state_type.hpp"
 #include "fiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp"
 #include "fiction/algorithms/simulation/sidb/clustercomplete.hpp"
-#include "fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp"
+#include "fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp"
 #include "fiction/algorithms/simulation/sidb/energy_distribution.hpp"
+#include "fiction/algorithms/simulation/sidb/is_operational.hpp"
 #include "fiction/algorithms/simulation/sidb/occupation_probability_of_excited_states.hpp"
 #include "fiction/algorithms/simulation/sidb/quickexact.hpp"
 #include "fiction/algorithms/simulation/sidb/quicksim.hpp"
@@ -45,15 +46,9 @@ namespace fiction
 struct critical_temperature_params
 {
     /**
-     * All parameters for physical SiDB simulations.
+     * The parameters used to determine if a layout is `operational` or `non-operational`.
      */
-    sidb_simulation_parameters simulation_parameters{};
-    /**
-     * Simulation mode to determine the *Critical Temperature*.
-     *
-     * @note Base 3 critical temperature simulation is experimental and only supported with *ClusterComplete*.
-     */
-    sidb_simulation_engine engine = sidb_simulation_engine::QUICKEXACT;
+    is_operational_params operational_params{};
     /**
      * Probability threshold for ground state population. The temperature at which the simulation finds the ground state
      * to be populated with a probability of less than the given percentage, is determined to be the critical
@@ -64,10 +59,6 @@ struct critical_temperature_params
      * Maximum simulation temperature beyond which no simulation will be conducted (~ 126 °C by default) (unit: K).
      */
     double max_temperature{400};
-    /**
-     * Parameters for the BDL input iterator.
-     */
-    bdl_input_iterator_params input_bdl_iterator_params{};
     /**
      * Number of iteration steps for the *QuickSim* algorithm (only applicable if engine == QUICKSIM).
      */
@@ -132,11 +123,11 @@ class critical_temperature_impl
             layout{lyt},
             params{ps},
             stats{st},
-            critical_temperature{ps.max_temperature},
-            bii(bdl_input_iterator<Lyt>{layout, params.input_bdl_iterator_params})
+            bii(bdl_input_iterator<Lyt>{layout, params.operational_params.input_bdl_iterator_params}),
+            critical_temperature{ps.max_temperature}
     {
-        stats.simulation_parameters = params.simulation_parameters;
-        stats.algorithm_name        = sidb_simulation_engine_name(params.engine);
+        stats.simulation_parameters = params.operational_params.simulation_parameters;
+        stats.algorithm_name        = sidb_simulation_engine_name(params.operational_params.sim_engine);
     }
 
     /**
@@ -156,21 +147,36 @@ class critical_temperature_impl
 
         if (layout.num_cells() > 1)
         {
-            const auto output_bdl_pairs = detect_bdl_pairs(layout, sidb_technology::cell_type::OUTPUT,
-                                                           params.input_bdl_iterator_params.bdl_pairs_params);
+            const auto output_bdl_pairs =
+                detect_bdl_pairs(layout, sidb_technology::cell_type::OUTPUT,
+                                 params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params);
+
+            auto input_bdl_wires  = std::vector<bdl_wire<Lyt>>{};
+            auto output_bdl_wires = std::vector<bdl_wire<Lyt>>{};
+
+            if (params.operational_params.op_condition == operational_condition::REJECT_KINKS)
+            {
+                input_bdl_wires =
+                    detect_bdl_wires(layout, params.operational_params.input_bdl_iterator_params.bdl_wire_params,
+                                     bdl_wire_selection::INPUT);
+                output_bdl_wires =
+                    detect_bdl_wires(layout, params.operational_params.input_bdl_iterator_params.bdl_wire_params,
+                                     bdl_wire_selection::OUTPUT);
+            }
 
             // number of different input combinations
             for (auto i = 0u; i < spec.front().num_bits(); ++i, ++bii)
             {
                 // if positively charged SiDBs can occur, the SiDB layout is considered as non-operational
-                if (can_positive_charges_occur(*bii, params.simulation_parameters))
+                if (can_positive_charges_occur(*bii, params.operational_params.simulation_parameters))
                 {
                     critical_temperature = 0.0;
                     return;
                 }
 
                 // performs physical simulation of a given SiDB layout at a given input combination
-                const auto sim_result = physical_simulation_of_layout(bii);
+                const auto sim_result = physical_simulation_of_bdl_iterator(bii);
+
                 if (sim_result.charge_distributions.empty())
                 {
                     critical_temperature = 0.0;
@@ -181,9 +187,19 @@ class critical_temperature_impl
                 // determined.
                 const auto distribution = energy_distribution(sim_result.charge_distributions);
 
-                // A label that indicates whether the state still fulfills the logic.
-                const auto energy_state_type = calculate_energy_and_state_type(
-                    distribution, sim_result.charge_distributions, output_bdl_pairs, spec, i);
+                sidb_energy_and_state_type energy_state_type{};
+
+                if (params.operational_params.op_condition == operational_condition::REJECT_KINKS)
+                {
+                    energy_state_type = calculate_energy_and_state_type_with_kinks_rejected<Lyt>(
+                        distribution, sim_result.charge_distributions, spec, i, input_bdl_wires, output_bdl_wires);
+                }
+                else
+                {
+                    // A label that indicates whether the state still fulfills the logic.
+                    energy_state_type = calculate_energy_and_state_type_with_kinks_accepted<Lyt>(
+                        distribution, sim_result.charge_distributions, output_bdl_pairs, spec, i);
+                }
 
                 const auto min_energy = energy_state_type.cbegin()->first;
 
@@ -210,28 +226,30 @@ class critical_temperature_impl
     {
         sidb_simulation_result<Lyt> simulation_results{};
 
-        if (params.engine == sidb_simulation_engine::QUICKEXACT)
+        if (params.operational_params.sim_engine == sidb_simulation_engine::QUICKEXACT)
         {
             const quickexact_params<cell<Lyt>> qe_params{
-                params.simulation_parameters, quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF};
+                params.operational_params.simulation_parameters,
+                quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF};
 
             // All physically valid charge configurations are determined for the given layout (`QuickExact` simulation
             // is used to provide 100 % accuracy for the Critical Temperature).
             simulation_results = quickexact(layout, qe_params);
         }
 #if (FICTION_ALGLIB_ENABLED)
-        else if (params.engine == sidb_simulation_engine::CLUSTERCOMPLETE)
+        else if (params.operational_params.sim_engine == sidb_simulation_engine::CLUSTERCOMPLETE)
         {
-            const clustercomplete_params<cell<Lyt>> cc_params{params.simulation_parameters};
+            const clustercomplete_params<cell<Lyt>> cc_params{params.operational_params.simulation_parameters};
 
             // All physically valid charge configurations are determined for the given layout (`ClusterComplete`
             // simulation is used to provide 100 % accuracy for the Critical Temperature).
             simulation_results = clustercomplete(layout, cc_params);
         }
 #endif  // FICTION_ALGLIB_ENABLED
-        else if (params.engine == sidb_simulation_engine::QUICKSIM)
+        else if (params.operational_params.sim_engine == sidb_simulation_engine::QUICKSIM)
         {
-            const quicksim_params qs_params{params.simulation_parameters, params.iteration_steps, params.alpha};
+            const quicksim_params qs_params{params.operational_params.simulation_parameters, params.iteration_steps,
+                                            params.alpha};
 
             // All physically valid charge configurations are determined for the given layout (probabilistic ground
             // state simulation is used).
@@ -385,13 +403,13 @@ class critical_temperature_impl
      */
     critical_temperature_stats& stats;
     /**
-     * Critical temperature [K].
-     */
-    double critical_temperature;
-    /**
      * Iterator that iterates over all possible input states.
      */
     bdl_input_iterator<Lyt> bii;
+    /**
+     * Critical temperature [K].
+     */
+    double critical_temperature;
     /**
      * This function conducts physical simulation of the given layout (gate layout with certain input combination). The
      * simulation results are stored in the `sim_result_100` variable.
@@ -401,33 +419,42 @@ class critical_temperature_impl
      * @return Simulation results.
      */
     [[nodiscard]] sidb_simulation_result<Lyt>
-    physical_simulation_of_layout(const bdl_input_iterator<Lyt>& bdl_iterator) noexcept
+    physical_simulation_of_bdl_iterator(const bdl_input_iterator<Lyt>& bdl_iterator) noexcept
     {
-        if (params.engine == sidb_simulation_engine::QUICKEXACT)
-        {
-            assert(params.simulation_parameters.base == 2 && "base number has to be 2");
 
-            // perform QuickExact simulation
+
+        if (params.operational_params.sim_engine == sidb_simulation_engine::QUICKEXACT)
+        {
+            assert(params.operational_params.simulation_parameters.base == 2 && "base number has to be 2");
+
+            // perform exact simulation
             const quickexact_params<cell<Lyt>> qe_params{
-                params.simulation_parameters,
+                params.operational_params.simulation_parameters,
                 fiction::quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF};
             return quickexact(*bdl_iterator, qe_params);
         }
-
 #if (FICTION_ALGLIB_ENABLED)
         if (params.engine == sidb_simulation_engine::CLUSTERCOMPLETE)
         {
             // perform ClusterComplete simulation -- base 3 simulation is allowed
-            const clustercomplete_params<cell<Lyt>> cc_params{params.simulation_parameters};
+            const clustercomplete_params<cell<Lyt>> cc_params{params.operational_params.simulation_parameters};
             return clustercomplete(*bdl_iterator, cc_params);
         }
 #endif  // FICTION_ALGLIB_ENABLED
-        if (params.engine == sidb_simulation_engine::QUICKSIM)
+        if (params.operational_params.sim_engine == sidb_simulation_engine::QUICKSIM)
         {
-            assert(params.simulation_parameters.base == 2 && "base number has to be 2");
+            assert(params.operational_params.simulation_parameters.base == 2 && "base number has to be 2");
 
-            const quicksim_params qs_params{params.simulation_parameters, params.iteration_steps, params.alpha};
+            const quicksim_params qs_params{params.operational_params.simulation_parameters, params.iteration_steps,
+                                            params.alpha};
             return quicksim(*bdl_iterator, qs_params);
+        }
+
+        if (params.operational_params.sim_engine == sidb_simulation_engine::EXGS)
+        {
+            assert(params.operational_params.simulation_parameters.base == 2 && "base number has to be 2");
+
+            return exhaustive_ground_state_simulation(*bdl_iterator, params.operational_params.simulation_parameters);
         }
 
         assert(false && "unsupported simulation engine");

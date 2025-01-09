@@ -2,10 +2,10 @@
 // Created by marcel on 06.01.20.
 //
 
-#if (FICTION_Z3_SOLVER)
-
 #ifndef FICTION_CMD_EXACT_HPP
 #define FICTION_CMD_EXACT_HPP
+
+#if (FICTION_Z3_SOLVER)
 
 #include <fiction/algorithms/physical_design/exact.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
@@ -244,6 +244,6 @@ ALICE_ADD_COMMAND(exact, "Physical Design")
 
 }  // namespace alice
 
-#endif  // FICTION_CMD_EXACT_HPP
-
 #endif  // FICTION_Z3_SOLVER
+
+#endif  // FICTION_CMD_EXACT_HPP

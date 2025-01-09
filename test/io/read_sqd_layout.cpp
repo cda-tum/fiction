@@ -176,8 +176,8 @@ TEST_CASE("Read multi-dot SQD layout", "[sqd]")
 
     SECTION("SiQAD coordinates")
     {
-        using sqd_layout  = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>;
-        const auto layout = read_sqd_layout<sidb_lattice<sidb_100_lattice, sqd_layout>>(layout_stream);
+        using siqad_layout = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>;
+        const auto layout  = read_sqd_layout<sidb_lattice<sidb_100_lattice, siqad_layout>>(layout_stream);
 
         CHECK(layout.x() == 2);
         CHECK(layout.y() == 2);
@@ -234,6 +234,11 @@ TEST_CASE("Read multi-dot SQD layout with cell type definitions", "[sqd]")
                                               "      </dbdot>\n"
                                               "      <dbdot>\n"
                                               "          <layer_id>2</layer_id>\n"
+                                              "          <latcoord n=\"1\" m=\"1\" l=\"1\"/>\n"
+                                              "          <type>logic</type>\n"
+                                              "      </dbdot>\n"
+                                              "      <dbdot>\n"
+                                              "          <layer_id>2</layer_id>\n"
                                               "          <latcoord n=\"2\" m=\"2\" l=\"1\"/>\n"
                                               "      </dbdot>\n"
                                               "    </layer>\n"
@@ -252,6 +257,7 @@ TEST_CASE("Read multi-dot SQD layout with cell type definitions", "[sqd]")
     CHECK(layout.get_cell_type({0, 1}) == sidb_technology::cell_type::OUTPUT);
     CHECK(layout.get_cell_type({2, 4}) == sidb_technology::cell_type::NORMAL);
     CHECK(layout.get_cell_type({2, 5}) == sidb_technology::cell_type::NORMAL);
+    CHECK(layout.get_cell_type({1, 3}) == sidb_technology::cell_type::LOGIC);
 }
 
 TEST_CASE("Read multi-dot SQD layout with cell type definitions, Si-111", "[sqd]")

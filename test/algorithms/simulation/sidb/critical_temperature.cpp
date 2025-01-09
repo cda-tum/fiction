@@ -9,9 +9,10 @@
 
 #include <fiction/algorithms/simulation/sidb/critical_temperature.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
+#include <fiction/algorithms/simulation/sidb/is_operational.hpp>
+#include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/technology/cell_technologies.hpp>
-#include <fiction/technology/charge_distribution_surface.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/truth_table_utils.hpp>
 
@@ -221,6 +222,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         params.engine                = sidb_simulation_engine::QUICKEXACT;
         params.input_bdl_iterator_params.input_bdl_config =
             bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED;
+        params.operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance = 1.5;
 
         const auto ct_qe =
             critical_temperature_gate_based(lyt_or_gate, std::vector<tt>{create_or_tt()}, params, &critical_stats);
@@ -281,25 +283,51 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         params.iteration_steps       = 80;
         params.alpha                 = 0.7;
 
-        const auto ct_qe =
-            critical_temperature_gate_based(lyt, std::vector<tt>{create_and_tt()}, params, &critical_stats);
+        SECTION("Kinks are allowed")
+        {
+            const auto ct_qe =
+                critical_temperature_gate_based(lyt, std::vector<tt>{create_and_tt()}, params, &critical_stats);
 
-        CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous),
-                   Catch::Matchers::WithinAbs(26.02, 0.01));
-        CHECK_THAT(std::abs(ct_qe - 59.19), Catch::Matchers::WithinAbs(0.00, 0.01));
+            CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous),
+                       Catch::Matchers::WithinAbs(26.02, 0.01));
+            CHECK_THAT(std::abs(ct_qe - 59.19), Catch::Matchers::WithinAbs(0.00, 0.01));
 
 #if (FICTION_ALGLIB_ENABLED)
 
-        params.engine = sidb_simulation_engine::CLUSTERCOMPLETE;
+            params.engine = sidb_simulation_engine::CLUSTERCOMPLETE;
 
-        const auto ct_cc =
-            critical_temperature_gate_based(lyt, std::vector<tt>{create_and_tt()}, params, &critical_stats);
+            const auto ct_cc =
+                critical_temperature_gate_based(lyt, std::vector<tt>{create_and_tt()}, params, &critical_stats);
 
-        CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous),
-                   Catch::Matchers::WithinAbs(26.02, 0.01));
-        CHECK_THAT(std::abs(ct_cc - 59.19), Catch::Matchers::WithinAbs(0.00, 0.01));
+            CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous),
+                       Catch::Matchers::WithinAbs(26.02, 0.01));
+            CHECK_THAT(std::abs(ct_cc - 59.19), Catch::Matchers::WithinAbs(0.00, 0.01));
 
 #endif  // FICTION_ALGLIB_ENABLED
+        }
+        SECTION("Kinks are not allowed")
+        {
+            params.operational_params.op_condition = operational_condition::REJECT_KINKS;
+            const auto ct_qe =
+                critical_temperature_gate_based(lyt, std::vector<tt>{create_and_tt()}, params, &critical_stats);
+
+            CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous),
+                       Catch::Matchers::WithinAbs(5.1153718076, 0.01));
+            CHECK_THAT(std::abs(ct_qe - 13.36), Catch::Matchers::WithinAbs(0.00, 0.01));
+
+#if (FICTION_ALGLIB_ENABLED)
+
+            params.engine = sidb_simulation_engine::CLUSTERCOMPLETE;
+
+            const auto ct_cc =
+                critical_temperature_gate_based(lyt, std::vector<tt>{create_and_tt()}, params, &critical_stats);
+
+            CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous),
+                       Catch::Matchers::WithinAbs(5.1153718076, 0.01));
+            CHECK_THAT(std::abs(ct_qe - 13.36), Catch::Matchers::WithinAbs(0.00, 0.01));
+
+#endif  // FICTION_ALGLIB_ENABLED
+        }
     }
 
     SECTION("Bestagon AND gate, QuickSim")
@@ -394,25 +422,51 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         params.iteration_steps       = 80;
         params.alpha                 = 0.7;
 
-        const auto ct_qe =
-            critical_temperature_gate_based(lyt, std::vector<tt>{create_fan_out_tt()}, params, &critical_stats);
+        SECTION("Kinks are allowed")
+        {
+            const auto ct_qe =
+                critical_temperature_gate_based(lyt, std::vector<tt>{create_fan_out_tt()}, params, &critical_stats);
 
-        CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous - 0.56),
-                   Catch::Matchers::WithinAbs(0.00, 0.01));
-        CHECK_THAT(std::abs(ct_qe - 1.46), Catch::Matchers::WithinAbs(0.00, 0.01));
+            CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous - 0.56),
+                       Catch::Matchers::WithinAbs(0.00, 0.01));
+            CHECK_THAT(std::abs(ct_qe - 1.46), Catch::Matchers::WithinAbs(0.00, 0.01));
 
 #if (FICTION_ALGLIB_ENABLED)
 
-        params.engine = sidb_simulation_engine::CLUSTERCOMPLETE;
+            params.engine = sidb_simulation_engine::CLUSTERCOMPLETE;
 
-        const auto ct_cc =
-            critical_temperature_gate_based(lyt, std::vector<tt>{create_fan_out_tt()}, params, &critical_stats);
+            const auto ct_cc =
+                critical_temperature_gate_based(lyt, std::vector<tt>{create_fan_out_tt()}, params, &critical_stats);
 
-        CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous - 0.56),
-                   Catch::Matchers::WithinAbs(0.00, 0.01));
-        CHECK_THAT(std::abs(ct_cc - 1.46), Catch::Matchers::WithinAbs(0.00, 0.01));
+            CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous - 0.56),
+                       Catch::Matchers::WithinAbs(0.00, 0.01));
+            CHECK_THAT(std::abs(ct_cc - 1.46), Catch::Matchers::WithinAbs(0.00, 0.01));
 
 #endif  // FICTION_ALGLIB_ENABLED
+        }
+        SECTION("Kinks are not allowed")
+        {
+            params.operational_params.op_condition = operational_condition::REJECT_KINKS;
+            const auto ct_qe =
+                critical_temperature_gate_based(lyt, std::vector<tt>{create_fan_out_tt()}, params, &critical_stats);
+
+            CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous - 0.56),
+                       Catch::Matchers::WithinAbs(0.00, 0.01));
+            CHECK_THAT(std::abs(ct_qe - 1.46), Catch::Matchers::WithinAbs(0.00, 0.01));
+
+#if (FICTION_ALGLIB_ENABLED)
+
+            params.engine = sidb_simulation_engine::CLUSTERCOMPLETE;
+
+            const auto ct_cc =
+                critical_temperature_gate_based(lyt, std::vector<tt>{create_fan_out_tt()}, params, &critical_stats);
+
+            CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous - 0.56),
+                       Catch::Matchers::WithinAbs(0.00, 0.01));
+            CHECK_THAT(std::abs(ct_cc - 1.46), Catch::Matchers::WithinAbs(0.00, 0.01));
+
+#endif  // FICTION_ALGLIB_ENABLED
+        }
     }
 
     SECTION("OR gate")
@@ -448,21 +502,43 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         params.iteration_steps       = 80;
         params.alpha                 = 0.7;
 
-        const auto ct_qe =
-            critical_temperature_gate_based(lyt, std::vector<tt>{create_or_tt()}, params, &critical_stats);
+        SECTION("Kinks are allowed")
+        {
+            const auto ct_qe =
+                critical_temperature_gate_based(lyt, std::vector<tt>{create_or_tt()}, params, &critical_stats);
 
-        CHECK(ct_qe < 350);
+            CHECK(ct_qe < 350);
 
 #if (FICTION_ALGLIB_ENABLED)
 
-        params.engine = sidb_simulation_engine::CLUSTERCOMPLETE;
+            params.engine = sidb_simulation_engine::CLUSTERCOMPLETE;
 
-        const auto ct_cc =
-            critical_temperature_gate_based(lyt, std::vector<tt>{create_or_tt()}, params, &critical_stats);
+            const auto ct_cc =
+                critical_temperature_gate_based(lyt, std::vector<tt>{create_or_tt()}, params, &critical_stats);
 
-        CHECK(ct_cc < 350);
+            CHECK(ct_cc < 350);
 
 #endif  // FICTION_ALGLIB_ENABLED
+        }
+        SECTION("Kinks are not allowed")
+        {
+            params.operational_params.op_condition = operational_condition::REJECT_KINKS;
+            const auto ct_qe =
+                critical_temperature_gate_based(lyt, std::vector<tt>{create_or_tt()}, params, &critical_stats);
+
+            CHECK(ct_qe < 350);
+
+#if (FICTION_ALGLIB_ENABLED)
+
+            params.engine = sidb_simulation_engine::CLUSTERCOMPLETE;
+
+            const auto ct_cc =
+                critical_temperature_gate_based(lyt, std::vector<tt>{create_or_tt()}, params, &critical_stats);
+
+            CHECK(ct_cc < 350);
+
+#endif  // FICTION_ALGLIB_ENABLED
+        }
     }
 
     SECTION("Not working diagonal Wire")
@@ -559,7 +635,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
 }
 
 TEMPLATE_TEST_CASE("Test critical_temperature function, using offset coordinates", "[critical-temperature]",
-                   sidb_100_cell_clk_lyt, cds_sidb_100_cell_clk_lyt)
+                   sidb_100_cell_clk_lyt)
 {
     TestType lyt{};
 
@@ -570,7 +646,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function, using offset coordinates
 
     SECTION("No physically valid charge distribution could be found")
     {
-        lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
+        lyt.assign_cell_type({0, 0}, sidb_technology::cell_type::INPUT);
         lyt.assign_cell_type({2, 2}, sidb_technology::cell_type::INPUT);
         lyt.assign_cell_type({6, 2}, sidb_technology::cell_type::OUTPUT);
         lyt.assign_cell_type({8, 2}, sidb_technology::cell_type::OUTPUT);
@@ -763,6 +839,8 @@ TEMPLATE_TEST_CASE("Test critical_temperature function, using offset coordinates
     }
 }
 
+// to save runtime in the CI, this test is only run in RELEASE mode
+#ifdef NDEBUG
 TEMPLATE_TEST_CASE("Critical temperature of Bestagon CX, QuickExact", "[critical-temperature], [quality]",
                    sidb_100_cell_clk_lyt_siqad, cds_sidb_100_cell_clk_lyt_siqad)
 {
@@ -808,8 +886,8 @@ TEMPLATE_TEST_CASE("Critical temperature of Bestagon CX, QuickExact", "[critical
     lyt.assign_cell_type({2, 19, 0}, sidb_technology::cell_type::NORMAL);
     lyt.assign_cell_type({36, 19, 0}, sidb_technology::cell_type::NORMAL);
 
-    critical_temperature_params params{};
-    sidb_simulation_parameters  sim_params{2, -0.32, 5.6, 5.0};
+    critical_temperature_params      params{};
+    const sidb_simulation_parameters sim_params{2, -0.32, 5.6, 5.0};
 
     critical_temperature_stats critical_stats{};
 
@@ -852,25 +930,51 @@ TEMPLATE_TEST_CASE("Critical temperature of Bestagon double wire, QuickExact", "
     params.confidence_level      = 0.99;
     params.max_temperature       = 350;
 
-    const auto ct_qe =
-        critical_temperature_gate_based(lyt_double_wire_gate, create_double_wire_tt(), params, &critical_stats);
+    SECTION("Kinks are allowed")
+    {
+        const auto ct_qe =
+            critical_temperature_gate_based(lyt_double_wire_gate, create_double_wire_tt(), params, &critical_stats);
 
-    CHECK_THAT(std::fabs(critical_stats.energy_between_ground_state_and_first_erroneous - 10.717),
-               Catch::Matchers::WithinAbs(0.00, 0.01));
-    CHECK_THAT(std::abs(ct_qe - 24.18), Catch::Matchers::WithinAbs(0.00, 0.01));
+        CHECK_THAT(std::fabs(critical_stats.energy_between_ground_state_and_first_erroneous - 10.717),
+                   Catch::Matchers::WithinAbs(0.00, 0.01));
+        CHECK_THAT(std::abs(ct_qe - 24.18), Catch::Matchers::WithinAbs(0.00, 0.01));
 
 #if (FICTION_ALGLIB_ENABLED)
 
-    params.engine = sidb_simulation_engine::CLUSTERCOMPLETE;
+        params.engine = sidb_simulation_engine::CLUSTERCOMPLETE;
 
-    const auto ct_cc =
-        critical_temperature_gate_based(lyt_double_wire_gate, create_double_wire_tt(), params, &critical_stats);
+        const auto ct_cc =
+            critical_temperature_gate_based(lyt_double_wire_gate, create_double_wire_tt(), params, &critical_stats);
 
-    CHECK_THAT(std::fabs(critical_stats.energy_between_ground_state_and_first_erroneous - 10.717),
-               Catch::Matchers::WithinAbs(0.00, 0.01));
-    CHECK_THAT(std::abs(ct_cc - 24.18), Catch::Matchers::WithinAbs(0.00, 0.01));
+        CHECK_THAT(std::fabs(critical_stats.energy_between_ground_state_and_first_erroneous - 10.717),
+                   Catch::Matchers::WithinAbs(0.00, 0.01));
+        CHECK_THAT(std::abs(ct_cc - 24.18), Catch::Matchers::WithinAbs(0.00, 0.01));
 
 #endif  // FICTION_ALGLIB_ENABLED
+    }
+    SECTION("Kinks are not allowed")
+    {
+        params.operational_params.op_condition = operational_condition::REJECT_KINKS;
+        const auto ct_qe =
+            critical_temperature_gate_based(lyt_double_wire_gate, create_double_wire_tt(), params, &critical_stats);
+
+        CHECK_THAT(std::fabs(critical_stats.energy_between_ground_state_and_first_erroneous - 10.717),
+                   Catch::Matchers::WithinAbs(0.00, 0.01));
+        CHECK_THAT(std::abs(ct_qe - 23.77), Catch::Matchers::WithinAbs(0.00, 0.01));
+
+#if (FICTION_ALGLIB_ENABLED)
+
+        params.engine = sidb_simulation_engine::CLUSTERCOMPLETE;
+
+        const auto ct_cc =
+            critical_temperature_gate_based(lyt_double_wire_gate, create_double_wire_tt(), params, &critical_stats);
+
+        CHECK_THAT(std::fabs(critical_stats.energy_between_ground_state_and_first_erroneous - 10.717),
+                   Catch::Matchers::WithinAbs(0.00, 0.01));
+        CHECK_THAT(std::abs(ct_cc - 23.77), Catch::Matchers::WithinAbs(0.00, 0.01));
+
+#endif  // FICTION_ALGLIB_ENABLED
+    }
 }
 
 TEMPLATE_TEST_CASE("Critical temperature of Bestagon half adder gate, QuickExact", "[critical-temperature], [quality]",
@@ -888,23 +992,50 @@ TEMPLATE_TEST_CASE("Critical temperature of Bestagon half adder gate, QuickExact
     params.confidence_level      = 0.99;
     params.max_temperature       = 350;
 
-    const auto ct_qe =
-        critical_temperature_gate_based(lyt_half_adder_gate, create_half_adder_tt(), params, &critical_stats);
+    SECTION("Kinks are allowed")
+    {
+        const auto ct_qe =
+            critical_temperature_gate_based(lyt_half_adder_gate, create_half_adder_tt(), params, &critical_stats);
 
-    CHECK_THAT(std::fabs(critical_stats.energy_between_ground_state_and_first_erroneous - 0.15),
-               Catch::Matchers::WithinAbs(0.00, 0.01));
-    CHECK_THAT(std::abs(ct_qe - 0.40), Catch::Matchers::WithinAbs(0.00, 0.01));
+        CHECK_THAT(std::fabs(critical_stats.energy_between_ground_state_and_first_erroneous - 0.15),
+                   Catch::Matchers::WithinAbs(0.00, 0.01));
+        CHECK_THAT(std::abs(ct_qe - 0.40), Catch::Matchers::WithinAbs(0.00, 0.01));
 
 #if (FICTION_ALGLIB_ENABLED)
 
-    params.engine = sidb_simulation_engine::CLUSTERCOMPLETE;
+        params.engine = sidb_simulation_engine::CLUSTERCOMPLETE;
 
-    const auto ct_cc =
-        critical_temperature_gate_based(lyt_half_adder_gate, create_half_adder_tt(), params, &critical_stats);
+        const auto ct_cc =
+            critical_temperature_gate_based(lyt_half_adder_gate, create_half_adder_tt(), params, &critical_stats);
 
-    CHECK_THAT(std::fabs(critical_stats.energy_between_ground_state_and_first_erroneous - 0.15),
-               Catch::Matchers::WithinAbs(0.00, 0.01));
-    CHECK_THAT(std::abs(ct_cc - 0.40), Catch::Matchers::WithinAbs(0.00, 0.01));
+        CHECK_THAT(std::fabs(critical_stats.energy_between_ground_state_and_first_erroneous - 0.15),
+                   Catch::Matchers::WithinAbs(0.00, 0.01));
+        CHECK_THAT(std::abs(ct_cc - 0.40), Catch::Matchers::WithinAbs(0.00, 0.01));
 
 #endif  // FICTION_ALGLIB_ENABLED
+    }
+    SECTION("Kinks are not allowed")
+    {
+        params.operational_params.op_condition = operational_condition::REJECT_KINKS;
+        const auto ct_qe =
+            critical_temperature_gate_based(lyt_half_adder_gate, create_half_adder_tt(), params, &critical_stats);
+
+        CHECK_THAT(std::fabs(critical_stats.energy_between_ground_state_and_first_erroneous - 0.15),
+                   Catch::Matchers::WithinAbs(0.00, 0.01));
+        CHECK_THAT(std::abs(ct_qe - 0.40), Catch::Matchers::WithinAbs(0.00, 0.01));
+
+#if (FICTION_ALGLIB_ENABLED)
+
+        params.engine = sidb_simulation_engine::CLUSTERCOMPLETE;
+
+        const auto ct_cc =
+            critical_temperature_gate_based(lyt_half_adder_gate, create_half_adder_tt(), params, &critical_stats);
+
+        CHECK_THAT(std::fabs(critical_stats.energy_between_ground_state_and_first_erroneous - 0.15),
+                   Catch::Matchers::WithinAbs(0.00, 0.01));
+        CHECK_THAT(std::abs(ct_cc - 0.40), Catch::Matchers::WithinAbs(0.00, 0.01));
+
+#endif  // FICTION_ALGLIB_ENABLED
+    }
 }
+#endif
