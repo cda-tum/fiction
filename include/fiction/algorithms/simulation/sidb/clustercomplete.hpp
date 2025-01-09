@@ -220,7 +220,7 @@ class clustercomplete_impl
     /**
      * Number of available threads.
      */
-    const uint64_t available_threads{};
+    const uint64_t available_threads;
     /**
      * Vector containing all workers.
      */
