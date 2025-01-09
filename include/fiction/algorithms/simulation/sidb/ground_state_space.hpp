@@ -772,6 +772,30 @@ class ground_state_space_impl
 
         return fixpoint;
     }
+    void write_children_pot_bounds_to_complete_store(const sidb_cluster_ptr& parent) const noexcept
+    {
+        for (const sidb_cluster_ptr& child : parent->children)
+        {
+            for (const sidb_cluster_charge_state& m : child->charge_space)
+            {
+                const auto ccs = static_cast<uint64_t>(m);
+
+                const sidb_cluster_projector_state pst{child, ccs};
+
+                complete_potential_bounds_store complete_pot_store{};
+                complete_pot_store.initialize_complete_potential_bounds(top_cluster->num_sidbs());
+
+                for (const uint64_t sidb_ix : top_cluster->sidbs)
+                {
+                    complete_pot_store.set(sidb_ix,
+                                           get_projector_state_bound<bound_direction::LOWER>(pst, sidb_ix).pot_val,
+                                           get_projector_state_bound<bound_direction::UPPER>(pst, sidb_ix).pot_val);
+                }
+
+                child->pot_projs_complete_store[ccs] = std::move(complete_pot_store);
+            }
+        }
+    }
     /**
      * This function performs the first step to merging a set of clusters to their direct parent. When clusters are
      * merged, their respective charge spaces have reached a fixed point in the construction; thereby, the projections
@@ -867,7 +891,7 @@ class ground_state_space_impl
     bool verify_composition(sidb_charge_space_composition& composition) const noexcept
     {
         // initialize the composition potential bounds to (0.0, 0.0) for all SiDBs
-        composition.pot_bounds.initialise_complete_potential_bounds(top_cluster->num_sidbs());
+        composition.pot_bounds.initialize_complete_potential_bounds(top_cluster->num_sidbs());
 
         // perform physically informed space pruning for a multiset composition
         for (sidb_cluster_projector_state& receiving_pst : composition.proj_states)
@@ -1079,6 +1103,8 @@ class ground_state_space_impl
         {
             clustering.erase(c);
         }
+
+        write_children_pot_bounds_to_complete_store(min_parent);
 
         projector_state_count += compute_external_pot_bounds_for_saved_compositions(min_parent);
 

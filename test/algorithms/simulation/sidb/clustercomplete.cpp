@@ -1958,16 +1958,6 @@ TEMPLATE_TEST_CASE("Special test cases", "[clustercomplete]", (sidb_100_cell_clk
     }
 }
 
-#else  // FICTION_ALGLIB_ENABLED
-
-#include <catch2/catch_test_macros.hpp>
-
-TEST_CASE("ClusterComplete", "[clustercomplete]")
-{
-    CHECK(true);  // workaround for empty test case
-}
-
-#endif  // FICTION_ALGLIB_ENABLED
 TEMPLATE_TEST_CASE("ClusterComplete gate simulation of Si-111 surface", "[clustercomplete]",
                    (sidb_111_cell_clk_lyt_siqad), (cds_sidb_111_cell_clk_lyt_siqad))
 {
@@ -2084,3 +2074,14 @@ TEMPLATE_TEST_CASE("ClusterComplete AND gate simulation of Si-111 surface", "[cl
         CHECK(ground_state.front().get_charge_state({23, 29, 1}) == sidb_charge_state::NEGATIVE);
     }
 }
+
+#else  // FICTION_ALGLIB_ENABLED
+
+#include <catch2/catch_test_macros.hpp>
+
+TEST_CASE("ClusterComplete", "[clustercomplete]")
+{
+    CHECK(true);  // workaround for empty test case
+}
+
+#endif  // FICTION_ALGLIB_ENABLED

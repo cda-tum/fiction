@@ -17,7 +17,7 @@
 #include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/utils/hash.hpp"
 
-#if (DEBUG_SIDB_CLUSTER_HIERARCHY)
+#ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
 #include <set>
 #include <unordered_map>
 #include <unordered_set>
@@ -88,7 +88,7 @@ struct sidb_binary_cluster_hierarchy_node
     /**
      * The set of SiDB indices contained in the node
      */
-#if (DEBUG_SIDB_CLUSTER_HIERARCHY)
+#ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
     std::set<uint64_t> c;
 #else
     phmap::flat_hash_set<uint64_t> c;
@@ -103,7 +103,7 @@ struct sidb_binary_cluster_hierarchy_node
      * @param sidbs The set of SiDBs to contain in this node.
      * @param children The pair of binary cluster hierarchy node pointers that become the children of this node.
      */
-#if (DEBUG_SIDB_CLUSTER_HIERARCHY)
+#ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
     sidb_binary_cluster_hierarchy_node(std::set<uint64_t>&& sidbs,
 #else
     sidb_binary_cluster_hierarchy_node(phmap::flat_hash_set<uint64_t>&& sidbs,
@@ -159,7 +159,7 @@ sidb_cluster_hierarchy(Lyt& lyt, sidb_cluster_hierarchy_linkage_method linkage_m
     alglib::ahcreport rep;
     clusterizerrunahc(s, rep);
 
-#if (DEBUG_SIDB_CLUSTER_HIERARCHY)
+#ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
     std::unordered_map<uint64_t, std::unique_ptr<sidb_binary_cluster_hierarchy_node>> nodes{};
 #else
     phmap::flat_hash_map<uint64_t, std::unique_ptr<sidb_binary_cluster_hierarchy_node>> nodes{};
@@ -175,7 +175,7 @@ sidb_cluster_hierarchy(Lyt& lyt, sidb_cluster_hierarchy_linkage_method linkage_m
             if (cs.at(c) < charge_lyt.num_cells())
             {
                 nodes[cs.at(c)] = std::make_unique<sidb_binary_cluster_hierarchy_node>(
-#if (DEBUG_SIDB_CLUSTER_HIERARCHY)
+#ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
                     std::set<uint64_t>{cs.at(c)},
 #else
                     phmap::flat_hash_set<uint64_t>{cs.at(c)},
@@ -187,7 +187,7 @@ sidb_cluster_hierarchy(Lyt& lyt, sidb_cluster_hierarchy_linkage_method linkage_m
         // rep.z assigns each new cluster to N + i
         const uint64_t new_n = charge_lyt.num_cells() + static_cast<uint64_t>(i);
 
-#if (DEBUG_SIDB_CLUSTER_HIERARCHY)
+#ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
         std::set<uint64_t> set_union{};
 #else
         phmap::flat_hash_set<uint64_t> set_union{};
@@ -346,6 +346,15 @@ struct potential_bounds_store
 {
   public:
     /**
+     * Getter for the size of the potential bounds store, i.e., the number of SiDBs considered in this store.
+     *
+     * @return The size of the potential bounds store.
+     */
+    [[nodiscard]] constexpr inline uint64_t num_sidbs() const noexcept
+    {
+        return store.size();
+    }
+    /**
      * Getter for a (partial) potential sum bound local to an SiDB.
      *
      * @tparam bound The potential bound to obtain.
@@ -406,11 +415,11 @@ struct potential_bounds_store
         store[sidb_ix][static_cast<uint8_t>(bound_direction::UPPER)] += max_diff;
     }
     /**
-     * Initialise potential bounds for the given number of SiDBs (applicable to a complete potential bounds store only).
+     * Initialize potential bounds for the given number of SiDBs (applicable to a complete potential bounds store only).
      *
      * @param num_sidbs The number of SiDBs in the layout that is simulated.
      */
-    inline void initialise_complete_potential_bounds(const uint64_t num_sidbs) noexcept
+    inline void initialize_complete_potential_bounds(const uint64_t num_sidbs) noexcept
     {
         store.assign(num_sidbs, std::array<double, 2>{});
     }
@@ -454,7 +463,7 @@ struct potential_bounds_store
 /**
  * The aggregates are used in the construction; they represent information of a subhierarchy.
  */
-#if (DEBUG_SIDB_CLUSTER_HIERARCHY)
+#ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
 using partial_potential_bounds_store = potential_bounds_store<std::map<uint64_t, std::array<double, 2>>>;
 #else
 using partial_potential_bounds_store = potential_bounds_store<phmap::flat_hash_map<uint64_t, std::array<double, 2>>>;
@@ -492,11 +501,47 @@ struct sidb_clustering_state
     /**
      * Projector states associated with charge space elements that make up the clustering state.
      */
-    std::vector<std::unique_ptr<sidb_cluster_projector_state>> proj_states;
+    std::vector<sidb_cluster_projector_state_ptr> proj_states{};
     /**
      * Flattened (hierarchical) potential bounds specific to this clustering state.
      */
-    complete_potential_bounds_store pot_bounds;
+    complete_potential_bounds_store pot_bounds{};
+    /**
+     * Default constructor.
+     *
+     * @param num_sidbs Number of SiDBs in the layout that the clustering state should consider.
+     */
+    explicit sidb_clustering_state(const uint64_t num_sidbs) noexcept
+    {
+        pot_bounds.initialize_complete_potential_bounds(num_sidbs);
+    }
+    /**
+     * Copy constructor.
+     *
+     * @param other Other clustering state to copy.
+     */
+    sidb_clustering_state(const sidb_clustering_state& other) noexcept
+    {
+        for (const sidb_cluster_projector_state_ptr& pst : other.proj_states)
+        {
+            proj_states.emplace_back(std::make_unique<sidb_cluster_projector_state>(*pst));
+        }
+
+        pot_bounds.initialize_complete_potential_bounds(other.pot_bounds.num_sidbs());
+        pot_bounds += other.pot_bounds;
+    }
+    /**
+     * Move constructor.
+     *
+     * @param other Other clustering state to move.
+     */
+    sidb_clustering_state(sidb_clustering_state&& other) noexcept = default;
+    /**
+     * Move assignment operator.
+     *
+     * @param other Other clustering state to move.
+     */
+    sidb_clustering_state& operator=(sidb_clustering_state&& other) noexcept = default;
 };
 /**
  * A cluster charge state is a multiset charge configuration. We may compress it into a 64 bit unsigned integer by
@@ -539,7 +584,7 @@ struct sidb_cluster_charge_state
             pos_count{static_cast<decltype(pos_count)>(cs == sidb_charge_state::POSITIVE)},
             compositions{{{{singleton, static_cast<uint64_t>(*this)}}}}
     {
-        compositions.front().pot_bounds.initialise_complete_potential_bounds(total_num_sidbs);
+        compositions.front().pot_bounds.initialize_complete_potential_bounds(total_num_sidbs);
         compositions.front().pot_bounds.set(get_singleton_sidb_ix(singleton), loc_ext_pot, loc_ext_pot);
     }
     /**
@@ -737,7 +782,7 @@ struct potential_projection_order
     /**
      * A potential projection order is an ordered set.
      */
-#if (DEBUG_SIDB_CLUSTER_HIERARCHY)
+#ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
     using pot_proj_order = std::set<potential_projection>;
 #else
     using pot_proj_order = phmap::btree_set<potential_projection>;
@@ -874,7 +919,7 @@ struct potential_projection_order
 /**
  * The type of a charge space is defined. It is a set of cluster charge states, forming the state space in our setting.
  */
-#if (DEBUG_SIDB_CLUSTER_HIERARCHY)
+#ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
 using sidb_cluster_charge_state_space = std::unordered_set<sidb_cluster_charge_state, sidb_cluster_charge_state>;
 #else
 using sidb_cluster_charge_state_space = phmap::flat_hash_set<sidb_cluster_charge_state, sidb_cluster_charge_state>;
@@ -898,7 +943,7 @@ struct sidb_cluster_ptr_hash
 /**
  * A clustering is a set of disjoint clusters, ie., none share an SiDB.
  */
-#if (DEBUG_SIDB_CLUSTER_HIERARCHY)
+#ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
 using sidb_clustering = std::set<sidb_cluster_ptr>;
 #else
 using sidb_clustering = phmap::flat_hash_set<sidb_cluster_ptr, sidb_cluster_ptr_hash>;
@@ -922,11 +967,11 @@ struct sidb_cluster
     /**
      * The SiDBs contained by the cluster.
      */
-    std::vector<sidb_ix> sidbs{};
+    std::vector<sidb_ix> sidbs;
     /**
      * The SiDBs in the layout that are not contained by the cluster.
      */
-    std::vector<sidb_ix> external_sidbs{};
+    std::vector<sidb_ix> external_sidbs;
     /**
      * The set of children of a cluster is a clustering.
      */
@@ -934,7 +979,7 @@ struct sidb_cluster
     /**
      * Every cluster carries a pointer to its parent. For the top cluster, this is `nullptr`.
      */
-    std::weak_ptr<sidb_cluster> parent{};
+    std::weak_ptr<sidb_cluster> parent;
     /**
      * The bounds on the electrostatic potential sum of SiDBs external to this cluster, local to an SiDB in the cluster.
      */
@@ -943,15 +988,17 @@ struct sidb_cluster
      * The bounds on the electrostatic potential that is projected from this cluster for the different multiset charge
      * configurations in the charge space.
      */
-#if (DEBUG_SIDB_CLUSTER_HIERARCHY)
-    std::map<sidb_ix, potential_projection_order> pot_projs{};
+#ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
+    std::map<sidb_ix, potential_projection_order>       pot_projs;
+    std::map<uint64_t, complete_potential_bounds_store> pot_projs_complete_store;
 #else
-    phmap::flat_hash_map<sidb_ix, potential_projection_order> pot_projs{};
+    phmap::flat_hash_map<sidb_ix, potential_projection_order>       pot_projs;
+    phmap::flat_hash_map<uint64_t, complete_potential_bounds_store> pot_projs_complete_store;
 #endif
     /**
      * The charge state space of the cluster.
      */
-    sidb_cluster_charge_state_space charge_space{};
+    sidb_cluster_charge_state_space charge_space;
     /**
      * SiDB cluster hierarchy constructor.
      *
@@ -1064,10 +1111,10 @@ static inline uint64_t get_singleton_sidb_ix(const sidb_cluster_ptr& c) noexcept
  * @param pst Projector state of which the corresponding compositions are requested.
  * @return The compositions associated with the multiset charge configuration of the projecting cluster.
  */
-static inline std::vector<sidb_charge_space_composition>
+static inline const std::vector<sidb_charge_space_composition>&
 get_projector_state_compositions(const sidb_cluster_projector_state& pst) noexcept
 {
-    return pst.cluster->charge_space.find(sidb_cluster_charge_state{pst.multiset_conf})->compositions;
+    return std::ref(pst.cluster->charge_space.find(sidb_cluster_charge_state{pst.multiset_conf})->compositions);
 }
 /**
  * This recursive function is used to convert a binary cluster hierarchy, as for instance returned by
@@ -1142,7 +1189,7 @@ static sidb_cluster_ptr to_sidb_cluster(const sidb_binary_cluster_hierarchy_node
         std::make_shared<sidb_cluster>(std::vector{*n.c.cbegin()}, std::vector<uint64_t>{},
                                        sidb_clustering{std::make_shared<sidb_cluster>(
                                            std::vector{*n.c.cbegin()}, std::vector<uint64_t>{}, sidb_clustering{}, 0)},
-                                       1);
+                                       0);
     (*parent->children.cbegin())->parent = std::weak_ptr<sidb_cluster>(parent);
 
     return parent;
