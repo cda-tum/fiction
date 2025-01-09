@@ -23,6 +23,7 @@
 
 // logic synthesis commands
 #ifdef FICTION_LOGIC_SYNTHESIS_FLOW
+#include "cmd/logic/abc.hpp"
 #include "cmd/logic/akers.hpp"
 #include "cmd/logic/balance.hpp"
 #include "cmd/logic/fanouts.hpp"
@@ -32,6 +33,7 @@
 #include "cmd/logic/miginvprop.hpp"
 #include "cmd/logic/random.hpp"
 #include "cmd/logic/simulate.hpp"
+#include "cmd/verification/equiv.hpp"
 #endif
 
 // physical design and validation commands
@@ -46,7 +48,6 @@
 #include "cmd/technology/cell.hpp"
 #include "cmd/technology/energy.hpp"
 #include "cmd/verification/check.hpp"
-#include "cmd/verification/equiv.hpp"
 #endif
 
 // physical simulation commands
