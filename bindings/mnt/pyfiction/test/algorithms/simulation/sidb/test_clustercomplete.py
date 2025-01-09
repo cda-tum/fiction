@@ -1,7 +1,9 @@
-from mnt.pyfiction import *
-from dotenv import load_dotenv
-import unittest
 import os
+import unittest
+
+from dotenv import load_dotenv
+
+from mnt.pyfiction import *
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 load_dotenv()
@@ -77,5 +79,5 @@ class TestClusterComplete(unittest.TestCase):
         self.assertEqual(groundstate[0].get_charge_state((3, 0)), sidb_charge_state.NEGATIVE)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

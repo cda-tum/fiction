@@ -13,7 +13,6 @@ from mnt.pyfiction import (
 )
 
 
-
 class TestExhaustiveGroundStateSimulation(unittest.TestCase):
     def test_perturber_and_sidb_pair(self):
         layout = sidb_100_lattice((10, 10))

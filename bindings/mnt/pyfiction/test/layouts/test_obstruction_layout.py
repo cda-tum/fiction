@@ -14,7 +14,6 @@ from mnt.pyfiction import (
 )
 
 
-
 class TestObstructionLayout(unittest.TestCase):
     def test_obstruction_layout_clocking_inheritance(self):
         for layout in [

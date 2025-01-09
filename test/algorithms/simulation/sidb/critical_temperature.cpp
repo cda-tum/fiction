@@ -8,7 +8,6 @@
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/algorithms/simulation/sidb/critical_temperature.hpp>
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
 #include <fiction/algorithms/simulation/sidb/is_operational.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
@@ -41,10 +40,10 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
 
         params.operational_params.simulation_parameters = sim_params;
         params.operational_params.sim_engine            = sidb_simulation_engine::QUICKSIM;
-        params.confidence_level      = 0.99;
-        params.max_temperature       = 350;
-        params.iteration_steps       = 0;
-        params.alpha                 = 0.0;
+        params.confidence_level                         = 0.99;
+        params.max_temperature                          = 350;
+        params.iteration_steps                          = 0;
+        params.alpha                                    = 0.0;
 
         const auto ct =
             critical_temperature_gate_based<TestType>(lyt, std::vector<tt>{create_id_tt()}, params, &critical_stats);
@@ -57,10 +56,10 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
     {
         params.operational_params.simulation_parameters = sim_params;
         params.operational_params.sim_engine            = sidb_simulation_engine::QUICKEXACT;
-        params.confidence_level      = 0.99;
-        params.max_temperature       = 350;
-        params.iteration_steps       = 80;
-        params.alpha                 = 0.7;
+        params.confidence_level                         = 0.99;
+        params.max_temperature                          = 350;
+        params.iteration_steps                          = 80;
+        params.alpha                                    = 0.7;
 
         const auto ct_qe =
             critical_temperature_gate_based<TestType>(lyt, std::vector<tt>{tt{}}, params, &critical_stats);
@@ -106,10 +105,10 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
 
         params.operational_params.simulation_parameters = sim_params;
         params.operational_params.sim_engine            = sidb_simulation_engine::QUICKEXACT;
-        params.confidence_level      = 0.99;
-        params.max_temperature       = 350;
-        params.iteration_steps       = 80;
-        params.alpha                 = 0.7;
+        params.confidence_level                         = 0.99;
+        params.max_temperature                          = 350;
+        params.iteration_steps                          = 80;
+        params.alpha                                    = 0.7;
 
         const auto ct = critical_temperature_gate_based(lyt, std::vector<tt>{create_id_tt()}, params, &critical_stats);
 
@@ -137,10 +136,10 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
 
         params.operational_params.simulation_parameters = sim_params;
         params.operational_params.sim_engine            = sidb_simulation_engine::QUICKEXACT;
-        params.confidence_level      = 0.99;
-        params.max_temperature       = 350;
-        params.iteration_steps       = 80;
-        params.alpha                 = 0.7;
+        params.confidence_level                         = 0.99;
+        params.max_temperature                          = 350;
+        params.iteration_steps                          = 80;
+        params.alpha                                    = 0.7;
 
         const auto ct_qe = critical_temperature_non_gate_based(lyt, params, &critical_stats);
 
@@ -186,10 +185,10 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
 
         params.operational_params.simulation_parameters = sim_params;
         params.operational_params.sim_engine            = sidb_simulation_engine::QUICKEXACT;
-        params.confidence_level      = 0.99;
-        params.max_temperature       = 350;
-        params.iteration_steps       = 80;
-        params.alpha                 = 0.7;
+        params.confidence_level                         = 0.99;
+        params.max_temperature                          = 350;
+        params.iteration_steps                          = 80;
+        params.alpha                                    = 0.7;
 
         const auto ct_qe =
             critical_temperature_gate_based(lyt, std::vector<tt>{create_and_tt()}, params, &critical_stats);
@@ -279,9 +278,9 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         params.operational_params.simulation_parameters = sim_params;
         params.operational_params.sim_engine            = sidb_simulation_engine::QUICKEXACT;
         params.confidence_level                         = 0.99;
-        params.max_temperature       = 350;
-        params.iteration_steps       = 80;
-        params.alpha                 = 0.7;
+        params.max_temperature                          = 350;
+        params.iteration_steps                          = 80;
+        params.alpha                                    = 0.7;
 
         SECTION("Kinks are allowed")
         {
@@ -363,10 +362,10 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
 
         params.operational_params.simulation_parameters = sim_params;
         params.operational_params.sim_engine            = sidb_simulation_engine::QUICKSIM;
-        params.confidence_level      = 0.99;
-        params.max_temperature       = 350;
-        params.iteration_steps       = 500;
-        params.alpha                 = 0.6;
+        params.confidence_level                         = 0.99;
+        params.max_temperature                          = 350;
+        params.iteration_steps                          = 500;
+        params.alpha                                    = 0.6;
 
         const auto ct_qs =
             critical_temperature_gate_based(lyt, std::vector<tt>{create_and_tt()}, params, &critical_stats);
@@ -417,10 +416,10 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
 
         params.operational_params.simulation_parameters = sim_params;
         params.operational_params.sim_engine            = sidb_simulation_engine::QUICKEXACT;
-        params.confidence_level      = 0.99;
-        params.max_temperature       = 350;
-        params.iteration_steps       = 80;
-        params.alpha                 = 0.7;
+        params.confidence_level                         = 0.99;
+        params.max_temperature                          = 350;
+        params.iteration_steps                          = 80;
+        params.alpha                                    = 0.7;
 
         SECTION("Kinks are allowed")
         {
@@ -497,10 +496,10 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
 
         params.operational_params.simulation_parameters = sim_params;
         params.operational_params.sim_engine            = sidb_simulation_engine::QUICKEXACT;
-        params.confidence_level      = 0.99;
-        params.max_temperature       = 350;
-        params.iteration_steps       = 80;
-        params.alpha                 = 0.7;
+        params.confidence_level                         = 0.99;
+        params.max_temperature                          = 350;
+        params.iteration_steps                          = 80;
+        params.alpha                                    = 0.7;
 
         SECTION("Kinks are allowed")
         {
@@ -564,10 +563,10 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
 
         params.operational_params.simulation_parameters = sim_params;
         params.operational_params.sim_engine            = sidb_simulation_engine::QUICKEXACT;
-        params.confidence_level      = 0.99;
-        params.max_temperature       = 350;
-        params.iteration_steps       = 80;
-        params.alpha                 = 0.7;
+        params.confidence_level                         = 0.99;
+        params.max_temperature                          = 350;
+        params.iteration_steps                          = 80;
+        params.alpha                                    = 0.7;
 
         const auto ct_qe =
             critical_temperature_gate_based(lyt, std::vector<tt>{create_id_tt()}, params, &critical_stats);
@@ -610,9 +609,9 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         params.operational_params.simulation_parameters = sim_params;
         params.operational_params.sim_engine            = sidb_simulation_engine::QUICKSIM;
         params.confidence_level                         = 0.99;
-        params.max_temperature       = 750;
-        params.iteration_steps       = 500;
-        params.alpha                 = 0.6;
+        params.max_temperature                          = 750;
+        params.iteration_steps                          = 500;
+        params.alpha                                    = 0.6;
 
         const auto ct_qe = critical_temperature_non_gate_based(lyt, params, &critical_stats);
 
@@ -653,10 +652,10 @@ TEMPLATE_TEST_CASE("Test critical_temperature function, using offset coordinates
 
         params.operational_params.simulation_parameters = sim_params;
         params.operational_params.sim_engine            = sidb_simulation_engine::QUICKSIM;
-        params.confidence_level      = 0.99;
-        params.max_temperature       = 350;
-        params.iteration_steps       = 0;
-        params.alpha                 = 0.0;
+        params.confidence_level                         = 0.99;
+        params.max_temperature                          = 350;
+        params.iteration_steps                          = 0;
+        params.alpha                                    = 0.0;
 
         const auto ct_qs =
             critical_temperature_gate_based<TestType>(lyt, std::vector<tt>{create_id_tt()}, params, &critical_stats);
@@ -686,10 +685,10 @@ TEMPLATE_TEST_CASE("Test critical_temperature function, using offset coordinates
     {
         params.operational_params.simulation_parameters = sim_params;
         params.operational_params.sim_engine            = sidb_simulation_engine::QUICKEXACT;
-        params.confidence_level      = 0.99;
-        params.max_temperature       = 350;
-        params.iteration_steps       = 80;
-        params.alpha                 = 0.7;
+        params.confidence_level                         = 0.99;
+        params.max_temperature                          = 350;
+        params.iteration_steps                          = 80;
+        params.alpha                                    = 0.7;
 
         const auto ct = critical_temperature_gate_based<TestType>(lyt, std::vector<tt>{tt{}}, params, &critical_stats);
 
@@ -724,10 +723,10 @@ TEMPLATE_TEST_CASE("Test critical_temperature function, using offset coordinates
 
         params.operational_params.simulation_parameters = sim_params;
         params.operational_params.sim_engine            = sidb_simulation_engine::QUICKEXACT;
-        params.confidence_level      = 0.99;
-        params.max_temperature       = 350;
-        params.iteration_steps       = 80;
-        params.alpha                 = 0.7;
+        params.confidence_level                         = 0.99;
+        params.max_temperature                          = 350;
+        params.iteration_steps                          = 80;
+        params.alpha                                    = 0.7;
 
         const auto ct_qe =
             critical_temperature_gate_based(lyt, std::vector<tt>{create_id_tt()}, params, &critical_stats);
@@ -756,10 +755,10 @@ TEMPLATE_TEST_CASE("Test critical_temperature function, using offset coordinates
 
         params.operational_params.simulation_parameters = sim_params;
         params.operational_params.sim_engine            = sidb_simulation_engine::QUICKEXACT;
-        params.confidence_level      = 0.99;
-        params.max_temperature       = 350;
-        params.iteration_steps       = 80;
-        params.alpha                 = 0.7;
+        params.confidence_level                         = 0.99;
+        params.max_temperature                          = 350;
+        params.iteration_steps                          = 80;
+        params.alpha                                    = 0.7;
 
         const auto ct_qe = critical_temperature_non_gate_based(lyt, params, &critical_stats);
 
@@ -805,13 +804,13 @@ TEMPLATE_TEST_CASE("Test critical_temperature function, using offset coordinates
 
         lyt.assign_cell_type({10, 19}, sidb_technology::cell_type::NORMAL);
 
-        sim_params.mu_minus          = -0.28;
+        sim_params.mu_minus                             = -0.28;
         params.operational_params.simulation_parameters = sim_params;
         params.operational_params.sim_engine            = sidb_simulation_engine::QUICKEXACT;
         params.confidence_level                         = 0.99;
-        params.max_temperature       = 350;
-        params.iteration_steps       = 80;
-        params.alpha                 = 0.7;
+        params.max_temperature                          = 350;
+        params.iteration_steps                          = 80;
+        params.alpha                                    = 0.7;
 
         const auto ct_qe =
             critical_temperature_gate_based(lyt, std::vector<tt>{create_and_tt()}, params, &critical_stats);
@@ -893,8 +892,8 @@ TEMPLATE_TEST_CASE("Critical temperature of Bestagon CX, QuickExact", "[critical
 
     params.operational_params.simulation_parameters = sim_params;
     params.operational_params.sim_engine            = sidb_simulation_engine::QUICKEXACT;
-    params.confidence_level      = 0.99;
-    params.max_temperature       = 350;
+    params.confidence_level                         = 0.99;
+    params.max_temperature                          = 350;
 
     const auto ct_qe = critical_temperature_gate_based(lyt, create_crossing_wire_tt(), params, &critical_stats);
 
@@ -927,8 +926,8 @@ TEMPLATE_TEST_CASE("Critical temperature of Bestagon double wire, QuickExact", "
 
     params.operational_params.simulation_parameters = sim_params;
     params.operational_params.sim_engine            = sidb_simulation_engine::QUICKEXACT;
-    params.confidence_level      = 0.99;
-    params.max_temperature       = 350;
+    params.confidence_level                         = 0.99;
+    params.max_temperature                          = 350;
 
     SECTION("Kinks are allowed")
     {
@@ -989,8 +988,8 @@ TEMPLATE_TEST_CASE("Critical temperature of Bestagon half adder gate, QuickExact
 
     params.operational_params.simulation_parameters = sim_params;
     params.operational_params.sim_engine            = sidb_simulation_engine::QUICKEXACT;
-    params.confidence_level      = 0.99;
-    params.max_temperature       = 350;
+    params.confidence_level                         = 0.99;
+    params.max_temperature                          = 350;
 
     SECTION("Kinks are allowed")
     {

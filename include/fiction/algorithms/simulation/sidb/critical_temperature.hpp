@@ -422,7 +422,6 @@ class critical_temperature_impl
     physical_simulation_of_bdl_iterator(const bdl_input_iterator<Lyt>& bdl_iterator) noexcept
     {
 
-
         if (params.operational_params.sim_engine == sidb_simulation_engine::QUICKEXACT)
         {
             assert(params.operational_params.simulation_parameters.base == 2 && "base number has to be 2");

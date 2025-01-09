@@ -14,7 +14,6 @@ from mnt.pyfiction import (
 )
 
 
-
 class TestQuickExact(unittest.TestCase):
     def test_three_sidbs(self):
         layout = sidb_100_lattice((2, 1))
