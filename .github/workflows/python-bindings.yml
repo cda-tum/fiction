@@ -46,7 +46,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        runs-on: [ubuntu-latest, macos-13, macos-14, macos-15, windows-latest]
+        runs-on:
+          [ubuntu-latest, macos-13, macos-14, macos-15-xlarge, windows-latest]
     steps:
       - name: Clone Repository
         uses: actions/checkout@v4
