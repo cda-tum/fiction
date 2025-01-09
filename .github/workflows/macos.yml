@@ -36,8 +36,6 @@ env:
 
 jobs:
   build_and_test_other_macos:
-    name: 🍎 ${{ matrix.os }} with ${{ matrix.compiler }} with ${{ matrix.architecture }}
-    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [macos-13, macos-14, macos-15-xlarge] # macos-15-large: intel image / macos-15-xlarge:arm64 image.
@@ -67,7 +65,8 @@ jobs:
             architecture: arm64
             compiler: g++-13
 
-      fail-fast: false
+    name: 🍎 ${{ matrix.os }} with ${{ matrix.compiler }} with ${{ matrix.architecture }}
+    runs-on: ${{ matrix.os }}
 
     steps:
       - name: Clone Repository
