@@ -772,6 +772,14 @@ class ground_state_space_impl
 
         return fixpoint;
     }
+    /**
+     * To facilitate efficient unfolding for the second stage of the simulation by *ClusterComplete*, potential bound
+     * data that is stored in the hierarchy which will not be subject to change anymore is converted to a handy format:
+     * a complete potential bounds store. It holds potential bounds for all SiDBs in the considered layout and thus
+     * addition and subtraction of other complete potential bound stores are easy to perform.
+     *
+     * @param parent The newly-forming parent cluster whose children's charge spaces become fixed upon their merging.
+     */
     void write_children_pot_bounds_to_complete_store(const sidb_cluster_ptr& parent) const noexcept
     {
         for (const sidb_cluster_ptr& child : parent->children)
