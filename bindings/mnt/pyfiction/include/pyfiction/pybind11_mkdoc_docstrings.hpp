@@ -12251,7 +12251,7 @@ seperated by a few lattice points).)doc";
 
 static const char *__doc_fiction_generate_random_sidb_layout_params_positive_charges_MAY_OCCUR =
 R"doc(Positive charges can occur, which means that the
-`can_positive_charge_occur` function returns `true`.)doc";
+`can_positive_charges_occur` function returns `true`.)doc";
 
 static const char *__doc_fiction_generate_random_sidb_layout_params_positive_sidbs =
 R"doc(If positively charged SiDBs should be prevented, SiDBs are not placed

@@ -196,7 +196,7 @@ class critical_temperature_impl
             for (auto i = 0u; i < spec.front().num_bits(); ++i, ++bii)
             {
                 // if positively charged SiDBs can occur, the SiDB layout is considered as non-operational
-                if (can_positive_charge_occur(*bii, params.operational_params.simulation_parameters))
+                if (can_positive_charges_occur(*bii, params.operational_params.simulation_parameters))
                 {
                     critical_temperature = 0.0;
                     return;

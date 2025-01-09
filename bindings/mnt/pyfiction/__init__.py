@@ -518,7 +518,6 @@ __all__ = [
     "physical_population_stability_111",
     "physical_population_stability_params",
     "physically_valid_parameters",
-    "physically_valid_parameters",
     "physically_valid_parameters_domain",
     "place",
     "population_stability_information_100",

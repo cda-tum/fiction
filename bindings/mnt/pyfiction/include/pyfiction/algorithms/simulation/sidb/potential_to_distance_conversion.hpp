@@ -20,7 +20,7 @@ inline void potential_to_distance_conversion(pybind11::module& m)
 {
     namespace py = pybind11;
 
-    m.def("potential_to_distance_conversion", &fiction::convert_potential_to_distance, py::arg("potential"),
+    m.def("potential_to_distance_conversion", &fiction::potential_to_distance_conversion, py::arg("potential"),
           py::arg("params"), py::arg("precision"), DOC(fiction_convert_potential_to_distance));
 }
 

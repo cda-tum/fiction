@@ -22,7 +22,7 @@ TEST_CASE("Conversion of potential to distance", "[potential_to_distance_convers
         uint64_t const precision         = 1;
         const double   potential_value   = 5.0;
         const double   expected_distance = 0.1;
-        REQUIRE_THAT(convert_potential_to_distance(potential_value, params, precision),
+        REQUIRE_THAT(potential_to_distance_conversion(potential_value, params, precision),
                      Catch::Matchers::WithinAbs(expected_distance, 1e-5));
     }
 
@@ -33,7 +33,7 @@ TEST_CASE("Conversion of potential to distance", "[potential_to_distance_convers
         const uint64_t precision         = 1;
         const double   potential_value   = 0.01;
         const double   expected_distance = 3.2;
-        REQUIRE_THAT(convert_potential_to_distance(potential_value, params, precision),
+        REQUIRE_THAT(potential_to_distance_conversion(potential_value, params, precision),
                      Catch::Matchers::WithinAbs(expected_distance, 1e-5));
     }
 
@@ -44,7 +44,7 @@ TEST_CASE("Conversion of potential to distance", "[potential_to_distance_convers
         const uint64_t precision         = 2;
         const double   potential_value   = 0.01;
         const double   expected_distance = 3.14;
-        REQUIRE_THAT(convert_potential_to_distance(potential_value, params, precision),
+        REQUIRE_THAT(potential_to_distance_conversion(potential_value, params, precision),
                      Catch::Matchers::WithinAbs(expected_distance, 1e-5));
     }
 
@@ -55,7 +55,7 @@ TEST_CASE("Conversion of potential to distance", "[potential_to_distance_convers
         const uint64_t precision         = 3;
         const double   potential_value   = 0.01;
         const double   expected_distance = 3.135;
-        REQUIRE_THAT(convert_potential_to_distance(potential_value, params, precision),
+        REQUIRE_THAT(potential_to_distance_conversion(potential_value, params, precision),
                      Catch::Matchers::WithinAbs(expected_distance, 1e-5));
     }
 
@@ -64,7 +64,7 @@ TEST_CASE("Conversion of potential to distance", "[potential_to_distance_convers
         const uint64_t precision         = 0;
         const double   potential_value   = 0.03;
         const double   expected_distance = 4;
-        REQUIRE_THAT(convert_potential_to_distance(potential_value, params, precision),
+        REQUIRE_THAT(potential_to_distance_conversion(potential_value, params, precision),
                      Catch::Matchers::WithinAbs(expected_distance, 1e-5));
     }
 
@@ -73,7 +73,7 @@ TEST_CASE("Conversion of potential to distance", "[potential_to_distance_convers
         const uint64_t precision         = 3;
         const double   potential_value   = std::numeric_limits<double>::infinity();
         const double   expected_distance = 0.001;
-        REQUIRE_THAT(convert_potential_to_distance(potential_value, params, precision),
+        REQUIRE_THAT(potential_to_distance_conversion(potential_value, params, precision),
                      Catch::Matchers::WithinAbs(expected_distance, 1e-5));
     }
 }

@@ -28,9 +28,9 @@ namespace fiction
  * @return The distance (unit: nm) corresponding to the given electrostatic potential.
  */
 [[nodiscard]] inline double
-convert_potential_to_distance(const double                      potential,
-                              const sidb_simulation_parameters& params    = sidb_simulation_parameters{},
-                              const uint64_t                    precision = 2) noexcept
+potential_to_distance_conversion(const double                      potential,
+                                 const sidb_simulation_parameters& params    = sidb_simulation_parameters{},
+                                 const uint64_t                    precision = 2) noexcept
 {
     // function to calculate the electrostatic potential for a given distance and given physical parameters on the H-Si
     // surface

@@ -20,22 +20,22 @@ namespace detail
 {
 
 template <typename Lyt>
-void can_positive_charge_occur(pybind11::module& m)
+void can_positive_charges_occur(pybind11::module& m)
 {
     namespace py = pybind11;
 
-    m.def("can_positive_charge_occur", &fiction::can_positive_charge_occur<Lyt>, py::arg("lyt"), py::arg("sim_params"),
-          DOC(fiction_can_positive_charge_occur));
+    m.def("can_positive_charges_occur", &fiction::can_positive_charges_occur<Lyt>, py::arg("lyt"),
+          py::arg("sim_params"), DOC(fiction_can_positive_charge_occur));
 }
 
 }  // namespace detail
 
-inline void can_positive_charge_occur(pybind11::module& m)
+inline void can_positive_charges_occur(pybind11::module& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::can_positive_charge_occur<py_sidb_100_lattice>(m);
-    detail::can_positive_charge_occur<py_sidb_111_lattice>(m);
+    detail::can_positive_charges_occur<py_sidb_100_lattice>(m);
+    detail::can_positive_charges_occur<py_sidb_111_lattice>(m);
 }
 
 }  // namespace pyfiction

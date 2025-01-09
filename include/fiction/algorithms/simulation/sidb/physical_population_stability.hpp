@@ -206,8 +206,8 @@ class physical_population_stability_impl
             for (const auto& transition : population_stability_info.transition_potentials)
             {
                 population_stability_info.distance_corresponding_to_potential[transition.first] =
-                    convert_potential_to_distance(transition.second.second, params.simulation_parameters,
-                                                  params.precision_for_distance_corresponding_to_potential);
+                    potential_to_distance_conversion(transition.second.second, params.simulation_parameters,
+                                                     params.precision_for_distance_corresponding_to_potential);
                 if (transition.second.second < minimum_potential_difference)
                 {
                     population_stability_info.critical_cell = transition.second.first;

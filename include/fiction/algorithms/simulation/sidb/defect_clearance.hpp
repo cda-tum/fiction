@@ -19,7 +19,7 @@ namespace fiction
  * @tparam CellType Cell type of the layout.
  */
 template <typename CellType>
-struct defect_clearance_result
+struct defect_clearance
 {
     /**
      * Position with maximum distance to the SiDB layout at which the placement of an SiDB defect still causes the gate
@@ -40,10 +40,10 @@ struct defect_clearance_result
  * @tparam Lyt SiDB cell-level layout type.
  * @param lyt SiDB layout for which the defect clearance is computed.
  * @param defect_inf_domain Defect influence domain of the given SiDB layout.
- * @return Defect clearance result.
+ * @return Defect clearance.
  */
 template <typename Lyt>
-[[nodiscard]] defect_clearance_result<cell<Lyt>>
+[[nodiscard]] defect_clearance<cell<Lyt>>
 calculate_defect_clearance(const Lyt& lyt, const defect_influence_domain<Lyt>& defect_inf_domain) noexcept
 {
     double    max_distance         = 0;
@@ -76,7 +76,7 @@ calculate_defect_clearance(const Lyt& lyt, const defect_influence_domain<Lyt>& d
         }
     }
 
-    return defect_clearance_result<cell<Lyt>>{max_distance_postion, max_distance};
+    return defect_clearance<cell<Lyt>>{max_distance_postion, max_distance};
 }
 
 }  // namespace fiction

@@ -23,7 +23,7 @@ namespace fiction
  * @param sim_params Physical parameters used to determine whether positively charged SiDBs can occur.
  */
 template <typename Lyt>
-[[nodiscard]] bool can_positive_charge_occur(const Lyt& lyt, const sidb_simulation_parameters& sim_params) noexcept
+[[nodiscard]] bool can_positive_charges_occur(const Lyt& lyt, const sidb_simulation_parameters& sim_params) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");

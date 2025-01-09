@@ -32,10 +32,10 @@ class TestDetermineGroundstateFromSimulationResults(unittest.TestCase):
         results = sidb_simulation_result_100()
         results.charge_distributions = [cds1, cds2, cds3]
 
-        result = groundstate_from_simulation_results(results)
-        self.assertEqual(len(result), 1)
+        ground_state = groundstate_from_simulation_results(results)
+        self.assertEqual(len(ground_state), 1)
 
-        groundstate = result[0]
+        groundstate = ground_state[0]
         self.assertEqual(groundstate.get_charge_state((0, 1)), sidb_charge_state.NEUTRAL)
         self.assertEqual(groundstate.get_charge_state((4, 1)), sidb_charge_state.NEUTRAL)
         self.assertEqual(groundstate.get_charge_state((6, 1)), sidb_charge_state.NEUTRAL)
@@ -60,10 +60,11 @@ class TestDetermineGroundstateFromSimulationResults(unittest.TestCase):
         result = groundstate_from_simulation_results(results)
         self.assertEqual(len(result), 1)
 
-        groundstate = result[0]
-        self.assertEqual(groundstate.get_charge_state((0, 1)), sidb_charge_state.NEUTRAL)
-        self.assertEqual(groundstate.get_charge_state((4, 1)), sidb_charge_state.NEUTRAL)
-        self.assertEqual(groundstate.get_charge_state((6, 1)), sidb_charge_state.NEUTRAL)
+        ground_state = result[0]
+
+        self.assertEqual(ground_state.get_charge_state((0, 1)), sidb_charge_state.NEUTRAL)
+        self.assertEqual(ground_state.get_charge_state((4, 1)), sidb_charge_state.NEUTRAL)
+        self.assertEqual(ground_state.get_charge_state((6, 1)), sidb_charge_state.NEUTRAL)
 
 
 if __name__ == "__main__":

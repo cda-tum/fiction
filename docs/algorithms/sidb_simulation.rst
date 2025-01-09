@@ -303,6 +303,8 @@ Physically Valid Parameters
         .. doxygenfunction:: fiction::physically_valid_parameters
 
    .. tab:: Python
+        .. autoclass:: mnt.pyfiction.physically_valid_parameters_domain
+            :members:
         .. autoclass:: mnt.pyfiction.physically_valid_parameters
 
 
@@ -357,12 +359,12 @@ Determine the Ground State from Simulation Results
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/algorithms/simulation/sidb/groundstate_from_simulation_results.hpp``
+        **Header:** ``fiction/algorithms/simulation/sidb/groundstate_from_simulation_result.hpp``
 
-        .. doxygenfunction:: fiction::groundstate_from_simulation_results
+        .. doxygenfunction:: fiction::groundstate_from_simulation_result
 
     .. tab:: Python
-        .. autofunction:: mnt.pyfiction.groundstate_from_simulation_results
+        .. autofunction:: mnt.pyfiction.groundstate_from_simulation_result
 
 
 Charge Detection
@@ -370,12 +372,12 @@ Charge Detection
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/algorithms/simulation/sidb/can_positive_charge_occur.hpp``
+        **Header:** ``fiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp``
 
-        .. doxygenfunction:: fiction::can_positive_charge_occur
+        .. doxygenfunction:: fiction::can_positive_charges_occur
 
     .. tab:: Python
-        .. autofunction:: mnt.pyfiction.can_positive_charge_occur
+        .. autofunction:: mnt.pyfiction.can_positive_charges_occur
 
 
 Binary-dot Logic (BDL) Pair Detection
@@ -460,7 +462,7 @@ Band-Bending Resilience
 
 .. doxygenstruct:: fiction::band_bending_resilience_params
    :members:
-.. doxygenstruct:: fiction::band_bending_resilience
+.. doxygenfunction:: fiction::band_bending_resilience
 
 
 Convert Potential to Distance
@@ -468,12 +470,12 @@ Convert Potential to Distance
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/algorithms/simulation/sidb/convert_potential_to_distance.hpp``
+        **Header:** ``fiction/algorithms/simulation/sidb/potential_to_distance_conversion.hpp``
 
-        .. doxygenfunction:: fiction::convert_potential_to_distance
+        .. doxygenfunction:: fiction::potential_to_distance_conversion
 
     .. tab:: Python
-        .. autofunction:: mnt.pyfiction.convert_potential_to_distance
+        .. autofunction:: mnt.pyfiction.potential_to_distance_conversion
 
 
 Fabrication Defects

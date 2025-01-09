@@ -42,7 +42,7 @@ struct generate_random_sidb_layout_params
          */
         FORBIDDEN,
         /**
-         * Positive charges can occur, which means that the `can_positive_charge_occur` function returns `true`.
+         * Positive charges can occur, which means that the `can_positive_charges_occur` function returns `true`.
          */
         MAY_OCCUR
     };
@@ -138,7 +138,7 @@ Lyt generate_random_sidb_layout(const Lyt&                                      
 
             if (params.positive_sidbs ==
                     generate_random_sidb_layout_params<coordinate<Lyt>>::positive_charges::FORBIDDEN &&
-                can_positive_charge_occur(lyt, params.sim_params))
+                can_positive_charges_occur(lyt, params.sim_params))
             {
                 lyt.assign_cell_type(random_coord, technology<Lyt>::cell_type::EMPTY);
             }
@@ -147,7 +147,7 @@ Lyt generate_random_sidb_layout(const Lyt&                                      
     }
 
     if (params.positive_sidbs == generate_random_sidb_layout_params<coordinate<Lyt>>::positive_charges::MAY_OCCUR &&
-        !can_positive_charge_occur(lyt, params.sim_params))
+        !can_positive_charges_occur(lyt, params.sim_params))
     {
         return generate_random_sidb_layout(lyt_skeleton, params);
     }

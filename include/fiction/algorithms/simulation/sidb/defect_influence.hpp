@@ -643,7 +643,7 @@ class defect_influence_impl
 
         const auto simulation_results = quickexact(lyt_without_defect, qe_params);
 
-        const auto ground_states = groundstate_from_simulation_results(simulation_results);
+        const auto ground_states = groundstate_from_simulation_result(simulation_results);
 
         if (lyt_without_defect.get_cell_type(defect_pos) == Lyt::technology::cell_type::EMPTY)
         {
@@ -651,7 +651,7 @@ class defect_influence_impl
 
             lyt_defect.assign_sidb_defect(defect_pos, params.defect);
 
-            if (can_positive_charge_occur(lyt_defect, params.operational_params.simulation_parameters))
+            if (can_positive_charges_occur(lyt_defect, params.operational_params.simulation_parameters))
             {
                 return defect_influence_status::INFLUENTIAL;
             }
@@ -659,7 +659,7 @@ class defect_influence_impl
             // conduct simulation with defect
             auto simulation_result_defect = quickexact(lyt_defect, qe_params);
 
-            const auto ground_states_defect = groundstate_from_simulation_results(simulation_result_defect);
+            const auto ground_states_defect = groundstate_from_simulation_result(simulation_result_defect);
 
             if (ground_states.size() != ground_states_defect.size())
             {

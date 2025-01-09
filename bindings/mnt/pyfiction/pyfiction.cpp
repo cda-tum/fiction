@@ -27,7 +27,7 @@
 #include "pyfiction/algorithms/properties/critical_path_length_and_throughput.hpp"
 #include "pyfiction/algorithms/simulation/logic_simulation.hpp"
 #include "pyfiction/algorithms/simulation/sidb/calculate_energy_and_state_type.hpp"
-#include "pyfiction/algorithms/simulation/sidb/can_positive_charge_occur.hpp"
+#include "pyfiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp"
 #include "pyfiction/algorithms/simulation/sidb/critical_temperature.hpp"
 #include "pyfiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp"
 #include "pyfiction/algorithms/simulation/sidb/detect_bdl_wires.hpp"
@@ -40,7 +40,7 @@
 // #include "pyfiction/algorithms/simulation/sidb/defect_influence.hpp"
 #include "pyfiction/algorithms/simulation/sidb/check_simulation_results_for_equivalence.hpp"
 #include "pyfiction/algorithms/simulation/sidb/displacement_robustness_domain.hpp"
-#include "pyfiction/algorithms/simulation/sidb/groundstate_from_simulation_results.hpp"
+#include "pyfiction/algorithms/simulation/sidb/groundstate_from_simulation_result.hpp"
 #include "pyfiction/algorithms/simulation/sidb/minimum_energy.hpp"
 #include "pyfiction/algorithms/simulation/sidb/occupation_probability_of_excited_states.hpp"
 #include "pyfiction/algorithms/simulation/sidb/operational_domain.hpp"
@@ -131,14 +131,13 @@ PYBIND11_MODULE(pyfiction, m, pybind11::mod_gil_not_used())
     pyfiction::sidb_simulation_engine(m);
     pyfiction::sidb_simulation_parameters(m);
     pyfiction::sidb_simulation_result(m);
-    pyfiction::can_positive_charge_occur(m);
+    pyfiction::can_positive_charges_occur(m);
     pyfiction::physical_population_stability(m);
     pyfiction::potential_to_distance_conversion(m);
     pyfiction::detect_bdl_pairs(m);
     pyfiction::detect_bdl_wires(m);
     pyfiction::is_operational(m);
     pyfiction::operational_domain(m);
-    //    pyfiction::maximum_defect_influence_distance(m);
     pyfiction::exhaustive_ground_state_simulation(m);
     pyfiction::quicksim(m);
     pyfiction::quickexact(m);
@@ -150,7 +149,7 @@ PYBIND11_MODULE(pyfiction, m, pybind11::mod_gil_not_used())
     pyfiction::critical_temperature(m);
     pyfiction::random_sidb_layout_generator(m);
     pyfiction::time_to_solution(m);
-    pyfiction::groundstate_from_simulation_results(m);
+    pyfiction::groundstate_from_simulation_result(m);
     pyfiction::check_simulation_results_for_equivalence(m);
     pyfiction::physically_valid_parameters(m);
     pyfiction::determine_displacement_robustness_domain(m);
