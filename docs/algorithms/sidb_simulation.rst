@@ -302,9 +302,9 @@ Physically Valid Parameters
 
         .. doxygenfunction:: fiction::physically_valid_parameters
 
-   .. tab:: Python
+    .. tab:: Python
         .. autoclass:: mnt.pyfiction.physically_valid_parameters_domain
-            :members:
+             :members:
         .. autoclass:: mnt.pyfiction.physically_valid_parameters
 
 
@@ -567,6 +567,6 @@ SiDB Defect Analysis
 
 **Header:** ``fiction/algorithms/simulation/sidb/calculate_defect_clearance.hpp``
 
-.. doxygenstruct:: fiction::defect_clearance_result
+.. doxygenstruct:: fiction::defect_clearance
    :members:
 .. doxygenfunction:: fiction::calculate_defect_clearance
