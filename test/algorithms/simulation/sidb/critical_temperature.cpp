@@ -685,7 +685,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function, using offset coordinates
     SECTION("One SiDB")
     {
         params.operational_params.simulation_parameters = sim_params;
-        params.operational_params.sim_engine                = sidb_simulation_engine::QUICKEXACT;
+        params.operational_params.sim_engine            = sidb_simulation_engine::QUICKEXACT;
         params.confidence_level      = 0.99;
         params.max_temperature       = 350;
         params.iteration_steps       = 80;
@@ -723,7 +723,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function, using offset coordinates
         lyt.assign_cell_type({36, 38, 0}, sidb_technology::cell_type::NORMAL);
 
         params.operational_params.simulation_parameters = sim_params;
-        params.operational_params.sim_engine                = sidb_simulation_engine::QUICKEXACT;
+        params.operational_params.sim_engine            = sidb_simulation_engine::QUICKEXACT;
         params.confidence_level      = 0.99;
         params.max_temperature       = 350;
         params.iteration_steps       = 80;
@@ -755,7 +755,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function, using offset coordinates
         lyt.assign_cell_type({2, 4}, TestType::cell_type::NORMAL);
 
         params.operational_params.simulation_parameters = sim_params;
-        params.operational_params.sim_engine                = sidb_simulation_engine::QUICKEXACT;
+        params.operational_params.sim_engine            = sidb_simulation_engine::QUICKEXACT;
         params.confidence_level      = 0.99;
         params.max_temperature       = 350;
         params.iteration_steps       = 80;
@@ -807,8 +807,8 @@ TEMPLATE_TEST_CASE("Test critical_temperature function, using offset coordinates
 
         sim_params.mu_minus          = -0.28;
         params.operational_params.simulation_parameters = sim_params;
-        params.operational_params.sim_engine                = sidb_simulation_engine::QUICKEXACT;
-        params.confidence_level      = 0.99;
+        params.operational_params.sim_engine            = sidb_simulation_engine::QUICKEXACT;
+        params.confidence_level                         = 0.99;
         params.max_temperature       = 350;
         params.iteration_steps       = 80;
         params.alpha                 = 0.7;
@@ -892,7 +892,7 @@ TEMPLATE_TEST_CASE("Critical temperature of Bestagon CX, QuickExact", "[critical
     critical_temperature_stats critical_stats{};
 
     params.operational_params.simulation_parameters = sim_params;
-    params.operational_params.sim_engine                = sidb_simulation_engine::QUICKEXACT;
+    params.operational_params.sim_engine            = sidb_simulation_engine::QUICKEXACT;
     params.confidence_level      = 0.99;
     params.max_temperature       = 350;
 
@@ -926,7 +926,7 @@ TEMPLATE_TEST_CASE("Critical temperature of Bestagon double wire, QuickExact", "
     critical_temperature_stats critical_stats{};
 
     params.operational_params.simulation_parameters = sim_params;
-    params.operational_params.sim_engine                = sidb_simulation_engine::QUICKEXACT;
+    params.operational_params.sim_engine            = sidb_simulation_engine::QUICKEXACT;
     params.confidence_level      = 0.99;
     params.max_temperature       = 350;
 
@@ -988,7 +988,7 @@ TEMPLATE_TEST_CASE("Critical temperature of Bestagon half adder gate, QuickExact
     critical_temperature_stats critical_stats{};
 
     params.operational_params.simulation_parameters = sim_params;
-    params.operational_params.sim_engine                = sidb_simulation_engine::QUICKEXACT;
+    params.operational_params.sim_engine            = sidb_simulation_engine::QUICKEXACT;
     params.confidence_level      = 0.99;
     params.max_temperature       = 350;
 
