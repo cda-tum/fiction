@@ -1128,6 +1128,56 @@ static const char *__doc_fiction_bounding_box_2d_x_size = R"doc(The horizontal s
 
 static const char *__doc_fiction_bounding_box_2d_y_size = R"doc(The vertical size of the bounding box in layout coordinates.)doc";
 
+static const char *__doc_fiction_branching_signal_container =
+R"doc(A container class to help identify layout locations of branching nodes
+like fanouts. When a node from a network is to placed in a layout,
+fetching the node's fanins and looking for their locations in the
+layout does not work properly when branching nodes like fanouts are
+involved that got extended by wire nodes. This container solves that
+issue.
+
+Template parameter ``Lyt``:
+    Gate-level layout type.
+
+Template parameter ``Ntk``:
+    Logic network type.
+
+Template parameter ``fanout_size``:
+    Maximum fanout size possible in the layout and/or the network.)doc";
+
+static const char *__doc_fiction_branching_signal_container_branches = R"doc(Storage for all branches.)doc";
+
+static const char *__doc_fiction_branching_signal_container_branching_signal = R"doc(Branch type.)doc";
+
+static const char *__doc_fiction_branching_signal_container_branching_signal_branching_signal = R"doc()doc";
+
+static const char *__doc_fiction_branching_signal_container_branching_signal_lyt_signal = R"doc()doc";
+
+static const char *__doc_fiction_branching_signal_container_branching_signal_ntk_node = R"doc()doc";
+
+static const char *__doc_fiction_branching_signal_container_operator_array =
+R"doc(Accesses the branching container to find the location of a given node
+`n`. Returns the signal to that location if it was already stored or
+the default signal, otherwise.
+
+Parameter ``n``:
+    Node whose branching position is desired.
+
+Returns:
+    Signal to `n`'s layout location or the default signal if it wasn't
+    found.)doc";
+
+static const char *__doc_fiction_branching_signal_container_update_branch =
+R"doc(Updates the given node's branch by another layout signal, thereby,
+creating a new branch or updating the position of an existing one,
+e.g., if further wire segments were moving the head of the branch.
+
+Parameter ``ntk_node``:
+    Node whose branch is to be updated.
+
+Parameter ``lyt_signal``:
+    New signal pointing to the end of the branch.)doc";
+
 static const char *__doc_fiction_calculate_energy_and_state_type_with_kinks_accepted =
 R"doc(This function takes in an SiDB energy distribution. For each charge
 distribution, the state type is determined (i.e. erroneous,
@@ -6655,32 +6705,6 @@ Template parameter ``TT``:
 
 static const char *__doc_fiction_detail_is_operational_impl_bii = R"doc(Iterator that iterates over all possible input states.)doc";
 
-static const char *__doc_fiction_detail_is_operational_impl_can_layout_be_discarded =
-R"doc(This function evaluates whether the given layout can be discarded
-since it cannot implement the given Boolean function. The filtering is
-subdivided into three single filtering steps: (1) discarding SiDB
-layouts with potentially positively charged SiDBs, (2) utilizing an
-efficient method to identify and discard SiDB layouts that do not
-satisfy physical model constraints under the I/O pin conditions
-required for the desired Boolean function, and (3) detecting I/O
-signal instability.
-
-Template parameter ``ChargeLyt``:
-    The charge distribution surface layout type.
-
-Parameter ``input_pattern``:
-    The current input pattern.
-
-Parameter ``cds_canvas``:
-    The charge distribution of the canvas layout.
-
-Parameter ``dependent_cell``:
-    A dependent-cell of the canvas SiDBs.
-
-Returns:
-    An optional layout_invalidity_reason indicating the reason why the
-    layout is non-operational.)doc";
-
 static const char *__doc_fiction_detail_is_operational_impl_canvas_lyt = R"doc(Layout consisting of all canvas SiDBs.)doc";
 
 static const char *__doc_fiction_detail_is_operational_impl_check_existence_of_kinks_in_input_wires =
@@ -6791,6 +6815,32 @@ Parameter ``minimal_energy_of_physically_valid_layout``:
 
 Returns:
     `true` if the I/O signal is unstable, `false` otherwise.)doc";
+
+static const char *__doc_fiction_detail_is_operational_impl_is_layout_invalid =
+R"doc(This function evaluates whether the given layout is invalid, i.e., it
+cannot implement the given Boolean function. This is done in three
+separate filtering steps: (1) discarding SiDB layouts with potentially
+positively charged SiDBs, (2) utilizing an efficient method to
+identify and discard SiDB layouts that do not satisfy physical model
+constraints under the I/O pin conditions required for the desired
+Boolean function, and (3) detecting I/O signal instability.
+
+Template parameter ``ChargeLyt``:
+    The charge distribution surface layout type.
+
+Parameter ``input_pattern``:
+    The current input pattern.
+
+Parameter ``cds_canvas``:
+    The charge distribution of the canvas layout.
+
+Parameter ``dependent_cell``:
+    A dependent-cell of the canvas SiDBs.
+
+Returns:
+    A `layout_invalidity_reason` object indicating why the layout is
+    non-operational; or `std::nullopt` if it could not certainly be
+    determined to be in fact non-operational.)doc";
 
 static const char *__doc_fiction_detail_is_operational_impl_is_operational_impl =
 R"doc(Constructor to initialize the algorithm with a layout and parameters.
@@ -9894,7 +9944,9 @@ Parameter ``current_input_index``:
     The index representing the current input pattern.
 
 Returns:
-    The output of the truth tables for the given input index.)doc";
+    A `std::optional<uint64_t>` containing the output of the truth
+    tables if the number of truth tables does not exceed 64; or
+    `std::nullopt` if the number of truth tables exceeds 64.)doc";
 
 static const char *__doc_fiction_even_column_cartesian =
 R"doc(\verbatim +-------+ +-------+ | | | | +-------+ (1,0) +-------+ (3,0)
@@ -10180,6 +10232,20 @@ Parameter ``lyt``:
 
 Returns:
     List of all routing objectives in the given layout.)doc";
+
+static const char *__doc_fiction_fanin_container =
+R"doc(Container that stores fanins of a node in a network, including whether
+one of them is a constant.
+
+Note that this container assumes that each node has a maximum of one
+constant fanin.
+
+Template parameter ``Ntk``:
+    `mockturtle` network type.)doc";
+
+static const char *__doc_fiction_fanin_container_constant_fanin =
+R"doc(Has a value if a fanin node is constant. In that case, it represents
+the constant value.)doc";
 
 static const char *__doc_fiction_fanin_edge_container =
 R"doc(Container that stores fanin edges of a node in a network, including
@@ -13872,7 +13938,7 @@ operational.)doc";
 
 static const char *__doc_fiction_is_operational_params_operational_analysis_strategy =
 R"doc(Simulation method to determine if the layout is operational or non-
-operational. There are three possible modes:
+operational. There are three possible strategies:
 
 - `SIMULATION_ONLY`: This setting does not apply any filtering
 strategies to determine if the layout is operational. Instead, it
@@ -13887,7 +13953,7 @@ the algorithm checks if filtering strategies have detected whether the
 layout is non-operational. This only provides any runtime benefits if
 kinks are rejected.)doc";
 
-static const char *__doc_fiction_is_operational_params_operational_analysis_strategy_FILTER_BASED =
+static const char *__doc_fiction_is_operational_params_operational_analysis_strategy_FILTER_ONLY =
 R"doc(Apply filtering exclusively to determine whether the layout is non-
 operational. If the layout passes all filter steps, it is considered
 operational.
@@ -13900,7 +13966,7 @@ R"doc(Before a physical simulation is conducted, the algorithm checks if
 filter strategies can determine that the layout is non-operational.
 This only provides any runtime benefits if kinks are rejected.)doc";
 
-static const char *__doc_fiction_is_operational_params_operational_analysis_strategy_SIMULATION_BASED =
+static const char *__doc_fiction_is_operational_params_operational_analysis_strategy_SIMULATION_ONLY =
 R"doc(Do not apply filter strategies to determine whether the layout is
 operational. Instead, rely solely on physical simulation.)doc";
 
@@ -15325,6 +15391,158 @@ static const char *__doc_fiction_path_set_add = R"doc()doc";
 static const char *__doc_fiction_path_set_contains = R"doc()doc";
 
 static const char *__doc_fiction_place =
+R"doc(Place 0-input gates.
+
+Template parameter ``Lyt``:
+    Gate-level layout type.
+
+Template parameter ``Ntk``:
+    Logic network type.
+
+Parameter ``lyt``:
+    Gate-level layout in which to place a 0-input gate.
+
+Parameter ``t``:
+    Tile in `lyt` to place the gate onto.
+
+Parameter ``ntk``:
+    Network whose node is to be placed.
+
+Parameter ``n``:
+    Node in `ntk` to place onto `t` in `lyt`.
+
+Returns:
+    Signal pointing to the placed gate in `lyt`.)doc";
+
+static const char *__doc_fiction_place_2 =
+R"doc(Place 1-input gates.
+
+Template parameter ``Lyt``:
+    Gate-level layout type.
+
+Template parameter ``Ntk``:
+    Logic network type.
+
+Parameter ``lyt``:
+    Gate-level layout in which to place a 1-input gate.
+
+Parameter ``t``:
+    Tile in `lyt` to place the gate onto.
+
+Parameter ``ntk``:
+    Network whose node is to be placed.
+
+Parameter ``n``:
+    Node in `ntk` to place onto `t` in `lyt`.
+
+Parameter ``a``:
+    Incoming signal to the newly placed gate in `lyt`.
+
+Returns:
+    Signal pointing to the placed gate in `lyt`.)doc";
+
+static const char *__doc_fiction_place_3 =
+R"doc(Place 2-input gates.
+
+Template parameter ``Lyt``:
+    Gate-level layout type.
+
+Template parameter ``Ntk``:
+    Logic network type.
+
+Parameter ``lyt``:
+    Gate-level layout in which to place a 2-input gate.
+
+Parameter ``t``:
+    Tile in `lyt` to place the gate onto.
+
+Parameter ``ntk``:
+    Network whose node is to be placed.
+
+Parameter ``n``:
+    Node in `ntk` to place onto `t` in `lyt`.
+
+Parameter ``a``:
+    First incoming signal to the newly placed gate in `lyt`.
+
+Parameter ``b``:
+    Second incoming signal to the newly placed gate in `lyt`.
+
+Parameter ``c``:
+    Third optional incoming constant value signal to the newly placed
+    gate in `lyt`. Might change the gate function when set, e.g., from
+    a MAJ to an AND if `c == false`.
+
+Returns:
+    Signal pointing to the placed gate in `lyt`.)doc";
+
+static const char *__doc_fiction_place_4 =
+R"doc(Place 3-input gates.
+
+Template parameter ``Lyt``:
+    Gate-level layout type.
+
+Template parameter ``Ntk``:
+    Logic network type.
+
+Parameter ``lyt``:
+    Gate-level layout in which to place a 3-input gate.
+
+Parameter ``t``:
+    Tile in `lyt` to place the gate onto.
+
+Parameter ``ntk``:
+    Network whose node is to be placed.
+
+Parameter ``n``:
+    Node in `ntk` to place onto `t` in `lyt`.
+
+Parameter ``a``:
+    First incoming signal to the newly placed gate in `lyt`.
+
+Parameter ``b``:
+    Second incoming signal to the newly placed gate in `lyt`.
+
+Parameter ``c``:
+    Third incoming signal to the newly placed gate in `lyt`.
+
+Returns:
+    Signal pointing to the placed gate in `lyt`.)doc";
+
+static const char *__doc_fiction_place_5 =
+R"doc(Place any gate from a network. This function automatically identifies
+the arity of the passed node and fetches its incoming signals from the
+given network and a provided `mockturtle::node_map`. This function
+does not update the `mockturtle::node_map`.
+
+Template parameter ``Lyt``:
+    Gate-level layout type.
+
+Template parameter ``Ntk``:
+    Logic network type.
+
+Parameter ``lyt``:
+    Gate-level layout in which to place any gate.
+
+Parameter ``t``:
+    Tile in `lyt` to place the gate onto.
+
+Parameter ``ntk``:
+    Network whose node is to be placed.
+
+Parameter ``n``:
+    Node in `ntk` to place onto `t` in `lyt`.
+
+Parameter ``node2pos``:
+    Mapping from network nodes to layout signals, i.e., a pointer to
+    their position in the layout. The map is used to fetch location of
+    the fanins. The `mockturtle::node_map` is not updated by this
+    function.
+
+Returns:
+    Signal to the newly placed gate in `lyt`.)doc";
+
+static const char *__doc_fiction_place_6 =
 R"doc(Place any gate from a network. This function automatically identifies
 the arity of the passed node and fetches its incoming signals from the
 given network and a provided branching_signal_container
@@ -19306,6 +19524,12 @@ static const char *__doc_fmt_formatter_format_2 = R"doc()doc";
 static const char *__doc_fmt_formatter_parse = R"doc()doc";
 
 static const char *__doc_fmt_formatter_parse_2 = R"doc()doc";
+
+static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_layouts_coordinates_hpp_1090_8 = R"doc()doc";
+
+static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_layouts_coordinates_hpp_1106_8 = R"doc()doc";
+
+static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_technology_cell_ports_hpp_291_8 = R"doc()doc";
 
 static const char *__doc_mockturtle_detail_foreach_element_if_transform = R"doc()doc";
 
