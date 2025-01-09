@@ -1133,6 +1133,56 @@ static const char *__doc_fiction_bounding_box_2d_x_size = R"doc(The horizontal s
 
 static const char *__doc_fiction_bounding_box_2d_y_size = R"doc(The vertical size of the bounding box in layout coordinates.)doc";
 
+static const char *__doc_fiction_branching_signal_container =
+R"doc(A container class to help identify layout locations of branching nodes
+like fanouts. When a node from a network is to placed in a layout,
+fetching the node's fanins and looking for their locations in the
+layout does not work properly when branching nodes like fanouts are
+involved that got extended by wire nodes. This container solves that
+issue.
+
+Template parameter ``Lyt``:
+    Gate-level layout type.
+
+Template parameter ``Ntk``:
+    Logic network type.
+
+Template parameter ``fanout_size``:
+    Maximum fanout size possible in the layout and/or the network.)doc";
+
+static const char *__doc_fiction_branching_signal_container_branches = R"doc(Storage for all branches.)doc";
+
+static const char *__doc_fiction_branching_signal_container_branching_signal = R"doc(Branch type.)doc";
+
+static const char *__doc_fiction_branching_signal_container_branching_signal_branching_signal = R"doc()doc";
+
+static const char *__doc_fiction_branching_signal_container_branching_signal_lyt_signal = R"doc()doc";
+
+static const char *__doc_fiction_branching_signal_container_branching_signal_ntk_node = R"doc()doc";
+
+static const char *__doc_fiction_branching_signal_container_operator_array =
+R"doc(Accesses the branching container to find the location of a given node
+`n`. Returns the signal to that location if it was already stored or
+the default signal, otherwise.
+
+Parameter ``n``:
+    Node whose branching position is desired.
+
+Returns:
+    Signal to `n`'s layout location or the default signal if it wasn't
+    found.)doc";
+
+static const char *__doc_fiction_branching_signal_container_update_branch =
+R"doc(Updates the given node's branch by another layout signal, thereby,
+creating a new branch or updating the position of an existing one,
+e.g., if further wire segments were moving the head of the branch.
+
+Parameter ``ntk_node``:
+    Node whose branch is to be updated.
+
+Parameter ``lyt_signal``:
+    New signal pointing to the end of the branch.)doc";
+
 static const char *__doc_fiction_calculate_defect_clearance =
 R"doc(Computes the defect clearance for a given SiDB layout based on a
 defect influence domain. The defect clearance is the maximum distance
@@ -1149,7 +1199,7 @@ Parameter ``defect_inf_domain``:
     Defect influence domain of the given SiDB layout.
 
 Returns:
-    Defect clearance result.)doc";
+    Defect clearance.)doc";
 
 static const char *__doc_fiction_calculate_energy_and_state_type_with_kinks_accepted =
 R"doc(This function takes in an SiDB energy distribution. For each charge
@@ -1221,7 +1271,7 @@ Returns:
     Electrostatic potential energy of all charge distributions with
     state type.)doc";
 
-static const char *__doc_fiction_can_positive_charge_occur =
+static const char *__doc_fiction_can_positive_charges_occur =
 R"doc(This algorithm determines if positively charged SiDBs can occur in a
 given SiDB cell-level layout due to strong electrostatic interaction.
 
@@ -2933,33 +2983,6 @@ Returns:
     A logic network of type `NtkDest` that is logically equivalent to
     `ntk`.)doc";
 
-static const char *__doc_fiction_convert_potential_to_distance =
-R"doc(The electrostatic potential on hydrogen-passivated silicon is
-typically modeled using a screened Coulomb potential. This
-electrostatic potential is commonly employed to determine the
-electrostatic potential for a given distance (between SiDB and point
-under consideration) and given physical parameters. However, the
-function provided here serves the inverse purpose by calculating the
-distance for a given potential and given physical parameters.
-
-@note Runtime depends exponentially on the provided precision.
-
-Parameter ``params``:
-    The physical parameters for a given hydrogen-passivated silicon
-    surface.
-
-Parameter ``potential``:
-    The electrostatic potential (unit: V) to be converted to a
-    distance.
-
-Parameter ``precision``:
-    The precision level for the conversion, specifying the number of
-    decimal places.
-
-Returns:
-    The distance (unit: nm) corresponding to the given electrostatic
-    potential.)doc";
-
 static const char *__doc_fiction_coord_iterator =
 R"doc(An iterator type that allows to enumerate coordinates in order within
 a boundary.
@@ -3744,17 +3767,17 @@ static const char *__doc_fiction_debug_write_dot_layout = R"doc()doc";
 
 static const char *__doc_fiction_debug_write_dot_network = R"doc()doc";
 
-static const char *__doc_fiction_defect_clearance_result =
+static const char *__doc_fiction_defect_clearance =
 R"doc(Results of the defect clearance calculation.
 
 Template parameter ``CellType``:
     Cell type of the layout.)doc";
 
-static const char *__doc_fiction_defect_clearance_result_defect_clearance_distance =
+static const char *__doc_fiction_defect_clearance_defect_clearance_distance =
 R"doc(The maximum of the minimum distances between any SiDB of the layout
 and the defect responsible for gate failure (unit: nm).)doc";
 
-static const char *__doc_fiction_defect_clearance_result_defect_position =
+static const char *__doc_fiction_defect_clearance_defect_position =
 R"doc(Position with maximum distance to the SiDB layout at which the
 placement of an SiDB defect still causes the gate to fail.)doc";
 
@@ -10548,6 +10571,20 @@ Parameter ``lyt``:
 Returns:
     List of all routing objectives in the given layout.)doc";
 
+static const char *__doc_fiction_fanin_container =
+R"doc(Container that stores fanins of a node in a network, including whether
+one of them is a constant.
+
+Note that this container assumes that each node has a maximum of one
+constant fanin.
+
+Template parameter ``Ntk``:
+    `mockturtle` network type.)doc";
+
+static const char *__doc_fiction_fanin_container_constant_fanin =
+R"doc(Has a value if a fanin node is constant. In that case, it represents
+the constant value.)doc";
+
 static const char *__doc_fiction_fanin_edge_container =
 R"doc(Container that stores fanin edges of a node in a network, including
 whether one of them is a constant.
@@ -12769,7 +12806,7 @@ Returns:
 
 static const char *__doc_fiction_gray_code_iterator_start_number = R"doc(Start number of the iteration.)doc";
 
-static const char *__doc_fiction_groundstate_from_simulation_results =
+static const char *__doc_fiction_groundstate_from_simulation_result =
 R"doc(This function calculates the ground state charge distributions from
 the provided simulation results. The ground state charge distributions
 are those with energy closest to the minimum energy found in the
@@ -15634,6 +15671,158 @@ Returns:
     point.)doc";
 
 static const char *__doc_fiction_place =
+R"doc(Place 0-input gates.
+
+Template parameter ``Lyt``:
+    Gate-level layout type.
+
+Template parameter ``Ntk``:
+    Logic network type.
+
+Parameter ``lyt``:
+    Gate-level layout in which to place a 0-input gate.
+
+Parameter ``t``:
+    Tile in `lyt` to place the gate onto.
+
+Parameter ``ntk``:
+    Network whose node is to be placed.
+
+Parameter ``n``:
+    Node in `ntk` to place onto `t` in `lyt`.
+
+Returns:
+    Signal pointing to the placed gate in `lyt`.)doc";
+
+static const char *__doc_fiction_place_2 =
+R"doc(Place 1-input gates.
+
+Template parameter ``Lyt``:
+    Gate-level layout type.
+
+Template parameter ``Ntk``:
+    Logic network type.
+
+Parameter ``lyt``:
+    Gate-level layout in which to place a 1-input gate.
+
+Parameter ``t``:
+    Tile in `lyt` to place the gate onto.
+
+Parameter ``ntk``:
+    Network whose node is to be placed.
+
+Parameter ``n``:
+    Node in `ntk` to place onto `t` in `lyt`.
+
+Parameter ``a``:
+    Incoming signal to the newly placed gate in `lyt`.
+
+Returns:
+    Signal pointing to the placed gate in `lyt`.)doc";
+
+static const char *__doc_fiction_place_3 =
+R"doc(Place 2-input gates.
+
+Template parameter ``Lyt``:
+    Gate-level layout type.
+
+Template parameter ``Ntk``:
+    Logic network type.
+
+Parameter ``lyt``:
+    Gate-level layout in which to place a 2-input gate.
+
+Parameter ``t``:
+    Tile in `lyt` to place the gate onto.
+
+Parameter ``ntk``:
+    Network whose node is to be placed.
+
+Parameter ``n``:
+    Node in `ntk` to place onto `t` in `lyt`.
+
+Parameter ``a``:
+    First incoming signal to the newly placed gate in `lyt`.
+
+Parameter ``b``:
+    Second incoming signal to the newly placed gate in `lyt`.
+
+Parameter ``c``:
+    Third optional incoming constant value signal to the newly placed
+    gate in `lyt`. Might change the gate function when set, e.g., from
+    a MAJ to an AND if `c == false`.
+
+Returns:
+    Signal pointing to the placed gate in `lyt`.)doc";
+
+static const char *__doc_fiction_place_4 =
+R"doc(Place 3-input gates.
+
+Template parameter ``Lyt``:
+    Gate-level layout type.
+
+Template parameter ``Ntk``:
+    Logic network type.
+
+Parameter ``lyt``:
+    Gate-level layout in which to place a 3-input gate.
+
+Parameter ``t``:
+    Tile in `lyt` to place the gate onto.
+
+Parameter ``ntk``:
+    Network whose node is to be placed.
+
+Parameter ``n``:
+    Node in `ntk` to place onto `t` in `lyt`.
+
+Parameter ``a``:
+    First incoming signal to the newly placed gate in `lyt`.
+
+Parameter ``b``:
+    Second incoming signal to the newly placed gate in `lyt`.
+
+Parameter ``c``:
+    Third incoming signal to the newly placed gate in `lyt`.
+
+Returns:
+    Signal pointing to the placed gate in `lyt`.)doc";
+
+static const char *__doc_fiction_place_5 =
+R"doc(Place any gate from a network. This function automatically identifies
+the arity of the passed node and fetches its incoming signals from the
+given network and a provided `mockturtle::node_map`. This function
+does not update the `mockturtle::node_map`.
+
+Template parameter ``Lyt``:
+    Gate-level layout type.
+
+Template parameter ``Ntk``:
+    Logic network type.
+
+Parameter ``lyt``:
+    Gate-level layout in which to place any gate.
+
+Parameter ``t``:
+    Tile in `lyt` to place the gate onto.
+
+Parameter ``ntk``:
+    Network whose node is to be placed.
+
+Parameter ``n``:
+    Node in `ntk` to place onto `t` in `lyt`.
+
+Parameter ``node2pos``:
+    Mapping from network nodes to layout signals, i.e., a pointer to
+    their position in the layout. The map is used to fetch location of
+    the fanins. The `mockturtle::node_map` is not updated by this
+    function.
+
+Returns:
+    Signal to the newly placed gate in `lyt`.)doc";
+
+static const char *__doc_fiction_place_6 =
 R"doc(Place any gate from a network. This function automatically identifies
 the arity of the passed node and fetches its incoming signals from the
 given network and a provided branching_signal_container
@@ -15925,6 +16114,33 @@ static const char *__doc_fiction_post_layout_optimization_stats_x_size_before = 
 static const char *__doc_fiction_post_layout_optimization_stats_y_size_after = R"doc(Layout height after the post-layout optimization process.)doc";
 
 static const char *__doc_fiction_post_layout_optimization_stats_y_size_before = R"doc(Layout height before the post-layout optimization process.)doc";
+
+static const char *__doc_fiction_potential_to_distance_conversion =
+R"doc(The electrostatic potential on hydrogen-passivated silicon is
+typically modeled using a screened Coulomb potential. This
+electrostatic potential is commonly employed to determine the
+electrostatic potential for a given distance (between SiDB and point
+under consideration) and given physical parameters. However, the
+function provided here serves the inverse purpose by calculating the
+distance for a given potential and given physical parameters.
+
+@note Runtime depends exponentially on the provided precision.
+
+Parameter ``params``:
+    The physical parameters for a given hydrogen-passivated silicon
+    surface.
+
+Parameter ``potential``:
+    The electrostatic potential (unit: V) to be converted to a
+    distance.
+
+Parameter ``precision``:
+    The precision level for the conversion, specifying the number of
+    decimal places.
+
+Returns:
+    The distance (unit: nm) corresponding to the given electrostatic
+    potential.)doc";
 
 static const char *__doc_fiction_print_cell_level_layout =
 R"doc(Writes a simplified 2D representation of a cell-level layout to an
@@ -19676,6 +19892,12 @@ static const char *__doc_fmt_formatter_format_2 = R"doc()doc";
 static const char *__doc_fmt_formatter_parse = R"doc()doc";
 
 static const char *__doc_fmt_formatter_parse_2 = R"doc()doc";
+
+static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_layouts_coordinates_hpp_1090_8 = R"doc()doc";
+
+static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_layouts_coordinates_hpp_1106_8 = R"doc()doc";
+
+static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_technology_cell_ports_hpp_291_8 = R"doc()doc";
 
 static const char *__doc_mockturtle_detail_foreach_element_if_transform = R"doc()doc";
 
