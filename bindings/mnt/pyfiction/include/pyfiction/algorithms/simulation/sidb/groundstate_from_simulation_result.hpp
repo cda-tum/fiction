@@ -24,9 +24,8 @@ void groundstate_from_simulation_result(pybind11::module& m)
 {
     namespace py = pybind11;
 
-    // TODO updat docu
     m.def("groundstate_from_simulation_result", &fiction::groundstate_from_simulation_result<Lyt>,
-          py::arg("simulation_results"), DOC(fiction_groundstate_from_simulation_results));
+          py::arg("simulation_results"), DOC(fiction_groundstate_from_simulation_result));
 }
 
 }  // namespace detail

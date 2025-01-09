@@ -27,7 +27,6 @@ void physically_valid_parameters(pybind11::module& m)
 {
     namespace py = pybind11;
 
-    // TODO update Docu
     m.def("physically_valid_parameters", &fiction::physically_valid_parameters<Lyt>, py::arg("cds"),
           py::arg("params") = fiction::operational_domain_params{}, DOC(fiction_physically_valid_parameters));
 }
