@@ -9944,9 +9944,7 @@ Parameter ``current_input_index``:
     The index representing the current input pattern.
 
 Returns:
-    A `std::optional<uint64_t>` containing the output of the truth
-    tables if the number of truth tables does not exceed 64; or
-    `std::nullopt` if the number of truth tables exceeds 64.)doc";
+    Output of the truth tables.)doc";
 
 static const char *__doc_fiction_even_column_cartesian =
 R"doc(\verbatim +-------+ +-------+ | | | | +-------+ (1,0) +-------+ (3,0)
