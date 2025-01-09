@@ -39,8 +39,8 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         lyt.assign_cell_type({6, 1, 0}, sidb_technology::cell_type::OUTPUT);
         lyt.assign_cell_type({8, 1, 0}, sidb_technology::cell_type::OUTPUT);
 
-        params.simulation_parameters = sim_params;
-        params.engine                = sidb_simulation_engine::QUICKSIM;
+        params.operational_params.simulation_parameters = sim_params;
+        params.operational_params.sim_engine            = sidb_simulation_engine::QUICKSIM;
         params.confidence_level      = 0.99;
         params.max_temperature       = 350;
         params.iteration_steps       = 0;
@@ -55,8 +55,8 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
 
     SECTION("No SiDB")
     {
-        params.simulation_parameters = sim_params;
-        params.engine                = sidb_simulation_engine::QUICKEXACT;
+        params.operational_params.simulation_parameters = sim_params;
+        params.operational_params.sim_engine            = sidb_simulation_engine::QUICKEXACT;
         params.confidence_level      = 0.99;
         params.max_temperature       = 350;
         params.iteration_steps       = 80;
@@ -70,7 +70,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
 
 #if (FICTION_ALGLIB_ENABLED)
 
-        params.engine = sidb_simulation_engine::CLUSTERCOMPLETE;
+        params.operational_params.sim_engine = sidb_simulation_engine::CLUSTERCOMPLETE;
 
         const auto ct_cc =
             critical_temperature_gate_based<TestType>(lyt, std::vector<tt>{tt{}}, params, &critical_stats);
@@ -104,8 +104,8 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
 
         lyt.assign_cell_type({36, 19, 0}, sidb_technology::cell_type::NORMAL);
 
-        params.simulation_parameters = sim_params;
-        params.engine                = sidb_simulation_engine::QUICKEXACT;
+        params.operational_params.simulation_parameters = sim_params;
+        params.operational_params.sim_engine            = sidb_simulation_engine::QUICKEXACT;
         params.confidence_level      = 0.99;
         params.max_temperature       = 350;
         params.iteration_steps       = 80;
@@ -117,7 +117,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
 
 #if (FICTION_ALGLIB_ENABLED)
 
-        params.engine = sidb_simulation_engine::CLUSTERCOMPLETE;
+        params.operational_params.sim_engine = sidb_simulation_engine::CLUSTERCOMPLETE;
 
         const auto ct_cc =
             critical_temperature_gate_based(lyt, std::vector<tt>{create_id_tt()}, params, &critical_stats);
@@ -135,8 +135,8 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         lyt.assign_cell_type({2, 0}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({2, 2}, TestType::cell_type::NORMAL);
 
-        params.simulation_parameters = sim_params;
-        params.engine                = sidb_simulation_engine::QUICKEXACT;
+        params.operational_params.simulation_parameters = sim_params;
+        params.operational_params.sim_engine            = sidb_simulation_engine::QUICKEXACT;
         params.confidence_level      = 0.99;
         params.max_temperature       = 350;
         params.iteration_steps       = 80;
@@ -151,7 +151,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
 
 #if (FICTION_ALGLIB_ENABLED)
 
-        params.engine = sidb_simulation_engine::CLUSTERCOMPLETE;
+        params.operational_params.sim_engine = sidb_simulation_engine::CLUSTERCOMPLETE;
 
         const auto ct_cc = critical_temperature_non_gate_based(lyt, params, &critical_stats);
 
@@ -184,8 +184,8 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
 
         sim_params.mu_minus = -0.28;
 
-        params.simulation_parameters = sim_params;
-        params.engine                = sidb_simulation_engine::QUICKEXACT;
+        params.operational_params.simulation_parameters = sim_params;
+        params.operational_params.sim_engine            = sidb_simulation_engine::QUICKEXACT;
         params.confidence_level      = 0.99;
         params.max_temperature       = 350;
         params.iteration_steps       = 80;
@@ -200,7 +200,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
 
 #if (FICTION_ALGLIB_ENABLED)
 
-        params.engine = sidb_simulation_engine::CLUSTERCOMPLETE;
+        params.operational_params.sim_engine = sidb_simulation_engine::CLUSTERCOMPLETE;
 
         const auto ct_cc =
             critical_temperature_gate_based(lyt, std::vector<tt>{create_and_tt()}, params, &critical_stats);
@@ -218,9 +218,9 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
 
         sim_params.mu_minus = -0.28;
 
-        params.simulation_parameters = sim_params;
-        params.engine                = sidb_simulation_engine::QUICKEXACT;
-        params.input_bdl_iterator_params.input_bdl_config =
+        params.operational_params.simulation_parameters = sim_params;
+        params.operational_params.sim_engine            = sidb_simulation_engine::QUICKEXACT;
+        params.operational_params.input_bdl_iterator_params.input_bdl_config =
             bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED;
         params.operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance = 1.5;
 
@@ -233,7 +233,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
 
 #if (FICTION_ALGLIB_ENABLED)
 
-        params.engine = sidb_simulation_engine::CLUSTERCOMPLETE;
+        params.operational_params.sim_engine = sidb_simulation_engine::CLUSTERCOMPLETE;
 
         const auto ct_cc =
             critical_temperature_gate_based(lyt_or_gate, std::vector<tt>{create_or_tt()}, params, &critical_stats);
@@ -276,9 +276,9 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
 
         lyt.assign_cell_type({36, 19, 0}, sidb_technology::cell_type::NORMAL);
 
-        params.simulation_parameters = sim_params;
-        params.engine                = sidb_simulation_engine::QUICKEXACT;
-        params.confidence_level      = 0.99;
+        params.operational_params.simulation_parameters = sim_params;
+        params.operational_params.sim_engine            = sidb_simulation_engine::QUICKEXACT;
+        params.confidence_level                         = 0.99;
         params.max_temperature       = 350;
         params.iteration_steps       = 80;
         params.alpha                 = 0.7;
@@ -294,7 +294,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
 
 #if (FICTION_ALGLIB_ENABLED)
 
-            params.engine = sidb_simulation_engine::CLUSTERCOMPLETE;
+            params.operational_params.sim_engine = sidb_simulation_engine::CLUSTERCOMPLETE;
 
             const auto ct_cc =
                 critical_temperature_gate_based(lyt, std::vector<tt>{create_and_tt()}, params, &critical_stats);
@@ -317,7 +317,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
 
 #if (FICTION_ALGLIB_ENABLED)
 
-            params.engine = sidb_simulation_engine::CLUSTERCOMPLETE;
+            params.operational_params.sim_engine = sidb_simulation_engine::CLUSTERCOMPLETE;
 
             const auto ct_cc =
                 critical_temperature_gate_based(lyt, std::vector<tt>{create_and_tt()}, params, &critical_stats);
@@ -361,8 +361,8 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
 
         lyt.assign_cell_type({36, 19, 0}, sidb_technology::cell_type::NORMAL);
 
-        params.simulation_parameters = sim_params;
-        params.engine                = sidb_simulation_engine::QUICKSIM;
+        params.operational_params.simulation_parameters = sim_params;
+        params.operational_params.sim_engine            = sidb_simulation_engine::QUICKSIM;
         params.confidence_level      = 0.99;
         params.max_temperature       = 350;
         params.iteration_steps       = 500;
@@ -375,7 +375,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
 
 #if (FICTION_ALGLIB_ENABLED)
 
-        params.engine = sidb_simulation_engine::CLUSTERCOMPLETE;
+        params.operational_params.sim_engine = sidb_simulation_engine::CLUSTERCOMPLETE;
 
         const auto ct_cc =
             critical_temperature_gate_based(lyt, std::vector<tt>{create_and_tt()}, params, &critical_stats);
@@ -415,8 +415,8 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         lyt.assign_cell_type({36, 19, 0}, sidb_technology::cell_type::NORMAL);
         lyt.assign_cell_type({2, 19, 0}, sidb_technology::cell_type::NORMAL);
 
-        params.simulation_parameters = sim_params;
-        params.engine                = sidb_simulation_engine::QUICKEXACT;
+        params.operational_params.simulation_parameters = sim_params;
+        params.operational_params.sim_engine            = sidb_simulation_engine::QUICKEXACT;
         params.confidence_level      = 0.99;
         params.max_temperature       = 350;
         params.iteration_steps       = 80;
@@ -433,7 +433,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
 
 #if (FICTION_ALGLIB_ENABLED)
 
-            params.engine = sidb_simulation_engine::CLUSTERCOMPLETE;
+            params.operational_params.sim_engine = sidb_simulation_engine::CLUSTERCOMPLETE;
 
             const auto ct_cc =
                 critical_temperature_gate_based(lyt, std::vector<tt>{create_fan_out_tt()}, params, &critical_stats);
@@ -456,7 +456,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
 
 #if (FICTION_ALGLIB_ENABLED)
 
-            params.engine = sidb_simulation_engine::CLUSTERCOMPLETE;
+            params.operational_params.sim_engine = sidb_simulation_engine::CLUSTERCOMPLETE;
 
             const auto ct_cc =
                 critical_temperature_gate_based(lyt, std::vector<tt>{create_fan_out_tt()}, params, &critical_stats);
@@ -495,8 +495,8 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
 
         sim_params.mu_minus = -0.25;
 
-        params.simulation_parameters = sim_params;
-        params.engine                = sidb_simulation_engine::QUICKEXACT;
+        params.operational_params.simulation_parameters = sim_params;
+        params.operational_params.sim_engine            = sidb_simulation_engine::QUICKEXACT;
         params.confidence_level      = 0.99;
         params.max_temperature       = 350;
         params.iteration_steps       = 80;
@@ -511,7 +511,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
 
 #if (FICTION_ALGLIB_ENABLED)
 
-            params.engine = sidb_simulation_engine::CLUSTERCOMPLETE;
+            params.operational_params.sim_engine = sidb_simulation_engine::CLUSTERCOMPLETE;
 
             const auto ct_cc =
                 critical_temperature_gate_based(lyt, std::vector<tt>{create_or_tt()}, params, &critical_stats);
@@ -530,7 +530,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
 
 #if (FICTION_ALGLIB_ENABLED)
 
-            params.engine = sidb_simulation_engine::CLUSTERCOMPLETE;
+            params.operational_params.sim_engine = sidb_simulation_engine::CLUSTERCOMPLETE;
 
             const auto ct_cc =
                 critical_temperature_gate_based(lyt, std::vector<tt>{create_or_tt()}, params, &critical_stats);
@@ -562,8 +562,8 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
 
         lyt.assign_cell_type({36, 19, 0}, sidb_technology::cell_type::NORMAL);
 
-        params.simulation_parameters = sim_params;
-        params.engine                = sidb_simulation_engine::QUICKEXACT;
+        params.operational_params.simulation_parameters = sim_params;
+        params.operational_params.sim_engine            = sidb_simulation_engine::QUICKEXACT;
         params.confidence_level      = 0.99;
         params.max_temperature       = 350;
         params.iteration_steps       = 80;
@@ -580,7 +580,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
 
 #if (FICTION_ALGLIB_ENABLED)
 
-        params.engine = sidb_simulation_engine::CLUSTERCOMPLETE;
+        params.operational_params.sim_engine = sidb_simulation_engine::CLUSTERCOMPLETE;
 
         const auto ct_cc =
             critical_temperature_gate_based(lyt, std::vector<tt>{create_id_tt()}, params, &critical_stats);
@@ -607,9 +607,9 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         lyt.assign_cell_type({9, 1, 1}, sidb_technology::cell_type::NORMAL);
         lyt.assign_cell_type({12, 1, 1}, sidb_technology::cell_type::NORMAL);
 
-        params.simulation_parameters = sim_params;
-        params.engine                = sidb_simulation_engine::QUICKSIM;
-        params.confidence_level      = 0.99;
+        params.operational_params.simulation_parameters = sim_params;
+        params.operational_params.sim_engine            = sidb_simulation_engine::QUICKSIM;
+        params.confidence_level                         = 0.99;
         params.max_temperature       = 750;
         params.iteration_steps       = 500;
         params.alpha                 = 0.6;
@@ -622,7 +622,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
 
 #if (FICTION_ALGLIB_ENABLED)
 
-        params.engine = sidb_simulation_engine::CLUSTERCOMPLETE;
+        params.operational_params.sim_engine = sidb_simulation_engine::CLUSTERCOMPLETE;
 
         const auto ct_cc = critical_temperature_non_gate_based(lyt, params, &critical_stats);
 
@@ -651,8 +651,8 @@ TEMPLATE_TEST_CASE("Test critical_temperature function, using offset coordinates
         lyt.assign_cell_type({6, 2}, sidb_technology::cell_type::OUTPUT);
         lyt.assign_cell_type({8, 2}, sidb_technology::cell_type::OUTPUT);
 
-        params.simulation_parameters = sim_params;
-        params.engine                = sidb_simulation_engine::QUICKSIM;
+        params.operational_params.simulation_parameters = sim_params;
+        params.operational_params.sim_engine            = sidb_simulation_engine::QUICKSIM;
         params.confidence_level      = 0.99;
         params.max_temperature       = 350;
         params.iteration_steps       = 0;
@@ -669,7 +669,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function, using offset coordinates
 #if (FICTION_ALGLIB_ENABLED)
 
         // TODO: ClusterComplete finds one valid layout, is that expected?
-        // params.engine                = sidb_simulation_engine::CLUSTERCOMPLETE;
+        // params.operational_params.sim_engine                = sidb_simulation_engine::CLUSTERCOMPLETE;
         //
         // const auto ct_cc =
         //     critical_temperature_gate_based<TestType>(lyt, std::vector<tt>{create_id_tt()}, params, &critical_stats);
@@ -684,8 +684,8 @@ TEMPLATE_TEST_CASE("Test critical_temperature function, using offset coordinates
 
     SECTION("One SiDB")
     {
-        params.simulation_parameters = sim_params;
-        params.engine                = sidb_simulation_engine::QUICKEXACT;
+        params.operational_params.simulation_parameters = sim_params;
+        params.operational_params.sim_engine                = sidb_simulation_engine::QUICKEXACT;
         params.confidence_level      = 0.99;
         params.max_temperature       = 350;
         params.iteration_steps       = 80;
@@ -722,8 +722,8 @@ TEMPLATE_TEST_CASE("Test critical_temperature function, using offset coordinates
 
         lyt.assign_cell_type({36, 38, 0}, sidb_technology::cell_type::NORMAL);
 
-        params.simulation_parameters = sim_params;
-        params.engine                = sidb_simulation_engine::QUICKEXACT;
+        params.operational_params.simulation_parameters = sim_params;
+        params.operational_params.sim_engine                = sidb_simulation_engine::QUICKEXACT;
         params.confidence_level      = 0.99;
         params.max_temperature       = 350;
         params.iteration_steps       = 80;
@@ -736,7 +736,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function, using offset coordinates
 
 #if (FICTION_ALGLIB_ENABLED)
 
-        params.engine = sidb_simulation_engine::CLUSTERCOMPLETE;
+        params.operational_params.sim_engine = sidb_simulation_engine::CLUSTERCOMPLETE;
 
         const auto ct_cc =
             critical_temperature_gate_based(lyt, std::vector<tt>{create_id_tt()}, params, &critical_stats);
@@ -754,8 +754,8 @@ TEMPLATE_TEST_CASE("Test critical_temperature function, using offset coordinates
         lyt.assign_cell_type({2, 0}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({2, 4}, TestType::cell_type::NORMAL);
 
-        params.simulation_parameters = sim_params;
-        params.engine                = sidb_simulation_engine::QUICKEXACT;
+        params.operational_params.simulation_parameters = sim_params;
+        params.operational_params.sim_engine                = sidb_simulation_engine::QUICKEXACT;
         params.confidence_level      = 0.99;
         params.max_temperature       = 350;
         params.iteration_steps       = 80;
@@ -772,7 +772,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function, using offset coordinates
 
 #if (FICTION_ALGLIB_ENABLED)
 
-        params.engine = sidb_simulation_engine::CLUSTERCOMPLETE;
+        params.operational_params.sim_engine = sidb_simulation_engine::CLUSTERCOMPLETE;
 
         const auto ct_cc = critical_temperature_non_gate_based(lyt, params, &critical_stats);
 
@@ -806,8 +806,8 @@ TEMPLATE_TEST_CASE("Test critical_temperature function, using offset coordinates
         lyt.assign_cell_type({10, 19}, sidb_technology::cell_type::NORMAL);
 
         sim_params.mu_minus          = -0.28;
-        params.simulation_parameters = sim_params;
-        params.engine                = sidb_simulation_engine::QUICKEXACT;
+        params.operational_params.simulation_parameters = sim_params;
+        params.operational_params.sim_engine                = sidb_simulation_engine::QUICKEXACT;
         params.confidence_level      = 0.99;
         params.max_temperature       = 350;
         params.iteration_steps       = 80;
@@ -824,7 +824,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function, using offset coordinates
 
 #if (FICTION_ALGLIB_ENABLED)
 
-        params.engine = sidb_simulation_engine::CLUSTERCOMPLETE;
+        params.operational_params.sim_engine = sidb_simulation_engine::CLUSTERCOMPLETE;
 
         const auto ct_cc =
             critical_temperature_gate_based(lyt, std::vector<tt>{create_and_tt()}, params, &critical_stats);
@@ -891,8 +891,8 @@ TEMPLATE_TEST_CASE("Critical temperature of Bestagon CX, QuickExact", "[critical
 
     critical_temperature_stats critical_stats{};
 
-    params.simulation_parameters = sim_params;
-    params.engine                = sidb_simulation_engine::QUICKEXACT;
+    params.operational_params.simulation_parameters = sim_params;
+    params.operational_params.sim_engine                = sidb_simulation_engine::QUICKEXACT;
     params.confidence_level      = 0.99;
     params.max_temperature       = 350;
 
@@ -904,7 +904,7 @@ TEMPLATE_TEST_CASE("Critical temperature of Bestagon CX, QuickExact", "[critical
 
 #if (FICTION_ALGLIB_ENABLED)
 
-    params.engine = sidb_simulation_engine::CLUSTERCOMPLETE;
+    params.operational_params.sim_engine = sidb_simulation_engine::CLUSTERCOMPLETE;
 
     const auto ct_cc = critical_temperature_gate_based(lyt, create_crossing_wire_tt(), params, &critical_stats);
 
@@ -925,8 +925,8 @@ TEMPLATE_TEST_CASE("Critical temperature of Bestagon double wire, QuickExact", "
 
     critical_temperature_stats critical_stats{};
 
-    params.simulation_parameters = sim_params;
-    params.engine                = sidb_simulation_engine::QUICKEXACT;
+    params.operational_params.simulation_parameters = sim_params;
+    params.operational_params.sim_engine                = sidb_simulation_engine::QUICKEXACT;
     params.confidence_level      = 0.99;
     params.max_temperature       = 350;
 
@@ -941,7 +941,7 @@ TEMPLATE_TEST_CASE("Critical temperature of Bestagon double wire, QuickExact", "
 
 #if (FICTION_ALGLIB_ENABLED)
 
-        params.engine = sidb_simulation_engine::CLUSTERCOMPLETE;
+        params.operational_params.sim_engine = sidb_simulation_engine::CLUSTERCOMPLETE;
 
         const auto ct_cc =
             critical_temperature_gate_based(lyt_double_wire_gate, create_double_wire_tt(), params, &critical_stats);
@@ -964,7 +964,7 @@ TEMPLATE_TEST_CASE("Critical temperature of Bestagon double wire, QuickExact", "
 
 #if (FICTION_ALGLIB_ENABLED)
 
-        params.engine = sidb_simulation_engine::CLUSTERCOMPLETE;
+        params.operational_params.sim_engine = sidb_simulation_engine::CLUSTERCOMPLETE;
 
         const auto ct_cc =
             critical_temperature_gate_based(lyt_double_wire_gate, create_double_wire_tt(), params, &critical_stats);
@@ -987,8 +987,8 @@ TEMPLATE_TEST_CASE("Critical temperature of Bestagon half adder gate, QuickExact
 
     critical_temperature_stats critical_stats{};
 
-    params.simulation_parameters = sim_params;
-    params.engine                = sidb_simulation_engine::QUICKEXACT;
+    params.operational_params.simulation_parameters = sim_params;
+    params.operational_params.sim_engine                = sidb_simulation_engine::QUICKEXACT;
     params.confidence_level      = 0.99;
     params.max_temperature       = 350;
 
@@ -1003,7 +1003,7 @@ TEMPLATE_TEST_CASE("Critical temperature of Bestagon half adder gate, QuickExact
 
 #if (FICTION_ALGLIB_ENABLED)
 
-        params.engine = sidb_simulation_engine::CLUSTERCOMPLETE;
+        params.operational_params.sim_engine = sidb_simulation_engine::CLUSTERCOMPLETE;
 
         const auto ct_cc =
             critical_temperature_gate_based(lyt_half_adder_gate, create_half_adder_tt(), params, &critical_stats);
@@ -1026,7 +1026,7 @@ TEMPLATE_TEST_CASE("Critical temperature of Bestagon half adder gate, QuickExact
 
 #if (FICTION_ALGLIB_ENABLED)
 
-        params.engine = sidb_simulation_engine::CLUSTERCOMPLETE;
+        params.operational_params.sim_engine = sidb_simulation_engine::CLUSTERCOMPLETE;
 
         const auto ct_cc =
             critical_temperature_gate_based(lyt_half_adder_gate, create_half_adder_tt(), params, &critical_stats);
