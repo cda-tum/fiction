@@ -12,6 +12,7 @@
 #include <bitset>
 #include <cassert>
 #include <cstdint>
+#include <optional>
 #include <vector>
 
 namespace fiction
@@ -417,12 +418,17 @@ namespace fiction
  *
  * @param truth_tables The truth tables to evaluate.
  * @param current_input_index The index representing the current input pattern.
- * @return The output of the truth tables for the given input index.
+ * @return A `std::optional<uint64_t>` containing the output of the truth tables if the number of
+ *         truth tables does not exceed 64; or `std::nullopt` if the number of truth tables exceeds 64.
  */
-[[nodiscard]] inline uint64_t evaluate_output(const std::vector<kitty::dynamic_truth_table>& truth_tables,
-                                              const uint64_t current_input_index) noexcept
+[[nodiscard]] inline std::optional<uint64_t>
+evaluate_output(const std::vector<kitty::dynamic_truth_table>& truth_tables,
+                const uint64_t                                 current_input_index) noexcept
 {
-    assert(truth_tables.size() <= 64 && "Number of truth tables exceeds 64");
+    if (truth_tables.size() > 64)
+    {
+        return std::nullopt;  // Indicate an error
+    }
 
     std::bitset<64> bits{};
     for (auto i = 0u; i < truth_tables.size(); i++)

@@ -95,7 +95,7 @@ TEST_CASE("BDL wire operational domain computation", "[compute-operational-ratio
     }
 }
 
-TEST_CASE("SiQAD AND gate", "[compute-operational-ratio]")
+TEST_CASE("SiQAD NAND gate", "[compute-operational-ratio]")
 {
     const auto lyt = blueprints::siqad_nand_gate<sidb_100_cell_clk_lyt_siqad>();
 
@@ -131,7 +131,7 @@ TEST_CASE("SiQAD AND gate", "[compute-operational-ratio]")
 
     // only pruning to determine the operational status of the layout
     op_ratio_params.op_domain_params.operational_params.strategy_to_analyze_operational_status =
-        is_operational_params::operational_analysis_strategy::FILTER_BASED;
+        is_operational_params::operational_analysis_strategy::FILTER_ONLY;
 
     const auto op_domain_ratio_only_pruning = compute_operational_ratio(
         lyt, std::vector<tt>{create_nand_tt()}, parameter_point({5.6, 5.0, -0.28}), op_ratio_params);
@@ -203,7 +203,7 @@ TEST_CASE("Bestagon AND gate", "[compute-operational-ratio]")
         op_domain_params.sweep_dimensions.push_back(z_dimension);
         op_domain_params.operational_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
         op_domain_params.operational_params.strategy_to_analyze_operational_status =
-            is_operational_params::operational_analysis_strategy::FILTER_BASED;
+            is_operational_params::operational_analysis_strategy::FILTER_ONLY;
 
         const compute_operational_ratio_params op_ratio_params{op_domain_params};
 

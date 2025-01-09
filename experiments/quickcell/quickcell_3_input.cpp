@@ -44,8 +44,8 @@ int main()  // NOLINT
             "#Lp2",                     // uint64_t
             "#Lp2/N [%]",               // double
             "#Lp3",                     // uint64_t
-            "#Lp3/N [%]",
-            "t_pruning [s]"  // double
+            "#Lp3/N [%]",               // double
+            "t_pruning [s]"             // double
         };
 
     const auto truth_tables_and_names =

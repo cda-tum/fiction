@@ -387,11 +387,10 @@ class operational_domain_impl
     {
         const auto logic_cells = lyt.get_cells_by_type(technology<Lyt>::cell_type::LOGIC);
 
-        if (params.operational_params.strategy_to_analyze_operational_status ==
-            is_operational_params::operational_analysis_strategy::FILTER_BASED)
-        {
-            assert(logic_cells.size() > 0 && "No logic cells found in the layout");
-        }
+        assert(((params.operational_params.strategy_to_analyze_operational_status !=
+                 is_operational_params::operational_analysis_strategy::FILTER_ONLY) ||
+                (logic_cells.size() > 0)) &&
+               "No logic cells found in the layout");
 
         // the canvas layout is created which is defined by the logic cells.
         for (const auto& c : logic_cells)

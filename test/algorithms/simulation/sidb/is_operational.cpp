@@ -109,7 +109,7 @@ TEST_CASE("SiQAD NAND gate", "[is-operational]")
     SECTION("only pruning")
     {
         op_params.strategy_to_analyze_operational_status =
-            is_operational_params::operational_analysis_strategy::FILTER_BASED;
+            is_operational_params::operational_analysis_strategy::FILTER_ONLY;
         CHECK(is_operational(lat, std::vector<tt>{create_nand_tt()}, op_params).first ==
               operational_status::OPERATIONAL);
     }
@@ -547,7 +547,7 @@ TEST_CASE("Special wire that cannot be pruned, but is non-operational when kinks
     {
         params.op_condition = is_operational_params::operational_condition::TOLERATE_KINKS;
         params.strategy_to_analyze_operational_status =
-            is_operational_params::operational_analysis_strategy::FILTER_BASED;
+            is_operational_params::operational_analysis_strategy::FILTER_ONLY;
 
         CHECK(is_operational(lyt, std::vector<tt>{create_id_tt()}, params).first ==
               operational_status::NON_OPERATIONAL);
@@ -629,7 +629,7 @@ TEST_CASE("is operational check for Bestagon CX gate", "[is-operational], [quali
 
         auto op_params = is_operational_params{sidb_simulation_parameters{2, -0.32}};
         op_params.strategy_to_analyze_operational_status =
-            is_operational_params::operational_analysis_strategy::FILTER_BASED;
+            is_operational_params::operational_analysis_strategy::FILTER_ONLY;
 
         CHECK(is_operational(lat, create_crossing_wire_tt(), op_params, input_bdl_wires, output_bdl_wires).first ==
               operational_status::OPERATIONAL);

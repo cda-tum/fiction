@@ -76,11 +76,12 @@ struct is_operational_params
     };
 
     /**
-     * Simulation method to determine if the layout is operational or non-operational. There are three possible modes:
+     * Simulation method to determine if the layout is operational or non-operational. There are three possible
+     * strategies:
      *
-     * - `SIMULATION_BASED`: This setting does not apply any filtering strategies to determine if the layout is
+     * - `SIMULATION_ONLY`: This setting does not apply any filtering strategies to determine if the layout is
      * operational. Instead, it relies solely on physical simulation to make this determination.
-     * - `FILTER_BASED`: This setting does only apply filtering strategies to determine if the layout is
+     * - `FILTER_ONLY`: This setting does only apply filtering strategies to determine if the layout is
      * non-operational. If the layout passes all filtering strategies, it is considered operational. This is only an
      * approximation. It may be possible that the layout is non-operational, but the filtering strategies do not detect
      * it.
@@ -94,14 +95,14 @@ struct is_operational_params
          * Do not apply filter strategies to determine whether the layout is operational.
          * Instead, rely solely on physical simulation.
          */
-        SIMULATION_BASED,
+        SIMULATION_ONLY,
         /**
          * Apply filtering exclusively to determine whether the layout is non-operational. If the layout
          * passes all filter steps, it is considered operational.
          *
          * @note This is an extremely fast approximation that may sometimes lead to false positives.
          */
-        FILTER_BASED,
+        FILTER_ONLY,
         /**
          * Before a physical simulation is conducted, the algorithm checks if filter strategies can determine that the
          * layout is non-operational. This only provides any runtime benefits if kinks are rejected.
@@ -128,7 +129,7 @@ struct is_operational_params
      * Strategy to determine whether a layout is operational or non-operational.
      */
     operational_analysis_strategy strategy_to_analyze_operational_status =
-        operational_analysis_strategy::SIMULATION_BASED;
+        operational_analysis_strategy::SIMULATION_ONLY;
 };
 
 namespace detail
@@ -298,8 +299,8 @@ class is_operational_impl
     {}
 
     /**
-     * This function evaluates whether the given layout can be discarded since it cannot implement the given Boolean
-     * function. The filtering is subdivided into three single filtering steps: (1) discarding SiDB layouts with
+     * This function evaluates whether the given layout is invalid, i.e., it cannot implement the given Boolean
+     * function. This is done in three separate filtering steps: (1) discarding SiDB layouts with
      * potentially positively charged SiDBs, (2) utilizing an efficient method to identify and discard SiDB layouts that
      * do not satisfy physical model constraints under the I/O pin conditions required for the desired Boolean function,
      * and (3) detecting I/O signal instability.
@@ -308,11 +309,12 @@ class is_operational_impl
      * @param input_pattern The current input pattern.
      * @param cds_canvas The charge distribution of the canvas layout.
      * @param dependent_cell A dependent-cell of the canvas SiDBs.
-     * @return An optional layout_invalidity_reason indicating the reason why the layout is non-operational.
+     * @return A `layout_invalidity_reason` object indicating why the layout is non-operational; or `std::nullopt` if it
+     * could not certainly be determined to be in fact non-operational.
      */
     template <typename ChargeLyt>
-    [[nodiscard]] std::optional<layout_invalidity_reason> can_layout_be_discarded(const uint64_t input_pattern,
-                                                                                  ChargeLyt&     cds_canvas) noexcept
+    [[nodiscard]] std::optional<layout_invalidity_reason> is_layout_invalid(const uint64_t input_pattern,
+                                                                            ChargeLyt&     cds_canvas) noexcept
     {
         static_assert(is_charge_distribution_surface_v<ChargeLyt>, "ChargeLyt is not a charge distribution surface");
 
@@ -377,12 +379,12 @@ class is_operational_impl
                  parameters.strategy_to_analyze_operational_status ==
                      is_operational_params::operational_analysis_strategy::FILTER_THEN_SIMULATION) ||
                 parameters.strategy_to_analyze_operational_status ==
-                    is_operational_params::operational_analysis_strategy::FILTER_BASED)
+                    is_operational_params::operational_analysis_strategy::FILTER_ONLY)
             {
                 // number of different input combinations
                 for (auto i = 0u; i < truth_table.front().num_bits(); ++i, ++bii)
                 {
-                    if (can_layout_be_discarded(bii.get_current_input_index(), cds_canvas))
+                    if (is_layout_invalid(bii.get_current_input_index(), cds_canvas))
                     {
                         return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
                     }
@@ -393,14 +395,14 @@ class is_operational_impl
         // if the layout is not discarded during the three filtering steps, it is considered operational.
         // This is only an approximation.
         if (parameters.strategy_to_analyze_operational_status ==
-                is_operational_params::operational_analysis_strategy::FILTER_BASED &&
+                is_operational_params::operational_analysis_strategy::FILTER_ONLY &&
             !canvas_lyt.is_empty())
         {
             return {operational_status::OPERATIONAL, non_operationality_reason::NONE};
         }
 
         if (parameters.strategy_to_analyze_operational_status ==
-                is_operational_params::operational_analysis_strategy::SIMULATION_BASED ||
+                is_operational_params::operational_analysis_strategy::SIMULATION_ONLY ||
             parameters.strategy_to_analyze_operational_status ==
                 is_operational_params::operational_analysis_strategy::FILTER_THEN_SIMULATION ||
             canvas_lyt.is_empty())

@@ -86,13 +86,13 @@ int main()  // NOLINT
         operational_domain_stats op_domain_stats_sketch{};
 
         op_domain_params.operational_params.strategy_to_analyze_operational_status =
-            is_operational_params::operational_analysis_strategy::SIMULATION_BASED;
+            is_operational_params::operational_analysis_strategy::SIMULATION_ONLY;
 
         const auto op_domain_gs_exact =
             operational_domain_grid_search(lyt, truth_table, op_domain_params, &op_domain_stats_gs_exact);
 
         op_domain_params.operational_params.strategy_to_analyze_operational_status =
-            is_operational_params::operational_analysis_strategy::FILTER_BASED;
+            is_operational_params::operational_analysis_strategy::FILTER_ONLY;
 
         const auto op_domain_gs_sketch =
             operational_domain_grid_search(lyt, truth_table, op_domain_params, &op_domain_stats_sketch);
