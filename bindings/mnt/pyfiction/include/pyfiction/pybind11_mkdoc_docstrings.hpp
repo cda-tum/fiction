@@ -7746,7 +7746,18 @@ Parameter ``composition``:
 Returns:
     `false` if and only if the given composition can be rejected.)doc";
 
-static const char *__doc_fiction_detail_ground_state_space_impl_write_children_pot_bounds_to_complete_store = R"doc()doc";
+static const char *__doc_fiction_detail_ground_state_space_impl_write_children_pot_bounds_to_complete_store =
+R"doc(To facilitate efficient unfolding for the second stage of the
+simulation by *ClusterComplete*, potential bound data that is stored
+in the hierarchy which will not be subject to change anymore is
+converted to a handy format: a complete potential bounds store. It
+holds potential bounds for all SiDBs in the considered layout and thus
+addition and subtraction of other complete potential bound stores are
+easy to perform.
+
+Parameter ``parent``:
+    The newly-forming parent cluster whose children's charge spaces
+    become fixed upon their merging.)doc";
 
 static const char *__doc_fiction_detail_improve_gate_location =
 R"doc(Utility function that moves gates to new coordinates and checks if
