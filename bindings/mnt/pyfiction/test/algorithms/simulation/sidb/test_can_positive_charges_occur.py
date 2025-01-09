@@ -1,7 +1,7 @@
 import unittest
 
 from mnt.pyfiction import (
-    can_positive_charge_occur,
+    can_positive_charges_occur,
     sidb_100_lattice,
     sidb_111_lattice,
     sidb_simulation_parameters,
@@ -16,11 +16,11 @@ class TestCanPositiveChargesOccur(unittest.TestCase):
         layout.assign_cell_type((1, 0), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((2, 0), sidb_technology.cell_type.NORMAL)
 
-        self.assertTrue(can_positive_charge_occur(layout, sidb_simulation_parameters()))
+        self.assertTrue(can_positive_charges_occur(layout, sidb_simulation_parameters()))
 
         params = sidb_simulation_parameters()
         params.mu_minus = -0.8
-        self.assertFalse(can_positive_charge_occur(layout, params))
+        self.assertFalse(can_positive_charges_occur(layout, params))
 
     def test_three_DBs_111_lattice(self):
         layout = sidb_111_lattice((2, 3))
@@ -31,10 +31,10 @@ class TestCanPositiveChargesOccur(unittest.TestCase):
         params = sidb_simulation_parameters()
         params.mu_minus = -0.05
 
-        self.assertTrue(can_positive_charge_occur(layout, params))
+        self.assertTrue(can_positive_charges_occur(layout, params))
 
         params.mu_minus = -0.8
-        self.assertFalse(can_positive_charge_occur(layout, params))
+        self.assertFalse(can_positive_charges_occur(layout, params))
 
 
 if __name__ == "__main__":
