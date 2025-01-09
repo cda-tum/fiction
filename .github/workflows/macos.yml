@@ -62,6 +62,8 @@ jobs:
           - os: macos-13
             architecture: arm64
           - os: macos-15-xlarge
+            architecture: x64
+          - os: macos-15-xlarge
             architecture: arm64
             compiler: g++-13
 
