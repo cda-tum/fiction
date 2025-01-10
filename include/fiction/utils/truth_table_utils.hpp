@@ -12,7 +12,6 @@
 #include <bitset>
 #include <cassert>
 #include <cstdint>
-#include <optional>
 #include <vector>
 
 namespace fiction
