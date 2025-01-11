@@ -4,7 +4,7 @@ from mnt.pyfiction import (
     exact_sidb_simulation_engine,
     heuristic_sidb_simulation_engine,
     sidb_simulation_engine,
-    sidb_simulation_engine_name
+    sidb_simulation_engine_name,
 )
 
 

@@ -13,7 +13,7 @@ from mnt.pyfiction import (
     sidb_100_lattice,
     sidb_111_lattice,
     sidb_charge_state,
-    sidb_technology
+    sidb_technology,
 )
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
