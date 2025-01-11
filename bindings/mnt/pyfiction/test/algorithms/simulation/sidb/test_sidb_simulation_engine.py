@@ -1,6 +1,11 @@
 import unittest
 
-from mnt.pyfiction import *
+from mnt.pyfiction import (
+    exact_sidb_simulation_engine,
+    heuristic_sidb_simulation_engine,
+    sidb_simulation_engine,
+    sidb_simulation_engine_name
+)
 
 
 class TestSiDBSimulationEngine(unittest.TestCase):
