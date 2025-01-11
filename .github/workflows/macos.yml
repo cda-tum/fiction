@@ -61,13 +61,13 @@ jobs:
             architecture: x64
           - os: macos-13
             architecture: arm64
-          - os: mac-13
+          - os: mac-14
             compiler: g++-13
-          - os: mac-13
+          - os: mac-14
             compiler: g++-14
-          - os: mac-14
+          - os: mac-15
             compiler: g++-13
-          - os: mac-14
+          - os: mac-15
             compiler: g++-14
 
     name: 🍎 ${{matrix.os}} with ${{matrix.compiler}} with ${{matrix.architecture}}
