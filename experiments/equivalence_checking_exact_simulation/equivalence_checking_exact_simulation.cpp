@@ -86,7 +86,6 @@ int main()  // NOLINT
 
                     auto result_exgs       = exhaustive_ground_state_simulation(lyt, params);
                     auto result_quickexact = quickexact(lyt, quickexact_params<cell<sidb_100_cell_clk_lyt>>{params});
-                    auto result_clustercomplete = clustercomplete(lyt, cc_params);
 
                     if (!check_simulation_results_for_equivalence(result_exgs, result_quickexact))
                     {
@@ -94,11 +93,15 @@ int main()  // NOLINT
                         quickexact_non_equivalence_counter++;
                     }
 
+#if (FICTION_ALGLIB_ENABLED)
+                    auto result_clustercomplete = clustercomplete(lyt, cc_params);
+
                     if (!check_simulation_results_for_equivalence(result_exgs, result_clustercomplete))
                     {
                         const std::lock_guard lock{mutex_cc};
                         clustercomplete_non_equivalence_counter++;
                     }
+#endif  // FICTION_ALGLIB_ENABLED
                 }
             });
     }
