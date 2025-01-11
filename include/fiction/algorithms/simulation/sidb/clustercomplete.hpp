@@ -4,7 +4,6 @@
 
 #ifndef FICTION_CLUSTERCOMPLETE_HPP
 #define FICTION_CLUSTERCOMPLETE_HPP
-#include "../../../../../bindings/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp"
 
 #if (FICTION_ALGLIB_ENABLED)
 
