@@ -63,12 +63,16 @@ jobs:
             architecture: arm64
           - os: mac-14
             compiler: g++-13
+            ccompiler: gcc-13
           - os: mac-14
             compiler: g++-14
+            ccompiler: gcc-14
           - os: mac-15
             compiler: g++-13
+            ccompiler: gcc-13
           - os: mac-15
             compiler: g++-14
+            ccompiler: gcc-14
 
     name: 🍎 ${{matrix.os}} with ${{matrix.compiler}} with ${{matrix.architecture}}
     runs-on: ${{matrix.os}}
