@@ -61,9 +61,17 @@ jobs:
             architecture: x64
           - os: macos-13
             architecture: arm64
+          - os: mac-13
+            compiler: g++-13
+          - os: mac-13
+            compiler: g++-14
+          - os: mac-14
+            compiler: g++-13
+          - os: mac-14
+            compiler: g++-14
 
-    name: 🍎 ${{ matrix.os }} with ${{ matrix.compiler }} with ${{ matrix.architecture }}
-    runs-on: ${{ matrix.os }}
+    name: 🍎 ${{matrix.os}} with ${{matrix.compiler}} with ${{matrix.architecture}}
+    runs-on: ${{matrix.os}}
 
     steps:
       - name: Clone Repository
@@ -75,6 +83,8 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.13.x"
+
+      # etup TBB for parallel STL algorithms via Homebrew
 
       - name: Setup TBB
         run: brew install tbb
@@ -105,7 +115,7 @@ jobs:
 
       # Build and test pipeline for Debug mode
       - name: Create Build Environment (Debug)
-        run: cmake -E make_directory build_debug
+        run: cmake -E make_directory ${{github.workspace}}/build_debug
 
       - name: Configure CMake (Debug)
         working-directory: ${{github.workspace}}/build_debug
@@ -134,7 +144,7 @@ jobs:
 
       # Build and test pipeline for Release mode
       - name: Create Build Environment (Release)
-        run: cmake -E make_directory build_release
+        run: cmake -E make_directory ${{github.workspace}}/build_release
 
       - name: Configure CMake (Release)
         working-directory: ${{github.workspace}}/build_release
