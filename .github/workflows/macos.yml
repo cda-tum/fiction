@@ -35,7 +35,7 @@ env:
   Z3_VERSION: 4.13.0
 
 jobs:
-  build_and_test_other_macos:
+  build_and_test:
     strategy:
       matrix:
         os: [macos-13, macos-14, macos-15]
