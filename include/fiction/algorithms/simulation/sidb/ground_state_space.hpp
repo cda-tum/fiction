@@ -21,6 +21,7 @@
 #include <array>
 #include <chrono>
 #include <cstdint>
+#include <functional>
 #include <iostream>
 #include <iterator>
 #include <memory>
