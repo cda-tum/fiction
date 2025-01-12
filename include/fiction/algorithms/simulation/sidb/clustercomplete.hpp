@@ -1013,7 +1013,7 @@ class clustercomplete_impl
         {
             if (!unfold_composition(w, std::get<work_t>(work).get()))
             {
-                // continue walking the back up the stack without backtracking
+                // continue walking back up the stack without backtracking
                 return false;
             }
 
