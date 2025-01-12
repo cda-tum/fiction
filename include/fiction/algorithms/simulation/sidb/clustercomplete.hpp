@@ -879,7 +879,8 @@ class clustercomplete_impl
      */
     void initialize_worker_queues(const std::vector<work_t>& work_from_top_cluster) noexcept
     {
-        const uint64_t num_threads_with_initial_work = std::min(available_threads, work_from_top_cluster.size());
+        const uint64_t num_threads_with_initial_work =
+            std::min(available_threads, static_cast<uint64_t>(work_from_top_cluster.size()));
 
         // divide the work into sections for each thread to handle
         std::vector<std::pair<uint64_t, uint64_t>> ranges{};
