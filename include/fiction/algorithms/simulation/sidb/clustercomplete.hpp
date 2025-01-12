@@ -154,8 +154,6 @@ class clustercomplete_impl
             gss_stats.report();
         }
 
-        std::cout << "running with " << available_threads << " threads" << std::endl;
-
         mockturtle::stopwatch<>::duration time_counter{};
         {
             const mockturtle::stopwatch stop{time_counter};
