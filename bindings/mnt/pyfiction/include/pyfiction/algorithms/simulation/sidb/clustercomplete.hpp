@@ -25,10 +25,11 @@ namespace detail
 template <typename Lyt>
 void clustercomplete(pybind11::module& m)
 {
-    using namespace pybind11::literals;
+    namespace py = pybind11;
 
-    m.def("clustercomplete", &fiction::clustercomplete<Lyt>, "lyt"_a,
-          "params"_a = fiction::clustercomplete_params<fiction::offset::ucoord_t>{}, DOC(fiction_clustercomplete));
+    m.def("clustercomplete", &fiction::clustercomplete<Lyt>, py::arg("lyt"),
+          py::arg("params") = fiction::clustercomplete_params<fiction::offset::ucoord_t>{},
+          DOC(fiction_clustercomplete));
 }
 
 }  // namespace detail
@@ -37,7 +38,6 @@ inline void clustercomplete(pybind11::module& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
     namespace py = pybind11;
-    using namespace pybind11::literals;
 
     /**
      * Report *Ground State Space* stats.

@@ -1,8 +1,6 @@
 import os
 import unittest
 
-from dotenv import load_dotenv
-
 from mnt.pyfiction import (
     charge_distribution_surface_100,
     charge_distribution_surface_111,
@@ -17,12 +15,9 @@ from mnt.pyfiction import (
 )
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
-load_dotenv()
-alglib = os.environ.get("alglib", "OFF")
 
 
 class TestClusterComplete(unittest.TestCase):
-    @unittest.skipIf(alglib == "OFF", "ALGLIB not enabled")
     def test_three_sidbs(self):
         layout = sidb_100_lattice((2, 1))
         layout.assign_cell_type((0, 0), sidb_technology.cell_type.NORMAL)
@@ -61,7 +56,6 @@ class TestClusterComplete(unittest.TestCase):
         result = clustercomplete(cds, params)
         self.assertLessEqual(len(result.charge_distributions), 2)
 
-    @unittest.skipIf(alglib == "OFF", "ALGLIB not enabled")
     def test_perturber_and_sidb_pair_111(self):
         layout = sidb_111_lattice((4, 1))
         layout.assign_cell_type((0, 0), sidb_technology.cell_type.NORMAL)
