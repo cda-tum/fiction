@@ -248,7 +248,7 @@ struct sidb_cluster_projector_state
      * charge, the number of occurrences is inferred by considering the size of the cluster in the projector state.
      */
     template <sidb_charge_state cs>
-    [[nodiscard]] constexpr inline uint64_t get_count() const noexcept
+    [[nodiscard]] constexpr uint64_t get_count() const noexcept
     {
         switch (cs)
         {
@@ -292,7 +292,7 @@ enum class bound_direction : uint8_t
  * @return The element of most information respective to the potential bound domain.
  */
 template <bound_direction bound>
-static constexpr inline double potential_bound_top() noexcept
+static constexpr double potential_bound_top() noexcept
 {
     if constexpr (bound == bound_direction::LOWER)
     {
@@ -313,7 +313,7 @@ static constexpr inline double potential_bound_top() noexcept
  * @param b Second potential bound.
  */
 template <bound_direction bound>
-static constexpr inline void take_meet_of_potential_bounds(double& a, const double b) noexcept
+static constexpr void take_meet_of_potential_bounds(double& a, const double b) noexcept
 {
     if constexpr (bound == bound_direction::LOWER)
     {
@@ -348,7 +348,7 @@ struct potential_bounds_store
      *
      * @return The size of the potential bounds store.
      */
-    [[nodiscard]] constexpr inline uint64_t num_sidbs() const noexcept
+    [[nodiscard]] constexpr uint64_t num_sidbs() const noexcept
     {
         return store.size();
     }
@@ -360,7 +360,7 @@ struct potential_bounds_store
      * @return The potential bound for this SiDB.
      */
     template <bound_direction bound>
-    [[nodiscard]] constexpr inline double get(const uint64_t sidb_ix) const noexcept
+    [[nodiscard]] constexpr double get(const uint64_t sidb_ix) const noexcept
     {
         return store.at(sidb_ix).at(static_cast<uint8_t>(bound));
     }
@@ -372,7 +372,7 @@ struct potential_bounds_store
      * @param bound_value New bound to set.
      */
     template <bound_direction bound>
-    inline void set(const uint64_t sidb_ix, const double bound_value) noexcept
+    void set(const uint64_t sidb_ix, const double bound_value) noexcept
     {
         store[sidb_ix][static_cast<uint8_t>(bound)] = bound_value;
     }
@@ -383,7 +383,7 @@ struct potential_bounds_store
      * @param min New lower bound to set.
      * @param max New upper bound to set.
      */
-    inline void set(const uint64_t sidb_ix, const double min, const double max) noexcept
+    void set(const uint64_t sidb_ix, const double min, const double max) noexcept
     {
         store[sidb_ix][static_cast<uint8_t>(bound_direction::LOWER)] = min;
         store[sidb_ix][static_cast<uint8_t>(bound_direction::UPPER)] = max;
@@ -396,7 +396,7 @@ struct potential_bounds_store
      * @param bound_diff Bound difference to apply.
      */
     template <bound_direction bound>
-    inline void update(const uint64_t sidb_ix, const double bound_diff) noexcept
+    void update(const uint64_t sidb_ix, const double bound_diff) noexcept
     {
         store[sidb_ix][static_cast<uint8_t>(bound)] += bound_diff;
     }
@@ -407,7 +407,7 @@ struct potential_bounds_store
      * @param min_diff Difference in lower bound potential to apply.
      * @param max_diff Difference in upper bound potential to apply.
      */
-    inline void update(const uint64_t sidb_ix, const double min_diff, const double max_diff) noexcept
+    void update(const uint64_t sidb_ix, const double min_diff, const double max_diff) noexcept
     {
         store[sidb_ix][static_cast<uint8_t>(bound_direction::LOWER)] += min_diff;
         store[sidb_ix][static_cast<uint8_t>(bound_direction::UPPER)] += max_diff;
@@ -417,7 +417,7 @@ struct potential_bounds_store
      *
      * @param num_sidbs The number of SiDBs in the layout that is simulated.
      */
-    inline void initialize_complete_potential_bounds(const uint64_t num_sidbs) noexcept
+    void initialize_complete_potential_bounds(const uint64_t num_sidbs) noexcept
     {
         store.assign(num_sidbs, std::array<double, 2>{});
     }
@@ -427,7 +427,7 @@ struct potential_bounds_store
      * @param other Other complete potential bound store.
      * @return Reference to this.
      */
-    inline potential_bounds_store<PotentialBoundsType>&
+    potential_bounds_store<PotentialBoundsType>&
     operator+=(const potential_bounds_store<PotentialBoundsType>& other) noexcept
     {
         for (uint64_t sidb_ix = 0; sidb_ix < store.size(); ++sidb_ix)
@@ -442,7 +442,7 @@ struct potential_bounds_store
        * @param other Other complete potential bound store.
        * @return Reference to this.
        */
-    inline potential_bounds_store<PotentialBoundsType>&
+    potential_bounds_store<PotentialBoundsType>&
     operator-=(const potential_bounds_store<PotentialBoundsType>& other) noexcept
     {
         for (uint64_t sidb_ix = 0; sidb_ix < store.size(); ++sidb_ix)
@@ -499,7 +499,7 @@ struct sidb_clustering_state
     /**
      * Projector states associated with charge space elements that make up the clustering state.
      */
-    std::vector<sidb_cluster_projector_state_ptr> proj_states{};
+    std::vector<sidb_cluster_projector_state_ptr> proj_states;
     /**
      * Flattened (hierarchical) potential bounds specific to this clustering state.
      */
@@ -514,6 +514,10 @@ struct sidb_clustering_state
         pot_bounds.initialize_complete_potential_bounds(num_sidbs);
     }
     /**
+     * Destructor.
+     */
+    ~sidb_clustering_state() = default;
+    /**
      * Copy constructor.
      *
      * @param other Other clustering state to copy.
@@ -527,6 +531,35 @@ struct sidb_clustering_state
 
         pot_bounds.initialize_complete_potential_bounds(other.pot_bounds.num_sidbs());
         pot_bounds += other.pot_bounds;
+    }
+    /**
+     * Copy assignment operator.
+     *
+     * Assigns the contents of another `sidb_clustering_state` instance to this instance.
+     * Performs a deep copy of `proj_states` and a complete copy of `pot_bounds`.
+     *
+     * @param other The `sidb_clustering_state` instance to copy from.
+     * @return A reference to this `sidb_clustering_state` instance after assignment.
+     */
+    sidb_clustering_state& operator=(const sidb_clustering_state& other) noexcept
+    {
+        if (this != &other)
+        {
+            // Clear the current state of proj_states
+            proj_states.clear();
+
+            // Deep copy proj_states
+            for (const sidb_cluster_projector_state_ptr& pst : other.proj_states)
+            {
+                proj_states.emplace_back(std::make_unique<sidb_cluster_projector_state>(*pst));
+            }
+
+            // Copy the pot_bounds
+            pot_bounds.initialize_complete_potential_bounds(other.pot_bounds.num_sidbs());
+            pot_bounds += other.pot_bounds;
+        }
+
+        return *this;
     }
     /**
      * Move constructor.
@@ -561,7 +594,7 @@ struct sidb_cluster_charge_state
     /**
      *  Stored compositions of this cluster charge state.
      */
-    mutable std::vector<sidb_charge_space_composition> compositions{};
+    mutable std::vector<sidb_charge_space_composition> compositions;
     /**
      * Default constructor, creates a cluster charge state without any negative and positive charges.
      */
@@ -649,7 +682,7 @@ struct sidb_cluster_charge_state
      * @param other Other cluster charge state to test for equality with the current.
      * @return `true` if and only if the compressed forms are equal.
      */
-    constexpr inline bool operator==(const sidb_cluster_charge_state& other) const noexcept
+    constexpr bool operator==(const sidb_cluster_charge_state& other) const noexcept
     {
         return static_cast<uint64_t>(*this) == static_cast<uint64_t>(other);
     }
@@ -660,7 +693,7 @@ struct sidb_cluster_charge_state
      * @param m Cluster charge state to compute the hash of.
      * @return The hash of the given cluster charge state.
      */
-    inline std::size_t operator()(const sidb_cluster_charge_state& m) const noexcept
+    std::size_t operator()(const sidb_cluster_charge_state& m) const noexcept
     {
         return std::hash<uint64_t>{}(static_cast<uint64_t>(m));
     }
@@ -670,7 +703,7 @@ struct sidb_cluster_charge_state
      * @param other Other cluster charge state to concatenate with the current.
      * @return The concatenated cluster charge state, which is the modified version of the current.
      */
-    constexpr inline sidb_cluster_charge_state& operator+=(const sidb_cluster_charge_state& other) noexcept
+    constexpr sidb_cluster_charge_state& operator+=(const sidb_cluster_charge_state& other) noexcept
     {
         neg_count += other.neg_count;
         pos_count += other.pos_count;
@@ -682,7 +715,7 @@ struct sidb_cluster_charge_state
      * @param other Other cluster charge state to take the difference of w.r.t. with the current.
      * @return The cluster charge state that is their difference, which is the modified version of the current.
      */
-    constexpr inline sidb_cluster_charge_state& operator-=(const sidb_cluster_charge_state& other) noexcept
+    constexpr sidb_cluster_charge_state& operator-=(const sidb_cluster_charge_state& other) noexcept
     {
         assert(neg_count >= other.neg_count && pos_count >= other.pos_count);
         neg_count -= other.neg_count;
@@ -696,7 +729,7 @@ struct sidb_cluster_charge_state
  * @param m A singleton multiset charge configuration.
  * @return The charge state associated with the sole element contained in the given multiset charge configuration.
  */
-static constexpr inline sidb_charge_state singleton_multiset_conf_to_charge_state(const uint64_t m) noexcept
+static constexpr sidb_charge_state singleton_multiset_conf_to_charge_state(const uint64_t m) noexcept
 {
     return sign_to_charge_state(
         static_cast<int8_t>(static_cast<uint32_t>(m) - static_cast<uint32_t>(static_cast<uint32_t>(m) < m)));
@@ -749,7 +782,7 @@ struct potential_projection
      * potential values are equal and the compressed form of the multiset charge configuration is strictly less than
      * that of `other`.
      */
-    constexpr inline bool operator<(const potential_projection& other) const noexcept
+    constexpr bool operator<(const potential_projection& other) const noexcept
     {
         return pot_val < other.pot_val || (pot_val == other.pot_val && multiset < other.multiset);
     }
@@ -761,7 +794,7 @@ struct potential_projection
      * @param other Other potential projection to sum with the current.
      * @return The current potential projection to which the other potential projection is now added.
      */
-    constexpr inline potential_projection& operator+=(const potential_projection& other) noexcept
+    constexpr potential_projection& operator+=(const potential_projection& other) noexcept
     {
         pot_val += other.pot_val;
         multiset += other.multiset;
@@ -788,7 +821,7 @@ struct potential_projection_order
     /**
      * The potential projection ordering.
      */
-    pot_proj_order order{};
+    pot_proj_order order;
     /**
      * Default constructor, creating the empty potential projection order.
      */
@@ -830,7 +863,7 @@ struct potential_projection_order
      * @return The potential projection that forms the requested bound on the potential projection order.
      */
     template <bound_direction bound>
-    [[nodiscard]] constexpr inline const potential_projection& get_bound() const noexcept
+    [[nodiscard]] constexpr const potential_projection& get_bound() const noexcept
     {
         if constexpr (bound == bound_direction::LOWER)
         {
@@ -851,7 +884,7 @@ struct potential_projection_order
      * current relevant bound would be erased.
      */
     template <bound_direction bound>
-    [[nodiscard]] inline const potential_projection& get_next_bound() const noexcept
+    [[nodiscard]] const potential_projection& get_next_bound() const noexcept
     {
         const uint64_t bound_m = get_bound<bound>().multiset;
 
@@ -909,7 +942,7 @@ struct potential_projection_order
      *
      * @param pp Potential projection to add.
      */
-    inline void add(const potential_projection& pp) noexcept
+    void add(const potential_projection& pp) noexcept
     {
         order.emplace(pp);
     }
@@ -933,7 +966,7 @@ struct sidb_cluster_ptr_hash
      * @param c Shared pointer to a cluster to take the has of.
      * @return The hash computed over the the unique id associated with the cluster.
      */
-    inline std::size_t operator()(const sidb_cluster_ptr& c) const noexcept
+    std::size_t operator()(const sidb_cluster_ptr& c) const noexcept
     {
         return std::hash<uint64_t>{}(get_unique_cluster_id(c));
     }
@@ -1018,7 +1051,7 @@ struct sidb_cluster
      *
      * @return A shared pointer to the parent of this cluster
      */
-    inline sidb_cluster_ptr get_parent() const noexcept
+    sidb_cluster_ptr get_parent() const noexcept
     {
         return parent.lock();
     }
@@ -1056,7 +1089,7 @@ struct sidb_cluster
      *
      * @return The number of SiDBs contained in the cluster.
      */
-    inline uint64_t num_sidbs() const noexcept
+    uint64_t num_sidbs() const noexcept
     {
         return sidbs.size();
     }
@@ -1066,7 +1099,7 @@ struct sidb_cluster
      * @param other Cluster (hierarchy) to compare to.
      * @return `true` if and only if the unique identifiers match.
      */
-    constexpr inline bool operator==(const sidb_cluster& other) const noexcept
+    constexpr bool operator==(const sidb_cluster& other) const noexcept
     {
         return uid == other.uid;
     }
