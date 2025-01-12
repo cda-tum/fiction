@@ -369,7 +369,7 @@ class ground_state_space_impl
      * @param rm_pst Projector state to move all occurrences of in the projection onto `sidb_ix`.
      * @param sidb_ix SiDB that receives the potential projections to be removed.
      */
-    static constexpr inline void remove_all_cluster_charge_state_occurrences(const sidb_cluster_projector_state& rm_pst,
+    static constexpr void remove_all_cluster_charge_state_occurrences(const sidb_cluster_projector_state& rm_pst,
                                                                              const uint64_t sidb_ix) noexcept
     {
         rm_pst.cluster->pot_projs[sidb_ix].remove_m_conf(rm_pst.multiset_conf);
@@ -457,7 +457,7 @@ class ground_state_space_impl
         /**
          * For each charge state there is a set of witnesses for this charge state.
          */
-        witness_set negative_witnesses{}, positive_witnesses{}, neutral_witnesses{};
+        witness_set negative_witnesses, positive_witnesses, neutral_witnesses;
         /**
          * The given multiset charge configuration determines how many witness are required for each charge state.
          */
@@ -626,7 +626,7 @@ class ground_state_space_impl
      * SiDB.
      */
     template <potential_bound_analysis_mode mode>
-    static inline std::pair<double, double>
+    static std::pair<double, double>
     get_received_potential_bounds(const sidb_cluster_projector_state& pst, const uint64_t sidb_ix,
                                   const std::optional<complete_potential_bounds_store>& composition_pot_bounds) noexcept
     {
@@ -1147,7 +1147,7 @@ class ground_state_space_impl
      * @param number_of_sidbs The number of SiDBs (\f$N\f$).
      * @return \f$\binom{N + 2}{2}\f$ if base = 3, or otherwise \f$\binom{N + 1}{1}\f$ when the base is 2.
      */
-    [[nodiscard]] constexpr inline uint64_t maximum_top_level_multisets(const uint64_t number_of_sidbs) const noexcept
+    [[nodiscard]] constexpr uint64_t maximum_top_level_multisets(const uint64_t number_of_sidbs) const noexcept
     {
         //
         return params.simulation_parameters.base == 3 ? ((number_of_sidbs + 1) * (number_of_sidbs + 2)) / 2 :
@@ -1164,7 +1164,7 @@ class ground_state_space_impl
     /**
      * The clustering starts at all singletons, then moves up through merges until only the top cluster remains
      */
-    sidb_clustering clustering{};
+    sidb_clustering clustering;
     /**
      * Count the total number of projector states that are stored in the constructed hierarchy.
      */
