@@ -15,7 +15,6 @@
 
 #include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
-#include "fiction/utils/hash.hpp"
 
 #ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
 #include <set>
@@ -39,7 +38,6 @@
 
 #include <ap.h>
 #include <dataanalysis.h>
-#include <linalg.h>
 
 namespace fiction
 {
