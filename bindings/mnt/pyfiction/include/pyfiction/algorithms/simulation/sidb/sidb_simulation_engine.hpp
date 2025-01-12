@@ -25,7 +25,8 @@ void sidb_simulation_engine_name(pybind11::module& m)
     namespace py = pybind11;
 
     m.def(
-        "sidb_simulation_engine_name", [](const EngineType& engine) -> std::string { return fiction::sidb_simulation_engine_name(engine); },
+        "sidb_simulation_engine_name",
+        [](const EngineType& engine) -> std::string { return fiction::sidb_simulation_engine_name(engine); },
         py::arg("engine"), DOC(fiction_sidb_simulation_engine_name));
 }
 
