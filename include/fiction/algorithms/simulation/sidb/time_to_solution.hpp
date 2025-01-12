@@ -16,7 +16,6 @@
 
 #include <fmt/format.h>
 
-#include <chrono>
 #include <cmath>
 #include <cstdint>
 #include <cstdlib>
