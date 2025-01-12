@@ -594,7 +594,7 @@ class ground_state_space_impl
      * A switch to enable the potential bound analysis function to analyse both multiset charge configurations without
      * composition information, and those with.
      */
-    enum class potential_bound_analysis_mode
+    enum class potential_bound_analysis_mode : uint8_t
     {
         /**
          * Switch used to analyse multiset charge configurations without composition information.
