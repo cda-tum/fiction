@@ -8,6 +8,7 @@
 #include <phmap.h>
 
 #include <algorithm>
+#include <cctype>
 #include <cstdint>
 #include <optional>
 #include <string>
