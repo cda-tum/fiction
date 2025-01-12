@@ -52,11 +52,11 @@ TEMPLATE_TEST_CASE("Ground State Space construction of a single SiDB", "[ground-
     const ground_state_space_results& res = ground_state_space(lyt);
 
     CHECK(res.top_cluster->num_sidbs() == 1);
-    CHECK(res.top_cluster->uid == 1);
+    CHECK(res.top_cluster->uid == 0);  // same UIDs, but only with single SiDB simulation
     REQUIRE(res.top_cluster->sidbs.size() == 1);
     CHECK(*res.top_cluster->sidbs.cbegin() == 0);
     REQUIRE(res.top_cluster->children.size() == 1);
-    CHECK((*res.top_cluster->children.cbegin())->uid == 0);
+    CHECK((*res.top_cluster->children.cbegin())->uid == 0);  // <<< same with here
     CHECK(res.top_cluster->charge_space.size() == 1);
     CHECK(res.maximum_top_level_multisets == 3);
     CHECK(*res.top_cluster->charge_space.cbegin() == sidb_cluster_charge_state{sidb_charge_state::NEGATIVE});
