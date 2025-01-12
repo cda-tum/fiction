@@ -164,6 +164,7 @@ endif ()
 
 # Include tinyXML2
 set(tinyxml2_BUILD_TESTING OFF)
+set(tinyxml2_SHARED_LIBS ON)
 check_if_present(tinyxml2)
 add_subdirectory(tinyxml2 EXCLUDE_FROM_ALL)
 set_property(TARGET tinyxml2 PROPERTY POSITION_INDEPENDENT_CODE ON)
