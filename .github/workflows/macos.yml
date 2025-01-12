@@ -39,7 +39,6 @@ jobs:
     strategy:
       matrix:
         os: [macos-13, macos-14, macos-15]
-        architecture: [x64, arm64]
         compiler: [g++-13, g++-14, clang++]
         include:
           - os: macos-13
@@ -56,25 +55,15 @@ jobs:
             ccompiler: gcc-14
         exclude:
           - os: macos-14
-            architecture: x64
-          - os: macos-15
-            architecture: x64
-          - os: macos-13
-            architecture: arm64
-          - os: macos-14
-            architecture: arm64
             compiler: g++-13
           - os: macos-14
-            architecture: arm64
             compiler: g++-14
           - os: macos-15
-            architecture: arm64
             compiler: g++-13
           - os: macos-15
-            architecture: arm64
             compiler: g++-14
 
-    name: 🍎 ${{matrix.os}} with ${{matrix.compiler}} with ${{matrix.architecture}}
+    name: 🍎 ${{matrix.os}} with ${{matrix.compiler}}
     runs-on: ${{matrix.os}}
 
     steps:
