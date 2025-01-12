@@ -433,7 +433,7 @@ class critical_temperature_impl
             return quickexact(*bdl_iterator, qe_params);
         }
 #if (FICTION_ALGLIB_ENABLED)
-        if (params.engine == sidb_simulation_engine::CLUSTERCOMPLETE)
+        if (params.operational_params.sim_engine == sidb_simulation_engine::CLUSTERCOMPLETE)
         {
             // perform ClusterComplete simulation -- base 3 simulation is allowed
             const clustercomplete_params<cell<Lyt>> cc_params{params.operational_params.simulation_parameters};
