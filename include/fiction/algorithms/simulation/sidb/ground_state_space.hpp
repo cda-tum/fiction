@@ -370,7 +370,7 @@ class ground_state_space_impl
      * @param sidb_ix SiDB that receives the potential projections to be removed.
      */
     static constexpr void remove_all_cluster_charge_state_occurrences(const sidb_cluster_projector_state& rm_pst,
-                                                                             const uint64_t sidb_ix) noexcept
+                                                                      const uint64_t sidb_ix) noexcept
     {
         rm_pst.cluster->pot_projs[sidb_ix].remove_m_conf(rm_pst.multiset_conf);
     }
