@@ -23,6 +23,7 @@
 #include <array>
 #include <cstdint>
 #include <deque>
+#include <functional>
 #include <memory>
 #include <mutex>
 #include <optional>
