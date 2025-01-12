@@ -18555,6 +18555,20 @@ moved. Thereby, this is the essential type of the dynamic objects in
 the complete layout.)doc";
 
 static const char *__doc_fiction_sidb_clustering_state_operator_assign =
+R"doc(Copy assignment operator.
+
+Assigns the contents of another `sidb_clustering_state` instance to
+this instance. Performs a deep copy of `proj_states` and a complete
+copy of `pot_bounds`.
+
+Parameter ``other``:
+    The `sidb_clustering_state` instance to copy from.
+
+Returns:
+    A reference to this `sidb_clustering_state` instance after
+    assignment.)doc";
+
+static const char *__doc_fiction_sidb_clustering_state_operator_assign_2 =
 R"doc(Move assignment operator.
 
 Parameter ``other``:
