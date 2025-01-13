@@ -150,6 +150,13 @@ add_subdirectory(graph-coloring EXCLUDE_FROM_ALL)
 target_include_directories(libfiction SYSTEM INTERFACE graph-coloring/Header)
 target_link_system_libraries(libfiction INTERFACE graph-coloring)
 
+# Include tinyXML2
+set(tinyxml2_BUILD_TESTING OFF)
+check_if_present(tinyxml2)
+add_subdirectory(tinyxml2 EXCLUDE_FROM_ALL)
+set_property(TARGET tinyxml2 PROPERTY POSITION_INDEPENDENT_CODE ON)
+target_link_system_libraries(libfiction INTERFACE tinyxml2::tinyxml2)
+
 # Enable the usage of ALGLIB by the ALGLIB Project
 option(FICTION_ALGLIB "Automatically download, include, and utilize ALGLIB by the ALGLIB project.")
 if (FICTION_ALGLIB)
@@ -161,10 +168,3 @@ if (FICTION_ALGLIB)
     target_include_directories(libfiction SYSTEM INTERFACE alglib-cmake/src/cpp/src/headers)
     target_link_system_libraries(libfiction INTERFACE ALGLIB)
 endif ()
-
-# Include tinyXML2
-set(tinyxml2_BUILD_TESTING OFF)
-check_if_present(tinyxml2)
-add_subdirectory(tinyxml2 EXCLUDE_FROM_ALL)
-set_property(TARGET tinyxml2 PROPERTY POSITION_INDEPENDENT_CODE ON)
-target_link_system_libraries(libfiction INTERFACE tinyxml2::tinyxml2)
