@@ -76,6 +76,7 @@
             <dbdot>
                 <layer_id>2</layer_id>
                 <latcoord n="17" m="12" l="0"/>
+                <type>logic</type>
                 <physloc x="65.28" y="92.16"/>
                 <color>#ffc8c8c8</color>
             </dbdot>
@@ -95,6 +96,7 @@
             <dbdot>
                 <layer_id>2</layer_id>
                 <latcoord n="22" m="10" l="0"/>
+                <type>logic</type>
                 <physloc x="84.48" y="76.8"/>
                 <color>#ffc8c8c8</color>
             </dbdot>
@@ -114,18 +116,21 @@
             <dbdot>
                 <layer_id>2</layer_id>
                 <latcoord n="14" m="15" l="0"/>
+                <type>logic</type>
                 <physloc x="53.76" y="115.2"/>
                 <color>#ffc8c8c8</color>
             </dbdot>
             <dbdot>
                 <layer_id>2</layer_id>
                 <latcoord n="22" m="12" l="0"/>
+                <type>logic</type>
                 <physloc x="84.48" y="92.16"/>
                 <color>#ffc8c8c8</color>
             </dbdot>
             <dbdot>
                 <layer_id>2</layer_id>
                 <latcoord n="25" m="15" l="0"/>
+                <type>logic</type>
                 <physloc x="96" y="115.2"/>
                 <color>#ffc8c8c8</color>
             </dbdot>
@@ -138,6 +143,7 @@
             <dbdot>
                 <layer_id>2</layer_id>
                 <latcoord n="17" m="8" l="0"/>
+                <type>logic</type>
                 <physloc x="65.28" y="61.44"/>
                 <color>#ffc8c8c8</color>
             </dbdot>
@@ -157,6 +163,7 @@
             <dbdot>
                 <layer_id>2</layer_id>
                 <latcoord n="17" m="10" l="0"/>
+                <type>logic</type>
                 <physloc x="65.28" y="76.8"/>
                 <color>#ffc8c8c8</color>
             </dbdot>
@@ -169,12 +176,14 @@
             <dbdot>
                 <layer_id>2</layer_id>
                 <latcoord n="22" m="8" l="0"/>
+                <type>logic</type>
                 <physloc x="84.48" y="61.44"/>
                 <color>#ffc8c8c8</color>
             </dbdot>
             <dbdot>
                 <layer_id>2</layer_id>
                 <latcoord n="25" m="5" l="0"/>
+                <type>logic</type>
                 <physloc x="96" y="38.4"/>
                 <color>#ffc8c8c8</color>
             </dbdot>

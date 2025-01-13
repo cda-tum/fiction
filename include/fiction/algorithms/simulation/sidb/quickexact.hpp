@@ -104,7 +104,7 @@ class quickexact_impl
                     required_simulation_base_number::THREE :
                     required_simulation_base_number::TWO;
 
-            // If layout has at least two SiDBs, all SiDBs that have to be negatively charged are erased from the
+            // If the layout has at least two SiDBs, all SiDBs that have to be negatively charged are erased from the
             // layout.
             if (number_of_sidbs > 1)
             {
@@ -115,17 +115,17 @@ class quickexact_impl
                 {
                     if constexpr (has_get_sidb_defect_v<Lyt>)
                     {
-                        charge_distribution_surface charge_layout{static_cast<Lyt>(layout)};
+                        charge_distribution_surface charge_layout{charge_lyt.clone()};
                         conduct_simulation(charge_layout, base_number);
                     }
                     else
                     {
-                        charge_distribution_surface charge_layout{static_cast<Lyt>(layout)};
+                        charge_distribution_surface charge_layout{layout.clone()};
                         conduct_simulation(charge_layout, base_number);
                     }
                 }
 
-                // If the layout consists of only pre-assigned negatively-charged SiDBs
+                // If the layout consists of only pre-assigned negatively charged SiDBs
                 // (i.e., only SiDBs that are far away from each other).
                 else if (all_sidbs_in_lyt_without_negative_preassigned_ones.empty())
                 {
@@ -231,8 +231,7 @@ class quickexact_impl
      * This function initializes the charge layout with necessary parameters, and conducts
      * the physical simulation based on whether a three-state simulation is required.
      *
-     * @tparam ChargeLyt The type of Charge Layout.
-     * @tparam ChargeLyt The type representing the charge layout to simulate.
+     * @tparam ChargeLyt Type of the charge distribution surface.
      * @param base_number `THREE` if a three-state simulation is required, `TWO` otherwise.
      */
     template <typename ChargeLyt>

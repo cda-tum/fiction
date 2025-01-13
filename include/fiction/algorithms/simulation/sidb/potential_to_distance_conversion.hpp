@@ -2,8 +2,8 @@
 // Created by Jan Drewniok on 10.11.23.
 //
 
-#ifndef FICTION_CONVERT_POTENTIAL_TO_DISTANCE_HPP
-#define FICTION_CONVERT_POTENTIAL_TO_DISTANCE_HPP
+#ifndef FICTION_POTENTIAL_TO_DISTANCE_CONVERSION_HPP
+#define FICTION_POTENTIAL_TO_DISTANCE_CONVERSION_HPP
 
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/technology/physical_constants.hpp"
@@ -28,9 +28,9 @@ namespace fiction
  * @return The distance (unit: nm) corresponding to the given electrostatic potential.
  */
 [[nodiscard]] inline double
-convert_potential_to_distance(const double                      potential,
-                              const sidb_simulation_parameters& params    = sidb_simulation_parameters{},
-                              const uint64_t                    precision = 2) noexcept
+potential_to_distance_conversion(const double                      potential,
+                                 const sidb_simulation_parameters& params    = sidb_simulation_parameters{},
+                                 const uint64_t                    precision = 2) noexcept
 {
     // function to calculate the electrostatic potential for a given distance and given physical parameters on the H-Si
     // surface
@@ -59,4 +59,4 @@ convert_potential_to_distance(const double                      potential,
 
 }  // namespace fiction
 
-#endif  // FICTION_CONVERT_POTENTIAL_TO_DISTANCE_HPP
+#endif  // FICTION_POTENTIAL_TO_DISTANCE_CONVERSION_HPP

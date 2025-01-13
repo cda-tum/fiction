@@ -23,8 +23,7 @@
 #include "fiction/utils/math_utils.hpp"
 
 #include <fmt/format.h>
-#include <kitty/bit_operations.hpp>
-#include <kitty/dynamic_truth_table.hpp>
+#include <mockturtle/utils/stopwatch.hpp>
 
 #include <cassert>
 #include <cmath>
@@ -73,6 +72,10 @@ struct critical_temperature_params
  */
 struct critical_temperature_stats
 {
+    /**
+     * The total runtime of the critical temperature computation.
+     */
+    mockturtle::stopwatch<>::duration time_total{0};
     /**
      * All parameters for physical SiDB simulations.
      */
@@ -153,17 +156,22 @@ class critical_temperature_impl
     /**
      * *Gate-based Critical Temperature* Simulation of a SiDB layout for a given Boolean function.
      *
-     * @tparam TT The type of the truth table specifying the gate behavior.
+
+     * tparam TT Type of the truth table.
      * @param spec Expected Boolean function of the layout given as a multi-output truth table.
      */
     template <typename TT>
     void gate_based_simulation(const std::vector<TT>& spec) noexcept
     {
+        mockturtle::stopwatch stop{stats.time_total};
         if (layout.is_empty())
         {
             critical_temperature = 0.0;
             return;
         }
+
+        assert(layout.num_pis() > 0 && "gate needs input cells");
+        assert(layout.num_pos() > 0 && "gate needs output cells");
 
         if (layout.num_cells() > 1)
         {
@@ -244,6 +252,7 @@ class critical_temperature_impl
      */
     void non_gate_based_simulation() noexcept
     {
+        mockturtle::stopwatch       stop{stats.time_total};
         sidb_simulation_result<Lyt> simulation_results{};
 
         if (params.operational_params.sim_engine == sidb_simulation_engine::QUICKEXACT)
@@ -287,9 +296,12 @@ class critical_temperature_impl
         }
 
         std::vector<double> temp_values{};  // unit: K
-        temp_values.reserve(static_cast<uint64_t>(params.max_temperature * 100));
 
-        for (uint64_t i = 1; i <= static_cast<uint64_t>(params.max_temperature * 100); i++)
+        // Calculate the number of iterations as an integer
+        const auto num_iterations = static_cast<uint64_t>(std::round(params.max_temperature * 100));
+        // Reserve space for the vector
+        temp_values.reserve(num_iterations);
+        for (uint64_t i = 1; i <= num_iterations; i++)
         {
             temp_values.emplace_back(static_cast<double>(i) / 100.0);
         }
@@ -468,7 +480,7 @@ class critical_temperature_impl
  * \f$\eta \in [0,1]\f$.
  *
  * @tparam Lyt SiDB cell-level layout type.
- * @tparam TT The type of the truth table specifying the gate behavior.
+ * @tparam TT Type of the truth table.
  * @param lyt The layout to simulate.
  * @param spec Expected Boolean function of the layout given as a multi-output truth table.
  * @param params Simulation and physical parameters.
