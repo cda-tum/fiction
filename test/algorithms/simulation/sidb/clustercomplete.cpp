@@ -81,9 +81,15 @@ static bool verify_clustercomplete_result(const charge_distribution_surface<Lyt>
     return std::any_of(cc_cdss.cbegin(), cc_cdss.cend(),
                        [&](const charge_distribution_surface<Lyt>& cc_cds)
                        {
-                           return std::all_of(qe_cds.get_sidb_order().cbegin(), qe_cds.get_sidb_order().cend(),
-                                              [&](const auto& c)
-                                              { return qe_cds.get_charge_state(c) == cc_cds.get_charge_state(c); });
+                           for (const auto& c : qe_cds.get_sidb_order())
+                           {
+                               if (qe_cds.get_charge_state(c) != cc_cds.get_charge_state(c))
+                               {
+                                   return false;
+                               }
+                           }
+
+                           return true;
                        });
 }
 
