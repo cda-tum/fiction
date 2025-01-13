@@ -12,6 +12,7 @@
 #include "fiction/technology/physical_constants.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/technology/sidb_cluster_hierarchy.hpp"
+#include "fiction/traits.hpp"
 
 #include <btree.h>
 #include <fmt/format.h>
@@ -308,7 +309,7 @@ class ground_state_space_impl
      * with a multiset charge configuration of the given cluster.
      */
     template <bound_direction bound>
-    static constexpr inline potential_projection get_projection_bound(const sidb_cluster_ptr& c,
+    static constexpr potential_projection get_projection_bound(const sidb_cluster_ptr& c,
                                                                       const uint64_t          sidb_ix) noexcept
     {
         return c->pot_projs.at(sidb_ix).get_bound<bound>();
@@ -324,7 +325,7 @@ class ground_state_space_impl
      * with a multiset charge configuration of the given cluster.
      */
     template <bound_direction bound>
-    static constexpr inline double get_next_projected_pot_bound(const sidb_cluster_ptr& c,
+    static constexpr double get_next_projected_pot_bound(const sidb_cluster_ptr& c,
                                                                 const uint64_t          sidb_ix) noexcept
     {
         return c->pot_projs.at(sidb_ix).get_next_bound<bound>().pot_val;
@@ -341,7 +342,7 @@ class ground_state_space_impl
      * with the given projector state.
      */
     template <bound_direction bound>
-    static constexpr inline potential_projection get_projector_state_bound(const sidb_cluster_projector_state& pst,
+    static constexpr potential_projection get_projector_state_bound(const sidb_cluster_projector_state& pst,
                                                                            const uint64_t sidb_ix) noexcept
     {
         return pst.cluster->pot_projs.at(sidb_ix).get_pot_proj_for_m_conf<bound>(pst.multiset_conf);
@@ -356,7 +357,7 @@ class ground_state_space_impl
      * @param sidb_ix SiDB that receives the given potential projection from `c`.
      * @param pp Potential projection from `c` to `sidb_ix` to add.
      */
-    static constexpr inline void add_pot_projection(const sidb_cluster_ptr& c, const uint64_t sidb_ix,
+    static constexpr void add_pot_projection(const sidb_cluster_ptr& c, const uint64_t sidb_ix,
                                                     const potential_projection& pp) noexcept
     {
         c->pot_projs[sidb_ix].add(pp);
