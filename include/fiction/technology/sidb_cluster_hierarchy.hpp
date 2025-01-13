@@ -627,7 +627,7 @@ struct sidb_cluster_charge_state
      * @param m The multiset charge configuration to create a cluster charge state of.
      */
     explicit sidb_cluster_charge_state(const uint64_t m) noexcept :
-            neg_count{m >> 32ull},
+            neg_count{static_cast<uint32_t>(m >> 32ull)},
             pos_count{m << 32ull >> 32ull}
     {}
     /**

@@ -43,7 +43,7 @@ static inline const std::vector<sidb_charge_state> SIDB_CHARGE_STATES_BASE_3{
 [[nodiscard]] inline std::vector<sidb_charge_state> sidb_charge_states_for_base_number(const uint8_t base) noexcept
 {
     return base == 2 ? SIDB_CHARGE_STATES_BASE_2 : SIDB_CHARGE_STATES_BASE_3;
-};
+}
 /**
  * Converts the charge state into an integer (`-1`, `0`, `1`).
  *
