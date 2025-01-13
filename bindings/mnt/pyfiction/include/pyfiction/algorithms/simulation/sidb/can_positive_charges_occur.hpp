@@ -2,8 +2,8 @@
 // Created by marcel on 21.11.23.
 //
 
-#ifndef PYFICTION_CAN_POSITIVE_CHARGES_OCCUR_HPP
-#define PYFICTION_CAN_POSITIVE_CHARGES_OCCUR_HPP
+#ifndef PYFICTION_CAN_POSITIVE_CHARGE_OCCUR_HPP
+#define PYFICTION_CAN_POSITIVE_CHARGE_OCCUR_HPP
 
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
@@ -12,8 +12,6 @@
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-
-#include <string>
 
 namespace pyfiction
 {
@@ -42,4 +40,4 @@ inline void can_positive_charges_occur(pybind11::module& m)
 
 }  // namespace pyfiction
 
-#endif  // PYFICTION_CAN_POSITIVE_CHARGES_OCCUR_HPP
+#endif  // PYFICTION_CAN_POSITIVE_CHARGE_OCCUR_HPP

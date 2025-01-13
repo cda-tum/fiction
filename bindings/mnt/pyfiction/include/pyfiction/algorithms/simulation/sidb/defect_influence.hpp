@@ -8,7 +8,7 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
-#include <fiction/algorithms/simulation/sidb/maximum_defect_influence_position_and_distance.hpp>
+#include <fiction/algorithms/simulation/sidb/defect_influence.hpp>
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
