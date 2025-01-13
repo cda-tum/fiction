@@ -32,6 +32,7 @@
 #include <mockturtle/views/depth_view.hpp>
 
 #include <cassert>
+#include <cstdint>
 #include <cstdlib>
 #include <string>
 
