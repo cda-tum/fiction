@@ -123,17 +123,17 @@ TEST_CASE("SiQAD NAND gate", "[compute-operational-ratio]")
     op_domain_params.sweep_dimensions[1].max  = 10.0;
     op_domain_params.sweep_dimensions[1].step = 0.1;
 
-    compute_operational_ratio_params op_ratio_params{op_domain_params};
+    operational_domain_ratio_params op_ratio_params{op_domain_params};
 
     // pruning and simulation to determine the operational status of the layout
-    const auto op_domain_ratio_pruning_and_simulation = compute_operational_ratio(
+    const auto op_domain_ratio_pruning_and_simulation = operational_domain_ratio(
         lyt, std::vector<tt>{create_nand_tt()}, parameter_point({5.6, 5.0, -0.28}), op_ratio_params);
 
     // only pruning to determine the operational status of the layout
     op_ratio_params.op_domain_params.operational_params.strategy_to_analyze_operational_status =
         is_operational_params::operational_analysis_strategy::FILTER_ONLY;
 
-    const auto op_domain_ratio_only_pruning = compute_operational_ratio(
+    const auto op_domain_ratio_only_pruning = operational_domain_ratio(
         lyt, std::vector<tt>{create_nand_tt()}, parameter_point({5.6, 5.0, -0.28}), op_ratio_params);
 
     CHECK_THAT(op_domain_ratio_pruning_and_simulation,
