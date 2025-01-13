@@ -38,27 +38,29 @@ jobs:
   build_and_test:
     strategy:
       matrix:
-        os: [macos-13, macos-14]
-        compiler: [g++-12, g++-13, g++-14, clang++]
+        os: [macos-13, macos-14, macos-15]
+        compiler: [g++-13, g++-14, clang++]
         include:
           - os: macos-13
             architecture: x64
           - os: macos-14
             architecture: arm64
+          - os: macos-15
+            architecture: arm64
           - compiler: clang++
             ccompiler: clang
-          - compiler: g++-12
-            ccompiler: gcc-12
           - compiler: g++-13
             ccompiler: gcc-13
           - compiler: g++-14
             ccompiler: gcc-14
         exclude:
           - os: macos-14
-            compiler: g++-12
-          - os: macos-14
             compiler: g++-13
           - os: macos-14
+            compiler: g++-14
+          - os: macos-15
+            compiler: g++-13
+          - os: macos-15
             compiler: g++-14
 
     name: 🍎 ${{matrix.os}} with ${{matrix.compiler}}
@@ -75,7 +77,8 @@ jobs:
         with:
           python-version: "3.13.x"
 
-      # Setup TBB for parallel STL algorithms via Homebrew
+      # etup TBB for parallel STL algorithms via Homebrew
+
       - name: Setup TBB
         run: brew install tbb
 
@@ -104,7 +107,6 @@ jobs:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
       # Build and test pipeline for Debug mode
-
       - name: Create Build Environment (Debug)
         run: cmake -E make_directory ${{github.workspace}}/build_debug
 
@@ -132,10 +134,9 @@ jobs:
 
       - name: Test (Debug)
         working-directory: ${{github.workspace}}/build_debug
-        run: ctest -C Debug --verbose --output-on-failure --repeat until-pass:3 --parallel 4 --exclude-regex "quality"
+        run: ctest -C Debug --verbose --output-on-failure --repeat until-pass:3 --parallel 4
 
       # Build and test pipeline for Release mode
-
       - name: Create Build Environment (Release)
         run: cmake -E make_directory ${{github.workspace}}/build_release
 
