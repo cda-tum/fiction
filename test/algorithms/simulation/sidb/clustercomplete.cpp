@@ -27,6 +27,7 @@
 #include <fiction/technology/sidb_defects.hpp>
 #include <fiction/technology/sidb_lattice.hpp>
 #include <fiction/technology/sidb_lattice_orientations.hpp>
+#include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/layout_utils.hpp>
 #include <fiction/utils/math_utils.hpp>
@@ -77,26 +78,13 @@ template <typename Lyt>
 static bool verify_clustercomplete_result(const charge_distribution_surface<Lyt>&              qe_cds,
                                           const std::vector<charge_distribution_surface<Lyt>>& cc_cdss) noexcept
 {
-    for (const auto& cc_cds : cc_cdss)
-    {
-        bool is_same = true;
-
-        for (const auto& c : qe_cds.get_sidb_order())
-        {
-            if (qe_cds.get_charge_state(c) != cc_cds.get_charge_state(c))
-            {
-                is_same = false;
-                break;
-            }
-        }
-
-        if (is_same)
-        {
-            return true;
-        }
-    }
-
-    return false;
+    return std::any_of(cc_cdss.cbegin(), cc_cdss.cend(),
+                       [&](const charge_distribution_surface<Lyt>& cc_cds)
+                       {
+                           return std::all_of(qe_cds.get_sidb_order().cbegin(), qe_cds.get_sidb_order().cend(),
+                                              [&](const auto& c)
+                                              { return qe_cds.get_charge_state(c) == cc_cds.get_charge_state(c); });
+                       });
 }
 
 template <typename Lyt>

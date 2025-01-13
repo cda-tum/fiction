@@ -323,7 +323,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
 
             CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous),
                        Catch::Matchers::WithinAbs(5.1153718076, 0.01));
-            CHECK_THAT(std::abs(ct_qe - 13.36), Catch::Matchers::WithinAbs(0.00, 0.01));
+            CHECK_THAT(std::abs(ct_cc - 13.36), Catch::Matchers::WithinAbs(0.00, 0.01));
 
 #endif  // FICTION_ALGLIB_ENABLED
         }

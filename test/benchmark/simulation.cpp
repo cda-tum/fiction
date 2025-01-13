@@ -16,6 +16,8 @@
 #include <fiction/types.hpp>
 #include <fiction/utils/layout_utils.hpp>
 
+#include <cstdint>
+
 using namespace fiction;
 
 using lattice = sidb_100_cell_clk_lyt_siqad;

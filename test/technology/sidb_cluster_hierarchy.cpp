@@ -6,11 +6,10 @@
 
 #include <catch2/catch_template_test_macros.hpp>
 
+#include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/charge_distribution_surface.hpp>
 #include <fiction/technology/sidb_cluster_hierarchy.hpp>
 #include <fiction/types.hpp>
-
-#include <phmap.h>
 
 #ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
 #include <set>
