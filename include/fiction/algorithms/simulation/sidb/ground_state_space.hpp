@@ -310,7 +310,7 @@ class ground_state_space_impl
      */
     template <bound_direction bound>
     static constexpr potential_projection get_projection_bound(const sidb_cluster_ptr& c,
-                                                                      const uint64_t          sidb_ix) noexcept
+                                                               const uint64_t          sidb_ix) noexcept
     {
         return c->pot_projs.at(sidb_ix).get_bound<bound>();
     }
@@ -325,8 +325,7 @@ class ground_state_space_impl
      * with a multiset charge configuration of the given cluster.
      */
     template <bound_direction bound>
-    static constexpr double get_next_projected_pot_bound(const sidb_cluster_ptr& c,
-                                                                const uint64_t          sidb_ix) noexcept
+    static constexpr double get_next_projected_pot_bound(const sidb_cluster_ptr& c, const uint64_t sidb_ix) noexcept
     {
         return c->pot_projs.at(sidb_ix).get_next_bound<bound>().pot_val;
     }
@@ -343,7 +342,7 @@ class ground_state_space_impl
      */
     template <bound_direction bound>
     static constexpr potential_projection get_projector_state_bound(const sidb_cluster_projector_state& pst,
-                                                                           const uint64_t sidb_ix) noexcept
+                                                                    const uint64_t sidb_ix) noexcept
     {
         return pst.cluster->pot_projs.at(sidb_ix).get_pot_proj_for_m_conf<bound>(pst.multiset_conf);
     }
@@ -358,7 +357,7 @@ class ground_state_space_impl
      * @param pp Potential projection from `c` to `sidb_ix` to add.
      */
     static constexpr void add_pot_projection(const sidb_cluster_ptr& c, const uint64_t sidb_ix,
-                                                    const potential_projection& pp) noexcept
+                                             const potential_projection& pp) noexcept
     {
         c->pot_projs[sidb_ix].add(pp);
     }
