@@ -7522,41 +7522,19 @@ Parameter ``c``:
 Parameter ``g_val``:
     New g-value for c.)doc";
 
-static const char *__doc_fiction_detail_maximum_defect_influence_position_and_distance_impl =
-R"doc(A class for simulating the maximum influence distance of defects
-within an SiDB layout.
+static const char *__doc_fiction_detail_layout_invalidity_reason =
+R"doc(Reason why the layout is not a valid gate implementation for the given
+Boolean function.)doc";
 
-This class is responsible for simulating the distance at which defects
-placed within an SiDB layout still influence the ground state of the
-layout. It conducts simulations at various defect positions,
-identifying the position that maximally impacts the layout and
-calculating the associated influence distance.
+static const char *__doc_fiction_detail_layout_invalidity_reason_IO_INSTABILITY =
+R"doc(I/O signals are unstable, indicating that an information flip results
+in a lower energy state.)doc";
 
-The class provides a `run` method to initiate the simulation and
-compute the maximum influence distance and corresponding defect
-position. It utilizes multithreading for efficient defect position
-simulations.)doc";
+static const char *__doc_fiction_detail_layout_invalidity_reason_PHYSICAL_INFEASIBILITY =
+R"doc(The layout is physically infeasible, meaning no charge distribution of
+the canvas SiDBs satisfies the criteria for physical validity.)doc";
 
-static const char *__doc_fiction_detail_maximum_defect_influence_position_and_distance_impl_collect_all_defect_cells =
-R"doc(Collects all possible defect cell positions within a given layout
-while avoiding SiDB cells.
-
-This function calculates a bounding box around the provided layout,
-encompassing the area where defect cells can be placed. It then
-iterates through this bounding box, scanning from top to bottom and
-left to right, and identifies all valid positions for defect cells. A
-defect cell can only be placed in locations where there are no SiDB
-cells.)doc";
-
-static const char *__doc_fiction_detail_maximum_defect_influence_position_and_distance_impl_defect_cells = R"doc(All allowed defect positions.)doc";
-
-static const char *__doc_fiction_detail_maximum_defect_influence_position_and_distance_impl_layout = R"doc(SiDB cell-level layout to simulate.)doc";
-
-static const char *__doc_fiction_detail_maximum_defect_influence_position_and_distance_impl_maximum_defect_influence_position_and_distance_impl = R"doc()doc";
-
-static const char *__doc_fiction_detail_maximum_defect_influence_position_and_distance_impl_params = R"doc(Parameters used for the simulation.)doc";
-
-static const char *__doc_fiction_detail_maximum_defect_influence_position_and_distance_impl_run = R"doc()doc";
+static const char *__doc_fiction_detail_layout_invalidity_reason_POTENTIAL_POSITIVE_CHARGES = R"doc(Positive SiDBs can potentially occur.)doc";
 
 static const char *__doc_fiction_detail_nested_vector_hash =
 R"doc(This struct defines a hash function for a nested vector of layout
