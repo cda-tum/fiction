@@ -187,10 +187,10 @@ TEST_CASE("Bestagon AND gate", "[compute-operational-ratio]")
         op_domain_params.sweep_dimensions.push_back(z_dimension);
         op_domain_params.operational_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
 
-        const compute_operational_ratio_params op_ratio_params{op_domain_params};
+        const operational_domain_ratio_params op_ratio_params{op_domain_params};
 
-        const auto op_domain_ratio = compute_operational_ratio(lyt, std::vector<tt>{create_and_tt()},
-                                                               parameter_point({5.6, 5.0, -0.32}), op_ratio_params);
+        const auto op_domain_ratio = operational_domain_ratio(lyt, std::vector<tt>{create_and_tt()},
+                                                              parameter_point({5.6, 5.0, -0.32}), op_ratio_params);
 
         // check if the operational domain has the correct size
         CHECK_THAT(op_domain_ratio - (23.0 / 121.0),
@@ -205,10 +205,10 @@ TEST_CASE("Bestagon AND gate", "[compute-operational-ratio]")
         op_domain_params.operational_params.strategy_to_analyze_operational_status =
             is_operational_params::operational_analysis_strategy::FILTER_ONLY;
 
-        const compute_operational_ratio_params op_ratio_params{op_domain_params};
+        const operational_domain_ratio_params op_ratio_params{op_domain_params};
 
-        const auto op_domain_ratio = compute_operational_ratio(lyt, std::vector<tt>{create_and_tt()},
-                                                               parameter_point({5.6, 5.0, -0.32}), op_ratio_params);
+        const auto op_domain_ratio = operational_domain_ratio(lyt, std::vector<tt>{create_and_tt()},
+                                                              parameter_point({5.6, 5.0, -0.32}), op_ratio_params);
 
         // check if the operational domain has the correct size
         CHECK(op_domain_ratio >= (23.0 / 121.0));
