@@ -207,6 +207,7 @@ TEMPLATE_TEST_CASE(
 
     clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{2, -0.28}};
 
+#ifdef NDEBUG
     SECTION("Check if ClusterComplete is deterministic")
     {
         std::set<double>   ground_state{};
@@ -222,6 +223,7 @@ TEMPLATE_TEST_CASE(
         CHECK(ground_state.size() == 1);
         CHECK(charge_index.size() == 1);
     }
+#endif
 
     SECTION("Add SiDBs which are positively charged in the ground state, layout does not fulfill the logic anymore.")
     {
