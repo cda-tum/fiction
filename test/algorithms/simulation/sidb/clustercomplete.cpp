@@ -207,9 +207,9 @@ TEMPLATE_TEST_CASE(
         std::set<uint64_t> charge_index{};
 #ifdef NDEBUG
         for (auto i = 0; i < 10000; i++)
-#else   // NDEBUG
+#else
         for (auto i = 0; i < 100; i++)
-#endif  // NDEBUG
+#endif
         {
             const auto simulation_results = clustercomplete<TestType>(lyt, params);
             auto&      charge_lyt_first   = simulation_results.charge_distributions.front();
