@@ -266,8 +266,6 @@ class clustercomplete_command : public command
     }
 };
 
-using ccsim_command = clustercomplete_command;
-
 ALICE_ADD_COMMAND(clustercomplete, "Simulation")
 
 }  // namespace alice
