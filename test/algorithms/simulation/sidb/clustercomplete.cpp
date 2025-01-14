@@ -207,15 +207,14 @@ TEMPLATE_TEST_CASE(
 
     clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{2, -0.28}};
 
-
     SECTION("Check if ClusterComplete is deterministic")
     {
         std::set<double>   ground_state{};
         std::set<uint64_t> charge_index{};
 #ifdef NDEBUG
         for (auto i = 0; i < 100; i++)
-#else  // NDEBUG
-            for (auto i = 0; i < 10000; i++)
+#else   // NDEBUG
+        for (auto i = 0; i < 10000; i++)
 #endif  // NDEBUG
         {
             const auto simulation_results = clustercomplete<TestType>(lyt, params);
