@@ -6,7 +6,6 @@ from mnt.pyfiction import (
     charge_distribution_surface_111,
     clustercomplete,
     clustercomplete_params,
-    groundstate_from_simulation_result,
     ground_state_space_reporting,
     sidb_100_lattice,
     sidb_111_lattice,
