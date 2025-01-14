@@ -115,8 +115,24 @@ TEST_CASE("Cell technology", "[cell-level-layout]")
 
         CHECK(tech_impl_name<sidb_technology> == std::string{"SiDB"});
 
-        CHECK(has_sidb_technology_v<sidb_100_cell_clk_lyt>);
-        CHECK(has_sidb_technology_v<sidb_111_cell_clk_lyt>);
+        CHECK(has_sidb_technology_v<sidb_cell_clk_lyt>);
+        CHECK(has_sidb_technology_v<sidb_cell_clk_lyt_siqad>);
+
+        sidb_cell_clk_lyt_siqad lyt{{15, 6}};
+        lyt.assign_cell_type({0, 0}, sidb_technology::cell_type::INPUT);
+        lyt.assign_cell_type({2, 1}, sidb_technology::cell_type::INPUT);
+        lyt.assign_cell_type({6, 2}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_cell_type({8, 3}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_cell_type({12, 4}, sidb_technology::cell_type::LOGIC);
+        lyt.assign_cell_type({14, 5}, sidb_technology::cell_type::OUTPUT);
+
+        const auto input_cells  = lyt.get_cells_by_type(sidb_technology::cell_type::INPUT);
+        const auto output_cells = lyt.get_cells_by_type(sidb_technology::cell_type::OUTPUT);
+        const auto logic_cells  = lyt.get_cells_by_type(sidb_technology::cell_type::LOGIC);
+
+        CHECK(input_cells.size() == 2);
+        CHECK(output_cells.size() == 1);
+        CHECK(logic_cells.size() == 1);
     }
 }
 
@@ -285,7 +301,7 @@ TEST_CASE("Clock zone assignment to cells", "[cell-level-layout]")
 {
     using clk_cell_lyt = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
 
-    clk_cell_lyt layout{clk_cell_lyt::aspect_ratio{4, 4, 0}, twoddwave_clocking<clk_cell_lyt>(), "Lyt", 2, 2};
+    const clk_cell_lyt layout{clk_cell_lyt::aspect_ratio{4, 4, 0}, twoddwave_clocking<clk_cell_lyt>(), "Lyt", 2, 2};
 
     CHECK(layout.get_clock_number({0, 0}) == 0);
     CHECK(layout.get_clock_number({0, 1}) == 0);

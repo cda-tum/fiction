@@ -2,7 +2,10 @@ import os
 import unittest
 
 from mnt.pyfiction import (
+    bdl_wire_selection,
     create_and_tt,
+    detect_bdl_wires_100,
+    detect_bdl_wires_params,
     is_kink_induced_non_operational,
     is_operational,
     is_operational_params,
@@ -52,6 +55,23 @@ class TestIsOperational(unittest.TestCase):
 
         [op_status, _evaluated_input_combinations] = is_operational(lyt, [create_and_tt()], params)
 
+        self.assertEqual(op_status, operational_status.NON_OPERATIONAL)
+
+        # pre-determined I/O pins
+        output_bdl_wires = detect_bdl_wires_100(lyt, detect_bdl_wires_params(), bdl_wire_selection.OUTPUT)
+        input_bdl_wires = detect_bdl_wires_100(lyt, detect_bdl_wires_params(), bdl_wire_selection.INPUT)
+        [op_status, _evaluated_input_combinations] = is_operational(
+            lyt, [create_and_tt()], params, input_bdl_wires, output_bdl_wires
+        )
+        self.assertEqual(op_status, operational_status.NON_OPERATIONAL)
+
+        # pre-determined I/O pins and canvas layout
+        canvas_lyt = sidb_100_lattice()
+        canvas_lyt.assign_cell_type((4, 5), sidb_technology.cell_type.LOGIC)
+        canvas_lyt.assign_cell_type((6, 7), sidb_technology.cell_type.LOGIC)
+        [op_status, _evaluated_input_combinations] = is_operational(
+            lyt, [create_and_tt()], params, input_bdl_wires, output_bdl_wires
+        )
         self.assertEqual(op_status, operational_status.NON_OPERATIONAL)
 
     def test_and_gate_kinks(self):
