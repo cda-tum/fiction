@@ -21,6 +21,12 @@
 
 using namespace fiction;
 
+#ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
+using set_container = std::set<uint64>;
+#else
+using set_container = phmap::flat_hash_set<uint64_t>;
+#endif
+
 TEMPLATE_TEST_CASE("SiDB cluster hierarchy of a Y-shape SiDB OR gate with input 01", "[sidb-cluster-hierarchy]",
                    sidb_cell_clk_lyt_siqad, charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
 {
@@ -47,20 +53,20 @@ TEMPLATE_TEST_CASE("SiDB cluster hierarchy of a Y-shape SiDB OR gate with input 
         REQUIRE(h.sub.at(1) != nullptr);
         REQUIRE(h.sub.at(0)->c.size() == 3);
         REQUIRE(h.sub.at(1)->c.size() == 5);
-        CHECK(h.sub.at(0)->c == phmap::flat_hash_set<uint64_t>{5, 6, 7});
-        CHECK(h.sub.at(1)->c == phmap::flat_hash_set<uint64_t>{0, 1, 2, 3, 4});
+        CHECK(h.sub.at(0)->c == set_container{5, 6, 7});
+        CHECK(h.sub.at(1)->c == set_container{0, 1, 2, 3, 4});
         REQUIRE(h.sub.at(0)->sub.at(0) != nullptr);
         REQUIRE(h.sub.at(0)->sub.at(1) != nullptr);
         REQUIRE(h.sub.at(1)->sub.at(0) != nullptr);
         REQUIRE(h.sub.at(1)->sub.at(1) != nullptr);
-        CHECK(h.sub.at(0)->sub.at(0)->c == phmap::flat_hash_set<uint64_t>{7});
-        CHECK(h.sub.at(0)->sub.at(1)->c == phmap::flat_hash_set<uint64_t>{5, 6});
-        CHECK(h.sub.at(1)->sub.at(0)->c == phmap::flat_hash_set<uint64_t>{1, 3});
-        CHECK(h.sub.at(1)->sub.at(1)->c == phmap::flat_hash_set<uint64_t>{0, 2, 4});
+        CHECK(h.sub.at(0)->sub.at(0)->c == set_container{7});
+        CHECK(h.sub.at(0)->sub.at(1)->c == set_container{5, 6});
+        CHECK(h.sub.at(1)->sub.at(0)->c == set_container{1, 3});
+        CHECK(h.sub.at(1)->sub.at(1)->c == set_container{0, 2, 4});
         REQUIRE(h.sub.at(1)->sub.at(1)->sub.at(0) != nullptr);
         REQUIRE(h.sub.at(1)->sub.at(1)->sub.at(1) != nullptr);
-        CHECK(h.sub.at(1)->sub.at(1)->sub.at(0)->c == phmap::flat_hash_set<uint64_t>{4});
-        CHECK(h.sub.at(1)->sub.at(1)->sub.at(1)->c == phmap::flat_hash_set<uint64_t>{0, 2});
+        CHECK(h.sub.at(1)->sub.at(1)->sub.at(0)->c == set_container{4});
+        CHECK(h.sub.at(1)->sub.at(1)->sub.at(1)->c == set_container{0, 2});
     }
 }
 
@@ -83,33 +89,24 @@ TEMPLATE_TEST_CASE("SiDB cluster hierarchy of an 8 DB layout with separated grou
     lyt.assign_cell_type({48, 13, 1}, sidb_technology::cell_type::NORMAL);
 
     const sidb_binary_cluster_hierarchy_node& h = sidb_cluster_hierarchy(lyt);
+
     REQUIRE(h.c.size() == 8);
     REQUIRE(h.sub.at(0) != nullptr);
     REQUIRE(h.sub.at(1) != nullptr);
     REQUIRE(h.sub.at(0)->c.size() == 4);
     REQUIRE(h.sub.at(1)->c.size() == 4);
-#ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
-    CHECK(h.sub.at(0)->c == std::set<uint64_t>{2, 3, 4, 5});
-    CHECK(h.sub.at(1)->c == std::set<uint64_t>{0, 1, 6, 7});
-#else
-    CHECK(h.sub.at(0)->c == phmap::flat_hash_set<uint64_t>{2, 3, 4, 5});
-    CHECK(h.sub.at(1)->c == phmap::flat_hash_set<uint64_t>{0, 1, 6, 7});
-#endif
+
+    CHECK(h.sub.at(0)->c == set_container{2, 3, 4, 5});
+    CHECK(h.sub.at(1)->c == set_container{0, 1, 6, 7});
+
     REQUIRE(h.sub.at(0)->sub.at(0) != nullptr);
     REQUIRE(h.sub.at(0)->sub.at(1) != nullptr);
     REQUIRE(h.sub.at(1)->sub.at(0) != nullptr);
-    REQUIRE(h.sub.at(1)->sub.at(1) != nullptr);
-#ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
-    CHECK(h.sub.at(0)->sub.at(0)->c == std::set<uint64_t>{4, 5});
-    CHECK(h.sub.at(0)->sub.at(1)->c == std::set<uint64_t>{2, 3});
-    CHECK(h.sub.at(1)->sub.at(0)->c == std::set<uint64_t>{0, 1});
-    CHECK(h.sub.at(1)->sub.at(1)->c == std::set<uint64_t>{6, 7});
-#else
-    CHECK(h.sub.at(0)->sub.at(0)->c == phmap::flat_hash_set<uint64_t>{4, 5});
-    CHECK(h.sub.at(0)->sub.at(1)->c == phmap::flat_hash_set<uint64_t>{2, 3});
-    CHECK(h.sub.at(1)->sub.at(0)->c == phmap::flat_hash_set<uint64_t>{0, 1});
-    CHECK(h.sub.at(1)->sub.at(1)->c == phmap::flat_hash_set<uint64_t>{6, 7});
-#endif
+
+    CHECK(h.sub.at(0)->sub.at(0)->c == set_container{4, 5});
+    CHECK(h.sub.at(0)->sub.at(1)->c == set_container{2, 3});
+    CHECK(h.sub.at(1)->sub.at(0)->c == set_container{0, 1});
+    CHECK(h.sub.at(1)->sub.at(1)->c == set_container{6, 7});
 }
 
 #else  // FICTION_ALGLIB_ENABLED
