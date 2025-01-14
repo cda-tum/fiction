@@ -190,15 +190,22 @@ sidb_cluster_hierarchy(Lyt& lyt, sidb_cluster_hierarchy_linkage_method linkage_m
 #ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
         std::set<uint64_t> set_union{};
 #else
-        phmap::flat_hash_set<uint64_t> set_union{};
+        phmap::flat_hash_set<uint64_t> unioned_set{};
 #endif
 
-        std::set_union(nodes.at(cs.at(0))->c.cbegin(), nodes.at(cs.at(0))->c.cend(), nodes.at(cs.at(1))->c.cbegin(),
-                       nodes.at(cs.at(1))->c.cend(), std::inserter(set_union, set_union.begin()));
+        for (const uint64_t sidb_ix : nodes.at(cs.at(0))->c)
+        {
+            unioned_set.insert(sidb_ix);
+        }
+
+        for (const uint64_t sidb_ix : nodes.at(cs.at(1))->c)
+        {
+            unioned_set.insert(sidb_ix);
+        }
 
         nodes[new_n] = std::make_unique<sidb_binary_cluster_hierarchy_node>(
-            std::move(set_union), std::array<sidb_binary_cluster_hierarchy_node_ptr, 2>{std::move(nodes.at(cs.at(0))),
-                                                                                        std::move(nodes.at(cs.at(1)))});
+            std::move(unioned_set), std::array<sidb_binary_cluster_hierarchy_node_ptr, 2>{
+                                        std::move(nodes.at(cs.at(0))), std::move(nodes.at(cs.at(1)))});
         nodes.erase(cs.at(0));
         nodes.erase(cs.at(1));
     }
