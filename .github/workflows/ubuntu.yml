@@ -128,6 +128,7 @@ jobs:
           -DFICTION_PROGRESS_BARS=OFF
           -DFICTION_WARNINGS_AS_ERRORS=OFF
           -DMOCKTURTLE_EXAMPLES=OFF
+          -DCMAKE_CXX_FLAGS_DEBUG="-g1 -fno-inline"
 
       - name: Build (Debug)
         working-directory: ${{github.workspace}}/build_debug
