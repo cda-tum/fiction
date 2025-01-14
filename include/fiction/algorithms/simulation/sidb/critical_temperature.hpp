@@ -246,16 +246,18 @@ class critical_temperature_impl
             // is used to provide 100 % accuracy for the Critical Temperature).
             simulation_results = quickexact(layout, qe_params);
         }
-#if (FICTION_ALGLIB_ENABLED)
         else if (params.operational_params.sim_engine == sidb_simulation_engine::CLUSTERCOMPLETE)
         {
+#if (FICTION_ALGLIB_ENABLED)
             const clustercomplete_params<cell<Lyt>> cc_params{params.operational_params.simulation_parameters};
 
             // All physically valid charge configurations are determined for the given layout (`ClusterComplete`
             // simulation is used to provide 100 % accuracy for the Critical Temperature).
             simulation_results = clustercomplete(layout, cc_params);
-        }
+#else   // FICTION_ALGLIB_ENABLED
+            assert(false && "ALGLIB must be enabled if ClusterComplete is to be used");
 #endif  // FICTION_ALGLIB_ENABLED
+        }
         else if (params.operational_params.sim_engine == sidb_simulation_engine::QUICKSIM)
         {
             const quicksim_params qs_params{params.operational_params.simulation_parameters, params.iteration_steps,
@@ -445,14 +447,16 @@ class critical_temperature_impl
                 fiction::quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF};
             return quickexact(*bdl_iterator, qe_params);
         }
-#if (FICTION_ALGLIB_ENABLED)
         if (params.operational_params.sim_engine == sidb_simulation_engine::CLUSTERCOMPLETE)
         {
+#if (FICTION_ALGLIB_ENABLED)
             // perform ClusterComplete simulation -- base 3 simulation is allowed
             const clustercomplete_params<cell<Lyt>> cc_params{params.operational_params.simulation_parameters};
             return clustercomplete(*bdl_iterator, cc_params);
-        }
+#else   // FICTION_ALGLIB_ENABLED
+            assert(false && "ALGLIB must be enabled if ClusterComplete is to be used");
 #endif  // FICTION_ALGLIB_ENABLED
+        }
         if (params.operational_params.sim_engine == sidb_simulation_engine::QUICKSIM)
         {
             assert(params.operational_params.simulation_parameters.base == 2 && "base number has to be 2");
