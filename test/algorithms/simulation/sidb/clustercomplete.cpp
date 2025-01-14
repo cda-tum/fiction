@@ -12,7 +12,7 @@
 
 #include <fiction/algorithms/physical_design/apply_gate_library.hpp>
 #include <fiction/algorithms/simulation/sidb/clustercomplete.hpp>
-#include <fiction/algorithms/simulation/sidb/determine_groundstate_from_simulation_results.hpp>
+#include <fiction/algorithms/simulation/sidb/groundstate_from_simulation_result.hpp>
 #include <fiction/algorithms/simulation/sidb/minimum_energy.hpp>
 #include <fiction/algorithms/simulation/sidb/quickexact.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
@@ -1973,7 +1973,7 @@ TEMPLATE_TEST_CASE("ClusterComplete gate simulation of Si-111 surface", "[cluste
 
     const auto simulation_results = clustercomplete<TestType>(lyt, params);
 
-    const auto ground_state = determine_groundstate_from_simulation_results(simulation_results);
+    const auto ground_state = groundstate_from_simulation_result(simulation_results);
     REQUIRE(ground_state.size() == 1);
 
     CHECK(ground_state.front().get_charge_state({0, 0, 0}) == sidb_charge_state::NEGATIVE);
@@ -1997,7 +1997,7 @@ TEMPLATE_TEST_CASE("ClusterComplete AND gate simulation of Si-111 surface", "[cl
 
         const auto simulation_results = clustercomplete<TestType>(lyt, params);
 
-        const auto ground_state = determine_groundstate_from_simulation_results(simulation_results);
+        const auto ground_state = groundstate_from_simulation_result(simulation_results);
         REQUIRE(ground_state.size() == 1);
 
         CHECK(ground_state.front().get_charge_state({0, 0, 0}) == sidb_charge_state::NEGATIVE);
@@ -2038,7 +2038,7 @@ TEMPLATE_TEST_CASE("ClusterComplete AND gate simulation of Si-111 surface", "[cl
         const auto simulation_results = clustercomplete<TestType>(lyt, params);
         CHECK(simulation_results.charge_distributions.size() == 7);
 
-        const auto ground_state = determine_groundstate_from_simulation_results(simulation_results);
+        const auto ground_state = groundstate_from_simulation_result(simulation_results);
 
         REQUIRE(ground_state.size() == 1);
 
