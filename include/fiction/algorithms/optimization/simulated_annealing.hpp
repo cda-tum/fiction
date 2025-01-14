@@ -5,15 +5,19 @@
 #ifndef FICTION_SIMULATED_ANNEALING_HPP
 #define FICTION_SIMULATED_ANNEALING_HPP
 
+#include "fiction/traits.hpp"
 #include "fiction/utils/execution_utils.hpp"
 
 #include <algorithm>
 #include <cassert>
 #include <cmath>
+#include <cstdint>
 #include <cstdlib>
 #include <random>
+#include <thread>
 #include <type_traits>
 #include <utility>
+#include <vector>
 
 namespace fiction
 {
@@ -38,6 +42,7 @@ constexpr auto geometric_temperature_schedule(const double t) noexcept
 {
     return t * 0.99;
 }
+
 /**
  * Simulated Annealing (SA) is a probabilistic optimization algorithm that is used to find a local minimum of a given
  * function. SA was first proposed in \"Optimization by simulated annealing\" by S. Kirkpatrick, C. D. Gelatt Jr, and M.
@@ -173,11 +178,27 @@ multi_simulated_annealing(const double init_temp, const double final_temp, const
     assert(std::isfinite(final_temp) && "final_temp must be a finite number");
 
     std::vector<std::pair<state_t, cost_t>> results(instances);
-    std::generate(
-        FICTION_EXECUTION_POLICY_PAR_UNSEQ results.begin(), results.end(),
-        [&init_temp, &final_temp, &cycles, &rand_state, &cost, &schedule, &next]() -> std::pair<state_t, cost_t>
-        { return simulated_annealing(rand_state(), init_temp, final_temp, cycles, cost, schedule, next); });
+    std::vector<std::thread>                threads{};
+    threads.reserve(instances);
 
+    // Function to perform simulated annealing and store the result in the results vector
+    const auto perform_simulated_annealing =
+        [&results, &init_temp, &final_temp, &cycles, &rand_state, &cost, &schedule, &next](const std::size_t index)
+    { results[index] = simulated_annealing(rand_state(), init_temp, final_temp, cycles, cost, schedule, next); };
+
+    // Start threads
+    for (std::size_t i = 0; i < instances; i++)
+    {
+        threads.emplace_back(perform_simulated_annealing, i);
+    }
+
+    // Join threads (wait for all threads to finish)
+    for (auto& thread : threads)
+    {
+        thread.join();
+    }
+
+    // Find the minimum result
     return *std::min_element(FICTION_EXECUTION_POLICY_PAR_UNSEQ results.cbegin(), results.cend(),
                              [](const auto& lhs, const auto& rhs) { return lhs.second < rhs.second; });
 }

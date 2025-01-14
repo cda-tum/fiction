@@ -476,37 +476,6 @@ static const char *__doc_fiction_aspect_ratio_iterator_operator_ne = R"doc()doc"
 
 static const char *__doc_fiction_aspect_ratio_iterator_operator_ne_2 = R"doc()doc";
 
-static const char *__doc_fiction_assess_physical_population_stability =
-R"doc(This function assesses the population stability of each physically
-valid charge distributions of a given SiDB layout. It determines the
-minimum absolute electrostatic potential required to induce a charge
-distribution transition. The function also identifies the SiDB for
-which this is the case (critical SiDB) and the corresponding charge
-state transition (i.e., the change from one charge state to another).
-
-Template parameter ``Lyt``:
-    SiDB cell-level layout type.
-
-Parameter ``lyt``:
-    The layout for which the population stability is assessed.
-
-Parameter ``params``:
-    Parameters used to assess the population stability.
-
-Returns:
-    A vector of population stability information for all physically
-    valid charge distributions of the given SiDB layout.)doc";
-
-static const char *__doc_fiction_assess_physical_population_stability_params =
-R"doc(This struct stores the parameters required to assess the population
-stability.)doc";
-
-static const char *__doc_fiction_assess_physical_population_stability_params_precision_for_distance_corresponding_to_potential =
-R"doc(The precision level for the conversion from the minimum potential
-difference to the corresponding distance.)doc";
-
-static const char *__doc_fiction_assess_physical_population_stability_params_simulation_parameters = R"doc(Parameters for the electrostatic potential.)doc";
-
 static const char *__doc_fiction_bancs_clocking =
 R"doc(Returns the BANCS clocking as defined in \"BANCS: Bidirectional
 Alternating Nanomagnetic Clocking Scheme\" by Ruan Evangelista
@@ -518,6 +487,48 @@ Template parameter ``Lyt``:
 
 Returns:
     BANCS clocking scheme.)doc";
+
+static const char *__doc_fiction_band_bending_resilience =
+R"doc(Calculates the band bending resilience. This is the minimum
+electrostatic potential required to induce a charge change in an SiDB
+layout among all possible input combinations which was proposed in
+\"Unifying Figures of Merit: A Versatile Cost Function for Silicon
+Dangling Bond Logic\" by J. Drewniok, M. Walter, S. S. H. Ng, K.
+Walus, and R. Wille in IEEE NANO 2024
+(https://ieeexplore.ieee.org/abstract/document/10628671).
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Template parameter ``TT``:
+    Truth table type.
+
+Parameter ``lyt``:
+    Layout for which the band bending resilience is calculated.
+
+Parameter ``spec``:
+    Expected Boolean function of the layout, provided as a multi-
+    output truth table.
+
+Parameter ``params``:
+    Parameters for assessing physical population stability.
+
+Parameter ``transition_type``:
+    The optional type of charge transition to consider. This can be
+    used if one is only interested in a specific type of charge
+    transition.
+
+Returns:
+    The minimum potential (in V) required for charge change across all
+    input combinations.)doc";
+
+static const char *__doc_fiction_band_bending_resilience_params =
+R"doc(This struct stores the parameters required to simulate the band
+bending resilience of an SiDB layout)doc";
+
+static const char *__doc_fiction_band_bending_resilience_params_assess_population_stability_params = R"doc(Parameters for the assessing physical population stability simulation)doc";
+
+static const char *__doc_fiction_band_bending_resilience_params_bdl_iterator_params = R"doc(Parameters for the input BDL iterator.)doc";
 
 static const char *__doc_fiction_bdl_input_iterator =
 R"doc(Iterator that iterates over all possible input states of a BDL layout.
@@ -575,6 +586,12 @@ starting pair. The resulting last BDL pairs are stored in
 
 @note Assumes that `input_bdl_wires` and `last_bdl_for_each_wire` are
 accessible within the scope.)doc";
+
+static const char *__doc_fiction_bdl_input_iterator_get_current_input_index =
+R"doc(Returns the current input index.
+
+Returns:
+    The current input index.)doc";
 
 static const char *__doc_fiction_bdl_input_iterator_input_bdl_wires = R"doc(The detected input BDL wires.)doc";
 
@@ -1046,29 +1063,6 @@ Parameter ``k``:
 Returns:
     The binomial coefficient :math:`\binom{n}{k}`.)doc";
 
-static const char *__doc_fiction_bound_direction =
-R"doc(The electrostatic potential bounds required for the *Ground State
-Space* algorithm. As the domain in which our potential bounds live are
-simply the real numbers, we may think of the lower bound and upper
-bound domains to be separate partial order structures on the real
-number line, inverse to each other. The *Ground State Space* algorithm
-requires the properties of a lower semi-lattice for these domains, ie.
-all finite meets must exist. This is implemented for the lower and
-upper bound respectively simply by taking a minimum or a maximum. One
-may think of meets as follows, which is very relevant to intention of
-their application: a meet, or greatest lower bound, is the *maximal
-information* common to a set (of potential bounds). This semantic
-operation is essential to the *Ground State Space* algorithm, which
-thus envelops without loss of accuracy.)doc";
-
-static const char *__doc_fiction_bound_direction_LOWER =
-R"doc(Lower bounds live in the set :math:`(-\infty\f, \infty]` and are
-ordered by >.)doc";
-
-static const char *__doc_fiction_bound_direction_UPPER =
-R"doc(Upper bounds live in the set :math:`[-\infty, \infty)` and are ordered
-by <.)doc";
-
 static const char *__doc_fiction_bounding_box_2d =
 R"doc(A 2D bounding box object that computes a minimum-sized box around all
 non-empty coordinates in a given layout. Layouts can be of arbitrary
@@ -1194,6 +1188,24 @@ Parameter ``ntk_node``:
 
 Parameter ``lyt_signal``:
     New signal pointing to the end of the branch.)doc";
+
+static const char *__doc_fiction_calculate_defect_clearance =
+R"doc(Computes the defect clearance for a given SiDB layout based on a
+defect influence domain. The defect clearance is the maximum distance
+at which a defect can influence the layout. It calculates the minimum
+distance from each SiDB to any influential defect position.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Parameter ``lyt``:
+    SiDB layout for which the defect clearance is computed.
+
+Parameter ``defect_inf_domain``:
+    Defect influence domain of the given SiDB layout.
+
+Returns:
+    Defect clearance.)doc";
 
 static const char *__doc_fiction_calculate_energy_and_state_type_with_kinks_accepted =
 R"doc(This function takes in an SiDB energy distribution. For each charge
@@ -2173,6 +2185,15 @@ Parameter ``c``:
 Returns:
     Cell type assigned to cell position `c`.)doc";
 
+static const char *__doc_fiction_cell_level_layout_get_cells_by_type =
+R"doc(Returns all cells of the given type.
+
+Parameter ``type``:
+    Type of cells to return.
+
+Returns:
+    All cells of the layout that have the given type.)doc";
+
 static const char *__doc_fiction_cell_level_layout_get_clock_number =
 R"doc(Returns the clock number of cell position `c` by accessing
 `ClockedLayout`'s underlying clocking scheme and respecting this
@@ -2759,86 +2780,6 @@ Parameter ``cn``:
 
 static const char *__doc_fiction_clocking_scheme_regular = R"doc(Defines the clocking as regular and well-defined by the scheme.)doc";
 
-static const char *__doc_fiction_clustercomplete =
-R"doc(*ClusterComplete* is an instantiation of a general solution to
-exhaustive state assignment searching for which all local predicates
-hold, given respective local evaluations that may be aggregated from
-individual inter-variable interactions. Applied to the problem of
-exact physical simulation of SiDBs, it is able to efficiently consider
-positive charges that are rare to occur, but drastically blow up exact
-simulation runtimes when hierarchical pruning methods are not applied.
-In fact, the exponential growth in problem complexity for added SiDBs
-is tamed by *ClusterComplete*, as SiDB layouts to simulate in practise
-amount to a high pruning efficacy, resulting in a layout-dependent
-reduction of the simulation base. This amounts to an effective
-simulation base in the real number range :math:`[1,b]`, where
-:math:`b\in\{2,3\}` is the given simulation base.
-
-The part of the *ClusterComplete* algorithm that is implemented in
-this file is the destructive phase of the procedure that employs the
-duality of construction and destruction, folding and unfolding. The
-phase preceding it is the key ingredient to the achieved efficiency:
-the *Ground State Space* algorithm, which constructs a minimized
-hierarchical search space of charge configurations that adhere to the
-critical population stability criterion. In particular, it generalizes
-physically informed space pruning that contributes to the capabilities
-of the *QuickExact* simulator, now applying to all charge states
-equally, and, most importantly, it lifts the associated potential
-equations to higher order, allowing us to reason over potential bounds
-in a cluster hierarchy.
-
-Template parameter ``Lyt``:
-    SiDB cell-level layout type.
-
-Parameter ``lyt``:
-    Layout to simulate.
-
-Parameter ``params``:
-    Parameter required for both the invocation of *Ground State
-    Space*, and the simulation following.
-
-Returns:
-    Simulation results.)doc";
-
-static const char *__doc_fiction_clustercomplete_params =
-R"doc(The struct containing the parameters both passed on to pre-simulator
-Ground State Space, and used during simulation.)doc";
-
-static const char *__doc_fiction_clustercomplete_params_available_threads =
-R"doc(Number of threads to make available to *ClusterComplete* for the
-unfolding stage.)doc";
-
-static const char *__doc_fiction_clustercomplete_params_global_potential =
-R"doc(Global external electrostatic potential. Value is applied on each cell
-in the layout.)doc";
-
-static const char *__doc_fiction_clustercomplete_params_local_external_potential =
-R"doc(Local external electrostatic potentials (e.g., locally applied
-electrodes).)doc";
-
-static const char *__doc_fiction_clustercomplete_params_num_overlapping_witnesses_limit_gss =
-R"doc(The complexity is of validity witness partitioning bounded by a
-factorial in the number of overlapping witnesses. This parameter thus
-allows the validity witness partitioning procedure to perform the
-reduction to overlapping witnesses for larger cluster sizes that could
-be runtime-impairing, then limiting specifically the length of the
-input to the factorial call.)doc";
-
-static const char *__doc_fiction_clustercomplete_params_report_gss_stats =
-R"doc(Option to decide if the *Ground State Space* statistics are reported
-to the standard output. By default, this option is disabled.)doc";
-
-static const char *__doc_fiction_clustercomplete_params_simulation_parameters = R"doc(Physical simulation parameters.)doc";
-
-static const char *__doc_fiction_clustercomplete_params_validity_witness_partitioning_max_cluster_size_gss =
-R"doc(This specifies the maximum cluster size for which *Ground State Space*
-will solve an NP-complete sub-problem exhaustively. The sets of SiDBs
-that witness local population stability for each respective charge
-state may be partitioned into disjoint sets such that the number of
-required witnesses for each respective charge state is satisfied. If
-no such partition exists, the multiset charge configuration associated
-with the requirements may be rejected.)doc";
-
 static const char *__doc_fiction_color_routing =
 R"doc(A multi-path signal routing approach based on coloring of edge
 intersection graphs as originally proposed in \"Efficient Multi-Path
@@ -2956,50 +2897,6 @@ Parameter ``n``:
 Returns:
     Columnar clocking scheme.)doc";
 
-static const char *__doc_fiction_compute_operational_ratio =
-R"doc(Calculates the ratio of operational parameter points surrounding a
-specified parameter point to the total number of parameter points in
-the given parameter space. This function is useful for assessing how
-robust a gate design is to variations in its parameters.
-
-A ratio close to 1 indicates that the gate is robust, meaning it
-functions correctly across a broad range of parameter values. A ratio
-close to 0 indicates that the gate is highly sensitive to parameter
-variations and may fail to operate correctly.
-
-Template parameter ``Lyt``:
-    SiDB cell-level layout type.
-
-Template parameter ``TT``:
-    Truth table type.
-
-Parameter ``lyt``:
-    The SiDB layout for which to compute the ratio of operational
-    parameter points surrounding a specified parameter point to the
-    total number of parameter points.
-
-Parameter ``spec``:
-    The expected Boolean function of the layout, provided as a multi-
-    output truth table.
-
-Parameter ``params``:
-    Parameters.
-
-Parameter ``pp``:
-    The specific parameter point around which the operational ratio is
-    computed.
-
-Returns:
-    The ratio of operational parameter points to the total number of
-    parameter points in the parameter space.)doc";
-
-static const char *__doc_fiction_compute_operational_ratio_params =
-R"doc(Parameters for computing the ratio of operational parameter points
-around a specified parameter point to the total number of parameter
-points in the given parameter space.)doc";
-
-static const char *__doc_fiction_compute_operational_ratio_params_op_domain_params = R"doc(Parameters for the operational domain computation.)doc";
-
 static const char *__doc_fiction_convert_array =
 R"doc(Converts an array of size `N` and type `T` to an array of size `N` and
 type `ElementType` by applying `static_cast` at compile time.
@@ -3101,33 +2998,6 @@ Returns:
     A logic network of type `NtkDest` that is logically equivalent to
     `ntk`.)doc";
 
-static const char *__doc_fiction_convert_potential_to_distance =
-R"doc(The electrostatic potential on hydrogen-passivated silicon is
-typically modeled using a screened Coulomb potential. This
-electrostatic potential is commonly employed to determine the
-electrostatic potential for a given distance (between SiDB and point
-under consideration) and given physical parameters. However, the
-function provided here serves the inverse purpose by calculating the
-distance for a given potential and given physical parameters.
-
-@note Runtime depends exponentially on the provided precision.
-
-Parameter ``params``:
-    The physical parameters for a given hydrogen-passivated silicon
-    surface.
-
-Parameter ``potential``:
-    The electrostatic potential (unit: V) to be converted to a
-    distance.
-
-Parameter ``precision``:
-    The precision level for the conversion, specifying the number of
-    decimal places.
-
-Returns:
-    The distance (unit: nm) corresponding to the given electrostatic
-    potential.)doc";
-
 static const char *__doc_fiction_coord_iterator =
 R"doc(An iterator type that allows to enumerate coordinates in order within
 a boundary.
@@ -3184,6 +3054,24 @@ static const char *__doc_fiction_coord_iterator_operator_lt = R"doc()doc";
 static const char *__doc_fiction_coord_iterator_operator_mul = R"doc()doc";
 
 static const char *__doc_fiction_coord_iterator_operator_ne = R"doc()doc";
+
+static const char *__doc_fiction_cost_function_chi =
+R"doc(Calculates the cost function :math:` \chi = \sum_{i=1} w_{i} \cdot
+\chi_{i} ` by summing the product of normalized chi values :math:`
+\chi_{i} ` and weights :math:` w_{i} `.
+
+Parameter ``chis``:
+    The vector containing the chi values.
+
+Parameter ``weights``:
+    The vector containing the weights.
+
+Returns:
+    The calculated cost function :math:` \chi(L) `.
+
+Throws:
+    std::invalid_argument If the sizes of chis and weights vectors are
+    different.)doc";
 
 static const char *__doc_fiction_cost_functor =
 R"doc(A functor that computes costs between coordinates and can be passed as
@@ -3565,7 +3453,7 @@ Template parameter ``Lyt``:
     SiDB cell-level layout type.
 
 Template parameter ``TT``:
-    The type of the truth table specifying the gate behavior.
+    Type of the truth table.
 
 Parameter ``lyt``:
     The layout to simulate.
@@ -3611,7 +3499,7 @@ algorithm.)doc";
 
 static const char *__doc_fiction_critical_temperature_params_alpha =
 R"doc(Alpha parameter for the *QuickSim* algorithm (only applicable if
-engine == QUICKSIM).)doc";
+engine == APPROXIMATE).)doc";
 
 static const char *__doc_fiction_critical_temperature_params_confidence_level =
 R"doc(Probability threshold for ground state population. The temperature at
@@ -3622,7 +3510,7 @@ probability of erroneous calculations of the gate.)doc";
 
 static const char *__doc_fiction_critical_temperature_params_iteration_steps =
 R"doc(Number of iteration steps for the *QuickSim* algorithm (only
-applicable if engine == QUICKSIM).)doc";
+applicable if engine == APPROXIMATE).)doc";
 
 static const char *__doc_fiction_critical_temperature_params_max_temperature =
 R"doc(Maximum simulation temperature beyond which no simulation will be
@@ -3637,6 +3525,8 @@ static const char *__doc_fiction_critical_temperature_stats = R"doc(This struct 
 static const char *__doc_fiction_critical_temperature_stats_algorithm_name =
 R"doc(Name of the algorithm used to compute the physically valid charge
 distributions.)doc";
+
+static const char *__doc_fiction_critical_temperature_stats_duration = R"doc(The total runtime of the critical temperature computation.)doc";
 
 static const char *__doc_fiction_critical_temperature_stats_energy_between_ground_state_and_first_erroneous =
 R"doc(Energy difference between the ground state and the first (erroneous)
@@ -3892,6 +3782,20 @@ static const char *__doc_fiction_debug_write_dot_layout = R"doc()doc";
 
 static const char *__doc_fiction_debug_write_dot_network = R"doc()doc";
 
+static const char *__doc_fiction_defect_clearance =
+R"doc(Results of the defect clearance calculation.
+
+Template parameter ``CellType``:
+    Cell type of the layout.)doc";
+
+static const char *__doc_fiction_defect_clearance_defect_clearance_distance =
+R"doc(The maximum of the minimum distances between any SiDB of the layout
+and the defect responsible for gate failure (unit: nm).)doc";
+
+static const char *__doc_fiction_defect_clearance_defect_position =
+R"doc(Position with maximum distance to the SiDB layout at which the
+placement of an SiDB defect still causes the gate to fail.)doc";
+
 static const char *__doc_fiction_defect_extent =
 R"doc(Returns the extent of a defect as a pair of SiDB distances in the
 horizontal and vertical directions. If the defect type is `NONE`, `{0,
@@ -3913,6 +3817,287 @@ Parameter ``neutral_defect_spacing_overwrite``:
 Returns:
     A pair of uint16_t values representing the number of horizontal
     and vertical SiDBs affected by the given defect type.)doc";
+
+static const char *__doc_fiction_defect_influence_domain =
+R"doc(A defect influence domain defines for each defect position the
+influence of the defect on the layout. Depending on the chosen
+definition of influence, this can either mean that the operational
+status or the ground state of the layout is changed due to the
+presence of the defect.)doc";
+
+static const char *__doc_fiction_defect_influence_domain_influence_information = R"doc(This stores for each defect position the condition of the layout.)doc";
+
+static const char *__doc_fiction_defect_influence_grid_search =
+R"doc(This algorithm uses a grid search to determine the defect influence
+domain. The grid search is performed by exhaustively sweeping all
+possible atomic defect positions in x and y dimensions.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Template parameter ``TT``:
+    Truth table type.
+
+Parameter ``lyt``:
+    Layout to compute the defect influence domain for.
+
+Parameter ``spec``:
+    Expected Boolean function of the layout given as a multi-output
+    truth table.
+
+Parameter ``step_size``:
+    The parameter specifying the interval between consecutive defect
+    positions to be evaluated.
+
+Parameter ``params``:
+    Defect influence domain computation parameters.
+
+Parameter ``stats``:
+    Statistics.
+
+Returns:
+    The defect influence domain of the layout.)doc";
+
+static const char *__doc_fiction_defect_influence_grid_search_2 =
+R"doc(This algorithm uses a grid search to determine the defect influence
+domain. The grid search is performed by exhaustively sweeping all
+possible atomic defect positions in x and y dimensions.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Parameter ``lyt``:
+    Layout to compute the defect influence domain for.
+
+Parameter ``step_size``:
+    The parameter specifying the interval between consecutive defect
+    positions to be evaluated.
+
+Parameter ``params``:
+    Defect influence domain computation parameters.
+
+Parameter ``stats``:
+    Statistics.
+
+Returns:
+    The defect influence domain of the layout.)doc";
+
+static const char *__doc_fiction_defect_influence_params =
+R"doc(Parameters to determine the defect influence.
+
+Template parameter ``CellType``:
+    Type of the cell.)doc";
+
+static const char *__doc_fiction_defect_influence_params_additional_scanning_area =
+R"doc(Area around the layout for additional defect scanning. This describes
+the additional space around the bounding box of the layout.)doc";
+
+static const char *__doc_fiction_defect_influence_params_defect = R"doc(The defect to calculate the defect influence for.)doc";
+
+static const char *__doc_fiction_defect_influence_params_influence_def = R"doc(Definition of defect influence.)doc";
+
+static const char *__doc_fiction_defect_influence_params_influence_definition = R"doc(Definition of defect influence.)doc";
+
+static const char *__doc_fiction_defect_influence_params_influence_definition_GROUND_STATE_CHANGE =
+R"doc(Influence is considered as the ability to change the ground state of
+the layout.)doc";
+
+static const char *__doc_fiction_defect_influence_params_influence_definition_OPERATIONALITY_CHANGE =
+R"doc(Influence is considered as the ability to change the operational
+status of the layout.)doc";
+
+static const char *__doc_fiction_defect_influence_params_operational_params = R"doc(Parameters for the `is_operational` algorithm.)doc";
+
+static const char *__doc_fiction_defect_influence_quicktrace =
+R"doc(Applies contour tracing to identify the boundary (contour) between
+influencing and non-influencing defect positions for a given SiDB
+layout.
+
+The algorithm leverages the concept of a screened Coulomb potential,
+where the electrostatic interaction weakens as distance increases. If
+a defect at position `p` causes the SiDB layout to be non-influential,
+then defects further away from the layout are also likely to have no
+influence on the layout's functionality or performance. Conversely,
+defects closer to the layout may cause it to fail. This behavior
+allows for efficient contour tracing of the transition between
+influential and non-influential states.
+
+The process is as follows: 1. **Initialization**: Randomly select
+`samples` initial defect positions several nanometers away from the
+layout where they are unlikely to influence the layout. 2. **Contour
+Tracing**: For each position, perform a defect-aware physical
+simulation to identify adjacent positions along the x-axis that
+influence the layout. 3. **Contour Following**: Trace the contour of
+non-influential positions until the starting point is reached again,
+thereby closing the contour. 4. **Repetition**: Repeat steps 1-3 for
+multiple initial heights to identify additional contours, since
+multiple influential-to-non-influential contours may exist. This
+process helps to detect all relevant transitions in the layout. This
+algorithm uses contour tracing to identify the transition between
+influencing and non-influencing defect positions of the SiDB layout.
+It starts by searching for defect locations on the left side
+(bounding_box + additional scanning area). The y-coordinate for these
+positions is chosen randomly. The number of samples is determined by
+the `samples` parameter. Then, the algorithm moves each defect
+position to the right, searching for the first last non-influencing
+defect position.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Template parameter ``TT``:
+    Truth table type.
+
+Parameter ``lyt``:
+    Layout to compute the defect influence domain for.
+
+Parameter ``spec``:
+    Expected Boolean function of the layout given as a multi-output
+    truth table.
+
+Parameter ``samples``:
+    Number of samples to perform.
+
+Parameter ``params``:
+    Defect influence domain computation parameters.
+
+Parameter ``stats``:
+    Defect influence computation statistics.
+
+Returns:
+    The (partial) defect influence domain of the layout.)doc";
+
+static const char *__doc_fiction_defect_influence_quicktrace_2 =
+R"doc(Applies contour tracing to identify the boundary (contour) between
+influencing and non-influencing defect positions for a given SiDB
+layout.
+
+The algorithm leverages the concept of a screened Coulomb potential,
+where the electrostatic interaction weakens as distance increases. If
+a defect at position `p` causes the SiDB layout to be non-influential,
+then defects further away from the layout are also likely to have no
+influence on the layout's functionality or performance. Conversely,
+defects closer to the layout may cause it to fail. This behavior
+allows for efficient contour tracing of the transition between
+influential and non-influential states.
+
+The process is as follows: 1. **Initialization**: Randomly select
+`samples` initial defect positions several nanometers away from the
+layout where they are unlikely to influence the layout. 2. **Contour
+Tracing**: For each position, perform a defect-aware physical
+simulation to identify adjacent positions along the x-axis that
+influence the layout. 3. **Contour Following**: Trace the contour of
+non-influential positions until the starting point is reached again,
+thereby closing the contour. 4. **Repetition**: Repeat steps 1-3 for
+multiple initial heights to identify additional contours, since
+multiple influential-to-non-influential contours may exist. This
+process helps to detect all relevant transitions in the layout.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Parameter ``lyt``:
+    Layout to compute the defect influence domain for.
+
+Parameter ``samples``:
+    Number of samples to perform.
+
+Parameter ``params``:
+    Defect influence domain computation parameters.
+
+Parameter ``stats``:
+    Defect influence computation statistics.
+
+Returns:
+    The (partial) defect influence domain of the layout.)doc";
+
+static const char *__doc_fiction_defect_influence_random_sampling =
+R"doc(This algorithm uses random sampling to find a part of the defect
+influence domain that might not be complete. It performs a total of
+`samples uniformly-distributed random samples within the specified
+area.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Template parameter ``TT``:
+    Truth table type.
+
+Parameter ``lyt``:
+    Layout to compute the defect influence domain for.
+
+Parameter ``spec``:
+    Expected Boolean function of the layout given as a multi-output
+    truth table.
+
+Parameter ``samples``:
+    Number of random samples to perform.
+
+Parameter ``params``:
+    Defect influence domain computation parameters.
+
+Parameter ``stats``:
+    Statistics.
+
+Returns:
+    The (partial) defect influence domain of the layout.)doc";
+
+static const char *__doc_fiction_defect_influence_random_sampling_2 =
+R"doc(This algorithm uses random sampling to find a part of the defect
+influence domain that might not be complete. It performs a total of
+`samples uniformly-distributed random samples within the specified
+area.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Parameter ``lyt``:
+    Layout to compute the defect influence domain for.
+
+Parameter ``samples``:
+    Number of random samples to perform.
+
+Parameter ``params``:
+    Defect influence domain computation parameters.
+
+Parameter ``stats``:
+    Statistics.
+
+Returns:
+    The (partial) defect influence domain of the layout.)doc";
+
+static const char *__doc_fiction_defect_influence_stats = R"doc(Statistics.)doc";
+
+static const char *__doc_fiction_defect_influence_stats_duration = R"doc(The total runtime of the defect influence computation.)doc";
+
+static const char *__doc_fiction_defect_influence_stats_num_evaluated_defect_positions = R"doc(Number of evaluated parameter combinations.)doc";
+
+static const char *__doc_fiction_defect_influence_stats_num_influencing_defect_positions =
+R"doc(Number of parameter combinations, for which the layout gets
+influenced.)doc";
+
+static const char *__doc_fiction_defect_influence_stats_num_non_influencing_defect_positions =
+R"doc(Number of parameter combinations, for which the layout is not
+influenced.)doc";
+
+static const char *__doc_fiction_defect_influence_stats_num_simulator_invocations = R"doc(Number of simulator invocations.)doc";
+
+static const char *__doc_fiction_defect_influence_status =
+R"doc(Defines whether the influence of a defect is present at a particular
+position in the layout. It can be used to classify positions as having
+an influence or not.)doc";
+
+static const char *__doc_fiction_defect_influence_status_INFLUENTIAL =
+R"doc(This indicates that the defect is actively influencing the layout at
+this position. It implies that some form of impact, such as a change
+in operational status or ground state, is being caused by the defect
+at this position.)doc";
+
+static const char *__doc_fiction_defect_influence_status_NON_INFLUENTIAL =
+R"doc(This indicates that the defect does not influence the layout at this
+position. It implies that the layout remains unaffected by the defect
+at this location, meaning there is no change in the operational status
+or the ground state.)doc";
 
 static const char *__doc_fiction_dependent_cell_mode = R"doc(An enumeration of modes for the dependent cell.)doc";
 
@@ -4346,119 +4531,6 @@ met.
 Returns:
     A `CellLyt` object representing the generated cell layout.)doc";
 
-static const char *__doc_fiction_detail_assess_physical_population_stability_impl = R"doc()doc";
-
-static const char *__doc_fiction_detail_assess_physical_population_stability_impl_assess_physical_population_stability_impl =
-R"doc(Constructor for assess_physical_population_stability_impl.
-
-Parameter ``lyt``:
-    SiDB layout.
-
-Parameter ``parameters``:
-    The simulation parameters used for the assessment.)doc";
-
-static const char *__doc_fiction_detail_assess_physical_population_stability_impl_collect_energy_and_charge_index =
-R"doc(Collects the system energy with the corresponding charge index
-information of all physically valid charge distributions of a given
-SiDB layout.
-
-Parameter ``sim_results``:
-    The simulation results, including all physically valid charge
-    distributions.
-
-Returns:
-    A vector of energy_and_charge_index pairs, where each pair
-    consists of a double value representing the system energy and a
-    uint64_t representing the unique charge index. The vector is
-    sorted in ascending order of the energy values.)doc";
-
-static const char *__doc_fiction_detail_assess_physical_population_stability_impl_energy_and_charge_index =
-R"doc(This struct represents the electrostatic energy and charge index of a
-charge distribution.)doc";
-
-static const char *__doc_fiction_detail_assess_physical_population_stability_impl_energy_and_charge_index_charge_index = R"doc(Charge index of the charge distribution.)doc";
-
-static const char *__doc_fiction_detail_assess_physical_population_stability_impl_energy_and_charge_index_energy = R"doc(Electrostatic energy of the charge distribution.)doc";
-
-static const char *__doc_fiction_detail_assess_physical_population_stability_impl_handle_negative_charges =
-R"doc(This function checks if the absolute difference between the given
-local potential and µ- is smaller than the current minimum potential
-difference to transition for a negatively charged SiDB. If `true`, it
-updates the population stability information with the new minimum
-difference and critical cell.
-
-Parameter ``local_potential``:
-    The local potential associated with the cell.
-
-Parameter ``c``:
-    The cell for which the charge state is being considered (SiDB is
-    negatively charged).
-
-Parameter ``pop_stability_information``:
-    The current population stability information.
-
-Returns:
-    An updated population stability information with potential
-    transition details.)doc";
-
-static const char *__doc_fiction_detail_assess_physical_population_stability_impl_handle_neutral_charges =
-R"doc(This function checks if the absolute difference between the given
-local potential and µ- or µ+ is smaller than the current minimum
-potential difference. If `true`, it updates the population stability
-information with the new minimum difference and critical cell.
-
-Parameter ``local_potential``:
-    The local potential associated with the cell.
-
-Parameter ``c``:
-    The cell for which the charge state is being considered (SiDB is
-    neutrally charged).
-
-Parameter ``pop_stability_information``:
-    The current population stability information.
-
-Returns:
-    An updated population stability information with potential
-    transition details.)doc";
-
-static const char *__doc_fiction_detail_assess_physical_population_stability_impl_handle_positive_charges =
-R"doc(This function checks if the absolute difference between the given
-local potential and µ+ is smaller than the current minimum potential
-difference. If true`, it updates the population stability information
-with the new minimum difference and critical cell.
-
-Parameter ``local_potential``:
-    The local potential associated with the cell.
-
-Parameter ``c``:
-    The cell for which the charge state is being considered (SiDB is
-    positively charged).
-
-Parameter ``pop_stability_information``:
-    The current population stability information.
-
-Returns:
-    An updated population stability information with potential
-    transition details.)doc";
-
-static const char *__doc_fiction_detail_assess_physical_population_stability_impl_layout = R"doc(Layout to analyze.)doc";
-
-static const char *__doc_fiction_detail_assess_physical_population_stability_impl_params = R"doc(Parameters required to assess the population stability.)doc";
-
-static const char *__doc_fiction_detail_assess_physical_population_stability_impl_run =
-R"doc(Runs a population stability assessment for a given SiDB layout using
-the provided simulation parameters. This function determines the
-minimum electrostatic potential required for charge state transitions
-within the layout and identifies the corresponding critical SiDB along
-with the type of charge state transition.
-
-Returns:
-    A vector of population stability information structures, where
-    each element represents a charge distribution in ascending energy
-    order. Each structure contains details about the critical SiDB,
-    the type of charge state transition, and the minimum electrostatic
-    potential required for the charge transition.)doc";
-
 static const char *__doc_fiction_detail_calculate_offset_matrix =
 R"doc(Calculate an offset matrix based on a to-delete list in a
 `wiring_reduction_layout`.
@@ -4484,453 +4556,6 @@ Parameter ``to_delete``:
 
 Returns:
     A 2D vector representing the calculated offset matrix.)doc";
-
-static const char *__doc_fiction_detail_clustercomplete_impl = R"doc()doc";
-
-static const char *__doc_fiction_detail_clustercomplete_impl_add_composition =
-R"doc(A composition is added to the given clustering state, i.e., the
-projector states in the composition are added to the clustering state
-and the potential bounds store is updated accordingly.
-
-Parameter ``clustering_state``:
-    Clustering state to which the given composition should be added.
-
-Parameter ``composition``:
-    The composition that needs to be added to the given clustering
-    state.)doc";
-
-static const char *__doc_fiction_detail_clustercomplete_impl_add_if_configuration_stability_is_met =
-R"doc(This function handles performs the last analysis step before
-collecting a simulation result. In order to judge whether a population
-stable charge distribution is physically valid, the *configuration
-stability* needs to be tested. If this criterion passes, the charge
-distribution is added to the simulation results.
-
-Parameter ``clustering_state``:
-    A clustering state consisting of only singleton clusters along
-    with associated charge states that make up a charge distribution
-    that conforms to the *population stability* criterion.)doc";
-
-static const char *__doc_fiction_detail_clustercomplete_impl_add_parent =
-R"doc(After all specializations have been tried, the clustering state needs
-to un-specialize in order for other specializations to take place
-later. This action undoes the action performed by the function above,
-adding the given parent projector state and putting it back at the
-given index.
-
-Parameter ``clustering_state``:
-    Clustering state to which the parent projector state should be
-    added.
-
-Parameter ``parent_pst_ix``:
-    The index in the vector of projector states in the given
-    clustering state at which the added parent projector state should
-    be placed.
-
-Parameter ``parent_pst``:
-    The parent projector state that needs to be added back to the
-    given clustering state at the given index.)doc";
-
-static const char *__doc_fiction_detail_clustercomplete_impl_add_physically_valid_charge_configurations =
-R"doc(This recursive function is the heart of the *ClusterComplete*
-destruction. The given clustering state is dissected at the largest
-cluster to each possible specialization of it, which then enters the
-recursive call with the clustering state modified to have a set of
-sibling children replacing their direct parent. For each
-specialization, appropriate updates are made to the potential bounds
-store that is part of the clustering state. After a specialization has
-been handled completely, i.e., when the recursive call for this
-specialization returns, the specialization to the potential bounds
-store is undone so that a new specialization may be applied.
-
-The two base cases to the recursion are as follows: (1) the charge
-distributions implied by the given clustering state do not meet the
-population stability, meaning that this branch of the search space may
-be pruned through terminating the recursion at this level, and, (2)
-the clustering state hold only singleton clusters and passes the
-population stability check. In the latter case, the configuration
-stability check is performed before the associated charge distribution
-is added to the simulation results.
-
-Parameter ``w``:
-    The worker running on the current thread. It has a clustering
-    state that holds a specific combination of multiset charge
-    configurations as projector states of which the respectively
-    associated clusters form a clustering in the cluster hierarchy.
-
-Parameter ``composition``:
-    To enable dynamic updates of the clustering states that thieves
-    can assume, the composition that the current worker's clustering
-    state is specialized to is to be stored in the worker's queue if
-    further compositions are to be unfolded.
-
-Returns:
-    `false` if and only if queue of this worker is found to be
-    completely empty and thus backtracking is not required.)doc";
-
-static const char *__doc_fiction_detail_clustercomplete_impl_available_threads = R"doc(Number of available threads.)doc";
-
-static const char *__doc_fiction_detail_clustercomplete_impl_charge_layout =
-R"doc(The base layout, along with the map of placed defects, that are used
-to create charge distribution surface copies.)doc";
-
-static const char *__doc_fiction_detail_clustercomplete_impl_clustercomplete_impl =
-R"doc(Constructor.
-
-Parameter ``lyt``:
-    Layout to simulate.
-
-Parameter ``params``:
-    Parameter required for both the invocation of *Ground State
-    Space*, and the simulation following.)doc";
-
-static const char *__doc_fiction_detail_clustercomplete_impl_extract_work_from_top_cluster =
-R"doc(Work in the form of compositions of charge space elements of the top
-cluster are extracted into a vector and shuffled at random before
-being returned.
-
-Parameter ``top_cluster``:
-    The top cluster that is returned by running the *Ground State
-    Space* construction.
-
-Returns:
-    A vector containing all work contained by the top cluster in
-    random order.)doc";
-
-static const char *__doc_fiction_detail_clustercomplete_impl_fail_onto_negative_charge =
-R"doc(Returns `true` if and only if the given potential bound closes out
-SiDB-.
-
-Parameter ``pot_bound``:
-    Potential lower bound.)doc";
-
-static const char *__doc_fiction_detail_clustercomplete_impl_fail_onto_positive_charge =
-R"doc(Returns `true` if and only if the given potential bound closes out
-SiDB+.
-
-Parameter ``pot_bound``:
-    Potential upper bound.)doc";
-
-static const char *__doc_fiction_detail_clustercomplete_impl_find_cluster_of_maximum_size =
-R"doc(Finds the cluster of the maximum size in the clustering associated
-with the input.
-
-Parameter ``proj_states``:
-    A vector of projector states that forms a clustering when only the
-    respectively contained clusters are considered.
-
-Returns:
-    The index in this vector of the projector state that contains the
-    cluster of maximum size.)doc";
-
-static const char *__doc_fiction_detail_clustercomplete_impl_get_projector_state_bound =
-R"doc(Helper function for obtaining the stored lower or upper bound on the
-electrostatic potential that SiDBs in the given projector state--i.e.,
-a cluster together with an associated multiset charge configuration--
-collectively project onto the given SiDB.
-
-Template parameter ``bound``:
-    Bound to obtain (lower/upper).
-
-Parameter ``pst``:
-    Projector state.
-
-Parameter ``sidb_ix``:
-    Receiving SiDB.
-
-Returns:
-    The potential projection value associated with this bound; i.e.,
-    an electrostatic potential (in V),)doc";
-
-static const char *__doc_fiction_detail_clustercomplete_impl_initialize_charge_layout =
-R"doc(Function to initialize the charge layout.
-
-Parameter ``lyt``:
-    Layout to simulate.
-
-Parameter ``params``:
-    Parameters for ClusterComplete.)doc";
-
-static const char *__doc_fiction_detail_clustercomplete_impl_initialize_worker_queues =
-R"doc(Initializes the worker queues with work from the top cluster, dividing
-it evenly over the available threads.
-
-Parameter ``work_from_top_cluster``:
-    A vector containing all compositions of all charge space elements
-    of the top cluster.)doc";
-
-static const char *__doc_fiction_detail_clustercomplete_impl_lb_fail_onto_neutral_charge =
-R"doc(Returns `true` if and only if the given potential bound closes out
-SiDB0.
-
-Parameter ``pot_bound``:
-    Potential lower bound.)doc";
-
-static const char *__doc_fiction_detail_clustercomplete_impl_meets_population_stability_criterion =
-R"doc(This function performs an analysis that is crucial to the
-*ClusterComplete*'s efficiency: as the *Ground State Space* construct
-is broken down, combinations of multiset charge configurations are
-tried together in more detail than in the construction preceding this
-second phase of the simulation.
-
-Parameter ``clustering_state``:
-    The clustering state that bundles a slice (i.e., a clustering) in
-    the cluster hierarchy along with respective projection states
-    (i.e., multiset charge configurations) together with a store of
-    accumulated potential projection bounds onto all SiDBs in the
-    layout, where this information is specific to the projection
-    states in the clustering state.
-
-Returns:
-    `false` if and only if a physically valid charge distribution
-    cannot be extracted from the clustering state.)doc";
-
-static const char *__doc_fiction_detail_clustercomplete_impl_mu_bounds_with_error =
-R"doc(Globally available array of bounds that section the band gap, used for
-pruning.)doc";
-
-static const char *__doc_fiction_detail_clustercomplete_impl_mutex_to_protect_the_simulation_results = R"doc(Mutex to protect the simulation results.)doc";
-
-static const char *__doc_fiction_detail_clustercomplete_impl_real_placed_defects = R"doc(Atomic defects that are placed in the layout.)doc";
-
-static const char *__doc_fiction_detail_clustercomplete_impl_remove_composition =
-R"doc(A composition is removed from the given clustering state, i.e., the
-projector states in the compositions are removed from the clustering
-state and the potential bounds store is updated accordingly.
-
-Parameter ``clustering_state``:
-    Clustering state from which the given composition should be
-    removed.
-
-Parameter ``composition``:
-    The composition that needs to be removed from the given clustering
-    state.)doc";
-
-static const char *__doc_fiction_detail_clustercomplete_impl_result = R"doc(Simulation results.)doc";
-
-static const char *__doc_fiction_detail_clustercomplete_impl_run =
-R"doc(This function performs the *ClusterComplete* simulation; first
-executing the *Ground State Space* construction, then destructing the
-result into the set of all physically valid charge distributions that
-are returned.
-
-Parameter ``params``:
-    Parameter required for both the invocation of *Ground State
-    Space*, and the simulation following.
-
-Returns:
-    Results of the exact simulation.)doc";
-
-static const char *__doc_fiction_detail_clustercomplete_impl_take_parent_out =
-R"doc(Before the parent projector state may be specialized to a specific
-composition of its children, first the projections of the parent must
-be subtracted. The parent projector state is moved out and returned.
-
-Parameter ``clustering_state``:
-    The clustering state from which the parent projector state should
-    be taken out.
-
-Parameter ``parent_pst_ix``:
-    The index of the parent projector state in the given clustering
-    state that should be taken out.
-
-Returns:
-    The parent projector state that was taken out of the given
-    clustering state.)doc";
-
-static const char *__doc_fiction_detail_clustercomplete_impl_ub_fail_onto_neutral_charge =
-R"doc(Returns `true` if and only if the given potential bound closes out
-SiDB0.
-
-Parameter ``pot_bound``:
-    Potential upper bound.)doc";
-
-static const char *__doc_fiction_detail_clustercomplete_impl_unfold_all_compositions =
-R"doc(After a cluster in a clustering state was chosen to be unfolded next,
-the unfolding is performed through ensuring that all compositions of
-the multiset associated with the cluster in the clustering state are
-each unfolded. The current worker will always unfold the first
-composition, while putting the other compositions in its queue such
-that threads without work may steal those if the current worker is
-still working on this first composition.
-
-Parameter ``w``:
-    The worker running on the current thread.
-
-Parameter ``compositions``:
-    A vector containing all compositions to unfold.
-
-Parameter ``informant``:
-    For other workers to be able to unfold one of those compositions
-    that are not being unfolded yet, they need to obtain the right
-    clustering state. The informant adds to the required information
-    to dynamically update the clustering state for other workers
-    looking to steal work.
-
-Returns:
-    `false` if and only if the queue of this worker is found to be
-    completely empty and thus backtracking is not required.)doc";
-
-static const char *__doc_fiction_detail_clustercomplete_impl_unfold_composition =
-R"doc(The clustering state of the current worker is specialized according to
-the given composition preceding the recursion. If there is still work
-left to do by this worker, backtracking is performed, for which also
-the aforementioned specialization needs to be undone.
-
-Parameter ``w``:
-    The worker running on the current thread.
-
-Parameter ``composition``:
-    The composition to unfold.)doc";
-
-static const char *__doc_fiction_detail_clustercomplete_impl_worker = R"doc(Forward declaration of the worker struct.)doc";
-
-static const char *__doc_fiction_detail_clustercomplete_impl_worker_2 = R"doc(Forward declaration of the worker struct.)doc";
-
-static const char *__doc_fiction_detail_clustercomplete_impl_worker_all_workers = R"doc(The vector of all workers where this worker is at `ix`.)doc";
-
-static const char *__doc_fiction_detail_clustercomplete_impl_worker_clustering_state =
-R"doc(This worker's current state, consisting of a clustering where each
-cluster has an assigned multiset charge configuration, and a store
-containing lower and upper bounds on the local potential for each SiDB
-under this multiset charge configuration assignment.)doc";
-
-static const char *__doc_fiction_detail_clustercomplete_impl_worker_index = R"doc(Worker index in the vector of all workers.)doc";
-
-static const char *__doc_fiction_detail_clustercomplete_impl_worker_obtain_work =
-R"doc(Obtains work for this worker, either from their own queue, or else
-from another worker's queue (work stealing).
-
-Returns:
-    Either nothing, when no work was found and this thread can thus
-    terminate, or that was obtained.)doc";
-
-static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue =
-R"doc(A worker queue contains a double-layer queue of work items, a
-clustering state for thieves that want to steal from the lowest layer
-of the queue, along with a queue of moles that tell how to transition
-this clustering state for thieves to facilitate stealing from one
-layer to the next.)doc";
-
-static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_add_to_queue =
-R"doc(Adds a vector of work items to the queue, along with adding an
-informant that allows for a dynamic update of the clustering state for
-thieves to assume one of the work items that are added to the queue.
-
-Parameter ``compositions``:
-    Vector of work items.
-
-Parameter ``informant``:
-    A mole providing the required information to update the clustering
-    state for thieves to enable forward-tracking. The mole says which
-    composition to add to the clustering state, and which cluster is
-    selected for the subsequent unfolding.)doc";
-
-static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_apply_informant =
-R"doc(A mole is popped from the queue which says which composition to add to
-the clustering state for thieves, and which cluster is selected for
-the subsequent unfolding, which should then be taken out.)doc";
-
-static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_clustering_state_for_thieves =
-R"doc(The clustering state for thieves, which enables thieves to join in and
-steal work from the bottom of the queue, while the owner of this queue
-will take items from the top of the queue.)doc";
-
-static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_get_from_this_queue =
-R"doc(Own work is obtained in a blocking fashion. If there is no more work
-in the queue, `false` is returned to indicate no backtracking is
-necessary, since there is no follow-up work item to backtrack towards.
-
-Returns:
-    Either work if there is work left to do on the current level---
-    i.e., for the current clustering state of the worker that calls
-    this function---or `true` if this not the case and backtracking is
-    required in order to do more work that is in this queue, or
-    `false` when there is no more such work and thus backtracking can
-    be skipped.)doc";
-
-static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_initialize_queue_after_stealing =
-R"doc(Initializes this queue with stolen work. The work itself is kept on
-the stack.)doc";
-
-static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_mole =
-R"doc(A mole contains information on how to transition from one clustering
-state to a subsequent one.)doc";
-
-static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_mole_composition =
-R"doc(The composition of the previously selected parent that fills the gap
-made by previously taking out this selected parent. In a clustering
-state transition, first the composition is added (filling the gap made
-by the previously selected parent), then the currently selected parent
-is taken out according to the `parent_to_move_out_ix` above. This way,
-a work item may be unfolded as it fills the gap made by taking out the
-currently selected parent. Thus, this work item becomes the
-`composition` value of the next mole in line.)doc";
-
-static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_mole_parent_to_move_out_ix =
-R"doc(The index of the cluster in the clustering state that is the selected
-parent cluster to unfold next. It needs to be taken out in a
-clustering state transition.)doc";
-
-static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_mutex_to_protect_this_queue = R"doc(Mutex used to protect shared resources in this queue.)doc";
-
-static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_pop_last_layer =
-R"doc(Called during backtracking to descend to the previous layer of the
-queue, along with popping the unnecessary mole.)doc";
-
-static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_queue =
-R"doc(Double layer queue of work items. Each layer corresponds with a
-clustering state that needs to be used to unfold the items in that
-layer. The clustering states of subsequent layers are each one
-informant application apart.)doc";
-
-static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_thief_informants =
-R"doc(The queue of moles. For each transition between layers of the double
-layer work queue below, there is an associated mole which informs how
-the transition takes place. This way, the clustering state for thieves
-can be dynamically updated through forward-tracking (opposite of
-backtracking).)doc";
-
-static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_try_steal_from_this_queue =
-R"doc(Attempt to steal work from this queue in a non-blocking fashion. When
-a lock is acquired, forward-tracking is applied to dynamically update
-the clustering state for thieves to where it can be copied for a thief
-that steals the last work item in this queue.
-
-Returns:
-    Either `true` when the queue is locked, `false` when there is no
-    work in this queue, or a pair of a copy of the updated (forward-
-    tracked) clustering state for thieves along with the corresponding
-    work item.)doc";
-
-static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_work_in_queue_count =
-R"doc(Counter to keep track of the total amount of work in the double-layer
-work queue.)doc";
-
-static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_worker_queue =
-R"doc(Standard constructor.
-
-Parameter ``num_sidbs_in_layout``:
-    The number of SiDBs in the layout to simulate. Required for
-    initializing clustering states.)doc";
-
-static const char *__doc_fiction_detail_clustercomplete_impl_worker_work_stealing_queue =
-R"doc(This worker's queue where work can be obtained from either by this
-worker or by others (work stealing).)doc";
-
-static const char *__doc_fiction_detail_clustercomplete_impl_worker_worker =
-R"doc(Standard constructor.
-
-Parameter ``ix``:
-    Worker index in the vector of all workers.
-
-Parameter ``num_sidbs``:
-    The number of SiDBs in the layout to simulate.
-
-Parameter ``workers``:
-    The vector of all workers where this worker is at `ix`.)doc";
-
-static const char *__doc_fiction_detail_clustercomplete_impl_workers = R"doc(Vector containing all workers.)doc";
 
 static const char *__doc_fiction_detail_color_routing_impl = R"doc()doc";
 
@@ -5003,22 +4628,22 @@ static const char *__doc_fiction_detail_connect_and_place = R"doc()doc";
 
 static const char *__doc_fiction_detail_connect_and_place_2 = R"doc()doc";
 
-static const char *__doc_fiction_detail_contains_parameter_point = R"doc(Forward-declaration for `operational_domain`.)doc";
+static const char *__doc_fiction_detail_contains_key = R"doc(Forward-declaration for `operational_domain`.)doc";
 
-static const char *__doc_fiction_detail_contains_parameter_point_2 =
-R"doc(This function checks for the containment of a parameter point,
-specified by `key`, in the provided map `map`. If the parameter point
-is found in the map, the associated `MapType::value_type` is returned.
-Otherwise, `std::nullopt` is returned.
+static const char *__doc_fiction_detail_contains_key_2 =
+R"doc(This function checks for the containment of a given key in a given
+map. If the key is found in the map, the associated
+`MapType::value_type` is returned. Otherwise, `std::nullopt` is
+returned.
 
 Template parameter ``MapType``:
-    The type of the map containing parameter points as keys.
+    The type of the map.
 
 Parameter ``map``:
     The map in which to search for `key`.
 
 Parameter ``key``:
-    The parameter point to search for in `map`.
+    The key to search for in `map`.
 
 Returns:
     The associated `MapType::value_type` of `key` in `map`, or
@@ -5130,8 +4755,7 @@ static const char *__doc_fiction_detail_critical_temperature_impl_gate_based_sim
 R"doc(*Gate-based Critical Temperature* Simulation of a SiDB layout for a
 given Boolean function.
 
-Template parameter ``TT``:
-    The type of the truth table specifying the gate behavior.
+tparam TT Type of the truth table.
 
 Parameter ``spec``:
     Expected Boolean function of the layout given as a multi-output
@@ -5182,6 +4806,184 @@ Returns:
     Simulation results.)doc";
 
 static const char *__doc_fiction_detail_critical_temperature_impl_stats = R"doc(Statistics.)doc";
+
+static const char *__doc_fiction_detail_defect_influence_impl = R"doc()doc";
+
+static const char *__doc_fiction_detail_defect_influence_impl_current_defect_position = R"doc(The current defect position.)doc";
+
+static const char *__doc_fiction_detail_defect_influence_impl_defect_influence_impl = R"doc()doc";
+
+static const char *__doc_fiction_detail_defect_influence_impl_determine_nw_se_cells =
+R"doc(This function determines the northwest and southeast cells based on
+the layout and the additional scan area specified.)doc";
+
+static const char *__doc_fiction_detail_defect_influence_impl_dist = R"doc(Uniform distribution for the y-coordinate of the defect.)doc";
+
+static const char *__doc_fiction_detail_defect_influence_impl_does_defect_influence_groundstate =
+R"doc(This function checks if the defect at position `defect_pos` influences
+the ground state of the layout.
+
+Parameter ``lyt_without_defect``:
+    Layout without the defect.
+
+Parameter ``defect_pos``:
+    Position of the defect.
+
+Returns:
+    The influence status of the defect.)doc";
+
+static const char *__doc_fiction_detail_defect_influence_impl_find_last_non_influential_defect_position_moving_right =
+R"doc(This function identifies the most recent non-influential defect
+position while traversing from left to right towards the SiDB layout.
+
+Parameter ``spec``:
+    The optional truth table to be used for the simulation.
+
+Parameter ``starting_defect_position``:
+    The starting position of the defect, from which the traversal
+    towards the right is conducted until an influential defect is
+    found.
+
+Returns:
+    The last non-influential defect position. If no non-influential
+    defect position is found, `std::nullopt` is returned.)doc";
+
+static const char *__doc_fiction_detail_defect_influence_impl_find_non_influential_defect_position_at_left_side =
+R"doc(This function aims to identify an influential defect position within
+the layout. It does so by selecting a defect position with the
+leftmost x-coordinate and a randomly selected y-coordinate limited the
+layout's bounding box.
+
+Parameter ``spec``:
+    The optional truth table to be used for the simulation.
+
+Returns:
+    Defect position which does not influence the SiDB layout. If no
+    non-influential defect position is found, `std::nullopt` is
+    returned.)doc";
+
+static const char *__doc_fiction_detail_defect_influence_impl_grid_search =
+R"doc(Simulates for each position in the area (spanned by `nw_cell` and
+`se_cell`) if the existence of a defect influences the layout.
+
+Parameter ``step_size``:
+    The step size used to sample defect positions in the grid. Only
+    positions with x and y coordinates divisible by `step_size` will
+    be checked.
+
+Returns:
+    The defect influence domain.)doc";
+
+static const char *__doc_fiction_detail_defect_influence_impl_has_already_been_sampled =
+R"doc(This function verifies whether the layout has already been analyzed
+for the specified defect position `c`.
+
+Parameter ``c``:
+    Position of the defect.)doc";
+
+static const char *__doc_fiction_detail_defect_influence_impl_influence_domain = R"doc(The defect influence domain of the layout.)doc";
+
+static const char *__doc_fiction_detail_defect_influence_impl_is_defect_influential =
+R"doc(This function evaluates if the defect at position `c` influences the
+layout.
+
+Parameter ``spec``:
+    The optional truth table to be used for the simulation.
+
+Parameter ``defect_cell``:
+    Defect position to be investigated.)doc";
+
+static const char *__doc_fiction_detail_defect_influence_impl_layout = R"doc(The SiDB cell-level layout to investigate.)doc";
+
+static const char *__doc_fiction_detail_defect_influence_impl_log_stats =
+R"doc(Helper function that writes the the statistics of the defect influence
+domain computation to the statistics object.)doc";
+
+static const char *__doc_fiction_detail_defect_influence_impl_moore_neighborhood =
+R"doc(Computes the Moore neighborhood of a given cell within the SiDB
+layout. The Moore neighborhood consists of the eight cells surrounding
+the central cell in horizontal, vertical, and diagonal directions.
+
+Parameter ``c``:
+    The cell for which the Moore neighborhood is computed.
+
+Returns:
+    A vector containing the cells in the Moore neighborhood that are
+    empty. If a cell is outside the layout boundaries or occupied, it
+    is not included in the result.)doc";
+
+static const char *__doc_fiction_detail_defect_influence_impl_num_evaluated_defect_positions = R"doc(Number of evaluated defect positions.)doc";
+
+static const char *__doc_fiction_detail_defect_influence_impl_num_simulator_invocations = R"doc(Number of simulator invocations.)doc";
+
+static const char *__doc_fiction_detail_defect_influence_impl_num_threads = R"doc(Number of available hardware threads.)doc";
+
+static const char *__doc_fiction_detail_defect_influence_impl_nw_bb_layout = R"doc(The north-west cell of the bounding box of the layout.)doc";
+
+static const char *__doc_fiction_detail_defect_influence_impl_nw_cell = R"doc(North-west cell.)doc";
+
+static const char *__doc_fiction_detail_defect_influence_impl_params = R"doc(The parameters for the defect influence domain computation.)doc";
+
+static const char *__doc_fiction_detail_defect_influence_impl_previous_defect_position = R"doc(The previous defect position.)doc";
+
+static const char *__doc_fiction_detail_defect_influence_impl_quicktrace =
+R"doc(Applies contour tracing to identify the boundary (contour) between
+influencing and non-influencing defect positions for a given SiDB
+layout.
+
+The algorithm leverages the concept of a screened Coulomb potential,
+where the electrostatic interaction weakens as distance increases. If
+a defect at position `p` causes the SiDB layout to be non-influential,
+then defects further away from the layout are also likely to have no
+influence on the layout's functionality or performance. Conversely,
+defects closer to the layout may cause it to fail. This behavior
+allows for efficient contour tracing of the transition between
+influential and non-influential states.
+
+The process is as follows: 1. **Initialization**: Randomly select
+`samples` initial defect positions several nanometers away from the
+layout where they are unlikely to influence the layout. 2. **Contour
+Tracing**: For each position, perform a defect-aware physical
+simulation to identify adjacent positions along the x-axis that
+influence the layout. 3. **Contour Following**: Trace the contour of
+non-influential positions until the starting point is reached again,
+thereby closing the contour. 4. **Repetition**: Repeat steps 1-3 for
+multiple initial heights to identify additional contours, since
+multiple influential-to-non-influential contours may exist. This
+process helps to detect all relevant transitions in the layout.
+
+Parameter ``samples``:
+    The number of random initial positions used to identify and trace
+    contours. Higher values increase the chance of capturing all
+    relevant contours but increase computation time.
+
+Parameter ``spec``:
+    The optional truth table to be used for the simulation.
+
+Returns:
+    The defect influence domain.)doc";
+
+static const char *__doc_fiction_detail_defect_influence_impl_random_sampling =
+R"doc(Checks for a certain number of random positions (given by `samples`)
+in the area (spanned by `nw_cell` and `se_cell`) if the existence of a
+defect leads to an influence of the layout.
+
+Parameter ``samples``:
+    The number of positions to sample. The actual number of iterations
+    may be less than the total number of positions or the `samples`
+    value.
+
+Parameter ``spec``:
+    The optional truth table to be used for the simulation.
+
+Returns:
+    The defect influence domain.)doc";
+
+static const char *__doc_fiction_detail_defect_influence_impl_se_bb_layout = R"doc(The south-east cell of the bounding box of the layout.)doc";
+
+static const char *__doc_fiction_detail_defect_influence_impl_se_cell = R"doc(South-east cell.)doc";
+
+static const char *__doc_fiction_detail_defect_influence_impl_stats = R"doc(The statistics of the defect influence domain computation.)doc";
 
 static const char *__doc_fiction_detail_delete_wires =
 R"doc(This function deletes wires from the provided
@@ -5248,90 +5050,7 @@ Returns:
     A vector containing all possible gate layouts generated from the
     combinations.)doc";
 
-static const char *__doc_fiction_detail_design_sidb_gates_impl_determine_output_index_of_output =
-R"doc(This function calculates the output index for a given input index by
-evaluating the truth table.
-
-Parameter ``current_input_index``:
-    The index representing the current input pattern.
-
-Returns:
-    The output index derived from the truth table for the given input
-    index.)doc";
-
 static const char *__doc_fiction_detail_design_sidb_gates_impl_input_bdl_wires = R"doc(Input BDL wires.)doc";
-
-static const char *__doc_fiction_detail_design_sidb_gates_impl_is_io_signal_unstable =
-R"doc(This function iterates through various input patterns and output wire
-indices to determine if any configuration results in a physically
-valid layout with energy below the given energy value, indicating I/O
-signal instability.
-
-Parameter ``cds_layout``:
-    The charge distribution surface layout to be modified and checked.
-
-Parameter ``cds_canvas``:
-    The charge distribution of the canvas SiDBs.
-
-Parameter ``max_input_pattern_index``:
-    The maximum index for input pattern
-
-Parameter ``input_pattern``:
-    The specific input pattern for which the stability check is
-    conducted.
-
-Parameter ``logical_correct_output_pattern``:
-    The expected correct output pattern for the given input.
-
-Parameter ``minimal_energy_of_physically_valid_layout``:
-    The minimum energy threshold below which the layout is considered
-    unstable.
-
-Returns:
-    `true` if the I/O signal is unstable, `false` otherwise.)doc";
-
-static const char *__doc_fiction_detail_design_sidb_gates_impl_is_physical_validity_feasible =
-R"doc(This function determines if there is a charge distribution of the
-canvas SiDBs for which the charge distribution of the whole layout is
-physically valid.
-
-Parameter ``cds_layout``:
-    The charge distribution surface layout to be evaluated.
-
-Parameter ``cds_canvas``:
-    The charge distribution surface of the canvas SiDBs. All possible
-    configurations are enumerated
-
-Returns:
-    The minimum energy value if a physically valid configuration is
-    found, `std::nullopt` otherwise.)doc";
-
-static const char *__doc_fiction_detail_design_sidb_gates_impl_layout_can_be_pruned =
-R"doc(This function evaluates whether the given layout can be discarded
-since it cannot implement the given Boolean function. The pruning is
-subdivided into three single pruning steps: (1) discarding SiDB
-layouts with potentially positively charged SiDBs, (2) utilizing an
-efficient method to identify and discard SiDB layouts that do not
-satisfy physical model constraints under the I/O pin conditions
-required for the desired Boolean function, and (3) detecting I/O
-signal instability.
-
-Parameter ``current_layout``:
-    The layout being evaluated for pruning.
-
-Parameter ``canvas_lyt``:
-    The canvas layout comprising of the canvas SiDBs.
-
-Parameter ``dependent_cell``:
-    A dependent-cell of the canvas SiDBs.
-
-Returns:
-    `true` if the current layout can be pruned. `false` otherwise,
-    which means that the layout is a candidate to be a valid gate
-    implementation. Physical simulation is required as a second step
-    to conduct the final validation.)doc";
-
-static const char *__doc_fiction_detail_design_sidb_gates_impl_num_threads = R"doc(Number of threads to be used for parallel execution.)doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_number_of_discarded_layouts_at_first_pruning = R"doc(Number of discarded layouts at first pruning.)doc";
 
@@ -5342,6 +5061,8 @@ static const char *__doc_fiction_detail_design_sidb_gates_impl_number_of_discard
 static const char *__doc_fiction_detail_design_sidb_gates_impl_number_of_input_wires = R"doc(Number of input BDL wires.)doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_number_of_output_wires = R"doc(Number of output BDL wires.)doc";
+
+static const char *__doc_fiction_detail_design_sidb_gates_impl_number_of_threads = R"doc(Number of threads to be used for the design process.)doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_output_bdl_wires = R"doc(Output BDL wires.)doc";
 
@@ -5387,64 +5108,6 @@ parameters. The design process is parallelized to improve performance.
 
 Returns:
     A vector of designed SiDB gate layouts.)doc";
-
-static const char *__doc_fiction_detail_design_sidb_gates_impl_set_charge_distribution_of_input_wires_based_on_input_pattern =
-R"doc(This function assigns the charge states of the input wires in the
-layout according to the provided input pattern index. It performs the
-following steps: - For `NORTH-SOUTH` port wires, if the corresponding
-bit in the input pattern is set, assigns `NEUTRAL` charge to the upper
-part and `NEGATIVE` charge to the lower part of the BDLs of the wire.
-- For `NORTH-SOUTH` port wires, if the corresponding bit in the input
-pattern is not set, assigns `NEGATIVE` charge to the upper part and
-`NEUTRAL` charge to the lower part of the BDLs of the wire. - For
-`SOUTH-NORTH` port wires, if the corresponding bit in the input
-pattern is set, assigns `NEGATIVE` charge to the upper part and
-`NEUTRAL` charge to the lower part of the BDLs of the wire. - For
-`SOUTH-NORTH` port wires, if the corresponding bit in the input
-pattern is not set, assigns `NEUTRAL` charge to the upper part and
-`NEGATIVE` charge to the lower part of the BDLs of the wire.
-
-Parameter ``layout``:
-    The charge distribution surface layout to be modified.
-
-Parameter ``current_input_index``:
-    The index representing the current input pattern.)doc";
-
-static const char *__doc_fiction_detail_design_sidb_gates_impl_set_charge_distribution_of_output_wires_based_on_output_index =
-R"doc(This function assigns the charge states of the input wires in the
-layout according to the provided input pattern index. It performs the
-following steps: - For `NORTH-SOUTH` port wires, if the corresponding
-bit in the input pattern is set, assigns `NEUTRAL` charge to the upper
-part and `NEGATIVE` charge to the lower part of the BDLs of the wire.
-- For `NORTH-SOUTH` port wires, if the corresponding bit in the input
-pattern is not set, assigns `NEGATIVE` charge to the upper part and
-`NEUTRAL` charge to the lower part of the BDLs of the wire. - For
-`SOUTH-NORTH` port wires, if the corresponding bit in the input
-pattern is set, assigns `NEGATIVE` charge to the upper part and
-`NEUTRAL` charge to the lower part of the BDLs of the wire. - For
-`SOUTH-NORTH` port wires, if the corresponding bit in the input
-pattern is not set, assigns `NEUTRAL` charge to the upper part and
-`NEGATIVE` charge to the lower part of the BDLs of the wire.
-
-Parameter ``layout``:
-    The charge distribution surface layout to be modified.
-
-Parameter ``current_input_index``:
-    The index representing the current input pattern.
-
-Returns:
-    void)doc";
-
-static const char *__doc_fiction_detail_design_sidb_gates_impl_set_charge_distribution_of_output_wires_based_on_truth_table =
-R"doc(This function assigns the charge states of the output wires in the
-layout according to the values in the truth table for the provided
-input pattern index.
-
-Parameter ``layout``:
-    The charge distribution surface layout to be modified.
-
-Parameter ``input_index``:
-    The index representing the current input pattern.)doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_skeleton_layout =
 R"doc(The skeleton layout serves as a starting layout to which SiDBs are
@@ -7331,374 +6994,6 @@ Parameter ``place_info``:
 Parameter ``ssg``:
     The search space graph.)doc";
 
-static const char *__doc_fiction_detail_ground_state_space_impl = R"doc()doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_check_charge_space =
-R"doc(The charge space of the given cluster is checked by performing the
-potential bound analysis on each multiset charge configuration in it
-(without composition information). For each invalid one found,
-corresponding updates are made to maintain consistency in the cluster
-hierarchy data structure. Updates make the stored bound information
-more strict, and as a result, more invalid states may be found.
-
-Parameter ``c``:
-    The cluster to check the charge space of.
-
-Returns:
-    `true` if and only if charge space of `c` has no invalid elements.)doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_clustering =
-R"doc(The clustering starts at all singletons, then moves up through merges
-until only the top cluster remains)doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_compute_external_pot_bounds_for_saved_compositions =
-R"doc(This function performs the first step to merging a set of clusters to
-their direct parent. When clusters are merged, their respective charge
-spaces have reached a fixed point in the construction; thereby, the
-projections specific to each stored composition in the respective
-charge spaces, for which previously only the receiving SiDBs in the
-respective child cluster were considered, are now composed to
-potential bounds onto each SiDB outside the respective cluster, thus
-making a complete potential bounds store.
-
-Parameter ``parent``:
-    The cluster that parents the clusters to merge.
-
-Returns:
-    The number of projector states that is the accumulation of the
-    number of projector states in the composition of each charge space
-    element of each child.)doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_compute_meets_for_internal_pot_bounds =
-R"doc(This function performs the flatten operation; the partial sum of the
-electrostatic potential local to all contained SiDBs as received from
-within the cluster is, for each multiset charge configuration in the
-new charge space, flattened, with respect to all compositions of the
-multiset, to the self-projection of the parent cluster.
-
-The above, and the fact that the self-projection for singletons is
-their respective local external electrostatic potential, thus defines
-"self-projections" inductively.
-
-Parameter ``parent``:
-    The newly-forming parent cluster.)doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_construct_merged_charge_state_space =
-R"doc(This function calls the recursive function above that goes through all
-combination of charge space elements of children to form the charge
-space of their direct parent.
-
-Parameter ``parent``:
-    The parent cluster to which charge spaces are combined.)doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_construct_merged_potential_projections =
-R"doc(After the charge space of the parent has been created, this function
-combines associated potential projections by going through the charge
-space elements of the children, and, for each recipient SiDB,
-aggregates the potential projections from each child onto that SiDB.
-
-Parameter ``parent``:
-    The newly-forming parent cluster.)doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_derive_children_received_bounds_without_siblings =
-R"doc(This function dynamically updates the externally received partial sums
-of local electrostatic potential of the children, and sets that of the
-parent
-
-Parameter ``parent``:
-    The newly forming parent cluster.)doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_fail_onto_negative_charge =
-R"doc(Returns `true` if and only if the given potential bound closes out
-SiDB-.
-
-Parameter ``pot_bound``:
-    Potential lower bound.)doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_fail_onto_positive_charge =
-R"doc(Returns `true` if and only if the given potential bound closes out
-SiDB+.
-
-Parameter ``pot_bound``:
-    Potential upper bound.)doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_fill_merged_charge_state_space =
-R"doc(This recursive function goes through all combinations of charge space
-elements of the children (exactly one element per child for each
-combination), and verifies each combination before adding it to the
-merged charge space of the parent. Combinations with equivalent
-multiset signatures are preserved under different compositions of the
-multiset charge configuration in the charge space of the parent.
-
-Parameter ``parent``:
-    The newly-forming parent cluster.
-
-Parameter ``cur_child_ix``:
-    The index of the child of which precisely one element of its
-    charge space should be added to the combination of charge space
-    element. When it reaches out of bounds, a combination is complete
-    and may be verified before adding it to the parent charge space.
-
-Parameter ``m``:
-    The dynamically combined cluster charge state (i.e., multiset
-    charge configuration). A copy of `m` when it is a complete
-    composition of charge space elements of the children is added to
-    the parent charge space if verification passes. After, `m` is
-    dynamically transformed to the next combination until no new
-    combination exists.)doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_find_valid_witness_partitioning =
-R"doc(A simple brute-force algorithm that solves the validity witness
-partitioning problem by looking for a partitioning, i.e., an
-assignment that maps each SiDB to a charge state that they are a
-witness of in such a way that required witness counts are met for each
-SiDB. Starting with the negative charge state, the requirement is
-fulfilled in a greedy manner by taking SiDBs witnessing this charge
-state. This process continues for the other charge states in the same
-way, though when an SiDB has already been assigned, it cannot be used
-to reduce the required witness count again. When all SiDBs have been
-assigned successfully, a partitioning is found and `true` is returned.
-Otherwise, when an in-progress assignment cannot be completed, the
-next assignment is tried through back-tracking. When no assignment can
-be completed, `false` is returned, which then proves that the multiset
-charge configuration that was given to create the witness partitioning
-state is invalid.
-
-Template parameter ``current_fill_cs``:
-    The charge state for which the function currently looks for
-    available witnesses until no more witnesses are required.
-
-Parameter ``st``:
-    The witness partitioning state, which holds the required witnesses
-    counters for each charge state.
-
-Parameter ``num_witnesses_for_current_cs``:
-    The number of available witnesses that are left for
-    `current_fill_cs`.
-
-Returns:
-    `true` if a validity witness partitioning was found, and `false`
-    if no consistent partitioning was found.)doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_get_received_potential_bounds =
-R"doc(This function obtains the pair of potential bounds relevant to a
-potential projection associated with a multiset charge configuration
-as received by the given SiDB. The entire layout of SiDBs is taken
-into account in the returned bounds, as this function accumulates the
-received potential that is external to the projecting cluster with
-that which is internal to it. Depending on the given potential bound
-analysis mode, the latter considers different levels of detail.
-
-Template parameter ``mode``:
-    This selects the potential bound analysis mode. Intuitively, when
-    analysing a composition, the information that constitutes bounds
-    has one level more detail; this information from the deeper level
-    in the cluster hierarchy is later flattened to enable analysis of
-    the composed multiset charge configuration without the additional
-    information.
-
-Parameter ``pst``:
-    The projector state that, together with a receiving SiDB, yields a
-    pair of bounds on the potential projection from the cluster
-    associated with the projector state onto the receiving SiDB.
-
-Parameter ``sidb_ix``:
-    The receiving SiDB.
-
-Parameter ``composition_pot_bounds``:
-    This optional parameter supplies the additional composition
-    information when available.
-
-Returns:
-    A pair of doubles that represent the lower and upper bound of the
-    potential projection onto the given SiDB.)doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_ground_state_space_impl =
-R"doc(Constructor. Invokes the algorithm with the given parameters on the
-given layout.
-
-Parameter ``lyt``:
-    Layout to construct the *Ground State Space* of.
-
-Parameter ``parameters``:
-    The parameters that *Ground State Space* will use throughout the
-    construction.)doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_lb_fail_onto_neutral_charge =
-R"doc(Returns `true` if and only if the given potential bound closes out
-SiDB0.
-
-Parameter ``pot_bound``:
-    Potential lower bound.)doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_maximum_top_level_multisets =
-R"doc(This function computes the maximum size of the charge space of the top
-cluster. Comparing this number with the size of the charge space of
-the top cluster that is returned after running *Ground State Space*
-gives an indication of how the search space was reduced.
-
-Parameter ``number_of_sidbs``:
-    The number of SiDBs (:math:`N`).
-
-Returns:
-    :math:`\binom{N + 2}{2}` if base = 3, or otherwise :math:`\binom{N
-    + 1}{1}` when the base is 2.)doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_merge_pot_projection_bounds =
-R"doc(This function aggregates the bounds on the electrostatic potential
-from the respective children onto the given receiving SiDB, giving
-rise to the bound from their direct parent onto this SiDB.
-
-Template parameter ``bound``:
-    Bound to handle (lower/upper)
-
-Parameter ``parent``:
-    The newly-forming parent cluster.
-
-Parameter ``rst``:
-    The receptor state with the receiving SiDB that is currently
-    handled.)doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_move_up_hierarchy =
-R"doc(This function performs the complete merging operation from a set of
-sibling clusters to their direct parent. In this process, combinations
-of charge space elements of the children are considered in special
-detail, before passing them to the charge space of the parent and
-flattening these details such that the process of checking multiset
-charge configurations in respective charge spaces of the clusters in
-the clustering may continue as before. The termination of the *Ground
-State Space* algorithm is signalled when the clustering only contains
-the top cluster.)doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_mu_bounds_with_error =
-R"doc(Globally available array of bounds that section the band gap, used for
-pruning.)doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_params = R"doc(Parameters used during the construction.)doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_perform_potential_bound_analysis =
-R"doc(This function receives a multiset charge configuration with an
-associated cluster and finds whether this multiset charge
-configuration can be declared invalid for this cluster.
-
-Template parameter ``mode``:
-    The potential bound analysis mode that switches the function
-    between analysing a multiset charge configuration either with or
-    without composition information.
-
-Parameter ``pst``:
-    The projector state for which the potential bound analysis is to
-    be performed.
-
-Parameter ``composition_potential_bounds``:
-    This optional parameter supplies the additional composition
-    information when available.
-
-Returns:
-    `false` if and only if `pst` can be excluded from the *Ground
-    State Space*.)doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_potential_bound_analysis_mode =
-R"doc(A switch to enable the potential bound analysis function to analyse
-both multiset charge configurations without composition information,
-and those with.)doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_potential_bound_analysis_mode_ANALYZE_COMPOSITION =
-R"doc(Switch used to analyse multiset charge configurations with information
-of specific composition thereof.)doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_potential_bound_analysis_mode_ANALYZE_MULTISET =
-R"doc(Switch used to analyse multiset charge configurations without
-composition information.)doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_projector_state_count =
-R"doc(Count the total number of projector states that are stored in the
-constructed hierarchy.)doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_run =
-R"doc(The main loop in the *Ground State Space* construction. Charge spaces
-are updated until a fixed point is reached, after which a merging of
-children to their direct parent is performed. This process repeats
-until the parent to which the children are merged is the top cluster,
-the cluster containing all SiDBs in the layout. The Ground State Space
-is the resulting hierarchical charge space structure.
-
-Returns:
-    The results of the construction, which include the top cluster
-    which parents all other clusters, and thereby contains the charge
-    spaces of each cluster.)doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_subtract_sibling_pot_from_received_ext_pot_bound =
-R"doc(This function derives the new externally received partial sums of
-electrostatic potential local to an SiDB contained by the child
-(together forming `child_rst`) through subtracting the projections of
-its siblings.
-
-Template parameter ``bound``:
-    The Bound to handle (lower/upper)
-
-Parameter ``parent``:
-    The newly forming parent cluster.
-
-Parameter ``child_rst``:
-    Receptor state from one of the children of the parent.)doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_terminate = R"doc(`true` if and only if the construction is to be terminated.)doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_top_cluster =
-R"doc(The top cluster, the cluster that contains all SiDBs, is returned as
-the result of the construction.)doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_ub_fail_onto_neutral_charge =
-R"doc(Returns `true` if and only if the given potential bound closes out
-SiDB0.
-
-Parameter ``pot_bound``:
-    Potential upper bound.)doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_update_charge_spaces =
-R"doc(The charge spaces of each cluster in the current clustering are
-checked and updated accordingly when needed.
-
-Parameter ``skip_cluster``:
-    This optional parameter specifies a cluster to skip in the pass
-    over all clusters in the current clustering.
-
-Returns:
-    `true` if and only if a fixed point has been reached; i.e., none
-    of the charge space contain an element that may be removed.)doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_verify_composition =
-R"doc(This function determines whether a newly composed candidate for the
-charge space of the newly forming parent cluster can be rejected in
-the creation of the combined charge space. Here, multiset charge
-configurations for the parents are checked with composition
-information: a combination of respective charge space elements of the
-children is considered, thus, intuitively, the information considered
-in the analysis goes one level deeper than when later considering the
-composed multiset with flattened information with respect to its
-compositions.
-
-Parameter ``composition``:
-    A composition of charge space elements of the children, making a
-    candidate for a charge space element of their direct parent.
-
-Returns:
-    `false` if and only if the given composition can be rejected.)doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_write_children_pot_bounds_to_complete_store =
-R"doc(To facilitate efficient unfolding for the second stage of the
-simulation by *ClusterComplete*, potential bound data that is stored
-in the hierarchy which will not be subject to change anymore is
-converted to a handy format: a complete potential bounds store. It
-holds potential bounds for all SiDBs in the considered layout and thus
-addition and subtraction of other complete potential bound stores are
-easy to perform.
-
-Parameter ``parent``:
-    The newly-forming parent cluster whose children's charge spaces
-    become fixed upon their merging.)doc";
-
 static const char *__doc_fiction_detail_is_balanced_impl = R"doc()doc";
 
 static const char *__doc_fiction_detail_is_balanced_impl_balanced = R"doc()doc";
@@ -7730,12 +7025,12 @@ static const char *__doc_fiction_detail_is_fanout_substituted_impl_run = R"doc()
 static const char *__doc_fiction_detail_is_fanout_substituted_impl_substituted = R"doc()doc";
 
 static const char *__doc_fiction_detail_is_operational_impl =
-R"doc(Implementation of the `is_operational` algorithm for a given gate
+R"doc(Implementation of the `is_operational` algorithm for a given SiDB
 layout.
 
 This class provides an implementation of the `is_operational`
-algorithm for a specified gate layout and parameters. It checks
-whether the gate layout is operational by simulating its behavior for
+algorithm for a specified SiDB layout and parameters. It checks
+whether the SiDB layout is operational by simulating its behavior for
 different input combinations and comparing the results to expected
 outputs from a truth table.
 
@@ -7747,15 +7042,14 @@ Template parameter ``TT``:
 
 static const char *__doc_fiction_detail_is_operational_impl_bii = R"doc(Iterator that iterates over all possible input states.)doc";
 
+static const char *__doc_fiction_detail_is_operational_impl_canvas_lyt = R"doc(Layout consisting of all canvas SiDBs.)doc";
+
 static const char *__doc_fiction_detail_is_operational_impl_check_existence_of_kinks_in_input_wires =
 R"doc(This function iterates through the input wires and evaluates their
 charge states against the expected states derived from the input
 pattern. A kink is considered to exist if an input wire's charge state
 does not match the expected value (i.e., bit one or bit zero) for the
 given input index.
-
-Template parameter ``Lyt``:
-    SiDB cell-level layout type
 
 Parameter ``ground_state``:
     The ground state charge distribution surface.
@@ -7775,9 +7069,6 @@ table. A kink is considered to exist if an output wire's charge state
 does not match the expected value (i.e., bit one or bit zero) for the
 given input index.
 
-Template parameter ``Lyt``:
-    SiDB cell-level layout type
-
 Parameter ``ground_state``:
     The ground state charge distribution surface.
 
@@ -7788,6 +7079,8 @@ Parameter ``current_input_index``:
 Returns:
     `true` if any output wire contains a kink (i.e., an unexpected
     charge state), `false` otherwise.)doc";
+
+static const char *__doc_fiction_detail_is_operational_impl_dependent_cell = R"doc(Dependent cell of the canvas SiDBs.)doc";
 
 static const char *__doc_fiction_detail_is_operational_impl_determine_non_operational_input_patterns_and_non_operationality_reason =
 R"doc(Determines the input combinations for which the layout is non-
@@ -7804,9 +7097,6 @@ static const char *__doc_fiction_detail_is_operational_impl_encodes_bit_one =
 R"doc(This function returns `true` if `1` is encoded in the charge state of
 the given BDL pair. `false` otherwise.
 
-Template parameter ``Lyt``:
-    SiDB cell-level layout type.
-
 Parameter ``ground_state``:
     The ground state charge distribution surface.
 
@@ -7819,9 +7109,6 @@ Returns:
 static const char *__doc_fiction_detail_is_operational_impl_encodes_bit_zero =
 R"doc(This function returns `true` if `0` is encoded in the charge state of
 the given BDL pair. `false` otherwise.
-
-Template parameter ``Lyt``:
-    SiDB cell-level layout type.
 
 Parameter ``ground_state``:
     The ground state charge distribution surface.
@@ -7840,6 +7127,58 @@ Returns:
 
 static const char *__doc_fiction_detail_is_operational_impl_input_bdl_wires = R"doc(Input BDL wires.)doc";
 
+static const char *__doc_fiction_detail_is_operational_impl_is_io_signal_unstable =
+R"doc(This function iterates through various input patterns and output wire
+indices to determine if any configuration results in a physically
+valid layout with energy below the given energy value, indicating I/O
+signal instability.
+
+Parameter ``cds_layout``:
+    The charge distribution surface layout to be modified and checked.
+
+Parameter ``max_input_pattern_index``:
+    The maximum index for input pattern
+
+Parameter ``input_pattern``:
+    The specific input pattern for which the stability check is
+    conducted.
+
+Parameter ``logical_correct_output_pattern``:
+    The expected correct output pattern for the given input.
+
+Parameter ``minimal_energy_of_physically_valid_layout``:
+    The minimum energy threshold below which the layout is considered
+    unstable.
+
+Returns:
+    `true` if the I/O signal is unstable, `false` otherwise.)doc";
+
+static const char *__doc_fiction_detail_is_operational_impl_is_layout_invalid =
+R"doc(This function evaluates whether the given layout is invalid, i.e., it
+cannot implement the given Boolean function. This is done in three
+separate filtering steps: (1) discarding SiDB layouts with potentially
+positively charged SiDBs, (2) utilizing an efficient method to
+identify and discard SiDB layouts that do not satisfy physical model
+constraints under the I/O pin conditions required for the desired
+Boolean function, and (3) detecting I/O signal instability.
+
+Template parameter ``ChargeLyt``:
+    The charge distribution surface layout type.
+
+Parameter ``input_pattern``:
+    The current input pattern.
+
+Parameter ``cds_canvas``:
+    The charge distribution of the canvas layout.
+
+Parameter ``dependent_cell``:
+    A dependent-cell of the canvas SiDBs.
+
+Returns:
+    A `layout_invalidity_reason` object indicating why the layout is
+    non-operational; or `std::nullopt` if it could not certainly be
+    determined to be in fact non-operational.)doc";
+
 static const char *__doc_fiction_detail_is_operational_impl_is_operational_impl =
 R"doc(Constructor to initialize the algorithm with a layout and parameters.
 
@@ -7854,7 +7193,8 @@ Parameter ``params``:
     Parameters for the `is_operational` algorithm.)doc";
 
 static const char *__doc_fiction_detail_is_operational_impl_is_operational_impl_2 =
-R"doc(Constructor to initialize the algorithm with a layout and parameters.
+R"doc(Constructor to initialize the algorithm with a layout, parameters,
+input and output wires.
 
 Parameter ``lyt``:
     The SiDB cell-level layout to be checked.
@@ -7870,9 +7210,66 @@ Parameter ``input_wires``:
     BDL input wires of lyt.
 
 Parameter ``output_wires``:
-    BDL output wires of lyt.)doc";
+    BDL output wires of lyt.
+
+Parameter ``initialize_bii``:
+    If `true`, the BDL input iterator is initialized, `false`
+    otherwise. This parameter is only needed in special cases
+    (verify_logic_match.hpp).)doc";
+
+static const char *__doc_fiction_detail_is_operational_impl_is_operational_impl_3 =
+R"doc(Constructor to initialize the algorithm with a layout, parameters,
+input and output wires, and a canvas layout.
+
+Parameter ``lyt``:
+    The SiDB cell-level layout to be checked.
+
+Parameter ``spec``:
+    Expected Boolean function of the layout given as a multi-output
+    truth table.
+
+Parameter ``params``:
+    Parameters for the `is_operational` algorithm.
+
+Parameter ``input_wires``:
+    BDL input wires of lyt.
+
+Parameter ``output_wires``:
+    BDL output wires of lyt.
+
+Parameter ``c_lyt``:
+    Canvas layout.)doc";
+
+static const char *__doc_fiction_detail_is_operational_impl_is_operational_impl_4 =
+R"doc(Constructor to initialize the algorithm with a layout and parameters.
+
+Parameter ``lyt``:
+    The SiDB cell-level layout to be checked.
+
+Parameter ``spec``:
+    Expected Boolean function of the layout given as a multi-output
+    truth table.
+
+Parameter ``params``:
+    Parameters for the `is_operational` algorithm.)doc";
+
+static const char *__doc_fiction_detail_is_operational_impl_is_physical_validity_feasible =
+R"doc(This function determines if there is a charge distribution of the
+canvas SiDBs for which the charge distribution of the whole layout is
+physically valid.
+
+Parameter ``cds_layout``:
+    The charge distribution surface layout to be evaluated.
+
+Returns:
+    The minimum energy value if a physically valid configuration is
+    found, `std::nullopt` otherwise.)doc";
 
 static const char *__doc_fiction_detail_is_operational_impl_layout = R"doc(SiDB cell-level layout.)doc";
+
+static const char *__doc_fiction_detail_is_operational_impl_number_of_input_wires = R"doc(Number of input BDL wires.)doc";
+
+static const char *__doc_fiction_detail_is_operational_impl_number_of_output_wires = R"doc(Number of output BDL wires.)doc";
 
 static const char *__doc_fiction_detail_is_operational_impl_output_bdl_pairs = R"doc(Output BDL pairs.)doc";
 
@@ -7881,14 +7278,12 @@ static const char *__doc_fiction_detail_is_operational_impl_output_bdl_wires = R
 static const char *__doc_fiction_detail_is_operational_impl_parameters = R"doc(Parameters for the `is_operational` algorithm.)doc";
 
 static const char *__doc_fiction_detail_is_operational_impl_physical_simulation_of_layout =
-R"doc(This function conducts physical simulation of the given layout (gate
-layout with certain input combination). The simulation results are
-stored in the `sim_result` variable.
+R"doc(This function conducts physical simulation of the given SiDB layout.
+The simulation results are stored in the `sim_result` variable.
 
 Parameter ``bdl_iterator``:
-    A reference to a BDL input iterator representing the gate layout
-    at a given input combination. The simulation is performed based on
-    the configuration represented by the iterator.
+    BDL input iterator representing the SiDB layout with a given input
+    combination.
 
 Returns:
     Simulation results.)doc";
@@ -7897,12 +7292,35 @@ static const char *__doc_fiction_detail_is_operational_impl_run =
 R"doc(Run the `is_operational` algorithm.
 
 This function executes the operational status checking algorithm for
-the gate layout and parameters provided during initialization.
+the given SiDB layout and parameters provided during initialization.
 
 Returns:
     Pair with the first element indicating the operational status
     (either `OPERATIONAL` or `NON_OPERATIONAL`) and the second element
     indicating the reason if it is non-operational.)doc";
+
+static const char *__doc_fiction_detail_is_operational_impl_set_charge_distribution_of_input_pins =
+R"doc(This function assigns the charge states of the input pins in the
+layout according to the input index provided. This means that when a
+zero is applied, each BDL pair in the wire is set to zero.
+
+Parameter ``cds``:
+    The charge distribution surface layout to be modified.
+
+Parameter ``current_input_index``:
+    The index representing the current input pattern.)doc";
+
+static const char *__doc_fiction_detail_is_operational_impl_set_charge_distribution_of_output_pins =
+R"doc(This function assigns the charge states of the output pins in the
+layout according to the input index provided. This means that when a
+zero is applied, each BDL pair in the wire is set to zero.
+
+Parameter ``cds``:
+    The charge distribution surface layout to be modified.
+
+Parameter ``output_wire_index``:
+    The index representing the current input pattern of the output
+    wire.)doc";
 
 static const char *__doc_fiction_detail_is_operational_impl_simulator_invocations = R"doc(Number of simulator invocations.)doc";
 
@@ -8104,41 +7522,19 @@ Parameter ``c``:
 Parameter ``g_val``:
     New g-value for c.)doc";
 
-static const char *__doc_fiction_detail_maximum_defect_influence_position_and_distance_impl =
-R"doc(A class for simulating the maximum influence distance of defects
-within an SiDB layout.
+static const char *__doc_fiction_detail_layout_invalidity_reason =
+R"doc(Reason why the layout is not a valid gate implementation for the given
+Boolean function.)doc";
 
-This class is responsible for simulating the distance at which defects
-placed within an SiDB layout still influence the ground state of the
-layout. It conducts simulations at various defect positions,
-identifying the position that maximally impacts the layout and
-calculating the associated influence distance.
+static const char *__doc_fiction_detail_layout_invalidity_reason_IO_INSTABILITY =
+R"doc(I/O signals are unstable, indicating that an information flip results
+in a lower energy state.)doc";
 
-The class provides a `run` method to initiate the simulation and
-compute the maximum influence distance and corresponding defect
-position. It utilizes multithreading for efficient defect position
-simulations.)doc";
+static const char *__doc_fiction_detail_layout_invalidity_reason_PHYSICAL_INFEASIBILITY =
+R"doc(The layout is physically infeasible, meaning no charge distribution of
+the canvas SiDBs satisfies the criteria for physical validity.)doc";
 
-static const char *__doc_fiction_detail_maximum_defect_influence_position_and_distance_impl_collect_all_defect_cells =
-R"doc(Collects all possible defect cell positions within a given layout
-while avoiding SiDB cells.
-
-This function calculates a bounding box around the provided layout,
-encompassing the area where defect cells can be placed. It then
-iterates through this bounding box, scanning from top to bottom and
-left to right, and identifies all valid positions for defect cells. A
-defect cell can only be placed in locations where there are no SiDB
-cells.)doc";
-
-static const char *__doc_fiction_detail_maximum_defect_influence_position_and_distance_impl_defect_cells = R"doc(All allowed defect positions.)doc";
-
-static const char *__doc_fiction_detail_maximum_defect_influence_position_and_distance_impl_layout = R"doc(SiDB cell-level layout to simulate.)doc";
-
-static const char *__doc_fiction_detail_maximum_defect_influence_position_and_distance_impl_maximum_defect_influence_position_and_distance_impl = R"doc()doc";
-
-static const char *__doc_fiction_detail_maximum_defect_influence_position_and_distance_impl_params = R"doc(Parameters used for the simulation.)doc";
-
-static const char *__doc_fiction_detail_maximum_defect_influence_position_and_distance_impl_run = R"doc()doc";
+static const char *__doc_fiction_detail_layout_invalidity_reason_POTENTIAL_POSITIVE_CHARGES = R"doc(Positive SiDBs can potentially occur.)doc";
 
 static const char *__doc_fiction_detail_nested_vector_hash =
 R"doc(This struct defines a hash function for a nested vector of layout
@@ -8205,6 +7601,8 @@ static const char *__doc_fiction_detail_on_the_fly_circuit_design_impl_params = 
 static const char *__doc_fiction_detail_on_the_fly_circuit_design_impl_stats = R"doc(Statistics for the on-the-fly circuit design.)doc";
 
 static const char *__doc_fiction_detail_operational_domain_impl = R"doc()doc";
+
+static const char *__doc_fiction_detail_operational_domain_impl_canvas_lyt = R"doc(This layout consists of the canvas cells of the layout.)doc";
 
 static const char *__doc_fiction_detail_operational_domain_impl_contour_tracing =
 R"doc(Performs contour tracing to determine the operational domain. The
@@ -8351,6 +7749,8 @@ static const char *__doc_fiction_detail_operational_domain_impl_inferred_op_doma
 R"doc(All the points inferred (assumed) to be operational but not actually
 simulated.)doc";
 
+static const char *__doc_fiction_detail_operational_domain_impl_input_bdl_wires = R"doc(Input BDL wires.)doc";
+
 static const char *__doc_fiction_detail_operational_domain_impl_is_step_point_inferred_operational =
 R"doc(Checks whether the given step point is part of the inferred
 operational domain. If it is, the point is marked as enclosed in the
@@ -8465,7 +7865,7 @@ exactly one output BDL pair.
 Parameter ``lyt``:
     SiDB cell-level lyt to be evaluated.
 
-Parameter ``spec``:
+Parameter ``tt``:
     Expected Boolean function of the lyt given as a multi-output truth
     table.
 
@@ -8489,6 +7889,8 @@ Parameter ``st``:
     Statistics of the process.)doc";
 
 static const char *__doc_fiction_detail_operational_domain_impl_output_bdl_pairs = R"doc(The output BDL pairs of the layout.)doc";
+
+static const char *__doc_fiction_detail_operational_domain_impl_output_bdl_wires = R"doc(Output BDL wires.)doc";
 
 static const char *__doc_fiction_detail_operational_domain_impl_params = R"doc(The parameters for the operational domain computation.)doc";
 
@@ -8618,6 +8020,127 @@ static const char *__doc_fiction_detail_orthogonal_impl_ps = R"doc()doc";
 static const char *__doc_fiction_detail_orthogonal_impl_pst = R"doc()doc";
 
 static const char *__doc_fiction_detail_orthogonal_impl_run = R"doc()doc";
+
+static const char *__doc_fiction_detail_physical_population_stability_impl =
+R"doc(This class implements the simulation of the population stability for a
+given SiDB layout. It determines the minimum electrostatic potential
+required for charge state transitions within the layout and identifies
+the corresponding critical SiDB along with the type of charge state
+transition.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.)doc";
+
+static const char *__doc_fiction_detail_physical_population_stability_impl_collect_energy_and_charge_index =
+R"doc(Collects the system energy with the corresponding charge index
+information of all physically valid charge distributions of a given
+SiDB layout.
+
+Parameter ``sim_results``:
+    The simulation results, including all physically valid charge
+    distributions.
+
+Returns:
+    A vector of energy_and_charge_index pairs, where each pair
+    consists of a double value representing the system energy and a
+    uint64_t representing the unique charge index. The vector is
+    sorted in ascending order of the energy values.)doc";
+
+static const char *__doc_fiction_detail_physical_population_stability_impl_energy_and_charge_index =
+R"doc(This struct represents the electrostatic energy and charge index of a
+charge distribution.)doc";
+
+static const char *__doc_fiction_detail_physical_population_stability_impl_energy_and_charge_index_charge_index = R"doc(Charge index of the charge distribution.)doc";
+
+static const char *__doc_fiction_detail_physical_population_stability_impl_energy_and_charge_index_energy = R"doc(Electrostatic energy of the charge distribution (unit: eV).)doc";
+
+static const char *__doc_fiction_detail_physical_population_stability_impl_handle_negative_charges =
+R"doc(This function checks if the absolute difference between the given
+local potential and µ- is smaller than the current minimum potential
+difference to transition for a negatively charged SiDB. If `true`, it
+updates the population stability information with the new minimum
+difference and critical cell.
+
+Parameter ``local_potential``:
+    The local potential associated with the cell.
+
+Parameter ``c``:
+    The cell for which the charge state is being considered (SiDB is
+    negatively charged).
+
+Parameter ``pop_stability_information``:
+    The current population stability information.
+
+Returns:
+    An updated population stability information with potential
+    transition details.)doc";
+
+static const char *__doc_fiction_detail_physical_population_stability_impl_handle_neutral_charges =
+R"doc(This function checks if the absolute difference between the given
+local potential and µ- or µ+ is smaller than the current minimum
+potential difference. If `true`, it updates the population stability
+information with the new minimum difference and critical cell.
+
+Parameter ``local_potential``:
+    The local potential associated with the cell.
+
+Parameter ``c``:
+    The cell for which the charge state is being considered (SiDB is
+    neutrally charged).
+
+Parameter ``pop_stability_information``:
+    The current population stability information.
+
+Returns:
+    An updated population stability information with potential
+    transition details.)doc";
+
+static const char *__doc_fiction_detail_physical_population_stability_impl_handle_positive_charges =
+R"doc(This function checks if the absolute difference between the given
+local potential and µ+ is smaller than the current minimum potential
+difference. If true`, it updates the population stability information
+with the new minimum difference and critical cell.
+
+Parameter ``local_potential``:
+    The local potential associated with the cell.
+
+Parameter ``c``:
+    The cell for which the charge state is being considered (SiDB is
+    positively charged).
+
+Parameter ``pop_stability_information``:
+    The current population stability information.
+
+Returns:
+    An updated population stability information with potential
+    transition details.)doc";
+
+static const char *__doc_fiction_detail_physical_population_stability_impl_layout = R"doc(Layout to analyze.)doc";
+
+static const char *__doc_fiction_detail_physical_population_stability_impl_params = R"doc(Parameters required to simulate the population stability.)doc";
+
+static const char *__doc_fiction_detail_physical_population_stability_impl_physical_population_stability_impl =
+R"doc(Constructor for physical_population_stability_impl.
+
+Parameter ``lyt``:
+    SiDB layout.
+
+Parameter ``parameters``:
+    The simulation parameters used.)doc";
+
+static const char *__doc_fiction_detail_physical_population_stability_impl_run =
+R"doc(Runs a population stability simulation for a given SiDB layout using
+the provided simulation parameters. This function determines the
+minimum electrostatic potential required for charge state transitions
+within the layout and identifies the corresponding critical SiDB along
+with the type of charge state transition.
+
+Returns:
+    A vector of population stability information structures, where
+    each element represents a charge distribution in ascending energy
+    order. Each structure contains details about the critical SiDB,
+    the type of charge state transition, and the minimum electrostatic
+    potential required for the charge transition.)doc";
 
 static const char *__doc_fiction_detail_pi_locations = R"doc(This enum class indicates the allowed positions for PIs.)doc";
 
@@ -8947,10 +8470,7 @@ and conducts the physical simulation based on whether a three-state
 simulation is required.
 
 Template parameter ``ChargeLyt``:
-    The type of Charge Layout.
-
-Template parameter ``ChargeLyt``:
-    The type representing the charge layout to simulate.
+    Type of the charge distribution surface.
 
 Parameter ``base_number``:
     `THREE` if a three-state simulation is required, `TWO` otherwise.)doc";
@@ -10241,56 +9761,6 @@ Parameter ``stats``:
 Returns:
     The displacement robustness domain of the SiDB layout.)doc";
 
-static const char *__doc_fiction_determine_groundstate_from_simulation_results =
-R"doc(This function calculates the ground state charge distributions from
-the provided simulation results. The ground state charge distributions
-are those with energy closest to the minimum energy found in the
-simulation results.
-
-@note When degenerate states exist, there are multiple ground states
-with the same energy.
-
-Template parameter ``Lyt``:
-    The layout type used in the simulation results.
-
-Parameter ``simulation_results``:
-    The simulation results containing charge distributions.
-
-Returns:
-    A vector of charge distributions with the minimal energy.)doc";
-
-static const char *__doc_fiction_determine_physically_valid_parameters =
-R"doc(This function computes the parameters necessary for ensuring the
-physical validity of a given charge distribution and determines the
-corresponding excited state number. The ground state is denoted by
-zero, with each subsequent excited state incrementally numbered.
-
-This function is designed to derive the physical parameters from
-charge distribution measurements of SiDB layouts, often acquired
-through Atomic Force Microscopy (AFM). Given a specific charge
-distribution, the function typically yields several physically valid
-parameters.
-
-As more SiDB layouts with corresponding charge distributions are
-recorded, the number of physically valid parameters for all layouts
-decreases. Consequently, this enables a more precise determination of
-the physical parameters present on the surface.
-
-Template parameter ``Lyt``:
-    The charge distribution surface type.
-
-Parameter ``cds``:
-    The charge distribution surface for which physical parameters are
-    to be determined.
-
-Parameter ``params``:
-    Operational domain parameters.
-
-Returns:
-    Physically valid parameters with the corresponding excited state
-    number of the given charge distribution surface for each parameter
-    point.)doc";
-
 static const char *__doc_fiction_determine_probability_of_fabricating_operational_gate =
 R"doc(During fabrication, SiDBs may not align precisely with their intended
 atomic positions, resulting in displacement. This means that an SiDB
@@ -10481,7 +9951,7 @@ displacement in the y-direction.)doc";
 
 static const char *__doc_fiction_displacement_robustness_domain_params_fixed_sidbs = R"doc(SiDBs in the given layout which shall not be affected by variations.)doc";
 
-static const char *__doc_fiction_displacement_robustness_domain_params_operational_params = R"doc(Parameters to check the operation status of the SiDB layout.)doc";
+static const char *__doc_fiction_displacement_robustness_domain_params_operational_params = R"doc(Parameters to check the operational status of the SiDB layout.)doc";
 
 static const char *__doc_fiction_displacement_robustness_domain_params_percentage_of_analyzed_displaced_layouts =
 R"doc(This parameter defines the percentage of all possible displaced SiDB
@@ -10835,6 +10305,19 @@ Template parameter ``Dist``:
 
 static const char *__doc_fiction_euclidean_distance_functor_euclidean_distance_functor = R"doc()doc";
 
+static const char *__doc_fiction_evaluate_output =
+R"doc(This function evaluates the given multi-output truth table at the
+given input index.
+
+Parameter ``truth_tables``:
+    The truth tables to evaluate.
+
+Parameter ``current_input_index``:
+    The index representing the current input pattern.
+
+Returns:
+    Output of the truth tables.)doc";
+
 static const char *__doc_fiction_even_column_cartesian =
 R"doc(\verbatim +-------+ +-------+ | | | | +-------+ (1,0) +-------+ (3,0)
 | | | | | | | (0,0) +-------+ (2,0) +-------+ | | | | | +-------+
@@ -11024,15 +10507,6 @@ static const char *__doc_fiction_exact_physical_design_stats_y_size = R"doc()doc
 
 static const char *__doc_fiction_exact_sidb_simulation_engine = R"doc(Selector exclusively for exact SiDB simulation engines.)doc";
 
-static const char *__doc_fiction_exact_sidb_simulation_engine_CLUSTERCOMPLETE =
-R"doc(*ClusterComplete* is a novel exact simulation engine that requires
-exponential runtime, though, depending on the simulation problem, it
-effectively reduces the base number by a real number, thus allowing
-problem sizes that were previously considered astronomical in size.
-Inherent to the simulation methodology that does not depend on the
-simulation base, it simulates very effectively for either base number
-(2 or 3).)doc";
-
 static const char *__doc_fiction_exact_sidb_simulation_engine_EXGS =
 R"doc(*Exhaustive Ground State Search* (EXGS) is an exact simulation engine
 that always has exponential runtime.)doc";
@@ -11087,8 +10561,8 @@ configurations are checked for validity, 100 % simulation accuracy is
 guaranteed.
 
 @note This was the first exact simulation approach. However, it is
-replaced by *QuickExact* and *ClusterComplete* due to the much better
-runtimes and more functionality.
+replaced by *QuickExact* due to the much better runtimes and more
+functionality.
 
 Template parameter ``Lyt``:
     SiDB cell-level layout type.
@@ -12877,14 +12351,6 @@ Returns:
     Clocking scheme object that matches the given `name`, or
     `std::nullopt` if no clocking scheme by the given `name` exists.)doc";
 
-static const char *__doc_fiction_get_cluster_size =
-R"doc(Forward declaration. Required for compilation due to the mutually
-recursive structure in this file.)doc";
-
-static const char *__doc_fiction_get_cluster_size_2 =
-R"doc(Forward declaration. Required for compilation due to the mutually
-recursive structure in this file.)doc";
-
 static const char *__doc_fiction_get_name =
 R"doc(Helper function to conveniently fetch the name from a layout or
 network as they use different function names for the same purpose.
@@ -12897,46 +12363,6 @@ Parameter ``ntk_or_lyt``:
 
 Returns:
     Name of given network or layout.)doc";
-
-static const char *__doc_fiction_get_projector_state_compositions =
-R"doc(This function is used to obtain the cluster charge state compositions
-of the multiset charge configuration in a projector state. The
-corresponding charge space element of the projector is found and its
-compositions are returned.
-
-Parameter ``pst``:
-    Projector state of which the corresponding compositions are
-    requested.
-
-Returns:
-    The compositions associated with the multiset charge configuration
-    of the projecting cluster.)doc";
-
-static const char *__doc_fiction_get_sidb_simulation_engine =
-R"doc(Returns a simulation engine by name.
-
-Parameter ``name``:
-    Name of the desired SiDB simulation engine.
-
-Returns:
-    SiDB simulation engine that matches the given `name`, or
-    `std::nullopt` if no simulation engine by the given `name` exists.)doc";
-
-static const char *__doc_fiction_get_singleton_sidb_ix =
-R"doc(Forward declaration. Required for compilation due to the mutually
-recursive structure in this file.)doc";
-
-static const char *__doc_fiction_get_singleton_sidb_ix_2 =
-R"doc(Forward declaration. Required for compilation due to the mutually
-recursive structure in this file.)doc";
-
-static const char *__doc_fiction_get_unique_cluster_id =
-R"doc(Forward declaration. Required for compilation due to the mutually
-recursive structure in this file.)doc";
-
-static const char *__doc_fiction_get_unique_cluster_id_2 =
-R"doc(Forward declaration. Required for compilation due to the mutually
-recursive structure in this file.)doc";
 
 static const char *__doc_fiction_graph_coloring_engine =
 R"doc(An enumeration of coloring engines to use for the graph coloring. All
@@ -13412,156 +12838,23 @@ Returns:
 
 static const char *__doc_fiction_gray_code_iterator_start_number = R"doc(Start number of the iteration.)doc";
 
-static const char *__doc_fiction_ground_state_space =
-R"doc(The purely constructive *Ground State Space* algorithm is the key
-ingredient of the *ClusterComplete* exact SiDB simulator that lifts
-exact SiDB simulation to permit multiple gates in connection. It uses
-iterative "loop until fixpoint" concepts to prune the simulation
-search space for not only a flat layout of SiDBs, but rather
-generalizes, and lifts the physically informed space pruning technique
-introduced with *QuickExact* to higher order, allowing *Ground State
-Space* to prune multiset charge state configurations at any level in a
-cluster hierarchy.
+static const char *__doc_fiction_groundstate_from_simulation_result =
+R"doc(This function calculates the ground state charge distributions from
+the provided simulation results. The ground state charge distributions
+are those with energy closest to the minimum energy found in the
+simulation results.
 
-The role of the cluster hierarchy is to rank interactions between
-groups, or clusters of SiDBs that together make up the whole layout,
-such that the variation in electrostatic potential under different
-charge state assignments is highest between the children clusters of
-clusters that low in the hierarchy. Thereby, the structure allows us
-to consider the most charge state assignment-dependent interaction in
-a more detailed physically informed space pruning analysis, enabling
-high pruning efficacy for the few pruning tests (with respect to the
-exponential search space).
-
-Starting at a clustering of all singleton clusters, the charge spaces,
-ie. a set of multiset charge configurations (initially { {{-}}, {{0}},
-{{+}} } or omitting the singleton multiset {{+}} in the case of base 2
-pre-simulation), are pruned iteratively through potential bound
-analysis. Through merges, ie., replacing a set of children in the
-clustering with their parent, we may inspect the most crucially
-dependant interactions in the layout separately. The procedure
-finishes when the charge spaces have been folded all the way up to the
-top cluster, parent of all, which then contains all information
-resulting from the construction. *ClusterComplete*, without much
-trickery, now simply unfolds this result, allowing simulation of
-problems that were previously seen as astronomical, due to the (base 2
-or 3) exponential growth in the number of SiDBs.
+@note When degenerate states exist, there are multiple ground states
+with the same energy.
 
 Template parameter ``Lyt``:
-    SiDB cell-level layout type.
+    The layout type used in the simulation results.
 
-Parameter ``lyt``:
-    Layout to construct the *Ground State Space* of.
-
-Parameter ``params``:
-    The parameters that *Ground State Space* will use throughout the
-    construction. The physical parameters that *Ground State Space*
-    will use to prune simulation search space are stored in there. In
-    particular, the user may configure parameters that decide limits
-    on the problem sizes of pruning by validity witness partitioning.
-    By default, these are set to avoid runtimes from being affected,
-    as these sub-problems may scale factorially. Thereby, these
-    parameters are especially useful for large simulation problems
-    that could benefit from extra intensive pruning before
-    *ClusterComplete* unfolds the constructed hierarchical charge
-    space.
+Parameter ``simulation_results``:
+    The simulation results containing charge distributions.
 
 Returns:
-    The results of the construction, which include the top cluster
-    which parents all other clusters, and thereby contains the charge
-    spaces of each cluster.)doc";
-
-static const char *__doc_fiction_ground_state_space_params = R"doc(The set of parameters used in the *Ground State Space* construction.)doc";
-
-static const char *__doc_fiction_ground_state_space_params_num_overlapping_witnesses_limit_gss =
-R"doc(The complexity is of validity witness partitioning bounded by a
-factorial in the number of overlapping witnesses. This parameter thus
-allows the validity witness partitioning procedure to perform the
-reduction to overlapping witnesses for larger cluster sizes that could
-be runtime-impairing, then limiting specifically the length of the
-input to the factorial call. As above, the defaulted value ensures no
-hindrance in runtimes.)doc";
-
-static const char *__doc_fiction_ground_state_space_params_simulation_parameters =
-R"doc(The physical parameters that *Ground State Space* will use to prune
-simulation search space.)doc";
-
-static const char *__doc_fiction_ground_state_space_params_witness_partitioning_cluster_size_limit =
-R"doc(This specifies the maximum cluster size for which *Ground State Space*
-will solve an NP-complete sub-problem exhaustively. The sets of SiDBs
-that witness local population stability for each respective charge
-state may be partitioned into disjoint sets such that the number of
-required witnesses for each respective charge state is satisfied. If
-no such partition exists, the multiset charge configuration associated
-with the requirements may be rejected. The defaulted value is chosen
-such that some extra pruning may be performed, while the impact on the
-runtime remains negligible. Validity witness partitioning parameters
-are relevant for large simulation problems.)doc";
-
-static const char *__doc_fiction_ground_state_space_reporting =
-R"doc(This enum class provides meaningful options for configuring the
-reporting of the *Ground State Space* statistics. These statistic may
-be used especially to configure the validity witness partitioning
-options for *Ground State Space*, that may impair runtimes when set
-too high, but could provide a large benefit to the complexity of the
-unfolding process of large simulation problems by performing more
-involved pruning procedures in the construction stage.)doc";
-
-static const char *__doc_fiction_ground_state_space_reporting_DISABLED =
-R"doc(Disabling this option will suppress the output of *Ground State Space*
-statistics.)doc";
-
-static const char *__doc_fiction_ground_state_space_reporting_ENABLED =
-R"doc(Enabling this option will output *Ground State Space* statistics to
-the standard output.)doc";
-
-static const char *__doc_fiction_ground_state_space_results =
-R"doc(This struct is used to store the results of the *Ground State Space*
-construction.)doc";
-
-static const char *__doc_fiction_ground_state_space_results_maximum_top_level_multisets =
-R"doc(The maximum size of the charge space of the top cluster, given the
-simulation base, can be inferred by the \"stars and bars\"
-combinatorial idea: the solution to this analogous problem determines
-the maximum amount of multisets of size :math:`N` (where :math:`N` is
-the number of SiDBs in the layout, and therefore in the top cluster)
-for the given base :math:`b`. In particular, the analogy is as
-follows: any such multiset can be seen as :math:`N` stars and :math:`b
-- 1` bars separating those stars. Then, the :math:`b` partitions
-forming from these :math:`b - 1` separators each have a respective
-size, adding up to :math:`N`. Therefore each partition is associated
-with an amount of one of the charge states of the multiset. Now we may
-compute total number of possible multisets for the top cluster as the
-number of combinations of :math:`N` stars and :math:`b - 1` bars.
-Hence this is computed with the following combinatorial formula:
-:math:`\binom{N + b - 1}{b - 1}`.)doc";
-
-static const char *__doc_fiction_ground_state_space_results_projector_state_count =
-R"doc(The total number of distinct projector states is counted. At each
-merge, the projector states in charge space compositions in the charge
-spaces of the clusters to merge are locked in the final construct, and
-can therefore be counted. This may be used to estimate the time it
-would take *ClusterComplete* to unfold the hierarchy.)doc";
-
-static const char *__doc_fiction_ground_state_space_results_report =
-R"doc(Report *Ground State Space* statistics. A quick heuristic to assess
-the quality of the pruning is captured by the size of the charge space
-of the top cluster, which depends on the charge spaces of all clusters
-below it.
-
-Parameter ``os``:
-    The output stream to write to (default: standard output).
-
-Returns:
-    Prints the runtime and the number of pruned top level multisets
-    versus the total amount possible.)doc";
-
-static const char *__doc_fiction_ground_state_space_results_runtime = R"doc(The runtime of the construction is stored.)doc";
-
-static const char *__doc_fiction_ground_state_space_results_top_cluster =
-R"doc(The top cluster is the root of the cluster hierarchy. It therefore
-allows access to the entire cluster hierarchy, including the charge
-spaces of each cluster.)doc";
+    A vector of charge distributions with the minimal energy.)doc";
 
 static const char *__doc_fiction_has_above = R"doc()doc";
 
@@ -13740,12 +13033,6 @@ Parameter ``v``:
 
 Parameter ``rest``:
     Remaining values to hash.)doc";
-
-static const char *__doc_fiction_heuristic_sidb_simulation_engine = R"doc(Selector exclusively for heuristic SiDB simulation engines.)doc";
-
-static const char *__doc_fiction_heuristic_sidb_simulation_engine_QUICKSIM =
-R"doc(*QuickSim* is a heuristic simulation engine that only requires
-polynomial runtime.)doc";
 
 static const char *__doc_fiction_hexagonal_layout =
 R"doc(A layout type that utilizes offset coordinates to represent a
@@ -14868,11 +14155,44 @@ Parameter ``spec``:
 Parameter ``params``:
     Parameters for the `is_operational` algorithm.
 
+Returns:
+    Bool that indicates whether kinks induce the layout to become non-
+    operational. `true` if the layout is non-operational due to kinks,
+    `false` otherwise.)doc";
+
+static const char *__doc_fiction_is_kink_induced_non_operational_2 =
+R"doc(This function determines if the layout is only considered as non-
+operational because of kinks. This means that the layout would be
+considered as operational, if kinks were accepted.
+
+@note "Kink induced non-operational" refers to the non-operational
+status being exclusively caused by kinks with an otherwise correct
+logic match.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Template parameter ``TT``:
+    Type of the truth table.
+
+Parameter ``lyt``:
+    The SiDB cell-level layout to be checked.
+
+Parameter ``spec``:
+    Expected Boolean function of the layout given as a multi-output
+    truth table.
+
+Parameter ``params``:
+    Parameters for the `is_operational` algorithm.
+
 Parameter ``input_bdl_wire``:
     Optional BDL input wires of lyt.
 
 Parameter ``output_bdl_wire``:
     Optional BDL output wires of lyt.
+
+Parameter ``canvas_lyt``:
+    Optional canvas layout.
 
 Returns:
     Bool that indicates whether kinks induce the layout to become non-
@@ -14932,8 +14252,37 @@ Returns:
 static const char *__doc_fiction_is_operational =
 R"doc(Determine the operational status of an SiDB layout.
 
-This function checks the operational status of a given gate layout
-using the `is_operational` algorithm. It determines whether the gate
+This function checks the operational status of a given SiDB layout
+using the `is_operational` algorithm. It determines whether the SiDB
+layout is operational and returns the correct result for all
+:math:`2^n` input combinations.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Template parameter ``TT``:
+    Type of the truth table.
+
+Parameter ``lyt``:
+    The SiDB cell-level layout to be checked.
+
+Parameter ``spec``:
+    Expected Boolean function of the layout given as a multi-output
+    truth table.
+
+Parameter ``params``:
+    Parameters for the `is_operational` algorithm.
+
+Returns:
+    A pair containing the operational status of the SiDB layout
+    (either `OPERATIONAL` or `NON_OPERATIONAL`) and the number of
+    input combinations tested.)doc";
+
+static const char *__doc_fiction_is_operational_2 =
+R"doc(Determine the operational status of an SiDB layout.
+
+This function checks the operational status of a given SiDB layout
+using the `is_operational` algorithm. It determines whether the SiDB
 layout is operational and returns the correct result for all
 :math:`2^n` input combinations.
 
@@ -14959,8 +14308,11 @@ Parameter ``input_bdl_wire``:
 Parameter ``output_bdl_wire``:
     Optional BDL output wires of lyt.
 
+Parameter ``canvas_lyt``:
+    Optional canvas layout.
+
 Returns:
-    A pair containing the operational status of the gate layout
+    A pair containing the operational status of the SiDB layout
     (either `OPERATIONAL` or `NON_OPERATIONAL`) and the number of
     input combinations tested.)doc";
 
@@ -14969,7 +14321,53 @@ static const char *__doc_fiction_is_operational_params = R"doc(Parameters for th
 static const char *__doc_fiction_is_operational_params_input_bdl_iterator_params = R"doc(Parameters for the BDL input iterator.)doc";
 
 static const char *__doc_fiction_is_operational_params_op_condition =
-R"doc(Condition which is used to decide if a layout is operational or non-
+R"doc(Condition to decide whether a layout is operational or non-
+operational.)doc";
+
+static const char *__doc_fiction_is_operational_params_operational_analysis_strategy =
+R"doc(Simulation method to determine if the layout is operational or non-
+operational. There are three possible strategies:
+
+- `SIMULATION_ONLY`: This setting does not apply any filtering
+strategies to determine if the layout is operational. Instead, it
+relies solely on physical simulation to make this determination. -
+`FILTER_ONLY`: This setting does only apply filtering strategies to
+determine if the layout is non-operational. If the layout passes all
+filtering strategies, it is considered operational. This is only an
+approximation. It may be possible that the layout is non-operational,
+but the filtering strategies do not detect it. -
+`FILTER_THEN_SIMULATION`: Before a physical simulation is conducted,
+the algorithm checks if filtering strategies have detected whether the
+layout is non-operational. This only provides any runtime benefits if
+kinks are rejected.)doc";
+
+static const char *__doc_fiction_is_operational_params_operational_analysis_strategy_FILTER_ONLY =
+R"doc(Apply filtering exclusively to determine whether the layout is non-
+operational. If the layout passes all filter steps, it is considered
+operational.
+
+@note This is an extremely fast approximation that may sometimes lead
+to false positives.)doc";
+
+static const char *__doc_fiction_is_operational_params_operational_analysis_strategy_FILTER_THEN_SIMULATION =
+R"doc(Before a physical simulation is conducted, the algorithm checks if
+filter strategies can determine that the layout is non-operational.
+This only provides any runtime benefits if kinks are rejected.)doc";
+
+static const char *__doc_fiction_is_operational_params_operational_analysis_strategy_SIMULATION_ONLY =
+R"doc(Do not apply filter strategies to determine whether the layout is
+operational. Instead, rely solely on physical simulation.)doc";
+
+static const char *__doc_fiction_is_operational_params_operational_condition =
+R"doc(Condition to decide whether a layout is operational or non-
+operational.)doc";
+
+static const char *__doc_fiction_is_operational_params_operational_condition_REJECT_KINKS =
+R"doc(The I/O pins are not allowed to show kinks. If kinks exist, the layout
+is considered as non-operational.)doc";
+
+static const char *__doc_fiction_is_operational_params_operational_condition_TOLERATE_KINKS =
+R"doc(Even if the I/O pins show kinks, the layout is still considered as
 operational.)doc";
 
 static const char *__doc_fiction_is_operational_params_sim_engine =
@@ -14979,6 +14377,10 @@ computation.)doc";
 static const char *__doc_fiction_is_operational_params_simulation_parameters =
 R"doc(The simulation parameters for the physical simulation of the ground
 state.)doc";
+
+static const char *__doc_fiction_is_operational_params_strategy_to_analyze_operational_status =
+R"doc(Strategy to determine whether a layout is operational or non-
+operational.)doc";
 
 static const char *__doc_fiction_is_positively_charged_defect =
 R"doc(Checks whether the given defect has a positive charge value assigned
@@ -15137,6 +14539,43 @@ Returns:
     The input combinations where kinks induce the SiDB layout to
     become non-operational.)doc";
 
+static const char *__doc_fiction_kink_induced_non_operational_input_patterns_2 =
+R"doc(This function determines all input combinations for which kinks induce
+the SiDB layout to become non-operational. This means that the layout
+is operational if kinks would be accepted.
+
+@note "Kink induced non-operational" refers to the non-operational
+status being exclusively caused by kinks with an otherwise correct
+logic match.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Template parameter ``TT``:
+    Type of the truth table.
+
+Parameter ``lyt``:
+    The SiDB layout.
+
+Parameter ``spec``:
+    Vector of truth table specifications.
+
+Parameter ``params``:
+    Parameters for the `is_operational` algorithm.
+
+Parameter ``input_bdl_wire``:
+    Optional BDL input wires of lyt.
+
+Parameter ``output_bdl_wire``:
+    Optional BDL output wires of lyt.
+
+Parameter ``canvas_lyt``:
+    Optional canvas layout.
+
+Returns:
+    The input combinations where kinks induce the SiDB layout to
+    become non-operational.)doc";
+
 static const char *__doc_fiction_layout_coordinate_path =
 R"doc(A path in a layout defined as an ordered sequence of coordinates.
 
@@ -15207,45 +14646,6 @@ Template parameter ``Dist``:
     Integral distance type.)doc";
 
 static const char *__doc_fiction_manhattan_distance_functor_manhattan_distance_functor = R"doc()doc";
-
-static const char *__doc_fiction_maximum_defect_influence_distance_params =
-R"doc(This struct stores the parameters for the
-maximum_defect_influence_position_and_distance algorithm.)doc";
-
-static const char *__doc_fiction_maximum_defect_influence_distance_params_additional_scanning_area =
-R"doc(The pair describes the width and height of the area around the gate,
-which is also used to place defects.
-
-@note If SiQAD coordinates are used, the second entry describes the
-number of dimer rows.)doc";
-
-static const char *__doc_fiction_maximum_defect_influence_distance_params_defect = R"doc(The defect to calculate the maximum defect influence distance for.)doc";
-
-static const char *__doc_fiction_maximum_defect_influence_distance_params_simulation_parameters = R"doc(Physical simulation parameters.)doc";
-
-static const char *__doc_fiction_maximum_defect_influence_position_and_distance =
-R"doc(Calculates the maximum distance at which a given defect can influence
-the layout's ground state.
-
-This function simulates the influence of defects on a SiDB cell-level
-layout. It computes the maximum influence distance, defined as the
-minimum distance between any SiDB cell and the given defect, at which
-the defect can still affect the layout's ground state, potentially
-altering its behavior, such as gate functionality.
-
-Parameter ``lyt``:
-    The SiDB cell-level layout for which the influence distance is
-    being determined.
-
-Parameter ``params``:
-    Parameters used to calculate the defect's maximum influence
-    distance.
-
-Returns:
-    Pair with the first element describing the position with maximum
-    distance to the layout where a placed defect can still affect the
-    ground state of the layout. The second entry describes the
-    distance of the defect from the layout.)doc";
 
 static const char *__doc_fiction_minimum_energy =
 R"doc(Computes the minimum energy of a range of
@@ -15428,6 +14828,29 @@ Parameter ``n``:
 
 Returns:
     Number of constant fanins to `n` in `ntk`.)doc";
+
+static const char *__doc_fiction_number_of_operational_input_combinations =
+R"doc(This function calculates the count of input combinations for which the
+SiDB-based logic, represented by the provided layout (`lyt`) and truth
+table specifications (`spec`), produces the correct output.
+
+Template parameter ``Lyt``:
+    Type of the cell-level layout.
+
+Template parameter ``TT``:
+    Type of the truth table.
+
+Parameter ``lyt``:
+    The SiDB layout.
+
+Parameter ``spec``:
+    Vector of truth table specifications.
+
+Parameter ``params``:
+    Parameters to simualte if a input combination is operational.
+
+Returns:
+    The count of operational input combinations.)doc";
 
 static const char *__doc_fiction_obstruction_layout = R"doc()doc";
 
@@ -15752,18 +15175,6 @@ Parameter ``n``:
 Returns:
     Irregular clocking scheme.)doc";
 
-static const char *__doc_fiction_operational_condition =
-R"doc(Condition which is used to decide if a layout is operational or non-
-operational.)doc";
-
-static const char *__doc_fiction_operational_condition_REJECT_KINKS =
-R"doc(The I/O pins are not allowed to show kinks. If kinks exist, the layout
-is considered as non-operational.)doc";
-
-static const char *__doc_fiction_operational_condition_TOLERATE_KINKS =
-R"doc(Even if the I/O pins show kinks, the layout is still considered as
-operational.)doc";
-
 static const char *__doc_fiction_operational_domain =
 R"doc(An operational domain is a set of simulation parameter values for
 which a given SiDB layout is logically operational. This means that a
@@ -15788,6 +15199,8 @@ Template parameter ``Key``:
 
 Template parameter ``Value``:
     The type representing the value. Defaults to `operational_status`.)doc";
+
+static const char *__doc_fiction_operational_domain_add_value = R"doc()doc";
 
 static const char *__doc_fiction_operational_domain_contour_tracing =
 R"doc(Computes the operational domain of the given SiDB cell-level layout.
@@ -15916,14 +15329,16 @@ Parameter ``stats``:
 Returns:
     The (partial) operational domain of the layout.)doc";
 
-static const char *__doc_fiction_operational_domain_get_value =
-R"doc(This function retrieves the value associated with the provided
-parameter point from the operational domain. If the parameter point is
-found in the domain, its corresponding value is returned. Otherwise,
-`std::out_of_range` is thrown.
+static const char *__doc_fiction_operational_domain_get_domain = R"doc()doc";
 
-Parameter ``pp``:
-    The parameter point to look up.
+static const char *__doc_fiction_operational_domain_get_value =
+R"doc(This function retrieves the value associated with the provided key
+from the operational domain. If the key is found in the domain, its
+corresponding value is returned. Otherwise, `std::nullopt` is
+returned.
+
+Parameter ``key``:
+    The key to look up.
 
 Returns:
     The value associated with the parameter point.)doc";
@@ -16037,6 +15452,50 @@ Parameter ``stats``:
 Returns:
     The (partial) operational domain of the layout.)doc";
 
+static const char *__doc_fiction_operational_domain_ratio =
+R"doc(Calculates the ratio of operational parameter points surrounding a
+specified parameter point to the total number of parameter points in
+the given parameter space. This function is useful for assessing how
+robust a gate design is to variations in its parameters.
+
+A ratio close to 1 indicates that the gate is robust, meaning it
+functions correctly across a broad range of parameter values. A ratio
+close to 0 indicates that the gate is highly sensitive to parameter
+variations and may fail to operate correctly.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Template parameter ``TT``:
+    Truth table type.
+
+Parameter ``lyt``:
+    The SiDB layout for which to compute the ratio of operational
+    parameter points surrounding a specified parameter point to the
+    total number of parameter points.
+
+Parameter ``spec``:
+    The expected Boolean function of the layout, provided as a multi-
+    output truth table.
+
+Parameter ``params``:
+    Parameters.
+
+Parameter ``pp``:
+    The specific parameter point around which the operational ratio is
+    computed.
+
+Returns:
+    The ratio of operational parameter points to the total number of
+    parameter points in the parameter space.)doc";
+
+static const char *__doc_fiction_operational_domain_ratio_params =
+R"doc(Parameters for computing the ratio of operational parameter points
+around a specified parameter point to the total number of parameter
+points in the given parameter space.)doc";
+
+static const char *__doc_fiction_operational_domain_ratio_params_op_domain_params = R"doc(Parameters for the operational domain computation.)doc";
+
 static const char *__doc_fiction_operational_domain_stats =
 R"doc(Statistics for the operational domain computation. The statistics are
 used across the different operational domain computation algorithms.)doc";
@@ -16085,6 +15544,37 @@ Parameter ``spec``:
 
 Parameter ``params``:
     Parameters to simulate if a input combination is operational.
+
+Returns:
+    The count of operational input combinations.)doc";
+
+static const char *__doc_fiction_operational_input_patterns_2 =
+R"doc(This function determines the input combinations for which the layout
+is operational.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Template parameter ``TT``:
+    Type of the truth table.
+
+Parameter ``lyt``:
+    The SiDB layout.
+
+Parameter ``spec``:
+    Vector of truth table specifications.
+
+Parameter ``params``:
+    Parameters to simulate if a input combination is operational.
+
+Parameter ``input_bdl_wire``:
+    Optional BDL input wires of lyt.
+
+Parameter ``output_bdl_wire``:
+    Optional BDL output wires of lyt.
+
+Parameter ``canvas_lyt``:
+    Optional canvas layout.
 
 Returns:
     The count of operational input combinations.)doc";
@@ -16320,6 +15810,69 @@ static const char *__doc_fiction_path_set_add = R"doc()doc";
 
 static const char *__doc_fiction_path_set_contains = R"doc()doc";
 
+static const char *__doc_fiction_physical_population_stability =
+R"doc(This function simulates the population stability of each physically
+valid charge distributions of a given SiDB layout. It determines the
+minimum absolute electrostatic potential required to induce a charge
+distribution transition. The function also identifies the SiDB for
+which this is the case (critical SiDB) and the corresponding charge
+state transition (i.e., the change from one charge state to another).
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Parameter ``lyt``:
+    The layout for which the population stability is simulated.
+
+Parameter ``params``:
+    Parameters used to simulate the population stability.
+
+Returns:
+    A vector of population stability information for all physically
+    valid charge distributions of the given SiDB layout.)doc";
+
+static const char *__doc_fiction_physical_population_stability_params =
+R"doc(This struct stores the parameters required to simulate the population
+stability.)doc";
+
+static const char *__doc_fiction_physical_population_stability_params_precision_for_distance_corresponding_to_potential =
+R"doc(The precision level for the conversion from the minimum potential
+difference to the corresponding distance.)doc";
+
+static const char *__doc_fiction_physical_population_stability_params_simulation_parameters = R"doc(Parameters for the electrostatic potential.)doc";
+
+static const char *__doc_fiction_physically_valid_parameters =
+R"doc(This function computes the physical parameters necessary for ensuring
+the physical validity of a given charge distribution and determines
+the corresponding excited state number. The ground state is denoted by
+zero, with each subsequent excited state incrementally numbered.
+
+This function is designed to derive the physical parameters from
+charge distribution measurements of SiDB layouts, often acquired
+through Atomic Force Microscopy (AFM). Given a specific charge
+distribution, the function typically yields several physically valid
+parameters.
+
+As more SiDB layouts with corresponding charge distributions are
+recorded, the number of physically valid parameters for all layouts
+decreases. Consequently, this enables a more precise determination of
+the physical parameters present on the surface.
+
+Template parameter ``Lyt``:
+    The charge distribution surface type.
+
+Parameter ``cds``:
+    The charge distribution surface for which physical parameters are
+    to be determined.
+
+Parameter ``params``:
+    Operational domain parameters.
+
+Returns:
+    Physically valid parameters with the corresponding excited state
+    number of the given charge distribution surface for each parameter
+    point.)doc";
+
 static const char *__doc_fiction_place =
 R"doc(Place 0-input gates.
 
@@ -16516,20 +16069,23 @@ state transition, the electrostatic potential difference required for
 the transition, the corresponding distance, and the total
 electrostatic energy of the given charge distribution.
 
-Template parameter ``CellType``:
-    Type of the used cells.)doc";
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.)doc";
 
 static const char *__doc_fiction_population_stability_information_critical_cell = R"doc(SiDB cell which is closest to a charge transition.)doc";
 
-static const char *__doc_fiction_population_stability_information_distance_corresponding_to_potential = R"doc(Distance (unit: nm) corresponding to the minimum potential difference.)doc";
-
-static const char *__doc_fiction_population_stability_information_minimum_potential_difference_to_transition =
-R"doc(Absolute electrostatic potential (unit: V) required for the charge
-state transition.)doc";
+static const char *__doc_fiction_population_stability_information_distance_corresponding_to_potential =
+R"doc(This map collects for all charge transition types, the electrostatic
+potential difference which is required to conduct a charge change as a
+distance in nanometer. This is possible since the electrostatic
+potential is connected to the distance.)doc";
 
 static const char *__doc_fiction_population_stability_information_system_energy = R"doc(Total electrostatic energy (unit: eV) of given charge distribution.)doc";
 
-static const char *__doc_fiction_population_stability_information_transition_from_to = R"doc(Charge transition from the current charge state to the closest one.)doc";
+static const char *__doc_fiction_population_stability_information_transition_potentials =
+R"doc(This map collects all charge transition types, the corresponding
+critical cells and the required electrostatic potential (unit: V)
+required to conduct the transition.)doc";
 
 static const char *__doc_fiction_port_direction =
 R"doc(A port direction is a relative (cardinal) direction of a port within a
@@ -16762,298 +16318,32 @@ static const char *__doc_fiction_post_layout_optimization_stats_y_size_after = R
 
 static const char *__doc_fiction_post_layout_optimization_stats_y_size_before = R"doc(Layout height before the post-layout optimization process.)doc";
 
-static const char *__doc_fiction_potential_bound_top =
-R"doc(The respective *top* elements of the lower semi-lattices in which our
-potential bounds live, ie., the respective elements of *most*
-information. This means that any meet with a top element (weakly)
-reduces the information, and thus any meet computed in iteration
-through binary application may start out with this element.
+static const char *__doc_fiction_potential_to_distance_conversion =
+R"doc(The electrostatic potential on hydrogen-passivated silicon is
+typically modeled using a screened Coulomb potential. This
+electrostatic potential is commonly employed to determine the
+electrostatic potential for a given distance (between SiDB and point
+under consideration) and given physical parameters. However, the
+function provided here serves the inverse purpose by calculating the
+distance for a given potential and given physical parameters.
 
-Template parameter ``bound``:
-    Potential bound domain to return the element of most information
-    of.
+@note Runtime depends exponentially on the provided precision.
 
-Returns:
-    The element of most information respective to the potential bound
-    domain.)doc";
+Parameter ``params``:
+    The physical parameters for a given hydrogen-passivated silicon
+    surface.
 
-static const char *__doc_fiction_potential_bounds_store =
-R"doc(This defines a store in which the bounds on the local electrostatic
-potential for an SiDB (index) may be stored. For the *Ground State
-Space* algorithm, this is used to keep track of the respective lower
-and upper bounds on the partial sum of the potential projected from
-SiDBs in a subhierarchy that is local to SiDBs that are also in the
-subhierarchy. During *ClusterComplete* simulation, the stored
-potential bounds represent information of the complete hierarchy, thus
-all SiDB interactions.)doc";
+Parameter ``potential``:
+    The electrostatic potential (unit: V) to be converted to a
+    distance.
 
-static const char *__doc_fiction_potential_bounds_store_get =
-R"doc(Getter for a (partial) potential sum bound local to an SiDB.
-
-Template parameter ``bound``:
-    The potential bound to obtain.
-
-Parameter ``sidb_ix``:
-    SiDB (index) to obtain the potential bound of.
+Parameter ``precision``:
+    The precision level for the conversion, specifying the number of
+    decimal places.
 
 Returns:
-    The potential bound for this SiDB.)doc";
-
-static const char *__doc_fiction_potential_bounds_store_initialize_complete_potential_bounds =
-R"doc(Initialize potential bounds for the given number of SiDBs (applicable
-to a complete potential bounds store only).
-
-Parameter ``num_sidbs``:
-    The number of SiDBs in the layout that is simulated.)doc";
-
-static const char *__doc_fiction_potential_bounds_store_num_sidbs =
-R"doc(Getter for the size of the potential bounds store, i.e., the number of
-SiDBs considered in this store.
-
-Returns:
-    The size of the potential bounds store.)doc";
-
-static const char *__doc_fiction_potential_bounds_store_operator_iadd =
-R"doc(Add a complete potential bound store to this (also a complete
-potential bound store) through pointwise updates.
-
-Parameter ``other``:
-    Other complete potential bound store.
-
-Returns:
-    Reference to this.)doc";
-
-static const char *__doc_fiction_potential_bounds_store_operator_isub =
-R"doc(Subtract a complete potential bound store to this (also a complete
-potential bound store) through pointwise updates, i.e., updates for
-each SiDB and for each bound (LB, UB).
-
-Parameter ``other``:
-    Other complete potential bound store.
-
-Returns:
-    Reference to this.)doc";
-
-static const char *__doc_fiction_potential_bounds_store_set =
-R"doc(Setter for a (partial) potential sum bound local to an SiDB.
-
-Template parameter ``bound``:
-    The potential bound to obtain.
-
-Parameter ``sidb_ix``:
-    SiDB (index) to set the potential bound for.
-
-Parameter ``bound_value``:
-    New bound to set.)doc";
-
-static const char *__doc_fiction_potential_bounds_store_set_2 =
-R"doc(Setter for (partial) potential sum bounds local to an SiDB.
-
-Parameter ``sidb_ix``:
-    SiDB (index) to set the potential bounds for.
-
-Parameter ``min``:
-    New lower bound to set.
-
-Parameter ``max``:
-    New upper bound to set.)doc";
-
-static const char *__doc_fiction_potential_bounds_store_store =
-R"doc(Potential bounds are a map from SiDB indices to two values
-respectively representing the lower and upper bound.)doc";
-
-static const char *__doc_fiction_potential_bounds_store_update =
-R"doc(Relative setter for a (partial) potential sum bound local to an SiDB.
-
-Template parameter ``bound``:
-    The potential bound to update.
-
-Parameter ``sidb_ix``:
-    SiDB (index) to update the potential bound of.
-
-Parameter ``bound_diff``:
-    Bound difference to apply.)doc";
-
-static const char *__doc_fiction_potential_bounds_store_update_2 =
-R"doc(Relative setter for (partial) potential sum bounds local to an SiDB.
-
-Parameter ``sidb_ix``:
-    SiDB (index) to update the potential bounds of.
-
-Parameter ``min_diff``:
-    Difference in lower bound potential to apply.
-
-Parameter ``max_diff``:
-    Difference in upper bound potential to apply.)doc";
-
-static const char *__doc_fiction_potential_projection =
-R"doc(This struct defines the type of an electrostatic potential projection,
-which pairs a multiset charge configuration with the potential value
-(in eV) associated with the potential projection in the given context.
-The context is given by potential projection stores in the decorated
-cluster hierarchies, which links the projecting cluster with SiDB that
-receives this potential projection.)doc";
-
-static const char *__doc_fiction_potential_projection_multiset = R"doc(Associated multiset charge configuration.)doc";
-
-static const char *__doc_fiction_potential_projection_operator_iadd =
-R"doc(Defines summation of potential projections through addition of the
-potential values and concatenation of the associated multiset charge
-configurations. The latter may simply be implemented by addition of
-the compressed forms.
-
-Parameter ``other``:
-    Other potential projection to sum with the current.
-
-Returns:
-    The current potential projection to which the other potential
-    projection is now added.)doc";
-
-static const char *__doc_fiction_potential_projection_operator_lt =
-R"doc(Defines an ordering of potential projections through comparison of the
-potential value. To prevent potential projections of equal potential
-value but different associated multiset charge configurations to be
-regarded as equal, a comparison of the latter is used as a "fail-
-safe".
-
-Parameter ``other``:
-    Other potential projection to compare with the current.
-
-Returns:
-    `true` if and only if the potential value of the current is lower
-    than that of `other`, or if the potential values are equal and the
-    compressed form of the multiset charge configuration is strictly
-    less than that of `other`.)doc";
-
-static const char *__doc_fiction_potential_projection_order =
-R"doc(This struct defines the type of potential projection order, along with
-getter and setter operations. Essentially, a potential projection
-order is an ordered collection of potential projections, which allow
-rapid access and modifications of the potential projection bounds by
-relying on the ordering defined on potential projections, and
-canonical operations on ordered set containers. In the decorated
-cluster hierarchy, each cluster has a potential projection order onto
-each SiDB in the layout from which the hierarchy was created.)doc";
-
-static const char *__doc_fiction_potential_projection_order_add =
-R"doc(Adds a potential projection to the ordering, automatically placing it
-appropriately.
-
-Parameter ``pp``:
-    Potential projection to add.)doc";
-
-static const char *__doc_fiction_potential_projection_order_get_bound =
-R"doc(A getter for a potential projection bound, which is the first or last
-item in the ordered set.
-
-Template parameter ``bound``:
-    The bound to obtain.
-
-Returns:
-    The potential projection that forms the requested bound on the
-    potential projection order.)doc";
-
-static const char *__doc_fiction_potential_projection_order_get_next_bound =
-R"doc(A getter for the next potential projection bound, which is the first
-potential projection when traversing the ordering either from below or
-from above, that differs in its multiset charge configuration from the
-relevant potential projection bound.
-
-Template parameter ``bound``:
-    The bound to obtain.
-
-Returns:
-    The potential projection that would be the requested bound on the
-    potential projection order if the current relevant bound would be
-    erased.)doc";
-
-static const char *__doc_fiction_potential_projection_order_get_pot_proj_for_m_conf =
-R"doc(A getter for the potential projection bound given a multiset charge
-configuration specification, which is the first potential projection
-in the ordering when traversing either from below or from above, that
-matches its multiset charge configuration to the argument.
-
-Template parameter ``bound``:
-    The bound to obtain.
-
-Parameter ``m_conf``:
-    The multiset charge configuration to match.
-
-Returns:
-    The potential projection that forms the requested bound on the
-    subset of the potential projection order of potential projections
-    that match their multiset charge configuration to the argument.)doc";
-
-static const char *__doc_fiction_potential_projection_order_order = R"doc(The potential projection ordering.)doc";
-
-static const char *__doc_fiction_potential_projection_order_potential_projection_order = R"doc(Default constructor, creating the empty potential projection order.)doc";
-
-static const char *__doc_fiction_potential_projection_order_potential_projection_order_2 =
-R"doc(Constructor for a potential projection from a singleton cluster onto
-the SiDB contained in it.
-
-Parameter ``loc_ext_pot``:
-    The local external potential at the SiDB in the singleton cluster.
-    Specifically, this is the sum of the local defect potential and
-    the local external potential.
-
-Parameter ``base``:
-    The simulation base. This defines whether positive charges are
-    considered.
-
-Parameter ``self_projection``:
-    Separates the constructor type from inter-SiDB potential
-    projections.)doc";
-
-static const char *__doc_fiction_potential_projection_order_potential_projection_order_3 =
-R"doc(Constructor for a potential projection from a singleton cluster onto
-an SiDB.
-
-Parameter ``inter_sidb_pot``:
-    The chargeless potential between the SiDB in the singleton cluster
-    and the one projected onto, as found in the potential matrix in an
-    associated `charge_distribution_surface` object.
-
-Parameter ``base``:
-    The simulation base. This defines whether positive charges are
-    considered.)doc";
-
-static const char *__doc_fiction_potential_projection_order_remove_m_conf =
-R"doc(Removes all occurrences of potential projections that match their
-multiset charge configuration to the argument.
-
-Parameter ``m_conf``:
-    The multiset charge configuration of which all occurrences must be
-    removed.)doc";
-
-static const char *__doc_fiction_potential_projection_pot_val = R"doc(Potential projection value (unit: eV).)doc";
-
-static const char *__doc_fiction_potential_projection_potential_projection =
-R"doc(Default constructor, used as a starting point for an accumulation of
-potential projections.)doc";
-
-static const char *__doc_fiction_potential_projection_potential_projection_2 =
-R"doc(Trivial copy constructor.
-
-Parameter ``pot``:
-    Potential value to copy.
-
-Parameter ``mul``:
-    Multiset charge configuration to copy.)doc";
-
-static const char *__doc_fiction_potential_projection_potential_projection_3 =
-R"doc(Constructor for a potential projection from a singleton cluster,
-thereby lifting a value in the potential matrix to a potential
-projection.
-
-Parameter ``inter_sidb_pot``:
-    Potential value of which the absolute value may be found in the
-    potential matrix in a associated `charge_distribution_surface`
-    object.
-
-Parameter ``cs``:
-    Charge state associated with the singleton cluster projector for
-    this potential projection.)doc";
+    The distance (unit: nm) corresponding to the given electrostatic
+    potential.)doc";
 
 static const char *__doc_fiction_print_cell_level_layout =
 R"doc(Writes a simplified 2D representation of a cell-level layout to an
@@ -18187,36 +17477,6 @@ Returns:
 
 static const char *__doc_fiction_sidb_bestagon_library_sidb_bestagon_library = R"doc()doc";
 
-static const char *__doc_fiction_sidb_binary_cluster_hierarchy_node = R"doc(Forward-declaration of sidb_binary_cluster_hierarchy_node.)doc";
-
-static const char *__doc_fiction_sidb_binary_cluster_hierarchy_node_2 = R"doc(Forward-declaration of sidb_binary_cluster_hierarchy_node.)doc";
-
-static const char *__doc_fiction_sidb_binary_cluster_hierarchy_node_c = R"doc()doc";
-
-static const char *__doc_fiction_sidb_binary_cluster_hierarchy_node_sidb_binary_cluster_hierarchy_node = R"doc()doc";
-
-static const char *__doc_fiction_sidb_binary_cluster_hierarchy_node_sub = R"doc(The two children of the node.)doc";
-
-static const char *__doc_fiction_sidb_charge_space_composition =
-R"doc(A charge space composition holds a number of projector states of
-sibling clusters. Summing the multiset charge configuration associated
-with each, we obtain an element of the charge space of their parent.
-Additionally, we have a store for the bounds on the partial potential
-sum local to each SiDB contained by the parent, i.e., partial in the
-sense that SiDBs not contained by the parent are not taken into
-account. The potential bounds for each SiDB correspond to the meet on
-the potential bounds for each (sub-)composition of the respective
-cluster charge states associated with the multiset charge
-configuration of each projector state in this composition of siblings.)doc";
-
-static const char *__doc_fiction_sidb_charge_space_composition_pot_bounds =
-R"doc(Flattened (hierarchical) potential bounds specific to this
-composition.)doc";
-
-static const char *__doc_fiction_sidb_charge_space_composition_proj_states =
-R"doc(Projector states associated with charge space elements that make up
-the composition.)doc";
-
 static const char *__doc_fiction_sidb_charge_state = R"doc(Charge states of SiDBs.)doc";
 
 static const char *__doc_fiction_sidb_charge_state_NEGATIVE = R"doc()doc";
@@ -18226,380 +17486,6 @@ static const char *__doc_fiction_sidb_charge_state_NEUTRAL = R"doc()doc";
 static const char *__doc_fiction_sidb_charge_state_NONE = R"doc()doc";
 
 static const char *__doc_fiction_sidb_charge_state_POSITIVE = R"doc()doc";
-
-static const char *__doc_fiction_sidb_charge_states_for_base_number =
-R"doc(Charge states of SiDBs for a given simulation base number. The full
-base states are returned for an invalid simulation base.
-
-Parameter ``base``:
-    The simulation base number to get the associated SiDB charge
-    states for.
-
-Returns:
-    NEG, NEUT, POS for base 3 (full base), and NEG, NEUT otherwise,
-    associated with base 2 simulation.)doc";
-
-static const char *__doc_fiction_sidb_cluster =
-R"doc(Forward declaration of the SiDB cluster hierarchy required for the
-mutual recursive structure in this file. Here we define a pointer to a
-SiDB cluster to be a shared pointer, which enables us to also have
-pointers to parents.)doc";
-
-static const char *__doc_fiction_sidb_cluster_2 =
-R"doc(Forward declaration of the SiDB cluster hierarchy required for the
-mutual recursive structure in this file. Here we define a pointer to a
-SiDB cluster to be a shared pointer, which enables us to also have
-pointers to parents.)doc";
-
-static const char *__doc_fiction_sidb_cluster_charge_space = R"doc(The charge state space of the cluster.)doc";
-
-static const char *__doc_fiction_sidb_cluster_charge_state =
-R"doc(A cluster charge state is a multiset charge configuration. We may
-compress it into a 64 bit unsigned integer by putting the number of
-negative and positive charges in the upper and lower 32 bits
-respectively. The number of neutral charges may then be inferred for a
-given cluster by considering its size. Cluster charge states are the
-crucial objects of the state spaces, called charge spaces, since they
-not only hold information of the multiset charge configuration, but
-also the set of compositions, each of which compose into the current
-cluster charge state.)doc";
-
-static const char *__doc_fiction_sidb_cluster_charge_state_add_charge =
-R"doc(Modifier of the cluster charge state, adding a single charge state.
-
-Parameter ``cs``:
-    The charge state to add.)doc";
-
-static const char *__doc_fiction_sidb_cluster_charge_state_compositions = R"doc(Stored compositions of this cluster charge state.)doc";
-
-static const char *__doc_fiction_sidb_cluster_charge_state_neg_count =
-R"doc(Number of negative charges in the cluster charge state (32 available
-bits).)doc";
-
-static const char *__doc_fiction_sidb_cluster_charge_state_operator_call =
-R"doc(Defined a hashing of a cluster charge state. Since we need only
-separate cluster charge states by their compressed form, we may
-compute a hash over this for optimal performance when used in a hash
-set.
-
-Parameter ``m``:
-    Cluster charge state to compute the hash of.
-
-Returns:
-    The hash of the given cluster charge state.)doc";
-
-static const char *__doc_fiction_sidb_cluster_charge_state_operator_eq =
-R"doc(Defines the equality operation of cluster charge states, which
-disregards the compositions.
-
-Parameter ``other``:
-    Other cluster charge state to test for equality with the current.
-
-Returns:
-    `true` if and only if the compressed forms are equal.)doc";
-
-static const char *__doc_fiction_sidb_cluster_charge_state_operator_iadd =
-R"doc(Defines addition of cluster charge states through multiset
-concatenation. Disregards compositions.
-
-Parameter ``other``:
-    Other cluster charge state to concatenate with the current.
-
-Returns:
-    The concatenated cluster charge state, which is the modified
-    version of the current.)doc";
-
-static const char *__doc_fiction_sidb_cluster_charge_state_operator_isub =
-R"doc(Defines subtraction of cluster charge states through multiset
-difference. Disregards compositions.
-
-Parameter ``other``:
-    Other cluster charge state to take the difference of w.r.t. with
-    the current.
-
-Returns:
-    The cluster charge state that is their difference, which is the
-    modified version of the current.)doc";
-
-static const char *__doc_fiction_sidb_cluster_charge_state_operator_unsigned_long =
-R"doc(Explicit instructions for the compiler on how to cast a cluster charge
-state to an 64 bit unsigned integer.
-
-Returns:
-    The 64 bit unsigned integer representing the compressed form of
-    the cluster charge state.)doc";
-
-static const char *__doc_fiction_sidb_cluster_charge_state_pos_count =
-R"doc(Number of positive charges in the cluster charge state (32 available
-bits).)doc";
-
-static const char *__doc_fiction_sidb_cluster_charge_state_sidb_cluster_charge_state =
-R"doc(Default constructor, creates a cluster charge state without any
-negative and positive charges.)doc";
-
-static const char *__doc_fiction_sidb_cluster_charge_state_sidb_cluster_charge_state_2 =
-R"doc(Constructor for a charge space element of a singleton cluster. It has
-a single composition, which is a cluster state of the singleton
-cluster and the singleton multiset charge configuration itself.
-
-Parameter ``singleton``:
-    Singleton cluster to put in the compositions of this cluster
-    charge state.
-
-Parameter ``cs``:
-    Charge state to lift to a singleton multiset charge configuration.
-
-Parameter ``loc_ext_pot``:
-    The local external potential at the SiDB in the singleton cluster.
-    Specifically, this is the sum of the local defect potential and
-    the local external potential.
-
-Parameter ``total_num_sidbs``:
-    The total number of SiDBs in the layout.)doc";
-
-static const char *__doc_fiction_sidb_cluster_charge_state_sidb_cluster_charge_state_3 =
-R"doc(Constructor for cluster charge state given a multiset charge
-configuration represented in its compressed form. It allows the
-compressed form to be lifted to the full type to facilitate equality
-checks.
-
-Parameter ``m``:
-    The multiset charge configuration to create a cluster charge state
-    of.)doc";
-
-static const char *__doc_fiction_sidb_cluster_charge_state_sidb_cluster_charge_state_4 =
-R"doc(Constructor of a cluster charge state allowing initializer list
-construction.
-
-Parameter ``charge_states``:
-    initializer list of charge states to form into a cluster charge
-    state.)doc";
-
-static const char *__doc_fiction_sidb_cluster_children = R"doc(The set of children of a cluster is a clustering.)doc";
-
-static const char *__doc_fiction_sidb_cluster_external_sidbs = R"doc(The SiDBs in the layout that are not contained by the cluster.)doc";
-
-static const char *__doc_fiction_sidb_cluster_get_parent =
-R"doc(This function returns a shared pointer to the parent of this cluster.
-
-Returns:
-    A shared pointer to the parent of this cluster)doc";
-
-static const char *__doc_fiction_sidb_cluster_hierarchy =
-R"doc(This function performs the ALGLIB agglomerative clustering algorithm
-for a given SiDB layout. By default, the cluster are created by a
-minimal positional variance heuristic, also known as Ward's method.
-
-Template parameter ``Lyt``:
-    SiDB cell-level layout type.
-
-Parameter ``lyt``:
-    The layout to create a cluster hierarchy of.
-
-Parameter ``linkage_method``:
-    The agglomerative clustering linking heuristic that is used by
-    ALGLIB.)doc";
-
-static const char *__doc_fiction_sidb_cluster_hierarchy_linkage_method =
-R"doc(An enumeration of cluster linkage methods. The chosen method defines
-how clusters are merged in the agglomerative clustering procedure, by,
-e.g., defining an inter-cluster distance to minimize for the cluster
-to merge. For more information, visit: https://docs.tibco.com/pub/spot
-fire/6.5.1/doc/html/hc/hc_clustering_methods_overview.htm.)doc";
-
-static const char *__doc_fiction_sidb_cluster_hierarchy_linkage_method_COMPLETE =
-R"doc(Complete linkage takes the maximum distance between nodes in a
-cluster.)doc";
-
-static const char *__doc_fiction_sidb_cluster_hierarchy_linkage_method_MINIMUM_VARIANCE =
-R"doc(Known as Ward's method, this type of linkage merges clusters based on
-a minimum variance measure.)doc";
-
-static const char *__doc_fiction_sidb_cluster_hierarchy_linkage_method_SINGLE = R"doc(Single linkage takes the minimum distance between nodes in a cluster.)doc";
-
-static const char *__doc_fiction_sidb_cluster_hierarchy_linkage_method_UNWEIGHTED_AVERAGE =
-R"doc(Unweighted average linkage takes the average distance between nodes in
-a cluster, disregarding the number of elements in a node.)doc";
-
-static const char *__doc_fiction_sidb_cluster_hierarchy_linkage_method_WEIGHTED_AVERAGE =
-R"doc(Weighted average linkage takes the average distance between nodes in a
-cluster, weighing in the number of elements in a node.)doc";
-
-static const char *__doc_fiction_sidb_cluster_initialize_singleton_cluster_charge_space =
-R"doc(This function initializes the charge space of a singleton cluster
-corresponding with the given simulation base, and sets the initial
-bounds on the potential received from outside the cluster as the local
-potential bounds. The local potential bounds do not include the local
-external potential at the SiDB in the singleton, as this is passed
-separately.
-
-Parameter ``loc_pot_min``:
-    The minimum local potential for the SiDB in the singleton cluster.
-
-Parameter ``loc_pot_max``:
-    The maximum local potential for the SiDB in the singleton cluster.
-
-Parameter ``loc_ext_pot``:
-    The local external potential at the SiDB in the singleton cluster.
-    Specifically, this is the sum of the local defect potential and
-    the local external potential.
-
-Parameter ``base``:
-    The simulation base.
-
-Parameter ``self_ptr``:
-    Shared pointer to itself.)doc";
-
-static const char *__doc_fiction_sidb_cluster_num_sidbs =
-R"doc(Function to return the number of SiDBs contained in the cluster.
-
-Returns:
-    The number of SiDBs contained in the cluster.)doc";
-
-static const char *__doc_fiction_sidb_cluster_operator_eq =
-R"doc(Equality operation on cluster hierarchies. Checks the respective
-unique identifiers for equality.
-
-Parameter ``other``:
-    Cluster (hierarchy) to compare to.
-
-Returns:
-    `true` if and only if the unique identifiers match.)doc";
-
-static const char *__doc_fiction_sidb_cluster_parent =
-R"doc(Every cluster carries a pointer to its parent. For the top cluster,
-this is `nullptr`.)doc";
-
-static const char *__doc_fiction_sidb_cluster_pot_projs = R"doc()doc";
-
-static const char *__doc_fiction_sidb_cluster_pot_projs_complete_store = R"doc()doc";
-
-static const char *__doc_fiction_sidb_cluster_projector_state =
-R"doc(A projector state pairs the potential projecting cluster with the
-associated multiset charge configuration.)doc";
-
-static const char *__doc_fiction_sidb_cluster_projector_state_cluster = R"doc(Projector cluster.)doc";
-
-static const char *__doc_fiction_sidb_cluster_projector_state_get_count =
-R"doc(Getter for the number of a given charge state in the multiset
-configuration.
-
-Template parameter ``cs``:
-    Charge state to count the number of occurrences in the projector
-    state of.
-
-Returns:
-    The number of occurrences of the given charge state in the
-    multiset charge configuration. For a neutral charge, the number of
-    occurrences is inferred by considering the size of the cluster in
-    the projector state.)doc";
-
-static const char *__doc_fiction_sidb_cluster_projector_state_multiset_conf =
-R"doc(Multiset charge configuration. It is an element of the charge space of
-the projector cluster.)doc";
-
-static const char *__doc_fiction_sidb_cluster_ptr_hash =
-R"doc(This struct defines a hashing of shared pointers to clusters, used to
-facilitate quick access in a clustering.)doc";
-
-static const char *__doc_fiction_sidb_cluster_ptr_hash_operator_call =
-R"doc(The hashing operation is defined.
-
-Parameter ``c``:
-    Shared pointer to a cluster to take the has of.
-
-Returns:
-    The hash computed over the the unique id associated with the
-    cluster.)doc";
-
-static const char *__doc_fiction_sidb_cluster_received_ext_pot_bounds =
-R"doc(The bounds on the electrostatic potential sum of SiDBs external to
-this cluster, local to an SiDB in the cluster.)doc";
-
-static const char *__doc_fiction_sidb_cluster_receptor_state =
-R"doc(A receptor state pairs the potential receiving cluster with the
-identifier of the SiDB.)doc";
-
-static const char *__doc_fiction_sidb_cluster_receptor_state_cluster = R"doc(Receptor cluster.)doc";
-
-static const char *__doc_fiction_sidb_cluster_receptor_state_sidb_ix = R"doc(SiDB index. It is contained in the receptor cluster.)doc";
-
-static const char *__doc_fiction_sidb_cluster_sidb_cluster =
-R"doc(SiDB cluster hierarchy constructor.
-
-Parameter ``c``:
-    Set of SiDB indices for the cluster to contain.
-
-Parameter ``other_c``:
-    Set of SiDB indices in the layout that the cluster will not
-    contain.
-
-Parameter ``v``:
-    A set of cluster hierarchies to set as the children of this
-    cluster.
-
-Parameter ``unique_id``:
-    The unsigned integer to identify the cluster hierarchy uniquely
-    with. For the case of a singleton cluster, the unique identifier
-    is set to be the index of the single SiDB it contains.)doc";
-
-static const char *__doc_fiction_sidb_cluster_sidbs = R"doc(The SiDBs contained by the cluster.)doc";
-
-static const char *__doc_fiction_sidb_cluster_uid = R"doc(Unique identifier. Equal to the SiDB index for singleton clusters.)doc";
-
-static const char *__doc_fiction_sidb_clustering_state =
-R"doc(A clustering state is very similar to a cluster state composition,
-though it uses unique pointers to the cluster states that may be
-moved. Thereby, this is the essential type of the dynamic objects in
-*ClusterComplete*'s operation, which always represent information of
-the complete layout.)doc";
-
-static const char *__doc_fiction_sidb_clustering_state_operator_assign =
-R"doc(Copy assignment operator.
-
-Assigns the contents of another `sidb_clustering_state` instance to
-this instance. Performs a deep copy of `proj_states` and a complete
-copy of `pot_bounds`.
-
-Parameter ``other``:
-    The `sidb_clustering_state` instance to copy from.
-
-Returns:
-    A reference to this `sidb_clustering_state` instance after
-    assignment.)doc";
-
-static const char *__doc_fiction_sidb_clustering_state_operator_assign_2 =
-R"doc(Move assignment operator.
-
-Parameter ``other``:
-    Other clustering state to move.)doc";
-
-static const char *__doc_fiction_sidb_clustering_state_pot_bounds =
-R"doc(Flattened (hierarchical) potential bounds specific to this clustering
-state.)doc";
-
-static const char *__doc_fiction_sidb_clustering_state_proj_states =
-R"doc(Projector states associated with charge space elements that make up
-the clustering state.)doc";
-
-static const char *__doc_fiction_sidb_clustering_state_sidb_clustering_state =
-R"doc(Default constructor.
-
-Parameter ``num_sidbs``:
-    Number of SiDBs in the layout that the clustering state should
-    consider.)doc";
-
-static const char *__doc_fiction_sidb_clustering_state_sidb_clustering_state_2 =
-R"doc(Copy constructor.
-
-Parameter ``other``:
-    Other clustering state to copy.)doc";
-
-static const char *__doc_fiction_sidb_clustering_state_sidb_clustering_state_3 =
-R"doc(Move constructor.
-
-Parameter ``other``:
-    Other clustering state to move.)doc";
 
 static const char *__doc_fiction_sidb_defect =
 R"doc(In accordance with the paper mentioned above, the `sidb_defect` struct
@@ -18936,15 +17822,6 @@ static const char *__doc_fiction_sidb_on_the_fly_gate_library_sidb_on_the_fly_ga
 
 static const char *__doc_fiction_sidb_simulation_engine = R"doc(Selector for the available SiDB simulation engines.)doc";
 
-static const char *__doc_fiction_sidb_simulation_engine_CLUSTERCOMPLETE =
-R"doc(*ClusterComplete* is a novel exact simulation engine that requires
-exponential runtime, though, depending on the simulation problem, it
-effectively reduces the base number by a real number, thus allowing
-problem sizes that were previously considered astronomical in size.
-Inherent to the simulation methodology that does not depend on the
-simulation base, it simulates very effectively for either base number
-(2 or 3).)doc";
-
 static const char *__doc_fiction_sidb_simulation_engine_EXGS =
 R"doc(*Exhaustive Ground State Search (EXGS)* is an exact simulation engine
 that always has exponential runtime.)doc";
@@ -18957,19 +17834,6 @@ effective search-space pruning.)doc";
 static const char *__doc_fiction_sidb_simulation_engine_QUICKSIM =
 R"doc(*QuickSim* is a heuristic simulation engine that only requires
 polynomial runtime.)doc";
-
-static const char *__doc_fiction_sidb_simulation_engine_name =
-R"doc(Returns the name of the given simulation engine.
-
-Template parameter ``EngineType``:
-    The type of the SiDB simulation engine
-    (exhaustive/heuristic/general).
-
-Parameter ``engine``:
-    An SiDB simulation engine.
-
-Returns:
-    The name of the simulation engine as a string.)doc";
 
 static const char *__doc_fiction_sidb_simulation_parameters =
 R"doc(This struct collects all physical parameters for physical SiDB
@@ -19194,17 +18058,6 @@ static const char *__doc_fiction_simple_gate_layout_tile_drawer_tile_fillcolor =
 static const char *__doc_fiction_simple_gate_layout_tile_drawer_tile_id = R"doc()doc";
 
 static const char *__doc_fiction_simple_gate_layout_tile_drawer_tile_label = R"doc()doc";
-
-static const char *__doc_fiction_singleton_multiset_conf_to_charge_state =
-R"doc(Function to convert a singleton cluster charge state in its compressed
-form to a charge state.
-
-Parameter ``m``:
-    A singleton multiset charge configuration.
-
-Returns:
-    The charge state associated with the sole element contained in the
-    given multiset charge configuration.)doc";
 
 static const char *__doc_fiction_siqad_coord_t =
 R"doc(SiQAD coordinates.
@@ -19774,23 +18627,6 @@ static const char *__doc_fiction_synchronization_element_layout_synchronization_
 
 static const char *__doc_fiction_synchronization_element_layout_synchronization_element_layout_storage_synchronization_element_layout_storage = R"doc()doc";
 
-static const char *__doc_fiction_take_meet_of_potential_bounds =
-R"doc(This function computes a binary meet, overwriting the first argument
-with the result. It takes the minimum in case of a lower bound, and a
-maximum in case of an upper bound, each corresponding to the minimal
-information common to the arguments.
-
-Template parameter ``bound``:
-    The potential bound domain which defines the implementation of the
-    meet.
-
-Parameter ``a``:
-    First potential bound which is overwritten with the result of the
-    meet.
-
-Parameter ``b``:
-    Second potential bound.)doc";
-
 static const char *__doc_fiction_technology_constraints = R"doc(Target technologies.)doc";
 
 static const char *__doc_fiction_technology_constraints_NONE = R"doc(No technology-specific constraints.)doc";
@@ -20163,7 +18999,7 @@ reference.)doc";
 static const char *__doc_fiction_time_to_solution_params_repetitions =
 R"doc(Number of iterations of the heuristic algorithm used to determine the
 simulation accuracy (`repetitions = 100` means that accuracy is
-precise to 1%).)doc";
+precise to 1 %).)doc";
 
 static const char *__doc_fiction_time_to_solution_stats =
 R"doc(This struct stores the time-to-solution, the simulation accuracy and
@@ -20190,36 +19026,6 @@ R"doc(Single simulation runtime of the exact ground state simulation
 algorithm.)doc";
 
 static const char *__doc_fiction_time_to_solution_stats_time_to_solution = R"doc(Time-to-solution in seconds.)doc";
-
-static const char *__doc_fiction_to_sidb_cluster =
-R"doc(This function initiates the recursive procedure of converting a binary
-cluster hierarchy to our bespoke version.
-
-Parameter ``n``:
-    A node from a binary cluster hierarchy, as for instance returned
-    by parsing ALGLIB's result.
-
-Returns:
-    A uniquely identified node in a decorated cluster hierarchy that
-    follows the "general tree" structure.)doc";
-
-static const char *__doc_fiction_to_unique_sidb_cluster =
-R"doc(This recursive function is used to convert a binary cluster hierarchy,
-as for instance returned by `sidb_cluster_hierarchy` function that
-uses ALGLIB's `clusterizer`. The returned structure includes parent
-pointers.
-
-Parameter ``n``:
-    A node from a binary cluster hierarchy, as for instance returned
-    by parsing ALGLIB's result.
-
-Parameter ``uid``:
-    Variable reference which is updated in each execution to ensure
-    uniqueness.
-
-Returns:
-    A uniquely identified node in a decorated cluster hierarchy that
-    follows the "general tree" structure.)doc";
 
 static const char *__doc_fiction_transition_type =
 R"doc(Possible types of charge transitions that can occur in an SiDB layout.
@@ -20608,6 +19414,64 @@ static const char *__doc_fiction_wiring_reduction_stats_x_size_before = R"doc(La
 static const char *__doc_fiction_wiring_reduction_stats_y_size_after = R"doc(Layout height before the wiring reduction process.)doc";
 
 static const char *__doc_fiction_wiring_reduction_stats_y_size_before = R"doc(Layout height before the wiring reduction process.)doc";
+
+static const char *__doc_fiction_write_defect_influence_domain =
+R"doc(Writes a CSV representation of an defect influence domain to the
+specified output stream. The data are written as rows, each
+corresponding to one set of simulation parameters and their
+corresponding influence status.
+
+The output CSV format is as follows: X_DIMENSION, Y_DIMENSION,
+Influence STATUS ... subsequent rows for each set of simulation
+parameters.
+
+Parameter ``defect_infdom``:
+    The defect influence domain to be written. It contains a mapping
+    from sets of simulation parameters (represented as a pair of sweep
+    parameters for the X and Y dimensions) to their influence status.
+
+Parameter ``os``:
+    The output stream where the CSV representation of the defect
+    influence domain is written to.
+
+Parameter ``params``:
+    The parameters used for writing, including the influential and
+    non-influential tags. Defaults to an empty
+    `write_defect_influence_domain_params` object, which provides
+    standard tags.)doc";
+
+static const char *__doc_fiction_write_defect_influence_domain_2 =
+R"doc(Writes a CSV representation of an defect influence domain to the
+specified file. The data are written as rows, each corresponding to
+one set of simulation parameters and their corresponding influence
+status.
+
+The output CSV format is as follows: X_DIMENSION, Y_DIMENSION,
+Influence STATUS ... subsequent rows for each set of simulation
+parameters.
+
+Parameter ``defect_infdom``:
+    The defect influence domain to be written. It contains a mapping
+    from sets of simulation parameters (represented as a pair of sweep
+    parameters for the X and Y dimensions) to their influence status.
+
+Parameter ``filename``:
+    The filename where the CSV representation of the defect influence
+    domain is written to.
+
+Parameter ``params``:
+    The parameters used for writing, including the influential and
+    non-influential tags. Defaults to an empty
+    `write_defect_influence_domain_params` object, which provides
+    standard tags.)doc";
+
+static const char *__doc_fiction_write_defect_influence_domain_params = R"doc(Parameters for writing a defect influence domain to a CSV file.)doc";
+
+static const char *__doc_fiction_write_defect_influence_domain_params_influential_tag = R"doc(The tag used to represent the influential value of a defect position.)doc";
+
+static const char *__doc_fiction_write_defect_influence_domain_params_non_influential_tag =
+R"doc(The tag used to represent the non-influential value of a defect
+position.)doc";
 
 static const char *__doc_fiction_write_dot_layout =
 R"doc(! Writes layout in DOT format into output stream

@@ -3,7 +3,7 @@ import unittest
 from mnt.pyfiction import (
     charge_distribution_surface_100,
     charge_distribution_surface_111,
-    determine_groundstate_from_simulation_results,
+    groundstate_from_simulation_result,
     sidb_100_lattice,
     sidb_111_lattice,
     sidb_charge_state,
@@ -32,10 +32,10 @@ class TestDetermineGroundstateFromSimulationResults(unittest.TestCase):
         results = sidb_simulation_result_100()
         results.charge_distributions = [cds1, cds2, cds3]
 
-        result = determine_groundstate_from_simulation_results(results)
-        self.assertEqual(len(result), 1)
+        ground_state = groundstate_from_simulation_result(results)
+        self.assertEqual(len(ground_state), 1)
 
-        groundstate = result[0]
+        groundstate = ground_state[0]
         self.assertEqual(groundstate.get_charge_state((0, 1)), sidb_charge_state.NEUTRAL)
         self.assertEqual(groundstate.get_charge_state((4, 1)), sidb_charge_state.NEUTRAL)
         self.assertEqual(groundstate.get_charge_state((6, 1)), sidb_charge_state.NEUTRAL)
@@ -57,13 +57,14 @@ class TestDetermineGroundstateFromSimulationResults(unittest.TestCase):
         results = sidb_simulation_result_111()
         results.charge_distributions = [cds1, cds2, cds3]
 
-        result = determine_groundstate_from_simulation_results(results)
+        result = groundstate_from_simulation_result(results)
         self.assertEqual(len(result), 1)
 
-        groundstate = result[0]
-        self.assertEqual(groundstate.get_charge_state((0, 1)), sidb_charge_state.NEUTRAL)
-        self.assertEqual(groundstate.get_charge_state((4, 1)), sidb_charge_state.NEUTRAL)
-        self.assertEqual(groundstate.get_charge_state((6, 1)), sidb_charge_state.NEUTRAL)
+        ground_state = result[0]
+
+        self.assertEqual(ground_state.get_charge_state((0, 1)), sidb_charge_state.NEUTRAL)
+        self.assertEqual(ground_state.get_charge_state((4, 1)), sidb_charge_state.NEUTRAL)
+        self.assertEqual(ground_state.get_charge_state((6, 1)), sidb_charge_state.NEUTRAL)
 
 
 if __name__ == "__main__":

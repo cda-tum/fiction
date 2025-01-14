@@ -2,8 +2,8 @@
 // Created by Jan Drewniok on 03.03.24.
 //
 
-#ifndef FICTION_CHECK_SIMULATION_RESULTS_FOR_EQUIVALENCE_HPP
-#define FICTION_CHECK_SIMULATION_RESULTS_FOR_EQUIVALENCE_HPP
+#ifndef FICTION_EQUIVALENCE_CHECK_FOR_SIMULATION_RESULTS_HPP
+#define FICTION_EQUIVALENCE_CHECK_FOR_SIMULATION_RESULTS_HPP
 
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "fiction/technology/physical_constants.hpp"
@@ -107,4 +107,4 @@ template <typename Lyt>
 
 }  // namespace fiction
 
-#endif  // FICTION_CHECK_SIMULATION_RESULTS_FOR_EQUIVALENCE_HPP
+#endif  // FICTION_EQUIVALENCE_CHECK_FOR_SIMULATION_RESULTS_HPP

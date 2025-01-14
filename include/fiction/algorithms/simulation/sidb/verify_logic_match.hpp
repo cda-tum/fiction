@@ -58,7 +58,7 @@ template <typename Lyt, typename TT>
     assert(std::adjacent_find(spec.cbegin(), spec.cend(), [](const auto& a, const auto& b)
                               { return a.num_vars() != b.num_vars(); }) == spec.cend());
 
-    detail::is_operational_impl<Lyt, TT> p{cds, spec, params, input_wires, output_wires};
+    detail::is_operational_impl<Lyt, TT> p{cds, spec, params, input_wires, output_wires, false};
 
     const auto [op_status, _] = p.verify_logic_match_of_cds(cds, input_pattern);
 

@@ -24,7 +24,6 @@ template <typename Lyt>
 void detect_bdl_wires(pybind11::module& m, const std::string& lattice)
 {
     namespace py = pybind11;
-    namespace py = pybind11;
 
     using bdl_wire_t = fiction::bdl_wire<Lyt>;
 
@@ -51,7 +50,6 @@ void detect_bdl_wires(pybind11::module& m, const std::string& lattice)
  */
 inline void detect_bdl_wires(pybind11::module& m)
 {
-    namespace py = pybind11;
     namespace py = pybind11;
 
     // Enum for wire selection options
