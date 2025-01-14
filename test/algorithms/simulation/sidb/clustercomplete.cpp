@@ -98,15 +98,10 @@ static bool
 verify_clustercomplete_result_by_charge_indices(const charge_distribution_surface<Lyt>&              qe_cds,
                                                 const std::vector<charge_distribution_surface<Lyt>>& cc_cdss) noexcept
 {
-    for (const auto& cc_cds : cc_cdss)
-    {
-        if (cc_cds.get_charge_index_and_base().first == qe_cds.get_charge_index_and_base().first)
-        {
-            return true;
-        }
-    }
-
-    return false;
+    return std::any_of(cc_cdss.cbegin(), cc_cdss.cend(),
+                       [&](const auto& cc_cds) {
+                           return cc_cds.get_charge_index_and_base().first == qe_cds.get_charge_index_and_base().first;
+                       });
 }
 
 TEMPLATE_TEST_CASE("ClusterComplete simulation of a 4 DB layout with a positive charge", "[clustercomplete]",
