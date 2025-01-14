@@ -8,6 +8,7 @@
 #if (FICTION_ALGLIB_ENABLED)
 
 #include "fiction/algorithms/simulation/sidb/ground_state_space.hpp"
+#include "fiction/algorithms/simulation/sidb/physically_valid_parameters.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "fiction/layouts/coordinates.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
