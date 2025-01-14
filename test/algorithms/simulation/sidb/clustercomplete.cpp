@@ -207,9 +207,9 @@ TEMPLATE_TEST_CASE(
         std::set<double>   ground_state{};
         std::set<uint64_t> charge_index{};
 #ifdef NDEBUG
-        for (auto i = 0; i < 100; i++)
-#else   // NDEBUG
         for (auto i = 0; i < 10000; i++)
+#else   // NDEBUG
+        for (auto i = 0; i < 100; i++)
 #endif  // NDEBUG
         {
             const auto simulation_results = clustercomplete<TestType>(lyt, params);
@@ -221,7 +221,6 @@ TEMPLATE_TEST_CASE(
         CHECK(ground_state.size() == 1);
         CHECK(charge_index.size() == 1);
     }
-#endif
 
     SECTION("Add SiDBs which are positively charged in the ground state, layout does not fulfill the logic anymore.")
     {
