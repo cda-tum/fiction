@@ -7,6 +7,7 @@ from mnt.pyfiction import (
     clustercomplete,
     clustercomplete_params,
     ground_state_space_reporting,
+    groundstate_from_simulation_result,
     sidb_100_lattice,
     sidb_111_lattice,
     sidb_charge_state,
@@ -73,7 +74,7 @@ class TestClusterComplete(unittest.TestCase):
 
         self.assertEqual(result.algorithm_name, "ClusterComplete")
 
-        groundstate = determine_groundstate_from_simulation_results(result)
+        groundstate = groundstate_from_simulation_result(result)
 
         self.assertEqual(len(groundstate), 1)
 
