@@ -834,6 +834,43 @@ Lyt siqad_or_gate() noexcept
     return lyt;
 };
 /**
+ * This layout represents the NAND Gate, as proposed in the paper titled \"SiQAD: A Design and Simulation Tool for
+ * Atomic Silicon Quantum Dot Circuits\" by Samuel Sze Hang Ng, Jacob Retallick, Hsi Nien Chiu, Robert Lupoiu, Lucian
+ * Livadaru, Taleana Huff, Mohammad Rashidi, Wyatt Vine, Thomas Dienel, Robert A. Wolkow, and Konrad Walus in IEEE
+ * TRANSACTIONS ON NANOTECHNOLOGY, Volume 19, 2020.
+ */
+template <typename Lyt>
+Lyt siqad_nand_gate() noexcept
+{
+    static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
+
+    Lyt lyt{};
+
+    lyt.assign_cell_type({0, 0, 1}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({2, 1, 1}, Lyt::cell_type::INPUT);
+
+    lyt.assign_cell_type({20, 0, 1}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({18, 1, 1}, Lyt::cell_type::INPUT);
+
+    lyt.assign_cell_type({4, 2, 1}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 3, 1}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({16, 2, 1}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 3, 1}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({10, 4, 1}, Lyt::cell_type::LOGIC);
+    lyt.assign_cell_type({10, 5, 1}, Lyt::cell_type::LOGIC);
+
+    lyt.assign_cell_type({10, 8, 0}, Lyt::cell_type::OUTPUT);
+    lyt.assign_cell_type({10, 9, 1}, Lyt::cell_type::OUTPUT);
+
+    lyt.assign_cell_type({10, 12, 0}, Lyt::cell_type::NORMAL);
+
+    return lyt;
+};
+/**
  * This layout represents the AND Gate, as proposed in the paper
  * titled \"Hexagons are the Bestagons: Design Automation for Silicon Dangling Bond Logic\" by
  * Marcel Walter, Samuel Sze Hang Ng, Konrad Walus, and Robert Wille in DAC 2022.
@@ -855,10 +892,10 @@ Lyt bestagon_and_gate() noexcept
     lyt.assign_cell_type({38, 0, 0}, Lyt::cell_type::INPUT);
     lyt.assign_cell_type({0, 0, 0}, Lyt::cell_type::INPUT);
 
-    lyt.assign_cell_type({23, 9, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({18, 11, 1}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({18, 9, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({19, 8, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({23, 9, 0}, Lyt::cell_type::LOGIC);
+    lyt.assign_cell_type({18, 11, 1}, Lyt::cell_type::LOGIC);
+    lyt.assign_cell_type({18, 9, 0}, Lyt::cell_type::LOGIC);
+    lyt.assign_cell_type({19, 8, 0}, Lyt::cell_type::LOGIC);
 
     lyt.assign_cell_type({20, 14, 0}, Lyt::cell_type::NORMAL);
     lyt.assign_cell_type({19, 13, 0}, Lyt::cell_type::NORMAL);

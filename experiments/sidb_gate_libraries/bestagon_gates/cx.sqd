@@ -129,7 +129,7 @@
             <dbdot>
                 <layer_id>2</layer_id>
                 <latcoord n="24" m="13" l="1"/>
-                <type>output</type>
+                <type>logic</type>
                 <physloc x="92.16" y="102.09"/>
                 <color>#ffc8c8c8</color>
             </dbdot>

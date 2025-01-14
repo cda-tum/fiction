@@ -5,6 +5,8 @@
 #ifndef FICTION_OPERATIONAL_DOMAIN_HPP
 #define FICTION_OPERATIONAL_DOMAIN_HPP
 
+#include "fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp"
+#include "fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp"
 #include "fiction/algorithms/simulation/sidb/energy_distribution.hpp"
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
 #include "fiction/algorithms/simulation/sidb/quickexact.hpp"
@@ -365,8 +367,25 @@ class operational_domain_impl
             output_bdl_pairs{detect_bdl_pairs<Lyt>(
                 layout, sidb_technology::cell_type::OUTPUT,
                 ps.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)},
-            num_dimensions{params.sweep_dimensions.size()}
+            num_dimensions{params.sweep_dimensions.size()},
+            input_bdl_wires{detect_bdl_wires(lyt, params.operational_params.input_bdl_iterator_params.bdl_wire_params,
+                                             bdl_wire_selection::INPUT)},
+            output_bdl_wires{detect_bdl_wires(lyt, params.operational_params.input_bdl_iterator_params.bdl_wire_params,
+                                              bdl_wire_selection::OUTPUT)}
     {
+        const auto logic_cells = lyt.get_cells_by_type(technology<Lyt>::cell_type::LOGIC);
+
+        assert(((params.operational_params.strategy_to_analyze_operational_status !=
+                 is_operational_params::operational_analysis_strategy::FILTER_ONLY) ||
+                (logic_cells.size() > 0)) &&
+               "No logic cells found in the layout");
+
+        // the canvas layout is created which is defined by the logic cells.
+        for (const auto& c : logic_cells)
+        {
+            canvas_lyt.assign_cell_type(c, technology<Lyt>::cell_type::NORMAL);
+        }
+
         op_domain.dimensions.reserve(num_dimensions);
 
         indices.reserve(num_dimensions);
@@ -843,6 +862,10 @@ class operational_domain_impl
      */
     std::vector<std::vector<double>> values;
     /**
+     * This layout consists of the canvas cells of the layout.
+     */
+    Lyt canvas_lyt{};
+    /**
      * The operational domain of the layout.
      */
     OpDomain op_domain{};
@@ -866,6 +889,14 @@ class operational_domain_impl
      * Number of available hardware threads.
      */
     const std::size_t num_threads{std::thread::hardware_concurrency()};
+    /**
+     * Input BDL wires.
+     */
+    const std::vector<bdl_wire<Lyt>> input_bdl_wires;
+    /**
+     * Output BDL wires.
+     */
+    const std::vector<bdl_wire<Lyt>> output_bdl_wires;
     /**
      * A step point represents a point in the x and y dimension from 0 to the maximum number of steps. A step point does
      * not hold the actual parameter values, but the step values in the x and y dimension, respectively.
@@ -1077,7 +1108,8 @@ class operational_domain_impl
         auto op_params_set_dimension_values                  = params.operational_params;
         op_params_set_dimension_values.simulation_parameters = sim_params;
 
-        const auto& [status, sim_calls] = is_operational(layout, truth_table, op_params_set_dimension_values);
+        const auto& [status, sim_calls] = is_operational(layout, truth_table, op_params_set_dimension_values,
+                                                         input_bdl_wires, output_bdl_wires, std::optional{canvas_lyt});
 
         num_simulator_invocations += sim_calls;
 
@@ -1518,7 +1550,7 @@ class operational_domain_impl
             const auto sp = queue.front();
             queue.pop();
 
-            // if the point is known to be non-operational continue with the next
+            // if the point is known to be non-operational, continue with the next
             if (const auto operational_status = has_already_been_sampled(sp); operational_status.has_value())
             {
                 if (operational_status.value() == operational_status::NON_OPERATIONAL)
@@ -1779,7 +1811,6 @@ operational_domain_contour_tracing(const Lyt& lyt, const std::vector<TT>& spec, 
     operational_domain_stats                                                                          st{};
     detail::operational_domain_impl<Lyt, TT, operational_domain<parameter_point, operational_status>> p{lyt, spec,
                                                                                                         params, st};
-
     const auto result = p.contour_tracing(samples);
 
     if (stats)

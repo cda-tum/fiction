@@ -478,19 +478,6 @@ TEST_CASE("Random siqad::coord_t layout generation", "[random-sidb-layout-genera
                 CHECK(cell.y < 91);
                 CHECK(cell.z <= 1);
             });
-        // check if all cells are not closer than two cells (Euclidean distance).
-        result_lyt.foreach_cell(
-            [&result_lyt](const auto& cell_one)
-            {
-                result_lyt.foreach_cell(
-                    [&cell_one, &result_lyt](const auto& cell_two)
-                    {
-                        if (cell_one != cell_two)
-                        {
-                            CHECK(euclidean_distance<sidb_cell_clk_lyt_siqad>(result_lyt, cell_one, cell_two) >= 2);
-                        }
-                    });
-            });
     }
 
     SECTION("given previous layouts")

@@ -17,11 +17,12 @@
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/sidb_defect_surface.hpp>
 #include <fiction/technology/sidb_defects.hpp>
-#include <fiction/technology/sidb_lattice.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/layout_utils.hpp>
 #include <fiction/utils/truth_table_utils.hpp>
+
+#include <mockturtle/utils/stopwatch.hpp>
 
 #include <thread>
 #include <vector>
@@ -35,9 +36,9 @@ TEST_CASE("Design AND gate with skeleton, where one input wire and the output wi
 
     design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
         is_operational_params{sidb_simulation_parameters{2, -0.31}, sidb_simulation_engine::QUICKEXACT,
-                              bdl_input_iterator_params{}, operational_condition::REJECT_KINKS},
+                              bdl_input_iterator_params{}, is_operational_params::operational_condition::REJECT_KINKS},
         design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::QUICKCELL,
-        {{25, 6, 0}, {30, 8, 0}},
+        {{27, 6, 0}, {30, 8, 0}},
         3};
 
     SECTION("QuickCell")
@@ -45,15 +46,16 @@ TEST_CASE("Design AND gate with skeleton, where one input wire and the output wi
         design_sidb_gates_stats design_gates_stats{};
         const auto              found_gate_layouts =
             design_sidb_gates(lyt, std::vector<tt>{create_and_tt()}, params, &design_gates_stats);
-        REQUIRE(found_gate_layouts.size() == 20);
+        REQUIRE(found_gate_layouts.size() == 10);
         const auto& first_gate = found_gate_layouts.front();
         CHECK(is_operational(first_gate, std::vector<tt>{create_and_tt()}, params.operational_params).first ==
               operational_status::OPERATIONAL);
 
-        CHECK(design_gates_stats.number_of_layouts == 4060);
-        CHECK(design_gates_stats.number_of_layouts_after_first_pruning == 1301);
-        CHECK(design_gates_stats.number_of_layouts_after_second_pruning == 418);
-        CHECK(design_gates_stats.number_of_layouts_after_third_pruning == 21);
+        CHECK(design_gates_stats.number_of_layouts == 1140);
+        CHECK(design_gates_stats.number_of_layouts_after_first_pruning == 167);
+        CHECK(design_gates_stats.number_of_layouts_after_second_pruning == 46);
+        CHECK(design_gates_stats.number_of_layouts_after_third_pruning == 11);
+        CHECK(design_gates_stats.time_total.count() > 0);
     }
 
     SECTION("Automatic Exhaustive Gate Designer")
@@ -62,7 +64,7 @@ TEST_CASE("Design AND gate with skeleton, where one input wire and the output wi
             cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER;
 
         const auto found_gate_layouts = design_sidb_gates(lyt, std::vector<tt>{create_and_tt()}, params);
-        REQUIRE(found_gate_layouts.size() == 20);
+        REQUIRE(found_gate_layouts.size() == 10);
         const auto& first_gate = found_gate_layouts.front();
         CHECK(is_operational(first_gate, std::vector<tt>{create_and_tt()}, params.operational_params).first ==
               operational_status::OPERATIONAL);
@@ -366,7 +368,8 @@ TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
     {
         const design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
             is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
-                                  bdl_input_iterator_params{}, operational_condition::TOLERATE_KINKS},
+                                  bdl_input_iterator_params{},
+                                  is_operational_params::operational_condition::TOLERATE_KINKS},
             design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::RANDOM,
             {{14, 6, 0}, {24, 12, 0}},
             3};
@@ -382,7 +385,8 @@ TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
 
         design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
             is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
-                                  bdl_input_iterator_params{}, operational_condition::REJECT_KINKS},
+                                  bdl_input_iterator_params{},
+                                  is_operational_params::operational_condition::REJECT_KINKS},
             design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::RANDOM,
             {{18, 8, 1}, {22, 12, 0}},
             2};
@@ -473,7 +477,8 @@ TEST_CASE("Design NOR Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
     {
         const design_sidb_gates_params<cell<sidb_111_cell_clk_lyt_siqad>> params{
             is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
-                                  bdl_input_iterator_params{}, operational_condition::REJECT_KINKS},
+                                  bdl_input_iterator_params{},
+                                  is_operational_params::operational_condition::REJECT_KINKS},
             design_sidb_gates_params<
                 cell<sidb_111_cell_clk_lyt_siqad>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
             {{10, 13, 0}, {15, 17, 0}},
@@ -563,7 +568,8 @@ TEST_CASE("Design AND gate with input left and output top-right with QuickCell (
     {
         const design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
             is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
-                                  bdl_input_iterator_params{}, operational_condition::REJECT_KINKS},
+                                  bdl_input_iterator_params{},
+                                  is_operational_params::operational_condition::REJECT_KINKS},
             design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::QUICKCELL,
             {{17, 5, 0}, {24, 8, 0}},
             3};

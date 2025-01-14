@@ -182,7 +182,7 @@ class critical_temperature_impl
             auto input_bdl_wires  = std::vector<bdl_wire<Lyt>>{};
             auto output_bdl_wires = std::vector<bdl_wire<Lyt>>{};
 
-            if (params.operational_params.op_condition == operational_condition::REJECT_KINKS)
+            if (params.operational_params.op_condition == is_operational_params::operational_condition::REJECT_KINKS)
             {
                 input_bdl_wires =
                     detect_bdl_wires(layout, params.operational_params.input_bdl_iterator_params.bdl_wire_params,
@@ -217,7 +217,8 @@ class critical_temperature_impl
 
                 sidb_energy_and_state_type energy_state_type{};
 
-                if (params.operational_params.op_condition == operational_condition::REJECT_KINKS)
+                if (params.operational_params.op_condition ==
+                    is_operational_params::operational_condition::REJECT_KINKS)
                 {
                     energy_state_type = calculate_energy_and_state_type_with_kinks_rejected<Lyt>(
                         distribution, sim_result.charge_distributions, spec, i, input_bdl_wires, output_bdl_wires);
