@@ -2,8 +2,8 @@
 // Created by Jan Drewniok on 03.03.24.
 //
 
-#include <fiction/algorithms/simulation/sidb/equivalence_check_for_simulation_results.hpp>
 #include <fiction/algorithms/simulation/sidb/clustercomplete.hpp>
+#include <fiction/algorithms/simulation/sidb/equivalence_check_for_simulation_results.hpp>
 #include <fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp>
 #include <fiction/algorithms/simulation/sidb/quickexact.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
