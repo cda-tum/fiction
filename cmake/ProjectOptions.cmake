@@ -37,6 +37,7 @@ macro(fiction_setup_options)
   option(FICTION_ENABLE_UNITY_BUILD "Enable unity builds" OFF)
   option(FICTION_ENABLE_PCH "Enable precompiled headers" OFF)
   option(FICTION_ENABLE_CACHE "Enable ccache" ON)
+  option(FICTION_ENABLE_LIGHTWEIGHT_DEBUG_BUILDS "Enable lightweight debug builds" OFF)
 
   if(NOT PROJECT_IS_TOP_LEVEL)
     mark_as_advanced(
@@ -50,7 +51,8 @@ macro(fiction_setup_options)
       FICTION_ENABLE_UNITY_BUILD
       FICTION_ENABLE_COVERAGE
       FICTION_ENABLE_PCH
-      FICTION_ENABLE_CACHE)
+            FICTION_ENABLE_CACHE
+            FICTION_ENABLE_LIGHTWEIGHT_DEBUG_BUILDS)
   endif()
 
 endmacro()
@@ -136,5 +138,14 @@ macro(fiction_local_options)
     fiction_enable_hardening(fiction_options OFF
                              ${ENABLE_UBSAN_MINIMAL_RUNTIME})
   endif()
+
+  # This applies a memory optimization for debug builds which may be used to conform to memory limitations
+  if (FICTION_ENABLE_LIGHTWEIGHT_DEBUG_BUILDS)
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+      set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /Z7 /Ob0")
+    else ()
+      set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g1 -fno-inline")
+    endif ()
+  endif ()
 
 endmacro()
