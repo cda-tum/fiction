@@ -2162,15 +2162,6 @@ Parameter ``type``:
 Returns:
     All cells of the layout that have the given type.)doc";
 
-static const char *__doc_fiction_cell_level_layout_get_cells_by_type_2 =
-R"doc(Returns all cells of the given type.
-
-Parameter ``type``:
-    Type of cells to return.
-
-Returns:
-    All cells of the layout that have the given type.)doc";
-
 static const char *__doc_fiction_cell_level_layout_get_clock_number =
 R"doc(Returns the clock number of cell position `c` by accessing
 `ClockedLayout`'s underlying clocking scheme and respecting this
