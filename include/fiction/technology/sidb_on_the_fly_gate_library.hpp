@@ -776,7 +776,7 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
         auto skeleton_with_defect = sidb_defect_surface{skeleton};
 
         defect_surface.foreach_sidb_defect(
-            [&skeleton_with_defect, &center_cell, &absolute_cell, &influence_distance, &skeleton](const auto& cd)
+            [&skeleton_with_defect, &center_cell, &absolute_cell, &influence_distance](const auto& cd)
             {
                 // all defects (charged) in a distance of influence_radius_charged_defects from the center are taken
                 // into account.
