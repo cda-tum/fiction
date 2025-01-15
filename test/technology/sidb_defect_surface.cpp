@@ -531,5 +531,11 @@ TEMPLATE_TEST_CASE(
 
         // number of defects should not count the ignored defect
         CHECK(defect_layout.num_defects() == 0);
+
+        defect_layout.assign_sidb_defect({0, 0}, sidb_defect{sidb_defect_type::SI_VACANCY});
+        defect_layout.assign_sidb_defect({1, 1}, sidb_defect{sidb_defect_type::STEP_EDGE});
+
+        CHECK(defect_layout.num_charged_defects() == 1);
+        CHECK(defect_layout.num_neutral_defects() == 1);
     }
 }

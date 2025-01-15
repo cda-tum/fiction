@@ -168,6 +168,46 @@ class sidb_defect_surface<Lyt, false> : public Lyt
         return strg->defective_coordinates.size();
     }
     /**
+     * Returns the number of charged defects.
+     *
+     * @return Number of charged defects.
+     */
+    [[nodiscard]] std::size_t num_charged_defects() const noexcept
+    {
+        std::size_t number_of_charged_defects = 0;
+
+        this->foreach_sidb_defect(
+            [&number_of_charged_defects](const auto& defect)
+            {
+                if (is_charged_defect_type(defect.second))
+                {
+                    number_of_charged_defects++;
+                }
+            });
+
+        return number_of_charged_defects;
+    }
+    /**
+     * Returns the number of neutral defects.
+     *
+     * @return Number of neutral defects.
+     */
+    [[nodiscard]] std::size_t num_neutral_defects() const noexcept
+    {
+        std::size_t number_of_neutral_defects = 0;
+
+        this->foreach_sidb_defect(
+            [&number_of_neutral_defects](const auto& defect)
+            {
+                if (is_charged_defect_type(defect.second))
+                {
+                    number_of_neutral_defects++;
+                }
+            });
+
+        return number_of_neutral_defects;
+    }
+    /**
      * Applies a function to all defects on the surface. Since the defects are fetched directly from the storage map,
      * the given function has to receive a pair of a coordinate and a defect type as its parameter.
      *
