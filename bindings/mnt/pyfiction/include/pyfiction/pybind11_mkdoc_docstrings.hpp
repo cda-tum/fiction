@@ -1207,6 +1207,38 @@ Parameter ``defect_inf_domain``:
 Returns:
     Defect clearance.)doc";
 
+static const char *__doc_fiction_calculate_energy_and_state_type_with_kinks_accepted =
+R"doc(This function takes in an SiDB energy distribution. For each charge
+distribution, the state type is determined (i.e. erroneous,
+transparent) while kinks are accepted, meaning a state with kinks is
+considered transparent.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Template parameter ``TT``:
+    The type of the truth table specifying the gate behavior.
+
+Parameter ``energy_distribution``:
+    Energy distribution.
+
+Parameter ``valid_charge_distributions``:
+    Physically valid charge distributions.
+
+Parameter ``output_bdl_pairs``:
+    Output BDL pairs.
+
+Parameter ``spec``:
+    Expected Boolean function of the layout given as a multi-output
+    truth table.
+
+Parameter ``input_index``:
+    The index of the current input configuration.
+
+Returns:
+    Electrostatic potential energy of all charge distributions with
+    state type.)doc";
+
 static const char *__doc_fiction_calculate_energy_and_state_type_with_kinks_rejected =
 R"doc(This function takes in an SiDB energy distribution. For each charge
 distribution, the state type is determined (i.e. erroneous,
