@@ -72,9 +72,9 @@ inline void design_sidb_gates(pybind11::module& m)
                        DOC(fiction_design_sidb_gates_params_design_mode))
         .def_readwrite("canvas", &fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::canvas,
                        DOC(fiction_design_sidb_gates_params_canvas))
-        .def_readwrite("number_of_sidbs",
+        .def_readwrite("number_of_canvas_sidbs",
                        &fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::number_of_canvas_sidbs,
-                       DOC(fiction_design_sidb_gates_params_number_of_sidbs));
+                       DOC(fiction_design_sidb_gates_params_number_of_canvas_sidbs));
 
     detail::design_sidb_gates<py_sidb_100_lattice>(m);
     detail::design_sidb_gates<py_sidb_111_lattice>(m);
