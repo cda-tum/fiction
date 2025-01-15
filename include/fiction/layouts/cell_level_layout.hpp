@@ -221,29 +221,6 @@ class cell_level_layout : public ClockedLayout
         return cells;
     }
     /**
-     * Returns all cells of the given type.
-     *
-     * @param type Type of cells to return.
-     * @return All cells of the layout that have the given type.
-     */
-    [[nodiscard]] std::vector<cell> get_cells_by_type(const typename Technology::cell_type type) const noexcept
-    {
-        std::vector<cell> cells{};
-        cells.reserve(num_cells());
-
-        foreach_cell(
-            [&cells, &type, this](const auto& c)
-            {
-                const auto c_type = get_cell_type(c);
-                if (c_type == type)
-                {
-                    cells.push_back(c);
-                }
-            });
-
-        return cells;
-    }
-    /**
      * Returns the numbers of cells of the given type.
      *
      * @param type Type of cells which are counted.
