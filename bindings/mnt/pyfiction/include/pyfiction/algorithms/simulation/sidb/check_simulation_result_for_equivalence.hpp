@@ -8,7 +8,7 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
-#include <fiction/algorithms/simulation/sidb/check_simulation_results_for_equivalence.hpp>
+#include <fiction/algorithms/simulation/sidb/equivalence_check_for_simulation_results.hpp>
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>

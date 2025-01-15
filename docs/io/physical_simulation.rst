@@ -157,7 +157,6 @@ SiDB Operational Domain
             :members:
         .. autofunction:: mnt.pyfiction.write_operational_domain
 
-
 Technology-independent Gate-level Layouts
 #########################################
 

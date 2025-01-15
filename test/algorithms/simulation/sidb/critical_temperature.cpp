@@ -228,7 +228,9 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         }
         SECTION("Kinks are not allowed")
         {
-            params.operational_params.op_condition = operational_condition::REJECT_KINKS;
+            params.operational_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
+            params.operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance = 2.5;
+
             const auto ct =
                 critical_temperature_gate_based(lyt, std::vector<tt>{create_and_tt()}, params, &critical_stats);
             CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous),
@@ -328,7 +330,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         }
         SECTION("Kinks are not allowed")
         {
-            params.operational_params.op_condition = operational_condition::REJECT_KINKS;
+            params.operational_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
             const auto ct =
                 critical_temperature_gate_based(lyt, std::vector<tt>{create_fan_out_tt()}, params, &critical_stats);
 
@@ -338,7 +340,25 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         }
     }
 
-    SECTION("OR gate")
+    SECTION("Bestagon CX gate")
+    {
+        const auto crossing_lyt = blueprints::bestagon_crossing<TestType>();
+
+        params.operational_params.simulation_parameters = sim_params;
+        params.confidence_level                         = 0.99;
+        params.max_temperature                          = 350;
+        params.iteration_steps                          = 80;
+        params.alpha                                    = 0.7;
+
+        const auto ct = critical_temperature_gate_based(crossing_lyt, std::vector<tt>{create_crossing_wire_tt()},
+                                                        params, &critical_stats);
+
+        CHECK_THAT(std::fabs(critical_stats.energy_between_ground_state_and_first_erroneous - 0.32),
+                   Catch::Matchers::WithinAbs(0.00, 0.01));
+        CHECK_THAT(std::abs(ct - 0.84999999999999998), Catch::Matchers::WithinAbs(0.000000, 0.000001));
+    }
+
+    SECTION("SiQAD OR gate")
     {
         lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
         lyt.assign_cell_type({26, 0, 0}, sidb_technology::cell_type::INPUT);
@@ -380,7 +400,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         }
         SECTION("Kinks are not allowed")
         {
-            params.operational_params.op_condition = operational_condition::REJECT_KINKS;
+            params.operational_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
             const auto ct =
                 critical_temperature_gate_based(lyt, std::vector<tt>{create_or_tt()}, params, &critical_stats);
 
@@ -684,7 +704,7 @@ TEMPLATE_TEST_CASE("Critical temperature of Bestagon double wire, QuickExact", "
     }
     SECTION("Kinks are not allowed")
     {
-        params.operational_params.op_condition = operational_condition::REJECT_KINKS;
+        params.operational_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
         const auto ct =
             critical_temperature_gate_based(lyt_double_wire_gate, create_double_wire_tt(), params, &critical_stats);
 
@@ -720,7 +740,7 @@ TEMPLATE_TEST_CASE("Critical temperature of Bestagon half adder gate, QuickExact
     }
     SECTION("Kinks are not allowed")
     {
-        params.operational_params.op_condition = operational_condition::REJECT_KINKS;
+        params.operational_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
 
         const auto ct =
             critical_temperature_gate_based(lyt_half_adder_gate, create_half_adder_tt(), params, &critical_stats);

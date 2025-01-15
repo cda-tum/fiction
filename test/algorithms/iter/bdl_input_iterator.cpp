@@ -8,12 +8,12 @@
 
 #include <fiction/algorithms/iter/bdl_input_iterator.hpp>
 #include <fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp>
-#include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/sidb_lattice.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/layout_utils.hpp>
 
+#include <cstdint>
 #include <iterator>
 #include <type_traits>
 

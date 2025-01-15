@@ -50,9 +50,6 @@ SVG Images
 
         .. doxygenclass:: fiction::unsupported_cell_type_exception
 
-        ..  doxygenenum:: fiction::color_mode
-           :members:
-
         .. doxygenstruct:: fiction::write_sidb_layout_svg_params
            :members:
 

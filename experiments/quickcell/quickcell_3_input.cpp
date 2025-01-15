@@ -32,18 +32,21 @@ using namespace fiction;
 int main()  // NOLINT
 {
     experiments::experiment<std::string, uint64_t, uint64_t, double, uint64_t, double, uint64_t, double, uint64_t,
-                            double>
-        simulation_exp{"benchmark",
-                       "gate",                     // std::string
-                       "#Total Layouts",           // uint64_t
-                       "#Gates (QuickCell)",       // uint64_t
-                       "runtime (QuickCell) [s]",  // double
-                       "#Lp1",                     // uint64_t
-                       "#Lp1/N [%]",               // double
-                       "#Lp2",                     // uint64_t
-                       "#Lp2/N [%]",               // double
-                       "#Lp3",                     // uint64_t
-                       "#Lp3/N [%]"};              // double
+                            double, double>
+        simulation_exp{
+            "benchmark",
+            "gate",                     // std::string
+            "#Total Layouts",           // uint64_t
+            "#Gates (QuickCell)",       // uint64_t
+            "runtime (QuickCell) [s]",  // double
+            "#Lp1",                     // uint64_t
+            "#Lp1/N [%]",               // double
+            "#Lp2",                     // uint64_t
+            "#Lp2/N [%]",               // double
+            "#Lp3",                     // uint64_t
+            "#Lp3/N [%]",               // double
+            "t_pruning [s]"             // double
+        };
 
     const auto truth_tables_and_names =
         std::array<std::pair<std::vector<tt>, std::string>, 10>{{{std::vector<tt>{create_and3_tt()}, "and3"},
@@ -70,7 +73,7 @@ int main()  // NOLINT
     const design_sidb_gates_params<fiction::cell<sidb_100_cell_clk_lyt_siqad>> params{
         is_operational_params{sidb_simulation_parameters{2, -0.31}, sidb_simulation_engine::QUICKEXACT,
                               bdl_input_iterator_params{detect_bdl_wires_params{3.0}},
-                              operational_condition::REJECT_KINKS},
+                              is_operational_params::operational_condition::REJECT_KINKS},
         design_sidb_gates_params<fiction::cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::QUICKCELL,
         {{22, 6, 0}, {32, 12, 0}},
         4};
@@ -102,7 +105,8 @@ int main()  // NOLINT
                            static_cast<double>(stats_quickcell.number_of_layouts),
                        stats_quickcell.number_of_layouts_after_third_pruning,
                        100.0 * static_cast<double>(stats_quickcell.number_of_layouts_after_third_pruning) /
-                           static_cast<double>(stats_quickcell.number_of_layouts));
+                           static_cast<double>(stats_quickcell.number_of_layouts),
+                       mockturtle::to_seconds(stats_quickcell.pruning_total));
 
         simulation_exp.save();
         simulation_exp.table();
