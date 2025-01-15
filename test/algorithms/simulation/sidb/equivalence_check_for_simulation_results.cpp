@@ -4,7 +4,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include <fiction/algorithms/simulation/sidb/check_simulation_results_for_equivalence.hpp>
+#include <fiction/algorithms/simulation/sidb/equivalence_check_for_simulation_results.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
 #include <fiction/technology/cell_technologies.hpp>
@@ -14,7 +14,7 @@
 
 using namespace fiction;
 
-TEST_CASE("Several tests", "[check-equivalence-simulation-result]")
+TEST_CASE("Several tests", "[equivalence-check-for-simulation-results]")
 {
     sidb_100_cell_clk_lyt lyt1{};
     lyt1.assign_cell_type({0, 0}, sidb_100_cell_clk_lyt::cell_type::NORMAL);

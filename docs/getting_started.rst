@@ -22,7 +22,7 @@ them automatically. Should the repository have been cloned before, the commands:
   git submodule update --init --recursive
 
 will fetch the latest version of all external modules used. Additionally, only ``CMake`` and a C++17 compiler are
-required for the C++ part. If you want to work with the Python bindings, you need a Python 3.8+ installation.
+required for the C++ part. If you want to work with the Python bindings, you need a Python 3.9+ installation.
 
 At the time of writing, for parallel STL algorithms to work when using GCC, the TBB library (``libtbb-dev`` on Ubuntu) is
 needed. It is an optional dependency that can be installed for a performance boost in certain scenarios. For your
@@ -171,7 +171,7 @@ Follow the `installation instructions <https://github.com/Z3Prover/z3/blob/maste
 ``sudo make install`` to install headers, scripts, and the binary.
 
 .. note::
-   Be sure to compile Z3 in **release mode** to avoid performance issues when running *fiction*'s dependent functions!
+   Be sure to compile Z3 in **Release mode** to avoid performance issues when running *fiction*'s dependent functions!
    This can be achieved by passing ``-DCMAKE_BUILD_TYPE=Release`` to Z3's ``cmake`` call.
 
 Finally, before building *fiction*, pass ``-DFICTION_Z3=ON`` to the ``cmake`` call. It should be able to find
@@ -193,6 +193,24 @@ The Python integration is experimental and may cause issues on some systems. It 
 and some macOS versions due to issues with ``python-sat``. Mugen requires at least Python 3.7!
 
 Finally, before building *fiction*, pass ``-DFICTION_ENABLE_MUGEN=ON`` to the ``cmake`` call.
+
+.. _abc-cmake:
+
+ABC callback
+############
+
+`ABC <https://github.com/berkeley-abc/abc/>`_ by Alan Mishchenko can be used as a callback for logic synthesis and
+optimization from within the *fiction* CLI. It must be compiled and installed manually and can be enabled by passing
+``-DFICTION_ABC=ON`` to the ``cmake`` call. If ABC is not in your ``PATH``, you can specify the path to the folder
+where the ``abc`` binary is located by passing ``-DABC_ROOT=<path_to_abc_root>`` to the ``cmake`` call. On the other
+hand, if you installed ABC in a default location on UNIX-like operating systems (e.g., ``/usr/bin/``
+or ``/usr/local/bin/``), it should be detected automatically without the need to pass the root directory.
+
+.. note::
+   Be sure to compile ABC in **Release mode** to avoid performance issues during synthesis and optimization!
+   This can be achieved by passing ``-DCMAKE_BUILD_TYPE=Release`` to ABC's ``cmake`` call.
+
+For information on usage, see the :ref:`ABC callback <abc-cli>` section in the CLI documentation.
 
 
 Building experiments

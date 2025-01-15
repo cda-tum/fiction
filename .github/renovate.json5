@@ -13,6 +13,9 @@
     "pip_requirements",
     "dockerfile",
   ],
+  "git-submodules": {
+    "enabled": true
+  },
   "pre-commit": {
     enabled: true
   },

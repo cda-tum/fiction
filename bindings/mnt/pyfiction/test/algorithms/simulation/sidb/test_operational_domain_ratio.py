@@ -2,10 +2,10 @@ import os
 import unittest
 
 from mnt.pyfiction import (
-    compute_operational_ratio,
-    compute_operational_ratio_params,
     create_and_tt,
     operational_domain_params,
+    operational_domain_ratio,
+    operational_domain_ratio_params,
     operational_domain_value_range,
     parameter_point,
     read_sqd_layout_100,
@@ -29,16 +29,16 @@ class TestComputeOperationalRatioAtPoint(unittest.TestCase):
             operational_domain_value_range(sweep_parameter.LAMBDA_TF, 5.00, 6.00, 0.1),
         ]
 
-        ratio_params = compute_operational_ratio_params()
+        ratio_params = operational_domain_ratio_params()
         ratio_params.op_domain_params = params
 
         self.assertEqual(ratio_params.op_domain_params.operational_params.simulation_parameters.base, 2)
 
-        operational_domain_ratio = compute_operational_ratio(
+        operational_domain_ratio_result = operational_domain_ratio(
             lyt, [create_and_tt()], parameter_point([5.6, 5.0]), ratio_params
         )
 
-        self.assertAlmostEqual(operational_domain_ratio, 23 / 121, delta=10e-6)
+        self.assertAlmostEqual(operational_domain_ratio_result, 23 / 121, delta=10e-6)
 
 
 if __name__ == "__main__":

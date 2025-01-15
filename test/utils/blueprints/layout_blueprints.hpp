@@ -740,10 +740,11 @@ CellLyt single_layer_inml_crosswire() noexcept
  *
  */
 template <typename Lyt>
-Lyt bdl_wire() noexcept
+[[nodiscard]] Lyt bdl_wire() noexcept
 {
     static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
 
     Lyt lyt{{24, 0}, "BDL wire"};
 
@@ -833,6 +834,43 @@ Lyt siqad_or_gate() noexcept
     return lyt;
 };
 /**
+ * This layout represents the NAND Gate, as proposed in the paper titled \"SiQAD: A Design and Simulation Tool for
+ * Atomic Silicon Quantum Dot Circuits\" by Samuel Sze Hang Ng, Jacob Retallick, Hsi Nien Chiu, Robert Lupoiu, Lucian
+ * Livadaru, Taleana Huff, Mohammad Rashidi, Wyatt Vine, Thomas Dienel, Robert A. Wolkow, and Konrad Walus in IEEE
+ * TRANSACTIONS ON NANOTECHNOLOGY, Volume 19, 2020.
+ */
+template <typename Lyt>
+Lyt siqad_nand_gate() noexcept
+{
+    static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
+
+    Lyt lyt{};
+
+    lyt.assign_cell_type({0, 0, 1}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({2, 1, 1}, Lyt::cell_type::INPUT);
+
+    lyt.assign_cell_type({20, 0, 1}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({18, 1, 1}, Lyt::cell_type::INPUT);
+
+    lyt.assign_cell_type({4, 2, 1}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 3, 1}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({16, 2, 1}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 3, 1}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({10, 4, 1}, Lyt::cell_type::LOGIC);
+    lyt.assign_cell_type({10, 5, 1}, Lyt::cell_type::LOGIC);
+
+    lyt.assign_cell_type({10, 8, 0}, Lyt::cell_type::OUTPUT);
+    lyt.assign_cell_type({10, 9, 1}, Lyt::cell_type::OUTPUT);
+
+    lyt.assign_cell_type({10, 12, 0}, Lyt::cell_type::NORMAL);
+
+    return lyt;
+};
+/**
  * This layout represents the AND Gate, as proposed in the paper
  * titled \"Hexagons are the Bestagons: Design Automation for Silicon Dangling Bond Logic\" by
  * Marcel Walter, Samuel Sze Hang Ng, Konrad Walus, and Robert Wille in DAC 2022.
@@ -854,10 +892,10 @@ Lyt bestagon_and_gate() noexcept
     lyt.assign_cell_type({38, 0, 0}, Lyt::cell_type::INPUT);
     lyt.assign_cell_type({0, 0, 0}, Lyt::cell_type::INPUT);
 
-    lyt.assign_cell_type({23, 9, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({18, 11, 1}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({18, 9, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({19, 8, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({23, 9, 0}, Lyt::cell_type::LOGIC);
+    lyt.assign_cell_type({18, 11, 1}, Lyt::cell_type::LOGIC);
+    lyt.assign_cell_type({18, 9, 0}, Lyt::cell_type::LOGIC);
+    lyt.assign_cell_type({19, 8, 0}, Lyt::cell_type::LOGIC);
 
     lyt.assign_cell_type({20, 14, 0}, Lyt::cell_type::NORMAL);
     lyt.assign_cell_type({19, 13, 0}, Lyt::cell_type::NORMAL);
@@ -884,7 +922,9 @@ Lyt bestagon_and_gate() noexcept
  * titled \"Unlocking Flexible Silicon Dangling Bond Logic Designs on Alternative Silicon Orientations\" by
  * Samuel Sze Hang Ng, Jan Drewniok, Marcel Walter, Jacob Retallick, Robert Wille, and Konrad Walus.
  *
- * (https://github.com/samuelngsh/si-111-paper-supplementary/blob/main/bestagon-111-gates/gates/AND_mu_032_111_surface.sqd)
+ * (https://github.com/samuelngsh/si-111-paper-supplementary/blob/main/bestagon-111-gates/gates/AND_mu_032_0.sqd)
+ *
+ *  @tparam Lyt SiDB cell-level layout type based on SiQAD-coordinates.
  */
 template <typename Lyt>
 Lyt and_gate_111() noexcept
@@ -981,10 +1021,11 @@ Lyt and_gate_111_mirrored_on_the_x_axis() noexcept
  * (https://github.com/cda-tum/mnt-bestagon-library)
  */
 template <typename Lyt>
-Lyt bestagon_crossing() noexcept
+[[nodiscard]] Lyt bestagon_crossing() noexcept
 {
     static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
 
     Lyt lyt{};
 
@@ -1038,6 +1079,7 @@ Lyt crossing_bestagon_shape_input_down_output_up() noexcept
 {
     static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
 
     Lyt lyt{};
 
@@ -1092,10 +1134,11 @@ Lyt crossing_bestagon_shape_input_down_output_up() noexcept
  * (https://github.com/cda-tum/mnt-bestagon-library)
  */
 template <typename Lyt>
-Lyt bestagon_and() noexcept
+[[nodiscard]] Lyt bestagon_and() noexcept
 {
     static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
 
     Lyt lyt{};
 
@@ -1146,6 +1189,7 @@ Lyt bestagon_fo2() noexcept
 {
     static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
 
     Lyt lyt{};
 
@@ -1189,10 +1233,11 @@ Lyt bestagon_fo2() noexcept
  * (https://github.com/cda-tum/mnt-bestagon-library)
  */
 template <typename Lyt>
-Lyt two_input_two_output_bestagon_skeleton() noexcept
+[[nodiscard]] Lyt two_input_two_output_bestagon_skeleton() noexcept
 {
     static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
 
     Lyt lyt{};
 
@@ -1240,10 +1285,11 @@ Lyt two_input_two_output_bestagon_skeleton() noexcept
  * (https://github.com/cda-tum/mnt-bestagon-library)
  */
 template <typename Lyt>
-Lyt two_input_two_output_bestagon_skeleton_input_down_output_up() noexcept
+[[nodiscard]] Lyt two_input_two_output_bestagon_skeleton_input_down_output_up() noexcept
 {
     static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
 
     Lyt lyt{};
 
@@ -1293,10 +1339,11 @@ Lyt two_input_two_output_bestagon_skeleton_input_down_output_up() noexcept
  * (https://github.com/cda-tum/mnt-bestagon-library)
  */
 template <typename Lyt>
-Lyt two_input_one_output_bestagon_skeleton() noexcept
+[[nodiscard]] Lyt two_input_one_output_bestagon_skeleton() noexcept
 {
     static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
 
     Lyt lyt{};
 
@@ -1331,15 +1378,62 @@ Lyt two_input_one_output_bestagon_skeleton() noexcept
     return lyt;
 };
 
+template <typename Lyt>
+[[nodiscard]] Lyt bestagon_xor() noexcept
+{
+    static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
+
+    Lyt lyt{};
+
+    // input wires
+    lyt.assign_cell_type({0, 0, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({38, 0, 0}, Lyt::cell_type::INPUT);
+
+    lyt.assign_cell_type({2, 1, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({36, 1, 0}, Lyt::cell_type::INPUT);
+
+    lyt.assign_cell_type({32, 2, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 2, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({30, 3, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 3, 0}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({26, 4, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 4, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 5, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 5, 0}, Lyt::cell_type::NORMAL);
+
+    // canvas
+    lyt.assign_cell_type({15, 7, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({19, 8, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({17, 9, 1}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({20, 11, 0}, Lyt::cell_type::NORMAL);
+
+    // output wire
+    lyt.assign_cell_type({19, 13, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({20, 14, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 15, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({26, 16, 0}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({30, 17, 0}, Lyt::cell_type::OUTPUT);
+    lyt.assign_cell_type({32, 18, 0}, Lyt::cell_type::OUTPUT);
+
+    lyt.assign_cell_type({36, 19, 0}, Lyt::cell_type::NORMAL);
+
+    return lyt;
+};
+
 /**
  * This layout represents an AND gate with the typical Bestagon skeleton. However, it shows kinks in the I/O pins for
  * certain input pattern.
  */
 template <typename Lyt>
-Lyt and_gate_with_kink_states() noexcept
+[[nodiscard]] Lyt and_gate_with_kink_states() noexcept
 {
     static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
 
     Lyt lyt{};
 
@@ -1388,6 +1482,7 @@ Lyt two_input_left_one_output_right_top_skeleton() noexcept
 {
     static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
 
     Lyt lyt{};
 
@@ -1493,7 +1588,7 @@ Lyt bestagon_double_wire() noexcept
  * (https://dl.acm.org/doi/10.1145/3489517.3530525)
  */
 template <typename Lyt>
-Lyt bestagon_ha() noexcept
+[[nodiscard]] Lyt bestagon_ha() noexcept
 {
     static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
