@@ -1139,56 +1139,6 @@ static const char *__doc_fiction_bounding_box_2d_x_size = R"doc(The horizontal s
 
 static const char *__doc_fiction_bounding_box_2d_y_size = R"doc(The vertical size of the bounding box in layout coordinates.)doc";
 
-static const char *__doc_fiction_branching_signal_container =
-R"doc(A container class to help identify layout locations of branching nodes
-like fanouts. When a node from a network is to placed in a layout,
-fetching the node's fanins and looking for their locations in the
-layout does not work properly when branching nodes like fanouts are
-involved that got extended by wire nodes. This container solves that
-issue.
-
-Template parameter ``Lyt``:
-    Gate-level layout type.
-
-Template parameter ``Ntk``:
-    Logic network type.
-
-Template parameter ``fanout_size``:
-    Maximum fanout size possible in the layout and/or the network.)doc";
-
-static const char *__doc_fiction_branching_signal_container_branches = R"doc(Storage for all branches.)doc";
-
-static const char *__doc_fiction_branching_signal_container_branching_signal = R"doc(Branch type.)doc";
-
-static const char *__doc_fiction_branching_signal_container_branching_signal_branching_signal = R"doc()doc";
-
-static const char *__doc_fiction_branching_signal_container_branching_signal_lyt_signal = R"doc()doc";
-
-static const char *__doc_fiction_branching_signal_container_branching_signal_ntk_node = R"doc()doc";
-
-static const char *__doc_fiction_branching_signal_container_operator_array =
-R"doc(Accesses the branching container to find the location of a given node
-`n`. Returns the signal to that location if it was already stored or
-the default signal, otherwise.
-
-Parameter ``n``:
-    Node whose branching position is desired.
-
-Returns:
-    Signal to `n`'s layout location or the default signal if it wasn't
-    found.)doc";
-
-static const char *__doc_fiction_branching_signal_container_update_branch =
-R"doc(Updates the given node's branch by another layout signal, thereby,
-creating a new branch or updating the position of an existing one,
-e.g., if further wire segments were moving the head of the branch.
-
-Parameter ``ntk_node``:
-    Node whose branch is to be updated.
-
-Parameter ``lyt_signal``:
-    New signal pointing to the end of the branch.)doc";
-
 static const char *__doc_fiction_calculate_defect_clearance =
 R"doc(Computes the defect clearance for a given SiDB layout based on a
 defect influence domain. The defect clearance is the maximum distance
@@ -4099,6 +4049,21 @@ position. It implies that the layout remains unaffected by the defect
 at this location, meaning there is no change in the operational status
 or the ground state.)doc";
 
+static const char *__doc_fiction_delete_virtual_pis =
+R"doc(Deletes virtual primary inputs from a network and maps all signals
+connected to virtual PIs back to the corresponding real PI. The main
+use is equivalence checking. If the network does not have any virtual
+PIs stored, the network is returned.
+
+Template parameter ``Ntk``:
+    The type of network.
+
+Parameter ``ntk``:
+    The input network.
+
+Returns:
+    The resulting network after virtual primary inputs are deleted.)doc";
+
 static const char *__doc_fiction_dependent_cell_mode = R"doc(An enumeration of modes for the dependent cell.)doc";
 
 static const char *__doc_fiction_dependent_cell_mode_FIXED =
@@ -4108,6 +4073,40 @@ local electrostatic potential at its position.)doc";
 static const char *__doc_fiction_dependent_cell_mode_VARIABLE =
 R"doc(The charge state of the dependent cell is changed based on the local
 electrostatic potential at its position.)doc";
+
+static const char *__doc_fiction_depth_view =
+R"doc(A specialization of `depth_view` for networks where
+`has_depth_interface` is `true`. When this condition is met,
+constructing a new depth view is unnecessary.
+
+Template parameter ``Ntk``:
+    The type of the network.
+
+Template parameter ``NodeCostFn``:
+    A function to compute the costs associated with nodes.)doc";
+
+static const char *__doc_fiction_depth_view_2 =
+R"doc(Deduction guide for `fiction::depth_view'.
+
+Template parameter ``T``:
+    Network type deduced from the construction context of
+    `fiction::depth_view`.)doc";
+
+static const char *__doc_fiction_depth_view_3 =
+R"doc(Deduction guide for `fiction::depth_view` with two constructor
+arguments
+
+Template parameter ``T``:
+    Network type deduced from the construction context of
+    `fiction::depth_view`.)doc";
+
+static const char *__doc_fiction_depth_view_depth_view = R"doc()doc";
+
+static const char *__doc_fiction_depth_view_params = R"doc(Parameters for depth view.)doc";
+
+static const char *__doc_fiction_depth_view_params_count_complements = R"doc(Take complemented edges into account for depth computation.)doc";
+
+static const char *__doc_fiction_depth_view_params_pi_cost = R"doc(Whether PIs have costs.)doc";
 
 static const char *__doc_fiction_design_sidb_gates =
 R"doc(The *SiDB Gate Designer* designs SiDB gate implementations based on a
@@ -4984,6 +4983,16 @@ static const char *__doc_fiction_detail_defect_influence_impl_se_bb_layout = R"d
 static const char *__doc_fiction_detail_defect_influence_impl_se_cell = R"doc(South-east cell.)doc";
 
 static const char *__doc_fiction_detail_defect_influence_impl_stats = R"doc(The statistics of the defect influence domain computation.)doc";
+
+static const char *__doc_fiction_detail_delete_virtual_pis_impl = R"doc()doc";
+
+static const char *__doc_fiction_detail_delete_virtual_pis_impl_delete_virtual_pis_impl = R"doc()doc";
+
+static const char *__doc_fiction_detail_delete_virtual_pis_impl_ntk = R"doc(Network without virtual PIs.)doc";
+
+static const char *__doc_fiction_detail_delete_virtual_pis_impl_ntk_topo = R"doc(Topological view of the input network.)doc";
+
+static const char *__doc_fiction_detail_delete_virtual_pis_impl_run = R"doc()doc";
 
 static const char *__doc_fiction_detail_delete_wires =
 R"doc(This function deletes wires from the provided
@@ -10579,6 +10588,32 @@ Parameter ``ps``:
 Returns:
     sidb_simulation_result is returned with all results.)doc";
 
+static const char *__doc_fiction_extended_rank_view =
+R"doc(@class extended_rank_view<Ntk, true>
+
+If already a rank_interface exists only the depth_view constructor
+gets called.
+
+Template parameter ``Ntk``:
+    The network type.)doc";
+
+static const char *__doc_fiction_extended_rank_view_2 =
+R"doc(Deduction guide for `extended_rank_view'.
+
+Template parameter ``T``:
+    Network type deduced from the construction context of
+    `extended_rank_view`.)doc";
+
+static const char *__doc_fiction_extended_rank_view_3 =
+R"doc(Deduction guide for `extended_rank_view` with two constructor
+arguments.
+
+Template parameter ``T``:
+    Network type deduced from the construction context of
+    `extended_rank_view`.)doc";
+
+static const char *__doc_fiction_extended_rank_view_extended_rank_view = R"doc()doc";
+
 static const char *__doc_fiction_extract_routing_objectives =
 R"doc(Extracts all routing objectives from the given layout. To this end,
 all routing paths in the layout are traversed, starting at each PI.
@@ -10602,20 +10637,6 @@ Parameter ``lyt``:
 
 Returns:
     List of all routing objectives in the given layout.)doc";
-
-static const char *__doc_fiction_fanin_container =
-R"doc(Container that stores fanins of a node in a network, including whether
-one of them is a constant.
-
-Note that this container assumes that each node has a maximum of one
-constant fanin.
-
-Template parameter ``Ntk``:
-    `mockturtle` network type.)doc";
-
-static const char *__doc_fiction_fanin_container_constant_fanin =
-R"doc(Has a value if a fanin node is constant. In that case, it represents
-the constant value.)doc";
 
 static const char *__doc_fiction_fanin_edge_container =
 R"doc(Container that stores fanin edges of a node in a network, including
@@ -12856,6 +12877,20 @@ Parameter ``simulation_results``:
 Returns:
     A vector of charge distributions with the minimal energy.)doc";
 
+static const char *__doc_fiction_handle_virtual_pis =
+R"doc(Removes virtual primary inputs from a network if supported. Otherwise
+the input network is returned unmodified.
+
+Template parameter ``Ntk``:
+    The network type.
+
+Parameter ``network``:
+    The input network to process.
+
+Returns:
+    The network with virtual primary inputs removed, or the original
+    network if unsupported.)doc";
+
 static const char *__doc_fiction_has_above = R"doc()doc";
 
 static const char *__doc_fiction_has_assign_charge_state = R"doc()doc";
@@ -12888,6 +12923,8 @@ static const char *__doc_fiction_has_foreach_incoming_clocked_zone = R"doc()doc"
 
 static const char *__doc_fiction_has_foreach_outgoing_clocked_zone = R"doc()doc";
 
+static const char *__doc_fiction_has_foreach_real_pi = R"doc()doc";
+
 static const char *__doc_fiction_has_foreach_sidb_defect = R"doc()doc";
 
 static const char *__doc_fiction_has_foreach_tile = R"doc()doc";
@@ -12899,6 +12936,8 @@ static const char *__doc_fiction_has_get_functional_implementations = R"doc()doc
 static const char *__doc_fiction_has_get_gate_ports = R"doc()doc";
 
 static const char *__doc_fiction_has_get_layout_name = R"doc()doc";
+
+static const char *__doc_fiction_has_get_real_pi = R"doc()doc";
 
 static const char *__doc_fiction_has_get_sidb_defect = R"doc()doc";
 
@@ -12984,6 +13023,10 @@ static const char *__doc_fiction_has_is_outgoing_clocked = R"doc()doc";
 
 static const char *__doc_fiction_has_is_po = R"doc()doc";
 
+static const char *__doc_fiction_has_is_real_pi = R"doc()doc";
+
+static const char *__doc_fiction_has_is_virtual_pi = R"doc()doc";
+
 static const char *__doc_fiction_has_is_wire_tile = R"doc()doc";
 
 static const char *__doc_fiction_has_is_xnor = R"doc()doc";
@@ -12995,6 +13038,10 @@ static const char *__doc_fiction_has_north = R"doc()doc";
 static const char *__doc_fiction_has_north_east = R"doc()doc";
 
 static const char *__doc_fiction_has_north_west = R"doc()doc";
+
+static const char *__doc_fiction_has_num_real_pis = R"doc()doc";
+
+static const char *__doc_fiction_has_num_virtual_pis = R"doc()doc";
 
 static const char *__doc_fiction_has_ordinal_operations = R"doc()doc";
 
@@ -13009,6 +13056,8 @@ static const char *__doc_fiction_has_south_east = R"doc()doc";
 static const char *__doc_fiction_has_south_west = R"doc()doc";
 
 static const char *__doc_fiction_has_synchronization_elements = R"doc()doc";
+
+static const char *__doc_fiction_has_update_ranks = R"doc()doc";
 
 static const char *__doc_fiction_has_west = R"doc()doc";
 
@@ -14437,6 +14486,8 @@ static const char *__doc_fiction_is_sidb_lattice_100 = R"doc()doc";
 static const char *__doc_fiction_is_sidb_lattice_111 = R"doc()doc";
 
 static const char *__doc_fiction_is_tile_based_layout = R"doc()doc";
+
+static const char *__doc_fiction_is_virtual_network_type = R"doc()doc";
 
 static const char *__doc_fiction_jump_point_search =
 R"doc(The Jump Point Search (JPS) path finding algorithm for shortest loop-
@@ -15874,158 +15925,6 @@ Returns:
     point.)doc";
 
 static const char *__doc_fiction_place =
-R"doc(Place 0-input gates.
-
-Template parameter ``Lyt``:
-    Gate-level layout type.
-
-Template parameter ``Ntk``:
-    Logic network type.
-
-Parameter ``lyt``:
-    Gate-level layout in which to place a 0-input gate.
-
-Parameter ``t``:
-    Tile in `lyt` to place the gate onto.
-
-Parameter ``ntk``:
-    Network whose node is to be placed.
-
-Parameter ``n``:
-    Node in `ntk` to place onto `t` in `lyt`.
-
-Returns:
-    Signal pointing to the placed gate in `lyt`.)doc";
-
-static const char *__doc_fiction_place_2 =
-R"doc(Place 1-input gates.
-
-Template parameter ``Lyt``:
-    Gate-level layout type.
-
-Template parameter ``Ntk``:
-    Logic network type.
-
-Parameter ``lyt``:
-    Gate-level layout in which to place a 1-input gate.
-
-Parameter ``t``:
-    Tile in `lyt` to place the gate onto.
-
-Parameter ``ntk``:
-    Network whose node is to be placed.
-
-Parameter ``n``:
-    Node in `ntk` to place onto `t` in `lyt`.
-
-Parameter ``a``:
-    Incoming signal to the newly placed gate in `lyt`.
-
-Returns:
-    Signal pointing to the placed gate in `lyt`.)doc";
-
-static const char *__doc_fiction_place_3 =
-R"doc(Place 2-input gates.
-
-Template parameter ``Lyt``:
-    Gate-level layout type.
-
-Template parameter ``Ntk``:
-    Logic network type.
-
-Parameter ``lyt``:
-    Gate-level layout in which to place a 2-input gate.
-
-Parameter ``t``:
-    Tile in `lyt` to place the gate onto.
-
-Parameter ``ntk``:
-    Network whose node is to be placed.
-
-Parameter ``n``:
-    Node in `ntk` to place onto `t` in `lyt`.
-
-Parameter ``a``:
-    First incoming signal to the newly placed gate in `lyt`.
-
-Parameter ``b``:
-    Second incoming signal to the newly placed gate in `lyt`.
-
-Parameter ``c``:
-    Third optional incoming constant value signal to the newly placed
-    gate in `lyt`. Might change the gate function when set, e.g., from
-    a MAJ to an AND if `c == false`.
-
-Returns:
-    Signal pointing to the placed gate in `lyt`.)doc";
-
-static const char *__doc_fiction_place_4 =
-R"doc(Place 3-input gates.
-
-Template parameter ``Lyt``:
-    Gate-level layout type.
-
-Template parameter ``Ntk``:
-    Logic network type.
-
-Parameter ``lyt``:
-    Gate-level layout in which to place a 3-input gate.
-
-Parameter ``t``:
-    Tile in `lyt` to place the gate onto.
-
-Parameter ``ntk``:
-    Network whose node is to be placed.
-
-Parameter ``n``:
-    Node in `ntk` to place onto `t` in `lyt`.
-
-Parameter ``a``:
-    First incoming signal to the newly placed gate in `lyt`.
-
-Parameter ``b``:
-    Second incoming signal to the newly placed gate in `lyt`.
-
-Parameter ``c``:
-    Third incoming signal to the newly placed gate in `lyt`.
-
-Returns:
-    Signal pointing to the placed gate in `lyt`.)doc";
-
-static const char *__doc_fiction_place_5 =
-R"doc(Place any gate from a network. This function automatically identifies
-the arity of the passed node and fetches its incoming signals from the
-given network and a provided `mockturtle::node_map`. This function
-does not update the `mockturtle::node_map`.
-
-Template parameter ``Lyt``:
-    Gate-level layout type.
-
-Template parameter ``Ntk``:
-    Logic network type.
-
-Parameter ``lyt``:
-    Gate-level layout in which to place any gate.
-
-Parameter ``t``:
-    Tile in `lyt` to place the gate onto.
-
-Parameter ``ntk``:
-    Network whose node is to be placed.
-
-Parameter ``n``:
-    Node in `ntk` to place onto `t` in `lyt`.
-
-Parameter ``node2pos``:
-    Mapping from network nodes to layout signals, i.e., a pointer to
-    their position in the layout. The map is used to fetch location of
-    the fanins. The `mockturtle::node_map` is not updated by this
-    function.
-
-Returns:
-    Signal to the newly placed gate in `lyt`.)doc";
-
-static const char *__doc_fiction_place_6 =
 R"doc(Place any gate from a network. This function automatically identifies
 the arity of the passed node and fetches its incoming signals from the
 given network and a provided branching_signal_container
@@ -19336,6 +19235,206 @@ static const char *__doc_fiction_vertical_shift_cartesian =
 R"doc(\verbatim +-------+ | | | +-------+ | | | +-------+ | | | +-------+
 \endverbatim)doc";
 
+static const char *__doc_fiction_virtual_miter =
+R"doc(Combines two networks into a combinational miter, similar to
+`mockturtle::miter`. Either input network may include virtual primary
+inputs (PIs). Virtual PIs are removed during miter construction, and
+all edges connected to them are remapped to their corresponding
+original PIs, ensuring consistent PI counts when the networks are
+equivalent.
+
+The resulting miter connects two networks with the same number of
+inputs and produces a single primary output. This output represents
+the OR of the XORs of all primary output pairs. Thus, the miter
+outputs 1 for any input assignment where the primary outputs of the
+two networks differ.
+
+The input networks may have different types. If the two input networks
+have mismatched numbers of primary inputs or outputs, the method
+returns `nullopt`.
+
+Template parameter ``NtkDest``:
+    The type of the resulting network.
+
+Template parameter ``NtkSource1``:
+    The type of the first input network.
+
+Template parameter ``NtkSource2``:
+    The type of the second input network.
+
+Parameter ``ntk1_in``:
+    The first input network.
+
+Parameter ``ntk2_in``:
+    The second input network.
+
+Returns:
+    An `optional` containing the virtual miter network if successful,
+    or `nullopt` if the networks are incompatible.)doc";
+
+static const char *__doc_fiction_virtual_pi_network = R"doc()doc";
+
+static const char *__doc_fiction_virtual_pi_network_clone = R"doc(Clones the `virtual_pi_network` object.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_create_virtual_pi =
+R"doc(Create a virtual PI, which is a mapping to a real PI.
+
+This function adds a PI to the parent network, but marks it as virtual
+and stores a mapping to a real PI.
+
+Parameter ``real_pi``:
+    The node representing the real PI in the network.
+
+Returns:
+    The signal of the newly created virtual PI.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_foreach_real_ci =
+R"doc(Iterates over the virtual CIs of the circuit and applies a given
+function.
+
+Template parameter ``Fn``:
+    The type of the function to be applied.
+
+Parameter ``fn``:
+    The function to be applied.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_foreach_real_pi =
+R"doc(Iterates over the real PIs of the circuit and applies a given
+function.
+
+Template parameter ``Fn``:
+    The type of the function to be applied.
+
+Parameter ``fn``:
+    The function to be applied.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_foreach_virtual_ci =
+R"doc(Iterates over the virtual CIs of the circuit and applies a given
+function.
+
+Template parameter ``Fn``:
+    The type of the function to be applied.
+
+Parameter ``fn``:
+    The function to be applied.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_foreach_virtual_pi =
+R"doc(Iterates over the virtual PIs of the circuit and applies a given
+function.
+
+Template parameter ``Fn``:
+    The type of the function to be applied.
+
+Parameter ``fn``:
+    The function to be applied.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_get_real_pi =
+R"doc(Get the real PI associated with a virtual PI node.
+
+Parameter ``v_pi``:
+    The virtual pi node to retrieve the real PI for.
+
+Returns:
+    The real pi associated with the virtual PI node.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_is_real_ci =
+R"doc(Check if a given node is a real CI in the `virtual_pi_network`.
+
+Parameter ``n``:
+    The node to check.
+
+Returns:
+    `true` if the node is a real CI, `false` otherwise.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_is_real_pi =
+R"doc(Check if a given node is a real PI. Real PIs are created with
+`create_pi()`.
+
+Parameter ``n``:
+    The node to check.
+
+Returns:
+    `true` if the node is a real PI, `false` otherwise.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_is_virtual_ci =
+R"doc(Check if a given node is a virtual CI in the `virtual_pi_network`.
+
+Parameter ``n``:
+    The node to check.
+
+Returns:
+    `true` if the node is a virtual CI, `false` otherwise.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_is_virtual_pi =
+R"doc(Check if a given node is a virtual PI. Virtual PIs are created with
+`create_virtual_pi()`.
+
+Parameter ``n``:
+    The node to check.
+
+Returns:
+    `true` if the node is a virtual PI, `false` otherwise.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_num_real_cis =
+R"doc(Get the number of real CIs in the `virtual_pi_network`.
+
+Returns:
+    The number of real CIs as a `uint32_t`.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_num_real_pis =
+R"doc(Get the number of real PIs in the `virtual_pi_network`.
+
+Returns:
+    The number of real PIs as a `uint32_t`.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_num_virtual_cis =
+R"doc(Get the number of virtual CIs in the `virtual_pi_network`.
+
+Returns:
+    The number of virtual CIs as a `uint32_t`.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_num_virtual_pis =
+R"doc(Get the number of virtual PIs in the `virtual_pi_network`.
+
+Returns:
+    The number of virtual PIs as a `uint32_t`.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_real_size =
+R"doc(Calculate the real size of the virtual_pi_network`.
+
+The real size of the network is considered the size without virtual
+PIs.
+
+Returns:
+    The real size of the `virtual_pi_network` as a `uint32_t`.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_v_storage = R"doc(Shared pointer of the virtual PI storage.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_virtual_pi_network =
+R"doc(Default constructor for the `virtual_pi_network` class. Initializes
+`v_storage` as a shared pointer.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_virtual_pi_network_2 =
+R"doc(Constructor for the `virtual_pi_network` class that takes a network
+and a shared pointer to a `virtual_storage` object. This is used for
+cloning.
+
+Template parameter ``Ntk``:
+    Network type.
+
+Parameter ``ntk``:
+    Input network.
+
+Parameter ``s``:
+    Shared pointer to the `virtual_storage` object to be used by this
+    `virtual_pi_network`.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_virtual_storage = R"doc()doc";
+
+static const char *__doc_fiction_virtual_pi_network_virtual_storage_map_virtual_to_real_pi = R"doc(Map from virtual_pis to real_pis.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_virtual_storage_virtual_inputs = R"doc(Vector storing virtual_inputs.)doc";
+
 static const char *__doc_fiction_volume =
 R"doc(Computes the volume of a given coordinate assuming its origin is (0,
 0, 0). Calculates :math:`(|x| + 1) \cdot (|y| + 1) \cdot (|z| + 1)` by
@@ -20095,12 +20194,6 @@ static const char *__doc_fmt_formatter_format_2 = R"doc()doc";
 static const char *__doc_fmt_formatter_parse = R"doc()doc";
 
 static const char *__doc_fmt_formatter_parse_2 = R"doc()doc";
-
-static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_layouts_coordinates_hpp_1090_8 = R"doc()doc";
-
-static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_layouts_coordinates_hpp_1106_8 = R"doc()doc";
-
-static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_technology_cell_ports_hpp_291_8 = R"doc()doc";
 
 static const char *__doc_mockturtle_detail_foreach_element_if_transform = R"doc()doc";
 
