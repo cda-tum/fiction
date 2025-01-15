@@ -199,7 +199,7 @@ TEST_CASE("Check modify ranks", "[extended-rank-view]")
     auto vpi_r = extended_rank_view(tec_balanced);
 
     const std::vector<technology_network::node> nodes = {13, 10, 14};
-    vpi_r.modify_rank(2, nodes);
+    vpi_r.set_ranks(2, nodes);
 
     CHECK(vpi_r.check_validity() == 1);
 }
@@ -282,4 +282,39 @@ TEST_CASE("Check equivalence checking for virtual PIs", "[extended-rank-view]")
     const bool cec_m = *maybe_cec_m;
     CHECK(cec_m == 1);
     CHECK(vpi_r.check_validity() == 1);
+}
+
+TEST_CASE("Check PI order for equivalence checking", "[extended-rank-view]")
+{
+    technology_network tec{};
+
+    const auto a = tec.create_pi();
+    const auto b = tec.create_pi();
+    const auto c = tec.create_pi();
+
+    const auto n1 = tec.create_and(a, b);
+    const auto n2 = tec.create_or(b, c);
+
+    tec.create_po(n1);
+    tec.create_po(n2);
+
+    auto vpi_r = extended_rank_view(tec);
+
+    // after the swap no equivalence is giving due to different ordering of the pi when calling `foreach_pi`
+    vpi_r.swap(2, 3);
+
+    mockturtle::equivalence_checking_stats st;
+    auto                                   maybe_cec_m =
+        mockturtle::equivalence_checking(*fiction::virtual_miter<technology_network>(tec, vpi_r), {}, &st);
+    REQUIRE(maybe_cec_m.has_value());
+    bool cec_m = *maybe_cec_m;
+    CHECK(cec_m == 0);
+
+    // this rearranges the order of the PI as stored in the underlying depth_view (corresponds to the order in _storage)
+    vpi_r.rearrange_pis();
+
+    maybe_cec_m = mockturtle::equivalence_checking(*fiction::virtual_miter<technology_network>(tec, vpi_r), {}, &st);
+    REQUIRE(maybe_cec_m.has_value());
+    cec_m = *maybe_cec_m;
+    CHECK(cec_m == 1);
 }

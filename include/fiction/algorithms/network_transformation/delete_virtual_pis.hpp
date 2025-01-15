@@ -183,7 +183,35 @@ class delete_virtual_pis_impl
         {
             old2new[src.get_constant(true)] = dest.get_constant(true);
         }
-        src.foreach_real_pi([&](auto const& n) { old2new[n] = dest.create_pi(); });
+
+        // discard virtual PIs and the PI order in the extended rank view when creating the PIs for the copy network
+        if constexpr (mockturtle::has_rank_position_v<Ntk>)
+        {
+            src.foreach_pi_unranked(
+                [&](auto const& n)
+                {
+                    if (src.is_real_pi(n))
+                    {
+                        old2new[n] = dest.create_pi();
+                        dest.on_add(old2new[n]);
+                    }
+                });
+        }
+        else
+        {
+            src.foreach_pi(
+                [&](auto const& n)
+                {
+                    if (src.is_real_pi(n))
+                    {
+                        old2new[n] = dest.create_pi();
+                        if constexpr (mockturtle::has_rank_position_v<Ntk>)
+                        {
+                            dest.on_add(old2new[n]);
+                        }
+                    }
+                });
+        }
 
         return {dest, old2new};
     }

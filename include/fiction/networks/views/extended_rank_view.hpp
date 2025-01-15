@@ -24,7 +24,7 @@ namespace fiction
  *
  * Provides a view with node ranks for given networks. It adds functionalities to modify ranks. Most importantly, the
  * new `init_ranks()` function allows an array of nodes to be provided, which sets the levels and ranks of the nodes in
- * the network. Additionally, the `modify_rank()` function allows to pass a vector to assign the ranks of nodes in one
+ * the network. Additionally, the `set_ranks()` function allows to pass a vector to assign the ranks of nodes in one
  * specific level.
  *
  * This class template is specialized depending on whether the provided network has a rank interface or not. The rank
@@ -168,6 +168,9 @@ class extended_rank_view<Ntk, false> : public fiction::depth_view<Ntk>
             return *this;
         }
 
+        // call assignment operator of `depth_view`
+        depth_view<Ntk>::operator=(other);
+
         /* update the base class */
         this->_storage = other._storage;
         this->_events  = other._events;
@@ -228,12 +231,12 @@ class extended_rank_view<Ntk, false> : public fiction::depth_view<Ntk>
     }
 
     /**
-     * Updates the nodes and associated rank positions for a specific level within the rank.
+     * Sets the associated rank positions for nodes in a specific level, given the order of `nodes`.
      *
      * @param level Level at which to replace nodes.
      * @param nodes The new nodes to be set at the given level.
      */
-    void modify_rank(const uint32_t level, const std::vector<node>& nodes)
+    void set_ranks(const uint32_t level, const std::vector<node>& nodes)
     {
         auto& rank = ranks[level];
         assert(rank.size() == nodes.size());
@@ -255,6 +258,7 @@ class extended_rank_view<Ntk, false> : public fiction::depth_view<Ntk>
 
         return ranks[level][pos];
     }
+
     /**
      * Returns the width of the widest rank in the network.
      *
@@ -264,6 +268,7 @@ class extended_rank_view<Ntk, false> : public fiction::depth_view<Ntk>
     {
         return max_rank_width;
     }
+
     /**
      * Returns the width of the rank.
      *
@@ -274,6 +279,7 @@ class extended_rank_view<Ntk, false> : public fiction::depth_view<Ntk>
         auto& rank = ranks[level];
         return static_cast<uint32_t>(rank.size());
     }
+
     /**
      * Swaps the positions of two nodes in the same rank.
      *
@@ -290,6 +296,7 @@ class extended_rank_view<Ntk, false> : public fiction::depth_view<Ntk>
         std::swap(ranks[this->level(n1)][pos1], ranks[this->level(n2)][pos2]);
         std::swap(pos1, pos2);
     }
+
     /**
      * Sorts the given rank according to a comparator.
      *
@@ -310,6 +317,7 @@ class extended_rank_view<Ntk, false> : public fiction::depth_view<Ntk>
             std::for_each(rank.cbegin(), rank.cend(), [this, i = 0u](auto const& n) mutable { rank_pos[n] = i++; });
         }
     }
+
     /**
      * Applies a given function to each node in the rank level in order.
      *
@@ -328,6 +336,7 @@ class extended_rank_view<Ntk, false> : public fiction::depth_view<Ntk>
             mockturtle::detail::foreach_element(rank.cbegin(), rank.cend(), std::forward<Fn>(fn));
         }
     }
+
     /**
      * Applies a given function to each node in rank order.
      *
@@ -344,6 +353,7 @@ class extended_rank_view<Ntk, false> : public fiction::depth_view<Ntk>
             foreach_node_in_rank(l, std::forward<Fn>(fn));
         }
     }
+
     /**
      * Applies a given function to each gate in the rank level in order.
      *
@@ -363,6 +373,7 @@ class extended_rank_view<Ntk, false> : public fiction::depth_view<Ntk>
                 rank.cbegin(), rank.cend(), [this](auto const& n) { return !this->is_ci(n); }, std::forward<Fn>(fn));
         }
     }
+
     /**
      * Applies a given function to each gate in rank order.
      *
@@ -379,6 +390,7 @@ class extended_rank_view<Ntk, false> : public fiction::depth_view<Ntk>
             foreach_gate_in_rank(l, std::forward<Fn>(fn));
         }
     }
+
     /**
      * Applies a given function to each PI in rank order.
      *
@@ -398,6 +410,33 @@ class extended_rank_view<Ntk, false> : public fiction::depth_view<Ntk>
                   [this](auto const& n1, auto const& n2) { return rank_pos.at(n1) < rank_pos.at(n2); });
         mockturtle::detail::foreach_element(pis.cbegin(), pis.cend(), std::forward<Fn>(fn));
     }
+
+    /**
+     * Applies a given function to each PI in unranked order, so the order in the underlying `depth_view`.
+     *
+     * @tparam Fn Functor type.
+     * @param fn The function to apply.
+     */
+    template <typename Fn>
+    void foreach_pi_unranked(Fn&& fn) const
+    {
+        fiction::depth_view<Ntk>::foreach_pi(std::forward<Fn>(fn));
+    }
+
+    /**
+     * Rearranges the rank order of the PIs to the underlying PI order.
+     * This can be used to ensure equivalent PI order for equivalence checking.
+     */
+    void rearrange_pis()
+    {
+        std::vector<node> pis{};
+        pis.reserve(this->num_pis());
+
+        fiction::depth_view<Ntk>::foreach_pi([&pis](auto const& pi) { pis.push_back(pi); });
+
+        set_ranks(0, pis);
+    }
+
     /**
      * Applies a given function to each CI in rank order.
      *
@@ -439,6 +478,25 @@ class extended_rank_view<Ntk, false> : public fiction::depth_view<Ntk>
         ranks.clear();
         ranks.resize(this->depth() + 1);
         init_ranks();
+    }
+
+    /*
+     * Add a node to the `extended_rank_view` and update its rank.
+     *
+     * @param n Node added to the `extended_rank_view`.
+     */
+    void on_add( node const& n ) noexcept
+    {
+        fiction::depth_view<Ntk>::on_add(n);
+
+        if ( this->level( n ) >= ranks.size() )
+        {
+            // add sufficient ranks to store the new node
+            ranks.insert( ranks.end(), this->level( n ) - ranks.size() + 1, {} );
+        }
+        rank_pos.rehash(this->size());
+
+        insert_in_rank( n );
     }
 
   private:

@@ -160,23 +160,32 @@ class depth_view<Ntk, NodeCostFn, false> : public Ntk
     depth_view<Ntk, NodeCostFn, false>& operator=(depth_view<Ntk, NodeCostFn, false> const& other)
     {
         // Check for self-assignment
-        if (this != &other)
+        if (this == &other)
         {
-            // update the base class
-            this->_storage = other._storage;
-            this->_events  = other._events;
-
-            // copy
-            _ps        = other._ps;
-            _levels    = other._levels;
-            _crit_path = other._crit_path;
-            _depth     = other._depth;
-            _cost_fn   = other._cost_fn;
+            return *this;
         }
+
+        // update the base class
+        this->_storage = other._storage;
+        this->_events  = other._events;
+
+        // update the virtual storage
+        if constexpr (has_is_virtual_pi_v<Ntk>)
+        {
+            this->v_storage = other.v_storage;
+        }
+
+        // copy
+        _ps        = other._ps;
+        _levels    = other._levels;
+        _crit_path = other._crit_path;
+        _depth     = other._depth;
+        _cost_fn   = other._cost_fn;
 
         // Return the current object
         return *this;
     }
+
     /**
      * Destructor for `fiction::depth_view`.
      */
@@ -234,6 +243,36 @@ class depth_view<Ntk, NodeCostFn, false> : public Ntk
 
         this->incr_trav_id();
         compute_levels();
+    }
+
+    /*
+     * Add a node to the `depth_view` and update its level.
+     *
+     * @param n Node added to the `depth_view`.
+     */
+    void on_add(node const& n)
+    {
+        _levels.rehash(this->size());
+
+        uint32_t level{0};
+        this->foreach_fanin(n,
+                            [&](auto const& f)
+                            {
+                                auto clevel = _levels[f];
+                                if (_ps.count_complements && this->is_complemented(f))
+                                {
+                                    clevel++;
+                                }
+                                level = std::max(level, clevel);
+                            });
+        if (this->is_pi(n))
+        {
+            _levels[n] = level;
+        }
+        else
+        {
+            _levels[n] = level + _cost_fn(*this, n);
+        }
     }
 
   private:

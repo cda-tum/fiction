@@ -300,7 +300,7 @@ class virtual_pi_network : public Ntk
                                             std::forward<Fn>(fn));
     }
 
-  private:
+  protected:
     /**
      * Shared pointer of the virtual PI storage.
      */
