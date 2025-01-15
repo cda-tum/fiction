@@ -485,18 +485,18 @@ class extended_rank_view<Ntk, false> : public fiction::depth_view<Ntk>
      *
      * @param n Node added to the `extended_rank_view`.
      */
-    void on_add( node const& n ) noexcept
+    void on_add(node const& n) noexcept
     {
         fiction::depth_view<Ntk>::on_add(n);
 
-        if ( this->level( n ) >= ranks.size() )
+        if (this->level(n) >= ranks.size())
         {
             // add sufficient ranks to store the new node
-            ranks.insert( ranks.end(), this->level( n ) - ranks.size() + 1, {} );
+            ranks.insert(ranks.end(), this->level(n) - ranks.size() + 1, {});
         }
         rank_pos.rehash(this->size());
 
-        insert_in_rank( n );
+        insert_in_rank(n);
     }
 
   private:
