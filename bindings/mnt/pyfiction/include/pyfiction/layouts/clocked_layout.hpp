@@ -28,7 +28,6 @@ template <typename LytBase, typename ClockedLyt>
 void clocked_layout(pybind11::module& m, const std::string& topology)
 {
     namespace py = pybind11;
-    namespace py = pybind11;
 
     /**
      * Clocked Cartesian layout.

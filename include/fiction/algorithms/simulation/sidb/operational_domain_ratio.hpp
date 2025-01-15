@@ -2,8 +2,8 @@
 // Created by Jan Drewniok on 09.09.24.
 //
 
-#ifndef FICTION_COMPUTE_OPERATIONAL_RATIO_HPP
-#define FICTION_COMPUTE_OPERATIONAL_RATIO_HPP
+#ifndef FICTION_OPERATIONAL_DOMAIN_RATIO_HPP
+#define FICTION_OPERATIONAL_DOMAIN_RATIO_HPP
 
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
 #include "fiction/algorithms/simulation/sidb/operational_domain.hpp"
@@ -18,7 +18,7 @@ namespace fiction
  * Parameters for computing the ratio of operational parameter points around a specified parameter point
  * to the total number of parameter points in the given parameter space.
  */
-struct compute_operational_ratio_params
+struct operational_domain_ratio_params
 {
     /**
      * Parameters for the operational domain computation.
@@ -45,8 +45,8 @@ struct compute_operational_ratio_params
  * @return The ratio of operational parameter points to the total number of parameter points in the parameter space.
  */
 template <typename Lyt, typename TT>
-[[nodiscard]] double compute_operational_ratio(const Lyt& lyt, const std::vector<TT>& spec, const parameter_point& pp,
-                                               const compute_operational_ratio_params& params = {}) noexcept
+[[nodiscard]] double operational_domain_ratio(const Lyt& lyt, const std::vector<TT>& spec, const parameter_point& pp,
+                                              const operational_domain_ratio_params& params = {}) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -66,4 +66,4 @@ template <typename Lyt, typename TT>
 
 }  // namespace fiction
 
-#endif  // FICTION_COMPUTE_OPERATIONAL_RATIO_HPP
+#endif  // FICTION_OPERATIONAL_DOMAIN_RATIO_HPP
