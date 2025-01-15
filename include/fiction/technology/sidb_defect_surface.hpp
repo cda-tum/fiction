@@ -199,7 +199,7 @@ class sidb_defect_surface<Lyt, false> : public Lyt
         this->foreach_sidb_defect(
             [&number_of_neutral_defects](const auto& defect)
             {
-                if (is_charged_defect_type(defect.second))
+                if (is_neutral_defect_type(defect.second))
                 {
                     number_of_neutral_defects++;
                 }
