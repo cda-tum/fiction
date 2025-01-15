@@ -47,7 +47,7 @@ inline void design_sidb_gates(pybind11::module& m)
     /**
      * Design approach selector type.
      */
-    pybind11::enum_<typename fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::design_sidb_gates_mode>(
+    py::enum_<typename fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::design_sidb_gates_mode>(
         m, "design_sidb_gates_mode", DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode))
         .value("QUICKCELL",
                fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::design_sidb_gates_mode::QUICKCELL,
@@ -73,7 +73,7 @@ inline void design_sidb_gates(pybind11::module& m)
         .def_readwrite("canvas", &fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::canvas,
                        DOC(fiction_design_sidb_gates_params_canvas))
         .def_readwrite("number_of_sidbs",
-                       &fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::number_of_sidbs,
+                       &fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::number_of_canvas_sidbs,
                        DOC(fiction_design_sidb_gates_params_number_of_sidbs));
 
     detail::design_sidb_gates<py_sidb_100_lattice>(m);

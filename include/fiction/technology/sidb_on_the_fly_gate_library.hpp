@@ -22,9 +22,11 @@
 #include <phmap.h>
 
 #include <array>
+#include <cassert>
 #include <cstdint>
 #include <cstdlib>
 #include <exception>
+#include <optional>
 #include <stdexcept>
 #include <utility>
 #include <vector>
@@ -97,15 +99,25 @@ class gate_design_exception : public std::exception
 /**
  * This struct encapsulates parameters for the parameterized SiDB gate library.
  *
- * @tparam Lyt Cell-level layout type.
+ * @tparam Lyt SiDB cell-level layout type.
  */
 template <typename Lyt>
 struct sidb_on_the_fly_gate_library_params
 {
     /**
-     * This layout stores all atomic defects.
+     * This struct represents the policy for complex (i.e., crossing, double wire, half-adder) gate design.
      */
-    sidb_defect_surface<Lyt> defect_surface{};
+    enum class complex_gate_design_policy : uint8_t
+    {
+        /**
+         * Use predefined complex gates if possible.
+         */
+        USING_PREDEFINED,
+        /**
+         * Design complex gates on-the-fly.
+         */
+        DESIGN_ON_THE_FLY
+    };
     /**
      * This struct holds parameters to design SiDB gates.
      */
@@ -116,10 +128,19 @@ struct sidb_on_the_fly_gate_library_params
      */
     uint64_t canvas_sidb_complex_gates = 3;
     /**
+     * This variable specifies the policy for complex gate design.
+     */
+    complex_gate_design_policy using_predefined_crossing_and_double_wire_if_possible =
+        complex_gate_design_policy::USING_PREDEFINED;
+    /**
      * This variable specifies the radius in nanometers around the center of the hexagon where atomic defects are
      * incorporated into the gate design.
      */
     double influence_radius_charged_defects = 15;  // (unit: nm)
+    /**
+     * This layout stores all atomic defects. ``std::nullopt`` if no defect surface is given.
+     */
+    std::optional<sidb_defect_surface<Lyt>> defect_surface{std::nullopt};
 };
 
 /**
@@ -131,7 +152,6 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
 {
   public:
     explicit sidb_on_the_fly_gate_library() = delete;
-
     /**
      * Overrides the corresponding function in fcn_gate_library. Given a tile `t`, this function takes all necessary
      * information from the stored grid into account to design the correct fcn_gate representation for that tile. In
@@ -146,7 +166,7 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
      * @return Bestagon gate representation of `t` including mirroring.
      */
     template <typename GateLyt, typename CellLyt, typename Params>
-    static fcn_gate set_up_gate(const GateLyt& lyt, const tile<GateLyt>& t, const Params& parameters = Params{})
+    static fcn_gate set_up_gate(const GateLyt& lyt, const tile<GateLyt>& t, const Params& params)
     {
         static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt must be a gate-level layout");
         static_assert(has_cube_coord_v<CellLyt>, "CellLyt must be based on cube coordinates");
@@ -155,12 +175,19 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
         const auto f = lyt.node_function(n);
         const auto p = determine_port_routing(lyt, t);
 
-        // center cell of the Bestagon tile
+        // center cell of the Bestagon tile. IMPORTANT: There is no center for the specified Bestagon library. The
+        // middle is at 22.66666 (34*2/3). However, this is not an integer and does not specify a cell. Cell close to it
+        // is chosen.
         auto center_cell = relative_to_absolute_cell_position<gate_x_size(), gate_y_size(), GateLyt, CellLyt>(
             lyt, t, cell<CellLyt>{gate_x_size() / 2, gate_y_size() / 2});
         // center cell of the current tile
         auto absolute_cell = relative_to_absolute_cell_position<gate_x_size(), gate_y_size(), GateLyt, CellLyt>(
             lyt, t, cell<CellLyt>{0, 0});
+
+        const auto defect_surface = params.defect_surface;
+
+        auto complex_gate_param                                      = params;
+        complex_gate_param.design_gate_params.number_of_canvas_sidbs = params.canvas_sidb_complex_gates;
 
         try
         {
@@ -170,12 +197,18 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
                 {
                     if (lyt.fanout_size(n) == 2)
                     {
-                        const auto layout =
-                            add_defect_to_skeleton(cell_list_to_cell_level_layout<CellLyt>(ONE_IN_TWO_OUT_MAP.at(p)),
-                                                   center_cell, absolute_cell, parameters);
+                        const auto skeleton = cell_list_to_cell_level_layout<CellLyt>(ONE_IN_TWO_OUT_MAP.at(p));
 
-                        return design_gate<decltype(layout), tt, CellLyt, GateLyt>(layout, create_fan_out_tt(),
-                                                                                   parameters, p, t);
+                        if (defect_surface.has_value())
+                        {
+                            const auto skeleton_with_defects = add_defect_to_skeleton(
+                                defect_surface.value(), skeleton, params.influence_radius_charged_defects, center_cell,
+                                absolute_cell);
+
+                            return design_gate<decltype(skeleton_with_defects), tt, CellLyt, GateLyt>(
+                                skeleton_with_defects, create_fan_out_tt(), params, p, t);
+                        }
+                        return design_gate<CellLyt, tt, CellLyt, GateLyt>(skeleton, create_fan_out_tt(), params, p, t);
                     }
                 }
             }
@@ -191,42 +224,62 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
                             // two possible options: actual crossover and (parallel) hourglass wire
                             const auto pa = determine_port_routing(lyt, at);
 
+                            const auto skeleton = cell_list_to_cell_level_layout<CellLyt>(TWO_IN_TWO_OUT);
+
                             if (auto cell_list = TWO_IN_TWO_OUT_MAP.at({p, pa}); cell_list == DOUBLE_WIRE)
                             {
-                                const auto layout =
-                                    add_defect_to_skeleton(cell_list_to_cell_level_layout<CellLyt>(TWO_IN_TWO_OUT),
-                                                           center_cell, absolute_cell, parameters);
+                                if (defect_surface.has_value())
+                                {
+                                    const auto skeleton_with_defects = add_defect_to_skeleton(
+                                        defect_surface.value(), skeleton, params.influence_radius_charged_defects,
+                                        center_cell, absolute_cell);
 
-                                if (is_bestagon_gate_applicable(cell_list_to_cell_level_layout<CellLyt>(DOUBLE_WIRE),
-                                                                create_double_wire_tt(), parameters))
+                                    if (is_bestagon_gate_applicable(
+                                            cell_list_to_cell_level_layout<CellLyt>(DOUBLE_WIRE), skeleton_with_defects,
+                                            create_double_wire_tt(), params))
+                                    {
+                                        return DOUBLE_WIRE;
+                                    }
+
+                                    return design_gate<decltype(skeleton_with_defects), tt, CellLyt, GateLyt>(
+                                        skeleton_with_defects, create_double_wire_tt(), complex_gate_param, p, t);
+                                }
+
+                                if (params.using_predefined_crossing_and_double_wire_if_possible ==
+                                    Params::complex_gate_design_policy::USING_PREDEFINED)
                                 {
                                     return DOUBLE_WIRE;
                                 }
 
-                                auto complex_gate_param = parameters;
-                                complex_gate_param.design_gate_params.number_of_sidbs =
-                                    parameters.canvas_sidb_complex_gates;
-
-                                return design_gate<decltype(layout), tt, CellLyt, GateLyt>(
-                                    layout, create_double_wire_tt(), complex_gate_param, p, t);
+                                return design_gate<CellLyt, tt, CellLyt, GateLyt>(skeleton, create_double_wire_tt(),
+                                                                                  complex_gate_param, p, t);
                             }
 
-                            const auto layout =
-                                add_defect_to_skeleton(cell_list_to_cell_level_layout<CellLyt>(TWO_IN_TWO_OUT),
-                                                       center_cell, absolute_cell, parameters);
+                            if (defect_surface.has_value())
+                            {
+                                const auto skeleton_with_defects = add_defect_to_skeleton(
+                                    defect_surface.value(), skeleton, params.influence_radius_charged_defects,
+                                    center_cell, absolute_cell);
 
-                            if (is_bestagon_gate_applicable(cell_list_to_cell_level_layout<CellLyt>(CROSSING),
-                                                            create_crossing_wire_tt(), parameters))
+                                if (is_bestagon_gate_applicable(cell_list_to_cell_level_layout<CellLyt>(CROSSING),
+                                                                skeleton_with_defects, create_crossing_wire_tt(),
+                                                                params))
+                                {
+                                    return CROSSING;
+                                }
+
+                                return design_gate<decltype(skeleton_with_defects), tt, CellLyt, GateLyt>(
+                                    skeleton_with_defects, create_crossing_wire_tt(), complex_gate_param, p, t);
+                            }
+
+                            if (params.using_predefined_crossing_and_double_wire_if_possible ==
+                                Params::complex_gate_design_policy::USING_PREDEFINED)
                             {
                                 return CROSSING;
                             }
 
-                            auto complex_gate_param = parameters;
-                            complex_gate_param.design_gate_params.number_of_sidbs =
-                                parameters.canvas_sidb_complex_gates;
-
-                            return design_gate<decltype(layout), tt, CellLyt, GateLyt>(
-                                layout, create_crossing_wire_tt(), complex_gate_param, p, t);
+                            return design_gate<CellLyt, tt, CellLyt, GateLyt>(skeleton, create_crossing_wire_tt(),
+                                                                              complex_gate_param, p, t);
                         }
 
                         const auto cell_list = ONE_IN_ONE_OUT_MAP.at(p);
@@ -234,11 +287,19 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
                         {
                             return EMPTY_GATE;
                         }
-                        const auto layout = add_defect_to_skeleton(cell_list_to_cell_level_layout<CellLyt>(cell_list),
-                                                                   center_cell, absolute_cell, parameters);
 
-                        return design_gate<decltype(layout), tt, CellLyt, GateLyt>(layout, std::vector<tt>{f},
-                                                                                   parameters, p, t);
+                        const auto skeleton = cell_list_to_cell_level_layout<CellLyt>(cell_list);
+
+                        if (defect_surface.has_value())
+                        {
+                            const auto skeleton_with_defects = add_defect_to_skeleton(
+                                defect_surface.value(), skeleton, params.influence_radius_charged_defects, center_cell,
+                                absolute_cell);
+                            return design_gate<decltype(skeleton_with_defects), tt, CellLyt, GateLyt>(
+                                skeleton_with_defects, std::vector<tt>{f}, params, p, t);
+                        }
+
+                        return design_gate<CellLyt, tt, CellLyt, GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
                     }
                     return EMPTY_GATE;
                 }
@@ -247,132 +308,209 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
             {
                 if (lyt.is_inv(n))
                 {
-                    const auto layout =
-                        add_defect_to_skeleton(cell_list_to_cell_level_layout<CellLyt>(ONE_IN_ONE_OUT_MAP.at(p)),
-                                               center_cell, absolute_cell, parameters);
+                    const auto skeleton = cell_list_to_cell_level_layout<CellLyt>(ONE_IN_ONE_OUT_MAP.at(p));
 
-                    return design_gate<decltype(layout), tt, CellLyt, GateLyt>(layout, std::vector<tt>{f}, parameters,
-                                                                               p, t);
+                    if (defect_surface.has_value())
+                    {
+                        const auto skeleton_with_defects =
+                            add_defect_to_skeleton(defect_surface.value(), skeleton,
+                                                   params.influence_radius_charged_defects, center_cell, absolute_cell);
+
+                        return design_gate<decltype(skeleton_with_defects), tt, CellLyt, GateLyt>(
+                            skeleton_with_defects, std::vector<tt>{f}, params, p, t);
+                    }
+
+                    return design_gate<CellLyt, tt, CellLyt, GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
                 }
             }
             if constexpr (mockturtle::has_is_and_v<GateLyt>)
             {
                 if (lyt.is_and(n))
                 {
-                    const auto layout =
-                        add_defect_to_skeleton(cell_list_to_cell_level_layout<CellLyt>(TWO_IN_ONE_OUT_MAP.at(p)),
-                                               center_cell, absolute_cell, parameters);
+                    const auto skeleton = cell_list_to_cell_level_layout<CellLyt>(TWO_IN_ONE_OUT_MAP.at(p));
 
-                    return design_gate<decltype(layout), tt, CellLyt, GateLyt>(layout, std::vector<tt>{f}, parameters,
-                                                                               p, t);
+                    if (defect_surface.has_value())
+                    {
+                        const auto skeleton_with_defects =
+                            add_defect_to_skeleton(defect_surface.value(), skeleton,
+                                                   params.influence_radius_charged_defects, center_cell, absolute_cell);
+
+                        return design_gate<decltype(skeleton_with_defects), tt, CellLyt, GateLyt>(
+                            skeleton_with_defects, std::vector<tt>{f}, params, p, t);
+                    }
+
+                    return design_gate<CellLyt, tt, CellLyt, GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
                 }
             }
             if constexpr (mockturtle::has_is_or_v<GateLyt>)
             {
                 if (lyt.is_or(n))
                 {
-                    const auto layout =
-                        add_defect_to_skeleton(cell_list_to_cell_level_layout<CellLyt>(TWO_IN_ONE_OUT_MAP.at(p)),
-                                               center_cell, absolute_cell, parameters);
+                    const auto skeleton = cell_list_to_cell_level_layout<CellLyt>(TWO_IN_ONE_OUT_MAP.at(p));
 
-                    return design_gate<decltype(layout), tt, CellLyt, GateLyt>(layout, std::vector<tt>{f}, parameters,
-                                                                               p, t);
+                    if (defect_surface.has_value())
+                    {
+                        const auto skeleton_with_defects =
+                            add_defect_to_skeleton(defect_surface.value(), skeleton,
+                                                   params.influence_radius_charged_defects, center_cell, absolute_cell);
+
+                        return design_gate<decltype(skeleton_with_defects), tt, CellLyt, GateLyt>(
+                            skeleton_with_defects, std::vector<tt>{f}, params, p, t);
+                    }
+
+                    return design_gate<CellLyt, tt, CellLyt, GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
                 }
             }
             if constexpr (fiction::has_is_nand_v<GateLyt>)
             {
                 if (lyt.is_nand(n))
                 {
-                    const auto layout =
-                        add_defect_to_skeleton(cell_list_to_cell_level_layout<CellLyt>(TWO_IN_ONE_OUT_MAP.at(p)),
-                                               center_cell, absolute_cell, parameters);
+                    const auto skeleton = cell_list_to_cell_level_layout<CellLyt>(TWO_IN_ONE_OUT_MAP.at(p));
 
-                    return design_gate<decltype(layout), tt, CellLyt, GateLyt>(layout, std::vector<tt>{f}, parameters,
-                                                                               p, t);
+                    if (defect_surface.has_value())
+                    {
+                        const auto skeleton_with_defects =
+                            add_defect_to_skeleton(defect_surface.value(), skeleton,
+                                                   params.influence_radius_charged_defects, center_cell, absolute_cell);
+
+                        return design_gate<decltype(skeleton_with_defects), tt, CellLyt, GateLyt>(
+                            skeleton_with_defects, std::vector<tt>{f}, params, p, t);
+                    }
+
+                    return design_gate<CellLyt, tt, CellLyt, GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
                 }
             }
             if constexpr (fiction::has_is_nor_v<GateLyt>)
             {
                 if (lyt.is_nor(n))
                 {
-                    const auto layout =
-                        add_defect_to_skeleton(cell_list_to_cell_level_layout<CellLyt>(TWO_IN_ONE_OUT_MAP.at(p)),
-                                               center_cell, absolute_cell, parameters);
+                    const auto skeleton = cell_list_to_cell_level_layout<CellLyt>(TWO_IN_ONE_OUT_MAP.at(p));
 
-                    return design_gate<decltype(layout), tt, CellLyt, GateLyt>(layout, std::vector<tt>{f}, parameters,
-                                                                               p, t);
+                    if (defect_surface.has_value())
+                    {
+                        const auto layout =
+                            add_defect_to_skeleton(defect_surface.value(), skeleton,
+                                                   params.influence_radius_charged_defects, center_cell, absolute_cell);
+
+                        return design_gate<decltype(layout), tt, CellLyt, GateLyt>(layout, std::vector<tt>{f}, params,
+                                                                                   p, t);
+                    }
+                    return design_gate<CellLyt, tt, CellLyt, GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
                 }
             }
             if constexpr (mockturtle::has_is_xor_v<GateLyt>)
             {
+                const auto skeleton = cell_list_to_cell_level_layout<CellLyt>(TWO_IN_ONE_OUT_MAP.at(p));
+
                 if (lyt.is_xor(n))
                 {
-                    const auto layout =
-                        add_defect_to_skeleton(cell_list_to_cell_level_layout<CellLyt>(TWO_IN_ONE_OUT_MAP.at(p)),
-                                               center_cell, absolute_cell, parameters);
 
-                    return design_gate<decltype(layout), tt, CellLyt, GateLyt>(layout, std::vector<tt>{f}, parameters,
-                                                                               p, t);
+                    if (defect_surface.has_value())
+                    {
+                        const auto skeleton_with_defects =
+                            add_defect_to_skeleton(defect_surface.value(), skeleton,
+                                                   params.influence_radius_charged_defects, center_cell, absolute_cell);
+
+                        return design_gate<decltype(skeleton_with_defects), tt, CellLyt, GateLyt>(
+                            skeleton_with_defects, std::vector<tt>{f}, params, p, t);
+                    }
+
+                    return design_gate<CellLyt, tt, CellLyt, GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
                 }
             }
             if constexpr (fiction::has_is_xnor_v<GateLyt>)
             {
                 if (lyt.is_xnor(n))
                 {
-                    const auto layout =
-                        add_defect_to_skeleton(cell_list_to_cell_level_layout<CellLyt>(TWO_IN_ONE_OUT_MAP.at(p)),
-                                               center_cell, absolute_cell, parameters);
+                    const auto skeleton = cell_list_to_cell_level_layout<CellLyt>(TWO_IN_ONE_OUT_MAP.at(p));
 
-                    return design_gate<decltype(layout), tt, CellLyt, GateLyt>(layout, std::vector<tt>{f}, parameters,
-                                                                               p, t);
+                    if (defect_surface.has_value())
+                    {
+                        const auto skeleton_with_defects =
+                            add_defect_to_skeleton(defect_surface.value(), skeleton,
+                                                   params.influence_radius_charged_defects, center_cell, absolute_cell);
+
+                        return design_gate<decltype(skeleton_with_defects), tt, CellLyt, GateLyt>(
+                            skeleton_with_defects, std::vector<tt>{f}, params, p, t);
+                    }
+
+                    return design_gate<CellLyt, tt, CellLyt, GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
                 }
             }
             if constexpr (fiction::has_is_ge_v<GateLyt>)
             {
                 if (lyt.is_ge(n))
                 {
-                    const auto layout =
-                        add_defect_to_skeleton(cell_list_to_cell_level_layout<CellLyt>(TWO_IN_ONE_OUT_MAP.at(p)),
-                                               center_cell, absolute_cell, parameters);
+                    const auto skeleton = cell_list_to_cell_level_layout<CellLyt>(TWO_IN_ONE_OUT_MAP.at(p));
 
-                    return design_gate<decltype(layout), tt, CellLyt, GateLyt>(layout, std::vector<tt>{f}, parameters,
-                                                                               p, t);
+                    if (defect_surface.has_value())
+                    {
+                        const auto skeleton_with_defects =
+                            add_defect_to_skeleton(defect_surface.value(), skeleton,
+                                                   params.influence_radius_charged_defects, center_cell, absolute_cell);
+
+                        return design_gate<decltype(skeleton_with_defects), tt, CellLyt, GateLyt>(
+                            skeleton_with_defects, std::vector<tt>{f}, params, p, t);
+                    }
+
+                    return design_gate<CellLyt, tt, CellLyt, GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
                 }
             }
             if constexpr (fiction::has_is_le_v<GateLyt>)
             {
                 if (lyt.is_le(n))
                 {
-                    const auto layout =
-                        add_defect_to_skeleton(cell_list_to_cell_level_layout<CellLyt>(TWO_IN_ONE_OUT_MAP.at(p)),
-                                               center_cell, absolute_cell, parameters);
+                    const auto skeleton = cell_list_to_cell_level_layout<CellLyt>(TWO_IN_ONE_OUT_MAP.at(p));
 
-                    return design_gate<decltype(layout), tt, CellLyt, GateLyt>(layout, std::vector<tt>{f}, parameters,
-                                                                               p, t);
+                    if (defect_surface.has_value())
+                    {
+                        const auto skeleton_with_defects =
+                            add_defect_to_skeleton(defect_surface.value(), skeleton,
+                                                   params.influence_radius_charged_defects, center_cell, absolute_cell);
+
+                        return design_gate<decltype(skeleton_with_defects), tt, CellLyt, GateLyt>(
+                            skeleton_with_defects, std::vector<tt>{f}, params, p, t);
+                    }
+
+                    return design_gate<CellLyt, tt, CellLyt, GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
                 }
             }
             if constexpr (fiction::has_is_gt_v<GateLyt>)
             {
                 if (lyt.is_gt(n))
                 {
-                    const auto layout =
-                        add_defect_to_skeleton(cell_list_to_cell_level_layout<CellLyt>(TWO_IN_ONE_OUT_MAP.at(p)),
-                                               center_cell, absolute_cell, parameters);
+                    const auto skeleton = cell_list_to_cell_level_layout<CellLyt>(TWO_IN_ONE_OUT_MAP.at(p));
 
-                    return design_gate<decltype(layout), tt, CellLyt, GateLyt>(layout, std::vector<tt>{f}, parameters,
-                                                                               p, t);
+                    if (defect_surface.has_value())
+                    {
+                        const auto skeleton_with_defects =
+                            add_defect_to_skeleton(defect_surface.value(), skeleton,
+                                                   params.influence_radius_charged_defects, center_cell, absolute_cell);
+
+                        return design_gate<decltype(skeleton_with_defects), tt, CellLyt, GateLyt>(
+                            skeleton_with_defects, std::vector<tt>{f}, params, p, t);
+                    }
+
+                    return design_gate<CellLyt, tt, CellLyt, GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
                 }
             }
             if constexpr (fiction::has_is_lt_v<GateLyt>)
             {
                 if (lyt.is_lt(n))
                 {
-                    const auto layout =
-                        add_defect_to_skeleton(cell_list_to_cell_level_layout<CellLyt>(TWO_IN_ONE_OUT_MAP.at(p)),
-                                               center_cell, absolute_cell, parameters);
+                    const auto skeleton = cell_list_to_cell_level_layout<CellLyt>(TWO_IN_ONE_OUT_MAP.at(p));
 
-                    return design_gate<decltype(layout), tt, CellLyt, GateLyt>(layout, std::vector<tt>{f}, parameters,
-                                                                               p, t);
+                    if (defect_surface.has_value())
+                    {
+                        const auto skeleton_with_defects =
+                            add_defect_to_skeleton(defect_surface.value(), skeleton,
+                                                   params.influence_radius_charged_defects, center_cell, absolute_cell);
+
+                        return design_gate<decltype(skeleton_with_defects), tt, CellLyt, GateLyt>(
+                            skeleton_with_defects, std::vector<tt>{f}, params, p, t);
+                    }
+
+                    return design_gate<CellLyt, tt, CellLyt, GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
                 }
             }
         }
@@ -399,40 +537,35 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
      * @return `true` if the Bestagon gate is applicable to the layout, considering the provided conditions;
      *         otherwise, returns `false`.
      */
-    template <typename Lyt, typename TT, typename Params>
-    [[nodiscard]] static bool is_bestagon_gate_applicable(const Lyt& bestagon_lyt, const std::vector<TT>& truth_table,
-                                                          const Params& parameters)
+    template <typename Lyt, typename TT>
+    [[nodiscard]] static bool is_bestagon_gate_applicable(const Lyt&                      bestagon_lyt,
+                                                          const sidb_defect_surface<Lyt>& skeleton_with_defects,
+                                                          const std::vector<TT>&          truth_table,
+                                                          const sidb_on_the_fly_gate_library_params<Lyt>& parameters)
     {
-        auto       defect_copy               = parameters.defect_surface.clone();
-        const auto sidbs_affected_by_defects = defect_copy.all_affected_sidbs(std::pair(0, 0));
+        const auto sidbs_affected_by_defects = skeleton_with_defects.all_affected_sidbs(std::pair(0, 0));
 
-        bool is_bestagon_gate_applicable = true;
-        defect_copy.foreach_sidb_defect(
-            [&bestagon_lyt, &is_bestagon_gate_applicable, &sidbs_affected_by_defects](const auto& cd)
-            {
-                if (is_charged_defect_type(cd.second))
-                {
-                    is_bestagon_gate_applicable = false;
-                    return;
-                }
-                bestagon_lyt.foreach_cell(
-                    [&cd, &is_bestagon_gate_applicable, &sidbs_affected_by_defects](const auto& c)
-                    {
-                        if (sidbs_affected_by_defects.count(c))
-                        {
-                            is_bestagon_gate_applicable = false;
-                            return;
-                        }
-                    });
-            });
-        if (is_bestagon_gate_applicable)
+        auto skeleton_with_defects_copy = skeleton_with_defects.clone();
+
+        const auto logic_cells = bestagon_lyt.get_cells_by_type(fiction::technology<Lyt>::cell_type::LOGIC);
+
+        assert(!logic_cells.empty() && "No Logic cells are found");
+
+        for (const auto& l_cells : logic_cells)
         {
-            return is_bestagon_gate_applicable;
+            if (sidbs_affected_by_defects.count(l_cells))
+            {
+                return false;
+            }
         }
-        bestagon_lyt.foreach_cell([&defect_copy, &bestagon_lyt](const auto& c)
-                                  { defect_copy.assign_cell_type(c, bestagon_lyt.get_cell_type(c)); });
+
+        for (const auto& l_cells : logic_cells)
+        {
+            skeleton_with_defects_copy.assign_cell_type(l_cells, sidb_technology::LOGIC);
+        }
+
         const auto status =
-            is_operational(defect_copy, truth_table,
+            is_operational(skeleton_with_defects_copy, truth_table,
                            is_operational_params{parameters.design_gate_params.operational_params.simulation_parameters,
                                                  parameters.design_gate_params.operational_params.sim_engine})
                 .first;
@@ -464,9 +597,18 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
                 switch (cell_type)
                 {
                     case (Lyt::technology::cell_type::NORMAL):
-                    case (Lyt::technology::cell_type::OUTPUT):
                     {
                         cell = 'x';
+                        break;
+                    }
+                    case (Lyt::technology::cell_type::INPUT):
+                    {
+                        cell = 'i';
+                        break;
+                    }
+                    case (Lyt::technology::cell_type::OUTPUT):
+                    {
+                        cell = 'o';
                         break;
                     }
                     case (Lyt::technology::cell_type::LOGIC):
@@ -517,12 +659,16 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
 
         if (spec == create_crossing_wire_tt() || spec == create_double_wire_tt())
         {
-            if (is_sidb_gate_design_impossible(skeleton, spec, params))
+            if constexpr (is_sidb_defect_surface_v<LytSkeleton>)
             {
-                throw gate_design_exception<tt, GateLyt>(tile, create_id_tt(), p);
+                if (is_sidb_gate_design_impossible(skeleton, spec, params))
+                {
+                    throw gate_design_exception<tt, GateLyt>(tile, create_id_tt(), p);
+                }
             }
 
             const auto found_gate_layouts = design_sidb_gates(skeleton, spec, parameters.design_gate_params);
+
             if (found_gate_layouts.empty())
             {
                 throw gate_design_exception<tt, GateLyt>(tile, create_id_tt(), p);
@@ -531,12 +677,16 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
             return cell_list_to_gate<char>(cell_level_layout_to_list(found_gate_layouts.front()));
         }
 
-        if (is_sidb_gate_design_impossible(skeleton, spec, params))
+        if constexpr (is_sidb_defect_surface_v<LytSkeleton>)
         {
-            throw gate_design_exception<tt, GateLyt>(tile, spec.front(), p);
+            if (is_sidb_gate_design_impossible(skeleton, spec, params))
+            {
+                throw gate_design_exception<tt, GateLyt>(tile, spec.front(), p);
+            }
         }
 
         const auto found_gate_layouts = design_sidb_gates(skeleton, spec, parameters.design_gate_params);
+
         if (found_gate_layouts.empty())
         {
             throw gate_design_exception<tt, GateLyt>(tile, spec.front(), p);
@@ -613,10 +763,11 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
      * @param parameters Parameters for defect handling.
      * @return The updated skeleton with added defects from the surrounding area.
      */
-    template <typename CellLyt, typename Params>
+    template <typename CellLyt>
     [[nodiscard]] static sidb_defect_surface<CellLyt>
-    add_defect_to_skeleton(const CellLyt& skeleton, const cell<CellLyt>& center_cell,
-                           const cell<CellLyt>& absolute_cell, const Params& parameters)
+    add_defect_to_skeleton(const sidb_defect_surface<CellLyt>& defect_surface, const CellLyt& skeleton,
+                           const double influence_distance, const cell<CellLyt>& center_cell,
+                           const cell<CellLyt>& absolute_cell)
     {
         static_assert(is_cell_level_layout_v<CellLyt>, "CellLyt is not a cell-level layout");
         static_assert(has_sidb_technology_v<CellLyt>, "CellLyt is not an SiDB layout");
@@ -624,15 +775,15 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
 
         auto skeleton_with_defect = sidb_defect_surface{skeleton};
 
-        parameters.defect_surface.foreach_sidb_defect(
-            [&skeleton_with_defect, &center_cell, &absolute_cell, &parameters](const auto& cd)
+        defect_surface.foreach_sidb_defect(
+            [&skeleton_with_defect, &center_cell, &absolute_cell, &influence_distance, &skeleton](const auto& cd)
             {
                 // all defects (charged) in a distance of influence_radius_charged_defects from the center are taken
                 // into account.
-                if (sidb_nm_distance(CellLyt{}, center_cell, cd.first) < parameters.influence_radius_charged_defects)
+                if (sidb_nm_distance(CellLyt{}, center_cell, cd.first) < influence_distance)
                 {
-                    const auto relative_cell = cd.first - absolute_cell;
-                    skeleton_with_defect.assign_sidb_defect(relative_cell, cd.second);
+                    const auto relative_defect_position = cd.first - absolute_cell;
+                    skeleton_with_defect.assign_sidb_defect(relative_defect_position, cd.second);
                 }
             });
 
@@ -642,14 +793,11 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
         return skeleton_with_defect;
     }
     /**
-     * This function determines the port routing for a specific tile within a layout represented by the object `lyt` of
-     * type `Lyt`. It examines the tile's characteristics and connectivity to determine the appropriate incoming and
-     * outgoing connector ports and populates them in a `port_list` object.
+     * Determines the port directions of a given tile.
      *
-     * @tparam Lyt Cell-level layout type.
-     * @param lyt A reference to an object of type `Lyt` representing the layout.
-     * @param t The tile for which port routing is being determined.
-     * @return A `port_list` object containing the determined port directions for incoming and outgoing signals.
+     * @tparam GateLyt Pointy-top hexagonal gate-level layout type.
+     * @param lyt Given tile `t` for which the port directions are determined.
+     * @return port directions of the given tile are returned as `port_list`.
      */
     template <typename Lyt>
     [[nodiscard]] static port_list<port_direction> determine_port_routing(const Lyt& lyt, const tile<Lyt>& t) noexcept
@@ -711,9 +859,9 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
     static constexpr const fcn_gate CROSSING{cell_list_to_gate<char>({{
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'i', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'i', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'i', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'i', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'x', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'x', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
@@ -731,13 +879,13 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'x', ' ', ' ', ' ', ' ', 'x', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'l', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'l', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'x', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'l', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
@@ -745,11 +893,11 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'x', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'x', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'x', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'x', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'o', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'o', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'x', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'x', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'o', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'o', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'x', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'x', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
@@ -760,9 +908,9 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
     static constexpr const fcn_gate DOUBLE_WIRE{cell_list_to_gate<char>({{
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'i', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'i', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'i', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'i', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'x', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'x', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
@@ -779,14 +927,14 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'x', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'l', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'x', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'l', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'x', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'l', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
@@ -794,11 +942,11 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'x', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'x', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'x', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'x', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'o', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'o', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'x', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'x', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'o', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'o', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'x', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'x', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
