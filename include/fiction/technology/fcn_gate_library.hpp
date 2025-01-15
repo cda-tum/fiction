@@ -5,18 +5,15 @@
 #ifndef FICTION_FCN_GATE_LIBRARY_HPP
 #define FICTION_FCN_GATE_LIBRARY_HPP
 
-#include "fiction/layouts/coordinates.hpp"
 #include "fiction/technology/cell_ports.hpp"
-#include "fiction/technology/cell_technologies.hpp"
 #include "fiction/utils/array_utils.hpp"
-#include "fiction/utils/hash.hpp"
 
 #include <kitty/dynamic_truth_table.hpp>
 #include <kitty/hash.hpp>
 
 #include <array>
-#include <initializer_list>
-#include <memory>
+#include <cstdint>
+#include <exception>
 #include <unordered_map>
 #include <vector>
 
@@ -40,6 +37,9 @@ class unsupported_gate_type_exception : public std::exception
     }
 
   private:
+    /**
+     * Coordinate of teh layout where the unsupported gate type was found.
+     */
     const CoordinateType coord;
 };
 /**
@@ -58,19 +58,29 @@ class unsupported_gate_orientation_exception : public std::exception
             coord{c},
             ports{p}
     {}
-
+    /**
+     * Coordinate of the layout where the unsupported gate orientation was found.
+     */
     [[nodiscard]] CoordinateType where() const noexcept
     {
         return coord;
     }
-
+    /**
+     * Ports of the unsupported gate orientation.
+     */
     [[nodiscard]] port_list<PortType> which_ports() const noexcept
     {
         return ports;
     }
 
   private:
-    const CoordinateType      coord;
+    /**
+     * Coordinate of the layout where the unsupported gate orientation was found.
+     */
+    const CoordinateType coord;
+    /**
+     * Ports of the unsupported gate orientation.
+     */
     const port_list<PortType> ports;
 };
 

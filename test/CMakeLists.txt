@@ -16,7 +16,6 @@ target_compile_definitions(
         fiction_test
         INTERFACE "TEST_PATH=\"${CMAKE_CURRENT_SOURCE_DIR}/\"")
 
-
 include_directories(.)
 
 file(GLOB_RECURSE FILENAMES */*.cpp)
