@@ -95,6 +95,7 @@ jobs:
         uses: ilammy/msvc-dev-cmd@v1
 
       - name: Setup ccache
+        if: matrix.runs-on != 'ubuntu-24.04-arm'
         uses: hendrikmuhs/ccache-action@v1.2
         with:
           key: "${{matrix.config.os}}-pyfiction"
