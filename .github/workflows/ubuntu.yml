@@ -48,6 +48,12 @@ jobs:
           - os: ubuntu-24.04
             compiler: clang++-14
           - os: ubuntu-24.04-arm
+            compiler: g++-11
+          - os: ubuntu-24.04-arm
+            compiler: g++-12
+          - os: ubuntu-24.04-arm
+            compiler: g++-13
+          - os: ubuntu-24.04-arm
             compiler: clang++-14
         include:
           - os: ubuntu-22.04
@@ -58,8 +64,6 @@ jobs:
             compiler: clang++-17
           - os: ubuntu-24.04
             compiler: clang++-18
-          - os: ubuntu-24.04-arm
-            compiler: g++-14
           - os: ubuntu-24.04-arm
             compiler: clang++-17
           - os: ubuntu-24.04-arm
