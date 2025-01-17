@@ -83,7 +83,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        runs-on: [ubuntu-24.04, ubuntu-24.04-arm, macos-13, macos-14, windows-latest]
+        runs-on:
+          [ubuntu-24.04, ubuntu-24.04-arm, macos-13, macos-14, windows-latest]
 
     steps:
       - uses: actions/checkout@v4
