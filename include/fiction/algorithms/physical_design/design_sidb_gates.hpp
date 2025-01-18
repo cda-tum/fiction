@@ -10,7 +10,6 @@
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
 #include "fiction/algorithms/simulation/sidb/random_sidb_layout_generator.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
-#include "fiction/technology/cell_ports.hpp"
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
@@ -20,7 +19,6 @@
 #include "fiction/utils/math_utils.hpp"
 
 #include <fmt/format.h>
-#include <kitty/dynamic_truth_table.hpp>
 #include <kitty/traits.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 
@@ -31,9 +29,9 @@
 #include <cstdlib>
 #include <iostream>
 #include <mutex>
+#include <optional>
 #include <random>
 #include <thread>
-#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -210,14 +208,6 @@ class design_sidb_gates_impl
         if (all_combinations.empty())
         {
             return designed_gate_layouts;
-        }
-
-        std::unordered_set<coordinate<Lyt>> sidbs_affected_by_defects = {};
-
-        // used to collect all SiDBs that are affected due to neutrally charged defects.
-        if constexpr (has_get_sidb_defect_v<Lyt>)
-        {
-            sidbs_affected_by_defects = skeleton_layout.all_affected_sidbs(std::make_pair(0, 0));
         }
 
         std::mutex mutex_to_protect_designed_gate_layouts{};
