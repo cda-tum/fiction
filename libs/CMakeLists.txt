@@ -161,9 +161,6 @@ target_link_system_libraries(libfiction INTERFACE tinyxml2::tinyxml2)
 option(FICTION_JEMALLOC "Automatically download and link jemalloc by Jason Evans.")
 if (FICTION_JEMALLOC)
     include(${PROJECT_SOURCE_DIR}/cmake/FetchJemalloc.cmake)
-    target_link_system_libraries(libfiction INTERFACE jemalloc)
-
+    target_link_system_libraries(libfiction INTERFACE jemalloc dl pthread m)
     target_include_directories(libfiction SYSTEM INTERFACE jemalloc)
-
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -ljemalloc -lm")
 endif ()
