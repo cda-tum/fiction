@@ -155,7 +155,7 @@ TEST_CASE("Compute levels during node construction", "[static-depth-view]")
 
 TEST_CASE("Compute levels during node construction with cost function", "[static-depth-view]")
 {
-    const mockturtle::xag_network                                                     xag;
+    const mockturtle::xag_network                                                            xag;
     static_depth_view<mockturtle::xag_network, mockturtle::mc_cost<mockturtle::xag_network>> dxag{xag};
 
     const auto a = dxag.create_pi();
@@ -171,11 +171,11 @@ TEST_CASE("Compute levels during node construction with cost function", "[static
 
 TEST_CASE("Compute levels during node construction after copy assignment", "[static-depth-view]")
 {
-    const mockturtle::xag_network       xag{};
+    const mockturtle::xag_network              xag{};
     static_depth_view<mockturtle::xag_network> dxag;
     {
         auto tmp = std::make_unique<static_depth_view<mockturtle::xag_network>>(xag);
-        dxag     = *tmp; // copy assignment
+        dxag     = *tmp;  // copy assignment
     }
 
     auto const a = dxag.create_pi();
@@ -190,12 +190,12 @@ TEST_CASE("Compute levels during node construction after copy assignment", "[sta
 
 TEST_CASE("Compute levels during node construction after move assignment", "[static-depth-view]")
 {
-    const mockturtle::xag_network       xag{};
+    const mockturtle::xag_network              xag{};
     static_depth_view<mockturtle::xag_network> dxag;
     {
         const std::unique_ptr<static_depth_view<mockturtle::xag_network>> tmp =
             std::make_unique<static_depth_view<mockturtle::xag_network>>(xag);
-        dxag = *tmp; // copy assignment
+        dxag = *tmp;  // copy assignment
     }
 
     const auto a = dxag.create_pi();

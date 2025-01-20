@@ -245,7 +245,7 @@ class mutable_rank_view<Ntk, false> : public fiction::static_depth_view<Ntk>
 
         // check that the `rank` contains all nodes from `nodes`
         assert(rank.size() == nodes.size());
-        auto sort_rank = rank;
+        auto sort_rank  = rank;
         auto sort_nodes = nodes;
         std::sort(sort_rank.begin(), sort_rank.end());
         std::sort(sort_nodes.begin(), sort_nodes.end());
@@ -328,7 +328,6 @@ class mutable_rank_view<Ntk, false> : public fiction::static_depth_view<Ntk>
 
         std::sort(rank.begin(), rank.end(), cmp);
         std::for_each(rank.cbegin(), rank.cend(), [this, i = 0u](auto const& n) mutable { rank_pos[n] = i++; });
-
     }
 
     /**
@@ -346,7 +345,6 @@ class mutable_rank_view<Ntk, false> : public fiction::static_depth_view<Ntk>
         auto const& rank = ranks[level];
 
         mockturtle::detail::foreach_element(rank.cbegin(), rank.cend(), std::forward<Fn>(fn));
-
     }
 
     /**

@@ -67,7 +67,7 @@ TEMPLATE_TEST_CASE("Traits", "[mutable-rank-view]", mockturtle::aig_network, moc
 
 TEST_CASE("Test constructors", "[mutable-rank-view]")
 {
-    technology_network                     tec{};
+    technology_network                    tec{};
     mutable_rank_view<technology_network> tec_r;
 
     const auto x1 = tec.create_pi();
@@ -310,7 +310,8 @@ TEST_CASE("Check PI order for equivalence checking", "[mutable-rank-view]")
     bool cec_m = *maybe_cec_m;
     CHECK(cec_m == 0);
 
-    // this rearranges the order of the PI as stored in the underlying static_depth_view (corresponds to the order in _storage)
+    // this rearranges the order of the PI as stored in the underlying static_depth_view (corresponds to the order in
+    // _storage)
     vpi_r.rearrange_pis();
 
     maybe_cec_m = mockturtle::equivalence_checking(*fiction::virtual_miter<technology_network>(tec, vpi_r), {}, &st);

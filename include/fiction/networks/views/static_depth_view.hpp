@@ -38,8 +38,9 @@ struct depth_view_params
  * Unlike the `mockturtle` implementation, this version uses flat hashmaps to store `level` data
  * instead of `mockturtle::node_map`. Additionally, the `add_event` functionality has been removed.
  * As a result, if the underlying network changes, either `on_add` has to be called when adding a node to the network
- * and keep the current depth information or the `update_levels` method must be called to refresh the `static_depth_view`
- * information. These modifications address performance issues encountered with `mockturtle::static_depth_view`.
+ * and keep the current depth information or the `update_levels` method must be called to refresh the
+ * `static_depth_view` information. These modifications address performance issues encountered with
+ * `mockturtle::static_depth_view`.
  *
  * This view computes the level of each node and the overall depth of the network. The `level` and
  * `depth` methods adhere to the network interface. Levels are calculated during construction and
@@ -142,7 +143,8 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
     }
 
     /**
-     * Copy constructor creates a new `fiction::static_depth_view` by copying the content of another `fiction::static_depth_view`.
+     * Copy constructor creates a new `fiction::static_depth_view` by copying the content of another
+     * `fiction::static_depth_view`.
      *
      * @param other The other `fiction::static_depth_view` object to be copied.
      */
@@ -156,7 +158,8 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
     {}
 
     /**
-     * Overloaded assignment operator for copying `fiction::static_depth_view` content of another `fiction::static_depth_view` object.
+     * Overloaded assignment operator for copying `fiction::static_depth_view` content of another
+     * `fiction::static_depth_view` object.
      *
      * @param other The source `fiction::static_depth_view` object whose contents are being copied.
      * @return A reference to the current object, enabling chain assignments.
@@ -183,7 +186,7 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
         ps        = other.ps;
         levels    = other.levels;
         crit_path = other.crit_path;
-        ntk_depth     = other.ntk_depth;
+        ntk_depth = other.ntk_depth;
         cost_fn   = other.cost_fn;
 
         // Return the current object
