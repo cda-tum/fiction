@@ -353,7 +353,7 @@ See ``quickexact -h`` for a full list.
 
 The simulated ground state charge distribution can be printed with ``print -c``.
 
-ClusterComplete (``clustercomplete``, ``ccsim``)
+ClusterComplete (``clustercomplete``)
 #####################################
 
 *ClusterComplete* too serves as an exact simulator in much the same way as *QuickExact*, yet it introduces a new
@@ -371,7 +371,7 @@ Most important parameters:
 - Witness partitioning limits (``-w``, ``-o``)
 - Report pruning statistics (``-r``)
 
-See ``clustercomplete -h`` or ``ccsim -h`` (alias) for a full list.
+See ``clustercomplete -h`` for a full list.
 
 Pruning statistics may be useful to optimise the efficacy of the first pruning stage with the witness partitioning
 limits to save time on time intensive simulation problems. These statistics can also provide an indication for the
