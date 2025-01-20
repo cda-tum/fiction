@@ -156,3 +156,19 @@ check_if_present(tinyxml2)
 add_subdirectory(tinyxml2 EXCLUDE_FROM_ALL)
 set_property(TARGET tinyxml2 PROPERTY POSITION_INDEPENDENT_CODE ON)
 target_link_system_libraries(libfiction INTERFACE tinyxml2::tinyxml2)
+
+# Enable jemalloc to be linked
+option(FICTION_JEMALLOC "Automatically download and link jemalloc by Jason Evans.")
+if (FICTION_JEMALLOC)
+    include(${PROJECT_SOURCE_DIR}/cmake/FetchJemalloc.cmake)
+
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(JEMALLOC jemalloc)
+
+    pkg_search_module(JEMALLOC REQUIRED jemalloc)
+    include_directories(${JEMALLOC_INCLUDE_DIRS})
+
+    target_link_system_libraries(libfiction INTERFACE ${JEMALLOC_LIBRARIES})
+
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -ljemalloc -lm")
+endif ()
