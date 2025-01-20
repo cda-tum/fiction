@@ -1,7 +1,6 @@
 include(ExternalProject)
 
-set(JEMALLOC_TAG "5.3.0" CACHE STRING "Which tag/revision of jemalloc to use")
-set(JEMALLOC_SOURCE_DIR "${CMAKE_SOURCE_DIR}/libs/jemalloc")
+set(JEMALLOC_SOURCE_DIR "1${CMAKE_SOURCE_DIR}/libs/jemalloc")
 set(JEMALLOC_PREFIX_DIR "${CMAKE_BINARY_DIR}/libs/jemalloc")
 set(JEMALLOC_INSTALL_DIR "${JEMALLOC_PREFIX_DIR}/install")
 
@@ -23,7 +22,7 @@ endif ()
 ExternalProject_Add(
         jemalloc_project
         PREFIX "${JEMALLOC_PREFIX_DIR}"
-        URL "https://github.com/jemalloc/jemalloc/archive/refs/tags/${JEMALLOC_TAG}.tar.gz"
+        URL "https://mirrors.slackware.com/slackware/slackware64-current/slackware64/l/jemalloc-5.3.0-x86_64-2.txz"
         SOURCE_DIR "${JEMALLOC_SOURCE_DIR}"
         CONFIGURE_COMMAND cd ${JEMALLOC_SOURCE_DIR} && ./autogen.sh --prefix=${JEMALLOC_INSTALL_DIR}
         BUILD_COMMAND cd ${JEMALLOC_SOURCE_DIR} && make ${PARALLEL_BUILD_ARGS}
