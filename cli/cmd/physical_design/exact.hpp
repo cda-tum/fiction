@@ -38,7 +38,7 @@ class exact_command : public command
     {
         add_option("--clk_scheme,-s", ps.scheme,
                    "Clocking scheme to use {OPEN[3|4], COLUMNAR[3|4], ROW[3|4] 2DDWAVE[3|4], 2DDWAVEHEX[3|4], USE, "
-                   "RES, ESR, CFE, RIPPLE, BANCS}",
+                   "RES, ESR, CFE, SRS, RIPPLE, BANCS}",
                    true);
         add_option("--upper_area", ps.upper_bound_area, "Upper bound for the total number of tiles");
         add_option("--upper_x", ps.upper_bound_x, "Upper bound for the number of tiles in x-direction");
