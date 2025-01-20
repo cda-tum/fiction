@@ -42,12 +42,12 @@ inline void clustercomplete(pybind11::module& m)
     /**
      * Report *Ground State Space* stats.
      */
-    py::enum_<fiction::ground_state_space_reporting>(m, "ground_state_space_reporting",
-                                                     DOC(fiction_ground_state_space_reporting))
-        .value("ENABLED", fiction::ground_state_space_reporting::ENABLED,
-               DOC(fiction_ground_state_space_reporting_ENABLED))
-        .value("DISABLED", fiction::ground_state_space_reporting::DISABLED,
-               DOC(fiction_ground_state_space_reporting_DISABLED));
+    py::enum_<typename fiction::clustercomplete_params<fiction::offset::ucoord_t>::ground_state_space_reporting>(m, "ground_state_space_reporting",
+                                                     DOC(fiction_clustercomplete_params_ground_state_space_reporting))
+        .value("ON", fiction::clustercomplete_params<fiction::offset::ucoord_t>::ground_state_space_reporting::ON,
+               DOC(fiction_clustercomplete_params_ground_state_space_reporting_ON))
+        .value("OFF", fiction::clustercomplete_params<fiction::offset::ucoord_t>::ground_state_space_reporting::OFF,
+               DOC(fiction_clustercomplete_params_ground_state_space_reporting_OFF));
 
     /**
      * ClusterComplete parameters.

@@ -75,7 +75,6 @@ Exhaustive Ground State Simulation
 
         **Header:** ``fiction/algorithms/simulation/sidb/clustercomplete.hpp``
 
-        .. doxygenenum:: fiction::ground_state_space_reporting
         .. doxygenstruct:: fiction::clustercomplete_params
            :members:
         .. doxygenfunction:: fiction::clustercomplete
@@ -89,8 +88,6 @@ Exhaustive Ground State Simulation
             :members:
         .. autofunction:: mnt.pyfiction.quickexact
         .. autoclass:: mnt.pyfiction.clustercomplete_params
-            :members:
-        .. autoclass:: mnt.pyfiction.ground_state_space_reporting
             :members:
         .. autofunction:: mnt.pyfiction.clustercomplete
         .. autofunction:: mnt.pyfiction.exhaustive_ground_state_simulation

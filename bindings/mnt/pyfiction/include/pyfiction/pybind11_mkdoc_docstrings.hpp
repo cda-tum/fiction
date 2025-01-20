@@ -13899,8 +13899,8 @@ such that some extra pruning may be performed, while the impact on the
 runtime remains negligible. Validity witness partitioning parameters
 are relevant for large simulation problems.)doc";
 
-static const char *__doc_fiction_ground_state_space_reporting =
-R"doc(This enum class provides meaningful options for configuring the
+static const char* __doc_fiction_clustercomplete_params_ground_state_space_reporting =
+    R"doc(This enum class provides meaningful options for configuring the
 reporting of the *Ground State Space* statistics. These statistic may
 be used especially to configure the validity witness partitioning
 options for *Ground State Space*, that may impair runtimes when set
@@ -13908,11 +13908,11 @@ too high, but could provide a large benefit to the complexity of the
 unfolding process of large simulation problems by performing more
 involved pruning procedures in the construction stage.)doc";
 
-static const char *__doc_fiction_ground_state_space_reporting_DISABLED =
+static const char* __doc_fiction_clustercomplete_params_ground_state_space_reporting_OFF =
 R"doc(Disabling this option will suppress the output of *Ground State Space*
 statistics.)doc";
 
-static const char *__doc_fiction_ground_state_space_reporting_ENABLED =
+static const char* __doc_fiction_clustercomplete_params_ground_state_space_reporting_ON =
 R"doc(Enabling this option will output *Ground State Space* statistics to
 the standard output.)doc";
 

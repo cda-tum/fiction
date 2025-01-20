@@ -40,30 +40,29 @@ namespace fiction
 {
 
 /**
- * This enum class provides meaningful options for configuring the reporting of the *Ground State Space* statistics.
- * These statistic may be used especially to configure the validity witness partitioning options for *Ground State
- * Space*, that may impair runtimes when set too high, but could provide a large benefit to the complexity of the
- * unfolding process of large simulation problems by performing more involved pruning procedures in the construction
- * stage.
- */
-enum class ground_state_space_reporting : uint8_t
-{
-    /**
-     * Enabling this option will output *Ground State Space* statistics to the standard output.
-     */
-    ENABLED,
-    /**
-     * Disabling this option will suppress the output of *Ground State Space* statistics.
-     */
-    DISABLED
-};
-
-/**
  * The struct containing the parameters both passed on to pre-simulator Ground State Space, and used during simulation.
  */
 template <typename CellType = siqad::coord_t>
 struct clustercomplete_params
 {
+    /**
+     * This enum class provides meaningful options for configuring the reporting of the *Ground State Space* statistics.
+     * These statistic may be used especially to configure the validity witness partitioning options for *Ground State
+     * Space*, that may impair runtimes when set too high, but could provide a large benefit to the complexity of the
+     * unfolding process of large simulation problems by performing more involved pruning procedures in the construction
+     * stage.
+     */
+    enum class ground_state_space_reporting : uint8_t
+    {
+        /**
+         * Enabling this option will output *Ground State Space* statistics to the standard output.
+         */
+        ON,
+        /**
+         * Disabling this option will suppress the output of *Ground State Space* statistics.
+         */
+        OFF
+    };
     /**
      * Physical simulation parameters.
      */
@@ -99,7 +98,7 @@ struct clustercomplete_params
      * Option to decide if the *Ground State Space* statistics are reported to the standard output. By default, this
      * option is disabled.
      */
-    ground_state_space_reporting report_gss_stats = ground_state_space_reporting::DISABLED;
+    ground_state_space_reporting report_gss_stats = ground_state_space_reporting::OFF;
 };
 
 namespace detail
@@ -152,7 +151,7 @@ class clustercomplete_impl
             return result;
         }
 
-        if (params.report_gss_stats == ground_state_space_reporting::ENABLED)
+        if (params.report_gss_stats == clustercomplete_params<cell<Lyt>>::ground_state_space_reporting::ON)
         {
             gss_stats.report();
         }

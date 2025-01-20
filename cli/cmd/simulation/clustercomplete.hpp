@@ -122,9 +122,10 @@ class clustercomplete_command : public command
                 {
                     params.simulation_parameters = physical_params;
 
-                    params.report_gss_stats = is_set("report_gss_stats") ?
-                                                  fiction::ground_state_space_reporting::ENABLED :
-                                                  fiction::ground_state_space_reporting::DISABLED;
+                    params.report_gss_stats =
+                        is_set("report_gss_stats") ?
+                            fiction::clustercomplete_params<fiction::cell<Lyt>>::ground_state_space_reporting::ON :
+                            fiction::clustercomplete_params<fiction::cell<Lyt>>::ground_state_space_reporting::OFF;
 
                     if constexpr (fiction::is_sidb_lattice_100_v<Lyt>)
                     {
