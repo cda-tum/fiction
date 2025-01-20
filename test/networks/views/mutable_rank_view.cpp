@@ -8,7 +8,7 @@
 #include <fiction/algorithms/network_transformation/network_balancing.hpp>
 #include <fiction/algorithms/verification/virtual_miter.hpp>
 #include <fiction/networks/technology_network.hpp>
-#include <fiction/networks/views/extended_rank_view.hpp>
+#include <fiction/networks/views/mutable_rank_view.hpp>
 #include <fiction/networks/virtual_pi_network.hpp>
 #include <fiction/traits.hpp>
 
@@ -28,7 +28,7 @@
 
 using namespace fiction;
 
-TEMPLATE_TEST_CASE("traits", "[extended_rank_view]", mockturtle::aig_network, mockturtle::mig_network,
+TEMPLATE_TEST_CASE("Traits", "[mutable-rank-view]", mockturtle::aig_network, mockturtle::mig_network,
                    mockturtle::xag_network, mockturtle::xmg_network, mockturtle::klut_network,
                    mockturtle::cover_network, mockturtle::buffered_aig_network, mockturtle::buffered_mig_network,
                    mockturtle::crossed_klut_network, mockturtle::buffered_crossed_klut_network)
@@ -42,7 +42,7 @@ TEMPLATE_TEST_CASE("traits", "[extended_rank_view]", mockturtle::aig_network, mo
     CHECK(!mockturtle::has_foreach_gate_in_rank_v<TestType>);
     CHECK(!mockturtle::is_topologically_sorted_v<TestType>);
 
-    using rank_ntk = extended_rank_view<TestType>;
+    using rank_ntk = mutable_rank_view<TestType>;
 
     CHECK(mockturtle::is_network_type_v<rank_ntk>);
     CHECK(mockturtle::has_rank_position_v<rank_ntk>);
@@ -53,7 +53,7 @@ TEMPLATE_TEST_CASE("traits", "[extended_rank_view]", mockturtle::aig_network, mo
     CHECK(mockturtle::has_foreach_gate_in_rank_v<rank_ntk>);
     CHECK(mockturtle::is_topologically_sorted_v<rank_ntk>);
 
-    using rank_rank_ntk = extended_rank_view<rank_ntk>;
+    using rank_rank_ntk = mutable_rank_view<rank_ntk>;
 
     CHECK(mockturtle::is_network_type_v<rank_rank_ntk>);
     CHECK(mockturtle::has_rank_position_v<rank_rank_ntk>);
@@ -65,10 +65,10 @@ TEMPLATE_TEST_CASE("traits", "[extended_rank_view]", mockturtle::aig_network, mo
     CHECK(mockturtle::is_topologically_sorted_v<rank_rank_ntk>);
 }
 
-TEST_CASE("Constructors", "[extended-rank-view]")
+TEST_CASE("Test constructors", "[mutable-rank-view]")
 {
     technology_network                     tec{};
-    extended_rank_view<technology_network> tec_r;
+    mutable_rank_view<technology_network> tec_r;
 
     const auto x1 = tec.create_pi();
     const auto x2 = tec.create_pi();
@@ -83,9 +83,9 @@ TEST_CASE("Constructors", "[extended-rank-view]")
 
     const auto                                                           tec_r_cpy(tec_r);
     const auto                                                           tec_r_eq     = tec_r;
-    const auto                                                           tec_r_create = extended_rank_view(tec);
+    const auto                                                           tec_r_create = mutable_rank_view(tec);
     const std::vector<std::vector<mockturtle::node<technology_network>>> ranks        = {{2, 3}, {4}};
-    const auto                                                           tec_r_vector = extended_rank_view(tec, ranks);
+    const auto                                                           tec_r_vector = mutable_rank_view(tec, ranks);
     CHECK(tec_r_vector.rank_position(2) == tec_r.rank_position(2));
     CHECK(tec_r_vector.rank_position(3) == tec_r.rank_position(3));
     CHECK(tec_r_vector.rank_position(4) == tec_r.rank_position(4));
@@ -97,9 +97,9 @@ TEST_CASE("Constructors", "[extended-rank-view]")
     CHECK(tec_r_eq.check_validity() == 1);
 }
 
-TEST_CASE("Foreach", "[extended-rank-view]")
+TEST_CASE("Foreach", "[mutable-rank-view]")
 {
-    extended_rank_view<technology_network> tec_r;
+    mutable_rank_view<technology_network> tec_r;
 
     const auto x1_r = tec_r.create_pi();
     const auto x2_r = tec_r.create_pi();
@@ -132,7 +132,7 @@ TEST_CASE("Foreach", "[extended-rank-view]")
     CHECK(node_vector.size() == tec_r.num_gates());
 }
 
-TEST_CASE("Construct extended_rank_view with given rank order", "[extended-rank-view]")
+TEST_CASE("Construct mutable_rank_view with given rank order", "[mutable-rank-view]")
 {
     technology_network tec{};
 
@@ -154,7 +154,7 @@ TEST_CASE("Construct extended_rank_view with given rank order", "[extended-rank-
 
     const std::vector<std::vector<technology_network::node>> rank_array = {{2, 4, 3, 5, 6}, {7, 8, 9, 11}, {10, 12}};
 
-    auto vpi_r = extended_rank_view(tec, rank_array);
+    auto vpi_r = mutable_rank_view(tec, rank_array);
 
     CHECK(vpi_r.rank_width(0) == 5);
     CHECK(vpi_r.rank_width(1) == 4);
@@ -171,7 +171,7 @@ TEST_CASE("Construct extended_rank_view with given rank order", "[extended-rank-
     CHECK(vpi_r.at_rank_position(0, 2) == 4);
 }
 
-TEST_CASE("Check modify ranks", "[extended-rank-view]")
+TEST_CASE("Check modify ranks", "[mutable-rank-view]")
 {
     technology_network tec{};
 
@@ -196,7 +196,7 @@ TEST_CASE("Check modify ranks", "[extended-rank-view]")
 
     const auto tec_balanced = network_balancing<technology_network>(tec, ps);
 
-    auto vpi_r = extended_rank_view(tec_balanced);
+    auto vpi_r = mutable_rank_view(tec_balanced);
 
     const std::vector<technology_network::node> nodes = {13, 10, 14};
     vpi_r.set_ranks(2, nodes);
@@ -204,7 +204,7 @@ TEST_CASE("Check modify ranks", "[extended-rank-view]")
     CHECK(vpi_r.check_validity() == 1);
 }
 
-TEMPLATE_TEST_CASE("Check equivalence checking", "[extended_rank_view]", mockturtle::aig_network,
+TEMPLATE_TEST_CASE("Check equivalence checking", "[mutable-rank-view]", mockturtle::aig_network,
                    mockturtle::mig_network, mockturtle::xag_network, mockturtle::xmg_network, mockturtle::klut_network,
                    mockturtle::buffered_aig_network, mockturtle::buffered_mig_network, mockturtle::crossed_klut_network,
                    mockturtle::buffered_crossed_klut_network)
@@ -232,7 +232,7 @@ TEMPLATE_TEST_CASE("Check equivalence checking", "[extended_rank_view]", mocktur
     network_balancing_params ps;
     ps.unify_outputs = true;
 
-    const auto ntk_r = extended_rank_view(ntk);
+    const auto ntk_r = mutable_rank_view(ntk);
 
     mockturtle::equivalence_checking_stats st;
     const auto                             maybe_cec_m =
@@ -243,7 +243,7 @@ TEMPLATE_TEST_CASE("Check equivalence checking", "[extended_rank_view]", mocktur
     CHECK(ntk_r.check_validity() == 1);
 }
 
-TEST_CASE("Check equivalence checking for virtual PIs", "[extended-rank-view]")
+TEST_CASE("Check equivalence checking for virtual PIs", "[mutable-rank-view]")
 {
     technology_network                     tec{};
     virtual_pi_network<technology_network> vpi{};
@@ -273,7 +273,7 @@ TEST_CASE("Check equivalence checking for virtual PIs", "[extended-rank-view]")
     tec.create_po(f2_t);
     tec.create_po(f3_t);
 
-    auto vpi_r = extended_rank_view(vpi);
+    auto vpi_r = mutable_rank_view(vpi);
 
     mockturtle::equivalence_checking_stats st;
     const auto                             maybe_cec_m =
@@ -284,7 +284,7 @@ TEST_CASE("Check equivalence checking for virtual PIs", "[extended-rank-view]")
     CHECK(vpi_r.check_validity() == 1);
 }
 
-TEST_CASE("Check PI order for equivalence checking", "[extended-rank-view]")
+TEST_CASE("Check PI order for equivalence checking", "[mutable-rank-view]")
 {
     technology_network tec{};
 
@@ -298,7 +298,7 @@ TEST_CASE("Check PI order for equivalence checking", "[extended-rank-view]")
     tec.create_po(n1);
     tec.create_po(n2);
 
-    auto vpi_r = extended_rank_view(tec);
+    auto vpi_r = mutable_rank_view(tec);
 
     // after the swap no equivalence is giving due to different ordering of the pi when calling `foreach_pi`
     vpi_r.swap(2, 3);
@@ -310,7 +310,7 @@ TEST_CASE("Check PI order for equivalence checking", "[extended-rank-view]")
     bool cec_m = *maybe_cec_m;
     CHECK(cec_m == 0);
 
-    // this rearranges the order of the PI as stored in the underlying depth_view (corresponds to the order in _storage)
+    // this rearranges the order of the PI as stored in the underlying static_depth_view (corresponds to the order in _storage)
     vpi_r.rearrange_pis();
 
     maybe_cec_m = mockturtle::equivalence_checking(*fiction::virtual_miter<technology_network>(tec, vpi_r), {}, &st);

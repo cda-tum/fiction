@@ -2,8 +2,10 @@
 // Created by benjamin on 13.12.24.
 //
 
-#ifndef FICTION_DEPTH_VIEW_HPP
-#define FICTION_DEPTH_VIEW_HPP
+#ifndef FICTION_STATIC_DEPTH_VIEW_HPP
+#define FICTION_STATIC_DEPTH_VIEW_HPP
+
+#include "fiction/traits.hpp"
 
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/cost_functions.hpp>
@@ -32,12 +34,12 @@ struct depth_view_params
 };
 
 /**
- * Provides `depth` and `level` methods for networks, similar to `mockturtle::depth_view()`.
+ * Provides `depth` and `level` methods for networks, similar to `mockturtle::static_depth_view`.
  * Unlike the `mockturtle` implementation, this version uses flat hashmaps to store `level` data
- * instead of `mockturtle::node_map`. Additionally, the `on_add` functionality has been removed.
- * As a result, if the underlying network changes, the `update_levels` method must be called to
- * refresh the `depth_view` information. These modifications address performance issues encountered
- * with `mockturtle::depth_view`.
+ * instead of `mockturtle::node_map`. Additionally, the `add_event` functionality has been removed.
+ * As a result, if the underlying network changes, either `on_add` has to be called when adding a node to the network
+ * and keep the current depth information or the `update_levels` method must be called to refresh the `static_depth_view`
+ * information. These modifications address performance issues encountered with `mockturtle::static_depth_view`.
  *
  * This view computes the level of each node and the overall depth of the network. The `level` and
  * `depth` methods adhere to the network interface. Levels are calculated during construction and
@@ -51,33 +53,35 @@ struct depth_view_params
 template <typename Ntk, typename NodeCostFn = mockturtle::unit_cost<Ntk>,
           bool has_depth_interface =
               mockturtle::has_depth_v<Ntk> && mockturtle::has_level_v<Ntk> && mockturtle::has_update_levels_v<Ntk>>
-class depth_view
+class static_depth_view
 {};
 
 /**
- * A specialization of `depth_view` for networks where `has_depth_interface` is `true`.
+ * A specialization of `static_depth_view` for networks where `has_depth_interface` is `true`.
  * When this condition is met, constructing a new depth view is unnecessary.
+ *
  * @tparam Ntk The type of the network.
  * @tparam NodeCostFn A function to compute the costs associated with nodes.
  */
 template <typename Ntk, typename NodeCostFn>
-class depth_view<Ntk, NodeCostFn, true> : public Ntk
+class static_depth_view<Ntk, NodeCostFn, true> : public Ntk
 {
   public:
-    explicit depth_view(Ntk const& ntk, depth_view_params const& ps = {}) : Ntk(ntk)
+    explicit static_depth_view(Ntk const& ntk, depth_view_params const& ps = {}) : Ntk(ntk)
     {
         (void)ps;
     }
 };
 
 /**
- * A specialization of `depth_view` for networks where `has_depth_interface` is `false`.
+ * A specialization of `static_depth_view` for networks where `has_depth_interface` is `false`.
  * When this condition is met, a depth view is constructed.
+ *
  * @tparam Ntk The type of the network.
  * @tparam NodeCostFn A function to compute the costs associated with nodes.
  */
 template <typename Ntk, typename NodeCostFn>
-class depth_view<Ntk, NodeCostFn, false> : public Ntk
+class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
 {
   public:
     using storage = typename Ntk::storage;
@@ -85,17 +89,17 @@ class depth_view<Ntk, NodeCostFn, false> : public Ntk
     using signal  = typename Ntk::signal;
 
     /**
-     * Default constructor for `fiction::depth_view`.
-     * Initializes an empty `fiction::depth_view` object, sets up base class properties,
+     * Default constructor for `fiction::static_depth_view`.
+     * Initializes an empty `fiction::static_depth_view` object, sets up base class properties,
      * and ensures that the network type (Ntk) satisfies required interface methods.
      *
      * @param cost_fn Optional cost function to compute node costs.
      * @param ps Optional parameters for depth view construction
      */
-    explicit depth_view(NodeCostFn const& cost_fn = {}, depth_view_params const& ps = {}) :
+    explicit static_depth_view(NodeCostFn const& cost_fn = {}, depth_view_params const& ps = {}) :
             Ntk(),
-            _ps(ps),
-            _cost_fn(cost_fn)
+            ps(ps),
+            cost_fn(cost_fn)
     {
         static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
         static_assert(mockturtle::has_size_v<Ntk>, "Ntk does not implement the size method");
@@ -106,11 +110,11 @@ class depth_view<Ntk, NodeCostFn, false> : public Ntk
         static_assert(mockturtle::has_foreach_po_v<Ntk>, "Ntk does not implement the foreach_po method");
         static_assert(mockturtle::has_foreach_fanin_v<Ntk>, "Ntk does not implement the foreach_fanin method");
 
-        _levels.rehash(this->size());
+        levels.rehash(this->size());
     }
 
     /**
-     * Constructs an `fiction::depth_view` from an existing network.
+     * Constructs an `fiction::static_depth_view` from an existing network.
      * Invokes the base class constructor with the provided network, initializes class-specific members,
      * and registers necessary network events. Ensures that the network type (Ntk) satisfies required
      * interface methods.
@@ -119,10 +123,10 @@ class depth_view<Ntk, NodeCostFn, false> : public Ntk
      * @param cost_fn Optional function to compute node costs.
      * @param ps Optional parameters for depth view construction.
      */
-    explicit depth_view(Ntk const& ntk, NodeCostFn const& cost_fn = {}, depth_view_params const& ps = {}) :
+    explicit static_depth_view(Ntk const& ntk, NodeCostFn const& cost_fn = {}, depth_view_params const& ps = {}) :
             Ntk(ntk),
-            _ps(ps),
-            _cost_fn(cost_fn)
+            ps(ps),
+            cost_fn(cost_fn)
     {
         static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
         static_assert(mockturtle::has_size_v<Ntk>, "Ntk does not implement the size method");
@@ -133,31 +137,31 @@ class depth_view<Ntk, NodeCostFn, false> : public Ntk
         static_assert(mockturtle::has_foreach_po_v<Ntk>, "Ntk does not implement the foreach_po method");
         static_assert(mockturtle::has_foreach_fanin_v<Ntk>, "Ntk does not implement the foreach_fanin method");
 
-        _levels.rehash(this->size());
+        levels.rehash(this->size());
         update_levels();
     }
 
     /**
-     * Copy constructor creates a new `fiction::depth_view` by copying the content of another `fiction::depth_view`.
+     * Copy constructor creates a new `fiction::static_depth_view` by copying the content of another `fiction::static_depth_view`.
      *
-     * @param other The other `fiction::depth_view` object to be copied.
+     * @param other The other `fiction::static_depth_view` object to be copied.
      */
-    depth_view(depth_view<Ntk, NodeCostFn, false> const& other) :
+    static_depth_view(static_depth_view<Ntk, NodeCostFn, false> const& other) :
             Ntk(other),
-            _ps(other._ps),
-            _levels(other._levels),
-            _crit_path(other._crit_path),
-            _depth(other._depth),
-            _cost_fn(other._cost_fn)
+            ps(other.ps),
+            levels(other.levels),
+            crit_path(other.crit_path),
+            ntk_depth(other.ntk_depth),
+            cost_fn(other.cost_fn)
     {}
 
     /**
-     * Overloaded assignment operator for copying `fiction::depth_view` content of another `fiction::depth_view` object.
+     * Overloaded assignment operator for copying `fiction::static_depth_view` content of another `fiction::static_depth_view` object.
      *
-     * @param other The source `fiction::depth_view` object whose contents are being copied.
+     * @param other The source `fiction::static_depth_view` object whose contents are being copied.
      * @return A reference to the current object, enabling chain assignments.
      */
-    depth_view<Ntk, NodeCostFn, false>& operator=(depth_view<Ntk, NodeCostFn, false> const& other)
+    static_depth_view<Ntk, NodeCostFn, false>& operator=(static_depth_view<Ntk, NodeCostFn, false> const& other)
     {
         // Check for self-assignment
         if (this == &other)
@@ -176,27 +180,27 @@ class depth_view<Ntk, NodeCostFn, false> : public Ntk
         }
 
         // copy
-        _ps        = other._ps;
-        _levels    = other._levels;
-        _crit_path = other._crit_path;
-        _depth     = other._depth;
-        _cost_fn   = other._cost_fn;
+        ps        = other.ps;
+        levels    = other.levels;
+        crit_path = other.crit_path;
+        ntk_depth     = other.ntk_depth;
+        cost_fn   = other.cost_fn;
 
         // Return the current object
         return *this;
     }
 
     /**
-     * Destructor for `fiction::depth_view`.
+     * Destructor for `fiction::static_depth_view`.
      */
-    ~depth_view() = default;
+    ~static_depth_view() = default;
 
     /**
      * @return The depth of the network.
      */
     [[nodiscard]] uint32_t depth() const
     {
-        return _depth;
+        return ntk_depth;
     }
 
     /**
@@ -204,7 +208,7 @@ class depth_view<Ntk, NodeCostFn, false> : public Ntk
      */
     uint32_t level(node const& n) const
     {
-        return _levels.at(n);
+        return levels.at(n);
     }
 
     /**
@@ -212,7 +216,7 @@ class depth_view<Ntk, NodeCostFn, false> : public Ntk
      */
     bool is_on_critical_path(node const& n) const
     {
-        return _crit_path.contains(n);
+        return crit_path.contains(n);
     }
 
     /**
@@ -220,7 +224,7 @@ class depth_view<Ntk, NodeCostFn, false> : public Ntk
      */
     void set_level(node const& n, uint32_t level)
     {
-        _levels[n] = level;
+        levels[n] = level;
     }
 
     /**
@@ -228,7 +232,7 @@ class depth_view<Ntk, NodeCostFn, false> : public Ntk
      */
     void set_depth(uint32_t level)
     {
-        _depth = level;
+        ntk_depth = level;
     }
 
     /**
@@ -236,30 +240,30 @@ class depth_view<Ntk, NodeCostFn, false> : public Ntk
      */
     void update_levels()
     {
-        _levels.clear();
-        _levels.rehash(this->size());
-        _crit_path.clear();
-        _crit_path.rehash(this->size());
+        levels.clear();
+        levels.rehash(this->size());
+        crit_path.clear();
+        crit_path.rehash(this->size());
 
         this->incr_trav_id();
         compute_levels();
     }
 
     /*
-     * Add a node to the `depth_view` and update its level.
+     * Add a node to the `static_depth_view` and update its level and the depth.
      *
-     * @param n Node added to the `depth_view`.
+     * @param n Node added to the `static_depth_view`.
      */
     void on_add(node const& n)
     {
-        _levels.rehash(this->size());
+        levels.rehash(this->size());
 
         uint32_t level{0};
         this->foreach_fanin(n,
                             [&](auto const& f)
                             {
-                                auto clevel = _levels[f];
-                                if (_ps.count_complements && this->is_complemented(f))
+                                auto clevel = levels[f];
+                                if (ps.count_complements && this->is_complemented(f))
                                 {
                                     clevel++;
                                 }
@@ -267,12 +271,13 @@ class depth_view<Ntk, NodeCostFn, false> : public Ntk
                             });
         if (this->is_pi(n))
         {
-            _levels[n] = level;
+            levels[n] = level;
         }
         else
         {
-            _levels[n] = level + _cost_fn(*this, n);
+            levels[n] = level + cost_fn(*this, n);
         }
+        ntk_depth = std::max(ntk_depth, level + cost_fn(*this, n));
     }
 
   private:
@@ -283,18 +288,18 @@ class depth_view<Ntk, NodeCostFn, false> : public Ntk
     {
         if (this->visited(n) == this->trav_id())
         {
-            return _levels[n];
+            return levels[n];
         }
         this->set_visited(n, this->trav_id());
 
         if (this->is_constant(n))
         {
-            return _levels[n] = 0;
+            return levels[n] = 0;
         }
         if (this->is_ci(n))
         {
-            assert(!_ps.pi_cost || _cost_fn(*this, n) >= 1);
-            return _levels[n] = _ps.pi_cost ? _cost_fn(*this, n) - 1 : 0;
+            assert(!ps.pi_cost || cost_fn(*this, n) >= 1);
+            return levels[n] = ps.pi_cost ? cost_fn(*this, n) - 1 : 0;
         }
 
         uint32_t level{0};
@@ -302,14 +307,14 @@ class depth_view<Ntk, NodeCostFn, false> : public Ntk
                             [&](auto const& f)
                             {
                                 auto clevel = compute_levels(this->get_node(f));
-                                if (_ps.count_complements && this->is_complemented(f))
+                                if (ps.count_complements && this->is_complemented(f))
                                 {
                                     clevel++;
                                 }
                                 level = std::max(level, clevel);
                             });
 
-        return _levels[n] = level + _cost_fn(*this, n);
+        return levels[n] = level + cost_fn(*this, n);
     }
 
     /**
@@ -317,16 +322,16 @@ class depth_view<Ntk, NodeCostFn, false> : public Ntk
      */
     void compute_levels()
     {
-        _depth = 0;
+        ntk_depth = 0;
         this->foreach_po(
             [&](auto const& f)
             {
                 auto clevel = compute_levels(this->get_node(f));
-                if (_ps.count_complements && this->is_complemented(f))
+                if (ps.count_complements && this->is_complemented(f))
                 {
                     clevel++;
                 }
-                _depth = std::max(_depth, clevel);
+                ntk_depth = std::max(ntk_depth, clevel);
             });
 
         if constexpr (mockturtle::has_foreach_ri_v<Ntk>)
@@ -335,11 +340,11 @@ class depth_view<Ntk, NodeCostFn, false> : public Ntk
                 [&](auto const& f)
                 {
                     auto clevel = compute_levels(this->get_node(f));
-                    if (_ps.count_complements && this->is_complemented(f))
+                    if (ps.count_complements && this->is_complemented(f))
                     {
                         clevel++;
                     }
-                    _depth = std::max(_depth, clevel);
+                    ntk_depth = std::max(ntk_depth, clevel);
                 });
         }
 
@@ -347,7 +352,7 @@ class depth_view<Ntk, NodeCostFn, false> : public Ntk
             [&](auto const& f)
             {
                 const auto n = this->get_node(f);
-                if (_levels[n] == _depth)
+                if (levels[n] == ntk_depth)
                 {
                     set_critical_path(n);
                 }
@@ -359,7 +364,7 @@ class depth_view<Ntk, NodeCostFn, false> : public Ntk
                 [&](auto const& f)
                 {
                     const auto n = this->get_node(f);
-                    if (_levels[n] == _depth)
+                    if (levels[n] == ntk_depth)
                     {
                         set_critical_path(n);
                     }
@@ -372,20 +377,20 @@ class depth_view<Ntk, NodeCostFn, false> : public Ntk
      */
     void set_critical_path(node const& n)
     {
-        _crit_path[n] = true;
-        if (!this->is_constant(n) && !(_ps.pi_cost && this->is_pi(n)))
+        crit_path[n] = true;
+        if (!this->is_constant(n) && !(ps.pi_cost && this->is_pi(n)))
         {
-            const auto lvl = _levels[n];
+            const auto lvl = levels[n];
             this->foreach_fanin(n,
                                 [&](auto const& f)
                                 {
                                     const auto cn     = this->get_node(f);
-                                    auto       offset = _cost_fn(*this, n);
-                                    if (_ps.count_complements && this->is_complemented(f))
+                                    auto       offset = cost_fn(*this, n);
+                                    if (ps.count_complements && this->is_complemented(f))
                                     {
                                         offset++;
                                     }
-                                    if (_levels[cn] + offset == lvl && !_crit_path[cn])
+                                    if (levels[cn] + offset == lvl && !crit_path[cn])
                                     {
                                         set_critical_path(cn);
                                     }
@@ -396,41 +401,41 @@ class depth_view<Ntk, NodeCostFn, false> : public Ntk
     /**
      * Depth view parameters.
      */
-    depth_view_params _ps;
+    depth_view_params ps;
     /**
-     * Hashmap assigning levels to nodes.
+     * Flat hashmap assigning levels to nodes.
      */
-    phmap::flat_hash_map<node, uint32_t> _levels;
+    phmap::flat_hash_map<node, uint32_t> levels;
     /**
-     * Hashmap assigning nodes on the critical path.
+     * Flat hashmap assigning nodes on the critical path.
      */
-    phmap::flat_hash_map<node, uint32_t> _crit_path;
+    phmap::flat_hash_map<node, uint32_t> crit_path;
     /**
      * The depth of the network.
      */
-    uint32_t _depth{};
+    uint32_t ntk_depth{};
     /**
      * The cost function.
      */
-    NodeCostFn _cost_fn;
+    NodeCostFn cost_fn;
 };
 
 /**
- * Deduction guide for `fiction::depth_view'.
+ * Deduction guide for `fiction::static_depth_view'.
  *
- * @tparam T Network type deduced from the construction context of `fiction::depth_view`.
+ * @tparam T Network type deduced from the construction context of `fiction::static_depth_view`.
  */
 template <typename T>
-depth_view(T const&) -> depth_view<T>;
+static_depth_view(T const&) -> static_depth_view<T>;
 
 /**
- * Deduction guide for `fiction::depth_view` with two constructor arguments
+ * Deduction guide for `fiction::static_depth_view` with two constructor arguments
  *
- * @tparam T Network type deduced from the construction context of `fiction::depth_view`.
+ * @tparam T Network type deduced from the construction context of `fiction::static_depth_view`.
  */
 template <typename T, typename NodeCostFn = mockturtle::unit_cost<T>>
-depth_view(T const&, NodeCostFn const&, depth_view_params const&) -> depth_view<T, NodeCostFn>;
+static_depth_view(T const&, NodeCostFn const&, depth_view_params const&) -> static_depth_view<T, NodeCostFn>;
 
 }  // namespace fiction
 
-#endif  // FICTION_DEPTH_VIEW_HPP
+#endif  // FICTION_STATIC_DEPTH_VIEW_HPP

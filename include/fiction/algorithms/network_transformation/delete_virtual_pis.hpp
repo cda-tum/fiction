@@ -169,12 +169,6 @@ class delete_virtual_pis_impl
     [[nodiscard]] std::pair<Ntk, mockturtle::node_map<mockturtle::signal<Ntk>, Ntk>>
     initialize_copy_virtual_pi_network(const Ntk& src)
     {
-        static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
-        static_assert(mockturtle::has_get_constant_v<Ntk>, "Ntk does not implement the get_constant method");
-        static_assert(mockturtle::has_create_pi_v<Ntk>, "Ntk does not implement the create_pi method");
-        static_assert(mockturtle::has_get_node_v<Ntk>, "Ntk does not implement the get_node method");
-        static_assert(fiction::has_foreach_real_pi_v<Ntk>, "Ntk does not implement the foreach_pi method");
-
         mockturtle::node_map<mockturtle::signal<Ntk>, Ntk> old2new(src);
         Ntk                                                dest;
 
@@ -219,9 +213,10 @@ class delete_virtual_pis_impl
 }  // namespace detail
 
 /**
- * Deletes virtual primary inputs from a network and maps all signals connected to virtual PIs back to the corresponding
- * real PI. The main use is equivalence checking. If the network does not have any virtual PIs stored, the
- * network is returned.
+ * Deletes virtual primary inputs (PIs) from a network and remaps all signals connected to the virtual PIs back to their
+ * corresponding real PIs. This ensures compatibility for equivalence checking between networks with and without virtual
+ * inputs, as the miter requires networks to have an identical number of primary inputs. If the network does not contain
+ * any virtual PIs, it is returned unchanged.
  *
  * @tparam Ntk The type of network.
  * @param ntk The input network.
@@ -231,7 +226,6 @@ template <typename Ntk>
 Ntk delete_virtual_pis(const Ntk& ntk) noexcept
 {
     static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
-    static_assert(mockturtle::has_clone_v<Ntk>, "Ntk does not implement the clone constructor");
     static_assert(mockturtle::has_get_node_v<Ntk>, "Ntk does not implement the get_node function");
     static_assert(mockturtle::has_is_complemented_v<Ntk>, "Ntk does not implement the is_complemented function");
     static_assert(mockturtle::has_foreach_pi_v<Ntk>, "Ntk does not implement the foreach_pi function");
@@ -242,11 +236,11 @@ Ntk delete_virtual_pis(const Ntk& ntk) noexcept
     static_assert(mockturtle::has_create_pi_v<Ntk>, "Ntk does not implement the create_pi function");
     static_assert(mockturtle::has_create_po_v<Ntk>, "Ntk does not implement the create_po function");
     static_assert(mockturtle::has_create_not_v<Ntk>, "Ntk does not implement the create_not function");
-    static_assert(fiction::is_virtual_network_type_v<Ntk>, "Ntk does not implement the get_real_pi function");
+    static_assert(fiction::is_virtual_network_type_v<Ntk>, "Ntk is not a virtual network type");
 
     assert(ntk.is_combinational() && "Network has to be combinational");
 
-    // to match the return type the network has to be cloned.
+    // return the network if it does not have virtual PIs
     if (ntk.num_virtual_pis() == 0)
     {
         return ntk;

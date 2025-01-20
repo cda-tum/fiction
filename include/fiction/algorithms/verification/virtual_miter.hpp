@@ -18,6 +18,9 @@
 namespace fiction
 {
 
+namespace detail
+{
+
 /**
  * Removes virtual primary inputs from a network if supported. Otherwise the input network is returned unmodified.
  *
@@ -47,8 +50,10 @@ Ntk handle_virtual_pis(const Ntk& network)
     }
 }
 
+}  // namespace detail
+
 /**
- * Combines two networks into a combinational miter, similar to `mockturtle::miter`. Either input network  may include
+ * Combines two networks into a combinational miter, similar to `mockturtle::miter`. Either input network may include
  * virtual primary inputs (PIs). Virtual PIs are removed during miter construction, and all edges connected to them are
  * remapped to their corresponding original PIs, ensuring consistent PI counts when the networks are equivalent.
  *
@@ -57,14 +62,14 @@ Ntk handle_virtual_pis(const Ntk& network)
  * where the primary outputs of the two networks differ.
  *
  * The input networks may have different types. If the two input networks have mismatched numbers of primary inputs or
- * outputs, the method returns `nullopt`.
+ * outputs, the method returns `std::nullopt`.
  *
  * @tparam NtkDest The type of the resulting network.
  * @tparam NtkSource1 The type of the first input network.
  * @tparam NtkSource2 The type of the second input network.
  * @param ntk1_in The first input network.
  * @param ntk2_in The second input network.
- * @return An `optional` containing the virtual miter network if successful, or `nullopt` if the networks are
+ * @return An `optional` containing the virtual miter network if successful, or `std::nullopt` if the networks are
  * incompatible.
  */
 
@@ -85,16 +90,16 @@ template <typename NtkDest, typename NtkSrc1, typename NtkSrc2>
     static_assert(mockturtle::has_create_nary_or_v<NtkDest>, "NtkDest does not implement the create_nary_or method");
 
     // handle (delete and remap) virtual primary inputs
-    const NtkSrc1 ntk1 = handle_virtual_pis(ntk1_in);
-    const NtkSrc2 ntk2 = handle_virtual_pis(ntk2_in);
+    const NtkSrc1 ntk1 = detail::handle_virtual_pis(ntk1_in);
+    const NtkSrc2 ntk2 = detail::handle_virtual_pis(ntk2_in);
 
-    /* both networks must have same number of inputs and outputs */
+    // both networks must have same number of inputs and outputs
     if ((ntk1.num_pis() != ntk2.num_pis()) || (ntk1.num_pos() != ntk2.num_pos()))
     {
         return std::nullopt;
     }
 
-    /* create primary inputs */
+    // create primary inputs
     NtkDest                                  dest;
     std::vector<mockturtle::signal<NtkDest>> pis{};
     pis.reserve(ntk1.num_pis());
@@ -103,7 +108,7 @@ template <typename NtkDest, typename NtkSrc1, typename NtkSrc2>
         pis.push_back(dest.create_pi());
     }
 
-    /* copy networks */
+    // copy networks
     const auto pos1 = cleanup_dangling(ntk1, dest, pis.cbegin(), pis.cend());
     const auto pos2 = cleanup_dangling(ntk2, dest, pis.cbegin(), pis.cend());
 
@@ -118,13 +123,13 @@ template <typename NtkDest, typename NtkSrc1, typename NtkSrc2>
         return dest;
     }
 
-    /* create XOR of output pairs */
+    // create XOR of output pairs
     std::vector<mockturtle::signal<NtkDest>> xor_outputs{};
     xor_outputs.reserve(ntk1.num_pos());
     std::transform(pos1.begin(), pos1.end(), pos2.begin(), std::back_inserter(xor_outputs),
                    [&](auto const& o1, auto const& o2) { return dest.create_xor(o1, o2); });
 
-    /* create big OR of XOR gates */
+    // create big OR of XOR gates
     dest.create_po(dest.create_nary_or(xor_outputs));
 
     return dest;

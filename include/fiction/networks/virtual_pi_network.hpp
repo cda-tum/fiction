@@ -100,12 +100,12 @@ class virtual_pi_network : public Ntk
         return virtual_pi_network(
             // Clone the parent network
             Ntk::clone(),
-            // Create a new shared pointer to `virtual_storage` using a copy of the current `_storage`
+            // Create a new shared pointer to `virtual_storage` using a copy of the current `v_storage`
             std::make_shared<virtual_storage>(*v_storage));
     }
 
     /**
-     * Calculate the real size of the virtual_pi_network`.
+     * Calculate the real size of the `virtual_pi_network`.
      *
      * The real size of the network is considered the size without virtual PIs.
      *
@@ -245,7 +245,7 @@ class virtual_pi_network : public Ntk
     template <typename Fn>
     void foreach_real_pi(Fn&& fn) const
     {
-        static_cast<const Ntk*>(this)->foreach_pi(
+        Ntk::foreach_pi(
             [this, fn = std::forward<Fn>(fn)](const auto& i)
             {
                 if (!is_virtual_pi(i))
@@ -277,7 +277,7 @@ class virtual_pi_network : public Ntk
     template <typename Fn>
     void foreach_real_ci(Fn&& fn) const
     {
-        static_cast<const Ntk*>(this)->foreach_ci(
+        Ntk::foreach_ci(
             [this, fn = std::forward<Fn>(fn)](const auto& i)
             {
                 if (!is_virtual_ci(i))

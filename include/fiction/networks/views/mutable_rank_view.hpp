@@ -2,10 +2,10 @@
 // Created by benjamin on 18.06.24.
 //
 
-#ifndef FICTION_EXTENDED_RANK_VIEW_HPP
-#define FICTION_EXTENDED_RANK_VIEW_HPP
+#ifndef FICTION_MUTABLE_RANK_VIEW_HPP
+#define FICTION_MUTABLE_RANK_VIEW_HPP
 
-#include <fiction/networks/views/depth_view.hpp>
+#include <fiction/networks/views/static_depth_view.hpp>
 
 #include <mockturtle/networks/detail/foreach.hpp>
 #include <mockturtle/traits.hpp>
@@ -20,7 +20,7 @@
 namespace fiction
 {
 /**
- * @class extended_rank_view. Extends the mockturtle::rank_view
+ * @class mutable_rank_view. Extends the mockturtle::rank_view
  *
  * Provides a view with node ranks for given networks. It adds functionalities to modify ranks. Most importantly, the
  * new `init_ranks()` function allows an array of nodes to be provided, which sets the levels and ranks of the nodes in
@@ -44,32 +44,32 @@ template <class Ntk, bool has_rank_interface =
                          mockturtle::has_rank_position_v<Ntk> && mockturtle::has_at_rank_position_v<Ntk> &&
                          mockturtle::has_swap_v<Ntk> && mockturtle::has_width_v<Ntk> &&
                          mockturtle::has_foreach_node_in_rank_v<Ntk> && mockturtle::has_foreach_gate_in_rank_v<Ntk>>
-class extended_rank_view
+class mutable_rank_view
 {};
 
 /**
- * @class extended_rank_view<Ntk, true>
+ * @class mutable_rank_view<Ntk, true>
  *
- * If already a rank_interface exists only the depth_view constructor gets called.
+ * If already a rank_interface exists only the static_depth_view constructor gets called.
  *
  * @tparam Ntk The network type.
  */
 template <class Ntk>
-class extended_rank_view<Ntk, true> : public fiction::depth_view<Ntk>
+class mutable_rank_view<Ntk, true> : public fiction::static_depth_view<Ntk>
 {
   public:
-    explicit extended_rank_view(const Ntk& ntk) : fiction::depth_view<Ntk>(ntk) {}
+    explicit mutable_rank_view(const Ntk& ntk) : fiction::static_depth_view<Ntk>(ntk) {}
 };
 
 /**
- * @class extended_rank_view<Ntk, false>
+ * @class mutable_rank_view<Ntk, false>
  *
- * If no rank_interface exists, inherits from mockturtle::depth_view<Ntk> and initializes ranks for the network.
+ * If no rank_interface exists, inherits from mockturtle::static_depth_view<Ntk> and initializes ranks for the network.
  *
  * @tparam Ntk The network type.
  */
 template <class Ntk>
-class extended_rank_view<Ntk, false> : public fiction::depth_view<Ntk>
+class mutable_rank_view<Ntk, false> : public fiction::static_depth_view<Ntk>
 {
   public:
     static constexpr bool is_topologically_sorted = true;
@@ -78,11 +78,11 @@ class extended_rank_view<Ntk, false> : public fiction::depth_view<Ntk>
     using signal                                  = typename Ntk::signal;
 
     /**
-     * Default constructor for `extended_rank_view`.
-     * Initializes an empty `extended_rank_view` object, sets up base class properties,
+     * Default constructor for `mutable_rank_view`.
+     * Initializes an empty `mutable_rank_view` object, sets up base class properties,
      * and ensures that the network type (Ntk) satisfies required interface methods.
      */
-    explicit extended_rank_view() : fiction::depth_view<Ntk>(), ranks{}, max_rank_width{0}
+    explicit mutable_rank_view() : fiction::static_depth_view<Ntk>(), ranks{}, max_rank_width{0}
     {
         static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
         static_assert(mockturtle::has_foreach_node_v<Ntk>, "Ntk does not implement the foreach_node method");
@@ -95,15 +95,15 @@ class extended_rank_view<Ntk, false> : public fiction::depth_view<Ntk>
     }
 
     /**
-     * Constructs an `extended_rank_view` from an existing network.
+     * Constructs an `mutable_rank_view` from an existing network.
      * Invokes the base class constructor with the provided network, initializes class-specific members,
      * and registers necessary network events. Ensures that the network type (Ntk) satisfies required
      * interface methods.
      *
      * @param ntk A reference to the network object.
      */
-    explicit extended_rank_view(const Ntk& ntk) :
-            fiction::depth_view<Ntk>{ntk},
+    explicit mutable_rank_view(const Ntk& ntk) :
+            fiction::static_depth_view<Ntk>{ntk},
             ranks{this->depth() + 1},
             max_rank_width{0}
     {
@@ -120,13 +120,13 @@ class extended_rank_view<Ntk, false> : public fiction::depth_view<Ntk>
     }
 
     /**
-     * Constructs an `extended_rank_view` from an existing network and a specific initial rank configuration.
+     * Constructs an `mutable_rank_view` from an existing network and a specific initial rank configuration.
      *
      * @param ntk Reference to the network.
      * @param ranks A vector of vectors specifying initial ranks for the nodes within the network.
      */
-    explicit extended_rank_view(const Ntk& ntk, const std::vector<std::vector<node>>& ranks) :
-            fiction::depth_view<Ntk>{ntk},
+    explicit mutable_rank_view(const Ntk& ntk, const std::vector<std::vector<node>>& ranks) :
+            fiction::static_depth_view<Ntk>{ntk},
             ranks{this->depth() + 1},
             max_rank_width{0}
     {
@@ -143,24 +143,24 @@ class extended_rank_view<Ntk, false> : public fiction::depth_view<Ntk>
     }
 
     /**
-     * Copy constructor creates a new `extended_rank_view` by copying the content of another `extended_rank_view`.
+     * Copy constructor creates a new `mutable_rank_view` by copying the content of another `mutable_rank_view`.
      *
-     * @param other The other `extended_rank_view` object to be copied.
+     * @param other The other `mutable_rank_view` object to be copied.
      */
-    extended_rank_view(const extended_rank_view<Ntk, false>& other) :
-            fiction::depth_view<Ntk>(other),
+    mutable_rank_view(const mutable_rank_view<Ntk, false>& other) :
+            fiction::static_depth_view<Ntk>(other),
             rank_pos{other.rank_pos},
             ranks{other.ranks},
             max_rank_width{other.max_rank_width}
     {}
 
     /**
-     * Overloaded assignment operator for copying `extended_rank_view` content of another `extended_rank_view` object.
+     * Overloaded assignment operator for copying `mutable_rank_view` content of another `mutable_rank_view` object.
      *
-     * @param other The source `extended_rank_view` object whose contents are being copied.
+     * @param other The source `mutable_rank_view` object whose contents are being copied.
      * @return A reference to the current object, enabling chain assignments.
      */
-    extended_rank_view<Ntk, false>& operator=(const extended_rank_view<Ntk, false>& other)
+    mutable_rank_view<Ntk, false>& operator=(const mutable_rank_view<Ntk, false>& other)
     {
         // Check for self-assignment
         if (this == &other)
@@ -168,8 +168,8 @@ class extended_rank_view<Ntk, false> : public fiction::depth_view<Ntk>
             return *this;
         }
 
-        // call assignment operator of `depth_view`
-        depth_view<Ntk>::operator=(other);
+        // call assignment operator of `static_depth_view`
+        static_depth_view<Ntk>::operator=(other);
 
         /* update the base class */
         this->_storage = other._storage;
@@ -184,9 +184,9 @@ class extended_rank_view<Ntk, false> : public fiction::depth_view<Ntk>
     }
 
     /**
-     * Destructor for `extended_rank_view`.
+     * Destructor for `mutable_rank_view`.
      */
-    ~extended_rank_view() = default;
+    ~mutable_rank_view() = default;
 
     /**
      * Returns the rank position of a node.
@@ -202,7 +202,10 @@ class extended_rank_view<Ntk, false> : public fiction::depth_view<Ntk>
     }
 
     /**
-     * Verifies the validity of ranks and rank positions within the extended_rank_view context.
+     * Verifies the validity of ranks and rank positions within the `mutable_rank_view` context.
+     * The view is valid, if the level of each node stored in the `ranks` array corresponds to the
+     * `static_depth_view::level()` and if the ranks saved in the `ranks` array are equivalent to the ranks in the
+     * `rank_pos` hashmap.
      *
      * @return A boolean indicating whether the ranks and rank positions are valid (true) or not (false).
      */
@@ -234,12 +237,21 @@ class extended_rank_view<Ntk, false> : public fiction::depth_view<Ntk>
      * Sets the associated rank positions for nodes in a specific level, given the order of `nodes`.
      *
      * @param level Level at which to replace nodes.
-     * @param nodes The new nodes to be set at the given level.
+     * @param nodes The new node order to be set at the given level.
      */
     void set_ranks(const uint32_t level, const std::vector<node>& nodes)
     {
         auto& rank = ranks[level];
+
+        // check that the `rank` contains all nodes from `nodes`
         assert(rank.size() == nodes.size());
+        auto sort_rank = rank;
+        auto sort_nodes = nodes;
+        std::sort(sort_rank.begin(), sort_rank.end());
+        std::sort(sort_nodes.begin(), sort_nodes.end());
+        assert(sort_rank == sort_nodes);
+
+        // assign new ranks
         rank = nodes;
         std::for_each(rank.cbegin(), rank.cend(), [this, i = 0u](auto const& n) mutable { rank_pos[n] = i++; });
     }
@@ -276,6 +288,8 @@ class extended_rank_view<Ntk, false> : public fiction::depth_view<Ntk>
      */
     uint32_t rank_width(const uint32_t level) noexcept
     {
+        assert(level < ranks.size() && "level must be less than the number of ranks");
+
         auto& rank = ranks[level];
         return static_cast<uint32_t>(rank.size());
     }
@@ -308,14 +322,13 @@ class extended_rank_view<Ntk, false> : public fiction::depth_view<Ntk>
     template <typename Cmp>
     void sort_rank(const uint32_t level, const Cmp& cmp)
     {
-        // level must be less than the number of ranks
-        if (level < ranks.size())
-        {
-            auto& rank = ranks[level];
+        assert(level < ranks.size() && "level must be less than the number of ranks");
 
-            std::sort(rank.begin(), rank.end(), cmp);
-            std::for_each(rank.cbegin(), rank.cend(), [this, i = 0u](auto const& n) mutable { rank_pos[n] = i++; });
-        }
+        auto& rank = ranks[level];
+
+        std::sort(rank.begin(), rank.end(), cmp);
+        std::for_each(rank.cbegin(), rank.cend(), [this, i = 0u](auto const& n) mutable { rank_pos[n] = i++; });
+
     }
 
     /**
@@ -328,13 +341,12 @@ class extended_rank_view<Ntk, false> : public fiction::depth_view<Ntk>
     template <typename Fn>
     void foreach_node_in_rank(const uint32_t level, Fn&& fn) const
     {
-        // level must be less than the number of ranks
-        if (level < ranks.size())
-        {
-            auto const& rank = ranks[level];
+        assert(level < ranks.size() && "level must be less than the number of ranks");
 
-            mockturtle::detail::foreach_element(rank.cbegin(), rank.cend(), std::forward<Fn>(fn));
-        }
+        auto const& rank = ranks[level];
+
+        mockturtle::detail::foreach_element(rank.cbegin(), rank.cend(), std::forward<Fn>(fn));
+
     }
 
     /**
@@ -348,7 +360,7 @@ class extended_rank_view<Ntk, false> : public fiction::depth_view<Ntk>
     template <typename Fn>
     void foreach_node(Fn&& fn) const
     {
-        for (auto l = 0; l < ranks.size(); ++l)
+        for (uint32_t l = 0; l < ranks.size(); ++l)
         {
             foreach_node_in_rank(l, std::forward<Fn>(fn));
         }
@@ -364,14 +376,12 @@ class extended_rank_view<Ntk, false> : public fiction::depth_view<Ntk>
     template <typename Fn>
     void foreach_gate_in_rank(const uint32_t level, Fn&& fn) const
     {
-        // level must be less than the number of ranks
-        if (level < ranks.size())
-        {
-            auto const& rank = ranks[level];
+        assert(level < ranks.size() && "level must be less than the number of ranks");
 
-            mockturtle::detail::foreach_element_if(
-                rank.cbegin(), rank.cend(), [this](auto const& n) { return !this->is_ci(n); }, std::forward<Fn>(fn));
-        }
+        auto const& rank = ranks[level];
+
+        mockturtle::detail::foreach_element_if(
+            rank.cbegin(), rank.cend(), [this](auto const& n) { return !this->is_ci(n); }, std::forward<Fn>(fn));
     }
 
     /**
@@ -385,7 +395,7 @@ class extended_rank_view<Ntk, false> : public fiction::depth_view<Ntk>
     template <typename Fn>
     void foreach_gate(Fn&& fn) const
     {
-        for (auto l = 0; l < ranks.size(); ++l)
+        for (uint32_t l = 0; l < ranks.size(); ++l)
         {
             foreach_gate_in_rank(l, std::forward<Fn>(fn));
         }
@@ -405,14 +415,14 @@ class extended_rank_view<Ntk, false> : public fiction::depth_view<Ntk>
         std::vector<node> pis{};
         pis.reserve(this->num_pis());
 
-        fiction::depth_view<Ntk>::foreach_pi([&pis](auto const& pi) { pis.push_back(pi); });
+        fiction::static_depth_view<Ntk>::foreach_pi([&pis](auto const& pi) { pis.push_back(pi); });
         std::sort(pis.begin(), pis.end(),
                   [this](auto const& n1, auto const& n2) { return rank_pos.at(n1) < rank_pos.at(n2); });
         mockturtle::detail::foreach_element(pis.cbegin(), pis.cend(), std::forward<Fn>(fn));
     }
 
     /**
-     * Applies a given function to each PI in unranked order, so the order in the underlying `depth_view`.
+     * Applies a given function to each PI in unranked order, so the order in the underlying `static_depth_view`.
      *
      * @tparam Fn Functor type.
      * @param fn The function to apply.
@@ -420,7 +430,7 @@ class extended_rank_view<Ntk, false> : public fiction::depth_view<Ntk>
     template <typename Fn>
     void foreach_pi_unranked(Fn&& fn) const
     {
-        fiction::depth_view<Ntk>::foreach_pi(std::forward<Fn>(fn));
+        fiction::static_depth_view<Ntk>::foreach_pi(std::forward<Fn>(fn));
     }
 
     /**
@@ -432,7 +442,7 @@ class extended_rank_view<Ntk, false> : public fiction::depth_view<Ntk>
         std::vector<node> pis{};
         pis.reserve(this->num_pis());
 
-        fiction::depth_view<Ntk>::foreach_pi([&pis](auto const& pi) { pis.push_back(pi); });
+        fiction::static_depth_view<Ntk>::foreach_pi([&pis](auto const& pi) { pis.push_back(pi); });
 
         set_ranks(0, pis);
     }
@@ -451,7 +461,7 @@ class extended_rank_view<Ntk, false> : public fiction::depth_view<Ntk>
         std::vector<node> pis{};
         pis.reserve(this->num_pis());
 
-        fiction::depth_view<Ntk>::foreach_ci([&pis](auto const& pi) { pis.push_back(pi); });
+        fiction::static_depth_view<Ntk>::foreach_ci([&pis](auto const& pi) { pis.push_back(pi); });
         std::sort(pis.begin(), pis.end(),
                   [this](auto const& n1, auto const& n2) { return rank_pos.at(n1) < rank_pos.at(n2); });
         mockturtle::detail::foreach_element(pis.cbegin(), pis.cend(), std::forward<Fn>(fn));
@@ -463,12 +473,12 @@ class extended_rank_view<Ntk, false> : public fiction::depth_view<Ntk>
      */
     signal create_pi()
     {
-        auto const n = fiction::depth_view<Ntk>::create_pi();
+        auto const n = fiction::static_depth_view<Ntk>::create_pi();
         return n;
     }
 
     /**
-     * Update the ranks in the `extended_rank_view`.
+     * Update the ranks in the `mutable_rank_view`.
      */
     void update_ranks()
     {
@@ -481,13 +491,13 @@ class extended_rank_view<Ntk, false> : public fiction::depth_view<Ntk>
     }
 
     /*
-     * Add a node to the `extended_rank_view` and update its rank.
+     * Add a node to the `mutable_rank_view` and update its rank.
      *
-     * @param n Node added to the `extended_rank_view`.
+     * @param n Node added to the `mutable_rank_view`.
      */
     void on_add(node const& n) noexcept
     {
-        fiction::depth_view<Ntk>::on_add(n);
+        fiction::static_depth_view<Ntk>::on_add(n);
 
         if (this->level(n) >= ranks.size())
         {
@@ -534,7 +544,7 @@ class extended_rank_view<Ntk, false> : public fiction::depth_view<Ntk>
      */
     void init_ranks() noexcept
     {
-        fiction::depth_view<Ntk>::foreach_node(
+        fiction::static_depth_view<Ntk>::foreach_node(
             [this](auto const& n)
             {
                 if (!this->is_constant(n))
@@ -581,21 +591,21 @@ class extended_rank_view<Ntk, false> : public fiction::depth_view<Ntk>
 };
 
 /**
- * Deduction guide for `extended_rank_view'.
+ * Deduction guide for `mutable_rank_view'.
  *
- * @tparam T Network type deduced from the construction context of `extended_rank_view`.
+ * @tparam T Network type deduced from the construction context of `mutable_rank_view`.
  */
 template <class T>
-extended_rank_view(const T&) -> extended_rank_view<T>;
+mutable_rank_view(const T&) -> mutable_rank_view<T>;
 
 /**
- * Deduction guide for `extended_rank_view` with two constructor arguments.
+ * Deduction guide for `mutable_rank_view` with two constructor arguments.
  *
- * @tparam T Network type deduced from the construction context of `extended_rank_view`.
+ * @tparam T Network type deduced from the construction context of `mutable_rank_view`.
  */
 template <class T>
-extended_rank_view(const T&, std::vector<std::vector<typename T::node>>) -> extended_rank_view<T>;
+mutable_rank_view(const T&, std::vector<std::vector<typename T::node>>) -> mutable_rank_view<T>;
 
 }  // namespace fiction
 
-#endif  // FICTION_EXTENDED_RANK_VIEW_HPP
+#endif  // FICTION_MUTABLE_RANK_VIEW_HPP

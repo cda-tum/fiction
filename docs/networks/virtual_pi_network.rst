@@ -1,4 +1,4 @@
-Technology Network
+Virtual PI Network
 ==================
 
 A logic network type that extends any ``mockturtle`` logic network. It enables copies of PIs, called virtual PIs.

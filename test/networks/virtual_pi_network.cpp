@@ -35,10 +35,10 @@ TEST_CASE("Check loops", "[virtual-pi-network]")
 
     CHECK(vpi.get_real_pi(c) == a);
 
-    std::uint32_t size_real_pis    = 0;
-    std::uint32_t size_virtual_pis = 0;
-    std::uint32_t size_real_cis    = 0;
-    std::uint32_t size_virtual_cis = 0;
+    uint32_t size_real_pis    = 0;
+    uint32_t size_virtual_pis = 0;
+    uint32_t size_real_cis    = 0;
+    uint32_t size_virtual_cis = 0;
     vpi.foreach_real_pi(
         [&](const auto& pi)
         {
