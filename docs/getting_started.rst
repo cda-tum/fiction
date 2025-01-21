@@ -194,6 +194,8 @@ and some macOS versions due to issues with ``python-sat``. Mugen requires at lea
 
 Finally, before building *fiction*, pass ``-DFICTION_ENABLE_MUGEN=ON`` to the ``cmake`` call.
 
+.. _abc-cmake:
+
 ABC callback
 ############
 
@@ -218,7 +220,6 @@ The :ref:`ClusterComplete <clustercomplete>` exact SiDB simulation algorithm rel
 When enabled, it will be downloaded automatically and linked to *fiction*.
 
 To enable it, before building *fiction*, pass ``-DFICTION_ALGLIB=ON`` to the ``cmake`` call.
-.. _abc-cmake:
 
 
 Building experiments
