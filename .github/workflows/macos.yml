@@ -2,7 +2,7 @@ name: 🍎 • CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
     paths:
       - "**/*.hpp"
       - "**/*.cpp"
@@ -12,7 +12,7 @@ on:
       - ".github/workflows/macos.yml"
       - "!bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp"
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
     paths:
       - "**/*.hpp"
       - "**/*.cpp"
@@ -38,8 +38,8 @@ jobs:
   build_and_test:
     strategy:
       matrix:
-        os: [ macos-13, macos-14, macos-15 ]
-        compiler: [ g++-13, g++-14, clang++ ]
+        os: [macos-13, macos-14, macos-15]
+        compiler: [g++-13, g++-14, clang++]
         include:
           - os: macos-13
             architecture: x64
