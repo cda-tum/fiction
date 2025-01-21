@@ -28,8 +28,7 @@ void clustercomplete(pybind11::module& m)
     namespace py = pybind11;
 
     m.def("clustercomplete", &fiction::clustercomplete<Lyt>, py::arg("lyt"),
-          py::arg("params") = fiction::clustercomplete_params<fiction::offset::ucoord_t>{},
-          DOC(fiction_clustercomplete));
+          py::arg("params") = fiction::clustercomplete_params<>{}, DOC(fiction_clustercomplete));
 }
 
 }  // namespace detail
@@ -41,40 +40,38 @@ inline void clustercomplete(pybind11::module& m)
     /**
      * Report *Ground State Space* stats.
      */
-    py::enum_<typename fiction::clustercomplete_params<fiction::offset::ucoord_t>::ground_state_space_reporting>(
+    py::enum_<fiction::clustercomplete_params<>::ground_state_space_reporting>(
         m, "ground_state_space_reporting", DOC(fiction_clustercomplete_params_ground_state_space_reporting))
-        .value("ON", fiction::clustercomplete_params<fiction::offset::ucoord_t>::ground_state_space_reporting::ON,
+        .value("ON", fiction::clustercomplete_params<>::ground_state_space_reporting::ON,
                DOC(fiction_clustercomplete_params_ground_state_space_reporting_ON))
-        .value("OFF", fiction::clustercomplete_params<fiction::offset::ucoord_t>::ground_state_space_reporting::OFF,
+        .value("OFF", fiction::clustercomplete_params<>::ground_state_space_reporting::OFF,
                DOC(fiction_clustercomplete_params_ground_state_space_reporting_OFF));
 
     /**
      * ClusterComplete parameters.
      */
-    py::class_<fiction::clustercomplete_params<fiction::offset::ucoord_t>>(m, "clustercomplete_params",
-                                                                           DOC(fiction_clustercomplete_params))
+    py::class_<fiction::clustercomplete_params<>>(m, "clustercomplete_params", DOC(fiction_clustercomplete_params))
         .def(py::init<>())
         .def_readwrite("simulation_parameters",
-                       &fiction::clustercomplete_params<fiction::offset::ucoord_t>::simulation_parameters,
+                       &fiction::clustercomplete_params<>::simulation_parameters,
                        DOC(fiction_clustercomplete_params_simulation_parameters))
         .def_readwrite("local_external_potential",
-                       &fiction::clustercomplete_params<fiction::offset::ucoord_t>::local_external_potential,
+                       &fiction::clustercomplete_params<>::local_external_potential,
                        DOC(fiction_clustercomplete_params_local_external_potential))
         .def_readwrite("global_potential",
-                       &fiction::clustercomplete_params<fiction::offset::ucoord_t>::global_potential,
+                       &fiction::clustercomplete_params<>::global_potential,
                        DOC(fiction_clustercomplete_params_global_potential))
         .def_readwrite("validity_witness_partitioning_max_cluster_size_gss",
-                       &fiction::clustercomplete_params<
-                           fiction::offset::ucoord_t>::validity_witness_partitioning_max_cluster_size_gss,
+                       &fiction::clustercomplete_params<>::validity_witness_partitioning_max_cluster_size_gss,
                        DOC(fiction_clustercomplete_params_validity_witness_partitioning_max_cluster_size_gss))
         .def_readwrite("num_overlapping_witnesses_limit_gss",
-                       &fiction::clustercomplete_params<fiction::offset::ucoord_t>::num_overlapping_witnesses_limit_gss,
+                       &fiction::clustercomplete_params<>::num_overlapping_witnesses_limit_gss,
                        DOC(fiction_clustercomplete_params_num_overlapping_witnesses_limit_gss))
         .def_readwrite("available_threads",
-                       &fiction::clustercomplete_params<fiction::offset::ucoord_t>::available_threads,
+                       &fiction::clustercomplete_params<>::available_threads,
                        DOC(fiction_clustercomplete_params_available_threads))
         .def_readwrite("report_gss_stats",
-                       &fiction::clustercomplete_params<fiction::offset::ucoord_t>::report_gss_stats,
+                       &fiction::clustercomplete_params<>::report_gss_stats,
                        DOC(fiction_clustercomplete_params_report_gss_stats));
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
