@@ -11,7 +11,7 @@
 
 #include <pybind11/pybind11.h>
 
-#include <string>
+#include <string_view>
 
 namespace pyfiction
 {
@@ -26,7 +26,7 @@ void sidb_simulation_engine_name(pybind11::module& m)
 
     m.def(
         "sidb_simulation_engine_name",
-        [](const EngineType& engine) -> std::string { return fiction::sidb_simulation_engine_name(engine); },
+        [](const EngineType& engine) -> std::string_view { return fiction::sidb_simulation_engine_name(engine); },
         py::arg("engine"), DOC(fiction_sidb_simulation_engine_name));
 }
 
