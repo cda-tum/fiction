@@ -439,8 +439,6 @@ class critical_temperature_impl
 
         if (params.operational_params.sim_engine == sidb_simulation_engine::QUICKEXACT)
         {
-            assert(params.operational_params.simulation_parameters.base == 2 && "base number has to be 2");
-
             // perform exact simulation
             const quickexact_params<cell<Lyt>> qe_params{
                 params.operational_params.simulation_parameters,
@@ -459,7 +457,8 @@ class critical_temperature_impl
         }
         if (params.operational_params.sim_engine == sidb_simulation_engine::QUICKSIM)
         {
-            assert(params.operational_params.simulation_parameters.base == 2 && "base number has to be 2");
+            assert(params.operational_params.simulation_parameters.base == 2 &&
+                   "QuickSim does not support base-3 simulation");
 
             const quicksim_params qs_params{params.operational_params.simulation_parameters, params.iteration_steps,
                                             params.alpha};
@@ -468,8 +467,6 @@ class critical_temperature_impl
 
         if (params.operational_params.sim_engine == sidb_simulation_engine::EXGS)
         {
-            assert(params.operational_params.simulation_parameters.base == 2 && "base number has to be 2");
-
             return exhaustive_ground_state_simulation(*bdl_iterator, params.operational_params.simulation_parameters);
         }
 
