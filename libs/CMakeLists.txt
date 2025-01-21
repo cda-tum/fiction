@@ -130,6 +130,18 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     message(STATUS "Parallel STL algorithms are enabled on MSVC by default")
 endif ()
 
+# Enable jemalloc to be linked
+option(FICTION_ENABLE_JEMALLOC "Automatically download and link jemalloc by Jason Evans.")
+if (FICTION_ENABLE_JEMALLOC)
+    include(${PROJECT_SOURCE_DIR}/cmake/FetchJemalloc.cmake)
+    if (APPLE)
+        target_link_system_libraries(libfiction INTERFACE jemalloc c++ dl pthread m)
+    else ()
+        target_link_system_libraries(libfiction INTERFACE jemalloc stdc++ dl pthread m)
+    endif ()
+    target_include_directories(libfiction SYSTEM INTERFACE jemalloc)
+endif ()
+
 # Include JSON by Niels Lohmann
 set(JSON_BuildTests OFF CACHE INTERNAL "")
 add_subdirectory(json EXCLUDE_FROM_ALL)
@@ -157,10 +169,3 @@ add_subdirectory(tinyxml2 EXCLUDE_FROM_ALL)
 set_property(TARGET tinyxml2 PROPERTY POSITION_INDEPENDENT_CODE ON)
 target_link_system_libraries(libfiction INTERFACE tinyxml2::tinyxml2)
 
-# Enable jemalloc to be linked
-option(FICTION_ENABLE_JEMALLOC "Automatically download and link jemalloc by Jason Evans.")
-if (FICTION_ENABLE_JEMALLOC)
-    include(${PROJECT_SOURCE_DIR}/cmake/FetchJemalloc.cmake)
-    target_link_system_libraries(libfiction INTERFACE jemalloc c++ dl pthread m)
-    target_include_directories(libfiction SYSTEM INTERFACE jemalloc)
-endif ()
