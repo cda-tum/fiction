@@ -17,6 +17,7 @@
 
 namespace fiction
 {
+
 /**
  * Selector for the available SiDB simulation engines.
  */
@@ -60,7 +61,7 @@ enum class exact_sidb_simulation_engine : uint8_t
     /**
      * *ClusterComplete* is a novel exact simulation engine that requires exponential runtime, though, depending on the
      * simulation problem, it effectively reduces the base number by a real number, thus allowing problem sizes that
-     * were previously considered astronomical in size. Inherent to the simulation methodology that does not depend on
+     * were previously considered astronomical. Inherent to the simulation methodology that does not depend on
      * the simulation base, it simulates very effectively for either base number (2 or 3).
      */
     CLUSTERCOMPLETE
@@ -75,22 +76,22 @@ enum class heuristic_sidb_simulation_engine : uint8_t
      */
     QUICKSIM
 };
-
 /**
  * Returns the name of the given simulation engine.
  *
- * @tparam EngineType The type of the SiDB simulation engine (exhaustive/heuristic/general).
+ * @tparam EngineType The type of the SiDB simulation engine (exhaustive/heuristic/generic).
  * @param engine An SiDB simulation engine.
- * @return The name of the simulation engine as a string.
+ * @return The name of the simulation engine.
  */
 template <typename EngineType>
-[[nodiscard]] inline std::string sidb_simulation_engine_name(const EngineType& engine) noexcept
+[[nodiscard]] std::string_view sidb_simulation_engine_name(const EngineType& engine) noexcept
 {
     static_assert(std::is_same_v<EngineType, sidb_simulation_engine> ||
                       std::is_same_v<EngineType, exact_sidb_simulation_engine> ||
                       std::is_same_v<EngineType, heuristic_sidb_simulation_engine>,
                   "EngineType must be a SiDB simulation engine type");
 
+	// generic SiDB simulation engines
     if constexpr (std::is_same_v<EngineType, sidb_simulation_engine>)
     {
         switch (engine)
@@ -118,6 +119,7 @@ template <typename EngineType>
         }
     }
 
+	// exact SiDB simulation engines
     if constexpr (std::is_same_v<EngineType, exact_sidb_simulation_engine>)
     {
         switch (engine)
@@ -141,6 +143,7 @@ template <typename EngineType>
         }
     }
 
+	// heuristic SiDB simulation engines
     if constexpr (std::is_same_v<EngineType, heuristic_sidb_simulation_engine>)
     {
         switch (engine)
@@ -156,7 +159,6 @@ template <typename EngineType>
         }
     }
 }
-
 /**
  * Returns a simulation engine by name.
  *
