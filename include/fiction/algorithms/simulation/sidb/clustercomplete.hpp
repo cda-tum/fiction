@@ -850,7 +850,7 @@ class clustercomplete_impl
     }
     /**
      * Work in the form of compositions of charge space elements of the top cluster are extracted into a vector and
-     * shuffled at random before being returned.
+     * shuffled at random before being returned. The shuffling may balance the initial workload division.
      *
      * @param top_cluster The top cluster that is returned by running the *Ground State Space* construction.
      * @return A vector containing all work contained by the top cluster in random order.
