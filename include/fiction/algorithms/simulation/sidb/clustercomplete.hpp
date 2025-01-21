@@ -434,8 +434,8 @@ class clustercomplete_impl
      * out.
      * @return The parent projector state that was taken out of the given clustering state.
      */
-    [[nodiscard]] static sidb_cluster_projector_state_ptr take_parent_out(sidb_clustering_state& clustering_state,
-                                                                          const uint64_t         parent_pst_ix) noexcept
+[    static sidb_cluster_projector_state_ptr take_parent_out(sidb_clustering_state& clustering_state,
+                                                            const uint64_t         parent_pst_ix) noexcept
     {
         // swap with last
         std::swap(clustering_state.proj_states.at(parent_pst_ix), clustering_state.proj_states.back());
@@ -1032,7 +1032,7 @@ class clustercomplete_impl
      * @param w The worker running on the current thread.
      * @param composition The composition to unfold.
      */
-    [[nodiscard]] bool unfold_composition(worker& w, const sidb_charge_space_composition& composition) noexcept
+    bool unfold_composition(worker& w, const sidb_charge_space_composition& composition) noexcept
     {
         // specialize parent to a specific composition of its children
         add_composition(w.clustering_state, composition);

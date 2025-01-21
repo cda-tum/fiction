@@ -1003,7 +1003,7 @@ class ground_state_space_impl
      * @param parent The newly-forming parent cluster.
      * @param rst The receptor state with the receiving SiDB that is currently handled.
      */
-    template <bound_direction bound> [[nodiscard]]
+    template <bound_direction bound>
     void merge_pot_projection_bounds(const sidb_cluster_ptr&            parent,
                                      const sidb_cluster_receptor_state& rst) const noexcept
     {

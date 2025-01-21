@@ -435,7 +435,7 @@ struct potential_bounds_store
      * @param other Other complete potential bound store.
      * @return Reference to this.
      */
-    [[nodiscard]] potential_bounds_store& operator+=(const potential_bounds_store& other) noexcept
+    potential_bounds_store& operator+=(const potential_bounds_store& other) noexcept
     {
         for (uint64_t sidb_ix = 0; sidb_ix < store.size(); ++sidb_ix)
         {
@@ -450,7 +450,7 @@ struct potential_bounds_store
      * @param other Other complete potential bound store.
      * @return Reference to this.
      */
-    [[nodiscard]] potential_bounds_store& operator-=(const potential_bounds_store& other) noexcept
+    potential_bounds_store& operator-=(const potential_bounds_store& other) noexcept
     {
         for (uint64_t sidb_ix = 0; sidb_ix < store.size(); ++sidb_ix)
         {
@@ -548,7 +548,7 @@ struct sidb_clustering_state
      * @param other The `sidb_clustering_state` instance to copy from.
      * @return A reference to this `sidb_clustering_state` instance after assignment.
      */
-    [[nodiscard]] sidb_clustering_state& operator=(const sidb_clustering_state& other) noexcept
+    sidb_clustering_state& operator=(const sidb_clustering_state& other) noexcept
     {
         if (this != &other)
         {
@@ -579,7 +579,7 @@ struct sidb_clustering_state
      *
      * @param other Other clustering state to move.
      */
-    [[nodiscard]] sidb_clustering_state& operator=(sidb_clustering_state&& other) noexcept = default;
+    sidb_clustering_state& operator=(sidb_clustering_state&& other) noexcept = default;
 };
 /**
  * A cluster charge state is a multiset charge configuration. We may compress it into a 64 bit unsigned integer by
@@ -638,9 +638,9 @@ struct sidb_cluster_charge_state
     /**
      * Explicit instructions for the compiler on how to cast a cluster charge state to an 64 bit unsigned integer.
      *
-     * @return The 64 bit unsigned integer representing the compressed form of the cluster charge state.
+     * @return The 64-bit unsigned integer representing the compressed form of the cluster charge state.
      */
-    explicit constexpr operator uint64_t() const noexcept
+    [[nodiscard]] explicit constexpr operator uint64_t() const noexcept
     {
         return (static_cast<uint64_t>(neg_count) << 32ull) | pos_count;
     }
@@ -689,7 +689,7 @@ struct sidb_cluster_charge_state
      * @param other Other cluster charge state to test for equality with the current.
      * @return `true` if and only if the compressed forms are equal.
      */
-    [[nodiscard]] constexpr bool operator==(const sidb_cluster_charge_state& other) const noexcept
+    constexpr bool operator==(const sidb_cluster_charge_state& other) const noexcept
     {
         return static_cast<uint64_t>(*this) == static_cast<uint64_t>(other);
     }
@@ -710,7 +710,7 @@ struct sidb_cluster_charge_state
      * @param other Other cluster charge state to concatenate with the current.
      * @return The concatenated cluster charge state, which is the modified version of the current.
      */
-    [[nodiscard]] constexpr sidb_cluster_charge_state& operator+=(const sidb_cluster_charge_state& other) noexcept
+    constexpr sidb_cluster_charge_state& operator+=(const sidb_cluster_charge_state& other) noexcept
     {
         neg_count += other.neg_count;
         pos_count += other.pos_count;
@@ -722,7 +722,7 @@ struct sidb_cluster_charge_state
      * @param other Other cluster charge state to take the difference of w.r.t. with the current.
      * @return The cluster charge state that is their difference, which is the modified version of the current.
      */
-    [[nodiscard]] constexpr sidb_cluster_charge_state& operator-=(const sidb_cluster_charge_state& other) noexcept
+    constexpr sidb_cluster_charge_state& operator-=(const sidb_cluster_charge_state& other) noexcept
     {
         assert(neg_count >= other.neg_count && pos_count >= other.pos_count);
         neg_count -= other.neg_count;
@@ -801,7 +801,7 @@ struct potential_projection
      * @param other Other potential projection to sum with the current.
      * @return The current potential projection to which the other potential projection is now added.
      */
-    [[nodiscard]] constexpr potential_projection& operator+=(const potential_projection& other) noexcept
+    constexpr potential_projection& operator+=(const potential_projection& other) noexcept
     {
         pot_val += other.pot_val;
         multiset += other.multiset;
@@ -971,15 +971,15 @@ struct sidb_cluster_ptr_hash
      * The hashing operation is defined.
      *
      * @param c Shared pointer to a cluster to take the has of.
-     * @return The hash computed over the the unique id associated with the cluster.
+     * @return The hash computed over the unique id associated with the cluster.
      */
-    std::size_t operator()(const sidb_cluster_ptr& c) const noexcept
+    [[nodiscard]] std::size_t operator()(const sidb_cluster_ptr& c) const noexcept
     {
         return std::hash<uint64_t>{}(get_unique_cluster_id(c));
     }
 };
 /**
- * A clustering is a set of disjoint clusters, ie., none share an SiDB.
+ * A clustering is a set of disjoint clusters, i.e., none share an SiDB.
  */
 #ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
 using sidb_clustering = std::set<sidb_cluster_ptr>;
@@ -1106,7 +1106,7 @@ struct sidb_cluster
      * @param other Cluster (hierarchy) to compare to.
      * @return `true` if and only if the unique identifiers match.
      */
-    constexpr bool operator==(const sidb_cluster& other) const noexcept
+    [[nodiscard]] constexpr bool operator==(const sidb_cluster& other) const noexcept
     {
         return uid == other.uid;
     }
