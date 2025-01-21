@@ -458,13 +458,29 @@ class ground_state_space_impl
          */
         using witness_set = phmap::btree_set<uint64_t>;
         /**
-         * For each charge state there is a set of witnesses for this charge state.
+         * The set of witnesses for the negative charge state.
          */
-        witness_set negative_witnesses, positive_witnesses, neutral_witnesses;
+        witness_set negative_witnesses;
         /**
-         * The given multiset charge configuration determines how many witness are required for each charge state.
+         * The set of witnesses for the positive charge state.
          */
-        uint64_t required_neg_count, required_pos_count, required_neut_count;
+        witness_set positive_witnesses;
+        /**
+         * The set of witnesses for the neutral charge state.
+         */
+        witness_set neutral_witnesses;
+        /**
+         * The number of witnesses required for the negative charge state.
+         */
+        uint64_t required_neg_count;
+        /**
+         * The number of witnesses required for the positive charge state.
+         */
+        uint64_t required_pos_count;
+        /**
+         * The number of witnesses required for the neutral charge state.
+         */
+        uint64_t required_neut_count;
         /**
          * Constructor. Converts the multiset charge configuration into requirements for each charge state.
          */
