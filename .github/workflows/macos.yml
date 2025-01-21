@@ -78,6 +78,7 @@ jobs:
           python-version: "3.13.x"
 
       - name: Install building tools
+        if: matrix.os != 'macos-13'
         run: brew install autoconf
 
       # Setup TBB for parallel STL algorithms via Homebrew
