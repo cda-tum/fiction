@@ -1,6 +1,6 @@
 include(ExternalProject)
 
-set(JEMALLOC_SOURCE_DIR "1${CMAKE_SOURCE_DIR}/libs/jemalloc")
+set(JEMALLOC_SOURCE_DIR "${CMAKE_SOURCE_DIR}/libs/jemalloc")
 set(JEMALLOC_PREFIX_DIR "${CMAKE_BINARY_DIR}/libs/jemalloc")
 set(JEMALLOC_INSTALL_DIR "${JEMALLOC_PREFIX_DIR}/install")
 
