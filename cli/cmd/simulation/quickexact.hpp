@@ -28,7 +28,7 @@
 namespace alice
 {
 /**
- *
+ * Executes *QuickExact* exact simulation for the current SiDB cell-level layout in store.
  */
 class quickexact_command : public command
 {

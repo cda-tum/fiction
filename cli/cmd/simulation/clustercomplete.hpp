@@ -30,7 +30,7 @@
 namespace alice
 {
 /**
- *
+ * Executes *ClusterComplete* exact simulation for the current SiDB cell-level layout in store.
  */
 class clustercomplete_command : public command
 {
