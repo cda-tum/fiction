@@ -772,7 +772,8 @@ class clustercomplete_impl
          * Obtains work for this worker, either from their own queue, or else from another worker's queue (work
          * stealing).
          *
-         * @return Either nothing, when no work was found and this thread can thus terminate, or that was obtained.
+         * @return Either nothing, if no work was found (and this thread can thus terminate), or the work that was
+         * obtained.
          */
         [[nodiscard]] std::optional<work_t> obtain_work() noexcept
         {
