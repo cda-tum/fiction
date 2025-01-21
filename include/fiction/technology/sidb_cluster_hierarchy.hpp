@@ -996,7 +996,13 @@ using sidb_clustering = phmap::flat_hash_set<sidb_cluster_ptr, sidb_cluster_ptr_
  */
 struct sidb_cluster
 {
-    using uid_t   = uint64_t;
+    /**
+     * For semantic clarity, this type alias creates a separate type for unique identifiers.
+     */
+    using uid_t = uint64_t;
+    /**
+     * For semantic clarity, this type alias creates a separate type for SiDB indices.
+     */
     using sidb_ix = uint64_t;
     /**
      * Unique identifier. Equal to the SiDB index for singleton clusters.
@@ -1027,11 +1033,11 @@ struct sidb_cluster
      * configurations in the charge space.
      */
 #ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
-    std::map<sidb_ix, potential_projection_order>       pot_projs;
-    std::map<uint64_t, complete_potential_bounds_store> pot_projs_complete_store;
+    std::map<sidb_ix, potential_projection_order>      pot_projs;
+    std::map<sidb_ix, complete_potential_bounds_store> pot_projs_complete_store;
 #else
-    phmap::flat_hash_map<sidb_ix, potential_projection_order>       pot_projs;
-    phmap::flat_hash_map<uint64_t, complete_potential_bounds_store> pot_projs_complete_store;
+    phmap::flat_hash_map<sidb_ix, potential_projection_order>      pot_projs;
+    phmap::flat_hash_map<sidb_ix, complete_potential_bounds_store> pot_projs_complete_store;
 #endif
     /**
      * The charge state space of the cluster.
