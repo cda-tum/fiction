@@ -158,8 +158,8 @@ set_property(TARGET tinyxml2 PROPERTY POSITION_INDEPENDENT_CODE ON)
 target_link_system_libraries(libfiction INTERFACE tinyxml2::tinyxml2)
 
 # Enable jemalloc to be linked
-option(FICTION_JEMALLOC "Automatically download and link jemalloc by Jason Evans.")
-if (FICTION_JEMALLOC)
+option(FICTION_ENABLE_JEMALLOC "Automatically download and link jemalloc by Jason Evans.")
+if (FICTION_ENABLE_JEMALLOC)
     include(${PROJECT_SOURCE_DIR}/cmake/FetchJemalloc.cmake)
     target_link_system_libraries(libfiction INTERFACE jemalloc dl pthread m)
     target_include_directories(libfiction SYSTEM INTERFACE jemalloc)
