@@ -14,18 +14,18 @@
 #include <fiction/technology/sidb_bestagon_library.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/layout_utils.hpp>
 
 #include <cstdint>
 
 using namespace fiction;
 
-using lattice = sidb_100_cell_clk_lyt_siqad;
+using lattice       = sidb_100_cell_clk_lyt;
+using lattice_siqad = sidb_100_cell_clk_lyt_siqad;
 
 TEST_CASE("Benchmark simulators", "[benchmark]")
 {
     // crossing bestagon gate
-    lattice lyt{};
+    lattice_siqad lyt{};
 
     lyt.assign_cell_type({36, 1, 0}, sidb_technology::cell_type::INPUT);
     lyt.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::INPUT);
@@ -69,21 +69,21 @@ TEST_CASE("Benchmark simulators", "[benchmark]")
 
     BENCHMARK("QuickExact")
     {
-        const quickexact_params<cell<lattice>> sim_params{sidb_simulation_parameters{2, -0.32}};
-        return quickexact<lattice>(lyt, sim_params);
+        const quickexact_params<cell<lattice_siqad>> sim_params{sidb_simulation_parameters{2, -0.32}};
+        return quickexact<lattice_siqad>(lyt, sim_params);
     };
 
     BENCHMARK("QuickSim")
     {
         const quicksim_params quicksim_params{sidb_simulation_parameters{2, -0.32}};
-        return quicksim<lattice>(lyt, quicksim_params);
+        return quicksim<lattice_siqad>(lyt, quicksim_params);
     };
 
 #if (FICTION_ALGLIB_ENABLED)
     BENCHMARK("ClusterComplete")
     {
-        const clustercomplete_params<cell<lattice>> sim_params{sidb_simulation_parameters{3, -0.32}};
-        return clustercomplete<lattice>(lyt, sim_params);
+        const clustercomplete_params<cell<lattice_siqad>> sim_params{sidb_simulation_parameters{3, -0.32}};
+        return clustercomplete<lattice_siqad>(lyt, sim_params);
     };
 #endif  // FICTION_ALGLIB_ENABLED
 }
@@ -181,12 +181,11 @@ TEST_CASE("Benchmark ClusterComplete", "[benchmark]")
 
     lyt.create_po(signal, "o", {(i + 1) / 2, i + 1});
 
-    const lattice cl{convert_layout_to_siqad_coordinates(
-        apply_gate_library<sidb_100_cell_clk_lyt, sidb_bestagon_library, hex_odd_row_gate_clk_lyt>(lyt))};
+    const lattice cl{apply_gate_library<sidb_100_cell_clk_lyt, sidb_bestagon_library, hex_odd_row_gate_clk_lyt>(lyt)};
 
     BENCHMARK("4 Segment Diagonal Bestagon Wire")
     {
-        const clustercomplete_params<cell<lattice>> sim_params{sidb_simulation_parameters{3, -0.32}};
+        const clustercomplete_params<> sim_params{sidb_simulation_parameters{3, -0.32}};
         return clustercomplete<lattice>(cl, sim_params);
     };
 }

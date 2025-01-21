@@ -30,7 +30,7 @@ namespace fiction
  *
  * @tparam CellType Cell type.
  */
-template <typename CellType = siqad::coord_t>
+template <typename CellType = offset::ucoord_t>
 struct quickexact_params
 {
     /**

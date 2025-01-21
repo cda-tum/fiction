@@ -29,7 +29,6 @@
 #include <fiction/technology/sidb_lattice_orientations.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/layout_utils.hpp>
 #include <fiction/utils/math_utils.hpp>
 
 #include <algorithm>
@@ -98,9 +97,10 @@ static bool
 verify_clustercomplete_result_by_charge_indices(const charge_distribution_surface<Lyt>&              qe_cds,
                                                 const std::vector<charge_distribution_surface<Lyt>>& cc_cdss) noexcept
 {
-    return std::any_of(
-        cc_cdss.cbegin(), cc_cdss.cend(), [&](const auto& cc_cds)
-        { return cc_cds.get_charge_index_and_base().first == qe_cds.get_charge_index_and_base().first; });
+    return std::any_of(cc_cdss.cbegin(), cc_cdss.cend(),
+                       [&](const auto& cc_cds) {
+                           return cc_cds.get_charge_index_and_base().first == qe_cds.get_charge_index_and_base().first;
+                       });
 }
 
 TEMPLATE_TEST_CASE("ClusterComplete simulation of a 4 DB layout with a positive charge", "[clustercomplete]",
@@ -158,12 +158,11 @@ TEST_CASE("Exact Cluster Simulation of 2 Bestagon NAND gates", "[clustercomplete
     gate_lyt.create_nand({}, {}, {0, 0});
     gate_lyt.create_nand({}, {}, {2, 2});
 
-    const sidb_cell_clk_lyt_siqad& cell_lyt{
-        convert_layout_to_siqad_coordinates(apply_gate_library<sidb_cell_clk_lyt, sidb_bestagon_library>(gate_lyt))};
+    const sidb_cell_clk_lyt& cell_lyt{apply_gate_library<sidb_cell_clk_lyt, sidb_bestagon_library>(gate_lyt)};
 
     SECTION("Base 2")
     {
-        const sidb_simulation_result<sidb_cell_clk_lyt_siqad>& res =
+        const sidb_simulation_result<sidb_cell_clk_lyt>& res =
             clustercomplete(cell_lyt, clustercomplete_params<>{sidb_simulation_parameters{2}});
 
         CHECK(res.charge_distributions.size() == 81);
@@ -173,7 +172,7 @@ TEST_CASE("Exact Cluster Simulation of 2 Bestagon NAND gates", "[clustercomplete
 
     SECTION("Base 3")
     {
-        const sidb_simulation_result<sidb_cell_clk_lyt_siqad>& res =
+        const sidb_simulation_result<sidb_cell_clk_lyt>& res =
             clustercomplete(cell_lyt, clustercomplete_params<>{sidb_simulation_parameters{3}});
 
         CHECK(res.charge_distributions.size() == 81);
@@ -681,7 +680,7 @@ TEST_CASE("ClusterComplete simulation of a one-pair BDL wire with two perturbers
 
     charge_layout_kon.update_after_charge_change();
 
-    const clustercomplete_params<> sim_params{sidb_simulation_parameters{3, -0.32}};
+    const clustercomplete_params<cell<sidb_100_cell_clk_lyt_siqad>> sim_params{sidb_simulation_parameters{3, -0.32}};
 
     const auto simulation_results = clustercomplete<sidb_100_cell_clk_lyt_siqad>(lyt, sim_params);
 

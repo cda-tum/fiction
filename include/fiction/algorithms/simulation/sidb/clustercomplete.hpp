@@ -42,7 +42,7 @@ namespace fiction
 /**
  * The struct containing the parameters both passed on to pre-simulator Ground State Space, and used during simulation.
  */
-template <typename CellType = siqad::coord_t>
+template <typename CellType = offset::ucoord_t>
 struct clustercomplete_params
 {
     /**
