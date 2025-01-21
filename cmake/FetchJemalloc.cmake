@@ -28,7 +28,7 @@ ExternalProject_Add(
         UPDATE_COMMAND bash -c "echo \"${JEMALLOC_TAG}-0-g$(git ls-remote --tags https://github.com/jemalloc/jemalloc.git | grep ${JEMALLOC_TAG} | tail -1 | cut -f1)\" > ${JEMALLOC_SOURCE_DIR}/VERSION"
         CONFIGURE_COMMAND cd ${JEMALLOC_SOURCE_DIR} && ./autogen.sh --prefix=${JEMALLOC_INSTALL_DIR} && rm VERSION
         BUILD_COMMAND cd ${JEMALLOC_SOURCE_DIR} && make ${PARALLEL_BUILD_ARGS}
-        INSTALL_COMMAND cd ${JEMALLOC_SOURCE_DIR} && make ${PARALLEL_BUILD_ARGS} install
+        INSTALL_COMMAND cd ${JEMALLOC_SOURCE_DIR} && make -j1 install
         BUILD_IN_SOURCE 1
 )
 
