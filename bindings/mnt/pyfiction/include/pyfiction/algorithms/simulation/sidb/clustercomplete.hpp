@@ -36,14 +36,13 @@ void clustercomplete(pybind11::module& m)
 
 inline void clustercomplete(pybind11::module& m)
 {
-    // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
     namespace py = pybind11;
 
     /**
      * Report *Ground State Space* stats.
      */
-    py::enum_<typename fiction::clustercomplete_params<fiction::offset::ucoord_t>::ground_state_space_reporting>(m, "ground_state_space_reporting",
-                                                     DOC(fiction_clustercomplete_params_ground_state_space_reporting))
+    py::enum_<typename fiction::clustercomplete_params<fiction::offset::ucoord_t>::ground_state_space_reporting>(
+        m, "ground_state_space_reporting", DOC(fiction_clustercomplete_params_ground_state_space_reporting))
         .value("ON", fiction::clustercomplete_params<fiction::offset::ucoord_t>::ground_state_space_reporting::ON,
                DOC(fiction_clustercomplete_params_ground_state_space_reporting_ON))
         .value("OFF", fiction::clustercomplete_params<fiction::offset::ucoord_t>::ground_state_space_reporting::OFF,
@@ -77,6 +76,8 @@ inline void clustercomplete(pybind11::module& m)
         .def_readwrite("report_gss_stats",
                        &fiction::clustercomplete_params<fiction::offset::ucoord_t>::report_gss_stats,
                        DOC(fiction_clustercomplete_params_report_gss_stats));
+
+    // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
     detail::clustercomplete<py_sidb_100_lattice>(m);
     detail::clustercomplete<py_sidb_111_lattice>(m);

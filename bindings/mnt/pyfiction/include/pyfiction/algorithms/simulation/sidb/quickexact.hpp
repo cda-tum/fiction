@@ -33,7 +33,6 @@ void quickexact(pybind11::module& m)
 
 inline void quickexact(pybind11::module& m)
 {
-    // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
     namespace py = pybind11;
 
     py::enum_<typename fiction::quickexact_params<fiction::offset::ucoord_t>::automatic_base_number_detection>(
@@ -60,6 +59,8 @@ inline void quickexact(pybind11::module& m)
                        DOC(fiction_quickexact_params_local_external_potential))
         .def_readwrite("global_potential", &fiction::quickexact_params<fiction::offset::ucoord_t>::global_potential,
                        DOC(fiction_quickexact_params_global_potential));
+
+    // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
     detail::quickexact<py_sidb_100_lattice>(m);
     detail::quickexact<py_sidb_111_lattice>(m);
