@@ -190,7 +190,7 @@ Ground State Space Construction
 
 **Header:** ``fiction/algorithms/simulation/sidb/ground_state_space.hpp``
 
-.. doxygenstruct:: fiction::ground_state_space_result
+.. doxygenstruct:: fiction::ground_state_space_results
    :members:
 .. doxygenfunction:: fiction::ground_state_space
 
