@@ -956,7 +956,7 @@ class is_operational_impl
             {
                 assert(parameters.simulation_parameters.base == 2 && "QuickSim does not support base-3 simulation");
 
-                // perform a heuristic simulation
+                // perform a QuickSim heuristic simulation
                 const quicksim_params qs_params{parameters.simulation_parameters, 500, 0.6};
                 return quicksim(*bdl_iterator, qs_params);
             }
