@@ -53,13 +53,13 @@ class clustercomplete_command : public command
                    true);
         add_option("--lambda_tf,-l", physical_params.lambda_tf, "Thomas-Fermi screening distance (unit: nm)", true);
         add_option("--mu_minus,-m", physical_params.mu_minus, "Energy transition level (0/-) (unit: eV)", true);
-        add_option("--global_potential,-g", params.global_potential,
+        add_option("--global_potential,-g", cc_params.global_potential,
                    "Global potential applied to the entire layout (unit: V)", true);
-        add_option("--witness_partitioning_limit,-w", params.validity_witness_partitioning_max_cluster_size_gss,
+        add_option("--witness_partitioning_limit,-w", cc_params.validity_witness_partitioning_max_cluster_size_gss,
                    "The limit on the cluster size before Ground State Space omits the check for which it solves the "
                    "validity witness partitioning NP-complete sub-problem",
                    true);
-        add_option("--overlapping_witnesses_limit,-o", params.num_overlapping_witnesses_limit_gss,
+        add_option("--overlapping_witnesses_limit,-o", cc_params.num_overlapping_witnesses_limit_gss,
                    "The limit on the number of overlapping witnesses (that determines the factorial scaling of the "
                    "sub-procedure) before Ground State Space skips validity witness partitioning",
                    true);
@@ -77,9 +77,8 @@ class clustercomplete_command : public command
     void execute() override
     {
         // reset sim result
-        sim_result_100 = {};
-        sim_result_111 = {};
-        min_energy     = std::numeric_limits<double>::infinity();
+        sim_result = {};
+        min_energy = std::numeric_limits<double>::infinity();
 
         if (physical_params.epsilon_r <= 0)
         {
@@ -110,72 +109,73 @@ class clustercomplete_command : public command
         {
             using Lyt = typename std::decay_t<decltype(lyt_ptr)>::element_type;
 
-            if constexpr (fiction::has_sidb_technology_v<Lyt>)
+            if constexpr (!fiction::has_sidb_technology_v<Lyt>)
             {
-                if constexpr (fiction::is_charge_distribution_surface_v<Lyt>)
+                env->out() << fmt::format("[e] {} is not an SiDB layout\n", get_name(lyt_ptr));
+                return;
+            }
+
+            if constexpr (fiction::is_charge_distribution_surface_v<Lyt>)
+            {
+                env->out() << fmt::format(
+                    "[w] {} already possesses a charge distribution; no simulation is conducted\n", get_name(lyt_ptr));
+                return;
+            }
+
+            if (physical_params.base != 2 && physical_params.base != 3)
+            {
+                env->out() << "[e] The simulation base has to be 2 or 3\n";
+                return;
+            }
+
+            cc_params.simulation_parameters = physical_params;
+
+            // To aid the compiler
+            if constexpr (fiction::has_sidb_technology_v<Lyt> && !fiction::is_charge_distribution_surface_v<Lyt>)
+            {
+                cc_params.report_gss_stats =
+                    is_set("report_gss_stats") ?
+                        fiction::clustercomplete_params<fiction::cell<Lyt>>::ground_state_space_reporting::ON :
+                        fiction::clustercomplete_params<fiction::cell<Lyt>>::ground_state_space_reporting::OFF;
+
+                sim_result = fiction::clustercomplete(*lyt_ptr, cc_params);
+
+                if constexpr (fiction::is_sidb_lattice_100_v<Lyt>)
                 {
-                    env->out() << fmt::format(
-                        "[w] {} already possesses a charge distribution; no simulation is conducted\n",
-                        get_name(lyt_ptr));
-                }
-                else
-                {
-                    params.simulation_parameters = physical_params;
-
-                    params.report_gss_stats =
-                        is_set("report_gss_stats") ?
-                            fiction::clustercomplete_params<fiction::cell<Lyt>>::ground_state_space_reporting::ON :
-                            fiction::clustercomplete_params<fiction::cell<Lyt>>::ground_state_space_reporting::OFF;
-
-                    if constexpr (fiction::is_sidb_lattice_100_v<Lyt>)
-                    {
-                        is_sidb_100_lattice = true;
-                        sim_result_100      = fiction::clustercomplete(*lyt_ptr, params);
-                    }
-                    else if constexpr (fiction::is_sidb_lattice_111_v<Lyt>)
-                    {
-                        is_sidb_100_lattice = false;
-                        sim_result_111      = fiction::clustercomplete(*lyt_ptr, params);
-                    }
-                    else
-                    {
-                        env->out() << "[e] no valid lattice orientation\n";
-                        return;
-                    }
-
-                    if (sim_result_100.charge_distributions.empty() && sim_result_111.charge_distributions.empty())
+                    if (std::get<sim_result_100>(sim_result).charge_distributions.empty())
                     {
                         env->out() << fmt::format("[e] ground state of {} could not be determined\n",
                                                   get_name(lyt_ptr));
                     }
-                    else
-                    {
-                        if constexpr (fiction::is_sidb_lattice_100_v<Lyt>)
-                        {
-                            const auto min_energy_distr =
-                                fiction::minimum_energy_distribution(sim_result_100.charge_distributions.cbegin(),
-                                                                     sim_result_100.charge_distributions.cend());
 
-                            min_energy = min_energy_distr->get_system_energy();
-                            store<fiction::cell_layout_t>().extend() =
-                                std::make_shared<fiction::cds_sidb_100_cell_clk_lyt>(*min_energy_distr);
-                        }
-                        else if constexpr (fiction::is_sidb_lattice_111_v<Lyt>)
-                        {
-                            const auto min_energy_distr =
-                                fiction::minimum_energy_distribution(sim_result_111.charge_distributions.cbegin(),
-                                                                     sim_result_111.charge_distributions.cend());
+                    const auto min_energy_distr =
+                        minimum_energy_distribution(std::get<sim_result_100>(sim_result).charge_distributions.cbegin(),
+                                                    std::get<sim_result_100>(sim_result).charge_distributions.cend());
 
-                            min_energy = min_energy_distr->get_system_energy();
-                            store<fiction::cell_layout_t>().extend() =
-                                std::make_shared<fiction::cds_sidb_111_cell_clk_lyt>(*min_energy_distr);
-                        }
-                    }
+                    min_energy = min_energy_distr->get_system_energy();
+                    store<fiction::cell_layout_t>().extend() =
+                        std::make_shared<fiction::cds_sidb_100_cell_clk_lyt>(*min_energy_distr);
                 }
-            }
-            else
-            {
-                env->out() << fmt::format("[e] {} is not an SiDB layout\n", get_name(lyt_ptr));
+                else if constexpr (fiction::is_sidb_lattice_111_v<Lyt>)
+                {
+                    if (std::get<sim_result_111>(sim_result).charge_distributions.empty())
+                    {
+                        env->out() << fmt::format("[e] ground state of {} could not be determined\n",
+                                                  get_name(lyt_ptr));
+                    }
+
+                    const auto min_energy_distr =
+                        minimum_energy_distribution(std::get<sim_result_111>(sim_result).charge_distributions.cbegin(),
+                                                    std::get<sim_result_111>(sim_result).charge_distributions.cend());
+
+                    min_energy = min_energy_distr->get_system_energy();
+                    store<fiction::cell_layout_t>().extend() =
+                        std::make_shared<fiction::cds_sidb_111_cell_clk_lyt>(*min_energy_distr);
+                }
+                else
+                {
+                    env->out() << "[e] no valid lattice orientation\n";
+                }
             }
         };
 
@@ -192,23 +192,23 @@ class clustercomplete_command : public command
     /**
      * ClusterComplete parameters.
      */
-    fiction::clustercomplete_params<fiction::offset::ucoord_t> params{};
+    fiction::clustercomplete_params<> cc_params{};
     /**
-     * Simulation result for H-Si(100)-2x1 surface.
+     * Type alias for H-Si(100)-2x1 simulation result.
      */
-    fiction::sidb_simulation_result<fiction::sidb_100_cell_clk_lyt> sim_result_100{};
+    using sim_result_100 = fiction::sidb_simulation_result<fiction::sidb_100_cell_clk_lyt>;
     /**
-     * Simulation result for H-Si(111)-1x1 surface.
+     * Type alias for H-Si(111)-1x1 simulation result.
      */
-    fiction::sidb_simulation_result<fiction::sidb_111_cell_clk_lyt> sim_result_111{};
+    using sim_result_111 = fiction::sidb_simulation_result<fiction::sidb_111_cell_clk_lyt>;
+    /**
+     * Simulation result for either the H-Si(100)-2x1 or the H-Si(111)-1x1 surface.
+     */
+    std::variant<sim_result_100, sim_result_111> sim_result;
     /**
      * Minimum energy.
      */
     double min_energy{std::numeric_limits<double>::infinity()};
-    /**
-     * Flag to determine the SiDB lattice used for the simulation when logging.
-     */
-    bool is_sidb_100_lattice = true;
     /**
      * Logs the resulting information in a log file.
      *
@@ -218,36 +218,41 @@ class clustercomplete_command : public command
     {
         try
         {
-            if (is_sidb_100_lattice)
+            if (std::holds_alternative<sim_result_100>(sim_result))
             {
-                return nlohmann::json{{"Algorithm name", sim_result_100.algorithm_name},
-                                      {"Simulation runtime", sim_result_100.simulation_runtime.count()},
+                const auto& sim_res = std::get<sim_result_100>(sim_result);
+
+                return nlohmann::json{{"Algorithm name", sim_res.algorithm_name},
+                                      {"Simulation runtime", sim_res.simulation_runtime.count()},
                                       {"Physical parameters",
-                                       {{"epsilon_r", sim_result_100.simulation_parameters.epsilon_r},
-                                        {"lambda_tf", sim_result_100.simulation_parameters.lambda_tf},
-                                        {"mu_minus", sim_result_100.simulation_parameters.mu_minus}}},
+                                       {{"epsilon_r", sim_res.simulation_parameters.epsilon_r},
+                                        {"lambda_tf", sim_res.simulation_parameters.lambda_tf},
+                                        {"mu_minus", sim_res.simulation_parameters.mu_minus}}},
                                       {"Lowest state energy (eV)", min_energy},
-                                      {"Number of stable states", sim_result_100.charge_distributions.size()},
+                                      {"Number of stable states", sim_res.charge_distributions.size()},
                                       {"Validity witness partitioning limit",
-                                       std::any_cast<uint64_t>(sim_result_100.additional_simulation_parameters.at(
+                                       std::any_cast<uint64_t>(sim_res.additional_simulation_parameters.at(
                                            "validity_witness_partitioning_limit"))},
                                       {"Number of overlapping witnesses limit",
-                                       std::any_cast<uint64_t>(sim_result_100.additional_simulation_parameters.at(
+                                       std::any_cast<uint64_t>(sim_res.additional_simulation_parameters.at(
                                            "num_overlapping_witnesses_limit"))}};
             }
-            return nlohmann::json{{"Algorithm name", sim_result_111.algorithm_name},
-                                  {"Simulation runtime", sim_result_111.simulation_runtime.count()},
+
+            const auto& sim_res = std::get<sim_result_111>(sim_result);
+
+            return nlohmann::json{{"Algorithm name", sim_res.algorithm_name},
+                                  {"Simulation runtime", sim_res.simulation_runtime.count()},
                                   {"Physical parameters",
-                                   {{"epsilon_r", sim_result_111.simulation_parameters.epsilon_r},
-                                    {"lambda_tf", sim_result_111.simulation_parameters.lambda_tf},
-                                    {"mu_minus", sim_result_111.simulation_parameters.mu_minus}}},
+                                   {{"epsilon_r", sim_res.simulation_parameters.epsilon_r},
+                                    {"lambda_tf", sim_res.simulation_parameters.lambda_tf},
+                                    {"mu_minus", sim_res.simulation_parameters.mu_minus}}},
                                   {"Lowest state energy (eV)", min_energy},
-                                  {"Number of stable states", sim_result_111.charge_distributions.size()},
+                                  {"Number of stable states", sim_res.charge_distributions.size()},
                                   {"Validity witness partitioning limit",
-                                   std::any_cast<uint64_t>(sim_result_111.additional_simulation_parameters.at(
+                                   std::any_cast<uint64_t>(sim_res.additional_simulation_parameters.at(
                                        "validity_witness_partitioning_limit"))},
                                   {"Number of overlapping witnesses limit",
-                                   std::any_cast<uint64_t>(sim_result_111.additional_simulation_parameters.at(
+                                   std::any_cast<uint64_t>(sim_res.additional_simulation_parameters.at(
                                        "num_overlapping_witnesses_limit"))}};
         }
         catch (...)
@@ -261,9 +266,8 @@ class clustercomplete_command : public command
     void reset_params()
     {
         physical_params = fiction::sidb_simulation_parameters{3, -0.32, 5.6, 5.0};
-        params          = {};
-        sim_result_100  = {};
-        sim_result_111  = {};
+        cc_params       = {};
+        sim_result      = {};
     }
 };
 
