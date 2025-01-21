@@ -416,7 +416,7 @@ static bool verify_ground_state_space_stats(const charge_distribution_surface<Ly
 }
 
 TEMPLATE_TEST_CASE("Ground State Space construction of sub-10 DB layouts", "[ground-state-space]",
-                   sidb_cell_clk_lyt_siqad, charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
+                   sidb_100_cell_clk_lyt_siqad, sidb_111_cell_clk_lyt_siqad)
 {
     const auto& verify_layout = [](const TestType& lyt)
     {
