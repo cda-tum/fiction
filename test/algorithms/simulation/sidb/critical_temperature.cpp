@@ -696,21 +696,6 @@ TEMPLATE_TEST_CASE("Test critical_temperature function, using offset coordinates
 
         CHECK(critical_stats.num_valid_lyt == 0);
         CHECK(ct_qs == 0.0);
-
-#if (FICTION_ALGLIB_ENABLED)
-
-        // TODO: ClusterComplete finds one valid layout, is that expected?
-        // params.operational_params.sim_engine                = sidb_simulation_engine::CLUSTERCOMPLETE;
-        //
-        // const auto ct_cc =
-        //     critical_temperature_gate_based<TestType>(lyt, std::vector<tt>{create_id_tt()}, params, &critical_stats);
-        //
-        // CHECK(critical_stats.algorithm_name == "ClusterComplete");
-        //
-        // CHECK(critical_stats.num_valid_lyt == 0);
-        // CHECK(ct_cc == 0.0);
-
-#endif  // FICTION_ALGLIB_ENABLED
     }
 
     SECTION("One SiDB")
