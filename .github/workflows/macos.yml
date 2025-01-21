@@ -41,12 +41,6 @@ jobs:
         os: [macos-13, macos-14, macos-15]
         compiler: [g++-13, g++-14, clang++]
         include:
-          - os: macos-13
-            architecture: x64
-          - os: macos-14
-            architecture: arm64
-          - os: macos-15
-            architecture: arm64
           - compiler: clang++
             ccompiler: clang
           - compiler: g++-13
@@ -101,10 +95,6 @@ jobs:
         uses: cda-tum/setup-z3@v1
         with:
           version: ${{env.Z3_VERSION}}
-          platform: macOS
-          architecture: ${{matrix.architecture}}
-        env:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
       # Build and test pipeline for Debug mode
       - name: Create Build Environment (Debug)
