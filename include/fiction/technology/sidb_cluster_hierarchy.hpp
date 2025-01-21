@@ -122,7 +122,7 @@ struct sidb_binary_cluster_hierarchy_node
  * @param linkage_method The agglomerative clustering linking heuristic that is used by ALGLIB.
  */
 template <typename Lyt>
-static sidb_binary_cluster_hierarchy_node
+[[nodiscard]] static sidb_binary_cluster_hierarchy_node
 sidb_cluster_hierarchy(Lyt& lyt, sidb_cluster_hierarchy_linkage_method linkage_method =
                                      sidb_cluster_hierarchy_linkage_method::MINIMUM_VARIANCE) noexcept
 {
@@ -235,7 +235,7 @@ struct sidb_cluster_receptor_state
 /**
  * Forward declaration. Required for compilation due to the mutually recursive structure in this file.
  */
-static inline uint64_t get_cluster_size(const sidb_cluster_ptr& c) noexcept;
+static uint64_t get_cluster_size(const sidb_cluster_ptr& c) noexcept;
 /**
  * A projector state pairs the potential projecting cluster with the associated multiset charge configuration.
  */
@@ -301,7 +301,7 @@ enum class bound_direction : uint8_t
  * @return The element of most information respective to the potential bound domain.
  */
 template <bound_direction bound>
-static constexpr double potential_bound_top() noexcept
+[[nodiscard]] static constexpr double potential_bound_top() noexcept
 {
     if constexpr (bound == bound_direction::LOWER)
     {
@@ -336,11 +336,11 @@ static constexpr void take_meet_of_potential_bounds(double& a, const double b) n
 /**
  * Forward declaration. Required for compilation due to the mutually recursive structure in this file.
  */
-static inline uint64_t get_singleton_sidb_ix(const sidb_cluster_ptr& c) noexcept;
+static uint64_t get_singleton_sidb_ix(const sidb_cluster_ptr& c) noexcept;
 /**
  * Forward declaration. Required for compilation due to the mutually recursive structure in this file.
  */
-static inline uint64_t get_unique_cluster_id(const sidb_cluster_ptr& c) noexcept;
+static uint64_t get_unique_cluster_id(const sidb_cluster_ptr& c) noexcept;
 /**
  * This defines a store in which the bounds on the local electrostatic potential for an SiDB (index) may be
  * stored. For the *Ground State Space* algorithm, this is used to keep track of the respective lower and upper bounds
@@ -351,7 +351,6 @@ static inline uint64_t get_unique_cluster_id(const sidb_cluster_ptr& c) noexcept
 template <typename PotentialBoundsType>
 struct potential_bounds_store
 {
-  public:
     /**
      * Getter for the size of the potential bounds store, i.e., the number of SiDBs considered in this store.
      *
@@ -436,23 +435,22 @@ struct potential_bounds_store
      * @param other Other complete potential bound store.
      * @return Reference to this.
      */
-    potential_bounds_store<PotentialBoundsType>&
-    operator+=(const potential_bounds_store<PotentialBoundsType>& other) noexcept
+    [[nodiscard]] potential_bounds_store& operator+=(const potential_bounds_store& other) noexcept
     {
         for (uint64_t sidb_ix = 0; sidb_ix < store.size(); ++sidb_ix)
         {
             update(sidb_ix, other.get<bound_direction::LOWER>(sidb_ix), other.get<bound_direction::UPPER>(sidb_ix));
         }
         return *this;
-    } /**
-       * Subtract a complete potential bound store to this (also a complete potential bound store) through pointwise
-       * updates, i.e., updates for each SiDB and for each bound (LB, UB).
-       *
-       * @param other Other complete potential bound store.
-       * @return Reference to this.
-       */
-    potential_bounds_store<PotentialBoundsType>&
-    operator-=(const potential_bounds_store<PotentialBoundsType>& other) noexcept
+    }
+    /**
+     * Subtract a complete potential bound store to this (also a complete potential bound store) through pointwise
+     * updates, i.e., updates for each SiDB and for each bound (LB, UB).
+     *
+     * @param other Other complete potential bound store.
+     * @return Reference to this.
+     */
+    [[nodiscard]] potential_bounds_store& operator-=(const potential_bounds_store& other) noexcept
     {
         for (uint64_t sidb_ix = 0; sidb_ix < store.size(); ++sidb_ix)
         {
@@ -550,7 +548,7 @@ struct sidb_clustering_state
      * @param other The `sidb_clustering_state` instance to copy from.
      * @return A reference to this `sidb_clustering_state` instance after assignment.
      */
-    sidb_clustering_state& operator=(const sidb_clustering_state& other) noexcept
+    [[nodiscard]] sidb_clustering_state& operator=(const sidb_clustering_state& other) noexcept
     {
         if (this != &other)
         {
@@ -581,7 +579,7 @@ struct sidb_clustering_state
      *
      * @param other Other clustering state to move.
      */
-    sidb_clustering_state& operator=(sidb_clustering_state&& other) noexcept = default;
+    [[nodiscard]] sidb_clustering_state& operator=(sidb_clustering_state&& other) noexcept = default;
 };
 /**
  * A cluster charge state is a multiset charge configuration. We may compress it into a 64 bit unsigned integer by
@@ -691,7 +689,7 @@ struct sidb_cluster_charge_state
      * @param other Other cluster charge state to test for equality with the current.
      * @return `true` if and only if the compressed forms are equal.
      */
-    constexpr bool operator==(const sidb_cluster_charge_state& other) const noexcept
+    [[nodiscard]] constexpr bool operator==(const sidb_cluster_charge_state& other) const noexcept
     {
         return static_cast<uint64_t>(*this) == static_cast<uint64_t>(other);
     }
@@ -702,7 +700,7 @@ struct sidb_cluster_charge_state
      * @param m Cluster charge state to compute the hash of.
      * @return The hash of the given cluster charge state.
      */
-    std::size_t operator()(const sidb_cluster_charge_state& m) const noexcept
+    [[nodiscard]] std::size_t operator()(const sidb_cluster_charge_state& m) const noexcept
     {
         return std::hash<uint64_t>{}(static_cast<uint64_t>(m));
     }
@@ -712,7 +710,7 @@ struct sidb_cluster_charge_state
      * @param other Other cluster charge state to concatenate with the current.
      * @return The concatenated cluster charge state, which is the modified version of the current.
      */
-    constexpr sidb_cluster_charge_state& operator+=(const sidb_cluster_charge_state& other) noexcept
+    [[nodiscard]] constexpr sidb_cluster_charge_state& operator+=(const sidb_cluster_charge_state& other) noexcept
     {
         neg_count += other.neg_count;
         pos_count += other.pos_count;
@@ -724,7 +722,7 @@ struct sidb_cluster_charge_state
      * @param other Other cluster charge state to take the difference of w.r.t. with the current.
      * @return The cluster charge state that is their difference, which is the modified version of the current.
      */
-    constexpr sidb_cluster_charge_state& operator-=(const sidb_cluster_charge_state& other) noexcept
+    [[nodiscard]] constexpr sidb_cluster_charge_state& operator-=(const sidb_cluster_charge_state& other) noexcept
     {
         assert(neg_count >= other.neg_count && pos_count >= other.pos_count);
         neg_count -= other.neg_count;
@@ -738,7 +736,7 @@ struct sidb_cluster_charge_state
  * @param m A singleton multiset charge configuration.
  * @return The charge state associated with the sole element contained in the given multiset charge configuration.
  */
-static constexpr sidb_charge_state singleton_multiset_conf_to_charge_state(const uint64_t m) noexcept
+[[nodiscard]] static constexpr sidb_charge_state singleton_multiset_conf_to_charge_state(const uint64_t m) noexcept
 {
     return sign_to_charge_state(
         static_cast<int8_t>(static_cast<uint32_t>(m) - static_cast<uint32_t>(static_cast<uint32_t>(m) < m)));
@@ -791,7 +789,7 @@ struct potential_projection
      * potential values are equal and the compressed form of the multiset charge configuration is strictly less than
      * that of `other`.
      */
-    constexpr bool operator<(const potential_projection& other) const noexcept
+    [[nodiscard]] constexpr bool operator<(const potential_projection& other) const noexcept
     {
         return pot_val < other.pot_val || (pot_val == other.pot_val && multiset < other.multiset);
     }
@@ -803,7 +801,7 @@ struct potential_projection
      * @param other Other potential projection to sum with the current.
      * @return The current potential projection to which the other potential projection is now added.
      */
-    constexpr potential_projection& operator+=(const potential_projection& other) noexcept
+    [[nodiscard]] constexpr potential_projection& operator+=(const potential_projection& other) noexcept
     {
         pot_val += other.pot_val;
         multiset += other.multiset;
@@ -1060,7 +1058,7 @@ struct sidb_cluster
      *
      * @return A shared pointer to the parent of this cluster
      */
-    sidb_cluster_ptr get_parent() const noexcept
+    [[nodiscard]] sidb_cluster_ptr get_parent() const noexcept
     {
         return parent.lock();
     }
@@ -1098,7 +1096,7 @@ struct sidb_cluster
      *
      * @return The number of SiDBs contained in the cluster.
      */
-    uint64_t num_sidbs() const noexcept
+    [[nodiscard]] uint64_t num_sidbs() const noexcept
     {
         return sidbs.size();
     }
@@ -1119,7 +1117,7 @@ struct sidb_cluster
  * @param c Cluster of which the number of SiDBs it contains is requested.
  * @return The number of SiDBs in the given cluster.
  */
-static inline uint64_t get_cluster_size(const sidb_cluster_ptr& c) noexcept
+[[nodiscard]] static uint64_t get_cluster_size(const sidb_cluster_ptr& c) noexcept
 {
     return c->sidbs.size();
 }
@@ -1129,7 +1127,7 @@ static inline uint64_t get_cluster_size(const sidb_cluster_ptr& c) noexcept
  * @param c Cluster of which its unique identifier is requested.
  * @return The unique identifier of the given cluster.
  */
-static inline uint64_t get_unique_cluster_id(const sidb_cluster_ptr& c) noexcept
+[[nodiscard]] static uint64_t get_unique_cluster_id(const sidb_cluster_ptr& c) noexcept
 {
     return c->uid;
 }
@@ -1139,7 +1137,7 @@ static inline uint64_t get_unique_cluster_id(const sidb_cluster_ptr& c) noexcept
  * @param c Singleton cluster of which the single SiDB (index) it contains is requested.
  * @return The SiDB index contained in the given cluster. It is equal to the unique identifier of the cluster.
  */
-static inline uint64_t get_singleton_sidb_ix(const sidb_cluster_ptr& c) noexcept
+[[nodiscard]] static uint64_t get_singleton_sidb_ix(const sidb_cluster_ptr& c) noexcept
 {
     assert(get_cluster_size(c) == 1 && "Not a singleton cluster");
     return get_unique_cluster_id(c);
@@ -1151,7 +1149,7 @@ static inline uint64_t get_singleton_sidb_ix(const sidb_cluster_ptr& c) noexcept
  * @param pst Projector state of which the corresponding compositions are requested.
  * @return The compositions associated with the multiset charge configuration of the projecting cluster.
  */
-static inline const std::vector<sidb_charge_space_composition>&
+[[nodiscard]] static const std::vector<sidb_charge_space_composition>&
 get_projector_state_compositions(const sidb_cluster_projector_state& pst) noexcept
 {
     return std::ref(pst.cluster->charge_space.find(sidb_cluster_charge_state{pst.multiset_conf})->compositions);
@@ -1164,8 +1162,8 @@ get_projector_state_compositions(const sidb_cluster_projector_state& pst) noexce
  * @param uid Variable reference which is updated in each execution to ensure uniqueness.
  * @return A uniquely identified node in a decorated cluster hierarchy that follows the "general tree" structure.
  */
-static sidb_cluster_ptr to_unique_sidb_cluster(const uint64_t total_sidbs, const sidb_binary_cluster_hierarchy_node& n,
-                                               uint64_t& uid) noexcept
+[[nodiscard]] static sidb_cluster_ptr
+to_unique_sidb_cluster(const uint64_t total_sidbs, const sidb_binary_cluster_hierarchy_node& n, uint64_t& uid) noexcept
 {
     sidb_clustering children;
 
@@ -1215,7 +1213,7 @@ static sidb_cluster_ptr to_unique_sidb_cluster(const uint64_t total_sidbs, const
  * @param n A node from a binary cluster hierarchy, as for instance returned by parsing ALGLIB's result.
  * @return A uniquely identified node in a decorated cluster hierarchy that follows the "general tree" structure.
  */
-static sidb_cluster_ptr to_sidb_cluster(const sidb_binary_cluster_hierarchy_node& n) noexcept
+[[nodiscard]] static sidb_cluster_ptr to_sidb_cluster(const sidb_binary_cluster_hierarchy_node& n) noexcept
 {
     uint64_t uid = n.c.size();
 
