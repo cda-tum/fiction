@@ -252,8 +252,8 @@ class clustercomplete_impl
      * @return The potential projection value associated with this bound; i.e., an electrostatic potential (in V),
      */
     template <bound_direction bound>
-    static constexpr double get_projector_state_bound(const sidb_cluster_projector_state& pst,
-                                                      const uint64_t                      sidb_ix) noexcept
+    [[nodiscard]] static constexpr double get_projector_state_bound(const sidb_cluster_projector_state& pst,
+                                                                    const uint64_t sidb_ix) noexcept
     {
         return pst.cluster->pot_projs.at(sidb_ix).get_pot_proj_for_m_conf<bound>(pst.multiset_conf).pot_val;
     }
@@ -408,7 +408,7 @@ class clustercomplete_impl
      * clusters are considered.
      * @return The index in this vector of the projector state that contains the cluster of maximum size.
      */
-    static uint64_t
+    [[nodiscard]] static uint64_t
     find_cluster_of_maximum_size(const std::vector<sidb_cluster_projector_state_ptr>& proj_states) noexcept
     {
         uint64_t max_cluster_size = proj_states.front()->cluster->num_sidbs();
@@ -434,8 +434,8 @@ class clustercomplete_impl
      * out.
      * @return The parent projector state that was taken out of the given clustering state.
      */
-    static sidb_cluster_projector_state_ptr take_parent_out(sidb_clustering_state& clustering_state,
-                                                            const uint64_t         parent_pst_ix) noexcept
+    [[nodiscard]] static sidb_cluster_projector_state_ptr take_parent_out(sidb_clustering_state& clustering_state,
+                                                                          const uint64_t         parent_pst_ix) noexcept
     {
         // swap with last
         std::swap(clustering_state.proj_states.at(parent_pst_ix), clustering_state.proj_states.back());
@@ -659,7 +659,7 @@ class clustercomplete_impl
          * to do more work that is in this queue, or `false` when there is no more such work and thus backtracking can
          * be skipped.
          */
-        std::variant<work_t, bool> get_from_this_queue() noexcept
+        [[nodiscard]] std::variant<work_t, bool> get_from_this_queue() noexcept
         {
             const std::lock_guard lock{mutex_to_protect_this_queue};
 
@@ -691,7 +691,7 @@ class clustercomplete_impl
          * @return Either `true` when the queue is locked, `false` when there is no work in this queue, or a pair of a
          * copy of the updated (forward-tracked) clustering state for thieves along with the corresponding work item.
          */
-        std::variant<bool, std::pair<sidb_clustering_state, work_t>> try_steal_from_this_queue() noexcept
+        [[nodiscard]] std::variant<bool, std::pair<sidb_clustering_state, work_t>> try_steal_from_this_queue() noexcept
         {
             const std::unique_lock lock{mutex_to_protect_this_queue, std::try_to_lock};
 
@@ -774,7 +774,7 @@ class clustercomplete_impl
          *
          * @return Either nothing, when no work was found and this thread can thus terminate, or that was obtained.
          */
-        std::optional<work_t> obtain_work() noexcept
+        [[nodiscard]] std::optional<work_t> obtain_work() noexcept
         {
             if (const std::variant<work_t, bool>& work = work_stealing_queue.get_from_this_queue();
                 std::holds_alternative<work_t>(work))
@@ -854,7 +854,7 @@ class clustercomplete_impl
      * @param top_cluster The top cluster that is returned by running the *Ground State Space* construction.
      * @return A vector containing all work contained by the top cluster in random order.
      */
-    static std::vector<work_t> extract_work_from_top_cluster(const sidb_cluster_ptr& top_cluster) noexcept
+    [[nodiscard]] static std::vector<work_t> extract_work_from_top_cluster(const sidb_cluster_ptr& top_cluster) noexcept
     {
         std::vector<work_t> work_from_top_cluster{};
 
@@ -949,8 +949,8 @@ class clustercomplete_impl
      * @return `false` if and only if queue of this worker is found to be completely empty and thus backtracking is
      * not required.
      */
-    bool add_physically_valid_charge_configurations(worker&                              w,
-                                                    const sidb_charge_space_composition& composition) noexcept
+    [[nodiscard]] bool
+    add_physically_valid_charge_configurations(worker& w, const sidb_charge_space_composition& composition) noexcept
     {
         // check for pruning
         if (!meets_population_stability_criterion(w.clustering_state))
@@ -999,8 +999,9 @@ class clustercomplete_impl
      * @return `false` if and only if the queue of this worker is found to be completely empty and thus backtracking is
      * not required.
      */
-    bool unfold_all_compositions(worker& w, const std::vector<sidb_charge_space_composition>& compositions,
-                                 typename worker_queue::mole&& informant) noexcept
+    [[nodiscard]] bool unfold_all_compositions(worker&                                           w,
+                                               const std::vector<sidb_charge_space_composition>& compositions,
+                                               typename worker_queue::mole&&                     informant) noexcept
     {
         w.work_stealing_queue.add_to_queue(compositions, std::move(informant));
 
@@ -1031,7 +1032,7 @@ class clustercomplete_impl
      * @param w The worker running on the current thread.
      * @param composition The composition to unfold.
      */
-    bool unfold_composition(worker& w, const sidb_charge_space_composition& composition) noexcept
+    [[nodiscard]] bool unfold_composition(worker& w, const sidb_charge_space_composition& composition) noexcept
     {
         // specialize parent to a specific composition of its children
         add_composition(w.clustering_state, composition);
