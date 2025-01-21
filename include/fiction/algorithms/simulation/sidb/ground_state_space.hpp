@@ -39,7 +39,7 @@ namespace fiction
 struct ground_state_space_params
 {
     /**
-     * The physical parameters that *Ground State Space* will use to prune simulation search space.
+     * The physical parameters that *Ground State Space* will use to prune the simulation search space.
      */
     const sidb_simulation_parameters simulation_parameters{};
     /**
