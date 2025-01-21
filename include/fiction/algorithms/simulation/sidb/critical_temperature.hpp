@@ -436,10 +436,14 @@ class critical_temperature_impl
     [[nodiscard]] sidb_simulation_result<Lyt>
     physical_simulation_of_bdl_iterator(const bdl_input_iterator<Lyt>& bdl_iterator) noexcept
     {
-
+        if (params.operational_params.sim_engine == sidb_simulation_engine::EXGS)
+        {
+            // perform exhaustive ground state simulation
+            return exhaustive_ground_state_simulation(*bdl_iterator, params.operational_params.simulation_parameters);
+        }
         if (params.operational_params.sim_engine == sidb_simulation_engine::QUICKEXACT)
         {
-            // perform exact simulation
+            // perform QuickExact exact simulation
             const quickexact_params<cell<Lyt>> qe_params{
                 params.operational_params.simulation_parameters,
                 fiction::quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF};
@@ -448,7 +452,7 @@ class critical_temperature_impl
         if (params.operational_params.sim_engine == sidb_simulation_engine::CLUSTERCOMPLETE)
         {
 #if (FICTION_ALGLIB_ENABLED)
-            // perform ClusterComplete simulation -- base 3 simulation is allowed
+            // perform ClusterComplete exact simulation
             const clustercomplete_params<cell<Lyt>> cc_params{params.operational_params.simulation_parameters};
             return clustercomplete(*bdl_iterator, cc_params);
 #else   // FICTION_ALGLIB_ENABLED
@@ -463,11 +467,6 @@ class critical_temperature_impl
             const quicksim_params qs_params{params.operational_params.simulation_parameters, params.iteration_steps,
                                             params.alpha};
             return quicksim(*bdl_iterator, qs_params);
-        }
-
-        if (params.operational_params.sim_engine == sidb_simulation_engine::EXGS)
-        {
-            return exhaustive_ground_state_simulation(*bdl_iterator, params.operational_params.simulation_parameters);
         }
 
         assert(false && "unsupported simulation engine");

@@ -946,20 +946,8 @@ class is_operational_impl
     {
         if (parameters.sim_engine == sidb_simulation_engine::EXGS)
         {
-            // perform an exhaustive ground state simulation
+            // perform exhaustive ground state simulation
             return exhaustive_ground_state_simulation(*bdl_iterator, parameters.simulation_parameters);
-        }
-
-        if constexpr (!is_sidb_defect_surface_v<Lyt>)
-        {
-            if (parameters.sim_engine == sidb_simulation_engine::QUICKSIM)
-            {
-                assert(parameters.simulation_parameters.base == 2 && "QuickSim does not support base-3 simulation");
-
-                // perform a QuickSim heuristic simulation
-                const quicksim_params qs_params{parameters.simulation_parameters, 500, 0.6};
-                return quicksim(*bdl_iterator, qs_params);
-            }
         }
         if (parameters.sim_engine == sidb_simulation_engine::QUICKEXACT)
         {
@@ -978,6 +966,17 @@ class is_operational_impl
 #else   // FICTION_ALGLIB_ENABLED
             assert(false && "ALGLIB must be enabled if ClusterComplete is to be used");
 #endif  // FICTION_ALGLIB_ENABLED
+        }
+        if constexpr (!is_sidb_defect_surface_v<Lyt>)
+        {
+            if (parameters.sim_engine == sidb_simulation_engine::QUICKSIM)
+            {
+                assert(parameters.simulation_parameters.base == 2 && "QuickSim does not support base-3 simulation");
+
+                // perform QuickSim heuristic simulation
+                const quicksim_params qs_params{parameters.simulation_parameters, 500, 0.6};
+                return quicksim(*bdl_iterator, qs_params);
+            }
         }
 
         assert(false && "unsupported simulation engine");
