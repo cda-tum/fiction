@@ -24,7 +24,7 @@ ExternalProject_Add(
         PREFIX "${JEMALLOC_PREFIX_DIR}"
         URL "https://mirrors.slackware.com/slackware/slackware64-current/slackware64/l/jemalloc-5.3.0-x86_64-2.txz"
         SOURCE_DIR "${JEMALLOC_SOURCE_DIR}"
-        CONFIGURE_COMMAND cd ${JEMALLOC_SOURCE_DIR} && ./autogen.sh --prefix=${JEMALLOC_INSTALL_DIR}
+        CONFIGURE_COMMAND cd ${JEMALLOC_SOURCE_DIR} && ./configure --prefix=${JEMALLOC_INSTALL_DIR}
         BUILD_COMMAND cd ${JEMALLOC_SOURCE_DIR} && make ${PARALLEL_BUILD_ARGS}
         INSTALL_COMMAND cd ${JEMALLOC_SOURCE_DIR} && make ${PARALLEL_BUILD_ARGS} install
         BUILD_IN_SOURCE 1
