@@ -605,7 +605,7 @@ struct sidb_cluster_charge_state
     /**
      * Default constructor, creates a cluster charge state without any negative and positive charges.
      */
-    explicit sidb_cluster_charge_state() noexcept : neg_count{0}, pos_count{0} {}
+    sidb_cluster_charge_state() noexcept : neg_count{0}, pos_count{0} {}
     /**
      * Constructor for a charge space element of a singleton cluster. It has a single composition, which is a cluster
      * state of the singleton cluster and the singleton multiset charge configuration itself.
@@ -616,8 +616,8 @@ struct sidb_cluster_charge_state
      * sum of the local defect potential and the local external potential.
      * @param total_num_sidbs The total number of SiDBs in the layout.
      */
-    explicit sidb_cluster_charge_state(const sidb_cluster_ptr& singleton, const sidb_charge_state cs,
-                                       const double loc_ext_pot, const uint64_t total_num_sidbs) noexcept :
+    sidb_cluster_charge_state(const sidb_cluster_ptr& singleton, const sidb_charge_state cs, const double loc_ext_pot,
+                              const uint64_t total_num_sidbs) noexcept :
             neg_count{static_cast<decltype(neg_count)>(cs == sidb_charge_state::NEGATIVE)},
             pos_count{static_cast<decltype(pos_count)>(cs == sidb_charge_state::POSITIVE)},
             compositions{{{{singleton, static_cast<uint64_t>(*this)}}}}
@@ -636,7 +636,7 @@ struct sidb_cluster_charge_state
             pos_count{m << 32ull >> 32ull}
     {}
     /**
-     * Explicit instructions for the compiler on how to cast a cluster charge state to an 64 bit unsigned integer.
+     * Explicit instructions for the compiler on how to cast a cluster charge state to an 64-bit unsigned integer.
      *
      * @return The 64-bit unsigned integer representing the compressed form of the cluster charge state.
      */
@@ -760,22 +760,22 @@ struct potential_projection
     /**
      * Default constructor, used as a starting point for an accumulation of potential projections.
      */
-    explicit potential_projection() noexcept = default;
+    potential_projection() noexcept = default;
     /**
      * Trivial copy constructor.
      *
      * @param pot Potential value to copy.
      * @param mul Multiset charge configuration to copy.
      */
-    explicit potential_projection(const double pot, const uint64_t mul) noexcept : pot_val{pot}, multiset{mul} {}
+    potential_projection(const double pot, const uint64_t mul) noexcept : pot_val{pot}, multiset{mul} {}
     /**
      * Constructor for a potential projection from a singleton cluster, thereby lifting a value in the potential matrix
      * to a potential projection.
-     * @param inter_sidb_pot Potential value of which the absolute value may be found in the potential matrix in a
+     * @param inter_sidb_pot Potential value of which the absolute value may be found in the potential matrix in an
      * associated `charge_distribution_surface` object.
      * @param cs Charge state associated with the singleton cluster projector for this potential projection.
      */
-    explicit potential_projection(const double inter_sidb_pot, const sidb_charge_state cs) noexcept :
+    potential_projection(const double inter_sidb_pot, const sidb_charge_state cs) noexcept :
             pot_val{inter_sidb_pot},
             multiset{static_cast<uint64_t>(sidb_cluster_charge_state{cs})}
     {}
@@ -832,7 +832,7 @@ struct potential_projection_order
     /**
      * Default constructor, creating the empty potential projection order.
      */
-    explicit potential_projection_order() noexcept = default;
+    potential_projection_order() noexcept = default;
     /**
      * Constructor for a potential projection from a singleton cluster onto the SiDB contained in it.
      *
@@ -841,8 +841,8 @@ struct potential_projection_order
      * @param base The simulation base. This defines whether positive charges are considered.
      * @param self_projection Separates the constructor type from inter-SiDB potential projections.
      */
-    explicit potential_projection_order(const double loc_ext_pot, const uint8_t base,
-                                        [[maybe_unused]] const bool self_projection) noexcept :
+    potential_projection_order(const double loc_ext_pot, const uint8_t base,
+                               [[maybe_unused]] const bool self_projection) noexcept :
             order{base == 3 ? pot_proj_order{potential_projection{loc_ext_pot, sidb_charge_state::POSITIVE},
                                              potential_projection{loc_ext_pot, sidb_charge_state::NEUTRAL},
                                              potential_projection{loc_ext_pot, sidb_charge_state::NEGATIVE}} :
@@ -856,7 +856,7 @@ struct potential_projection_order
      * onto, as found in the potential matrix in an associated `charge_distribution_surface` object.
      * @param base The simulation base. This defines whether positive charges are considered.
      */
-    explicit potential_projection_order(const double inter_sidb_pot, const uint8_t base) noexcept :
+    potential_projection_order(const double inter_sidb_pot, const uint8_t base) noexcept :
             order{base == 3 ? pot_proj_order{potential_projection{-inter_sidb_pot, sidb_charge_state::POSITIVE},
                                              potential_projection{0.0, sidb_charge_state::NEUTRAL},
                                              potential_projection{inter_sidb_pot, sidb_charge_state::NEGATIVE}} :
@@ -1048,12 +1048,12 @@ struct sidb_cluster
      *
      * @param c Set of SiDB indices for the cluster to contain.
      * @param other_c Set of SiDB indices in the layout that the cluster will not contain.
-     * @param v A set of cluster hierarchies to set as the children of this cluster.
+     * @param x A set of cluster hierarchies to set as the children of this cluster.
      * @param unique_id The unsigned integer to identify the cluster hierarchy uniquely with. For the case of a
      * singleton cluster, the unique identifier is set to be the index of the single SiDB it contains.
      */
-    explicit sidb_cluster(std::vector<sidb_ix>&& c, std::vector<sidb_ix>&& other_c, sidb_clustering&& x,
-                          uid_t unique_id) noexcept :
+    sidb_cluster(std::vector<sidb_ix>&& c, std::vector<sidb_ix>&& other_c, sidb_clustering&& x,
+                 const uid_t unique_id) noexcept :
             uid{x.empty() ? *c.cbegin() : unique_id},
             sidbs{std::move(c)},
             external_sidbs{std::move(other_c)},

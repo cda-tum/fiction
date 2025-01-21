@@ -114,7 +114,7 @@ class clustercomplete_impl
      * @param lyt Layout to simulate.
      * @param params Parameter required for both the invocation of *Ground State Space*, and the simulation following.
      */
-    explicit clustercomplete_impl(const Lyt& lyt, const clustercomplete_params<cell<Lyt>>& params) noexcept :
+    clustercomplete_impl(const Lyt& lyt, const clustercomplete_params<cell<Lyt>>& params) noexcept :
             available_threads{std::max(uint64_t{1}, params.available_threads)},
             charge_layout{initialize_charge_layout(lyt, params)},
             real_placed_defects{charge_layout.get_defects()},
@@ -761,8 +761,8 @@ class clustercomplete_impl
          * @param num_sidbs The number of SiDBs in the layout to simulate.
          * @param workers The vector of all workers where this worker is at `ix`.
          */
-        explicit worker(const uint64_t ix, const uint64_t num_sidbs,
-                        const std::vector<std::unique_ptr<worker>>& workers) noexcept :
+        worker(const uint64_t ix, const uint64_t num_sidbs,
+               const std::vector<std::unique_ptr<worker>>& workers) noexcept :
                 index{ix},
                 work_stealing_queue{num_sidbs},
                 clustering_state{num_sidbs},

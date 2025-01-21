@@ -125,7 +125,7 @@ class ground_state_space_impl
      * @param lyt Layout to construct the *Ground State Space* of.
      * @param parameters The parameters that *Ground State Space* will use throughout the construction.
      */
-    explicit ground_state_space_impl(const Lyt& lyt, const ground_state_space_params parameters) noexcept :
+    ground_state_space_impl(const Lyt& lyt, const ground_state_space_params parameters) noexcept :
             params{parameters},
             top_cluster{to_sidb_cluster(sidb_cluster_hierarchy(lyt))},
             clustering{
