@@ -2856,6 +2856,23 @@ static const char *__doc_fiction_clustercomplete_params_global_potential =
 R"doc(Global external electrostatic potential. Value is applied on each cell
 in the layout.)doc";
 
+static const char *__doc_fiction_clustercomplete_params_ground_state_space_reporting =
+R"doc(This enum class provides meaningful options for configuring the
+reporting of the *Ground State Space* statistics. These statistic may
+be used especially to configure the validity witness partitioning
+options for *Ground State Space*, that may impair runtimes when set
+too high, but could provide a large benefit to the complexity of the
+unfolding process of large simulation problems by performing more
+involved pruning procedures in the construction stage.)doc";
+
+static const char *__doc_fiction_clustercomplete_params_ground_state_space_reporting_OFF =
+R"doc(Disabling this option will suppress the output of *Ground State Space*
+statistics.)doc";
+
+static const char *__doc_fiction_clustercomplete_params_ground_state_space_reporting_ON =
+R"doc(Enabling this option will output *Ground State Space* statistics to
+the standard output.)doc";
+
 static const char *__doc_fiction_clustercomplete_params_local_external_potential =
 R"doc(Local external electrostatic potentials (e.g., locally applied
 electrodes).)doc";
@@ -4762,7 +4779,8 @@ Parameter ``params``:
 static const char *__doc_fiction_detail_clustercomplete_impl_extract_work_from_top_cluster =
 R"doc(Work in the form of compositions of charge space elements of the top
 cluster are extracted into a vector and shuffled at random before
-being returned.
+being returned. The shuffling may balance the initial workload
+division.
 
 Parameter ``top_cluster``:
     The top cluster that is returned by running the *Ground State
@@ -4780,11 +4798,13 @@ Parameter ``pot_bound``:
     Potential lower bound.)doc";
 
 static const char *__doc_fiction_detail_clustercomplete_impl_fail_onto_positive_charge =
-R"doc(Returns `true` if and only if the given potential bound closes out
-SiDB+.
+R"doc(Performs V < -e - mu+.
 
 Parameter ``pot_bound``:
-    Potential upper bound.)doc";
+    Potential upper bound.
+
+Returns:
+    `true` if and only if the given potential bound closes out SiDB+.)doc";
 
 static const char *__doc_fiction_detail_clustercomplete_impl_find_cluster_of_maximum_size =
 R"doc(Finds the cluster of the maximum size in the clustering associated
@@ -4824,7 +4844,11 @@ Parameter ``lyt``:
     Layout to simulate.
 
 Parameter ``params``:
-    Parameters for ClusterComplete.)doc";
+    Parameters for ClusterComplete.
+
+Returns:
+    The charge layout initializes with defects specified in the given
+    parameters.)doc";
 
 static const char *__doc_fiction_detail_clustercomplete_impl_initialize_worker_queues =
 R"doc(Initializes the worker queues with work from the top cluster, dividing
@@ -4835,11 +4859,13 @@ Parameter ``work_from_top_cluster``:
     of the top cluster.)doc";
 
 static const char *__doc_fiction_detail_clustercomplete_impl_lb_fail_onto_neutral_charge =
-R"doc(Returns `true` if and only if the given potential bound closes out
-SiDB0.
+R"doc(Performs V > e - mu+.
 
 Parameter ``pot_bound``:
-    Potential lower bound.)doc";
+    Potential lower bound.
+
+Returns:
+    `true` if and only if the given potential bound closes out SiDB0.)doc";
 
 static const char *__doc_fiction_detail_clustercomplete_impl_meets_population_stability_criterion =
 R"doc(This function performs an analysis that is crucial to the
@@ -4914,11 +4940,13 @@ Returns:
     clustering state.)doc";
 
 static const char *__doc_fiction_detail_clustercomplete_impl_ub_fail_onto_neutral_charge =
-R"doc(Returns `true` if and only if the given potential bound closes out
-SiDB0.
+R"doc(Performs V < -e - mu-.
 
 Parameter ``pot_bound``:
-    Potential upper bound.)doc";
+    Potential upper bound.
+
+Returns:
+    `true` if and only if the given potential bound closes out SiDB0.)doc";
 
 static const char *__doc_fiction_detail_clustercomplete_impl_unfold_all_compositions =
 R"doc(After a cluster in a clustering state was chosen to be unfolded next,
@@ -4956,7 +4984,11 @@ Parameter ``w``:
     The worker running on the current thread.
 
 Parameter ``composition``:
-    The composition to unfold.)doc";
+    The composition to unfold.
+
+Returns:
+    `false` if and only if there is no need for backtracking after
+    this return.)doc";
 
 static const char *__doc_fiction_detail_clustercomplete_impl_worker = R"doc(Forward declaration of the worker struct.)doc";
 
@@ -4977,8 +5009,8 @@ R"doc(Obtains work for this worker, either from their own queue, or else
 from another worker's queue (work stealing).
 
 Returns:
-    Either nothing, when no work was found and this thread can thus
-    terminate, or that was obtained.)doc";
+    Either nothing, if no work was found (and this thread can thus
+    terminate), or the work that was obtained.)doc";
 
 static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue =
 R"doc(A worker queue contains a double-layer queue of work items, a
@@ -7629,11 +7661,13 @@ Parameter ``pot_bound``:
     Potential lower bound.)doc";
 
 static const char *__doc_fiction_detail_ground_state_space_impl_fail_onto_positive_charge =
-R"doc(Returns `true` if and only if the given potential bound closes out
-SiDB+.
+R"doc(Performs V < -e - mu+.
 
 Parameter ``pot_bound``:
-    Potential upper bound.)doc";
+    Potential upper bound.
+
+Returns:
+    `true` if and only if the given potential bound closes out SiDB+.)doc";
 
 static const char *__doc_fiction_detail_ground_state_space_impl_fill_merged_charge_state_space =
 R"doc(This recursive function goes through all combinations of charge space
@@ -7738,11 +7772,13 @@ Parameter ``parameters``:
     construction.)doc";
 
 static const char *__doc_fiction_detail_ground_state_space_impl_lb_fail_onto_neutral_charge =
-R"doc(Returns `true` if and only if the given potential bound closes out
-SiDB0.
+R"doc(Performs V > e - mu+.
 
 Parameter ``pot_bound``:
-    Potential lower bound.)doc";
+    Potential lower bound.
+
+Returns:
+    `true` if and only if the given potential bound closes out SiDB0.)doc";
 
 static const char *__doc_fiction_detail_ground_state_space_impl_maximum_top_level_multisets =
 R"doc(This function computes the maximum size of the charge space of the top
@@ -7863,11 +7899,13 @@ R"doc(The top cluster, the cluster that contains all SiDBs, is returned as
 the result of the construction.)doc";
 
 static const char *__doc_fiction_detail_ground_state_space_impl_ub_fail_onto_neutral_charge =
-R"doc(Returns `true` if and only if the given potential bound closes out
-SiDB0.
+R"doc(Performs V < -e - mu-.
 
 Parameter ``pot_bound``:
-    Potential upper bound.)doc";
+    Potential upper bound.
+
+Returns:
+    `true` if and only if the given potential bound closes out SiDB0.)doc";
 
 static const char *__doc_fiction_detail_ground_state_space_impl_update_charge_spaces =
 R"doc(The charge spaces of each cluster in the current clustering are
@@ -11429,10 +11467,9 @@ static const char *__doc_fiction_exact_sidb_simulation_engine_CLUSTERCOMPLETE =
 R"doc(*ClusterComplete* is a novel exact simulation engine that requires
 exponential runtime, though, depending on the simulation problem, it
 effectively reduces the base number by a real number, thus allowing
-problem sizes that were previously considered astronomical in size.
-Inherent to the simulation methodology that does not depend on the
-simulation base, it simulates very effectively for either base number
-(2 or 3).)doc";
+problem sizes that were previously considered astronomical. Inherent
+to the simulation methodology that does not depend on the simulation
+base, it simulates very effectively for either base number (2 or 3).)doc";
 
 static const char *__doc_fiction_exact_sidb_simulation_engine_EXGS =
 R"doc(*Exhaustive Ground State Search* (EXGS) is an exact simulation engine
@@ -13885,7 +13922,7 @@ hindrance in runtimes.)doc";
 
 static const char *__doc_fiction_ground_state_space_params_simulation_parameters =
 R"doc(The physical parameters that *Ground State Space* will use to prune
-simulation search space.)doc";
+the simulation search space.)doc";
 
 static const char *__doc_fiction_ground_state_space_params_witness_partitioning_cluster_size_limit =
 R"doc(This specifies the maximum cluster size for which *Ground State Space*
@@ -13898,23 +13935,6 @@ with the requirements may be rejected. The defaulted value is chosen
 such that some extra pruning may be performed, while the impact on the
 runtime remains negligible. Validity witness partitioning parameters
 are relevant for large simulation problems.)doc";
-
-static const char* __doc_fiction_clustercomplete_params_ground_state_space_reporting =
-    R"doc(This enum class provides meaningful options for configuring the
-reporting of the *Ground State Space* statistics. These statistic may
-be used especially to configure the validity witness partitioning
-options for *Ground State Space*, that may impair runtimes when set
-too high, but could provide a large benefit to the complexity of the
-unfolding process of large simulation problems by performing more
-involved pruning procedures in the construction stage.)doc";
-
-static const char* __doc_fiction_clustercomplete_params_ground_state_space_reporting_OFF =
-R"doc(Disabling this option will suppress the output of *Ground State Space*
-statistics.)doc";
-
-static const char* __doc_fiction_clustercomplete_params_ground_state_space_reporting_ON =
-R"doc(Enabling this option will output *Ground State Space* statistics to
-the standard output.)doc";
 
 static const char *__doc_fiction_ground_state_space_results =
 R"doc(This struct is used to store the results of the *Ground State Space*
@@ -17736,7 +17756,7 @@ projection.
 
 Parameter ``inter_sidb_pot``:
     Potential value of which the absolute value may be found in the
-    potential matrix in a associated `charge_distribution_surface`
+    potential matrix in an associated `charge_distribution_surface`
     object.
 
 Parameter ``cs``:
@@ -19038,10 +19058,10 @@ Returns:
 
 static const char *__doc_fiction_sidb_cluster_charge_state_operator_unsigned_long =
 R"doc(Explicit instructions for the compiler on how to cast a cluster charge
-state to an 64 bit unsigned integer.
+state to an 64-bit unsigned integer.
 
 Returns:
-    The 64 bit unsigned integer representing the compressed form of
+    The 64-bit unsigned integer representing the compressed form of
     the cluster charge state.)doc";
 
 static const char *__doc_fiction_sidb_cluster_charge_state_pos_count =
@@ -19224,8 +19244,7 @@ Parameter ``c``:
     Shared pointer to a cluster to take the has of.
 
 Returns:
-    The hash computed over the the unique id associated with the
-    cluster.)doc";
+    The hash computed over the unique id associated with the cluster.)doc";
 
 static const char *__doc_fiction_sidb_cluster_received_ext_pot_bounds =
 R"doc(The bounds on the electrostatic potential sum of SiDBs external to
@@ -19249,7 +19268,7 @@ Parameter ``other_c``:
     Set of SiDB indices in the layout that the cluster will not
     contain.
 
-Parameter ``v``:
+Parameter ``x``:
     A set of cluster hierarchies to set as the children of this
     cluster.
 
@@ -19678,13 +19697,13 @@ R"doc(Returns the name of the given simulation engine.
 
 Template parameter ``EngineType``:
     The type of the SiDB simulation engine
-    (exhaustive/heuristic/general).
+    (exhaustive/heuristic/generic).
 
 Parameter ``engine``:
     An SiDB simulation engine.
 
 Returns:
-    The name of the simulation engine as a string.)doc";
+    The name of the simulation engine.)doc";
 
 static const char *__doc_fiction_sidb_simulation_parameters =
 R"doc(This struct collects all physical parameters for physical SiDB

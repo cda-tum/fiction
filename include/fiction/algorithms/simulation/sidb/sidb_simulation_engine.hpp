@@ -91,7 +91,7 @@ template <typename EngineType>
                       std::is_same_v<EngineType, heuristic_sidb_simulation_engine>,
                   "EngineType must be a SiDB simulation engine type");
 
-	// generic SiDB simulation engines
+    // generic SiDB simulation engines
     if constexpr (std::is_same_v<EngineType, sidb_simulation_engine>)
     {
         switch (engine)
@@ -119,7 +119,7 @@ template <typename EngineType>
         }
     }
 
-	// exact SiDB simulation engines
+    // exact SiDB simulation engines
     if constexpr (std::is_same_v<EngineType, exact_sidb_simulation_engine>)
     {
         switch (engine)
@@ -143,7 +143,7 @@ template <typename EngineType>
         }
     }
 
-	// heuristic SiDB simulation engines
+    // heuristic SiDB simulation engines
     if constexpr (std::is_same_v<EngineType, heuristic_sidb_simulation_engine>)
     {
         switch (engine)

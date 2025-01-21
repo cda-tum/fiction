@@ -52,14 +52,11 @@ inline void clustercomplete(pybind11::module& m)
      */
     py::class_<fiction::clustercomplete_params<>>(m, "clustercomplete_params", DOC(fiction_clustercomplete_params))
         .def(py::init<>())
-        .def_readwrite("simulation_parameters",
-                       &fiction::clustercomplete_params<>::simulation_parameters,
+        .def_readwrite("simulation_parameters", &fiction::clustercomplete_params<>::simulation_parameters,
                        DOC(fiction_clustercomplete_params_simulation_parameters))
-        .def_readwrite("local_external_potential",
-                       &fiction::clustercomplete_params<>::local_external_potential,
+        .def_readwrite("local_external_potential", &fiction::clustercomplete_params<>::local_external_potential,
                        DOC(fiction_clustercomplete_params_local_external_potential))
-        .def_readwrite("global_potential",
-                       &fiction::clustercomplete_params<>::global_potential,
+        .def_readwrite("global_potential", &fiction::clustercomplete_params<>::global_potential,
                        DOC(fiction_clustercomplete_params_global_potential))
         .def_readwrite("validity_witness_partitioning_max_cluster_size_gss",
                        &fiction::clustercomplete_params<>::validity_witness_partitioning_max_cluster_size_gss,
@@ -67,11 +64,9 @@ inline void clustercomplete(pybind11::module& m)
         .def_readwrite("num_overlapping_witnesses_limit_gss",
                        &fiction::clustercomplete_params<>::num_overlapping_witnesses_limit_gss,
                        DOC(fiction_clustercomplete_params_num_overlapping_witnesses_limit_gss))
-        .def_readwrite("available_threads",
-                       &fiction::clustercomplete_params<>::available_threads,
+        .def_readwrite("available_threads", &fiction::clustercomplete_params<>::available_threads,
                        DOC(fiction_clustercomplete_params_available_threads))
-        .def_readwrite("report_gss_stats",
-                       &fiction::clustercomplete_params<>::report_gss_stats,
+        .def_readwrite("report_gss_stats", &fiction::clustercomplete_params<>::report_gss_stats,
                        DOC(fiction_clustercomplete_params_report_gss_stats));
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
