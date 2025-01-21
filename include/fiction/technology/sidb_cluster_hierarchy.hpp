@@ -142,7 +142,7 @@ sidb_cluster_hierarchy(Lyt& lyt, sidb_cluster_hierarchy_linkage_method linkage_m
 
     charge_distribution_surface<Lyt> charge_lyt{lyt};
 
-    alglib::real_2d_array d;
+    alglib::real_2d_array d{};
     d.setlength(static_cast<alglib::ae_int_t>(charge_lyt.num_cells()), 2);
     for (uint64_t i = 0; i < charge_lyt.num_cells(); ++i)
     {
@@ -152,11 +152,11 @@ sidb_cluster_hierarchy(Lyt& lyt, sidb_cluster_hierarchy_linkage_method linkage_m
         d(static_cast<int>(i), 1) = y;
     }
 
-    alglib::clusterizerstate s;
+    alglib::clusterizerstate s{};
     clusterizercreate(s);
     clusterizersetpoints(s, d, 2);                               // assign data and specify L2 norm (Euclidean metric)
     clusterizersetahcalgo(s, static_cast<int>(linkage_method));  // set the linkage method (default: Ward's method)
-    alglib::ahcreport rep;
+    alglib::ahcreport rep{};
     clusterizerrunahc(s, rep);
 
 #ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
