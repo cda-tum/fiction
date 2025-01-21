@@ -213,7 +213,7 @@ class ground_state_space_impl
      * @param lyt Layout to construct the *Ground State Space* of.
      * @param simulation_parameters Parameters used to calculate the electrostatic potential in the layout.
      */
-    static std::pair<charge_distribution_surface<Lyt>, charge_distribution_surface<Lyt>>
+    [[nodiscard]] static std::pair<charge_distribution_surface<Lyt>, charge_distribution_surface<Lyt>>
     get_local_potential_bounds(const Lyt& lyt, const sidb_simulation_parameters& simulation_parameters) noexcept
     {
         charge_distribution_surface<Lyt> cds_min{lyt};
@@ -249,7 +249,7 @@ class ground_state_space_impl
      * minimum and maximum electrostatic potential.
      * @return The clustering that contains only singleton clusters, one for each SiDB in the layout.
      */
-    static sidb_clustering
+    [[nodiscard]] static sidb_clustering
     get_initial_clustering(const sidb_cluster_ptr& c,
                            const std::pair<charge_distribution_surface<Lyt>, charge_distribution_surface<Lyt>>&
                                local_potential_bound_containers) noexcept
@@ -308,7 +308,7 @@ class ground_state_space_impl
      * @return The potential projection associated with this bound; i.e., an electrostatic potential (in V) associated
      * with a multiset charge configuration of the given cluster.
      */
-    template <bound_direction bound>
+    template <bound_direction bound> [[nodiscard]]
     static constexpr potential_projection get_projection_bound(const sidb_cluster_ptr& c,
                                                                const uint64_t          sidb_ix) noexcept
     {
@@ -324,7 +324,7 @@ class ground_state_space_impl
      * @return The potential projection associated with this bound; i.e., an electrostatic potential (in V) associated
      * with a multiset charge configuration of the given cluster.
      */
-    template <bound_direction bound>
+    template <bound_direction bound> [[nodiscard]]
     static constexpr double get_next_projected_pot_bound(const sidb_cluster_ptr& c, const uint64_t sidb_ix) noexcept
     {
         return c->pot_projs.at(sidb_ix).get_next_bound<bound>().pot_val;
@@ -340,7 +340,7 @@ class ground_state_space_impl
      * @return The potential projection associated with this bound; i.e., an electrostatic potential (in V) associated
      * with the given projector state.
      */
-    template <bound_direction bound>
+    template <bound_direction bound> [[nodiscard]]
     static constexpr potential_projection get_projector_state_bound(const sidb_cluster_projector_state& pst,
                                                                     const uint64_t sidb_ix) noexcept
     {
@@ -476,7 +476,7 @@ class ground_state_space_impl
          *
          * @return The number of overlapping witnesses that determines the resulting problem's complexity.
          */
-        uint64_t omit_free_witnesses_and_count_overlap() noexcept
+        [[nodiscard]] uint64_t omit_free_witnesses_and_count_overlap() noexcept
         {
             witness_set overlap{};
 
@@ -525,7 +525,7 @@ class ground_state_space_impl
      * @return `true` if a validity witness partitioning was found, and `false` if no consistent partitioning was found.
      */
     template <sidb_charge_state current_fill_cs>
-    static bool find_valid_witness_partitioning(witness_partitioning_state& st,
+    [[nodiscard]] static bool find_valid_witness_partitioning(witness_partitioning_state& st,
                                                 const uint64_t              num_witnesses_for_current_cs) noexcept
     {
         if constexpr (current_fill_cs == sidb_charge_state::NEUTRAL)
@@ -625,7 +625,7 @@ class ground_state_space_impl
      * @return A pair of doubles that represent the lower and upper bound of the potential projection onto the given
      * SiDB.
      */
-    template <potential_bound_analysis_mode mode>
+    template <potential_bound_analysis_mode mode> [[nodiscard]]
     static std::pair<double, double>
     get_received_potential_bounds(const sidb_cluster_projector_state& pst, const uint64_t sidb_ix,
                                   const std::optional<complete_potential_bounds_store>& composition_pot_bounds) noexcept
@@ -718,7 +718,7 @@ class ground_state_space_impl
      * @param c The cluster to check the charge space of.
      * @return `true` if and only if charge space of `c` has no invalid elements.
      */
-    bool check_charge_space(const sidb_cluster_ptr& c) noexcept
+    [[nodiscard]] bool check_charge_space(const sidb_cluster_ptr& c) noexcept
     {
         // skip if |charge space| = 1
         if (c->charge_space.size() == 1)
@@ -759,7 +759,7 @@ class ground_state_space_impl
      * @return `true` if and only if a fixed point has been reached; i.e., none of the charge space contain an element
      * that may be removed.
      */
-    bool update_charge_spaces(const std::optional<uint64_t>& skip_cluster = std::nullopt) noexcept
+    [[nodiscard]] bool update_charge_spaces(const std::optional<uint64_t>& skip_cluster = std::nullopt) noexcept
     {
         bool fixpoint = true;
 
@@ -817,7 +817,7 @@ class ground_state_space_impl
      * @return The number of projector states that is the accumulation of the number of projector states in the
      * composition of each charge space element of each child.
      */
-    static uint64_t compute_external_pot_bounds_for_saved_compositions(const sidb_cluster_ptr& parent) noexcept
+    [[nodiscard]] static uint64_t compute_external_pot_bounds_for_saved_compositions(const sidb_cluster_ptr& parent) noexcept
     {
         uint64_t saved_projector_states = 0;
 
@@ -898,7 +898,7 @@ class ground_state_space_impl
      * element of their direct parent.
      * @return `false` if and only if the given composition can be rejected.
      */
-    bool verify_composition(sidb_charge_space_composition& composition) const noexcept
+    [[nodiscard]] bool verify_composition(sidb_charge_space_composition& composition) const noexcept
     {
         // initialize the composition potential bounds to (0.0, 0.0) for all SiDBs
         composition.pot_bounds.initialize_complete_potential_bounds(top_cluster->num_sidbs());
@@ -1003,7 +1003,7 @@ class ground_state_space_impl
      * @param parent The newly-forming parent cluster.
      * @param rst The receptor state with the receiving SiDB that is currently handled.
      */
-    template <bound_direction bound>
+    template <bound_direction bound> [[nodiscard]]
     void merge_pot_projection_bounds(const sidb_cluster_ptr&            parent,
                                      const sidb_cluster_receptor_state& rst) const noexcept
     {
