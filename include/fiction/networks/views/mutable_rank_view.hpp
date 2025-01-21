@@ -257,6 +257,17 @@ class mutable_rank_view<Ntk, false> : public fiction::static_depth_view<Ntk>
     }
 
     /**
+     * Gets the associated nodes in rank order in a specific `level`.
+     *
+     * @param level Level at which to return the nodes.
+     * @return The node order at the given level.
+     */
+    std::vector<node> get_ranks(const uint32_t level)
+    {
+        return ranks[level];
+    }
+
+    /**
      * Fetches a node at a specific rank position
      *
      * @param level The level in the network, from which the node is to be fetched.
