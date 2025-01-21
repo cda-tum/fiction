@@ -268,33 +268,33 @@ class clustercomplete_impl
         return pot_bound > mu_bounds_with_error.at(0);
     }
     /**
-     * Returns `true` if and only if the given potential bound closes out SiDB+.
+     * Performs V < -e - mu+.
      *
      * @param pot_bound Potential upper bound.
+     * @return `true` if and only if the given potential bound closes out SiDB+.
      */
     [[nodiscard]] constexpr bool fail_onto_positive_charge(const double pot_bound) const noexcept
     {
-        // V < -e - mu+
         return pot_bound < mu_bounds_with_error.at(3);
     }
     /**
-     * Returns `true` if and only if the given potential bound closes out SiDB0.
+     * Performs V < -e - mu-.
      *
      * @param pot_bound Potential upper bound.
+     * @return `true` if and only if the given potential bound closes out SiDB0.
      */
     [[nodiscard]] constexpr bool ub_fail_onto_neutral_charge(const double pot_bound) const noexcept
     {
-        // V < -e - mu-
         return pot_bound < mu_bounds_with_error.at(1);
     }
     /**
-     * Returns `true` if and only if the given potential bound closes out SiDB0.
+     * Performs V > e - mu+.
      *
      * @param pot_bound Potential lower bound.
+     * @return `true` if and only if the given potential bound closes out SiDB0.
      */
     [[nodiscard]] constexpr bool lb_fail_onto_neutral_charge(const double pot_bound) const noexcept
     {
-        // V > e - mu+
         return pot_bound > mu_bounds_with_error.at(2);
     }
     /**
@@ -434,7 +434,7 @@ class clustercomplete_impl
      * out.
      * @return The parent projector state that was taken out of the given clustering state.
      */
-[    static sidb_cluster_projector_state_ptr take_parent_out(sidb_clustering_state& clustering_state,
+    static sidb_cluster_projector_state_ptr take_parent_out(sidb_clustering_state& clustering_state,
                                                             const uint64_t         parent_pst_ix) noexcept
     {
         // swap with last
@@ -822,6 +822,7 @@ class clustercomplete_impl
      *
      * @param lyt Layout to simulate.
      * @param params Parameters for ClusterComplete.
+     * @return The charge layout initializes with defects specified in the given parameters.
      */
     [[nodiscard]] static charge_distribution_surface<Lyt>
     initialize_charge_layout(const Lyt& lyt, const clustercomplete_params<cell<Lyt>>& params) noexcept
@@ -1031,6 +1032,7 @@ class clustercomplete_impl
      *
      * @param w The worker running on the current thread.
      * @param composition The composition to unfold.
+     * @return `false` if and only if there is no need for backtracking after this return.
      */
     bool unfold_composition(worker& w, const sidb_charge_space_composition& composition) noexcept
     {

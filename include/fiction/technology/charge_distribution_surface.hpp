@@ -1002,8 +1002,10 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     /**
      * The configuration stability of the current charge distribution is evaluated. It is performed as the last check
      * towards a judgement of physical validity of the present charge distribution layout.
+     *
+     * @return `true` if and only if the present charge distribution layout is deemed to be configuration stable.
      */
-    bool is_configuration_stable() noexcept
+    [[nodiscard]] bool is_configuration_stable() const noexcept
     {
         const auto hop_del =
             [this](const uint64_t c1, const uint64_t c2)  // energy change when charge hops between two SiDBs.
