@@ -262,7 +262,7 @@ class mutable_rank_view<Ntk, false> : public fiction::static_depth_view<Ntk>
      * @param level Level at which to return the nodes.
      * @return The node order at the given level.
      */
-    std::vector<node> get_ranks(const uint32_t level)
+    [[nodiscard]] std::vector<node> get_ranks(const uint32_t level) const noexcept
     {
         return ranks[level];
     }
@@ -297,7 +297,7 @@ class mutable_rank_view<Ntk, false> : public fiction::static_depth_view<Ntk>
      *
      * @return Width of the rank.
      */
-    uint32_t rank_width(const uint32_t level) noexcept
+    [[nodiscard]] uint32_t rank_width(const uint32_t level) const noexcept
     {
         assert(level < ranks.size() && "level must be less than the number of ranks");
 
