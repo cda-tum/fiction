@@ -60,8 +60,8 @@ class temp_command : public command
         add_option("--lambda_tf,-l", physical_params.lambda_tf, "Thomas-Fermi screening distance (unit: nm)", true);
         add_option("--mu_minus,-m", physical_params.mu_minus, "Energy transition level (0/-) (unit: eV)", true);
         add_option("--base", physical_params.base,
-                   "The simulation base, can be 2 or 3, though base 3 critical temperature simulation is experimental "
-                   "(only ClusterComplete supports base 3 simulation)",
+                   "The simulation base, can be 2 or 3, though base-3 critical temperature simulation is experimental "
+                   "(only ClusterComplete supports base-3 simulation)",
                    true);
         add_option("--engine", sim_engine_str,
                    "The simulation engine to use {QuickExact [default], ClusterComplete, QuickSim}", true);

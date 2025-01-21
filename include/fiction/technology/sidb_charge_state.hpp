@@ -29,7 +29,7 @@ enum class sidb_charge_state : int8_t
 static inline const std::vector<sidb_charge_state> SIDB_CHARGE_STATES_BASE_2{sidb_charge_state::NEGATIVE,
                                                                              sidb_charge_state::NEUTRAL};
 /**
- * Charge states of SiDBs for the context of base 3 (full base) simulation.
+ * Charge states of SiDBs for the context of base-3 (full base) simulation.
  */
 static inline const std::vector<sidb_charge_state> SIDB_CHARGE_STATES_BASE_3{
     sidb_charge_state::NEGATIVE, sidb_charge_state::NEUTRAL, sidb_charge_state::POSITIVE};
