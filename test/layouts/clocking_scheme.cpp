@@ -2110,17 +2110,25 @@ TEST_CASE("Linear schemes", "[clocking-scheme]")
 {
     using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
 
-    CHECK(is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::COLUMNAR)));
-    CHECK(is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::ROW)));
-    CHECK(is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::TWODDWAVE)));
-    CHECK(is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::TWODDWAVE_HEX)));
+    auto check_linear_scheme = [](const auto& name, bool expected) {
+        auto cs = get_clocking_scheme<clk_lyt>(name);
+        REQUIRE(cs.has_value());
+        CHECK(is_linear_scheme<clk_lyt>(*cs) == expected);
+    };
 
-    CHECK(!is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::OPEN)));
-    CHECK(!is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::USE)));
-    CHECK(!is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::RES)));
-    CHECK(!is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::ESR)));
-    CHECK(!is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::CFE)));
-    CHECK(!is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::RIPPLE)));
-    CHECK(!is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::SRS)));
-    CHECK(!is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::BANCS)));
+    // Linear clocking schemes
+    check_linear_scheme(clock_name::COLUMNAR, true);
+    check_linear_scheme(clock_name::ROW, true);
+    check_linear_scheme(clock_name::TWODDWAVE, true);
+    check_linear_scheme(clock_name::TWODDWAVE_HEX, true);
+
+    // Non-linear clocking schemes
+    check_linear_scheme(clock_name::OPEN, false);
+    check_linear_scheme(clock_name::USE, false);
+    check_linear_scheme(clock_name::RES, false);
+    check_linear_scheme(clock_name::ESR, false);
+    check_linear_scheme(clock_name::CFE, false);
+    check_linear_scheme(clock_name::RIPPLE, false);
+    check_linear_scheme(clock_name::SRS, false);
+    check_linear_scheme(clock_name::BANCS, false);
 }
