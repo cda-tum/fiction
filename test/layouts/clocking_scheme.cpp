@@ -2110,7 +2110,8 @@ TEST_CASE("Linear schemes", "[clocking-scheme]")
 {
     using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
 
-    auto check_linear_scheme = [](const auto& name, bool expected) {
+    auto check_linear_scheme = [](const auto& name, bool expected)
+    {
         auto cs = get_clocking_scheme<clk_lyt>(name);
         REQUIRE(cs.has_value());
         CHECK(is_linear_scheme<clk_lyt>(*cs) == expected);
