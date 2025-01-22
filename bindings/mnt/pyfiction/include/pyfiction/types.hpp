@@ -43,29 +43,49 @@ using py_siqad_coordinate  = fiction::siqad::coord_t;
 /**
  * Cartesian layout.
  */
-using py_cartesian_layout = fiction::cartesian_layout<py_offset_coordinate>;
+using py_cartesian_layout                   = fiction::cartesian_layout<py_offset_coordinate>;
+using py_cartesian_layout_cube_coordinates  = fiction::cartesian_layout<py_cube_coordinate>;
+using py_cartesian_layout_siqad_coordinates = fiction::cartesian_layout<py_siqad_coordinate>;
 /**
  * Shifted Cartesian layout.
  */
 using py_shifted_cartesian_layout =
     fiction::shifted_cartesian_layout<py_offset_coordinate, fiction::odd_column_cartesian>;
+using py_shifted_cartesian_layout_cube_coordinates =
+    fiction::shifted_cartesian_layout<py_cube_coordinate, fiction::odd_column_cartesian>;
+using py_shifted_cartesian_layout_siqad_coordinates =
+    fiction::shifted_cartesian_layout<py_siqad_coordinate, fiction::odd_column_cartesian>;
 /**
  * Hexagonal layout.
  */
-using py_hexagonal_layout = fiction::hexagonal_layout<py_offset_coordinate, fiction::even_row_hex>;
+using py_hexagonal_layout                   = fiction::hexagonal_layout<py_offset_coordinate, fiction::even_row_hex>;
+using py_hexagonal_layout_cube_coordinates  = fiction::hexagonal_layout<py_cube_coordinate, fiction::even_row_hex>;
+using py_hexagonal_layout_siqad_coordinates = fiction::hexagonal_layout<py_siqad_coordinate, fiction::even_row_hex>;
 /**
  * Cartesian clocked layout.
  */
 using py_cartesian_clocked_layout = fiction::clocked_layout<fiction::tile_based_layout<py_cartesian_layout>>;
+using py_cartesian_clocked_layout_cube_coordinates =
+    fiction::clocked_layout<fiction::tile_based_layout<py_cartesian_layout_cube_coordinates>>;
+using py_cartesian_clocked_layout_siqad_coordinates =
+    fiction::clocked_layout<fiction::tile_based_layout<py_cartesian_layout_siqad_coordinates>>;
 /**
  * Shifted Cartesian clocked layout.
  */
 using py_shifted_cartesian_clocked_layout =
     fiction::clocked_layout<fiction::tile_based_layout<py_shifted_cartesian_layout>>;
+using py_shifted_cartesian_clocked_layout_cube_coordinates =
+    fiction::clocked_layout<fiction::tile_based_layout<py_shifted_cartesian_layout_cube_coordinates>>;
+using py_shifted_cartesian_clocked_layout_siqad_coordinates =
+    fiction::clocked_layout<fiction::tile_based_layout<py_shifted_cartesian_layout_siqad_coordinates>>;
 /**
  * Hexagonal clocked layout.
  */
 using py_hexagonal_clocked_layout = fiction::clocked_layout<fiction::tile_based_layout<py_hexagonal_layout>>;
+using py_hexagonal_clocked_layout_cube_coordinates =
+    fiction::clocked_layout<fiction::tile_based_layout<py_hexagonal_layout_cube_coordinates>>;
+using py_hexagonal_clocked_layout_siqad_coordinates =
+    fiction::clocked_layout<fiction::tile_based_layout<py_hexagonal_layout_siqad_coordinates>>;
 /**
  * Cartesian gate layout.
  */

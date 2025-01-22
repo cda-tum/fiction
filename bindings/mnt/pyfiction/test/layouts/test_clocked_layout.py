@@ -1,14 +1,30 @@
 import unittest
 
-from mnt.pyfiction import clocked_cartesian_layout, clocked_hexagonal_layout, clocked_shifted_cartesian_layout
+from mnt.pyfiction import (
+    clocked_cartesian_layout,
+    clocked_cartesian_layout_cube_coordinates,
+    clocked_cartesian_layout_siqad_coordinates,
+    clocked_hexagonal_layout,
+    clocked_hexagonal_layout_cube_coordinates,
+    clocked_hexagonal_layout_siqad_coordinates,
+    clocked_shifted_cartesian_layout,
+    clocked_shifted_cartesian_layout_cube_coordinates,
+    clocked_shifted_cartesian_layout_siqad_coordinates,
+)
 
 
 class TestClockedLayout(unittest.TestCase):
     def test_clocked_layout_inheritance(self):
         for layout in [
             clocked_cartesian_layout((2, 2, 0), "2DDWave"),
+            clocked_cartesian_layout_cube_coordinates((2, 2, 0), "2DDWave"),
+            clocked_cartesian_layout_siqad_coordinates((2, 2, 0), "2DDWave"),
             clocked_shifted_cartesian_layout((2, 2, 0), "2DDWave"),
+            clocked_shifted_cartesian_layout_cube_coordinates((2, 2, 0), "2DDWave"),
+            clocked_shifted_cartesian_layout_siqad_coordinates((2, 2, 0), "2DDWave"),
             clocked_hexagonal_layout((2, 2, 0), "2DDWave"),
+            clocked_hexagonal_layout_cube_coordinates((2, 2, 0), "2DDWave"),
+            clocked_hexagonal_layout_siqad_coordinates((2, 2, 0), "2DDWave"),
         ]:
             for t in layout.coordinates():
                 self.assertTrue(t <= (9, 9, 1))
@@ -25,8 +41,14 @@ class TestClockedLayout(unittest.TestCase):
     def test_clock_zone_iteration(self):
         for layout in [
             clocked_cartesian_layout((2, 2, 0), "2DDWave"),
+            clocked_cartesian_layout_cube_coordinates((2, 2, 0), "2DDWave"),
+            clocked_cartesian_layout_siqad_coordinates((2, 2, 0), "2DDWave"),
             clocked_shifted_cartesian_layout((2, 2, 0), "2DDWave"),
+            clocked_shifted_cartesian_layout_cube_coordinates((2, 2, 0), "2DDWave"),
+            clocked_shifted_cartesian_layout_siqad_coordinates((2, 2, 0), "2DDWave"),
             clocked_hexagonal_layout((2, 2, 0), "2DDWave"),
+            clocked_hexagonal_layout_cube_coordinates((2, 2, 0), "2DDWave"),
+            clocked_hexagonal_layout_siqad_coordinates((2, 2, 0), "2DDWave"),
         ]:
             self.assertEqual(layout.incoming_clocked_zones((0, 0)), [])
             self.assertEqual(layout.outgoing_clocked_zones((2, 2)), [])
@@ -38,7 +60,17 @@ class TestClockedLayout(unittest.TestCase):
                 self.assertIn(icz, [layout.coord(1, 2), layout.coord(2, 1)])
 
     def test_fetch_clocking_scheme(self):
-        for layout in [clocked_cartesian_layout, clocked_shifted_cartesian_layout, clocked_hexagonal_layout]:
+        for layout in [
+            clocked_cartesian_layout,
+            clocked_cartesian_layout_cube_coordinates,
+            clocked_cartesian_layout_siqad_coordinates,
+            clocked_shifted_cartesian_layout,
+            clocked_shifted_cartesian_layout_cube_coordinates,
+            clocked_shifted_cartesian_layout_siqad_coordinates,
+            clocked_hexagonal_layout,
+            clocked_hexagonal_layout_cube_coordinates,
+            clocked_hexagonal_layout_siqad_coordinates,
+        ]:
             layout((1, 1), "USE")
             layout((2, 2), "2DDWave")
             layout((3, 3), "RES")
