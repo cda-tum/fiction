@@ -88,7 +88,7 @@ jobs:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
       - name: Set up vcpkg
-        uses: lukka/get-vcpkg@latest # or whichever version is current
+        uses: lukka/get-vcpkg@master # or whichever version is current
         with:
           # By default, it installs vcpkg in the environment variable VCPKG_ROOT
           # You can configure caching if you like, to speed repeated builds.
