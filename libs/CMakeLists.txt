@@ -130,18 +130,6 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     message(STATUS "Parallel STL algorithms are enabled on MSVC by default")
 endif ()
 
-# Enable the usage of ALGLIB by the ALGLIB Project
-option(FICTION_ALGLIB "Automatically download, include, and utilize ALGLIB by the ALGLIB project.")
-if (FICTION_ALGLIB)
-    # Compile definition to guard include files
-    target_compile_definitions(libfiction INTERFACE FICTION_ALGLIB_ENABLED)
-
-    # Download, include and link ALGLIB
-    add_subdirectory(alglib-cmake EXCLUDE_FROM_ALL)
-    target_include_directories(libfiction SYSTEM INTERFACE alglib-cmake/src/cpp/src/headers)
-    target_link_system_libraries(libfiction INTERFACE ALGLIB)
-endif ()
-
 # Include JSON by Niels Lohmann
 set(JSON_BuildTests OFF CACHE INTERNAL "")
 add_subdirectory(json EXCLUDE_FROM_ALL)
@@ -168,3 +156,15 @@ check_if_present(tinyxml2)
 add_subdirectory(tinyxml2 EXCLUDE_FROM_ALL)
 set_property(TARGET tinyxml2 PROPERTY POSITION_INDEPENDENT_CODE ON)
 target_link_system_libraries(libfiction INTERFACE tinyxml2::tinyxml2)
+
+# Enable the usage of ALGLIB by the ALGLIB Project
+option(FICTION_ALGLIB "Automatically download, include, and utilize ALGLIB by the ALGLIB project.")
+if (FICTION_ALGLIB)
+    # Compile definition to guard include files
+    target_compile_definitions(libfiction INTERFACE FICTION_ALGLIB_ENABLED)
+
+    # Download, include and link ALGLIB
+    add_subdirectory(alglib-cmake EXCLUDE_FROM_ALL)
+    target_include_directories(libfiction SYSTEM INTERFACE alglib-cmake/src/cpp/src/headers)
+    target_link_system_libraries(libfiction INTERFACE ALGLIB)
+endif ()
