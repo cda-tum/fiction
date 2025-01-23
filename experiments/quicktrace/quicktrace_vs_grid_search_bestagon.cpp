@@ -114,7 +114,8 @@ int main()  // NOLINT
     }
 
     // Log the total number of samples
-    simulation_exp("", 0, 0.0, 0.0, 0.0, total_number_of_samples_grid, 0.0, 0, 0.0, total_number_of_samples_quicktrace);
+    simulation_exp("Sum", 0, 0.0, 0.0, 0.0, total_number_of_samples_grid, 0.0, 0, 0.0,
+                   total_number_of_samples_quicktrace);
     simulation_exp.save();
     simulation_exp.table();
 
