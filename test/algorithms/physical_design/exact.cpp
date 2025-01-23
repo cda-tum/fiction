@@ -92,6 +92,13 @@ exact_physical_design_params&& cfe(exact_physical_design_params&& ps) noexcept
     return std::move(ps);
 }
 
+exact_physical_design_params&& srs(exact_physical_design_params&& ps) noexcept
+{
+    ps.scheme = "SRS";
+
+    return std::move(ps);
+}
+
 exact_physical_design_params&& crossings(exact_physical_design_params&& ps) noexcept
 {
     ps.crossings = true;
@@ -351,6 +358,11 @@ TEST_CASE("Exact Cartesian physical design", "[exact]")
     {
         check_with_gate_library<qca_cell_clk_lyt, qca_one_library, cart_gate_clk_lyt>(
             blueprints::and_or_network<mockturtle::mig_network>(), cfe(crossings(configuration())));
+    }
+    SECTION("SRS clocking")
+    {
+        check_with_gate_library<qca_cell_clk_lyt, qca_one_library, cart_gate_clk_lyt>(
+            blueprints::and_or_network<mockturtle::mig_network>(), srs(crossings(configuration())));
     }
     SECTION("Border I/O")
     {

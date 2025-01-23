@@ -556,12 +556,12 @@ class simple_gate_layout_tile_drawer : public technology_dot_drawer<Lyt, DrawInd
         return columns;
     }
 
-    [[nodiscard]] std::string same_rank(const std::vector<std::string>& rank) const noexcept
+    [[nodiscard]] static std::string same_rank(const std::vector<std::string>& rank) noexcept
     {
         return fmt::format("rank = same {{ {} }};\n", fmt::join(rank, " -> "));
     }
 
-    [[nodiscard]] std::string edge(const std::string_view& src, const std::string_view& tgt) const noexcept
+    [[nodiscard]] static std::string edge(const std::string_view& src, const std::string_view& tgt) noexcept
     {
         return fmt::format("{} -> {};\n", src, tgt);
     }
@@ -995,7 +995,7 @@ class gate_layout_hexagonal_drawer : public simple_gate_layout_tile_drawer<Lyt, 
   protected:
     using base_drawer = simple_gate_layout_tile_drawer<Lyt, ClockColors, DrawIndexes>;
 
-    [[nodiscard]] std::string invisible_node(const uint64_t i) const noexcept
+    [[nodiscard]] static std::string invisible_node(const uint64_t i) noexcept
     {
         return fmt::format("invis{}", i);
     }
@@ -1037,7 +1037,7 @@ class gate_layout_hexagonal_drawer : public simple_gate_layout_tile_drawer<Lyt, 
 
     void shift_row(const Lyt& lyt, const uint64_t row, std::stringstream& stream) const noexcept
     {
-        stream << base_drawer::same_rank({{invisible_node(row), base_drawer::tile_id({0, row})}});
+        stream << base_drawer::same_rank(std::vector<std::string>{invisible_node(row), base_drawer::tile_id({0, row})});
 
         // previous row only exist if i != 0
         if (row != 0)
