@@ -20271,6 +20271,18 @@ Template parameter ``Dist``:
 
 static const char *__doc_fiction_squared_euclidean_distance_functor_squared_euclidean_distance_functor = R"doc()doc";
 
+static const char *__doc_fiction_srs_clocking =
+R"doc(Returns the SRS clocking as defined in \"Simple, robust and systematic
+QCA clocking scheme for area-efficient nanocircuits\" by Mrinal
+Goswami, Tonmoy Jyoti Sharma, and Arpita Nath Boruah in International
+Journal of Electronics Letters 2025.
+
+Template parameter ``Lyt``:
+    Clocked layout type.
+
+Returns:
+    SRS clocking scheme.)doc";
+
 static const char *__doc_fiction_sweep_parameter = R"doc(Possible sweep parameters for the operational domain computation.)doc";
 
 static const char *__doc_fiction_sweep_parameter_EPSILON_R = R"doc(The relative permittivity of the dielectric material.)doc";

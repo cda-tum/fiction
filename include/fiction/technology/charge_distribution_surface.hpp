@@ -174,7 +174,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     {
       private:
         /**
-         * The distance matrix is a vector of vectors storing the euclidean distance in nm.
+         * The distance matrix is a vector of vectors storing the Euclidean distance in nm.
          */
         using distance_matrix = std::vector<std::vector<double>>;
         /**
@@ -382,8 +382,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
         for (const auto& c : strg->sidb_order)
         {
-            auto pos = sidb_nm_position<Lyt>(*this, c);
-            positions.push_back(std::make_pair(pos.first, pos.second));
+            auto pos = sidb_nm_position<Lyt>(Lyt{}, c);
+            positions.emplace_back(pos.first, pos.second);
         }
 
         return positions;
