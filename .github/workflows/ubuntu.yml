@@ -106,10 +106,15 @@ jobs:
         uses: rui314/setup-mold@v1
 
       - name: Setup Z3 Solver
+        if: matrix.os != 'ubuntu-24.04-arm'
         id: z3
         uses: cda-tum/setup-z3@v1
         with:
           version: ${{env.Z3_VERSION}}
+          platform: linux
+          architecture: x64
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
       # Build and test pipeline for Debug mode
 
@@ -128,7 +133,7 @@ jobs:
           -DFICTION_TEST=ON
           -DFICTION_BENCHMARK=OFF
           -DFICTION_EXPERIMENTS=ON
-          -DFICTION_Z3=ON
+          ${{ matrix.os != 'ubuntu-24.04-arm' && '-DFICTION_Z3=ON' || '' }}
           -DFICTION_ENABLE_MUGEN=ON
           -DFICTION_PROGRESS_BARS=OFF
           -DFICTION_WARNINGS_AS_ERRORS=OFF
@@ -159,7 +164,7 @@ jobs:
           -DFICTION_TEST=ON
           -DFICTION_BENCHMARK=OFF
           -DFICTION_EXPERIMENTS=ON
-          -DFICTION_Z3=ON
+          ${{ matrix.os != 'ubuntu-24.04-arm' && '-DFICTION_Z3=ON' || '' }}
           -DFICTION_ENABLE_MUGEN=ON
           -DFICTION_PROGRESS_BARS=OFF
           -DFICTION_WARNINGS_AS_ERRORS=OFF
