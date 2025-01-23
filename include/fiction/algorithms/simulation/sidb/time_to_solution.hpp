@@ -34,7 +34,7 @@ struct time_to_solution_params
     exact_sidb_simulation_engine engine = exact_sidb_simulation_engine::QUICKEXACT;
     /**
      * Number of iterations of the heuristic algorithm used to determine the simulation accuracy (`repetitions = 100`
-     * means that accuracy is precise to 1%).
+     * means that accuracy is precise to 1 %).
      */
     uint64_t repetitions = 100;
     /**

@@ -1,12 +1,12 @@
-from mnt.pyfiction import (read_technology_network, orthogonal, equivalence_checking, hexagonalization, eq_type)
-import unittest
 import os
+import unittest
+
+from mnt.pyfiction import eq_type, equivalence_checking, hexagonalization, orthogonal, read_technology_network
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
 class TestHexagonalization(unittest.TestCase):
-
     def test_hexagonalization_default(self):
         network = read_technology_network(dir_path + "/../../resources/mux21.v")
         cart_layout = orthogonal(network)
@@ -16,5 +16,5 @@ class TestHexagonalization(unittest.TestCase):
         self.assertEqual(equivalence_checking(cart_layout, hex_layout), eq_type.STRONG)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

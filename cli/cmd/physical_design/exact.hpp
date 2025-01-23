@@ -2,10 +2,10 @@
 // Created by marcel on 06.01.20.
 //
 
-#if (FICTION_Z3_SOLVER)
-
 #ifndef FICTION_CMD_EXACT_HPP
 #define FICTION_CMD_EXACT_HPP
+
+#if (FICTION_Z3_SOLVER)
 
 #include <fiction/algorithms/physical_design/exact.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
@@ -38,7 +38,7 @@ class exact_command : public command
     {
         add_option("--clk_scheme,-s", ps.scheme,
                    "Clocking scheme to use {OPEN[3|4], COLUMNAR[3|4], ROW[3|4] 2DDWAVE[3|4], 2DDWAVEHEX[3|4], USE, "
-                   "RES, ESR, CFE, RIPPLE, BANCS}",
+                   "RES, ESR, CFE, RIPPLE, SRS, BANCS}",
                    true);
         add_option("--upper_area", ps.upper_bound_area, "Upper bound for the total number of tiles");
         add_option("--upper_x", ps.upper_bound_x, "Upper bound for the number of tiles in x-direction");
@@ -244,6 +244,6 @@ ALICE_ADD_COMMAND(exact, "Physical Design")
 
 }  // namespace alice
 
-#endif  // FICTION_CMD_EXACT_HPP
-
 #endif  // FICTION_Z3_SOLVER
+
+#endif  // FICTION_CMD_EXACT_HPP

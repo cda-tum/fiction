@@ -1,13 +1,20 @@
 import unittest
 
-from mnt.pyfiction import (sidb_simulation_result_111, sidb_simulation_result_100, sidb_100_lattice, sidb_111_lattice,
-                           sidb_technology, charge_distribution_surface_100, sidb_simulation_parameters,
-                           sidb_charge_state, determine_groundstate_from_simulation_results,
-                           charge_distribution_surface_111)
+from mnt.pyfiction import (
+    charge_distribution_surface_100,
+    charge_distribution_surface_111,
+    groundstate_from_simulation_result,
+    sidb_100_lattice,
+    sidb_111_lattice,
+    sidb_charge_state,
+    sidb_simulation_parameters,
+    sidb_simulation_result_100,
+    sidb_simulation_result_111,
+    sidb_technology,
+)
 
 
 class TestSiDBSimulationResult(unittest.TestCase):
-
     def test_negative_and_neutral_layout_100_lattice(self):
         # Use standard constructor.
         result = sidb_simulation_result_100()
@@ -22,7 +29,7 @@ class TestSiDBSimulationResult(unittest.TestCase):
 
         result.charge_distributions = [cds_negative, cds_neutral]
 
-        groundstate = determine_groundstate_from_simulation_results(result)
+        groundstate = groundstate_from_simulation_result(result)
 
         self.assertEqual(len(groundstate), 1)
         self.assertEqual(groundstate[0].get_charge_state((0, 1)), sidb_charge_state.NEUTRAL)
@@ -42,12 +49,12 @@ class TestSiDBSimulationResult(unittest.TestCase):
 
         result.charge_distributions = [cds_negative, cds_neutral]
 
-        groundstate = determine_groundstate_from_simulation_results(result)
+        groundstate = groundstate_from_simulation_result(result)
 
         self.assertEqual(len(groundstate), 1)
         self.assertEqual(groundstate[0].get_charge_state((0, 1)), sidb_charge_state.NEUTRAL)
         self.assertEqual(groundstate[0].get_charge_state((0, 3)), sidb_charge_state.NEUTRAL)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

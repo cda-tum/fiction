@@ -116,7 +116,6 @@
             <dbdot>
                 <layer_id>2</layer_id>
                 <latcoord n="14" m="15" l="0"/>
-                <type>logic</type>
                 <physloc x="53.76" y="115.2"/>
                 <color>#ffc8c8c8</color>
             </dbdot>

@@ -14,6 +14,8 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
+#include <string>
+
 namespace pyfiction
 {
 
@@ -23,16 +25,14 @@ namespace detail
 template <typename Lyt>
 void determine_displacement_robustness_domain(pybind11::module& m, const std::string& lattice = "")
 {
-
-    namespace py = pybind11;
     namespace py = pybind11;
 
     py::class_<fiction::displacement_robustness_domain<Lyt>>(
-        m, fmt::format("displacement_robustness_domain{}", lattice).c_str())
+        m, fmt::format("displacement_robustness_domain_{}", lattice).c_str())
         .def(py::init<>())
-        .def_readwrite("operational_values", &fiction::displacement_robustness_domain<Lyt>::operational_values);
+        .def_readwrite("influence_information", &fiction::displacement_robustness_domain<Lyt>::operational_values);
 
-    m.def(fmt::format("determine_displacement_robustness_domain{}", lattice).c_str(),
+    m.def(fmt::format("determine_displacement_robustness_domain_{}", lattice).c_str(),
           &fiction::determine_displacement_robustness_domain<Lyt, py_tt>, py::arg("layout"), py::arg("spec"),
           py::arg("params"), py::arg("stats") = nullptr);
 }
@@ -41,7 +41,6 @@ void determine_displacement_robustness_domain(pybind11::module& m, const std::st
 
 inline void determine_displacement_robustness_domain(pybind11::module& m)
 {
-    namespace py = pybind11;
     namespace py = pybind11;
 
     py::enum_<fiction::displacement_robustness_domain_params<fiction::offset::ucoord_t>::dimer_displacement_policy>(
@@ -86,8 +85,8 @@ inline void determine_displacement_robustness_domain(pybind11::module& m)
                        &fiction::displacement_robustness_domain_stats::num_non_operational_sidb_displacements);
 
     // NOTE: be careful with the order of the following calls! Python will resolve the first matching overload!
-    detail::determine_displacement_robustness_domain<py_sidb_100_lattice>(m, "_100");
-    detail::determine_displacement_robustness_domain<py_sidb_111_lattice>(m, "_111");
+    detail::determine_displacement_robustness_domain<py_sidb_100_lattice>(m, "100");
+    detail::determine_displacement_robustness_domain<py_sidb_111_lattice>(m, "111");
 }
 
 }  // namespace pyfiction

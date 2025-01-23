@@ -10,8 +10,45 @@ Unreleased
 
 Added
 #####
+- Clocking schemes:
+    - SRS
+
+
+v0.6.7 - 2025-01-20
+-------------------
+
+Added
+#####
+- Algorithms:
+    - Simulation:
+        - Implemented new algorithms utilizing grid search, random sampling, and contour tracing to determine defect clearance distances of SiDB layouts
+        - Restructured defect influence simulation for enhanced usability
+        - Integrated ``QuickCell's`` pruning strategies to efficiently identify non-operational layouts
 - Experiments:
-    - Added information about how many layouts remain after each of QuickCell's pruning steps.
+    - Added rectangular SiDB gate skeletons (16.896 nm x 16.896 nm) and a script for designing a corresponding library
+    - Enhanced results tables in the ``QuickCell`` experiment script with information about how many layouts remain and are pruned at each pruning step
+- Continuous integration:
+    - Added MacOS 15 and Windows 2025 to the CI
+    - Added `Renovate <https://github.com/renovatebot/renovate>`_ to keep dependencies up-to-date
+    - Added `ruff <https://docs.astral.sh/ruff/>`_ as a Python linter and `mypy <https://mypy-lang.org/>`_ for static Python type checking. Extended the pre-commit configuration with ``check-jsonschema``, ``validate-pyproject-schema-store``, ``nb-clean``, ``prettier``, ``ruff``, and ``mypy``
+- CLI:
+    - Added an optional callback to `ABC <https://github.com/berkeley-abc/abc>`_ in fiction's CLI
+
+Changed
+#######
+- Continuous integration:
+    - Updated the workflow to reduce runtime when building the wheels by excluding redundant combinations of OSs and Python versions
+
+Fixed
+#####
+- Fixed a bug in the ``show`` command of the CLI
+
+Removed
+#######
+- Continuous integration:
+    - Dropped Python 3.8 support due to its end-of-life status
+    - Dropped Dependabot
+
 
 v0.6.6 - 2024-11-26
 -------------------

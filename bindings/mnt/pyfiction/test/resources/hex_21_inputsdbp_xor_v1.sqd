@@ -70,6 +70,7 @@
             <dbdot>
                 <layer_id>2</layer_id>
                 <latcoord n="19" m="8" l="0"/>
+                <type>logic</type>
                 <physloc x="72.96" y="61.44"/>
                 <color>#ffc8c8c8</color>
             </dbdot>
@@ -115,6 +116,7 @@
             <dbdot>
                 <layer_id>2</layer_id>
                 <latcoord n="15" m="7" l="0"/>
+                <type>logic</type>
                 <physloc x="57.6" y="53.76"/>
                 <color>#ffc8c8c8</color>
             </dbdot>
@@ -127,6 +129,7 @@
             <dbdot>
                 <layer_id>2</layer_id>
                 <latcoord n="20" m="11" l="0"/>
+                <type>logic</type>
                 <physloc x="76.8" y="84.48"/>
                 <color>#ffc8c8c8</color>
             </dbdot>
@@ -182,6 +185,7 @@
             <dbdot>
                 <layer_id>2</layer_id>
                 <latcoord n="17" m="9" l="1"/>
+                <type>logic</type>
                 <physloc x="65.28" y="71.37"/>
                 <color>#ffc8c8c8</color>
             </dbdot>

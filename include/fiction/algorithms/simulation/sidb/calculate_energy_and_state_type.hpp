@@ -137,7 +137,7 @@ template <typename Lyt, typename TT>
                 bool correct_output = true;
 
                 is_operational_params params{};
-                params.op_condition = operational_condition::REJECT_KINKS;
+                params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
 
                 const auto operational_status =
                     verify_logic_match(valid_layout, params, spec, input_index, input_bdl_wires, output_bdl_wires);
