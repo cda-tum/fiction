@@ -4099,6 +4099,23 @@ position. It implies that the layout remains unaffected by the defect
 at this location, meaning there is no change in the operational status
 or the ground state.)doc";
 
+static const char *__doc_fiction_delete_virtual_pis =
+R"doc(Deletes virtual primary inputs (PIs) from a network and remaps all
+signals connected to the virtual PIs back to their corresponding real
+PIs. This ensures compatibility for equivalence checking between
+networks with and without virtual inputs, as the miter requires
+networks to have an identical number of primary inputs. If the network
+does not contain any virtual PIs, it is returned unchanged.
+
+Template parameter ``Ntk``:
+    The type of network.
+
+Parameter ``ntk``:
+    The input network.
+
+Returns:
+    The resulting network after virtual primary inputs are deleted.)doc";
+
 static const char *__doc_fiction_dependent_cell_mode = R"doc(An enumeration of modes for the dependent cell.)doc";
 
 static const char *__doc_fiction_dependent_cell_mode_FIXED =
@@ -4108,6 +4125,12 @@ local electrostatic potential at its position.)doc";
 static const char *__doc_fiction_dependent_cell_mode_VARIABLE =
 R"doc(The charge state of the dependent cell is changed based on the local
 electrostatic potential at its position.)doc";
+
+static const char *__doc_fiction_depth_view_params = R"doc(Parameters for depth view.)doc";
+
+static const char *__doc_fiction_depth_view_params_count_complements = R"doc(Take complemented edges into account for depth computation.)doc";
+
+static const char *__doc_fiction_depth_view_params_pi_cost = R"doc(Whether PIs have costs.)doc";
 
 static const char *__doc_fiction_design_sidb_gates =
 R"doc(The *SiDB Gate Designer* designs SiDB gate implementations based on a
@@ -4984,6 +5007,16 @@ static const char *__doc_fiction_detail_defect_influence_impl_se_bb_layout = R"d
 static const char *__doc_fiction_detail_defect_influence_impl_se_cell = R"doc(South-east cell.)doc";
 
 static const char *__doc_fiction_detail_defect_influence_impl_stats = R"doc(The statistics of the defect influence domain computation.)doc";
+
+static const char *__doc_fiction_detail_delete_virtual_pis_impl = R"doc()doc";
+
+static const char *__doc_fiction_detail_delete_virtual_pis_impl_delete_virtual_pis_impl = R"doc()doc";
+
+static const char *__doc_fiction_detail_delete_virtual_pis_impl_ntk = R"doc(Network without virtual PIs.)doc";
+
+static const char *__doc_fiction_detail_delete_virtual_pis_impl_ntk_topo = R"doc(Topological view of the input network.)doc";
+
+static const char *__doc_fiction_detail_delete_virtual_pis_impl_run = R"doc()doc";
 
 static const char *__doc_fiction_detail_delete_wires =
 R"doc(This function deletes wires from the provided
@@ -6993,6 +7026,20 @@ Parameter ``place_info``:
 
 Parameter ``ssg``:
     The search space graph.)doc";
+
+static const char *__doc_fiction_detail_handle_virtual_pis =
+R"doc(Removes virtual primary inputs from a network if supported. Otherwise
+the input network is returned unmodified.
+
+Template parameter ``Ntk``:
+    The network type.
+
+Parameter ``network``:
+    The input network to process.
+
+Returns:
+    The network with virtual primary inputs removed, or the original
+    network if unsupported.)doc";
 
 static const char *__doc_fiction_detail_is_balanced_impl = R"doc()doc";
 
@@ -12888,6 +12935,8 @@ static const char *__doc_fiction_has_foreach_incoming_clocked_zone = R"doc()doc"
 
 static const char *__doc_fiction_has_foreach_outgoing_clocked_zone = R"doc()doc";
 
+static const char *__doc_fiction_has_foreach_real_pi = R"doc()doc";
+
 static const char *__doc_fiction_has_foreach_sidb_defect = R"doc()doc";
 
 static const char *__doc_fiction_has_foreach_tile = R"doc()doc";
@@ -12899,6 +12948,8 @@ static const char *__doc_fiction_has_get_functional_implementations = R"doc()doc
 static const char *__doc_fiction_has_get_gate_ports = R"doc()doc";
 
 static const char *__doc_fiction_has_get_layout_name = R"doc()doc";
+
+static const char *__doc_fiction_has_get_real_pi = R"doc()doc";
 
 static const char *__doc_fiction_has_get_sidb_defect = R"doc()doc";
 
@@ -12984,6 +13035,10 @@ static const char *__doc_fiction_has_is_outgoing_clocked = R"doc()doc";
 
 static const char *__doc_fiction_has_is_po = R"doc()doc";
 
+static const char *__doc_fiction_has_is_real_pi = R"doc()doc";
+
+static const char *__doc_fiction_has_is_virtual_pi = R"doc()doc";
+
 static const char *__doc_fiction_has_is_wire_tile = R"doc()doc";
 
 static const char *__doc_fiction_has_is_xnor = R"doc()doc";
@@ -12995,6 +13050,10 @@ static const char *__doc_fiction_has_north = R"doc()doc";
 static const char *__doc_fiction_has_north_east = R"doc()doc";
 
 static const char *__doc_fiction_has_north_west = R"doc()doc";
+
+static const char *__doc_fiction_has_num_real_pis = R"doc()doc";
+
+static const char *__doc_fiction_has_num_virtual_pis = R"doc()doc";
 
 static const char *__doc_fiction_has_ordinal_operations = R"doc()doc";
 
@@ -13009,6 +13068,8 @@ static const char *__doc_fiction_has_south_east = R"doc()doc";
 static const char *__doc_fiction_has_south_west = R"doc()doc";
 
 static const char *__doc_fiction_has_synchronization_elements = R"doc()doc";
+
+static const char *__doc_fiction_has_update_ranks = R"doc()doc";
 
 static const char *__doc_fiction_has_west = R"doc()doc";
 
@@ -14438,6 +14499,8 @@ static const char *__doc_fiction_is_sidb_lattice_111 = R"doc()doc";
 
 static const char *__doc_fiction_is_tile_based_layout = R"doc()doc";
 
+static const char *__doc_fiction_is_virtual_network_type = R"doc()doc";
+
 static const char *__doc_fiction_jump_point_search =
 R"doc(The Jump Point Search (JPS) path finding algorithm for shortest loop-
 less paths between a given source and target coordinate in a Cartesian
@@ -14692,6 +14755,32 @@ static const char *__doc_fiction_missing_sidb_position_exception_line = R"doc()d
 static const char *__doc_fiction_missing_sidb_position_exception_missing_sidb_position_exception = R"doc()doc";
 
 static const char *__doc_fiction_missing_sidb_position_exception_where = R"doc()doc";
+
+static const char *__doc_fiction_mutable_rank_view =
+R"doc(@class mutable_rank_view<Ntk, true>
+
+If already a rank_interface exists only the static_depth_view
+constructor gets called.
+
+Template parameter ``Ntk``:
+    The network type.)doc";
+
+static const char *__doc_fiction_mutable_rank_view_2 =
+R"doc(Deduction guide for `mutable_rank_view'.
+
+Template parameter ``T``:
+    Network type deduced from the construction context of
+    `mutable_rank_view`.)doc";
+
+static const char *__doc_fiction_mutable_rank_view_3 =
+R"doc(Deduction guide for `mutable_rank_view` with two constructor
+arguments.
+
+Template parameter ``T``:
+    Network type deduced from the construction context of
+    `mutable_rank_view`.)doc";
+
+static const char *__doc_fiction_mutable_rank_view_mutable_rank_view = R"doc()doc";
 
 static const char *__doc_fiction_network_balancing =
 R"doc(Balances a logic network with buffer nodes that compute the identity
@@ -18402,6 +18491,34 @@ Template parameter ``Lyt``:
 Returns:
     SRS clocking scheme.)doc";
 
+static const char *__doc_fiction_static_depth_view =
+R"doc(A specialization of `static_depth_view` for networks where
+`has_depth_interface` is `true`. When this condition is met,
+constructing a new depth view is unnecessary.
+
+Template parameter ``Ntk``:
+    The type of the network.
+
+Template parameter ``NodeCostFn``:
+    A function to compute the costs associated with nodes.)doc";
+
+static const char *__doc_fiction_static_depth_view_2 =
+R"doc(Deduction guide for `fiction::static_depth_view'.
+
+Template parameter ``T``:
+    Network type deduced from the construction context of
+    `fiction::static_depth_view`.)doc";
+
+static const char *__doc_fiction_static_depth_view_3 =
+R"doc(Deduction guide for `fiction::static_depth_view` with two constructor
+arguments
+
+Template parameter ``T``:
+    Network type deduced from the construction context of
+    `fiction::static_depth_view`.)doc";
+
+static const char *__doc_fiction_static_depth_view_static_depth_view = R"doc()doc";
+
 static const char *__doc_fiction_sweep_parameter = R"doc(Possible sweep parameters for the operational domain computation.)doc";
 
 static const char *__doc_fiction_sweep_parameter_EPSILON_R = R"doc(The relative permittivity of the dielectric material.)doc";
@@ -19347,6 +19464,206 @@ Template parameter ``Color``:
 static const char *__doc_fiction_vertical_shift_cartesian =
 R"doc(\verbatim +-------+ | | | +-------+ | | | +-------+ | | | +-------+
 \endverbatim)doc";
+
+static const char *__doc_fiction_virtual_miter =
+R"doc(Combines two networks into a combinational miter, similar to
+`mockturtle::miter`. Either input network may include virtual primary
+inputs (PIs). Virtual PIs are removed during miter construction, and
+all edges connected to them are remapped to their corresponding
+original PIs, ensuring consistent PI counts when the networks are
+equivalent.
+
+The resulting miter connects two networks with the same number of
+inputs and produces a single primary output. This output represents
+the OR of the XORs of all primary output pairs. Thus, the miter
+outputs 1 for any input assignment where the primary outputs of the
+two networks differ.
+
+The input networks may have different types. If the two input networks
+have mismatched numbers of primary inputs or outputs, the method
+returns `std::nullopt`.
+
+Template parameter ``NtkDest``:
+    The type of the resulting network.
+
+Template parameter ``NtkSource1``:
+    The type of the first input network.
+
+Template parameter ``NtkSource2``:
+    The type of the second input network.
+
+Parameter ``ntk1_in``:
+    The first input network.
+
+Parameter ``ntk2_in``:
+    The second input network.
+
+Returns:
+    An `optional` containing the virtual miter network if successful,
+    or `std::nullopt` if the networks are incompatible.)doc";
+
+static const char *__doc_fiction_virtual_pi_network = R"doc()doc";
+
+static const char *__doc_fiction_virtual_pi_network_clone = R"doc(Clones the `virtual_pi_network` object.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_create_virtual_pi =
+R"doc(Create a virtual PI, which is a mapping to a real PI.
+
+This function adds a PI to the parent network, but marks it as virtual
+and stores a mapping to a real PI.
+
+Parameter ``real_pi``:
+    The node representing the real PI in the network.
+
+Returns:
+    The signal of the newly created virtual PI.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_foreach_real_ci =
+R"doc(Iterates over the virtual CIs of the circuit and applies a given
+function.
+
+Template parameter ``Fn``:
+    The type of the function to be applied.
+
+Parameter ``fn``:
+    The function to be applied.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_foreach_real_pi =
+R"doc(Iterates over the real PIs of the circuit and applies a given
+function.
+
+Template parameter ``Fn``:
+    The type of the function to be applied.
+
+Parameter ``fn``:
+    The function to be applied.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_foreach_virtual_ci =
+R"doc(Iterates over the virtual CIs of the circuit and applies a given
+function.
+
+Template parameter ``Fn``:
+    The type of the function to be applied.
+
+Parameter ``fn``:
+    The function to be applied.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_foreach_virtual_pi =
+R"doc(Iterates over the virtual PIs of the circuit and applies a given
+function.
+
+Template parameter ``Fn``:
+    The type of the function to be applied.
+
+Parameter ``fn``:
+    The function to be applied.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_get_real_pi =
+R"doc(Get the real PI associated with a virtual PI node.
+
+Parameter ``v_pi``:
+    The virtual pi node to retrieve the real PI for.
+
+Returns:
+    The real pi associated with the virtual PI node.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_is_real_ci =
+R"doc(Check if a given node is a real CI in the `virtual_pi_network`.
+
+Parameter ``n``:
+    The node to check.
+
+Returns:
+    `true` if the node is a real CI, `false` otherwise.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_is_real_pi =
+R"doc(Check if a given node is a real PI. Real PIs are created with
+`create_pi()`.
+
+Parameter ``n``:
+    The node to check.
+
+Returns:
+    `true` if the node is a real PI, `false` otherwise.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_is_virtual_ci =
+R"doc(Check if a given node is a virtual CI in the `virtual_pi_network`.
+
+Parameter ``n``:
+    The node to check.
+
+Returns:
+    `true` if the node is a virtual CI, `false` otherwise.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_is_virtual_pi =
+R"doc(Check if a given node is a virtual PI. Virtual PIs are created with
+`create_virtual_pi()`.
+
+Parameter ``n``:
+    The node to check.
+
+Returns:
+    `true` if the node is a virtual PI, `false` otherwise.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_num_real_cis =
+R"doc(Get the number of real CIs in the `virtual_pi_network`.
+
+Returns:
+    The number of real CIs as a `uint32_t`.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_num_real_pis =
+R"doc(Get the number of real PIs in the `virtual_pi_network`.
+
+Returns:
+    The number of real PIs as a `uint32_t`.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_num_virtual_cis =
+R"doc(Get the number of virtual CIs in the `virtual_pi_network`.
+
+Returns:
+    The number of virtual CIs as a `uint32_t`.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_num_virtual_pis =
+R"doc(Get the number of virtual PIs in the `virtual_pi_network`.
+
+Returns:
+    The number of virtual PIs as a `uint32_t`.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_real_size =
+R"doc(Calculate the real size of the `virtual_pi_network`.
+
+The real size of the network is considered the size without virtual
+PIs.
+
+Returns:
+    The real size of the `virtual_pi_network` as a `uint32_t`.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_v_storage = R"doc(Shared pointer of the virtual PI storage.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_virtual_pi_network =
+R"doc(Default constructor for the `virtual_pi_network` class. Initializes
+`v_storage` as a shared pointer.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_virtual_pi_network_2 =
+R"doc(Constructor for the `virtual_pi_network` class that takes a network
+and a shared pointer to a `virtual_storage` object. This is used for
+cloning.
+
+Template parameter ``Ntk``:
+    Network type.
+
+Parameter ``ntk``:
+    Input network.
+
+Parameter ``s``:
+    Shared pointer to the `virtual_storage` object to be used by this
+    `virtual_pi_network`.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_virtual_storage = R"doc()doc";
+
+static const char *__doc_fiction_virtual_pi_network_virtual_storage_map_virtual_to_real_pi = R"doc(Map from virtual_pis to real_pis.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_virtual_storage_virtual_inputs = R"doc(Vector storing virtual_inputs.)doc";
 
 static const char *__doc_fiction_volume =
 R"doc(Computes the volume of a given coordinate assuming its origin is (0,
