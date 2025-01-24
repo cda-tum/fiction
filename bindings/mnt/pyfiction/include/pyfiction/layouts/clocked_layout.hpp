@@ -30,9 +30,9 @@ void clocked_layout(pybind11::module& m, const std::string& topology, const std:
     namespace py = pybind11;
 
     /**
-     * Clocked Cartesian layout.
+     * Clocked layout.
      */
-    py::class_<ClockedLyt, LytBase>(m, fmt::format("clocked_{}_layout{}", topology, coord_type).c_str(),
+    py::class_<ClockedLyt, LytBase>(m, fmt::format("clocked_{}_layout_{}", topology, coord_type).c_str(),
                                     DOC(fiction_clocked_layout))
         .def(py::init<>())
         .def(py::init<const fiction::aspect_ratio<ClockedLyt>&>(), py::arg("dimension"),
@@ -89,24 +89,154 @@ void clocked_layout(pybind11::module& m, const std::string& topology, const std:
 
 void clocked_layouts(pybind11::module& m)
 {
-    detail::clocked_layout<py_cartesian_layout, py_cartesian_clocked_layout>(m, "cartesian", "");
+    detail::clocked_layout<py_cartesian_layout, py_cartesian_clocked_layout>(m, "cartesian", "offset_coordinates");
     detail::clocked_layout<py_cartesian_layout_cube_coordinates, py_cartesian_clocked_layout_cube_coordinates>(
-        m, "cartesian", "_cube_coordinates");
-    detail::clocked_layout<py_cartesian_layout_siqad_coordinates, py_cartesian_clocked_layout_siqad_coordinates>(
-        m, "cartesian", "_siqad_coordinates");
+        m, "cartesian", "cube_coordinates");
     detail::clocked_layout<py_shifted_cartesian_layout, py_shifted_cartesian_clocked_layout>(m, "shifted_cartesian",
-                                                                                             "");
+                                                                                             "offset_coordinates");
     detail::clocked_layout<py_shifted_cartesian_layout_cube_coordinates,
                            py_shifted_cartesian_clocked_layout_cube_coordinates>(m, "shifted_cartesian",
-                                                                                 "_cube_coordinates");
-    detail::clocked_layout<py_shifted_cartesian_layout_siqad_coordinates,
-                           py_shifted_cartesian_clocked_layout_siqad_coordinates>(m, "shifted_cartesian",
-                                                                                  "_siqad_coordinates");
-    detail::clocked_layout<py_hexagonal_layout, py_hexagonal_clocked_layout>(m, "hexagonal", "");
+                                                                                 "cube_coordinates");
+    detail::clocked_layout<py_hexagonal_layout, py_hexagonal_clocked_layout>(m, "hexagonal", "offset_coordinates");
     detail::clocked_layout<py_hexagonal_layout_cube_coordinates, py_hexagonal_clocked_layout_cube_coordinates>(
-        m, "hexagonal", "_cube_coordinates");
-    detail::clocked_layout<py_hexagonal_layout_siqad_coordinates, py_hexagonal_clocked_layout_siqad_coordinates>(
-        m, "hexagonal", "_siqad_coordinates");
+        m, "hexagonal", "cube_coordinates");
+}
+/**
+ * A "factory" function that Python users can call as
+ *   <cartesian|shifted_cartesian|hexagonal>_clocked_layout(dimension, scheme_name="open", coordinate_type="offset")
+ * to create the correct layout type (offset or cube).
+ */
+inline void clocked_layout_factory(pybind11::module& m)
+{
+    namespace py = pybind11;
+
+    m.def(
+        "clocked_cartesian_layout",
+        [](const py::tuple dimension, const std::string& scheme_name, const std::string& coordinate_type)
+        {
+            if (coordinate_type == "cube")
+            {
+                const auto ar = extract_aspect_ratio<py_cartesian_layout_cube_coordinates>(dimension);
+                if (const auto scheme =
+                        fiction::get_clocking_scheme<py_cartesian_clocked_layout_cube_coordinates>(scheme_name);
+                    scheme.has_value())
+                {
+                    return py::cast(py_cartesian_clocked_layout_cube_coordinates{ar, *scheme});
+                }
+                else
+                {
+                    throw std::runtime_error("Given name does not refer to a supported clocking scheme");
+                }
+            }
+            else  // default: offset
+            {
+                const auto ar = extract_aspect_ratio<py_cartesian_layout>(dimension);
+                if (const auto scheme = fiction::get_clocking_scheme<py_cartesian_clocked_layout>(scheme_name);
+                    scheme.has_value())
+                {
+                    return py::cast(py_cartesian_clocked_layout{ar, *scheme});
+                }
+                else
+                {
+                    throw std::runtime_error("Given name does not refer to a supported clocking scheme");
+                }
+            }
+        },
+        py::arg("dimension"), py::arg("scheme_name") = "open",
+        py::arg("coordinate_type") = "offset",  // default
+        R"doc(
+            Creates and returns a clocked_cartesian_layout instance, choosing the coordinate system
+            based on the string argument. Valid options for `coordinate_type` are:
+
+                - "offset" (default)
+                - "cube"
+        )doc");
+
+    m.def(
+        "clocked_shifted_cartesian_layout",
+        [](const py::tuple dimension, const std::string& scheme_name,
+           const std::string& coordinate_type /* = "offset" by default */)
+        {
+            if (coordinate_type == "cube")
+            {
+                const auto ar = extract_aspect_ratio<py_shifted_cartesian_layout_cube_coordinates>(dimension);
+                if (const auto scheme =
+                        fiction::get_clocking_scheme<py_shifted_cartesian_clocked_layout_cube_coordinates>(scheme_name);
+                    scheme.has_value())
+                {
+                    return py::cast(py_shifted_cartesian_clocked_layout_cube_coordinates{ar, *scheme});
+                }
+                else
+                {
+                    throw std::runtime_error("Given name does not refer to a supported clocking scheme");
+                }
+            }
+            else  // default: offset
+            {
+                const auto ar = extract_aspect_ratio<py_shifted_cartesian_layout>(dimension);
+                if (const auto scheme = fiction::get_clocking_scheme<py_shifted_cartesian_clocked_layout>(scheme_name);
+                    scheme.has_value())
+                {
+                    return py::cast(py_shifted_cartesian_clocked_layout{ar, *scheme});
+                }
+                else
+                {
+                    throw std::runtime_error("Given name does not refer to a supported clocking scheme");
+                }
+            }
+        },
+        py::arg("dimension"), py::arg("scheme_name") = "open",
+        py::arg("coordinate_type") = "offset",  // default
+        R"doc(
+            Creates and returns a clocked_shifted_cartesian_layout instance, choosing the coordinate system
+            based on the string argument. Valid options for `coordinate_type` are:
+
+                - "offset" (default)
+                - "cube"
+        )doc");
+
+    m.def(
+        "clocked_hexagonal_layout",
+        [](const py::tuple dimension, const std::string& scheme_name,
+           const std::string& coordinate_type /* = "offset" by default */)
+        {
+            if (coordinate_type == "cube")
+            {
+                const auto ar = extract_aspect_ratio<py_hexagonal_layout_cube_coordinates>(dimension);
+                if (const auto scheme =
+                        fiction::get_clocking_scheme<py_hexagonal_clocked_layout_cube_coordinates>(scheme_name);
+                    scheme.has_value())
+                {
+                    return py::cast(py_hexagonal_clocked_layout_cube_coordinates{ar, *scheme});
+                }
+                else
+                {
+                    throw std::runtime_error("Given name does not refer to a supported clocking scheme");
+                }
+            }
+            else  // default: offset
+            {
+                const auto ar = extract_aspect_ratio<py_hexagonal_layout>(dimension);
+                if (const auto scheme = fiction::get_clocking_scheme<py_hexagonal_clocked_layout>(scheme_name);
+                    scheme.has_value())
+                {
+                    return py::cast(py_hexagonal_clocked_layout{ar, *scheme});
+                }
+                else
+                {
+                    throw std::runtime_error("Given name does not refer to a supported clocking scheme");
+                }
+            }
+        },
+        py::arg("dimension"), py::arg("scheme_name") = "open",
+        py::arg("coordinate_type") = "offset",  // default
+        R"doc(
+            Creates and returns a clocked_hexagonal_layout instance, choosing the coordinate system
+            based on the string argument. Valid options for `coordinate_type` are:
+
+                - "offset" (default)
+                - "cube"
+        )doc");
 }
 
 }  // namespace pyfiction

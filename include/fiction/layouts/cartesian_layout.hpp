@@ -6,6 +6,7 @@
 #define FICTION_CARTESIAN_LAYOUT_HPP
 
 #include "fiction/layouts/coordinates.hpp"
+#include "fiction/traits.hpp"
 #include "fiction/utils/range.hpp"
 
 #include <mockturtle/networks/detail/foreach.hpp>
@@ -171,9 +172,12 @@ class cartesian_layout
      */
     [[nodiscard]] constexpr OffsetCoordinateType north(const OffsetCoordinateType& c) const noexcept
     {
-        if (c.y == 0ull)
+        if constexpr (is_offset_ucoord_v<OffsetCoordinateType>)
         {
-            return c;
+            if (c.y == 0ull)
+            {
+                return c;
+            }
         }
 
         auto nc = c;
@@ -191,9 +195,12 @@ class cartesian_layout
      */
     [[nodiscard]] constexpr OffsetCoordinateType north_east(const OffsetCoordinateType& c) const noexcept
     {
-        if (c.x == x() || c.y == 0ull)
+        if constexpr (is_offset_ucoord_v<OffsetCoordinateType>)
         {
-            return c;
+            if (c.x == x() || c.y == 0ull)
+            {
+                return c;
+            }
         }
 
         auto nec = c;
@@ -286,10 +293,21 @@ class cartesian_layout
         {
             swc.d = 1;
         }
-        else if (c.x > 0ull && c.y < y())
+        else if (c.y < y())
+        {
+            ++swc.y;
+        }
+
+        if constexpr (!is_offset_ucoord_v<OffsetCoordinateType>)
         {
             --swc.x;
-            ++swc.y;
+        }
+        else
+        {
+            if (c.x > 0ull)
+            {
+                --swc.x;
+            }
         }
 
         return swc;
@@ -303,9 +321,12 @@ class cartesian_layout
      */
     [[nodiscard]] constexpr OffsetCoordinateType west(const OffsetCoordinateType& c) const noexcept
     {
-        if (c.x == 0ull)
+        if constexpr (is_offset_ucoord_v<OffsetCoordinateType>)
         {
-            return c;
+            if (c.x == 0ull)
+            {
+                return c;
+            }
         }
 
         auto wc = c;
@@ -323,9 +344,12 @@ class cartesian_layout
      */
     [[nodiscard]] constexpr OffsetCoordinateType north_west(const OffsetCoordinateType& c) const noexcept
     {
-        if (c.x == 0ull || c.y == 0ull)
+        if constexpr (is_offset_ucoord_v<OffsetCoordinateType>)
         {
-            return c;
+            if (c.x == 0ull || c.y == 0ull)
+            {
+                return c;
+            }
         }
 
         auto nwc = c;

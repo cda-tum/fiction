@@ -375,9 +375,36 @@ struct coord_t
             y{static_cast<decltype(y)>(y_)},
             x{static_cast<decltype(x)>(x_)}
     {}
+    /**
+     * Standard constructor. Instantiates a coordinate from an uint64_t, where the positions are encoded in the
+     * following four parts of the unsigned 64-bit integer (from MSB to LSB):
+     *  - 1 bit for the dead indicator
+     *  - 1 bit for the z position
+     *  - 31 bit for the y position
+     *  - 31 bit for the x position
+     *
+     * @param t Unsigned 64-bit integer to instantiate the coordinate from.
+     */
+    constexpr explicit coord_t(const uint64_t t) noexcept :
+            d{static_cast<decltype(d)>(t >> 63ull)},
+            z{static_cast<decltype(z)>((t << 1ull) >> 63ull)},
+            y{static_cast<decltype(y)>((t << 2ull) >> 33ull)},
+            x{static_cast<decltype(x)>((t << 33ull) >> 33ull)}
+    {}
 
     // NOLINTEND(readability-identifier-naming)
 
+    /**
+     * Allows explicit conversion to `uint64_t`. Segments an unsigned 64-bit integer into four parts (from MSB to LSB):
+     *  - 1 bit for the dead indicator
+     *  - 1 bit for the z position
+     *  - 31 bit for the y position
+     *  - 31 bit for the x position
+     */
+    explicit constexpr operator uint64_t() const noexcept
+    {
+        return (((((((static_cast<uint64_t>(d)) << 1ull) | z) << 31ull) | y) << 31ull) | x);
+    }
     /**
      * Returns whether the coordinate is dead.
      *
@@ -436,6 +463,16 @@ struct coord_t
     constexpr bool operator==(const coord_t& other) const noexcept
     {
         return d == other.d && z == other.z && y == other.y && x == other.x;
+    }
+    /**
+     * Compares against another coordinate's `uint64_t` representation for equality. Respects the dead indicator.
+     *
+     * @param other Right-hand side coordinate representation in `uint64_t` format.
+     * @return `true` iff this coordinate is equal to the converted one.
+     */
+    constexpr bool operator==(const uint64_t& other) const noexcept
+    {
+        return static_cast<uint64_t>(*this) == other;
     }
     /**
      * Compares against another coordinate for inequality. Respects the dead indicator.

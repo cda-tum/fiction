@@ -14,6 +14,7 @@
 #include <pybind11/stl.h>
 
 #include <cstdint>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -23,9 +24,15 @@ namespace pyfiction
 namespace detail
 {
 
+/**
+ * A helper template that creates a Python binding for a given C++ ShiftedCartLyt type.
+ * \param coord_type is appended to the Python class name so you get
+ *        "shifted_cartesian_layout_offset_coordinates" or "shifted_cartesian_layout_cube_coordinates".
+ */
 template <typename ShiftedCartLyt, typename CoordType>
 inline void shifted_cartesian_layout(pybind11::module& m, const std::string& coord_type)
 {
+    namespace py = pybind11;
     namespace py = pybind11;
 
     /**
@@ -34,7 +41,7 @@ inline void shifted_cartesian_layout(pybind11::module& m, const std::string& coo
      * @note All functions had to be redefined, because in the regular C++ version, this layout extends a specific
      * hexagonal layout, which we do not expose in pyfiction.
      */
-    py::class_<ShiftedCartLyt>(m, fmt::format("shifted_cartesian_layout{}", coord_type).c_str(),
+    py::class_<ShiftedCartLyt>(m, fmt::format("shifted_cartesian_layout_{}", coord_type).c_str(),
                                DOC(fiction_shifted_cartesian_layout_overridden))
         .def(py::init<>())
         .def(py::init<const fiction::aspect_ratio<ShiftedCartLyt>&>(), py::arg("dimension"),
@@ -211,22 +218,57 @@ inline void shifted_cartesian_layout(pybind11::module& m, const std::string& coo
 
 }  // namespace detail
 
+/**
+ * Register two different layout classes under two different Python names:
+ *   - "shifted_cartesian_layout_offset_coordinates"
+ *   - "shifted_cartesian_layout_cube_coordinates"
+ */
 inline void shifted_cartesian_layouts(pybind11::module& m)
 {
     /**
      * Shifted Cartesian layout with offset coordinates.
      */
-    detail::shifted_cartesian_layout<py_shifted_cartesian_layout, py_offset_coordinate>(m, "");
+    detail::shifted_cartesian_layout<py_shifted_cartesian_layout, py_offset_coordinate>(m, "offset_coordinates");
     /**
      * Shifted Cartesian layout with cube coordinates.
      */
     detail::shifted_cartesian_layout<py_shifted_cartesian_layout_cube_coordinates, py_cube_coordinate>(
-        m, "_cube_coordinates");
-    /**
-     * Shifted Cartesian layout with SiQAD coordinates.
-     */
-    detail::shifted_cartesian_layout<py_shifted_cartesian_layout_siqad_coordinates, py_siqad_coordinate>(
-        m, "_siqad_coordinates");
+        m, "cube_coordinates");
+}
+
+/**
+ * A "factory" function that Python users can call as
+ *   shifted_cartesian_layout(dimension, coordinate_type="offset")
+ * to create the correct layout type (offset or cube).
+ */
+inline void shifted_cartesian_layout_factory(pybind11::module& m)
+{
+    namespace py = pybind11;
+
+    m.def(
+        "shifted_cartesian_layout",
+        [](const py::tuple dimension, const std::string& coordinate_type)
+        {
+            if (coordinate_type == "cube")
+            {
+                const auto ar = extract_aspect_ratio<py_shifted_cartesian_layout_cube_coordinates>(dimension);
+                return py::cast(py_shifted_cartesian_layout_cube_coordinates{ar});
+            }
+            else  // default: offset
+            {
+                const auto ar = extract_aspect_ratio<py_shifted_cartesian_layout>(dimension);
+                return py::cast(py_shifted_cartesian_layout{ar});
+            }
+        },
+        py::arg("dimension"),
+        py::arg("coordinate_type") = "offset",  // default
+        R"doc(
+            Creates and returns a shifted_cartesian_layout instance, choosing the coordinate system
+            based on the string argument. Valid options for `coordinate_type` are:
+
+                - "offset" (default)
+                - "cube"
+        )doc");
 }
 
 }  // namespace pyfiction

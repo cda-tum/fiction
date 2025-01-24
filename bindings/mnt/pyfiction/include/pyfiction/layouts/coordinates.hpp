@@ -97,6 +97,7 @@ inline void cube_coordinate(pybind11::module& m)
 
     py::class_<py_cube_coordinate>(m, "cube_coordinate", DOC(fiction_cube_coord_t))
         .def(py::init<>(), DOC(fiction_cube_coord_t_coord_t))
+        .def(py::init<const uint64_t>(), py::arg("int_repr"), DOC(fiction_cube_coord_t_coord_t_2))
         .def(py::init<const decltype(py_cube_coordinate().x), const decltype(py_cube_coordinate().y),
                       const decltype(py_cube_coordinate().z)>(),
              py::arg("x"), py::arg("y"), py::arg("z") = 0, DOC(fiction_cube_coord_t_coord_t_2))

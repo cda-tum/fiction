@@ -15,6 +15,8 @@
 #include <pybind11/stl.h>
 
 #include <cstdint>
+#include <sstream>
+#include <string>
 #include <vector>
 
 namespace pyfiction
@@ -23,15 +25,21 @@ namespace pyfiction
 namespace detail
 {
 
+/**
+ * A helper template that creates a Python binding for a given C++ CartLyt type.
+ * \param coord_type is appended to the Python class name so you get "cartesian_layout_offset_coordinates" or
+ * "cartesian_layout_cube_coordinates".
+ */
 template <typename CartLyt>
 void cartesian_layout(pybind11::module& m, const std::string& coord_type)
 {
+    namespace py = pybind11;
     namespace py = pybind11;
 
     /**
      * Cartesian layout.
      */
-    py::class_<CartLyt>(m, fmt::format("cartesian_layout{}", coord_type).c_str(),
+    py::class_<CartLyt>(m, fmt::format("cartesian_layout_{}", coord_type).c_str(),
                         DOC(fiction_cartesian_layout_overridden))
         .def(py::init<>())
         .def(py::init<const fiction::aspect_ratio<CartLyt>&>(), py::arg("dimension"),
@@ -143,20 +151,79 @@ void cartesian_layout(pybind11::module& m, const std::string& coord_type)
 
 }  // namespace detail
 
+/**
+ * Register two different layout classes under two different Python names:
+ *   - "cartesian_layout_offset_coordinates"
+ *   - "cartesian_layout_cube_coordinates"
+ */
 inline void cartesian_layouts(pybind11::module& m)
 {
     /**
      * Cartesian layout with offset coordinates.
      */
-    detail::cartesian_layout<py_cartesian_layout>(m, "");
+    detail::cartesian_layout<py_cartesian_layout>(m, "offset_coordinates");
     /**
      * Cartesian layout with cube coordinates.
      */
-    detail::cartesian_layout<py_cartesian_layout_cube_coordinates>(m, "_cube_coordinates");
-    /**
-     * Cartesian layout with SiQAD coordinates.
-     */
-    detail::cartesian_layout<py_cartesian_layout_siqad_coordinates>(m, "_siqad_coordinates");
+    detail::cartesian_layout<py_cartesian_layout_cube_coordinates>(m, "cube_coordinates");
+}
+
+template <typename CoordLyt>
+fiction::aspect_ratio<CoordLyt> extract_aspect_ratio(pybind11::tuple dimension)
+{
+    if (dimension.size() < 2 || dimension.size() > 3)
+    {
+        throw std::runtime_error("dimension must be a 2-tuple (x, y) or a 3-tuple (x, y, z).");
+    }
+
+    // Extract x, y from the tuple
+    uint64_t x = dimension[0].cast<uint64_t>();
+    uint64_t y = dimension[1].cast<uint64_t>();
+    // Default z = 0
+    uint64_t z = 0;
+    // If a 3rd element is provided, override z
+    if (dimension.size() == 3)
+    {
+        z = dimension[2].cast<uint64_t>();
+    }
+
+    fiction::aspect_ratio<CoordLyt> ar{x, y, z};
+
+    return ar;
+}
+/**
+ * A "factory" function that Python users can call as
+ *   cartesian_layout(dimension, coordinate_type="offset")
+ * to create the correct layout type (offset or cube).
+ */
+inline void cartesian_layout_factory(pybind11::module& m)
+{
+    namespace py = pybind11;
+
+    m.def(
+        "cartesian_layout",
+        [](const py::tuple dimension, const std::string& coordinate_type)
+        {
+            if (coordinate_type == "cube")
+            {
+                const auto ar = extract_aspect_ratio<py_cartesian_layout_cube_coordinates>(dimension);
+                return py::cast(py_cartesian_layout_cube_coordinates{ar});
+            }
+            else  // default: offset
+            {
+                const auto ar = extract_aspect_ratio<py_cartesian_layout>(dimension);
+                return py::cast(py_cartesian_layout{ar});
+            }
+        },
+        py::arg("dimension"),
+        py::arg("coordinate_type") = "offset",  // default
+        R"doc(
+            Creates and returns a cartesian_layout instance, choosing the coordinate system
+            based on the string argument. Valid options for `coordinate_type` are:
+
+                - "offset" (default)
+                - "cube"
+        )doc");
 }
 
 }  // namespace pyfiction

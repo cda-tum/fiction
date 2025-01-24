@@ -14,6 +14,8 @@
 #include <pybind11/stl.h>
 
 #include <cstdint>
+#include <sstream>
+#include <string>
 #include <vector>
 
 namespace pyfiction
@@ -22,15 +24,21 @@ namespace pyfiction
 namespace detail
 {
 
+/**
+ * A helper template that creates a Python binding for a given C++ HexLyt type.
+ * \param coord_type is appended to the Python class name so you get "hexagonal_layout_offset_coordinates" or
+ * "hexagonal_layout_cube_coordinates".
+ */
 template <typename HexLyt>
 inline void hexagonal_layout(pybind11::module& m, const std::string& coord_type)
 {
+    namespace py = pybind11;
     namespace py = pybind11;
 
     /**
      * Hexagonal layout.
      */
-    py::class_<HexLyt>(m, fmt::format("hexagonal_layout{}", coord_type).c_str(),
+    py::class_<HexLyt>(m, fmt::format("hexagonal_layout_{}", coord_type).c_str(),
                        DOC(fiction_hexagonal_layout_overridden))
         .def(py::init<>())
         .def(py::init<const fiction::aspect_ratio<HexLyt>&>(), py::arg("dimension"),
@@ -142,20 +150,56 @@ inline void hexagonal_layout(pybind11::module& m, const std::string& coord_type)
 
 }  // namespace detail
 
+/**
+ * Register two different layout classes under two different Python names:
+ *   - "hexagonal_layout_offset_coordinates"
+ *   - "hexagonal_layout_cube_coordinates"
+ */
 inline void hexagonal_layouts(pybind11::module& m)
 {
     /**
      * Hexagonal layout with offset coordinates.
      */
-    detail::hexagonal_layout<py_hexagonal_layout>(m, "");
+    detail::hexagonal_layout<py_hexagonal_layout>(m, "offset_coordinates");
     /**
      * Hexagonal layout with cube coordinates.
      */
-    detail::hexagonal_layout<py_hexagonal_layout_cube_coordinates>(m, "_cube_coordinates");
-    /**
-     * Hexagonal layout with SiQAD coordinates.
-     */
-    detail::hexagonal_layout<py_hexagonal_layout_siqad_coordinates>(m, "_siqad_coordinates");
+    detail::hexagonal_layout<py_hexagonal_layout_cube_coordinates>(m, "cube_coordinates");
+}
+
+/**
+ * A "factory" function that Python users can call as
+ *   hexagonal_layout(dimension, coordinate_type="offset")
+ * to create the correct layout type (offset or cube).
+ */
+inline void hexagonal_layout_factory(pybind11::module& m)
+{
+    namespace py = pybind11;
+
+    m.def(
+        "hexagonal_layout",
+        [](const py::tuple dimension, const std::string& coordinate_type)
+        {
+            if (coordinate_type == "cube")
+            {
+                const auto ar = extract_aspect_ratio<py_hexagonal_layout_cube_coordinates>(dimension);
+                return py::cast(py_hexagonal_layout_cube_coordinates{ar});
+            }
+            else
+            {
+                const auto ar = extract_aspect_ratio<py_hexagonal_layout>(dimension);
+                return py::cast(py_hexagonal_layout{ar});
+            }
+        },
+        py::arg("dimension"),
+        py::arg("coordinate_type") = "offset",  // default
+        R"doc(
+            Creates and returns a hexagonal_layout instance, choosing the coordinate system
+            based on the string argument. Valid options for `coordinate_type` are:
+
+                - "offset" (default)
+                - "cube"
+        )doc");
 }
 
 }  // namespace pyfiction
