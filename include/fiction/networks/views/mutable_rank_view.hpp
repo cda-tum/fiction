@@ -264,6 +264,8 @@ class mutable_rank_view<Ntk, false> : public fiction::static_depth_view<Ntk>
      */
     [[nodiscard]] std::vector<node> get_ranks(const uint32_t level) const noexcept
     {
+        assert(level < ranks.size() && "level must be less than the number of ranks");
+
         return ranks[level];
     }
 
@@ -431,7 +433,12 @@ class mutable_rank_view<Ntk, false> : public fiction::static_depth_view<Ntk>
     }
 
     /**
-     * Applies a given function to each PI in unranked order, so the order in the underlying `static_depth_view`.
+     * Applies a given function to each PI in unranked order. That means the order in the underlying
+     * `static_depth_view`. This corresponds to the order in the network's `_storage`, which reflects the order of PI
+     * creation.
+     *
+     * This ensures a consistent PI order, which is essential for equivalence checking, as `mockturtle` relies on the PI
+     * order for this process.
      *
      * @tparam Fn Functor type.
      * @param fn The function to apply.
@@ -443,8 +450,11 @@ class mutable_rank_view<Ntk, false> : public fiction::static_depth_view<Ntk>
     }
 
     /**
-     * Rearranges the rank order of the PIs to the underlying PI order.
-     * This can be used to ensure equivalent PI order for equivalence checking.
+     * Rearranges the rank order of the PIs to match the underlying PI order defined by `static_depth_view`. This
+     * corresponds to the order in the network's `_storage`, which reflects the order of PI creation.
+     *
+     * This ensures a consistent PI order, which is essential for equivalence checking, as `mockturtle` relies on the PI
+     * order for this process.
      */
     void rearrange_pis()
     {
