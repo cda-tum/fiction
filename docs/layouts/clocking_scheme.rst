@@ -88,6 +88,14 @@ Ripple
 
 .. doxygenfunction:: fiction::ripple_clocking
 
+SRS
+###
+
+.. figure:: /_static/srs.png
+   :width: 200
+
+.. doxygenfunction:: fiction::srs_clocking
+
 BANCS
 #####
 
