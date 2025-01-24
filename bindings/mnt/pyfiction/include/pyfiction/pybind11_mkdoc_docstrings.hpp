@@ -3648,6 +3648,16 @@ Parameter ``x_``:
 Parameter ``y_``:
     y position.)doc";
 
+static const char *__doc_fiction_cube_coord_t_coord_t_4 =
+R"doc(Standard constructor. Instantiates a coordinate from an uint64_t,
+where the positions are encoded in the following four parts of the
+unsigned 64-bit integer (from MSB to LSB): - 1 bit for the dead
+indicator - 1 bit for the z position - 31 bit for the y position - 31
+bit for the x position
+
+Parameter ``t``:
+    Unsigned 64-bit integer to instantiate the coordinate from.)doc";
+
 static const char *__doc_fiction_cube_coord_t_d = R"doc(Dead indicator.)doc";
 
 static const char *__doc_fiction_cube_coord_t_get_dead =
@@ -3681,6 +3691,16 @@ Parameter ``other``:
 
 Returns:
     `true` iff both coordinates are identical.)doc";
+
+static const char *__doc_fiction_cube_coord_t_operator_eq_2 =
+R"doc(Compares against another coordinate's `uint64_t` representation for
+equality. Respects the dead indicator.
+
+Parameter ``other``:
+    Right-hand side coordinate representation in `uint64_t` format.
+
+Returns:
+    `true` iff this coordinate is equal to the converted one.)doc";
 
 static const char *__doc_fiction_cube_coord_t_operator_ge =
 R"doc(Determine whether this coordinate is "greater than or equal to"
@@ -3745,6 +3765,12 @@ Parameter ``other``:
 
 Returns:
     Difference of both coordinates.)doc";
+
+static const char *__doc_fiction_cube_coord_t_operator_unsigned_long =
+R"doc(Allows explicit conversion to `uint64_t`. Segments an unsigned 64-bit
+integer into four parts (from MSB to LSB): - 1 bit for the dead
+indicator - 1 bit for the z position - 31 bit for the y position - 31
+bit for the x position)doc";
 
 static const char *__doc_fiction_cube_coord_t_str =
 R"doc(Returns a string representation of the coordinate of the form `"(x, y,
@@ -20096,9 +20122,9 @@ static const char *__doc_fmt_formatter_parse = R"doc()doc";
 
 static const char *__doc_fmt_formatter_parse_2 = R"doc()doc";
 
-static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_layouts_coordinates_hpp_1090_8 = R"doc()doc";
+static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_layouts_coordinates_hpp_1127_8 = R"doc()doc";
 
-static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_layouts_coordinates_hpp_1106_8 = R"doc()doc";
+static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_layouts_coordinates_hpp_1143_8 = R"doc()doc";
 
 static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_technology_cell_ports_hpp_291_8 = R"doc()doc";
 
