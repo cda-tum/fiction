@@ -65,17 +65,22 @@ int main()  // NOLINT
     static const std::string folder = fmt::format("{}sidb_gate_libraries/bestagon_gates/", EXPERIMENTS_PATH);
 
     const auto truth_tables_and_names =
-        std::array<std::pair<std::vector<tt>, std::string>, 11>{{{std::vector<tt>{create_id_tt()}, "wire"},
+        std::array<std::pair<std::vector<tt>, std::string>, 14>{{{std::vector<tt>{create_id_tt()}, "wire"},
+                                                                 {std::vector<tt>{create_id_tt()}, "wire_diag"},
                                                                  {std::vector<tt>{create_not_tt()}, "inv"},
+                                                                 {std::vector<tt>{create_not_tt()}, "inv_diag"},
                                                                  {std::vector<tt>{create_and_tt()}, "and"},
                                                                  {std::vector<tt>{create_nand_tt()}, "nand"},
                                                                  {std::vector<tt>{create_or_tt()}, "or"},
                                                                  {std::vector<tt>{create_nor_tt()}, "nor"},
                                                                  {std::vector<tt>{create_xor_tt()}, "xor"},
                                                                  {std::vector<tt>{create_xnor_tt()}, "xnor"},
+                                                                 {create_fan_out_tt(), "fo2"},
                                                                  {create_crossing_wire_tt(), "cx"},
                                                                  {create_half_adder_tt(), "ha"},
                                                                  {create_double_wire_tt(), "hourglass"}}};
+
+    double mean_ratio_num_op_sketch_to_num_op_exact = 0.0;
 
     for (const auto& [truth_table, gate] : truth_tables_and_names)
     {
@@ -100,6 +105,10 @@ int main()  // NOLINT
         write_operational_domain(op_domain_gs_exact, fmt::format("{}/exact_{}.csv", folder, gate));
         write_operational_domain(op_domain_gs_sketch, fmt::format("{}/sketch_{}.csv", folder, gate));
 
+        mean_ratio_num_op_sketch_to_num_op_exact +=
+            static_cast<double>(op_domain_stats_sketch.num_operational_parameter_combinations) /
+            static_cast<double>(op_domain_stats_gs_exact.num_operational_parameter_combinations);
+
         opdomain_exp(
             // Benchmark
             gate, lyt.num_cells(),
@@ -119,6 +128,8 @@ int main()  // NOLINT
         opdomain_exp.save();
         opdomain_exp.table();
     }
+
+    opdomain_exp("Average", 0, 0, 0.0, 0, 0.0, mean_ratio_num_op_sketch_to_num_op_exact, 0.0);
 
     opdomain_exp.save();
     opdomain_exp.table();
