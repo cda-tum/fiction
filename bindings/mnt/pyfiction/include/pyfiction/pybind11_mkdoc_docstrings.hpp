@@ -15292,9 +15292,19 @@ Template parameter ``Value``:
 Template parameter ``MetricType``:
     The type representing the metric value. Defaults to `double`.)doc";
 
-static const char *__doc_fiction_operational_domain_add_metric_value = R"doc(Adds a value to the metric values.)doc";
+static const char *__doc_fiction_operational_domain_add_metric_value =
+R"doc(Adds a value to the metric values.
 
-static const char *__doc_fiction_operational_domain_add_value = R"doc(Adds a value to the operational domain.)doc";
+Parameter ``key``:
+    The key to add the value to.
+
+Parameter ``value``:
+    The value to add.)doc";
+
+static const char *__doc_fiction_operational_domain_add_value =
+R"doc(Adds a value to the operational domain.
+
+@key The key to add the value to. @value The value to add.)doc";
 
 static const char *__doc_fiction_operational_domain_contour_tracing =
 R"doc(Computes the operational domain of the given SiDB cell-level layout.
@@ -15437,9 +15447,16 @@ Returns:
 
 static const char *__doc_fiction_operational_domain_get_metric_values =
 R"doc(Returns the metric values. If no metric values are present,
-`std::nullopt` is returned.)doc";
+`std::nullopt` is returned.
 
-static const char *__doc_fiction_operational_domain_get_operational_domain = R"doc(Returns the operational domain.)doc";
+Returns:
+    The metric values.)doc";
+
+static const char *__doc_fiction_operational_domain_get_operational_domain =
+R"doc(Returns the operational domain.
+
+Returns:
+    The operational domain.)doc";
 
 static const char *__doc_fiction_operational_domain_get_value =
 R"doc(This function retrieves the value associated with the provided key
