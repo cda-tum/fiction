@@ -103,14 +103,17 @@ namespace detail
  * The operational status is a binary value represented by specified tags in `params` indicating whether the simulation
  * parameters are within the operational domain or not.
  *
+ * @tparam OpDomain The type of the operational domain.
  * @param opdom The operational domain to be written. It contains a mapping from sets of simulation parameters
- * (represented as a pair of sweep parameters for the X and Y dimensions) to their operational status.
+ * (represented as a pair of sweep parameters for the X and Y dimensions) to their operational status, and it can
+ include metric values (e.g., the critical temperature on top of that).
  * @param os The output stream where the CSV representation of the operational domain is written to.
  * @param params The parameters used for writing, including the operational and non-operational tags. Defaults to an
  * empty `write_operational_domain_params` object, which provides standard tags.
  */
-inline void write_operational_domain(const operational_domain<parameter_point, operational_status>& opdom,
-                                     std::ostream& os, const write_operational_domain_params& params = {})
+template <typename OpDomain>
+inline void write_operational_domain(const OpDomain& opdom, std::ostream& os,
+                                     const write_operational_domain_params& params = {})
 {
     csv_writer writer{os};
 
@@ -121,45 +124,94 @@ inline void write_operational_domain(const operational_domain<parameter_point, o
         throw std::invalid_argument("unsupported number of dimensions in the given operational domain");
     }
 
-    if (num_dimensions == 1)
+    if (!opdom.metric_values.empty())
     {
-        writer.write_line(detail::sweep_parameter_to_string(opdom.dimensions[0]), "operational status");
-    }
-    else if (num_dimensions == 2)
-    {
-        writer.write_line(detail::sweep_parameter_to_string(opdom.dimensions[0]),
-                          detail::sweep_parameter_to_string(opdom.dimensions[1]), "operational status");
-    }
-    else  // num_dimensions == 3
-    {
-        writer.write_line(detail::sweep_parameter_to_string(opdom.dimensions[0]),
-                          detail::sweep_parameter_to_string(opdom.dimensions[1]),
-                          detail::sweep_parameter_to_string(opdom.dimensions[2]), "operational status");
-    }
-
-    for (const auto& [sim_param, op_val] : opdom.operational_values)
-    {
-        // skip non-operational samples if the respective flag is set
-        if (params.writing_mode == write_operational_domain_params::sample_writing_mode::OPERATIONAL_ONLY &&
-            op_val == operational_status::NON_OPERATIONAL)
-        {
-            continue;
-        }
-
-        const auto tag =
-            op_val == operational_status::OPERATIONAL ? params.operational_tag : params.non_operational_tag;
-
         if (num_dimensions == 1)
         {
-            writer.write_line(sim_param.parameters[0], tag);
+            writer.write_line(detail::sweep_parameter_to_string(opdom.dimensions[0]), "operational status", "ct");
         }
         else if (num_dimensions == 2)
         {
-            writer.write_line(sim_param.parameters[0], sim_param.parameters[1], tag);
+            writer.write_line(detail::sweep_parameter_to_string(opdom.dimensions[0]),
+                              detail::sweep_parameter_to_string(opdom.dimensions[1]), "operational status", "ct");
         }
         else  // num_dimensions == 3
         {
-            writer.write_line(sim_param.parameters[0], sim_param.parameters[1], sim_param.parameters[2], tag);
+            writer.write_line(detail::sweep_parameter_to_string(opdom.dimensions[0]),
+                              detail::sweep_parameter_to_string(opdom.dimensions[1]),
+                              detail::sweep_parameter_to_string(opdom.dimensions[2]), "operational status", "ct");
+        }
+
+        for (const auto& [sim_param, op_val] : opdom.operational_values)
+        {
+            // skip non-operational samples if the respective flag is set
+            if (params.writing_mode == write_operational_domain_params::sample_writing_mode::OPERATIONAL_ONLY &&
+                op_val == operational_status::NON_OPERATIONAL)
+            {
+                continue;
+            }
+
+            const auto tag =
+                op_val == operational_status::OPERATIONAL ? params.operational_tag : params.non_operational_tag;
+
+            if (num_dimensions == 1)
+            {
+                writer.write_line(sim_param.parameters[0], tag, (opdom.get_metric_value(sim_param)).value());
+            }
+            else if (num_dimensions == 2)
+            {
+                writer.write_line(sim_param.parameters[0], sim_param.parameters[1], tag,
+                                  (opdom.get_metric_value(sim_param)).value());
+            }
+            else  // num_dimensions == 3
+            {
+                writer.write_line(sim_param.parameters[0], sim_param.parameters[1], sim_param.parameters[2], tag,
+                                  (opdom.get_metric_value(sim_param)).value());
+            }
+        }
+    }
+    else
+    {
+        if (num_dimensions == 1)
+        {
+            writer.write_line(detail::sweep_parameter_to_string(opdom.dimensions[0]), "operational status");
+        }
+        else if (num_dimensions == 2)
+        {
+            writer.write_line(detail::sweep_parameter_to_string(opdom.dimensions[0]),
+                              detail::sweep_parameter_to_string(opdom.dimensions[1]), "operational status");
+        }
+        else  // num_dimensions == 3
+        {
+            writer.write_line(detail::sweep_parameter_to_string(opdom.dimensions[0]),
+                              detail::sweep_parameter_to_string(opdom.dimensions[1]),
+                              detail::sweep_parameter_to_string(opdom.dimensions[2]), "operational status");
+        }
+
+        for (const auto& [sim_param, op_val] : opdom.operational_values)
+        {
+            // skip non-operational samples if the respective flag is set
+            if (params.writing_mode == write_operational_domain_params::sample_writing_mode::OPERATIONAL_ONLY &&
+                op_val == operational_status::NON_OPERATIONAL)
+            {
+                continue;
+            }
+
+            const auto tag =
+                op_val == operational_status::OPERATIONAL ? params.operational_tag : params.non_operational_tag;
+
+            if (num_dimensions == 1)
+            {
+                writer.write_line(sim_param.parameters[0], tag);
+            }
+            else if (num_dimensions == 2)
+            {
+                writer.write_line(sim_param.parameters[0], sim_param.parameters[1], tag);
+            }
+            else  // num_dimensions == 3
+            {
+                writer.write_line(sim_param.parameters[0], sim_param.parameters[1], sim_param.parameters[2], tag);
+            }
         }
     }
 }
@@ -180,15 +232,17 @@ inline void write_operational_domain(const operational_domain<parameter_point, o
  * The operational status is a binary value represented by specified tags in `params` indicating whether the simulation
  * parameters are within the operational domain or not.
  *
- * @param opdom The operational domain to be written. It contains a mapping from sets of simulation parameters
- * (represented as a pair of sweep parameters for the X and Y dimensions) to their operational status.
+* @tparam OpDomain The type of the operational domain.
+* @param opdom The operational domain to be written. It contains a mapping from sets of simulation parameters
+* (represented as a pair of sweep parameters for the X and Y dimensions) to their operational status, and it can include
+metric values (e.g., the critical temperature on top of that).
  * @param filename The filename where the CSV representation of the operational domain is written to.
  * @param params The parameters used for writing, including the operational and non-operational tags. Defaults to an
  * empty `write_operational_domain_params` object, which provides standard tags.
  */
-inline void write_operational_domain(const operational_domain<parameter_point, operational_status>& opdom,
-                                     const std::string_view&                                        filename,
-                                     const write_operational_domain_params&                         params = {})
+template <typename OpDomain>
+inline void write_operational_domain(const OpDomain& opdom, const std::string_view& filename,
+                                     const write_operational_domain_params& params = {})
 {
     std::ofstream os{filename.data(), std::ofstream::out};
 

@@ -5,6 +5,7 @@
 #ifndef FICTION_OPERATIONAL_DOMAIN_HPP
 #define FICTION_OPERATIONAL_DOMAIN_HPP
 
+#include "fiction/algorithms/simulation/sidb/critical_temperature.hpp"
 #include "fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp"
 #include "fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp"
 #include "fiction/algorithms/simulation/sidb/energy_distribution.hpp"
@@ -38,7 +39,6 @@
 #include <optional>
 #include <queue>
 #include <random>
-#include <sstream>
 #include <stdexcept>
 #include <thread>
 #include <tuple>
@@ -164,8 +164,9 @@ std::optional<typename MapType::mapped_type> contains_key(const MapType& map, co
  *
  * @tparam Key The type representing the key. Defaults to `parameter_point`.
  * @tparam Value The type representing the value. Defaults to `operational_status`.
+ * @tparam MetricType The type representing the metric value. Defaults to `double`.
  */
-template <typename Key = parameter_point, typename Value = operational_status>
+template <typename Key = parameter_point, typename Value = operational_status, typename MetricType = double>
 struct operational_domain
 {
     /**
@@ -179,26 +180,61 @@ struct operational_domain
      */
     locked_parallel_flat_hash_map<Key, Value> operational_values{};
     /**
+     * This can store different information depending on the use case. If the critical temperature is simulated on top
+     * of the operational domain, it is stored here.
+     */
+    locked_parallel_flat_hash_map<Key, MetricType> metric_values{};
+    /**
      * This function retrieves the value associated with the provided key from the operational domain. If
      * the key is found in the domain, its corresponding value is returned. Otherwise, `std::nullopt`
      * is returned.
      *
      * @param key The key to look up.
-     * @return The value associated with the parameter point.
+     * @return The value associated with the provided key. If the key is not found, `std::nullopt` is returned.
      */
     [[nodiscard]] std::optional<Value> get_value(const Key& key) const
     {
         return detail::contains_key(operational_values, key);
     }
-
+    /**
+     * This function retrieves the value associated with the provided key from the metric values. If
+     * the key is found, its corresponding value is returned. Otherwise, `std::nullopt`
+     * is returned.
+     *
+     * @param key The key to look up in the metric values.
+     * @return The value associated with the provided key. If the key is not found, `std::nullopt` is returned.
+     */
+    [[nodiscard]] std::optional<MetricType> get_metric_value(const Key& key) const
+    {
+        return detail::contains_key(metric_values, key);
+    }
+    /**
+     * Adds a value to the operational domain.
+     */
     void add_value(const Key& key, const Value& value)
     {
         operational_values.try_emplace(key, value);
     }
-
-    [[nodiscard]] locked_parallel_flat_hash_map<Key, Value> get_domain() const
+    /**
+     * Adds a value to the metric values.
+     */
+    void add_metric_value(const Key& key, const Value& value)
+    {
+        (*metric_values).try_emplace(key, value);
+    }
+    /**
+     * Returns the operational domain.
+     */
+    [[nodiscard]] locked_parallel_flat_hash_map<Key, Value> get_operational_domain() const
     {
         return operational_values;
+    }
+    /**
+     * Returns the metric values. If no metric values are present, `std::nullopt` is returned.
+     */
+    [[nodiscard]] locked_parallel_flat_hash_map<Key, Value> get_metric_values() const
+    {
+        return metric_values;
     }
 };
 /**
@@ -230,6 +266,21 @@ struct operational_domain_value_range
 struct operational_domain_params
 {
     /**
+     * This enumeration defines whether specific metrics, such as critical temperature,
+     * are simulated within the operational domain or if simulations are disabled.
+     */
+    enum class metric_simulation : uint8_t
+    {
+        /**
+         * Simulates the critical temperature within the operational domain.
+         */
+        CRITICAL_TEMPERATURE_SIM,
+        /**
+         * Disables metric simulation, meaning no metrics are simulated within the operational domain.
+         */
+        DISABLED
+    };
+    /**
      * The parameters used to determine if a layout is operational or non-operational.
      */
     is_operational_params operational_params{};
@@ -240,6 +291,10 @@ struct operational_domain_params
     std::vector<operational_domain_value_range> sweep_dimensions{
         operational_domain_value_range{sweep_parameter::EPSILON_R, 1.0, 10.0, 0.1},
         operational_domain_value_range{sweep_parameter::LAMBDA_TF, 1.0, 10.0, 0.1}};
+    /**
+     * The metric to simulate within the operational domain.
+     */
+    metric_simulation metric_sim{metric_simulation::DISABLED};
 };
 /**
  * Statistics for the operational domain computation. The statistics are used across the different operational domain
@@ -577,7 +632,7 @@ class operational_domain_impl
         };
 
         // add the neighbors of each operational point to the queue
-        for (const auto& [param_point, status] : op_domain.get_domain())
+        for (const auto& [param_point, status] : op_domain.get_operational_domain())
         {
             if (status == operational_status::OPERATIONAL)
             {
@@ -888,7 +943,7 @@ class operational_domain_impl
     /**
      * Number of available hardware threads.
      */
-    const std::size_t num_threads{std::thread::hardware_concurrency()};
+    const std::size_t num_threads{1};
     /**
      * Input BDL wires.
      */
@@ -1082,9 +1137,14 @@ class operational_domain_impl
 
         const auto param_point = to_parameter_point(sp);
 
-        const auto operational = [this, &param_point]() noexcept
+        const auto operational = [this, &param_point](const std::optional<double>& ct_value = std::nullopt) noexcept
         {
             op_domain.operational_values.try_emplace(param_point, operational_status::OPERATIONAL);
+
+            if (ct_value.has_value())
+            {
+                op_domain.metric_values.try_emplace(param_point, ct_value.value());
+            }
 
             return operational_status::OPERATIONAL;
         };
@@ -1093,6 +1153,10 @@ class operational_domain_impl
         {
             op_domain.operational_values.try_emplace(param_point, operational_status::NON_OPERATIONAL);
 
+            if (params.metric_sim == operational_domain_params::metric_simulation::CRITICAL_TEMPERATURE_SIM)
+            {
+                op_domain.metric_values.try_emplace(param_point, 0.0);
+            }
             return operational_status::NON_OPERATIONAL;
         };
 
@@ -1116,6 +1180,13 @@ class operational_domain_impl
         if (status == operational_status::NON_OPERATIONAL)
         {
             return non_operational();
+        }
+
+        if (params.metric_sim == operational_domain_params::metric_simulation::CRITICAL_TEMPERATURE_SIM)
+        {
+            const auto ct = critical_temperature_gate_based(
+                layout, truth_table, critical_temperature_params{op_params_set_dimension_values});
+            return operational(ct);
         }
 
         return operational();
@@ -1573,7 +1644,7 @@ class operational_domain_impl
         stats.num_simulator_invocations            = num_simulator_invocations.load();
         stats.num_evaluated_parameter_combinations = num_evaluated_parameter_combinations.load();
 
-        for (const auto& [param_point, status] : op_domain.get_domain())
+        for (const auto& [param_point, status] : op_domain.get_operational_domain())
         {
             if (status == operational_status::OPERATIONAL)
             {

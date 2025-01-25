@@ -50,7 +50,6 @@ void operational_domain(pybind11::module& m)
 inline void operational_domain(pybind11::module& m)
 {
     namespace py = pybind11;
-    namespace py = pybind11;
 
     py::class_<fiction::parameter_point>(m, "parameter_point", DOC(fiction_parameter_point))
         .def(py::init<>(), DOC(fiction_parameter_point_parameter_point))
@@ -79,7 +78,7 @@ inline void operational_domain(pybind11::module& m)
                        &fiction::operational_domain<fiction::parameter_point, fiction::operational_status>::dimensions,
                        DOC(fiction_operational_domain_dimensions))
         .def_readwrite(
-            "influence_information",
+            "operational_values",
             &fiction::operational_domain<fiction::parameter_point, fiction::operational_status>::operational_values,
             DOC(fiction_operational_domain_operational_values))
 
@@ -91,9 +90,10 @@ inline void operational_domain(pybind11::module& m)
              &fiction::operational_domain<fiction::parameter_point, fiction::operational_status>::add_value,
              py::arg("key"), py::arg("value"), DOC(fiction_operational_domain_add_value))
 
-        .def("get_domain",
-             &fiction::operational_domain<fiction::parameter_point, fiction::operational_status>::get_domain,
-             DOC(fiction_operational_domain_get_domain))
+        .def(
+            "get_operational_domain",
+            &fiction::operational_domain<fiction::parameter_point, fiction::operational_status>::get_operational_domain,
+            DOC(fiction_operational_domain_get_domain))
 
         ;
 
@@ -113,6 +113,12 @@ inline void operational_domain(pybind11::module& m)
 
         ;
 
+    // todo update docu
+    py::enum_<fiction::operational_domain_params::metric_simulation>(m, "metric_simulation")
+        .value("TEMPERATURE_SIMULATION",
+               fiction::operational_domain_params::metric_simulation::CRITICAL_TEMPERATURE_SIM)
+        .value("DISABLED", fiction::operational_domain_params::metric_simulation::DISABLED);
+
     py::class_<fiction::operational_domain_params>(m, "operational_domain_params",
                                                    DOC(fiction_operational_domain_params))
         .def(py::init<>())
@@ -120,8 +126,7 @@ inline void operational_domain(pybind11::module& m)
                        DOC(fiction_operational_domain_params_operational_params))
         .def_readwrite("sweep_dimensions", &fiction::operational_domain_params::sweep_dimensions,
                        DOC(fiction_operational_domain_params_sweep_dimensions))
-
-        ;
+        .def_readwrite("metric_sim", &fiction::operational_domain_params::metric_sim);
 
     py::class_<fiction::operational_domain_stats>(m, "operational_domain_stats", DOC(fiction_operational_domain_stats))
         .def(py::init<>())

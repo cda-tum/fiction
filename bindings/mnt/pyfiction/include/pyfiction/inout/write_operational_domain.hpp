@@ -8,9 +8,14 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
+#include <fiction/algorithms/simulation/sidb/is_operational.hpp>
+#include <fiction/algorithms/simulation/sidb/operational_domain.hpp>
 #include <fiction/io/write_operational_domain.hpp>
 
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
+
+#include <string_view>
 
 namespace pyfiction
 {
