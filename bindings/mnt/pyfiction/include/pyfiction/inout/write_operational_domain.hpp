@@ -15,6 +15,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
+#include <string>
 #include <string_view>
 
 namespace pyfiction
@@ -41,16 +42,28 @@ inline void write_operational_domain(pybind11::module& m)
         .def_readwrite("non_operational_tag", &fiction::write_operational_domain_params::non_operational_tag,
                        DOC(fiction_write_operational_domain_params_non_operational_tag))
         .def_readwrite("writing_mode", &fiction::write_operational_domain_params::writing_mode,
-                       DOC(fiction_write_operational_domain_params_writing_mode))
+                       DOC(fiction_write_operational_domain_params_writing_mode));
 
-        ;
-
+    // Function pointer for writing to a file
     void (*write_operational_domain_pointer)(
         const fiction::operational_domain<fiction::parameter_point, fiction::operational_status>&,
         const std::string_view&, const fiction::write_operational_domain_params&) = &fiction::write_operational_domain;
 
+    // Define function using function pointer
     m.def("write_operational_domain", write_operational_domain_pointer, py::arg("opdom"), py::arg("filename"),
-          py::arg("params") = fiction::write_operational_domain_params{}, DOC(fiction_write_operational_domain));
+          py::arg("params"), DOC(fiction_write_operational_domain));
+
+    m.def(
+        "write_operational_domain_to_string",
+        [](const fiction::operational_domain<fiction::parameter_point, fiction::operational_status>& opdom,
+           const fiction::write_operational_domain_params& params = {}) -> std::string
+        {
+            std::ostringstream oss;                                 // Create an in-memory output stream
+            fiction::write_operational_domain(opdom, oss, params);  // Write to the stream
+            return oss.str();                                       // Return the string content
+        },
+        py::arg("opdom"), py::arg("params") = fiction::write_operational_domain_params{},
+        "Writes the operational domain to a CSV string.");
 }
 
 }  // namespace pyfiction

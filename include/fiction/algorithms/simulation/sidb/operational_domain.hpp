@@ -210,6 +210,9 @@ struct operational_domain
     }
     /**
      * Adds a value to the operational domain.
+     *
+     * @key The key to add the value to.
+     * @value The value to add.
      */
     void add_value(const Key& key, const Value& value)
     {
@@ -217,13 +220,18 @@ struct operational_domain
     }
     /**
      * Adds a value to the metric values.
+     *
+     * @param key The key to add the value to.
+     * @param value The value to add.
      */
-    void add_metric_value(const Key& key, const Value& value)
+    void add_metric_value(const Key& key, const MetricType& value)
     {
-        (*metric_values).try_emplace(key, value);
+        metric_values.try_emplace(key, value);
     }
     /**
      * Returns the operational domain.
+     *
+     * @return The operational domain.
      */
     [[nodiscard]] locked_parallel_flat_hash_map<Key, Value> get_operational_domain() const
     {
@@ -231,6 +239,8 @@ struct operational_domain
     }
     /**
      * Returns the metric values. If no metric values are present, `std::nullopt` is returned.
+     *
+     * @return The metric values.
      */
     [[nodiscard]] locked_parallel_flat_hash_map<Key, Value> get_metric_values() const
     {

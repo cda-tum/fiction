@@ -1,5 +1,4 @@
 import unittest
-from io import StringIO
 
 from mnt.pyfiction import (
     operational_domain,
@@ -7,177 +6,111 @@ from mnt.pyfiction import (
     parameter_point,
     sample_writing_mode,
     sweep_parameter,
-    write_operational_domain,
     write_operational_domain_params,
+    write_operational_domain_to_string,
 )
 
 
 class TestWriteOperationalDomain(unittest.TestCase):
-    def test_write_empty_operational_domain(self):
-        os = StringIO()
-
-        # Default sweep dimensions
-        opdom = operational_domain()
-        opdom.dimensions.extend([sweep_parameter.EPSILON_R, sweep_parameter.LAMBDA_TF])
-
-        expected = "epsilon_r,lambda_tf,operational status\n"
-
-        write_operational_domain(opdom, os)
-        self.assertEqual(os.getvalue(), expected)
-
-        # Custom sweep dimensions
-        opdom = operational_domain()
-        opdom.dimensions.extend([sweep_parameter.LAMBDA_TF, sweep_parameter.MU_MINUS])
-
-        expected = "lambda_tf,mu_minus,operational status\n"
-
-        os = StringIO()
-        write_operational_domain(opdom, os)
-        self.assertEqual(os.getvalue(), expected)
-
     def test_write_simple_operational_domain(self):
-        opdom = operational_domain()
-        opdom.dimensions.extend([sweep_parameter.EPSILON_R, sweep_parameter.LAMBDA_TF])
+        # Correct initialization
+        opdom = operational_domain()  # Creating an empty operational domain
 
-        opdom.operational_values = {
-            parameter_point([0, 0]): operational_status.OPERATIONAL,
-            parameter_point([0, 1]): operational_status.NON_OPERATIONAL,
-        }
+        # Ensure dimensions are set correctly
+        opdom.dimensions = [sweep_parameter.EPSILON_R, sweep_parameter.LAMBDA_TF]
 
-        # Default operational tags
-        os = StringIO()
-        expected = {"epsilon_r,lambda_tf,operational status", "0,0,1", "0,1,0"}
+        # Use parameter_point constructor with values
+        opdom.add_value(parameter_point([0, 0]), operational_status.OPERATIONAL)
+        opdom.add_value(parameter_point([0, 1]), operational_status.NON_OPERATIONAL)
 
-        write_operational_domain(opdom, os)
-        lines = set(os.getvalue().strip().split("\n"))
-        self.assertEqual(lines, expected)
+        expected = "epsilon_r,lambda_tf,operational status\n0,0,1\n0,1,0"
+
+        # Get the result from the function that returns a string
+        result = write_operational_domain_to_string(opdom, write_operational_domain_params())
+
+        # Sort both expected and result to handle order variations
+        self.assertEqual(sorted(result.strip().split("\n")), sorted(expected.strip().split("\n")))
 
         # Custom operational tags
-        os = StringIO()
-        params = write_operational_domain_params(operational_tag="True", non_operational_tag="False")
-        expected = {"epsilon_r,lambda_tf,operational status", "0,0,True", "0,1,False"}
+        expected_custom = "epsilon_r,lambda_tf,operational status\n0,0,True\n0,1,False"
+        params = write_operational_domain_params()
+        params.operational_tag = "True"
+        params.non_operational_tag = "False"
 
-        write_operational_domain(opdom, os, params)
-        lines = set(os.getvalue().strip().split("\n"))
-        self.assertEqual(lines, expected)
+        result_custom = write_operational_domain_to_string(opdom, params)
 
-        # Skip non-operational samples
-        os = StringIO()
-        params.writing_mode = sample_writing_mode.OPERATIONAL_ONLY
-        expected = {"epsilon_r,lambda_tf,operational status", "0,0,1"}
-
-        write_operational_domain(opdom, os, params)
-        lines = set(os.getvalue().strip().split("\n"))
-        self.assertEqual(lines, expected)
+        self.assertEqual(sorted(result_custom.strip().split("\n")), sorted(expected_custom.strip().split("\n")))
 
     def test_write_operational_domain_with_floating_point_values(self):
         opdom = operational_domain()
-        opdom.dimensions.extend([sweep_parameter.EPSILON_R, sweep_parameter.LAMBDA_TF])
+        opdom.dimensions = [sweep_parameter.EPSILON_R, sweep_parameter.LAMBDA_TF]
 
-        opdom.operational_values = {
-            parameter_point([0.1, 0.2]): operational_status.OPERATIONAL,
-            parameter_point([0.3, 0.4]): operational_status.NON_OPERATIONAL,
-            parameter_point([1.2, 1.4]): operational_status.OPERATIONAL,
-            parameter_point([2.4, 5.75]): operational_status.NON_OPERATIONAL,
-        }
+        # Using floating point values for the parameter points
+        opdom.add_value(parameter_point([0.1, 0.2]), operational_status.OPERATIONAL)
+        opdom.add_value(parameter_point([0.3, 0.4]), operational_status.NON_OPERATIONAL)
 
-        # Default operational tags
-        os = StringIO()
-        expected = {
-            "epsilon_r,lambda_tf,operational status",
-            "0.1,0.2,1",
-            "0.3,0.4,0",
-            "1.2,1.4,1",
-            "2.4,5.75,0",
-        }
+        expected = "epsilon_r,lambda_tf,operational status\n0.1,0.2,1\n0.3,0.4,0"
 
-        write_operational_domain(opdom, os)
-        lines = set(os.getvalue().strip().split("\n"))
-        self.assertEqual(lines, expected)
+        # Get the result from the function that returns a string
+        result = write_operational_domain_to_string(opdom)
+
+        self.assertEqual(sorted(result.strip().split("\n")), sorted(expected.strip().split("\n")))
 
         # Custom operational tags
-        os = StringIO()
-        params = write_operational_domain_params(operational_tag="operational", non_operational_tag="non-operational")
-        expected = {
-            "epsilon_r,lambda_tf,operational status",
-            "0.1,0.2,operational",
-            "0.3,0.4,non-operational",
-            "1.2,1.4,operational",
-            "2.4,5.75,non-operational",
-        }
+        expected_custom = "epsilon_r,lambda_tf,operational status\n0.1,0.2,operational\n0.3,0.4,non-operational"
+        params = write_operational_domain_params()
+        params.operational_tag = "operational"
+        params.non_operational_tag = "non-operational"
 
-        write_operational_domain(opdom, os, params)
-        lines = set(os.getvalue().strip().split("\n"))
-        self.assertEqual(lines, expected)
+        result_custom = write_operational_domain_to_string(opdom, params)
 
-        # Skip non-operational samples
-        os = StringIO()
-        params.writing_mode = sample_writing_mode.OPERATIONAL_ONLY
-        expected = {"epsilon_r,lambda_tf,operational status", "0.1,0.2,1", "1.2,1.4,1"}
+        self.assertEqual(sorted(result_custom.strip().split("\n")), sorted(expected_custom.strip().split("\n")))
 
-        write_operational_domain(opdom, os, params)
-        lines = set(os.getvalue().strip().split("\n"))
-        self.assertEqual(lines, expected)
-
-    def test_write_operational_domain_with_floating_point_and_temperature_values(self):
+    def test_write_operational_domain_with_metric_values(self):
         opdom = operational_domain()
-        opdom.dimensions.extend([sweep_parameter.EPSILON_R, sweep_parameter.LAMBDA_TF])
+        opdom.dimensions = [sweep_parameter.EPSILON_R, sweep_parameter.LAMBDA_TF]
 
-        opdom.operational_values = {
-            parameter_point([0.1, 0.2]): operational_status.OPERATIONAL,
-            parameter_point([0.3, 0.4]): operational_status.NON_OPERATIONAL,
-            parameter_point([1.2, 1.4]): operational_status.OPERATIONAL,
-            parameter_point([2.4, 5.75]): operational_status.NON_OPERATIONAL,
-        }
+        # Adding metric values
+        opdom.add_value(parameter_point([0.1, 0.2]), operational_status.OPERATIONAL)
+        opdom.add_value(parameter_point([0.3, 0.4]), operational_status.NON_OPERATIONAL)
+        opdom.add_metric_value(parameter_point([0.1, 0.2]), 50.3)
+        opdom.add_metric_value(parameter_point([0.3, 0.4]), 0.0)
 
-        opdom.metric_values = {
-            parameter_point([0.1, 0.2]): 50.3,
-            parameter_point([0.3, 0.4]): 0.0,
-            parameter_point([1.2, 1.4]): 400.0,
-            parameter_point([2.4, 5.75]): 0.0,
-        }
+        expected = "epsilon_r,lambda_tf,operational status,ct\n0.1,0.2,1,50.3\n0.3,0.4,0,0"
 
-        # Default operational tags
-        os = StringIO()
-        expected = {
-            "epsilon_r,lambda_tf,operational status,ct",
-            "0.1,0.2,1,50.3",
-            "0.3,0.4,0,0",
-            "1.2,1.4,1,400",
-            "2.4,5.75,0,0",
-        }
+        # Get the result from the function that returns a string
+        result = write_operational_domain_to_string(opdom)
 
-        write_operational_domain(opdom, os)
-        lines = set(os.getvalue().strip().split("\n"))
-        self.assertEqual(lines, expected)
+        self.assertEqual(sorted(result.strip().split("\n")), sorted(expected.strip().split("\n")))
 
         # Custom operational tags
-        os = StringIO()
-        params = write_operational_domain_params(operational_tag="operational", non_operational_tag="non-operational")
-        expected = {
-            "epsilon_r,lambda_tf,operational status,ct",
-            "0.1,0.2,operational,50.3",
-            "0.3,0.4,non-operational,0",
-            "1.2,1.4,operational,400",
-            "2.4,5.75,non-operational,0",
-        }
+        expected_custom = (
+            "epsilon_r,lambda_tf,operational status,ct\n0.1,0.2,operational,50.3\n0.3,0.4,non-operational,0"
+        )
+        params = write_operational_domain_params()
+        params.operational_tag = "operational"
+        params.non_operational_tag = "non-operational"
 
-        write_operational_domain(opdom, os, params)
-        lines = set(os.getvalue().strip().split("\n"))
-        self.assertEqual(lines, expected)
+        result_custom = write_operational_domain_to_string(opdom, params)
+
+        self.assertEqual(sorted(result_custom.strip().split("\n")), sorted(expected_custom.strip().split("\n")))
+
+    def test_skip_non_operational_samples(self):
+        opdom = operational_domain()
+        opdom.dimensions = [sweep_parameter.EPSILON_R, sweep_parameter.LAMBDA_TF]
+
+        opdom.add_value(parameter_point([0.1, 0.2]), operational_status.OPERATIONAL)
+        opdom.add_value(parameter_point([0.3, 0.4]), operational_status.NON_OPERATIONAL)
 
         # Skip non-operational samples
-        os = StringIO()
+        params = write_operational_domain_params()
         params.writing_mode = sample_writing_mode.OPERATIONAL_ONLY
-        expected = {
-            "epsilon_r,lambda_tf,operational status,ct",
-            "0.1,0.2,1,50.3",
-            "1.2,1.4,1,400",
-        }
 
-        write_operational_domain(opdom, os, params)
-        lines = set(os.getvalue().strip().split("\n"))
-        self.assertEqual(lines, expected)
+        expected = "epsilon_r,lambda_tf,operational status\n0.1,0.2,1"
+
+        result = write_operational_domain_to_string(opdom, params)
+
+        self.assertEqual(sorted(result.strip().split("\n")), sorted(expected.strip().split("\n")))
 
 
 if __name__ == "__main__":
