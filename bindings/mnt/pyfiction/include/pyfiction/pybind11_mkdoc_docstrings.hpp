@@ -15198,9 +15198,14 @@ Template parameter ``Key``:
     The type representing the key. Defaults to `parameter_point`.
 
 Template parameter ``Value``:
-    The type representing the value. Defaults to `operational_status`.)doc";
+    The type representing the value. Defaults to `operational_status`.
 
-static const char *__doc_fiction_operational_domain_add_value = R"doc()doc";
+Template parameter ``MetricType``:
+    The type representing the metric value. Defaults to `double`.)doc";
+
+static const char *__doc_fiction_operational_domain_add_metric_value = R"doc(Adds a value to the metric values.)doc";
+
+static const char *__doc_fiction_operational_domain_add_value = R"doc(Adds a value to the operational domain.)doc";
 
 static const char *__doc_fiction_operational_domain_contour_tracing =
 R"doc(Computes the operational domain of the given SiDB cell-level layout.
@@ -15329,7 +15334,23 @@ Parameter ``stats``:
 Returns:
     The (partial) operational domain of the layout.)doc";
 
-static const char *__doc_fiction_operational_domain_get_domain = R"doc()doc";
+static const char *__doc_fiction_operational_domain_get_metric_value =
+R"doc(This function retrieves the value associated with the provided key
+from the metric values. If the key is found, its corresponding value
+is returned. Otherwise, `std::nullopt` is returned.
+
+Parameter ``key``:
+    The key to look up in the metric values.
+
+Returns:
+    The value associated with the provided key. If the key is not
+    found, `std::nullopt` is returned.)doc";
+
+static const char *__doc_fiction_operational_domain_get_metric_values =
+R"doc(Returns the metric values. If no metric values are present,
+`std::nullopt` is returned.)doc";
+
+static const char *__doc_fiction_operational_domain_get_operational_domain = R"doc(Returns the operational domain.)doc";
 
 static const char *__doc_fiction_operational_domain_get_value =
 R"doc(This function retrieves the value associated with the provided key
@@ -15341,7 +15362,8 @@ Parameter ``key``:
     The key to look up.
 
 Returns:
-    The value associated with the parameter point.)doc";
+    The value associated with the provided key. If the key is not
+    found, `std::nullopt` is returned.)doc";
 
 static const char *__doc_fiction_operational_domain_grid_search =
 R"doc(Computes the operational domain of the given SiDB cell-level layout.
@@ -15388,6 +15410,11 @@ Parameter ``stats``:
 Returns:
     The operational domain of the layout.)doc";
 
+static const char *__doc_fiction_operational_domain_metric_values =
+R"doc(This can store different information depending on the use case. If the
+critical temperature is simulated on top of the operational domain, it
+is stored here.)doc";
+
 static const char *__doc_fiction_operational_domain_operational_values =
 R"doc(This can store different information depending on the use case. If the
 operational domain is simulated for different physical parameters, the
@@ -15396,6 +15423,19 @@ parameters are stored with the corresponding operating status.)doc";
 static const char *__doc_fiction_operational_domain_params =
 R"doc(Parameters for the operational domain computation. The parameters are
 used across the different operational domain computation algorithms.)doc";
+
+static const char *__doc_fiction_operational_domain_params_metric_sim = R"doc(The metric to simulate within the operational domain.)doc";
+
+static const char *__doc_fiction_operational_domain_params_metric_simulation =
+R"doc(This enumeration defines whether specific metrics, such as critical
+temperature, are simulated within the operational domain or if
+simulations are disabled.)doc";
+
+static const char *__doc_fiction_operational_domain_params_metric_simulation_CRITICAL_TEMPERATURE_SIM = R"doc(Simulates the critical temperature within the operational domain.)doc";
+
+static const char *__doc_fiction_operational_domain_params_metric_simulation_DISABLED =
+R"doc(Disables metric simulation, meaning no metrics are simulated within
+the operational domain.)doc";
 
 static const char *__doc_fiction_operational_domain_params_operational_params =
 R"doc(The parameters used to determine if a layout is operational or non-
@@ -19633,11 +19673,15 @@ The operational status is a binary value represented by specified tags
 in `params` indicating whether the simulation parameters are within
 the operational domain or not.
 
+Template parameter ``OpDomain``:
+    The type of the operational domain.
+
 Parameter ``opdom``:
     The operational domain to be written. It contains a mapping from
     sets of simulation parameters (represented as a pair of sweep
     parameters for the X and Y dimensions) to their operational
-    status.
+    status, and it can include metric values (e.g., the critical
+    temperature on top of that).
 
 Parameter ``os``:
     The output stream where the CSV representation of the operational
@@ -19664,11 +19708,15 @@ The operational status is a binary value represented by specified tags
 in `params` indicating whether the simulation parameters are within
 the operational domain or not.
 
+Template parameter ``OpDomain``:
+    The type of the operational domain.
+
 Parameter ``opdom``:
     The operational domain to be written. It contains a mapping from
     sets of simulation parameters (represented as a pair of sweep
     parameters for the X and Y dimensions) to their operational
-    status.
+    status, and it can include metric values (e.g., the critical
+    temperature on top of that).
 
 Parameter ``filename``:
     The filename where the CSV representation of the operational
