@@ -14,7 +14,6 @@
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/physical_constants.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/layout_utils.hpp>
 #include <fiction/utils/truth_table_utils.hpp>
 
 #include <mockturtle/utils/stopwatch.hpp>
@@ -54,6 +53,7 @@ void check_op_domain_params_and_operational_status(
             {
                 if (params.metric_sim == operational_domain_params::metric_simulation::CRITICAL_TEMPERATURE_SIM)
                 {
+                    REQUIRE(op_domain.get_metric_value(coord).has_value());
                     CHECK(op_domain.get_metric_value(coord).value() > 0.0);
                 }
                 CHECK(op_value == *status);
@@ -62,6 +62,7 @@ void check_op_domain_params_and_operational_status(
             {
                 if (params.metric_sim == operational_domain_params::metric_simulation::CRITICAL_TEMPERATURE_SIM)
                 {
+                    REQUIRE(op_domain.get_metric_value(coord).has_value());
                     CHECK_THAT(op_domain.get_metric_value(coord).value(), Catch::Matchers::WithinAbs(0.0, 0.00001));
                 }
             }
@@ -296,6 +297,9 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
     op_domain_params.operational_params.simulation_parameters = sim_params;
     op_domain_params.sweep_dimensions = {{sweep_parameter::EPSILON_R}, {sweep_parameter::LAMBDA_TF}};
 
+    CHECK(op_domain_params.sweep_dimensions[0].dimension == sweep_parameter::EPSILON_R);
+    CHECK(op_domain_params.sweep_dimensions[1].dimension == sweep_parameter::LAMBDA_TF);
+
     operational_domain_stats op_domain_stats{};
 
     SECTION("operational area, only one parameter point")
@@ -305,10 +309,18 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
         op_domain_params.sweep_dimensions[0].max  = 5.5;
         op_domain_params.sweep_dimensions[0].step = 0.1;
 
+        CHECK(op_domain_params.sweep_dimensions[0].min == 5.5);
+        CHECK(op_domain_params.sweep_dimensions[0].max == 5.5);
+        CHECK(op_domain_params.sweep_dimensions[0].step == 0.1);
+
         // set y-dimension
         op_domain_params.sweep_dimensions[1].min  = 5.0;
         op_domain_params.sweep_dimensions[1].max  = 5.0;
         op_domain_params.sweep_dimensions[1].step = 0.1;
+
+        CHECK(op_domain_params.sweep_dimensions[1].min == 5.0);
+        CHECK(op_domain_params.sweep_dimensions[1].max == 5.0);
+        CHECK(op_domain_params.sweep_dimensions[1].step == 0.1);
 
         SECTION("grid_search")
         {
