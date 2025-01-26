@@ -15530,12 +15530,11 @@ static const char *__doc_fiction_operational_domain_params =
 R"doc(Parameters for the operational domain computation. The parameters are
 used across the different operational domain computation algorithms.)doc";
 
-static const char *__doc_fiction_operational_domain_params_metric_sim = R"doc(The metric to simulate within the operational domain.)doc";
+static const char *__doc_fiction_operational_domain_params_metric_sim = R"doc(Specifies the metric to simulate within the operational domain.)doc";
 
 static const char *__doc_fiction_operational_domain_params_metric_simulation =
 R"doc(This enumeration defines whether specific metrics, such as critical
-temperature, are simulated within the operational domain or if
-simulations are disabled.)doc";
+temperature, are simulated within the operational domain.)doc";
 
 static const char *__doc_fiction_operational_domain_params_metric_simulation_CRITICAL_TEMPERATURE_SIM = R"doc(Simulates the critical temperature within the operational domain.)doc";
 
