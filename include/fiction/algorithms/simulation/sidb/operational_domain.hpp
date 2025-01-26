@@ -277,7 +277,7 @@ struct operational_domain_params
 {
     /**
      * This enumeration defines whether specific metrics, such as critical temperature,
-     * are simulated within the operational domain or if simulations are disabled.
+     * are simulated within the operational domain.
      */
     enum class metric_simulation : uint8_t
     {
@@ -302,7 +302,7 @@ struct operational_domain_params
         operational_domain_value_range{sweep_parameter::EPSILON_R, 1.0, 10.0, 0.1},
         operational_domain_value_range{sweep_parameter::LAMBDA_TF, 1.0, 10.0, 0.1}};
     /**
-     * The metric to simulate within the operational domain.
+     * Specifies the metric to simulate within the operational domain.
      */
     metric_simulation metric_sim{metric_simulation::DISABLED};
 };
@@ -953,7 +953,7 @@ class operational_domain_impl
     /**
      * Number of available hardware threads.
      */
-    const std::size_t num_threads{1};
+    const std::size_t num_threads{std::thread::hardware_concurrency()};
     /**
      * Input BDL wires.
      */
@@ -1196,6 +1196,7 @@ class operational_domain_impl
         {
             const auto ct = critical_temperature_gate_based(
                 layout, truth_table, critical_temperature_params{op_params_set_dimension_values});
+
             return operational(ct);
         }
 
