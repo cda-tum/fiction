@@ -282,7 +282,7 @@ struct operational_domain_params
     enum class metric_simulation : uint8_t
     {
         /**
-         * Simulates the critical temperature within the operational domain.
+         * Simulates the critical temperature on top of the operational domain.
          */
         CRITICAL_TEMPERATURE_SIM,
         /**

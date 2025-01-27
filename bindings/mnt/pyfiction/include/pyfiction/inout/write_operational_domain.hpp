@@ -58,9 +58,9 @@ inline void write_operational_domain(pybind11::module& m)
         [](const fiction::operational_domain<fiction::parameter_point, fiction::operational_status>& opdom,
            const fiction::write_operational_domain_params& params = {}) -> std::string
         {
-            std::ostringstream oss;                                 // Create an in-memory output stream
-            fiction::write_operational_domain(opdom, oss, params);  // Write to the stream
-            return oss.str();                                       // Return the string content
+            std::ostringstream oss;
+            fiction::write_operational_domain(opdom, oss, params);
+            return oss.str();
         },
         py::arg("opdom"), py::arg("params") = fiction::write_operational_domain_params{},
         "Writes the operational domain to a CSV string.");
