@@ -15536,7 +15536,7 @@ static const char *__doc_fiction_operational_domain_params_metric_simulation =
 R"doc(This enumeration defines whether specific metrics, such as critical
 temperature, are simulated within the operational domain.)doc";
 
-static const char *__doc_fiction_operational_domain_params_metric_simulation_CRITICAL_TEMPERATURE_SIM = R"doc(Simulates the critical temperature within the operational domain.)doc";
+static const char *__doc_fiction_operational_domain_params_metric_simulation_CRITICAL_TEMPERATURE_SIM = R"doc(Simulates the critical temperature on top of the operational domain.)doc";
 
 static const char *__doc_fiction_operational_domain_params_metric_simulation_DISABLED =
 R"doc(Disables metric simulation, meaning no metrics are simulated within
