@@ -83,7 +83,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        runs-on: [ubuntu-latest, macos-13, macos-14, windows-latest]
+        runs-on:
+          [ubuntu-24.04, ubuntu-24.04-arm, macos-13, macos-14, windows-latest]
 
     steps:
       - uses: actions/checkout@v4
@@ -95,9 +96,10 @@ jobs:
         uses: ilammy/msvc-dev-cmd@v1
 
       - name: Setup ccache
+        if: matrix.runs-on != 'ubuntu-24.04-arm'
         uses: hendrikmuhs/ccache-action@v1.2
         with:
-          key: "${{matrix.config.os}}-pyfiction"
+          key: "${{matrix.runs-on}}-pyfiction"
           save: true
           max-size: 10G
 
@@ -124,7 +126,7 @@ jobs:
       - name: Upload wheel as an artifact
         uses: actions/upload-artifact@v4
         with:
-          name: cibw-wheels-${{ matrix.config.os }}-${{ matrix.config.arch }}-${{ matrix.python }}
+          name: cibw-wheels-${{ matrix.runs-on }}
           path: ./wheelhouse/*.whl
           overwrite: true
 
