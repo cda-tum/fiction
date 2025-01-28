@@ -1,6 +1,6 @@
 import unittest
 
-from mnt.pyfiction import inml_technology, qca_layout, qca_technology, sidb_layout, sidb_technology
+from mnt.pyfiction import inml_layout, inml_technology, qca_layout, qca_technology, sidb_layout, sidb_technology
 
 
 class TestCellTechnology(unittest.TestCase):
@@ -36,147 +36,161 @@ class TestCellTechnology(unittest.TestCase):
         self.assertEqual(str(sidb.cell_type.LOGIC), "cell_type.LOGIC")
 
 
-class TestQCACellLevelLayout(unittest.TestCase):
-    def test_qca_cell_layout_inheritance(self):
-        layout = qca_layout((9, 9, 1))
+class TestCellLevelLayout(unittest.TestCase):
+    def test_cell_layout_inheritance(self):
+        for layout in [qca_layout((9, 9, 1)), inml_layout((9, 9, 1)), sidb_layout((9, 9, 1))]:
+            for t in layout.coordinates():
+                self.assertLessEqual(t, (9, 9, 1))
+                self.assertTrue(layout.is_within_bounds(t))
 
-        for t in layout.coordinates():
-            self.assertTrue(t <= (9, 9, 1))
-            self.assertTrue(layout.is_within_bounds(t))
+            for t in layout.ground_coordinates():
+                self.assertEqual(t.z, 0)
+                self.assertLessEqual(t, (9, 9, 0))
+                self.assertTrue(layout.is_within_bounds(t))
 
-        for t in layout.ground_coordinates():
-            self.assertTrue(t.z == 0)
-            self.assertTrue(t <= (9, 9, 0))
-            self.assertTrue(layout.is_within_bounds(t))
+            for t in layout.adjacent_coordinates((2, 2)):
+                self.assertIn(t, [(1, 2), (2, 1), (3, 2), (2, 3)])
 
-        for t in layout.adjacent_coordinates((2, 2)):
-            self.assertIn(t, [(1, 2), (2, 1), (3, 2), (2, 3)])
+    def test_cell_layout_inheritance_cube_coordinates(self):
+        for layout in [
+            qca_layout((9, 9, 1), "OPEN", "AND", "cube"),
+            inml_layout((9, 9, 1), "OPEN", "AND", "cube"),
+            sidb_layout((9, 9, 1), "OPEN", "AND", "cube"),
+        ]:
+            for t in layout.coordinates():
+                self.assertLessEqual(t, (9, 9, 1))
+                self.assertTrue(layout.is_within_bounds(t))
 
-    def test_cell_type_assignment(self):
-        layout = qca_layout((4, 4), "OPEN", "AND")
+            for t in layout.ground_coordinates():
+                self.assertEqual(t.z, 0)
+                self.assertLessEqual(t, (9, 9, 0))
+                self.assertTrue(layout.is_within_bounds(t))
 
-        self.assertTrue(layout.is_empty())
-
-        layout.assign_cell_type((0, 2), qca_technology.cell_type.INPUT)
-        layout.assign_cell_type((2, 4), qca_technology.cell_type.INPUT)
-        layout.assign_cell_type((2, 0), qca_technology.cell_type.CONST_0)
-        layout.assign_cell_type((2, 1), qca_technology.cell_type.NORMAL)
-        layout.assign_cell_type((2, 2), qca_technology.cell_type.NORMAL)
-        layout.assign_cell_type((2, 3), qca_technology.cell_type.NORMAL)
-        layout.assign_cell_type((1, 2), qca_technology.cell_type.NORMAL)
-        layout.assign_cell_type((3, 2), qca_technology.cell_type.NORMAL)
-        layout.assign_cell_type((4, 2), qca_technology.cell_type.OUTPUT)
-
-        self.assertFalse(layout.is_empty())
-
-        layout.assign_cell_name((0, 2), "a")
-        layout.assign_cell_name((2, 4), "b")
-        layout.assign_cell_name((4, 2), "f")
-
-        self.assertEqual(layout.get_layout_name(), "AND")
-        self.assertEqual(layout.get_cell_name((0, 2)), "a")
-        self.assertEqual(layout.get_cell_name((2, 4)), "b")
-        self.assertEqual(layout.get_cell_name((4, 2)), "f")
-
-        self.assertEqual(layout.num_cells(), 9)
-        self.assertEqual(layout.num_pis(), 2)
-        self.assertEqual(layout.num_pos(), 1)
-
-        self.assertTrue(layout.is_pi((0, 2)))
-        self.assertTrue(layout.is_pi((2, 4)))
-        self.assertTrue(layout.is_po((4, 2)))
-
-        self.assertEqual(layout.get_cell_type((2, 0)), qca_technology.cell_type.CONST_0)
-        self.assertEqual(layout.get_cell_type((2, 4)), qca_technology.cell_type.INPUT)
-        self.assertEqual(layout.get_cell_type((0, 2)), qca_technology.cell_type.INPUT)
-        self.assertEqual(layout.get_cell_type((2, 1)), qca_technology.cell_type.NORMAL)
-        self.assertEqual(layout.get_cell_type((2, 2)), qca_technology.cell_type.NORMAL)
-        self.assertEqual(layout.get_cell_type((2, 3)), qca_technology.cell_type.NORMAL)
-        self.assertEqual(layout.get_cell_type((1, 2)), qca_technology.cell_type.NORMAL)
-        self.assertEqual(layout.get_cell_type((3, 2)), qca_technology.cell_type.NORMAL)
-        self.assertEqual(layout.get_cell_type((4, 2)), qca_technology.cell_type.OUTPUT)
-
-        self.assertTrue(layout.is_empty_cell((0, 0)))
-        self.assertTrue(layout.is_empty_cell((0, 1)))
-        self.assertTrue(layout.is_empty_cell((1, 0)))
-        self.assertTrue(layout.is_empty_cell((1, 1)))
-        self.assertTrue(layout.is_empty_cell((3, 0)))
-        self.assertTrue(layout.is_empty_cell((3, 1)))
-        self.assertTrue(layout.is_empty_cell((4, 0)))
-        self.assertTrue(layout.is_empty_cell((4, 1)))
-        self.assertTrue(layout.is_empty_cell((0, 3)))
-        self.assertTrue(layout.is_empty_cell((1, 3)))
-        self.assertTrue(layout.is_empty_cell((0, 4)))
-        self.assertTrue(layout.is_empty_cell((1, 0)))
-        self.assertTrue(layout.is_empty_cell((3, 3)))
-        self.assertTrue(layout.is_empty_cell((3, 4)))
-        self.assertTrue(layout.is_empty_cell((4, 3)))
-        self.assertTrue(layout.is_empty_cell((4, 4)))
-
-        self.assertFalse(layout.is_empty_cell((2, 0)))
-        self.assertFalse(layout.is_empty_cell((2, 4)))
-        self.assertFalse(layout.is_empty_cell((0, 2)))
-        self.assertFalse(layout.is_empty_cell((2, 1)))
-        self.assertFalse(layout.is_empty_cell((2, 2)))
-        self.assertFalse(layout.is_empty_cell((2, 3)))
-        self.assertFalse(layout.is_empty_cell((1, 2)))
-        self.assertFalse(layout.is_empty_cell((3, 2)))
-        self.assertFalse(layout.is_empty_cell((4, 2)))
-
-
-class TestSiDBCellLevelLayout(unittest.TestCase):
-    def test_sidb_cell_layout_inheritance(self):
-        layout = sidb_layout((9, 9, 1), "OPEN", "AND", "cube")
-
-        for t in layout.coordinates():
-            self.assertTrue(t <= (9, 9, 1))
-            self.assertTrue(layout.is_within_bounds(t))
-
-        for t in layout.ground_coordinates():
-            self.assertTrue(t.z == 0)
-            self.assertTrue(t <= (9, 9, 0))
-            self.assertTrue(layout.is_within_bounds(t))
-
-        for t in layout.adjacent_coordinates((0, 0)):
-            self.assertIn(t, [(-1, 0), (0, 1), (1, 0), (0, -1)])
+            for t in layout.adjacent_coordinates((0, 0)):
+                self.assertIn(t, [(-1, 0), (0, 1), (1, 0), (0, -1)])
 
     def test_cell_type_assignment(self):
-        layout = sidb_layout((1, 1), "OPEN", "AND", "cube")
+        for layout, technology in [
+            (qca_layout((4, 4), "OPEN", "AND"), qca_technology),
+            (inml_layout((4, 4), "OPEN", "AND"), inml_technology),
+            (sidb_layout((4, 4), "OPEN", "AND"), sidb_technology),
+        ]:
+            self.assertTrue(layout.is_empty())
 
-        self.assertTrue(layout.is_empty())
+            layout.assign_cell_type((0, 2), technology.cell_type.INPUT)
+            layout.assign_cell_type((2, 4), technology.cell_type.INPUT)
+            if technology == qca_technology:
+                layout.assign_cell_type((2, 0), technology.cell_type.CONST_0)
+            layout.assign_cell_type((2, 1), technology.cell_type.NORMAL)
+            layout.assign_cell_type((2, 2), technology.cell_type.NORMAL)
+            layout.assign_cell_type((2, 3), technology.cell_type.NORMAL)
+            layout.assign_cell_type((1, 2), technology.cell_type.NORMAL)
+            layout.assign_cell_type((3, 2), technology.cell_type.NORMAL)
+            layout.assign_cell_type((4, 2), technology.cell_type.OUTPUT)
 
-        layout.assign_cell_type((-1, 0), sidb_technology.cell_type.INPUT)
-        layout.assign_cell_type((0, 0), sidb_technology.cell_type.NORMAL)
-        layout.assign_cell_type((1, 0), sidb_technology.cell_type.OUTPUT)
+            self.assertFalse(layout.is_empty())
 
-        self.assertFalse(layout.is_empty())
+            layout.assign_cell_name((0, 2), "a")
+            layout.assign_cell_name((2, 4), "b")
+            layout.assign_cell_name((4, 2), "f")
 
-        layout.assign_cell_name((-1, 0), "a")
-        layout.assign_cell_name((0, 0), "b")
-        layout.assign_cell_name((1, 0), "f")
+            self.assertEqual(layout.get_layout_name(), "AND")
+            self.assertEqual(layout.get_cell_name((0, 2)), "a")
+            self.assertEqual(layout.get_cell_name((2, 4)), "b")
+            self.assertEqual(layout.get_cell_name((4, 2)), "f")
 
-        self.assertEqual(layout.get_layout_name(), "AND")
-        self.assertEqual(layout.get_cell_name((-1, 0)), "a")
-        self.assertEqual(layout.get_cell_name((0, 0)), "b")
-        self.assertEqual(layout.get_cell_name((1, 0)), "f")
+            if technology == qca_technology:
+                self.assertEqual(layout.num_cells(), 9)
+            else:
+                self.assertEqual(layout.num_cells(), 8)
+            self.assertEqual(layout.num_pis(), 2)
+            self.assertEqual(layout.num_pos(), 1)
 
-        self.assertEqual(layout.num_cells(), 3)
-        self.assertEqual(layout.num_pis(), 1)
-        self.assertEqual(layout.num_pos(), 1)
+            self.assertTrue(layout.is_pi((0, 2)))
+            self.assertTrue(layout.is_pi((2, 4)))
+            self.assertTrue(layout.is_po((4, 2)))
 
-        self.assertTrue(layout.is_pi((-1, 0)))
-        self.assertTrue(layout.is_po((1, 0)))
+            if technology == qca_technology:
+                self.assertEqual(layout.get_cell_type((2, 0)), technology.cell_type.CONST_0)
+            self.assertEqual(layout.get_cell_type((2, 4)), technology.cell_type.INPUT)
+            self.assertEqual(layout.get_cell_type((0, 2)), technology.cell_type.INPUT)
+            self.assertEqual(layout.get_cell_type((2, 1)), technology.cell_type.NORMAL)
+            self.assertEqual(layout.get_cell_type((2, 2)), technology.cell_type.NORMAL)
+            self.assertEqual(layout.get_cell_type((2, 3)), technology.cell_type.NORMAL)
+            self.assertEqual(layout.get_cell_type((1, 2)), technology.cell_type.NORMAL)
+            self.assertEqual(layout.get_cell_type((3, 2)), technology.cell_type.NORMAL)
+            self.assertEqual(layout.get_cell_type((4, 2)), technology.cell_type.OUTPUT)
 
-        self.assertEqual(layout.get_cell_type((-1, 0)), qca_technology.cell_type.INPUT)
-        self.assertEqual(layout.get_cell_type((0, 0)), qca_technology.cell_type.NORMAL)
-        self.assertEqual(layout.get_cell_type((1, 0)), qca_technology.cell_type.OUTPUT)
+            self.assertTrue(layout.is_empty_cell((0, 0)))
+            self.assertTrue(layout.is_empty_cell((0, 1)))
+            self.assertTrue(layout.is_empty_cell((1, 0)))
+            self.assertTrue(layout.is_empty_cell((1, 1)))
+            self.assertTrue(layout.is_empty_cell((3, 0)))
+            self.assertTrue(layout.is_empty_cell((3, 1)))
+            self.assertTrue(layout.is_empty_cell((4, 0)))
+            self.assertTrue(layout.is_empty_cell((4, 1)))
+            self.assertTrue(layout.is_empty_cell((0, 3)))
+            self.assertTrue(layout.is_empty_cell((1, 3)))
+            self.assertTrue(layout.is_empty_cell((0, 4)))
+            self.assertTrue(layout.is_empty_cell((1, 0)))
+            self.assertTrue(layout.is_empty_cell((3, 3)))
+            self.assertTrue(layout.is_empty_cell((3, 4)))
+            self.assertTrue(layout.is_empty_cell((4, 3)))
+            self.assertTrue(layout.is_empty_cell((4, 4)))
 
-        self.assertTrue(layout.is_empty_cell((-1, -1)))
-        self.assertTrue(layout.is_empty_cell((0, -1)))
-        self.assertTrue(layout.is_empty_cell((1, -1)))
-        self.assertTrue(layout.is_empty_cell((-1, 1)))
-        self.assertTrue(layout.is_empty_cell((0, 1)))
-        self.assertTrue(layout.is_empty_cell((1, 1)))
+            if technology == qca_technology:
+                self.assertFalse(layout.is_empty_cell((2, 0)))
+            else:
+                self.assertTrue(layout.is_empty_cell((2, 0)))
+            self.assertFalse(layout.is_empty_cell((2, 4)))
+            self.assertFalse(layout.is_empty_cell((0, 2)))
+            self.assertFalse(layout.is_empty_cell((2, 1)))
+            self.assertFalse(layout.is_empty_cell((2, 2)))
+            self.assertFalse(layout.is_empty_cell((2, 3)))
+            self.assertFalse(layout.is_empty_cell((1, 2)))
+            self.assertFalse(layout.is_empty_cell((3, 2)))
+            self.assertFalse(layout.is_empty_cell((4, 2)))
+
+    def test_cell_type_assignment_cube_coordinates(self):
+        for layout, technology in [
+            (qca_layout((1, 1), "OPEN", "AND", "cube"), qca_technology),
+            (inml_layout((1, 1), "OPEN", "AND", "cube"), inml_technology),
+            (sidb_layout((1, 1), "OPEN", "AND", "cube"), sidb_technology),
+        ]:
+            self.assertTrue(layout.is_empty())
+
+            layout.assign_cell_type((-1, 0), technology.cell_type.INPUT)
+            layout.assign_cell_type((0, 0), technology.cell_type.NORMAL)
+            layout.assign_cell_type((1, 0), technology.cell_type.OUTPUT)
+
+            self.assertFalse(layout.is_empty())
+
+            layout.assign_cell_name((-1, 0), "a")
+            layout.assign_cell_name((0, 0), "b")
+            layout.assign_cell_name((1, 0), "f")
+
+            self.assertEqual(layout.get_layout_name(), "AND")
+            self.assertEqual(layout.get_cell_name((-1, 0)), "a")
+            self.assertEqual(layout.get_cell_name((0, 0)), "b")
+            self.assertEqual(layout.get_cell_name((1, 0)), "f")
+
+            self.assertEqual(layout.num_cells(), 3)
+            self.assertEqual(layout.num_pis(), 1)
+            self.assertEqual(layout.num_pos(), 1)
+
+            self.assertTrue(layout.is_pi((-1, 0)))
+            self.assertTrue(layout.is_po((1, 0)))
+
+            self.assertEqual(layout.get_cell_type((-1, 0)), technology.cell_type.INPUT)
+            self.assertEqual(layout.get_cell_type((0, 0)), technology.cell_type.NORMAL)
+            self.assertEqual(layout.get_cell_type((1, 0)), technology.cell_type.OUTPUT)
+
+            self.assertTrue(layout.is_empty_cell((-1, -1)))
+            self.assertTrue(layout.is_empty_cell((0, -1)))
+            self.assertTrue(layout.is_empty_cell((1, -1)))
+            self.assertTrue(layout.is_empty_cell((-1, 1)))
+            self.assertTrue(layout.is_empty_cell((0, 1)))
+            self.assertTrue(layout.is_empty_cell((1, 1)))
 
 
 if __name__ == "__main__":

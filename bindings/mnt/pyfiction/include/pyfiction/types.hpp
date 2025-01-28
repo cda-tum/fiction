@@ -117,11 +117,13 @@ using py_cartesian_cell_layout_cube_coordinates =
 /**
  * QCA cell layout.
  */
-using py_qca_layout = py_cartesian_cell_layout<fiction::qca_technology>;
+using py_qca_layout                  = py_cartesian_cell_layout<fiction::qca_technology>;
+using py_qca_layout_cube_coordinates = py_cartesian_cell_layout_cube_coordinates<fiction::qca_technology>;
 /**
  * iNML cell layout.
  */
-using py_inml_layout = py_cartesian_cell_layout<fiction::inml_technology>;
+using py_inml_layout                  = py_cartesian_cell_layout<fiction::inml_technology>;
+using py_inml_layout_cube_coordinates = py_cartesian_cell_layout_cube_coordinates<fiction::inml_technology>;
 /**
  * SiDB cell layout.
  */
