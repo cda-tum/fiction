@@ -264,7 +264,7 @@ TEST_CASE("Use SiQAD's AND gate skeleton to generate all possible AND gates", "[
     SECTION("canvas hits wires and defect lies inside the canvas")
     {
         params.canvas                 = {{4, 2, 0}, {14, 8, 1}};
-        params.number_of_canvas_sidbs = 0;
+        params.number_of_canvas_sidbs = 2;
         params.design_mode            = design_sidb_gates_params<
                        cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER;
 
@@ -275,7 +275,7 @@ TEST_CASE("Use SiQAD's AND gate skeleton to generate all possible AND gates", "[
 
         const auto found_gate_layouts_exhaustive =
             design_sidb_gates(defect_layout, std::vector<tt>{create_and_tt()}, params);
-        CHECK(found_gate_layouts_exhaustive.empty());
+        CHECK(!found_gate_layouts_exhaustive.empty());
         params.design_mode =
             design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::QUICKCELL;
         const auto found_gate_layouts_quickcell = design_sidb_gates(lyt, std::vector<tt>{create_and_tt()}, params);
