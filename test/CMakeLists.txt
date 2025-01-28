@@ -1,4 +1,4 @@
-#Benchmarking(depends on Catch2)
+# Benchmarking (depends on Catch2)
 option(
         FICTION_BENCHMARK
         "Build fiction benchmarks, which can evaluate the performance of certain code fragments"
@@ -8,12 +8,12 @@ if (FICTION_BENCHMARK)
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/benchmark)
 endif ()
 
-#Define fiction_test as an interface target
-add_library(fiction_test INTERFACE)
+# Define libfiction_test as an interface target
+add_library(libfiction_test INTERFACE)
 
-#Apply compile definitions for TEST_PATH and others
+# Apply compile definitions to libfiction_test that point to the test folder
 target_compile_definitions(
-        fiction_test
+        libfiction_test
         INTERFACE "TEST_PATH=\"${CMAKE_CURRENT_SOURCE_DIR}/\"")
 
 include_directories(.)
@@ -26,16 +26,11 @@ foreach (FILE IN LISTS FILENAMES)
     set(TEST_NAME test_${NAME})
     add_executable(${TEST_NAME} ${FILE})
 
-    # Link to fiction_test to inherit the compile definitions
-    target_link_libraries(${TEST_NAME} PRIVATE fiction_test)
+    # Link the test executable against libfiction and Catch2
+    target_link_libraries(${TEST_NAME} PRIVATE libfiction_test libfiction Catch2::Catch2WithMain)
 
-    target_compile_definitions(
-            ${TEST_NAME} INTERFACE CATCH_CONFIG_NO_POSIX_SIGNALS) # make catch2 ignore
-    # SIGTERMs sent to
-    # applications when
-    # timeouts are reached
-    target_link_libraries(${TEST_NAME} PRIVATE libfiction Catch2::Catch2WithMain)
+    # Make Catch2 ignore SIGTERMs sent to applications when timeouts are reached
+    target_compile_definitions(${TEST_NAME} INTERFACE CATCH_CONFIG_NO_POSIX_SIGNALS)
 
-  add_test(NAME ${NAME} COMMAND ${TEST_NAME}) # group tests by file
-  # catch_discover_tests(${TEST_NAME})
-endforeach()
+    add_test(NAME ${NAME} COMMAND ${TEST_NAME}) # group tests by file
+endforeach ()
