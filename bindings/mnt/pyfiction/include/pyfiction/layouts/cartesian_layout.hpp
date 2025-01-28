@@ -15,7 +15,7 @@
 #include <pybind11/stl.h>
 
 #include <cstdint>
-#include <sstream>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -33,7 +33,6 @@ namespace detail
 template <typename CartLyt>
 void cartesian_layout(pybind11::module& m, const std::string& coord_type)
 {
-    namespace py = pybind11;
     namespace py = pybind11;
 
     /**

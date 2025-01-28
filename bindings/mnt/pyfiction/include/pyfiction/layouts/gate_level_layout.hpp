@@ -29,7 +29,6 @@ template <typename LytBase, typename GateLyt>
 void gate_level_layout(pybind11::module& m, const std::string& topology, const std::string& coord_type)
 {
     namespace py = pybind11;
-    namespace py = pybind11;
 
     py::class_<GateLyt, LytBase>(m, fmt::format("{}_gate_layout_{}", topology, coord_type).c_str(),
                                  DOC(fiction_gate_level_layout))

@@ -78,7 +78,6 @@ template <typename ClockedLyt, typename CellLyt, typename Technology>
 void cell_level_layout(pybind11::module& m, const std::string& coord_type)
 {
     namespace py = pybind11;
-    namespace py = pybind11;
 
     // fetch technology name
     auto tech_name = std::string{fiction::tech_impl_name<Technology>};
