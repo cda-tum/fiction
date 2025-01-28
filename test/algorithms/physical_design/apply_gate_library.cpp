@@ -9,6 +9,7 @@
 #include <fiction/algorithms/physical_design/design_sidb_gates.hpp>
 #include <fiction/algorithms/simulation/sidb/is_operational.hpp>
 #include <fiction/io/read_sqd_layout.hpp>
+#include <fiction/io/write_sqd_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/technology/sidb_bestagon_library.hpp>
@@ -65,7 +66,9 @@ TEST_CASE("Gate-level layout with AND gate", "[apply-gate-library]")
 
         design_sidb_gates_params<cell<cell_lyt>> design_gate_params{};
         design_gate_params.operational_params.simulation_parameters = fiction::sidb_simulation_parameters{2, -0.32};
-        design_gate_params.canvas                                   = {{24, 17}, {34, 28}};
+        design_gate_params.termination_cond =
+            design_sidb_gates_params<cell<cell_lyt>>::termination_condition::AFTER_FIRST_SOLUTION;
+        design_gate_params.canvas = {{24, 17}, {34, 28}};
 
         SECTION("AND gate can be designed successfully")
         {
@@ -115,7 +118,7 @@ TEST_CASE("Gate-level layout with two input wires, one double wire, and two outp
     {
         const auto double_wire = apply_gate_library<cell_lyt, sidb_bestagon_library, hex_even_row_gate_clk_lyt>(layout);
 
-        check_equivalence(double_wire, fmt::format("{}/resources/double_wire_static.sqd", TEST_PATH));
+        check_equivalence(double_wire, fmt::format("{}/resources/double_wire.sqd", TEST_PATH));
     }
 
     SECTION("Use parameterized gate library")
@@ -125,6 +128,8 @@ TEST_CASE("Gate-level layout with two input wires, one double wire, and two outp
         design_sidb_gates_params<cell<cell_lyt>> design_gate_params{};
         design_gate_params.operational_params.simulation_parameters = fiction::sidb_simulation_parameters{2, -0.32};
         design_gate_params.canvas                                   = {{24, 17}, {34, 28}};
+        design_gate_params.termination_cond =
+            design_sidb_gates_params<cell<cell_lyt>>::termination_condition::AFTER_FIRST_SOLUTION;
 
         SECTION("use predefined gate implementation for complex gates (double wire and crossing)")
         {
@@ -138,7 +143,7 @@ TEST_CASE("Gate-level layout with two input wires, one double wire, and two outp
                     layout, params);
 
             check_equivalence(bestagon_double_wire,
-                              fmt::format("{}/resources/on_the_fly_but_predefined_double_wire.sqd", TEST_PATH));
+                              fmt::format("{}/resources/on_the_fly_with_predefined_double_wire.sqd", TEST_PATH));
         }
         SECTION("Design all gates of the layout on-the-fly")
         {
@@ -157,6 +162,264 @@ TEST_CASE("Gate-level layout with two input wires, one double wire, and two outp
                     layout, params);
 
             check_equivalence(bestagon_double_wire, fmt::format("{}/resources/on_the_fly_double_wire.sqd", TEST_PATH));
+        }
+    }
+}
+
+TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
+{
+    SECTION("Inverter with input and output wire tile")
+    {
+        hex_even_row_gate_clk_lyt layout{{2, 2, 1}, fiction::row_clocking<hex_even_row_gate_clk_lyt>()};
+
+        const auto x1   = layout.create_pi("x1", {0, 0});
+        const auto buf1 = layout.create_not(x1, {1, 1, 0});
+        layout.create_po(buf1, "f1", {0, 2, 0});
+
+        SECTION("Apply static Bestagon gate library")
+        {
+            const auto inverter =
+                apply_gate_library<cell_lyt, sidb_bestagon_library, hex_even_row_gate_clk_lyt>(layout);
+
+            check_equivalence(inverter, fmt::format("{}/resources/INV_layout.sqd", TEST_PATH));
+        }
+
+        SECTION("Use parameterized gate library")
+        {
+            sidb_on_the_fly_gate_library_params<cell_lyt> params{};
+
+            design_sidb_gates_params<cell<cell_lyt>> design_gate_params{};
+            design_gate_params.operational_params.simulation_parameters = fiction::sidb_simulation_parameters{2, -0.32};
+            design_gate_params.canvas                                   = {{25, 19}, {32, 25}};
+            design_gate_params.number_of_canvas_sidbs                   = 3;
+            design_gate_params.termination_cond =
+                design_sidb_gates_params<cell<cell_lyt>>::termination_condition::AFTER_FIRST_SOLUTION;
+
+            params.design_gate_params = design_gate_params;
+
+            const auto inverter =
+                apply_parameterized_gate_library<cell_lyt, sidb_on_the_fly_gate_library, hex_even_row_gate_clk_lyt>(
+                    layout, params);
+
+            check_equivalence(inverter, fmt::format("{}/resources/on_the_fly_INV_layout.sqd", TEST_PATH));
+        }
+    }
+
+    SECTION("Or with input and output wire tile")
+    {
+        hex_even_row_gate_clk_lyt layout{{2, 2, 1}, fiction::row_clocking<hex_even_row_gate_clk_lyt>()};
+
+        const auto x1      = layout.create_pi("x1", {0, 0});
+        const auto x2      = layout.create_pi("x1", {1, 0});
+        const auto or_gate = layout.create_or(x1, x2, {1, 1, 0});
+        layout.create_po(or_gate, "f1", {0, 2, 0});
+
+        SECTION("Apply static Bestagon gate library")
+        {
+            const auto or_layout =
+                apply_gate_library<cell_lyt, sidb_bestagon_library, hex_even_row_gate_clk_lyt>(layout);
+
+            check_equivalence(or_layout, fmt::format("{}/resources/OR_layout.sqd", TEST_PATH));
+        }
+
+        SECTION("Use parameterized gate library")
+        {
+            sidb_on_the_fly_gate_library_params<cell_lyt> params{};
+
+            design_sidb_gates_params<cell<cell_lyt>> design_gate_params{};
+            design_gate_params.operational_params.simulation_parameters = fiction::sidb_simulation_parameters{2, -0.32};
+            design_gate_params.canvas                                   = {{24, 17}, {34, 28}};
+            design_gate_params.number_of_canvas_sidbs                   = 3;
+            design_gate_params.termination_cond =
+                design_sidb_gates_params<cell<cell_lyt>>::termination_condition::AFTER_FIRST_SOLUTION;
+
+            params.design_gate_params = design_gate_params;
+
+            const auto or_layout =
+                apply_parameterized_gate_library<cell_lyt, sidb_on_the_fly_gate_library, hex_even_row_gate_clk_lyt>(
+                    layout, params);
+
+            check_equivalence(or_layout, fmt::format("{}/resources/on_the_fly_OR_layout.sqd", TEST_PATH));
+        }
+    }
+
+    SECTION("NAND with input and output wire tile")
+    {
+        hex_even_row_gate_clk_lyt layout{{2, 2, 1}, fiction::row_clocking<hex_even_row_gate_clk_lyt>()};
+
+        const auto x1        = layout.create_pi("x1", {0, 0});
+        const auto x2        = layout.create_pi("x1", {1, 0});
+        const auto nand_gate = layout.create_nand(x1, x2, {1, 1, 0});
+        layout.create_po(nand_gate, "f1", {0, 2, 0});
+
+        SECTION("Apply static Bestagon gate library")
+        {
+            const auto nand_layout =
+                apply_gate_library<cell_lyt, sidb_bestagon_library, hex_even_row_gate_clk_lyt>(layout);
+
+            check_equivalence(nand_layout, fmt::format("{}/resources/NAND_layout.sqd", TEST_PATH));
+        }
+
+        SECTION("Use parameterized gate library")
+        {
+            sidb_on_the_fly_gate_library_params<cell_lyt> params{};
+
+            design_sidb_gates_params<cell<cell_lyt>> design_gate_params{};
+            design_gate_params.operational_params.simulation_parameters = fiction::sidb_simulation_parameters{2, -0.32};
+            design_gate_params.canvas                                   = {{24, 17}, {34, 28}};
+            design_gate_params.number_of_canvas_sidbs                   = 3;
+            design_gate_params.termination_cond =
+                design_sidb_gates_params<cell<cell_lyt>>::termination_condition::AFTER_FIRST_SOLUTION;
+
+            params.design_gate_params = design_gate_params;
+
+            const auto nand_layout =
+                apply_parameterized_gate_library<cell_lyt, sidb_on_the_fly_gate_library, hex_even_row_gate_clk_lyt>(
+                    layout, params);
+
+            check_equivalence(nand_layout, fmt::format("{}/resources/on_the_fly_NAND_layout.sqd", TEST_PATH));
+        }
+    }
+
+    SECTION("NOR with input and output wire tile")
+    {
+        hex_even_row_gate_clk_lyt layout{{2, 2, 1}, fiction::row_clocking<hex_even_row_gate_clk_lyt>()};
+
+        const auto x1       = layout.create_pi("x1", {0, 0});
+        const auto x2       = layout.create_pi("x1", {1, 0});
+        const auto nor_gate = layout.create_nor(x1, x2, {1, 1, 0});
+        layout.create_po(nor_gate, "f1", {0, 2, 0});
+
+        SECTION("Apply static Bestagon gate library")
+        {
+            const auto nor_layout =
+                apply_gate_library<cell_lyt, sidb_bestagon_library, hex_even_row_gate_clk_lyt>(layout);
+
+            write_sqd_layout(nor_layout, fmt::format("{}/resources/NOR_layout.sqd", TEST_PATH));
+
+            // check_equivalence(inverter, fmt::format("{}/resources/double_wire.sqd", TEST_PATH));
+        }
+
+        SECTION("Use parameterized gate library")
+        {
+            sidb_on_the_fly_gate_library_params<cell_lyt> params{};
+
+            design_sidb_gates_params<cell<cell_lyt>> design_gate_params{};
+            design_gate_params.operational_params.simulation_parameters = fiction::sidb_simulation_parameters{2, -0.32};
+            design_gate_params.canvas                                   = {{24, 17}, {34, 28}};
+            design_gate_params.number_of_canvas_sidbs                   = 3;
+            design_gate_params.termination_cond =
+                design_sidb_gates_params<cell<cell_lyt>>::termination_condition::AFTER_FIRST_SOLUTION;
+
+            params.design_gate_params = design_gate_params;
+
+            const auto nor_layout =
+                apply_parameterized_gate_library<cell_lyt, sidb_on_the_fly_gate_library, hex_even_row_gate_clk_lyt>(
+                    layout, params);
+
+            write_sqd_layout(nor_layout, fmt::format("{}/resources/on_the_fly_NOR_layout.sqd", TEST_PATH));
+
+            //                check_equivalence(inverter,
+            //                                  fmt::format("{}/resources/on_the_fly_double_wire.sqd", TEST_PATH));
+        }
+    }
+
+    SECTION("XOR with input and output wire tile")
+    {
+        hex_even_row_gate_clk_lyt layout{{2, 2, 1}, fiction::row_clocking<hex_even_row_gate_clk_lyt>()};
+
+        const auto x1       = layout.create_pi("x1", {0, 0});
+        const auto x2       = layout.create_pi("x1", {1, 0});
+        const auto xor_gate = layout.create_xor(x1, x2, {1, 1, 0});
+        layout.create_po(xor_gate, "f1", {0, 2, 0});
+
+        SECTION("Apply static Bestagon gate library")
+        {
+            const auto xor_layout =
+                apply_gate_library<cell_lyt, sidb_bestagon_library, hex_even_row_gate_clk_lyt>(layout);
+
+            check_equivalence(xor_layout, fmt::format("{}/resources/XOR_layout.sqd", TEST_PATH));
+        }
+
+        SECTION("Use parameterized gate library")
+        {
+            sidb_on_the_fly_gate_library_params<cell_lyt> params{};
+
+            design_sidb_gates_params<cell<cell_lyt>> design_gate_params{};
+            design_gate_params.operational_params.simulation_parameters = fiction::sidb_simulation_parameters{2, -0.32};
+            design_gate_params.canvas                                   = {{24, 17}, {34, 28}};
+            design_gate_params.number_of_canvas_sidbs                   = 3;
+            design_gate_params.termination_cond =
+                design_sidb_gates_params<cell<cell_lyt>>::termination_condition::AFTER_FIRST_SOLUTION;
+
+            params.design_gate_params = design_gate_params;
+
+            const auto xor_layout =
+                apply_parameterized_gate_library<cell_lyt, sidb_on_the_fly_gate_library, hex_even_row_gate_clk_lyt>(
+                    layout, params);
+
+            check_equivalence(xor_layout, fmt::format("{}/resources/on_the_fly_XOR_layout.sqd", TEST_PATH));
+        }
+
+        SECTION("Use parameterized gate library, reject kinks")
+        {
+            sidb_on_the_fly_gate_library_params<cell_lyt> params{};
+
+            design_sidb_gates_params<cell<cell_lyt>> design_gate_params{};
+            design_gate_params.operational_params.simulation_parameters = fiction::sidb_simulation_parameters{2, -0.32};
+            design_gate_params.canvas                                   = {{24, 17}, {34, 28}};
+            design_gate_params.number_of_canvas_sidbs                   = 3;
+            design_gate_params.termination_cond =
+                design_sidb_gates_params<cell<cell_lyt>>::termination_condition::AFTER_FIRST_SOLUTION;
+            design_gate_params.operational_params.op_condition =
+                is_operational_params::operational_condition::REJECT_KINKS;
+
+            params.design_gate_params = design_gate_params;
+
+            const auto xor_layout =
+                apply_parameterized_gate_library<cell_lyt, sidb_on_the_fly_gate_library, hex_even_row_gate_clk_lyt>(
+                    layout, params);
+
+            check_equivalence(xor_layout,
+                              fmt::format("{}/resources/on_the_fly_XOR_layout_reject_kinks.sqd", TEST_PATH));
+        }
+    }
+
+    SECTION("XNOR with input and output wire tile")
+    {
+        hex_even_row_gate_clk_lyt layout{{2, 2, 1}, fiction::row_clocking<hex_even_row_gate_clk_lyt>()};
+
+        const auto x1        = layout.create_pi("x1", {0, 0});
+        const auto x2        = layout.create_pi("x1", {1, 0});
+        const auto xnor_gate = layout.create_xnor(x1, x2, {1, 1, 0});
+        layout.create_po(xnor_gate, "f1", {0, 2, 0});
+
+        SECTION("Apply static Bestagon gate library")
+        {
+            const auto xnor_layout =
+                apply_gate_library<cell_lyt, sidb_bestagon_library, hex_even_row_gate_clk_lyt>(layout);
+
+            check_equivalence(xnor_layout, fmt::format("{}/resources/XNOR_layout.sqd", TEST_PATH));
+        }
+
+        SECTION("Use parameterized gate library")
+        {
+            sidb_on_the_fly_gate_library_params<cell_lyt> params{};
+
+            design_sidb_gates_params<cell<cell_lyt>> design_gate_params{};
+            design_gate_params.operational_params.simulation_parameters = fiction::sidb_simulation_parameters{2, -0.32};
+            design_gate_params.canvas                                   = {{24, 17}, {34, 28}};
+            design_gate_params.number_of_canvas_sidbs                   = 3;
+            design_gate_params.termination_cond =
+                design_sidb_gates_params<cell<cell_lyt>>::termination_condition::AFTER_FIRST_SOLUTION;
+
+            params.design_gate_params = design_gate_params;
+
+            const auto xnor_layout =
+                apply_parameterized_gate_library<cell_lyt, sidb_on_the_fly_gate_library, hex_even_row_gate_clk_lyt>(
+                    layout, params);
+
+            check_equivalence(xnor_layout, fmt::format("{}/resources/on_the_fly_XNOR_layout.sqd", TEST_PATH));
         }
     }
 }

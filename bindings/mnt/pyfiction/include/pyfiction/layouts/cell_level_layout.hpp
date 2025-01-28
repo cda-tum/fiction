@@ -124,6 +124,11 @@ void fcn_technology_cell_level_layout(pybind11::module& m)
         .def("is_pi", &py_cartesian_technology_cell_layout::is_pi, py::arg("c"), DOC(fiction_cell_level_layout_is_pi))
         .def("is_po", &py_cartesian_technology_cell_layout::is_po, py::arg("c"), DOC(fiction_cell_level_layout_is_po))
 
+        // todo add docu
+        .def("get_cell_type", &py_cartesian_technology_cell_layout::get_cell_type, py::arg("c"))
+        .def("get_cells_by_type", &py_cartesian_technology_cell_layout::get_cells_by_type, py::arg("type"))
+        .def("num_cells_of_given_type", &py_cartesian_technology_cell_layout::num_cells_of_given_type, py::arg("type"))
+
         .def("cells",
              [](const py_cartesian_technology_cell_layout& lyt)
              {

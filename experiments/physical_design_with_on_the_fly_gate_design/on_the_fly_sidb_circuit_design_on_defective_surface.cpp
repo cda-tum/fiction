@@ -146,7 +146,7 @@ int main()  // NOLINT
         params.exact_design_parameters.upper_bound_y = 30;         // 12 x 31 tiles
         params.exact_design_parameters.timeout       = 3'600'000;  // 1h in ms
 
-        params.sidb_on_the_fly_gate_library_parameters.defect_surface     = std::optional{surface_lattice};
+        params.sidb_on_the_fly_gate_library_parameters.defect_surface     = surface_lattice;
         params.sidb_on_the_fly_gate_library_parameters.design_gate_params = design_gate_params;
 
         fiction::on_the_fly_circuit_design_on_defective_surface_stats<gate_lyt> st{};

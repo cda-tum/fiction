@@ -11,6 +11,7 @@
 #include <phmap.h>
 
 #include <cassert>
+#include <cstddef>
 #include <cstdint>
 #include <memory>
 #include <optional>
@@ -184,24 +185,43 @@ class sidb_defect_surface<Lyt, false> : public Lyt
         return strg->defective_coordinates.size();
     }
     /**
-     * Returns the number of charged defects.
      *
-     * @return Number of charged defects.
      */
-    [[nodiscard]] std::size_t num_charged_defects() const noexcept
+    [[nodiscard]] std::size_t num_positively_charged_defects() const noexcept
     {
-        std::size_t number_of_charged_defects = 0;
+        std::size_t number_of_positively_charged_defects = 0;
 
         this->foreach_sidb_defect(
-            [&number_of_charged_defects](const auto& defect)
+            [&number_of_positively_charged_defects](const auto& defect)
             {
-                if (is_charged_defect_type(defect.second))
+                if (is_positively_charged_defect(defect.second))
                 {
-                    number_of_charged_defects++;
+                    number_of_positively_charged_defects++;
                 }
             });
 
-        return number_of_charged_defects;
+        return number_of_positively_charged_defects;
+    }
+
+    [[nodiscard]] std::size_t num_negatively_charged_defects() const noexcept
+    {
+        std::size_t number_of_negatively_charged_defects = 0;
+
+        this->foreach_sidb_defect(
+            [&number_of_negatively_charged_defects](const auto& defect)
+            {
+                if (is_negatively_charged_defect(defect.second))
+                {
+                    number_of_negatively_charged_defects++;
+                }
+            });
+
+        return number_of_negatively_charged_defects;
+    }
+
+    [[nodiscard]] std::size_t num_charged_defects() const noexcept
+    {
+        return num_positively_charged_defects() + num_negatively_charged_defects();
     }
     /**
      * Returns the number of neutral defects.

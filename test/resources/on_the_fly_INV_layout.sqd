@@ -4,7 +4,7 @@
         <file_purpose>layout simulation</file_purpose>
         <created_by>fiction v0.6.6</created_by>
         <available_at>https://github.com/cda-tum/fiction</available_at>
-        <date>2025-01-14 17:55:35</date>
+        <date>2025-01-28 16:03:22</date>
     </program>
     <layers>
         <layer_prop>
@@ -58,116 +58,218 @@
         <layer type="DB">
             <dbdot>
                 <layer_id>2</layer_id>
-                <latcoord n="138" m="35" l="0"/>
-                <type>input</type>
+                <latcoord n="66" m="51" l="0"/>
+
                 <color>#ffc8c8c8</color>
             </dbdot>
             <dbdot>
                 <layer_id>2</layer_id>
-                <latcoord n="136" m="36" l="0"/>
-                <type>input</type>
-                <color>#ffc8c8c8</color>
-            </dbdot>
-            <dbdot>
-                <layer_id>2</layer_id>
-                <latcoord n="122" m="46" l="1"/>
+                <latcoord n="88" m="28" l="0"/>
                 <type>logic</type>
                 <color>#ffc8c8c8</color>
             </dbdot>
             <dbdot>
                 <layer_id>2</layer_id>
-                <latcoord n="100" m="35" l="0"/>
+                <latcoord n="76" m="36" l="0"/>
                 <type>input</type>
                 <color>#ffc8c8c8</color>
             </dbdot>
             <dbdot>
                 <layer_id>2</layer_id>
-                <latcoord n="126" m="39" l="0"/>
-
-                <color>#ffc8c8c8</color>
-            </dbdot>
-            <dbdot>
-                <layer_id>2</layer_id>
-                <latcoord n="106" m="37" l="0"/>
-
-                <color>#ffc8c8c8</color>
-            </dbdot>
-            <dbdot>
-                <layer_id>2</layer_id>
-                <latcoord n="102" m="36" l="0"/>
-                <type>input</type>
-                <color>#ffc8c8c8</color>
-            </dbdot>
-            <dbdot>
-                <layer_id>2</layer_id>
-                <latcoord n="130" m="38" l="0"/>
-
-                <color>#ffc8c8c8</color>
-            </dbdot>
-            <dbdot>
-                <layer_id>2</layer_id>
-                <latcoord n="124" m="50" l="0"/>
-
-                <color>#ffc8c8c8</color>
-            </dbdot>
-            <dbdot>
-                <layer_id>2</layer_id>
-                <latcoord n="130" m="52" l="0"/>
-                <type>output</type>
-                <color>#ffc8c8c8</color>
-            </dbdot>
-            <dbdot>
-                <layer_id>2</layer_id>
-                <latcoord n="120" m="47" l="1"/>
+                <latcoord n="55" m="44" l="1"/>
                 <type>logic</type>
                 <color>#ffc8c8c8</color>
             </dbdot>
             <dbdot>
                 <layer_id>2</layer_id>
-                <latcoord n="114" m="40" l="0"/>
+                <latcoord n="40" m="1" l="0"/>
+                <type>input</type>
+                <color>#ffc8c8c8</color>
+            </dbdot>
+            <dbdot>
+                <layer_id>2</layer_id>
+                <latcoord n="72" m="37" l="0"/>
 
                 <color>#ffc8c8c8</color>
             </dbdot>
             <dbdot>
                 <layer_id>2</layer_id>
-                <latcoord n="132" m="53" l="0"/>
+                <latcoord n="48" m="4" l="0"/>
+
+                <color>#ffc8c8c8</color>
+            </dbdot>
+            <dbdot>
+                <layer_id>2</layer_id>
+                <latcoord n="58" m="9" l="1"/>
+                <type>logic</type>
+                <color>#ffc8c8c8</color>
+            </dbdot>
+            <dbdot>
+                <layer_id>2</layer_id>
+                <latcoord n="72" m="53" l="0"/>
                 <type>output</type>
                 <color>#ffc8c8c8</color>
             </dbdot>
             <dbdot>
                 <layer_id>2</layer_id>
-                <latcoord n="124" m="40" l="0"/>
+                <latcoord n="52" m="5" l="0"/>
 
                 <color>#ffc8c8c8</color>
             </dbdot>
             <dbdot>
                 <layer_id>2</layer_id>
-                <latcoord n="126" m="51" l="0"/>
+                <latcoord n="54" m="6" l="0"/>
 
                 <color>#ffc8c8c8</color>
             </dbdot>
             <dbdot>
                 <layer_id>2</layer_id>
-                <latcoord n="132" m="37" l="0"/>
+                <latcoord n="70" m="52" l="0"/>
+                <type>output</type>
+                <color>#ffc8c8c8</color>
+            </dbdot>
+            <dbdot>
+                <layer_id>2</layer_id>
+                <latcoord n="56" m="43" l="1"/>
+                <type>logic</type>
+                <color>#ffc8c8c8</color>
+            </dbdot>
+            <dbdot>
+                <layer_id>2</layer_id>
+                <latcoord n="85" m="29" l="1"/>
+                <type>logic</type>
+                <color>#ffc8c8c8</color>
+            </dbdot>
+            <dbdot>
+                <layer_id>2</layer_id>
+                <latcoord n="46" m="3" l="0"/>
 
                 <color>#ffc8c8c8</color>
             </dbdot>
             <dbdot>
                 <layer_id>2</layer_id>
-                <latcoord n="112" m="39" l="0"/>
+                <latcoord n="66" m="17" l="0"/>
 
                 <color>#ffc8c8c8</color>
             </dbdot>
             <dbdot>
                 <layer_id>2</layer_id>
-                <latcoord n="108" m="38" l="0"/>
+                <latcoord n="82" m="34" l="0"/>
 
                 <color>#ffc8c8c8</color>
             </dbdot>
             <dbdot>
                 <layer_id>2</layer_id>
-                <latcoord n="136" m="54" l="0"/>
+                <latcoord n="42" m="2" l="0"/>
+                <type>input</type>
+                <color>#ffc8c8c8</color>
+            </dbdot>
+            <dbdot>
+                <layer_id>2</layer_id>
+                <latcoord n="78" m="21" l="0"/>
 
+                <color>#ffc8c8c8</color>
+            </dbdot>
+            <dbdot>
+                <layer_id>2</layer_id>
+                <latcoord n="70" m="18" l="0"/>
+                <type>input</type>
+                <color>#ffc8c8c8</color>
+            </dbdot>
+            <dbdot>
+                <layer_id>2</layer_id>
+                <latcoord n="58" m="10" l="1"/>
+                <type>logic</type>
+                <color>#ffc8c8c8</color>
+            </dbdot>
+            <dbdot>
+                <layer_id>2</layer_id>
+                <latcoord n="76" m="20" l="0"/>
+
+                <color>#ffc8c8c8</color>
+            </dbdot>
+            <dbdot>
+                <layer_id>2</layer_id>
+                <latcoord n="60" m="10" l="0"/>
+                <type>logic</type>
+                <color>#ffc8c8c8</color>
+            </dbdot>
+            <dbdot>
+                <layer_id>2</layer_id>
+                <latcoord n="82" m="22" l="0"/>
+
+                <color>#ffc8c8c8</color>
+            </dbdot>
+            <dbdot>
+                <layer_id>2</layer_id>
+                <latcoord n="84" m="23" l="0"/>
+
+                <color>#ffc8c8c8</color>
+            </dbdot>
+            <dbdot>
+                <layer_id>2</layer_id>
+                <latcoord n="78" m="35" l="0"/>
+                <type>input</type>
+                <color>#ffc8c8c8</color>
+            </dbdot>
+            <dbdot>
+                <layer_id>2</layer_id>
+                <latcoord n="64" m="16" l="0"/>
+
+                <color>#ffc8c8c8</color>
+            </dbdot>
+            <dbdot>
+                <layer_id>2</layer_id>
+                <latcoord n="72" m="19" l="0"/>
+                <type>input</type>
+                <color>#ffc8c8c8</color>
+            </dbdot>
+            <dbdot>
+                <layer_id>2</layer_id>
+                <latcoord n="64" m="40" l="0"/>
+
+                <color>#ffc8c8c8</color>
+            </dbdot>
+            <dbdot>
+                <layer_id>2</layer_id>
+                <latcoord n="66" m="39" l="0"/>
+
+                <color>#ffc8c8c8</color>
+            </dbdot>
+            <dbdot>
+                <layer_id>2</layer_id>
+                <latcoord n="64" m="50" l="0"/>
+
+                <color>#ffc8c8c8</color>
+            </dbdot>
+            <dbdot>
+                <layer_id>2</layer_id>
+                <latcoord n="76" m="54" l="0"/>
+
+                <color>#ffc8c8c8</color>
+            </dbdot>
+            <dbdot>
+                <layer_id>2</layer_id>
+                <latcoord n="70" m="38" l="0"/>
+
+                <color>#ffc8c8c8</color>
+            </dbdot>
+            <dbdot>
+                <layer_id>2</layer_id>
+                <latcoord n="84" m="33" l="0"/>
+
+                <color>#ffc8c8c8</color>
+            </dbdot>
+            <dbdot>
+                <layer_id>2</layer_id>
+                <latcoord n="57" m="44" l="0"/>
+                <type>logic</type>
+                <color>#ffc8c8c8</color>
+            </dbdot>
+            <dbdot>
+                <layer_id>2</layer_id>
+                <latcoord n="91" m="26" l="1"/>
+                <type>logic</type>
                 <color>#ffc8c8c8</color>
             </dbdot>
         </layer>
