@@ -129,7 +129,7 @@ void fcn_technology_cell_level_layout(pybind11::module& m)
         .def("get_cells_by_type", &py_cartesian_technology_cell_layout::get_cells_by_type, py::arg("type"),
              DOC(fiction_cell_level_layout_get_cells_by_type))
         .def("num_cells_of_given_type", &py_cartesian_technology_cell_layout::num_cells_of_given_type, py::arg("type"),
-             DOC(DOC(fiction_cell_level_layout_num_cells_of_given_type)))
+             DOC(fiction_cell_level_layout_num_cells_of_given_type))
 
         .def("cells",
              [](const py_cartesian_technology_cell_layout& lyt)
