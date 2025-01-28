@@ -15213,7 +15213,7 @@ Parameter ``params``:
 
 Parameter ``stats``:
     Pointer to a structure for collecting statistics. If `nullptr`,
-    statistics are not collected.
+    statistics are discarded.
 
 Returns:
     A `CellLyt` representing the designed SiDB circuit.)doc";
@@ -15262,8 +15262,8 @@ Parameter ``params``:
     `on_the_fly_sidb_circuit_design_params` object.
 
 Parameter ``stats``:
-    Pointer to a structure for collecting statistics. If nullptr,
-    statistics are not collected.
+    Pointer to a structure for collecting statistics. If `nullptr`,
+    statistics are discarded.
 
 Returns:
     A `sidb_defect_surface<CellLyt>` representing the designed circuit
@@ -17871,10 +17871,10 @@ Parameter ``lyt``:
 Returns:
     port directions of the given tile are returned as `port_list`.)doc";
 
-static const char *__doc_fiction_sidb_on_the_fly_gate_library_is_bestagon_gate_applicable =
-R"doc(This function evaluates whether a Bestagon gate can be applied to the
-given node by considering various conditions, including the presence
-of defects and spacing requirements.
+static const char *__doc_fiction_sidb_on_the_fly_gate_library_is_predefined_bestagon_gate_applicable =
+R"doc(This function evaluates whether a predefined Bestagon gate can be
+applied to the given node by considering various conditions, including
+the presence of defects and spacing requirements.
 
 Template parameter ``Lyt``:
     The type of the cell-level layout.
@@ -17887,6 +17887,9 @@ Template parameter ``Params``:
 
 Parameter ``bestagon_lyt``:
     The Bestagon gate which is to be applied.
+
+Parameter ``skeleton_with_defects``:
+    The skeleton layout with atomic defects.
 
 Parameter ``truth_table``:
     The truth table representing the gate's logic function.
@@ -17918,7 +17921,7 @@ static const char *__doc_fiction_sidb_on_the_fly_gate_library_params_complex_gat
 static const char *__doc_fiction_sidb_on_the_fly_gate_library_params_complex_gate_design_policy_USING_PREDEFINED = R"doc(Use predefined complex gates if possible.)doc";
 
 static const char *__doc_fiction_sidb_on_the_fly_gate_library_params_defect_surface =
-R"doc(This layout stores all atomic defects. ``std::nullopt`` if no defect
+R"doc(This layout stores all atomic defects. `std::nullopt` if no defect
 surface is given.)doc";
 
 static const char *__doc_fiction_sidb_on_the_fly_gate_library_params_design_gate_params = R"doc(This struct holds parameters to design SiDB gates.)doc";
@@ -19389,6 +19392,16 @@ static const char *__doc_fiction_unrecognized_cell_definition_exception_unrecogn
 
 static const char *__doc_fiction_unrecognized_cell_definition_exception_where = R"doc()doc";
 
+static const char *__doc_fiction_unsuccessful_gate_design_error = R"doc(Exception thrown when the gate design was unsuccessful.)doc";
+
+static const char *__doc_fiction_unsuccessful_gate_design_error_unsuccessful_gate_design_error = R"doc()doc";
+
+static const char *__doc_fiction_unsuccessful_pr_error =
+R"doc(Exception thrown when no valid placement and routing is found for the
+given blacklist.)doc";
+
+static const char *__doc_fiction_unsuccessful_pr_error_unsuccessful_pr_error = R"doc()doc";
+
 static const char *__doc_fiction_unsupported_cell_type_exception = R"doc()doc";
 
 static const char *__doc_fiction_unsupported_cell_type_exception_coord = R"doc()doc";
@@ -19433,19 +19446,23 @@ Template parameter ``CoordinateType``:
 Template parameter ``PortType``:
     Type of the library ports.)doc";
 
-static const char *__doc_fiction_unsupported_gate_orientation_exception_coord =
-R"doc(Coordinate of the layout where the unsupported gate orientation was
-found.)doc";
+static const char *__doc_fiction_unsupported_gate_orientation_exception_coord = R"doc(Coordinate at which the unsupported gate orientation was found.)doc";
 
 static const char *__doc_fiction_unsupported_gate_orientation_exception_ports = R"doc(Ports of the unsupported gate orientation.)doc";
 
 static const char *__doc_fiction_unsupported_gate_orientation_exception_unsupported_gate_orientation_exception = R"doc()doc";
 
 static const char *__doc_fiction_unsupported_gate_orientation_exception_where =
-R"doc(Coordinate of the layout where the unsupported gate orientation was
-found.)doc";
+R"doc(Coordinate at which the unsupported gate orientation was found.
 
-static const char *__doc_fiction_unsupported_gate_orientation_exception_which_ports = R"doc(Ports of the unsupported gate orientation.)doc";
+Returns:
+    Coordinate.)doc";
+
+static const char *__doc_fiction_unsupported_gate_orientation_exception_which_ports =
+R"doc(Ports of the unsupported gate orientation.
+
+Returns:
+    Ports.)doc";
 
 static const char *__doc_fiction_unsupported_gate_type_exception =
 R"doc(Exception to be thrown when a layout hosts a gate type that is not
@@ -19454,7 +19471,7 @@ implemented in the applied gate library.
 Template parameter ``CoordinateType``:
     Type of the layout coordinates.)doc";
 
-static const char *__doc_fiction_unsupported_gate_type_exception_coord = R"doc(Coordinate of teh layout where the unsupported gate type was found.)doc";
+static const char *__doc_fiction_unsupported_gate_type_exception_coord = R"doc(Coordinate at which the unsupported gate type was found.)doc";
 
 static const char *__doc_fiction_unsupported_gate_type_exception_unsupported_gate_type_exception = R"doc()doc";
 
