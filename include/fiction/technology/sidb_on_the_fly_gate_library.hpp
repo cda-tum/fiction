@@ -138,7 +138,7 @@ struct sidb_on_the_fly_gate_library_params
      */
     double influence_radius_charged_defects = 15;  // (unit: nm)
     /**
-     * This layout stores all atomic defects. ``std::nullopt`` if no defect surface is given.
+     * This layout stores all atomic defects. `std::nullopt` if no defect surface is given.
      */
     std::optional<sidb_defect_surface<Lyt>> defect_surface{std::nullopt};
 };
@@ -234,7 +234,7 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
                                         defect_surface.value(), skeleton, params.influence_radius_charged_defects,
                                         center_cell, absolute_cell);
 
-                                    if (is_bestagon_gate_applicable(
+                                    if (is_predefined_bestagon_gate_applicable(
                                             cell_list_to_cell_level_layout<CellLyt>(DOUBLE_WIRE), skeleton_with_defects,
                                             create_double_wire_tt(), params))
                                     {
@@ -261,9 +261,9 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
                                     defect_surface.value(), skeleton, params.influence_radius_charged_defects,
                                     center_cell, absolute_cell);
 
-                                if (is_bestagon_gate_applicable(cell_list_to_cell_level_layout<CellLyt>(CROSSING),
-                                                                skeleton_with_defects, create_crossing_wire_tt(),
-                                                                params))
+                                if (is_predefined_bestagon_gate_applicable(
+                                        cell_list_to_cell_level_layout<CellLyt>(CROSSING), skeleton_with_defects,
+                                        create_crossing_wire_tt(), params))
                                 {
                                     return CROSSING;
                                 }
@@ -525,23 +525,23 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
 
   private:
     /**
-     * This function evaluates whether a Bestagon gate can be applied to the given node by considering
+     * This function evaluates whether a predefined Bestagon gate can be applied to the given node by considering
      * various conditions, including the presence of defects and spacing requirements.
      *
      * @tparam Lyt The type of the cell-level layout.
      * @tparam TT Truth table type.
      * @tparam Params Type of the parameters used for the parametrized gate library.
      * @param bestagon_lyt The Bestagon gate which is to be applied.
+     * @param skeleton_with_defects The skeleton layout with atomic defects.
      * @param truth_table The truth table representing the gate's logic function.
      * @param parameters Parameters for the gate design and simulation.
      * @return `true` if the Bestagon gate is applicable to the layout, considering the provided conditions;
      *         otherwise, returns `false`.
      */
     template <typename Lyt, typename TT>
-    [[nodiscard]] static bool is_bestagon_gate_applicable(const Lyt&                      bestagon_lyt,
-                                                          const sidb_defect_surface<Lyt>& skeleton_with_defects,
-                                                          const std::vector<TT>&          truth_table,
-                                                          const sidb_on_the_fly_gate_library_params<Lyt>& parameters)
+    [[nodiscard]] static bool is_predefined_bestagon_gate_applicable(
+        const Lyt& bestagon_lyt, const sidb_defect_surface<Lyt>& skeleton_with_defects,
+        const std::vector<TT>& truth_table, const sidb_on_the_fly_gate_library_params<Lyt>& parameters)
     {
         const auto sidbs_affected_by_defects = skeleton_with_defects.all_affected_sidbs(std::pair(0, 0));
 
@@ -551,12 +551,10 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
 
         assert(!logic_cells.empty() && "No Logic cells are found");
 
-        for (const auto& l_cells : logic_cells)
+        if (std::any_of(logic_cells.cbegin(), logic_cells.cend(),
+                        [&](const auto& l_cell) { return sidbs_affected_by_defects.count(l_cell); }))
         {
-            if (sidbs_affected_by_defects.count(l_cells))
-            {
-                return false;
-            }
+            return false;
         }
 
         for (const auto& l_cells : logic_cells)

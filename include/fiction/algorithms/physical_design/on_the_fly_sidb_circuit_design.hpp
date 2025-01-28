@@ -21,11 +21,28 @@
 #include <cstdio>
 #include <optional>
 #include <stdexcept>
+#include <string_view>
 #include <utility>
 
 namespace fiction
 {
 
+/**
+ * Exception thrown when no valid placement and routing is found for the given blacklist.
+ */
+class unsuccessful_pr_error : public std::runtime_error
+{
+  public:
+    explicit unsuccessful_pr_error(const std::string_view& msg) noexcept : std::runtime_error(msg.data()) {}
+};
+/**
+ * Exception thrown when the gate design was unsuccessful.
+ */
+class unsuccessful_gate_design_error : public std::runtime_error
+{
+  public:
+    explicit unsuccessful_gate_design_error(const std::string_view& msg) noexcept : std::runtime_error(msg.data()) {}
+};
 /**
  * This struct stores the parameters to design an SiDB circuit on a defective surface.
  *
@@ -101,7 +118,7 @@ struct on_the_fly_circuit_design_on_defective_surface_stats
  * @param defective_surface The defective surface on which the SiDB circuit is designed.
  * @param params The parameters used for designing the circuit, encapsulated in an
  * `on_the_fly_sidb_circuit_design_params` object.
- * @param stats Pointer to a structure for collecting statistics. If nullptr, statistics are not collected.
+ * @param stats Pointer to a structure for collecting statistics. If `nullptr`, statistics are discarded.
  * @return A `sidb_defect_surface<CellLyt>` representing the designed circuit on the defective surface.
  */
 template <typename Ntk, typename CellLyt, typename GateLyt>
@@ -171,20 +188,30 @@ template <typename Ntk, typename CellLyt, typename GateLyt>
                     fmt::print(stderr, "[e] Terminating loop due to critical error.\n");
                     break;
                 }
+
+                catch (...)
+                {
+                    fmt::print(stderr, "[e] An unexpected error occurred during gate design.\n");
+                    fmt::print(stderr, "[e] Terminating loop due to critical error.\n");
+                    break;
+                }
             }
             // P&R was unsuccessful
             else
             {
-                throw std::runtime_error("P&R was unsuccessful");
+                throw unsuccessful_pr_error("Placement and routing was unsuccessful");
             }
         }
 
         sidb_defect_surface<CellLyt> sidbs_and_defects{lyt};
 
-        // add defects to the circuit.
-        params.sidb_on_the_fly_gate_library_parameters.defect_surface.value().foreach_sidb_defect(
-            [&sidbs_and_defects](const auto& defect)
-            { sidbs_and_defects.assign_sidb_defect(defect.first, defect.second); });
+        if (params.sidb_on_the_fly_gate_library_parameters.defect_surface.has_value())
+        {
+            // add defects to the circuit.
+            params.sidb_on_the_fly_gate_library_parameters.defect_surface.value().foreach_sidb_defect(
+                [&sidbs_and_defects](const auto& defect)
+                { sidbs_and_defects.assign_sidb_defect(defect.first, defect.second); });
+        }
 
         result = sidbs_and_defects;
     }
@@ -209,7 +236,7 @@ template <typename Ntk, typename CellLyt, typename GateLyt>
  * @param lattice_tiling The lattice tiling used for the circuit design.
  * @param params The parameters used for designing the circuit, encapsulated in an
  * `on_the_fly_sidb_circuit_design_params` object.
- * @param stats Pointer to a structure for collecting statistics. If `nullptr`, statistics are not collected.
+ * @param stats Pointer to a structure for collecting statistics. If `nullptr`, statistics are discarded.
  * @return A `CellLyt` representing the designed SiDB circuit.
  */
 template <typename CellLyt, typename GateLyt>
@@ -234,7 +261,7 @@ template <typename CellLyt, typename GateLyt>
     // blacklist and the process is rerun.
     catch (const gate_design_exception<tt, GateLyt>& e)
     {
-        throw std::runtime_error("Gate design was unsuccessful");
+        throw unsuccessful_gate_design_error("Gate design was unsuccessful");
     }
 }
 
