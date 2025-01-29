@@ -78,6 +78,25 @@ struct hash<std::set<T>>
     }
 };
 /**
+ * Provides a hash implementation for `std::multiset<T>`.
+ *
+ * @tparam T Object type in `std::multiset`.
+ */
+template <typename T>
+struct hash<std::multiset<T>>
+{
+    std::size_t operator()(const std::multiset<T>& s) const noexcept
+    {
+        std::size_t h = 0;
+        for (const auto& e : s)
+        {
+            fiction::hash_combine(h, e);
+        }
+
+        return h;
+    }
+};
+/**
  * Provides a hash implementation for `std::pair<T1, T2>`.
  *
  * @tparam T1 First object type in `std::pair`.

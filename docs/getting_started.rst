@@ -212,6 +212,15 @@ or ``/usr/local/bin/``), it should be detected automatically without the need to
 
 For information on usage, see the :ref:`ABC callback <abc-cli>` section in the CLI documentation.
 
+ALGLIB-dependent ``ClusterComplete`` exact SiDB simulation
+##########################################################
+
+The :ref:`ClusterComplete <clustercomplete>` exact SiDB simulation algorithm relies on functionality offered by
+`ALGLIB <https://www.alglib.net>`_ by the ALGLIB Project.
+When enabled, it will be downloaded automatically and linked against *fiction*.
+
+To enable it, before building *fiction*, pass ``-DFICTION_ALGLIB=ON`` to the ``cmake`` call.
+
 
 Building experiments
 --------------------

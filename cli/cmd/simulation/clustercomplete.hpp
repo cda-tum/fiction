@@ -1,12 +1,14 @@
 //
-// Created by marcel on 06.12.23.
+// Created by Willem Lambooy on 07.03.2024.
 //
 
-#ifndef FICTION_CMD_QUICKEXACT_HPP
-#define FICTION_CMD_QUICKEXACT_HPP
+#ifndef FICTION_CMD_CLUSTERCOMPLETE_HPP
+#define FICTION_CMD_CLUSTERCOMPLETE_HPP
 
+#if (FICTION_ALGLIB_ENABLED)
+
+#include <fiction/algorithms/simulation/sidb/clustercomplete.hpp>
 #include <fiction/algorithms/simulation/sidb/minimum_energy.hpp>
-#include <fiction/algorithms/simulation/sidb/quickexact.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
@@ -27,9 +29,9 @@
 namespace alice
 {
 /**
- * Executes *QuickExact* exact simulation for the current SiDB cell-level layout in store.
+ * Executes *ClusterComplete* exact simulation for the current SiDB cell-level layout in store.
  */
-class quickexact_command : public command
+class clustercomplete_command : public command
 {
   public:
     /**
@@ -37,17 +39,34 @@ class quickexact_command : public command
      *
      * @param e alice::environment that specifies stores etc.
      */
-    explicit quickexact_command(const environment::ptr& e) :
-            command(e, "QuickExact is a quick and exact electrostatic ground state simulation algorithm designed "
-                       "specifically for SiDB layouts. It provides a significant performance advantage of more than "
-                       "three orders of magnitude over ExGS from SiQAD.")
+    explicit clustercomplete_command(const environment::ptr& e) :
+            command(
+                e,
+                "ClusterComplete is a proof of concept of the more general idea of state space pruning in a cluster "
+                "hierarchy. In the application on SiDB layouts, it is able to simulate SiDB logic in base 3 for 50 DBs "
+                "and more, depending on the layout that determines base of the exponential growth in simulation "
+                "complexity with added SiDBs. The shorter alias command is 'ccsim'.")
     {
+        add_option("--base,-b", physical_params.base, "The simulation base, can be 2 or 3", true);
         add_option("--epsilon_r,-e", physical_params.epsilon_r, "Electric permittivity of the substrate (unit-less)",
                    true);
         add_option("--lambda_tf,-l", physical_params.lambda_tf, "Thomas-Fermi screening distance (unit: nm)", true);
         add_option("--mu_minus,-m", physical_params.mu_minus, "Energy transition level (0/-) (unit: eV)", true);
-        add_option("--global_potential,-g", qe_params.global_potential,
+        add_option("--global_potential,-g", cc_params.global_potential,
                    "Global potential applied to the entire layout (unit: V)", true);
+        add_option("--witness_partitioning_limit,-w", cc_params.validity_witness_partitioning_max_cluster_size_gss,
+                   "The limit on the cluster size before Ground State Space omits the check for which it solves the "
+                   "validity witness partitioning NP-complete sub-problem",
+                   true);
+        add_option("--overlapping_witnesses_limit,-o", cc_params.num_overlapping_witnesses_limit_gss,
+                   "The limit on the number of overlapping witnesses (that determines the factorial scaling of the "
+                   "sub-procedure) before Ground State Space skips validity witness partitioning",
+                   true);
+        add_flag("--report_gss_stats,-r",
+                 "When set, Ground State Space statistics are shown, which give an estimate for the ClusterComplete "
+                 "runtimes, and thus allow the user to configure the validity witness partitioning parameters that "
+                 "could benefit large simulation problems through more intensive pruning before starting a lengthy "
+                 "unfolding process");
     }
 
   protected:
@@ -85,7 +104,7 @@ class quickexact_command : public command
 
         const auto get_name = [](auto&& lyt_ptr) -> std::string { return fiction::get_name(*lyt_ptr); };
 
-        const auto quickexact = [this, &get_name](auto&& lyt_ptr)
+        const auto clustercomplete = [this, &get_name](auto&& lyt_ptr)
         {
             using Lyt = typename std::decay_t<decltype(lyt_ptr)>::element_type;
 
@@ -103,21 +122,30 @@ class quickexact_command : public command
                 return;
             }
 
-            qe_params.simulation_parameters = physical_params;
+            if (physical_params.base != 2 && physical_params.base != 3)
+            {
+                env->out() << "[e] The simulation base has to be 2 or 3\n";
+                return;
+            }
+
+            cc_params.simulation_parameters = physical_params;
 
             // To aid the compiler
             if constexpr (fiction::has_sidb_technology_v<Lyt> && !fiction::is_charge_distribution_surface_v<Lyt>)
             {
-                sim_result = fiction::quickexact(*lyt_ptr, qe_params);
+                cc_params.report_gss_stats =
+                    is_set("report_gss_stats") ?
+                        fiction::clustercomplete_params<fiction::cell<Lyt>>::ground_state_space_reporting::ON :
+                        fiction::clustercomplete_params<fiction::cell<Lyt>>::ground_state_space_reporting::OFF;
+
+                sim_result = fiction::clustercomplete(*lyt_ptr, cc_params);
 
                 if constexpr (fiction::is_sidb_lattice_100_v<Lyt>)
                 {
-
                     if (std::get<sim_result_100>(sim_result).charge_distributions.empty())
                     {
                         env->out() << fmt::format("[e] ground state of '{}' could not be determined\n",
                                                   get_name(lyt_ptr));
-                        return;
                     }
 
                     const auto min_energy_distr =
@@ -134,7 +162,6 @@ class quickexact_command : public command
                     {
                         env->out() << fmt::format("[e] ground state of '{}' could not be determined\n",
                                                   get_name(lyt_ptr));
-                        return;
                     }
 
                     const auto min_energy_distr =
@@ -152,7 +179,7 @@ class quickexact_command : public command
             }
         };
 
-        std::visit(quickexact, s.current());
+        std::visit(clustercomplete, s.current());
 
         reset_params();
     }
@@ -161,11 +188,11 @@ class quickexact_command : public command
     /**
      * Physical parameters for the simulation.
      */
-    fiction::sidb_simulation_parameters physical_params{2, -0.32, 5.6, 5.0};
+    fiction::sidb_simulation_parameters physical_params{3, -0.32, 5.6, 5.0};
     /**
-     * QuickExact parameters.
+     * ClusterComplete parameters.
      */
-    fiction::quickexact_params<> qe_params{};
+    fiction::clustercomplete_params<> cc_params{};
     /**
      * Type alias for H-Si(100)-2x1 simulation result.
      */
@@ -202,7 +229,13 @@ class quickexact_command : public command
                                         {"lambda_tf", sim_res.simulation_parameters.lambda_tf},
                                         {"mu_minus", sim_res.simulation_parameters.mu_minus}}},
                                       {"Lowest state energy (eV)", min_energy},
-                                      {"Number of stable states", sim_res.charge_distributions.size()}};
+                                      {"Number of stable states", sim_res.charge_distributions.size()},
+                                      {"Validity witness partitioning limit",
+                                       std::any_cast<uint64_t>(sim_res.additional_simulation_parameters.at(
+                                           "validity_witness_partitioning_limit"))},
+                                      {"Number of overlapping witnesses limit",
+                                       std::any_cast<uint64_t>(sim_res.additional_simulation_parameters.at(
+                                           "num_overlapping_witnesses_limit"))}};
             }
 
             const auto& sim_res = std::get<sim_result_111>(sim_result);
@@ -214,27 +247,34 @@ class quickexact_command : public command
                                     {"lambda_tf", sim_res.simulation_parameters.lambda_tf},
                                     {"mu_minus", sim_res.simulation_parameters.mu_minus}}},
                                   {"Lowest state energy (eV)", min_energy},
-                                  {"Number of stable states", sim_res.charge_distributions.size()}};
+                                  {"Number of stable states", sim_res.charge_distributions.size()},
+                                  {"Validity witness partitioning limit",
+                                   std::any_cast<uint64_t>(sim_res.additional_simulation_parameters.at(
+                                       "validity_witness_partitioning_limit"))},
+                                  {"Number of overlapping witnesses limit",
+                                   std::any_cast<uint64_t>(sim_res.additional_simulation_parameters.at(
+                                       "num_overlapping_witnesses_limit"))}};
         }
         catch (...)
         {
             return nlohmann::json{};
         }
     }
-
     /**
      * Resets the parameters to their default values.
      */
     void reset_params()
     {
-        physical_params = fiction::sidb_simulation_parameters{2, -0.32, 5.6, 5.0};
-        qe_params       = {};
+        physical_params = fiction::sidb_simulation_parameters{3, -0.32, 5.6, 5.0};
+        cc_params       = {};
         sim_result      = {};
     }
 };
 
-ALICE_ADD_COMMAND(quickexact, "Simulation")
+ALICE_ADD_COMMAND(clustercomplete, "Simulation")
 
 }  // namespace alice
 
-#endif  // FICTION_CMD_QUICKEXACT_HPP
+#endif  // FICTION_ALGLIB_ENABLED
+
+#endif  // FICTION_CMD_CLUSTERCOMPLETE_HPP

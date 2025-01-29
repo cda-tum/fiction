@@ -44,20 +44,20 @@ struct sidb_simulation_parameters
     /**
      * `epsilon_r` is the electric permittivity. It is a material specific number (unit-less).
      */
-    double epsilon_r;
+    double epsilon_r{5.6};
     /**
      * `lambda_tf` is the Thomas-Fermi screening distance (unit: nm).
      */
-    double lambda_tf;
+    double lambda_tf{5.0};
     /**
      * `mu_minus` (µ-) is the energy transition level (0/-) (unit: eV).
      */
-    double mu_minus;
+    double mu_minus{-0.32};
     /**
      * `base` can be either 2 or 3 and describes the assumed number of charge states of one SiDB.
      * It often makes sense to assume only negatively and neutrally charged SiDBs.
      */
-    uint8_t base;
+    uint8_t base{3};
     /**
      * `k` is the Coulomb constant `K_E` divided by `epsilon_r` (unit: \f$N \cdot m^{2} \cdot C^{-2}\f$).
      */
