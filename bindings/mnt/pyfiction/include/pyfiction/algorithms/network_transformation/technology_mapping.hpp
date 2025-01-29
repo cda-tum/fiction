@@ -73,9 +73,7 @@ inline void technology_mapping(pybind11::module& m)
     py::class_<fiction::technology_mapping_stats>(m, "technology_mapping_stats", DOC(fiction_technology_mapping_stats))
         .def(py::init<>())
         .def("__repr__", [](const fiction::technology_mapping_stats& stats) { return stats.report(); })
-        .def("report", &fiction::technology_mapping_stats::report, DOC(fiction_technology_mapping_stats_report))
-        .def_readonly("mapper_stats", &fiction::technology_mapping_stats::mapper_stats,
-                      DOC(fiction_technology_mapping_stats_mapper_stats));
+        .def("report", &fiction::technology_mapping_stats::report, DOC(fiction_technology_mapping_stats_report));
 
     m.def("and_or_not", &fiction::and_or_not, DOC(fiction_and_or_not));
 

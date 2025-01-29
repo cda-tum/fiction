@@ -22,6 +22,8 @@ namespace pyfiction
 namespace detail
 {
 
+// TODO update docu
+
 template <typename Lyt>
 void physically_valid_parameters(pybind11::module& m)
 {
@@ -37,10 +39,10 @@ inline void physically_valid_parameters(pybind11::module& m)
 {
     namespace py = pybind11;
 
-    py::class_<fiction::operational_domain<fiction::parameter_point, uint64_t>>(m, "physically_valid_parameters_domain")
+    py::class_<fiction::operational_domain<fiction::parameter_point, uint64_t>>(
+        m, "physically_valid_parameters_domain", DOC(fiction_physically_valid_parameters))
         .def(py::init<>())
         .def_readwrite("dimensions", &fiction::operational_domain<fiction::parameter_point, uint64_t>::dimensions)
-
         .def(
             "get_excited_state_number_for_parameter",
             [](const fiction::operational_domain<fiction::parameter_point, uint64_t>& domain,
@@ -66,4 +68,4 @@ inline void physically_valid_parameters(pybind11::module& m)
 
 }  // namespace pyfiction
 
-#endif  // FICTION_PHYSICALLY_VALID_PARAMETERS_HPP
+#endif  // PYFICTION_PHYSICALLY_VALID_PARAMETERS_HPP

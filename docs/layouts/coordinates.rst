@@ -59,15 +59,9 @@ Utility functions
         .. doxygenfunction:: fiction::siqad::to_siqad_coord
 
     .. tab:: Python
-        .. autofunction:: mnt.pyfiction.offset_area
-        .. autofunction:: mnt.pyfiction.cube_area
-        .. autofunction:: mnt.pyfiction.siqad_area
-
-        .. autofunction:: mnt.pyfiction.offset_volume
-        .. autofunction:: mnt.pyfiction.cube_volume
-        .. autofunction:: mnt.pyfiction.siqad_volume
+        .. autofunction:: mnt.pyfiction.area
+        .. autofunction:: mnt.pyfiction.volume
 
         .. autofunction:: mnt.pyfiction.to_offset_coord
         .. autofunction:: mnt.pyfiction.to_cube_coord
-
         .. autofunction:: mnt.pyfiction.to_siqad_coord

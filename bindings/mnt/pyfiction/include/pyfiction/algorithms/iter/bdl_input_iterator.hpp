@@ -48,10 +48,29 @@ void bdl_input_iterator(pybind11::module& m, const std::string& lattice)
             },
             DOC(fiction_bdl_input_iterator_operator_mul))
         .def(
-            "__eq__", [](const fiction::bdl_input_iterator<Lyt>& self, const uint64_t n) -> bool { return self == n; },
+            "__eq__",
+            [](const fiction::bdl_input_iterator<Lyt>& self, const py::object& other) -> bool
+            {
+                if (!py::isinstance<uint64_t>(other))
+                {
+                    return false;
+                }
+
+                return self == other.cast<const uint64_t>();
+            },
+
             py::arg("m"), DOC(fiction_bdl_input_iterator_operator_eq))
         .def(
-            "__ne__", [](const fiction::bdl_input_iterator<Lyt>& self, const uint64_t n) -> bool { return self != n; },
+            "__ne__",
+            [](const fiction::bdl_input_iterator<Lyt>& self, const py::object& other) -> bool
+            {
+                if (!py::isinstance<uint64_t>(other))
+                {
+                    return false;
+                }
+
+                return self != other.cast<const uint64_t>();
+            },
             py::arg("m"), DOC(fiction_bdl_input_iterator_operator_ne))
         .def(
             "__lt__", [](const fiction::bdl_input_iterator<Lyt>& self, const uint64_t n) -> bool { return self < n; },

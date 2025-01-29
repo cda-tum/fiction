@@ -11,7 +11,6 @@
 #include <fiction/algorithms/physical_design/orthogonal.hpp>
 
 #include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
 
 #include <sstream>
 
@@ -23,7 +22,6 @@ namespace pyfiction
  */
 inline void orthogonal(pybind11::module& m)
 {
-    namespace py = pybind11;
     namespace py = pybind11;
 
     py::class_<fiction::orthogonal_physical_design_params>(m, "orthogonal_params",

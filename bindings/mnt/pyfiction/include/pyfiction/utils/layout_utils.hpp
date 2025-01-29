@@ -8,12 +8,10 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
+#include <fiction/traits.hpp>
 #include <fiction/utils/layout_utils.hpp>
 
 #include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
-
-#include <vector>
 
 namespace pyfiction
 {

@@ -1,5 +1,5 @@
 Support
-=======
+-------
 
 If you are stuck with a problem using *fiction* or are having questions, please do get in touch at our `Issues <https://github.com/cda-tum/fiction/issues>`_ or `Discussions <https://github.com/cda-tum/fiction/discussions>`_. We'd love to help.
 

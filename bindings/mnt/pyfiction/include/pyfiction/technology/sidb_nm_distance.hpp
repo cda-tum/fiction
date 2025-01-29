@@ -21,20 +21,20 @@ namespace detail
 {
 
 template <typename Lyt>
-void nanometer_distance(pybind11::module& m, const std::string& lattice = "")
+void nanometer_distance(pybind11::module& m)
 {
     namespace py = pybind11;
 
-    m.def(fmt::format("sidb_nm_distance{}", lattice).c_str(), &fiction::sidb_nm_distance<Lyt>, py::arg("lyt"),
-          py::arg("source"), py::arg("target"), DOC(fiction_sidb_nm_distance));
+    m.def(fmt::format("sidb_nm_distance").c_str(), &fiction::sidb_nm_distance<Lyt>, py::arg("lyt"), py::arg("source"),
+          py::arg("target"), DOC(fiction_sidb_nm_distance));
 }
 
 }  // namespace detail
 
 inline void sidb_nm_distance(pybind11::module& m)
 {
-    detail::nanometer_distance<py_sidb_100_lattice>(m, "_100");
-    detail::nanometer_distance<py_sidb_111_lattice>(m, "_111");
+    detail::nanometer_distance<py_sidb_100_lattice>(m);
+    detail::nanometer_distance<py_sidb_111_lattice>(m);
 }
 
 }  // namespace pyfiction

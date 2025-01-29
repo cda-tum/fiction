@@ -17,7 +17,6 @@ namespace pyfiction
 inline void sidb_charge_state(pybind11::module& m)
 {
     namespace py = pybind11;
-    namespace py = pybind11;
 
     py::enum_<fiction::sidb_charge_state>(m, "sidb_charge_state", DOC(fiction_sidb_charge_state))
         .value("NEGATIVE", fiction::sidb_charge_state::NEGATIVE, DOC(fiction_sidb_charge_state_NEGATIVE))

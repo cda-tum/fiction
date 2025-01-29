@@ -41,7 +41,6 @@ void random_layout_generator(pybind11::module& m)
 inline void random_sidb_layout_generator(pybind11::module& m)
 {
     namespace py = pybind11;
-    namespace py = pybind11;
 
     py::enum_<typename fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>::positive_charges>(
         m, "positive_charges", DOC(fiction_generate_random_sidb_layout_params_positive_charges))

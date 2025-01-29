@@ -43,28 +43,23 @@ class sidb_lattice<LatticeOrientation, Lyt, false> : public Lyt
      */
     using orientation = LatticeOrientation;
 
-    explicit sidb_lattice() : Lyt()
-    {
-        static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-        static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    }
     /**
-     * Constructor. Creates a named sidb lattice layout of the given cell-level layout.
-     *
-     * @param layout SiDB Cell-level layout.
-     */
-    explicit sidb_lattice(const Lyt& layout) : Lyt(layout)
-    {
-        static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-        static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    }
-    /**
-     * Constructor. Creates a named sidb lattice layout of the given aspect ratio.
+     * Constructor. Creates a named SiDB lattice layout of the given aspect ratio.
      *
      * @param ar Highest possible position in the layout.
      * @param name Layout name.
      */
-    explicit sidb_lattice(const aspect_ratio<Lyt>& ar, const std::string& name = "") : Lyt(ar, name)
+    explicit sidb_lattice(const aspect_ratio<Lyt>& ar = {}, const std::string& name = "") : Lyt(ar, name)
+    {
+        static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+        static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    }
+    /**
+     * Constructor. Creates an SiDB lattice layout on top of the given cell-level layout.
+     *
+     * @param layout SiDB Cell-level layout.
+     */
+    explicit sidb_lattice(const Lyt& layout) : Lyt(layout)
     {
         static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
         static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");

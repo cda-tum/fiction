@@ -10,12 +10,12 @@
 #include "fiction/traits.hpp"
 #include "fiction/utils/routing_utils.hpp"
 
-#include <mockturtle/traits.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <algorithm>
-#include <map>
-#include <utility>
+#include <cstdint>
+#include <cstdlib>
+#include <optional>
 #include <vector>
 
 namespace fiction

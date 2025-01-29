@@ -49,7 +49,7 @@ class TestPostLayoutOptimiztaion(unittest.TestCase):
         post_layout_optimization(layout, statistics=stats)
 
         self.assertEqual(equivalence_checking(network, layout), eq_type.STRONG)
-        self.assertGreater(stats.time_total.total_seconds(), 0)
+        self.assertGreater(stats.time_total, 0)
         self.assertEqual(stats.x_size_before, 6)
         self.assertEqual(stats.y_size_before, 8)
         self.assertEqual(stats.x_size_after, 6)
@@ -71,7 +71,7 @@ class TestPostLayoutOptimiztaion(unittest.TestCase):
         post_layout_optimization(layout, params, statistics=stats)
 
         self.assertEqual(equivalence_checking(network, layout), eq_type.STRONG)
-        self.assertGreater(stats.time_total.total_seconds(), 0)
+        self.assertGreater(stats.time_total, 0)
         self.assertEqual(stats.x_size_before, 6)
         self.assertEqual(stats.y_size_before, 8)
         self.assertEqual(stats.x_size_after, 6)

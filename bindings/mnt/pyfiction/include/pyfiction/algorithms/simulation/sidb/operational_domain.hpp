@@ -50,7 +50,6 @@ void operational_domain(pybind11::module& m)
 inline void operational_domain(pybind11::module& m)
 {
     namespace py = pybind11;
-    namespace py = pybind11;
 
     py::class_<fiction::parameter_point>(m, "parameter_point", DOC(fiction_parameter_point))
         .def(py::init<>(), DOC(fiction_parameter_point_parameter_point))
@@ -100,8 +99,8 @@ inline void operational_domain(pybind11::module& m)
     py::class_<fiction::operational_domain_value_range>(m, "operational_domain_value_range",
                                                         DOC(fiction_operational_domain_value_range))
         .def(py::init<fiction::sweep_parameter>(), py::arg("dimension"))
-        .def(py::init<fiction::sweep_parameter, double, double, double>(), py::arg("dimension"), py::arg("min"),
-             py::arg("max"), py::arg("step"))
+        .def(py::init<fiction::sweep_parameter, double, double, double>(), py::arg("dimension"), py::arg("minimum"),
+             py::arg("maximum"), py::arg("step"))
         .def_readwrite("dimension", &fiction::operational_domain_value_range::dimension,
                        DOC(fiction_operational_domain_value_range_dimension))
         .def_readwrite("min", &fiction::operational_domain_value_range::min,

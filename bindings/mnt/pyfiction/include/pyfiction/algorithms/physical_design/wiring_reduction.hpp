@@ -21,7 +21,6 @@ namespace pyfiction
 inline void wiring_reduction(pybind11::module& m)
 {
     namespace py = pybind11;
-    namespace py = pybind11;
 
     py::class_<fiction::wiring_reduction_params>(m, "wiring_reduction_params", DOC(fiction_wiring_reduction_params))
         .def(py::init<>())
