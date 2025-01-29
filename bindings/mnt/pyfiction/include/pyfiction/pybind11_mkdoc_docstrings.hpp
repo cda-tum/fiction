@@ -292,6 +292,9 @@ Parameter ``lyt``:
 Parameter ``params``:
     Parameter for the gate library.
 
+Parameter ``cell_lyt``:
+    Optional cell-level layout to add defects to.
+
 Returns:
     A cell-level layout that implements `lyt`'s gate types with
     building blocks defined in `GateLibrary`.)doc";
@@ -4546,6 +4549,9 @@ Template parameter ``Params``:
 
 Parameter ``params``:
     Parameters used for the SiDB on-the-fly gate library.
+
+Parameter ``lyt``:
+    Optional cell-level layout to add defects to.
 
 Returns:
     A `CellLyt` object representing the generated cell layout.)doc";
@@ -15243,7 +15249,7 @@ Template parameter ``Ntk``:
     The type of the input network.
 
 Template parameter ``CellLyt``:
-    SiDB cell-level layout type.
+    SiDB defect surface type.
 
 Template parameter ``GateLyt``:
     Gate-level layout type.
@@ -17774,8 +17780,7 @@ a specified distance from the center cell are taken into account. The
 resulting skeleton with added defects is returned.
 
 Template parameter ``CellLyt``:
-    The type of the defect surface, which should not have SiQAD
-    coordinates.
+    SiDB defect surface type.
 
 Template parameter ``Params``:
     Type of Parameters.
@@ -17876,8 +17881,8 @@ R"doc(This function evaluates whether a predefined Bestagon gate can be
 applied to the given node by considering various conditions, including
 the presence of defects and spacing requirements.
 
-Template parameter ``Lyt``:
-    The type of the cell-level layout.
+Template parameter ``CellLyt``:
+    SiDB defect surface type.
 
 Template parameter ``TT``:
     Truth table type.
@@ -17905,8 +17910,8 @@ static const char *__doc_fiction_sidb_on_the_fly_gate_library_params =
 R"doc(This struct encapsulates parameters for the parameterized SiDB gate
 library.
 
-Template parameter ``Lyt``:
-    SiDB cell-level layout type.)doc";
+Template parameter ``CellType``:
+    Cell type.)doc";
 
 static const char *__doc_fiction_sidb_on_the_fly_gate_library_params_canvas_sidb_complex_gates =
 R"doc(This variable defines the number of canvas SiDBs dedicated to complex
@@ -17919,10 +17924,6 @@ wire, half-adder) gate design.)doc";
 static const char *__doc_fiction_sidb_on_the_fly_gate_library_params_complex_gate_design_policy_DESIGN_ON_THE_FLY = R"doc(Design complex gates on-the-fly.)doc";
 
 static const char *__doc_fiction_sidb_on_the_fly_gate_library_params_complex_gate_design_policy_USING_PREDEFINED = R"doc(Use predefined complex gates if possible.)doc";
-
-static const char *__doc_fiction_sidb_on_the_fly_gate_library_params_defect_surface =
-R"doc(This layout stores all atomic defects. `std::nullopt` if no defect
-surface is given.)doc";
 
 static const char *__doc_fiction_sidb_on_the_fly_gate_library_params_design_gate_params = R"doc(This struct holds parameters to design SiDB gates.)doc";
 
@@ -17957,6 +17958,9 @@ Parameter ``t``:
 
 Parameter ``parameters``:
     Parameter to design SiDB gates.
+
+Parameter ``defect_surface``:
+    Optional atomic defect surface.
 
 Returns:
     Bestagon gate representation of `t` including mirroring.)doc";
@@ -18108,13 +18112,13 @@ Template parameter ``GateLyt``:
     surface.
 
 Template parameter ``CellLyt``:
-    SiDB cell-level layout type that is underlying to the SiDB
+    SiDB cell-level layout type that is underlying to the SiDB defect
     surface.
 
 Parameter ``gate_lyt``:
     Gate-level layout instance that specifies the aspect ratio.
 
-Parameter ``sidb_defect_surface``:
+Parameter ``surface``:
     SiDB surface that instantiates the defects.
 
 Parameter ``charged_defect_spacing_overwrite``:
