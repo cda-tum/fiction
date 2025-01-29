@@ -269,8 +269,8 @@ template <typename CellLyt, typename GateLibrary, typename GateLyt>
  * @return A cell-level layout that implements `lyt`'s gate types with building blocks defined in `GateLibrary`.
  */
 template <typename CellLyt, typename GateLibrary, typename GateLyt, typename Params>
-auto apply_parameterized_gate_library(const GateLyt& lyt, const Params& params,
-                                      const std::optional<CellLyt>& cell_lyt = std::nullopt)
+CellLyt apply_parameterized_gate_library(const GateLyt& lyt, const Params& params,
+                                         const std::optional<CellLyt>& cell_lyt = std::nullopt)
 {
     static_assert(is_cell_level_layout_v<CellLyt>, "CellLyt is not a cell-level layout");
     static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt is not a gate-level layout");

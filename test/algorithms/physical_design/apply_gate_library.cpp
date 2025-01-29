@@ -31,8 +31,8 @@ void check_equivalence(const Lyt& layout_designed, const std::string& path_layou
 
     REQUIRE(layout_designed.num_cells() == layout_correct.num_cells());
 
-    CHECK(layout_designed.num_cells_of_given_type(technology<Lyt>::cell_type::LOGIC) ==
-          layout_correct.num_cells_of_given_type(technology<Lyt>::cell_type::LOGIC));
+    REQUIRE(layout_designed.num_cells_of_given_type(technology<Lyt>::cell_type::LOGIC) ==
+            layout_correct.num_cells_of_given_type(technology<Lyt>::cell_type::LOGIC));
 
     layout_designed.foreach_cell(
         [&layout_correct, &layout_designed](const auto& c)
