@@ -5,9 +5,12 @@
 #ifndef FICTION_TRUTH_TABLE_UTILS_HPP
 #define FICTION_TRUTH_TABLE_UTILS_HPP
 
+#include <kitty/bit_operations.hpp>
 #include <kitty/constructors.hpp>
 #include <kitty/dynamic_truth_table.hpp>
 
+#include <bitset>
+#include <cassert>
 #include <cstdint>
 #include <vector>
 
@@ -407,6 +410,26 @@ namespace fiction
     kitty::create_from_binary_string(table2, truth_table_string2);
 
     return std::vector<kitty::dynamic_truth_table>{table1, table2};
+}
+
+/**
+ * This function evaluates the given multi-output truth table at the given input index.
+ *
+ * @param truth_tables The truth tables to evaluate.
+ * @param current_input_index The index representing the current input pattern.
+ * @return Output of the truth tables.
+ */
+[[nodiscard]] inline uint64_t evaluate_output(const std::vector<kitty::dynamic_truth_table>& truth_tables,
+                                              const uint64_t current_input_index) noexcept
+{
+    assert(truth_tables.size() <= 64 && "Number of truth tables exceeds 64");
+
+    std::bitset<64> bits{};
+    for (auto i = 0u; i < truth_tables.size(); i++)
+    {
+        bits[i] = (kitty::get_bit(truth_tables[i], current_input_index) != 0u);
+    }
+    return bits.to_ulong();
 }
 
 // NOLINTEND(*-pointer-arithmetic)

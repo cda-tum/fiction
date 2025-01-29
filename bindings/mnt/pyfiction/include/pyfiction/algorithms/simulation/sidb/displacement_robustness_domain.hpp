@@ -14,6 +14,8 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
+#include <string>
+
 namespace pyfiction
 {
 
@@ -23,14 +25,13 @@ namespace detail
 template <typename Lyt>
 void determine_displacement_robustness_domain(pybind11::module& m, const std::string& lattice = "")
 {
-
     namespace py = pybind11;
 
     py::class_<fiction::displacement_robustness_domain<Lyt>>(
         m, fmt::format("displacement_robustness_domain_{}", lattice).c_str(),
         DOC(fiction_displacement_robustness_domain))
         .def(py::init<>())
-        .def_readwrite("operational_values", &fiction::displacement_robustness_domain<Lyt>::operational_values,
+        .def_readwrite("influence_information", &fiction::displacement_robustness_domain<Lyt>::operational_values,
                        DOC(fiction_displacement_robustness_domain_operational_values))
 
         ;

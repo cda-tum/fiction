@@ -72,22 +72,9 @@ TEST_CASE("Benchmark simulators", "[benchmark]")
         return quicksim<lattice>(lyt, quicksim_params);
     };
 }
-//      Mac M1, Ventura 13.0, Apple clang version 14.0.0 (24.07.24)
+//      Mac M1, Sequoia 15.2, Apple clang version 14.0.3 (16.12.24)
 //
-//      Before PR #483:
-//      benchmark name      samples             iterations              est run time
-//                          mean                low mean                high mean
-//                          std dev             low std dev             high std dev
-//      -----------------------------------------------------------------------------
-//      QuickExact          100                 1                       1.7502 m
-//                          1.06044 s           1.05536 s               1.06813 s
-//                          31.4551 ms          23.1414 ms              44.911 ms
-//
-//      QuickSim            100                 1                       570.56 ms
-//                          6.02459 ms          5.92537 ms              6.12262 ms
-//                          505.788 us          450.737 us              574.389 us
-
-//      PR #483:
+//      Before PR #602:
 //      benchmark name      samples             iterations              est run time
 //                          mean                low mean                high mean
 //                          std dev             low std dev             high std dev
@@ -99,3 +86,16 @@ TEST_CASE("Benchmark simulators", "[benchmark]")
 //      QuickSim            100                 1                       492.005 ms
 //                          4.85343 ms          4.80376 ms              4.98192 ms
 //                          381.332 us          184.008 us              801.102 us
+//
+//      PR #602:
+//      benchmark name      samples             iterations              est run time
+//                          mean                low mean                high mean
+//                          std dev             low std dev             high std dev
+//    -------------------------------------------------------------------------------
+//      QuickExact          100                 1                       1.68503 m
+//                          1.01966 s           1.01725 s               1.02271 s
+//                          13.7569 ms          11.465 ms               18.3512 ms
+//
+//      QuickSim            100                 1                       445.639 ms
+//                          4.50754 ms          4.47813 ms              4.54016 ms
+//                          158.347 us          137.998 us              187.498 us

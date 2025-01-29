@@ -10,6 +10,7 @@
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/traits.hpp"
 
+#include <cassert>
 #include <cstdint>
 #include <iterator>
 #include <vector>
@@ -340,6 +341,15 @@ class bdl_input_iterator
     {
         return input_pairs.size();
     }
+    /**
+     * Returns the current input index.
+     *
+     * @return The current input index.
+     */
+    [[nodiscard]] uint64_t get_current_input_index() const noexcept
+    {
+        return current_input_index;
+    }
 
   private:
     /**
@@ -425,6 +435,8 @@ class bdl_input_iterator
      */
     void set_all_inputs() noexcept
     {
+        assert(num_inputs == input_bdl_wires.size() && "number of inputs and number of wires don't match");
+
         for (uint64_t i = num_inputs - 1; i < num_inputs; --i)
         {
             const auto& input_i = input_pairs[i];

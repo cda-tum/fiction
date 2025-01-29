@@ -174,7 +174,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     {
       private:
         /**
-         * The distance matrix is a vector of vectors storing the euclidean distance in nm.
+         * The distance matrix is a vector of vectors storing the Euclidean distance in nm.
          */
         using distance_matrix = std::vector<std::vector<double>>;
         /**
@@ -360,6 +360,17 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         return *this;
     }
     /**
+     * Clones the current charge distribution surface and returns a deep copy.
+     *
+     * @return A deep copy of the current charge_distribution_surface, preserving all its properties.
+     */
+    [[nodiscard]] charge_distribution_surface clone() const noexcept
+    {
+        charge_distribution_surface copy{Lyt::clone()};
+        copy.strg = std::make_shared<charge_distribution_storage>(*strg);
+        return copy;
+    }
+    /**
      * This function returns the locations of all SiDBs in nm of the form `(x,y)`.
      *
      * @return Vector of SiDB nanometer positions (unit: nm).
@@ -372,7 +383,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         for (const auto& c : strg->sidb_order)
         {
             auto pos = sidb_nm_position<Lyt>(Lyt{}, c);
-            positions.push_back(std::make_pair(pos.first, pos.second));
+            positions.emplace_back(pos.first, pos.second);
         }
 
         return positions;

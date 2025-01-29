@@ -1,5 +1,6 @@
+from collections.abc import Iterable
 from enum import Enum
-from typing import Any, Callable, Iterable, overload
+from typing import Any, Callable, overload
 
 from typing_extensions import Self
 

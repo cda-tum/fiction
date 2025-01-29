@@ -229,7 +229,7 @@ void charge_distribution_surface_layout(pybind11::module& m, const std::string& 
              [](const py_cds& lyt)
              {
                  std::stringstream ss;
-                 print_layout(fiction::convert_layout_to_siqad_coordinates(lyt), ss);
+                 fiction::print_layout(fiction::convert_layout_to_siqad_coordinates(lyt), ss);
                  return ss.str();
              })
 

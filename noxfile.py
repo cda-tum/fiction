@@ -17,7 +17,7 @@ nox.options.default_venv_backend = "uv|virtualenv"
 
 nox.options.sessions = ["lint", "tests", "minimums"]
 
-PYTHON_ALL_VERSIONS = ["3.8", "3.9", "3.10", "3.11", "3.12"]
+PYTHON_ALL_VERSIONS = ["3.9", "3.10", "3.11", "3.12", "3.13"]
 
 # The following lists all the build requirements for building the package.
 # Note that this includes transitive build dependencies of package dependencies,
@@ -56,13 +56,13 @@ def _run_tests(
     if shutil.which("ninja") is None:
         session.install("ninja")
 
-    _extras = ["test", *extras]
+    extras_ = ["test", *extras]
     if "--cov" in posargs:
-        _extras.append("coverage")
+        extras_.append("coverage")
         posargs.append("--cov-config=pyproject.toml")
 
     session.install(*BUILD_REQUIREMENTS, *install_args, env=env)
-    install_arg = f"-ve.[{','.join(_extras)}]"
+    install_arg = f"-ve.[{','.join(extras_)}]"
     session.install("--no-build-isolation", install_arg, *install_args, env=env)
     session.run("pytest", *run_args, *posargs, env=env)
 

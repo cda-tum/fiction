@@ -7,7 +7,7 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "mnt.pyfiction"
-version = "0.6.6"
+version = "0.6.8"
 description = "Design Automation for Field-coupled Nanotechnologies"
 readme = "README.md"
 authors = [
@@ -24,7 +24,6 @@ classifiers = [
     'Development Status :: 4 - Beta',
     'Programming Language :: Python :: 3',
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -41,7 +40,7 @@ classifiers = [
     'Topic :: Scientific/Engineering :: Electronic Design Automation (EDA)',
 ]
 
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 dependencies = [
     "z3-solver>=4.8.0"
 ]
@@ -180,7 +179,6 @@ reinstall-package = ["mnt.pyfiction"]
 [tool.mypy]
 files = ["bindings/mnt/pyfiction", "noxfile.py"]
 mypy_path = ["$MYPY_CONFIG_FILE_DIR/bindings"]
-python_version = "3.8"
 warn_unused_configs = true
 enable_error_code = ["ignore-without-code", "redundant-expr", "truthy-bool"]
 strict = true

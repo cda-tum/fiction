@@ -15,6 +15,7 @@
 #include <alice/alice.hpp>
 #include <fmt/format.h>
 
+#include <filesystem>
 #include <memory>
 #include <string>
 
