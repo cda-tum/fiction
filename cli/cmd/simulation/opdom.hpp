@@ -278,7 +278,7 @@ class opdom_command : public command
 
             if constexpr (!fiction::has_sidb_technology_v<Lyt>)
             {
-                env->out() << fmt::format("[e] {} is not an SiDB layout\n", get_name(lyt_ptr));
+                env->out() << fmt::format("[e] '{}' is not an SiDB layout\n", get_name(lyt_ptr));
             }
 
             if (lyt_ptr->num_pis() == 0 || lyt_ptr->num_pos() == 0)

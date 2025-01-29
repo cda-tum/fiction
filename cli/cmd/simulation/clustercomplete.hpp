@@ -110,14 +110,15 @@ class clustercomplete_command : public command
 
             if constexpr (!fiction::has_sidb_technology_v<Lyt>)
             {
-                env->out() << fmt::format("[e] {} is not an SiDB layout\n", get_name(lyt_ptr));
+                env->out() << fmt::format("[e] '{}' is not an SiDB layout\n", get_name(lyt_ptr));
                 return;
             }
 
             if constexpr (fiction::is_charge_distribution_surface_v<Lyt>)
             {
                 env->out() << fmt::format(
-                    "[w] {} already possesses a charge distribution; no simulation is conducted\n", get_name(lyt_ptr));
+                    "[w] '{}' already possesses a charge distribution; no simulation is conducted\n",
+                    get_name(lyt_ptr));
                 return;
             }
 
@@ -143,7 +144,7 @@ class clustercomplete_command : public command
                 {
                     if (std::get<sim_result_100>(sim_result).charge_distributions.empty())
                     {
-                        env->out() << fmt::format("[e] ground state of {} could not be determined\n",
+                        env->out() << fmt::format("[e] ground state of '{}' could not be determined\n",
                                                   get_name(lyt_ptr));
                     }
 
@@ -159,7 +160,7 @@ class clustercomplete_command : public command
                 {
                     if (std::get<sim_result_111>(sim_result).charge_distributions.empty())
                     {
-                        env->out() << fmt::format("[e] ground state of {} could not be determined\n",
+                        env->out() << fmt::format("[e] ground state of '{}' could not be determined\n",
                                                   get_name(lyt_ptr));
                     }
 

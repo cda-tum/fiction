@@ -127,14 +127,15 @@ class temp_command : public command
 
             if constexpr (!fiction::has_sidb_technology_v<Lyt>)
             {
-                env->out() << fmt::format("[e] {} is not an SiDB layout\n", get_name(lyt_ptr));
+                env->out() << fmt::format("[e] '{}' is not an SiDB layout\n", get_name(lyt_ptr));
                 return;
             }
 
             if constexpr (fiction::is_charge_distribution_surface_v<Lyt>)
             {
                 env->out() << fmt::format(
-                    "[w] {} already possesses a charge distribution; no simulation is conducted\n", get_name(lyt_ptr));
+                    "[w] '{}' already possesses a charge distribution; no simulation is conducted\n",
+                    get_name(lyt_ptr));
                 return;
             }
 
@@ -142,7 +143,7 @@ class temp_command : public command
 
             if (!sim_engine.has_value())
             {
-                env->out() << fmt::format("[e] {} is not a supported SiDB simulation engine\n", sim_engine_str);
+                env->out() << fmt::format("[e] '{}' is not a supported SiDB simulation engine\n", sim_engine_str);
                 return;
             }
 
@@ -157,7 +158,7 @@ class temp_command : public command
                 {
                     if (lyt_ptr->num_pis() == 0 || lyt_ptr->num_pos() == 0)
                     {
-                        env->out() << fmt::format("[e] {} requires primary input and output cells to simulate its "
+                        env->out() << fmt::format("[e] '{}' requires primary input and output cells to simulate its "
                                                   "Boolean function\n",
                                                   get_name(lyt_ptr));
                         return;
@@ -174,10 +175,10 @@ class temp_command : public command
 
                 if (stats.num_valid_lyt == 0)
                 {
-                    env->out() << fmt::format("[e] ground state of {} could not be determined\n", get_name(lyt_ptr));
+                    env->out() << fmt::format("[e] ground state of '{}' could not be determined\n", get_name(lyt_ptr));
                 }
 
-                env->out() << fmt::format("[i] critical temperature of {} is {}{} K\n", get_name(lyt_ptr),
+                env->out() << fmt::format("[i] critical temperature of '{}' is {}{} K\n", get_name(lyt_ptr),
                                           (ct == params.max_temperature ? "> " : ""), ct);
 
                 if (stats.num_valid_lyt > 1)
