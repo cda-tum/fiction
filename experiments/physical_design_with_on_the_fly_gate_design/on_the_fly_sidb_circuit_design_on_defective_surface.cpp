@@ -11,6 +11,7 @@
 #include <fiction/algorithms/physical_design/on_the_fly_sidb_circuit_design.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
 #include <fiction/io/read_sidb_surface_defects.hpp>
+#include <fiction/io/write_sqd_layout.hpp>
 #include <fiction/layouts/bounding_box.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/sidb_defect_surface.hpp>
@@ -68,7 +69,7 @@ int main()  // NOLINT
 
     // read-in the initial defects. Physical parameters of the defects are not stored yet.
     auto surface_lattice_initial = fiction::read_sidb_surface_defects<cell_lyt>(
-        "../../experiments/physical_design_with_on_the_fly_gate_design/1_percent_with_charged_surface.txt");
+        "../../experiments/physical_design_with_on_the_fly_gate_design/0.5_percent_with_charged_surface.txt");
 
     // create an empty surface.
     fiction::sidb_defect_surface<cell_lyt> surface_lattice{};
@@ -136,7 +137,7 @@ int main()  // NOLINT
         // perform technology mapping
         const auto mapped_network = fiction::technology_mapping(cut_xag, tech_map_params);
 
-        fiction::on_the_fly_sidb_circuit_design_on_defective_surface_params<cell_lyt> params{};
+        fiction::on_the_fly_sidb_circuit_design_on_defective_surface_params<fiction::cell<cell_lyt>> params{};
 
         params.exact_design_parameters.scheme        = "ROW4";
         params.exact_design_parameters.crossings     = true;
@@ -146,16 +147,18 @@ int main()  // NOLINT
         params.exact_design_parameters.upper_bound_y = 30;         // 12 x 31 tiles
         params.exact_design_parameters.timeout       = 3'600'000;  // 1h in ms
 
-        params.sidb_on_the_fly_gate_library_parameters.defect_surface     = surface_lattice;
         params.sidb_on_the_fly_gate_library_parameters.design_gate_params = design_gate_params;
 
         fiction::on_the_fly_circuit_design_on_defective_surface_stats<gate_lyt> st{};
 
         try
         {
-            const auto result = fiction::on_the_fly_sidb_circuit_design_on_defective_surface<decltype(mapped_network),
-                                                                                             cell_lyt, gate_lyt>(
-                mapped_network, lattice_tiling, surface_lattice, params, &st);
+            const auto result =
+                fiction::on_the_fly_sidb_circuit_design_on_defective_surface<decltype(mapped_network),
+                                                                             decltype(surface_lattice), gate_lyt>(
+                    mapped_network, lattice_tiling, surface_lattice, params, &st);
+
+            write_sqd_layout(result, fmt::format("{}/{}.sqd", layouts_folder, benchmark));
 
             // check equivalence
             const auto miter = mockturtle::miter<mockturtle::klut_network>(mapped_network, st.gate_layout.value());

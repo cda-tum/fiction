@@ -42,7 +42,6 @@ namespace fiction
  * This struct contains parameters and settings to design SiDB gates.
  *
  * @tparam CellType Cell type.
- *
  */
 template <typename CellType>
 struct design_sidb_gates_params
