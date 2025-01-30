@@ -59,7 +59,7 @@ TEST_CASE("Deep copy Cartesian layout", "[cartesian-layout]")
 
     auto copy = original.clone();
 
-    copy.resize({10, 10, 1});
+    copy.resize(aspect_ratio<cartesian_layout<offset::ucoord_t>>{10, 10, 1});
 
     CHECK(original.x() == 5);
     CHECK(original.y() == 5);
@@ -80,7 +80,7 @@ TEST_CASE("Cartesian coordinate iteration", "[cartesian-layout]")
 
     const auto check1 = [&visited, &ar, &layout](const auto& t)
     {
-        CHECK(t <= ar);
+        CHECK(t <= ar.end);
 
         // all coordinates are within the layout bounds
         CHECK(layout.is_within_bounds(t));
@@ -103,13 +103,13 @@ TEST_CASE("Cartesian coordinate iteration", "[cartesian-layout]")
 
     visited.clear();
 
-    cartesian_layout<offset::ucoord_t>::aspect_ratio ar_ground{ar.x, ar.y, 0};
+    cartesian_layout<offset::ucoord_t>::aspect_ratio ar_ground{ar.x(), ar.y(), 0};
 
     const auto check2 = [&visited, &ar_ground, &layout](const auto& t)
     {
         // iteration stays in ground layer
         CHECK(t.z == 0);
-        CHECK(t <= ar_ground);
+        CHECK(t <= ar_ground.end);
 
         // all coordinates are within the layout bounds
         CHECK(layout.is_within_bounds(t));

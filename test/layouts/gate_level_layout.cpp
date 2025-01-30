@@ -42,7 +42,7 @@ TEST_CASE("Deep copy gate-level layout", "[gate-level-layout]")
 
     auto copy = original.clone();
 
-    copy.resize({10, 10, 1});
+    copy.resize(aspect_ratio<gate_layout>{10, 10, 1});
     copy.replace_clocking_scheme(use_clocking<gate_layout>());
     copy.set_layout_name("Copy");
     copy.move_node(copy.get_node({0, 2}), {0, 0});

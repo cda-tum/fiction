@@ -276,8 +276,8 @@ Lyt normalize_layout_coordinates(const Lyt& lyt) noexcept
     assert(lyt.x() - x_offset >= 0 && "x_offset is too large");
     assert(lyt.y() - y_offset >= 0 && "y_offset is too large");
 
-    lyt_new.resize(
-        {static_cast<std::size_t>(lyt.x() - x_offset), static_cast<std::size_t>(lyt.y() - y_offset), lyt.z()});
+    lyt_new.resize(aspect_ratio<Lyt>{static_cast<std::size_t>(lyt.x() - x_offset),
+                                     static_cast<std::size_t>(lyt.y() - y_offset), lyt.z()});
 
     lyt_new.set_layout_name(lyt.get_layout_name());
     lyt_new.set_tile_size_x(lyt.get_tile_size_x());
@@ -310,7 +310,7 @@ auto convert_layout_to_siqad_coordinates(const Lyt& lyt) noexcept
 
     auto process_layout = [](auto& lyt_orig, auto lyt_new)
     {
-        lyt_new.resize({lyt_orig.x(), (lyt_orig.y() - lyt_orig.y() % 2) / 2});
+        lyt_new.resize(aspect_ratio<decltype(lyt_new)>{lyt_orig.x(), (lyt_orig.y() - lyt_orig.y() % 2) / 2});
         lyt_new.set_layout_name(lyt_orig.get_layout_name());
         lyt_new.set_tile_size_x(lyt_orig.get_tile_size_x());
         lyt_new.set_tile_size_y(lyt_orig.get_tile_size_y());
@@ -439,7 +439,7 @@ template <typename LytDest, typename LytSrc>
     {
         if constexpr (is_sidb_lattice_v<LytSrc>)
         {
-            lyt_new.resize({lyt.x(), lyt.y() * 2 + 1});
+            lyt_new.resize(aspect_ratio<decltype(lyt_new)>{lyt.x(), lyt.y() * 2 + 1});
             lyt_new.set_layout_name(lyt.get_layout_name());
             lyt_new.set_tile_size_x(lyt.get_tile_size_x());
             lyt_new.set_tile_size_y(lyt.get_tile_size_y());

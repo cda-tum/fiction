@@ -60,7 +60,7 @@ TEST_CASE("Update 2D gate-level bounding box", "[bounding-box]")
     bounding_box_2d bb_crossing{lyt_crossing};
 
     // resize the layout to size of 6 x 6 tiles
-    lyt_crossing.resize({5, 5});
+    lyt_crossing.resize(aspect_ratio<cart_gate_clk_lyt>{5, 5});
 
     // move the PO from tile (3, 2) to tile (2, 3) but keep its child on tile (2, 2)
     lyt_crossing.move_node(lyt_crossing.get_node({3, 2}), {2, 3},
@@ -108,7 +108,7 @@ TEST_CASE("Update 2D cell-level bounding box", "[bounding-box]")
     bounding_box_2d bb_and{lyt_and};
 
     // resize the layout to size of 8 x 8 cells
-    lyt_and.resize({7, 7});
+    lyt_and.resize(aspect_ratio<qca_cell_clk_lyt>{7, 7});
 
     // erase an input cell and the constant cell
     lyt_and.assign_cell_type({0, 2}, qca_technology::cell_type::EMPTY);

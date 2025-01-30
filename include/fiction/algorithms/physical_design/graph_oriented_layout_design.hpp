@@ -1039,7 +1039,7 @@ class graph_oriented_layout_design_impl
 
         coord_vec_type<ObstrLyt> possible_positions{};
 
-        layout.resize({layout.x() + 1, layout.y() + 1, 1});
+        layout.resize(aspect_ratio<ObstrLyt>{layout.x() + 1, layout.y() + 1, 1});
         const tile<ObstrLyt> drain{layout.x(), layout.y(), 0};
 
         // check if a path from the input to the drain exists
@@ -1083,13 +1083,13 @@ class graph_oriented_layout_design_impl
             }
             if (count_expansions >= expansion_limit)
             {
-                layout.resize({layout.x() - 1, layout.y() - 1, 1});
+                layout.resize(aspect_ratio<ObstrLyt>{layout.x() - 1, layout.y() - 1, 1});
 
                 return possible_positions;
             }
         }
 
-        layout.resize({layout.x() - 1, layout.y() - 1, 1});
+        layout.resize(aspect_ratio<ObstrLyt>{layout.x() - 1, layout.y() - 1, 1});
 
         return possible_positions;
     }
@@ -1173,7 +1173,7 @@ class graph_oriented_layout_design_impl
 
             if (!check_path(layout, pre_t, new_pos, new_gate_location::DEST, planar).empty())
             {
-                layout.resize({layout.x() + 1, layout.y() + 1, 1});
+                layout.resize(aspect_ratio<ObstrLyt>{layout.x() + 1, layout.y() + 1, 1});
                 const tile<ObstrLyt> drain{layout.x(), layout.y(), 0};
 
                 if (!check_path(layout, new_pos, drain, new_gate_location::SRC, planar).empty())
@@ -1182,7 +1182,7 @@ class graph_oriented_layout_design_impl
                     count_expansions++;
                 }
 
-                layout.resize({layout.x() - 1, layout.y() - 1, 1});
+                layout.resize(aspect_ratio<ObstrLyt>{layout.x() - 1, layout.y() - 1, 1});
             }
         };
 
@@ -1250,7 +1250,7 @@ class graph_oriented_layout_design_impl
 
                 if (!check_path(layout, pre2_t, new_pos, new_gate_location::DEST, planar).empty())
                 {
-                    layout.resize({layout.x() + 1, layout.y() + 1, 1});
+                    layout.resize(aspect_ratio<ObstrLyt>{layout.x() + 1, layout.y() + 1, 1});
                     const tile<ObstrLyt> drain{layout.x(), layout.y(), 0};
 
                     if (!check_path(layout, new_pos, drain, new_gate_location::SRC, planar).empty())
@@ -1259,7 +1259,7 @@ class graph_oriented_layout_design_impl
                         count_expansions++;
                     }
 
-                    layout.resize({layout.x() - 1, layout.y() - 1, 1});
+                    layout.resize(aspect_ratio<ObstrLyt>{layout.x() - 1, layout.y() - 1, 1});
                 }
 
                 for (const auto& el : path)
@@ -1335,11 +1335,11 @@ class graph_oriented_layout_design_impl
     {
         const auto check_tile = [&](const auto& t) noexcept
         {
-            layout.resize({layout.x() + 1, layout.y() + 1, 1});
+            layout.resize(aspect_ratio<ObstrLyt>{layout.x() + 1, layout.y() + 1, 1});
             const tile<ObstrLyt> drain{layout.x(), layout.y(), 0};
 
             const bool path_exists = !check_path(layout, t, drain, new_gate_location::DEST, ssg.planar).empty();
-            layout.resize({layout.x() - 1, layout.y() - 1, 1});
+            layout.resize(aspect_ratio<ObstrLyt>{layout.x() - 1, layout.y() - 1, 1});
 
             return path_exists;
         };
@@ -1579,12 +1579,12 @@ class graph_oriented_layout_design_impl
         if (position.x == layout.x() && layout.x() < (max_layout_width - 1) &&
             !ssg.network.is_po(ssg.nodes_to_place[place_info.current_node - 1]))
         {
-            layout.resize({layout.x() + 1, layout.y(), layout.z()});
+            layout.resize(aspect_ratio<ObstrLyt>{layout.x() + 1, layout.y(), layout.z()});
         }
         if (position.y == layout.y() && layout.y() < (max_layout_height - 1) &&
             !ssg.network.is_po(ssg.nodes_to_place[place_info.current_node - 1]))
         {
-            layout.resize({layout.x(), layout.y() + 1, layout.z()});
+            layout.resize(aspect_ratio<ObstrLyt>{layout.x(), layout.y() + 1, layout.z()});
         }
     }
     std::uint64_t calculate_cost(const Lyt& layout, graph_oriented_layout_design_params::cost_objective cost_function)
@@ -1791,7 +1791,7 @@ class graph_oriented_layout_design_impl
                 fiction::post_layout_optimization(layout, plo_params);
 
                 const auto bb_after_plo = fiction::bounding_box_2d(layout);
-                layout.resize({bb_after_plo.get_max().x, bb_after_plo.get_max().y, layout.z()});
+                layout.resize(aspect_ratio<ObstrLyt>{bb_after_plo.get_max().x, bb_after_plo.get_max().y, layout.z()});
 
                 desired_cost = calculate_cost(layout, ps.cost);
 

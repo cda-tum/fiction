@@ -192,7 +192,7 @@ class exact_impl
         lower_bound = static_cast<decltype(lower_bound)>(ntk->num_gates() + ntk->num_pis());
 
         // NOLINTNEXTLINE(*-prefer-member-initializer)
-        ari = aspect_ratio_iterator<typename Lyt::aspect_ratio>{
+        ari = aspect_ratio_iterator<typename Lyt::coordinate>{
             ps.fixed_size ? std::min(static_cast<uint64_t>(ps.upper_bound_area),
                                      static_cast<uint64_t>(ps.upper_bound_x * ps.upper_bound_y)) :
                             static_cast<uint64_t>(lower_bound)};
@@ -241,11 +241,11 @@ class exact_impl
     /**
      * Iterator for the factorization of possible aspect ratios.
      */
-    aspect_ratio_iterator<typename Lyt::aspect_ratio> ari{0};
+    aspect_ratio_iterator<typename Lyt::coordinate> ari{0};
     /**
      * Aspect ratio of found result. Only needed for the asynchronous case.
      */
-    std::optional<typename Lyt::aspect_ratio> result_aspect_ratio;
+    std::optional<typename Lyt::coordinate> result_aspect_ratio;
     /**
      * Restricts access to the aspect_ratio_iterator and the result_aspect_ratio.
      */
@@ -290,7 +290,7 @@ class exact_impl
          * @param ar Aspect ratio to evaluate.
          * @return `true` if ar can safely be skipped because it is UNSAT anyway.
          */
-        [[nodiscard]] bool skippable(const typename Lyt::aspect_ratio& ar) const noexcept
+        [[nodiscard]] bool skippable(const typename Lyt::coordinate& ar) const noexcept
         {
             // skip aspect ratios that extend beyond the specified upper bounds
             if ((ar.x + 1) * (ar.y + 1) > params.upper_bound_area || ar.x >= params.upper_bound_x ||
@@ -344,9 +344,9 @@ class exact_impl
          *
          * @param ar Current aspect ratio to work on.
          */
-        void update(const typename Lyt::aspect_ratio& ar) noexcept
+        void update(const typename Lyt::coordinate& ar) noexcept
         {
-            layout.resize({ar.x, ar.y, params.crossings ? 1 : 0});
+            layout.resize(aspect_ratio<Lyt>{ar.x, ar.y, params.crossings ? 1 : 0});
             check_point = std::make_shared<solver_check_point>(fetch_solver(ar));
             ++lc;
             solver = check_point->state->solver;
@@ -399,7 +399,7 @@ class exact_impl
          *
          * @param ar Key to storing the current solver state.
          */
-        void store_solver_state(const typename Lyt::aspect_ratio& ar) noexcept
+        void store_solver_state(const typename Lyt::coordinate& ar) noexcept
         {
             solver_tree[ar] = check_point->state;
         }
@@ -529,7 +529,7 @@ class exact_impl
          * strategy using factorizations is kept and several solvers are employed that can be reused at a later point.
          * In the example, the 4 x 4 solver would be stored and revisited when 4 x 5 is to be explored.
          */
-        std::unordered_map<typename Lyt::aspect_ratio, state_ptr> solver_tree{};
+        std::unordered_map<typename Lyt::coordinate, state_ptr> solver_tree{};
         /**
          * Current solver checkpoint extracted from the solver tree.
          */
@@ -567,7 +567,7 @@ class exact_impl
          * @return Solver state associated with an aspect ratio of size x - 1 * y or x * y - 1 and, additionally, the
          * tiles new to the solver. If no such solver is available, a new one is created.
          */
-        [[nodiscard]] solver_check_point fetch_solver(const typename Lyt::aspect_ratio& ar)
+        [[nodiscard]] solver_check_point fetch_solver(const typename Lyt::coordinate& ar)
         {
             const auto create_assumptions = [this](const solver_state& state) -> z3::expr_vector
             {
@@ -2837,7 +2837,7 @@ class exact_impl
         /**
          * Currently examined layout aspect ratio.
          */
-        typename Lyt::aspect_ratio worker_aspect_ratio;
+        typename Lyt::coordinate worker_aspect_ratio;
     };
     /**
      * Thread function for the asynchronous solving strategy. It registers its own context in the given list of
@@ -2861,7 +2861,7 @@ class exact_impl
 
         while (true)
         {
-            typename Lyt::aspect_ratio ar;
+            typename Lyt::coordinate ar;
 
             // mutually exclusive access to the aspect ratio iterator
             {

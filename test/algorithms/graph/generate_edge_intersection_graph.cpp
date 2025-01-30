@@ -102,7 +102,7 @@ TEST_CASE("EPG on 2x2 layouts", "[generate-edge-intersection-graph]")
         }
         SECTION("Unsatisfiable objective")
         {
-            layout.resize({0, 2});
+            layout.resize(aspect_ratio<gate_lyt>{0, 2});
             // (0,2) --> (0,0), (0,0) --> (0,2)
             const std::vector<routing_objective<gate_lyt>> objectives{{{0, 2}, {0, 0}}, {{0, 0}, {0, 2}}};
 
