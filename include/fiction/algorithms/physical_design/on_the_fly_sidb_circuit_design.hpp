@@ -9,7 +9,6 @@
 #include "fiction/algorithms/physical_design/exact.hpp"
 #include "fiction/technology/cell_ports.hpp"
 #include "fiction/technology/fcn_gate_library.hpp"
-#include "fiction/technology/sidb_defect_surface.hpp"
 #include "fiction/technology/sidb_on_the_fly_gate_library.hpp"
 #include "fiction/technology/sidb_skeleton_bestagon_library.hpp"
 #include "fiction/technology/sidb_surface_analysis.hpp"
@@ -77,6 +76,8 @@ struct on_the_fly_sidb_circuit_design_params
 
 /**
  * Statistics for the on-the-fly defect-aware circuit design.
+ *
+ * @tparam GateLyt Gate-level layout type.
  */
 template <typename GateLyt>
 struct on_the_fly_circuit_design_on_defective_surface_stats
@@ -119,7 +120,7 @@ struct on_the_fly_circuit_design_on_defective_surface_stats
  * @param params The parameters used for designing the circuit, encapsulated in an
  * `on_the_fly_sidb_circuit_design_params` object.
  * @param stats Pointer to a structure for collecting statistics. If `nullptr`, statistics are discarded.
- * @return A `sidb_defect_surface<CellLyt>` representing the designed circuit on the defective surface.
+ * @return Layout representing the designed circuit on the defective surface.
  */
 template <typename Ntk, typename CellLyt, typename GateLyt>
 [[nodiscard]] CellLyt on_the_fly_sidb_circuit_design_on_defective_surface(
@@ -224,7 +225,7 @@ template <typename Ntk, typename CellLyt, typename GateLyt>
  * @param params The parameters used for designing the circuit, encapsulated in an
  * `on_the_fly_sidb_circuit_design_params` object.
  * @param stats Pointer to a structure for collecting statistics. If `nullptr`, statistics are discarded.
- * @return A `CellLyt` representing the designed SiDB circuit.
+ * @return Layout representing the designed SiDB circuit.
  */
 template <typename CellLyt, typename GateLyt>
 [[nodiscard]] CellLyt on_the_fly_sidb_circuit_design(const GateLyt&                                        gate_lyt,
