@@ -32,7 +32,6 @@ namespace pyfiction
 inline void offset_coordinate(pybind11::module& m)
 {
     namespace py = pybind11;
-    namespace py = pybind11;
 
     py::class_<py_offset_coordinate>(m, "offset_coordinate", DOC(fiction_offset_ucoord_t))
         .def(py::init<>(), DOC(fiction_offset_ucoord_t_ucoord_t))
@@ -93,10 +92,10 @@ inline void offset_coordinate(pybind11::module& m)
 inline void cube_coordinate(pybind11::module& m)
 {
     namespace py = pybind11;
-    namespace py = pybind11;
 
     py::class_<py_cube_coordinate>(m, "cube_coordinate", DOC(fiction_cube_coord_t))
         .def(py::init<>(), DOC(fiction_cube_coord_t_coord_t))
+        .def(py::init<const uint64_t>(), py::arg("int_repr"), DOC(fiction_cube_coord_t_coord_t_2))
         .def(py::init<const decltype(py_cube_coordinate().x), const decltype(py_cube_coordinate().y),
                       const decltype(py_cube_coordinate().z)>(),
              py::arg("x"), py::arg("y"), py::arg("z") = 0, DOC(fiction_cube_coord_t_coord_t_2))
@@ -149,7 +148,6 @@ inline void cube_coordinate(pybind11::module& m)
  */
 inline void siqad_coordinate(pybind11::module& m)
 {
-    namespace py = pybind11;
     namespace py = pybind11;
 
     py::class_<py_siqad_coordinate>(m, "siqad_coordinate", DOC(fiction_siqad_coord_t))

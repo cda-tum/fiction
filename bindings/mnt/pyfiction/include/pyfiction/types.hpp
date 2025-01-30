@@ -43,41 +43,57 @@ using py_siqad_coordinate  = fiction::siqad::coord_t;
 /**
  * Cartesian layout.
  */
-using py_cartesian_layout = fiction::cartesian_layout<py_offset_coordinate>;
+using py_cartesian_layout                  = fiction::cartesian_layout<py_offset_coordinate>;
+using py_cartesian_layout_cube_coordinates = fiction::cartesian_layout<py_cube_coordinate>;
 /**
  * Shifted Cartesian layout.
  */
 using py_shifted_cartesian_layout =
     fiction::shifted_cartesian_layout<py_offset_coordinate, fiction::odd_column_cartesian>;
+using py_shifted_cartesian_layout_cube_coordinates =
+    fiction::shifted_cartesian_layout<py_cube_coordinate, fiction::odd_column_cartesian>;
 /**
  * Hexagonal layout.
  */
-using py_hexagonal_layout = fiction::hexagonal_layout<py_offset_coordinate, fiction::even_row_hex>;
+using py_hexagonal_layout                  = fiction::hexagonal_layout<py_offset_coordinate, fiction::even_row_hex>;
+using py_hexagonal_layout_cube_coordinates = fiction::hexagonal_layout<py_cube_coordinate, fiction::even_row_hex>;
 /**
  * Cartesian clocked layout.
  */
 using py_cartesian_clocked_layout = fiction::clocked_layout<fiction::tile_based_layout<py_cartesian_layout>>;
+using py_cartesian_clocked_layout_cube_coordinates =
+    fiction::clocked_layout<fiction::tile_based_layout<py_cartesian_layout_cube_coordinates>>;
 /**
  * Shifted Cartesian clocked layout.
  */
 using py_shifted_cartesian_clocked_layout =
     fiction::clocked_layout<fiction::tile_based_layout<py_shifted_cartesian_layout>>;
+using py_shifted_cartesian_clocked_layout_cube_coordinates =
+    fiction::clocked_layout<fiction::tile_based_layout<py_shifted_cartesian_layout_cube_coordinates>>;
 /**
  * Hexagonal clocked layout.
  */
 using py_hexagonal_clocked_layout = fiction::clocked_layout<fiction::tile_based_layout<py_hexagonal_layout>>;
+using py_hexagonal_clocked_layout_cube_coordinates =
+    fiction::clocked_layout<fiction::tile_based_layout<py_hexagonal_layout_cube_coordinates>>;
 /**
  * Cartesian gate layout.
  */
 using py_cartesian_gate_layout = fiction::gate_level_layout<py_cartesian_clocked_layout>;
+using py_cartesian_gate_layout_cube_coordinates =
+    fiction::gate_level_layout<py_cartesian_clocked_layout_cube_coordinates>;
 /**
  * Shifted Cartesian gate layout.
  */
 using py_shifted_cartesian_gate_layout = fiction::gate_level_layout<py_shifted_cartesian_clocked_layout>;
+using py_shifted_cartesian_gate_layout_cube_coordinates =
+    fiction::gate_level_layout<py_shifted_cartesian_clocked_layout_cube_coordinates>;
 /**
  * Hexagonal gate layout.
  */
 using py_hexagonal_gate_layout = fiction::gate_level_layout<py_hexagonal_clocked_layout>;
+using py_hexagonal_gate_layout_cube_coordinates =
+    fiction::gate_level_layout<py_hexagonal_clocked_layout_cube_coordinates>;
 /**
  * Cartesian gate-level obstruction layout.
  */
@@ -95,19 +111,24 @@ using py_hexagonal_obstruction_layout = fiction::obstruction_layout<py_hexagonal
  */
 template <typename Technology>
 using py_cartesian_cell_layout = fiction::cell_level_layout<Technology, py_cartesian_clocked_layout>;
+template <typename Technology>
+using py_cartesian_cell_layout_cube_coordinates =
+    fiction::cell_level_layout<Technology, py_cartesian_clocked_layout_cube_coordinates>;
 /**
  * QCA cell layout.
  */
-using py_qca_layout = py_cartesian_cell_layout<fiction::qca_technology>;
+using py_qca_layout                  = py_cartesian_cell_layout<fiction::qca_technology>;
+using py_qca_layout_cube_coordinates = py_cartesian_cell_layout_cube_coordinates<fiction::qca_technology>;
 /**
  * iNML cell layout.
  */
-using py_inml_layout = py_cartesian_cell_layout<fiction::inml_technology>;
+using py_inml_layout                  = py_cartesian_cell_layout<fiction::inml_technology>;
+using py_inml_layout_cube_coordinates = py_cartesian_cell_layout_cube_coordinates<fiction::inml_technology>;
 /**
  * SiDB cell layout.
  */
-using py_sidb_layout = py_cartesian_cell_layout<fiction::sidb_technology>;
-
+using py_sidb_layout                  = py_cartesian_cell_layout<fiction::sidb_technology>;
+using py_sidb_layout_cube_coordinates = py_cartesian_cell_layout_cube_coordinates<fiction::sidb_technology>;
 /**
  * SiDB lattice layout.
  */

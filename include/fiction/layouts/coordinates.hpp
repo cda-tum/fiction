@@ -375,9 +375,36 @@ struct coord_t
             y{static_cast<decltype(y)>(y_)},
             x{static_cast<decltype(x)>(x_)}
     {}
+    /**
+     * Standard constructor. Instantiates a coordinate from an uint64_t, where the positions are encoded in the
+     * following four parts of the unsigned 64-bit integer (from MSB to LSB):
+     *  - 1 bit for the dead indicator
+     *  - 1 bit for the z position
+     *  - 31 bit for the y position
+     *  - 31 bit for the x position
+     *
+     * @param t Unsigned 64-bit integer to instantiate the coordinate from.
+     */
+    constexpr explicit coord_t(const uint64_t t) noexcept :
+            d{static_cast<decltype(d)>(t >> 63ull)},
+            z{static_cast<decltype(z)>((t << 1ull) >> 63ull)},
+            y{static_cast<decltype(y)>((t << 2ull) >> 33ull)},
+            x{static_cast<decltype(x)>((t << 33ull) >> 33ull)}
+    {}
 
     // NOLINTEND(readability-identifier-naming)
 
+    /**
+     * Allows explicit conversion to `uint64_t`. Segments an unsigned 64-bit integer into four parts (from MSB to LSB):
+     *  - 1 bit for the dead indicator
+     *  - 1 bit for the z position
+     *  - 31 bit for the y position
+     *  - 31 bit for the x position
+     */
+    explicit constexpr operator uint64_t() const noexcept
+    {
+        return (((((((static_cast<uint64_t>(d)) << 1ull) | z) << 31ull) | y) << 31ull) | x);
+    }
     /**
      * Returns whether the coordinate is dead.
      *
@@ -436,6 +463,16 @@ struct coord_t
     constexpr bool operator==(const coord_t& other) const noexcept
     {
         return d == other.d && z == other.z && y == other.y && x == other.x;
+    }
+    /**
+     * Compares against another coordinate's `uint64_t` representation for equality. Respects the dead indicator.
+     *
+     * @param other Right-hand side coordinate representation in `uint64_t` format.
+     * @return `true` iff this coordinate is equal to the converted one.
+     */
+    constexpr bool operator==(const uint64_t& other) const noexcept
+    {
+        return static_cast<uint64_t>(*this) == other;
     }
     /**
      * Compares against another coordinate for inequality. Respects the dead indicator.
@@ -1015,6 +1052,119 @@ class coord_iterator
     const CoordinateType aspect_ratio;
 
     CoordinateType coord;
+};
+
+/**
+ * Struct representing the aspect ratio of the cartesian layout.
+ *
+ * The `aspect_ratio` struct defines the starting and ending coordinates, effectively
+ * determining the size and position of the layout within a coordinate space.
+ */
+template <typename CoordinateType>
+struct aspect_ratio
+{
+    CoordinateType start;
+    CoordinateType end;
+
+    /**
+     * Default constructor. Initializes both start and end to (0, 0, 0).
+     *
+     * This creates a layout with a single point at the origin.
+     */
+    aspect_ratio() : start{0, 0, 0}, end{0, 0, 0} {}
+
+    /**
+     * Constructs an aspect_ratio from a single end coordinate.
+     *
+     * The start coordinate is initialized to (0, 0, 0), and the end coordinate is set to `e`.
+     *
+     * @param e The ending coordinate defining the layout's size.
+     */
+    explicit aspect_ratio(const CoordinateType& e) : start{0, 0, 0}, end{e} {}
+
+    /**
+     * Constructs an aspect_ratio from specified start and end coordinates.
+     *
+     * @param s The starting coordinate of the layout.
+     * @param e The ending coordinate of the layout.
+     */
+    aspect_ratio(const CoordinateType& s, const CoordinateType& e) : start{s}, end{e} {}
+
+    /**
+     * Templated constructor for initializing aspect_ratio with three integral coordinates.
+     *
+     * Initializes the start coordinate to (0, 0, 0) and sets the end coordinate to (x, y, z).
+     *
+     * @tparam X Type of the x-coordinate. Must be integral.
+     * @tparam Y Type of the y-coordinate. Must be integral.
+     * @tparam Z Type of the z-coordinate. Must be integral.
+     * @param x The x-coordinate value.
+     * @param y The y-coordinate value.
+     * @param z The z-coordinate value.
+     */
+    template <typename X, typename Y, typename Z,
+              typename = std::enable_if_t<std::is_integral_v<X> && std::is_integral_v<Y> && std::is_integral_v<Z>>>
+    aspect_ratio(X x, Y y, Z z) :
+            start{0, 0, 0},
+            end{static_cast<decltype(end.x)>(x), static_cast<decltype(end.y)>(y), static_cast<decltype(end.z)>(z)}
+    {}
+
+    /**
+     * Templated constructor for initializing aspect_ratio with two integral coordinates.
+     *
+     * Initializes the start coordinate to (0, 0, 0) and sets the end coordinate to (x, y, 0).
+     *
+     * @tparam X Type of the x-coordinate. Must be integral.
+     * @tparam Y Type of the y-coordinate. Must be integral.
+     * @param x The x-coordinate value.
+     * @param y The y-coordinate value.
+     */
+    template <typename X, typename Y, typename = std::enable_if_t<std::is_integral_v<X> && std::is_integral_v<Y>>>
+    aspect_ratio(X x, Y y) : start{0, 0, 0}, end{static_cast<decltype(end.x)>(x), static_cast<decltype(end.y)>(y), 0}
+    {}
+
+    /**
+     * Gets the x-coordinate of the end position.
+     *
+     * @return The x-coordinate value.
+     */
+    auto x() const
+    {
+        return end.x;
+    }
+
+    /**
+     * Gets the y-coordinate of the end position.
+     *
+     * @return The y-coordinate value.
+     */
+    auto y() const
+    {
+        return end.y;
+    }
+
+    /**
+     * Gets the z-coordinate of the end position.
+     *
+     * @return The z-coordinate value.
+     */
+    auto z() const
+    {
+        return end.z;
+    }
+
+    /**
+     * Equality operator for aspect_ratio.
+     *
+     * Compares two `aspect_ratio` instances for equality based on their end coordinates.
+     *
+     * @param other The other aspect_ratio instance to compare against.
+     * @return `true` if both aspect_ratios have the same end coordinates; `false` otherwise.
+     */
+    bool operator==(const aspect_ratio& other) const noexcept
+    {
+        return (x() == other.x()) && (y() == other.y()) && (z() == other.z());
+    }
 };
 
 }  // namespace fiction

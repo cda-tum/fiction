@@ -184,7 +184,7 @@ class mugen_handler
      * @param ratio Aspect ratio to evaluate.
      * @return `true` iff ratio can safely be skipped because it is UNSAT anyways.
      */
-    [[nodiscard]] bool skippable(const aspect_ratio<Lyt>& ratio) const noexcept
+    [[nodiscard]] bool skippable(const aspect_ratio_t<Lyt>& ratio) const noexcept
     {
         // skip aspect ratios that extend beyond the specified upper bounds
         if (ratio.x >= ps.upper_bound_x || ratio.y >= ps.upper_bound_y)
@@ -208,7 +208,7 @@ class mugen_handler
      *
      * @param ratio Current aspect ratio to work on.
      */
-    void update_aspect_ratio(const aspect_ratio<Lyt>& ratio) noexcept
+    void update_aspect_ratio(const aspect_ratio_t<Lyt>& ratio) noexcept
     {
         lyt.resize(ratio);
     }

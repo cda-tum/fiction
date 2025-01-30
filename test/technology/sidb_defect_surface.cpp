@@ -237,7 +237,7 @@ TEMPLATE_TEST_CASE(
          {{0, 12}, sidb_defect{sidb_defect_type::GUNK}},
          {{0, 13}, sidb_defect{sidb_defect_type::UNKNOWN}}}};
 
-    TestType lyt{aspect_ratio<TestType>{0, defect_map.size() - 1}};
+    TestType lyt{aspect_ratio_t<TestType>{0, defect_map.size() - 1}};
 
     sidb_defect_surface<TestType> defect_layout{lyt};
 
@@ -276,7 +276,7 @@ TEMPLATE_TEST_CASE(
     (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, odd_column_hex>>>),
     (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, even_column_hex>>>))
 {
-    TestType lyt{aspect_ratio<TestType>{11, 9}};
+    TestType lyt{aspect_ratio_t<TestType>{11, 9}};
 
     sidb_defect_surface<TestType> defect_layout{lyt};
 
@@ -431,7 +431,7 @@ TEMPLATE_TEST_CASE(
     (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, odd_column_hex>>>),
     (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, even_column_hex>>>))
 {
-    TestType lyt{aspect_ratio<TestType>{11, 9}};
+    TestType lyt{aspect_ratio_t<TestType>{11, 9}};
 
     sidb_defect_surface<TestType> defect_layout{lyt};
 
@@ -508,7 +508,7 @@ TEMPLATE_TEST_CASE(
     (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, odd_column_hex>>>),
     (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, even_column_hex>>>))
 {
-    TestType lyt{aspect_ratio<TestType>{4, 4}};
+    TestType lyt{aspect_ratio_t<TestType>{4, 4}};
 
     SECTION("DB")
     {

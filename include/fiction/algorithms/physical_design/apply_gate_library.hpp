@@ -39,8 +39,8 @@ class apply_gate_library_impl
   public:
     explicit apply_gate_library_impl(const GateLyt& lyt) : gate_lyt{lyt}, cell_lyt{}
     {
-        cell_lyt.resize(aspect_ratio<CellLyt>{((gate_lyt.x() + 1) * GateLibrary::gate_x_size()) - 1,
-                                              ((gate_lyt.y() + 1) * GateLibrary::gate_y_size()) - 1, gate_lyt.z()});
+        cell_lyt.resize(aspect_ratio_t<CellLyt>{((gate_lyt.x() + 1) * GateLibrary::gate_x_size()) - 1,
+                                                ((gate_lyt.y() + 1) * GateLibrary::gate_y_size()) - 1, gate_lyt.z()});
         cell_lyt.set_tile_size_x(GateLibrary::gate_x_size());
         cell_lyt.set_tile_size_y(GateLibrary::gate_y_size());
 

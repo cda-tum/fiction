@@ -270,7 +270,7 @@ TEST_CASE("Print Bestagon OR-gate without defect", "[print-charge-layout]")
 {
     using hex_gate_lyt = hex_odd_row_gate_clk_lyt;
 
-    hex_gate_lyt layout{aspect_ratio<hex_gate_lyt>{0, 0}};
+    hex_gate_lyt layout{aspect_ratio_t<hex_gate_lyt>{0, 0}};
 
     layout.create_or({}, {}, {0, 0});
 
@@ -429,7 +429,7 @@ TEST_CASE("Print Bestagon OR-gate with defect", "[print-charge-layout]")
 {
     using hex_gate_lyt = hex_odd_row_gate_clk_lyt;
 
-    hex_gate_lyt layout{aspect_ratio<hex_gate_lyt>{0, 0}};
+    hex_gate_lyt layout{aspect_ratio_t<hex_gate_lyt>{0, 0}};
 
     layout.create_or({}, {}, {0, 0});
 
@@ -586,7 +586,7 @@ TEST_CASE("Print Bestagon OR-gate", "[print-charge-layout]")
 {
     using hex_gate_lyt = hex_odd_row_gate_clk_lyt;
 
-    hex_gate_lyt layout{aspect_ratio<hex_gate_lyt>{0, 0}};
+    hex_gate_lyt layout{aspect_ratio_t<hex_gate_lyt>{0, 0}};
 
     constexpr const char* layout_print =
         " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
