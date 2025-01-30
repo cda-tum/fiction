@@ -221,7 +221,7 @@ class apply_gate_library_impl
         const std::function<cell<CellLyt>(GateLyt, tile<GateLyt>, cell<CellLyt>)> rel_to_abs_cell_pos =
             relative_to_absolute_cell_position<GateLibrary::gate_x_size(), GateLibrary::gate_y_size(), GateLyt,
                                                CellLyt>;
-      
+
         const cell<CellLyt> max_rel_coord = {GateLibrary::gate_x_size() - 1, GateLibrary::gate_y_size() - 1};
 
         const cell<CellLyt> first_odd_tile = {gate_lyt.x() != 0 ? 1 : 0, gate_lyt.y() != 0 ? 1 : 0};
