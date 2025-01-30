@@ -331,8 +331,8 @@ Physical Simulation of SiDBs
 Performing physical simulation of SiDB layouts is crucial for understanding layout behavior and
 facilitating rapid prototyping, eliminating the need for expensive and time-intensive fabrication processes.
 The command ``read --sqd`` (or ``read -s``) is used to import a SiDB layout from an sqd-file, a format compatible with `SiQAD <https://github.com/siqad/siqad>`_.
-The SiDB layout can be visualized using the ``print -c`` command. Currently, *fiction* provides two electrostatic physical simulators:
-the exact one *QuickExact* and the scalable one *QuickSim*.
+The SiDB layout can be visualized using the ``print -c`` command. Currently, *fiction* provides three electrostatic physical simulators:
+the two exact ones: *QuickExact* and *ClusterComplete*, and the scalable one *QuickSim*.
 
 QuickExact (``quickexact``)
 ###########################
@@ -350,6 +350,33 @@ Most important parameters:
 - Energy transition level (0/-) :math:`\mu_-` (``-m``)
 
 See ``quickexact -h`` for a full list.
+
+The simulated ground state charge distribution can be printed with ``print -c``.
+
+ClusterComplete (``clustercomplete``)
+#####################################
+
+*ClusterComplete* too serves as an exact simulator in much the same way as *QuickExact*, yet it introduces a new
+dimension of scalability for the purpose of SiDB logic simulation. For the first time, it enables exact simulation of
+layouts with multiple gates in base 3, incorporating efficient consideration of positive charges.
+Similar to *QuickExact*, it considers all possible charge distributions, though through intricate analysis of bounds on
+local potentials, it is able to prune charge assignments to clusters of SiDBs in a hierarchy, thus providing scalability
+to exact simulation of SiDB logic to an extent that was previously thought to be impossible.
+
+Most important parameters:
+
+- Relative permittivity :math:`\epsilon_r` (``-e``)
+- Thomas-Fermi screening length :math:`\lambda_{tf}` (``-l``)
+- Energy transition level (0/-) :math:`\mu_-` (``-m``)
+- Witness partitioning limits (``-w``, ``-o``)
+- Report pruning statistics (``-r``)
+
+See ``clustercomplete -h`` for a full list.
+
+Pruning statistics may be useful to optimise the efficacy of the first pruning stage with the witness partitioning
+limits to save time on time intensive simulation problems. These statistics can also provide an indication for the
+complexity of the remaining problem that is solved in the second stage. Thus, through experience with *ClusterComplete*
+and these statistics, the expected time required to terminate may be gauged.
 
 The simulated ground state charge distribution can be printed with ``print -c``.
 
@@ -389,7 +416,7 @@ Most important parameters:
 - Relative permittivity :math:`\epsilon_r` (``-e``)
 - Thomas-Fermi screening :math:`\lambda_{tf}` (``-l``)
 - Energy transition level (0/-) :math:`\mu_-` (``-m``)
-
+- SiDB simulation engine to use (``--engine``)
 
 Operational Domain (``opdom``)
 ##############################
@@ -430,6 +457,9 @@ the following options:
 - ``--flood_fill``/``-f``
 - ``--contour_tracing``/``-c``
 each of which start from a set of random samples, whose number has to be passed as an argument to the flag.
+
+Operational domain calculation may be powered by *QuickExact*, *ClusterComplete*, *ExGS* or *QuickSim*. The simulation
+engine to use can be set with ``--engine``.
 
 See ``opdom -h`` for a full list of arguments.
 

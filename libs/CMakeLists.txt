@@ -122,6 +122,20 @@ if (FICTION_Z3)
     endif ()
 endif ()
 
+# Enable the usage of ALGLIB by the ALGLIB Project
+option(FICTION_ALGLIB "Automatically download, include, and utilize ALGLIB by the ALGLIB project.")
+if (FICTION_ALGLIB)
+    message(STATUS "Usage of the Z3 solver was enabled.")
+
+    # Compile definition to guard include files
+    target_compile_definitions(libfiction INTERFACE FICTION_ALGLIB_ENABLED)
+
+    # Include and link ALGLIB
+    add_subdirectory(alglib-cmake EXCLUDE_FROM_ALL)
+    target_include_directories(libfiction SYSTEM INTERFACE alglib-cmake/src/cpp/src/headers)
+    target_link_system_libraries(libfiction INTERFACE ALGLIB)
+endif ()
+
 # If using GCC or Clang, find TBB if installed
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES ".*Clang")
     list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/") # include FindTBB.cmake

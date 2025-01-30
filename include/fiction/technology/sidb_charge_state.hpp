@@ -24,6 +24,27 @@ enum class sidb_charge_state : int8_t
     NONE     = 127  // assigned when layout cell is empty
 };
 /**
+ * Charge states of SiDBs for the context of base 2 simulation.
+ */
+static inline const std::vector<sidb_charge_state> SIDB_CHARGE_STATES_BASE_2{sidb_charge_state::NEGATIVE,
+                                                                             sidb_charge_state::NEUTRAL};
+/**
+ * Charge states of SiDBs for the context of base-3 (full base) simulation.
+ */
+static inline const std::vector<sidb_charge_state> SIDB_CHARGE_STATES_BASE_3{
+    sidb_charge_state::NEGATIVE, sidb_charge_state::NEUTRAL, sidb_charge_state::POSITIVE};
+/**
+ * Charge states of SiDBs for a given simulation base number. The full base states are returned for an invalid
+ * simulation base.
+ *
+ * @param base The simulation base number to get the associated SiDB charge states for.
+ * @return NEG, NEUT, POS for base 3 (full base), and NEG, NEUT otherwise, associated with base 2 simulation.
+ */
+[[nodiscard]] inline std::vector<sidb_charge_state> sidb_charge_states_for_base_number(const uint8_t base) noexcept
+{
+    return base == 2 ? SIDB_CHARGE_STATES_BASE_2 : SIDB_CHARGE_STATES_BASE_3;
+}
+/**
  * Converts the charge state into an integer (`-1`, `0`, `1`).
  *
  * @param cs SiDB charge state.
