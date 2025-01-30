@@ -37,14 +37,14 @@ void normalize_layout_coordinates(pybind11::module& m)
           DOC(fiction_normalize_layout_coordinates));
 }
 
-template <typename Lyt>
-void convert_to_siqad_coordinates(pybind11::module& m)
-{
-    namespace py = pybind11;
-
-    m.def("convert_layout_to_siqad_coordinates", &fiction::convert_layout_to_siqad_coordinates<Lyt>, py::arg("lyt"),
-          DOC(fiction_convert_layout_to_siqad_coordinates));
-}
+// template <typename Lyt>
+// void convert_to_siqad_coordinates(pybind11::module& m)
+// {
+//     namespace py = pybind11;
+//
+//     m.def("convert_layout_to_siqad_coordinates", &fiction::convert_layout_to_siqad_coordinates<Lyt>, py::arg("lyt"),
+//           DOC(fiction_convert_layout_to_siqad_coordinates));
+// }
 
 inline void random_coordinate(pybind11::module& m)
 {
@@ -66,18 +66,15 @@ inline void layout_utils(pybind11::module& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::num_adjacent_coordinates<py_cartesian_obstruction_layout>(m);
-    detail::num_adjacent_coordinates<py_cartesian_gate_layout>(m);
-    detail::num_adjacent_coordinates<py_shifted_cartesian_obstruction_layout>(m);
-    detail::num_adjacent_coordinates<py_shifted_cartesian_gate_layout>(m);
-    detail::num_adjacent_coordinates<py_hexagonal_obstruction_layout>(m);
-    detail::num_adjacent_coordinates<py_hexagonal_gate_layout>(m);
+    detail::num_adjacent_coordinates<py_cartesian_layout>(m);
+    detail::num_adjacent_coordinates<py_shifted_cartesian_layout>(m);
+    detail::num_adjacent_coordinates<py_hexagonal_layout>(m);
 
     detail::normalize_layout_coordinates<py_qca_layout>(m);
     detail::normalize_layout_coordinates<py_inml_layout>(m);
     detail::normalize_layout_coordinates<py_sidb_layout>(m);
 
-    detail::convert_to_siqad_coordinates<py_sidb_layout>(m);
+    // detail::convert_to_siqad_coordinates<py_sidb_layout>(m);
 
     detail::random_coordinate(m);
 }

@@ -21,7 +21,8 @@ inline void potential_to_distance_conversion(pybind11::module& m)
     namespace py = pybind11;
 
     m.def("potential_to_distance_conversion", &fiction::potential_to_distance_conversion, py::arg("potential"),
-          py::arg("params"), py::arg("precision"), DOC(fiction_potential_to_distance_conversion));
+          py::arg("params") = fiction::sidb_simulation_parameters{}, py::arg("precision") = 2,
+          DOC(fiction_potential_to_distance_conversion));
 }
 
 }  // namespace pyfiction

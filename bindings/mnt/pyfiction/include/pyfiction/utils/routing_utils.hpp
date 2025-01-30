@@ -39,7 +39,7 @@ void route_path(pybind11::module& m)
 
     m.def(
         "route_path",
-        [](Lyt& lyt, const std::vector<fiction::coordinate<Lyt>>& path)
+        [](Lyt& lyt, const std::vector<fiction::coordinate<Lyt>>& path) -> void
         {
             fiction::layout_coordinate_path<Lyt> converted_path{};
             converted_path.resize(path.size());
