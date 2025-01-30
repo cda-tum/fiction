@@ -249,7 +249,7 @@ void optimize_output_positions(Lyt& lyt) noexcept
     }
     // calculate bounding box
     auto bounding_box = bounding_box_2d(lyt);
-    lyt.resize(aspect_ratio<Lyt>{bounding_box.get_max().x, bounding_box.get_max().y, lyt.z()});
+    lyt.resize(aspect_ratio_t<Lyt>{bounding_box.get_max().x, bounding_box.get_max().y, lyt.z()});
 
     // check for misplaced POs in second last row and move them one row down
     for (uint64_t x = 0; x < lyt.x(); ++x)
@@ -299,7 +299,7 @@ void optimize_output_positions(Lyt& lyt) noexcept
 
     // update bounding box
     bounding_box.update_bounding_box();
-    lyt.resize(aspect_ratio<Lyt>{bounding_box.get_max().x, bounding_box.get_max().y, lyt.z()});
+    lyt.resize(aspect_ratio_t<Lyt>{bounding_box.get_max().x, bounding_box.get_max().y, lyt.z()});
 
     // check if PO is located in bottom right corner and relocation would save more tiles (only possible for layouts
     // with a single PO)
@@ -316,7 +316,7 @@ void optimize_output_positions(Lyt& lyt) noexcept
                               [&signals](const auto& fanin) { signals.push_back(fanin); });
 
             // resize layout
-            lyt.resize(aspect_ratio<Lyt>{lyt.x(), lyt.y() + 1, lyt.z()});
+            lyt.resize(aspect_ratio_t<Lyt>{lyt.x(), lyt.y() + 1, lyt.z()});
 
             // move PO one tile down and to the left
             lyt.move_node(lyt.get_node({lyt.x(), lyt.y() - 1}), {lyt.x() - 1, lyt.y(), 0}, signals);
@@ -332,7 +332,7 @@ void optimize_output_positions(Lyt& lyt) noexcept
                               [&signals](const auto& fanin) { signals.push_back(fanin); });
 
             // resize layout
-            lyt.resize(aspect_ratio<Lyt>{lyt.x() + 1, lyt.y(), lyt.z()});
+            lyt.resize(aspect_ratio_t<Lyt>{lyt.x() + 1, lyt.y(), lyt.z()});
 
             // move PO one tile up and to the right
             lyt.move_node(lyt.get_node({lyt.x() - 1, lyt.y()}), {lyt.x(), lyt.y() - 1, 0}, signals);
@@ -478,7 +478,7 @@ class post_layout_optimization_impl
 
                 // resize the layout to fit within the new bounding box after relocations
                 const auto bounding_box = bounding_box_2d(layout);
-                layout.resize(aspect_ratio<Lyt>{bounding_box.get_max().x, bounding_box.get_max().y, layout.z()});
+                layout.resize(aspect_ratio_t<Lyt>{bounding_box.get_max().x, bounding_box.get_max().y, layout.z()});
             }
         }
 
@@ -490,7 +490,7 @@ class post_layout_optimization_impl
 
         // final bounding box calculation and layout resizing
         const auto final_bounding_box = bounding_box_2d(layout);
-        layout.resize(aspect_ratio<Lyt>{final_bounding_box.get_max().x, final_bounding_box.get_max().y, layout.z()});
+        layout.resize(aspect_ratio_t<Lyt>{final_bounding_box.get_max().x, final_bounding_box.get_max().y, layout.z()});
 
         // update final layout statistics
         pst.x_size_after = layout.x() + 1;
@@ -1052,7 +1052,7 @@ class post_layout_optimization_impl
         }
 
         // remove children of gate to be moved
-        lyt.resize(aspect_ratio<ObstrLyt>{lyt.x() + 2, lyt.y(), lyt.z()});
+        lyt.resize(aspect_ratio_t<ObstrLyt>{lyt.x() + 2, lyt.y(), lyt.z()});
         lyt.move_node(lyt.get_node(old_pos), {lyt.x(), 0}, {});
 
         // update children of fanouts
@@ -1075,7 +1075,7 @@ class post_layout_optimization_impl
 
         // remove children of gate to be moved
         lyt.move_node(lyt.get_node({lyt.x(), 0}), old_pos, {});
-        lyt.resize(aspect_ratio<ObstrLyt>{lyt.x() - 2, lyt.y(), lyt.z()});
+        lyt.resize(aspect_ratio_t<ObstrLyt>{lyt.x() - 2, lyt.y(), lyt.z()});
 
         // fix wires that cross over empty tiles
         fix_wires(lyt, to_clear);

@@ -1040,7 +1040,7 @@ void delete_wires(Lyt& lyt, WiringReductionLyt& wiring_reduction_layout,
     const auto bounding_box = bounding_box_2d(lyt);
 
     // resize the layout to the optimized size
-    lyt.resize(aspect_ratio<Lyt>{bounding_box.get_max().x, bounding_box.get_max().y, lyt.z()});
+    lyt.resize(aspect_ratio_t<Lyt>{bounding_box.get_max().x, bounding_box.get_max().y, lyt.z()});
 }
 
 template <typename Lyt>
@@ -1148,7 +1148,7 @@ class wiring_reduction_impl
 
         // calculate the final bounding box and resize the layout accordingly
         const auto bounding_box = bounding_box_2d(layout);
-        layout.resize(aspect_ratio<Lyt>{bounding_box.get_max().x, bounding_box.get_max().y, layout.z()});
+        layout.resize(aspect_ratio_t<Lyt>{bounding_box.get_max().x, bounding_box.get_max().y, layout.z()});
 
         // update final layout statistics
         pst.x_size_after = layout.x() + 1;

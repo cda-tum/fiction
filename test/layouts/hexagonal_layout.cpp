@@ -115,7 +115,7 @@ TEST_CASE("Deep copy hexagonal layout", "[hexagonal-layout]")
 template <typename Lyt>
 void check_identity_conversion()
 {
-    Lyt layout{aspect_ratio<Lyt>{10, 10}};
+    Lyt layout{aspect_ratio_t<Lyt>{10, 10}};
 
     layout.foreach_coordinate([&layout](const auto& coord)
                               { CHECK(layout.to_offset_coordinate(layout.to_cube_coordinate(coord)) == coord); });
@@ -244,7 +244,7 @@ TEST_CASE("Coordinate conversions", "[hexagonal-layout]")
 template <typename Lyt>
 void check_visited_coordinates()
 {
-    aspect_ratio<Lyt> ar{9, 9, 1};
+    aspect_ratio_t<Lyt> ar{9, 9, 1};
 
     Lyt layout{ar};
 
@@ -275,7 +275,7 @@ void check_visited_coordinates()
 
     visited.clear();
 
-    aspect_ratio<Lyt> ar_ground{ar.x, ar.y, 0};
+    aspect_ratio_t<Lyt> ar_ground{ar.x, ar.y, 0};
 
     const auto check2 = [&visited, &ar_ground, &layout](const auto& c)
     {

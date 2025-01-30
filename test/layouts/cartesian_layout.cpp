@@ -59,7 +59,7 @@ TEST_CASE("Deep copy Cartesian layout", "[cartesian-layout]")
 
     auto copy = original.clone();
 
-    copy.resize(aspect_ratio<cartesian_layout<offset::ucoord_t>>{10, 10, 1});
+    copy.resize(aspect_ratio_t<cartesian_layout<offset::ucoord_t>>{10, 10, 1});
 
     CHECK(original.x() == 5);
     CHECK(original.y() == 5);
@@ -285,7 +285,7 @@ TEST_CASE("Cartesian layouts with SiQAD coordinates must have a z dimension of 1
 {
     using lyt = cartesian_layout<siqad::coord_t>;
 
-    CHECK(lyt{aspect_ratio<lyt>{0, 0}}.z() == 1);
-    CHECK(lyt{aspect_ratio<lyt>{9, 9}}.z() == 1);
-    CHECK(lyt{aspect_ratio<lyt>{42, 42, 1}}.z() == 1);
+    CHECK(lyt{aspect_ratio_t<lyt>{0, 0}}.z() == 1);
+    CHECK(lyt{aspect_ratio_t<lyt>{9, 9}}.z() == 1);
+    CHECK(lyt{aspect_ratio_t<lyt>{42, 42, 1}}.z() == 1);
 }

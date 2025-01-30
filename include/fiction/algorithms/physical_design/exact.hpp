@@ -346,7 +346,7 @@ class exact_impl
          */
         void update(const typename Lyt::coordinate& ar) noexcept
         {
-            layout.resize(aspect_ratio<Lyt>{ar.x, ar.y, params.crossings ? 1 : 0});
+            layout.resize(aspect_ratio_t<Lyt>{ar.x, ar.y, params.crossings ? 1 : 0});
             check_point = std::make_shared<solver_check_point>(fetch_solver(ar));
             ++lc;
             solver = check_point->state->solver;
