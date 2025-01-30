@@ -307,7 +307,7 @@ While enabling jemalloc through the above CMake is not beneficial to every appli
 .. note::
    Windows users need to install jemalloc manually. It can be done by following `these steps <https://github.com/jemalloc/jemalloc/blob/dev/INSTALL.md#building-for-windows>`_.
 
-.. note:: 
+.. note::
    Usage of jemalloc in *fiction* is not tested on macOS with the g++ compiler.
 
 Uninstall
