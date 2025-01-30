@@ -215,7 +215,7 @@ class apply_gate_library_impl
      * @param gate_lyt Gate-level layout of which the dimensions are read.
      * @return Aspect ratio for a cell-level layout that corresponds to the dimensions of the given gate-level layout.
      */
-    static aspect_ratio<CellLyt> get_aspect_ratio_for_cell_level_layout(const GateLyt& gate_lyt) noexcept
+    static aspect_ratio<CellLyt> determine_aspect_ratio_for_cell_level_layout(const GateLyt& gate_lyt) noexcept
     {
         using rel_to_abs_cell_pos = relative_to_absolute_cell_position<GateLibrary::gate_x_size(),
                                                                        GateLibrary::gate_y_size(), GateLyt, CellLyt>;
