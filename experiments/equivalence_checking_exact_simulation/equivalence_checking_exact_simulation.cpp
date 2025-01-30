@@ -82,7 +82,7 @@ int main()  // NOLINT
                     }
 
                     auto result_exgs       = exhaustive_ground_state_simulation(lyt, params);
-                    auto result_quickexact = quickexact(lyt, quickexact_params{params});
+                    auto result_quickexact = quickexact(lyt, quickexact_params<cell<sidb_100_cell_clk_lyt>>{params});
 
                     if (!check_simulation_results_for_equivalence(result_exgs, result_quickexact))
                     {
@@ -91,7 +91,7 @@ int main()  // NOLINT
                     }
 
 #if (FICTION_ALGLIB_ENABLED)
-                    clustercomplete_params cc_params{params};
+                    clustercomplete_params<cell<sidb_100_cell_clk_lyt>> cc_params{params};
                     cc_params.available_threads = 1;
 
                     auto result_clustercomplete = clustercomplete(lyt, cc_params);
