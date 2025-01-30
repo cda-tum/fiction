@@ -40,7 +40,7 @@ class apply_gate_library_impl
   public:
     explicit apply_gate_library_impl(const GateLyt& lyt) :
             gate_lyt{lyt},
-            cell_lyt{get_aspect_ratio_for_cell_level_layout(gate_lyt)}
+            cell_lyt{determine_aspect_ratio_for_cell_level_layout(gate_lyt)}
     {
         cell_lyt.set_tile_size_x(GateLibrary::gate_x_size());
         cell_lyt.set_tile_size_y(GateLibrary::gate_y_size());
