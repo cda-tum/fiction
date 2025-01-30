@@ -3956,15 +3956,6 @@ Returns:
     A pair of uint16_t values representing the number of horizontal
     and vertical SiDBs affected by the given defect type.)doc";
 
-static const char *__doc_fiction_defect_influence_domain =
-R"doc(A defect influence domain defines for each defect position the
-influence of the defect on the layout. Depending on the chosen
-definition of influence, this can either mean that the operational
-status or the ground state of the layout is changed due to the
-presence of the defect.)doc";
-
-static const char *__doc_fiction_defect_influence_domain_influence_information = R"doc(This stores for each defect position the condition of the layout.)doc";
-
 static const char *__doc_fiction_defect_influence_grid_search =
 R"doc(This algorithm uses a grid search to determine the defect influence
 domain. The grid search is performed by exhaustively sweeping all
@@ -11920,8 +11911,8 @@ Returns:
 static const char *__doc_fiction_find_key_with_tolerance =
 R"doc(This function searches for a floating-point value specified by the
 `key` in the provided map `map`, applying a tolerance specified by
-`fiction::physical_constants::SCALED_EPSILON`. Each key in the map
-is compared to the specified key within this tolerance.
+`fiction::physical_constants::SCALED_EPSILON`. Each key in the map is
+compared to the specified key within this tolerance.
 
 Template parameter ``MapType``:
     The type of the map containing parameter points as keys.
