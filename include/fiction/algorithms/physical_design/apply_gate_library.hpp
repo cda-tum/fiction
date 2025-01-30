@@ -285,7 +285,7 @@ template <typename CellLyt, typename GateLibrary, typename GateLyt, typename Par
     detail::apply_gate_library_impl<CellLyt, GateLibrary, GateLyt> p{lyt};
 
     // Running the gate library with the parameters
-    const auto result = p.template run_parameterized_gate_library<Params, CellLyt>(params, cell_lyt);
+    const auto result = p.template run_parameterized_gate_library<Params>(params, cell_lyt);
 
     return result;
 }
