@@ -513,7 +513,7 @@ class operational_domain_impl
         };
 
         // add the neighbors of each operational point to the queue
-        for (const auto& [param_point, status] : op_domain.domain_values)
+        for (const auto& [param_point, status] : op_domain.get_domain())
         {
             if (std::get<0>(status) == operational_status::OPERATIONAL)
             {
@@ -707,7 +707,7 @@ class operational_domain_impl
 
         sidb_simulation_parameters simulation_parameters = params.operational_params.simulation_parameters;
 
-        for (const auto& [param_point, status] : op_domain.domain_values)
+        for (const auto& [param_point, status] : op_domain.get_domain())
         {
             if constexpr (std::is_same_v<OpDomain, operational_domain>)
             {
@@ -758,7 +758,6 @@ class operational_domain_impl
                 }
 
                 const auto excited_state_number = std::distance(energy_dist.cbegin(), position);
-                // suitable_params_domain.domain_values.emplace(param_point, excited_state_number);
                 suitable_params_domain.add_value(param_point, std::make_tuple(excited_state_number));
             }
         }
@@ -1104,14 +1103,14 @@ class operational_domain_impl
 
         const auto operational = [this, &param_point]()
         {
-            op_domain.domain_values.try_emplace(param_point, std::make_tuple(operational_status::OPERATIONAL));
+            op_domain.add_value(param_point, std::make_tuple(operational_status::OPERATIONAL));
 
             return operational_status::OPERATIONAL;
         };
 
         const auto non_operational = [this, &param_point]()
         {
-            op_domain.domain_values.try_emplace(param_point, std::make_tuple(operational_status::NON_OPERATIONAL));
+            op_domain.add_value(param_point, std::make_tuple(operational_status::NON_OPERATIONAL));
 
             return operational_status::NON_OPERATIONAL;
         };
@@ -1538,7 +1537,7 @@ class operational_domain_impl
         stats.num_simulator_invocations            = num_simulator_invocations.load();
         stats.num_evaluated_parameter_combinations = num_evaluated_parameter_combinations.load();
 
-        for (const auto& [param_point, status] : op_domain.domain_values)
+        for (const auto& [param_point, status] : op_domain.get_domain())
         {
             if (std::get<0>(status) == operational_status::OPERATIONAL)
             {

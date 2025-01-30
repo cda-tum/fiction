@@ -4,6 +4,7 @@ import unittest
 from mnt.pyfiction import (
     create_and_tt,
     create_xor_tt,
+    operational_domain,
     operational_domain_contour_tracing,
     operational_domain_flood_fill,
     operational_domain_grid_search,
@@ -11,10 +12,13 @@ from mnt.pyfiction import (
     operational_domain_random_sampling,
     operational_domain_stats,
     operational_domain_value_range,
+    operational_status,
+    parameter_point,
     read_sqd_layout_100,
     read_sqd_layout_111,
     sidb_simulation_engine,
     sweep_parameter,
+    temperature_operational_domain,
 )
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -76,6 +80,46 @@ class TestOperationalDomain(unittest.TestCase):
         stats_contour_tracing = operational_domain_stats()
         operational_domain_contour_tracing(lyt, [create_and_tt()], 100, params, stats_contour_tracing)
         self.assertGreater(stats_contour_tracing.num_operational_parameter_combinations, 0)
+
+    def test_temperature_operational_domain(self):
+        # Create an instance of temperature_operational_domain
+        temp_domain = temperature_operational_domain()
+
+        # Create test key and value
+        key = parameter_point([1.0, 2.0, 3.0])  # Example parameter point
+        value = (operational_status.OPERATIONAL, 0.1)  # Example tuple value
+
+        # Add a value to the domain
+        temp_domain.add_value(key, value)
+
+        self.assertEqual(temp_domain.get_value(key), value)
+
+        # Test retrieving a value that doesn't exist
+        missing_key = parameter_point([4.0, 5.0, 6.0])
+        self.assertIsNone(temp_domain.get_value(missing_key))
+
+        # Modify dimensions and verify
+        temp_domain.dimensions = [sweep_parameter.EPSILON_R, sweep_parameter.LAMBDA_TF]
+        self.assertEqual(temp_domain.dimensions, [sweep_parameter.EPSILON_R, sweep_parameter.LAMBDA_TF])
+
+    def test_operational_domain(self):
+        # Create an instance of operational_domain
+        op_domain = operational_domain()
+
+        # Create test key and value
+        key = parameter_point([10.0, 20.0, 30.0])  # Example parameter point
+        value = (operational_status.NON_OPERATIONAL,)  # Example tuple value
+
+        # Add a value to the domain
+        op_domain.add_value(key, value)
+
+        # Test retrieving a value that doesn't exist
+        missing_key = parameter_point([7.0, 8.0, 9.0])
+        self.assertIsNone(op_domain.get_value(missing_key))
+
+        # Modify dimensions and verify
+        op_domain.dimensions = [sweep_parameter.EPSILON_R, sweep_parameter.LAMBDA_TF]
+        self.assertEqual(op_domain.dimensions, [sweep_parameter.EPSILON_R, sweep_parameter.LAMBDA_TF])
 
 
 if __name__ == "__main__":

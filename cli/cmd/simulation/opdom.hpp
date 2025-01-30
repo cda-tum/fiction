@@ -399,14 +399,14 @@ class opdom_command : public command
     /**
      * The operational domain.
      */
-    fiction::operational_domain<> op_domain{};
+    fiction::operational_domain op_domain{};
     /**
      * Writes the operational domain to the specified CSV file.
      */
     void write_op_domain()
     {
         // if the operational domain call was unsuccessful, do not attempt writing anything
-        if (op_domain.operational_values.empty())
+        if (op_domain.get_domain().empty())
         {
             reset_params();
             return;

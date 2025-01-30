@@ -74,35 +74,25 @@ inline void operational_domain(pybind11::module& m)
 
         ;
 
+    // todo update docu
     py::class_<fiction::temperature_operational_domain>(m, "temperature_operational_domain",
                                                         DOC(fiction_operational_domain))
         .def(py::init<>())
         .def_readwrite("dimensions", &fiction::temperature_operational_domain::dimensions,
                        DOC(fiction_operational_domain_dimensions))
-        .def_readwrite("operational_values", &fiction::temperature_operational_domain::domain_values,
-                       DOC(fiction_operational_domain_operational_values))
+        .def_readwrite("domain_values", &fiction::temperature_operational_domain::domain_values)
+        .def("get_value", &fiction::temperature_operational_domain::get_value, py::arg("point"))
+        .def("add_value", &fiction::temperature_operational_domain::add_value, py::arg("key"), py::arg("value"));
 
-        .def("get_value", &fiction::temperature_operational_domain::get_value, py::arg("point"),
-             DOC(fiction_operational_domain_get_value))
-
-        .def("add_value", &fiction::temperature_operational_domain::add_value, py::arg("key"), py::arg("value"),
-             DOC(fiction_operational_domain_add_value));
-
+    // todo update docu
     py::class_<fiction::operational_domain>(m, "operational_domain", DOC(fiction_operational_domain))
         .def(py::init<>())
         .def_readwrite("dimensions", &fiction::operational_domain::dimensions,
                        DOC(fiction_operational_domain_dimensions))
-        .def_readwrite("operational_values", &fiction::operational_domain::domain_values,
-                       DOC(fiction_operational_domain_operational_values))
-
-        .def("get_value", &fiction::operational_domain::get_value, py::arg("point"),
-             DOC(fiction_operational_domain_get_value))
-
-        .def("add_value", &fiction::operational_domain::add_value, py::arg("key"), py::arg("value"),
-             DOC(fiction_operational_domain_add_value))
-
-        .def("get_domain", &fiction::operational_domain::get_domain,
-             DOC(fiction_operational_domain_get_operational_domain))
+        .def_readwrite("domain_values", &fiction::operational_domain::domain_values)
+        .def("get_value", &fiction::operational_domain::get_value, py::arg("point"))
+        .def("add_value", &fiction::operational_domain::add_value, py::arg("key"), py::arg("value"))
+        .def("get_domain", &fiction::operational_domain::get_domain)
 
         ;
 
