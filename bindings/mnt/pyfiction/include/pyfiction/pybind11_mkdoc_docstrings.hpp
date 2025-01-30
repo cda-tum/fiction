@@ -397,6 +397,38 @@ static const char *__doc_fiction_area_stats_area = R"doc(Area requirements in nm
 
 static const char *__doc_fiction_area_stats_report = R"doc()doc";
 
+static const char *__doc_fiction_aspect_ratio =
+R"doc(Struct representing the aspect ratio of the cartesian layout.
+
+The `aspect_ratio` struct defines the starting and ending coordinates,
+effectively determining the size and position of the layout within a
+coordinate space.)doc";
+
+static const char *__doc_fiction_aspect_ratio_aspect_ratio =
+R"doc(Default constructor. Initializes both start and end to (0, 0, 0).
+
+This creates a layout with a single point at the origin.)doc";
+
+static const char *__doc_fiction_aspect_ratio_aspect_ratio_2 =
+R"doc(Constructs an aspect_ratio from a single end coordinate.
+
+The start coordinate is initialized to (0, 0, 0), and the end
+coordinate is set to `e`.
+
+Parameter ``e``:
+    The ending coordinate defining the layout's size.)doc";
+
+static const char *__doc_fiction_aspect_ratio_aspect_ratio_3 =
+R"doc(Constructs an aspect_ratio from specified start and end coordinates.
+
+Parameter ``s``:
+    The starting coordinate of the layout.
+
+Parameter ``e``:
+    The ending coordinate of the layout.)doc";
+
+static const char *__doc_fiction_aspect_ratio_end = R"doc()doc";
+
 static const char *__doc_fiction_aspect_ratio_iterator =
 R"doc(An iterator type that iterates over increasingly larger 2D aspect
 ratios via factorization, starting from a number of faces :math:`n`.
@@ -475,6 +507,8 @@ static const char *__doc_fiction_aspect_ratio_iterator_operator_mul = R"doc()doc
 static const char *__doc_fiction_aspect_ratio_iterator_operator_ne = R"doc()doc";
 
 static const char *__doc_fiction_aspect_ratio_iterator_operator_ne_2 = R"doc()doc";
+
+static const char *__doc_fiction_aspect_ratio_start = R"doc()doc";
 
 static const char *__doc_fiction_bancs_clocking =
 R"doc(Returns the BANCS clocking as defined in \"BANCS: Bidirectional
@@ -1372,40 +1406,6 @@ R"doc(Returns the layout's number of faces depending on the coordinate type.
 
 Returns:
     Area of layout.)doc";
-
-static const char *__doc_fiction_cartesian_layout_aspect_ratio =
-R"doc(Struct representing the aspect ratio of the cartesian layout.
-
-The `aspect_ratio` struct defines the starting and ending coordinates,
-effectively determining the size and position of the layout within a
-coordinate space.)doc";
-
-static const char *__doc_fiction_cartesian_layout_aspect_ratio_aspect_ratio =
-R"doc(Default constructor. Initializes both start and end to (0, 0, 0).
-
-This creates a layout with a single point at the origin.)doc";
-
-static const char *__doc_fiction_cartesian_layout_aspect_ratio_aspect_ratio_2 =
-R"doc(Constructs an aspect_ratio from a single end coordinate.
-
-The start coordinate is initialized to (0, 0, 0), and the end
-coordinate is set to `e`.
-
-Parameter ``e``:
-    The ending coordinate defining the layout's size.)doc";
-
-static const char *__doc_fiction_cartesian_layout_aspect_ratio_aspect_ratio_3 =
-R"doc(Constructs an aspect_ratio from specified start and end coordinates.
-
-Parameter ``s``:
-    The starting coordinate of the layout.
-
-Parameter ``e``:
-    The ending coordinate of the layout.)doc";
-
-static const char *__doc_fiction_cartesian_layout_aspect_ratio_end = R"doc()doc";
-
-static const char *__doc_fiction_cartesian_layout_aspect_ratio_start = R"doc()doc";
 
 static const char *__doc_fiction_cartesian_layout_below =
 R"doc(Returns the coordinate that is directly below a given coordinate `c`,
@@ -20215,9 +20215,9 @@ static const char *__doc_fmt_formatter_parse = R"doc()doc";
 
 static const char *__doc_fmt_formatter_parse_2 = R"doc()doc";
 
-static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_layouts_coordinates_hpp_1127_8 = R"doc()doc";
+static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_layouts_coordinates_hpp_1240_8 = R"doc()doc";
 
-static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_layouts_coordinates_hpp_1143_8 = R"doc()doc";
+static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_layouts_coordinates_hpp_1256_8 = R"doc()doc";
 
 static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_technology_cell_ports_hpp_291_8 = R"doc()doc";
 
