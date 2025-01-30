@@ -21710,8 +21710,7 @@ parameters.
 
 Parameter ``defect_infdom``:
     The defect influence domain to be written. It contains a mapping
-    from sets of simulation parameters (represented as a pair of sweep
-    parameters for the X and Y dimensions) to their influence status.
+    from defect positions to their influence status.
 
 Parameter ``os``:
     The output stream where the CSV representation of the defect
@@ -21735,8 +21734,7 @@ parameters.
 
 Parameter ``defect_infdom``:
     The defect influence domain to be written. It contains a mapping
-    from sets of simulation parameters (represented as a pair of sweep
-    parameters for the X and Y dimensions) to their influence status.
+    from defect positions to their influence status.
 
 Parameter ``filename``:
     The filename where the CSV representation of the defect influence
