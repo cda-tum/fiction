@@ -1373,6 +1373,40 @@ R"doc(Returns the layout's number of faces depending on the coordinate type.
 Returns:
     Area of layout.)doc";
 
+static const char *__doc_fiction_cartesian_layout_aspect_ratio =
+R"doc(Struct representing the aspect ratio of the cartesian layout.
+
+The `aspect_ratio` struct defines the starting and ending coordinates,
+effectively determining the size and position of the layout within a
+coordinate space.)doc";
+
+static const char *__doc_fiction_cartesian_layout_aspect_ratio_aspect_ratio =
+R"doc(Default constructor. Initializes both start and end to (0, 0, 0).
+
+This creates a layout with a single point at the origin.)doc";
+
+static const char *__doc_fiction_cartesian_layout_aspect_ratio_aspect_ratio_2 =
+R"doc(Constructs an aspect_ratio from a single end coordinate.
+
+The start coordinate is initialized to (0, 0, 0), and the end
+coordinate is set to `e`.
+
+Parameter ``e``:
+    The ending coordinate defining the layout's size.)doc";
+
+static const char *__doc_fiction_cartesian_layout_aspect_ratio_aspect_ratio_3 =
+R"doc(Constructs an aspect_ratio from specified start and end coordinates.
+
+Parameter ``s``:
+    The starting coordinate of the layout.
+
+Parameter ``e``:
+    The ending coordinate of the layout.)doc";
+
+static const char *__doc_fiction_cartesian_layout_aspect_ratio_end = R"doc()doc";
+
+static const char *__doc_fiction_cartesian_layout_aspect_ratio_start = R"doc()doc";
+
 static const char *__doc_fiction_cartesian_layout_below =
 R"doc(Returns the coordinate that is directly below a given coordinate `c`,
 i.e., the face whose z-dimension is lower by 1. If `c`'s z-dimension
@@ -1385,25 +1419,46 @@ Returns:
     Coordinate directly below `c`.)doc";
 
 static const char *__doc_fiction_cartesian_layout_cartesian_layout =
-R"doc(Standard constructor. The given aspect ratio points to the highest
-possible coordinate in the layout. That means in the ASCII layout
-above `ar = (3,2)`. Consequently, with `ar = (0,0)`, the layout has
-exactly one coordinate.
+R"doc(Standard constructor.
 
-Parameter ``ar``:
-    Highest possible position in the layout.)doc";
+Initializes the layout with the highest possible coordinate at (0, 0,
+0), effectively creating a layout with a single coordinate.)doc";
 
 static const char *__doc_fiction_cartesian_layout_cartesian_layout_2 =
+R"doc(Constructs a cartesian_layout from an aspect_ratio.
+
+This constructor initializes the layout's dimensions based on the
+provided aspect_ratio, and sets the origin to the start coordinate of
+the aspect_ratio.
+
+Parameter ``ar``:
+    The aspect_ratio defining the layout's size and origin.)doc";
+
+static const char *__doc_fiction_cartesian_layout_cartesian_layout_3 =
 R"doc(Copy constructor from another layout's storage.
 
 Parameter ``s``:
     Storage of another cartesian_layout.)doc";
 
-static const char *__doc_fiction_cartesian_layout_cartesian_layout_storage = R"doc()doc";
+static const char *__doc_fiction_cartesian_layout_cartesian_layout_storage =
+R"doc(Struct representing the storage for a cartesian_layout.
 
-static const char *__doc_fiction_cartesian_layout_cartesian_layout_storage_cartesian_layout_storage = R"doc()doc";
+The `cartesian_layout_storage` struct holds the dimensions and origin
+of the layout.)doc";
+
+static const char *__doc_fiction_cartesian_layout_cartesian_layout_storage_cartesian_layout_storage =
+R"doc(Constructs a cartesian_layout_storage with specified dimensions and
+origin.
+
+Parameter ``dim``:
+    The dimensions of the layout (width, height, etc.).
+
+Parameter ``org``:
+    The origin coordinate. Defaults to (0, 0, 0).)doc";
 
 static const char *__doc_fiction_cartesian_layout_cartesian_layout_storage_dimension = R"doc()doc";
+
+static const char *__doc_fiction_cartesian_layout_cartesian_layout_storage_origin = R"doc()doc";
 
 static const char *__doc_fiction_cartesian_layout_clone =
 R"doc(Clones the layout returning a deep copy.
@@ -1858,10 +1913,24 @@ Returns:
     The northern border equivalent of `c`.)doc";
 
 static const char *__doc_fiction_cartesian_layout_resize =
-R"doc(Updates the layout's dimensions, effectively resizing it.
+R"doc(Updates the layout's dimensions and origin based on a new
+aspect_ratio.
+
+This method effectively resizes the layout by adjusting its dimensions
+to match the provided aspect_ratio. The origin is also updated to the
+start coordinate of the aspect_ratio.
 
 Parameter ``ar``:
-    New aspect ratio.)doc";
+    The new aspect_ratio to apply to the layout.)doc";
+
+static const char *__doc_fiction_cartesian_layout_resize_2 =
+R"doc(Overloaded resize method to accept a coordinate.
+
+This method resizes the layout by creating an aspect_ratio from the
+provided end coordinate, with the origin remaining unchanged.
+
+Parameter ``end_coord``:
+    The new end coordinate defining the layout's size.)doc";
 
 static const char *__doc_fiction_cartesian_layout_south =
 R"doc(Returns the coordinate that is directly adjacent in southern direction
@@ -1941,6 +2010,14 @@ that still belongs to the layout.
 Returns:
     x-dimension.)doc";
 
+static const char *__doc_fiction_cartesian_layout_x_org =
+R"doc(Returns the layout's x-org coordinate.
+
+The x-org coordinate represents the origin's x-value in the layout.
+
+Returns:
+    The x-start coordinate of the layout.)doc";
+
 static const char *__doc_fiction_cartesian_layout_y =
 R"doc(Returns the layout's y-dimension, i.e., returns the biggest y-value
 that still belongs to the layout.
@@ -1948,12 +2025,28 @@ that still belongs to the layout.
 Returns:
     y-dimension.)doc";
 
+static const char *__doc_fiction_cartesian_layout_y_org =
+R"doc(Returns the layout's y-org coordinate.
+
+The y-org coordinate represents the origin's y-value in the layout.
+
+Returns:
+    The y-org coordinate of the layout.)doc";
+
 static const char *__doc_fiction_cartesian_layout_z =
 R"doc(Returns the layout's z-dimension, i.e., returns the biggest z-value
 that still belongs to the layout.
 
 Returns:
     z-dimension.)doc";
+
+static const char *__doc_fiction_cartesian_layout_z_orgt =
+R"doc(Returns the layout's z-org coordinate.
+
+The z-org coordinate represents the origin's z-value in the layout.
+
+Returns:
+    The z-org coordinate of the layout.)doc";
 
 static const char *__doc_fiction_cds_configuration = R"doc(An enumeration of modes for the charge distribution surface.)doc";
 
