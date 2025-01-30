@@ -104,9 +104,9 @@ namespace detail
  * parameters are within the operational domain or not.
  *
  * @tparam OpDomain The type of the operational domain.
- * @param opdom The operational domain to be written. It contains a mapping from sets of simulation parameters
- * (represented as a pair of sweep parameters for the X and Y dimensions) to their operational status, and it can
- include metric values (e.g., the critical temperature on top of that).
+ * @param opdom The operational domain to be written. It represents a mapping between sets of simulation parameters
+ (defined as a pair of sweep parameters for the X, Y, and Z dimensions) and a tuple containing detailed  information
+ about the SiDB layout associated with those simulation parameters.
  * @param os The output stream where the CSV representation of the operational domain is written to.
  * @param params The parameters used for writing, including the operational and non-operational tags. Defaults to an
  * empty `write_operational_domain_params` object, which provides standard tags.
@@ -124,53 +124,55 @@ inline void write_operational_domain(const OpDomain& opdom, std::ostream& os,
         throw std::invalid_argument("unsupported number of dimensions in the given operational domain");
     }
 
-    if (!opdom.metric_values.empty())
+    if constexpr (std::is_same_v<OpDomain, temperature_operational_domain>)
     {
         if (num_dimensions == 1)
         {
-            writer.write_line(detail::sweep_parameter_to_string(opdom.dimensions[0]), "operational status", "ct");
+            writer.write_line(detail::sweep_parameter_to_string(opdom.dimensions[0]), "operational status",
+                              "critical temperature");
         }
         else if (num_dimensions == 2)
         {
             writer.write_line(detail::sweep_parameter_to_string(opdom.dimensions[0]),
-                              detail::sweep_parameter_to_string(opdom.dimensions[1]), "operational status", "ct");
+                              detail::sweep_parameter_to_string(opdom.dimensions[1]), "operational status",
+                              "critical temperature");
         }
         else  // num_dimensions == 3
         {
             writer.write_line(detail::sweep_parameter_to_string(opdom.dimensions[0]),
                               detail::sweep_parameter_to_string(opdom.dimensions[1]),
-                              detail::sweep_parameter_to_string(opdom.dimensions[2]), "operational status", "ct");
+                              detail::sweep_parameter_to_string(opdom.dimensions[2]), "operational status",
+                              "critical temperature");
         }
 
-        for (const auto& [sim_param, op_val] : opdom.operational_values)
+        for (const auto& [sim_param, op_val] : opdom.domain_values)
         {
             // skip non-operational samples if the respective flag is set
             if (params.writing_mode == write_operational_domain_params::sample_writing_mode::OPERATIONAL_ONLY &&
-                op_val == operational_status::NON_OPERATIONAL)
+                std::get<0>(op_val) == operational_status::NON_OPERATIONAL)
             {
                 continue;
             }
 
-            const auto tag =
-                op_val == operational_status::OPERATIONAL ? params.operational_tag : params.non_operational_tag;
+            const auto tag = std::get<0>(op_val) == operational_status::OPERATIONAL ? params.operational_tag :
+                                                                                      params.non_operational_tag;
 
             if (num_dimensions == 1)
             {
-                writer.write_line(sim_param.parameters[0], tag, (opdom.get_metric_value(sim_param)).value());
+                writer.write_line(sim_param.parameters[0], tag, std::get<1>(op_val));
             }
             else if (num_dimensions == 2)
             {
-                writer.write_line(sim_param.parameters[0], sim_param.parameters[1], tag,
-                                  (opdom.get_metric_value(sim_param)).value());
+                writer.write_line(sim_param.parameters[0], sim_param.parameters[1], tag, std::get<1>(op_val));
             }
             else  // num_dimensions == 3
             {
                 writer.write_line(sim_param.parameters[0], sim_param.parameters[1], sim_param.parameters[2], tag,
-                                  (opdom.get_metric_value(sim_param)).value());
+                                  std::get<1>(op_val));
             }
         }
     }
-    else
+    else if constexpr (std::is_same_v<OpDomain, operational_domain>)
     {
         if (num_dimensions == 1)
         {
@@ -188,17 +190,17 @@ inline void write_operational_domain(const OpDomain& opdom, std::ostream& os,
                               detail::sweep_parameter_to_string(opdom.dimensions[2]), "operational status");
         }
 
-        for (const auto& [sim_param, op_val] : opdom.operational_values)
+        for (const auto& [sim_param, op_val] : opdom.domain_values)
         {
             // skip non-operational samples if the respective flag is set
             if (params.writing_mode == write_operational_domain_params::sample_writing_mode::OPERATIONAL_ONLY &&
-                op_val == operational_status::NON_OPERATIONAL)
+                std::get<0>(op_val) == operational_status::NON_OPERATIONAL)
             {
                 continue;
             }
 
-            const auto tag =
-                op_val == operational_status::OPERATIONAL ? params.operational_tag : params.non_operational_tag;
+            const auto tag = std::get<0>(op_val) == operational_status::OPERATIONAL ? params.operational_tag :
+                                                                                      params.non_operational_tag;
 
             if (num_dimensions == 1)
             {
@@ -233,9 +235,9 @@ inline void write_operational_domain(const OpDomain& opdom, std::ostream& os,
  * parameters are within the operational domain or not.
  *
 * @tparam OpDomain The type of the operational domain.
-* @param opdom The operational domain to be written. It contains a mapping from sets of simulation parameters
-* (represented as a pair of sweep parameters for the X and Y dimensions) to their operational status, and it can include
-metric values (e.g., the critical temperature on top of that).
+* @param opdom The operational domain to be written. It represents a mapping between sets of simulation parameters
+(defined as a pair of sweep parameters for the X, Y, and Z dimensions) and a tuple containing detailed information about
+the SiDB layout associated with those simulation parameters.
  * @param filename The filename where the CSV representation of the operational domain is written to.
  * @param params The parameters used for writing, including the operational and non-operational tags. Defaults to an
  * empty `write_operational_domain_params` object, which provides standard tags.

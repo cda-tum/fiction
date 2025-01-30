@@ -279,6 +279,7 @@ from .pyfiction import (  # type: ignore[import-not-found]
     technology_mapping_stats,
     # Networks
     technology_network,
+    temperature_operational_domain,
     time_to_solution,
     time_to_solution_for_given_simulation_results,
     time_to_solution_params,
@@ -315,6 +316,7 @@ from .pyfiction import (  # type: ignore[import-not-found]
     write_sidb_layout_svg_to_string,
     write_sqd_layout,
     write_sqd_sim_result,
+    write_temperature_operational_domain_to_string,
     yen_k_shortest_paths,
     yen_k_shortest_paths_params,
 )
@@ -582,6 +584,7 @@ __all__ = [
     "technology_mapping_stats",
     # Networks
     "technology_network",
+    "temperature_operational_domain",
     "time_to_solution",
     "time_to_solution_for_given_simulation_results",
     "time_to_solution_params",
@@ -618,6 +621,7 @@ __all__ = [
     "write_sidb_layout_svg_to_string",
     "write_sqd_layout",
     "write_sqd_sim_result",
+    "write_temperature_operational_domain_to_string",
     "yen_k_shortest_paths",
     "yen_k_shortest_paths_params",
 ]

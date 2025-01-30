@@ -5,7 +5,6 @@
 #ifndef FICTION_PHYSICALLY_VALID_PARAMETERS_HPP
 #define FICTION_PHYSICALLY_VALID_PARAMETERS_HPP
 
-#include <fiction/algorithms/simulation/sidb/is_operational.hpp>
 #include <fiction/algorithms/simulation/sidb/operational_domain.hpp>
 #include <fiction/types.hpp>
 
@@ -34,7 +33,7 @@ namespace fiction
  * surface for each parameter point.
  */
 template <typename Lyt>
-[[nodiscard]] operational_domain<parameter_point, uint64_t>
+[[nodiscard]] sidb_simulation_domain<parameter_point, uint64_t>
 physically_valid_parameters(Lyt& cds, const operational_domain_params& params = {}) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
@@ -43,10 +42,10 @@ physically_valid_parameters(Lyt& cds, const operational_domain_params& params = 
 
     operational_domain_stats st{};
 
-    using op_domain = operational_domain<parameter_point, operational_status>;
-    detail::operational_domain_impl<Lyt, tt, op_domain> p{cds, params, st};
+    detail::operational_domain_impl<Lyt, tt, operational_domain> p{cds, params, st};
 
-    const auto result = p.grid_search_for_physically_valid_parameters(cds);
+    const auto result =
+        p.template grid_search_for_physically_valid_parameters<sidb_simulation_domain<parameter_point, uint64_t>>(cds);
 
     return result;
 }
