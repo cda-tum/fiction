@@ -46,13 +46,18 @@ void convert_to_siqad_coordinates(pybind11::module& m)
           DOC(fiction_convert_layout_to_siqad_coordinates));
 }
 
-template <typename Lyt>
-void random_coordinate(pybind11::module& m)
+inline void random_coordinate(pybind11::module& m)
 {
     namespace py = pybind11;
 
-    m.def("random_coordinate", &fiction::random_coordinate<fiction::coordinate<Lyt>>, py::arg("coordinate1"),
-          py::arg("coordinate_2"), DOC(fiction_random_coordinate));
+    m.def("random_offset_coordinate", &fiction::random_coordinate<fiction::offset::ucoord_t>, py::arg("coordinate1"),
+          py::arg("coordinate2"), DOC(fiction_random_coordinate));
+
+    m.def("random_cube_coordinate", &fiction::random_coordinate<fiction::cube::coord_t>, py::arg("coordinate1"),
+          py::arg("coordinate2"), DOC(fiction_random_coordinate));
+
+    m.def("random_siqad_coordinate", &fiction::random_coordinate<fiction::siqad::coord_t>, py::arg("coordinate1"),
+          py::arg("coordinate2"), DOC(fiction_random_coordinate));
 }
 
 }  // namespace detail
@@ -74,15 +79,7 @@ inline void layout_utils(pybind11::module& m)
 
     detail::convert_to_siqad_coordinates<py_sidb_layout>(m);
 
-    detail::random_coordinate<py_cartesian_obstruction_layout>(m);
-    detail::random_coordinate<py_cartesian_gate_layout>(m);
-    detail::random_coordinate<py_shifted_cartesian_obstruction_layout>(m);
-    detail::random_coordinate<py_shifted_cartesian_gate_layout>(m);
-    detail::random_coordinate<py_hexagonal_obstruction_layout>(m);
-    detail::random_coordinate<py_hexagonal_gate_layout>(m);
-    detail::random_coordinate<py_qca_layout>(m);
-    detail::random_coordinate<py_inml_layout>(m);
-    detail::random_coordinate<py_sidb_layout>(m);
+    detail::random_coordinate(m);
 }
 
 }  // namespace pyfiction

@@ -76,7 +76,13 @@ inline void critical_temperature(pybind11::module& m)
         .def_readwrite("confidence_level", &fiction::critical_temperature_params::confidence_level,
                        DOC(fiction_critical_temperature_params_confidence_level))
         .def_readwrite("max_temperature", &fiction::critical_temperature_params::max_temperature,
-                       DOC(fiction_critical_temperature_params_max_temperature));
+                       DOC(fiction_critical_temperature_params_max_temperature))
+        .def_readwrite("iteration_steps", &fiction::critical_temperature_params::iteration_steps,
+                       DOC(fiction_critical_temperature_params_iteration_steps))
+        .def_readwrite("alpha", &fiction::critical_temperature_params::alpha,
+                       DOC(fiction_critical_temperature_params_alpha))
+
+        ;
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
