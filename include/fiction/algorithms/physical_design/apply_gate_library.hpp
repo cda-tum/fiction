@@ -167,8 +167,9 @@ class apply_gate_library_impl
             if (lyt.has_value())
             {
                 // add defects to the circuit.
-                lyt.value().foreach_sidb_defect([this](const auto& defect)
-                                                { cell_lyt.assign_sidb_defect(defect.first, defect.second); });
+                (lyt.value())
+                    .foreach_sidb_defect([this](const auto& def)
+                                         { cell_lyt.assign_sidb_defect(def.first, def.second); });
             }
         }
 
