@@ -16338,7 +16338,11 @@ static const char *__doc_fiction_offset_ucoord_t_y = R"doc(31 bit for the y coor
 
 static const char *__doc_fiction_offset_ucoord_t_z = R"doc(1 bit for the z coordinate.)doc";
 
-static const char *__doc_fiction_on_the_fly_circuit_design_on_defective_surface_stats = R"doc(Statistics for the on-the-fly defect-aware circuit design.)doc";
+static const char *__doc_fiction_on_the_fly_circuit_design_on_defective_surface_stats =
+R"doc(Statistics for the on-the-fly defect-aware circuit design.
+
+Template parameter ``GateLyt``:
+    Gate-level layout type.)doc";
 
 static const char *__doc_fiction_on_the_fly_circuit_design_on_defective_surface_stats_duration = R"doc(The total runtime of the on-the-fly circuit design.)doc";
 
@@ -16374,7 +16378,7 @@ Parameter ``stats``:
     statistics are discarded.
 
 Returns:
-    A `CellLyt` representing the designed SiDB circuit.)doc";
+    Layout representing the designed SiDB circuit.)doc";
 
 static const char *__doc_fiction_on_the_fly_sidb_circuit_design_on_defective_surface =
 R"doc(This function implements an on-the-fly circuit design algorithm for a
@@ -16424,8 +16428,7 @@ Parameter ``stats``:
     statistics are discarded.
 
 Returns:
-    A `sidb_defect_surface<CellLyt>` representing the designed circuit
-    on the defective surface.)doc";
+    Layout representing the designed circuit on the defective surface.)doc";
 
 static const char *__doc_fiction_on_the_fly_sidb_circuit_design_on_defective_surface_params =
 R"doc(This struct stores the parameters to design an SiDB circuit on a
