@@ -18,7 +18,6 @@
 #include <mockturtle/traits.hpp>
 
 #include <algorithm>
-#include <functional>
 #include <type_traits>
 
 // data types cannot properly be converted to bit field types
@@ -218,9 +217,8 @@ class apply_gate_library_impl
      */
     static aspect_ratio<CellLyt> get_aspect_ratio_for_cell_level_layout(const GateLyt& gate_lyt) noexcept
     {
-        const std::function<cell<CellLyt>(GateLyt, tile<GateLyt>, cell<CellLyt>)> rel_to_abs_cell_pos =
-            relative_to_absolute_cell_position<GateLibrary::gate_x_size(), GateLibrary::gate_y_size(), GateLyt,
-                                               CellLyt>;
+        using rel_to_abs_cell_pos = relative_to_absolute_cell_position<GateLibrary::gate_x_size(),
+                                                                       GateLibrary::gate_y_size(), GateLyt, CellLyt>;
 
         const cell<CellLyt> max_rel_coord = {GateLibrary::gate_x_size() - 1, GateLibrary::gate_y_size() - 1};
 
