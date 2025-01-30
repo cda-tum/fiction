@@ -592,8 +592,7 @@ SiDB Defect Analysis
 .. doxygenstruct:: fiction::defect_influence_params
    :members:
 .. doxygenenum:: fiction::defect_influence_status
-.. doxygenstruct:: fiction::defect_influence_domain
-   :members:
+.. doxygentypedef:: fiction::sidb_energy_and_state_type
 
 .. doxygenstruct:: fiction::defect_influence_stats
 .. doxygenfunction:: fiction::defect_influence_grid_search(const Lyt& lyt, const std::vector<TT>& spec, const defect_influence_params<cell<Lyt>>& params = {}, const std::size_t step_size = 1, defect_influence_stats* stats = nullptr)
