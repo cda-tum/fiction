@@ -35,6 +35,7 @@ jobs:
             -DFICTION_TEST=ON
             -DFICTION_BENCHMARK=OFF
             -DFICTION_EXPERIMENTS=ON
+            -DFICTION_ALGLIB=ON
             -DMOCKTURTLE_EXAMPLES=OFF
           build_dir: build
           apt_packages: "libreadline-dev,libtbb-dev"

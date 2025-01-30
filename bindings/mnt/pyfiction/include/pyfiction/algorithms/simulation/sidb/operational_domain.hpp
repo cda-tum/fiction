@@ -50,7 +50,6 @@ void operational_domain(pybind11::module& m)
 inline void operational_domain(pybind11::module& m)
 {
     namespace py = pybind11;
-    namespace py = pybind11;
 
     py::class_<fiction::parameter_point>(m, "parameter_point", DOC(fiction_parameter_point))
         .def(py::init<>(), DOC(fiction_parameter_point_parameter_point))

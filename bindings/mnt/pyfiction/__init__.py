@@ -8,13 +8,16 @@ import os
 import sys
 from pathlib import Path
 
-if sys.platform == "win32" and "Z3_ROOT" in os.environ:
-    lib_path = Path(os.environ["Z3_ROOT"]) / "lib"
-    if lib_path.exists():
-        os.add_dll_directory(str(lib_path))
-    bin_path = Path(os.environ["Z3_ROOT"]) / "bin"
-    if bin_path.exists():
-        os.add_dll_directory(str(bin_path))
+if sys.platform == "win32":
+    if "Z3_ROOT" in os.environ:
+        lib_path = Path(os.environ["Z3_ROOT"]) / "lib"
+        if lib_path.exists():
+            os.add_dll_directory(str(lib_path))
+        bin_path = Path(os.environ["Z3_ROOT"]) / "bin"
+        if bin_path.exists():
+            os.add_dll_directory(str(bin_path))
+    if "ALGLIB_DIR" in os.environ:
+        os.add_dll_directory(str(os.environ["ALGLIB_DIR"]))
 
 from .pyfiction import (  # type: ignore[import-not-found]
     __compiled_date__,
@@ -64,6 +67,8 @@ from .pyfiction import (  # type: ignore[import-not-found]
     clocked_cartesian_layout,
     clocked_hexagonal_layout,
     clocked_shifted_cartesian_layout,
+    clustercomplete,
+    clustercomplete_params,
     color_mode,
     color_routing,
     color_routing_params,
@@ -155,8 +160,10 @@ from .pyfiction import (  # type: ignore[import-not-found]
     graph_oriented_layout_design,
     graph_oriented_layout_design_params,
     graph_oriented_layout_design_stats,
+    ground_state_space_reporting,
     groundstate_from_simulation_result,
     has_high_degree_fanin_nodes,
+    heuristic_sidb_simulation_engine,
     hexagonal_gate_layout,
     hexagonal_layout,
     hexagonal_obstruction_layout,
@@ -258,6 +265,7 @@ from .pyfiction import (  # type: ignore[import-not-found]
     sidb_nm_distance_111,
     sidb_nm_position,
     sidb_simulation_engine,
+    sidb_simulation_engine_name,
     sidb_simulation_parameters,
     sidb_simulation_result_100,
     sidb_simulation_result_111,
@@ -366,6 +374,8 @@ __all__ = [
     "clocked_cartesian_layout",
     "clocked_hexagonal_layout",
     "clocked_shifted_cartesian_layout",
+    "clustercomplete",
+    "clustercomplete_params",
     "color_mode",
     "color_routing",
     "color_routing_params",
@@ -457,8 +467,10 @@ __all__ = [
     "graph_oriented_layout_design",
     "graph_oriented_layout_design_params",
     "graph_oriented_layout_design_stats",
+    "ground_state_space_reporting",
     "groundstate_from_simulation_result",
     "has_high_degree_fanin_nodes",
+    "heuristic_sidb_simulation_engine",
     "hexagonal_gate_layout",
     "hexagonal_layout",
     "hexagonal_obstruction_layout",
@@ -560,6 +572,7 @@ __all__ = [
     "sidb_nm_distance_111",
     "sidb_nm_position",
     "sidb_simulation_engine",
+    "sidb_simulation_engine_name",
     "sidb_simulation_parameters",
     "sidb_simulation_result_100",
     "sidb_simulation_result_111",
