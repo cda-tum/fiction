@@ -17,7 +17,7 @@
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "fiction/technology/cell_technologies.hpp"
-#include "fiction/technology/physical_constants.hpp"
+#include "fiction/technology/constants.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/hash.hpp"
 #include "fiction/utils/math_utils.hpp"
@@ -70,7 +70,7 @@ struct parameter_point
     std::vector<double> parameters{};
     /**
      * Equality operator. Checks if this parameter point is equal to another point within a specified tolerance.
-     * The tolerance is defined by `physical_constants::POP_STABILITY_ERR`.
+     * The tolerance is defined by `physical_constants::SCALED_EPSILON`.
      *
      * @param other Other parameter point to compare with.
      * @return `true` iff the parameter points are equal.
@@ -84,7 +84,7 @@ struct parameter_point
         }
 
         // Define tolerance for comparison
-        constexpr auto tolerance = physical_constants::POP_STABILITY_ERR;
+        constexpr auto tolerance = constants::ERROR_MARGIN;
 
         // Compare each element with tolerance
         for (std::size_t i = 0; i < parameters.size(); ++i)
@@ -337,7 +337,7 @@ class operational_domain_impl
                 if ((params.sweep_dimensions[d].min +
                      static_cast<double>(indices[d].size() - 1) * params.sweep_dimensions[d].step) -
                         params.sweep_dimensions[d].max >
-                    physical_constants::POP_STABILITY_ERR)
+                    constants::ERROR_MARGIN)
                 {
                     indices[d].pop_back();
                 }
@@ -388,7 +388,7 @@ class operational_domain_impl
                 if ((params.sweep_dimensions[d].min +
                      static_cast<double>(indices[d].size() - 1) * params.sweep_dimensions[d].step) -
                         params.sweep_dimensions[d].max >
-                    physical_constants::POP_STABILITY_ERR)
+                    constants::ERROR_MARGIN)
                 {
                     indices[d].pop_back();
                 }
@@ -1817,7 +1817,7 @@ template <>
 struct hash<fiction::parameter_point>
 {
     // tolerance for double hashing
-    static constexpr auto tolerance = fiction::physical_constants::POP_STABILITY_ERR;
+    static constexpr auto tolerance = fiction::constants::ERROR_MARGIN;
 
     size_t operator()(const fiction::parameter_point& p) const noexcept
     {

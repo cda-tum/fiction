@@ -11089,7 +11089,7 @@ R"doc(This function takes in a vector of `charge_distribution_surface`
 objects and returns a map containing the system energy and the number
 of occurrences of that energy in the input vector. To compare two
 energy values for equality, the comparison uses a tolerance specified
-by `physical_constants::POP_STABILITY_ERR`.
+by `physical_constants::SCALED_EPSILON`.
 
 Template parameter ``Lyt``:
     SiDB cell-level layout type.
@@ -11920,7 +11920,7 @@ Returns:
 static const char *__doc_fiction_find_key_with_tolerance =
 R"doc(This function searches for a floating-point value specified by the
 `key` in the provided map `map`, applying a tolerance specified by
-`fiction::physical_constants::POP_STABILITY_ERR`. Each key in the map
+`fiction::physical_constants::SCALED_EPSILON`. Each key in the map
 is compared to the specified key within this tolerance.
 
 Template parameter ``MapType``:
@@ -16988,7 +16988,7 @@ Returns:
 static const char *__doc_fiction_parameter_point_operator_eq =
 R"doc(Equality operator. Checks if this parameter point is equal to another
 point within a specified tolerance. The tolerance is defined by
-`physical_constants::POP_STABILITY_ERR`.
+`physical_constants::SCALED_EPSILON`.
 
 Parameter ``other``:
     Other parameter point to compare with.

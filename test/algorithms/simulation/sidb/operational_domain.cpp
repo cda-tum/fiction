@@ -12,7 +12,7 @@
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/cell_technologies.hpp>
-#include <fiction/technology/physical_constants.hpp>
+#include <fiction/technology/constants.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/truth_table_utils.hpp>
 
@@ -26,7 +26,7 @@ using namespace fiction;
 
 template <typename OpDomain>
 void check_op_domain_params_and_operational_status(const OpDomain& op_domain, const operational_domain_params& params,
-                                                   const std::optional<operational_status>& status) noexcept
+                                                   const std::optional<operational_status>& status)
 {
     REQUIRE(params.sweep_dimensions.size() == op_domain.dimensions.size());
 
@@ -42,8 +42,8 @@ void check_op_domain_params_and_operational_status(const OpDomain& op_domain, co
             const auto& sweep_param = params.sweep_dimensions[d];
             const auto& coord_value = coord.parameters[d];
 
-            CHECK(sweep_param.min <= (coord_value + physical_constants::POP_STABILITY_ERR));
-            CHECK(sweep_param.max >= (coord_value - physical_constants::POP_STABILITY_ERR));
+            CHECK(sweep_param.min <= (coord_value + constants::ERROR_MARGIN));
+            CHECK(sweep_param.max >= (coord_value - constants::ERROR_MARGIN));
             CHECK(sweep_param.step > 0.0);
         }
 
@@ -65,7 +65,6 @@ void check_op_domain_params_and_operational_status(const OpDomain& op_domain, co
             {
                 if constexpr (std::is_same_v<OpDomain, temperature_operational_domain>)
                 {
-
                     REQUIRE(op_domain.get_value(coord).has_value());
                     CHECK_THAT(std::get<1>(op_domain.get_value(coord).value()),
                                Catch::Matchers::WithinAbs(0.0, 0.00001));

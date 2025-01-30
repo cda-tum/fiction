@@ -2,7 +2,7 @@
 // Created by Jan Drewniok on 29.01.25.
 //
 
-#include "fiction/technology/physical_constants.hpp"
+#include "fiction/technology/constants.hpp"
 #include "fiction/utils/phmap_utils.hpp"
 
 #include <optional>
@@ -32,7 +32,7 @@ std::optional<typename MapType::mapped_type> contains_key(const MapType& map, co
 
 /**
  * This function searches for a floating-point value specified by the `key` in the provided map `map`, applying a
- * tolerance specified by `fiction::physical_constants::POP_STABILITY_ERR`. Each key in the map is compared to the
+ * tolerance specified by `fiction::physical_constants::SCALED_EPSILON`. Each key in the map is compared to the
  * specified key within this tolerance.
  *
  * @tparam MapType The type of the map containing parameter points as keys.
@@ -45,7 +45,7 @@ typename MapType::const_iterator find_key_with_tolerance(const MapType& map, con
 {
     static_assert(std::is_floating_point_v<typename MapType::key_type>, "Map key type must be floating-point");
 
-    constexpr double tolerance = physical_constants::POP_STABILITY_ERR;
+    constexpr double tolerance = constants::ERROR_MARGIN;
 
     auto compare_keys = [&key, &tolerance](const auto& pair) { return std::abs(pair.first - key) < tolerance; };
 

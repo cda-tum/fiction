@@ -249,8 +249,6 @@ Operational Domain Computation
         .. doxygenenum:: fiction::operational_status
         .. doxygenstruct:: fiction::is_operational_params
            :members:
-        .. doxygenfunction:: fiction::operational_domain
-        .. doxygenfunction:: fiction::temperature_operational_domain
         .. doxygenfunction:: fiction::is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params = {})
         .. doxygenfunction:: fiction::is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params, const std::vector<bdl_wire<Lyt>>& input_bdl_wire, const std::vector<bdl_wire<Lyt>>& output_bdl_wire, const std::optional<Lyt>& canvas_lyt = std::nullopt)
         .. doxygenfunction:: fiction::operational_input_patterns(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params = {})
@@ -277,13 +275,9 @@ Operational Domain Computation
            :members:
 
         .. doxygenfunction:: fiction::operational_domain_grid_search
-        .. doxygenfunction:: fiction::temperature_operational_domain_grid_search
         .. doxygenfunction:: fiction::operational_domain_random_sampling
-        .. doxygenfunction:: fiction::temperature_operational_domain_random_sampling
         .. doxygenfunction:: fiction::operational_domain_flood_fill
-        .. doxygenfunction:: fiction::temeprature_operational_domain_flood_fill
         .. doxygenfunction:: fiction::operational_domain_contour_tracing
-        .. doxygenfunction:: fiction::temperature_operational_domain_contour_tracing
 
         **Header:** ``fiction/algorithms/simulation/sidb/operational_domain_ratio.hpp``
 
@@ -313,6 +307,8 @@ Operational Domain Computation
             :members:
         .. autoclass:: mnt.pyfiction.operational_domain
             :members:
+        .. autoclass:: mnt.pyfiction.temperature_operational_domain
+            :members:
         .. autoclass:: mnt.pyfiction.operational_domain_value_range
             :members:
         .. autoclass:: mnt.pyfiction.operational_domain_params
@@ -321,9 +317,13 @@ Operational Domain Computation
             :members:
 
         .. autofunction:: mnt.pyfiction.operational_domain_grid_search
+        .. autofunction:: mnt.pyfiction.temperature_operational_domain_grid_search
         .. autofunction:: mnt.pyfiction.operational_domain_random_sampling
+        .. autofunction:: mnt.pyfiction.temperature_operational_domain_random_sampling
         .. autofunction:: mnt.pyfiction.operational_domain_flood_fill
+        .. autofunction:: mnt.pyfiction.temperature_operational_domain_flood_fill
         .. autofunction:: mnt.pyfiction.operational_domain_contour_tracing
+        .. autofunction:: mnt.pyfiction.temperature_operational_domain_contour_tracing
 
         .. autoclass:: mnt.pyfiction.compute_operational_ratio_params
                 :members:

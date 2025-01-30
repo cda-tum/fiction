@@ -49,9 +49,9 @@ calculate_defect_clearance(const Lyt& lyt, const defect_influence_domain<Lyt>& d
     double    max_distance         = 0;
     cell<Lyt> max_distance_postion = {};
 
-    for (const auto& val : defect_inf_domain.influence_information)
+    for (const auto& [key, val] : defect_inf_domain.get_domain())
     {
-        if (val.second == defect_influence_status::NON_INFLUENTIAL)
+        if (std::get<0>(val) == defect_influence_status::NON_INFLUENTIAL)
         {
             continue;
         }
@@ -60,12 +60,12 @@ calculate_defect_clearance(const Lyt& lyt, const defect_influence_domain<Lyt>& d
         cell<Lyt> min_distance_position = {};
 
         lyt.foreach_cell(
-            [&val, &min_distance, &min_distance_position, &lyt](const auto& c)
+            [key = key, &min_distance, &min_distance_position, &lyt](const auto& c)
             {
-                if (sidb_nm_distance<Lyt>(lyt, c, val.first) < min_distance)
+                if (sidb_nm_distance<Lyt>(lyt, c, key) < min_distance)
                 {
-                    min_distance          = sidb_nm_distance<Lyt>(lyt, c, val.first);
-                    min_distance_position = val.first;
+                    min_distance          = sidb_nm_distance<Lyt>(lyt, c, key);
+                    min_distance_position = key;
                 }
             });
 
