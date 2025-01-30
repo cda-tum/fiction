@@ -167,9 +167,8 @@ class apply_gate_library_impl
             if (lyt.has_value())
             {
                 // add defects to the circuit.
-                (lyt.value())
-                    .foreach_sidb_defect([this](const auto& def)
-                                         { cell_lyt.assign_sidb_defect(def.first, def.second); });
+                lyt.value().foreach_sidb_defect([this](const auto& def)
+                                                { cell_lyt.assign_sidb_defect(def.first, def.second); });
             }
         }
 
@@ -286,7 +285,7 @@ template <typename CellLyt, typename GateLibrary, typename GateLyt, typename Par
     detail::apply_gate_library_impl<CellLyt, GateLibrary, GateLyt> p{lyt};
 
     // Running the gate library with the parameters
-    const auto result = p.template run_parameterized_gate_library<Params>(params, cell_lyt);
+    const CellLyt result = p.template run_parameterized_gate_library<Params>(params, cell_lyt);
 
     return result;
 }
