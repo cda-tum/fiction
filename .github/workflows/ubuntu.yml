@@ -134,10 +134,12 @@ jobs:
           -DFICTION_BENCHMARK=OFF
           -DFICTION_EXPERIMENTS=ON
           ${{ matrix.os != 'ubuntu-24.04-arm' && '-DFICTION_Z3=ON' || '' }}
+          -DFICTION_ALGLIB=ON
           -DFICTION_ENABLE_MUGEN=ON
           -DFICTION_PROGRESS_BARS=OFF
           -DFICTION_WARNINGS_AS_ERRORS=OFF
           -DMOCKTURTLE_EXAMPLES=OFF
+          -DFICTION_LIGHTWEIGHT_DEBUG_BUILDS=ON
 
       - name: Build (Debug)
         working-directory: ${{github.workspace}}/build_debug
@@ -165,6 +167,7 @@ jobs:
           -DFICTION_BENCHMARK=OFF
           -DFICTION_EXPERIMENTS=ON
           ${{ matrix.os != 'ubuntu-24.04-arm' && '-DFICTION_Z3=ON' || '' }}
+          -DFICTION_ALGLIB=ON
           -DFICTION_ENABLE_MUGEN=ON
           -DFICTION_PROGRESS_BARS=OFF
           -DFICTION_WARNINGS_AS_ERRORS=OFF

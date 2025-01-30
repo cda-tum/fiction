@@ -20,3 +20,6 @@
 	path = libs/mockturtle
 	url = https://github.com/marcelwa/mockturtle.git
 	branch = mnt
+[submodule "libs/alglib-cmake"]
+	path = libs/alglib-cmake
+	url = https://github.com/wlambooy/alglib-cmake.git

@@ -1066,6 +1066,29 @@ Parameter ``k``:
 Returns:
     The binomial coefficient :math:`\binom{n}{k}`.)doc";
 
+static const char *__doc_fiction_bound_direction =
+R"doc(The electrostatic potential bounds required for the *Ground State
+Space* algorithm. As the domain in which our potential bounds live are
+simply the real numbers, we may think of the lower bound and upper
+bound domains to be separate partial order structures on the real
+number line, inverse to each other. The *Ground State Space* algorithm
+requires the properties of a lower semi-lattice for these domains, ie.
+all finite meets must exist. This is implemented for the lower and
+upper bound respectively simply by taking a minimum or a maximum. One
+may think of meets as follows, which is very relevant to intention of
+their application: a meet, or greatest lower bound, is the *maximal
+information* common to a set (of potential bounds). This semantic
+operation is essential to the *Ground State Space* algorithm, which
+thus envelops without loss of accuracy.)doc";
+
+static const char *__doc_fiction_bound_direction_LOWER =
+R"doc(Lower bounds live in the set :math:`(-\infty\f, \infty]` and are
+ordered by >.)doc";
+
+static const char *__doc_fiction_bound_direction_UPPER =
+R"doc(Upper bounds live in the set :math:`[-\infty, \infty)` and are ordered
+by <.)doc";
+
 static const char *__doc_fiction_bounding_box_2d =
 R"doc(A 2D bounding box object that computes a minimum-sized box around all
 non-empty coordinates in a given layout. Layouts can be of arbitrary
@@ -2792,6 +2815,103 @@ Parameter ``cn``:
 
 static const char *__doc_fiction_clocking_scheme_regular = R"doc(Defines the clocking as regular and well-defined by the scheme.)doc";
 
+static const char *__doc_fiction_clustercomplete =
+R"doc(*ClusterComplete* is an instantiation of a general solution to
+exhaustive state assignment searching for which all local predicates
+hold, given respective local evaluations that may be aggregated from
+individual inter-variable interactions. Applied to the problem of
+exact physical simulation of SiDBs, it is able to efficiently consider
+positive charges that are rare to occur, but drastically blow up exact
+simulation runtimes when hierarchical pruning methods are not applied.
+In fact, the exponential growth in problem complexity for added SiDBs
+is tamed by *ClusterComplete*, as SiDB layouts to simulate in practise
+amount to a high pruning efficacy, resulting in a layout-dependent
+reduction of the simulation base. This amounts to an effective
+simulation base in the real number range :math:`[1,b]`, where
+:math:`b\in\{2,3\}` is the given simulation base.
+
+The part of the *ClusterComplete* algorithm that is implemented in
+this file is the destructive phase of the procedure that employs the
+duality of construction and destruction, folding and unfolding. The
+phase preceding it is the key ingredient to the achieved efficiency:
+the *Ground State Space* algorithm, which constructs a minimized
+hierarchical search space of charge configurations that adhere to the
+critical population stability criterion. In particular, it generalizes
+physically informed space pruning that contributes to the capabilities
+of the *QuickExact* simulator, now applying to all charge states
+equally, and, most importantly, it lifts the associated potential
+equations to higher order, allowing us to reason over potential bounds
+in a cluster hierarchy.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Parameter ``lyt``:
+    Layout to simulate.
+
+Parameter ``params``:
+    Parameter required for both the invocation of *Ground State
+    Space*, and the simulation following.
+
+Returns:
+    Simulation results.)doc";
+
+static const char *__doc_fiction_clustercomplete_params =
+R"doc(The struct containing the parameters both passed on to pre-simulator
+Ground State Space, and used during simulation.)doc";
+
+static const char *__doc_fiction_clustercomplete_params_available_threads =
+R"doc(Number of threads to make available to *ClusterComplete* for the
+unfolding stage.)doc";
+
+static const char *__doc_fiction_clustercomplete_params_global_potential =
+R"doc(Global external electrostatic potential. Value is applied on each cell
+in the layout.)doc";
+
+static const char *__doc_fiction_clustercomplete_params_ground_state_space_reporting =
+R"doc(This enum class provides meaningful options for configuring the
+reporting of the *Ground State Space* statistics. These statistic may
+be used especially to configure the validity witness partitioning
+options for *Ground State Space*, that may impair runtimes when set
+too high, but could provide a large benefit to the complexity of the
+unfolding process of large simulation problems by performing more
+involved pruning procedures in the construction stage.)doc";
+
+static const char *__doc_fiction_clustercomplete_params_ground_state_space_reporting_OFF =
+R"doc(Disabling this option will suppress the output of *Ground State Space*
+statistics.)doc";
+
+static const char *__doc_fiction_clustercomplete_params_ground_state_space_reporting_ON =
+R"doc(Enabling this option will output *Ground State Space* statistics to
+the standard output.)doc";
+
+static const char *__doc_fiction_clustercomplete_params_local_external_potential =
+R"doc(Local external electrostatic potentials (e.g., locally applied
+electrodes).)doc";
+
+static const char *__doc_fiction_clustercomplete_params_num_overlapping_witnesses_limit_gss =
+R"doc(The complexity is of validity witness partitioning bounded by a
+factorial in the number of overlapping witnesses. This parameter thus
+allows the validity witness partitioning procedure to perform the
+reduction to overlapping witnesses for larger cluster sizes that could
+be runtime-impairing, then limiting specifically the length of the
+input to the factorial call.)doc";
+
+static const char *__doc_fiction_clustercomplete_params_report_gss_stats =
+R"doc(Option to decide if the *Ground State Space* statistics are reported
+to the standard output. By default, this option is disabled.)doc";
+
+static const char *__doc_fiction_clustercomplete_params_simulation_parameters = R"doc(Physical simulation parameters.)doc";
+
+static const char *__doc_fiction_clustercomplete_params_validity_witness_partitioning_max_cluster_size_gss =
+R"doc(This specifies the maximum cluster size for which *Ground State Space*
+will solve an NP-complete sub-problem exhaustively. The sets of SiDBs
+that witness local population stability for each respective charge
+state may be partitioned into disjoint sets such that the number of
+required witnesses for each respective charge state is satisfied. If
+no such partition exists, the multiset charge configuration associated
+with the requirements may be rejected.)doc";
+
 static const char *__doc_fiction_color_routing =
 R"doc(A multi-path signal routing approach based on coloring of edge
 intersection graphs as originally proposed in \"Efficient Multi-Path
@@ -3511,7 +3631,7 @@ algorithm.)doc";
 
 static const char *__doc_fiction_critical_temperature_params_alpha =
 R"doc(Alpha parameter for the *QuickSim* algorithm (only applicable if
-engine == APPROXIMATE).)doc";
+engine == QUICKSIM).)doc";
 
 static const char *__doc_fiction_critical_temperature_params_confidence_level =
 R"doc(Probability threshold for ground state population. The temperature at
@@ -3522,7 +3642,7 @@ probability of erroneous calculations of the gate.)doc";
 
 static const char *__doc_fiction_critical_temperature_params_iteration_steps =
 R"doc(Number of iteration steps for the *QuickSim* algorithm (only
-applicable if engine == APPROXIMATE).)doc";
+applicable if engine == QUICKSIM).)doc";
 
 static const char *__doc_fiction_critical_temperature_params_max_temperature =
 R"doc(Maximum simulation temperature beyond which no simulation will be
@@ -4595,6 +4715,468 @@ Parameter ``to_delete``:
 
 Returns:
     A 2D vector representing the calculated offset matrix.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl = R"doc()doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_add_composition =
+R"doc(A composition is added to the given clustering state, i.e., the
+projector states in the composition are added to the clustering state
+and the potential bounds store is updated accordingly.
+
+Parameter ``clustering_state``:
+    Clustering state to which the given composition should be added.
+
+Parameter ``composition``:
+    The composition that needs to be added to the given clustering
+    state.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_add_if_configuration_stability_is_met =
+R"doc(This function handles performs the last analysis step before
+collecting a simulation result. In order to judge whether a population
+stable charge distribution is physically valid, the *configuration
+stability* needs to be tested. If this criterion passes, the charge
+distribution is added to the simulation results.
+
+Parameter ``clustering_state``:
+    A clustering state consisting of only singleton clusters along
+    with associated charge states that make up a charge distribution
+    that conforms to the *population stability* criterion.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_add_parent =
+R"doc(After all specializations have been tried, the clustering state needs
+to un-specialize in order for other specializations to take place
+later. This action undoes the action performed by the function above,
+adding the given parent projector state and putting it back at the
+given index.
+
+Parameter ``clustering_state``:
+    Clustering state to which the parent projector state should be
+    added.
+
+Parameter ``parent_pst_ix``:
+    The index in the vector of projector states in the given
+    clustering state at which the added parent projector state should
+    be placed.
+
+Parameter ``parent_pst``:
+    The parent projector state that needs to be added back to the
+    given clustering state at the given index.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_add_physically_valid_charge_configurations =
+R"doc(This recursive function is the heart of the *ClusterComplete*
+destruction. The given clustering state is dissected at the largest
+cluster to each possible specialization of it, which then enters the
+recursive call with the clustering state modified to have a set of
+sibling children replacing their direct parent. For each
+specialization, appropriate updates are made to the potential bounds
+store that is part of the clustering state. After a specialization has
+been handled completely, i.e., when the recursive call for this
+specialization returns, the specialization to the potential bounds
+store is undone so that a new specialization may be applied.
+
+The two base cases to the recursion are as follows: (1) the charge
+distributions implied by the given clustering state do not meet the
+population stability, meaning that this branch of the search space may
+be pruned through terminating the recursion at this level, and, (2)
+the clustering state hold only singleton clusters and passes the
+population stability check. In the latter case, the configuration
+stability check is performed before the associated charge distribution
+is added to the simulation results.
+
+Parameter ``w``:
+    The worker running on the current thread. It has a clustering
+    state that holds a specific combination of multiset charge
+    configurations as projector states of which the respectively
+    associated clusters form a clustering in the cluster hierarchy.
+
+Parameter ``composition``:
+    To enable dynamic updates of the clustering states that thieves
+    can assume, the composition that the current worker's clustering
+    state is specialized to is to be stored in the worker's queue if
+    further compositions are to be unfolded.
+
+Returns:
+    `false` if and only if queue of this worker is found to be
+    completely empty and thus backtracking is not required.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_available_threads = R"doc(Number of available threads.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_charge_layout =
+R"doc(The base layout, along with the map of placed defects, that are used
+to create charge distribution surface copies.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_clustercomplete_impl =
+R"doc(Constructor.
+
+Parameter ``lyt``:
+    Layout to simulate.
+
+Parameter ``params``:
+    Parameter required for both the invocation of *Ground State
+    Space*, and the simulation following.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_extract_work_from_top_cluster =
+R"doc(Work in the form of compositions of charge space elements of the top
+cluster are extracted into a vector and shuffled at random before
+being returned. The shuffling may balance the initial workload
+division.
+
+Parameter ``top_cluster``:
+    The top cluster that is returned by running the *Ground State
+    Space* construction.
+
+Returns:
+    A vector containing all work contained by the top cluster in
+    random order.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_fail_onto_negative_charge =
+R"doc(Returns `true` if and only if the given potential bound closes out
+SiDB-.
+
+Parameter ``pot_bound``:
+    Potential lower bound.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_fail_onto_positive_charge =
+R"doc(Performs V < -e - mu+.
+
+Parameter ``pot_bound``:
+    Potential upper bound.
+
+Returns:
+    `true` if and only if the given potential bound closes out SiDB+.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_find_cluster_of_maximum_size =
+R"doc(Finds the cluster of the maximum size in the clustering associated
+with the input.
+
+Parameter ``proj_states``:
+    A vector of projector states that forms a clustering when only the
+    respectively contained clusters are considered.
+
+Returns:
+    The index in this vector of the projector state that contains the
+    cluster of maximum size.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_get_projector_state_bound =
+R"doc(Helper function for obtaining the stored lower or upper bound on the
+electrostatic potential that SiDBs in the given projector state--i.e.,
+a cluster together with an associated multiset charge configuration--
+collectively project onto the given SiDB.
+
+Template parameter ``bound``:
+    Bound to obtain (lower/upper).
+
+Parameter ``pst``:
+    Projector state.
+
+Parameter ``sidb_ix``:
+    Receiving SiDB.
+
+Returns:
+    The potential projection value associated with this bound; i.e.,
+    an electrostatic potential (in V),)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_initialize_charge_layout =
+R"doc(Function to initialize the charge layout.
+
+Parameter ``lyt``:
+    Layout to simulate.
+
+Parameter ``params``:
+    Parameters for ClusterComplete.
+
+Returns:
+    The charge layout initializes with defects specified in the given
+    parameters.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_initialize_worker_queues =
+R"doc(Initializes the worker queues with work from the top cluster, dividing
+it evenly over the available threads.
+
+Parameter ``work_from_top_cluster``:
+    A vector containing all compositions of all charge space elements
+    of the top cluster.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_lb_fail_onto_neutral_charge =
+R"doc(Performs V > e - mu+.
+
+Parameter ``pot_bound``:
+    Potential lower bound.
+
+Returns:
+    `true` if and only if the given potential bound closes out SiDB0.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_meets_population_stability_criterion =
+R"doc(This function performs an analysis that is crucial to the
+*ClusterComplete*'s efficiency: as the *Ground State Space* construct
+is broken down, combinations of multiset charge configurations are
+tried together in more detail than in the construction preceding this
+second phase of the simulation.
+
+Parameter ``clustering_state``:
+    The clustering state that bundles a slice (i.e., a clustering) in
+    the cluster hierarchy along with respective projection states
+    (i.e., multiset charge configurations) together with a store of
+    accumulated potential projection bounds onto all SiDBs in the
+    layout, where this information is specific to the projection
+    states in the clustering state.
+
+Returns:
+    `false` if and only if a physically valid charge distribution
+    cannot be extracted from the clustering state.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_mu_bounds_with_error =
+R"doc(Globally available array of bounds that section the band gap, used for
+pruning.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_mutex_to_protect_the_simulation_results = R"doc(Mutex to protect the simulation results.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_real_placed_defects = R"doc(Atomic defects that are placed in the layout.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_remove_composition =
+R"doc(A composition is removed from the given clustering state, i.e., the
+projector states in the compositions are removed from the clustering
+state and the potential bounds store is updated accordingly.
+
+Parameter ``clustering_state``:
+    Clustering state from which the given composition should be
+    removed.
+
+Parameter ``composition``:
+    The composition that needs to be removed from the given clustering
+    state.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_result = R"doc(Simulation results.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_run =
+R"doc(This function performs the *ClusterComplete* simulation; first
+executing the *Ground State Space* construction, then destructing the
+result into the set of all physically valid charge distributions that
+are returned.
+
+Parameter ``params``:
+    Parameter required for both the invocation of *Ground State
+    Space*, and the simulation following.
+
+Returns:
+    Results of the exact simulation.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_take_parent_out =
+R"doc(Before the parent projector state may be specialized to a specific
+composition of its children, first the projections of the parent must
+be subtracted. The parent projector state is moved out and returned.
+
+Parameter ``clustering_state``:
+    The clustering state from which the parent projector state should
+    be taken out.
+
+Parameter ``parent_pst_ix``:
+    The index of the parent projector state in the given clustering
+    state that should be taken out.
+
+Returns:
+    The parent projector state that was taken out of the given
+    clustering state.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_ub_fail_onto_neutral_charge =
+R"doc(Performs V < -e - mu-.
+
+Parameter ``pot_bound``:
+    Potential upper bound.
+
+Returns:
+    `true` if and only if the given potential bound closes out SiDB0.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_unfold_all_compositions =
+R"doc(After a cluster in a clustering state was chosen to be unfolded next,
+the unfolding is performed through ensuring that all compositions of
+the multiset associated with the cluster in the clustering state are
+each unfolded. The current worker will always unfold the first
+composition, while putting the other compositions in its queue such
+that threads without work may steal those if the current worker is
+still working on this first composition.
+
+Parameter ``w``:
+    The worker running on the current thread.
+
+Parameter ``compositions``:
+    A vector containing all compositions to unfold.
+
+Parameter ``informant``:
+    For other workers to be able to unfold one of those compositions
+    that are not being unfolded yet, they need to obtain the right
+    clustering state. The informant adds to the required information
+    to dynamically update the clustering state for other workers
+    looking to steal work.
+
+Returns:
+    `false` if and only if the queue of this worker is found to be
+    completely empty and thus backtracking is not required.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_unfold_composition =
+R"doc(The clustering state of the current worker is specialized according to
+the given composition preceding the recursion. If there is still work
+left to do by this worker, backtracking is performed, for which also
+the aforementioned specialization needs to be undone.
+
+Parameter ``w``:
+    The worker running on the current thread.
+
+Parameter ``composition``:
+    The composition to unfold.
+
+Returns:
+    `false` if and only if there is no need for backtracking after
+    this return.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_worker = R"doc(Forward declaration of the worker struct.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_2 = R"doc(Forward declaration of the worker struct.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_all_workers = R"doc(The vector of all workers where this worker is at `ix`.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_clustering_state =
+R"doc(This worker's current state, consisting of a clustering where each
+cluster has an assigned multiset charge configuration, and a store
+containing lower and upper bounds on the local potential for each SiDB
+under this multiset charge configuration assignment.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_index = R"doc(Worker index in the vector of all workers.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_obtain_work =
+R"doc(Obtains work for this worker, either from their own queue, or else
+from another worker's queue (work stealing).
+
+Returns:
+    Either nothing, if no work was found (and this thread can thus
+    terminate), or the work that was obtained.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue =
+R"doc(A worker queue contains a double-layer queue of work items, a
+clustering state for thieves that want to steal from the lowest layer
+of the queue, along with a queue of moles that tell how to transition
+this clustering state for thieves to facilitate stealing from one
+layer to the next.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_add_to_queue =
+R"doc(Adds a vector of work items to the queue, along with adding an
+informant that allows for a dynamic update of the clustering state for
+thieves to assume one of the work items that are added to the queue.
+
+Parameter ``compositions``:
+    Vector of work items.
+
+Parameter ``informant``:
+    A mole providing the required information to update the clustering
+    state for thieves to enable forward-tracking. The mole says which
+    composition to add to the clustering state, and which cluster is
+    selected for the subsequent unfolding.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_apply_informant =
+R"doc(A mole is popped from the queue which says which composition to add to
+the clustering state for thieves, and which cluster is selected for
+the subsequent unfolding, which should then be taken out.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_clustering_state_for_thieves =
+R"doc(The clustering state for thieves, which enables thieves to join in and
+steal work from the bottom of the queue, while the owner of this queue
+will take items from the top of the queue.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_get_from_this_queue =
+R"doc(Own work is obtained in a blocking fashion. If there is no more work
+in the queue, `false` is returned to indicate no backtracking is
+necessary, since there is no follow-up work item to backtrack towards.
+
+Returns:
+    Either work if there is work left to do on the current level---
+    i.e., for the current clustering state of the worker that calls
+    this function---or `true` if this not the case and backtracking is
+    required in order to do more work that is in this queue, or
+    `false` when there is no more such work and thus backtracking can
+    be skipped.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_initialize_queue_after_stealing =
+R"doc(Initializes this queue with stolen work. The work itself is kept on
+the stack.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_mole =
+R"doc(A mole contains information on how to transition from one clustering
+state to a subsequent one.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_mole_composition =
+R"doc(The composition of the previously selected parent that fills the gap
+made by previously taking out this selected parent. In a clustering
+state transition, first the composition is added (filling the gap made
+by the previously selected parent), then the currently selected parent
+is taken out according to the `parent_to_move_out_ix` above. This way,
+a work item may be unfolded as it fills the gap made by taking out the
+currently selected parent. Thus, this work item becomes the
+`composition` value of the next mole in line.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_mole_parent_to_move_out_ix =
+R"doc(The index of the cluster in the clustering state that is the selected
+parent cluster to unfold next. It needs to be taken out in a
+clustering state transition.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_mutex_to_protect_this_queue = R"doc(Mutex used to protect shared resources in this queue.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_pop_last_layer =
+R"doc(Called during backtracking to descend to the previous layer of the
+queue, along with popping the unnecessary mole.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_queue =
+R"doc(Double layer queue of work items. Each layer corresponds with a
+clustering state that needs to be used to unfold the items in that
+layer. The clustering states of subsequent layers are each one
+informant application apart.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_thief_informants =
+R"doc(The queue of moles. For each transition between layers of the double
+layer work queue below, there is an associated mole which informs how
+the transition takes place. This way, the clustering state for thieves
+can be dynamically updated through forward-tracking (opposite of
+backtracking).)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_try_steal_from_this_queue =
+R"doc(Attempt to steal work from this queue in a non-blocking fashion. When
+a lock is acquired, forward-tracking is applied to dynamically update
+the clustering state for thieves to where it can be copied for a thief
+that steals the last work item in this queue.
+
+Returns:
+    Either `true` when the queue is locked, `false` when there is no
+    work in this queue, or a pair of a copy of the updated (forward-
+    tracked) clustering state for thieves along with the corresponding
+    work item.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_work_in_queue_count =
+R"doc(Counter to keep track of the total amount of work in the double-layer
+work queue.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_queue_worker_queue =
+R"doc(Standard constructor.
+
+Parameter ``num_sidbs_in_layout``:
+    The number of SiDBs in the layout to simulate. Required for
+    initializing clustering states.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_work_stealing_queue =
+R"doc(This worker's queue where work can be obtained from either by this
+worker or by others (work stealing).)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_worker_worker =
+R"doc(Standard constructor.
+
+Parameter ``ix``:
+    Worker index in the vector of all workers.
+
+Parameter ``num_sidbs``:
+    The number of SiDBs in the layout to simulate.
+
+Parameter ``workers``:
+    The vector of all workers where this worker is at `ix`.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_workers = R"doc(Vector containing all workers.)doc";
 
 static const char *__doc_fiction_detail_color_routing_impl = R"doc()doc";
 
@@ -7042,6 +7624,380 @@ Parameter ``place_info``:
 
 Parameter ``ssg``:
     The search space graph.)doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl = R"doc()doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_check_charge_space =
+R"doc(The charge space of the given cluster is checked by performing the
+potential bound analysis on each multiset charge configuration in it
+(without composition information). For each invalid one found,
+corresponding updates are made to maintain consistency in the cluster
+hierarchy data structure. Updates make the stored bound information
+more strict, and as a result, more invalid states may be found.
+
+Parameter ``c``:
+    The cluster to check the charge space of.
+
+Returns:
+    `true` if and only if charge space of `c` has no invalid elements.)doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_clustering =
+R"doc(The clustering starts at all singletons, then moves up through merges
+until only the top cluster remains)doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_compute_external_pot_bounds_for_saved_compositions =
+R"doc(This function performs the first step to merging a set of clusters to
+their direct parent. When clusters are merged, their respective charge
+spaces have reached a fixed point in the construction; thereby, the
+projections specific to each stored composition in the respective
+charge spaces, for which previously only the receiving SiDBs in the
+respective child cluster were considered, are now composed to
+potential bounds onto each SiDB outside the respective cluster, thus
+making a complete potential bounds store.
+
+Parameter ``parent``:
+    The cluster that parents the clusters to merge.
+
+Returns:
+    The number of projector states that is the accumulation of the
+    number of projector states in the composition of each charge space
+    element of each child.)doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_compute_meets_for_internal_pot_bounds =
+R"doc(This function performs the flatten operation; the partial sum of the
+electrostatic potential local to all contained SiDBs as received from
+within the cluster is, for each multiset charge configuration in the
+new charge space, flattened, with respect to all compositions of the
+multiset, to the self-projection of the parent cluster.
+
+The above, and the fact that the self-projection for singletons is
+their respective local external electrostatic potential, thus defines
+"self-projections" inductively.
+
+Parameter ``parent``:
+    The newly-forming parent cluster.)doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_construct_merged_charge_state_space =
+R"doc(This function calls the recursive function above that goes through all
+combination of charge space elements of children to form the charge
+space of their direct parent.
+
+Parameter ``parent``:
+    The parent cluster to which charge spaces are combined.)doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_construct_merged_potential_projections =
+R"doc(After the charge space of the parent has been created, this function
+combines associated potential projections by going through the charge
+space elements of the children, and, for each recipient SiDB,
+aggregates the potential projections from each child onto that SiDB.
+
+Parameter ``parent``:
+    The newly-forming parent cluster.)doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_derive_children_received_bounds_without_siblings =
+R"doc(This function dynamically updates the externally received partial sums
+of local electrostatic potential of the children, and sets that of the
+parent
+
+Parameter ``parent``:
+    The newly forming parent cluster.)doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_fail_onto_negative_charge =
+R"doc(Returns `true` if and only if the given potential bound closes out
+SiDB-.
+
+Parameter ``pot_bound``:
+    Potential lower bound.)doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_fail_onto_positive_charge =
+R"doc(Performs V < -e - mu+.
+
+Parameter ``pot_bound``:
+    Potential upper bound.
+
+Returns:
+    `true` if and only if the given potential bound closes out SiDB+.)doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_fill_merged_charge_state_space =
+R"doc(This recursive function goes through all combinations of charge space
+elements of the children (exactly one element per child for each
+combination), and verifies each combination before adding it to the
+merged charge space of the parent. Combinations with equivalent
+multiset signatures are preserved under different compositions of the
+multiset charge configuration in the charge space of the parent.
+
+Parameter ``parent``:
+    The newly-forming parent cluster.
+
+Parameter ``cur_child_ix``:
+    The index of the child of which precisely one element of its
+    charge space should be added to the combination of charge space
+    element. When it reaches out of bounds, a combination is complete
+    and may be verified before adding it to the parent charge space.
+
+Parameter ``m``:
+    The dynamically combined cluster charge state (i.e., multiset
+    charge configuration). A copy of `m` when it is a complete
+    composition of charge space elements of the children is added to
+    the parent charge space if verification passes. After, `m` is
+    dynamically transformed to the next combination until no new
+    combination exists.)doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_find_valid_witness_partitioning =
+R"doc(A simple brute-force algorithm that solves the validity witness
+partitioning problem by looking for a partitioning, i.e., an
+assignment that maps each SiDB to a charge state that they are a
+witness of in such a way that required witness counts are met for each
+SiDB. Starting with the negative charge state, the requirement is
+fulfilled in a greedy manner by taking SiDBs witnessing this charge
+state. This process continues for the other charge states in the same
+way, though when an SiDB has already been assigned, it cannot be used
+to reduce the required witness count again. When all SiDBs have been
+assigned successfully, a partitioning is found and `true` is returned.
+Otherwise, when an in-progress assignment cannot be completed, the
+next assignment is tried through back-tracking. When no assignment can
+be completed, `false` is returned, which then proves that the multiset
+charge configuration that was given to create the witness partitioning
+state is invalid.
+
+Template parameter ``current_fill_cs``:
+    The charge state for which the function currently looks for
+    available witnesses until no more witnesses are required.
+
+Parameter ``st``:
+    The witness partitioning state, which holds the required witnesses
+    counters for each charge state.
+
+Parameter ``num_witnesses_for_current_cs``:
+    The number of available witnesses that are left for
+    `current_fill_cs`.
+
+Returns:
+    `true` if a validity witness partitioning was found, and `false`
+    if no consistent partitioning was found.)doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_get_received_potential_bounds =
+R"doc(This function obtains the pair of potential bounds relevant to a
+potential projection associated with a multiset charge configuration
+as received by the given SiDB. The entire layout of SiDBs is taken
+into account in the returned bounds, as this function accumulates the
+received potential that is external to the projecting cluster with
+that which is internal to it. Depending on the given potential bound
+analysis mode, the latter considers different levels of detail.
+
+Template parameter ``mode``:
+    This selects the potential bound analysis mode. Intuitively, when
+    analysing a composition, the information that constitutes bounds
+    has one level more detail; this information from the deeper level
+    in the cluster hierarchy is later flattened to enable analysis of
+    the composed multiset charge configuration without the additional
+    information.
+
+Parameter ``pst``:
+    The projector state that, together with a receiving SiDB, yields a
+    pair of bounds on the potential projection from the cluster
+    associated with the projector state onto the receiving SiDB.
+
+Parameter ``sidb_ix``:
+    The receiving SiDB.
+
+Parameter ``composition_pot_bounds``:
+    This optional parameter supplies the additional composition
+    information when available.
+
+Returns:
+    A pair of doubles that represent the lower and upper bound of the
+    potential projection onto the given SiDB.)doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_ground_state_space_impl =
+R"doc(Constructor. Invokes the algorithm with the given parameters on the
+given layout.
+
+Parameter ``lyt``:
+    Layout to construct the *Ground State Space* of.
+
+Parameter ``parameters``:
+    The parameters that *Ground State Space* will use throughout the
+    construction.)doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_lb_fail_onto_neutral_charge =
+R"doc(Performs V > e - mu+.
+
+Parameter ``pot_bound``:
+    Potential lower bound.
+
+Returns:
+    `true` if and only if the given potential bound closes out SiDB0.)doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_maximum_top_level_multisets =
+R"doc(This function computes the maximum size of the charge space of the top
+cluster. Comparing this number with the size of the charge space of
+the top cluster that is returned after running *Ground State Space*
+gives an indication of how the search space was reduced.
+
+Parameter ``number_of_sidbs``:
+    The number of SiDBs (:math:`N`).
+
+Returns:
+    :math:`\binom{N + 2}{2}` if base = 3, or otherwise :math:`\binom{N
+    + 1}{1}` when the base is 2.)doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_merge_pot_projection_bounds =
+R"doc(This function aggregates the bounds on the electrostatic potential
+from the respective children onto the given receiving SiDB, giving
+rise to the bound from their direct parent onto this SiDB.
+
+Template parameter ``bound``:
+    Bound to handle (lower/upper)
+
+Parameter ``parent``:
+    The newly-forming parent cluster.
+
+Parameter ``rst``:
+    The receptor state with the receiving SiDB that is currently
+    handled.)doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_move_up_hierarchy =
+R"doc(This function performs the complete merging operation from a set of
+sibling clusters to their direct parent. In this process, combinations
+of charge space elements of the children are considered in special
+detail, before passing them to the charge space of the parent and
+flattening these details such that the process of checking multiset
+charge configurations in respective charge spaces of the clusters in
+the clustering may continue as before. The termination of the *Ground
+State Space* algorithm is signalled when the clustering only contains
+the top cluster.)doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_mu_bounds_with_error =
+R"doc(Globally available array of bounds that section the band gap, used for
+pruning.)doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_params = R"doc(Parameters used during the construction.)doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_perform_potential_bound_analysis =
+R"doc(This function receives a multiset charge configuration with an
+associated cluster and finds whether this multiset charge
+configuration can be declared invalid for this cluster.
+
+Template parameter ``mode``:
+    The potential bound analysis mode that switches the function
+    between analysing a multiset charge configuration either with or
+    without composition information.
+
+Parameter ``pst``:
+    The projector state for which the potential bound analysis is to
+    be performed.
+
+Parameter ``composition_potential_bounds``:
+    This optional parameter supplies the additional composition
+    information when available.
+
+Returns:
+    `false` if and only if `pst` can be excluded from the *Ground
+    State Space*.)doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_potential_bound_analysis_mode =
+R"doc(A switch to enable the potential bound analysis function to analyse
+both multiset charge configurations without composition information,
+and those with.)doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_potential_bound_analysis_mode_ANALYZE_COMPOSITION =
+R"doc(Switch used to analyse multiset charge configurations with information
+of specific composition thereof.)doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_potential_bound_analysis_mode_ANALYZE_MULTISET =
+R"doc(Switch used to analyse multiset charge configurations without
+composition information.)doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_projector_state_count =
+R"doc(Count the total number of projector states that are stored in the
+constructed hierarchy.)doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_run =
+R"doc(The main loop in the *Ground State Space* construction. Charge spaces
+are updated until a fixed point is reached, after which a merging of
+children to their direct parent is performed. This process repeats
+until the parent to which the children are merged is the top cluster,
+the cluster containing all SiDBs in the layout. The Ground State Space
+is the resulting hierarchical charge space structure.
+
+Returns:
+    The results of the construction, which include the top cluster
+    which parents all other clusters, and thereby contains the charge
+    spaces of each cluster.)doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_subtract_sibling_pot_from_received_ext_pot_bound =
+R"doc(This function derives the new externally received partial sums of
+electrostatic potential local to an SiDB contained by the child
+(together forming `child_rst`) through subtracting the projections of
+its siblings.
+
+Template parameter ``bound``:
+    The Bound to handle (lower/upper)
+
+Parameter ``parent``:
+    The newly forming parent cluster.
+
+Parameter ``child_rst``:
+    Receptor state from one of the children of the parent.)doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_terminate = R"doc(`true` if and only if the construction is to be terminated.)doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_top_cluster =
+R"doc(The top cluster, the cluster that contains all SiDBs, is returned as
+the result of the construction.)doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_ub_fail_onto_neutral_charge =
+R"doc(Performs V < -e - mu-.
+
+Parameter ``pot_bound``:
+    Potential upper bound.
+
+Returns:
+    `true` if and only if the given potential bound closes out SiDB0.)doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_update_charge_spaces =
+R"doc(The charge spaces of each cluster in the current clustering are
+checked and updated accordingly when needed.
+
+Parameter ``skip_cluster``:
+    This optional parameter specifies a cluster to skip in the pass
+    over all clusters in the current clustering.
+
+Returns:
+    `true` if and only if a fixed point has been reached; i.e., none
+    of the charge space contain an element that may be removed.)doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_verify_composition =
+R"doc(This function determines whether a newly composed candidate for the
+charge space of the newly forming parent cluster can be rejected in
+the creation of the combined charge space. Here, multiset charge
+configurations for the parents are checked with composition
+information: a combination of respective charge space elements of the
+children is considered, thus, intuitively, the information considered
+in the analysis goes one level deeper than when later considering the
+composed multiset with flattened information with respect to its
+compositions.
+
+Parameter ``composition``:
+    A composition of charge space elements of the children, making a
+    candidate for a charge space element of their direct parent.
+
+Returns:
+    `false` if and only if the given composition can be rejected.)doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_write_children_pot_bounds_to_complete_store =
+R"doc(To facilitate efficient unfolding for the second stage of the
+simulation by *ClusterComplete*, potential bound data that is stored
+in the hierarchy which will not be subject to change anymore is
+converted to a handy format: a complete potential bounds store. It
+holds potential bounds for all SiDBs in the considered layout and thus
+addition and subtraction of other complete potential bound stores are
+easy to perform.
+
+Parameter ``parent``:
+    The newly-forming parent cluster whose children's charge spaces
+    become fixed upon their merging.)doc";
 
 static const char *__doc_fiction_detail_handle_virtual_pis =
 R"doc(Removes virtual primary inputs from a network if supported. Otherwise
@@ -10556,6 +11512,14 @@ static const char *__doc_fiction_exact_physical_design_stats_y_size = R"doc()doc
 
 static const char *__doc_fiction_exact_sidb_simulation_engine = R"doc(Selector exclusively for exact SiDB simulation engines.)doc";
 
+static const char *__doc_fiction_exact_sidb_simulation_engine_CLUSTERCOMPLETE =
+R"doc(*ClusterComplete* is a novel exact simulation engine that requires
+exponential runtime, though, depending on the simulation problem, it
+effectively reduces the base number by a real number, thus allowing
+problem sizes that were previously considered astronomical. Inherent
+to the simulation methodology that does not depend on the simulation
+base, it simulates very effectively for either base number (2 or 3).)doc";
+
 static const char *__doc_fiction_exact_sidb_simulation_engine_EXGS =
 R"doc(*Exhaustive Ground State Search* (EXGS) is an exact simulation engine
 that always has exponential runtime.)doc";
@@ -10610,8 +11574,8 @@ configurations are checked for validity, 100 % simulation accuracy is
 guaranteed.
 
 @note This was the first exact simulation approach. However, it is
-replaced by *QuickExact* due to the much better runtimes and more
-functionality.
+replaced by *QuickExact* and *ClusterComplete* due to the much better
+runtimes and more functionality.
 
 Template parameter ``Lyt``:
     SiDB cell-level layout type.
@@ -12400,6 +13364,14 @@ Returns:
     Clocking scheme object that matches the given `name`, or
     `std::nullopt` if no clocking scheme by the given `name` exists.)doc";
 
+static const char *__doc_fiction_get_cluster_size =
+R"doc(Forward declaration. Required for compilation due to the mutually
+recursive structure in this file.)doc";
+
+static const char *__doc_fiction_get_cluster_size_2 =
+R"doc(Forward declaration. Required for compilation due to the mutually
+recursive structure in this file.)doc";
+
 static const char *__doc_fiction_get_name =
 R"doc(Helper function to conveniently fetch the name from a layout or
 network as they use different function names for the same purpose.
@@ -12412,6 +13384,46 @@ Parameter ``ntk_or_lyt``:
 
 Returns:
     Name of given network or layout.)doc";
+
+static const char *__doc_fiction_get_projector_state_compositions =
+R"doc(This function is used to obtain the cluster charge state compositions
+of the multiset charge configuration in a projector state. The
+corresponding charge space element of the projector is found and its
+compositions are returned.
+
+Parameter ``pst``:
+    Projector state of which the corresponding compositions are
+    requested.
+
+Returns:
+    The compositions associated with the multiset charge configuration
+    of the projecting cluster.)doc";
+
+static const char *__doc_fiction_get_sidb_simulation_engine =
+R"doc(Returns a simulation engine by name.
+
+Parameter ``name``:
+    Name of the desired SiDB simulation engine.
+
+Returns:
+    SiDB simulation engine that matches the given `name`, or
+    `std::nullopt` if no simulation engine by the given `name` exists.)doc";
+
+static const char *__doc_fiction_get_singleton_sidb_ix =
+R"doc(Forward declaration. Required for compilation due to the mutually
+recursive structure in this file.)doc";
+
+static const char *__doc_fiction_get_singleton_sidb_ix_2 =
+R"doc(Forward declaration. Required for compilation due to the mutually
+recursive structure in this file.)doc";
+
+static const char *__doc_fiction_get_unique_cluster_id =
+R"doc(Forward declaration. Required for compilation due to the mutually
+recursive structure in this file.)doc";
+
+static const char *__doc_fiction_get_unique_cluster_id_2 =
+R"doc(Forward declaration. Required for compilation due to the mutually
+recursive structure in this file.)doc";
 
 static const char *__doc_fiction_graph_coloring_engine =
 R"doc(An enumeration of coloring engines to use for the graph coloring. All
@@ -12887,6 +13899,140 @@ Returns:
 
 static const char *__doc_fiction_gray_code_iterator_start_number = R"doc(Start number of the iteration.)doc";
 
+static const char *__doc_fiction_ground_state_space =
+R"doc(The purely constructive *Ground State Space* algorithm is the key
+ingredient of the *ClusterComplete* exact SiDB simulator that lifts
+exact SiDB simulation to permit multiple gates in connection. It uses
+iterative "loop until fixpoint" concepts to prune the simulation
+search space for not only a flat layout of SiDBs, but rather
+generalizes, and lifts the physically informed space pruning technique
+introduced with *QuickExact* to higher order, allowing *Ground State
+Space* to prune multiset charge state configurations at any level in a
+cluster hierarchy.
+
+The role of the cluster hierarchy is to rank interactions between
+groups, or clusters of SiDBs that together make up the whole layout,
+such that the variation in electrostatic potential under different
+charge state assignments is highest between the children clusters of
+clusters that low in the hierarchy. Thereby, the structure allows us
+to consider the most charge state assignment-dependent interaction in
+a more detailed physically informed space pruning analysis, enabling
+high pruning efficacy for the few pruning tests (with respect to the
+exponential search space).
+
+Starting at a clustering of all singleton clusters, the charge spaces,
+ie. a set of multiset charge configurations (initially { {{-}}, {{0}},
+{{+}} } or omitting the singleton multiset {{+}} in the case of base 2
+pre-simulation), are pruned iteratively through potential bound
+analysis. Through merges, ie., replacing a set of children in the
+clustering with their parent, we may inspect the most crucially
+dependant interactions in the layout separately. The procedure
+finishes when the charge spaces have been folded all the way up to the
+top cluster, parent of all, which then contains all information
+resulting from the construction. *ClusterComplete*, without much
+trickery, now simply unfolds this result, allowing simulation of
+problems that were previously seen as astronomical, due to the (base 2
+or 3) exponential growth in the number of SiDBs.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Parameter ``lyt``:
+    Layout to construct the *Ground State Space* of.
+
+Parameter ``params``:
+    The parameters that *Ground State Space* will use throughout the
+    construction. The physical parameters that *Ground State Space*
+    will use to prune simulation search space are stored in there. In
+    particular, the user may configure parameters that decide limits
+    on the problem sizes of pruning by validity witness partitioning.
+    By default, these are set to avoid runtimes from being affected,
+    as these sub-problems may scale factorially. Thereby, these
+    parameters are especially useful for large simulation problems
+    that could benefit from extra intensive pruning before
+    *ClusterComplete* unfolds the constructed hierarchical charge
+    space.
+
+Returns:
+    The results of the construction, which include the top cluster
+    which parents all other clusters, and thereby contains the charge
+    spaces of each cluster.)doc";
+
+static const char *__doc_fiction_ground_state_space_params = R"doc(The set of parameters used in the *Ground State Space* construction.)doc";
+
+static const char *__doc_fiction_ground_state_space_params_num_overlapping_witnesses_limit_gss =
+R"doc(The complexity is of validity witness partitioning bounded by a
+factorial in the number of overlapping witnesses. This parameter thus
+allows the validity witness partitioning procedure to perform the
+reduction to overlapping witnesses for larger cluster sizes that could
+be runtime-impairing, then limiting specifically the length of the
+input to the factorial call. As above, the defaulted value ensures no
+hindrance in runtimes.)doc";
+
+static const char *__doc_fiction_ground_state_space_params_simulation_parameters =
+R"doc(The physical parameters that *Ground State Space* will use to prune
+the simulation search space.)doc";
+
+static const char *__doc_fiction_ground_state_space_params_witness_partitioning_cluster_size_limit =
+R"doc(This specifies the maximum cluster size for which *Ground State Space*
+will solve an NP-complete sub-problem exhaustively. The sets of SiDBs
+that witness local population stability for each respective charge
+state may be partitioned into disjoint sets such that the number of
+required witnesses for each respective charge state is satisfied. If
+no such partition exists, the multiset charge configuration associated
+with the requirements may be rejected. The defaulted value is chosen
+such that some extra pruning may be performed, while the impact on the
+runtime remains negligible. Validity witness partitioning parameters
+are relevant for large simulation problems.)doc";
+
+static const char *__doc_fiction_ground_state_space_results =
+R"doc(This struct is used to store the results of the *Ground State Space*
+construction.)doc";
+
+static const char *__doc_fiction_ground_state_space_results_maximum_top_level_multisets =
+R"doc(The maximum size of the charge space of the top cluster, given the
+simulation base, can be inferred by the \"stars and bars\"
+combinatorial idea: the solution to this analogous problem determines
+the maximum amount of multisets of size :math:`N` (where :math:`N` is
+the number of SiDBs in the layout, and therefore in the top cluster)
+for the given base :math:`b`. In particular, the analogy is as
+follows: any such multiset can be seen as :math:`N` stars and :math:`b
+- 1` bars separating those stars. Then, the :math:`b` partitions
+forming from these :math:`b - 1` separators each have a respective
+size, adding up to :math:`N`. Therefore each partition is associated
+with an amount of one of the charge states of the multiset. Now we may
+compute total number of possible multisets for the top cluster as the
+number of combinations of :math:`N` stars and :math:`b - 1` bars.
+Hence this is computed with the following combinatorial formula:
+:math:`\binom{N + b - 1}{b - 1}`.)doc";
+
+static const char *__doc_fiction_ground_state_space_results_projector_state_count =
+R"doc(The total number of distinct projector states is counted. At each
+merge, the projector states in charge space compositions in the charge
+spaces of the clusters to merge are locked in the final construct, and
+can therefore be counted. This may be used to estimate the time it
+would take *ClusterComplete* to unfold the hierarchy.)doc";
+
+static const char *__doc_fiction_ground_state_space_results_report =
+R"doc(Report *Ground State Space* statistics. A quick heuristic to assess
+the quality of the pruning is captured by the size of the charge space
+of the top cluster, which depends on the charge spaces of all clusters
+below it.
+
+Parameter ``os``:
+    The output stream to write to (default: standard output).
+
+Returns:
+    Prints the runtime and the number of pruned top level multisets
+    versus the total amount possible.)doc";
+
+static const char *__doc_fiction_ground_state_space_results_runtime = R"doc(The runtime of the construction is stored.)doc";
+
+static const char *__doc_fiction_ground_state_space_results_top_cluster =
+R"doc(The top cluster is the root of the cluster hierarchy. It therefore
+allows access to the entire cluster hierarchy, including the charge
+spaces of each cluster.)doc";
+
 static const char *__doc_fiction_groundstate_from_simulation_result =
 R"doc(This function calculates the ground state charge distributions from
 the provided simulation results. The ground state charge distributions
@@ -13096,6 +14242,12 @@ Parameter ``v``:
 
 Parameter ``rest``:
     Remaining values to hash.)doc";
+
+static const char *__doc_fiction_heuristic_sidb_simulation_engine = R"doc(Selector exclusively for heuristic SiDB simulation engines.)doc";
+
+static const char *__doc_fiction_heuristic_sidb_simulation_engine_QUICKSIM =
+R"doc(*QuickSim* is a heuristic simulation engine that only requires
+polynomial runtime.)doc";
 
 static const char *__doc_fiction_hexagonal_layout =
 R"doc(A layout type that utilizes offset coordinates to represent a
@@ -16450,6 +17602,299 @@ static const char *__doc_fiction_post_layout_optimization_stats_y_size_after = R
 
 static const char *__doc_fiction_post_layout_optimization_stats_y_size_before = R"doc(Layout height before the post-layout optimization process.)doc";
 
+static const char *__doc_fiction_potential_bound_top =
+R"doc(The respective *top* elements of the lower semi-lattices in which our
+potential bounds live, ie., the respective elements of *most*
+information. This means that any meet with a top element (weakly)
+reduces the information, and thus any meet computed in iteration
+through binary application may start out with this element.
+
+Template parameter ``bound``:
+    Potential bound domain to return the element of most information
+    of.
+
+Returns:
+    The element of most information respective to the potential bound
+    domain.)doc";
+
+static const char *__doc_fiction_potential_bounds_store =
+R"doc(This defines a store in which the bounds on the local electrostatic
+potential for an SiDB (index) may be stored. For the *Ground State
+Space* algorithm, this is used to keep track of the respective lower
+and upper bounds on the partial sum of the potential projected from
+SiDBs in a subhierarchy that is local to SiDBs that are also in the
+subhierarchy. During *ClusterComplete* simulation, the stored
+potential bounds represent information of the complete hierarchy, thus
+all SiDB interactions.)doc";
+
+static const char *__doc_fiction_potential_bounds_store_get =
+R"doc(Getter for a (partial) potential sum bound local to an SiDB.
+
+Template parameter ``bound``:
+    The potential bound to obtain.
+
+Parameter ``sidb_ix``:
+    SiDB (index) to obtain the potential bound of.
+
+Returns:
+    The potential bound for this SiDB.)doc";
+
+static const char *__doc_fiction_potential_bounds_store_initialize_complete_potential_bounds =
+R"doc(Initialize potential bounds for the given number of SiDBs (applicable
+to a complete potential bounds store only).
+
+Parameter ``num_sidbs``:
+    The number of SiDBs in the layout that is simulated.)doc";
+
+static const char *__doc_fiction_potential_bounds_store_num_sidbs =
+R"doc(Getter for the size of the potential bounds store, i.e., the number of
+SiDBs considered in this store.
+
+Returns:
+    The size of the potential bounds store.)doc";
+
+static const char *__doc_fiction_potential_bounds_store_operator_iadd =
+R"doc(Add a complete potential bound store to this (also a complete
+potential bound store) through pointwise updates.
+
+Parameter ``other``:
+    Other complete potential bound store.
+
+Returns:
+    Reference to this.)doc";
+
+static const char *__doc_fiction_potential_bounds_store_operator_isub =
+R"doc(Subtract a complete potential bound store to this (also a complete
+potential bound store) through pointwise updates, i.e., updates for
+each SiDB and for each bound (LB, UB).
+
+Parameter ``other``:
+    Other complete potential bound store.
+
+Returns:
+    Reference to this.)doc";
+
+static const char *__doc_fiction_potential_bounds_store_set =
+R"doc(Setter for a (partial) potential sum bound local to an SiDB.
+
+Template parameter ``bound``:
+    The potential bound to obtain.
+
+Parameter ``sidb_ix``:
+    SiDB (index) to set the potential bound for.
+
+Parameter ``bound_value``:
+    New bound to set.)doc";
+
+static const char *__doc_fiction_potential_bounds_store_set_2 =
+R"doc(Setter for (partial) potential sum bounds local to an SiDB.
+
+Parameter ``sidb_ix``:
+    SiDB (index) to set the potential bounds for.
+
+Parameter ``min``:
+    New lower bound to set.
+
+Parameter ``max``:
+    New upper bound to set.)doc";
+
+static const char *__doc_fiction_potential_bounds_store_store =
+R"doc(Potential bounds are a map from SiDB indices to two values
+respectively representing the lower and upper bound.)doc";
+
+static const char *__doc_fiction_potential_bounds_store_update =
+R"doc(Relative setter for a (partial) potential sum bound local to an SiDB.
+
+Template parameter ``bound``:
+    The potential bound to update.
+
+Parameter ``sidb_ix``:
+    SiDB (index) to update the potential bound of.
+
+Parameter ``bound_diff``:
+    Bound difference to apply.)doc";
+
+static const char *__doc_fiction_potential_bounds_store_update_2 =
+R"doc(Relative setter for (partial) potential sum bounds local to an SiDB.
+
+Parameter ``sidb_ix``:
+    SiDB (index) to update the potential bounds of.
+
+Parameter ``min_diff``:
+    Difference in lower bound potential to apply.
+
+Parameter ``max_diff``:
+    Difference in upper bound potential to apply.)doc";
+
+static const char *__doc_fiction_potential_projection =
+R"doc(This struct defines the type of an electrostatic potential projection,
+which pairs a multiset charge configuration with the potential value
+(in eV) associated with the potential projection in the given context.
+The context is given by potential projection stores in the decorated
+cluster hierarchies, which links the projecting cluster with SiDB that
+receives this potential projection.)doc";
+
+static const char *__doc_fiction_potential_projection_multiset = R"doc(Associated multiset charge configuration.)doc";
+
+static const char *__doc_fiction_potential_projection_operator_iadd =
+R"doc(Defines summation of potential projections through addition of the
+potential values and concatenation of the associated multiset charge
+configurations. The latter may simply be implemented by addition of
+the compressed forms.
+
+Parameter ``other``:
+    Other potential projection to sum with the current.
+
+Returns:
+    The current potential projection to which the other potential
+    projection is now added.)doc";
+
+static const char *__doc_fiction_potential_projection_operator_lt =
+R"doc(Defines an ordering of potential projections through comparison of the
+potential value. To prevent potential projections of equal potential
+value but different associated multiset charge configurations to be
+regarded as equal, a comparison of the latter is used as a "fail-
+safe".
+
+Parameter ``other``:
+    Other potential projection to compare with the current.
+
+Returns:
+    `true` if and only if the potential value of the current is lower
+    than that of `other`, or if the potential values are equal and the
+    compressed form of the multiset charge configuration is strictly
+    less than that of `other`.)doc";
+
+static const char *__doc_fiction_potential_projection_order =
+R"doc(This struct defines the type of potential projection order, along with
+getter and setter operations. Essentially, a potential projection
+order is an ordered collection of potential projections, which allow
+rapid access and modifications of the potential projection bounds by
+relying on the ordering defined on potential projections, and
+canonical operations on ordered set containers. In the decorated
+cluster hierarchy, each cluster has a potential projection order onto
+each SiDB in the layout from which the hierarchy was created.)doc";
+
+static const char *__doc_fiction_potential_projection_order_add =
+R"doc(Adds a potential projection to the ordering, automatically placing it
+appropriately.
+
+Parameter ``pp``:
+    Potential projection to add.)doc";
+
+static const char *__doc_fiction_potential_projection_order_get_bound =
+R"doc(A getter for a potential projection bound, which is the first or last
+item in the ordered set.
+
+Template parameter ``bound``:
+    The bound to obtain.
+
+Returns:
+    The potential projection that forms the requested bound on the
+    potential projection order.)doc";
+
+static const char *__doc_fiction_potential_projection_order_get_next_bound =
+R"doc(A getter for the next potential projection bound, which is the first
+potential projection when traversing the ordering either from below or
+from above, that differs in its multiset charge configuration from the
+relevant potential projection bound.
+
+Template parameter ``bound``:
+    The bound to obtain.
+
+Returns:
+    The potential projection that would be the requested bound on the
+    potential projection order if the current relevant bound would be
+    erased.)doc";
+
+static const char *__doc_fiction_potential_projection_order_get_pot_proj_for_m_conf =
+R"doc(A getter for the potential projection bound given a multiset charge
+configuration specification, which is the first potential projection
+in the ordering when traversing either from below or from above, that
+matches its multiset charge configuration to the argument.
+
+Template parameter ``bound``:
+    The bound to obtain.
+
+Parameter ``m_conf``:
+    The multiset charge configuration to match.
+
+Returns:
+    The potential projection that forms the requested bound on the
+    subset of the potential projection order of potential projections
+    that match their multiset charge configuration to the argument.)doc";
+
+static const char *__doc_fiction_potential_projection_order_order = R"doc(The potential projection ordering.)doc";
+
+static const char *__doc_fiction_potential_projection_order_potential_projection_order = R"doc(Default constructor, creating the empty potential projection order.)doc";
+
+static const char *__doc_fiction_potential_projection_order_potential_projection_order_2 =
+R"doc(Constructor for a potential projection from a singleton cluster onto
+the SiDB contained in it.
+
+Parameter ``loc_ext_pot``:
+    The local external potential at the SiDB in the singleton cluster.
+    Specifically, this is the sum of the local defect potential and
+    the local external potential.
+
+Parameter ``base``:
+    The simulation base. This defines whether positive charges are
+    considered.
+
+Parameter ``self_projection``:
+    Separates the constructor type from inter-SiDB potential
+    projections.)doc";
+
+static const char *__doc_fiction_potential_projection_order_potential_projection_order_3 =
+R"doc(Constructor for a potential projection from a singleton cluster onto
+an SiDB.
+
+Parameter ``inter_sidb_pot``:
+    The chargeless potential between the SiDB in the singleton cluster
+    and the one projected onto, as found in the potential matrix in an
+    associated `charge_distribution_surface` object.
+
+Parameter ``base``:
+    The simulation base. This defines whether positive charges are
+    considered.)doc";
+
+static const char *__doc_fiction_potential_projection_order_remove_m_conf =
+R"doc(Removes all occurrences of potential projections that match their
+multiset charge configuration to the argument.
+
+Parameter ``m_conf``:
+    The multiset charge configuration of which all occurrences must be
+    removed.)doc";
+
+static const char *__doc_fiction_potential_projection_pot_val = R"doc(Potential projection value (unit: eV).)doc";
+
+static const char *__doc_fiction_potential_projection_potential_projection =
+R"doc(Default constructor, used as a starting point for an accumulation of
+potential projections.)doc";
+
+static const char *__doc_fiction_potential_projection_potential_projection_2 =
+R"doc(Trivial copy constructor.
+
+Parameter ``pot``:
+    Potential value to copy.
+
+Parameter ``mul``:
+    Multiset charge configuration to copy.)doc";
+
+static const char *__doc_fiction_potential_projection_potential_projection_3 =
+R"doc(Constructor for a potential projection from a singleton cluster,
+thereby lifting a value in the potential matrix to a potential
+projection.
+
+Parameter ``inter_sidb_pot``:
+    Potential value of which the absolute value may be found in the
+    potential matrix in an associated `charge_distribution_surface`
+    object.
+
+Parameter ``cs``:
+    Charge state associated with the singleton cluster projector for
+    this potential projection.)doc";
+
 static const char *__doc_fiction_potential_to_distance_conversion =
 R"doc(The electrostatic potential on hydrogen-passivated silicon is
 typically modeled using a screened Coulomb potential. This
@@ -17619,6 +19064,36 @@ Returns:
 
 static const char *__doc_fiction_sidb_bestagon_library_sidb_bestagon_library = R"doc()doc";
 
+static const char *__doc_fiction_sidb_binary_cluster_hierarchy_node = R"doc(Forward-declaration of sidb_binary_cluster_hierarchy_node.)doc";
+
+static const char *__doc_fiction_sidb_binary_cluster_hierarchy_node_2 = R"doc(Forward-declaration of sidb_binary_cluster_hierarchy_node.)doc";
+
+static const char *__doc_fiction_sidb_binary_cluster_hierarchy_node_c = R"doc()doc";
+
+static const char *__doc_fiction_sidb_binary_cluster_hierarchy_node_sidb_binary_cluster_hierarchy_node = R"doc()doc";
+
+static const char *__doc_fiction_sidb_binary_cluster_hierarchy_node_sub = R"doc(The two children of the node.)doc";
+
+static const char *__doc_fiction_sidb_charge_space_composition =
+R"doc(A charge space composition holds a number of projector states of
+sibling clusters. Summing the multiset charge configuration associated
+with each, we obtain an element of the charge space of their parent.
+Additionally, we have a store for the bounds on the partial potential
+sum local to each SiDB contained by the parent, i.e., partial in the
+sense that SiDBs not contained by the parent are not taken into
+account. The potential bounds for each SiDB correspond to the meet on
+the potential bounds for each (sub-)composition of the respective
+cluster charge states associated with the multiset charge
+configuration of each projector state in this composition of siblings.)doc";
+
+static const char *__doc_fiction_sidb_charge_space_composition_pot_bounds =
+R"doc(Flattened (hierarchical) potential bounds specific to this
+composition.)doc";
+
+static const char *__doc_fiction_sidb_charge_space_composition_proj_states =
+R"doc(Projector states associated with charge space elements that make up
+the composition.)doc";
+
 static const char *__doc_fiction_sidb_charge_state = R"doc(Charge states of SiDBs.)doc";
 
 static const char *__doc_fiction_sidb_charge_state_NEGATIVE = R"doc()doc";
@@ -17628,6 +19103,379 @@ static const char *__doc_fiction_sidb_charge_state_NEUTRAL = R"doc()doc";
 static const char *__doc_fiction_sidb_charge_state_NONE = R"doc()doc";
 
 static const char *__doc_fiction_sidb_charge_state_POSITIVE = R"doc()doc";
+
+static const char *__doc_fiction_sidb_charge_states_for_base_number =
+R"doc(Charge states of SiDBs for a given simulation base number. The full
+base states are returned for an invalid simulation base.
+
+Parameter ``base``:
+    The simulation base number to get the associated SiDB charge
+    states for.
+
+Returns:
+    NEG, NEUT, POS for base 3 (full base), and NEG, NEUT otherwise,
+    associated with base 2 simulation.)doc";
+
+static const char *__doc_fiction_sidb_cluster =
+R"doc(Forward declaration of the SiDB cluster hierarchy required for the
+mutual recursive structure in this file. Here we define a pointer to a
+SiDB cluster to be a shared pointer, which enables us to also have
+pointers to parents.)doc";
+
+static const char *__doc_fiction_sidb_cluster_2 =
+R"doc(Forward declaration of the SiDB cluster hierarchy required for the
+mutual recursive structure in this file. Here we define a pointer to a
+SiDB cluster to be a shared pointer, which enables us to also have
+pointers to parents.)doc";
+
+static const char *__doc_fiction_sidb_cluster_charge_space = R"doc(The charge state space of the cluster.)doc";
+
+static const char *__doc_fiction_sidb_cluster_charge_state =
+R"doc(A cluster charge state is a multiset charge configuration. We may
+compress it into a 64 bit unsigned integer by putting the number of
+negative and positive charges in the upper and lower 32 bits
+respectively. The number of neutral charges may then be inferred for a
+given cluster by considering its size. Cluster charge states are the
+crucial objects of the state spaces, called charge spaces, since they
+not only hold information of the multiset charge configuration, but
+also the set of compositions, each of which compose into the current
+cluster charge state.)doc";
+
+static const char *__doc_fiction_sidb_cluster_charge_state_add_charge =
+R"doc(Modifier of the cluster charge state, adding a single charge state.
+
+Parameter ``cs``:
+    The charge state to add.)doc";
+
+static const char *__doc_fiction_sidb_cluster_charge_state_compositions = R"doc(Stored compositions of this cluster charge state.)doc";
+
+static const char *__doc_fiction_sidb_cluster_charge_state_neg_count =
+R"doc(Number of negative charges in the cluster charge state (32 available
+bits).)doc";
+
+static const char *__doc_fiction_sidb_cluster_charge_state_operator_call =
+R"doc(Defined a hashing of a cluster charge state. Since we need only
+separate cluster charge states by their compressed form, we may
+compute a hash over this for optimal performance when used in a hash
+set.
+
+Parameter ``m``:
+    Cluster charge state to compute the hash of.
+
+Returns:
+    The hash of the given cluster charge state.)doc";
+
+static const char *__doc_fiction_sidb_cluster_charge_state_operator_eq =
+R"doc(Defines the equality operation of cluster charge states, which
+disregards the compositions.
+
+Parameter ``other``:
+    Other cluster charge state to test for equality with the current.
+
+Returns:
+    `true` if and only if the compressed forms are equal.)doc";
+
+static const char *__doc_fiction_sidb_cluster_charge_state_operator_iadd =
+R"doc(Defines addition of cluster charge states through multiset
+concatenation. Disregards compositions.
+
+Parameter ``other``:
+    Other cluster charge state to concatenate with the current.
+
+Returns:
+    The concatenated cluster charge state, which is the modified
+    version of the current.)doc";
+
+static const char *__doc_fiction_sidb_cluster_charge_state_operator_isub =
+R"doc(Defines subtraction of cluster charge states through multiset
+difference. Disregards compositions.
+
+Parameter ``other``:
+    Other cluster charge state to take the difference of w.r.t. with
+    the current.
+
+Returns:
+    The cluster charge state that is their difference, which is the
+    modified version of the current.)doc";
+
+static const char *__doc_fiction_sidb_cluster_charge_state_operator_unsigned_long =
+R"doc(Explicit instructions for the compiler on how to cast a cluster charge
+state to an 64-bit unsigned integer.
+
+Returns:
+    The 64-bit unsigned integer representing the compressed form of
+    the cluster charge state.)doc";
+
+static const char *__doc_fiction_sidb_cluster_charge_state_pos_count =
+R"doc(Number of positive charges in the cluster charge state (32 available
+bits).)doc";
+
+static const char *__doc_fiction_sidb_cluster_charge_state_sidb_cluster_charge_state =
+R"doc(Default constructor, creates a cluster charge state without any
+negative and positive charges.)doc";
+
+static const char *__doc_fiction_sidb_cluster_charge_state_sidb_cluster_charge_state_2 =
+R"doc(Constructor for a charge space element of a singleton cluster. It has
+a single composition, which is a cluster state of the singleton
+cluster and the singleton multiset charge configuration itself.
+
+Parameter ``singleton``:
+    Singleton cluster to put in the compositions of this cluster
+    charge state.
+
+Parameter ``cs``:
+    Charge state to lift to a singleton multiset charge configuration.
+
+Parameter ``loc_ext_pot``:
+    The local external potential at the SiDB in the singleton cluster.
+    Specifically, this is the sum of the local defect potential and
+    the local external potential.
+
+Parameter ``total_num_sidbs``:
+    The total number of SiDBs in the layout.)doc";
+
+static const char *__doc_fiction_sidb_cluster_charge_state_sidb_cluster_charge_state_3 =
+R"doc(Constructor for cluster charge state given a multiset charge
+configuration represented in its compressed form. It allows the
+compressed form to be lifted to the full type to facilitate equality
+checks.
+
+Parameter ``m``:
+    The multiset charge configuration to create a cluster charge state
+    of.)doc";
+
+static const char *__doc_fiction_sidb_cluster_charge_state_sidb_cluster_charge_state_4 =
+R"doc(Constructor of a cluster charge state allowing initializer list
+construction.
+
+Parameter ``charge_states``:
+    initializer list of charge states to form into a cluster charge
+    state.)doc";
+
+static const char *__doc_fiction_sidb_cluster_children = R"doc(The set of children of a cluster is a clustering.)doc";
+
+static const char *__doc_fiction_sidb_cluster_external_sidbs = R"doc(The SiDBs in the layout that are not contained by the cluster.)doc";
+
+static const char *__doc_fiction_sidb_cluster_get_parent =
+R"doc(This function returns a shared pointer to the parent of this cluster.
+
+Returns:
+    A shared pointer to the parent of this cluster)doc";
+
+static const char *__doc_fiction_sidb_cluster_hierarchy =
+R"doc(This function performs the ALGLIB agglomerative clustering algorithm
+for a given SiDB layout. By default, the cluster are created by a
+minimal positional variance heuristic, also known as Ward's method.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Parameter ``lyt``:
+    The layout to create a cluster hierarchy of.
+
+Parameter ``linkage_method``:
+    The agglomerative clustering linking heuristic that is used by
+    ALGLIB.)doc";
+
+static const char *__doc_fiction_sidb_cluster_hierarchy_linkage_method =
+R"doc(An enumeration of cluster linkage methods. The chosen method defines
+how clusters are merged in the agglomerative clustering procedure, by,
+e.g., defining an inter-cluster distance to minimize for the cluster
+to merge. For more information, visit: https://docs.tibco.com/pub/spot
+fire/6.5.1/doc/html/hc/hc_clustering_methods_overview.htm.)doc";
+
+static const char *__doc_fiction_sidb_cluster_hierarchy_linkage_method_COMPLETE =
+R"doc(Complete linkage takes the maximum distance between nodes in a
+cluster.)doc";
+
+static const char *__doc_fiction_sidb_cluster_hierarchy_linkage_method_MINIMUM_VARIANCE =
+R"doc(Known as Ward's method, this type of linkage merges clusters based on
+a minimum variance measure.)doc";
+
+static const char *__doc_fiction_sidb_cluster_hierarchy_linkage_method_SINGLE = R"doc(Single linkage takes the minimum distance between nodes in a cluster.)doc";
+
+static const char *__doc_fiction_sidb_cluster_hierarchy_linkage_method_UNWEIGHTED_AVERAGE =
+R"doc(Unweighted average linkage takes the average distance between nodes in
+a cluster, disregarding the number of elements in a node.)doc";
+
+static const char *__doc_fiction_sidb_cluster_hierarchy_linkage_method_WEIGHTED_AVERAGE =
+R"doc(Weighted average linkage takes the average distance between nodes in a
+cluster, weighing in the number of elements in a node.)doc";
+
+static const char *__doc_fiction_sidb_cluster_initialize_singleton_cluster_charge_space =
+R"doc(This function initializes the charge space of a singleton cluster
+corresponding with the given simulation base, and sets the initial
+bounds on the potential received from outside the cluster as the local
+potential bounds. The local potential bounds do not include the local
+external potential at the SiDB in the singleton, as this is passed
+separately.
+
+Parameter ``loc_pot_min``:
+    The minimum local potential for the SiDB in the singleton cluster.
+
+Parameter ``loc_pot_max``:
+    The maximum local potential for the SiDB in the singleton cluster.
+
+Parameter ``loc_ext_pot``:
+    The local external potential at the SiDB in the singleton cluster.
+    Specifically, this is the sum of the local defect potential and
+    the local external potential.
+
+Parameter ``base``:
+    The simulation base.
+
+Parameter ``self_ptr``:
+    Shared pointer to itself.)doc";
+
+static const char *__doc_fiction_sidb_cluster_num_sidbs =
+R"doc(Function to return the number of SiDBs contained in the cluster.
+
+Returns:
+    The number of SiDBs contained in the cluster.)doc";
+
+static const char *__doc_fiction_sidb_cluster_operator_eq =
+R"doc(Equality operation on cluster hierarchies. Checks the respective
+unique identifiers for equality.
+
+Parameter ``other``:
+    Cluster (hierarchy) to compare to.
+
+Returns:
+    `true` if and only if the unique identifiers match.)doc";
+
+static const char *__doc_fiction_sidb_cluster_parent =
+R"doc(Every cluster carries a pointer to its parent. For the top cluster,
+this is `nullptr`.)doc";
+
+static const char *__doc_fiction_sidb_cluster_pot_projs = R"doc()doc";
+
+static const char *__doc_fiction_sidb_cluster_pot_projs_complete_store = R"doc()doc";
+
+static const char *__doc_fiction_sidb_cluster_projector_state =
+R"doc(A projector state pairs the potential projecting cluster with the
+associated multiset charge configuration.)doc";
+
+static const char *__doc_fiction_sidb_cluster_projector_state_cluster = R"doc(Projector cluster.)doc";
+
+static const char *__doc_fiction_sidb_cluster_projector_state_get_count =
+R"doc(Getter for the number of a given charge state in the multiset
+configuration.
+
+Template parameter ``cs``:
+    Charge state to count the number of occurrences in the projector
+    state of.
+
+Returns:
+    The number of occurrences of the given charge state in the
+    multiset charge configuration. For a neutral charge, the number of
+    occurrences is inferred by considering the size of the cluster in
+    the projector state.)doc";
+
+static const char *__doc_fiction_sidb_cluster_projector_state_multiset_conf =
+R"doc(Multiset charge configuration. It is an element of the charge space of
+the projector cluster.)doc";
+
+static const char *__doc_fiction_sidb_cluster_ptr_hash =
+R"doc(This struct defines a hashing of shared pointers to clusters, used to
+facilitate quick access in a clustering.)doc";
+
+static const char *__doc_fiction_sidb_cluster_ptr_hash_operator_call =
+R"doc(The hashing operation is defined.
+
+Parameter ``c``:
+    Shared pointer to a cluster to take the has of.
+
+Returns:
+    The hash computed over the unique id associated with the cluster.)doc";
+
+static const char *__doc_fiction_sidb_cluster_received_ext_pot_bounds =
+R"doc(The bounds on the electrostatic potential sum of SiDBs external to
+this cluster, local to an SiDB in the cluster.)doc";
+
+static const char *__doc_fiction_sidb_cluster_receptor_state =
+R"doc(A receptor state pairs the potential receiving cluster with the
+identifier of the SiDB.)doc";
+
+static const char *__doc_fiction_sidb_cluster_receptor_state_cluster = R"doc(Receptor cluster.)doc";
+
+static const char *__doc_fiction_sidb_cluster_receptor_state_sidb_ix = R"doc(SiDB index. It is contained in the receptor cluster.)doc";
+
+static const char *__doc_fiction_sidb_cluster_sidb_cluster =
+R"doc(SiDB cluster hierarchy constructor.
+
+Parameter ``c``:
+    Set of SiDB indices for the cluster to contain.
+
+Parameter ``other_c``:
+    Set of SiDB indices in the layout that the cluster will not
+    contain.
+
+Parameter ``x``:
+    A set of cluster hierarchies to set as the children of this
+    cluster.
+
+Parameter ``unique_id``:
+    The unsigned integer to identify the cluster hierarchy uniquely
+    with. For the case of a singleton cluster, the unique identifier
+    is set to be the index of the single SiDB it contains.)doc";
+
+static const char *__doc_fiction_sidb_cluster_sidbs = R"doc(The SiDBs contained by the cluster.)doc";
+
+static const char *__doc_fiction_sidb_cluster_uid = R"doc(Unique identifier. Equal to the SiDB index for singleton clusters.)doc";
+
+static const char *__doc_fiction_sidb_clustering_state =
+R"doc(A clustering state is very similar to a cluster state composition,
+though it uses unique pointers to the cluster states that may be
+moved. Thereby, this is the essential type of the dynamic objects in
+*ClusterComplete*'s operation, which always represent information of
+the complete layout.)doc";
+
+static const char *__doc_fiction_sidb_clustering_state_operator_assign =
+R"doc(Copy assignment operator.
+
+Assigns the contents of another `sidb_clustering_state` instance to
+this instance. Performs a deep copy of `proj_states` and a complete
+copy of `pot_bounds`.
+
+Parameter ``other``:
+    The `sidb_clustering_state` instance to copy from.
+
+Returns:
+    A reference to this `sidb_clustering_state` instance after
+    assignment.)doc";
+
+static const char *__doc_fiction_sidb_clustering_state_operator_assign_2 =
+R"doc(Move assignment operator.
+
+Parameter ``other``:
+    Other clustering state to move.)doc";
+
+static const char *__doc_fiction_sidb_clustering_state_pot_bounds =
+R"doc(Flattened (hierarchical) potential bounds specific to this clustering
+state.)doc";
+
+static const char *__doc_fiction_sidb_clustering_state_proj_states =
+R"doc(Projector states associated with charge space elements that make up
+the clustering state.)doc";
+
+static const char *__doc_fiction_sidb_clustering_state_sidb_clustering_state =
+R"doc(Default constructor.
+
+Parameter ``num_sidbs``:
+    Number of SiDBs in the layout that the clustering state should
+    consider.)doc";
+
+static const char *__doc_fiction_sidb_clustering_state_sidb_clustering_state_2 =
+R"doc(Copy constructor.
+
+Parameter ``other``:
+    Other clustering state to copy.)doc";
+
+static const char *__doc_fiction_sidb_clustering_state_sidb_clustering_state_3 =
+R"doc(Move constructor.
+
+Parameter ``other``:
+    Other clustering state to move.)doc";
 
 static const char *__doc_fiction_sidb_defect =
 R"doc(In accordance with the paper mentioned above, the `sidb_defect` struct
@@ -17969,6 +19817,15 @@ static const char *__doc_fiction_sidb_on_the_fly_gate_library_sidb_on_the_fly_ga
 
 static const char *__doc_fiction_sidb_simulation_engine = R"doc(Selector for the available SiDB simulation engines.)doc";
 
+static const char *__doc_fiction_sidb_simulation_engine_CLUSTERCOMPLETE =
+R"doc(*ClusterComplete* is a novel exact simulation engine that requires
+exponential runtime, though, depending on the simulation problem, it
+effectively reduces the base number by a real number, thus allowing
+problem sizes that were previously considered astronomical in size.
+Inherent to the simulation methodology that does not depend on the
+simulation base, it simulates very effectively for either base number
+(2 or 3).)doc";
+
 static const char *__doc_fiction_sidb_simulation_engine_EXGS =
 R"doc(*Exhaustive Ground State Search (EXGS)* is an exact simulation engine
 that always has exponential runtime.)doc";
@@ -17981,6 +19838,19 @@ effective search-space pruning.)doc";
 static const char *__doc_fiction_sidb_simulation_engine_QUICKSIM =
 R"doc(*QuickSim* is a heuristic simulation engine that only requires
 polynomial runtime.)doc";
+
+static const char *__doc_fiction_sidb_simulation_engine_name =
+R"doc(Returns the name of the given simulation engine.
+
+Template parameter ``EngineType``:
+    The type of the SiDB simulation engine
+    (exhaustive/heuristic/generic).
+
+Parameter ``engine``:
+    An SiDB simulation engine.
+
+Returns:
+    The name of the simulation engine.)doc";
 
 static const char *__doc_fiction_sidb_simulation_parameters =
 R"doc(This struct collects all physical parameters for physical SiDB
@@ -18215,6 +20085,17 @@ static const char *__doc_fiction_simple_gate_layout_tile_drawer_tile_fillcolor =
 static const char *__doc_fiction_simple_gate_layout_tile_drawer_tile_id = R"doc()doc";
 
 static const char *__doc_fiction_simple_gate_layout_tile_drawer_tile_label = R"doc()doc";
+
+static const char *__doc_fiction_singleton_multiset_conf_to_charge_state =
+R"doc(Function to convert a singleton cluster charge state in its compressed
+form to a charge state.
+
+Parameter ``m``:
+    A singleton multiset charge configuration.
+
+Returns:
+    The charge state associated with the sole element contained in the
+    given multiset charge configuration.)doc";
 
 static const char *__doc_fiction_siqad_coord_t =
 R"doc(SiQAD coordinates.
@@ -18824,6 +20705,23 @@ static const char *__doc_fiction_synchronization_element_layout_synchronization_
 
 static const char *__doc_fiction_synchronization_element_layout_synchronization_element_layout_storage_synchronization_element_layout_storage = R"doc()doc";
 
+static const char *__doc_fiction_take_meet_of_potential_bounds =
+R"doc(This function computes a binary meet, overwriting the first argument
+with the result. It takes the minimum in case of a lower bound, and a
+maximum in case of an upper bound, each corresponding to the minimal
+information common to the arguments.
+
+Template parameter ``bound``:
+    The potential bound domain which defines the implementation of the
+    meet.
+
+Parameter ``a``:
+    First potential bound which is overwritten with the result of the
+    meet.
+
+Parameter ``b``:
+    Second potential bound.)doc";
+
 static const char *__doc_fiction_technology_constraints = R"doc(Target technologies.)doc";
 
 static const char *__doc_fiction_technology_constraints_NONE = R"doc(No technology-specific constraints.)doc";
@@ -19223,6 +21121,36 @@ R"doc(Single simulation runtime of the exact ground state simulation
 algorithm.)doc";
 
 static const char *__doc_fiction_time_to_solution_stats_time_to_solution = R"doc(Time-to-solution in seconds.)doc";
+
+static const char *__doc_fiction_to_sidb_cluster =
+R"doc(This function initiates the recursive procedure of converting a binary
+cluster hierarchy to our bespoke version.
+
+Parameter ``n``:
+    A node from a binary cluster hierarchy, as for instance returned
+    by parsing ALGLIB's result.
+
+Returns:
+    A uniquely identified node in a decorated cluster hierarchy that
+    follows the "general tree" structure.)doc";
+
+static const char *__doc_fiction_to_unique_sidb_cluster =
+R"doc(This recursive function is used to convert a binary cluster hierarchy,
+as for instance returned by `sidb_cluster_hierarchy` function that
+uses ALGLIB's `clusterizer`. The returned structure includes parent
+pointers.
+
+Parameter ``n``:
+    A node from a binary cluster hierarchy, as for instance returned
+    by parsing ALGLIB's result.
+
+Parameter ``uid``:
+    Variable reference which is updated in each execution to ensure
+    uniqueness.
+
+Returns:
+    A uniquely identified node in a decorated cluster hierarchy that
+    follows the "general tree" structure.)doc";
 
 static const char *__doc_fiction_transition_type =
 R"doc(Possible types of charge transitions that can occur in an SiDB layout.

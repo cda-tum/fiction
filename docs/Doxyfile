@@ -2384,8 +2384,9 @@ INCLUDE_FILE_PATTERNS  =
 # recursively expanded use the := operator instead of the = operator.
 # This tag requires that the tag ENABLE_PREPROCESSING is set to YES.
 
-PREDEFINED             = "FICTION_Z3_SOLVER=1," \
-                         MUGEN=1
+PREDEFINED             = FICTION_Z3_SOLVER=1, \
+                         MUGEN=1, \
+                         FICTION_ALGLIB_ENABLED=1
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then this
 # tag can be used to specify a list of macro names that should be expanded. The
