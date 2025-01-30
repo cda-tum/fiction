@@ -52,6 +52,7 @@
 
 // physical simulation commands
 #ifdef FICTION_SIMULATION_FLOW
+#include "cmd/simulation/clustercomplete.hpp"
 #include "cmd/simulation/opdom.hpp"
 #include "cmd/simulation/quickexact.hpp"
 #include "cmd/simulation/quicksim.hpp"
