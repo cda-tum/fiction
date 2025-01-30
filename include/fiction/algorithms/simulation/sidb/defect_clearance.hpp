@@ -65,7 +65,7 @@ calculate_defect_clearance(const Lyt& lyt, const defect_influence_domain<Lyt>& d
                 if (sidb_nm_distance<Lyt>(lyt, c, val.first) < min_distance)
                 {
                     min_distance          = sidb_nm_distance<Lyt>(lyt, c, val.first);
-                    min_distance_position = defect_position;
+                    min_distance_position = val.first;
                 }
             });
 
