@@ -1393,7 +1393,7 @@ TEMPLATE_TEST_CASE("Grid search to determine the operational domain. The operati
     }
 }
 
-TEST_CASE("Bestagon AND gate operational domain and temperature computation, using cube coordinates",
+TEST_CASE("Bestagon AND gate operational domain and temperature computation, using siqad coordinates",
           "[operational-domain]")
 {
     const auto lyt = blueprints::bestagon_and<sidb_cell_clk_lyt_siqad>();
