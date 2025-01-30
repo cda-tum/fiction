@@ -185,7 +185,9 @@ class sidb_defect_surface<Lyt, false> : public Lyt
         return strg->defective_coordinates.size();
     }
     /**
+     * Number of positively charged defects on the surface.
      *
+     * @return Number of positively charged defects.
      */
     [[nodiscard]] std::size_t num_positively_charged_defects() const noexcept
     {
@@ -202,7 +204,11 @@ class sidb_defect_surface<Lyt, false> : public Lyt
 
         return number_of_positively_charged_defects;
     }
-
+    /**
+     * Returns the number of negatively charged defects.
+     *
+     * @return Number of negatively charged defects.
+     */
     [[nodiscard]] std::size_t num_negatively_charged_defects() const noexcept
     {
         std::size_t number_of_negatively_charged_defects = 0;
@@ -218,7 +224,11 @@ class sidb_defect_surface<Lyt, false> : public Lyt
 
         return number_of_negatively_charged_defects;
     }
-
+    /**
+     * Returns the number of charged defects.
+     *
+     * @return Number of charged defects.
+     */
     [[nodiscard]] std::size_t num_charged_defects() const noexcept
     {
         return num_positively_charged_defects() + num_negatively_charged_defects();

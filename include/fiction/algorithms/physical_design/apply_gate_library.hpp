@@ -150,7 +150,8 @@ class apply_gate_library_impl
                         relative_to_absolute_cell_position<GateLibrary::gate_x_size(), GateLibrary::gate_y_size(),
                                                            GateLyt, CellLyt>(gate_lyt, t, cell<CellLyt>{0, 0});
 
-                    assign_gate(c, GateLibrary::template set_up_gate<GateLyt, CellLyt>(gate_lyt, t, params, lyt), n);
+                    assign_gate(
+                        c, GateLibrary::template set_up_gate<GateLyt, CellLyt, Params>(gate_lyt, t, params, lyt), n);
                 }
 #if (PROGRESS_BARS)
                 // update progress
@@ -269,8 +270,8 @@ template <typename CellLyt, typename GateLibrary, typename GateLyt>
  * @return A cell-level layout that implements `lyt`'s gate types with building blocks defined in `GateLibrary`.
  */
 template <typename CellLyt, typename GateLibrary, typename GateLyt, typename Params>
-CellLyt apply_parameterized_gate_library(const GateLyt& lyt, const Params& params,
-                                         const std::optional<CellLyt>& cell_lyt = std::nullopt)
+[[nodiscard]] CellLyt apply_parameterized_gate_library(const GateLyt& lyt, const Params& params,
+                                                       const std::optional<CellLyt>& cell_lyt = std::nullopt)
 {
     static_assert(is_cell_level_layout_v<CellLyt>, "CellLyt is not a cell-level layout");
     static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt is not a gate-level layout");
@@ -284,7 +285,7 @@ CellLyt apply_parameterized_gate_library(const GateLyt& lyt, const Params& param
     detail::apply_gate_library_impl<CellLyt, GateLibrary, GateLyt> p{lyt};
 
     // Running the gate library with the parameters
-    const auto result = p.template run_parameterized_gate_library<Params>(params, cell_lyt);
+    const auto result = p.template run_parameterized_gate_library<Params, CellLyt>(params, cell_lyt);
 
     return result;
 }
