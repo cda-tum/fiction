@@ -299,10 +299,16 @@ attempts, or performance of the resulting binaries:
 * ``-DFICTION_ENABLE_JEMALLOC=ON``: Enable the usage of jemalloc by Jason Evans to speed up ``malloc`` in parallelized
 processes.
 
+Usage of jemalloc
+#################
+
+While enabling jemalloc through the above CMake is not beneficial to every application (and may add runtime due to overhead), it can bring significant runtime improvements to some applications. In particular, it is recommended to use jemalloc for a parallelised application in which allocations are predominantly non-ephemeral.
+
 .. note::
-   When jemalloc is enabled using the above CMake option on Windows, it needs to be installed manually by following
-   `these steps <https://github.com/jemalloc/jemalloc/blob/dev/INSTALL.md#building-for-windows>`_. NB: Usage of jemalloc
-   in *fiction* is not tested on macOS with the g++ compiler.
+   Windows users need to install jemalloc manually. It can be done by following `these steps <https://github.com/jemalloc/jemalloc/blob/dev/INSTALL.md#building-for-windows>`_.
+
+.. note:: 
+   Usage of jemalloc in *fiction* is not tested on macOS with the g++ compiler.
 
 Uninstall
 ---------
