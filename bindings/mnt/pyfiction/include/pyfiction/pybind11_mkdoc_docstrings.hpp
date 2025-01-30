@@ -4640,6 +4640,19 @@ static const char *__doc_fiction_detail_apply_gate_library_impl_cell_lyt = R"doc
 
 static const char *__doc_fiction_detail_apply_gate_library_impl_gate_lyt = R"doc(Gate-level layout.)doc";
 
+static const char *__doc_fiction_detail_apply_gate_library_impl_get_aspect_ratio_for_cell_level_layout =
+R"doc(Computes the (inclusively) bounding coordinate for a cell-level layout
+that is derived from the dimensions of the given gate-level layout,
+while respecting tiling geometry in which even and odd rows/columns do
+not line up.
+
+Parameter ``gate_lyt``:
+    Gate-level layout of which the dimensions are read.
+
+Returns:
+    Aspect ratio for a cell-level layout that corresponds to the
+    dimensions of the given gate-level layout.)doc";
+
 static const char *__doc_fiction_detail_apply_gate_library_impl_run_parameterized_gate_library =
 R"doc(Run the cell layout generation process.
 
