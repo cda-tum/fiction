@@ -38,8 +38,8 @@ struct write_defect_influence_domain_params
  * X_DIMENSION, Y_DIMENSION, Influence STATUS
  * ... subsequent rows for each set of simulation parameters.
  *
- * @param defect_infdom The defect influence domain to be written. It contains a mapping from sets of simulation
- * parameters (represented as a pair of sweep parameters for the X and Y dimensions) to their influence status.
+ * @param defect_infdom The defect influence domain to be written. It contains a mapping from defect positions to their
+ * influence status.
  * @param os The output stream where the CSV representation of the defect influence domain is written to.
  * @param params The parameters used for writing, including the influential and non-influential tags. Defaults to an
  * empty `write_defect_influence_domain_params` object, which provides standard tags.
@@ -67,8 +67,8 @@ inline void write_defect_influence_domain(const defect_influence_domain<Lyt>& de
  * X_DIMENSION, Y_DIMENSION, Influence STATUS
  * ... subsequent rows for each set of simulation parameters.
  *
- * @param defect_infdom The defect influence domain to be written. It contains a mapping from sets of simulation
- * parameters (represented as a pair of sweep parameters for the X and Y dimensions) to their influence status.
+ * @param defect_infdom The defect influence domain to be written. It contains a mapping from defect positions to their
+ * influence status.
  * @param filename The filename where the CSV representation of the defect influence domain is written to.
  * @param params The parameters used for writing, including the influential and non-influential tags. Defaults to an
  * empty `write_defect_influence_domain_params` object, which provides standard tags.
