@@ -142,7 +142,6 @@ jobs:
           -DFICTION_ENABLE_UNITY_BUILD=ON
           -DFICTION_ENABLE_PCH=ON
           ${{ startsWith(matrix.compiler, 'g++-') && '' || '-DFICTION_ENABLE_JEMALLOC=ON' }}
-          -DFICTION_ENABLE_JEMALLOC=ON
           -DFICTION_CLI=ON
           -DFICTION_TEST=ON
           -DFICTION_BENCHMARK=OFF
