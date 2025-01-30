@@ -1,6 +1,6 @@
 # FetchJemalloc.cmake   |   this file is intended to be run only on UNIX-like operating systems
 
-if (WIN32)
+if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     message(SEND_ERROR "Install jemalloc on Windows using the instructions found in https://github.com/jemalloc/jemalloc/blob/dev/INSTALL.md#building-for-windows.")
 endif ()
 
@@ -29,7 +29,6 @@ ExternalProject_Add(
         CONFIGURE_COMMAND cd ${JEMALLOC_SOURCE_DIR} && ./autogen.sh --prefix=${JEMALLOC_INSTALL_DIR} && rm VERSION
         BUILD_COMMAND cd ${JEMALLOC_SOURCE_DIR} && make ${PARALLEL_BUILD_ARGS}
         INSTALL_COMMAND cd ${JEMALLOC_SOURCE_DIR} && make -j1 install
-        BUILD_IN_SOURCE 1
 )
 
 # Create an imported target (works on all platforms).
