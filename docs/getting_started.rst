@@ -302,7 +302,7 @@ processes.
 Usage of jemalloc
 #################
 
-While enabling jemalloc through the above CMake is not beneficial to every application (and may add runtime due to overhead), it can bring significant runtime improvements to some applications. In particular, it is recommended to use jemalloc for a parallelised application in which allocations are predominantly non-ephemeral.
+While enabling jemalloc through the above CMake is not beneficial to every application (and may add runtime due to overhead), it can bring significant runtime improvements to some applications. In particular, it is recommended to use jemalloc for parallelized applications in which allocations are predominantly non-ephemeral.
 
 .. note::
    Windows users need to install jemalloc manually. It can be done by following `these steps <https://github.com/jemalloc/jemalloc/blob/dev/INSTALL.md#building-for-windows>`_.
