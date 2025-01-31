@@ -127,8 +127,8 @@ class apply_gate_library_impl
      * @return A `CellLyt` object representing the generated cell layout.
      */
     template <typename Params>
-    [[nodiscard]] CellLyt run_parameterized_gate_library(const Params&                 params,
-                                                         const std::optional<CellLyt>& lyt = std::nullopt)
+    [[nodiscard]] auto run_parameterized_gate_library(const Params&                 params,
+                                                      const std::optional<CellLyt>& lyt = std::nullopt)
     {
 #if (PROGRESS_BARS)
         // initialize a progress bar
@@ -164,13 +164,16 @@ class apply_gate_library_impl
         // if available, recover layout name
         cell_lyt.set_layout_name(get_name(gate_lyt));
 
-        if (lyt.has_value())
+        if constexpr (is_sidb_defect_surface_v<CellLyt>)
         {
-            if constexpr (is_sidb_defect_surface_v<decltype(lyt)>)
+            if (lyt.has_value())
             {
+                // due to issue with windows-2019 Visual Studio 16 2019 and v142.
+                auto copy_lyt = cell_lyt.clone();
                 // add defects to the circuit.
-                lyt.value().foreach_sidb_defect([this](const auto& def)
-                                                { cell_lyt.assign_sidb_defect(def.first, def.second); });
+                lyt.value().foreach_sidb_defect([this, &copy_lyt](const auto& def)
+                                                { copy_lyt.assign_sidb_defect(def.first, def.second); });
+                return copy_lyt;
             }
         }
 
