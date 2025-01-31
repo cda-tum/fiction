@@ -166,7 +166,7 @@ class apply_gate_library_impl
 
         if (lyt.has_value())
         {
-            if constexpr (has_assign_sidb_defect_v<CellLyt>)
+            if constexpr (is_sidb_defect_surface_v<decltype(lyt)>)
             {
                 // add defects to the circuit.
                 lyt.value().foreach_sidb_defect([this](const auto& def)
