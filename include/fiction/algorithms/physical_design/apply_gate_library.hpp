@@ -17,6 +17,8 @@
 #endif
 #include <mockturtle/traits.hpp>
 
+#include <algorithm>
+#include <functional>
 #include <type_traits>
 
 // data types cannot properly be converted to bit field types
@@ -37,10 +39,10 @@ template <typename CellLyt, typename GateLibrary, typename GateLyt>
 class apply_gate_library_impl
 {
   public:
-    explicit apply_gate_library_impl(const GateLyt& lyt) : gate_lyt{lyt}, cell_lyt{}
+    explicit apply_gate_library_impl(const GateLyt& lyt) :
+            gate_lyt{lyt},
+            cell_lyt{determine_aspect_ratio_for_cell_level_layout(gate_lyt)}
     {
-        cell_lyt.resize(aspect_ratio<CellLyt>{((gate_lyt.x() + 1) * GateLibrary::gate_x_size()) - 1,
-                                              ((gate_lyt.y() + 1) * GateLibrary::gate_y_size()) - 1, gate_lyt.z()});
         cell_lyt.set_tile_size_x(GateLibrary::gate_x_size());
         cell_lyt.set_tile_size_y(GateLibrary::gate_y_size());
 
@@ -206,6 +208,30 @@ class apply_gate_library_impl
                 }
             }
         }
+    }
+    /**
+     * Computes the (inclusively) bounding coordinate for a cell-level layout that is derived from the dimensions of the
+     * given gate-level layout, while respecting tiling geometry in which even and odd rows/columns do not line up.
+     *
+     * @param gate_lyt Gate-level layout of which the dimensions are read.
+     * @return Aspect ratio for a cell-level layout that corresponds to the dimensions of the given gate-level layout.
+     */
+    static aspect_ratio<CellLyt> determine_aspect_ratio_for_cell_level_layout(const GateLyt& gate_lyt) noexcept
+    {
+        const std::function<cell<CellLyt>(GateLyt, tile<GateLyt>, cell<CellLyt>)> rel_to_abs_cell_pos =
+            relative_to_absolute_cell_position<GateLibrary::gate_x_size(), GateLibrary::gate_y_size(), GateLyt,
+                                               CellLyt>;
+
+        const cell<CellLyt> max_rel_coord = {GateLibrary::gate_x_size() - 1, GateLibrary::gate_y_size() - 1};
+
+        const cell<CellLyt> first_odd_tile = {gate_lyt.x() != 0 ? 1 : 0, gate_lyt.y() != 0 ? 1 : 0};
+
+        const auto max_coord_even_x = rel_to_abs_cell_pos(gate_lyt, {0, gate_lyt.y()}, max_rel_coord);
+        const auto max_coord_odd_x  = rel_to_abs_cell_pos(gate_lyt, {first_odd_tile.x, gate_lyt.y()}, max_rel_coord);
+        const auto max_coord_even_y = rel_to_abs_cell_pos(gate_lyt, {gate_lyt.x(), 0}, max_rel_coord);
+        const auto max_coord_odd_y  = rel_to_abs_cell_pos(gate_lyt, {gate_lyt.x(), first_odd_tile.y}, max_rel_coord);
+
+        return {std::max(max_coord_even_y.x, max_coord_odd_y.x), std::max(max_coord_even_x.y, max_coord_odd_x.y)};
     }
 };
 
