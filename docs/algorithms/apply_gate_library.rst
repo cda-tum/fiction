@@ -13,6 +13,8 @@ implementations for each gate present in the passed ``gate_level_layout``.
 
         .. doxygenfunction:: fiction::apply_gate_library(const GateLyt& lyt)
         .. doxygenfunction:: fiction::apply_parameterized_gate_library(const GateLyt& lyt, const Params& params)
+        .. doxygenfunction:: fiction::apply_parameterized_gate_library(const GateLyt& lyt, const Params& params,
+                                                       const std::optional<CellLyt>& cell_lyt = std::nullopt)
 
     .. tab:: Python
         .. autofunction:: mnt.pyfiction.apply_qca_one_library

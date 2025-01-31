@@ -30,7 +30,7 @@ This iterative approach ensures that the designed SiDB circuits can effectively 
    :members:
 .. doxygenstruct:: fiction::on_the_fly_sidb_circuit_design_params
    :members:
-.. doxygenstruct:: fiction::on_the_fly_sidb_circuit_design_on_defective_surface_stats
+.. doxygenstruct:: fiction::on_the_fly_circuit_design_on_defective_surface_stats
     :members:
 .. doxygenfunction:: fiction::on_the_fly_sidb_circuit_design_on_defective_surface
 .. doxygenfunction:: fiction::on_the_fly_sidb_circuit_design
