@@ -162,7 +162,7 @@ class apply_gate_library_impl
         // if available, recover layout name
         cell_lyt.set_layout_name(get_name(gate_lyt));
 
-        if constexpr (is_sidb_defect_surface_v<CellLyt>)
+        if constexpr (has_assign_sidb_defect_v<CellLyt>)
         {
             if (lyt.has_value())
             {
