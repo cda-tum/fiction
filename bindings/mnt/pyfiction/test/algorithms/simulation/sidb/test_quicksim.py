@@ -80,6 +80,19 @@ class TestQuicksim(unittest.TestCase):
         self.assertEqual(groundstate[0].get_charge_state((2, 0)), sidb_charge_state.NEUTRAL)
         self.assertEqual(groundstate[0].get_charge_state((3, 0)), sidb_charge_state.NEGATIVE)
 
+        # test timeout
+        params.timeout = 1
+        params.iteration_steps = 10000
+        params.number_threads = 1
+        result_timeout_1 = quicksim(layout, params)
+        groundstate_timeout_1 = groundstate_from_simulation_result(result_timeout_1)
+        print(groundstate_timeout_1)
+
+        print(result_timeout_1.additional_simulation_parameters)
+        self.assertEqual(result_timeout_1.additional_simulation_parameters["alpha"], 0.7)
+        self.assertEqual(result_timeout_1.additional_simulation_parameters["iteration_steps"], 10000)
+        self.assertTrue(result_timeout_1.additional_simulation_parameters["timeout_reached"])
+
 
 if __name__ == "__main__":
     unittest.main()
