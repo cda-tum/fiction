@@ -161,7 +161,7 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
         for (uint64_t z = 0ul; z < num_threads; z++)
         {
             threads.emplace_back(
-                [&]
+                [&]()
                 {
                     charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt};
 
@@ -172,7 +172,7 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
                         const auto elapsed_time =
                             std::chrono::duration_cast<std::chrono::milliseconds>(current_time - start_time).count();
 
-                        if (elapsed_time >= static_cast<decltype(elapsed_time)>(ps.timeout))
+                        if (static_cast<uint64_t>(elapsed_time) >= ps.timeout)
                         {
                             timeout_limit_reached = true;
                             return;  // Exit the thread if the timeout has been reached
