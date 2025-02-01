@@ -7,7 +7,7 @@
 
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
-#include "fiction/technology/physical_constants.hpp"
+#include "fiction/technology/constants.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/traits.hpp"
 
@@ -44,7 +44,7 @@ template <typename Lyt>
         {
             if (const auto local_pot = charge_lyt.get_local_potential(c); local_pot.has_value())
             {
-                if ((-(*local_pot) + mu_plus) > -physical_constants::POP_STABILITY_ERR)
+                if ((-(*local_pot) + mu_plus) > -constants::ERROR_MARGIN)
                 {
                     result = true;
 

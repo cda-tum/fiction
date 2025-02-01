@@ -237,7 +237,6 @@ Random SiDB Layout Generator
         .. autofunction:: mnt.pyfiction.generate_multiple_random_sidb_layouts
 
 
-
 Operational Domain Computation
 ##############################
 
@@ -265,6 +264,8 @@ Operational Domain Computation
            :members:
         .. doxygenenum:: fiction::sweep_parameter
         .. doxygenstruct:: fiction::operational_domain
+           :members:
+        .. doxygenstruct:: fiction::temperature_operational_domain
            :members:
         .. doxygenstruct:: fiction::operational_domain_value_range
            :members:
@@ -306,6 +307,8 @@ Operational Domain Computation
             :members:
         .. autoclass:: mnt.pyfiction.operational_domain
             :members:
+        .. autoclass:: mnt.pyfiction.temperature_operational_domain
+            :members:
         .. autoclass:: mnt.pyfiction.operational_domain_value_range
             :members:
         .. autoclass:: mnt.pyfiction.operational_domain_params
@@ -314,9 +317,13 @@ Operational Domain Computation
             :members:
 
         .. autofunction:: mnt.pyfiction.operational_domain_grid_search
+        .. autofunction:: mnt.pyfiction.temperature_operational_domain_grid_search
         .. autofunction:: mnt.pyfiction.operational_domain_random_sampling
+        .. autofunction:: mnt.pyfiction.temperature_operational_domain_random_sampling
         .. autofunction:: mnt.pyfiction.operational_domain_flood_fill
+        .. autofunction:: mnt.pyfiction.temperature_operational_domain_flood_fill
         .. autofunction:: mnt.pyfiction.operational_domain_contour_tracing
+        .. autofunction:: mnt.pyfiction.temperature_operational_domain_contour_tracing
 
         .. autoclass:: mnt.pyfiction.compute_operational_ratio_params
                 :members:
@@ -585,8 +592,7 @@ SiDB Defect Analysis
 .. doxygenstruct:: fiction::defect_influence_params
    :members:
 .. doxygenenum:: fiction::defect_influence_status
-.. doxygenstruct:: fiction::defect_influence_domain
-   :members:
+.. doxygentypedef:: fiction::sidb_energy_and_state_type
 
 .. doxygenstruct:: fiction::defect_influence_stats
 .. doxygenfunction:: fiction::defect_influence_grid_search(const Lyt& lyt, const std::vector<TT>& spec, const defect_influence_params<cell<Lyt>>& params = {}, const std::size_t step_size = 1, defect_influence_stats* stats = nullptr)

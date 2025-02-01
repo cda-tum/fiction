@@ -3017,6 +3017,24 @@ Parameter ``n``:
 Returns:
     Columnar clocking scheme.)doc";
 
+static const char *__doc_fiction_contains_key =
+R"doc(Checks whether a specified key exists in the given map and retrieves
+its associated value if present. This function utilizes the
+`if_contains` method of the map to ensure thread-safe access.
+
+Template parameter ``MapType``:
+    The type of the map, which must provide the `if_contains` method.
+
+Parameter ``map``:
+    The map in which to search for the specified key.
+
+Parameter ``key``:
+    The key to search for in the map.
+
+Returns:
+    An `std::optional` containing the value associated with the key if
+    it exists, `std::optional` otherwise.)doc";
+
 static const char *__doc_fiction_convert_array =
 R"doc(Converts an array of size `N` and type `T` to an array of size `N` and
 type `ElementType` by applying `static_cast` at compile time.
@@ -3937,15 +3955,6 @@ Parameter ``neutral_defect_spacing_overwrite``:
 Returns:
     A pair of uint16_t values representing the number of horizontal
     and vertical SiDBs affected by the given defect type.)doc";
-
-static const char *__doc_fiction_defect_influence_domain =
-R"doc(A defect influence domain defines for each defect position the
-influence of the defect on the layout. Depending on the chosen
-definition of influence, this can either mean that the operational
-status or the ground state of the layout is changed due to the
-presence of the defect.)doc";
-
-static const char *__doc_fiction_defect_influence_domain_influence_information = R"doc(This stores for each defect position the condition of the layout.)doc";
 
 static const char *__doc_fiction_defect_influence_grid_search =
 R"doc(This algorithm uses a grid search to determine the defect influence
@@ -5245,27 +5254,6 @@ Returns:
 static const char *__doc_fiction_detail_connect_and_place = R"doc()doc";
 
 static const char *__doc_fiction_detail_connect_and_place_2 = R"doc()doc";
-
-static const char *__doc_fiction_detail_contains_key = R"doc(Forward-declaration for `operational_domain`.)doc";
-
-static const char *__doc_fiction_detail_contains_key_2 =
-R"doc(This function checks for the containment of a given key in a given
-map. If the key is found in the map, the associated
-`MapType::value_type` is returned. Otherwise, `std::nullopt` is
-returned.
-
-Template parameter ``MapType``:
-    The type of the map.
-
-Parameter ``map``:
-    The map in which to search for `key`.
-
-Parameter ``key``:
-    The key to search for in `map`.
-
-Returns:
-    The associated `MapType::value_type` of `key` in `map`, or
-    `std::nullopt` if `key` is not contained in `map`.)doc";
 
 static const char *__doc_fiction_detail_convert_array =
 R"doc(Based on https://stackoverflow.com/questions/57756557/initializing-a-
@@ -6893,25 +6881,6 @@ static const char *__doc_fiction_detail_fanout_substitution_impl_ntk_topo = R"do
 static const char *__doc_fiction_detail_fanout_substitution_impl_ps = R"doc()doc";
 
 static const char *__doc_fiction_detail_fanout_substitution_impl_run = R"doc()doc";
-
-static const char *__doc_fiction_detail_find_key_with_tolerance =
-R"doc(This function searches for a floating-point value specified by the
-`key` in the provided map `map`, applying a tolerance specified by
-`fiction::physical_constants::POP_STABILITY_ERR`. Each key in the map
-is compared to the specified key within this tolerance.
-
-Template parameter ``MapType``:
-    The type of the map containing parameter points as keys.
-
-Parameter ``map``:
-    The map containing parameter points as keys and associated values.
-
-Parameter ``key``:
-    The parameter point to search for in the map.
-
-Returns:
-    An iterator to the found parameter point in the map, or
-    `map.cend()` if not found.)doc";
 
 static const char *__doc_fiction_detail_gate_level_drvs_impl = R"doc()doc";
 
@@ -8868,7 +8837,7 @@ provided parameters.
 Returns:
     The number of steps in the given dimension.)doc";
 
-static const char *__doc_fiction_detail_operational_domain_impl_num_threads = R"doc(Number of available hardware threads.)doc";
+static const char *__doc_fiction_detail_operational_domain_impl_number_of_threads = R"doc(Number of available hardware threads.)doc";
 
 static const char *__doc_fiction_detail_operational_domain_impl_op_domain = R"doc(The operational domain of the layout.)doc";
 
@@ -11124,7 +11093,7 @@ R"doc(This function takes in a vector of `charge_distribution_surface`
 objects and returns a map containing the system energy and the number
 of occurrences of that energy in the input vector. To compare two
 energy values for equality, the comparison uses a tolerance specified
-by `physical_constants::POP_STABILITY_ERR`.
+by `physical_constants::SCALED_EPSILON`.
 
 Template parameter ``Lyt``:
     SiDB cell-level layout type.
@@ -11951,6 +11920,25 @@ Returns:
     Iterator in the range `[first, last)` to the first position of the
     first 2-element sub-sequence shared between the two ranges, or
     `last` if no such shared sub-sequence exists.)doc";
+
+static const char *__doc_fiction_find_key_with_tolerance =
+R"doc(This function searches for a floating-point value specified by the
+`key` in the provided map `map`, applying a tolerance specified by
+`fiction::physical_constants::SCALED_EPSILON`. Each key in the map is
+compared to the specified key within this tolerance.
+
+Template parameter ``MapType``:
+    The type of the map containing parameter points as keys.
+
+Parameter ``map``:
+    The map containing parameter points as keys and associated values.
+
+Parameter ``key``:
+    The parameter point to search for in the map.
+
+Returns:
+    An iterator to the found parameter point in the map, or
+    `map.cend()` if not found.)doc";
 
 static const char *__doc_fiction_flat_top_hex = R"doc(\verbatim _____ / \ / \ \ / \_____/ \endverbatim)doc";
 
@@ -14073,6 +14061,8 @@ static const char *__doc_fiction_has_below = R"doc()doc";
 static const char *__doc_fiction_has_cardinal_operations = R"doc()doc";
 
 static const char *__doc_fiction_has_create_dot = R"doc()doc";
+
+static const char *__doc_fiction_has_dimensions = R"doc()doc";
 
 static const char *__doc_fiction_has_east = R"doc()doc";
 
@@ -16446,15 +16436,7 @@ simulation parameters and checking the operational status of the
 layout for each parameter combination. The operational domain is then
 defined as the set of all parameter combinations for which the layout
 is operational. Different techniques for performing these sweep are
-implemented.
-
-Template parameter ``Key``:
-    The type representing the key. Defaults to `parameter_point`.
-
-Template parameter ``Value``:
-    The type representing the value. Defaults to `operational_status`.)doc";
-
-static const char *__doc_fiction_operational_domain_add_value = R"doc()doc";
+implemented.)doc";
 
 static const char *__doc_fiction_operational_domain_contour_tracing =
 R"doc(Computes the operational domain of the given SiDB cell-level layout.
@@ -16493,6 +16475,9 @@ Walus, and R. Wille in NANOARCH 2023.
 
 This function may throw an `std::invalid_argument` exception if the
 given sweep parameters are invalid.
+
+Template parameter ``OpDomain``:
+    Operational domain type to compute.
 
 Template parameter ``Lyt``:
     SiDB cell-level layout type.
@@ -16558,6 +16543,9 @@ Walus, and R. Wille in NANOARCH 2023.
 This function may throw an `std::invalid_argument` exception if the
 given sweep parameters are invalid.
 
+Template parameter ``OpDomain``:
+    Operational domain type to compute.
+
 Template parameter ``Lyt``:
     SiDB cell-level layout type.
 
@@ -16583,20 +16571,6 @@ Parameter ``stats``:
 Returns:
     The (partial) operational domain of the layout.)doc";
 
-static const char *__doc_fiction_operational_domain_get_domain = R"doc()doc";
-
-static const char *__doc_fiction_operational_domain_get_value =
-R"doc(This function retrieves the value associated with the provided key
-from the operational domain. If the key is found in the domain, its
-corresponding value is returned. Otherwise, `std::nullopt` is
-returned.
-
-Parameter ``key``:
-    The key to look up.
-
-Returns:
-    The value associated with the parameter point.)doc";
-
 static const char *__doc_fiction_operational_domain_grid_search =
 R"doc(Computes the operational domain of the given SiDB cell-level layout.
 The operational domain is the set of all parameter combinations for
@@ -16620,6 +16594,9 @@ with few inputs.
 This function may throw an `std::invalid_argument` exception if the
 given sweep parameters are invalid.
 
+Template parameter ``OpDomain``:
+    Operational domain type to compute.
+
 Template parameter ``Lyt``:
     SiDB cell-level layout type.
 
@@ -16641,11 +16618,6 @@ Parameter ``stats``:
 
 Returns:
     The operational domain of the layout.)doc";
-
-static const char *__doc_fiction_operational_domain_operational_values =
-R"doc(This can store different information depending on the use case. If the
-operational domain is simulated for different physical parameters, the
-parameters are stored with the corresponding operating status.)doc";
 
 static const char *__doc_fiction_operational_domain_params =
 R"doc(Parameters for the operational domain computation. The parameters are
@@ -16680,6 +16652,9 @@ feasible for small layouts with few inputs.
 
 This function may throw an `std::invalid_argument` exception if the
 given sweep parameters are invalid.
+
+Template parameter ``OpDomain``:
+    Operational domain type to compute.
 
 Template parameter ``Lyt``:
     SiDB cell-level layout type.
@@ -17017,7 +16992,7 @@ Returns:
 static const char *__doc_fiction_parameter_point_operator_eq =
 R"doc(Equality operator. Checks if this parameter point is equal to another
 point within a specified tolerance. The tolerance is defined by
-`physical_constants::POP_STABILITY_ERR`.
+`physical_constants::SCALED_EPSILON`.
 
 Parameter ``other``:
     Other parameter point to compare with.
@@ -19770,6 +19745,51 @@ Returns:
 
 static const char *__doc_fiction_sidb_on_the_fly_gate_library_sidb_on_the_fly_gate_library = R"doc()doc";
 
+static const char *__doc_fiction_sidb_simulation_domain =
+R"doc(The `sidb_simulation_domain` is designed to represent a generic
+simulation domain where keys are associated with values stored as
+tuples. It uses a `locked_parallel_flat_hash_map` to ensure thread-
+safe access to the stored data. This is especially useful for parallel
+simulations or multithreaded environments.
+
+Template parameter ``Key``:
+    The type of the key used to identify entries in the domain.
+
+Template parameter ``Value1``:
+    The first value type stored in the tuple associated with each key.
+
+Template parameter ``Valuetypes``:
+    Additional value types stored in the tuple.)doc";
+
+static const char *__doc_fiction_sidb_simulation_domain_add_value =
+R"doc(Adds a value to the operational domain.
+
+Parameter ``key``:
+    The key to associate with the value.
+
+Parameter ``value``:
+    The value to add, which must be a tuple.)doc";
+
+static const char *__doc_fiction_sidb_simulation_domain_domain_values = R"doc()doc";
+
+static const char *__doc_fiction_sidb_simulation_domain_get_domain =
+R"doc(Returns the entire operational domain.
+
+Returns:
+    The operational domain as a map.)doc";
+
+static const char *__doc_fiction_sidb_simulation_domain_get_value =
+R"doc(Retrieves the value associated with the provided key from the
+operational domain. If the key is found, the value is returned;
+otherwise, `std::nullopt` is returned.
+
+Parameter ``key``:
+    The key to look up in the domain.
+
+Returns:
+    The `std::tuple`` associated with the provided key is returned,
+    `std::nullopt` otherwise.)doc";
+
 static const char *__doc_fiction_sidb_simulation_engine = R"doc(Selector for the available SiDB simulation engines.)doc";
 
 static const char *__doc_fiction_sidb_simulation_engine_CLUSTERCOMPLETE =
@@ -20939,6 +20959,12 @@ static const char *__doc_fiction_technology_network_technology_network = R"doc()
 
 static const char *__doc_fiction_technology_network_technology_network_2 = R"doc()doc";
 
+static const char *__doc_fiction_temperature_operational_domain = R"doc()doc";
+
+static const char *__doc_fiction_temperature_operational_domain_dimensions =
+R"doc(The dimensions to sweep over, ordered by priority. The first dimension
+is the x dimension, the second dimension is the y dimension, etc.)doc";
+
 static const char *__doc_fiction_tile_based_layout =
 R"doc(This class provides a tile-based naming scheme for coordinate-based
 functions. It does not add any functionality, but it might be useful
@@ -21697,8 +21723,7 @@ parameters.
 
 Parameter ``defect_infdom``:
     The defect influence domain to be written. It contains a mapping
-    from sets of simulation parameters (represented as a pair of sweep
-    parameters for the X and Y dimensions) to their influence status.
+    from defect positions to their influence status.
 
 Parameter ``os``:
     The output stream where the CSV representation of the defect
@@ -21722,8 +21747,7 @@ parameters.
 
 Parameter ``defect_infdom``:
     The defect influence domain to be written. It contains a mapping
-    from sets of simulation parameters (represented as a pair of sweep
-    parameters for the X and Y dimensions) to their influence status.
+    from defect positions to their influence status.
 
 Parameter ``filename``:
     The filename where the CSV representation of the defect influence
@@ -21891,11 +21915,15 @@ The operational status is a binary value represented by specified tags
 in `params` indicating whether the simulation parameters are within
 the operational domain or not.
 
+Template parameter ``OpDomain``:
+    The type of the operational domain.
+
 Parameter ``opdom``:
-    The operational domain to be written. It contains a mapping from
-    sets of simulation parameters (represented as a pair of sweep
-    parameters for the X and Y dimensions) to their operational
-    status.
+    The operational domain to be written. It represents a mapping
+    between sets of simulation parameters (defined as a pair of sweep
+    parameters for the X, Y, and Z dimensions) and a tuple containing
+    detailed information about the SiDB layout associated with those
+    simulation parameters.
 
 Parameter ``os``:
     The output stream where the CSV representation of the operational
@@ -21922,11 +21950,15 @@ The operational status is a binary value represented by specified tags
 in `params` indicating whether the simulation parameters are within
 the operational domain or not.
 
+Template parameter ``OpDomain``:
+    The type of the operational domain.
+
 Parameter ``opdom``:
-    The operational domain to be written. It contains a mapping from
-    sets of simulation parameters (represented as a pair of sweep
-    parameters for the X and Y dimensions) to their operational
-    status.
+    The operational domain to be written. It represents a mapping
+    between sets of simulation parameters (defined as a pair of sweep
+    parameters for the X, Y, and Z dimensions) and a tuple containing
+    detailed information about the SiDB layout associated with those
+    simulation parameters.
 
 Parameter ``filename``:
     The filename where the CSV representation of the operational

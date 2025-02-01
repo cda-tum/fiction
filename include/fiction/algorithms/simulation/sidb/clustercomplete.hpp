@@ -12,7 +12,7 @@
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "fiction/layouts/coordinates.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
-#include "fiction/technology/physical_constants.hpp"
+#include "fiction/technology/constants.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/technology/sidb_cluster_hierarchy.hpp"
 #include "fiction/technology/sidb_defects.hpp"
@@ -118,10 +118,10 @@ class clustercomplete_impl
             available_threads{std::max(uint64_t{1}, params.available_threads)},
             charge_layout{initialize_charge_layout(lyt, params)},
             real_placed_defects{charge_layout.get_defects()},
-            mu_bounds_with_error{physical_constants::POP_STABILITY_ERR - params.simulation_parameters.mu_minus,
-                                 -physical_constants::POP_STABILITY_ERR - params.simulation_parameters.mu_minus,
-                                 physical_constants::POP_STABILITY_ERR - params.simulation_parameters.mu_plus(),
-                                 -physical_constants::POP_STABILITY_ERR - params.simulation_parameters.mu_plus()}
+            mu_bounds_with_error{constants::ERROR_MARGIN - params.simulation_parameters.mu_minus,
+                                 -constants::ERROR_MARGIN - params.simulation_parameters.mu_minus,
+                                 constants::ERROR_MARGIN - params.simulation_parameters.mu_plus(),
+                                 -constants::ERROR_MARGIN - params.simulation_parameters.mu_plus()}
     {}
     /**
      * This function performs the *ClusterComplete* simulation; first executing the *Ground State Space* construction,

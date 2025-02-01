@@ -8,13 +8,13 @@
 #include "fiction/algorithms/iter/bdl_input_iterator.hpp"
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
 #include "fiction/algorithms/simulation/sidb/quickexact.hpp"
+#include "fiction/algorithms/simulation/sidb/sidb_simulation_domain.hpp"
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/technology/sidb_defect_surface.hpp"
 #include "fiction/technology/sidb_defects.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 #include "fiction/utils/layout_utils.hpp"
-#include "fiction/utils/phmap_utils.hpp"
 
 #include <kitty/traits.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
@@ -98,13 +98,8 @@ enum class defect_influence_status : uint8_t
  * or the ground state of the layout is changed due to the presence of the defect.
  */
 template <typename Lyt>
-struct defect_influence_domain
-{
-    /**
-     * This stores for each defect position the condition of the layout.
-     */
-    locked_parallel_flat_hash_map<typename Lyt::cell, defect_influence_status> influence_information{};
-};
+using defect_influence_domain = sidb_simulation_domain<typename Lyt::cell, defect_influence_status>;
+
 /**
  * Statistics.
  */
@@ -549,7 +544,7 @@ class defect_influence_impl
         const auto non_influential = [this, &defect_cell]()
         {
             ++num_simulator_invocations;
-            influence_domain.influence_information[defect_cell] = defect_influence_status::NON_INFLUENTIAL;
+            influence_domain.add_value(defect_cell, {defect_influence_status::NON_INFLUENTIAL});
 
             return defect_influence_status::NON_INFLUENTIAL;
         };
@@ -557,7 +552,7 @@ class defect_influence_impl
         const auto influential = [this, &defect_cell]()
         {
             ++num_simulator_invocations;
-            influence_domain.influence_information[defect_cell] = defect_influence_status::INFLUENTIAL;
+            influence_domain.add_value(defect_cell, {defect_influence_status::INFLUENTIAL});
 
             return defect_influence_status::INFLUENTIAL;
         };
@@ -692,10 +687,9 @@ class defect_influence_impl
     [[nodiscard]] std::optional<defect_influence_status>
     has_already_been_sampled(const typename Lyt::cell& c) const noexcept
     {
-        if (const auto it = influence_domain.influence_information.find(c);
-            it != influence_domain.influence_information.cend())
+        if (const auto v = contains_key(influence_domain.get_domain(), c); v.has_value())
         {
-            return it->second;
+            return std::get<0>(v.value());
         }
 
         return std::nullopt;
@@ -757,9 +751,9 @@ class defect_influence_impl
         stats.num_simulator_invocations      = num_simulator_invocations.load();
         stats.num_evaluated_defect_positions = num_evaluated_defect_positions.load();
 
-        for (const auto& [param_point, status] : influence_domain.influence_information)
+        for (const auto& [param_point, status] : influence_domain.get_domain())
         {
-            if (status == defect_influence_status::INFLUENTIAL)
+            if (std::get<0>(status) == defect_influence_status::INFLUENTIAL)
             {
                 ++stats.num_influencing_defect_positions;
             }

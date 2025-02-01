@@ -49,9 +49,9 @@ calculate_defect_clearance(const Lyt& lyt, const defect_influence_domain<Lyt>& d
     double    max_distance         = 0;
     cell<Lyt> max_distance_postion = {};
 
-    for (const auto& val : defect_inf_domain.influence_information)
+    for (const auto& val : defect_inf_domain.get_domain())
     {
-        if (val.second == defect_influence_status::NON_INFLUENTIAL)
+        if (std::get<0>(val.second) == defect_influence_status::NON_INFLUENTIAL)
         {
             continue;
         }

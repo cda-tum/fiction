@@ -70,7 +70,6 @@
 #include "pyfiction/inout/write_qll_layout.hpp"
 #include "pyfiction/inout/write_sqd_layout.hpp"
 #include "pyfiction/inout/write_sqd_sim_result.hpp"
-#include "pyfiction/inout/write_svg_layout.hpp"
 #include "pyfiction/layouts/cartesian_layout.hpp"
 #include "pyfiction/layouts/cell_level_layout.hpp"
 #include "pyfiction/layouts/clocked_layout.hpp"

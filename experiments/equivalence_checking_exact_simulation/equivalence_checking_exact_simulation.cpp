@@ -65,7 +65,6 @@ int main()  // NOLINT
     threads.reserve(num_threads_to_use);
 
     std::mutex mutex_qe{};
-    std::mutex mutex_cc{};
 
     for (const auto& [range_start, range_end] : ranges)
     {
@@ -81,9 +80,6 @@ int main()  // NOLINT
                         lyt.assign_cell_type(all_cells_in_region[idx], sidb_technology::cell_type::NORMAL);
                     }
 
-                    clustercomplete_params<cell<sidb_100_cell_clk_lyt>> cc_params{params};
-                    cc_params.available_threads = 1;
-
                     auto result_exgs       = exhaustive_ground_state_simulation(lyt, params);
                     auto result_quickexact = quickexact(lyt, quickexact_params<cell<sidb_100_cell_clk_lyt>>{params});
 
@@ -94,6 +90,10 @@ int main()  // NOLINT
                     }
 
 #if (FICTION_ALGLIB_ENABLED)
+                    std::mutex                                          mutex_cc{};
+                    clustercomplete_params<cell<sidb_100_cell_clk_lyt>> cc_params{params};
+                    cc_params.available_threads = 1;
+
                     auto result_clustercomplete = clustercomplete(lyt, cc_params);
 
                     if (!check_simulation_results_for_equivalence(result_exgs, result_clustercomplete))

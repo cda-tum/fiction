@@ -11,7 +11,7 @@
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
 #include "fiction/algorithms/simulation/sidb/verify_logic_match.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
-#include "fiction/technology/physical_constants.hpp"
+#include "fiction/technology/constants.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/math_utils.hpp"
 
@@ -72,7 +72,7 @@ template <typename Lyt, typename TT>
             // round the energy value of the given valid_layout to six decimal places to overcome possible rounding
             // errors and to provide comparability with the energy_value from before.
             if (std::abs(round_to_n_decimal_places(valid_layout.get_system_energy(), 6) - energy_value) <
-                physical_constants::POP_STABILITY_ERR)
+                constants::ERROR_MARGIN)
             {
                 bool correct_output = true;
 
@@ -132,7 +132,7 @@ template <typename Lyt, typename TT>
             // round the energy value of the given valid_layout to six decimal places to overcome possible rounding
             // errors and to provide comparability with the energy_value from before.
             if (std::abs(round_to_n_decimal_places(valid_layout.get_system_energy(), 6) - energy_value) <
-                physical_constants::POP_STABILITY_ERR)
+                constants::ERROR_MARGIN)
             {
                 bool correct_output = true;
 

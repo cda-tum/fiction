@@ -12,7 +12,7 @@
 #include <fiction/algorithms/simulation/sidb/quickexact.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
 #include <fiction/technology/charge_distribution_surface.hpp>
-#include <fiction/technology/physical_constants.hpp>
+#include <fiction/technology/constants.hpp>
 #include <fiction/technology/sidb_cluster_hierarchy.hpp>
 #include <fiction/types.hpp>
 
@@ -121,9 +121,9 @@ TEMPLATE_TEST_CASE("Ground State Space construction of a 7 DB layout", "[ground-
     for (uint64_t i = 0; i < 7; ++i)
     {
         CHECK_THAT(gss_res.top_cluster->received_ext_pot_bounds.get<bound_direction::LOWER>(i),
-                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0, constants::ERROR_MARGIN));
         CHECK_THAT(gss_res.top_cluster->received_ext_pot_bounds.get<bound_direction::UPPER>(i),
-                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0, constants::ERROR_MARGIN));
     }
 
     REQUIRE(gss_res.top_cluster->charge_space.size() == 1);
@@ -310,9 +310,9 @@ TEMPLATE_TEST_CASE("Ground state space construction of a 14 DB layout", "[ground
     for (uint64_t i = 0; i < 14; ++i)
     {
         CHECK_THAT(gss_res.top_cluster->received_ext_pot_bounds.get<bound_direction::LOWER>(i),
-                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0, constants::ERROR_MARGIN));
         CHECK_THAT(gss_res.top_cluster->received_ext_pot_bounds.get<bound_direction::UPPER>(i),
-                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0, constants::ERROR_MARGIN));
     }
 }
 
@@ -369,9 +369,9 @@ TEMPLATE_TEST_CASE("Ground state space construction of a 28 DB layout", "[ground
     for (uint64_t i = 0; i < 28; ++i)
     {
         CHECK_THAT(gss_res.top_cluster->received_ext_pot_bounds.get<bound_direction::LOWER>(i),
-                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0, constants::ERROR_MARGIN));
         CHECK_THAT(gss_res.top_cluster->received_ext_pot_bounds.get<bound_direction::UPPER>(i),
-                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0, constants::ERROR_MARGIN));
     }
 }
 
