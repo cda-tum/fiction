@@ -1,3 +1,7 @@
+//
+// Created by marcel on 22.05.23.
+//
+
 #ifndef PYFICTION_SIDB_SIMULATION_RESULT_HPP
 #define PYFICTION_SIDB_SIMULATION_RESULT_HPP
 
