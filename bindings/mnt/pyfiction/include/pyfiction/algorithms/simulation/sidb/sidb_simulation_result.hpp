@@ -75,7 +75,7 @@ inline py::dict convert_map_to_py(const std::unordered_map<std::string, std::any
         }
         catch (const std::exception& e)
         {
-            throw std::runtime_error(std::string("Error converting key '") + key + "': " + e.what());
+            throw std::runtime_error(fmt::format("Error converting key: {}", e.what()));
         }
     }
     return result;
