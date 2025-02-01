@@ -168,10 +168,11 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
                     for (uint64_t l = 0ul; l < iter_per_thread; ++l)
                     {
                         // Check if the timeout has been reached before starting the iterations
-                        auto current_time = std::chrono::high_resolution_clock::now();
-                        auto elapsed_time =
+                        const auto current_time = std::chrono::high_resolution_clock::now();
+                        const auto elapsed_time =
                             std::chrono::duration_cast<std::chrono::milliseconds>(current_time - start_time).count();
-                        if (elapsed_time >= ps.timeout)
+
+                        if (elapsed_time >= static_cast<decltype(elapsed_time)>(ps.timeout))
                         {
                             timeout_limit_reached = true;
                             return;  // Exit the thread if the timeout has been reached

@@ -15,6 +15,8 @@
 #include <pybind11/stl.h>
 
 #include <any>
+#include <cstdint>
+#include <stdexcept>
 #include <string>
 #include <unordered_map>
 
@@ -53,8 +55,6 @@ inline py::object convert_any_to_py(const std::any& value)
         }
         else
         {
-            // Log unsupported type
-            std::cerr << "Unsupported type in std::any: " << value.type().name() << std::endl;
             throw std::runtime_error(std::string("Unsupported type in std::any: ") + value.type().name());
         }
     }
@@ -63,7 +63,7 @@ inline py::object convert_any_to_py(const std::any& value)
         throw std::runtime_error(std::string("Error in convert_any_to_py: ") + e.what());
     }
 }
-// Convert std::unordered_map<std::string, std::any> to Python dict
+
 inline py::dict convert_map_to_py(const std::unordered_map<std::string, std::any>& map)
 {
     pybind11::dict result;
