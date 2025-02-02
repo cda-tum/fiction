@@ -3017,24 +3017,6 @@ Parameter ``n``:
 Returns:
     Columnar clocking scheme.)doc";
 
-static const char *__doc_fiction_contains_key =
-R"doc(Checks whether a specified key exists in the given map and retrieves
-its associated value if present. This function utilizes the
-`if_contains` method of the map to ensure thread-safe access.
-
-Template parameter ``MapType``:
-    The type of the map, which must provide the `if_contains` method.
-
-Parameter ``map``:
-    The map in which to search for the specified key.
-
-Parameter ``key``:
-    The key to search for in the map.
-
-Returns:
-    An `std::optional` containing the value associated with the key if
-    it exists, `std::optional` otherwise.)doc";
-
 static const char *__doc_fiction_convert_array =
 R"doc(Converts an array of size `N` and type `T` to an array of size `N` and
 type `ElementType` by applying `static_cast` at compile time.
@@ -3575,6 +3557,218 @@ Parameter ``lyt``:
 Returns:
     A struct containing the CP and TP.)doc";
 
+static const char *__doc_fiction_critical_temperature_domain =
+R"doc(The `critical_temperature_domain` class collects the critical
+temperature for a range of different physical parameters. It allows
+for the evaluation of how the critical temperature depends on
+variations in the underlying parameter points. This enables
+simulations to explore the critical temperature's behavior across
+different conditions and configurations.)doc";
+
+static const char *__doc_fiction_critical_temperature_domain_contour_tracing =
+R"doc(Computes the critical temperature domain of the given SiDB cell-level
+layout. The critical temperature domain consists of all parameter
+combinations for which the layout is logically operational, along with
+the critical temperature for each specific parameter point.nt.
+
+This algorithm first uses random sampling to find a set of operational
+point within the parameter range. From there, it traverses outwards to
+find the edge of the operational area and performs Moore neighborhood
+contour tracing to explore the contour of the operational domain. This
+is repeated for all initially sampled points that do not lie within a
+contour. The algorithm is guaranteed to determine the contours of all
+operational "islands" if the initial random sampling found at least
+one operational point within them. Thereby, this algorithm works for
+disconnected operational domains. The critical temperature is computed
+for each operational point.
+
+It performs `samples` uniformly-distributed random samples within the
+parameter range. For each thusly discovered operational island, it
+performs another number of samples equal to the distance to an edge of
+each operational area. Finally, it performs up to 8 samples for each
+contour point (however, the actual number is usually lower). For each
+sample, the algorithm performs one operational check on the layout,
+where each operational check consists of up to :math:`2^n` exact
+ground state simulations, where :math:`n` is the number of inputs of
+the layout. Each exact ground state simulation has exponential
+complexity in of itself. Therefore, the algorithm is only feasible for
+small layouts with few inputs.
+
+This function may throw an `std::invalid_argument` exception if the
+given sweep parameters are invalid.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Template parameter ``TT``:
+    Truth table type.
+
+Parameter ``lyt``:
+    Layout to compute the operational domain for.
+
+Parameter ``spec``:
+    Expected Boolean function of the layout given as a multi-output
+    truth table.
+
+Parameter ``samples``:
+    Number of samples to perform.
+
+Parameter ``params``:
+    Operational domain computation parameters.
+
+Parameter ``stats``:
+    Operational domain computation statistics.
+
+Returns:
+    The (partial) operational domain of the layout.)doc";
+
+static const char *__doc_fiction_critical_temperature_domain_dimensions =
+R"doc(The dimensions to sweep over, ordered by priority. The first dimension
+is the x dimension, the second dimension is the y dimension, etc.)doc";
+
+static const char *__doc_fiction_critical_temperature_domain_flood_fill =
+R"doc(Computes the critical temperature domain of the given SiDB cell-level
+layout. The critical temperature domain consists of all parameter
+combinations for which the layout is logically operational, along with
+the critical temperature for each specific parameter point.
+
+This algorithm first uses random sampling to find several operational
+points within the parameter range. From there, it employs the "flood
+fill" algorithm to explore the operational domain. The algorithm is
+guaranteed to determine all operational "islands" in their entirety if
+the initial random sampling found at least one operational point
+within them. Thereby, this algorithm works for disconnected
+operational domains.
+
+It performs `samples` uniformly-distributed random samples within the
+parameter range. From there, it performs another number of samples
+equal to the number of points within the operational domain plus the
+first non-operational point in each direction. For each sample, the
+algorithm performs one operational check on the layout, where each
+operational check consists of up to :math:`2^n` exact ground state
+simulations, where :math:`n` is the number of inputs of the layout.
+Each exact ground state simulation has exponential complexity in of
+itself. Therefore, the algorithm is only feasible for small layouts
+with few inputs.
+
+This function may throw an `std::invalid_argument` exception if the
+given sweep parameters are invalid.
+
+Template parameter ``OpDomain``:
+    Operational domain type to compute.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Template parameter ``TT``:
+    Truth table type.
+
+Parameter ``lyt``:
+    Layout to compute the operational domain for.
+
+Parameter ``spec``:
+    Expected Boolean function of the layout given as a multi-output
+    truth table.
+
+Parameter ``samples``:
+    Number of samples to perform.
+
+Parameter ``params``:
+    Operational domain computation parameters.
+
+Parameter ``stats``:
+    Operational domain computation statistics.
+
+Returns:
+    The (partial) operational domain of the layout.)doc";
+
+static const char *__doc_fiction_critical_temperature_domain_grid_search =
+R"doc(Computes the critical temperature domain of the given SiDB cell-level
+layout. The critical temperature domain consists of all parameter
+combinations for which the layout is logically operational, along with
+the critical temperature for each specific parameter point.
+
+This algorithm uses a grid search to find the operational domain. The
+grid search is performed by exhaustively sweeping the parameter space
+in the x and y dimensions. Since grid search is exhaustive, the
+algorithm is guaranteed to find the operational domain, if it exists
+within the parameter range. However, the algorithm performs a
+quadratic number of operational checks on the layout, where each
+operational check consists of up to :math:`2^n` exact ground state
+simulations, where :math:`n` is the number of inputs of the layout.
+Each exact ground state simulation has exponential complexity in of
+itself. Therefore, the algorithm is only feasible for small layouts
+with few inputs.
+
+This function may throw an `std::invalid_argument` exception if the
+given sweep parameters are invalid.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Template parameter ``TT``:
+    Truth table type.
+
+Parameter ``lyt``:
+    Layout to compute the operational domain for.
+
+Parameter ``spec``:
+    Expected vector of truth tables of the layout. Each truth table
+    represents an output of the Boolean function.
+
+Parameter ``params``:
+    Operational domain computation parameters.
+
+Parameter ``stats``:
+    Operational domain computation statistics.
+
+Returns:
+    The operational domain of the layout.)doc";
+
+static const char *__doc_fiction_critical_temperature_domain_random_sampling =
+R"doc(Computes the critical temperature domain of the given SiDB cell-level
+layout. The critical temperature domain consists of all parameter
+combinations for which the layout is logically operational, along with
+the critical temperature for each specific parameter point.
+
+This algorithm uses random sampling to find a part of the operational
+domain that might not be complete. It performs a total of `samples`
+uniformly-distributed random samples within the parameter range. For
+each sample, the algorithm performs one operational check on the
+layout, where each operational check consists of up to :math:`2^n`
+exact ground state simulations, where :math:`n` is the number of
+inputs of the layout. Each exact ground state simulation has
+exponential complexity in of itself. Therefore, the algorithm is only
+feasible for small layouts with few inputs.
+
+This function may throw an `std::invalid_argument` exception if the
+given sweep parameters are invalid.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Template parameter ``TT``:
+    Truth table type.
+
+Parameter ``lyt``:
+    Layout to compute the operational domain for.
+
+Parameter ``spec``:
+    Expected Boolean function of the layout given as a multi-output
+    truth table.
+
+Parameter ``samples``:
+    Number of samples to perform.
+
+Parameter ``params``:
+    Operational domain computation parameters.
+
+Parameter ``stats``:
+    Operational domain computation statistics.
+
+Returns:
+    The (partial) operational domain of the layout.)doc";
+
 static const char *__doc_fiction_critical_temperature_gate_based =
 R"doc(This algorithm performs temperature-aware SiDB simulation as proposed
 in \"Temperature Behavior of Silicon Dangling Bond Logic\" by J.
@@ -3955,6 +4149,20 @@ Parameter ``neutral_defect_spacing_overwrite``:
 Returns:
     A pair of uint16_t values representing the number of horizontal
     and vertical SiDBs affected by the given defect type.)doc";
+
+static const char *__doc_fiction_defect_influence_domain =
+R"doc(A `defect_influence_domain` defines for each defect position the
+influence of the defect on the layout. Depending on the chosen
+definition of influence, this can either mean that the operational
+status or the ground state of the layout is changed due to the
+presence of the defect.)doc";
+
+static const char *__doc_fiction_defect_influence_domain_has_already_been_sampled =
+R"doc(This function verifies whether the defect position `c` has already
+been sampled.
+
+Parameter ``c``:
+    Position of the defect, `std::nullptr` otherwise.)doc";
 
 static const char *__doc_fiction_defect_influence_grid_search =
 R"doc(This algorithm uses a grid search to determine the defect influence
@@ -5479,13 +5687,6 @@ Parameter ``step_size``:
 
 Returns:
     The defect influence domain.)doc";
-
-static const char *__doc_fiction_detail_defect_influence_impl_has_already_been_sampled =
-R"doc(This function verifies whether the layout has already been analyzed
-for the specified defect position `c`.
-
-Parameter ``c``:
-    Position of the defect.)doc";
 
 static const char *__doc_fiction_detail_defect_influence_impl_influence_domain = R"doc(The defect influence domain of the layout.)doc";
 
@@ -8694,20 +8895,6 @@ Returns:
     All physically valid physical parameters and the excited state
     number.)doc";
 
-static const char *__doc_fiction_detail_operational_domain_impl_has_already_been_sampled =
-R"doc(Determines whether the point at step position `(d1, ..., dn)` has
-already been sampled and returns the operational value at `(d1, ...,
-dn)` if it already exists. Here, `di` represents steps in the i-th
-dimension, not the actual values of the parameters.
-
-Parameter ``sp``:
-    Step point to check.
-
-Returns:
-    The operational status of the point at step position `sp = (d1,
-    ..., dn)` or `std::nullopt` if the point `(d1, ..., dn)` has not
-    been sampled yet.)doc";
-
 static const char *__doc_fiction_detail_operational_domain_impl_indices = R"doc(Dimension steps.)doc";
 
 static const char *__doc_fiction_detail_operational_domain_impl_infer_operational_status_in_enclosing_contour =
@@ -11093,7 +11280,7 @@ R"doc(This function takes in a vector of `charge_distribution_surface`
 objects and returns a map containing the system energy and the number
 of occurrences of that energy in the input vector. To compare two
 energy values for equality, the comparison uses a tolerance specified
-by `physical_constants::SCALED_EPSILON`.
+by `constants::ERROR_MARGIN`.
 
 Template parameter ``Lyt``:
     SiDB cell-level layout type.
@@ -16476,9 +16663,6 @@ Walus, and R. Wille in NANOARCH 2023.
 This function may throw an `std::invalid_argument` exception if the
 given sweep parameters are invalid.
 
-Template parameter ``OpDomain``:
-    Operational domain type to compute.
-
 Template parameter ``Lyt``:
     SiDB cell-level layout type.
 
@@ -16594,9 +16778,6 @@ with few inputs.
 This function may throw an `std::invalid_argument` exception if the
 given sweep parameters are invalid.
 
-Template parameter ``OpDomain``:
-    Operational domain type to compute.
-
 Template parameter ``Lyt``:
     SiDB cell-level layout type.
 
@@ -16652,9 +16833,6 @@ feasible for small layouts with few inputs.
 
 This function may throw an `std::invalid_argument` exception if the
 given sweep parameters are invalid.
-
-Template parameter ``OpDomain``:
-    Operational domain type to compute.
 
 Template parameter ``Lyt``:
     SiDB cell-level layout type.
@@ -16992,7 +17170,7 @@ Returns:
 static const char *__doc_fiction_parameter_point_operator_eq =
 R"doc(Equality operator. Checks if this parameter point is equal to another
 point within a specified tolerance. The tolerance is defined by
-`physical_constants::SCALED_EPSILON`.
+`constants::ERROR_MARGIN`.
 
 Parameter ``other``:
     Other parameter point to compare with.
@@ -19749,17 +19927,14 @@ static const char *__doc_fiction_sidb_simulation_domain =
 R"doc(The `sidb_simulation_domain` is designed to represent a generic
 simulation domain where keys are associated with values stored as
 tuples. It uses a `locked_parallel_flat_hash_map` to ensure thread-
-safe access to the stored data. This is especially useful for parallel
-simulations or multithreaded environments.
+safe access to the stored data. All methods of this class are thread-
+safe.
 
 Template parameter ``Key``:
     The type of the key used to identify entries in the domain.
 
-Template parameter ``Value1``:
-    The first value type stored in the tuple associated with each key.
-
 Template parameter ``MappedTypes``:
-    Additional value types stored in the tuple.)doc";
+    Value types stored in the tuple.)doc";
 
 static const char *__doc_fiction_sidb_simulation_domain_add_value =
 R"doc(Adds a value to the operational domain.
@@ -19770,13 +19945,31 @@ Parameter ``key``:
 Parameter ``value``:
     The value to add, which must be a tuple.)doc";
 
-static const char *__doc_fiction_sidb_simulation_domain_domain_values = R"doc()doc";
+static const char *__doc_fiction_sidb_simulation_domain_contains_key =
+R"doc(Checks whether a specified key exists in the given map and retrieves
+its associated value if present. This function utilizes the
+`if_contains` method of the map to ensure thread-safe access.
 
-static const char *__doc_fiction_sidb_simulation_domain_get_domain =
-R"doc(Returns the entire operational domain.
+Template parameter ``MapType``:
+    The type of the map, which must provide the `if_contains` method.
+
+Parameter ``map``:
+    The map in which to search for the specified key.
+
+Parameter ``key``:
+    The key to search for in the map.
 
 Returns:
-    The operational domain as a map.)doc";
+    An `std::optional` containing the value associated with the key if
+    it exists, `std::optional` otherwise.)doc";
+
+static const char *__doc_fiction_sidb_simulation_domain_domain_values = R"doc(The domain values stored in a thread-safe map.)doc";
+
+static const char *__doc_fiction_sidb_simulation_domain_for_each =
+R"doc(Iterates over all key-value pairs in the operational domain and
+applies a provided callback function to each pair. This method ensures
+thread-safe access to the underlying data by leveraging the `for_each`
+method of the thread-safe `locked_parallel_flat_hash_map`.)doc";
 
 static const char *__doc_fiction_sidb_simulation_domain_get_value =
 R"doc(Retrieves the value associated with the provided key from the
@@ -19789,6 +19982,32 @@ Parameter ``key``:
 Returns:
     The `std::tuple`` associated with the provided key is returned,
     `std::nullopt` otherwise.)doc";
+
+static const char *__doc_fiction_sidb_simulation_domain_has_already_been_sampled =
+R"doc(Checks whether a specified key exists in the given map and retrieves
+its associated value if present. This function utilizes the
+`if_contains` method of the map to ensure thread-safe access.
+
+Template parameter ``MapType``:
+    The type of the map, which must provide the `if_contains` method.
+
+Parameter ``map``:
+    The map in which to search for the specified key.
+
+Parameter ``key``:
+    The key to search for in the map.
+
+Returns:
+    An `std::optional` containing the value associated with the key if
+    it exists, `std::optional` otherwise.)doc";
+
+static const char *__doc_fiction_sidb_simulation_domain_number_of_values =
+R"doc(Counts the number of key-value pairs in the operational domain.
+
+Parameter ``key``:
+    The key to remove from the domain.)doc";
+
+static const char *__doc_fiction_sidb_simulation_domain_sidb_simulation_domain = R"doc(Constructs a new `sidb_simulation_domain` instance.)doc";
 
 static const char *__doc_fiction_sidb_simulation_engine = R"doc(Selector for the available SiDB simulation engines.)doc";
 
@@ -20958,12 +21177,6 @@ already point to a buffer.)doc";
 static const char *__doc_fiction_technology_network_technology_network = R"doc()doc";
 
 static const char *__doc_fiction_technology_network_technology_network_2 = R"doc()doc";
-
-static const char *__doc_fiction_temperature_operational_domain = R"doc()doc";
-
-static const char *__doc_fiction_temperature_operational_domain_dimensions =
-R"doc(The dimensions to sweep over, ordered by priority. The first dimension
-is the x dimension, the second dimension is the y dimension, etc.)doc";
 
 static const char *__doc_fiction_tile_based_layout =
 R"doc(This class provides a tile-based naming scheme for coordinate-based
