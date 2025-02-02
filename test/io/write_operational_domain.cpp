@@ -205,7 +205,7 @@ TEST_CASE("Write operational domain with floating-point parameter and temperatur
 {
     SECTION("One sweep parameters")
     {
-        temperature_operational_domain opdom{};
+        critical_temperature_domain opdom{};
 
         opdom.dimensions.push_back(sweep_parameter::EPSILON_R);
 
@@ -270,7 +270,7 @@ TEST_CASE("Write operational domain with floating-point parameter and temperatur
     }
     SECTION("Two sweep parameters")
     {
-        temperature_operational_domain opdom{};
+        critical_temperature_domain opdom{};
 
         opdom.dimensions.push_back(sweep_parameter::EPSILON_R);
         opdom.dimensions.push_back(sweep_parameter::LAMBDA_TF);

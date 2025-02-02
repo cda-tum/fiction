@@ -124,7 +124,7 @@ inline void write_operational_domain(const OpDomain& opdom, std::ostream& os,
         throw std::invalid_argument("unsupported number of dimensions in the given operational domain");
     }
 
-    if constexpr (std::is_same_v<OpDomain, temperature_operational_domain>)
+    if constexpr (std::is_same_v<OpDomain, critical_temperature_domain>)
     {
         if (num_dimensions == 1)
         {
@@ -145,32 +145,33 @@ inline void write_operational_domain(const OpDomain& opdom, std::ostream& os,
                               "critical temperature");
         }
 
-        for (const auto& [sim_param, op_val] : opdom.domain_values)
-        {
-            // skip non-operational samples if the respective flag is set
-            if (params.writing_mode == write_operational_domain_params::sample_writing_mode::OPERATIONAL_ONLY &&
-                std::get<0>(op_val) == operational_status::NON_OPERATIONAL)
+        opdom.for_each(
+            [&params, &writer, &num_dimensions](const auto& sim_param, const auto& op_val)
             {
-                continue;
-            }
+                // skip non-operational samples if the respective flag is set
+                if (params.writing_mode == write_operational_domain_params::sample_writing_mode::OPERATIONAL_ONLY &&
+                    std::get<0>(op_val) == operational_status::NON_OPERATIONAL)
+                {
+                    return;
+                }
 
-            const auto tag = std::get<0>(op_val) == operational_status::OPERATIONAL ? params.operational_tag :
-                                                                                      params.non_operational_tag;
+                const auto tag = std::get<0>(op_val) == operational_status::OPERATIONAL ? params.operational_tag :
+                                                                                          params.non_operational_tag;
 
-            if (num_dimensions == 1)
-            {
-                writer.write_line(sim_param.parameters[0], tag, std::get<1>(op_val));
-            }
-            else if (num_dimensions == 2)
-            {
-                writer.write_line(sim_param.parameters[0], sim_param.parameters[1], tag, std::get<1>(op_val));
-            }
-            else  // num_dimensions == 3
-            {
-                writer.write_line(sim_param.parameters[0], sim_param.parameters[1], sim_param.parameters[2], tag,
-                                  std::get<1>(op_val));
-            }
-        }
+                if (num_dimensions == 1)
+                {
+                    writer.write_line(sim_param.parameters[0], tag, std::get<1>(op_val));
+                }
+                else if (num_dimensions == 2)
+                {
+                    writer.write_line(sim_param.parameters[0], sim_param.parameters[1], tag, std::get<1>(op_val));
+                }
+                else  // num_dimensions == 3
+                {
+                    writer.write_line(sim_param.parameters[0], sim_param.parameters[1], sim_param.parameters[2], tag,
+                                      std::get<1>(op_val));
+                }
+            });
     }
     else if constexpr (std::is_same_v<OpDomain, operational_domain>)
     {
@@ -190,31 +191,32 @@ inline void write_operational_domain(const OpDomain& opdom, std::ostream& os,
                               detail::sweep_parameter_to_string(opdom.dimensions[2]), "operational status");
         }
 
-        for (const auto& [sim_param, op_val] : opdom.domain_values)
-        {
-            // skip non-operational samples if the respective flag is set
-            if (params.writing_mode == write_operational_domain_params::sample_writing_mode::OPERATIONAL_ONLY &&
-                std::get<0>(op_val) == operational_status::NON_OPERATIONAL)
+        opdom.for_each(
+            [&params, &writer, &num_dimensions](const auto& sim_param, const auto& op_val)
             {
-                continue;
-            }
+                // skip non-operational samples if the respective flag is set
+                if (params.writing_mode == write_operational_domain_params::sample_writing_mode::OPERATIONAL_ONLY &&
+                    std::get<0>(op_val) == operational_status::NON_OPERATIONAL)
+                {
+                    return;
+                }
 
-            const auto tag = std::get<0>(op_val) == operational_status::OPERATIONAL ? params.operational_tag :
-                                                                                      params.non_operational_tag;
+                const auto tag = std::get<0>(op_val) == operational_status::OPERATIONAL ? params.operational_tag :
+                                                                                          params.non_operational_tag;
 
-            if (num_dimensions == 1)
-            {
-                writer.write_line(sim_param.parameters[0], tag);
-            }
-            else if (num_dimensions == 2)
-            {
-                writer.write_line(sim_param.parameters[0], sim_param.parameters[1], tag);
-            }
-            else  // num_dimensions == 3
-            {
-                writer.write_line(sim_param.parameters[0], sim_param.parameters[1], sim_param.parameters[2], tag);
-            }
-        }
+                if (num_dimensions == 1)
+                {
+                    writer.write_line(sim_param.parameters[0], tag);
+                }
+                else if (num_dimensions == 2)
+                {
+                    writer.write_line(sim_param.parameters[0], sim_param.parameters[1], tag);
+                }
+                else  // num_dimensions == 3
+                {
+                    writer.write_line(sim_param.parameters[0], sim_param.parameters[1], sim_param.parameters[2], tag);
+                }
+            });
     }
 }
 /**

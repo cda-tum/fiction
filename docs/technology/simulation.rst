@@ -88,7 +88,7 @@ Physical Constants
 .. doxygenvariable:: EPSILON
 .. doxygenvariable:: ELEMENTARY_CHARGE
 .. doxygenvariable:: K_E
-.. doxygenvariable:: SCALED_EPSILON
+.. doxygenvariable:: constants::ERROR_MARGIN
 .. doxygenvariable:: PI
 
 

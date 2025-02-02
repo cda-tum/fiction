@@ -19745,7 +19745,7 @@ Template parameter ``Key``:
 Template parameter ``Value1``:
     The first value type stored in the tuple associated with each key.
 
-Template parameter ``Valuetypes``:
+Template parameter ``MappedTypes``:
     Additional value types stored in the tuple.)doc";
 
 static const char *__doc_fiction_sidb_simulation_domain_add_value =

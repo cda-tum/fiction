@@ -2,9 +2,10 @@
 // Created by Jan Drewniok on 29.01.25.
 //
 
-#include "fiction/technology/constants.hpp"
 #include "fiction/utils/phmap_utils.hpp"
 
+#include <cstdio>
+#include <functional>
 #include <optional>
 #include <tuple>
 
@@ -12,60 +13,42 @@ namespace fiction
 {
 
 /**
- * Checks whether a specified key exists in the given map and retrieves its associated value if present.
- * This function utilizes the `if_contains` method of the map to ensure thread-safe access.
- *
- * @tparam MapType The type of the map, which must provide the `if_contains` method.
- * @param map The map in which to search for the specified key.
- * @param key The key to search for in the map.
- * @return An `std::optional` containing the value associated with the key if it exists, `std::optional` otherwise.
- */
-template <typename MapType>
-std::optional<typename MapType::mapped_type> contains_key(const MapType& map, const typename MapType::key_type& key)
-{
-    std::optional<typename MapType::mapped_type> result;
-
-    map.if_contains(key, [&result](const typename MapType::value_type& entry) { result = entry.second; });
-
-    return result;
-}
-
-/**
- * This function searches for a floating-point value specified by the `key` in the provided map `map`, applying a
- * tolerance specified by `fiction::physical_constants::SCALED_EPSILON`. Each key in the map is compared to the
- * specified key within this tolerance.
- *
- * @tparam MapType The type of the map containing parameter points as keys.
- * @param map The map containing parameter points as keys and associated values.
- * @param key The parameter point to search for in the map.
- * @return An iterator to the found parameter point in the map, or `map.cend()` if not found.
- */
-template <typename MapType>
-typename MapType::const_iterator find_key_with_tolerance(const MapType& map, const typename MapType::key_type& key)
-{
-    static_assert(std::is_floating_point_v<typename MapType::key_type>, "Map key type must be floating-point");
-
-    constexpr double tolerance = constants::ERROR_MARGIN;
-
-    auto compare_keys = [&key, &tolerance](const auto& pair) { return std::abs(pair.first - key) < tolerance; };
-
-    return std::find_if(map.cbegin(), map.cend(), compare_keys);
-}
-
-/**
  * The `sidb_simulation_domain` is designed to represent a generic simulation domain where keys are
  * associated with values stored as tuples. It uses a `locked_parallel_flat_hash_map` to ensure
- * thread-safe access to the stored data. This is especially useful for parallel simulations or
- * multithreaded environments.
+ * thread-safe access to the stored data. All methods of this class are thread-safe.
  *
  * @tparam Key The type of the key used to identify entries in the domain.
- * @tparam Value1 The first value type stored in the tuple associated with each key.
- * @tparam Valuetypes Additional value types stored in the tuple.
+ * @tparam MappedTypes Value types stored in the tuple.
  */
-template <typename Key, typename Value1, typename... Valuetypes>
-struct sidb_simulation_domain
+template <typename Key, typename... MappedTypes>
+class sidb_simulation_domain
 {
-    locked_parallel_flat_hash_map<Key, std::tuple<Value1, Valuetypes...>> domain_values{};
+  public:
+    /**
+     * Checks whether a specified key exists in the given map and retrieves its associated value if present.
+     * This function utilizes the `if_contains` method of the map to ensure thread-safe access.
+     *
+     * @tparam MapType The type of the map, which must provide the `if_contains` method.
+     * @param map The map in which to search for the specified key.
+     * @param key The key to search for in the map.
+     * @return An `std::optional` containing the value associated with the key if it exists, `std::optional` otherwise.
+     */
+    [[nodiscard]] std::optional<std::tuple<MappedTypes...>> has_already_been_sampled(const Key& key) const noexcept
+    {
+        if (const auto v = contains_key(key); v.has_value())
+        {
+            return v.value();
+        }
+
+        return std::nullopt;
+    }
+    /**
+     * Constructs a new `sidb_simulation_domain` instance.
+     */
+    sidb_simulation_domain()
+    {
+        static_assert(sizeof...(MappedTypes) > 0, "MappedTypes must not be empty");
+    }
     /**
      * Retrieves the value associated with the provided key from the operational domain.
      * If the key is found, the value is returned; otherwise, `std::nullopt` is returned.
@@ -73,30 +56,64 @@ struct sidb_simulation_domain
      * @param key The key to look up in the domain.
      * @return The `std::tuple`` associated with the provided key is returned, `std::nullopt` otherwise.
      */
-    [[nodiscard]] std::optional<std::tuple<Value1, Valuetypes...>> get_value(const Key& key) const
+    [[nodiscard]] std::optional<std::tuple<MappedTypes...>> get_value(const Key& key) const
     {
-        return contains_key(domain_values, key);
+        return contains_key(key);
     }
-
     /**
      * Adds a value to the operational domain.
      *
      * @param key The key to associate with the value.
      * @param value The value to add, which must be a tuple.
      */
-    void add_value(const Key& key, const std::tuple<Value1, Valuetypes...>& value)
+    void add_value(const Key& key, const std::tuple<MappedTypes...>& value)
     {
         domain_values.try_emplace(key, value);
     }
     /**
-     * Returns the entire operational domain.
+     * Counts the number of key-value pairs in the operational domain.
      *
-     * @return The operational domain as a map.
+     * @param key The key to remove from the domain.
      */
-    [[nodiscard]] const auto& get_domain() const
+    [[nodiscard]] std::size_t number_of_values() const
     {
-        return domain_values;
+        return domain_values.size();
     }
+    /**
+     * Iterates over all key-value pairs in the operational domain and applies a provided callback function
+     * to each pair. This method ensures thread-safe access to the underlying data by leveraging the
+     * `for_each` method of the thread-safe `locked_parallel_flat_hash_map`.
+     */
+    void for_each(const std::function<void(const Key&, const std::tuple<MappedTypes...>&)>& callback) const
+    {
+        for (auto it = domain_values.cbegin(); it != domain_values.cend(); ++it)
+        {
+            callback(it->first, it->second);
+        }
+    }
+    /**
+     * Checks whether a specified key exists in the given map and retrieves its associated value if present.
+     * This function utilizes the `if_contains` method of the map to ensure thread-safe access.
+     *
+     * @tparam MapType The type of the map, which must provide the `if_contains` method.
+     * @param map The map in which to search for the specified key.
+     * @param key The key to search for in the map.
+     * @return An `std::optional` containing the value associated with the key if it exists, `std::optional` otherwise.
+     */
+    [[nodiscard]] std::optional<std::tuple<MappedTypes...>> contains_key(const Key& key) const
+    {
+        std::optional<std::tuple<MappedTypes...>> result;
+
+        domain_values.if_contains(key, [&result](const auto& entry) { result = entry.second; });
+
+        return result;
+    }
+
+  private:
+    /**
+     * The domain values stored in a thread-safe map.
+     */
+    locked_parallel_flat_hash_map<Key, std::tuple<MappedTypes...>> domain_values{};
 };
 
 }  // namespace fiction

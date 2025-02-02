@@ -49,30 +49,31 @@ inline void write_operational_domain(pybind11::module& m)
         "Writes the operational domain to a CSV string.");
 }
 
-inline void write_temperature_operational_domain(pybind11::module& m)
+inline void write_critical_temperature_domain(pybind11::module& m)
 {
     namespace py = pybind11;
 
+    // todo update docu
+
     // Function pointer for writing to a file
-    void (*write_temperature_operational_domain_pointer)(
-        const fiction::temperature_operational_domain&, const std::string_view&,
+    void (*write_critical_temperature_domain_pointer)(
+        const fiction::critical_temperature_domain&, const std::string_view&,
         const fiction::write_operational_domain_params&) = &fiction::write_operational_domain;
 
     // Define function using function pointer
-    m.def("write_temperature_operational_domain", write_temperature_operational_domain_pointer, py::arg("opdom"),
-          py::arg("filename"), py::arg("params"), DOC(fiction_write_operational_domain));
+    m.def("write_critical_temperature_domain", write_critical_temperature_domain_pointer, py::arg("opdom"),
+          py::arg("filename"), py::arg("params"));
 
     m.def(
-        "write_temperature_operational_domain_to_string",
-        [](const fiction::temperature_operational_domain&  opdom,
+        "write_critical_temperature_domain_to_string",
+        [](const fiction::critical_temperature_domain&     opdom,
            const fiction::write_operational_domain_params& params = {}) -> std::string
         {
             std::ostringstream oss;
             fiction::write_operational_domain(opdom, oss, params);
             return oss.str();
         },
-        py::arg("opdom"), py::arg("params") = fiction::write_operational_domain_params{},
-        "Writes the operational domain to a CSV string.");
+        py::arg("opdom"), py::arg("params") = fiction::write_operational_domain_params{});
 }
 
 }  // namespace detail
@@ -101,7 +102,7 @@ inline void write_operational_domain(pybind11::module& m)
                        DOC(fiction_write_operational_domain_params_writing_mode));
 
     detail::write_operational_domain(m);
-    detail::write_temperature_operational_domain(m);
+    detail::write_critical_temperature_domain(m);
 }
 
 }  // namespace pyfiction

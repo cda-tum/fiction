@@ -57,7 +57,7 @@ TEMPLATE_TEST_CASE("novel designed AND Gate influence distance function which fa
         defect_influence_stats stats{};
         const auto             defect_influence_domain =
             defect_influence_random_sampling(cube_lyt, std::vector<tt>{create_and_tt()}, 100, params, &stats);
-        CHECK(defect_influence_domain.get_domain().size() > 0);
+        CHECK(defect_influence_domain.number_of_values() > 0);
         CHECK(calculate_defect_clearance(cube_lyt, defect_influence_domain).defect_clearance_distance <=
               6.21261176961831474);
     }
@@ -110,7 +110,7 @@ TEMPLATE_TEST_CASE(
             defect_influence_stats stats{};
             const auto             defect_influence_domain =
                 defect_influence_random_sampling(lyt_cube, std::vector<tt>{create_and_tt()}, 100, params, &stats);
-            CHECK(defect_influence_domain.get_domain().size() > 0);
+            CHECK(defect_influence_domain.number_of_values() > 0);
             CHECK(calculate_defect_clearance(lyt_cube, defect_influence_domain).defect_clearance_distance <=
                   3.16654512047436443);
         }

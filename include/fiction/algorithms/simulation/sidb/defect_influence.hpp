@@ -93,12 +93,30 @@ enum class defect_influence_status : uint8_t
     NON_INFLUENTIAL
 };
 /**
- * A defect influence domain defines for each defect position the influence of the defect on the layout.
+ * A `defect_influence_domain` defines for each defect position the influence of the defect on the layout.
  * Depending on the chosen definition of influence, this can either mean that the operational status
  * or the ground state of the layout is changed due to the presence of the defect.
  */
 template <typename Lyt>
-using defect_influence_domain = sidb_simulation_domain<typename Lyt::cell, defect_influence_status>;
+class defect_influence_domain : public sidb_simulation_domain<typename Lyt::cell, defect_influence_status>
+{
+  public:
+    /**
+     * This function verifies whether the defect position `c` has already been sampled.
+     *
+     * @param c Position of the defect, `std::nullptr` otherwise.
+     */
+    [[nodiscard]] std::optional<defect_influence_status>
+    has_already_been_sampled(const typename Lyt::cell& c) const noexcept
+    {
+        if (const auto v = this->contains_key(c); v.has_value())
+        {
+            return std::get<0>(v.value());
+        }
+
+        return std::nullopt;
+    }
+};
 
 /**
  * Statistics.
@@ -536,7 +554,7 @@ class defect_influence_impl
 
         auto lyt_copy = layout.clone();
 
-        if (const auto op_value = has_already_been_sampled(defect_cell); op_value.has_value())
+        if (const auto op_value = influence_domain.has_already_been_sampled(defect_cell); op_value.has_value())
         {
             return *op_value;
         }
@@ -680,21 +698,6 @@ class defect_influence_impl
         return defect_influence_status::NON_INFLUENTIAL;
     };
     /**
-     * This function verifies whether the layout has already been analyzed for the specified defect position `c`.
-     *
-     * @param c Position of the defect.
-     */
-    [[nodiscard]] std::optional<defect_influence_status>
-    has_already_been_sampled(const typename Lyt::cell& c) const noexcept
-    {
-        if (const auto v = contains_key(influence_domain.get_domain(), c); v.has_value())
-        {
-            return std::get<0>(v.value());
-        }
-
-        return std::nullopt;
-    }
-    /**
      * This function identifies the most recent non-influential defect position while traversing from left to right
      * towards the SiDB layout.
      *
@@ -751,18 +754,20 @@ class defect_influence_impl
         stats.num_simulator_invocations      = num_simulator_invocations.load();
         stats.num_evaluated_defect_positions = num_evaluated_defect_positions.load();
 
-        for (const auto& [param_point, status] : influence_domain.get_domain())
-        {
-            if (std::get<0>(status) == defect_influence_status::INFLUENTIAL)
+        influence_domain.for_each(
+            [this](const auto& defect_pos [[maybe_unused]], const auto& status)
             {
-                ++stats.num_influencing_defect_positions;
-            }
-            else
-            {
-                ++stats.num_non_influencing_defect_positions;
-            }
-        }
+                if (std::get<0>(status) == defect_influence_status::INFLUENTIAL)
+                {
+                    ++stats.num_influencing_defect_positions;
+                }
+                else
+                {
+                    ++stats.num_non_influencing_defect_positions;
+                }
+            });
     }
+
     /**
      * Computes the Moore neighborhood of a given cell within the SiDB layout.
      * The Moore neighborhood consists of the eight cells surrounding the central cell

@@ -1,15 +1,15 @@
 import unittest
 
 from mnt.pyfiction import (
+    critical_temperature_domain,
     operational_domain,
     operational_status,
     parameter_point,
     sample_writing_mode,
     sweep_parameter,
-    temperature_operational_domain,
+    write_critical_temperature_domain_to_string,
     write_operational_domain_params,
     write_operational_domain_to_string,
-    write_temperature_operational_domain_to_string,
 )
 
 
@@ -69,7 +69,7 @@ class TestWriteOperationalDomain(unittest.TestCase):
         )
 
     def test_write_operational_domain_with_metric_values(self):
-        opdom = temperature_operational_domain()
+        opdom = critical_temperature_domain()
         opdom.dimensions = [sweep_parameter.EPSILON_R, sweep_parameter.LAMBDA_TF]
 
         # Adding metric values
@@ -79,7 +79,7 @@ class TestWriteOperationalDomain(unittest.TestCase):
         expected = "epsilon_r,lambda_tf,operational status,critical temperature\n0.1,0.2,1,50.3\n0.3,0.4,0,0"
 
         # Get the result from the function that returns a string
-        temperature_operational_domain_as_string = write_temperature_operational_domain_to_string(opdom)
+        temperature_operational_domain_as_string = write_critical_temperature_domain_to_string(opdom)
 
         self.assertEqual(
             sorted(temperature_operational_domain_as_string.strip().split("\n")), sorted(expected.strip().split("\n"))
@@ -91,7 +91,7 @@ class TestWriteOperationalDomain(unittest.TestCase):
         params.operational_tag = "operational"
         params.non_operational_tag = "non-operational"
 
-        temperature_operational_domain_custom_as_string = write_temperature_operational_domain_to_string(opdom, params)
+        temperature_operational_domain_custom_as_string = write_critical_temperature_domain_to_string(opdom, params)
 
         self.assertEqual(
             sorted(temperature_operational_domain_custom_as_string.strip().split("\n")),

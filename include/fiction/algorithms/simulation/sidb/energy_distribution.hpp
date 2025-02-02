@@ -26,7 +26,7 @@ using sidb_energy_distribution = std::map<double, uint64_t>;  // unit: (eV, unit
 /**
  * This function takes in a vector of `charge_distribution_surface` objects and returns a map containing the system
  * energy and the number of occurrences of that energy in the input vector. To compare two energy values for equality,
- * the comparison uses a tolerance specified by `physical_constants::SCALED_EPSILON`.
+ * the comparison uses a tolerance specified by `constants::ERROR_MARGIN`.
  *
  * @tparam Lyt SiDB cell-level layout type.
  * @param input_vec A vector of `charge_distribution_surface` objects for which statistics are to be computed.

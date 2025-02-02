@@ -101,6 +101,11 @@ from .pyfiction import (  # type: ignore[import-not-found]
     create_xor_tt,
     ## properties
     critical_path_length_and_throughput,
+    critical_temperature_domain,
+    critical_temperature_domain_contour_tracing,
+    critical_temperature_domain_flood_fill,
+    critical_temperature_domain_grid_search,
+    critical_temperature_domain_random_sampling,
     critical_temperature_gate_based,
     critical_temperature_non_gate_based,
     critical_temperature_params,
@@ -287,7 +292,6 @@ from .pyfiction import (  # type: ignore[import-not-found]
     technology_mapping_stats,
     # Networks
     technology_network,
-    temperature_operational_domain,
     time_to_solution,
     time_to_solution_for_given_simulation_results,
     time_to_solution_params,
@@ -305,6 +309,8 @@ from .pyfiction import (  # type: ignore[import-not-found]
     wiring_reduction,
     wiring_reduction_params,
     wiring_reduction_stats,
+    write_critical_temperature_domain,
+    write_critical_temperature_domain_to_string,
     write_dot_layout,
     write_dot_network,
     write_fgl_layout,
@@ -324,7 +330,6 @@ from .pyfiction import (  # type: ignore[import-not-found]
     write_sidb_layout_svg_to_string,
     write_sqd_layout,
     write_sqd_sim_result,
-    write_temperature_operational_domain_to_string,
     yen_k_shortest_paths,
     yen_k_shortest_paths_params,
 )
@@ -411,6 +416,11 @@ __all__ = [
     "create_xor_tt",
     ## properties
     "critical_path_length_and_throughput",
+    "critical_temperature_domain",
+    "critical_temperature_domain_contour_tracing",
+    "critical_temperature_domain_flood_fill",
+    "critical_temperature_domain_grid_search",
+    "critical_temperature_domain_random_sampling",
     "critical_temperature_gate_based",
     "critical_temperature_non_gate_based",
     "critical_temperature_params",
@@ -597,7 +607,6 @@ __all__ = [
     "technology_mapping_stats",
     # Networks
     "technology_network",
-    "temperature_operational_domain",
     "time_to_solution",
     "time_to_solution_for_given_simulation_results",
     "time_to_solution_params",
@@ -615,6 +624,8 @@ __all__ = [
     "wiring_reduction",
     "wiring_reduction_params",
     "wiring_reduction_stats",
+    "write_critical_temperature_domain",
+    "write_critical_temperature_domain_to_string",
     "write_dot_layout",
     "write_dot_network",
     "write_fgl_layout",
@@ -634,7 +645,6 @@ __all__ = [
     "write_sidb_layout_svg_to_string",
     "write_sqd_layout",
     "write_sqd_sim_result",
-    "write_temperature_operational_domain_to_string",
     "yen_k_shortest_paths",
     "yen_k_shortest_paths_params",
 ]

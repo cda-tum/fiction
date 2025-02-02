@@ -60,15 +60,15 @@ TEST_CASE("Determine physical parameters for CDS of SiQAD Y-shaped AND gate, 10 
         cds.update_after_charge_change();
 
         const auto valid_parameters = physically_valid_parameters(cds, op_domain_params);
-        CHECK(valid_parameters.get_domain().size() == 43);
+        CHECK(valid_parameters.number_of_values() == 43);
 
         op_domain_params.operational_params.sim_engine = sidb_simulation_engine::EXGS;
         const auto valid_parameters_exgs               = physically_valid_parameters(cds, op_domain_params);
-        CHECK(valid_parameters_exgs.get_domain().size() == 43);
+        CHECK(valid_parameters_exgs.number_of_values() == 43);
 
         op_domain_params.operational_params.sim_engine = sidb_simulation_engine::QUICKSIM;
         const auto valid_parameters_quicksim           = physically_valid_parameters(cds, op_domain_params);
-        CHECK(valid_parameters_quicksim.get_domain().size() == 43);
+        CHECK(valid_parameters_quicksim.number_of_values() == 43);
     }
 
     SECTION("Using the 2nd excited charge distribution for default physical parameters as given CDS")
@@ -84,7 +84,7 @@ TEST_CASE("Determine physical parameters for CDS of SiQAD Y-shaped AND gate, 10 
         cds.update_after_charge_change();
 
         const auto valid_parameters = physically_valid_parameters(cds, op_domain_params);
-        CHECK(valid_parameters.get_domain().size() == 98);
+        CHECK(valid_parameters.number_of_values() == 98);
 
         const auto p1 = valid_parameters.get_value(parameter_point{{5.9, 5.5}});
         REQUIRE(p1.has_value());
@@ -158,7 +158,7 @@ TEST_CASE(
         cds.update_after_charge_change();
 
         const auto valid_parameters = physically_valid_parameters(cds, op_domain_params);
-        REQUIRE(valid_parameters.get_domain().size() == 100);
+        REQUIRE(valid_parameters.number_of_values() == 100);
 
         const auto p1 = valid_parameters.get_value(parameter_point{{5.6, 5.0}});
         REQUIRE(p1.has_value());
@@ -216,7 +216,7 @@ TEST_CASE(
         cds.update_after_charge_change();
 
         const auto valid_parameters = physically_valid_parameters(cds, op_domain_params);
-        REQUIRE(valid_parameters.get_domain().size() == 27);
+        REQUIRE(valid_parameters.number_of_values() == 27);
         const auto p1 = valid_parameters.get_value(parameter_point{{5.6, 5.0, -0.32}});
         REQUIRE(p1.has_value());
         CHECK(std::get<0>(p1.value()) == 0);
