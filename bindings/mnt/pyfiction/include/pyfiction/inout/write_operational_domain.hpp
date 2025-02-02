@@ -59,7 +59,7 @@ inline void write_critical_temperature_domain(pybind11::module& m)
 
     // Define function using function pointer
     m.def("write_critical_temperature_domain", write_critical_temperature_domain_pointer, py::arg("opdom"),
-          py::arg("filename"), py::arg("params"), DOC(fiction_write_critical_temperature_domain));
+          py::arg("filename"), py::arg("params"));
 
     m.def(
         "write_critical_temperature_domain_to_string",
