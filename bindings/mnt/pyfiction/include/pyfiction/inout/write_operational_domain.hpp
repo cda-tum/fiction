@@ -45,15 +45,12 @@ inline void write_operational_domain(pybind11::module& m)
             fiction::write_operational_domain(opdom, oss, params);
             return oss.str();
         },
-        py::arg("opdom"), py::arg("params") = fiction::write_operational_domain_params{},
-        "Writes the operational domain to a CSV string.");
+        py::arg("opdom"), py::arg("params") = fiction::write_operational_domain_params{});
 }
 
 inline void write_critical_temperature_domain(pybind11::module& m)
 {
     namespace py = pybind11;
-
-    // todo update docu
 
     // Function pointer for writing to a file
     void (*write_critical_temperature_domain_pointer)(
@@ -62,7 +59,7 @@ inline void write_critical_temperature_domain(pybind11::module& m)
 
     // Define function using function pointer
     m.def("write_critical_temperature_domain", write_critical_temperature_domain_pointer, py::arg("opdom"),
-          py::arg("filename"), py::arg("params"));
+          py::arg("filename"), py::arg("params"), DOC(fiction_write_critical_temperature_domain));
 
     m.def(
         "write_critical_temperature_domain_to_string",
