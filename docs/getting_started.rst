@@ -296,6 +296,18 @@ attempts, or performance of the resulting binaries:
 * ``-DFICTION_ENABLE_SANITIZER_UNDEFINED=ON``: Enable the undefined behavior sanitizer to detect undefined behavior.
 * ``-DFICTION_ENABLE_SANITIZER_THREAD=ON``: Enable the thread sanitizer to detect multithreading-related problems.
 * ``-DFICTION_ENABLE_SANITIZER_MEMORY=ON``: Enable the memory sanitizer to detect uninitialized reads.
+* ``-DFICTION_ENABLE_JEMALLOC=ON``: Enable the usage of jemalloc by Jason Evans to speed up ``malloc`` in parallelized processes.
+
+Usage of jemalloc
+#################
+
+While enabling jemalloc through the above CMake is not beneficial to every application (and may add runtime due to overhead), it can bring significant runtime improvements to some applications. In particular, it is recommended to use jemalloc for parallelized applications in which allocations are predominantly non-ephemeral.
+
+.. note::
+   Windows users need to install jemalloc manually. It can be done by following `these steps <https://github.com/jemalloc/jemalloc/blob/dev/INSTALL.md#building-for-windows>`_.
+
+.. note::
+   Usage of jemalloc in *fiction* is not tested on macOS with the g++ compiler.
 
 Uninstall
 ---------
