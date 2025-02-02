@@ -102,7 +102,7 @@ inline void operational_domain(pybind11::module& m)
     py::class_<fiction::critical_temperature_domain>(m, "critical_temperature_domain", DOC(fiction_operational_domain))
         .def(py::init<>())
         .def_readwrite("dimensions", &fiction::critical_temperature_domain::dimensions,
-                       DOC(fiction_temperature_operational_domain_dimensions))
+                       DOC(fiction_critical_temperature_domain_dimensions))
         .def("get_value", &fiction::critical_temperature_domain::get_value, py::arg("point"))
         .def("add_value", &fiction::critical_temperature_domain::add_value, py::arg("key"), py::arg("value"))
         .def("number_of_values", &fiction::critical_temperature_domain::number_of_values)
