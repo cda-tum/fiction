@@ -1110,7 +1110,7 @@ TEMPLATE_TEST_CASE("QuickSim AND gate simulation on the Si-111 surface", "[quick
     SECTION("timeout with 100 ms")
     {
         auto                  lyt = blueprints::and_gate_111<TestType>();
-        const quicksim_params params{sidb_simulation_parameters{2, -0.32, 5.6, 5}, 3000, 0.5, 1, 100};
+        const quicksim_params params{sidb_simulation_parameters{2, -0.32, 5.6, 5}, 300000, 0.5, 1, 100};
         const auto            simulation_results_timeout_100 = quicksim<TestType>(lyt, params);
 
         check_for_absence_of_positive_charges(simulation_results_timeout_100);
