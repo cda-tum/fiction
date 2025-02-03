@@ -18216,8 +18216,7 @@ Parameter ``lyt``:
     The layout to simulate.
 
 Parameter ``ps``:
-    Physical parameters. They are material-specific and may vary from
-    experiment to experiment.
+    QuickSim parameters.
 
 Returns:
     sidb_simulation_result is returned with all results.)doc";
