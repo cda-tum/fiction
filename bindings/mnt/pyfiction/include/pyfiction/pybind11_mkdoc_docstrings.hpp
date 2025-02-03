@@ -318,21 +318,6 @@ Returns:
     `true` if the layouts are identical, `false` otherwise.)doc";
 
 static const char *__doc_fiction_area =
-R"doc(Computes the area of a given coordinate assuming its origin is (0, 0,
-0). Calculates :math:`(|x| + 1) \cdot (|y| + 1)` by default. The
-exception is SiQAD coordinates, for which it computes :math:`(|x| + 1)
-\cdot (2 \cdot |y| + |z| + 1)`.
-
-Template parameter ``CoordinateType``:
-    Coordinate type.
-
-Parameter ``coord``:
-    Coordinate.
-
-Returns:
-    Area of coord.)doc";
-
-static const char *__doc_fiction_area_2 =
 R"doc(Computes real-world area requirements in nm² of a given cell-level
 layout. For this purpose, each cell position in the layout is assigned
 a vertical and horizontal size. Additionally, a spacing between cell
@@ -356,7 +341,7 @@ Parameter ``pst``:
 Returns:
     Area requirements in nm².)doc";
 
-static const char *__doc_fiction_area_3 =
+static const char *__doc_fiction_area_2 =
 R"doc(Computes real-world area requirements in nm² of the bounding box of a
 given cell-level layout. For this purpose, each cell position in the
 layout is assigned a vertical and horizontal size. Additionally, a
@@ -400,34 +385,92 @@ static const char *__doc_fiction_area_stats_report = R"doc()doc";
 static const char *__doc_fiction_aspect_ratio =
 R"doc(Struct representing the aspect ratio of the cartesian layout.
 
-The `aspect_ratio` struct defines the starting and ending coordinates,
+The `aspect_ratio` struct defines the minimum and maximum coordinates,
 effectively determining the size and position of the layout within a
 coordinate space.)doc";
 
+static const char *__doc_fiction_aspect_ratio_area =
+R"doc(Computes the area of a given coordinate assuming its origin is (0, 0,
+0). Calculates :math:`(|x| + 1) \cdot (|y| + 1)` by default. The
+exception is SiQAD coordinates, for which it computes :math:`(|x| + 1)
+\cdot (2 \cdot |y| + |z| + 1)`.
+
+Template parameter ``CoordinateType``:
+    Coordinate type.
+
+Parameter ``coord``:
+    Coordinate.
+
+Returns:
+    Area of coord.)doc";
+
 static const char *__doc_fiction_aspect_ratio_aspect_ratio =
-R"doc(Default constructor. Initializes both start and end to (0, 0, 0).
+R"doc(Default constructor. Initializes both minimum and maximum to (0, 0,
+0).
 
 This creates a layout with a single point at the origin.)doc";
 
 static const char *__doc_fiction_aspect_ratio_aspect_ratio_2 =
 R"doc(Constructs an aspect_ratio from a single end coordinate.
 
-The start coordinate is initialized to (0, 0, 0), and the end
+The minimium coordinate is initialized to (0, 0, 0), and the maximum
 coordinate is set to `e`.
 
 Parameter ``e``:
-    The ending coordinate defining the layout's size.)doc";
+    The maximum coordinate defining the layout's size.)doc";
 
 static const char *__doc_fiction_aspect_ratio_aspect_ratio_3 =
 R"doc(Constructs an aspect_ratio from specified start and end coordinates.
 
-Parameter ``s``:
-    The starting coordinate of the layout.
+Parameter ``mi``:
+    The minimum coordinate of the layout.
 
-Parameter ``e``:
-    The ending coordinate of the layout.)doc";
+Parameter ``ma``:
+    The maximum coordinate of the layout.)doc";
 
-static const char *__doc_fiction_aspect_ratio_end = R"doc()doc";
+static const char *__doc_fiction_aspect_ratio_aspect_ratio_4 =
+R"doc(Templated constructor for initializing aspect_ratio with three
+integral coordinates.
+
+Initializes the minimum coordinate to (0, 0, 0) and sets the maximum
+coordinate to (x, y, z).
+
+Template parameter ``X``:
+    Type of the x-coordinate. Must be integral.
+
+Template parameter ``Y``:
+    Type of the y-coordinate. Must be integral.
+
+Template parameter ``Z``:
+    Type of the z-coordinate. Must be integral.
+
+Parameter ``x``:
+    The x-coordinate value.
+
+Parameter ``y``:
+    The y-coordinate value.
+
+Parameter ``z``:
+    The z-coordinate value.)doc";
+
+static const char *__doc_fiction_aspect_ratio_aspect_ratio_5 =
+R"doc(Templated constructor for initializing aspect_ratio with two integral
+coordinates.
+
+Initializes the start coordinate to (0, 0, 0) and sets the end
+coordinate to (x, y, 0).
+
+Template parameter ``X``:
+    Type of the x-coordinate. Must be integral.
+
+Template parameter ``Y``:
+    Type of the y-coordinate. Must be integral.
+
+Parameter ``x``:
+    The x-coordinate value.
+
+Parameter ``y``:
+    The y-coordinate value.)doc";
 
 static const char *__doc_fiction_aspect_ratio_iterator =
 R"doc(An iterator type that iterates over increasingly larger 2D aspect
@@ -508,7 +551,67 @@ static const char *__doc_fiction_aspect_ratio_iterator_operator_ne = R"doc()doc"
 
 static const char *__doc_fiction_aspect_ratio_iterator_operator_ne_2 = R"doc()doc";
 
-static const char *__doc_fiction_aspect_ratio_start = R"doc()doc";
+static const char *__doc_fiction_aspect_ratio_max = R"doc()doc";
+
+static const char *__doc_fiction_aspect_ratio_min = R"doc()doc";
+
+static const char *__doc_fiction_aspect_ratio_operator_eq =
+R"doc(Equality operator for `aspect_ratio`.
+
+Compares two `aspect_ratio` instances for equality based on their max
+coordinates.
+
+Parameter ``other``:
+    The other aspect_ratio instance to compare against.
+
+Returns:
+    `true` if both aspect_ratios have the same max coordinates;
+    `false` otherwise.)doc";
+
+static const char *__doc_fiction_aspect_ratio_volume =
+R"doc(Computes the volume of a given coordinate assuming its origin is (0,
+0, 0). Calculates :math:`(|x| + 1) \cdot (|y| + 1) \cdot (|z| + 1)` by
+default. For SiQAD coordinates, which are planar by definition, the
+area is returned.
+
+Template parameter ``CoordinateType``:
+    Coordinate type.
+
+Parameter ``coord``:
+    Coordinate.
+
+Returns:
+    Volume of coord.)doc";
+
+static const char *__doc_fiction_aspect_ratio_x = R"doc()doc";
+
+static const char *__doc_fiction_aspect_ratio_x_max = R"doc()doc";
+
+static const char *__doc_fiction_aspect_ratio_x_min =
+R"doc(Gets the x-coordinate of the maximum coordinate.
+
+Returns:
+    The x-coordinate value.)doc";
+
+static const char *__doc_fiction_aspect_ratio_y = R"doc()doc";
+
+static const char *__doc_fiction_aspect_ratio_y_max = R"doc()doc";
+
+static const char *__doc_fiction_aspect_ratio_y_min =
+R"doc(Gets the y-coordinate of the maximum position.
+
+Returns:
+    The y-coordinate value.)doc";
+
+static const char *__doc_fiction_aspect_ratio_z = R"doc()doc";
+
+static const char *__doc_fiction_aspect_ratio_z_max = R"doc()doc";
+
+static const char *__doc_fiction_aspect_ratio_z_min =
+R"doc(Gets the z-coordinate of the maximum position.
+
+Returns:
+    The z-coordinate value.)doc";
 
 static const char *__doc_fiction_bancs_clocking =
 R"doc(Returns the BANCS clocking as defined in \"BANCS: Bidirectional
@@ -1428,7 +1531,7 @@ static const char *__doc_fiction_cartesian_layout_cartesian_layout_2 =
 R"doc(Constructs a cartesian_layout from an aspect_ratio.
 
 This constructor initializes the layout's dimensions based on the
-provided aspect_ratio, and sets the origin to the start coordinate of
+provided aspect_ratio, and sets the origin to the min coordinate of
 the aspect_ratio.
 
 Parameter ``ar``:
@@ -1446,6 +1549,8 @@ R"doc(Struct representing the storage for a cartesian_layout.
 The `cartesian_layout_storage` struct holds the dimensions and origin
 of the layout.)doc";
 
+static const char *__doc_fiction_cartesian_layout_cartesian_layout_storage_ar = R"doc()doc";
+
 static const char *__doc_fiction_cartesian_layout_cartesian_layout_storage_cartesian_layout_storage =
 R"doc(Constructs a cartesian_layout_storage with specified dimensions and
 origin.
@@ -1455,10 +1560,6 @@ Parameter ``dim``:
 
 Parameter ``org``:
     The origin coordinate. Defaults to (0, 0, 0).)doc";
-
-static const char *__doc_fiction_cartesian_layout_cartesian_layout_storage_dimension = R"doc()doc";
-
-static const char *__doc_fiction_cartesian_layout_cartesian_layout_storage_origin = R"doc()doc";
 
 static const char *__doc_fiction_cartesian_layout_clone =
 R"doc(Clones the layout returning a deep copy.
@@ -1927,9 +2028,9 @@ static const char *__doc_fiction_cartesian_layout_resize_2 =
 R"doc(Overloaded resize method to accept a coordinate.
 
 This method resizes the layout by creating an aspect_ratio from the
-provided end coordinate, with the origin remaining unchanged.
+provided max coordinate, with the origin remaining unchanged.
 
-Parameter ``end_coord``:
+Parameter ``max``:
     The new end coordinate defining the layout's size.)doc";
 
 static const char *__doc_fiction_cartesian_layout_south =
@@ -2010,7 +2111,15 @@ that still belongs to the layout.
 Returns:
     x-dimension.)doc";
 
-static const char *__doc_fiction_cartesian_layout_x_org =
+static const char *__doc_fiction_cartesian_layout_x_max =
+R"doc(Returns the layout's x-org coordinate.
+
+The x-org coordinate represents the origin's x-value in the layout.
+
+Returns:
+    The x-start coordinate of the layout.)doc";
+
+static const char *__doc_fiction_cartesian_layout_x_min =
 R"doc(Returns the layout's x-org coordinate.
 
 The x-org coordinate represents the origin's x-value in the layout.
@@ -2025,7 +2134,15 @@ that still belongs to the layout.
 Returns:
     y-dimension.)doc";
 
-static const char *__doc_fiction_cartesian_layout_y_org =
+static const char *__doc_fiction_cartesian_layout_y_max =
+R"doc(Returns the layout's y-org coordinate.
+
+The y-org coordinate represents the origin's y-value in the layout.
+
+Returns:
+    The y-org coordinate of the layout.)doc";
+
+static const char *__doc_fiction_cartesian_layout_y_min =
 R"doc(Returns the layout's y-org coordinate.
 
 The y-org coordinate represents the origin's y-value in the layout.
@@ -2040,7 +2157,15 @@ that still belongs to the layout.
 Returns:
     z-dimension.)doc";
 
-static const char *__doc_fiction_cartesian_layout_z_orgt =
+static const char *__doc_fiction_cartesian_layout_z_max =
+R"doc(Returns the layout's z-org coordinate.
+
+The z-org coordinate represents the origin's z-value in the layout.
+
+Returns:
+    The z-org coordinate of the layout.)doc";
+
+static const char *__doc_fiction_cartesian_layout_z_min =
 R"doc(Returns the layout's z-org coordinate.
 
 The z-org coordinate represents the origin's z-value in the layout.
@@ -19455,21 +19580,6 @@ static const char *__doc_fiction_vertical_shift_cartesian =
 R"doc(\verbatim +-------+ | | | +-------+ | | | +-------+ | | | +-------+
 \endverbatim)doc";
 
-static const char *__doc_fiction_volume =
-R"doc(Computes the volume of a given coordinate assuming its origin is (0,
-0, 0). Calculates :math:`(|x| + 1) \cdot (|y| + 1) \cdot (|z| + 1)` by
-default. For SiQAD coordinates, which are planar by definition, the
-area is returned.
-
-Template parameter ``CoordinateType``:
-    Coordinate type.
-
-Parameter ``coord``:
-    Coordinate.
-
-Returns:
-    Volume of coord.)doc";
-
 static const char *__doc_fiction_wiring_reduction =
 R"doc(A scalable wiring reduction algorithm for 2DDWave-clocked layouts
 based on A* path finding.
@@ -20215,9 +20325,9 @@ static const char *__doc_fmt_formatter_parse = R"doc()doc";
 
 static const char *__doc_fmt_formatter_parse_2 = R"doc()doc";
 
-static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_layouts_coordinates_hpp_1240_8 = R"doc()doc";
+static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_layouts_coordinates_hpp_1268_8 = R"doc()doc";
 
-static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_layouts_coordinates_hpp_1256_8 = R"doc()doc";
+static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_layouts_coordinates_hpp_1284_8 = R"doc()doc";
 
 static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_technology_cell_ports_hpp_291_8 = R"doc()doc";
 
