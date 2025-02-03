@@ -168,3 +168,26 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     # Status update
     message(STATUS "Parallel STL algorithms are enabled on MSVC by default")
 endif ()
+
+# Enable jemalloc to be linked
+option(FICTION_ENABLE_JEMALLOC "Automatically download and link jemalloc by Jason Evans.")
+if (FICTION_ENABLE_JEMALLOC)
+    message(STATUS "jemalloc will override the standard malloc implementation globally. Note that your program may run slower when jemalloc is used!")
+    # On Windows, jemalloc needs to be installed manually
+    if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+        message(STATUS "Automatic downloading and linking of jemalloc is not supported on Windows. Make sure that it is installed on your system!")
+        find_package(jemalloc CONFIG REQUIRED)
+        target_link_libraries(libfiction INTERFACE jemalloc)
+    else ()
+        # On Unix-like operating systems, jemalloc can be downloaded, built and linked automatically
+        include(${PROJECT_SOURCE_DIR}/cmake/FetchJemalloc.cmake)
+        if (APPLE)
+            target_link_system_libraries(libfiction INTERFACE jemalloc c++ dl pthread m)
+        elseif (UNIX)
+            target_link_system_libraries(libfiction INTERFACE jemalloc stdc++ dl pthread m)
+        else ()
+            message(FATAL_ERROR "Unsupported environment")
+        endif ()
+        target_include_directories(libfiction SYSTEM INTERFACE jemalloc)
+    endif ()
+endif ()
