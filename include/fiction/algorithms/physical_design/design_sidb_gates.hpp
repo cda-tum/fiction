@@ -125,7 +125,6 @@ struct design_sidb_gates_params
      */
     post_design_mode post_design_process = post_design_mode::DO_NOTHING;
 };
-
 /**
  * Statistics for the design of SiDB gates.
  */
@@ -188,11 +187,11 @@ class design_sidb_gates_impl
      * @param ps Parameters and settings for the gate designer.
      * @param st Statistics for the gate design process.
      */
-    design_sidb_gates_impl(const Lyt& skeleton, const std::vector<TT>& spec, design_sidb_gates_params<cell<Lyt>>&& ps,
+    design_sidb_gates_impl(const Lyt& skeleton, const std::vector<TT>& spec, design_sidb_gates_params<cell<Lyt>> ps,
                            design_sidb_gates_stats& st) :
             skeleton_layout{skeleton},
             truth_table{spec},
-            params{set_simulation_results_retention_accordingly(std::move(ps))},
+            params{ps},
             all_sidbs_in_canvas{all_coordinates_in_spanned_area(params.canvas.first, params.canvas.second)},
             stats{st},
             input_bdl_wires{detect_bdl_wires(skeleton_layout,
@@ -207,8 +206,9 @@ class design_sidb_gates_impl
     {
         stats.number_of_layouts = all_canvas_layouts.size();
         stats.sim_engine        = params.operational_params.sim_engine;
-    }
 
+        set_simulation_results_retention_accordingly();
+    }
     /**
      * Design gates by using the *Automatic Exhaustive Gate Desginer*. This algorithm was proposed in \"Minimal
      * Design of SiDB Gates: An Optimal Basis for Circuits Based on Silicon Dangling Bonds\" by J. Drewniok, M. Walter,
@@ -418,7 +418,6 @@ class design_sidb_gates_impl
 
         return randomly_designed_gate_layouts;
     }
-
     /**
      * Design Standard Cells/gates by using the *QuickCell* algorithm.
      *
@@ -808,31 +807,18 @@ class design_sidb_gates_impl
 
         return lyt;
     }
-
     /**
      * This function makes sure that the underlying parameters for `is_operational` allow simulation results to be used
      * when the given parameter set indicates the use for it.
-     *
-     * @param params Parameters and settings for the gate designer.
-     * @return Parameters and settings for the gate designer for which the simulation results retention of the
-     * underlying parameter for operational status assessment is set accordingly.
      */
-    [[nodiscard]] static design_sidb_gates_params<cell<Lyt>>
-    set_simulation_results_retention_accordingly(const design_sidb_gates_params<cell<Lyt>>& params) noexcept
+    void set_simulation_results_retention_accordingly() noexcept
     {
-        design_sidb_gates_params<cell<Lyt>> ps{params};
-
-        if (params.post_design_process == design_sidb_gates_params<cell<Lyt>>::post_design_mode::DO_NOTHING)
+        if (params.post_design_process != design_sidb_gates_params<cell<Lyt>>::post_design_mode::DO_NOTHING)
         {
-            return ps;
+            params.operational_params.simulation_results_retention =
+                is_operational_params::simulation_results_mode::KEEP_SIMULATION_RESULTS;
         }
-
-        ps.operational_params.simulation_results_retention =
-            is_operational_params::simulation_results_mode::KEEP_SIMULATION_RESULTS;
-
-        return ps;
     }
-
     /**
      * Performs a sorting operation on the designed gate layouts, putting those in front for which the energetic gap
      * between the ground state and the first excited state is larger. For each designed gate layout, the minimum
