@@ -128,25 +128,6 @@ inline void is_operational(pybind11::module& m)
                fiction::is_operational_params::simulation_results_mode::DISCARD_SIMULATION_RESULTS,
                DOC(fiction_is_operational_params_simulation_results_mode_DISCARD_SIMULATION_RESULTS));
 
-    py::enum_<fiction::is_operational_params::operational_analysis_strategy>(
-        m, "operational_analysis_strategy", DOC(fiction_is_operational_params_operational_analysis_strategy))
-        .value("SIMULATION_ONLY", fiction::is_operational_params::operational_analysis_strategy::SIMULATION_ONLY,
-               DOC(fiction_is_operational_params_operational_analysis_strategy_SIMULATION_ONLY))
-        .value("FILTER_ONLY", fiction::is_operational_params::operational_analysis_strategy::FILTER_ONLY,
-               DOC(fiction_is_operational_params_operational_analysis_strategy_FILTER_ONLY))
-        .value("FILTER_THEN_SIMULATION",
-               fiction::is_operational_params::operational_analysis_strategy::FILTER_THEN_SIMULATION,
-               DOC(fiction_is_operational_params_operational_analysis_strategy_FILTER_THEN_SIMULATION));
-
-    py::enum_<fiction::is_operational_params::simulation_results_mode>(
-        m, "simulation_results_mode", DOC(fiction_is_operational_params_simulation_results_mode))
-        .value("KEEP_SIMULATION_RESULTS",
-               fiction::is_operational_params::simulation_results_mode::KEEP_SIMULATION_RESULTS,
-               DOC(fiction_is_operational_params_simulation_results_mode_KEEP_SIMULATION_RESULTS))
-        .value("DISCARD_SIMULATION_RESULTS",
-               fiction::is_operational_params::simulation_results_mode::DISCARD_SIMULATION_RESULTS,
-               DOC(fiction_is_operational_params_simulation_results_mode_DISCARD_SIMULATION_RESULTS));
-
     py::class_<fiction::is_operational_params>(m, "is_operational_params", DOC(fiction_is_operational_params))
         .def(py::init<>())
         .def_readwrite("simulation_parameters", &fiction::is_operational_params::simulation_parameters,
