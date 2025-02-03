@@ -8,15 +8,13 @@
 #include "fiction/technology/constants.hpp"
 
 #include <algorithm>
-#include <optional>
-#include <tuple>
 
 namespace fiction
 {
 
 /**
  * This function searches for a floating-point value specified by the `key` in the provided map `map`, applying a
- * tolerance specified by `fiction::physical_constants::SCALED_EPSILON`. Each key in the map is compared to the
+ * tolerance specified by `fiction::physical_constants::ERROR_MARGIN`. Each key in the map is compared to the
  * specified key within this tolerance.
  *
  * @tparam MapType The type of the map containing parameter points as keys.

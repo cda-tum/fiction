@@ -73,7 +73,7 @@ class sidb_simulation_domain
     /**
      * Counts the number of key-value pairs in the operational domain.
      *
-     * @param key The key to remove from the domain.
+     * @return The number of key-value pairs in the domain.
      */
     [[nodiscard]] std::size_t number_of_values() const
     {
@@ -83,6 +83,10 @@ class sidb_simulation_domain
      * Iterates over all key-value pairs in the operational domain and applies a provided callback function
      * to each pair. This method ensures thread-safe access to the underlying data by leveraging the
      * `for_each` method of the thread-safe `locked_parallel_flat_hash_map`.
+     *
+     * @param callback A callable object (e.g., lambda, function pointer) that accepts two arguments:
+     *                 the key (`const Key&`) and the associated tuple of mapped values
+     *                 (`const std::tuple<MappedTypes...>&`).
      */
     void for_each(const std::function<void(const Key&, const std::tuple<MappedTypes...>&)>& callback) const
     {
@@ -96,7 +100,6 @@ class sidb_simulation_domain
      * This function utilizes the `if_contains` method of the map to ensure thread-safe access.
      *
      * @tparam MapType The type of the map, which must provide the `if_contains` method.
-     * @param map The map in which to search for the specified key.
      * @param key The key to search for in the map.
      * @return An `std::optional` containing the value associated with the key if it exists, `std::optional` otherwise.
      */

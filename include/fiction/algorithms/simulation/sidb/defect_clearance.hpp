@@ -61,7 +61,7 @@ calculate_defect_clearance(const Lyt& lyt, const defect_influence_domain<Lyt>& d
             cell<Lyt> min_distance_position = {};
 
             lyt.foreach_cell(
-                [&val, &defect_pos, &min_distance, &min_distance_position, &lyt](const auto& c)
+                [&defect_pos, &min_distance, &min_distance_position, &lyt](const auto& c)
                 {
                     if (sidb_nm_distance<Lyt>(lyt, c, defect_pos) < min_distance)
                     {
