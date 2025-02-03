@@ -5754,15 +5754,7 @@ Returns:
 static const char *__doc_fiction_detail_design_sidb_gates_impl_set_simulation_results_retention_accordingly =
 R"doc(This function makes sure that the underlying parameters for
 `is_operational` allow simulation results to be used when the given
-parameter set indicates the use for it.
-
-Parameter ``params``:
-    Parameters and settings for the gate designer.
-
-Returns:
-    Parameters and settings for the gate designer for which the
-    simulation results retention of the underlying parameter for
-    operational status assessment is set accordingly.)doc";
+parameter set indicates the use for it.)doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_skeleton_layout =
 R"doc(The skeleton layout serves as a starting layout to which SiDBs are
