@@ -668,9 +668,10 @@ class operational_domain_impl
         // Cartesian product of all step point indices
         const auto all_index_combinations = cartesian_combinations(indices);
 
-        // calculate the size of each slice
+        // number of threads
         const auto num_threads = std::min(number_of_threads, all_index_combinations.size());
 
+        // calculate the size of each slice
         const auto slice_size = (all_index_combinations.size() + num_threads - 1) / num_threads;
 
         std::vector<std::thread> threads{};
