@@ -4320,6 +4320,20 @@ static const char *__doc_fiction_design_sidb_gates_params_number_of_sidbs = R"do
 
 static const char *__doc_fiction_design_sidb_gates_params_operational_params = R"doc(Parameters for the `is_operational` function.)doc";
 
+static const char *__doc_fiction_design_sidb_gates_params_post_design_mode = R"doc(Selector for the available post-design processes.)doc";
+
+static const char *__doc_fiction_design_sidb_gates_params_post_design_mode_DO_NOTHING = R"doc(No post-design operation is performed.)doc";
+
+static const char *__doc_fiction_design_sidb_gates_params_post_design_mode_PREFER_ENERGETICALLY_ISOLATED_GROUND_STATES =
+R"doc(The designed gates are sorted by how energetically isolated the ground
+state is from the first excited state.)doc";
+
+static const char *__doc_fiction_design_sidb_gates_params_post_design_process =
+R"doc(After the design process, the returned gates are not sorted.
+
+@note This parameter has no effect unless the gate design is
+exhaustive and all combinations are enumerated.)doc";
+
 static const char *__doc_fiction_design_sidb_gates_params_termination_cond =
 R"doc(The design process is terminated after a valid SiDB gate design is
 found.
@@ -5737,6 +5751,19 @@ parameters. The design process is parallelized to improve performance.
 Returns:
     A vector of designed SiDB gate layouts.)doc";
 
+static const char *__doc_fiction_detail_design_sidb_gates_impl_set_simulation_results_retention_accordingly =
+R"doc(This function makes sure that the underlying parameters for
+`is_operational` allow simulation results to be used when the given
+parameter set indicates the use for it.
+
+Parameter ``params``:
+    Parameters and settings for the gate designer.
+
+Returns:
+    Parameters and settings for the gate designer for which the
+    simulation results retention of the underlying parameter for
+    operational status assessment is set accordingly.)doc";
+
 static const char *__doc_fiction_detail_design_sidb_gates_impl_skeleton_layout =
 R"doc(The skeleton layout serves as a starting layout to which SiDBs are
 added to create unique SiDB layouts and, if possible, working gates.
@@ -5752,6 +5779,21 @@ Parameter ``cell_indices``:
 Returns:
     A copy of the original layout (`skeleton_layout`) with SiDB cells
     added at specified indices.)doc";
+
+static const char *__doc_fiction_detail_design_sidb_gates_impl_sort_designed_gate_layouts_by_ground_state_isolation =
+R"doc(Performs a sorting operation on the designed gate layouts, putting
+those in front for which the energetic gap between the ground state
+and the first excited state is larger. For each designed gate layout,
+the minimum energetic gap is taken over each input. When the minima
+are equal for two designed gate layouts, the average energetic gap
+over each input is taken as a tiebreaker.
+
+Parameter ``designed_gate_layouts``:
+    A vector of designed gate layouts to sort in place.
+
+Parameter ``sim_results_per_input_for_each_gate_design``:
+    The simulation results for each input of each designed gate
+    layout.)doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_stats = R"doc(The statistics of the gate design.)doc";
 
@@ -8135,11 +8177,12 @@ Parameter ``bdl``:
 Returns:
     `true` if `0` is encoded, `false` otherwise.)doc";
 
-static const char *__doc_fiction_detail_is_operational_impl_get_number_of_simulator_invocations =
-R"doc(Returns the total number of simulator invocations.
+static const char *__doc_fiction_detail_is_operational_impl_get_operational_status_assessment_stats =
+R"doc(Returns auxiliary results from the operational status assessment,
+including the number of simulator invocations.
 
 Returns:
-    The number of simulator invocations.)doc";
+    Auxiliary results from the operational status assessment.)doc";
 
 static const char *__doc_fiction_detail_is_operational_impl_input_bdl_wires = R"doc(Input BDL wires.)doc";
 
@@ -8338,7 +8381,9 @@ Parameter ``output_wire_index``:
     The index representing the current input pattern of the output
     wire.)doc";
 
-static const char *__doc_fiction_detail_is_operational_impl_simulator_invocations = R"doc(Number of simulator invocations.)doc";
+static const char *__doc_fiction_detail_is_operational_impl_stats =
+R"doc(Auxiliary results from the operational status assessment, including
+the number of simulator invocations.)doc";
 
 static const char *__doc_fiction_detail_is_operational_impl_truth_table = R"doc(The specification of the layout.)doc";
 
@@ -15500,9 +15545,9 @@ Parameter ``params``:
     Parameters for the `is_operational` algorithm.
 
 Returns:
-    A pair containing the operational status of the SiDB layout
-    (either `OPERATIONAL` or `NON_OPERATIONAL`) and the number of
-    input combinations tested.)doc";
+    A pair containing the operational status of the gate layout
+    (either `OPERATIONAL` or `NON_OPERATIONAL`) along with auxiliary
+    statistics.)doc";
 
 static const char *__doc_fiction_is_operational_2 =
 R"doc(Determine the operational status of an SiDB layout.
@@ -15538,9 +15583,9 @@ Parameter ``canvas_lyt``:
     Optional canvas layout.
 
 Returns:
-    A pair containing the operational status of the SiDB layout
-    (either `OPERATIONAL` or `NON_OPERATIONAL`) and the number of
-    input combinations tested.)doc";
+    A pair containing the operational status of the gate layout
+    (either `OPERATIONAL` or `NON_OPERATIONAL`) along with auxiliary
+    statistics.)doc";
 
 static const char *__doc_fiction_is_operational_params = R"doc(Parameters for the `is_operational` algorithm.)doc";
 
@@ -15603,6 +15648,20 @@ computation.)doc";
 static const char *__doc_fiction_is_operational_params_simulation_parameters =
 R"doc(The simulation parameters for the physical simulation of the ground
 state.)doc";
+
+static const char *__doc_fiction_is_operational_params_simulation_results_mode = R"doc(Selector for the different ways to handle obtained simulation results.)doc";
+
+static const char *__doc_fiction_is_operational_params_simulation_results_mode_DISCARD_SIMULATION_RESULTS =
+R"doc(The simulation results are discarded after the operational status was
+assessed.)doc";
+
+static const char *__doc_fiction_is_operational_params_simulation_results_mode_KEEP_SIMULATION_RESULTS =
+R"doc(The simulation results for each input pattern are returned for
+operational gates.)doc";
+
+static const char *__doc_fiction_is_operational_params_simulation_results_retention =
+R"doc(Simulation results that are used to certify the status `OPERATIONAL`
+are not kept by default.)doc";
 
 static const char *__doc_fiction_is_operational_params_strategy_to_analyze_operational_status =
 R"doc(Strategy to determine whether a layout is operational or non-
@@ -15884,7 +15943,7 @@ Template parameter ``InputIt``:
     Must meet the requirements of `LegacyInputIterator`.
 
 Parameter ``first``:
-    Begin of the range to examime.
+    Begin of the range to examine.
 
 Parameter ``last``:
     End of the range to examine.
@@ -15902,7 +15961,7 @@ Template parameter ``InputIt``:
     Must meet the requirements of `LegacyInputIterator`.
 
 Parameter ``first``:
-    Begin of the range to examime.
+    Begin of the range to examine.
 
 Parameter ``last``:
     End of the range to examine.
@@ -16802,42 +16861,25 @@ Parameter ``params``:
 Returns:
     The count of operational input combinations.)doc";
 
-static const char *__doc_fiction_operational_input_patterns_2 =
-R"doc(This function determines the input combinations for which the layout
-is operational.
-
-Template parameter ``Lyt``:
-    SiDB cell-level layout type.
-
-Template parameter ``TT``:
-    Type of the truth table.
-
-Parameter ``lyt``:
-    The SiDB layout.
-
-Parameter ``spec``:
-    Vector of truth table specifications.
-
-Parameter ``params``:
-    Parameters to simulate if a input combination is operational.
-
-Parameter ``input_bdl_wire``:
-    Optional BDL input wires of lyt.
-
-Parameter ``output_bdl_wire``:
-    Optional BDL output wires of lyt.
-
-Parameter ``canvas_lyt``:
-    Optional canvas layout.
-
-Returns:
-    The count of operational input combinations.)doc";
-
 static const char *__doc_fiction_operational_status = R"doc(Possible operational status of a layout.)doc";
 
 static const char *__doc_fiction_operational_status_NON_OPERATIONAL = R"doc(The layout is non-operational.)doc";
 
 static const char *__doc_fiction_operational_status_OPERATIONAL = R"doc(The layout is operational.)doc";
+
+static const char *__doc_fiction_operational_status_assessment_stats =
+R"doc(This struct is used to collect auxiliary results from the operational
+status assessment.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.)doc";
+
+static const char *__doc_fiction_operational_status_assessment_stats_simulation_results =
+R"doc(The charge distributions obtained for each input combination tested,
+sorted by the binary representation of the respectively associated
+input combinations.)doc";
+
+static const char *__doc_fiction_operational_status_assessment_stats_simulator_invocations = R"doc(The number of input combinations tested.)doc";
 
 static const char *__doc_fiction_orthogonal =
 R"doc(A scalable placement & routing approach based on orthogonal graph

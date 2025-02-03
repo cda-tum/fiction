@@ -444,7 +444,7 @@ class is_operational_impl
                 is_operational_params::operational_analysis_strategy::SIMULATION_ONLY &&
             parameters.strategy_to_analyze_operational_status !=
                 is_operational_params::operational_analysis_strategy::FILTER_THEN_SIMULATION &&
-           !canvas_lyt.is_empty())
+            !canvas_lyt.is_empty())
         {
             return {operational_status::OPERATIONAL, non_operationality_reason::NONE};
         }
