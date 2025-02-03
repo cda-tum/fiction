@@ -42,7 +42,7 @@ CheckOptions:
   - key: cppcoreguidelines-avoid-do-while.IgnoreMacros
     value: "true"
   - key: misc-include-cleaner.IgnoreHeaders
-    value: ".*/experiments.hpp;.*/fiction_experiments.hpp;.*/fmt/.*"
+    value: "cmake/try_z3.cpp;.*/experiments.hpp;.*/fiction_experiments.hpp;.*/fmt/.*"
   - key: readability-identifier-naming.NamespaceCase
     value: lower_case
   - key: readability-identifier-naming.ClassCase

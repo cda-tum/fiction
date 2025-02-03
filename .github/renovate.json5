@@ -1,0 +1,102 @@
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  extends: [
+    "config:recommended",
+    ":gitSignOff"
+  ],
+  prHourlyLimit: 10,
+  enabledManagers: [
+    "git-submodules",
+    "github-actions",
+    "pre-commit",
+    "pep621",
+    "pip_requirements",
+    "dockerfile",
+  ],
+  "git-submodules": {
+    "enabled": true
+  },
+  "pre-commit": {
+    enabled: true
+  },
+  lockFileMaintenance: {
+    "enabled": true
+    // "automerge": true, disabled due to endless update loops caused by setuptools_scm
+  },
+  configMigration: true,
+  schedule: [
+    "every weekend"
+  ],
+  packageRules: [
+    {
+      matchManagers: [
+        "git-submodules"
+      ],
+      addLabels: [
+        "dependencies",
+        "submodules"
+      ],
+      commitMessagePrefix: "⬆\uFE0F\uD83D\uDC68\u200D\uD83D\uDCBB",
+      "groupName": "Submodules",
+    },
+    {
+      matchManagers: [
+        "github-actions"
+      ],
+      addLabels: [
+        "github_actions"
+      ],
+      commitMessagePrefix: "⬆\uFE0F\uD83D\uDC68\u200D\uD83D\uDCBB",
+      "groupName": "GitHub Actions",
+    },
+    {
+      matchManagers: [
+        "pre-commit"
+      ],
+      addLabels: [
+        "pre-commit"
+      ],
+      commitMessagePrefix: "⬆\uFE0F\uD83E\uDE9D",
+      "groupName": "Pre-Commit Hooks",
+    },
+    {
+      matchManagers: [
+        "pep621"
+      ],
+      addLabels: [
+        "dependencies",
+        "python"
+      ],
+      commitMessagePrefix: "⬆\uFE0F\uD83D\uDC0D",
+      "groupName": "Python Dependencies",
+    },
+    {
+      matchManagers: [
+        "pip_requirements"
+      ],
+      addLabels: [
+        "dependencies",
+        "python"
+      ],
+      commitMessagePrefix: "⬆\uFE0F\uD83D\uDC0D",
+      "groupName": "Python Dependencies",
+    },
+    {
+      matchManagers: [
+        "dockerfile"
+      ],
+      addLabels: [
+        "docker"
+      ],
+      commitMessagePrefix: "⬆\uD83D\uDC0B",
+      "groupName": "Dockerfile",
+    },
+    {
+      "description": "Automerge patch updates",
+      "matchUpdateTypes": [
+        "patch"
+      ],
+      "automerge": true
+    }
+  ]
+}

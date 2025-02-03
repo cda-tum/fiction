@@ -5,6 +5,9 @@
 #ifndef FICTION_OPERATIONAL_DOMAIN_HPP
 #define FICTION_OPERATIONAL_DOMAIN_HPP
 
+#include "fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp"
+#include "fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp"
+#include "fiction/algorithms/simulation/sidb/energy_distribution.hpp"
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
 #include "fiction/algorithms/simulation/sidb/quickexact.hpp"
 #include "fiction/algorithms/simulation/sidb/quicksim.hpp"
@@ -144,8 +147,8 @@ namespace detail
  * Forward-declaration for `operational_domain`.
  */
 template <typename MapType>
-std::optional<typename MapType::value_type> contains_parameter_point(const MapType&                    map,
-                                                                     const typename MapType::key_type& key);
+std::optional<typename MapType::mapped_type> contains_key(const MapType& map, const typename MapType::key_type& key);
+
 }  // namespace detail
 /**
  * An operational domain is a set of simulation parameter values for which a given SiDB layout is logically operational.
@@ -176,35 +179,26 @@ struct operational_domain
      */
     locked_parallel_flat_hash_map<Key, Value> operational_values{};
     /**
-     * This function retrieves the value associated with the provided parameter point from the operational domain. If
-     * the parameter point is found in the domain, its corresponding value is returned. Otherwise, `std::out_of_range`
-     * is thrown.
+     * This function retrieves the value associated with the provided key from the operational domain. If
+     * the key is found in the domain, its corresponding value is returned. Otherwise, `std::nullopt`
+     * is returned.
      *
-     * @param pp The parameter point to look up.
+     * @param key The key to look up.
      * @return The value associated with the parameter point.
      */
-    [[nodiscard]] Value get_value(const parameter_point& pp) const
+    [[nodiscard]] std::optional<Value> get_value(const Key& key) const
     {
-        if (const auto v = detail::contains_parameter_point(operational_values, pp); v.has_value())
-        {
-            return v.value().second;
-        }
+        return detail::contains_key(operational_values, key);
+    }
 
-        // Create a string stream to hold the string representation
-        std::stringstream ss;
+    void add_value(const Key& key, const Value& value)
+    {
+        operational_values.try_emplace(key, value);
+    }
 
-        // Iterate over the vector and add elements to the string stream
-        for (std::size_t i = 0; i < pp.parameters.size(); ++i)
-        {
-            ss << pp.parameters[i];
-
-            if (i != pp.parameters.size() - 1)
-            {
-                ss << ", ";
-            }
-        }
-
-        throw std::out_of_range(fmt::format("{} not found in the operational domain", ss.str()).c_str());
+    [[nodiscard]] locked_parallel_flat_hash_map<Key, Value> get_domain() const
+    {
+        return operational_values;
     }
 };
 /**
@@ -310,27 +304,24 @@ void validate_sweep_parameters(const operational_domain_params& params)
     }
 }
 /**
- * This function checks for the containment of a parameter point, specified by `key`, in the provided map `map`. If the
- * parameter point is found in the map, the associated `MapType::value_type` is returned. Otherwise, `std::nullopt` is
- * returned.
+ * This function checks for the containment of a given key in a given map. If the key is found in the map, the
+ * associated `MapType::value_type` is returned. Otherwise, `std::nullopt` is returned.
  *
- * @tparam MapType The type of the map containing parameter points as keys.
+ * @tparam MapType The type of the map.
  * @param map The map in which to search for `key`.
- * @param key The parameter point to search for in `map`.
+ * @param key The key to search for in `map`.
  * @return The associated `MapType::value_type` of `key` in `map`, or `std::nullopt` if `key` is not contained in `map`.
  */
 template <typename MapType>
-std::optional<typename MapType::value_type> contains_parameter_point(const MapType&                    map,
-                                                                     const typename MapType::key_type& key)
+std::optional<typename MapType::mapped_type> contains_key(const MapType& map, const typename MapType::key_type& key)
 {
-    static_assert(std::is_same_v<typename MapType::key_type, parameter_point>, "Map key type must be parameter_point");
+    std::optional<typename MapType::mapped_type> result;
 
-    std::optional<typename MapType::value_type> result = std::nullopt;
-
-    map.if_contains(key, [&result](const typename MapType::value_type& v) { result.emplace(v); });
+    map.if_contains(key, [&result](const typename MapType::value_type& entry) { result = entry.second; });
 
     return result;
 }
+
 /**
  * This function searches for a floating-point value specified by the `key` in the provided map `map`, applying a
  * tolerance specified by `fiction::physical_constants::POP_STABILITY_ERR`. Each key in the map is compared to the
@@ -363,7 +354,7 @@ class operational_domain_impl
      * have exactly one output BDL pair.
      *
      * @param lyt SiDB cell-level lyt to be evaluated.
-     * @param spec Expected Boolean function of the lyt given as a multi-output truth table.
+     * @param tt Expected Boolean function of the lyt given as a multi-output truth table.
      * @param ps Parameters for the operational domain computation.
      * @param st Statistics of the process.
      */
@@ -376,8 +367,25 @@ class operational_domain_impl
             output_bdl_pairs{detect_bdl_pairs<Lyt>(
                 layout, sidb_technology::cell_type::OUTPUT,
                 ps.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)},
-            num_dimensions{params.sweep_dimensions.size()}
+            num_dimensions{params.sweep_dimensions.size()},
+            input_bdl_wires{detect_bdl_wires(lyt, params.operational_params.input_bdl_iterator_params.bdl_wire_params,
+                                             bdl_wire_selection::INPUT)},
+            output_bdl_wires{detect_bdl_wires(lyt, params.operational_params.input_bdl_iterator_params.bdl_wire_params,
+                                              bdl_wire_selection::OUTPUT)}
     {
+        const auto logic_cells = lyt.get_cells_by_type(technology<Lyt>::cell_type::LOGIC);
+
+        assert(((params.operational_params.strategy_to_analyze_operational_status !=
+                 is_operational_params::operational_analysis_strategy::FILTER_ONLY) ||
+                (logic_cells.size() > 0)) &&
+               "No logic cells found in the layout");
+
+        // the canvas layout is created which is defined by the logic cells.
+        for (const auto& c : logic_cells)
+        {
+            canvas_lyt.assign_cell_type(c, technology<Lyt>::cell_type::NORMAL);
+        }
+
         op_domain.dimensions.reserve(num_dimensions);
 
         indices.reserve(num_dimensions);
@@ -407,7 +415,7 @@ class operational_domain_impl
             for (const auto i : indices[d])
             {
                 values[d].push_back(params.sweep_dimensions[d].min +
-                                    static_cast<double>(i) * params.sweep_dimensions[d].step);
+                                    (static_cast<double>(i) * params.sweep_dimensions[d].step));
             }
         }
     }
@@ -455,7 +463,7 @@ class operational_domain_impl
             for (const auto i : indices[d])
             {
                 values[d].push_back(params.sweep_dimensions[d].min +
-                                    static_cast<double>(i) * params.sweep_dimensions[d].step);
+                                    (static_cast<double>(i) * params.sweep_dimensions[d].step));
             }
         }
     }
@@ -569,7 +577,7 @@ class operational_domain_impl
         };
 
         // add the neighbors of each operational point to the queue
-        for (const auto& [param_point, status] : op_domain.operational_values)
+        for (const auto& [param_point, status] : op_domain.get_domain())
         {
             if (status == operational_status::OPERATIONAL)
             {
@@ -644,9 +652,13 @@ class operational_domain_impl
         for (const auto& starting_point : step_point_samples)
         {
             // if the current starting point is non-operational, skip to the next one
-            if (op_domain.operational_values[to_parameter_point(starting_point)] == operational_status::NON_OPERATIONAL)
+            const auto domain_value = op_domain.get_value(to_parameter_point(starting_point));
+            if (domain_value.has_value())
             {
-                continue;
+                if (domain_value.value() == operational_status::NON_OPERATIONAL)
+                {
+                    continue;
+                }
             }
 
             // if the current step point has been inferred as operational, skip to the next one
@@ -850,6 +862,10 @@ class operational_domain_impl
      */
     std::vector<std::vector<double>> values;
     /**
+     * This layout consists of the canvas cells of the layout.
+     */
+    Lyt canvas_lyt{};
+    /**
      * The operational domain of the layout.
      */
     OpDomain op_domain{};
@@ -873,6 +889,14 @@ class operational_domain_impl
      * Number of available hardware threads.
      */
     const std::size_t num_threads{std::thread::hardware_concurrency()};
+    /**
+     * Input BDL wires.
+     */
+    const std::vector<bdl_wire<Lyt>> input_bdl_wires;
+    /**
+     * Output BDL wires.
+     */
+    const std::vector<bdl_wire<Lyt>> output_bdl_wires;
     /**
      * A step point represents a point in the x and y dimension from 0 to the maximum number of steps. A step point does
      * not hold the actual parameter values, but the step values in the x and y dimension, respectively.
@@ -1030,10 +1054,9 @@ class operational_domain_impl
      */
     [[nodiscard]] inline std::optional<operational_status> has_already_been_sampled(const step_point& sp) const noexcept
     {
-        if (const auto v = contains_parameter_point(op_domain.operational_values, to_parameter_point(sp));
-            v.has_value())
+        if (const auto v = contains_key(op_domain.operational_values, to_parameter_point(sp)); v.has_value())
         {
-            return v.value().second;
+            return v.value();
         }
 
         return std::nullopt;
@@ -1085,7 +1108,8 @@ class operational_domain_impl
         auto op_params_set_dimension_values                  = params.operational_params;
         op_params_set_dimension_values.simulation_parameters = sim_params;
 
-        const auto& [status, aux_stats] = is_operational(layout, truth_table, op_params_set_dimension_values);
+        const auto& [status, aux_stats] = is_operational(layout, truth_table, op_params_set_dimension_values,
+                                                         input_bdl_wires, output_bdl_wires, std::optional{canvas_lyt});
 
         num_simulator_invocations += aux_stats.number_of_simulator_invocations;
 
@@ -1117,14 +1141,14 @@ class operational_domain_impl
 
         const auto operational = [this, &param_point]()
         {
-            op_domain.operational_values.try_emplace(param_point, operational_status::OPERATIONAL);
+            op_domain.add_value(param_point, operational_status::OPERATIONAL);
 
             return operational_status::OPERATIONAL;
         };
 
         const auto non_operational = [this, &param_point]()
         {
-            op_domain.operational_values.try_emplace(param_point, operational_status::NON_OPERATIONAL);
+            op_domain.add_value(param_point, operational_status::NON_OPERATIONAL);
 
             return operational_status::NON_OPERATIONAL;
         };
@@ -1526,7 +1550,7 @@ class operational_domain_impl
             const auto sp = queue.front();
             queue.pop();
 
-            // if the point is known to be non-operational continue with the next
+            // if the point is known to be non-operational, continue with the next
             if (const auto operational_status = has_already_been_sampled(sp); operational_status.has_value())
             {
                 if (operational_status.value() == operational_status::NON_OPERATIONAL)
@@ -1549,7 +1573,7 @@ class operational_domain_impl
         stats.num_simulator_invocations            = num_simulator_invocations.load();
         stats.num_evaluated_parameter_combinations = num_evaluated_parameter_combinations.load();
 
-        for (const auto& [param_point, status] : op_domain.operational_values)
+        for (const auto& [param_point, status] : op_domain.get_domain())
         {
             if (status == operational_status::OPERATIONAL)
             {
@@ -1787,7 +1811,6 @@ operational_domain_contour_tracing(const Lyt& lyt, const std::vector<TT>& spec, 
     operational_domain_stats                                                                          st{};
     detail::operational_domain_impl<Lyt, TT, operational_domain<parameter_point, operational_status>> p{lyt, spec,
                                                                                                         params, st};
-
     const auto result = p.contour_tracing(samples);
 
     if (stats)

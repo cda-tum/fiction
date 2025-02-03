@@ -452,18 +452,35 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
         std::array<std::array<char, gate_x_size()>, gate_y_size()> result{};
         const auto                                                 all_coordinates_in_the_spanned_area =
             all_coordinates_in_spanned_area({0, 0, 0}, cell<Lyt>{gate_x_size() - 1, gate_y_size() - 1});
-        uint64_t counter = 0;
+
+        uint64_t cell_index = 0;
 
         for (auto& row : result)
         {
             for (auto& cell : row)
             {
-                const auto cell_type = lyt.get_cell_type(all_coordinates_in_the_spanned_area[counter]);
-                cell                 = (cell_type == Lyt::technology::cell_type::NORMAL ||
-                        cell_type == Lyt::technology::cell_type::OUTPUT) ?
-                                           'x' :
-                                           ' ';
-                counter++;
+                const auto cell_type = lyt.get_cell_type(all_coordinates_in_the_spanned_area[cell_index]);
+
+                switch (cell_type)
+                {
+                    case (Lyt::technology::cell_type::NORMAL):
+                    case (Lyt::technology::cell_type::OUTPUT):
+                    {
+                        cell = 'x';
+                        break;
+                    }
+                    case (Lyt::technology::cell_type::LOGIC):
+                    {
+                        cell = 'l';
+                        break;
+                    }
+                    default:
+                    {
+                        cell = ' ';
+                        break;
+                    }
+                }
+                cell_index++;
             }
         }
 
@@ -687,7 +704,7 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
         }
 
         return p;
-    };
+    }
 
     // clang-format off
 

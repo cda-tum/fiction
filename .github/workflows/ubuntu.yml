@@ -2,25 +2,25 @@ name: 🐧 • CI
 
 on:
   push:
-    branches: [ 'main' ]
+    branches: ["main"]
     paths:
-      - '**/*.hpp'
-      - '**/*.cpp'
-      - '**/*.cmake'
-      - '**/CMakeLists.txt'
-      - 'libs/**'
-      - '.github/workflows/ubuntu.yml'
-      - '!bindings/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp'
+      - "**/*.hpp"
+      - "**/*.cpp"
+      - "**/*.cmake"
+      - "**/CMakeLists.txt"
+      - "libs/**"
+      - ".github/workflows/ubuntu.yml"
+      - "!bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp"
   pull_request:
-    branches: [ 'main' ]
+    branches: ["main"]
     paths:
-      - '**/*.hpp'
-      - '**/*.cpp'
-      - '**/*.cmake'
-      - '**/CMakeLists.txt'
-      - 'libs/**'
-      - '.github/workflows/ubuntu.yml'
-      - '!bindings/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp'
+      - "**/*.hpp"
+      - "**/*.cpp"
+      - "**/*.cmake"
+      - "**/CMakeLists.txt"
+      - "libs/**"
+      - ".github/workflows/ubuntu.yml"
+      - "!bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp"
   merge_group:
 
 concurrency:
@@ -38,14 +38,22 @@ jobs:
   build_and_test:
     strategy:
       matrix:
-        os: [ ubuntu-22.04, ubuntu-24.04 ]
-        compiler: [ g++-11, g++-12, g++-13, clang++-14, clang++-15, clang++-16 ]
+        os: [ubuntu-22.04, ubuntu-24.04, ubuntu-24.04-arm]
+        compiler: [g++-11, g++-12, g++-13, clang++-14, clang++-15, clang++-16]
         exclude:
           - os: ubuntu-22.04
             compiler: g++-13
           - os: ubuntu-22.04
             compiler: clang++-16
           - os: ubuntu-24.04
+            compiler: clang++-14
+          - os: ubuntu-24.04-arm
+            compiler: g++-11
+          - os: ubuntu-24.04-arm
+            compiler: g++-12
+          - os: ubuntu-24.04-arm
+            compiler: g++-13
+          - os: ubuntu-24.04-arm
             compiler: clang++-14
         include:
           - os: ubuntu-22.04
@@ -56,12 +64,12 @@ jobs:
             compiler: clang++-17
           - os: ubuntu-24.04
             compiler: clang++-18
-          - os: ubuntu-20.04
-            compiler: g++-10
-            cppstandard: -DCMAKE_CXX_STANDARD=20
-            cppname: C++20
+          - os: ubuntu-24.04-arm
+            compiler: clang++-17
+          - os: ubuntu-24.04-arm
+            compiler: clang++-18
 
-    name: 🐧 ${{matrix.os}} with ${{matrix.compiler}} ${{matrix.cppname}}
+    name: 🐧 ${{matrix.os}} with ${{matrix.compiler}}
     runs-on: ${{matrix.os}}
 
     steps:
@@ -74,9 +82,11 @@ jobs:
           submodules: recursive
 
       - name: Setup ccache
+        # ccache is not supported on ARM yet
+        if: matrix.os != 'ubuntu-24.04-arm'
         uses: hendrikmuhs/ccache-action@v1.2
         with:
-          key: '${{matrix.os}}-${{matrix.compiler}}'
+          key: "${{matrix.os}}-${{matrix.compiler}}"
           variant: ccache
           save: true
           max-size: 10G
@@ -84,8 +94,8 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10.x'
-          cache: 'pip'
+          python-version: "3.13.x"
+          cache: "pip"
 
       - name: Install pip packages
         uses: BSFishy/pip-action@v1
@@ -96,6 +106,7 @@ jobs:
         uses: rui314/setup-mold@v1
 
       - name: Setup Z3 Solver
+        if: matrix.os != 'ubuntu-24.04-arm'
         id: z3
         uses: cda-tum/setup-z3@v1
         with:
@@ -104,7 +115,6 @@ jobs:
           architecture: x64
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-
 
       # Build and test pipeline for Debug mode
 
@@ -123,11 +133,13 @@ jobs:
           -DFICTION_TEST=ON
           -DFICTION_BENCHMARK=OFF
           -DFICTION_EXPERIMENTS=ON
-          -DFICTION_Z3=ON
+          ${{ matrix.os != 'ubuntu-24.04-arm' && '-DFICTION_Z3=ON' || '' }}
+          -DFICTION_ALGLIB=ON
           -DFICTION_ENABLE_MUGEN=ON
           -DFICTION_PROGRESS_BARS=OFF
           -DFICTION_WARNINGS_AS_ERRORS=OFF
           -DMOCKTURTLE_EXAMPLES=OFF
+          -DFICTION_LIGHTWEIGHT_DEBUG_BUILDS=ON
 
       - name: Build (Debug)
         working-directory: ${{github.workspace}}/build_debug
@@ -135,8 +147,7 @@ jobs:
 
       - name: Test (Debug)
         working-directory: ${{github.workspace}}/build_debug
-        run: ctest -C Debug --verbose --output-on-failure --repeat until-pass:3 --parallel 4 --exclude-regex "quality"
-
+        run: ctest -C Debug --verbose --output-on-failure --repeat until-pass:3 --parallel 4
 
       # Build and test pipeline for Release mode
 
@@ -155,7 +166,8 @@ jobs:
           -DFICTION_TEST=ON
           -DFICTION_BENCHMARK=OFF
           -DFICTION_EXPERIMENTS=ON
-          -DFICTION_Z3=ON
+          ${{ matrix.os != 'ubuntu-24.04-arm' && '-DFICTION_Z3=ON' || '' }}
+          -DFICTION_ALGLIB=ON
           -DFICTION_ENABLE_MUGEN=ON
           -DFICTION_PROGRESS_BARS=OFF
           -DFICTION_WARNINGS_AS_ERRORS=OFF

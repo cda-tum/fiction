@@ -887,6 +887,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
             CHECK(op_domain_stats.num_operational_parameter_combinations == 80);
             CHECK(op_domain_stats.num_non_operational_parameter_combinations == 176);
         }
+
         SECTION("random_sampling")
         {
             const auto op_domain = operational_domain_random_sampling(lat, std::vector<tt>{create_id_tt()}, 100,
@@ -904,6 +905,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
             CHECK(op_domain_stats.num_operational_parameter_combinations <= 100);
             CHECK(op_domain_stats.num_non_operational_parameter_combinations <= 100);
         }
+
         SECTION("flood_fill")
         {
             SECTION("random sample to find operational parameter points")
@@ -1167,8 +1169,7 @@ TEST_CASE("SiQAD's AND gate operational domain computation, using cube coordinat
     }
 }
 
-TEMPLATE_TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[operational-domain]", sidb_111_cell_clk_lyt_siqad,
-                   cds_sidb_111_cell_clk_lyt_siqad)
+TEMPLATE_TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[operational-domain]", sidb_111_cell_clk_lyt_siqad)
 {
     const auto layout = blueprints::and_gate_111<TestType>();
 
@@ -1257,7 +1258,7 @@ TEMPLATE_TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[operational-domain
 }
 
 TEMPLATE_TEST_CASE("AND gate with Bestagon shape and kink states at default physical parameters",
-                   "[operational-domain]", sidb_100_cell_clk_lyt_siqad, cds_sidb_100_cell_clk_lyt_siqad)
+                   "[operational-domain]", sidb_100_cell_clk_lyt_siqad)
 {
     const auto layout = blueprints::and_gate_with_kink_states<TestType>();
 
@@ -1285,9 +1286,9 @@ TEMPLATE_TEST_CASE("AND gate with Bestagon shape and kink states at default phys
         CHECK(op_domain_stats.num_non_operational_parameter_combinations == 33);
     }
 
-    SECTION("grid_search, forbid kinks")
+    SECTION("grid_search, reject kinks")
     {
-        op_domain_params.operational_params.op_condition = operational_condition::REJECT_KINKS;
+        op_domain_params.operational_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
 
         const auto op_domain = operational_domain_grid_search(layout, std::vector<tt>{create_and_tt()},
                                                               op_domain_params, &op_domain_stats);
@@ -1298,5 +1299,62 @@ TEMPLATE_TEST_CASE("AND gate with Bestagon shape and kink states at default phys
         CHECK(op_domain_stats.num_evaluated_parameter_combinations == 36);
         CHECK(op_domain_stats.num_operational_parameter_combinations == 0);
         CHECK(op_domain_stats.num_non_operational_parameter_combinations == 36);
+    }
+}
+
+TEMPLATE_TEST_CASE("Grid search to determine the operational domain. The operational status is determined by physical "
+                   "simulation and the efficient but approximate method of pruning only.",
+                   "[operational-domain]", sidb_100_cell_clk_lyt_siqad)
+{
+    const auto layout = blueprints::bestagon_and<TestType>();
+
+    sidb_simulation_parameters sim_params{};
+    sim_params.base     = 2;
+    sim_params.mu_minus = -0.32;
+
+    operational_domain_params op_domain_params{};
+    op_domain_params.operational_params.simulation_parameters = sim_params;
+    op_domain_params.sweep_dimensions                         = {{sweep_parameter::EPSILON_R, 4.0, 6.0, 0.4},
+                                                                 {sweep_parameter::LAMBDA_TF, 4.0, 6.0, 0.4}};
+
+    op_domain_params.operational_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
+
+    operational_domain_stats op_domain_stats{};
+
+    SECTION("grid search, determine operational status with physical simulation")
+    {
+        const auto op_domain = operational_domain_grid_search(layout, std::vector<tt>{create_and_tt()},
+                                                              op_domain_params, &op_domain_stats);
+
+        // check if the operational domain has the correct size (10 steps in each dimension)
+        CHECK(op_domain.operational_values.size() == 36);
+
+        CHECK(op_domain_stats.num_evaluated_parameter_combinations == 36);
+        CHECK(op_domain_stats.num_operational_parameter_combinations == 5);
+        CHECK(op_domain_stats.num_non_operational_parameter_combinations == 31);
+    }
+
+    SECTION("grid search, determine operational status with only pruning")
+    {
+        op_domain_params.operational_params.strategy_to_analyze_operational_status =
+            is_operational_params::operational_analysis_strategy::FILTER_ONLY;
+
+        const auto op_domain = operational_domain_grid_search(layout, std::vector<tt>{create_and_tt()},
+                                                              op_domain_params, &op_domain_stats);
+
+        // check if the operational domain has the correct size (10 steps in each dimension)
+        CHECK(op_domain.operational_values.size() == 36);
+
+        CHECK(op_domain_stats.num_evaluated_parameter_combinations == 36);
+        CHECK(op_domain_stats.num_operational_parameter_combinations == 5);
+        CHECK(op_domain_stats.num_non_operational_parameter_combinations == 31);
+
+        // this test was created to cover a special case: Strange behavior was observed when no clone was used in the
+        // `is_physical_validity_feasible` function.
+        for (const auto& [pp, status] : op_domain.operational_values)
+        {
+            CHECK(pp.parameters[0] >= 4.0);
+            CHECK(pp.parameters[1] >= 4.0);
+        }
     }
 }

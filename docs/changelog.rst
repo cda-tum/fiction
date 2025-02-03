@@ -5,6 +5,107 @@ All notable changes to this project will be documented in this file.
 
 The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`_.
 
+
+v0.6.8 - 2025-01-25
+-------------------
+
+Added
+#####
+- Data structures:
+    - ``virtual_pi_network`` that allows for the duplication of input signals
+    - ``mutable_rank_view`` that allows for the reordering of nodes
+    - ``static_depth_view`` that disables depth recomputation
+- Algorithms:
+    - Logic synthesis:
+        - Equivalence checking for networks with virtual PIs
+- Clocking schemes:
+    - SRS
+- Continuous integration:
+    - Added Linux on ARM runners
+
+Fixed
+#####
+- Continuous deployment:
+    - Fixed a critical issue with wheel building and deployment to PyPI that caused some operating systems to not be served
+- Experiments:
+    - Fixed outdated paths in the ``QuickCell`` experiment script
+
+
+v0.6.7 - 2025-01-20
+-------------------
+
+Added
+#####
+- Algorithms:
+    - Simulation:
+        - Implemented new algorithms utilizing grid search, random sampling, and contour tracing to determine defect clearance distances of SiDB layouts
+        - Restructured defect influence simulation for enhanced usability
+        - Integrated ``QuickCell's`` pruning strategies to efficiently identify non-operational layouts
+- Experiments:
+    - Added rectangular SiDB gate skeletons (16.896 nm x 16.896 nm) and a script for designing a corresponding library
+    - Enhanced results tables in the ``QuickCell`` experiment script with information about how many layouts remain and are pruned at each pruning step
+- Continuous integration:
+    - Added MacOS 15 and Windows 2025 to the CI
+    - Added `Renovate <https://github.com/renovatebot/renovate>`_ to keep dependencies up-to-date
+    - Added `ruff <https://docs.astral.sh/ruff/>`_ as a Python linter and `mypy <https://mypy-lang.org/>`_ for static Python type checking. Extended the pre-commit configuration with ``check-jsonschema``, ``validate-pyproject-schema-store``, ``nb-clean``, ``prettier``, ``ruff``, and ``mypy``
+- CLI:
+    - Added an optional callback to `ABC <https://github.com/berkeley-abc/abc>`_ in fiction's CLI
+
+Changed
+#######
+- Continuous integration:
+    - Updated the workflow to reduce runtime when building the wheels by excluding redundant combinations of OSs and Python versions
+
+Fixed
+#####
+- Fixed a bug in the ``show`` command of the CLI
+
+Removed
+#######
+- Continuous integration:
+    - Dropped Python 3.8 support due to its end-of-life status
+    - Dropped Dependabot
+
+
+v0.6.6 - 2024-11-26
+-------------------
+
+Added
+#####
+- Algorithms:
+    - Simulation:
+        - Added option to determine if kinks induce layout to become non-operational
+        - Kink control option for critical temperature simulation of SiDB layouts
+- Python bindings:
+    - Support for Python 3.13 (including GIL-free multi-threading)
+- I/O:
+    - SVG drawer for SiDB layouts
+- Experiments:
+    - Ship the SiQAD and Bestagon gate libraries als SQD files
+- Documentation:
+    - Added wiring reduction paper to publication list
+    - Added Willem Lambooy to the authors list
+- Continuous integration:
+    - Several improvements to the Docker workflow including publishing images to DockerHub
+
+Changed
+#######
+- Continuous integration:
+    - Exclude long-running tests from the Debug CI workflows
+
+Fixed
+#####
+- Fixed a bug in SiDB gate design when using skeletons with I/O wires facing east
+- Adapted ``post-layout optimization`` and ``wiring reduction`` to handle layouts with PIs not placed at the borders
+- Fix neutral defect handling in CDS and correct gate design termination condition
+- Enforce runtime evaluation of dynamic formatting strings to fix consteval contexts
+- Microsoft logo in CI badge by replacing the logo slug with a base64 encoding of the SVG image
+- Remove explicit XCode version setup for macOS 13 CIs
+- Adjusted PyPI deployment target for macOS
+- Several bugs resulting from the new cell_type::LOGIC in the SiDB technology
+- Several compiler and linter warnings
+- Documentation for BDL wire detection
+
 v0.6.5 - 2024-10-22
 -------------------
 

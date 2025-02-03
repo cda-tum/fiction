@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<siqad>
+    <!--Program Flags-->
+    <program>
+        <file_purpose>save</file_purpose>
+        <version>0.3.3</version>
+        <date>2023-08-08 13:30:48</date>
+    </program>
+    <!--GUI Flags-->
+    <gui>
+        <zoom>0.0713898</zoom>
+        <displayed_region x1="-59.5323" y1="-31.237" x2="141.197" y2="55.0499"/>
+        <scroll x="-211" y="-413"/>
+    </gui>
+    <!--Layer Properties-->
+    <!--Layer ID is intrinsic to the layer order-->
+    <layers>
+        <layer_prop>
+            <name>Lattice</name>
+            <type>Lattice</type>
+            <role>Design</role>
+            <zoffset>0</zoffset>
+            <zheight>0</zheight>
+            <visible>1</visible>
+            <active>0</active>
+            <lat_vec>
+                <a1 x="3.84" y="0"/>
+                <a2 x="0" y="7.68"/>
+                <N>2</N>
+                <b1 x="0" y="0"/>
+                <b2 x="0" y="2.25"/>
+            </lat_vec>
+        </layer_prop>
+        <layer_prop>
+            <name>Screenshot Overlay</name>
+            <type>Misc</type>
+            <role>Overlay</role>
+            <zoffset>0</zoffset>
+            <zheight>0</zheight>
+            <visible>1</visible>
+            <active>0</active>
+        </layer_prop>
+        <layer_prop>
+            <name>Misc</name>
+            <type>Misc</type>
+            <role>Design</role>
+            <zoffset>0</zoffset>
+            <zheight>0</zheight>
+            <visible>1</visible>
+            <active>0</active>
+        </layer_prop>
+        <layer_prop>
+            <name>Surface</name>
+            <type>DB</type>
+            <role>Design</role>
+            <zoffset>0</zoffset>
+            <zheight>0</zheight>
+            <visible>1</visible>
+            <active>0</active>
+        </layer_prop>
+        <layer_prop>
+            <name>Metal</name>
+            <type>Electrode</type>
+            <role>Design</role>
+            <zoffset>-1e-07</zoffset>
+            <zheight>0</zheight>
+            <visible>1</visible>
+            <active>0</active>
+        </layer_prop>
+        <layer_prop>
+            <name>AFM</name>
+            <type></type>
+            <role>Design</role>
+            <zoffset>5e-10</zoffset>
+            <zheight>5e-11</zheight>
+            <visible>1</visible>
+            <active>0</active>
+        </layer_prop>
+        <layer_prop>
+            <name>Plot</name>
+            <type></type>
+            <role>Design</role>
+            <zoffset>-5e-08</zoffset>
+            <zheight>0</zheight>
+            <visible>1</visible>
+            <active>0</active>
+        </layer_prop>
+    </layers>
+    <!--Item Hierarchy-->
+    <design>
+        <!--Lattice-->
+        <layer type="Lattice"/>
+        <!--Screenshot Overlay-->
+        <layer type="Misc"/>
+        <!--Misc-->
+        <layer type="Misc"/>
+        <!--Surface-->
+        <layer type="DB">
+            <dbdot>
+                <layer_id>3</layer_id>
+                <latcoord n="4" m="2" l="1"/>
+                <physloc x="15.36" y="17.61"/>
+                <color>#ffc8c8c8</color>
+            </dbdot>
+            <dbdot>
+                <layer_id>3</layer_id>
+                <latcoord n="6" m="3" l="1"/>
+                <physloc x="23.04" y="25.29"/>
+                <color>#ffc8c8c8</color>
+            </dbdot>
+            <dbdot>
+                <layer_id>3</layer_id>
+                <latcoord n="14" m="3" l="1"/>
+                <physloc x="53.76" y="25.29"/>
+                <color>#ffc8c8c8</color>
+            </dbdot>
+            <dbdot>
+                <layer_id>3</layer_id>
+                <latcoord n="16" m="2" l="1"/>
+                <physloc x="61.44" y="17.61"/>
+                <color>#ffc8c8c8</color>
+            </dbdot>
+            <dbdot>
+                <layer_id>3</layer_id>
+                <latcoord n="10" m="5" l="0"/>
+                <type>logic</type>
+                <physloc x="38.4" y="38.4"/>
+                <color>#ffc8c8c8</color>
+            </dbdot>
+            <dbdot>
+                <layer_id>3</layer_id>
+                <latcoord n="10" m="6" l="0"/>
+                <type>logic</type>
+                <physloc x="38.4" y="46.08"/>
+                <color>#ffc8c8c8</color>
+            </dbdot>
+            <dbdot>
+                <layer_id>3</layer_id>
+                <latcoord n="10" m="8" l="0"/>
+                <type>output</type>
+                <physloc x="38.4" y="61.44"/>
+                <color>#ffc8c8c8</color>
+            </dbdot>
+            <dbdot>
+                <layer_id>3</layer_id>
+                <latcoord n="10" m="9" l="0"/>
+                <type>output</type>
+                <physloc x="38.4" y="69.12"/>
+                <color>#ffc8c8c8</color>
+            </dbdot>
+            <dbdot>
+                <layer_id>3</layer_id>
+                <latcoord n="10" m="11" l="1"/>
+                <physloc x="38.4" y="86.73"/>
+                <color>#ffc8c8c8</color>
+            </dbdot>
+            <dbdot>
+                <layer_id>3</layer_id>
+                <latcoord n="2" m="1" l="1"/>
+                <type>input</type>
+                <physloc x="7.68" y="9.93"/>
+                <color>#ffc8c8c8</color>
+            </dbdot>
+            <dbdot>
+                <layer_id>3</layer_id>
+                <latcoord n="0" m="0" l="1"/>
+                <type>input</type>
+                <physloc x="0" y="2.25"/>
+                <color>#ffc8c8c8</color>
+            </dbdot>
+            <dbdot>
+                <layer_id>3</layer_id>
+                <latcoord n="18" m="1" l="1"/>
+                <type>input</type>
+                <physloc x="69.12" y="9.93"/>
+                <color>#ffc8c8c8</color>
+            </dbdot>
+            <dbdot>
+                <layer_id>3</layer_id>
+                <latcoord n="20" m="0" l="1"/>
+                <type>input</type>
+                <physloc x="76.8" y="2.25"/>
+                <color>#ffc8c8c8</color>
+            </dbdot>
+        </layer>
+        <!--Metal-->
+        <layer type="Electrode"/>
+        <!--AFM-->
+        <layer type=""/>
+        <!--Plot-->
+        <layer type=""/>
+    </design>
+</siqad>

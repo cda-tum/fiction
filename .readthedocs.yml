@@ -5,20 +5,20 @@ submodules:
   recursive: true
 
 build:
-  os: ubuntu-22.04
+  os: ubuntu-24.04
   tools:
-    python: "3.10"
+    python: "3.12"
   apt_packages:
     - cmake
   jobs:
     pre_build:
-      - echo "Reinstall pyfiction with Z3 enabled"
-      - z3="ON" python -m pip install --upgrade --upgrade-strategy eager --no-cache-dir .[docs]
+      - echo "Reinstall pyfiction with Z3 and ALGLIB enabled"
+      - z3="ON" alglib="ON" python -m pip install --upgrade --upgrade-strategy eager --no-cache-dir .[docs]
 
 sphinx:
   configuration: docs/conf.py
 
-formats: [ ]
+formats: []
 
 python:
   install:

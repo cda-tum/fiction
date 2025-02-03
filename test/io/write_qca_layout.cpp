@@ -1430,9 +1430,21 @@ TEST_CASE("Write wire crossing", "[qcad]")
                                                        "[#TYPE:DESIGN]\n",
                                                        FICTION_VERSION, FICTION_REPO);
 
-    std::ostringstream layout_stream{};
+    SECTION("Using specific function")
+    {
 
-    write_qca_layout(layout, layout_stream, {true});
+        std::ostringstream layout_stream{};
 
-    CHECK(layout_stream.str() == qcad_layout);
+        write_qca_layout(layout, layout_stream, {true});
+
+        CHECK(layout_stream.str() == qcad_layout);
+    }
+    SECTION("Using general function")
+    {
+        std::ostringstream layout_stream{};
+
+        write_qca_layout(layout, layout_stream);
+
+        CHECK(layout_stream.str() == qcad_layout);
+    }
 }

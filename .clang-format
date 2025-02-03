@@ -59,7 +59,7 @@ IncludeCategories:
     Priority: 4
   - Regex: '<z3[a-zA-Z0-9_\+]+.+>$'
     Priority: 5
-  - Regex: '<[a-zA-Z0-9_]+>$'
+  - Regex: "<[a-zA-Z0-9_]+>$"
     Priority: 6
 IndentCaseLabels: true
 IndentWidth: 4
@@ -85,5 +85,3 @@ SpacesInSquareBrackets: false
 Standard: c++17
 UseTab: Never
 LineEnding: LF
-
-...

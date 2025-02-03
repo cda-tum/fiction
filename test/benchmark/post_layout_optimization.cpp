@@ -51,7 +51,7 @@ TEST_CASE("Benchmark Post-Layout Optimization", "[benchmark]")
     };
 }
 
-//  Mac M1, Sonoma 14.6.1, Apple clang version 15.0.0 (14.10.24)
+//  Mac M1, Sonoma 14.6.1, Apple clang version 15.0.0 (07.11.24)
 // -------------------------------------------------------------------------------
 // Benchmark Post-Layout Optimization
 // -------------------------------------------------------------------------------
@@ -63,14 +63,14 @@ TEST_CASE("Benchmark Post-Layout Optimization", "[benchmark]")
 //                                      std dev       low std dev   high std dev
 // -------------------------------------------------------------------------------
 // post_layout_optimization: full
-// optimization                                   100             1     3.08351 m
-//                                          1.80757 s     1.80401 s     1.81184 s
-//                                         19.6917 ms    16.8471 ms    23.0171 ms
+// optimization                                   100             1     2.94146 m
+//                                          1.77164 s     1.76488 s     1.78234 s
+//                                         42.7398 ms    30.7818 ms    67.1015 ms
 //
 // post_layout_optimization: wiring
-// reduction only                                 100             1     3.31998 s
-//                                         33.2883 ms    33.1682 ms    33.4216 ms
-//                                         647.063 us    559.353 us    778.412 us
+// reduction only                                 100             1     3.18196 s
+//                                         31.6457 ms    31.5807 ms    31.7191 ms
+//                                         352.788 us    307.317 us    418.116 us
 //
 //
 // ===============================================================================

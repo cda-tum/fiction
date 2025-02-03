@@ -19,6 +19,7 @@
 #include <numeric>
 #include <optional>
 #include <string>
+#include <tuple>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -296,19 +297,19 @@ class sat_coloring_handler
         std::iota(potential_chromatic_numbers.begin(), potential_chromatic_numbers.end(), h / 2);
 
         // binary search for the chromatic number, i.e., the lower bound of potential ones
-        std::lower_bound(potential_chromatic_numbers.cbegin(), potential_chromatic_numbers.cend(), h,
-                         [this, &most_recent_sat_instance](const auto& k1, [[maybe_unused]] const auto& k2)
-                         {
-                             if (const auto [sat, instance] = check_k_coloring(k1);
-                                 sat == bill::result::states::satisfiable)
-                             {
-                                 most_recent_sat_instance = {k1, instance};
+        std::ignore = std::lower_bound(
+            potential_chromatic_numbers.cbegin(), potential_chromatic_numbers.cend(), h,
+            [this, &most_recent_sat_instance](const auto& k1, [[maybe_unused]] const auto& k2)
+            {
+                if (const auto [sat, instance] = check_k_coloring(k1); sat == bill::result::states::satisfiable)
+                {
+                    most_recent_sat_instance = {k1, instance};
 
-                                 return false;
-                             }
+                    return false;
+                }
 
-                             return true;
-                         });
+                return true;
+            });
 
         return most_recent_sat_instance;
     }
@@ -532,7 +533,7 @@ class sat_coloring_handler
         }
         else  // without clique information, at least the first vertex can be painted
         {
-            std::find_if(
+            std::ignore = std::find_if(
                 graph.begin_vertices(), graph.end_vertices(),
                 [this, &instance, &clique_first_ordering](const auto& vp)
                 {
@@ -543,18 +544,18 @@ class sat_coloring_handler
                     // create a clique first vertex ordering
                     clique_first_ordering.push_back(v);
 
-                    std::find_if(graph.begin_adjacent(v), graph.end_adjacent(v),
-                                 [&instance, &clique_first_ordering](const auto& av)
-                                 {
-                                     // assign color 1 to an adjacent vertex
-                                     instance->solver.add_clause(
-                                         bill::lit_type{instance->variables[{av, 1}], bill::positive_polarity});
+                    std::ignore = std::find_if(graph.begin_adjacent(v), graph.end_adjacent(v),
+                                               [&instance, &clique_first_ordering](const auto& av)
+                                               {
+                                                   // assign color 1 to an adjacent vertex
+                                                   instance->solver.add_clause(bill::lit_type{
+                                                       instance->variables[{av, 1}], bill::positive_polarity});
 
-                                     // create a clique first vertex ordering
-                                     clique_first_ordering.push_back(av);
+                                                   // create a clique first vertex ordering
+                                                   clique_first_ordering.push_back(av);
 
-                                     return true;  // abort loop after first iteration
-                                 });
+                                                   return true;  // abort loop after first iteration
+                                               });
 
                     return true;  // abort loop after first iteration
                 });
