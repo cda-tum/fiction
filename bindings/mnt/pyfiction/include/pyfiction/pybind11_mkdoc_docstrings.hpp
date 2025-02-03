@@ -21850,21 +21850,6 @@ static const char *__doc_fiction_virtual_pi_network_virtual_storage_map_virtual_
 
 static const char *__doc_fiction_virtual_pi_network_virtual_storage_virtual_inputs = R"doc(Vector storing virtual_inputs.)doc";
 
-static const char *__doc_fiction_volume =
-R"doc(Computes the volume of a given coordinate assuming its origin is (0,
-0, 0). Calculates :math:`(|x| + 1) \cdot (|y| + 1) \cdot (|z| + 1)` by
-default. For SiQAD coordinates, which are planar by definition, the
-area is returned.
-
-Template parameter ``CoordinateType``:
-    Coordinate type.
-
-Parameter ``coord``:
-    Coordinate.
-
-Returns:
-    Volume of coord.)doc";
-
 static const char *__doc_fiction_wiring_reduction =
 R"doc(A scalable wiring reduction algorithm for 2DDWave-clocked layouts
 based on A* path finding.
