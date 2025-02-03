@@ -188,7 +188,7 @@ class design_sidb_gates_impl
      * @param ps Parameters and settings for the gate designer.
      * @param st Statistics for the gate design process.
      */
-    design_sidb_gates_impl(const Lyt& skeleton, const std::vector<TT>& spec, design_sidb_gates_params<cell<Lyt>> ps,
+    design_sidb_gates_impl(const Lyt& skeleton, const std::vector<TT>& spec, design_sidb_gates_params<cell<Lyt>>&& ps,
                            design_sidb_gates_stats& st) :
             skeleton_layout{skeleton},
             truth_table{spec},
