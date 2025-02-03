@@ -32,10 +32,13 @@ TEST_CASE("SiQAD OR gate", "[is-operational]")
     const sidb_100_cell_clk_lyt_siqad lat{or_gate};
 
     auto op_params = is_operational_params{
-        sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
+        sidb_simulation_parameters{2, -0.32},
+        sidb_simulation_engine::QUICKEXACT,
         bdl_input_iterator_params{detect_bdl_wires_params{1.5},
                                   bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED},
-        is_operational_params::operational_condition::TOLERATE_KINKS, {}, is_operational_params::simulation_results_mode::KEEP_SIMULATION_RESULTS};
+        is_operational_params::operational_condition::TOLERATE_KINKS,
+        {},
+        is_operational_params::simulation_results_mode::KEEP_SIMULATION_RESULTS};
 
     SECTION("determine if layout is operational, tolerate kinks and keep simulation results")
     {
