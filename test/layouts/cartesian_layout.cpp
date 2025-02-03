@@ -80,7 +80,7 @@ TEST_CASE("Cartesian coordinate iteration", "[cartesian-layout]")
 
     const auto check1 = [&visited, &ar, &layout](const auto& t)
     {
-        CHECK(t <= ar.end);
+        CHECK(t <= ar.max);
 
         // all coordinates are within the layout bounds
         CHECK(layout.is_within_bounds(t));
@@ -109,7 +109,7 @@ TEST_CASE("Cartesian coordinate iteration", "[cartesian-layout]")
     {
         // iteration stays in ground layer
         CHECK(t.z == 0);
-        CHECK(t <= ar_ground.end);
+        CHECK(t <= ar_ground.max);
 
         // all coordinates are within the layout bounds
         CHECK(layout.is_within_bounds(t));

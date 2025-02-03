@@ -89,7 +89,7 @@ class sidb_defect_surface<Lyt, false> : public Lyt
      * @param ar aspect ratio of the layout.
      * @param ps SiDB defect surface parameters.
      */
-    explicit sidb_defect_surface(const typename Lyt::aspect_ratio& ar, const sidb_defect_surface_params& ps = {}) :
+    explicit sidb_defect_surface(const aspect_ratio_t<Lyt>& ar, const sidb_defect_surface_params& ps = {}) :
             Lyt(ar),
             strg{std::make_shared<sidb_surface_storage>(ps)}
     {

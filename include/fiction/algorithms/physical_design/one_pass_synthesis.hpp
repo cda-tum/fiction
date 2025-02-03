@@ -744,7 +744,7 @@ class one_pass_synthesis_impl
             mockturtle::progress_bar bar("[i] examining layout aspect ratios: {:>2} × {:<2}");
 #endif
 
-            const auto aspect_ratio = typename Lyt::aspect_ratio{(*ari).x, (*ari).y, ps.crossings ? 1 : 0};
+            const auto aspect_ratio = aspect_ratio_t<Lyt>{(*ari).x, (*ari).y, ps.crossings ? 1 : 0};
 
             if (handler.skippable(aspect_ratio))
             {
