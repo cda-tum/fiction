@@ -1111,7 +1111,7 @@ class operational_domain_impl
         const auto& [status, aux_stats] = is_operational(layout, truth_table, op_params_set_dimension_values,
                                                          input_bdl_wires, output_bdl_wires, std::optional{canvas_lyt});
 
-        num_simulator_invocations += aux_stats.number_of_simulator_invocations;
+        num_simulator_invocations += aux_stats.simulator_invocations;
 
         if (status == operational_status::NON_OPERATIONAL)
         {
