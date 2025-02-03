@@ -27,7 +27,7 @@
 namespace alice
 {
 /**
- *
+ * Executes *QuickExact* exact simulation for the current SiDB cell-level layout in store.
  */
 class quickexact_command : public command
 {
@@ -46,7 +46,7 @@ class quickexact_command : public command
                    true);
         add_option("--lambda_tf,-l", physical_params.lambda_tf, "Thomas-Fermi screening distance (unit: nm)", true);
         add_option("--mu_minus,-m", physical_params.mu_minus, "Energy transition level (0/-) (unit: eV)", true);
-        add_option("--global_potential,-g", params.global_potential,
+        add_option("--global_potential,-g", qe_params.global_potential,
                    "Global potential applied to the entire layout (unit: V)", true);
     }
 
@@ -57,10 +57,8 @@ class quickexact_command : public command
     void execute() override
     {
         // reset sim result
-        sim_result_100      = {};
-        sim_result_111      = {};
-        min_energy          = std::numeric_limits<double>::infinity();
-        is_sidb_100_lattice = true;
+        sim_result = {};
+        min_energy = std::numeric_limits<double>::infinity();
 
         if (physical_params.epsilon_r <= 0)
         {
@@ -91,68 +89,66 @@ class quickexact_command : public command
         {
             using Lyt = typename std::decay_t<decltype(lyt_ptr)>::element_type;
 
-            if constexpr (fiction::has_sidb_technology_v<Lyt>)
+            if constexpr (!fiction::has_sidb_technology_v<Lyt>)
             {
-                if constexpr (fiction::is_charge_distribution_surface_v<Lyt>)
-                {
-                    env->out() << fmt::format(
-                        "[w] {} already possesses a charge distribution; no simulation is conducted\n",
-                        get_name(lyt_ptr));
-                }
-                else
-                {
-                    if constexpr (fiction::is_sidb_lattice_100_v<Lyt>)
-                    {
-                        is_sidb_100_lattice          = true;
-                        params.simulation_parameters = physical_params;
-                        sim_result_100               = fiction::quickexact(*lyt_ptr, params);
-                    }
-                    else if constexpr (fiction::is_sidb_lattice_111_v<Lyt>)
-                    {
-                        is_sidb_100_lattice          = false;
-                        params.simulation_parameters = physical_params;
-                        sim_result_111               = fiction::quickexact(*lyt_ptr, params);
-                    }
+                env->out() << fmt::format("[e] '{}' is not an SiDB layout\n", get_name(lyt_ptr));
+                return;
+            }
 
-                    else
+            if constexpr (fiction::is_charge_distribution_surface_v<Lyt>)
+            {
+                env->out() << fmt::format(
+                    "[w] '{}' already possesses a charge distribution; no simulation is conducted\n",
+                    get_name(lyt_ptr));
+                return;
+            }
+
+            qe_params.simulation_parameters = physical_params;
+
+            // To aid the compiler
+            if constexpr (fiction::has_sidb_technology_v<Lyt> && !fiction::is_charge_distribution_surface_v<Lyt>)
+            {
+                sim_result = fiction::quickexact(*lyt_ptr, qe_params);
+
+                if constexpr (fiction::is_sidb_lattice_100_v<Lyt>)
+                {
+
+                    if (std::get<sim_result_100>(sim_result).charge_distributions.empty())
                     {
-                        env->out() << "[e] no valid lattice orientation\n";
+                        env->out() << fmt::format("[e] ground state of '{}' could not be determined\n",
+                                                  get_name(lyt_ptr));
                         return;
                     }
 
-                    if (sim_result_100.charge_distributions.empty() && sim_result_111.charge_distributions.empty())
-                    {
-                        env->out() << fmt::format("[e] ground state of {} could not be determined", get_name(lyt_ptr))
-                                   << std::endl;
-                    }
-                    else
-                    {
-                        if constexpr (fiction::is_sidb_lattice_100_v<Lyt>)
-                        {
-                            const auto min_energy_distr =
-                                fiction::minimum_energy_distribution(sim_result_100.charge_distributions.cbegin(),
-                                                                     sim_result_100.charge_distributions.cend());
+                    const auto min_energy_distr =
+                        minimum_energy_distribution(std::get<sim_result_100>(sim_result).charge_distributions.cbegin(),
+                                                    std::get<sim_result_100>(sim_result).charge_distributions.cend());
 
-                            min_energy = min_energy_distr->get_system_energy();
-                            store<fiction::cell_layout_t>().extend() =
-                                std::make_shared<fiction::cds_sidb_100_cell_clk_lyt>(*min_energy_distr);
-                        }
-                        else if constexpr (fiction::is_sidb_lattice_111_v<Lyt>)
-                        {
-                            const auto min_energy_distr =
-                                fiction::minimum_energy_distribution(sim_result_111.charge_distributions.cbegin(),
-                                                                     sim_result_111.charge_distributions.cend());
-
-                            min_energy = min_energy_distr->get_system_energy();
-                            store<fiction::cell_layout_t>().extend() =
-                                std::make_shared<fiction::cds_sidb_111_cell_clk_lyt>(*min_energy_distr);
-                        }
-                    }
+                    min_energy = min_energy_distr->get_system_energy();
+                    store<fiction::cell_layout_t>().extend() =
+                        std::make_shared<fiction::cds_sidb_100_cell_clk_lyt>(*min_energy_distr);
                 }
-            }
-            else
-            {
-                env->out() << fmt::format("[e] {} is not an SiDB layout\n", get_name(lyt_ptr));
+                else if constexpr (fiction::is_sidb_lattice_111_v<Lyt>)
+                {
+                    if (std::get<sim_result_111>(sim_result).charge_distributions.empty())
+                    {
+                        env->out() << fmt::format("[e] ground state of '{}' could not be determined\n",
+                                                  get_name(lyt_ptr));
+                        return;
+                    }
+
+                    const auto min_energy_distr =
+                        minimum_energy_distribution(std::get<sim_result_111>(sim_result).charge_distributions.cbegin(),
+                                                    std::get<sim_result_111>(sim_result).charge_distributions.cend());
+
+                    min_energy = min_energy_distr->get_system_energy();
+                    store<fiction::cell_layout_t>().extend() =
+                        std::make_shared<fiction::cds_sidb_111_cell_clk_lyt>(*min_energy_distr);
+                }
+                else
+                {
+                    env->out() << "[e] no valid lattice orientation\n";
+                }
             }
         };
 
@@ -169,22 +165,23 @@ class quickexact_command : public command
     /**
      * QuickExact parameters.
      */
-    fiction::quickexact_params<fiction::offset::ucoord_t> params{};
+    fiction::quickexact_params<> qe_params{};
     /**
-     * Simulation result for H-Si(100)-2x1 surface.
+     * Type alias for H-Si(100)-2x1 simulation result.
      */
-    fiction::sidb_simulation_result<fiction::sidb_100_cell_clk_lyt> sim_result_100{};
+    using sim_result_100 = fiction::sidb_simulation_result<fiction::sidb_100_cell_clk_lyt>;
     /**
-     * Simulation result for H-Si(111)-1x1 surface.
+     * Type alias for H-Si(111)-1x1 simulation result.
      */
-    fiction::sidb_simulation_result<fiction::sidb_111_cell_clk_lyt> sim_result_111{};
+    using sim_result_111 = fiction::sidb_simulation_result<fiction::sidb_111_cell_clk_lyt>;
+    /**
+     * Simulation result for either the H-Si(100)-2x1 or the H-Si(111)-1x1 surface.
+     */
+    std::variant<sim_result_100, sim_result_111> sim_result;
     /**
      * Minimum energy.
      */
     double min_energy{std::numeric_limits<double>::infinity()};
-
-    bool is_sidb_100_lattice = true;
-
     /**
      * Logs the resulting information in a log file.
      *
@@ -194,33 +191,30 @@ class quickexact_command : public command
     {
         try
         {
-            if (is_sidb_100_lattice)
+            if (std::holds_alternative<sim_result_100>(sim_result))
             {
-                return nlohmann::json{
-                    {"Algorithm name", sim_result_100.algorithm_name},
-                    {"Simulation runtime", sim_result_100.simulation_runtime.count()},
-                    {"Physical parameters",
-                     {{"epsilon_r", sim_result_100.simulation_parameters.epsilon_r},
-                      {"lambda_tf", sim_result_100.simulation_parameters.lambda_tf},
-                      {"mu_minus", sim_result_100.simulation_parameters.mu_minus}}},
-                    {"Lowest state energy (eV)", min_energy},
-                    {"Number of stable states", sim_result_100.charge_distributions.size()},
-                    {"Iteration steps",
-                     std::any_cast<uint64_t>(sim_result_100.additional_simulation_parameters.at("iteration_steps"))},
-                    {"alpha", std::any_cast<double>(sim_result_100.additional_simulation_parameters.at("alpha"))}};
+                const auto& sim_res = std::get<sim_result_100>(sim_result);
+
+                return nlohmann::json{{"Algorithm name", sim_res.algorithm_name},
+                                      {"Simulation runtime", sim_res.simulation_runtime.count()},
+                                      {"Physical parameters",
+                                       {{"epsilon_r", sim_res.simulation_parameters.epsilon_r},
+                                        {"lambda_tf", sim_res.simulation_parameters.lambda_tf},
+                                        {"mu_minus", sim_res.simulation_parameters.mu_minus}}},
+                                      {"Lowest state energy (eV)", min_energy},
+                                      {"Number of stable states", sim_res.charge_distributions.size()}};
             }
-            return nlohmann::json{
-                {"Algorithm name", sim_result_111.algorithm_name},
-                {"Simulation runtime", sim_result_111.simulation_runtime.count()},
-                {"Physical parameters",
-                 {{"epsilon_r", sim_result_111.simulation_parameters.epsilon_r},
-                  {"lambda_tf", sim_result_111.simulation_parameters.lambda_tf},
-                  {"mu_minus", sim_result_111.simulation_parameters.mu_minus}}},
-                {"Lowest state energy (eV)", min_energy},
-                {"Number of stable states", sim_result_111.charge_distributions.size()},
-                {"Iteration steps",
-                 std::any_cast<uint64_t>(sim_result_111.additional_simulation_parameters.at("iteration_steps"))},
-                {"alpha", std::any_cast<double>(sim_result_111.additional_simulation_parameters.at("alpha"))}};
+
+            const auto& sim_res = std::get<sim_result_111>(sim_result);
+
+            return nlohmann::json{{"Algorithm name", sim_res.algorithm_name},
+                                  {"Simulation runtime", sim_res.simulation_runtime.count()},
+                                  {"Physical parameters",
+                                   {{"epsilon_r", sim_res.simulation_parameters.epsilon_r},
+                                    {"lambda_tf", sim_res.simulation_parameters.lambda_tf},
+                                    {"mu_minus", sim_res.simulation_parameters.mu_minus}}},
+                                  {"Lowest state energy (eV)", min_energy},
+                                  {"Number of stable states", sim_res.charge_distributions.size()}};
         }
         catch (...)
         {
@@ -234,9 +228,8 @@ class quickexact_command : public command
     void reset_params()
     {
         physical_params = fiction::sidb_simulation_parameters{2, -0.32, 5.6, 5.0};
-        params          = {};
-        sim_result_100  = {};
-        sim_result_111  = {};
+        qe_params       = {};
+        sim_result      = {};
     }
 };
 

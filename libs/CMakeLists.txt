@@ -17,6 +17,33 @@ check_if_present(mockturtle)
 add_subdirectory(mockturtle)
 target_link_system_libraries(libfiction INTERFACE mockturtle)
 
+# Include JSON by Niels Lohmann
+set(JSON_BuildTests OFF CACHE INTERNAL "")
+add_subdirectory(json EXCLUDE_FROM_ALL)
+target_link_system_libraries(libfiction INTERFACE nlohmann_json::nlohmann_json)
+
+# Include parallel_hashmap by Gregory Popovitch
+check_if_present(parallel-hashmap)
+target_include_directories(libfiction SYSTEM INTERFACE parallel-hashmap/parallel_hashmap)
+
+# Include undirected_graph by Fabian Löschner
+target_include_directories(libfiction SYSTEM INTERFACE undirected_graph/source)
+
+# Include combinations by Howard Hinnant
+target_include_directories(libfiction SYSTEM INTERFACE combinations)
+
+# Include graph-coloring by Brian Crites
+add_subdirectory(graph-coloring EXCLUDE_FROM_ALL)
+target_include_directories(libfiction SYSTEM INTERFACE graph-coloring/Header)
+target_link_system_libraries(libfiction INTERFACE graph-coloring)
+
+# Include tinyXML2
+set(tinyxml2_BUILD_TESTING OFF)
+check_if_present(tinyxml2)
+add_subdirectory(tinyxml2 EXCLUDE_FROM_ALL)
+set_property(TARGET tinyxml2 PROPERTY POSITION_INDEPENDENT_CODE ON)
+target_link_system_libraries(libfiction INTERFACE tinyxml2::tinyxml2)
+
 # Include Catch2
 if (FICTION_TEST)
     check_if_present(Catch2)
@@ -90,11 +117,23 @@ if (FICTION_Z3)
         if (APPLE)
             set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++ -lc++abi")
         endif ()
-
     else ()
         message(SEND_ERROR "Z3 solver could not be detected")
     endif ()
+endif ()
 
+# Enable the usage of ALGLIB by the ALGLIB Project
+option(FICTION_ALGLIB "Automatically download, include, and utilize ALGLIB by the ALGLIB project.")
+if (FICTION_ALGLIB)
+    message(STATUS "Usage of the Z3 solver was enabled.")
+
+    # Compile definition to guard include files
+    target_compile_definitions(libfiction INTERFACE FICTION_ALGLIB_ENABLED)
+
+    # Include and link ALGLIB
+    add_subdirectory(alglib-cmake EXCLUDE_FROM_ALL)
+    target_include_directories(libfiction SYSTEM INTERFACE alglib-cmake/src/cpp/src/headers)
+    target_link_system_libraries(libfiction INTERFACE ALGLIB)
 endif ()
 
 # If using GCC or Clang, find TBB if installed
@@ -130,29 +169,25 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     message(STATUS "Parallel STL algorithms are enabled on MSVC by default")
 endif ()
 
-# Include JSON by Niels Lohmann
-set(JSON_BuildTests OFF CACHE INTERNAL "")
-add_subdirectory(json EXCLUDE_FROM_ALL)
-target_link_system_libraries(libfiction INTERFACE nlohmann_json::nlohmann_json)
-
-# Include parallel_hashmap by Gregory Popovitch
-check_if_present(parallel-hashmap)
-target_include_directories(libfiction SYSTEM INTERFACE parallel-hashmap/parallel_hashmap)
-
-# Include undirected_graph by Fabian Löschner
-target_include_directories(libfiction SYSTEM INTERFACE undirected_graph/source)
-
-# Include combinations by Howard Hinnant
-target_include_directories(libfiction SYSTEM INTERFACE combinations)
-
-# Include graph-coloring by Brian Crites
-add_subdirectory(graph-coloring EXCLUDE_FROM_ALL)
-target_include_directories(libfiction SYSTEM INTERFACE graph-coloring/Header)
-target_link_system_libraries(libfiction INTERFACE graph-coloring)
-
-# Include tinyXML2
-set(tinyxml2_BUILD_TESTING OFF)
-check_if_present(tinyxml2)
-add_subdirectory(tinyxml2 EXCLUDE_FROM_ALL)
-set_property(TARGET tinyxml2 PROPERTY POSITION_INDEPENDENT_CODE ON)
-target_link_system_libraries(libfiction INTERFACE tinyxml2::tinyxml2)
+# Enable jemalloc to be linked
+option(FICTION_ENABLE_JEMALLOC "Automatically download and link jemalloc by Jason Evans.")
+if (FICTION_ENABLE_JEMALLOC)
+    message(STATUS "jemalloc will override the standard malloc implementation globally. Note that your program may run slower when jemalloc is used!")
+    # On Windows, jemalloc needs to be installed manually
+    if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+        message(STATUS "Automatic downloading and linking of jemalloc is not supported on Windows. Make sure that it is installed on your system!")
+        find_package(jemalloc CONFIG REQUIRED)
+        target_link_libraries(libfiction INTERFACE jemalloc)
+    else ()
+        # On Unix-like operating systems, jemalloc can be downloaded, built and linked automatically
+        include(${PROJECT_SOURCE_DIR}/cmake/FetchJemalloc.cmake)
+        if (APPLE)
+            target_link_system_libraries(libfiction INTERFACE jemalloc c++ dl pthread m)
+        elseif (UNIX)
+            target_link_system_libraries(libfiction INTERFACE jemalloc stdc++ dl pthread m)
+        else ()
+            message(FATAL_ERROR "Unsupported environment")
+        endif ()
+        target_include_directories(libfiction SYSTEM INTERFACE jemalloc)
+    endif ()
+endif ()

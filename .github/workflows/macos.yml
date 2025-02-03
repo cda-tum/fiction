@@ -41,12 +41,6 @@ jobs:
         os: [macos-13, macos-14, macos-15]
         compiler: [g++-13, g++-14, clang++]
         include:
-          - os: macos-13
-            architecture: x64
-          - os: macos-14
-            architecture: arm64
-          - os: macos-15
-            architecture: arm64
           - compiler: clang++
             ccompiler: clang
           - compiler: g++-13
@@ -77,8 +71,11 @@ jobs:
         with:
           python-version: "3.13.x"
 
-      # etup TBB for parallel STL algorithms via Homebrew
+      - name: Install building tools
+        if: matrix.os != 'macos-13'
+        run: brew install autoconf
 
+      # Setup TBB for parallel STL algorithms via Homebrew
       - name: Setup TBB
         run: brew install tbb
 
@@ -101,10 +98,6 @@ jobs:
         uses: cda-tum/setup-z3@v1
         with:
           version: ${{env.Z3_VERSION}}
-          platform: macOS
-          architecture: ${{matrix.architecture}}
-        env:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
       # Build and test pipeline for Debug mode
       - name: Create Build Environment (Debug)
@@ -123,6 +116,7 @@ jobs:
           -DFICTION_BENCHMARK=OFF
           -DFICTION_EXPERIMENTS=ON
           -DFICTION_Z3=ON
+          -DFICTION_ALGLIB=ON
           -DFICTION_PROGRESS_BARS=OFF
           -DFICTION_WARNINGS_AS_ERRORS=OFF
           -DMOCKTURTLE_EXAMPLES=OFF
@@ -147,11 +141,13 @@ jobs:
           -DCMAKE_BUILD_TYPE=Release
           -DFICTION_ENABLE_UNITY_BUILD=ON
           -DFICTION_ENABLE_PCH=ON
+          ${{ !startsWith(matrix.compiler, 'g++-') && '-DFICTION_ENABLE_JEMALLOC=ON' || '' }}
           -DFICTION_CLI=ON
           -DFICTION_TEST=ON
           -DFICTION_BENCHMARK=OFF
           -DFICTION_EXPERIMENTS=ON
           -DFICTION_Z3=ON
+          -DFICTION_ALGLIB=ON
           -DFICTION_PROGRESS_BARS=OFF
           -DFICTION_WARNINGS_AS_ERRORS=OFF
           -DMOCKTURTLE_EXAMPLES=OFF

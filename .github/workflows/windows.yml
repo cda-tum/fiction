@@ -82,10 +82,6 @@ jobs:
         uses: cda-tum/setup-z3@v1
         with:
           version: ${{env.Z3_VERSION}}
-          platform: windows
-          architecture: x64
-        env:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
       # Build and test pipeline for Debug mode
 
@@ -104,6 +100,7 @@ jobs:
           -DFICTION_BENCHMARK=OFF
           -DFICTION_EXPERIMENTS=ON
           -DFICTION_Z3=ON
+          -DFICTION_ALGLIB=ON
           -DFICTION_WARNINGS_AS_ERRORS=OFF
           -DMOCKTURTLE_EXAMPLES=OFF
 
@@ -132,6 +129,7 @@ jobs:
           -DFICTION_BENCHMARK=OFF
           -DFICTION_EXPERIMENTS=ON
           -DFICTION_Z3=ON
+          -DFICTION_ALGLIB=ON
           -DFICTION_WARNINGS_AS_ERRORS=OFF
           -DMOCKTURTLE_EXAMPLES=OFF
 

@@ -39,6 +39,7 @@
 #include "pyfiction/algorithms/simulation/sidb/physically_valid_parameters.hpp"
 // #include "pyfiction/algorithms/simulation/sidb/defect_influence.hpp"
 #include "pyfiction/algorithms/simulation/sidb/check_simulation_result_for_equivalence.hpp"
+#include "pyfiction/algorithms/simulation/sidb/clustercomplete.hpp"
 #include "pyfiction/algorithms/simulation/sidb/displacement_robustness_domain.hpp"
 #include "pyfiction/algorithms/simulation/sidb/groundstate_from_simulation_result.hpp"
 #include "pyfiction/algorithms/simulation/sidb/minimum_energy.hpp"
@@ -147,6 +148,7 @@ PYBIND11_MODULE(pyfiction, m, pybind11::mod_gil_not_used())
     pyfiction::exhaustive_ground_state_simulation(m);
     pyfiction::quicksim(m);
     pyfiction::quickexact(m);
+    pyfiction::clustercomplete(m);
     pyfiction::is_ground_state(m);
     pyfiction::minimum_energy(m);
     pyfiction::energy_distribution(m);

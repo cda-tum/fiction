@@ -188,6 +188,7 @@ void charge_distribution_surface_layout(pybind11::module& m, const std::string& 
              py::arg("defect") = fiction::sidb_defect{})
         .def("assign_local_external_potential", &py_cds::assign_local_external_potential, py::arg("external_potential"))
         .def("get_local_external_potentials", &py_cds::get_local_external_potentials)
+        .def("reset_local_external_potential", &py_cds::reset_local_external_potentials)
         .def("get_local_defect_potentials", &py_cds::get_local_defect_potentials)
         .def("get_defects", &py_cds::get_defects)
         //

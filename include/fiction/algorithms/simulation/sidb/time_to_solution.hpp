@@ -5,6 +5,7 @@
 #ifndef FICTION_TIME_TO_SOLUTION_HPP
 #define FICTION_TIME_TO_SOLUTION_HPP
 
+#include "fiction/algorithms/simulation/sidb/clustercomplete.hpp"
 #include "fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
 #include "fiction/algorithms/simulation/sidb/is_ground_state.hpp"
 #include "fiction/algorithms/simulation/sidb/quickexact.hpp"
@@ -106,12 +107,22 @@ void time_to_solution(const Lyt& lyt, const quicksim_params& quicksim_params,
     if (tts_params.engine == exact_sidb_simulation_engine::QUICKEXACT)
     {
         const quickexact_params<cell<Lyt>> params{quicksim_params.simulation_parameters};
-        st.algorithm      = "QuickExact";
+        st.algorithm      = sidb_simulation_engine_name(exact_sidb_simulation_engine::QUICKEXACT);
         simulation_result = quickexact(lyt, params);
+    }
+    else if (tts_params.engine == exact_sidb_simulation_engine::CLUSTERCOMPLETE)
+    {
+#if (FICTION_ALGLIB_ENABLED)
+        const clustercomplete_params<cell<Lyt>> params{quicksim_params.simulation_parameters};
+        st.algorithm      = sidb_simulation_engine_name(exact_sidb_simulation_engine::CLUSTERCOMPLETE);
+        simulation_result = clustercomplete(lyt, params);
+#else   // FICTION_ALGLIB_ENABLED
+        assert(false && "ALGLIB must be enabled if ClusterComplete is to be used");
+#endif  // FICTION_ALGLIB_ENABLED
     }
     else
     {
-        st.algorithm      = "ExGS";
+        st.algorithm      = sidb_simulation_engine_name(exact_sidb_simulation_engine::EXGS);
         simulation_result = exhaustive_ground_state_simulation(lyt, quicksim_params.simulation_parameters);
     }
 
