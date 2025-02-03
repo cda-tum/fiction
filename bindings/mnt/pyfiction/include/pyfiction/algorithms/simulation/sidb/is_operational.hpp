@@ -83,6 +83,22 @@ void is_operational(pybind11::module& m)
           py::arg("canvas_lyt") = std::nullopt, DOC(fiction_is_kink_induced_non_operational_2));
 }
 
+template <typename Lyt>
+void operational_status_assessment_stats(pybind11::module& m, const std::string& lattice = "")
+{
+    namespace py = pybind11;
+
+    py::class_<fiction::operational_status_assessment_stats<Lyt>>(
+        m, fmt::format("operational_status_assessment_stats{}", lattice).c_str(),
+        DOC(fiction_operational_status_assessment_stats))
+        .def(py::init<>())
+        .def_readwrite("simulation_results", &fiction::operational_status_assessment_stats<Lyt>::simulation_results,
+                       DOC(fiction_operational_status_assessment_stats_simulation_results))
+        .def_readwrite("simulator_invocations",
+                       &fiction::operational_status_assessment_stats<Lyt>::simulator_invocations,
+                       DOC(fiction_operational_status_assessment_stats_simulator_invocations));
+}
+
 }  // namespace detail
 
 inline void is_operational(pybind11::module& m)
@@ -101,6 +117,44 @@ inline void is_operational(pybind11::module& m)
         .value("REJECT_KINKS", fiction::is_operational_params::operational_condition::REJECT_KINKS,
                DOC(fiction_is_operational_params_operational_condition_REJECT_KINKS));
 
+    py::enum_<fiction::is_operational_params::operational_analysis_strategy>(
+        m, "operational_analysis_strategy", DOC(fiction_is_operational_params_operational_analysis_strategy))
+        .value("SIMULATION_ONLY", fiction::is_operational_params::operational_analysis_strategy::SIMULATION_ONLY,
+               DOC(fiction_is_operational_params_operational_analysis_strategy_SIMULATION_ONLY))
+        .value("FILTER_ONLY", fiction::is_operational_params::operational_analysis_strategy::FILTER_ONLY,
+               DOC(fiction_is_operational_params_operational_analysis_strategy_FILTER_ONLY))
+        .value("FILTER_THEN_SIMULATION",
+               fiction::is_operational_params::operational_analysis_strategy::FILTER_THEN_SIMULATION,
+               DOC(fiction_is_operational_params_operational_analysis_strategy_FILTER_THEN_SIMULATION));
+
+    py::enum_<fiction::is_operational_params::simulation_results_mode>(
+        m, "simulation_results_mode", DOC(fiction_is_operational_params_simulation_results_mode))
+        .value("KEEP_SIMULATION_RESULTS",
+               fiction::is_operational_params::simulation_results_mode::KEEP_SIMULATION_RESULTS,
+               DOC(fiction_is_operational_params_simulation_results_mode_KEEP_SIMULATION_RESULTS))
+        .value("DISCARD_SIMULATION_RESULTS",
+               fiction::is_operational_params::simulation_results_mode::DISCARD_SIMULATION_RESULTS,
+               DOC(fiction_is_operational_params_simulation_results_mode_DISCARD_SIMULATION_RESULTS));
+
+    py::enum_<fiction::is_operational_params::operational_analysis_strategy>(
+        m, "operational_analysis_strategy", DOC(fiction_is_operational_params_operational_analysis_strategy))
+        .value("SIMULATION_ONLY", fiction::is_operational_params::operational_analysis_strategy::SIMULATION_ONLY,
+               DOC(fiction_is_operational_params_operational_analysis_strategy_SIMULATION_ONLY))
+        .value("FILTER_ONLY", fiction::is_operational_params::operational_analysis_strategy::FILTER_ONLY,
+               DOC(fiction_is_operational_params_operational_analysis_strategy_FILTER_ONLY))
+        .value("FILTER_THEN_SIMULATION",
+               fiction::is_operational_params::operational_analysis_strategy::FILTER_THEN_SIMULATION,
+               DOC(fiction_is_operational_params_operational_analysis_strategy_FILTER_THEN_SIMULATION));
+
+    py::enum_<fiction::is_operational_params::simulation_results_mode>(
+        m, "simulation_results_mode", DOC(fiction_is_operational_params_simulation_results_mode))
+        .value("KEEP_SIMULATION_RESULTS",
+               fiction::is_operational_params::simulation_results_mode::KEEP_SIMULATION_RESULTS,
+               DOC(fiction_is_operational_params_simulation_results_mode_KEEP_SIMULATION_RESULTS))
+        .value("DISCARD_SIMULATION_RESULTS",
+               fiction::is_operational_params::simulation_results_mode::DISCARD_SIMULATION_RESULTS,
+               DOC(fiction_is_operational_params_simulation_results_mode_DISCARD_SIMULATION_RESULTS));
+
     py::class_<fiction::is_operational_params>(m, "is_operational_params", DOC(fiction_is_operational_params))
         .def(py::init<>())
         .def_readwrite("simulation_parameters", &fiction::is_operational_params::simulation_parameters,
@@ -113,9 +167,14 @@ inline void is_operational(pybind11::module& m)
                        DOC(fiction_is_operational_params_op_condition))
         .def_readwrite("strategy_to_analyze_operational_status",
                        &fiction::is_operational_params::strategy_to_analyze_operational_status,
-                       DOC(fiction_is_operational_params_strategy_to_analyze_operational_status));
+                       DOC(fiction_is_operational_params_strategy_to_analyze_operational_status))
+        .def_readwrite("simulation_results_retention", &fiction::is_operational_params::simulation_results_retention,
+                       DOC(fiction_is_operational_params_simulation_results_retention));
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
+    detail::operational_status_assessment_stats<py_sidb_100_lattice>(m);
+    detail::operational_status_assessment_stats<py_sidb_111_lattice>(m);
+
     detail::is_operational<py_sidb_100_lattice>(m);
     detail::is_operational<py_sidb_111_lattice>(m);
 }

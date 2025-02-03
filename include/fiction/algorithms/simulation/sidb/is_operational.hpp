@@ -75,7 +75,6 @@ struct is_operational_params
          */
         REJECT_KINKS
     };
-
     /**
      * Simulation method to determine if the layout is operational or non-operational. There are three possible
      * strategies:
