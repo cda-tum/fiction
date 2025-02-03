@@ -201,7 +201,8 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
         CHECK(mockturtle::to_seconds(stats.time_total) > 0.0);
         CHECK(stats.sim_engine == sidb_simulation_engine::QUICKSIM);
     }
-    SECTION("Four cells in canvas, design all gates with one SiDB in the canvas and sort by ground state isolation (Automatic Exhaustive Gate Designer)")
+    SECTION("Four cells in canvas, design all gates with one SiDB in the canvas and sort by ground state isolation "
+            "(Automatic Exhaustive Gate Designer)")
     {
         const auto params = design_sidb_gates_params<cell<siqad_layout>>{
             is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT},
@@ -220,7 +221,8 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
         CHECK(found_gate_layouts[2].get_cell_type({12, 4, 0}) == siqad_layout::technology::LOGIC);
         CHECK(found_gate_layouts[3].get_cell_type({13, 4, 0}) == siqad_layout::technology::LOGIC);
     }
-    SECTION("Four cells in canvas, design all gates with one SiDB in the canvas and sort by ground state isolation (QuickCell)")
+    SECTION("Four cells in canvas, design all gates with one SiDB in the canvas and sort by ground state isolation "
+            "(QuickCell)")
     {
         const auto params = design_sidb_gates_params<cell<siqad_layout>>{
             is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT},
