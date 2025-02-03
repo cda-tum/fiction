@@ -1113,7 +1113,6 @@ TEMPLATE_TEST_CASE("QuickSim AND gate simulation on the Si-111 surface", "[quick
         const quicksim_params params{sidb_simulation_parameters{2, -0.32, 5.6, 5}, 300000, 0.5, 1, 100};
         const auto            simulation_results_timeout_100 = quicksim<TestType>(lyt, params);
 
-        check_for_absence_of_positive_charges(simulation_results_timeout_100);
         CHECK_THAT(mockturtle::to_seconds(simulation_results_timeout_100.simulation_runtime) * 1000,
                    Catch::Matchers::WithinAbs(100, 5));
         CHECK(

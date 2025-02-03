@@ -62,7 +62,7 @@ struct quicksim_params
  *
  * @tparam Lyt SiDB cell-level layout type.
  * @param lyt The layout to simulate.
- * @param ps Physical parameters. They are material-specific and may vary from experiment to experiment.
+ * @param ps QuickSim parameters.
  * @return sidb_simulation_result is returned with all results.
  */
 template <typename Lyt>
