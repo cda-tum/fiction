@@ -263,9 +263,9 @@ Operational Domain Computation
         .. doxygenstruct:: fiction::parameter_point
            :members:
         .. doxygenenum:: fiction::sweep_parameter
-        .. doxygenstruct:: fiction::operational_domain
+        .. doxygenclass:: fiction::operational_domain
            :members:
-        .. doxygenstruct:: fiction::critical_temperature_domain
+        .. doxygenclass:: fiction::critical_temperature_domain
            :members:
         .. doxygenstruct:: fiction::operational_domain_value_range
            :members:
