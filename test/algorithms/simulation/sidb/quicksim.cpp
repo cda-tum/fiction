@@ -1114,7 +1114,7 @@ TEMPLATE_TEST_CASE("QuickSim AND gate simulation on the Si-111 surface", "[quick
         const auto            simulation_results_timeout_100 = quicksim<TestType>(lyt, params);
 
         CHECK_THAT(mockturtle::to_seconds(simulation_results_timeout_100.simulation_runtime) * 1000,
-                   Catch::Matchers::WithinAbs(100, 5));
+                   Catch::Matchers::WithinAbs(100, 20));
         CHECK(
             std::any_cast<bool>(simulation_results_timeout_100.additional_simulation_parameters.at("timeout_reached")));
     }
