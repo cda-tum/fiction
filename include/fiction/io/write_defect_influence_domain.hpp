@@ -52,12 +52,13 @@ inline void write_defect_influence_domain(const defect_influence_domain<Lyt>& de
 
     writer.write_line("x", "y", "operational status");
 
-    for (const auto& [sim_param, op_val] : defect_infdom.get_domain())
-    {
-        writer.write_line(sim_param.x, sim_param.y,
-                          std::get<0>(op_val) == defect_influence_status::INFLUENTIAL ? params.influential_tag :
-                                                                                        params.non_influential_tag);
-    }
+    defect_infdom.for_each(
+        [&params, &writer](const auto& sim_param, const auto& op_val)
+        {
+            writer.write_line(sim_param.x, sim_param.y,
+                              std::get<0>(op_val) == defect_influence_status::INFLUENTIAL ? params.influential_tag :
+                                                                                            params.non_influential_tag);
+        });
 }
 /**
  * Writes a CSV representation of an defect influence domain to the specified file. The data are written
