@@ -146,8 +146,8 @@ inline void is_operational(pybind11::module& m)
                        DOC(fiction_is_operational_params_simulation_results_retention));
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
-    detail::operational_status_assessment_stats<py_sidb_100_lattice>(m);
-    detail::operational_status_assessment_stats<py_sidb_111_lattice>(m);
+    detail::operational_status_assessment_stats<py_sidb_100_lattice>(m, "_100");
+    detail::operational_status_assessment_stats<py_sidb_111_lattice>(m, "_111");
 
     detail::is_operational<py_sidb_100_lattice>(m);
     detail::is_operational<py_sidb_111_lattice>(m);
