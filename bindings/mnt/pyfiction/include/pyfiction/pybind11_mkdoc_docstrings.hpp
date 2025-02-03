@@ -8887,6 +8887,9 @@ physical parameter combination found for which the given CDS is
 physically valid, it is determined whether the CDS is the ground state
 or the n-th excited state.
 
+Template parameter ``OpDomainTarget``:
+    The target operational domain type.
+
 Parameter ``lyt``:
     SiDB cell-level layout that is simulated and compared to the given
     CDS.
@@ -12111,7 +12114,7 @@ Returns:
 static const char *__doc_fiction_find_key_with_tolerance =
 R"doc(This function searches for a floating-point value specified by the
 `key` in the provided map `map`, applying a tolerance specified by
-`fiction::physical_constants::SCALED_EPSILON`. Each key in the map is
+`fiction::physical_constants::ERROR_MARGIN`. Each key in the map is
 compared to the specified key within this tolerance.
 
 Template parameter ``MapType``:
@@ -19953,9 +19956,6 @@ its associated value if present. This function utilizes the
 Template parameter ``MapType``:
     The type of the map, which must provide the `if_contains` method.
 
-Parameter ``map``:
-    The map in which to search for the specified key.
-
 Parameter ``key``:
     The key to search for in the map.
 
@@ -19969,7 +19969,12 @@ static const char *__doc_fiction_sidb_simulation_domain_for_each =
 R"doc(Iterates over all key-value pairs in the operational domain and
 applies a provided callback function to each pair. This method ensures
 thread-safe access to the underlying data by leveraging the `for_each`
-method of the thread-safe `locked_parallel_flat_hash_map`.)doc";
+method of the thread-safe `locked_parallel_flat_hash_map`.
+
+Parameter ``callback``:
+    A callable object (e.g., lambda, function pointer) that accepts
+    two arguments: the key (`const Key&`) and the associated tuple of
+    mapped values (`const std::tuple<MappedTypes...>&`).)doc";
 
 static const char *__doc_fiction_sidb_simulation_domain_get_value =
 R"doc(Retrieves the value associated with the provided key from the
@@ -20004,8 +20009,8 @@ Returns:
 static const char *__doc_fiction_sidb_simulation_domain_number_of_values =
 R"doc(Counts the number of key-value pairs in the operational domain.
 
-Parameter ``key``:
-    The key to remove from the domain.)doc";
+Returns:
+    The number of key-value pairs in the domain.)doc";
 
 static const char *__doc_fiction_sidb_simulation_domain_sidb_simulation_domain = R"doc(Constructs a new `sidb_simulation_domain` instance.)doc";
 
