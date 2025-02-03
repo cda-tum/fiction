@@ -1386,7 +1386,7 @@ TEMPLATE_TEST_CASE("Grid search to determine the operational domain. The operati
         // this test was created to cover a special case: Strange behavior was observed when no clone was used in the
         // `is_physical_validity_feasible` function.
         op_domain.for_each(
-            [](const auto& pp, const auto& status [[maybe_unused]])
+            [](const auto& pp, const auto& status)
             {
                 CHECK(pp.parameters[0] >= 4.0);
                 CHECK(pp.parameters[1] >= 4.0);
