@@ -1,12 +1,12 @@
 import unittest
 
 from mnt.pyfiction import (
+    aspect_ratio_offset,
     can_positive_charges_occur,
     sidb_100_lattice,
     sidb_111_lattice,
     sidb_simulation_parameters,
     sidb_technology,
-    aspect_ratio_offset,
 )
 
 

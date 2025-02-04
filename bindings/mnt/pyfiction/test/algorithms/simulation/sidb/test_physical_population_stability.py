@@ -1,13 +1,13 @@
 import unittest
 
 from mnt.pyfiction import (
+    aspect_ratio_offset,
     physical_population_stability_100,
     physical_population_stability_111,
     physical_population_stability_params,
     sidb_100_lattice,
     sidb_111_lattice,
     sidb_technology,
-    aspect_ratio_offset,
 )
 
 

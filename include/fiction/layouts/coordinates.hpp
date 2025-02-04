@@ -1195,8 +1195,6 @@ class coord_iterator
     CoordinateType coord;
 };
 
-
-
 }  // namespace fiction
 
 // NOLINTBEGIN(cert-dcl58-cpp)

@@ -39,6 +39,9 @@ from .pyfiction import (  # type: ignore[import-not-found]
     apply_topolinano_library,
     # Technology
     area,
+    aspect_ratio_cube,
+    aspect_ratio_offset,
+    aspect_ratio_siqad,
     automatic_base_number_detection,
     bdl_input_iterator_100,
     bdl_input_iterator_111,
@@ -105,6 +108,7 @@ from .pyfiction import (  # type: ignore[import-not-found]
     critical_temperature_non_gate_based,
     critical_temperature_params,
     critical_temperature_stats,
+    cube_coordinate,
     defect_extent,
     dependent_cell_mode,
     design_sidb_gates,
@@ -191,16 +195,11 @@ from .pyfiction import (  # type: ignore[import-not-found]
     network_balancing,
     network_balancing_params,
     normalize_layout_coordinates,
-    aspect_ratio_offset,
-    aspect_ratio_cube,
-    aspect_ratio_siqad,
-    # Utils
-    offset_coordinate,
-    siqad_coordinate,
-    cube_coordinate,
     num_adjacent_coordinates,
     occupation_probability_gate_based,
     occupation_probability_non_gate_based,
+    # Utils
+    offset_coordinate,
     operational_condition,
     operational_domain,
     operational_domain_contour_tracing,
@@ -273,6 +272,7 @@ from .pyfiction import (  # type: ignore[import-not-found]
     sign_to_charge_state,
     ### logic
     simulate,
+    siqad_coordinate,
     sqd_parsing_error,
     squared_euclidean_distance,
     ## network_transformation
@@ -343,6 +343,9 @@ __all__ = [
     "apply_topolinano_library",
     # Technology
     "area",
+    "aspect_ratio_cube",
+    "aspect_ratio_offset",
+    "aspect_ratio_siqad",
     "automatic_base_number_detection",
     "bdl_input_iterator_100",
     "bdl_input_iterator_111",
@@ -409,6 +412,7 @@ __all__ = [
     "critical_temperature_non_gate_based",
     "critical_temperature_params",
     "critical_temperature_stats",
+    "cube_coordinate",
     "defect_extent",
     "dependent_cell_mode",
     "design_sidb_gates",
@@ -499,6 +503,7 @@ __all__ = [
     "num_adjacent_coordinates",
     "occupation_probability_gate_based",
     "occupation_probability_non_gate_based",
+    "offset_coordinate",
     "operational_condition",
     "operational_domain",
     "operational_domain_contour_tracing",
@@ -571,6 +576,7 @@ __all__ = [
     "sign_to_charge_state",
     ### logic
     "simulate",
+    "siqad_coordinate",
     "sqd_parsing_error",
     "squared_euclidean_distance",
     ## network_transformation

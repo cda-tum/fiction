@@ -2,6 +2,7 @@ import os
 import unittest
 
 from mnt.pyfiction import (
+    aspect_ratio_offset,
     charge_distribution_surface_100,
     charge_distribution_surface_111,
     create_not_tt,
@@ -15,7 +16,6 @@ from mnt.pyfiction import (
     sidb_111_lattice,
     sidb_simulation_engine,
     sidb_technology,
-    aspect_ratio_offset,
 )
 
 dir_path = os.path.dirname(os.path.realpath(__file__))

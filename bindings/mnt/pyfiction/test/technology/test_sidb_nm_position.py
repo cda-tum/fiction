@@ -1,6 +1,6 @@
 import unittest
 
-from mnt.pyfiction import sidb_100_lattice, sidb_111_lattice, sidb_layout, sidb_nm_position, aspect_ratio_offset
+from mnt.pyfiction import aspect_ratio_offset, sidb_100_lattice, sidb_111_lattice, sidb_layout, sidb_nm_position
 
 
 class TestSiDBNmPosition(unittest.TestCase):

@@ -1,13 +1,13 @@
 import unittest
 
 from mnt.pyfiction import (
+    aspect_ratio_offset,
     bdl_wire_selection,
     charge_distribution_surface_100,
     detect_bdl_wires_100,
     detect_bdl_wires_params,
     sidb_100_lattice,
     sidb_technology,
-    aspect_ratio_offset,
 )
 
 

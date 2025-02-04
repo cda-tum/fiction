@@ -258,7 +258,7 @@ inline void coordinates(pybind11::module& m)
     detail::aspect_ratio_bindings<py_siqad_coordinate>(m, "_siqad");
 }
 
-} // namespace pyfiction
+}  // namespace pyfiction
 
 #pragma GCC diagnostic pop
 

@@ -1,6 +1,7 @@
 import unittest
 
 from mnt.pyfiction import (
+    aspect_ratio_offset,
     create_and_tt,
     create_nor_tt,
     design_sidb_gates,
@@ -11,7 +12,6 @@ from mnt.pyfiction import (
     sidb_111_lattice,
     sidb_simulation_engine,
     sidb_technology,
-    aspect_ratio_offset,
 )
 
 
