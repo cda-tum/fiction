@@ -285,10 +285,10 @@ class hexagonal_layout
      *
      * @param max The new end coordinate defining the layout's size.
      */
-//    void resize(const coordinate& max) noexcept
-//    {
-//        resize(aspect_ratio{max});
-//    }
+    //    void resize(const coordinate& max) noexcept
+    //    {
+    //        resize(aspect_ratio{max});
+    //    }
     //    void resize(const aspect_ratio& ar) noexcept
     //    {
     //        strg->dimension = ar;
