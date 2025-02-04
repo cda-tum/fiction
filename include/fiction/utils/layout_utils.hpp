@@ -313,6 +313,7 @@ auto convert_layout_to_siqad_coordinates(const Lyt& lyt) noexcept
     auto process_layout = [](auto& lyt_orig, auto lyt_new)
     {
         // todo rethink this
+
         lyt_new.resize(aspect_ratio_t<decltype(lyt_new)>{lyt_orig.x(), (lyt_orig.y() - lyt_orig.y() % 2) / 2, 1});
         lyt_new.set_layout_name(lyt_orig.get_layout_name());
         lyt_new.set_tile_size_x(lyt_orig.get_tile_size_x());
