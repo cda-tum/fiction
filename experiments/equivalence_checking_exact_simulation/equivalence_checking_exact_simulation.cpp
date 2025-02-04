@@ -65,6 +65,7 @@ int main()  // NOLINT
     threads.reserve(num_threads_to_use);
 
     std::mutex mutex_qe{};
+    std::mutex mutex_cc{};
 
     for (const auto& [range_start, range_end] : ranges)
     {
@@ -90,7 +91,6 @@ int main()  // NOLINT
                     }
 
 #if (FICTION_ALGLIB_ENABLED)
-                    std::mutex                                          mutex_cc{};
                     clustercomplete_params<cell<sidb_100_cell_clk_lyt>> cc_params{params};
                     cc_params.available_threads = 1;
 
