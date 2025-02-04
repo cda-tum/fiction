@@ -91,8 +91,8 @@ void cell_level_layout(pybind11::module& m, const std::string& coord_type)
         .def(py::init<const fiction::aspect_ratio<fiction::coordinate<CellLyt>>&>(), py::arg("dimension"),
              DOC(fiction_cell_level_layout_cell_level_layout))
         .def(py::init(
-                 [](const fiction::aspect_ratio<fiction::coordinate<CellLyt>>& dimension, const std::string& scheme_name,
-                    const std::string& layout_name) -> CellLyt
+                 [](const fiction::aspect_ratio<fiction::coordinate<CellLyt>>& dimension,
+                    const std::string& scheme_name, const std::string& layout_name) -> CellLyt
                  {
                      if (const auto scheme = fiction::get_clocking_scheme<CellLyt>(scheme_name); scheme.has_value())
                      {

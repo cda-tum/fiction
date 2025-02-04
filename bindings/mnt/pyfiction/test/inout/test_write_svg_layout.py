@@ -2,6 +2,7 @@ import unittest
 
 import mnt.pyfiction
 from mnt.pyfiction import (
+    aspect_ratio_offset,
     charge_distribution_surface_100,
     color_mode,
     sidb_100_lattice,
@@ -9,7 +10,6 @@ from mnt.pyfiction import (
     sidb_technology,
     write_sidb_layout_svg_params,
     write_sidb_layout_svg_to_string,
-    aspect_ratio_offset,
 )
 
 

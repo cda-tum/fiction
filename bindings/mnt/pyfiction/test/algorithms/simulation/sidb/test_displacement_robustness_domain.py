@@ -1,6 +1,7 @@
 import unittest
 
 from mnt.pyfiction import (
+    aspect_ratio_offset,
     create_and_tt,
     determine_displacement_robustness_domain_100,
     dimer_displacement_policy,
@@ -11,7 +12,6 @@ from mnt.pyfiction import (
     sidb_100_lattice,
     sidb_simulation_parameters,
     sidb_technology,
-    aspect_ratio_offset,
 )
 
 

@@ -45,7 +45,7 @@ class clustercomplete_command : public command
                 "ClusterComplete is a proof of concept of the more general idea of state space pruning in a cluster "
                 "hierarchy. In the application on SiDB layouts, it is able to simulate SiDB logic in base 3 for 50 DBs "
                 "and more, depending on the layout that determines base of the exponential growth in simulation "
-                "complexity with added SiDBs. The shorter alias command is 'ccsim'.")
+                "complexity with added SiDBs.")
     {
         add_option("--base,-b", physical_params.base, "The simulation base, can be 2 or 3", true);
         add_option("--epsilon_r,-e", physical_params.epsilon_r, "Electric permittivity of the substrate (unit-less)",

@@ -1,6 +1,7 @@
 import unittest
 
 from mnt.pyfiction import (
+    aspect_ratio_offset,
     charge_distribution_surface_100,
     charge_distribution_surface_111,
     minimum_energy,
@@ -9,7 +10,6 @@ from mnt.pyfiction import (
     sidb_charge_state,
     sidb_simulation_parameters,
     sidb_technology,
-    aspect_ratio_offset
 )
 
 

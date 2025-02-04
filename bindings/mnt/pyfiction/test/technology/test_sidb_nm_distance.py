@@ -1,6 +1,12 @@
 import unittest
 
-from mnt.pyfiction import sidb_100_lattice, sidb_111_lattice, sidb_nm_distance_100, sidb_nm_distance_111, aspect_ratio_offset
+from mnt.pyfiction import (
+    aspect_ratio_offset,
+    sidb_100_lattice,
+    sidb_111_lattice,
+    sidb_nm_distance_100,
+    sidb_nm_distance_111,
+)
 
 
 class TestSiDBNmDistance(unittest.TestCase):

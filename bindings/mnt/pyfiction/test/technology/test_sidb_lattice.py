@@ -1,6 +1,6 @@
 import unittest
 
-from mnt.pyfiction import sidb_100_lattice, sidb_111_lattice, sidb_technology, aspect_ratio_offset
+from mnt.pyfiction import aspect_ratio_offset, sidb_100_lattice, sidb_111_lattice, sidb_technology
 
 
 class TestSiDBLattice(unittest.TestCase):

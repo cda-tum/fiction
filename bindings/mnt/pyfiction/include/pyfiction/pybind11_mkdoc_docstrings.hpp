@@ -1551,16 +1551,6 @@ Initializes the layout with the highest possible coordinate at (0, 0,
 0), effectively creating a layout with a single coordinate.)doc";
 
 static const char *__doc_fiction_cartesian_layout_cartesian_layout_2 =
-R"doc(Constructs a cartesian_layout from an aspect_ratio.
-
-This constructor initializes the layout's dimensions based on the
-provided aspect_ratio, and sets the origin to the min coordinate of
-the aspect_ratio.
-
-Parameter ``ar``:
-    The aspect_ratio defining the layout's size and origin.)doc";
-
-static const char *__doc_fiction_cartesian_layout_cartesian_layout_3 =
 R"doc(Copy constructor from another layout's storage.
 
 Parameter ``s``:
@@ -2046,15 +2036,6 @@ start coordinate of the aspect_ratio.
 
 Parameter ``ar``:
     The new aspect_ratio to apply to the layout.)doc";
-
-static const char *__doc_fiction_cartesian_layout_resize_2 =
-R"doc(Overloaded resize method to accept a coordinate.
-
-This method resizes the layout by creating an aspect_ratio from the
-provided max coordinate, with the origin remaining unchanged.
-
-Parameter ``max``:
-    The new end coordinate defining the layout's size.)doc";
 
 static const char *__doc_fiction_cartesian_layout_south =
 R"doc(Returns the coordinate that is directly adjacent in southern direction
@@ -15117,6 +15098,15 @@ R"doc(Updates the layout's dimensions, effectively resizing it.
 
 Parameter ``ar``:
     New aspect ratio.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_resize_2 =
+R"doc(Overloaded resize method to accept a coordinate.
+
+This method resizes the layout by creating an aspect_ratio from the
+provided max coordinate, with the origin remaining unchanged.
+
+Parameter ``max``:
+    The new end coordinate defining the layout's size.)doc";
 
 static const char *__doc_fiction_hexagonal_layout_south =
 R"doc(Returns the coordinate that is directly adjacent in southern direction

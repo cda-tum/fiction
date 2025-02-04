@@ -23,10 +23,8 @@ ExternalProject_Add(
         PREFIX ${JEMALLOC_PREFIX_DIR}
         URL "https://github.com/jemalloc/jemalloc/archive/refs/tags/${JEMALLOC_TAG}.tar.gz"
         SOURCE_DIR ${JEMALLOC_SOURCE_DIR}
-
-        # Optional: embed version info if you want
-        UPDATE_COMMAND bash -c "echo \"${JEMALLOC_TAG}-0-g$(git ls-remote --tags https://github.com/jemalloc/jemalloc.git | grep ${JEMALLOC_TAG} | tail -1 | cut -f1)\" > ${JEMALLOC_SOURCE_DIR}/VERSION"
-        CONFIGURE_COMMAND cd ${JEMALLOC_SOURCE_DIR} && ./autogen.sh --prefix=${JEMALLOC_INSTALL_DIR} && rm VERSION
+        UPDATE_COMMAND ""
+        CONFIGURE_COMMAND bash -c "echo \"${JEMALLOC_TAG}-0-g$(git ls-remote --tags https://github.com/jemalloc/jemalloc.git | grep ${JEMALLOC_TAG} | tail -1 | cut -f1)\" > ${JEMALLOC_SOURCE_DIR}/VERSION" && cd ${JEMALLOC_SOURCE_DIR} && ./autogen.sh --prefix=${JEMALLOC_INSTALL_DIR} && rm VERSION
         BUILD_COMMAND cd ${JEMALLOC_SOURCE_DIR} && make ${PARALLEL_BUILD_ARGS}
         INSTALL_COMMAND cd ${JEMALLOC_SOURCE_DIR} && make -j1 install
 )

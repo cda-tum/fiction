@@ -85,10 +85,9 @@ class cartesian_layout
      * a layout with a single coordinate.
      */
     explicit cartesian_layout(const aspect_ratio& ar = {}) :
-            strg{std::make_shared<cartesian_layout_storage>(initialize_dimension(ar))}
-    {
+            strg{std::make_shared<cartesian_layout_storage>(initialize_dimension(ar))} {
 
-    };
+            };
     /**
      * Constructs a cartesian_layout from an aspect_ratio.
      *
@@ -97,7 +96,7 @@ class cartesian_layout
      *
      * @param ar The aspect_ratio defining the layout's size and origin.
      */
-//    explicit cartesian_layout(const aspect_ratio& ar) : strg{std::make_shared<cartesian_layout_storage>(ar)} {}
+    //    explicit cartesian_layout(const aspect_ratio& ar) : strg{std::make_shared<cartesian_layout_storage>(ar)} {}
 
     /**
      * Copy constructor from another layout's storage.
