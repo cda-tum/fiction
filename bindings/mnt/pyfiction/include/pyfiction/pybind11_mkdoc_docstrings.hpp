@@ -15099,15 +15099,6 @@ R"doc(Updates the layout's dimensions, effectively resizing it.
 Parameter ``ar``:
     New aspect ratio.)doc";
 
-static const char *__doc_fiction_hexagonal_layout_resize_2 =
-R"doc(Overloaded resize method to accept a coordinate.
-
-This method resizes the layout by creating an aspect_ratio from the
-provided max coordinate, with the origin remaining unchanged.
-
-Parameter ``max``:
-    The new end coordinate defining the layout's size.)doc";
-
 static const char *__doc_fiction_hexagonal_layout_south =
 R"doc(Returns the coordinate that is directly adjacent in southern direction
 of a given coordinate `c`, i.e., the face whose y-dimension is higher
@@ -22585,9 +22576,9 @@ static const char *__doc_fmt_formatter_parse = R"doc()doc";
 
 static const char *__doc_fmt_formatter_parse_2 = R"doc()doc";
 
-static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_layouts_coordinates_hpp_1281_8 = R"doc()doc";
+static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_layouts_coordinates_hpp_1280_8 = R"doc()doc";
 
-static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_layouts_coordinates_hpp_1297_8 = R"doc()doc";
+static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_layouts_coordinates_hpp_1296_8 = R"doc()doc";
 
 static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_technology_cell_ports_hpp_291_8 = R"doc()doc";
 
