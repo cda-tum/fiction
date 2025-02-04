@@ -51,7 +51,7 @@ class cartesian_layout
 #pragma region Types and constructors
 
     using coordinate   = OffsetCoordinateType;
-    using aspect_ratio = aspect_ratio<OffsetCoordinateType>;
+    using aspect_ratio_t = aspect_ratio<OffsetCoordinateType>;
 
     /**
      * Struct representing the storage for a cartesian_layout.
@@ -66,9 +66,9 @@ class cartesian_layout
          * @param dim The dimensions of the layout (width, height, etc.).
          * @param org The origin coordinate. Defaults to (0, 0, 0).
          */
-        explicit cartesian_layout_storage(const aspect_ratio& ar) : ar{ar} {}
+        explicit cartesian_layout_storage(const aspect_ratio_t& ar) : ar{ar} {}
 
-        aspect_ratio ar;  // width,height, etc.
+        aspect_ratio_t ar;  // width,height, etc.
     };
 
     static constexpr auto min_fanin_size = 0u;  // NOLINT(readability-identifier-naming): mockturtle requirement
@@ -84,7 +84,7 @@ class cartesian_layout
      * Initializes the layout with the highest possible coordinate at (0, 0, 0), effectively creating
      * a layout with a single coordinate.
      */
-    explicit cartesian_layout(const aspect_ratio& ar = {}) :
+    explicit cartesian_layout(const aspect_ratio_t& ar = {}) :
             strg{std::make_shared<cartesian_layout_storage>(initialize_dimension(ar))} {
 
             };
@@ -245,7 +245,7 @@ class cartesian_layout
      *
      * @param ar The new aspect_ratio to apply to the layout.
      */
-    void resize(const aspect_ratio& ar) noexcept
+    void resize(const aspect_ratio_t& ar) noexcept
     {
         strg->ar = ar;
     }
@@ -932,7 +932,7 @@ class cartesian_layout
      * Initializer for a cartesian layout dimension. When using SiQAD coordinates, it will default the z value to 1 if
      * the y value is greater than 0.
      */
-    constexpr aspect_ratio initialize_dimension(const aspect_ratio& coord) const
+    constexpr aspect_ratio_t initialize_dimension(const aspect_ratio_t& coord) const
     {
         if constexpr (std::is_same_v<OffsetCoordinateType, siqad::coord_t>)
         {
