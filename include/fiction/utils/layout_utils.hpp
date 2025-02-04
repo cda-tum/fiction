@@ -250,7 +250,7 @@ template <typename Lyt>
  * @return New normalized equivalent layout.
  */
 template <typename Lyt>
-Lyt normalize_layout_coordinates(const Lyt& lyt) noexcept
+[[nodiscard]] Lyt normalize_layout_coordinates(const Lyt& lyt) noexcept
 {
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
@@ -312,7 +312,8 @@ auto convert_layout_to_siqad_coordinates(const Lyt& lyt) noexcept
 
     auto process_layout = [](auto& lyt_orig, auto lyt_new)
     {
-        lyt_new.resize(aspect_ratio_t<decltype(lyt_new)>{lyt_orig.x(), (lyt_orig.y() - lyt_orig.y() % 2) / 2});
+        // todo rethink this
+        lyt_new.resize(aspect_ratio_t<decltype(lyt_new)>{lyt_orig.x(), (lyt_orig.y() - lyt_orig.y() % 2) / 2, 1});
         lyt_new.set_layout_name(lyt_orig.get_layout_name());
         lyt_new.set_tile_size_x(lyt_orig.get_tile_size_x());
         lyt_new.set_tile_size_y(lyt_orig.get_tile_size_y());
@@ -434,7 +435,8 @@ template <typename LytDest, typename LytSrc>
 
     if (are_cells_assigned_to_negative_coordinates && has_offset_ucoord_v<LytDest>)
     {
-        return convert_layout_to_fiction_coordinates<LytDest>(normalize_layout_coordinates(lyt));
+        const auto normalized_lyt = normalize_layout_coordinates(lyt);
+        return convert_layout_to_fiction_coordinates<LytDest>(normalized_lyt);
     }
 
     auto process_layout = [&lyt](auto lyt_new)

@@ -909,7 +909,6 @@ struct aspect_ratio
                           std::is_same_v<CoordinateType, offset::ucoord_t>,
                       "CoordinateType is not supported");
     }
-
     /**
      * Constructs an aspect_ratio from a single end coordinate.
      *
@@ -990,7 +989,7 @@ struct aspect_ratio
     }
     auto x() const
     {
-        return static_cast<uint64_t>(integral_abs(max.x - min.x));
+        return static_cast<decltype(max.x)>(integral_abs(max.x - min.x));
     }
     /**
      * Gets the y-coordinate of the maximum position.
@@ -1024,7 +1023,7 @@ struct aspect_ratio
     }
     auto z() const
     {
-        return static_cast<uint64_t>(integral_abs(max.z - min.z));
+        return static_cast<decltype(max.z)>(integral_abs(max.z - min.z));
     }
     /**
      * Equality operator for `aspect_ratio`.
@@ -1053,10 +1052,10 @@ struct aspect_ratio
     {
         if constexpr (std::is_same_v<CoordinateType, siqad::coord_t>)
         {
-            return ((x() + 1) * (2 * y() + z() + 1));
+            return static_cast<uint64_t>(((x() + 1) * (2 * y() + z() + 1)));
         }
 
-        return ((x() + 1) * (y() + 1));
+        return static_cast<uint64_t>((x() + 1) * (y() + 1));
     }
     /**
      * Computes the volume of a given coordinate assuming its origin is (0, 0, 0). Calculates \f$(|x| + 1) \cdot (|y| +

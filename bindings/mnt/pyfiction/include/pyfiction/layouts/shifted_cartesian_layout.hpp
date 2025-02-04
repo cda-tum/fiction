@@ -57,7 +57,7 @@ inline void shifted_cartesian_layout(pybind11::module& m, const std::string& coo
         .def(
             "area", [](const ShiftedCartLyt& lyt) { return lyt.area(); }, DOC(fiction_cartesian_layout_area))
         .def(
-            "resize", [](ShiftedCartLyt& lyt, const CoordType& dimension) { lyt.resize(dimension); },
+            "resize", [](ShiftedCartLyt& lyt, const fiction::aspect_ratio<CoordType>& dimension) { lyt.resize(dimension); },
             py::arg("dimension"), DOC(fiction_cartesian_layout_resize))
         .def(
             "north", [](const ShiftedCartLyt& lyt, const CoordType& c) { return lyt.north(c); }, py::arg("c"),

@@ -936,7 +936,7 @@ class cartesian_layout
     {
         if constexpr (std::is_same_v<OffsetCoordinateType, siqad::coord_t>)
         {
-            return aspect_ratio{{coord.max.x, coord.max.y, 1}};
+            return aspect_ratio{coord.max.x, coord.max.y, 1};
         }
 
         return coord;
