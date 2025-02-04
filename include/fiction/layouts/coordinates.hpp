@@ -903,7 +903,12 @@ struct aspect_ratio
      *
      * This creates a layout with a single point at the origin.
      */
-    aspect_ratio() : min{0, 0, 0}, max{0, 0, 0} {}
+    aspect_ratio() : min{0, 0, 0}, max{0, 0, 0}
+    {
+        static_assert(std::is_same_v<CoordinateType, cube::coord_t> || std::is_same_v<CoordinateType, siqad::coord_t> ||
+                          std::is_same_v<CoordinateType, offset::ucoord_t>,
+                      "CoordinateType is not supported");
+    }
 
     /**
      * Constructs an aspect_ratio from a single end coordinate.
@@ -912,7 +917,12 @@ struct aspect_ratio
      *
      * @param e The maximum coordinate defining the layout's size.
      */
-    explicit aspect_ratio(const CoordinateType& e) : min{0, 0, 0}, max{e} {}
+    explicit aspect_ratio(const CoordinateType& e) : min{0, 0, 0}, max{e}
+    {
+        static_assert(std::is_same_v<CoordinateType, cube::coord_t> || std::is_same_v<CoordinateType, siqad::coord_t> ||
+                          std::is_same_v<CoordinateType, offset::ucoord_t>,
+                      "CoordinateType is not supported");
+    }
 
     /**
      * Constructs an aspect_ratio from specified start and end coordinates.
@@ -922,6 +932,9 @@ struct aspect_ratio
      */
     aspect_ratio(const CoordinateType& minimum, const CoordinateType& maximum) : min{minimum}, max{maximum}
     {
+        static_assert(std::is_same_v<CoordinateType, cube::coord_t> || std::is_same_v<CoordinateType, siqad::coord_t> ||
+                          std::is_same_v<CoordinateType, offset::ucoord_t>,
+                      "CoordinateType is not supported");
         assert(minimum <= maximum);
     }
 
@@ -1194,8 +1207,6 @@ class coord_iterator
 
     CoordinateType coord;
 };
-
-
 
 }  // namespace fiction
 
