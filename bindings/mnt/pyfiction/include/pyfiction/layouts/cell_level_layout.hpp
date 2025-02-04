@@ -32,7 +32,6 @@ template <typename Technology>
 void fcn_technology(pybind11::module& m)
 {
     namespace py = pybind11;
-    namespace py = pybind11;
 
     // fetch technology name
     auto tech_name = std::string{fiction::tech_impl_name<Technology>};
@@ -89,10 +88,10 @@ void cell_level_layout(pybind11::module& m, const std::string& coord_type)
     py::class_<CellLyt, ClockedLyt>(m, fmt::format("{}_layout_{}", tech_name, coord_type).c_str(),
                                     DOC(fiction_cell_level_layout))
         .def(py::init<>())
-        .def(py::init<const fiction::aspect_ratio<CellLyt>&>(), py::arg("dimension"),
+        .def(py::init<const fiction::aspect_ratio<fiction::coordinate<CellLyt>>&>(), py::arg("dimension"),
              DOC(fiction_cell_level_layout_cell_level_layout))
         .def(py::init(
-                 [](const fiction::aspect_ratio<CellLyt>& dimension, const std::string& scheme_name,
+                 [](const fiction::aspect_ratio<fiction::coordinate<CellLyt>>& dimension, const std::string& scheme_name,
                     const std::string& layout_name) -> CellLyt
                  {
                      if (const auto scheme = fiction::get_clocking_scheme<CellLyt>(scheme_name); scheme.has_value())

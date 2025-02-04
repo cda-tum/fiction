@@ -155,7 +155,7 @@ class hexagonal_layout
 #pragma region Types and constructors
 
     using coordinate   = OffsetCoordinateType;
-    using aspect_ratio = OffsetCoordinateType;
+    using aspect_ratio = aspect_ratio<OffsetCoordinateType>;
 
     using cube_coordinate = CubeCoordinateType;
 
@@ -239,7 +239,7 @@ class hexagonal_layout
      */
     [[nodiscard]] uint64_t x() const noexcept
     {
-        return strg->dimension.x;
+        return strg->dimension.x();
     }
     /**
      * Returns the layout's y-dimension, i.e., returns the biggest y-value that still belongs to the layout.
@@ -248,7 +248,7 @@ class hexagonal_layout
      */
     [[nodiscard]] uint64_t y() const noexcept
     {
-        return strg->dimension.y;
+        return strg->dimension.y();
     }
     /**
      * Returns the layout's z-dimension, i.e., returns the biggest z-value that still belongs to the layout.
@@ -257,7 +257,7 @@ class hexagonal_layout
      */
     [[nodiscard]] uint64_t z() const noexcept
     {
-        return strg->dimension.z;
+        return strg->dimension.z();
     }
     /**
      * Returns the layout's number of faces depending on the coordinate type.
@@ -266,7 +266,7 @@ class hexagonal_layout
      */
     [[nodiscard]] uint64_t area() const noexcept
     {
-        return fiction::area(strg->dimension);
+        return strg->dimension.area();
     }
     /**
      * Updates the layout's dimensions, effectively resizing it.
@@ -277,6 +277,22 @@ class hexagonal_layout
     {
         strg->dimension = ar;
     }
+    /**
+     * Overloaded resize method to accept a coordinate.
+     *
+     * This method resizes the layout by creating an aspect_ratio from the provided max coordinate,
+     * with the origin remaining unchanged.
+     *
+     * @param max The new end coordinate defining the layout's size.
+     */
+    void resize(const coordinate& max) noexcept
+    {
+        resize(aspect_ratio{max});
+    }
+//    void resize(const aspect_ratio& ar) noexcept
+//    {
+//        strg->dimension = ar;
+//    }
 
 #pragma endregion
 
@@ -828,8 +844,8 @@ class hexagonal_layout
     [[nodiscard]] auto coordinates(const OffsetCoordinateType& start = {}, const OffsetCoordinateType& stop = {}) const
     {
         return range_t{
-            std::make_pair(coord_iterator{strg->dimension, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
-                           coord_iterator{strg->dimension, stop.is_dead() ? strg->dimension.get_dead() : stop})};
+            std::make_pair(coord_iterator{strg->dimension.max, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
+                           coord_iterator{strg->dimension.max, stop.is_dead() ? strg->dimension.max.get_dead() : stop})};
     }
     /**
      * Applies a function to all coordinates accessible in the layout between `start` and `stop`. The iteration order is
@@ -845,8 +861,8 @@ class hexagonal_layout
                             const OffsetCoordinateType& stop = {}) const
     {
         mockturtle::detail::foreach_element(
-            coord_iterator{strg->dimension, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
-            coord_iterator{strg->dimension, stop.is_dead() ? strg->dimension.get_dead() : stop}, fn);
+            coord_iterator{strg->dimension.max, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
+            coord_iterator{strg->dimension.max, stop.is_dead() ? strg->dimension.max.get_dead() : stop}, fn);
     }
     /**
      * Returns a range of all coordinates accessible in the layout's ground layer between `start` and `stop`. The
@@ -865,8 +881,8 @@ class hexagonal_layout
         auto ground_layer = aspect_ratio{x(), y(), 0};
 
         return range_t{
-            std::make_pair(coord_iterator{ground_layer, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
-                           coord_iterator{ground_layer, stop.is_dead() ? ground_layer.get_dead() : stop})};
+            std::make_pair(coord_iterator{ground_layer.max, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
+                           coord_iterator{ground_layer.max, stop.is_dead() ? ground_layer.max.get_dead() : stop})};
     }
     /**
      * Applies a function to all coordinates accessible in the layout's ground layer between `start` and `stop`. The
@@ -886,8 +902,8 @@ class hexagonal_layout
         auto ground_layer = aspect_ratio{x(), y(), 0};
 
         mockturtle::detail::foreach_element(
-            coord_iterator{ground_layer, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
-            coord_iterator{ground_layer, stop.is_dead() ? ground_layer.get_dead() : stop}, fn);
+            coord_iterator{ground_layer.max, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
+            coord_iterator{ground_layer.max, stop.is_dead() ? ground_layer.max.get_dead() : stop}, fn);
     }
     /**
      * Returns a container that contains all coordinates that are adjacent to a given one. Thereby, cardinal and ordinal

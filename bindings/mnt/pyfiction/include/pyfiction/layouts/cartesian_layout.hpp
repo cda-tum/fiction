@@ -41,7 +41,7 @@ void cartesian_layout(pybind11::module& m, const std::string& coord_type)
     py::class_<CartLyt>(m, fmt::format("cartesian_layout_{}", coord_type).c_str(),
                         DOC(fiction_cartesian_layout_overridden))
         .def(py::init<>())
-        .def(py::init<const fiction::aspect_ratio<CartLyt>&>(), py::arg("dimension"),
+        .def(py::init<const fiction::aspect_ratio<fiction::coordinate<CartLyt>>&>(), py::arg("ar"),
              DOC(fiction_cartesian_layout_cartesian_layout))
         .def(
             "coord", [](const CartLyt& layout, const int64_t x, const int64_t y, const int64_t z)
@@ -51,7 +51,7 @@ void cartesian_layout(pybind11::module& m, const std::string& coord_type)
         .def("y", &CartLyt::y, DOC(fiction_cartesian_layout_y))
         .def("z", &CartLyt::z, DOC(fiction_cartesian_layout_z))
         .def("area", &CartLyt::area, DOC(fiction_cartesian_layout_area))
-        .def("resize", &CartLyt::resize, py::arg("dimension"), DOC(fiction_cartesian_layout_resize))
+//        .def("resize", &CartLyt::resize, py::arg("dimension"), DOC(fiction_cartesian_layout_resize))
 
         .def("north", &CartLyt::north, py::arg("c"), DOC(fiction_cartesian_layout_north))
         .def("north_east", &CartLyt::north_east, py::arg("c"), DOC(fiction_cartesian_layout_north_east))

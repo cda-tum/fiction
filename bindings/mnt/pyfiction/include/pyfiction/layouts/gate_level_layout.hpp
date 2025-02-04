@@ -33,10 +33,10 @@ void gate_level_layout(pybind11::module& m, const std::string& topology, const s
     py::class_<GateLyt, LytBase>(m, fmt::format("{}_gate_layout_{}", topology, coord_type).c_str(),
                                  DOC(fiction_gate_level_layout))
         .def(py::init<>())
-        .def(py::init<const fiction::aspect_ratio<GateLyt>&>(), py::arg("dimension"),
+        .def(py::init<const fiction::aspect_ratio<fiction::coordinate<GateLyt>>&>(), py::arg("dimension"),
              DOC(fiction_gate_level_layout_gate_level_layout))
         .def(py::init(
-                 [](const fiction::aspect_ratio<GateLyt>& dimension, const std::string& scheme_name,
+                 [](const fiction::aspect_ratio<fiction::coordinate<GateLyt>>& dimension, const std::string& scheme_name,
                     const std::string& layout_name) -> GateLyt
                  {
                      if (const auto scheme = fiction::get_clocking_scheme<GateLyt>(scheme_name); scheme.has_value())

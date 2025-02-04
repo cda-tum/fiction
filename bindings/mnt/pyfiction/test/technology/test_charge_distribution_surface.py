@@ -9,6 +9,7 @@ from mnt.pyfiction import (
     sidb_charge_state,
     sidb_layout,
     sidb_technology,
+    aspect_ratio_offset,
 )
 
 
@@ -47,7 +48,7 @@ class TestChargeDistributionSurface(unittest.TestCase):
         self.assertEqual(charge_lyt.get_system_energy(), 0)
 
     def test_initialization_111_lattice(self):
-        layout_one = sidb_111_lattice((10, 10))
+        layout_one = sidb_111_lattice(aspect_ratio_offset((10, 10)))
         layout_one.assign_cell_type((0, 1), sidb_technology.cell_type.NORMAL)
         layout_one.assign_cell_type((1, 1), sidb_technology.cell_type.NORMAL)
         layout_one.assign_cell_type((2, 1), sidb_technology.cell_type.NORMAL)

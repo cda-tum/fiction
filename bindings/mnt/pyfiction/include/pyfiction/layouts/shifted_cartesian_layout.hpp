@@ -42,7 +42,7 @@ inline void shifted_cartesian_layout(pybind11::module& m, const std::string& coo
     py::class_<ShiftedCartLyt>(m, fmt::format("shifted_cartesian_layout_{}", coord_type).c_str(),
                                DOC(fiction_shifted_cartesian_layout_overridden))
         .def(py::init<>())
-        .def(py::init<const fiction::aspect_ratio<ShiftedCartLyt>&>(), py::arg("dimension"),
+        .def(py::init<const fiction::aspect_ratio<fiction::coordinate<ShiftedCartLyt>>&>(), py::arg("dimension"),
              DOC(fiction_shifted_cartesian_layout_shifted_cartesian_layout))
         .def(
             "coord", [](const ShiftedCartLyt& layout, const int64_t x, const int64_t y, const int64_t z)

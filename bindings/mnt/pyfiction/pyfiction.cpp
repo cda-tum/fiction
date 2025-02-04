@@ -70,7 +70,6 @@
 #include "pyfiction/inout/write_qll_layout.hpp"
 #include "pyfiction/inout/write_sqd_layout.hpp"
 #include "pyfiction/inout/write_sqd_sim_result.hpp"
-#include "pyfiction/inout/write_svg_layout.hpp"
 #include "pyfiction/layouts/cartesian_layout.hpp"
 #include "pyfiction/layouts/cell_level_layout.hpp"
 #include "pyfiction/layouts/clocked_layout.hpp"
@@ -106,10 +105,7 @@ PYBIND11_MODULE(pyfiction, m, pybind11::mod_gil_not_used())
     /**
      * Coordinates
      */
-    pyfiction::offset_coordinate(m);
-    pyfiction::cube_coordinate(m);
-    pyfiction::siqad_coordinate(m);
-    pyfiction::coordinate_utility(m);
+    pyfiction::coordinates(m);
     /**
      * Logic
      */

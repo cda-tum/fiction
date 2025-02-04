@@ -51,7 +51,7 @@ class cartesian_layout
 #pragma region Types and constructors
 
     using coordinate   = OffsetCoordinateType;
-    using aspect_ratio = aspect_ratio<coordinate>;
+    using aspect_ratio = aspect_ratio<OffsetCoordinateType>;
 
     /**
      * Struct representing the storage for a cartesian_layout.
@@ -84,8 +84,11 @@ class cartesian_layout
      * Initializes the layout with the highest possible coordinate at (0, 0, 0), effectively creating
      * a layout with a single coordinate.
      */
-    cartesian_layout() : cartesian_layout(aspect_ratio{0, 0, 0}) {}
+    explicit cartesian_layout(const aspect_ratio& ar = {}) :
+            strg{std::make_shared<cartesian_layout_storage>(initialize_dimension(ar))}
+    {
 
+    };
     /**
      * Constructs a cartesian_layout from an aspect_ratio.
      *
@@ -94,7 +97,7 @@ class cartesian_layout
      *
      * @param ar The aspect_ratio defining the layout's size and origin.
      */
-    explicit cartesian_layout(const aspect_ratio& ar) : strg{std::make_shared<cartesian_layout_storage>(ar)} {}
+//    explicit cartesian_layout(const aspect_ratio& ar) : strg{std::make_shared<cartesian_layout_storage>(ar)} {}
 
     /**
      * Copy constructor from another layout's storage.
@@ -246,18 +249,6 @@ class cartesian_layout
     void resize(const aspect_ratio& ar) noexcept
     {
         strg->ar = ar;
-    }
-    /**
-     * Overloaded resize method to accept a coordinate.
-     *
-     * This method resizes the layout by creating an aspect_ratio from the provided max coordinate,
-     * with the origin remaining unchanged.
-     *
-     * @param max The new end coordinate defining the layout's size.
-     */
-    void resize(const coordinate& max) noexcept
-    {
-        resize(aspect_ratio{initialize_dimension(max)});
     }
 
 #pragma endregion
@@ -942,11 +933,11 @@ class cartesian_layout
      * Initializer for a cartesian layout dimension. When using SiQAD coordinates, it will default the z value to 1 if
      * the y value is greater than 0.
      */
-    constexpr OffsetCoordinateType initialize_dimension(const OffsetCoordinateType& coord) const
+    constexpr aspect_ratio initialize_dimension(const aspect_ratio& coord) const
     {
         if constexpr (std::is_same_v<OffsetCoordinateType, siqad::coord_t>)
         {
-            return OffsetCoordinateType{coord.x, coord.y, 1};
+            return aspect_ratio{{coord.max.x, coord.max.y, 1}};
         }
 
         return coord;

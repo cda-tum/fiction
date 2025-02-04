@@ -6,6 +6,7 @@ from mnt.pyfiction import (
     sidb_charge_state,
     sidb_layout,
     sidb_technology,
+    aspect_ratio_offset,
 )
 
 

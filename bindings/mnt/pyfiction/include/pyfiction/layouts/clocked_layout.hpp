@@ -35,10 +35,10 @@ void clocked_layout(pybind11::module& m, const std::string& topology, const std:
     py::class_<ClockedLyt, LytBase>(m, fmt::format("clocked_{}_layout_{}", topology, coord_type).c_str(),
                                     DOC(fiction_clocked_layout))
         .def(py::init<>())
-        .def(py::init<const fiction::aspect_ratio<ClockedLyt>&>(), py::arg("dimension"),
+        .def(py::init<const fiction::aspect_ratio<fiction::coordinate<ClockedLyt>>&>(), py::arg("dimension"),
              DOC(fiction_clocked_layout_clocked_layout))
         .def(py::init(
-                 [](const fiction::aspect_ratio<ClockedLyt>& dimension, const std::string& scheme_name)
+                 [](const fiction::aspect_ratio<fiction::coordinate<ClockedLyt>>& dimension, const std::string& scheme_name)
                  {
                      if (const auto scheme = fiction::get_clocking_scheme<ClockedLyt>(scheme_name); scheme.has_value())
                      {

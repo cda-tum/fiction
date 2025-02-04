@@ -18,12 +18,13 @@ from mnt.pyfiction import (
     time_to_solution_for_given_simulation_results,
     time_to_solution_params,
     time_to_solution_stats,
+    aspect_ratio_offset
 )
 
 
 class TestTimeToSolution(unittest.TestCase):
     def test_one_sidb_100_lattice(self):
-        layout = sidb_100_lattice((0, 0))
+        layout = sidb_100_lattice(aspect_ratio_offset((0, 0)))
         layout.assign_cell_type((0, 0), sidb_technology.cell_type.NORMAL)
 
         quicksim_parameter = quicksim_params()
@@ -42,7 +43,7 @@ class TestTimeToSolution(unittest.TestCase):
         self.assertGreater(stats.mean_single_runtime, 0.0)
 
     def test_one_sidb_111_lattice(self):
-        layout = sidb_111_lattice((0, 0))
+        layout = sidb_111_lattice(aspect_ratio_offset((0, 0)))
         layout.assign_cell_type((0, 0), sidb_technology.cell_type.NORMAL)
 
         quicksim_parameter = quicksim_params()
@@ -61,7 +62,7 @@ class TestTimeToSolution(unittest.TestCase):
         self.assertGreater(stats.mean_single_runtime, 0.0)
 
     def test_time_to_solution_with_simulation_results(self):
-        layout = sidb_100_lattice((0, 0))
+        layout = sidb_100_lattice(aspect_ratio_offset((0, 0)))
 
         # Assign SiDBs to the layout
         layout.assign_cell_type((0, 0), sidb_technology.cell_type.NORMAL)

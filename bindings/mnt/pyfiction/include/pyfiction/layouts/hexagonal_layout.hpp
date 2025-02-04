@@ -39,7 +39,7 @@ inline void hexagonal_layout(pybind11::module& m, const std::string& coord_type)
     py::class_<HexLyt>(m, fmt::format("hexagonal_layout_{}", coord_type).c_str(),
                        DOC(fiction_hexagonal_layout_overridden))
         .def(py::init<>())
-        .def(py::init<const fiction::aspect_ratio<HexLyt>&>(), py::arg("dimension"),
+        .def(py::init<const fiction::aspect_ratio<fiction::coordinate<HexLyt>>&>(), py::arg("ar"),
              DOC(fiction_hexagonal_layout_hexagonal_layout))
         .def(
             "coord", [](const HexLyt& layout, const int64_t x, const int64_t y, const int64_t z)
@@ -48,8 +48,8 @@ inline void hexagonal_layout(pybind11::module& m, const std::string& coord_type)
         .def("x", &HexLyt::x, DOC(fiction_hexagonal_layout_x))
         .def("y", &HexLyt::y, DOC(fiction_hexagonal_layout_y))
         .def("z", &HexLyt::z, DOC(fiction_hexagonal_layout_z))
-        .def("area", &HexLyt::area, DOC(fiction_hexagonal_layout_area))
-        .def("resize", &HexLyt::resize, py::arg("dimension"), DOC(fiction_hexagonal_layout_resize))
+//        .def("area", &HexLyt::area, DOC(fiction_hexagonal_layout_area))
+//        .def("resize", &HexLyt::resize, py::arg("dimension"), DOC(fiction_hexagonal_layout_resize))
 
         .def("north", &HexLyt::north, py::arg("c"), DOC(fiction_hexagonal_layout_north))
         .def("north_east", &HexLyt::north_east, py::arg("c"), DOC(fiction_hexagonal_layout_north_east))

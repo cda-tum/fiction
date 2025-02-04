@@ -218,7 +218,7 @@ class apply_gate_library_impl
      * @param gate_lyt Gate-level layout of which the dimensions are read.
      * @return Aspect ratio for a cell-level layout that corresponds to the dimensions of the given gate-level layout.
      */
-    static aspect_ratio<CellLyt> determine_aspect_ratio_for_cell_level_layout(const GateLyt& gate_lyt) noexcept
+    static aspect_ratio_t<CellLyt> determine_aspect_ratio_for_cell_level_layout(const GateLyt& gate_lyt) noexcept
     {
         const std::function<cell<CellLyt>(GateLyt, tile<GateLyt>, cell<CellLyt>)> rel_to_abs_cell_pos =
             relative_to_absolute_cell_position<GateLibrary::gate_x_size(), GateLibrary::gate_y_size(), GateLyt,
@@ -233,7 +233,7 @@ class apply_gate_library_impl
         const auto max_coord_even_y = rel_to_abs_cell_pos(gate_lyt, {gate_lyt.x(), 0}, max_rel_coord);
         const auto max_coord_odd_y  = rel_to_abs_cell_pos(gate_lyt, {gate_lyt.x(), first_odd_tile.y}, max_rel_coord);
 
-        return {std::max(max_coord_even_y.x, max_coord_odd_y.x), std::max(max_coord_even_x.y, max_coord_odd_x.y)};
+        return aspect_ratio_t<CellLyt>{coordinate<CellLyt>{std::max(max_coord_even_y.x, max_coord_odd_y.x), std::max(max_coord_even_x.y, max_coord_odd_x.y)}};
     }
 };
 

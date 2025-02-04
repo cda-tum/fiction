@@ -11,6 +11,7 @@ from mnt.pyfiction import (
     sidb_simulation_result_100,
     sidb_simulation_result_111,
     sidb_technology,
+    aspect_ratio_offset,
 )
 
 
@@ -19,7 +20,7 @@ class TestSiDBSimulationResult(unittest.TestCase):
         # Use standard constructor.
         result = sidb_simulation_result_100()
 
-        layout = sidb_100_lattice((2, 3))
+        layout = sidb_100_lattice(aspect_ratio_offset((2, 3)))
         layout.assign_cell_type((0, 1), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((0, 3), sidb_technology.cell_type.NORMAL)
 
@@ -39,7 +40,7 @@ class TestSiDBSimulationResult(unittest.TestCase):
         # Use standard constructor.
         result = sidb_simulation_result_111()
 
-        layout = sidb_111_lattice((2, 3))
+        layout = sidb_111_lattice(aspect_ratio_offset((2, 3)))
         layout.assign_cell_type((0, 1), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((0, 3), sidb_technology.cell_type.NORMAL)
 
