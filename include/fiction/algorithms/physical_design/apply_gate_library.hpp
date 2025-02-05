@@ -44,7 +44,8 @@ class apply_gate_library_impl
             cell_lyt{determine_aspect_ratio_for_cell_level_layout(gate_lyt)}
     {
         cell_lyt.resize(aspect_ratio_type_t<CellLyt>{((gate_lyt.x() + 1) * GateLibrary::gate_x_size()) - 1,
-                                                ((gate_lyt.y() + 1) * GateLibrary::gate_y_size()) - 1, gate_lyt.z()});
+                                                     ((gate_lyt.y() + 1) * GateLibrary::gate_y_size()) - 1,
+                                                     gate_lyt.z()});
         cell_lyt.set_tile_size_x(GateLibrary::gate_x_size());
         cell_lyt.set_tile_size_y(GateLibrary::gate_y_size());
 
@@ -234,7 +235,7 @@ class apply_gate_library_impl
         const auto max_coord_odd_y  = rel_to_abs_cell_pos(gate_lyt, {gate_lyt.x(), first_odd_tile.y}, max_rel_coord);
 
         return aspect_ratio_type_t<CellLyt>{coordinate<CellLyt>{std::max(max_coord_even_y.x, max_coord_odd_y.x),
-                                                           std::max(max_coord_even_x.y, max_coord_odd_x.y)}};
+                                                                std::max(max_coord_even_x.y, max_coord_odd_x.y)}};
     }
 };
 

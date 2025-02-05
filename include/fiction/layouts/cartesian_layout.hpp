@@ -944,14 +944,14 @@ class cartesian_layout
 };
 
 //// Deduction guide for the constructor with aspect_ratio_type
-//template <typename OffsetCoordinateType>
-//cartesian_layout(const aspect_ratio<OffsetCoordinateType>& = {})
-//    -> cartesian_layout<OffsetCoordinateType>;
+// template <typename OffsetCoordinateType>
+// cartesian_layout(const aspect_ratio<OffsetCoordinateType>& = {})
+//     -> cartesian_layout<OffsetCoordinateType>;
 //
 //// Deduction guide for the constructor with OffsetCoordinateType
-//template <typename OffsetCoordinateType>
-//cartesian_layout(const OffsetCoordinateType& coord)
-//    -> cartesian_layout<OffsetCoordinateType>;
+// template <typename OffsetCoordinateType>
+// cartesian_layout(const OffsetCoordinateType& coord)
+//     -> cartesian_layout<OffsetCoordinateType>;
 
 }  // namespace fiction
 

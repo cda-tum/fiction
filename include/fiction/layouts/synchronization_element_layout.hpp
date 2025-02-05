@@ -74,7 +74,7 @@ class synchronization_element_layout : public ClockedLayout
      * @param ar Highest possible position in the layout.
      * @param scheme Clocking scheme to apply to this layout.
      */
-    synchronization_element_layout(const typename ClockedLayout::aspect_ratio_type&      ar,
+    synchronization_element_layout(const typename ClockedLayout::aspect_ratio_type& ar,
                                    const typename ClockedLayout::clocking_scheme_t& scheme) :
             ClockedLayout(ar, scheme),
             strg{std::make_shared<synchronization_element_layout_storage>()}

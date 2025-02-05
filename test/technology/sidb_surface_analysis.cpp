@@ -198,8 +198,8 @@ TEST_CASE("Dummy gate library simple defects", "[sidb-surface-analysis]")
 TEST_CASE("SiDB Bestagon gate library with simple defects", "[sidb-surface-analysis]")
 {
     static const hex_even_col_gate_clk_lyt gate_lyt{
-        aspect_ratio_type_t<hex_even_col_gate_clk_lyt>{0, 0}};   // 1 x 1 tiles of size 60 x 46 cells each
-    static const sidb_100_cell_clk_lyt cell_lyt{{59, 45}};  // makes for exactly one gate of the Bestagon library
+        aspect_ratio_type_t<hex_even_col_gate_clk_lyt>{0, 0}};  // 1 x 1 tiles of size 60 x 46 cells each
+    static const sidb_100_cell_clk_lyt cell_lyt{{59, 45}};      // makes for exactly one gate of the Bestagon library
 
     sidb_defect_surface defect_layout{cell_lyt};
 

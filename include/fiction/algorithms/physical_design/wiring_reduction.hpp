@@ -141,7 +141,7 @@ class wiring_reduction_layout : public cartesian_layout<OffsetCoordinateType>
      * @param direction The search direction to be used. Defaults to HORIZONTAL if not provided.
      */
     explicit wiring_reduction_layout(const aspect_ratio<OffsetCoordinateType>& ar = {},
-                                     search_direction direction = search_direction::HORIZONTAL) :
+                                     search_direction direction                   = search_direction::HORIZONTAL) :
             cartesian_layout<OffsetCoordinateType>(ar),
             search_dir(direction)
     {}
