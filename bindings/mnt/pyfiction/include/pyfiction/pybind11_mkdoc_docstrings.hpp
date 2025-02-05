@@ -385,9 +385,9 @@ static const char *__doc_fiction_area_stats_report = R"doc()doc";
 static const char *__doc_fiction_aspect_ratio =
 R"doc(Struct representing the aspect ratio of the cartesian layout.
 
-The `aspect_ratio_type` struct defines the minimum and maximum coordinates,
-effectively determining the size and position of the layout within a
-coordinate space.)doc";
+The `aspect_ratio_type` struct defines the minimum and maximum
+coordinates, effectively determining the size and position of the
+layout within a coordinate space.)doc";
 
 static const char *__doc_fiction_aspect_ratio_area =
 R"doc(Computes the area of a given coordinate assuming its origin is (0, 0,
@@ -420,7 +420,8 @@ Parameter ``e``:
     The maximum coordinate defining the layout's size.)doc";
 
 static const char *__doc_fiction_aspect_ratio_aspect_ratio_3 =
-R"doc(Constructs an aspect_ratio_type from specified start and end coordinates.
+R"doc(Constructs an aspect_ratio_type from specified start and end
+coordinates.
 
 Parameter ``mi``:
     The minimum coordinate of the layout.
@@ -454,8 +455,8 @@ Parameter ``z``:
     The z-coordinate value.)doc";
 
 static const char *__doc_fiction_aspect_ratio_aspect_ratio_5 =
-R"doc(Templated constructor for initializing aspect_ratio_type with two integral
-coordinates.
+R"doc(Templated constructor for initializing aspect_ratio_type with two
+integral coordinates.
 
 Initializes the start coordinate to (0, 0, 0) and sets the end
 coordinate to (x, y, 0).
@@ -558,8 +559,8 @@ static const char *__doc_fiction_aspect_ratio_min = R"doc()doc";
 static const char *__doc_fiction_aspect_ratio_operator_eq =
 R"doc(Equality operator for `aspect_ratio_type`.
 
-Compares two `aspect_ratio_type` instances for equality based on their max
-coordinates.
+Compares two `aspect_ratio_type` instances for equality based on their
+max coordinates.
 
 Parameter ``other``:
     The other aspect_ratio_type instance to compare against.
@@ -2031,8 +2032,8 @@ R"doc(Updates the layout's dimensions and origin based on a new
 aspect_ratio_type.
 
 This method effectively resizes the layout by adjusting its dimensions
-to match the provided aspect_ratio_type. The origin is also updated to the
-start coordinate of the aspect_ratio_type.
+to match the provided aspect_ratio_type. The origin is also updated to
+the start coordinate of the aspect_ratio_type.
 
 Parameter ``ar``:
     The new aspect_ratio_type to apply to the layout.)doc";
@@ -4110,7 +4111,7 @@ this function is the coordinate iterator, which implements iterator
 advancing by first incrementing the x dimension, then wrapping the
 coordinate to the boundary within to enumerate.
 
-Parameter ``aspect_ratio_type``:
+Parameter ``aspect_ratio``:
     Aspect ratio to wrap the coordinate to.)doc";
 
 static const char *__doc_fiction_cube_coord_t_x = R"doc(x coordinate.)doc";
@@ -16565,7 +16566,7 @@ this function is the coordinate iterator, which implements iterator
 advancing by first incrementing the x dimension, then wrapping the
 coordinate to the boundary within to enumerate.
 
-Parameter ``aspect_ratio_type``:
+Parameter ``aspect_ratio``:
     Aspect ratio to wrap the coordinate to.)doc";
 
 static const char *__doc_fiction_offset_ucoord_t_x = R"doc(31 bit for the x coordinate.)doc";
@@ -20431,7 +20432,7 @@ this function is the coordinate iterator, which implements iterator
 advancing by first incrementing the x dimension, then wrapping the
 coordinate to the boundary within to enumerate.
 
-Parameter ``aspect_ratio_type``:
+Parameter ``aspect_ratio``:
     Aspect ratio to wrap the coordinate to.)doc";
 
 static const char *__doc_fiction_siqad_coord_t_x = R"doc(31 bit for the x coordinate.)doc";
