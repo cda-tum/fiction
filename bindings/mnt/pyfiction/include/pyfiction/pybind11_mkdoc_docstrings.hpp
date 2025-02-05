@@ -4301,10 +4301,8 @@ Returns:
 static const char *__doc_fiction_design_sidb_gates_params =
 R"doc(This struct contains parameters and settings to design SiDB gates.
 
-Template parameter ``CellType``:
-    Cell type.)doc";
-
-static const char *__doc_fiction_design_sidb_gates_params_canvas = R"doc(Canvas spanned by the northwest and southeast cell.)doc";
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.)doc";
 
 static const char *__doc_fiction_design_sidb_gates_params_design_mode = R"doc(Gate design mode.)doc";
 
@@ -4320,19 +4318,7 @@ static const char *__doc_fiction_design_sidb_gates_params_number_of_sidbs = R"do
 
 static const char *__doc_fiction_design_sidb_gates_params_operational_params = R"doc(Parameters for the `is_operational` function.)doc";
 
-static const char *__doc_fiction_design_sidb_gates_params_post_design_mode = R"doc(Selector for the available post-design processes.)doc";
-
-static const char *__doc_fiction_design_sidb_gates_params_post_design_mode_DO_NOTHING = R"doc(No post-design operation is performed.)doc";
-
-static const char *__doc_fiction_design_sidb_gates_params_post_design_mode_PREFER_ENERGETICALLY_ISOLATED_GROUND_STATES =
-R"doc(The designed gates are sorted by how energetically isolated the ground
-state is from the first excited state.)doc";
-
-static const char *__doc_fiction_design_sidb_gates_params_post_design_process =
-R"doc(After the design process, the returned gates are not sorted.
-
-@note This parameter has no effect unless the gate design is
-exhaustive and all combinations are enumerated.)doc";
+static const char *__doc_fiction_design_sidb_gates_params_post_design_process = R"doc()doc";
 
 static const char *__doc_fiction_design_sidb_gates_params_termination_cond =
 R"doc(The design process is terminated after a valid SiDB gate design is
@@ -5771,21 +5757,6 @@ Parameter ``cell_indices``:
 Returns:
     A copy of the original layout (`skeleton_layout`) with SiDB cells
     added at specified indices.)doc";
-
-static const char *__doc_fiction_detail_design_sidb_gates_impl_sort_designed_gate_layouts_by_ground_state_isolation =
-R"doc(Performs a sorting operation on the designed gate layouts, putting
-those in front for which the energetic gap between the ground state
-and the first excited state is larger. For each designed gate layout,
-the minimum energetic gap is taken over each input. When the minima
-are equal for two designed gate layouts, the average energetic gap
-over each input is taken as a tiebreaker.
-
-Parameter ``designed_gate_layouts``:
-    A vector of designed gate layouts to sort in place.
-
-Parameter ``sim_results_per_input_for_each_gate_design``:
-    The simulation results for each input of each designed gate
-    layout.)doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_stats = R"doc(The statistics of the gate design.)doc";
 
