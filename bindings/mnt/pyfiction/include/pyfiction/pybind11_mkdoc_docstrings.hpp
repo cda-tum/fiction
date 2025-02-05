@@ -2038,6 +2038,8 @@ the start coordinate of the aspect_ratio_type.
 Parameter ``ar``:
     The new aspect_ratio_type to apply to the layout.)doc";
 
+static const char *__doc_fiction_cartesian_layout_resize_2 = R"doc()doc";
+
 static const char *__doc_fiction_cartesian_layout_south =
 R"doc(Returns the coordinate that is directly adjacent in southern direction
 of a given coordinate `c`, i.e., the face whose y-dimension is higher
