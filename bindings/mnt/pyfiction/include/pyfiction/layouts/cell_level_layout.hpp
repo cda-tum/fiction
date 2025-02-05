@@ -216,10 +216,7 @@ inline void cell_level_layout_factory(pybind11::module& m)
                 {
                     return py::cast(py_qca_layout_cube_coordinates{ar, *scheme, layout_name});
                 }
-                else
-                {
                     throw std::runtime_error("Given name does not refer to a supported clocking scheme");
-                }
             }
             else  // default: offset
             {
@@ -228,10 +225,7 @@ inline void cell_level_layout_factory(pybind11::module& m)
                 {
                     return py::cast(py_qca_layout{ar, *scheme, layout_name});
                 }
-                else
-                {
                     throw std::runtime_error("Given name does not refer to a supported clocking scheme");
-                }
             }
         },
         py::arg("dimension"), py::arg("scheme_name") = "open", py::arg("layout_name") = "",
@@ -256,10 +250,7 @@ inline void cell_level_layout_factory(pybind11::module& m)
                 {
                     return py::cast(py_inml_layout_cube_coordinates{ar, *scheme, layout_name});
                 }
-                else
-                {
                     throw std::runtime_error("Given name does not refer to a supported clocking scheme");
-                }
             }
             else  // default: offset
             {
@@ -268,10 +259,7 @@ inline void cell_level_layout_factory(pybind11::module& m)
                 {
                     return py::cast(py_inml_layout{ar, *scheme, layout_name});
                 }
-                else
-                {
                     throw std::runtime_error("Given name does not refer to a supported clocking scheme");
-                }
             }
         },
         py::arg("dimension"), py::arg("scheme_name") = "open", py::arg("layout_name") = "",
@@ -296,10 +284,7 @@ inline void cell_level_layout_factory(pybind11::module& m)
                 {
                     return py::cast(py_sidb_layout_cube_coordinates{ar, *scheme, layout_name});
                 }
-                else
-                {
                     throw std::runtime_error("Given name does not refer to a supported clocking scheme");
-                }
             }
             else  // default: offset
             {
@@ -308,10 +293,7 @@ inline void cell_level_layout_factory(pybind11::module& m)
                 {
                     return py::cast(py_sidb_layout{ar, *scheme, layout_name});
                 }
-                else
-                {
                     throw std::runtime_error("Given name does not refer to a supported clocking scheme");
-                }
             }
         },
         py::arg("dimension"), py::arg("scheme_name") = "open", py::arg("layout_name") = "",
