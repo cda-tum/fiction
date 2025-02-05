@@ -24,7 +24,7 @@ void design_sidb_gates(pybind11::module& m)
     namespace py = pybind11;
 
     m.def("design_sidb_gates", &fiction::design_sidb_gates<Lyt, py_tt>, py::arg("skeleton"), py::arg("spec"),
-          py::arg("params") = fiction::design_sidb_gates_params<fiction::cell<Lyt>>{}, py::arg("stats") = nullptr,
+          py::arg("params") = fiction::design_sidb_gates_params<Lyt>{}, py::arg("stats") = nullptr,
           DOC(fiction_design_sidb_gates));
 }
 
@@ -43,6 +43,8 @@ inline void design_sidb_gates(pybind11::module& m)
                  stats.report(stream);
                  return stream.str();
              });
+
+    // TODO: fix design_sidb_gates_params template arg
 
     /**
      * Design approach selector type.

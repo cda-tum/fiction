@@ -6,6 +6,7 @@
 #define FICTION_DESIGN_SIDB_GATES_HPP
 
 #include "fiction/algorithms/iter/bdl_input_iterator.hpp"
+#include "fiction/algorithms/physical_design/compare_designed_sidb_gates.hpp"
 #include "fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp"
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
 #include "fiction/algorithms/simulation/sidb/random_sidb_layout_generator.hpp"
@@ -26,10 +27,7 @@
 #include <atomic>
 #include <cassert>
 #include <cstdint>
-#include <cstdlib>
 #include <iostream>
-#include <iterator>
-#include <limits>
 #include <mutex>
 #include <optional>
 #include <random>
@@ -44,10 +42,10 @@ namespace fiction
 /**
  * This struct contains parameters and settings to design SiDB gates.
  *
- * @tparam CellType Cell type.
+ * @tparam Lyt SiDB cell-level layout type.
  *
  */
-template <typename CellType>
+template <typename Lyt>
 struct design_sidb_gates_params
 {
     /**
@@ -83,20 +81,6 @@ struct design_sidb_gates_params
         ALL_COMBINATIONS_ENUMERATED
     };
     /**
-     * Selector for the available post-design processes.
-     */
-    enum class post_design_mode : uint8_t
-    {
-        /**
-         * No post-design operation is performed.
-         */
-        DO_NOTHING,
-        /**
-         * The designed gates are sorted by how energetically isolated the ground state is from the first excited state.
-         */
-        PREFER_ENERGETICALLY_ISOLATED_GROUND_STATES
-    };
-    /**
      * Parameters for the `is_operational` function.
      */
     is_operational_params operational_params{};
@@ -107,7 +91,7 @@ struct design_sidb_gates_params
     /**
      * Canvas spanned by the northwest and southeast cell.
      */
-    std::pair<CellType, CellType> canvas{};
+    std::pair<cell<Lyt>, cell<Lyt>> canvas{};
     /**
      * Number of SiDBs placed in the canvas to create a working gate.
      */
@@ -118,12 +102,13 @@ struct design_sidb_gates_params
      * @note This parameter has no effect unless the gate design is exhaustive.
      */
     termination_condition termination_cond = termination_condition::ALL_COMBINATIONS_ENUMERATED;
-    /**
-     * After the design process, the returned gates are not sorted.
-     *
-     * @note This parameter has no effect unless the gate design is exhaustive and all combinations are enumerated.
-     */
-    post_design_mode post_design_process = post_design_mode::DO_NOTHING;
+    // /**
+    //  * After the design process, the returned gates are not sorted.
+    //  *
+    //  * @note This parameter has no effect unless the gate design is exhaustive and all combinations are enumerated.
+    //  */
+    // post_design_mode post_design_process = post_design_mode::DO_NOTHING;
+    designed_sidb_gates_ordering_recipe<Lyt> post_design_process{};
 };
 /**
  * Statistics for the design of SiDB gates.
@@ -187,7 +172,7 @@ class design_sidb_gates_impl
      * @param ps Parameters and settings for the gate designer.
      * @param st Statistics for the gate design process.
      */
-    design_sidb_gates_impl(const Lyt& skeleton, const std::vector<TT>& spec, design_sidb_gates_params<cell<Lyt>> ps,
+    design_sidb_gates_impl(const Lyt& skeleton, const std::vector<TT>& spec, design_sidb_gates_params<Lyt> ps,
                            design_sidb_gates_stats& st) :
             skeleton_layout{skeleton},
             truth_table{spec},
@@ -226,21 +211,17 @@ class design_sidb_gates_impl
         auto all_combinations = determine_all_combinations_of_distributing_k_entities_on_n_positions(
             params.number_of_sidbs, static_cast<std::size_t>(all_sidbs_in_canvas.size()));
 
-        std::vector<Lyt> designed_gate_layouts{};
-
         if (all_combinations.empty())
         {
-            return designed_gate_layouts;
+            return std::vector<Lyt>{};
         }
 
-        std::optional<std::vector<std::vector<std::vector<charge_distribution_surface<Lyt>>>>>
-            sim_results_per_input_for_each_gate_design{};
+        designed_sidb_gates<Lyt> designed_gate_layouts{};
 
-        if (params.post_design_process ==
-            design_sidb_gates_params<cell<Lyt>>::post_design_mode::PREFER_ENERGETICALLY_ISOLATED_GROUND_STATES)
+        if (!params.post_design_process.empty())
         {
-            sim_results_per_input_for_each_gate_design =
-                std::make_optional<std::vector<std::vector<std::vector<charge_distribution_surface<Lyt>>>>>();
+            designed_gate_layouts.simulation_results =
+                std::make_optional<std::vector<typename designed_sidb_gates<Lyt>::simulation_results_per_input>>();
         }
 
         std::unordered_set<coordinate<Lyt>> sidbs_affected_by_defects = {};
@@ -259,12 +240,12 @@ class design_sidb_gates_impl
         std::shuffle(all_combinations.begin(), all_combinations.end(),
                      std::default_random_engine(std::random_device{}()));
 
-        const auto add_combination_to_layout_and_check_operation =
-            [this, &mutex_to_protect_designed_gate_layouts, &designed_gate_layouts,
-             &sim_results_per_input_for_each_gate_design, &solution_found](const auto& combination) noexcept
+        const auto add_combination_to_layout_and_check_operation = [this, &mutex_to_protect_designed_gate_layouts,
+                                                                    &designed_gate_layouts,
+                                                                    &solution_found](const auto& combination) noexcept
         {
             // canvas SiDBs are added to the skeleton
-            const auto layout_with_added_cells = skeleton_layout_with_canvas_sidbs(combination);
+            auto&& layout_with_added_cells = skeleton_layout_with_canvas_sidbs(combination);
 
             if (const auto [status, aux_stats] = is_operational(
                     layout_with_added_cells, truth_table, params.operational_params, input_bdl_wires, output_bdl_wires);
@@ -273,11 +254,11 @@ class design_sidb_gates_impl
                 {
                     const std::lock_guard lock_vector{mutex_to_protect_designed_gate_layouts};
 
-                    designed_gate_layouts.emplace_back(layout_with_added_cells);
+                    designed_gate_layouts.gate_layouts.emplace_back(std::move(layout_with_added_cells));
 
-                    if (sim_results_per_input_for_each_gate_design.has_value())
+                    if (designed_gate_layouts.simulation_results.has_value())
                     {
-                        sim_results_per_input_for_each_gate_design.value().emplace_back(
+                        designed_gate_layouts.simulation_results.value().emplace_back(
                             std::move(aux_stats.simulation_results.value()));
                     }
                 }
@@ -306,7 +287,7 @@ class design_sidb_gates_impl
                     {
                         if (solution_found &&
                             (params.termination_cond ==
-                             design_sidb_gates_params<cell<Lyt>>::termination_condition::AFTER_FIRST_SOLUTION))
+                             design_sidb_gates_params<Lyt>::termination_condition::AFTER_FIRST_SOLUTION))
                         {
                             return;
                         }
@@ -324,15 +305,12 @@ class design_sidb_gates_impl
             }
         }
 
-        if (params.post_design_process ==
-                design_sidb_gates_params<cell<Lyt>>::post_design_mode::PREFER_ENERGETICALLY_ISOLATED_GROUND_STATES &&
-            designed_gate_layouts.size() > 1)
+        if (!params.post_design_process.empty() && designed_gate_layouts.gate_layouts.size() > 1)
         {
-            sort_designed_gate_layouts_by_ground_state_isolation(
-                designed_gate_layouts, std::move(sim_results_per_input_for_each_gate_design.value()));
+            order_designed_sidb_gates(params.post_design_process, designed_gate_layouts);
         }
 
-        return designed_gate_layouts;
+        return designed_gate_layouts.gate_layouts;
     }
     /**
      * Design gates randomly and in parallel.
@@ -442,27 +420,22 @@ class design_sidb_gates_impl
         stats.number_of_layouts_after_third_pruning =
             stats.number_of_layouts_after_second_pruning - number_of_discarded_layouts_at_third_pruning.load();
 
-        std::vector<Lyt> gate_layouts{};
-        gate_layouts.reserve(gate_candidates.size());
-
         if (gate_candidates.empty())
         {
-            return gate_layouts;
+            return std::vector<Lyt>{};
         }
 
-        std::optional<std::vector<std::vector<std::vector<charge_distribution_surface<Lyt>>>>>
-            sim_results_per_input_for_each_gate_design{};
+        designed_sidb_gates<Lyt> designed_gate_layouts{};
 
-        if (params.post_design_process ==
-            design_sidb_gates_params<cell<Lyt>>::post_design_mode::PREFER_ENERGETICALLY_ISOLATED_GROUND_STATES)
+        if (!params.post_design_process.empty())
         {
-            sim_results_per_input_for_each_gate_design =
-                std::make_optional<std::vector<std::vector<std::vector<charge_distribution_surface<Lyt>>>>>();
+            designed_gate_layouts.simulation_results =
+                std::make_optional<std::vector<typename designed_sidb_gates<Lyt>::simulation_results_per_input>>();
         }
 
         std::mutex mutex_to_protect_gate_designs{};
 
-        gate_layouts.reserve(gate_candidates.size());
+        designed_gate_layouts.gate_layouts.reserve(gate_candidates.size());  // TODO: is it smart to do a reserve here?
 
         const std::size_t num_threads = std::min(number_of_threads, gate_candidates.size());
 
@@ -473,13 +446,11 @@ class design_sidb_gates_impl
 
         std::atomic<bool> gate_design_found = false;
 
-        const auto check_operational_status =
-            [this, &gate_layouts, &mutex_to_protect_gate_designs, &gate_design_found,
-             &sim_results_per_input_for_each_gate_design](const auto& candidate) noexcept
+        const auto check_operational_status = [this, &designed_gate_layouts, &mutex_to_protect_gate_designs,
+                                               &gate_design_found](auto&& candidate) noexcept
         {
             // Early exit if a solution is found and only the first solution is required
-            if (gate_design_found && (params.termination_cond ==
-                                      design_sidb_gates_params<cell<Lyt>>::termination_condition::AFTER_FIRST_SOLUTION))
+            if (gate_design_found && (params.termination_cond == design_sidb_gates_params<Lyt>::termination_condition::AFTER_FIRST_SOLUTION))
             {
                 return;
             }
@@ -496,11 +467,11 @@ class design_sidb_gates_impl
                 {
                     const std::lock_guard lock{mutex_to_protect_gate_designs};
 
-                    gate_layouts.emplace_back(candidate);
+                    designed_gate_layouts.gate_layouts.emplace_back(std::move(candidate));
 
-                    if (sim_results_per_input_for_each_gate_design.has_value())
+                    if (designed_gate_layouts.simulation_results.has_value())
                     {
-                        sim_results_per_input_for_each_gate_design.value().emplace_back(
+                        designed_gate_layouts.simulation_results.value().emplace_back(
                             std::move(aux_stats.simulation_results.value()));
                     }
                 }
@@ -520,7 +491,7 @@ class design_sidb_gates_impl
                     {
                         if (gate_design_found &&
                             (params.termination_cond ==
-                             design_sidb_gates_params<cell<Lyt>>::termination_condition::AFTER_FIRST_SOLUTION))
+                             design_sidb_gates_params<Lyt>::termination_condition::AFTER_FIRST_SOLUTION))
                         {
                             return;
                         }
@@ -538,15 +509,12 @@ class design_sidb_gates_impl
             }
         }
 
-        if (params.post_design_process ==
-                design_sidb_gates_params<cell<Lyt>>::post_design_mode::PREFER_ENERGETICALLY_ISOLATED_GROUND_STATES &&
-            gate_layouts.size() > 1)
+        if (!params.post_design_process.empty() && designed_gate_layouts.gate_layouts.size() > 1)
         {
-            sort_designed_gate_layouts_by_ground_state_isolation(
-                gate_layouts, std::move(sim_results_per_input_for_each_gate_design.value()));
+            order_designed_sidb_gates(params.post_design_process, designed_gate_layouts);
         }
 
-        return gate_layouts;
+        return designed_gate_layouts.gate_layouts;
     }
 
   private:
@@ -562,7 +530,7 @@ class design_sidb_gates_impl
     /**
      * Parameters for the *SiDB Gate Designer*.
      */
-    design_sidb_gates_params<cell<Lyt>> params;
+    design_sidb_gates_params<Lyt> params;
     /**
      * All cells within the canvas.
      */
@@ -813,111 +781,10 @@ class design_sidb_gates_impl
      */
     void set_simulation_results_retention_accordingly() noexcept
     {
-        if (params.post_design_process != design_sidb_gates_params<cell<Lyt>>::post_design_mode::DO_NOTHING)
+        if (!params.post_design_process.empty())
         {
             params.operational_params.simulation_results_retention =
                 is_operational_params::simulation_results_mode::KEEP_SIMULATION_RESULTS;
-        }
-    }
-    /**
-     * Performs a sorting operation on the designed gate layouts, putting those in front for which the energetic gap
-     * between the ground state and the first excited state is larger. For each designed gate layout, the minimum
-     * energetic gap is taken over each input. When the minima are equal for two designed gate layouts, the average
-     * energetic gap over each input is taken as a tiebreaker.
-     *
-     * @param designed_gate_layouts A vector of designed gate layouts to sort in place.
-     * @param sim_results_per_input_for_each_gate_design The simulation results for each input of each designed gate
-     * layout.
-     */
-    void sort_designed_gate_layouts_by_ground_state_isolation(
-        std::vector<Lyt>& designed_gate_layouts, std::vector<std::vector<std::vector<charge_distribution_surface<Lyt>>>>
-                                                     sim_results_per_input_for_each_gate_design) const noexcept
-    {
-        // pair the two input vectors
-        std::vector<std::pair<Lyt, std::vector<std::vector<charge_distribution_surface<Lyt>>>>> pairs{};
-        pairs.reserve(designed_gate_layouts.size());
-
-        for (uint64_t i = 0; i < designed_gate_layouts.size(); ++i)
-        {
-            pairs.emplace_back(std::move(designed_gate_layouts.at(i)),
-                               std::move(sim_results_per_input_for_each_gate_design.at(i)));
-        }
-
-        // clear the designed_gate_layouts vector so that we may reenter the elements in order later
-        designed_gate_layouts.clear();
-
-        // sort all individual simulation results by system energy
-        for (auto& pair : pairs)
-        {
-            for (std::vector<charge_distribution_surface<Lyt>>& sim_res : pair.second)
-            {
-                std::sort(sim_res.begin(), sim_res.end(), [](const auto& cds1, const auto& cds2) noexcept
-                          { return cds1.get_system_energy() < cds2.get_system_energy(); });
-            }
-        }
-
-        const auto get_ground_state_isolation =
-            [&](const std::vector<charge_distribution_surface<Lyt>>& sim_res) noexcept
-        {
-            return sim_res.size() == 1 ? std::numeric_limits<double>::infinity() :
-                                         sim_res.at(1).get_system_energy() - sim_res.at(0).get_system_energy();
-        };
-
-        const auto minimum_ground_state_isolation_for_all_inputs =
-            [&get_ground_state_isolation](
-                const std::vector<std::vector<charge_distribution_surface<Lyt>>>& res_per_input) noexcept
-        {
-            std::vector<double> ground_state_isolations{};
-            std::transform(res_per_input.cbegin(), res_per_input.cend(), std::back_inserter(ground_state_isolations),
-                           get_ground_state_isolation);
-            return *std::min_element(ground_state_isolations.cbegin(), ground_state_isolations.cend());
-        };
-
-        const auto average_ground_state_isolation_for_all_inputs =
-            [&get_ground_state_isolation](
-                const std::vector<std::vector<charge_distribution_surface<Lyt>>>& res_per_input) noexcept
-        {
-            uint64_t count = 0;
-
-            double accumulated_ground_state_isolation = 0.0;
-
-            for (const auto& sim_res : res_per_input)
-            {
-                if (sim_res.size() == 1)
-                {
-                    continue;
-                }
-
-                accumulated_ground_state_isolation += get_ground_state_isolation(sim_res);
-
-                ++count;
-            }
-
-            return accumulated_ground_state_isolation / static_cast<double>(count);
-        };
-
-        // sort the pairs by minimum ground state isolation for each input
-        std::sort(pairs.begin(), pairs.end(),
-                  [&minimum_ground_state_isolation_for_all_inputs,
-                   &average_ground_state_isolation_for_all_inputs](const auto& lhs, const auto& rhs) noexcept
-                  {
-                      const double diff = minimum_ground_state_isolation_for_all_inputs(lhs.second) -
-                                          minimum_ground_state_isolation_for_all_inputs(rhs.second);
-
-                      // when minima are equal, take the average
-                      if (std::abs(diff) < std::numeric_limits<double>::epsilon())
-                      {
-                          return average_ground_state_isolation_for_all_inputs(lhs.second) >
-                                 average_ground_state_isolation_for_all_inputs(rhs.second);
-                      }
-
-                      return diff > 0.0;
-                  });
-
-        // put the designed gate layouts back in the sorted order
-        for (auto& pair : pairs)
-        {
-            designed_gate_layouts.emplace_back(pair.first);
         }
     }
 };
@@ -955,8 +822,8 @@ class design_sidb_gates_impl
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] std::vector<Lyt> design_sidb_gates(const Lyt& skeleton, const std::vector<TT>& spec,
-                                                 const design_sidb_gates_params<cell<Lyt>>& params = {},
-                                                 design_sidb_gates_stats*                   stats  = nullptr) noexcept
+                                                 const design_sidb_gates_params<Lyt>& params = {},
+                                                 design_sidb_gates_stats*             stats  = nullptr) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -977,12 +844,12 @@ template <typename Lyt, typename TT>
     std::vector<Lyt> result{};
 
     if (params.design_mode ==
-        design_sidb_gates_params<cell<Lyt>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER)
+        design_sidb_gates_params<Lyt>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER)
     {
         result = p.run_automatic_exhaustive_gate_designer();
     }
 
-    else if (params.design_mode == design_sidb_gates_params<cell<Lyt>>::design_sidb_gates_mode::QUICKCELL)
+    else if (params.design_mode == design_sidb_gates_params<Lyt>::design_sidb_gates_mode::QUICKCELL)
     {
         result = p.run_quickcell();
     }
