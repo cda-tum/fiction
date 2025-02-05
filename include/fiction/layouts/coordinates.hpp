@@ -892,7 +892,7 @@ constexpr cube::coord_t offset_to_cube_coord(const offset::ucoord_t& coord) noex
 /**
  * Struct representing the aspect ratio of the cartesian layout.
  *
- * The `aspect_ratio` struct defines the minimum and maximum coordinates, effectively
+ * The `aspect_ratio_type` struct defines the minimum and maximum coordinates, effectively
  * determining the size and position of the layout within a coordinate space.
  */
 template <typename CoordinateType>
@@ -910,7 +910,7 @@ struct aspect_ratio
                       "CoordinateType is not supported");
     }
     /**
-     * Constructs an aspect_ratio from a single end coordinate.
+     * Constructs an aspect_ratio_type from a single end coordinate.
      *
      * The minimium coordinate is initialized to (0, 0, 0), and the maximum coordinate is set to `e`.
      *
@@ -924,7 +924,7 @@ struct aspect_ratio
     }
 
     /**
-     * Constructs an aspect_ratio from specified start and end coordinates.
+     * Constructs an aspect_ratio_type from specified start and end coordinates.
      *
      * @param mi The minimum coordinate of the layout.
      * @param ma The maximum coordinate of the layout.
@@ -938,7 +938,7 @@ struct aspect_ratio
     }
 
     /**
-     * Templated constructor for initializing aspect_ratio with three integral coordinates.
+     * Templated constructor for initializing aspect_ratio_type with three integral coordinates.
      *
      * Initializes the minimum coordinate to (0, 0, 0) and sets the maximum coordinate to (x, y, z).
      *
@@ -959,7 +959,7 @@ struct aspect_ratio
     }
 
     /**
-     * Templated constructor for initializing aspect_ratio with two integral coordinates.
+     * Templated constructor for initializing aspect_ratio_type with two integral coordinates.
      *
      * Initializes the start coordinate to (0, 0, 0) and sets the end coordinate to (x, y, 0).
      *
@@ -1026,11 +1026,11 @@ struct aspect_ratio
         return static_cast<decltype(max.z)>(integral_abs(max.z - min.z));
     }
     /**
-     * Equality operator for `aspect_ratio`.
+     * Equality operator for `aspect_ratio_type`.
      *
-     * Compares two `aspect_ratio` instances for equality based on their max coordinates.
+     * Compares two `aspect_ratio_type` instances for equality based on their max coordinates.
      *
-     * @param other The other aspect_ratio instance to compare against.
+     * @param other The other aspect_ratio_type instance to compare against.
      * @return `true` if both aspect_ratios have the same max coordinates; `false` otherwise.
      */
     [[nodiscard]] bool operator==(const aspect_ratio& other) const noexcept

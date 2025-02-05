@@ -237,7 +237,7 @@ class read_fgl_layout_impl
                 throw fgl_parsing_error("Error parsing FGL file: no element 'z' in 'size'");
             }
 
-            const aspect_ratio_t<Lyt> ar{x, y, z};
+            const aspect_ratio_type_t<Lyt> ar{x, y, z};
             lyt.resize(ar);
         }
         else

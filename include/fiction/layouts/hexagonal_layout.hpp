@@ -155,15 +155,15 @@ class hexagonal_layout
 #pragma region Types and constructors
 
     using coordinate   = OffsetCoordinateType;
-    using aspect_ratio = aspect_ratio<OffsetCoordinateType>;
+    using aspect_ratio_type = aspect_ratio<OffsetCoordinateType>;
 
     using cube_coordinate = CubeCoordinateType;
 
     struct hexagonal_layout_storage
     {
-        explicit hexagonal_layout_storage(const aspect_ratio& ar) noexcept : dimension{ar} {};
+        explicit hexagonal_layout_storage(const aspect_ratio_type& ar) noexcept : dimension{ar} {};
 
-        aspect_ratio dimension;
+        aspect_ratio_type dimension;
     };
 
     static constexpr auto min_fanin_size = 0u;  // NOLINT(readability-identifier-naming): mockturtle requirement
@@ -182,7 +182,7 @@ class hexagonal_layout
      *
      * @param ar Highest possible position in the layout.
      */
-    explicit hexagonal_layout(const aspect_ratio& ar = {}) : strg{std::make_shared<hexagonal_layout_storage>(ar)}
+    explicit hexagonal_layout(const aspect_ratio_type& ar = {}) : strg{std::make_shared<hexagonal_layout_storage>(ar)}
     {
         static_assert(std::is_same_v<HexagonalCoordinateSystem, odd_row_hex> ||
                           std::is_same_v<HexagonalCoordinateSystem, even_row_hex> ||
@@ -273,23 +273,23 @@ class hexagonal_layout
      *
      * @param ar New aspect ratio.
      */
-    void resize(const aspect_ratio& ar) noexcept
+    void resize(const aspect_ratio_type& ar) noexcept
     {
         strg->dimension = ar;
     }
     /**
      * Overloaded resize method to accept a coordinate.
      *
-     * This method resizes the layout by creating an aspect_ratio from the provided max coordinate,
+     * This method resizes the layout by creating an aspect_ratio_type from the provided max coordinate,
      * with the origin remaining unchanged.
      *
      * @param max The new end coordinate defining the layout's size.
      */
     //    void resize(const coordinate& max) noexcept
     //    {
-    //        resize(aspect_ratio{max});
+    //        resize(aspect_ratio_type{max});
     //    }
-    //    void resize(const aspect_ratio& ar) noexcept
+    //    void resize(const aspect_ratio_type& ar) noexcept
     //    {
     //        strg->dimension = ar;
     //    }
@@ -878,7 +878,7 @@ class hexagonal_layout
     {
         assert(start.z == 0 && stop.z == 0);
 
-        auto ground_layer = aspect_ratio{x(), y(), 0};
+        auto ground_layer = aspect_ratio_type{x(), y(), 0};
 
         return range_t{
             std::make_pair(coord_iterator{ground_layer.max, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
@@ -899,7 +899,7 @@ class hexagonal_layout
     {
         assert(start.z == 0 && stop.z == 0);
 
-        auto ground_layer = aspect_ratio{x(), y(), 0};
+        auto ground_layer = aspect_ratio_type{x(), y(), 0};
 
         mockturtle::detail::foreach_element(
             coord_iterator{ground_layer.max, start.is_dead() ? OffsetCoordinateType{0, 0} : start},

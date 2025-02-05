@@ -226,6 +226,7 @@ inline void aspect_ratio_bindings(pybind11::module& m, const std::string& coordi
 {
     namespace py = pybind11;
 
+    // todo add docu
     py::class_<fiction::aspect_ratio<CoordinateType>>(m, fmt::format("aspect_ratio{}", coordinate_type).c_str())
         .def(py::init<>())
         .def(py::init<const CoordinateType&>(), py::arg("max"))

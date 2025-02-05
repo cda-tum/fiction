@@ -36,13 +36,13 @@ TEST_CASE("Deep copy gate-level layout", "[gate-level-layout]")
 {
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
 
-    gate_layout original{gate_layout::aspect_ratio{5, 5, 0}, twoddwave_clocking<gate_layout>(), "Original"};
+    gate_layout original{{5, 5, 0}, twoddwave_clocking<gate_layout>(), "Original"};
     original.create_pi("x1", {0, 2});
     original.create_pi("x2", {2, 4});
 
     auto copy = original.clone();
 
-    copy.resize(aspect_ratio_t<gate_layout>{10, 10, 1});
+    copy.resize(aspect_ratio_type_t<gate_layout>{10, 10, 1});
     copy.replace_clocking_scheme(use_clocking<gate_layout>());
     copy.set_layout_name("Copy");
     copy.move_node(copy.get_node({0, 2}), {0, 0});
@@ -78,7 +78,7 @@ TEST_CASE("Creation and usage of constants", "[gate-level-layout]")
     REQUIRE(mockturtle::has_get_node_v<gate_layout>);
     REQUIRE(mockturtle::has_is_complemented_v<gate_layout>);
 
-    const gate_layout layout{gate_layout::aspect_ratio{2, 2, 1}};
+    const gate_layout layout{{2, 2, 1}};
 
     CHECK(layout.size() == 2);
 
@@ -111,7 +111,7 @@ TEST_CASE("Creation and usage of primary inputs", "[gate-level-layout]")
     REQUIRE(mockturtle::has_num_gates_v<gate_layout>);
     REQUIRE(mockturtle::has_foreach_pi_v<gate_layout>);
 
-    gate_layout layout{gate_layout::aspect_ratio{2, 2, 1}};
+    gate_layout layout{{2, 2, 1}};
 
     CHECK(layout.is_empty());
 
@@ -203,7 +203,7 @@ TEST_CASE("Creation and usage of primary outputs", "[gate-level-layout]")
     REQUIRE(mockturtle::has_num_pos_v<gate_layout>);
     REQUIRE(mockturtle::has_foreach_po_v<gate_layout>);
 
-    gate_layout layout{gate_layout::aspect_ratio{2, 2, 1}};
+    gate_layout layout{{2, 2, 1}};
 
     const auto x1 = layout.create_pi("x1", tile<gate_layout>{0, 0});
 
@@ -320,7 +320,7 @@ TEST_CASE("Creation of unary operations", "[gate-level-layout]")
     REQUIRE(mockturtle::has_create_buf_v<gate_layout>);
     REQUIRE(mockturtle::has_create_not_v<gate_layout>);
 
-    gate_layout layout{gate_layout::aspect_ratio{2, 2, 1}};
+    gate_layout layout{{2, 2, 1}};
 
     CHECK(layout.is_empty());
 
@@ -376,7 +376,7 @@ TEST_CASE("Creation of binary operations", "[gate-level-layout]")
     REQUIRE(mockturtle::has_create_nor_v<gate_layout>);
     REQUIRE(mockturtle::has_create_xor_v<gate_layout>);
 
-    gate_layout layout{gate_layout::aspect_ratio{2, 2, 1}};
+    gate_layout layout{{2, 2, 1}};
 
     auto x1 = layout.create_pi("x1", {1, 0});
     auto x2 = layout.create_pi("x2", {0, 1});
@@ -483,7 +483,7 @@ TEST_CASE("Creation of ternary operations", "[gate-level-layout]")
     REQUIRE(mockturtle::has_num_pis_v<gate_layout>);
     REQUIRE(mockturtle::has_create_maj_v<gate_layout>);
 
-    gate_layout layout{gate_layout::aspect_ratio{2, 3, 1}};
+    gate_layout layout{{2, 3, 1}};
 
     auto x1 = layout.create_pi("x1", {1, 0});
     auto x2 = layout.create_pi("x2", {0, 1});
@@ -516,7 +516,7 @@ TEST_CASE("compute functions from AND and NOT gates", "[gate-level-layout]")
 
     REQUIRE(mockturtle::has_compute_v<gate_layout, kitty::dynamic_truth_table>);
 
-    gate_layout layout{gate_layout::aspect_ratio{3, 1, 0}, open_clocking<gate_layout>(num_clks::FOUR)};
+    gate_layout layout{{3, 1, 0}, open_clocking<gate_layout>(num_clks::FOUR)};
 
     layout.assign_clock_number({2, 0}, static_cast<typename gate_layout::clock_number_t>(0));
     layout.assign_clock_number({1, 0}, static_cast<typename gate_layout::clock_number_t>(1));

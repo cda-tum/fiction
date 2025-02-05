@@ -204,7 +204,7 @@ TEST_CASE("Write defective surface SQD layout", "[sqd]")
          {{0, 12}, sidb_defect{sidb_defect_type::GUNK}},
          {{0, 13}, sidb_defect{sidb_defect_type::UNKNOWN}}}};
 
-    const sidb_cell_clk_lyt lyt{aspect_ratio_t<sidb_cell_clk_lyt>{0, defect_map.size() - 1}};
+    const sidb_cell_clk_lyt lyt{aspect_ratio_type_t<sidb_cell_clk_lyt>{0, defect_map.size() - 1}};
 
     sidb_defect_surface<sidb_cell_clk_lyt> defect_layout{lyt};
 
@@ -265,7 +265,7 @@ TEST_CASE("Write defective surface SQD layout based on SiQAD coordinates", "[sqd
          {{0, 12, 0}, sidb_defect{sidb_defect_type::GUNK}},
          {{0, 13}, sidb_defect{sidb_defect_type::UNKNOWN}}}};
 
-    const sidb_cell_clk_lyt_siqad lyt{aspect_ratio_t<sidb_cell_clk_lyt_siqad>{0, defect_map.size() - 1}};
+    const sidb_cell_clk_lyt_siqad lyt{aspect_ratio_type_t<sidb_cell_clk_lyt_siqad>{0, defect_map.size() - 1}};
 
     sidb_defect_surface<sidb_cell_clk_lyt_siqad> defect_layout{lyt};
 

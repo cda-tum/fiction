@@ -50,8 +50,8 @@ class cartesian_layout
   public:
 #pragma region Types and constructors
 
-    using coordinate   = OffsetCoordinateType;
-    using aspect_ratio_t = aspect_ratio<OffsetCoordinateType>;
+    using coordinate        = OffsetCoordinateType;
+    using aspect_ratio_type = aspect_ratio<OffsetCoordinateType>;
 
     /**
      * Struct representing the storage for a cartesian_layout.
@@ -66,9 +66,9 @@ class cartesian_layout
          * @param dim The dimensions of the layout (width, height, etc.).
          * @param org The origin coordinate. Defaults to (0, 0, 0).
          */
-        explicit cartesian_layout_storage(const aspect_ratio_t& ar) : ar{ar} {}
+        explicit cartesian_layout_storage(const aspect_ratio_type& ar) : ar{ar} {}
 
-        aspect_ratio_t ar;  // width,height, etc.
+        aspect_ratio_type ar;  // width,height, etc.
     };
 
     static constexpr auto min_fanin_size = 0u;  // NOLINT(readability-identifier-naming): mockturtle requirement
@@ -84,19 +84,19 @@ class cartesian_layout
      * Initializes the layout with the highest possible coordinate at (0, 0, 0), effectively creating
      * a layout with a single coordinate.
      */
-    explicit cartesian_layout(const aspect_ratio_t& ar = {}) :
-            strg{std::make_shared<cartesian_layout_storage>(initialize_dimension(ar))} {
+    explicit cartesian_layout(const aspect_ratio_type& ar = {}) :
+            strg{std::make_shared<cartesian_layout_storage>(initialize_dimension(ar))} {};
 
-            };
     /**
-     * Constructs a cartesian_layout from an aspect_ratio.
+     * Constructs a cartesian_layout from an aspect_ratio_type.
      *
-     * This constructor initializes the layout's dimensions based on the provided aspect_ratio,
-     * and sets the origin to the min coordinate of the aspect_ratio.
+     * This constructor initializes the layout's dimensions based on the provided aspect_ratio_type,
+     * and sets the origin to the min coordinate of the aspect_ratio_type.
      *
-     * @param ar The aspect_ratio defining the layout's size and origin.
+     * @param ar The aspect_ratio_type defining the layout's size and origin.
      */
-    //    explicit cartesian_layout(const aspect_ratio& ar) : strg{std::make_shared<cartesian_layout_storage>(ar)} {}
+    //    explicit cartesian_layout(const aspect_ratio_type& ar) : strg{std::make_shared<cartesian_layout_storage>(ar)}
+    //    {}
 
     /**
      * Copy constructor from another layout's storage.
@@ -238,14 +238,14 @@ class cartesian_layout
         return strg->ar.area();
     }
     /**
-     * Updates the layout's dimensions and origin based on a new aspect_ratio.
+     * Updates the layout's dimensions and origin based on a new aspect_ratio_type.
      *
      * This method effectively resizes the layout by adjusting its dimensions to match
-     * the provided aspect_ratio. The origin is also updated to the start coordinate of the aspect_ratio.
+     * the provided aspect_ratio_type. The origin is also updated to the start coordinate of the aspect_ratio_type.
      *
-     * @param ar The new aspect_ratio to apply to the layout.
+     * @param ar The new aspect_ratio_type to apply to the layout.
      */
-    void resize(const aspect_ratio_t& ar) noexcept
+    void resize(const aspect_ratio_type& ar) noexcept
     {
         strg->ar = ar;
     }
@@ -932,16 +932,26 @@ class cartesian_layout
      * Initializer for a cartesian layout dimension. When using SiQAD coordinates, it will default the z value to 1 if
      * the y value is greater than 0.
      */
-    constexpr aspect_ratio_t initialize_dimension(const aspect_ratio_t& coord) const
+    constexpr aspect_ratio_type initialize_dimension(const aspect_ratio_type& coord) const
     {
         if constexpr (std::is_same_v<OffsetCoordinateType, siqad::coord_t>)
         {
-            return aspect_ratio{coord.max.x, coord.max.y, 1};
+            return aspect_ratio<OffsetCoordinateType>{coord.max.x, coord.max.y, 1};
         }
 
         return coord;
     }
 };
+
+//// Deduction guide for the constructor with aspect_ratio_type
+//template <typename OffsetCoordinateType>
+//cartesian_layout(const aspect_ratio<OffsetCoordinateType>& = {})
+//    -> cartesian_layout<OffsetCoordinateType>;
+//
+//// Deduction guide for the constructor with OffsetCoordinateType
+//template <typename OffsetCoordinateType>
+//cartesian_layout(const OffsetCoordinateType& coord)
+//    -> cartesian_layout<OffsetCoordinateType>;
 
 }  // namespace fiction
 

@@ -168,7 +168,7 @@ inline void cartesian_layouts(pybind11::module& m)
 }
 
 template <typename CoordLyt>
-fiction::aspect_ratio_t<CoordLyt> extract_aspect_ratio(pybind11::tuple dimension)
+fiction::aspect_ratio_type_t<CoordLyt> extract_aspect_ratio(pybind11::tuple dimension)
 {
     if (dimension.size() < 2 || dimension.size() > 3)
     {
@@ -186,7 +186,7 @@ fiction::aspect_ratio_t<CoordLyt> extract_aspect_ratio(pybind11::tuple dimension
         z = dimension[2].cast<uint64_t>();
     }
 
-    fiction::aspect_ratio_t<CoordLyt> ar{x, y, z};
+    fiction::aspect_ratio_type_t<CoordLyt> ar{x, y, z};
 
     return ar;
 }

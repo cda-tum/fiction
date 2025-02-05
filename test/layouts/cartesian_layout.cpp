@@ -59,7 +59,7 @@ TEST_CASE("Deep copy Cartesian layout", "[cartesian-layout]")
 
     auto copy = original.clone();
 
-    copy.resize(aspect_ratio_t<cartesian_layout<offset::ucoord_t>>{10, 10, 1});
+    copy.resize(aspect_ratio_type_t<cartesian_layout<offset::ucoord_t>>{10, 10, 1});
 
     CHECK(original.x() == 5);
     CHECK(original.y() == 5);
@@ -72,7 +72,7 @@ TEST_CASE("Deep copy Cartesian layout", "[cartesian-layout]")
 
 TEST_CASE("Cartesian coordinate iteration", "[cartesian-layout]")
 {
-    cartesian_layout<offset::ucoord_t>::aspect_ratio ar{9, 9, 1};
+    cartesian_layout<offset::ucoord_t>::aspect_ratio_type ar{9, 9, 1};
 
     cartesian_layout layout{ar};
 
@@ -103,7 +103,7 @@ TEST_CASE("Cartesian coordinate iteration", "[cartesian-layout]")
 
     visited.clear();
 
-    cartesian_layout<offset::ucoord_t>::aspect_ratio ar_ground{ar.x(), ar.y(), 0};
+    aspect_ratio<offset::ucoord_t> ar_ground{ar.x(), ar.y(), 0};
 
     const auto check2 = [&visited, &ar_ground, &layout](const auto& t)
     {
@@ -163,7 +163,7 @@ TEST_CASE("Cartesian coordinate iteration", "[cartesian-layout]")
 
 TEST_CASE("Cartesian cardinal operations", "[cartesian-layout]")
 {
-    const cartesian_layout<offset::ucoord_t>::aspect_ratio ar{10, 10, 1};
+    const aspect_ratio<offset::ucoord_t> ar{10, 10, 1};
 
     cartesian_layout layout{ar};
 
@@ -285,7 +285,7 @@ TEST_CASE("Cartesian layouts with SiQAD coordinates must have a z dimension of 1
 {
     using lyt = cartesian_layout<siqad::coord_t>;
 
-    CHECK(lyt{aspect_ratio_t<lyt>{0, 0}}.z() == 1);
-    CHECK(lyt{aspect_ratio_t<lyt>{9, 9}}.z() == 1);
-    CHECK(lyt{aspect_ratio_t<lyt>{42, 42, 1}}.z() == 1);
+    CHECK(lyt{aspect_ratio_type_t<lyt>{0, 0}}.z() == 1);
+    CHECK(lyt{aspect_ratio_type_t<lyt>{9, 9}}.z() == 1);
+    CHECK(lyt{aspect_ratio_type_t<lyt>{42, 42, 1}}.z() == 1);
 }

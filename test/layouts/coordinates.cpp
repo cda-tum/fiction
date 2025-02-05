@@ -277,7 +277,7 @@ TEMPLATE_TEST_CASE("Coordinate iteration", "[coordinates]", offset::ucoord_t, cu
 
             using h_lyt = hexagonal_layout<TestType, even_row_hex>;
 
-            test_bounds_equal(h_lyt{aspect_ratio_t<h_lyt>{0, 1, 0}}, {0, 1, 1}, {});
+            test_bounds_equal(h_lyt{aspect_ratio_type_t<h_lyt>{0, 1, 0}}, {0, 1, 1}, {});
         }
         else
         {
@@ -286,10 +286,10 @@ TEMPLATE_TEST_CASE("Coordinate iteration", "[coordinates]", offset::ucoord_t, cu
             test_bounds_equal(lyt, {2, 1, 0}, {0, 0, 1});
             test_bounds_equal(lyt, {0, 2, 0}, {0, 0, 1});
 
-            test_bounds_equal(lyt_t{aspect_ratio_t<lyt_t>{0, 1, 0}}, {0, 1, 1}, {});
+            test_bounds_equal(lyt_t{aspect_ratio_type_t<lyt_t>{0, 1, 0}}, {0, 1, 1}, {});
         }
 
-        test_bounds_equal(lyt_t{aspect_ratio_t<lyt_t>{0, 0, 0}}, {9, 9, 9}, {});
+        test_bounds_equal(lyt_t{aspect_ratio_type_t<lyt_t>{0, 0, 0}}, {9, 9, 9}, {});
     }
 }
 
