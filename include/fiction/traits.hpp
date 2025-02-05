@@ -231,8 +231,8 @@ struct is_coordinate_layout<
     Lyt,
     std::enable_if_t<std::conjunction_v<std::is_constructible<aspect_ratio_type_t<Lyt>, coordinate<Lyt>>,
                                         has_cardinal_operations<Lyt>, has_elevation_operations<Lyt>>,
-                     std::void_t<typename Lyt::base_type, aspect_ratio_type_t<Lyt>, coordinate<Lyt>, typename Lyt::storage,
-                                 decltype(Lyt::max_fanin_size), decltype(Lyt::min_fanin_size),
+                     std::void_t<typename Lyt::base_type, aspect_ratio_type_t<Lyt>, coordinate<Lyt>,
+                                 typename Lyt::storage, decltype(Lyt::max_fanin_size), decltype(Lyt::min_fanin_size),
                                  decltype(std::declval<Lyt>().x()), decltype(std::declval<Lyt>().y()),
                                  decltype(std::declval<Lyt>().z()), decltype(std::declval<Lyt>().area())>>>
         : std::true_type
@@ -294,11 +294,9 @@ struct is_cartesian_layout : std::false_type
 {};
 
 template <class Lyt>
-struct is_cartesian_layout<
-    Lyt,
-    std::enable_if_t<is_coordinate_layout_v<Lyt> && Lyt::max_fanin_size == 3u,
-                     std::void_t<typename Lyt::base_type, aspect_ratio_type_t<Lyt>, coordinate<Lyt>, typename Lyt::storage>>>
-        : std::true_type
+struct is_cartesian_layout<Lyt, std::enable_if_t<is_coordinate_layout_v<Lyt> && Lyt::max_fanin_size == 3u,
+                                                 std::void_t<typename Lyt::base_type, aspect_ratio_type_t<Lyt>,
+                                                             coordinate<Lyt>, typename Lyt::storage>>> : std::true_type
 {};
 
 template <class Lyt>
@@ -314,8 +312,8 @@ template <class Lyt>
 struct is_shifted_cartesian_layout<
     Lyt, std::enable_if_t<is_coordinate_layout_v<Lyt> && has_ordinal_operations_v<Lyt> && Lyt::max_fanin_size == 5u,
                           std::void_t<typename Lyt::base_type, typename Lyt::cartesian_arrangement,
-                                      aspect_ratio_type_t<Lyt>,
-                                      coordinate<Lyt>, typename Lyt::storage>>> : std::true_type
+                                      aspect_ratio_type_t<Lyt>, coordinate<Lyt>, typename Lyt::storage>>>
+        : std::true_type
 {};
 
 template <class Lyt>
@@ -349,11 +347,11 @@ struct is_hexagonal_layout : std::false_type
 {};
 
 template <class Lyt>
-struct is_hexagonal_layout<Lyt,
-                           std::enable_if_t<!is_shifted_cartesian_layout_v<Lyt> && is_coordinate_layout_v<Lyt> &&
-                                                has_ordinal_operations_v<Lyt> && Lyt::max_fanin_size == 5u,
-                                            std::void_t<typename Lyt::base_type, typename Lyt::hex_arrangement, aspect_ratio_type_t<Lyt>, coordinate<Lyt>, typename Lyt::storage>>>
-        : std::true_type
+struct is_hexagonal_layout<
+    Lyt, std::enable_if_t<!is_shifted_cartesian_layout_v<Lyt> && is_coordinate_layout_v<Lyt> &&
+                              has_ordinal_operations_v<Lyt> && Lyt::max_fanin_size == 5u,
+                          std::void_t<typename Lyt::base_type, typename Lyt::hex_arrangement, aspect_ratio_type_t<Lyt>,
+                                      coordinate<Lyt>, typename Lyt::storage>>> : std::true_type
 {};
 
 template <class Lyt>

@@ -154,7 +154,7 @@ class hexagonal_layout
   public:
 #pragma region Types and constructors
 
-    using coordinate   = OffsetCoordinateType;
+    using coordinate        = OffsetCoordinateType;
     using aspect_ratio_type = aspect_ratio<OffsetCoordinateType>;
 
     using cube_coordinate = CubeCoordinateType;
