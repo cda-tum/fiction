@@ -250,6 +250,12 @@ class cartesian_layout
         strg->ar = ar;
     }
 
+    // todo
+    void resize(const OffsetCoordinateType& ar) noexcept
+    {
+        strg->ar = aspect_ratio_type(ar);
+    }
+
 #pragma endregion
 
 #pragma region Cardinal operations
