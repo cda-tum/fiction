@@ -622,7 +622,7 @@ CoordinateType random_coordinate(CoordinateType coordinate1, CoordinateType coor
  * @return A vector containing all cells within the specified area.
  */
 template <typename CoordinateType>
-[[nodiscard]] inline std::vector<CoordinateType>
+[[nodiscard]] std::vector<CoordinateType>
 all_coordinates_in_spanned_area(const CoordinateType& cell_first_corner,
                                 const CoordinateType& cell_second_corner) noexcept
 {
@@ -713,7 +713,7 @@ all_coordinates_in_spanned_area(const CoordinateType& cell_first_corner,
  * @return `true` if the layouts are identical, `false` otherwise.
  */
 template <typename Lyt>
-[[nodiscard]] inline bool are_cell_layouts_identical(const Lyt& first_lyt, const Lyt& second_lyt) noexcept
+[[nodiscard]] bool are_cell_layouts_identical(const Lyt& first_lyt, const Lyt& second_lyt) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
 
