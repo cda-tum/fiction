@@ -9,7 +9,6 @@
 #include <fiction/algorithms/physical_design/design_sidb_gates.hpp>
 #include <fiction/algorithms/simulation/sidb/is_operational.hpp>
 #include <fiction/io/read_sqd_layout.hpp>
-#include <fiction/io/write_sqd_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/technology/sidb_bestagon_library.hpp>
@@ -195,11 +194,6 @@ TEST_CASE("Gate-level layout with two input wires, one double wire, and two outp
                 apply_parameterized_gate_library<cell_lyt, sidb_on_the_fly_gate_library, hex_even_row_gate_clk_lyt>(
                     layout, params);
 
-            fiction::write_sqd_layout(
-                bestagon_double_wire,
-                fmt::format("{}/resources/sidb_on_the_fly_gate_library/multi_tile_layout/double_wire.sqd", TEST_PATH));
-
-            // todo
             check_equivalence(
                 bestagon_double_wire,
                 fmt::format("{}/resources/sidb_on_the_fly_gate_library/multi_tile_layout/double_wire.sqd", TEST_PATH));
