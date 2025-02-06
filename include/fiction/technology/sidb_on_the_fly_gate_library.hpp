@@ -98,7 +98,7 @@ class gate_design_exception : public std::exception
 /**
  * This struct encapsulates parameters for the parameterized SiDB gate library.
  *
- * @tparam CellType Cell type.
+ * @tparam CellType SiDB cell type.
  */
 template <typename CellType>
 struct sidb_on_the_fly_gate_library_params
@@ -153,12 +153,12 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
      * case there is no possible SiDB design, the blacklist is updated and an error fcn gate is returned.
      *
      * @tparam GateLyt Pointy-top hexagonal gate-level layout type.
-     * @tparam CellLyt The type of the cell-level layout.
+     * @tparam CellLyt SiDB cell-level layout type.
      * @tparam Params Type of the parameter used for the gate library.
      * @param lyt Layout that hosts tile `t`.
      * @param t Tile to be realized as a Bestagon gate.
      * @param parameters Parameter to design SiDB gates.
-     * @param defect_surface Optional atomic defect surface.
+     * @param defect_surface Optional atomic defect surface in case atomic defects are present.
      * @return Bestagon gate representation of `t` including mirroring.
      */
     template <typename GateLyt, typename CellLyt, typename Params>
@@ -167,6 +167,8 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
     {
         static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt must be a gate-level layout");
         static_assert(has_cube_coord_v<CellLyt>, "CellLyt must be based on cube coordinates");
+        static_assert(is_cell_level_layout_v<CellLyt>, "Lyt is not a cell-level layout");
+        static_assert(has_sidb_technology_v<CellLyt>, "Lyt is not an SiDB layout");
 
         const auto n = lyt.get_node(t);
         const auto f = lyt.node_function(n);

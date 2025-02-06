@@ -27,19 +27,34 @@ namespace fiction
 {
 
 /**
- * Exception thrown when no valid placement and routing is found for the given blacklist.
+ * If the blacklist is overly restrictive, finding a valid placement and routing becomes impossible, resulting in this
+ * exception being thrown.
  */
 class unsuccessful_pr_error : public std::runtime_error
 {
   public:
+    /**
+     * This class inherits from `std::runtime_error` and is used to signal
+     * errors related to unsuccessful placement and routing.
+     *
+     * @param msg The error message describing the unsuccessful placement and routing.
+     */
     explicit unsuccessful_pr_error(const std::string_view& msg) noexcept : std::runtime_error(msg.data()) {}
 };
 /**
- * Exception thrown when the gate design was unsuccessful.
+ * Exception thrown if the gate design was unsuccessful. Depending on the given gate design parameters and the defect
+ * density, the gate design may fail.
  */
 class unsuccessful_gate_design_error : public std::runtime_error
 {
   public:
+    /**
+     * This explicit constructor initializes the base `std::runtime_error` class
+     * with the provided error message, ensuring that the exception contains
+     * detailed information about the reason for the gate design failure.
+     *
+     * @param msg A descriptive message explaining why the gate design failed.
+     */
     explicit unsuccessful_gate_design_error(const std::string_view& msg) noexcept : std::runtime_error(msg.data()) {}
 };
 /**
@@ -133,7 +148,7 @@ template <typename Ntk, typename CellLyt, typename GateLyt>
     static_assert(is_cell_level_layout_v<CellLyt>, "CellLyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<CellLyt>, "CellLyt is not an SiDB layout");
     static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
-    static_assert(is_sidb_defect_surface_v<CellLyt>, "CellLyt is not an SiDB defect layout");
+    static_assert(is_sidb_defect_surface_v<CellLyt>, "CellLyt is not an SiDB defect surface");
 
     on_the_fly_circuit_design_on_defective_surface_stats<GateLyt> st{};
 
@@ -183,21 +198,19 @@ template <typename Ntk, typename CellLyt, typename GateLyt>
                 {
                     fmt::print(stderr, "[e] Unsupported gate orientation encountered at tile: {} and ports: {}\n",
                                e.where(), e.which_ports());
-                    fmt::print(stderr, "[e] Terminating loop due to critical error.\n");
                     break;
                 }
 
                 catch (...)
                 {
                     fmt::print(stderr, "[e] An unexpected error occurred during gate design.\n");
-                    fmt::print(stderr, "[e] Terminating loop due to critical error.\n");
                     break;
                 }
             }
             // P&R was unsuccessful
             else
             {
-                throw unsuccessful_pr_error("Placement and routing was unsuccessful");
+                throw unsuccessful_pr_error("Placement and routing is impossible with the current blacklist.");
             }
         }
 
@@ -235,7 +248,7 @@ template <typename CellLyt, typename GateLyt>
     static_assert(is_hexagonal_layout_v<GateLyt>, "GateLyt is not a hexagonal");
     static_assert(is_cell_level_layout_v<CellLyt>, "CellLyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<CellLyt>, "CellLyt is not an SiDB layout");
-    static_assert(!is_sidb_defect_surface_v<CellLyt>, "CellLyt cannot be an SiDB defect layout");
+    static_assert(!is_sidb_defect_surface_v<CellLyt>, "CellLyt cannot be an SiDB defect surface");
 
     CellLyt result{};
 

@@ -1,6 +1,6 @@
 .. _on_the_fly_design:
 
-SiDB Circuit Design Algorithm in the Presence of Atomic Defects
+SiDB Circuit Design Algorithm on defectivein the Presence of Atomic Defects
 ---------------------------------------------------------------
 
 This algorithm is designed to create SiDB circuits on a clocked surface, accommodating the presence of atomic defects.
