@@ -4318,7 +4318,11 @@ static const char *__doc_fiction_design_sidb_gates_params_number_of_sidbs = R"do
 
 static const char *__doc_fiction_design_sidb_gates_params_operational_params = R"doc(Parameters for the `is_operational` function.)doc";
 
-static const char *__doc_fiction_design_sidb_gates_params_post_design_process = R"doc()doc";
+static const char *__doc_fiction_design_sidb_gates_params_post_design_process =
+R"doc(After the design process, the returned gates are not sorted.
+
+@note This parameter has no effect unless the gate design is
+exhaustive and all combinations are enumerated.)doc";
 
 static const char *__doc_fiction_design_sidb_gates_params_termination_cond =
 R"doc(The design process is terminated after a valid SiDB gate design is
@@ -5638,8 +5642,6 @@ Parameter ``to_delete``:
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl = R"doc()doc";
 
-static const char *__doc_fiction_detail_design_sidb_gates_impl_all_canvas_layouts = R"doc(All Canvas SiDB layout (without I/O pins).)doc";
-
 static const char *__doc_fiction_detail_design_sidb_gates_impl_all_sidbs_in_canvas = R"doc(All cells within the canvas.)doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_convert_canvas_cell_indices_to_layout =
@@ -5650,6 +5652,15 @@ Parameter ``cell_indices``:
 
 Returns:
     An SiDB cell-level layout consisting of canvas SidBs.)doc";
+
+static const char *__doc_fiction_detail_design_sidb_gates_impl_create_all_possible_canvas_layouts =
+R"doc(This function calculates all combinations of distributing a given
+number of SiDBs across a specified number of positions in the canvas.
+Each combination is then used to create a gate layout candidate.
+
+Returns:
+    A vector containing all possible gate layouts generated from the
+    combinations.)doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_design_sidb_gates_impl =
 R"doc(This constructor initializes an instance of the *SiDB Gate Designer*
@@ -5669,14 +5680,7 @@ Parameter ``ps``:
 Parameter ``st``:
     Statistics for the gate design process.)doc";
 
-static const char *__doc_fiction_detail_design_sidb_gates_impl_determine_all_possible_canvas_layouts =
-R"doc(This function calculates all combinations of distributing a given
-number of SiDBs across a specified number of positions in the canvas.
-Each combination is then used to create a gate layout candidate.
-
-Returns:
-    A vector containing all possible gate layouts generated from the
-    combinations.)doc";
+static const char *__doc_fiction_detail_design_sidb_gates_impl_extract_gate_designs = R"doc()doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_input_bdl_wires = R"doc(Input BDL wires.)doc";
 
@@ -5697,7 +5701,7 @@ static const char *__doc_fiction_detail_design_sidb_gates_impl_output_bdl_wires 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_params = R"doc(Parameters for the *SiDB Gate Designer*.)doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_run_automatic_exhaustive_gate_designer =
-R"doc(Design gates by using the *Automatic Exhaustive Gate Desginer*. This
+R"doc(Design gates by using the *Automatic Exhaustive Gate Designer*. This
 algorithm was proposed in \"Minimal Design of SiDB Gates: An Optimal
 Basis for Circuits Based on Silicon Dangling Bonds\" by J. Drewniok,
 M. Walter, and R. Wille in NANOARCH 2023
@@ -5737,26 +5741,15 @@ parameters. The design process is parallelized to improve performance.
 Returns:
     A vector of designed SiDB gate layouts.)doc";
 
-static const char *__doc_fiction_detail_design_sidb_gates_impl_set_simulation_results_retention_accordingly =
+static const char *__doc_fiction_detail_design_sidb_gates_impl_set_operational_params_accordingly =
 R"doc(This function makes sure that the underlying parameters for
 `is_operational` allow simulation results to be used when the given
-parameter set indicates the use for it.)doc";
+parameter set indicates the use for it. TODO)doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_skeleton_layout =
 R"doc(The skeleton layout serves as a starting layout to which SiDBs are
 added to create unique SiDB layouts and, if possible, working gates.
 It defines input and output wires.)doc";
-
-static const char *__doc_fiction_detail_design_sidb_gates_impl_skeleton_layout_with_canvas_sidbs =
-R"doc(This function adds SiDBs (given by indices) to the skeleton layout
-that is returned afterwards.
-
-Parameter ``cell_indices``:
-    A vector of indices of cells to be added to the skeleton layout.
-
-Returns:
-    A copy of the original layout (`skeleton_layout`) with SiDB cells
-    added at specified indices.)doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_stats = R"doc(The statistics of the gate design.)doc";
 
@@ -8101,8 +8094,6 @@ Returns:
     `true` if any output wire contains a kink (i.e., an unexpected
     charge state), `false` otherwise.)doc";
 
-static const char *__doc_fiction_detail_is_operational_impl_dependent_cell = R"doc(Dependent cell of the canvas SiDBs.)doc";
-
 static const char *__doc_fiction_detail_is_operational_impl_determine_non_operational_input_patterns_and_non_operationality_reason =
 R"doc(Determines the input combinations for which the layout is non-
 operational and the reason why the layout is non-operational.
@@ -8184,17 +8175,8 @@ identify and discard SiDB layouts that do not satisfy physical model
 constraints under the I/O pin conditions required for the desired
 Boolean function, and (3) detecting I/O signal instability.
 
-Template parameter ``ChargeLyt``:
-    The charge distribution surface layout type.
-
 Parameter ``input_pattern``:
     The current input pattern.
-
-Parameter ``cds_canvas``:
-    The charge distribution of the canvas layout.
-
-Parameter ``dependent_cell``:
-    A dependent-cell of the canvas SiDBs.
 
 Returns:
     A `layout_invalidity_reason` object indicating why the layout is
@@ -8268,12 +8250,15 @@ R"doc(Constructor to initialize the algorithm with a layout and parameters.
 Parameter ``lyt``:
     The SiDB cell-level layout to be checked.
 
-Parameter ``spec``:
+Parameter ``tt``:
     Expected Boolean function of the layout given as a multi-output
     truth table.
 
 Parameter ``params``:
-    Parameters for the `is_operational` algorithm.)doc";
+    Parameters for the `is_operational` algorithm.
+
+Parameter ``c_lyt``:
+    Canvas layout.)doc";
 
 static const char *__doc_fiction_detail_is_operational_impl_is_physical_validity_feasible =
 R"doc(This function determines if there is a charge distribution of the
@@ -15560,28 +15545,15 @@ operational.)doc";
 
 static const char *__doc_fiction_is_operational_params_operational_analysis_strategy =
 R"doc(Simulation method to determine if the layout is operational or non-
-operational. There are three possible strategies:
-
-- `SIMULATION_ONLY`: This setting does not apply any filtering
-strategies to determine if the layout is operational. Instead, it
-relies solely on physical simulation to make this determination. -
-`FILTER_ONLY`: This setting does only apply filtering strategies to
-determine if the layout is non-operational. If the layout passes all
-filtering strategies, it is considered operational. This is only an
-approximation. It may be possible that the layout is non-operational,
-but the filtering strategies do not detect it. -
-`FILTER_THEN_SIMULATION`: Before a physical simulation is conducted,
-the algorithm checks if filtering strategies have detected whether the
-layout is non-operational. This only provides any runtime benefits if
-kinks are rejected.)doc";
+operational.)doc";
 
 static const char *__doc_fiction_is_operational_params_operational_analysis_strategy_FILTER_ONLY =
 R"doc(Apply filtering exclusively to determine whether the layout is non-
 operational. If the layout passes all filter steps, it is considered
 operational.
 
-@note This is an extremely fast approximation that may sometimes lead
-to false positives.)doc";
+@note This is an extremely fast approximation that may lead to false
+positives.)doc";
 
 static const char *__doc_fiction_is_operational_params_operational_analysis_strategy_FILTER_THEN_SIMULATION =
 R"doc(Before a physical simulation is conducted, the algorithm checks if
@@ -16820,6 +16792,37 @@ Parameter ``spec``:
 
 Parameter ``params``:
     Parameters to simulate if a input combination is operational.
+
+Returns:
+    The count of operational input combinations.)doc";
+
+static const char *__doc_fiction_operational_input_patterns_2 =
+R"doc(This function determines the input combinations for which the layout
+is operational.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Template parameter ``TT``:
+    Type of the truth table.
+
+Parameter ``lyt``:
+    The SiDB layout.
+
+Parameter ``spec``:
+    Vector of truth table specifications.
+
+Parameter ``params``:
+    Parameters to simulate if an input combination is operational.
+
+Parameter ``input_bdl_wire``:
+    Optional BDL input wires of lyt.
+
+Parameter ``output_bdl_wire``:
+    Optional BDL output wires of lyt.
+
+Parameter ``canvas_lyt``:
+    Optional canvas layout.
 
 Returns:
     The count of operational input combinations.)doc";
