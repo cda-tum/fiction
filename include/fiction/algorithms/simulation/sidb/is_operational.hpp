@@ -613,6 +613,8 @@ class is_operational_impl
     [[nodiscard]] std::optional<double>
     is_physical_validity_feasible(charge_distribution_surface<Lyt>& cds_layout) const noexcept
     {
+        std::cout << "Energy: " << cds_layout.get_system_energy() << std::endl;
+
         auto min_energy = std::numeric_limits<double>::infinity();
 
         uint64_t canvas_charge_index = 0;
@@ -1209,7 +1211,7 @@ is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational
  * @param lyt The SiDB layout.
  * @param spec Vector of truth table specifications.
  * @param params Parameters to simulate if a input combination is operational.
- * @return The count of operational input combinations.
+ * @return The operational input combinations.
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] std::set<uint64_t> operational_input_patterns(const Lyt& lyt, const std::vector<TT>& spec,

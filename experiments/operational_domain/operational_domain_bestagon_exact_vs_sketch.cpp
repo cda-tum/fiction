@@ -129,7 +129,8 @@ int main()  // NOLINT
         opdomain_exp.table();
     }
 
-    opdomain_exp("Average", 0, 0, 0.0, 0, 0.0, mean_ratio_num_op_sketch_to_num_op_exact, 0.0);
+    opdomain_exp("Average", 0, 0, 0.0, 0, 0.0, mean_ratio_num_op_sketch_to_num_op_exact / truth_tables_and_names.size(),
+                 0.0);
 
     opdomain_exp.save();
     opdomain_exp.table();
