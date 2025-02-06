@@ -16846,7 +16846,7 @@ Parameter ``params``:
     Parameters to simulate if a input combination is operational.
 
 Returns:
-    The count of operational input combinations.)doc";
+    The operational input combinations.)doc";
 
 static const char *__doc_fiction_operational_input_patterns_2 =
 R"doc(This function determines the input combinations for which the layout
