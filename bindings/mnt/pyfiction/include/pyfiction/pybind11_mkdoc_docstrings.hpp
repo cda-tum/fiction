@@ -19775,7 +19775,7 @@ R"doc(This struct encapsulates parameters for the parameterized SiDB gate
 library.
 
 Template parameter ``CellType``:
-    Cell type.)doc";
+    SiDB cell type.)doc";
 
 static const char *__doc_fiction_sidb_on_the_fly_gate_library_params_canvas_sidb_complex_gates =
 R"doc(This variable defines the number of canvas SiDBs dedicated to complex
@@ -19809,7 +19809,7 @@ Template parameter ``GateLyt``:
     Pointy-top hexagonal gate-level layout type.
 
 Template parameter ``CellLyt``:
-    The type of the cell-level layout.
+    SiDB cell-level layout type.
 
 Template parameter ``Params``:
     Type of the parameter used for the gate library.
@@ -19824,7 +19824,7 @@ Parameter ``parameters``:
     Parameter to design SiDB gates.
 
 Parameter ``defect_surface``:
-    Optional atomic defect surface.
+    Optional atomic defect surface in case atomic defects are present.
 
 Returns:
     Bestagon gate representation of `t` including mirroring.)doc";
@@ -21340,15 +21340,31 @@ static const char *__doc_fiction_unrecognized_cell_definition_exception_unrecogn
 
 static const char *__doc_fiction_unrecognized_cell_definition_exception_where = R"doc()doc";
 
-static const char *__doc_fiction_unsuccessful_gate_design_error = R"doc(Exception thrown when the gate design was unsuccessful.)doc";
+static const char *__doc_fiction_unsuccessful_gate_design_error =
+R"doc(Exception thrown if the gate design was unsuccessful. Depending on the
+given gate design parameters and the defect density, the gate design
+may fail.)doc";
 
-static const char *__doc_fiction_unsuccessful_gate_design_error_unsuccessful_gate_design_error = R"doc()doc";
+static const char *__doc_fiction_unsuccessful_gate_design_error_unsuccessful_gate_design_error =
+R"doc(This explicit constructor initializes the base `std::runtime_error`
+class with the provided error message, ensuring that the exception
+contains detailed information about the reason for the gate design
+failure.
+
+Parameter ``msg``:
+    A descriptive message explaining why the gate design failed.)doc";
 
 static const char *__doc_fiction_unsuccessful_pr_error =
-R"doc(Exception thrown when no valid placement and routing is found for the
-given blacklist.)doc";
+R"doc(If the blacklist is overly restrictive, finding a valid placement and
+routing becomes impossible, resulting in this exception being thrown.)doc";
 
-static const char *__doc_fiction_unsuccessful_pr_error_unsuccessful_pr_error = R"doc()doc";
+static const char *__doc_fiction_unsuccessful_pr_error_unsuccessful_pr_error =
+R"doc(This class inherits from `std::runtime_error` and is used to signal
+errors related to unsuccessful placement and routing.
+
+Parameter ``msg``:
+    The error message describing the unsuccessful placement and
+    routing.)doc";
 
 static const char *__doc_fiction_unsupported_cell_type_exception = R"doc()doc";
 
