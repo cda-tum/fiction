@@ -161,8 +161,7 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
 
         REQUIRE(found_gate_layouts.size() == 4);
     }
-    SECTION("Four cells in canvas, design process is terminated after first solution is found (one SiDB in the "
-            "canvas), QuickExact")
+    SECTION("one SiDB in the, terminate after first solution is found, QuickExact")
     {
         const auto params = design_sidb_gates_params<cell<siqad_layout>>{
             is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT},
@@ -181,8 +180,7 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
         CHECK(mockturtle::to_seconds(stats.time_total) > 0.0);
         CHECK(stats.sim_engine == sidb_simulation_engine::QUICKEXACT);
     }
-    SECTION("Four cells in canvas, design process is terminated after first solution is found (one SiDB in the "
-            "canvas), QuickSim")
+    SECTION("one SiDB in the, terminate after first solution is found, QuickSim")
     {
         const auto params = design_sidb_gates_params<cell<siqad_layout>>{
             is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKSIM},
