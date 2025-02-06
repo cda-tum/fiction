@@ -296,19 +296,14 @@ class is_operational_impl
             output_bdl_pairs = detect_bdl_pairs(layout, sidb_technology::cell_type::OUTPUT,
                                                 params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params);
         }
-        canvas_lyt.foreach_cell(
-            [this](const auto& c)
-            {
-                dependent_cell = c;
-                return false;
-            });
     }
     /**
      * Constructor to initialize the algorithm with a layout and parameters.
      *
      * @param lyt The SiDB cell-level layout to be checked.
-     * @param spec Expected Boolean function of the layout given as a multi-output truth table.
+     * @param tt Expected Boolean function of the layout given as a multi-output truth table.
      * @param params Parameters for the `is_operational` algorithm.
+     * @param c_lyt Canvas layout.
      */
     is_operational_impl(const Lyt& lyt, const std::vector<TT>& tt, const is_operational_params& params,
                         const Lyt& c_lyt) :
@@ -333,22 +328,15 @@ class is_operational_impl
      * do not satisfy physical model constraints under the I/O pin conditions required for the desired Boolean function,
      * and (3) detecting I/O signal instability.
      *
-     * @tparam ChargeLyt The charge distribution surface layout type.
      * @param input_pattern The current input pattern.
-     * @param cds_canvas The charge distribution of the canvas layout.
-     * @param dependent_cell A dependent-cell of the canvas SiDBs.
      * @return A `layout_invalidity_reason` object indicating why the layout is non-operational; or `std::nullopt` if it
      * could not certainly be determined to be in fact non-operational.
      */
-    template <typename ChargeLyt>
-    [[nodiscard]] std::optional<layout_invalidity_reason> is_layout_invalid(const uint64_t input_pattern,
-                                                                            ChargeLyt&     cds_canvas) noexcept
+    [[nodiscard]] std::optional<layout_invalidity_reason> is_layout_invalid(const uint64_t input_pattern) noexcept
     {
-        static_assert(is_charge_distribution_surface_v<ChargeLyt>, "ChargeLyt is not a charge distribution surface");
-
         bii = input_pattern;
 
-        ChargeLyt cds_layout{*bii};
+        charge_distribution_surface<Lyt> cds_layout{*bii};
         cds_layout.assign_all_charge_states(sidb_charge_state::NEGATIVE);
         cds_layout.assign_physical_parameters(parameters.simulation_parameters);
 
@@ -357,22 +345,15 @@ class is_operational_impl
             return layout_invalidity_reason::POTENTIAL_POSITIVE_CHARGES;
         }
 
-        cds_layout.assign_dependent_cell(dependent_cell);
-        cds_canvas.assign_dependent_cell(dependent_cell);
-
         const auto input_index = bii.get_current_input_index();
 
         set_charge_distribution_of_input_pins(cds_layout, bii.get_current_input_index());
         set_charge_distribution_of_output_pins(cds_layout, evaluate_output(truth_table, input_index));
 
-        const auto physical_validity = is_physical_validity_feasible(cds_layout);
-
-        if (physical_validity.has_value())
+        if (const auto physical_validity = is_physical_validity_feasible(cds_layout); physical_validity.has_value())
         {
-            const auto output_index = evaluate_output(truth_table, input_index);
-
-            if (is_io_signal_unstable(cds_layout, truth_table.front().num_bits(), input_index, output_index,
-                                      physical_validity.value()))
+            if (const auto output_index = evaluate_output(truth_table, input_index); is_io_signal_unstable(
+                    cds_layout, truth_table.front().num_bits(), input_index, output_index, physical_validity.value()))
             {
                 return layout_invalidity_reason::IO_INSTABILITY;
             };
@@ -397,11 +378,6 @@ class is_operational_impl
 
         if (!canvas_lyt.is_empty())
         {
-            charge_distribution_surface<Lyt> cds_canvas{canvas_lyt};
-
-            cds_canvas.assign_dependent_cell(dependent_cell);
-            cds_canvas.assign_physical_parameters(parameters.simulation_parameters);
-
             if ((parameters.op_condition == is_operational_params::operational_condition::REJECT_KINKS &&
                  parameters.strategy_to_analyze_operational_status ==
                      is_operational_params::operational_analysis_strategy::FILTER_THEN_SIMULATION) ||
@@ -411,7 +387,7 @@ class is_operational_impl
                 // number of different input combinations
                 for (auto i = 0u; i < truth_table.front().num_bits(); ++i, ++bii)
                 {
-                    if (is_layout_invalid(bii.get_current_input_index(), cds_canvas))
+                    if (is_layout_invalid(bii.get_current_input_index()))
                     {
                         return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
                     }
@@ -667,6 +643,20 @@ class is_operational_impl
     [[nodiscard]] std::optional<double>
     is_physical_validity_feasible(charge_distribution_surface<Lyt>& cds_layout) const noexcept
     {
+        if (canvas_lyt.num_cells() == 0)
+        {
+            cds_layout.update_after_charge_change(dependent_cell_mode::FIXED,
+                                                  energy_calculation::KEEP_OLD_ENERGY_VALUE);
+
+            if (cds_layout.is_physically_valid())
+            {
+                cds_layout.recompute_system_energy();
+                return cds_layout.get_system_energy();
+            }
+
+            return std::nullopt;
+        }
+
         auto min_energy = std::numeric_limits<double>::infinity();
 
         uint64_t canvas_charge_index = 0;
@@ -674,18 +664,17 @@ class is_operational_impl
         charge_distribution_surface<Lyt> cds_canvas_copy{canvas_lyt};
         cds_canvas_copy.assign_base_number(2);
         cds_canvas_copy.assign_charge_index(canvas_charge_index);
-        cds_canvas_copy.assign_dependent_cell(dependent_cell);
+        cds_layout.assign_dependent_cell(cds_canvas_copy.get_sidb_order().front());
 
         const auto max_index = cds_canvas_copy.get_max_charge_index();
 
-        assert(max_index == static_cast<uint64_t>(std::pow(2, cds_canvas_copy.num_cells() - 1) - 1) &&
-               "The maximum charge index is incorrect. Probably, the dependent cell is not set.");
+        // assert(max_index == static_cast<uint64_t>(std::pow(2, cds_canvas_copy.num_cells() - 1) - 1) &&
+        //        "The maximum charge index is incorrect. Probably, the dependent cell is not set.");
 
         while (canvas_charge_index <= max_index)
         {
             cds_canvas_copy.foreach_cell(
-                [&cds_layout, &cds_canvas_copy](const auto& c)
-                {
+                [&cds_layout, &cds_canvas_copy](const auto& c) {
                     cds_layout.assign_charge_state(c, cds_canvas_copy.get_charge_state(c),
                                                    charge_index_mode::KEEP_CHARGE_INDEX);
                 });
@@ -921,9 +910,8 @@ class is_operational_impl
                 set_charge_distribution_of_input_pins(cds_layout, kink_states_input);
                 set_charge_distribution_of_output_pins(cds_layout, output_wire_index);
 
-                const auto physical_validity = is_physical_validity_feasible(cds_layout);
-
-                if (physical_validity.has_value())
+                if (const auto physical_validity = is_physical_validity_feasible(cds_layout);
+                    physical_validity.has_value())
                 {
                     if (physical_validity.value() + physical_constants::POP_STABILITY_ERR <
                         minimal_energy_of_physically_valid_layout)
@@ -982,10 +970,6 @@ class is_operational_impl
      * Layout consisting of all canvas SiDBs.
      */
     Lyt canvas_lyt{};
-    /**
-     * Dependent cell of the canvas SiDBs.
-     */
-    cell<Lyt> dependent_cell{};
     /**
      * This function conducts physical simulation of the given SiDB layout.
      * The simulation results are stored in the `sim_result` variable.
@@ -1280,6 +1264,81 @@ template <typename Lyt, typename TT>
                               { return a.num_vars() != b.num_vars(); }) == spec.cend());
 
     detail::is_operational_impl<Lyt, TT> p{lyt, spec, params};
+
+    std::set<uint64_t> input_patterns{};
+
+    // all possible input patterns
+    for (auto i = 0u; i < spec.front().num_bits(); ++i)
+    {
+        input_patterns.insert(i);
+    }
+
+    const auto non_op_patterns_and_non_op_reason =
+        p.determine_non_operational_input_patterns_and_non_operationality_reason();
+
+    for (const auto& [input_pattern, _] : non_op_patterns_and_non_op_reason)
+    {
+        input_patterns.erase(input_pattern);
+    }
+
+    return input_patterns;
+}
+/**
+ * This function determines the input combinations for which the layout is operational.
+ *
+ * @tparam Lyt SiDB cell-level layout type.
+ * @tparam TT Type of the truth table.
+ * @param lyt The SiDB layout.
+ * @param spec Vector of truth table specifications.
+ * @param params Parameters to simulate if an input combination is operational.
+ * @param input_bdl_wire Optional BDL input wires of lyt.
+ * @param output_bdl_wire Optional BDL output wires of lyt.
+ * @param canvas_lyt Optional canvas layout.
+ * @return The count of operational input combinations.
+ */
+template <typename Lyt, typename TT>
+[[nodiscard]] std::set<uint64_t>
+operational_input_patterns(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params,
+                           const std::vector<bdl_wire<Lyt>>& input_bdl_wire,
+                           const std::vector<bdl_wire<Lyt>>& output_bdl_wire,
+                           const std::optional<Lyt>&         canvas_lyt = std::nullopt) noexcept
+{
+    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
+
+    assert(lyt.num_pis() > 0 && "skeleton needs input cells");
+    assert(lyt.num_pos() > 0 && "skeleton needs output cells");
+
+    assert(!spec.empty());
+    // all elements in spec must have the same number of variables
+    assert(std::adjacent_find(spec.cbegin(), spec.cend(), [](const auto& a, const auto& b)
+                              { return a.num_vars() != b.num_vars(); }) == spec.cend());
+
+    if (canvas_lyt.has_value())
+    {
+        detail::is_operational_impl<Lyt, TT> p{lyt, spec, params, input_bdl_wire, output_bdl_wire, canvas_lyt.value()};
+
+        std::set<uint64_t> input_patterns{};
+
+        // all possible input patterns
+        for (auto i = 0u; i < spec.front().num_bits(); ++i)
+        {
+            input_patterns.insert(i);
+        }
+
+        const auto non_op_patterns_and_non_op_reason =
+            p.determine_non_operational_input_patterns_and_non_operationality_reason();
+
+        for (const auto& [input_pattern, _] : non_op_patterns_and_non_op_reason)
+        {
+            input_patterns.erase(input_pattern);
+        }
+
+        return input_patterns;
+    }
+
+    detail::is_operational_impl<Lyt, TT> p{lyt, spec, params, input_bdl_wire, output_bdl_wire};
 
     std::set<uint64_t> input_patterns{};
 

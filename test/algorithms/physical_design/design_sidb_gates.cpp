@@ -212,8 +212,8 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
             {{10, 4, 0}, {13, 4, 0}},
             1,
             design_sidb_gates_params<siqad_layout>::termination_condition::ALL_COMBINATIONS_ENUMERATED,
-            {std::make_unique<compare_by_minimum_ground_state_isolation<siqad_layout>>(),
-             std::make_unique<compare_by_average_ground_state_isolation<siqad_layout>>()}};
+            {std::make_shared<compare_by_minimum_ground_state_isolation<siqad_layout>>(),
+             std::make_shared<compare_by_average_ground_state_isolation<siqad_layout>>()}};
 
         const auto found_gate_layouts = design_sidb_gates(lyt, std::vector<tt>{create_xnor_tt()}, params);
 
@@ -242,6 +242,26 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
         CHECK(found_gate_layouts[1].get_cell_type({11, 4, 0}) == siqad_layout::technology::LOGIC);
         CHECK(found_gate_layouts[2].get_cell_type({12, 4, 0}) == siqad_layout::technology::LOGIC);
         CHECK(found_gate_layouts[3].get_cell_type({13, 4, 0}) == siqad_layout::technology::LOGIC);
+    }
+    SECTION("no canvas")
+    {
+        auto                    params = design_sidb_gates_params<siqad_layout>{};
+        design_sidb_gates_stats design_gates_stats_exhaustive{};
+        params.canvas          = {{10, 4, 0}, {10, 4, 0}};
+        params.number_of_sidbs = 0;
+        params.design_mode     = design_sidb_gates_params<
+                sidb_100_cell_clk_lyt_siqad>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER;
+        const auto found_gate_layouts_exhaustive =
+            design_sidb_gates(lyt, std::vector<tt>{create_xnor_tt()}, params, &design_gates_stats_exhaustive);
+        CHECK(found_gate_layouts_exhaustive.empty());
+        CHECK(design_gates_stats_exhaustive.number_of_layouts == 1);
+
+        design_sidb_gates_stats design_gates_stats_quickcell{};
+        params.design_mode = design_sidb_gates_params<sidb_100_cell_clk_lyt_siqad>::design_sidb_gates_mode::QUICKCELL;
+        const auto found_gate_layouts_quickcell =
+            design_sidb_gates(lyt, std::vector<tt>{create_xnor_tt()}, params, &design_gates_stats_quickcell);
+        CHECK(found_gate_layouts_quickcell.empty());
+        CHECK(design_gates_stats_quickcell.number_of_layouts == 1);
     }
 }
 
@@ -290,12 +310,42 @@ TEST_CASE("Use SiQAD's AND gate skeleton to generate all possible AND gates", "[
 
     SECTION("no canvas")
     {
+        design_sidb_gates_stats design_gates_stats_exhaustive{};
         params.canvas          = {{4, 4, 0}, {4, 4, 0}};
         params.number_of_sidbs = 0;
         params.design_mode     = design_sidb_gates_params<
                 sidb_100_cell_clk_lyt_siqad>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER;
-        const auto found_gate_layouts_exhaustive = design_sidb_gates(lyt, std::vector<tt>{create_and_tt()}, params);
+        const auto found_gate_layouts_exhaustive =
+            design_sidb_gates(lyt, std::vector<tt>{create_and_tt()}, params, &design_gates_stats_exhaustive);
+        REQUIRE(found_gate_layouts_exhaustive.size() == 1);
+        const auto& first_gate_exhaustive = found_gate_layouts_exhaustive.front();
+        CHECK(
+            is_operational(first_gate_exhaustive, std::vector<tt>{create_and_tt()}, params.operational_params).first ==
+            operational_status::OPERATIONAL);
+        CHECK(design_gates_stats_exhaustive.number_of_layouts == 1);
+
+        design_sidb_gates_stats design_gates_stats_quickcell{};
+        params.design_mode = design_sidb_gates_params<sidb_100_cell_clk_lyt_siqad>::design_sidb_gates_mode::QUICKCELL;
+        const auto found_gate_layouts_quickcell =
+            design_sidb_gates(lyt, std::vector<tt>{create_and_tt()}, params, &design_gates_stats_quickcell);
+        REQUIRE(found_gate_layouts_quickcell.size() == 1);
+        const auto& first_gate_quickcell = found_gate_layouts_exhaustive.front();
+        CHECK(is_operational(first_gate_quickcell, std::vector<tt>{create_and_tt()}, params.operational_params).first ==
+              operational_status::OPERATIONAL);
+        CHECK(design_gates_stats_quickcell.number_of_layouts == 1);
+    }
+
+    SECTION("more SiDBs than canvas positions")
+    {
+        design_sidb_gates_stats design_gates_stats{};
+        params.canvas          = {{4, 4, 0}, {4, 4, 0}};
+        params.number_of_sidbs = 2;
+        params.design_mode     = design_sidb_gates_params<
+                sidb_100_cell_clk_lyt_siqad>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER;
+        const auto found_gate_layouts_exhaustive =
+            design_sidb_gates(lyt, std::vector<tt>{create_and_tt()}, params, &design_gates_stats);
         CHECK(found_gate_layouts_exhaustive.empty());
+        CHECK(design_gates_stats.number_of_layouts == 0);
         params.design_mode = design_sidb_gates_params<sidb_100_cell_clk_lyt_siqad>::design_sidb_gates_mode::QUICKCELL;
         const auto found_gate_layouts_quickcell = design_sidb_gates(lyt, std::vector<tt>{create_and_tt()}, params);
         CHECK(found_gate_layouts_quickcell.empty());
