@@ -613,8 +613,6 @@ class is_operational_impl
     [[nodiscard]] std::optional<double>
     is_physical_validity_feasible(charge_distribution_surface<Lyt>& cds_layout) const noexcept
     {
-        std::cout << "Energy: " << cds_layout.get_system_energy() << std::endl;
-
         auto min_energy = std::numeric_limits<double>::infinity();
 
         uint64_t canvas_charge_index = 0;
