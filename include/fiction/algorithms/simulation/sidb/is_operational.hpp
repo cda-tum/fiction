@@ -674,7 +674,8 @@ class is_operational_impl
         while (canvas_charge_index <= max_index)
         {
             cds_canvas_copy.foreach_cell(
-                [&cds_layout, &cds_canvas_copy](const auto& c) {
+                [&cds_layout, &cds_canvas_copy](const auto& c)
+                {
                     cds_layout.assign_charge_state(c, cds_canvas_copy.get_charge_state(c),
                                                    charge_index_mode::KEEP_CHARGE_INDEX);
                 });
