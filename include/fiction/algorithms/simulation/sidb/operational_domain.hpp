@@ -1024,7 +1024,7 @@ class operational_domain_impl
             [[maybe_unused]] const auto min_val = values[d].front();
             [[maybe_unused]] const auto max_val = values[d].back();
 
-            assert(pp.parameters[d] >= min_val && pp.parameters[d] <= max_val &&
+            assert(pp.get_parameters()[d] >= min_val && pp.get_parameters()[d] <= max_val &&
                    "Parameter point is outside of the value range");
 
             const auto it = std::lower_bound(values[d].cbegin(), values[d].cend(), pp.get_parameters()[d]);

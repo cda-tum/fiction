@@ -83,7 +83,6 @@ inline void operational_domain(pybind11::module& m)
         .def(py::init<>(), DOC(fiction_parameter_point_parameter_point))
         .def(py::init<const std::vector<double>>(), py::arg("values"), DOC(fiction_parameter_point_parameter_point_2))
 
-        // todo update docu
         .def("set_parameters", &fiction::parameter_point::set_parameters, py::arg("values"))
         .def("get_parameters", &fiction::parameter_point::get_parameters)
 
