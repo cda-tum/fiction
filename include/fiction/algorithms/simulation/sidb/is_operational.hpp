@@ -270,7 +270,7 @@ class is_operational_impl
      * Constructor to initialize the algorithm with a layout, parameters, input and output wires, and a canvas layout.
      *
      * @param lyt The SiDB cell-level layout to be checked.
-     * @param spec Expected Boolean function of the layout given as a multi-output truth table.
+     * @param tt Expected Boolean function of the layout given as a multi-output truth table.
      * @param params Parameters for the `is_operational` algorithm.
      * @param input_wires BDL input wires of lyt.
      * @param output_wires BDL output wires of lyt.
@@ -664,12 +664,13 @@ class is_operational_impl
         charge_distribution_surface<Lyt> cds_canvas_copy{canvas_lyt};
         cds_canvas_copy.assign_base_number(2);
         cds_canvas_copy.assign_charge_index(canvas_charge_index);
+        cds_canvas_copy.assign_dependent_cell(cds_canvas_copy.get_sidb_order().front());
         cds_layout.assign_dependent_cell(cds_canvas_copy.get_sidb_order().front());
 
         const auto max_index = cds_canvas_copy.get_max_charge_index();
 
-        // assert(max_index == static_cast<uint64_t>(std::pow(2, cds_canvas_copy.num_cells() - 1) - 1) &&
-        //        "The maximum charge index is incorrect. Probably, the dependent cell is not set.");
+        assert(max_index == static_cast<uint64_t>(std::pow(2, cds_canvas_copy.num_cells() - 1) - 1) &&
+               "The maximum charge index is incorrect. Probably, the dependent cell is not set.");
 
         while (canvas_charge_index <= max_index)
         {
