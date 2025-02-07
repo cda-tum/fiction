@@ -149,9 +149,9 @@ SiDB Operational Domain
 
         .. doxygenstruct:: fiction::write_operational_domain_params
            :members:
-        .. doxygenfunction:: fiction::write_operational_domain(const OpDomain& opdom, std::ostream& os,
+        .. doxygenfunction:: fiction::write_operational_domain<OpDomain>(const OpDomain& opdom, std::ostream& os,
                                      const write_operational_domain_params& params = {})
-        .. doxygenfunction:: fiction::write_operational_domain(const OpDomain& opdom, const std::string_view& filename,
+        .. doxygenfunction:: fiction::write_operational_domain<OpDomain>(const OpDomain& opdom, const std::string_view& filename,
                                      const write_operational_domain_params& params = {})
 
     .. tab:: Python
