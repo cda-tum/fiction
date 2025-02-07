@@ -3017,6 +3017,26 @@ Parameter ``n``:
 Returns:
     Columnar clocking scheme.)doc";
 
+static const char *__doc_fiction_compare_by_average_ground_state_isolation = R"doc()doc";
+
+static const char *__doc_fiction_compare_by_average_ground_state_isolation_average_ground_state_isolation_over_all_inputs = R"doc()doc";
+
+static const char *__doc_fiction_compare_by_average_ground_state_isolation_compare_by_average_ground_state_isolation = R"doc()doc";
+
+static const char *__doc_fiction_compare_by_average_ground_state_isolation_equals = R"doc()doc";
+
+static const char *__doc_fiction_compare_by_average_ground_state_isolation_operator_call = R"doc()doc";
+
+static const char *__doc_fiction_compare_by_minimum_ground_state_isolation = R"doc()doc";
+
+static const char *__doc_fiction_compare_by_minimum_ground_state_isolation_compare_by_minimum_ground_state_isolation = R"doc()doc";
+
+static const char *__doc_fiction_compare_by_minimum_ground_state_isolation_equals = R"doc()doc";
+
+static const char *__doc_fiction_compare_by_minimum_ground_state_isolation_minimum_ground_state_isolation_over_all_inputs = R"doc()doc";
+
+static const char *__doc_fiction_compare_by_minimum_ground_state_isolation_operator_call = R"doc()doc";
+
 static const char *__doc_fiction_convert_array =
 R"doc(Converts an array of size `N` and type `T` to an array of size `N` and
 type `ElementType` by applying `static_cast` at compile time.
@@ -4372,6 +4392,34 @@ Parameter ``out``:
 static const char *__doc_fiction_design_sidb_gates_stats_sim_engine =
 R"doc(The simulation engine to be used for the operational domain
 computation.)doc";
+
+static const char *__doc_fiction_designed_sidb_gates = R"doc()doc";
+
+static const char *__doc_fiction_designed_sidb_gates_comparator = R"doc()doc";
+
+static const char *__doc_fiction_designed_sidb_gates_comparator_designed_sidb_gates_comparator = R"doc()doc";
+
+static const char *__doc_fiction_designed_sidb_gates_comparator_designed_sidb_gates_comparator_2 = R"doc()doc";
+
+static const char *__doc_fiction_designed_sidb_gates_comparator_equals = R"doc()doc";
+
+static const char *__doc_fiction_designed_sidb_gates_comparator_operator_assign = R"doc()doc";
+
+static const char *__doc_fiction_designed_sidb_gates_comparator_operator_assign_2 = R"doc()doc";
+
+static const char *__doc_fiction_designed_sidb_gates_comparator_operator_call = R"doc()doc";
+
+static const char *__doc_fiction_designed_sidb_gates_comparator_sensitivity = R"doc()doc";
+
+static const char *__doc_fiction_designed_sidb_gates_comparator_sidb_gate_design = R"doc()doc";
+
+static const char *__doc_fiction_designed_sidb_gates_comparator_sidb_gate_design_gate_design = R"doc()doc";
+
+static const char *__doc_fiction_designed_sidb_gates_comparator_sidb_gate_design_simulation_results_per_input = R"doc()doc";
+
+static const char *__doc_fiction_designed_sidb_gates_gate_layouts = R"doc()doc";
+
+static const char *__doc_fiction_designed_sidb_gates_simulation_results = R"doc()doc";
 
 static const char *__doc_fiction_detail_a_star_impl = R"doc()doc";
 
@@ -7145,6 +7193,8 @@ static const char *__doc_fiction_detail_generate_edge_intersection_graph_impl_ps
 
 static const char *__doc_fiction_detail_generate_edge_intersection_graph_impl_run = R"doc()doc";
 
+static const char *__doc_fiction_detail_get_ground_state_isolation = R"doc()doc";
+
 static const char *__doc_fiction_detail_get_offset =
 R"doc(Utility function to calculate the offset that has to be subtracted
 from any x-coordinate on the hexagonal layout.
@@ -8131,13 +8181,6 @@ Parameter ``bdl``:
 Returns:
     `true` if `0` is encoded, `false` otherwise.)doc";
 
-static const char *__doc_fiction_detail_is_operational_impl_get_operational_status_assessment_stats =
-R"doc(Returns auxiliary results from the operational status assessment,
-including the number of simulator invocations.
-
-Returns:
-    Auxiliary results from the operational status assessment.)doc";
-
 static const char *__doc_fiction_detail_is_operational_impl_input_bdl_wires = R"doc(Input BDL wires.)doc";
 
 static const char *__doc_fiction_detail_is_operational_impl_is_io_signal_unstable =
@@ -8189,7 +8232,7 @@ R"doc(Constructor to initialize the algorithm with a layout and parameters.
 Parameter ``lyt``:
     The SiDB cell-level layout to be checked.
 
-Parameter ``spec``:
+Parameter ``tt``:
     Expected Boolean function of the layout given as a multi-output
     truth table.
 
@@ -8228,7 +8271,7 @@ input and output wires, and a canvas layout.
 Parameter ``lyt``:
     The SiDB cell-level layout to be checked.
 
-Parameter ``spec``:
+Parameter ``tt``:
     Expected Boolean function of the layout given as a multi-output
     truth table.
 
@@ -8328,10 +8371,6 @@ Parameter ``cds``:
 Parameter ``output_wire_index``:
     The index representing the current input pattern of the output
     wire.)doc";
-
-static const char *__doc_fiction_detail_is_operational_impl_stats =
-R"doc(Auxiliary results from the operational status assessment, including
-the number of simulator invocations.)doc";
 
 static const char *__doc_fiction_detail_is_operational_impl_truth_table = R"doc(The specification of the layout.)doc";
 
@@ -15602,6 +15641,21 @@ static const char *__doc_fiction_is_operational_params_strategy_to_analyze_opera
 R"doc(Strategy to determine whether a layout is operational or non-
 operational.)doc";
 
+static const char *__doc_fiction_is_operational_params_termination_cond =
+R"doc(Condition to decide when to terminate the assessment of the
+operational status of the given layout.)doc";
+
+static const char *__doc_fiction_is_operational_params_termination_condition =
+R"doc(The termination condition for assessment of the operational status of
+the given layout.)doc";
+
+static const char *__doc_fiction_is_operational_params_termination_condition_ALL_INPUT_COMBINATIONS_ASSESSED = R"doc(The operational status is assessed for all input combinations.)doc";
+
+static const char *__doc_fiction_is_operational_params_termination_condition_ON_FIRST_NON_OPERATIONAL =
+R"doc(The assessment for the given layout terminates either when it is found
+to be operational for all input combinations, or an input combination
+is found for which the layout is not operational.)doc";
+
 static const char *__doc_fiction_is_positively_charged_defect =
 R"doc(Checks whether the given defect has a positive charge value assigned
 to it. This function is irrespective of the associated defect type.
@@ -16423,6 +16477,42 @@ Parameter ``n``:
 Returns:
     Irregular clocking scheme.)doc";
 
+static const char *__doc_fiction_operational_assessment =
+R"doc(This struct is used to collect results from the operational status
+assessment.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.)doc";
+
+static const char *__doc_fiction_operational_assessment_assessment_per_input =
+R"doc(When the termination condition is set to
+`ALL_INPUT_COMBINATIONS_ASSESSED`, the operational status for each
+respective input combination is stored here, sorted by their binary
+representation.)doc";
+
+static const char *__doc_fiction_operational_assessment_operational_assessment = R"doc(Standard constructor that only sets the operational status.)doc";
+
+static const char *__doc_fiction_operational_assessment_operational_assessment_for_input =
+R"doc(This struct collects the information for a specific input combination
+that was obtained during the assessment.)doc";
+
+static const char *__doc_fiction_operational_assessment_operational_assessment_for_input_operational_assessment_for_input = R"doc(Standard constructor that only sets the operational status.)doc";
+
+static const char *__doc_fiction_operational_assessment_operational_assessment_for_input_simulation_results =
+R"doc(The charge distributions obtained for one input combination that was
+tested.)doc";
+
+static const char *__doc_fiction_operational_assessment_operational_assessment_for_input_status =
+R"doc(The assessed operational status of the given layout under one input
+combination.)doc";
+
+static const char *__doc_fiction_operational_assessment_simulator_invocations = R"doc(The number of input combinations tested.)doc";
+
+static const char *__doc_fiction_operational_assessment_status =
+R"doc(The assessed operational status of the given layout. The status
+`OPERATIONAL` is given if and only the layout is operational under all
+input combinations.)doc";
+
 static const char *__doc_fiction_operational_domain =
 R"doc(An operational domain is a set of simulation parameter values for
 which a given SiDB layout is logically operational. This means that a
@@ -16791,7 +16881,7 @@ Parameter ``spec``:
     Vector of truth table specifications.
 
 Parameter ``params``:
-    Parameters to simulate if a input combination is operational.
+    Parameters to simulate if an input combination is operational.
 
 Returns:
     The count of operational input combinations.)doc";
@@ -16833,19 +16923,7 @@ static const char *__doc_fiction_operational_status_NON_OPERATIONAL = R"doc(The 
 
 static const char *__doc_fiction_operational_status_OPERATIONAL = R"doc(The layout is operational.)doc";
 
-static const char *__doc_fiction_operational_status_assessment_stats =
-R"doc(This struct is used to collect auxiliary results from the operational
-status assessment.
-
-Template parameter ``Lyt``:
-    SiDB cell-level layout type.)doc";
-
-static const char *__doc_fiction_operational_status_assessment_stats_simulation_results =
-R"doc(The charge distributions obtained for each input combination tested,
-sorted by the binary representation of the respectively associated
-input combinations.)doc";
-
-static const char *__doc_fiction_operational_status_assessment_stats_simulator_invocations = R"doc(The number of input combinations tested.)doc";
+static const char *__doc_fiction_order_designed_sidb_gates = R"doc()doc";
 
 static const char *__doc_fiction_orthogonal =
 R"doc(A scalable placement & routing approach based on orthogonal graph
