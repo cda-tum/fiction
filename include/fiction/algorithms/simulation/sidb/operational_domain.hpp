@@ -2104,13 +2104,13 @@ struct tuple_element<I, fiction::parameter_point>
 template <>
 struct hash<fiction::parameter_point>
 {
-    size_t operator()(const fiction::parameter_point& p) const noexcept
+    size_t operator()(const fiction::parameter_point& pp) const noexcept
     {
         size_t h = 0;
-        for (const auto& d : p.get_parameters())
+        for (const auto& param : pp.get_parameters())
         {
             // hash the double values with tolerance
-            fiction::hash_combine(h, static_cast<size_t>(d / fiction::constants::ERROR_MARGIN));
+            fiction::hash_combine(h, static_cast<size_t>(param / fiction::constants::ERROR_MARGIN));
         }
 
         return h;

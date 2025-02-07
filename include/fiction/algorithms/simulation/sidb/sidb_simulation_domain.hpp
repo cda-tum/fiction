@@ -8,7 +8,6 @@
 #include "fiction/utils/phmap_utils.hpp"
 
 #include <cstdio>
-#include <functional>
 #include <optional>
 #include <tuple>
 
