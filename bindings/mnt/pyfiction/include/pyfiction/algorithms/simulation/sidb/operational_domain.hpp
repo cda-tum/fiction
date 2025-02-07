@@ -82,7 +82,10 @@ inline void operational_domain(pybind11::module& m)
     py::class_<fiction::parameter_point>(m, "parameter_point", DOC(fiction_parameter_point))
         .def(py::init<>(), DOC(fiction_parameter_point_parameter_point))
         .def(py::init<const std::vector<double>>(), py::arg("values"), DOC(fiction_parameter_point_parameter_point_2))
-        .def_readwrite("parameters", &fiction::parameter_point::parameters, DOC(fiction_parameter_point))
+
+        // todo update docu
+        .def("set_parameters", &fiction::parameter_point::set_parameters, py::arg("values"))
+        .def("get_parameters", &fiction::parameter_point::get_parameters)
 
         .def(py::self == py::self, py::arg("other"), DOC(fiction_parameter_point_operator_eq))
         .def(py::self != py::self, py::arg("other"), DOC(fiction_parameter_point_operator_ne))
@@ -99,13 +102,16 @@ inline void operational_domain(pybind11::module& m)
 
         ;
 
+    // todu update docu
     py::class_<fiction::critical_temperature_domain>(m, "critical_temperature_domain", DOC(fiction_operational_domain))
         .def(py::init<>())
-        .def_readwrite("dimensions", &fiction::critical_temperature_domain::dimensions,
-                       DOC(fiction_critical_temperature_domain_dimensions))
-        .def("get_value", &fiction::critical_temperature_domain::get_value, py::arg("point"))
+        .def("set_dimensions", &fiction::critical_temperature_domain::set_dimensions, py::arg("dims"))
+        .def("add_dimension", &fiction::critical_temperature_domain::add_dimension, py::arg("dim"))
+        .def("get_dimensions", &fiction::critical_temperature_domain::get_dimensions)
+        .def("get_number_of_dimensions", &fiction::critical_temperature_domain::get_number_of_dimensions)
+        .def("contains", &fiction::critical_temperature_domain::contains, py::arg("key"))
         .def("add_value", &fiction::critical_temperature_domain::add_value, py::arg("key"), py::arg("value"))
-        .def("number_of_values", &fiction::critical_temperature_domain::number_of_values)
+        .def("size", &fiction::critical_temperature_domain::size)
         .def("for_each",
              [](const fiction::critical_temperature_domain& self, const py::function& py_callback)
              {
@@ -118,22 +124,16 @@ inline void operational_domain(pybind11::module& m)
 
         ;
 
+    // todo add docu
     py::class_<fiction::operational_domain>(m, "operational_domain", DOC(fiction_operational_domain))
         .def(py::init<>())
-        .def_readwrite("dimensions", &fiction::operational_domain::dimensions,
-                       DOC(fiction_operational_domain_dimensions))
-        .def("get_value", &fiction::operational_domain::get_value, py::arg("point"))
+        .def("set_dimensions", &fiction::operational_domain::set_dimensions, py::arg("dims"))
+        .def("add_dimension", &fiction::operational_domain::add_dimension, py::arg("dim"))
+        .def("get_dimensions", &fiction::operational_domain::get_dimensions)
+        .def("get_number_of_dimensions", &fiction::operational_domain::get_number_of_dimensions)
+        .def("contains", &fiction::operational_domain::contains, py::arg("key"))
         .def("add_value", &fiction::operational_domain::add_value, py::arg("key"), py::arg("value"))
-        .def("number_of_values", &fiction::operational_domain::number_of_values)
-        .def("for_each",
-             [](const fiction::operational_domain& self, const py::function& py_callback)
-             {
-                 self.for_each(
-                     [&py_callback](const auto& key, const auto& value)
-                     {
-                         py_callback(key, value);  // Pass the key and value to the Python callback
-                     });
-             })
+        .def("size", &fiction::operational_domain::size)
 
         ;
 

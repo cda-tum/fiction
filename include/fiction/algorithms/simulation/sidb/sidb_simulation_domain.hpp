@@ -2,6 +2,9 @@
 // Created by Jan Drewniok on 29.01.25.
 //
 
+#ifndef FICTION_SIDB_SIMULATION_DOMAIN_HPP
+#define FICTION_SIDB_SIMULATION_DOMAIN_HPP
+
 #include "fiction/utils/phmap_utils.hpp"
 
 #include <cstdio>
@@ -25,24 +28,6 @@ class sidb_simulation_domain
 {
   public:
     /**
-     * Checks whether a specified key exists in the given map and retrieves its associated value if present.
-     * This function utilizes the `if_contains` method of the map to ensure thread-safe access.
-     *
-     * @tparam MapType The type of the map, which must provide the `if_contains` method.
-     * @param map The map in which to search for the specified key.
-     * @param key The key to search for in the map.
-     * @return An `std::optional` containing the value associated with the key if it exists, `std::optional` otherwise.
-     */
-    [[nodiscard]] std::optional<std::tuple<MappedTypes...>> has_already_been_sampled(const Key& key) const noexcept
-    {
-        if (const auto v = contains_key(key); v.has_value())
-        {
-            return v.value();
-        }
-
-        return std::nullopt;
-    }
-    /**
      * Constructs a new `sidb_simulation_domain` instance.
      */
     sidb_simulation_domain()
@@ -50,18 +35,7 @@ class sidb_simulation_domain
         static_assert(sizeof...(MappedTypes) > 0, "MappedTypes must not be empty");
     }
     /**
-     * Retrieves the value associated with the provided key from the operational domain.
-     * If the key is found, the value is returned; otherwise, `std::nullopt` is returned.
-     *
-     * @param key The key to look up in the domain.
-     * @return The `std::tuple`` associated with the provided key is returned, `std::nullopt` otherwise.
-     */
-    [[nodiscard]] std::optional<std::tuple<MappedTypes...>> get_value(const Key& key) const
-    {
-        return contains_key(key);
-    }
-    /**
-     * Adds a value to the operational domain.
+     * Adds a value to the operational domain. This function is thread-safe and uses the `try_emplace` method.
      *
      * @param key The key to associate with the value.
      * @param value The value to add, which must be a tuple.
@@ -73,37 +47,35 @@ class sidb_simulation_domain
     /**
      * Counts the number of key-value pairs in the operational domain.
      *
-     * @return The number of key-value pairs in the domain.
+     * @return The size of the operational domain.
      */
-    [[nodiscard]] std::size_t number_of_values() const
+    [[nodiscard]] std::size_t size() const
     {
         return domain_values.size();
     }
     /**
-     * Iterates over all key-value pairs in the operational domain and applies a provided callback function
-     * to each pair. This method ensures thread-safe access to the underlying data by leveraging the
-     * `for_each` method of the thread-safe `locked_parallel_flat_hash_map`.
+     * Applies a callable to all key-value pairs in the container.
      *
-     * @param callback A callable object (e.g., lambda, function pointer) that accepts two arguments:
-     *                 the key (`const Key&`) and the associated tuple of mapped values
-     *                 (`const std::tuple<MappedTypes...>&`).
+     * @tparam Fn Functor type.
+     * @param fn Functor to apply to each key-value pair.
      */
-    void for_each(const std::function<void(const Key&, const std::tuple<MappedTypes...>&)>& callback) const
+    template <typename Fn>
+    void for_each(Fn&& fn) const
     {
-        for (auto it = domain_values.cbegin(); it != domain_values.cend(); ++it)
-        {
-            callback(it->first, it->second);
-        }
+        // copy for thread-safety
+        const auto domain_values_copy = domain_values;
+
+        std::for_each(domain_values_copy.cbegin(), domain_values_copy.cend(),
+                      [&fn](const auto& pair) { fn(pair.first, pair.second); });
     }
     /**
      * Checks whether a specified key exists in the given map and retrieves its associated value if present.
      * This function utilizes the `if_contains` method of the map to ensure thread-safe access.
      *
-     * @tparam MapType The type of the map, which must provide the `if_contains` method.
      * @param key The key to search for in the map.
      * @return An `std::optional` containing the value associated with the key if it exists, `std::optional` otherwise.
      */
-    [[nodiscard]] std::optional<std::tuple<MappedTypes...>> contains_key(const Key& key) const
+    [[nodiscard]] std::optional<std::tuple<MappedTypes...>> contains(const Key& key) const
     {
         std::optional<std::tuple<MappedTypes...>> result;
 
@@ -120,3 +92,5 @@ class sidb_simulation_domain
 };
 
 }  // namespace fiction
+
+#endif  // FICTION_SIDB_SIMULATION_DOMAIN_HPP

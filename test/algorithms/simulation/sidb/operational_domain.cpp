@@ -28,11 +28,11 @@ template <typename OpDomain>
 void check_op_domain_params_and_operational_status(const OpDomain& op_domain, const operational_domain_params& params,
                                                    const std::optional<operational_status>& status)
 {
-    REQUIRE(params.sweep_dimensions.size() == op_domain.dimensions.size());
+    REQUIRE(params.sweep_dimensions.size() == op_domain.get_dimensions().size());
 
     for (auto d = 0u; d < params.sweep_dimensions.size(); ++d)
     {
-        CHECK(op_domain.dimensions[d] == params.sweep_dimensions[d].dimension);
+        CHECK(op_domain.get_dimensions()[d] == params.sweep_dimensions[d].dimension);
     }
 
     op_domain.for_each(
@@ -41,7 +41,7 @@ void check_op_domain_params_and_operational_status(const OpDomain& op_domain, co
             for (auto d = 0u; d < params.sweep_dimensions.size(); ++d)
             {
                 const auto& sweep_param = params.sweep_dimensions[d];
-                const auto& coord_value = coord.parameters[d];
+                const auto& coord_value = coord.get_parameters()[d];
 
                 CHECK(sweep_param.min <= (coord_value + constants::ERROR_MARGIN));
                 CHECK(sweep_param.max >= (coord_value - constants::ERROR_MARGIN));
@@ -54,8 +54,8 @@ void check_op_domain_params_and_operational_status(const OpDomain& op_domain, co
                 {
                     if constexpr (std::is_same_v<OpDomain, critical_temperature_domain>)
                     {
-                        REQUIRE(op_domain.get_value(coord).has_value());
-                        CHECK(std::get<1>(op_domain.get_value(coord).value()) > 0.0);
+                        REQUIRE(op_domain.contains(coord).has_value());
+                        CHECK(std::get<1>(op_domain.contains(coord).value()) > 0.0);
                     }
                     else
                     {
@@ -66,8 +66,8 @@ void check_op_domain_params_and_operational_status(const OpDomain& op_domain, co
                 {
                     if constexpr (std::is_same_v<OpDomain, critical_temperature_domain>)
                     {
-                        REQUIRE(op_domain.get_value(coord).has_value());
-                        CHECK_THAT(std::get<1>(op_domain.get_value(coord).value()),
+                        REQUIRE(op_domain.contains(coord).has_value());
+                        CHECK_THAT(std::get<1>(op_domain.contains(coord).value()),
                                    Catch::Matchers::WithinAbs(0.0, 0.00001));
                     }
                     else
@@ -83,12 +83,12 @@ TEST_CASE("Test parameter point", "[operational-domain]")
 {
     // Test default constructor
     const parameter_point p_default;
-    REQUIRE(p_default.parameters.empty());
+    REQUIRE(p_default.get_parameters().empty());
 
     // Test parameterized constructor
     const std::vector<double> values = {1.0, 2.0, 3.0};
     const parameter_point     p_param(values);
-    REQUIRE(p_param.parameters == values);
+    REQUIRE(p_param.get_parameters() == values);
 
     // Test equality operator
     const parameter_point p1({1.0, 2.0, 3.0});
@@ -337,7 +337,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
                                                                   op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct size
-            CHECK(op_domain.number_of_values() == 1);
+            CHECK(op_domain.size() == 1);
 
             // for the selected range, all samples should be within the parameters and operational
             check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
@@ -358,7 +358,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
                                                                          op_domain_params, &op_domain_stats);
 
                 // check if the operational domain has the correct size
-                CHECK(op_domain_3d.number_of_values() == 1);
+                CHECK(op_domain_3d.size() == 1);
 
                 // for the selected range, all samples should be within the parameters and operational
                 check_op_domain_params_and_operational_status(op_domain_3d, op_domain_params,
@@ -377,7 +377,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
                                                                       op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct size
-            CHECK(op_domain.number_of_values() == 1);
+            CHECK(op_domain.size() == 1);
 
             // for the selected range, all samples should be within the parameters and operational
             check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
@@ -399,7 +399,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
                                                                              op_domain_params, &op_domain_stats);
 
                 // check if the operational domain has the correct size
-                CHECK(op_domain_3d.number_of_values() == 1);
+                CHECK(op_domain_3d.size() == 1);
 
                 // for the selected range, all samples should be within the parameters and operational
                 check_op_domain_params_and_operational_status(op_domain_3d, op_domain_params,
@@ -419,7 +419,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
                                                                  op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct size
-            CHECK(op_domain.number_of_values() == 1);
+            CHECK(op_domain.size() == 1);
 
             // for the selected range, all samples should be within the parameters and operational
             check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
@@ -442,7 +442,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
                                                                             op_domain_params, &op_domain_stats);
 
                     // check if the operational domain has the correct size
-                    CHECK(op_domain_3d.number_of_values() == 1);
+                    CHECK(op_domain_3d.size() == 1);
 
                     // for the selected range, all samples should be within the parameters and operational
                     check_op_domain_params_and_operational_status(op_domain_3d, op_domain_params,
@@ -462,7 +462,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
                                                                       op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct size
-            CHECK(op_domain.number_of_values() == 1);
+            CHECK(op_domain.size() == 1);
 
             // for the selected range, all samples should be within the parameters and operational
             check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
@@ -493,7 +493,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
                                                                   op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct size
-            CHECK(op_domain.number_of_values() == 100);
+            CHECK(op_domain.size() == 100);
 
             // for the selected range, all samples should be within the parameters and operational
             check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
@@ -510,7 +510,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
                                                                       op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct size
-            CHECK(op_domain.number_of_values() <= 100);
+            CHECK(op_domain.size() <= 100);
 
             // for the selected range, all samples should be within the parameters and operational
             check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
@@ -528,7 +528,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
                                                                  op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct size
-            CHECK(op_domain.number_of_values() == 100);
+            CHECK(op_domain.size() == 100);
 
             // for the selected range, all samples should be within the parameters and operational
             check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
@@ -545,7 +545,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
                                                                       op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct size
-            CHECK(op_domain.number_of_values() <= 100);
+            CHECK(op_domain.size() <= 100);
 
             // for the selected range, all samples should be within the parameters and operational
             check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
@@ -576,7 +576,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
                                                                   op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct size
-            CHECK(op_domain.number_of_values() == 50);
+            CHECK(op_domain.size() == 50);
 
             // for the selected range, all samples should be within the parameters and operational
             check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
@@ -597,7 +597,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
                                                                          op_domain_params, &op_domain_stats);
 
                 // check if the operational domain has the correct size
-                CHECK(op_domain_3d.number_of_values() == 350);
+                CHECK(op_domain_3d.size() == 350);
 
                 // for the selected range, all samples should be within the parameters and operational
                 check_op_domain_params_and_operational_status(op_domain_3d, op_domain_params,
@@ -616,7 +616,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
                                                                       op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct size
-            CHECK(op_domain.number_of_values() <= 100);
+            CHECK(op_domain.size() <= 100);
 
             // for the selected range, all samples should be within the parameters and operational
             check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
@@ -638,7 +638,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
                                                                              op_domain_params, &op_domain_stats);
 
                 // check if the operational domain has the correct size
-                CHECK(op_domain_3d.number_of_values() <= 350);
+                CHECK(op_domain_3d.size() <= 350);
 
                 // for the selected range, all samples should be within the parameters and operational
                 check_op_domain_params_and_operational_status(op_domain_3d, op_domain_params,
@@ -658,7 +658,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
                                                                  op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct size
-            CHECK(op_domain.number_of_values() == 50);
+            CHECK(op_domain.size() == 50);
 
             // for the selected range, all samples should be within the parameters and operational
             check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
@@ -681,7 +681,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
                                                                             op_domain_params, &op_domain_stats);
 
                     // check if the operational domain has the correct size
-                    CHECK(op_domain_3d.number_of_values() == 350);
+                    CHECK(op_domain_3d.size() == 350);
 
                     // for the selected range, all samples should be within the parameters and operational
                     check_op_domain_params_and_operational_status(op_domain_3d, op_domain_params,
@@ -701,7 +701,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
                                                                       op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct size
-            CHECK(op_domain.number_of_values() <= 50);
+            CHECK(op_domain.size() <= 50);
 
             // for the selected range, all samples should be within the parameters and operational
             check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
@@ -732,7 +732,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
                                                                   op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct size (10 steps in each dimension)
-            CHECK(op_domain.number_of_values() == 100);
+            CHECK(op_domain.size() == 100);
 
             // for the selected range, all samples should be within the parameters and non-operational
             check_op_domain_params_and_operational_status(op_domain, op_domain_params,
@@ -754,7 +754,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
                                                                          op_domain_params, &op_domain_stats);
 
                 // check if the operational domain has the correct size
-                CHECK(op_domain_3d.number_of_values() == 500);
+                CHECK(op_domain_3d.size() == 500);
 
                 // for the selected range, all samples should be within the parameters and non-operational
                 check_op_domain_params_and_operational_status(op_domain_3d, op_domain_params,
@@ -773,7 +773,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
                                                                       op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct maximum size
-            CHECK(op_domain.number_of_values() <= 5000);
+            CHECK(op_domain.size() <= 5000);
 
             // for the selected range, all samples should be within the parameters and non-operational
             check_op_domain_params_and_operational_status(op_domain, op_domain_params,
@@ -795,7 +795,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
                                                                              op_domain_params, &op_domain_stats);
 
                 // check if the operational domain has the correct maximum size
-                CHECK(op_domain_3d.number_of_values() <= 5000);
+                CHECK(op_domain_3d.size() <= 5000);
 
                 // for the selected range, all samples should be within the parameters and non-operational
                 check_op_domain_params_and_operational_status(op_domain_3d, op_domain_params,
@@ -814,7 +814,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
                                                                  op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct maximum size
-            CHECK(op_domain.number_of_values() <= 100);
+            CHECK(op_domain.size() <= 100);
 
             // for the selected range, all samples should be within the parameters and non-operational
             check_op_domain_params_and_operational_status(op_domain, op_domain_params,
@@ -836,7 +836,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
                                                                         op_domain_params, &op_domain_stats);
 
                 // check if the operational domain has the correct maximum size
-                CHECK(op_domain_3d.number_of_values() <= 500);
+                CHECK(op_domain_3d.size() <= 500);
 
                 // for the selected range, all samples should be within the parameters and non-operational
                 check_op_domain_params_and_operational_status(op_domain_3d, op_domain_params,
@@ -855,7 +855,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
                                                                       op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct maximum size
-            CHECK(op_domain.number_of_values() <= 25);
+            CHECK(op_domain.size() <= 25);
 
             // for the selected range, all samples should be within the parameters and non-operational
             check_op_domain_params_and_operational_status(op_domain, op_domain_params,
@@ -886,7 +886,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
                                                                  op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct size
-            CHECK(op_domain.number_of_values() == 3);
+            CHECK(op_domain.size() == 3);
 
             CHECK(op_domain_stats.num_operational_parameter_combinations == 2);
             CHECK(op_domain_stats.num_non_operational_parameter_combinations == 1);
@@ -910,7 +910,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
                                                                   op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct size (16 steps in each dimension)
-            CHECK(op_domain.number_of_values() == 256);
+            CHECK(op_domain.size() == 256);
 
             // for the selected range, all samples should be within the parameters
             check_op_domain_params_and_operational_status(op_domain, op_domain_params, std::nullopt);
@@ -928,7 +928,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
                                                                       op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct maximum size
-            CHECK(op_domain.number_of_values() <= 100);
+            CHECK(op_domain.size() <= 100);
 
             // for the selected range, all samples should be within the parameters
             check_op_domain_params_and_operational_status(op_domain, op_domain_params, std::nullopt);
@@ -948,7 +948,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
                                                                      op_domain_params, &op_domain_stats);
 
                 // check if the operational domain has the correct size
-                CHECK(op_domain.number_of_values() <= 256);
+                CHECK(op_domain.size() <= 256);
 
                 // for the selected range, all samples should be within the parameters
                 check_op_domain_params_and_operational_status(op_domain, op_domain_params, std::nullopt);
@@ -966,7 +966,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
                                                                       op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct size (max 10 steps in each dimension)
-            CHECK(op_domain.number_of_values() <= 256);
+            CHECK(op_domain.size() <= 256);
 
             // for the selected range, all samples should be within the parameters
             check_op_domain_params_and_operational_status(op_domain, op_domain_params, std::nullopt);
@@ -1022,7 +1022,7 @@ TEST_CASE("SiQAD's AND gate operational domain computation", "[operational-domai
             operational_domain_grid_search(lat, std::vector<tt>{create_and_tt()}, op_domain_params, &op_domain_stats);
 
         // check if the operational domain has the correct size (10 steps in each dimension)
-        CHECK(op_domain.number_of_values() == 100);
+        CHECK(op_domain.size() == 100);
 
         // for the selected range, all samples should be within the parameters and operational
         check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
@@ -1039,7 +1039,7 @@ TEST_CASE("SiQAD's AND gate operational domain computation", "[operational-domai
                                                                   op_domain_params, &op_domain_stats);
 
         // check if the operational domain has the correct size (max 10 steps in each dimension)
-        CHECK(op_domain.number_of_values() <= 100);
+        CHECK(op_domain.size() <= 100);
 
         // for the selected range, all samples should be within the parameters and operational
         check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
@@ -1056,7 +1056,7 @@ TEST_CASE("SiQAD's AND gate operational domain computation", "[operational-domai
             operational_domain_flood_fill(lat, std::vector<tt>{create_and_tt()}, 1, op_domain_params, &op_domain_stats);
 
         // check if the operational domain has the correct size (10 steps in each dimension)
-        CHECK(op_domain.number_of_values() == 100);
+        CHECK(op_domain.size() == 100);
 
         // for the selected range, all samples should be within the parameters and operational
         check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
@@ -1073,7 +1073,7 @@ TEST_CASE("SiQAD's AND gate operational domain computation", "[operational-domai
                                                                   op_domain_params, &op_domain_stats);
 
         // check if the operational domain has the correct size (max 10 steps in each dimension)
-        CHECK(op_domain.number_of_values() <= 100);
+        CHECK(op_domain.size() <= 100);
 
         // for the selected range, all samples should be within the parameters and operational
         check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
@@ -1139,7 +1139,7 @@ TEST_CASE("SiQAD's AND gate operational domain computation, using cube coordinat
             operational_domain_grid_search(lat, std::vector<tt>{create_and_tt()}, op_domain_params, &op_domain_stats);
 
         // check if the operational domain has the correct size (10 steps in each dimension)
-        CHECK(op_domain.number_of_values() == 100);
+        CHECK(op_domain.size() == 100);
 
         // for the selected range, all samples should be within the parameters and operational
         check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
@@ -1156,7 +1156,7 @@ TEST_CASE("SiQAD's AND gate operational domain computation, using cube coordinat
                                                                   op_domain_params, &op_domain_stats);
 
         // check if the operational domain has the correct size (max 10 steps in each dimension)
-        CHECK(op_domain.number_of_values() <= 100);
+        CHECK(op_domain.size() <= 100);
 
         // for the selected range, all samples should be within the parameters and operational
         check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
@@ -1173,7 +1173,7 @@ TEST_CASE("SiQAD's AND gate operational domain computation, using cube coordinat
             operational_domain_flood_fill(lat, std::vector<tt>{create_and_tt()}, 1, op_domain_params, &op_domain_stats);
 
         // check if the operational domain has the correct size (10 steps in each dimension)
-        CHECK(op_domain.number_of_values() == 100);
+        CHECK(op_domain.size() == 100);
 
         // for the selected range, all samples should be within the parameters and operational
         check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
@@ -1190,7 +1190,7 @@ TEST_CASE("SiQAD's AND gate operational domain computation, using cube coordinat
                                                                   op_domain_params, &op_domain_stats);
 
         // check if the operational domain has the correct size (max 10 steps in each dimension)
-        CHECK(op_domain.number_of_values() <= 100);
+        CHECK(op_domain.size() <= 100);
 
         // for the selected range, all samples should be within the parameters and operational
         check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
@@ -1224,7 +1224,7 @@ TEMPLATE_TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[operational-domain
                                                               op_domain_params, &op_domain_stats);
 
         // check if the operational domain has the correct size (10 steps in each dimension)
-        CHECK(op_domain.number_of_values() == 4);
+        CHECK(op_domain.size() == 4);
 
         // for the selected range, all samples should be within the parameters and operational
         check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
@@ -1241,7 +1241,7 @@ TEMPLATE_TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[operational-domain
                                                                   op_domain_params, &op_domain_stats);
 
         // check if the operational domain has the correct size (max 10 steps in each dimension)
-        CHECK(op_domain.number_of_values() <= 100);
+        CHECK(op_domain.size() <= 100);
 
         // for the selected range, all samples should be within the parameters and operational
         check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
@@ -1260,7 +1260,7 @@ TEMPLATE_TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[operational-domain
                                                                  op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct size (10 steps in each dimension)
-            CHECK(op_domain.number_of_values() == 4);
+            CHECK(op_domain.size() == 4);
 
             // for the selected range, all samples should be within the parameters and operational
             check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
@@ -1278,7 +1278,7 @@ TEMPLATE_TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[operational-domain
                                                                   op_domain_params, &op_domain_stats);
 
         // check if the operational domain has the correct size (max 10 steps in each dimension)
-        CHECK(op_domain.number_of_values() <= 4);
+        CHECK(op_domain.size() <= 4);
 
         // for the selected range, all samples should be within the parameters and operational
         check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
@@ -1313,7 +1313,7 @@ TEMPLATE_TEST_CASE("AND gate with Bestagon shape and kink states at default phys
                                                               op_domain_params, &op_domain_stats);
 
         // check if the operational domain has the correct size (10 steps in each dimension)
-        CHECK(op_domain.number_of_values() == 36);
+        CHECK(op_domain.size() == 36);
 
         CHECK(op_domain_stats.num_evaluated_parameter_combinations == 36);
         CHECK(op_domain_stats.num_operational_parameter_combinations == 3);
@@ -1328,7 +1328,7 @@ TEMPLATE_TEST_CASE("AND gate with Bestagon shape and kink states at default phys
                                                               op_domain_params, &op_domain_stats);
 
         // check if the operational domain has the correct size (10 steps in each dimension)
-        CHECK(op_domain.number_of_values() == 36);
+        CHECK(op_domain.size() == 36);
 
         CHECK(op_domain_stats.num_evaluated_parameter_combinations == 36);
         CHECK(op_domain_stats.num_operational_parameter_combinations == 0);
@@ -1361,7 +1361,7 @@ TEMPLATE_TEST_CASE("Grid search to determine the operational domain. The operati
                                                               op_domain_params, &op_domain_stats);
 
         // check if the operational domain has the correct size (10 steps in each dimension)
-        CHECK(op_domain.number_of_values() == 36);
+        CHECK(op_domain.size() == 36);
 
         CHECK(op_domain_stats.num_evaluated_parameter_combinations == 36);
         CHECK(op_domain_stats.num_operational_parameter_combinations == 5);
@@ -1377,7 +1377,7 @@ TEMPLATE_TEST_CASE("Grid search to determine the operational domain. The operati
                                                               op_domain_params, &op_domain_stats);
 
         // check if the operational domain has the correct size (10 steps in each dimension)
-        CHECK(op_domain.number_of_values() == 36);
+        CHECK(op_domain.size() == 36);
 
         CHECK(op_domain_stats.num_evaluated_parameter_combinations == 36);
         CHECK(op_domain_stats.num_operational_parameter_combinations == 5);
@@ -1388,8 +1388,8 @@ TEMPLATE_TEST_CASE("Grid search to determine the operational domain. The operati
         op_domain.for_each(
             [](const auto& pp, const auto& status)
             {
-                CHECK(pp.parameters[0] >= 4.0);
-                CHECK(pp.parameters[1] >= 4.0);
+                CHECK(pp.get_parameters()[0] >= 4.0);
+                CHECK(pp.get_parameters()[1] >= 4.0);
             });
     }
 }
@@ -1416,7 +1416,7 @@ TEST_CASE("Bestagon AND gate operational domain and temperature computation, usi
                                                                        op_domain_params, &op_domain_stats);
 
         // check if the operational domain has the correct size (10 steps in each dimension)
-        CHECK(op_domain.number_of_values() == 9);
+        CHECK(op_domain.size() == 9);
 
         // for the selected range, all samples should be within the parameters and operational
         check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
@@ -1436,7 +1436,7 @@ TEST_CASE("Bestagon AND gate operational domain and temperature computation, usi
                                                                            op_domain_params, &op_domain_stats);
 
         // check if the operational domain has the correct size (max 10 steps in each dimension)
-        CHECK(op_domain.number_of_values() <= 9);
+        CHECK(op_domain.size() <= 9);
 
         // for the selected range, all samples should be within the parameters and operational
         check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::NON_OPERATIONAL);
@@ -1456,7 +1456,7 @@ TEST_CASE("Bestagon AND gate operational domain and temperature computation, usi
                                                                       op_domain_params, &op_domain_stats);
 
         // check if the operational domain has the correct size (10 steps in each dimension)
-        CHECK(op_domain.number_of_values() == 9);
+        CHECK(op_domain.size() == 9);
 
         // for the selected range, all samples should be within the parameters and operational
         check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);

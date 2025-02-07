@@ -6,6 +6,7 @@
 #define FICTION_PHYSICALLY_VALID_PARAMETERS_HPP
 
 #include <fiction/algorithms/simulation/sidb/operational_domain.hpp>
+#include <fiction/algorithms/simulation/sidb/sidb_simulation_domain.hpp>
 #include <fiction/types.hpp>
 
 #include <cstdint>
@@ -44,8 +45,7 @@ physically_valid_parameters(Lyt& cds, const operational_domain_params& params = 
 
     detail::operational_domain_impl<Lyt, tt, operational_domain> p{cds, params, st};
 
-    const auto result =
-        p.template grid_search_for_physically_valid_parameters<sidb_simulation_domain<parameter_point, uint64_t>>(cds);
+    const auto result = p.grid_search_for_physically_valid_parameters(cds);
 
     return result;
 }

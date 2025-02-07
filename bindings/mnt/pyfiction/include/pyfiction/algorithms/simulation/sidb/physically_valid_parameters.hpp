@@ -45,7 +45,7 @@ inline void physically_valid_parameters(pybind11::module& m)
             [](const fiction::sidb_simulation_domain<fiction::parameter_point, uint64_t>& domain,
                const fiction::parameter_point&                                            pp)
             {
-                const auto result = domain.get_value(pp);
+                const auto result = domain.contains(pp);
 
                 // Check if the result has a value
                 if (result.has_value())

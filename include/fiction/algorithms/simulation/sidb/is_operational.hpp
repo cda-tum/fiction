@@ -442,8 +442,7 @@ class is_operational_impl
                         non_op_reason == non_operationality_reason::KINKS &&
                         parameters.op_condition == is_operational_params::operational_condition::REJECT_KINKS)
                     {
-                        at_least_one_layout_is_kink_induced_non_operational = true;
-                        continue;
+                        return {operational_status::NON_OPERATIONAL, non_operationality_reason::KINKS};
                     }
                 }
             }

@@ -60,15 +60,15 @@ TEST_CASE("Determine physical parameters for CDS of SiQAD Y-shaped AND gate, 10 
         cds.update_after_charge_change();
 
         const auto valid_parameters = physically_valid_parameters(cds, op_domain_params);
-        CHECK(valid_parameters.number_of_values() == 43);
+        CHECK(valid_parameters.size() == 43);
 
         op_domain_params.operational_params.sim_engine = sidb_simulation_engine::EXGS;
         const auto valid_parameters_exgs               = physically_valid_parameters(cds, op_domain_params);
-        CHECK(valid_parameters_exgs.number_of_values() == 43);
+        CHECK(valid_parameters_exgs.size() == 43);
 
         op_domain_params.operational_params.sim_engine = sidb_simulation_engine::QUICKSIM;
         const auto valid_parameters_quicksim           = physically_valid_parameters(cds, op_domain_params);
-        CHECK(valid_parameters_quicksim.number_of_values() == 43);
+        CHECK(valid_parameters_quicksim.size() == 43);
     }
 
     SECTION("Using the 2nd excited charge distribution for default physical parameters as given CDS")
@@ -84,21 +84,21 @@ TEST_CASE("Determine physical parameters for CDS of SiQAD Y-shaped AND gate, 10 
         cds.update_after_charge_change();
 
         const auto valid_parameters = physically_valid_parameters(cds, op_domain_params);
-        CHECK(valid_parameters.number_of_values() == 98);
+        CHECK(valid_parameters.size() == 98);
 
-        const auto p1 = valid_parameters.get_value(parameter_point{{5.9, 5.5}});
+        const auto p1 = valid_parameters.contains(parameter_point{{5.9, 5.5}});
         REQUIRE(p1.has_value());
         CHECK(std::get<0>(p1.value()) == 1);
 
-        const auto p2 = valid_parameters.get_value(parameter_point{{5.8, 4.4}});
+        const auto p2 = valid_parameters.contains(parameter_point{{5.8, 4.4}});
         REQUIRE(p2.has_value());
         CHECK(std::get<0>(p2.value()) == 0);
 
-        const auto p3 = valid_parameters.get_value(parameter_point{{5.8, 4.4}});
+        const auto p3 = valid_parameters.contains(parameter_point{{5.8, 4.4}});
         REQUIRE(p3.has_value());
         CHECK(std::get<0>(p3.value()) == 0);
 
-        const auto p4 = valid_parameters.get_value(parameter_point{{6.0, 6.0}});
+        const auto p4 = valid_parameters.contains(parameter_point{{6.0, 6.0}});
         REQUIRE(p4.has_value());
         CHECK(std::get<0>(p4.value()) == 1);
     }
@@ -158,21 +158,21 @@ TEST_CASE(
         cds.update_after_charge_change();
 
         const auto valid_parameters = physically_valid_parameters(cds, op_domain_params);
-        REQUIRE(valid_parameters.number_of_values() == 100);
+        REQUIRE(valid_parameters.size() == 100);
 
-        const auto p1 = valid_parameters.get_value(parameter_point{{5.6, 5.0}});
+        const auto p1 = valid_parameters.contains(parameter_point{{5.6, 5.0}});
         REQUIRE(p1.has_value());
         CHECK(std::get<0>(p1.value()) == 0);
 
-        const auto p2 = valid_parameters.get_value(parameter_point{{5.0, 5.9}});
+        const auto p2 = valid_parameters.contains(parameter_point{{5.0, 5.9}});
         REQUIRE(p2.has_value());
         CHECK(std::get<0>(p2.value()) == 2);
 
-        const auto p3 = valid_parameters.get_value(parameter_point{{5.4, 5.3}});
+        const auto p3 = valid_parameters.contains(parameter_point{{5.4, 5.3}});
         REQUIRE(p3.has_value());
         CHECK(std::get<0>(p3.value()) == 1);
 
-        const auto p4 = valid_parameters.get_value(parameter_point{{5.8, 5.3}});
+        const auto p4 = valid_parameters.contains(parameter_point{{5.8, 5.3}});
         REQUIRE(p4.has_value());
         CHECK(std::get<0>(p4.value()) == 0);
     }
@@ -216,20 +216,20 @@ TEST_CASE(
         cds.update_after_charge_change();
 
         const auto valid_parameters = physically_valid_parameters(cds, op_domain_params);
-        REQUIRE(valid_parameters.number_of_values() == 27);
-        const auto p1 = valid_parameters.get_value(parameter_point{{5.6, 5.0, -0.32}});
+        REQUIRE(valid_parameters.size() == 27);
+        const auto p1 = valid_parameters.contains(parameter_point{{5.6, 5.0, -0.32}});
         REQUIRE(p1.has_value());
         CHECK(std::get<0>(p1.value()) == 0);
 
-        const auto p2 = valid_parameters.get_value(parameter_point{{5.6, 5.0, -0.33}});
+        const auto p2 = valid_parameters.contains(parameter_point{{5.6, 5.0, -0.33}});
         REQUIRE(p2.has_value());
         CHECK(std::get<0>(p2.value()) == 0);
 
-        const auto p3 = valid_parameters.get_value(parameter_point{{5.6, 5.0, -0.31}});
+        const auto p3 = valid_parameters.contains(parameter_point{{5.6, 5.0, -0.31}});
         REQUIRE(p3.has_value());
         CHECK(std::get<0>(p3.value()) == 1);
 
-        const auto p4 = valid_parameters.get_value(parameter_point{{5.7, 5.2, -0.33}});
+        const auto p4 = valid_parameters.contains(parameter_point{{5.7, 5.2, -0.33}});
         REQUIRE(p4.has_value());
         CHECK(std::get<0>(p4.value()) == 0);
     }

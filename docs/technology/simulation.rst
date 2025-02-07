@@ -85,11 +85,11 @@ Physical Constants
 
 **Header:** ``fiction/technology/physical_constants.hpp``
 
-.. doxygenvariable:: EPSILON
-.. doxygenvariable:: ELEMENTARY_CHARGE
-.. doxygenvariable:: K_E
-.. doxygenvariable:: constants::ERROR_MARGIN
-.. doxygenvariable:: PI
+.. doxygenvariable:: fiction::constants::physical::EPSILON
+.. doxygenvariable:: fiction::constants::physical::ELEMENTARY_CHARGE
+.. doxygenvariable:: fiction::constants::physical::K_E
+.. doxygenvariable:: fiction::constants::ERROR_MARGIN
+.. doxygenvariable:: fiction::constants::PI
 
 
 Euclidean distance between two SiDBs in nanometers

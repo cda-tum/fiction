@@ -124,15 +124,15 @@ class TestOperationalDomain(unittest.TestCase):
         # Add a value to the domain
         temp_domain.add_value(key, value)
 
-        self.assertEqual(temp_domain.get_value(key), value)
+        self.assertEqual(temp_domain.contains(key), value)
 
         # Test retrieving a value that doesn't exist
         missing_key = parameter_point([4.0, 5.0, 6.0])
-        self.assertIsNone(temp_domain.get_value(missing_key))
+        self.assertIsNone(temp_domain.contains(missing_key))
 
         # Modify dimensions and verify
-        temp_domain.dimensions = [sweep_parameter.EPSILON_R, sweep_parameter.LAMBDA_TF]
-        self.assertEqual(temp_domain.dimensions, [sweep_parameter.EPSILON_R, sweep_parameter.LAMBDA_TF])
+        temp_domain.set_dimensions([sweep_parameter.EPSILON_R, sweep_parameter.LAMBDA_TF])
+        self.assertEqual(temp_domain.get_dimensions(), [sweep_parameter.EPSILON_R, sweep_parameter.LAMBDA_TF])
 
     def test_operational_domain(self):
         # Create an instance of operational_domain
@@ -147,11 +147,11 @@ class TestOperationalDomain(unittest.TestCase):
 
         # Test retrieving a value that doesn't exist
         missing_key = parameter_point([7.0, 8.0, 9.0])
-        self.assertIsNone(op_domain.get_value(missing_key))
+        self.assertIsNone(op_domain.contains(missing_key))
 
         # Modify dimensions and verify
-        op_domain.dimensions = [sweep_parameter.EPSILON_R, sweep_parameter.LAMBDA_TF]
-        self.assertEqual(op_domain.dimensions, [sweep_parameter.EPSILON_R, sweep_parameter.LAMBDA_TF])
+        op_domain.set_dimensions([sweep_parameter.EPSILON_R, sweep_parameter.LAMBDA_TF])
+        self.assertEqual(op_domain.get_dimensions(), [sweep_parameter.EPSILON_R, sweep_parameter.LAMBDA_TF])
 
 
 if __name__ == "__main__":

@@ -18,7 +18,7 @@ class TestWriteOperationalDomain(unittest.TestCase):
         opdom = operational_domain()
 
         # Ensure dimensions are set correctly
-        opdom.dimensions = [sweep_parameter.EPSILON_R, sweep_parameter.LAMBDA_TF]
+        opdom.set_dimensions([sweep_parameter.EPSILON_R, sweep_parameter.LAMBDA_TF])
 
         opdom.add_value(parameter_point([0, 0]), [operational_status.OPERATIONAL])
         opdom.add_value(parameter_point([0, 1]), [operational_status.NON_OPERATIONAL])
@@ -43,7 +43,7 @@ class TestWriteOperationalDomain(unittest.TestCase):
 
     def test_write_operational_domain_with_floating_point_values(self):
         opdom = operational_domain()
-        opdom.dimensions = [sweep_parameter.EPSILON_R, sweep_parameter.LAMBDA_TF]
+        opdom.set_dimensions([sweep_parameter.EPSILON_R, sweep_parameter.LAMBDA_TF])
 
         # Using floating point values for the parameter points
         opdom.add_value(parameter_point([0.1, 0.2]), [operational_status.OPERATIONAL])
@@ -70,7 +70,7 @@ class TestWriteOperationalDomain(unittest.TestCase):
 
     def test_write_operational_domain_with_metric_values(self):
         opdom = critical_temperature_domain()
-        opdom.dimensions = [sweep_parameter.EPSILON_R, sweep_parameter.LAMBDA_TF]
+        opdom.set_dimensions([sweep_parameter.EPSILON_R, sweep_parameter.LAMBDA_TF])
 
         # Adding metric values
         opdom.add_value(parameter_point([0.1, 0.2]), [operational_status.OPERATIONAL, 50.3])
@@ -100,7 +100,7 @@ class TestWriteOperationalDomain(unittest.TestCase):
 
     def test_skip_non_operational_samples(self):
         opdom = operational_domain()
-        opdom.dimensions = [sweep_parameter.EPSILON_R, sweep_parameter.LAMBDA_TF]
+        opdom.set_dimensions([sweep_parameter.EPSILON_R, sweep_parameter.LAMBDA_TF])
 
         opdom.add_value(parameter_point([0.1, 0.2]), [operational_status.OPERATIONAL])
         opdom.add_value(parameter_point([0.3, 0.4]), [operational_status.NON_OPERATIONAL])

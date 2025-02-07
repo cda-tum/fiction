@@ -321,12 +321,12 @@ Operational Domain Computation
             :members:
 
         .. autofunction:: mnt.pyfiction.operational_domain_grid_search
-        .. autofunction:: mnt.pyfiction.critical_temperature_domain_grid_search
         .. autofunction:: mnt.pyfiction.operational_domain_random_sampling
-        .. autofunction:: mnt.pyfiction.critical_temperature_domain_random_sampling
         .. autofunction:: mnt.pyfiction.operational_domain_flood_fill
-        .. autofunction:: mnt.pyfiction.critical_temperature_domain_flood_fill
         .. autofunction:: mnt.pyfiction.operational_domain_contour_tracing
+        .. autofunction:: mnt.pyfiction.critical_temperature_domain_grid_search
+        .. autofunction:: mnt.pyfiction.critical_temperature_domain_random_sampling
+        .. autofunction:: mnt.pyfiction.critical_temperature_domain_flood_fill
         .. autofunction:: mnt.pyfiction.critical_temperature_domain_contour_tracing
 
         .. autoclass:: mnt.pyfiction.compute_operational_ratio_params

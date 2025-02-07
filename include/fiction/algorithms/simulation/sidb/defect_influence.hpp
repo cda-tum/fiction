@@ -99,24 +99,7 @@ enum class defect_influence_status : uint8_t
  */
 template <typename Lyt>
 class defect_influence_domain : public sidb_simulation_domain<typename Lyt::cell, defect_influence_status>
-{
-  public:
-    /**
-     * This function verifies whether the defect position `c` has already been sampled.
-     *
-     * @param c Position of the defect, `std::nullptr` otherwise.
-     */
-    [[nodiscard]] std::optional<defect_influence_status>
-    has_already_been_sampled(const typename Lyt::cell& c) const noexcept
-    {
-        if (const auto v = this->contains_key(c); v.has_value())
-        {
-            return std::get<0>(v.value());
-        }
-
-        return std::nullopt;
-    }
-};
+{};
 
 /**
  * Statistics.
@@ -554,9 +537,9 @@ class defect_influence_impl
 
         auto lyt_copy = layout.clone();
 
-        if (const auto op_value = influence_domain.has_already_been_sampled(defect_cell); op_value.has_value())
+        if (const auto op_value = influence_domain.contains(defect_cell); op_value.has_value())
         {
-            return *op_value;
+            return std::get<0>(*op_value);
         }
 
         const auto non_influential = [this, &defect_cell]()

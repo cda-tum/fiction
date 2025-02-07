@@ -64,10 +64,6 @@ struct parameter_point
      */
     explicit parameter_point(const std::vector<double>& values) : parameters(values) {}
     /**
-     * Parameter values for each dimension.
-     */
-    std::vector<double> parameters{};
-    /**
      * Equality operator. Checks if this parameter point is equal to another point within a specified tolerance.
      * The tolerance is defined by `constants::ERROR_MARGIN`.
      *
@@ -122,6 +118,30 @@ struct parameter_point
 
         return parameters[I];
     }
+    /**
+     * Sets the parameter values for each dimension.
+     *
+     * @param values The parameter values to set.
+     */
+    void set_parameters(const std::vector<double>& values)
+    {
+        parameters = values;
+    }
+    /**
+     * Returns the parameter values for each dimension.
+     *
+     * @return The parameter values for each dimension.
+     */
+    [[nodiscard]] const std::vector<double>& get_parameters() const noexcept
+    {
+        return parameters;
+    }
+
+  private:
+    /**
+     * Parameter values for each dimension.
+     */
+    std::vector<double> parameters{};
 };
 /**
  * Possible sweep parameters for the operational domain computation.
@@ -157,6 +177,48 @@ class operational_domain : public sidb_simulation_domain<parameter_point, operat
 {
   public:
     /**
+     * Sets the dimensions to sweep over, ordered by priority. The first dimension is the x dimension, the second
+     * dimension is the y dimension, etc.
+     *
+     * @param dims The dimensions to sweep over.
+     */
+    void set_dimensions(const std::vector<sweep_parameter>& dims)
+    {
+        dimensions = dims;
+    }
+    /**
+     * Adds a dimension to sweep over. The first dimension is the x dimension, the second dimension is the y dimension,
+     * etc.
+     *
+     * @param dim The dimension to add.
+     */
+    void add_dimension(const sweep_parameter& dim)
+    {
+        dimensions.push_back(dim);
+    }
+    /**
+     * Returns the dimensions to sweep over, ordered by priority. The first dimension is the x dimension, the second
+     * dimension is the y dimension, etc.
+     *
+     * @return The dimensions to sweep over.
+     */
+    [[nodiscard]] const std::vector<sweep_parameter>& get_dimensions() const noexcept
+    {
+        return dimensions;
+    }
+    /**
+     * Returns the number of dimensions to sweep over.
+     *
+     * @return The number of dimensions to sweep over.
+     */
+    [[nodiscard]]
+    std::size_t get_number_of_dimensions() const noexcept
+    {
+        return dimensions.size();
+    }
+
+  private:
+    /**
      * The dimensions to sweep over, ordered by priority. The first dimension is the x dimension, the second dimension
      * is the y dimension, etc.
      */
@@ -171,6 +233,48 @@ class operational_domain : public sidb_simulation_domain<parameter_point, operat
 class critical_temperature_domain : public sidb_simulation_domain<parameter_point, operational_status, double>
 {
   public:
+    /**
+     * Sets the dimensions to sweep over, ordered by priority. The first dimension is the x dimension, the second
+     * dimension is the y dimension, etc.
+     *
+     * @param dim The dimensions to sweep over.
+     */
+    void set_dimensions(const std::vector<sweep_parameter>& dim)
+    {
+        dimensions = dim;
+    }
+    /**
+     * Adds a dimension to sweep over. The first dimension is the x dimension, the second dimension is the y dimension,
+     * etc.
+     *
+     * @param param The dimension to add.
+     */
+    void add_dimension(const sweep_parameter& param)
+    {
+        dimensions.push_back(param);
+    }
+    /**
+     * Returns the dimensions to sweep over, ordered by priority. The first dimension is the x dimension, the second
+     * dimension is the y dimension, etc.
+     *
+     * @return The dimensions to sweep over.
+     */
+    [[nodiscard]] const std::vector<sweep_parameter>& get_dimensions() const noexcept
+    {
+        return dimensions;
+    }
+    /**
+     * Returns the number of dimensions to sweep over.
+     *
+     * @return The number of dimensions to sweep over.
+     */
+    [[nodiscard]]
+    std::size_t get_number_of_dimensions() const noexcept
+    {
+        return dimensions.size();
+    }
+
+  private:
     /**
      * The dimensions to sweep over, ordered by priority. The first dimension is the x dimension, the second dimension
      * is the y dimension, etc.
@@ -262,7 +366,7 @@ namespace detail
  *
  * @param params The operational domain parameters to validate.
  */
-void validate_sweep_parameters(const operational_domain_params& params)
+inline void validate_sweep_parameters(const operational_domain_params& params)
 {
     for (auto d = 0u; d < params.sweep_dimensions.size(); ++d)
     {
@@ -323,14 +427,12 @@ class operational_domain_impl
             canvas_lyt.assign_cell_type(c, technology<Lyt>::cell_type::NORMAL);
         }
 
-        op_domain.dimensions.reserve(num_dimensions);
-
         indices.reserve(num_dimensions);
         values.reserve(num_dimensions);
 
         for (auto d = 0u; d < num_dimensions; ++d)
         {
-            op_domain.dimensions.push_back(params.sweep_dimensions[d].dimension);
+            op_domain.add_dimension(params.sweep_dimensions[d].dimension);
 
             // generate the step points for the dimension
             indices.push_back(std::vector<std::size_t>(num_steps(d) + 1));
@@ -371,14 +473,13 @@ class operational_domain_impl
             stats{st},
             num_dimensions{params.sweep_dimensions.size()}
     {
-        op_domain.dimensions.reserve(num_dimensions);
 
         indices.reserve(num_dimensions);
         values.reserve(num_dimensions);
 
         for (auto d = 0u; d < num_dimensions; ++d)
         {
-            op_domain.dimensions.push_back(params.sweep_dimensions[d].dimension);
+            op_domain.add_dimension(params.sweep_dimensions[d].dimension);
 
             // generate the step points for the dimension
             indices.push_back(std::vector<std::size_t>(num_steps(d) + 1));
@@ -494,7 +595,7 @@ class operational_domain_impl
             {
                 for (const auto& m : moore_neighborhood_2d(sp))
                 {
-                    if (!op_domain.has_already_been_sampled(to_parameter_point(m)))
+                    if (!op_domain.contains(to_parameter_point(m)))
                     {
                         queue.push(m);
                     }
@@ -504,7 +605,7 @@ class operational_domain_impl
             {
                 for (const auto& m : moore_neighborhood_3d(sp))
                 {
-                    if (!op_domain.has_already_been_sampled(to_parameter_point(m)))
+                    if (!op_domain.contains(to_parameter_point(m)))
                     {
                         queue.push(m);
                     }
@@ -530,7 +631,7 @@ class operational_domain_impl
             queue.pop();
 
             // if the point has already been sampled, continue with the next
-            if (op_domain.has_already_been_sampled(to_parameter_point(sp)))
+            if (op_domain.contains(to_parameter_point(sp)))
             {
                 continue;
             }
@@ -588,7 +689,7 @@ class operational_domain_impl
         for (const auto& starting_point : step_point_samples)
         {
             // if the current starting point is non-operational, skip to the next one
-            const auto domain_value = op_domain.get_value(to_parameter_point(starting_point));
+            const auto domain_value = op_domain.contains(to_parameter_point(starting_point));
             if (domain_value.has_value())
             {
                 if (std::get<0>(domain_value.value()) == operational_status::NON_OPERATIONAL)
@@ -654,14 +755,13 @@ class operational_domain_impl
      * which the given CDS is physically valid, it is determined whether the CDS is the ground state or the n-th excited
      * state.
      *
-     * @tparam OpDomainTarget The target operational domain type.
      * @param lyt SiDB cell-level layout that is simulated and compared to the given CDS.
      * @return All physically valid physical parameters and the excited state number.
      */
-    template <typename OpDomainTarget>
-    [[nodiscard]] OpDomainTarget grid_search_for_physically_valid_parameters(Lyt& lyt) noexcept
+    [[nodiscard]] sidb_simulation_domain<parameter_point, uint64_t>
+    grid_search_for_physically_valid_parameters(Lyt& lyt) noexcept
     {
-        OpDomainTarget suitable_params_domain{};
+        sidb_simulation_domain<parameter_point, uint64_t> suitable_params_domain{};
 
         mockturtle::stopwatch stop{stats.time_total};
 
@@ -722,7 +822,7 @@ class operational_domain_impl
 
                     for (auto d = 0u; d < num_dimensions; ++d)
                     {
-                        set_dimension_value(simulation_parameters, param_point.parameters[d], d);
+                        set_dimension_value(simulation_parameters, param_point.get_parameters()[d], d);
                     }
 
                     auto sim_results = sidb_simulation_result<Lyt>{};
@@ -927,7 +1027,7 @@ class operational_domain_impl
             assert(pp.parameters[d] >= min_val && pp.parameters[d] <= max_val &&
                    "Parameter point is outside of the value range");
 
-            const auto it = std::lower_bound(values[d].cbegin(), values[d].cend(), pp.parameters[d]);
+            const auto it = std::lower_bound(values[d].cbegin(), values[d].cend(), pp.get_parameters()[d]);
 
             const auto dis = std::distance(values[d].cbegin(), it);
 
@@ -998,7 +1098,7 @@ class operational_domain_impl
      */
     operational_status is_step_point_operational(const step_point& sp) noexcept
     {
-        if (const auto op_value = op_domain.has_already_been_sampled(to_parameter_point(sp)); op_value.has_value())
+        if (const auto op_value = op_domain.contains(to_parameter_point(sp)); op_value.has_value())
         {
             return std::get<0>(*op_value);
         }
@@ -1079,7 +1179,7 @@ class operational_domain_impl
     operational_status is_step_point_suitable(Lyt lyt, const step_point& sp) noexcept
     {
         // if the point has already been sampled, return the stored operational status
-        if (const auto op_value = op_domain.has_already_been_sampled(to_parameter_point(sp)); op_value.has_value())
+        if (const auto op_value = op_domain.contains(to_parameter_point(sp)); op_value.has_value())
         {
             return std::get<0>(*op_value);
         }
@@ -1108,7 +1208,7 @@ class operational_domain_impl
 
         for (auto d = 0u; d < num_dimensions; ++d)
         {
-            set_dimension_value(sim_params, param_point.parameters[d], d);
+            set_dimension_value(sim_params, param_point.get_parameters()[d], d);
         }
 
         lyt.assign_physical_parameters(sim_params);
@@ -1468,7 +1568,7 @@ class operational_domain_impl
                 }
 
                 // if the point has already been sampled
-                if (const auto operational_status = op_domain.has_already_been_sampled(to_parameter_point(m));
+                if (const auto operational_status = op_domain.contains(to_parameter_point(m));
                     operational_status.has_value())
                 {
                     // and found to be non-operational, continue with the next
@@ -1502,7 +1602,7 @@ class operational_domain_impl
             queue.pop();
 
             // if the point is known to be non-operational, continue with the next
-            if (const auto operational_status = op_domain.has_already_been_sampled(to_parameter_point(sp));
+            if (const auto operational_status = op_domain.contains(to_parameter_point(sp));
                 operational_status.has_value())
             {
                 if (std::get<0>(operational_status.value()) == operational_status::NON_OPERATIONAL)
@@ -1595,54 +1695,6 @@ template <typename Lyt, typename TT>
     return result;
 }
 /**
- * Computes the critical temperature domain of the given SiDB cell-level layout. The critical temperature domain
- * consists of all parameter combinations for which the layout is logically operational, along with the critical
- * temperature for each specific parameter point.
- *
- * This algorithm uses a grid search to find the operational domain. The grid search is performed by exhaustively
- * sweeping the parameter space in the x and y dimensions. Since grid search is exhaustive, the algorithm is guaranteed
- * to find the operational domain, if it exists within the parameter range. However, the algorithm performs a quadratic
- * number of operational checks on the layout, where each operational check consists of up to \f$2^n\f$ exact ground
- * state simulations, where \f$n\f$ is the number of inputs of the layout. Each exact ground state simulation has
- * exponential complexity in of itself. Therefore, the algorithm is only feasible for small layouts with few inputs.
- *
- * This function may throw an `std::invalid_argument` exception if the given sweep parameters are invalid.
- *
- * @tparam Lyt SiDB cell-level layout type.
- * @tparam TT Truth table type.
- * @param lyt Layout to compute the operational domain for.
- * @param spec Expected vector of truth tables of the layout. Each truth table represents an output of
- * the Boolean function.
- * @param params Operational domain computation parameters.
- * @param stats Operational domain computation statistics.
- * @return The operational domain of the layout.
- */
-template <typename Lyt, typename TT>
-[[nodiscard]] critical_temperature_domain
-critical_temperature_domain_grid_search(const Lyt& lyt, const std::vector<TT>& spec,
-                                        const operational_domain_params& params = {},
-                                        operational_domain_stats*        stats  = nullptr)
-{
-    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
-
-    // this may throw an `std::invalid_argument` exception
-    detail::validate_sweep_parameters(params);
-
-    operational_domain_stats                                              st{};
-    detail::operational_domain_impl<Lyt, TT, critical_temperature_domain> p{lyt, spec, params, st};
-
-    const auto result = p.grid_search();
-
-    if (stats)
-    {
-        *stats = st;
-    }
-
-    return result;
-}
-/**
  * Computes the operational domain of the given SiDB cell-level layout. The operational domain is the set of all
  * parameter combinations for which the layout is logically operational. Logical operation is defined as the layout
  * implementing the given truth table. The input BDL pairs of the layout are assumed to be in the same order as the
@@ -1682,6 +1734,116 @@ template <typename Lyt, typename TT>
     detail::operational_domain_impl<Lyt, TT, operational_domain> p{lyt, spec, params, st};
 
     const auto result = p.random_sampling(samples);
+
+    if (stats)
+    {
+        *stats = st;
+    }
+
+    return result;
+}
+/**
+ * Computes the operational domain of the given SiDB cell-level layout. The operational domain is the set of all
+ * parameter combinations for which the layout is logically operational. Logical operation is defined as the layout
+ * implementing the given truth table. The input BDL pairs of the layout are assumed to be in the same order as the
+ * inputs of the truth table.
+ *
+ * This algorithm first uses random sampling to find several operational points within the parameter range. From there,
+ * it employs the "flood fill" algorithm to explore the operational domain. The algorithm is guaranteed to determine all
+ * operational "islands" in their entirety if the initial random sampling found at least one operational point within
+ * them. Thereby, this algorithm works for disconnected operational domains.
+ *
+ * It performs `samples` uniformly-distributed random samples within the parameter range. From there, it performs
+ * another number of samples equal to the number of points within the operational domain plus the first non-operational
+ * point in each direction. For each sample, the algorithm performs one operational check on the layout, where each
+ * operational check consists of up to \f$2^n\f$ exact ground state simulations, where \f$n\f$ is the number of
+ * inputs of the layout. Each exact ground state simulation has exponential complexity in of itself. Therefore, the
+ * algorithm is only feasible for small layouts with few inputs.
+ *
+ * This flavor of operational domain computation was proposed in \"Reducing the Complexity of Operational Domain
+ * Computation in Silicon Dangling Bond Logic\" by M. Walter, J. Drewniok, S. S. H. Ng, K. Walus, and R. Wille in
+ * NANOARCH 2023.
+ *
+ * This function may throw an `std::invalid_argument` exception if the given sweep parameters are invalid.
+ *
+ * @tparam Lyt SiDB cell-level layout type.
+ * @tparam TT Truth table type.
+ * @param lyt Layout to compute the operational domain for.
+ * @param spec Expected Boolean function of the layout given as a multi-output truth table.
+ * @param samples Number of samples to perform.
+ * @param params Operational domain computation parameters.
+ * @param stats Operational domain computation statistics.
+ * @return The (partial) operational domain of the layout.
+ */
+template <typename Lyt, typename TT>
+[[nodiscard]] operational_domain
+operational_domain_flood_fill(const Lyt& lyt, const std::vector<TT>& spec, const std::size_t samples,
+                              const operational_domain_params& params = {}, operational_domain_stats* stats = nullptr)
+{
+    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
+
+    if (params.sweep_dimensions.size() != 2 && params.sweep_dimensions.size() != 3)
+    {
+        throw std::invalid_argument("Flood fill is only applicable to 2 or 3 dimensions");
+    }
+
+    // this may throw an `std::invalid_argument` exception
+    detail::validate_sweep_parameters(params);
+
+    operational_domain_stats                                     st{};
+    detail::operational_domain_impl<Lyt, TT, operational_domain> p{lyt, spec, params, st};
+
+    const auto result = p.flood_fill(samples);
+
+    if (stats)
+    {
+        *stats = st;
+    }
+
+    return result;
+}
+/**
+ * Computes the critical temperature domain of the given SiDB cell-level layout. The critical temperature domain
+ * consists of all parameter combinations for which the layout is logically operational, along with the critical
+ * temperature for each specific parameter point.
+ *
+ * This algorithm uses a grid search to find the operational domain. The grid search is performed by exhaustively
+ * sweeping the parameter space in the x and y dimensions. Since grid search is exhaustive, the algorithm is guaranteed
+ * to find the operational domain, if it exists within the parameter range. However, the algorithm performs a quadratic
+ * number of operational checks on the layout, where each operational check consists of up to \f$2^n\f$ exact ground
+ * state simulations, where \f$n\f$ is the number of inputs of the layout. Each exact ground state simulation has
+ * exponential complexity in of itself. Therefore, the algorithm is only feasible for small layouts with few inputs.
+ *
+ * This function may throw an `std::invalid_argument` exception if the given sweep parameters are invalid.
+ *
+ * @tparam Lyt SiDB cell-level layout type.
+ * @tparam TT Truth table type.
+ * @param lyt Layout to compute the operational domain for.
+ * @param spec Expected vector of truth tables of the layout. Each truth table represents an output of
+ * the Boolean function.
+ * @param params Operational domain computation parameters.
+ * @param stats Operational domain computation statistics.
+ * @return The operational domain of the layout.
+ */
+template <typename Lyt, typename TT>
+[[nodiscard]] critical_temperature_domain
+critical_temperature_domain_grid_search(const Lyt& lyt, const std::vector<TT>& spec,
+                                        const operational_domain_params& params = {},
+                                        operational_domain_stats*        stats  = nullptr)
+{
+    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
+
+    // this may throw an `std::invalid_argument` exception
+    detail::validate_sweep_parameters(params);
+
+    operational_domain_stats                                              st{};
+    detail::operational_domain_impl<Lyt, TT, critical_temperature_domain> p{lyt, spec, params, st};
+
+    const auto result = p.grid_search();
 
     if (stats)
     {
@@ -1738,70 +1900,6 @@ critical_temperature_domain_random_sampling(const Lyt& lyt, const std::vector<TT
     return result;
 }
 /**
- * Computes the operational domain of the given SiDB cell-level layout. The operational domain is the set of all
- * parameter combinations for which the layout is logically operational. Logical operation is defined as the layout
- * implementing the given truth table. The input BDL pairs of the layout are assumed to be in the same order as the
- * inputs of the truth table.
- *
- * This algorithm first uses random sampling to find several operational points within the parameter range. From there,
- * it employs the "flood fill" algorithm to explore the operational domain. The algorithm is guaranteed to determine all
- * operational "islands" in their entirety if the initial random sampling found at least one operational point within
- * them. Thereby, this algorithm works for disconnected operational domains.
- *
- * It performs `samples` uniformly-distributed random samples within the parameter range. From there, it performs
- * another number of samples equal to the number of points within the operational domain plus the first non-operational
- * point in each direction. For each sample, the algorithm performs one operational check on the layout, where each
- * operational check consists of up to \f$2^n\f$ exact ground state simulations, where \f$n\f$ is the number of
- * inputs of the layout. Each exact ground state simulation has exponential complexity in of itself. Therefore, the
- * algorithm is only feasible for small layouts with few inputs.
- *
- * This flavor of operational domain computation was proposed in \"Reducing the Complexity of Operational Domain
- * Computation in Silicon Dangling Bond Logic\" by M. Walter, J. Drewniok, S. S. H. Ng, K. Walus, and R. Wille in
- * NANOARCH 2023.
- *
- * This function may throw an `std::invalid_argument` exception if the given sweep parameters are invalid.
- *
- * @tparam OpDomain Operational domain type to compute.
- * @tparam Lyt SiDB cell-level layout type.
- * @tparam TT Truth table type.
- * @param lyt Layout to compute the operational domain for.
- * @param spec Expected Boolean function of the layout given as a multi-output truth table.
- * @param samples Number of samples to perform.
- * @param params Operational domain computation parameters.
- * @param stats Operational domain computation statistics.
- * @return The (partial) operational domain of the layout.
- */
-template <typename Lyt, typename TT>
-[[nodiscard]] operational_domain
-operational_domain_flood_fill(const Lyt& lyt, const std::vector<TT>& spec, const std::size_t samples,
-                              const operational_domain_params& params = {}, operational_domain_stats* stats = nullptr)
-{
-    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
-
-    if (params.sweep_dimensions.size() != 2 && params.sweep_dimensions.size() != 3)
-    {
-        throw std::invalid_argument("Flood fill is only applicable to 2 or 3 dimensions");
-    }
-
-    // this may throw an `std::invalid_argument` exception
-    detail::validate_sweep_parameters(params);
-
-    operational_domain_stats                                     st{};
-    detail::operational_domain_impl<Lyt, TT, operational_domain> p{lyt, spec, params, st};
-
-    const auto result = p.flood_fill(samples);
-
-    if (stats)
-    {
-        *stats = st;
-    }
-
-    return result;
-}
-
-/**
  * Computes the critical temperature domain of the given SiDB cell-level layout. The critical temperature domain
  * consists of all parameter combinations for which the layout is logically operational, along with the critical
  * temperature for each specific parameter point.
@@ -1820,7 +1918,6 @@ operational_domain_flood_fill(const Lyt& lyt, const std::vector<TT>& spec, const
  *
  * This function may throw an `std::invalid_argument` exception if the given sweep parameters are invalid.
  *
- * @tparam OpDomain Operational domain type to compute.
  * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT Truth table type.
  * @param lyt Layout to compute the operational domain for.
@@ -2007,16 +2104,13 @@ struct tuple_element<I, fiction::parameter_point>
 template <>
 struct hash<fiction::parameter_point>
 {
-    // tolerance for double hashing
-    static constexpr auto tolerance = fiction::constants::ERROR_MARGIN;
-
     size_t operator()(const fiction::parameter_point& p) const noexcept
     {
         size_t h = 0;
-        for (const auto& d : p.parameters)
+        for (const auto& d : p.get_parameters())
         {
             // hash the double values with tolerance
-            fiction::hash_combine(h, static_cast<size_t>(d / tolerance));
+            fiction::hash_combine(h, static_cast<size_t>(d / fiction::constants::ERROR_MARGIN));
         }
 
         return h;
