@@ -479,7 +479,8 @@ class is_operational_impl
         for (auto i = 0u; i < truth_table.front().num_bits(); ++i, ++bii)
         {
             typename operational_assessment<Lyt>::operational_assessment_for_input
-                assessment_results_for_this_input_combination{operational_status::OPERATIONAL};;
+                assessment_results_for_this_input_combination{operational_status::OPERATIONAL};
+            ;
 
             // if positively charged SiDBs can occur, the SiDB layout is considered as non-operational
             if (can_positive_charges_occur(*bii, parameters.simulation_parameters))
@@ -769,7 +770,8 @@ class is_operational_impl
         while (canvas_charge_index <= max_index)
         {
             cds_canvas_copy.foreach_cell(
-                [&cds_layout, &cds_canvas_copy](const auto& c) {
+                [&cds_layout, &cds_canvas_copy](const auto& c)
+                {
                     cds_layout.assign_charge_state(c, cds_canvas_copy.get_charge_state(c),
                                                    charge_index_mode::KEEP_CHARGE_INDEX);
                 });

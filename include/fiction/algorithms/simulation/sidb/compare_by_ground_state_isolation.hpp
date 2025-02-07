@@ -49,8 +49,8 @@ class compare_by_minimum_ground_state_isolation final : public designed_sidb_gat
   public:
     using typename designed_sidb_gates_comparator<Lyt>::sidb_gate_design;
 
-    explicit
-    compare_by_minimum_ground_state_isolation(const double sens = std::numeric_limits<double>::epsilon()) noexcept :
+    explicit compare_by_minimum_ground_state_isolation(
+        const double sens = std::numeric_limits<double>::epsilon()) noexcept :
             designed_sidb_gates_comparator<Lyt>{sens}
     {}
 
@@ -67,14 +67,15 @@ class compare_by_minimum_ground_state_isolation final : public designed_sidb_gat
     }
 
   private:
-    [[nodiscard]] double minimum_ground_state_isolation_over_all_inputs(const sidb_gate_design& gate_design) const noexcept
+    [[nodiscard]] double
+    minimum_ground_state_isolation_over_all_inputs(const sidb_gate_design& gate_design) const noexcept
     {
         std::vector<double> ground_state_isolations{};
         ground_state_isolations.reserve(gate_design.simulation_results_per_input.size());
 
         std::transform(gate_design.simulation_results_per_input.cbegin(),
                        gate_design.simulation_results_per_input.cend(), std::back_inserter(ground_state_isolations),
-                       [](const auto& sim_res) { return detail::get_ground_state_isolation(sim_res);});
+                       [](const auto& sim_res) { return detail::get_ground_state_isolation(sim_res); });
 
         return *std::min_element(ground_state_isolations.cbegin(), ground_state_isolations.cend());
     }
@@ -86,8 +87,8 @@ class compare_by_average_ground_state_isolation final : public designed_sidb_gat
   public:
     using typename designed_sidb_gates_comparator<Lyt>::sidb_gate_design;
 
-    explicit
-    compare_by_average_ground_state_isolation(const double sens = std::numeric_limits<double>::epsilon()) noexcept :
+    explicit compare_by_average_ground_state_isolation(
+        const double sens = std::numeric_limits<double>::epsilon()) noexcept :
             designed_sidb_gates_comparator<Lyt>{sens}
     {}
 
@@ -104,7 +105,8 @@ class compare_by_average_ground_state_isolation final : public designed_sidb_gat
     }
 
   private:
-    [[nodiscard]] double average_ground_state_isolation_over_all_inputs(const sidb_gate_design& gate_design) const noexcept
+    [[nodiscard]] double
+    average_ground_state_isolation_over_all_inputs(const sidb_gate_design& gate_design) const noexcept
     {
         uint64_t count = 0;
 
