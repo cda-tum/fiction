@@ -28,23 +28,21 @@ void operational_domain(pybind11::module& m)
 {
     namespace py = pybind11;
 
-    m.def(fmt::format("operational_domain_grid_search").c_str(), &fiction::operational_domain_grid_search<Lyt, py_tt>,
-          py::arg("lyt"), py::arg("spec"), py::arg("params") = fiction::operational_domain_params{},
-          py::arg("stats") = nullptr, DOC(fiction_operational_domain_grid_search));
+    m.def("operational_domain_grid_search", &fiction::operational_domain_grid_search<Lyt, py_tt>, py::arg("lyt"),
+          py::arg("spec"), py::arg("params") = fiction::operational_domain_params{}, py::arg("stats") = nullptr,
+          DOC(fiction_operational_domain_grid_search));
 
-    m.def(fmt::format("operational_domain_random_sampling").c_str(),
-          &fiction::operational_domain_random_sampling<Lyt, py_tt>, py::arg("lyt"), py::arg("spec"), py::arg("samples"),
-          py::arg("params") = fiction::operational_domain_params{}, py::arg("stats") = nullptr,
-          DOC(fiction_operational_domain_random_sampling));
-
-    m.def(fmt::format("operational_domain_flood_fill").c_str(), &fiction::operational_domain_flood_fill<Lyt, py_tt>,
+    m.def("operational_domain_random_sampling", &fiction::operational_domain_random_sampling<Lyt, py_tt>,
           py::arg("lyt"), py::arg("spec"), py::arg("samples"), py::arg("params") = fiction::operational_domain_params{},
+          py::arg("stats") = nullptr, DOC(fiction_operational_domain_random_sampling));
+
+    m.def("operational_domain_flood_fill", &fiction::operational_domain_flood_fill<Lyt, py_tt>, py::arg("lyt"),
+          py::arg("spec"), py::arg("samples"), py::arg("params") = fiction::operational_domain_params{},
           py::arg("stats") = nullptr, DOC(fiction_operational_domain_flood_fill));
 
-    m.def(fmt::format("operational_domain_contour_tracing").c_str(),
-          &fiction::operational_domain_contour_tracing<Lyt, py_tt>, py::arg("lyt"), py::arg("spec"), py::arg("samples"),
-          py::arg("params") = fiction::operational_domain_params{}, py::arg("stats") = nullptr,
-          DOC(fiction_operational_domain_contour_tracing));
+    m.def("operational_domain_contour_tracing", &fiction::operational_domain_contour_tracing<Lyt, py_tt>,
+          py::arg("lyt"), py::arg("spec"), py::arg("samples"), py::arg("params") = fiction::operational_domain_params{},
+          py::arg("stats") = nullptr, DOC(fiction_operational_domain_contour_tracing));
 }
 
 template <typename Lyt>
@@ -52,25 +50,21 @@ void critical_temperature_domain(pybind11::module& m)
 {
     namespace py = pybind11;
 
-    m.def(fmt::format("critical_temperature_domain_grid_search").c_str(),
-          &fiction::operational_domain_grid_search<Lyt, py_tt>, py::arg("lyt"), py::arg("spec"),
-          py::arg("params") = fiction::operational_domain_params{}, py::arg("stats") = nullptr,
-          DOC(fiction_operational_domain_grid_search));
+    m.def("critical_temperature_domain_grid_search", &fiction::operational_domain_grid_search<Lyt, py_tt>,
+          py::arg("lyt"), py::arg("spec"), py::arg("params") = fiction::operational_domain_params{},
+          py::arg("stats") = nullptr, DOC(fiction_operational_domain_grid_search));
 
-    m.def(fmt::format("critical_temperature_domain_random_sampling").c_str(),
-          &fiction::operational_domain_random_sampling<Lyt, py_tt>, py::arg("lyt"), py::arg("spec"), py::arg("samples"),
-          py::arg("params") = fiction::operational_domain_params{}, py::arg("stats") = nullptr,
-          DOC(fiction_operational_domain_random_sampling));
+    m.def("critical_temperature_domain_random_sampling", &fiction::operational_domain_random_sampling<Lyt, py_tt>,
+          py::arg("lyt"), py::arg("spec"), py::arg("samples"), py::arg("params") = fiction::operational_domain_params{},
+          py::arg("stats") = nullptr, DOC(fiction_operational_domain_random_sampling));
 
-    m.def(fmt::format("critical_temperature_domain_flood_fill").c_str(),
-          &fiction::operational_domain_flood_fill<Lyt, py_tt>, py::arg("lyt"), py::arg("spec"), py::arg("samples"),
-          py::arg("params") = fiction::operational_domain_params{}, py::arg("stats") = nullptr,
-          DOC(fiction_operational_domain_flood_fill));
+    m.def("critical_temperature_domain_flood_fill", &fiction::operational_domain_flood_fill<Lyt, py_tt>, py::arg("lyt"),
+          py::arg("spec"), py::arg("samples"), py::arg("params") = fiction::operational_domain_params{},
+          py::arg("stats") = nullptr, DOC(fiction_operational_domain_flood_fill));
 
-    m.def(fmt::format("critical_temperature_domain_contour_tracing").c_str(),
-          &fiction::operational_domain_contour_tracing<Lyt, py_tt>, py::arg("lyt"), py::arg("spec"), py::arg("samples"),
-          py::arg("params") = fiction::operational_domain_params{}, py::arg("stats") = nullptr,
-          DOC(fiction_operational_domain_contour_tracing));
+    m.def("critical_temperature_domain_contour_tracing", &fiction::operational_domain_contour_tracing<Lyt, py_tt>,
+          py::arg("lyt"), py::arg("spec"), py::arg("samples"), py::arg("params") = fiction::operational_domain_params{},
+          py::arg("stats") = nullptr, DOC(fiction_operational_domain_contour_tracing));
 }
 
 }  // namespace detail
@@ -82,8 +76,6 @@ inline void operational_domain(pybind11::module& m)
     py::class_<fiction::parameter_point>(m, "parameter_point", DOC(fiction_parameter_point))
         .def(py::init<>(), DOC(fiction_parameter_point_parameter_point))
         .def(py::init<const std::vector<double>>(), py::arg("values"), DOC(fiction_parameter_point_parameter_point_2))
-
-        .def("set_parameters", &fiction::parameter_point::set_parameters, py::arg("values"))
         .def("get_parameters", &fiction::parameter_point::get_parameters)
 
         .def(py::self == py::self, py::arg("other"), DOC(fiction_parameter_point_operator_eq))
@@ -104,31 +96,22 @@ inline void operational_domain(pybind11::module& m)
     // todu update docu
     py::class_<fiction::critical_temperature_domain>(m, "critical_temperature_domain", DOC(fiction_operational_domain))
         .def(py::init<>())
-        .def("set_dimensions", &fiction::critical_temperature_domain::set_dimensions, py::arg("dims"))
+        .def(py::init<const std::vector<fiction::sweep_parameter>>(), py::arg("dims"))
         .def("add_dimension", &fiction::critical_temperature_domain::add_dimension, py::arg("dim"))
-        .def("get_dimensions", &fiction::critical_temperature_domain::get_dimensions)
+        .def("get_dimension", &fiction::critical_temperature_domain::get_dimension, py::arg("index"))
         .def("get_number_of_dimensions", &fiction::critical_temperature_domain::get_number_of_dimensions)
         .def("contains", &fiction::critical_temperature_domain::contains, py::arg("key"))
         .def("add_value", &fiction::critical_temperature_domain::add_value, py::arg("key"), py::arg("value"))
         .def("size", &fiction::critical_temperature_domain::size)
-        .def("for_each",
-             [](const fiction::critical_temperature_domain& self, const py::function& py_callback)
-             {
-                 self.for_each(
-                     [&py_callback](const auto& key, const auto& value)
-                     {
-                         py_callback(key, value);  // Pass the key and value to the Python callback
-                     });
-             })
 
         ;
 
     // todo add docu
     py::class_<fiction::operational_domain>(m, "operational_domain", DOC(fiction_operational_domain))
         .def(py::init<>())
-        .def("set_dimensions", &fiction::operational_domain::set_dimensions, py::arg("dims"))
+        .def(py::init<const std::vector<fiction::sweep_parameter>>(), py::arg("dims"))
         .def("add_dimension", &fiction::operational_domain::add_dimension, py::arg("dim"))
-        .def("get_dimensions", &fiction::operational_domain::get_dimensions)
+        .def("get_dimension", &fiction::operational_domain::get_dimension, py::arg("index"))
         .def("get_number_of_dimensions", &fiction::operational_domain::get_number_of_dimensions)
         .def("contains", &fiction::operational_domain::contains, py::arg("key"))
         .def("add_value", &fiction::operational_domain::add_value, py::arg("key"), py::arg("value"))

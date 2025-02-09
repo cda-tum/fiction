@@ -406,7 +406,7 @@ class opdom_command : public command
     void write_op_domain()
     {
         // if the operational domain call was unsuccessful, do not attempt to write anything
-        if (op_domain.size() == 0)
+        if (op_domain.empty())
         {
             reset_params();
             return;

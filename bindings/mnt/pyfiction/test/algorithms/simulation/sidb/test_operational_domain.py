@@ -115,7 +115,7 @@ class TestOperationalDomain(unittest.TestCase):
 
     def test_temperature_operational_domain(self):
         # Create an instance of temperature_operational_domain
-        temp_domain = critical_temperature_domain()
+        temp_domain = critical_temperature_domain([sweep_parameter.EPSILON_R, sweep_parameter.LAMBDA_TF])
 
         # Create test key and value
         key = parameter_point([1.0, 2.0, 3.0])  # Example parameter point
@@ -131,12 +131,12 @@ class TestOperationalDomain(unittest.TestCase):
         self.assertIsNone(temp_domain.contains(missing_key))
 
         # Modify dimensions and verify
-        temp_domain.set_dimensions([sweep_parameter.EPSILON_R, sweep_parameter.LAMBDA_TF])
-        self.assertEqual(temp_domain.get_dimensions(), [sweep_parameter.EPSILON_R, sweep_parameter.LAMBDA_TF])
+        self.assertEqual(temp_domain.get_dimension(0), sweep_parameter.EPSILON_R)
+        self.assertEqual(temp_domain.get_dimension(1), sweep_parameter.LAMBDA_TF)
 
     def test_operational_domain(self):
         # Create an instance of operational_domain
-        op_domain = operational_domain()
+        op_domain = operational_domain([sweep_parameter.EPSILON_R, sweep_parameter.LAMBDA_TF])
 
         # Create test key and value
         key = parameter_point([10.0, 20.0, 30.0])  # Example parameter point
@@ -150,8 +150,8 @@ class TestOperationalDomain(unittest.TestCase):
         self.assertIsNone(op_domain.contains(missing_key))
 
         # Modify dimensions and verify
-        op_domain.set_dimensions([sweep_parameter.EPSILON_R, sweep_parameter.LAMBDA_TF])
-        self.assertEqual(op_domain.get_dimensions(), [sweep_parameter.EPSILON_R, sweep_parameter.LAMBDA_TF])
+        self.assertEqual(op_domain.get_dimension(0), sweep_parameter.EPSILON_R)
+        self.assertEqual(op_domain.get_dimension(1), sweep_parameter.LAMBDA_TF)
 
 
 if __name__ == "__main__":

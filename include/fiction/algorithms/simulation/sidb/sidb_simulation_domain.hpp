@@ -53,7 +53,17 @@ class sidb_simulation_domain
         return domain_values.size();
     }
     /**
-     * Applies a callable to all key-value pairs in the container.
+     * Checks whether the operational domain is empty.
+     *
+     * @return `true` if the operational domain is empty, `false` otherwise.
+     */
+    [[nodiscard]] bool empty() const noexcept
+    {
+        return domain_values.empty();
+    }
+    /**
+     * Applies a callable to all key-value pairs in the container. For thread-safety, this function operates on a copy
+     * of the underlying map created at the time of the function call.
      *
      * @tparam Fn Functor type.
      * @param fn Functor to apply to each key-value pair.
@@ -65,14 +75,14 @@ class sidb_simulation_domain
         const auto domain_values_copy = domain_values;
 
         std::for_each(domain_values_copy.cbegin(), domain_values_copy.cend(),
-                      [&fn](const auto& pair) { fn(pair.first, pair.second); });
+                      [&fn](const auto& pair) { std::invoke(std::forward<Fn>(fn), pair.first, pair.second); });
     }
     /**
      * Checks whether a specified key exists in the given map and retrieves its associated value if present.
      * This function utilizes the `if_contains` method of the map to ensure thread-safe access.
      *
      * @param key The key to search for in the map.
-     * @return An `std::optional` containing the value associated with the key if it exists, `std::optional` otherwise.
+     * @return The value associated with the key if it exists, `std::nullopt` otherwise.
      */
     [[nodiscard]] std::optional<std::tuple<MappedTypes...>> contains(const Key& key) const
     {

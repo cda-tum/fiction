@@ -28,11 +28,11 @@ template <typename OpDomain>
 void check_op_domain_params_and_operational_status(const OpDomain& op_domain, const operational_domain_params& params,
                                                    const std::optional<operational_status>& status)
 {
-    REQUIRE(params.sweep_dimensions.size() == op_domain.get_dimensions().size());
+    REQUIRE(params.sweep_dimensions.size() == op_domain.get_number_of_dimensions());
 
     for (auto d = 0u; d < params.sweep_dimensions.size(); ++d)
     {
-        CHECK(op_domain.get_dimensions()[d] == params.sweep_dimensions[d].dimension);
+        CHECK(op_domain.get_dimension(d) == params.sweep_dimensions[d].dimension);
     }
 
     op_domain.for_each(

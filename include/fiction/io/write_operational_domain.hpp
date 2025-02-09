@@ -112,13 +112,12 @@ namespace detail
  * empty `write_operational_domain_params` object, which provides standard tags.
  */
 template <typename OpDomain>
-inline void write_operational_domain(const OpDomain& opdom, std::ostream& os,
-                                     const write_operational_domain_params& params = {})
+void write_operational_domain(const OpDomain& opdom, std::ostream& os,
+                              const write_operational_domain_params& params = {})
 {
     csv_writer writer{os};
 
     const auto num_dimensions = opdom.get_number_of_dimensions();
-    const auto dimensions     = opdom.get_dimensions();
 
     if (num_dimensions == 0 || num_dimensions > 3)
     {
@@ -129,25 +128,26 @@ inline void write_operational_domain(const OpDomain& opdom, std::ostream& os,
     {
         if (num_dimensions == 1)
         {
-            writer.write_line(detail::sweep_parameter_to_string(dimensions[0]), "operational status",
+            writer.write_line(detail::sweep_parameter_to_string(opdom.get_dimension(0)), "operational status",
                               "critical temperature");
         }
         else if (num_dimensions == 2)
         {
-            writer.write_line(detail::sweep_parameter_to_string(dimensions[0]),
-                              detail::sweep_parameter_to_string(dimensions[1]), "operational status",
+            writer.write_line(detail::sweep_parameter_to_string(opdom.get_dimension(0)),
+                              detail::sweep_parameter_to_string(opdom.get_dimension(1)), "operational status",
                               "critical temperature");
         }
         else if (num_dimensions == 3)  // num_dimensions == 3
         {
-            writer.write_line(
-                detail::sweep_parameter_to_string(dimensions[0]), detail::sweep_parameter_to_string(dimensions[1]),
-                detail::sweep_parameter_to_string(dimensions[2]), "operational status", "critical temperature");
+            writer.write_line(detail::sweep_parameter_to_string(opdom.get_dimension(0)),
+                              detail::sweep_parameter_to_string(opdom.get_dimension(1)),
+                              detail::sweep_parameter_to_string(opdom.get_dimension(2)), "operational status",
+                              "critical temperature");
         }
 
         else
         {
-            throw std::invalid_argument("Unsupported number of dimensions: " + std::to_string(num_dimensions));
+            throw std::invalid_argument(fmt::format("Unsupported number of dimensions: {}", num_dimensions));
         }
 
         opdom.for_each(
@@ -182,23 +182,23 @@ inline void write_operational_domain(const OpDomain& opdom, std::ostream& os,
     {
         if (num_dimensions == 1)
         {
-            writer.write_line(detail::sweep_parameter_to_string(dimensions[0]), "operational status");
+            writer.write_line(detail::sweep_parameter_to_string(opdom.get_dimension(0)), "operational status");
         }
         else if (num_dimensions == 2)
         {
-            writer.write_line(detail::sweep_parameter_to_string(dimensions[0]),
-                              detail::sweep_parameter_to_string(dimensions[1]), "operational status");
+            writer.write_line(detail::sweep_parameter_to_string(opdom.get_dimension(0)),
+                              detail::sweep_parameter_to_string(opdom.get_dimension(1)), "operational status");
         }
         else if (num_dimensions == 3)  // num_dimensions == 3
         {
-            writer.write_line(detail::sweep_parameter_to_string(dimensions[0]),
-                              detail::sweep_parameter_to_string(dimensions[1]),
-                              detail::sweep_parameter_to_string(dimensions[2]), "operational status");
+            writer.write_line(detail::sweep_parameter_to_string(opdom.get_dimension(0)),
+                              detail::sweep_parameter_to_string(opdom.get_dimension(1)),
+                              detail::sweep_parameter_to_string(opdom.get_dimension(2)), "operational status");
         }
 
         else
         {
-            throw std::invalid_argument("Unsupported number of dimensions: " + std::to_string(num_dimensions));
+            throw std::invalid_argument(fmt::format("Unsupported number of dimensions: {}", num_dimensions));
         }
 
         opdom.for_each(
@@ -257,8 +257,8 @@ the SiDB layout associated with those simulation parameters.
  * empty `write_operational_domain_params` object, which provides standard tags.
  */
 template <typename OpDomain>
-inline void write_operational_domain(const OpDomain& opdom, const std::string_view& filename,
-                                     const write_operational_domain_params& params = {})
+void write_operational_domain(const OpDomain& opdom, const std::string_view& filename,
+                              const write_operational_domain_params& params = {})
 {
     std::ofstream os{filename.data(), std::ofstream::out};
 

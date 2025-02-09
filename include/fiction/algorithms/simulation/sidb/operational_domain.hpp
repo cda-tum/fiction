@@ -119,15 +119,6 @@ struct parameter_point
         return parameters[I];
     }
     /**
-     * Sets the parameter values for each dimension.
-     *
-     * @param values The parameter values to set.
-     */
-    void set_parameters(const std::vector<double>& values)
-    {
-        parameters = values;
-    }
-    /**
      * Returns the parameter values for each dimension.
      *
      * @return The parameter values for each dimension.
@@ -177,15 +168,15 @@ class operational_domain : public sidb_simulation_domain<parameter_point, operat
 {
   public:
     /**
-     * Sets the dimensions to sweep over, ordered by priority. The first dimension is the x dimension, the second
-     * dimension is the y dimension, etc.
-     *
-     * @param dims The dimensions to sweep over.
+     * Default constructor.
      */
-    void set_dimensions(const std::vector<sweep_parameter>& dims)
-    {
-        dimensions = dims;
-    }
+    operational_domain() = default;
+    /**
+     * Standard constructor.
+     *
+     * @param dims Dimensions.
+     */
+    explicit operational_domain(const std::vector<sweep_parameter>& dims) : dimensions(dims) {}
     /**
      * Adds a dimension to sweep over. The first dimension is the x dimension, the second dimension is the y dimension,
      * etc.
@@ -197,14 +188,19 @@ class operational_domain : public sidb_simulation_domain<parameter_point, operat
         dimensions.push_back(dim);
     }
     /**
-     * Returns the dimensions to sweep over, ordered by priority. The first dimension is the x dimension, the second
-     * dimension is the y dimension, etc.
+     * Returns a specific dimension by index.
      *
-     * @return The dimensions to sweep over.
+     * @param index The index of the dimension to return.
+     * @return The dimension at the specified index.
+     * @throws std::out_of_range if the index is out of range.
      */
-    [[nodiscard]] const std::vector<sweep_parameter>& get_dimensions() const noexcept
+    [[nodiscard]] const sweep_parameter& get_dimension(const std::size_t index) const
     {
-        return dimensions;
+        if (index >= dimensions.size())
+        {
+            throw std::out_of_range("Index out of range");
+        }
+        return dimensions[index];
     }
     /**
      * Returns the number of dimensions to sweep over.
@@ -219,30 +215,30 @@ class operational_domain : public sidb_simulation_domain<parameter_point, operat
 
   private:
     /**
-     * The dimensions to sweep over, ordered by priority. The first dimension is the x dimension, the second dimension
+     * The dimensions to sweep over. The first dimension is the x dimension, the second dimension
      * is the y dimension, etc.
      */
     std::vector<sweep_parameter> dimensions{};
 };
 /**
- * The `critical_temperature_domain` class collects the critical temperature for a range of different physical
- * parameters. It allows for the evaluation of how the critical temperature depends on variations in the underlying
- * parameter points. This enables simulations to explore the critical temperature's behavior across different conditions
- * and configurations.
+ * The `critical_temperature_domain` class collects the critical temperature and the operational status for a range of
+ * different physical parameters of a given SiDB layout. It allows for the evaluation of how the critical temperature
+ * depends on variations in the underlying parameter points. This enables simulations to explore the critical
+ * temperature's behavior across different conditions and configurations.
  */
 class critical_temperature_domain : public sidb_simulation_domain<parameter_point, operational_status, double>
 {
   public:
     /**
-     * Sets the dimensions to sweep over, ordered by priority. The first dimension is the x dimension, the second
-     * dimension is the y dimension, etc.
-     *
-     * @param dim The dimensions to sweep over.
+     * Default constructor.
      */
-    void set_dimensions(const std::vector<sweep_parameter>& dim)
-    {
-        dimensions = dim;
-    }
+    critical_temperature_domain() = default;
+    /**
+     * Standard constructor.
+     *
+     * @param dims Dimensions.
+     */
+    explicit critical_temperature_domain(const std::vector<sweep_parameter>& dims) : dimensions(dims) {}
     /**
      * Adds a dimension to sweep over. The first dimension is the x dimension, the second dimension is the y dimension,
      * etc.
@@ -254,14 +250,19 @@ class critical_temperature_domain : public sidb_simulation_domain<parameter_poin
         dimensions.push_back(param);
     }
     /**
-     * Returns the dimensions to sweep over, ordered by priority. The first dimension is the x dimension, the second
-     * dimension is the y dimension, etc.
+     * Returns a specific dimension by index.
      *
-     * @return The dimensions to sweep over.
+     * @param index The index of the dimension to return.
+     * @return The dimension at the specified index.
+     * @throws std::out_of_range if the index is out of range.
      */
-    [[nodiscard]] const std::vector<sweep_parameter>& get_dimensions() const noexcept
+    [[nodiscard]] const sweep_parameter& get_dimension(const std::size_t index) const
     {
-        return dimensions;
+        if (index >= dimensions.size())
+        {
+            throw std::out_of_range("Index out of range");
+        }
+        return dimensions[index];
     }
     /**
      * Returns the number of dimensions to sweep over.
@@ -1805,6 +1806,71 @@ operational_domain_flood_fill(const Lyt& lyt, const std::vector<TT>& spec, const
     return result;
 }
 /**
+ * Computes the operational domain of the given SiDB cell-level layout. The operational domain is the set of all
+ * parameter combinations for which the layout is logically operational. Logical operation is defined as the layout
+ * implementing the given truth table. The input BDL pairs of the layout are assumed to be in the same order as the
+ * inputs of the truth table.
+ *
+ * This algorithm first uses random sampling to find a set of operational point within the parameter range. From there,
+ * it traverses outwards to find the edge of the operational area and performs Moore neighborhood contour tracing to
+ * explore the contour of the operational domain. This is repeated for all initially sampled points that do not lie
+ * within a contour. The algorithm is guaranteed to determine the contours of all operational "islands" if the initial
+ * random sampling found at least one operational point within them. Thereby, this algorithm works for disconnected
+ * operational domains.
+ *
+ * It performs `samples` uniformly-distributed random samples within the parameter range. For each thusly discovered
+ * operational island, it performs another number of samples equal to the distance to an edge of each operational
+ * area. Finally, it performs up to 8 samples for each contour point (however, the actual number is usually lower).
+ * For each sample, the algorithm performs one operational check on the layout, where each operational check consists of
+ * up to \f$2^n\f$ exact ground state simulations, where \f$n\f$ is the number of inputs of the layout. Each exact
+ * ground state simulation has exponential complexity in of itself. Therefore, the algorithm is only feasible for small
+ * layouts with few inputs.
+ *
+ * This flavor of operational domain computation was proposed in \"Reducing the Complexity of Operational Domain
+ * Computation in Silicon Dangling Bond Logic\" by M. Walter, J. Drewniok, S. S. H. Ng, K. Walus, and R. Wille in
+ * NANOARCH 2023.
+ *
+ * This function may throw an `std::invalid_argument` exception if the given sweep parameters are invalid.
+ *
+ * @tparam Lyt SiDB cell-level layout type.
+ * @tparam TT Truth table type.
+ * @param lyt Layout to compute the operational domain for.
+ * @param spec Expected Boolean function of the layout given as a multi-output truth table.
+ * @param samples Number of samples to perform.
+ * @param params Operational domain computation parameters.
+ * @param stats Operational domain computation statistics.
+ * @return The (partial) operational domain of the layout.
+ */
+template <typename Lyt, typename TT>
+[[nodiscard]] operational_domain operational_domain_contour_tracing(const Lyt& lyt, const std::vector<TT>& spec,
+                                                                    const std::size_t                samples,
+                                                                    const operational_domain_params& params = {},
+                                                                    operational_domain_stats*        stats  = nullptr)
+{
+    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
+
+    if (params.sweep_dimensions.size() != 2)
+    {
+        throw std::invalid_argument("Contour tracing is only applicable to exactly 2 dimensions");
+    }
+
+    // this may throw an `std::invalid_argument` exception
+    detail::validate_sweep_parameters(params);
+
+    operational_domain_stats                                     st{};
+    detail::operational_domain_impl<Lyt, TT, operational_domain> p{lyt, spec, params, st};
+    const auto                                                   result = p.contour_tracing(samples);
+
+    if (stats)
+    {
+        *stats = st;
+    }
+
+    return result;
+}
+/**
  * Computes the critical temperature domain of the given SiDB cell-level layout. The critical temperature domain
  * consists of all parameter combinations for which the layout is logically operational, along with the critical
  * temperature for each specific parameter point.
@@ -1949,71 +2015,6 @@ critical_temperature_domain_flood_fill(const Lyt& lyt, const std::vector<TT>& sp
     detail::operational_domain_impl<Lyt, TT, critical_temperature_domain> p{lyt, spec, params, st};
 
     const auto result = p.flood_fill(samples);
-
-    if (stats)
-    {
-        *stats = st;
-    }
-
-    return result;
-}
-/**
- * Computes the operational domain of the given SiDB cell-level layout. The operational domain is the set of all
- * parameter combinations for which the layout is logically operational. Logical operation is defined as the layout
- * implementing the given truth table. The input BDL pairs of the layout are assumed to be in the same order as the
- * inputs of the truth table.
- *
- * This algorithm first uses random sampling to find a set of operational point within the parameter range. From there,
- * it traverses outwards to find the edge of the operational area and performs Moore neighborhood contour tracing to
- * explore the contour of the operational domain. This is repeated for all initially sampled points that do not lie
- * within a contour. The algorithm is guaranteed to determine the contours of all operational "islands" if the initial
- * random sampling found at least one operational point within them. Thereby, this algorithm works for disconnected
- * operational domains.
- *
- * It performs `samples` uniformly-distributed random samples within the parameter range. For each thusly discovered
- * operational island, it performs another number of samples equal to the distance to an edge of each operational
- * area. Finally, it performs up to 8 samples for each contour point (however, the actual number is usually lower).
- * For each sample, the algorithm performs one operational check on the layout, where each operational check consists of
- * up to \f$2^n\f$ exact ground state simulations, where \f$n\f$ is the number of inputs of the layout. Each exact
- * ground state simulation has exponential complexity in of itself. Therefore, the algorithm is only feasible for small
- * layouts with few inputs.
- *
- * This flavor of operational domain computation was proposed in \"Reducing the Complexity of Operational Domain
- * Computation in Silicon Dangling Bond Logic\" by M. Walter, J. Drewniok, S. S. H. Ng, K. Walus, and R. Wille in
- * NANOARCH 2023.
- *
- * This function may throw an `std::invalid_argument` exception if the given sweep parameters are invalid.
- *
- * @tparam Lyt SiDB cell-level layout type.
- * @tparam TT Truth table type.
- * @param lyt Layout to compute the operational domain for.
- * @param spec Expected Boolean function of the layout given as a multi-output truth table.
- * @param samples Number of samples to perform.
- * @param params Operational domain computation parameters.
- * @param stats Operational domain computation statistics.
- * @return The (partial) operational domain of the layout.
- */
-template <typename Lyt, typename TT>
-[[nodiscard]] operational_domain operational_domain_contour_tracing(const Lyt& lyt, const std::vector<TT>& spec,
-                                                                    const std::size_t                samples,
-                                                                    const operational_domain_params& params = {},
-                                                                    operational_domain_stats*        stats  = nullptr)
-{
-    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
-
-    if (params.sweep_dimensions.size() != 2)
-    {
-        throw std::invalid_argument("Contour tracing is only applicable to exactly 2 dimensions");
-    }
-
-    // this may throw an `std::invalid_argument` exception
-    detail::validate_sweep_parameters(params);
-
-    operational_domain_stats                                     st{};
-    detail::operational_domain_impl<Lyt, TT, operational_domain> p{lyt, spec, params, st};
-    const auto                                                   result = p.contour_tracing(samples);
 
     if (stats)
     {

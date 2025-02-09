@@ -45,8 +45,8 @@ struct write_defect_influence_domain_params
  * empty `write_defect_influence_domain_params` object, which provides standard tags.
  */
 template <typename Lyt>
-inline void write_defect_influence_domain(const defect_influence_domain<Lyt>& defect_infdom, std::ostream& os,
-                                          const write_defect_influence_domain_params& params = {})
+void write_defect_influence_domain(const defect_influence_domain<Lyt>& defect_infdom, std::ostream& os,
+                                   const write_defect_influence_domain_params& params = {})
 {
     csv_writer writer{os};
 
@@ -75,9 +75,8 @@ inline void write_defect_influence_domain(const defect_influence_domain<Lyt>& de
  * empty `write_defect_influence_domain_params` object, which provides standard tags.
  */
 template <typename Lyt>
-inline void write_defect_influence_domain(const defect_influence_domain<Lyt>&         defect_infdom,
-                                          const std::string_view&                     filename,
-                                          const write_defect_influence_domain_params& params = {})
+void write_defect_influence_domain(const defect_influence_domain<Lyt>& defect_infdom, const std::string_view& filename,
+                                   const write_defect_influence_domain_params& params = {})
 {
     std::ofstream os{filename.data(), std::ofstream::out};
 
