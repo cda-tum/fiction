@@ -96,10 +96,9 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
     mockturtle::stopwatch<>::duration time_counter{};
 
     // Track the start time for timeout
-    auto start_time = std::chrono::high_resolution_clock::now();
+    const auto start_time = std::chrono::high_resolution_clock::now();
 
     // measure run time (artificial scope)
-    // main loop
     {
         const mockturtle::stopwatch stop{time_counter};
 
