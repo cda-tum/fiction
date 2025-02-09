@@ -14,7 +14,6 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include <string>
 #include <vector>
 
 namespace pyfiction
@@ -76,7 +75,7 @@ inline void operational_domain(pybind11::module& m)
     py::class_<fiction::parameter_point>(m, "parameter_point", DOC(fiction_parameter_point))
         .def(py::init<>(), DOC(fiction_parameter_point_parameter_point))
         .def(py::init<const std::vector<double>>(), py::arg("values"), DOC(fiction_parameter_point_parameter_point_2))
-        .def("get_parameters", &fiction::parameter_point::get_parameters)
+        .def("get_parameters", &fiction::parameter_point::get_parameters, DOC(fiction_parameter_point_get_parameters))
 
         .def(py::self == py::self, py::arg("other"), DOC(fiction_parameter_point_operator_eq))
         .def(py::self != py::self, py::arg("other"), DOC(fiction_parameter_point_operator_ne))
@@ -94,25 +93,32 @@ inline void operational_domain(pybind11::module& m)
         ;
 
     // todu update docu
-    py::class_<fiction::critical_temperature_domain>(m, "critical_temperature_domain", DOC(fiction_operational_domain))
+    py::class_<fiction::critical_temperature_domain>(m, "critical_temperature_domain",
+                                                     DOC(fiction_critical_temperature_domain))
         .def(py::init<>())
         .def(py::init<const std::vector<fiction::sweep_parameter>>(), py::arg("dims"))
-        .def("add_dimension", &fiction::critical_temperature_domain::add_dimension, py::arg("dim"))
-        .def("get_dimension", &fiction::critical_temperature_domain::get_dimension, py::arg("index"))
-        .def("get_number_of_dimensions", &fiction::critical_temperature_domain::get_number_of_dimensions)
+        .def("add_dimension", &fiction::critical_temperature_domain::add_dimension, py::arg("dim"),
+             DOC(fiction_critical_temperature_domain_add_dimension))
+        .def("get_dimension", &fiction::critical_temperature_domain::get_dimension, py::arg("index"),
+             DOC(fiction_critical_temperature_domain_get_dimension))
+        .def("get_number_of_dimensions", &fiction::critical_temperature_domain::get_number_of_dimensions,
+             DOC(fiction_critical_temperature_domain_get_number_of_dimensions))
         .def("contains", &fiction::critical_temperature_domain::contains, py::arg("key"))
         .def("add_value", &fiction::critical_temperature_domain::add_value, py::arg("key"), py::arg("value"))
         .def("size", &fiction::critical_temperature_domain::size)
 
         ;
 
-    // todo add docu
     py::class_<fiction::operational_domain>(m, "operational_domain", DOC(fiction_operational_domain))
-        .def(py::init<>())
-        .def(py::init<const std::vector<fiction::sweep_parameter>>(), py::arg("dims"))
-        .def("add_dimension", &fiction::operational_domain::add_dimension, py::arg("dim"))
-        .def("get_dimension", &fiction::operational_domain::get_dimension, py::arg("index"))
-        .def("get_number_of_dimensions", &fiction::operational_domain::get_number_of_dimensions)
+        .def(py::init<>(), DOC(fiction_operational_domain_operational_domain))
+        .def(py::init<const std::vector<fiction::sweep_parameter>>(), py::arg("dims"),
+             DOC(fiction_operational_domain_operational_domain_2))
+        .def("add_dimension", &fiction::operational_domain::add_dimension, py::arg("dim"),
+             DOC(fiction_operational_domain_add_dimension))
+        .def("get_dimension", &fiction::operational_domain::get_dimension, py::arg("index"),
+             DOC(fiction_operational_domain_get_dimension))
+        .def("get_number_of_dimensions", &fiction::operational_domain::get_number_of_dimensions,
+             DOC(fiction_operational_domain_get_number_of_dimensions))
         .def("contains", &fiction::operational_domain::contains, py::arg("key"))
         .def("add_value", &fiction::operational_domain::add_value, py::arg("key"), py::arg("value"))
         .def("size", &fiction::operational_domain::size)
