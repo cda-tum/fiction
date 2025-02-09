@@ -3559,11 +3559,12 @@ Returns:
 
 static const char *__doc_fiction_critical_temperature_domain =
 R"doc(The `critical_temperature_domain` class collects the critical
-temperature for a range of different physical parameters. It allows
-for the evaluation of how the critical temperature depends on
-variations in the underlying parameter points. This enables
-simulations to explore the critical temperature's behavior across
-different conditions and configurations.)doc";
+temperature and the operational status for a range of different
+physical parameters of a given SiDB layout. It allows for the
+evaluation of how the critical temperature depends on variations in
+the underlying parameter points. This enables simulations to explore
+the critical temperature's behavior across different conditions and
+configurations.)doc";
 
 static const char *__doc_fiction_critical_temperature_domain_add_dimension =
 R"doc(Adds a dimension to sweep over. The first dimension is the x
@@ -3629,6 +3630,14 @@ Parameter ``stats``:
 Returns:
     The (partial) operational domain of the layout.)doc";
 
+static const char *__doc_fiction_critical_temperature_domain_critical_temperature_domain = R"doc(Default constructor.)doc";
+
+static const char *__doc_fiction_critical_temperature_domain_critical_temperature_domain_2 =
+R"doc(Standard constructor.
+
+Parameter ``dims``:
+    Dimensions.)doc";
+
 static const char *__doc_fiction_critical_temperature_domain_dimensions =
 R"doc(The dimensions to sweep over, ordered by priority. The first dimension
 is the x dimension, the second dimension is the y dimension, etc.)doc";
@@ -3686,13 +3695,17 @@ Parameter ``stats``:
 Returns:
     The (partial) operational domain of the layout.)doc";
 
-static const char *__doc_fiction_critical_temperature_domain_get_dimensions =
-R"doc(Returns the dimensions to sweep over, ordered by priority. The first
-dimension is the x dimension, the second dimension is the y dimension,
-etc.
+static const char *__doc_fiction_critical_temperature_domain_get_dimension =
+R"doc(Returns a specific dimension by index.
+
+Parameter ``index``:
+    The index of the dimension to return.
 
 Returns:
-    The dimensions to sweep over.)doc";
+    The dimension at the specified index.
+
+Throws:
+    std::out_of_range if the index is out of range.)doc";
 
 static const char *__doc_fiction_critical_temperature_domain_get_number_of_dimensions =
 R"doc(Returns the number of dimensions to sweep over.
@@ -3786,14 +3799,6 @@ Parameter ``stats``:
 
 Returns:
     The (partial) operational domain of the layout.)doc";
-
-static const char *__doc_fiction_critical_temperature_domain_set_dimensions =
-R"doc(Sets the dimensions to sweep over, ordered by priority. The first
-dimension is the x dimension, the second dimension is the y dimension,
-etc.
-
-Parameter ``dim``:
-    The dimensions to sweep over.)doc";
 
 static const char *__doc_fiction_critical_temperature_gate_based =
 R"doc(This algorithm performs temperature-aware SiDB simulation as proposed
@@ -16715,8 +16720,8 @@ Returns:
     The (partial) operational domain of the layout.)doc";
 
 static const char *__doc_fiction_operational_domain_dimensions =
-R"doc(The dimensions to sweep over, ordered by priority. The first dimension
-is the x dimension, the second dimension is the y dimension, etc.)doc";
+R"doc(The dimensions to sweep over. The first dimension is the x dimension,
+the second dimension is the y dimension, etc.)doc";
 
 static const char *__doc_fiction_operational_domain_flood_fill =
 R"doc(Computes the operational domain of the given SiDB cell-level layout.
@@ -16778,13 +16783,17 @@ Parameter ``stats``:
 Returns:
     The (partial) operational domain of the layout.)doc";
 
-static const char *__doc_fiction_operational_domain_get_dimensions =
-R"doc(Returns the dimensions to sweep over, ordered by priority. The first
-dimension is the x dimension, the second dimension is the y dimension,
-etc.
+static const char *__doc_fiction_operational_domain_get_dimension =
+R"doc(Returns a specific dimension by index.
+
+Parameter ``index``:
+    The index of the dimension to return.
 
 Returns:
-    The dimensions to sweep over.)doc";
+    The dimension at the specified index.
+
+Throws:
+    std::out_of_range if the index is out of range.)doc";
 
 static const char *__doc_fiction_operational_domain_get_number_of_dimensions =
 R"doc(Returns the number of dimensions to sweep over.
@@ -16836,6 +16845,14 @@ Parameter ``stats``:
 
 Returns:
     The operational domain of the layout.)doc";
+
+static const char *__doc_fiction_operational_domain_operational_domain = R"doc(Default constructor.)doc";
+
+static const char *__doc_fiction_operational_domain_operational_domain_2 =
+R"doc(Standard constructor.
+
+Parameter ``dims``:
+    Dimensions.)doc";
 
 static const char *__doc_fiction_operational_domain_params =
 R"doc(Parameters for the operational domain computation. The parameters are
@@ -16939,14 +16956,6 @@ around a specified parameter point to the total number of parameter
 points in the given parameter space.)doc";
 
 static const char *__doc_fiction_operational_domain_ratio_params_op_domain_params = R"doc(Parameters for the operational domain computation.)doc";
-
-static const char *__doc_fiction_operational_domain_set_dimensions =
-R"doc(Sets the dimensions to sweep over, ordered by priority. The first
-dimension is the x dimension, the second dimension is the y dimension,
-etc.
-
-Parameter ``dims``:
-    The dimensions to sweep over.)doc";
 
 static const char *__doc_fiction_operational_domain_stats =
 R"doc(Statistics for the operational domain computation. The statistics are
@@ -17247,12 +17256,6 @@ Parameter ``values``:
     Parameter values for each dimension.)doc";
 
 static const char *__doc_fiction_parameter_point_parameters = R"doc(Parameter values for each dimension.)doc";
-
-static const char *__doc_fiction_parameter_point_set_parameters =
-R"doc(Sets the parameter values for each dimension.
-
-Parameter ``values``:
-    The parameter values to set.)doc";
 
 static const char *__doc_fiction_path_collection =
 R"doc(An ordered collection of multiple paths in a layout.
@@ -20012,13 +20015,21 @@ Parameter ``key``:
     The key to search for in the map.
 
 Returns:
-    An `std::optional` containing the value associated with the key if
-    it exists, `std::optional` otherwise.)doc";
+    The value associated with the key if it exists, `std::nullopt`
+    otherwise.)doc";
 
 static const char *__doc_fiction_sidb_simulation_domain_domain_values = R"doc(The domain values stored in a thread-safe map.)doc";
 
+static const char *__doc_fiction_sidb_simulation_domain_empty =
+R"doc(Checks whether the operational domain is empty.
+
+Returns:
+    `true` if the operational domain is empty, `false` otherwise.)doc";
+
 static const char *__doc_fiction_sidb_simulation_domain_for_each =
-R"doc(Applies a callable to all key-value pairs in the container.
+R"doc(Applies a callable to all key-value pairs in the container. For
+thread-safety, this function operates on a copy of the underlying map
+created at the time of the function call.
 
 Template parameter ``Fn``:
     Functor type.
