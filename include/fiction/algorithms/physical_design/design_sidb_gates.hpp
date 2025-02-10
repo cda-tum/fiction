@@ -113,7 +113,7 @@ struct design_sidb_gates_params
 struct design_sidb_gates_stats
 {
     /**
-     * The total runtime of SiDB gate design process.
+     * The total runtime of the SiDB gate design process.
      */
     mockturtle::stopwatch<>::duration time_total{0};
     /**
