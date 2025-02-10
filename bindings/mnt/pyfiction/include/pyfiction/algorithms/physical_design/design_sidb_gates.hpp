@@ -10,6 +10,7 @@
 #include <fiction/algorithms/physical_design/design_sidb_gates.hpp>
 #include <fiction/types.hpp>
 
+#include <fmt/format.h>
 #include <pybind11/pybind11.h>
 
 #include <string>
@@ -54,23 +55,17 @@ void design_sidb_gates(pybind11::module& m)
         .value("ALL_COMBINATIONS_ENUMERATED",
                fiction::design_sidb_gates_params<Lyt>::termination_condition::ALL_COMBINATIONS_ENUMERATED,
                DOC(fiction_design_sidb_gates_params_termination_condition_ALL_COMBINATIONS_ENUMERATED));
+}
 
-    /**
-     * Post-design processes selector type.
-     */
-    py::enum_<typename fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::post_design_mode>(
-        m, "post_design_mode", DOC(fiction_design_sidb_gates_params_post_design_mode))
-        .value("DO_NOTHING", fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::post_design_mode::DO_NOTHING,
-               DOC(fiction_design_sidb_gates_params_post_design_mode_DO_NOTHING))
-        .value("PREFER_ENERGETICALLY_ISOLATED_GROUND_STATES",
-               fiction::design_sidb_gates_params<
-                   fiction::offset::ucoord_t>::post_design_mode::PREFER_ENERGETICALLY_ISOLATED_GROUND_STATES,
-               DOC(fiction_design_sidb_gates_params_post_design_mode_PREFER_ENERGETICALLY_ISOLATED_GROUND_STATES));
+template <typename Lyt>
+void design_sidb_gates_params(pybind11::module& m, const std::string& lattice = "")
+{
+    namespace py = pybind11;
 
     /**
      * Parameters.
      */
-    py::class_<fiction::design_sidb_gates_params<Lyt>>(m, "design_sidb_gates_params",
+    py::class_<fiction::design_sidb_gates_params<Lyt>>(m, fmt::format("design_sidb_gates_params{}", lattice).c_str(),
                                                        DOC(fiction_design_sidb_gates_params))
         .def(py::init<>())
         .def_readwrite("operational_params", &fiction::design_sidb_gates_params<Lyt>::operational_params,
@@ -85,12 +80,6 @@ void design_sidb_gates(pybind11::module& m)
                        DOC(fiction_design_sidb_gates_params_termination_cond))
         .def_readwrite("post_design_process", &fiction::design_sidb_gates_params<Lyt>::post_design_process,
                        DOC(fiction_design_sidb_gates_params_post_design_process));
-}
-
-template <typename Lyt>
-void design_sidb_gates_params(pybind11::module& m, const std::string& lattice = "")
-{
-    namespace py = pybind11;
 }
 
 }  // namespace detail
@@ -127,6 +116,9 @@ inline void design_sidb_gates(pybind11::module& m)
                  stats.report(stream);
                  return stream.str();
              });
+
+    detail::design_sidb_gates_params<py_sidb_100_lattice>(m, "_100");
+    detail::design_sidb_gates_params<py_sidb_111_lattice>(m, "_111");
 
     detail::design_sidb_gates<py_sidb_100_lattice>(m);
     detail::design_sidb_gates<py_sidb_111_lattice>(m);
