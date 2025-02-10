@@ -50,7 +50,7 @@ TEST_CASE("Design AND gate with skeleton, where one input wire and the output wi
             design_sidb_gates(lyt, std::vector<tt>{create_and_tt()}, params, &design_gates_stats);
         REQUIRE(found_gate_layouts.size() == 10);
         const auto& first_gate = found_gate_layouts.front();
-        CHECK(is_operational(first_gate, std::vector<tt>{create_and_tt()}, params.operational_params).first ==
+        CHECK(is_operational(first_gate, std::vector<tt>{create_and_tt()}, params.operational_params).status ==
               operational_status::OPERATIONAL);
 
         CHECK(design_gates_stats.number_of_layouts == 1140);
@@ -68,7 +68,7 @@ TEST_CASE("Design AND gate with skeleton, where one input wire and the output wi
         const auto found_gate_layouts = design_sidb_gates(lyt, std::vector<tt>{create_and_tt()}, params);
         REQUIRE(found_gate_layouts.size() == 10);
         const auto& first_gate = found_gate_layouts.front();
-        CHECK(is_operational(first_gate, std::vector<tt>{create_and_tt()}, params.operational_params).first ==
+        CHECK(is_operational(first_gate, std::vector<tt>{create_and_tt()}, params.operational_params).status ==
               operational_status::OPERATIONAL);
     }
 }
@@ -320,7 +320,7 @@ TEST_CASE("Use SiQAD's AND gate skeleton to generate all possible AND gates", "[
         REQUIRE(found_gate_layouts_exhaustive.size() == 1);
         const auto& first_gate_exhaustive = found_gate_layouts_exhaustive.front();
         CHECK(
-            is_operational(first_gate_exhaustive, std::vector<tt>{create_and_tt()}, params.operational_params).first ==
+            is_operational(first_gate_exhaustive, std::vector<tt>{create_and_tt()}, params.operational_params).status ==
             operational_status::OPERATIONAL);
         CHECK(design_gates_stats_exhaustive.number_of_layouts == 1);
 
@@ -330,7 +330,7 @@ TEST_CASE("Use SiQAD's AND gate skeleton to generate all possible AND gates", "[
             design_sidb_gates(lyt, std::vector<tt>{create_and_tt()}, params, &design_gates_stats_quickcell);
         REQUIRE(found_gate_layouts_quickcell.size() == 1);
         const auto& first_gate_quickcell = found_gate_layouts_exhaustive.front();
-        CHECK(is_operational(first_gate_quickcell, std::vector<tt>{create_and_tt()}, params.operational_params).first ==
+        CHECK(is_operational(first_gate_quickcell, std::vector<tt>{create_and_tt()}, params.operational_params).status ==
               operational_status::OPERATIONAL);
         CHECK(design_gates_stats_quickcell.number_of_layouts == 1);
     }
@@ -667,7 +667,7 @@ TEST_CASE("Design AND gate with input left and output top-right with QuickCell (
         const auto found_gate_layouts = design_sidb_gates(lyt, std::vector<tt>{create_and_tt()}, params);
         REQUIRE(found_gate_layouts.size() == 234);
         const auto& first_gate = found_gate_layouts.front();
-        CHECK(is_operational(first_gate, std::vector<tt>{create_and_tt()}, params.operational_params).first ==
+        CHECK(is_operational(first_gate, std::vector<tt>{create_and_tt()}, params.operational_params).status ==
               operational_status::OPERATIONAL);
     }
 }

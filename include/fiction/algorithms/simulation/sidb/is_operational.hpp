@@ -196,13 +196,36 @@ struct operational_assessment
     operational_status status;
     /**
      * When the termination condition is set to `ALL_INPUT_COMBINATIONS_ASSESSED`, the operational status for each
-     * respective input combination is stored here, sorted by their binary representation.
+     * respective input combination is stored here, sorted by their binary representation. When the simulation retention
+     * is set to `KEEP_SIMULATION_RESULTS`, this optional structure is also populated.
      */
     std::optional<std::vector<operational_assessment_for_input>> assessment_per_input{};
     /**
      * The number of input combinations tested.
      */
     std::size_t simulator_invocations{0};
+    /**
+     * Extracts the simulation results contained in this operational assessment through moves.
+     *
+     * @return A vector containing the simulation results for each respective input that was assessed.
+     */
+    std::vector<std::vector<charge_distribution_surface<Lyt>>> extract_simulation_results_per_input() const noexcept
+    {
+        assert(assessment_per_input.has_value() && "Assessment results per input are not present.");
+        assert(!assessment_per_input.value().empty() && "No input combinations were assessed.");
+        assert(assessment_per_input.value().front().simulation_results.has_value() &&
+               "Simulation results were not retained during assessment.");
+
+        std::vector<std::vector<charge_distribution_surface<Lyt>>> simulation_results_per_input{};
+        simulation_results_per_input.reserve(assessment_per_input.value().size());
+
+        for (operational_assessment_for_input assessment : assessment_per_input.value())
+        {
+            simulation_results_per_input.push_back(std::move(assessment.simulation_results.value()));
+        }
+
+        return simulation_results_per_input;
+    }
 };
 
 namespace detail

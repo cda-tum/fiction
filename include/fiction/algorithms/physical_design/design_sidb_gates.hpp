@@ -337,9 +337,9 @@ class design_sidb_gates_impl
                                 });
                         }
 
-                        if (const auto [status, aux_stats] = is_operational(
+                        if (const operational_assessment<Lyt>& assessment_results = is_operational(
                                 result_lyt, truth_table, params.operational_params, input_bdl_wires, output_bdl_wires);
-                            status == operational_status::OPERATIONAL)
+                            assessment_results.status == operational_status::OPERATIONAL)
                         {
                             const std::lock_guard lock{mutex_to_protect_designed_gate_layouts};
                             if constexpr (has_get_sidb_defect_v<Lyt>)
@@ -453,9 +453,9 @@ class design_sidb_gates_impl
                                                                     &designed_gate_layouts,
                                                                     &solution_found](const auto& candidate) noexcept
         {
-            if (const auto [status, aux_stats] = is_operational(candidate, truth_table, params.operational_params,
-                                                                input_bdl_wires, output_bdl_wires);
-                status == operational_status::OPERATIONAL)
+            if (const operational_assessment<Lyt>& assessment_results = is_operational(
+                    candidate, truth_table, params.operational_params, input_bdl_wires, output_bdl_wires);
+                assessment_results.status == operational_status::OPERATIONAL)
             {
                 {
                     const std::lock_guard lock_vector{mutex_to_protect_designed_gate_layouts};
@@ -464,8 +464,8 @@ class design_sidb_gates_impl
 
                     if (designed_gate_layouts.simulation_results.has_value())
                     {
-                        designed_gate_layouts.simulation_results.value().emplace_back(
-                            std::move(aux_stats.simulation_results.value()));
+                        designed_gate_layouts.simulation_results.value().push_back(
+                            assessment_results.extract_simulation_results_per_input());
                     }
                 }
 
@@ -690,8 +690,8 @@ class design_sidb_gates_impl
         return lyt;
     }
     /**
-     * This function makes sure that the underlying parameters for `is_operational` allow simulation results to be used
-     * when the given parameter set indicates the use for it. TODO
+     * This function makes sure that underlying parameters for `is_operational` are set according to the given
+     * parameters for `design_sidb_gates`.
      */
     void set_operational_params_accordingly() noexcept
     {
