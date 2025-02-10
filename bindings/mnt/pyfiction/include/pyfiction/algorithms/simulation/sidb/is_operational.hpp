@@ -136,7 +136,7 @@ inline void is_operational(pybind11::module& m)
                DOC(fiction_is_operational_params_operational_analysis_strategy_FILTER_THEN_SIMULATION));
 
     py::enum_<fiction::is_operational_params::termination_condition>(
-        m, "termination_condition_is_operational_params", DOC(fiction_is_operational_params_termination_condition))
+        m, "is_operational_params_termination_condition", DOC(fiction_is_operational_params_termination_condition))
         .value("ON_FIRST_NON_OPERATIONAL",
                fiction::is_operational_params::termination_condition::ON_FIRST_NON_OPERATIONAL,
                DOC(fiction_is_operational_params_termination_condition_ON_FIRST_NON_OPERATIONAL))

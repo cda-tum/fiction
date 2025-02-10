@@ -47,7 +47,7 @@ void design_sidb_gates(pybind11::module& m)
      * Termination condition selector type.
      */
     py::enum_<typename fiction::design_sidb_gates_params<Lyt>::termination_condition>(
-        m, "termination_condition_design_sidb_gates_params",
+        m, "design_sidb_gates_params_termination_condition",
         DOC(fiction_design_sidb_gates_params_termination_condition))
         .value("AFTER_FIRST_SOLUTION",
                fiction::design_sidb_gates_params<Lyt>::termination_condition::AFTER_FIRST_SOLUTION,
