@@ -330,8 +330,9 @@ TEST_CASE("Use SiQAD's AND gate skeleton to generate all possible AND gates", "[
             design_sidb_gates(lyt, std::vector<tt>{create_and_tt()}, params, &design_gates_stats_quickcell);
         REQUIRE(found_gate_layouts_quickcell.size() == 1);
         const auto& first_gate_quickcell = found_gate_layouts_exhaustive.front();
-        CHECK(is_operational(first_gate_quickcell, std::vector<tt>{create_and_tt()}, params.operational_params).status ==
-              operational_status::OPERATIONAL);
+        CHECK(
+            is_operational(first_gate_quickcell, std::vector<tt>{create_and_tt()}, params.operational_params).status ==
+            operational_status::OPERATIONAL);
         CHECK(design_gates_stats_quickcell.number_of_layouts == 1);
     }
 
