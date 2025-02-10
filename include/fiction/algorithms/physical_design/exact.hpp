@@ -852,7 +852,7 @@ class exact_impl
             z3::expr_vector eq{*ctx};
             for (int i = 1; static_cast<decltype(v.size())>(i) < v.size(); ++i)
             {
-                eq.push_back(v[static_cast<unsigned int>(i - 1)] == v[static_cast<unsigned int>(i)]);
+                eq.push_back(v[i - 1] == v[i]);
             }
 
             return z3::mk_and(eq);

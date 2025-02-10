@@ -348,8 +348,7 @@ auto convert_layout_to_siqad_coordinates(const Lyt& lyt) noexcept
         {
             sidb_defect_surface<decltype(lyt_new)> lyt_surface{lyt_new};
             lyt_orig.foreach_sidb_defect(
-                [&lyt_surface, &lyt_orig](const auto& cd)
-                {
+                [&lyt_surface, &lyt_orig](const auto& cd) {
                     lyt_surface.assign_sidb_defect(siqad::to_siqad_coord(cd.first), lyt_orig.get_sidb_defect(cd.first));
                 });
             return lyt_surface;
@@ -457,8 +456,7 @@ template <typename LytDest, typename LytSrc>
                 auto lyt_defect = sidb_defect_surface{lyt_new};
 
                 lyt.foreach_sidb_defect(
-                    [&lyt_defect](const auto& cd)
-                    {
+                    [&lyt_defect](const auto& cd) {
                         lyt_defect.assign_sidb_defect(siqad::to_fiction_coord<coordinate<LytDest>>(cd.first),
                                                       cd.second);
                     });
@@ -632,10 +630,10 @@ all_coordinates_in_spanned_area(const CoordinateType& cell_first_corner,
         auto cell_first_corner_cube  = siqad::to_fiction_coord<cube::coord_t>(cell_first_corner);
         auto cell_second_corner_cube = siqad::to_fiction_coord<cube::coord_t>(cell_second_corner);
 
-        cube::coord_t nw_cell{std::min(cell_first_corner_cube.x, cell_second_corner_cube.x),
-                              std::min(cell_first_corner_cube.y, cell_second_corner_cube.y)};
-        cube::coord_t se_cell{std::max(cell_first_corner_cube.x, cell_second_corner_cube.x),
-                              std::max(cell_first_corner_cube.y, cell_second_corner_cube.y)};
+        const cube::coord_t nw_cell{std::min(cell_first_corner_cube.x, cell_second_corner_cube.x),
+                                    std::min(cell_first_corner_cube.y, cell_second_corner_cube.y)};
+        const cube::coord_t se_cell{std::max(cell_first_corner_cube.x, cell_second_corner_cube.x),
+                                    std::max(cell_first_corner_cube.y, cell_second_corner_cube.y)};
 
         const auto total_cell_count = static_cast<uint64_t>(std::abs(nw_cell.x - se_cell.x) + 1) *
                                       static_cast<uint64_t>(std::abs(nw_cell.y - se_cell.y) + 1);
