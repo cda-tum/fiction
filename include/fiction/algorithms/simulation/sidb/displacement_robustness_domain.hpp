@@ -160,7 +160,7 @@ class displacement_robustness_domain_impl
             generator(rd())
     {
         assert(
-            (is_operational(layout, truth_table, params.operational_params).first == operational_status::OPERATIONAL) &&
+            (is_operational(layout, truth_table, params.operational_params).status == operational_status::OPERATIONAL) &&
             "The given layout is not a valid SiDB layout for the given Boolean function");
 
         if (params.analysis_mode ==
