@@ -47,7 +47,7 @@ int main()  // NOLINT
         std::make_pair("wire", std::vector<tt>{create_id_tt()})};
 
     const sidb_simulation_parameters  sim_params{2, -0.32};
-    const critical_temperature_params ct_params{sim_params};
+    const critical_temperature_params ct_params{{sim_params}};
 
     for (const auto& [gate, truth_table] : gates)
     {
