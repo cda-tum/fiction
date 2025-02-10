@@ -96,7 +96,7 @@ void operational_status_assessment_stats(pybind11::module& m, const std::string&
 
 inline void is_operational(pybind11::module& m)
 {
-    namespace py = pybind11;
+    namespace py = pybind11; // TODO
 
     py::enum_<fiction::operational_status>(m, "operational_status", DOC(fiction_operational_status))
         .value("OPERATIONAL", fiction::operational_status::OPERATIONAL, DOC(fiction_operational_status_OPERATIONAL))

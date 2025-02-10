@@ -573,8 +573,8 @@ class defect_influence_impl
         {
             if (params.influence_def == defect_influence_params<cell<Lyt>>::influence_definition::OPERATIONALITY_CHANGE)
             {
-                const auto [status, result] = is_operational(lyt_copy, spec.value(), params.operational_params);
-                if (status == operational_status::OPERATIONAL)
+                if (const auto& assessment_results = is_operational(lyt_copy, spec.value(), params.operational_params);
+                    assessment_results.status == operational_status::OPERATIONAL)
                 {
                     lyt_copy.assign_sidb_defect(defect_cell, sidb_defect{sidb_defect_type::NONE});
                     return non_influential();

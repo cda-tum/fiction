@@ -204,7 +204,7 @@ class displacement_robustness_domain_impl
             const auto op_status = is_operational(lyt, truth_table, params.operational_params);
             {
                 const std::lock_guard lock_domain{mutex_to_protect_displacement_robustness_domain};
-                update_displacement_robustness_domain(domain, lyt, op_status.first);
+                update_displacement_robustness_domain(domain, lyt, op_status.status);
             }
         };
 

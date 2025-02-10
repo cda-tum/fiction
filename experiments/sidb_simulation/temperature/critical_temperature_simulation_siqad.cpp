@@ -38,8 +38,8 @@ int main()  // NOLINT
         std::make_pair("xnor", std::vector<tt>{create_xnor_tt()}),
         std::make_pair("xor", std::vector<tt>{create_xor_tt()}), std::make_pair("or", std::vector<tt>{create_or_tt()})};
 
-    const sidb_simulation_parameters sim_params{2, -0.28};
-    critical_temperature_params      ct_params{sim_params};
+    constexpr sidb_simulation_parameters sim_params{2, -0.28};
+    critical_temperature_params      ct_params{{sim_params}};
 
     // this is how the gates are presented and simulated in "SiQAD: A Design and Simulation Tool for Atomic Silicon
     // Quantum Dot Circuits\" by Samuel Sze Hang Ng, Jacob Retallick, Hsi Nien Chiu, Robert Lupoiu, Lucian Livadaru,
