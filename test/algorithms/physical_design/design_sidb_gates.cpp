@@ -62,8 +62,7 @@ TEST_CASE("Design AND gate with skeleton, where one input wire and the output wi
 
     SECTION("Automatic Exhaustive Gate Designer")
     {
-        params.design_mode = design_sidb_gates_params<
-            sidb_100_cell_clk_lyt_siqad>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER;
+        params.design_mode = design_sidb_gates_params<sidb_100_cell_clk_lyt_siqad>::design_sidb_gates_mode::EXHAUSTIVE_GATE_DESIGNER;
 
         const auto found_gate_layouts = design_sidb_gates(lyt, std::vector<tt>{create_and_tt()}, params);
         REQUIRE(found_gate_layouts.size() == 10);
@@ -107,7 +106,7 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
     {
         const auto params = design_sidb_gates_params<siqad_layout>{
             is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT},
-            design_sidb_gates_params<siqad_layout>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
+            design_sidb_gates_params<siqad_layout>::design_sidb_gates_mode::EXHAUSTIVE_GATE_DESIGNER,
             {{10, 4, 0}, {10, 4, 0}},
             1};
 
@@ -121,7 +120,7 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
         const auto lyt_in_cube_coord = convert_layout_to_fiction_coordinates<cube_layout>(lyt);
         const design_sidb_gates_params<cube_layout> params_cube{
             is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT},
-            design_sidb_gates_params<cube_layout>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
+            design_sidb_gates_params<cube_layout>::design_sidb_gates_mode::EXHAUSTIVE_GATE_DESIGNER,
             {siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{10, 4, 0}),
              siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{10, 4, 0})},
             1};
@@ -138,7 +137,7 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
         const auto lyt_in_offset_coord = convert_layout_to_fiction_coordinates<offset_layout>(lyt);
         const design_sidb_gates_params<offset_layout> params_offset{
             is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT},
-            design_sidb_gates_params<offset_layout>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
+            design_sidb_gates_params<offset_layout>::design_sidb_gates_mode::EXHAUSTIVE_GATE_DESIGNER,
             {siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{10, 4, 0}),
              siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{10, 4, 0})},
             1};
@@ -155,7 +154,7 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
     {
         const auto params = design_sidb_gates_params<siqad_layout>{
             is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT},
-            design_sidb_gates_params<siqad_layout>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
+            design_sidb_gates_params<siqad_layout>::design_sidb_gates_mode::EXHAUSTIVE_GATE_DESIGNER,
             {{10, 4, 0}, {13, 4, 0}},
             1};
 
@@ -168,7 +167,7 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
     {
         const auto params = design_sidb_gates_params<siqad_layout>{
             is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT},
-            design_sidb_gates_params<siqad_layout>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
+            design_sidb_gates_params<siqad_layout>::design_sidb_gates_mode::EXHAUSTIVE_GATE_DESIGNER,
             {{10, 4, 0}, {10, 4, 0}},
             1,
             design_sidb_gates_params<siqad_layout>::termination_condition::AFTER_FIRST_SOLUTION};
@@ -188,7 +187,7 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
     {
         const auto params = design_sidb_gates_params<siqad_layout>{
             is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKSIM},
-            design_sidb_gates_params<siqad_layout>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
+            design_sidb_gates_params<siqad_layout>::design_sidb_gates_mode::EXHAUSTIVE_GATE_DESIGNER,
             {{10, 4, 0}, {10, 4, 0}},
             1,
             design_sidb_gates_params<siqad_layout>::termination_condition::AFTER_FIRST_SOLUTION};
@@ -208,7 +207,7 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
     {
         const auto params = design_sidb_gates_params<siqad_layout>{
             is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT},
-            design_sidb_gates_params<siqad_layout>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
+            design_sidb_gates_params<siqad_layout>::design_sidb_gates_mode::EXHAUSTIVE_GATE_DESIGNER,
             {{10, 4, 0}, {13, 4, 0}},
             1,
             design_sidb_gates_params<siqad_layout>::termination_condition::ALL_COMBINATIONS_ENUMERATED,
@@ -249,8 +248,7 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
         design_sidb_gates_stats design_gates_stats_exhaustive{};
         params.canvas          = {{10, 4, 0}, {10, 4, 0}};
         params.number_of_sidbs = 0;
-        params.design_mode     = design_sidb_gates_params<
-                sidb_100_cell_clk_lyt_siqad>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER;
+        params.design_mode     = design_sidb_gates_params<sidb_100_cell_clk_lyt_siqad>::design_sidb_gates_mode::EXHAUSTIVE_GATE_DESIGNER;
         const auto found_gate_layouts_exhaustive =
             design_sidb_gates(lyt, std::vector<tt>{create_xnor_tt()}, params, &design_gates_stats_exhaustive);
         CHECK(found_gate_layouts_exhaustive.empty());
@@ -291,7 +289,7 @@ TEST_CASE("Use SiQAD's AND gate skeleton to generate all possible AND gates", "[
                               sidb_simulation_engine::EXGS,
                               {detect_bdl_wires_params{2.0}}},
         design_sidb_gates_params<
-            sidb_100_cell_clk_lyt_siqad>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
+            sidb_100_cell_clk_lyt_siqad>::design_sidb_gates_mode::EXHAUSTIVE_GATE_DESIGNER,
         {{4, 4, 0}, {14, 5, 1}},
         1};
 
@@ -314,7 +312,7 @@ TEST_CASE("Use SiQAD's AND gate skeleton to generate all possible AND gates", "[
         params.canvas          = {{4, 4, 0}, {4, 4, 0}};
         params.number_of_sidbs = 0;
         params.design_mode     = design_sidb_gates_params<
-                sidb_100_cell_clk_lyt_siqad>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER;
+                sidb_100_cell_clk_lyt_siqad>::design_sidb_gates_mode::EXHAUSTIVE_GATE_DESIGNER;
         const auto found_gate_layouts_exhaustive =
             design_sidb_gates(lyt, std::vector<tt>{create_and_tt()}, params, &design_gates_stats_exhaustive);
         REQUIRE(found_gate_layouts_exhaustive.size() == 1);
@@ -342,7 +340,7 @@ TEST_CASE("Use SiQAD's AND gate skeleton to generate all possible AND gates", "[
         params.canvas          = {{4, 4, 0}, {4, 4, 0}};
         params.number_of_sidbs = 2;
         params.design_mode     = design_sidb_gates_params<
-                sidb_100_cell_clk_lyt_siqad>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER;
+                sidb_100_cell_clk_lyt_siqad>::design_sidb_gates_mode::EXHAUSTIVE_GATE_DESIGNER;
         const auto found_gate_layouts_exhaustive =
             design_sidb_gates(lyt, std::vector<tt>{create_and_tt()}, params, &design_gates_stats);
         CHECK(found_gate_layouts_exhaustive.empty());
@@ -394,7 +392,7 @@ TEST_CASE("Use FO2 Bestagon gate without SiDB at {17, 11, 0} and generate origin
         const design_sidb_gates_params<sidb_100_cell_clk_lyt_siqad> params{
             is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT},
             design_sidb_gates_params<
-                sidb_100_cell_clk_lyt_siqad>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
+                sidb_100_cell_clk_lyt_siqad>::design_sidb_gates_mode::EXHAUSTIVE_GATE_DESIGNER,
             {{17, 11, 0}, {17, 11, 0}},
             1};
 
@@ -413,7 +411,7 @@ TEST_CASE("Use FO2 Bestagon gate without SiDB at {17, 11, 0} and generate origin
         design_sidb_gates_params<sidb_defect_surface<sidb_100_cell_clk_lyt_siqad>> params{
             is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT},
             design_sidb_gates_params<sidb_defect_surface<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::
-                AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
+                EXHAUSTIVE_GATE_DESIGNER,
             {{17, 11, 0}, {17, 11, 0}},
             1};
 
@@ -539,7 +537,7 @@ TEST_CASE("Design NOR Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
         design_sidb_gates_params<sidb_111_cell_clk_lyt_siqad> params{
             is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT},
             design_sidb_gates_params<
-                sidb_111_cell_clk_lyt_siqad>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
+                sidb_111_cell_clk_lyt_siqad>::design_sidb_gates_mode::EXHAUSTIVE_GATE_DESIGNER,
             {{10, 13, 0}, {14, 17, 0}},
             3};
 // to save runtime in the CI, this test is only run in RELEASE mode
@@ -571,7 +569,7 @@ TEST_CASE("Design NOR Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
                                   bdl_input_iterator_params{},
                                   is_operational_params::operational_condition::REJECT_KINKS},
             design_sidb_gates_params<
-                sidb_111_cell_clk_lyt_siqad>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
+                sidb_111_cell_clk_lyt_siqad>::design_sidb_gates_mode::EXHAUSTIVE_GATE_DESIGNER,
             {{10, 13, 0}, {15, 17, 0}},
             3};
 

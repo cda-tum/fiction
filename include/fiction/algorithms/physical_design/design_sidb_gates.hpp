@@ -60,7 +60,7 @@ struct design_sidb_gates_params
         /**
          * Gates are designed by using the *Automatic Exhaustive Gate Designer*.
          */
-        AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
+        EXHAUSTIVE_GATE_DESIGNER,
         /**
          * Gate layouts are designed randomly.
          */
@@ -87,7 +87,7 @@ struct design_sidb_gates_params
     /**
      * Gate design mode.
      */
-    design_sidb_gates_mode design_mode = design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER;
+    design_sidb_gates_mode design_mode = design_sidb_gates_mode::EXHAUSTIVE_GATE_DESIGNER;
     /**
      * Canvas spanned by the northwest and southeast cell.
      */
@@ -202,7 +202,7 @@ class design_sidb_gates_impl
      *
      * @return A vector of designed SiDB gate layouts.
      */
-    [[nodiscard]] std::vector<Lyt> run_automatic_exhaustive_gate_designer() const noexcept
+    [[nodiscard]] std::vector<Lyt> run_exhaustive_gate_designer() const noexcept
     {
         if (stats.number_of_layouts == 0)
         {
@@ -763,9 +763,9 @@ template <typename Lyt, typename TT>
 
     std::vector<Lyt> result{};
 
-    if (params.design_mode == design_sidb_gates_params<Lyt>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER)
+    if (params.design_mode == design_sidb_gates_params<Lyt>::design_sidb_gates_mode::EXHAUSTIVE_GATE_DESIGNER)
     {
-        result = p.run_automatic_exhaustive_gate_designer();
+        result = p.run_exhaustive_gate_designer();
     }
 
     else if (params.design_mode == design_sidb_gates_params<Lyt>::design_sidb_gates_mode::QUICKCELL)

@@ -12,6 +12,8 @@
 
 #include <pybind11/pybind11.h>
 
+#include <string>
+
 namespace pyfiction
 {
 
@@ -34,8 +36,8 @@ void design_sidb_gates(pybind11::module& m)
         m, "design_sidb_gates_mode", DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode))
         .value("QUICKCELL", fiction::design_sidb_gates_params<Lyt>::design_sidb_gates_mode::QUICKCELL,
                DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode_QUICKCELL))
-        .value("AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER",
-               fiction::design_sidb_gates_params<Lyt>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
+        .value("EXHAUSTIVE_GATE_DESIGNER",
+               fiction::design_sidb_gates_params<Lyt>::design_sidb_gates_mode::EXHAUSTIVE_GATE_DESIGNER,
                DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode_QUICKCELL))
         .value("RANDOM", fiction::design_sidb_gates_params<Lyt>::design_sidb_gates_mode::RANDOM,
                DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode_RANDOM));
@@ -83,6 +85,12 @@ void design_sidb_gates(pybind11::module& m)
                        DOC(fiction_design_sidb_gates_params_termination_cond))
         .def_readwrite("post_design_process", &fiction::design_sidb_gates_params<Lyt>::post_design_process,
                        DOC(fiction_design_sidb_gates_params_post_design_process));
+}
+
+template <typename Lyt>
+void design_sidb_gates_params(pybind11::module& m, const std::string& lattice = "")
+{
+    namespace py = pybind11;
 }
 
 }  // namespace detail

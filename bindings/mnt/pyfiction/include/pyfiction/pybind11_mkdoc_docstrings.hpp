@@ -4328,7 +4328,7 @@ static const char *__doc_fiction_design_sidb_gates_params_design_mode = R"doc(Ga
 
 static const char *__doc_fiction_design_sidb_gates_params_design_sidb_gates_mode = R"doc(Selector for the available design approaches.)doc";
 
-static const char *__doc_fiction_design_sidb_gates_params_design_sidb_gates_mode_AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER = R"doc(Gates are designed by using the *Automatic Exhaustive Gate Designer*.)doc";
+static const char *__doc_fiction_design_sidb_gates_params_design_sidb_gates_mode_EXHAUSTIVE_GATE_DESIGNER = R"doc(Gates are designed by using the *Automatic Exhaustive Gate Designer*.)doc";
 
 static const char *__doc_fiction_design_sidb_gates_params_design_sidb_gates_mode_QUICKCELL = R"doc(Gates are designed by using *QuickCell*.)doc";
 
@@ -5748,7 +5748,7 @@ static const char *__doc_fiction_detail_design_sidb_gates_impl_output_bdl_wires 
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_params = R"doc(Parameters for the *SiDB Gate Designer*.)doc";
 
-static const char *__doc_fiction_detail_design_sidb_gates_impl_run_automatic_exhaustive_gate_designer =
+static const char *__doc_fiction_detail_design_sidb_gates_impl_run_exhaustive_gate_designer =
 R"doc(Design gates by using the *Automatic Exhaustive Gate Designer*. This
 algorithm was proposed in \"Minimal Design of SiDB Gates: An Optimal
 Basis for Circuits Based on Silicon Dangling Bonds\" by J. Drewniok,
