@@ -155,7 +155,8 @@ struct is_operational_params
     /**
      * Simulation results that are used to certify the status `OPERATIONAL` are not kept by default.
      */
-    simulation_results_mode simulation_results_retention = simulation_results_mode::DISCARD_SIMULATION_RESULTS;
+    simulation_results_mode simulation_results_retention =
+        simulation_results_mode::DISCARD_SIMULATION_RESULTS;  // TODO retain + term early
 };
 
 /**
@@ -565,9 +566,12 @@ class is_operational_impl
             }
 
             // store the assessment results for this input combination when the termination condition is set to
-            // `termination_condition::ALL_INPUT_COMBINATION_ASSESSED`
+            // `termination_condition::ALL_INPUT_COMBINATION_ASSESSED` or the simulation result retention is set to
+            // `simulation_results_mode::KEEP_SIMULATION_RESULTS`
             if (parameters.termination_cond ==
-                is_operational_params::termination_condition::ALL_INPUT_COMBINATIONS_ASSESSED)
+                    is_operational_params::termination_condition::ALL_INPUT_COMBINATIONS_ASSESSED ||
+                parameters.simulation_results_retention ==
+                    is_operational_params::simulation_results_mode::KEEP_SIMULATION_RESULTS)
             {
                 // save simulation results when the simulation result retention is set to
                 // `simulation_results_mode::KEEP_SIMULATION_RESULTS`
@@ -583,9 +587,12 @@ class is_operational_impl
         }
 
         // store the assessment results for all input combinations when the termination condition is set to
-        // `termination_condition::ALL_INPUT_COMBINATION_ASSESSED`
+        // `termination_condition::ALL_INPUT_COMBINATION_ASSESSED` or the simulation result retention is set to
+        // `simulation_results_mode::KEEP_SIMULATION_RESULTS`
         if (parameters.termination_cond ==
-            is_operational_params::termination_condition::ALL_INPUT_COMBINATIONS_ASSESSED)
+                is_operational_params::termination_condition::ALL_INPUT_COMBINATIONS_ASSESSED ||
+            parameters.simulation_results_retention ==
+                is_operational_params::simulation_results_mode::KEEP_SIMULATION_RESULTS)
         {
             assessment_results.assessment_per_input = std::move(assessment_results_per_input);
         }
@@ -770,8 +777,7 @@ class is_operational_impl
         while (canvas_charge_index <= max_index)
         {
             cds_canvas_copy.foreach_cell(
-                [&cds_layout, &cds_canvas_copy](const auto& c)
-                {
+                [&cds_layout, &cds_canvas_copy](const auto& c) {
                     cds_layout.assign_charge_state(c, cds_canvas_copy.get_charge_state(c),
                                                    charge_index_mode::KEEP_CHARGE_INDEX);
                 });
