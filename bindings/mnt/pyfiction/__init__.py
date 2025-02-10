@@ -521,8 +521,7 @@ __all__ = [
     "offset_area",
     "offset_coordinate",
     "offset_volume",
-    "operational_analysis_strategy"
-    "operational_assessment_100",
+    "operational_analysis_strategyoperational_assessment_100",
     "operational_assessment_111",
     "operational_assessment_for_input_100",
     "operational_assessment_for_input_111",
@@ -651,4 +650,6 @@ __all__ = [
     "write_sqd_sim_result",
     "yen_k_shortest_paths",
     "yen_k_shortest_paths_params",
+    "operational_analysis_strategy",
+    "operational_assessment_100",
 ]
