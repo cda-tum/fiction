@@ -77,26 +77,40 @@ void is_operational(pybind11::module& m)
 }
 
 template <typename Lyt>
-void operational_status_assessment_stats(pybind11::module& m, const std::string& lattice = "")
+void operational_assessment(pybind11::module& m, const std::string& lattice = "")
 {
     namespace py = pybind11;
 
-    py::class_<fiction::operational_status_assessment_stats<Lyt>>(
-        m, fmt::format("operational_status_assessment_stats{}", lattice).c_str(),
-        DOC(fiction_operational_status_assessment_stats))
-        .def(py::init<>())
-        .def_readwrite("simulation_results", &fiction::operational_status_assessment_stats<Lyt>::simulation_results,
-                       DOC(fiction_operational_status_assessment_stats_simulation_results))
-        .def_readwrite("simulator_invocations",
-                       &fiction::operational_status_assessment_stats<Lyt>::simulator_invocations,
-                       DOC(fiction_operational_status_assessment_stats_simulator_invocations));
+    // operational assessments are defined to be read-only
+
+    py::class_<typename fiction::operational_assessment<Lyt>::operational_assessment_for_input>(
+        m, fmt::format("operational_assessment_for_input{}", lattice).c_str(),
+        DOC(fiction_operational_assessment_operational_assessment_for_input))
+        .def(py::init<fiction::operational_status>(), py::arg(" op_status"),
+             DOC(fiction_operational_assessment_operational_assessment_for_input_operational_assessment_for_input))
+        .def_readonly("status", &fiction::operational_assessment<Lyt>::operational_assessment_for_input::status,
+                      DOC(fiction_operational_assessment_operational_assessment_for_input_status))
+        .def_readonly("simulation_results",
+                      &fiction::operational_assessment<Lyt>::operational_assessment_for_input::simulation_results,
+                      DOC(fiction_operational_assessment_operational_assessment_for_input_simulation_results));
+
+    py::class_<fiction::operational_assessment<Lyt>>(m, fmt::format("operational_assessment{}", lattice).c_str(),
+                                                     DOC(fiction_operational_assessment))
+        .def(py::init<fiction::operational_status>(), py::arg("op_status"),
+             DOC(fiction_operational_assessment_operational_assessment))
+        .def_readonly("status", &fiction::operational_assessment<Lyt>::status,
+                      DOC(fiction_operational_assessment_status))
+        .def_readonly("assessment_per_input", &fiction::operational_assessment<Lyt>::assessment_per_input,
+                      DOC(fiction_operational_assessment_assessment_per_input))
+        .def_readonly("simulator_invocations", &fiction::operational_assessment<Lyt>::simulator_invocations,
+                      DOC(fiction_operational_assessment_simulator_invocations));
 }
 
 }  // namespace detail
 
 inline void is_operational(pybind11::module& m)
 {
-    namespace py = pybind11; // TODO
+    namespace py = pybind11;
 
     py::enum_<fiction::operational_status>(m, "operational_status", DOC(fiction_operational_status))
         .value("OPERATIONAL", fiction::operational_status::OPERATIONAL, DOC(fiction_operational_status_OPERATIONAL))
@@ -120,6 +134,15 @@ inline void is_operational(pybind11::module& m)
                fiction::is_operational_params::operational_analysis_strategy::FILTER_THEN_SIMULATION,
                DOC(fiction_is_operational_params_operational_analysis_strategy_FILTER_THEN_SIMULATION));
 
+    py::enum_<fiction::is_operational_params::termination_condition>(
+        m, "termination_condition_is_operational_params", DOC(fiction_is_operational_params_termination_condition))
+        .value("ON_FIRST_NON_OPERATIONAL",
+               fiction::is_operational_params::termination_condition::ON_FIRST_NON_OPERATIONAL,
+               DOC(fiction_is_operational_params_termination_condition_ON_FIRST_NON_OPERATIONAL))
+        .value("ALL_INPUT_COMBINATIONS_ASSESSED",
+               fiction::is_operational_params::termination_condition::ALL_INPUT_COMBINATIONS_ASSESSED,
+               DOC(fiction_is_operational_params_termination_condition_ALL_INPUT_COMBINATIONS_ASSESSED));
+
     py::enum_<fiction::is_operational_params::simulation_results_mode>(
         m, "simulation_results_mode", DOC(fiction_is_operational_params_simulation_results_mode))
         .value("KEEP_SIMULATION_RESULTS",
@@ -142,12 +165,14 @@ inline void is_operational(pybind11::module& m)
         .def_readwrite("strategy_to_analyze_operational_status",
                        &fiction::is_operational_params::strategy_to_analyze_operational_status,
                        DOC(fiction_is_operational_params_strategy_to_analyze_operational_status))
+        .def_readwrite("termination_condition", &fiction::is_operational_params::termination_cond,
+                       DOC(fiction_is_operational_params_termination_condition))
         .def_readwrite("simulation_results_retention", &fiction::is_operational_params::simulation_results_retention,
                        DOC(fiction_is_operational_params_simulation_results_retention));
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
-    detail::operational_status_assessment_stats<py_sidb_100_lattice>(m, "_100");
-    detail::operational_status_assessment_stats<py_sidb_111_lattice>(m, "_111");
+    detail::operational_assessment<py_sidb_100_lattice>(m, "_100");
+    detail::operational_assessment<py_sidb_111_lattice>(m, "_111");
 
     detail::is_operational<py_sidb_100_lattice>(m);
     detail::is_operational<py_sidb_111_lattice>(m);

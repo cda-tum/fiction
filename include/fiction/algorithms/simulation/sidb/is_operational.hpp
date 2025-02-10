@@ -155,8 +155,7 @@ struct is_operational_params
     /**
      * Simulation results that are used to certify the status `OPERATIONAL` are not kept by default.
      */
-    simulation_results_mode simulation_results_retention =
-        simulation_results_mode::DISCARD_SIMULATION_RESULTS;  // TODO retain + term early
+    simulation_results_mode simulation_results_retention = simulation_results_mode::DISCARD_SIMULATION_RESULTS;
 };
 
 /**
