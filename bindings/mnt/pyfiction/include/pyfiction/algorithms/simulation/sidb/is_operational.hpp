@@ -11,6 +11,7 @@
 #include <fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp>
 #include <fiction/algorithms/simulation/sidb/is_operational.hpp>
 
+#include <fmt/format.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
