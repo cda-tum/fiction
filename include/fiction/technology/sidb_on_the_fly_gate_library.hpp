@@ -109,7 +109,7 @@ struct sidb_on_the_fly_gate_library_params
     /**
      * This struct holds parameters to design SiDB gates.
      */
-    design_sidb_gates_params<cell<Lyt>> design_gate_params{};
+    design_sidb_gates_params<Lyt> design_gate_params{};
     /**
      * This variable defines the number of canvas SiDBs dedicated to complex gates, such as crossing, double wire,
      * and half-adder.
