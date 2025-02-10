@@ -5790,9 +5790,9 @@ Returns:
     A vector of designed SiDB gate layouts.)doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_set_operational_params_accordingly =
-R"doc(This function makes sure that the underlying parameters for
-`is_operational` allow simulation results to be used when the given
-parameter set indicates the use for it. TODO)doc";
+R"doc(This function makes sure that underlying parameters for
+`is_operational` are set according to the given parameters for
+`design_sidb_gates`.)doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_skeleton_layout =
 R"doc(The skeleton layout serves as a starting layout to which SiDBs are
@@ -16488,7 +16488,16 @@ static const char *__doc_fiction_operational_assessment_assessment_per_input =
 R"doc(When the termination condition is set to
 `ALL_INPUT_COMBINATIONS_ASSESSED`, the operational status for each
 respective input combination is stored here, sorted by their binary
-representation.)doc";
+representation. When the simulation retention is set to
+`KEEP_SIMULATION_RESULTS`, this optional structure is also populated.)doc";
+
+static const char *__doc_fiction_operational_assessment_extract_simulation_results_per_input =
+R"doc(Extracts the simulation results contained in this operational
+assessment through moves.
+
+Returns:
+    A vector containing the simulation results for each respective
+    input that was assessed.)doc";
 
 static const char *__doc_fiction_operational_assessment_operational_assessment = R"doc(Standard constructor that only sets the operational status.)doc";
 
