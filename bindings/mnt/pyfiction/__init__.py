@@ -522,7 +522,6 @@ __all__ = [
     "offset_coordinate",
     "offset_volume",
     "operational_analysis_strategy",
-    "operational_analysis_strategyoperational_assessment_100",
     "operational_assessment_100",
     "operational_assessment_111",
     "operational_assessment_for_input_100",
