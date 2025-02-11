@@ -18219,7 +18219,8 @@ Parameter ``ps``:
     QuickSim parameters.
 
 Returns:
-    sidb_simulation_result is returned with all results.)doc";
+    `sidb_simulation_result` is returned if the simulation was
+    successful, otherwise `std::nullopt`.)doc";
 
 static const char *__doc_fiction_quicksim_params = R"doc(This struct stores the parameters for the *QuickSim* algorithm.)doc";
 
