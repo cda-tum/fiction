@@ -717,7 +717,7 @@ class clustercomplete_impl
         {
             const std::lock_guard lock(mutex_to_protect_this_queue);
 
-            clustering_state_for_thieves = sidb_clustering_state{clustering_state};
+            clustering_state_for_thieves = clustering_state;
 
             thief_informants.clear();
 
