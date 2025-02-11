@@ -298,6 +298,37 @@ class clustercomplete_impl
         return pot_bound > mu_bounds_with_error.at(2);
     }
     /**
+     * Function to initialize the charge layout.
+     *
+     * @param lyt Layout to simulate.
+     * @param params Parameters for ClusterComplete.
+     * @return The charge layout initializes with defects specified in the given parameters.
+     */
+    [[nodiscard]] static charge_distribution_surface<Lyt>
+    initialize_charge_layout(const Lyt& lyt, const clustercomplete_params<cell<Lyt>>& params) noexcept
+    {
+        charge_distribution_surface<Lyt> cds{lyt};
+        cds.assign_physical_parameters(params.simulation_parameters);
+
+        // assign defects if applicable
+        if constexpr (has_foreach_sidb_defect_v<Lyt>)
+        {
+            lyt.foreach_sidb_defect(
+                [&](const auto& cd)
+                {
+                    if (const auto& [cell, defect] = cd; defect.type != sidb_defect_type::NONE)
+                    {
+                        cds.add_sidb_defect_to_potential_landscape(cell, lyt.get_sidb_defect(cell));
+                    }
+                });
+        }
+
+        cds.assign_local_external_potential(params.local_external_potential);
+        cds.assign_global_external_potential(params.global_potential);
+
+        return cds;
+    }
+    /**
      * This function performs an analysis that is crucial to the *ClusterComplete*'s efficiency: as the *Ground State
      * Space* construct is broken down, combinations of multiset charge configurations are tried together in more detail
      * than in the construction preceding this second phase of the simulation.
@@ -818,37 +849,6 @@ class clustercomplete_impl
             return std::nullopt;
         }
     };
-    /**
-     * Function to initialize the charge layout.
-     *
-     * @param lyt Layout to simulate.
-     * @param params Parameters for ClusterComplete.
-     * @return The charge layout initializes with defects specified in the given parameters.
-     */
-    [[nodiscard]] static charge_distribution_surface<Lyt>
-    initialize_charge_layout(const Lyt& lyt, const clustercomplete_params<cell<Lyt>>& params) noexcept
-    {
-        charge_distribution_surface<Lyt> cds{lyt};
-        cds.assign_physical_parameters(params.simulation_parameters);
-
-        // assign defects if applicable
-        if constexpr (has_foreach_sidb_defect_v<Lyt>)
-        {
-            lyt.foreach_sidb_defect(
-                [&](const auto& cd)
-                {
-                    if (const auto& [cell, defect] = cd; defect.type != sidb_defect_type::NONE)
-                    {
-                        cds.add_sidb_defect_to_potential_landscape(cell, lyt.get_sidb_defect(cell));
-                    }
-                });
-        }
-
-        cds.assign_local_external_potential(params.local_external_potential);
-        cds.assign_global_external_potential(params.global_potential);
-
-        return cds;
-    }
     /**
      * Work in the form of compositions of charge space elements of the top cluster are extracted into a vector and
      * shuffled at random before being returned. The shuffling may balance the initial workload division.
