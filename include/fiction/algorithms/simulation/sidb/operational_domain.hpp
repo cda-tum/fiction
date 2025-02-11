@@ -803,7 +803,15 @@ class operational_domain_impl
                 {
                     // perform a heuristic simulation
                     const quicksim_params qs_params{simulation_parameters, 500, 0.6};
-                    sim_results = quicksim(lyt, qs_params);
+
+                    if (const auto result = quicksim(lyt, qs_params); result.has_value())
+                    {
+                        sim_results = result.value();
+                    }
+                    else
+                    {
+                        continue;
+                    }
                 }
                 else
                 {

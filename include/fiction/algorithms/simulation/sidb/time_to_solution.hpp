@@ -131,7 +131,10 @@ void time_to_solution(const Lyt& lyt, const quicksim_params& quicksim_params,
 
     for (auto i = 0u; i < tts_params.repetitions; ++i)
     {
-        simulation_results_quicksim.push_back(quicksim<Lyt>(lyt, quicksim_params));
+        if (const auto result = quicksim<Lyt>(lyt, quicksim_params))
+        {
+            simulation_results_quicksim.push_back(*result);
+        }
     }
 
     time_to_solution_for_given_simulation_results(simulation_result, simulation_results_quicksim,

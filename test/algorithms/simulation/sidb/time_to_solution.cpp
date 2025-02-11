@@ -207,7 +207,11 @@ TEMPLATE_TEST_CASE("time-to-solution test with simulation results", "[time-to-so
 
         for (auto i = 0u; i < number_of_repetitions; i++)
         {
-            simulation_results_quicksim.push_back(quicksim<TestType>(lyt, quicksim_params));
+            const auto simulation_result = quicksim<TestType>(lyt, quicksim_params);
+            if (simulation_result.has_value())
+            {
+                simulation_results_quicksim.push_back(simulation_result.value());
+            }
         }
 
         const auto simulation_results_quickexact =
