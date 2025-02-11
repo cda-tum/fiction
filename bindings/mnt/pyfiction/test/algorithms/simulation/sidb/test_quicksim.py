@@ -85,7 +85,7 @@ class TestQuicksim(unittest.TestCase):
         params.iteration_steps = 10000
         params.number_threads = 1
 
-        # timeout should return None
+        # should return None since no solution can be found in 1 millisecond.
         self.assertIsNone(quicksim(layout, params))
 
 
