@@ -32,6 +32,7 @@
 #include <iostream>
 #include <iterator>
 #include <limits>
+#include <optional>
 #include <string>
 #include <utility>
 #include <vector>
@@ -265,7 +266,14 @@ class critical_temperature_impl
 
             // All physically valid charge configurations are determined for the given layout (probabilistic ground
             // state simulation is used).
-            simulation_results = quicksim(layout, qs_params);
+            if (const auto result = quicksim(layout, qs_params); result.has_value())
+            {
+                simulation_results = result.value();
+            }
+            else
+            {
+                return;
+            }
         }
         else
         {
@@ -466,7 +474,12 @@ class critical_temperature_impl
 
             const quicksim_params qs_params{params.operational_params.simulation_parameters, params.iteration_steps,
                                             params.alpha};
-            return quicksim(*bdl_iterator, qs_params);
+
+            if (const auto result = quicksim<Lyt>(*bdl_iterator, qs_params))
+            {
+                return result.value();
+            }
+            return sidb_simulation_result<Lyt>{};  // return empty result if no valid charge distribution was found
         }
 
         assert(false && "unsupported simulation engine");

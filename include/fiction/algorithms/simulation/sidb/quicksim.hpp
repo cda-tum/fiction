@@ -18,6 +18,7 @@
 #include <cstdint>
 #include <limits>
 #include <mutex>
+#include <optional>
 #include <thread>
 #include <vector>
 
@@ -63,10 +64,10 @@ struct quicksim_params
  * @tparam Lyt SiDB cell-level layout type.
  * @param lyt The layout to simulate.
  * @param ps QuickSim parameters.
- * @return sidb_simulation_result is returned with all results.
+ * @return `sidb_simulation_result` is returned if the simulation was successful, otherwise `std::nullopt`.
  */
 template <typename Lyt>
-sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{})
+std::optional<sidb_simulation_result<Lyt>> quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{})
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt must be an SiDB layout");
@@ -75,7 +76,7 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
 
     if (ps.iteration_steps == 0)
     {
-        return sidb_simulation_result<Lyt>{};
+        return std::nullopt;
     }
 
     sidb_simulation_result<Lyt> st{};
@@ -85,10 +86,9 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
     st.simulation_parameters = ps.simulation_parameters;
     st.charge_distributions.reserve(ps.iteration_steps);
 
-    if (ps.timeout == 0)
+    if (ps.iteration_steps == 0)
     {
-        st.additional_simulation_parameters.emplace("timeout_reached", true);
-        return st;
+        return std::nullopt;
     }
 
     bool timeout_limit_reached = false;
@@ -236,7 +236,7 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
 
     if (timeout_limit_reached)
     {
-        st.additional_simulation_parameters.emplace("timeout_reached", true);
+        return std::nullopt;
     }
 
     return st;
