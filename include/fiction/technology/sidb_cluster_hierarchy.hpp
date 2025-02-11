@@ -531,8 +531,6 @@ struct sidb_clustering_state
      */
     sidb_clustering_state(const sidb_clustering_state& other) noexcept
     {
-        proj_states.reserve(other.proj_states.size());
-
         for (const sidb_cluster_projector_state_ptr& pst : other.proj_states)
         {
             proj_states.emplace_back(std::make_unique<sidb_cluster_projector_state>(*pst));
