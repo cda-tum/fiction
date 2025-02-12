@@ -52,7 +52,7 @@ class designed_sidb_gate_comparator
         typename designed_sidb_gates<Lyt>::simulation_results_per_input simulation_results_per_input;
     };
 
-             designed_sidb_gate_comparator() = delete;
+    designed_sidb_gate_comparator()          = delete;
     virtual ~designed_sidb_gate_comparator() = default;
 
     designed_sidb_gate_comparator& operator=(const designed_sidb_gate_comparator& other) noexcept = default;
