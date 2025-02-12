@@ -177,7 +177,7 @@ TEST_CASE("Benchmark simulators", "[benchmark]")
 //      benchmark name                     samples         iterations         est run time
 //                                         mean            low mean           high mean
 //                                         std dev         low std dev        high std dev
-//      -----------------------------------------------------------------------------
+//      -----------------------------------------------------------------------------------
 //      QuickExact                         100             1                  1.68635 m
 //                                         1.07188 s       1.06547 s          1.07837 s
 //                                         32.9658 ms      31.1111 ms         35.3383 ms
@@ -193,6 +193,27 @@ TEST_CASE("Benchmark simulators", "[benchmark]")
 //      ClusterComplete (single-threaded)  100             1                  759.588 ms
 //                                         7.61088 ms      7.59401 ms         7.62819 ms
 //                                         87.2281 us      75.7313 us         104.133 us
+//
+//      After PR #663 (with jemalloc)
+//      benchmark name                       samples       iterations         est run time
+//                                           mean          low mean           high mean
+//                                           std dev       low std dev        high std dev
+//      -----------------------------------------------------------------------------------
+//      QuickExact                         100             1                  1.69636 m
+//                                         1.01288 s       1.01171 s          1.01426 s
+//                                         6.44908 ms      5.43149 ms         7.60552 ms
+//
+//      QuickSim                           100             1                  266.627 ms
+//                                         2.73651 ms      2.69581 ms         2.83154 ms
+//                                         298.359 us      152.152 us         521.457 us
+//
+//      ClusterComplete (multi-threaded)   100             1                  1.57307 s
+//                                         5.22269 ms      4.8304 ms          5.95271 ms
+//                                         2.66566 ms      1.61691 ms         4.20681 ms
+//
+//      ClusterComplete (single-threaded)  100             1                  726.747 ms
+//                                         7.25989 ms      7.25401 ms         7.2662 ms
+//                                         31.1296 us      27.4805 us         36.3467 us
 
 #if (FICTION_ALGLIB_ENABLED)
 TEST_CASE("Benchmark ClusterComplete", "[benchmark]")
@@ -217,7 +238,7 @@ TEST_CASE("Benchmark ClusterComplete", "[benchmark]")
     const lattice cl_4_seg{apply_gate_library<sidb_100_cell_clk_lyt, sidb_bestagon_library, hex_odd_row_gate_clk_lyt>(
         create_diagonal_wire_with_n_non_terminating_segments(2))};
 
-    BENCHMARK("4 Segment Diagonal Bestagon Wire")
+    BENCHMARK("4 Segment Diagonal Bestagon Wire (multi-threaded)")
     {
         const clustercomplete_params<> sim_params{sidb_simulation_parameters{3, -0.32}};
         return clustercomplete<lattice>(cl_4_seg, sim_params);
@@ -261,10 +282,25 @@ TEST_CASE("Benchmark ClusterComplete", "[benchmark]")
 //                                          std dev             low std dev             high std dev
 //      ---------------------------------------------------------------------------------------------
 //      4 Segment Diagonal Bestagon Wire    100                 1                       1.38135 m
-//                                          837.966 ms          835.809 ms              841.715 ms
+//      (multi-threaded)                    837.966 ms          835.809 ms              841.715 ms
 //                                          14.1689 ms          9.41514 ms              24.4521 ms
 //
 //      3 Segment Diagonal Bestagon Wire
 //      (single-threaded)                   100                 1                       19.6147 s
 //                                          192.324 ms          191.795 ms              192.866 ms
 //                                          2.73183 ms          2.45956 ms              3.0714 ms
+//
+//      After PR #663 (with jemalloc)
+//      benchmark name                      samples             iterations              est run time
+//                                          mean                low mean                high mean
+//                                          std dev             low std dev             high std dev
+//      ---------------------------------------------------------------------------------------------
+//      4 Segment Diagonal Bestagon Wire
+//      (multi-threaded)                    100                 1                       1.41724 m
+//                                          834.071 ms          832.759 ms              835.443 ms
+//                                          6.87635 ms          6.03154 ms              8.19222 ms
+//
+//      3 Segment Diagonal Bestagon Wire
+//      (single-threaded)                   100                 1                       19.7644 s
+//                                          190.366 ms          189.739 ms              191.044 ms
+//                                          3.32957 ms          2.89922 ms              3.89814 ms
