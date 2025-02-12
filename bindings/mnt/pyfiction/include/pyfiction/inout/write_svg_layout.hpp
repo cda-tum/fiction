@@ -89,7 +89,11 @@ void write_svg_layout(pybind11::module& m)
         .def_readwrite("sidb_border_width", &fiction::write_sidb_layout_svg_params::sidb_border_width,
                        DOC(fiction_write_sidb_layout_svg_params_sidb_border_width))
         .def_readwrite("color_background", &fiction::write_sidb_layout_svg_params::color_background,
-                       DOC(fiction_write_sidb_layout_svg_params_color_background));
+                       DOC(fiction_write_sidb_layout_svg_params_color_background))
+        .def_readwrite("lattice_mode", &fiction::write_sidb_layout_svg_params::lattice_mode,
+                       DOC(fiction_write_sidb_layout_svg_params_lattice_mode))
+
+        ;
 
     py::class_<fiction::write_qca_layout_svg_params>(m, "write_qca_layout_svg_params",
                                                      DOC(fiction_write_qca_layout_svg_params))
