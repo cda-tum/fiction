@@ -109,7 +109,7 @@ struct sidb_on_the_fly_gate_library_params
     /**
      * This struct holds parameters to design SiDB gates.
      */
-    design_sidb_gates_params<Lyt> design_gate_params{};
+    design_sidb_gates_params<sidb_defect_surface<Lyt>> design_gate_params{};
     /**
      * This variable defines the number of canvas SiDBs dedicated to complex gates, such as crossing, double wire,
      * and half-adder.
@@ -435,7 +435,7 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
             is_operational(defect_copy, truth_table,
                            is_operational_params{parameters.design_gate_params.operational_params.simulation_parameters,
                                                  parameters.design_gate_params.operational_params.sim_engine})
-                .first;
+                .status;
         return static_cast<bool>(status == operational_status::OPERATIONAL);
     }
     /**
