@@ -44,14 +44,14 @@ template <typename Lyt>
 }  // namespace detail
 
 template <typename Lyt>
-class compare_by_minimum_ground_state_isolation final : public designed_sidb_gates_comparator<Lyt>
+class compare_by_minimum_ground_state_isolation final : public designed_sidb_gate_comparator<Lyt>
 {
   public:
-    using typename designed_sidb_gates_comparator<Lyt>::sidb_gate_design;
+    using typename designed_sidb_gate_comparator<Lyt>::sidb_gate_design;
 
     explicit compare_by_minimum_ground_state_isolation(
         const double sens = std::numeric_limits<double>::epsilon()) noexcept :
-            designed_sidb_gates_comparator<Lyt>{sens}
+            designed_sidb_gate_comparator<Lyt>{sens}
     {}
 
     [[nodiscard]] bool operator()(const sidb_gate_design& lhs, const sidb_gate_design& rhs) const noexcept override
@@ -82,14 +82,14 @@ class compare_by_minimum_ground_state_isolation final : public designed_sidb_gat
 };
 
 template <typename Lyt>
-class compare_by_average_ground_state_isolation final : public designed_sidb_gates_comparator<Lyt>
+class compare_by_average_ground_state_isolation final : public designed_sidb_gate_comparator<Lyt>
 {
   public:
-    using typename designed_sidb_gates_comparator<Lyt>::sidb_gate_design;
+    using typename designed_sidb_gate_comparator<Lyt>::sidb_gate_design;
 
     explicit compare_by_average_ground_state_isolation(
         const double sens = std::numeric_limits<double>::epsilon()) noexcept :
-            designed_sidb_gates_comparator<Lyt>{sens}
+            designed_sidb_gate_comparator<Lyt>{sens}
     {}
 
     [[nodiscard]] bool operator()(const sidb_gate_design& lhs, const sidb_gate_design& rhs) const noexcept override

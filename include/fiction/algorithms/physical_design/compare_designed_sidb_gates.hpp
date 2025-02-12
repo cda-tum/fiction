@@ -29,7 +29,7 @@ struct designed_sidb_gates
 // every instance of a designed_sidb_gates_comparator should implement operator<, operator==, and have a sensitivity
 // parameter
 template <typename Lyt>
-class designed_sidb_gates_comparator
+class designed_sidb_gate_comparator
 {
   public:
     struct sidb_gate_design
@@ -38,13 +38,13 @@ class designed_sidb_gates_comparator
         typename designed_sidb_gates<Lyt>::simulation_results_per_input simulation_results_per_input;
     };
 
-    designed_sidb_gates_comparator()          = delete;
-    virtual ~designed_sidb_gates_comparator() = default;
+    designed_sidb_gate_comparator()          = delete;
+    virtual ~designed_sidb_gate_comparator() = default;
 
-    designed_sidb_gates_comparator& operator=(const designed_sidb_gates_comparator& other) noexcept = default;
-    designed_sidb_gates_comparator& operator=(designed_sidb_gates_comparator&& other) noexcept      = default;
+    designed_sidb_gate_comparator& operator=(const designed_sidb_gate_comparator& other) noexcept = default;
+    designed_sidb_gate_comparator& operator=(designed_sidb_gate_comparator&& other) noexcept      = default;
 
-    explicit designed_sidb_gates_comparator(const double sens) noexcept : sensitivity{sens} {}
+    explicit designed_sidb_gate_comparator(const double sens) noexcept : sensitivity{sens} {}
 
     [[nodiscard]] virtual bool operator()(const sidb_gate_design& lhs, const sidb_gate_design& rhs) const noexcept = 0;
     [[nodiscard]] virtual bool equals(const sidb_gate_design& lhs, const sidb_gate_design& rhs) const noexcept     = 0;
@@ -54,8 +54,13 @@ class designed_sidb_gates_comparator
 };
 
 // use pointers to prevent slicing
+/**
+ * A ordering recipe for designed SiDB gates is a vector of pointers to designed SiDB gate
+ *
+ * @tparam Lyt SiDB cell-level layout.
+ */
 template <typename Lyt>
-using designed_sidb_gates_ordering_recipe = std::vector<std::shared_ptr<designed_sidb_gates_comparator<Lyt>>>;
+using designed_sidb_gates_ordering_recipe = std::vector<std::shared_ptr<designed_sidb_gate_comparator<Lyt>>>;
 
 /**
  * The designed SiDB gates are ordered inplace according to the given ordering recipe. Comparators that occur earlier in
@@ -76,13 +81,13 @@ void order_designed_sidb_gates(const designed_sidb_gates_ordering_recipe<Lyt>& r
     assert(designed_gates.simulation_results.has_value() &&
            "Simulation results must be available for gate design ordering");
 
-    std::vector<typename designed_sidb_gates_comparator<Lyt>::sidb_gate_design> gate_designs_for_assessment{};
+    std::vector<typename designed_sidb_gate_comparator<Lyt>::sidb_gate_design> gate_designs_for_assessment{};
     gate_designs_for_assessment.reserve(designed_gates.gate_layouts.size());
 
     // pair the gate layouts with the associated simulation results using move
     for (uint64_t i = 0; i < designed_gates.gate_layouts.size(); ++i)
     {
-        gate_designs_for_assessment.emplace_back(typename designed_sidb_gates_comparator<Lyt>::sidb_gate_design{
+        gate_designs_for_assessment.emplace_back(typename designed_sidb_gate_comparator<Lyt>::sidb_gate_design{
             std::move(designed_gates.gate_layouts.at(i)), std::move(designed_gates.simulation_results.value().at(i))});
     }
 
