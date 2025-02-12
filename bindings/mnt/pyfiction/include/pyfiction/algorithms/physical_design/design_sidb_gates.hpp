@@ -29,32 +29,6 @@ void design_sidb_gates(pybind11::module& m)
     m.def("design_sidb_gates", &fiction::design_sidb_gates<Lyt, py_tt>, py::arg("skeleton"), py::arg("spec"),
           py::arg("params") = fiction::design_sidb_gates_params<Lyt>{}, py::arg("stats") = nullptr,
           DOC(fiction_design_sidb_gates));
-
-    /**
-     * Design approach selector type.
-     */
-    py::enum_<typename fiction::design_sidb_gates_params<Lyt>::design_sidb_gates_mode>(
-        m, "design_sidb_gates_mode", DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode))
-        .value("QUICKCELL", fiction::design_sidb_gates_params<Lyt>::design_sidb_gates_mode::QUICKCELL,
-               DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode_QUICKCELL))
-        .value("EXHAUSTIVE_GATE_DESIGNER",
-               fiction::design_sidb_gates_params<Lyt>::design_sidb_gates_mode::EXHAUSTIVE_GATE_DESIGNER,
-               DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode_QUICKCELL))
-        .value("RANDOM", fiction::design_sidb_gates_params<Lyt>::design_sidb_gates_mode::RANDOM,
-               DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode_RANDOM));
-
-    /**
-     * Termination condition selector type.
-     */
-    py::enum_<typename fiction::design_sidb_gates_params<Lyt>::termination_condition>(
-        m, "design_sidb_gates_params_termination_condition",
-        DOC(fiction_design_sidb_gates_params_termination_condition))
-        .value("AFTER_FIRST_SOLUTION",
-               fiction::design_sidb_gates_params<Lyt>::termination_condition::AFTER_FIRST_SOLUTION,
-               DOC(fiction_design_sidb_gates_params_termination_condition_AFTER_FIRST_SOLUTION))
-        .value("ALL_COMBINATIONS_ENUMERATED",
-               fiction::design_sidb_gates_params<Lyt>::termination_condition::ALL_COMBINATIONS_ENUMERATED,
-               DOC(fiction_design_sidb_gates_params_termination_condition_ALL_COMBINATIONS_ENUMERATED));
 }
 
 template <typename Lyt>
@@ -87,6 +61,33 @@ void design_sidb_gates_params(pybind11::module& m, const std::string& lattice = 
 inline void design_sidb_gates(pybind11::module& m)
 {
     namespace py = pybind11;
+
+    /**
+     * Design approach selector type.
+     */
+    py::enum_<fiction::design_sidb_gates_params<py_sidb_100_lattice>::design_sidb_gates_mode>(
+        m, "design_sidb_gates_mode", DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode))
+        .value("QUICKCELL", fiction::design_sidb_gates_params<py_sidb_100_lattice>::design_sidb_gates_mode::QUICKCELL,
+               DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode_QUICKCELL))
+        .value("EXHAUSTIVE_GATE_DESIGNER",
+               fiction::design_sidb_gates_params<py_sidb_100_lattice>::design_sidb_gates_mode::EXHAUSTIVE_GATE_DESIGNER,
+               DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode_QUICKCELL))
+        .value("RANDOM", fiction::design_sidb_gates_params<py_sidb_100_lattice>::design_sidb_gates_mode::RANDOM,
+               DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode_RANDOM));
+
+    /**
+     * Termination condition selector type.
+     */
+    py::enum_<fiction::design_sidb_gates_params<py_sidb_100_lattice>::termination_condition>(
+        m, "design_sidb_gates_params_termination_condition",
+        DOC(fiction_design_sidb_gates_params_termination_condition))
+        .value("AFTER_FIRST_SOLUTION",
+               fiction::design_sidb_gates_params<py_sidb_100_lattice>::termination_condition::AFTER_FIRST_SOLUTION,
+               DOC(fiction_design_sidb_gates_params_termination_condition_AFTER_FIRST_SOLUTION))
+        .value(
+            "ALL_COMBINATIONS_ENUMERATED",
+            fiction::design_sidb_gates_params<py_sidb_100_lattice>::termination_condition::ALL_COMBINATIONS_ENUMERATED,
+            DOC(fiction_design_sidb_gates_params_termination_condition_ALL_COMBINATIONS_ENUMERATED));
 
     // stats are defined to be read-only
 
