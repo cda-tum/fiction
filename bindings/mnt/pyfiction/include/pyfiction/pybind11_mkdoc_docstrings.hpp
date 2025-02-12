@@ -4393,27 +4393,87 @@ static const char *__doc_fiction_design_sidb_gates_stats_sim_engine =
 R"doc(The simulation engine to be used for the operational domain
 computation.)doc";
 
-static const char *__doc_fiction_designed_sidb_gate_comparator = R"doc()doc";
+static const char *__doc_fiction_designed_sidb_gate_comparator =
+R"doc(A designed SiDB gate comparator is used to compare two designed SiDB
+gates. It offers an equality comparison, of which the sensitivity
+depends on the `sensitivity` parameter given to the comparator, and a
+strict comparator. These ingredients allow a chaining of comparators,
+in which the result of the strict comparison is returned of the first
+comparator in the chain that judges that the two designed SiDB gates
+to compare are not equal, as determined by its respective sensitivity
+parameter.
 
-static const char *__doc_fiction_designed_sidb_gate_comparator_designed_sidb_gate_comparator = R"doc()doc";
+Template parameter ``Lyt``:
+    SiDB cell-level layout.)doc";
 
-static const char *__doc_fiction_designed_sidb_gate_comparator_designed_sidb_gate_comparator_2 = R"doc()doc";
+static const char *__doc_fiction_designed_sidb_gate_comparator_designed_sidb_gate_comparator = R"doc(The default no-arguments constructor is deleted.)doc";
 
-static const char *__doc_fiction_designed_sidb_gate_comparator_equals = R"doc()doc";
+static const char *__doc_fiction_designed_sidb_gate_comparator_designed_sidb_gate_comparator_2 =
+R"doc(Standard constructor.
 
-static const char *__doc_fiction_designed_sidb_gate_comparator_operator_assign = R"doc()doc";
+Parameter ``sens``:
+    Determines the sensitivity of the equality comparison.)doc";
 
-static const char *__doc_fiction_designed_sidb_gate_comparator_operator_assign_2 = R"doc()doc";
+static const char *__doc_fiction_designed_sidb_gate_comparator_designed_sidb_gate_comparator_3 =
+R"doc(Copy constructor.
 
-static const char *__doc_fiction_designed_sidb_gate_comparator_operator_call = R"doc()doc";
+Parameter ``other``:
+    Other comparator to copy.)doc";
 
-static const char *__doc_fiction_designed_sidb_gate_comparator_sensitivity = R"doc()doc";
+static const char *__doc_fiction_designed_sidb_gate_comparator_designed_sidb_gate_comparator_4 =
+R"doc(Move constructor.
 
-static const char *__doc_fiction_designed_sidb_gate_comparator_sidb_gate_design = R"doc()doc";
+Parameter ``other``:
+    Other comparator to move to this one.)doc";
 
-static const char *__doc_fiction_designed_sidb_gate_comparator_sidb_gate_design_gate_design = R"doc()doc";
+static const char *__doc_fiction_designed_sidb_gate_comparator_equals =
+R"doc(Each designed SiDB gate comparator must implement an equality
+comparison.
 
-static const char *__doc_fiction_designed_sidb_gate_comparator_sidb_gate_design_simulation_results_per_input = R"doc()doc";
+Parameter ``lhs``:
+    Left hand side argument.
+
+Parameter ``rhs``:
+    Right hand side argument.
+
+Returns:
+    `lhs = rhs`)doc";
+
+static const char *__doc_fiction_designed_sidb_gate_comparator_operator_assign =
+R"doc(Copy assignment operator.
+
+Parameter ``other``:
+    Other comparator to copy.)doc";
+
+static const char *__doc_fiction_designed_sidb_gate_comparator_operator_assign_2 =
+R"doc(Move assignment operator.
+
+Parameter ``other``:
+    Other comparator to move to this one.)doc";
+
+static const char *__doc_fiction_designed_sidb_gate_comparator_operator_call =
+R"doc(Each designed SiDB gate comparator must implement a strict comparator.
+
+Parameter ``lhs``:
+    Left hand side argument.
+
+Parameter ``rhs``:
+    Right hand side argument.
+
+Returns:
+    `lhs < rhs`)doc";
+
+static const char *__doc_fiction_designed_sidb_gate_comparator_sensitivity =
+R"doc(Each designed SiDB gate comparator depends on a sensitivity parameter,
+which determines the sensitivity of the equality comparison.)doc";
+
+static const char *__doc_fiction_designed_sidb_gate_comparator_sidb_gate_design =
+R"doc(This struct is used to pair a gate design with its respective
+simulation results per input.)doc";
+
+static const char *__doc_fiction_designed_sidb_gate_comparator_sidb_gate_design_gate_design = R"doc(The designed SiDB gate layout.)doc";
+
+static const char *__doc_fiction_designed_sidb_gate_comparator_sidb_gate_design_simulation_results_per_input = R"doc(The respectively associated simulation results per input.)doc";
 
 static const char *__doc_fiction_designed_sidb_gates =
 R"doc(This struct is used to store designed gate layouts, optionally along
