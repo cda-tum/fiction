@@ -601,7 +601,7 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
         return lyt;
     }
     /**
-     * This function takes a defect surface and a skeleton skeleton and adds defects from the surrounding area
+     * This function takes a defect surface and a skeleton and adds defects from the surrounding area
      * to the skeleton. The defects within a specified distance from the center cell are taken into account.
      * The resulting skeleton with added defects is returned.
      *
