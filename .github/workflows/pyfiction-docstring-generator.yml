@@ -4,7 +4,6 @@ on:
   push:
     paths:
       - "**/*.hpp"
-      - "!**/pybind11_mkdoc_docstrings.hpp"
       - ".github/workflows/pyfiction-docstring-generator.yml"
   workflow_dispatch:
 
