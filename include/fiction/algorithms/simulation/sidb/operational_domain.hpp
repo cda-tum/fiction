@@ -107,6 +107,7 @@ struct parameter_point
      *
      * @tparam I Index of the parameter value to be returned.
      * @return The parameter value at the specified index.
+     * @throws std::out_of_range if the index is out of bounds.
      */
     template <std::size_t I>
     auto get() const
@@ -196,11 +197,7 @@ class operational_domain : public sidb_simulation_domain<parameter_point, operat
      */
     [[nodiscard]] const sweep_parameter& get_dimension(const std::size_t index) const
     {
-        if (index >= dimensions.size())
-        {
-            throw std::out_of_range("Index out of range");
-        }
-        return dimensions[index];
+        return dimensions.at(index);
     }
     /**
      * Returns the number of dimensions to sweep over.
@@ -215,8 +212,8 @@ class operational_domain : public sidb_simulation_domain<parameter_point, operat
 
   private:
     /**
-     * The dimensions to sweep over. The first dimension is the x dimension, the second dimension
-     * is the y dimension, etc.
+     * The dimensions to sweep over. The first dimension is the x dimension, the second dimension is the y dimension,
+     * etc.
      */
     std::vector<sweep_parameter> dimensions{};
 };
@@ -258,11 +255,7 @@ class critical_temperature_domain : public sidb_simulation_domain<parameter_poin
      */
     [[nodiscard]] const sweep_parameter& get_dimension(const std::size_t index) const
     {
-        if (index >= dimensions.size())
-        {
-            throw std::out_of_range("Index out of range");
-        }
-        return dimensions[index];
+        return dimensions.at(index);
     }
     /**
      * Returns the number of dimensions to sweep over.
@@ -363,9 +356,8 @@ namespace detail
  * value of any sweep dimension is larger than the corresponding maximum value. Additionally, it checks if the step size
  * of any sweep dimension is negative or zero.
  *
- * If any of this is the case, an `std::invalid_argument` is thrown.
- *
  * @param params The operational domain parameters to validate.
+ * @throws std::invalid_argument if the sweep parameters are invalid.
  */
 inline void validate_sweep_parameters(const operational_domain_params& params)
 {
@@ -1660,16 +1652,15 @@ class operational_domain_impl
  * state simulations, where \f$n\f$ is the number of inputs of the layout. Each exact ground state simulation has
  * exponential complexity in of itself. Therefore, the algorithm is only feasible for small layouts with few inputs.
  *
- * This function may throw an `std::invalid_argument` exception if the given sweep parameters are invalid.
- *
  * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT Truth table type.
  * @param lyt Layout to compute the operational domain for.
- * @param spec Expected vector of truth tables of the layout. Each truth table represents an output of
- * the Boolean function.
+ * @param spec Expected vector of truth tables of the layout. Each truth table represents an output of the Boolean
+ * function.
  * @param params Operational domain computation parameters.
  * @param stats Operational domain computation statistics.
  * @return The operational domain of the layout.
+ * @throws std::invalid_argument if the given sweep parameters are invalid.
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] operational_domain operational_domain_grid_search(const Lyt& lyt, const std::vector<TT>& spec,
@@ -1707,8 +1698,6 @@ template <typename Lyt, typename TT>
  * ground state simulations, where \f$n\f$ is the number of inputs of the layout. Each exact ground state simulation
  * has exponential complexity in of itself. Therefore, the algorithm is only feasible for small layouts with few inputs.
  *
- * This function may throw an `std::invalid_argument` exception if the given sweep parameters are invalid.
- *
  * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT Truth table type.
  * @param lyt Layout to compute the operational domain for.
@@ -1717,6 +1706,7 @@ template <typename Lyt, typename TT>
  * @param params Operational domain computation parameters.
  * @param stats Operational domain computation statistics.
  * @return The (partial) operational domain of the layout.
+ * @throws std::invalid_argument if the given sweep parameters are invalid.
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] operational_domain operational_domain_random_sampling(const Lyt& lyt, const std::vector<TT>& spec,
@@ -1765,8 +1755,6 @@ template <typename Lyt, typename TT>
  * Computation in Silicon Dangling Bond Logic\" by M. Walter, J. Drewniok, S. S. H. Ng, K. Walus, and R. Wille in
  * NANOARCH 2023.
  *
- * This function may throw an `std::invalid_argument` exception if the given sweep parameters are invalid.
- *
  * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT Truth table type.
  * @param lyt Layout to compute the operational domain for.
@@ -1775,6 +1763,7 @@ template <typename Lyt, typename TT>
  * @param params Operational domain computation parameters.
  * @param stats Operational domain computation statistics.
  * @return The (partial) operational domain of the layout.
+ * @throws std::invalid_argument if the given sweep parameters are invalid.
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] operational_domain
@@ -1830,8 +1819,6 @@ operational_domain_flood_fill(const Lyt& lyt, const std::vector<TT>& spec, const
  * Computation in Silicon Dangling Bond Logic\" by M. Walter, J. Drewniok, S. S. H. Ng, K. Walus, and R. Wille in
  * NANOARCH 2023.
  *
- * This function may throw an `std::invalid_argument` exception if the given sweep parameters are invalid.
- *
  * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT Truth table type.
  * @param lyt Layout to compute the operational domain for.
@@ -1840,6 +1827,7 @@ operational_domain_flood_fill(const Lyt& lyt, const std::vector<TT>& spec, const
  * @param params Operational domain computation parameters.
  * @param stats Operational domain computation statistics.
  * @return The (partial) operational domain of the layout.
+ * @throws std::invalid_argument if the given sweep parameters are invalid.
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] operational_domain operational_domain_contour_tracing(const Lyt& lyt, const std::vector<TT>& spec,
@@ -1882,16 +1870,15 @@ template <typename Lyt, typename TT>
  * state simulations, where \f$n\f$ is the number of inputs of the layout. Each exact ground state simulation has
  * exponential complexity in of itself. Therefore, the algorithm is only feasible for small layouts with few inputs.
  *
- * This function may throw an `std::invalid_argument` exception if the given sweep parameters are invalid.
- *
  * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT Truth table type.
  * @param lyt Layout to compute the operational domain for.
- * @param spec Expected vector of truth tables of the layout. Each truth table represents an output of
- * the Boolean function.
+ * @param spec Expected vector of truth tables of the layout. Each truth table represents an output of the Boolean
+ * function.
  * @param params Operational domain computation parameters.
  * @param stats Operational domain computation statistics.
  * @return The operational domain of the layout.
+ * @throws std::invalid_argument if the given sweep parameters are invalid.
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] critical_temperature_domain
@@ -1929,8 +1916,6 @@ critical_temperature_domain_grid_search(const Lyt& lyt, const std::vector<TT>& s
  * ground state simulations, where \f$n\f$ is the number of inputs of the layout. Each exact ground state simulation
  * has exponential complexity in of itself. Therefore, the algorithm is only feasible for small layouts with few inputs.
  *
- * This function may throw an `std::invalid_argument` exception if the given sweep parameters are invalid.
- *
  * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT Truth table type.
  * @param lyt Layout to compute the operational domain for.
@@ -1939,6 +1924,7 @@ critical_temperature_domain_grid_search(const Lyt& lyt, const std::vector<TT>& s
  * @param params Operational domain computation parameters.
  * @param stats Operational domain computation statistics.
  * @return The (partial) operational domain of the layout.
+ * @throws std::invalid_argument if the given sweep parameters are invalid.
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] operational_domain
@@ -1982,8 +1968,6 @@ critical_temperature_domain_random_sampling(const Lyt& lyt, const std::vector<TT
  * inputs of the layout. Each exact ground state simulation has exponential complexity in of itself. Therefore, the
  * algorithm is only feasible for small layouts with few inputs.
  *
- * This function may throw an `std::invalid_argument` exception if the given sweep parameters are invalid.
- *
  * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT Truth table type.
  * @param lyt Layout to compute the operational domain for.
@@ -1992,6 +1976,7 @@ critical_temperature_domain_random_sampling(const Lyt& lyt, const std::vector<TT
  * @param params Operational domain computation parameters.
  * @param stats Operational domain computation statistics.
  * @return The (partial) operational domain of the layout.
+ * @throws std::invalid_argument if the given sweep parameters are invalid.
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] critical_temperature_domain
@@ -2043,8 +2028,6 @@ critical_temperature_domain_flood_fill(const Lyt& lyt, const std::vector<TT>& sp
  * ground state simulation has exponential complexity in of itself. Therefore, the algorithm is only feasible for small
  * layouts with few inputs.
  *
- * This function may throw an `std::invalid_argument` exception if the given sweep parameters are invalid.
- *
  * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT Truth table type.
  * @param lyt Layout to compute the operational domain for.
@@ -2053,6 +2036,7 @@ critical_temperature_domain_flood_fill(const Lyt& lyt, const std::vector<TT>& sp
  * @param params Operational domain computation parameters.
  * @param stats Operational domain computation statistics.
  * @return The (partial) operational domain of the layout.
+ * @throws std::invalid_argument if the given sweep parameters are invalid.
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] critical_temperature_domain

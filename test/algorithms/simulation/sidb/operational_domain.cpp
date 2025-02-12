@@ -25,8 +25,9 @@
 using namespace fiction;
 
 template <typename OpDomain>
-void check_op_domain_params_and_operational_status(const OpDomain& op_domain, const operational_domain_params& params,
-                                                   const std::optional<operational_status>& status)
+static void check_op_domain_params_and_operational_status(const OpDomain&                          op_domain,
+                                                          const operational_domain_params&         params,
+                                                          const std::optional<operational_status>& status)
 {
     REQUIRE(params.sweep_dimensions.size() == op_domain.get_number_of_dimensions());
 
@@ -121,6 +122,26 @@ TEST_CASE("Test parameter point", "[operational-domain]")
     {
         REQUIRE_THROWS_AS(p1.get<3>(), std::out_of_range);
     }
+}
+
+TEST_CASE("operational_domain class member functions", "[operational-domain]")
+{
+    operational_domain opdom{};
+
+    CHECK(opdom.empty());
+    CHECK(opdom.get_number_of_dimensions() == 0);
+    REQUIRE_THROWS_AS(opdom.get_dimension(0), std::out_of_range);
+    REQUIRE_THROWS_AS(opdom.get_dimension(1), std::out_of_range);
+
+    opdom.add_dimension(sweep_parameter::EPSILON_R);
+    CHECK(opdom.get_number_of_dimensions() == 1);
+    CHECK(opdom.get_dimension(0) == sweep_parameter::EPSILON_R);
+    REQUIRE_THROWS_AS(opdom.get_dimension(1), std::out_of_range);
+
+    opdom = operational_domain({sweep_parameter::LAMBDA_TF, sweep_parameter::MU_MINUS});
+    CHECK(opdom.get_number_of_dimensions() == 2);
+    CHECK(opdom.get_dimension(0) == sweep_parameter::LAMBDA_TF);
+    CHECK(opdom.get_dimension(1) == sweep_parameter::MU_MINUS);
 }
 
 TEST_CASE("Error handling of operational domain algorithms", "[operational-domain]")
@@ -1392,6 +1413,26 @@ TEMPLATE_TEST_CASE("Grid search to determine the operational domain. The operati
                 CHECK(pp.get_parameters()[1] >= 4.0);
             });
     }
+}
+
+TEST_CASE("critical_temperature_domain class member functions", "[operational-domain]")
+{
+    critical_temperature_domain ctdom{};
+
+    CHECK(ctdom.empty());
+    CHECK(ctdom.get_number_of_dimensions() == 0);
+    REQUIRE_THROWS_AS(ctdom.get_dimension(0), std::out_of_range);
+    REQUIRE_THROWS_AS(ctdom.get_dimension(1), std::out_of_range);
+
+    ctdom.add_dimension(sweep_parameter::EPSILON_R);
+    CHECK(ctdom.get_number_of_dimensions() == 1);
+    CHECK(ctdom.get_dimension(0) == sweep_parameter::EPSILON_R);
+    REQUIRE_THROWS_AS(ctdom.get_dimension(1), std::out_of_range);
+
+    ctdom = critical_temperature_domain({sweep_parameter::LAMBDA_TF, sweep_parameter::MU_MINUS});
+    CHECK(ctdom.get_number_of_dimensions() == 2);
+    CHECK(ctdom.get_dimension(0) == sweep_parameter::LAMBDA_TF);
+    CHECK(ctdom.get_dimension(1) == sweep_parameter::MU_MINUS);
 }
 
 TEST_CASE("Bestagon AND gate operational domain and temperature computation, using siqad coordinates",

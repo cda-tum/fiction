@@ -105,11 +105,12 @@ namespace detail
  *
  * @tparam OpDomain The type of the operational domain.
  * @param opdom The operational domain to be written. It represents a mapping between sets of simulation parameters
- (defined as a pair of sweep parameters for the X, Y, and Z dimensions) and a tuple containing detailed  information
- about the SiDB layout associated with those simulation parameters.
+ * (defined as a pair of sweep parameters for the X, Y, and Z dimensions) and a tuple containing detailed  information
+ * about the SiDB layout associated with those simulation parameters.
  * @param os The output stream where the CSV representation of the operational domain is written to.
  * @param params The parameters used for writing, including the operational and non-operational tags. Defaults to an
  * empty `write_operational_domain_params` object, which provides standard tags.
+ * @throws std::invalid_argument if the number of dimensions in the operational domain is 0 or greater than 3.
  */
 template <typename OpDomain>
 void write_operational_domain(const OpDomain& opdom, std::ostream& os,
@@ -248,13 +249,14 @@ void write_operational_domain(const OpDomain& opdom, std::ostream& os,
  * The operational status is a binary value represented by specified tags in `params` indicating whether the simulation
  * parameters are within the operational domain or not.
  *
-* @tparam OpDomain The type of the operational domain.
-* @param opdom The operational domain to be written. It represents a mapping between sets of simulation parameters
-(defined as a pair of sweep parameters for the X, Y, and Z dimensions) and a tuple containing detailed information about
-the SiDB layout associated with those simulation parameters.
+ * @tparam OpDomain The type of the operational domain.
+ * @param opdom The operational domain to be written. It represents a mapping between sets of simulation parameters
+ * (defined as a pair of sweep parameters for the X, Y, and Z dimensions) and a tuple containing detailed information
+ * about the SiDB layout associated with those simulation parameters.
  * @param filename The filename where the CSV representation of the operational domain is written to.
  * @param params The parameters used for writing, including the operational and non-operational tags. Defaults to an
  * empty `write_operational_domain_params` object, which provides standard tags.
+ * @throws std::ofstream::failure if the file could not be opened.
  */
 template <typename OpDomain>
 void write_operational_domain(const OpDomain& opdom, const std::string_view& filename,
