@@ -47,7 +47,7 @@ void design_sidb_gates_params(pybind11::module& m, const std::string& lattice = 
         .def_readwrite("design_mode", &fiction::design_sidb_gates_params<Lyt>::design_mode,
                        DOC(fiction_design_sidb_gates_params_design_mode))
         .def_readwrite("canvas", &fiction::design_sidb_gates_params<Lyt>::canvas,
-                       DOC(fiction_design_sidb_gates_params_canvas))
+                       DOC(fiction_design_sidb_gates_params_canvas_overridden))
         .def_readwrite("number_of_sidbs", &fiction::design_sidb_gates_params<Lyt>::number_of_sidbs,
                        DOC(fiction_design_sidb_gates_params_number_of_sidbs))
         .def_readwrite("termination_cond", &fiction::design_sidb_gates_params<Lyt>::termination_cond,
@@ -94,9 +94,9 @@ inline void design_sidb_gates(pybind11::module& m)
     py::class_<fiction::design_sidb_gates_stats>(m, "design_sidb_gates_stats", DOC(fiction_design_sidb_gates_stats))
         .def(py::init<>())
         .def_readonly("time_total", &fiction::design_sidb_gates_stats::time_total,
-                      DOC(fiction_design_sidb_gates_stats_time_total))
+                      DOC(fiction_design_sidb_gates_stats_time_total_overridden))
         .def_readonly("pruning_total", &fiction::design_sidb_gates_stats::pruning_total,
-                      DOC(fiction_design_sidb_gates_stats_pruning_total))
+                      DOC(fiction_design_sidb_gates_stats_pruning_total_overridden))
         .def_readonly("sim_engine", &fiction::design_sidb_gates_stats::sim_engine,
                       DOC(fiction_design_sidb_gates_stats_sim_engine))
         .def_readonly("number_of_layouts", &fiction::design_sidb_gates_stats::number_of_layouts,
