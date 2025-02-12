@@ -38,7 +38,7 @@ class designed_sidb_gates_comparator
         typename designed_sidb_gates<Lyt>::simulation_results_per_input simulation_results_per_input;
     };
 
-    designed_sidb_gates_comparator()          = delete;
+             designed_sidb_gates_comparator() = delete;
     virtual ~designed_sidb_gates_comparator() = default;
 
     designed_sidb_gates_comparator& operator=(const designed_sidb_gates_comparator& other) noexcept = default;
@@ -57,6 +57,18 @@ class designed_sidb_gates_comparator
 template <typename Lyt>
 using designed_sidb_gates_ordering_recipe = std::vector<std::shared_ptr<designed_sidb_gates_comparator<Lyt>>>;
 
+/**
+ * The designed SiDB gates are ordered inplace according to the given ordering recipe. Comparators that occur earlier in
+ * the recipe have a higher precedence. Two designed gates are compared using the recipe as follows: iterating through
+ * the comparators in the order of precedence, the `equals` function is invoked. When the current comparator judges the
+ * two gate implementations to be equal, we move on to the next comparator. This proceeds until one comparator judges
+ * non-equality, in which case `operator()` is invoked, which implements `<`. If all comparators judge the two gate
+ * implementations to be equal, `operator()` is invoked on the last in the recipe.
+ *
+ * @tparam Lyt SiDB cell-level layout.
+ * @param recipe A list of comparators that compose a recipe for determining an ordering of the designed SiDB gates.
+ * @param designed_gates The gates that were designed that are to be ordered by the given ordering recipe.
+ */
 template <typename Lyt>
 void order_designed_sidb_gates(const designed_sidb_gates_ordering_recipe<Lyt>& recipe,
                                designed_sidb_gates<Lyt>&                       designed_gates) noexcept
