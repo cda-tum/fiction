@@ -16,13 +16,27 @@
 namespace fiction
 {
 
+/**
+ * This struct is used to store designed gate layouts, optionally along with their respective simulation results for
+ * each input.
+ *
+ * @tparam Lyt SiDB cell-level layout
+ */
 template <typename Lyt>
 struct designed_sidb_gates
 {
+    /**
+     * Simulation results per input is a vector of simulation results (which is a vector of charge distribution
+     * surfaces) that occur in the order of the bit representation of the respectively associated inputs.
+     */
     using simulation_results_per_input = std::vector<std::vector<charge_distribution_surface<Lyt>>>;
-
+    /**
+     * The designed SiDB gate layouts are stored here.
+     */
     std::vector<Lyt> gate_layouts;
-
+    /**
+     * Optionally, the respectively associated simulation results for each input are stored here.
+     */
     std::optional<std::vector<simulation_results_per_input>> simulation_results;
 };
 
@@ -38,7 +52,7 @@ class designed_sidb_gate_comparator
         typename designed_sidb_gates<Lyt>::simulation_results_per_input simulation_results_per_input;
     };
 
-    designed_sidb_gate_comparator()          = delete;
+             designed_sidb_gate_comparator() = delete;
     virtual ~designed_sidb_gate_comparator() = default;
 
     designed_sidb_gate_comparator& operator=(const designed_sidb_gate_comparator& other) noexcept = default;
@@ -53,9 +67,9 @@ class designed_sidb_gate_comparator
     double sensitivity;
 };
 
-// use pointers to prevent slicing
 /**
- * A ordering recipe for designed SiDB gates is a vector of pointers to designed SiDB gate
+ * An ordering recipe for designed SiDB gates is a vector of pointers to designed SiDB gate comparators. Pointers are
+ * used to prevent slicing.
  *
  * @tparam Lyt SiDB cell-level layout.
  */
