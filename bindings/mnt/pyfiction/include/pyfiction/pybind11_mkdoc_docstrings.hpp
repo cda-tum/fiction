@@ -4324,8 +4324,6 @@ R"doc(This struct contains parameters and settings to design SiDB gates.
 Template parameter ``Lyt``:
     SiDB cell-level layout type.)doc";
 
-static const char *__doc_fiction_design_sidb_gates_params_canvas = R"doc(Canvas spanned by the northwest and southeast cell.)doc";
-
 static const char *__doc_fiction_design_sidb_gates_params_design_mode = R"doc(Gate design mode.)doc";
 
 static const char *__doc_fiction_design_sidb_gates_params_design_sidb_gates_mode = R"doc(Selector for the available design approaches.)doc";
@@ -4367,6 +4365,8 @@ within the canvas are enumerated.)doc";
 
 static const char *__doc_fiction_design_sidb_gates_stats = R"doc(Statistics for the design of SiDB gates.)doc";
 
+static const char *__doc_fiction_design_sidb_gates_stats_duration = R"doc(The total runtime of the SiDB gate design process.)doc";
+
 static const char *__doc_fiction_design_sidb_gates_stats_number_of_layouts = R"doc(The number of all possible layouts.)doc";
 
 static const char *__doc_fiction_design_sidb_gates_stats_number_of_layouts_after_first_pruning =
@@ -4381,8 +4381,6 @@ static const char *__doc_fiction_design_sidb_gates_stats_number_of_layouts_after
 R"doc(The number of layouts that remain after third pruning (discarding
 layouts with unstable I/O signals).)doc";
 
-static const char *__doc_fiction_design_sidb_gates_stats_pruning_total = R"doc(The total runtime of the process.)doc";
-
 static const char *__doc_fiction_design_sidb_gates_stats_report =
 R"doc(This function outputs the total time taken for the SiDB gate design
 process to the provided output stream. If no output stream is
@@ -4394,8 +4392,6 @@ Parameter ``out``:
 static const char *__doc_fiction_design_sidb_gates_stats_sim_engine =
 R"doc(The simulation engine to be used for the operational domain
 computation.)doc";
-
-static const char *__doc_fiction_design_sidb_gates_stats_time_total = R"doc(The total runtime of the SiDB gate design process.)doc";
 
 static const char *__doc_fiction_designed_sidb_gates = R"doc()doc";
 
