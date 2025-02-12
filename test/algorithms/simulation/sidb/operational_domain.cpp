@@ -1433,6 +1433,13 @@ TEST_CASE("critical_temperature_domain class member functions", "[operational-do
     CHECK(ctdom.get_number_of_dimensions() == 2);
     CHECK(ctdom.get_dimension(0) == sweep_parameter::LAMBDA_TF);
     CHECK(ctdom.get_dimension(1) == sweep_parameter::MU_MINUS);
+
+    ctdom = critical_temperature_domain(
+        {sweep_parameter::LAMBDA_TF, sweep_parameter::EPSILON_R, sweep_parameter::MU_MINUS});
+    CHECK(ctdom.get_number_of_dimensions() == 3);
+    CHECK(ctdom.get_dimension(0) == sweep_parameter::LAMBDA_TF);
+    CHECK(ctdom.get_dimension(1) == sweep_parameter::EPSILON_R);
+    CHECK(ctdom.get_dimension(2) == sweep_parameter::MU_MINUS);
 }
 
 TEST_CASE("Bestagon AND gate operational domain and temperature computation, using siqad coordinates",
