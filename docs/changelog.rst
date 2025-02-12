@@ -11,7 +11,7 @@ v0.6.9 - 2025-02-12
 Added
 #####
 - Algorithms:
-    - Added ``ClusterComplete``, a novel exact physical simulator for SiDB layouts with substantially improved runtime, allowing the simulation of multi-gate SiDB layouts.
+    - Added ``ClusterComplete``, a novel exact physical simulator for SiDB layouts with substantially improved runtimes, allowing the simulation of multi-gate SiDB layouts.
     - Added temperature-aware operational domain simulation and restructured the function to simplify the integration of additional figures of merit in the future
 
 Changed
@@ -22,7 +22,7 @@ Changed
 Fixed
 #####
 - Algorithms:
-    - Fixed a bug in ``apply_gate_library`` that resulted in incorrect cell-level layout sizing.
+    - Fixed a bug in ``apply_gate_library`` that resulted in incorrect cell-level layout sizing
 - Build and documentation:
     - Added a CMake file for detecting pre-installed jemalloc
 - Experiments:
