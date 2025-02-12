@@ -73,7 +73,7 @@ class designed_sidb_gate_comparator
     /**
      * Destructor.
      */
-    virtual ~designed_sidb_gate_comparator() = default;
+    virtual ~designed_sidb_gate_comparator() noexcept = default;
     /**
      * Standard constructor.
      *
