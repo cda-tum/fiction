@@ -173,7 +173,7 @@ TEST_CASE("Benchmark simulators", "[benchmark]")
 
 //      AMD Ryzen Threadripper PRO 5955X, Ubuntu 20.04, Ubuntu clang version 18.1.3 (11.02.2025)
 //
-//      Before PR #663 (with jemalloc)
+//      Before PR #664 (with jemalloc)
 //      benchmark name                     samples         iterations         est run time
 //                                         mean            low mean           high mean
 //                                         std dev         low std dev        high std dev
@@ -194,7 +194,7 @@ TEST_CASE("Benchmark simulators", "[benchmark]")
 //                                         7.61088 ms      7.59401 ms         7.62819 ms
 //                                         87.2281 us      75.7313 us         104.133 us
 //
-//      After PR #663 (with jemalloc)
+//      After PR #664 (with jemalloc)
 //      benchmark name                       samples       iterations         est run time
 //                                           mean          low mean           high mean
 //                                           std dev       low std dev        high std dev
@@ -276,7 +276,7 @@ TEST_CASE("Benchmark ClusterComplete", "[benchmark]")
 
 //      AMD Ryzen Threadripper PRO 5955X, Ubuntu 20.04, Ubuntu clang version 18.1.3 (11.02.2025)
 //
-//      Before PR #663 (with jemalloc)
+//      Before PR #664 (with jemalloc)
 //      benchmark name                      samples             iterations              est run time
 //                                          mean                low mean                high mean
 //                                          std dev             low std dev             high std dev
@@ -290,7 +290,7 @@ TEST_CASE("Benchmark ClusterComplete", "[benchmark]")
 //                                          192.324 ms          191.795 ms              192.866 ms
 //                                          2.73183 ms          2.45956 ms              3.0714 ms
 //
-//      After PR #663 (with jemalloc)
+//      After PR #664 (with jemalloc)
 //      benchmark name                      samples             iterations              est run time
 //                                          mean                low mean                high mean
 //                                          std dev             low std dev             high std dev
