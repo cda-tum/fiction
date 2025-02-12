@@ -298,6 +298,8 @@ Operational Domain Computation
             :members:
         .. autoclass:: mnt.pyfiction.operational_condition
             :members:
+        .. autoclass:: mnt.pyfiction.operational_analysis_strategy
+            :members:
         .. autoclass:: mnt.pyfiction.is_operational_params
             :members:
         .. autofunction:: mnt.pyfiction.is_operational
