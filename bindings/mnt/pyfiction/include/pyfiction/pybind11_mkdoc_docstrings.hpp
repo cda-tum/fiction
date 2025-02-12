@@ -3602,9 +3602,6 @@ the layout. Each exact ground state simulation has exponential
 complexity in of itself. Therefore, the algorithm is only feasible for
 small layouts with few inputs.
 
-This function may throw an `std::invalid_argument` exception if the
-given sweep parameters are invalid.
-
 Template parameter ``Lyt``:
     SiDB cell-level layout type.
 
@@ -3628,7 +3625,10 @@ Parameter ``stats``:
     Operational domain computation statistics.
 
 Returns:
-    The (partial) operational domain of the layout.)doc";
+    The (partial) operational domain of the layout.
+
+Throws:
+    std::invalid_argument if the given sweep parameters are invalid.)doc";
 
 static const char *__doc_fiction_critical_temperature_domain_critical_temperature_domain = R"doc(Default constructor.)doc";
 
@@ -3667,9 +3667,6 @@ Each exact ground state simulation has exponential complexity in of
 itself. Therefore, the algorithm is only feasible for small layouts
 with few inputs.
 
-This function may throw an `std::invalid_argument` exception if the
-given sweep parameters are invalid.
-
 Template parameter ``Lyt``:
     SiDB cell-level layout type.
 
@@ -3693,7 +3690,10 @@ Parameter ``stats``:
     Operational domain computation statistics.
 
 Returns:
-    The (partial) operational domain of the layout.)doc";
+    The (partial) operational domain of the layout.
+
+Throws:
+    std::invalid_argument if the given sweep parameters are invalid.)doc";
 
 static const char *__doc_fiction_critical_temperature_domain_get_dimension =
 R"doc(Returns a specific dimension by index.
@@ -3731,9 +3731,6 @@ Each exact ground state simulation has exponential complexity in of
 itself. Therefore, the algorithm is only feasible for small layouts
 with few inputs.
 
-This function may throw an `std::invalid_argument` exception if the
-given sweep parameters are invalid.
-
 Template parameter ``Lyt``:
     SiDB cell-level layout type.
 
@@ -3754,7 +3751,10 @@ Parameter ``stats``:
     Operational domain computation statistics.
 
 Returns:
-    The operational domain of the layout.)doc";
+    The operational domain of the layout.
+
+Throws:
+    std::invalid_argument if the given sweep parameters are invalid.)doc";
 
 static const char *__doc_fiction_critical_temperature_domain_random_sampling =
 R"doc(Computes the critical temperature domain of the given SiDB cell-level
@@ -3771,9 +3771,6 @@ exact ground state simulations, where :math:`n` is the number of
 inputs of the layout. Each exact ground state simulation has
 exponential complexity in of itself. Therefore, the algorithm is only
 feasible for small layouts with few inputs.
-
-This function may throw an `std::invalid_argument` exception if the
-given sweep parameters are invalid.
 
 Template parameter ``Lyt``:
     SiDB cell-level layout type.
@@ -3798,7 +3795,10 @@ Parameter ``stats``:
     Operational domain computation statistics.
 
 Returns:
-    The (partial) operational domain of the layout.)doc";
+    The (partial) operational domain of the layout.
+
+Throws:
+    std::invalid_argument if the given sweep parameters are invalid.)doc";
 
 static const char *__doc_fiction_critical_temperature_gate_based =
 R"doc(This algorithm performs temperature-aware SiDB simulation as proposed
@@ -10248,10 +10248,11 @@ dimension is larger than the corresponding maximum value.
 Additionally, it checks if the step size of any sweep dimension is
 negative or zero.
 
-If any of this is the case, an `std::invalid_argument` is thrown.
-
 Parameter ``params``:
-    The operational domain parameters to validate.)doc";
+    The operational domain parameters to validate.
+
+Throws:
+    std::invalid_argument if the sweep parameters are invalid.)doc";
 
 static const char *__doc_fiction_detail_wire_east = R"doc()doc";
 
@@ -16691,9 +16692,6 @@ This flavor of operational domain computation was proposed in
 Dangling Bond Logic\" by M. Walter, J. Drewniok, S. S. H. Ng, K.
 Walus, and R. Wille in NANOARCH 2023.
 
-This function may throw an `std::invalid_argument` exception if the
-given sweep parameters are invalid.
-
 Template parameter ``Lyt``:
     SiDB cell-level layout type.
 
@@ -16717,7 +16715,10 @@ Parameter ``stats``:
     Operational domain computation statistics.
 
 Returns:
-    The (partial) operational domain of the layout.)doc";
+    The (partial) operational domain of the layout.
+
+Throws:
+    std::invalid_argument if the given sweep parameters are invalid.)doc";
 
 static const char *__doc_fiction_operational_domain_dimensions =
 R"doc(The dimensions to sweep over. The first dimension is the x dimension,
@@ -16755,9 +16756,6 @@ This flavor of operational domain computation was proposed in
 Dangling Bond Logic\" by M. Walter, J. Drewniok, S. S. H. Ng, K.
 Walus, and R. Wille in NANOARCH 2023.
 
-This function may throw an `std::invalid_argument` exception if the
-given sweep parameters are invalid.
-
 Template parameter ``Lyt``:
     SiDB cell-level layout type.
 
@@ -16781,7 +16779,10 @@ Parameter ``stats``:
     Operational domain computation statistics.
 
 Returns:
-    The (partial) operational domain of the layout.)doc";
+    The (partial) operational domain of the layout.
+
+Throws:
+    std::invalid_argument if the given sweep parameters are invalid.)doc";
 
 static const char *__doc_fiction_operational_domain_get_dimension =
 R"doc(Returns a specific dimension by index.
@@ -16821,9 +16822,6 @@ Each exact ground state simulation has exponential complexity in of
 itself. Therefore, the algorithm is only feasible for small layouts
 with few inputs.
 
-This function may throw an `std::invalid_argument` exception if the
-given sweep parameters are invalid.
-
 Template parameter ``Lyt``:
     SiDB cell-level layout type.
 
@@ -16844,7 +16842,10 @@ Parameter ``stats``:
     Operational domain computation statistics.
 
 Returns:
-    The operational domain of the layout.)doc";
+    The operational domain of the layout.
+
+Throws:
+    std::invalid_argument if the given sweep parameters are invalid.)doc";
 
 static const char *__doc_fiction_operational_domain_operational_domain = R"doc(Default constructor.)doc";
 
@@ -16885,9 +16886,6 @@ inputs of the layout. Each exact ground state simulation has
 exponential complexity in of itself. Therefore, the algorithm is only
 feasible for small layouts with few inputs.
 
-This function may throw an `std::invalid_argument` exception if the
-given sweep parameters are invalid.
-
 Template parameter ``Lyt``:
     SiDB cell-level layout type.
 
@@ -16911,7 +16909,10 @@ Parameter ``stats``:
     Operational domain computation statistics.
 
 Returns:
-    The (partial) operational domain of the layout.)doc";
+    The (partial) operational domain of the layout.
+
+Throws:
+    std::invalid_argument if the given sweep parameters are invalid.)doc";
 
 static const char *__doc_fiction_operational_domain_ratio =
 R"doc(Calculates the ratio of operational parameter points surrounding a
@@ -17219,7 +17220,10 @@ Template parameter ``I``:
     Index of the parameter value to be returned.
 
 Returns:
-    The parameter value at the specified index.)doc";
+    The parameter value at the specified index.
+
+Throws:
+    std::out_of_range if the index is out of bounds.)doc";
 
 static const char *__doc_fiction_parameter_point_get_parameters =
 R"doc(Returns the parameter values for each dimension.
@@ -22182,7 +22186,11 @@ Parameter ``params``:
     The parameters used for writing, including the operational and
     non-operational tags. Defaults to an empty
     `write_operational_domain_params` object, which provides standard
-    tags.)doc";
+    tags.
+
+Throws:
+    std::invalid_argument if the number of dimensions in the
+    operational domain is 0 or greater than 3.)doc";
 
 static const char *__doc_fiction_write_operational_domain_2 =
 R"doc(Writes a CSV representation of an operational domain to the specified
@@ -22217,7 +22225,10 @@ Parameter ``params``:
     The parameters used for writing, including the operational and
     non-operational tags. Defaults to an empty
     `write_operational_domain_params` object, which provides standard
-    tags.)doc";
+    tags.
+
+Throws:
+    std::ofstream::failure if the file could not be opened.)doc";
 
 static const char *__doc_fiction_write_operational_domain_params = R"doc(Parameters for writing an operational domain to a CSV file.)doc";
 
