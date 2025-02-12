@@ -101,12 +101,15 @@ inline void is_operational(pybind11::module& m)
         .value("REJECT_KINKS", fiction::is_operational_params::operational_condition::REJECT_KINKS,
                DOC(fiction_is_operational_params_operational_condition_REJECT_KINKS));
 
-    // todo docu
-    py::enum_<fiction::is_operational_params::operational_analysis_strategy>(m, "operational_analysis_strategy")
-        .value("SIMULATION_ONLY", fiction::is_operational_params::operational_analysis_strategy::SIMULATION_ONLY)
-        .value("FILTER_ONLY", fiction::is_operational_params::operational_analysis_strategy::FILTER_ONLY)
+    py::enum_<fiction::is_operational_params::operational_analysis_strategy>(
+        m, "operational_analysis_strategy", DOC(fiction_is_operational_params_operational_analysis_strategy))
+        .value("SIMULATION_ONLY", fiction::is_operational_params::operational_analysis_strategy::SIMULATION_ONLY,
+               DOC(fiction_is_operational_params_operational_analysis_strategy_SIMULATION_ONLY))
+        .value("FILTER_ONLY", fiction::is_operational_params::operational_analysis_strategy::FILTER_ONLY,
+               DOC(fiction_is_operational_params_operational_analysis_strategy_FILTER_ONLY))
         .value("FILTER_THEN_SIMULATION",
-               fiction::is_operational_params::operational_analysis_strategy::FILTER_THEN_SIMULATION);
+               fiction::is_operational_params::operational_analysis_strategy::FILTER_THEN_SIMULATION,
+               DOC(fiction_is_operational_params_operational_analysis_strategy_FILTER_THEN_SIMULATION));
 
     py::class_<fiction::is_operational_params>(m, "is_operational_params", DOC(fiction_is_operational_params))
         .def(py::init<>())
