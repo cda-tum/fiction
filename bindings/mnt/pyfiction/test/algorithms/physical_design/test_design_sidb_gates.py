@@ -5,7 +5,8 @@ from mnt.pyfiction import (
     create_nor_tt,
     design_sidb_gates,
     design_sidb_gates_mode,
-    design_sidb_gates_params,
+    design_sidb_gates_params_100,
+    design_sidb_gates_params_111,
     operational_condition,
     sidb_100_lattice,
     sidb_111_lattice,
@@ -35,7 +36,7 @@ class TestDesignSiDBGates(unittest.TestCase):
 
         layout.assign_cell_type((10, 19), sidb_technology.cell_type.NORMAL)
 
-        params = design_sidb_gates_params()
+        params = design_sidb_gates_params_100()
         params.operational_params.simulation_parameters.base = 2
         params.operational_params.simulation_parameters.mu_minus = -0.28
         params.design_mode = design_sidb_gates_mode.EXHAUSTIVE_GATE_DESIGNER
@@ -81,7 +82,7 @@ class TestDesignSiDBGates(unittest.TestCase):
 
         layout.assign_cell_type((23, 59), sidb_technology.cell_type.NORMAL)
 
-        params = design_sidb_gates_params()
+        params = design_sidb_gates_params_111()
         params.operational_params.simulation_parameters.base = 2
         params.operational_params.simulation_parameters.mu_minus = -0.32
         params.design_mode = design_sidb_gates_mode.EXHAUSTIVE_GATE_DESIGNER
@@ -132,7 +133,7 @@ class TestDesignSiDBGates(unittest.TestCase):
 
         layout.assign_cell_type((23, 59), sidb_technology.cell_type.NORMAL)
 
-        params = design_sidb_gates_params()
+        params = design_sidb_gates_params_111()
         params.operational_params.simulation_parameters.base = 2
         params.operational_params.simulation_parameters.mu_minus = -0.32
         params.design_mode = design_sidb_gates_mode.EXHAUSTIVE_GATE_DESIGNER
