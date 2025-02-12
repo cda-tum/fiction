@@ -416,12 +416,11 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
                     return;
                 }
                 bestagon_lyt.foreach_cell(
-                    [&cd, &is_bestagon_gate_applicable, &sidbs_affected_by_defects](const auto& c)
+                    [&is_bestagon_gate_applicable, &sidbs_affected_by_defects](const auto& c)
                     {
                         if (sidbs_affected_by_defects.count(c))
                         {
                             is_bestagon_gate_applicable = false;
-                            return;
                         }
                     });
             });

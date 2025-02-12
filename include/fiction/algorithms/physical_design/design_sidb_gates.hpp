@@ -380,7 +380,7 @@ class design_sidb_gates_impl
     /**
      * Truth table of the given gate.
      */
-    const std::vector<TT> truth_table;
+    const std::vector<TT> truth_table{};
     /**
      * Parameters for the *SiDB Gate Designer*.
      */
@@ -388,7 +388,7 @@ class design_sidb_gates_impl
     /**
      * All cells within the canvas.
      */
-    std::vector<typename Lyt::cell> all_sidbs_in_canvas;
+    const std::vector<typename Lyt::cell> all_sidbs_in_canvas{};
     /**
      * The statistics of the gate design.
      */
@@ -396,19 +396,19 @@ class design_sidb_gates_impl
     /**
      * Input BDL wires.
      */
-    const std::vector<bdl_wire<Lyt>> input_bdl_wires;
+    const std::vector<bdl_wire<Lyt>> input_bdl_wires{};
     /**
      * Output BDL wires.
      */
-    const std::vector<bdl_wire<Lyt>> output_bdl_wires;
+    const std::vector<bdl_wire<Lyt>> output_bdl_wires{};
     /**
      * Number of input BDL wires.
      */
-    const std::size_t number_of_input_wires;
+    const std::size_t number_of_input_wires{};
     /**
      * Number of output BDL wires.
      */
-    const std::size_t number_of_output_wires;
+    const std::size_t number_of_output_wires{};
     /**
      * Number of discarded layouts at first pruning.
      */
@@ -426,7 +426,7 @@ class design_sidb_gates_impl
      */
     std::size_t number_of_threads{std::thread::hardware_concurrency()};
 
-    [[nodiscard]] std::vector<Lyt> extract_gate_designs(const std::vector<Lyt>& gate_candidates) const noexcept
+    [[nodiscard]] std::vector<Lyt> extract_gate_designs(std::vector<Lyt>& gate_candidates) const noexcept
     {
         mockturtle::stopwatch stop{stats.time_total};
 
@@ -449,7 +449,7 @@ class design_sidb_gates_impl
 
         const auto add_combination_to_layout_and_check_operation = [this, &mutex_to_protect_designed_gate_layouts,
                                                                     &designed_gate_layouts,
-                                                                    &solution_found](const auto& candidate) noexcept
+                                                                    &solution_found](Lyt&& candidate) noexcept
         {
             if (const operational_assessment<Lyt>& assessment_results = is_operational(
                     candidate, truth_table, params.operational_params, input_bdl_wires, output_bdl_wires);
@@ -496,7 +496,7 @@ class design_sidb_gates_impl
                             return;
                         }
 
-                        add_combination_to_layout_and_check_operation(gate_candidates.at(j));
+                        add_combination_to_layout_and_check_operation(std::move(gate_candidates[j]));
                     }
                 });
         }
@@ -645,8 +645,7 @@ class design_sidb_gates_impl
         }
 
         // Shuffle all canvas layouts to distribute thread load when extracting gate layouts later
-        std::shuffle(all_canvas_layouts.begin(), all_canvas_layouts.end(),
-                     std::default_random_engine(std::random_device{}()));
+        std::shuffle(all_canvas_layouts.begin(), all_canvas_layouts.end(), std::mt19937_64{std::random_device{}()});
 
         return all_canvas_layouts;
     }
@@ -667,12 +666,12 @@ class design_sidb_gates_impl
             // SiDBs cannot be placed on positions which are already occupied by atomic defects.
             if constexpr (is_sidb_defect_surface_v<Lyt>)
             {
-                if (skeleton_layout.get_sidb_defect(all_sidbs_in_canvas[i]).type != sidb_defect_type::NONE)
+                if (skeleton_layout.get_sidb_defect(all_sidbs_in_canvas.at(i)).type != sidb_defect_type::NONE)
                 {
                     continue;
                 }
             }
-            lyt.assign_cell_type(all_sidbs_in_canvas[i], sidb_technology::cell_type::LOGIC);
+            lyt.assign_cell_type(all_sidbs_in_canvas.at(i), sidb_technology::cell_type::LOGIC);
         }
 
         // the skeleton can already exhibit some canvas SiDBs (partially filled canvas)
