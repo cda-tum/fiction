@@ -39,34 +39,98 @@ struct designed_sidb_gates
      */
     std::optional<std::vector<simulation_results_per_input>> simulation_results;
 };
-
-// every instance of a designed_sidb_gates_comparator should implement operator<, operator==, and have a sensitivity
-// parameter
+/**
+ * A designed SiDB gate comparator is used to compare two designed SiDB gates. It offers an equality comparison, of
+ * which the sensitivity depends on the `sensitivity` parameter given to the comparator, and a strict comparator. These
+ * ingredients allow a chaining of comparators, in which the result of the strict comparison is returned of the first
+ * comparator in the chain that judges that the two designed SiDB gates to compare are not equal, as determined by its
+ * respective sensitivity parameter.
+ *
+ * @tparam Lyt SiDB cell-level layout.
+ */
 template <typename Lyt>
 class designed_sidb_gate_comparator
 {
   public:
+    /**
+     * This struct is used to pair a gate design with its respective simulation results per input.
+     */
     struct sidb_gate_design
     {
-        Lyt                                                             gate_design;
+        /**
+         * The designed SiDB gate layout.
+         */
+        Lyt gate_design;
+        /**
+         * The respectively associated simulation results per input.
+         */
         typename designed_sidb_gates<Lyt>::simulation_results_per_input simulation_results_per_input;
     };
-
-    designed_sidb_gate_comparator()          = delete;
+    /**
+     * The default no-arguments constructor is deleted.
+     */
+    explicit designed_sidb_gate_comparator() = delete;
+    /**
+     * Destructor.
+     */
     virtual ~designed_sidb_gate_comparator() = default;
-
+    /**
+     * Standard constructor.
+     *
+     * @param sens Determines the sensitivity of the equality comparison.
+     */
+    explicit designed_sidb_gate_comparator(const double sens) noexcept : sensitivity{sens}
+    {
+        assert(sensitivity >= 0.0 && "The given sensitivity is negative.");
+    }
+    /**
+     * Copy constructor.
+     *
+     * @param other Other comparator to copy.
+     */
+    designed_sidb_gate_comparator(const designed_sidb_gate_comparator& other) noexcept = default;
+    /**
+     * Move constructor.
+     *
+     * @param other Other comparator to move to this one.
+     */
+    designed_sidb_gate_comparator(designed_sidb_gate_comparator&& other) noexcept = default;
+    /**
+     * Copy assignment operator.
+     *
+     * @param other Other comparator to copy.
+     */
     designed_sidb_gate_comparator& operator=(const designed_sidb_gate_comparator& other) noexcept = default;
-    designed_sidb_gate_comparator& operator=(designed_sidb_gate_comparator&& other) noexcept      = default;
-
-    explicit designed_sidb_gate_comparator(const double sens) noexcept : sensitivity{sens} {}
-
+    /**
+     * Move assignment operator.
+     *
+     * @param other Other comparator to move to this one.
+     */
+    designed_sidb_gate_comparator& operator=(designed_sidb_gate_comparator&& other) noexcept = default;
+    /**
+     * Each designed SiDB gate comparator must implement a strict comparator.
+     *
+     * @param lhs Left hand side argument.
+     * @param rhs Right hand side argument.
+     * @return `lhs < rhs`
+     */
     [[nodiscard]] virtual bool operator()(const sidb_gate_design& lhs, const sidb_gate_design& rhs) const noexcept = 0;
-    [[nodiscard]] virtual bool equals(const sidb_gate_design& lhs, const sidb_gate_design& rhs) const noexcept     = 0;
+    /**
+     * Each designed SiDB gate comparator must implement an equality comparison.
+     *
+     * @param lhs Left hand side argument.
+     * @param rhs Right hand side argument.
+     * @return `lhs = rhs`
+     */
+    [[nodiscard]] virtual bool equals(const sidb_gate_design& lhs, const sidb_gate_design& rhs) const noexcept = 0;
 
   protected:
+    /**
+     * Each designed SiDB gate comparator depends on a sensitivity parameter, which determines the sensitivity of the
+     * equality comparison.
+     */
     double sensitivity;
 };
-
 /**
  * An ordering recipe for designed SiDB gates is a vector of pointers to designed SiDB gate comparators. Pointers are
  * used to prevent slicing.
@@ -75,7 +139,6 @@ class designed_sidb_gate_comparator
  */
 template <typename Lyt>
 using designed_sidb_gates_ordering_recipe = std::vector<std::shared_ptr<designed_sidb_gate_comparator<Lyt>>>;
-
 /**
  * The designed SiDB gates are ordered inplace according to the given ordering recipe. Comparators that occur earlier in
  * the recipe have a higher precedence. Two designed gates are compared using the recipe as follows: iterating through
