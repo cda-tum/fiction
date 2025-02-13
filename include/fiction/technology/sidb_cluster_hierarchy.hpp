@@ -188,7 +188,7 @@ sidb_cluster_hierarchy(Lyt& lyt, sidb_cluster_hierarchy_linkage_method linkage_m
         const uint64_t new_n = charge_lyt.num_cells() + static_cast<uint64_t>(i);
 
 #ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
-        std::set<uint64_t> set_union{};
+        std::set<uint64_t> unioned_set{};
 #else
         phmap::flat_hash_set<uint64_t> unioned_set{};
 #endif
