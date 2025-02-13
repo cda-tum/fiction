@@ -61,10 +61,9 @@ void design_sidb_gates_params(pybind11::module& m, const std::string& lattice = 
         .value("AFTER_FIRST_SOLUTION",
                fiction::design_sidb_gates_params<Lyt>::termination_condition::AFTER_FIRST_SOLUTION,
                DOC(fiction_design_sidb_gates_params_termination_condition_AFTER_FIRST_SOLUTION))
-        .value(
-            "ALL_COMBINATIONS_ENUMERATED",
-            fiction::design_sidb_gates_params<Lyt>::termination_condition::ALL_COMBINATIONS_ENUMERATED,
-            DOC(fiction_design_sidb_gates_params_termination_condition_ALL_COMBINATIONS_ENUMERATED));
+        .value("ALL_COMBINATIONS_ENUMERATED",
+               fiction::design_sidb_gates_params<Lyt>::termination_condition::ALL_COMBINATIONS_ENUMERATED,
+               DOC(fiction_design_sidb_gates_params_termination_condition_ALL_COMBINATIONS_ENUMERATED));
 
     /**
      * Parameters.
