@@ -109,10 +109,12 @@ int main()  // NOLINT
 
         params_2_in_1_out.design_mode =
             design_sidb_gates_params<sidb_100_cell_clk_lyt_siqad>::design_sidb_gates_mode::EXHAUSTIVE_GATE_DESIGNER;
-        params_2_in_1_out.operational_params.op_condition_kinks = is_operational_params::operational_condition_kinks::REJECT_KINKS;
+        params_2_in_1_out.operational_params.op_condition_kinks =
+            is_operational_params::operational_condition_kinks::REJECT_KINKS;
         params_2_in_2_out.design_mode =
             design_sidb_gates_params<sidb_100_cell_clk_lyt_siqad>::design_sidb_gates_mode::EXHAUSTIVE_GATE_DESIGNER;
-        params_2_in_2_out.operational_params.op_condition_kinks = is_operational_params::operational_condition_kinks::REJECT_KINKS;
+        params_2_in_2_out.operational_params.op_condition_kinks =
+            is_operational_params::operational_condition_kinks::REJECT_KINKS;
 
         params_1_in_1_out_straight.design_mode =
             design_sidb_gates_params<sidb_100_cell_clk_lyt_siqad>::design_sidb_gates_mode::EXHAUSTIVE_GATE_DESIGNER;
