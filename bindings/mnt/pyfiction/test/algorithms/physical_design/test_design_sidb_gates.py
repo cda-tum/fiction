@@ -4,7 +4,8 @@ from mnt.pyfiction import (
     create_and_tt,
     create_nor_tt,
     design_sidb_gates,
-    design_sidb_gates_mode,
+    design_sidb_gates_mode_100,
+    design_sidb_gates_mode_111,
     design_sidb_gates_params_100,
     design_sidb_gates_params_111,
     operational_condition,
@@ -39,7 +40,7 @@ class TestDesignSiDBGates(unittest.TestCase):
         params = design_sidb_gates_params_100()
         params.operational_params.simulation_parameters.base = 2
         params.operational_params.simulation_parameters.mu_minus = -0.28
-        params.design_mode = design_sidb_gates_mode.EXHAUSTIVE_GATE_DESIGNER
+        params.design_mode = design_sidb_gates_mode_100.EXHAUSTIVE_GATE_DESIGNER
         params.canvas = [(4, 8), (14, 11)]
         params.number_of_sidbs = 1
         params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
@@ -85,7 +86,7 @@ class TestDesignSiDBGates(unittest.TestCase):
         params = design_sidb_gates_params_111()
         params.operational_params.simulation_parameters.base = 2
         params.operational_params.simulation_parameters.mu_minus = -0.32
-        params.design_mode = design_sidb_gates_mode.EXHAUSTIVE_GATE_DESIGNER
+        params.design_mode = design_sidb_gates_mode_111.EXHAUSTIVE_GATE_DESIGNER
         params.canvas = [(10, 22), (14, 34)]
         params.number_of_sidbs = 3
         params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
@@ -136,7 +137,7 @@ class TestDesignSiDBGates(unittest.TestCase):
         params = design_sidb_gates_params_111()
         params.operational_params.simulation_parameters.base = 2
         params.operational_params.simulation_parameters.mu_minus = -0.32
-        params.design_mode = design_sidb_gates_mode.EXHAUSTIVE_GATE_DESIGNER
+        params.design_mode = design_sidb_gates_mode_111.EXHAUSTIVE_GATE_DESIGNER
 
         params.canvas = [(10, 26), (14, 34)]
         params.number_of_sidbs = 3
