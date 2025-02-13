@@ -6072,7 +6072,14 @@ Returns:
 static const char *__doc_fiction_detail_design_sidb_gates_impl_set_operational_params_accordingly =
 R"doc(This function makes sure that underlying parameters for
 `is_operational` are set according to the given parameters for
-`design_sidb_gates`.)doc";
+`design_sidb_gates`.
+
+Parameter ``params``:
+    The given parameters for `design_sidb_gates`.
+
+Returns:
+    The same parameters, but now the underlying parameters for
+    `is_operational` are adjusted accordingly.)doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_skeleton_layout =
 R"doc(The skeleton layout serves as a starting layout to which SiDBs are
