@@ -14,7 +14,7 @@
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/charge_distribution_surface.hpp>
-#include <fiction/technology/physical_constants.hpp>
+#include <fiction/technology/constants.hpp>
 #include <fiction/technology/sidb_charge_state.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
@@ -208,7 +208,7 @@ TEMPLATE_TEST_CASE("QuickSim simulation of an SiDB layout comprising of 10 SiDBs
         CHECK(charge_lyt_first.get_charge_state({17, -1, 1}) == sidb_charge_state::NEGATIVE);
 
         CHECK_THAT(charge_lyt_first.get_system_energy(),
-                   Catch::Matchers::WithinAbs(0.4798721334, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0.4798721334, constants::ERROR_MARGIN));
     };
 
     SECTION("Default settings")
@@ -297,7 +297,7 @@ TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shaped SiDB arrangement with vary
         CHECK(charge_lyt_first.get_charge_state({-7, 3, 0}) == sidb_charge_state::NEGATIVE);
 
         CHECK_THAT(charge_lyt_first.get_system_energy(),
-                   Catch::Matchers::WithinAbs(0.3191788254, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0.3191788254, constants::ERROR_MARGIN));
     };
 
     SECTION("Default settings")
@@ -388,7 +388,7 @@ TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shaped SiDB OR gate with input 01
         CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == sidb_charge_state::NEGATIVE);
 
         CHECK_THAT(charge_lyt_first.get_system_energy(),
-                   Catch::Matchers::WithinAbs(0.4662582096, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0.4662582096, constants::ERROR_MARGIN));
     };
 
     SECTION("Default settings")
@@ -757,7 +757,7 @@ TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shaped SiDB OR gate with input 01
         CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == sidb_charge_state::NEUTRAL);
 
         CHECK_THAT(charge_lyt_first.get_system_energy(),
-                   Catch::Matchers::WithinAbs(0.4662582096, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0.4662582096, constants::ERROR_MARGIN));
     }
 
     SECTION("Increased mu_minus")
@@ -781,7 +781,7 @@ TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shaped SiDB OR gate with input 01
         CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == sidb_charge_state::NEUTRAL);
 
         CHECK_THAT(charge_lyt_first.get_system_energy(),
-                   Catch::Matchers::WithinAbs(0.061037632, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0.061037632, constants::ERROR_MARGIN));
     }
 
     SECTION("Decreased mu_minus")
@@ -805,7 +805,7 @@ TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shaped SiDB OR gate with input 01
         CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == sidb_charge_state::NEGATIVE);
 
         CHECK_THAT(charge_lyt_first.get_system_energy(),
-                   Catch::Matchers::WithinAbs(2.069954113, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(2.069954113, constants::ERROR_MARGIN));
     }
 
     SECTION("Decreased lambda_tf")
@@ -829,7 +829,7 @@ TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shaped SiDB OR gate with input 01
         CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == sidb_charge_state::NEGATIVE);
 
         CHECK_THAT(charge_lyt_first.get_system_energy(),
-                   Catch::Matchers::WithinAbs(0.5432404075, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0.5432404075, constants::ERROR_MARGIN));
     }
 
     SECTION("Increased lambda_tf")
@@ -853,7 +853,7 @@ TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shaped SiDB OR gate with input 01
         CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == sidb_charge_state::NEUTRAL);
 
         CHECK_THAT(charge_lyt_first.get_system_energy(),
-                   Catch::Matchers::WithinAbs(0.2930574885, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0.2930574885, constants::ERROR_MARGIN));
     }
 
     SECTION("Increased epsilon_r")
@@ -877,7 +877,7 @@ TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shaped SiDB OR gate with input 01
         CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == sidb_charge_state::NEGATIVE);
 
         CHECK_THAT(charge_lyt_first.get_system_energy(),
-                   Catch::Matchers::WithinAbs(0.505173434, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0.505173434, constants::ERROR_MARGIN));
     }
 }
 
@@ -928,7 +928,7 @@ TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shaped SiDB arrangement with vary
               sidb_charge_state::NEGATIVE);
 
         CHECK_THAT(charge_lyt_first.get_system_energy(),
-                   Catch::Matchers::WithinAbs(0.3191788254, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0.3191788254, constants::ERROR_MARGIN));
     };
 
     SECTION("Default settings")
