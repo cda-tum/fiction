@@ -503,7 +503,6 @@ class is_operational_impl
         {
             typename operational_assessment<Lyt>::operational_assessment_for_input
                 assessment_results_for_this_input_combination{operational_status::OPERATIONAL};
-            ;
 
             // if positively charged SiDBs can occur, the SiDB layout is considered as non-operational
             if (can_positive_charges_occur(*bii, parameters.simulation_parameters))
