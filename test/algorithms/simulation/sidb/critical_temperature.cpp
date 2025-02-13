@@ -306,7 +306,8 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         }
         SECTION("Kinks are not allowed")
         {
-            params.operational_params.op_condition_kinks = is_operational_params::operational_condition_kinks::REJECT_KINKS;
+            params.operational_params.op_condition_kinks =
+                is_operational_params::operational_condition_kinks::REJECT_KINKS;
             params.operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance = 2.5;
             const auto ct_qe =
                 critical_temperature_gate_based(lyt, std::vector<tt>{create_and_tt()}, params, &critical_stats);
@@ -446,7 +447,8 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         }
         SECTION("Kinks are not allowed")
         {
-            params.operational_params.op_condition_kinks = is_operational_params::operational_condition_kinks::REJECT_KINKS;
+            params.operational_params.op_condition_kinks =
+                is_operational_params::operational_condition_kinks::REJECT_KINKS;
             const auto ct_qe =
                 critical_temperature_gate_based(lyt, std::vector<tt>{create_fan_out_tt()}, params, &critical_stats);
 
@@ -553,7 +555,8 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         }
         SECTION("Kinks are not allowed")
         {
-            params.operational_params.op_condition_kinks = is_operational_params::operational_condition_kinks::REJECT_KINKS;
+            params.operational_params.op_condition_kinks =
+                is_operational_params::operational_condition_kinks::REJECT_KINKS;
             const auto ct_qe =
                 critical_temperature_gate_based(lyt, std::vector<tt>{create_or_tt()}, params, &critical_stats);
 
