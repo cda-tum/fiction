@@ -169,11 +169,11 @@ class design_sidb_gates_impl
      * @param ps Parameters and settings for the gate designer.
      * @param st Statistics for the gate design process.
      */
-    design_sidb_gates_impl(const Lyt& skeleton, const std::vector<TT>& spec, design_sidb_gates_params<Lyt> ps,
+    design_sidb_gates_impl(const Lyt& skeleton, const std::vector<TT>& spec, const design_sidb_gates_params<Lyt>& ps,
                            design_sidb_gates_stats& st) :
             skeleton_layout{skeleton},
             truth_table{spec},
-            params{ps},
+            params{set_operational_params_accordingly(ps)},
             all_sidbs_in_canvas{all_coordinates_in_spanned_area(params.canvas.first, params.canvas.second)},
             stats{st},
             input_bdl_wires{detect_bdl_wires(skeleton_layout,
@@ -187,8 +187,6 @@ class design_sidb_gates_impl
     {
         stats.number_of_layouts = binomial_coefficient(all_sidbs_in_canvas.size(), params.number_of_sidbs);
         stats.sim_engine        = params.operational_params.sim_engine;
-
-        set_operational_params_accordingly();
     }
     /**
      * Design gates by using the *Automatic Exhaustive Gate Designer*. This algorithm was proposed in \"Minimal
@@ -384,7 +382,7 @@ class design_sidb_gates_impl
     /**
      * Parameters for the *SiDB Gate Designer*.
      */
-    design_sidb_gates_params<Lyt> params;
+    const design_sidb_gates_params<Lyt> params;
     /**
      * All cells within the canvas.
      */
@@ -689,20 +687,28 @@ class design_sidb_gates_impl
     /**
      * This function makes sure that underlying parameters for `is_operational` are set according to the given
      * parameters for `design_sidb_gates`.
+     *
+     * @param params The given parameters for `design_sidb_gates`.
+     * @return The same parameters, but now the underlying parameters for `is_operational` are adjusted accordingly.
      */
-    void set_operational_params_accordingly() noexcept
+    static design_sidb_gates_params<Lyt>
+    set_operational_params_accordingly(const design_sidb_gates_params<Lyt>& params) noexcept
     {
-        if (!params.post_design_process.empty())
+        design_sidb_gates_params<Lyt> new_params{params};
+
+        if (!new_params.post_design_process.empty())
         {
-            params.operational_params.simulation_results_retention =
+            new_params.operational_params.simulation_results_retention =
                 is_operational_params::simulation_results_mode::KEEP_SIMULATION_RESULTS;
         }
 
-        if (params.design_mode == design_sidb_gates_params<Lyt>::design_sidb_gates_mode::QUICKCELL)
+        if (new_params.design_mode == design_sidb_gates_params<Lyt>::design_sidb_gates_mode::QUICKCELL)
         {
-            params.operational_params.strategy_to_analyze_operational_status =
+            new_params.operational_params.strategy_to_analyze_operational_status =
                 is_operational_params::operational_analysis_strategy::SIMULATION_ONLY;
         }
+
+        return new_params;
     }
 };
 
