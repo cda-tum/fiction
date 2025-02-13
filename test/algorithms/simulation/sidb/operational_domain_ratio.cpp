@@ -199,7 +199,8 @@ TEST_CASE("Bestagon AND gate", "[compute-operational-ratio]")
         "semi-operational domain, reject kinks, only pruning is used to determine the operational status of the layout")
     {
         op_domain_params.sweep_dimensions.push_back(z_dimension);
-        op_domain_params.operational_params.op_condition_kinks = is_operational_params::operational_condition_kinks::REJECT_KINKS;
+        op_domain_params.operational_params.op_condition_kinks =
+            is_operational_params::operational_condition_kinks::REJECT_KINKS;
         op_domain_params.operational_params.strategy_to_analyze_operational_status =
             is_operational_params::operational_analysis_strategy::FILTER_ONLY;
 
