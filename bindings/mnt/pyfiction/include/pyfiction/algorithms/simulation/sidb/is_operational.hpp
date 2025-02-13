@@ -179,9 +179,9 @@ inline void is_operational(pybind11::module& m)
                        DOC(fiction_is_operational_params_sim_engine))
         .def_readwrite("input_bdl_iterator_params", &fiction::is_operational_params::input_bdl_iterator_params,
                        DOC(fiction_is_operational_params_input_bdl_iterator_params))
-        .def_readwrite("op_condition", &fiction::is_operational_params::op_condition_kinks,
+        .def_readwrite("op_condition_kinks", &fiction::is_operational_params::op_condition_kinks,
                        DOC(fiction_is_operational_params_op_condition_kinks))
-        .def_readwrite("op_condition", &fiction::is_operational_params::op_condition_positive_charges,
+        .def_readwrite("op_condition_positive_charges", &fiction::is_operational_params::op_condition_positive_charges,
                        DOC(fiction_is_operational_params_op_condition_positive_charges))
         .def_readwrite("strategy_to_analyze_operational_status",
                        &fiction::is_operational_params::strategy_to_analyze_operational_status,
