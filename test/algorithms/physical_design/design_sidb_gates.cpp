@@ -38,7 +38,7 @@ TEST_CASE("Design AND gate with skeleton, where one input wire and the output wi
 
     design_sidb_gates_params<sidb_100_cell_clk_lyt_siqad> params{
         is_operational_params{sidb_simulation_parameters{2, -0.31}, sidb_simulation_engine::QUICKEXACT,
-                              bdl_input_iterator_params{}, is_operational_params::operational_condition::REJECT_KINKS},
+                              bdl_input_iterator_params{}, is_operational_params::operational_condition_kinks::REJECT_KINKS},
         design_sidb_gates_params<sidb_100_cell_clk_lyt_siqad>::design_sidb_gates_mode::QUICKCELL,
         {{27, 6, 0}, {30, 8, 0}},
         3};
@@ -475,7 +475,7 @@ TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
         design_sidb_gates_params<sidb_defect_surface<sidb_100_cell_clk_lyt_siqad>> params{
             is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
                                   bdl_input_iterator_params{},
-                                  is_operational_params::operational_condition::REJECT_KINKS},
+                                  is_operational_params::operational_condition_kinks::REJECT_KINKS},
             design_sidb_gates_params<sidb_defect_surface<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::RANDOM,
             {{18, 8, 1}, {22, 12, 0}},
             2};
@@ -566,7 +566,7 @@ TEST_CASE("Design NOR Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
         const design_sidb_gates_params<sidb_111_cell_clk_lyt_siqad> params{
             is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
                                   bdl_input_iterator_params{},
-                                  is_operational_params::operational_condition::REJECT_KINKS},
+                                  is_operational_params::operational_condition_kinks::REJECT_KINKS}, 
             design_sidb_gates_params<sidb_111_cell_clk_lyt_siqad>::design_sidb_gates_mode::EXHAUSTIVE_GATE_DESIGNER,
             {{10, 13, 0}, {15, 17, 0}},
             3};
@@ -656,7 +656,7 @@ TEST_CASE("Design AND gate with input left and output top-right with QuickCell (
         const design_sidb_gates_params<sidb_100_cell_clk_lyt_siqad> params{
             is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
                                   bdl_input_iterator_params{},
-                                  is_operational_params::operational_condition::REJECT_KINKS},
+                                  is_operational_params::operational_condition_kinks::REJECT_KINKS},
             design_sidb_gates_params<sidb_100_cell_clk_lyt_siqad>::design_sidb_gates_mode::QUICKCELL,
             {{17, 5, 0}, {24, 8, 0}},
             3};
