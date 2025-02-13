@@ -126,12 +126,22 @@ inline void is_operational(pybind11::module& m)
         .value("NON_OPERATIONAL", fiction::operational_status::NON_OPERATIONAL,
                DOC(fiction_operational_status_NON_OPERATIONAL));
 
-    py::enum_<fiction::is_operational_params::operational_condition>(
-        m, "operational_condition", DOC(fiction_is_operational_params_operational_condition))
-        .value("TOLERATE_KINKS", fiction::is_operational_params::operational_condition::TOLERATE_KINKS,
-               DOC(fiction_is_operational_params_operational_condition_TOLERATE_KINKS))
-        .value("REJECT_KINKS", fiction::is_operational_params::operational_condition::REJECT_KINKS,
-               DOC(fiction_is_operational_params_operational_condition_REJECT_KINKS));
+    py::enum_<fiction::is_operational_params::operational_condition_kinks>(
+        m, "operational_condition_kinks", DOC(fiction_is_operational_params_operational_condition_kinks))
+        .value("TOLERATE_KINKS", fiction::is_operational_params::operational_condition_kinks::TOLERATE_KINKS,
+               DOC(fiction_is_operational_params_operational_condition_kinks_TOLERATE_KINKS))
+        .value("REJECT_KINKS", fiction::is_operational_params::operational_condition_kinks::REJECT_KINKS,
+               DOC(fiction_is_operational_params_operational_condition_kinks_REJECT_KINKS));
+
+    py::enum_<fiction::is_operational_params::operational_condition_positive_charges>(
+        m, "operational_condition_positive_charges",
+        DOC(fiction_is_operational_params_operational_condition_positive_charges))
+        .value("REJECT_POSITIVE_CHARGES",
+               fiction::is_operational_params::operational_condition_positive_charges::REJECT_POSITIVE_CHARGES,
+               DOC(fiction_is_operational_params_operational_condition_positive_charges_REJECT_POSITIVE_CHARGES))
+        .value("TOLERATE_POSITIVE_CHARGES",
+               fiction::is_operational_params::operational_condition_positive_charges::TOLERATE_POSITIVE_CHARGES,
+               DOC(fiction_is_operational_params_operational_condition_positive_charges_TOLERATE_POSITIVE_CHARGES));
 
     py::enum_<fiction::is_operational_params::operational_analysis_strategy>(
         m, "operational_analysis_strategy", DOC(fiction_is_operational_params_operational_analysis_strategy))
@@ -169,8 +179,10 @@ inline void is_operational(pybind11::module& m)
                        DOC(fiction_is_operational_params_sim_engine))
         .def_readwrite("input_bdl_iterator_params", &fiction::is_operational_params::input_bdl_iterator_params,
                        DOC(fiction_is_operational_params_input_bdl_iterator_params))
-        .def_readwrite("op_condition", &fiction::is_operational_params::op_condition,
-                       DOC(fiction_is_operational_params_op_condition))
+        .def_readwrite("op_condition", &fiction::is_operational_params::op_condition_kinks,
+                       DOC(fiction_is_operational_params_op_condition_kinks))
+        .def_readwrite("op_condition", &fiction::is_operational_params::op_condition_positive_charges,
+                       DOC(fiction_is_operational_params_op_condition_positive_charges))
         .def_readwrite("strategy_to_analyze_operational_status",
                        &fiction::is_operational_params::strategy_to_analyze_operational_status,
                        DOC(fiction_is_operational_params_strategy_to_analyze_operational_status))

@@ -11,7 +11,7 @@ from mnt.pyfiction import (
     is_operational_params,
     kink_induced_non_operational_input_patterns,
     operational_analysis_strategy,
-    operational_condition,
+    operational_condition_kinks,
     operational_input_patterns,
     operational_status,
     read_sqd_layout_100,
@@ -81,7 +81,7 @@ class TestIsOperational(unittest.TestCase):
 
         self.assertEqual(assessment_results.status, operational_status.OPERATIONAL)
 
-        params.op_condition = operational_condition.REJECT_KINKS
+        params.op_condition_kinks = operational_condition_kinks.REJECT_KINKS
 
         assessment_results = is_operational(lyt, [create_and_tt()], params)
 

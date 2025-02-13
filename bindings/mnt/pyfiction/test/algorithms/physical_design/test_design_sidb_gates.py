@@ -8,7 +8,7 @@ from mnt.pyfiction import (
     design_sidb_gates_mode_111,
     design_sidb_gates_params_100,
     design_sidb_gates_params_111,
-    operational_condition,
+    operational_condition_kinks,
     sidb_100_lattice,
     sidb_111_lattice,
     sidb_simulation_engine,
@@ -90,7 +90,7 @@ class TestDesignSiDBGates(unittest.TestCase):
         params.canvas = [(10, 22), (14, 34)]
         params.number_of_sidbs = 3
         params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
-        params.operational_params.op_condition = operational_condition.REJECT_KINKS
+        params.operational_params.op_condition_kinks = operational_condition_kinks.REJECT_KINKS
 
         self.assertEqual(params.operational_params.simulation_parameters.mu_minus, -0.32)
         self.assertEqual(params.number_of_sidbs, 3)
@@ -101,7 +101,7 @@ class TestDesignSiDBGates(unittest.TestCase):
         self.assertEqual(len(designed_gates), 44)
 
         # tolerate kink states
-        params.operational_params.op_condition = operational_condition.TOLERATE_KINKS
+        params.operational_params.op_condition_kinks = operational_condition_kinks.TOLERATE_KINKS
         designed_gates = design_sidb_gates(layout, [create_nor_tt()], params)
         self.assertEqual(len(designed_gates), 175)
 

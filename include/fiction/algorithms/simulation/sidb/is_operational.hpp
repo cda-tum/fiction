@@ -62,9 +62,9 @@ enum class operational_status : uint8_t
 struct is_operational_params
 {
     /**
-     * Condition to decide whether a layout is operational or non-operational.
+     * Condition to decide whether a layout is operational or non-operational, relating to kinks.
      */
-    enum class operational_condition : uint8_t
+    enum class operational_condition_kinks : uint8_t
     {
         /**
          * Even if the I/O pins show kinks, the layout is still considered as operational.
@@ -74,6 +74,21 @@ struct is_operational_params
          * The I/O pins are not allowed to show kinks. If kinks exist, the layout is considered as non-operational.
          */
         REJECT_KINKS
+    };
+    /**
+     * Condition to decide whether a layout is operational or non-operational, relating to positive charges.
+     */
+    enum class operational_condition_positive_charges : uint8_t
+    {
+        /**
+         * Positive charges may not be able to occur. In the case of the converse being true, the layout is considered
+         * as non-operational.
+         */
+        REJECT_POSITIVE_CHARGES,
+        /**
+         * Even if positive charges can occur, the layout is still considered as operational.
+         */
+        TOLERATE_POSITIVE_CHARGES,
     };
     /**
      * Simulation method to determine if the layout is operational or non-operational.
@@ -140,9 +155,14 @@ struct is_operational_params
      */
     bdl_input_iterator_params input_bdl_iterator_params{};
     /**
-     * Condition to decide whether a layout is operational or non-operational.
+     * Condition to decide whether a layout is operational or non-operational, relating to kinks.
      */
-    operational_condition op_condition = operational_condition::TOLERATE_KINKS;
+    operational_condition_kinks op_condition_kinks = operational_condition_kinks::TOLERATE_KINKS;
+    /**
+     * Condition to decide whether a layout is operational or non-operational, relating to kinks.
+     */
+    operational_condition_positive_charges op_condition_positive_charges =
+        operational_condition_positive_charges::REJECT_POSITIVE_CHARGES;
     /**
      * Strategy to determine whether a layout is operational or non-operational.
      */
@@ -355,7 +375,7 @@ class is_operational_impl
             number_of_input_wires{input_bdl_wires.size()},
             canvas_lyt{c_lyt}
     {
-        if (params.op_condition == is_operational_params::operational_condition::TOLERATE_KINKS)
+        if (params.op_condition_kinks == is_operational_params::operational_condition_kinks::TOLERATE_KINKS)
         {
             output_bdl_pairs = detect_bdl_pairs(layout, sidb_technology::cell_type::OUTPUT,
                                                 params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params);
@@ -404,7 +424,9 @@ class is_operational_impl
         cds_layout.assign_all_charge_states(sidb_charge_state::NEGATIVE);
         cds_layout.assign_physical_parameters(parameters.simulation_parameters);
 
-        if (can_positive_charges_occur(cds_layout, parameters.simulation_parameters))
+        if (parameters.op_condition_positive_charges ==
+                is_operational_params::operational_condition_positive_charges::REJECT_POSITIVE_CHARGES &&
+            can_positive_charges_occur(cds_layout, parameters.simulation_parameters))
         {
             return layout_invalidity_reason::POTENTIAL_POSITIVE_CHARGES;
         }
@@ -440,7 +462,7 @@ class is_operational_impl
     {
         if (!canvas_lyt.is_empty())
         {
-            if ((parameters.op_condition == is_operational_params::operational_condition::REJECT_KINKS &&
+            if ((parameters.op_condition_kinks == is_operational_params::operational_condition_kinks::REJECT_KINKS &&
                  parameters.strategy_to_analyze_operational_status ==
                      is_operational_params::operational_analysis_strategy::FILTER_THEN_SIMULATION) ||
                 parameters.strategy_to_analyze_operational_status ==
@@ -505,7 +527,9 @@ class is_operational_impl
                 assessment_results_for_this_input_combination{operational_status::OPERATIONAL};
 
             // if positively charged SiDBs can occur, the SiDB layout is considered as non-operational
-            if (can_positive_charges_occur(*bii, parameters.simulation_parameters))
+            if (parameters.op_condition_positive_charges ==
+                    is_operational_params::operational_condition_positive_charges::REJECT_POSITIVE_CHARGES &&
+                can_positive_charges_occur(*bii, parameters.simulation_parameters))
             {
                 assessment_results.status = operational_status::NON_OPERATIONAL;
 
@@ -575,7 +599,8 @@ class is_operational_impl
                     }
 
                     if (non_op_reason == non_operationality_reason::KINKS &&
-                        parameters.op_condition == is_operational_params::operational_condition::REJECT_KINKS)
+                        parameters.op_condition_kinks ==
+                            is_operational_params::operational_condition_kinks::REJECT_KINKS)
                     {
                         return {assessment_results, non_operationality_reason::KINKS};
                     }
@@ -646,7 +671,9 @@ class is_operational_impl
         auto non_operational_reason = non_operationality_reason::LOGIC_MISMATCH;
 
         // if positively charged SiDBs can occur, the SiDB layout is considered as non-operational
-        if (can_positive_charges_occur(given_cds, parameters.simulation_parameters))
+        if (parameters.op_condition_positive_charges ==
+                is_operational_params::operational_condition_positive_charges::REJECT_POSITIVE_CHARGES &&
+            can_positive_charges_occur(given_cds, parameters.simulation_parameters))
         {
             return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
         }
@@ -683,7 +710,7 @@ class is_operational_impl
             }
         }
 
-        if (parameters.op_condition == is_operational_params::operational_condition::REJECT_KINKS)
+        if (parameters.op_condition_kinks == is_operational_params::operational_condition_kinks::REJECT_KINKS)
         {
             assert(!input_bdl_wires.empty() && "No input wires provided.");
             assert(!output_bdl_wires.empty() && "No output wires provided.");
@@ -798,8 +825,7 @@ class is_operational_impl
         while (canvas_charge_index <= max_index)
         {
             cds_canvas_copy.foreach_cell(
-                [&cds_layout, &cds_canvas_copy](const auto& c)
-                {
+                [&cds_layout, &cds_canvas_copy](const auto& c) {
                     cds_layout.assign_charge_state(c, cds_canvas_copy.get_charge_state(c),
                                                    charge_index_mode::KEEP_CHARGE_INDEX);
                 });
@@ -1214,6 +1240,7 @@ class is_operational_impl
      *
      * @param ground_state The ground state charge distribution surface.
      * @param bdl BDL pair to be evaluated.
+     * @param port Port direction where the BDL pair to be evaluated is.
      * @return `true` if `0` is encoded, `false` otherwise.
      */
     [[nodiscard]] bool encodes_bit_zero(const charge_distribution_surface<Lyt>& ground_state,
@@ -1233,6 +1260,7 @@ class is_operational_impl
      *
      * @param ground_state The ground state charge distribution surface.
      * @param bdl BDL pair to be evaluated.
+     * @param port Port direction where the BDL pair to be evaluated is.
      * @return `true` if `1` is encoded, `false` otherwise.
      */
     [[nodiscard]] bool encodes_bit_one(const charge_distribution_surface<Lyt>& ground_state,
@@ -1267,8 +1295,9 @@ class is_operational_impl
  * with auxiliary statistics.
  */
 template <typename Lyt, typename TT>
-[[nodiscard]] operational_assessment<Lyt> is_operational(const Lyt& lyt, const std::vector<TT>& spec,
-                                                         const is_operational_params& params = {}) noexcept
+[[nodiscard]] operational_assessment<Lyt>
+is_operational(const Lyt& lyt, const std::vector<TT>& spec,
+               const is_operational_params& params = {}) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -1366,8 +1395,9 @@ is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational
  * @return The count of operational input combinations.
  */
 template <typename Lyt, typename TT>
-[[nodiscard]] std::set<uint64_t> operational_input_patterns(const Lyt& lyt, const std::vector<TT>& spec,
-                                                            const is_operational_params& params = {}) noexcept
+[[nodiscard]] std::set<uint64_t>
+operational_input_patterns(const Lyt& lyt, const std::vector<TT>& spec,
+                           const is_operational_params& params = {}) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -1509,7 +1539,7 @@ kink_induced_non_operational_input_patterns(const Lyt& lyt, const std::vector<TT
 
     is_operational_params params_with_rejecting_kinks = params;
 
-    params_with_rejecting_kinks.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
+    params_with_rejecting_kinks.op_condition_kinks = is_operational_params::operational_condition_kinks::REJECT_KINKS;
 
     detail::is_operational_impl<Lyt, TT> p{lyt, spec, params_with_rejecting_kinks};
 
@@ -1565,7 +1595,7 @@ template <typename Lyt, typename TT>
 
     is_operational_params params_with_rejecting_kinks = params;
 
-    params_with_rejecting_kinks.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
+    params_with_rejecting_kinks.op_condition_kinks = is_operational_params::operational_condition_kinks::REJECT_KINKS;
 
     if (canvas_lyt.has_value())
     {
@@ -1621,8 +1651,9 @@ template <typename Lyt, typename TT>
  * non-operational due to kinks, `false` otherwise.
  */
 template <typename Lyt, typename TT>
-[[nodiscard]] bool is_kink_induced_non_operational(const Lyt& lyt, const std::vector<TT>& spec,
-                                                   const is_operational_params& params = {}) noexcept
+[[nodiscard]] bool
+is_kink_induced_non_operational(const Lyt& lyt, const std::vector<TT>& spec,
+                                const is_operational_params& params = {}) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -1637,7 +1668,7 @@ template <typename Lyt, typename TT>
                               { return a.num_vars() != b.num_vars(); }) == spec.cend());
 
     is_operational_params params_with_rejecting_kinks = params;
-    params_with_rejecting_kinks.op_condition          = is_operational_params::operational_condition::REJECT_KINKS;
+    params_with_rejecting_kinks.op_condition_kinks = is_operational_params::operational_condition_kinks::REJECT_KINKS;
 
     detail::is_operational_impl<Lyt, TT> p{lyt, spec, params_with_rejecting_kinks};
 
@@ -1685,7 +1716,7 @@ template <typename Lyt, typename TT>
                               { return a.num_vars() != b.num_vars(); }) == spec.cend());
 
     is_operational_params params_with_rejecting_kinks = params;
-    params_with_rejecting_kinks.op_condition          = is_operational_params::operational_condition::REJECT_KINKS;
+    params_with_rejecting_kinks.op_condition_kinks = is_operational_params::operational_condition_kinks::REJECT_KINKS;
 
     if (canvas_lyt.has_value())
     {
@@ -1718,8 +1749,9 @@ template <typename Lyt, typename TT>
  *
  */
 template <typename Lyt, typename TT>
-[[nodiscard]] std::size_t number_of_operational_input_combinations(const Lyt& lyt, const std::vector<TT>& spec,
-                                                                   const is_operational_params& params = {}) noexcept
+[[nodiscard]] std::size_t
+number_of_operational_input_combinations(const Lyt& lyt, const std::vector<TT>& spec,
+                                         const is_operational_params& params = {}) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
