@@ -8433,6 +8433,9 @@ Parameter ``ground_state``:
 Parameter ``bdl``:
     BDL pair to be evaluated.
 
+Parameter ``port``:
+    Port direction where the BDL pair to be evaluated is.
+
 Returns:
     `true` if `1` is encoded, `false` otherwise.)doc";
 
@@ -8445,6 +8448,9 @@ Parameter ``ground_state``:
 
 Parameter ``bdl``:
     BDL pair to be evaluated.
+
+Parameter ``port``:
+    Port direction where the BDL pair to be evaluated is.
 
 Returns:
     `true` if `0` is encoded, `false` otherwise.)doc";
@@ -15854,9 +15860,13 @@ static const char *__doc_fiction_is_operational_params = R"doc(Parameters for th
 
 static const char *__doc_fiction_is_operational_params_input_bdl_iterator_params = R"doc(Parameters for the BDL input iterator.)doc";
 
-static const char *__doc_fiction_is_operational_params_op_condition =
+static const char *__doc_fiction_is_operational_params_op_condition_kinks =
 R"doc(Condition to decide whether a layout is operational or non-
-operational.)doc";
+operational, relating to kinks.)doc";
+
+static const char *__doc_fiction_is_operational_params_op_condition_positive_charges =
+R"doc(Condition to decide whether a layout is operational or non-
+operational, relating to kinks.)doc";
 
 static const char *__doc_fiction_is_operational_params_operational_analysis_strategy =
 R"doc(Simulation method to determine if the layout is operational or non-
@@ -15879,16 +15889,28 @@ static const char *__doc_fiction_is_operational_params_operational_analysis_stra
 R"doc(Do not apply filter strategies to determine whether the layout is
 operational. Instead, rely solely on physical simulation.)doc";
 
-static const char *__doc_fiction_is_operational_params_operational_condition =
+static const char *__doc_fiction_is_operational_params_operational_condition_kinks =
 R"doc(Condition to decide whether a layout is operational or non-
-operational.)doc";
+operational, relating to kinks.)doc";
 
-static const char *__doc_fiction_is_operational_params_operational_condition_REJECT_KINKS =
+static const char *__doc_fiction_is_operational_params_operational_condition_kinks_REJECT_KINKS =
 R"doc(The I/O pins are not allowed to show kinks. If kinks exist, the layout
 is considered as non-operational.)doc";
 
-static const char *__doc_fiction_is_operational_params_operational_condition_TOLERATE_KINKS =
+static const char *__doc_fiction_is_operational_params_operational_condition_kinks_TOLERATE_KINKS =
 R"doc(Even if the I/O pins show kinks, the layout is still considered as
+operational.)doc";
+
+static const char *__doc_fiction_is_operational_params_operational_condition_positive_charges =
+R"doc(Condition to decide whether a layout is operational or non-
+operational, relating to positive charges.)doc";
+
+static const char *__doc_fiction_is_operational_params_operational_condition_positive_charges_REJECT_POSITIVE_CHARGES =
+R"doc(Positive charges may not be able to occur. In the case of the converse
+being true, the layout is considered as non-operational.)doc";
+
+static const char *__doc_fiction_is_operational_params_operational_condition_positive_charges_TOLERATE_POSITIVE_CHARGES =
+R"doc(Even if positive charges can occur, the layout is still considered as
 operational.)doc";
 
 static const char *__doc_fiction_is_operational_params_sim_engine =
