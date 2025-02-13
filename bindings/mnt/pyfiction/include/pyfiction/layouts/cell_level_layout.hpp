@@ -32,7 +32,6 @@ template <typename Technology>
 void fcn_technology_cell_level_layout(pybind11::module& m)
 {
     namespace py = pybind11;
-    namespace py = pybind11;
 
     // fetch technology name
     auto tech_name = std::string{fiction::tech_impl_name<Technology>};
