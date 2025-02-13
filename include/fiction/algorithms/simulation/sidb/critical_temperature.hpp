@@ -162,7 +162,8 @@ class critical_temperature_impl
             auto input_bdl_wires  = std::vector<bdl_wire<Lyt>>{};
             auto output_bdl_wires = std::vector<bdl_wire<Lyt>>{};
 
-            if (params.operational_params.op_condition_kinks == is_operational_params::operational_condition_kinks::REJECT_KINKS)
+            if (params.operational_params.op_condition_kinks ==
+                is_operational_params::operational_condition_kinks::REJECT_KINKS)
             {
                 input_bdl_wires =
                     detect_bdl_wires(layout, params.operational_params.input_bdl_iterator_params.bdl_wire_params,
