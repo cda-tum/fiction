@@ -95,7 +95,7 @@ int main()  // NOLINT
     design_sidb_gates_params<sidb_100_cell_clk_lyt_siqad> params{
         is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
                               bdl_input_iterator_params{{3}},
-                              is_operational_params::operational_condition::REJECT_KINKS},
+                              is_operational_params::operational_condition_kinks::REJECT_KINKS},
         design_sidb_gates_params<sidb_100_cell_clk_lyt_siqad>::design_sidb_gates_mode::QUICKCELL,
         {{18, 9, 0}, {26, 13, 0}},
         num_canvas_sidbs};
