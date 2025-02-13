@@ -10,7 +10,7 @@
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
-#include "fiction/technology/physical_constants.hpp"
+#include "fiction/technology/constants.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/technology/sidb_defects.hpp"
 #include "fiction/traits.hpp"
@@ -86,13 +86,13 @@ template <typename Lyt, typename TT>
         for (const auto& bdl : output_pairs)
         {
             if ((-(*charge_lyt.get_local_potential(bdl.lower)) + params.simulation_params.mu_minus) >
-                -physical_constants::POP_STABILITY_ERR)
+                -constants::ERROR_MARGIN)
             {
                 return true;  // the lower part can never be negatively charged. Thus, BDL property is not fulfilled
                               // anymore
             }
             if ((-(*charge_lyt.get_local_potential(bdl.upper)) + params.simulation_params.mu_minus) >
-                -physical_constants::POP_STABILITY_ERR)
+                -constants::ERROR_MARGIN)
             {
                 return true;  // the upper part can never be negatively charged. Thus, BDL property is not fulfilled
                               // anymore
