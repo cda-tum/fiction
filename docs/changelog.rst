@@ -17,7 +17,7 @@ Added
 Changed
 #######
 - Build and documentation:
-    - Added optional usage of `jemalloc <https://github.com/jemalloc/jemalloc>`_ to speed up parallelized applications
+    - Added optional usage of `jemalloc <https://github.com/jemalloc/jemalloc>`_ to speed up certain parallelized applications
 
 Fixed
 #####
