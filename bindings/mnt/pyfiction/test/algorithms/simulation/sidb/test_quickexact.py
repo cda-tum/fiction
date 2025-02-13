@@ -101,7 +101,7 @@ class TestQuickExact(unittest.TestCase):
             offset_coordinate(24, 2), sidb_technology.cell_type.EMPTY
         )  # delete one SiDB of the input BDL pair
 
-        self.assertTrue(len(quickexact(and_gate, quickexact_parameter).charge_distributions) > 0)
+        self.assertGreater(len(quickexact(and_gate, quickexact_parameter).charge_distributions), 0)
 
         and_gate.assign_cell_type(
             offset_coordinate(2, 2), sidb_technology.cell_type.INPUT
@@ -114,7 +114,7 @@ class TestQuickExact(unittest.TestCase):
         and_gate.assign_cell_type(offset_coordinate(2, 2), sidb_technology.cell_type.EMPTY)
         and_gate.assign_cell_type(offset_coordinate(26, 0), sidb_technology.cell_type.EMPTY)
 
-        self.assertTrue(len(quickexact(and_gate, quickexact_parameter).charge_distributions) > 0)
+        self.assertGreater(len(quickexact(and_gate, quickexact_parameter).charge_distributions), 0)
 
         and_gate.assign_cell_type(offset_coordinate(2, 2), sidb_technology.cell_type.INPUT)
         and_gate.assign_cell_type(offset_coordinate(26, 0), sidb_technology.cell_type.INPUT)
@@ -123,7 +123,7 @@ class TestQuickExact(unittest.TestCase):
         and_gate.assign_cell_type(offset_coordinate(0, 0), sidb_technology.cell_type.EMPTY)
         and_gate.assign_cell_type(offset_coordinate(24, 2), sidb_technology.cell_type.EMPTY)
 
-        self.assertTrue(len(quickexact(and_gate, quickexact_parameter).charge_distributions) > 0)
+        self.assertGreater(len(quickexact(and_gate, quickexact_parameter).charge_distributions), 0)
 
         and_gate.assign_cell_type(offset_coordinate(0, 0), sidb_technology.cell_type.INPUT)
         and_gate.assign_cell_type(offset_coordinate(24, 2), sidb_technology.cell_type.INPUT)
@@ -132,7 +132,7 @@ class TestQuickExact(unittest.TestCase):
         and_gate.assign_cell_type(offset_coordinate(0, 0), sidb_technology.cell_type.EMPTY)
         and_gate.assign_cell_type(offset_coordinate(26, 0), sidb_technology.cell_type.EMPTY)
 
-        self.assertTrue(len(quickexact(and_gate, quickexact_parameter).charge_distributions) > 0)
+        self.assertGreater(len(quickexact(and_gate, quickexact_parameter).charge_distributions), 0)
 
         and_gate.assign_cell_type(offset_coordinate(0, 0), sidb_technology.cell_type.INPUT)
         and_gate.assign_cell_type(offset_coordinate(26, 0), sidb_technology.cell_type.INPUT)
