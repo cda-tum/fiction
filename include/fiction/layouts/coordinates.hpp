@@ -375,9 +375,36 @@ struct coord_t
             y{static_cast<decltype(y)>(y_)},
             x{static_cast<decltype(x)>(x_)}
     {}
+    /**
+     * Standard constructor. Instantiates a coordinate from an uint64_t, where the positions are encoded in the
+     * following four parts of the unsigned 64-bit integer (from MSB to LSB):
+     *  - 1 bit for the dead indicator
+     *  - 1 bit for the z position
+     *  - 31 bit for the y position
+     *  - 31 bit for the x position
+     *
+     * @param t Unsigned 64-bit integer to instantiate the coordinate from.
+     */
+    constexpr explicit coord_t(const uint64_t t) noexcept :
+            d{static_cast<decltype(d)>(t >> 63ull)},
+            z{static_cast<decltype(z)>((t << 1ull) >> 63ull)},
+            y{static_cast<decltype(y)>((t << 2ull) >> 33ull)},
+            x{static_cast<decltype(x)>((t << 33ull) >> 33ull)}
+    {}
 
     // NOLINTEND(readability-identifier-naming)
 
+    /**
+     * Allows explicit conversion to `uint64_t`. Segments an unsigned 64-bit integer into four parts (from MSB to LSB):
+     *  - 1 bit for the dead indicator
+     *  - 1 bit for the z position
+     *  - 31 bit for the y position
+     *  - 31 bit for the x position
+     */
+    explicit constexpr operator uint64_t() const noexcept
+    {
+        return (((((((static_cast<uint64_t>(d)) << 1ull) | z) << 31ull) | y) << 31ull) | x);
+    }
     /**
      * Returns whether the coordinate is dead.
      *
@@ -436,6 +463,16 @@ struct coord_t
     constexpr bool operator==(const coord_t& other) const noexcept
     {
         return d == other.d && z == other.z && y == other.y && x == other.x;
+    }
+    /**
+     * Compares against another coordinate's `uint64_t` representation for equality. Respects the dead indicator.
+     *
+     * @param other Right-hand side coordinate representation in `uint64_t` format.
+     * @return `true` iff this coordinate is equal to the converted one.
+     */
+    constexpr bool operator==(const uint64_t& other) const noexcept
+    {
+        return static_cast<uint64_t>(*this) == other;
     }
     /**
      * Compares against another coordinate for inequality. Respects the dead indicator.
@@ -851,44 +888,197 @@ constexpr cube::coord_t offset_to_cube_coord(const offset::ucoord_t& coord) noex
     return {static_cast<decltype(cube::coord_t::x)>(coord.x), static_cast<decltype(cube::coord_t::y)>(coord.y),
             static_cast<decltype(cube::coord_t::z)>(coord.z)};
 }
+
 /**
- * Computes the area of a given coordinate assuming its origin is (0, 0, 0). Calculates \f$(|x| + 1) \cdot (|y| + 1)\f$
- * by default. The exception is SiQAD coordinates, for which it computes \f$(|x| + 1) \cdot (2 \cdot |y| + |z| + 1)\f$.
+ * Struct representing the aspect ratio of the cartesian layout.
  *
- * @tparam CoordinateType Coordinate type.
- * @param coord Coordinate.
- * @return Area of coord.
+ * The `aspect_ratio_type` struct defines the minimum and maximum coordinates, effectively
+ * determining the size and position of the layout within a coordinate space.
  */
 template <typename CoordinateType>
-uint64_t area(const CoordinateType& coord) noexcept
+struct aspect_ratio
 {
-    if constexpr (std::is_same_v<CoordinateType, siqad::coord_t>)
+    /**
+     * Default constructor. Initializes both minimum and maximum to (0, 0, 0).
+     *
+     * This creates a layout with a single point at the origin.
+     */
+    aspect_ratio() : min{0, 0, 0}, max{0, 0, 0}
     {
-        return (static_cast<uint64_t>(integral_abs(coord.x)) + 1) *
-               (2 * static_cast<uint64_t>(integral_abs(coord.y)) + static_cast<uint64_t>(integral_abs(coord.z)) + 1);
+        static_assert(std::is_same_v<CoordinateType, cube::coord_t> || std::is_same_v<CoordinateType, siqad::coord_t> ||
+                          std::is_same_v<CoordinateType, offset::ucoord_t>,
+                      "CoordinateType is not supported");
+    }
+    /**
+     * Constructs an aspect_ratio_type from a single end coordinate.
+     *
+     * The minimium coordinate is initialized to (0, 0, 0), and the maximum coordinate is set to `e`.
+     *
+     * @param e The maximum coordinate defining the layout's size.
+     */
+    explicit aspect_ratio(const CoordinateType& e) : min{0, 0, 0}, max{e}
+    {
+        static_assert(std::is_same_v<CoordinateType, cube::coord_t> || std::is_same_v<CoordinateType, siqad::coord_t> ||
+                          std::is_same_v<CoordinateType, offset::ucoord_t>,
+                      "CoordinateType is not supported");
     }
 
-    return (static_cast<uint64_t>(integral_abs(coord.x)) + 1) * (static_cast<uint64_t>(integral_abs(coord.y)) + 1);
-}
-/**
- * Computes the volume of a given coordinate assuming its origin is (0, 0, 0). Calculates \f$(|x| + 1) \cdot (|y| + 1)
- * \cdot (|z| + 1)\f$ by default. For SiQAD coordinates, which are planar by definition, the area is returned.
- *
- * @tparam CoordinateType Coordinate type.
- * @param coord Coordinate.
- * @return Volume of coord.
- */
-template <typename CoordinateType>
-uint64_t volume(const CoordinateType& coord) noexcept
-{
-    if constexpr (std::is_same_v<CoordinateType, siqad::coord_t>)
+    /**
+     * Constructs an aspect_ratio_type from specified start and end coordinates.
+     *
+     * @param mi The minimum coordinate of the layout.
+     * @param ma The maximum coordinate of the layout.
+     */
+    aspect_ratio(const CoordinateType& minimum, const CoordinateType& maximum) : min{minimum}, max{maximum}
     {
-        return area(coord);
+        static_assert(std::is_same_v<CoordinateType, cube::coord_t> || std::is_same_v<CoordinateType, siqad::coord_t> ||
+                          std::is_same_v<CoordinateType, offset::ucoord_t>,
+                      "CoordinateType is not supported");
+        assert(minimum <= maximum);
     }
 
-    return (static_cast<uint64_t>(integral_abs(coord.x)) + 1) * (static_cast<uint64_t>(integral_abs(coord.y)) + 1) *
-           (static_cast<uint64_t>(integral_abs(coord.z)) + 1);
-}
+    /**
+     * Templated constructor for initializing aspect_ratio_type with three integral coordinates.
+     *
+     * Initializes the minimum coordinate to (0, 0, 0) and sets the maximum coordinate to (x, y, z).
+     *
+     * @tparam X Type of the x-coordinate. Must be integral.
+     * @tparam Y Type of the y-coordinate. Must be integral.
+     * @tparam Z Type of the z-coordinate. Must be integral.
+     * @param x The x-coordinate value.
+     * @param y The y-coordinate value.
+     * @param z The z-coordinate value.
+     */
+    template <typename X, typename Y, typename Z>
+    aspect_ratio(X x, Y y, Z z) :
+            min{0, 0, 0},
+            max{static_cast<decltype(max.x)>(x), static_cast<decltype(max.y)>(y), static_cast<decltype(max.z)>(z)}
+    {
+        static_assert(std::is_integral_v<X> && std::is_integral_v<Y> && std::is_integral_v<Z>,
+                      "Coordinate must be positive");
+    }
+
+    /**
+     * Templated constructor for initializing aspect_ratio_type with two integral coordinates.
+     *
+     * Initializes the start coordinate to (0, 0, 0) and sets the end coordinate to (x, y, 0).
+     *
+     * @tparam X Type of the x-coordinate. Must be integral.
+     * @tparam Y Type of the y-coordinate. Must be integral.
+     * @param x The x-coordinate value.
+     * @param y The y-coordinate value.
+     */
+    template <typename X, typename Y>
+    aspect_ratio(X x, Y y) : min{0, 0, 0}, max{static_cast<decltype(max.x)>(x), static_cast<decltype(max.y)>(y), 0}
+    {
+        static_assert(std::is_integral_v<X> && std::is_integral_v<Y>, "Coordinate must be positive");
+    }
+
+    /**
+     * Gets the x-coordinate of the maximum coordinate.
+     *
+     * @return The x-coordinate value.
+     */
+    auto x_min() const
+    {
+        return min.x;
+    }
+    auto x_max() const
+    {
+        return max.x;
+    }
+    auto x() const
+    {
+        return static_cast<decltype(max.x)>(integral_abs(max.x - min.x));
+    }
+    /**
+     * Gets the y-coordinate of the maximum position.
+     *
+     * @return The y-coordinate value.
+     */
+    auto y_min() const
+    {
+        return min.y;
+    }
+    auto y_max() const
+    {
+        return max.y;
+    }
+    auto y() const
+    {
+        return static_cast<decltype(max.y)>(integral_abs(max.y - min.y));
+    }
+    /**
+     * Gets the z-coordinate of the maximum position.
+     *
+     * @return The z-coordinate value.
+     */
+    auto z_min() const
+    {
+        return min.z;
+    }
+    auto z_max() const
+    {
+        return max.z;
+    }
+    auto z() const
+    {
+        return static_cast<decltype(max.z)>(integral_abs(max.z - min.z));
+    }
+    /**
+     * Equality operator for `aspect_ratio_type`.
+     *
+     * Compares two `aspect_ratio_type` instances for equality based on their max coordinates.
+     *
+     * @param other The other aspect_ratio_type instance to compare against.
+     * @return `true` if both aspect_ratios have the same max coordinates; `false` otherwise.
+     */
+    [[nodiscard]] bool operator==(const aspect_ratio& other) const noexcept
+    {
+        auto min_equal = (min.x == other.min.x) && (min.y == other.min.y) && (min.z == other.min.z);
+        auto max_equal = (max.x == other.max.x) && (max.y == other.max.y) && (max.z == other.max.z);
+        return (min_equal && max_equal);
+    }
+    /**
+     * Computes the area of a given coordinate assuming its origin is (0, 0, 0). Calculates \f$(|x| + 1) \cdot (|y| +
+     * 1)\f$ by default. The exception is SiQAD coordinates, for which it computes \f$(|x| + 1) \cdot (2 \cdot |y| + |z|
+     * + 1)\f$.
+     *
+     * @tparam CoordinateType Coordinate type.
+     * @param coord Coordinate.
+     * @return Area of coord.
+     */
+    uint64_t area() noexcept
+    {
+        if constexpr (std::is_same_v<CoordinateType, siqad::coord_t>)
+        {
+            return static_cast<uint64_t>(((x() + 1) * (2 * y() + z() + 1)));
+        }
+
+        return static_cast<uint64_t>((x() + 1) * (y() + 1));
+    }
+    /**
+     * Computes the volume of a given coordinate assuming its origin is (0, 0, 0). Calculates \f$(|x| + 1) \cdot (|y| +
+     * 1)
+     * \cdot (|z| + 1)\f$ by default. For SiQAD coordinates, which are planar by definition, the area is returned.
+     *
+     * @tparam CoordinateType Coordinate type.
+     * @param coord Coordinate.
+     * @return Volume of coord.
+     */
+    uint64_t volume() noexcept
+    {
+        if constexpr (std::is_same_v<CoordinateType, siqad::coord_t>)
+        {
+            return area();
+        }
+
+        return area() * (z() + 1);
+    }
+
+    CoordinateType min;
+    CoordinateType max;
+};
 
 /**
  * An iterator type that allows to enumerate coordinates in order within a boundary.

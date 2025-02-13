@@ -50,14 +50,25 @@ class cartesian_layout
   public:
 #pragma region Types and constructors
 
-    using coordinate   = OffsetCoordinateType;
-    using aspect_ratio = OffsetCoordinateType;
+    using coordinate        = OffsetCoordinateType;
+    using aspect_ratio_type = aspect_ratio<OffsetCoordinateType>;
 
+    /**
+     * Struct representing the storage for a cartesian_layout.
+     *
+     * The `cartesian_layout_storage` struct holds the dimensions and origin of the layout.
+     */
     struct cartesian_layout_storage
     {
-        explicit cartesian_layout_storage(const aspect_ratio& ar) noexcept : dimension{ar} {};
+        /**
+         * Constructs a cartesian_layout_storage with specified dimensions and origin.
+         *
+         * @param dim The dimensions of the layout (width, height, etc.).
+         * @param org The origin coordinate. Defaults to (0, 0, 0).
+         */
+        explicit cartesian_layout_storage(const aspect_ratio_type& ar) : ar{ar} {}
 
-        aspect_ratio dimension;
+        aspect_ratio_type ar;  // width,height, etc.
     };
 
     static constexpr auto min_fanin_size = 0u;  // NOLINT(readability-identifier-naming): mockturtle requirement
@@ -68,14 +79,25 @@ class cartesian_layout
     using storage = std::shared_ptr<cartesian_layout_storage>;
 
     /**
-     * Standard constructor. The given aspect ratio points to the highest possible coordinate in the layout. That means
-     * in the ASCII layout above `ar = (3,2)`. Consequently, with `ar = (0,0)`, the layout has exactly one coordinate.
+     * Standard constructor.
      *
-     * @param ar Highest possible position in the layout.
+     * Initializes the layout with the highest possible coordinate at (0, 0, 0), effectively creating
+     * a layout with a single coordinate.
      */
-    explicit cartesian_layout(const aspect_ratio& ar = {}) :
-            strg{std::make_shared<cartesian_layout_storage>(initialize_dimension(ar))}
-    {}
+    explicit cartesian_layout(const aspect_ratio_type& ar = {}) :
+            strg{std::make_shared<cartesian_layout_storage>(initialize_dimension(ar))} {};
+
+    /**
+     * Constructs a cartesian_layout from an aspect_ratio_type.
+     *
+     * This constructor initializes the layout's dimensions based on the provided aspect_ratio_type,
+     * and sets the origin to the min coordinate of the aspect_ratio_type.
+     *
+     * @param ar The aspect_ratio_type defining the layout's size and origin.
+     */
+    //    explicit cartesian_layout(const aspect_ratio_type& ar) : strg{std::make_shared<cartesian_layout_storage>(ar)}
+    //    {}
+
     /**
      * Copy constructor from another layout's storage.
      *
@@ -120,7 +142,7 @@ class cartesian_layout
      */
     [[nodiscard]] auto x() const noexcept
     {
-        return strg->dimension.x;
+        return strg->ar.x();
     }
     /**
      * Returns the layout's y-dimension, i.e., returns the biggest y-value that still belongs to the layout.
@@ -129,7 +151,7 @@ class cartesian_layout
      */
     [[nodiscard]] auto y() const noexcept
     {
-        return strg->dimension.y;
+        return strg->ar.y();
     }
     /**
      * Returns the layout's z-dimension, i.e., returns the biggest z-value that still belongs to the layout.
@@ -138,7 +160,73 @@ class cartesian_layout
      */
     [[nodiscard]] auto z() const noexcept
     {
-        return strg->dimension.z;
+        return strg->ar.z();
+    }
+    /**
+     * Returns the layout's x-org coordinate.
+     *
+     * The x-org coordinate represents the origin's x-value in the layout.
+     *
+     * @return The x-start coordinate of the layout.
+     */
+    [[nodiscard]] auto x_min() const noexcept
+    {
+        return strg->ar.x_min();
+    }
+    /**
+     * Returns the layout's y-org coordinate.
+     *
+     * The y-org coordinate represents the origin's y-value in the layout.
+     *
+     * @return The y-org coordinate of the layout.
+     */
+    [[nodiscard]] auto y_min() const noexcept
+    {
+        return strg->ar.y_min();
+    }
+    /**
+     * Returns the layout's z-org coordinate.
+     *
+     * The z-org coordinate represents the origin's z-value in the layout.
+     *
+     * @return The z-org coordinate of the layout.
+     */
+    [[nodiscard]] auto z_min() const noexcept
+    {
+        return strg->ar.z_min();
+    }
+    /**
+     * Returns the layout's x-org coordinate.
+     *
+     * The x-org coordinate represents the origin's x-value in the layout.
+     *
+     * @return The x-start coordinate of the layout.
+     */
+    [[nodiscard]] auto x_max() const noexcept
+    {
+        return strg->ar.x_max();
+    }
+    /**
+     * Returns the layout's y-org coordinate.
+     *
+     * The y-org coordinate represents the origin's y-value in the layout.
+     *
+     * @return The y-org coordinate of the layout.
+     */
+    [[nodiscard]] auto y_max() const noexcept
+    {
+        return strg->ar.y_max();
+    }
+    /**
+     * Returns the layout's z-org coordinate.
+     *
+     * The z-org coordinate represents the origin's z-value in the layout.
+     *
+     * @return The z-org coordinate of the layout.
+     */
+    [[nodiscard]] auto z_max() const noexcept
+    {
+        return strg->ar.z_max();
     }
     /**
      * Returns the layout's number of faces depending on the coordinate type.
@@ -147,16 +235,25 @@ class cartesian_layout
      */
     [[nodiscard]] auto area() const noexcept
     {
-        return fiction::area(strg->dimension);
+        return strg->ar.area();
     }
     /**
-     * Updates the layout's dimensions, effectively resizing it.
+     * Updates the layout's dimensions and origin based on a new aspect_ratio_type.
      *
-     * @param ar New aspect ratio.
+     * This method effectively resizes the layout by adjusting its dimensions to match
+     * the provided aspect_ratio_type. The origin is also updated to the start coordinate of the aspect_ratio_type.
+     *
+     * @param ar The new aspect_ratio_type to apply to the layout.
      */
-    void resize(const aspect_ratio& ar) noexcept
+    void resize(const aspect_ratio_type& ar) noexcept
     {
-        strg->dimension = initialize_dimension(ar);
+        strg->ar = ar;
+    }
+
+    // todo
+    void resize(const OffsetCoordinateType& ar) noexcept
+    {
+        strg->ar = aspect_ratio_type(ar);
     }
 
 #pragma endregion
@@ -171,16 +268,22 @@ class cartesian_layout
      */
     [[nodiscard]] constexpr OffsetCoordinateType north(const OffsetCoordinateType& c) const noexcept
     {
-        if (c.y == 0ull)
+        auto nc = c;
+
+        if (c.y <= y_min())
         {
-            return c;
+            if (c.y < y_min())
+            {
+                nc.d = 1;
+            }
+            return nc;
         }
 
-        auto nc = c;
         --nc.y;
 
         return nc;
     }
+
     /**
      * Returns the coordinate that is located in north-eastern direction of a given coordinate `c`, i.e., the face
      * whose x-dimension is higher by 1 and whose y-dimension is lower by 1. If `c`'s x-dimension is already at maximum
@@ -191,12 +294,17 @@ class cartesian_layout
      */
     [[nodiscard]] constexpr OffsetCoordinateType north_east(const OffsetCoordinateType& c) const noexcept
     {
-        if (c.x == x() || c.y == 0ull)
+        auto nec = c;
+
+        if (c.x >= x() || c.y <= y_min())
         {
-            return c;
+            if (c.x > x() || c.y < y_min())
+            {
+                nec.d = 1;
+            }
+            return nec;
         }
 
-        auto nec = c;
         ++nec.x;
         --nec.y;
 
@@ -213,11 +321,11 @@ class cartesian_layout
     {
         auto ec = c;
 
-        if (c.x > x())
+        if (c.x > x_max())
         {
             ec.d = 1;
         }
-        else if (c.x < x())
+        else if (c.x < x_max())
         {
             ++ec.x;
         }
@@ -236,11 +344,11 @@ class cartesian_layout
     {
         auto sec = c;
 
-        if (c.x > x() || c.y > y())
+        if (c.x > x_max() || c.y > y_max())
         {
             sec.d = 1;
         }
-        else if (c.x < x() && c.y < y())
+        else if (c.x < x_max() && c.y < y_max())
         {
             ++sec.x;
             ++sec.y;
@@ -259,11 +367,11 @@ class cartesian_layout
     {
         auto sc = c;
 
-        if (c.y > y())
+        if (c.y > y_max())
         {
             sc.d = 1;
         }
-        else if (c.y < y())
+        else if (c.y < y_max())
         {
             ++sc.y;
         }
@@ -282,15 +390,17 @@ class cartesian_layout
     {
         auto swc = c;
 
-        if (c.y > y())
+        if (c.x <= x_min() || c.y >= y_max())
         {
-            swc.d = 1;
+            if (c.x < x_min() || c.y > y_max())
+            {
+                swc.d = 1;
+            }
+            return swc;
         }
-        else if (c.x > 0ull && c.y < y())
-        {
-            --swc.x;
-            ++swc.y;
-        }
+
+        --swc.x;
+        ++swc.y;
 
         return swc;
     }
@@ -303,12 +413,17 @@ class cartesian_layout
      */
     [[nodiscard]] constexpr OffsetCoordinateType west(const OffsetCoordinateType& c) const noexcept
     {
-        if (c.x == 0ull)
+        auto wc = c;
+
+        if (c.x <= x_min())
         {
-            return c;
+            if (c.x < x_min())
+            {
+                wc.d = 1;
+            }
+            return wc;
         }
 
-        auto wc = c;
         --wc.x;
 
         return wc;
@@ -323,12 +438,17 @@ class cartesian_layout
      */
     [[nodiscard]] constexpr OffsetCoordinateType north_west(const OffsetCoordinateType& c) const noexcept
     {
-        if (c.x == 0ull || c.y == 0ull)
+        auto nwc = c;
+
+        if (c.x <= x_min() || c.y <= y_min())
         {
-            return c;
+            if (c.x < x_min() || c.y < y_min())
+            {
+                nwc.d = 1;
+            }
+            return nwc;
         }
 
-        auto nwc = c;
         --nwc.x;
         --nwc.y;
 
@@ -660,8 +780,8 @@ class cartesian_layout
     [[nodiscard]] auto coordinates(const OffsetCoordinateType& start = {}, const OffsetCoordinateType& stop = {}) const
     {
         return range_t{
-            std::make_pair(coord_iterator{strg->dimension, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
-                           coord_iterator{strg->dimension, stop.is_dead() ? strg->dimension.get_dead() : stop})};
+            std::make_pair(coord_iterator{strg->ar.max, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
+                           coord_iterator{strg->ar.max, stop.is_dead() ? strg->ar.max.get_dead() : stop})};
     }
     /**
      * Applies a function to all coordinates accessible in the layout between `start` and `stop`. The iteration order is
@@ -677,8 +797,8 @@ class cartesian_layout
                             const OffsetCoordinateType& stop = {}) const
     {
         mockturtle::detail::foreach_element(
-            coord_iterator{strg->dimension, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
-            coord_iterator{strg->dimension, stop.is_dead() ? strg->dimension.get_dead() : stop}, fn);
+            coord_iterator{strg->ar.max, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
+            coord_iterator{strg->ar.max, stop.is_dead() ? strg->ar.max.get_dead() : stop}, fn);
     }
     /**
      * Returns a range of all coordinates accessible in the layout's ground layer between `start` and `stop`. The
@@ -694,7 +814,7 @@ class cartesian_layout
     {
         assert(start.z == 0 && stop.z == 0);
 
-        const auto ground_layer = aspect_ratio{x(), y(), 0};
+        const auto ground_layer = coordinate{x(), y(), 0};
 
         return range_t{
             std::make_pair(coord_iterator{ground_layer, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
@@ -715,7 +835,7 @@ class cartesian_layout
     {
         assert(start.z == 0 && stop.z == 0);
 
-        const auto ground_layer = aspect_ratio{x(), y(), 0};
+        const auto ground_layer = coordinate{x(), y(), 0};
 
         mockturtle::detail::foreach_element(
             coord_iterator{ground_layer, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
@@ -818,16 +938,26 @@ class cartesian_layout
      * Initializer for a cartesian layout dimension. When using SiQAD coordinates, it will default the z value to 1 if
      * the y value is greater than 0.
      */
-    constexpr OffsetCoordinateType initialize_dimension(const OffsetCoordinateType& coord) const
+    constexpr aspect_ratio_type initialize_dimension(const aspect_ratio_type& coord) const
     {
         if constexpr (std::is_same_v<OffsetCoordinateType, siqad::coord_t>)
         {
-            return OffsetCoordinateType{coord.x, coord.y, 1};
+            return aspect_ratio<OffsetCoordinateType>{coord.max.x, coord.max.y, 1};
         }
 
         return coord;
     }
 };
+
+//// Deduction guide for the constructor with aspect_ratio_type
+// template <typename OffsetCoordinateType>
+// cartesian_layout(const aspect_ratio<OffsetCoordinateType>& = {})
+//     -> cartesian_layout<OffsetCoordinateType>;
+//
+//// Deduction guide for the constructor with OffsetCoordinateType
+// template <typename OffsetCoordinateType>
+// cartesian_layout(const OffsetCoordinateType& coord)
+//     -> cartesian_layout<OffsetCoordinateType>;
 
 }  // namespace fiction
 

@@ -250,13 +250,15 @@ template <typename Lyt>
  * @return New normalized equivalent layout.
  */
 template <typename Lyt>
-Lyt normalize_layout_coordinates(const Lyt& lyt) noexcept
+[[nodiscard]] Lyt normalize_layout_coordinates(const Lyt& lyt) noexcept
 {
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
 
     auto x_offset = std::numeric_limits<decltype(lyt.x())>::max();
     auto y_offset = std::numeric_limits<decltype(lyt.y())>::max();
+
+    const auto num_cells = lyt.num_cells();
 
     lyt.foreach_cell(
         [&x_offset, &y_offset](const auto& c)
@@ -276,8 +278,8 @@ Lyt normalize_layout_coordinates(const Lyt& lyt) noexcept
     assert(lyt.x() - x_offset >= 0 && "x_offset is too large");
     assert(lyt.y() - y_offset >= 0 && "y_offset is too large");
 
-    lyt_new.resize(
-        {static_cast<std::size_t>(lyt.x() - x_offset), static_cast<std::size_t>(lyt.y() - y_offset), lyt.z()});
+    lyt_new.resize(aspect_ratio_type_t<Lyt>{
+        {static_cast<std::size_t>(lyt.x() - x_offset), static_cast<std::size_t>(lyt.y() - y_offset), lyt.z()}});
 
     lyt_new.set_layout_name(lyt.get_layout_name());
     lyt_new.set_tile_size_x(lyt.get_tile_size_x());
@@ -310,7 +312,9 @@ auto convert_layout_to_siqad_coordinates(const Lyt& lyt) noexcept
 
     auto process_layout = [](auto& lyt_orig, auto lyt_new)
     {
-        lyt_new.resize({lyt_orig.x(), (lyt_orig.y() - lyt_orig.y() % 2) / 2});
+        // todo rethink this
+
+        lyt_new.resize(aspect_ratio_type_t<decltype(lyt_new)>{lyt_orig.x(), (lyt_orig.y() - lyt_orig.y() % 2) / 2, 1});
         lyt_new.set_layout_name(lyt_orig.get_layout_name());
         lyt_new.set_tile_size_x(lyt_orig.get_tile_size_x());
         lyt_new.set_tile_size_y(lyt_orig.get_tile_size_y());
@@ -432,14 +436,15 @@ template <typename LytDest, typename LytSrc>
 
     if (are_cells_assigned_to_negative_coordinates && has_offset_ucoord_v<LytDest>)
     {
-        return convert_layout_to_fiction_coordinates<LytDest>(normalize_layout_coordinates(lyt));
+        const auto normalized_lyt = normalize_layout_coordinates(lyt);
+        return convert_layout_to_fiction_coordinates<LytDest>(normalized_lyt);
     }
 
     auto process_layout = [&lyt](auto lyt_new)
     {
         if constexpr (is_sidb_lattice_v<LytSrc>)
         {
-            lyt_new.resize({lyt.x(), lyt.y() * 2 + 1});
+            lyt_new.resize(aspect_ratio_type_t<decltype(lyt_new)>{{lyt.x(), (lyt.y() * 2) + 1}});
             lyt_new.set_layout_name(lyt.get_layout_name());
             lyt_new.set_tile_size_x(lyt.get_tile_size_x());
             lyt_new.set_tile_size_y(lyt.get_tile_size_y());

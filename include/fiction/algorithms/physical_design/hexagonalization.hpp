@@ -63,7 +63,7 @@ template <typename CartLyt, typename HexLyt>
     const auto y = cartesian_tile.x + cartesian_tile.y;
     const auto x = static_cast<int64_t>(
         cartesian_tile.x + static_cast<int64_t>(std::ceil(std::floor(static_cast<double>(cartesian_layout_height) / 2) -
-                                                          static_cast<double>(y) / 2)));
+                                                          (static_cast<double>(y) / 2))));
     const auto z = cartesian_tile.z;
 
     return tile<HexLyt>{x, y, z};
@@ -294,7 +294,7 @@ template <typename HexLyt, typename CartLyt>
         const auto mapped_layout_width  = layout_max.x;
         const auto mapped_layout_height = layout_max.y;
 
-        hex_layout.resize({mapped_layout_width, mapped_layout_height, hex_layout.z()});
+        hex_layout.resize(aspect_ratio<coordinate<CartLyt>>{mapped_layout_width, mapped_layout_height, hex_layout.z()});
 
         restore_names<CartLyt, HexLyt>(lyt, hex_layout);
     }

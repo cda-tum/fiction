@@ -1,6 +1,7 @@
 import unittest
 
 from mnt.pyfiction import (
+    aspect_ratio_offset,
     bdl_wire_selection,
     charge_distribution_surface_100,
     detect_bdl_wires_100,
@@ -12,7 +13,7 @@ from mnt.pyfiction import (
 
 class TestDetectBDLWires(unittest.TestCase):
     def test_detect_bdl_wires_100_lattice(self):
-        lyt = sidb_100_lattice((7, 0))
+        lyt = sidb_100_lattice(aspect_ratio_offset((7, 0)))
 
         lyt = charge_distribution_surface_100(lyt)
 

@@ -1,6 +1,7 @@
 import unittest
 
 from mnt.pyfiction import (
+    aspect_ratio_offset,
     charge_distribution_surface_100,
     charge_distribution_surface_111,
     minimum_energy,
@@ -14,7 +15,7 @@ from mnt.pyfiction import (
 
 class TestMinimumEnergy(unittest.TestCase):
     def test_three_DBs_100_lattice(self):
-        layout = sidb_100_lattice((10, 10))
+        layout = sidb_100_lattice(aspect_ratio_offset((10, 10)))
 
         layout.assign_cell_type((0, 1), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((4, 1), sidb_technology.cell_type.NORMAL)
@@ -36,7 +37,7 @@ class TestMinimumEnergy(unittest.TestCase):
         self.assertLessEqual(result, 0)
 
     def test_three_DBs_111_lattice(self):
-        layout = sidb_111_lattice((10, 10))
+        layout = sidb_111_lattice(aspect_ratio_offset((10, 10)))
 
         layout.assign_cell_type((0, 1), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((4, 1), sidb_technology.cell_type.NORMAL)

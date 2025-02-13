@@ -224,7 +224,7 @@ class read_fqca_layout_impl
         }
 
         // resize the layout to fit all cells
-        lyt.resize(max_cell_pos);
+        lyt.resize(aspect_ratio{max_cell_pos});
 
         return lyt;
     }
