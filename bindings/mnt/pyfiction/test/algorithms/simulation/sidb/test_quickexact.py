@@ -19,6 +19,7 @@ from mnt.pyfiction import (
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
+
 class TestQuickExact(unittest.TestCase):
     def test_three_sidbs(self):
         layout = sidb_100_lattice((2, 1))
@@ -86,22 +87,28 @@ class TestQuickExact(unittest.TestCase):
         physical_parameters.base = 2
         physical_parameters.epsilon_r = 5.6
         physical_parameters.lambda_tf = 5.0  # (nm)
-        physical_parameters.mu_minus = -0.25  # (eV) (energy threshold to change the charge state of a negatively charged SiDB to a neutrally charged SiDB)
+        physical_parameters.mu_minus = (
+            -0.25
+        )  # (eV) (energy threshold to change the charge state of a negatively charged SiDB to a neutrally charged SiDB)
         quickexact_parameter = quickexact_params()
         quickexact_parameter.simulation_parameters = physical_parameters
 
         # input 00
-        and_gate.assign_cell_type(offset_coordinate(2, 2),
-                                  sidb_technology.cell_type.EMPTY)  # delete one SiDB of the input BDL pair
-        and_gate.assign_cell_type(offset_coordinate(24, 2),
-                                  sidb_technology.cell_type.EMPTY)  # delete one SiDB of the input BDL pair
+        and_gate.assign_cell_type(
+            offset_coordinate(2, 2), sidb_technology.cell_type.EMPTY
+        )  # delete one SiDB of the input BDL pair
+        and_gate.assign_cell_type(
+            offset_coordinate(24, 2), sidb_technology.cell_type.EMPTY
+        )  # delete one SiDB of the input BDL pair
 
         self.assertTrue(len(quickexact(and_gate, quickexact_parameter).charge_distributions) > 0)
 
-        and_gate.assign_cell_type(offset_coordinate(2, 2),
-                                  sidb_technology.cell_type.INPUT)  # add SiDB of the input BDL pair again to have the original layout
-        and_gate.assign_cell_type(offset_coordinate(24, 2),
-                                  sidb_technology.cell_type.INPUT)  # add SiDB of the input BDL pair again to have the original layout
+        and_gate.assign_cell_type(
+            offset_coordinate(2, 2), sidb_technology.cell_type.INPUT
+        )  # add SiDB of the input BDL pair again to have the original layout
+        and_gate.assign_cell_type(
+            offset_coordinate(24, 2), sidb_technology.cell_type.INPUT
+        )  # add SiDB of the input BDL pair again to have the original layout
 
         # input 01
         and_gate.assign_cell_type(offset_coordinate(2, 2), sidb_technology.cell_type.EMPTY)
@@ -129,6 +136,7 @@ class TestQuickExact(unittest.TestCase):
 
         and_gate.assign_cell_type(offset_coordinate(0, 0), sidb_technology.cell_type.INPUT)
         and_gate.assign_cell_type(offset_coordinate(26, 0), sidb_technology.cell_type.INPUT)
+
 
 if __name__ == "__main__":
     unittest.main()
