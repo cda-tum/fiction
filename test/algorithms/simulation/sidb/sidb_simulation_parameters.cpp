@@ -6,7 +6,7 @@
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
-#include <fiction/technology/physical_constants.hpp>
+#include <fiction/technology/constants.hpp>
 
 using namespace fiction;
 
@@ -48,7 +48,7 @@ TEST_CASE("Test sidb_simulation_parameters", "[sidb-simulation-parameters]")
         const sidb_simulation_parameters params{};
 
         const double epsilon_r  = 5.6;
-        const double k_expected = physical_constants::K_E / epsilon_r;
+        const double k_expected = constants::physical::K_E / epsilon_r;
         CHECK_THAT(params.k() - k_expected, Catch::Matchers::WithinAbs(0.0, 0.00001));
 
         const double mu_minus         = -0.32;

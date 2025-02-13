@@ -49,6 +49,14 @@ void is_operational(pybind11::module& m)
           py::arg("lyt"), py::arg("spec"), py::arg("params") = fiction::is_operational_params{},
           DOC(fiction_operational_input_patterns));
 
+    m.def("operational_input_patterns",
+          py::overload_cast<const Lyt&, const std::vector<py_tt>&, const fiction::is_operational_params&,
+                            const std::vector<fiction::bdl_wire<Lyt>>&, const std::vector<fiction::bdl_wire<Lyt>>&,
+                            const std::optional<Lyt>&>(&fiction::operational_input_patterns<Lyt, py_tt>),
+          py::arg("lyt"), py::arg("spec"), py::arg("params") = fiction::is_operational_params{},
+          py::arg("input_bdl_wire"), py::arg("output_bdl_wire"), py::arg("canvas_lyt") = std::nullopt,
+          DOC(fiction_operational_input_patterns_2));
+
     m.def("kink_induced_non_operational_input_patterns",
           py::overload_cast<const Lyt&, const std::vector<py_tt>&, const fiction::is_operational_params&>(
               &fiction::kink_induced_non_operational_input_patterns<Lyt, py_tt>),

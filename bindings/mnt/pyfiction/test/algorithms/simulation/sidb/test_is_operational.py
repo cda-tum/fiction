@@ -10,6 +10,7 @@ from mnt.pyfiction import (
     is_operational,
     is_operational_params,
     kink_induced_non_operational_input_patterns,
+    operational_analysis_strategy,
     operational_condition,
     operational_input_patterns,
     operational_status,
@@ -123,6 +124,20 @@ class TestIsOperational(unittest.TestCase):
         assessment_results = is_operational(lyt, [create_and_tt()], params)
 
         self.assertEqual(assessment_results.status, operational_status.NON_OPERATIONAL)
+
+        # filer only
+        params.strategy_to_analyze_operational_status = operational_analysis_strategy.FILTER_ONLY
+        self.assertEqual(params.strategy_to_analyze_operational_status, operational_analysis_strategy.FILTER_ONLY)
+        [op_status, _evaluated_input_combinations] = is_operational(lyt, [create_and_tt()], params)
+        self.assertEqual(op_status, operational_status.NON_OPERATIONAL)
+
+        # filer then simulation
+        params.strategy_to_analyze_operational_status = operational_analysis_strategy.FILTER_THEN_SIMULATION
+        self.assertEqual(
+            params.strategy_to_analyze_operational_status, operational_analysis_strategy.FILTER_THEN_SIMULATION
+        )
+        [op_status, _evaluated_input_combinations] = is_operational(lyt, [create_and_tt()], params)
+        self.assertEqual(op_status, operational_status.NON_OPERATIONAL)
 
     def test_and_gate_111_lattice_operational_input_pattern(self):
         lyt = read_sqd_layout_111(dir_path + "/../../../resources/AND_mu_032_111_surface.sqd")
