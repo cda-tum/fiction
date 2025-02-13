@@ -825,7 +825,8 @@ class is_operational_impl
         while (canvas_charge_index <= max_index)
         {
             cds_canvas_copy.foreach_cell(
-                [&cds_layout, &cds_canvas_copy](const auto& c) {
+                [&cds_layout, &cds_canvas_copy](const auto& c)
+                {
                     cds_layout.assign_charge_state(c, cds_canvas_copy.get_charge_state(c),
                                                    charge_index_mode::KEEP_CHARGE_INDEX);
                 });
@@ -1295,9 +1296,8 @@ class is_operational_impl
  * with auxiliary statistics.
  */
 template <typename Lyt, typename TT>
-[[nodiscard]] operational_assessment<Lyt>
-is_operational(const Lyt& lyt, const std::vector<TT>& spec,
-               const is_operational_params& params = {}) noexcept
+[[nodiscard]] operational_assessment<Lyt> is_operational(const Lyt& lyt, const std::vector<TT>& spec,
+                                                         const is_operational_params& params = {}) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -1395,9 +1395,8 @@ is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational
  * @return The count of operational input combinations.
  */
 template <typename Lyt, typename TT>
-[[nodiscard]] std::set<uint64_t>
-operational_input_patterns(const Lyt& lyt, const std::vector<TT>& spec,
-                           const is_operational_params& params = {}) noexcept
+[[nodiscard]] std::set<uint64_t> operational_input_patterns(const Lyt& lyt, const std::vector<TT>& spec,
+                                                            const is_operational_params& params = {}) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -1651,9 +1650,8 @@ template <typename Lyt, typename TT>
  * non-operational due to kinks, `false` otherwise.
  */
 template <typename Lyt, typename TT>
-[[nodiscard]] bool
-is_kink_induced_non_operational(const Lyt& lyt, const std::vector<TT>& spec,
-                                const is_operational_params& params = {}) noexcept
+[[nodiscard]] bool is_kink_induced_non_operational(const Lyt& lyt, const std::vector<TT>& spec,
+                                                   const is_operational_params& params = {}) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -1749,9 +1747,8 @@ template <typename Lyt, typename TT>
  *
  */
 template <typename Lyt, typename TT>
-[[nodiscard]] std::size_t
-number_of_operational_input_combinations(const Lyt& lyt, const std::vector<TT>& spec,
-                                         const is_operational_params& params = {}) noexcept
+[[nodiscard]] std::size_t number_of_operational_input_combinations(const Lyt& lyt, const std::vector<TT>& spec,
+                                                                   const is_operational_params& params = {}) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");

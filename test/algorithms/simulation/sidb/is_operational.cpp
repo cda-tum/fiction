@@ -82,13 +82,14 @@ TEST_CASE("SiQAD OR gate", "[is-operational]")
     {
         const auto check_for_non_operationality = [&lat, &op_params]
         {
-            const auto assessment_results             = is_operational(lat, std::vector<tt>{create_or_tt()}, op_params);
+            const auto assessment_results = is_operational(lat, std::vector<tt>{create_or_tt()}, op_params);
             CHECK(assessment_results.status == operational_status::NON_OPERATIONAL);
             REQUIRE(assessment_results.assessment_per_input.has_value());
             REQUIRE(assessment_results.assessment_per_input.value().size() == 4);
             for (uint64_t i = 0; i < 4; ++i)
             {
-                CHECK(assessment_results.assessment_per_input.value().at(i).status == operational_status::NON_OPERATIONAL);
+                CHECK(assessment_results.assessment_per_input.value().at(i).status ==
+                      operational_status::NON_OPERATIONAL);
             }
         };
 
@@ -102,7 +103,6 @@ TEST_CASE("SiQAD OR gate", "[is-operational]")
         op_params.op_condition_positive_charges =
             is_operational_params::operational_condition_positive_charges::REJECT_POSITIVE_CHARGES;
         op_params.simulation_parameters.epsilon_r = 5.6;
-
     }
 
     // from now on, we will terminate when the first non-operational input combination is found
@@ -179,7 +179,9 @@ TEST_CASE("SiQAD NAND gate", "[is-operational]")
                                   bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED},
         is_operational_params::operational_condition_kinks::REJECT_KINKS,
         {},
-        is_operational_params::operational_analysis_strategy::FILTER_THEN_SIMULATION, {}, {}};
+        is_operational_params::operational_analysis_strategy::FILTER_THEN_SIMULATION,
+        {},
+        {}};
 
     SECTION("Pruning and simulation")
     {
