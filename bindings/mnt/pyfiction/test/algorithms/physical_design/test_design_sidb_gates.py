@@ -4,9 +4,11 @@ from mnt.pyfiction import (
     create_and_tt,
     create_nor_tt,
     design_sidb_gates,
-    design_sidb_gates_mode,
-    design_sidb_gates_params,
-    operational_condition,
+    design_sidb_gates_mode_100,
+    design_sidb_gates_mode_111,
+    design_sidb_gates_params_100,
+    design_sidb_gates_params_111,
+    operational_condition_kinks,
     sidb_100_lattice,
     sidb_111_lattice,
     sidb_simulation_engine,
@@ -35,10 +37,10 @@ class TestDesignSiDBGates(unittest.TestCase):
 
         layout.assign_cell_type((10, 19), sidb_technology.cell_type.NORMAL)
 
-        params = design_sidb_gates_params()
+        params = design_sidb_gates_params_100()
         params.operational_params.simulation_parameters.base = 2
         params.operational_params.simulation_parameters.mu_minus = -0.28
-        params.design_mode = design_sidb_gates_mode.AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER
+        params.design_mode = design_sidb_gates_mode_100.EXHAUSTIVE_GATE_DESIGNER
         params.canvas = [(4, 8), (14, 11)]
         params.number_of_sidbs = 1
         params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
@@ -81,14 +83,14 @@ class TestDesignSiDBGates(unittest.TestCase):
 
         layout.assign_cell_type((23, 59), sidb_technology.cell_type.NORMAL)
 
-        params = design_sidb_gates_params()
+        params = design_sidb_gates_params_111()
         params.operational_params.simulation_parameters.base = 2
         params.operational_params.simulation_parameters.mu_minus = -0.32
-        params.design_mode = design_sidb_gates_mode.AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER
+        params.design_mode = design_sidb_gates_mode_111.EXHAUSTIVE_GATE_DESIGNER
         params.canvas = [(10, 22), (14, 34)]
         params.number_of_sidbs = 3
         params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
-        params.operational_params.op_condition = operational_condition.REJECT_KINKS
+        params.operational_params.op_condition_kinks = operational_condition_kinks.REJECT_KINKS
 
         self.assertEqual(params.operational_params.simulation_parameters.mu_minus, -0.32)
         self.assertEqual(params.number_of_sidbs, 3)
@@ -99,7 +101,7 @@ class TestDesignSiDBGates(unittest.TestCase):
         self.assertEqual(len(designed_gates), 44)
 
         # tolerate kink states
-        params.operational_params.op_condition = operational_condition.TOLERATE_KINKS
+        params.operational_params.op_condition_kinks = operational_condition_kinks.TOLERATE_KINKS
         designed_gates = design_sidb_gates(layout, [create_nor_tt()], params)
         self.assertEqual(len(designed_gates), 175)
 
@@ -132,10 +134,10 @@ class TestDesignSiDBGates(unittest.TestCase):
 
         layout.assign_cell_type((23, 59), sidb_technology.cell_type.NORMAL)
 
-        params = design_sidb_gates_params()
+        params = design_sidb_gates_params_111()
         params.operational_params.simulation_parameters.base = 2
         params.operational_params.simulation_parameters.mu_minus = -0.32
-        params.design_mode = design_sidb_gates_mode.AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER
+        params.design_mode = design_sidb_gates_mode_111.EXHAUSTIVE_GATE_DESIGNER
 
         params.canvas = [(10, 26), (14, 34)]
         params.number_of_sidbs = 3
