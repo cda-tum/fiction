@@ -110,7 +110,7 @@ TEST_CASE("AND gate mirrored on the x-axis on the H-Si 111 surface",
         REQUIRE(!gs.empty());
 
         is_operational_params op_params{};
-        op_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
+        op_params.op_condition_kinks = is_operational_params::operational_condition_kinks::REJECT_KINKS;
 
         SECTION("Correct index")
         {
