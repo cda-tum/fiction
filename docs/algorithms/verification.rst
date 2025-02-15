@@ -34,3 +34,15 @@ Equivalence Checking
         .. autoclass:: mnt.pyfiction.eq_type
             :members:
         .. autofunction:: mnt.pyfiction.equivalence_checking
+
+Virtual Miter
+-------------
+
+.. tabs::
+    .. tab:: C++
+        **Header:** ``fiction/algorithms/verification/virtual_miter.hpp``
+
+        .. doxygenfunction:: fiction::virtual_miter
+
+    .. tab:: Python
+        .. autofunction:: mnt.pyfiction.virtual_miter

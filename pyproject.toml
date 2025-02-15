@@ -7,7 +7,7 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "mnt.pyfiction"
-version = "0.6.7"
+version = "0.6.9"
 description = "Design Automation for Field-coupled Nanotechnologies"
 readme = "README.md"
 authors = [
@@ -124,6 +124,7 @@ FICTION_ENABLE_IPO = "ON"
 FICTION_ENABLE_PCH = "ON"
 FICTION_ENABLE_UNITY_BUILD = "ON"
 FICTION_Z3 = "ON"
+FICTION_ALGLIB = "ON"
 FICTION_PYTHON_BINDINGS = "ON"
 
 [[tool.scikit-build.overrides]]
@@ -152,7 +153,7 @@ free-threaded-support = true
 manylinux-x86_64-image = "manylinux_2_28"
 
 [tool.cibuildwheel.linux]
-environment = { Z3_ROOT = "/opt/python/cp311-cp311/lib/python3.11/site-packages/z3" }
+environment = { Z3_ROOT = "/opt/python/cp311-cp311/lib/python3.11/site-packages/z3", ALGLIB_DIR = "libs/alglib-cmake/src/cpp/src" }
 before-all = "/opt/python/cp311-cp311/bin/pip install z3-solver>=4.8.0"
 repair-wheel-command = [
     "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/python/cp311-cp311/lib/python3.11/site-packages/z3/lib",

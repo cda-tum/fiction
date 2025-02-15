@@ -13,6 +13,9 @@ Possible charge states of SiDBs.
         **Header:** ``fiction/technology/sidb_charge_state.hpp``
 
         .. doxygenenum:: fiction::sidb_charge_state
+        .. doxygenvariable:: fiction::SIDB_CHARGE_STATES_BASE_2
+        .. doxygenvariable:: fiction::SIDB_CHARGE_STATES_BASE_3
+        .. doxygenfunction:: fiction::sidb_charge_states_for_base_number
         .. doxygenfunction:: fiction::charge_state_to_sign
         .. doxygenfunction:: fiction::sign_to_charge_state
         .. doxygenfunction:: fiction::charge_configuration_to_string
@@ -20,6 +23,7 @@ Possible charge states of SiDBs.
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.sidb_charge_state
             :members:
+        .. autofunction:: mnt.pyfiction.sidb_charge_states_for_base_number
         .. autofunction:: mnt.pyfiction.charge_state_to_sign
         .. autofunction:: mnt.pyfiction.sign_to_charge_state
         .. autofunction:: mnt.pyfiction.charge_configuration_to_string
@@ -81,11 +85,11 @@ Physical Constants
 
 **Header:** ``fiction/technology/physical_constants.hpp``
 
-.. doxygenvariable:: EPSILON
-.. doxygenvariable:: ELEMENTARY_CHARGE
-.. doxygenvariable:: K_E
-.. doxygenvariable:: POP_STABILITY_ERR
-.. doxygenvariable:: PI
+.. doxygenvariable:: fiction::constants::physical::EPSILON
+.. doxygenvariable:: fiction::constants::physical::ELEMENTARY_CHARGE
+.. doxygenvariable:: fiction::constants::physical::K_E
+.. doxygenvariable:: fiction::constants::ERROR_MARGIN
+.. doxygenvariable:: fiction::constants::PI
 
 
 Euclidean distance between two SiDBs in nanometers
@@ -100,3 +104,48 @@ Euclidean distance between two SiDBs in nanometers
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.sidb_nm_distance_100
         .. autoclass:: mnt.pyfiction.sidb_nm_distance_111
+
+
+SiDB Cluster Hierarchy
+----------------------
+
+**Header:** ``fiction/technology/sidb_cluster_hierarchy.hpp``
+
+A cluster hierarchy can be computed over any SiDB layout, resulting in a useful structure for simulation of possible
+charge distributions. This header provides the structures used for :ref:`*Ground State Space* <ground_state_space>`
+construction, which enables the :ref:`*ClusterComplete* <clustercomplete>` exact SiDB simulator.
+
+.. doxygenenum:: fiction::sidb_cluster_hierarchy_linkage_method
+.. doxygenstruct:: fiction::sidb_binary_cluster_hierarchy_node
+   :members:
+.. doxygenfunction:: fiction::sidb_cluster_hierarchy
+.. doxygenstruct:: fiction::sidb_cluster_receptor_state
+   :members:
+.. doxygenstruct:: fiction::sidb_cluster_projector_state
+.. doxygentypedef:: fiction::sidb_cluster_projector_state_ptr
+   :members:
+.. doxygenenum:: fiction::bound_direction
+.. doxygenfunction:: fiction::potential_bound_top
+.. doxygenfunction:: fiction::take_meet_of_potential_bounds
+.. doxygenstruct:: fiction::potential_bounds_store
+   :members:
+.. doxygentypedef:: fiction::partial_potential_bounds_store
+.. doxygentypedef:: fiction::complete_potential_bounds_store
+.. doxygenstruct:: fiction::sidb_charge_space_composition
+   :members:
+.. doxygenstruct:: fiction::sidb_clustering_state
+   :members:
+.. doxygenstruct:: fiction::sidb_cluster_charge_state
+   :members:
+.. doxygenfunction:: fiction::singleton_multiset_conf_to_charge_state
+.. doxygenstruct:: fiction::potential_projection
+   :members:
+.. doxygenstruct:: fiction::potential_projection_order
+   :members:
+.. doxygentypedef:: fiction::sidb_cluster_charge_state_space
+.. doxygentypedef:: fiction::sidb_clustering
+.. doxygenstruct:: fiction::sidb_cluster
+   :members:
+.. doxygenfunction:: fiction::get_projector_state_compositions
+.. doxygenfunction:: fiction::to_unique_sidb_cluster
+.. doxygenfunction:: fiction::to_sidb_cluster

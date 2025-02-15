@@ -2,20 +2,28 @@
 // Created by Jan Drewniok on 03.03.24.
 //
 
+#include <fiction/algorithms/simulation/sidb/clustercomplete.hpp>
 #include <fiction/algorithms/simulation/sidb/equivalence_check_for_simulation_results.hpp>
 #include <fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp>
 #include <fiction/algorithms/simulation/sidb/quickexact.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/cell_technologies.hpp>
+#include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/layout_utils.hpp>
 #include <fiction/utils/math_utils.hpp>
 
 #include <fmt/format.h>
 
+#include <algorithm>
 #include <cstdint>
 #include <iostream>
+#include <iterator>
+#include <mutex>
+#include <thread>
+#include <utility>
+#include <vector>
 
 using namespace fiction;
 
@@ -32,26 +40,83 @@ int main()  // NOLINT
 
     const auto params = sidb_simulation_parameters{3, -0.32};
 
-    uint64_t non_equivalence_counter = 0;
+    uint64_t quickexact_non_equivalence_counter      = 0;
+    uint64_t clustercomplete_non_equivalence_counter = 0;
 
-    for (const auto& distribution : all_distributions)
+    const uint64_t num_threads_to_use = std::min(std::max(uint64_t{std::thread::hardware_concurrency()}, uint64_t{1}),
+                                                 uint64_t{all_distributions.size()});
+
+    // define the top cluster charge space ranges per thread
+    std::vector<std::pair<uint64_t, uint64_t>> ranges{};
+    ranges.reserve(num_threads_to_use);
+
+    const uint64_t chunk_size = std::max(all_distributions.size() / num_threads_to_use, uint64_t{1});
+    uint64_t       start      = 0;
+    uint64_t       end        = chunk_size - 1;
+
+    for (uint64_t i = 0; i < num_threads_to_use; ++i)
     {
-        sidb_100_cell_clk_lyt lyt{};
-        for (const auto idx : distribution)
+        ranges.emplace_back(start, end);
+        start = end + 1;
+        end   = i == num_threads_to_use - 2 ? all_distributions.size() - 1 : start + chunk_size - 1;
+    }
+
+    std::vector<std::thread> threads{};
+    threads.reserve(num_threads_to_use);
+
+    std::mutex mutex_qe{};
+    std::mutex mutex_cc{};
+
+    for (const auto& [range_start, range_end] : ranges)
+    {
+        threads.emplace_back(
+            [&, start = range_start, end = range_end]
+            {
+                for (uint64_t ix = start; ix <= end; ++ix)
+                {
+                    sidb_100_cell_clk_lyt lyt{};
+
+                    for (const auto idx : *std::next(all_distributions.cbegin(), static_cast<int64_t>(ix)))
+                    {
+                        lyt.assign_cell_type(all_cells_in_region[idx], sidb_technology::cell_type::NORMAL);
+                    }
+
+                    auto result_exgs       = exhaustive_ground_state_simulation(lyt, params);
+                    auto result_quickexact = quickexact(lyt, quickexact_params<cell<sidb_100_cell_clk_lyt>>{params});
+
+                    if (!check_simulation_results_for_equivalence(result_exgs, result_quickexact))
+                    {
+                        const std::lock_guard lock{mutex_qe};
+                        quickexact_non_equivalence_counter++;
+                    }
+
+#if (FICTION_ALGLIB_ENABLED)
+                    clustercomplete_params<cell<sidb_100_cell_clk_lyt>> cc_params{params};
+                    cc_params.available_threads = 1;
+
+                    auto result_clustercomplete = clustercomplete(lyt, cc_params);
+
+                    if (!check_simulation_results_for_equivalence(result_exgs, result_clustercomplete))
+                    {
+                        const std::lock_guard lock{mutex_cc};
+                        clustercomplete_non_equivalence_counter++;
+                    }
+#endif  // FICTION_ALGLIB_ENABLED
+                }
+            });
+    }
+
+    // wait for all threads to complete
+    for (auto& thread : threads)
+    {
+        if (thread.joinable())
         {
-            lyt.assign_cell_type(all_cells_in_region[idx], sidb_technology::cell_type::NORMAL);
-        }
-        auto result_exgs       = exhaustive_ground_state_simulation(lyt, params);
-        auto result_quickexact = quickexact(
-            lyt,
-            quickexact_params<fiction::cell<sidb_100_cell_clk_lyt>>{
-                params, quickexact_params<fiction::cell<sidb_100_cell_clk_lyt>>::automatic_base_number_detection::OFF});
-        if (!check_simulation_results_for_equivalence(result_exgs, result_quickexact))
-        {
-            non_equivalence_counter++;
+            thread.join();
         }
     }
-    std::cout << fmt::format("non equivalent layouts = {}", non_equivalence_counter) << '\n';
+
+    std::cout << fmt::format("QuickExact non equivalent layouts = {}\nClusterComplete non equivalent layouts = {}\n",
+                             quickexact_non_equivalence_counter, clustercomplete_non_equivalence_counter);
 
     return EXIT_SUCCESS;
 }
