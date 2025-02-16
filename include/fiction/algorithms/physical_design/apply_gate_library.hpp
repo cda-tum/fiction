@@ -5,10 +5,11 @@
 #ifndef FICTION_APPLY_GATE_LIBRARY_HPP
 #define FICTION_APPLY_GATE_LIBRARY_HPP
 
-#include "fiction/technology/sidb_on_the_fly_gate_library.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/layout_utils.hpp"
 #include "fiction/utils/name_utils.hpp"
+
+#include <optional>
 
 #if (PROGRESS_BARS)
 #include <mockturtle/utils/progress_bar.hpp>
@@ -122,15 +123,23 @@ class apply_gate_library_impl
      *
      * @tparam Params Type of the Parameters used for the SiDB on-the-fly gate library.
      * @param params Parameters used for the SiDB on-the-fly gate library.
+     * @param lyt Optional cell-level layout to add defects to.
      * @return A `CellLyt` object representing the generated cell layout.
      */
     template <typename Params>
-    [[nodiscard]] CellLyt run_parameterized_gate_library(const Params& params)
+    [[nodiscard]] auto run_parameterized_gate_library(const Params&                 params,
+                                                      const std::optional<CellLyt>& lyt = std::nullopt)
     {
 #if (PROGRESS_BARS)
         // initialize a progress bar
         mockturtle::progress_bar bar{static_cast<uint32_t>(gate_lyt.size()), "[i] applying gate library: |{0}|"};
 #endif
+        // perform post-layout optimization if necessary
+        if constexpr (has_post_layout_optimization_v<GateLibrary, CellLyt>)
+        {
+            GateLibrary::post_layout_optimization(gate_lyt);
+        }
+
         gate_lyt.foreach_node(
             [&, this](const auto& n, [[maybe_unused]] auto i)
             {
@@ -143,9 +152,8 @@ class apply_gate_library_impl
                         relative_to_absolute_cell_position<GateLibrary::gate_x_size(), GateLibrary::gate_y_size(),
                                                            GateLyt, CellLyt>(gate_lyt, t, cell<CellLyt>{0, 0});
 
-                    const auto gate = GateLibrary::template set_up_gate<GateLyt, CellLyt, Params>(gate_lyt, t, params);
-
-                    assign_gate(c, gate, n);
+                    assign_gate(
+                        c, GateLibrary::template set_up_gate<GateLyt, CellLyt, Params>(gate_lyt, t, params, lyt), n);
                 }
 #if (PROGRESS_BARS)
                 // update progress
@@ -153,14 +161,21 @@ class apply_gate_library_impl
 #endif
             });
 
-        // perform post-layout optimization if necessary
-        if constexpr (has_post_layout_optimization_v<GateLibrary, CellLyt>)
-        {
-            GateLibrary::post_layout_optimization(cell_lyt);
-        }
-
         // if available, recover layout name
         cell_lyt.set_layout_name(get_name(gate_lyt));
+
+        if constexpr (is_sidb_defect_surface_v<CellLyt>)
+        {
+            if (lyt.has_value())
+            {
+                // due to issue with windows-2019 Visual Studio 16 2019 and v142.
+                auto copy_lyt = cell_lyt.clone();
+                // add defects to the circuit.
+                lyt.value().foreach_sidb_defect([this, &copy_lyt](const auto& def)
+                                                { copy_lyt.assign_sidb_defect(def.first, def.second); });
+                return copy_lyt;
+            }
+        }
 
         return cell_lyt;
     }
@@ -174,7 +189,6 @@ class apply_gate_library_impl
      * Cell-level layout.
      */
     CellLyt cell_lyt;
-
     /**
      * This function assigns a given FCN gate implementation to the total cell layout.
      *
@@ -281,10 +295,12 @@ template <typename CellLyt, typename GateLibrary, typename GateLyt>
  * @tparam Params Type of the parameter used for SiDB on-the-fly gate library.
  * @param lyt The gate-level layout.
  * @param params Parameter for the gate library.
+ * @param cell_lyt Optional cell-level layout to add defects to.
  * @return A cell-level layout that implements `lyt`'s gate types with building blocks defined in `GateLibrary`.
  */
 template <typename CellLyt, typename GateLibrary, typename GateLyt, typename Params>
-[[nodiscard]] CellLyt apply_parameterized_gate_library(const GateLyt& lyt, const Params& params)
+[[nodiscard]] CellLyt apply_parameterized_gate_library(const GateLyt& lyt, const Params& params,
+                                                       const std::optional<CellLyt>& cell_lyt = std::nullopt)
 {
     static_assert(is_cell_level_layout_v<CellLyt>, "CellLyt is not a cell-level layout");
     static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt is not a gate-level layout");
@@ -297,7 +313,10 @@ template <typename CellLyt, typename GateLibrary, typename GateLyt, typename Par
 
     detail::apply_gate_library_impl<CellLyt, GateLibrary, GateLyt> p{lyt};
 
-    return p.template run_parameterized_gate_library<Params>(params);
+    // Running the gate library with the parameters
+    const CellLyt result = p.template run_parameterized_gate_library<Params>(params, cell_lyt);
+
+    return result;
 }
 
 }  // namespace fiction

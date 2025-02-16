@@ -32,7 +32,6 @@ template <typename Lyt>
 void charge_distribution_surface_layout(pybind11::module& m, const std::string& lattice = "")
 {
     namespace py = pybind11;
-    namespace py = pybind11;
 
     using py_cds = py_charge_distribution_surface_layout<Lyt>;
 

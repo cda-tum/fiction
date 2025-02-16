@@ -67,6 +67,9 @@ class TestQCACellLevelLayout(unittest.TestCase):
         layout.assign_cell_type((3, 2), qca_technology.cell_type.NORMAL)
         layout.assign_cell_type((4, 2), qca_technology.cell_type.OUTPUT)
 
+        self.assertEqual(layout.get_cells_by_type(qca_technology.cell_type.OUTPUT), [(4, 2)])
+        self.assertEqual(layout.num_cells_of_given_type(qca_technology.cell_type.INPUT), 2)
+
         self.assertFalse(layout.is_empty())
 
         layout.assign_cell_name((0, 2), "a")
