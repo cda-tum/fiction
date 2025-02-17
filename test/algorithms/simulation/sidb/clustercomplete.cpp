@@ -20,7 +20,7 @@
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/charge_distribution_surface.hpp>
-#include <fiction/technology/physical_constants.hpp>
+#include <fiction/technology/constants.hpp>
 #include <fiction/technology/sidb_bestagon_library.hpp>
 #include <fiction/technology/sidb_charge_state.hpp>
 #include <fiction/technology/sidb_defect_surface.hpp>
@@ -183,7 +183,7 @@ TEST_CASE("Exact Cluster Simulation of 2 Bestagon NAND gates", "[clustercomplete
 
         CHECK(res.charge_distributions.size() == 81);
         CHECK_THAT(minimum_energy(res.charge_distributions.cbegin(), res.charge_distributions.cend()),
-                   Catch::Matchers::WithinAbs(1.3192717848, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(1.3192717848, constants::ERROR_MARGIN));
     }
 
     SECTION("Base 3, multiple threads")
@@ -219,7 +219,7 @@ TEST_CASE("Exact Cluster Simulation of 2 Bestagon NAND gates", "[clustercomplete
 
         CHECK(res.charge_distributions.size() == 81);
         CHECK_THAT(minimum_energy(res.charge_distributions.cbegin(), res.charge_distributions.cend()),
-                   Catch::Matchers::WithinAbs(1.3192717848, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(1.3192717848, constants::ERROR_MARGIN));
     }
 }
 
@@ -294,7 +294,7 @@ TEMPLATE_TEST_CASE(
         CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == sidb_charge_state::NEUTRAL);
 
         CHECK_THAT(charge_lyt_first.get_system_energy(),
-                   Catch::Matchers::WithinAbs(0.4662582096, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0.4662582096, constants::ERROR_MARGIN));
     }
 
     SECTION("Increased mu_minus")
@@ -316,7 +316,7 @@ TEMPLATE_TEST_CASE(
         CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == sidb_charge_state::NEUTRAL);
 
         CHECK_THAT(charge_lyt_first.get_system_energy(),
-                   Catch::Matchers::WithinAbs(0.061037632, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0.061037632, constants::ERROR_MARGIN));
     }
 
     SECTION("Decreased mu_minus")
@@ -338,7 +338,7 @@ TEMPLATE_TEST_CASE(
         CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == sidb_charge_state::NEGATIVE);
 
         CHECK_THAT(charge_lyt_first.get_system_energy(),
-                   Catch::Matchers::WithinAbs(2.069954113, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(2.069954113, constants::ERROR_MARGIN));
     }
 
     SECTION("Decreased lambda_tf")
@@ -360,7 +360,7 @@ TEMPLATE_TEST_CASE(
         CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == sidb_charge_state::NEGATIVE);
 
         CHECK_THAT(charge_lyt_first.get_system_energy(),
-                   Catch::Matchers::WithinAbs(0.5432404075, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0.5432404075, constants::ERROR_MARGIN));
     }
 
     SECTION("Increased lambda_tf")
@@ -382,7 +382,7 @@ TEMPLATE_TEST_CASE(
         CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == sidb_charge_state::NEUTRAL);
 
         CHECK_THAT(charge_lyt_first.get_system_energy(),
-                   Catch::Matchers::WithinAbs(0.2930574885, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0.2930574885, constants::ERROR_MARGIN));
     }
 
     SECTION("Increased epsilon_r")
@@ -404,7 +404,7 @@ TEMPLATE_TEST_CASE(
         CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == sidb_charge_state::NEGATIVE);
 
         CHECK_THAT(charge_lyt_first.get_system_energy(),
-                   Catch::Matchers::WithinAbs(0.505173434, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0.505173434, constants::ERROR_MARGIN));
     }
 }
 
@@ -698,8 +698,7 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of a two-pair BDL wire with one p
     CHECK(charge_lyt_first.get_charge_state({17, 0, 0}) == sidb_charge_state::NEUTRAL);
     CHECK(charge_lyt_first.get_charge_state({19, 0, 0}) == sidb_charge_state::NEGATIVE);
 
-    CHECK_THAT(charge_lyt_first.get_system_energy(),
-               Catch::Matchers::WithinAbs(0.2460493219, physical_constants::POP_STABILITY_ERR));
+    CHECK_THAT(charge_lyt_first.get_system_energy(), Catch::Matchers::WithinAbs(0.2460493219, constants::ERROR_MARGIN));
 }
 
 TEST_CASE("ClusterComplete simulation of a one-pair BDL wire with two perturbers", "[clustercomplete]")
@@ -735,8 +734,7 @@ TEST_CASE("ClusterComplete simulation of a one-pair BDL wire with two perturbers
     CHECK(charge_lyt_first.get_charge_state({7, 0, 0}) == sidb_charge_state::NEGATIVE);
     CHECK(charge_lyt_first.get_charge_state({15, 0, 0}) == sidb_charge_state::NEGATIVE);
 
-    CHECK_THAT(charge_lyt_first.get_system_energy(),
-               Catch::Matchers::WithinAbs(0.1152677452, physical_constants::POP_STABILITY_ERR));
+    CHECK_THAT(charge_lyt_first.get_system_energy(), Catch::Matchers::WithinAbs(0.1152677452, constants::ERROR_MARGIN));
 }
 
 TEMPLATE_TEST_CASE("ClusterComplete simulation of a Y-shape SiDB arrangement", "[clustercomplete]",
@@ -770,8 +768,7 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of a Y-shape SiDB arrangement", "
     CHECK(charge_lyt_first.get_charge_state({-7, 1, 1}) == sidb_charge_state::NEUTRAL);
     CHECK(charge_lyt_first.get_charge_state({-7, 3, 0}) == sidb_charge_state::NEGATIVE);
 
-    CHECK_THAT(charge_lyt_first.get_system_energy(),
-               Catch::Matchers::WithinAbs(0.3191788254, physical_constants::POP_STABILITY_ERR));
+    CHECK_THAT(charge_lyt_first.get_system_energy(), Catch::Matchers::WithinAbs(0.3191788254, constants::ERROR_MARGIN));
 }
 
 TEMPLATE_TEST_CASE("ClusterComplete simulation of a Y-shape SiDB OR gate with input 01, check energy and charge "
@@ -809,8 +806,7 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of a Y-shape SiDB OR gate with in
     CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == sidb_charge_state::NEUTRAL);
     CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == sidb_charge_state::NEGATIVE);
 
-    CHECK_THAT(charge_lyt_first.get_system_energy(),
-               Catch::Matchers::WithinAbs(0.4662582096, physical_constants::POP_STABILITY_ERR));
+    CHECK_THAT(charge_lyt_first.get_system_energy(), Catch::Matchers::WithinAbs(0.4662582096, constants::ERROR_MARGIN));
 }
 
 TEMPLATE_TEST_CASE("ClusterComplete simulation of a Y-shape SiDB OR gate with input 01, check energy and charge "
@@ -865,8 +861,7 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of a Y-shape SiDB OR gate with in
     CHECK(charge_lyt_first.get_charge_state(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{6, 2, 0})) ==
           sidb_charge_state::NEGATIVE);
 
-    CHECK_THAT(charge_lyt_first.get_system_energy(),
-               Catch::Matchers::WithinAbs(0.4662582096, physical_constants::POP_STABILITY_ERR));
+    CHECK_THAT(charge_lyt_first.get_system_energy(), Catch::Matchers::WithinAbs(0.4662582096, constants::ERROR_MARGIN));
 }
 
 TEMPLATE_TEST_CASE("ClusterComplete simulation of a Y-shape SiDB OR gate with input 01, check energy and charge "
@@ -913,8 +908,7 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of a Y-shape SiDB OR gate with in
     CHECK(charge_lyt_first.get_charge_state(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{6, 2, 0})) ==
           sidb_charge_state::NEGATIVE);
 
-    CHECK_THAT(charge_lyt_first.get_system_energy(),
-               Catch::Matchers::WithinAbs(0.4662582096, physical_constants::POP_STABILITY_ERR));
+    CHECK_THAT(charge_lyt_first.get_system_energy(), Catch::Matchers::WithinAbs(0.4662582096, constants::ERROR_MARGIN));
 }
 
 TEMPLATE_TEST_CASE("ClusterComplete simulation of a Y-shape SiDB OR gate with input 01 and local external potential at "
@@ -1314,7 +1308,7 @@ TEMPLATE_TEST_CASE("four DBs next to each other, small mu-", "[clustercomplete]"
     const auto excited_state = *std::max_element(
         simulation_results.charge_distributions.cbegin(), simulation_results.charge_distributions.cend(),
         [](const auto& lhs, const auto& rhs) { return lhs.get_system_energy() < rhs.get_system_energy(); });
-    CHECK_THAT(excited_state.get_system_energy(), Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
+    CHECK_THAT(excited_state.get_system_energy(), Catch::Matchers::WithinAbs(0, constants::ERROR_MARGIN));
 }
 
 TEMPLATE_TEST_CASE("seven DBs next to each other, small mu-", "[clustercomplete]", (sidb_100_cell_clk_lyt_siqad),
@@ -1550,8 +1544,7 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of a 3 DB Wire", "[clustercomplet
         CHECK(ground_state->get_charge_state({26, 0, 0}) == sidb_charge_state::NEUTRAL);
         CHECK(ground_state->get_charge_state({29, 0, 0}) == sidb_charge_state::NEGATIVE);
 
-        CHECK_THAT(ground_state->get_system_energy(),
-                   Catch::Matchers::WithinAbs(0.274134844, physical_constants::POP_STABILITY_ERR));
+        CHECK_THAT(ground_state->get_system_energy(), Catch::Matchers::WithinAbs(0.274134844, constants::ERROR_MARGIN));
     }
 
     SECTION("Increased mu_minus")
@@ -1580,7 +1573,7 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of a 3 DB Wire", "[clustercomplet
         CHECK(ground_state->get_charge_state({29, 0, 0}) == sidb_charge_state::NEGATIVE);
 
         CHECK_THAT(ground_state->get_system_energy(),
-                   Catch::Matchers::WithinAbs(0.0329179963, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0.0329179963, constants::ERROR_MARGIN));
     }
 
     SECTION("Decreased mu_minus")
@@ -1610,7 +1603,7 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of a 3 DB Wire", "[clustercomplet
         CHECK(ground_state->get_charge_state({29, 0, 0}) == sidb_charge_state::NEGATIVE);
 
         CHECK_THAT(ground_state->get_system_energy(),
-                   Catch::Matchers::WithinAbs(1.8649862557, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(1.8649862557, constants::ERROR_MARGIN));
     }
 
     SECTION("Decreased lambda_tf")
@@ -1639,7 +1632,7 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of a 3 DB Wire", "[clustercomplet
         CHECK(ground_state->get_charge_state({29, 0, 0}) == sidb_charge_state::NEGATIVE);
 
         CHECK_THAT(ground_state->get_system_energy(),
-                   Catch::Matchers::WithinAbs(0.4606785472, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0.4606785472, constants::ERROR_MARGIN));
     }
 
     SECTION("Increased lambda_tf")
@@ -1668,7 +1661,7 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of a 3 DB Wire", "[clustercomplet
         CHECK(ground_state->get_charge_state({29, 0, 0}) == sidb_charge_state::NEGATIVE);
 
         CHECK_THAT(ground_state->get_system_energy(),
-                   Catch::Matchers::WithinAbs(0.3967750406, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0.3967750406, constants::ERROR_MARGIN));
     }
 
     SECTION("Increased epsilon_r")
@@ -1697,7 +1690,7 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of a 3 DB Wire", "[clustercomplet
         CHECK(ground_state->get_charge_state({29, 0, 0}) == sidb_charge_state::NEGATIVE);
 
         CHECK_THAT(ground_state->get_system_energy(),
-                   Catch::Matchers::WithinAbs(1.0443923032, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(1.0443923032, constants::ERROR_MARGIN));
     }
 
     SECTION("Decrease epsilon_r, positively charged SiDBs can occur")
@@ -1726,7 +1719,7 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of a 3 DB Wire", "[clustercomplet
         CHECK(ground_state->get_charge_state({29, 0, 0}) == sidb_charge_state::NEGATIVE);
 
         CHECK_THAT(ground_state->get_system_energy(),
-                   Catch::Matchers::WithinAbs(-5.0592576221, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(-5.0592576221, constants::ERROR_MARGIN));
     }
 }
 

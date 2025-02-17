@@ -6,7 +6,7 @@
 #define FICTION_POTENTIAL_TO_DISTANCE_CONVERSION_HPP
 
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
-#include "fiction/technology/physical_constants.hpp"
+#include "fiction/technology/constants.hpp"
 
 #include <cmath>
 #include <cstdint>
@@ -37,7 +37,7 @@ potential_to_distance_conversion(const double                      potential,
     const auto calculate_potential_for_given_distance = [&params](const double distance) noexcept
     {
         return params.k() * params.epsilon_r / params.epsilon_r / (distance * 1e-9) *
-               std::exp(-distance / params.lambda_tf) * physical_constants::ELEMENTARY_CHARGE;
+               std::exp(-distance / params.lambda_tf) * constants::physical::ELEMENTARY_CHARGE;
     };
 
     // calculate the step size based on the precision
