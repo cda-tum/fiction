@@ -89,7 +89,7 @@ TEST_CASE("Benchmark simulators", "[benchmark]")
     BENCHMARK("ClusterComplete (single-threaded)")
     {
         const clustercomplete_params<cell<lattice_siqad>> sim_params{
-            sidb_simulation_parameters{3, -0.32}, {}, {}, {}, {}, 1};
+            sidb_simulation_parameters{3, -0.32}, {}, {}, 6, 6, 1};
         return clustercomplete<lattice_siqad>(lyt, sim_params);
     };
 #endif  // FICTION_ALGLIB_ENABLED
@@ -199,21 +199,21 @@ TEST_CASE("Benchmark simulators", "[benchmark]")
 //                                           mean          low mean           high mean
 //                                           std dev       low std dev        high std dev
 //      -----------------------------------------------------------------------------------
-//      QuickExact                         100             1                  1.69636 m
-//                                         1.01288 s       1.01171 s          1.01426 s
-//                                         6.44908 ms      5.43149 ms         7.60552 ms
+//      QuickExact                         100             1                  1.68023 m
+//                                         1.02348 s       1.02048 s          1.02689 s
+//                                         16.327 ms       14.0743 ms         19.8756 ms
 //
-//      QuickSim                           100             1                  266.627 ms
-//                                         2.73651 ms      2.69581 ms         2.83154 ms
-//                                         298.359 us      152.152 us         521.457 us
+//      QuickSim                           100             1                  274.735 ms
+//                                         2.79275 ms      2.76267 ms         2.88513 ms
+//                                         244.823 us      91.1395 us         536.164 us
 //
-//      ClusterComplete (multi-threaded)   100             1                  1.57307 s
-//                                         5.22269 ms      4.8304 ms          5.95271 ms
-//                                         2.66566 ms      1.61691 ms         4.20681 ms
+//      ClusterComplete (multi-threaded)   100             1                  7.14016 s
+//                                         7.43542 ms      6.28543 ms         9.75564 ms
+//                                         8.07302 ms      4.73162 ms         14.0938 ms
 //
 //      ClusterComplete (single-threaded)  100             1                  726.747 ms
-//                                         7.25989 ms      7.25401 ms         7.2662 ms
-//                                         31.1296 us      27.4805 us         36.3467 us
+//                                         7.08628 ms      7.07611 ms         7.09851  ms
+//                                         56.9189 us      47.144 us          73.1902 us
 
 #if (FICTION_ALGLIB_ENABLED)
 TEST_CASE("Benchmark ClusterComplete", "[benchmark]")
@@ -249,7 +249,7 @@ TEST_CASE("Benchmark ClusterComplete", "[benchmark]")
 
     BENCHMARK("3 Segment Diagonal Bestagon Wire (single-threaded)")
     {
-        const clustercomplete_params<> sim_params{sidb_simulation_parameters{3, -0.32}, {}, {}, {}, {}, 1};
+        const clustercomplete_params<> sim_params{sidb_simulation_parameters{3, -0.32}, {}, {}, 6, 6, 1};
         return clustercomplete<lattice>(cl_3_seg, sim_params);
     };
 }
@@ -296,11 +296,11 @@ TEST_CASE("Benchmark ClusterComplete", "[benchmark]")
 //                                          std dev             low std dev             high std dev
 //      ---------------------------------------------------------------------------------------------
 //      4 Segment Diagonal Bestagon Wire
-//      (multi-threaded)                    100                 1                       1.41724 m
-//                                          834.071 ms          832.759 ms              835.443 ms
-//                                          6.87635 ms          6.03154 ms              8.19222 ms
+//      (multi-threaded)                    100                 1                       1.35702 m
+//                                          821.239 ms          819.725 ms              822.841 ms
+//                                          7.96672 ms          7.01983 ms              9.21399 ms
 //
 //      3 Segment Diagonal Bestagon Wire
-//      (single-threaded)                   100                 1                       19.7644 s
-//                                          190.366 ms          189.739 ms              191.044 ms
-//                                          3.32957 ms          2.89922 ms              3.89814 ms
+//      (single-threaded)                   100                 1                       18.5153 s
+//                                          187.65 ms           187.029 ms              188.333 ms
+//                                          3.31611 ms          2.83437 ms              4.32337 ms
