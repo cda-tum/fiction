@@ -194,7 +194,7 @@ TEST_CASE("Exact Cluster Simulation of 2 Bestagon NAND gates", "[clustercomplete
 
         CHECK(res.charge_distributions.size() == 81);
         CHECK_THAT(minimum_energy(res.charge_distributions.cbegin(), res.charge_distributions.cend()),
-                   Catch::Matchers::WithinAbs(1.3192717848, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(1.3192717848, constants::ERROR_MARGIN));
     }
 
     // from now on, we use only one thread
@@ -208,7 +208,7 @@ TEST_CASE("Exact Cluster Simulation of 2 Bestagon NAND gates", "[clustercomplete
 
         CHECK(res.charge_distributions.size() == 81);
         CHECK_THAT(minimum_energy(res.charge_distributions.cbegin(), res.charge_distributions.cend()),
-                   Catch::Matchers::WithinAbs(1.3192717848, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(1.3192717848, constants::ERROR_MARGIN));
     }
 
     SECTION("Base 3, single thread")
