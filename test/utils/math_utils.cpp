@@ -66,54 +66,54 @@ TEST_CASE("Binomial Coefficient Tests")
     SECTION("C(5, 2)")
     {
         const uint64_t result = binomial_coefficient(5, 2);
-        REQUIRE(result == 10);  // C(5, 2) = 10
+        CHECK(result == 10);  // C(5, 2) = 10
     }
 
     SECTION("C(10, 3)")
     {
         const uint64_t result = binomial_coefficient(10, 3);
-        REQUIRE(result == 120);  // C(10, 3) = 120
+        CHECK(result == 120);  // C(10, 3) = 120
     }
 
     SECTION("C(0, 0)")
     {
         const uint64_t result = binomial_coefficient(0, 0);
-        REQUIRE(result == 1);  // C(0, 0) = 1
+        CHECK(result == 1);  // C(0, 0) = 1
     }
 
     SECTION("C(8, 8)")
     {
         const uint64_t result = binomial_coefficient(8, 8);
-        REQUIRE(result == 1);  // C(8, 8) = 1
+        CHECK(result == 1);  // C(8, 8) = 1
     }
 
     SECTION("C(7, 10)")
     {
         const uint64_t result = binomial_coefficient(7, 10);
-        REQUIRE(result == 0);  // C(7, 10) = 0 (k > n)
+        CHECK(result == 0);  // C(7, 10) = 0 (k > n)
     }
     SECTION("C(15, 7)")
     {
         const uint64_t result = binomial_coefficient(15, 7);
-        REQUIRE(result == 6435);  // C(15, 7) = 6435
+        CHECK(result == 6435);  // C(15, 7) = 6435
     }
 
     SECTION("C(20, 10)")
     {
         const uint64_t result = binomial_coefficient(20, 10);
-        REQUIRE(result == 184756);  // C(20, 10) = 184,756
+        CHECK(result == 184756);  // C(20, 10) = 184,756
     }
 
     SECTION("C(30, 15)")
     {
         const uint64_t result = binomial_coefficient(30, 15);
-        REQUIRE(result == 155117520);  // C(30, 15) = 155,117,520
+        CHECK(result == 155117520);  // C(30, 15) = 155,117,520
     }
 
     SECTION("C(50, 25)")
     {
         const uint64_t result = binomial_coefficient(50, 25);
-        REQUIRE(result == 126410606437752);  // C(50, 25) = 126,410,606,437,752
+        CHECK(result == 126410606437752);  // C(50, 25) = 126,410,606,437,752
     }
 }
 
@@ -126,7 +126,7 @@ TEST_CASE("Test the computation of the cartesian combinations", "[cartesian_comb
 
         auto result = cartesian_combinations(input);
 
-        REQUIRE(result == expected);
+        CHECK(result == expected);
     }
 
     SECTION("Two dimensions")
@@ -136,7 +136,7 @@ TEST_CASE("Test the computation of the cartesian combinations", "[cartesian_comb
 
         auto result = cartesian_combinations(input);
 
-        REQUIRE(result == expected);
+        CHECK(result == expected);
     }
 
     SECTION("Three dimensions")
@@ -147,7 +147,7 @@ TEST_CASE("Test the computation of the cartesian combinations", "[cartesian_comb
 
         auto result = cartesian_combinations(input);
 
-        REQUIRE(result == expected);
+        CHECK(result == expected);
     }
 
     SECTION("Empty input")
@@ -157,7 +157,7 @@ TEST_CASE("Test the computation of the cartesian combinations", "[cartesian_comb
 
         auto result = cartesian_combinations(input);
 
-        REQUIRE(result == expected);
+        CHECK(result == expected);
     }
 
     SECTION("Empty dimension")
@@ -167,7 +167,7 @@ TEST_CASE("Test the computation of the cartesian combinations", "[cartesian_comb
 
         auto result = cartesian_combinations(input);
 
-        REQUIRE(result == expected);
+        CHECK(result == expected);
     }
 
     SECTION("Mixed types")
@@ -177,7 +177,7 @@ TEST_CASE("Test the computation of the cartesian combinations", "[cartesian_comb
 
         auto result = cartesian_combinations(input);
 
-        REQUIRE(result == expected);
+        CHECK(result == expected);
     }
 }
 
@@ -188,11 +188,11 @@ TEST_CASE("Test the determination of all combinations of distributing k entities
     {
         const std::size_t                           k = 0;
         const std::size_t                           n = 0;
-        const std::vector<std::vector<std::size_t>> expected{};
+        const std::vector<std::vector<std::size_t>> expected{{}};
 
         auto result = determine_all_combinations_of_distributing_k_entities_on_n_positions(k, n);
 
-        REQUIRE(result == expected);
+        CHECK(result == expected);
     }
 
     SECTION("k = 1, n = 1")
@@ -203,7 +203,7 @@ TEST_CASE("Test the determination of all combinations of distributing k entities
 
         auto result = determine_all_combinations_of_distributing_k_entities_on_n_positions(k, n);
 
-        REQUIRE(result == expected);
+        CHECK(result == expected);
     }
 
     SECTION("k = 2, n = 3")
@@ -214,7 +214,7 @@ TEST_CASE("Test the determination of all combinations of distributing k entities
 
         auto result = determine_all_combinations_of_distributing_k_entities_on_n_positions(k, n);
 
-        REQUIRE(result == expected);
+        CHECK(result == expected);
     }
 
     SECTION("k = 3, n = 5")
@@ -226,18 +226,18 @@ TEST_CASE("Test the determination of all combinations of distributing k entities
 
         auto result = determine_all_combinations_of_distributing_k_entities_on_n_positions(k, n);
 
-        REQUIRE(result == expected);
+        CHECK(result == expected);
     }
 
     SECTION("k = 0, n = 5")
     {
         const std::size_t                           k = 0;
         const std::size_t                           n = 5;
-        const std::vector<std::vector<std::size_t>> expected{};
+        const std::vector<std::vector<std::size_t>> expected{{}};
 
         auto result = determine_all_combinations_of_distributing_k_entities_on_n_positions(k, n);
 
-        REQUIRE(result == expected);
+        CHECK(result == expected);
     }
 
     SECTION("k = 5, n = 5")
@@ -248,7 +248,7 @@ TEST_CASE("Test the determination of all combinations of distributing k entities
 
         auto result = determine_all_combinations_of_distributing_k_entities_on_n_positions(k, n);
 
-        REQUIRE(result == expected);
+        CHECK(result == expected);
     }
 
     SECTION("k > n (invalid case)")
@@ -259,34 +259,35 @@ TEST_CASE("Test the determination of all combinations of distributing k entities
 
         auto result = determine_all_combinations_of_distributing_k_entities_on_n_positions(k, n);
 
-        REQUIRE(result == expected);
+        CHECK(result == expected);
     }
 }
 
 TEST_CASE("Zero entities", "[determine-all-combinations-of-distributing-k-entities-on-n-positions]")
 {
     const auto result = determine_all_combinations_of_distributing_k_entities_on_n_positions(0, 5);
-    REQUIRE(result.empty());
+    REQUIRE(result.size() == 1);
+    CHECK(result.front().empty());
 }
 
 TEST_CASE("More entities than positions", "[determine-all-combinations-of-distributing-k-entities-on-n-positions]")
 {
     const auto result = determine_all_combinations_of_distributing_k_entities_on_n_positions(5, 3);
-    REQUIRE(result.empty());
+    CHECK(result.empty());
 }
 
 TEST_CASE("Equal entities and positions", "[determine-all-combinations-of-distributing-k-entities-on-n-positions]")
 {
     const auto result = determine_all_combinations_of_distributing_k_entities_on_n_positions(3, 3);
     REQUIRE(result.size() == 1);
-    REQUIRE(result[0] == std::vector<std::size_t>{0, 1, 2});
+    CHECK(result[0] == std::vector<std::size_t>{0, 1, 2});
 }
 
 TEST_CASE("Less entities than positions", "[determine-all-combinations-of-distributing-k-entities-on-n-positions]")
 {
     const auto result = determine_all_combinations_of_distributing_k_entities_on_n_positions(2, 3);
     REQUIRE(result.size() == 3);
-    REQUIRE(result[0] == std::vector<std::size_t>{0, 1});
-    REQUIRE(result[1] == std::vector<std::size_t>{0, 2});
-    REQUIRE(result[2] == std::vector<std::size_t>{1, 2});
+    CHECK(result[0] == std::vector<std::size_t>{0, 1});
+    CHECK(result[1] == std::vector<std::size_t>{0, 2});
+    CHECK(result[2] == std::vector<std::size_t>{1, 2});
 }
