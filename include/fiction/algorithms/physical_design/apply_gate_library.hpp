@@ -168,7 +168,9 @@ class apply_gate_library_impl
         {
             if (lyt.has_value())
             {
-                // due to issue with windows-2019 Visual Studio 16 2019 and v142.
+                // due to issue with windows-2019 Visual Studio 16 2019 and v142. It doesn't compile without using
+                // "copy_lyt". When using "cell_lyt.assign_sidb_defect(...)" inside the lambda function, it results in
+                // the error: "error C2059: syntax error: '.'".
                 auto copy_lyt = cell_lyt.clone();
                 // add defects to the circuit.
                 lyt.value().foreach_sidb_defect([this, &copy_lyt](const auto& def)
@@ -313,7 +315,7 @@ template <typename CellLyt, typename GateLibrary, typename GateLyt, typename Par
 
     detail::apply_gate_library_impl<CellLyt, GateLibrary, GateLyt> p{lyt};
 
-    // Running the gate library with the parameters
+    // Run the gate library with the parameters
     const CellLyt result = p.template run_parameterized_gate_library<Params>(params, cell_lyt);
 
     return result;

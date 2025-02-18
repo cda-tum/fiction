@@ -292,7 +292,7 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
         hex_even_row_gate_clk_lyt layout{{2, 2, 1}, fiction::row_clocking<hex_even_row_gate_clk_lyt>()};
 
         const auto x1      = layout.create_pi("x1", {0, 0});
-        const auto x2      = layout.create_pi("x1", {1, 0});
+        const auto x2      = layout.create_pi("x2", {1, 0});
         const auto or_gate = layout.create_or(x1, x2, {1, 1, 0});
         layout.create_po(or_gate, "f1", {0, 2, 0});
 
@@ -353,7 +353,7 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
         hex_even_row_gate_clk_lyt layout{{2, 2, 1}, fiction::row_clocking<hex_even_row_gate_clk_lyt>()};
 
         const auto x1        = layout.create_pi("x1", {0, 0});
-        const auto x2        = layout.create_pi("x1", {1, 0});
+        const auto x2        = layout.create_pi("x2", {1, 0});
         const auto nand_gate = layout.create_nand(x1, x2, {1, 1, 0});
         layout.create_po(nand_gate, "f1", {0, 2, 0});
 
@@ -419,7 +419,7 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
         hex_even_row_gate_clk_lyt layout{{2, 2, 1}, fiction::row_clocking<hex_even_row_gate_clk_lyt>()};
 
         const auto x1       = layout.create_pi("x1", {0, 0});
-        const auto x2       = layout.create_pi("x1", {1, 0});
+        const auto x2       = layout.create_pi("x2", {1, 0});
         const auto nor_gate = layout.create_nor(x1, x2, {1, 1, 0});
         layout.create_po(nor_gate, "f1", {0, 2, 0});
 
@@ -460,7 +460,7 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
         hex_even_row_gate_clk_lyt layout{{2, 2, 1}, fiction::row_clocking<hex_even_row_gate_clk_lyt>()};
 
         const auto x1       = layout.create_pi("x1", {0, 0});
-        const auto x2       = layout.create_pi("x1", {1, 0});
+        const auto x2       = layout.create_pi("x2", {1, 0});
         const auto xor_gate = layout.create_xor(x1, x2, {1, 1, 0});
         layout.create_po(xor_gate, "f1", {0, 2, 0});
 
@@ -526,7 +526,7 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
         hex_even_row_gate_clk_lyt layout{{2, 2, 1}, fiction::row_clocking<hex_even_row_gate_clk_lyt>()};
 
         const auto x1        = layout.create_pi("x1", {0, 0});
-        const auto x2        = layout.create_pi("x1", {1, 0});
+        const auto x2        = layout.create_pi("x2", {1, 0});
         const auto xnor_gate = layout.create_xnor(x1, x2, {1, 1, 0});
         layout.create_po(xnor_gate, "f1", {0, 2, 0});
 
