@@ -53,19 +53,21 @@ void critical_temperature_domain(pybind11::module& m)
 
     m.def("critical_temperature_domain_grid_search", &fiction::critical_temperature_domain_grid_search<Lyt, py_tt>,
           py::arg("lyt"), py::arg("spec"), py::arg("params") = fiction::operational_domain_params{},
-          py::arg("stats") = nullptr);
+          py::arg("stats") = nullptr, DOC(fiction_critical_temperature_domain_grid_search));
 
     m.def("critical_temperature_domain_random_sampling",
           &fiction::critical_temperature_domain_random_sampling<Lyt, py_tt>, py::arg("lyt"), py::arg("spec"),
-          py::arg("samples"), py::arg("params") = fiction::operational_domain_params{}, py::arg("stats") = nullptr);
+          py::arg("samples"), py::arg("params") = fiction::operational_domain_params{}, py::arg("stats") = nullptr,
+          DOC(fiction_critical_temperature_domain_random_sampling));
 
     m.def("critical_temperature_domain_flood_fill", &fiction::critical_temperature_domain_flood_fill<Lyt, py_tt>,
           py::arg("lyt"), py::arg("spec"), py::arg("samples"), py::arg("params") = fiction::operational_domain_params{},
-          py::arg("stats") = nullptr);
+          py::arg("stats") = nullptr, DOC(fiction_critical_temperature_domain_flood_fill));
 
     m.def("critical_temperature_domain_contour_tracing",
           &fiction::critical_temperature_domain_contour_tracing<Lyt, py_tt>, py::arg("lyt"), py::arg("spec"),
-          py::arg("samples"), py::arg("params") = fiction::operational_domain_params{}, py::arg("stats") = nullptr);
+          py::arg("samples"), py::arg("params") = fiction::operational_domain_params{}, py::arg("stats") = nullptr,
+          DOC(fiction_critical_temperature_domain_contour_tracing));
 }
 
 }  // namespace detail
