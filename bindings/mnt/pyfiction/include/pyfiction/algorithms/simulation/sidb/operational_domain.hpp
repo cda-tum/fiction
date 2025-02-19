@@ -49,21 +49,23 @@ void critical_temperature_domain(pybind11::module& m)
 {
     namespace py = pybind11;
 
-    m.def("critical_temperature_domain_grid_search", &fiction::operational_domain_grid_search<Lyt, py_tt>,
+    // todo update docu
+
+    m.def("critical_temperature_domain_grid_search", &fiction::critical_temperature_domain_grid_search<Lyt, py_tt>,
           py::arg("lyt"), py::arg("spec"), py::arg("params") = fiction::operational_domain_params{},
-          py::arg("stats") = nullptr, DOC(fiction_operational_domain_grid_search));
+          py::arg("stats") = nullptr);
 
-    m.def("critical_temperature_domain_random_sampling", &fiction::operational_domain_random_sampling<Lyt, py_tt>,
+    m.def("critical_temperature_domain_random_sampling",
+          &fiction::critical_temperature_domain_random_sampling<Lyt, py_tt>, py::arg("lyt"), py::arg("spec"),
+          py::arg("samples"), py::arg("params") = fiction::operational_domain_params{}, py::arg("stats") = nullptr);
+
+    m.def("critical_temperature_domain_flood_fill", &fiction::critical_temperature_domain_flood_fill<Lyt, py_tt>,
           py::arg("lyt"), py::arg("spec"), py::arg("samples"), py::arg("params") = fiction::operational_domain_params{},
-          py::arg("stats") = nullptr, DOC(fiction_operational_domain_random_sampling));
+          py::arg("stats") = nullptr);
 
-    m.def("critical_temperature_domain_flood_fill", &fiction::operational_domain_flood_fill<Lyt, py_tt>, py::arg("lyt"),
-          py::arg("spec"), py::arg("samples"), py::arg("params") = fiction::operational_domain_params{},
-          py::arg("stats") = nullptr, DOC(fiction_operational_domain_flood_fill));
-
-    m.def("critical_temperature_domain_contour_tracing", &fiction::operational_domain_contour_tracing<Lyt, py_tt>,
-          py::arg("lyt"), py::arg("spec"), py::arg("samples"), py::arg("params") = fiction::operational_domain_params{},
-          py::arg("stats") = nullptr, DOC(fiction_operational_domain_contour_tracing));
+    m.def("critical_temperature_domain_contour_tracing",
+          &fiction::critical_temperature_domain_contour_tracing<Lyt, py_tt>, py::arg("lyt"), py::arg("spec"),
+          py::arg("samples"), py::arg("params") = fiction::operational_domain_params{}, py::arg("stats") = nullptr);
 }
 
 }  // namespace detail
