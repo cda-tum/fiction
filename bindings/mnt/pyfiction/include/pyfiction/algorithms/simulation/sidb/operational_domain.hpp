@@ -49,8 +49,6 @@ void critical_temperature_domain(pybind11::module& m)
 {
     namespace py = pybind11;
 
-    // todo update docu
-
     m.def("critical_temperature_domain_grid_search", &fiction::critical_temperature_domain_grid_search<Lyt, py_tt>,
           py::arg("lyt"), py::arg("spec"), py::arg("params") = fiction::operational_domain_params{},
           py::arg("stats") = nullptr, DOC(fiction_critical_temperature_domain_grid_search));
