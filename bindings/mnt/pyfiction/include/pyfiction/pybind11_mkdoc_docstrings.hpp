@@ -3625,7 +3625,7 @@ Parameter ``stats``:
     Operational domain computation statistics.
 
 Returns:
-    The (partial) operational domain of the layout.
+    The critical temperature domain of the layout.
 
 Throws:
     std::invalid_argument if the given sweep parameters are invalid.)doc";
@@ -3690,7 +3690,7 @@ Parameter ``stats``:
     Operational domain computation statistics.
 
 Returns:
-    The (partial) operational domain of the layout.
+    The critical temperature domain of the layout.
 
 Throws:
     std::invalid_argument if the given sweep parameters are invalid.)doc";
@@ -3751,7 +3751,7 @@ Parameter ``stats``:
     Operational domain computation statistics.
 
 Returns:
-    The operational domain of the layout.
+    The critical temperature domain of the layout.
 
 Throws:
     std::invalid_argument if the given sweep parameters are invalid.)doc";
@@ -3795,7 +3795,7 @@ Parameter ``stats``:
     Operational domain computation statistics.
 
 Returns:
-    The (partial) operational domain of the layout.
+    The critical temperature domain of the layout.
 
 Throws:
     std::invalid_argument if the given sweep parameters are invalid.)doc";
@@ -16715,7 +16715,7 @@ Parameter ``stats``:
     Operational domain computation statistics.
 
 Returns:
-    The (partial) operational domain of the layout.
+    The operational domain of the layout.
 
 Throws:
     std::invalid_argument if the given sweep parameters are invalid.)doc";
@@ -16779,7 +16779,7 @@ Parameter ``stats``:
     Operational domain computation statistics.
 
 Returns:
-    The (partial) operational domain of the layout.
+    The operational domain of the layout.
 
 Throws:
     std::invalid_argument if the given sweep parameters are invalid.)doc";
@@ -16909,7 +16909,7 @@ Parameter ``stats``:
     Operational domain computation statistics.
 
 Returns:
-    The (partial) operational domain of the layout.
+    The operational domain of the layout.
 
 Throws:
     std::invalid_argument if the given sweep parameters are invalid.)doc";
