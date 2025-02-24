@@ -71,7 +71,8 @@ inline void random_sidb_layout_generator(pybind11::module& m)
                        &fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>::positive_sidbs,
                        DOC(fiction_generate_random_sidb_layout_params_positive_sidbs))
         .def_readwrite("simulation_parameters",
-                       &fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>::simulation_parameters)
+                       &fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>::simulation_parameters,
+                       DOC(fiction_generate_random_sidb_layout_params_simulation_parameters))
         .def_readwrite("maximal_attempts",
                        &fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>::maximal_attempts,
                        DOC(fiction_generate_random_sidb_layout_params_maximal_attempts))
