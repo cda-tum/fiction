@@ -13476,14 +13476,15 @@ layout to which SiDBs are added to create unique SiDB layouts.
 Template parameter ``Lyt``:
     SiDB cell-level SiDB layout type.
 
-Parameter ``lyt_skeleton``:
-    A layout to which random SiDBs are added to create unique layouts.
-
 Parameter ``params``:
     The parameters for generating the random SiDB layouts.
 
+Parameter ``lyt_skeleton``:
+    A layout to which random SiDBs are added to create unique layouts.
+
 Returns:
-    A vector containing the unique randomly generated SiDB layouts.)doc";
+    A vector containing the unique randomly generated SiDB layouts. If
+    the design is impossible, `std::nullopt`)doc";
 
 static const char *__doc_fiction_generate_random_sidb_layout =
 R"doc(Generates a random layout of SiDBs by adding them to the provided
@@ -13493,15 +13494,16 @@ which SiDBs are added to create the final layout.
 Template parameter ``Lyt``:
     SiDB cell-level SiDB layout type.
 
-Parameter ``lyt_skeleton``:
-    A layout to which random cells are added to create the final
-    layout.
-
 Parameter ``params``:
     The parameters for generating the random layout.
 
+Parameter ``lyt_skeleton``:
+    Optional layout to which random cells are added to create the
+    final layout.
+
 Returns:
-    A randomly-generated layout of SiDBs.)doc";
+    A randomly-generated layout of SiDBs. If the design is impossible,
+    `std::nullopt` is returned.)doc";
 
 static const char *__doc_fiction_generate_random_sidb_layout_params =
 R"doc(This struct stores the parameters for the
@@ -13550,7 +13552,7 @@ static const char *__doc_fiction_generate_random_sidb_layout_params_positive_sid
 R"doc(If positively charged SiDBs should be prevented, SiDBs are not placed
 closer than the minimal_spacing.)doc";
 
-static const char *__doc_fiction_generate_random_sidb_layout_params_sim_params = R"doc(Simulation parameters.)doc";
+static const char *__doc_fiction_generate_random_sidb_layout_params_simulation_parameters = R"doc(Simulation parameters.)doc";
 
 static const char *__doc_fiction_geometric_temperature_schedule =
 R"doc(A logarithmically decreasing temperature schedule. The temperature is
