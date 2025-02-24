@@ -73,6 +73,7 @@ class TestRandomSiDBLayoutGenerator(unittest.TestCase):
 
     def test_impossible_design_of_mutiple_layouts(self):
         params = generate_random_sidb_layout_params()
+        params.maximal_attempts_for_multiple_layouts = 5
         params.number_of_sidbs = 2
         result_lyt = generate_multiple_random_sidb_layouts(params, sidb_layout())
         self.assertIsNone(result_lyt)
