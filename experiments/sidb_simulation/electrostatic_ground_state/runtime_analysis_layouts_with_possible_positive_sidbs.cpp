@@ -9,6 +9,7 @@
 #include <fiction/algorithms/simulation/sidb/quickexact.hpp>
 #include <fiction/algorithms/simulation/sidb/random_sidb_layout_generator.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
+#include <fiction/types.hpp>
 
 #include <mockturtle/utils/stopwatch.hpp>
 
