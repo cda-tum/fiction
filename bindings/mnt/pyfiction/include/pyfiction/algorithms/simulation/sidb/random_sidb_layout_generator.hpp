@@ -56,8 +56,6 @@ inline void random_sidb_layout_generator(pybind11::module& m)
     /**
      * Parameters.
      */
-
-    // todo update docu
     py::class_<fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>>(
         m, "generate_random_sidb_layout_params", DOC(fiction_generate_random_sidb_layout_params))
         .def(py::init<>())
