@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`_.
 
+v0.6.10 - 2025-02-21
+--------------------
+
+Fixed
+#####
+- Fixed the Python bindings for the critical temperature domain simulation
+
 v0.6.9 - 2025-02-12
 -------------------
 
