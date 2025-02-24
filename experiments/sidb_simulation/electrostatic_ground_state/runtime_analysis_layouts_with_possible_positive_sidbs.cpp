@@ -52,7 +52,7 @@ int main()  // NOLINT
     {
         random_layouts_params.number_of_sidbs = num_sidbs;
 
-        const auto random_layouts = generate_multiple_random_sidb_layouts(Lyt{}, random_layouts_params);
+        const auto random_layouts = generate_multiple_random_sidb_layouts<Lyt>(random_layouts_params);
 
         double runtime_exhaustive = 0;
         double runtime_quickexact = 0;
