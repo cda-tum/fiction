@@ -78,7 +78,7 @@ int main()  // NOLINT
         double      quicksim_single_runtime = 0.0;
 
         // simulate layout with no input pattern
-        const auto             exhaustive_results_layout = sidb_simulation_result<sidb_100_cell_clk_lyt_siqad>{};
+        const auto             exhaustive_results_layout = exhaustive_ground_state_simulation(*bii, sim_params);
         time_to_solution_stats stats{};
         time_to_solution(layout, qs_params, tts_params, &stats);
         const auto quickexact_results_layout = quickexact(layout, qe_params);
@@ -96,7 +96,7 @@ int main()  // NOLINT
 
         for (auto i = 0u; i < num_input_patterns; ++i, ++bii)
         {
-            const auto             exhaustive_results = sidb_simulation_result<sidb_100_cell_clk_lyt_siqad>{};
+            const auto             exhaustive_results = exhaustive_ground_state_simulation(*bii, sim_params);
             time_to_solution_stats tts_stats{};
             time_to_solution(*bii, qs_params, tts_params, &tts_stats);
             const auto quickexact_results = quickexact(*bii, qe_params);
