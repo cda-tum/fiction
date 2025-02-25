@@ -725,11 +725,10 @@ TEMPLATE_TEST_CASE("Edge case with four SiDBs", "[quicksim]", (sidb_100_cell_clk
 {
     TestType lyt{};
 
-    lyt.assign_cell_type({0, 1, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({3, 1, 0}, TestType::cell_type::NORMAL);
-
-    lyt.assign_cell_type({6, 1, 1}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 0, 1}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({0, 1, 1}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({3, 2, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({3, 0, 1}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({7, 0, 0}, TestType::cell_type::NORMAL);
 
     quicksim_params quicksim_params{};
 
