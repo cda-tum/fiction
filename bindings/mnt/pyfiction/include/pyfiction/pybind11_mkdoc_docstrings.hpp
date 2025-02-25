@@ -13470,7 +13470,7 @@ layout, this counter is incremented.)doc";
 
 static const char *__doc_fiction_generate_multiple_random_sidb_layouts =
 R"doc(Generates multiple unique random SiDB layouts by adding them to the
-provided layout skeleton. The layout skeleton serves as the starting
+provided layout layout. The optional layout serves as the starting
 layout to which SiDBs are added to create unique SiDB layouts.
 
 Template parameter ``Lyt``:
@@ -13479,8 +13479,8 @@ Template parameter ``Lyt``:
 Parameter ``params``:
     The parameters for generating the random SiDB layouts.
 
-Parameter ``lyt_skeleton``:
-    A layout to which random SiDBs are added to create unique layouts.
+Parameter ``layout``:
+    Optional layout to which random cells are added.
 
 Returns:
     A vector containing the unique randomly generated SiDB layouts. If
@@ -13488,7 +13488,7 @@ Returns:
 
 static const char *__doc_fiction_generate_random_sidb_layout =
 R"doc(Generates a random layout of SiDBs by adding them to the provided
-layout skeleton. The layout skeleton serves as the starting layout to
+layout layout. The optional layout serves as the starting layout to
 which SiDBs are added to create the final layout.
 
 Template parameter ``Lyt``:
@@ -13497,13 +13497,12 @@ Template parameter ``Lyt``:
 Parameter ``params``:
     The parameters for generating the random layout.
 
-Parameter ``lyt_skeleton``:
-    Optional layout to which random cells are added to create the
-    final layout.
+Parameter ``layout``:
+    Optional layout to which random cells are added.
 
 Returns:
-    A randomly-generated layout of SiDBs. If the design is impossible,
-    `std::nullopt` is returned.)doc";
+    A randomly generated layout of SiDBs, or `std::nullopt` if the
+    process failed due to conflicting parameters.)doc";
 
 static const char *__doc_fiction_generate_random_sidb_layout_params =
 R"doc(This struct stores the parameters for the
