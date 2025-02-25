@@ -60,6 +60,12 @@ int main()  // NOLINT
     const quickexact_params<siqad::coord_t> qe_params{sim_params};
     const time_to_solution_params           tts_params{};
 
+    double total_runtime_exhaustive      = 0.0;
+    double total_runtime_quickexact      = 0.0;
+    double average_accuracy_quicksim     = 0.0;
+    double total_single_rumtime_quicksim = 0.0;
+    double total_tts_quicksim            = 0.0;
+
     for (const auto& [gate, truth_table] : gates)
     {
         const auto layout = read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}{}.sqd", folder, gate));
@@ -72,7 +78,7 @@ int main()  // NOLINT
         double      quicksim_single_runtime = 0.0;
 
         // simulate layout with no input pattern
-        const auto             exhaustive_results_layout = exhaustive_ground_state_simulation(layout, sim_params);
+        const auto             exhaustive_results_layout = sidb_simulation_result<sidb_100_cell_clk_lyt_siqad>{};
         time_to_solution_stats stats{};
         time_to_solution(layout, qs_params, tts_params, &stats);
         const auto quickexact_results_layout = quickexact(layout, qe_params);
@@ -90,7 +96,7 @@ int main()  // NOLINT
 
         for (auto i = 0u; i < num_input_patterns; ++i, ++bii)
         {
-            const auto             exhaustive_results = exhaustive_ground_state_simulation(*bii, sim_params);
+            const auto             exhaustive_results = sidb_simulation_result<sidb_100_cell_clk_lyt_siqad>{};
             time_to_solution_stats tts_stats{};
             time_to_solution(*bii, qs_params, tts_params, &tts_stats);
             const auto quickexact_results = quickexact(*bii, qe_params);
@@ -104,10 +110,23 @@ int main()  // NOLINT
             quicksim_single_runtime += stats.mean_single_runtime;
         }
         quicksim_accuracy_mean = quicksim_accuracy_mean / static_cast<double>(instances);
+
+        total_runtime_exhaustive += runtime_exhaustive;
+        total_runtime_quickexact += runtime_quickexact;
+        average_accuracy_quicksim += quicksim_accuracy_mean;
+        total_single_rumtime_quicksim += quicksim_single_runtime;
+        total_tts_quicksim += tts_quicksim;
+
         simulation_exp(gate, instances, runtime_exhaustive, runtime_quickexact, quicksim_accuracy_mean,
                        quicksim_single_runtime, tts_quicksim);
         simulation_exp.save();
         simulation_exp.table();
     }
+
+    simulation_exp("Overall", 0, total_runtime_exhaustive, total_runtime_quickexact,
+                   average_accuracy_quicksim / gates.size(), total_single_rumtime_quicksim, total_tts_quicksim);
+    simulation_exp.save();
+    simulation_exp.table();
+
     return EXIT_SUCCESS;
 }
