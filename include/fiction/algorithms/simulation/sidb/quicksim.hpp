@@ -93,7 +93,7 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
         charge_lyt.assign_base_number(2);
         charge_lyt.assign_all_charge_states(sidb_charge_state::NEGATIVE);
         charge_lyt.update_after_charge_change(dependent_cell_mode::VARIABLE);
-        const auto negative_sidb_indices = charge_lyt.negative_sidb_detection();
+        const auto predefined_negative_sidbs_indices = charge_lyt.negative_sidb_detection();
 
         // Check that the layout with all SiDBs negatively charged is physically valid.
         if (charge_lyt.is_physically_valid())
@@ -105,7 +105,7 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
         charge_lyt.assign_all_charge_states(sidb_charge_state::NEUTRAL);
         charge_lyt.update_after_charge_change();
 
-        if (!negative_sidb_indices.empty())
+        if (!predefined_negative_sidbs_indices.empty())
         {
             if (charge_lyt.is_physically_valid())
             {
@@ -115,18 +115,28 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
 
         // Check if the layout where all SiDBs that need to be negatively charged are negatively charged and the rest
         // are neutrally charged is physically valid.
-        for (const auto& index : negative_sidb_indices)
+        std::vector<uint64_t> all_sidbs_indices_with_unknow_charge_state{};
+        all_sidbs_indices_with_unknow_charge_state.reserve(charge_lyt.num_cells());
+
+        for (const auto& cell : charge_lyt.get_sidb_order())
         {
-            charge_lyt.assign_charge_state_by_cell_index(static_cast<uint64_t>(index), sidb_charge_state::NEGATIVE);
+            if (std::find(predefined_negative_sidbs_indices.cbegin(), predefined_negative_sidbs_indices.cend(),
+                          charge_lyt.cell_to_index(cell)) == predefined_negative_sidbs_indices.cend())
+            {
+                all_sidbs_indices_with_unknow_charge_state.push_back(charge_lyt.cell_to_index(cell));
+            }
         }
+
+        for (const auto& negative_sidb_index : predefined_negative_sidbs_indices)
+        {
+            charge_lyt.assign_charge_state_by_index(negative_sidb_index, sidb_charge_state::NEGATIVE);
+        }
+
         charge_lyt.update_after_charge_change();
         if (charge_lyt.is_physically_valid())
         {
             st.charge_distributions.push_back(charge_distribution_surface<Lyt>{charge_lyt});
         }
-
-        charge_lyt.assign_all_charge_states(sidb_charge_state::NEUTRAL);
-        charge_lyt.update_after_charge_change();
 
         // If the number of threads is initially set to zero, the simulation is run with one thread.
         const uint64_t num_threads = std::max(ps.number_threads, uint64_t{1});
@@ -146,32 +156,30 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
             threads.emplace_back(
                 [&]
                 {
-                    charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt};
+                    // all SiDBs are negatively charged
+                    if (predefined_negative_sidbs_indices.size() == charge_lyt.num_cells())
+                    {
+                        return;
+                    }
+
+                    charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt.clone()};
 
                     for (uint64_t l = 0ul; l < iter_per_thread; ++l)
                     {
-                        for (uint64_t i = 0ul; i < charge_lyt.num_cells(); ++i)
+                        for (const auto& sidb_index_with_unknown_charge_state :
+                             all_sidbs_indices_with_unknow_charge_state)
                         {
-                            {
-                                if (std::find(negative_sidb_indices.cbegin(), negative_sidb_indices.cend(), i) !=
-                                    negative_sidb_indices.cend())
-                                {
-                                    continue;
-                                }
-                            }
-
-                            std::vector<uint64_t> index_start{i};
-
                             charge_lyt_copy.assign_all_charge_states(sidb_charge_state::NEUTRAL);
 
-                            for (const auto& index : negative_sidb_indices)
+                            auto negative_sidbs_indices = predefined_negative_sidbs_indices;
+                            negative_sidbs_indices.push_back(sidb_index_with_unknown_charge_state);
+
+                            for (const auto& negative_sidb_index : negative_sidbs_indices)
                             {
-                                charge_lyt_copy.assign_charge_state_by_cell_index(static_cast<uint64_t>(index),
-                                                                                  sidb_charge_state::NEGATIVE);
-                                index_start.push_back(static_cast<uint64_t>(index));
+                                charge_lyt_copy.assign_charge_state_by_index(negative_sidb_index,
+                                                                             sidb_charge_state::NEGATIVE);
                             }
 
-                            charge_lyt_copy.assign_charge_state_by_cell_index(i, sidb_charge_state::NEGATIVE);
                             charge_lyt_copy.update_after_charge_change();
 
                             if (charge_lyt_copy.is_physically_valid())
@@ -180,13 +188,11 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
                                 st.charge_distributions.push_back(charge_distribution_surface<Lyt>{charge_lyt_copy});
                             }
 
-                            const auto upper_limit =
-                                std::min(static_cast<uint64_t>(static_cast<double>(charge_lyt_copy.num_cells()) / 1.5),
-                                         charge_lyt.num_cells() - negative_sidb_indices.size());
+                            const auto upper_limit = all_sidbs_indices_with_unknow_charge_state.size() - 1;
 
                             for (uint64_t num = 0ul; num < upper_limit; num++)
                             {
-                                charge_lyt_copy.adjacent_search(ps.alpha, index_start);
+                                charge_lyt_copy.adjacent_search(ps.alpha, negative_sidbs_indices);
                                 charge_lyt_copy.validity_check();
 
                                 if (charge_lyt_copy.is_physically_valid())

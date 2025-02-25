@@ -499,9 +499,6 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         {
             this->charge_distribution_to_index();
         }
-        {
-            this->charge_distribution_to_index();
-        }
     }
     /**
      * This function assigns the dependent cell (i.e., cell which charge state is set based on the neighbor cells
@@ -617,9 +614,9 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @param cs The charge state to be assigned to the cell.
      * @param index_mode Mode to determine whether the charge index should be updated.
      */
-    void assign_charge_state_by_cell_index(
-        const uint64_t index, const sidb_charge_state cs,
-        const charge_index_mode index_mode = charge_index_mode::UPDATE_CHARGE_INDEX) noexcept
+    void
+    assign_charge_state_by_index(const uint64_t index, const sidb_charge_state cs,
+                                 const charge_index_mode index_mode = charge_index_mode::UPDATE_CHARGE_INDEX) noexcept
     {
         strg->cell_charge[index] = cs;
 
@@ -671,26 +668,29 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * This function can be used to detect which SiDBs must be negatively charged due to their location. Important:
      * This function must be applied to a charge layout where all SiDBs are negatively initialized.
      *
-     * @return Vector of indices describing which SiDBs must be negatively charged.
+     * @return Vector of SiDBs that must be negatively charged to fulfill the population stability.
      */
-    [[nodiscard]] std::vector<int64_t> negative_sidb_detection() const noexcept
+    [[nodiscard]] std::vector<uint64_t> negative_sidb_detection() const noexcept
     {
-        std::vector<int64_t> negative_sidbs{};
+        std::vector<uint64_t> negative_sidbs{};
         negative_sidbs.reserve(this->num_cells());
-        this->foreach_cell(
-            [&negative_sidbs, this](const auto& c)
+
+        for (const auto& cell : strg->sidb_order)
+        {
+            if (const auto local_pot = this->get_local_potential(cell); local_pot.has_value())
             {
-                if (const auto local_pot = this->get_local_potential(c); local_pot.has_value())
+                // Check if the maximum band bending is sufficient to shift (0/-) above the Fermi level. The local
+                // potential is converted from J to eV to compare the band bending with the Fermi level (which is also
+                // given in eV).
+                if ((-*local_pot + strg->simulation_parameters.mu_minus) < -constants::ERROR_MARGIN)
                 {
-                    // Check if the maximum band bending is sufficient to shift (0/-) above the Fermi level. The local
-                    // potential is converted from J to eV to compare the band bending with the Fermi level (which is
-                    // also given in eV).
-                    if ((-*local_pot + strg->simulation_parameters.mu_minus) < -constants::ERROR_MARGIN)
-                    {
-                        negative_sidbs.push_back(cell_to_index(c));
-                    }
+                    const auto cell_index = cell_to_index(cell);
+                    assert(cell_index != -1 && "Cell is not part of the layout");
+                    negative_sidbs.push_back(cell_index);
                 }
-            });
+            }
+        }
+
         return negative_sidbs;
     }
     /**
@@ -1775,15 +1775,15 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             {
                 strg->cell_history_gray_code.first  = static_cast<int64_t>(index_changed);
                 strg->cell_history_gray_code.second = sign_old;
-                this->assign_charge_state_by_cell_index(index_changed, sign_to_charge_state(sign_new),
-                                                        charge_index_mode::KEEP_CHARGE_INDEX);
+                this->assign_charge_state_by_index(index_changed, sign_to_charge_state(sign_new),
+                                                   charge_index_mode::KEEP_CHARGE_INDEX);
             }
             else
             {
                 strg->cell_history_gray_code.first  = static_cast<int64_t>(index_changed) + 1;
                 strg->cell_history_gray_code.second = sign_old;
-                this->assign_charge_state_by_cell_index(index_changed + 1, sign_to_charge_state(sign_new),
-                                                        charge_index_mode::KEEP_CHARGE_INDEX);
+                this->assign_charge_state_by_index(index_changed + 1, sign_to_charge_state(sign_new),
+                                                   charge_index_mode::KEEP_CHARGE_INDEX);
             }
         }
         else
@@ -2087,7 +2087,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 strg->cell_history.emplace_back(
                     static_cast<uint64_t>(cell_to_index(index_to_three_state_cell(counter))),
                     charge_state_to_sign(new_chargesign));
-                this->assign_charge_state_by_cell_index(
+                this->assign_charge_state_by_index(
                     static_cast<uint64_t>(cell_to_index(index_to_three_state_cell(counter))), sign,
                     charge_index_mode::KEEP_CHARGE_INDEX);
             }
@@ -2121,9 +2121,9 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 strg->cell_history.emplace_back(static_cast<uint64_t>(cell_to_index(
                                                     index_to_two_state_cell(static_cast<uint64_t>(counter_negative)))),
                                                 charge_state_to_sign(new_chargesign));
-                this->assign_charge_state_by_cell_index(static_cast<uint64_t>(cell_to_index(index_to_two_state_cell(
-                                                            static_cast<uint64_t>(counter_negative)))),
-                                                        sign, charge_index_mode::KEEP_CHARGE_INDEX);
+                this->assign_charge_state_by_index(static_cast<uint64_t>(cell_to_index(index_to_two_state_cell(
+                                                       static_cast<uint64_t>(counter_negative)))),
+                                                   sign, charge_index_mode::KEEP_CHARGE_INDEX);
             }
             counter_negative -= 1;
             // If the current position is the dependent cell position, first the counter_negative is decremented
@@ -2165,14 +2165,14 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             // cell position.
             if (has_dependent_cell && counter == dependent_cell_index)
             {
-                // The charge state is only changed (i.e., the function assign_charge_state_by_cell_index is
+                // The charge state is only changed (i.e., the function assign_charge_state_by_index is
                 // called), if the nw charge state differs to the previous one. Only then will the cell be
                 // added to the charge_distribution_history.
                 counter -= 1;
             }
 
-            this->assign_charge_state_by_cell_index(static_cast<uint64_t>(counter), charge_state,
-                                                    charge_index_mode::KEEP_CHARGE_INDEX);
+            this->assign_charge_state_by_index(static_cast<uint64_t>(counter), charge_state,
+                                               charge_index_mode::KEEP_CHARGE_INDEX);
 
             charge_quot /= base;
             counter -= 1;
@@ -2186,8 +2186,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         // If the counter is >= 0, then the first <counter> cells should be assigned a negative charge state.
         for (uint64_t i = 0; static_cast<int64_t>(i) <= counter; ++i)
         {
-            this->assign_charge_state_by_cell_index(i, sidb_charge_state::NEGATIVE,
-                                                    charge_index_mode::KEEP_CHARGE_INDEX);
+            this->assign_charge_state_by_index(i, sidb_charge_state::NEGATIVE, charge_index_mode::KEEP_CHARGE_INDEX);
         }
     }
 };
