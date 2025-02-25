@@ -720,6 +720,33 @@ TEMPLATE_TEST_CASE("QuickSim simulation of an layout comprising of 13 SiDBs, all
     }
 }
 
+TEMPLATE_TEST_CASE("Edge case with four SiDBs", "[quicksim]", (sidb_100_cell_clk_lyt_siqad),
+                   (cds_sidb_100_cell_clk_lyt_siqad))
+{
+    TestType lyt{};
+
+    lyt.assign_cell_type({0, 1, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({3, 1, 0}, TestType::cell_type::NORMAL);
+
+    lyt.assign_cell_type({6, 1, 1}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 0, 1}, TestType::cell_type::NORMAL);
+
+    quicksim_params quicksim_params{};
+
+    SECTION("alpha = 1.0 does not work")
+    {
+        quicksim_params.alpha         = 1.0;
+        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+        CHECK(simulation_results.charge_distributions.size() == 0);
+    }
+    SECTION("alpha = 0.7 works")
+    {
+        quicksim_params.alpha         = 0.7;
+        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+        CHECK(simulation_results.charge_distributions.size() > 0);
+    }
+}
+
 TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shaped SiDB OR gate with input 01", "[ExGS]",
                    (sidb_100_cell_clk_lyt_siqad), (charge_distribution_surface<sidb_100_cell_clk_lyt_siqad>))
 {
