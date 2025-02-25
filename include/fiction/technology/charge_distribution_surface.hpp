@@ -686,7 +686,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 {
                     const auto cell_index = cell_to_index(cell);
                     assert(cell_index != -1 && "Cell is not part of the layout");
-                    negative_sidbs.push_back(cell_index);
+                    negative_sidbs.push_back(static_cast<uint64_t>(cell_index));
                 }
             }
         }
