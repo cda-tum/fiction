@@ -83,18 +83,18 @@ struct generate_random_sidb_layout_params
 };
 
 /**
- * Generates a random layout of SiDBs by adding them to the provided layout skeleton.
- * The layout skeleton serves as the starting layout to which SiDBs are added to create the final layout.
+ * Generates a random layout of SiDBs by adding them to the provided layout layout.
+ * The optional layout serves as the starting layout to which SiDBs are added to create the final layout.
  *
  * @tparam Lyt SiDB cell-level SiDB layout type.
  * @param params The parameters for generating the random layout.
- * @param lyt_skeleton Optional layout to which random cells are added to create the final layout.
- * @return A randomly-generated layout of SiDBs. If the design is impossible, `std::nullopt` is returned.
+ * @param layout Optional layout to which random cells are added.
+ * @return A randomly generated layout of SiDBs, or `std::nullopt` if the process failed due to conflicting parameters.
  */
 template <typename Lyt>
 [[nodiscard]] std::optional<Lyt>
 generate_random_sidb_layout(const generate_random_sidb_layout_params<coordinate<Lyt>>& params,
-                            const std::optional<Lyt>& lyt_skeleton = std::nullopt) noexcept
+                            const std::optional<Lyt>&                                  layout = std::nullopt) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -105,14 +105,14 @@ generate_random_sidb_layout(const generate_random_sidb_layout_params<coordinate<
 
     Lyt lyt{};
 
-    if (lyt_skeleton.has_value())
+    if (layout.has_value())
     {
-        lyt = lyt_skeleton.value().clone();
+        lyt = layout.value().clone();
         number_of_sidbs_of_final_layout += lyt.num_cells();
 
         if constexpr (is_sidb_defect_surface_v<Lyt>)
         {
-            sidbs_affected_by_defects = lyt_skeleton.value().all_affected_sidbs(std::make_pair(0, 0));
+            sidbs_affected_by_defects = layout.value().all_affected_sidbs(std::make_pair(0, 0));
         }
     }
 
@@ -142,7 +142,7 @@ generate_random_sidb_layout(const generate_random_sidb_layout_params<coordinate<
         // the SiDB is added to the layout
         if (!random_cell_is_identical_wih_defect && !next_to_neutral_defect)
         {
-            if (lyt_skeleton.has_value())
+            if (layout.has_value())
             {
                 lyt.assign_cell_type(random_coord, technology<Lyt>::cell_type::LOGIC);
             }
@@ -164,7 +164,7 @@ generate_random_sidb_layout(const generate_random_sidb_layout_params<coordinate<
     if (params.positive_sidbs == generate_random_sidb_layout_params<coordinate<Lyt>>::positive_charges::MAY_OCCUR &&
         !can_positive_charges_occur(lyt, params.simulation_parameters))
     {
-        return generate_random_sidb_layout(params, lyt_skeleton);
+        return generate_random_sidb_layout(params, layout);
     }
 
     if (lyt.num_cells() == number_of_sidbs_of_final_layout)
@@ -172,23 +172,23 @@ generate_random_sidb_layout(const generate_random_sidb_layout_params<coordinate<
         return lyt;
     }
 
-    // if not all SiDBs can be placed, std::nullopt is returned
+    // in case some SiDBs could not be placed, return std::nullopt
     return std::nullopt;
 }
 
 /**
- * Generates multiple unique random SiDB layouts by adding them to the provided layout skeleton.
- * The layout skeleton serves as the starting layout to which SiDBs are added to create unique SiDB layouts.
+ * Generates multiple unique random SiDB layouts by adding them to the provided layout layout.
+ * The optional layout serves as the starting layout to which SiDBs are added to create unique SiDB layouts.
  *
  * @tparam Lyt SiDB cell-level SiDB layout type.
  * @param params The parameters for generating the random SiDB layouts.
- * @param lyt_skeleton A layout to which random SiDBs are added to create unique layouts.
+ * @param layout Optional layout to which random cells are added.
  * @return A vector containing the unique randomly generated SiDB layouts. If the design is impossible, `std::nullopt`
  */
 template <typename Lyt>
 [[nodiscard]] std::optional<std::vector<Lyt>>
 generate_multiple_random_sidb_layouts(const generate_random_sidb_layout_params<coordinate<Lyt>>& params,
-                                      const std::optional<Lyt>& lyt_skeleton = std::nullopt) noexcept
+                                      const std::optional<Lyt>& layout = std::nullopt) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -203,11 +203,11 @@ generate_multiple_random_sidb_layouts(const generate_random_sidb_layout_params<c
     while (unique_lyts.size() < params.number_of_unique_generated_layouts &&
            unsuccessful_generation_attempt_counter < params.maximal_attempts_for_multiple_layouts)
     {
-        if (auto random_lyt = generate_random_sidb_layout(params, lyt_skeleton); random_lyt.has_value())
+        if (auto random_lyt = generate_random_sidb_layout(params, layout); random_lyt.has_value())
         {
             // check if layout is unique
-            const auto is_identical = std::any_of(FICTION_EXECUTION_POLICY_PAR unique_lyts.cbegin(), unique_lyts.cend(),
-                                                  [&](const auto& old_lyt)
+            const auto is_identical = std::any_of(FICTION_EXECUTION_POLICY_PAR_UNSEQ unique_lyts.cbegin(),
+                                                  unique_lyts.cend(), [&](const auto& old_lyt)
                                                   { return are_cell_layouts_identical(random_lyt.value(), old_lyt); });
 
             // add layout if unique
