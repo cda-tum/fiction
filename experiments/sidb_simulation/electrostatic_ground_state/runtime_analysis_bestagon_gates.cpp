@@ -126,7 +126,7 @@ int main()  // NOLINT
         simulation_exp.table();
     }
 
-    simulation_exp("Overall", total_number_of_instances, total_runtime_exhaustive, total_runtime_quickexact,
+    simulation_exp("Total", total_number_of_instances, total_runtime_exhaustive, total_runtime_quickexact,
                    average_accuracy_quicksim / gates.size(), total_single_rumtime_quicksim, total_tts_quicksim);
     simulation_exp.save();
     simulation_exp.table();

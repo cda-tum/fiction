@@ -10,6 +10,7 @@
 #include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/traits.hpp"
+#include "fiction/utils/execution_utils.hpp"
 
 #include <mockturtle/utils/stopwatch.hpp>
 
@@ -93,7 +94,7 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
         charge_lyt.assign_base_number(2);
         charge_lyt.assign_all_charge_states(sidb_charge_state::NEGATIVE);
         charge_lyt.update_after_charge_change(dependent_cell_mode::VARIABLE);
-        const auto predefined_negative_sidbs_indices = charge_lyt.negative_sidb_detection();
+        const auto predefined_negative_sidb_indices = charge_lyt.negative_sidb_detection();
 
         // Check that the layout with all SiDBs negatively charged is physically valid.
         if (charge_lyt.is_physically_valid())
@@ -105,7 +106,7 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
         charge_lyt.assign_all_charge_states(sidb_charge_state::NEUTRAL);
         charge_lyt.update_after_charge_change();
 
-        if (!predefined_negative_sidbs_indices.empty())
+        if (!predefined_negative_sidb_indices.empty())
         {
             if (charge_lyt.is_physically_valid())
             {
@@ -115,20 +116,21 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
 
         // Check if the layout where all SiDBs that need to be negatively charged are negatively charged and the rest
         // are neutrally charged is physically valid.
-        std::vector<uint64_t> all_sidbs_indices_with_unknow_charge_state{};
-        all_sidbs_indices_with_unknow_charge_state.reserve(charge_lyt.num_cells());
+        std::vector<uint64_t> all_sidb_indices_with_unknown_charge_state{};
+        all_sidb_indices_with_unknown_charge_state.reserve(charge_lyt.num_cells());
 
         for (const auto& cell : charge_lyt.get_sidb_order())
         {
-            if (std::find(predefined_negative_sidbs_indices.cbegin(), predefined_negative_sidbs_indices.cend(),
-                          charge_lyt.cell_to_index(cell)) == predefined_negative_sidbs_indices.cend())
+            if (std::find(FICTION_EXECUTION_POLICY_PAR_UNSEQ predefined_negative_sidb_indices.cbegin(),
+                          predefined_negative_sidb_indices.cend(),
+                          charge_lyt.cell_to_index(cell)) == predefined_negative_sidb_indices.cend())
             {
-                all_sidbs_indices_with_unknow_charge_state.push_back(
+                all_sidb_indices_with_unknown_charge_state.push_back(
                     static_cast<uint64_t>(charge_lyt.cell_to_index(cell)));
             }
         }
 
-        for (const auto& negative_sidb_index : predefined_negative_sidbs_indices)
+        for (const auto& negative_sidb_index : predefined_negative_sidb_indices)
         {
             charge_lyt.assign_charge_state_by_index(negative_sidb_index, sidb_charge_state::NEGATIVE);
         }
@@ -157,8 +159,8 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
             threads.emplace_back(
                 [&]
                 {
-                    // all SiDBs are negatively charged
-                    if (predefined_negative_sidbs_indices.size() == charge_lyt.num_cells())
+                    // if all SiDBs are negatively charged, abort
+                    if (predefined_negative_sidb_indices.size() == charge_lyt.num_cells())
                     {
                         return;
                     }
@@ -168,11 +170,11 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
                     for (uint64_t l = 0ul; l < iter_per_thread; ++l)
                     {
                         for (const auto& sidb_index_with_unknown_charge_state :
-                             all_sidbs_indices_with_unknow_charge_state)
+                             all_sidb_indices_with_unknown_charge_state)
                         {
                             charge_lyt_copy.assign_all_charge_states(sidb_charge_state::NEUTRAL);
 
-                            auto negative_sidbs_indices = predefined_negative_sidbs_indices;
+                            auto negative_sidbs_indices = predefined_negative_sidb_indices;
                             negative_sidbs_indices.push_back(sidb_index_with_unknown_charge_state);
 
                             for (const auto& negative_sidb_index : negative_sidbs_indices)
@@ -189,7 +191,7 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
                                 st.charge_distributions.push_back(charge_distribution_surface<Lyt>{charge_lyt_copy});
                             }
 
-                            const auto upper_limit = all_sidbs_indices_with_unknow_charge_state.size() - 1;
+                            const auto upper_limit = all_sidb_indices_with_unknown_charge_state.size() - 1;
 
                             for (uint64_t num = 0ul; num < upper_limit; num++)
                             {

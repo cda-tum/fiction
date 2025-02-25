@@ -668,7 +668,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * This function can be used to detect which SiDBs must be negatively charged due to their location. Important:
      * This function must be applied to a charge layout where all SiDBs are negatively initialized.
      *
-     * @return Vector of SiDBs that must be negatively charged to fulfill the population stability.
+     * @return Vector of SiDB indices that must be negatively charged to fulfill the population stability.
      */
     [[nodiscard]] std::vector<uint64_t> negative_sidb_detection() const noexcept
     {
