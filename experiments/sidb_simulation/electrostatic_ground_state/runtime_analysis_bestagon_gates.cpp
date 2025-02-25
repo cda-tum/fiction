@@ -78,7 +78,7 @@ int main()  // NOLINT
         double      quicksim_single_runtime = 0.0;
 
         // simulate layout with no input pattern
-        const auto             exhaustive_results_layout = exhaustive_ground_state_simulation(*bii, sim_params);
+        const auto             exhaustive_results_layout = exhaustive_ground_state_simulation(layout, sim_params);
         time_to_solution_stats stats{};
         time_to_solution(layout, qs_params, tts_params, &stats);
         const auto quickexact_results_layout = quickexact(layout, qe_params);
