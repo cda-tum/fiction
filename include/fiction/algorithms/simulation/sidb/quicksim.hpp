@@ -123,7 +123,8 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
             if (std::find(predefined_negative_sidbs_indices.cbegin(), predefined_negative_sidbs_indices.cend(),
                           charge_lyt.cell_to_index(cell)) == predefined_negative_sidbs_indices.cend())
             {
-                all_sidbs_indices_with_unknow_charge_state.push_back(charge_lyt.cell_to_index(cell));
+                all_sidbs_indices_with_unknow_charge_state.push_back(
+                    static_cast<uint64_t>(charge_lyt.cell_to_index(cell)));
             }
         }
 
