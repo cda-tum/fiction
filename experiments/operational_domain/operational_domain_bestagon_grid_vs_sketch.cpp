@@ -24,23 +24,23 @@
 
 using namespace fiction;
 
-// This script compares the exact operational domain computation of Bestagon gates with an approximate algorithm. The
-// exact method employs a grid search approach, while the approximate algorithm estimates the operational domain by
-// identifying non-operational parameter points through filtering strategies. For the remaining parameter points, the
-// algorithm assumes an operational status, resulting in an approximation referred to as the operational domain sketch.
+// This script compares the operational domain computation of Bestagon gates using grid search with an approximate
+// algorithm that computes the so-called "Operational Domain Sketch". The approximate algorithm identifies
+// non-operational parameter points through filtering strategies. For the remaining parameter points, it assumes they
+// are operational, which can lead to false positives.
 
 int main()  // NOLINT
 {
     experiments::experiment<std::string, uint64_t, uint64_t, double, uint64_t, double, double, double> opdomain_exp{
-        "Operational Domain Bestagon Exact vs Sketch",
+        "Operational Domain vs Sketch (Bestagon)",
         "Name",
         "#SiDBs",  // Benchmark
-        "num op exact",
-        "t in s (exact)",
+        "num op (grid)",
+        "t in s (grid)",
         "num op sketch",
         "t in s (sketch)",
-        "num op sketch / num op exact",
-        "t in s (exact) / t in s (sketch)"};
+        "num op (sketch) / num op (grid)",
+        "t in s (grid) / t in s (sketch)"};
 
     // simulation parameters
     sidb_simulation_parameters sim_params{};
@@ -80,21 +80,25 @@ int main()  // NOLINT
                                                                  {create_half_adder_tt(), "ha"},
                                                                  {create_double_wire_tt(), "hourglass"}}};
 
-    double mean_ratio_num_op_sketch_to_num_op_exact = 0.0;
+    double mean_ratio_num_op_sketch_to_num_op_grid = 0.0;
+    double total_runtime_grid                      = 0.0;
+    double total_runtime_sketch                    = 0.0;
 
     for (const auto& [truth_table, gate] : truth_tables_and_names)
     {
         const auto lyt = read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}/{}.sqd", folder, gate), gate);
 
         // operational domain stats
-        operational_domain_stats op_domain_stats_gs_exact{};
+        operational_domain_stats op_domain_stats_grid{};
         operational_domain_stats op_domain_stats_sketch{};
 
         op_domain_params.operational_params.strategy_to_analyze_operational_status =
             is_operational_params::operational_analysis_strategy::SIMULATION_ONLY;
 
-        const auto op_domain_gs_exact =
-            operational_domain_grid_search(lyt, truth_table, op_domain_params, &op_domain_stats_gs_exact);
+        const auto op_domain_grid =
+            operational_domain_grid_search(lyt, truth_table, op_domain_params, &op_domain_stats_grid);
+
+        total_runtime_grid += mockturtle::to_seconds(op_domain_stats_grid.time_total);
 
         op_domain_params.operational_params.strategy_to_analyze_operational_status =
             is_operational_params::operational_analysis_strategy::FILTER_ONLY;
@@ -102,34 +106,37 @@ int main()  // NOLINT
         const auto op_domain_gs_sketch =
             operational_domain_grid_search(lyt, truth_table, op_domain_params, &op_domain_stats_sketch);
 
-        write_operational_domain(op_domain_gs_exact, fmt::format("{}/exact_{}.csv", folder, gate));
+        total_runtime_sketch += mockturtle::to_seconds(op_domain_stats_sketch.time_total);
+
+        write_operational_domain(op_domain_grid, fmt::format("{}/grid_{}.csv", folder, gate));
         write_operational_domain(op_domain_gs_sketch, fmt::format("{}/sketch_{}.csv", folder, gate));
 
-        mean_ratio_num_op_sketch_to_num_op_exact +=
+        mean_ratio_num_op_sketch_to_num_op_grid +=
             static_cast<double>(op_domain_stats_sketch.num_operational_parameter_combinations) /
-            static_cast<double>(op_domain_stats_gs_exact.num_operational_parameter_combinations);
+            static_cast<double>(op_domain_stats_grid.num_operational_parameter_combinations);
 
         opdomain_exp(
             // Benchmark
             gate, lyt.num_cells(),
 
-            // Exact Operational Domain (determine the operation status by simulation)
-            op_domain_stats_gs_exact.num_operational_parameter_combinations,
-            mockturtle::to_seconds(op_domain_stats_gs_exact.time_total),
+            // Operational Domain (determine the operation status by simulation)
+            op_domain_stats_grid.num_operational_parameter_combinations,
+            mockturtle::to_seconds(op_domain_stats_grid.time_total),
 
             // Operational Domain Sketch (determine the operation status by pruning)
             op_domain_stats_sketch.num_operational_parameter_combinations,
             mockturtle::to_seconds(op_domain_stats_sketch.time_total),
             static_cast<double>(op_domain_stats_sketch.num_operational_parameter_combinations) /
-                static_cast<double>(op_domain_stats_gs_exact.num_operational_parameter_combinations),
-            mockturtle::to_seconds(op_domain_stats_gs_exact.time_total) /
+                static_cast<double>(op_domain_stats_grid.num_operational_parameter_combinations),
+            mockturtle::to_seconds(op_domain_stats_grid.time_total) /
                 mockturtle::to_seconds(op_domain_stats_sketch.time_total));
 
         opdomain_exp.save();
         opdomain_exp.table();
     }
 
-    opdomain_exp("Average", 0, 0, 0.0, 0, 0.0, mean_ratio_num_op_sketch_to_num_op_exact, 0.0);
+    opdomain_exp("Total", 0, 0, total_runtime_grid, 0, total_runtime_sketch,
+                 mean_ratio_num_op_sketch_to_num_op_grid / truth_tables_and_names.size(), 0.0);
 
     opdomain_exp.save();
     opdomain_exp.table();
