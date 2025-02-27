@@ -88,7 +88,7 @@ struct generate_random_sidb_layout_params
  *
  * @tparam Lyt SiDB cell-level SiDB layout type.
  * @param params The parameters for generating the random layout.
- * @param skeleton Optional layout to which random cells are added.
+ * @param skeleton Optional layout to which random dots are added.
  * @return A randomly generated SiDB layout, or `std::nullopt` if the process failed due to conflicting
  * parameters.
  */
@@ -183,7 +183,7 @@ generate_random_sidb_layout(const generate_random_sidb_layout_params<coordinate<
  *
  * @tparam Lyt SiDB cell-level SiDB layout type.
  * @param params The parameters for generating the random SiDB layouts.
- * @param skeleton Optional layout to which random cells are added.
+ * @param skeleton Optional layout to which random dots are added.
  * @return A vector containing the unique randomly generated SiDB layouts. If the design is impossible, `std::nullopt`
  */
 template <typename Lyt>
