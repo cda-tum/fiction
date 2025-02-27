@@ -13469,9 +13469,9 @@ R"doc(For each routing objective that cannot be fulfilled in the given
 layout, this counter is incremented.)doc";
 
 static const char *__doc_fiction_generate_multiple_random_sidb_layouts =
-R"doc(Generates multiple unique random SiDB layouts by adding them to the
-provided layout layout. The optional layout serves as the starting
-layout to which SiDBs are added to create unique SiDB layouts.
+R"doc(Generates multiple random layouts featuring a random arrangement of
+SiDBs. These randomly placed dots can be incorporated into an existing
+layout skeleton that may be optionally provided.
 
 Template parameter ``Lyt``:
     SiDB cell-level SiDB layout type.
@@ -13479,17 +13479,17 @@ Template parameter ``Lyt``:
 Parameter ``params``:
     The parameters for generating the random SiDB layouts.
 
-Parameter ``layout``:
-    Optional layout to which random cells are added.
+Parameter ``skeleton``:
+    Optional layout to which random dots are added.
 
 Returns:
     A vector containing the unique randomly generated SiDB layouts. If
     the design is impossible, `std::nullopt`)doc";
 
 static const char *__doc_fiction_generate_random_sidb_layout =
-R"doc(Generates a random layout of SiDBs by adding them to the provided
-layout layout. The optional layout serves as the starting layout to
-which SiDBs are added to create the final layout.
+R"doc(Generates a layout featuring a random arrangement of SiDBs. These
+randomly placed dots can be incorporated into an existing layout
+skeleton that may be optionally provided.
 
 Template parameter ``Lyt``:
     SiDB cell-level SiDB layout type.
@@ -13497,12 +13497,12 @@ Template parameter ``Lyt``:
 Parameter ``params``:
     The parameters for generating the random layout.
 
-Parameter ``layout``:
-    Optional layout to which random cells are added.
+Parameter ``skeleton``:
+    Optional layout to which random dots are added.
 
 Returns:
-    A randomly generated layout of SiDBs, or `std::nullopt` if the
-    process failed due to conflicting parameters.)doc";
+    A randomly generated SiDB layout, or `std::nullopt` if the process
+    failed due to conflicting parameters.)doc";
 
 static const char *__doc_fiction_generate_random_sidb_layout_params =
 R"doc(This struct stores the parameters for the
