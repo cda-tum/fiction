@@ -35,12 +35,12 @@ int main()  // NOLINT
         "Operational Domain vs Sketch (Bestagon)",
         "Name",
         "#SiDBs",  // Benchmark
-        "num op (grid)",
-        "t in s (grid)",
+        "num op (grid search)",
+        "t in s (grid search)",
         "num op sketch",
         "t in s (sketch)",
-        "num op (sketch) / num op (grid)",
-        "t in s (grid) / t in s (sketch)"};
+        "num op (sketch) / num op (grid search)",
+        "t in s (grid search) / t in s (sketch)"};
 
     // simulation parameters
     sidb_simulation_parameters sim_params{};
@@ -80,63 +80,63 @@ int main()  // NOLINT
                                                                  {create_half_adder_tt(), "ha"},
                                                                  {create_double_wire_tt(), "hourglass"}}};
 
-    double mean_ratio_num_op_sketch_to_num_op_grid = 0.0;
-    double total_runtime_grid                      = 0.0;
-    double total_runtime_sketch                    = 0.0;
+    double mean_ratio_num_op_sketch_to_num_op_grid_search = 0.0;
+    double total_runtime_grid_search                      = 0.0;
+    double total_runtime_sketch                           = 0.0;
 
     for (const auto& [truth_table, gate] : truth_tables_and_names)
     {
         const auto lyt = read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}/{}.sqd", folder, gate), gate);
 
         // operational domain stats
-        operational_domain_stats op_domain_stats_grid{};
+        operational_domain_stats op_domain_stats_grid_search{};
         operational_domain_stats op_domain_stats_sketch{};
 
         op_domain_params.operational_params.strategy_to_analyze_operational_status =
             is_operational_params::operational_analysis_strategy::SIMULATION_ONLY;
 
-        const auto op_domain_grid =
-            operational_domain_grid_search(lyt, truth_table, op_domain_params, &op_domain_stats_grid);
+        const auto op_domain_grid_search =
+            operational_domain_grid_search(lyt, truth_table, op_domain_params, &op_domain_stats_grid_search);
 
-        total_runtime_grid += mockturtle::to_seconds(op_domain_stats_grid.time_total);
+        total_runtime_grid_search += mockturtle::to_seconds(op_domain_stats_grid_search.time_total);
 
         op_domain_params.operational_params.strategy_to_analyze_operational_status =
             is_operational_params::operational_analysis_strategy::FILTER_ONLY;
 
-        const auto op_domain_gs_sketch =
+        const auto op_domain_sketch =
             operational_domain_grid_search(lyt, truth_table, op_domain_params, &op_domain_stats_sketch);
 
         total_runtime_sketch += mockturtle::to_seconds(op_domain_stats_sketch.time_total);
 
-        write_operational_domain(op_domain_grid, fmt::format("{}/grid_{}.csv", folder, gate));
-        write_operational_domain(op_domain_gs_sketch, fmt::format("{}/sketch_{}.csv", folder, gate));
+        write_operational_domain(op_domain_grid_search, fmt::format("{}/grid_search{}.csv", folder, gate));
+        write_operational_domain(op_domain_sketch, fmt::format("{}/sketch_{}.csv", folder, gate));
 
-        mean_ratio_num_op_sketch_to_num_op_grid +=
+        mean_ratio_num_op_sketch_to_num_op_grid_search +=
             static_cast<double>(op_domain_stats_sketch.num_operational_parameter_combinations) /
-            static_cast<double>(op_domain_stats_grid.num_operational_parameter_combinations);
+            static_cast<double>(op_domain_stats_grid_search.num_operational_parameter_combinations);
 
         opdomain_exp(
             // Benchmark
             gate, lyt.num_cells(),
 
             // Operational Domain (determine the operation status by simulation)
-            op_domain_stats_grid.num_operational_parameter_combinations,
-            mockturtle::to_seconds(op_domain_stats_grid.time_total),
+            op_domain_stats_grid_search.num_operational_parameter_combinations,
+            mockturtle::to_seconds(op_domain_stats_grid_search.time_total),
 
             // Operational Domain Sketch (determine the operation status by pruning)
             op_domain_stats_sketch.num_operational_parameter_combinations,
             mockturtle::to_seconds(op_domain_stats_sketch.time_total),
             static_cast<double>(op_domain_stats_sketch.num_operational_parameter_combinations) /
-                static_cast<double>(op_domain_stats_grid.num_operational_parameter_combinations),
-            mockturtle::to_seconds(op_domain_stats_grid.time_total) /
+                static_cast<double>(op_domain_stats_grid_search.num_operational_parameter_combinations),
+            mockturtle::to_seconds(op_domain_stats_grid_search.time_total) /
                 mockturtle::to_seconds(op_domain_stats_sketch.time_total));
 
         opdomain_exp.save();
         opdomain_exp.table();
     }
 
-    opdomain_exp("Total", 0, 0, total_runtime_grid, 0, total_runtime_sketch,
-                 mean_ratio_num_op_sketch_to_num_op_grid / truth_tables_and_names.size(), 0.0);
+    opdomain_exp("Total", 0, 0, total_runtime_grid_search, 0, total_runtime_sketch,
+                 mean_ratio_num_op_sketch_to_num_op_grid_search / truth_tables_and_names.size(), 0.0);
 
     opdomain_exp.save();
     opdomain_exp.table();
