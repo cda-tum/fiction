@@ -214,7 +214,7 @@ void charge_distribution_surface_layout(pybind11::module& m, const std::string& 
         .def("add_sidb", &py_cds::add_sidb, py::arg("cell"), py::arg("charge"))
         .def("num_negative_sidbs", &py_cds::num_negative_sidbs)
         .def("num_positive_sidbs", &py_cds::num_positive_sidbs)
-        .def("num_neutral_sidbs", &py_cds::num_neutral_positive_sidbs)
+        .def("num_neutral_sidbs", &py_cds::num_neutral_sidbs)
         .def("cells",
              [](const py_cds& lyt)
              {
