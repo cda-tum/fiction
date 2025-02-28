@@ -17,6 +17,6 @@ authors:
   given-names: "Robert"
   orcid: "0000-0002-4993-7860"
 title: "The Munich Nanotech Toolkit (MNT)"
-version: 0.6.8
+version: 0.6.10
 doi: 10.1109/NANO61778.2024.10628747
 url: "https://github.com/cda-tum/fiction"

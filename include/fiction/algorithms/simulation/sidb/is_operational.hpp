@@ -20,7 +20,7 @@
 #include "fiction/technology/cell_ports.hpp"
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
-#include "fiction/technology/physical_constants.hpp"
+#include "fiction/technology/constants.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/truth_table_utils.hpp"
@@ -442,8 +442,7 @@ class is_operational_impl
                         non_op_reason == non_operationality_reason::KINKS &&
                         parameters.op_condition == is_operational_params::operational_condition::REJECT_KINKS)
                     {
-                        at_least_one_layout_is_kink_induced_non_operational = true;
-                        continue;
+                        return {operational_status::NON_OPERATIONAL, non_operationality_reason::KINKS};
                     }
                 }
             }
@@ -641,7 +640,7 @@ class is_operational_impl
             if (cds_layout.is_physically_valid())
             {
                 cds_layout.recompute_system_energy();
-                if (cds_layout.get_system_energy() + physical_constants::POP_STABILITY_ERR < min_energy)
+                if (cds_layout.get_system_energy() + constants::ERROR_MARGIN < min_energy)
                 {
                     min_energy = cds_layout.get_system_energy();
                 }
@@ -871,8 +870,7 @@ class is_operational_impl
 
                 if (physical_validity.has_value())
                 {
-                    if (physical_validity.value() + physical_constants::POP_STABILITY_ERR <
-                        minimal_energy_of_physically_valid_layout)
+                    if (physical_validity.value() + constants::ERROR_MARGIN < minimal_energy_of_physically_valid_layout)
                     {
                         return true;
                     }
