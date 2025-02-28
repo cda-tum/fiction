@@ -68,7 +68,8 @@ struct quicksim_params
  * @return `sidb_simulation_result` is returned if the simulation was successful, otherwise `std::nullopt`.
  */
 template <typename Lyt>
-std::optional<sidb_simulation_result<Lyt>> quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{})
+[[nodiscard]] std::optional<sidb_simulation_result<Lyt>>
+quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt must be an SiDB layout");
@@ -87,7 +88,7 @@ std::optional<sidb_simulation_result<Lyt>> quicksim(const Lyt& lyt, const quicks
     st.simulation_parameters = ps.simulation_parameters;
     st.charge_distributions.reserve(ps.iteration_steps);
 
-    if (ps.iteration_steps == 0)
+    if (ps.iteration_steps == 0 || lyt.num_cells() == 0)
     {
         return std::nullopt;
     }

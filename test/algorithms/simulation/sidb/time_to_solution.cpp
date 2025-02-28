@@ -40,7 +40,7 @@ TEMPLATE_TEST_CASE("Basic time-to-solution test with varying layouts", "[time-to
         CHECK_THAT(tts_stat_quickexact.acc, Catch::Matchers::WithinAbs(0.0, 0.00001));
         CHECK_THAT(tts_stat_quickexact.time_to_solution,
                    Catch::Matchers::WithinAbs(std::numeric_limits<double>::max(), 0.00001));
-        CHECK(tts_stat_quickexact.mean_single_runtime > 0.0);
+        CHECK_THAT(tts_stat_quickexact.mean_single_runtime, Catch::Matchers::WithinAbs(0.0, 0.00001));
 
 #if (FICTION_ALGLIB_ENABLED)
 
@@ -52,7 +52,7 @@ TEMPLATE_TEST_CASE("Basic time-to-solution test with varying layouts", "[time-to
         CHECK_THAT(tts_stat_clustercomplete.acc, Catch::Matchers::WithinAbs(0.0, 0.00001));
         CHECK_THAT(tts_stat_clustercomplete.time_to_solution,
                    Catch::Matchers::WithinAbs(std::numeric_limits<double>::max(), 0.00001));
-        CHECK(tts_stat_clustercomplete.mean_single_runtime > 0.0);
+        CHECK_THAT(tts_stat_clustercomplete.mean_single_runtime, Catch::Matchers::WithinAbs(0.0, 0.00001));
 
 #endif  // FICTION_ALGLIB_ENABLED
 
@@ -64,7 +64,7 @@ TEMPLATE_TEST_CASE("Basic time-to-solution test with varying layouts", "[time-to
         CHECK_THAT(tts_stat_exgs.acc, Catch::Matchers::WithinAbs(0.0, 0.00001));
         CHECK_THAT(tts_stat_exgs.time_to_solution,
                    Catch::Matchers::WithinAbs(std::numeric_limits<double>::max(), 0.00001));
-        CHECK(tts_stat_exgs.mean_single_runtime > 0.0);
+        CHECK_THAT(tts_stat_exgs.mean_single_runtime, Catch::Matchers::WithinAbs(0.0, 0.00001));
     }
 
     SECTION("layout with seven SiDBs placed")

@@ -103,6 +103,21 @@ void time_to_solution(const Lyt& lyt, const quicksim_params& quicksim_params,
 
     time_to_solution_stats st{};
 
+    if (lyt.num_cells() == 0)
+    {
+        st.single_runtime_exact = 0.0;
+        st.time_to_solution     = std::numeric_limits<double>::max();
+        st.acc                  = 0.0;
+        st.mean_single_runtime  = 0.0;
+        st.algorithm            = sidb_simulation_engine_name(tts_params.engine);
+
+        if (ps)
+        {
+            *ps = st;
+        }
+        return;
+    }
+
     sidb_simulation_result<Lyt> simulation_result{};
     if (tts_params.engine == exact_sidb_simulation_engine::QUICKEXACT)
     {
@@ -133,7 +148,14 @@ void time_to_solution(const Lyt& lyt, const quicksim_params& quicksim_params,
     {
         if (const auto result = quicksim<Lyt>(lyt, quicksim_params))
         {
-            simulation_results_quicksim.push_back(*result);
+            if (!result.has_value())
+            {
+                simulation_results_quicksim.push_back(sidb_simulation_result<Lyt>{});
+            }
+            else
+            {
+                simulation_results_quicksim.push_back(*result);
+            }
         }
     }
 

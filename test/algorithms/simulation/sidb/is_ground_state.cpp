@@ -80,8 +80,7 @@ TEMPLATE_TEST_CASE("check if ground state is found", "[is-ground-state]", sidb_1
         const quicksim_params quicksim_params{params};
         const auto            simulation_results_quicksim = quicksim<TestType>(charge_layout, quicksim_params);
 
-        REQUIRE(simulation_results_quicksim.has_value());
-        CHECK(!is_ground_state(simulation_results_exgs, simulation_results_quicksim.value()));
+        REQUIRE(!simulation_results_quicksim.has_value());
     }
 
     SECTION("Layout with seven SiDBs placed, verify independence from charge index")
