@@ -9,8 +9,6 @@
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/fcn_gate_library.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/utils/array_utils.hpp"
-#include "fiction/utils/hash.hpp"
 #include "fiction/utils/truth_table_utils.hpp"
 
 namespace fiction
@@ -103,6 +101,13 @@ class sidb_skeleton_bestagon_library
     }
 
   private:
+    /**
+     * Determines the port directions of a given tile.
+     *
+     * @tparam GateLyt Pointy-top hexagonal gate-level layout type.
+     * @param lyt Given tile `t` for which the port directions are determined.
+     * @return port directions of the given tile are returned as `port_list`.
+     */
     template <typename Lyt>
     [[nodiscard]] static port_list<port_direction> determine_port_routing(const Lyt& lyt, const tile<Lyt>& t) noexcept
     {
