@@ -9,6 +9,7 @@
 #include <fiction/algorithms/simulation/sidb/quickexact.hpp>
 #include <fiction/algorithms/simulation/sidb/random_sidb_layout_generator.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
+#include <fiction/types.hpp>
 
 #include <mockturtle/utils/stopwatch.hpp>
 
@@ -52,7 +53,7 @@ int main()  // NOLINT
     {
         random_layouts_params.number_of_sidbs = num_sidbs;
 
-        const auto random_layouts = generate_multiple_random_sidb_layouts(Lyt{}, random_layouts_params);
+        const auto random_layouts = generate_multiple_random_sidb_layouts<Lyt>(random_layouts_params);
 
         double runtime_exhaustive = 0;
         double runtime_quickexact = 0;
@@ -60,7 +61,12 @@ int main()  // NOLINT
         std::vector<std::size_t> number_of_positive_sidbs_of_gs_per_layout{};
         number_of_positive_sidbs_of_gs_per_layout.reserve(random_layouts_params.number_of_unique_generated_layouts);
 
-        for (const auto& layout : random_layouts)
+        if (!random_layouts.has_value())
+        {
+            continue;
+        }
+
+        for (const auto& layout : random_layouts.value())
         {
             const auto exhaustive_results_layout = exhaustive_ground_state_simulation(layout, sim_params);
 
@@ -80,7 +86,7 @@ int main()  // NOLINT
                                                 number_of_positive_sidbs_of_gs_per_layout.cend(), 0u)) /
             static_cast<double>(number_of_positive_sidbs_of_gs_per_layout.size());
 
-        simulation_exp(random_layouts_params.number_of_sidbs, random_layouts.size(), runtime_exhaustive,
+        simulation_exp(random_layouts_params.number_of_sidbs, random_layouts.value().size(), runtime_exhaustive,
                        runtime_quickexact, average_pos_sibs_of_gs);
 
         simulation_exp.save();
