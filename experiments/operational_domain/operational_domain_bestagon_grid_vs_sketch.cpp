@@ -32,7 +32,7 @@ using namespace fiction;
 int main()  // NOLINT
 {
     experiments::experiment<std::string, uint64_t, uint64_t, double, uint64_t, double, double, double> opdomain_exp{
-        "Operational Domain vs Sketch (Bestagon)",
+        "Operational Domain Sketch",
         "Name",
         "#SiDBs",  // Benchmark
         "num op (grid search)",
