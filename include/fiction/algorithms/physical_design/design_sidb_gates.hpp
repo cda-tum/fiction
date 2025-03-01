@@ -339,8 +339,9 @@ class design_sidb_gates_impl
                                 });
                         }
 
-                        if (const operational_assessment<Lyt>& assessment_results = is_operational(
-                                result_lyt.value(), truth_table, params.operational_params, input_bdl_wires, output_bdl_wires);
+                        if (const operational_assessment<Lyt>& assessment_results =
+                                is_operational(result_lyt.value(), truth_table, params.operational_params,
+                                               input_bdl_wires, output_bdl_wires);
                             assessment_results.status == operational_status::OPERATIONAL)
                         {
                             const std::lock_guard lock{mutex_to_protect_designed_gate_layouts};

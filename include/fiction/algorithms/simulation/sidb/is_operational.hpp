@@ -1294,8 +1294,8 @@ class is_operational_impl
  * @param lyt The SiDB cell-level layout to be checked.
  * @param spec Expected Boolean function of the layout given as a multi-output truth table.
  * @param params Parameters for the `is_operational` algorithm.
- * @return A pair containing the operational status of the gate-level layout (either `OPERATIONAL` or `NON_OPERATIONAL`) along
- * with auxiliary statistics.
+ * @return A pair containing the operational status of the gate-level layout (either `OPERATIONAL` or `NON_OPERATIONAL`)
+ * along with auxiliary statistics.
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] operational_assessment<Lyt> is_operational(const Lyt& lyt, const std::vector<TT>& spec,
@@ -1334,8 +1334,8 @@ template <typename Lyt, typename TT>
  * @param input_bdl_wire Optional BDL input wires of lyt.
  * @param output_bdl_wire Optional BDL output wires of lyt.
  * @param canvas_lyt Optional canvas layout.
- * @return A pair containing the operational status of the gate-level layout (either `OPERATIONAL` or `NON_OPERATIONAL`) along
- * with auxiliary statistics.
+ * @return A pair containing the operational status of the gate-level layout (either `OPERATIONAL` or `NON_OPERATIONAL`)
+ * along with auxiliary statistics.
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] operational_assessment<Lyt>
