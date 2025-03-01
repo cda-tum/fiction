@@ -541,7 +541,7 @@ class design_sidb_gates_impl
 
         std::mutex mutex_to_protect_gate_candidates{};  // used to control access to shared resources
 
-        std::vector<Lyt> all_canvas_layouts = create_all_possible_canvas_layouts();
+        const std::vector<Lyt>& all_canvas_layouts = create_all_possible_canvas_layouts();
 
         // Function to check validity and add layout to all_designs
         auto conduct_pruning_steps = [&](const Lyt& canvas_lyt)

@@ -2,8 +2,8 @@
 // Created by Willem Lambooy on 05/02/2025.
 //
 
-#ifndef COMPARE_BY_ENERGETIC_GAP_HPP
-#define COMPARE_BY_ENERGETIC_GAP_HPP
+#ifndef COMPARE_BY_GROUND_STATE_ISOLATION
+#define COMPARE_BY_GROUND_STATE_ISOLATION
 
 #include "fiction/algorithms/physical_design/compare_designed_sidb_gates.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
@@ -130,7 +130,7 @@ class compare_by_average_ground_state_isolation final : public designed_sidb_gat
 
 }  // namespace fiction
 
-#endif  // COMPARE_BY_ENERGETIC_GAP_HPP
+#endif  // COMPARE_BY_GROUND_STATE_ISOLATION
 
 //
 // /**
