@@ -1380,12 +1380,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         strg->dependent_cell_in_sub_layout         = false;
 
         // check if all SiDBs are negatively charged
-        this->foreach_cell(
-            [this]([[maybe_unused]] const auto& c)
-            {
-                assert(this->get_charge_state(c) == sidb_charge_state::NEGATIVE &&
-                       "All SiDBs have to be negatively charged");
-            });
+        assert(this->num_negative_sidbs() == this->num_cells() && "All SiDBs have to be negatively charged");
 
         // Each SiDB is checked to see if the local electrostatic potential is high enough
         // to cause a positively charged SiDB
