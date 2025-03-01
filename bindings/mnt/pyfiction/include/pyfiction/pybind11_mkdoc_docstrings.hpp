@@ -15815,7 +15815,7 @@ Parameter ``params``:
     Parameters for the `is_operational` algorithm.
 
 Returns:
-    A pair containing the operational status of the gate layout
+    A pair containing the operational status of the gate-level layout
     (either `OPERATIONAL` or `NON_OPERATIONAL`) along with auxiliary
     statistics.)doc";
 
@@ -15853,7 +15853,7 @@ Parameter ``canvas_lyt``:
     Optional canvas layout.
 
 Returns:
-    A pair containing the operational status of the gate layout
+    A pair containing the operational status of the gate-level layout
     (either `OPERATIONAL` or `NON_OPERATIONAL`) along with auxiliary
     statistics.)doc";
 
