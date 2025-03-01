@@ -7,7 +7,7 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "mnt.pyfiction"
-version = "0.6.9"
+version = "0.6.10"
 description = "Design Automation for Field-coupled Nanotechnologies"
 readme = "README.md"
 authors = [
