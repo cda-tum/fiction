@@ -33,8 +33,8 @@ class TestChargeDistributionSurface(unittest.TestCase):
         self.assertEqual(charge_lyt.get_charge_state((6, 1)), sidb_charge_state.NEGATIVE)
         charge_lyt.update_after_charge_change()
         self.assertFalse(charge_lyt.is_physically_valid())
-        self.assertEqual(charge_lyt.num_neutral_sidbs, 1)
-        self.assertEqual(charge_lyt.num_negative_sidbs, 2)
+        self.assertEqual(charge_lyt.num_neutral_sidbs(), 1)
+        self.assertEqual(charge_lyt.num_negative_sidbs(), 2)
 
         charge_lyt.assign_charge_state((0, 1), sidb_charge_state.NEGATIVE)
         charge_lyt.assign_charge_state((4, 1), sidb_charge_state.NEUTRAL)
@@ -91,8 +91,7 @@ class TestChargeDistributionSurface(unittest.TestCase):
         self.assertEqual(charge_lyt.get_system_energy(), 0)
 
         charge_lyt.assign_charge_state((2, 1), sidb_charge_state.POSITIVE)
-        print(charge_lyt)
-        self.assertEqual(charge_lyt.num_positive_sidbs, 1)
+        self.assertEqual(charge_lyt.num_positive_sidbs(), 1)
 
 
 if __name__ == "__main__":
