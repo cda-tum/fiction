@@ -15,14 +15,16 @@
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <algorithm>
+#include <chrono>
 #include <cstdint>
+#include <limits>
 #include <mutex>
+#include <optional>
 #include <thread>
 #include <vector>
 
 namespace fiction
 {
-
 /**
  * This struct stores the parameters for the *QuickSim* algorithm.
  */
@@ -44,6 +46,10 @@ struct quicksim_params
      * Number of threads to spawn. By default the number of threads is set to the number of available hardware threads.
      */
     uint64_t number_threads{std::thread::hardware_concurrency()};
+    /**
+     * Timeout limit (in ms).
+     */
+    uint64_t timeout = std::numeric_limits<uint64_t>::max();
 };
 
 /**
@@ -58,11 +64,12 @@ struct quicksim_params
  *
  * @tparam Lyt SiDB cell-level layout type.
  * @param lyt The layout to simulate.
- * @param ps Physical parameters. They are material-specific and may vary from experiment to experiment.
- * @return sidb_simulation_result is returned with all results.
+ * @param ps QuickSim parameters.
+ * @return `sidb_simulation_result` is returned if the simulation was successful, otherwise `std::nullopt`.
  */
 template <typename Lyt>
-sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{})
+[[nodiscard]] std::optional<sidb_simulation_result<Lyt>>
+quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt must be an SiDB layout");
@@ -71,7 +78,7 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
 
     if (ps.iteration_steps == 0)
     {
-        return sidb_simulation_result<Lyt>{};
+        return std::nullopt;
     }
 
     sidb_simulation_result<Lyt> st{};
@@ -81,7 +88,17 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
     st.simulation_parameters = ps.simulation_parameters;
     st.charge_distributions.reserve(ps.iteration_steps);
 
+    if (ps.iteration_steps == 0 || lyt.num_cells() == 0)
+    {
+        return std::nullopt;
+    }
+
+    bool timeout_limit_reached = false;
+
     mockturtle::stopwatch<>::duration time_counter{};
+
+    // Track the start time for timeout
+    const auto start_time = std::chrono::high_resolution_clock::now();
 
     // measure run time (artificial scope)
     {
@@ -172,6 +189,18 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
                         for (const auto& sidb_index_with_unknown_charge_state :
                              all_sidb_indices_with_unknown_charge_state)
                         {
+                            // Check if the timeout has been reached before starting the iterations
+                            const auto current_time = std::chrono::high_resolution_clock::now();
+                            const auto elapsed_time =
+                                std::chrono::duration_cast<std::chrono::milliseconds>(current_time - start_time)
+                                    .count();
+
+                            if (static_cast<uint64_t>(elapsed_time) >= ps.timeout)
+                            {
+                                timeout_limit_reached = true;
+                                return;  // Exit the thread if the timeout has been reached
+                            }
+
                             charge_lyt_copy.assign_all_charge_states(sidb_charge_state::NEUTRAL);
 
                             auto negative_sidbs_indices = predefined_negative_sidb_indices;
@@ -217,6 +246,11 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
     }
 
     st.simulation_runtime = time_counter;
+
+    if (timeout_limit_reached || st.charge_distributions.empty())
+    {
+        return std::nullopt;
+    }
 
     return st;
 }

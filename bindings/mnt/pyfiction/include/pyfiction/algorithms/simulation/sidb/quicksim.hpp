@@ -46,8 +46,9 @@ inline void quicksim(pybind11::module& m)
         .def_readwrite("alpha", &fiction::quicksim_params::alpha, DOC(fiction_quicksim_params_alpha))
         .def_readwrite("number_threads", &fiction::quicksim_params::number_threads,
                        DOC(fiction_quicksim_params_number_threads))
+        .def_readwrite("timeout", &fiction::quicksim_params::timeout, DOC(fiction_quicksim_params_timeout));
 
-        ;
+    ;
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 

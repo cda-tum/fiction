@@ -40,7 +40,7 @@ TEMPLATE_TEST_CASE("Basic time-to-solution test with varying layouts", "[time-to
         CHECK_THAT(tts_stat_quickexact.acc, Catch::Matchers::WithinAbs(0.0, 0.00001));
         CHECK_THAT(tts_stat_quickexact.time_to_solution,
                    Catch::Matchers::WithinAbs(std::numeric_limits<double>::max(), 0.00001));
-        CHECK(tts_stat_quickexact.mean_single_runtime > 0.0);
+        CHECK_THAT(tts_stat_quickexact.mean_single_runtime, Catch::Matchers::WithinAbs(0.0, 0.00001));
 
 #if (FICTION_ALGLIB_ENABLED)
 
@@ -52,7 +52,7 @@ TEMPLATE_TEST_CASE("Basic time-to-solution test with varying layouts", "[time-to
         CHECK_THAT(tts_stat_clustercomplete.acc, Catch::Matchers::WithinAbs(0.0, 0.00001));
         CHECK_THAT(tts_stat_clustercomplete.time_to_solution,
                    Catch::Matchers::WithinAbs(std::numeric_limits<double>::max(), 0.00001));
-        CHECK(tts_stat_clustercomplete.mean_single_runtime > 0.0);
+        CHECK_THAT(tts_stat_clustercomplete.mean_single_runtime, Catch::Matchers::WithinAbs(0.0, 0.00001));
 
 #endif  // FICTION_ALGLIB_ENABLED
 
@@ -64,7 +64,7 @@ TEMPLATE_TEST_CASE("Basic time-to-solution test with varying layouts", "[time-to
         CHECK_THAT(tts_stat_exgs.acc, Catch::Matchers::WithinAbs(0.0, 0.00001));
         CHECK_THAT(tts_stat_exgs.time_to_solution,
                    Catch::Matchers::WithinAbs(std::numeric_limits<double>::max(), 0.00001));
-        CHECK(tts_stat_exgs.mean_single_runtime > 0.0);
+        CHECK_THAT(tts_stat_exgs.mean_single_runtime, Catch::Matchers::WithinAbs(0.0, 0.00001));
     }
 
     SECTION("layout with seven SiDBs placed")
@@ -207,7 +207,11 @@ TEMPLATE_TEST_CASE("time-to-solution test with simulation results", "[time-to-so
 
         for (auto i = 0u; i < number_of_repetitions; i++)
         {
-            simulation_results_quicksim.push_back(quicksim<TestType>(lyt, quicksim_params));
+            const auto simulation_result = quicksim<TestType>(lyt, quicksim_params);
+            if (simulation_result.has_value())
+            {
+                simulation_results_quicksim.push_back(simulation_result.value());
+            }
         }
 
         const auto simulation_results_quickexact =

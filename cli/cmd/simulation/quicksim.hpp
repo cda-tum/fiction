@@ -117,7 +117,15 @@ class quicksim_command : public command
             // To aid the compiler
             if constexpr (fiction::has_sidb_technology_v<Lyt> && !fiction::is_charge_distribution_surface_v<Lyt>)
             {
-                sim_result = fiction::quicksim(*lyt_ptr, qs_params);
+                if (const auto result = fiction::quicksim(*lyt_ptr, qs_params); result.has_value())
+                {
+                    sim_result = *result;
+                }
+                else
+                {
+                    env->out() << fmt::format("[e] no stable charge distribution could be determined for '{}'\n",
+                                              get_name(lyt_ptr));
+                }
 
                 if constexpr (fiction::is_sidb_lattice_100_v<Lyt>)
                 {

@@ -41,7 +41,7 @@ struct sidb_simulation_result
      */
     std::string algorithm_name{};
     /**
-     * Total simulation runtime.
+     * Total simulation runtime in seconds.
      */
     std::chrono::duration<double> simulation_runtime{};
     /**
