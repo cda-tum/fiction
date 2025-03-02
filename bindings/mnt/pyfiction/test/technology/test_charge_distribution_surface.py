@@ -91,7 +91,8 @@ class TestChargeDistributionSurface(unittest.TestCase):
         self.assertEqual(charge_lyt.get_system_energy(), 0)
 
         charge_lyt.assign_charge_state((2, 1), sidb_charge_state.POSITIVE)
-        self.assertFalse(charge_lyt.num_positive_sidbs, 1)
+        print(charge_lyt)
+        self.assertEqual(charge_lyt.num_positive_sidbs, 1)
 
 
 if __name__ == "__main__":
