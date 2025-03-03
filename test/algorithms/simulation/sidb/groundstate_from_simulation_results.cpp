@@ -123,7 +123,7 @@ TEST_CASE("Determine the groundstate from simulation results for Si-111 lattice 
     }
 }
 
-TEMPLATE_TEST_CASE("Determine the groundstate of two BDL wire with input 1 applied",
+TEMPLATE_TEST_CASE("Determine the groundstate of a two BDL pair wire with input 1 applied",
                    "[groundstate-from-simulation-results]", sidb_100_cell_clk_lyt, sidb_cell_clk_lyt)
 {
     TestType lyt{};

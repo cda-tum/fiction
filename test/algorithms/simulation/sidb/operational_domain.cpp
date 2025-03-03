@@ -1517,7 +1517,7 @@ TEST_CASE("Bestagon AND gate operational domain and temperature computation, usi
     }
 }
 
-TEST_CASE("Two BDL wire with degeneracy for input 1", "[operational-domain]")
+TEST_CASE("Two BDL pair wire with degeneracy for input 1", "[operational-domain]")
 {
     auto lyt = sidb_cell_clk_lyt_siqad{};
 
