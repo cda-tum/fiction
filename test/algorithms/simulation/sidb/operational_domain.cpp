@@ -1549,7 +1549,6 @@ TEST_CASE("Two BDL pair wire with degeneracy for input 1", "[operational-domain]
         const auto op_domain =
             operational_domain_grid_search(lyt, std::vector<tt>{create_id_tt()}, op_domain_params, &op_domain_stats);
 
-        // for the selected range, all samples should be within the parameters and operational
         check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::NON_OPERATIONAL);
 
         CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
@@ -1568,7 +1567,6 @@ TEST_CASE("Two BDL pair wire with degeneracy for input 1", "[operational-domain]
         const auto op_domain =
             operational_domain_grid_search(lyt, std::vector<tt>{create_id_tt()}, op_domain_params, &op_domain_stats);
 
-        // for the selected range, all samples should be within the parameters and operational
         check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::NON_OPERATIONAL);
 
         CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);

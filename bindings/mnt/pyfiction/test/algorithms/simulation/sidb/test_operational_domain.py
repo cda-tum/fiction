@@ -174,7 +174,7 @@ class TestOperationalDomain(unittest.TestCase):
         self.assertEqual(op_domain.get_dimension(0), sweep_parameter.EPSILON_R)
         self.assertEqual(op_domain.get_dimension(1), sweep_parameter.LAMBDA_TF)
 
-    def test_operational_domain_two_bdl_wire(self):
+    def test_operational_domain_two_bdl_pair_wire(self):
         bdl_wire = sidb_100_lattice()
 
         bdl_wire.assign_cell_type((0, 0), sidb_technology.cell_type.INPUT)
