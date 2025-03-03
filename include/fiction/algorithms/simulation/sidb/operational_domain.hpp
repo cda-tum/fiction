@@ -35,6 +35,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include <iterator>
+#include <limits>
 #include <numeric>
 #include <optional>
 #include <queue>
@@ -266,6 +267,46 @@ class critical_temperature_domain : public sidb_simulation_domain<parameter_poin
     std::size_t get_number_of_dimensions() const noexcept
     {
         return dimensions.size();
+    }
+    /**
+     * Finds the minimum critical temperature in the domain.
+     *
+     * @return The minimum critical temperature.
+     */
+    [[nodiscard]] double minimum_ct() const noexcept
+    {
+        double min_ct = std::numeric_limits<double>::max();
+
+        this->for_each(
+            [&min_ct](const auto&, const auto& op_value)
+            {
+                if (std::get<0>(op_value) == operational_status::OPERATIONAL)
+                {
+                    min_ct = std::min(min_ct, std::get<1>(op_value));
+                }
+            });
+
+        return min_ct;
+    }
+    /**
+     * Finds the maximum critical temperature in the domain.
+     *
+     * @return The maximum critical temperature.
+     */
+    [[nodiscard]] double maximum_ct() const noexcept
+    {
+        double max_ct = 0.0;
+
+        this->for_each(
+            [&max_ct](const auto&, const auto& op_value)
+            {
+                if (std::get<0>(op_value) == operational_status::OPERATIONAL)
+                {
+                    max_ct = std::max(max_ct, std::get<1>(op_value));
+                }
+            });
+
+        return max_ct;
     }
 
   private:
