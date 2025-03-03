@@ -108,6 +108,8 @@ inline void operational_domain(pybind11::module& m)
         .def("contains", &fiction::critical_temperature_domain::contains, py::arg("key"))
         .def("add_value", &fiction::critical_temperature_domain::add_value, py::arg("key"), py::arg("value"))
         .def("size", &fiction::critical_temperature_domain::size)
+        .def("minimum_ct", &fiction::critical_temperature_domain::minimum_ct)
+        .def("maximum_ct", &fiction::critical_temperature_domain::maximum_ct)
 
         ;
 

@@ -74,6 +74,8 @@ class TestOperationalDomain(unittest.TestCase):
         self.assertEqual(ct_domain_grid.contains(parameter_point([5.60, 5.00]))[0], operational_status.OPERATIONAL)
         self.assertGreater(ct_domain_grid.contains(parameter_point([5.60, 5.00]))[1], 30)
         self.assertGreater(stats_grid.num_operational_parameter_combinations, 0)
+        self.assertGreater(ct_domain_grid.minimum_ct(), 23)
+        self.assertLess(ct_domain_grid.maximum_ct(), 38)
 
         stats_flood_fill = operational_domain_stats()
         ct_domain_flood = critical_temperature_domain_flood_fill(lyt, [create_xor_tt()], 100, params, stats_flood_fill)
