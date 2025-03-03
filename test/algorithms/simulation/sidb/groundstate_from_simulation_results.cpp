@@ -2,6 +2,7 @@
 // Created by Jan Drewniok on 12.02.24.
 //
 
+#include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
@@ -120,4 +121,25 @@ TEST_CASE("Determine the groundstate from simulation results for Si-111 lattice 
         CHECK_THAT(ground_state.front().get_system_energy() - ground_state.back().get_system_energy(),
                    Catch::Matchers::WithinAbs(0.0, 0.00001));
     }
+}
+
+TEMPLATE_TEST_CASE("Determine the groundstate of two BDL wire with input 1 applied",
+                   "[groundstate-from-simulation-results]", sidb_100_cell_clk_lyt, sidb_cell_clk_lyt)
+{
+    TestType lyt{};
+
+    lyt.assign_cell_type({2, 0, 0}, sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({6, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 0, 0}, sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({14, 0, 0}, sidb_technology::cell_type::OUTPUT);
+
+    lyt.assign_cell_type({18, 0, 0}, sidb_technology::cell_type::NORMAL);
+
+    const sidb_simulation_parameters params{2, -0.32};
+
+    const auto results = exhaustive_ground_state_simulation(lyt, params);
+
+    const auto ground_state = groundstate_from_simulation_result(results);
+    REQUIRE(ground_state.size() == 2);
 }

@@ -7,6 +7,7 @@
 
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
+#include "fiction/technology/constants.hpp"
 
 #include <algorithm>
 #include <cstdint>
@@ -58,13 +59,13 @@ groundstate_from_simulation_result(const sidb_simulation_result<Lyt>& simulation
 
     for (const auto charge_index : charge_indices)
     {
-        const auto cds_it = std::find_if(charge_configurations_copy.cbegin(), charge_configurations_copy.cend(),
-                                         [&](const auto& cds)
-                                         {
-                                             return cds.get_charge_index_and_base().first == charge_index &&
-                                                    std::abs(cds.get_system_energy() - min_energy) <
-                                                        std::numeric_limits<double>::epsilon();
-                                         });
+        const auto cds_it =
+            std::find_if(charge_configurations_copy.cbegin(), charge_configurations_copy.cend(),
+                         [&](const auto& cds)
+                         {
+                             return cds.get_charge_index_and_base().first == charge_index &&
+                                    std::abs(cds.get_system_energy() - min_energy) < constants::ERROR_MARGIN;
+                         });
 
         if (cds_it != charge_configurations_copy.cend())
         {
