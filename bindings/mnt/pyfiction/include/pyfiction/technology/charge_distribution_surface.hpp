@@ -89,9 +89,9 @@ void charge_distribution_surface_layout(pybind11::module& m, const std::string& 
             "erase_defect", [](py_cds& cds, fiction::cell<py_cds> c) { return cds.erase_defect(c); }, py::arg("c"))
 
         .def(
-            "assign_charge_state_by_cell_index",
+            "assign_charge_state_by_index",
             [](py_cds& cds, uint64_t index, fiction::sidb_charge_state cs, fiction::charge_index_mode index_mode)
-            { return cds.assign_charge_state_by_cell_index(index, cs, index_mode); }, py::arg("index"), py::arg("cs"),
+            { return cds.assign_charge_state_by_index(index, cs, index_mode); }, py::arg("index"), py::arg("cs"),
             py::arg("index_mode") = fiction::charge_index_mode::UPDATE_CHARGE_INDEX)
         .def(
             "get_charge_state", [](py_cds& cds, fiction::cell<py_cds> c) { return cds.get_charge_state(c); },

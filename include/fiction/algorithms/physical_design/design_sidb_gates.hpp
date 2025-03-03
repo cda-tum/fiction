@@ -317,23 +317,33 @@ class design_sidb_gates_impl
                 {
                     while (!gate_layout_is_found)
                     {
-                        auto result_lyt = generate_random_sidb_layout<Lyt>(skeleton_layout, parameter);
+                        auto result_lyt = generate_random_sidb_layout<Lyt>(parameter, skeleton_layout);
+
+                        if (!result_lyt.has_value())
+                        {
+                            continue;
+                        }
+
                         if constexpr (has_get_sidb_defect_v<Lyt>)
                         {
-                            result_lyt.foreach_sidb_defect(
+                            result_lyt.value().foreach_sidb_defect(
                                 [&result_lyt](const auto& cd)
                                 {
                                     if (is_neutrally_charged_defect(cd.second))
                                     {
-                                        result_lyt.assign_sidb_defect(cd.first, sidb_defect{sidb_defect_type::NONE});
+                                        result_lyt.value().assign_sidb_defect(cd.first,
+                                                                              sidb_defect{sidb_defect_type::NONE});
                                     }
                                 });
                         }
-                        if (const auto [status, sim_calls] = is_operational(
-                                result_lyt, truth_table, params.operational_params, input_bdl_wires, output_bdl_wires);
+
+                        if (const auto [status, sim_calls] =
+                                is_operational(result_lyt.value(), truth_table, params.operational_params,
+                                               input_bdl_wires, output_bdl_wires);
                             status == operational_status::OPERATIONAL)
                         {
                             const std::lock_guard lock{mutex_to_protect_designed_gate_layouts};
+
                             if constexpr (has_get_sidb_defect_v<Lyt>)
                             {
                                 skeleton_layout.foreach_sidb_defect(
@@ -341,12 +351,12 @@ class design_sidb_gates_impl
                                     {
                                         if (is_neutrally_charged_defect(cd.second))
                                         {
-                                            result_lyt.assign_sidb_defect(cd.first, cd.second);
+                                            result_lyt.value().assign_sidb_defect(cd.first, cd.second);
                                         }
                                     });
                             }
 
-                            randomly_designed_gate_layouts.push_back(result_lyt);
+                            randomly_designed_gate_layouts.push_back(result_lyt.value());
                             gate_layout_is_found = true;
                             break;
                         }

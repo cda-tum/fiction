@@ -121,7 +121,7 @@ jobs:
           enable-cache: true
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.22
+        uses: pypa/cibuildwheel@v2.23
 
       - name: Upload wheel as an artifact
         uses: actions/upload-artifact@v4
