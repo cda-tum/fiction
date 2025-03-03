@@ -27,8 +27,6 @@ from mnt.pyfiction import (
     sidb_simulation_engine,
     sidb_technology,
     sweep_parameter,
-    write_operational_domain,
-    write_operational_domain_params,
 )
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -193,7 +191,6 @@ class TestOperationalDomain(unittest.TestCase):
         params = operational_domain_params()
         params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
         params.operational_params.simulation_parameters.base = 2
-        # params.operational_params.op_condition = operational_condition.REJECT_KINKS
         params.operational_params.input_bdl_iterator_params.input_bdl_config = (
             input_bdl_configuration.PERTURBER_DISTANCE_ENCODED
         )
@@ -206,18 +203,12 @@ class TestOperationalDomain(unittest.TestCase):
         stats_grid = operational_domain_stats()
         op_domain = operational_domain_grid_search(bdl_wire, [create_id_tt()], params, stats_grid)
 
-        # self.assertEqual(op_domain.size(), 8281)
-        #
-        # self.assertEqual(stats_grid.num_simulator_invocations, 462)
-        # self.assertEqual(stats_grid.num_evaluated_parameter_combinations, 231)
-        # self.assertEqual(stats_grid.num_operational_parameter_combinations, 231)
-        # self.assertEqual(stats_grid.num_non_operational_parameter_combinations, 0)
+        self.assertEqual(op_domain.size(), 8281)
 
-        write_operational_domain(
-            op_domain,
-            "/Users/jandrewniok/git_lfs/fcn/papers/2025_opdom_explorer/IEEE_NANO/img/perturber_positions/debugging.csv",
-            write_operational_domain_params(),
-        )
+        self.assertEqual(stats_grid.num_simulator_invocations, 10034)
+        self.assertEqual(stats_grid.num_evaluated_parameter_combinations, 8281)
+        self.assertEqual(stats_grid.num_operational_parameter_combinations, 8281)
+        self.assertEqual(stats_grid.num_non_operational_parameter_combinations, 0)
 
 
 if __name__ == "__main__":
