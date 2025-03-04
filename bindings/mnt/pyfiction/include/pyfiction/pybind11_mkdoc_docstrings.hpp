@@ -18438,11 +18438,11 @@ Parameter ``lyt``:
     The layout to simulate.
 
 Parameter ``ps``:
-    Physical parameters. They are material-specific and may vary from
-    experiment to experiment.
+    QuickSim parameters.
 
 Returns:
-    sidb_simulation_result is returned with all results.)doc";
+    `sidb_simulation_result` is returned if the simulation was
+    successful, otherwise `std::nullopt`.)doc";
 
 static const char *__doc_fiction_quicksim_params = R"doc(This struct stores the parameters for the *QuickSim* algorithm.)doc";
 
@@ -18457,6 +18457,8 @@ R"doc(Number of threads to spawn. By default the number of threads is set to
 the number of available hardware threads.)doc";
 
 static const char *__doc_fiction_quicksim_params_simulation_parameters = R"doc(Simulation parameters for the simulation of the physical SiDB system.)doc";
+
+static const char *__doc_fiction_quicksim_params_timeout = R"doc(Timeout limit (in ms).)doc";
 
 static const char *__doc_fiction_random_coordinate =
 R"doc(Generates a random coordinate within the region spanned by two given
@@ -20161,7 +20163,7 @@ R"doc(Default constructor. It only exists to allow for the use of
 
 static const char *__doc_fiction_sidb_simulation_result_simulation_parameters = R"doc(Physical parameters used in the simulation.)doc";
 
-static const char *__doc_fiction_sidb_simulation_result_simulation_runtime = R"doc(Total simulation runtime.)doc";
+static const char *__doc_fiction_sidb_simulation_result_simulation_runtime = R"doc(Total simulation runtime in seconds.)doc";
 
 static const char *__doc_fiction_sidb_skeleton_bestagon_library =
 R"doc(This library contains SiDB I/O wires designed for both 1- and 2-input
