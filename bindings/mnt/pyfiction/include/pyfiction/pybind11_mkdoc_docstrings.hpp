@@ -6031,6 +6031,10 @@ of different lengths are found.
 Parameter ``type``:
     The type of the cell to filter by.
 
+Parameter ``forbidden_type``:
+    The type of cell that is forbidden in the wire and is
+    automatically filtered out.
+
 Returns:
     A vector of `bdl_wire` objects containing cells of the specified
     type. If no such wires are found, an empty vector is returned.)doc";
