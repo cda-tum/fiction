@@ -369,6 +369,28 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
             CHECK(op_domain_stats.num_operational_parameter_combinations == 1);
             CHECK(op_domain_stats.num_non_operational_parameter_combinations == 0);
 
+            SECTION("reject kinks")
+            {
+                op_domain_params.operational_params.op_condition =
+                    is_operational_params::operational_condition::REJECT_KINKS;
+
+                const auto op_domain_kinks = operational_domain_grid_search(lat, std::vector<tt>{create_id_tt()},
+                                                                            op_domain_params, &op_domain_stats);
+
+                // check if the operational domain has the correct size
+                CHECK(op_domain_kinks.size() == 1);
+
+                // for the selected range, all samples should be within the parameters and operational
+                check_op_domain_params_and_operational_status(op_domain_kinks, op_domain_params,
+                                                              operational_status::OPERATIONAL);
+
+                CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
+                CHECK(op_domain_stats.num_simulator_invocations == 2);
+                CHECK(op_domain_stats.num_evaluated_parameter_combinations == 1);
+                CHECK(op_domain_stats.num_operational_parameter_combinations == 1);
+                CHECK(op_domain_stats.num_non_operational_parameter_combinations == 0);
+            }
+
             SECTION("3-dimensional")
             {
                 const auto z_dimension = operational_domain_value_range{sweep_parameter::MU_MINUS, -0.32, -0.32, 0.01};
