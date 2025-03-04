@@ -367,8 +367,6 @@ class is_operational_impl
      */
     [[nodiscard]] std::pair<operational_status, non_operationality_reason> run() noexcept
     {
-        bool at_least_one_layout_is_kink_induced_non_operational = false;
-
         if (!canvas_lyt.is_empty())
         {
             charge_distribution_surface<Lyt> cds_canvas{canvas_lyt};
@@ -446,11 +444,6 @@ class is_operational_impl
                     }
                 }
             }
-        }
-
-        if (at_least_one_layout_is_kink_induced_non_operational)
-        {
-            return {operational_status::NON_OPERATIONAL, non_operationality_reason::KINKS};
         }
 
         // if we made it here, the layout is operational
