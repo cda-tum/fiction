@@ -105,7 +105,7 @@ int main()  // NOLINT
 
             if (i == 1)
             {
-                gate_name += " (reject kinks)";  // Update gate name for kink rejection case
+                gate_name += " (I/O integrity)";  // Update gate name for kink rejection case
             }
 
             const auto ct_domain =
