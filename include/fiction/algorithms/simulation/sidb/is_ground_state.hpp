@@ -37,9 +37,9 @@ template <typename Lyt>
         return false;
     }
 
-    const auto ground_state_charge_distributions_exact = exact_results.get_groundstates();
+    const auto ground_state_charge_distributions_exact = exact_results.groundstates();
 
-    const auto ground_state_charge_distributions_heuristic = heuristic_results.get_groundstates();
+    const auto ground_state_charge_distributions_heuristic = heuristic_results.groundstates();
 
     assert(ground_state_charge_distributions_heuristic.size() <= ground_state_charge_distributions_exact.size() &&
            "The heuristic results must be less equal than the exact results.");

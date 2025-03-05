@@ -436,7 +436,7 @@ TEMPLATE_TEST_CASE("ExGS gate simulation of Si-111 surface", "[exhaustive-ground
 
     const auto simulation_results = exhaustive_ground_state_simulation<TestType>(lyt, params);
 
-    const auto ground_state = simulation_results.get_groundstates();
+    const auto ground_state = simulation_results.groundstates();
     REQUIRE(ground_state.size() == 1);
 
     CHECK(ground_state.front().get_charge_state({0, 0, 0}) == sidb_charge_state::NEGATIVE);

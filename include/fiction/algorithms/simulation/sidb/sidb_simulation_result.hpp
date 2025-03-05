@@ -7,9 +7,13 @@
 
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
+#include "fiction/technology/constants.hpp"
 
 #include <any>
 #include <chrono>
+#include <cstdint>
+#include <limits>
+#include <set>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -68,7 +72,7 @@ struct sidb_simulation_result
      *
      * @return A vector of charge distributions with the minimal energy.
      */
-    [[nodiscard]] std::vector<charge_distribution_surface<Lyt>> get_groundstates() const noexcept
+    [[nodiscard]] std::vector<charge_distribution_surface<Lyt>> groundstates() const noexcept
     {
         std::vector<charge_distribution_surface<Lyt>> groundstate_charge_distributions{};
         std::set<uint64_t>                            charge_indices{};

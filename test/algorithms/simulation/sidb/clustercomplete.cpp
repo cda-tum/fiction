@@ -1961,7 +1961,7 @@ TEMPLATE_TEST_CASE("ClusterComplete gate simulation of Si-111 surface", "[cluste
 
     const auto simulation_results = clustercomplete<TestType>(lyt, params);
 
-    const auto ground_state = simulation_results.get_groundstates();
+    const auto ground_state = simulation_results.groundstates();
     REQUIRE(ground_state.size() == 1);
 
     CHECK(ground_state.front().get_charge_state({0, 0, 0}) == sidb_charge_state::NEGATIVE);
@@ -1985,7 +1985,7 @@ TEMPLATE_TEST_CASE("ClusterComplete AND gate simulation of Si-111 surface", "[cl
 
         const auto simulation_results = clustercomplete<TestType>(lyt, params);
 
-        const auto ground_state = simulation_results.get_groundstates();
+        const auto ground_state = simulation_results.groundstates();
         REQUIRE(ground_state.size() == 1);
 
         CHECK(ground_state.front().get_charge_state({0, 0, 0}) == sidb_charge_state::NEGATIVE);
@@ -2026,7 +2026,7 @@ TEMPLATE_TEST_CASE("ClusterComplete AND gate simulation of Si-111 surface", "[cl
         const auto simulation_results = clustercomplete<TestType>(lyt, params);
         CHECK(simulation_results.charge_distributions.size() == 7);
 
-        const auto ground_state = simulation_results.get_groundstates();
+        const auto ground_state = simulation_results.groundstates();
 
         REQUIRE(ground_state.size() == 1);
 

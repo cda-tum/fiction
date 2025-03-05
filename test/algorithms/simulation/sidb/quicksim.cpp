@@ -1108,7 +1108,7 @@ TEMPLATE_TEST_CASE("QuickSim gate simulation on the Si-111 surface", "[quicksim]
 
     REQUIRE(simulation_results.has_value());
 
-    const auto ground_state = simulation_results.value().get_groundstates();
+    const auto ground_state = simulation_results.value().groundstates();
     REQUIRE(ground_state.size() == 1);
 
     CHECK(ground_state.front().get_charge_state({0, 0, 0}) == sidb_charge_state::NEGATIVE);
@@ -1134,7 +1134,7 @@ TEMPLATE_TEST_CASE("QuickSim AND gate simulation on the Si-111 surface", "[quick
 
         REQUIRE(simulation_results.has_value());
 
-        const auto ground_state = simulation_results.value().get_groundstates();
+        const auto ground_state = simulation_results.value().groundstates();
         REQUIRE(ground_state.size() == 1);
 
         CHECK(ground_state.front().get_charge_state({0, 0, 0}) == sidb_charge_state::NEGATIVE);
@@ -1176,7 +1176,7 @@ TEMPLATE_TEST_CASE("QuickSim AND gate simulation on the Si-111 surface", "[quick
 
         REQUIRE(simulation_results.has_value());
 
-        const auto ground_state = simulation_results.value().get_groundstates();
+        const auto ground_state = simulation_results.value().groundstates();
 
         REQUIRE(ground_state.size() == 1);
 

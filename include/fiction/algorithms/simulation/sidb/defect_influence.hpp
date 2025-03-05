@@ -640,7 +640,7 @@ class defect_influence_impl
 
         const auto simulation_results = quickexact(lyt_without_defect, qe_params);
 
-        const auto ground_states = simulation_results.get_groundstates();
+        const auto ground_states = simulation_results.groundstates();
 
         if (lyt_without_defect.get_cell_type(defect_pos) == Lyt::technology::cell_type::EMPTY)
         {
@@ -656,7 +656,7 @@ class defect_influence_impl
             // conduct simulation with defect
             auto simulation_result_defect = quickexact(lyt_defect, qe_params);
 
-            const auto ground_states_defect = simulation_result_defect.get_groundstates();
+            const auto ground_states_defect = simulation_result_defect.groundstates();
 
             if (ground_states.size() != ground_states_defect.size())
             {

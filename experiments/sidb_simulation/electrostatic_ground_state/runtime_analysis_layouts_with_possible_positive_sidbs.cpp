@@ -72,7 +72,7 @@ int main()  // NOLINT
 
             const auto quickexact_results_layout = quickexact(layout, qe_params);
 
-            const auto gs = exhaustive_results_layout.get_groundstates();
+            const auto gs = exhaustive_results_layout.groundstates();
 
             // determine the number of positive SiDBs in the ground state
             number_of_positive_sidbs_of_gs_per_layout.push_back(gs.at(0).num_positive_sidbs());

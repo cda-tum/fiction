@@ -425,7 +425,7 @@ class is_operational_impl
                     return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
                 }
 
-                const auto ground_states = simulation_results.get_groundstates();
+                const auto ground_states = simulation_results.groundstates();
 
                 for (const auto& gs : ground_states)
                 {
@@ -568,7 +568,7 @@ class is_operational_impl
                 continue;
             }
 
-            const auto ground_states = simulation_results.get_groundstates();
+            const auto ground_states = simulation_results.groundstates();
 
             for (const auto& gs : ground_states)
             {

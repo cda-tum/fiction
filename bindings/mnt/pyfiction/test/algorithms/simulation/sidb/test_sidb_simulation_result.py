@@ -3,7 +3,6 @@ import unittest
 from mnt.pyfiction import (
     charge_distribution_surface_100,
     charge_distribution_surface_111,
-    groundstate_from_simulation_result,
     sidb_100_lattice,
     sidb_111_lattice,
     sidb_charge_state,
@@ -27,7 +26,7 @@ class TestSiDBSimulationResult(unittest.TestCase):
 
         result.charge_distributions = [cds_negative, cds_neutral]
 
-        groundstate = groundstate_from_simulation_result(result)
+        groundstate = result.groundstates()
 
         self.assertEqual(len(groundstate), 1, "Expected exactly one ground state.")
         self.assertEqual(
@@ -53,7 +52,7 @@ class TestSiDBSimulationResult(unittest.TestCase):
 
         result.charge_distributions = [cds_negative, cds_neutral]
 
-        groundstate = groundstate_from_simulation_result(result)
+        groundstate = result.groundstates()
 
         self.assertEqual(len(groundstate), 1, "Expected exactly one ground state.")
         self.assertEqual(
@@ -75,7 +74,7 @@ class TestSiDBSimulationResult(unittest.TestCase):
         cds_empty = charge_distribution_surface_100(layout)
 
         result.charge_distributions = [cds_empty]
-        groundstate = groundstate_from_simulation_result(result)
+        groundstate = result.groundstates()
 
         self.assertEqual(len(groundstate), 1)
 
@@ -87,7 +86,7 @@ class TestSiDBSimulationResult(unittest.TestCase):
         cds_empty = charge_distribution_surface_111(layout)
 
         result.charge_distributions = [cds_empty]
-        groundstate = groundstate_from_simulation_result(result)
+        groundstate = result.groundstates()
 
         self.assertEqual(len(groundstate), 1)
 
@@ -108,7 +107,7 @@ class TestSiDBSimulationResult(unittest.TestCase):
         results = sidb_simulation_result_100()
         results.charge_distributions = [cds1, cds2, cds3]
 
-        ground_state = results.groundstates_from_simulation_result()
+        ground_state = results.groundstates()
         self.assertEqual(len(ground_state), 1)
 
         groundstate = ground_state[0]
@@ -133,7 +132,7 @@ class TestSiDBSimulationResult(unittest.TestCase):
         results = sidb_simulation_result_111()
         results.charge_distributions = [cds1, cds2, cds3]
 
-        result = results.groundstates_from_simulation_result()
+        result = results.groundstates()
         self.assertEqual(len(result), 1)
 
         ground_state = result[0]

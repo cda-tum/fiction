@@ -34,7 +34,7 @@ TEST_CASE("Bestagon FO2 gate", "[does-charge-distribution-match-logic-for-given-
 
         const auto simulation_results = quickexact<sidb_cell_clk_lyt_siqad>(*bii, params);
 
-        const auto gs = simulation_results.get_groundstates();
+        const auto gs = simulation_results.groundstates();
 
         REQUIRE(!gs.empty());
 
@@ -49,7 +49,7 @@ TEST_CASE("Bestagon FO2 gate", "[does-charge-distribution-match-logic-for-given-
 
         const auto simulation_results = quickexact<sidb_cell_clk_lyt_siqad>(*bii, params);
 
-        const auto gs = simulation_results.get_groundstates();
+        const auto gs = simulation_results.groundstates();
 
         REQUIRE(!gs.empty());
 
@@ -89,7 +89,7 @@ TEST_CASE("AND gate mirrored on the x-axis on the H-Si 111 surface",
 
         const auto simulation_results = quickexact<sidb_111_cell_clk_lyt_siqad>(*bii, params);
 
-        const auto gs = simulation_results.get_groundstates();
+        const auto gs = simulation_results.groundstates();
 
         REQUIRE(!gs.empty());
 
@@ -104,7 +104,7 @@ TEST_CASE("AND gate mirrored on the x-axis on the H-Si 111 surface",
 
         const auto simulation_results = quickexact<sidb_111_cell_clk_lyt_siqad>(*bii, params);
 
-        const auto gs = simulation_results.get_groundstates();
+        const auto gs = simulation_results.groundstates();
 
         REQUIRE(!gs.empty());
 

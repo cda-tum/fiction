@@ -207,8 +207,8 @@ class TestOperationalDomain(unittest.TestCase):
 
         self.assertEqual(stats_grid.num_simulator_invocations, 10034)
         self.assertEqual(stats_grid.num_evaluated_parameter_combinations, 8281)
-        self.assertEqual(stats_grid.num_operational_parameter_combinations, 8281)
-        self.assertEqual(stats_grid.num_non_operational_parameter_combinations, 0)
+        self.assertEqual(stats_grid.num_operational_parameter_combinations, 0)
+        self.assertEqual(stats_grid.num_non_operational_parameter_combinations, 8281)
 
 
 if __name__ == "__main__":
