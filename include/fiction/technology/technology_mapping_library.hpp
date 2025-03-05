@@ -9,7 +9,9 @@ namespace fiction
 {
 
 /**
- * This file provides preset gates for mockturtle's technology mapper that are parsable by lorina's genlib parser.
+ * This file provides preset gates for mockturtle's technology mapper that are parsable by lorina's genlib parser. The
+ * cost values are chosen based on the paper: "Unifying Figures of Merit: A Versatile Cost Function for Silicon Dangling
+ * Bond Logic" (https://www.cda.cit.tum.de/files/eda/2024_ieee_nano_figures_of_metrit.pdf).
  */
 
 /**
@@ -22,24 +24,24 @@ inline constexpr const char* GATE_ONE  = "GATE  one   0  O=CONST1;\n";
  * 1-ary functions.
  */
 inline constexpr const char* GATE_BUF = "GATE  buf   1 O=a;   PIN * NONINV 1 999 1.0 1.0 1.0 1.0\n";
-inline constexpr const char* GATE_INV = "GATE  inv1  1 O=!a;  PIN * NONINV 1 999 1.0 1.0 1.0 1.0\n";
+inline constexpr const char* GATE_INV = "GATE  inv1  100 O=!a;  PIN * NONINV 1 999 1.0 1.0 1.0 1.0\n";
 
 /**
  * 2-ary functions.
  */
-inline constexpr const char* GATE_AND2  = "GATE  and2  1 O=a*b;     PIN * NONINV 1 999 1.0 1.0 1.0 1.0\n";
-inline constexpr const char* GATE_NAND2 = "GATE  nand2 1 O=!(a*b);  PIN * NONINV 1 999 1.0 1.0 1.0 1.0\n";
-inline constexpr const char* GATE_OR2   = "GATE  or2   1 O=a+b;     PIN * NONINV 1 999 1.0 1.0 1.0 1.0\n";
-inline constexpr const char* GATE_NOR2  = "GATE  nor2  1 O=!(a+b);  PIN * NONINV 1 999 1.0 1.0 1.0 1.0\n";
-inline constexpr const char* GATE_XOR2  = "GATE  xor2  1 O=a^b;     PIN * NONINV 1 999 1.0 1.0 1.0 1.0\n";
-inline constexpr const char* GATE_XNOR2 = "GATE  xnor2 1 O=!(a^b);  PIN * NONINV 1 999 1.0 1.0 1.0 1.0\n";
+inline constexpr const char* GATE_AND2  = "GATE  and2  128 O=a*b;     PIN * NONINV 1 999 1.0 1.0 1.0 1.0\n";
+inline constexpr const char* GATE_NAND2 = "GATE  nand2 100 O=!(a*b);  PIN * NONINV 1 999 1.0 1.0 1.0 1.0\n";
+inline constexpr const char* GATE_OR2   = "GATE  or2   162 O=a+b;     PIN * NONINV 1 999 1.0 1.0 1.0 1.0\n";
+inline constexpr const char* GATE_NOR2  = "GATE  nor2  151 O=!(a+b);  PIN * NONINV 1 999 1.0 1.0 1.0 1.0\n";
+inline constexpr const char* GATE_XOR2  = "GATE  xor2  131 O=a^b;     PIN * NONINV 1 999 1.0 1.0 1.0 1.0\n";
+inline constexpr const char* GATE_XNOR2 = "GATE  xnor2 173 O=!(a^b);  PIN * NONINV 1 999 1.0 1.0 1.0 1.0\n";
 /**
  * Non-standard 2-ary functions.
  */
-inline constexpr const char* GATE_LT2 = "GATE  lt2  1 O=(!a*b);      PIN * NONINV 1 999 1.0 1.0 1.0 1.0\n";
-inline constexpr const char* GATE_GT2 = "GATE  gt2  1 O=(a*!b);      PIN * NONINV 1 999 1.0 1.0 1.0 1.0\n";
-inline constexpr const char* GATE_LE2 = "GATE  le2  1 O=!(a*!b);     PIN * NONINV 1 999 1.0 1.0 1.0 1.0\n";
-inline constexpr const char* GATE_GE2 = "GATE  ge2  1 O=!(!a*b);     PIN * NONINV 1 999 1.0 1.0 1.0 1.0\n";
+inline constexpr const char* GATE_LT2 = "GATE  lt2  201 O=(!a*b);      PIN * NONINV 1 999 1.0 1.0 1.0 1.0\n";
+inline constexpr const char* GATE_GT2 = "GATE  gt2  182 O=(a*!b);      PIN * NONINV 1 999 1.0 1.0 1.0 1.0\n";
+inline constexpr const char* GATE_LE2 = "GATE  le2  151 O=!(a*!b);     PIN * NONINV 1 999 1.0 1.0 1.0 1.0\n";
+inline constexpr const char* GATE_GE2 = "GATE  ge2  172 O=!(!a*b);     PIN * NONINV 1 999 1.0 1.0 1.0 1.0\n";
 
 /**
  * 3-ary functions.
