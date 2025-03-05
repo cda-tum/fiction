@@ -20139,7 +20139,7 @@ static const char *__doc_fiction_sidb_simulation_result_algorithm_name = R"doc(N
 
 static const char *__doc_fiction_sidb_simulation_result_charge_distributions = R"doc(Charge distributions determined by the algorithm.)doc";
 
-static const char *__doc_fiction_sidb_simulation_result_get_groundstates =
+static const char *__doc_fiction_sidb_simulation_result_groundstates =
 R"doc(This function calculates the ground state charge distributions from
 the provided simulation results. The ground state charge distributions
 are those with energy closest to the minimum energy found in the
