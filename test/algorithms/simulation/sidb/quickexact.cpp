@@ -8,7 +8,6 @@
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp>
-#include <fiction/algorithms/simulation/sidb/groundstate_from_simulation_result.hpp>
 #include <fiction/algorithms/simulation/sidb/quickexact.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
@@ -2043,7 +2042,7 @@ TEMPLATE_TEST_CASE("QuickExact gate simulation of Si-111 surface", "[quickexact]
 
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
-    const auto ground_state = groundstate_from_simulation_result(simulation_results);
+    const auto ground_state = simulation_results.get_groundstates();
     REQUIRE(ground_state.size() == 1);
 
     CHECK(ground_state.front().get_charge_state({0, 0, 0}) == sidb_charge_state::NEGATIVE);
@@ -2067,7 +2066,7 @@ TEMPLATE_TEST_CASE("QuickExact AND gate simulation of Si-111 surface", "[quickex
 
         const auto simulation_results = quickexact<TestType>(lyt, params);
 
-        const auto ground_state = groundstate_from_simulation_result(simulation_results);
+        const auto ground_state = simulation_results.get_groundstate();
         REQUIRE(ground_state.size() == 1);
 
         CHECK(ground_state.front().get_charge_state({0, 0, 0}) == sidb_charge_state::NEGATIVE);
@@ -2108,7 +2107,7 @@ TEMPLATE_TEST_CASE("QuickExact AND gate simulation of Si-111 surface", "[quickex
         const auto simulation_results = quickexact<TestType>(lyt, params);
         CHECK(simulation_results.charge_distributions.size() == 7);
 
-        const auto ground_state = groundstate_from_simulation_result(simulation_results);
+        const auto ground_state = simulation_results.get_groundstates();
 
         REQUIRE(ground_state.size() == 1);
 

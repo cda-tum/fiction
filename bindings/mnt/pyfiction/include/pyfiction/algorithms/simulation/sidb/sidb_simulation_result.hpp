@@ -86,6 +86,8 @@ void sidb_simulation_result(pybind11::module& m, const std::string& lattice = ""
 {
     namespace py = pybind11;
 
+    // todo update docu
+
     py::class_<fiction::sidb_simulation_result<Lyt>>(m, fmt::format("sidb_simulation_result{}", lattice).c_str(),
                                                      DOC(fiction_sidb_simulation_result))
         .def(py::init<>())
@@ -100,7 +102,10 @@ void sidb_simulation_result(pybind11::module& m, const std::string& lattice = ""
         .def_property_readonly(
             "additional_simulation_parameters", [](const fiction::sidb_simulation_result<Lyt>& self)
             { return convert_map_to_py(self.additional_simulation_parameters); },
-            DOC(fiction_sidb_simulation_result_additional_simulation_parameters));
+            DOC(fiction_sidb_simulation_result_additional_simulation_parameters))
+        .def("ground_state_charge_distributions", &fiction::sidb_simulation_result<Lyt>::get_groundstates)
+
+        ;
 }
 
 }  // namespace detail

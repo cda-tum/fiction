@@ -11,7 +11,6 @@
 #include "fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp"
 #include "fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp"
 #include "fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
-#include "fiction/algorithms/simulation/sidb/groundstate_from_simulation_result.hpp"
 #include "fiction/algorithms/simulation/sidb/quickexact.hpp"
 #include "fiction/algorithms/simulation/sidb/quicksim.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
@@ -426,7 +425,7 @@ class is_operational_impl
                     return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
                 }
 
-                const auto ground_states = groundstate_from_simulation_result(simulation_results);
+                const auto ground_states = simulation_results.get_groundstates();
 
                 for (const auto& gs : ground_states)
                 {
@@ -569,7 +568,7 @@ class is_operational_impl
                 continue;
             }
 
-            const auto ground_states = groundstate_from_simulation_result(simulation_results);
+            const auto ground_states = simulation_results.get_groundstates();
 
             for (const auto& gs : ground_states)
             {

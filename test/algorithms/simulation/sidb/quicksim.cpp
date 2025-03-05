@@ -8,7 +8,6 @@
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/algorithms/simulation/sidb/energy_distribution.hpp>
-#include <fiction/algorithms/simulation/sidb/groundstate_from_simulation_result.hpp>
 #include <fiction/algorithms/simulation/sidb/quicksim.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
 #include <fiction/layouts/coordinates.hpp>
@@ -1109,7 +1108,7 @@ TEMPLATE_TEST_CASE("QuickSim gate simulation on the Si-111 surface", "[quicksim]
 
     REQUIRE(simulation_results.has_value());
 
-    const auto ground_state = groundstate_from_simulation_result(simulation_results.value());
+    const auto ground_state = simulation_results.value().get_groundstates();
     REQUIRE(ground_state.size() == 1);
 
     CHECK(ground_state.front().get_charge_state({0, 0, 0}) == sidb_charge_state::NEGATIVE);
@@ -1135,7 +1134,7 @@ TEMPLATE_TEST_CASE("QuickSim AND gate simulation on the Si-111 surface", "[quick
 
         REQUIRE(simulation_results.has_value());
 
-        const auto ground_state = groundstate_from_simulation_result(simulation_results.value());
+        const auto ground_state = simulation_results.value().get_groundstates();
         REQUIRE(ground_state.size() == 1);
 
         CHECK(ground_state.front().get_charge_state({0, 0, 0}) == sidb_charge_state::NEGATIVE);
@@ -1177,7 +1176,7 @@ TEMPLATE_TEST_CASE("QuickSim AND gate simulation on the Si-111 surface", "[quick
 
         REQUIRE(simulation_results.has_value());
 
-        const auto ground_state = groundstate_from_simulation_result(simulation_results.value());
+        const auto ground_state = simulation_results.value().get_groundstates();
 
         REQUIRE(ground_state.size() == 1);
 

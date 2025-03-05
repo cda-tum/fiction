@@ -9,6 +9,7 @@
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
 #include "fiction/algorithms/simulation/sidb/quickexact.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_domain.hpp"
+#include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/technology/sidb_defect_surface.hpp"
 #include "fiction/technology/sidb_defects.hpp"
@@ -639,7 +640,7 @@ class defect_influence_impl
 
         const auto simulation_results = quickexact(lyt_without_defect, qe_params);
 
-        const auto ground_states = groundstate_from_simulation_result(simulation_results);
+        const auto ground_states = simulation_results.get_groundstates();
 
         if (lyt_without_defect.get_cell_type(defect_pos) == Lyt::technology::cell_type::EMPTY)
         {
@@ -655,7 +656,7 @@ class defect_influence_impl
             // conduct simulation with defect
             auto simulation_result_defect = quickexact(lyt_defect, qe_params);
 
-            const auto ground_states_defect = groundstate_from_simulation_result(simulation_result_defect);
+            const auto ground_states_defect = simulation_result_defect.get_groundstates();
 
             if (ground_states.size() != ground_states_defect.size())
             {
