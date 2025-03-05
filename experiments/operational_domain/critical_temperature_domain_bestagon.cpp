@@ -4,6 +4,7 @@
 
 #include "fiction_experiments.hpp"
 
+#include <fiction/algorithms/simulation/sidb/critical_temperature.hpp>
 #include <fiction/algorithms/simulation/sidb/is_operational.hpp>
 #include <fiction/algorithms/simulation/sidb/operational_domain.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
@@ -23,70 +24,19 @@
 
 using namespace fiction;
 
-/*
- * Compute the operational domain for a given CT in relation to the critical temperature domain at 0 K.
- *
- * @param ct_domain The critical temperature domain at 0 K.
- * @param ct The critical temperature for which the operational domain should be computed.
- * @param num_op_params The number of operational parameters.
- * @return The operational domain ratio in percent.
- */
-[[nodiscard]] static double compute_op_domain_relative_to_0_k(const critical_temperature_domain& ct_domain,
-                                                              const double ct, const std::size_t num_op_params)
-{
-    std::size_t count = 0;
-
-    ct_domain.for_each(
-        [&ct, &count](const auto&, const auto& op_value)
-        {
-            if (std::get<0>(op_value) == operational_status::OPERATIONAL && std::get<1>(op_value) >= ct)
-            {
-                count++;
-            }
-        });
-
-    return static_cast<double>(count) / static_cast<double>(num_op_params) * 100;
-}
-
-[[nodiscard]] static std::array<double, 6>
-compute_op_domains_relative_to_0_k(const critical_temperature_domain& ct_domain,
-                                   const operational_domain_stats& op_domain_stats_gs, double min_ct, double max_ct)
-{
-    std::array<double, 6> op_ratios{};
-
-    // Critical temperatures at 0%, 20%, 40%, 60%, 80%, and 100% of the temperature range. 20% means, for example, "CT
-    // min + 0.2 * ΔCT", where ΔCT is "CT max - CT min".
-    const std::array<double, 6> relative_temperature = {0.0, 0.2, 0.4, 0.6, 0.8, 1.0};
-
-    for (uint64_t i = 0; i < relative_temperature.size(); i++)
-    {
-        const auto ct = min_ct + (relative_temperature[i] * (max_ct - min_ct));
-        op_ratios[i] =
-            compute_op_domain_relative_to_0_k(ct_domain, ct, op_domain_stats_gs.num_operational_parameter_combinations);
-    }
-
-    return op_ratios;
-}
-
 // This script analyzes the critical temperature within the operational domain of the Bestagon gates. It calculates
 // the operational domain at various temperatures relative to the total operational domain at 0 K.
 
 int main()  // NOLINT
 {
-    experiments::experiment<std::string, uint64_t, double, double, double, double, double, double, double, double>
-        opdomain_exp{
-            "Critical Temperature Domain Bestagon",
-            "Name",
-            "#SiDBs",  // Benchmark
-            "CT min",
-            "CT max",
-            "Rel. OpD (CT min)",
-            "Rel. OpD (CT min + 0.2 * ΔCT) [%]",  //
-            "Rel. OpD (CT min + 0.4 * ΔCT) [%]",
-            "Rel. OpD (CT min + 0.6 * ΔCT) [%]",
-            "Rel. OpD (CT min + 0.8 * ΔCT) [%]",
-            "Rel. OpD (CT max)",
-        };
+    experiments::experiment<std::string, uint64_t, double, double, double, double> opdomain_exp{
+        "Critical Temperature Domain Bestagon",
+        "Name",
+        "#SiDBs",  // Benchmark
+        "CT min",
+        "CT (default physical values)",
+        "CT max",
+        "ΔCT"};
 
     // simulation parameters
     sidb_simulation_parameters sim_params{};
@@ -132,13 +82,16 @@ int main()  // NOLINT
         for (uint64_t i = 0; i < 2; i++)
         {
             operational_domain_stats op_domain_stats_gs{};
-            std::string              gate_name = gate;
+            std::string              gate_name  = gate;
+            double                   ct_default = 0;
 
             // tolerate kinks first
             if (i == 0)
             {
                 op_domain_params.operational_params.op_condition =
                     is_operational_params::operational_condition::TOLERATE_KINKS;
+                ct_default = critical_temperature_gate_based(
+                    lyt, truth_table, critical_temperature_params{op_domain_params.operational_params});
             }
 
             // reject kinks afterwards
@@ -146,6 +99,8 @@ int main()  // NOLINT
             {
                 op_domain_params.operational_params.op_condition =
                     is_operational_params::operational_condition::REJECT_KINKS;
+                ct_default = critical_temperature_gate_based(
+                    lyt, truth_table, critical_temperature_params{op_domain_params.operational_params});
             }
 
             if (i == 1)
@@ -156,19 +111,12 @@ int main()  // NOLINT
             const auto ct_domain =
                 critical_temperature_domain_grid_search(lyt, truth_table, op_domain_params, &op_domain_stats_gs);
 
-            const auto min_ct = ct_domain.minimum_ct();
-            const auto max_ct = ct_domain.maximum_ct();
-
-            // Calculate operational ratios at various critical temperatures
-            const auto op_ratios = compute_op_domains_relative_to_0_k(ct_domain, op_domain_stats_gs, min_ct, max_ct);
-
-            // Unpack operational ratios (from 0% to 100%)
-            const auto [op_ratio_ct_0, op_ratio_ct_20, op_ratio_ct_40, op_ratio_ct_60, op_ratio_ct_80,
-                        op_ratio_ct_100] = op_ratios;
+            const auto min_ct   = ct_domain.minimum_ct();
+            const auto max_ct   = ct_domain.maximum_ct();
+            const auto delta_ct = max_ct - min_ct;
 
             // Benchmark and save
-            opdomain_exp(gate_name, lyt.num_cells(), min_ct, max_ct, op_ratio_ct_0, op_ratio_ct_20, op_ratio_ct_40,
-                         op_ratio_ct_60, op_ratio_ct_80, op_ratio_ct_100);
+            opdomain_exp(gate_name, lyt.num_cells(), min_ct, ct_default, max_ct, delta_ct);
             opdomain_exp.save();
             opdomain_exp.table();
         }
