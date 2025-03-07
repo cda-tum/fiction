@@ -771,6 +771,13 @@ class gate_level_layout : public ClockedLayout
                         strg->data.num_crossings--;
                     }
 
+                    if (ClockedLayout::is_ground_layer(t) &&
+                        ClockedLayout::is_crossing_layer(ClockedLayout::above(t)) &&
+                        !is_empty_tile(ClockedLayout::above(t)))
+                    {
+                        strg->data.num_crossings--;
+                    }
+
                     // find PO entry and remove it if present
                     if (const auto po_it =
                             std::find_if(strg->outputs.cbegin(), strg->outputs.cend(),
@@ -1687,6 +1694,12 @@ class gate_level_layout : public ClockedLayout
                 strg->data.num_wires++;
 
                 if (ClockedLayout::is_crossing_layer(t) && !is_empty_tile(ClockedLayout::below(t)))
+                {
+                    strg->data.num_crossings++;
+                }
+
+                if (ClockedLayout::is_ground_layer(t) && ClockedLayout::is_crossing_layer(ClockedLayout::above(t)) &&
+                    !is_empty_tile(ClockedLayout::above(t)))
                 {
                     strg->data.num_crossings++;
                 }
