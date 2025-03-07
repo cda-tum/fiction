@@ -771,7 +771,9 @@ class gate_level_layout : public ClockedLayout
                         strg->data.num_crossings--;
                     }
 
-                    if (ClockedLayout::is_ground_layer(t) && ClockedLayout::is_crossing_layer(ClockedLayout::above(t)) && !is_empty_tile(ClockedLayout::above(t)))
+                    if (ClockedLayout::is_ground_layer(t) &&
+                        ClockedLayout::is_crossing_layer(ClockedLayout::above(t)) &&
+                        !is_empty_tile(ClockedLayout::above(t)))
                     {
                         strg->data.num_crossings--;
                     }
@@ -1696,7 +1698,8 @@ class gate_level_layout : public ClockedLayout
                     strg->data.num_crossings++;
                 }
 
-                if (ClockedLayout::is_ground_layer(t) && ClockedLayout::is_crossing_layer(ClockedLayout::above(t)) && !is_empty_tile(ClockedLayout::above(t)))
+                if (ClockedLayout::is_ground_layer(t) && ClockedLayout::is_crossing_layer(ClockedLayout::above(t)) &&
+                    !is_empty_tile(ClockedLayout::above(t)))
                 {
                     strg->data.num_crossings++;
                 }
