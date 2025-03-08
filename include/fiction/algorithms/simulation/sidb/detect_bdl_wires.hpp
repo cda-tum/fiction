@@ -597,13 +597,13 @@ class detect_bdl_wires_impl
      * lengths are found.
      *
      * @param type The type of the cell to filter by.
-     * @param forbidden_type The type of cell that is forbidden in the wire and is automatically filtered out.
+     * @param filtered_type The type of cell that is automatically filtered out.
      * @return A vector of `bdl_wire` objects containing cells of the specified type. If no such wires are found,
      *         an empty vector is returned.
      */
     [[nodiscard]] std::vector<bdl_wire<Lyt>>
     filter_wires_by_type(const typename technology<Lyt>::cell_type& type,
-                         const typename technology<Lyt>::cell_type  forbidden_type) const noexcept
+                         const typename technology<Lyt>::cell_type& filtered_type) const noexcept
     {
         std::vector<bdl_wire<Lyt>> filtered_wires{};
         std::optional<std::size_t> wire_length_of_the_first_wire{};  // Track the length of the first wire
@@ -614,12 +614,12 @@ class detect_bdl_wires_impl
                             [&type](const auto& bdl) { return bdl.type == type; }))
             {
                 if (std::any_of(wire.pairs.cbegin(), wire.pairs.cend(),
-                                [&forbidden_type](const auto& bdl) { return bdl.type == forbidden_type; }))
+                                [&filtered_type](const auto& bdl) { return bdl.type == filtered_type; }))
                 {
                     auto wire_copy = wire;
                     wire_copy.pairs.erase(std::remove_if(wire_copy.pairs.begin(), wire_copy.pairs.end(),
-                                                         [&forbidden_type](const auto& bdl)
-                                                         { return bdl.type == forbidden_type; }),
+                                                         [&filtered_type](const auto& bdl)
+                                                         { return bdl.type == filtered_type; }),
                                           wire_copy.pairs.cend());
                     filtered_wires.push_back(wire_copy);
                 }

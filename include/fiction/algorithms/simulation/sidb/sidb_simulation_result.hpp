@@ -5,6 +5,7 @@
 #ifndef FICTION_SIDB_SIMULATION_RESULT_HPP
 #define FICTION_SIDB_SIMULATION_RESULT_HPP
 
+#include "fiction/algorithms/simulation/sidb/minimum_energy.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/technology/constants.hpp"
@@ -64,9 +65,7 @@ struct sidb_simulation_result
      */
     std::unordered_map<std::string, std::any> additional_simulation_parameters{};
     /**
-     * This function calculates the ground state charge distributions from the provided simulation results.
-     * The ground state charge distributions are those with energy closest to the minimum energy found in the simulation
-     * results.
+     * This function computes the ground state of the charge distributions.
      *
      * @note When degenerate states exist, there are multiple ground states with the same energy.
      *
@@ -92,10 +91,8 @@ struct sidb_simulation_result
         double min_energy = std::numeric_limits<double>::infinity();
         if (!charge_configurations_copy.empty())
         {
-            min_energy = std::min_element(charge_configurations_copy.begin(), charge_configurations_copy.end(),
-                                          [](const auto& lhs, const auto& rhs)
-                                          { return lhs.get_system_energy() < rhs.get_system_energy(); })
-                             ->get_system_energy();
+
+            min_energy = minimum_energy(charge_configurations_copy.cbegin(), charge_configurations_copy.cend());
         }
 
         for (const auto charge_index : charge_indices)
