@@ -936,6 +936,10 @@ TEST_CASE("Functional properties", "[gate-level-layout]")
     REQUIRE(fiction::has_is_nor_v<gate_layout>);
     REQUIRE(mockturtle::has_is_maj_v<gate_layout>);
     REQUIRE(mockturtle::has_is_xor_v<gate_layout>);
+    REQUIRE(fiction::has_is_lt_v<gate_layout>);
+    REQUIRE(fiction::has_is_le_v<gate_layout>);
+    REQUIRE(fiction::has_is_gt_v<gate_layout>);
+    REQUIRE(fiction::has_is_ge_v<gate_layout>);
     REQUIRE(mockturtle::has_is_function_v<gate_layout>);
 
     auto layout = blueprints::non_structural_all_function_gate_layout<gate_layout>();
@@ -958,6 +962,11 @@ TEST_CASE("Functional properties", "[gate-level-layout]")
     const auto na = tile<gate_layout>{0, 4};
     const auto no = tile<gate_layout>{1, 4};
 
+    const auto lt = tile<gate_layout>{0, 5};
+    const auto le = tile<gate_layout>{1, 5};
+    const auto gt = tile<gate_layout>{2, 5};
+    const auto ge = tile<gate_layout>{3, 5};
+
     CHECK(layout.is_pi(layout.get_node(x1)));
     CHECK(layout.is_pi(layout.get_node(x2)));
     CHECK(layout.is_pi(layout.get_node(x3)));
@@ -977,6 +986,11 @@ TEST_CASE("Functional properties", "[gate-level-layout]")
 
     CHECK(layout.is_nand(layout.get_node(na)));
     CHECK(layout.is_nor(layout.get_node(no)));
+
+    CHECK(layout.is_lt(layout.get_node(lt)));
+    CHECK(layout.is_le(layout.get_node(le)));
+    CHECK(layout.is_gt(layout.get_node(gt)));
+    CHECK(layout.is_ge(layout.get_node(ge)));
 }
 
 TEST_CASE("Custom node values", "[gate-level-layout]")
