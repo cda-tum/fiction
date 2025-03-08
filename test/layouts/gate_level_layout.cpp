@@ -1201,6 +1201,36 @@ TEST_CASE("Move crossing", "[gate-level-layout]")
     CHECK(layout.num_crossings() == 0);
     CHECK(layout.num_pis() == 4);
     CHECK(layout.num_pos() == 2);
+
+    crossing = layout.get_node({3, 0});
+
+    // move crossing back
+    layout.move_node(crossing, {2, 1, 1}, {});
+    CHECK(layout.num_gates() == 2);
+    CHECK(layout.num_wires() == 9);
+    CHECK(layout.num_crossings() == 1);
+    CHECK(layout.num_pis() == 4);
+    CHECK(layout.num_pos() == 2);
+
+    auto underneath_crossing = layout.get_node({2, 1, 0});
+
+    // move crossing to empty location
+    layout.move_node(underneath_crossing, {3, 0}, {});
+    CHECK(layout.num_gates() == 2);
+    CHECK(layout.num_wires() == 9);
+    CHECK(layout.num_crossings() == 0);
+    CHECK(layout.num_pis() == 4);
+    CHECK(layout.num_pos() == 2);
+
+    underneath_crossing = layout.get_node({3, 0});
+
+    // move crossing back
+    layout.move_node(underneath_crossing, {2, 1, 0}, {});
+    CHECK(layout.num_gates() == 2);
+    CHECK(layout.num_wires() == 9);
+    CHECK(layout.num_crossings() == 1);
+    CHECK(layout.num_pis() == 4);
+    CHECK(layout.num_pos() == 2);
 }
 
 TEST_CASE("Clear tiles", "[gate-level-layout]")
