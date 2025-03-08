@@ -6031,9 +6031,8 @@ of different lengths are found.
 Parameter ``type``:
     The type of the cell to filter by.
 
-Parameter ``forbidden_type``:
-    The type of cell that is forbidden in the wire and is
-    automatically filtered out.
+Parameter ``filtered_type``:
+    The type of cell that is automatically filtered out.
 
 Returns:
     A vector of `bdl_wire` objects containing cells of the specified
@@ -20140,10 +20139,7 @@ static const char *__doc_fiction_sidb_simulation_result_algorithm_name = R"doc(N
 static const char *__doc_fiction_sidb_simulation_result_charge_distributions = R"doc(Charge distributions determined by the algorithm.)doc";
 
 static const char *__doc_fiction_sidb_simulation_result_groundstates =
-R"doc(This function calculates the ground state charge distributions from
-the provided simulation results. The ground state charge distributions
-are those with energy closest to the minimum energy found in the
-simulation results.
+R"doc(This function computes the ground state of the charge distributions.
 
 @note When degenerate states exist, there are multiple ground states
 with the same energy.
