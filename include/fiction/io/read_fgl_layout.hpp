@@ -492,7 +492,6 @@ class read_fgl_layout_impl
                             lyt.create_po(incoming_signal, gate.name, location);
                         }
                     }
-
                     else if (gate.type == "BUF")
                     {
                         if constexpr (mockturtle::has_create_buf_v<Lyt>)
@@ -500,7 +499,6 @@ class read_fgl_layout_impl
                             lyt.create_buf(incoming_signal, location);
                         }
                     }
-
                     else if (gate.type == "INV")
                     {
                         if constexpr (mockturtle::has_create_not_v<Lyt>)
@@ -541,7 +539,6 @@ class read_fgl_layout_impl
                             lyt.create_and(incoming_signal_1, incoming_signal_2, location);
                         }
                     }
-
                     else if (gate.type == "NAND")
                     {
                         if constexpr (mockturtle::has_create_nand_v<Lyt>)
@@ -549,7 +546,6 @@ class read_fgl_layout_impl
                             lyt.create_nand(incoming_signal_1, incoming_signal_2, location);
                         }
                     }
-
                     else if (gate.type == "OR")
                     {
                         if constexpr (mockturtle::has_create_or_v<Lyt>)
@@ -557,7 +553,6 @@ class read_fgl_layout_impl
                             lyt.create_or(incoming_signal_1, incoming_signal_2, location);
                         }
                     }
-
                     else if (gate.type == "NOR")
                     {
                         if constexpr (mockturtle::has_create_nor_v<Lyt>)
@@ -565,7 +560,6 @@ class read_fgl_layout_impl
                             lyt.create_nor(incoming_signal_1, incoming_signal_2, location);
                         }
                     }
-
                     else if (gate.type == "XOR")
                     {
                         if constexpr (mockturtle::has_create_xor_v<Lyt>)
@@ -573,12 +567,39 @@ class read_fgl_layout_impl
                             lyt.create_xor(incoming_signal_1, incoming_signal_2, location);
                         }
                     }
-
                     else if (gate.type == "XNOR")
                     {
                         if constexpr (mockturtle::has_create_xnor_v<Lyt>)
                         {
                             lyt.create_xnor(incoming_signal_1, incoming_signal_2, location);
+                        }
+                    }
+                    else if (gate.type == "LT")
+                    {
+                        if constexpr (mockturtle::has_create_lt_v<Lyt>)
+                        {
+                            lyt.create_lt(incoming_signal_1, incoming_signal_2, location);
+                        }
+                    }
+                    else if (gate.type == "LE")
+                    {
+                        if constexpr (mockturtle::has_create_le_v<Lyt>)
+                        {
+                            lyt.create_le(incoming_signal_1, incoming_signal_2, location);
+                        }
+                    }
+                    else if (gate.type == "GT")
+                    {
+                        if constexpr (mockturtle::has_create_gt_v<Lyt>)
+                        {
+                            lyt.create_gt(incoming_signal_1, incoming_signal_2, location);
+                        }
+                    }
+                    else if (gate.type == "GE")
+                    {
+                        if constexpr (mockturtle::has_create_ge_v<Lyt>)
+                        {
+                            lyt.create_ge(incoming_signal_1, incoming_signal_2, location);
                         }
                     }
                     else if (std::all_of(gate.type.begin(), gate.type.end(), ::isxdigit))
