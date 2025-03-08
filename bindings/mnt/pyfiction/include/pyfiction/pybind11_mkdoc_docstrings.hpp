@@ -12497,6 +12497,14 @@ static const char *__doc_fiction_gate_level_layout_create_and = R"doc()doc";
 
 static const char *__doc_fiction_gate_level_layout_create_buf = R"doc()doc";
 
+static const char *__doc_fiction_gate_level_layout_create_ge = R"doc()doc";
+
+static const char *__doc_fiction_gate_level_layout_create_gt = R"doc()doc";
+
+static const char *__doc_fiction_gate_level_layout_create_le = R"doc()doc";
+
+static const char *__doc_fiction_gate_level_layout_create_lt = R"doc()doc";
+
 static const char *__doc_fiction_gate_level_layout_create_maj = R"doc()doc";
 
 static const char *__doc_fiction_gate_level_layout_create_nand = R"doc()doc";
