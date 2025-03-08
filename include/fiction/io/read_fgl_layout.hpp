@@ -474,8 +474,8 @@ class read_fgl_layout_impl
                     }
                     else
                     {
-                        throw fgl_parsing_error(
-                            fmt::format("Error parsing FGL file: unknown gate type: {}", gate.type));
+                        throw fgl_parsing_error(fmt::format(
+                            "Error parsing FGL file: unknown gate of type '{}' without input signals", gate.type));
                     }
                 }
 
@@ -519,8 +519,8 @@ class read_fgl_layout_impl
                     }
                     else
                     {
-                        throw fgl_parsing_error(
-                            fmt::format("Error parsing FGL file: unknown gate type: {}", gate.type));
+                        throw fgl_parsing_error(fmt::format(
+                            "Error parsing FGL file: unknown gate of type '{}' with 1 input signal", gate.type));
                     }
                 }
 
@@ -592,8 +592,8 @@ class read_fgl_layout_impl
                     }
                     else
                     {
-                        throw fgl_parsing_error(
-                            fmt::format("Error parsing FGL file: unknown gate type: {}", gate.type));
+                        throw fgl_parsing_error(fmt::format(
+                            "Error parsing FGL file: unknown gate of type '{}' with 2 input signals", gate.type));
                     }
                 }
                 else if (gate.incoming.size() == 3)
@@ -626,8 +626,8 @@ class read_fgl_layout_impl
                     }
                     else
                     {
-                        throw fgl_parsing_error(
-                            fmt::format("Error parsing FGL file: unknown gate type: {}", gate.type));
+                        throw fgl_parsing_error(fmt::format(
+                            "Error parsing FGL file: unknown gate of type '{}' with 3 input signals", gate.type));
                     }
                 }
                 else if (std::all_of(gate.type.begin(), gate.type.end(), ::isxdigit))
@@ -649,7 +649,9 @@ class read_fgl_layout_impl
                 }
                 else
                 {
-                    throw fgl_parsing_error(fmt::format("Error parsing FGL file: unknown gate type: {}", gate.type));
+                    throw fgl_parsing_error(
+                        fmt::format("Error parsing FGL file: unknown gate of type '{}' with {} input signals",
+                                    gate.type, gate.incoming.size()));
                 }
             }
         }
