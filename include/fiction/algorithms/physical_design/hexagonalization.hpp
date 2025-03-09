@@ -9,10 +9,16 @@
 #pragma GCC diagnostic ignored "-Wconversion"
 
 #include "fiction/layouts/bounding_box.hpp"
+#include "fiction/layouts/obstruction_layout.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 #include "fiction/utils/name_utils.hpp"
 #include "fiction/utils/placement_utils.hpp"
+#include "fiction/utils/routing_utils.hpp"
+
+#include <fiction/algorithms/path_finding/a_star.hpp>
+#include <fiction/algorithms/path_finding/cost.hpp>
+#include <fiction/algorithms/path_finding/distance.hpp>
 
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
@@ -118,6 +124,24 @@ template <typename HexLyt, typename CartLyt>
         }
     }
 
+    const auto top_pi = detail::to_hex<CartLyt, HexLyt>({0, 0}, cartesian_layout_height);
+    // inputs
+    uint64_t num_inputs_in_first_column = 0;
+    lyt.foreach_pi(
+        [&lyt, &num_inputs_in_first_column](const auto& gate)
+        {
+            const auto old_coord = lyt.get_tile(gate);
+            if (old_coord.x == 0 && old_coord.y != 0)
+            {
+                num_inputs_in_first_column++;
+            }
+        });
+
+    if (top_pi.x - offset < num_inputs_in_first_column)
+    {
+        offset = top_pi.x - num_inputs_in_first_column;
+    }
+
     return offset;
 }
 }  // namespace detail
@@ -166,15 +190,50 @@ template <typename HexLyt, typename CartLyt>
         // calculate offset
         const auto offset = detail::get_offset<HexLyt, CartLyt>(lyt, layout_width, layout_height);
 
+        auto top_pi = detail::to_hex<CartLyt, HexLyt>({0, 0}, layout_height);
+
+        uint64_t num_inputs_in_first_row = 0;
+        lyt.foreach_pi(
+            [&lyt, &num_inputs_in_first_row](const auto& gate)
+            {
+                const auto old_coord = lyt.get_tile(gate);
+                if (old_coord.x != 0 && old_coord.y == 0)
+                {
+                    num_inputs_in_first_row++;
+                }
+            });
+
+        auto min_width = top_pi.x - offset + num_inputs_in_first_row + 1;
+        if (hex_width < min_width)
+        {
+            hex_layout.resize({min_width, hex_height, hex_depth});
+        }
+
+        std::vector<tile<HexLyt>> left_pis = {};
+        std::vector<tile<HexLyt>> top_pis  = {};
+
         // inputs
         lyt.foreach_pi(
-            [&lyt, &hex_layout, &offset, &layout_height](const auto& gate)
+            [&lyt, &hex_layout, &offset, &layout_height, &left_pis, &top_pis](const auto& gate)
             {
                 const auto    old_coord = lyt.get_tile(gate);
                 tile<CartLyt> hex{detail::to_hex<CartLyt, HexLyt>(old_coord, layout_height)};
                 hex.x -= static_cast<decltype(hex.x)>(offset);
                 hex_layout.create_pi(lyt.get_name(lyt.get_node(old_coord)), hex);
+
+                if (old_coord.x == 0 && old_coord.y != 0)
+                {
+                    left_pis.push_back(hex);
+                }
+                if (old_coord.x != 0 && old_coord.y == 0)
+                {
+                    top_pis.push_back(hex);
+                }
             });
+
+        // Sort by y ascending
+        std::sort(left_pis.begin(), left_pis.end(), [](const auto& lhs, const auto& rhs) { return lhs.y < rhs.y; });
+        std::sort(top_pis.begin(), top_pis.end(), [](const auto& lhs, const auto& rhs) { return lhs.y < rhs.y; });
 
         // iterate through cartesian layout diagonally
         for (uint64_t k = 0; k < layout_width + layout_height - 1; ++k)
@@ -287,6 +346,100 @@ template <typename HexLyt, typename CartLyt>
                 const auto hex_signal = hex_layout.make_signal(hex_layout.get_node(hex_tile));
                 hex_layout.create_po(hex_signal, lyt.get_name(lyt.get_node(old_coord)), hex);
             });
+
+        top_pi.x -= static_cast<decltype(top_pi.x)>(offset);
+
+        std::vector<routing_objective<HexLyt>> objectives{};
+
+        for (const auto& c : left_pis)
+        {
+            tile<HexLyt> fanout = {};
+            hex_layout.foreach_fanout(hex_layout.get_node(c),
+                                      [&hex_layout, &fanout](const auto& fout) { fanout = hex_layout.get_tile(fout); });
+
+            top_pi.x -= 1;
+            hex_layout.move_node(hex_layout.get_node(c), top_pi);
+
+            objectives.push_back({top_pi, fanout});
+
+            std::vector<mockturtle::signal<HexLyt>> fins{};
+            fins.reserve(2);
+            hex_layout.foreach_fanin(hex_layout.get_node(fanout),
+                                     [&hex_layout, &fins, &c](const auto& i)
+                                     {
+                                         auto fout = static_cast<tile<HexLyt>>(i);
+                                         if (fout != c)
+                                         {
+                                             fins.push_back(hex_layout.make_signal(hex_layout.get_node(fout)));
+                                         }
+                                     });
+
+            hex_layout.move_node(hex_layout.get_node(fanout), fanout, fins);
+        }
+
+        top_pi = detail::to_hex<CartLyt, HexLyt>({0, 0}, layout_height);
+        top_pi.x -= static_cast<decltype(top_pi.x)>(offset);
+
+        for (const auto& c : top_pis)
+        {
+            tile<HexLyt> fanout = {};
+            hex_layout.foreach_fanout(hex_layout.get_node(c),
+                                      [&hex_layout, &fanout](const auto& fout) { fanout = hex_layout.get_tile(fout); });
+
+            top_pi.x += 1;
+            hex_layout.move_node(hex_layout.get_node(c), top_pi);
+
+            objectives.push_back({top_pi, fanout});
+
+            std::vector<mockturtle::signal<HexLyt>> fins{};
+            fins.reserve(2);
+            hex_layout.foreach_fanin(hex_layout.get_node(fanout),
+                                     [&hex_layout, &fins, &c](const auto& i)
+                                     {
+                                         auto fout = static_cast<tile<HexLyt>>(i);
+                                         if (fout != c)
+                                         {
+                                             fins.push_back(hex_layout.make_signal(hex_layout.get_node(fout)));
+                                         }
+                                     });
+
+            hex_layout.move_node(hex_layout.get_node(fanout), fanout, fins);
+        }
+        auto layout = obstruction_layout<HexLyt>(hex_layout);
+
+        using path = layout_coordinate_path<decltype(layout)>;
+        const a_star_params params{true};
+        using dist = manhattan_distance_functor<decltype(layout), uint64_t>;
+        using cost = unit_cost_functor<decltype(layout), uint8_t>;
+
+        for (auto c : objectives)
+        {
+            if (c.target.z == 0)
+            {
+                const auto new_path = a_star<path>(layout, {c.source, c.target}, dist(), cost(), params);
+                if (new_path.size() != 0)
+                {
+                    route_path(hex_layout, new_path);
+                }
+                for (const auto& tile : new_path)
+                {
+                    layout.obstruct_coordinate(tile);
+                }
+            }
+            else
+            {
+                auto new_path = a_star<path>(layout, {c.source, hex_layout.below(c.target)}, dist(), cost(), params);
+                if (new_path.size() != 0)
+                {
+                    new_path.back().z = 1;
+                    route_path(hex_layout, new_path);
+                }
+                for (const auto& tile : new_path)
+                {
+                    layout.obstruct_coordinate(tile);
+                }
+            }
+        }
 
         // calculate bounding box
         const auto bounding_box         = bounding_box_2d(hex_layout);
