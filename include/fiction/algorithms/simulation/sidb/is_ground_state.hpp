@@ -5,7 +5,6 @@
 #ifndef FICTION_IS_GROUND_STATE_HPP
 #define FICTION_IS_GROUND_STATE_HPP
 
-#include "fiction/algorithms/simulation/sidb/groundstate_from_simulation_result.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "fiction/traits.hpp"
 
@@ -38,9 +37,9 @@ template <typename Lyt>
         return false;
     }
 
-    const auto ground_state_charge_distributions_exact = groundstate_from_simulation_result(exact_results);
+    const auto ground_state_charge_distributions_exact = exact_results.groundstates();
 
-    const auto ground_state_charge_distributions_heuristic = groundstate_from_simulation_result(heuristic_results);
+    const auto ground_state_charge_distributions_heuristic = heuristic_results.groundstates();
 
     assert(ground_state_charge_distributions_heuristic.size() <= ground_state_charge_distributions_exact.size() &&
            "The heuristic results must be less equal than the exact results.");

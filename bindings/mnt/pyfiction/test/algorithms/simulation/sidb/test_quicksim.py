@@ -3,7 +3,6 @@ import unittest
 from mnt.pyfiction import (
     charge_distribution_surface,
     charge_distribution_surface_111,
-    groundstate_from_simulation_result,
     quicksim,
     quicksim_params,
     sidb_100_lattice,
@@ -71,7 +70,7 @@ class TestQuicksim(unittest.TestCase):
 
         self.assertEqual(result.algorithm_name, "QuickSim")
 
-        groundstate = groundstate_from_simulation_result(result)
+        groundstate = result.groundstates()
 
         self.assertEqual(len(groundstate), 1)
 
