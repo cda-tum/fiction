@@ -458,19 +458,39 @@ class gate_level_layout : public ClockedLayout
         return create_node_from_literal({a, b}, 7, t);
     }
 
-    signal create_xor(signal a, signal b, const tile& t = {})
+    signal create_lt(signal a, signal b, const tile& t = {})
     {
         return create_node_from_literal({a, b}, 8, t);
     }
 
-    signal create_xnor(signal a, signal b, const tile& t = {})
+    signal create_ge(signal a, signal b, const tile& t = {})
     {
         return create_node_from_literal({a, b}, 9, t);
     }
 
+    signal create_gt(signal a, signal b, const tile& t = {})
+    {
+        return create_node_from_literal({a, b}, 10, t);
+    }
+
+    signal create_le(signal a, signal b, const tile& t = {})
+    {
+        return create_node_from_literal({a, b}, 11, t);
+    }
+
+    signal create_xor(signal a, signal b, const tile& t = {})
+    {
+        return create_node_from_literal({a, b}, 12, t);
+    }
+
+    signal create_xnor(signal a, signal b, const tile& t = {})
+    {
+        return create_node_from_literal({a, b}, 13, t);
+    }
+
     signal create_maj(signal a, signal b, signal c, const tile& t = {})
     {
-        return create_node_from_literal({a, b, c}, 10, t);
+        return create_node_from_literal({a, b, c}, 14, t);
     }
 
     signal create_node(const std::vector<signal>& children, const kitty::dynamic_truth_table& function,
@@ -881,37 +901,37 @@ class gate_level_layout : public ClockedLayout
         return strg->nodes[n].data[1].h1 == 7;
     }
 
-    [[nodiscard]] bool is_xor(const node n) const noexcept
+    [[nodiscard]] bool is_lt(const node n) const noexcept
     {
         return strg->nodes[n].data[1].h1 == 8;
     }
 
-    [[nodiscard]] bool is_xnor(const node n) const noexcept
+    [[nodiscard]] bool is_ge(const node n) const noexcept
     {
         return strg->nodes[n].data[1].h1 == 9;
     }
 
-    [[nodiscard]] bool is_maj(const node n) const noexcept
+    [[nodiscard]] bool is_gt(const node n) const noexcept
     {
         return strg->nodes[n].data[1].h1 == 10;
     }
 
-    [[nodiscard]] bool is_lt(const node n) const noexcept
+    [[nodiscard]] bool is_le(const node n) const noexcept
     {
         return strg->nodes[n].data[1].h1 == 11;
     }
 
-    [[nodiscard]] bool is_gt(const node n) const noexcept
+    [[nodiscard]] bool is_xor(const node n) const noexcept
     {
         return strg->nodes[n].data[1].h1 == 12;
     }
 
-    [[nodiscard]] bool is_ge(const node n) const noexcept
+    [[nodiscard]] bool is_xnor(const node n) const noexcept
     {
         return strg->nodes[n].data[1].h1 == 13;
     }
 
-    [[nodiscard]] bool is_le(const node n) const noexcept
+    [[nodiscard]] bool is_maj(const node n) const noexcept
     {
         return strg->nodes[n].data[1].h1 == 14;
     }
@@ -1664,18 +1684,16 @@ class gate_level_layout : public ClockedLayout
             strg->data.fn_cache.insert(tt);
         };
 
-        static constexpr const uint64_t lit_not = 0x1, lit_and = 0x8, lit_or = 0xe, lit_xor = 0x6, lit_maj = 0xe8,
-                                        lit_lt = 0x2, lit_gt = 0x4, lit_ge = 0x13, lit_le = 0x11;
+        static constexpr const uint64_t lit_not = 0x1, lit_and = 0x8, lit_or = 0xe, lit_lt = 0x2, lit_le = 0xb,
+                                        lit_xor = 0x6, lit_maj = 0xe8;
 
         create_and_cache(lit_not, 1);  // since NOT is not normal, its complement, i.e., the identity, is stored
         create_and_cache(lit_and, 2);
         create_and_cache(lit_or, 2);
+        create_and_cache(lit_lt, 2);  // since GE is not normal, it is covered as LT's complement
+        create_and_cache(lit_le, 2);  // since GT is not normal, it is covered as LE's complement
         create_and_cache(lit_xor, 2);
         create_and_cache(lit_maj, 3);
-        create_and_cache(lit_lt, 2);
-        create_and_cache(lit_gt, 2);
-        create_and_cache(lit_ge, 2);
-        create_and_cache(lit_le, 2);
     }
 
     void assign_node(const tile& t, const node n)
