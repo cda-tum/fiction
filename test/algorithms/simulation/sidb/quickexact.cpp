@@ -2066,7 +2066,7 @@ TEMPLATE_TEST_CASE("QuickExact AND gate simulation of Si-111 surface", "[quickex
 
         const auto simulation_results = quickexact<TestType>(lyt, params);
 
-        const auto ground_state = simulation_results.groundstate();
+        const auto ground_state = simulation_results.groundstates();
         REQUIRE(ground_state.size() == 1);
 
         CHECK(ground_state.front().get_charge_state({0, 0, 0}) == sidb_charge_state::NEGATIVE);
