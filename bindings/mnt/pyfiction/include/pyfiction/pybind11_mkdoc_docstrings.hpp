@@ -6031,7 +6031,7 @@ of different lengths are found.
 Parameter ``type``:
     The type of the cell to filter by.
 
-Parameter ``filtered_out_type``:
+Parameter ``filtered_out_bdl_pair``:
     The type of cell that is automatically filtered out.
 
 Returns:
