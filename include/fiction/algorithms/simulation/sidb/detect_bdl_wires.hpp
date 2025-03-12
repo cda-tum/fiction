@@ -637,22 +637,19 @@ class detect_bdl_wires_impl
                     }
                 }
 
+                filtered_wires.push_back(wire);
+
+                std::size_t current_wire_length = wire.pairs.size();
+
+                // Store the length of the first wire
+                if (!wire_length_of_the_first_wire)
+                {
+                    wire_length_of_the_first_wire = current_wire_length;
+                }
                 else
                 {
-                    filtered_wires.push_back(wire);
-
-                    std::size_t current_wire_length = wire.pairs.size();
-
-                    // Store the length of the first wire
-                    if (!wire_length_of_the_first_wire)
-                    {
-                        wire_length_of_the_first_wire = current_wire_length;
-                    }
-                    else
-                    {
-                        assert(*wire_length_of_the_first_wire == current_wire_length &&
-                               "input or output wires have different lengths");
-                    }
+                    assert(*wire_length_of_the_first_wire == current_wire_length &&
+                           "input or output wires have different lengths");
                 }
             }
         }
