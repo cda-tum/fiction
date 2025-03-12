@@ -6024,15 +6024,12 @@ Returns:
 
 static const char *__doc_fiction_detail_detect_bdl_wires_impl_filter_wires_by_type =
 R"doc(This function scans through the `bdl_wires` and selects those
-containing a cell of the specified type. It also checks that all
-selected wires have the same length and triggers an assertion if wires
-of different lengths are found.
+containing BDL pair cells of the specified type. It also checks that
+all selected wires have the same length and triggers an assertion if
+wires of different lengths are found.
 
 Parameter ``type``:
-    The type of the cell to filter by.
-
-Parameter ``filtered_out_bdl_pair``:
-    The type of cell that is automatically filtered out.
+    The type of the BDL pair cells to filter by.
 
 Returns:
     A vector of `bdl_wire` objects containing cells of the specified
