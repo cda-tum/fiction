@@ -375,7 +375,7 @@ class hexagonalization_impl
                                 }
                                 else if (plyt.is_or(node))
                                 {
-                                    hex_layout.create_nand(hex_signal_a, hex_signal_b, hex_tile);
+                                    hex_layout.create_or(hex_signal_a, hex_signal_b, hex_tile);
                                 }
                                 else if (plyt.is_nor(node))
                                 {
