@@ -93,6 +93,8 @@ int main()  // NOLINT
 
     // stats for ortho
     fiction::orthogonal_physical_design_stats orthogonal_stats{};
+    // params for hexagonalization
+    fiction::hexagonalization_params hexagonalization_params{};
     // stats for hexagonalization
     fiction::hexagonalization_stats hexagonalization_stats{};
 
@@ -128,8 +130,8 @@ int main()  // NOLINT
         // compute critical path and throughput
         const auto cp_tp = fiction::critical_path_length_and_throughput(gate_level_layout);
 
-        const auto hex_layout =
-            fiction::hexagonalization<hex_lyt, gate_lyt>(gate_level_layout, &hexagonalization_stats);
+        const auto hex_layout = fiction::hexagonalization<hex_lyt, gate_lyt>(gate_level_layout, hexagonalization_params,
+                                                                             &hexagonalization_stats);
 
         // check equivalence
         fiction::equivalence_checking_stats eq_stats{};

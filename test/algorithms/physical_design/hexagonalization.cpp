@@ -27,22 +27,40 @@ template <typename Lyt, typename Ntk>
 void check_mapping_equiv(const Ntk& ntk)
 {
     const auto             layout = orthogonal<Lyt>(ntk, {});
+
     hexagonalization_stats stats{};
-    const auto             hex_layout = hexagonalization<hex_even_row_gate_clk_lyt, Lyt>(layout, &stats);
+    hexagonalization_params params{};
+    const auto              hex_layout = hexagonalization<hex_even_row_gate_clk_lyt, Lyt>(layout, params, &stats);
+
+    params.place_inputs_in_top_row = true;
+    const auto hex_layout_top_pis  = hexagonalization<hex_even_row_gate_clk_lyt, Lyt>(layout, params, &stats);
 
     check_eq(ntk, layout);
     check_eq(ntk, hex_layout);
+    check_eq(ntk, hex_layout_top_pis);
     check_eq(layout, hex_layout);
+    check_eq(layout, hex_layout_top_pis);
+
+    hex_layout_top_pis.foreach_pi([&](const auto& gate) { CHECK(hex_layout_top_pis.get_tile(gate).y == 0); });
 }
 
 template <typename Lyt>
 void check_mapping_equiv_layout(const Lyt& lyt)
 {
     hexagonalization_stats stats{};
-    const auto             hex_layout = hexagonalization<hex_even_row_gate_clk_lyt, Lyt>(lyt, &stats);
+    hexagonalization_params params{};
+    const auto              hex_layout = hexagonalization<hex_even_row_gate_clk_lyt, Lyt>(lyt, params, &stats);
+
+    params.place_inputs_in_top_row = true;
+    const auto hex_layout_top_pis  = hexagonalization<hex_even_row_gate_clk_lyt, Lyt>(lyt, params, &stats);
 
     check_eq(lyt, hex_layout);
+    check_eq(lyt, hex_layout_top_pis);
+
     CHECK(lyt.get_layout_name() == hex_layout.get_layout_name());
+    CHECK(lyt.get_layout_name() == hex_layout_top_pis.get_layout_name());
+
+    hex_layout_top_pis.foreach_pi([&](const auto& gate) { CHECK(hex_layout_top_pis.get_tile(gate).y == 0); });
 }
 
 template <typename Lyt>
