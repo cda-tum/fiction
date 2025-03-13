@@ -69,6 +69,29 @@ namespace detail
 {
 
 /**
+ * This struct encapsulates a routing objective that specifies the source and target coordinates,
+ * along with a flag indicating whether the primary input was the first fanin for the corresponding fanout.
+ * @tparam HexLyt type of the hexagonal layout.
+ */
+template <typename HexLyt>
+struct extended_routing_objective
+{
+    /**
+     * The coordinate of the moved primary input.
+     */
+    tile<HexLyt> source;
+    /**
+     * The coordinate of the fanout node.
+     */
+    tile<HexLyt> target;
+    /**
+     * Flag that is set to true if the primary input was the first fanin; this indicates that the
+     *   fanin signals need to be reordered.
+     */
+    bool update_first_fanin = false;
+};
+
+/**
  * Utility function to transform a Cartesian tile into a hexagonal one.
  *
  * @param cartesian_tile Tile on the Cartesian grid.
@@ -126,6 +149,37 @@ template <typename CartLyt>
         });
 
     return num_inputs_left_to_middle_pi;
+}
+
+/**
+ * This function iterates over all primary inputs in the given cartesian layout and counts those
+ * whose tile is at the northern border. Such inputs are considered to be positioned right of the middle
+ * primary input when the layout is converted to a hexagonal format.
+ *
+ * @tparam CartLyt type of the cartesian layout.
+ * @param lyt the cartesian gate-level layout containing primary inputs.
+ * @return the number of primary inputs that are placed to the right of the middle primary input.
+ */
+template <typename CartLyt>
+[[nodiscard]] uint64_t compute_num_inputs_right_to_middle_pi(const CartLyt& lyt) noexcept
+{
+    // convert the origin tile to hex format to get the middle primary input coordinate
+    uint64_t num_inputs_right_to_middle_pi = 0;
+
+    // iterate over all primary inputs
+    lyt.foreach_pi(
+        [&](const auto& gate)
+        {
+            const auto coord = lyt.get_tile(gate);
+
+            // if the tile is at the western border, it is placed left of the middle PI in the hex layout
+            if (coord.x != 0 && coord.y == 0)
+            {
+                ++num_inputs_right_to_middle_pi;
+            }
+        });
+
+    return num_inputs_right_to_middle_pi;
 }
 
 /**
@@ -279,10 +333,10 @@ class hexagonalization_impl
             // adjust hex layout width if necessary (only if all inputs placed in top row)
             if (ps.place_inputs_in_top_row)
             {
-                // adjust offset based on primary inputs in the first column
-                auto num_inputs_left_to_middle_pi = compute_num_inputs_left_to_middle_pi(plyt);
+                // adjust offset based on primary inputs in the first row
+                const auto num_inputs_right_to_middle_pi = compute_num_inputs_right_to_middle_pi(plyt);
 
-                auto min_width = middle_pi.x - offset + num_inputs_left_to_middle_pi + 1;
+                const auto min_width = middle_pi.x - offset + num_inputs_right_to_middle_pi + 1;
                 if (hex_width < min_width)
                 {
                     hex_layout.resize({min_width, hex_height, hex_depth});
@@ -441,9 +495,9 @@ class hexagonalization_impl
             {
                 // adjust positions and prepare for routing
                 middle_pi.x -= static_cast<decltype(middle_pi.x)>(offset);
-                std::vector<routing_objective<HexLyt>> objectives;
+                std::vector<extended_routing_objective<HexLyt>> objectives;
 
-                // move PIs from left column of the Cartesian layout to top row in the hexagonal layout
+                // process PIs from left column of the Cartesian layout
                 for (const auto& c : left_pis)
                 {
                     tile<HexLyt> fanout;
@@ -452,28 +506,54 @@ class hexagonalization_impl
 
                     // shift left primary input position
                     middle_pi.x -= 1;
-                    hex_layout.move_node(hex_layout.get_node(c), middle_pi);
-                    objectives.push_back({middle_pi, fanout});
 
-                    // collect fan-in signals for the node
+                    extended_routing_objective<HexLyt> obj;
+                    obj.source             = middle_pi;
+                    obj.target             = fanout;
+                    obj.update_first_fanin = false;
+
+                    // collect fan-in signals for the fanout node
                     std::vector<mockturtle::signal<HexLyt>> fins;
                     fins.reserve(2);
+                    bool first            = true;
+                    bool first_fanin_is_c = false;
                     hex_layout.foreach_fanin(hex_layout.get_node(fanout),
                                              [&](const auto& i)
                                              {
                                                  auto fout = static_cast<tile<HexLyt>>(i);
+                                                 if (first)
+                                                 {
+                                                     first = false;
+                                                     if (fout == c)
+                                                     {
+                                                         first_fanin_is_c = true;
+                                                     }
+                                                 }
                                                  if (fout != c)
                                                  {
                                                      fins.push_back(hex_layout.make_signal(hex_layout.get_node(fout)));
                                                  }
                                              });
+
+                    hex_layout.move_node(hex_layout.get_node(c), middle_pi);
+
+                    const auto target_node = hex_layout.get_node(fanout);
+                    if (hex_layout.is_gt(target_node) || hex_layout.is_ge(target_node) ||
+                        hex_layout.is_lt(target_node) || hex_layout.is_le(target_node))
+                    {
+                        std::cout << first_fanin_is_c << std::endl;
+                        obj.update_first_fanin = first_fanin_is_c;
+                    }
+
                     hex_layout.move_node(hex_layout.get_node(fanout), fanout, fins);
+
+                    objectives.push_back(obj);
                 }
 
                 // move back to middle PIs original position
                 middle_pi.x += left_pis.size();
 
-                // move PIs from top row of the Cartesian layout to top row in the hexagonal layout
+                // process PIs from top row of the Cartesian layout (similar to before)
                 for (const auto& c : right_pis)
                 {
                     tile<HexLyt> fanout;
@@ -482,47 +562,88 @@ class hexagonalization_impl
 
                     // shift top primary input position
                     middle_pi.x += 1;
-                    hex_layout.move_node(hex_layout.get_node(c), middle_pi);
-                    objectives.push_back({middle_pi, fanout});
+                    extended_routing_objective<HexLyt> obj;
+                    obj.source             = middle_pi;
+                    obj.target             = fanout;
+                    obj.update_first_fanin = false;
 
-                    // collect fan-in signals for the node
+                    // collect fan-in signals for the fanout node
                     std::vector<mockturtle::signal<HexLyt>> fins;
                     fins.reserve(2);
+                    bool first            = true;
+                    bool first_fanin_is_c = false;
                     hex_layout.foreach_fanin(hex_layout.get_node(fanout),
                                              [&](const auto& i)
                                              {
                                                  auto fout = static_cast<tile<HexLyt>>(i);
+                                                 if (first)
+                                                 {
+                                                     first = false;
+                                                     if (fout == c)
+                                                     {
+                                                         first_fanin_is_c = true;
+                                                     }
+                                                 }
                                                  if (fout != c)
                                                  {
                                                      fins.push_back(hex_layout.make_signal(hex_layout.get_node(fout)));
                                                  }
                                              });
+
+                    hex_layout.move_node(hex_layout.get_node(c), middle_pi);
+
+                    const auto target_node = hex_layout.get_node(fanout);
+                    if (hex_layout.is_gt(target_node) || hex_layout.is_ge(target_node) ||
+                        hex_layout.is_lt(target_node) || hex_layout.is_le(target_node))
+                    {
+                        std::cout << first_fanin_is_c << std::endl;
+                        obj.update_first_fanin = first_fanin_is_c;
+                    }
+
                     hex_layout.move_node(hex_layout.get_node(fanout), fanout, fins);
+
+                    objectives.push_back(obj);
                 }
 
                 // perform routing using A*
                 auto layout_obstruct = obstruction_layout<HexLyt>(hex_layout);
-                using path           = layout_coordinate_path<decltype(layout_obstruct)>;
-                const a_star_params params_astar{true};
+                using path                    = layout_coordinate_path<decltype(layout_obstruct)>;
+                const auto          crossings = (hex_depth != 0);
+                const a_star_params params_astar{crossings};
                 using dist = manhattan_distance_functor<decltype(layout_obstruct), uint64_t>;
                 using cost = unit_cost_functor<decltype(layout_obstruct), uint8_t>;
 
                 // for each routing objective, find a path and route it
-                for (const auto& c : objectives)
+                for (const auto& obj : objectives)
                 {
                     const auto new_path =
-                        a_star<path>(layout_obstruct, {c.source, c.target}, dist(), cost(), params_astar);
+                        a_star<path>(layout_obstruct, {obj.source, obj.target}, dist(), cost(), params_astar);
                     if (!new_path.empty())
                     {
                         route_path(hex_layout, new_path);
+                        for (const auto& t : new_path)
+                        {
+                            layout_obstruct.obstruct_coordinate(t);
+                        }
+                        // if the flag is set, re-collect and update fanins
+                        if (obj.update_first_fanin)
+                        {
+                            std::vector<mockturtle::signal<HexLyt>> fins;
+                            fins.reserve(2);
+                            hex_layout.foreach_fanin(hex_layout.get_node(obj.target),
+                                                     [&](const auto& i)
+                                                     {
+                                                         auto fout = static_cast<tile<HexLyt>>(i);
+                                                         fins.push_back(
+                                                             hex_layout.make_signal(hex_layout.get_node(fout)));
+                                                     });
+                            std::reverse(fins.begin(), fins.end());
+                            hex_layout.move_node(hex_layout.get_node(obj.target), obj.target, fins);
+                        }
                     }
                     else
                     {
                         throw std::runtime_error("Moving PIs to top border failed.");
-                    }
-                    for (const auto& t : new_path)
-                    {
-                        layout_obstruct.obstruct_coordinate(t);
                     }
                 }
             }
