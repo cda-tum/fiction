@@ -5483,6 +5483,22 @@ Parameter ``b``:
 Returns:
     `true` iff `a < b` based on the aforementioned rule.)doc";
 
+static const char *__doc_fiction_detail_compute_num_inputs_left_to_middle_pi =
+R"doc(This function iterates over all primary inputs in the given cartesian
+layout and counts those whose tile is at the western border. Such
+inputs are considered to be positioned left of the middle primary
+input when the layout is converted to a hexagonal format.
+
+Template parameter ``CartLyt``:
+    type of the cartesian layout.
+
+Parameter ``lyt``:
+    the cartesian gate-level layout containing primary inputs.
+
+Returns:
+    the number of primary inputs that are placed to the left of the
+    middle primary input.)doc";
+
 static const char *__doc_fiction_detail_connect_and_place = R"doc()doc";
 
 static const char *__doc_fiction_detail_connect_and_place_2 = R"doc()doc";
@@ -7368,6 +7384,9 @@ Parameter ``cartesian_layout_width``:
 Parameter ``cartesian_layout_height``:
     Height of the Cartesian layout.
 
+Parameter ``adjust_for_inputs_in_top_row``:
+    Adjust offset based on PIs relocated to the top row.
+
 Returns:
     offset.)doc";
 
@@ -8203,6 +8222,18 @@ Parameter ``network``:
 Returns:
     The network with virtual primary inputs removed, or the original
     network if unsupported.)doc";
+
+static const char *__doc_fiction_detail_hexagonalization_impl = R"doc()doc";
+
+static const char *__doc_fiction_detail_hexagonalization_impl_hexagonalization_impl = R"doc()doc";
+
+static const char *__doc_fiction_detail_hexagonalization_impl_plyt = R"doc(The 2DDWave-clocked layout to hexagonalize.)doc";
+
+static const char *__doc_fiction_detail_hexagonalization_impl_ps = R"doc(Hexagonalization parameters.)doc";
+
+static const char *__doc_fiction_detail_hexagonalization_impl_pst = R"doc(Hexagonalization statistics.)doc";
+
+static const char *__doc_fiction_detail_hexagonalization_impl_run = R"doc()doc";
 
 static const char *__doc_fiction_detail_is_balanced_impl = R"doc()doc";
 
@@ -15217,8 +15248,18 @@ Template parameter ``CartLyt``:
 Parameter ``lyt``:
     2DDWave-clocked Cartesian gate-level layout to hexagonalize.
 
+Parameter ``params``:
+    Parameters.
+
+Parameter ``stats``:
+    Statistics.
+
 Returns:
     Hexagonal representation of the Cartesian layout.)doc";
+
+static const char *__doc_fiction_hexagonalization_params = R"doc(Parameters for the hexagonalization algorithm.)doc";
+
+static const char *__doc_fiction_hexagonalization_params_place_inputs_in_top_row = R"doc(Flag that decides if primary inputs should be placed in the top row.)doc";
 
 static const char *__doc_fiction_hexagonalization_stats = R"doc(This struct stores statistics about the hexagonalization process.)doc";
 
