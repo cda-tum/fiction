@@ -606,7 +606,7 @@ class hexagonalization_impl
                 }
 
                 // perform routing using A*
-                auto layout_obstruct = obstruction_layout<HexLyt>(hex_layout);
+                auto layout_obstruct          = obstruction_layout<HexLyt>(hex_layout);
                 using path                    = layout_coordinate_path<decltype(layout_obstruct)>;
                 const auto          crossings = (hex_depth != 0);
                 const a_star_params params_astar{crossings};
