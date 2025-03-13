@@ -23,7 +23,7 @@ class TestHexagonalization(unittest.TestCase):
         self.assertEqual(equivalence_checking(network, hex_layout), eq_type.STRONG)
         self.assertEqual(equivalence_checking(cart_layout, hex_layout), eq_type.STRONG)
 
-    def test_hexagonalization_default_with_parameters(self):
+    def test_hexagonalization_with_parameters(self):
         network = read_technology_network(dir_path + "/../../resources/mux21.v")
         cart_layout = orthogonal(network)
         self.assertEqual(equivalence_checking(network, cart_layout), eq_type.STRONG)
@@ -32,7 +32,7 @@ class TestHexagonalization(unittest.TestCase):
         self.assertEqual(equivalence_checking(network, hex_layout), eq_type.STRONG)
         self.assertEqual(equivalence_checking(cart_layout, hex_layout), eq_type.STRONG)
 
-    def test_hexagonalization_default_with_stats(self):
+    def test_hexagonalization_with_stats(self):
         network = read_technology_network(dir_path + "/../../resources/mux21.v")
         cart_layout = orthogonal(network)
         self.assertEqual(equivalence_checking(network, cart_layout), eq_type.STRONG)
@@ -42,7 +42,7 @@ class TestHexagonalization(unittest.TestCase):
         self.assertEqual(equivalence_checking(cart_layout, hex_layout), eq_type.STRONG)
         self.assertGreater(stats.time_total.total_seconds(), 0)
 
-    def test_hexagonalization_default_with_stats_and_parameters(self):
+    def test_hexagonalization_with_stats_and_parameters(self):
         network = read_technology_network(dir_path + "/../../resources/mux21.v")
         cart_layout = orthogonal(network)
         self.assertEqual(equivalence_checking(network, cart_layout), eq_type.STRONG)
