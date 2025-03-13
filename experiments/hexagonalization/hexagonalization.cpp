@@ -94,7 +94,7 @@ int main()  // NOLINT
     // stats for ortho
     fiction::orthogonal_physical_design_stats orthogonal_stats{};
     // params for hexagonalization
-    fiction::hexagonalization_params hexagonalization_params{};
+    const fiction::hexagonalization_params hexagonalization_params{};
     // stats for hexagonalization
     fiction::hexagonalization_stats hexagonalization_stats{};
 

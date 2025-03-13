@@ -24,9 +24,11 @@
 #include <mockturtle/views/topo_view.hpp>
 
 #include <algorithm>
+#include <cassert>
 #include <cmath>
 #include <cstdint>
 #include <iostream>
+#include <stdexcept>
 #include <vector>
 
 namespace fiction
@@ -309,14 +311,18 @@ class hexagonalization_impl
 
                             // skip processing if tile is empty
                             if (plyt.is_empty_tile(old_tile))
+                            {
                                 continue;
+                            }
 
                             // retrieve node associated with the current tile
                             const auto node = plyt.get_node(old_tile);
 
                             // skip if node is a primary input
                             if (plyt.is_pi(node))
+                            {
                                 continue;
+                            }
 
                             // get incoming data flow signals for the tile
                             const auto signals = plyt.incoming_data_flow(old_tile);
@@ -336,9 +342,13 @@ class hexagonalization_impl
 
                                 // create appropriate gate in hex layout based on node type
                                 if (!plyt.is_po(node) && plyt.is_wire(node))
+                                {
                                     hex_layout.create_buf(hex_signal, hex_tile);
+                                }
                                 else if (plyt.is_inv(node))
+                                {
                                     hex_layout.create_not(hex_signal, hex_tile);
+                                }
                             }
                             else if (signals.size() == 2)
                             {
@@ -356,17 +366,45 @@ class hexagonalization_impl
 
                                 // create the corresponding gate based on the node's function
                                 if (plyt.is_and(node))
+                                {
                                     hex_layout.create_and(hex_signal_a, hex_signal_b, hex_tile);
+                                }
                                 else if (plyt.is_nand(node))
+                                {
                                     hex_layout.create_nand(hex_signal_a, hex_signal_b, hex_tile);
+                                }
                                 else if (plyt.is_or(node))
-                                    hex_layout.create_or(hex_signal_a, hex_signal_b, hex_tile);
+                                {
+                                    hex_layout.create_nand(hex_signal_a, hex_signal_b, hex_tile);
+                                }
                                 else if (plyt.is_nor(node))
+                                {
                                     hex_layout.create_nor(hex_signal_a, hex_signal_b, hex_tile);
+                                }
                                 else if (plyt.is_xor(node))
+                                {
                                     hex_layout.create_xor(hex_signal_a, hex_signal_b, hex_tile);
+                                }
                                 else if (plyt.is_xnor(node))
+                                {
                                     hex_layout.create_xnor(hex_signal_a, hex_signal_b, hex_tile);
+                                }
+                                else if (plyt.is_lt(node))
+                                {
+                                    hex_layout.create_lt(hex_signal_a, hex_signal_b, hex_tile);
+                                }
+                                else if (plyt.is_le(node))
+                                {
+                                    hex_layout.create_le(hex_signal_a, hex_signal_b, hex_tile);
+                                }
+                                else if (plyt.is_gt(node))
+                                {
+                                    hex_layout.create_gt(hex_signal_a, hex_signal_b, hex_tile);
+                                }
+                                else if (plyt.is_ge(node))
+                                {
+                                    hex_layout.create_ge(hex_signal_a, hex_signal_b, hex_tile);
+                                }
                                 else if (plyt.is_function(node))
                                 {
                                     const auto node_fun = plyt.node_function(node);
@@ -425,7 +463,9 @@ class hexagonalization_impl
                                              {
                                                  auto fout = static_cast<tile<HexLyt>>(i);
                                                  if (fout != c)
+                                                 {
                                                      fins.push_back(hex_layout.make_signal(hex_layout.get_node(fout)));
+                                                 }
                                              });
                     hex_layout.move_node(hex_layout.get_node(fanout), fanout, fins);
                 }
@@ -453,7 +493,9 @@ class hexagonalization_impl
                                              {
                                                  auto fout = static_cast<tile<HexLyt>>(i);
                                                  if (fout != c)
+                                                 {
                                                      fins.push_back(hex_layout.make_signal(hex_layout.get_node(fout)));
+                                                 }
                                              });
                     hex_layout.move_node(hex_layout.get_node(fanout), fanout, fins);
                 }
@@ -495,7 +537,7 @@ class hexagonalization_impl
         }
 
         // update statistics if provided
-        if (pst)
+        if (pst != nullptr)
         {
             *pst = stats;
         }

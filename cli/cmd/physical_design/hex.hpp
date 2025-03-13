@@ -12,6 +12,8 @@
 
 #include <alice/alice.hpp>
 
+#include <optional>
+
 namespace alice
 {
 /**
