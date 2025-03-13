@@ -1,8 +1,15 @@
 import os
 import unittest
 
-from mnt.pyfiction import (eq_type, equivalence_checking, hexagonalization, hexagonalization_params,
-                           hexagonalization_stats, orthogonal, read_technology_network)
+from mnt.pyfiction import (
+    eq_type,
+    equivalence_checking,
+    hexagonalization,
+    hexagonalization_params,
+    hexagonalization_stats,
+    orthogonal,
+    read_technology_network,
+)
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
