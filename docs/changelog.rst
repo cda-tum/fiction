@@ -8,6 +8,11 @@ The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`
 v0.6.10 - 2025-02-21
 --------------------
 
+Added
+#####
+- Algorithms:
+    - Added parameter to move PIs to the first row after ``Hexagonalization``.
+
 Fixed
 #####
 - Fixed the Python bindings for the critical temperature domain simulation
