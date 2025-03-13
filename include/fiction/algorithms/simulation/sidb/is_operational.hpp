@@ -973,7 +973,12 @@ class is_operational_impl
 
                 // perform QuickSim heuristic simulation
                 const quicksim_params qs_params{parameters.simulation_parameters, 500, 0.6};
-                return quicksim(*bdl_iterator, qs_params);
+
+                if (const auto qs_result = quicksim(*bdl_iterator, qs_params); qs_result.has_value())
+                {
+                    return qs_result.value();
+                }
+                return sidb_simulation_result<Lyt>{};  // return empty result if no valid charge distribution was found
             }
         }
 

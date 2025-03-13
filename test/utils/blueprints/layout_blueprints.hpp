@@ -360,7 +360,7 @@ GateLyt unbalanced_and_layout() noexcept
 template <typename GateLyt>
 GateLyt non_structural_all_function_gate_layout() noexcept
 {
-    GateLyt layout{typename GateLyt::aspect_ratio{2, 4, 0}, fiction::open_clocking<GateLyt>()};
+    GateLyt layout{typename GateLyt::aspect_ratio{3, 5, 0}, fiction::open_clocking<GateLyt>()};
 
     layout.assign_clock_number({0, 0}, static_cast<typename GateLyt::clock_number_t>(0));
     layout.assign_clock_number({1, 0}, static_cast<typename GateLyt::clock_number_t>(0));
@@ -395,6 +395,11 @@ GateLyt non_structural_all_function_gate_layout() noexcept
 
     layout.create_nand(x1, x2, {0, 4});
     layout.create_nor(x1, x2, {1, 4});
+
+    layout.create_lt(x1, x2, {0, 5});
+    layout.create_le(x1, x2, {1, 5});
+    layout.create_gt(x1, x2, {2, 5});
+    layout.create_ge(x1, x2, {3, 5});
 
     return layout;
 }
