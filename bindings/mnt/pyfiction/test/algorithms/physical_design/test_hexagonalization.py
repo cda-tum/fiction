@@ -57,6 +57,7 @@ class TestHexagonalization(unittest.TestCase):
             self.assertEqual(pi.y, 0)
 
         params.planar_routing_for_moved_inputs = True
+        stats = hexagonalization_stats()
         hex_layout = hexagonalization(cart_layout, params, stats)
         self.assertEqual(equivalence_checking(cart_layout, hex_layout), eq_type.STRONG)
         self.assertGreater(stats.time_total.total_seconds(), 0)
