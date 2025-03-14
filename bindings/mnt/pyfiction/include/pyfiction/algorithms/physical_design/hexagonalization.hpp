@@ -28,7 +28,7 @@ inline void hexagonalization(pybind11::module& m)
                        DOC(fiction_hexagonalization_params_place_inputs_in_top_row))
         .def_readwrite("planar_routing_for_moved_inputs",
                        &fiction::hexagonalization_params::planar_routing_for_moved_inputs,
-                   DOC(fiction_hexagonalization_params_planar_routing_for_moved_inputs));
+                       DOC(fiction_hexagonalization_params_planar_routing_for_moved_inputs));
 
     py::class_<fiction::hexagonalization_stats>(m, "hexagonalization_stats", DOC(fiction_hexagonalization_stats))
         .def(py::init<>())
