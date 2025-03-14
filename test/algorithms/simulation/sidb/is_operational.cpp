@@ -304,7 +304,7 @@ TEST_CASE("SiQAD AND gate", "[is-operational]")
             CHECK(is_operational(lyt, std::vector<tt>{create_and_tt()}, is_operational_params{params}).first ==
                   operational_status::NON_OPERATIONAL);
             CHECK(operational_input_patterns(lyt, std::vector<tt>{create_and_tt()}, is_operational_params{params})
-                      .size() == 0);
+                      .empty());
 
             params.epsilon_r = 3.5;
             params.lambda_tf = 5.9;
@@ -321,7 +321,7 @@ TEST_CASE("SiQAD AND gate", "[is-operational]")
             CHECK(is_operational(lyt, std::vector<tt>{create_and_tt()}, is_operational_params{params}).first ==
                   operational_status::NON_OPERATIONAL);
             CHECK(operational_input_patterns(lyt, std::vector<tt>{create_and_tt()}, is_operational_params{params})
-                      .empty() == 0);
+                      .empty());
 
             params.epsilon_r = 3.5;
             params.lambda_tf = 5.9;
