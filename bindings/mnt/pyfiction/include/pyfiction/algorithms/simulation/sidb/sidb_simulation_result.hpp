@@ -100,7 +100,11 @@ void sidb_simulation_result(pybind11::module& m, const std::string& lattice = ""
         .def_property_readonly(
             "additional_simulation_parameters", [](const fiction::sidb_simulation_result<Lyt>& self)
             { return convert_map_to_py(self.additional_simulation_parameters); },
-            DOC(fiction_sidb_simulation_result_additional_simulation_parameters));
+            DOC(fiction_sidb_simulation_result_additional_simulation_parameters))
+        .def("groundstates", &fiction::sidb_simulation_result<Lyt>::groundstates,
+             DOC(fiction_sidb_simulation_result_groundstates))
+
+        ;
 }
 
 }  // namespace detail

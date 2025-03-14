@@ -3,12 +3,14 @@ import unittest
 
 from mnt.pyfiction import (
     create_and_tt,
+    create_id_tt,
     create_xor_tt,
     critical_temperature_domain,
     critical_temperature_domain_contour_tracing,
     critical_temperature_domain_flood_fill,
     critical_temperature_domain_grid_search,
     critical_temperature_domain_random_sampling,
+    input_bdl_configuration,
     operational_domain,
     operational_domain_contour_tracing,
     operational_domain_flood_fill,
@@ -21,7 +23,9 @@ from mnt.pyfiction import (
     parameter_point,
     read_sqd_layout_100,
     read_sqd_layout_111,
+    sidb_100_lattice,
     sidb_simulation_engine,
+    sidb_technology,
     sweep_parameter,
 )
 
@@ -169,6 +173,42 @@ class TestOperationalDomain(unittest.TestCase):
         # Modify dimensions and verify
         self.assertEqual(op_domain.get_dimension(0), sweep_parameter.EPSILON_R)
         self.assertEqual(op_domain.get_dimension(1), sweep_parameter.LAMBDA_TF)
+
+    def test_operational_domain_two_bdl_pair_wire(self):
+        bdl_wire = sidb_100_lattice()
+
+        bdl_wire.assign_cell_type((0, 0), sidb_technology.cell_type.INPUT)
+        bdl_wire.assign_cell_type((2, 0), sidb_technology.cell_type.INPUT)
+
+        bdl_wire.assign_cell_type((6, 0), sidb_technology.cell_type.NORMAL)
+        bdl_wire.assign_cell_type((8, 0), sidb_technology.cell_type.NORMAL)
+
+        bdl_wire.assign_cell_type((12, 0), sidb_technology.cell_type.OUTPUT)
+        bdl_wire.assign_cell_type((14, 0), sidb_technology.cell_type.OUTPUT)
+
+        bdl_wire.assign_cell_type((18, 0), sidb_technology.cell_type.NORMAL)
+
+        params = operational_domain_params()
+        params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
+        params.operational_params.simulation_parameters.base = 2
+        params.operational_params.input_bdl_iterator_params.input_bdl_config = (
+            input_bdl_configuration.PERTURBER_DISTANCE_ENCODED
+        )
+
+        params.sweep_dimensions = [
+            operational_domain_value_range(sweep_parameter.EPSILON_R, 1.0, 10.0, 0.1),
+            operational_domain_value_range(sweep_parameter.LAMBDA_TF, 1.0, 10.0, 0.1),
+        ]
+
+        stats_grid = operational_domain_stats()
+        op_domain = operational_domain_grid_search(bdl_wire, [create_id_tt()], params, stats_grid)
+
+        self.assertEqual(op_domain.size(), 8281)
+
+        self.assertEqual(stats_grid.num_simulator_invocations, 10034)
+        self.assertEqual(stats_grid.num_evaluated_parameter_combinations, 8281)
+        self.assertEqual(stats_grid.num_operational_parameter_combinations, 0)
+        self.assertEqual(stats_grid.num_non_operational_parameter_combinations, 8281)
 
 
 if __name__ == "__main__":

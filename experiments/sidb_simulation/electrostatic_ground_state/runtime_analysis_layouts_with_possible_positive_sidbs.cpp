@@ -5,10 +5,10 @@
 #include "fiction_experiments.hpp"
 
 #include <fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp>
-#include <fiction/algorithms/simulation/sidb/groundstate_from_simulation_result.hpp>
 #include <fiction/algorithms/simulation/sidb/quickexact.hpp>
 #include <fiction/algorithms/simulation/sidb/random_sidb_layout_generator.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
+#include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
 #include <fiction/types.hpp>
 
 #include <mockturtle/utils/stopwatch.hpp>
@@ -72,7 +72,7 @@ int main()  // NOLINT
 
             const auto quickexact_results_layout = quickexact(layout, qe_params);
 
-            const auto gs = groundstate_from_simulation_result(exhaustive_results_layout);
+            const auto gs = exhaustive_results_layout.groundstates();
 
             // determine the number of positive SiDBs in the ground state
             number_of_positive_sidbs_of_gs_per_layout.push_back(gs.at(0).num_positive_sidbs());
