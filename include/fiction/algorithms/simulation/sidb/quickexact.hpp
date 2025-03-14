@@ -197,7 +197,7 @@ class quickexact_impl
     /**
      * Indices of all SiDBs that are pre-assigned to be negatively charged in a physically valid layout.
      */
-    std::vector<int64_t> preassigned_negative_sidb_indices{};
+    std::vector<uint64_t> preassigned_negative_sidb_indices{};
     /**
      * All SiDBs that are pre-assigned to be negatively charged in a physically valid layout.
      */
@@ -495,12 +495,12 @@ class quickexact_impl
     {
         for (const auto& index : preassigned_negative_sidb_indices)
         {
-            const auto cell = charge_lyt.index_to_cell(static_cast<uint64_t>(index));
+            const auto cell = charge_lyt.index_to_cell(index);
             preassigned_negative_sidbs.push_back(cell);
             layout.assign_cell_type(cell, Lyt::cell_type::EMPTY);
         }
 
-        // All pre-assigned negatively-charged SiDBs are erased from the
+        // all pre-assigned negatively charged SiDBs are erased from the
         // all_sidbs_in_lyt_without_negative_preassigned_ones vector.
         all_sidbs_in_lyt_without_negative_preassigned_ones.erase(
             std::remove_if(all_sidbs_in_lyt_without_negative_preassigned_ones.begin(),

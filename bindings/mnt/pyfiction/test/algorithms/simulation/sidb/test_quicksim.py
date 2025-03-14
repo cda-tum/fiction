@@ -80,6 +80,14 @@ class TestQuicksim(unittest.TestCase):
         self.assertEqual(groundstate[0].get_charge_state((2, 0)), sidb_charge_state.NEUTRAL)
         self.assertEqual(groundstate[0].get_charge_state((3, 0)), sidb_charge_state.NEGATIVE)
 
+        # test timeout
+        params.timeout = 1
+        params.iteration_steps = 10000
+        params.number_threads = 1
+
+        # should return None since no solution can be found in 1 millisecond.
+        self.assertIsNone(quicksim(layout, params))
+
 
 if __name__ == "__main__":
     unittest.main()

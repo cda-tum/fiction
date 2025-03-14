@@ -837,7 +837,15 @@ class operational_domain_impl
                     {
                         // perform a heuristic simulation
                         const quicksim_params qs_params{simulation_parameters, 500, 0.6};
-                        sim_results = quicksim(lyt, qs_params);
+
+                        if (const auto result = quicksim(lyt, qs_params); result.has_value())
+                        {
+                            sim_results = result.value();
+                        }
+                        else
+                        {
+                            return;
+                        }
                     }
                     else
                     {
@@ -1705,7 +1713,7 @@ template <typename Lyt, typename TT>
  * @param samples Number of samples to perform.
  * @param params Operational domain computation parameters.
  * @param stats Operational domain computation statistics.
- * @return The (partial) operational domain of the layout.
+ * @return The operational domain of the layout.
  * @throws std::invalid_argument if the given sweep parameters are invalid.
  */
 template <typename Lyt, typename TT>
@@ -1762,7 +1770,7 @@ template <typename Lyt, typename TT>
  * @param samples Number of samples to perform.
  * @param params Operational domain computation parameters.
  * @param stats Operational domain computation statistics.
- * @return The (partial) operational domain of the layout.
+ * @return The operational domain of the layout.
  * @throws std::invalid_argument if the given sweep parameters are invalid.
  */
 template <typename Lyt, typename TT>
@@ -1826,7 +1834,7 @@ operational_domain_flood_fill(const Lyt& lyt, const std::vector<TT>& spec, const
  * @param samples Number of samples to perform.
  * @param params Operational domain computation parameters.
  * @param stats Operational domain computation statistics.
- * @return The (partial) operational domain of the layout.
+ * @return The operational domain of the layout.
  * @throws std::invalid_argument if the given sweep parameters are invalid.
  */
 template <typename Lyt, typename TT>
@@ -1877,7 +1885,7 @@ template <typename Lyt, typename TT>
  * function.
  * @param params Operational domain computation parameters.
  * @param stats Operational domain computation statistics.
- * @return The operational domain of the layout.
+ * @return The critical temperature domain of the layout.
  * @throws std::invalid_argument if the given sweep parameters are invalid.
  */
 template <typename Lyt, typename TT>
@@ -1923,11 +1931,11 @@ critical_temperature_domain_grid_search(const Lyt& lyt, const std::vector<TT>& s
  * @param samples Number of samples to perform.
  * @param params Operational domain computation parameters.
  * @param stats Operational domain computation statistics.
- * @return The (partial) operational domain of the layout.
+ * @return The critical temperature domain of the layout.
  * @throws std::invalid_argument if the given sweep parameters are invalid.
  */
 template <typename Lyt, typename TT>
-[[nodiscard]] operational_domain
+[[nodiscard]] critical_temperature_domain
 critical_temperature_domain_random_sampling(const Lyt& lyt, const std::vector<TT>& spec, const std::size_t samples,
                                             const operational_domain_params& params = {},
                                             operational_domain_stats*        stats  = nullptr)
@@ -1939,8 +1947,8 @@ critical_temperature_domain_random_sampling(const Lyt& lyt, const std::vector<TT
     // this may throw an `std::invalid_argument` exception
     detail::validate_sweep_parameters(params);
 
-    operational_domain_stats                                     st{};
-    detail::operational_domain_impl<Lyt, TT, operational_domain> p{lyt, spec, params, st};
+    operational_domain_stats                                              st{};
+    detail::operational_domain_impl<Lyt, TT, critical_temperature_domain> p{lyt, spec, params, st};
 
     const auto result = p.random_sampling(samples);
 
@@ -1975,7 +1983,7 @@ critical_temperature_domain_random_sampling(const Lyt& lyt, const std::vector<TT
  * @param samples Number of samples to perform.
  * @param params Operational domain computation parameters.
  * @param stats Operational domain computation statistics.
- * @return The (partial) operational domain of the layout.
+ * @return The critical temperature domain of the layout.
  * @throws std::invalid_argument if the given sweep parameters are invalid.
  */
 template <typename Lyt, typename TT>
@@ -2035,7 +2043,7 @@ critical_temperature_domain_flood_fill(const Lyt& lyt, const std::vector<TT>& sp
  * @param samples Number of samples to perform.
  * @param params Operational domain computation parameters.
  * @param stats Operational domain computation statistics.
- * @return The (partial) operational domain of the layout.
+ * @return The critical temperature domain of the layout.
  * @throws std::invalid_argument if the given sweep parameters are invalid.
  */
 template <typename Lyt, typename TT>
