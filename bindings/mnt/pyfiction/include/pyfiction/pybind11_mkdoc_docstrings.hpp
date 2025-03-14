@@ -8797,6 +8797,8 @@ static const char *__doc_fiction_detail_non_operationality_reason_LOGIC_MISMATCH
 
 static const char *__doc_fiction_detail_non_operationality_reason_NONE = R"doc(No reason for non-operationality could be determined.)doc";
 
+static const char *__doc_fiction_detail_non_operationality_reason_POTENTIAL_POSITIVE_CHARGES = R"doc(Positive charges may occur and the simulation base is 2.)doc";
+
 static const char *__doc_fiction_detail_on_the_fly_circuit_design_impl = R"doc()doc";
 
 static const char *__doc_fiction_detail_on_the_fly_circuit_design_impl_design_circuit_on_defective_surface = R"doc()doc";
@@ -16294,29 +16296,6 @@ Parameter ``n``:
 
 Returns:
     Number of constant fanins to `n` in `ntk`.)doc";
-
-static const char *__doc_fiction_number_of_operational_input_combinations =
-R"doc(This function calculates the count of input combinations for which the
-SiDB-based logic, represented by the provided layout (`lyt`) and truth
-table specifications (`spec`), produces the correct output.
-
-Template parameter ``Lyt``:
-    Type of the cell-level layout.
-
-Template parameter ``TT``:
-    Type of the truth table.
-
-Parameter ``lyt``:
-    The SiDB layout.
-
-Parameter ``spec``:
-    Vector of truth table specifications.
-
-Parameter ``params``:
-    Parameters to simualte if a input combination is operational.
-
-Returns:
-    The count of operational input combinations.)doc";
 
 static const char *__doc_fiction_obstruction_layout = R"doc()doc";
 
