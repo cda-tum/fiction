@@ -15292,7 +15292,24 @@ Returns:
 
 static const char *__doc_fiction_hexagonalization_params = R"doc(Parameters for the hexagonalization algorithm.)doc";
 
-static const char *__doc_fiction_hexagonalization_params_place_inputs_in_top_row = R"doc(Flag that decides if primary inputs should be placed in the top row.)doc";
+static const char *__doc_fiction_hexagonalization_params_place_inputs_in_top_row =
+R"doc(If set to true, all primary inputs will be relocated to the top row of
+the hexagonal layout.)doc";
+
+static const char *__doc_fiction_hexagonalization_params_planar_routing_for_moved_inputs =
+R"doc(If true, the routing of primary inputs that have been moved to the top
+row will be constrained to be planar (i.e., without crossings).)doc";
+
+static const char *__doc_fiction_hexagonalization_route_inputs_error =
+R"doc(Exception thrown when an error occurs during moving inputs to top
+border and rerouting.)doc";
+
+static const char *__doc_fiction_hexagonalization_route_inputs_error_hexagonalization_route_inputs_error =
+R"doc(Constructs a `hexagonalization_route_inputs_error` object with the
+given error message.
+
+Parameter ``msg``:
+    The error message describing the error.)doc";
 
 static const char *__doc_fiction_hexagonalization_stats = R"doc(This struct stores statistics about the hexagonalization process.)doc";
 
