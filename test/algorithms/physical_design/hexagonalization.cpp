@@ -69,9 +69,9 @@ void check_mapping_equiv_layout_with_planar_rerouting(const Lyt& lyt)
     hexagonalization_stats  stats{};
     hexagonalization_params params{};
 
-    params.place_inputs_in_top_row = true;
+    params.place_inputs_in_top_row         = true;
     params.planar_routing_for_moved_inputs = true;
-    const auto hex_layout  = hexagonalization<hex_even_row_gate_clk_lyt, Lyt>(lyt, params, &stats);
+    const auto hex_layout                  = hexagonalization<hex_even_row_gate_clk_lyt, Lyt>(lyt, params, &stats);
 
     check_eq(lyt, hex_layout);
 

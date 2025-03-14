@@ -46,7 +46,8 @@ class hexagonalization_route_inputs_error : public std::runtime_error
      *
      * @param msg The error message describing the error.
      */
-    explicit hexagonalization_route_inputs_error(const std::string_view& msg) noexcept : std::runtime_error(msg.data()) {}
+    explicit hexagonalization_route_inputs_error(const std::string_view& msg) noexcept : std::runtime_error(msg.data())
+    {}
 };
 
 /**
@@ -662,7 +663,8 @@ class hexagonalization_impl
                     else
                     {
                         throw hexagonalization_route_inputs_error(
-                            fmt::format("Rerouting PIs that have been moved to the top border failed with the following parameters: "
+                            fmt::format("Rerouting PIs that have been moved to the top border failed with the "
+                                        "following parameters: "
                                         "place_inputs_in_top_row={}, planar_routing_for_moved_inputs={}",
                                         ps.place_inputs_in_top_row, ps.planar_routing_for_moved_inputs));
                     }
