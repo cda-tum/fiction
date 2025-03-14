@@ -19,6 +19,7 @@
 #include "fiction/utils/placement_utils.hpp"
 #include "fiction/utils/routing_utils.hpp"
 
+#include <fmt/format.h>
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 #include <mockturtle/views/topo_view.hpp>
@@ -35,14 +36,33 @@ namespace fiction
 {
 
 /**
+ * Exception thrown when an error occurs during moving inputs to top border and rerouting.
+ */
+class hexagonalization_route_inputs_error : public std::runtime_error
+{
+  public:
+    /**
+     * Constructs a `hexagonalization_route_inputs_error` object with the given error message.
+     *
+     * @param msg The error message describing the error.
+     */
+    explicit hexagonalization_route_inputs_error(const std::string_view& msg) noexcept : std::runtime_error(msg.data()) {}
+};
+
+/**
  * Parameters for the hexagonalization algorithm.
  */
 struct hexagonalization_params
 {
     /**
-     * Flag that decides if primary inputs should be placed in the top row.
+     * If set to true, all primary inputs will be relocated to the top row of the hexagonal layout.
      */
     bool place_inputs_in_top_row = false;
+    /**
+     * If true, the routing of primary inputs that have been moved to the top row will be constrained
+     *   to be planar (i.e., without crossings).
+     */
+    bool planar_routing_for_moved_inputs = false;
 };
 
 /**
@@ -541,7 +561,6 @@ class hexagonalization_impl
                     if (hex_layout.is_gt(target_node) || hex_layout.is_ge(target_node) ||
                         hex_layout.is_lt(target_node) || hex_layout.is_le(target_node))
                     {
-                        std::cout << first_fanin_is_c << std::endl;
                         obj.update_first_fanin = first_fanin_is_c;
                     }
 
@@ -596,7 +615,6 @@ class hexagonalization_impl
                     if (hex_layout.is_gt(target_node) || hex_layout.is_ge(target_node) ||
                         hex_layout.is_lt(target_node) || hex_layout.is_le(target_node))
                     {
-                        std::cout << first_fanin_is_c << std::endl;
                         obj.update_first_fanin = first_fanin_is_c;
                     }
 
@@ -608,7 +626,7 @@ class hexagonalization_impl
                 // perform routing using A*
                 auto layout_obstruct          = obstruction_layout<HexLyt>(hex_layout);
                 using path                    = layout_coordinate_path<decltype(layout_obstruct)>;
-                const auto          crossings = (hex_depth != 0);
+                const auto          crossings = (hex_depth != 0) && !ps.planar_routing_for_moved_inputs;
                 const a_star_params params_astar{crossings};
                 using dist = manhattan_distance_functor<decltype(layout_obstruct), uint64_t>;
                 using cost = unit_cost_functor<decltype(layout_obstruct), uint8_t>;
@@ -643,7 +661,10 @@ class hexagonalization_impl
                     }
                     else
                     {
-                        throw std::runtime_error("Moving PIs to top border failed.");
+                        throw hexagonalization_route_inputs_error(
+                            fmt::format("Rerouting PIs that have been moved to the top border failed with the following parameters: "
+                                        "place_inputs_in_top_row={}, planar_routing_for_moved_inputs={}",
+                                        ps.place_inputs_in_top_row, ps.planar_routing_for_moved_inputs));
                     }
                 }
             }
@@ -698,7 +719,7 @@ class hexagonalization_impl
  */
 template <typename HexLyt, typename CartLyt>
 [[nodiscard]] HexLyt hexagonalization(const CartLyt& lyt, const hexagonalization_params& params = {},
-                                      hexagonalization_stats* stats = nullptr) noexcept
+                                      hexagonalization_stats* stats = nullptr)
 {
     detail::hexagonalization_impl<HexLyt, CartLyt> impl(lyt, params, stats);
 

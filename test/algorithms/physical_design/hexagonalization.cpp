@@ -64,6 +64,23 @@ void check_mapping_equiv_layout(const Lyt& lyt)
 }
 
 template <typename Lyt>
+void check_mapping_equiv_layout_with_planar_rerouting(const Lyt& lyt)
+{
+    hexagonalization_stats  stats{};
+    hexagonalization_params params{};
+
+    params.place_inputs_in_top_row = true;
+    params.planar_routing_for_moved_inputs = true;
+    const auto hex_layout  = hexagonalization<hex_even_row_gate_clk_lyt, Lyt>(lyt, params, &stats);
+
+    check_eq(lyt, hex_layout);
+
+    CHECK(lyt.get_layout_name() == hex_layout.get_layout_name());
+
+    hex_layout.foreach_pi([&](const auto& gate) { CHECK(hex_layout.get_tile(gate).y == 0); });
+}
+
+template <typename Lyt>
 void check_mapping_equiv_all()
 {
     check_mapping_equiv<Lyt>(blueprints::maj1_network<mockturtle::aig_network>());
@@ -87,6 +104,12 @@ void check_mapping_equiv_all()
     check_mapping_equiv_layout(blueprints::crossing_layout<cart_gate_clk_lyt>());
     check_mapping_equiv_layout(blueprints::tautology_gate_layout<cart_gate_clk_lyt>());
     check_mapping_equiv_layout(blueprints::ge_gt_le_lt_layout<cart_gate_clk_lyt>());
+
+    check_mapping_equiv_layout_with_planar_rerouting(blueprints::straight_wire_gate_layout<cart_gate_clk_lyt>());
+    check_mapping_equiv_layout_with_planar_rerouting(blueprints::or_not_gate_layout<cart_gate_clk_lyt>());
+    check_mapping_equiv_layout_with_planar_rerouting(blueprints::crossing_layout<cart_gate_clk_lyt>());
+    check_mapping_equiv_layout_with_planar_rerouting(blueprints::tautology_gate_layout<cart_gate_clk_lyt>());
+    check_mapping_equiv_layout_with_planar_rerouting(blueprints::ge_gt_le_lt_layout<cart_gate_clk_lyt>());
 }
 
 TEST_CASE("Layout equivalence", "[hexagonalization]")

@@ -600,14 +600,14 @@ GateLyt ge_gt_le_lt_layout() noexcept
 {
     GateLyt layout{{5, 1, 1}, fiction::twoddwave_clocking<GateLyt>()};
 
-    const auto x1 = layout.create_pi("x1", {0, 0});
-    const auto x2 = layout.create_pi("x2", {1, 0});
+    const auto x1 = layout.create_pi("x1", {0, 1});
+    const auto x2 = layout.create_pi("x2", {0, 0});
     const auto x3 = layout.create_pi("x3", {2, 0});
     const auto x4 = layout.create_pi("x4", {3, 0});
     const auto x5 = layout.create_pi("x5", {4, 0});
 
-    const auto w1 = layout.create_buf(x1, {0, 1});
-    const auto ge = layout.create_ge(w1, x2, {1, 1});
+    const auto w1 = layout.create_buf(x2, {1, 0});
+    const auto ge = layout.create_ge(x1, w1, {1, 1});
     const auto gt = layout.create_gt(x3, ge, {2, 1});
     const auto le = layout.create_le(x4, gt, {3, 1});
     const auto lt = layout.create_lt(x5, le, {4, 1});
