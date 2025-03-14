@@ -19,7 +19,7 @@ inline void hexagonalization(pybind11::module& m)
 {
     namespace py = pybind11;
 
-    py::register_exception<fiction::fgl_parsing_error>(m, "hexagonalization_route_inputs_error", PyExc_RuntimeError);
+    py::register_exception<fiction::hexagonalization_route_inputs_error>(m, "hexagonalization_route_inputs_error", PyExc_RuntimeError);
 
     py::class_<fiction::hexagonalization_params>(m, "hexagonalization_params", DOC(fiction_hexagonalization_params))
         .def(py::init<>())
