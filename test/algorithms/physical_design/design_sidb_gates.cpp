@@ -39,7 +39,9 @@ TEST_CASE("Design AND gate with skeleton, where one input wire and the output wi
                               bdl_input_iterator_params{}, is_operational_params::operational_condition::REJECT_KINKS},
         design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::QUICKCELL,
         {{27, 6, 0}, {30, 8, 0}},
-        3};
+        3,
+        design_sidb_gates_params<
+            cell<sidb_100_cell_clk_lyt_siqad>>::termination_condition::ALL_COMBINATIONS_ENUMERATED};
 
     SECTION("QuickCell")
     {
@@ -62,6 +64,8 @@ TEST_CASE("Design AND gate with skeleton, where one input wire and the output wi
     {
         params.design_mode = design_sidb_gates_params<
             cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER;
+        params.termination_cond = design_sidb_gates_params<
+            cell<sidb_100_cell_clk_lyt_siqad>>::termination_condition::ALL_COMBINATIONS_ENUMERATED;
 
         const auto found_gate_layouts = design_sidb_gates(lyt, std::vector<tt>{create_and_tt()}, params);
         REQUIRE(found_gate_layouts.size() == 10);

@@ -89,7 +89,7 @@ struct design_sidb_gates_params
     /**
      * Canvas spanned by the northwest and southeast cell.
      */
-    std::pair<CellType, CellType> canvas{};
+    std::pair<CellType, CellType> canvas = {{24, 17}, {34, 28}};
     /**
      * Number of SiDBs placed in the canvas to create a working gate.
      */
@@ -99,7 +99,7 @@ struct design_sidb_gates_params
      *
      * @note This parameter has no effect unless the gate design is exhaustive.
      */
-    termination_condition termination_cond = termination_condition::ALL_COMBINATIONS_ENUMERATED;
+    termination_condition termination_cond = termination_condition::AFTER_FIRST_SOLUTION;
 };
 
 /**
