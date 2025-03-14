@@ -238,6 +238,11 @@ Hexagonalization (``hex``)
 Transforms a 2DDWave-clocked Cartesian layout into a hexagonal row-clocked layout suitable for SiDBs by
 remapping all gates and wires. For more information, see `the paper <https://ieeexplore.ieee.org/document/10231278>`_.
 
+Possible parameters:
+
+- Place inputs in top row (``-i``) to move PIs to the first row after hexagonalization.
+- Restrict the routing of primary inputs that have been moved to the top row to be planar (``-p``) to avoid the creation of crossings.
+
 Post-Layout Optimization (``optimize``)
 #######################################
 
