@@ -67,7 +67,8 @@ struct sidb_simulation_result
     /**
      * This function computes the ground state of the charge distributions.
      *
-     * @note When degenerate states exist, there are multiple ground states with the same energy.
+     * @note If degenerate states exist in the simulation result, this function will return multiple ground states that
+     * all possess the same system energy.
      *
      * @return A vector of charge distributions with the minimal energy.
      */
@@ -76,12 +77,9 @@ struct sidb_simulation_result
         std::vector<charge_distribution_surface<Lyt>> groundstate_charge_distributions{};
         std::set<uint64_t>                            charge_indices{};
 
-        // in case, the charge indices are not updated.
-        auto charge_configurations_copy = charge_distributions;
-
         // Find all unique charge indices. This is done because simulation results can have multiple identical charge
         // distributions.
-        for (auto& cds : charge_configurations_copy)
+        for (auto& cds : charge_distributions)
         {
             cds.charge_distribution_to_index();
             charge_indices.insert(cds.get_charge_index_and_base().first);
@@ -89,23 +87,22 @@ struct sidb_simulation_result
 
         // Find the minimum energy
         double min_energy = std::numeric_limits<double>::infinity();
-        if (!charge_configurations_copy.empty())
+        if (!charge_distributions.empty())
         {
-
-            min_energy = minimum_energy(charge_configurations_copy.cbegin(), charge_configurations_copy.cend());
+            min_energy = minimum_energy(charge_distributions.cbegin(), charge_distributions.cend());
         }
 
         for (const auto charge_index : charge_indices)
         {
             const auto cds_it =
-                std::find_if(charge_configurations_copy.cbegin(), charge_configurations_copy.cend(),
+                std::find_if(charge_distributions.cbegin(), charge_distributions.cend(),
                              [&](const auto& cds)
                              {
                                  return cds.get_charge_index_and_base().first == charge_index &&
                                         std::abs(cds.get_system_energy() - min_energy) < constants::ERROR_MARGIN;
                              });
 
-            if (cds_it != charge_configurations_copy.cend())
+            if (cds_it != charge_distributions.cend())
             {
                 groundstate_charge_distributions.push_back(*cds_it);
             }
