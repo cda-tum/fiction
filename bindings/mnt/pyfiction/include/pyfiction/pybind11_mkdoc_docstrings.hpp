@@ -20147,8 +20147,9 @@ static const char *__doc_fiction_sidb_simulation_result_charge_distributions = R
 static const char *__doc_fiction_sidb_simulation_result_groundstates =
 R"doc(This function computes the ground state of the charge distributions.
 
-@note When degenerate states exist, there are multiple ground states
-with the same energy.
+@note If degenerate states exist in the simulation result, this
+function will return multiple ground states that all possess the same
+system energy.
 
 Returns:
     A vector of charge distributions with the minimal energy.)doc";
