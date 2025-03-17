@@ -7417,7 +7417,7 @@ Parameter ``cartesian_layout_width``:
 Parameter ``cartesian_layout_height``:
     Height of the Cartesian layout.
 
-Parameter ``adjust_for_inputs_in_top_row``:
+Parameter ``input_mode``:
     Adjust offset based on PIs relocated to the top row.
 
 Returns:
@@ -15272,15 +15272,24 @@ Parameter ``stats``:
 Returns:
     Hexagonal representation of the Cartesian layout.)doc";
 
-static const char *__doc_fiction_hexagonalization_params = R"doc(Parameters for the hexagonalization algorithm.)doc";
+static const char *__doc_fiction_hexagonalization_params =
+R"doc(This structure encapsulates settings that determine how primary inputs
+(PIs) are handled during the conversion from a Cartesian to a
+hexagonal layout.)doc";
 
-static const char *__doc_fiction_hexagonalization_params_extend_inputs_to_top_row =
-R"doc(If set to true, all primary inputs will be extended to the top row in
-the hexagonal layout.)doc";
+static const char *__doc_fiction_hexagonalization_params_hexagonalization_input_mode =
+R"doc(Specifies how primary inputs should be handled in the hexagonalization
+process.)doc";
 
-static const char *__doc_fiction_hexagonalization_params_planar_routing_for_extended_inputs =
-R"doc(If true, the routing of primary inputs that have been extended to the
-top row will be constrained to be planar (i.e., without crossings).)doc";
+static const char *__doc_fiction_hexagonalization_params_hexagonalization_input_mode_EXTEND = R"doc(Extend primary inputs to the top row.)doc";
+
+static const char *__doc_fiction_hexagonalization_params_hexagonalization_input_mode_EXTEND_PLANAR =
+R"doc(Extend primary inputs to the top row with planar rerouting (i.e.,
+without crossings).)doc";
+
+static const char *__doc_fiction_hexagonalization_params_hexagonalization_input_mode_NONE = R"doc(Do not extend primary inputs to the top row (default).)doc";
+
+static const char *__doc_fiction_hexagonalization_params_input_mode = R"doc(Input extension mode. Defaults to none)doc";
 
 static const char *__doc_fiction_hexagonalization_route_inputs_error =
 R"doc(Exception thrown when an error occurs during moving inputs to top
