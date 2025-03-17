@@ -51,19 +51,33 @@ class hexagonalization_route_inputs_error : public std::runtime_error
 };
 
 /**
- * Parameters for the hexagonalization algorithm.
+ * This structure encapsulates settings that determine how primary inputs (PIs) are handled
+ * during the conversion from a Cartesian to a hexagonal layout.
  */
 struct hexagonalization_params
 {
     /**
-     * If set to true, all primary inputs will be extended to the top row in the hexagonal layout.
+     * Specifies how primary inputs should be handled in the hexagonalization process.
      */
-    bool extend_inputs_to_top_row = false;
+    enum hexagonalization_input_mode : std::uint8_t
+    {
+        /**
+         * Do not extend primary inputs to the top row (default).
+         */
+        NONE,
+        /**
+         * Extend primary inputs to the top row.
+         */
+        EXTEND,
+        /**
+         * Extend primary inputs to the top row with planar rerouting (i.e., without crossings).
+         */
+        EXTEND_PLANAR
+    };
     /**
-     * If true, the routing of primary inputs that have been extended to the top row will be constrained
-     * to be planar (i.e., without crossings).
+     * Input extension mode. Defaults to none
      */
-    bool planar_routing_for_extended_inputs = false;
+    hexagonalization_input_mode input_mode = NONE;
 };
 
 /**
@@ -218,12 +232,12 @@ template <typename CartLyt>
  * @param lyt 2DDWave-clocked Cartesian gate-level layout to hexagonalize.
  * @param cartesian_layout_width Width of the Cartesian layout.
  * @param cartesian_layout_height Height of the Cartesian layout.
- * @param adjust_for_inputs_in_top_row Adjust offset based on PIs relocated to the top row.
+ * @param input_mode Adjust offset based on PIs relocated to the top row.
  * @return offset.
  */
 template <typename HexLyt, typename CartLyt>
 [[nodiscard]] uint64_t get_offset(const CartLyt& lyt, uint64_t cartesian_layout_width, uint64_t cartesian_layout_height,
-                                  bool adjust_for_inputs_in_top_row) noexcept
+                                  hexagonalization_params::hexagonalization_input_mode input_mode) noexcept
 {
     static_assert(is_cartesian_layout_v<CartLyt>, "CartLyt is not a Cartesian layout");
     static_assert(is_hexagonal_layout_v<HexLyt>, "HexLyt is not a hexagonal layout");
@@ -253,7 +267,7 @@ template <typename HexLyt, typename CartLyt>
         }
     }
 
-    if (adjust_for_inputs_in_top_row)
+    if (input_mode != hexagonalization_params::hexagonalization_input_mode::NONE)
     {
         const auto middle_pi = detail::to_hex<CartLyt, HexLyt>({0, 0}, cartesian_layout_height);
 
@@ -313,8 +327,7 @@ class hexagonalization_impl
             const mockturtle::stopwatch stop{stats.time_total};
 
             // calculate horizontal offset for hexagonal layout
-            const auto offset =
-                detail::get_offset<HexLyt, CartLyt>(plyt, layout_width, layout_height, ps.place_inputs_in_top_row);
+            const auto offset = detail::get_offset<HexLyt, CartLyt>(plyt, layout_width, layout_height, ps.input_mode);
 
             // determine the top primary input coordinate
             auto middle_pi = detail::to_hex<CartLyt, HexLyt>({0, 0}, layout_height);
@@ -352,7 +365,7 @@ class hexagonalization_impl
                       [](const auto& lhs, const auto& rhs) { return lhs.y < rhs.y; });
 
             // adjust hex layout width if necessary (only if all inputs placed in top row)
-            if (ps.place_inputs_in_top_row)
+            if (ps.input_mode != hexagonalization_params::hexagonalization_input_mode::NONE)
             {
                 // adjust offset based on primary inputs in the first row
                 const auto num_inputs_right_to_middle_pi = compute_num_inputs_right_to_middle_pi(plyt);
@@ -512,7 +525,7 @@ class hexagonalization_impl
                     hex_layout.create_po(hex_signal, plyt.get_name(plyt.get_node(old_coord)), hex_coord);
                 });
 
-            if (ps.place_inputs_in_top_row)
+            if (ps.input_mode != hexagonalization_params::hexagonalization_input_mode::NONE)
             {
                 // adjust positions and prepare for routing
                 middle_pi.x -= static_cast<decltype(middle_pi.x)>(offset);
@@ -627,7 +640,9 @@ class hexagonalization_impl
                 // perform routing using A*
                 auto layout_obstruct          = obstruction_layout<HexLyt>(hex_layout);
                 using path                    = layout_coordinate_path<decltype(layout_obstruct)>;
-                const auto          crossings = (hex_depth != 0) && !ps.planar_routing_for_moved_inputs;
+                const auto crossings =
+                    (hex_depth != 0) &&
+                    !(ps.input_mode != hexagonalization_params::hexagonalization_input_mode::EXTEND_PLANAR);
                 const a_star_params params_astar{crossings};
                 using dist = manhattan_distance_functor<decltype(layout_obstruct), uint64_t>;
                 using cost = unit_cost_functor<decltype(layout_obstruct), uint8_t>;
@@ -662,11 +677,7 @@ class hexagonalization_impl
                     }
                     else
                     {
-                        throw hexagonalization_route_inputs_error(
-                            fmt::format("Rerouting PIs that have been moved to the top border failed with the "
-                                        "following parameters: "
-                                        "place_inputs_in_top_row={}, planar_routing_for_moved_inputs={}",
-                                        ps.place_inputs_in_top_row, ps.planar_routing_for_moved_inputs));
+                        throw hexagonalization_route_inputs_error("Extending PIs to the top border failed.");
                     }
                 }
             }
