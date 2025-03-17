@@ -5,8 +5,9 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
+#include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
+
 #include <fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp>
-#include <fiction/algorithms/simulation/sidb/groundstate_from_simulation_result.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/constants.hpp>
@@ -435,7 +436,7 @@ TEMPLATE_TEST_CASE("ExGS gate simulation of Si-111 surface", "[exhaustive-ground
 
     const auto simulation_results = exhaustive_ground_state_simulation<TestType>(lyt, params);
 
-    const auto ground_state = groundstate_from_simulation_result(simulation_results);
+    const auto ground_state = simulation_results.groundstates();
     REQUIRE(ground_state.size() == 1);
 
     CHECK(ground_state.front().get_charge_state({0, 0, 0}) == sidb_charge_state::NEGATIVE);
