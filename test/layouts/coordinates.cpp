@@ -296,25 +296,34 @@ TEMPLATE_TEST_CASE("Coordinate iteration", "[coordinates]", offset::ucoord_t, cu
 TEST_CASE("Computing area and volume of offset coordinates", "[coordinates]")
 {
     CHECK(aspect_ratio(offset::ucoord_t{1, 1, 1}).area() == 4);
+    CHECK(aspect_ratio(offset::ucoord_t{1, 1}).area() == 4);
+    CHECK(aspect_ratio(offset::ucoord_t{1, 1, 0}, offset::ucoord_t{2, 2, 1}).area() == 4);
+
     CHECK(aspect_ratio(offset::ucoord_t{1, 1, 1}).volume() == 8);
+    CHECK(aspect_ratio(offset::ucoord_t{1, 1}).volume() == 4);
+    CHECK(aspect_ratio(offset::ucoord_t{1, 1, 0}, offset::ucoord_t{2, 2, 1}).volume() == 8);
 }
 
 TEST_CASE("Computing area and volume of cube coordinates", "[coordinates]")
 {
     CHECK(aspect_ratio(cube::coord_t{1, 1, 1}).area() == 4);
     CHECK(aspect_ratio(cube::coord_t{-1, -1, -1}).area() == 4);
+    CHECK(aspect_ratio(cube::coord_t{-1, -1, 0}, cube::coord_t{1, 1, 1}).area() == 9);
 
     CHECK(aspect_ratio(cube::coord_t{-1, -1, -1}).volume() == 8);
     CHECK(aspect_ratio(cube::coord_t{1, 1, 1}).volume() == 8);
+    CHECK(aspect_ratio(cube::coord_t{-1, -1, 0}, cube::coord_t{1, 1, 1}).volume() == 18);
 }
 
 TEST_CASE("Computing area and volume of SiQAD coordinates", "[coordinates]")
 {
     CHECK(aspect_ratio(siqad::coord_t{1, 1, 1}).area() == 8);
     CHECK(aspect_ratio(siqad::coord_t{-1, -1, 1}).area() == 8);
+    CHECK(aspect_ratio(siqad::coord_t{-1, -1, 0}, siqad::coord_t{1, 1, 1}).area() == 18);
 
     CHECK(aspect_ratio(siqad::coord_t{1, 1, 1}).volume() == 8);
     CHECK(aspect_ratio(siqad::coord_t{-1, -1, 1}).volume() == 8);
+    CHECK(aspect_ratio(siqad::coord_t{-1, -1, 0}, siqad::coord_t{1, 1, 1}).volume() == 18);
 }
 
 TEST_CASE("Addition / subtraction of SiQAD coordinates", "[coordinates]")

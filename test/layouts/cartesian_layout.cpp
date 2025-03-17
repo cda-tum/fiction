@@ -103,7 +103,7 @@ TEST_CASE("Cartesian coordinate iteration", "[cartesian-layout]")
 
     visited.clear();
 
-    aspect_ratio<offset::ucoord_t> ar_ground{ar.x(), ar.y(), 0};
+    cartesian_layout<offset::ucoord_t>::aspect_ratio_type ar_ground{ar.x(), ar.y(), 0};
 
     const auto check2 = [&visited, &ar_ground, &layout](const auto& t)
     {

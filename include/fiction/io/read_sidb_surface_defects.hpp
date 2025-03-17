@@ -147,7 +147,7 @@ class read_sidb_surface_defects_impl
         max_cell_pos.y = static_cast<decltype(max_cell_pos.y)>(matrix_matches.empty() ? 0 : matrix_matches.size() - 1);
 
         // resize the layout to fit all surface defects
-        lyt.resize(aspect_ratio{max_cell_pos});
+        lyt.resize(aspect_ratio_type_t<Lyt>{max_cell_pos});
 
         return lyt;
     }

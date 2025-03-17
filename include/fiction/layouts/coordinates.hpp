@@ -1028,16 +1028,30 @@ struct aspect_ratio
     /**
      * Equality operator for `aspect_ratio_type`.
      *
-     * Compares two `aspect_ratio_type` instances for equality based on their max coordinates.
+     * Compares two `aspect_ratio_type` instances for equality based on their min and max coordinates.
      *
      * @param other The other aspect_ratio_type instance to compare against.
-     * @return `true` if both aspect_ratios have the same max coordinates; `false` otherwise.
+     * @return `true` if both aspect_ratios have the same min and max coordinates; `false` otherwise.
      */
     [[nodiscard]] bool operator==(const aspect_ratio& other) const noexcept
     {
         auto min_equal = (min.x == other.min.x) && (min.y == other.min.y) && (min.z == other.min.z);
         auto max_equal = (max.x == other.max.x) && (max.y == other.max.y) && (max.z == other.max.z);
         return (min_equal && max_equal);
+    }
+    /**
+     * Inequality operator for `aspect_ratio_type`.
+     *
+     * Compares two `aspect_ratio_type` instances for equality based on their min and max coordinates.
+     *
+     * @param other The other aspect_ratio_type instance to compare against.
+     * @return `true` if both aspect_ratios have different min and max coordinates; `false` otherwise.
+     */
+    [[nodiscard]] bool operator!=(const aspect_ratio& other) const noexcept
+    {
+        auto min_not_equal = (min.x != other.min.x) || (min.y != other.min.y) || (min.z != other.min.z);
+        auto max_not_equal = (max.x != other.max.x) || (max.y != other.max.y) || (max.z != other.max.z);
+        return (min_not_equal || max_not_equal);
     }
     /**
      * Computes the area of a given coordinate assuming its origin is (0, 0, 0). Calculates \f$(|x| + 1) \cdot (|y| +

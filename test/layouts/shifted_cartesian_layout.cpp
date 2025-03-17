@@ -102,7 +102,7 @@ TEST_CASE("Deep copy shifted Cartesian layout", "[shifted-cartesian-layout]")
 
     auto copy = original.clone();
 
-    copy.resize(aspect_ratio<coordinate<decltype(original)>>{10, 10, 1});
+    copy.resize(aspect_ratio_type_t<decltype(original)>{10, 10, 1});
 
     CHECK(original.x() == 5);
     CHECK(original.y() == 5);

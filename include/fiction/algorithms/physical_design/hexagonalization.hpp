@@ -294,7 +294,7 @@ template <typename HexLyt, typename CartLyt>
         const auto mapped_layout_width  = layout_max.x;
         const auto mapped_layout_height = layout_max.y;
 
-        hex_layout.resize(aspect_ratio<coordinate<CartLyt>>{mapped_layout_width, mapped_layout_height, hex_layout.z()});
+        hex_layout.resize(aspect_ratio_type_t<CartLyt>{mapped_layout_width, mapped_layout_height, hex_layout.z()});
 
         restore_names<CartLyt, HexLyt>(lyt, hex_layout);
     }

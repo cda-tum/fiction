@@ -15,6 +15,7 @@
 
 #include <cstdint>
 #include <stdexcept>
+#include <string>
 
 // data types cannot properly be converted to bit field types
 #pragma GCC diagnostic push
