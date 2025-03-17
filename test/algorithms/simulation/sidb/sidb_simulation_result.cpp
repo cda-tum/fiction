@@ -1,22 +1,17 @@
 //
-// Created by Jan Drewniok on 12.02.24.
+// Created by Jan Drewniok on 05.03.25.
 //
 
-#include <catch2/catch_test_macros.hpp>
+#include <catch2/catch_template_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include <fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp>
-#include <fiction/algorithms/simulation/sidb/groundstate_from_simulation_result.hpp>
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
-#include <fiction/technology/cell_technologies.hpp>
-#include <fiction/technology/charge_distribution_surface.hpp>
-#include <fiction/technology/sidb_charge_state.hpp>
 #include <fiction/types.hpp>
 
 using namespace fiction;
 
-TEST_CASE("Determine the groundstate from simulation results", "[groundstate-from-simulation-results]")
+TEST_CASE("Determine the groundstate from simulation results", "[sidb-simulation-result]")
 {
     using lattice = sidb_cell_clk_lyt;
 
@@ -50,7 +45,7 @@ TEST_CASE("Determine the groundstate from simulation results", "[groundstate-fro
         results.charge_distributions = {cds1, cds2, cds3};
         results.algorithm_name       = "test";
 
-        const auto ground_state = groundstate_from_simulation_result(results);
+        const auto ground_state = results.groundstates();
         CHECK(ground_state.size() == 1);
     }
     SECTION("Several charge distributions with degeneracy")
@@ -88,7 +83,7 @@ TEST_CASE("Determine the groundstate from simulation results", "[groundstate-fro
         results.charge_distributions = {cds1, cds2, cds3, cds4};
         results.algorithm_name       = "test";
 
-        const auto ground_states = groundstate_from_simulation_result(results);
+        const auto ground_states = results.groundstates();
         REQUIRE(ground_states.size() == 2);
         CHECK_THAT(ground_states[0].get_system_energy() - ground_states[1].get_system_energy(),
                    Catch::Matchers::WithinAbs(0.0, 0.00001));
@@ -96,7 +91,7 @@ TEST_CASE("Determine the groundstate from simulation results", "[groundstate-fro
 }
 
 TEST_CASE("Determine the groundstate from simulation results for Si-111 lattice orientation",
-          "[groundstate-from-simulation-results]")
+          "[sidb-simulation-result]")
 {
     using lattice = sidb_111_cell_clk_lyt;
 
@@ -114,10 +109,31 @@ TEST_CASE("Determine the groundstate from simulation results for Si-111 lattice 
         const sidb_simulation_parameters params{2, -0.30};
         const auto                       results = exhaustive_ground_state_simulation(lyt, params);
 
-        const auto ground_state = groundstate_from_simulation_result(results);
+        const auto ground_state = results.groundstates();
         REQUIRE(ground_state.size() == 2);
         CHECK_THAT(ground_state.front().get_system_energy(), Catch::Matchers::WithinAbs(0.29683, 0.00001));
         CHECK_THAT(ground_state.front().get_system_energy() - ground_state.back().get_system_energy(),
                    Catch::Matchers::WithinAbs(0.0, 0.00001));
     }
+}
+
+TEMPLATE_TEST_CASE("Determine the groundstate of a two BDL pair wire with input 1 applied", "[sidb-simulation-result]",
+                   sidb_100_cell_clk_lyt, sidb_cell_clk_lyt)
+{
+    TestType lyt{};
+
+    lyt.assign_cell_type({2, 0, 0}, sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({6, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 0, 0}, sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({14, 0, 0}, sidb_technology::cell_type::OUTPUT);
+
+    lyt.assign_cell_type({18, 0, 0}, sidb_technology::cell_type::NORMAL);
+
+    const sidb_simulation_parameters params{2, -0.32};
+
+    const auto results = exhaustive_ground_state_simulation(lyt, params);
+
+    const auto ground_state = results.groundstates();
+    REQUIRE(ground_state.size() == 2);
 }
