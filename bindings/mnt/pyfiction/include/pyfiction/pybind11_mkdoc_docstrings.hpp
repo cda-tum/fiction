@@ -560,14 +560,27 @@ static const char *__doc_fiction_aspect_ratio_operator_eq =
 R"doc(Equality operator for `aspect_ratio_type`.
 
 Compares two `aspect_ratio_type` instances for equality based on their
-max coordinates.
+min and max coordinates.
 
 Parameter ``other``:
     The other aspect_ratio_type instance to compare against.
 
 Returns:
-    `true` if both aspect_ratios have the same max coordinates;
-    `false` otherwise.)doc";
+    `true` if both aspect_ratios have the same min and max
+    coordinates; `false` otherwise.)doc";
+
+static const char *__doc_fiction_aspect_ratio_operator_ne =
+R"doc(Inequality operator for `aspect_ratio_type`.
+
+Compares two `aspect_ratio_type` instances for equality based on their
+min and max coordinates.
+
+Parameter ``other``:
+    The other aspect_ratio_type instance to compare against.
+
+Returns:
+    `true` if both aspect_ratios have different min and max
+    coordinates; `false` otherwise.)doc";
 
 static const char *__doc_fiction_aspect_ratio_volume =
 R"doc(Computes the volume of a given coordinate assuming its origin is (0,
@@ -22579,9 +22592,9 @@ static const char *__doc_fmt_formatter_parse = R"doc()doc";
 
 static const char *__doc_fmt_formatter_parse_2 = R"doc()doc";
 
-static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_layouts_coordinates_hpp_1280_8 = R"doc()doc";
+static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_layouts_coordinates_hpp_1294_8 = R"doc()doc";
 
-static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_layouts_coordinates_hpp_1296_8 = R"doc()doc";
+static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_layouts_coordinates_hpp_1310_8 = R"doc()doc";
 
 static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_technology_cell_ports_hpp_291_8 = R"doc()doc";
 
