@@ -803,6 +803,24 @@ inline constexpr bool has_foreach_sidb_defect_v = has_foreach_sidb_defect<Lyt>::
 #pragma endregion
 
 /**
+ * SiDB simulation domain
+ */
+#pragma region has_dimensions
+
+template <typename T, typename = void>
+struct has_dimensions : std::false_type
+{};
+
+template <typename T>
+struct has_dimensions<T, std::void_t<decltype(std::declval<T>().dimensions)>> : std::true_type
+{};
+
+template <typename T>
+constexpr bool has_dimensions_v = has_dimensions<T>::value;
+
+#pragma endregion
+
+/**
  * Charge distribution surfaces
  */
 

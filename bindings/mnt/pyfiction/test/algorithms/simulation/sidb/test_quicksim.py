@@ -4,7 +4,6 @@ from mnt.pyfiction import (
     aspect_ratio_offset,
     charge_distribution_surface,
     charge_distribution_surface_111,
-    groundstate_from_simulation_result,
     quicksim,
     quicksim_params,
     sidb_100_lattice,
@@ -72,7 +71,7 @@ class TestQuicksim(unittest.TestCase):
 
         self.assertEqual(result.algorithm_name, "QuickSim")
 
-        groundstate = groundstate_from_simulation_result(result)
+        groundstate = result.groundstates()
 
         self.assertEqual(len(groundstate), 1)
 
@@ -80,6 +79,14 @@ class TestQuicksim(unittest.TestCase):
         self.assertEqual(groundstate[0].get_charge_state((1, 0)), sidb_charge_state.NEUTRAL)
         self.assertEqual(groundstate[0].get_charge_state((2, 0)), sidb_charge_state.NEUTRAL)
         self.assertEqual(groundstate[0].get_charge_state((3, 0)), sidb_charge_state.NEGATIVE)
+
+        # test timeout
+        params.timeout = 1
+        params.iteration_steps = 10000
+        params.number_threads = 1
+
+        # should return None since no solution can be found in 1 millisecond.
+        self.assertIsNone(quicksim(layout, params))
 
 
 if __name__ == "__main__":

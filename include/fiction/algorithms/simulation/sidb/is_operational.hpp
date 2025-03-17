@@ -11,7 +11,6 @@
 #include "fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp"
 #include "fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp"
 #include "fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
-#include "fiction/algorithms/simulation/sidb/groundstate_from_simulation_result.hpp"
 #include "fiction/algorithms/simulation/sidb/quickexact.hpp"
 #include "fiction/algorithms/simulation/sidb/quicksim.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
@@ -20,7 +19,7 @@
 #include "fiction/technology/cell_ports.hpp"
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
-#include "fiction/technology/physical_constants.hpp"
+#include "fiction/technology/constants.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/truth_table_utils.hpp"
@@ -367,8 +366,6 @@ class is_operational_impl
      */
     [[nodiscard]] std::pair<operational_status, non_operationality_reason> run() noexcept
     {
-        bool at_least_one_layout_is_kink_induced_non_operational = false;
-
         if (!canvas_lyt.is_empty())
         {
             charge_distribution_surface<Lyt> cds_canvas{canvas_lyt};
@@ -428,7 +425,7 @@ class is_operational_impl
                     return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
                 }
 
-                const auto ground_states = groundstate_from_simulation_result(simulation_results);
+                const auto ground_states = simulation_results.groundstates();
 
                 for (const auto& gs : ground_states)
                 {
@@ -442,16 +439,10 @@ class is_operational_impl
                         non_op_reason == non_operationality_reason::KINKS &&
                         parameters.op_condition == is_operational_params::operational_condition::REJECT_KINKS)
                     {
-                        at_least_one_layout_is_kink_induced_non_operational = true;
-                        continue;
+                        return {operational_status::NON_OPERATIONAL, non_operationality_reason::KINKS};
                     }
                 }
             }
-        }
-
-        if (at_least_one_layout_is_kink_induced_non_operational)
-        {
-            return {operational_status::NON_OPERATIONAL, non_operationality_reason::KINKS};
         }
 
         // if we made it here, the layout is operational
@@ -577,7 +568,7 @@ class is_operational_impl
                 continue;
             }
 
-            const auto ground_states = groundstate_from_simulation_result(simulation_results);
+            const auto ground_states = simulation_results.groundstates();
 
             for (const auto& gs : ground_states)
             {
@@ -641,7 +632,7 @@ class is_operational_impl
             if (cds_layout.is_physically_valid())
             {
                 cds_layout.recompute_system_energy();
-                if (cds_layout.get_system_energy() + physical_constants::POP_STABILITY_ERR < min_energy)
+                if (cds_layout.get_system_energy() + constants::ERROR_MARGIN < min_energy)
                 {
                     min_energy = cds_layout.get_system_energy();
                 }
@@ -871,8 +862,7 @@ class is_operational_impl
 
                 if (physical_validity.has_value())
                 {
-                    if (physical_validity.value() + physical_constants::POP_STABILITY_ERR <
-                        minimal_energy_of_physically_valid_layout)
+                    if (physical_validity.value() + constants::ERROR_MARGIN < minimal_energy_of_physically_valid_layout)
                     {
                         return true;
                     }
@@ -975,7 +965,12 @@ class is_operational_impl
 
                 // perform QuickSim heuristic simulation
                 const quicksim_params qs_params{parameters.simulation_parameters, 500, 0.6};
-                return quicksim(*bdl_iterator, qs_params);
+
+                if (const auto qs_result = quicksim(*bdl_iterator, qs_params); qs_result.has_value())
+                {
+                    return qs_result.value();
+                }
+                return sidb_simulation_result<Lyt>{};  // return empty result if no valid charge distribution was found
             }
         }
 

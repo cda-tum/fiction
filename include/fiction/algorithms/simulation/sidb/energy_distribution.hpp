@@ -6,7 +6,7 @@
 #define FICTION_ENERGY_DISTRIBUTION_HPP
 
 #include "fiction/technology/charge_distribution_surface.hpp"
-#include "fiction/technology/physical_constants.hpp"
+#include "fiction/technology/constants.hpp"
 
 #include <cmath>
 #include <cstdint>
@@ -26,7 +26,7 @@ using sidb_energy_distribution = std::map<double, uint64_t>;  // unit: (eV, unit
 /**
  * This function takes in a vector of `charge_distribution_surface` objects and returns a map containing the system
  * energy and the number of occurrences of that energy in the input vector. To compare two energy values for equality,
- * the comparison uses a tolerance specified by `physical_constants::POP_STABILITY_ERR`.
+ * the comparison uses a tolerance specified by `constants::ERROR_MARGIN`.
  *
  * @tparam Lyt SiDB cell-level layout type.
  * @param input_vec A vector of `charge_distribution_surface` objects for which statistics are to be computed.
@@ -61,7 +61,7 @@ energy_distribution(const std::vector<charge_distribution_surface<Lyt>>& input_v
 
                 for (auto& energy_index : distribution)
                 {
-                    if (std::abs(energy_index.first - energy) < physical_constants::POP_STABILITY_ERR)
+                    if (std::abs(energy_index.first - energy) < constants::ERROR_MARGIN)
                     {
                         energy_index.second++;
                         found = true;

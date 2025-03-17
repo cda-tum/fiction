@@ -19,7 +19,7 @@
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "fiction/technology/cell_technologies.hpp"
-#include "fiction/technology/physical_constants.hpp"
+#include "fiction/technology/constants.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/math_utils.hpp"
 
@@ -265,7 +265,14 @@ class critical_temperature_impl
 
             // All physically valid charge configurations are determined for the given layout (probabilistic ground
             // state simulation is used).
-            simulation_results = quicksim(layout, qs_params);
+            if (const auto result = quicksim(layout, qs_params); result.has_value())
+            {
+                simulation_results = result.value();
+            }
+            else
+            {
+                return;
+            }
         }
         else
         {
@@ -354,7 +361,7 @@ class critical_temperature_impl
             // value of the given valid_layout to six decimal places to overcome possible rounding errors and for
             // comparability with the min_energy.
             if (std::abs(round_to_n_decimal_places(energy, 6) - round_to_n_decimal_places(min_energy, 6)) <
-                    physical_constants::POP_STABILITY_ERR &&
+                    constants::ERROR_MARGIN &&
                 state_type)
             {
                 ground_state_is_transparent = true;
@@ -466,7 +473,12 @@ class critical_temperature_impl
 
             const quicksim_params qs_params{params.operational_params.simulation_parameters, params.iteration_steps,
                                             params.alpha};
-            return quicksim(*bdl_iterator, qs_params);
+
+            if (const auto result = quicksim<Lyt>(*bdl_iterator, qs_params))
+            {
+                return result.value();
+            }
+            return sidb_simulation_result<Lyt>{};  // return empty result if no valid charge distribution was found
         }
 
         assert(false && "unsupported simulation engine");

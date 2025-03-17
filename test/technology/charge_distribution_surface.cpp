@@ -9,7 +9,7 @@
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/charge_distribution_surface.hpp>
-#include <fiction/technology/physical_constants.hpp>
+#include <fiction/technology/constants.hpp>
 #include <fiction/technology/sidb_charge_state.hpp>
 #include <fiction/technology/sidb_defect_surface.hpp>
 #include <fiction/technology/sidb_defects.hpp>
@@ -408,9 +408,9 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects", "[charge-d
 
         CHECK(charge_layout.get_charge_state({7, 6}) == sidb_charge_state::NONE);
 
-        charge_layout.assign_charge_state_by_cell_index(0, sidb_charge_state::NEUTRAL);
-        charge_layout.assign_charge_state_by_cell_index(1, sidb_charge_state::POSITIVE);
-        charge_layout.assign_charge_state_by_cell_index(2, sidb_charge_state::POSITIVE);
+        charge_layout.assign_charge_state_by_index(0, sidb_charge_state::NEUTRAL);
+        charge_layout.assign_charge_state_by_index(1, sidb_charge_state::POSITIVE);
+        charge_layout.assign_charge_state_by_index(2, sidb_charge_state::POSITIVE);
         CHECK(charge_layout.get_charge_state_by_index(0) == sidb_charge_state::NEUTRAL);
         CHECK(charge_layout.get_charge_state_by_index(1) == sidb_charge_state::POSITIVE);
         CHECK(charge_layout.get_charge_state_by_index(2) == sidb_charge_state::POSITIVE);
@@ -742,7 +742,7 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects", "[charge-d
 
         REQUIRE(charge_layout_new.get_local_potential({0, 0, 1}).has_value());
         CHECK_THAT(charge_layout_new.get_local_potential({0, 0, 1}).value() + 0.5,
-                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0, constants::ERROR_MARGIN));
         REQUIRE(charge_layout_new.get_local_potential({1, 3, 0}).has_value());
         CHECK_THAT(charge_layout_new.get_local_potential({1, 3, 0}).value(),
                    Catch::Matchers::WithinAbs(0.000000, 0.000001));
@@ -765,7 +765,7 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects", "[charge-d
         charge_layout_new.assign_local_external_potential({{{0, 0, 1}, -0.1}});
         REQUIRE(charge_layout_new.get_local_potential({0, 0, 1}).has_value());
         CHECK_THAT(charge_layout_new.get_local_potential({0, 0, 1}).value() + 0.1,
-                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0, constants::ERROR_MARGIN));
         CHECK_THAT(charge_layout_new.get_local_potential({1, 3, 0}).value(),
                    Catch::Matchers::WithinAbs(0.000000, 0.000001));
         CHECK_THAT(charge_layout_new.get_local_potential({10, 5, 1}).value(),
@@ -794,13 +794,13 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects", "[charge-d
 
         REQUIRE(charge_layout.get_local_potential({0, 0, 1}).has_value());
         CHECK_THAT(charge_layout.get_local_potential({0, 0, 1}).value() + 0.1,
-                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0, constants::ERROR_MARGIN));
         REQUIRE(charge_layout.get_local_potential({1, 3, 0}).has_value());
         CHECK_THAT(charge_layout.get_local_potential({1, 3, 0}).value() + 0.1,
-                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0, constants::ERROR_MARGIN));
         REQUIRE(charge_layout.get_local_potential({10, 5, 1}).has_value());
         CHECK_THAT(charge_layout.get_local_potential({10, 5, 1}).value() + 0.1,
-                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0, constants::ERROR_MARGIN));
 
         lyt.assign_cell_type({0, 0, 1}, TestType::cell_type::EMPTY);
         lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::EMPTY);
@@ -1125,14 +1125,13 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects", "[charge-d
         charge_layout_new.assign_charge_state({10, 4, 1}, sidb_charge_state::NEGATIVE);
         charge_layout_new.update_after_charge_change();
         CHECK_THAT(loc_one - charge_layout_new.get_local_potential({0, 3, 1}).value(),
-                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0, constants::ERROR_MARGIN));
         CHECK_THAT(loc_two - charge_layout_new.get_local_potential({1, 3, 0}).value(),
-                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0, constants::ERROR_MARGIN));
         CHECK_THAT(loc_three - charge_layout_new.get_local_potential({10, 4, 1}).value(),
-                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0, constants::ERROR_MARGIN));
         auto system_energy_second = charge_layout_new.get_system_energy();
-        CHECK_THAT(system_energy_first - system_energy_second,
-                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
+        CHECK_THAT(system_energy_first - system_energy_second, Catch::Matchers::WithinAbs(0, constants::ERROR_MARGIN));
     }
 
     SECTION("Physical validity check after dependent cell is updated")
@@ -1336,7 +1335,7 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects, part one", 
 
         REQUIRE(charge_layout.get_local_potential({5, 4}).has_value());
         CHECK_THAT(charge_layout.get_local_potential({5, 4}).value(),
-                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0, constants::ERROR_MARGIN));
     }
 
     SECTION("perturber is replaced by an equivalent defect")
@@ -1351,10 +1350,10 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects, part one", 
             {5, 6}, sidb_defect{sidb_defect_type::UNKNOWN, -1, charge_layout_new.get_simulation_params().epsilon_r,
                                 charge_layout_new.get_simulation_params().lambda_tf});
         CHECK_THAT(charge_layout_new.chargeless_potential_generated_by_defect_at_given_distance(0.0),
-                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0, constants::ERROR_MARGIN));
         charge_layout_new.update_after_charge_change();
         CHECK_THAT(charge_layout.get_system_energy() - charge_layout_new.get_system_energy(),
-                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0, constants::ERROR_MARGIN));
     }
 
     SECTION("overwrite an assigned charge state")
@@ -1682,7 +1681,7 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects, part two", 
         REQUIRE(charge_layout_new.get_local_potential({10, 5, 1}).has_value());
 
         CHECK_THAT(charge_layout_new.get_local_potential({0, 0, 1}).value() + 0.5,
-                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0, constants::ERROR_MARGIN));
         CHECK_THAT(charge_layout_new.get_local_potential({1, 3, 0}).value(),
                    Catch::Matchers::WithinAbs(0.000000, 0.000001));
         CHECK_THAT(charge_layout_new.get_local_potential({10, 5, 1}).value(),
@@ -1701,7 +1700,7 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects, part two", 
 
         charge_layout_new.assign_local_external_potential({{{0, 0, 1}, -0.1}});
         CHECK_THAT(charge_layout_new.get_local_potential({0, 0, 1}).value() + 0.6,
-                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0, constants::ERROR_MARGIN));
         CHECK_THAT(charge_layout_new.get_local_potential({1, 3, 0}).value(),
                    Catch::Matchers::WithinAbs(0.000000, 0.000001));
         CHECK_THAT(charge_layout_new.get_local_potential({10, 5, 1}).value(),
@@ -1710,7 +1709,7 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects, part two", 
         charge_layout_new.reset_local_external_potentials();
         charge_layout_new.assign_local_external_potential({{{0, 0, 1}, -0.1}});
         CHECK_THAT(charge_layout_new.get_local_potential({0, 0, 1}).value() + 0.1,
-                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0, constants::ERROR_MARGIN));
         CHECK_THAT(charge_layout_new.get_local_potential({1, 3, 0}).value(),
                    Catch::Matchers::WithinAbs(0.000000, 0.000001));
         CHECK_THAT(charge_layout_new.get_local_potential({10, 5, 1}).value(),
@@ -1743,11 +1742,11 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects, part two", 
         REQUIRE(charge_layout.get_local_potential({10, 5, 1}).has_value());
 
         CHECK_THAT(charge_layout.get_local_potential({0, 0, 1}).value() + 0.1,
-                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0, constants::ERROR_MARGIN));
         CHECK_THAT(charge_layout.get_local_potential({1, 3, 0}).value() + 0.1,
-                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0, constants::ERROR_MARGIN));
         CHECK_THAT(charge_layout.get_local_potential({10, 5, 1}).value() + 0.1,
-                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0, constants::ERROR_MARGIN));
 
         lyt.assign_cell_type({0, 0, 1}, TestType::cell_type::EMPTY);
         lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::EMPTY);
@@ -2080,11 +2079,11 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects, part two", 
                                    charge_layout.get_simulation_params().lambda_tf});
 
         CHECK_THAT(loc_one_wo_defect - (charge_layout.get_local_potential({0, 0, 0}).value()),
-                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0, constants::ERROR_MARGIN));
         CHECK_THAT(loc_two_wo_defect - (charge_layout.get_local_potential({3, 0, 0}).value()),
-                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0, constants::ERROR_MARGIN));
         CHECK_THAT(loc_three_wo_defect - (charge_layout.get_local_potential({5, 0, 0}).value()),
-                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0, constants::ERROR_MARGIN));
 
         auto defect_potentials_negative = charge_layout.get_local_defect_potentials();
         CHECK(defect_potentials_negative.empty());
@@ -2134,11 +2133,11 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects, part two", 
 
         charge_layout.erase_defect({8, 0, 0});
         CHECK_THAT(charge_layout.get_local_potential({0, 0, 0}).value(),
-                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0, constants::ERROR_MARGIN));
         CHECK_THAT(charge_layout.get_local_potential({3, 0, 0}).value(),
-                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0, constants::ERROR_MARGIN));
         CHECK_THAT(charge_layout.get_local_potential({5, 0, 0}).value(),
-                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0, constants::ERROR_MARGIN));
     }
 }
 

@@ -237,7 +237,6 @@ Random SiDB Layout Generator
         .. autofunction:: mnt.pyfiction.generate_multiple_random_sidb_layouts
 
 
-
 Operational Domain Computation
 ##############################
 
@@ -264,7 +263,9 @@ Operational Domain Computation
         .. doxygenstruct:: fiction::parameter_point
            :members:
         .. doxygenenum:: fiction::sweep_parameter
-        .. doxygenstruct:: fiction::operational_domain
+        .. doxygenclass:: fiction::operational_domain
+           :members:
+        .. doxygenclass:: fiction::critical_temperature_domain
            :members:
         .. doxygenstruct:: fiction::operational_domain_value_range
            :members:
@@ -277,6 +278,10 @@ Operational Domain Computation
         .. doxygenfunction:: fiction::operational_domain_random_sampling
         .. doxygenfunction:: fiction::operational_domain_flood_fill
         .. doxygenfunction:: fiction::operational_domain_contour_tracing
+        .. doxygenfunction:: fiction::critical_temperature_domain_grid_search
+        .. doxygenfunction:: fiction::critical_temperature_domain_random_sampling
+        .. doxygenfunction:: fiction::critical_temperature_domain_flood_fill
+        .. doxygenfunction:: fiction::critical_temperature_domain_contour_tracing
 
         **Header:** ``fiction/algorithms/simulation/sidb/operational_domain_ratio.hpp``
 
@@ -293,6 +298,8 @@ Operational Domain Computation
             :members:
         .. autoclass:: mnt.pyfiction.operational_condition
             :members:
+        .. autoclass:: mnt.pyfiction.operational_analysis_strategy
+            :members:
         .. autoclass:: mnt.pyfiction.is_operational_params
             :members:
         .. autofunction:: mnt.pyfiction.is_operational
@@ -306,6 +313,8 @@ Operational Domain Computation
             :members:
         .. autoclass:: mnt.pyfiction.operational_domain
             :members:
+        .. autoclass:: mnt.pyfiction.critical_temperature_domain
+            :members:
         .. autoclass:: mnt.pyfiction.operational_domain_value_range
             :members:
         .. autoclass:: mnt.pyfiction.operational_domain_params
@@ -317,6 +326,10 @@ Operational Domain Computation
         .. autofunction:: mnt.pyfiction.operational_domain_random_sampling
         .. autofunction:: mnt.pyfiction.operational_domain_flood_fill
         .. autofunction:: mnt.pyfiction.operational_domain_contour_tracing
+        .. autofunction:: mnt.pyfiction.critical_temperature_domain_grid_search
+        .. autofunction:: mnt.pyfiction.critical_temperature_domain_random_sampling
+        .. autofunction:: mnt.pyfiction.critical_temperature_domain_flood_fill
+        .. autofunction:: mnt.pyfiction.critical_temperature_domain_contour_tracing
 
         .. autoclass:: mnt.pyfiction.compute_operational_ratio_params
                 :members:
@@ -383,19 +396,6 @@ Simulation Equivalence Checking
 
     .. tab:: Python
         .. autofunction:: mnt.pyfiction.check_simulation_results_for_equivalence
-
-
-Determine the Ground State from Simulation Results
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. tabs::
-    .. tab:: C++
-        **Header:** ``fiction/algorithms/simulation/sidb/groundstate_from_simulation_result.hpp``
-
-        .. doxygenfunction:: fiction::groundstate_from_simulation_result
-
-    .. tab:: Python
-        .. autofunction:: mnt.pyfiction.groundstate_from_simulation_result
 
 
 Charge Detection
@@ -585,7 +585,7 @@ SiDB Defect Analysis
 .. doxygenstruct:: fiction::defect_influence_params
    :members:
 .. doxygenenum:: fiction::defect_influence_status
-.. doxygenstruct:: fiction::defect_influence_domain
+.. doxygenclass:: fiction::defect_influence_domain
    :members:
 
 .. doxygenstruct:: fiction::defect_influence_stats
