@@ -34,7 +34,8 @@ class hex_command : public command
                    "Specifies how primary inputs should be handled in the hexagonalization process:\n"
                    " - `0` (none): Do not extend primary inputs to the top row (default).\n"
                    " - `1 (extend): Extend primary inputs to the top row.\n"
-                   " - `2` (extend_planar): Extend primary inputs to the top row with planar rerouting (i.e., without crossings).",
+                   " - `2` (extend_planar): Extend primary inputs to the top row with planar rerouting (i.e., without "
+                   "crossings).",
                    true)
             ->set_type_name("{none=0, extend=1, extend_planar=2}");
         add_flag("--verbose,-v", "Be verbose");

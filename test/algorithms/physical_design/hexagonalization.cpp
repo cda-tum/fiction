@@ -32,8 +32,8 @@ void check_mapping_equiv(const Ntk& ntk)
     hexagonalization_params params{};
     const auto              hex_layout = hexagonalization<hex_even_row_gate_clk_lyt, Lyt>(layout, params, &stats);
 
-    params.input_mode = hexagonalization_params::hexagonalization_input_mode::EXTEND;
-    const auto hex_layout_top_pis  = hexagonalization<hex_even_row_gate_clk_lyt, Lyt>(layout, params, &stats);
+    params.input_mode             = hexagonalization_params::hexagonalization_input_mode::EXTEND;
+    const auto hex_layout_top_pis = hexagonalization<hex_even_row_gate_clk_lyt, Lyt>(layout, params, &stats);
 
     check_eq(ntk, layout);
     check_eq(ntk, hex_layout);
@@ -51,8 +51,8 @@ void check_mapping_equiv_layout(const Lyt& lyt)
     hexagonalization_params params{};
     const auto              hex_layout = hexagonalization<hex_even_row_gate_clk_lyt, Lyt>(lyt, params, &stats);
 
-    params.input_mode = hexagonalization_params::hexagonalization_input_mode::EXTEND;
-    const auto hex_layout_top_pis  = hexagonalization<hex_even_row_gate_clk_lyt, Lyt>(lyt, params, &stats);
+    params.input_mode             = hexagonalization_params::hexagonalization_input_mode::EXTEND;
+    const auto hex_layout_top_pis = hexagonalization<hex_even_row_gate_clk_lyt, Lyt>(lyt, params, &stats);
 
     check_eq(lyt, hex_layout);
     check_eq(lyt, hex_layout_top_pis);
@@ -69,8 +69,8 @@ void check_mapping_equiv_layout_with_planar_rerouting(const Lyt& lyt)
     hexagonalization_stats  stats{};
     hexagonalization_params params{};
 
-    params.input_mode =hexagonalization_params::hexagonalization_input_mode::EXTEND_PLANAR;
-    const auto hex_layout                  = hexagonalization<hex_even_row_gate_clk_lyt, Lyt>(lyt, params, &stats);
+    params.input_mode     = hexagonalization_params::hexagonalization_input_mode::EXTEND_PLANAR;
+    const auto hex_layout = hexagonalization<hex_even_row_gate_clk_lyt, Lyt>(lyt, params, &stats);
 
     check_eq(lyt, hex_layout);
 

@@ -638,8 +638,8 @@ class hexagonalization_impl
                 }
 
                 // perform routing using A*
-                auto layout_obstruct          = obstruction_layout<HexLyt>(hex_layout);
-                using path                    = layout_coordinate_path<decltype(layout_obstruct)>;
+                auto layout_obstruct = obstruction_layout<HexLyt>(hex_layout);
+                using path           = layout_coordinate_path<decltype(layout_obstruct)>;
                 const auto crossings =
                     (hex_depth != 0) &&
                     !(ps.input_mode != hexagonalization_params::hexagonalization_input_mode::EXTEND_PLANAR);
