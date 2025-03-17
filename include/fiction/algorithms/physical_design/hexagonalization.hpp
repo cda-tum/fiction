@@ -173,13 +173,13 @@ template <typename CartLyt>
 }
 
 /**
- * This function iterates over all primary inputs in the given cartesian layout and counts those
+ * This function iterates over all primary inputs in the given Cartesian layout and counts those
  * whose tile is at the northern border. Such inputs are considered to be positioned right of the middle
  * primary input when the layout is converted to a hexagonal format.
  *
- * @tparam CartLyt type of the cartesian layout.
- * @param lyt the cartesian gate-level layout containing primary inputs.
- * @return the number of primary inputs that are placed to the right of the middle primary input.
+ * @tparam CartLyt Type of the Cartesian layout.
+ * @param lyt The Cartesian gate-level layout containing primary inputs.
+ * @return The number of primary inputs that are placed to the right of the middle primary input.
  */
 template <typename CartLyt>
 [[nodiscard]] uint64_t compute_num_inputs_right_to_middle_pi(const CartLyt& lyt) noexcept
@@ -287,17 +287,17 @@ class hexagonalization_impl
         static_assert(is_hexagonal_layout_v<HexLyt>, "HexLyt is not a hexagonal layout");
         static_assert(has_even_row_hex_arrangement_v<HexLyt>, "HexLyt does not have an even row hexagon arrangement");
         static_assert(is_gate_level_layout_v<CartLyt>, "CartLyt is not a gate-level layout");
-        static_assert(is_cartesian_layout_v<CartLyt>, "CartLyt is not a cartesian layout");
+        static_assert(is_cartesian_layout_v<CartLyt>, "CartLyt is not a Cartesian layout");
 
         // ensure the layout uses the correct clocking scheme
         assert(plyt.is_clocking_scheme(clock_name::TWODDWAVE));
 
-        // get cartesian layout dimensions
+        // get Cartesian layout dimensions
         const auto layout_width  = plyt.x() + 1;
         const auto layout_height = plyt.y() + 1;
         const auto layout_depth  = plyt.z();
 
-        // compute hexagonal layout dimensions based on cartesian dimensions
+        // compute hexagonal layout dimensions based on Cartesian dimensions
         const auto hex_height =
             detail::to_hex<CartLyt, HexLyt>({layout_width - 1, layout_height - 1, 0}, layout_height).y;
         const auto hex_width = detail::to_hex<CartLyt, HexLyt>({layout_width - 1, 0, 0}, layout_height).x;
@@ -328,7 +328,7 @@ class hexagonalization_impl
                 [&](const auto& gate)
                 {
                     const auto old_coord = plyt.get_tile(gate);
-                    // convert cartesian coordinate to hex coordinate
+                    // convert Cartesian coordinate to hex coordinate
                     auto hex_coord = detail::to_hex<CartLyt, HexLyt>(old_coord, layout_height);
                     hex_coord.x -= static_cast<decltype(hex_coord.x)>(offset);
 
@@ -364,7 +364,7 @@ class hexagonalization_impl
                 }
             }
 
-            // process internal nodes by iterating diagonally over the cartesian layout
+            // process internal nodes by iterating diagonally over the Cartesian layout
             for (uint64_t k = 0; k < layout_width + layout_height - 1; ++k)
             {
                 for (uint64_t x = 0; x <= k; ++x)
@@ -377,10 +377,10 @@ class hexagonalization_impl
                         // iterate through all layers
                         for (uint64_t z = 0; z <= hex_depth; ++z)
                         {
-                            // define the current cartesian tile
+                            // define the current Cartesian tile
                             tile<CartLyt> old_tile{x, y, z};
 
-                            // convert the cartesian tile to a hexagonal tile and adjust x-coordinate
+                            // convert the Cartesian tile to a hexagonal tile and adjust x-coordinate
                             auto hex_tile = detail::to_hex<CartLyt, HexLyt>(old_tile, layout_height);
                             hex_tile.x -= static_cast<decltype(hex_tile.x)>(offset);
 
@@ -495,7 +495,7 @@ class hexagonalization_impl
             plyt.foreach_po(
                 [&](const auto& gate)
                 {
-                    // get the original cartesian tile for the output
+                    // get the original Cartesian tile for the output
                     const auto old_coord = plyt.get_tile(plyt.get_node(gate));
 
                     // get the output signal
@@ -676,7 +676,7 @@ class hexagonalization_impl
             const auto layout_max = bbox.get_max();
             hex_layout.resize({layout_max.x, layout_max.y, hex_layout.z()});
 
-            // restore original names from the cartesian layout
+            // restore original names from the Cartesian layout
             restore_names<CartLyt, HexLyt>(plyt, hex_layout);
         }
 

@@ -231,6 +231,7 @@ Possible parameters:
 - High effort mode (``-e``), should be set if more runtime is available to find layouts with even less area, not set by default.
 - Return first (``-r``), to return the first found layout, not set by default.
 - Planar (``-p``), should be set to create layouts without crossings, not set by default.
+- Verbose (``-v``), to output runtime statistics after graph-oriented layout design.
 
 Hexagonalization (``hex``)
 ##########################
@@ -242,6 +243,7 @@ Possible parameters:
 
 - Place inputs in top row (``-i``) to move PIs to the first row after hexagonalization.
 - Restrict the routing of primary inputs that have been moved to the top row to be planar (``-p``) to avoid the creation of crossings.
+- Verbose (``-v``), to output runtime statistics after hexagonalization.
 
 Post-Layout Optimization (``optimize``)
 #######################################
@@ -258,6 +260,7 @@ Possible parameters:
 - Number of maximum gate relocations (``-m``), should be set to 1 for layouts with more than 100000 tiles, defaults to the number of tiles in the layout.
 - Wiring reduction only (``-w``), should be set for layouts with more than 20000000 tiles, not set by default.
 - Planar optimization (``-p``), should be set if during optimization, gates should only be relocated if the new wiring contains no crossings, not set by default.
+- Verbose (``-v``), to output runtime statistics after post-layout optimization.
 
 Design rule checking (``check``)
 --------------------------------
