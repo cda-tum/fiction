@@ -5485,19 +5485,19 @@ Returns:
     `true` iff `a < b` based on the aforementioned rule.)doc";
 
 static const char *__doc_fiction_detail_compute_num_inputs_left_to_middle_pi =
-R"doc(This function iterates over all primary inputs in the given cartesian
+R"doc(This function iterates over all primary inputs in the given Cartesian
 layout and counts those whose tile is at the western border. Such
 inputs are considered to be positioned left of the middle primary
 input when the layout is converted to a hexagonal format.
 
 Template parameter ``CartLyt``:
-    type of the cartesian layout.
+    Type of the Cartesian layout.
 
 Parameter ``lyt``:
-    the cartesian gate-level layout containing primary inputs.
+    The Cartesian gate-level layout containing primary inputs.
 
 Returns:
-    the number of primary inputs that are placed to the left of the
+    The number of primary inputs that are placed to the left of the
     middle primary input.)doc";
 
 static const char *__doc_fiction_detail_compute_num_inputs_right_to_middle_pi =
@@ -15274,13 +15274,13 @@ Returns:
 
 static const char *__doc_fiction_hexagonalization_params = R"doc(Parameters for the hexagonalization algorithm.)doc";
 
-static const char *__doc_fiction_hexagonalization_params_place_inputs_in_top_row =
-R"doc(If set to true, all primary inputs will be relocated to the top row of
+static const char *__doc_fiction_hexagonalization_params_extend_inputs_to_top_row =
+R"doc(If set to true, all primary inputs will be extended to the top row in
 the hexagonal layout.)doc";
 
-static const char *__doc_fiction_hexagonalization_params_planar_routing_for_moved_inputs =
-R"doc(If true, the routing of primary inputs that have been moved to the top
-row will be constrained to be planar (i.e., without crossings).)doc";
+static const char *__doc_fiction_hexagonalization_params_planar_routing_for_extended_inputs =
+R"doc(If true, the routing of primary inputs that have been extended to the
+top row will be constrained to be planar (i.e., without crossings).)doc";
 
 static const char *__doc_fiction_hexagonalization_route_inputs_error =
 R"doc(Exception thrown when an error occurs during moving inputs to top
