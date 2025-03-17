@@ -5501,19 +5501,19 @@ Returns:
     middle primary input.)doc";
 
 static const char *__doc_fiction_detail_compute_num_inputs_right_to_middle_pi =
-R"doc(This function iterates over all primary inputs in the given cartesian
+R"doc(This function iterates over all primary inputs in the given Cartesian
 layout and counts those whose tile is at the northern border. Such
 inputs are considered to be positioned right of the middle primary
 input when the layout is converted to a hexagonal format.
 
 Template parameter ``CartLyt``:
-    type of the cartesian layout.
+    Type of the Cartesian layout.
 
 Parameter ``lyt``:
-    the cartesian gate-level layout containing primary inputs.
+    The Cartesian gate-level layout containing primary inputs.
 
 Returns:
-    the number of primary inputs that are placed to the right of the
+    The number of primary inputs that are placed to the right of the
     middle primary input.)doc";
 
 static const char *__doc_fiction_detail_connect_and_place = R"doc()doc";
