@@ -56,14 +56,14 @@ class hexagonalization_route_inputs_error : public std::runtime_error
 struct hexagonalization_params
 {
     /**
-     * If set to true, all primary inputs will be relocated to the top row of the hexagonal layout.
+     * If set to true, all primary inputs will be extended to the top row in the hexagonal layout.
      */
-    bool place_inputs_in_top_row = false;
+    bool extend_inputs_to_top_row = false;
     /**
-     * If true, the routing of primary inputs that have been moved to the top row will be constrained
-     *   to be planar (i.e., without crossings).
+     * If true, the routing of primary inputs that have been extended to the top row will be constrained
+     * to be planar (i.e., without crossings).
      */
-    bool planar_routing_for_moved_inputs = false;
+    bool planar_routing_for_extended_inputs = false;
 };
 
 /**
@@ -107,7 +107,7 @@ struct extended_routing_objective
     tile<HexLyt> target;
     /**
      * Flag that is set to true if the primary input was the first fanin; this indicates that the
-     *   fanin signals need to be reordered.
+     * fanin signals need to be reordered.
      */
     bool update_first_fanin = false;
 };
@@ -142,13 +142,13 @@ template <typename CartLyt, typename HexLyt>
 }
 
 /**
- * This function iterates over all primary inputs in the given cartesian layout and counts those
+ * This function iterates over all primary inputs in the given Cartesian layout and counts those
  * whose tile is at the western border. Such inputs are considered to be positioned left of the middle
  * primary input when the layout is converted to a hexagonal format.
  *
- * @tparam CartLyt type of the cartesian layout.
- * @param lyt the cartesian gate-level layout containing primary inputs.
- * @return the number of primary inputs that are placed to the left of the middle primary input.
+ * @tparam CartLyt Type of the Cartesian layout.
+ * @param lyt The Cartesian gate-level layout containing primary inputs.
+ * @return The number of primary inputs that are placed to the left of the middle primary input.
  */
 template <typename CartLyt>
 [[nodiscard]] uint64_t compute_num_inputs_left_to_middle_pi(const CartLyt& lyt) noexcept
@@ -231,7 +231,7 @@ template <typename HexLyt, typename CartLyt>
     bool     non_empty_tile_found = false;
     uint64_t offset               = 0;
 
-    // iterate diagonally over the cartesian layout
+    // iterate diagonally over the Cartesian layout
     for (uint64_t diag = 0; diag < cartesian_layout_height + cartesian_layout_width - 1 && !non_empty_tile_found;
          ++diag)
     {

@@ -30,10 +30,10 @@ class hex_command : public command
     explicit hex_command(const environment::ptr& e) :
             command(e, "Transforms a 2DDWave-clocked Cartesian layout into a hexagonal one.")
     {
-        add_flag("--place_inputs_in_top_row,-i", ps.place_inputs_in_top_row,
-                 "Relocated all primary inputs to the top row of the hexagonal layout.");
-        add_flag("--planar_routing_for_moved_inputs,-p", ps.planar_routing_for_moved_inputs,
-                 "Restrict the routing of primary inputs that have been moved to the top row to be planar (i.e., "
+        add_flag("--extend_inputs_to_top_row,-i", ps.extend_inputs_to_top_row,
+                 "Extend all primary inputs to the top row of the hexagonal layout.");
+        add_flag("--planar_routing_for_extended_inputs,-p", ps.planar_routing_for_extended_inputs,
+                 "Restrict the routing of primary inputs that have been extended to the top row to be planar (i.e., "
                  "without crossings)");
         add_flag("--verbose,-v", "Be verbose");
     }
