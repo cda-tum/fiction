@@ -141,7 +141,6 @@ enum class sweep_parameter : uint8_t
      */
     MU_MINUS
 };
-
 namespace detail
 {
 /**
