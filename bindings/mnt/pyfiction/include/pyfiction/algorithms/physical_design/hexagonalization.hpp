@@ -22,13 +22,21 @@ inline void hexagonalization(pybind11::module& m)
     py::register_exception<fiction::hexagonalization_route_inputs_error>(m, "hexagonalization_route_inputs_error",
                                                                          PyExc_RuntimeError);
 
+    py::enum_<fiction::hexagonalization_params::hexagonalization_input_mode>(
+        m, "hexagonalization_input_mode", DOC(fiction_hexagonalization_params_hexagonalization_input_mode))
+        .value("NONE", fiction::hexagonalization_params::hexagonalization_input_mode::NONE,
+               DOC(fiction_hexagonalization_params_hexagonalization_input_mode_NONE))
+        .value("EXTEND", fiction::hexagonalization_params::hexagonalization_input_mode::EXTEND,
+               DOC(fiction_hexagonalization_params_hexagonalization_input_mode_EXTEND))
+        .value("EXTEND_PLANAR", fiction::hexagonalization_params::hexagonalization_input_mode::EXTEND_PLANAR,
+               DOC(fiction_hexagonalization_params_hexagonalization_input_mode_EXTEND_PLANAR))
+
+        ;
+
     py::class_<fiction::hexagonalization_params>(m, "hexagonalization_params", DOC(fiction_hexagonalization_params))
         .def(py::init<>())
-        .def_readwrite("place_inputs_in_top_row", &fiction::hexagonalization_params::place_inputs_in_top_row,
-                       DOC(fiction_hexagonalization_params_place_inputs_in_top_row))
-        .def_readwrite("planar_routing_for_moved_inputs",
-                       &fiction::hexagonalization_params::planar_routing_for_moved_inputs,
-                       DOC(fiction_hexagonalization_params_planar_routing_for_moved_inputs));
+        .def_readwrite("input_mode", &fiction::hexagonalization_params::input_mode,
+                       DOC(fiction_hexagonalization_params_input_mode));
 
     py::class_<fiction::hexagonalization_stats>(m, "hexagonalization_stats", DOC(fiction_hexagonalization_stats))
         .def(py::init<>())
