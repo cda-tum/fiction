@@ -70,7 +70,7 @@ struct is_operational_params
          */
         TOLERATE_KINKS,
         /**
-         * The I/O pins are not allowed to show kinks. If kinks exist, the layout is considered as non-operational.
+         * The I/O pins are not allowed to show kinks. If kinks exist, the layout is considered non-operational.
          */
         REJECT_KINKS
     };
@@ -149,7 +149,7 @@ enum class non_operationality_reason : uint8_t
      */
     LOGIC_MISMATCH,
     /**
-     * Positive charges may occur and the simulation base is 2.
+     * Positive charges may occur with the simulation base set to `2.
      */
     POTENTIAL_POSITIVE_CHARGES,
     /**
@@ -414,7 +414,7 @@ class is_operational_impl
             // number of different input combinations
             for (auto i = 0u; i < truth_table.front().num_bits(); ++i, ++bii)
             {
-                // if positively charged SiDBs can occur, the SiDB layout is considered as non-operational
+                // if positively charged SiDBs can occur, the SiDB layout is considered non-operational
                 if ((parameters.simulation_parameters.base == 2) &&
                     (can_positive_charges_occur(*bii, parameters.simulation_parameters)))
                 {
@@ -477,7 +477,7 @@ class is_operational_impl
     {
         auto non_operational_reason = non_operationality_reason::LOGIC_MISMATCH;
 
-        // if positively charged SiDBs can occur, the SiDB layout is considered as non-operational
+        // if positively charged SiDBs can occur, the SiDB layout is considered non-operational
         if (parameters.simulation_parameters.base == 2 &&
             can_positive_charges_occur(given_cds, parameters.simulation_parameters))
         {
@@ -560,7 +560,7 @@ class is_operational_impl
         {
             ++simulator_invocations;
 
-            // if positively charged SiDBs can occur, the SiDB layout is considered as non-operational
+            // if positively charged SiDBs can occur, the SiDB layout is considered non-operational
             if ((parameters.simulation_parameters.base == 2) &&
                 (can_positive_charges_occur(*bii, parameters.simulation_parameters)))
             {
@@ -1458,7 +1458,7 @@ template <typename Lyt, typename TT>
     return kink_induced_non_op_patterns;
 }
 /**
- * This function determines if the layout is only considered as non-operational because of kinks. This means that
+ * This function determines if the layout is only considered non-operational because of kinks. This means that
  * the layout would be considered as operational, if kinks were accepted.
  *
  * @note "Kink induced non-operational" refers to the non-operational status being exclusively caused by kinks with an
@@ -1500,7 +1500,7 @@ template <typename Lyt, typename TT>
 }
 
 /**
- * This function determines if the layout is only considered as non-operational because of kinks. This means that
+ * This function determines if the layout is only considered non-operational because of kinks. This means that
  * the layout would be considered as operational, if kinks were accepted.
  *
  * @note "Kink induced non-operational" refers to the non-operational status being exclusively caused by kinks with an

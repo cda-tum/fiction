@@ -33,8 +33,8 @@ void energy_distribution(pybind11::module& m)
 inline void energy_distribution(pybind11::module& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
-
-    detail::energy_distribution<py_charge_distribution_surface>(m);
+    detail::energy_distribution<py_charge_distribution_surface_100>(m);
+    detail::energy_distribution<py_charge_distribution_surface_111>(m);
 }
 
 }  // namespace pyfiction

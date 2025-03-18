@@ -299,6 +299,7 @@ TEST_CASE("SiQAD AND gate", "[is-operational]")
     {
         SECTION("base 2")
         {
+            params.base      = 2;
             params.epsilon_r = 1.7;
             params.lambda_tf = 6.9;
             CHECK(is_operational(lyt, std::vector<tt>{create_and_tt()}, is_operational_params{params}).first ==
