@@ -203,6 +203,7 @@ PYBIND11_MODULE(pyfiction, m, pybind11::mod_gil_not_used())
     pyfiction::sidb_nm_position(m);
     pyfiction::sidb_nm_distance(m);
     pyfiction::sidb_lattices(m);
+    pyfiction::sidb_lattice_factory(m);
     pyfiction::charge_distribution_surfaces(m);
     /**
      * Input/Output
