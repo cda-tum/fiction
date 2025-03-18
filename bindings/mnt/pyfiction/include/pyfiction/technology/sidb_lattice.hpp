@@ -29,7 +29,7 @@ namespace detail
 {
 
 template <typename LatticeOrientation, typename SidbLattice, typename SidbLyt>
-void sidb_lattice_cell_level_layout(pybind11::module& m, const std::string& coord_type)
+void sidb_lattice(pybind11::module& m, const std::string& coord_type)
 {
     namespace py = pybind11;
 
@@ -53,16 +53,14 @@ void sidb_lattice_cell_level_layout(pybind11::module& m, const std::string& coor
 
 inline void sidb_lattices(pybind11::module& m)
 {
-    detail::sidb_lattice_cell_level_layout<fiction::sidb_100_lattice, py_sidb_lattice<fiction::sidb_100_lattice>,
-                                           py_sidb_layout>(m, "offset_coordinates");
-    detail::sidb_lattice_cell_level_layout<fiction::sidb_100_lattice,
-                                           py_sidb_lattice_cube_coordinates<fiction::sidb_100_lattice>,
-                                           py_sidb_layout_cube_coordinates>(m, "cube_coordinates");
-    detail::sidb_lattice_cell_level_layout<fiction::sidb_111_lattice, py_sidb_lattice<fiction::sidb_111_lattice>,
-                                           py_sidb_layout>(m, "offset_coordinates");
-    detail::sidb_lattice_cell_level_layout<fiction::sidb_111_lattice,
-                                           py_sidb_lattice_cube_coordinates<fiction::sidb_111_lattice>,
-                                           py_sidb_layout_cube_coordinates>(m, "cube_coordinates");
+    detail::sidb_lattice<fiction::sidb_100_lattice, py_sidb_lattice<fiction::sidb_100_lattice>, py_sidb_layout>(
+        m, "offset_coordinates");
+    detail::sidb_lattice<fiction::sidb_100_lattice, py_sidb_lattice_cube_coordinates<fiction::sidb_100_lattice>,
+                         py_sidb_layout_cube_coordinates>(m, "cube_coordinates");
+    detail::sidb_lattice<fiction::sidb_111_lattice, py_sidb_lattice<fiction::sidb_111_lattice>, py_sidb_layout>(
+        m, "offset_coordinates");
+    detail::sidb_lattice<fiction::sidb_111_lattice, py_sidb_lattice_cube_coordinates<fiction::sidb_111_lattice>,
+                         py_sidb_layout_cube_coordinates>(m, "cube_coordinates");
 }
 
 /**
