@@ -134,14 +134,18 @@ using py_sidb_layout_cube_coordinates = py_cartesian_cell_layout_cube_coordinate
  */
 template <typename LatticeOrientation>
 using py_sidb_lattice = fiction::sidb_lattice<LatticeOrientation, py_sidb_layout>;
+template <typename LatticeOrientation>
+using py_sidb_lattice_cube_coordinates = fiction::sidb_lattice<LatticeOrientation, py_sidb_layout_cube_coordinates>;
 /**
  * SiDB cell layout (with specified H-Si(100)-2x1 lattice orientation).
  */
-using py_sidb_100_lattice = py_sidb_lattice<fiction::sidb_100_lattice>;
+using py_sidb_100_lattice                  = py_sidb_lattice<fiction::sidb_100_lattice>;
+using py_sidb_100_lattice_cube_coordinates = py_sidb_lattice_cube_coordinates<fiction::sidb_100_lattice>;
 /**
  * SiDB cell layout (with specified H-Si(111)-1x1 lattice orientation).
  */
-using py_sidb_111_lattice = py_sidb_lattice<fiction::sidb_111_lattice>;
+using py_sidb_111_lattice                  = py_sidb_lattice<fiction::sidb_111_lattice>;
+using py_sidb_111_lattice_cube_coordinates = py_sidb_lattice_cube_coordinates<fiction::sidb_111_lattice>;
 
 /**
  * Charge distribution surface. This is a special SiDB cell-level layout that is used for the SiDB simulation

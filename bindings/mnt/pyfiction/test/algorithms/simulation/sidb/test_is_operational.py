@@ -16,7 +16,7 @@ from mnt.pyfiction import (
     operational_status,
     read_sqd_layout_100,
     read_sqd_layout_111,
-    sidb_100_lattice,
+    sidb_lattice,
     sidb_simulation_parameters,
     sidb_technology,
 )
@@ -26,7 +26,7 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 
 class TestIsOperational(unittest.TestCase):
     def test_is_operational(self):
-        lyt = sidb_100_lattice()
+        lyt = sidb_lattice(orientation="100")
 
         lyt.assign_cell_type((0, 1), sidb_technology.cell_type.INPUT)
         lyt.assign_cell_type((2, 3), sidb_technology.cell_type.INPUT)
@@ -67,7 +67,7 @@ class TestIsOperational(unittest.TestCase):
         self.assertEqual(op_status, operational_status.NON_OPERATIONAL)
 
         # pre-determined I/O pins and canvas layout
-        canvas_lyt = sidb_100_lattice()
+        canvas_lyt = sidb_lattice(orientation="100")
         canvas_lyt.assign_cell_type((4, 5), sidb_technology.cell_type.LOGIC)
         canvas_lyt.assign_cell_type((6, 7), sidb_technology.cell_type.LOGIC)
         [op_status, _evaluated_input_combinations] = is_operational(

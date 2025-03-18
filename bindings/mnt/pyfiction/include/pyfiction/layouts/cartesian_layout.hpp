@@ -214,7 +214,7 @@ inline void cartesian_layout_factory(pybind11::module& m)
                 return py::cast(py_cartesian_layout{ar});
             }
         },
-        py::arg("dimension"),
+        py::arg("dimension")       = py::make_tuple(0, 0, 0),
         py::arg("coordinate_type") = "offset",  // default
         R"doc(
             Creates and returns a cartesian_layout instance, choosing the coordinate system

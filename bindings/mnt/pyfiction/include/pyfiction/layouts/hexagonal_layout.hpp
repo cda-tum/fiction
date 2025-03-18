@@ -189,7 +189,7 @@ inline void hexagonal_layout_factory(pybind11::module& m)
                 return py::cast(py_hexagonal_layout{ar});
             }
         },
-        py::arg("dimension"),
+        py::arg("dimension")       = py::make_tuple(0, 0, 0),
         py::arg("coordinate_type") = "offset",  // default
         R"doc(
             Creates and returns a hexagonal_layout instance, choosing the coordinate system

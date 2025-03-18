@@ -12,8 +12,7 @@ from mnt.pyfiction import (
     critical_temperature_params,
     critical_temperature_stats,
     read_sqd_layout_100,
-    sidb_100_lattice,
-    sidb_111_lattice,
+    sidb_lattice,
     sidb_simulation_engine,
     sidb_technology,
 )
@@ -23,7 +22,7 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 
 class TestCriticalTemperature(unittest.TestCase):
     def test_perturber_and_DB_pair_100(self):
-        layout = sidb_100_lattice(aspect_ratio_offset((10, 10)))
+        layout = sidb_lattice(aspect_ratio_offset((10, 10)), orienation="100")
         layout.assign_cell_type((0, 1), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((4, 1), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((6, 1), sidb_technology.cell_type.NORMAL)
@@ -42,7 +41,7 @@ class TestCriticalTemperature(unittest.TestCase):
         self.assertEqual(stats.num_valid_lyt, 1)
 
     def test_perturber_and_DB_pair_111(self):
-        layout = sidb_111_lattice(aspect_ratio_offset((10, 10)))
+        layout = sidb_lattice(aspect_ratio_offset((10, 10)), orienation="111")
         layout.assign_cell_type((0, 1), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((4, 1), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((6, 1), sidb_technology.cell_type.NORMAL)

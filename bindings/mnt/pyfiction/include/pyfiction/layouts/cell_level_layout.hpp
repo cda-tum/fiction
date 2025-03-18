@@ -228,7 +228,7 @@ inline void cell_level_layout_factory(pybind11::module& m)
                 throw std::runtime_error("Given name does not refer to a supported clocking scheme");
             }
         },
-        py::arg("dimension"), py::arg("scheme_name") = "open", py::arg("layout_name") = "",
+        py::arg("dimension") = py::make_tuple(0, 0, 0), py::arg("scheme_name") = "open", py::arg("layout_name") = "",
         py::arg("coordinate_type") = "offset",
         R"doc(
             Creates and returns a qca_layout instance, choosing the coordinate system
@@ -262,7 +262,7 @@ inline void cell_level_layout_factory(pybind11::module& m)
                 throw std::runtime_error("Given name does not refer to a supported clocking scheme");
             }
         },
-        py::arg("dimension"), py::arg("scheme_name") = "open", py::arg("layout_name") = "",
+        py::arg("dimension") = py::make_tuple(0, 0, 0), py::arg("scheme_name") = "open", py::arg("layout_name") = "",
         py::arg("coordinate_type") = "offset",
         R"doc(
             Creates and returns a inml_layout instance, choosing the coordinate system
@@ -296,7 +296,7 @@ inline void cell_level_layout_factory(pybind11::module& m)
                 throw std::runtime_error("Given name does not refer to a supported clocking scheme");
             }
         },
-        py::arg("dimension"), py::arg("scheme_name") = "open", py::arg("layout_name") = "",
+        py::arg("dimension") = py::make_tuple(0, 0, 0), py::arg("scheme_name") = "open", py::arg("layout_name") = "",
         py::arg("coordinate_type") = "offset",
         R"doc(
             Creates and returns a sidb_layout instance, choosing the coordinate system

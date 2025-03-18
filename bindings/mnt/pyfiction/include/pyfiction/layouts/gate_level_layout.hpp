@@ -380,7 +380,7 @@ inline void gate_level_layout_factory(pybind11::module& m)
                 }
             }
         },
-        py::arg("dimension"), py::arg("scheme_name") = "open", py::arg("layout_name") = "",
+        py::arg("dimension") = py::make_tuple(0, 0, 0), py::arg("scheme_name") = "open", py::arg("layout_name") = "",
         py::arg("coordinate_type") = "offset",
         R"doc(
             Creates and returns a cartesian_gate_layout instance, choosing the coordinate system
@@ -422,7 +422,7 @@ inline void gate_level_layout_factory(pybind11::module& m)
                 }
             }
         },
-        py::arg("dimension"), py::arg("scheme_name") = "open", py::arg("layout_name") = "",
+        py::arg("dimension") = py::make_tuple(0, 0, 0), py::arg("scheme_name") = "open", py::arg("layout_name") = "",
         py::arg("coordinate_type") = "offset",
         R"doc(
             Creates and returns a shifted_cartesian_gate_layout instance, choosing the coordinate system
@@ -464,7 +464,7 @@ inline void gate_level_layout_factory(pybind11::module& m)
                 }
             }
         },
-        py::arg("dimension"), py::arg("scheme_name") = "open", py::arg("layout_name") = "",
+        py::arg("dimension") = py::make_tuple(0, 0, 0), py::arg("scheme_name") = "open", py::arg("layout_name") = "",
         py::arg("coordinate_type") = "offset",
         R"doc(
             Creates and returns a hexagonal_gate_layout instance, choosing the coordinate system

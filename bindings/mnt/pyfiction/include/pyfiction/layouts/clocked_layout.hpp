@@ -143,7 +143,7 @@ inline void clocked_layout_factory(pybind11::module& m)
                 }
             }
         },
-        py::arg("dimension"), py::arg("scheme_name") = "open",
+        py::arg("dimension") = py::make_tuple(0, 0, 0), py::arg("scheme_name") = "open",
         py::arg("coordinate_type") = "offset",  // default
         R"doc(
             Creates and returns a clocked_cartesian_layout instance, choosing the coordinate system
@@ -186,7 +186,7 @@ inline void clocked_layout_factory(pybind11::module& m)
                 }
             }
         },
-        py::arg("dimension"), py::arg("scheme_name") = "open",
+        py::arg("dimension") = py::make_tuple(0, 0, 0), py::arg("scheme_name") = "open",
         py::arg("coordinate_type") = "offset",  // default
         R"doc(
             Creates and returns a clocked_shifted_cartesian_layout instance, choosing the coordinate system
@@ -229,7 +229,7 @@ inline void clocked_layout_factory(pybind11::module& m)
                 }
             }
         },
-        py::arg("dimension"), py::arg("scheme_name") = "open",
+        py::arg("dimension") = py::make_tuple(0, 0, 0), py::arg("scheme_name") = "open",
         py::arg("coordinate_type") = "offset",  // default
         R"doc(
             Creates and returns a clocked_hexagonal_layout instance, choosing the coordinate system

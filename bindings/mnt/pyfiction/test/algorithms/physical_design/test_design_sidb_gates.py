@@ -8,8 +8,7 @@ from mnt.pyfiction import (
     design_sidb_gates_mode,
     design_sidb_gates_params,
     operational_condition,
-    sidb_100_lattice,
-    sidb_111_lattice,
+    sidb_lattice,
     sidb_simulation_engine,
     sidb_technology,
 )
@@ -17,7 +16,7 @@ from mnt.pyfiction import (
 
 class TestDesignSiDBGates(unittest.TestCase):
     def test_siqad_and_gate_skeleton_100(self):
-        layout = sidb_100_lattice(aspect_ratio_offset((20, 20)))
+        layout = sidb_lattice(aspect_ratio_offset((20, 20)), orienation="100")
 
         layout.assign_cell_type((0, 1), sidb_technology.cell_type.INPUT)
         layout.assign_cell_type((2, 3), sidb_technology.cell_type.INPUT)
@@ -54,7 +53,7 @@ class TestDesignSiDBGates(unittest.TestCase):
         self.assertEqual(len(designed_gates), 23)
 
     def test_nor_gate_111(self):
-        layout = sidb_111_lattice(aspect_ratio_offset((30, 30)))
+        layout = sidb_lattice(aspect_ratio_offset((30, 30)), orienation="111")
 
         layout.assign_cell_type((0, 0), sidb_technology.cell_type.INPUT)
         layout.assign_cell_type((1, 3), sidb_technology.cell_type.INPUT)
@@ -105,7 +104,7 @@ class TestDesignSiDBGates(unittest.TestCase):
         self.assertEqual(len(designed_gates), 175)
 
     def test_nor_gate_111_quickcell(self):
-        layout = sidb_111_lattice(aspect_ratio_offset((30, 30)))
+        layout = sidb_lattice(aspect_ratio_offset((30, 30)), orienation="111")
 
         layout.assign_cell_type((0, 0), sidb_technology.cell_type.INPUT)
         layout.assign_cell_type((1, 3), sidb_technology.cell_type.INPUT)

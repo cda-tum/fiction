@@ -9,7 +9,7 @@ from mnt.pyfiction import (
     displacement_robustness_domain_params,
     displacement_robustness_domain_stats,
     offset_coordinate,
-    sidb_100_lattice,
+    sidb_lattice,
     sidb_simulation_parameters,
     sidb_technology,
 )
@@ -17,7 +17,7 @@ from mnt.pyfiction import (
 
 class TestDisplacementRobustnessDomain(unittest.TestCase):
     def test_siqad_and_gate_100_lattice(self):
-        layout = sidb_100_lattice(aspect_ratio_offset((10, 10)))
+        layout = sidb_lattice(aspect_ratio_offset((10, 10)), orienation="100")
 
         layout.assign_cell_type((0, 1), sidb_technology.cell_type.INPUT)
         layout.assign_cell_type((2, 3), sidb_technology.cell_type.INPUT)

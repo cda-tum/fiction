@@ -23,7 +23,7 @@ from mnt.pyfiction import (
     parameter_point,
     read_sqd_layout_100,
     read_sqd_layout_111,
-    sidb_100_lattice,
+    sidb_lattice,
     sidb_simulation_engine,
     sidb_technology,
     sweep_parameter,
@@ -175,7 +175,7 @@ class TestOperationalDomain(unittest.TestCase):
         self.assertEqual(op_domain.get_dimension(1), sweep_parameter.LAMBDA_TF)
 
     def test_operational_domain_two_bdl_pair_wire(self):
-        bdl_wire = sidb_100_lattice()
+        bdl_wire = sidb_lattice(orienation="100")
 
         bdl_wire.assign_cell_type((0, 0), sidb_technology.cell_type.INPUT)
         bdl_wire.assign_cell_type((2, 0), sidb_technology.cell_type.INPUT)

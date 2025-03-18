@@ -1,11 +1,11 @@
 import unittest
 
-from mnt.pyfiction import aspect_ratio_offset, sidb_100_lattice, sidb_111_lattice, sidb_technology
+from mnt.pyfiction import aspect_ratio_offset, sidb_lattice, sidb_technology
 
 
 class TestSiDBLattice(unittest.TestCase):
     def test_qca_cell_layout_inheritance(self):
-        layout = sidb_100_lattice(aspect_ratio_offset((9, 9)))
+        layout = sidb_lattice(aspect_ratio_offset((9, 9)), orienation="100")
 
         for t in layout.coordinates():
             self.assertTrue(t <= (9, 9, 1))
@@ -20,7 +20,7 @@ class TestSiDBLattice(unittest.TestCase):
             self.assertIn(t, [(1, 2), (2, 1), (3, 2), (2, 3)])
 
     def test_cell_type_assignment_100_lattice(self):
-        layout = sidb_100_lattice(aspect_ratio_offset((4, 4)), "AND")
+        layout = sidb_lattice(aspect_ratio_offset((4, 4)), orienation="100", name="AND")
 
         self.assertTrue(layout.is_empty())
 
@@ -88,7 +88,7 @@ class TestSiDBLattice(unittest.TestCase):
         self.assertFalse(layout.is_empty_cell((4, 2)))
 
     def test_cell_type_assignment_111_lattice(self):
-        layout = sidb_111_lattice(aspect_ratio_offset((4, 4)), "AND")
+        layout = sidb_lattice(aspect_ratio_offset((4, 4)), orienation="111", name="AND")
 
         self.assertTrue(layout.is_empty())
 

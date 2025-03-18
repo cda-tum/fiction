@@ -5,8 +5,8 @@ from mnt.pyfiction import (
     aspect_ratio_offset,
     charge_distribution_surface_100,
     color_mode,
-    sidb_100_lattice,
     sidb_charge_state,
+    sidb_lattice,
     sidb_technology,
     write_sidb_layout_svg_params,
     write_sidb_layout_svg_to_string,
@@ -203,7 +203,7 @@ cds_light_mode = (
 class TestWriteSvgLayout(unittest.TestCase):
     def test_write_sidb_cell_level_layout_to_svg(self):
         # Create and configure the SIDB layout
-        sidb_layout = sidb_100_lattice(aspect_ratio_offset((4, 4)))
+        sidb_layout = sidb_lattice(aspect_ratio_offset((4, 4)), orienation="100")
         sidb_layout.assign_cell_type((0, 0), sidb_technology.cell_type.NORMAL)
         sidb_layout.assign_cell_type((1, 1), sidb_technology.cell_type.NORMAL)
         sidb_layout.assign_cell_type((1, 0), sidb_technology.cell_type.NORMAL)
@@ -223,7 +223,7 @@ class TestWriteSvgLayout(unittest.TestCase):
 
     def test_write_sidb_charge_distribution_to_svg(self):
         # Create and configure the SIDB layout
-        sidb_layout = sidb_100_lattice(aspect_ratio_offset((4, 4)))
+        sidb_layout = sidb_lattice(aspect_ratio_offset((4, 4)), orienation="100")
         sidb_layout.assign_cell_type((0, 0), sidb_technology.cell_type.NORMAL)
         sidb_layout.assign_cell_type((1, 1), sidb_technology.cell_type.NORMAL)
         sidb_layout.assign_cell_type((1, 0), sidb_technology.cell_type.NORMAL)
