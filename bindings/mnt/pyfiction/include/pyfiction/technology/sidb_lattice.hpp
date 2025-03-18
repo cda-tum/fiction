@@ -75,8 +75,9 @@ inline void sidb_lattice_factory(pybind11::module& m)
     m.def(
         "sidb_lattice",
         [](const py::tuple&   dimension,
-           const std::string& orientation = "100",    // default
-           const std::string& coord_type  = "offset"  // default
+           const std::string& orientation = "100",     // default
+           const std::string& coord_type  = "offset",  // default
+           const std::string& name        = ""         // default
         )
         {
             // Decide which orientation
@@ -86,13 +87,13 @@ inline void sidb_lattice_factory(pybind11::module& m)
                 {
                     // 1) H-Si(100)-2x1 orientation, cube coordinates
                     const auto ar = extract_aspect_ratio<py_sidb_layout<py_cube_coordinate>>(dimension);
-                    return py::cast(py_sidb_100_lattice<py_cube_coordinate>{ar});
+                    return py::cast(py_sidb_100_lattice<py_cube_coordinate>{ar, name});
                 }
                 else
                 {
                     // 2) H-Si(100)-2x1 orientation, offset coordinates
                     const auto ar = extract_aspect_ratio<py_sidb_layout<py_offset_coordinate>>(dimension);
-                    return py::cast(py_sidb_100_lattice<py_offset_coordinate>{ar});
+                    return py::cast(py_sidb_100_lattice<py_offset_coordinate>{ar, name});
                 }
             }
             else if (orientation == "111")
@@ -101,13 +102,13 @@ inline void sidb_lattice_factory(pybind11::module& m)
                 {
                     // 3) H-Si(111)-1x1 orientation, cube coordinates
                     const auto ar = extract_aspect_ratio<py_sidb_layout<py_cube_coordinate>>(dimension);
-                    return py::cast(py_sidb_111_lattice<py_cube_coordinate>{ar});
+                    return py::cast(py_sidb_111_lattice<py_cube_coordinate>{ar, name});
                 }
                 else
                 {
                     // 4) H-Si(111)-1x1 orientation, offset coordinates
                     const auto ar = extract_aspect_ratio<py_sidb_layout<py_offset_coordinate>>(dimension);
-                    return py::cast(py_sidb_111_lattice<py_offset_coordinate>{ar});
+                    return py::cast(py_sidb_111_lattice<py_offset_coordinate>{ar, name});
                 }
             }
             else
@@ -116,7 +117,7 @@ inline void sidb_lattice_factory(pybind11::module& m)
             }
         },
         py::arg("dimension") = py::make_tuple(0, 0, 0), py::arg("orientation") = "100",
-        py::arg("coordinate_type") = "offset",
+        py::arg("coordinate_type") = "offset", py::arg("name") = "",
         R"doc(
             Creates and returns a sidb_lattice instance, choosing both the lattice orientation
             and the coordinate system based on the string arguments.
