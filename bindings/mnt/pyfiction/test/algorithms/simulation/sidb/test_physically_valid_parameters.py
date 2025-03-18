@@ -13,7 +13,7 @@ from mnt.pyfiction import (
 
 class TestDeterminePhysicallyValidParameters(unittest.TestCase):
     def test_one_DB_100_lattice(self):
-        layout = sidb_lattice(aspect_ratio_offset((10, 10)), orienation="100")
+        layout = sidb_lattice(aspect_ratio_offset((10, 10)), orientation="100")
         layout.assign_cell_type((0, 0), sidb_technology.cell_type.NORMAL)
         cds = charge_distribution_surface_100(layout)
 
@@ -28,7 +28,7 @@ class TestDeterminePhysicallyValidParameters(unittest.TestCase):
             valid_parameters.get_excited_state_number_for_parameter(parameter_point([15, 15]))
 
     def test_one_DB_111_lattice(self):
-        layout = sidb_lattice(aspect_ratio_offset((10, 10)), orienation="111")
+        layout = sidb_lattice(aspect_ratio_offset((10, 10)), orientation="111")
         layout.assign_cell_type((0, 0), sidb_technology.cell_type.NORMAL)
         cds = charge_distribution_surface_111(layout)
 

@@ -13,7 +13,7 @@ from mnt.pyfiction import (
 
 class TestDetectBDLWires(unittest.TestCase):
     def test_detect_bdl_wires_100_lattice(self):
-        lyt = sidb_lattice(aspect_ratio_offset((7, 0)), orienation="100")
+        lyt = sidb_lattice(aspect_ratio_offset((7, 0)), orientation="100")
 
         lyt = charge_distribution_surface_100(lyt)
 

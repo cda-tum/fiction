@@ -13,7 +13,7 @@ from mnt.pyfiction import (
 
 class TestDetectBDLPairs(unittest.TestCase):
     def test_detect_bdl_pairs_100_lattice(self):
-        lyt = sidb_lattice(aspect_ratio_offset((7, 0)), orienation="100")
+        lyt = sidb_lattice(aspect_ratio_offset((7, 0)), orientation="100")
 
         lyt = charge_distribution_surface_100(lyt)
 
@@ -39,7 +39,7 @@ class TestDetectBDLPairs(unittest.TestCase):
         self.assertEqual(len(normal_bdl_pairs), 2)
 
     def test_detect_bdl_pairs_111_lattice(self):
-        lyt = sidb_lattice(aspect_ratio_offset((7, 0)), orienation="111")
+        lyt = sidb_lattice(aspect_ratio_offset((7, 0)), orientation="111")
 
         lyt = charge_distribution_surface_111(lyt)
 

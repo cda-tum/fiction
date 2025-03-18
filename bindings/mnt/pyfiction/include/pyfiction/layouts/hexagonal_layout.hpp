@@ -158,11 +158,11 @@ inline void hexagonal_layouts(pybind11::module& m)
     /**
      * Hexagonal layout with offset coordinates.
      */
-    detail::hexagonal_layout<py_hexagonal_layout>(m, "offset_coordinates");
+    detail::hexagonal_layout<py_hexagonal_layout<py_offset_coordinate>>(m, "offset_coordinates");
     /**
      * Hexagonal layout with cube coordinates.
      */
-    detail::hexagonal_layout<py_hexagonal_layout_cube_coordinates>(m, "cube_coordinates");
+    detail::hexagonal_layout<py_hexagonal_layout<py_cube_coordinate>>(m, "cube_coordinates");
 }
 
 /**
@@ -180,13 +180,13 @@ inline void hexagonal_layout_factory(pybind11::module& m)
         {
             if (coordinate_type == "cube")
             {
-                const auto ar = extract_aspect_ratio<py_hexagonal_layout_cube_coordinates>(dimension);
-                return py::cast(py_hexagonal_layout_cube_coordinates{ar});
+                const auto ar = extract_aspect_ratio<py_hexagonal_layout<py_cube_coordinate>>(dimension);
+                return py::cast(py_hexagonal_layout<py_cube_coordinate>{ar});
             }
             else
             {
-                const auto ar = extract_aspect_ratio<py_hexagonal_layout>(dimension);
-                return py::cast(py_hexagonal_layout{ar});
+                const auto ar = extract_aspect_ratio<py_hexagonal_layout<py_offset_coordinate>>(dimension);
+                return py::cast(py_hexagonal_layout<py_offset_coordinate>{ar});
             }
         },
         py::arg("dimension")       = py::make_tuple(0, 0, 0),

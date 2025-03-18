@@ -5,7 +5,7 @@ from mnt.pyfiction import bdl_input_iterator_100, sidb_lattice, sidb_technology
 
 class TestBDLInputIterator(unittest.TestCase):
     def test_empty_layout(self):
-        layout = sidb_lattice((0, 0), orienation="100")
+        layout = sidb_lattice((0, 0), orientation="100")
 
         bii = bdl_input_iterator_100(layout)
 
@@ -17,7 +17,7 @@ class TestBDLInputIterator(unittest.TestCase):
         self.assertGreaterEqual(bii, 0)
 
     def test_iteration_empty_layout(self):
-        layout = sidb_lattice((0, 0), orienation="100")
+        layout = sidb_lattice((0, 0), orientation="100")
 
         bii = bdl_input_iterator_100(layout)
 
@@ -38,7 +38,7 @@ class TestBDLInputIterator(unittest.TestCase):
         self.assertEqual(bii.get_layout().num_cells(), 0)
 
     def test_manual_bdl_wire_iteration(self):
-        layout = sidb_lattice((20, 0), orienation="100")
+        layout = sidb_lattice((20, 0), orientation="100")
 
         layout.assign_cell_type((0, 0, 0), sidb_technology.cell_type.INPUT)
         layout.assign_cell_type((2, 0, 0), sidb_technology.cell_type.INPUT)
@@ -94,7 +94,7 @@ class TestBDLInputIterator(unittest.TestCase):
         self.assertEqual(lyt0.get_cell_type((2, 0, 0)), sidb_technology.cell_type.EMPTY)
 
     def test_automatic_bdl_wire_iteration(self):
-        layout = sidb_lattice((20, 0), orienation="100")
+        layout = sidb_lattice((20, 0), orientation="100")
 
         layout.assign_cell_type((0, 0, 0), sidb_technology.cell_type.INPUT)
         layout.assign_cell_type((2, 0, 0), sidb_technology.cell_type.INPUT)
@@ -125,7 +125,7 @@ class TestBDLInputIterator(unittest.TestCase):
                 break
 
     def test_automatic_siqad_and_gate_iteration(self):
-        layout = sidb_lattice((20, 10), orienation="100", name="AND gate")
+        layout = sidb_lattice((20, 10), orientation="100", name="AND gate")
 
         layout.assign_cell_type((0, 0, 1), sidb_technology.cell_type.INPUT)
         layout.assign_cell_type((2, 1, 1), sidb_technology.cell_type.INPUT)

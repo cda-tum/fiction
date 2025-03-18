@@ -14,7 +14,7 @@ from mnt.pyfiction import (
 class TestCheckSimulationResultsForEquivalence(unittest.TestCase):
     def test_cds_with_two_sidbs_100_lattice(self):
         # Use standard constructor.
-        lattice_100 = sidb_lattice(orienation="100")
+        lattice_100 = sidb_lattice(orientation="100")
         lattice_100.assign_cell_type((0, 1), sidb_technology.cell_type.NORMAL)
         lattice_100.assign_cell_type((0, 3), sidb_technology.cell_type.NORMAL)
 
@@ -30,7 +30,7 @@ class TestCheckSimulationResultsForEquivalence(unittest.TestCase):
 
     def test_cds_with_two_sidbs_111_lattice(self):
         # Use standard constructor.
-        lattice_111 = sidb_lattice(orienation="111")
+        lattice_111 = sidb_lattice(orientation="111")
         lattice_111.assign_cell_type((0, 1), sidb_technology.cell_type.NORMAL)
         lattice_111.assign_cell_type((0, 3), sidb_technology.cell_type.NORMAL)
 

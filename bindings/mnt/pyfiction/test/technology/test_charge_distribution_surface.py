@@ -50,7 +50,7 @@ class TestChargeDistributionSurface(unittest.TestCase):
         self.assertEqual(charge_lyt.get_system_energy(), 0)
 
     def test_initialization_111_lattice(self):
-        layout_one = sidb_lattice(aspect_ratio_offset((10, 10)), orienation="111")
+        layout_one = sidb_lattice(aspect_ratio_offset((10, 10)), orientation="111")
         layout_one.assign_cell_type((0, 1), sidb_technology.cell_type.NORMAL)
         layout_one.assign_cell_type((1, 1), sidb_technology.cell_type.NORMAL)
         layout_one.assign_cell_type((2, 1), sidb_technology.cell_type.NORMAL)

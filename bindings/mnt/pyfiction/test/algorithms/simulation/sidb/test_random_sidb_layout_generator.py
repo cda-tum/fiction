@@ -16,7 +16,7 @@ class TestRandomSiDBLayoutGenerator(unittest.TestCase):
         params = generate_random_sidb_layout_params()
         params.number_of_sidbs = 1
         params.coordinate_pair = ((10, 10), (10, 10))
-        result_lyt = generate_random_sidb_layout(params, sidb_lattice(orienation="100"))
+        result_lyt = generate_random_sidb_layout(params, sidb_lattice(orientation="100"))
         self.assertEqual(result_lyt.num_cells(), 1)
         cell = (result_lyt.cells())[0]
         self.assertEqual(cell.x, 10)
@@ -35,7 +35,7 @@ class TestRandomSiDBLayoutGenerator(unittest.TestCase):
         params.number_of_sidbs = 5
         print(params.number_of_sidbs)
         params.coordinate_pair = ((0, 0), (10, 10))
-        result_lyt = generate_random_sidb_layout(params, sidb_lattice(orienation="100"))
+        result_lyt = generate_random_sidb_layout(params, sidb_lattice(orientation="100"))
         self.assertEqual(result_lyt.num_cells(), 5)
 
     def test_area_with_five_sidbs_cds_100(self):
@@ -58,7 +58,7 @@ class TestRandomSiDBLayoutGenerator(unittest.TestCase):
         params = generate_random_sidb_layout_params()
         params.number_of_sidbs = 1
         params.coordinate_pair = ((10, 10), (10, 10))
-        result_lyt = generate_random_sidb_layout(params, sidb_lattice(orienation="111"))
+        result_lyt = generate_random_sidb_layout(params, sidb_lattice(orientation="111"))
         self.assertEqual(result_lyt.num_cells(), 1)
         cell = (result_lyt.cells())[0]
         self.assertEqual(cell.x, 10)

@@ -226,11 +226,12 @@ inline void shifted_cartesian_layouts(pybind11::module& m)
     /**
      * Shifted Cartesian layout with offset coordinates.
      */
-    detail::shifted_cartesian_layout<py_shifted_cartesian_layout, py_offset_coordinate>(m, "offset_coordinates");
+    detail::shifted_cartesian_layout<py_shifted_cartesian_layout<py_offset_coordinate>, py_offset_coordinate>(
+        m, "offset_coordinates");
     /**
      * Shifted Cartesian layout with cube coordinates.
      */
-    detail::shifted_cartesian_layout<py_shifted_cartesian_layout_cube_coordinates, py_cube_coordinate>(
+    detail::shifted_cartesian_layout<py_shifted_cartesian_layout<py_cube_coordinate>, py_cube_coordinate>(
         m, "cube_coordinates");
 }
 
@@ -249,13 +250,13 @@ inline void shifted_cartesian_layout_factory(pybind11::module& m)
         {
             if (coordinate_type == "cube")
             {
-                const auto ar = extract_aspect_ratio<py_shifted_cartesian_layout_cube_coordinates>(dimension);
-                return py::cast(py_shifted_cartesian_layout_cube_coordinates{ar});
+                const auto ar = extract_aspect_ratio<py_shifted_cartesian_layout<py_cube_coordinate>>(dimension);
+                return py::cast(py_shifted_cartesian_layout<py_cube_coordinate>{ar});
             }
             else  // default: offset
             {
-                const auto ar = extract_aspect_ratio<py_shifted_cartesian_layout>(dimension);
-                return py::cast(py_shifted_cartesian_layout{ar});
+                const auto ar = extract_aspect_ratio<py_shifted_cartesian_layout<py_offset_coordinate>>(dimension);
+                return py::cast(py_shifted_cartesian_layout<py_offset_coordinate>{ar});
             }
         },
         py::arg("dimension")       = py::make_tuple(0, 0, 0),

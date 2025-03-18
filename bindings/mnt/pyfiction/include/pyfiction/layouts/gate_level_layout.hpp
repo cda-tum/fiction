@@ -318,10 +318,10 @@ inline void gate_level_layouts(pybind11::module& m)
     /**
      * Gate-level clocked Cartesian layout.
      */
-    detail::gate_level_layout<py_cartesian_clocked_layout, py_cartesian_gate_layout>(m, "cartesian",
-                                                                                     "offset_coordinates");
-    detail::gate_level_layout<py_cartesian_clocked_layout_cube_coordinates, py_cartesian_gate_layout_cube_coordinates>(
-        m, "cartesian", "cube_coordinates");
+    detail::gate_level_layout<py_cartesian_clocked_layout<py_offset_coordinate>, py_cartesian_gate_layout>(
+        m, "cartesian", "offset_coordinates");
+    detail::gate_level_layout<py_cartesian_clocked_layout<py_cube_coordinate>,
+                              py_cartesian_gate_layout_cube_coordinates>(m, "cartesian", "cube_coordinates");
     /**
      * Gate-level clocked shifted Cartesian layout.
      */
@@ -354,7 +354,7 @@ inline void gate_level_layout_factory(pybind11::module& m)
         {
             if (coordinate_type == "cube")
             {
-                const auto ar = extract_aspect_ratio<py_cartesian_layout_cube_coordinates>(dimension);
+                const auto ar = extract_aspect_ratio<py_cartesian_layout<py_cube_coordinate>>(dimension);
                 if (const auto scheme =
                         fiction::get_clocking_scheme<py_cartesian_gate_layout_cube_coordinates>(scheme_name);
                     scheme.has_value())
@@ -368,7 +368,7 @@ inline void gate_level_layout_factory(pybind11::module& m)
             }
             else  // default: offset
             {
-                const auto ar = extract_aspect_ratio<py_cartesian_layout>(dimension);
+                const auto ar = extract_aspect_ratio<py_cartesian_layout<py_offset_coordinate>>(dimension);
                 if (const auto scheme = fiction::get_clocking_scheme<py_cartesian_gate_layout>(scheme_name);
                     scheme.has_value())
                 {
@@ -396,7 +396,7 @@ inline void gate_level_layout_factory(pybind11::module& m)
         {
             if (coordinate_type == "cube")
             {
-                const auto ar = extract_aspect_ratio<py_shifted_cartesian_layout_cube_coordinates>(dimension);
+                const auto ar = extract_aspect_ratio<py_shifted_cartesian_layout<py_cube_coordinate>>(dimension);
                 if (const auto scheme =
                         fiction::get_clocking_scheme<py_shifted_cartesian_gate_layout_cube_coordinates>(scheme_name);
                     scheme.has_value())
@@ -410,7 +410,7 @@ inline void gate_level_layout_factory(pybind11::module& m)
             }
             else  // default: offset
             {
-                const auto ar = extract_aspect_ratio<py_cartesian_layout>(dimension);
+                const auto ar = extract_aspect_ratio<py_cartesian_layout<py_offset_coordinate>>(dimension);
                 if (const auto scheme = fiction::get_clocking_scheme<py_shifted_cartesian_gate_layout>(scheme_name);
                     scheme.has_value())
                 {
@@ -438,7 +438,7 @@ inline void gate_level_layout_factory(pybind11::module& m)
         {
             if (coordinate_type == "cube")
             {
-                const auto ar = extract_aspect_ratio<py_hexagonal_layout_cube_coordinates>(dimension);
+                const auto ar = extract_aspect_ratio<py_hexagonal_layout<py_cube_coordinate>>(dimension);
                 if (const auto scheme =
                         fiction::get_clocking_scheme<py_hexagonal_gate_layout_cube_coordinates>(scheme_name);
                     scheme.has_value())
@@ -452,7 +452,7 @@ inline void gate_level_layout_factory(pybind11::module& m)
             }
             else  // default: offset
             {
-                const auto ar = extract_aspect_ratio<py_hexagonal_layout>(dimension);
+                const auto ar = extract_aspect_ratio<py_hexagonal_layout<py_offset_coordinate>>(dimension);
                 if (const auto scheme = fiction::get_clocking_scheme<py_hexagonal_gate_layout>(scheme_name);
                     scheme.has_value())
                 {

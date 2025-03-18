@@ -16,7 +16,7 @@ from mnt.pyfiction import (
 
 class TestIsGroundState(unittest.TestCase):
     def test_three_DBs_100_lattice(self):
-        layout = sidb_lattice(aspect_ratio_offset((10, 10)), orienation="100")
+        layout = sidb_lattice(aspect_ratio_offset((10, 10)), orientation="100")
 
         layout.assign_cell_type((0, 1), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((4, 1), sidb_technology.cell_type.NORMAL)
@@ -45,7 +45,7 @@ class TestIsGroundState(unittest.TestCase):
         self.assertTrue(is_ground_state(heuristic_results, exact_results))
 
     def test_three_DBs_111_lattice(self):
-        layout = sidb_lattice(aspect_ratio_offset((10, 10)), orienation="111")
+        layout = sidb_lattice(aspect_ratio_offset((10, 10)), orientation="111")
 
         layout.assign_cell_type((0, 1), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((4, 1), sidb_technology.cell_type.NORMAL)

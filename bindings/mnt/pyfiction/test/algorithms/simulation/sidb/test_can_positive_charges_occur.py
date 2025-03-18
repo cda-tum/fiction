@@ -11,7 +11,7 @@ from mnt.pyfiction import (
 
 class TestCanPositiveChargesOccur(unittest.TestCase):
     def test_three_DBs_100_lattice(self):
-        layout = sidb_lattice(aspect_ratio_offset((2, 3)), orienation="100")
+        layout = sidb_lattice(aspect_ratio_offset((2, 3)), orientation="100")
         layout.assign_cell_type((0, 0), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((1, 0), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((2, 0), sidb_technology.cell_type.NORMAL)
@@ -23,7 +23,7 @@ class TestCanPositiveChargesOccur(unittest.TestCase):
         self.assertFalse(can_positive_charges_occur(layout, params))
 
     def test_three_DBs_111_lattice(self):
-        layout = sidb_lattice(aspect_ratio_offset((2, 3)), orienation="111")
+        layout = sidb_lattice(aspect_ratio_offset((2, 3)), orientation="111")
         layout.assign_cell_type((0, 0), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((1, 0), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((2, 0), sidb_technology.cell_type.NORMAL)

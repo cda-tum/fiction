@@ -39,9 +39,9 @@ void distance(pybind11::module& m)
 
 inline void distance(pybind11::module& m)
 {
-    detail::distance<py_cartesian_layout>(m);
-    detail::distance<py_shifted_cartesian_layout>(m);
-    detail::distance<py_hexagonal_layout>(m);
+    detail::distance<py_cartesian_layout<py_offset_coordinate>>(m);
+    detail::distance<py_shifted_cartesian_layout<py_offset_coordinate>>(m);
+    detail::distance<py_hexagonal_layout<py_offset_coordinate>>(m);
 }
 
 }  // namespace pyfiction

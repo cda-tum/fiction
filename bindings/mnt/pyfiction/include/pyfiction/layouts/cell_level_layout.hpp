@@ -181,17 +181,17 @@ inline void cell_level_layouts(pybind11::module& m)
     detail::fcn_technology<fiction::qca_technology>(m);
     detail::fcn_technology<fiction::inml_technology>(m);
     detail::fcn_technology<fiction::sidb_technology>(m);
-    detail::cell_level_layout<py_cartesian_clocked_layout, py_qca_layout, fiction::qca_technology>(
-        m, "offset_coordinates");
-    detail::cell_level_layout<py_cartesian_clocked_layout_cube_coordinates, py_qca_layout_cube_coordinates,
+    detail::cell_level_layout<py_cartesian_clocked_layout<py_offset_coordinate>, py_qca_layout,
+                              fiction::qca_technology>(m, "offset_coordinates");
+    detail::cell_level_layout<py_cartesian_clocked_layout<py_cube_coordinate>, py_qca_layout_cube_coordinates,
                               fiction::qca_technology>(m, "cube_coordinates");
-    detail::cell_level_layout<py_cartesian_clocked_layout, py_inml_layout, fiction::inml_technology>(
-        m, "offset_coordinates");
-    detail::cell_level_layout<py_cartesian_clocked_layout_cube_coordinates, py_inml_layout_cube_coordinates,
+    detail::cell_level_layout<py_cartesian_clocked_layout<py_offset_coordinate>, py_inml_layout,
+                              fiction::inml_technology>(m, "offset_coordinates");
+    detail::cell_level_layout<py_cartesian_clocked_layout<py_cube_coordinate>, py_inml_layout_cube_coordinates,
                               fiction::inml_technology>(m, "cube_coordinates");
-    detail::cell_level_layout<py_cartesian_clocked_layout, py_sidb_layout, fiction::sidb_technology>(
-        m, "offset_coordinates");
-    detail::cell_level_layout<py_cartesian_clocked_layout_cube_coordinates, py_sidb_layout_cube_coordinates,
+    detail::cell_level_layout<py_cartesian_clocked_layout<py_offset_coordinate>, py_sidb_layout,
+                              fiction::sidb_technology>(m, "offset_coordinates");
+    detail::cell_level_layout<py_cartesian_clocked_layout<py_cube_coordinate>, py_sidb_layout_cube_coordinates,
                               fiction::sidb_technology>(m, "cube_coordinates");
 }
 /**
@@ -210,7 +210,7 @@ inline void cell_level_layout_factory(pybind11::module& m)
         {
             if (coordinate_type == "cube")
             {
-                const auto ar = extract_aspect_ratio<py_cartesian_layout_cube_coordinates>(dimension);
+                const auto ar = extract_aspect_ratio<py_cartesian_layout<py_cube_coordinate>>(dimension);
                 if (const auto scheme = fiction::get_clocking_scheme<py_qca_layout_cube_coordinates>(scheme_name);
                     scheme.has_value())
                 {
@@ -220,7 +220,7 @@ inline void cell_level_layout_factory(pybind11::module& m)
             }
             else  // default: offset
             {
-                const auto ar = extract_aspect_ratio<py_cartesian_layout>(dimension);
+                const auto ar = extract_aspect_ratio<py_cartesian_layout<py_offset_coordinate>>(dimension);
                 if (const auto scheme = fiction::get_clocking_scheme<py_qca_layout>(scheme_name); scheme.has_value())
                 {
                     return py::cast(py_qca_layout{ar, *scheme, layout_name});
@@ -244,7 +244,7 @@ inline void cell_level_layout_factory(pybind11::module& m)
         {
             if (coordinate_type == "cube")
             {
-                const auto ar = extract_aspect_ratio<py_cartesian_layout_cube_coordinates>(dimension);
+                const auto ar = extract_aspect_ratio<py_cartesian_layout<py_cube_coordinate>>(dimension);
                 if (const auto scheme = fiction::get_clocking_scheme<py_inml_layout_cube_coordinates>(scheme_name);
                     scheme.has_value())
                 {
@@ -254,7 +254,7 @@ inline void cell_level_layout_factory(pybind11::module& m)
             }
             else  // default: offset
             {
-                const auto ar = extract_aspect_ratio<py_cartesian_layout>(dimension);
+                const auto ar = extract_aspect_ratio<py_cartesian_layout<py_offset_coordinate>>(dimension);
                 if (const auto scheme = fiction::get_clocking_scheme<py_inml_layout>(scheme_name); scheme.has_value())
                 {
                     return py::cast(py_inml_layout{ar, *scheme, layout_name});
@@ -278,7 +278,7 @@ inline void cell_level_layout_factory(pybind11::module& m)
         {
             if (coordinate_type == "cube")
             {
-                const auto ar = extract_aspect_ratio<py_cartesian_layout_cube_coordinates>(dimension);
+                const auto ar = extract_aspect_ratio<py_cartesian_layout<py_cube_coordinate>>(dimension);
                 if (const auto scheme = fiction::get_clocking_scheme<py_sidb_layout_cube_coordinates>(scheme_name);
                     scheme.has_value())
                 {
@@ -288,7 +288,7 @@ inline void cell_level_layout_factory(pybind11::module& m)
             }
             else  // default: offset
             {
-                const auto ar = extract_aspect_ratio<py_cartesian_layout>(dimension);
+                const auto ar = extract_aspect_ratio<py_cartesian_layout<py_offset_coordinate>>(dimension);
                 if (const auto scheme = fiction::get_clocking_scheme<py_sidb_layout>(scheme_name); scheme.has_value())
                 {
                     return py::cast(py_sidb_layout{ar, *scheme, layout_name});

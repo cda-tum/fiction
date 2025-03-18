@@ -17,7 +17,7 @@ class TestSiDBSimulationResult(unittest.TestCase):
     def test_negative_and_neutral_layout_100_lattice(self):
         result = sidb_simulation_result_100()
 
-        layout = sidb_lattice(aspect_ratio_offset((2, 3)), orienation="100")
+        layout = sidb_lattice(aspect_ratio_offset((2, 3)), orientation="100")
         layout.assign_cell_type((0, 1), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((0, 3), sidb_technology.cell_type.NORMAL)
 
@@ -43,7 +43,7 @@ class TestSiDBSimulationResult(unittest.TestCase):
     def test_negative_and_neutral_layout_111_lattice(self):
         result = sidb_simulation_result_111()
 
-        layout = sidb_lattice(aspect_ratio_offset((2, 3)), orienation="111")
+        layout = sidb_lattice(aspect_ratio_offset((2, 3)), orientation="111")
         layout.assign_cell_type((0, 1), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((0, 3), sidb_technology.cell_type.NORMAL)
 
@@ -69,7 +69,7 @@ class TestSiDBSimulationResult(unittest.TestCase):
     def test_empty_layout_100_lattice(self):
         result = sidb_simulation_result_100()
 
-        layout = sidb_lattice((0, 0), orienation="100")  # Empty layout
+        layout = sidb_lattice((0, 0), orientation="100")  # Empty layout
 
         cds_empty = charge_distribution_surface_100(layout)
 
@@ -81,7 +81,7 @@ class TestSiDBSimulationResult(unittest.TestCase):
     def test_empty_layout_111_lattice(self):
         result = sidb_simulation_result_111()
 
-        layout = sidb_lattice((0, 0), orienation="111")  # Empty layout
+        layout = sidb_lattice((0, 0), orientation="111")  # Empty layout
 
         cds_empty = charge_distribution_surface_111(layout)
 
@@ -91,7 +91,7 @@ class TestSiDBSimulationResult(unittest.TestCase):
         self.assertEqual(len(groundstate), 1)
 
     def test_three_DBs_100_lattice(self):
-        layout = sidb_lattice((10, 10), orienation="100")
+        layout = sidb_lattice((10, 10), orientation="100")
 
         layout.assign_cell_type((0, 1), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((4, 1), sidb_technology.cell_type.NORMAL)
@@ -116,7 +116,7 @@ class TestSiDBSimulationResult(unittest.TestCase):
         self.assertEqual(groundstate.get_charge_state((6, 1)), sidb_charge_state.NEUTRAL)
 
     def test_three_DBs_111_lattice(self):
-        layout = sidb_lattice((10, 10), orienation="111")
+        layout = sidb_lattice((10, 10), orientation="111")
 
         layout.assign_cell_type((0, 1), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((4, 1), sidb_technology.cell_type.NORMAL)

@@ -16,7 +16,7 @@ from mnt.pyfiction import (
 
 class TestDesignSiDBGates(unittest.TestCase):
     def test_siqad_and_gate_skeleton_100(self):
-        layout = sidb_lattice(aspect_ratio_offset((20, 20)), orienation="100")
+        layout = sidb_lattice(aspect_ratio_offset((20, 20)), orientation="100")
 
         layout.assign_cell_type((0, 1), sidb_technology.cell_type.INPUT)
         layout.assign_cell_type((2, 3), sidb_technology.cell_type.INPUT)
@@ -53,7 +53,7 @@ class TestDesignSiDBGates(unittest.TestCase):
         self.assertEqual(len(designed_gates), 23)
 
     def test_nor_gate_111(self):
-        layout = sidb_lattice(aspect_ratio_offset((30, 30)), orienation="111")
+        layout = sidb_lattice(aspect_ratio_offset((30, 30)), orientation="111")
 
         layout.assign_cell_type((0, 0), sidb_technology.cell_type.INPUT)
         layout.assign_cell_type((1, 3), sidb_technology.cell_type.INPUT)
@@ -104,7 +104,7 @@ class TestDesignSiDBGates(unittest.TestCase):
         self.assertEqual(len(designed_gates), 175)
 
     def test_nor_gate_111_quickcell(self):
-        layout = sidb_lattice(aspect_ratio_offset((30, 30)), orienation="111")
+        layout = sidb_lattice(aspect_ratio_offset((30, 30)), orientation="111")
 
         layout.assign_cell_type((0, 0), sidb_technology.cell_type.INPUT)
         layout.assign_cell_type((1, 3), sidb_technology.cell_type.INPUT)
