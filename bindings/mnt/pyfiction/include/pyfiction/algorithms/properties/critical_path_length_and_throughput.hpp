@@ -41,8 +41,11 @@ void critical_path_length_and_throughput(pybind11::module& m)
 inline void critical_path_length_and_throughput(pybind11::module& m)
 {
     detail::critical_path_length_and_throughput<py_cartesian_gate_layout<py_offset_coordinate>>(m);
+    detail::critical_path_length_and_throughput<py_cartesian_gate_layout<py_cube_coordinate>>(m);
     detail::critical_path_length_and_throughput<py_shifted_cartesian_gate_layout<py_offset_coordinate>>(m);
+    detail::critical_path_length_and_throughput<py_shifted_cartesian_gate_layout<py_cube_coordinate>>(m);
     detail::critical_path_length_and_throughput<py_hexagonal_gate_layout<py_offset_coordinate>>(m);
+    detail::critical_path_length_and_throughput<py_hexagonal_gate_layout<py_cube_coordinate>>(m);
 }
 
 }  // namespace pyfiction

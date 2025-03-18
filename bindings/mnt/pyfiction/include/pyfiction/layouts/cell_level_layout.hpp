@@ -196,7 +196,7 @@ inline void cell_level_layouts(pybind11::module& m)
 }
 /**
  * A "factory" function that Python users can call as
- *   <qca|inml|sidb>_layout(dimension, scheme_name="open", coordinate_type="offset")
+ * <qca|inml|sidb>_layout(dimension, scheme_name="open", coordinate_type="offset")
  * to create the correct layout type (offset or cube).
  */
 inline void cell_level_layout_factory(pybind11::module& m)
