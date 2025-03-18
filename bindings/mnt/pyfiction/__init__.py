@@ -56,7 +56,6 @@ from .pyfiction import (  # type: ignore[import-not-found]
     cartesian_gate_layout,
     # Layouts
     cartesian_layout,
-    cartesian_obstruction_layout,
     charge_configuration_to_string,
     charge_distribution_mode,
     charge_distribution_surface,
@@ -171,7 +170,6 @@ from .pyfiction import (  # type: ignore[import-not-found]
     heuristic_sidb_simulation_engine,
     hexagonal_gate_layout,
     hexagonal_layout,
-    hexagonal_obstruction_layout,
     hexagonalization,
     high_degree_fanin_exception,
     inml_layout,
@@ -200,6 +198,7 @@ from .pyfiction import (  # type: ignore[import-not-found]
     network_balancing_params,
     normalize_layout_coordinates,
     num_adjacent_coordinates,
+    obstruction_layout,
     occupation_probability_gate_based,
     occupation_probability_non_gate_based,
     # Utils
@@ -257,7 +256,6 @@ from .pyfiction import (  # type: ignore[import-not-found]
     set_name,
     shifted_cartesian_gate_layout,
     shifted_cartesian_layout,
-    shifted_cartesian_obstruction_layout,
     sidb_charge_state,
     sidb_defect,
     sidb_defect_type,
@@ -367,7 +365,6 @@ __all__ = [
     "cartesian_gate_layout",
     # Layouts
     "cartesian_layout",
-    "cartesian_obstruction_layout",
     "charge_configuration_to_string",
     "charge_distribution_mode",
     "charge_distribution_surface",
@@ -482,7 +479,6 @@ __all__ = [
     "heuristic_sidb_simulation_engine",
     "hexagonal_gate_layout",
     "hexagonal_layout",
-    "hexagonal_obstruction_layout",
     "hexagonalization",
     "high_degree_fanin_exception",
     "inml_layout",
@@ -512,6 +508,7 @@ __all__ = [
     "normalize_layout_coordinates",
     # Utils
     "num_adjacent_coordinates",
+    "obstruction_layout",
     "occupation_probability_gate_based",
     "occupation_probability_non_gate_based",
     "offset_coordinate",
@@ -568,7 +565,6 @@ __all__ = [
     "set_name",
     "shifted_cartesian_gate_layout",
     "shifted_cartesian_layout",
-    "shifted_cartesian_obstruction_layout",
     "sidb_charge_state",
     "sidb_defect",
     "sidb_defect_type",

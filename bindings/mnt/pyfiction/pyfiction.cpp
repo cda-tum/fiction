@@ -126,6 +126,7 @@ PYBIND11_MODULE(pyfiction, m, pybind11::mod_gil_not_used())
     pyfiction::cell_level_layouts(m);
     pyfiction::cell_level_layout_factory(m);
     pyfiction::obstruction_layouts(m);
+    pyfiction::obstruction_layout_factory(m);
     /**
      * Algorithms: Simulation
      */

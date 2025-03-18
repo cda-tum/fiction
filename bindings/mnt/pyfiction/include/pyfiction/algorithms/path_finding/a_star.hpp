@@ -57,15 +57,15 @@ inline void a_star(pybind11::module& m)
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::a_star<py_cartesian_obstruction_layout>(m);
+    detail::a_star<py_cartesian_obstruction_layout<py_offset_coordinate>>(m);
     detail::a_star<py_cartesian_gate_layout<py_offset_coordinate>>(m);
     detail::a_star<py_cartesian_clocked_layout<py_offset_coordinate>>(m);
     detail::a_star<py_cartesian_layout<py_offset_coordinate>>(m);
-    detail::a_star<py_shifted_cartesian_obstruction_layout>(m);
+    detail::a_star<py_shifted_cartesian_obstruction_layout<py_offset_coordinate>>(m);
     detail::a_star<py_shifted_cartesian_gate_layout<py_offset_coordinate>>(m);
     detail::a_star<py_shifted_cartesian_clocked_layout<py_offset_coordinate>>(m);
     detail::a_star<py_shifted_cartesian_layout<py_offset_coordinate>>(m);
-    detail::a_star<py_hexagonal_obstruction_layout>(m);
+    detail::a_star<py_hexagonal_obstruction_layout<py_offset_coordinate>>(m);
     detail::a_star<py_hexagonal_gate_layout<py_offset_coordinate>>(m);
     detail::a_star<py_hexagonal_clocked_layout<py_offset_coordinate>>(m);
     detail::a_star<py_hexagonal_layout<py_offset_coordinate>>(m);
