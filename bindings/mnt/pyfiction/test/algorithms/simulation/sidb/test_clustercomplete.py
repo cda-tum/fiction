@@ -2,7 +2,6 @@ import os
 import unittest
 
 from mnt.pyfiction import (
-    aspect_ratio_offset,
     charge_distribution_surface_100,
     charge_distribution_surface_111,
     clustercomplete,
@@ -18,7 +17,7 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 
 class TestClusterComplete(unittest.TestCase):
     def test_three_sidbs(self):
-        layout = sidb_lattice(aspect_ratio_offset((2, 1)), orientation="100")
+        layout = sidb_lattice((2, 1), orientation="100")
         layout.assign_cell_type((0, 0), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((1, 0), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((2, 0), sidb_technology.cell_type.NORMAL)
@@ -56,7 +55,7 @@ class TestClusterComplete(unittest.TestCase):
         self.assertLessEqual(len(result.charge_distributions), 2)
 
     def test_perturber_and_sidb_pair_111(self):
-        layout = sidb_lattice(aspect_ratio_offset((4, 1)), orientation="111")
+        layout = sidb_lattice((4, 1), orientation="111")
         layout.assign_cell_type((0, 0), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((1, 0), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((2, 0), sidb_technology.cell_type.NORMAL)

@@ -324,9 +324,9 @@ inline void charge_distribution_surfaces(pybind11::module& m)
         .value("NEGLECT", fiction::charge_distribution_history::NEGLECT,
                DOC(fiction_charge_distribution_history_NEGLECT));
 
-    detail::charge_distribution_surface_layout<py_sidb_111_lattice>(m, "_111");
-    detail::charge_distribution_surface_layout<py_sidb_100_lattice>(m, "_100");
-    detail::charge_distribution_surface_layout<py_sidb_layout>(m);
+    detail::charge_distribution_surface_layout<py_sidb_111_lattice<py_offset_coordinate>>(m, "_111");
+    detail::charge_distribution_surface_layout<py_sidb_100_lattice<py_offset_coordinate>>(m, "_100");
+    detail::charge_distribution_surface_layout<py_sidb_layout<py_offset_coordinate>>(m);
 }
 
 }  // namespace pyfiction

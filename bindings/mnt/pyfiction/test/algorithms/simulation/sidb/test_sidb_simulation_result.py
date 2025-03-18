@@ -1,7 +1,6 @@
 import unittest
 
 from mnt.pyfiction import (
-    aspect_ratio_offset,
     charge_distribution_surface_100,
     charge_distribution_surface_111,
     sidb_charge_state,
@@ -17,7 +16,7 @@ class TestSiDBSimulationResult(unittest.TestCase):
     def test_negative_and_neutral_layout_100_lattice(self):
         result = sidb_simulation_result_100()
 
-        layout = sidb_lattice(aspect_ratio_offset((2, 3)), orientation="100")
+        layout = sidb_lattice((2, 3), orientation="100")
         layout.assign_cell_type((0, 1), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((0, 3), sidb_technology.cell_type.NORMAL)
 
@@ -43,7 +42,7 @@ class TestSiDBSimulationResult(unittest.TestCase):
     def test_negative_and_neutral_layout_111_lattice(self):
         result = sidb_simulation_result_111()
 
-        layout = sidb_lattice(aspect_ratio_offset((2, 3)), orientation="111")
+        layout = sidb_lattice((2, 3), orientation="111")
         layout.assign_cell_type((0, 1), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((0, 3), sidb_technology.cell_type.NORMAL)
 

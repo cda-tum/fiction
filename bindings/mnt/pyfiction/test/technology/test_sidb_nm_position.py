@@ -1,6 +1,6 @@
 import unittest
 
-from mnt.pyfiction import aspect_ratio_offset, sidb_lattice, sidb_layout, sidb_nm_position
+from mnt.pyfiction import sidb_lattice, sidb_layout, sidb_nm_position
 
 
 class TestSiDBNmPosition(unittest.TestCase):
@@ -12,14 +12,14 @@ class TestSiDBNmPosition(unittest.TestCase):
         self.assertEqual(result, (0, 0))
 
     def test_layout_with_100_lattice_orientation(self):
-        layout_one = sidb_lattice(aspect_ratio_offset((10, 10)), orientation="100")
+        layout_one = sidb_lattice((10, 10), orientation="100")
 
         result = sidb_nm_position(layout_one, (0, 0))
 
         self.assertEqual(result, (0, 0))
 
     def test_layout_with_111_lattice_orientation(self):
-        layout_one = sidb_lattice(aspect_ratio_offset((10, 10)), orientation="111")
+        layout_one = sidb_lattice((10, 10), orientation="111")
 
         result = sidb_nm_position(layout_one, (0, 0))
 

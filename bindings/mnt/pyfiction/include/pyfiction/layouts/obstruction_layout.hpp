@@ -47,16 +47,18 @@ inline void obstruction_layouts(pybind11::module& m)
     /**
      * Cartesian obstruction layout.
      */
-    detail::obstruction_layout<py_cartesian_gate_layout, py_cartesian_obstruction_layout>(m, "cartesian");
+    detail::obstruction_layout<py_cartesian_gate_layout<py_offset_coordinate>, py_cartesian_obstruction_layout>(
+        m, "cartesian");
     /**
      * Shifted Cartesian obstruction layout.
      */
-    detail::obstruction_layout<py_shifted_cartesian_gate_layout, py_shifted_cartesian_obstruction_layout>(
-        m, "shifted_cartesian");
+    detail::obstruction_layout<py_shifted_cartesian_gate_layout<py_offset_coordinate>,
+                               py_shifted_cartesian_obstruction_layout>(m, "shifted_cartesian");
     /**
      * Hexagonal obstruction layout.
      */
-    detail::obstruction_layout<py_hexagonal_gate_layout, py_hexagonal_obstruction_layout>(m, "hexagonal");
+    detail::obstruction_layout<py_hexagonal_gate_layout<py_offset_coordinate>, py_hexagonal_obstruction_layout>(
+        m, "hexagonal");
 }
 
 }  // namespace pyfiction

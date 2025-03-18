@@ -53,14 +53,14 @@ void sidb_lattice(pybind11::module& m, const std::string& coord_type)
 
 inline void sidb_lattices(pybind11::module& m)
 {
-    detail::sidb_lattice<fiction::sidb_100_lattice, py_sidb_lattice<fiction::sidb_100_lattice>, py_sidb_layout>(
-        m, "offset_coordinates");
-    detail::sidb_lattice<fiction::sidb_100_lattice, py_sidb_lattice_cube_coordinates<fiction::sidb_100_lattice>,
-                         py_sidb_layout_cube_coordinates>(m, "cube_coordinates");
-    detail::sidb_lattice<fiction::sidb_111_lattice, py_sidb_lattice<fiction::sidb_111_lattice>, py_sidb_layout>(
-        m, "offset_coordinates");
-    detail::sidb_lattice<fiction::sidb_111_lattice, py_sidb_lattice_cube_coordinates<fiction::sidb_111_lattice>,
-                         py_sidb_layout_cube_coordinates>(m, "cube_coordinates");
+    detail::sidb_lattice<fiction::sidb_100_lattice, py_sidb_lattice<fiction::sidb_100_lattice, py_offset_coordinate>,
+                         py_sidb_layout<py_offset_coordinate>>(m, "offset_coordinates");
+    detail::sidb_lattice<fiction::sidb_100_lattice, py_sidb_lattice<fiction::sidb_100_lattice, py_cube_coordinate>,
+                         py_sidb_layout<py_cube_coordinate>>(m, "cube_coordinates");
+    detail::sidb_lattice<fiction::sidb_111_lattice, py_sidb_lattice<fiction::sidb_111_lattice>,
+                         py_sidb_layout<py_offset_coordinate>>(m, "offset_coordinates");
+    detail::sidb_lattice<fiction::sidb_111_lattice, py_sidb_lattice<fiction::sidb_111_lattice, py_cube_coordinate>,
+                         py_sidb_layout<py_cube_coordinate>>(m, "cube_coordinates");
 }
 
 /**
@@ -85,14 +85,14 @@ inline void sidb_lattice_factory(pybind11::module& m)
                 if (coord_type == "cube")
                 {
                     // 1) H-Si(100)-2x1 orientation, cube coordinates
-                    const auto ar = extract_aspect_ratio<py_sidb_layout_cube_coordinates>(dimension);
-                    return py::cast(py_sidb_100_lattice_cube_coordinates{ar});
+                    const auto ar = extract_aspect_ratio<py_sidb_layout<py_cube_coordinate>>(dimension);
+                    return py::cast(py_sidb_100_lattice<py_cube_coordinate>{ar});
                 }
                 else
                 {
                     // 2) H-Si(100)-2x1 orientation, offset coordinates
-                    const auto ar = extract_aspect_ratio<py_sidb_layout>(dimension);
-                    return py::cast(py_sidb_100_lattice{ar});
+                    const auto ar = extract_aspect_ratio<py_sidb_layout<py_offset_coordinate>>(dimension);
+                    return py::cast(py_sidb_100_lattice<py_offset_coordinate>{ar});
                 }
             }
             else if (orientation == "111")
@@ -100,14 +100,14 @@ inline void sidb_lattice_factory(pybind11::module& m)
                 if (coord_type == "cube")
                 {
                     // 3) H-Si(111)-1x1 orientation, cube coordinates
-                    const auto ar = extract_aspect_ratio<py_sidb_layout_cube_coordinates>(dimension);
-                    return py::cast(py_sidb_111_lattice_cube_coordinates{ar});
+                    const auto ar = extract_aspect_ratio<py_sidb_layout<py_cube_coordinate>>(dimension);
+                    return py::cast(py_sidb_111_lattice<py_cube_coordinate>{ar});
                 }
                 else
                 {
                     // 4) H-Si(111)-1x1 orientation, offset coordinates
-                    const auto ar = extract_aspect_ratio<py_sidb_layout>(dimension);
-                    return py::cast(py_sidb_111_lattice{ar});
+                    const auto ar = extract_aspect_ratio<py_sidb_layout<py_offset_coordinate>>(dimension);
+                    return py::cast(py_sidb_111_lattice<py_offset_coordinate>{ar});
                 }
             }
             else

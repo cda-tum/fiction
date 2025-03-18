@@ -85,8 +85,8 @@ inline void determine_displacement_robustness_domain(pybind11::module& m)
                        &fiction::displacement_robustness_domain_stats::num_non_operational_sidb_displacements);
 
     // NOTE: be careful with the order of the following calls! Python will resolve the first matching overload!
-    detail::determine_displacement_robustness_domain<py_sidb_100_lattice>(m, "100");
-    detail::determine_displacement_robustness_domain<py_sidb_111_lattice>(m, "111");
+    detail::determine_displacement_robustness_domain<py_sidb_100_lattice<py_offset_coordinate>>(m, "100");
+    detail::determine_displacement_robustness_domain<py_sidb_111_lattice<py_offset_coordinate>>(m, "111");
 }
 
 }  // namespace pyfiction

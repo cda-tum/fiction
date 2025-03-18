@@ -38,7 +38,7 @@ void write_location_and_ground_state(pybind11::module& m)
 
 inline void write_location_and_ground_state(pybind11::module& m)
 {
-    detail::write_location_and_ground_state<py_sidb_layout>(m);
+    detail::write_location_and_ground_state<py_sidb_layout<py_offset_coordinate>>(m);
 }
 
 }  // namespace pyfiction

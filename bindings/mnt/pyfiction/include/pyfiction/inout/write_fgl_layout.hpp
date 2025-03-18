@@ -36,9 +36,9 @@ void write_fgl_layout(pybind11::module& m)
 
 inline void write_fgl_layout(pybind11::module& m)
 {
-    detail::write_fgl_layout<py_cartesian_gate_layout>(m);
-    detail::write_fgl_layout<py_shifted_cartesian_gate_layout>(m);
-    detail::write_fgl_layout<py_hexagonal_gate_layout>(m);
+    detail::write_fgl_layout<py_cartesian_gate_layout<py_offset_coordinate>>(m);
+    detail::write_fgl_layout<py_shifted_cartesian_gate_layout<py_offset_coordinate>>(m);
+    detail::write_fgl_layout<py_hexagonal_gate_layout<py_offset_coordinate>>(m);
 }
 
 }  // namespace pyfiction

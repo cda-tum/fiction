@@ -65,107 +65,97 @@ using py_cartesian_clocked_layout =
 /**
  * Shifted Cartesian clocked layout.
  */
+template <typename OffsetCoordinateType = py_offset_coordinate>
 using py_shifted_cartesian_clocked_layout =
-    fiction::clocked_layout<fiction::tile_based_layout<py_shifted_cartesian_layout<py_offset_coordinate>>>;
-using py_shifted_cartesian_clocked_layout_cube_coordinates =
-    fiction::clocked_layout<fiction::tile_based_layout<py_shifted_cartesian_layout<py_cube_coordinate>>>;
+    fiction::clocked_layout<fiction::tile_based_layout<py_shifted_cartesian_layout<OffsetCoordinateType>>>;
 /**
  * Hexagonal clocked layout.
  */
+template <typename OffsetCoordinateType = py_offset_coordinate>
 using py_hexagonal_clocked_layout =
-    fiction::clocked_layout<fiction::tile_based_layout<py_hexagonal_layout<py_offset_coordinate>>>;
-using py_hexagonal_clocked_layout_cube_coordinates =
-    fiction::clocked_layout<fiction::tile_based_layout<py_hexagonal_layout<py_cube_coordinate>>>;
+    fiction::clocked_layout<fiction::tile_based_layout<py_hexagonal_layout<OffsetCoordinateType>>>;
 /**
  * Cartesian gate layout.
  */
-using py_cartesian_gate_layout = fiction::gate_level_layout<py_cartesian_clocked_layout<>>;
-using py_cartesian_gate_layout_cube_coordinates =
-    fiction::gate_level_layout<py_cartesian_clocked_layout<py_cube_coordinate>>;
+template <typename OffsetCoordinateType = py_offset_coordinate>
+using py_cartesian_gate_layout = fiction::gate_level_layout<py_cartesian_clocked_layout<OffsetCoordinateType>>;
 /**
  * Shifted Cartesian gate layout.
  */
-using py_shifted_cartesian_gate_layout = fiction::gate_level_layout<py_shifted_cartesian_clocked_layout>;
-using py_shifted_cartesian_gate_layout_cube_coordinates =
-    fiction::gate_level_layout<py_shifted_cartesian_clocked_layout_cube_coordinates>;
+template <typename OffsetCoordinateType = py_offset_coordinate>
+using py_shifted_cartesian_gate_layout =
+    fiction::gate_level_layout<py_shifted_cartesian_clocked_layout<OffsetCoordinateType>>;
 /**
  * Hexagonal gate layout.
  */
-using py_hexagonal_gate_layout = fiction::gate_level_layout<py_hexagonal_clocked_layout>;
-using py_hexagonal_gate_layout_cube_coordinates =
-    fiction::gate_level_layout<py_hexagonal_clocked_layout_cube_coordinates>;
+template <typename OffsetCoordinateType = py_offset_coordinate>
+using py_hexagonal_gate_layout = fiction::gate_level_layout<py_hexagonal_clocked_layout<OffsetCoordinateType>>;
 /**
  * Cartesian gate-level obstruction layout.
  */
-using py_cartesian_obstruction_layout = fiction::obstruction_layout<py_cartesian_gate_layout>;
+using py_cartesian_obstruction_layout = fiction::obstruction_layout<py_cartesian_gate_layout<py_offset_coordinate>>;
 /**
  * Shifted Cartesian gate-level obstruction layout.
  */
-using py_shifted_cartesian_obstruction_layout = fiction::obstruction_layout<py_shifted_cartesian_gate_layout>;
+using py_shifted_cartesian_obstruction_layout =
+    fiction::obstruction_layout<py_shifted_cartesian_gate_layout<py_offset_coordinate>>;
 /**
  * Hexagonal gate-level obstruction layout.
  */
-using py_hexagonal_obstruction_layout = fiction::obstruction_layout<py_hexagonal_gate_layout>;
+using py_hexagonal_obstruction_layout = fiction::obstruction_layout<py_hexagonal_gate_layout<py_offset_coordinate>>;
 /**
  * Cartesian cell layout.
  */
-template <typename Technology>
+template <typename Technology, typename OffsetCoordinateType = py_offset_coordinate>
 using py_cartesian_cell_layout =
-    fiction::cell_level_layout<Technology, py_cartesian_clocked_layout<py_offset_coordinate>>;
-template <typename Technology>
-using py_cartesian_cell_layout_cube_coordinates =
-    fiction::cell_level_layout<Technology, py_cartesian_clocked_layout<py_cube_coordinate>>;
+    fiction::cell_level_layout<Technology, py_cartesian_clocked_layout<OffsetCoordinateType>>;
 /**
  * QCA cell layout.
  */
-using py_qca_layout                  = py_cartesian_cell_layout<fiction::qca_technology>;
-using py_qca_layout_cube_coordinates = py_cartesian_cell_layout_cube_coordinates<fiction::qca_technology>;
+template <typename OffsetCoordinateType = py_offset_coordinate>
+using py_qca_layout = py_cartesian_cell_layout<fiction::qca_technology, OffsetCoordinateType>;
 /**
  * iNML cell layout.
  */
-using py_inml_layout                  = py_cartesian_cell_layout<fiction::inml_technology>;
-using py_inml_layout_cube_coordinates = py_cartesian_cell_layout_cube_coordinates<fiction::inml_technology>;
+template <typename OffsetCoordinateType = py_offset_coordinate>
+using py_inml_layout = py_cartesian_cell_layout<fiction::inml_technology, OffsetCoordinateType>;
 /**
  * SiDB cell layout.
  */
-using py_sidb_layout                  = py_cartesian_cell_layout<fiction::sidb_technology>;
-using py_sidb_layout_cube_coordinates = py_cartesian_cell_layout_cube_coordinates<fiction::sidb_technology>;
+template <typename OffsetCoordinateType = py_offset_coordinate>
+using py_sidb_layout = py_cartesian_cell_layout<fiction::sidb_technology, OffsetCoordinateType>;
 /**
  * SiDB lattice layout.
  */
-template <typename LatticeOrientation>
-using py_sidb_lattice = fiction::sidb_lattice<LatticeOrientation, py_sidb_layout>;
-template <typename LatticeOrientation>
-using py_sidb_lattice_cube_coordinates = fiction::sidb_lattice<LatticeOrientation, py_sidb_layout_cube_coordinates>;
+template <typename LatticeOrientation, typename OffsetCoordinateType = py_offset_coordinate>
+using py_sidb_lattice = fiction::sidb_lattice<LatticeOrientation, py_sidb_layout<OffsetCoordinateType>>;
 /**
  * SiDB cell layout (with specified H-Si(100)-2x1 lattice orientation).
  */
-using py_sidb_100_lattice                  = py_sidb_lattice<fiction::sidb_100_lattice>;
-using py_sidb_100_lattice_cube_coordinates = py_sidb_lattice_cube_coordinates<fiction::sidb_100_lattice>;
+template <typename OffsetCoordinateType = py_offset_coordinate>
+using py_sidb_100_lattice = py_sidb_lattice<fiction::sidb_100_lattice, OffsetCoordinateType>;
 /**
  * SiDB cell layout (with specified H-Si(111)-1x1 lattice orientation).
  */
-using py_sidb_111_lattice                  = py_sidb_lattice<fiction::sidb_111_lattice>;
-using py_sidb_111_lattice_cube_coordinates = py_sidb_lattice_cube_coordinates<fiction::sidb_111_lattice>;
-
+template <typename OffsetCoordinateType = py_offset_coordinate>
+using py_sidb_111_lattice = py_sidb_lattice<fiction::sidb_111_lattice, OffsetCoordinateType>;
 /**
  * Charge distribution surface. This is a special SiDB cell-level layout that is used for the SiDB simulation
  * algorithms.
  */
-
 template <typename Lyt>
 using py_charge_distribution_surface_layout = fiction::charge_distribution_surface<Lyt>;
-
-using py_charge_distribution_surface = fiction::charge_distribution_surface<py_sidb_layout>;
-
+using py_charge_distribution_surface = fiction::charge_distribution_surface<py_sidb_layout<py_offset_coordinate>>;
 /**
  * Charge distribution surface with underlying H-Si(100)-2x1 lattice.
  */
-using py_charge_distribution_surface_100 = py_charge_distribution_surface_layout<py_sidb_100_lattice>;
+using py_charge_distribution_surface_100 =
+    py_charge_distribution_surface_layout<py_sidb_100_lattice<py_offset_coordinate>>;
 /**
  * Charge distribution surface with underlying H-Si(111)-1x1 lattice.
  */
-using py_charge_distribution_surface_111 = py_charge_distribution_surface_layout<py_sidb_111_lattice>;
+using py_charge_distribution_surface_111 =
+    py_charge_distribution_surface_layout<py_sidb_111_lattice<py_offset_coordinate>>;
 
 }  // namespace pyfiction
 

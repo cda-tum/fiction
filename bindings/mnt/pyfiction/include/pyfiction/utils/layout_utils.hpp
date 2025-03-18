@@ -64,27 +64,27 @@ inline void layout_utils(pybind11::module& m)
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
     detail::num_adjacent_coordinates<py_cartesian_obstruction_layout>(m);
-    detail::num_adjacent_coordinates<py_cartesian_gate_layout>(m);
+    detail::num_adjacent_coordinates<py_cartesian_gate_layout<py_offset_coordinate>>(m);
     detail::num_adjacent_coordinates<py_shifted_cartesian_obstruction_layout>(m);
-    detail::num_adjacent_coordinates<py_shifted_cartesian_gate_layout>(m);
+    detail::num_adjacent_coordinates<py_shifted_cartesian_gate_layout<py_offset_coordinate>>(m);
     detail::num_adjacent_coordinates<py_hexagonal_obstruction_layout>(m);
-    detail::num_adjacent_coordinates<py_hexagonal_gate_layout>(m);
+    detail::num_adjacent_coordinates<py_hexagonal_gate_layout<py_offset_coordinate>>(m);
 
-    detail::normalize_layout_coordinates<py_qca_layout>(m);
-    detail::normalize_layout_coordinates<py_inml_layout>(m);
-    detail::normalize_layout_coordinates<py_sidb_layout>(m);
+    detail::normalize_layout_coordinates<py_qca_layout<py_offset_coordinate>>(m);
+    detail::normalize_layout_coordinates<py_inml_layout<py_offset_coordinate>>(m);
+    detail::normalize_layout_coordinates<py_sidb_layout<py_offset_coordinate>>(m);
 
-    detail::convert_layout_to_siqad_coordinates<py_sidb_layout>(m);
+    detail::convert_layout_to_siqad_coordinates<py_sidb_layout<py_offset_coordinate>>(m);
 
     detail::random_coordinate<py_cartesian_obstruction_layout>(m);
-    detail::random_coordinate<py_cartesian_gate_layout>(m);
+    detail::random_coordinate<py_cartesian_gate_layout<py_offset_coordinate>>(m);
     detail::random_coordinate<py_shifted_cartesian_obstruction_layout>(m);
-    detail::random_coordinate<py_shifted_cartesian_gate_layout>(m);
+    detail::random_coordinate<py_shifted_cartesian_gate_layout<py_offset_coordinate>>(m);
     detail::random_coordinate<py_hexagonal_obstruction_layout>(m);
-    detail::random_coordinate<py_hexagonal_gate_layout>(m);
-    detail::random_coordinate<py_qca_layout>(m);
-    detail::random_coordinate<py_inml_layout>(m);
-    detail::random_coordinate<py_sidb_layout>(m);
+    detail::random_coordinate<py_hexagonal_gate_layout<py_offset_coordinate>>(m);
+    detail::random_coordinate<py_qca_layout<py_offset_coordinate>>(m);
+    detail::random_coordinate<py_inml_layout<py_offset_coordinate>>(m);
+    detail::random_coordinate<py_sidb_layout<py_offset_coordinate>>(m);
 }
 
 }  // namespace pyfiction

@@ -318,25 +318,26 @@ inline void gate_level_layouts(pybind11::module& m)
     /**
      * Gate-level clocked Cartesian layout.
      */
-    detail::gate_level_layout<py_cartesian_clocked_layout<py_offset_coordinate>, py_cartesian_gate_layout>(
-        m, "cartesian", "offset_coordinates");
+    detail::gate_level_layout<py_cartesian_clocked_layout<py_offset_coordinate>,
+                              py_cartesian_gate_layout<py_offset_coordinate>>(m, "cartesian", "offset_coordinates");
     detail::gate_level_layout<py_cartesian_clocked_layout<py_cube_coordinate>,
-                              py_cartesian_gate_layout_cube_coordinates>(m, "cartesian", "cube_coordinates");
+                              py_cartesian_gate_layout<py_cube_coordinate>>(m, "cartesian", "cube_coordinates");
     /**
      * Gate-level clocked shifted Cartesian layout.
      */
-    detail::gate_level_layout<py_shifted_cartesian_clocked_layout, py_shifted_cartesian_gate_layout>(
-        m, "shifted_cartesian", "offset_coordinates");
-    detail::gate_level_layout<py_shifted_cartesian_clocked_layout_cube_coordinates,
-                              py_shifted_cartesian_gate_layout_cube_coordinates>(m, "shifted_cartesian",
-                                                                                 "cube_coordinates");
+    detail::gate_level_layout<py_shifted_cartesian_clocked_layout<py_offset_coordinate>,
+                              py_shifted_cartesian_gate_layout<py_offset_coordinate>>(m, "shifted_cartesian",
+                                                                                      "offset_coordinates");
+    detail::gate_level_layout<py_shifted_cartesian_clocked_layout<py_cube_coordinate>,
+                              py_shifted_cartesian_gate_layout<py_cube_coordinate>>(m, "shifted_cartesian",
+                                                                                    "cube_coordinates");
     /**
      * Gate-level clocked hexagonal layout.
      */
-    detail::gate_level_layout<py_hexagonal_clocked_layout, py_hexagonal_gate_layout>(m, "hexagonal",
-                                                                                     "offset_coordinates");
-    detail::gate_level_layout<py_hexagonal_clocked_layout_cube_coordinates, py_hexagonal_gate_layout_cube_coordinates>(
-        m, "hexagonal", "cube_coordinates");
+    detail::gate_level_layout<py_hexagonal_clocked_layout<py_offset_coordinate>,
+                              py_hexagonal_gate_layout<py_offset_coordinate>>(m, "hexagonal", "offset_coordinates");
+    detail::gate_level_layout<py_hexagonal_clocked_layout<py_cube_coordinate>,
+                              py_hexagonal_gate_layout<py_cube_coordinate>>(m, "hexagonal", "cube_coordinates");
 }
 /**
  * A "factory" function that Python users can call as
@@ -356,10 +357,10 @@ inline void gate_level_layout_factory(pybind11::module& m)
             {
                 const auto ar = extract_aspect_ratio<py_cartesian_layout<py_cube_coordinate>>(dimension);
                 if (const auto scheme =
-                        fiction::get_clocking_scheme<py_cartesian_gate_layout_cube_coordinates>(scheme_name);
+                        fiction::get_clocking_scheme<py_cartesian_gate_layout<py_cube_coordinate>>(scheme_name);
                     scheme.has_value())
                 {
-                    return py::cast(py_cartesian_gate_layout_cube_coordinates{ar, *scheme, layout_name});
+                    return py::cast(py_cartesian_gate_layout<py_cube_coordinate>{ar, *scheme, layout_name});
                 }
                 else
                 {
@@ -369,10 +370,11 @@ inline void gate_level_layout_factory(pybind11::module& m)
             else  // default: offset
             {
                 const auto ar = extract_aspect_ratio<py_cartesian_layout<py_offset_coordinate>>(dimension);
-                if (const auto scheme = fiction::get_clocking_scheme<py_cartesian_gate_layout>(scheme_name);
+                if (const auto scheme =
+                        fiction::get_clocking_scheme<py_cartesian_gate_layout<py_offset_coordinate>>(scheme_name);
                     scheme.has_value())
                 {
-                    return py::cast(py_cartesian_gate_layout{ar, *scheme, layout_name});
+                    return py::cast(py_cartesian_gate_layout<py_offset_coordinate>{ar, *scheme, layout_name});
                 }
                 else
                 {
@@ -398,10 +400,10 @@ inline void gate_level_layout_factory(pybind11::module& m)
             {
                 const auto ar = extract_aspect_ratio<py_shifted_cartesian_layout<py_cube_coordinate>>(dimension);
                 if (const auto scheme =
-                        fiction::get_clocking_scheme<py_shifted_cartesian_gate_layout_cube_coordinates>(scheme_name);
+                        fiction::get_clocking_scheme<py_shifted_cartesian_gate_layout<py_cube_coordinate>>(scheme_name);
                     scheme.has_value())
                 {
-                    return py::cast(py_shifted_cartesian_gate_layout_cube_coordinates{ar, *scheme, layout_name});
+                    return py::cast(py_shifted_cartesian_gate_layout<py_cube_coordinate>{ar, *scheme, layout_name});
                 }
                 else
                 {
@@ -411,10 +413,12 @@ inline void gate_level_layout_factory(pybind11::module& m)
             else  // default: offset
             {
                 const auto ar = extract_aspect_ratio<py_cartesian_layout<py_offset_coordinate>>(dimension);
-                if (const auto scheme = fiction::get_clocking_scheme<py_shifted_cartesian_gate_layout>(scheme_name);
+                if (const auto scheme =
+                        fiction::get_clocking_scheme<py_shifted_cartesian_gate_layout<py_offset_coordinate>>(
+                            scheme_name);
                     scheme.has_value())
                 {
-                    return py::cast(py_shifted_cartesian_gate_layout{ar, *scheme, layout_name});
+                    return py::cast(py_shifted_cartesian_gate_layout<py_offset_coordinate>{ar, *scheme, layout_name});
                 }
                 else
                 {
@@ -440,10 +444,10 @@ inline void gate_level_layout_factory(pybind11::module& m)
             {
                 const auto ar = extract_aspect_ratio<py_hexagonal_layout<py_cube_coordinate>>(dimension);
                 if (const auto scheme =
-                        fiction::get_clocking_scheme<py_hexagonal_gate_layout_cube_coordinates>(scheme_name);
+                        fiction::get_clocking_scheme<py_hexagonal_gate_layout<py_cube_coordinate>>(scheme_name);
                     scheme.has_value())
                 {
-                    return py::cast(py_hexagonal_gate_layout_cube_coordinates{ar, *scheme, layout_name});
+                    return py::cast(py_hexagonal_gate_layout<py_cube_coordinate>{ar, *scheme, layout_name});
                 }
                 else
                 {
@@ -453,10 +457,11 @@ inline void gate_level_layout_factory(pybind11::module& m)
             else  // default: offset
             {
                 const auto ar = extract_aspect_ratio<py_hexagonal_layout<py_offset_coordinate>>(dimension);
-                if (const auto scheme = fiction::get_clocking_scheme<py_hexagonal_gate_layout>(scheme_name);
+                if (const auto scheme =
+                        fiction::get_clocking_scheme<py_hexagonal_gate_layout<py_offset_coordinate>>(scheme_name);
                     scheme.has_value())
                 {
-                    return py::cast(py_hexagonal_gate_layout{ar, *scheme, layout_name});
+                    return py::cast(py_hexagonal_gate_layout<py_offset_coordinate>{ar, *scheme, layout_name});
                 }
                 else
                 {

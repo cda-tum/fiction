@@ -1,7 +1,6 @@
 import unittest
 
 from mnt.pyfiction import (
-    aspect_ratio_offset,
     create_and_tt,
     determine_displacement_robustness_domain_100,
     dimer_displacement_policy,
@@ -17,7 +16,7 @@ from mnt.pyfiction import (
 
 class TestDisplacementRobustnessDomain(unittest.TestCase):
     def test_siqad_and_gate_100_lattice(self):
-        layout = sidb_lattice(aspect_ratio_offset((10, 10)), orientation="100")
+        layout = sidb_lattice((10, 10), orientation="100")
 
         layout.assign_cell_type((0, 1), sidb_technology.cell_type.INPUT)
         layout.assign_cell_type((2, 3), sidb_technology.cell_type.INPUT)

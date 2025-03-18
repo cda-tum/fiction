@@ -34,8 +34,8 @@ inline void can_positive_charges_occur(pybind11::module& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::can_positive_charges_occur<py_sidb_100_lattice>(m);
-    detail::can_positive_charges_occur<py_sidb_111_lattice>(m);
+    detail::can_positive_charges_occur<py_sidb_100_lattice<py_offset_coordinate>>(m);
+    detail::can_positive_charges_occur<py_sidb_111_lattice<py_offset_coordinate>>(m);
 }
 
 }  // namespace pyfiction

@@ -33,9 +33,9 @@ inline void write_sqd_layout(pybind11::module& m)
 
 inline void write_sqd_layout(pybind11::module& m)
 {
-    detail::write_sqd_layout<py_sidb_111_lattice>(m);
-    detail::write_sqd_layout<py_sidb_100_lattice>(m);
-    detail::write_sqd_layout<py_sidb_layout>(m);
+    detail::write_sqd_layout<py_sidb_111_lattice<py_offset_coordinate>>(m);
+    detail::write_sqd_layout<py_sidb_100_lattice<py_offset_coordinate>>(m);
+    detail::write_sqd_layout<py_sidb_layout<py_offset_coordinate>>(m);
 }
 
 }  // namespace pyfiction

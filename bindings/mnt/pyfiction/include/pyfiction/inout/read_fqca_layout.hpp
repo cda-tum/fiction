@@ -43,7 +43,7 @@ inline void read_fqca_layout(pybind11::module& m)
     py::register_exception<fiction::unrecognized_cell_definition_exception>(m,
                                                                             "unrecognized_cell_definition_exception");
 
-    detail::read_fqca_layout<py_qca_layout>(m);
+    detail::read_fqca_layout<py_qca_layout<py_offset_coordinate>>(m);
 }
 
 }  // namespace pyfiction

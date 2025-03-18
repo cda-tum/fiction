@@ -173,11 +173,11 @@ inline void operational_domain(pybind11::module& m)
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::operational_domain<py_sidb_100_lattice>(m);
-    detail::operational_domain<py_sidb_111_lattice>(m);
+    detail::operational_domain<py_sidb_100_lattice<py_offset_coordinate>>(m);
+    detail::operational_domain<py_sidb_111_lattice<py_offset_coordinate>>(m);
 
-    detail::critical_temperature_domain<py_sidb_100_lattice>(m);
-    detail::critical_temperature_domain<py_sidb_111_lattice>(m);
+    detail::critical_temperature_domain<py_sidb_100_lattice<py_offset_coordinate>>(m);
+    detail::critical_temperature_domain<py_sidb_111_lattice<py_offset_coordinate>>(m);
 }
 
 }  // namespace pyfiction

@@ -181,17 +181,17 @@ inline void cell_level_layouts(pybind11::module& m)
     detail::fcn_technology<fiction::qca_technology>(m);
     detail::fcn_technology<fiction::inml_technology>(m);
     detail::fcn_technology<fiction::sidb_technology>(m);
-    detail::cell_level_layout<py_cartesian_clocked_layout<py_offset_coordinate>, py_qca_layout,
+    detail::cell_level_layout<py_cartesian_clocked_layout<py_offset_coordinate>, py_qca_layout<py_offset_coordinate>,
                               fiction::qca_technology>(m, "offset_coordinates");
-    detail::cell_level_layout<py_cartesian_clocked_layout<py_cube_coordinate>, py_qca_layout_cube_coordinates,
+    detail::cell_level_layout<py_cartesian_clocked_layout<py_cube_coordinate>, py_qca_layout<py_cube_coordinate>,
                               fiction::qca_technology>(m, "cube_coordinates");
-    detail::cell_level_layout<py_cartesian_clocked_layout<py_offset_coordinate>, py_inml_layout,
+    detail::cell_level_layout<py_cartesian_clocked_layout<py_offset_coordinate>, py_inml_layout<py_offset_coordinate>,
                               fiction::inml_technology>(m, "offset_coordinates");
-    detail::cell_level_layout<py_cartesian_clocked_layout<py_cube_coordinate>, py_inml_layout_cube_coordinates,
+    detail::cell_level_layout<py_cartesian_clocked_layout<py_cube_coordinate>, py_inml_layout<py_cube_coordinate>,
                               fiction::inml_technology>(m, "cube_coordinates");
-    detail::cell_level_layout<py_cartesian_clocked_layout<py_offset_coordinate>, py_sidb_layout,
+    detail::cell_level_layout<py_cartesian_clocked_layout<py_offset_coordinate>, py_sidb_layout<py_offset_coordinate>,
                               fiction::sidb_technology>(m, "offset_coordinates");
-    detail::cell_level_layout<py_cartesian_clocked_layout<py_cube_coordinate>, py_sidb_layout_cube_coordinates,
+    detail::cell_level_layout<py_cartesian_clocked_layout<py_cube_coordinate>, py_sidb_layout<py_cube_coordinate>,
                               fiction::sidb_technology>(m, "cube_coordinates");
 }
 /**
@@ -211,19 +211,20 @@ inline void cell_level_layout_factory(pybind11::module& m)
             if (coordinate_type == "cube")
             {
                 const auto ar = extract_aspect_ratio<py_cartesian_layout<py_cube_coordinate>>(dimension);
-                if (const auto scheme = fiction::get_clocking_scheme<py_qca_layout_cube_coordinates>(scheme_name);
+                if (const auto scheme = fiction::get_clocking_scheme<py_qca_layout<py_cube_coordinate>>(scheme_name);
                     scheme.has_value())
                 {
-                    return py::cast(py_qca_layout_cube_coordinates{ar, *scheme, layout_name});
+                    return py::cast(py_qca_layout<py_cube_coordinate>{ar, *scheme, layout_name});
                 }
                 throw std::runtime_error("Given name does not refer to a supported clocking scheme");
             }
             else  // default: offset
             {
                 const auto ar = extract_aspect_ratio<py_cartesian_layout<py_offset_coordinate>>(dimension);
-                if (const auto scheme = fiction::get_clocking_scheme<py_qca_layout>(scheme_name); scheme.has_value())
+                if (const auto scheme = fiction::get_clocking_scheme<py_qca_layout<py_offset_coordinate>>(scheme_name);
+                    scheme.has_value())
                 {
-                    return py::cast(py_qca_layout{ar, *scheme, layout_name});
+                    return py::cast(py_qca_layout<py_offset_coordinate>{ar, *scheme, layout_name});
                 }
                 throw std::runtime_error("Given name does not refer to a supported clocking scheme");
             }
@@ -245,19 +246,20 @@ inline void cell_level_layout_factory(pybind11::module& m)
             if (coordinate_type == "cube")
             {
                 const auto ar = extract_aspect_ratio<py_cartesian_layout<py_cube_coordinate>>(dimension);
-                if (const auto scheme = fiction::get_clocking_scheme<py_inml_layout_cube_coordinates>(scheme_name);
+                if (const auto scheme = fiction::get_clocking_scheme<py_inml_layout<py_cube_coordinate>>(scheme_name);
                     scheme.has_value())
                 {
-                    return py::cast(py_inml_layout_cube_coordinates{ar, *scheme, layout_name});
+                    return py::cast(py_inml_layout<py_cube_coordinate>{ar, *scheme, layout_name});
                 }
                 throw std::runtime_error("Given name does not refer to a supported clocking scheme");
             }
             else  // default: offset
             {
                 const auto ar = extract_aspect_ratio<py_cartesian_layout<py_offset_coordinate>>(dimension);
-                if (const auto scheme = fiction::get_clocking_scheme<py_inml_layout>(scheme_name); scheme.has_value())
+                if (const auto scheme = fiction::get_clocking_scheme<py_inml_layout<py_offset_coordinate>>(scheme_name);
+                    scheme.has_value())
                 {
-                    return py::cast(py_inml_layout{ar, *scheme, layout_name});
+                    return py::cast(py_inml_layout<py_offset_coordinate>{ar, *scheme, layout_name});
                 }
                 throw std::runtime_error("Given name does not refer to a supported clocking scheme");
             }
@@ -279,19 +281,20 @@ inline void cell_level_layout_factory(pybind11::module& m)
             if (coordinate_type == "cube")
             {
                 const auto ar = extract_aspect_ratio<py_cartesian_layout<py_cube_coordinate>>(dimension);
-                if (const auto scheme = fiction::get_clocking_scheme<py_sidb_layout_cube_coordinates>(scheme_name);
+                if (const auto scheme = fiction::get_clocking_scheme<py_sidb_layout<py_cube_coordinate>>(scheme_name);
                     scheme.has_value())
                 {
-                    return py::cast(py_sidb_layout_cube_coordinates{ar, *scheme, layout_name});
+                    return py::cast(py_sidb_layout<py_cube_coordinate>{ar, *scheme, layout_name});
                 }
                 throw std::runtime_error("Given name does not refer to a supported clocking scheme");
             }
             else  // default: offset
             {
                 const auto ar = extract_aspect_ratio<py_cartesian_layout<py_offset_coordinate>>(dimension);
-                if (const auto scheme = fiction::get_clocking_scheme<py_sidb_layout>(scheme_name); scheme.has_value())
+                if (const auto scheme = fiction::get_clocking_scheme<py_sidb_layout<py_offset_coordinate>>(scheme_name);
+                    scheme.has_value())
                 {
-                    return py::cast(py_sidb_layout{ar, *scheme, layout_name});
+                    return py::cast(py_sidb_layout<py_offset_coordinate>{ar, *scheme, layout_name});
                 }
                 throw std::runtime_error("Given name does not refer to a supported clocking scheme");
             }

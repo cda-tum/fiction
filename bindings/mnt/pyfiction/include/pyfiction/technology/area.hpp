@@ -45,9 +45,9 @@ void area(pybind11::module& m)
 
 inline void area(pybind11::module& m)
 {
-    detail::area<py_qca_layout>(m);
-    detail::area<py_inml_layout>(m);
-    detail::area<py_sidb_layout>(m);
+    detail::area<py_qca_layout<py_offset_coordinate>>(m);
+    detail::area<py_inml_layout<py_offset_coordinate>>(m);
+    detail::area<py_sidb_layout<py_offset_coordinate>>(m);
 }
 
 }  // namespace pyfiction

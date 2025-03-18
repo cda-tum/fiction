@@ -36,8 +36,8 @@ inline void check_simulation_results_for_equivalence(pybind11::module& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::check_for_equivalence<py_sidb_100_lattice>(m);
-    detail::check_for_equivalence<py_sidb_111_lattice>(m);
+    detail::check_for_equivalence<py_sidb_100_lattice<py_offset_coordinate>>(m);
+    detail::check_for_equivalence<py_sidb_111_lattice<py_offset_coordinate>>(m);
 }
 
 }  // namespace pyfiction

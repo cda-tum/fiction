@@ -70,7 +70,8 @@ inline void post_layout_optimization(pybind11::module& m)
 
         ;
 
-    m.def("post_layout_optimization", &fiction::post_layout_optimization<py_cartesian_gate_layout>, py::arg("layout"),
+    m.def("post_layout_optimization",
+          &fiction::post_layout_optimization<py_cartesian_gate_layout<py_offset_coordinate>>, py::arg("layout"),
           py::arg("parameters") = fiction::post_layout_optimization_params{}, py::arg("statistics") = nullptr,
           DOC(fiction_post_layout_optimization));
 }

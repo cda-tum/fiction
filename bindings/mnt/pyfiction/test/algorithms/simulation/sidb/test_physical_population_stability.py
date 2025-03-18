@@ -1,7 +1,6 @@
 import unittest
 
 from mnt.pyfiction import (
-    aspect_ratio_offset,
     physical_population_stability_100,
     physical_population_stability_111,
     physical_population_stability_params,
@@ -12,7 +11,7 @@ from mnt.pyfiction import (
 
 class TestAssessPhysicalPopulationStability(unittest.TestCase):
     def test_three_DBs_100_lattice(self):
-        layout = sidb_lattice(aspect_ratio_offset((2, 3)), orientation="100")
+        layout = sidb_lattice((2, 3), orientation="100")
         layout.assign_cell_type((0, 1), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((0, 3), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((1, 1), sidb_technology.cell_type.NORMAL)
@@ -28,7 +27,7 @@ class TestAssessPhysicalPopulationStability(unittest.TestCase):
         self.assertEqual(len(result), 1)
 
     def test_three_DBs_111_lattice(self):
-        layout = sidb_lattice(aspect_ratio_offset((2, 3)), orientation="111")
+        layout = sidb_lattice((2, 3), orientation="111")
         layout.assign_cell_type((0, 1), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((0, 3), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((1, 1), sidb_technology.cell_type.NORMAL)

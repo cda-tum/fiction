@@ -58,8 +58,8 @@ inline void detect_bdl_pairs(pybind11::module& m)
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::detect_bdl_pairs<py_sidb_100_lattice>(m);
-    detail::detect_bdl_pairs<py_sidb_111_lattice>(m);
+    detail::detect_bdl_pairs<py_sidb_100_lattice<py_offset_coordinate>>(m);
+    detail::detect_bdl_pairs<py_sidb_111_lattice<py_offset_coordinate>>(m);
 }
 
 }  // namespace pyfiction

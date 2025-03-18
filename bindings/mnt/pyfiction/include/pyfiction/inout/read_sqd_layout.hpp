@@ -24,8 +24,9 @@ void read_sqd_layout_100(pybind11::module& m)
 {
     namespace py = pybind11;
 
-    py_sidb_100_lattice (*read_sqd_layout_function_pointer)(const std::string_view&, const std::string_view&) =
-        &fiction::read_sqd_layout<py_sidb_100_lattice>;
+    py_sidb_100_lattice<py_offset_coordinate> (*read_sqd_layout_function_pointer)(const std::string_view&,
+                                                                                  const std::string_view&) =
+        &fiction::read_sqd_layout<py_sidb_100_lattice<py_offset_coordinate>>;
 
     m.def("read_sqd_layout_100", read_sqd_layout_function_pointer, py::arg("filename"), py::arg("layout_name") = "",
           DOC(fiction_read_sqd_layout_3));
@@ -35,8 +36,9 @@ void read_sqd_layout_111(pybind11::module& m)
 {
     namespace py = pybind11;
 
-    py_sidb_111_lattice (*read_sqd_layout_function_pointer)(const std::string_view&, const std::string_view&) =
-        &fiction::read_sqd_layout<py_sidb_111_lattice>;
+    py_sidb_111_lattice<py_offset_coordinate> (*read_sqd_layout_function_pointer)(const std::string_view&,
+                                                                                  const std::string_view&) =
+        &fiction::read_sqd_layout<py_sidb_111_lattice<py_offset_coordinate>>;
 
     m.def("read_sqd_layout_111", read_sqd_layout_function_pointer, py::arg("filename"), py::arg("layout_name") = "",
           DOC(fiction_read_sqd_layout_3));
