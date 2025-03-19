@@ -254,6 +254,10 @@ Possible parameters:
     - 0 (none): Do not extend primary inputs to the top row. This is the default behavior.
     - 1 (extend): Extend primary inputs to the top row.
     - 2 (extend_planar): Extend primary inputs to the top row and enforce planar rerouting, ensuring that the routing is free of crossings.
+- Output mode (``-o``): Control the placement and routing behavior of primary outputs in the resulting hexagonal layout. The available modes are:
+    - 0 (none): Do not extend primary outputs to the bottom row. This is the default behavior.
+    - 1 (extend): Extend primary outputs to the bottom row.
+    - 2 (extend_planar): Extend primary outputs to the bottom row and enforce planar rerouting, ensuring that the routing is free of crossings.
 - Verbose (``-v``): Output detailed runtime statistics after the algorithm completes.
 
 Post-Layout Optimization (``optimize``)

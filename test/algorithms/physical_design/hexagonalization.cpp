@@ -32,16 +32,36 @@ void check_mapping_equiv(const Ntk& ntk)
     hexagonalization_params params{};
     const auto              hex_layout = hexagonalization<hex_even_row_gate_clk_lyt, Lyt>(layout, params, &stats);
 
-    params.input_mode             = hexagonalization_params::hexagonalization_input_mode::EXTEND;
-    const auto hex_layout_top_pis = hexagonalization<hex_even_row_gate_clk_lyt, Lyt>(layout, params, &stats);
-
     check_eq(ntk, layout);
     check_eq(ntk, hex_layout);
-    check_eq(ntk, hex_layout_top_pis);
     check_eq(layout, hex_layout);
+
+    params.input_mode             = hexagonalization_params::hexagonalization_input_output_mode::EXTEND;
+    const auto hex_layout_top_pis = hexagonalization<hex_even_row_gate_clk_lyt, Lyt>(layout, params, &stats);
+
+
+    check_eq(ntk, hex_layout_top_pis);
     check_eq(layout, hex_layout_top_pis);
 
     hex_layout_top_pis.foreach_pi([&](const auto& gate) { CHECK(hex_layout_top_pis.get_tile(gate).y == 0); });
+
+    params.input_mode             = hexagonalization_params::hexagonalization_input_output_mode::NONE;
+    params.output_mode             = hexagonalization_params::hexagonalization_input_output_mode::EXTEND;
+    const auto hex_layout_bottom_pos = hexagonalization<hex_even_row_gate_clk_lyt, Lyt>(layout, params, &stats);
+
+    check_eq(ntk, hex_layout_bottom_pos);
+    check_eq(layout, hex_layout_bottom_pos);
+
+    hex_layout_bottom_pos.foreach_po([&](const auto& gate) { CHECK(hex_layout_bottom_pos.get_tile(hex_layout_bottom_pos.get_node(gate)).y == hex_layout_bottom_pos.y()); });
+
+    params.input_mode             = hexagonalization_params::hexagonalization_input_output_mode::EXTEND;
+    const auto hex_layout_top_pis_bottom_pos = hexagonalization<hex_even_row_gate_clk_lyt, Lyt>(layout, params, &stats);
+
+    check_eq(ntk, hex_layout_top_pis_bottom_pos);
+    check_eq(layout, hex_layout_top_pis_bottom_pos);
+
+    hex_layout_top_pis_bottom_pos.foreach_pi([&](const auto& gate) { CHECK(hex_layout_top_pis_bottom_pos.get_tile(gate).y == 0); });
+    hex_layout_top_pis_bottom_pos.foreach_po([&](const auto& gate) { CHECK(hex_layout_top_pis_bottom_pos.get_tile(hex_layout_top_pis_bottom_pos.get_node(gate)).y == hex_layout_top_pis_bottom_pos.y()); });
 }
 
 template <typename Lyt>
@@ -51,16 +71,34 @@ void check_mapping_equiv_layout(const Lyt& lyt)
     hexagonalization_params params{};
     const auto              hex_layout = hexagonalization<hex_even_row_gate_clk_lyt, Lyt>(lyt, params, &stats);
 
-    params.input_mode             = hexagonalization_params::hexagonalization_input_mode::EXTEND;
+    check_eq(lyt, hex_layout);
+    CHECK(lyt.get_layout_name() == hex_layout.get_layout_name());
+
+    params.input_mode             = hexagonalization_params::hexagonalization_input_output_mode::EXTEND;
     const auto hex_layout_top_pis = hexagonalization<hex_even_row_gate_clk_lyt, Lyt>(lyt, params, &stats);
 
-    check_eq(lyt, hex_layout);
     check_eq(lyt, hex_layout_top_pis);
-
-    CHECK(lyt.get_layout_name() == hex_layout.get_layout_name());
     CHECK(lyt.get_layout_name() == hex_layout_top_pis.get_layout_name());
 
     hex_layout_top_pis.foreach_pi([&](const auto& gate) { CHECK(hex_layout_top_pis.get_tile(gate).y == 0); });
+
+    params.input_mode             = hexagonalization_params::hexagonalization_input_output_mode::NONE;
+    params.output_mode           = hexagonalization_params::hexagonalization_input_output_mode::EXTEND;
+    const auto hex_layout_bottom_pos = hexagonalization<hex_even_row_gate_clk_lyt, Lyt>(lyt, params, &stats);
+
+    check_eq(lyt, hex_layout_bottom_pos);
+    CHECK(lyt.get_layout_name() == hex_layout_bottom_pos.get_layout_name());
+
+    hex_layout_bottom_pos.foreach_po([&](const auto& gate) { CHECK(hex_layout_bottom_pos.get_tile(hex_layout_bottom_pos.get_node(gate)).y == hex_layout_bottom_pos.y()); });
+
+    params.input_mode             = hexagonalization_params::hexagonalization_input_output_mode::EXTEND;
+    const auto hex_layout_top_pis_bottom_pos = hexagonalization<hex_even_row_gate_clk_lyt, Lyt>(lyt, params, &stats);
+
+    check_eq(lyt, hex_layout_top_pis_bottom_pos);
+    CHECK(lyt.get_layout_name() == hex_layout_top_pis_bottom_pos.get_layout_name());
+
+    hex_layout_top_pis_bottom_pos.foreach_pi([&](const auto& gate) { CHECK(hex_layout_top_pis_bottom_pos.get_tile(gate).y == 0); });
+    hex_layout_top_pis_bottom_pos.foreach_po([&](const auto& gate) { CHECK(hex_layout_top_pis_bottom_pos.get_tile(hex_layout_top_pis_bottom_pos.get_node(gate)).y == hex_layout_top_pis_bottom_pos.y()); });
 }
 
 template <typename Lyt>
@@ -69,14 +107,35 @@ void check_mapping_equiv_layout_with_planar_rerouting(const Lyt& lyt)
     hexagonalization_stats  stats{};
     hexagonalization_params params{};
 
-    params.input_mode     = hexagonalization_params::hexagonalization_input_mode::EXTEND_PLANAR;
-    const auto hex_layout = hexagonalization<hex_even_row_gate_clk_lyt, Lyt>(lyt, params, &stats);
+    params.input_mode     = hexagonalization_params::hexagonalization_input_output_mode::EXTEND_PLANAR;
+    const auto hex_layout_top_pis = hexagonalization<hex_even_row_gate_clk_lyt, Lyt>(lyt, params, &stats);
 
-    check_eq(lyt, hex_layout);
+    check_eq(lyt, hex_layout_top_pis);
 
-    CHECK(lyt.get_layout_name() == hex_layout.get_layout_name());
+    CHECK(lyt.get_layout_name() == hex_layout_top_pis.get_layout_name());
 
-    hex_layout.foreach_pi([&](const auto& gate) { CHECK(hex_layout.get_tile(gate).y == 0); });
+    hex_layout_top_pis.foreach_pi([&](const auto& gate) { CHECK(hex_layout_top_pis.get_tile(gate).y == 0); });
+
+    params.input_mode     = hexagonalization_params::hexagonalization_input_output_mode::NONE;
+    params.output_mode     = hexagonalization_params::hexagonalization_input_output_mode::EXTEND_PLANAR;
+    const auto hex_layout_bottom_pos = hexagonalization<hex_even_row_gate_clk_lyt, Lyt>(lyt, params, &stats);
+
+    check_eq(lyt, hex_layout_bottom_pos);
+
+    CHECK(lyt.get_layout_name() == hex_layout_bottom_pos.get_layout_name());
+
+    hex_layout_bottom_pos.foreach_po([&](const auto& gate) { CHECK(hex_layout_bottom_pos.get_tile(hex_layout_bottom_pos.get_node(gate)).y == hex_layout_bottom_pos.y()); });
+
+    params.input_mode     = hexagonalization_params::hexagonalization_input_output_mode::EXTEND_PLANAR;
+    params.output_mode     = hexagonalization_params::hexagonalization_input_output_mode::EXTEND_PLANAR;
+    const auto hex_layout_top_pis_bottom_pos = hexagonalization<hex_even_row_gate_clk_lyt, Lyt>(lyt, params, &stats);
+
+    check_eq(lyt, hex_layout_top_pis_bottom_pos);
+
+    CHECK(lyt.get_layout_name() == hex_layout_top_pis_bottom_pos.get_layout_name());
+
+    hex_layout_top_pis_bottom_pos.foreach_pi([&](const auto& gate) { CHECK(hex_layout_top_pis_bottom_pos.get_tile(gate).y == 0); });
+    hex_layout_top_pis_bottom_pos.foreach_po([&](const auto& gate) { CHECK(hex_layout_top_pis_bottom_pos.get_tile(hex_layout_top_pis_bottom_pos.get_node(gate)).y == hex_layout_top_pis_bottom_pos.y()); });
 }
 
 template <typename Lyt>

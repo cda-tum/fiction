@@ -5,7 +5,7 @@ from mnt.pyfiction import (
     eq_type,
     equivalence_checking,
     hexagonalization,
-    hexagonalization_input_mode,
+    hexagonalization_input_output_mode,
     hexagonalization_params,
     hexagonalization_stats,
     orthogonal,
@@ -47,8 +47,10 @@ class TestHexagonalization(unittest.TestCase):
         network = read_technology_network(dir_path + "/../../resources/mux21.v")
         cart_layout = orthogonal(network)
         self.assertEqual(equivalence_checking(network, cart_layout), eq_type.STRONG)
+
         params = hexagonalization_params()
-        params.input_mode = hexagonalization_input_mode.EXTEND
+        params.input_mode = hexagonalization_input_output_mode.EXTEND
+        params.output_mode = hexagonalization_input_output_mode.NONE
         stats = hexagonalization_stats()
         hex_layout = hexagonalization(cart_layout, params, stats)
         self.assertEqual(equivalence_checking(network, hex_layout), eq_type.STRONG)
@@ -57,13 +59,59 @@ class TestHexagonalization(unittest.TestCase):
         for pi in hex_layout.pis():
             self.assertEqual(pi.y, 0)
 
-        params.input_mode = hexagonalization_input_mode.EXTEND_PLANAR
+        params.input_mode = hexagonalization_input_output_mode.NONE
+        params.output_mode = hexagonalization_input_output_mode.EXTEND
         stats = hexagonalization_stats()
         hex_layout = hexagonalization(cart_layout, params, stats)
+        self.assertEqual(equivalence_checking(network, hex_layout), eq_type.STRONG)
+        self.assertEqual(equivalence_checking(cart_layout, hex_layout), eq_type.STRONG)
+        self.assertGreater(stats.time_total.total_seconds(), 0)
+        for po in hex_layout.pos():
+            self.assertEqual(po.y, hex_layout.y())
+
+        params.input_mode = hexagonalization_input_output_mode.EXTEND
+        params.output_mode = hexagonalization_input_output_mode.EXTEND
+        stats = hexagonalization_stats()
+        hex_layout = hexagonalization(cart_layout, params, stats)
+        self.assertEqual(equivalence_checking(network, hex_layout), eq_type.STRONG)
         self.assertEqual(equivalence_checking(cart_layout, hex_layout), eq_type.STRONG)
         self.assertGreater(stats.time_total.total_seconds(), 0)
         for pi in hex_layout.pis():
             self.assertEqual(pi.y, 0)
+        for po in hex_layout.pos():
+            self.assertEqual(po.y, hex_layout.y())
+
+        params.input_mode = hexagonalization_input_output_mode.EXTEND_PLANAR
+        params.output_mode = hexagonalization_input_output_mode.NONE
+        stats = hexagonalization_stats()
+        hex_layout = hexagonalization(cart_layout, params, stats)
+        self.assertEqual(equivalence_checking(network, hex_layout), eq_type.STRONG)
+        self.assertEqual(equivalence_checking(cart_layout, hex_layout), eq_type.STRONG)
+        self.assertGreater(stats.time_total.total_seconds(), 0)
+        for pi in hex_layout.pis():
+            self.assertEqual(pi.y, 0)
+
+        params.input_mode = hexagonalization_input_output_mode.NONE
+        params.output_mode = hexagonalization_input_output_mode.EXTEND_PLANAR
+        stats = hexagonalization_stats()
+        hex_layout = hexagonalization(cart_layout, params, stats)
+        self.assertEqual(equivalence_checking(network, hex_layout), eq_type.STRONG)
+        self.assertEqual(equivalence_checking(cart_layout, hex_layout), eq_type.STRONG)
+        self.assertGreater(stats.time_total.total_seconds(), 0)
+        for po in hex_layout.pos():
+            self.assertEqual(po.y, hex_layout.y())
+
+        params.input_mode = hexagonalization_input_output_mode.EXTEND_PLANAR
+        params.output_mode = hexagonalization_input_output_mode.EXTEND_PLANAR
+        stats = hexagonalization_stats()
+        hex_layout = hexagonalization(cart_layout, params, stats)
+        self.assertEqual(equivalence_checking(network, hex_layout), eq_type.STRONG)
+        self.assertEqual(equivalence_checking(cart_layout, hex_layout), eq_type.STRONG)
+        self.assertGreater(stats.time_total.total_seconds(), 0)
+        for pi in hex_layout.pis():
+            self.assertEqual(pi.y, 0)
+        for po in hex_layout.pos():
+            self.assertEqual(po.y, hex_layout.y())
 
 
 if __name__ == "__main__":

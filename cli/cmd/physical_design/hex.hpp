@@ -38,6 +38,14 @@ class hex_command : public command
                    "crossings).",
                    true)
             ->set_type_name("{none=0, extend=1, extend_planar=2}");
+        add_option("--output_mode,-o", ps.output_mode,
+                   "Specifies how primary outputs should be handled in the hexagonalization process:\n"
+                   " - `0` (none): Do not extend primary outputs to the bottom row (default).\n"
+                   " - `1 (extend): Extend primary outputs to the bottom row.\n"
+                   " - `2` (extend_planar): Extend primary outputs to the bottom row with planar rerouting (i.e., without "
+                   "crossings).",
+                   true)
+            ->set_type_name("{none=0, extend=1, extend_planar=2}");
         add_flag("--verbose,-v", "Be verbose");
     }
 

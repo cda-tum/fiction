@@ -51,33 +51,37 @@ class hexagonalization_route_inputs_error : public std::runtime_error
 };
 
 /**
- * This structure encapsulates settings that determine how primary inputs (PIs) are handled
+ * This structure encapsulates settings that determine how primary inputs (PIs) and primary outputs (POs) are handled
  * during the conversion from a Cartesian to a hexagonal layout.
  */
 struct hexagonalization_params
 {
     /**
-     * Specifies how primary inputs should be handled in the hexagonalization process.
+     * Specifies how primary inputs/outputs should be handled in the hexagonalization process.
      */
-    enum hexagonalization_input_mode : std::uint8_t
+    enum hexagonalization_input_output_mode : std::uint8_t
     {
         /**
-         * Do not extend primary inputs to the top row (default).
+         * Do not extend primary inputs/outputs to the top/bottom row (default).
          */
         NONE,
         /**
-         * Extend primary inputs to the top row.
+         * Extend primary inputs/outputs to the top/bottom row.
          */
         EXTEND,
         /**
-         * Extend primary inputs to the top row with planar rerouting (i.e., without crossings).
+         * Extend primary inputs/outputs to the top/bottom row with planar rerouting (i.e., without crossings).
          */
         EXTEND_PLANAR
     };
     /**
      * Input extension mode. Defaults to none
      */
-    hexagonalization_input_mode input_mode = NONE;
+    hexagonalization_input_output_mode input_mode = NONE;
+    /**
+     * Output extension mode. Defaults to none
+     */
+    hexagonalization_input_output_mode output_mode = NONE;
 };
 
 /**
@@ -167,7 +171,6 @@ template <typename CartLyt, typename HexLyt>
 template <typename CartLyt>
 [[nodiscard]] uint64_t compute_num_inputs_left_to_middle_pi(const CartLyt& lyt) noexcept
 {
-    // convert the origin tile to hex format to get the middle primary input coordinate
     uint64_t num_inputs_left_to_middle_pi = 0;
 
     // iterate over all primary inputs
@@ -187,6 +190,36 @@ template <typename CartLyt>
 }
 
 /**
+ * This function iterates over all primary outputs in the given Cartesian layout and counts those
+ * whose tile is at the southern border. Such outputs are considered to be positioned left of the middle
+ * primary output when the layout is converted to a hexagonal format.
+ *
+ * @tparam CartLyt Type of the Cartesian layout.
+ * @param lyt The Cartesian gate-level layout containing primary outputs.
+ * @return The number of primary outputs that are placed to the left of the middle primary output.
+ */
+template <typename CartLyt>
+[[nodiscard]] uint64_t compute_num_outputs_left_to_middle_po(const CartLyt& lyt) noexcept
+{
+    uint64_t num_outputs_left_to_middle_po = 0;
+
+    // iterate over all primary inputs
+    lyt.foreach_po(
+        [&](const auto& gate)
+        {
+            const auto coord = lyt.get_tile(lyt.get_node(gate));
+
+            // if the tile is at the southern border, it is placed left of the middle PO in the hex layout
+            if (coord.x != 0 && coord.y == lyt.y())
+            {
+                ++num_outputs_left_to_middle_po;
+            }
+        });
+
+    return num_outputs_left_to_middle_po;
+}
+
+/**
  * This function iterates over all primary inputs in the given Cartesian layout and counts those
  * whose tile is at the northern border. Such inputs are considered to be positioned right of the middle
  * primary input when the layout is converted to a hexagonal format.
@@ -198,7 +231,6 @@ template <typename CartLyt>
 template <typename CartLyt>
 [[nodiscard]] uint64_t compute_num_inputs_right_to_middle_pi(const CartLyt& lyt) noexcept
 {
-    // convert the origin tile to hex format to get the middle primary input coordinate
     uint64_t num_inputs_right_to_middle_pi = 0;
 
     // iterate over all primary inputs
@@ -207,7 +239,7 @@ template <typename CartLyt>
         {
             const auto coord = lyt.get_tile(gate);
 
-            // if the tile is at the western border, it is placed left of the middle PI in the hex layout
+            // if the tile is at the northern border, it is placed right of the middle PI in the hex layout
             if (coord.x != 0 && coord.y == 0)
             {
                 ++num_inputs_right_to_middle_pi;
@@ -215,6 +247,36 @@ template <typename CartLyt>
         });
 
     return num_inputs_right_to_middle_pi;
+}
+
+/**
+ * This function iterates over all primary outputs in the given Cartesian layout and counts those
+ * whose tile is at the eastern border. Such outputs are considered to be positioned right of the middle
+ * primary output when the layout is converted to a hexagonal format.
+ *
+ * @tparam CartLyt Type of the Cartesian layout.
+ * @param lyt The Cartesian gate-level layout containing primary outputs.
+ * @return The number of primary outputs that are placed to the right of the middle primary output.
+ */
+template <typename CartLyt>
+[[nodiscard]] uint64_t compute_num_outputs_right_to_middle_po(const CartLyt& lyt) noexcept
+{
+    uint64_t num_outputs_right_to_middle_po = 0;
+
+    // iterate over all primary inputs
+    lyt.foreach_po(
+        [&](const auto& gate)
+        {
+            const auto coord = lyt.get_tile(lyt.get_node(gate));
+
+            // if the tile is at the eastern border, it is placed right of the middle PO in the hex layout
+            if (coord.x == lyt.x() && coord.y != 0)
+            {
+                ++num_outputs_right_to_middle_po;
+            }
+        });
+
+    return num_outputs_right_to_middle_po;
 }
 
 /**
@@ -233,11 +295,12 @@ template <typename CartLyt>
  * @param cartesian_layout_width Width of the Cartesian layout.
  * @param cartesian_layout_height Height of the Cartesian layout.
  * @param input_mode Adjust offset based on PIs relocated to the top row.
+ * @param output_mode Adjust offset based on POs relocated to the bottom row.
  * @return offset.
  */
 template <typename HexLyt, typename CartLyt>
 [[nodiscard]] uint64_t get_offset(const CartLyt& lyt, uint64_t cartesian_layout_width, uint64_t cartesian_layout_height,
-                                  hexagonalization_params::hexagonalization_input_mode input_mode) noexcept
+                                  hexagonalization_params::hexagonalization_input_output_mode input_mode, hexagonalization_params::hexagonalization_input_output_mode output_mode) noexcept
 {
     static_assert(is_cartesian_layout_v<CartLyt>, "CartLyt is not a Cartesian layout");
     static_assert(is_hexagonal_layout_v<HexLyt>, "HexLyt is not a hexagonal layout");
@@ -267,7 +330,7 @@ template <typename HexLyt, typename CartLyt>
         }
     }
 
-    if (input_mode != hexagonalization_params::hexagonalization_input_mode::NONE)
+    if (input_mode != hexagonalization_params::hexagonalization_input_output_mode::NONE)
     {
         const auto middle_pi = detail::to_hex<CartLyt, HexLyt>({0, 0}, cartesian_layout_height);
 
@@ -278,6 +341,20 @@ template <typename HexLyt, typename CartLyt>
         if (middle_pi.x < offset + num_inputs_left_to_middle_pi)
         {
             offset = middle_pi.x - num_inputs_left_to_middle_pi;
+        }
+    }
+
+    if (output_mode != hexagonalization_params::hexagonalization_input_output_mode::NONE)
+    {
+        const auto middle_po = detail::to_hex<CartLyt, HexLyt>({lyt.x(), lyt.y()}, cartesian_layout_height);
+
+        // adjust offset based on primary inputs in the first column
+        auto num_outputs_left_to_middle_po = compute_num_outputs_left_to_middle_po(lyt);
+
+        // if necessary, adjust the offset to account for primary inputs
+        if (middle_po.x < offset + num_outputs_left_to_middle_po)
+        {
+            offset = middle_po.x - num_outputs_left_to_middle_po;
         }
     }
 
@@ -327,14 +404,21 @@ class hexagonalization_impl
             const mockturtle::stopwatch stop{stats.time_total};
 
             // calculate horizontal offset for hexagonal layout
-            const auto offset = detail::get_offset<HexLyt, CartLyt>(plyt, layout_width, layout_height, ps.input_mode);
+            const auto offset = detail::get_offset<HexLyt, CartLyt>(plyt, layout_width, layout_height, ps.input_mode, ps.output_mode);
 
             // determine the top primary input coordinate
             auto middle_pi = detail::to_hex<CartLyt, HexLyt>({0, 0}, layout_height);
 
+            // determine the bottom primary output coordinate
+            auto middle_po = detail::to_hex<CartLyt, HexLyt>({plyt.x(), plyt.y()}, layout_height);
+
             // vectors to store primary inputs
             std::vector<tile<HexLyt>> left_pis;
             std::vector<tile<HexLyt>> right_pis;
+
+            // vectors to store primary outputs
+            std::vector<tile<HexLyt>> left_pos;
+            std::vector<tile<HexLyt>> right_pos;
 
             // map primary inputs to the hexagonal layout
             plyt.foreach_pi(
@@ -362,15 +446,28 @@ class hexagonalization_impl
             // sort primary inputs by y-coordinate for consistency
             std::sort(left_pis.begin(), left_pis.end(), [](const auto& lhs, const auto& rhs) { return lhs.y < rhs.y; });
             std::sort(right_pis.begin(), right_pis.end(),
-                      [](const auto& lhs, const auto& rhs) { return lhs.y < rhs.y; });
+                      [](const auto& lhs, const auto& rhs) { return lhs.x < rhs.x; });
 
             // adjust hex layout width if necessary (only if all inputs placed in top row)
-            if (ps.input_mode != hexagonalization_params::hexagonalization_input_mode::NONE)
+            if (ps.input_mode != hexagonalization_params::hexagonalization_input_output_mode::NONE)
             {
                 // adjust offset based on primary inputs in the first row
                 const auto num_inputs_right_to_middle_pi = compute_num_inputs_right_to_middle_pi(plyt);
 
                 const auto min_width = middle_pi.x - offset + num_inputs_right_to_middle_pi + 1;
+                if (hex_width < min_width)
+                {
+                    hex_layout.resize({min_width, hex_height, hex_depth});
+                }
+            }
+
+            // adjust hex layout width if necessary (only if all outputs placed in bottom row)
+            if (ps.output_mode != hexagonalization_params::hexagonalization_input_output_mode::NONE)
+            {
+                // adjust offset based on primary outputs in the last row
+                const auto num_outputs_right_to_middle_po = compute_num_outputs_right_to_middle_po(plyt);
+
+                const auto min_width = middle_po.x - offset + num_outputs_right_to_middle_po + 1;
                 if (hex_width < min_width)
                 {
                     hex_layout.resize({min_width, hex_height, hex_depth});
@@ -523,9 +620,23 @@ class hexagonalization_impl
                     // create the primary output in the hex layout
                     const auto hex_signal = hex_layout.make_signal(hex_layout.get_node(hex_tile));
                     hex_layout.create_po(hex_signal, plyt.get_name(plyt.get_node(old_coord)), hex_coord);
+
+                    // collect POs to the left and to the right of the middle PO
+                    if (old_coord.x != 0 && old_coord.y == plyt.y())
+                    {
+                        left_pos.push_back(hex_coord);
+                    }
+                    else if (old_coord.x == plyt.x() && old_coord.y != 0)
+                    {
+                        right_pos.push_back(hex_coord);
+                    }
                 });
 
-            if (ps.input_mode != hexagonalization_params::hexagonalization_input_mode::NONE)
+            std::sort(left_pos.begin(), left_pos.end(), [](const auto& lhs, const auto& rhs) { return lhs.x < rhs.x; });
+            std::sort(right_pos.begin(), right_pos.end(),
+                      [](const auto& lhs, const auto& rhs) { return lhs.y > rhs.y; });
+
+            if (ps.input_mode != hexagonalization_params::hexagonalization_input_output_mode::NONE)
             {
                 // adjust positions and prepare for routing
                 middle_pi.x -= static_cast<decltype(middle_pi.x)>(offset);
@@ -642,7 +753,7 @@ class hexagonalization_impl
                 using path           = layout_coordinate_path<decltype(layout_obstruct)>;
                 const auto crossings =
                     (hex_depth != 0) &&
-                    !(ps.input_mode != hexagonalization_params::hexagonalization_input_mode::EXTEND_PLANAR);
+                    !(ps.input_mode != hexagonalization_params::hexagonalization_input_output_mode::EXTEND_PLANAR);
                 const a_star_params params_astar{crossings};
                 using dist = manhattan_distance_functor<decltype(layout_obstruct), uint64_t>;
                 using cost = unit_cost_functor<decltype(layout_obstruct), uint8_t>;
@@ -678,6 +789,84 @@ class hexagonalization_impl
                     else
                     {
                         throw hexagonalization_route_inputs_error("Extending PIs to the top border failed.");
+                    }
+                }
+            }
+
+            if (ps.output_mode != hexagonalization_params::hexagonalization_input_output_mode::NONE)
+            {
+                // adjust positions and prepare for routing
+                middle_po.x -= static_cast<decltype(middle_po.x)>(offset);
+                std::vector<extended_routing_objective<HexLyt>> objectives;
+
+                // process PIs from left column of the Cartesian layout
+                for (const auto& c : left_pos)
+                {
+                    tile<HexLyt> fanin;
+                    hex_layout.foreach_fanin(hex_layout.get_node(c),
+                                              [&](const auto& fin) {
+                                                 fanin = static_cast<tile<HexLyt>>(fin); });
+
+                    // shift left primary output position
+                    middle_po.x -= 1;
+
+                    extended_routing_objective<HexLyt> obj;
+                    obj.source             = fanin;
+                    obj.target             = middle_po;
+                    obj.update_first_fanin = false;
+
+                    hex_layout.move_node(hex_layout.get_node(c), middle_po);
+                    objectives.push_back(obj);
+                }
+
+                // move back to middle POs original position
+                middle_po.x += left_pos.size();
+
+                // process POs from bottom row of the Cartesian layout (similar to before)
+                for (const auto& c : right_pos)
+                {
+                    tile<HexLyt> fanin;
+                    hex_layout.foreach_fanin(hex_layout.get_node(c),
+                                             [&](const auto& fin) {
+                                                 fanin = static_cast<tile<HexLyt>>(fin); });
+
+                    // shift bottom primary output position
+                    middle_po.x += 1;
+                    extended_routing_objective<HexLyt> obj;
+                    obj.source             = fanin;
+                    obj.target             = middle_po;
+                    obj.update_first_fanin = false;
+
+                    hex_layout.move_node(hex_layout.get_node(c), middle_po);
+                    objectives.push_back(obj);
+                }
+
+                // perform routing using A*
+                auto layout_obstruct = obstruction_layout<HexLyt>(hex_layout);
+                using path           = layout_coordinate_path<decltype(layout_obstruct)>;
+                const auto crossings =
+                    (hex_depth != 0) &&
+                    !(ps.output_mode != hexagonalization_params::hexagonalization_input_output_mode::EXTEND_PLANAR);
+                const a_star_params params_astar{crossings};
+                using dist = manhattan_distance_functor<decltype(layout_obstruct), uint64_t>;
+                using cost = unit_cost_functor<decltype(layout_obstruct), uint8_t>;
+
+                // for each routing objective, find a path and route it
+                for (const auto& obj : objectives)
+                {
+                    const auto new_path =
+                        a_star<path>(layout_obstruct, {obj.source, obj.target}, dist(), cost(), params_astar);
+                    if (!new_path.empty())
+                    {
+                        route_path(hex_layout, new_path);
+                        for (const auto& t : new_path)
+                        {
+                            layout_obstruct.obstruct_coordinate(t);
+                        }
+                    }
+                    else
+                    {
+                        throw hexagonalization_route_inputs_error("Extending POs to the bottom border failed.");
                     }
                 }
             }
