@@ -37,9 +37,9 @@ inline void hexagonalization(pybind11::module& m)
     py::class_<fiction::hexagonalization_params>(m, "hexagonalization_params", DOC(fiction_hexagonalization_params))
         .def(py::init<>())
         .def_readwrite("input_mode", &fiction::hexagonalization_params::input_mode,
-                       DOC(fiction_hexagonalization_params_input_mode));
-    .def_readwrite("output_mode", &fiction::hexagonalization_params::output_mode,
-                   DOC(fiction_hexagonalization_params_output_mode));
+                       DOC(fiction_hexagonalization_params_input_mode))
+        .def_readwrite("output_mode", &fiction::hexagonalization_params::output_mode,
+                       DOC(fiction_hexagonalization_params_output_mode));
 
     py::class_<fiction::hexagonalization_stats>(m, "hexagonalization_stats", DOC(fiction_hexagonalization_stats))
         .def(py::init<>())
