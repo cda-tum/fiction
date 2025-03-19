@@ -205,7 +205,7 @@ inline void cell_level_layout_factory(pybind11::module& m)
 
     m.def(
         "qca_layout",
-        [](const py::tuple dimension, const std::string& scheme_name, const std::string& layout_name,
+        [](const py::object dimension, const std::string& scheme_name, const std::string& layout_name,
            const std::string& coordinate_type)
         {
             if (coordinate_type == "cube")
@@ -240,7 +240,7 @@ inline void cell_level_layout_factory(pybind11::module& m)
 
     m.def(
         "inml_layout",
-        [](const py::tuple dimension, const std::string& scheme_name, const std::string& layout_name,
+        [](const py::object dimension, const std::string& scheme_name, const std::string& layout_name,
            const std::string& coordinate_type)
         {
             if (coordinate_type == "cube")
@@ -275,7 +275,7 @@ inline void cell_level_layout_factory(pybind11::module& m)
 
     m.def(
         "sidb_layout",
-        [](const py::tuple dimension, const std::string& scheme_name, const std::string& layout_name,
+        [](const py::object dimension, const std::string& scheme_name, const std::string& layout_name,
            const std::string& coordinate_type)
         {
             if (coordinate_type == "cube")
@@ -306,6 +306,11 @@ inline void cell_level_layout_factory(pybind11::module& m)
             based on the string argument. Valid options for `coordinate_type` are:
                 - "offset" (default)
                 - "cube"
+
+            For the dimension, you can pass either:
+              - A single tuple (x, y) or (x, y, z) to specify only the "max" coordinate, with min defaulting to (0,0,0),
+              - Two nested tuples ((xmin, ymin), (xmax, ymax)) or 3D
+                ((xmin, ymin, zmin), (xmax, ymax, zmax)) to specify min and max explicitly.
         )doc");
 }
 

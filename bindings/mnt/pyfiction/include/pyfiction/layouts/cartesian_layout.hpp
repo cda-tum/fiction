@@ -168,27 +168,77 @@ inline void cartesian_layouts(pybind11::module& m)
 }
 
 template <typename CoordLyt>
-fiction::aspect_ratio_type_t<CoordLyt> extract_aspect_ratio(pybind11::tuple dimension)
+inline fiction::aspect_ratio_type_t<CoordLyt> extract_aspect_ratio(pybind11::object dimension)
 {
-    if (dimension.size() < 2 || dimension.size() > 3)
+    namespace py = pybind11;
+
+    // 1) Figure out what coordinate type this layout uses:
+    //    "cube" => fiction::cube::coord_t
+    //    "offset" => fiction::offset::ucoord_t
+    using coordinate_t = typename CoordLyt::coordinate;
+
+    // 2) Decide on signed or unsigned integral to parse from Python
+    //    – Typically you want signed for "cube" (which can go negative)
+    //    – Typically you want unsigned for "offset" (non-negative)
+    using parse_integral_t =
+        std::conditional_t<std::is_same_v<coordinate_t, fiction::cube::coord_t>, int32_t, uint64_t>;
+
+    // 3) A small lambda that does the cast from Python int => parse_integral_t
+    auto get_val = [&](py::handle h) { return h.cast<parse_integral_t>(); };
+
+    // 4) dimension must be a Python tuple
+    if (!py::isinstance<py::tuple>(dimension))
+        throw std::runtime_error("dimension must be a tuple or nested tuples.");
+
+    py::tuple  dimension_tuple = dimension.cast<py::tuple>();
+    const auto N               = dimension_tuple.size();
+
+    // -- CASE A: Check if dimension_tuple is 2-length and each element is a sub-tuple => (min, max)
+    //            i.e. dimension_tuple = ((xmin, ymin[, zmin]), (xmax, ymax[, zmax]))
+    if (N == 2 && py::isinstance<py::tuple>(dimension_tuple[0]) && py::isinstance<py::tuple>(dimension_tuple[1]))
     {
-        throw std::runtime_error("dimension must be a 2-tuple (x, y) or a 3-tuple (x, y, z).");
+        py::tuple tmin = dimension_tuple[0].cast<py::tuple>();
+        py::tuple tmax = dimension_tuple[1].cast<py::tuple>();
+
+        if (tmin.size() < 2 || tmin.size() > 3)
+            throw std::runtime_error("Min tuple must have 2 or 3 elements.");
+        if (tmax.size() < 2 || tmax.size() > 3)
+            throw std::runtime_error("Max tuple must have 2 or 3 elements.");
+
+        // parse min:
+        auto xmin = get_val(tmin[0]);
+        auto ymin = get_val(tmin[1]);
+        auto zmin = (tmin.size() == 3) ? get_val(tmin[2]) : parse_integral_t{0};
+
+        // parse max:
+        auto xmax = get_val(tmax[0]);
+        auto ymax = get_val(tmax[1]);
+        auto zmax = (tmax.size() == 3) ? get_val(tmax[2]) : parse_integral_t{0};
+
+        // Make actual coordinate objects for aspect_ratio(min, max)
+        coordinate_t cmin{xmin, ymin, zmin};
+        coordinate_t cmax{xmax, ymax, zmax};
+
+        // We can now call aspect_ratio(cmin, cmax)
+        return fiction::aspect_ratio_type_t<CoordLyt>{cmin, cmax};
     }
 
-    // Extract x, y from the tuple
-    uint64_t x = dimension[0].cast<uint64_t>();
-    uint64_t y = dimension[1].cast<uint64_t>();
-    // Default z = 0
-    uint64_t z = 0;
-    // If a 3rd element is provided, override z
-    if (dimension.size() == 3)
+    // -- CASE B: Single-tuple => "max" only => aspect_ratio(x, y, z)
+    //            dimension_tuple = (x, y[, z])
+    else
     {
-        z = dimension[2].cast<uint64_t>();
+        if (N < 2 || N > 3)
+            throw std::runtime_error("dimension must be (x,y) or (x,y,z) if passing only one tuple.");
+
+        auto x = get_val(dimension_tuple[0]);
+        auto y = get_val(dimension_tuple[1]);
+        auto z = (N == 3) ? get_val(dimension_tuple[2]) : parse_integral_t{0};
+
+        // The aspect_ratio constructor template <X,Y,Z> aspect_ratio(X x, Y y, Z z)
+        // sets min=(0,0,0) and max=(x,y,z).
+        // Just pass them as integrals and let the template do the rest:
+        return fiction::aspect_ratio_type_t<CoordLyt>{x, y, z};
     }
-
-    fiction::aspect_ratio_type_t<CoordLyt> ar{x, y, z};
-
-    return ar;
 }
 /**
  * A "factory" function that Python users can call as
@@ -214,15 +264,19 @@ inline void cartesian_layout_factory(pybind11::module& m)
                 return py::cast(py_cartesian_layout<py_offset_coordinate>{ar});
             }
         },
-        py::arg("dimension")       = py::make_tuple(0, 0, 0),
-        py::arg("coordinate_type") = "offset",  // default
+        py::arg("dimension") = py::make_tuple(0, 0, 0), py::arg("coordinate_type") = "offset",
         R"doc(
-            Creates and returns a cartesian_layout instance, choosing the coordinate system
-            based on the string argument. Valid options for `coordinate_type` are:
+        Creates and returns a cartesian_layout instance.
 
-                - "offset" (default)
-                - "cube"
-        )doc");
+        For the dimension, you can pass either:
+          - A single tuple (x, y) or (x, y, z) to specify only the "max" coordinate, with min defaulting to (0,0,0),
+          - Two nested tuples ((xmin, ymin), (xmax, ymax)) or 3D
+            ((xmin, ymin, zmin), (xmax, ymax, zmax)) to specify min and max explicitly.
+
+        coordinate_type can be:
+          - "offset": uses offset::ucoord_t (non-negative),
+          - "cube":   uses cube::coord_t    (can be signed).
+    )doc");
 }
 
 }  // namespace pyfiction

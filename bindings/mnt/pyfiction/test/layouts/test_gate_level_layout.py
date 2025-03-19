@@ -310,12 +310,12 @@ class TestCartesianGateLevelLayout(unittest.TestCase):
             self.assertEqual(len(outa2), 1)
             self.assertIn(cube_coordinate(f2), outa2)
 
-            # cp, tp = critical_path_length_and_throughput(layout)
-            # self.assertEqual(cp, 4)
-            # self.assertEqual(tp, 1)
+            cp, tp = critical_path_length_and_throughput(layout)
+            self.assertEqual(cp, 4)
+            self.assertEqual(tp, 1)
 
-            # drv_params = gate_level_drv_params()
-            # self.assertEqual(gate_level_drvs(layout, drv_params, False), (0, 0))
+            drv_params = gate_level_drv_params()
+            self.assertEqual(gate_level_drvs(layout, drv_params, False), (0, 0))
 
     def test_gate_level_layout_gate_types(self):
         for layout in [

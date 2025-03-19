@@ -258,8 +258,6 @@ template <typename Lyt>
     auto x_offset = std::numeric_limits<decltype(lyt.x())>::max();
     auto y_offset = std::numeric_limits<decltype(lyt.y())>::max();
 
-    const auto num_cells = lyt.num_cells();
-
     lyt.foreach_cell(
         [&x_offset, &y_offset](const auto& c)
         {

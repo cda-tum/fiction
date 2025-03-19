@@ -844,8 +844,9 @@ class hexagonal_layout
     [[nodiscard]] auto coordinates(const OffsetCoordinateType& start = {}, const OffsetCoordinateType& stop = {}) const
     {
         return range_t{std::make_pair(
-            coord_iterator{strg->dimension.max, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
-            coord_iterator{strg->dimension.max, stop.is_dead() ? strg->dimension.max.get_dead() : stop})};
+            coord_iterator{strg->dimension.max, start.is_dead() ? strg->dimension.min : start, strg->dimension.min},
+            coord_iterator{strg->dimension.max, stop.is_dead() ? strg->dimension.max.get_dead() : stop,
+                           OffsetCoordinateType{0, 0}})};
     }
     /**
      * Applies a function to all coordinates accessible in the layout between `start` and `stop`. The iteration order is
@@ -861,8 +862,10 @@ class hexagonal_layout
                             const OffsetCoordinateType& stop = {}) const
     {
         mockturtle::detail::foreach_element(
-            coord_iterator{strg->dimension.max, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
-            coord_iterator{strg->dimension.max, stop.is_dead() ? strg->dimension.max.get_dead() : stop}, fn);
+            coord_iterator{strg->dimension.max, start.is_dead() ? strg->dimension.min : start, strg->dimension.min},
+            coord_iterator{strg->dimension.max, stop.is_dead() ? strg->dimension.max.get_dead() : stop,
+                           strg->dimension.min},
+            fn);
     }
     /**
      * Returns a range of all coordinates accessible in the layout's ground layer between `start` and `stop`. The
@@ -878,11 +881,13 @@ class hexagonal_layout
     {
         assert(start.z == 0 && stop.z == 0);
 
-        auto ground_layer = aspect_ratio_type{x(), y(), 0};
+        const auto ground_layer_start = coordinate{strg->dimension.min.x, strg->dimension.min.y, 0};
+        auto       ground_layer       = aspect_ratio_type{x(), y(), 0};
 
-        return range_t{
-            std::make_pair(coord_iterator{ground_layer.max, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
-                           coord_iterator{ground_layer.max, stop.is_dead() ? ground_layer.max.get_dead() : stop})};
+        return range_t{std::make_pair(
+            coord_iterator{ground_layer.max, start.is_dead() ? ground_layer_start : start, strg->dimension.min},
+            coord_iterator{ground_layer.max, stop.is_dead() ? ground_layer.max.get_dead() : stop,
+                           strg->dimension.min})};
     }
     /**
      * Applies a function to all coordinates accessible in the layout's ground layer between `start` and `stop`. The
@@ -899,11 +904,13 @@ class hexagonal_layout
     {
         assert(start.z == 0 && stop.z == 0);
 
-        auto ground_layer = aspect_ratio_type{x(), y(), 0};
+        const auto ground_layer_start = coordinate{strg->dimension.min.x, strg->dimension.min.y, 0};
+        auto       ground_layer       = aspect_ratio_type{x(), y(), 0};
 
         mockturtle::detail::foreach_element(
-            coord_iterator{ground_layer.max, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
-            coord_iterator{ground_layer.max, stop.is_dead() ? ground_layer.max.get_dead() : stop}, fn);
+            coord_iterator{ground_layer.max, start.is_dead() ? ground_layer_start : start, strg->dimension.min},
+            coord_iterator{ground_layer.max, stop.is_dead() ? ground_layer.max.get_dead() : stop, strg->dimension.min},
+            fn);
     }
     /**
      * Returns a container that contains all coordinates that are adjacent to a given one. Thereby, cardinal and ordinal

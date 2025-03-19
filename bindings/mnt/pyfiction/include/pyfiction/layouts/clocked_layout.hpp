@@ -245,6 +245,11 @@ inline void clocked_layout_factory(pybind11::module& m)
 
                 - "offset" (default)
                 - "cube"
+
+            For the dimension, you can pass either:
+              - A single tuple (x, y) or (x, y, z) to specify only the "max" coordinate, with min defaulting to (0,0,0),
+              - Two nested tuples ((xmin, ymin), (xmax, ymax)) or 3D
+                ((xmin, ymin, zmin), (xmax, ymax, zmax)) to specify min and max explicitly.
         )doc");
 }
 

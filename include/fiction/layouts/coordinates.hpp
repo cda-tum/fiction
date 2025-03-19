@@ -162,11 +162,11 @@ struct ucoord_t
      *
      * @param aspect_ratio Aspect ratio to wrap the coordinate to.
      */
-    void wrap(const ucoord_t& aspect_ratio) noexcept
+    void wrap(const ucoord_t& aspect_ratio, const ucoord_t& wrap_to) noexcept
     {
         if (x > aspect_ratio.x)
         {
-            x = 0;
+            x = wrap_to.x;
             ++y;
         }
 
@@ -178,7 +178,7 @@ struct ucoord_t
             }
             else
             {
-                y = 0;
+                y = wrap_to.y;
                 z = 1;
             }
         }
@@ -435,17 +435,17 @@ struct coord_t
      *
      * @param aspect_ratio Aspect ratio to wrap the coordinate to.
      */
-    void wrap(const coord_t& aspect_ratio) noexcept
+    void wrap(const coord_t& aspect_ratio, const coord_t& wrap_to) noexcept
     {
         if (x > aspect_ratio.x)
         {
-            x = 0;
+            x = wrap_to.x;
             ++y;
         }
 
         if (y > aspect_ratio.y)
         {
-            y = 0;
+            y = wrap_to.y;
             ++z;
         }
 
@@ -690,11 +690,11 @@ struct coord_t
      *
      * @param aspect_ratio Aspect ratio to wrap the coordinate to.
      */
-    void wrap(const coord_t& aspect_ratio) noexcept
+    void wrap(const coord_t& aspect_ratio, const coord_t& wrap_to) noexcept
     {
         if (x > aspect_ratio.x)
         {
-            x = 0;
+            x = wrap_to.x;
             y += z;
             z = !z;
         }
@@ -983,11 +983,11 @@ struct aspect_ratio
     {
         return min.x;
     }
-    auto x_max() const
+    auto x() const
     {
         return max.x;
     }
-    auto x() const
+    auto x_size() const
     {
         return static_cast<decltype(max.x)>(integral_abs(max.x - min.x));
     }
@@ -1000,11 +1000,11 @@ struct aspect_ratio
     {
         return min.y;
     }
-    auto y_max() const
+    auto y() const
     {
         return max.y;
     }
-    auto y() const
+    auto y_size() const
     {
         return static_cast<decltype(max.y)>(integral_abs(max.y - min.y));
     }
@@ -1017,11 +1017,11 @@ struct aspect_ratio
     {
         return min.z;
     }
-    auto z_max() const
+    auto z() const
     {
         return max.z;
     }
-    auto z() const
+    auto z_size() const
     {
         return static_cast<decltype(max.z)>(integral_abs(max.z - min.z));
     }
@@ -1066,10 +1066,10 @@ struct aspect_ratio
     {
         if constexpr (std::is_same_v<CoordinateType, siqad::coord_t>)
         {
-            return static_cast<uint64_t>(((x() + 1) * (2 * y() + z() + 1)));
+            return static_cast<uint64_t>(((x_size() + 1) * (2 * y_size() + z_size() + 1)));
         }
 
-        return static_cast<uint64_t>((x() + 1) * (y() + 1));
+        return static_cast<uint64_t>((x_size() + 1) * (y_size() + 1));
     }
     /**
      * Computes the volume of a given coordinate assuming its origin is (0, 0, 0). Calculates \f$(|x| + 1) \cdot (|y| +
@@ -1087,7 +1087,7 @@ struct aspect_ratio
             return area();
         }
 
-        return area() * (z() + 1);
+        return area() * (z_size() + 1);
     }
 
     CoordinateType min;
@@ -1143,9 +1143,11 @@ class coord_iterator
      * @param dimension Boundary within to enumerate. Iteration wraps at its limits.
      * @param start Starting coordinate to enumerate first.
      */
-    constexpr explicit coord_iterator(const CoordinateType& dimension, const CoordinateType& start) noexcept :
+    constexpr explicit coord_iterator(const CoordinateType& dimension, const CoordinateType& start,
+                                      const CoordinateType& wrap_to) noexcept :
             aspect_ratio{dimension},
-            coord{start}
+            coord{start},
+            wrap_to{wrap_to}
     {
         static_assert(std::is_same_v<CoordinateType, offset::ucoord_t> ||
                           std::is_same_v<CoordinateType, cube::coord_t> ||
@@ -1158,7 +1160,7 @@ class coord_iterator
         coord.z = std::max(coord.z, static_cast<decltype(coord.z)>(0));
 
         // ... then handle coordinates that are beyond the given boundary.
-        coord.wrap(aspect_ratio);
+        coord.wrap(aspect_ratio, wrap_to);
     }
     /**
      * Increments the iterator, while keeping it within the boundary. Also defined on iterators that are out of bounds.
@@ -1171,7 +1173,7 @@ class coord_iterator
         {
             ++coord.x;
 
-            coord.wrap(aspect_ratio);
+            coord.wrap(aspect_ratio, wrap_to);
         }
         else
         {
@@ -1219,6 +1221,7 @@ class coord_iterator
     const CoordinateType aspect_ratio;
 
     CoordinateType coord;
+    CoordinateType wrap_to;
 };
 
 }  // namespace fiction

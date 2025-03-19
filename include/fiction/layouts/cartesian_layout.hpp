@@ -202,9 +202,9 @@ class cartesian_layout
      *
      * @return The x-start coordinate of the layout.
      */
-    [[nodiscard]] auto x_max() const noexcept
+    [[nodiscard]] auto x_size() const noexcept
     {
-        return strg->ar.x_max();
+        return strg->ar.x_size();
     }
     /**
      * Returns the layout's y-org coordinate.
@@ -213,9 +213,9 @@ class cartesian_layout
      *
      * @return The y-org coordinate of the layout.
      */
-    [[nodiscard]] auto y_max() const noexcept
+    [[nodiscard]] auto y_size() const noexcept
     {
-        return strg->ar.y_max();
+        return strg->ar.y_size();
     }
     /**
      * Returns the layout's z-org coordinate.
@@ -224,9 +224,9 @@ class cartesian_layout
      *
      * @return The z-org coordinate of the layout.
      */
-    [[nodiscard]] auto z_max() const noexcept
+    [[nodiscard]] auto z_size() const noexcept
     {
-        return strg->ar.z_max();
+        return strg->ar.z_size();
     }
     /**
      * Returns the layout's number of faces depending on the coordinate type.
@@ -321,11 +321,11 @@ class cartesian_layout
     {
         auto ec = c;
 
-        if (c.x > x_max())
+        if (c.x > x())
         {
             ec.d = 1;
         }
-        else if (c.x < x_max())
+        else if (c.x < x())
         {
             ++ec.x;
         }
@@ -344,11 +344,11 @@ class cartesian_layout
     {
         auto sec = c;
 
-        if (c.x > x_max() || c.y > y_max())
+        if (c.x > x() || c.y > y())
         {
             sec.d = 1;
         }
-        else if (c.x < x_max() && c.y < y_max())
+        else if (c.x < x() && c.y < y())
         {
             ++sec.x;
             ++sec.y;
@@ -367,11 +367,11 @@ class cartesian_layout
     {
         auto sc = c;
 
-        if (c.y > y_max())
+        if (c.y > y())
         {
             sc.d = 1;
         }
-        else if (c.y < y_max())
+        else if (c.y < y())
         {
             ++sc.y;
         }
@@ -390,9 +390,9 @@ class cartesian_layout
     {
         auto swc = c;
 
-        if (c.x <= x_min() || c.y >= y_max())
+        if (c.x <= x_min() || c.y >= y())
         {
-            if (c.x < x_min() || c.y > y_max())
+            if (c.x < x_min() || c.y > y())
             {
                 swc.d = 1;
             }
@@ -759,7 +759,7 @@ class cartesian_layout
      */
     [[nodiscard]] constexpr bool is_within_bounds(const OffsetCoordinateType& c) const noexcept
     {
-        return c.x <= x() && c.y <= y() && c.z <= z();
+        return x_min() <= c.x && c.x <= x() && y_min() <= c.y && c.y <= y() && z_min() <= c.z && c.z <= z();
     }
 
 #pragma endregion
@@ -779,9 +779,9 @@ class cartesian_layout
      */
     [[nodiscard]] auto coordinates(const OffsetCoordinateType& start = {}, const OffsetCoordinateType& stop = {}) const
     {
-        return range_t{
-            std::make_pair(coord_iterator{strg->ar.max, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
-                           coord_iterator{strg->ar.max, stop.is_dead() ? strg->ar.max.get_dead() : stop})};
+        return range_t{std::make_pair(
+            coord_iterator{strg->ar.max, start.is_dead() ? strg->ar.min : start, strg->ar.min},
+            coord_iterator{strg->ar.max, stop.is_dead() ? strg->ar.max.get_dead() : stop, strg->ar.min})};
     }
     /**
      * Applies a function to all coordinates accessible in the layout between `start` and `stop`. The iteration order is
@@ -797,8 +797,8 @@ class cartesian_layout
                             const OffsetCoordinateType& stop = {}) const
     {
         mockturtle::detail::foreach_element(
-            coord_iterator{strg->ar.max, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
-            coord_iterator{strg->ar.max, stop.is_dead() ? strg->ar.max.get_dead() : stop}, fn);
+            coord_iterator{strg->ar.max, start.is_dead() ? strg->ar.min : start, strg->ar.min},
+            coord_iterator{strg->ar.max, stop.is_dead() ? strg->ar.max.get_dead() : stop, strg->ar.min}, fn);
     }
     /**
      * Returns a range of all coordinates accessible in the layout's ground layer between `start` and `stop`. The
@@ -814,11 +814,12 @@ class cartesian_layout
     {
         assert(start.z == 0 && stop.z == 0);
 
-        const auto ground_layer = coordinate{x(), y(), 0};
+        const auto ground_layer_start = coordinate{strg->ar.min.x, strg->ar.min.y, 0};
+        const auto ground_layer       = coordinate{x(), y(), 0};
 
-        return range_t{
-            std::make_pair(coord_iterator{ground_layer, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
-                           coord_iterator{ground_layer, stop.is_dead() ? ground_layer.get_dead() : stop})};
+        return range_t{std::make_pair(
+            coord_iterator{ground_layer, start.is_dead() ? ground_layer_start : start, strg->ar.min},
+            coord_iterator{ground_layer, stop.is_dead() ? ground_layer.get_dead() : stop, strg->ar.min})};
     }
     /**
      * Applies a function to all coordinates accessible in the layout's ground layer between `start` and `stop`. The
@@ -835,11 +836,12 @@ class cartesian_layout
     {
         assert(start.z == 0 && stop.z == 0);
 
-        const auto ground_layer = coordinate{x(), y(), 0};
+        const auto ground_layer_start = coordinate{strg->ar.min.x, strg->ar.min.y, 0};
+        const auto ground_layer       = coordinate{x(), y(), 0};
 
         mockturtle::detail::foreach_element(
-            coord_iterator{ground_layer, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
-            coord_iterator{ground_layer, stop.is_dead() ? ground_layer.get_dead() : stop}, fn);
+            coord_iterator{ground_layer, start.is_dead() ? ground_layer_start : start, strg->ar.min},
+            coord_iterator{ground_layer, stop.is_dead() ? ground_layer.get_dead() : stop, strg->ar.min}, fn);
     }
     /**
      * Returns a container that contains all coordinates that are adjacent to a given one. Thereby, only cardinal
