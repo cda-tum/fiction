@@ -599,17 +599,15 @@ Returns:
 
 static const char *__doc_fiction_aspect_ratio_x = R"doc()doc";
 
-static const char *__doc_fiction_aspect_ratio_x_max = R"doc()doc";
-
 static const char *__doc_fiction_aspect_ratio_x_min =
 R"doc(Gets the x-coordinate of the maximum coordinate.
 
 Returns:
     The x-coordinate value.)doc";
 
-static const char *__doc_fiction_aspect_ratio_y = R"doc()doc";
+static const char *__doc_fiction_aspect_ratio_x_size = R"doc()doc";
 
-static const char *__doc_fiction_aspect_ratio_y_max = R"doc()doc";
+static const char *__doc_fiction_aspect_ratio_y = R"doc()doc";
 
 static const char *__doc_fiction_aspect_ratio_y_min =
 R"doc(Gets the y-coordinate of the maximum position.
@@ -617,15 +615,17 @@ R"doc(Gets the y-coordinate of the maximum position.
 Returns:
     The y-coordinate value.)doc";
 
-static const char *__doc_fiction_aspect_ratio_z = R"doc()doc";
+static const char *__doc_fiction_aspect_ratio_y_size = R"doc()doc";
 
-static const char *__doc_fiction_aspect_ratio_z_max = R"doc()doc";
+static const char *__doc_fiction_aspect_ratio_z = R"doc()doc";
 
 static const char *__doc_fiction_aspect_ratio_z_min =
 R"doc(Gets the z-coordinate of the maximum position.
 
 Returns:
     The z-coordinate value.)doc";
+
+static const char *__doc_fiction_aspect_ratio_z_size = R"doc()doc";
 
 static const char *__doc_fiction_bancs_clocking =
 R"doc(Returns the BANCS clocking as defined in \"BANCS: Bidirectional
@@ -2132,7 +2132,7 @@ that still belongs to the layout.
 Returns:
     x-dimension.)doc";
 
-static const char *__doc_fiction_cartesian_layout_x_max =
+static const char *__doc_fiction_cartesian_layout_x_min =
 R"doc(Returns the layout's x-org coordinate.
 
 The x-org coordinate represents the origin's x-value in the layout.
@@ -2140,7 +2140,7 @@ The x-org coordinate represents the origin's x-value in the layout.
 Returns:
     The x-start coordinate of the layout.)doc";
 
-static const char *__doc_fiction_cartesian_layout_x_min =
+static const char *__doc_fiction_cartesian_layout_x_size =
 R"doc(Returns the layout's x-org coordinate.
 
 The x-org coordinate represents the origin's x-value in the layout.
@@ -2155,7 +2155,7 @@ that still belongs to the layout.
 Returns:
     y-dimension.)doc";
 
-static const char *__doc_fiction_cartesian_layout_y_max =
+static const char *__doc_fiction_cartesian_layout_y_min =
 R"doc(Returns the layout's y-org coordinate.
 
 The y-org coordinate represents the origin's y-value in the layout.
@@ -2163,7 +2163,7 @@ The y-org coordinate represents the origin's y-value in the layout.
 Returns:
     The y-org coordinate of the layout.)doc";
 
-static const char *__doc_fiction_cartesian_layout_y_min =
+static const char *__doc_fiction_cartesian_layout_y_size =
 R"doc(Returns the layout's y-org coordinate.
 
 The y-org coordinate represents the origin's y-value in the layout.
@@ -2178,7 +2178,7 @@ that still belongs to the layout.
 Returns:
     z-dimension.)doc";
 
-static const char *__doc_fiction_cartesian_layout_z_max =
+static const char *__doc_fiction_cartesian_layout_z_min =
 R"doc(Returns the layout's z-org coordinate.
 
 The z-org coordinate represents the origin's z-value in the layout.
@@ -2186,7 +2186,7 @@ The z-org coordinate represents the origin's z-value in the layout.
 Returns:
     The z-org coordinate of the layout.)doc";
 
-static const char *__doc_fiction_cartesian_layout_z_min =
+static const char *__doc_fiction_cartesian_layout_z_size =
 R"doc(Returns the layout's z-org coordinate.
 
 The z-org coordinate represents the origin's z-value in the layout.
@@ -3390,6 +3390,8 @@ static const char *__doc_fiction_coord_iterator_operator_lt = R"doc()doc";
 static const char *__doc_fiction_coord_iterator_operator_mul = R"doc()doc";
 
 static const char *__doc_fiction_coord_iterator_operator_ne = R"doc()doc";
+
+static const char *__doc_fiction_coord_iterator_wrap_to = R"doc()doc";
 
 static const char *__doc_fiction_cost_function_chi =
 R"doc(Calculates the cost function :math:` \chi = \sum_{i=1} w_{i} \cdot
@@ -22888,9 +22890,9 @@ static const char *__doc_fmt_formatter_parse = R"doc()doc";
 
 static const char *__doc_fmt_formatter_parse_2 = R"doc()doc";
 
-static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_layouts_coordinates_hpp_1294_8 = R"doc()doc";
+static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_layouts_coordinates_hpp_1297_8 = R"doc()doc";
 
-static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_layouts_coordinates_hpp_1310_8 = R"doc()doc";
+static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_layouts_coordinates_hpp_1313_8 = R"doc()doc";
 
 static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_technology_cell_ports_hpp_291_8 = R"doc()doc";
 
