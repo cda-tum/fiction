@@ -300,7 +300,8 @@ template <typename CartLyt>
  */
 template <typename HexLyt, typename CartLyt>
 [[nodiscard]] uint64_t get_offset(const CartLyt& lyt, uint64_t cartesian_layout_width, uint64_t cartesian_layout_height,
-                                  hexagonalization_params::hexagonalization_input_output_mode input_mode, hexagonalization_params::hexagonalization_input_output_mode output_mode) noexcept
+                                  hexagonalization_params::hexagonalization_input_output_mode input_mode,
+                                  hexagonalization_params::hexagonalization_input_output_mode output_mode) noexcept
 {
     static_assert(is_cartesian_layout_v<CartLyt>, "CartLyt is not a Cartesian layout");
     static_assert(is_hexagonal_layout_v<HexLyt>, "HexLyt is not a hexagonal layout");
@@ -404,7 +405,8 @@ class hexagonalization_impl
             const mockturtle::stopwatch stop{stats.time_total};
 
             // calculate horizontal offset for hexagonal layout
-            const auto offset = detail::get_offset<HexLyt, CartLyt>(plyt, layout_width, layout_height, ps.input_mode, ps.output_mode);
+            const auto offset =
+                detail::get_offset<HexLyt, CartLyt>(plyt, layout_width, layout_height, ps.input_mode, ps.output_mode);
 
             // determine the top primary input coordinate
             auto middle_pi = detail::to_hex<CartLyt, HexLyt>({0, 0}, layout_height);
@@ -804,8 +806,7 @@ class hexagonalization_impl
                 {
                     tile<HexLyt> fanin;
                     hex_layout.foreach_fanin(hex_layout.get_node(c),
-                                              [&](const auto& fin) {
-                                                 fanin = static_cast<tile<HexLyt>>(fin); });
+                                             [&](const auto& fin) { fanin = static_cast<tile<HexLyt>>(fin); });
 
                     // shift left primary output position
                     middle_po.x -= 1;
@@ -827,8 +828,7 @@ class hexagonalization_impl
                 {
                     tile<HexLyt> fanin;
                     hex_layout.foreach_fanin(hex_layout.get_node(c),
-                                             [&](const auto& fin) {
-                                                 fanin = static_cast<tile<HexLyt>>(fin); });
+                                             [&](const auto& fin) { fanin = static_cast<tile<HexLyt>>(fin); });
 
                     // shift bottom primary output position
                     middle_po.x += 1;

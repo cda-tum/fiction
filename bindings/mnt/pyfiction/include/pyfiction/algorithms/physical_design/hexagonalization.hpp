@@ -23,7 +23,8 @@ inline void hexagonalization(pybind11::module& m)
                                                                          PyExc_RuntimeError);
 
     py::enum_<fiction::hexagonalization_params::hexagonalization_input_output_mode>(
-        m, "hexagonalization_input_output_mode", DOC(fiction_hexagonalization_params_hexagonalization_input_output_mode))
+        m, "hexagonalization_input_output_mode",
+        DOC(fiction_hexagonalization_params_hexagonalization_input_output_mode))
         .value("NONE", fiction::hexagonalization_params::hexagonalization_input_output_mode::NONE,
                DOC(fiction_hexagonalization_params_hexagonalization_input_output_mode_NONE))
         .value("EXTEND", fiction::hexagonalization_params::hexagonalization_input_output_mode::EXTEND,
@@ -37,8 +38,8 @@ inline void hexagonalization(pybind11::module& m)
         .def(py::init<>())
         .def_readwrite("input_mode", &fiction::hexagonalization_params::input_mode,
                        DOC(fiction_hexagonalization_params_input_mode));
-        .def_readwrite("output_mode", &fiction::hexagonalization_params::output_mode,
-                       DOC(fiction_hexagonalization_params_output_mode));
+    .def_readwrite("output_mode", &fiction::hexagonalization_params::output_mode,
+                   DOC(fiction_hexagonalization_params_output_mode));
 
     py::class_<fiction::hexagonalization_stats>(m, "hexagonalization_stats", DOC(fiction_hexagonalization_stats))
         .def(py::init<>())
