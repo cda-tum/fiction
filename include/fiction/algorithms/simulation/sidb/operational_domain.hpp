@@ -855,14 +855,15 @@ class operational_domain_impl
                     const auto energy_dist = energy_distribution(sim_results.charge_distributions);
 
                     lyt.assign_physical_parameters(simulation_parameters);
-                    const auto position = find_key_with_tolerance(energy_dist, lyt.get_system_energy());
+                    const auto position =
+                        energy_dist.degeneracy_of_given_energy(lyt.get_electrostatic_potential_energy());
 
-                    if (position == energy_dist.cend())
+                    if (!position.has_value())
                     {
                         return;
                     }
 
-                    const auto excited_state_number = std::distance(energy_dist.cbegin(), position);
+                    const auto excited_state_number = position.value();
                     suitable_params_domain.add_value(param_point, std::make_tuple(excited_state_number));
                 }
             });

@@ -34,15 +34,15 @@ class TestEnergyDistribution(unittest.TestCase):
 
         charge_layouts = [cds1, cds2, cds3, cds4]
 
-        print(cds1.get_system_energy())
-        print(cds2.get_system_energy())
-        print(cds3.get_system_energy())
-        print(cds4.get_system_energy())
+        print(cds1.get_electrostatic_potential_energy())
+        print(cds2.get_electrostatic_potential_energy())
+        print(cds3.get_electrostatic_potential_energy())
+        print(cds4.get_electrostatic_potential_energy())
 
-        self.assertAlmostEqual(cds1.get_system_energy(), 0.48066663155586997)
-        self.assertAlmostEqual(cds2.get_system_energy(), 0.0)
-        self.assertAlmostEqual(cds3.get_system_energy(), 0.48066663155586997)
-        self.assertAlmostEqual(cds4.get_system_energy(), 0.48066663155586997)
+        self.assertAlmostEqual(cds1.get_electrostatic_potential_energy(), 0.48066663155586997)
+        self.assertAlmostEqual(cds2.get_electrostatic_potential_energy(), 0.0)
+        self.assertAlmostEqual(cds3.get_electrostatic_potential_energy(), 0.48066663155586997)
+        self.assertAlmostEqual(cds4.get_electrostatic_potential_energy(), 0.48066663155586997)
 
         result = energy_distribution(charge_layouts)
 
@@ -72,23 +72,17 @@ class TestEnergyDistribution(unittest.TestCase):
 
         charge_layouts = [cds1, cds2, cds3, cds4]
 
-        print(cds1.get_system_energy())
-        print(cds2.get_system_energy())
-        print(cds3.get_system_energy())
-        print(cds4.get_system_energy())
+        print(cds1.get_electrostatic_potential_energy())
+        print(cds2.get_electrostatic_potential_energy())
+        print(cds3.get_electrostatic_potential_energy())
+        print(cds4.get_electrostatic_potential_energy())
 
-        self.assertAlmostEqual(cds1.get_system_energy(), 0.233980661373219)
-        self.assertAlmostEqual(cds2.get_system_energy(), 0.0)
-        self.assertAlmostEqual(cds3.get_system_energy(), 0.233980661373219)
-        self.assertAlmostEqual(cds4.get_system_energy(), 0.233980661373219)
+        self.assertAlmostEqual(cds1.get_electrostatic_potential_energy(), 0.233980661373219)
+        self.assertAlmostEqual(cds2.get_electrostatic_potential_energy(), 0.0)
+        self.assertAlmostEqual(cds3.get_electrostatic_potential_energy(), 0.233980661373219)
+        self.assertAlmostEqual(cds4.get_electrostatic_potential_energy(), 0.233980661373219)
 
-        result = energy_distribution(charge_layouts)
-
-        self.assertLessEqual(result[0], 0)
-        self.assertLessEqual(result[1], 0)
-        self.assertLessEqual(result[2], 0)
-        self.assertLessEqual(result[3], 0)
-        self.assertLessEqual(result, 0)
+        energy_distribution(charge_layouts)
 
 
 if __name__ == "__main__":

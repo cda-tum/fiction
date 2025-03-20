@@ -642,9 +642,9 @@ class is_operational_impl
             if (cds_layout.is_physically_valid())
             {
                 cds_layout.recompute_system_energy();
-                if (cds_layout.get_system_energy() + constants::ERROR_MARGIN < min_energy)
+                if (cds_layout.get_electrostatic_potential_energy() + constants::ERROR_MARGIN < min_energy)
                 {
-                    min_energy = cds_layout.get_system_energy();
+                    min_energy = cds_layout.get_electrostatic_potential_energy();
                 }
             }
 

@@ -121,7 +121,8 @@ Energy Calculation
     .. tab:: C++
         **Header:** ``fiction/algorithms/simulation/sidb/energy_distribution.hpp``
 
-        .. doxygentypedef:: fiction::sidb_energy_distribution
+        .. doxygenstruct:: fiction::sidb_energy_distribution
+           :members:
         .. doxygenfunction:: fiction::energy_distribution
 
 

@@ -968,7 +968,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      *
      * @return The system's total electrostatic potential energy (unit: eV).
      */
-    [[nodiscard]] double get_system_energy() const noexcept
+    [[nodiscard]] double get_electrostatic_potential_energy() const noexcept
     {
         return strg->system_energy;
     }
