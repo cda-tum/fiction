@@ -2043,16 +2043,24 @@ Returns:
 
 static const char *__doc_fiction_cartesian_layout_resize =
 R"doc(Updates the layout's dimensions and origin based on a new
-aspect_ratio_type.
+aspect_ratio.
 
 This method effectively resizes the layout by adjusting its dimensions
-to match the provided aspect_ratio_type. The origin is also updated to
-the start coordinate of the aspect_ratio_type.
+to match the provided aspect_ratio. The origin is also updated to the
+start coordinate of the aspect_ratio.
 
 Parameter ``ar``:
-    The new aspect_ratio_type to apply to the layout.)doc";
+    The new aspect_ratio to apply to the layout.)doc";
 
-static const char *__doc_fiction_cartesian_layout_resize_2 = R"doc()doc";
+static const char *__doc_fiction_cartesian_layout_resize_2 =
+R"doc(Updates the layout's dimensions based on a new coordinate.
+
+This method effectively resizes the layout by adjusting its dimensions
+to match the provided coordinate. The origin is also updated to (0, 0,
+0).
+
+Parameter ``ar``:
+    The new max coordinate of the layout.)doc";
 
 static const char *__doc_fiction_cartesian_layout_south =
 R"doc(Returns the coordinate that is directly adjacent in southern direction
@@ -2141,12 +2149,11 @@ Returns:
     The x-start coordinate of the layout.)doc";
 
 static const char *__doc_fiction_cartesian_layout_x_size =
-R"doc(Returns the layout's x-org coordinate.
-
-The x-org coordinate represents the origin's x-value in the layout.
+R"doc(Returns the layout's size in the x-dimension, i.e., the distance
+between x-org and the maximum x-value.
 
 Returns:
-    The x-start coordinate of the layout.)doc";
+    The size of the layout in the x-dimension.)doc";
 
 static const char *__doc_fiction_cartesian_layout_y =
 R"doc(Returns the layout's y-dimension, i.e., returns the biggest y-value
@@ -2164,12 +2171,11 @@ Returns:
     The y-org coordinate of the layout.)doc";
 
 static const char *__doc_fiction_cartesian_layout_y_size =
-R"doc(Returns the layout's y-org coordinate.
-
-The y-org coordinate represents the origin's y-value in the layout.
+R"doc(Returns the layout's size in the y-dimension, i.e., the distance
+between y-org and the maximum y-value.
 
 Returns:
-    The y-org coordinate of the layout.)doc";
+    The size of the layout in the y-dimension.)doc";
 
 static const char *__doc_fiction_cartesian_layout_z =
 R"doc(Returns the layout's z-dimension, i.e., returns the biggest z-value
@@ -2187,12 +2193,11 @@ Returns:
     The z-org coordinate of the layout.)doc";
 
 static const char *__doc_fiction_cartesian_layout_z_size =
-R"doc(Returns the layout's z-org coordinate.
-
-The z-org coordinate represents the origin's z-value in the layout.
+R"doc(Returns the layout's size in the z-dimension, i.e., the distance
+between z-org and the maximum z-value.
 
 Returns:
-    The z-org coordinate of the layout.)doc";
+    The size of the layout in the z-dimension.)doc";
 
 static const char *__doc_fiction_cds_configuration = R"doc(An enumeration of modes for the charge distribution surface.)doc";
 
