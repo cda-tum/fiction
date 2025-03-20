@@ -262,37 +262,45 @@ class hexagonal_layout
     /**
      * Returns the layout's number of faces depending on the coordinate type.
      *
-     * @return Area of layout.
+     * @return Area of the layout.
      */
-    [[nodiscard]] uint64_t area() const noexcept
+    [[nodiscard]] auto area() const noexcept
     {
         return strg->dimension.area();
     }
     /**
-     * Updates the layout's dimensions, effectively resizing it.
+     * Returns the layout's volume depending on the coordinate type.
      *
-     * @param ar New aspect ratio.
+     * @return Volume of the layout.
+     */
+    [[nodiscard]] auto volume() const noexcept
+    {
+        return strg->dimension.volume();
+    }
+    /**
+     * Updates the layout's dimensions and origin based on a new aspect_ratio.
+     *
+     * This method effectively resizes the layout by adjusting its dimensions to match
+     * the provided aspect_ratio. The origin is also updated to the start coordinate of the aspect_ratio.
+     *
+     * @param ar The new aspect_ratio to apply to the layout.
      */
     void resize(const aspect_ratio_type& ar) noexcept
     {
         strg->dimension = ar;
     }
     /**
-     * Overloaded resize method to accept a coordinate.
+     * Updates the layout's dimensions based on a new coordinate.
      *
-     * This method resizes the layout by creating an aspect_ratio_type from the provided max coordinate,
-     * with the origin remaining unchanged.
+     * This method effectively resizes the layout by adjusting its dimensions to match
+     * the provided coordinate. The origin is also updated to (0, 0, 0).
      *
-     * @param max The new end coordinate defining the layout's size.
+     * @param ar The new max coordinate of the layout.
      */
-    //    void resize(const coordinate& max) noexcept
-    //    {
-    //        resize(aspect_ratio_type{max});
-    //    }
-    //    void resize(const aspect_ratio_type& ar) noexcept
-    //    {
-    //        strg->dimension = ar;
-    //    }
+    void resize(const OffsetCoordinateType& ar) noexcept
+    {
+        strg->dimension = aspect_ratio_type(ar);
+    }
 
 #pragma endregion
 

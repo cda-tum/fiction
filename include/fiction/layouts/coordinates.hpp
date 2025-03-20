@@ -1054,13 +1054,11 @@ struct aspect_ratio
         return (min_not_equal || max_not_equal);
     }
     /**
-     * Computes the area of a given coordinate assuming its origin is (0, 0, 0). Calculates \f$(|x| + 1) \cdot (|y| +
+     * Computes the area of a given aspect_ratio. Calculates \f$(|x| + 1) \cdot (|y| +
      * 1)\f$ by default. The exception is SiQAD coordinates, for which it computes \f$(|x| + 1) \cdot (2 \cdot |y| + |z|
      * + 1)\f$.
      *
-     * @tparam CoordinateType Coordinate type.
-     * @param coord Coordinate.
-     * @return Area of coord.
+     * @return Area of the aspect_ratio.
      */
     uint64_t area() noexcept
     {
@@ -1072,13 +1070,11 @@ struct aspect_ratio
         return static_cast<uint64_t>((x_size() + 1) * (y_size() + 1));
     }
     /**
-     * Computes the volume of a given coordinate assuming its origin is (0, 0, 0). Calculates \f$(|x| + 1) \cdot (|y| +
+     * Computes the volume of a given aspect_ratio. Calculates \f$(|x| + 1) \cdot (|y| +
      * 1)
      * \cdot (|z| + 1)\f$ by default. For SiQAD coordinates, which are planar by definition, the area is returned.
      *
-     * @tparam CoordinateType Coordinate type.
-     * @param coord Coordinate.
-     * @return Volume of coord.
+     * @return Volume of the aspect_ratio.
      */
     uint64_t volume() noexcept
     {

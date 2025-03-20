@@ -225,11 +225,20 @@ class cartesian_layout
     /**
      * Returns the layout's number of faces depending on the coordinate type.
      *
-     * @return Area of layout.
+     * @return Area of the layout.
      */
     [[nodiscard]] auto area() const noexcept
     {
         return strg->ar.area();
+    }
+    /**
+     * Returns the layout's volume depending on the coordinate type.
+     *
+     * @return Volume of the layout.
+     */
+    [[nodiscard]] auto volume() const noexcept
+    {
+        return strg->ar.volume();
     }
     /**
      * Updates the layout's dimensions and origin based on a new aspect_ratio.

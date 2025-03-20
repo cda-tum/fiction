@@ -48,9 +48,19 @@ inline void hexagonal_layout(pybind11::module& m, const std::string& coord_type)
         .def("x", &HexLyt::x, DOC(fiction_hexagonal_layout_x))
         .def("y", &HexLyt::y, DOC(fiction_hexagonal_layout_y))
         .def("z", &HexLyt::z, DOC(fiction_hexagonal_layout_z))
-        //        .def("area", &HexLyt::area, DOC(fiction_hexagonal_layout_area))
-        //        .def("resize", &HexLyt::resize, py::arg("dimension"), DOC(fiction_hexagonal_layout_resize))
-
+        .def("area", &HexLyt::area, DOC(fiction_hexagonal_layout_area))
+        .def("volume", &HexLyt::volume, DOC(fiction_hexagonal_layout_volume))
+        .def(
+            "resize", [](HexLyt& lyt, const fiction::aspect_ratio_type_t<HexLyt>& dimension) { lyt.resize(dimension); },
+            py::arg("dimension"), DOC(fiction_hexagonal_layout_resize))
+        .def(
+            "resize",
+            [&](HexLyt& layout, py::tuple dimension)
+            {
+                auto ar = extract_aspect_ratio<HexLyt>(dimension);
+                layout.resize(ar);
+            },
+            py::arg("dimension"), DOC(fiction_hexagonal_layout_resize_2))
         .def("north", &HexLyt::north, py::arg("c"), DOC(fiction_hexagonal_layout_north))
         .def("north_east", &HexLyt::north_east, py::arg("c"), DOC(fiction_hexagonal_layout_north_east))
         .def("east", &HexLyt::east, py::arg("c"), DOC(fiction_hexagonal_layout_east))

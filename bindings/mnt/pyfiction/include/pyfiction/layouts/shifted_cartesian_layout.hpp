@@ -54,11 +54,19 @@ inline void shifted_cartesian_layout(pybind11::module& m, const std::string& coo
             "y", [](const ShiftedCartLyt& lyt) { return lyt.y(); }, DOC(fiction_cartesian_layout_y))
         .def(
             "z", [](const ShiftedCartLyt& lyt) { return lyt.z(); }, DOC(fiction_cartesian_layout_z))
+        .def("area", &ShiftedCartLyt::area, DOC(fiction_cartesian_layout_area))
+        .def("volume", &ShiftedCartLyt::volume, DOC(fiction_cartesian_layout_volume))
         .def(
-            "area", [](const ShiftedCartLyt& lyt) { return lyt.area(); }, DOC(fiction_cartesian_layout_area))
-        .def(
-            "resize", [](ShiftedCartLyt& lyt, const fiction::aspect_ratio<CoordType>& dimension)
+            "resize", [](ShiftedCartLyt& lyt, const fiction::aspect_ratio_type_t<ShiftedCartLyt>& dimension)
             { lyt.resize(dimension); }, py::arg("dimension"), DOC(fiction_cartesian_layout_resize))
+        .def(
+            "resize",
+            [&](ShiftedCartLyt& layout, py::tuple dimension)
+            {
+                auto ar = extract_aspect_ratio<ShiftedCartLyt>(dimension);
+                layout.resize(ar);
+            },
+            py::arg("dimension"), DOC(fiction_cartesian_layout_resize_2))
         .def(
             "north", [](const ShiftedCartLyt& lyt, const CoordType& c) { return lyt.north(c); }, py::arg("c"),
             DOC(fiction_cartesian_layout_north))
