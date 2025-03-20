@@ -4378,6 +4378,8 @@ static const char *__doc_fiction_cube_coord_t_y = R"doc(y coordinate.)doc";
 
 static const char *__doc_fiction_cube_coord_t_z = R"doc(z coordinate.)doc";
 
+static const char *__doc_fiction_cube_operator_lshift = R"doc()doc";
+
 static const char *__doc_fiction_debug_print_node_to_tile_assignments = R"doc()doc";
 
 static const char *__doc_fiction_debug_print_tile_to_node_assignments = R"doc()doc";
@@ -14980,7 +14982,7 @@ static const char *__doc_fiction_hexagonal_layout_hexagonal_layout_2 = R"doc()do
 
 static const char *__doc_fiction_hexagonal_layout_hexagonal_layout_storage = R"doc()doc";
 
-static const char *__doc_fiction_hexagonal_layout_hexagonal_layout_storage_dimension = R"doc()doc";
+static const char *__doc_fiction_hexagonal_layout_hexagonal_layout_storage_ar = R"doc()doc";
 
 static const char *__doc_fiction_hexagonal_layout_hexagonal_layout_storage_hexagonal_layout_storage = R"doc()doc";
 
@@ -15430,6 +15432,21 @@ that still belongs to the layout.
 Returns:
     x-dimension.)doc";
 
+static const char *__doc_fiction_hexagonal_layout_x_min =
+R"doc(Returns the layout's x-org coordinate.
+
+The x-org coordinate represents the origin's x-value in the layout.
+
+Returns:
+    The x-start coordinate of the layout.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_x_size =
+R"doc(Returns the layout's size in the x-dimension, i.e., the distance
+between x-org and the maximum x-value.
+
+Returns:
+    The size of the layout in the x-dimension.)doc";
+
 static const char *__doc_fiction_hexagonal_layout_y =
 R"doc(Returns the layout's y-dimension, i.e., returns the biggest y-value
 that still belongs to the layout.
@@ -15437,12 +15454,42 @@ that still belongs to the layout.
 Returns:
     y-dimension.)doc";
 
+static const char *__doc_fiction_hexagonal_layout_y_min =
+R"doc(Returns the layout's y-org coordinate.
+
+The y-org coordinate represents the origin's y-value in the layout.
+
+Returns:
+    The y-org coordinate of the layout.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_y_size =
+R"doc(Returns the layout's size in the y-dimension, i.e., the distance
+between y-org and the maximum y-value.
+
+Returns:
+    The size of the layout in the y-dimension.)doc";
+
 static const char *__doc_fiction_hexagonal_layout_z =
 R"doc(Returns the layout's z-dimension, i.e., returns the biggest z-value
 that still belongs to the layout.
 
 Returns:
     z-dimension.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_z_min =
+R"doc(Returns the layout's z-org coordinate.
+
+The z-org coordinate represents the origin's z-value in the layout.
+
+Returns:
+    The z-org coordinate of the layout.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_z_size =
+R"doc(Returns the layout's size in the z-dimension, i.e., the distance
+between z-org and the maximum z-value.
+
+Returns:
+    The size of the layout in the z-dimension.)doc";
 
 static const char *__doc_fiction_hexagonalization =
 R"doc(Transforms a 2DDWave-clocked Cartesian layout into a hexagonal even
@@ -22908,9 +22955,9 @@ static const char *__doc_fmt_formatter_parse = R"doc()doc";
 
 static const char *__doc_fmt_formatter_parse_2 = R"doc()doc";
 
-static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_layouts_coordinates_hpp_1293_8 = R"doc()doc";
+static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_layouts_coordinates_hpp_1308_8 = R"doc()doc";
 
-static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_layouts_coordinates_hpp_1309_8 = R"doc()doc";
+static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_layouts_coordinates_hpp_1324_8 = R"doc()doc";
 
 static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_technology_cell_ports_hpp_291_8 = R"doc()doc";
 
