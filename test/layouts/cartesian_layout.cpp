@@ -161,6 +161,97 @@ TEST_CASE("Cartesian coordinate iteration", "[cartesian-layout]")
     CHECK(visited.size() == 23);
 }
 
+TEST_CASE("Cartesian coordinate iteration with positive minimum", "[cartesian-layout]")
+{
+    cartesian_layout<offset::ucoord_t>::aspect_ratio_type ar{{1, 1, 0}, {9, 9, 1}};
+
+    cartesian_layout layout{ar};
+
+    std::set<cartesian_layout<offset::ucoord_t>::coordinate> visited{};
+
+    const auto check1 = [&visited, &ar, &layout](const auto& t)
+    {
+        CHECK(t <= ar.max);
+
+        // all coordinates are within the layout bounds
+        CHECK(layout.is_within_bounds(t));
+
+        // no coordinate is visited twice
+        CHECK(visited.count(t) == 0);
+        visited.insert(t);
+    };
+
+    for (auto&& t : layout.coordinates())
+    {
+        check1(t);
+    }
+    CHECK(visited.size() == 162);
+
+    visited.clear();
+
+    layout.foreach_coordinate(check1);
+    CHECK(visited.size() == 162);
+
+    visited.clear();
+
+    cartesian_layout<offset::ucoord_t>::aspect_ratio_type ar_ground{ar.x(), ar.y(), 0};
+
+    const auto check2 = [&visited, &ar_ground, &layout](const auto& t)
+    {
+        // iteration stays in ground layer
+        CHECK(t.z == 0);
+        CHECK(t <= ar_ground.max);
+
+        // all coordinates are within the layout bounds
+        CHECK(layout.is_within_bounds(t));
+
+        // no coordinate is visited twice
+        CHECK(visited.count(t) == 0);
+        visited.insert(t);
+    };
+
+    for (auto&& t : layout.ground_coordinates())
+    {
+        check2(t);
+    }
+    CHECK(visited.size() == 81);
+
+    visited.clear();
+
+    layout.foreach_ground_coordinate(check2);
+    CHECK(visited.size() == 81);
+
+    visited.clear();
+
+    cartesian_layout<offset::ucoord_t>::coordinate start{2, 2}, stop{5, 4};
+
+    const auto check3 = [&visited, &start, &stop, &layout](const auto& t)
+    {
+        CHECK(t.z == 0);
+        // iteration stays in between the bounds
+        CHECK(t >= start);
+        CHECK(t < stop);
+
+        // all coordinates are within the layout bounds
+        CHECK(layout.is_within_bounds(t));
+
+        // no coordinate is visited twice
+        CHECK(visited.count(t) == 0);
+        visited.insert(t);
+    };
+
+    for (auto&& t : layout.coordinates(start, stop))
+    {
+        check3(t);
+    }
+    CHECK(visited.size() == 21);
+
+    visited.clear();
+
+    layout.foreach_coordinate(check3, start, stop);
+    CHECK(visited.size() == 21);
+}
+
 TEST_CASE("Cartesian cardinal operations", "[cartesian-layout]")
 {
     const aspect_ratio<offset::ucoord_t> ar{10, 10, 1};

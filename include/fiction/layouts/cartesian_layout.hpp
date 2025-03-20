@@ -196,33 +196,27 @@ class cartesian_layout
         return strg->ar.z_min();
     }
     /**
-     * Returns the layout's x-org coordinate.
+     * Returns the layout's size in the x-dimension, i.e., the distance between x-org and the maximum x-value.
      *
-     * The x-org coordinate represents the origin's x-value in the layout.
-     *
-     * @return The x-start coordinate of the layout.
+     * @return The size of the layout in the x-dimension.
      */
     [[nodiscard]] auto x_size() const noexcept
     {
         return strg->ar.x_size();
     }
     /**
-     * Returns the layout's y-org coordinate.
+     * Returns the layout's size in the y-dimension, i.e., the distance between y-org and the maximum y-value.
      *
-     * The y-org coordinate represents the origin's y-value in the layout.
-     *
-     * @return The y-org coordinate of the layout.
+     * @return The size of the layout in the y-dimension.
      */
     [[nodiscard]] auto y_size() const noexcept
     {
         return strg->ar.y_size();
     }
     /**
-     * Returns the layout's z-org coordinate.
+     * Returns the layout's size in the z-dimension, i.e., the distance between z-org and the maximum z-value.
      *
-     * The z-org coordinate represents the origin's z-value in the layout.
-     *
-     * @return The z-org coordinate of the layout.
+     * @return The size of the layout in the z-dimension.
      */
     [[nodiscard]] auto z_size() const noexcept
     {
@@ -238,19 +232,25 @@ class cartesian_layout
         return strg->ar.area();
     }
     /**
-     * Updates the layout's dimensions and origin based on a new aspect_ratio_type.
+     * Updates the layout's dimensions and origin based on a new aspect_ratio.
      *
      * This method effectively resizes the layout by adjusting its dimensions to match
-     * the provided aspect_ratio_type. The origin is also updated to the start coordinate of the aspect_ratio_type.
+     * the provided aspect_ratio. The origin is also updated to the start coordinate of the aspect_ratio.
      *
-     * @param ar The new aspect_ratio_type to apply to the layout.
+     * @param ar The new aspect_ratio to apply to the layout.
      */
     void resize(const aspect_ratio_type& ar) noexcept
     {
         strg->ar = ar;
     }
-
-    // todo
+    /**
+     * Updates the layout's dimensions based on a new coordinate.
+     *
+     * This method effectively resizes the layout by adjusting its dimensions to match
+     * the provided coordinate. The origin is also updated to (0, 0, 0).
+     *
+     * @param ar The new max coordinate of the layout.
+     */
     void resize(const OffsetCoordinateType& ar) noexcept
     {
         strg->ar = aspect_ratio_type(ar);
@@ -643,7 +643,7 @@ class cartesian_layout
      */
     [[nodiscard]] constexpr bool is_at_northern_border(const OffsetCoordinateType& c) const noexcept
     {
-        return c.y == 0ull;
+        return c.y == y_min();
     }
     /**
      * Returns whether the given coordinate is located at the layout's eastern border where x is maximal.
@@ -673,7 +673,7 @@ class cartesian_layout
      */
     [[nodiscard]] constexpr bool is_at_western_border(const OffsetCoordinateType& c) const noexcept
     {
-        return c.x == 0ull;
+        return c.x == x_min();
     }
     /**
      * Returns whether the given coordinate is located at any of the layout's borders where x or y are either minimal or
@@ -696,7 +696,7 @@ class cartesian_layout
      */
     [[nodiscard]] OffsetCoordinateType northern_border_of(const OffsetCoordinateType& c) const noexcept
     {
-        return {c.x, 0ull, c.z};
+        return {c.x, y_min(), c.z};
     }
     /**
      * Returns the coordinate with the same y and z values as a given coordinate but that is located at the layout's
@@ -729,7 +729,7 @@ class cartesian_layout
      */
     [[nodiscard]] OffsetCoordinateType western_border_of(const OffsetCoordinateType& c) const noexcept
     {
-        return {0ull, c.y, c.z};
+        return {x_min(), c.y, c.z};
     }
     /**
      * Returns whether the given coordinate is located in the ground layer where z is minimal.

@@ -239,11 +239,11 @@ inline void aspect_ratio_bindings(pybind11::module& m, const std::string& coordi
         .def("volume", &fiction::aspect_ratio<CoordinateType>::volume)
         .def("__eq__", &fiction::aspect_ratio<CoordinateType>::operator==)
         .def_property_readonly("x_min", &fiction::aspect_ratio<CoordinateType>::x_min)
-        .def_property_readonly("x_max", &fiction::aspect_ratio<CoordinateType>::x_max)
+        .def_property_readonly("x_size", &fiction::aspect_ratio<CoordinateType>::x_size)
         .def_property_readonly("y_min", &fiction::aspect_ratio<CoordinateType>::y_min)
-        .def_property_readonly("y_max", &fiction::aspect_ratio<CoordinateType>::y_max)
+        .def_property_readonly("y_size", &fiction::aspect_ratio<CoordinateType>::y_size)
         .def_property_readonly("z_min", &fiction::aspect_ratio<CoordinateType>::z_min)
-        .def_property_readonly("z_max", &fiction::aspect_ratio<CoordinateType>::z_max);
+        .def_property_readonly("z_size", &fiction::aspect_ratio<CoordinateType>::z_size);
 }
 
 }  // namespace detail
