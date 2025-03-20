@@ -49,8 +49,8 @@ inline void energy_distribution(pybind11::module& m)
              DOC(fiction_sidb_energy_distribution_max_energy))
         .def("min_energy", &fiction::sidb_energy_distribution::min_energy,
              DOC(fiction_sidb_energy_distribution_min_energy))
-        .def("get_distribution", &fiction::sidb_energy_distribution::get_distribution,
-             DOC(fiction_sidb_energy_distribution_get_distribution));
+
+        ;
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
     detail::energy_distribution<py_sidb_100_lattice>(m);
