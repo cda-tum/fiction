@@ -369,6 +369,28 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
             CHECK(op_domain_stats.num_operational_parameter_combinations == 1);
             CHECK(op_domain_stats.num_non_operational_parameter_combinations == 0);
 
+            SECTION("reject kinks")
+            {
+                op_domain_params.operational_params.op_condition =
+                    is_operational_params::operational_condition::REJECT_KINKS;
+
+                const auto op_domain_kinks = operational_domain_grid_search(lat, std::vector<tt>{create_id_tt()},
+                                                                            op_domain_params, &op_domain_stats);
+
+                // check if the operational domain has the correct size
+                CHECK(op_domain_kinks.size() == 1);
+
+                // for the selected range, all samples should be within the parameters and operational
+                check_op_domain_params_and_operational_status(op_domain_kinks, op_domain_params,
+                                                              operational_status::OPERATIONAL);
+
+                CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
+                CHECK(op_domain_stats.num_simulator_invocations == 2);
+                CHECK(op_domain_stats.num_evaluated_parameter_combinations == 1);
+                CHECK(op_domain_stats.num_operational_parameter_combinations == 1);
+                CHECK(op_domain_stats.num_non_operational_parameter_combinations == 0);
+            }
+
             SECTION("3-dimensional")
             {
                 const auto z_dimension = operational_domain_value_range{sweep_parameter::MU_MINUS, -0.32, -0.32, 0.01};
@@ -1516,5 +1538,65 @@ TEST_CASE("Bestagon AND gate operational domain and temperature computation, usi
         CHECK(op_domain_stats.num_evaluated_parameter_combinations <= 9);
         CHECK(op_domain_stats.num_operational_parameter_combinations <= 9);
         CHECK(op_domain_stats.num_non_operational_parameter_combinations == 0);
+    }
+}
+
+TEST_CASE("Two BDL pair wire with degeneracy for input 1", "[operational-domain]")
+{
+    auto lyt = sidb_cell_clk_lyt_siqad{};
+
+    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({2, 0, 0}, sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({6, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 0, 0}, sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({14, 0, 0}, sidb_technology::cell_type::OUTPUT);
+
+    lyt.assign_cell_type({18, 0, 0}, sidb_technology::cell_type::NORMAL);
+
+    sidb_simulation_parameters sim_params{};
+    sim_params.base     = 2;
+    sim_params.mu_minus = -0.32;
+
+    operational_domain_params op_domain_params{};
+    op_domain_params.operational_params.simulation_parameters = sim_params;
+    op_domain_params.sweep_dimensions                         = {{sweep_parameter::EPSILON_R, 1, 10, 0.1},
+                                                                 {sweep_parameter::LAMBDA_TF, 1, 10, 0.1}};
+
+    SECTION("grid search, input is set via the distance of the perturbers")
+    {
+        operational_domain_stats op_domain_stats{};
+
+        op_domain_params.operational_params.input_bdl_iterator_params.input_bdl_config =
+            bdl_input_iterator_params::input_bdl_configuration::PERTURBER_DISTANCE_ENCODED;
+
+        const auto op_domain =
+            operational_domain_grid_search(lyt, std::vector<tt>{create_id_tt()}, op_domain_params, &op_domain_stats);
+
+        check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::NON_OPERATIONAL);
+
+        CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
+        CHECK(op_domain_stats.num_simulator_invocations == 10034);
+        CHECK(op_domain_stats.num_evaluated_parameter_combinations == 8281);
+        CHECK(op_domain_stats.num_operational_parameter_combinations == 0);
+        CHECK(op_domain_stats.num_non_operational_parameter_combinations == 8281);
+    }
+    SECTION("grid search, input is set via the absense of perturbers")
+    {
+        operational_domain_stats op_domain_stats{};
+
+        op_domain_params.operational_params.input_bdl_iterator_params.input_bdl_config =
+            bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED;
+
+        const auto op_domain =
+            operational_domain_grid_search(lyt, std::vector<tt>{create_id_tt()}, op_domain_params, &op_domain_stats);
+
+        check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::NON_OPERATIONAL);
+
+        CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
+        CHECK(op_domain_stats.num_simulator_invocations == 9828);
+        CHECK(op_domain_stats.num_evaluated_parameter_combinations == 8281);
+        CHECK(op_domain_stats.num_operational_parameter_combinations == 0);
+        CHECK(op_domain_stats.num_non_operational_parameter_combinations == 8281);
     }
 }

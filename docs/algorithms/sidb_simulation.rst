@@ -398,19 +398,6 @@ Simulation Equivalence Checking
         .. autofunction:: mnt.pyfiction.check_simulation_results_for_equivalence
 
 
-Determine the Ground State from Simulation Results
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. tabs::
-    .. tab:: C++
-        **Header:** ``fiction/algorithms/simulation/sidb/groundstate_from_simulation_result.hpp``
-
-        .. doxygenfunction:: fiction::groundstate_from_simulation_result
-
-    .. tab:: Python
-        .. autofunction:: mnt.pyfiction.groundstate_from_simulation_result
-
-
 Charge Detection
 ^^^^^^^^^^^^^^^^
 

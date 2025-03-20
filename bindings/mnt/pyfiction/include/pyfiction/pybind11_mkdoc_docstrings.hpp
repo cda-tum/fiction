@@ -6037,12 +6037,12 @@ Returns:
 
 static const char *__doc_fiction_detail_detect_bdl_wires_impl_filter_wires_by_type =
 R"doc(This function scans through the `bdl_wires` and selects those
-containing a cell of the specified type. It also checks that all
-selected wires have the same length and triggers an assertion if wires
-of different lengths are found.
+containing BDL pair cells of the specified type. It also checks that
+all selected wires have the same length and triggers an assertion if
+wires of different lengths are found.
 
 Parameter ``type``:
-    The type of the cell to filter by.
+    The type of the BDL pair cells to filter by.
 
 Returns:
     A vector of `bdl_wire` objects containing cells of the specified
@@ -14266,24 +14266,6 @@ R"doc(The top cluster is the root of the cluster hierarchy. It therefore
 allows access to the entire cluster hierarchy, including the charge
 spaces of each cluster.)doc";
 
-static const char *__doc_fiction_groundstate_from_simulation_result =
-R"doc(This function calculates the ground state charge distributions from
-the provided simulation results. The ground state charge distributions
-are those with energy closest to the minimum energy found in the
-simulation results.
-
-@note When degenerate states exist, there are multiple ground states
-with the same energy.
-
-Template parameter ``Lyt``:
-    The layout type used in the simulation results.
-
-Parameter ``simulation_results``:
-    The simulation results containing charge distributions.
-
-Returns:
-    A vector of charge distributions with the minimal energy.)doc";
-
 static const char *__doc_fiction_has_above = R"doc()doc";
 
 static const char *__doc_fiction_has_assign_charge_state = R"doc()doc";
@@ -20173,6 +20155,16 @@ value of the parameter.)doc";
 static const char *__doc_fiction_sidb_simulation_result_algorithm_name = R"doc(Name of the algorithm used to determine the charge distributions.)doc";
 
 static const char *__doc_fiction_sidb_simulation_result_charge_distributions = R"doc(Charge distributions determined by the algorithm.)doc";
+
+static const char *__doc_fiction_sidb_simulation_result_groundstates =
+R"doc(This function computes the ground state of the charge distributions.
+
+@note If degenerate states exist in the simulation result, this
+function will return multiple ground states that all possess the same
+system energy.
+
+Returns:
+    A vector of charge distributions with the minimal energy.)doc";
 
 static const char *__doc_fiction_sidb_simulation_result_sidb_simulation_result =
 R"doc(Default constructor. It only exists to allow for the use of
