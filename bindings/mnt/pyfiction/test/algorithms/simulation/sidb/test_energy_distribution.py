@@ -44,12 +44,10 @@ class TestEnergyDistribution(unittest.TestCase):
         self.assertAlmostEqual(cds3.get_electrostatic_potential_energy(), 0.48066663155586997)
         self.assertAlmostEqual(cds4.get_electrostatic_potential_energy(), 0.48066663155586997)
 
-        result = energy_distribution(charge_layouts)
+        distribution = energy_distribution(charge_layouts)
 
-        self.assertLessEqual(result[0], 0)
-        self.assertLessEqual(result[1], 0)
-        self.assertLessEqual(result[2], 0)
-        self.assertLessEqual(result[3], 0)
+        self.assertLessEqual(distribution.get_nth_state(0)[1], 0)
+        self.assertLessEqual(distribution.get_nth_state(2)[1], 3)
 
     def test_three_DBs_111_lattice(self):
         layout = sidb_111_lattice((10, 10))
@@ -82,7 +80,10 @@ class TestEnergyDistribution(unittest.TestCase):
         self.assertAlmostEqual(cds3.get_electrostatic_potential_energy(), 0.233980661373219)
         self.assertAlmostEqual(cds4.get_electrostatic_potential_energy(), 0.233980661373219)
 
-        energy_distribution(charge_layouts)
+        distribution = energy_distribution(charge_layouts)
+
+        self.assertLessEqual(distribution.get_nth_state(0)[1], 0)
+        self.assertLessEqual(distribution.get_nth_state(2)[1], 3)
 
 
 if __name__ == "__main__":
