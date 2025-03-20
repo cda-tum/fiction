@@ -34,7 +34,6 @@ inline void energy_distribution(pybind11::module& m)
 {
     namespace py = pybind11;
 
-    // todo update docu
     py::class_<fiction::sidb_energy_distribution>(m, "sidb_energy_distribution")
         .def(py::init<>())
         .def("get_nth_state", &fiction::sidb_energy_distribution::get_nth_state, py::arg("state_index"),
@@ -48,7 +47,7 @@ inline void energy_distribution(pybind11::module& m)
         .def("max_energy", &fiction::sidb_energy_distribution::max_energy,
              DOC(fiction_sidb_energy_distribution_max_energy))
         .def("min_energy", &fiction::sidb_energy_distribution::min_energy,
-             DOC(fiction_sidb_energy_distribution_min_energy))
+             DOC(fiction_sidb_energy_distribution_min_energy), DOC(fiction_sidb_energy_distribution_min_energy))
 
         ;
 

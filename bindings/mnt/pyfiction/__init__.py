@@ -152,7 +152,6 @@ from .pyfiction import (  # type: ignore[import-not-found]
     fanout_substitution_params,
     # Inout
     fgl_parsing_error,
-    # Utils
     ## verfication
     gate_level_drv_params,
     gate_level_drvs,
@@ -199,6 +198,7 @@ from .pyfiction import (  # type: ignore[import-not-found]
     network_balancing,
     network_balancing_params,
     normalize_layout_coordinates,
+    # Utils
     num_adjacent_coordinates,
     occupation_probability_gate_based,
     occupation_probability_non_gate_based,
@@ -467,7 +467,6 @@ __all__ = [
     "fanout_substitution_params",
     # Inout
     "fgl_parsing_error",
-    # Utils
     ## verfication
     "gate_level_drv_params",
     "gate_level_drvs",
@@ -514,6 +513,7 @@ __all__ = [
     "network_balancing",
     "network_balancing_params",
     "normalize_layout_coordinates",
+    # Utils
     "num_adjacent_coordinates",
     "occupation_probability_gate_based",
     "occupation_probability_non_gate_based",

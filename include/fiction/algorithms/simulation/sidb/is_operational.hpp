@@ -149,7 +149,7 @@ enum class non_operationality_reason : uint8_t
      */
     LOGIC_MISMATCH,
     /**
-     * Positive charges may occur with the simulation base set to `2.
+     * Positive charges may occur with the simulation base set to `2`.
      */
     POTENTIAL_POSITIVE_CHARGES,
     /**
