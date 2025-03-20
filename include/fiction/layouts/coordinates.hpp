@@ -578,6 +578,12 @@ struct coord_t
     }
 };
 
+inline std::ostream& operator<<(std::ostream& os, const coord_t& t)
+{
+    os << t.str();
+    return os;
+}
+
 }  // namespace cube
 
 /**
@@ -1151,9 +1157,18 @@ class coord_iterator
                       "CoordinateType must be a supported coordinate");
 
         // Make sure the start iterator is within the given boundary; first handle negative coordinates ...
-        coord.x = std::max(coord.x, static_cast<decltype(coord.x)>(0));
-        coord.y = std::max(coord.y, static_cast<decltype(coord.y)>(0));
-        coord.z = std::max(coord.z, static_cast<decltype(coord.z)>(0));
+        if (std::is_same_v<CoordinateType, fiction::offset::ucoord_t>)
+        {
+            coord.x = std::max(coord.x, static_cast<decltype(coord.x)>(0));
+            coord.y = std::max(coord.y, static_cast<decltype(coord.y)>(0));
+            coord.z = std::max(coord.z, static_cast<decltype(coord.z)>(0));
+        }
+        else
+        {
+            coord.x = std::max(coord.x, static_cast<decltype(coord.x)>(wrap_to.x));
+            coord.y = std::max(coord.y, static_cast<decltype(coord.y)>(wrap_to.y));
+            coord.z = std::max(coord.z, static_cast<decltype(coord.z)>(wrap_to.z));
+        }
 
         // ... then handle coordinates that are beyond the given boundary.
         coord.wrap(aspect_ratio, wrap_to);

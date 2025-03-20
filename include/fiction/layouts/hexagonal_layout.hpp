@@ -161,9 +161,9 @@ class hexagonal_layout
 
     struct hexagonal_layout_storage
     {
-        explicit hexagonal_layout_storage(const aspect_ratio_type& ar) noexcept : dimension{ar} {};
+        explicit hexagonal_layout_storage(const aspect_ratio_type& ar) noexcept : ar{ar} {};
 
-        aspect_ratio_type dimension;
+        aspect_ratio_type ar;
     };
 
     static constexpr auto min_fanin_size = 0u;  // NOLINT(readability-identifier-naming): mockturtle requirement
@@ -239,7 +239,7 @@ class hexagonal_layout
      */
     [[nodiscard]] uint64_t x() const noexcept
     {
-        return strg->dimension.x();
+        return strg->ar.x();
     }
     /**
      * Returns the layout's y-dimension, i.e., returns the biggest y-value that still belongs to the layout.
@@ -248,7 +248,7 @@ class hexagonal_layout
      */
     [[nodiscard]] uint64_t y() const noexcept
     {
-        return strg->dimension.y();
+        return strg->ar.y();
     }
     /**
      * Returns the layout's z-dimension, i.e., returns the biggest z-value that still belongs to the layout.
@@ -257,7 +257,67 @@ class hexagonal_layout
      */
     [[nodiscard]] uint64_t z() const noexcept
     {
-        return strg->dimension.z();
+        return strg->ar.z();
+    }
+    /**
+     * Returns the layout's x-org coordinate.
+     *
+     * The x-org coordinate represents the origin's x-value in the layout.
+     *
+     * @return The x-start coordinate of the layout.
+     */
+    [[nodiscard]] auto x_min() const noexcept
+    {
+        return strg->ar.x_min();
+    }
+    /**
+     * Returns the layout's y-org coordinate.
+     *
+     * The y-org coordinate represents the origin's y-value in the layout.
+     *
+     * @return The y-org coordinate of the layout.
+     */
+    [[nodiscard]] auto y_min() const noexcept
+    {
+        return strg->ar.y_min();
+    }
+    /**
+     * Returns the layout's z-org coordinate.
+     *
+     * The z-org coordinate represents the origin's z-value in the layout.
+     *
+     * @return The z-org coordinate of the layout.
+     */
+    [[nodiscard]] auto z_min() const noexcept
+    {
+        return strg->ar.z_min();
+    }
+    /**
+     * Returns the layout's size in the x-dimension, i.e., the distance between x-org and the maximum x-value.
+     *
+     * @return The size of the layout in the x-dimension.
+     */
+    [[nodiscard]] auto x_size() const noexcept
+    {
+        return strg->ar.x_size();
+    }
+    /**
+     * Returns the layout's size in the y-dimension, i.e., the distance between y-org and the maximum y-value.
+     *
+     * @return The size of the layout in the y-dimension.
+     */
+    [[nodiscard]] auto y_size() const noexcept
+    {
+        return strg->ar.y_size();
+    }
+    /**
+     * Returns the layout's size in the z-dimension, i.e., the distance between z-org and the maximum z-value.
+     *
+     * @return The size of the layout in the z-dimension.
+     */
+    [[nodiscard]] auto z_size() const noexcept
+    {
+        return strg->ar.z_size();
     }
     /**
      * Returns the layout's number of faces depending on the coordinate type.
@@ -266,7 +326,7 @@ class hexagonal_layout
      */
     [[nodiscard]] auto area() const noexcept
     {
-        return strg->dimension.area();
+        return strg->ar.area();
     }
     /**
      * Returns the layout's volume depending on the coordinate type.
@@ -275,7 +335,7 @@ class hexagonal_layout
      */
     [[nodiscard]] auto volume() const noexcept
     {
-        return strg->dimension.volume();
+        return strg->ar.volume();
     }
     /**
      * Updates the layout's dimensions and origin based on a new aspect_ratio.
@@ -287,7 +347,7 @@ class hexagonal_layout
      */
     void resize(const aspect_ratio_type& ar) noexcept
     {
-        strg->dimension = ar;
+        strg->ar = ar;
     }
     /**
      * Updates the layout's dimensions based on a new coordinate.
@@ -299,7 +359,7 @@ class hexagonal_layout
      */
     void resize(const OffsetCoordinateType& ar) noexcept
     {
-        strg->dimension = aspect_ratio_type(ar);
+        strg->ar = aspect_ratio_type(ar);
     }
 
 #pragma endregion
@@ -358,12 +418,17 @@ class hexagonal_layout
      */
     [[nodiscard]] constexpr OffsetCoordinateType north(const OffsetCoordinateType& c) const noexcept
     {
-        if (c.y == 0ull)
+        auto nc = c;
+
+        if (c.y <= y_min())
         {
-            return c;
+            if (c.y < y_min())
+            {
+                nc.d = 1;
+            }
+            return nc;
         }
 
-        auto nc = c;
         --nc.y;
 
         return nc;
@@ -477,12 +542,17 @@ class hexagonal_layout
      */
     [[nodiscard]] constexpr OffsetCoordinateType west(const OffsetCoordinateType& c) const noexcept
     {
-        if (c.x == 0ull)
+        auto wc = c;
+
+        if (c.x <= x_min())
         {
-            return c;
+            if (c.x < x_min())
+            {
+                wc.d = 1;
+            }
+            return wc;
         }
 
-        auto wc = c;
         --wc.x;
 
         return wc;
@@ -715,7 +785,7 @@ class hexagonal_layout
      */
     [[nodiscard]] constexpr bool is_at_northern_border(const OffsetCoordinateType& c) const noexcept
     {
-        return c.y == 0ull;
+        return c.y == y_min();
     }
     /**
      * Returns whether the given coordinate is located at the layout's eastern border where x is maximal.
@@ -745,7 +815,7 @@ class hexagonal_layout
      */
     [[nodiscard]] constexpr bool is_at_western_border(const OffsetCoordinateType& c) const noexcept
     {
-        return c.x == 0ull;
+        return c.x == x_min();
     }
     /**
      * Returns whether the given coordinate is located at any of the layout's borders where x or y are either minimal or
@@ -768,7 +838,7 @@ class hexagonal_layout
      */
     [[nodiscard]] OffsetCoordinateType northern_border_of(const OffsetCoordinateType& c) const noexcept
     {
-        return {c.x, 0ull, c.z};
+        return {c.x, y_min(), c.z};
     }
     /**
      * Returns the coordinate with the same y and z values as a given coordinate but that is located at the layout's
@@ -801,7 +871,7 @@ class hexagonal_layout
      */
     [[nodiscard]] OffsetCoordinateType western_border_of(const OffsetCoordinateType& c) const noexcept
     {
-        return {0ull, c.y, c.z};
+        return {x_min(), c.y, c.z};
     }
     /**
      * Returns whether the given coordinate is located in the ground layer where z is minimal.
@@ -831,7 +901,7 @@ class hexagonal_layout
      */
     [[nodiscard]] constexpr bool is_within_bounds(const OffsetCoordinateType& c) const noexcept
     {
-        return c.x <= x() && c.y <= y() && c.z <= z();
+        return x_min() <= x() && c.x <= x() && y_min() <= y() && c.y <= y() && z_min() <= z() && c.z <= z();
     }
 
 #pragma endregion
@@ -852,9 +922,8 @@ class hexagonal_layout
     [[nodiscard]] auto coordinates(const OffsetCoordinateType& start = {}, const OffsetCoordinateType& stop = {}) const
     {
         return range_t{std::make_pair(
-            coord_iterator{strg->dimension.max, start.is_dead() ? strg->dimension.min : start, strg->dimension.min},
-            coord_iterator{strg->dimension.max, stop.is_dead() ? strg->dimension.max.get_dead() : stop,
-                           OffsetCoordinateType{0, 0}})};
+            coord_iterator{strg->ar.max, start.is_dead() ? strg->ar.min : start, strg->ar.min},
+            coord_iterator{strg->ar.max, stop.is_dead() ? strg->ar.max.get_dead() : stop, strg->ar.min})};
     }
     /**
      * Applies a function to all coordinates accessible in the layout between `start` and `stop`. The iteration order is
@@ -870,10 +939,8 @@ class hexagonal_layout
                             const OffsetCoordinateType& stop = {}) const
     {
         mockturtle::detail::foreach_element(
-            coord_iterator{strg->dimension.max, start.is_dead() ? strg->dimension.min : start, strg->dimension.min},
-            coord_iterator{strg->dimension.max, stop.is_dead() ? strg->dimension.max.get_dead() : stop,
-                           strg->dimension.min},
-            fn);
+            coord_iterator{strg->ar.max, start.is_dead() ? strg->ar.min : start, strg->ar.min},
+            coord_iterator{strg->ar.max, stop.is_dead() ? strg->ar.max.get_dead() : stop, strg->ar.min}, fn);
     }
     /**
      * Returns a range of all coordinates accessible in the layout's ground layer between `start` and `stop`. The
@@ -889,13 +956,12 @@ class hexagonal_layout
     {
         assert(start.z == 0 && stop.z == 0);
 
-        const auto ground_layer_start = coordinate{strg->dimension.min.x, strg->dimension.min.y, 0};
-        auto       ground_layer       = aspect_ratio_type{x(), y(), 0};
+        const auto ground_layer_start = coordinate{strg->ar.min.x, strg->ar.min.y, 0};
+        const auto ground_layer       = coordinate{x(), y(), 0};
 
         return range_t{std::make_pair(
-            coord_iterator{ground_layer.max, start.is_dead() ? ground_layer_start : start, strg->dimension.min},
-            coord_iterator{ground_layer.max, stop.is_dead() ? ground_layer.max.get_dead() : stop,
-                           strg->dimension.min})};
+            coord_iterator{ground_layer, start.is_dead() ? ground_layer_start : start, strg->ar.min},
+            coord_iterator{ground_layer, stop.is_dead() ? ground_layer.get_dead() : stop, strg->ar.min})};
     }
     /**
      * Applies a function to all coordinates accessible in the layout's ground layer between `start` and `stop`. The
@@ -912,13 +978,12 @@ class hexagonal_layout
     {
         assert(start.z == 0 && stop.z == 0);
 
-        const auto ground_layer_start = coordinate{strg->dimension.min.x, strg->dimension.min.y, 0};
-        auto       ground_layer       = aspect_ratio_type{x(), y(), 0};
+        const auto ground_layer_start = coordinate{strg->ar.min.x, strg->ar.min.y, 0};
+        const auto ground_layer       = coordinate{x(), y(), 0};
 
         mockturtle::detail::foreach_element(
-            coord_iterator{ground_layer.max, start.is_dead() ? ground_layer_start : start, strg->dimension.min},
-            coord_iterator{ground_layer.max, stop.is_dead() ? ground_layer.max.get_dead() : stop, strg->dimension.min},
-            fn);
+            coord_iterator{ground_layer, start.is_dead() ? ground_layer_start : start, strg->ar.min},
+            coord_iterator{ground_layer, stop.is_dead() ? ground_layer.get_dead() : stop, strg->ar.min}, fn);
     }
     /**
      * Returns a container that contains all coordinates that are adjacent to a given one. Thereby, cardinal and ordinal
