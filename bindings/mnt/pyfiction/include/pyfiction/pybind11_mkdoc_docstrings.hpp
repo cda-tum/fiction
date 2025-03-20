@@ -8797,7 +8797,7 @@ static const char *__doc_fiction_detail_non_operationality_reason_LOGIC_MISMATCH
 
 static const char *__doc_fiction_detail_non_operationality_reason_NONE = R"doc(No reason for non-operationality could be determined.)doc";
 
-static const char *__doc_fiction_detail_non_operationality_reason_POTENTIAL_POSITIVE_CHARGES = R"doc(Positive charges may occur with the simulation base set to `2.)doc";
+static const char *__doc_fiction_detail_non_operationality_reason_POTENTIAL_POSITIVE_CHARGES = R"doc(Positive charges may occur with the simulation base set to `2`.)doc";
 
 static const char *__doc_fiction_detail_on_the_fly_circuit_design_impl = R"doc()doc";
 
