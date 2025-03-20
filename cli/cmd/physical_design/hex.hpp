@@ -30,23 +30,10 @@ class hex_command : public command
     explicit hex_command(const environment::ptr& e) :
             command(e, "Transforms a 2DDWave-clocked Cartesian layout into a hexagonal one.")
     {
-        add_option("--input_mode,-i", ps.input_mode,
-                   "Specifies how primary inputs should be handled in the hexagonalization process:\n"
-                   " - `0` (none): Do not extend primary inputs to the top row (default).\n"
-                   " - `1 (extend): Extend primary inputs to the top row.\n"
-                   " - `2` (extend_planar): Extend primary inputs to the top row with planar rerouting (i.e., without "
-                   "crossings).",
-                   true)
-            ->set_type_name("{none=0, extend=1, extend_planar=2}");
-        add_option(
-            "--output_mode,-o", ps.output_mode,
-            "Specifies how primary outputs should be handled in the hexagonalization process:\n"
-            " - `0` (none): Do not extend primary outputs to the bottom row (default).\n"
-            " - `1 (extend): Extend primary outputs to the bottom row.\n"
-            " - `2` (extend_planar): Extend primary outputs to the bottom row with planar rerouting (i.e., without "
-            "crossings).",
-            true)
-            ->set_type_name("{none=0, extend=1, extend_planar=2}");
+        add_flag("--input_mode,-i", "Extend primary inputs to the top row");
+        add_flag("--output_mode,-o", "Extend primary outputs to the bottom row");
+        add_flag("--planar,-p",
+                 "Extend primary inputs and/or outputs with planar rerouting (i.e., without crossings).");
         add_flag("--verbose,-v", "Be verbose");
     }
 
@@ -88,6 +75,37 @@ class hex_command : public command
             return;
         }
 
+        if (this->is_set("planar") && !(this->is_set("input_mode") || this->is_set("output_mode")))
+        {
+            env->out()
+                << "[w] planar rerouting is only possible when extending inputs and/or outputs (using -i and/or -o)"
+                << std::endl;
+        }
+
+        if (this->is_set("input_mode"))
+        {
+            if (this->is_set("planar"))
+            {
+                ps.input_mode = fiction::hexagonalization_params::hexagonalization_input_output_mode::EXTEND_PLANAR;
+            }
+            else
+            {
+                ps.input_mode = fiction::hexagonalization_params::hexagonalization_input_output_mode::EXTEND;
+            }
+        }
+
+        if (this->is_set("output_mode"))
+        {
+            if (this->is_set("planar"))
+            {
+                ps.output_mode = fiction::hexagonalization_params::hexagonalization_input_output_mode::EXTEND_PLANAR;
+            }
+            else
+            {
+                ps.output_mode = fiction::hexagonalization_params::hexagonalization_input_output_mode::EXTEND;
+            }
+        }
+
         const auto apply_hexagonalization = [&](auto&& lyt_ptr) -> std::optional<fiction::hex_even_row_gate_clk_lyt>
         {
             using Lyt = typename std::decay_t<decltype(lyt_ptr)>::element_type;
@@ -109,6 +127,7 @@ class hex_command : public command
         {
             if (const auto hex_lyt = std::visit(apply_hexagonalization, lyt); hex_lyt.has_value())
             {
+                ps = {};
                 if (is_set("verbose"))
                 {
                     st.report(env->out());
