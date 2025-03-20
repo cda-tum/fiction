@@ -11,7 +11,7 @@ v0.6.10 - 2025-02-21
 Added
 #####
 - Algorithms:
-    - Added a parameter to extend the PIs to the first layout row after ``hexagonalization``.
+    - Added parameters to extend the PIs to the first layout row or POs to the last layout row after ``hexagonalization``.
 
 Fixed
 #####
