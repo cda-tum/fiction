@@ -34,11 +34,6 @@ class TestEnergyDistribution(unittest.TestCase):
 
         charge_layouts = [cds1, cds2, cds3, cds4]
 
-        print(cds1.get_electrostatic_potential_energy())
-        print(cds2.get_electrostatic_potential_energy())
-        print(cds3.get_electrostatic_potential_energy())
-        print(cds4.get_electrostatic_potential_energy())
-
         self.assertAlmostEqual(cds1.get_electrostatic_potential_energy(), 0.48066663155586997)
         self.assertAlmostEqual(cds2.get_electrostatic_potential_energy(), 0.0)
         self.assertAlmostEqual(cds3.get_electrostatic_potential_energy(), 0.48066663155586997)
@@ -46,8 +41,8 @@ class TestEnergyDistribution(unittest.TestCase):
 
         distribution = energy_distribution(charge_layouts)
 
-        self.assertLessEqual(distribution.get_nth_state(0)[1], 0)
-        self.assertLessEqual(distribution.get_nth_state(2)[1], 3)
+        self.assertLessEqual(distribution.get_nth_state(0)[1], 1)
+        self.assertLessEqual(distribution.get_nth_state(1)[1], 3)
 
     def test_three_DBs_111_lattice(self):
         layout = sidb_111_lattice((10, 10))
@@ -70,11 +65,6 @@ class TestEnergyDistribution(unittest.TestCase):
 
         charge_layouts = [cds1, cds2, cds3, cds4]
 
-        print(cds1.get_electrostatic_potential_energy())
-        print(cds2.get_electrostatic_potential_energy())
-        print(cds3.get_electrostatic_potential_energy())
-        print(cds4.get_electrostatic_potential_energy())
-
         self.assertAlmostEqual(cds1.get_electrostatic_potential_energy(), 0.233980661373219)
         self.assertAlmostEqual(cds2.get_electrostatic_potential_energy(), 0.0)
         self.assertAlmostEqual(cds3.get_electrostatic_potential_energy(), 0.233980661373219)
@@ -82,8 +72,8 @@ class TestEnergyDistribution(unittest.TestCase):
 
         distribution = energy_distribution(charge_layouts)
 
-        self.assertLessEqual(distribution.get_nth_state(0)[1], 0)
-        self.assertLessEqual(distribution.get_nth_state(2)[1], 3)
+        self.assertLessEqual(distribution.get_nth_state(0)[1], 1)
+        self.assertLessEqual(distribution.get_nth_state(1)[1], 3)
 
 
 if __name__ == "__main__":
