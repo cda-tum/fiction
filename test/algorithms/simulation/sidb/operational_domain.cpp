@@ -1496,6 +1496,8 @@ TEST_CASE("Bestagon AND gate operational domain and temperature computation, usi
         CHECK(op_domain_stats.num_evaluated_parameter_combinations == 9);
         CHECK(op_domain_stats.num_operational_parameter_combinations == 9);
         CHECK(op_domain_stats.num_non_operational_parameter_combinations == 0);
+        CHECK_THAT(op_domain.minimum_ct(), Catch::Matchers::WithinAbs(56.25, 0.01));
+        CHECK_THAT(op_domain.maximum_ct(), Catch::Matchers::WithinAbs(62.26, 0.01));
     }
     SECTION("random_sampling in non-operational regime")
     {
