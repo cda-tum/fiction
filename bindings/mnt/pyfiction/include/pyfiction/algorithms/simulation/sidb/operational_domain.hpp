@@ -94,7 +94,6 @@ inline void operational_domain(pybind11::module& m)
 
         ;
 
-    // todu update docu
     py::class_<fiction::critical_temperature_domain>(m, "critical_temperature_domain",
                                                      DOC(fiction_critical_temperature_domain))
         .def(py::init<>())

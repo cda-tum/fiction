@@ -79,33 +79,26 @@ int main()  // NOLINT
         auto lyt = read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}/{}.sqd", folder, gate), gate);
 
         // Loop over operational conditions
-        for (uint64_t i = 0; i < 2; i++)
+        for (const auto cond : {is_operational_params::operational_condition::TOLERATE_KINKS,
+                                is_operational_params::operational_condition::REJECT_KINKS})
         {
             operational_domain_stats op_domain_stats_gs{};
             std::string              gate_name  = gate;
             double                   ct_default = 0;
 
-            // tolerate kinks first
-            if (i == 0)
-            {
-                op_domain_params.operational_params.op_condition =
-                    is_operational_params::operational_condition::TOLERATE_KINKS;
-                ct_default = critical_temperature_gate_based(
-                    lyt, truth_table, critical_temperature_params{op_domain_params.operational_params});
-            }
+            op_domain_params.operational_params.op_condition = cond;
+            ct_default                                       = critical_temperature_gate_based(
+                lyt, truth_table, critical_temperature_params{op_domain_params.operational_params});
 
-            // reject kinks afterwards
-            else
-            {
-                op_domain_params.operational_params.op_condition =
-                    is_operational_params::operational_condition::REJECT_KINKS;
-                ct_default = critical_temperature_gate_based(
-                    lyt, truth_table, critical_temperature_params{op_domain_params.operational_params});
-            }
+            op_domain_params.operational_params.op_condition =
+                is_operational_params::operational_condition::REJECT_KINKS;
+            ct_default = critical_temperature_gate_based(
+                lyt, truth_table, critical_temperature_params{op_domain_params.operational_params});
 
-            if (i == 1)
+            if (cond == is_operational_params::operational_condition::REJECT_KINKS)
             {
-                gate_name += " (I/O integrity)";  // Update gate name for kink rejection case
+                gate_name +=
+                    " (I/O integrity)";  // Add I/O integrity to the gate name to make clear that kinks are rejected
             }
 
             const auto ct_domain =
