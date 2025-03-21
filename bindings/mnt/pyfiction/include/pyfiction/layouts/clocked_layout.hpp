@@ -100,10 +100,7 @@ void clocked_layouts(pybind11::module& m)
     detail::clocked_layout<py_shifted_cartesian_layout<py_cube_coordinate>,
                            py_shifted_cartesian_clocked_layout<py_cube_coordinate>>(m, "shifted_cartesian",
                                                                                     "cube_coordinates");
-    detail::clocked_layout<py_hexagonal_layout<py_offset_coordinate>,
-                           py_hexagonal_clocked_layout<py_offset_coordinate>>(m, "hexagonal", "offset_coordinates");
-    detail::clocked_layout<py_hexagonal_layout<py_cube_coordinate>, py_hexagonal_clocked_layout<py_cube_coordinate>>(
-        m, "hexagonal", "cube_coordinates");
+    detail::clocked_layout<py_hexagonal_layout, py_hexagonal_clocked_layout>(m, "hexagonal", "offset_coordinates");
 }
 /**
  * A "factory" function that Python users can call as
@@ -205,46 +202,22 @@ inline void clocked_layout_factory(pybind11::module& m)
 
     m.def(
         "clocked_hexagonal_layout",
-        [](const py::tuple dimension, const std::string& scheme_name,
-           const std::string& coordinate_type /* = "offset" by default */)
+        [](const py::tuple dimension, const std::string& scheme_name)
         {
-            if (coordinate_type == "cube")
+            const auto ar = extract_aspect_ratio<py_hexagonal_layout>(dimension);
+            if (const auto scheme = fiction::get_clocking_scheme<py_hexagonal_clocked_layout>(scheme_name);
+                scheme.has_value())
             {
-                const auto ar = extract_aspect_ratio<py_hexagonal_layout<py_cube_coordinate>>(dimension);
-                if (const auto scheme =
-                        fiction::get_clocking_scheme<py_hexagonal_clocked_layout<py_cube_coordinate>>(scheme_name);
-                    scheme.has_value())
-                {
-                    return py::cast(py_hexagonal_clocked_layout<py_cube_coordinate>{ar, *scheme});
-                }
-                else
-                {
-                    throw std::runtime_error("Given name does not refer to a supported clocking scheme");
-                }
+                return py::cast(py_hexagonal_clocked_layout{ar, *scheme});
             }
-            else  // default: offset
+            else
             {
-                const auto ar = extract_aspect_ratio<py_hexagonal_layout<py_offset_coordinate>>(dimension);
-                if (const auto scheme =
-                        fiction::get_clocking_scheme<py_hexagonal_clocked_layout<py_offset_coordinate>>(scheme_name);
-                    scheme.has_value())
-                {
-                    return py::cast(py_hexagonal_clocked_layout<py_offset_coordinate>{ar, *scheme});
-                }
-                else
-                {
-                    throw std::runtime_error("Given name does not refer to a supported clocking scheme");
-                }
+                throw std::runtime_error("Given name does not refer to a supported clocking scheme");
             }
         },
         py::arg("dimension") = py::make_tuple(0, 0, 0), py::arg("scheme_name") = "open",
-        py::arg("coordinate_type") = "offset",  // default
         R"doc(
-            Creates and returns a clocked_hexagonal_layout instance, choosing the coordinate system
-            based on the string argument. Valid options for `coordinate_type` are:
-
-                - "offset" (default)
-                - "cube"
+            Creates and returns a clocked_hexagonal_layout instance.
 
             For the dimension, you can pass either:
               - A single tuple (x, y) or (x, y, z) to specify only the "max" coordinate, with min defaulting to (0,0,0),

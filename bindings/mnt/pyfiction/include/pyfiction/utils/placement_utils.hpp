@@ -75,10 +75,8 @@ inline void placement_utils(pybind11::module& m)
     detail::reserve_input_nodes<py_shifted_cartesian_obstruction_layout<py_cube_coordinate>, py_logic_network>(m);
     detail::reserve_input_nodes<py_shifted_cartesian_gate_layout<py_offset_coordinate>, py_logic_network>(m);
     detail::reserve_input_nodes<py_shifted_cartesian_gate_layout<py_cube_coordinate>, py_logic_network>(m);
-    detail::reserve_input_nodes<py_hexagonal_obstruction_layout<py_offset_coordinate>, py_logic_network>(m);
-    detail::reserve_input_nodes<py_hexagonal_obstruction_layout<py_cube_coordinate>, py_logic_network>(m);
-    detail::reserve_input_nodes<py_hexagonal_gate_layout<py_offset_coordinate>, py_logic_network>(m);
-    detail::reserve_input_nodes<py_hexagonal_gate_layout<py_cube_coordinate>, py_logic_network>(m);
+    detail::reserve_input_nodes<py_hexagonal_obstruction_layout, py_logic_network>(m);
+    detail::reserve_input_nodes<py_hexagonal_gate_layout, py_logic_network>(m);
 
     detail::place<py_cartesian_obstruction_layout<py_offset_coordinate>, py_logic_network>(m);
     detail::place<py_cartesian_obstruction_layout<py_cube_coordinate>, py_logic_network>(m);
@@ -88,10 +86,8 @@ inline void placement_utils(pybind11::module& m)
     detail::place<py_shifted_cartesian_obstruction_layout<py_cube_coordinate>, py_logic_network>(m);
     detail::place<py_shifted_cartesian_gate_layout<py_offset_coordinate>, py_logic_network>(m);
     detail::place<py_shifted_cartesian_gate_layout<py_cube_coordinate>, py_logic_network>(m);
-    detail::place<py_hexagonal_obstruction_layout<py_offset_coordinate>, py_logic_network>(m);
-    detail::place<py_hexagonal_obstruction_layout<py_cube_coordinate>, py_logic_network>(m);
-    detail::place<py_hexagonal_gate_layout<py_offset_coordinate>, py_logic_network>(m);
-    detail::place<py_hexagonal_gate_layout<py_cube_coordinate>, py_logic_network>(m);
+    detail::place<py_hexagonal_obstruction_layout, py_logic_network>(m);
+    detail::place<py_hexagonal_gate_layout, py_logic_network>(m);
 }
 
 }  // namespace pyfiction

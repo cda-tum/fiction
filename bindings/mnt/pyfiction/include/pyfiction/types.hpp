@@ -54,8 +54,7 @@ using py_shifted_cartesian_layout =
 /**
  * Hexagonal layout.
  */
-template <typename OffsetCoordinateType = py_offset_coordinate>
-using py_hexagonal_layout = fiction::hexagonal_layout<OffsetCoordinateType, fiction::even_row_hex>;
+using py_hexagonal_layout = fiction::hexagonal_layout<py_offset_coordinate, fiction::even_row_hex>;
 /**
  * Cartesian clocked layout.
  */
@@ -71,9 +70,7 @@ using py_shifted_cartesian_clocked_layout =
 /**
  * Hexagonal clocked layout.
  */
-template <typename OffsetCoordinateType = py_offset_coordinate>
-using py_hexagonal_clocked_layout =
-    fiction::clocked_layout<fiction::tile_based_layout<py_hexagonal_layout<OffsetCoordinateType>>>;
+using py_hexagonal_clocked_layout = fiction::clocked_layout<fiction::tile_based_layout<py_hexagonal_layout>>;
 /**
  * Cartesian gate layout.
  */
@@ -88,8 +85,7 @@ using py_shifted_cartesian_gate_layout =
 /**
  * Hexagonal gate layout.
  */
-template <typename OffsetCoordinateType = py_offset_coordinate>
-using py_hexagonal_gate_layout = fiction::gate_level_layout<py_hexagonal_clocked_layout<OffsetCoordinateType>>;
+using py_hexagonal_gate_layout = fiction::gate_level_layout<py_hexagonal_clocked_layout>;
 /**
  * Cartesian gate-level obstruction layout.
  */
@@ -104,8 +100,7 @@ using py_shifted_cartesian_obstruction_layout =
 /**
  * Hexagonal gate-level obstruction layout.
  */
-template <typename OffsetCoordinateType = py_offset_coordinate>
-using py_hexagonal_obstruction_layout = fiction::obstruction_layout<py_hexagonal_gate_layout<OffsetCoordinateType>>;
+using py_hexagonal_obstruction_layout = fiction::obstruction_layout<py_hexagonal_gate_layout>;
 /**
  * Cartesian cell layout.
  */

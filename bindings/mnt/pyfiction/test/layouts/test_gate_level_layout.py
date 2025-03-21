@@ -31,7 +31,6 @@ class TestCartesianGateLevelLayout(unittest.TestCase):
         for layout in [
             cartesian_gate_layout((2, 2, 0), "2DDWave", "Layout", "cube"),
             shifted_cartesian_gate_layout((2, 2, 0), "2DDWave", "layout", "cube"),
-            hexagonal_gate_layout((2, 2, 0), "2DDWave", "Layout", "cube"),
         ]:
             for icz in layout.incoming_clocked_zones((0, 0)):
                 self.assertIn(icz, [layout.coord(-1, 0), layout.coord(0, -1)])
@@ -184,7 +183,6 @@ class TestCartesianGateLevelLayout(unittest.TestCase):
         for layout in [
             cartesian_gate_layout((3, 3, 1), "2DDWave", "Layout", "cube"),
             shifted_cartesian_gate_layout((3, 3, 1), "2DDWave", "layout", "cube"),
-            hexagonal_gate_layout((3, 3, 1), "2DDWave", "Layout", "cube"),
         ]:
             self.assertTrue(layout.is_empty())
 
@@ -324,7 +322,6 @@ class TestCartesianGateLevelLayout(unittest.TestCase):
             shifted_cartesian_gate_layout((2, 8, 0), "2DDWave", "Layout"),
             shifted_cartesian_gate_layout((2, 8, 0), "2DDWave", "Layout", "cube"),
             hexagonal_gate_layout((2, 8, 0), "2DDWave", "Layout"),
-            hexagonal_gate_layout((2, 8, 0), "2DDWave", "Layout", "cube"),
         ]:
             self.assertTrue(layout.is_empty())
 
@@ -384,7 +381,6 @@ class TestCartesianGateLevelLayout(unittest.TestCase):
             shifted_cartesian_gate_layout((2, 2, 0), "RES", "Layout"),
             shifted_cartesian_gate_layout((2, 2, 0), "RES", "Layout", "cube"),
             hexagonal_gate_layout((2, 2, 0), "RES", "Layout"),
-            hexagonal_gate_layout((2, 2, 0), "RES", "Layout", "cube"),
         ]:
             self.assertTrue(layout.is_empty())
 

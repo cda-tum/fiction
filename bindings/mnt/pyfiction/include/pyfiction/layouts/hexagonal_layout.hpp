@@ -25,8 +25,6 @@ namespace detail
 
 /**
  * A helper template that creates a Python binding for a given C++ HexLyt type.
- * \param coord_type is appended to the Python class name so you get "hexagonal_layout_offset_coordinates" or
- * "hexagonal_layout_cube_coordinates".
  */
 template <typename HexLyt>
 inline void hexagonal_layout(pybind11::module& m, const std::string& coord_type)
@@ -158,27 +156,17 @@ inline void hexagonal_layout(pybind11::module& m, const std::string& coord_type)
 
 }  // namespace detail
 
-/**
- * Register two different layout classes under two different Python names:
- *   - "hexagonal_layout_offset_coordinates"
- *   - "hexagonal_layout_cube_coordinates"
- */
 inline void hexagonal_layouts(pybind11::module& m)
 {
     /**
      * Hexagonal layout with offset coordinates.
      */
-    detail::hexagonal_layout<py_hexagonal_layout<py_offset_coordinate>>(m, "offset_coordinates");
-    /**
-     * Hexagonal layout with cube coordinates.
-     */
-    detail::hexagonal_layout<py_hexagonal_layout<py_cube_coordinate>>(m, "cube_coordinates");
+    detail::hexagonal_layout<py_hexagonal_layout>(m, "offset_coordinates");
 }
 
 /**
  * A "factory" function that Python users can call as
- *   hexagonal_layout(dimension, coordinate_type="offset")
- * to create the correct layout type (offset or cube).
+ *   hexagonal_layout(dimension).
  */
 inline void hexagonal_layout_factory(pybind11::module& m)
 {
@@ -186,27 +174,14 @@ inline void hexagonal_layout_factory(pybind11::module& m)
 
     m.def(
         "hexagonal_layout",
-        [](const py::tuple dimension, const std::string& coordinate_type)
+        [](const py::tuple dimension)
         {
-            if (coordinate_type == "cube")
-            {
-                const auto ar = extract_aspect_ratio<py_hexagonal_layout<py_cube_coordinate>>(dimension);
-                return py::cast(py_hexagonal_layout<py_cube_coordinate>{ar});
-            }
-            else
-            {
-                const auto ar = extract_aspect_ratio<py_hexagonal_layout<py_offset_coordinate>>(dimension);
-                return py::cast(py_hexagonal_layout<py_offset_coordinate>{ar});
-            }
+            const auto ar = extract_aspect_ratio<py_hexagonal_layout>(dimension);
+            return py::cast(py_hexagonal_layout{ar});
         },
-        py::arg("dimension")       = py::make_tuple(0, 0, 0),
-        py::arg("coordinate_type") = "offset",  // default
+        py::arg("dimension") = py::make_tuple(0, 0, 0),
         R"doc(
-            Creates and returns a hexagonal_layout instance, choosing the coordinate system
-            based on the string argument. Valid options for `coordinate_type` are:
-
-                - "offset" (default)
-                - "cube"
+            Creates and returns a hexagonal_layout instance.
 
             For the dimension, you can pass either:
               - A single tuple (x, y) or (x, y, z) to specify only the "max" coordinate, with min defaulting to (0,0,0),

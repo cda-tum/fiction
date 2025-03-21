@@ -24,9 +24,9 @@ void hexagonalization(pybind11::module& m)
     namespace py = pybind11;
 
     m.def(
-        "hexagonalization", [](const Lyt& lyt) -> py_hexagonal_gate_layout<py_offset_coordinate>
-        { return fiction::hexagonalization<py_hexagonal_gate_layout<py_offset_coordinate>, Lyt>(lyt); },
-        py::arg("layout"), DOC(fiction_hexagonalization));
+        "hexagonalization", [](const Lyt& lyt) -> py_hexagonal_gate_layout
+        { return fiction::hexagonalization<py_hexagonal_gate_layout, Lyt>(lyt); }, py::arg("layout"),
+        DOC(fiction_hexagonalization));
 }
 
 }  // namespace detail

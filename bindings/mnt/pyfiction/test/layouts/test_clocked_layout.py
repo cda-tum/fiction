@@ -15,7 +15,6 @@ class TestClockedLayout(unittest.TestCase):
             clocked_shifted_cartesian_layout((2, 2, 0), "2DDWave"),
             clocked_shifted_cartesian_layout((2, 2, 0), "2DDWave", coordinate_type="cube"),
             clocked_hexagonal_layout((2, 2, 0), "2DDWave"),
-            clocked_hexagonal_layout((2, 2, 0), "2DDWave", coordinate_type="cube"),
         ]:
             for t in layout.coordinates():
                 self.assertTrue(t <= (9, 9, 1))
@@ -47,7 +46,6 @@ class TestClockedLayout(unittest.TestCase):
         for layout in [
             clocked_cartesian_layout((2, 2, 0), "2DDWave", coordinate_type="cube"),
             clocked_shifted_cartesian_layout((2, 2, 0), "2DDWave", coordinate_type="cube"),
-            clocked_hexagonal_layout((2, 2, 0), "2DDWave", coordinate_type="cube"),
         ]:
             for icz in layout.incoming_clocked_zones((0, 0)):
                 self.assertIn(icz, [layout.coord(-1, 0), layout.coord(0, -1)])

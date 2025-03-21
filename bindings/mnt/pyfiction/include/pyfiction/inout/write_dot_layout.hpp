@@ -60,7 +60,7 @@ inline void write_dot_layout(pybind11::module& m)
 {
     detail::write_dot_layout<py_cartesian_gate_layout<py_offset_coordinate>>(m);
     detail::write_dot_layout<py_shifted_cartesian_gate_layout<py_offset_coordinate>>(m);
-    detail::write_dot_layout<py_hexagonal_gate_layout<py_offset_coordinate>>(m);
+    detail::write_dot_layout<py_hexagonal_gate_layout>(m);
 
     detail::write_dot_network<py_logic_network>(m);
 }

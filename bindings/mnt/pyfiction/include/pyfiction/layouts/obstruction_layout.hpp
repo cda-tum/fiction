@@ -70,14 +70,8 @@ inline void obstruction_layouts(pybind11::module& m)
     /**
      * Hexagonal obstruction layout with offset coordinates.
      */
-    detail::obstruction_layout<py_hexagonal_gate_layout<py_offset_coordinate>,
-                               py_hexagonal_obstruction_layout<py_offset_coordinate>>(m, "hexagonal",
-                                                                                      "offset_coordinates");
-    /**
-     * Hexagonal obstruction layout with cube coordinates.
-     */
-    detail::obstruction_layout<py_hexagonal_gate_layout<py_cube_coordinate>,
-                               py_hexagonal_obstruction_layout<py_cube_coordinate>>(m, "hexagonal", "cube_coordinates");
+    detail::obstruction_layout<py_hexagonal_gate_layout, py_hexagonal_obstruction_layout>(m, "hexagonal",
+                                                                                          "offset_coordinates");
 }
 
 inline void obstruction_layout_factory(pybind11::module& m)
@@ -130,17 +124,8 @@ inline void obstruction_layout_factory(pybind11::module& m)
             // hex + offset
             try
             {
-                auto& lyt = layout_obj.cast<py_hexagonal_gate_layout<py_offset_coordinate>&>();
-                return py::cast(py_hexagonal_obstruction_layout<py_offset_coordinate>{lyt});
-            }
-            catch (const py::cast_error&)
-            {}
-
-            // hex + cube
-            try
-            {
-                auto& lyt = layout_obj.cast<py_hexagonal_gate_layout<py_cube_coordinate>&>();
-                return py::cast(py_hexagonal_obstruction_layout<py_cube_coordinate>{lyt});
+                auto& lyt = layout_obj.cast<py_hexagonal_gate_layout&>();
+                return py::cast(py_hexagonal_obstruction_layout{lyt});
             }
             catch (const py::cast_error&)
             {}
