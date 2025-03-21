@@ -11,6 +11,7 @@ from mnt.pyfiction import (
     sidb_111_lattice,
     sidb_simulation_engine,
     sidb_technology,
+    termination_condition,
 )
 
 
@@ -39,6 +40,7 @@ class TestDesignSiDBGates(unittest.TestCase):
         params.operational_params.simulation_parameters.base = 2
         params.operational_params.simulation_parameters.mu_minus = -0.28
         params.design_mode = design_sidb_gates_mode.AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER
+        params.termination_condition = termination_condition.ALL_COMBINATIONS_ENUMERATED
         params.canvas = [(4, 8), (14, 11)]
         params.number_of_canvas_sidbs = 1
         params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
@@ -85,6 +87,7 @@ class TestDesignSiDBGates(unittest.TestCase):
         params.operational_params.simulation_parameters.base = 2
         params.operational_params.simulation_parameters.mu_minus = -0.32
         params.design_mode = design_sidb_gates_mode.AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER
+        params.termination_condition = termination_condition.ALL_COMBINATIONS_ENUMERATED
         params.canvas = [(10, 22), (14, 34)]
         params.number_of_canvas_sidbs = 3
         params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
@@ -136,6 +139,7 @@ class TestDesignSiDBGates(unittest.TestCase):
         params.operational_params.simulation_parameters.base = 2
         params.operational_params.simulation_parameters.mu_minus = -0.32
         params.design_mode = design_sidb_gates_mode.AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER
+        params.termination_condition = termination_condition.ALL_COMBINATIONS_ENUMERATED
 
         params.canvas = [(10, 26), (14, 34)]
         params.number_of_canvas_sidbs = 3
