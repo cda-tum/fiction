@@ -4,7 +4,6 @@ from mnt.pyfiction import (
     automatic_base_number_detection,
     charge_distribution_surface_100,
     charge_distribution_surface_111,
-    groundstate_from_simulation_result,
     quickexact,
     quickexact_params,
     sidb_100_lattice,
@@ -66,7 +65,7 @@ class TestQuickExact(unittest.TestCase):
 
         self.assertEqual(result.algorithm_name, "QuickExact")
 
-        groundstate = groundstate_from_simulation_result(result)
+        groundstate = result.groundstates()
 
         self.assertEqual(len(groundstate), 1)
 

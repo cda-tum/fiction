@@ -3,7 +3,6 @@ import unittest
 from mnt.pyfiction import (
     charge_distribution_surface_100,
     charge_distribution_surface_111,
-    groundstate_from_simulation_result,
     sidb_100_lattice,
     sidb_111_lattice,
     sidb_charge_state,
@@ -32,7 +31,7 @@ class TestDetermineGroundstateFromSimulationResults(unittest.TestCase):
         results = sidb_simulation_result_100()
         results.charge_distributions = [cds1, cds2, cds3]
 
-        ground_state = groundstate_from_simulation_result(results)
+        ground_state = results.groundstates()
         self.assertEqual(len(ground_state), 1)
 
         groundstate = ground_state[0]
@@ -57,7 +56,7 @@ class TestDetermineGroundstateFromSimulationResults(unittest.TestCase):
         results = sidb_simulation_result_111()
         results.charge_distributions = [cds1, cds2, cds3]
 
-        result = groundstate_from_simulation_result(results)
+        result = results.groundstates()
         self.assertEqual(len(result), 1)
 
         ground_state = result[0]
