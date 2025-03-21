@@ -181,8 +181,9 @@ template <typename Ntk, typename CellLyt, typename GateLyt>
 
                 try
                 {
-                    lyt = apply_parameterized_gate_library<CellLyt, sidb_on_the_fly_gate_library, GateLyt,
-                                                           sidb_on_the_fly_gate_library_params<cell<CellLyt>>>(
+                    lyt = apply_parameterized_gate_library_on_defective_surface<
+                        CellLyt, sidb_on_the_fly_gate_library, GateLyt,
+                        sidb_on_the_fly_gate_library_params<cell<CellLyt>>>(
                         *gate_level_layout, params.sidb_on_the_fly_gate_library_parameters, defective_surface);
                 }
 

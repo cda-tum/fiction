@@ -172,7 +172,8 @@ class apply_gate_library_impl
                 // "copy_lyt". When using "cell_lyt.assign_sidb_defect(...)" inside the lambda function, it results in
                 // the error: "error C2059: syntax error: '.'".
                 auto copy_lyt = cell_lyt.clone();
-                // add defects to the circuit.
+                // copy the original defects over to the circuit since they are gone when converting the gate-level
+                // layout to the cell-level layout.
                 lyt.value().foreach_sidb_defect([this, &copy_lyt](const auto& def)
                                                 { copy_lyt.assign_sidb_defect(def.first, def.second); });
                 return copy_lyt;
@@ -297,12 +298,10 @@ template <typename CellLyt, typename GateLibrary, typename GateLyt>
  * @tparam Params Type of the parameter used for SiDB on-the-fly gate library.
  * @param lyt The gate-level layout.
  * @param params Parameter for the gate library.
- * @param cell_lyt Optional cell-level layout to add defects to.
  * @return A cell-level layout that implements `lyt`'s gate types with building blocks defined in `GateLibrary`.
  */
 template <typename CellLyt, typename GateLibrary, typename GateLyt, typename Params>
-[[nodiscard]] CellLyt apply_parameterized_gate_library(const GateLyt& lyt, const Params& params,
-                                                       const std::optional<CellLyt>& cell_lyt = std::nullopt)
+[[nodiscard]] CellLyt apply_parameterized_gate_library(const GateLyt& lyt, const Params& params)
 {
     static_assert(is_cell_level_layout_v<CellLyt>, "CellLyt is not a cell-level layout");
     static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt is not a gate-level layout");
@@ -316,7 +315,45 @@ template <typename CellLyt, typename GateLibrary, typename GateLyt, typename Par
     detail::apply_gate_library_impl<CellLyt, GateLibrary, GateLyt> p{lyt};
 
     // Run the gate library with the parameters
-    const CellLyt result = p.template run_parameterized_gate_library<Params>(params, cell_lyt);
+    const CellLyt result = p.template run_parameterized_gate_library<Params>(params);
+
+    return result;
+}
+
+/**
+ * Applies a defect-aware parameterized gate library to a given
+ * gate-level layout and, thereby, creates and returns a cell-level layout.
+ *
+ * May pass through, and thereby throw, an `unsupported_gate_type_exception`, an
+ * `unsupported_gate_orientation_exception` and any further custom exceptions of the gate libraries.
+ *
+ * @tparam DefectLyt Type of the returned cell-level layout.
+ * @tparam GateLibrary Type of the gate library to apply.
+ * @tparam GateLyt Type of the gate-level layout to apply the library to.
+ * @tparam Params Type of the parameter used for SiDB on-the-fly gate library.
+ * @param lyt The gate-level layout.
+ * @param params Parameter for the gate library.
+ * @param defect_lyt Defect surface.
+ * @return A cell-level layout that implements `lyt`'s gate types with building blocks defined in `GateLibrary`.
+ */
+template <typename DefectLyt, typename GateLibrary, typename GateLyt, typename Params>
+[[nodiscard]] DefectLyt apply_parameterized_gate_library_on_defective_surface(const GateLyt& lyt, const Params& params,
+                                                                              const DefectLyt& defect_surface)
+{
+    static_assert(is_cell_level_layout_v<DefectLyt>, "DefectLyt is not a cell-level layout");
+    static_assert(is_sidb_defect_surface_v<DefectLyt>, "DefectLyt is not an SiDB defect surface");
+    static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt is not a gate-level layout");
+    static_assert(has_cube_coord_v<DefectLyt>, "DefectLyt must be based on cube coordinates");
+    static_assert(mockturtle::has_is_constant_v<GateLyt>, "GateLyt does not implement the is_constant function");
+    static_assert(mockturtle::has_foreach_node_v<GateLyt>, "GateLyt does not implement the foreach_node function");
+
+    static_assert(std::is_same_v<technology<DefectLyt>, technology<GateLibrary>>,
+                  "DefectLyt and GateLibrary must implement the same technology");
+
+    detail::apply_gate_library_impl<DefectLyt, GateLibrary, GateLyt> p{lyt};
+
+    // Run the gate library with the parameters
+    const DefectLyt result = p.template run_parameterized_gate_library<Params>(params, defect_surface);
 
     return result;
 }
