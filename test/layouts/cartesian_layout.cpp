@@ -2,7 +2,7 @@
 // Created by marcel on 31.03.21.
 //
 
-#include <catch2/catch_test_macros.hpp>
+#include <catch2/catch_template_test_macros.hpp>
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/traits.hpp>
@@ -11,9 +11,10 @@
 
 using namespace fiction;
 
-template <typename Layout>
-void test_layout_traits_impl()
+TEMPLATE_TEST_CASE("Cartesian layout traits", "[cartesian-layout]", offset::ucoord_t, cube::coord_t)
 {
+    using Layout = cartesian_layout<TestType>;
+
     CHECK(has_north_v<Layout>);
     CHECK(has_east_v<Layout>);
     CHECK(has_south_v<Layout>);
@@ -37,20 +38,10 @@ void test_layout_traits_impl()
     CHECK(has_foreach_adjacent_opposite_coordinates_v<Layout>);
 }
 
-TEST_CASE("Cartesian offset layout traits", "[cartesian-layout]")
+TEMPLATE_TEST_CASE("Coordinate creation", "[cartesian-layout]", offset::ucoord_t, cube::coord_t)
 {
-    test_layout_traits_impl<cartesian_layout<offset::ucoord_t>>();
-}
-
-TEST_CASE("Cartesian cube layout traits", "[cartesian-layout]")
-{
-    test_layout_traits_impl<cartesian_layout<cube::coord_t>>();
-}
-
-template <typename Layout>
-void test_coordinate_creation_impl()
-{
-    using coord = typename Layout::coordinate;
+    using Layout = cartesian_layout<TestType>;
+    using coord  = typename Layout::coordinate;
 
     // create a layout with max=(3,3)
     const Layout lyt{{3, 3}};
@@ -65,20 +56,10 @@ void test_coordinate_creation_impl()
     CHECK(lyt.coord(2, 1) == coord{2, 1});
 }
 
-TEST_CASE("Offset coordinate creation", "[cartesian-layout]")
+TEMPLATE_TEST_CASE("Deep copy Cartesian layout", "[cartesian-layout]", offset::ucoord_t, cube::coord_t)
 {
-    test_coordinate_creation_impl<cartesian_layout<offset::ucoord_t>>();
-}
-
-TEST_CASE("Cube coordinate creation", "[cartesian-layout]")
-{
-    test_coordinate_creation_impl<cartesian_layout<cube::coord_t>>();
-}
-
-template <typename Layout>
-void test_deep_copy_impl()
-{
-    using ar_t = typename Layout::aspect_ratio_type;
+    using Layout = cartesian_layout<TestType>;
+    using ar_t   = typename Layout::aspect_ratio_type;
 
     // original layout with max=(5,5,0)
     const Layout original{{5, 5, 0}};
@@ -100,21 +81,11 @@ void test_deep_copy_impl()
     CHECK(copy.z() == 1);
 }
 
-TEST_CASE("Deep copy Cartesian offset layout", "[cartesian-layout]")
+TEMPLATE_TEST_CASE("Cartesian coordinate iteration", "[cartesian-layout]", offset::ucoord_t, cube::coord_t)
 {
-    test_deep_copy_impl<cartesian_layout<offset::ucoord_t>>();
-}
-
-TEST_CASE("Deep copy Cartesian cube layout", "[cartesian-layout]")
-{
-    test_deep_copy_impl<cartesian_layout<cube::coord_t>>();
-}
-
-template <typename Layout>
-void test_coordinate_iteration_impl()
-{
-    using coord = typename Layout::coordinate;
-    using ar_t  = typename Layout::aspect_ratio_type;
+    using Layout = cartesian_layout<TestType>;
+    using coord  = typename Layout::coordinate;
+    using ar_t   = typename Layout::aspect_ratio_type;
 
     ar_t   ar{9, 9, 1};
     Layout layout{ar};
@@ -204,21 +175,12 @@ void test_coordinate_iteration_impl()
     CHECK(visited.size() == 23);
 }
 
-TEST_CASE("Cartesian offset coordinate iteration", "[cartesian-layout]")
+TEMPLATE_TEST_CASE("Cartesian coordinate iteration with non-zero minimum", "[cartesian-layout]", offset::ucoord_t,
+                   cube::coord_t)
 {
-    test_coordinate_iteration_impl<cartesian_layout<offset::ucoord_t>>();
-}
-
-TEST_CASE("Cartesian cube coordinate iteration", "[cartesian-layout]")
-{
-    test_coordinate_iteration_impl<cartesian_layout<cube::coord_t>>();
-}
-
-template <typename Layout>
-void test_coordinate_iteration_non_zero_min_impl()
-{
-    using coord = typename Layout::coordinate;
-    using ar_t  = typename Layout::aspect_ratio_type;
+    using Layout = cartesian_layout<TestType>;
+    using coord  = typename Layout::coordinate;
+    using ar_t   = typename Layout::aspect_ratio_type;
 
     // offset => min=(1,1,0), max=(9,9,1)
     // cube   => min=(-9,-9,0), max=(9,9,1)
@@ -380,29 +342,11 @@ void test_coordinate_iteration_non_zero_min_impl()
     }
 }
 
-TEST_CASE("Cartesian offset coordinate iteration with non-zero minimum", "[cartesian-layout]")
+TEMPLATE_TEST_CASE("Cartesian cardinal operations", "[cartesian-layout]", offset::ucoord_t, cube::coord_t)
 {
-    test_coordinate_iteration_non_zero_min_impl<cartesian_layout<offset::ucoord_t>>();
-}
-
-TEST_CASE("Cartesian cube coordinate iteration with non-zero minimum", "[cartesian-layout]")
-{
-    test_coordinate_iteration_non_zero_min_impl<cartesian_layout<cube::coord_t>>();
-}
-
-/**
- * A function template that runs the "cardinal operations" checks for any
- * cartesian_layout<CoordinateType>. It replicates the logic from your existing
- * "Cartesian offset cardinal operations" and "Cartesian cube cardinal operations."
- *
- * @tparam Layout A cartesian_layout type, e.g. cartesian_layout<offset::ucoord_t>
- *                or cartesian_layout<cube::coord_t>.
- */
-template <typename Layout>
-void test_cardinal_operations_impl()
-{
-    using coord = typename Layout::coordinate;
-    using ar_t  = typename Layout::aspect_ratio_type;
+    using Layout = cartesian_layout<TestType>;
+    using coord  = typename Layout::coordinate;
+    using ar_t   = typename Layout::aspect_ratio_type;
 
     ar_t   ar{10, 10, 1};
     Layout layout{ar};
@@ -532,21 +476,12 @@ void test_cardinal_operations_impl()
     layout.foreach_adjacent_coordinate({5, 5, 0}, [&](const auto& adj) { CHECK(s2.count(adj) == 1); });
 }
 
-TEST_CASE("Cartesian offset cardinal operations", "[cartesian-layout]")
+TEMPLATE_TEST_CASE("Cartesian cardinal operations with non-zero minimum", "[cartesian-layout]", offset::ucoord_t,
+                   cube::coord_t)
 {
-    test_cardinal_operations_impl<cartesian_layout<offset::ucoord_t>>();
-}
-
-TEST_CASE("Cartesian cube cardinal operations", "[cartesian-layout]")
-{
-    test_cardinal_operations_impl<cartesian_layout<cube::coord_t>>();
-}
-
-template <typename Layout>
-void test_cardinal_operations_non_zero_impl()
-{
-    using coord = typename Layout::coordinate;
-    using ar_t  = typename Layout::aspect_ratio_type;
+    using Layout = cartesian_layout<TestType>;
+    using coord  = typename Layout::coordinate;
+    using ar_t   = typename Layout::aspect_ratio_type;
 
     ar_t ar;
     if constexpr (std::is_same_v<coord, offset::ucoord_t>)
@@ -717,16 +652,6 @@ void test_cardinal_operations_non_zero_impl()
 
             CHECK(((abs(dx) == 1 && dy == 0 && dz == 0) || (abs(dy) == 1 && dx == 0 && dz == 0)));
         });
-}
-
-TEST_CASE("Cartesian offset cardinal operations (with non-zero min)", "[cartesian-layout]")
-{
-    test_cardinal_operations_non_zero_impl<cartesian_layout<offset::ucoord_t>>();
-}
-
-TEST_CASE("Cartesian cube cardinal operations (with negative min)", "[cartesian-layout]")
-{
-    test_cardinal_operations_non_zero_impl<cartesian_layout<cube::coord_t>>();
 }
 
 TEST_CASE("Cartesian layouts with SiQAD coordinates must have a z dimension of 1")
