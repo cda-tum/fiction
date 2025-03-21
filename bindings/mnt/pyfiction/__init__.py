@@ -201,7 +201,6 @@ from .pyfiction import (  # type: ignore[import-not-found]
     obstruction_layout,
     occupation_probability_gate_based,
     occupation_probability_non_gate_based,
-    # Utils
     offset_coordinate,
     operational_analysis_strategy,
     operational_condition,
