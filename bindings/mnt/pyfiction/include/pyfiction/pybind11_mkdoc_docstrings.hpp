@@ -11313,7 +11313,7 @@ by `constants::ERROR_MARGIN`.
 Template parameter ``Lyt``:
     SiDB cell-level layout type.
 
-Parameter ``input_vec``:
+Parameter ``charge_distributions``:
     A vector of `charge_distribution_surface` objects for which
     statistics are to be computed.
 
@@ -19719,9 +19719,11 @@ static const char *__doc_fiction_sidb_defect_type_THREE_BY_ONE = R"doc(A collect
 static const char *__doc_fiction_sidb_defect_type_UNKNOWN = R"doc(Unknown defect.)doc";
 
 static const char *__doc_fiction_sidb_energy_distribution =
-R"doc(Data type to collect electrostatic potential energies (unit: eV) of
-charge distributions with corresponding degeneracy (i.e., how often a
-certain energy value occurs).)doc";
+R"doc(This class is used to store the energy distribution of an SiDB layout.
+The energy distribution is a map that contains the electrostatic
+potential as a key and its degeneracy as a value. To be more precise,
+if two different charge distributions occur with the same energy, the
+degeneracy value of the energy state is two.)doc";
 
 static const char *__doc_fiction_sidb_energy_distribution_add_state =
 R"doc(Adds a state to the energy distribution.
@@ -19733,14 +19735,16 @@ Parameter ``degeneracy``:
     The degeneracy of the state to be added.)doc";
 
 static const char *__doc_fiction_sidb_energy_distribution_degeneracy_of_given_energy =
-R"doc(Returns the number of states with the given energy value.
+R"doc(Returns the degeneracy value (number of states) with the given energy
+value.
 
 Parameter ``energy``:
     The energy value for which the excited state number is to be
     determined.
 
 Returns:
-    The excited state number of the given energy value.)doc";
+    The excited state number of the given energy value. If the energy
+    value is not found, `std::nullopt` is returned instead.)doc";
 
 static const char *__doc_fiction_sidb_energy_distribution_distribution =
 R"doc(The energy distribution map. The key is the energy value and the value
@@ -19762,13 +19766,15 @@ Parameter ``fn``:
     Functor to apply to each key-value pair.)doc";
 
 static const char *__doc_fiction_sidb_energy_distribution_get_nth_state =
-R"doc(Returns the nth state in the energy distribution.
+R"doc(Returns the nth state (energy + degeneracy) in the energy
+distribution.
 
 Parameter ``state_index``:
     The index of the state to be retrieved.
 
 Returns:
-    The energy and degeneracy of the state at the specified index.)doc";
+    The energy and degeneracy of the state at the specified index. If
+    the index is out of range, `std::nullopt` is returned instead.)doc";
 
 static const char *__doc_fiction_sidb_energy_distribution_max_energy =
 R"doc(Returns the maximum energy value in the energy distribution.
