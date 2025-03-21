@@ -292,8 +292,39 @@ Parameter ``lyt``:
 Parameter ``params``:
     Parameter for the gate library.
 
-Parameter ``cell_lyt``:
-    Optional cell-level layout to add defects to.
+Returns:
+    A cell-level layout that implements `lyt`'s gate types with
+    building blocks defined in `GateLibrary`.)doc";
+
+static const char *__doc_fiction_apply_parameterized_gate_library_on_defective_surface =
+R"doc(Applies a defect-aware parameterized gate library to a given gate-
+level layout and, thereby, creates and returns a cell-level layout.
+
+May pass through, and thereby throw, an
+`unsupported_gate_type_exception`, an
+`unsupported_gate_orientation_exception` and any further custom
+exceptions of the gate libraries.
+
+Template parameter ``DefectLyt``:
+    Type of the returned cell-level layout.
+
+Template parameter ``GateLibrary``:
+    Type of the gate library to apply.
+
+Template parameter ``GateLyt``:
+    Type of the gate-level layout to apply the library to.
+
+Template parameter ``Params``:
+    Type of the parameter used for SiDB on-the-fly gate library.
+
+Parameter ``lyt``:
+    The gate-level layout.
+
+Parameter ``params``:
+    Parameter for the gate library.
+
+Parameter ``defect_lyt``:
+    Defect surface.
 
 Returns:
     A cell-level layout that implements `lyt`'s gate types with
