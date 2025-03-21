@@ -199,7 +199,7 @@ class physical_population_stability_impl
                         }
                     }
                 });
-            population_stability_info.system_energy = charge_lyt.get_system_energy();
+            population_stability_info.system_energy = charge_lyt.get_electrostatic_potential_energy();
 
             auto minimum_potential_difference = std::numeric_limits<double>::infinity();
 
@@ -365,10 +365,13 @@ class physical_population_stability_impl
         std::vector<energy_and_charge_index> energy_charge_index{};
         energy_charge_index.reserve(sim_results.charge_distributions.size());
 
-        std::transform(
-            sim_results.charge_distributions.cbegin(), sim_results.charge_distributions.cend(),
-            std::back_inserter(energy_charge_index), [](const auto& ch_lyt)
-            { return energy_and_charge_index{ch_lyt.get_system_energy(), ch_lyt.get_charge_index_and_base().first}; });
+        std::transform(sim_results.charge_distributions.cbegin(), sim_results.charge_distributions.cend(),
+                       std::back_inserter(energy_charge_index),
+                       [](const auto& ch_lyt)
+                       {
+                           return energy_and_charge_index{ch_lyt.get_electrostatic_potential_energy(),
+                                                          ch_lyt.get_charge_index_and_base().first};
+                       });
 
         // Sort the vector in ascending order of the energy value
         std::sort(energy_charge_index.begin(), energy_charge_index.end(),

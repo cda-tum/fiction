@@ -80,7 +80,8 @@ template <typename Lyt>
     {
         const auto& cds1 = result1.charge_distributions.at(i);
         const auto& cds2 = result2.charge_distributions.at(i);
-        if (std::abs(cds1.get_system_energy() - cds2.get_system_energy()) > constants::ERROR_MARGIN)
+        if (std::abs(cds1.get_electrostatic_potential_energy() - cds2.get_electrostatic_potential_energy()) >
+            constants::ERROR_MARGIN)
         {
             return false;
         }

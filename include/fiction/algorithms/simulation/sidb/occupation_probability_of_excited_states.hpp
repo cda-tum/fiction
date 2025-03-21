@@ -82,28 +82,27 @@ namespace fiction
         return 0.0;
     }
 
-    const auto& [energy, degeneracy] = *(energy_distribution.begin());
-    const auto min_energy            = energy;  // unit: eV
+    const auto min_energy = energy_distribution.min_energy();  // unit: eV
 
     // The partition function is obtained by summing up all the Boltzmann factors.
-    const double partition_function = std::accumulate(
-        energy_distribution.cbegin(), energy_distribution.cend(), 0.0, [&](const double sum, const auto& it)
-        { return sum + std::exp(-((it.first - min_energy) * 12'000 / temperature)); });
 
-    // All Boltzmann factors of the excited states are summed.
-    const double p =
-        std::accumulate(energy_distribution.cbegin(), energy_distribution.cend(), 0.0,
-                        [&](const double sum, const auto& it)
-                        {
-                            // round the energy value of the given valid_layout to six decimal places and check if they
-                            // are different
-                            if (std::abs(round_to_n_decimal_places(it.first, 6) -
-                                         round_to_n_decimal_places(min_energy, 6)) > constants::ERROR_MARGIN)
-                            {
-                                return sum + std::exp(-((it.first - min_energy) * 12'000 / temperature));
-                            }
-                            return sum;
-                        });
+    double partition_function = 0.0;
+
+    energy_distribution.for_each(
+        [&](const double energy, const uint64_t degeneracy)
+        { partition_function += degeneracy * std::exp(-((energy - min_energy) * 12'000 / temperature)); });
+
+    double p = 0;
+
+    energy_distribution.for_each(
+        [&](const double energy, const uint64_t degeneracy)
+        {
+            if (std::abs(round_to_n_decimal_places(energy, 6) - round_to_n_decimal_places(min_energy, 6)) >
+                constants::ERROR_MARGIN)
+            {
+                p += degeneracy * std::exp(-((energy - min_energy) * 12'000 / temperature));
+            }
+        });
 
     return p / partition_function;  // Occupation probability of the excited states.
 }
