@@ -76,8 +76,8 @@ inline void design_sidb_gates(pybind11::module& m)
                        &fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::number_of_sidbs,
                        DOC(fiction_design_sidb_gates_params_number_of_sidbs));
 
-    detail::design_sidb_gates<py_sidb_100_lattice>(m);
-    detail::design_sidb_gates<py_sidb_111_lattice>(m);
+    detail::design_sidb_gates<py_sidb_100_lattice<py_offset_coordinate>>(m);
+    detail::design_sidb_gates<py_sidb_111_lattice<py_offset_coordinate>>(m);
 }
 
 }  // namespace pyfiction

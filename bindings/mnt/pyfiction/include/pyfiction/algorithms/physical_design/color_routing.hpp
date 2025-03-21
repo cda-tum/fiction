@@ -79,8 +79,10 @@ inline void color_routing(pybind11::module& m)
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::color_routing<py_cartesian_obstruction_layout>(m);
-    detail::color_routing<py_cartesian_gate_layout>(m);
+    detail::color_routing<py_cartesian_obstruction_layout<py_offset_coordinate>>(m);
+    detail::color_routing<py_cartesian_obstruction_layout<py_cube_coordinate>>(m);
+    detail::color_routing<py_cartesian_gate_layout<py_offset_coordinate>>(m);
+    detail::color_routing<py_cartesian_gate_layout<py_cube_coordinate>>(m);
     detail::color_routing<py_shifted_cartesian_obstruction_layout>(m);
     detail::color_routing<py_shifted_cartesian_gate_layout>(m);
     detail::color_routing<py_hexagonal_obstruction_layout>(m);

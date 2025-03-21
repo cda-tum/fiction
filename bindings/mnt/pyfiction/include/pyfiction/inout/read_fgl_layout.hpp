@@ -24,8 +24,9 @@ inline void read_fgl_layout(pybind11::module& m)
 
     py::register_exception<fiction::fgl_parsing_error>(m, "fgl_parsing_error", PyExc_RuntimeError);
 
-    py_cartesian_gate_layout (*read_cartesian_fgl_layout_function_pointer)(
-        const std::string_view&, const std::string_view&) = &fiction::read_fgl_layout<py_cartesian_gate_layout>;
+    py_cartesian_gate_layout<py_offset_coordinate> (*read_cartesian_fgl_layout_function_pointer)(
+        const std::string_view&, const std::string_view&) =
+        &fiction::read_fgl_layout<py_cartesian_gate_layout<py_offset_coordinate>>;
     py_shifted_cartesian_gate_layout (*read_shifted_cartesian_fgl_layout_function_pointer)(
         const std::string_view&, const std::string_view&) = &fiction::read_fgl_layout<py_shifted_cartesian_gate_layout>;
     py_hexagonal_gate_layout (*read_hexagonal_fgl_layout_function_pointer)(

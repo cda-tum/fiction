@@ -67,10 +67,14 @@ inline void yen_k_shortest_paths(pybind11::module& m)
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::yen_k_shortest_paths<py_cartesian_obstruction_layout>(m);
-    detail::yen_k_shortest_paths<py_cartesian_gate_layout>(m);
-    detail::yen_k_shortest_paths<py_cartesian_clocked_layout>(m);
-    detail::yen_k_shortest_paths<py_cartesian_layout>(m);
+    detail::yen_k_shortest_paths<py_cartesian_obstruction_layout<py_offset_coordinate>>(m);
+    detail::yen_k_shortest_paths<py_cartesian_obstruction_layout<py_cube_coordinate>>(m);
+    detail::yen_k_shortest_paths<py_cartesian_gate_layout<py_offset_coordinate>>(m);
+    detail::yen_k_shortest_paths<py_cartesian_gate_layout<py_cube_coordinate>>(m);
+    detail::yen_k_shortest_paths<py_cartesian_clocked_layout<py_offset_coordinate>>(m);
+    detail::yen_k_shortest_paths<py_cartesian_clocked_layout<py_cube_coordinate>>(m);
+    detail::yen_k_shortest_paths<py_cartesian_layout<py_offset_coordinate>>(m);
+    detail::yen_k_shortest_paths<py_cartesian_layout<py_cube_coordinate>>(m);
     detail::yen_k_shortest_paths<py_shifted_cartesian_obstruction_layout>(m);
     detail::yen_k_shortest_paths<py_shifted_cartesian_gate_layout>(m);
     detail::yen_k_shortest_paths<py_shifted_cartesian_clocked_layout>(m);

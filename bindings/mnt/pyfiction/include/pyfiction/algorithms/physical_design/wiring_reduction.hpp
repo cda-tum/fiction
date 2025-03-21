@@ -59,9 +59,9 @@ inline void wiring_reduction(pybind11::module& m)
 
         ;
 
-    m.def("wiring_reduction", &fiction::wiring_reduction<py_cartesian_gate_layout>, py::arg("layout"),
-          py::arg("parameters") = fiction::wiring_reduction_params{}, py::arg("statistics") = nullptr,
-          DOC(fiction_wiring_reduction));
+    m.def("wiring_reduction", &fiction::wiring_reduction<py_cartesian_gate_layout<py_offset_coordinate>>,
+          py::arg("layout"), py::arg("parameters") = fiction::wiring_reduction_params{},
+          py::arg("statistics") = nullptr, DOC(fiction_wiring_reduction));
 }
 
 }  // namespace pyfiction

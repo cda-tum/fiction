@@ -64,7 +64,7 @@ class clocked_layout : public CoordinateLayout
      *
      * @param ar Highest possible position in the layout.
      */
-    explicit clocked_layout(const typename CoordinateLayout::aspect_ratio& ar = {}) :
+    explicit clocked_layout(const typename CoordinateLayout::aspect_ratio_type& ar = {}) :
             CoordinateLayout(ar),
             strg{std::make_shared<clocked_layout_storage>(
                 open_clocking<clocked_layout<CoordinateLayout>>(num_clks::FOUR))}
@@ -78,7 +78,7 @@ class clocked_layout : public CoordinateLayout
      * @param ar Highest possible position in the layout.
      * @param scheme Clocking scheme to apply to this layout.
      */
-    clocked_layout(const typename CoordinateLayout::aspect_ratio& ar, const clocking_scheme_t& scheme) :
+    clocked_layout(const typename CoordinateLayout::aspect_ratio_type& ar, const clocking_scheme_t& scheme) :
             CoordinateLayout(ar),
             strg{std::make_shared<clocked_layout_storage>(scheme)}
     {

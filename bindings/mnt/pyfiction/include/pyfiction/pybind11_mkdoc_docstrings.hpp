@@ -318,21 +318,6 @@ Returns:
     `true` if the layouts are identical, `false` otherwise.)doc";
 
 static const char *__doc_fiction_area =
-R"doc(Computes the area of a given coordinate assuming its origin is (0, 0,
-0). Calculates :math:`(|x| + 1) \cdot (|y| + 1)` by default. The
-exception is SiQAD coordinates, for which it computes :math:`(|x| + 1)
-\cdot (2 \cdot |y| + |z| + 1)`.
-
-Template parameter ``CoordinateType``:
-    Coordinate type.
-
-Parameter ``coord``:
-    Coordinate.
-
-Returns:
-    Area of coord.)doc";
-
-static const char *__doc_fiction_area_2 =
 R"doc(Computes real-world area requirements in nm² of a given cell-level
 layout. For this purpose, each cell position in the layout is assigned
 a vertical and horizontal size. Additionally, a spacing between cell
@@ -356,7 +341,7 @@ Parameter ``pst``:
 Returns:
     Area requirements in nm².)doc";
 
-static const char *__doc_fiction_area_3 =
+static const char *__doc_fiction_area_2 =
 R"doc(Computes real-world area requirements in nm² of the bounding box of a
 given cell-level layout. For this purpose, each cell position in the
 layout is assigned a vertical and horizontal size. Additionally, a
@@ -396,6 +381,90 @@ static const char *__doc_fiction_area_stats = R"doc()doc";
 static const char *__doc_fiction_area_stats_area = R"doc(Area requirements in nm².)doc";
 
 static const char *__doc_fiction_area_stats_report = R"doc()doc";
+
+static const char *__doc_fiction_aspect_ratio =
+R"doc(Struct representing the aspect ratio of the cartesian layout.
+
+The `aspect_ratio_type` struct defines the minimum and maximum
+coordinates, effectively determining the size and position of the
+layout within a coordinate space.)doc";
+
+static const char *__doc_fiction_aspect_ratio_area =
+R"doc(Computes the area of a given aspect_ratio. Calculates :math:`(|x| + 1)
+\cdot (|y| + 1)` by default. The exception is SiQAD coordinates, for
+which it computes :math:`(|x| + 1) \cdot (2 \cdot |y| + |z| + 1)`.
+
+Returns:
+    Area of the aspect_ratio.)doc";
+
+static const char *__doc_fiction_aspect_ratio_aspect_ratio =
+R"doc(Default constructor. Initializes both minimum and maximum to (0, 0,
+0).
+
+This creates a layout with a single point at the origin.)doc";
+
+static const char *__doc_fiction_aspect_ratio_aspect_ratio_2 =
+R"doc(Constructs an aspect_ratio_type from a single end coordinate.
+
+The minimium coordinate is initialized to (0, 0, 0), and the maximum
+coordinate is set to `e`.
+
+Parameter ``e``:
+    The maximum coordinate defining the layout's size.)doc";
+
+static const char *__doc_fiction_aspect_ratio_aspect_ratio_3 =
+R"doc(Constructs an aspect_ratio_type from specified start and end
+coordinates.
+
+Parameter ``mi``:
+    The minimum coordinate of the layout.
+
+Parameter ``ma``:
+    The maximum coordinate of the layout.)doc";
+
+static const char *__doc_fiction_aspect_ratio_aspect_ratio_4 =
+R"doc(Templated constructor for initializing aspect_ratio_type with three
+integral coordinates.
+
+Initializes the minimum coordinate to (0, 0, 0) and sets the maximum
+coordinate to (x, y, z).
+
+Template parameter ``X``:
+    Type of the x-coordinate. Must be integral.
+
+Template parameter ``Y``:
+    Type of the y-coordinate. Must be integral.
+
+Template parameter ``Z``:
+    Type of the z-coordinate. Must be integral.
+
+Parameter ``x``:
+    The x-coordinate value.
+
+Parameter ``y``:
+    The y-coordinate value.
+
+Parameter ``z``:
+    The z-coordinate value.)doc";
+
+static const char *__doc_fiction_aspect_ratio_aspect_ratio_5 =
+R"doc(Templated constructor for initializing aspect_ratio_type with two
+integral coordinates.
+
+Initializes the start coordinate to (0, 0, 0) and sets the end
+coordinate to (x, y, 0).
+
+Template parameter ``X``:
+    Type of the x-coordinate. Must be integral.
+
+Template parameter ``Y``:
+    Type of the y-coordinate. Must be integral.
+
+Parameter ``x``:
+    The x-coordinate value.
+
+Parameter ``y``:
+    The y-coordinate value.)doc";
 
 static const char *__doc_fiction_aspect_ratio_iterator =
 R"doc(An iterator type that iterates over increasingly larger 2D aspect
@@ -475,6 +544,74 @@ static const char *__doc_fiction_aspect_ratio_iterator_operator_mul = R"doc()doc
 static const char *__doc_fiction_aspect_ratio_iterator_operator_ne = R"doc()doc";
 
 static const char *__doc_fiction_aspect_ratio_iterator_operator_ne_2 = R"doc()doc";
+
+static const char *__doc_fiction_aspect_ratio_max = R"doc()doc";
+
+static const char *__doc_fiction_aspect_ratio_min = R"doc()doc";
+
+static const char *__doc_fiction_aspect_ratio_operator_eq =
+R"doc(Equality operator for `aspect_ratio_type`.
+
+Compares two `aspect_ratio_type` instances for equality based on their
+min and max coordinates.
+
+Parameter ``other``:
+    The other aspect_ratio_type instance to compare against.
+
+Returns:
+    `true` if both aspect_ratios have the same min and max
+    coordinates; `false` otherwise.)doc";
+
+static const char *__doc_fiction_aspect_ratio_operator_ne =
+R"doc(Inequality operator for `aspect_ratio_type`.
+
+Compares two `aspect_ratio_type` instances for equality based on their
+min and max coordinates.
+
+Parameter ``other``:
+    The other aspect_ratio_type instance to compare against.
+
+Returns:
+    `true` if both aspect_ratios have different min and max
+    coordinates; `false` otherwise.)doc";
+
+static const char *__doc_fiction_aspect_ratio_volume =
+R"doc(Computes the volume of a given aspect_ratio. Calculates :math:`(|x| +
+1) \cdot (|y| + 1) \cdot (|z| + 1)` by default. For SiQAD coordinates,
+which are planar by definition, the area is returned.
+
+Returns:
+    Volume of the aspect_ratio.)doc";
+
+static const char *__doc_fiction_aspect_ratio_x = R"doc()doc";
+
+static const char *__doc_fiction_aspect_ratio_x_min =
+R"doc(Gets the x-coordinate of the maximum coordinate.
+
+Returns:
+    The x-coordinate value.)doc";
+
+static const char *__doc_fiction_aspect_ratio_x_size = R"doc()doc";
+
+static const char *__doc_fiction_aspect_ratio_y = R"doc()doc";
+
+static const char *__doc_fiction_aspect_ratio_y_min =
+R"doc(Gets the y-coordinate of the maximum position.
+
+Returns:
+    The y-coordinate value.)doc";
+
+static const char *__doc_fiction_aspect_ratio_y_size = R"doc()doc";
+
+static const char *__doc_fiction_aspect_ratio_z = R"doc()doc";
+
+static const char *__doc_fiction_aspect_ratio_z_min =
+R"doc(Gets the z-coordinate of the maximum position.
+
+Returns:
+    The z-coordinate value.)doc";
+
+static const char *__doc_fiction_aspect_ratio_z_size = R"doc()doc";
 
 static const char *__doc_fiction_bancs_clocking =
 R"doc(Returns the BANCS clocking as defined in \"BANCS: Bidirectional
@@ -1395,7 +1532,7 @@ static const char *__doc_fiction_cartesian_layout_area =
 R"doc(Returns the layout's number of faces depending on the coordinate type.
 
 Returns:
-    Area of layout.)doc";
+    Area of the layout.)doc";
 
 static const char *__doc_fiction_cartesian_layout_below =
 R"doc(Returns the coordinate that is directly below a given coordinate `c`,
@@ -1409,13 +1546,10 @@ Returns:
     Coordinate directly below `c`.)doc";
 
 static const char *__doc_fiction_cartesian_layout_cartesian_layout =
-R"doc(Standard constructor. The given aspect ratio points to the highest
-possible coordinate in the layout. That means in the ASCII layout
-above `ar = (3,2)`. Consequently, with `ar = (0,0)`, the layout has
-exactly one coordinate.
+R"doc(Standard constructor.
 
-Parameter ``ar``:
-    Highest possible position in the layout.)doc";
+Initializes the layout with the highest possible coordinate at (0, 0,
+0), effectively creating a layout with a single coordinate.)doc";
 
 static const char *__doc_fiction_cartesian_layout_cartesian_layout_2 =
 R"doc(Copy constructor from another layout's storage.
@@ -1423,11 +1557,23 @@ R"doc(Copy constructor from another layout's storage.
 Parameter ``s``:
     Storage of another cartesian_layout.)doc";
 
-static const char *__doc_fiction_cartesian_layout_cartesian_layout_storage = R"doc()doc";
+static const char *__doc_fiction_cartesian_layout_cartesian_layout_storage =
+R"doc(Struct representing the storage for a cartesian_layout.
 
-static const char *__doc_fiction_cartesian_layout_cartesian_layout_storage_cartesian_layout_storage = R"doc()doc";
+The `cartesian_layout_storage` struct holds the dimensions and origin
+of the layout.)doc";
 
-static const char *__doc_fiction_cartesian_layout_cartesian_layout_storage_dimension = R"doc()doc";
+static const char *__doc_fiction_cartesian_layout_cartesian_layout_storage_ar = R"doc()doc";
+
+static const char *__doc_fiction_cartesian_layout_cartesian_layout_storage_cartesian_layout_storage =
+R"doc(Constructs a cartesian_layout_storage with specified dimensions and
+origin.
+
+Parameter ``dim``:
+    The dimensions of the layout (width, height, etc.).
+
+Parameter ``org``:
+    The origin coordinate. Defaults to (0, 0, 0).)doc";
 
 static const char *__doc_fiction_cartesian_layout_clone =
 R"doc(Clones the layout returning a deep copy.
@@ -1882,10 +2028,25 @@ Returns:
     The northern border equivalent of `c`.)doc";
 
 static const char *__doc_fiction_cartesian_layout_resize =
-R"doc(Updates the layout's dimensions, effectively resizing it.
+R"doc(Updates the layout's dimensions and origin based on a new
+aspect_ratio.
+
+This method effectively resizes the layout by adjusting its dimensions
+to match the provided aspect_ratio. The origin is also updated to the
+start coordinate of the aspect_ratio.
 
 Parameter ``ar``:
-    New aspect ratio.)doc";
+    The new aspect_ratio to apply to the layout.)doc";
+
+static const char *__doc_fiction_cartesian_layout_resize_2 =
+R"doc(Updates the layout's dimensions based on a new coordinate.
+
+This method effectively resizes the layout by adjusting its dimensions
+to match the provided coordinate. The origin is also updated to (0, 0,
+0).
+
+Parameter ``ar``:
+    The new max coordinate of the layout.)doc";
 
 static const char *__doc_fiction_cartesian_layout_south =
 R"doc(Returns the coordinate that is directly adjacent in southern direction
@@ -1936,6 +2097,12 @@ Returns:
 
 static const char *__doc_fiction_cartesian_layout_strg = R"doc()doc";
 
+static const char *__doc_fiction_cartesian_layout_volume =
+R"doc(Returns the layout's volume depending on the coordinate type.
+
+Returns:
+    Volume of the layout.)doc";
+
 static const char *__doc_fiction_cartesian_layout_west =
 R"doc(Returns the coordinate that is directly adjacent in western direction
 of a given coordinate `c`, i.e., the face whose x-dimension is lower
@@ -1965,6 +2132,21 @@ that still belongs to the layout.
 Returns:
     x-dimension.)doc";
 
+static const char *__doc_fiction_cartesian_layout_x_min =
+R"doc(Returns the layout's x-org coordinate.
+
+The x-org coordinate represents the origin's x-value in the layout.
+
+Returns:
+    The x-start coordinate of the layout.)doc";
+
+static const char *__doc_fiction_cartesian_layout_x_size =
+R"doc(Returns the layout's size in the x-dimension, i.e., the distance
+between x-org and the maximum x-value.
+
+Returns:
+    The size of the layout in the x-dimension.)doc";
+
 static const char *__doc_fiction_cartesian_layout_y =
 R"doc(Returns the layout's y-dimension, i.e., returns the biggest y-value
 that still belongs to the layout.
@@ -1972,12 +2154,42 @@ that still belongs to the layout.
 Returns:
     y-dimension.)doc";
 
+static const char *__doc_fiction_cartesian_layout_y_min =
+R"doc(Returns the layout's y-org coordinate.
+
+The y-org coordinate represents the origin's y-value in the layout.
+
+Returns:
+    The y-org coordinate of the layout.)doc";
+
+static const char *__doc_fiction_cartesian_layout_y_size =
+R"doc(Returns the layout's size in the y-dimension, i.e., the distance
+between y-org and the maximum y-value.
+
+Returns:
+    The size of the layout in the y-dimension.)doc";
+
 static const char *__doc_fiction_cartesian_layout_z =
 R"doc(Returns the layout's z-dimension, i.e., returns the biggest z-value
 that still belongs to the layout.
 
 Returns:
     z-dimension.)doc";
+
+static const char *__doc_fiction_cartesian_layout_z_min =
+R"doc(Returns the layout's z-org coordinate.
+
+The z-org coordinate represents the origin's z-value in the layout.
+
+Returns:
+    The z-org coordinate of the layout.)doc";
+
+static const char *__doc_fiction_cartesian_layout_z_size =
+R"doc(Returns the layout's size in the z-dimension, i.e., the distance
+between z-org and the maximum z-value.
+
+Returns:
+    The size of the layout in the z-dimension.)doc";
 
 static const char *__doc_fiction_cds_configuration = R"doc(An enumeration of modes for the charge distribution surface.)doc";
 
@@ -3176,6 +3388,8 @@ static const char *__doc_fiction_coord_iterator_operator_mul = R"doc()doc";
 
 static const char *__doc_fiction_coord_iterator_operator_ne = R"doc()doc";
 
+static const char *__doc_fiction_coord_iterator_wrap_to = R"doc()doc";
+
 static const char *__doc_fiction_cost_function_chi =
 R"doc(Calculates the cost function :math:` \chi = \sum_{i=1} w_{i} \cdot
 \chi_{i} ` by summing the product of normalized chi values :math:`
@@ -4012,6 +4226,16 @@ Parameter ``x_``:
 Parameter ``y_``:
     y position.)doc";
 
+static const char *__doc_fiction_cube_coord_t_coord_t_4 =
+R"doc(Standard constructor. Instantiates a coordinate from an uint64_t,
+where the positions are encoded in the following four parts of the
+unsigned 64-bit integer (from MSB to LSB): - 1 bit for the dead
+indicator - 1 bit for the z position - 31 bit for the y position - 31
+bit for the x position
+
+Parameter ``t``:
+    Unsigned 64-bit integer to instantiate the coordinate from.)doc";
+
 static const char *__doc_fiction_cube_coord_t_d = R"doc(Dead indicator.)doc";
 
 static const char *__doc_fiction_cube_coord_t_get_dead =
@@ -4045,6 +4269,16 @@ Parameter ``other``:
 
 Returns:
     `true` iff both coordinates are identical.)doc";
+
+static const char *__doc_fiction_cube_coord_t_operator_eq_2 =
+R"doc(Compares against another coordinate's `uint64_t` representation for
+equality. Respects the dead indicator.
+
+Parameter ``other``:
+    Right-hand side coordinate representation in `uint64_t` format.
+
+Returns:
+    `true` iff this coordinate is equal to the converted one.)doc";
 
 static const char *__doc_fiction_cube_coord_t_operator_ge =
 R"doc(Determine whether this coordinate is "greater than or equal to"
@@ -4110,6 +4344,12 @@ Parameter ``other``:
 Returns:
     Difference of both coordinates.)doc";
 
+static const char *__doc_fiction_cube_coord_t_operator_unsigned_long =
+R"doc(Allows explicit conversion to `uint64_t`. Segments an unsigned 64-bit
+integer into four parts (from MSB to LSB): - 1 bit for the dead
+indicator - 1 bit for the z position - 31 bit for the y position - 31
+bit for the x position)doc";
+
 static const char *__doc_fiction_cube_coord_t_str =
 R"doc(Returns a string representation of the coordinate of the form `"(x, y,
 z)"` that does not respect the dead indicator.
@@ -4137,6 +4377,8 @@ static const char *__doc_fiction_cube_coord_t_x = R"doc(x coordinate.)doc";
 static const char *__doc_fiction_cube_coord_t_y = R"doc(y coordinate.)doc";
 
 static const char *__doc_fiction_cube_coord_t_z = R"doc(z coordinate.)doc";
+
+static const char *__doc_fiction_cube_operator_lshift = R"doc()doc";
 
 static const char *__doc_fiction_debug_print_node_to_tile_assignments = R"doc()doc";
 
@@ -14535,7 +14777,7 @@ static const char *__doc_fiction_hexagonal_layout_area =
 R"doc(Returns the layout's number of faces depending on the coordinate type.
 
 Returns:
-    Area of layout.)doc";
+    Area of the layout.)doc";
 
 static const char *__doc_fiction_hexagonal_layout_below =
 R"doc(Returns the coordinate that is directly below a given coordinate `c`,
@@ -14740,7 +14982,7 @@ static const char *__doc_fiction_hexagonal_layout_hexagonal_layout_2 = R"doc()do
 
 static const char *__doc_fiction_hexagonal_layout_hexagonal_layout_storage = R"doc()doc";
 
-static const char *__doc_fiction_hexagonal_layout_hexagonal_layout_storage_dimension = R"doc()doc";
+static const char *__doc_fiction_hexagonal_layout_hexagonal_layout_storage_ar = R"doc()doc";
 
 static const char *__doc_fiction_hexagonal_layout_hexagonal_layout_storage_hexagonal_layout_storage = R"doc()doc";
 
@@ -15063,10 +15305,25 @@ Returns:
     The northern border equivalent of `c`.)doc";
 
 static const char *__doc_fiction_hexagonal_layout_resize =
-R"doc(Updates the layout's dimensions, effectively resizing it.
+R"doc(Updates the layout's dimensions and origin based on a new
+aspect_ratio.
+
+This method effectively resizes the layout by adjusting its dimensions
+to match the provided aspect_ratio. The origin is also updated to the
+start coordinate of the aspect_ratio.
 
 Parameter ``ar``:
-    New aspect ratio.)doc";
+    The new aspect_ratio to apply to the layout.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_resize_2 =
+R"doc(Updates the layout's dimensions based on a new coordinate.
+
+This method effectively resizes the layout by adjusting its dimensions
+to match the provided coordinate. The origin is also updated to (0, 0,
+0).
+
+Parameter ``ar``:
+    The new max coordinate of the layout.)doc";
 
 static const char *__doc_fiction_hexagonal_layout_south =
 R"doc(Returns the coordinate that is directly adjacent in southern direction
@@ -15140,6 +15397,12 @@ Returns:
     Offset coordinate representing `cube_coord` in the layout's
     hexagonal orientation.)doc";
 
+static const char *__doc_fiction_hexagonal_layout_volume =
+R"doc(Returns the layout's volume depending on the coordinate type.
+
+Returns:
+    Volume of the layout.)doc";
+
 static const char *__doc_fiction_hexagonal_layout_west =
 R"doc(Returns the coordinate that is directly adjacent in western direction
 of a given coordinate `c`, i.e., the face whose x-dimension is lower
@@ -15169,6 +15432,21 @@ that still belongs to the layout.
 Returns:
     x-dimension.)doc";
 
+static const char *__doc_fiction_hexagonal_layout_x_min =
+R"doc(Returns the layout's x-org coordinate.
+
+The x-org coordinate represents the origin's x-value in the layout.
+
+Returns:
+    The x-start coordinate of the layout.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_x_size =
+R"doc(Returns the layout's size in the x-dimension, i.e., the distance
+between x-org and the maximum x-value.
+
+Returns:
+    The size of the layout in the x-dimension.)doc";
+
 static const char *__doc_fiction_hexagonal_layout_y =
 R"doc(Returns the layout's y-dimension, i.e., returns the biggest y-value
 that still belongs to the layout.
@@ -15176,12 +15454,42 @@ that still belongs to the layout.
 Returns:
     y-dimension.)doc";
 
+static const char *__doc_fiction_hexagonal_layout_y_min =
+R"doc(Returns the layout's y-org coordinate.
+
+The y-org coordinate represents the origin's y-value in the layout.
+
+Returns:
+    The y-org coordinate of the layout.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_y_size =
+R"doc(Returns the layout's size in the y-dimension, i.e., the distance
+between y-org and the maximum y-value.
+
+Returns:
+    The size of the layout in the y-dimension.)doc";
+
 static const char *__doc_fiction_hexagonal_layout_z =
 R"doc(Returns the layout's z-dimension, i.e., returns the biggest z-value
 that still belongs to the layout.
 
 Returns:
     z-dimension.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_z_min =
+R"doc(Returns the layout's z-org coordinate.
+
+The z-org coordinate represents the origin's z-value in the layout.
+
+Returns:
+    The z-org coordinate of the layout.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_z_size =
+R"doc(Returns the layout's size in the z-dimension, i.e., the distance
+between z-org and the maximum z-value.
+
+Returns:
+    The size of the layout in the z-dimension.)doc";
 
 static const char *__doc_fiction_hexagonalization =
 R"doc(Transforms a 2DDWave-clocked Cartesian layout into a hexagonal even
@@ -21889,21 +22197,6 @@ static const char *__doc_fiction_virtual_pi_network_virtual_storage_map_virtual_
 
 static const char *__doc_fiction_virtual_pi_network_virtual_storage_virtual_inputs = R"doc(Vector storing virtual_inputs.)doc";
 
-static const char *__doc_fiction_volume =
-R"doc(Computes the volume of a given coordinate assuming its origin is (0,
-0, 0). Calculates :math:`(|x| + 1) \cdot (|y| + 1) \cdot (|z| + 1)` by
-default. For SiQAD coordinates, which are planar by definition, the
-area is returned.
-
-Template parameter ``CoordinateType``:
-    Coordinate type.
-
-Parameter ``coord``:
-    Coordinate.
-
-Returns:
-    Volume of coord.)doc";
-
 static const char *__doc_fiction_wiring_reduction =
 R"doc(A scalable wiring reduction algorithm for 2DDWave-clocked layouts
 based on A* path finding.
@@ -22662,9 +22955,9 @@ static const char *__doc_fmt_formatter_parse = R"doc()doc";
 
 static const char *__doc_fmt_formatter_parse_2 = R"doc()doc";
 
-static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_layouts_coordinates_hpp_1090_8 = R"doc()doc";
+static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_layouts_coordinates_hpp_1308_8 = R"doc()doc";
 
-static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_layouts_coordinates_hpp_1106_8 = R"doc()doc";
+static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_layouts_coordinates_hpp_1324_8 = R"doc()doc";
 
 static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_technology_cell_ports_hpp_291_8 = R"doc()doc";
 
