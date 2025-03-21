@@ -108,15 +108,15 @@ int main()  // NOLINT
         if (gate_name == "cx_2i_top_left_2o_down_right" || gate_name == "ha_2i_top_left_2o_down_right" ||
             gate_name == "hourglass_2i_top_left_2o_down_right")
         {
-            params.number_of_sidbs = num_canvas_sidbs_2_input_2_output;
-            params.canvas          = {{17, 8, 0}, {27, 14, 0}};
+            params.number_of_canvas_sidbs = num_canvas_sidbs_2_input_2_output;
+            params.canvas                 = {{17, 8, 0}, {27, 14, 0}};
             quickcell_design =
                 design_sidb_gates(rectangular_2i_top_left_2o_down_right, truth_table, params, &stats_quickcell);
         }
 
         else
         {
-            params.number_of_sidbs = num_canvas_sidbs;
+            params.number_of_canvas_sidbs = num_canvas_sidbs;
 
             if (gate_name == "fo2_1i_top_2o_left_right")
             {
