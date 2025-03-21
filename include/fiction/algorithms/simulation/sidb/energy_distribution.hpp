@@ -24,19 +24,20 @@ namespace fiction
 {
 
 /**
- * Data type to collect electrostatic potential energies (unit: eV) of charge distributions with corresponding
- * degeneracy (i.e., how often a certain energy value occurs).
+ * This class is used to store the energy distribution of an SiDB layout. The energy distribution is a map that contains
+ * the electrostatic potential as a key and its degeneracy as a value. To be more precise, if two different charge
+ * distributions occur with the same energy, the degeneracy value of the energy state is two.
  */
-
 class sidb_energy_distribution
 {
   public:
     sidb_energy_distribution() = default;
     /**
-     * Returns the nth state in the energy distribution.
+     * Returns the nth state (energy + degeneracy) in the energy distribution.
      *
      * @param state_index The index of the state to be retrieved.
-     * @return The energy and degeneracy of the state at the specified index.
+     * @return The energy and degeneracy of the state at the specified index. If the index is out of range,
+     * `std::nullopt` is returned instead.
      */
     [[nodiscard]] std::optional<std::pair<double, uint64_t>> get_nth_state(const uint64_t state_index) const noexcept
     {
@@ -52,21 +53,22 @@ class sidb_energy_distribution
         return std::nullopt;
     }
     /**
-     * Returns the number of states with the given energy value.
+     * Returns the degeneracy value (number of states) with the given energy value.
      *
      * @param energy The energy value for which the excited state number is to be determined.
-     * @return The excited state number of the given energy value.
+     * @return The excited state number of the given energy value. If the energy value is not found, `std::nullopt` is
+     * returned instead.
      */
     [[nodiscard]] std::optional<uint64_t> degeneracy_of_given_energy(const double energy) const noexcept
     {
-        uint64_t count = 0;
+        uint64_t degeneracy = 0;
         for (const auto& [key, value] : distribution)
         {
             if (std::abs(key - energy) < constants::ERROR_MARGIN)
             {
-                return count;
+                return degeneracy;
             }
-            ++count;
+            ++degeneracy;
         }
         return std::nullopt;
     }
@@ -143,13 +145,14 @@ class sidb_energy_distribution
  * the comparison uses a tolerance specified by `constants::ERROR_MARGIN`.
  *
  * @tparam Lyt SiDB cell-level layout type.
- * @param input_vec A vector of `charge_distribution_surface` objects for which statistics are to be computed.
+ * @param charge_distributions A vector of `charge_distribution_surface` objects for which statistics are to be
+ * computed.
  * @return A map containing the system energy as the key and the number of occurrences of that energy in the input
  * vector as the value.
  */
 template <typename Lyt>
 [[nodiscard]] sidb_energy_distribution
-energy_distribution(const std::vector<charge_distribution_surface<Lyt>>& input_vec)
+energy_distribution(const std::vector<charge_distribution_surface<Lyt>>& charge_distributions)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -157,12 +160,12 @@ energy_distribution(const std::vector<charge_distribution_surface<Lyt>>& input_v
     sidb_energy_distribution distribution{};
 
     std::vector<charge_distribution_surface<Lyt>> cds_updated_charge_index{};
-    cds_updated_charge_index.reserve(input_vec.size());
+    cds_updated_charge_index.reserve(charge_distributions.size());
 
     // collect all unique charge indices
     std::set<uint64_t> unique_charge_index{};
 
-    for (auto& lyt : input_vec)
+    for (auto& lyt : charge_distributions)
     {
         lyt.charge_distribution_to_index_general();
         unique_charge_index.insert(lyt.get_charge_index_and_base().first);
