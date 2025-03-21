@@ -108,8 +108,7 @@ inline void logic_simulation(pybind11::module& m)
     detail::logic_simulation<py_logic_network>(m, "network");
     detail::logic_simulation<py_cartesian_gate_layout<py_offset_coordinate>>(m, "layout");
     detail::logic_simulation<py_cartesian_gate_layout<py_cube_coordinate>>(m, "layout");
-    detail::logic_simulation<py_shifted_cartesian_gate_layout<py_offset_coordinate>>(m, "layout");
-    detail::logic_simulation<py_shifted_cartesian_gate_layout<py_cube_coordinate>>(m, "layout");
+    detail::logic_simulation<py_shifted_cartesian_gate_layout>(m, "layout");
     detail::logic_simulation<py_hexagonal_gate_layout>(m, "layout");
 }
 

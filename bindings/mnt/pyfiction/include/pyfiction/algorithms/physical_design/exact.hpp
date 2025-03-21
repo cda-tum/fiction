@@ -97,9 +97,9 @@ inline void exact(pybind11::module& m)
           py::arg("network"), py::arg("parameters") = fiction::exact_physical_design_params{},
           py::arg("statistics") = nullptr, DOC(fiction_exact));
 
-    m.def("exact_shifted_cartesian",
-          &fiction::exact<py_shifted_cartesian_gate_layout<py_offset_coordinate>, py_logic_network>, py::arg("network"),
-          py::arg("parameters") = fiction::exact_physical_design_params{}, py::arg("statistics") = nullptr);
+    m.def("exact_shifted_cartesian", &fiction::exact<py_shifted_cartesian_gate_layout, py_logic_network>,
+          py::arg("network"), py::arg("parameters") = fiction::exact_physical_design_params{},
+          py::arg("statistics") = nullptr);
 
     m.def("exact_hexagonal", &fiction::exact<py_hexagonal_gate_layout, py_logic_network>, py::arg("network"),
           py::arg("parameters") = fiction::exact_physical_design_params{}, py::arg("statistics") = nullptr,

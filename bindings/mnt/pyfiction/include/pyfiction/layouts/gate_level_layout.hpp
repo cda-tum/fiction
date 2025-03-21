@@ -325,12 +325,8 @@ inline void gate_level_layouts(pybind11::module& m)
     /**
      * Gate-level clocked shifted Cartesian layout.
      */
-    detail::gate_level_layout<py_shifted_cartesian_clocked_layout<py_offset_coordinate>,
-                              py_shifted_cartesian_gate_layout<py_offset_coordinate>>(m, "shifted_cartesian",
-                                                                                      "offset_coordinates");
-    detail::gate_level_layout<py_shifted_cartesian_clocked_layout<py_cube_coordinate>,
-                              py_shifted_cartesian_gate_layout<py_cube_coordinate>>(m, "shifted_cartesian",
-                                                                                    "cube_coordinates");
+    detail::gate_level_layout<py_shifted_cartesian_clocked_layout, py_shifted_cartesian_gate_layout>(
+        m, "shifted_cartesian", "offset_coordinates");
     /**
      * Gate-level clocked hexagonal layout.
      */
@@ -385,52 +381,38 @@ inline void gate_level_layout_factory(pybind11::module& m)
         R"doc(
             Creates and returns a cartesian_gate_layout instance, choosing the coordinate system
             based on the string argument. Valid options for `coordinate_type` are:
-                - "offset" (default)
-                - "cube"
+              - "offset" (default)
+              - "cube"
+
+            For the dimension, you can pass either:
+              - A single tuple (x, y) or (x, y, z) to specify only the "max" coordinate, with min defaulting to (0,0,0),
+              - Two nested tuples ((xmin, ymin), (xmax, ymax)) or 3D
+                ((xmin, ymin, zmin), (xmax, ymax, zmax)) to specify min and max explicitly.
         )doc");
 
     m.def(
         "shifted_cartesian_gate_layout",
-        [](const py::tuple dimension, const std::string& scheme_name, const std::string& layout_name,
-           const std::string& coordinate_type)
+        [](const py::tuple dimension, const std::string& scheme_name, const std::string& layout_name)
         {
-            if (coordinate_type == "cube")
+            const auto ar = extract_aspect_ratio<py_shifted_cartesian_layout>(dimension);
+            if (const auto scheme = fiction::get_clocking_scheme<py_shifted_cartesian_gate_layout>(scheme_name);
+                scheme.has_value())
             {
-                const auto ar = extract_aspect_ratio<py_shifted_cartesian_layout<py_cube_coordinate>>(dimension);
-                if (const auto scheme =
-                        fiction::get_clocking_scheme<py_shifted_cartesian_gate_layout<py_cube_coordinate>>(scheme_name);
-                    scheme.has_value())
-                {
-                    return py::cast(py_shifted_cartesian_gate_layout<py_cube_coordinate>{ar, *scheme, layout_name});
-                }
-                else
-                {
-                    throw std::runtime_error("Given name does not refer to a supported clocking scheme");
-                }
+                return py::cast(py_shifted_cartesian_gate_layout{ar, *scheme, layout_name});
             }
-            else  // default: offset
+            else
             {
-                const auto ar = extract_aspect_ratio<py_cartesian_layout<py_offset_coordinate>>(dimension);
-                if (const auto scheme =
-                        fiction::get_clocking_scheme<py_shifted_cartesian_gate_layout<py_offset_coordinate>>(
-                            scheme_name);
-                    scheme.has_value())
-                {
-                    return py::cast(py_shifted_cartesian_gate_layout<py_offset_coordinate>{ar, *scheme, layout_name});
-                }
-                else
-                {
-                    throw std::runtime_error("Given name does not refer to a supported clocking scheme");
-                }
+                throw std::runtime_error("Given name does not refer to a supported clocking scheme");
             }
         },
         py::arg("dimension") = py::make_tuple(0, 0, 0), py::arg("scheme_name") = "open", py::arg("layout_name") = "",
-        py::arg("coordinate_type") = "offset",
         R"doc(
-            Creates and returns a shifted_cartesian_gate_layout instance, choosing the coordinate system
-            based on the string argument. Valid options for `coordinate_type` are:
-                - "offset" (default)
-                - "cube"
+            Creates and returns a shifted_cartesian_gate_layout instance.
+
+            For the dimension, you can pass either:
+              - A single tuple (x, y) or (x, y, z) to specify only the "max" coordinate, with min defaulting to (0,0,0),
+              - Two nested tuples ((xmin, ymin), (xmax, ymax)) or 3D
+                ((xmin, ymin, zmin), (xmax, ymax, zmax)) to specify min and max explicitly.
         )doc");
 
     m.def(
@@ -453,8 +435,8 @@ inline void gate_level_layout_factory(pybind11::module& m)
             Creates and returns a hexagonal_gate_layout instance.
 
             For the dimension, you can pass either:
-                - A single tuple (x, y) or (x, y, z) to specify only the "max" coordinate, with min defaulting to (0,0,0),
-                - Two nested tuples ((xmin, ymin), (xmax, ymax)) or 3D
+              - A single tuple (x, y) or (x, y, z) to specify only the "max" coordinate, with min defaulting to (0,0,0),
+              - Two nested tuples ((xmin, ymin), (xmax, ymax)) or 3D
                 ((xmin, ymin, zmin), (xmax, ymax, zmax)) to specify min and max explicitly.
         )doc");
 }

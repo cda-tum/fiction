@@ -75,14 +75,10 @@ inline void yen_k_shortest_paths(pybind11::module& m)
     detail::yen_k_shortest_paths<py_cartesian_clocked_layout<py_cube_coordinate>>(m);
     detail::yen_k_shortest_paths<py_cartesian_layout<py_offset_coordinate>>(m);
     detail::yen_k_shortest_paths<py_cartesian_layout<py_cube_coordinate>>(m);
-    detail::yen_k_shortest_paths<py_shifted_cartesian_obstruction_layout<py_offset_coordinate>>(m);
-    detail::yen_k_shortest_paths<py_shifted_cartesian_obstruction_layout<py_cube_coordinate>>(m);
-    detail::yen_k_shortest_paths<py_shifted_cartesian_gate_layout<py_offset_coordinate>>(m);
-    detail::yen_k_shortest_paths<py_shifted_cartesian_gate_layout<py_cube_coordinate>>(m);
-    detail::yen_k_shortest_paths<py_shifted_cartesian_clocked_layout<py_offset_coordinate>>(m);
-    detail::yen_k_shortest_paths<py_shifted_cartesian_clocked_layout<py_cube_coordinate>>(m);
-    detail::yen_k_shortest_paths<py_shifted_cartesian_layout<py_offset_coordinate>>(m);
-    detail::yen_k_shortest_paths<py_shifted_cartesian_layout<py_cube_coordinate>>(m);
+    detail::yen_k_shortest_paths<py_shifted_cartesian_obstruction_layout>(m);
+    detail::yen_k_shortest_paths<py_shifted_cartesian_gate_layout>(m);
+    detail::yen_k_shortest_paths<py_shifted_cartesian_clocked_layout>(m);
+    detail::yen_k_shortest_paths<py_shifted_cartesian_layout>(m);
     detail::yen_k_shortest_paths<py_hexagonal_obstruction_layout>(m);
     detail::yen_k_shortest_paths<py_hexagonal_gate_layout>(m);
     detail::yen_k_shortest_paths<py_hexagonal_clocked_layout>(m);

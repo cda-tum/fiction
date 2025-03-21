@@ -94,12 +94,8 @@ void clocked_layouts(pybind11::module& m)
                            py_cartesian_clocked_layout<py_offset_coordinate>>(m, "cartesian", "offset_coordinates");
     detail::clocked_layout<py_cartesian_layout<py_cube_coordinate>, py_cartesian_clocked_layout<py_cube_coordinate>>(
         m, "cartesian", "cube_coordinates");
-    detail::clocked_layout<py_shifted_cartesian_layout<py_offset_coordinate>,
-                           py_shifted_cartesian_clocked_layout<py_offset_coordinate>>(m, "shifted_cartesian",
-                                                                                      "offset_coordinates");
-    detail::clocked_layout<py_shifted_cartesian_layout<py_cube_coordinate>,
-                           py_shifted_cartesian_clocked_layout<py_cube_coordinate>>(m, "shifted_cartesian",
-                                                                                    "cube_coordinates");
+    detail::clocked_layout<py_shifted_cartesian_layout, py_shifted_cartesian_clocked_layout>(m, "shifted_cartesian",
+                                                                                             "offset_coordinates");
     detail::clocked_layout<py_hexagonal_layout, py_hexagonal_clocked_layout>(m, "hexagonal", "offset_coordinates");
 }
 /**
@@ -152,52 +148,36 @@ inline void clocked_layout_factory(pybind11::module& m)
 
                 - "offset" (default)
                 - "cube"
+
+            For the dimension, you can pass either:
+              - A single tuple (x, y) or (x, y, z) to specify only the "max" coordinate, with min defaulting to (0,0,0),
+              - Two nested tuples ((xmin, ymin), (xmax, ymax)) or 3D
+                ((xmin, ymin, zmin), (xmax, ymax, zmax)) to specify min and max explicitly.
         )doc");
 
     m.def(
         "clocked_shifted_cartesian_layout",
-        [](const py::tuple dimension, const std::string& scheme_name,
-           const std::string& coordinate_type /* = "offset" by default */)
+        [](const py::tuple dimension, const std::string& scheme_name)
         {
-            if (coordinate_type == "cube")
+            const auto ar = extract_aspect_ratio<py_shifted_cartesian_layout>(dimension);
+            if (const auto scheme = fiction::get_clocking_scheme<py_shifted_cartesian_clocked_layout>(scheme_name);
+                scheme.has_value())
             {
-                const auto ar = extract_aspect_ratio<py_shifted_cartesian_layout<py_cube_coordinate>>(dimension);
-                if (const auto scheme =
-                        fiction::get_clocking_scheme<py_shifted_cartesian_clocked_layout<py_cube_coordinate>>(
-                            scheme_name);
-                    scheme.has_value())
-                {
-                    return py::cast(py_shifted_cartesian_clocked_layout<py_cube_coordinate>{ar, *scheme});
-                }
-                else
-                {
-                    throw std::runtime_error("Given name does not refer to a supported clocking scheme");
-                }
+                return py::cast(py_shifted_cartesian_clocked_layout{ar, *scheme});
             }
-            else  // default: offset
+            else
             {
-                const auto ar = extract_aspect_ratio<py_shifted_cartesian_layout<py_offset_coordinate>>(dimension);
-                if (const auto scheme =
-                        fiction::get_clocking_scheme<py_shifted_cartesian_clocked_layout<py_offset_coordinate>>(
-                            scheme_name);
-                    scheme.has_value())
-                {
-                    return py::cast(py_shifted_cartesian_clocked_layout<py_offset_coordinate>{ar, *scheme});
-                }
-                else
-                {
-                    throw std::runtime_error("Given name does not refer to a supported clocking scheme");
-                }
+                throw std::runtime_error("Given name does not refer to a supported clocking scheme");
             }
         },
         py::arg("dimension") = py::make_tuple(0, 0, 0), py::arg("scheme_name") = "open",
-        py::arg("coordinate_type") = "offset",  // default
         R"doc(
-            Creates and returns a clocked_shifted_cartesian_layout instance, choosing the coordinate system
-            based on the string argument. Valid options for `coordinate_type` are:
+            Creates and returns a clocked_shifted_cartesian_layout instance.
 
-                - "offset" (default)
-                - "cube"
+            For the dimension, you can pass either:
+              - A single tuple (x, y) or (x, y, z) to specify only the "max" coordinate, with min defaulting to (0,0,0),
+              - Two nested tuples ((xmin, ymin), (xmax, ymax)) or 3D
+                ((xmin, ymin, zmin), (xmax, ymax, zmax)) to specify min and max explicitly.
         )doc");
 
     m.def(

@@ -47,10 +47,8 @@ inline void name_utils(pybind11::module& m)
     detail::get_name<py_cartesian_obstruction_layout<py_cube_coordinate>>(m);
     detail::get_name<py_cartesian_gate_layout<py_offset_coordinate>>(m);
     detail::get_name<py_cartesian_gate_layout<py_cube_coordinate>>(m);
-    detail::get_name<py_shifted_cartesian_obstruction_layout<py_offset_coordinate>>(m);
-    detail::get_name<py_shifted_cartesian_obstruction_layout<py_cube_coordinate>>(m);
-    detail::get_name<py_shifted_cartesian_gate_layout<py_offset_coordinate>>(m);
-    detail::get_name<py_shifted_cartesian_gate_layout<py_cube_coordinate>>(m);
+    detail::get_name<py_shifted_cartesian_obstruction_layout>(m);
+    detail::get_name<py_shifted_cartesian_gate_layout>(m);
     detail::get_name<py_hexagonal_obstruction_layout>(m);
     detail::get_name<py_hexagonal_gate_layout>(m);
     detail::get_name<py_qca_layout<py_offset_coordinate>>(m);
@@ -65,10 +63,8 @@ inline void name_utils(pybind11::module& m)
     detail::set_name<py_cartesian_obstruction_layout<py_cube_coordinate>>(m);
     detail::set_name<py_cartesian_gate_layout<py_offset_coordinate>>(m);
     detail::set_name<py_cartesian_gate_layout<py_cube_coordinate>>(m);
-    detail::set_name<py_shifted_cartesian_obstruction_layout<py_offset_coordinate>>(m);
-    detail::set_name<py_shifted_cartesian_obstruction_layout<py_cube_coordinate>>(m);
-    detail::set_name<py_shifted_cartesian_gate_layout<py_offset_coordinate>>(m);
-    detail::set_name<py_shifted_cartesian_gate_layout<py_cube_coordinate>>(m);
+    detail::set_name<py_shifted_cartesian_obstruction_layout>(m);
+    detail::set_name<py_shifted_cartesian_gate_layout>(m);
     detail::set_name<py_hexagonal_obstruction_layout>(m);
     detail::set_name<py_hexagonal_gate_layout>(m);
     detail::set_name<py_qca_layout<py_offset_coordinate>>(m);

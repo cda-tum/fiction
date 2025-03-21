@@ -58,15 +58,8 @@ inline void obstruction_layouts(pybind11::module& m)
     /**
      * Shifted Cartesian obstruction layout with offset coordinates.
      */
-    detail::obstruction_layout<py_shifted_cartesian_gate_layout<py_offset_coordinate>,
-                               py_shifted_cartesian_obstruction_layout<py_offset_coordinate>>(m, "shifted_cartesian",
-                                                                                              "offset_coordinates");
-    /**
-     * Shifted Cartesian obstruction layout with cube coordinates.
-     */
-    detail::obstruction_layout<py_shifted_cartesian_gate_layout<py_cube_coordinate>,
-                               py_shifted_cartesian_obstruction_layout<py_cube_coordinate>>(m, "shifted_cartesian",
-                                                                                            "cube_coordinates");
+    detail::obstruction_layout<py_shifted_cartesian_gate_layout, py_shifted_cartesian_obstruction_layout>(
+        m, "shifted_cartesian", "offset_coordinates");
     /**
      * Hexagonal obstruction layout with offset coordinates.
      */
@@ -106,17 +99,8 @@ inline void obstruction_layout_factory(pybind11::module& m)
             // shifted cart + offset
             try
             {
-                auto& lyt = layout_obj.cast<py_shifted_cartesian_gate_layout<py_offset_coordinate>&>();
-                return py::cast(py_shifted_cartesian_obstruction_layout<py_offset_coordinate>{lyt});
-            }
-            catch (const py::cast_error&)
-            {}
-
-            // shifted cart + cube
-            try
-            {
-                auto& lyt = layout_obj.cast<py_shifted_cartesian_gate_layout<py_cube_coordinate>&>();
-                return py::cast(py_shifted_cartesian_obstruction_layout<py_cube_coordinate>{lyt});
+                auto& lyt = layout_obj.cast<py_shifted_cartesian_gate_layout&>();
+                return py::cast(py_shifted_cartesian_obstruction_layout{lyt});
             }
             catch (const py::cast_error&)
             {}
@@ -137,8 +121,8 @@ inline void obstruction_layout_factory(pybind11::module& m)
         },
         R"doc(
             Creates and returns an obstruction_layout by inferring the base layout type from
-            the given `layout_obj`. For example, if you pass a `hexagonal_layout` with cube
-            coordinates, you'll get a `hexagonal_obstruction_layout_cube_coordinates`. No extra
+            the given `layout_obj`. For example, if you pass a `cartesian_layout` with cube
+            coordinates, you'll get a `cartesian_obstruction_layout_cube_coordinates`. No extra
             parameters are needed.
         )doc");
 }

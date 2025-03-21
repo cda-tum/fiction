@@ -89,10 +89,8 @@ inline void routing_utils(pybind11::module& m)
     detail::is_crossable_wire<py_cartesian_obstruction_layout<py_cube_coordinate>>(m);
     detail::is_crossable_wire<py_cartesian_gate_layout<py_offset_coordinate>>(m);
     detail::is_crossable_wire<py_cartesian_gate_layout<py_cube_coordinate>>(m);
-    detail::is_crossable_wire<py_shifted_cartesian_obstruction_layout<py_offset_coordinate>>(m);
-    detail::is_crossable_wire<py_shifted_cartesian_obstruction_layout<py_cube_coordinate>>(m);
-    detail::is_crossable_wire<py_shifted_cartesian_gate_layout<py_offset_coordinate>>(m);
-    detail::is_crossable_wire<py_shifted_cartesian_gate_layout<py_cube_coordinate>>(m);
+    detail::is_crossable_wire<py_shifted_cartesian_obstruction_layout>(m);
+    detail::is_crossable_wire<py_shifted_cartesian_gate_layout>(m);
     detail::is_crossable_wire<py_hexagonal_obstruction_layout>(m);
     detail::is_crossable_wire<py_hexagonal_gate_layout>(m);
 
@@ -100,10 +98,8 @@ inline void routing_utils(pybind11::module& m)
     detail::route_path<py_cartesian_obstruction_layout<py_cube_coordinate>>(m);
     detail::route_path<py_cartesian_gate_layout<py_offset_coordinate>>(m);
     detail::route_path<py_cartesian_gate_layout<py_cube_coordinate>>(m);
-    detail::route_path<py_shifted_cartesian_obstruction_layout<py_offset_coordinate>>(m);
-    detail::route_path<py_shifted_cartesian_obstruction_layout<py_cube_coordinate>>(m);
-    detail::route_path<py_shifted_cartesian_gate_layout<py_offset_coordinate>>(m);
-    detail::route_path<py_shifted_cartesian_gate_layout<py_cube_coordinate>>(m);
+    detail::route_path<py_shifted_cartesian_obstruction_layout>(m);
+    detail::route_path<py_shifted_cartesian_gate_layout>(m);
     detail::route_path<py_hexagonal_obstruction_layout>(m);
     detail::route_path<py_hexagonal_gate_layout>(m);
 
@@ -111,10 +107,8 @@ inline void routing_utils(pybind11::module& m)
     detail::extract_routing_objectives<py_cartesian_obstruction_layout<py_cube_coordinate>>(m);
     detail::extract_routing_objectives<py_cartesian_gate_layout<py_offset_coordinate>>(m);
     detail::extract_routing_objectives<py_cartesian_gate_layout<py_cube_coordinate>>(m);
-    detail::extract_routing_objectives<py_shifted_cartesian_obstruction_layout<py_offset_coordinate>>(m);
-    detail::extract_routing_objectives<py_shifted_cartesian_obstruction_layout<py_cube_coordinate>>(m);
-    detail::extract_routing_objectives<py_shifted_cartesian_gate_layout<py_offset_coordinate>>(m);
-    detail::extract_routing_objectives<py_shifted_cartesian_gate_layout<py_cube_coordinate>>(m);
+    detail::extract_routing_objectives<py_shifted_cartesian_obstruction_layout>(m);
+    detail::extract_routing_objectives<py_shifted_cartesian_gate_layout>(m);
     detail::extract_routing_objectives<py_hexagonal_obstruction_layout>(m);
     detail::extract_routing_objectives<py_hexagonal_gate_layout>(m);
 
@@ -122,10 +116,8 @@ inline void routing_utils(pybind11::module& m)
     detail::clear_routing<py_cartesian_obstruction_layout<py_cube_coordinate>>(m);
     detail::clear_routing<py_cartesian_gate_layout<py_offset_coordinate>>(m);
     detail::clear_routing<py_cartesian_gate_layout<py_cube_coordinate>>(m);
-    detail::clear_routing<py_shifted_cartesian_obstruction_layout<py_offset_coordinate>>(m);
-    detail::clear_routing<py_shifted_cartesian_obstruction_layout<py_cube_coordinate>>(m);
-    detail::clear_routing<py_shifted_cartesian_gate_layout<py_offset_coordinate>>(m);
-    detail::clear_routing<py_shifted_cartesian_gate_layout<py_cube_coordinate>>(m);
+    detail::clear_routing<py_shifted_cartesian_obstruction_layout>(m);
+    detail::clear_routing<py_shifted_cartesian_gate_layout>(m);
     detail::clear_routing<py_hexagonal_obstruction_layout>(m);
     detail::clear_routing<py_hexagonal_gate_layout>(m);
 }

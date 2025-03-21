@@ -47,12 +47,8 @@ inline void apply_gate_library(pybind11::module& m)
                                    py_offset_coordinate>(m, "qca_one");
     detail::apply_fcn_gate_library<fiction::qca_one_library, py_cartesian_gate_layout<py_cube_coordinate>,
                                    py_cube_coordinate>(m, "qca_one");
-    detail::apply_fcn_gate_library<fiction::inml_topolinano_library,
-                                   py_shifted_cartesian_gate_layout<py_offset_coordinate>, py_offset_coordinate>(
-        m, "topolinano");
-    detail::apply_fcn_gate_library<fiction::inml_topolinano_library,
-                                   py_shifted_cartesian_gate_layout<py_cube_coordinate>, py_cube_coordinate>(
-        m, "topolinano");
+    detail::apply_fcn_gate_library<fiction::inml_topolinano_library, py_shifted_cartesian_gate_layout,
+                                   py_offset_coordinate>(m, "topolinano");
     detail::apply_fcn_gate_library<fiction::sidb_bestagon_library, py_hexagonal_gate_layout, py_offset_coordinate>(
         m, "bestagon");
 }
