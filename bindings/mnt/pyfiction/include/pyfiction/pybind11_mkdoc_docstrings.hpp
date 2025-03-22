@@ -3757,6 +3757,18 @@ Returns:
 Throws:
     std::invalid_argument if the given sweep parameters are invalid.)doc";
 
+static const char *__doc_fiction_critical_temperature_domain_maximum_ct =
+R"doc(Finds the maximum critical temperature in the domain.
+
+Returns:
+    The maximum critical temperature.)doc";
+
+static const char *__doc_fiction_critical_temperature_domain_minimum_ct =
+R"doc(Finds the minimum critical temperature in the domain.
+
+Returns:
+    The minimum critical temperature.)doc";
+
 static const char *__doc_fiction_critical_temperature_domain_random_sampling =
 R"doc(Computes the critical temperature domain of the given SiDB cell-level
 layout. The critical temperature domain consists of all parameter
