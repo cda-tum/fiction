@@ -16,13 +16,11 @@
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 #include "fiction/utils/name_utils.hpp"
-#include "fiction/utils/placement_utils.hpp"
 #include "fiction/utils/routing_utils.hpp"
 
 #include <fmt/format.h>
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
-#include <mockturtle/views/topo_view.hpp>
 
 #include <algorithm>
 #include <cassert>
@@ -108,8 +106,9 @@ namespace detail
 {
 
 /**
- * This struct encapsulates a routing objective that specifies the source and target coordinates,
- * along with a flag indicating whether the primary input was the first fanin for the corresponding fanout.
+ * This struct encapsulates a routing objective that specifies the source and target coordinates, along with a flag
+ * indicating whether the primary input was the first fanin for the corresponding fanout.
+ *
  * @tparam HexLyt type of the hexagonal layout.
  */
 template <typename HexLyt>
@@ -124,8 +123,8 @@ struct extended_routing_objective
      */
     tile<HexLyt> target;
     /**
-     * Flag that is set to true if the primary input was the first fanin; this indicates that the
-     * fanin signals need to be reordered.
+     * Flag that is set to true if the primary input was the first fanin; this indicates that the fanin signals need to
+     * be reordered.
      */
     bool update_first_fanin = false;
 };
@@ -150,7 +149,7 @@ template <typename CartLyt, typename HexLyt>
     const auto half_height = static_cast<double>(cartesian_layout_height) / 2.0;
 
     // calculate adjustment based on layout height and y coordinate
-    const auto adjustment = static_cast<int64_t>(std::ceil(std::floor(half_height) - static_cast<double>(y) / 2.0));
+    const auto adjustment = static_cast<int64_t>(std::ceil(std::floor(half_height) - (static_cast<double>(y) / 2.0)));
 
     // compute new x coordinate by adding adjustment
     const auto x = cartesian_tile.x + adjustment;
@@ -160,9 +159,9 @@ template <typename CartLyt, typename HexLyt>
 }
 
 /**
- * This function iterates over all primary inputs in the given Cartesian layout and counts those
- * whose tile is at the western border. Such inputs are considered to be positioned left of the middle
- * primary input when the layout is converted to a hexagonal format.
+ * This function iterates over all primary inputs in the given Cartesian layout and counts those whose tile is at the
+ * western border. Such inputs are considered to be positioned left of the middle primary input when the layout is
+ * converted to a hexagonal format.
  *
  * @tparam CartLyt Type of the Cartesian layout.
  * @param lyt The Cartesian gate-level layout containing primary inputs.
@@ -190,9 +189,9 @@ template <typename CartLyt>
 }
 
 /**
- * This function iterates over all primary outputs in the given Cartesian layout and counts those
- * whose tile is at the southern border. Such outputs are considered to be positioned left of the middle
- * primary output when the layout is converted to a hexagonal format.
+ * This function iterates over all primary outputs in the given Cartesian layout and counts those whose tile is at the
+ * southern border. Such outputs are considered to be positioned left of the middle primary output when the layout is
+ * converted to a hexagonal format.
  *
  * @tparam CartLyt Type of the Cartesian layout.
  * @param lyt The Cartesian gate-level layout containing primary outputs.
@@ -220,9 +219,9 @@ template <typename CartLyt>
 }
 
 /**
- * This function iterates over all primary inputs in the given Cartesian layout and counts those
- * whose tile is at the northern border. Such inputs are considered to be positioned right of the middle
- * primary input when the layout is converted to a hexagonal format.
+ * This function iterates over all primary inputs in the given Cartesian layout and counts those whose tile is at the
+ * northern border. Such inputs are considered to be positioned right of the middle primary input when the layout is
+ * converted to a hexagonal format.
  *
  * @tparam CartLyt Type of the Cartesian layout.
  * @param lyt The Cartesian gate-level layout containing primary inputs.
@@ -250,9 +249,9 @@ template <typename CartLyt>
 }
 
 /**
- * This function iterates over all primary outputs in the given Cartesian layout and counts those
- * whose tile is at the eastern border. Such outputs are considered to be positioned right of the middle
- * primary output when the layout is converted to a hexagonal format.
+ * This function iterates over all primary outputs in the given Cartesian layout and counts those whose tile is at the
+ * eastern border. Such outputs are considered to be positioned right of the middle primary output when the layout is
+ * converted to a hexagonal format.
  *
  * @tparam CartLyt Type of the Cartesian layout.
  * @param lyt The Cartesian gate-level layout containing primary outputs.
@@ -283,11 +282,9 @@ template <typename CartLyt>
  * Utility function to calculate the offset that has to be subtracted from any x-coordinate on the hexagonal layout.
  *
  * This function iterates through diagonals starting from the bottom left corner until it finds a non-empty tile or
- * until it has traversed all diagonals.
- * In each iteration, it checks tiles along the diagonal line.
- * If it finds a non-empty tile, it calculates an offset value, which is the number of columns on the left side of the
- * hexagonal layout that will be empty.
- * This offset is based on the leftmost tile that will appear in the hexagonal layout.
+ * until it has traversed all diagonals. In each iteration, it checks tiles along the diagonal line. If it finds a
+ * non-empty tile, it calculates an offset value, which is the number of columns on the left side of the hexagonal
+ * layout that will be empty. This offset is based on the leftmost tile that will appear in the hexagonal layout.
  *
  * @tparam HexLyt Even-row hexagonal gate-level layout return type.
  * @tparam CartLyt Input Cartesian gate-level layout type.
@@ -401,7 +398,9 @@ class hexagonalization_impl
         // initialize statistics for hexagonalization
         hexagonalization_stats stats{};
 
-        {  // start timing the hexagonalization process
+        // artificial scope to restrict the lifetime of the stopwatch
+        {
+            // start timing the hexagonalization process
             const mockturtle::stopwatch stop{stats.time_total};
 
             // calculate horizontal offset for hexagonal layout
@@ -415,12 +414,12 @@ class hexagonalization_impl
             auto middle_po = detail::to_hex<CartLyt, HexLyt>({plyt.x(), plyt.y()}, layout_height);
 
             // vectors to store primary inputs
-            std::vector<tile<HexLyt>> left_pis;
-            std::vector<tile<HexLyt>> right_pis;
+            std::vector<tile<HexLyt>> left_pis{};
+            std::vector<tile<HexLyt>> right_pis{};
 
             // vectors to store primary outputs
-            std::vector<tile<HexLyt>> left_pos;
-            std::vector<tile<HexLyt>> right_pos;
+            std::vector<tile<HexLyt>> left_pos{};
+            std::vector<tile<HexLyt>> right_pos{};
 
             // map primary inputs to the hexagonal layout
             plyt.foreach_pi(
@@ -845,8 +844,8 @@ class hexagonalization_impl
                 auto layout_obstruct = obstruction_layout<HexLyt>(hex_layout);
                 using path           = layout_coordinate_path<decltype(layout_obstruct)>;
                 const auto crossings =
-                    (hex_depth != 0) &&
-                    !(ps.output_mode != hexagonalization_params::hexagonalization_input_output_mode::EXTEND_PLANAR);
+                    hex_depth != 0 &&
+                    ps.output_mode == hexagonalization_params::hexagonalization_input_output_mode::EXTEND_PLANAR;
                 const a_star_params params_astar{crossings};
                 using dist = manhattan_distance_functor<decltype(layout_obstruct), uint64_t>;
                 using cost = unit_cost_functor<decltype(layout_obstruct), uint8_t>;
