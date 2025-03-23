@@ -20,11 +20,10 @@ inline void hexagonalization(pybind11::module& m)
     namespace py = pybind11;
 
     py::register_exception<fiction::hexagonalization_io_pin_routing_error>(m, "hexagonalization_io_pin_routing_error",
-                                                                         PyExc_RuntimeError);
+                                                                           PyExc_RuntimeError);
 
     py::enum_<fiction::hexagonalization_params::io_pin_extension_mode>(
-        m, "hexagonalization_io_pin_extension_mode",
-        DOC(fiction_hexagonalization_params_io_pin_extension_mode))
+        m, "hexagonalization_io_pin_extension_mode", DOC(fiction_hexagonalization_params_io_pin_extension_mode))
         .value("NONE", fiction::hexagonalization_params::io_pin_extension_mode::NONE,
                DOC(fiction_hexagonalization_params_io_pin_extension_mode_NONE))
         .value("EXTEND", fiction::hexagonalization_params::io_pin_extension_mode::EXTEND,

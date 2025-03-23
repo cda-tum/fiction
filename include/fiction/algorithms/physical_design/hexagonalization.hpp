@@ -44,7 +44,8 @@ class hexagonalization_io_pin_routing_error : public std::runtime_error
      *
      * @param msg The error message describing the error.
      */
-    explicit hexagonalization_io_pin_routing_error(const std::string_view& msg) noexcept : std::runtime_error(msg.data())
+    explicit hexagonalization_io_pin_routing_error(const std::string_view& msg) noexcept :
+            std::runtime_error(msg.data())
     {}
 };
 
@@ -115,11 +116,10 @@ template <typename HexLyt>
 struct routing_objective_with_fanin_update_information : public routing_objective<HexLyt>
 {
     // Constructor that forwards to base class constructor
-    routing_objective_with_fanin_update_information(
-        const coordinate<HexLyt>& src,
-        const coordinate<HexLyt>& tgt,
-        bool update = false)
-            : routing_objective<HexLyt>{src, tgt}, update_first_fanin{update}
+    routing_objective_with_fanin_update_information(const coordinate<HexLyt>& src, const coordinate<HexLyt>& tgt,
+                                                    bool update = false) :
+            routing_objective<HexLyt>{src, tgt},
+            update_first_fanin{update}
     {}
     /**
      * Flag that is set to true if the primary input was the first fanin; this indicates that the fanin signals need to
@@ -389,10 +389,11 @@ class hexagonalization_impl
         const auto hex_height =
             detail::to_hex<CartLyt, HexLyt>({layout_width - 1, layout_height - 1, 0}, layout_height).y;
         const auto hex_width = detail::to_hex<CartLyt, HexLyt>({layout_width - 1, 0, 0}, layout_height).x;
-        auto hex_depth = layout_depth;
+        auto       hex_depth = layout_depth;
 
         // if input and/or input pin will get extended and crossings are allowed, add crossing layer
-        if (hex_depth == 0 && (ps.input_pin_extension == hexagonalization_params::io_pin_extension_mode::EXTEND || ps.output_pin_extension == hexagonalization_params::io_pin_extension_mode::EXTEND))
+        if (hex_depth == 0 && (ps.input_pin_extension == hexagonalization_params::io_pin_extension_mode::EXTEND ||
+                               ps.output_pin_extension == hexagonalization_params::io_pin_extension_mode::EXTEND))
         {
             hex_depth = 1;
         }
@@ -409,8 +410,8 @@ class hexagonalization_impl
             const mockturtle::stopwatch stop{stats.time_total};
 
             // calculate horizontal offset for hexagonal layout
-            const auto offset =
-                detail::get_offset<HexLyt, CartLyt>(layout, layout_width, layout_height, ps.input_pin_extension, ps.output_pin_extension);
+            const auto offset = detail::get_offset<HexLyt, CartLyt>(layout, layout_width, layout_height,
+                                                                    ps.input_pin_extension, ps.output_pin_extension);
 
             // determine the top primary input coordinate
             auto middle_pi = detail::to_hex<CartLyt, HexLyt>({0, 0}, layout_height);
