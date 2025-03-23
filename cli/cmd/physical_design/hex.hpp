@@ -30,10 +30,10 @@ class hex_command : public command
     explicit hex_command(const environment::ptr& e) :
             command(e, "Transforms a 2DDWave-clocked Cartesian layout into a hexagonal one.")
     {
-        add_flag("--input_mode,-i", "Extend primary inputs to the top row");
-        add_flag("--output_mode,-o", "Extend primary outputs to the bottom row");
+        add_flag("--input_pin_extension,-i", "Extend primary input pins to the resulting layout's top row");
+        add_flag("--output_pin_extension,-o", "Extend primary output pins to the resulting layout's bottom row");
         add_flag("--planar,-p",
-                 "Extend primary inputs and/or outputs with planar rerouting (i.e., without crossings).");
+                 "Extend primary input and/or output pins with planar rerouting (i.e., without crossings) in the resulting layout");
         add_flag("--verbose,-v", "Be verbose");
     }
 

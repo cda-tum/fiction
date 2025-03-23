@@ -227,11 +227,11 @@ Generates gate-level layouts from logic network specifications by spanning a sea
 Possible parameters:
 
 - Timeout (``-t``): Timeout for the algorithm in seconds.
-- Number of vertex expansions (``-n``): Specifies the number of vertex expansions during search for each vertex in the search space graph (defaults to 4 if not provided).
+- Number of vertex expansions (``-n``): Specifies the number of vertex expansions during the search for each vertex in the search space graph (defaults to ``4`` if not provided).
 - Effort mode (``-e``): Determines the computational effort used by the algorithm. Possible values are:
-    - ``0`` (high_efficiency): Uses minimal computational resources, resulting in fewer search space graphs and potentially lower quality solutions.
-    - ``1`` (high_effort): Uses increased computational resources to generate more search space graphs, thereby improving the chance of finding an optimal solution.
-    - ``2`` (highest_effort): Utilizes maximum computational resources to produce the most search space graphs, ensuring the highest probability of obtaining the best possible layout.
+    - ``0`` (``high_efficiency``): Uses minimal computational resources, resulting in fewer search space graphs and potentially lower quality solutions.
+    - ``1`` (``high_effort``): Uses increased computational resources to generate more search space graphs, thereby improving the chance of finding an optimal solution.
+    - ``2`` (``highest_effort``): Utilizes maximum computational resources to produce the most search space graphs, ensuring the highest probability of obtaining the best possible layout.
 - Cost objective (``-c``): Specifies the cost objective for the layout design. Options include:
     - ``0`` (area): Minimize the layout area.
     - ``1`` (wires): Minimize the number of wire segments.
@@ -267,9 +267,9 @@ For more information, see `this paper <https://dl.acm.org/doi/10.1145/3611315.36
 Possible parameters:
 
 - Timeout (``-t``): Timeout for the algorithm in seconds.
-- Number of maximum gate relocations (``-m``): Should be set to 1 for layouts with more than 100000 tiles, defaults to the number of tiles in the layout.
+- Number of maximum gate relocations (``-m``): Should be set to ``1`` for layouts with more than 100000 tiles, defaults to the number of tiles in the layout.
 - Wiring reduction only (``-w``): Should be set for layouts with more than 20000000 tiles, not set by default.
-- Planar optimization (``-p``: Only relocate gates if the new wiring contains no crossings, not set by default.
+- Planar optimization (``-p``): Only relocate gates if the new wiring contains no crossings, not set by default.
 - Verbose (``-v``): Output detailed runtime statistics after the algorithm completes.
 
 Design rule checking (``check``)
