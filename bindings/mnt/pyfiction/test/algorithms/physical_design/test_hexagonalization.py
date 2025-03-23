@@ -49,8 +49,8 @@ class TestHexagonalization(unittest.TestCase):
         self.assertEqual(equivalence_checking(network, cart_layout), eq_type.STRONG)
 
         params = hexagonalization_params()
-        params.input_mode = hexagonalization_input_output_mode.EXTEND
-        params.output_mode = hexagonalization_input_output_mode.NONE
+        params.input_pin_extension = hexagonalization_input_output_mode.EXTEND
+        params.output_pin_extension = hexagonalization_input_output_mode.NONE
         stats = hexagonalization_stats()
         hex_layout = hexagonalization(cart_layout, params, stats)
         self.assertEqual(equivalence_checking(network, hex_layout), eq_type.STRONG)
@@ -59,8 +59,8 @@ class TestHexagonalization(unittest.TestCase):
         for pi in hex_layout.pis():
             self.assertEqual(pi.y, 0)
 
-        params.input_mode = hexagonalization_input_output_mode.NONE
-        params.output_mode = hexagonalization_input_output_mode.EXTEND
+        params.input_pin_extension = hexagonalization_input_output_mode.NONE
+        params.output_pin_extension = hexagonalization_input_output_mode.EXTEND
         stats = hexagonalization_stats()
         hex_layout = hexagonalization(cart_layout, params, stats)
         self.assertEqual(equivalence_checking(network, hex_layout), eq_type.STRONG)
@@ -69,8 +69,8 @@ class TestHexagonalization(unittest.TestCase):
         for po in hex_layout.pos():
             self.assertEqual(po.y, hex_layout.y())
 
-        params.input_mode = hexagonalization_input_output_mode.EXTEND
-        params.output_mode = hexagonalization_input_output_mode.EXTEND
+        params.input_pin_extension = hexagonalization_input_output_mode.EXTEND
+        params.output_pin_extension = hexagonalization_input_output_mode.EXTEND
         stats = hexagonalization_stats()
         hex_layout = hexagonalization(cart_layout, params, stats)
         self.assertEqual(equivalence_checking(network, hex_layout), eq_type.STRONG)
@@ -81,8 +81,8 @@ class TestHexagonalization(unittest.TestCase):
         for po in hex_layout.pos():
             self.assertEqual(po.y, hex_layout.y())
 
-        params.input_mode = hexagonalization_input_output_mode.EXTEND_PLANAR
-        params.output_mode = hexagonalization_input_output_mode.NONE
+        params.input_pin_extension = hexagonalization_input_output_mode.EXTEND_PLANAR
+        params.output_pin_extension = hexagonalization_input_output_mode.NONE
         stats = hexagonalization_stats()
         hex_layout = hexagonalization(cart_layout, params, stats)
         self.assertEqual(equivalence_checking(network, hex_layout), eq_type.STRONG)
@@ -91,8 +91,8 @@ class TestHexagonalization(unittest.TestCase):
         for pi in hex_layout.pis():
             self.assertEqual(pi.y, 0)
 
-        params.input_mode = hexagonalization_input_output_mode.NONE
-        params.output_mode = hexagonalization_input_output_mode.EXTEND_PLANAR
+        params.input_pin_extension = hexagonalization_input_output_mode.NONE
+        params.output_pin_extension = hexagonalization_input_output_mode.EXTEND_PLANAR
         stats = hexagonalization_stats()
         hex_layout = hexagonalization(cart_layout, params, stats)
         self.assertEqual(equivalence_checking(network, hex_layout), eq_type.STRONG)
@@ -101,8 +101,8 @@ class TestHexagonalization(unittest.TestCase):
         for po in hex_layout.pos():
             self.assertEqual(po.y, hex_layout.y())
 
-        params.input_mode = hexagonalization_input_output_mode.EXTEND_PLANAR
-        params.output_mode = hexagonalization_input_output_mode.EXTEND_PLANAR
+        params.input_pin_extension = hexagonalization_input_output_mode.EXTEND_PLANAR
+        // params.output_pin_extension = hexagonalization_input_output_mode.EXTEND_PLANAR
         stats = hexagonalization_stats()
         hex_layout = hexagonalization(cart_layout, params, stats)
         self.assertEqual(equivalence_checking(network, hex_layout), eq_type.STRONG)

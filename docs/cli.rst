@@ -250,8 +250,8 @@ remapping all gates and wires. For more information, see `the paper <https://iee
 
 Possible parameters:
 
-- Input mode (``-i``): Extend primary inputs to the top row.
-- Output mode (``-o``): Extend primary outputs to the bottom row.
+- Input pin extension (``-i``): Extend primary inputs to the top row.
+- Output pin extension (``-o``): Extend primary outputs to the bottom row.
 - Planar (``-p``): If ``-i`` and/or (``-o``) is set, enforce planar rerouting when extending primary inputs and/or outputs, ensuring that the routing is free of crossings.
 - Verbose (``-v``): Output detailed runtime statistics after the algorithm completes.
 

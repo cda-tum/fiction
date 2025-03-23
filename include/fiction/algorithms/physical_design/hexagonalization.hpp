@@ -34,17 +34,17 @@ namespace fiction
 {
 
 /**
- * Exception thrown when an error occurs during moving inputs to top border and rerouting.
+ * Exception thrown when an error occurs during moving inputs/outputs to top/bottom border and rerouting.
  */
-class hexagonalization_route_inputs_error : public std::runtime_error
+class hexagonalization_io_pin_routing_error : public std::runtime_error
 {
   public:
     /**
-     * Constructs a `hexagonalization_route_inputs_error` object with the given error message.
+     * Constructs a `hexagonalization_io_pin_routing_error` object with the given error message.
      *
      * @param msg The error message describing the error.
      */
-    explicit hexagonalization_route_inputs_error(const std::string_view& msg) noexcept : std::runtime_error(msg.data())
+    explicit hexagonalization_io_pin_routing_error(const std::string_view& msg) noexcept : std::runtime_error(msg.data())
     {}
 };
 
@@ -57,7 +57,7 @@ struct hexagonalization_params
     /**
      * Specifies how primary inputs/outputs should be handled in the hexagonalization process.
      */
-    enum hexagonalization_input_output_mode : std::uint8_t
+    enum io_pin_extension_mode : std::uint8_t
     {
         /**
          * Do not extend primary inputs/outputs to the top/bottom row (default).
@@ -75,11 +75,11 @@ struct hexagonalization_params
     /**
      * Input extension mode. Defaults to none
      */
-    hexagonalization_input_output_mode input_mode = NONE;
+    io_pin_extension_mode input_pin_extension = NONE;
     /**
      * Output extension mode. Defaults to none
      */
-    hexagonalization_input_output_mode output_mode = NONE;
+    io_pin_extension_mode output_pin_extension = NONE;
 };
 
 /**
@@ -112,16 +112,15 @@ namespace detail
  * @tparam HexLyt type of the hexagonal layout.
  */
 template <typename HexLyt>
-struct extended_routing_objective
+struct routing_objective_with_fanin_update_information : public routing_objective<HexLyt>
 {
-    /**
-     * The coordinate of the moved primary input.
-     */
-    tile<HexLyt> source;
-    /**
-     * The coordinate of the fanout node.
-     */
-    tile<HexLyt> target;
+    // Constructor that forwards to base class constructor
+    routing_objective_with_fanin_update_information(
+        const coordinate<HexLyt>& src,
+        const coordinate<HexLyt>& tgt,
+        bool update = false)
+            : routing_objective<HexLyt>{src, tgt}, update_first_fanin{update}
+    {}
     /**
      * Flag that is set to true if the primary input was the first fanin; this indicates that the fanin signals need to
      * be reordered.
@@ -189,7 +188,7 @@ template <typename CartLyt>
 }
 
 /**
- * This function iterates over all primary outputs in the given Cartesian layout and counts those whose tile is at the
+ * This function iterates over all primary outputs in the given Cartesian layout and counts those whose tiles are at the
  * southern border. Such outputs are considered to be positioned left of the middle primary output when the layout is
  * converted to a hexagonal format.
  *
@@ -219,7 +218,7 @@ template <typename CartLyt>
 }
 
 /**
- * This function iterates over all primary inputs in the given Cartesian layout and counts those whose tile is at the
+ * This function iterates over all primary inputs in the given Cartesian layout and counts those whose tiles are at the
  * northern border. Such inputs are considered to be positioned right of the middle primary input when the layout is
  * converted to a hexagonal format.
  *
@@ -297,8 +296,8 @@ template <typename CartLyt>
  */
 template <typename HexLyt, typename CartLyt>
 [[nodiscard]] uint64_t get_offset(const CartLyt& lyt, uint64_t cartesian_layout_width, uint64_t cartesian_layout_height,
-                                  hexagonalization_params::hexagonalization_input_output_mode input_mode,
-                                  hexagonalization_params::hexagonalization_input_output_mode output_mode) noexcept
+                                  hexagonalization_params::io_pin_extension_mode input_mode,
+                                  hexagonalization_params::io_pin_extension_mode output_mode) noexcept
 {
     static_assert(is_cartesian_layout_v<CartLyt>, "CartLyt is not a Cartesian layout");
     static_assert(is_hexagonal_layout_v<HexLyt>, "HexLyt is not a hexagonal layout");
@@ -328,7 +327,7 @@ template <typename HexLyt, typename CartLyt>
         }
     }
 
-    if (input_mode != hexagonalization_params::hexagonalization_input_output_mode::NONE)
+    if (input_mode != hexagonalization_params::io_pin_extension_mode::NONE)
     {
         const auto middle_pi = detail::to_hex<CartLyt, HexLyt>({0, 0}, cartesian_layout_height);
 
@@ -342,7 +341,7 @@ template <typename HexLyt, typename CartLyt>
         }
     }
 
-    if (output_mode != hexagonalization_params::hexagonalization_input_output_mode::NONE)
+    if (output_mode != hexagonalization_params::io_pin_extension_mode::NONE)
     {
         const auto middle_po = detail::to_hex<CartLyt, HexLyt>({lyt.x(), lyt.y()}, cartesian_layout_height);
 
@@ -364,7 +363,7 @@ class hexagonalization_impl
 {
   public:
     hexagonalization_impl(const CartLyt& lyt, const hexagonalization_params& p, hexagonalization_stats* st = nullptr) :
-            plyt(lyt),
+            layout(lyt),
             ps(p),
             pst(st)
     {}
@@ -379,18 +378,24 @@ class hexagonalization_impl
         static_assert(is_cartesian_layout_v<CartLyt>, "CartLyt is not a Cartesian layout");
 
         // ensure the layout uses the correct clocking scheme
-        assert(plyt.is_clocking_scheme(clock_name::TWODDWAVE));
+        assert(layout.is_clocking_scheme(clock_name::TWODDWAVE));
 
         // get Cartesian layout dimensions
-        const auto layout_width  = plyt.x() + 1;
-        const auto layout_height = plyt.y() + 1;
-        const auto layout_depth  = plyt.z();
+        const auto layout_width  = layout.x() + 1;
+        const auto layout_height = layout.y() + 1;
+        const auto layout_depth  = layout.z();
 
         // compute hexagonal layout dimensions based on Cartesian dimensions
         const auto hex_height =
             detail::to_hex<CartLyt, HexLyt>({layout_width - 1, layout_height - 1, 0}, layout_height).y;
         const auto hex_width = detail::to_hex<CartLyt, HexLyt>({layout_width - 1, 0, 0}, layout_height).x;
-        const auto hex_depth = layout_depth;
+        auto hex_depth = layout_depth;
+
+        // if input and/or input pin will get extended and crossings are allowed, add crossing layer
+        if (hex_depth == 0 && (ps.input_pin_extension == hexagonalization_params::io_pin_extension_mode::EXTEND || ps.output_pin_extension == hexagonalization_params::io_pin_extension_mode::EXTEND))
+        {
+            hex_depth = 1;
+        }
 
         // create the initial hexagonal layout
         HexLyt hex_layout{{hex_width, hex_height, hex_depth}, row_clocking<HexLyt>()};
@@ -405,33 +410,37 @@ class hexagonalization_impl
 
             // calculate horizontal offset for hexagonal layout
             const auto offset =
-                detail::get_offset<HexLyt, CartLyt>(plyt, layout_width, layout_height, ps.input_mode, ps.output_mode);
+                detail::get_offset<HexLyt, CartLyt>(layout, layout_width, layout_height, ps.input_pin_extension, ps.output_pin_extension);
 
             // determine the top primary input coordinate
             auto middle_pi = detail::to_hex<CartLyt, HexLyt>({0, 0}, layout_height);
 
             // determine the bottom primary output coordinate
-            auto middle_po = detail::to_hex<CartLyt, HexLyt>({plyt.x(), plyt.y()}, layout_height);
+            auto middle_po = detail::to_hex<CartLyt, HexLyt>({layout.x(), layout.y()}, layout_height);
 
             // vectors to store primary inputs
             std::vector<tile<HexLyt>> left_pis{};
             std::vector<tile<HexLyt>> right_pis{};
+            left_pis.reserve(layout.num_pis());
+            right_pis.reserve(layout.num_pis());
 
             // vectors to store primary outputs
             std::vector<tile<HexLyt>> left_pos{};
             std::vector<tile<HexLyt>> right_pos{};
+            left_pos.reserve(layout.num_pos());
+            right_pos.reserve(layout.num_pos());
 
             // map primary inputs to the hexagonal layout
-            plyt.foreach_pi(
+            layout.foreach_pi(
                 [&](const auto& gate)
                 {
-                    const auto old_coord = plyt.get_tile(gate);
+                    const auto old_coord = layout.get_tile(gate);
                     // convert Cartesian coordinate to hex coordinate
                     auto hex_coord = detail::to_hex<CartLyt, HexLyt>(old_coord, layout_height);
                     hex_coord.x -= static_cast<decltype(hex_coord.x)>(offset);
 
                     // create primary input in hex layout
-                    hex_layout.create_pi(plyt.get_name(plyt.get_node(old_coord)), hex_coord);
+                    hex_layout.create_pi(layout.get_name(layout.get_node(old_coord)), hex_coord);
 
                     // collect PIs to the left and to the right of the middle PI
                     if (old_coord.x == 0 && old_coord.y != 0)
@@ -450,10 +459,10 @@ class hexagonalization_impl
                       [](const auto& lhs, const auto& rhs) { return lhs.x < rhs.x; });
 
             // adjust hex layout width if necessary (only if all inputs placed in top row)
-            if (ps.input_mode != hexagonalization_params::hexagonalization_input_output_mode::NONE)
+            if (ps.input_pin_extension != hexagonalization_params::io_pin_extension_mode::NONE)
             {
                 // adjust offset based on primary inputs in the first row
-                const auto num_inputs_right_to_middle_pi = compute_num_inputs_right_to_middle_pi(plyt);
+                const auto num_inputs_right_to_middle_pi = compute_num_inputs_right_to_middle_pi(layout);
 
                 const auto min_width = middle_pi.x - offset + num_inputs_right_to_middle_pi + 1;
                 if (hex_width < min_width)
@@ -463,10 +472,10 @@ class hexagonalization_impl
             }
 
             // adjust hex layout width if necessary (only if all outputs placed in bottom row)
-            if (ps.output_mode != hexagonalization_params::hexagonalization_input_output_mode::NONE)
+            if (ps.output_pin_extension != hexagonalization_params::io_pin_extension_mode::NONE)
             {
                 // adjust offset based on primary outputs in the last row
-                const auto num_outputs_right_to_middle_po = compute_num_outputs_right_to_middle_po(plyt);
+                const auto num_outputs_right_to_middle_po = compute_num_outputs_right_to_middle_po(layout);
 
                 const auto min_width = middle_po.x - offset + num_outputs_right_to_middle_po + 1;
                 if (hex_width < min_width)
@@ -496,22 +505,22 @@ class hexagonalization_impl
                             hex_tile.x -= static_cast<decltype(hex_tile.x)>(offset);
 
                             // skip processing if tile is empty
-                            if (plyt.is_empty_tile(old_tile))
+                            if (layout.is_empty_tile(old_tile))
                             {
                                 continue;
                             }
 
                             // retrieve node associated with the current tile
-                            const auto node = plyt.get_node(old_tile);
+                            const auto node = layout.get_node(old_tile);
 
                             // skip if node is a primary input
-                            if (plyt.is_pi(node))
+                            if (layout.is_pi(node))
                             {
                                 continue;
                             }
 
                             // get incoming data flow signals for the tile
-                            const auto signals = plyt.incoming_data_flow(old_tile);
+                            const auto signals = layout.incoming_data_flow(old_tile);
 
                             // process single input signals (buffer or inverter)
                             if (signals.size() == 1)
@@ -527,11 +536,11 @@ class hexagonalization_impl
                                 const auto hex_signal = hex_layout.make_signal(hex_layout.get_node(hex_source));
 
                                 // create appropriate gate in hex layout based on node type
-                                if (!plyt.is_po(node) && plyt.is_wire(node))
+                                if (!layout.is_po(node) && layout.is_wire(node))
                                 {
                                     hex_layout.create_buf(hex_signal, hex_tile);
                                 }
-                                else if (plyt.is_inv(node))
+                                else if (layout.is_inv(node))
                                 {
                                     hex_layout.create_not(hex_signal, hex_tile);
                                 }
@@ -551,49 +560,49 @@ class hexagonalization_impl
                                 const auto hex_signal_b = hex_layout.make_signal(hex_layout.get_node(hex_tile_b));
 
                                 // create the corresponding gate based on the node's function
-                                if (plyt.is_and(node))
+                                if (layout.is_and(node))
                                 {
                                     hex_layout.create_and(hex_signal_a, hex_signal_b, hex_tile);
                                 }
-                                else if (plyt.is_nand(node))
+                                else if (layout.is_nand(node))
                                 {
                                     hex_layout.create_nand(hex_signal_a, hex_signal_b, hex_tile);
                                 }
-                                else if (plyt.is_or(node))
+                                else if (layout.is_or(node))
                                 {
                                     hex_layout.create_or(hex_signal_a, hex_signal_b, hex_tile);
                                 }
-                                else if (plyt.is_nor(node))
+                                else if (layout.is_nor(node))
                                 {
                                     hex_layout.create_nor(hex_signal_a, hex_signal_b, hex_tile);
                                 }
-                                else if (plyt.is_xor(node))
+                                else if (layout.is_xor(node))
                                 {
                                     hex_layout.create_xor(hex_signal_a, hex_signal_b, hex_tile);
                                 }
-                                else if (plyt.is_xnor(node))
+                                else if (layout.is_xnor(node))
                                 {
                                     hex_layout.create_xnor(hex_signal_a, hex_signal_b, hex_tile);
                                 }
-                                else if (plyt.is_lt(node))
+                                else if (layout.is_lt(node))
                                 {
                                     hex_layout.create_lt(hex_signal_a, hex_signal_b, hex_tile);
                                 }
-                                else if (plyt.is_le(node))
+                                else if (layout.is_le(node))
                                 {
                                     hex_layout.create_le(hex_signal_a, hex_signal_b, hex_tile);
                                 }
-                                else if (plyt.is_gt(node))
+                                else if (layout.is_gt(node))
                                 {
                                     hex_layout.create_gt(hex_signal_a, hex_signal_b, hex_tile);
                                 }
-                                else if (plyt.is_ge(node))
+                                else if (layout.is_ge(node))
                                 {
                                     hex_layout.create_ge(hex_signal_a, hex_signal_b, hex_tile);
                                 }
-                                else if (plyt.is_function(node))
+                                else if (layout.is_function(node))
                                 {
-                                    const auto node_fun = plyt.node_function(node);
+                                    const auto node_fun = layout.node_function(node);
                                     hex_layout.create_node({hex_signal_a, hex_signal_b}, node_fun, hex_tile);
                                 }
                             }
@@ -603,14 +612,14 @@ class hexagonalization_impl
             }
 
             // map primary outputs to hex layout
-            plyt.foreach_po(
+            layout.foreach_po(
                 [&](const auto& gate)
                 {
                     // get the original Cartesian tile for the output
-                    const auto old_coord = plyt.get_tile(plyt.get_node(gate));
+                    const auto old_coord = layout.get_tile(layout.get_node(gate));
 
                     // get the output signal
-                    const auto signal = plyt.incoming_data_flow(old_coord)[0];
+                    const auto signal = layout.incoming_data_flow(old_coord)[0];
 
                     // convert coordinates to hex format and adjust x-coordinate
                     auto hex_coord = detail::to_hex<CartLyt, HexLyt>(old_coord, layout_height);
@@ -620,14 +629,14 @@ class hexagonalization_impl
 
                     // create the primary output in the hex layout
                     const auto hex_signal = hex_layout.make_signal(hex_layout.get_node(hex_tile));
-                    hex_layout.create_po(hex_signal, plyt.get_name(plyt.get_node(old_coord)), hex_coord);
+                    hex_layout.create_po(hex_signal, layout.get_name(layout.get_node(old_coord)), hex_coord);
 
                     // collect POs to the left and to the right of the middle PO
-                    if (old_coord.x != 0 && old_coord.y == plyt.y())
+                    if (old_coord.x != 0 && old_coord.y == layout.y())
                     {
                         left_pos.push_back(hex_coord);
                     }
-                    else if (old_coord.x == plyt.x() && old_coord.y != 0)
+                    else if (old_coord.x == layout.x() && old_coord.y != 0)
                     {
                         right_pos.push_back(hex_coord);
                     }
@@ -637,11 +646,12 @@ class hexagonalization_impl
             std::sort(right_pos.begin(), right_pos.end(),
                       [](const auto& lhs, const auto& rhs) { return lhs.y > rhs.y; });
 
-            if (ps.input_mode != hexagonalization_params::hexagonalization_input_output_mode::NONE)
+            if (ps.input_pin_extension != hexagonalization_params::io_pin_extension_mode::NONE)
             {
                 // adjust positions and prepare for routing
                 middle_pi.x -= static_cast<decltype(middle_pi.x)>(offset);
-                std::vector<extended_routing_objective<HexLyt>> objectives;
+                std::vector<routing_objective_with_fanin_update_information<HexLyt>> objectives{};
+                objectives.reserve(hex_layout.num_pis());
 
                 // process PIs from left column of the Cartesian layout
                 for (const auto& c : left_pis)
@@ -653,10 +663,7 @@ class hexagonalization_impl
                     // shift left primary input position
                     middle_pi.x -= 1;
 
-                    extended_routing_objective<HexLyt> obj;
-                    obj.source             = middle_pi;
-                    obj.target             = fanout;
-                    obj.update_first_fanin = false;
+                    routing_objective_with_fanin_update_information<HexLyt> obj(middle_pi, fanout, false);
 
                     // collect fan-in signals for the fanout node
                     std::vector<mockturtle::signal<HexLyt>> fins;
@@ -707,10 +714,7 @@ class hexagonalization_impl
 
                     // shift top primary input position
                     middle_pi.x += 1;
-                    extended_routing_objective<HexLyt> obj;
-                    obj.source             = middle_pi;
-                    obj.target             = fanout;
-                    obj.update_first_fanin = false;
+                    routing_objective_with_fanin_update_information<HexLyt> obj(middle_pi, fanout, false);
 
                     // collect fan-in signals for the fanout node
                     std::vector<mockturtle::signal<HexLyt>> fins;
@@ -752,9 +756,7 @@ class hexagonalization_impl
                 // perform routing using A*
                 auto layout_obstruct = obstruction_layout<HexLyt>(hex_layout);
                 using path           = layout_coordinate_path<decltype(layout_obstruct)>;
-                const auto crossings =
-                    (hex_depth != 0) &&
-                    !(ps.input_mode != hexagonalization_params::hexagonalization_input_output_mode::EXTEND_PLANAR);
+                const auto crossings = ps.input_pin_extension == hexagonalization_params::io_pin_extension_mode::EXTEND;
                 const a_star_params params_astar{crossings};
                 using dist = manhattan_distance_functor<decltype(layout_obstruct), uint64_t>;
                 using cost = unit_cost_functor<decltype(layout_obstruct), uint8_t>;
@@ -789,16 +791,17 @@ class hexagonalization_impl
                     }
                     else
                     {
-                        throw hexagonalization_route_inputs_error("Extending PIs to the top border failed.");
+                        throw hexagonalization_io_pin_routing_error("Extending PIs to the top border failed.");
                     }
                 }
             }
 
-            if (ps.output_mode != hexagonalization_params::hexagonalization_input_output_mode::NONE)
+            if (ps.output_pin_extension != hexagonalization_params::io_pin_extension_mode::NONE)
             {
                 // adjust positions and prepare for routing
                 middle_po.x -= static_cast<decltype(middle_po.x)>(offset);
-                std::vector<extended_routing_objective<HexLyt>> objectives;
+                std::vector<routing_objective_with_fanin_update_information<HexLyt>> objectives{};
+                objectives.reserve(hex_layout.num_pos());
 
                 // process PIs from left column of the Cartesian layout
                 for (const auto& c : left_pos)
@@ -810,10 +813,7 @@ class hexagonalization_impl
                     // shift left primary output position
                     middle_po.x -= 1;
 
-                    extended_routing_objective<HexLyt> obj;
-                    obj.source             = fanin;
-                    obj.target             = middle_po;
-                    obj.update_first_fanin = false;
+                    routing_objective_with_fanin_update_information<HexLyt> obj{fanin, middle_po, false};
 
                     hex_layout.move_node(hex_layout.get_node(c), middle_po);
                     objectives.push_back(obj);
@@ -831,10 +831,7 @@ class hexagonalization_impl
 
                     // shift bottom primary output position
                     middle_po.x += 1;
-                    extended_routing_objective<HexLyt> obj;
-                    obj.source             = fanin;
-                    obj.target             = middle_po;
-                    obj.update_first_fanin = false;
+                    routing_objective_with_fanin_update_information<HexLyt> obj{fanin, middle_po, false};
 
                     hex_layout.move_node(hex_layout.get_node(c), middle_po);
                     objectives.push_back(obj);
@@ -844,8 +841,7 @@ class hexagonalization_impl
                 auto layout_obstruct = obstruction_layout<HexLyt>(hex_layout);
                 using path           = layout_coordinate_path<decltype(layout_obstruct)>;
                 const auto crossings =
-                    hex_depth != 0 &&
-                    ps.output_mode == hexagonalization_params::hexagonalization_input_output_mode::EXTEND_PLANAR;
+                    ps.output_pin_extension == hexagonalization_params::io_pin_extension_mode::EXTEND;
                 const a_star_params params_astar{crossings};
                 using dist = manhattan_distance_functor<decltype(layout_obstruct), uint64_t>;
                 using cost = unit_cost_functor<decltype(layout_obstruct), uint8_t>;
@@ -865,7 +861,7 @@ class hexagonalization_impl
                     }
                     else
                     {
-                        throw hexagonalization_route_inputs_error("Extending POs to the bottom border failed.");
+                        throw hexagonalization_io_pin_routing_error("Extending POs to the bottom border failed.");
                     }
                 }
             }
@@ -876,7 +872,7 @@ class hexagonalization_impl
             hex_layout.resize({layout_max.x, layout_max.y, hex_layout.z()});
 
             // restore original names from the Cartesian layout
-            restore_names<CartLyt, HexLyt>(plyt, hex_layout);
+            restore_names<CartLyt, HexLyt>(layout, hex_layout);
         }
 
         // update statistics if provided
@@ -892,7 +888,7 @@ class hexagonalization_impl
     /**
      * The 2DDWave-clocked layout to hexagonalize.
      */
-    const CartLyt& plyt;
+    const CartLyt& layout;
     /**
      * Hexagonalization parameters.
      */

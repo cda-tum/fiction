@@ -75,34 +75,34 @@ class hex_command : public command
             return;
         }
 
-        if (this->is_set("planar") && !(this->is_set("input_mode") || this->is_set("output_mode")))
+        if (this->is_set("planar") && !(this->is_set("input_pin_extension") || this->is_set("output_pin_extension")))
         {
             env->out()
                 << "[w] planar rerouting is only possible when extending inputs and/or outputs (using -i and/or -o)"
                 << std::endl;
         }
 
-        if (this->is_set("input_mode"))
+        if (this->is_set("input_pin_extension"))
         {
             if (this->is_set("planar"))
             {
-                ps.input_mode = fiction::hexagonalization_params::hexagonalization_input_output_mode::EXTEND_PLANAR;
+                ps.input_pin_extension = fiction::hexagonalization_params::io_pin_extension_mode::EXTEND_PLANAR;
             }
             else
             {
-                ps.input_mode = fiction::hexagonalization_params::hexagonalization_input_output_mode::EXTEND;
+                ps.input_pin_extension = fiction::hexagonalization_params::io_pin_extension_mode::EXTEND;
             }
         }
 
-        if (this->is_set("output_mode"))
+        if (this->is_set("output_pin_extension"))
         {
             if (this->is_set("planar"))
             {
-                ps.output_mode = fiction::hexagonalization_params::hexagonalization_input_output_mode::EXTEND_PLANAR;
+                ps.output_pin_extension = fiction::hexagonalization_params::io_pin_extension_mode::EXTEND_PLANAR;
             }
             else
             {
-                ps.output_mode = fiction::hexagonalization_params::hexagonalization_input_output_mode::EXTEND;
+                ps.output_pin_extension = fiction::hexagonalization_params::io_pin_extension_mode::EXTEND;
             }
         }
 
@@ -135,7 +135,7 @@ class hex_command : public command
                 gls.extend() = std::make_shared<fiction::hex_even_row_gate_clk_lyt>(*hex_lyt);
             }
         }
-        catch (const fiction::hexagonalization_route_inputs_error& e)
+        catch (const fiction::hexagonalization_io_pin_routing_error& e)
         {
             ps = {};
             env->out() << fmt::format("[e] {}", e.what()) << std::endl;

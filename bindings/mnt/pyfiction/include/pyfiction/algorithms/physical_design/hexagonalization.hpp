@@ -19,27 +19,27 @@ inline void hexagonalization(pybind11::module& m)
 {
     namespace py = pybind11;
 
-    py::register_exception<fiction::hexagonalization_route_inputs_error>(m, "hexagonalization_route_inputs_error",
+    py::register_exception<fiction::hexagonalization_io_pin_routing_error>(m, "hexagonalization_io_pin_routing_error",
                                                                          PyExc_RuntimeError);
 
-    py::enum_<fiction::hexagonalization_params::hexagonalization_input_output_mode>(
-        m, "hexagonalization_input_output_mode",
-        DOC(fiction_hexagonalization_params_hexagonalization_input_output_mode))
-        .value("NONE", fiction::hexagonalization_params::hexagonalization_input_output_mode::NONE,
-               DOC(fiction_hexagonalization_params_hexagonalization_input_output_mode_NONE))
-        .value("EXTEND", fiction::hexagonalization_params::hexagonalization_input_output_mode::EXTEND,
-               DOC(fiction_hexagonalization_params_hexagonalization_input_output_mode_EXTEND))
-        .value("EXTEND_PLANAR", fiction::hexagonalization_params::hexagonalization_input_output_mode::EXTEND_PLANAR,
-               DOC(fiction_hexagonalization_params_hexagonalization_input_output_mode_EXTEND_PLANAR))
+    py::enum_<fiction::hexagonalization_params::io_pin_extension_mode>(
+        m, "hexagonalization_io_pin_extension_mode",
+        DOC(fiction_hexagonalization_params_io_pin_extension_mode))
+        .value("NONE", fiction::hexagonalization_params::io_pin_extension_mode::NONE,
+               DOC(fiction_hexagonalization_params_io_pin_extension_mode_NONE))
+        .value("EXTEND", fiction::hexagonalization_params::io_pin_extension_mode::EXTEND,
+               DOC(fiction_hexagonalization_params_io_pin_extension_mode_EXTEND))
+        .value("EXTEND_PLANAR", fiction::hexagonalization_params::io_pin_extension_mode::EXTEND_PLANAR,
+               DOC(fiction_hexagonalization_params_io_pin_extension_mode_EXTEND_PLANAR))
 
         ;
 
     py::class_<fiction::hexagonalization_params>(m, "hexagonalization_params", DOC(fiction_hexagonalization_params))
         .def(py::init<>())
-        .def_readwrite("input_mode", &fiction::hexagonalization_params::input_mode,
-                       DOC(fiction_hexagonalization_params_input_mode))
-        .def_readwrite("output_mode", &fiction::hexagonalization_params::output_mode,
-                       DOC(fiction_hexagonalization_params_output_mode));
+        .def_readwrite("input_pin_extension", &fiction::hexagonalization_params::input_pin_extension,
+                       DOC(fiction_hexagonalization_params_input_pin_extension))
+        .def_readwrite("output_pin_extension", &fiction::hexagonalization_params::output_pin_extension,
+                       DOC(fiction_hexagonalization_params_output_pin_extension));
 
     py::class_<fiction::hexagonalization_stats>(m, "hexagonalization_stats", DOC(fiction_hexagonalization_stats))
         .def(py::init<>())

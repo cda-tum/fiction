@@ -36,7 +36,7 @@ void check_mapping_equiv(const Ntk& ntk)
     check_eq(ntk, hex_layout);
     check_eq(layout, hex_layout);
 
-    params.input_mode             = hexagonalization_params::hexagonalization_input_output_mode::EXTEND;
+    params.input_pin_extension             = hexagonalization_params::io_pin_extension_mode::EXTEND;
     const auto hex_layout_top_pis = hexagonalization<hex_even_row_gate_clk_lyt, Lyt>(layout, params, &stats);
 
     check_eq(ntk, hex_layout_top_pis);
@@ -44,8 +44,8 @@ void check_mapping_equiv(const Ntk& ntk)
 
     hex_layout_top_pis.foreach_pi([&](const auto& gate) { CHECK(hex_layout_top_pis.get_tile(gate).y == 0); });
 
-    params.input_mode                = hexagonalization_params::hexagonalization_input_output_mode::NONE;
-    params.output_mode               = hexagonalization_params::hexagonalization_input_output_mode::EXTEND;
+    params.input_pin_extension                = hexagonalization_params::io_pin_extension_mode::NONE;
+    params.output_pin_extension               = hexagonalization_params::io_pin_extension_mode::EXTEND;
     const auto hex_layout_bottom_pos = hexagonalization<hex_even_row_gate_clk_lyt, Lyt>(layout, params, &stats);
 
     check_eq(ntk, hex_layout_bottom_pos);
@@ -57,7 +57,7 @@ void check_mapping_equiv(const Ntk& ntk)
             CHECK(hex_layout_bottom_pos.get_tile(hex_layout_bottom_pos.get_node(gate)).y == hex_layout_bottom_pos.y());
         });
 
-    params.input_mode                        = hexagonalization_params::hexagonalization_input_output_mode::EXTEND;
+    params.input_pin_extension                        = hexagonalization_params::io_pin_extension_mode::EXTEND;
     const auto hex_layout_top_pis_bottom_pos = hexagonalization<hex_even_row_gate_clk_lyt, Lyt>(layout, params, &stats);
 
     check_eq(ntk, hex_layout_top_pis_bottom_pos);
@@ -83,7 +83,7 @@ void check_mapping_equiv_layout(const Lyt& lyt)
     check_eq(lyt, hex_layout);
     CHECK(lyt.get_layout_name() == hex_layout.get_layout_name());
 
-    params.input_mode             = hexagonalization_params::hexagonalization_input_output_mode::EXTEND;
+    params.input_pin_extension             = hexagonalization_params::io_pin_extension_mode::EXTEND;
     const auto hex_layout_top_pis = hexagonalization<hex_even_row_gate_clk_lyt, Lyt>(lyt, params, &stats);
 
     check_eq(lyt, hex_layout_top_pis);
@@ -91,8 +91,8 @@ void check_mapping_equiv_layout(const Lyt& lyt)
 
     hex_layout_top_pis.foreach_pi([&](const auto& gate) { CHECK(hex_layout_top_pis.get_tile(gate).y == 0); });
 
-    params.input_mode                = hexagonalization_params::hexagonalization_input_output_mode::NONE;
-    params.output_mode               = hexagonalization_params::hexagonalization_input_output_mode::EXTEND;
+    params.input_pin_extension                = hexagonalization_params::io_pin_extension_mode::NONE;
+    params.output_pin_extension               = hexagonalization_params::io_pin_extension_mode::EXTEND;
     const auto hex_layout_bottom_pos = hexagonalization<hex_even_row_gate_clk_lyt, Lyt>(lyt, params, &stats);
 
     check_eq(lyt, hex_layout_bottom_pos);
@@ -104,7 +104,7 @@ void check_mapping_equiv_layout(const Lyt& lyt)
             CHECK(hex_layout_bottom_pos.get_tile(hex_layout_bottom_pos.get_node(gate)).y == hex_layout_bottom_pos.y());
         });
 
-    params.input_mode                        = hexagonalization_params::hexagonalization_input_output_mode::EXTEND;
+    params.input_pin_extension                       = hexagonalization_params::io_pin_extension_mode::EXTEND;
     const auto hex_layout_top_pis_bottom_pos = hexagonalization<hex_even_row_gate_clk_lyt, Lyt>(lyt, params, &stats);
 
     check_eq(lyt, hex_layout_top_pis_bottom_pos);
@@ -126,7 +126,7 @@ void check_mapping_equiv_layout_with_planar_rerouting(const Lyt& lyt)
     hexagonalization_stats  stats{};
     hexagonalization_params params{};
 
-    params.input_mode             = hexagonalization_params::hexagonalization_input_output_mode::EXTEND_PLANAR;
+    params.input_pin_extension             = hexagonalization_params::io_pin_extension_mode::EXTEND_PLANAR;
     const auto hex_layout_top_pis = hexagonalization<hex_even_row_gate_clk_lyt, Lyt>(lyt, params, &stats);
 
     check_eq(lyt, hex_layout_top_pis);
@@ -135,8 +135,8 @@ void check_mapping_equiv_layout_with_planar_rerouting(const Lyt& lyt)
 
     hex_layout_top_pis.foreach_pi([&](const auto& gate) { CHECK(hex_layout_top_pis.get_tile(gate).y == 0); });
 
-    params.input_mode                = hexagonalization_params::hexagonalization_input_output_mode::NONE;
-    params.output_mode               = hexagonalization_params::hexagonalization_input_output_mode::EXTEND_PLANAR;
+    params.input_pin_extension                = hexagonalization_params::io_pin_extension_mode::NONE;
+    params.output_pin_extension               = hexagonalization_params::io_pin_extension_mode::EXTEND_PLANAR;
     const auto hex_layout_bottom_pos = hexagonalization<hex_even_row_gate_clk_lyt, Lyt>(lyt, params, &stats);
 
     check_eq(lyt, hex_layout_bottom_pos);
@@ -149,8 +149,8 @@ void check_mapping_equiv_layout_with_planar_rerouting(const Lyt& lyt)
             CHECK(hex_layout_bottom_pos.get_tile(hex_layout_bottom_pos.get_node(gate)).y == hex_layout_bottom_pos.y());
         });
 
-    params.input_mode  = hexagonalization_params::hexagonalization_input_output_mode::EXTEND_PLANAR;
-    params.output_mode = hexagonalization_params::hexagonalization_input_output_mode::EXTEND_PLANAR;
+    params.input_pin_extension  = hexagonalization_params::io_pin_extension_mode::EXTEND_PLANAR;
+    params.output_pin_extension = hexagonalization_params::io_pin_extension_mode::EXTEND_PLANAR;
     const auto hex_layout_top_pis_bottom_pos = hexagonalization<hex_even_row_gate_clk_lyt, Lyt>(lyt, params, &stats);
 
     check_eq(lyt, hex_layout_top_pis_bottom_pos);
