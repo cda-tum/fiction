@@ -32,8 +32,8 @@ class hex_command : public command
     {
         add_flag("--input_pin_extension,-i", "Extend primary input pins to the resulting layout's top row");
         add_flag("--output_pin_extension,-o", "Extend primary output pins to the resulting layout's bottom row");
-        add_flag("--planar,-p",
-                 "Extend primary input and/or output pins with planar rerouting (i.e., without crossings) in the resulting layout");
+        add_flag("--planar,-p", "Extend primary input and/or output pins with planar rerouting (i.e., without "
+                                "crossings) in the resulting layout");
         add_flag("--verbose,-v", "Be verbose");
     }
 
