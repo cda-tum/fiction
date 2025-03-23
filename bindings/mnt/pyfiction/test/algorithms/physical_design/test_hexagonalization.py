@@ -102,7 +102,7 @@ class TestHexagonalization(unittest.TestCase):
             self.assertEqual(po.y, hex_layout.y())
 
         params.input_pin_extension = hexagonalization_input_output_mode.EXTEND_PLANAR
-        // params.output_pin_extension = hexagonalization_input_output_mode.EXTEND_PLANAR
+        params.output_pin_extension = hexagonalization_input_output_mode.EXTEND_PLANAR
         stats = hexagonalization_stats()
         hex_layout = hexagonalization(cart_layout, params, stats)
         self.assertEqual(equivalence_checking(network, hex_layout), eq_type.STRONG)
