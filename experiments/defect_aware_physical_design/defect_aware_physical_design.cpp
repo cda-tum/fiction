@@ -206,7 +206,7 @@ int main()  // NOLINT
                        gate_level_layout->x() + 1, gate_level_layout->y() + 1,
                        (gate_level_layout->x() + 1) * (gate_level_layout->y() + 1), gate_level_layout->num_gates(),
                        gate_level_layout->num_wires(), cp_tp.critical_path_length, cp_tp.throughput,
-                       mockturtle::to_seconds(exact_stats.time_total), *eq, cell_level_layout.num_cells(),
+                       mockturtle::to_seconds(exact_stats.time_total), *eq, dot_accurate_layout.num_cells(),
                        area_stats.area);
         }
         else  // no layout was obtained
