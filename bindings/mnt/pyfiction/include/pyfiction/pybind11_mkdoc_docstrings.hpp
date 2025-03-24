@@ -20847,6 +20847,8 @@ static const char *__doc_fiction_siqad_coord_t_y = R"doc(31 bit for the y coordi
 
 static const char *__doc_fiction_siqad_coord_t_z = R"doc(1 bit for the z coordinate.)doc";
 
+static const char *__doc_fiction_siqad_operator_lshift = R"doc()doc";
+
 static const char *__doc_fiction_siqad_to_fiction_coord =
 R"doc(Converts SiQAD coordinates to other coordinates (offset, cube).
 
@@ -22996,9 +22998,9 @@ static const char *__doc_fmt_formatter_parse = R"doc()doc";
 
 static const char *__doc_fmt_formatter_parse_2 = R"doc()doc";
 
-static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_layouts_coordinates_hpp_1370_8 = R"doc()doc";
+static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_layouts_coordinates_hpp_1376_8 = R"doc()doc";
 
-static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_layouts_coordinates_hpp_1386_8 = R"doc()doc";
+static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_layouts_coordinates_hpp_1392_8 = R"doc()doc";
 
 static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_technology_cell_ports_hpp_291_8 = R"doc()doc";
 
