@@ -8261,7 +8261,11 @@ Template parameter ``Lyt``:
     SiDB cell-level layout type.
 
 Template parameter ``TT``:
-    Type of the truth table.)doc";
+    Type of the truth table.
+
+Parameter ``spec``:
+    Expected Boolean function of the layout given as a multi-output
+    truth table.)doc";
 
 static const char *__doc_fiction_detail_is_operational_impl_bii = R"doc(Iterator that iterates over all possible input states.)doc";
 
@@ -8394,9 +8398,6 @@ Parameter ``input_pattern``:
 Parameter ``cds_canvas``:
     The charge distribution of the canvas layout.
 
-Parameter ``dependent_cell``:
-    A dependent-cell of the canvas SiDBs.
-
 Returns:
     A `layout_invalidity_reason` object indicating why the layout is
     non-operational; or `std::nullopt` if it could not certainly be
@@ -8408,7 +8409,7 @@ R"doc(Constructor to initialize the algorithm with a layout and parameters.
 Parameter ``lyt``:
     The SiDB cell-level layout to be checked.
 
-Parameter ``spec``:
+Parameter ``tt``:
     Expected Boolean function of the layout given as a multi-output
     truth table.
 
@@ -8809,7 +8810,7 @@ static const char *__doc_fiction_detail_non_operationality_reason_LOGIC_MISMATCH
 
 static const char *__doc_fiction_detail_non_operationality_reason_NONE = R"doc(No reason for non-operationality could be determined.)doc";
 
-static const char *__doc_fiction_detail_non_operationality_reason_POTENTIAL_POSITIVE_CHARGES = R"doc(Positive charges may occur with the simulation base set to `2`.)doc";
+static const char *__doc_fiction_detail_non_operationality_reason_POTENTIAL_POSITIVE_CHARGES = R"doc(Positive charges may occur but the simulation base is set to `2`.)doc";
 
 static const char *__doc_fiction_detail_on_the_fly_circuit_design_impl = R"doc()doc";
 
@@ -11332,6 +11333,17 @@ Parameter ``charge_distributions``:
 Returns:
     A map containing the system energy as the key and the number of
     occurrences of that energy in the input vector as the value.)doc";
+
+static const char *__doc_fiction_energy_state =
+R"doc(This struct stores the energy state of an SiDB layout. The energy
+state consists of the electrostatic potential energy and the
+degeneracy of the state.)doc";
+
+static const char *__doc_fiction_energy_state_degeneracy = R"doc(The degeneracy of the state.)doc";
+
+static const char *__doc_fiction_energy_state_electrostatic_potential_energy = R"doc(The electrostatic potential energy of the charge distribution (eV).)doc";
+
+static const char *__doc_fiction_energy_state_energy_state = R"doc(Default constructor.)doc";
 
 static const char *__doc_fiction_enumerate_all_paths =
 R"doc(Enumerates all possible paths in a layout that start at a given source
@@ -16313,6 +16325,22 @@ Parameter ``temperature``:
 Returns:
     The occupation probability of all erroneous states is returned.)doc";
 
+static const char *__doc_fiction_occupation_probability_non_gate_based =
+R"doc(This function computes the occupation probability of excited states
+(charge distributions with energy higher than the ground state) at a
+given temperature.
+
+Parameter ``energy_distribution``:
+    This contains the energies in eV of all possible charge
+    distributions with the degeneracy.
+
+Parameter ``temperature``:
+    System temperature to assume (unit: K).
+
+Returns:
+    The total occupation probability of all excited states is
+    returned.)doc";
+
 static const char *__doc_fiction_odd_column_cartesian =
 R"doc(\verbatim +-------+ +-------+ | | | | | (0,0) +-------+ (2,0)
 +-------+ | | | | | +-------+ (1,0) +-------+ (3,0) | | | | | | |
@@ -19735,7 +19763,7 @@ R"doc(This class is used to store the energy distribution of an SiDB layout.
 The energy distribution is a map that contains the electrostatic
 potential as a key and its degeneracy as a value. To be more precise,
 if two different charge distributions occur with the same energy, the
-degeneracy value of the energy state is two.)doc";
+degeneracy value of the energy state is 2.)doc";
 
 static const char *__doc_fiction_sidb_energy_distribution_add_state =
 R"doc(Adds a state to the energy distribution.
@@ -19800,7 +19828,7 @@ R"doc(Returns the minimum energy value in the energy distribution.
 Returns:
     The minimum energy value in the energy distribution.)doc";
 
-static const char *__doc_fiction_sidb_energy_distribution_sidb_energy_distribution = R"doc()doc";
+static const char *__doc_fiction_sidb_energy_distribution_sidb_energy_distribution = R"doc(Default constructor.)doc";
 
 static const char *__doc_fiction_sidb_energy_distribution_size =
 R"doc(Returns the number of states in the energy distribution.
