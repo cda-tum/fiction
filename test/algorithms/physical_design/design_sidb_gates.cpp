@@ -473,7 +473,9 @@ TEST_CASE("Design NOR Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
             design_sidb_gates_params<
                 cell<sidb_111_cell_clk_lyt_siqad>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
             {{10, 13, 0}, {14, 17, 0}},
-            3};
+            3,
+            design_sidb_gates_params<
+                cell<sidb_111_cell_clk_lyt_siqad>>::termination_condition::ALL_COMBINATIONS_ENUMERATED};
 // to save runtime in the CI, this test is only run in RELEASE mode
 #ifdef NDEBUG
         SECTION("all design")
