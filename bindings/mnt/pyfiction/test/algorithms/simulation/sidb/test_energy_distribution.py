@@ -41,8 +41,8 @@ class TestEnergyDistribution(unittest.TestCase):
 
         distribution = energy_distribution(charge_layouts)
 
-        self.assertLessEqual(distribution.get_nth_state(0)[1], 1)
-        self.assertLessEqual(distribution.get_nth_state(1)[1], 3)
+        self.assertLessEqual(distribution.get_nth_state(0).degeneracy, 1)
+        self.assertLessEqual(distribution.get_nth_state(1).degeneracy, 3)
 
     def test_three_DBs_111_lattice(self):
         layout = sidb_111_lattice((10, 10))
@@ -72,8 +72,8 @@ class TestEnergyDistribution(unittest.TestCase):
 
         distribution = energy_distribution(charge_layouts)
 
-        self.assertLessEqual(distribution.get_nth_state(0)[1], 1)
-        self.assertLessEqual(distribution.get_nth_state(1)[1], 3)
+        self.assertLessEqual(distribution.get_nth_state(0).degeneracy, 1)
+        self.assertLessEqual(distribution.get_nth_state(1).degeneracy, 3)
 
 
 if __name__ == "__main__":
