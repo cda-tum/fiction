@@ -265,6 +265,34 @@ Returns:
     A cell-level layout that implements `lyt`'s gate types with
     building blocks defined in `GateLibrary`.)doc";
 
+static const char *__doc_fiction_apply_gate_library_to_defective_surface =
+R"doc(Applies a gate library to a given gate-level layout and maps the SiDB
+and defect locations onto a defect surface. The gate library type
+should provide all functions specified in fcn_gate_library. It is,
+thus, easiest to extend fcn_gate_library to implement a new gate
+library. Examples are `qca_one_library`, `inml_topolinano_library`,
+and `sidb_bestagon_library`.
+
+May pass through, and thereby throw, an
+`unsupported_gate_type_exception` or an
+`unsupported_gate_orientation_exception`.
+
+Template parameter ``CellLyt``:
+    Type of the returned cell-level layout.
+
+Template parameter ``GateLibrary``:
+    Type of the gate library to apply.
+
+Template parameter ``GateLyt``:
+    Type of the gate-level layout to apply the library to.
+
+Parameter ``lyt``:
+    The gate-level layout.
+
+Returns:
+    A cell-level layout that implements `lyt`'s gate types with
+    building blocks defined in `GateLibrary`.)doc";
+
 static const char *__doc_fiction_apply_parameterized_gate_library =
 R"doc(Applies a parameterized gate library to a given gate-level layout and,
 thereby, creates and returns a cell-level layout.
@@ -296,7 +324,7 @@ Returns:
     A cell-level layout that implements `lyt`'s gate types with
     building blocks defined in `GateLibrary`.)doc";
 
-static const char *__doc_fiction_apply_parameterized_gate_library_on_defective_surface =
+static const char *__doc_fiction_apply_parameterized_gate_library_to_defective_surface =
 R"doc(Applies a defect-aware parameterized gate library to a given gate-
 level layout and, thereby, creates and returns a cell-level layout.
 
@@ -4956,8 +4984,8 @@ Template parameter ``Params``:
 Parameter ``params``:
     Parameters used for the SiDB on-the-fly gate library.
 
-Parameter ``lyt``:
-    Optional cell-level layout to add defects to.
+Parameter ``defect_surface``:
+    Optional defect surface.
 
 Returns:
     A `CellLyt` object representing the generated cell layout.)doc";
@@ -4972,6 +5000,9 @@ gate-level layout and maps gates to cell implementations based on
 their corresponding positions and types. Optionally, it performs post-
 layout optimization and sets the layout name if certain conditions are
 met.
+
+Parameter ``defect_lyt``:
+    Optional defect surface.
 
 Returns:
     A `CellLyt` object representing the generated cell layout.)doc";
