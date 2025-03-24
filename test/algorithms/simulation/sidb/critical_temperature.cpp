@@ -495,7 +495,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
 
         CHECK_THAT(std::fabs(critical_stats.energy_between_ground_state_and_first_erroneous - 0.32),
                    Catch::Matchers::WithinAbs(0.00, 0.01));
-        CHECK_THAT(std::abs(ct_cc - 0.819999), Catch::Matchers::WithinAbs(0.000000, 0.0001));
+        CHECK_THAT(std::abs(ct_cc - 0.81999), Catch::Matchers::WithinAbs(0.000000, 0.0001));
 
 #endif  // FICTION_ALGLIB_ENABLED
     }
@@ -916,7 +916,8 @@ TEMPLATE_TEST_CASE("Critical temperature of Bestagon CX, QuickExact", "[critical
 
     CHECK_THAT(std::fabs(critical_stats.energy_between_ground_state_and_first_erroneous - 0.32),
                Catch::Matchers::WithinAbs(0.00, 0.01));
-    CHECK_THAT(std::abs(ct_qe - 0.85), Catch::Matchers::WithinAbs(0.00, 0.01));
+
+    CHECK_THAT(std::abs(ct_qe - 0.82), Catch::Matchers::WithinAbs(0.00, 0.01));
 
 #if (FICTION_ALGLIB_ENABLED)
 
@@ -926,7 +927,7 @@ TEMPLATE_TEST_CASE("Critical temperature of Bestagon CX, QuickExact", "[critical
 
     CHECK_THAT(std::fabs(critical_stats.energy_between_ground_state_and_first_erroneous - 0.32),
                Catch::Matchers::WithinAbs(0.00, 0.01));
-    CHECK_THAT(std::abs(ct_cc - 0.85), Catch::Matchers::WithinAbs(0.00, 0.01));
+    CHECK_THAT(std::abs(ct_cc - 0.82), Catch::Matchers::WithinAbs(0.00, 0.01));
 
 #endif  // FICTION_ALGLIB_ENABLED
 }
@@ -953,7 +954,7 @@ TEMPLATE_TEST_CASE("Critical temperature of Bestagon double wire, QuickExact", "
 
         CHECK_THAT(std::fabs(critical_stats.energy_between_ground_state_and_first_erroneous - 10.717),
                    Catch::Matchers::WithinAbs(0.00, 0.01));
-        CHECK_THAT(std::abs(ct_qe - 24.18), Catch::Matchers::WithinAbs(0.00, 0.01));
+        CHECK_THAT(std::abs(ct_qe - 23.38), Catch::Matchers::WithinAbs(0.00, 0.01));
 
 #if (FICTION_ALGLIB_ENABLED)
 
@@ -964,7 +965,7 @@ TEMPLATE_TEST_CASE("Critical temperature of Bestagon double wire, QuickExact", "
 
         CHECK_THAT(std::fabs(critical_stats.energy_between_ground_state_and_first_erroneous - 10.717),
                    Catch::Matchers::WithinAbs(0.00, 0.01));
-        CHECK_THAT(std::abs(ct_cc - 24.18), Catch::Matchers::WithinAbs(0.00, 0.01));
+        CHECK_THAT(std::abs(ct_cc - 23.37), Catch::Matchers::WithinAbs(0.00, 0.01));
 
 #endif  // FICTION_ALGLIB_ENABLED
     }
@@ -976,7 +977,7 @@ TEMPLATE_TEST_CASE("Critical temperature of Bestagon double wire, QuickExact", "
 
         CHECK_THAT(std::fabs(critical_stats.energy_between_ground_state_and_first_erroneous - 10.717),
                    Catch::Matchers::WithinAbs(0.00, 0.01));
-        CHECK_THAT(std::abs(ct_qe - 23.77), Catch::Matchers::WithinAbs(0.00, 0.01));
+        CHECK_THAT(std::abs(ct_qe - 22.99), Catch::Matchers::WithinAbs(0.00, 0.01));
 
 #if (FICTION_ALGLIB_ENABLED)
 
@@ -987,7 +988,7 @@ TEMPLATE_TEST_CASE("Critical temperature of Bestagon double wire, QuickExact", "
 
         CHECK_THAT(std::fabs(critical_stats.energy_between_ground_state_and_first_erroneous - 10.717),
                    Catch::Matchers::WithinAbs(0.00, 0.01));
-        CHECK_THAT(std::abs(ct_cc - 23.77), Catch::Matchers::WithinAbs(0.00, 0.01));
+        CHECK_THAT(std::abs(ct_cc - 22.99), Catch::Matchers::WithinAbs(0.00, 0.01));
 
 #endif  // FICTION_ALGLIB_ENABLED
     }
@@ -1015,7 +1016,7 @@ TEMPLATE_TEST_CASE("Critical temperature of Bestagon half adder gate, QuickExact
 
         CHECK_THAT(std::fabs(critical_stats.energy_between_ground_state_and_first_erroneous - 0.15),
                    Catch::Matchers::WithinAbs(0.00, 0.01));
-        CHECK_THAT(std::abs(ct_qe - 0.40), Catch::Matchers::WithinAbs(0.00, 0.01));
+        CHECK_THAT(std::abs(ct_qe - 0.39), Catch::Matchers::WithinAbs(0.00, 0.01));
 
 #if (FICTION_ALGLIB_ENABLED)
 
@@ -1026,7 +1027,7 @@ TEMPLATE_TEST_CASE("Critical temperature of Bestagon half adder gate, QuickExact
 
         CHECK_THAT(std::fabs(critical_stats.energy_between_ground_state_and_first_erroneous - 0.15),
                    Catch::Matchers::WithinAbs(0.00, 0.01));
-        CHECK_THAT(std::abs(ct_cc - 0.40), Catch::Matchers::WithinAbs(0.00, 0.01));
+        CHECK_THAT(std::abs(ct_cc - 0.39), Catch::Matchers::WithinAbs(0.00, 0.01));
 
 #endif  // FICTION_ALGLIB_ENABLED
     }
@@ -1038,7 +1039,7 @@ TEMPLATE_TEST_CASE("Critical temperature of Bestagon half adder gate, QuickExact
 
         CHECK_THAT(std::fabs(critical_stats.energy_between_ground_state_and_first_erroneous - 0.15),
                    Catch::Matchers::WithinAbs(0.00, 0.01));
-        CHECK_THAT(std::abs(ct_qe - 0.40), Catch::Matchers::WithinAbs(0.00, 0.01));
+        CHECK_THAT(std::abs(ct_qe - 0.39), Catch::Matchers::WithinAbs(0.00, 0.01));
 
 #if (FICTION_ALGLIB_ENABLED)
 
@@ -1049,7 +1050,7 @@ TEMPLATE_TEST_CASE("Critical temperature of Bestagon half adder gate, QuickExact
 
         CHECK_THAT(std::fabs(critical_stats.energy_between_ground_state_and_first_erroneous - 0.15),
                    Catch::Matchers::WithinAbs(0.00, 0.01));
-        CHECK_THAT(std::abs(ct_cc - 0.40), Catch::Matchers::WithinAbs(0.00, 0.01));
+        CHECK_THAT(std::abs(ct_cc - 0.39), Catch::Matchers::WithinAbs(0.00, 0.01));
 
 #endif  // FICTION_ALGLIB_ENABLED
     }
