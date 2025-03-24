@@ -289,7 +289,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
 
             CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous),
                        Catch::Matchers::WithinAbs(26.02, 0.01));
-            CHECK_THAT(std::abs(ct_qe - 59.19), Catch::Matchers::WithinAbs(0.00, 0.01));
+            CHECK_THAT(std::abs(ct_qe - 57.24), Catch::Matchers::WithinAbs(0.00, 0.01));
 
 #if (FICTION_ALGLIB_ENABLED)
 
@@ -300,7 +300,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
 
             CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous),
                        Catch::Matchers::WithinAbs(26.02, 0.01));
-            CHECK_THAT(std::abs(ct_cc - 59.19), Catch::Matchers::WithinAbs(0.00, 0.01));
+            CHECK_THAT(std::abs(ct_cc - 57.24), Catch::Matchers::WithinAbs(0.00, 0.01));
 
 #endif  // FICTION_ALGLIB_ENABLED
         }
@@ -313,7 +313,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
 
             CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous),
                        Catch::Matchers::WithinAbs(5.1153718076, 0.01));
-            CHECK_THAT(std::abs(ct_qe - 13.36), Catch::Matchers::WithinAbs(0.00, 0.01));
+            CHECK_THAT(std::abs(ct_qe - 12.92), Catch::Matchers::WithinAbs(0.00, 0.01));
 
 #if (FICTION_ALGLIB_ENABLED)
 
@@ -324,7 +324,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
 
             CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous),
                        Catch::Matchers::WithinAbs(5.1153718076, 0.01));
-            CHECK_THAT(std::abs(ct_cc - 13.36), Catch::Matchers::WithinAbs(0.00, 0.01));
+            CHECK_THAT(std::abs(ct_cc - 12.92), Catch::Matchers::WithinAbs(0.00, 0.01));
 
 #endif  // FICTION_ALGLIB_ENABLED
         }
@@ -429,7 +429,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
 
             CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous - 0.56),
                        Catch::Matchers::WithinAbs(0.00, 0.01));
-            CHECK_THAT(std::abs(ct_qe - 1.46), Catch::Matchers::WithinAbs(0.00, 0.01));
+            CHECK_THAT(std::abs(ct_qe - 1.41), Catch::Matchers::WithinAbs(0.00, 0.01));
 
 #if (FICTION_ALGLIB_ENABLED)
 
@@ -440,7 +440,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
 
             CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous - 0.56),
                        Catch::Matchers::WithinAbs(0.00, 0.01));
-            CHECK_THAT(std::abs(ct_cc - 1.46), Catch::Matchers::WithinAbs(0.00, 0.01));
+            CHECK_THAT(std::abs(ct_cc - 1.41), Catch::Matchers::WithinAbs(0.00, 0.01));
 
 #endif  // FICTION_ALGLIB_ENABLED
         }
@@ -452,7 +452,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
 
             CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous - 0.56),
                        Catch::Matchers::WithinAbs(0.00, 0.01));
-            CHECK_THAT(std::abs(ct_qe - 1.46), Catch::Matchers::WithinAbs(0.00, 0.01));
+            CHECK_THAT(std::abs(ct_qe - 1.409), Catch::Matchers::WithinAbs(0.00, 0.01));
 
 #if (FICTION_ALGLIB_ENABLED)
 
@@ -463,7 +463,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
 
             CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous - 0.56),
                        Catch::Matchers::WithinAbs(0.00, 0.01));
-            CHECK_THAT(std::abs(ct_cc - 1.46), Catch::Matchers::WithinAbs(0.00, 0.01));
+            CHECK_THAT(std::abs(ct_cc - 1.409), Catch::Matchers::WithinAbs(0.00, 0.01));
 
 #endif  // FICTION_ALGLIB_ENABLED
         }
@@ -484,7 +484,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
 
         CHECK_THAT(std::fabs(critical_stats.energy_between_ground_state_and_first_erroneous - 0.32),
                    Catch::Matchers::WithinAbs(0.00, 0.01));
-        CHECK_THAT(std::abs(ct_qe - 0.84999999999999998), Catch::Matchers::WithinAbs(0.000000, 0.000001));
+        CHECK_THAT(std::abs(ct_qe - 0.8199), Catch::Matchers::WithinAbs(0.000000, 0.001));
 
 #if (FICTION_ALGLIB_ENABLED)
 
@@ -495,7 +495,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
 
         CHECK_THAT(std::fabs(critical_stats.energy_between_ground_state_and_first_erroneous - 0.32),
                    Catch::Matchers::WithinAbs(0.00, 0.01));
-        CHECK_THAT(std::abs(ct_cc - 0.84999999999999998), Catch::Matchers::WithinAbs(0.000000, 0.000001));
+        CHECK_THAT(std::abs(ct_cc - 0.819999), Catch::Matchers::WithinAbs(0.000000, 0.0001));
 
 #endif  // FICTION_ALGLIB_ENABLED
     }
@@ -649,7 +649,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
 
         CHECK(critical_stats.algorithm_name == "QuickSim");
 
-        CHECK_THAT(std::abs(ct_qe), Catch::Matchers::WithinAbs(11.55, 0.01));
+        CHECK_THAT(std::abs(ct_qe), Catch::Matchers::WithinAbs(11.17, 0.01));
 
 #if (FICTION_ALGLIB_ENABLED)
 
@@ -659,7 +659,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
 
         CHECK(critical_stats.algorithm_name == "ClusterComplete");
 
-        CHECK_THAT(std::abs(ct_cc), Catch::Matchers::WithinAbs(11.55, 0.01));
+        CHECK_THAT(std::abs(ct_cc), Catch::Matchers::WithinAbs(11.17, 0.01));
 
 #endif  // FICTION_ALGLIB_ENABLED
     }

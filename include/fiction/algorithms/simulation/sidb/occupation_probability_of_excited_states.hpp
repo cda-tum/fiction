@@ -13,7 +13,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cmath>
-#include <map>
+#include <cstdint>
 #include <numeric>
 #include <utility>
 
@@ -42,12 +42,17 @@ namespace fiction
     // Determine the minimal energy.
     const auto [energy, state_type] = *std::min_element(energy_and_state_type.cbegin(), energy_and_state_type.cend(),
                                                         [](const auto& a, const auto& b) { return a.first < b.first; });
-    const auto min_energy           = energy;
+
+    const auto min_energy = energy;
 
     // The partition function is obtained by summing up all the Boltzmann factors.
-    const double partition_function = std::accumulate(
-        energy_and_state_type.cbegin(), energy_and_state_type.cend(), 0.0, [&](const double sum, const auto& it)
-        { return sum + std::exp(-((it.first - min_energy) * 12'000 / temperature)); });
+    const double partition_function =
+        std::accumulate(energy_and_state_type.cbegin(), energy_and_state_type.cend(), 0.0,
+                        [&](const double sum, const auto& it)
+                        {
+                            return sum + std::exp(-((it.first - min_energy) * constants::physical::EV_TO_JOULE /
+                                                    (constants::physical::BOLTZMANN_CONSTANT * temperature)));
+                        });
 
     // All Boltzmann factors of the erroneous states are summed.
     double p = 0;
@@ -57,7 +62,8 @@ namespace fiction
     {
         if (!state_transparent_erroneous)
         {
-            p += std::exp(-((energies - min_energy) * 12'000 / temperature));
+            p += std::exp(-((energies - min_energy) * constants::physical::EV_TO_JOULE /
+                            (constants::physical::BOLTZMANN_CONSTANT * temperature)));
         }
     }
 
@@ -90,7 +96,11 @@ namespace fiction
 
     energy_distribution.for_each(
         [&](const double energy, const uint64_t degeneracy)
-        { partition_function += degeneracy * std::exp(-((energy - min_energy) * 12'000 / temperature)); });
+        {
+            partition_function +=
+                static_cast<double>(degeneracy) * std::exp(-((energy - min_energy) * constants::physical::EV_TO_JOULE /
+                                                             (constants::physical::BOLTZMANN_CONSTANT * temperature)));
+        });
 
     double p = 0;
 
@@ -100,7 +110,9 @@ namespace fiction
             if (std::abs(round_to_n_decimal_places(energy, 6) - round_to_n_decimal_places(min_energy, 6)) >
                 constants::ERROR_MARGIN)
             {
-                p += degeneracy * std::exp(-((energy - min_energy) * 12'000 / temperature));
+                p += static_cast<double>(degeneracy) *
+                     std::exp(-((energy - min_energy) * constants::physical::EV_TO_JOULE /
+                                (constants::physical::BOLTZMANN_CONSTANT * temperature)));
             }
         });
 

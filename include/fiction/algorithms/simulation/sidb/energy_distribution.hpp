@@ -24,13 +24,39 @@ namespace fiction
 {
 
 /**
+ * This struct stores the energy state of an SiDB layout. The energy state consists of the electrostatic potential
+ * energy and the degeneracy of the state.
+ */
+struct energy_state
+{
+    /**
+     * Default constructor.
+     */
+    energy_state(const double electrostatic_potential_energy, const uint64_t degeneracy) :
+            electrostatic_potential_energy{electrostatic_potential_energy},
+            degeneracy{degeneracy}
+    {}
+    /**
+     * The electrostatic potential energy of the charge distribution (eV).
+     */
+    double electrostatic_potential_energy;
+    /**
+     * The degeneracy of the state.
+     */
+    uint64_t degeneracy;
+};
+
+/**
  * This class is used to store the energy distribution of an SiDB layout. The energy distribution is a map that contains
  * the electrostatic potential as a key and its degeneracy as a value. To be more precise, if two different charge
- * distributions occur with the same energy, the degeneracy value of the energy state is two.
+ * distributions occur with the same energy, the degeneracy value of the energy state is 2.
  */
 class sidb_energy_distribution
 {
   public:
+    /**
+     * Default constructor.
+     */
     sidb_energy_distribution() = default;
     /**
      * Returns the nth state (energy + degeneracy) in the energy distribution.
@@ -39,15 +65,15 @@ class sidb_energy_distribution
      * @return The energy and degeneracy of the state at the specified index. If the index is out of range,
      * `std::nullopt` is returned instead.
      */
-    [[nodiscard]] std::optional<std::pair<double, uint64_t>> get_nth_state(const uint64_t state_index) const noexcept
+    [[nodiscard]] std::optional<energy_state> get_nth_state(const uint64_t state_index) const noexcept
     {
         if (state_index < distribution.size())
         {
             const auto it =
-                std::next(distribution.begin(),
-                          static_cast<typename std::iterator_traits<decltype(distribution.begin())>::difference_type>(
+                std::next(distribution.cbegin(),
+                          static_cast<typename std::iterator_traits<decltype(distribution.cbegin())>::difference_type>(
                               state_index));
-            return std::make_pair(it->first, it->second);
+            return energy_state{it->first, it->second};
         }
 
         return std::nullopt;
@@ -78,7 +104,7 @@ class sidb_energy_distribution
      * @param energy The energy of the state to be added.
      * @param degeneracy The degeneracy of the state to be added.
      */
-    void add_state(const double energy, const uint64_t degeneracy)
+    void add_state(const double energy, const uint64_t degeneracy) noexcept
     {
         distribution[energy] = degeneracy;
     }
@@ -107,7 +133,7 @@ class sidb_energy_distribution
      */
     [[nodiscard]] double max_energy() const noexcept
     {
-        return distribution.rbegin()->first;
+        return distribution.crbegin()->first;
     }
     /**
      * Returns the minimum energy value in the energy distribution.
@@ -116,7 +142,7 @@ class sidb_energy_distribution
      */
     [[nodiscard]] double min_energy() const noexcept
     {
-        return distribution.begin()->first;
+        return distribution.cbegin()->first;
     }
     /**
      * Applies a function to all states in the energy distribution.

@@ -25,7 +25,8 @@ TEST_CASE("Test energy_distribution function", "[energy-distribution]")
         auto result = energy_distribution(all_lyts);
         CHECK(result.size() == 1);
         REQUIRE(result.get_nth_state(0).has_value());
-        CHECK_THAT(result.get_nth_state(0).value().first, Catch::Matchers::WithinAbs(0.0, 0.00001));
+        CHECK_THAT(result.get_nth_state(0).value().electrostatic_potential_energy,
+                   Catch::Matchers::WithinAbs(0.0, 0.00001));
     }
 
     SECTION("one layout with one SiDB placed")
@@ -98,9 +99,9 @@ TEST_CASE("Test energy_distribution function", "[energy-distribution]")
         // last two have an identical potential energy (it.second == 2) which is smaller than the one from the first
         // layout.
         REQUIRE(result.get_nth_state(0).has_value());
-        CHECK(result.get_nth_state(0).value().second == 2);
+        CHECK(result.get_nth_state(0).value().degeneracy == 2);
 
         REQUIRE(result.get_nth_state(1).has_value());
-        CHECK(result.get_nth_state(1).value().second == 1);
+        CHECK(result.get_nth_state(1).value().degeneracy == 1);
     }
 }

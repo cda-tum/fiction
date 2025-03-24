@@ -287,8 +287,9 @@ class critical_temperature_impl
         // if there is more than one metastable state
         if (distribution.size() > 1)
         {
-            const auto ground_state_energy        = distribution.get_nth_state(0).value().first;
-            const auto first_excited_state_energy = distribution.get_nth_state(1).value().first;
+            const auto ground_state_energy = distribution.get_nth_state(0).value().electrostatic_potential_energy;
+            const auto first_excited_state_energy =
+                distribution.get_nth_state(1).value().electrostatic_potential_energy;
 
             // The energy difference between the first excited and the ground state in meV.
             if (stats.energy_between_ground_state_and_first_erroneous >

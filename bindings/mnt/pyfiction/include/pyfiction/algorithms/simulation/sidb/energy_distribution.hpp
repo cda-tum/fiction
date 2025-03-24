@@ -34,6 +34,12 @@ inline void energy_distribution(pybind11::module& m)
 {
     namespace py = pybind11;
 
+    // todo: add documentation
+    py::class_<fiction::energy_state>(m, "energy_state")
+        .def(py::init<double, uint64_t>(), py::arg("electrostatic_potential_energy"), py::arg("degeneracy"))
+        .def_readwrite("electrostatic_potential_energy", &fiction::energy_state::electrostatic_potential_energy)
+        .def_readwrite("degeneracy", &fiction::energy_state::degeneracy);
+
     py::class_<fiction::sidb_energy_distribution>(m, "sidb_energy_distribution")
         .def(py::init<>())
         .def("get_nth_state", &fiction::sidb_energy_distribution::get_nth_state, py::arg("state_index"),

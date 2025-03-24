@@ -149,7 +149,7 @@ enum class non_operationality_reason : uint8_t
      */
     LOGIC_MISMATCH,
     /**
-     * Positive charges may occur with the simulation base set to `2`.
+     * Positive charges may occur but the simulation base is set to `2`.
      */
     POTENTIAL_POSITIVE_CHARGES,
     /**
@@ -187,6 +187,7 @@ enum class layout_invalidity_reason : uint8_t
  *
  * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT Type of the truth table.
+ * @param spec Expected Boolean function of the layout given as a multi-output truth table.
  */
 template <typename Lyt, typename TT>
 class is_operational_impl
@@ -196,12 +197,12 @@ class is_operational_impl
      * Constructor to initialize the algorithm with a layout and parameters.
      *
      * @param lyt The SiDB cell-level layout to be checked.
-     * @param spec Expected Boolean function of the layout given as a multi-output truth table.
+     * @param tt Expected Boolean function of the layout given as a multi-output truth table.
      * @param params Parameters for the `is_operational` algorithm.
      */
-    is_operational_impl(const Lyt& lyt, const std::vector<TT>& tt, const is_operational_params& params) :
+    is_operational_impl(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params) :
             layout{lyt},
-            truth_table{tt},
+            truth_table{spec},
             parameters{params},
             output_bdl_pairs(detect_bdl_pairs(lyt, sidb_technology::cell_type::OUTPUT,
                                               params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)),
@@ -250,11 +251,11 @@ class is_operational_impl
      * @param output_wires BDL output wires of lyt.
      * @param c_lyt Canvas layout.
      */
-    is_operational_impl(const Lyt& lyt, const std::vector<TT>& tt, const is_operational_params& params,
+    is_operational_impl(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params,
                         const std::vector<bdl_wire<Lyt>>& input_wires, const std::vector<bdl_wire<Lyt>>& output_wires,
                         const Lyt& c_lyt) :
             layout{lyt},
-            truth_table{tt},
+            truth_table{spec},
             parameters{params},
             output_bdl_pairs(detect_bdl_pairs(lyt, sidb_technology::cell_type::OUTPUT,
                                               params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)),
@@ -285,10 +286,10 @@ class is_operational_impl
      * @param spec Expected Boolean function of the layout given as a multi-output truth table.
      * @param params Parameters for the `is_operational` algorithm.
      */
-    is_operational_impl(const Lyt& lyt, const std::vector<TT>& tt, const is_operational_params& params,
+    is_operational_impl(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params,
                         const Lyt& c_lyt) :
             layout{lyt},
-            truth_table{tt},
+            truth_table{spec},
             parameters{params},
             output_bdl_pairs(detect_bdl_pairs(lyt, sidb_technology::cell_type::OUTPUT,
                                               params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)),
@@ -312,7 +313,6 @@ class is_operational_impl
      * @tparam ChargeLyt The charge distribution surface layout type.
      * @param input_pattern The current input pattern.
      * @param cds_canvas The charge distribution of the canvas layout.
-     * @param dependent_cell A dependent-cell of the canvas SiDBs.
      * @return A `layout_invalidity_reason` object indicating why the layout is non-operational; or `std::nullopt` if it
      * could not certainly be determined to be in fact non-operational.
      */

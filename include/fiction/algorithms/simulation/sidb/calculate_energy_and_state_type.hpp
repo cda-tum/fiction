@@ -81,7 +81,7 @@ template <typename Lyt, typename TT>
                         }
                     }
 
-                    // The output SiDB matches the truth table entry. Hence, state is called transparent.
+                    // The output SiDB matches the truth table entry. Hence, the state is called transparent.
                     energy_and_state_type.emplace_back(energy, correct_output);
                 }
             }
