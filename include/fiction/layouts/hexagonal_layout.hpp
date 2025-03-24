@@ -233,91 +233,85 @@ class hexagonal_layout
 
 #pragma region Structural properties
     /**
-     * Returns the layout's x-dimension, i.e., returns the biggest x-value that still belongs to the layout.
+     * Returns the layout's size in the x-dimension, i.e., the distance between x_min() and x().
      *
      * @return x-dimension.
-     */
-    [[nodiscard]] uint64_t x() const noexcept
-    {
-        return strg->ar.x();
-    }
-    /**
-     * Returns the layout's y-dimension, i.e., returns the biggest y-value that still belongs to the layout.
-     *
-     * @return y-dimension.
-     */
-    [[nodiscard]] uint64_t y() const noexcept
-    {
-        return strg->ar.y();
-    }
-    /**
-     * Returns the layout's z-dimension, i.e., returns the biggest z-value that still belongs to the layout.
-     *
-     * @return z-dimension.
-     */
-    [[nodiscard]] uint64_t z() const noexcept
-    {
-        return strg->ar.z();
-    }
-    /**
-     * Returns the layout's x-org coordinate.
-     *
-     * The x-org coordinate represents the origin's x-value in the layout.
-     *
-     * @return The x-start coordinate of the layout.
-     */
-    [[nodiscard]] auto x_min() const noexcept
-    {
-        return strg->ar.x_min();
-    }
-    /**
-     * Returns the layout's y-org coordinate.
-     *
-     * The y-org coordinate represents the origin's y-value in the layout.
-     *
-     * @return The y-org coordinate of the layout.
-     */
-    [[nodiscard]] auto y_min() const noexcept
-    {
-        return strg->ar.y_min();
-    }
-    /**
-     * Returns the layout's z-org coordinate.
-     *
-     * The z-org coordinate represents the origin's z-value in the layout.
-     *
-     * @return The z-org coordinate of the layout.
-     */
-    [[nodiscard]] auto z_min() const noexcept
-    {
-        return strg->ar.z_min();
-    }
-    /**
-     * Returns the layout's size in the x-dimension, i.e., the distance between x-org and the maximum x-value.
-     *
-     * @return The size of the layout in the x-dimension.
      */
     [[nodiscard]] auto x_size() const noexcept
     {
         return strg->ar.x_size();
     }
     /**
-     * Returns the layout's size in the y-dimension, i.e., the distance between y-org and the maximum y-value.
+     * Returns the layout's size in the y-dimension, i.e., the distance between y_min() and y().
      *
-     * @return The size of the layout in the y-dimension.
+     * @return y-dimension.
      */
     [[nodiscard]] auto y_size() const noexcept
     {
         return strg->ar.y_size();
     }
     /**
-     * Returns the layout's size in the z-dimension, i.e., the distance between z-org and the maximum z-value.
+     * Returns the layout's size in the z-dimension, i.e., the distance between z_min() and z().
      *
-     * @return The size of the layout in the z-dimension.
+     * @return z-dimension.
      */
     [[nodiscard]] auto z_size() const noexcept
     {
         return strg->ar.z_size();
+    }
+    /**
+     * Returns the layout's minimum x-coordinate.
+     *
+     * @return The x_min coordinate of the layout.
+     */
+    [[nodiscard]] auto x_min() const noexcept
+    {
+        return strg->ar.x_min();
+    }
+    /**
+     * Returns the layout's minimum y-coordinate.
+     *
+     * @return The y_min coordinate of the layout.
+     */
+    [[nodiscard]] auto y_min() const noexcept
+    {
+        return strg->ar.y_min();
+    }
+    /**
+     * Returns the layout's minimum z-coordinate.
+     *
+     * @return The z_min coordinate of the layout.
+     */
+    [[nodiscard]] auto z_min() const noexcept
+    {
+        return strg->ar.z_min();
+    }
+    /**
+     * Returns the layout's maximum x-coordinate.
+     *
+     * @return The maximum x-coordinate of the layout.
+     */
+    [[nodiscard]] auto x() const noexcept
+    {
+        return strg->ar.x();
+    }
+    /**
+     * Returns the layout's maximum y-coordinate.
+     *
+     * @return The maximum y-coordinate of the layout.
+     */
+    [[nodiscard]] auto y() const noexcept
+    {
+        return strg->ar.y();
+    }
+    /**
+     * Returns the layout's maximum z-coordinate.
+     *
+     * @return The maximum z-coordinate of the layout.
+     */
+    [[nodiscard]] auto z() const noexcept
+    {
+        return strg->ar.z();
     }
     /**
      * Returns the layout's number of faces depending on the coordinate type.
@@ -901,7 +895,7 @@ class hexagonal_layout
      */
     [[nodiscard]] constexpr bool is_within_bounds(const OffsetCoordinateType& c) const noexcept
     {
-        return x_min() <= x() && c.x <= x() && y_min() <= y() && c.y <= y() && z_min() <= z() && c.z <= z();
+        return x_min() <= c.x && c.x <= x() && y_min() <= c.y && c.y <= y() && z_min() <= c.z && c.z <= z();
     }
 
 #pragma endregion
@@ -957,7 +951,7 @@ class hexagonal_layout
         assert(start.z == 0 && stop.z == 0);
 
         const auto ground_layer_start = coordinate{strg->ar.min.x, strg->ar.min.y, 0};
-        const auto ground_layer       = coordinate{x(), y(), 0};
+        const auto ground_layer       = coordinate{strg->ar.max.x, strg->ar.max.y, 0};
 
         return range_t{std::make_pair(
             coord_iterator{ground_layer, start.is_dead() ? ground_layer_start : start, strg->ar.min},
@@ -979,7 +973,7 @@ class hexagonal_layout
         assert(start.z == 0 && stop.z == 0);
 
         const auto ground_layer_start = coordinate{strg->ar.min.x, strg->ar.min.y, 0};
-        const auto ground_layer       = coordinate{x(), y(), 0};
+        const auto ground_layer       = coordinate{strg->ar.max.x, strg->ar.max.y, 0};
 
         mockturtle::detail::foreach_element(
             coord_iterator{ground_layer, start.is_dead() ? ground_layer_start : start, strg->ar.min},

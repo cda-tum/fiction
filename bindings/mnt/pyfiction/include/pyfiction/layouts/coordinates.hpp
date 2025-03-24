@@ -203,14 +203,6 @@ inline void coordinate_utility(pybind11::module& m)
 {
     namespace py = pybind11;
 
-    //    m.def("offset_area", &fiction::area<py_offset_coordinate>, py::arg("coord"), DOC(fiction_area));
-    //    m.def("cube_area", &fiction::area<py_cube_coordinate>, py::arg("coord"), DOC(fiction_area));
-    //    m.def("siqad_area", &fiction::area<py_siqad_coordinate>, py::arg("coord"), DOC(fiction_area));
-    //
-    //    m.def("offset_volume", &fiction::volume<py_offset_coordinate>, py::arg("coord"), DOC(fiction_volume));
-    //    m.def("cube_volume", &fiction::volume<py_cube_coordinate>, py::arg("coord"), DOC(fiction_volume));
-    //    m.def("siqad_volume", &fiction::volume<py_siqad_coordinate>, py::arg("coord"), DOC(fiction_volume));
-
     m.def("to_offset_coord", &fiction::siqad::to_fiction_coord<py_offset_coordinate>, py::arg("coord"),
           DOC(fiction_siqad_to_fiction_coord));
     m.def("to_cube_coord", &fiction::siqad::to_fiction_coord<py_cube_coordinate>, py::arg("coord"),
@@ -227,7 +219,6 @@ inline void aspect_ratio_bindings(pybind11::module& m, const std::string& coordi
 {
     namespace py = pybind11;
 
-    // todo add docu
     py::class_<fiction::aspect_ratio<CoordinateType>>(m, fmt::format("aspect_ratio{}", coordinate_type).c_str())
         .def(py::init<>())
         .def(py::init<const CoordinateType&>(), py::arg("max"))

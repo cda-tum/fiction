@@ -345,6 +345,129 @@ TEST_CASE("Addition / subtraction of cube coordinates", "[coordinates]")
     CHECK(coord{-4, 4, 42} - coord{1, -7, 24} == coord{-5, 11, 18});
 }
 
+TEMPLATE_TEST_CASE("aspect_ratio constructor and operator checks", "[coordinates]", offset::ucoord_t, cube::coord_t,
+                   siqad::coord_t)
+{
+    using coord_t      = TestType;
+    using aspect_ratio = aspect_ratio<coord_t>;
+
+    SECTION("Default constructor: min == max == (0,0,0)")
+    {
+        aspect_ratio ar;
+        CHECK(ar.min.x == 0);
+        CHECK(ar.min.y == 0);
+        CHECK(ar.min.z == 0);
+
+        CHECK(ar.max.x == 0);
+        CHECK(ar.max.y == 0);
+        CHECK(ar.max.z == 0);
+
+        CHECK(ar.x_min() == 0);
+        CHECK(ar.y_min() == 0);
+        CHECK(ar.z_min() == 0);
+
+        CHECK(ar.x() == 0);
+        CHECK(ar.y() == 0);
+        CHECK(ar.z() == 0);
+
+        CHECK(ar.x_size() == 0);
+        CHECK(ar.y_size() == 0);
+        CHECK(ar.z_size() == 0);
+    }
+
+    SECTION("Single-coordinate constructor (0,0,0) -> e")
+    {
+        coord_t      e{1, 2, 1};
+        aspect_ratio ar(e);
+
+        // min should still be (0,0,0)
+        CHECK(ar.min.x == 0);
+        CHECK(ar.min.y == 0);
+        CHECK(ar.min.z == 0);
+
+        // max should be e
+        CHECK(ar.max.x == e.x);
+        CHECK(ar.max.y == e.y);
+        CHECK(ar.max.z == e.z);
+    }
+
+    SECTION("Min/Max constructor")
+    {
+        // use different values for min and max
+        coord_t mn{-1, -2, -3};
+        coord_t mx{4, 5, 1};
+
+        // if the coordinate type is unsigned (offset::ucoord_t),
+        // negative initialization effectively becomes 0.
+        if constexpr (std::is_same_v<coord_t, offset::ucoord_t>)
+        {
+            mn = {0, 0, 0};
+            mx = {4, 5, 1};
+        }
+
+        aspect_ratio ar(mn, mx);
+
+        CHECK(ar.min.x == mn.x);
+        CHECK(ar.min.y == mn.y);
+        CHECK(ar.min.z == mn.z);
+
+        CHECK(ar.max.x == mx.x);
+        CHECK(ar.max.y == mx.y);
+        CHECK(ar.max.z == mx.z);
+
+        // check dimension sizes
+        auto expected_x_size = (mx.x >= mn.x) ? static_cast<decltype(ar.x_size())>(mx.x - mn.x) :
+                                                static_cast<decltype(ar.x_size())>(mn.x - mx.x);
+        auto expected_y_size = (mx.y >= mn.y) ? static_cast<decltype(ar.y_size())>(mx.y - mn.y) :
+                                                static_cast<decltype(ar.y_size())>(mn.y - mx.y);
+        auto expected_z_size = (mx.z >= mn.z) ? static_cast<decltype(ar.z_size())>(mx.z - mn.z) :
+                                                static_cast<decltype(ar.y_size())>(mn.z - mx.z);
+
+        CHECK(ar.x_size() == expected_x_size);
+        CHECK(ar.y_size() == expected_y_size);
+        CHECK(ar.z_size() == expected_z_size);
+    }
+
+    SECTION("Templated constructor (3D)")
+    {
+        // construct from integral x,y,z
+        aspect_ratio ar(10, 20, 1);
+
+        CHECK(ar.min.x == 0);
+        CHECK(ar.min.y == 0);
+        CHECK(ar.min.z == 0);
+
+        CHECK(ar.max.x == 10);
+        CHECK(ar.max.y == 20);
+        CHECK(ar.max.z == 1);
+    }
+
+    SECTION("Templated constructor (2D)")
+    {
+        aspect_ratio ar(10, 20);
+
+        CHECK(ar.min.x == 0);
+        CHECK(ar.min.y == 0);
+        CHECK(ar.min.z == 0);
+
+        CHECK(ar.max.x == 10);
+        CHECK(ar.max.y == 20);
+        CHECK(ar.max.z == 0);  // z should be 0 in 2D
+    }
+
+    SECTION("Equality and inequality")
+    {
+        aspect_ratio ar1(5, 6, 1);
+        aspect_ratio ar2(5, 6, 1);
+        aspect_ratio ar3(1, 2, 1);
+
+        CHECK(ar1 == ar2);
+        CHECK(ar1 != ar3);
+        CHECK_FALSE(ar1 == ar3);
+        CHECK_FALSE(ar1 != ar2);
+    }
+}
+
 #if defined(__GNUC__)
 #pragma GCC diagnostic pop
 #endif
