@@ -164,6 +164,10 @@ TEST_CASE("SiQAD coordinate conversion", "[coordinates]")
     auto fiction_10 = siqad::to_fiction_coord<coordinate_fiction>(t10);
     CHECK(fiction_10.x == t10.x);
     CHECK(fiction_10.y == std::numeric_limits<int32_t>::min() + 2);
+
+    std::ostringstream os{};
+    os << coordinate{3, 2, 1};
+    CHECK(os.str() == "(3,2,1)");
 }
 
 TEST_CASE("Offset to cube coordinate conversion", "[coordinates]")
@@ -189,6 +193,10 @@ TEST_CASE("Offset to cube coordinate conversion", "[coordinates]")
     CHECK(t2_cube.x == t2.x);
     CHECK(t2_cube.y == 2);
     CHECK(t2_cube.z == 0);
+
+    std::ostringstream os{};
+    os << offset{3, 2, 1};
+    CHECK(os.str() == "(3,2,1)");
 }
 
 TEMPLATE_TEST_CASE("Coordinate iteration", "[coordinates]", offset::ucoord_t, cube::coord_t, siqad::coord_t)
