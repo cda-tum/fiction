@@ -147,8 +147,6 @@ class apply_gate_library_impl
     [[nodiscard]] auto run_parameterized_gate_library(const Params&                 params,
                                                       const std::optional<CellLyt>& defect_surface = std::nullopt)
     {
-        static_assert(is_sidb_defect_surface_v<CellLyt>, "CellLyt is not a defect surface");
-
 #if (PROGRESS_BARS)
         // initialize a progress bar
         mockturtle::progress_bar bar{static_cast<uint32_t>(gate_lyt.size()), "[i] applying gate library: |{0}|"};
