@@ -103,7 +103,7 @@ TEST_CASE("Gate-level layout with AND gate", "[apply-gate-library]")
                 defect_surface.assign_sidb_defect({45, 55, 0},
                                                   fiction::sidb_defect{fiction::sidb_defect_type::DB, -1, 4.1, 1.8});
 
-                const auto bestagon_and_with_defects = apply_parameterized_gate_library_on_defective_surface<
+                const auto bestagon_and_with_defects = apply_parameterized_gate_library_to_defective_surface<
                     sidb_defect_surface<cell_lyt>, sidb_on_the_fly_gate_library, hex_even_row_gate_clk_lyt>(
                     layout, params, defect_surface);
 
@@ -207,7 +207,7 @@ TEST_CASE("Gate-level layout with two input wires, one double wire, and two outp
                 defect_surface.assign_sidb_defect({45, 55, 0},
                                                   fiction::sidb_defect{fiction::sidb_defect_type::DB, -1, 4.1, 1.8});
 
-                const auto bestagon_double_wire_with_defects = apply_parameterized_gate_library_on_defective_surface<
+                const auto bestagon_double_wire_with_defects = apply_parameterized_gate_library_to_defective_surface<
                     sidb_defect_surface<cell_lyt>, sidb_on_the_fly_gate_library, hex_even_row_gate_clk_lyt>(
                     layout, params, defect_surface);
 
@@ -273,7 +273,7 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
                                              design_gate_params.operational_params.simulation_parameters.epsilon_r,
                                              design_gate_params.operational_params.simulation_parameters.lambda_tf});
 
-                const auto inverter_with_defects = apply_parameterized_gate_library_on_defective_surface<
+                const auto inverter_with_defects = apply_parameterized_gate_library_to_defective_surface<
                     sidb_defect_surface<cell_lyt>, sidb_on_the_fly_gate_library, hex_even_row_gate_clk_lyt>(
                     layout, params, defect_layout);
 
@@ -334,7 +334,7 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
                                              design_gate_params.operational_params.simulation_parameters.epsilon_r,
                                              design_gate_params.operational_params.simulation_parameters.lambda_tf});
 
-                const auto or_layout_with_defects = apply_parameterized_gate_library_on_defective_surface<
+                const auto or_layout_with_defects = apply_parameterized_gate_library_to_defective_surface<
                     sidb_defect_surface<cell_lyt>, sidb_on_the_fly_gate_library, hex_even_row_gate_clk_lyt>(
                     layout, params, defect_layout);
 
@@ -400,7 +400,7 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
                                              design_gate_params.operational_params.simulation_parameters.epsilon_r,
                                              design_gate_params.operational_params.simulation_parameters.lambda_tf});
 
-                const auto nand_layout_with_defects = apply_parameterized_gate_library_on_defective_surface<
+                const auto nand_layout_with_defects = apply_parameterized_gate_library_to_defective_surface<
                     sidb_defect_surface<cell_lyt>, sidb_on_the_fly_gate_library, hex_even_row_gate_clk_lyt>(
                     layout, params, defect_layout);
 

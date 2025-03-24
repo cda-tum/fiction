@@ -184,11 +184,13 @@ int main()  // NOLINT
             const auto cp_tp = fiction::critical_path_length_and_throughput(*gate_level_layout);
 
             // apply gate library
-            const auto cell_level_layout =
-                fiction::apply_gate_library<cell_lyt, fiction::sidb_bestagon_library>(*gate_level_layout);
+            const auto dot_accurate_layout =
+                fiction::apply_gate_library_to_defective_surface<fiction::sidb_defect_surface<cell_lyt>,
+                                                                 fiction::sidb_bestagon_library>(*gate_level_layout,
+                                                                                                 surface_lattice);
 
             // determine bounding box
-            const auto bb = fiction::bounding_box_2d<cell_lyt>(cell_level_layout);
+            const auto bb = fiction::bounding_box_2d<cell_lyt>(dot_accurate_layout);
 
             // compute area
             fiction::area_stats                            area_stats{};
@@ -196,8 +198,7 @@ int main()  // NOLINT
             fiction::area(bb, area_ps, &area_stats);
 
             // write a SiQAD simulation file
-            fiction::write_sqd_layout(cell_level_layout, fmt::format("{}/{}.sqd", layouts_folder, benchmark));
-            // TODO integrate defects into the cell layout before writing
+            fiction::write_sqd_layout(dot_accurate_layout, fmt::format("{}/{}.sqd", layouts_folder, benchmark));
 
             // log results
             defect_exp(benchmark, xag.num_pis(), xag.num_pos(), xag.num_gates(), depth_xag.depth(), cut_xag.num_gates(),
