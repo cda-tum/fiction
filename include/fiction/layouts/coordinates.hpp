@@ -895,6 +895,12 @@ constexpr coord_t to_siqad_coord(const CoordinateType& coord) noexcept
     return {coord.x, (coord.y + coord.y % 2) / 2, (-coord.y - 1) % 2 + 1};
 }
 
+inline std::ostream& operator<<(std::ostream& os, const coord_t& t)
+{
+    os << t.str();
+    return os;
+}
+
 }  // namespace siqad
 
 /**
