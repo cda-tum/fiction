@@ -49,6 +49,7 @@ from .pyfiction import (  # type: ignore[import-not-found]
     bdl_wire_selection,
     calculate_energy_and_state_type_with_kinks_accepted,
     calculate_energy_and_state_type_with_kinks_rejected,
+    calculate_energy_distribution,
     can_positive_charges_occur,
     cartesian_gate_layout,
     # Layouts
@@ -365,6 +366,7 @@ __all__ = [
     "bdl_wire_selection",
     "calculate_energy_and_state_type_with_kinks_accepted",
     "calculate_energy_and_state_type_with_kinks_rejected",
+    "calculate_energy_distribution",
     "can_positive_charges_occur",
     "cartesian_gate_layout",
     # Layouts

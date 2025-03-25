@@ -26,8 +26,8 @@ void energy_distribution(pybind11::module& m)
 {
     namespace py = pybind11;
 
-    m.def("calculate_energy_distribution", &fiction::calculate_energy_distribution<Lyt>, py::arg("input_vec"),
-          DOC(fiction_energy_distribution));
+    m.def("calculate_energy_distribution", &fiction::calculate_energy_distribution<Lyt>,
+          py::arg("charge_distributions"), DOC(fiction_energy_distribution));
 }
 
 }  // namespace detail

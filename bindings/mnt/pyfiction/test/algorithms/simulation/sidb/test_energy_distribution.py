@@ -1,9 +1,9 @@
 import unittest
 
 from mnt.pyfiction import (
+    calculate_energy_distribution,
     charge_distribution_surface_100,
     charge_distribution_surface_111,
-    energy_distribution,
     sidb_100_lattice,
     sidb_111_lattice,
     sidb_charge_state,
@@ -39,7 +39,7 @@ class TestEnergyDistribution(unittest.TestCase):
         self.assertAlmostEqual(cds3.get_electrostatic_potential_energy(), 0.48066663155586997)
         self.assertAlmostEqual(cds4.get_electrostatic_potential_energy(), 0.48066663155586997)
 
-        distribution = energy_distribution(charge_layouts)
+        distribution = calculate_energy_distribution(charge_layouts)
 
         self.assertAlmostEqual(distribution.get_nth_state(0).electrostatic_potential_energy, 0.0)
         self.assertAlmostEqual(distribution.get_nth_state(1).electrostatic_potential_energy, 0.48066663155586997)
@@ -72,7 +72,7 @@ class TestEnergyDistribution(unittest.TestCase):
         self.assertAlmostEqual(cds3.get_electrostatic_potential_energy(), 0.233980661373219)
         self.assertAlmostEqual(cds4.get_electrostatic_potential_energy(), 0.233980661373219)
 
-        distribution = energy_distribution(charge_layouts)
+        distribution = calculate_energy_distribution(charge_layouts)
 
         self.assertLessEqual(distribution.get_nth_state(0).degeneracy, 1)
         self.assertLessEqual(distribution.get_nth_state(1).degeneracy, 3)
