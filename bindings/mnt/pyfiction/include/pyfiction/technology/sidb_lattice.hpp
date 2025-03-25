@@ -32,7 +32,6 @@ template <typename LatticeOrientation>
 void sidb_lattice_cell_level_layout(pybind11::module& m)
 {
     namespace py = pybind11;
-    namespace py = pybind11;
 
     // fetch technology name
     auto orientation = std::string{fiction::sidb_lattice_name<LatticeOrientation>};

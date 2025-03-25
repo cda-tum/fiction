@@ -296,6 +296,7 @@ from .pyfiction import (  # type: ignore[import-not-found]
     technology_mapping_stats,
     # Networks
     technology_network,
+    termination_condition,
     time_to_solution,
     time_to_solution_for_given_simulation_results,
     time_to_solution_params,
@@ -615,6 +616,7 @@ __all__ = [
     "technology_mapping_stats",
     # Networks
     "technology_network",
+    "termination_condition",
     "time_to_solution",
     "time_to_solution_for_given_simulation_results",
     "time_to_solution_params",
