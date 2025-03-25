@@ -10017,18 +10017,40 @@ Parameter ``cell``:
 static const char *__doc_fiction_detail_recursively_paint_edges = R"doc()doc";
 
 static const char *__doc_fiction_detail_routing_objective_with_fanin_update_information =
-R"doc(This struct encapsulates a routing objective that specifies the source
-and target coordinates, along with a flag indicating whether the
-primary input was the first fanin for the corresponding fanout.
+R"doc(Encapsulates a routing objective with fanin update information.
+
+This struct specifies a routing objective by defining the source and
+target coordinates, and it includes a flag that indicates whether the
+primary input was the first fanin for the corresponding fanout and the
+fanout gate is asymmetric (e.g., greater than). If the flag is set to
+true, the fanin signals need to be reordered.
 
 Template parameter ``HexLyt``:
-    type of the hexagonal layout.)doc";
+    The type of the hexagonal layout.)doc";
 
-static const char *__doc_fiction_detail_routing_objective_with_fanin_update_information_routing_objective_with_fanin_update_information = R"doc()doc";
+static const char *__doc_fiction_detail_routing_objective_with_fanin_update_information_routing_objective_with_fanin_update_information =
+R"doc(Constructs a routing objective with fanin update information.
+
+Initializes the base routing objective with the given source and
+target coordinates, and sets the update flag based on the provided
+parameter.
+
+Parameter ``src``:
+    The source coordinate of the routing objective.
+
+Parameter ``tgt``:
+    The target coordinate of the routing objective.
+
+Parameter ``update``:
+    (Optional) A flag that, if true, indicates that the primary input
+    was the first fanin and the fanout gate is asymmetric, which means
+    that the fanin signals need to be reordered. Defaults to false.)doc";
 
 static const char *__doc_fiction_detail_routing_objective_with_fanin_update_information_update_first_fanin =
-R"doc(Flag that is set to true if the primary input was the first fanin;
-this indicates that the fanin signals need to be reordered.)doc";
+R"doc(Flag indicating whether the primary input was the first fanin and the
+fanout gate is asymmetric.
+
+If this flag is true, the fanin signals need to be reordered.)doc";
 
 static const char *__doc_fiction_detail_sat_clocking_handler = R"doc()doc";
 
