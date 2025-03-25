@@ -13,7 +13,6 @@
 #include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/technology/constants.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/utils/math_utils.hpp"
 
 #include <kitty/bit_operations.hpp>
 #include <kitty/traits.hpp>
