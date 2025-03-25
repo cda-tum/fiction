@@ -11,6 +11,7 @@
 #include <phmap.h>
 
 #include <cassert>
+#include <cstddef>
 #include <cstdint>
 #include <memory>
 #include <optional>
@@ -182,6 +183,75 @@ class sidb_defect_surface<Lyt, false> : public Lyt
     [[nodiscard]] uint64_t num_defects() const noexcept
     {
         return strg->defective_coordinates.size();
+    }
+    /**
+     * Number of positively charged defects on the surface.
+     *
+     * @return Number of positively charged defects.
+     */
+    [[nodiscard]] std::size_t num_positively_charged_defects() const noexcept
+    {
+        std::size_t number_of_positively_charged_defects = 0;
+
+        this->foreach_sidb_defect(
+            [&number_of_positively_charged_defects](const auto& defect)
+            {
+                if (is_positively_charged_defect(defect.second))
+                {
+                    number_of_positively_charged_defects++;
+                }
+            });
+
+        return number_of_positively_charged_defects;
+    }
+    /**
+     * Returns the number of negatively charged defects.
+     *
+     * @return Number of negatively charged defects.
+     */
+    [[nodiscard]] std::size_t num_negatively_charged_defects() const noexcept
+    {
+        std::size_t number_of_negatively_charged_defects = 0;
+
+        this->foreach_sidb_defect(
+            [&number_of_negatively_charged_defects](const auto& defect)
+            {
+                if (is_negatively_charged_defect(defect.second))
+                {
+                    number_of_negatively_charged_defects++;
+                }
+            });
+
+        return number_of_negatively_charged_defects;
+    }
+    /**
+     * Returns the number of charged defects.
+     *
+     * @return Number of charged defects.
+     */
+    [[nodiscard]] std::size_t num_charged_defects() const noexcept
+    {
+        return num_positively_charged_defects() + num_negatively_charged_defects();
+    }
+    /**
+     * Returns the number of neutral defects.
+     *
+     * @return Number of neutral defects.
+     */
+    [[nodiscard]] std::size_t num_neutral_defects() const noexcept
+    {
+        std::size_t number_of_neutral_defects = 0;
+
+        this->foreach_sidb_defect(
+            [&number_of_neutral_defects](const auto& defect)
+            {
+                if (is_neutral_defect_type(defect.second))
+                {
+                    number_of_neutral_defects++;
+                }
+            });
+
+        return number_of_neutral_defects;
     }
     /**
      * Applies a function to all defects on the surface. Since the defects are fetched directly from the storage map,

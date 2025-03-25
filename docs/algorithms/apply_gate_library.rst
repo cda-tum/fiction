@@ -12,7 +12,9 @@ implementations for each gate present in the passed ``gate_level_layout``.
         **Header:** ``fiction/algorithms/physical_design/apply_gate_library.hpp``
 
         .. doxygenfunction:: fiction::apply_gate_library(const GateLyt& lyt)
+        .. doxygenfunction:: apply_gate_library_to_defective_surface(const GateLyt& lyt, const DefectLyt& defect_surface)
         .. doxygenfunction:: fiction::apply_parameterized_gate_library(const GateLyt& lyt, const Params& params)
+        .. doxygenfunction:: fiction::apply_parameterized_gate_library_to_defective_surface(const GateLyt& lyt, const Params& params, const DefectLyt& defect_surface)
 
     .. tab:: Python
         .. autofunction:: mnt.pyfiction.apply_qca_one_library
