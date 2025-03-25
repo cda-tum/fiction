@@ -16,6 +16,7 @@
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 #include "fiction/utils/name_utils.hpp"
+#include "fiction/utils/placement_utils.hpp"
 #include "fiction/utils/routing_utils.hpp"
 
 #include <fmt/format.h>
@@ -107,23 +108,37 @@ namespace detail
 {
 
 /**
- * This struct encapsulates a routing objective that specifies the source and target coordinates, along with a flag
- * indicating whether the primary input was the first fanin for the corresponding fanout.
+ * Encapsulates a routing objective with fanin update information.
  *
- * @tparam HexLyt type of the hexagonal layout.
+ * This struct specifies a routing objective by defining the source and target coordinates, and it includes
+ * a flag that indicates whether the primary input was the first fanin for the corresponding fanout and the fanout gate
+ * is asymmetric (e.g., greater than). If the flag is set to true, the fanin signals need to be reordered.
+ *
+ * @tparam HexLyt The type of the hexagonal layout.
  */
 template <typename HexLyt>
 struct routing_objective_with_fanin_update_information : public routing_objective<HexLyt>
 {
-    // Constructor that forwards to base class constructor
+    /**
+     * Constructs a routing objective with fanin update information.
+     *
+     * Initializes the base routing objective with the given source and target coordinates,
+     * and sets the update flag based on the provided parameter.
+     *
+     * @param src The source coordinate of the routing objective.
+     * @param tgt The target coordinate of the routing objective.
+     * @param update (Optional) A flag that, if true, indicates that the primary input was the first fanin and the
+     * fanout gate is asymmetric, which means that the fanin signals need to be reordered. Defaults to false.
+     */
     routing_objective_with_fanin_update_information(const coordinate<HexLyt>& src, const coordinate<HexLyt>& tgt,
                                                     bool update = false) :
             routing_objective<HexLyt>{src, tgt},
             update_first_fanin{update}
     {}
     /**
-     * Flag that is set to true if the primary input was the first fanin; this indicates that the fanin signals need to
-     * be reordered.
+     * Flag indicating whether the primary input was the first fanin and the fanout gate is asymmetric.
+     *
+     * If this flag is true, the fanin signals need to be reordered.
      */
     bool update_first_fanin = false;
 };
@@ -537,13 +552,9 @@ class hexagonalization_impl
                                 const auto hex_signal = hex_layout.make_signal(hex_layout.get_node(hex_source));
 
                                 // create appropriate gate in hex layout based on node type
-                                if (!layout.is_po(node) && layout.is_wire(node))
+                                if (!layout.is_po(node))
                                 {
-                                    hex_layout.create_buf(hex_signal, hex_tile);
-                                }
-                                else if (layout.is_inv(node))
-                                {
-                                    hex_layout.create_not(hex_signal, hex_tile);
+                                    (void)place(hex_layout, hex_tile, layout, node, hex_signal);
                                 }
                             }
                             else if (signals.size() == 2)
@@ -560,52 +571,7 @@ class hexagonalization_impl
                                 const auto hex_signal_a = hex_layout.make_signal(hex_layout.get_node(hex_tile_a));
                                 const auto hex_signal_b = hex_layout.make_signal(hex_layout.get_node(hex_tile_b));
 
-                                // create the corresponding gate based on the node's function
-                                if (layout.is_and(node))
-                                {
-                                    hex_layout.create_and(hex_signal_a, hex_signal_b, hex_tile);
-                                }
-                                else if (layout.is_nand(node))
-                                {
-                                    hex_layout.create_nand(hex_signal_a, hex_signal_b, hex_tile);
-                                }
-                                else if (layout.is_or(node))
-                                {
-                                    hex_layout.create_or(hex_signal_a, hex_signal_b, hex_tile);
-                                }
-                                else if (layout.is_nor(node))
-                                {
-                                    hex_layout.create_nor(hex_signal_a, hex_signal_b, hex_tile);
-                                }
-                                else if (layout.is_xor(node))
-                                {
-                                    hex_layout.create_xor(hex_signal_a, hex_signal_b, hex_tile);
-                                }
-                                else if (layout.is_xnor(node))
-                                {
-                                    hex_layout.create_xnor(hex_signal_a, hex_signal_b, hex_tile);
-                                }
-                                else if (layout.is_lt(node))
-                                {
-                                    hex_layout.create_lt(hex_signal_a, hex_signal_b, hex_tile);
-                                }
-                                else if (layout.is_le(node))
-                                {
-                                    hex_layout.create_le(hex_signal_a, hex_signal_b, hex_tile);
-                                }
-                                else if (layout.is_gt(node))
-                                {
-                                    hex_layout.create_gt(hex_signal_a, hex_signal_b, hex_tile);
-                                }
-                                else if (layout.is_ge(node))
-                                {
-                                    hex_layout.create_ge(hex_signal_a, hex_signal_b, hex_tile);
-                                }
-                                else if (layout.is_function(node))
-                                {
-                                    const auto node_fun = layout.node_function(node);
-                                    hex_layout.create_node({hex_signal_a, hex_signal_b}, node_fun, hex_tile);
-                                }
+                                (void)place(hex_layout, hex_tile, layout, node, hex_signal_a, hex_signal_b);
                             }
                         }
                     }
@@ -792,7 +758,10 @@ class hexagonalization_impl
                     }
                     else
                     {
-                        throw hexagonalization_io_pin_routing_error("Extending PIs to the top border failed.");
+                        throw hexagonalization_io_pin_routing_error(
+                            fmt::format("After extending PI to tile {} at the top border, rerouting to its fanout at "
+                                        "tile {} was not possible with crossings {}",
+                                        obj.source, obj.target, crossings ? "enabled" : "disabled"));
                     }
                 }
             }
@@ -862,7 +831,10 @@ class hexagonalization_impl
                     }
                     else
                     {
-                        throw hexagonalization_io_pin_routing_error("Extending POs to the bottom border failed.");
+                        throw hexagonalization_io_pin_routing_error(
+                            fmt::format("After extending PO to tile {} at the bottom border, rerouting from its fanin "
+                                        "at tile {} was not possible with crossings {}",
+                                        obj.target, obj.source, crossings ? "enabled" : "disabled"));
                     }
                 }
             }
