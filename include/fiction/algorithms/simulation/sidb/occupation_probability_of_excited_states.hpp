@@ -21,6 +21,21 @@ namespace fiction
 {
 
 /**
+ * This function computes the Boltzmann factor for a given energy, the minimal energy, and the temperature.
+ *
+ * @param energy Boltzmann factor for the given energy is calculated.
+ * @param min_energy Minimum energy of the system.
+ * @param temperature Temperature of the system (unit: K).
+ * @return Boltzmann factor.
+ */
+[[nodiscard]] inline double calculate_boltzmann_factor(const double energy, const double min_energy,
+                                                       const double temperature) noexcept
+{
+    return std::exp(-((energy - min_energy) * constants::physical::EV_TO_JOULE /
+                      (constants::physical::BOLTZMANN_CONSTANT * temperature)));
+}
+
+/**
  * This function computes the occupation probability of erroneous charge distributions (output charge does not match the
  * expected output according the truth table) at a given temperature.
  *
@@ -46,13 +61,9 @@ namespace fiction
     const auto min_energy = energy;
 
     // The partition function is obtained by summing up all the Boltzmann factors.
-    const double partition_function =
-        std::accumulate(energy_and_state_type.cbegin(), energy_and_state_type.cend(), 0.0,
-                        [&](const double sum, const auto& it)
-                        {
-                            return sum + std::exp(-((it.first - min_energy) * constants::physical::EV_TO_JOULE /
-                                                    (constants::physical::BOLTZMANN_CONSTANT * temperature)));
-                        });
+    const double partition_function = std::accumulate(
+        energy_and_state_type.cbegin(), energy_and_state_type.cend(), 0.0, [&](const double sum, const auto& it)
+        { return sum + calculate_boltzmann_factor(it.first, min_energy, temperature); });
 
     // All Boltzmann factors of the erroneous states are summed.
     double p = 0;
@@ -62,8 +73,7 @@ namespace fiction
     {
         if (!state_transparent_erroneous)
         {
-            p += std::exp(-((energies - min_energy) * constants::physical::EV_TO_JOULE /
-                            (constants::physical::BOLTZMANN_CONSTANT * temperature)));
+            p += calculate_boltzmann_factor(energies, min_energy, temperature);
         }
     }
 
@@ -78,8 +88,8 @@ namespace fiction
  * @param temperature System temperature to assume (unit: K).
  * @return The total occupation probability of all excited states is returned.
  */
-[[nodiscard]] inline double occupation_probability_non_gate_based(const sidb_energy_distribution& energy_distribution,
-                                                                  const double                    temperature) noexcept
+[[nodiscard]] inline double occupation_probability_non_gate_based(const energy_distribution& energy_distribution,
+                                                                  const double               temperature) noexcept
 {
     assert((temperature > 0.0) && "Temperature should be slightly above 0 K");
 
@@ -98,8 +108,7 @@ namespace fiction
         [&](const double energy, const uint64_t degeneracy)
         {
             partition_function +=
-                static_cast<double>(degeneracy) * std::exp(-((energy - min_energy) * constants::physical::EV_TO_JOULE /
-                                                             (constants::physical::BOLTZMANN_CONSTANT * temperature)));
+                static_cast<double>(degeneracy) * calculate_boltzmann_factor(energy, min_energy, temperature);
         });
 
     double p = 0;

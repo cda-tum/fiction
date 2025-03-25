@@ -487,7 +487,7 @@ TEMPLATE_TEST_CASE("QuickSim simulation of an SiDB BDL pair with varying thread 
     {
         REQUIRE(!result.charge_distributions.empty());
 
-        REQUIRE(!energy_distribution(result.charge_distributions).empty());
+        REQUIRE(!calculate_energy_distribution(result.charge_distributions).empty());
 
         const auto& charge_lyt_first = result.charge_distributions.front();
 
@@ -593,7 +593,7 @@ TEMPLATE_TEST_CASE("QuickSim simulation of an layout comprising of 13 SiDBs", "[
     {
         REQUIRE(!sim_results.charge_distributions.empty());
 
-        REQUIRE(!energy_distribution(sim_results.charge_distributions).empty());
+        REQUIRE(!calculate_energy_distribution(sim_results.charge_distributions).empty());
 
         const auto& charge_lyt_first = sim_results.charge_distributions.front();
 
@@ -707,7 +707,7 @@ TEMPLATE_TEST_CASE("QuickSim simulation of an layout comprising of 13 SiDBs, all
     {
         REQUIRE(!simulation_results.charge_distributions.empty());
 
-        REQUIRE(!energy_distribution(simulation_results.charge_distributions).empty());
+        REQUIRE(!calculate_energy_distribution(simulation_results.charge_distributions).empty());
 
         const auto& charge_lyt_first = simulation_results.charge_distributions.front();
 

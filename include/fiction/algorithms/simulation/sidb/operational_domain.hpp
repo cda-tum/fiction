@@ -893,7 +893,7 @@ class operational_domain_impl
                         assert(false && "unsupported simulation engine");
                     }
 
-                    const auto energy_dist = energy_distribution(sim_results.charge_distributions);
+                    const auto energy_dist = calculate_energy_distribution(sim_results.charge_distributions);
 
                     lyt.assign_physical_parameters(simulation_parameters);
                     const auto degeneracy_of_layout_energy =

@@ -14,7 +14,7 @@
 
 using namespace fiction;
 
-TEST_CASE("Test energy_distribution function", "[energy-distribution]")
+TEST_CASE("Test calculate_energy_distribution function", "[energy-distribution]")
 {
     SECTION("one empty layout")
     {
@@ -22,7 +22,7 @@ TEST_CASE("Test energy_distribution function", "[energy-distribution]")
         std::vector<charge_distribution_surface<sidb_100_cell_clk_lyt_siqad>> all_lyts{};
         const charge_distribution_surface                                     charge_layout{lyt};
         all_lyts.push_back(charge_layout);
-        auto result = energy_distribution(all_lyts);
+        auto result = calculate_energy_distribution(all_lyts);
         CHECK(result.size() == 1);
         REQUIRE(result.get_nth_state(0).has_value());
         CHECK_THAT(result.get_nth_state(0).value().electrostatic_potential_energy,
@@ -38,7 +38,7 @@ TEST_CASE("Test energy_distribution function", "[energy-distribution]")
         charge_layout.assign_charge_state({0, 0}, sidb_charge_state::NEUTRAL);
         all_lyts.push_back(charge_layout);
 
-        auto result = energy_distribution(all_lyts);
+        auto result = calculate_energy_distribution(all_lyts);
         CHECK(result.size() == 1);
         result.for_each([&](const auto& energy [[maybe_unused]], const auto& degeneracy) { CHECK(degeneracy == 1); });
     }
@@ -93,7 +93,7 @@ TEST_CASE("Test energy_distribution function", "[energy-distribution]")
         all_lyts.push_back(charge_layout_third);
         all_lyts.push_back(charge_layout_third);
 
-        const auto result = energy_distribution(all_lyts);
+        const auto result = calculate_energy_distribution(all_lyts);
 
         // "all_lyts" collects all three layouts (charge_layout_first, charge_layout_second, charge_layout_third). The
         // last two have an identical potential energy (it.second == 2) which is smaller than the one from the first

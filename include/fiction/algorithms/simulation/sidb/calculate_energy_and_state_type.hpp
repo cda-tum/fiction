@@ -48,7 +48,7 @@ using sidb_energy_and_state_type = std::vector<std::pair<double, bool>>;
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] sidb_energy_and_state_type calculate_energy_and_state_type_with_kinks_accepted(
-    const sidb_energy_distribution&                      energy_distribution,
+    const energy_distribution&                           energy_distribution,
     const std::vector<charge_distribution_surface<Lyt>>& valid_charge_distributions,
     const std::vector<bdl_pair<cell<Lyt>>>& output_bdl_pairs, const std::vector<TT>& spec,
     const uint64_t input_index) noexcept
@@ -107,7 +107,7 @@ template <typename Lyt, typename TT>
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] sidb_energy_and_state_type calculate_energy_and_state_type_with_kinks_rejected(
-    const sidb_energy_distribution&                      energy_distribution,
+    const energy_distribution&                           energy_distribution,
     const std::vector<charge_distribution_surface<Lyt>>& valid_charge_distributions, const std::vector<TT>& spec,
     const uint64_t input_index, const std::vector<bdl_wire<Lyt>>& input_bdl_wires,
     std::vector<bdl_wire<Lyt>>& output_bdl_wires) noexcept

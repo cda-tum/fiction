@@ -31,6 +31,9 @@ struct energy_state
 {
     /**
      * Default constructor.
+     *
+     * @param electrostatic_potential_energy The electrostatic potential energy of the charge distribution (eV).
+     * @param degeneracy The degeneracy of the state.
      */
     energy_state(const double electrostatic_potential_energy, const uint64_t degeneracy) :
             electrostatic_potential_energy{electrostatic_potential_energy},
@@ -51,13 +54,13 @@ struct energy_state
  * the electrostatic potential as a key and its degeneracy as a value. To be more precise, if two different charge
  * distributions occur with the same energy, the degeneracy value of the energy state is 2.
  */
-class sidb_energy_distribution
+class energy_distribution
 {
   public:
     /**
      * Default constructor.
      */
-    sidb_energy_distribution() = default;
+    energy_distribution() = default;
     /**
      * Returns the nth state (energy + degeneracy) in the energy distribution.
      *
@@ -177,13 +180,13 @@ class sidb_energy_distribution
  * vector as the value.
  */
 template <typename Lyt>
-[[nodiscard]] sidb_energy_distribution
-energy_distribution(const std::vector<charge_distribution_surface<Lyt>>& charge_distributions)
+[[nodiscard]] energy_distribution
+calculate_energy_distribution(const std::vector<charge_distribution_surface<Lyt>>& charge_distributions)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
-    sidb_energy_distribution distribution{};
+    energy_distribution distribution{};
 
     std::vector<charge_distribution_surface<Lyt>> cds_updated_charge_index{};
     cds_updated_charge_index.reserve(charge_distributions.size());

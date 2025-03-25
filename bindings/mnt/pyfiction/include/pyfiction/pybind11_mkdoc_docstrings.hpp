@@ -1243,7 +1243,7 @@ Template parameter ``Lyt``:
 Template parameter ``TT``:
     The type of the truth table specifying the gate behavior.
 
-Parameter ``energy_distribution``:
+Parameter ``calculate_energy_distribution``:
     Energy distribution.
 
 Parameter ``valid_charge_distributions``:
@@ -1275,7 +1275,7 @@ Template parameter ``Lyt``:
 Template parameter ``TT``:
     The type of the truth table specifying the gate behavior.
 
-Parameter ``energy_distribution``:
+Parameter ``calculate_energy_distribution``:
     Energy distribution.
 
 Parameter ``valid_charge_distributions``:
@@ -16330,7 +16330,7 @@ R"doc(This function computes the occupation probability of excited states
 (charge distributions with energy higher than the ground state) at a
 given temperature.
 
-Parameter ``energy_distribution``:
+Parameter ``calculate_energy_distribution``:
     This contains the energies in eV of all possible charge
     distributions with the degeneracy.
 

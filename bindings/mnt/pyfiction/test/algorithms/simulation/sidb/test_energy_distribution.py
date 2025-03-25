@@ -41,6 +41,8 @@ class TestEnergyDistribution(unittest.TestCase):
 
         distribution = energy_distribution(charge_layouts)
 
+        self.assertAlmostEqual(distribution.get_nth_state(0).electrostatic_potential_energy, 0.0)
+        self.assertAlmostEqual(distribution.get_nth_state(1).electrostatic_potential_energy, 0.48066663155586997)
         self.assertLessEqual(distribution.get_nth_state(0).degeneracy, 1)
         self.assertLessEqual(distribution.get_nth_state(1).degeneracy, 3)
 
