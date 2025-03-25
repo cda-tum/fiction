@@ -1204,7 +1204,7 @@ is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational
  * @param lyt The SiDB layout.
  * @param spec Vector of truth table specifications.
  * @param params Parameters to simulate if a input combination is operational.
- * @return The count of operational input combinations.
+ * @return The operational input combinations.
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] std::set<uint64_t> operational_input_patterns(const Lyt& lyt, const std::vector<TT>& spec,

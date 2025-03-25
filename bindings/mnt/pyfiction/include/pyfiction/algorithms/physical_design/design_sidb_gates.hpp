@@ -47,7 +47,7 @@ inline void design_sidb_gates(pybind11::module& m)
     /**
      * Design approach selector type.
      */
-    pybind11::enum_<typename fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::design_sidb_gates_mode>(
+    py::enum_<typename fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::design_sidb_gates_mode>(
         m, "design_sidb_gates_mode", DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode))
         .value("QUICKCELL",
                fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::design_sidb_gates_mode::QUICKCELL,
@@ -58,6 +58,17 @@ inline void design_sidb_gates(pybind11::module& m)
                DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode_QUICKCELL))
         .value("RANDOM", fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::design_sidb_gates_mode::RANDOM,
                DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode_RANDOM));
+    /**
+     * Termination condition selector type.
+     */
+    py::enum_<typename fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::termination_condition>(
+        m, "termination_condition")
+        .value(
+            "AFTER_FIRST_SOLUTION",
+            fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::termination_condition::AFTER_FIRST_SOLUTION)
+        .value("ALL_COMBINATIONS_ENUMERATED",
+               fiction::design_sidb_gates_params<
+                   fiction::offset::ucoord_t>::termination_condition::ALL_COMBINATIONS_ENUMERATED);
 
     /**
      * Parameters.
@@ -72,9 +83,14 @@ inline void design_sidb_gates(pybind11::module& m)
                        DOC(fiction_design_sidb_gates_params_design_mode))
         .def_readwrite("canvas", &fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::canvas,
                        DOC(fiction_design_sidb_gates_params_canvas))
-        .def_readwrite("number_of_sidbs",
-                       &fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::number_of_sidbs,
-                       DOC(fiction_design_sidb_gates_params_number_of_sidbs));
+        .def_readwrite("number_of_canvas_sidbs",
+                       &fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::number_of_canvas_sidbs,
+                       DOC(fiction_design_sidb_gates_params_number_of_canvas_sidbs))
+        .def_readwrite("termination_cond",
+                       &fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::termination_cond,
+                       DOC(fiction_design_sidb_gates_params_termination_condition))
+
+        ;
 
     detail::design_sidb_gates<py_sidb_100_lattice<py_offset_coordinate>>(m);
     detail::design_sidb_gates<py_sidb_111_lattice<py_offset_coordinate>>(m);

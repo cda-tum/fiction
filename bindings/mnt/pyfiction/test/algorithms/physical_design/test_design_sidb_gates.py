@@ -10,6 +10,7 @@ from mnt.pyfiction import (
     sidb_lattice,
     sidb_simulation_engine,
     sidb_technology,
+    termination_condition,
 )
 
 
@@ -38,12 +39,13 @@ class TestDesignSiDBGates(unittest.TestCase):
         params.operational_params.simulation_parameters.base = 2
         params.operational_params.simulation_parameters.mu_minus = -0.28
         params.design_mode = design_sidb_gates_mode.AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER
+        params.termination_cond = termination_condition.ALL_COMBINATIONS_ENUMERATED
         params.canvas = [(4, 8), (14, 11)]
-        params.number_of_sidbs = 1
+        params.number_of_canvas_sidbs = 1
         params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
 
         self.assertEqual(params.operational_params.simulation_parameters.mu_minus, -0.28)
-        self.assertEqual(params.number_of_sidbs, 1)
+        self.assertEqual(params.number_of_canvas_sidbs, 1)
         self.assertEqual(params.canvas[0], (4, 8, 0))
         self.assertEqual(params.canvas[1], (14, 11))
 
@@ -84,13 +86,14 @@ class TestDesignSiDBGates(unittest.TestCase):
         params.operational_params.simulation_parameters.base = 2
         params.operational_params.simulation_parameters.mu_minus = -0.32
         params.design_mode = design_sidb_gates_mode.AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER
+        params.termination_cond = termination_condition.ALL_COMBINATIONS_ENUMERATED
         params.canvas = [(10, 22), (14, 34)]
-        params.number_of_sidbs = 3
+        params.number_of_canvas_sidbs = 3
         params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
         params.operational_params.op_condition = operational_condition.REJECT_KINKS
 
         self.assertEqual(params.operational_params.simulation_parameters.mu_minus, -0.32)
-        self.assertEqual(params.number_of_sidbs, 3)
+        self.assertEqual(params.number_of_canvas_sidbs, 3)
         self.assertEqual(params.canvas[0], (10, 22, 0))
         self.assertEqual(params.canvas[1], (14, 34))
 
@@ -135,13 +138,14 @@ class TestDesignSiDBGates(unittest.TestCase):
         params.operational_params.simulation_parameters.base = 2
         params.operational_params.simulation_parameters.mu_minus = -0.32
         params.design_mode = design_sidb_gates_mode.AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER
+        params.termination_cond = termination_condition.ALL_COMBINATIONS_ENUMERATED
 
         params.canvas = [(10, 26), (14, 34)]
-        params.number_of_sidbs = 3
+        params.number_of_canvas_sidbs = 3
         params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
 
         self.assertEqual(params.operational_params.simulation_parameters.mu_minus, -0.32)
-        self.assertEqual(params.number_of_sidbs, 3)
+        self.assertEqual(params.number_of_canvas_sidbs, 3)
         self.assertEqual(params.canvas[0], (10, 26, 0))
         self.assertEqual(params.canvas[1], (14, 34))
 
