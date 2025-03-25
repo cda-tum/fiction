@@ -33,7 +33,7 @@ void hexagonalization(pybind11::module& m)
 
 inline void hexagonalization(pybind11::module& m)
 {
-    detail::hexagonalization<py_cartesian_gate_layout>(m);
+    detail::hexagonalization<py_cartesian_gate_layout<py_offset_coordinate>>(m);
 }
 
 }  // namespace pyfiction

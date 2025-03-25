@@ -92,8 +92,8 @@ inline void design_sidb_gates(pybind11::module& m)
 
         ;
 
-    detail::design_sidb_gates<py_sidb_100_lattice>(m);
-    detail::design_sidb_gates<py_sidb_111_lattice>(m);
+    detail::design_sidb_gates<py_sidb_100_lattice<py_offset_coordinate>>(m);
+    detail::design_sidb_gates<py_sidb_111_lattice<py_offset_coordinate>>(m);
 }
 
 }  // namespace pyfiction

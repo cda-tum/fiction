@@ -33,9 +33,9 @@ void sidb_nm_position(pybind11::module& m)
 inline void sidb_nm_position(pybind11::module& m)
 {
     detail::sidb_nm_position<py_charge_distribution_surface>(m);
-    detail::sidb_nm_position<py_sidb_layout>(m);
-    detail::sidb_nm_position<py_sidb_lattice<fiction::sidb_100_lattice>>(m);
-    detail::sidb_nm_position<py_sidb_lattice<fiction::sidb_111_lattice>>(m);
+    detail::sidb_nm_position<py_sidb_layout<py_offset_coordinate>>(m);
+    detail::sidb_nm_position<py_sidb_lattice<fiction::sidb_100_lattice, py_offset_coordinate>>(m);
+    detail::sidb_nm_position<py_sidb_lattice<fiction::sidb_111_lattice, py_offset_coordinate>>(m);
 }
 
 }  // namespace pyfiction
