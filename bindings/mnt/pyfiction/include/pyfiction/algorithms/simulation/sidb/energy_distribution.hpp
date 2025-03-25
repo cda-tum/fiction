@@ -46,16 +46,16 @@ inline void energy_distribution(pybind11::module& m)
     py::class_<fiction::energy_distribution>(m, "energy_distribution")
         .def(py::init<>())
         .def("get_nth_state", &fiction::energy_distribution::get_nth_state, py::arg("state_index"),
-             DOC(fiction_sidb_energy_distribution_get_nth_state))
+             DOC(fiction_energy_distribution_get_nth_state))
         .def("degeneracy_of_given_energy", &fiction::energy_distribution::degeneracy_of_given_energy, py::arg("energy"),
-             DOC(fiction_sidb_energy_distribution_degeneracy_of_given_energy))
+             DOC(fiction_energy_distribution_degeneracy_of_given_energy))
         .def("add_state", &fiction::energy_distribution::add_state, py::arg("energy"), py::arg("degeneracy"),
-             DOC(fiction_sidb_energy_distribution_add_state))
-        .def("size", &fiction::energy_distribution::size, DOC(fiction_sidb_energy_distribution_size))
-        .def("empty", &fiction::energy_distribution::empty, DOC(fiction_sidb_energy_distribution_empty))
-        .def("max_energy", &fiction::energy_distribution::max_energy, DOC(fiction_sidb_energy_distribution_max_energy))
-        .def("min_energy", &fiction::energy_distribution::min_energy, DOC(fiction_sidb_energy_distribution_min_energy),
-             DOC(fiction_sidb_energy_distribution_min_energy))
+             DOC(fiction_energy_distribution_add_state))
+        .def("size", &fiction::energy_distribution::size, DOC(fiction_energy_distribution_size))
+        .def("empty", &fiction::energy_distribution::empty, DOC(fiction_energy_distribution_empty))
+        .def("max_energy", &fiction::energy_distribution::max_energy, DOC(fiction_energy_distribution_max_energy))
+        .def("min_energy", &fiction::energy_distribution::min_energy, DOC(fiction_energy_distribution_min_energy),
+             DOC(fiction_energy_distribution_min_energy))
 
         ;
 
