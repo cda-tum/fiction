@@ -1390,12 +1390,11 @@ Template parameter ``Lyt``:
     SiDB cell-level layout type.
 
 Parameter ``charge_distributions``:
-    A vector of `charge_distribution_surface` objects for which
-    statistics are to be computed.
+    A vector of `charge_distribution_surface` objects for which the
+    energy distribution is computed.
 
 Returns:
-    A map containing the system energy as the key and the number of
-    occurrences of that energy in the input vector as the value.)doc";
+    Energy distribution.)doc";
 
 static const char *__doc_fiction_can_positive_charges_occur =
 R"doc(This algorithm determines if positively charged SiDBs can occur in a
@@ -11421,14 +11420,11 @@ potential as a key and its degeneracy as a value. To be more precise,
 if two different charge distributions occur with the same energy, the
 degeneracy value of the energy state is 2.)doc";
 
-static const char *__doc_fiction_energy_distribution_add_state =
+static const char *__doc_fiction_energy_distribution_add_energy_state =
 R"doc(Adds a state to the energy distribution.
 
-Parameter ``energy``:
-    The energy of the state to be added.
-
-Parameter ``degeneracy``:
-    The degeneracy of the state to be added.)doc";
+Parameter ``state``:
+    The energy state to be added.)doc";
 
 static const char *__doc_fiction_energy_distribution_degeneracy =
 R"doc(Returns the degeneracy value (number of states) with the given energy
@@ -11439,8 +11435,8 @@ Parameter ``energy``:
     determined.
 
 Returns:
-    The excited state number of the given energy value. If the energy
-    value is not found, `std::nullopt` is returned instead.)doc";
+    The degeneracy of the given energy. If the energy value is not
+    found, `std::nullopt` is returned instead.)doc";
 
 static const char *__doc_fiction_energy_distribution_distribution =
 R"doc(The energy distribution map. The key is the energy value and the value
@@ -11471,8 +11467,8 @@ Parameter ``state_index``:
     The index of the state to be retrieved.
 
 Returns:
-    The energy and degeneracy of the state at the specified index. If
-    the index is out of range, `std::nullopt` is returned instead.)doc";
+    Energy state. If the index is out of range, `std::nullopt` is
+    returned instead.)doc";
 
 static const char *__doc_fiction_energy_distribution_max_energy =
 R"doc(Returns the maximum energy value in the energy distribution.
@@ -11487,10 +11483,10 @@ Returns:
     The minimum energy value in the energy distribution.)doc";
 
 static const char *__doc_fiction_energy_distribution_size =
-R"doc(Returns the number of states in the energy distribution.
+R"doc(Returns the number of energy states in the energy distribution.
 
 Returns:
-    The number of states in the energy distribution.)doc";
+    The number of energy states in the energy distribution.)doc";
 
 static const char *__doc_fiction_energy_state =
 R"doc(This struct stores the energy state of an SiDB layout. The energy
