@@ -897,7 +897,7 @@ class operational_domain_impl
 
                     lyt.assign_physical_parameters(simulation_parameters);
                     const auto degeneracy_of_layout_energy =
-                        energy_dist.degeneracy_of_given_energy(lyt.get_electrostatic_potential_energy());
+                        energy_dist.degeneracy(lyt.get_electrostatic_potential_energy());
 
                     if (!degeneracy_of_layout_energy.has_value())
                     {

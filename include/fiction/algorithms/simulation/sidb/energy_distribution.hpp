@@ -88,7 +88,7 @@ class energy_distribution
      * @return The excited state number of the given energy value. If the energy value is not found, `std::nullopt` is
      * returned instead.
      */
-    [[nodiscard]] std::optional<uint64_t> degeneracy_of_given_energy(const double energy) const noexcept
+    [[nodiscard]] std::optional<uint64_t> degeneracy(const double energy) const noexcept
     {
         uint64_t degeneracy = 0;
         for (const auto& [key, value] : distribution)

@@ -47,7 +47,7 @@ inline void energy_distribution(pybind11::module& m)
         .def(py::init<>())
         .def("get_nth_state", &fiction::energy_distribution::get_nth_state, py::arg("state_index"),
              DOC(fiction_energy_distribution_get_nth_state))
-        .def("degeneracy_of_given_energy", &fiction::energy_distribution::degeneracy_of_given_energy, py::arg("energy"),
+        .def("degeneracy", &fiction::energy_distribution::degeneracy, py::arg("energy"),
              DOC(fiction_energy_distribution_degeneracy_of_given_energy))
         .def("add_state", &fiction::energy_distribution::add_state, py::arg("energy"), py::arg("degeneracy"),
              DOC(fiction_energy_distribution_add_state))
