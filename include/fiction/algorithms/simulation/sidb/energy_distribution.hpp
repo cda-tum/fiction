@@ -65,8 +65,7 @@ class energy_distribution
      * Returns the nth state (energy + degeneracy) in the energy distribution.
      *
      * @param state_index The index of the state to be retrieved.
-     * @return The energy and degeneracy of the state at the specified index. If the index is out of range,
-     * `std::nullopt` is returned instead.
+     * @return Energy state. If the index is out of range, `std::nullopt` is returned instead.
      */
     [[nodiscard]] std::optional<energy_state> get_nth_state(const uint64_t state_index) const noexcept
     {
@@ -85,12 +84,13 @@ class energy_distribution
      * Returns the degeneracy value (number of states) with the given energy value.
      *
      * @param energy The energy value for which the excited state number is to be determined.
-     * @return The excited state number of the given energy value. If the energy value is not found, `std::nullopt` is
+     * @return The degeneracy of the given energy. If the energy value is not found, `std::nullopt` is
      * returned instead.
      */
     [[nodiscard]] std::optional<uint64_t> degeneracy(const double energy) const noexcept
     {
         uint64_t degeneracy = 0;
+
         for (const auto& [key, value] : distribution)
         {
             if (std::abs(key - energy) < constants::ERROR_MARGIN)
@@ -99,22 +99,22 @@ class energy_distribution
             }
             ++degeneracy;
         }
+
         return std::nullopt;
     }
     /**
      * Adds a state to the energy distribution.
      *
-     * @param energy The energy of the state to be added.
-     * @param degeneracy The degeneracy of the state to be added.
+     * @param state The energy state to be added.
      */
-    void add_state(const double energy, const uint64_t degeneracy) noexcept
+    void add_energy_state(const energy_state& state) noexcept
     {
-        distribution[energy] = degeneracy;
+        distribution[state.electrostatic_potential_energy] = state.degeneracy;
     }
     /**
-     * Returns the number of states in the energy distribution.
+     * Returns the number of energy states in the energy distribution.
      *
-     * @return The number of states in the energy distribution.
+     * @return The number of energy states in the energy distribution.
      */
     [[nodiscard]] std::size_t size() const noexcept
     {
@@ -174,10 +174,9 @@ class energy_distribution
  * the comparison uses a tolerance specified by `constants::ERROR_MARGIN`.
  *
  * @tparam Lyt SiDB cell-level layout type.
- * @param charge_distributions A vector of `charge_distribution_surface` objects for which statistics are to be
+ * @param charge_distributions A vector of `charge_distribution_surface` objects for which the energy distribution is
  * computed.
- * @return A map containing the system energy as the key and the number of occurrences of that energy in the input
- * vector as the value.
+ * @return Energy distribution.
  */
 template <typename Lyt>
 [[nodiscard]] energy_distribution
@@ -243,7 +242,7 @@ calculate_energy_distribution(const std::vector<charge_distribution_surface<Lyt>
             unique_cds.cbegin(), unique_cds.cend(), [&energy](const auto& lyt)
             { return std::abs(lyt.get_electrostatic_potential_energy() - energy) < constants::ERROR_MARGIN; }));
 
-        distribution.add_state(energy, number_of_states_with_given_energy);
+        distribution.add_energy_state(energy_state(energy, number_of_states_with_given_energy));
     }
 
     return distribution;
