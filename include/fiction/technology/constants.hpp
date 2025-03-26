@@ -33,6 +33,16 @@ constexpr double ELEMENTARY_CHARGE = 1.6021766 * 1E-19;
  */
 constexpr double K_E = 8.987552 * 1E9;
 
+/**
+ * The Boltzmann constant \f$k_B\f$ in \f$J \cdot K^{-1}\f$.
+ */
+constexpr double BOLTZMANN_CONSTANT = 1.38064852 * 1E-23;
+
+/**
+ * The conversion factor from electronvolts to joules.
+ */
+constexpr double EV_TO_JOULE = ELEMENTARY_CHARGE;
+
 }  // namespace physical
 
 }  // namespace fiction::constants

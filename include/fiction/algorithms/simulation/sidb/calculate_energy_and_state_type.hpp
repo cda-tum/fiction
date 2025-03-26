@@ -13,7 +13,6 @@
 #include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/technology/constants.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/utils/math_utils.hpp"
 
 #include <kitty/bit_operations.hpp>
 #include <kitty/traits.hpp>
@@ -48,7 +47,7 @@ using sidb_energy_and_state_type = std::vector<std::pair<double, bool>>;
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] sidb_energy_and_state_type calculate_energy_and_state_type_with_kinks_accepted(
-    const sidb_energy_distribution&                      energy_distribution,
+    const energy_distribution&                           energy_distribution,
     const std::vector<charge_distribution_surface<Lyt>>& valid_charge_distributions,
     const std::vector<bdl_pair<cell<Lyt>>>& output_bdl_pairs, const std::vector<TT>& spec,
     const uint64_t input_index) noexcept
@@ -63,33 +62,29 @@ template <typename Lyt, typename TT>
 
     sidb_energy_and_state_type energy_and_state_type{};
 
-    for (const auto& [energy, occurrence] : energy_distribution)
-    {
-        // round the energy value to six decimal places to overcome potential rounding errors.
-        const auto energy_value = round_to_n_decimal_places(energy, 6);
-        for (const auto& valid_layout : valid_charge_distributions)
+    energy_distribution.for_each(
+        [&](const double energy, const uint64_t occurrence [[maybe_unused]])
         {
-            // round the energy value of the given valid_layout to six decimal places to overcome possible rounding
-            // errors and to provide comparability with the energy_value from before.
-            if (std::abs(round_to_n_decimal_places(valid_layout.get_system_energy(), 6) - energy_value) <
-                constants::ERROR_MARGIN)
+            for (const auto& valid_layout : valid_charge_distributions)
             {
-                bool correct_output = true;
-
-                for (auto i = 0u; i < output_bdl_pairs.size(); i++)
+                if (std::abs(valid_layout.get_electrostatic_potential_energy() - energy) < constants::ERROR_MARGIN)
                 {
-                    if (static_cast<bool>(-charge_state_to_sign(valid_layout.get_charge_state(
-                            output_bdl_pairs[i].lower))) != kitty::get_bit(spec[i], input_index))
-                    {
-                        correct_output = false;
-                    }
-                }
+                    bool correct_output = true;
 
-                // The output SiDB matches the truth table entry. Hence, state is called transparent.
-                energy_and_state_type.emplace_back(energy, correct_output);
+                    for (auto i = 0u; i < output_bdl_pairs.size(); i++)
+                    {
+                        if (static_cast<bool>(-charge_state_to_sign(valid_layout.get_charge_state(
+                                output_bdl_pairs[i].lower))) != kitty::get_bit(spec[i], input_index))
+                        {
+                            correct_output = false;
+                        }
+                    }
+
+                    // The output SiDB matches the truth table entry. Hence, the state is called transparent.
+                    energy_and_state_type.emplace_back(energy, correct_output);
+                }
             }
-        }
-    }
+        });
 
     return energy_and_state_type;
 }
@@ -111,7 +106,7 @@ template <typename Lyt, typename TT>
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] sidb_energy_and_state_type calculate_energy_and_state_type_with_kinks_rejected(
-    const sidb_energy_distribution&                      energy_distribution,
+    const energy_distribution&                           energy_distribution,
     const std::vector<charge_distribution_surface<Lyt>>& valid_charge_distributions, const std::vector<TT>& spec,
     const uint64_t input_index, const std::vector<bdl_wire<Lyt>>& input_bdl_wires,
     std::vector<bdl_wire<Lyt>>& output_bdl_wires) noexcept
@@ -123,34 +118,30 @@ template <typename Lyt, typename TT>
 
     sidb_energy_and_state_type energy_and_state_type{};
 
-    for (const auto& [energy, occurrence] : energy_distribution)
-    {
-        // round the energy value to six decimal places to overcome potential rounding errors.
-        const auto energy_value = round_to_n_decimal_places(energy, 6);
-        for (const auto& valid_layout : valid_charge_distributions)
+    energy_distribution.for_each(
+        [&](const double energy, const uint64_t occurrence [[maybe_unused]])
         {
-            // round the energy value of the given valid_layout to six decimal places to overcome possible rounding
-            // errors and to provide comparability with the energy_value from before.
-            if (std::abs(round_to_n_decimal_places(valid_layout.get_system_energy(), 6) - energy_value) <
-                constants::ERROR_MARGIN)
+            for (const auto& valid_layout : valid_charge_distributions)
             {
-                bool correct_output = true;
-
-                is_operational_params params{};
-                params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
-
-                const auto operational_status =
-                    verify_logic_match(valid_layout, params, spec, input_index, input_bdl_wires, output_bdl_wires);
-                if (operational_status == operational_status::NON_OPERATIONAL)
+                if (std::abs(valid_layout.get_electrostatic_potential_energy() - energy) < constants::ERROR_MARGIN)
                 {
-                    correct_output = false;
-                }
+                    bool correct_output = true;
 
-                // The output SiDB matches the truth table entry. Hence, state is called transparent.
-                energy_and_state_type.emplace_back(energy, correct_output);
+                    is_operational_params params{};
+                    params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
+
+                    const auto operational_status =
+                        verify_logic_match(valid_layout, params, spec, input_index, input_bdl_wires, output_bdl_wires);
+                    if (operational_status == operational_status::NON_OPERATIONAL)
+                    {
+                        correct_output = false;
+                    }
+
+                    // The output SiDB matches the truth table entry. Hence, state is called transparent.
+                    energy_and_state_type.emplace_back(energy, correct_output);
+                }
             }
-        }
-    }
+        });
 
     return energy_and_state_type;
 }

@@ -193,7 +193,7 @@ class critical_temperature_impl
                 stats.num_valid_lyt = sim_result.charge_distributions.size();
                 // The energy distribution of the physically valid charge configurations for the given layout is
                 // determined.
-                const auto distribution = energy_distribution(sim_result.charge_distributions);
+                const auto distribution = calculate_energy_distribution(sim_result.charge_distributions);
 
                 sidb_energy_and_state_type energy_state_type{};
 
@@ -282,13 +282,14 @@ class critical_temperature_impl
         // The number of physically valid charge configurations is stored.
         stats.num_valid_lyt = simulation_results.charge_distributions.size();
 
-        const auto distribution = energy_distribution(simulation_results.charge_distributions);
+        const auto distribution = calculate_energy_distribution(simulation_results.charge_distributions);
 
         // if there is more than one metastable state
         if (distribution.size() > 1)
         {
-            const auto ground_state_energy        = distribution.cbegin()->first;
-            const auto first_excited_state_energy = std::next(distribution.cbegin())->first;
+            const auto ground_state_energy = distribution.get_nth_state(0).value().electrostatic_potential_energy;
+            const auto first_excited_state_energy =
+                distribution.get_nth_state(1).value().electrostatic_potential_energy;
 
             // The energy difference between the first excited and the ground state in meV.
             if (stats.energy_between_ground_state_and_first_erroneous >
