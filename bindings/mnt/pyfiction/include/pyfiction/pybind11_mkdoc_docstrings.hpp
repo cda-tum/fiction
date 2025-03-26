@@ -11430,7 +11430,7 @@ Parameter ``energy``:
 Parameter ``degeneracy``:
     The degeneracy of the state to be added.)doc";
 
-static const char *__doc_fiction_energy_distribution_degeneracy_of_given_energy =
+static const char *__doc_fiction_energy_distribution_degeneracy =
 R"doc(Returns the degeneracy value (number of states) with the given energy
 value.
 
