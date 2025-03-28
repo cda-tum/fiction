@@ -3884,6 +3884,62 @@ Returns:
 Throws:
     std::invalid_argument if the given sweep parameters are invalid.)doc";
 
+static const char *__doc_fiction_critical_temperature_gate_based =
+R"doc(This algorithm performs temperature-aware SiDB simulation as proposed
+in \"Temperature Behavior of Silicon Dangling Bond Logic\" by J.
+Drewniok, M. Walter, and R. Wille in IEEE NANO 2023
+(https://ieeexplore.ieee.org/document/10231259). It comes in two
+flavors: gate-based and non-gate based.
+
+For *Gate-based Critical Temperature* Simulation, the Critical
+Temperature is defined as follows: The temperature at which the
+erroneous charge distributions are populated by more than :math:`1 -
+\eta`, where :math:`\eta \in [0,1]`.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Template parameter ``TT``:
+    Type of the truth table.
+
+Parameter ``lyt``:
+    The layout to simulate.
+
+Parameter ``spec``:
+    Expected Boolean function of the layout given as a multi-output
+    truth table.
+
+Parameter ``params``:
+    Simulation and physical parameters.
+
+Parameter ``pst``:
+    Statistics.
+
+Returns:
+    The critical temperature (unit: K).)doc";
+
+static const char *__doc_fiction_critical_temperature_non_gate_based =
+R"doc(For *Non-gate-based Critical Temperature* simulation, the Critical
+Temperature is defined as follows: The temperature at which the
+excited charge distributions are populated by more than :math:`1 -
+\eta`, where :math:`\eta \in [0,1]` is the confidence level for the
+presence of a working gate.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Parameter ``lyt``:
+    The layout to simulate.
+
+Parameter ``params``:
+    Simulation and physical parameters.
+
+Parameter ``pst``:
+    Statistics.
+
+Returns:
+    The critical temperature (unit: K))doc";
+
 static const char *__doc_fiction_critical_temperature_params =
 R"doc(This struct stores the parameters for the *Critical Temperature*`
 algorithm.)doc";
@@ -5609,43 +5665,20 @@ static const char *__doc_fiction_detail_critical_path_length_and_throughput_impl
 
 static const char *__doc_fiction_detail_critical_path_length_and_throughput_impl_signal_delay = R"doc()doc";
 
-static const char *__doc_fiction_detail_critical_temperature_gate_based =
-R"doc(This algorithm performs temperature-aware SiDB simulation as proposed
-in \"Temperature Behavior of Silicon Dangling Bond Logic\" by J.
-Drewniok, M. Walter, and R. Wille in IEEE NANO 2023
-(https://ieeexplore.ieee.org/document/10231259). It comes in two
-flavors: gate-based and non-gate based.
-
-For *Gate-based Critical Temperature* Simulation, the Critical
-Temperature is defined as follows: The temperature at which the
-erroneous charge distributions are populated by more than :math:`1 -
-\eta`, where :math:`\eta \in [0,1]`.
-
-Template parameter ``Lyt``:
-    SiDB cell-level layout type.
-
-Template parameter ``TT``:
-    Type of the truth table.
-
-Parameter ``lyt``:
-    The layout to simulate.
-
-Parameter ``spec``:
-    Expected Boolean function of the layout given as a multi-output
-    truth table.
-
-Parameter ``params``:
-    Simulation and physical parameters.
-
-Parameter ``pst``:
-    Statistics.
-
-Returns:
-    The critical temperature (unit: K).)doc";
-
 static const char *__doc_fiction_detail_critical_temperature_impl = R"doc()doc";
 
+static const char *__doc_fiction_detail_critical_temperature_impl_bii = R"doc(Iterator that iterates over all possible input states.)doc";
+
+static const char *__doc_fiction_detail_critical_temperature_impl_critical_temperature = R"doc(Critical temperature [K].)doc";
+
 static const char *__doc_fiction_detail_critical_temperature_impl_critical_temperature_impl = R"doc()doc";
+
+static const char *__doc_fiction_detail_critical_temperature_impl_determine_critical_temperature =
+R"doc(The *Critical Temperature* is determined.
+
+Parameter ``energy_state_type``:
+    All energies of all physically valid charge distributions with the
+    corresponding state type (i.e. transparent, erroneous).)doc";
 
 static const char *__doc_fiction_detail_critical_temperature_impl_gate_based_simulation =
 R"doc(*Gate-based Critical Temperature* Simulation of a SiDB layout for a
@@ -5657,31 +5690,51 @@ Parameter ``spec``:
     Expected Boolean function of the layout given as a multi-output
     truth table.)doc";
 
+static const char *__doc_fiction_detail_critical_temperature_impl_get_critical_temperature =
+R"doc(Returns the critical temperature.
+
+Returns:
+    The critical temperature (unit: K).)doc";
+
+static const char *__doc_fiction_detail_critical_temperature_impl_is_ground_state_transparent =
+R"doc(The energy difference between the ground state and the first erroneous
+state is determined. Additionally, the state type of the ground state
+is determined and returned.
+
+Parameter ``energy_and_state_type``:
+    All energies of all physically valid charge distributions with the
+    corresponding state type (i.e. transparent, erroneous).
+
+Parameter ``min_energy``:
+    Minimal energy of all physically valid charge distributions of a
+    given layout (unit: eV).
+
+Returns:
+    State type (i.e. transparent, erroneous) of the ground state is
+    returned.)doc";
+
+static const char *__doc_fiction_detail_critical_temperature_impl_layout = R"doc(SiDB cell-level layout.)doc";
+
 static const char *__doc_fiction_detail_critical_temperature_impl_non_gate_based_simulation =
 R"doc(*Gate-based Critical Temperature* Simulation of a SiDB layout for a
 given Boolean function.)doc";
 
-static const char *__doc_fiction_detail_critical_temperature_non_gate_based =
-R"doc(For *Non-gate-based Critical Temperature* simulation, the Critical
-Temperature is defined as follows: The temperature at which the
-excited charge distributions are populated by more than :math:`1 -
-\eta`, where :math:`\eta \in [0,1]` is the confidence level for the
-presence of a working gate.
+static const char *__doc_fiction_detail_critical_temperature_impl_params = R"doc(Parameters for the critical_temperature algorithm.)doc";
 
-Template parameter ``Lyt``:
-    SiDB cell-level layout type.
+static const char *__doc_fiction_detail_critical_temperature_impl_physical_simulation_of_bdl_iterator =
+R"doc(This function conducts physical simulation of the given layout (gate
+layout with certain input combination). The simulation results are
+stored in the `sim_result_100` variable.
 
-Parameter ``lyt``:
-    The layout to simulate.
-
-Parameter ``params``:
-    Simulation and physical parameters.
-
-Parameter ``pst``:
-    Statistics.
+Parameter ``bdl_iterator``:
+    A reference to a BDL input iterator representing the gate layout
+    at a given input combination. The simulation is performed based on
+    the configuration represented by the iterator.
 
 Returns:
-    The critical temperature (unit: K))doc";
+    Simulation results.)doc";
+
+static const char *__doc_fiction_detail_critical_temperature_impl_stats = R"doc(Statistics.)doc";
 
 static const char *__doc_fiction_detail_defect_influence_impl = R"doc()doc";
 
