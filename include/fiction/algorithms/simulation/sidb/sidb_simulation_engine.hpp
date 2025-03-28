@@ -183,12 +183,13 @@ get_sidb_simulation_engine(const std::string_view& name) noexcept
         {"QUICKEXACT", sidb_simulation_engine::QUICKEXACT},
         {"CLUSTERCOMPLETE", sidb_simulation_engine::CLUSTERCOMPLETE},
         {"QUICKSIM", sidb_simulation_engine::QUICKSIM}};
-#endif  // FICTION_ALGLIB_ENABLED
+#else   // FICTION_ALGLIB_ENABLED
 
     static const phmap::flat_hash_map<std::string, sidb_simulation_engine> engine_lookup{
         {"EXGS", sidb_simulation_engine::EXGS},
         {"QUICKEXACT", sidb_simulation_engine::QUICKEXACT},
         {"QUICKSIM", sidb_simulation_engine::QUICKSIM}};
+#endif  // FICTION_ALGLIB_ENABLED
 
     std::string upper_name = name.data();
     std::transform(upper_name.begin(), upper_name.end(), upper_name.begin(), ::toupper);
