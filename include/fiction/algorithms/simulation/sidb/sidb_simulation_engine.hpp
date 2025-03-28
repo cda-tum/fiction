@@ -108,10 +108,12 @@ template <typename EngineType>
             {
                 return "QuickExact";
             }
+#if (FICTION_ALGLIB_ENABLED)
             case EngineType::CLUSTERCOMPLETE:
             {
                 return "ClusterComplete";
             }
+#endif  // FICTION_ALGLIB_ENABLED
             case EngineType::QUICKSIM:
             {
                 return "QuickSim";
@@ -136,10 +138,12 @@ template <typename EngineType>
             {
                 return "QuickExact";
             }
+#if (FICTION_ALGLIB_ENABLED)
             case EngineType::CLUSTERCOMPLETE:
             {
                 return "ClusterComplete";
             }
+#endif  // FICTION_ALGLIB_ENABLED
             default:
             {
                 return "unsupported simulation engine";
@@ -173,10 +177,16 @@ template <typename EngineType>
 [[nodiscard]] inline std::optional<sidb_simulation_engine>
 get_sidb_simulation_engine(const std::string_view& name) noexcept
 {
+#if (FICTION_ALGLIB_ENABLED)
     static const phmap::flat_hash_map<std::string, sidb_simulation_engine> engine_lookup{
         {"EXGS", sidb_simulation_engine::EXGS},
         {"QUICKEXACT", sidb_simulation_engine::QUICKEXACT},
         {"CLUSTERCOMPLETE", sidb_simulation_engine::CLUSTERCOMPLETE},
+        {"QUICKSIM", sidb_simulation_engine::QUICKSIM}};
+#else
+    static const phmap::flat_hash_map<std::string, sidb_simulation_engine> engine_lookup{
+        {"EXGS", sidb_simulation_engine::EXGS},
+        {"QUICKEXACT", sidb_simulation_engine::QUICKEXACT},
         {"QUICKSIM", sidb_simulation_engine::QUICKSIM}};
 
     std::string upper_name = name.data();
