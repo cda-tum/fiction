@@ -36,6 +36,7 @@ enum class sidb_simulation_engine : uint8_t
      * than *ExGS* due to its effective search-space pruning.
      */
     QUICKEXACT,
+#if (FICTION_ALGLIB_ENABLED)
     /**
      * *ClusterComplete* is a novel exact simulation engine that requires exponential runtime, though, depending on the
      * simulation problem, it effectively reduces the base number by a real number, thus allowing problem sizes that
@@ -43,6 +44,7 @@ enum class sidb_simulation_engine : uint8_t
      * the simulation base, it simulates very effectively for either base number (2 or 3).
      */
     CLUSTERCOMPLETE
+#endif  // FICTION_ALGLIB_ENABLED
 };
 /**
  * Selector exclusively for exact SiDB simulation engines.
@@ -58,6 +60,7 @@ enum class exact_sidb_simulation_engine : uint8_t
      * than ExGS due to its effective search-space pruning.
      */
     QUICKEXACT,
+#if (FICTION_ALGLIB_ENABLED)
     /**
      * *ClusterComplete* is a novel exact simulation engine that requires exponential runtime, though, depending on the
      * simulation problem, it effectively reduces the base number by a real number, thus allowing problem sizes that
@@ -65,6 +68,7 @@ enum class exact_sidb_simulation_engine : uint8_t
      * the simulation base, it simulates very effectively for either base number (2 or 3).
      */
     CLUSTERCOMPLETE
+#endif  // FICTION_ALGLIB_ENABLED
 };
 /**
  * Selector exclusively for heuristic SiDB simulation engines.
