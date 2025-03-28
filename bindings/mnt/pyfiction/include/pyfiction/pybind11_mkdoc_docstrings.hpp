@@ -5684,7 +5684,8 @@ static const char *__doc_fiction_detail_critical_temperature_impl_gate_based_sim
 R"doc(*Gate-based Critical Temperature* Simulation of a SiDB layout for a
 given Boolean function.
 
-tparam TT Type of the truth table.
+Template parameter ``TT``:
+    Type of the truth table.
 
 Parameter ``spec``:
     Expected Boolean function of the layout given as a multi-output
