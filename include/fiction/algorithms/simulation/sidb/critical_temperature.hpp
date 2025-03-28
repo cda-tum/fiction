@@ -136,8 +136,7 @@ class critical_temperature_impl
     /**
      * *Gate-based Critical Temperature* Simulation of a SiDB layout for a given Boolean function.
      *
-
-     * tparam TT Type of the truth table.
+     * @tparam TT Type of the truth table.
      * @param spec Expected Boolean function of the layout given as a multi-output truth table.
      */
     template <typename TT>
