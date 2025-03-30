@@ -348,8 +348,8 @@ class critical_temperature_impl
      * @param min_energy Minimal energy of all physically valid charge distributions of a given layout (unit: eV).
      * @return State type (i.e. transparent, erroneous) of the ground state is returned.
      */
-    bool is_ground_state_transparent(const sidb_energy_and_state_type& energy_and_state_type,
-                                     const double                      min_energy) noexcept
+    [[nodiscard]] bool is_ground_state_transparent(const sidb_energy_and_state_type& energy_and_state_type,
+                                                   const double                      min_energy) const noexcept
     {
         bool ground_state_is_transparent = false;
 
@@ -365,8 +365,8 @@ class critical_temperature_impl
                 ground_state_is_transparent = true;
             }
 
-            if (!state_type && (energy > min_energy) && ground_state_is_transparent &&
-                (((energy - min_energy) * 1000) < stats.energy_between_ground_state_and_first_erroneous))
+            if (!state_type && energy > min_energy && ground_state_is_transparent &&
+                (energy - min_energy) * 1000 < stats.energy_between_ground_state_and_first_erroneous)
             {
                 // The energy difference is stored in meV.
                 stats.energy_between_ground_state_and_first_erroneous = (energy - min_energy) * 1000;

@@ -97,7 +97,6 @@ template <typename Lyt, typename TT>
  * @tparam TT The type of the truth table specifying the gate behavior.
  * @param energy_distribution Energy distribution.
  * @param valid_charge_distributions Physically valid charge distributions.
- * @param output_bdl_pairs Output BDL pairs.
  * @param spec Expected Boolean function of the layout given as a multi-output truth table.
  * @param input_index The index of the current input configuration.
  * @param input_bdl_wires Input BDL wires.
