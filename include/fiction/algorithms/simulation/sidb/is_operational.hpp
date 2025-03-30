@@ -957,16 +957,14 @@ class is_operational_impl
                 fiction::quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF};
             return quickexact(*bdl_iterator, quickexact_params);
         }
+#if (FICTION_ALGLIB_ENABLED)
         if (parameters.sim_engine == sidb_simulation_engine::CLUSTERCOMPLETE)
         {
-#if (FICTION_ALGLIB_ENABLED)
             // perform ClusterComplete exact simulation
             const clustercomplete_params<cell<Lyt>> cc_params{parameters.simulation_parameters};
             return clustercomplete(*bdl_iterator, cc_params);
-#else   // FICTION_ALGLIB_ENABLED
-            assert(false && "ALGLIB must be enabled if ClusterComplete is to be used");
-#endif  // FICTION_ALGLIB_ENABLED
         }
+#endif  // FICTION_ALGLIB_ENABLED
         if constexpr (!is_sidb_defect_surface_v<Lyt>)
         {
             if (parameters.sim_engine == sidb_simulation_engine::QUICKSIM)
