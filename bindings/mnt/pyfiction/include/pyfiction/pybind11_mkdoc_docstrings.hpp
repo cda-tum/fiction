@@ -1359,9 +1359,6 @@ Parameter ``energy_distribution``:
 Parameter ``valid_charge_distributions``:
     Physically valid charge distributions.
 
-Parameter ``output_bdl_pairs``:
-    Output BDL pairs.
-
 Parameter ``spec``:
     Expected Boolean function of the layout given as a multi-output
     truth table.
