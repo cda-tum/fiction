@@ -14,7 +14,9 @@
 #include <bill/sat/tseytin.hpp>
 #include <fmt/format.h>
 #include <mockturtle/traits.hpp>
+#include <mockturtle/utils/cost_functions.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
+#include <mockturtle/views/depth_view.hpp>
 
 #include <algorithm>
 #include <functional>
@@ -268,30 +270,41 @@ class sat_clocking_handler
      */
     void symmetry_breaking() noexcept
     {
+        // compute the critical path of the layout (unit cost for all nodes, no complemented edges, consider PI cost)
+        mockturtle::depth_view depth_layout{layout, mockturtle::unit_cost<Lyt>(), {false, true}};
+
         const std::function<void(const mockturtle::node<Lyt>& n)> recurse =
-            [this, &recurse, clk = 0](const auto& n) mutable
+            [this, &depth_layout, &recurse, clk = 0](const auto& n) mutable
         {
-            const auto t = layout.get_tile(n);
+            const auto t = depth_layout.get_tile(n);
 
             // pre-assign tile t to clock number clk
             solver.add_clause(variables[{t, clk++ % number_of_clocks}]);
 
-            layout.foreach_fanout(n,
-                                  [&recurse](auto const& fon)
-                                  {
-                                      recurse(fon);
+            depth_layout.foreach_fanout(n,
+                                        [&depth_layout, &recurse](auto const& fon)
+                                        {
+                                            if (depth_layout.is_on_critical_path(fon))
+                                            {
+                                                recurse(fon);
+                                                return false;  // terminate
+                                            }
 
-                                      return false;  // terminate after one iteration
-                                  });
+                                            return true;  // continue until fan-out on critical path is found
+                                        });
         };
 
-        // only for the first PI
-        layout.foreach_pi(
-            [&recurse](const auto& pi)
+        // only for the PI on the critical path
+        depth_layout.foreach_pi(
+            [&depth_layout, &recurse](const auto& pi)
             {
-                recurse(pi);
+                if (depth_layout.is_on_critical_path(pi))
+                {
+                    recurse(pi);
+                    return false;  // terminate
+                }
 
-                return false;  // terminate after one iteration
+                return true;  // continue until PI on critical path is found
             });
     }
     /**
