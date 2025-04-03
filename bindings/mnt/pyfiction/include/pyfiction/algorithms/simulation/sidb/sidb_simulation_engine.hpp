@@ -41,8 +41,10 @@ inline void sidb_simulation_engine(pybind11::module& m)
         .value("QUICKSIM", fiction::sidb_simulation_engine::QUICKSIM, DOC(fiction_sidb_simulation_engine_QUICKSIM))
         .value("QUICKEXACT", fiction::sidb_simulation_engine::QUICKEXACT,
                DOC(fiction_sidb_simulation_engine_QUICKEXACT))
+#if (FICTION_ALGLIB_ENABLED)
         .value("CLUSTERCOMPLETE", fiction::sidb_simulation_engine::CLUSTERCOMPLETE,
                DOC(fiction_sidb_simulation_engine_CLUSTERCOMPLETE))
+#endif  // FICTION_ALGLIB_ENABLED
 
         ;
 
@@ -51,8 +53,10 @@ inline void sidb_simulation_engine(pybind11::module& m)
         .value("EXGS", fiction::exact_sidb_simulation_engine::EXGS, DOC(fiction_exact_sidb_simulation_engine_EXGS))
         .value("QUICKEXACT", fiction::exact_sidb_simulation_engine::QUICKEXACT,
                DOC(fiction_exact_sidb_simulation_engine_QUICKEXACT))
+#if (FICTION_ALGLIB_ENABLED)
         .value("CLUSTERCOMPLETE", fiction::exact_sidb_simulation_engine::CLUSTERCOMPLETE,
                DOC(fiction_exact_sidb_simulation_engine_CLUSTERCOMPLETE))
+#endif  // FICTION_ALGLIB_ENABLED
 
         ;
 
