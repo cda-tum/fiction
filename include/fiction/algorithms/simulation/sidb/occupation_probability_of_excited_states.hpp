@@ -119,9 +119,7 @@ namespace fiction
             if (std::abs(round_to_n_decimal_places(energy, 6) - round_to_n_decimal_places(min_energy, 6)) >
                 constants::ERROR_MARGIN)
             {
-                p += static_cast<double>(degeneracy) *
-                     std::exp(-((energy - min_energy) * constants::physical::EV_TO_JOULE /
-                                (constants::physical::BOLTZMANN_CONSTANT * temperature)));
+                p += static_cast<double>(degeneracy) * calculate_boltzmann_factor(energy, min_energy, temperature);
             }
         });
 
