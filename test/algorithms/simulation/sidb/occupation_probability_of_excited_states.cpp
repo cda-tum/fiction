@@ -30,8 +30,8 @@ TEST_CASE("occupation probability of all erroneous charge distribution states", 
     SECTION("one state with degeneracy")
     {
         sidb_energy_and_state_type energy_and_state_type{};
-        energy_and_state_type.emplace_back(0.1, true);
-        energy_and_state_type.emplace_back(0.1, false);
+        energy_and_state_type.emplace_back(0.1, state_type::ACCEPTED);
+        energy_and_state_type.emplace_back(0.1, state_type::REJECTED);
 
         CHECK(occupation_probability_gate_based(energy_and_state_type, 10) == 0.5);
         CHECK(occupation_probability_gate_based(energy_and_state_type, 0.01) == 0.5);
@@ -46,11 +46,11 @@ TEST_CASE("occupation probability of all erroneous charge distribution states", 
     SECTION("a few states with degeneracy")
     {
         sidb_energy_and_state_type energy_and_state_type{};
-        energy_and_state_type.emplace_back(0.1, true);
-        energy_and_state_type.emplace_back(0.1, false);
+        energy_and_state_type.emplace_back(0.1, state_type::ACCEPTED);
+        energy_and_state_type.emplace_back(0.1, state_type::REJECTED);
 
-        energy_and_state_type.emplace_back(0.2, true);
-        energy_and_state_type.emplace_back(0.2, true);
+        energy_and_state_type.emplace_back(0.2, state_type::ACCEPTED);
+        energy_and_state_type.emplace_back(0.2, state_type::ACCEPTED);
 
         CHECK(occupation_probability_gate_based(energy_and_state_type, 0.001) == 0.5);
 
@@ -68,11 +68,11 @@ TEST_CASE("occupation probability of all erroneous charge distribution states", 
     {
         sidb_energy_and_state_type energy_and_state_type{};
 
-        energy_and_state_type.emplace_back(0.2, true);
-        energy_and_state_type.emplace_back(0.2, true);
+        energy_and_state_type.emplace_back(0.2, state_type::ACCEPTED);
+        energy_and_state_type.emplace_back(0.2, state_type::ACCEPTED);
 
-        energy_and_state_type.emplace_back(0.1, true);
-        energy_and_state_type.emplace_back(0.1, false);
+        energy_and_state_type.emplace_back(0.1, state_type::ACCEPTED);
+        energy_and_state_type.emplace_back(0.1, state_type::REJECTED);
 
         CHECK(occupation_probability_gate_based(energy_and_state_type, 0.001) == 0.5);
 
@@ -89,7 +89,7 @@ TEST_CASE("occupation probability of all erroneous charge distribution states", 
     SECTION("one state / true")
     {
         sidb_energy_and_state_type energy_and_state_type{};
-        energy_and_state_type.emplace_back(1, true);
+        energy_and_state_type.emplace_back(1, state_type::ACCEPTED);
         CHECK(occupation_probability_gate_based(energy_and_state_type, 1000) == 0.0);
         CHECK(occupation_probability_gate_based(energy_and_state_type, 10) == 0.0);
         CHECK(occupation_probability_gate_based(energy_and_state_type, 0.01) == 0.0);
@@ -105,7 +105,7 @@ TEST_CASE("occupation probability of all erroneous charge distribution states", 
     SECTION("one state / false")
     {
         sidb_energy_and_state_type energy_and_state_type{};
-        energy_and_state_type.emplace_back(1, false);
+        energy_and_state_type.emplace_back(1, state_type::REJECTED);
 
         CHECK(occupation_probability_gate_based(energy_and_state_type, 1000) == 1.0);
         CHECK(occupation_probability_gate_based(energy_and_state_type, 10) == 1.0);

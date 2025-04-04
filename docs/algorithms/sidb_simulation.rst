@@ -168,6 +168,7 @@ Temperature Behavior
 
         **Header:** ``fiction/algorithms/simulation/sidb/calculate_energy_and_state_type.hpp``
 
+        .. doxygenenum:: fiction::state_type
         .. doxygentypedef:: fiction::sidb_energy_and_state_type
         .. doxygenfunction:: fiction::calculate_energy_and_state_type_with_kinks_accepted
         .. doxygenfunction:: fiction::calculate_energy_and_state_type_with_kinks_rejected

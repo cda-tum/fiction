@@ -69,9 +69,9 @@ namespace fiction
     double p = 0;
 
     // The Boltzmann factors of all erroneous excited states are accumulated.
-    for (const auto& [energies, state_transparent_erroneous] : energy_and_state_type)
+    for (const auto& [energies, state_type] : energy_and_state_type)
     {
-        if (!state_transparent_erroneous)
+        if (state_type == state_type::REJECTED)
         {
             p += calculate_boltzmann_factor(energies, min_energy, temperature);
         }

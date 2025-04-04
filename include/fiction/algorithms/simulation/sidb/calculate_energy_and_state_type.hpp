@@ -27,10 +27,25 @@ namespace fiction
 {
 
 /**
+ * Label to categorize ground and excited states of an SiDB layout.
+ */
+enum class state_type
+{
+    /**
+     * A state is accepted if the charge distribution encodes the desired logic.
+     */
+    ACCEPTED,
+    /**
+     * A state is rejected if the charge distributiion does not encode the desired logic. Moreover, if kinks are
+     * rejected, a charge distribution that encodes the logic, but does show kinks, is rejected.
+     */
+    REJECTED
+};
+/**
  *  Data type to collect electrostatic potential energies (in eV) of charge distributions with corresponding state types
  * (i.e., `true` = transparent, `false` = erroneous).
  */
-using sidb_energy_and_state_type = std::vector<std::pair<double, bool>>;
+using sidb_energy_and_state_type = std::vector<std::pair<double, state_type>>;
 
 /**
  * This function takes in an SiDB energy distribution. For each charge distribution, the state type is determined (i.e.
@@ -69,19 +84,18 @@ template <typename Lyt, typename TT>
             {
                 if (std::abs(valid_layout.get_electrostatic_potential_energy() - energy) < constants::ERROR_MARGIN)
                 {
-                    bool correct_output = true;
+                    energy_and_state_type.emplace_back(energy, state_type::ACCEPTED);
 
                     for (auto i = 0u; i < output_bdl_pairs.size(); i++)
                     {
                         if (static_cast<bool>(-charge_state_to_sign(valid_layout.get_charge_state(
                                 output_bdl_pairs[i].lower))) != kitty::get_bit(spec[i], input_index))
                         {
-                            correct_output = false;
+                            // The output SiDB matches the truth table entry. Hence, the state is called transparent.
+                            energy_and_state_type.emplace_back(energy, state_type::REJECTED);
+                            break;
                         }
                     }
-
-                    // The output SiDB matches the truth table entry. Hence, the state is called transparent.
-                    energy_and_state_type.emplace_back(energy, correct_output);
                 }
             }
         });
@@ -110,7 +124,6 @@ template <typename Lyt, typename TT>
     const std::vector<charge_distribution_surface<Lyt>>& valid_charge_distributions, const std::vector<TT>& spec,
     const uint64_t input_index, const std::vector<bdl_wire<Lyt>>& input_bdl_wires,
     std::vector<bdl_wire<Lyt>>& output_bdl_wires) noexcept
-
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -125,7 +138,8 @@ template <typename Lyt, typename TT>
             {
                 if (std::abs(valid_layout.get_electrostatic_potential_energy() - energy) < constants::ERROR_MARGIN)
                 {
-                    bool correct_output = true;
+                    // The output SiDB matches the truth table entry. Hence, state is called transparent.
+                    energy_and_state_type.emplace_back(energy, state_type::ACCEPTED);
 
                     is_operational_params params{};
                     params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
@@ -134,11 +148,10 @@ template <typename Lyt, typename TT>
                         verify_logic_match(valid_layout, params, spec, input_index, input_bdl_wires, output_bdl_wires);
                     if (operational_status == operational_status::NON_OPERATIONAL)
                     {
-                        correct_output = false;
+                        // The output SiDB matches the truth table entry. Hence, state is called transparent.
+                        energy_and_state_type.emplace_back(energy, state_type::REJECTED);
+                        break;
                     }
-
-                    // The output SiDB matches the truth table entry. Hence, state is called transparent.
-                    energy_and_state_type.emplace_back(energy, correct_output);
                 }
             }
         });

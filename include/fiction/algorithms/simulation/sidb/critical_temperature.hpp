@@ -30,7 +30,6 @@
 #include <cmath>
 #include <cstdint>
 #include <iostream>
-#include <iterator>
 #include <limits>
 #include <string>
 #include <utility>
@@ -363,12 +362,12 @@ class critical_temperature_impl
             // comparability with the min_energy.
             if (std::abs(round_to_n_decimal_places(energy, 6) - round_to_n_decimal_places(min_energy, 6)) <
                     constants::ERROR_MARGIN &&
-                state_type)
+                state_type == state_type::ACCEPTED)
             {
                 ground_state_is_transparent = true;
             }
 
-            if (!state_type && (energy > min_energy) && ground_state_is_transparent &&
+            if ((state_type == state_type::REJECTED) && (energy > min_energy) && ground_state_is_transparent &&
                 (((energy - min_energy) * 1000) < stats.energy_between_ground_state_and_first_erroneous))
             {
                 // The energy difference is stored in meV.
