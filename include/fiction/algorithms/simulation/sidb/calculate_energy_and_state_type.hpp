@@ -84,7 +84,7 @@ template <typename Lyt, typename TT>
             {
                 if (std::abs(valid_layout.get_electrostatic_potential_energy() - energy) < constants::ERROR_MARGIN)
                 {
-                    energy_and_state_type.emplace_back(energy, state_type::ACCEPTED);
+                    state_type type_of_considered_state = state_type::ACCEPTED;
 
                     for (auto i = 0u; i < output_bdl_pairs.size(); i++)
                     {
@@ -92,13 +92,17 @@ template <typename Lyt, typename TT>
                                 output_bdl_pairs[i].lower))) != kitty::get_bit(spec[i], input_index))
                         {
                             // The output SiDB matches the truth table entry. Hence, the state is called transparent.
-                            energy_and_state_type.emplace_back(energy, state_type::REJECTED);
+                            type_of_considered_state = state_type::REJECTED;
                             break;
                         }
                     }
+                    energy_and_state_type.emplace_back(energy, type_of_considered_state);
                 }
             }
         });
+
+    std::sort(energy_and_state_type.begin(), energy_and_state_type.end(),
+              [](const auto& a, const auto& b) { return a.first < b.first; });
 
     return energy_and_state_type;
 }
