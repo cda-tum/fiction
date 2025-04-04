@@ -2,8 +2,7 @@ import os
 import unittest
 
 from mnt.pyfiction import (
-    charge_distribution_surface_100,
-    charge_distribution_surface_111,
+    charge_distribution_surface,
     create_not_tt,
     create_xor_tt,
     critical_temperature_gate_based,
@@ -32,7 +31,7 @@ class TestCriticalTemperature(unittest.TestCase):
 
         stats = critical_temperature_stats()
 
-        cds = charge_distribution_surface_100(layout)
+        cds = charge_distribution_surface(layout)
 
         self.assertEqual(critical_temperature_non_gate_based(cds, params, stats), 400)
 
@@ -51,7 +50,7 @@ class TestCriticalTemperature(unittest.TestCase):
 
         stats = critical_temperature_stats()
 
-        cds = charge_distribution_surface_111(layout)
+        cds = charge_distribution_surface(layout)
 
         self.assertEqual(critical_temperature_non_gate_based(cds, params, stats), 400)
 
@@ -68,7 +67,7 @@ class TestCriticalTemperature(unittest.TestCase):
 
         stats = critical_temperature_stats()
 
-        cds = charge_distribution_surface_100(layout)
+        cds = charge_distribution_surface(layout)
         spec = [create_xor_tt()]
 
         self.assertLessEqual(critical_temperature_gate_based(cds, spec, params, stats), 200)
@@ -86,7 +85,7 @@ class TestCriticalTemperature(unittest.TestCase):
 
         stats = critical_temperature_stats()
 
-        cds = charge_distribution_surface_100(layout)
+        cds = charge_distribution_surface(layout)
         spec = [create_not_tt()]
 
         self.assertLessEqual(critical_temperature_gate_based(cds, spec, params, stats), 400)
@@ -107,7 +106,7 @@ class TestCriticalTemperature(unittest.TestCase):
 
         stats = critical_temperature_stats()
 
-        cds = charge_distribution_surface_100(layout)
+        cds = charge_distribution_surface(layout)
         spec = [create_not_tt()]
 
         self.assertLessEqual(critical_temperature_gate_based(cds, spec, params, stats), 0)

@@ -75,55 +75,51 @@ inline void obstruction_layout_factory(pybind11::module& m)
         "obstruction_layout",
         [](py::object layout_obj)
         {
-            // Try each known base type in turn. If a cast fails, we catch py::cast_error and move on.
-            // Once a cast succeeds, build the corresponding obstruction_layout and return it.
-
             // cartesian + offset
-            try
+            if (py::isinstance<py_cartesian_gate_layout<py_offset_coordinate>>(layout_obj))
             {
+                // Perform the safe cast
                 auto& lyt = layout_obj.cast<py_cartesian_gate_layout<py_offset_coordinate>&>();
                 return py::cast(py_cartesian_obstruction_layout<py_offset_coordinate>{lyt});
             }
-            catch (const py::cast_error&)
-            {}
-
             // cartesian + cube
-            try
+            else if (py::isinstance<py_cartesian_gate_layout<py_cube_coordinate>>(layout_obj))
             {
                 auto& lyt = layout_obj.cast<py_cartesian_gate_layout<py_cube_coordinate>&>();
                 return py::cast(py_cartesian_obstruction_layout<py_cube_coordinate>{lyt});
             }
-            catch (const py::cast_error&)
-            {}
-
             // shifted cart + offset
-            try
+            else if (py::isinstance<py_shifted_cartesian_gate_layout>(layout_obj))
             {
                 auto& lyt = layout_obj.cast<py_shifted_cartesian_gate_layout&>();
                 return py::cast(py_shifted_cartesian_obstruction_layout{lyt});
             }
-            catch (const py::cast_error&)
-            {}
-
             // hex + offset
-            try
+            else if (py::isinstance<py_hexagonal_gate_layout>(layout_obj))
             {
                 auto& lyt = layout_obj.cast<py_hexagonal_gate_layout&>();
                 return py::cast(py_hexagonal_obstruction_layout{lyt});
             }
-            catch (const py::cast_error&)
-            {}
-
-            // If none matched, raise an error
-            throw std::invalid_argument(
-                "[pyfiction] The given layout object is not a recognized cartesian/hex/shifted layout "
-                "in offset or cube coordinates.");
+            // None matched → throw
+            else
+            {
+                throw std::invalid_argument(
+                    "[pyfiction] The given layout object is not recognized as a valid cartesian/hex/shifted layout "
+                    "in offset or cube coordinates.");
+            }
         },
         R"doc(
-            Creates and returns an obstruction_layout by inferring the base layout type from
-            the given `layout_obj`. For example, if you pass a `cartesian_layout` with cube
-            coordinates, you'll get a `cartesian_obstruction_layout_cube_coordinates`. No extra
-            parameters are needed.
+            Creates and returns an obstruction_layout from the given `layout_obj` by checking its type with
+            `py::isinstance`. For example, if it's a `cartesian_gate_layout<py_cube_coordinate>`, we return a
+            `cartesian_obstruction_layout_cube_coordinates`. If no recognized type is found, an exception is raised.
+
+            Example usage (Python)::
+
+                from pyfiction import cartesian_gate_layout, obstruction_layout
+                lay = cartesian_gate_layout((10, 10))
+                obs_lay = obstruction_layout(lay)
+                obs_lay.obstruct_coordinate((5, 2))
+                assert obs_lay.is_obstructed_coordinate((5, 2))
         )doc");
 }
 

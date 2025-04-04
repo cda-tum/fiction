@@ -55,7 +55,7 @@ GateLyt xor_maj_gate_layout() noexcept
 {
     REQUIRE(mockturtle::has_create_node_v<GateLyt>);
 
-    GateLyt layout{fiction::aspect_ratio_type_t<GateLyt>{3, 2, 0}, fiction::open_clocking<GateLyt>()};
+    GateLyt layout{fiction::aspect_ratio_t<GateLyt>{3, 2, 0}, fiction::open_clocking<GateLyt>()};
 
     layout.assign_clock_number({2, 0}, static_cast<typename GateLyt::clock_number_t>(0));
     layout.assign_clock_number({1, 1}, static_cast<typename GateLyt::clock_number_t>(0));

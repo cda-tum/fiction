@@ -3,8 +3,7 @@ import unittest
 
 from mnt.pyfiction import (
     automatic_base_number_detection,
-    charge_distribution_surface_100,
-    charge_distribution_surface_111,
+    charge_distribution_surface,
     exact_sidb_simulation_engine,
     quickexact,
     quickexact_params,
@@ -32,7 +31,7 @@ class TestTimeToSolution(unittest.TestCase):
         tts_params.engine = exact_sidb_simulation_engine.QUICKEXACT
         stats = time_to_solution_stats()
 
-        cds = charge_distribution_surface_100(layout)
+        cds = charge_distribution_surface(layout)
 
         time_to_solution(cds, quicksim_parameter, tts_params, stats)
 
@@ -51,7 +50,7 @@ class TestTimeToSolution(unittest.TestCase):
         tts_params.engine = exact_sidb_simulation_engine.QUICKEXACT
         stats = time_to_solution_stats()
 
-        cds = charge_distribution_surface_111(layout)
+        cds = charge_distribution_surface(layout)
 
         time_to_solution(cds, quicksim_parameter, tts_params, stats)
 

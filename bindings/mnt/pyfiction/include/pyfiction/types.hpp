@@ -137,17 +137,21 @@ using py_sidb_111_lattice = py_sidb_lattice<fiction::sidb_111_lattice, OffsetCoo
  */
 template <typename Lyt>
 using py_charge_distribution_surface_layout = fiction::charge_distribution_surface<Lyt>;
-using py_charge_distribution_surface = fiction::charge_distribution_surface<py_sidb_layout<py_offset_coordinate>>;
+
+template <typename OffsetCoordinateType = py_offset_coordinate>
+using py_charge_distribution_surface = fiction::charge_distribution_surface<py_sidb_layout<OffsetCoordinateType>>;
 /**
  * Charge distribution surface with underlying H-Si(100)-2x1 lattice.
  */
+template <typename OffsetCoordinateType = py_offset_coordinate>
 using py_charge_distribution_surface_100 =
-    py_charge_distribution_surface_layout<py_sidb_100_lattice<py_offset_coordinate>>;
+    py_charge_distribution_surface_layout<py_sidb_100_lattice<OffsetCoordinateType>>;
 /**
  * Charge distribution surface with underlying H-Si(111)-1x1 lattice.
  */
+template <typename OffsetCoordinateType = py_offset_coordinate>
 using py_charge_distribution_surface_111 =
-    py_charge_distribution_surface_layout<py_sidb_111_lattice<py_offset_coordinate>>;
+    py_charge_distribution_surface_layout<py_sidb_111_lattice<OffsetCoordinateType>>;
 
 }  // namespace pyfiction
 

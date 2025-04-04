@@ -2,8 +2,7 @@ import os
 import unittest
 
 from mnt.pyfiction import (
-    charge_distribution_surface_100,
-    charge_distribution_surface_111,
+    charge_distribution_surface,
     clustercomplete,
     clustercomplete_params,
     ground_state_space_reporting,
@@ -36,7 +35,7 @@ class TestClusterComplete(unittest.TestCase):
         self.assertEqual(params.available_threads, 4)
         self.assertEqual(params.report_gss_stats, ground_state_space_reporting.ON)
 
-        cds = charge_distribution_surface_100(layout)
+        cds = charge_distribution_surface(layout)
 
         result = clustercomplete(cds, params)
 
@@ -66,7 +65,7 @@ class TestClusterComplete(unittest.TestCase):
         params.simulation_parameters.mu_minus = -0.32
         self.assertEqual(params.simulation_parameters.mu_minus, -0.32)
 
-        cds = charge_distribution_surface_111(layout)
+        cds = charge_distribution_surface(layout)
 
         result = clustercomplete(cds, params)
 

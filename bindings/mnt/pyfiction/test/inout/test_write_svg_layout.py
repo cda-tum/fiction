@@ -2,7 +2,7 @@ import unittest
 
 import mnt.pyfiction
 from mnt.pyfiction import (
-    charge_distribution_surface_100,
+    charge_distribution_surface,
     color_mode,
     sidb_charge_state,
     sidb_lattice,
@@ -228,7 +228,7 @@ class TestWriteSvgLayout(unittest.TestCase):
         sidb_layout.assign_cell_type((1, 0), sidb_technology.cell_type.NORMAL)
         sidb_layout.assign_cell_type((3, 3), sidb_technology.cell_type.NORMAL)
 
-        cds = charge_distribution_surface_100(sidb_layout)
+        cds = charge_distribution_surface(sidb_layout)
         cds.assign_charge_state((0, 0), sidb_charge_state.NEGATIVE)
         cds.assign_charge_state((1, 1), sidb_charge_state.NEGATIVE)
         cds.assign_charge_state((1, 0), sidb_charge_state.NEUTRAL)

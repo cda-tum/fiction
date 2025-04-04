@@ -49,7 +49,7 @@ inline void hexagonal_layout(pybind11::module& m, const std::string& coord_type)
         .def("area", &HexLyt::area, DOC(fiction_hexagonal_layout_area))
         .def("volume", &HexLyt::volume, DOC(fiction_hexagonal_layout_volume))
         .def(
-            "resize", [](HexLyt& lyt, const fiction::aspect_ratio_type_t<HexLyt>& dimension) { lyt.resize(dimension); },
+            "resize", [](HexLyt& lyt, const fiction::aspect_ratio_t<HexLyt>& dimension) { lyt.resize(dimension); },
             py::arg("dimension"), DOC(fiction_hexagonal_layout_resize))
         .def(
             "resize",

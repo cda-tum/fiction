@@ -1,8 +1,7 @@
 import unittest
 
 from mnt.pyfiction import (
-    charge_distribution_surface_100,
-    charge_distribution_surface_111,
+    charge_distribution_surface,
     check_simulation_results_for_equivalence,
     sidb_lattice,
     sidb_simulation_result_100,
@@ -21,8 +20,8 @@ class TestCheckSimulationResultsForEquivalence(unittest.TestCase):
         first_result_100 = sidb_simulation_result_100()
         second_result_100 = sidb_simulation_result_100()
 
-        first_result_100.charge_distributions = [charge_distribution_surface_100(lattice_100)]
-        second_result_100.charge_distributions = [charge_distribution_surface_100(lattice_100)]
+        first_result_100.charge_distributions = [charge_distribution_surface(lattice_100)]
+        second_result_100.charge_distributions = [charge_distribution_surface(lattice_100)]
 
         equivalent = check_simulation_results_for_equivalence(first_result_100, second_result_100)
 
@@ -37,8 +36,8 @@ class TestCheckSimulationResultsForEquivalence(unittest.TestCase):
         first_result_111 = sidb_simulation_result_111()
         second_result_111 = sidb_simulation_result_111()
 
-        first_result_111.charge_distributions = [charge_distribution_surface_111(lattice_111)]
-        second_result_111.charge_distributions = [charge_distribution_surface_111(lattice_111)]
+        first_result_111.charge_distributions = [charge_distribution_surface(lattice_111)]
+        second_result_111.charge_distributions = [charge_distribution_surface(lattice_111)]
 
         equivalent = check_simulation_results_for_equivalence(first_result_111, second_result_111)
 

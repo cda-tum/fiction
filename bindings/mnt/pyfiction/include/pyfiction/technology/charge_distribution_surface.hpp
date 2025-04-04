@@ -29,7 +29,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void charge_distribution_surface_layout(pybind11::module& m, const std::string& lattice = "")
+void charge_distribution_surface_layout(pybind11::module& m, const std::string& lattice, const std::string& coord_type)
 {
     namespace py = pybind11;
 
@@ -39,7 +39,7 @@ void charge_distribution_surface_layout(pybind11::module& m, const std::string& 
      * Charge distribution surface.
      */
 
-    py::class_<py_cds, Lyt>(m, fmt::format("charge_distribution_surface{}", lattice).c_str(),
+    py::class_<py_cds, Lyt>(m, fmt::format("charge_distribution_surface{}_{}", lattice, coord_type).c_str(),
                             DOC(fiction_charge_distribution_surface), py::module_local())
         .def(py::init<const fiction::sidb_simulation_parameters&, const fiction::sidb_charge_state&>(),
              py::arg("params") = fiction::sidb_simulation_parameters{},
@@ -324,9 +324,112 @@ inline void charge_distribution_surfaces(pybind11::module& m)
         .value("NEGLECT", fiction::charge_distribution_history::NEGLECT,
                DOC(fiction_charge_distribution_history_NEGLECT));
 
-    detail::charge_distribution_surface_layout<py_sidb_111_lattice<py_offset_coordinate>>(m, "_111");
-    detail::charge_distribution_surface_layout<py_sidb_100_lattice<py_offset_coordinate>>(m, "_100");
-    detail::charge_distribution_surface_layout<py_sidb_layout<py_offset_coordinate>>(m);
+    // offset coords
+    detail::charge_distribution_surface_layout<py_sidb_111_lattice<py_offset_coordinate>>(m, "_111",
+                                                                                          "offset_coordinates");
+    detail::charge_distribution_surface_layout<py_sidb_100_lattice<py_offset_coordinate>>(m, "_100",
+                                                                                          "offset_coordinates");
+    detail::charge_distribution_surface_layout<py_sidb_layout<py_offset_coordinate>>(m, "", "offset_coordinates");
+
+    // cube coords
+    detail::charge_distribution_surface_layout<py_sidb_111_lattice<py_cube_coordinate>>(m, "_111", "cube_coordinate");
+    detail::charge_distribution_surface_layout<py_sidb_100_lattice<py_cube_coordinate>>(m, "_100", "cube_coordinate");
+    detail::charge_distribution_surface_layout<py_sidb_layout<py_cube_coordinate>>(m, "", "cube_coordinate");
+}
+
+/**
+ *  A factory function for automatically wrapping an existing layout in a charge_distribution_surface.
+ *
+ *  Example usage (Python):
+ *     layout_one = sidb_layout((10, 10))  # offset by default
+ *     cds = charge_distribution_surface(layout_one)
+ *
+ *  This tries to dynamically cast the given `layout` to each recognized type, builds
+ *  a `charge_distribution_surface_<orientation>_<coordinate_type>`, and returns it.
+ */
+inline void charge_distribution_surface_factory(pybind11::module& m)
+{
+    namespace py = pybind11;
+
+    m.def(
+        "charge_distribution_surface",
+        [](py::object layout, const fiction::sidb_simulation_parameters& params, fiction::sidb_charge_state cs)
+        {
+            // 1. Attempt to cast to each known layout type (100/111 offset/cube, or generic sidb_layout)
+            //    If it matches, wrap that layout in a corresponding py_charge_distribution_surface_layout and return.
+
+            // --- 100 offset ---
+            if (py::isinstance<py_sidb_100_lattice<py_offset_coordinate>>(layout))
+            {
+                auto& l = layout.cast<py_sidb_100_lattice<py_offset_coordinate>&>();
+                return py::cast(
+                    py_charge_distribution_surface_layout<py_sidb_100_lattice<py_offset_coordinate>>(l, params, cs));
+            }
+            // --- 111 offset ---
+            if (py::isinstance<py_sidb_111_lattice<py_offset_coordinate>>(layout))
+            {
+                auto& l = layout.cast<py_sidb_111_lattice<py_offset_coordinate>&>();
+                return py::cast(
+                    py_charge_distribution_surface_layout<py_sidb_111_lattice<py_offset_coordinate>>(l, params, cs));
+            }
+            // --- generic sidb_layout offset ---
+            if (py::isinstance<py_sidb_layout<py_offset_coordinate>>(layout))
+            {
+                auto& l = layout.cast<py_sidb_layout<py_offset_coordinate>&>();
+                return py::cast(
+                    py_charge_distribution_surface_layout<py_sidb_layout<py_offset_coordinate>>(l, params, cs));
+            }
+
+            // --- 100 cube ---
+            if (py::isinstance<py_sidb_100_lattice<py_cube_coordinate>>(layout))
+            {
+                auto& l = layout.cast<py_sidb_100_lattice<py_cube_coordinate>&>();
+                return py::cast(
+                    py_charge_distribution_surface_layout<py_sidb_100_lattice<py_cube_coordinate>>(l, params, cs));
+            }
+            // --- 111 cube ---
+            if (py::isinstance<py_sidb_111_lattice<py_cube_coordinate>>(layout))
+            {
+                auto& l = layout.cast<py_sidb_111_lattice<py_cube_coordinate>&>();
+                return py::cast(
+                    py_charge_distribution_surface_layout<py_sidb_111_lattice<py_cube_coordinate>>(l, params, cs));
+            }
+            // --- generic sidb_layout cube ---
+            if (py::isinstance<py_sidb_layout<py_cube_coordinate>>(layout))
+            {
+                auto& l = layout.cast<py_sidb_layout<py_cube_coordinate>&>();
+                return py::cast(
+                    py_charge_distribution_surface_layout<py_sidb_layout<py_cube_coordinate>>(l, params, cs));
+            }
+
+            // If none matched, raise an exception
+            throw std::invalid_argument(
+                "[pyfiction] Provided layout is not recognized as a supported SiDB layout type. "
+                "Perhaps an unsupported orientation or coordinate system?");
+        },
+        py::arg("layout"), py::arg("params") = fiction::sidb_simulation_parameters{},
+        py::arg("cs") = fiction::sidb_charge_state::NEGATIVE,
+        R"doc(
+            Wraps an existing SiDB layout in a charge_distribution_surface, deducing its
+            orientation and coordinate type automatically.
+
+            :param layout:
+                A sidb_layout, sidb_100_lattice, or sidb_111_lattice object in either
+                offset or cube coordinates.
+            :param params:
+                Optional sidb_simulation_parameters to assign (default constructed if not given).
+            :param cs:
+                Optional initial SiDB charge state for the newly created surface
+                (defaults to sidb_charge_state.NEGATIVE).
+
+            Example usage::
+
+                from pyfiction import sidb_layout, charge_distribution_surface
+                lay = sidb_layout((10, 10))
+                cds = charge_distribution_surface(lay)
+                print(cds.get_system_energy())
+
+        )doc");
 }
 
 }  // namespace pyfiction

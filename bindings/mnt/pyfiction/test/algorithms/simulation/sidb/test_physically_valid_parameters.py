@@ -1,8 +1,7 @@
 import unittest
 
 from mnt.pyfiction import (
-    charge_distribution_surface_100,
-    charge_distribution_surface_111,
+    charge_distribution_surface,
     parameter_point,
     physically_valid_parameters,
     sidb_lattice,
@@ -14,7 +13,7 @@ class TestDeterminePhysicallyValidParameters(unittest.TestCase):
     def test_one_DB_100_lattice(self):
         layout = sidb_lattice((10, 10), orientation="100")
         layout.assign_cell_type((0, 0), sidb_technology.cell_type.NORMAL)
-        cds = charge_distribution_surface_100(layout)
+        cds = charge_distribution_surface(layout)
 
         valid_parameters = physically_valid_parameters(cds)
 
@@ -29,7 +28,7 @@ class TestDeterminePhysicallyValidParameters(unittest.TestCase):
     def test_one_DB_111_lattice(self):
         layout = sidb_lattice((10, 10), orientation="111")
         layout.assign_cell_type((0, 0), sidb_technology.cell_type.NORMAL)
-        cds = charge_distribution_surface_111(layout)
+        cds = charge_distribution_surface(layout)
 
         valid_parameters = physically_valid_parameters(cds)
 

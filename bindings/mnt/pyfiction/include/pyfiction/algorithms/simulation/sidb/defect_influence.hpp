@@ -51,7 +51,8 @@ inline void maximum_defect_influence_distance(pybind11::module& m)
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::maximum_defect_influence_distance<py_charge_distribution_surface>(m);
+    detail::maximum_defect_influence_distance<py_charge_distribution_surface<py_offset_coordinate>>(m);
+    detail::maximum_defect_influence_distance<py_charge_distribution_surface<py_cube_coordinate>>(m);
 }
 
 }  // namespace pyfiction

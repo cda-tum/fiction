@@ -206,6 +206,7 @@ PYBIND11_MODULE(pyfiction, m, pybind11::mod_gil_not_used())
     pyfiction::sidb_lattices(m);
     pyfiction::sidb_lattice_factory(m);
     pyfiction::charge_distribution_surfaces(m);
+    pyfiction::charge_distribution_surface_factory(m);
     /**
      * Input/Output
      */

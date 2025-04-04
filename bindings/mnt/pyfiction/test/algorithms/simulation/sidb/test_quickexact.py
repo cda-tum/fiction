@@ -2,8 +2,7 @@ import unittest
 
 from mnt.pyfiction import (
     automatic_base_number_detection,
-    charge_distribution_surface_100,
-    charge_distribution_surface_111,
+    charge_distribution_surface,
     quickexact,
     quickexact_params,
     sidb_charge_state,
@@ -26,7 +25,7 @@ class TestQuickExact(unittest.TestCase):
         self.assertEqual(params.simulation_parameters.mu_minus, -0.25)
         self.assertEqual(params.base_number_detection, automatic_base_number_detection.OFF)
 
-        cds = charge_distribution_surface_100(layout)
+        cds = charge_distribution_surface(layout)
 
         result = quickexact(cds, params)
 
@@ -58,7 +57,7 @@ class TestQuickExact(unittest.TestCase):
         self.assertEqual(params.simulation_parameters.mu_minus, -0.32)
         self.assertEqual(params.base_number_detection, automatic_base_number_detection.OFF)
 
-        cds = charge_distribution_surface_111(layout)
+        cds = charge_distribution_surface(layout)
 
         result = quickexact(cds, params)
 

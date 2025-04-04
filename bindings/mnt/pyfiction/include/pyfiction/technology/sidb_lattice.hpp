@@ -53,13 +53,13 @@ void sidb_lattice(pybind11::module& m, const std::string& coord_type)
 
 inline void sidb_lattices(pybind11::module& m)
 {
-    detail::sidb_lattice<fiction::sidb_100_lattice, py_sidb_lattice<fiction::sidb_100_lattice, py_offset_coordinate>,
+    detail::sidb_lattice<fiction::sidb_100_lattice, py_sidb_100_lattice<py_offset_coordinate>,
                          py_sidb_layout<py_offset_coordinate>>(m, "offset_coordinates");
-    detail::sidb_lattice<fiction::sidb_100_lattice, py_sidb_lattice<fiction::sidb_100_lattice, py_cube_coordinate>,
+    detail::sidb_lattice<fiction::sidb_100_lattice, py_sidb_100_lattice<py_cube_coordinate>,
                          py_sidb_layout<py_cube_coordinate>>(m, "cube_coordinates");
-    detail::sidb_lattice<fiction::sidb_111_lattice, py_sidb_lattice<fiction::sidb_111_lattice>,
+    detail::sidb_lattice<fiction::sidb_111_lattice, py_sidb_111_lattice<py_offset_coordinate>,
                          py_sidb_layout<py_offset_coordinate>>(m, "offset_coordinates");
-    detail::sidb_lattice<fiction::sidb_111_lattice, py_sidb_lattice<fiction::sidb_111_lattice, py_cube_coordinate>,
+    detail::sidb_lattice<fiction::sidb_111_lattice, py_sidb_111_lattice<py_cube_coordinate>,
                          py_sidb_layout<py_cube_coordinate>>(m, "cube_coordinates");
 }
 

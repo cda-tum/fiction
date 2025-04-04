@@ -30,7 +30,7 @@ TEST_CASE("Deep copy clocked layout", "[clocked-layout]")
 
     auto copy = original.clone();
 
-    copy.resize(aspect_ratio_type_t<clk_lyt>{10, 10, 1});
+    copy.resize(aspect_ratio_t<clk_lyt>{10, 10, 1});
     copy.replace_clocking_scheme(use_clocking<clk_lyt>());
 
     CHECK(original.x() == 5);

@@ -30,7 +30,7 @@ TEST_CASE("Deep copy synchronization element layout", "[synchronization-element-
 
     auto copy = original.clone();
 
-    copy.resize(aspect_ratio_type_t<se_layout>{10, 10, 1});
+    copy.resize(aspect_ratio_t<se_layout>{10, 10, 1});
     copy.replace_clocking_scheme(use_clocking<se_layout>());
     copy.assign_synchronization_element({0, 0}, 2);
     copy.assign_synchronization_element({1, 0}, 3);

@@ -1,8 +1,7 @@
 import unittest
 
 from mnt.pyfiction import (
-    charge_distribution_surface_100,
-    charge_distribution_surface_111,
+    charge_distribution_surface,
     generate_multiple_random_sidb_layouts,
     generate_random_sidb_layout,
     generate_random_sidb_layout_params,
@@ -43,7 +42,7 @@ class TestRandomSiDBLayoutGenerator(unittest.TestCase):
         params.number_of_sidbs = 5
         print(params.number_of_sidbs)
         params.coordinate_pair = ((0, 0), (10, 10))
-        result_lyt = generate_random_sidb_layout(params, charge_distribution_surface_100())
+        result_lyt = generate_random_sidb_layout(params, charge_distribution_surface())
         self.assertEqual(result_lyt.num_cells(), 5)
 
     def test_area_with_five_sidbs_cds_111(self):
@@ -51,7 +50,7 @@ class TestRandomSiDBLayoutGenerator(unittest.TestCase):
         params.number_of_sidbs = 5
         print(params.number_of_sidbs)
         params.coordinate_pair = ((0, 0), (10, 10))
-        result_lyt = generate_random_sidb_layout(params, charge_distribution_surface_111())
+        result_lyt = generate_random_sidb_layout(params, charge_distribution_surface())
         self.assertEqual(result_lyt.num_cells(), 5)
 
     def test_area_with_one_coordinate_111_lattice(self):

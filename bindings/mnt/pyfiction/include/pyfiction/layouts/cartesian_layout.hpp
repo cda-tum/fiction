@@ -23,7 +23,7 @@ namespace pyfiction
 {
 
 template <typename CoordLyt>
-inline fiction::aspect_ratio_type_t<CoordLyt> extract_aspect_ratio(pybind11::tuple dimension)
+inline fiction::aspect_ratio_t<CoordLyt> extract_aspect_ratio(pybind11::tuple dimension)
 {
     namespace py = pybind11;
 
@@ -75,7 +75,7 @@ inline fiction::aspect_ratio_type_t<CoordLyt> extract_aspect_ratio(pybind11::tup
         coordinate_t cmax{xmax, ymax, zmax};
 
         // We can now call aspect_ratio(cmin, cmax)
-        return fiction::aspect_ratio_type_t<CoordLyt>{cmin, cmax};
+        return fiction::aspect_ratio_t<CoordLyt>{cmin, cmax};
     }
 
     // -- CASE B: Single-tuple => "max" only => aspect_ratio(x, y, z)
@@ -92,7 +92,7 @@ inline fiction::aspect_ratio_type_t<CoordLyt> extract_aspect_ratio(pybind11::tup
         // The aspect_ratio constructor template <X,Y,Z> aspect_ratio(X x, Y y, Z z)
         // sets min=(0,0,0) and max=(x,y,z).
         // Just pass them as integrals and let the template do the rest:
-        return fiction::aspect_ratio_type_t<CoordLyt>{x, y, z};
+        return fiction::aspect_ratio_t<CoordLyt>{x, y, z};
     }
 }
 
@@ -133,8 +133,8 @@ void cartesian_layout(pybind11::module& m, const std::string& coord_type)
         .def("area", &CartLyt::area, DOC(fiction_cartesian_layout_area))
         .def("volume", &CartLyt::volume, DOC(fiction_cartesian_layout_volume))
         .def(
-            "resize", [](CartLyt& lyt, const fiction::aspect_ratio_type_t<CartLyt>& dimension)
-            { lyt.resize(dimension); }, py::arg("dimension"), DOC(fiction_cartesian_layout_resize))
+            "resize", [](CartLyt& lyt, const fiction::aspect_ratio_t<CartLyt>& dimension) { lyt.resize(dimension); },
+            py::arg("dimension"), DOC(fiction_cartesian_layout_resize))
         .def(
             "resize",
             [&](CartLyt& layout, py::tuple dimension)

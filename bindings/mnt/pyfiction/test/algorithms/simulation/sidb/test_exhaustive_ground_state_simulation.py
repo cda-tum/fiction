@@ -1,8 +1,7 @@
 import unittest
 
 from mnt.pyfiction import (
-    charge_distribution_surface_100,
-    charge_distribution_surface_111,
+    charge_distribution_surface,
     exhaustive_ground_state_simulation,
     sidb_charge_state,
     sidb_lattice,
@@ -20,7 +19,7 @@ class TestExhaustiveGroundStateSimulation(unittest.TestCase):
 
         params = sidb_simulation_parameters()
 
-        charge_distribution_surface_100(layout)
+        charge_distribution_surface(layout)
 
         result = exhaustive_ground_state_simulation(layout, params)
 
@@ -46,7 +45,7 @@ class TestExhaustiveGroundStateSimulation(unittest.TestCase):
 
         self.assertEqual(params.mu_minus, -0.32)
 
-        cds = charge_distribution_surface_111(layout)
+        cds = charge_distribution_surface(layout)
 
         result = exhaustive_ground_state_simulation(cds, params)
 

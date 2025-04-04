@@ -222,8 +222,8 @@ uint32_t is_eastern_po_orientation_available(const coloring_container<Ntk>& ctn,
 }
 
 template <typename Lyt, typename Ntk>
-aspect_ratio_type_t<Lyt> determine_layout_size(const coloring_container<Ntk>& ctn,
-                                               const uint32_t                 num_multi_output_nodes) noexcept
+aspect_ratio_t<Lyt> determine_layout_size(const coloring_container<Ntk>& ctn,
+                                          const uint32_t                 num_multi_output_nodes) noexcept
 {
 #if (PROGRESS_BARS)
     // initialize a progress bar

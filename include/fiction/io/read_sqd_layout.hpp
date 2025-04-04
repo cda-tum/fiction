@@ -144,7 +144,7 @@ class read_sqd_layout_impl
         }
 
         // resize the layout to fit all cells
-        lyt.resize(aspect_ratio_type_t<Lyt>{max_cell_pos});
+        lyt.resize(aspect_ratio_t<Lyt>{max_cell_pos});
 
         return lyt;
     }

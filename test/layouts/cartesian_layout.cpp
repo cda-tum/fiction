@@ -658,7 +658,7 @@ TEST_CASE("Cartesian layouts with SiQAD coordinates must have a z dimension of 1
 {
     using lyt = cartesian_layout<siqad::coord_t>;
 
-    CHECK(lyt{aspect_ratio_type_t<lyt>{0, 0}}.z() == 1);
-    CHECK(lyt{aspect_ratio_type_t<lyt>{9, 9}}.z() == 1);
-    CHECK(lyt{aspect_ratio_type_t<lyt>{42, 42, 1}}.z() == 1);
+    CHECK(lyt{aspect_ratio_t<lyt>{0, 0}}.z() == 1);
+    CHECK(lyt{aspect_ratio_t<lyt>{9, 9}}.z() == 1);
+    CHECK(lyt{aspect_ratio_t<lyt>{42, 42, 1}}.z() == 1);
 }
