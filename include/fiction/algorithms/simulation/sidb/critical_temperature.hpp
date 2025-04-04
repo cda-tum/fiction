@@ -135,8 +135,7 @@ class critical_temperature_impl
     /**
      * *Gate-based Critical Temperature* Simulation of a SiDB layout for a given Boolean function.
      *
-
-     * tparam TT Type of the truth table.
+     * @tparam TT Type of the truth table.
      * @param spec Expected Boolean function of the layout given as a multi-output truth table.
      */
     template <typename TT>
@@ -245,18 +244,16 @@ class critical_temperature_impl
             // is used to provide 100 % accuracy for the Critical Temperature).
             simulation_results = quickexact(layout, qe_params);
         }
+#if (FICTION_ALGLIB_ENABLED)
         else if (params.operational_params.sim_engine == sidb_simulation_engine::CLUSTERCOMPLETE)
         {
-#if (FICTION_ALGLIB_ENABLED)
             const clustercomplete_params<cell<Lyt>> cc_params{params.operational_params.simulation_parameters};
 
             // All physically valid charge configurations are determined for the given layout (`ClusterComplete`
             // simulation is used to provide 100 % accuracy for the Critical Temperature).
             simulation_results = clustercomplete(layout, cc_params);
-#else   // FICTION_ALGLIB_ENABLED
-            assert(false && "ALGLIB must be enabled if ClusterComplete is to be used");
-#endif  // FICTION_ALGLIB_ENABLED
         }
+#endif  // FICTION_ALGLIB_ENABLED
         else if (params.operational_params.sim_engine == sidb_simulation_engine::QUICKSIM)
         {
             const quicksim_params qs_params{params.operational_params.simulation_parameters, params.iteration_steps,
@@ -350,8 +347,8 @@ class critical_temperature_impl
      * @param min_energy Minimal energy of all physically valid charge distributions of a given layout (unit: eV).
      * @return State type (i.e. transparent, erroneous) of the ground state is returned.
      */
-    bool is_ground_state_transparent(const sidb_energy_and_state_type& energy_and_state_type,
-                                     const double                      min_energy) noexcept
+    [[nodiscard]] bool is_ground_state_transparent(const sidb_energy_and_state_type& energy_and_state_type,
+                                                   const double                      min_energy) const noexcept
     {
         bool ground_state_is_transparent = false;
 
@@ -380,8 +377,8 @@ class critical_temperature_impl
     /**
      * The *Critical Temperature* is determined.
      *
-     * @param energy_state_type All energies of all physically valid charge distributions with the corresponding state
-     * type (i.e. transparent, erroneous).
+     * @param energy_state_type All energies of all physically valid charge distributions with the corresponding
+     * state type (i.e. transparent, erroneous).
      */
     void determine_critical_temperature(const sidb_energy_and_state_type& energy_state_type) noexcept
     {
@@ -433,8 +430,8 @@ class critical_temperature_impl
      */
     double critical_temperature;
     /**
-     * This function conducts physical simulation of the given layout (gate layout with certain input combination). The
-     * simulation results are stored in the `sim_result_100` variable.
+     * This function conducts physical simulation of the given layout (gate layout with certain input combination).
+     * The simulation results are stored in the `sim_result_100` variable.
      *
      * @param bdl_iterator A reference to a BDL input iterator representing the gate layout at a given input
      * combination. The simulation is performed based on the configuration represented by the iterator.
@@ -456,16 +453,14 @@ class critical_temperature_impl
                 fiction::quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF};
             return quickexact(*bdl_iterator, qe_params);
         }
+#if (FICTION_ALGLIB_ENABLED)
         if (params.operational_params.sim_engine == sidb_simulation_engine::CLUSTERCOMPLETE)
         {
-#if (FICTION_ALGLIB_ENABLED)
             // perform ClusterComplete exact simulation
             const clustercomplete_params<cell<Lyt>> cc_params{params.operational_params.simulation_parameters};
             return clustercomplete(*bdl_iterator, cc_params);
-#else   // FICTION_ALGLIB_ENABLED
-            assert(false && "ALGLIB must be enabled if ClusterComplete is to be used");
-#endif  // FICTION_ALGLIB_ENABLED
         }
+#endif  // FICTION_ALGLIB_ENABLED
         if (params.operational_params.sim_engine == sidb_simulation_engine::QUICKSIM)
         {
             assert(params.operational_params.simulation_parameters.base == 2 &&

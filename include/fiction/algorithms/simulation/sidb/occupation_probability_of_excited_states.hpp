@@ -61,9 +61,10 @@ namespace fiction
     const auto min_energy = energy;
 
     // The partition function is obtained by summing up all the Boltzmann factors.
-    const double partition_function = std::accumulate(
-        energy_and_state_type.cbegin(), energy_and_state_type.cend(), 0.0, [&](const double sum, const auto& it)
-        { return sum + calculate_boltzmann_factor(it.first, min_energy, temperature); });
+    const double partition_function =
+        std::accumulate(energy_and_state_type.cbegin(), energy_and_state_type.cend(), 0.0,
+                        [min_energy, temperature](const double sum, const auto& it)
+                        { return sum + calculate_boltzmann_factor(it.first, min_energy, temperature); });
 
     // All Boltzmann factors of the erroneous states are summed.
     double p = 0;
@@ -105,7 +106,7 @@ namespace fiction
     double partition_function = 0.0;
 
     energy_distribution.for_each(
-        [&](const double energy, const uint64_t degeneracy)
+        [&partition_function, min_energy, temperature](const double energy, const uint64_t degeneracy)
         {
             partition_function +=
                 static_cast<double>(degeneracy) * calculate_boltzmann_factor(energy, min_energy, temperature);
@@ -114,7 +115,7 @@ namespace fiction
     double p = 0;
 
     energy_distribution.for_each(
-        [&](const double energy, const uint64_t degeneracy)
+        [&p, min_energy, temperature](const double energy, const uint64_t degeneracy)
         {
             if (std::abs(round_to_n_decimal_places(energy, 6) - round_to_n_decimal_places(min_energy, 6)) >
                 constants::ERROR_MARGIN)
