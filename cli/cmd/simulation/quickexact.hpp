@@ -124,7 +124,7 @@ class quickexact_command : public command
                         minimum_energy_distribution(std::get<sim_result_100>(sim_result).charge_distributions.cbegin(),
                                                     std::get<sim_result_100>(sim_result).charge_distributions.cend());
 
-                    min_energy = min_energy_distr->get_system_energy();
+                    min_energy = min_energy_distr->get_electrostatic_potential_energy();
                     store<fiction::cell_layout_t>().extend() =
                         std::make_shared<fiction::cds_sidb_100_cell_clk_lyt>(*min_energy_distr);
                 }
@@ -141,7 +141,7 @@ class quickexact_command : public command
                         minimum_energy_distribution(std::get<sim_result_111>(sim_result).charge_distributions.cbegin(),
                                                     std::get<sim_result_111>(sim_result).charge_distributions.cend());
 
-                    min_energy = min_energy_distr->get_system_energy();
+                    min_energy = min_energy_distr->get_electrostatic_potential_energy();
                     store<fiction::cell_layout_t>().extend() =
                         std::make_shared<fiction::cds_sidb_111_cell_clk_lyt>(*min_energy_distr);
                 }

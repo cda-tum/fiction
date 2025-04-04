@@ -21,7 +21,6 @@ class TestCalculateEnergyAndStateType(unittest.TestCase):
         charge_lyt_one.assign_charge_state(offset_coordinate(1, 2), sidb_charge_state.NEGATIVE)
         charge_lyt_one.assign_charge_state(offset_coordinate(5, 2), sidb_charge_state.NEGATIVE)
         charge_lyt_one.update_after_charge_change()
-        charge_lyt_one.get_system_energy()
 
         layout_two = sidb_layout((10, 10))
         layout_two.assign_cell_type(offset_coordinate(0, 0), sidb_technology.cell_type.NORMAL)
