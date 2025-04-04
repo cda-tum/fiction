@@ -20916,6 +20916,17 @@ Template parameter ``Lyt``:
 Returns:
     SRS clocking scheme.)doc";
 
+static const char *__doc_fiction_state_type = R"doc(Label to categorize ground and excited states of an SiDB layout.)doc";
+
+static const char *__doc_fiction_state_type_ACCEPTED =
+R"doc(A state is accepted if the charge distribution encodes the desired
+logic.)doc";
+
+static const char *__doc_fiction_state_type_REJECTED =
+R"doc(A state is rejected if the charge distributiion does not encode the
+desired logic. Moreover, if kinks are rejected, a charge distribution
+that encodes the logic, but does show kinks, is rejected.)doc";
+
 static const char *__doc_fiction_static_depth_view =
 R"doc(A specialization of `static_depth_view` for networks where
 `has_depth_interface` is `true`. When this condition is met,
