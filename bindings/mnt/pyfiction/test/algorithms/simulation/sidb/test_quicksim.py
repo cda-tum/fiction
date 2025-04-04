@@ -2,7 +2,6 @@ import unittest
 
 from mnt.pyfiction import (
     charge_distribution_surface,
-    charge_distribution_surface_111,
     quicksim,
     quicksim_params,
     sidb_charge_state,
@@ -63,7 +62,7 @@ class TestQuicksim(unittest.TestCase):
         self.assertEqual(params.alpha, 0.7)
         self.assertEqual(params.simulation_parameters.mu_minus, -0.32)
 
-        charge_distribution_surface_111(layout)
+        charge_distribution_surface(layout)
 
         result = quicksim(layout, params)
 
