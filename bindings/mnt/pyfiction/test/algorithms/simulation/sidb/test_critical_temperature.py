@@ -111,8 +111,6 @@ class TestCriticalTemperature(unittest.TestCase):
         cds = charge_distribution_surface_100(layout)
         spec = [create_not_tt()]
 
-        print(critical_temperature_gate_based(cds, spec, params, stats))
-
         self.assertLessEqual(critical_temperature_gate_based(cds, spec, params, stats), 5)
 
         self.assertEqual(stats.algorithm_name, "QuickExact")
