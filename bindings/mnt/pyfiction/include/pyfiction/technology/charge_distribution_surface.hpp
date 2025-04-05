@@ -351,6 +351,31 @@ inline void charge_distribution_surface_factory(pybind11::module& m)
 {
     namespace py = pybind11;
 
+    // -------------------------------------------------------------------------
+    // 1) Overload for NO arguments: creates a default-constructed
+    //    `charge_distribution_surface_layout` using some chosen underlying layout type
+    //    (`py_sidb_layout<py_offset_coordinate>`).
+    // -------------------------------------------------------------------------
+    m.def(
+        "charge_distribution_surface",
+        [](const fiction::sidb_simulation_parameters& params, fiction::sidb_charge_state cs)
+        {
+            using default_layout_type = py_sidb_layout<py_offset_coordinate>;
+            using default_cds_type    = py_charge_distribution_surface_layout<default_layout_type>;
+            return default_cds_type{params, cs};
+        },
+        py::arg("params") = fiction::sidb_simulation_parameters{}, py::arg("cs") = fiction::sidb_charge_state::NEGATIVE,
+        R"doc(
+            Default constructor-like overload of `charge_distribution_surface`.
+
+            Creates a charge_distribution_surface with a default underlying SiDB layout
+            (generic py_sidb_layout in offset coordinates), default simulation parameters,
+            and negative initial SiDB charge state.
+        )doc");
+
+    // -------------------------------------------------------------------------
+    // 2) Overload that takes a `layout` argument and deduces the specialized type.
+    // -------------------------------------------------------------------------
     m.def(
         "charge_distribution_surface",
         [](py::object layout, const fiction::sidb_simulation_parameters& params, fiction::sidb_charge_state cs)

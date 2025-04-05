@@ -3,6 +3,7 @@ import unittest
 from mnt.pyfiction import (
     charge_distribution_surface,
     charge_index_mode,
+    cube_coordinate,
     offset_coordinate,
     sidb_charge_state,
     sidb_lattice,
@@ -13,14 +14,17 @@ from mnt.pyfiction import (
 
 class TestChargeDistributionSurface(unittest.TestCase):
     def test_initialization(self):
-        for layout_one in [sidb_layout((10, 10)), sidb_layout((10, 10), coordinate_type="cube")]:
+        for layout_one, coordinate_type in [
+            (sidb_layout((10, 10)), offset_coordinate),
+            (sidb_layout((10, 10), coordinate_type="cube"), cube_coordinate),
+        ]:
             layout_one.assign_cell_type((0, 1), sidb_technology.cell_type.NORMAL)
             layout_one.assign_cell_type((4, 1), sidb_technology.cell_type.NORMAL)
             layout_one.assign_cell_type((6, 1), sidb_technology.cell_type.NORMAL)
 
             charge_lyt = charge_distribution_surface(layout_one)
 
-            self.assertEqual(charge_lyt.get_charge_state(offset_coordinate(0, 1)), sidb_charge_state.NEGATIVE)
+            self.assertEqual(charge_lyt.get_charge_state(coordinate_type(0, 1)), sidb_charge_state.NEGATIVE)
             self.assertEqual(charge_lyt.get_charge_state((4, 1)), sidb_charge_state.NEGATIVE)
             self.assertEqual(charge_lyt.get_charge_state((6, 1)), sidb_charge_state.NEGATIVE)
 
