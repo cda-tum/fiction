@@ -34,7 +34,7 @@ inline void energy_distribution(pybind11::module& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::energy_distribution<py_charge_distribution_surface>(m);
+    detail::energy_distribution<py_charge_distribution_surface<py_offset_coordinate>>(m);
 }
 
 }  // namespace pyfiction

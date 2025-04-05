@@ -6,17 +6,15 @@ from mnt.pyfiction import (
     a_star_params,
     cartesian_gate_layout,
     cartesian_layout,
-    cartesian_obstruction_layout,
     clocked_cartesian_layout,
     clocked_hexagonal_layout,
     clocked_shifted_cartesian_layout,
     hexagonal_gate_layout,
     hexagonal_layout,
-    hexagonal_obstruction_layout,
+    obstruction_layout,
     offset_coordinate,
     shifted_cartesian_gate_layout,
     shifted_cartesian_layout,
-    shifted_cartesian_obstruction_layout,
 )
 
 
@@ -44,9 +42,9 @@ class TestAStar(unittest.TestCase):
 
     def test_path_finding_with_obstructions(self):
         for lyt in [
-            cartesian_obstruction_layout(cartesian_gate_layout((4, 4), "2DDWave", "Layout")),
-            shifted_cartesian_obstruction_layout(shifted_cartesian_gate_layout((4, 4), "2DDWave", "Layout")),
-            hexagonal_obstruction_layout(hexagonal_gate_layout((4, 4), "2DDWave", "Layout")),
+            obstruction_layout(cartesian_gate_layout((4, 4), "2DDWave", "Layout")),
+            obstruction_layout(shifted_cartesian_gate_layout((4, 4), "2DDWave", "Layout")),
+            obstruction_layout(hexagonal_gate_layout((4, 4), "2DDWave", "Layout")),
         ]:
             # block a vertical line of offset_coordinates
             lyt.obstruct_coordinate(offset_coordinate(1, 0))
@@ -71,9 +69,9 @@ class TestAStar(unittest.TestCase):
 
     def test_path_finding_with_obstructions_and_crossings(self):
         for lyt in [
-            cartesian_obstruction_layout(cartesian_gate_layout((2, 1, 1), "2DDWave", "Layout")),
-            shifted_cartesian_obstruction_layout(shifted_cartesian_gate_layout((2, 1, 1), "2DDWave", "Layout")),
-            hexagonal_obstruction_layout(hexagonal_gate_layout((2, 1, 1), "2DDWave", "Layout")),
+            obstruction_layout(cartesian_gate_layout((2, 1, 1), "2DDWave", "Layout")),
+            obstruction_layout(shifted_cartesian_gate_layout((2, 1, 1), "2DDWave", "Layout")),
+            obstruction_layout(hexagonal_gate_layout((2, 1, 1), "2DDWave", "Layout")),
         ]:
             x1 = lyt.create_pi("x1", (0, 0))
             lyt.obstruct_coordinate((0, 0, 0))

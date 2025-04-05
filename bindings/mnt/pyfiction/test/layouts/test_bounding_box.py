@@ -3,16 +3,14 @@ import unittest
 
 from mnt.pyfiction import (
     cartesian_gate_layout,
-    cartesian_obstruction_layout,
     hexagonal_gate_layout,
-    hexagonal_obstruction_layout,
     inml_layout,
+    obstruction_layout,
     orthogonal,
     orthogonal_params,
     qca_layout,
     read_technology_network,
     shifted_cartesian_gate_layout,
-    shifted_cartesian_obstruction_layout,
     sidb_layout,
 )
 
@@ -25,9 +23,9 @@ class TestBoundingBox(unittest.TestCase):
             cartesian_gate_layout((2, 2, 0), "2DDWave", "Layout"),
             shifted_cartesian_gate_layout((2, 2, 0), "2DDWave", "Layout"),
             hexagonal_gate_layout((2, 2, 0), "2DDWave", "Layout"),
-            cartesian_obstruction_layout(cartesian_gate_layout((2, 2, 0), "2DDWave", "Layout")),
-            shifted_cartesian_obstruction_layout(shifted_cartesian_gate_layout((2, 2, 0), "2DDWave", "Layout")),
-            hexagonal_obstruction_layout(hexagonal_gate_layout((2, 2, 0), "2DDWave", "Layout")),
+            obstruction_layout(cartesian_gate_layout((2, 2, 0), "2DDWave", "Layout")),
+            obstruction_layout(shifted_cartesian_gate_layout((2, 2, 0), "2DDWave", "Layout")),
+            obstruction_layout(hexagonal_gate_layout((2, 2, 0), "2DDWave", "Layout")),
         ]:
             min_coord, max_coord = layout.bounding_box_2d()
             self.assertEqual(min_coord, layout.coord(0, 0))

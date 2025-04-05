@@ -29,7 +29,7 @@ namespace detail
 {
 
 template <typename Technology>
-void fcn_technology_cell_level_layout(pybind11::module& m)
+void fcn_technology(pybind11::module& m)
 {
     namespace py = pybind11;
 
@@ -71,30 +71,32 @@ void fcn_technology_cell_level_layout(pybind11::module& m)
     {
         cell_type.value("LOGIC", Technology::cell_type::LOGIC);
     }
-    // NOTE: more technologies go here
+}
 
-    using py_cartesian_technology_cell_layout = py_cartesian_cell_layout<Technology>;
+template <typename ClockedLyt, typename CellLyt, typename Technology>
+void cell_level_layout(pybind11::module& m, const std::string& coord_type)
+{
+    namespace py = pybind11;
+
+    // fetch technology name
+    auto tech_name = std::string{fiction::tech_impl_name<Technology>};
+    std::transform(tech_name.begin(), tech_name.end(), tech_name.begin(), ::tolower);
 
     /**
      * Cell-level clocked Cartesian layout.
      */
-    py::class_<
-        py_cartesian_technology_cell_layout,
-        fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<fiction::offset::ucoord_t>>>>(
-        m, fmt::format("{}_layout", tech_name).c_str(), DOC(fiction_cell_level_layout))
+    py::class_<CellLyt, ClockedLyt>(m, fmt::format("{}_layout_{}", tech_name, coord_type).c_str(),
+                                    DOC(fiction_cell_level_layout))
         .def(py::init<>())
-        .def(py::init<const fiction::aspect_ratio<py_cartesian_technology_cell_layout>&>(), py::arg("dimension"),
+        .def(py::init<const fiction::aspect_ratio<fiction::coordinate<CellLyt>>&>(), py::arg("dimension"),
              DOC(fiction_cell_level_layout_cell_level_layout))
         .def(py::init(
-                 [](const fiction::aspect_ratio<py_cartesian_technology_cell_layout>& dimension,
-                    const std::string&                                                scheme_name,
-                    const std::string& layout_name) -> py_cartesian_technology_cell_layout
+                 [](const fiction::aspect_ratio<fiction::coordinate<CellLyt>>& dimension,
+                    const std::string& scheme_name, const std::string& layout_name) -> CellLyt
                  {
-                     if (const auto scheme =
-                             fiction::get_clocking_scheme<py_cartesian_technology_cell_layout>(scheme_name);
-                         scheme.has_value())
+                     if (const auto scheme = fiction::get_clocking_scheme<CellLyt>(scheme_name); scheme.has_value())
                      {
-                         return py_cartesian_technology_cell_layout{dimension, *scheme, layout_name};
+                         return CellLyt{dimension, *scheme, layout_name};
                      }
 
                      throw std::runtime_error("Given name does not refer to a supported clocking scheme");
@@ -102,69 +104,64 @@ void fcn_technology_cell_level_layout(pybind11::module& m)
              py::arg("dimension"), py::arg("clocking_scheme") = "2DDWave", py::arg("layout_name") = "",
              DOC(fiction_cell_level_layout_cell_level_layout_2))
 
-        .def("assign_cell_type", &py_cartesian_technology_cell_layout::assign_cell_type, py::arg("c"), py::arg("ct"),
+        .def("assign_cell_type", &CellLyt::assign_cell_type, py::arg("c"), py::arg("ct"),
              DOC(fiction_cell_level_layout_assign_cell_type))
-        .def("get_cell_type", &py_cartesian_technology_cell_layout::get_cell_type, py::arg("c"),
-             DOC(fiction_cell_level_layout_get_cell_type))
-        .def("is_empty_cell", &py_cartesian_technology_cell_layout::is_empty_cell, py::arg("c"),
-             DOC(fiction_cell_level_layout_is_empty_cell))
-        .def("assign_cell_name", &py_cartesian_technology_cell_layout::assign_cell_name, py::arg("c"), py::arg("n"),
+        .def("get_cell_type", &CellLyt::get_cell_type, py::arg("c"), DOC(fiction_cell_level_layout_get_cell_type))
+        .def("is_empty_cell", &CellLyt::is_empty_cell, py::arg("c"), DOC(fiction_cell_level_layout_is_empty_cell))
+        .def("assign_cell_name", &CellLyt::assign_cell_name, py::arg("c"), py::arg("n"),
              DOC(fiction_cell_level_layout_assign_cell_name))
-        .def("get_cell_name", &py_cartesian_technology_cell_layout::get_cell_name, py::arg("c"),
-             DOC(fiction_cell_level_layout_get_cell_name))
-        .def("set_layout_name", &py_cartesian_technology_cell_layout::set_layout_name, py::arg("name"),
+        .def("get_cell_name", &CellLyt::get_cell_name, py::arg("c"), DOC(fiction_cell_level_layout_get_cell_name))
+        .def("set_layout_name", &CellLyt::set_layout_name, py::arg("name"),
              DOC(fiction_cell_level_layout_set_layout_name))
-        .def("get_layout_name", &py_cartesian_technology_cell_layout::get_layout_name,
-             DOC(fiction_cell_level_layout_get_layout_name))
-        .def("num_cells", &py_cartesian_technology_cell_layout::num_cells, DOC(fiction_cell_level_layout_num_cells))
-        .def("is_empty", &py_cartesian_technology_cell_layout::is_empty, DOC(fiction_cell_level_layout_is_empty))
-        .def("num_pis", &py_cartesian_technology_cell_layout::num_pis, DOC(fiction_cell_level_layout_num_pis))
-        .def("num_pos", &py_cartesian_technology_cell_layout::num_pos, DOC(fiction_cell_level_layout_num_pos))
-        .def("is_pi", &py_cartesian_technology_cell_layout::is_pi, py::arg("c"), DOC(fiction_cell_level_layout_is_pi))
-        .def("is_po", &py_cartesian_technology_cell_layout::is_po, py::arg("c"), DOC(fiction_cell_level_layout_is_po))
+        .def("get_layout_name", &CellLyt::get_layout_name, DOC(fiction_cell_level_layout_get_layout_name))
+        .def("num_cells", &CellLyt::num_cells, DOC(fiction_cell_level_layout_num_cells))
+        .def("is_empty", &CellLyt::is_empty, DOC(fiction_cell_level_layout_is_empty))
+        .def("num_pis", &CellLyt::num_pis, DOC(fiction_cell_level_layout_num_pis))
+        .def("num_pos", &CellLyt::num_pos, DOC(fiction_cell_level_layout_num_pos))
+        .def("is_pi", &CellLyt::is_pi, py::arg("c"), DOC(fiction_cell_level_layout_is_pi))
+        .def("is_po", &CellLyt::is_po, py::arg("c"), DOC(fiction_cell_level_layout_is_po))
 
-        .def("get_cell_type", &py_cartesian_technology_cell_layout::get_cell_type, py::arg("c"),
-             DOC(fiction_cell_level_layout_get_cell_type))
-        .def("get_cells_by_type", &py_cartesian_technology_cell_layout::get_cells_by_type, py::arg("type"),
+        .def("get_cell_type", &CellLyt::get_cell_type, py::arg("c"), DOC(fiction_cell_level_layout_get_cell_type))
+        .def("get_cells_by_type", &CellLyt::get_cells_by_type, py::arg("type"),
              DOC(fiction_cell_level_layout_get_cells_by_type))
-        .def("num_cells_of_given_type", &py_cartesian_technology_cell_layout::num_cells_of_given_type, py::arg("type"),
+        .def("num_cells_of_given_type", &CellLyt::num_cells_of_given_type, py::arg("type"),
              DOC(fiction_cell_level_layout_num_cells_of_given_type))
 
         .def("cells",
-             [](const py_cartesian_technology_cell_layout& lyt)
+             [](const CellLyt& lyt)
              {
-                 std::vector<fiction::coordinate<py_cartesian_technology_cell_layout>> cells{};
+                 std::vector<fiction::coordinate<CellLyt>> cells{};
                  cells.reserve(lyt.num_cells());
                  lyt.foreach_cell([&cells](const auto& c) { cells.push_back(c); });
                  return cells;
              })
         .def("pis",
-             [](const py_cartesian_technology_cell_layout& lyt)
+             [](const CellLyt& lyt)
              {
-                 std::vector<fiction::coordinate<py_cartesian_technology_cell_layout>> pis{};
+                 std::vector<fiction::coordinate<CellLyt>> pis{};
                  pis.reserve(lyt.num_pis());
                  lyt.foreach_pi([&pis](const auto& c) { pis.push_back(c); });
                  return pis;
              })
         .def("pos",
-             [](const py_cartesian_technology_cell_layout& lyt)
+             [](const CellLyt& lyt)
              {
-                 std::vector<fiction::coordinate<py_cartesian_technology_cell_layout>> pos{};
+                 std::vector<fiction::coordinate<CellLyt>> pos{};
                  pos.reserve(lyt.num_pos());
                  lyt.foreach_po([&pos](const auto& c) { pos.push_back(c); });
                  return pos;
              })
         .def(
             "bounding_box_2d",
-            [](const py_cartesian_technology_cell_layout& lyt)
+            [](const CellLyt& lyt)
             {
-                const auto bb = fiction::bounding_box_2d<py_cartesian_technology_cell_layout>(lyt);
+                const auto bb = fiction::bounding_box_2d<CellLyt>(lyt);
                 return std::make_pair(bb.get_min(), bb.get_max());
             },
             DOC(fiction_bounding_box_2d_overridden))
 
         .def("__repr__",
-             [](const py_cartesian_technology_cell_layout& lyt) -> std::string
+             [](const CellLyt& lyt) -> std::string
              {
                  std::stringstream stream{};
 
@@ -187,9 +184,140 @@ void fcn_technology_cell_level_layout(pybind11::module& m)
 
 inline void cell_level_layouts(pybind11::module& m)
 {
-    detail::fcn_technology_cell_level_layout<fiction::qca_technology>(m);
-    detail::fcn_technology_cell_level_layout<fiction::inml_technology>(m);
-    detail::fcn_technology_cell_level_layout<fiction::sidb_technology>(m);
+    detail::fcn_technology<fiction::qca_technology>(m);
+    detail::fcn_technology<fiction::inml_technology>(m);
+    detail::fcn_technology<fiction::sidb_technology>(m);
+    detail::cell_level_layout<py_cartesian_clocked_layout<py_offset_coordinate>, py_qca_layout<py_offset_coordinate>,
+                              fiction::qca_technology>(m, "offset_coordinates");
+    detail::cell_level_layout<py_cartesian_clocked_layout<py_cube_coordinate>, py_qca_layout<py_cube_coordinate>,
+                              fiction::qca_technology>(m, "cube_coordinates");
+    detail::cell_level_layout<py_cartesian_clocked_layout<py_offset_coordinate>, py_inml_layout<py_offset_coordinate>,
+                              fiction::inml_technology>(m, "offset_coordinates");
+    detail::cell_level_layout<py_cartesian_clocked_layout<py_cube_coordinate>, py_inml_layout<py_cube_coordinate>,
+                              fiction::inml_technology>(m, "cube_coordinates");
+    detail::cell_level_layout<py_cartesian_clocked_layout<py_offset_coordinate>, py_sidb_layout<py_offset_coordinate>,
+                              fiction::sidb_technology>(m, "offset_coordinates");
+    detail::cell_level_layout<py_cartesian_clocked_layout<py_cube_coordinate>, py_sidb_layout<py_cube_coordinate>,
+                              fiction::sidb_technology>(m, "cube_coordinates");
+}
+/**
+ * A "factory" function that Python users can call as
+ * <qca|inml|sidb>_layout(dimension, scheme_name="open", coordinate_type="offset")
+ * to create the correct layout type (offset or cube).
+ */
+inline void cell_level_layout_factory(pybind11::module& m)
+{
+    namespace py = pybind11;
+
+    m.def(
+        "qca_layout",
+        [](const py::object dimension, const std::string& scheme_name, const std::string& layout_name,
+           const std::string& coordinate_type)
+        {
+            if (coordinate_type == "cube")
+            {
+                const auto ar = extract_aspect_ratio<py_cartesian_layout<py_cube_coordinate>>(dimension);
+                if (const auto scheme = fiction::get_clocking_scheme<py_qca_layout<py_cube_coordinate>>(scheme_name);
+                    scheme.has_value())
+                {
+                    return py::cast(py_qca_layout<py_cube_coordinate>{ar, *scheme, layout_name});
+                }
+                throw std::runtime_error("Given name does not refer to a supported clocking scheme");
+            }
+            else  // default: offset
+            {
+                const auto ar = extract_aspect_ratio<py_cartesian_layout<py_offset_coordinate>>(dimension);
+                if (const auto scheme = fiction::get_clocking_scheme<py_qca_layout<py_offset_coordinate>>(scheme_name);
+                    scheme.has_value())
+                {
+                    return py::cast(py_qca_layout<py_offset_coordinate>{ar, *scheme, layout_name});
+                }
+                throw std::runtime_error("Given name does not refer to a supported clocking scheme");
+            }
+        },
+        py::arg("dimension") = py::make_tuple(0, 0, 0), py::arg("scheme_name") = "open", py::arg("layout_name") = "",
+        py::arg("coordinate_type") = "offset",
+        R"doc(
+            Creates and returns a qca_layout instance, choosing the coordinate system
+            based on the string argument. Valid options for `coordinate_type` are:
+
+                - "offset"
+        )doc");
+
+    m.def(
+        "inml_layout",
+        [](const py::object dimension, const std::string& scheme_name, const std::string& layout_name,
+           const std::string& coordinate_type)
+        {
+            if (coordinate_type == "cube")
+            {
+                const auto ar = extract_aspect_ratio<py_cartesian_layout<py_cube_coordinate>>(dimension);
+                if (const auto scheme = fiction::get_clocking_scheme<py_inml_layout<py_cube_coordinate>>(scheme_name);
+                    scheme.has_value())
+                {
+                    return py::cast(py_inml_layout<py_cube_coordinate>{ar, *scheme, layout_name});
+                }
+                throw std::runtime_error("Given name does not refer to a supported clocking scheme");
+            }
+            else  // default: offset
+            {
+                const auto ar = extract_aspect_ratio<py_cartesian_layout<py_offset_coordinate>>(dimension);
+                if (const auto scheme = fiction::get_clocking_scheme<py_inml_layout<py_offset_coordinate>>(scheme_name);
+                    scheme.has_value())
+                {
+                    return py::cast(py_inml_layout<py_offset_coordinate>{ar, *scheme, layout_name});
+                }
+                throw std::runtime_error("Given name does not refer to a supported clocking scheme");
+            }
+        },
+        py::arg("dimension") = py::make_tuple(0, 0, 0), py::arg("scheme_name") = "open", py::arg("layout_name") = "",
+        py::arg("coordinate_type") = "offset",
+        R"doc(
+            Creates and returns a inml_layout instance, choosing the coordinate system
+            based on the string argument. Valid options for `coordinate_type` are:
+
+                - "offset" (default)
+        )doc");
+
+    m.def(
+        "sidb_layout",
+        [](const py::object dimension, const std::string& scheme_name, const std::string& layout_name,
+           const std::string& coordinate_type)
+        {
+            if (coordinate_type == "cube")
+            {
+                const auto ar = extract_aspect_ratio<py_cartesian_layout<py_cube_coordinate>>(dimension);
+                if (const auto scheme = fiction::get_clocking_scheme<py_sidb_layout<py_cube_coordinate>>(scheme_name);
+                    scheme.has_value())
+                {
+                    return py::cast(py_sidb_layout<py_cube_coordinate>{ar, *scheme, layout_name});
+                }
+                throw std::runtime_error("Given name does not refer to a supported clocking scheme");
+            }
+            else  // default: offset
+            {
+                const auto ar = extract_aspect_ratio<py_cartesian_layout<py_offset_coordinate>>(dimension);
+                if (const auto scheme = fiction::get_clocking_scheme<py_sidb_layout<py_offset_coordinate>>(scheme_name);
+                    scheme.has_value())
+                {
+                    return py::cast(py_sidb_layout<py_offset_coordinate>{ar, *scheme, layout_name});
+                }
+                throw std::runtime_error("Given name does not refer to a supported clocking scheme");
+            }
+        },
+        py::arg("dimension") = py::make_tuple(0, 0, 0), py::arg("scheme_name") = "open", py::arg("layout_name") = "",
+        py::arg("coordinate_type") = "offset",
+        R"doc(
+            Creates and returns a sidb_layout instance, choosing the coordinate system
+            based on the string argument. Valid options for `coordinate_type` are:
+                - "offset" (default)
+                - "cube"
+
+            For the dimension, you can pass either:
+              - A single tuple (x, y) or (x, y, z) to specify only the "max" coordinate, with min defaulting to (0,0,0),
+              - Two nested tuples ((xmin, ymin), (xmax, ymax)) or 3D
+                ((xmin, ymin, zmin), (xmax, ymax, zmax)) to specify min and max explicitly.
+        )doc");
 }
 
 }  // namespace pyfiction

@@ -171,7 +171,7 @@ class shifted_cartesian_layout
      *
      * @param ar Highest possible position in the layout.
      */
-    explicit shifted_cartesian_layout(const typename HexagonalLayout::aspect_ratio& ar = {}) : HexagonalLayout(ar)
+    explicit shifted_cartesian_layout(const typename HexagonalLayout::aspect_ratio_type& ar = {}) : HexagonalLayout(ar)
     {
         static_assert(
             std::is_same_v<ShiftedCartesianCoordinateSystem, odd_row_cartesian> ||
