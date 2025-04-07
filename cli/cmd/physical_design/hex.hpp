@@ -64,11 +64,11 @@ class hex_command : public command
 
         const auto& lyt = gls.current();
 
-        const auto check_clocking_scheme = [](auto&& lyt_ptr)
+        const auto check_clocking_scheme_2ddwave = [](auto&& lyt_ptr)
         { return lyt_ptr->is_clocking_scheme(fiction::clock_name::TWODDWAVE); };
 
         // error case: layout is not 2DDWave-clocked
-        if (const auto is_twoddwave_clocked = std::visit(check_clocking_scheme, lyt); !is_twoddwave_clocked)
+        if (const auto is_2ddwave_clocked = std::visit(check_clocking_scheme_2ddwave, lyt); !is_2ddwave_clocked)
         {
             env->out() << "[e] layout has to be 2DDWave-clocked" << std::endl;
             ps = {};
@@ -106,7 +106,7 @@ class hex_command : public command
             }
         }
 
-        const auto apply_hexagonalization = [&](auto&& lyt_ptr) -> std::optional<fiction::hex_even_row_gate_clk_lyt>
+        const auto apply_hexagonalization = [this](auto&& lyt_ptr) -> std::optional<fiction::hex_even_row_gate_clk_lyt>
         {
             using Lyt = typename std::decay_t<decltype(lyt_ptr)>::element_type;
 
