@@ -32,7 +32,6 @@ template <typename Lyt>
 void charge_distribution_surface_layout(pybind11::module& m, const std::string& lattice = "")
 {
     namespace py = pybind11;
-    namespace py = pybind11;
 
     using py_cds = py_charge_distribution_surface_layout<Lyt>;
 
@@ -90,9 +89,9 @@ void charge_distribution_surface_layout(pybind11::module& m, const std::string& 
             "erase_defect", [](py_cds& cds, fiction::cell<py_cds> c) { return cds.erase_defect(c); }, py::arg("c"))
 
         .def(
-            "assign_charge_state_by_cell_index",
+            "assign_charge_state_by_index",
             [](py_cds& cds, uint64_t index, fiction::sidb_charge_state cs, fiction::charge_index_mode index_mode)
-            { return cds.assign_charge_state_by_cell_index(index, cs, index_mode); }, py::arg("index"), py::arg("cs"),
+            { return cds.assign_charge_state_by_index(index, cs, index_mode); }, py::arg("index"), py::arg("cs"),
             py::arg("index_mode") = fiction::charge_index_mode::UPDATE_CHARGE_INDEX)
         .def(
             "get_charge_state", [](py_cds& cds, fiction::cell<py_cds> c) { return cds.get_charge_state(c); },
@@ -138,7 +137,7 @@ void charge_distribution_surface_layout(pybind11::module& m, const std::string& 
             [](py_cds& cds, uint64_t index) { return cds.get_local_potential_by_index(index); }, py::arg("index"))
         .def("assign_system_energy_to_zero", [](py_cds& cds) { return cds.assign_system_energy_to_zero(); })
         .def("recompute_system_energy", [](py_cds& cds) { return cds.recompute_system_energy(); })
-        .def("get_system_energy", [](py_cds& cds) { return cds.get_system_energy(); })
+        .def("get_electrostatic_potential_energy", [](py_cds& cds) { return cds.get_electrostatic_potential_energy(); })
 
         .def(
             "update_after_charge_change",
@@ -213,7 +212,9 @@ void charge_distribution_surface_layout(pybind11::module& m, const std::string& 
              py::arg("gray_code"), py::arg("gray_code_old"))
         .def("get_sidb_order", &py_cds::get_sidb_order)
         .def("add_sidb", &py_cds::add_sidb, py::arg("cell"), py::arg("charge"))
-
+        .def("num_positive_sidbs", [](const py_cds& lyt) { return lyt.num_positive_sidbs(); })
+        .def("num_negative_sidbs", [](const py_cds& lyt) { return lyt.num_negative_sidbs(); })
+        .def("num_neutral_sidbs", [](const py_cds& lyt) { return lyt.num_neutral_sidbs(); })
         .def("cells",
              [](const py_cds& lyt)
              {

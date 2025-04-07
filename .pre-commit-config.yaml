@@ -47,7 +47,7 @@ repos:
 
   # clang-format the C++ part of the code base
   - repo: https://github.com/pre-commit/mirrors-clang-format
-    rev: v19.1.7
+    rev: v20.1.0
     hooks:
       - id: clang-format
         types_or: [c++, c]
@@ -55,7 +55,7 @@ repos:
 
   # Python linting using ruff
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.9.6
+    rev: v0.11.4
     hooks:
       - id: ruff
         args: ["--fix", "--show-fixes"]
@@ -76,14 +76,14 @@ repos:
 
   # Format configuration files with prettier
   - repo: https://github.com/rbubley/mirrors-prettier
-    rev: v3.5.1
+    rev: v3.5.3
     hooks:
       - id: prettier
         types_or: [yaml, markdown, html, css, scss, javascript, json]
 
   # Check JSON schemata
   - repo: https://github.com/python-jsonschema/check-jsonschema
-    rev: 0.31.1
+    rev: 0.32.1
     hooks:
       - id: check-github-workflows
       - id: check-readthedocs

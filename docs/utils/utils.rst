@@ -123,6 +123,16 @@ Layout Utils
         .. autofunction:: mnt.pyfiction.random_coordinate
 
 
+Map utils
+---------
+
+.. tabs::
+    .. tab:: C++
+        **Header:** ``fiction/utils/map_utils.hpp``
+
+        .. doxygenfunction:: fiction::find_key_with_tolerance
+
+
 Placement Utils
 ---------------
 

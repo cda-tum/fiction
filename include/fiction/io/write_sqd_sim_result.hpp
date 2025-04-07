@@ -246,8 +246,8 @@ class write_sqd_sim_result_impl
                       { ordered_surface_pointers.push_back(&surface); });
 
         // sort the surface references by their system energy
-        std::sort(ordered_surface_pointers.begin(), ordered_surface_pointers.end(),
-                  [](const auto& a, const auto& b) { return a->get_system_energy() < b->get_system_energy(); });
+        std::sort(ordered_surface_pointers.begin(), ordered_surface_pointers.end(), [](const auto& a, const auto& b)
+                  { return a->get_electrostatic_potential_energy() < b->get_electrostatic_potential_energy(); });
 
         // write the distributions to the output stream
         std::for_each(
@@ -263,9 +263,9 @@ class write_sqd_sim_result_impl
 
                 os << fmt::format(
                     siqad::DIST_ENERGY,
-                    surface->get_system_energy(),            // system energy
-                    1,                                       // occurrence count
-                    surface->is_physically_valid() ? 1 : 0,  // physical validity
+                    surface->get_electrostatic_potential_energy(),  // system energy
+                    1,                                              // occurrence count
+                    surface->is_physically_valid() ? 1 : 0,         // physical validity
                     3,  // simulation state count (fixed to 3 since state count = 2 is not supported by SiQAD yet).
                     charge_configuration_to_string(ordered_charges)  // charge distribution as a string
                 );

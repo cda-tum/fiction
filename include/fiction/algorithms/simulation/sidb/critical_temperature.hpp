@@ -30,7 +30,6 @@
 #include <cmath>
 #include <cstdint>
 #include <iostream>
-#include <iterator>
 #include <limits>
 #include <string>
 #include <utility>
@@ -136,8 +135,7 @@ class critical_temperature_impl
     /**
      * *Gate-based Critical Temperature* Simulation of a SiDB layout for a given Boolean function.
      *
-
-     * tparam TT Type of the truth table.
+     * @tparam TT Type of the truth table.
      * @param spec Expected Boolean function of the layout given as a multi-output truth table.
      */
     template <typename TT>
@@ -193,7 +191,7 @@ class critical_temperature_impl
                 stats.num_valid_lyt = sim_result.charge_distributions.size();
                 // The energy distribution of the physically valid charge configurations for the given layout is
                 // determined.
-                const auto distribution = energy_distribution(sim_result.charge_distributions);
+                const auto distribution = calculate_energy_distribution(sim_result.charge_distributions);
 
                 sidb_energy_and_state_type energy_state_type{};
 
@@ -246,18 +244,16 @@ class critical_temperature_impl
             // is used to provide 100 % accuracy for the Critical Temperature).
             simulation_results = quickexact(layout, qe_params);
         }
+#if (FICTION_ALGLIB_ENABLED)
         else if (params.operational_params.sim_engine == sidb_simulation_engine::CLUSTERCOMPLETE)
         {
-#if (FICTION_ALGLIB_ENABLED)
             const clustercomplete_params<cell<Lyt>> cc_params{params.operational_params.simulation_parameters};
 
             // All physically valid charge configurations are determined for the given layout (`ClusterComplete`
             // simulation is used to provide 100 % accuracy for the Critical Temperature).
             simulation_results = clustercomplete(layout, cc_params);
-#else   // FICTION_ALGLIB_ENABLED
-            assert(false && "ALGLIB must be enabled if ClusterComplete is to be used");
-#endif  // FICTION_ALGLIB_ENABLED
         }
+#endif  // FICTION_ALGLIB_ENABLED
         else if (params.operational_params.sim_engine == sidb_simulation_engine::QUICKSIM)
         {
             const quicksim_params qs_params{params.operational_params.simulation_parameters, params.iteration_steps,
@@ -265,7 +261,14 @@ class critical_temperature_impl
 
             // All physically valid charge configurations are determined for the given layout (probabilistic ground
             // state simulation is used).
-            simulation_results = quicksim(layout, qs_params);
+            if (const auto result = quicksim(layout, qs_params); result.has_value())
+            {
+                simulation_results = result.value();
+            }
+            else
+            {
+                return;
+            }
         }
         else
         {
@@ -275,13 +278,14 @@ class critical_temperature_impl
         // The number of physically valid charge configurations is stored.
         stats.num_valid_lyt = simulation_results.charge_distributions.size();
 
-        const auto distribution = energy_distribution(simulation_results.charge_distributions);
+        const auto distribution = calculate_energy_distribution(simulation_results.charge_distributions);
 
         // if there is more than one metastable state
         if (distribution.size() > 1)
         {
-            const auto ground_state_energy        = distribution.cbegin()->first;
-            const auto first_excited_state_energy = std::next(distribution.cbegin())->first;
+            const auto ground_state_energy = distribution.get_nth_state(0).value().electrostatic_potential_energy;
+            const auto first_excited_state_energy =
+                distribution.get_nth_state(1).value().electrostatic_potential_energy;
 
             // The energy difference between the first excited and the ground state in meV.
             if (stats.energy_between_ground_state_and_first_erroneous >
@@ -343,8 +347,8 @@ class critical_temperature_impl
      * @param min_energy Minimal energy of all physically valid charge distributions of a given layout (unit: eV).
      * @return State type (i.e. transparent, erroneous) of the ground state is returned.
      */
-    bool is_ground_state_transparent(const sidb_energy_and_state_type& energy_and_state_type,
-                                     const double                      min_energy) noexcept
+    [[nodiscard]] bool is_ground_state_transparent(const sidb_energy_and_state_type& energy_and_state_type,
+                                                   const double                      min_energy) const noexcept
     {
         bool ground_state_is_transparent = false;
 
@@ -355,12 +359,12 @@ class critical_temperature_impl
             // comparability with the min_energy.
             if (std::abs(round_to_n_decimal_places(energy, 6) - round_to_n_decimal_places(min_energy, 6)) <
                     constants::ERROR_MARGIN &&
-                state_type)
+                state_type == state_type::ACCEPTED)
             {
                 ground_state_is_transparent = true;
             }
 
-            if (!state_type && (energy > min_energy) && ground_state_is_transparent &&
+            if ((state_type == state_type::REJECTED) && (energy > min_energy) && ground_state_is_transparent &&
                 (((energy - min_energy) * 1000) < stats.energy_between_ground_state_and_first_erroneous))
             {
                 // The energy difference is stored in meV.
@@ -373,8 +377,8 @@ class critical_temperature_impl
     /**
      * The *Critical Temperature* is determined.
      *
-     * @param energy_state_type All energies of all physically valid charge distributions with the corresponding state
-     * type (i.e. transparent, erroneous).
+     * @param energy_state_type All energies of all physically valid charge distributions with the corresponding
+     * state type (i.e. transparent, erroneous).
      */
     void determine_critical_temperature(const sidb_energy_and_state_type& energy_state_type) noexcept
     {
@@ -426,8 +430,8 @@ class critical_temperature_impl
      */
     double critical_temperature;
     /**
-     * This function conducts physical simulation of the given layout (gate layout with certain input combination). The
-     * simulation results are stored in the `sim_result_100` variable.
+     * This function conducts physical simulation of the given layout (gate layout with certain input combination).
+     * The simulation results are stored in the `sim_result_100` variable.
      *
      * @param bdl_iterator A reference to a BDL input iterator representing the gate layout at a given input
      * combination. The simulation is performed based on the configuration represented by the iterator.
@@ -449,16 +453,14 @@ class critical_temperature_impl
                 fiction::quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF};
             return quickexact(*bdl_iterator, qe_params);
         }
+#if (FICTION_ALGLIB_ENABLED)
         if (params.operational_params.sim_engine == sidb_simulation_engine::CLUSTERCOMPLETE)
         {
-#if (FICTION_ALGLIB_ENABLED)
             // perform ClusterComplete exact simulation
             const clustercomplete_params<cell<Lyt>> cc_params{params.operational_params.simulation_parameters};
             return clustercomplete(*bdl_iterator, cc_params);
-#else   // FICTION_ALGLIB_ENABLED
-            assert(false && "ALGLIB must be enabled if ClusterComplete is to be used");
-#endif  // FICTION_ALGLIB_ENABLED
         }
+#endif  // FICTION_ALGLIB_ENABLED
         if (params.operational_params.sim_engine == sidb_simulation_engine::QUICKSIM)
         {
             assert(params.operational_params.simulation_parameters.base == 2 &&
@@ -466,7 +468,12 @@ class critical_temperature_impl
 
             const quicksim_params qs_params{params.operational_params.simulation_parameters, params.iteration_steps,
                                             params.alpha};
-            return quicksim(*bdl_iterator, qs_params);
+
+            if (const auto result = quicksim<Lyt>(*bdl_iterator, qs_params))
+            {
+                return result.value();
+            }
+            return sidb_simulation_result<Lyt>{};  // return empty result if no valid charge distribution was found
         }
 
         assert(false && "unsupported simulation engine");

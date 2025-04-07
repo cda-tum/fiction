@@ -96,31 +96,38 @@ TEST_CASE("Benchmark simulators", "[benchmark]")
 }
 //      Mac M1, Sequoia 15.2, Apple clang version 14.0.3 (16.12.24)
 //
-//      Before PR #602:
-//      benchmark name      samples             iterations              est run time
-//                          mean                low mean                high mean
-//                          std dev             low std dev             high std dev
-//      -----------------------------------------------------------------------------
-//      QuickExact          100                 1                       1.69216 m
-//                          1.01658 s           1.01384 s               1.02149 s
-//                          18.1717 ms          11.4147 ms              28.4481 ms
-//
-//      QuickSim            100                 1                       492.005 ms
-//                          4.85343 ms          4.80376 ms              4.98192 ms
-//                          381.332 us          184.008 us              801.102 us
-//
-//      PR #602:
+//      Before PR #679:
 //      benchmark name      samples             iterations              est run time
 //                          mean                low mean                high mean
 //                          std dev             low std dev             high std dev
 //    -------------------------------------------------------------------------------
-//      QuickExact          100                 1                       1.68503 m
-//                          1.01966 s           1.01725 s               1.02271 s
-//                          13.7569 ms          11.465 ms               18.3512 ms
+//      QuickExact          100                 1                       1.7844 m
+//                          1.07493 s           1.07269 s               1.07752 s
+//                          12.2561 ms          10.7246 ms              13.8817 ms
 //
-//      QuickSim            100                 1                       445.639 ms
-//                          4.50754 ms          4.47813 ms              4.54016 ms
-//                          158.347 us          137.998 us              187.498 us
+//      QuickSim            100                 1                       445.05 ms
+//                          4.43629 ms          4.41687 ms              4.46476 ms
+//                          118.778 us          88.1746 us              158.552 us
+//
+//       ClusterComplete    100                 1                       299.125 ms
+//                          3.00976 ms          2.98784 ms              3.03247 ms
+//                          113.591 us          101.271 us              128.938 us
+//      After PR #679:
+//      benchmark name      samples             iterations              est run time
+//                          mean                low mean                high mean
+//                          std dev             low std dev             high std dev
+//    -------------------------------------------------------------------------------
+//      QuickExact          100                 1                       1.78579 m
+//                          1.06699 s           1.06575 s               1.06858 s
+//                          7.12851 ms          5.64407 ms              10.528 ms
+//
+//      QuickSim            100                 1                       551.093 ms
+//                          5.54284 ms          5.52032 ms              5.57622 ms
+//                          137.976 us          100.606 us              201.053 us
+//
+//      ClusterComplete     100                 1                       298.05 ms
+//                          3.01338 ms          2.98089 ms              3.12774 ms
+//                          278.749 us          79.1939 us              640.667 us
 
 //      AMD Ryzen Threadripper PRO 5955X, Ubuntu 20.04, Ubuntu clang version 18.1.3 (15.01.2025)
 //
