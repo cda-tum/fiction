@@ -30,7 +30,6 @@
 #include <cmath>
 #include <cstdint>
 #include <iostream>
-#include <iterator>
 #include <limits>
 #include <string>
 #include <utility>
@@ -192,7 +191,7 @@ class critical_temperature_impl
                 stats.num_valid_lyt = sim_result.charge_distributions.size();
                 // The energy distribution of the physically valid charge configurations for the given layout is
                 // determined.
-                const auto distribution = energy_distribution(sim_result.charge_distributions);
+                const auto distribution = calculate_energy_distribution(sim_result.charge_distributions);
 
                 sidb_energy_and_state_type energy_state_type{};
 
@@ -279,13 +278,14 @@ class critical_temperature_impl
         // The number of physically valid charge configurations is stored.
         stats.num_valid_lyt = simulation_results.charge_distributions.size();
 
-        const auto distribution = energy_distribution(simulation_results.charge_distributions);
+        const auto distribution = calculate_energy_distribution(simulation_results.charge_distributions);
 
         // if there is more than one metastable state
         if (distribution.size() > 1)
         {
-            const auto ground_state_energy        = distribution.cbegin()->first;
-            const auto first_excited_state_energy = std::next(distribution.cbegin())->first;
+            const auto ground_state_energy = distribution.get_nth_state(0).value().electrostatic_potential_energy;
+            const auto first_excited_state_energy =
+                distribution.get_nth_state(1).value().electrostatic_potential_energy;
 
             // The energy difference between the first excited and the ground state in meV.
             if (stats.energy_between_ground_state_and_first_erroneous >
@@ -347,8 +347,8 @@ class critical_temperature_impl
      * @param min_energy Minimal energy of all physically valid charge distributions of a given layout (unit: eV).
      * @return State type (i.e. transparent, erroneous) of the ground state is returned.
      */
-    bool is_ground_state_transparent(const sidb_energy_and_state_type& energy_and_state_type,
-                                     const double                      min_energy) noexcept
+    [[nodiscard]] bool is_ground_state_transparent(const sidb_energy_and_state_type& energy_and_state_type,
+                                                   const double                      min_energy) const noexcept
     {
         bool ground_state_is_transparent = false;
 
@@ -359,12 +359,12 @@ class critical_temperature_impl
             // comparability with the min_energy.
             if (std::abs(round_to_n_decimal_places(energy, 6) - round_to_n_decimal_places(min_energy, 6)) <
                     constants::ERROR_MARGIN &&
-                state_type)
+                state_type == state_type::ACCEPTED)
             {
                 ground_state_is_transparent = true;
             }
 
-            if (!state_type && (energy > min_energy) && ground_state_is_transparent &&
+            if ((state_type == state_type::REJECTED) && (energy > min_energy) && ground_state_is_transparent &&
                 (((energy - min_energy) * 1000) < stats.energy_between_ground_state_and_first_erroneous))
             {
                 // The energy difference is stored in meV.
