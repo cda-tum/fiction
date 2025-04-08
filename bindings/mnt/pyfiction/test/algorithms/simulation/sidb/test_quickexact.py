@@ -85,7 +85,9 @@ class TestQuickExact(unittest.TestCase):
         physical_parameters.base = 2
         physical_parameters.epsilon_r = 5.6
         physical_parameters.lambda_tf = 5.0  # (nm)
-        physical_parameters.mu_minus = -0.25  # (eV) (energy threshold to change the charge state of a negatively charged SiDB to a neutrally charged SiDB)
+        physical_parameters.mu_minus = (
+            -0.25
+        )  # (eV) (energy threshold to change the charge state of a negatively charged SiDB to a neutrally charged SiDB)
         quickexact_parameter = quickexact_params()
         quickexact_parameter.simulation_parameters = physical_parameters
 
@@ -95,8 +97,12 @@ class TestQuickExact(unittest.TestCase):
 
         self.assertGreater(len(quickexact(and_gate, quickexact_parameter).charge_distributions), 0)
 
-        and_gate.assign_cell_type((2, 2), sidb_technology.cell_type.INPUT)  # add SiDB of the input BDL pair again to have the original layout
-        and_gate.assign_cell_type((24, 2), sidb_technology.cell_type.INPUT)  # add SiDB of the input BDL pair again to have the original layout
+        and_gate.assign_cell_type(
+            (2, 2), sidb_technology.cell_type.INPUT
+        )  # add SiDB of the input BDL pair again to have the original layout
+        and_gate.assign_cell_type(
+            (24, 2), sidb_technology.cell_type.INPUT
+        )  # add SiDB of the input BDL pair again to have the original layout
 
         # input 01
         and_gate.assign_cell_type((2, 2), sidb_technology.cell_type.EMPTY)
