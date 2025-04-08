@@ -33,7 +33,7 @@ template <typename InputIt>
 
     if (first != last)
     {
-        return minimum_energy_distribution(first, last)->get_system_energy();
+        return minimum_energy_distribution(first, last)->get_electrostatic_potential_energy();
     }
 
     return std::numeric_limits<double>::infinity();
@@ -55,8 +55,9 @@ template <typename InputIt>
     static_assert(is_charge_distribution_surface_v<typename std::iterator_traits<InputIt>::value_type>,
                   "Range must be of charge_distribution_surface objects");
 
-    return std::min_element(first, last, [](const auto& cds1, const auto& cds2)
-                            { return cds1.get_system_energy() < cds2.get_system_energy(); });
+    return std::min_element(
+        first, last, [](const auto& cds1, const auto& cds2)
+        { return cds1.get_electrostatic_potential_energy() < cds2.get_electrostatic_potential_energy(); });
 }
 
 }  // namespace fiction

@@ -93,7 +93,7 @@ struct design_sidb_gates_params
     /**
      * Number of SiDBs placed in the canvas to create a working gate.
      */
-    std::size_t number_of_sidbs = 1;
+    std::size_t number_of_canvas_sidbs = 1;
     /**
      * The design process is terminated after a valid SiDB gate design is found.
      *
@@ -200,6 +200,8 @@ class design_sidb_gates_impl
      */
     [[nodiscard]] std::vector<Lyt> run_exhaustive_gate_designer() const noexcept
     {
+        mockturtle::stopwatch stop{stats.time_total};
+
         if (stats.number_of_layouts == 0)
         {
             return std::vector<Lyt>{};
@@ -301,7 +303,7 @@ class design_sidb_gates_impl
         // Allow positive charges here, as a layout that displays positive charges without inputs may not exhibit them
         // once inputs are applied.
         const generate_random_sidb_layout_params<cell<Lyt>> parameter{
-            params.canvas, params.number_of_sidbs,
+            params.canvas, params.number_of_canvas_sidbs,
             generate_random_sidb_layout_params<cell<Lyt>>::positive_charges::ALLOWED};
 
         std::vector<std::thread> threads{};
@@ -634,15 +636,19 @@ class design_sidb_gates_impl
     [[nodiscard]] std::vector<Lyt> create_all_possible_canvas_layouts() const noexcept
     {
         const auto all_combinations = determine_all_combinations_of_distributing_k_entities_on_n_positions(
-            params.number_of_sidbs, static_cast<std::size_t>(all_sidbs_in_canvas.size()));
+            params.number_of_canvas_sidbs, static_cast<std::size_t>(all_sidbs_in_canvas.size()));
 
         std::vector<Lyt> all_canvas_layouts = {};
         all_canvas_layouts.reserve(all_combinations.size());
 
         const auto add_cell_combination_to_layout = [this, &all_canvas_layouts](const auto& combination) noexcept
         {
-            const auto layout_with_added_cells = convert_canvas_cell_indices_to_layout(combination);
-            all_canvas_layouts.emplace_back(layout_with_added_cells);
+            auto layout_with_added_cells = convert_canvas_cell_indices_to_layout(combination);
+            if (!layout_with_added_cells.has_value())
+            {
+                return;
+            }
+            all_canvas_layouts.push_back(std::move(layout_with_added_cells.value()));
         };
 
         for (const auto& combination : all_combinations)
@@ -661,7 +667,8 @@ class design_sidb_gates_impl
      * @param cell_indices A vector of indices of cells to be added to the skeleton layout.
      * @return An SiDB cell-level layout consisting of canvas SidBs.
      */
-    [[nodiscard]] Lyt convert_canvas_cell_indices_to_layout(const std::vector<std::size_t>& cell_indices) const noexcept
+    [[nodiscard]] std::optional<Lyt>
+    convert_canvas_cell_indices_to_layout(const std::vector<std::size_t>& cell_indices) const noexcept
     {
         Lyt lyt{};
 
@@ -674,7 +681,7 @@ class design_sidb_gates_impl
             {
                 if (skeleton_layout.get_sidb_defect(all_sidbs_in_canvas.at(i)).type != sidb_defect_type::NONE)
                 {
-                    continue;
+                    return std::nullopt;
                 }
             }
             lyt.assign_cell_type(all_sidbs_in_canvas.at(i), sidb_technology::cell_type::LOGIC);
@@ -728,16 +735,16 @@ class design_sidb_gates_impl
  * modes are implemented: `exhaustive` and `random design`.
  *
  * The `exhaustive design` is composed of three steps:
- * 1. In the initial step, all possible distributions of `number_of_sidbs` SiDBs within a given canvas are
- * exhaustively determined. This ensures exhaustive coverage of every potential arrangement of ``number_of_sidbs`` SiDBs
- * across the canvas.
+ * 1. In the initial step, all possible distributions of `number_of_canvas_sidbs` SiDBs within a given canvas are
+ * exhaustively determined. This ensures exhaustive coverage of every potential arrangement of `number_of_canvas_sidbs`
+ * SiDBs across the canvas.
  * 2. The calculated SiDB distributions are then incorporated into the skeleton, resulting in the generation of distinct
  * SiDB layouts.
  * 3. The generated SiDB layouts then undergo an extensive simulation process. All input combinations possible for the
  * given Boolean function are used to verify if the logic is fulfilled.
  *
  * The `random design` is composed of four steps:
- * 1. A specified number of canvas SiDBs (`number_of_sidbs`) are randomly added to the skeleton layout.
+ * 1. A specified number of canvas SiDBs (`number_of_canvas_sidbs`) are randomly added to the skeleton layout.
  * 2. The operation status of the layout is simulated based on a given Boolean function.
  * 3. If the layout is `operational`, it is returned as the result, and the process terminates successfully.
  * 4. If the layout is `non-operational`, the process is repeated from the first step until an operational layout is

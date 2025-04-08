@@ -49,6 +49,7 @@ from .pyfiction import (  # type: ignore[import-not-found]
     bdl_wire_selection,
     calculate_energy_and_state_type_with_kinks_accepted,
     calculate_energy_and_state_type_with_kinks_rejected,
+    calculate_energy_distribution,
     can_positive_charges_occur,
     cartesian_gate_layout,
     # Layouts
@@ -170,7 +171,6 @@ from .pyfiction import (  # type: ignore[import-not-found]
     graph_oriented_layout_design_params,
     graph_oriented_layout_design_stats,
     ground_state_space_reporting,
-    groundstate_from_simulation_result,
     has_high_degree_fanin_nodes,
     heuristic_sidb_simulation_engine,
     hexagonal_gate_layout,
@@ -304,6 +304,7 @@ from .pyfiction import (  # type: ignore[import-not-found]
     technology_mapping_stats,
     # Networks
     technology_network,
+    termination_condition,
     time_to_solution,
     time_to_solution_for_given_simulation_results,
     time_to_solution_params,
@@ -376,6 +377,7 @@ __all__ = [
     "bdl_wire_selection",
     "calculate_energy_and_state_type_with_kinks_accepted",
     "calculate_energy_and_state_type_with_kinks_rejected",
+    "calculate_energy_distribution",
     "can_positive_charges_occur",
     "cartesian_gate_layout",
     # Layouts
@@ -497,7 +499,6 @@ __all__ = [
     "graph_oriented_layout_design_params",
     "graph_oriented_layout_design_stats",
     "ground_state_space_reporting",
-    "groundstate_from_simulation_result",
     "has_high_degree_fanin_nodes",
     "heuristic_sidb_simulation_engine",
     "hexagonal_gate_layout",
@@ -631,6 +632,7 @@ __all__ = [
     "technology_mapping_stats",
     # Networks
     "technology_network",
+    "termination_condition",
     "time_to_solution",
     "time_to_solution_for_given_simulation_results",
     "time_to_solution_params",

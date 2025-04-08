@@ -221,6 +221,16 @@ class cell_level_layout : public ClockedLayout
         return cells;
     }
     /**
+     * Returns the numbers of cells of the given type.
+     *
+     * @param type Type of cells which are counted.
+     * @return Number of the cells with the given type.
+     */
+    [[nodiscard]] uint64_t num_cells_of_given_type(const typename Technology::cell_type type) const noexcept
+    {
+        return get_cells_by_type(type).size();
+    }
+    /**
      * Returns `true` if no cell type is assigned to cell position `c` or if the empty type was assigned.
      *
      * @param c Cell position to check for emptiness.

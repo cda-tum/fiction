@@ -35,6 +35,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include <iterator>
+#include <limits>
 #include <numeric>
 #include <optional>
 #include <queue>
@@ -266,6 +267,46 @@ class critical_temperature_domain : public sidb_simulation_domain<parameter_poin
     std::size_t get_number_of_dimensions() const noexcept
     {
         return dimensions.size();
+    }
+    /**
+     * Finds the minimum critical temperature in the domain.
+     *
+     * @return The minimum critical temperature.
+     */
+    [[nodiscard]] double minimum_ct() const noexcept
+    {
+        double min_ct = std::numeric_limits<double>::max();
+
+        this->for_each(
+            [&min_ct](const auto&, const auto& op_value)
+            {
+                if (std::get<0>(op_value) == operational_status::OPERATIONAL)
+                {
+                    min_ct = std::min(min_ct, std::get<1>(op_value));
+                }
+            });
+
+        return min_ct;
+    }
+    /**
+     * Finds the maximum critical temperature in the domain.
+     *
+     * @return The maximum critical temperature.
+     */
+    [[nodiscard]] double maximum_ct() const noexcept
+    {
+        double max_ct = 0.0;
+
+        this->for_each(
+            [&max_ct](const auto&, const auto& op_value)
+            {
+                if (std::get<0>(op_value) == operational_status::OPERATIONAL)
+                {
+                    max_ct = std::max(max_ct, std::get<1>(op_value));
+                }
+            });
+
+        return max_ct;
     }
 
   private:
@@ -837,24 +878,33 @@ class operational_domain_impl
                     {
                         // perform a heuristic simulation
                         const quicksim_params qs_params{simulation_parameters, 500, 0.6};
-                        sim_results = quicksim(lyt, qs_params);
+
+                        if (const auto result = quicksim(lyt, qs_params); result.has_value())
+                        {
+                            sim_results = result.value();
+                        }
+                        else
+                        {
+                            return;
+                        }
                     }
                     else
                     {
                         assert(false && "unsupported simulation engine");
                     }
 
-                    const auto energy_dist = energy_distribution(sim_results.charge_distributions);
+                    const auto energy_dist = calculate_energy_distribution(sim_results.charge_distributions);
 
                     lyt.assign_physical_parameters(simulation_parameters);
-                    const auto position = find_key_with_tolerance(energy_dist, lyt.get_system_energy());
+                    const auto degeneracy_of_layout_energy =
+                        energy_dist.degeneracy(lyt.get_electrostatic_potential_energy());
 
-                    if (position == energy_dist.cend())
+                    if (!degeneracy_of_layout_energy.has_value())
                     {
                         return;
                     }
 
-                    const auto excited_state_number = std::distance(energy_dist.cbegin(), position);
+                    const auto excited_state_number = degeneracy_of_layout_energy.value();
                     suitable_params_domain.add_value(param_point, std::make_tuple(excited_state_number));
                 }
             });

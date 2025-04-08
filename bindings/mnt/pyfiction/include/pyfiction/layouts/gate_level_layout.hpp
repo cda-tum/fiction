@@ -64,6 +64,10 @@ void gate_level_layout(pybind11::module& m, const std::string& topology)
         .def("is_nor", &GateLyt::is_nor, DOC(fiction_gate_level_layout_is_nor))
         .def("is_xor", &GateLyt::is_xor, DOC(fiction_gate_level_layout_is_xor))
         .def("is_xnor", &GateLyt::is_xnor, DOC(fiction_gate_level_layout_is_xnor))
+        .def("is_lt", &GateLyt::is_lt, DOC(fiction_gate_level_layout_is_lt))
+        .def("is_le", &GateLyt::is_le, DOC(fiction_gate_level_layout_is_le))
+        .def("is_gt", &GateLyt::is_gt, DOC(fiction_gate_level_layout_is_gt))
+        .def("is_ge", &GateLyt::is_ge, DOC(fiction_gate_level_layout_is_ge))
         .def("is_maj", &GateLyt::is_maj, DOC(fiction_gate_level_layout_is_maj))
         .def("is_fanout", &GateLyt::is_fanout, DOC(fiction_gate_level_layout_is_fanout))
         .def("is_wire", &GateLyt::is_wire, DOC(fiction_gate_level_layout_is_wire))
@@ -99,6 +103,14 @@ void gate_level_layout(pybind11::module& m, const std::string& topology)
              DOC(fiction_gate_level_layout_create_xor))
         .def("create_xnor", &GateLyt::create_xnor, py::arg("a"), py::arg("b"), py::arg("t") = fiction::tile<GateLyt>{},
              DOC(fiction_gate_level_layout_create_xnor))
+        .def("create_lt", &GateLyt::create_lt, py::arg("a"), py::arg("b"), py::arg("t") = fiction::tile<GateLyt>{},
+             DOC(fiction_gate_level_layout_create_lt))
+        .def("create_le", &GateLyt::create_le, py::arg("a"), py::arg("b"), py::arg("t") = fiction::tile<GateLyt>{},
+             DOC(fiction_gate_level_layout_create_le))
+        .def("create_gt", &GateLyt::create_gt, py::arg("a"), py::arg("b"), py::arg("t") = fiction::tile<GateLyt>{},
+             DOC(fiction_gate_level_layout_create_gt))
+        .def("create_ge", &GateLyt::create_ge, py::arg("a"), py::arg("b"), py::arg("t") = fiction::tile<GateLyt>{},
+             DOC(fiction_gate_level_layout_create_ge))
         .def("create_maj", &GateLyt::create_maj, py::arg("a"), py::arg("b"), py::arg("c"),
              py::arg("t") = fiction::tile<GateLyt>{}, DOC(fiction_gate_level_layout_create_maj))
 
