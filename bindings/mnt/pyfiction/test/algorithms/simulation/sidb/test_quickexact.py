@@ -82,14 +82,12 @@ class TestQuickExact(unittest.TestCase):
         self.assertEqual(groundstate[0].get_charge_state((3, 0)), sidb_charge_state.NEGATIVE)
 
     def test_simulate_all_inputs_of_and_gate(self):
-        and_gate = read_sqd_layout_100(dir_path + "/../../../resources/and_v0.sqd")
+        and_gate = read_sqd_layout_100(dir_path + "/../../../resources/Bestagon_AND_mu_025_v0.sqd")
         physical_parameters = sidb_simulation_parameters()
         physical_parameters.base = 2
         physical_parameters.epsilon_r = 5.6
         physical_parameters.lambda_tf = 5.0  # (nm)
-        physical_parameters.mu_minus = (
-            -0.25
-        )  # (eV) (energy threshold to change the charge state of a negatively charged SiDB to a neutrally charged SiDB)
+        physical_parameters.mu_minus = -0.25  # (eV) (energy threshold to change the charge state of a negatively charged SiDB to a neutrally charged SiDB)
         quickexact_parameter = quickexact_params()
         quickexact_parameter.simulation_parameters = physical_parameters
 
