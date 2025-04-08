@@ -299,12 +299,13 @@ template <typename CartLyt>
  * @param cartesian_layout_height Height of the Cartesian layout.
  * @param input_mode Adjust offset based on PIs relocated to the top row.
  * @param output_mode Adjust offset based on POs relocated to the bottom row.
- * @return offset.
+ * @return offset and if has to be added.
  */
 template <typename HexLyt, typename CartLyt>
-[[nodiscard]] int64_t get_offset(const CartLyt& lyt, uint64_t cartesian_layout_width, uint64_t cartesian_layout_height,
-                                 hexagonalization_params::io_pin_extension_mode input_mode,
-                                 hexagonalization_params::io_pin_extension_mode output_mode) noexcept
+[[nodiscard]] std::pair<uint64_t, bool> get_offset(const CartLyt& lyt, uint64_t cartesian_layout_width,
+                                                   uint64_t cartesian_layout_height,
+                                                   hexagonalization_params::io_pin_extension_mode input_mode,
+                                                   hexagonalization_params::io_pin_extension_mode output_mode) noexcept
 {
     static_assert(is_cartesian_layout_v<CartLyt>, "CartLyt is not a Cartesian layout");
     static_assert(is_hexagonal_layout_v<HexLyt>, "HexLyt is not a hexagonal layout");
@@ -362,7 +363,10 @@ template <typename HexLyt, typename CartLyt>
         }
     }
 
-    return offset;
+    auto offset_is_negative = offset < 0;
+    auto abs_offset         = std::abs(offset);
+
+    return std::make_pair(abs_offset, offset_is_negative);
 }
 
 template <typename HexLyt, typename CartLyt>
@@ -417,11 +421,10 @@ class hexagonalization_impl
             const mockturtle::stopwatch stop{stats.time_total};
 
             // calculate horizontal offset for hexagonal layout
-            auto offset = detail::get_offset<HexLyt, CartLyt>(layout, layout_width, layout_height,
-                                                              ps.input_pin_extension, ps.output_pin_extension);
-            // check if offset is negative and set flag
-            auto offset_has_to_be_added = offset < 0;
-            offset                      = std::abs(offset);
+            auto offset_info            = detail::get_offset<HexLyt, CartLyt>(layout, layout_width, layout_height,
+                                                                              ps.input_pin_extension, ps.output_pin_extension);
+            auto offset                 = offset_info.first;
+            auto offset_has_to_be_added = offset_info.second;
 
             // determine the top primary input coordinate
             auto middle_pi = detail::to_hex<CartLyt, HexLyt>({0, 0}, layout_height);
