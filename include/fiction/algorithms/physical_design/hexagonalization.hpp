@@ -421,10 +421,7 @@ class hexagonalization_impl
                                                               ps.input_pin_extension, ps.output_pin_extension);
             // check if offset is negative and set flag
             auto offset_has_to_be_added = offset < 0;
-            if (offset_has_to_be_added)
-            {
-                offset = static_cast<uint64_t>(-offset);
-            }
+            offset                      = std::abs(offset);
 
             // determine the top primary input coordinate
             auto middle_pi = detail::to_hex<CartLyt, HexLyt>({0, 0}, layout_height);
