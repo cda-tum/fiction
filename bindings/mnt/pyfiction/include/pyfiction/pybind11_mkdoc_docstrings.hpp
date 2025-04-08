@@ -1275,6 +1275,22 @@ Parameter ``ntk_node``:
 Parameter ``lyt_signal``:
     New signal pointing to the end of the branch.)doc";
 
+static const char *__doc_fiction_calculate_boltzmann_factor =
+R"doc(This function computes the Boltzmann factor for a given energy, the
+minimal energy, and the temperature.
+
+Parameter ``energy``:
+    Boltzmann factor for the given energy is calculated.
+
+Parameter ``min_energy``:
+    Minimum energy of the system.
+
+Parameter ``temperature``:
+    Temperature of the system (unit: K).
+
+Returns:
+    Boltzmann factor.)doc";
+
 static const char *__doc_fiction_calculate_defect_clearance =
 R"doc(Computes the defect clearance for a given SiDB layout based on a
 defect influence domain. The defect clearance is the maximum distance
@@ -1343,9 +1359,6 @@ Parameter ``energy_distribution``:
 Parameter ``valid_charge_distributions``:
     Physically valid charge distributions.
 
-Parameter ``output_bdl_pairs``:
-    Output BDL pairs.
-
 Parameter ``spec``:
     Expected Boolean function of the layout given as a multi-output
     truth table.
@@ -1362,6 +1375,23 @@ Parameter ``output_bdl_wires``:
 Returns:
     Electrostatic potential energy of all charge distributions with
     state type.)doc";
+
+static const char *__doc_fiction_calculate_energy_distribution =
+R"doc(This function takes in a vector of `charge_distribution_surface`
+objects and returns a map containing the system energy and the number
+of occurrences of that energy in the input vector. To compare two
+energy values for equality, the comparison uses a tolerance specified
+by `constants::ERROR_MARGIN`.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Parameter ``charge_distributions``:
+    A vector of `charge_distribution_surface` objects for which the
+    energy distribution is computed.
+
+Returns:
+    Energy distribution.)doc";
 
 static const char *__doc_fiction_can_positive_charges_occur =
 R"doc(This algorithm determines if positively charged SiDBs can occur in a
@@ -5748,7 +5778,8 @@ static const char *__doc_fiction_detail_critical_temperature_impl_gate_based_sim
 R"doc(*Gate-based Critical Temperature* Simulation of a SiDB layout for a
 given Boolean function.
 
-tparam TT Type of the truth table.
+Template parameter ``TT``:
+    Type of the truth table.
 
 Parameter ``spec``:
     Expected Boolean function of the layout given as a multi-output
@@ -8421,7 +8452,11 @@ Template parameter ``Lyt``:
     SiDB cell-level layout type.
 
 Template parameter ``TT``:
-    Type of the truth table.)doc";
+    Type of the truth table.
+
+Parameter ``spec``:
+    Expected Boolean function of the layout given as a multi-output
+    truth table.)doc";
 
 static const char *__doc_fiction_detail_is_operational_impl_bii = R"doc(Iterator that iterates over all possible input states.)doc";
 
@@ -8554,9 +8589,6 @@ Parameter ``input_pattern``:
 Parameter ``cds_canvas``:
     The charge distribution of the canvas layout.
 
-Parameter ``dependent_cell``:
-    A dependent-cell of the canvas SiDBs.
-
 Returns:
     A `layout_invalidity_reason` object indicating why the layout is
     non-operational; or `std::nullopt` if it could not certainly be
@@ -8568,7 +8600,7 @@ R"doc(Constructor to initialize the algorithm with a layout and parameters.
 Parameter ``lyt``:
     The SiDB cell-level layout to be checked.
 
-Parameter ``spec``:
+Parameter ``tt``:
     Expected Boolean function of the layout given as a multi-output
     truth table.
 
@@ -8968,6 +9000,8 @@ static const char *__doc_fiction_detail_non_operationality_reason_KINKS = R"doc(
 static const char *__doc_fiction_detail_non_operationality_reason_LOGIC_MISMATCH = R"doc(The layout is non-operational because of logic mismatch.)doc";
 
 static const char *__doc_fiction_detail_non_operationality_reason_NONE = R"doc(No reason for non-operationality could be determined.)doc";
+
+static const char *__doc_fiction_detail_non_operationality_reason_POTENTIAL_POSITIVE_CHARGES = R"doc(Positive charges may occur but the simulation base is set to `2`.)doc";
 
 static const char *__doc_fiction_detail_operational_domain_impl = R"doc()doc";
 
@@ -11496,22 +11530,98 @@ GHz) clocking.)doc";
 static const char *__doc_fiction_energy_dissipation_stats_unknown = R"doc()doc";
 
 static const char *__doc_fiction_energy_distribution =
-R"doc(This function takes in a vector of `charge_distribution_surface`
-objects and returns a map containing the system energy and the number
-of occurrences of that energy in the input vector. To compare two
-energy values for equality, the comparison uses a tolerance specified
-by `constants::ERROR_MARGIN`.
+R"doc(This class is used to store the energy distribution of an SiDB layout.
+The energy distribution is a map that contains the electrostatic
+potential as a key and its degeneracy as a value. To be more precise,
+if two different charge distributions occur with the same energy, the
+degeneracy value of the energy state is 2.)doc";
 
-Template parameter ``Lyt``:
-    SiDB cell-level layout type.
+static const char *__doc_fiction_energy_distribution_add_energy_state =
+R"doc(Adds a state to the energy distribution.
 
-Parameter ``input_vec``:
-    A vector of `charge_distribution_surface` objects for which
-    statistics are to be computed.
+Parameter ``state``:
+    The energy state to be added.)doc";
+
+static const char *__doc_fiction_energy_distribution_degeneracy =
+R"doc(Returns the degeneracy value (number of states) with the given energy
+value.
+
+Parameter ``energy``:
+    The energy value for which the excited state number is to be
+    determined.
 
 Returns:
-    A map containing the system energy as the key and the number of
-    occurrences of that energy in the input vector as the value.)doc";
+    The degeneracy of the given energy. If the energy value is not
+    found, `std::nullopt` is returned instead.)doc";
+
+static const char *__doc_fiction_energy_distribution_distribution =
+R"doc(The energy distribution map. The key is the energy value and the value
+is the degeneracy of the energy value.)doc";
+
+static const char *__doc_fiction_energy_distribution_empty =
+R"doc(Checks if the energy distribution is empty.
+
+Returns:
+    `true` if the energy distribution is empty, `false` otherwise.)doc";
+
+static const char *__doc_fiction_energy_distribution_energy_distribution = R"doc(Default constructor.)doc";
+
+static const char *__doc_fiction_energy_distribution_for_each =
+R"doc(Applies a function to all states in the energy distribution.
+
+Template parameter ``Fn``:
+    Functor type.
+
+Parameter ``fn``:
+    Functor to apply to each key-value pair.)doc";
+
+static const char *__doc_fiction_energy_distribution_get_nth_state =
+R"doc(Returns the nth state (energy + degeneracy) in the energy
+distribution.
+
+Parameter ``state_index``:
+    The index of the state to be retrieved.
+
+Returns:
+    Energy state. If the index is out of range, `std::nullopt` is
+    returned instead.)doc";
+
+static const char *__doc_fiction_energy_distribution_max_energy =
+R"doc(Returns the maximum energy value in the energy distribution.
+
+Returns:
+    The maximum energy value in the energy distribution.)doc";
+
+static const char *__doc_fiction_energy_distribution_min_energy =
+R"doc(Returns the minimum energy value in the energy distribution.
+
+Returns:
+    The minimum energy value in the energy distribution.)doc";
+
+static const char *__doc_fiction_energy_distribution_size =
+R"doc(Returns the number of energy states in the energy distribution.
+
+Returns:
+    The number of energy states in the energy distribution.)doc";
+
+static const char *__doc_fiction_energy_state =
+R"doc(This struct stores the energy state of an SiDB layout. The energy
+state consists of the electrostatic potential energy and the
+degeneracy of the state.)doc";
+
+static const char *__doc_fiction_energy_state_degeneracy = R"doc(The degeneracy of the state.)doc";
+
+static const char *__doc_fiction_energy_state_electrostatic_potential_energy = R"doc(The electrostatic potential energy of the charge distribution (eV).)doc";
+
+static const char *__doc_fiction_energy_state_energy_state =
+R"doc(Default constructor.
+
+Parameter ``electrostatic_potential_energy``:
+    The electrostatic potential energy of the charge distribution
+    (eV).
+
+Parameter ``degeneracy``:
+    The degeneracy of the state.)doc";
 
 static const char *__doc_fiction_enumerate_all_paths =
 R"doc(Enumerates all possible paths in a layout that start at a given source
@@ -15783,7 +15893,7 @@ Returns:
 static const char *__doc_fiction_is_hexagonal_layout = R"doc()doc";
 
 static const char *__doc_fiction_is_kink_induced_non_operational =
-R"doc(This function determines if the layout is only considered as non-
+R"doc(This function determines if the layout is only considered non-
 operational because of kinks. This means that the layout would be
 considered as operational, if kinks were accepted.
 
@@ -15813,7 +15923,7 @@ Returns:
     `false` otherwise.)doc";
 
 static const char *__doc_fiction_is_kink_induced_non_operational_2 =
-R"doc(This function determines if the layout is only considered as non-
+R"doc(This function determines if the layout is only considered non-
 operational because of kinks. This means that the layout would be
 considered as operational, if kinks were accepted.
 
@@ -16016,7 +16126,7 @@ operational.)doc";
 
 static const char *__doc_fiction_is_operational_params_operational_condition_REJECT_KINKS =
 R"doc(The I/O pins are not allowed to show kinks. If kinks exist, the layout
-is considered as non-operational.)doc";
+is considered non-operational.)doc";
 
 static const char *__doc_fiction_is_operational_params_operational_condition_TOLERATE_KINKS =
 R"doc(Even if the I/O pins show kinks, the layout is still considered as
@@ -16509,29 +16619,6 @@ Parameter ``n``:
 Returns:
     Number of constant fanins to `n` in `ntk`.)doc";
 
-static const char *__doc_fiction_number_of_operational_input_combinations =
-R"doc(This function calculates the count of input combinations for which the
-SiDB-based logic, represented by the provided layout (`lyt`) and truth
-table specifications (`spec`), produces the correct output.
-
-Template parameter ``Lyt``:
-    Type of the cell-level layout.
-
-Template parameter ``TT``:
-    Type of the truth table.
-
-Parameter ``lyt``:
-    The SiDB layout.
-
-Parameter ``spec``:
-    Vector of truth table specifications.
-
-Parameter ``params``:
-    Parameters to simualte if a input combination is operational.
-
-Returns:
-    The count of operational input combinations.)doc";
-
 static const char *__doc_fiction_obstruction_layout = R"doc()doc";
 
 static const char *__doc_fiction_obstruction_layout_2 = R"doc()doc";
@@ -16553,6 +16640,22 @@ Parameter ``temperature``:
 
 Returns:
     The occupation probability of all erroneous states is returned.)doc";
+
+static const char *__doc_fiction_occupation_probability_non_gate_based =
+R"doc(This function computes the occupation probability of excited states
+(charge distributions with energy higher than the ground state) at a
+given temperature.
+
+Parameter ``energy_distribution``:
+    This contains the energies in eV of all possible charge
+    distributions with the degeneracy.
+
+Parameter ``temperature``:
+    System temperature to assume (unit: K).
+
+Returns:
+    The total occupation probability of all excited states is
+    returned.)doc";
 
 static const char *__doc_fiction_odd_column_cartesian =
 R"doc(\verbatim +-------+ +-------+ | | | | | (0,0) +-------+ (2,0)
@@ -20968,6 +21071,17 @@ Template parameter ``Lyt``:
 
 Returns:
     SRS clocking scheme.)doc";
+
+static const char *__doc_fiction_state_type = R"doc(Label to categorize ground and excited states of an SiDB layout.)doc";
+
+static const char *__doc_fiction_state_type_ACCEPTED =
+R"doc(A state is accepted if the charge distribution encodes the desired
+logic.)doc";
+
+static const char *__doc_fiction_state_type_REJECTED =
+R"doc(A state is rejected if the charge distributiion does not encode the
+desired logic. Moreover, if kinks are rejected, a charge distribution
+that encodes the logic, but does show kinks, is rejected.)doc";
 
 static const char *__doc_fiction_static_depth_view =
 R"doc(A specialization of `static_depth_view` for networks where

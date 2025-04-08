@@ -85,6 +85,8 @@ Physical Constants
 
 **Header:** ``fiction/technology/physical_constants.hpp``
 
+.. doxygenvariable:: fiction::constants::physical::BOLTZMANN_CONSTANT
+.. doxygenvariable:: fiction::constants::physical::EV_TO_JOULE
 .. doxygenvariable:: fiction::constants::physical::EPSILON
 .. doxygenvariable:: fiction::constants::physical::ELEMENTARY_CHARGE
 .. doxygenvariable:: fiction::constants::physical::K_E
