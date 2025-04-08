@@ -223,7 +223,7 @@ template <typename CartLyt>
             const auto coord = lyt.get_tile(lyt.get_node(gate));
 
             // if the tile is at the southern border, it is placed left of the middle PO in the hex layout
-            if (coord.x != 0 && coord.y == lyt.y())
+            if (coord.x != lyt.x() && coord.y == lyt.y())
             {
                 ++num_outputs_left_to_middle_po;
             }
@@ -283,7 +283,7 @@ template <typename CartLyt>
             const auto coord = lyt.get_tile(lyt.get_node(gate));
 
             // if the tile is at the eastern border, it is placed right of the middle PO in the hex layout
-            if (coord.x == lyt.x() && coord.y != 0)
+            if (coord.x == lyt.x() && coord.y != lyt.y())
             {
                 ++num_outputs_right_to_middle_po;
             }
@@ -310,15 +310,15 @@ template <typename CartLyt>
  * @return offset.
  */
 template <typename HexLyt, typename CartLyt>
-[[nodiscard]] uint64_t get_offset(const CartLyt& lyt, uint64_t cartesian_layout_width, uint64_t cartesian_layout_height,
-                                  hexagonalization_params::io_pin_extension_mode input_mode,
-                                  hexagonalization_params::io_pin_extension_mode output_mode) noexcept
+[[nodiscard]] int64_t get_offset(const CartLyt& lyt, uint64_t cartesian_layout_width, uint64_t cartesian_layout_height,
+                                 hexagonalization_params::io_pin_extension_mode input_mode,
+                                 hexagonalization_params::io_pin_extension_mode output_mode) noexcept
 {
     static_assert(is_cartesian_layout_v<CartLyt>, "CartLyt is not a Cartesian layout");
     static_assert(is_hexagonal_layout_v<HexLyt>, "HexLyt is not a hexagonal layout");
 
-    bool     non_empty_tile_found = false;
-    uint64_t offset               = 0;
+    bool    non_empty_tile_found = false;
+    int64_t offset               = 0;
 
     // iterate diagonally over the Cartesian layout
     for (uint64_t diag = 0; diag < cartesian_layout_height + cartesian_layout_width - 1 && !non_empty_tile_found;
@@ -336,7 +336,7 @@ template <typename HexLyt, typename CartLyt>
                 {
                     non_empty_tile_found = true;
                     const auto hex_coord = to_hex<CartLyt, HexLyt>(current_tile, cartesian_layout_height);
-                    offset               = std::max(offset, static_cast<uint64_t>(hex_coord.x));
+                    offset               = std::max(offset, static_cast<int64_t>(hex_coord.x));
                 }
             }
         }
@@ -350,9 +350,9 @@ template <typename HexLyt, typename CartLyt>
         auto num_inputs_left_to_middle_pi = compute_num_inputs_left_to_middle_pi(lyt);
 
         // if necessary, adjust the offset to account for primary inputs
-        if (middle_pi.x < offset + num_inputs_left_to_middle_pi)
+        if (static_cast<int64_t>(middle_pi.x) - offset < static_cast<int64_t>(num_inputs_left_to_middle_pi))
         {
-            offset = middle_pi.x - num_inputs_left_to_middle_pi;
+            offset = static_cast<int64_t>(middle_pi.x - num_inputs_left_to_middle_pi);
         }
     }
 
@@ -363,10 +363,10 @@ template <typename HexLyt, typename CartLyt>
         // adjust offset based on primary inputs in the first column
         auto num_outputs_left_to_middle_po = compute_num_outputs_left_to_middle_po(lyt);
 
-        // if necessary, adjust the offset to account for primary inputs
-        if (middle_po.x < offset + num_outputs_left_to_middle_po)
+        // if necessary, adjust the offset to account for primary outputs
+        if (static_cast<int64_t>(middle_po.x) - offset < static_cast<int64_t>(num_outputs_left_to_middle_po))
         {
-            offset = middle_po.x - num_outputs_left_to_middle_po;
+            offset = static_cast<int64_t>(middle_po.x - num_outputs_left_to_middle_po);
         }
     }
 
@@ -425,8 +425,14 @@ class hexagonalization_impl
             const mockturtle::stopwatch stop{stats.time_total};
 
             // calculate horizontal offset for hexagonal layout
-            const auto offset = detail::get_offset<HexLyt, CartLyt>(layout, layout_width, layout_height,
-                                                                    ps.input_pin_extension, ps.output_pin_extension);
+            auto offset = detail::get_offset<HexLyt, CartLyt>(layout, layout_width, layout_height,
+                                                              ps.input_pin_extension, ps.output_pin_extension);
+            // check if offset is negative and set flag
+            auto offset_has_to_be_added = offset < 0;
+            if (offset_has_to_be_added)
+            {
+                offset = static_cast<uint64_t>(-offset);
+            }
 
             // determine the top primary input coordinate
             auto middle_pi = detail::to_hex<CartLyt, HexLyt>({0, 0}, layout_height);
@@ -453,8 +459,8 @@ class hexagonalization_impl
                     const auto old_coord = layout.get_tile(gate);
                     // convert Cartesian coordinate to hex coordinate
                     auto hex_coord = detail::to_hex<CartLyt, HexLyt>(old_coord, layout_height);
-                    hex_coord.x -= static_cast<decltype(hex_coord.x)>(offset);
-
+                    hex_coord.x += (offset_has_to_be_added ? static_cast<decltype(hex_coord.x)>(offset) :
+                                                             -static_cast<decltype(hex_coord.x)>(offset));
                     // create primary input in hex layout
                     hex_layout.create_pi(layout.get_name(layout.get_node(old_coord)), hex_coord);
 
@@ -480,7 +486,8 @@ class hexagonalization_impl
                 // adjust offset based on primary inputs in the first row
                 const auto num_inputs_right_to_middle_pi = compute_num_inputs_right_to_middle_pi(layout);
 
-                const auto min_width = middle_pi.x - offset + num_inputs_right_to_middle_pi + 1;
+                const auto min_width =
+                    middle_pi.x + num_inputs_right_to_middle_pi + 1 + (offset_has_to_be_added ? offset : -offset);
                 if (hex_width < min_width)
                 {
                     hex_layout.resize({min_width, hex_height, hex_depth});
@@ -493,7 +500,8 @@ class hexagonalization_impl
                 // adjust offset based on primary outputs in the last row
                 const auto num_outputs_right_to_middle_po = compute_num_outputs_right_to_middle_po(layout);
 
-                const auto min_width = middle_po.x - offset + num_outputs_right_to_middle_po + 1;
+                const auto min_width =
+                    middle_po.x + num_outputs_right_to_middle_po + 1 + (offset_has_to_be_added ? offset : -offset);
                 if (hex_width < min_width)
                 {
                     hex_layout.resize({min_width, hex_height, hex_depth});
@@ -518,7 +526,8 @@ class hexagonalization_impl
 
                             // convert the Cartesian tile to a hexagonal tile and adjust x-coordinate
                             auto hex_tile = detail::to_hex<CartLyt, HexLyt>(old_tile, layout_height);
-                            hex_tile.x -= static_cast<decltype(hex_tile.x)>(offset);
+                            hex_tile.x += (offset_has_to_be_added ? static_cast<decltype(hex_tile.x)>(offset) :
+                                                                    -static_cast<decltype(hex_tile.x)>(offset));
 
                             // skip processing if tile is empty
                             if (layout.is_empty_tile(old_tile))
@@ -544,7 +553,8 @@ class hexagonalization_impl
                                 const auto hex_source = [&]()
                                 {
                                     auto t = detail::to_hex<CartLyt, HexLyt>(signals[0], layout_height);
-                                    t.x -= static_cast<decltype(t.x)>(offset);
+                                    t.x += (offset_has_to_be_added ? static_cast<decltype(t.x)>(offset) :
+                                                                     -static_cast<decltype(t.x)>(offset));
                                     return t;
                                 }();
 
@@ -564,8 +574,10 @@ class hexagonalization_impl
                                 auto hex_tile_b = detail::to_hex<CartLyt, HexLyt>(signals[1], layout_height);
 
                                 // adjust coordinates for offset
-                                hex_tile_a.x -= static_cast<decltype(hex_tile_a.x)>(offset);
-                                hex_tile_b.x -= static_cast<decltype(hex_tile_b.x)>(offset);
+                                hex_tile_a.x += (offset_has_to_be_added ? static_cast<decltype(hex_tile_a.x)>(offset) :
+                                                                          -static_cast<decltype(hex_tile_a.x)>(offset));
+                                hex_tile_b.x += (offset_has_to_be_added ? static_cast<decltype(hex_tile_b.x)>(offset) :
+                                                                          -static_cast<decltype(hex_tile_b.x)>(offset));
 
                                 // create signals for both inputs
                                 const auto hex_signal_a = hex_layout.make_signal(hex_layout.get_node(hex_tile_a));
@@ -590,33 +602,36 @@ class hexagonalization_impl
 
                     // convert coordinates to hex format and adjust x-coordinate
                     auto hex_coord = detail::to_hex<CartLyt, HexLyt>(old_coord, layout_height);
-                    hex_coord.x -= static_cast<decltype(hex_coord.x)>(offset);
+                    hex_coord.x += (offset_has_to_be_added ? static_cast<decltype(hex_coord.x)>(offset) :
+                                                             -static_cast<decltype(hex_coord.x)>(offset));
                     auto hex_tile = detail::to_hex<CartLyt, HexLyt>(signal, layout_height);
-                    hex_tile.x -= static_cast<decltype(hex_tile.x)>(offset);
+                    hex_tile.x += (offset_has_to_be_added ? static_cast<decltype(hex_tile.x)>(offset) :
+                                                            -static_cast<decltype(hex_tile.x)>(offset));
 
                     // create the primary output in the hex layout
                     const auto hex_signal = hex_layout.make_signal(hex_layout.get_node(hex_tile));
                     hex_layout.create_po(hex_signal, layout.get_name(layout.get_node(old_coord)), hex_coord);
 
                     // collect POs to the left and to the right of the middle PO
-                    if (old_coord.x != 0 && old_coord.y == layout.y())
+                    if (old_coord.x != layout.x() && old_coord.y == layout.y())
                     {
                         left_pos.push_back(hex_coord);
                     }
-                    else if (old_coord.x == layout.x() && old_coord.y != 0)
+                    else if (old_coord.x == layout.x() && old_coord.y != layout.y())
                     {
                         right_pos.push_back(hex_coord);
                     }
                 });
 
-            std::sort(left_pos.begin(), left_pos.end(), [](const auto& lhs, const auto& rhs) { return lhs.x < rhs.x; });
+            std::sort(left_pos.begin(), left_pos.end(), [](const auto& lhs, const auto& rhs) { return lhs.x > rhs.x; });
             std::sort(right_pos.begin(), right_pos.end(),
                       [](const auto& lhs, const auto& rhs) { return lhs.y > rhs.y; });
 
             if (ps.input_pin_extension != hexagonalization_params::io_pin_extension_mode::NONE)
             {
                 // adjust positions and prepare for routing
-                middle_pi.x -= static_cast<decltype(middle_pi.x)>(offset);
+                middle_pi.x += (offset_has_to_be_added ? static_cast<decltype(middle_pi.x)>(offset) :
+                                                         -static_cast<decltype(middle_pi.x)>(offset));
                 std::vector<routing_objective_with_fanin_update_information<HexLyt>> objectives{};
                 objectives.reserve(hex_layout.num_pis());
 
@@ -731,10 +746,25 @@ class hexagonalization_impl
                 // for each routing objective, find a path and route it
                 for (const auto& obj : objectives)
                 {
-                    const auto new_path =
-                        a_star<path>(layout_obstruct, {obj.source, obj.target}, dist(), cost(), params_astar);
+                    auto target        = obj.target;
+                    auto update_target = false;
+
+                    // for planar extension, check if target is in the crossing layer
+                    if (!crossings && obj.target.z == 1)
+                    {
+                        target.z      = 0;
+                        update_target = true;
+                    }
+
+                    auto new_path = a_star<path>(layout_obstruct, {obj.source, target}, dist(), cost(), params_astar);
                     if (!new_path.empty())
                     {
+                        // for planar extension, if target is in the crossing layer, update path
+                        if (update_target)
+                        {
+                            new_path.back().z = 1;
+                        }
+
                         route_path(hex_layout, new_path);
                         for (const auto& t : new_path)
                         {
@@ -769,7 +799,8 @@ class hexagonalization_impl
             if (ps.output_pin_extension != hexagonalization_params::io_pin_extension_mode::NONE)
             {
                 // adjust positions and prepare for routing
-                middle_po.x -= static_cast<decltype(middle_po.x)>(offset);
+                middle_po.x += (offset_is_negative ? static_cast<decltype(middle_po.x)>(offset) :
+                                                     -static_cast<decltype(middle_po.x)>(offset));
                 std::vector<routing_objective_with_fanin_update_information<HexLyt>> objectives{};
                 objectives.reserve(hex_layout.num_pos());
 
@@ -819,10 +850,25 @@ class hexagonalization_impl
                 // for each routing objective, find a path and route it
                 for (const auto& obj : objectives)
                 {
-                    const auto new_path =
-                        a_star<path>(layout_obstruct, {obj.source, obj.target}, dist(), cost(), params_astar);
+                    auto source        = obj.source;
+                    auto update_source = false;
+
+                    // for planar extension, check if source is in the crossing layer
+                    if (!crossings && obj.source.z == 1)
+                    {
+                        source.z      = 0;
+                        update_source = true;
+                    }
+
+                    auto new_path = a_star<path>(layout_obstruct, {source, obj.target}, dist(), cost(), params_astar);
                     if (!new_path.empty())
                     {
+                        // for planar extension, if source or target are in the crossing layer, update path
+                        if (update_source)
+                        {
+                            new_path.front().z = 1;
+                        }
+
                         route_path(hex_layout, new_path);
                         for (const auto& t : new_path)
                         {
