@@ -44,7 +44,7 @@ int main()  // NOLINT
 
     const design_sidb_gates_params<sidb_100_cell_clk_lyt_cube> params_2_in_1_out{
         is_operational_params{sidb_simulation_parameters{2, -0.32}},
-        design_sidb_gates_params<sidb_100_cell_clk_lyt_cube>::design_sidb_gates_mode::EXHAUSTIVE_GATE_DESIGNER,
+        design_sidb_gates_params<sidb_100_cell_clk_lyt_cube>::design_sidb_gates_mode::EXHAUSTIVE,
         {{14, 12, 0}, {24, 23, 0}},
         3};
 

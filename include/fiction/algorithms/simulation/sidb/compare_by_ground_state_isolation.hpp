@@ -35,7 +35,7 @@ template <typename Lyt>
 
     for (const charge_distribution_surface<Lyt>& cds : sim_res)
     {
-        system_energies.insert(cds.get_system_energy());
+        system_energies.insert(cds.get_electrostatic_potential_energy());
     }
 
     return *system_energies.cbegin() - *std::next(system_energies.cbegin(), 1);
@@ -167,7 +167,7 @@ class compare_by_average_ground_state_isolation final : public designed_sidb_gat
 //             for (std::vector<charge_distribution_surface<Lyt>>& sim_res : pair.second)
 //             {
 //                 std::sort(sim_res.begin(), sim_res.end(), [](const auto& cds1, const auto& cds2) noexcept
-//                           { return cds1.get_system_energy() < cds2.get_system_energy(); });
+//                           { return cds1.get_electrostatic_potential_energy() < cds2.get_electrostatic_potential_energy(); });
 //             }
 //         }
 //
@@ -175,7 +175,7 @@ class compare_by_average_ground_state_isolation final : public designed_sidb_gat
 //             [&](const std::vector<charge_distribution_surface<Lyt>>& sim_res) noexcept
 //         {
 //             return sim_res.size() == 1 ? std::numeric_limits<double>::infinity() :
-//                                          sim_res.at(1).get_system_energy() - sim_res.at(0).get_system_energy();
+//                                          sim_res.at(1).get_electrostatic_potential_energy() - sim_res.at(0).get_electrostatic_potential_energy();
 //         };
 //
 //         const auto minimum_ground_state_isolation_for_all_inputs =

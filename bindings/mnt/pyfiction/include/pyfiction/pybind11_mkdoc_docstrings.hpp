@@ -4684,7 +4684,7 @@ static const char *__doc_fiction_design_sidb_gates_params_design_mode = R"doc(Ga
 
 static const char *__doc_fiction_design_sidb_gates_params_design_sidb_gates_mode = R"doc(Selector for the available design approaches.)doc";
 
-static const char *__doc_fiction_design_sidb_gates_params_design_sidb_gates_mode_EXHAUSTIVE_GATE_DESIGNER = R"doc(Gates are designed by using the *Automatic Exhaustive Gate Designer*.)doc";
+static const char *__doc_fiction_design_sidb_gates_params_design_sidb_gates_mode_EXHAUSTIVE = R"doc(Gates are designed by using the *Automatic Exhaustive Gate Designer*.)doc";
 
 static const char *__doc_fiction_design_sidb_gates_params_design_sidb_gates_mode_QUICKCELL = R"doc(Gates are designed by using *QuickCell*.)doc";
 
@@ -4711,7 +4711,7 @@ static const char *__doc_fiction_design_sidb_gates_params_termination_condition 
 R"doc(Selector for the different termination conditions for the SiDB gate
 design process.)doc";
 
-static const char *__doc_fiction_design_sidb_gates_params_termination_condition_AFTER_FIRST_SOLUTION =
+static const char *__doc_fiction_design_sidb_gates_params_termination_condition_OBTAINED_N_SOLUTIONS =
 R"doc(The design process is terminated as soon as the first valid SiDB gate
 design is found.)doc";
 

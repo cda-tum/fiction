@@ -81,7 +81,7 @@ int main()  // NOLINT
         is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
                               bdl_input_iterator_params{},
                               is_operational_params::operational_condition_kinks::REJECT_KINKS},
-        design_sidb_gates_params<sidb_100_cell_clk_lyt_siqad>::design_sidb_gates_mode::EXHAUSTIVE_GATE_DESIGNER,
+        design_sidb_gates_params<sidb_100_cell_clk_lyt_siqad>::design_sidb_gates_mode::EXHAUSTIVE,
         {{9, 6, 0}, {21, 14, 0}},
         3,
         design_sidb_gates_params<
@@ -91,7 +91,7 @@ int main()  // NOLINT
         is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
                               bdl_input_iterator_params{},
                               is_operational_params::operational_condition_kinks::REJECT_KINKS},
-        design_sidb_gates_params<sidb_100_cell_clk_lyt_siqad>::design_sidb_gates_mode::EXHAUSTIVE_GATE_DESIGNER,
+        design_sidb_gates_params<sidb_100_cell_clk_lyt_siqad>::design_sidb_gates_mode::EXHAUSTIVE,
         {{14, 6, 0}, {24, 10, 0}},
         3,
         design_sidb_gates_params<
@@ -101,7 +101,7 @@ int main()  // NOLINT
         is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
                               bdl_input_iterator_params{},
                               is_operational_params::operational_condition_kinks::REJECT_KINKS},
-        design_sidb_gates_params<sidb_100_cell_clk_lyt_siqad>::design_sidb_gates_mode::EXHAUSTIVE_GATE_DESIGNER,
+        design_sidb_gates_params<sidb_100_cell_clk_lyt_siqad>::design_sidb_gates_mode::EXHAUSTIVE,
         {{14, 6, 0}, {24, 14, 0}},
         3,
         design_sidb_gates_params<
@@ -117,16 +117,16 @@ int main()  // NOLINT
         std::vector<sidb_100_cell_clk_lyt_siqad> exhaustive_design{};
 
         params_2_in_1_out.design_mode =
-            design_sidb_gates_params<sidb_100_cell_clk_lyt_siqad>::design_sidb_gates_mode::EXHAUSTIVE_GATE_DESIGNER;
+            design_sidb_gates_params<sidb_100_cell_clk_lyt_siqad>::design_sidb_gates_mode::EXHAUSTIVE;
         params_2_in_1_out.operational_params.op_condition_kinks =
             is_operational_params::operational_condition_kinks::REJECT_KINKS;
         params_2_in_2_out.design_mode =
-            design_sidb_gates_params<sidb_100_cell_clk_lyt_siqad>::design_sidb_gates_mode::EXHAUSTIVE_GATE_DESIGNER;
+            design_sidb_gates_params<sidb_100_cell_clk_lyt_siqad>::design_sidb_gates_mode::EXHAUSTIVE;
         params_2_in_2_out.operational_params.op_condition_kinks =
             is_operational_params::operational_condition_kinks::REJECT_KINKS;
 
         params_1_in_1_out_straight.design_mode =
-            design_sidb_gates_params<sidb_100_cell_clk_lyt_siqad>::design_sidb_gates_mode::EXHAUSTIVE_GATE_DESIGNER;
+            design_sidb_gates_params<sidb_100_cell_clk_lyt_siqad>::design_sidb_gates_mode::EXHAUSTIVE;
         params_1_in_1_out_straight.operational_params.op_condition_kinks =
             is_operational_params::operational_condition_kinks::REJECT_KINKS;
 

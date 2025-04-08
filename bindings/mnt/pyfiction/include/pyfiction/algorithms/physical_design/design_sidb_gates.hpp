@@ -46,22 +46,10 @@ void design_sidb_gates_params(pybind11::module& m, const std::string& lattice = 
         DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode))
         .value("QUICKCELL", fiction::design_sidb_gates_params<Lyt>::design_sidb_gates_mode::QUICKCELL,
                DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode_QUICKCELL))
-        .value("EXHAUSTIVE_GATE_DESIGNER",
-               fiction::design_sidb_gates_params<Lyt>::design_sidb_gates_mode::EXHAUSTIVE_GATE_DESIGNER,
+        .value("EXHAUSTIVE", fiction::design_sidb_gates_params<Lyt>::design_sidb_gates_mode::EXHAUSTIVE,
                DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode_QUICKCELL))
         .value("RANDOM", fiction::design_sidb_gates_params<Lyt>::design_sidb_gates_mode::RANDOM,
                DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode_RANDOM));
-    /**
-     * Termination condition selector type.
-     */
-    py::enum_<typename fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::termination_condition>(
-        m, "termination_condition")
-        .value(
-            "AFTER_FIRST_SOLUTION",
-            fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::termination_condition::AFTER_FIRST_SOLUTION)
-        .value("ALL_COMBINATIONS_ENUMERATED",
-               fiction::design_sidb_gates_params<
-                   fiction::offset::ucoord_t>::termination_condition::ALL_COMBINATIONS_ENUMERATED);
 
     /**
      * Termination condition selector type.
@@ -69,9 +57,9 @@ void design_sidb_gates_params(pybind11::module& m, const std::string& lattice = 
     py::enum_<typename fiction::design_sidb_gates_params<Lyt>::termination_condition>(
         m, fmt::format("design_sidb_gates_params_termination_condition{}", lattice).c_str(),
         DOC(fiction_design_sidb_gates_params_termination_condition))
-        .value("AFTER_FIRST_SOLUTION",
-               fiction::design_sidb_gates_params<Lyt>::termination_condition::AFTER_FIRST_SOLUTION,
-               DOC(fiction_design_sidb_gates_params_termination_condition_AFTER_FIRST_SOLUTION))
+        .value("OBTAINED_N_SOLUTIONS",
+               fiction::design_sidb_gates_params<Lyt>::termination_condition::OBTAINED_N_SOLUTIONS,
+               DOC(fiction_design_sidb_gates_params_termination_condition_OBTAINED_N_SOLUTIONS))
         .value("ALL_COMBINATIONS_ENUMERATED",
                fiction::design_sidb_gates_params<Lyt>::termination_condition::ALL_COMBINATIONS_ENUMERATED,
                DOC(fiction_design_sidb_gates_params_termination_condition_ALL_COMBINATIONS_ENUMERATED));
@@ -92,6 +80,11 @@ void design_sidb_gates_params(pybind11::module& m, const std::string& lattice = 
                        DOC(fiction_design_sidb_gates_params_number_of_canvas_sidbs))
         .def_readwrite("termination_cond", &fiction::design_sidb_gates_params<Lyt>::termination_cond,
                        DOC(fiction_design_sidb_gates_params_termination_cond))
+        .def_readwrite("maximum_number_of_solutions",
+                       &fiction::design_sidb_gates_params<Lyt>::maximum_number_of_solutions,
+                       DOC(fiction_design_sidb_gates_params_maximum_number_of_solutions))
+        .def_readwrite("available_threads", &fiction::design_sidb_gates_params<Lyt>::available_threads,
+                       DOC(fiction_design_sidb_gates_params_available_threads))
         .def_readwrite("post_design_process", &fiction::design_sidb_gates_params<Lyt>::post_design_process,
                        DOC(fiction_design_sidb_gates_params_post_design_process));
 }

@@ -55,7 +55,7 @@ int main()  // NOLINT
     design_gate_params.number_of_canvas_sidbs        = 3;
     design_gate_params.operational_params.sim_engine = fiction::sidb_simulation_engine::QUICKEXACT;
     design_gate_params.termination_cond              = fiction::design_sidb_gates_params<
-                     fiction::sidb_defect_surface<cell_lyt>>::termination_condition::AFTER_FIRST_SOLUTION;
+                     fiction::sidb_defect_surface<cell_lyt>>::termination_condition::OBTAINED_N_SOLUTIONS;
 
     // save atomic defects which their respective physical parameters as experimentally determined by T. R. Huff, T.
     // Dienel, M. Rashidi, R. Achal, L. Livadaru, J. Croshaw, and R. A. Wolkow, "Electrostatic landscape of a
