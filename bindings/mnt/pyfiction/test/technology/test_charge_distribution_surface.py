@@ -45,11 +45,11 @@ class TestChargeDistributionSurface(unittest.TestCase):
             charge_lyt.update_after_charge_change()
             self.assertTrue(charge_lyt.is_physically_valid())
 
-            self.assertNotEqual(charge_lyt.get_system_energy(), 0)
+            self.assertNotEqual(charge_lyt.get_electrostatic_potential_energy(), 0)
 
             charge_lyt.assign_system_energy_to_zero()
 
-            self.assertEqual(charge_lyt.get_system_energy(), 0)
+            self.assertEqual(charge_lyt.get_electrostatic_potential_energy(), 0)
 
     def test_initialization_111_lattice(self):
         for layout_one in [
@@ -90,11 +90,11 @@ class TestChargeDistributionSurface(unittest.TestCase):
             charge_lyt.update_after_charge_change()
             self.assertTrue(charge_lyt.is_physically_valid())
 
-            self.assertNotEqual(charge_lyt.get_system_energy(), 0)
+            self.assertNotEqual(charge_lyt.get_electrostatic_potential_energy(), 0)
 
             charge_lyt.assign_system_energy_to_zero()
 
-            self.assertEqual(charge_lyt.get_system_energy(), 0)
+            self.assertEqual(charge_lyt.get_electrostatic_potential_energy(), 0)
 
             charge_lyt.assign_charge_state((2, 1), sidb_charge_state.POSITIVE)
             self.assertEqual(charge_lyt.num_positive_sidbs(), 1)

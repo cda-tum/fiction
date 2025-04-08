@@ -137,7 +137,7 @@ void charge_distribution_surface_layout(pybind11::module& m, const std::string& 
             [](py_cds& cds, uint64_t index) { return cds.get_local_potential_by_index(index); }, py::arg("index"))
         .def("assign_system_energy_to_zero", [](py_cds& cds) { return cds.assign_system_energy_to_zero(); })
         .def("recompute_system_energy", [](py_cds& cds) { return cds.recompute_system_energy(); })
-        .def("get_system_energy", [](py_cds& cds) { return cds.get_system_energy(); })
+        .def("get_electrostatic_potential_energy", [](py_cds& cds) { return cds.get_electrostatic_potential_energy(); })
 
         .def(
             "update_after_charge_change",
