@@ -301,7 +301,6 @@ enum class layout_invalidity_reason : uint8_t
  *
  * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT Type of the truth table.
- * @param spec Expected Boolean function of the layout given as a multi-output truth table.
  */
 template <typename Lyt, typename TT>
 class is_operational_impl
@@ -311,7 +310,7 @@ class is_operational_impl
      * Constructor to initialize the algorithm with a layout and parameters.
      *
      * @param lyt The SiDB cell-level layout to be checked.
-     * @param tt Expected Boolean function of the layout given as a multi-output truth table.
+     * @param spec Expected Boolean function of the layout given as a multi-output truth table.
      * @param params Parameters for the `is_operational` algorithm.
      */
     is_operational_impl(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params) :
@@ -358,7 +357,7 @@ class is_operational_impl
      * Constructor to initialize the algorithm with a layout, parameters, input and output wires, and a canvas layout.
      *
      * @param lyt The SiDB cell-level layout to be checked.
-     * @param tt Expected Boolean function of the layout given as a multi-output truth table.
+     * @param spec Expected Boolean function of the layout given as a multi-output truth table.
      * @param params Parameters for the `is_operational` algorithm.
      * @param input_wires BDL input wires of lyt.
      * @param output_wires BDL output wires of lyt.
@@ -389,7 +388,7 @@ class is_operational_impl
      * Constructor to initialize the algorithm with a layout and parameters.
      *
      * @param lyt The SiDB cell-level layout to be checked.
-     * @param tt Expected Boolean function of the layout given as a multi-output truth table.
+     * @param spec Expected Boolean function of the layout given as a multi-output truth table.
      * @param params Parameters for the `is_operational` algorithm.
      * @param c_lyt Canvas layout.
      */
@@ -486,7 +485,7 @@ class is_operational_impl
             // if the layout is not discarded during the three filtering steps, it is considered operational.
             // This is only an approximation.
             if (parameters.strategy_to_analyze_operational_status ==
-                    is_operational_params::operational_analysis_strategy::FILTER_ONLY)
+                is_operational_params::operational_analysis_strategy::FILTER_ONLY)
             {
                 return {operational_assessment<Lyt>{operational_status::OPERATIONAL}, non_operationality_reason::NONE};
             }
@@ -499,7 +498,6 @@ class is_operational_impl
                 return {operational_assessment<Lyt>{operational_status::OPERATIONAL}, non_operationality_reason::NONE};
             }
         }
-
 
         operational_assessment<Lyt> assessment_results{operational_status::OPERATIONAL};
 
@@ -522,31 +520,25 @@ class is_operational_impl
             sim_res_per_input.reserve(truth_table.front().num_bits());
         }
 
-        if (parameters.strategy_to_analyze_operational_status !=
-                is_operational_params::operational_analysis_strategy::SIMULATION_ONLY &&
-            parameters.strategy_to_analyze_operational_status !=
-                is_operational_params::operational_analysis_strategy::FILTER_THEN_SIMULATION &&
-            !canvas_lyt.is_empty())
+        bii = 0;
+        // number of different input combinations
+        for (auto i = 0u; i < truth_table.front().num_bits(); ++i, ++bii)
         {
-            bii = 0;
-            // number of different input combinations
-            for (auto i = 0u; i < truth_table.front().num_bits(); ++i, ++bii)
-            {
-                typename operational_assessment<Lyt>::operational_assessment_for_input
+            typename operational_assessment<Lyt>::operational_assessment_for_input
                 assessment_results_for_this_input_combination{operational_status::OPERATIONAL};
 
-                // if positively charged SiDBs can occur, the SiDB layout is considered non-operational
-                if (parameters.op_condition_positive_charges ==
-                        is_operational_params::operational_condition_positive_charges::REJECT_POSITIVE_CHARGES &&
-                    can_positive_charges_occur(*bii, parameters.simulation_parameters))
-                {
-                    assessment_results.status = operational_status::NON_OPERATIONAL;
+            // if positively charged SiDBs can occur, the SiDB layout is considered non-operational
+            if (parameters.op_condition_positive_charges ==
+                    is_operational_params::operational_condition_positive_charges::REJECT_POSITIVE_CHARGES &&
+                can_positive_charges_occur(*bii, parameters.simulation_parameters))
+            {
+                assessment_results.status = operational_status::NON_OPERATIONAL;
 
-                    if (parameters.termination_cond ==
-                        is_operational_params::termination_condition::ON_FIRST_NON_OPERATIONAL)
-                    {
-                        return {assessment_results, non_operationality_reason::POTENTIAL_POSITIVE_CHARGES};
-                    }
+                if (parameters.termination_cond ==
+                    is_operational_params::termination_condition::ON_FIRST_NON_OPERATIONAL)
+                {
+                    return {assessment_results, non_operationality_reason::POTENTIAL_POSITIVE_CHARGES};
+                }
 
                 // all input combinations are assessed
 
@@ -584,7 +576,7 @@ class is_operational_impl
                 continue;
             }
 
-                const auto ground_states = simulation_results.groundstates();
+            const auto ground_states = simulation_results.groundstates();
 
             for (const auto& gs : ground_states)
             {
@@ -1308,8 +1300,8 @@ class is_operational_impl
  * @param lyt The SiDB cell-level layout to be checked.
  * @param spec Expected Boolean function of the layout given as a multi-output truth table.
  * @param params Parameters for the `is_operational` algorithm.
- * @return A datatype containing the operational status of the gate-level layout (either `OPERATIONAL` or `NON_OPERATIONAL`)
- * along with auxiliary statistics.
+ * @return A datatype containing the operational status of the gate-level layout (either `OPERATIONAL` or
+ * `NON_OPERATIONAL`) along with auxiliary statistics.
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] operational_assessment<Lyt> is_operational(const Lyt& lyt, const std::vector<TT>& spec,
@@ -1348,8 +1340,8 @@ template <typename Lyt, typename TT>
  * @param input_bdl_wire Optional BDL input wires of lyt.
  * @param output_bdl_wire Optional BDL output wires of lyt.
  * @param canvas_lyt Optional canvas layout.
- * @return A datatype containing the operational status of the gate-level layout (either `OPERATIONAL` or `NON_OPERATIONAL`)
- * along with auxiliary statistics.
+ * @return A datatype containing the operational status of the gate-level layout (either `OPERATIONAL` or
+ * `NON_OPERATIONAL`) along with auxiliary statistics.
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] operational_assessment<Lyt>
