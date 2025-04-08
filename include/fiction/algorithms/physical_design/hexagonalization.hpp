@@ -480,7 +480,7 @@ class hexagonalization_impl
                 const auto num_inputs_right_to_middle_pi = compute_num_inputs_right_to_middle_pi(layout);
 
                 const auto min_width =
-                    middle_pi.x + num_inputs_right_to_middle_pi + 1 + (offset_has_to_be_added ? offset : -offset);
+                    middle_pi.x + num_inputs_right_to_middle_pi + 2 + (offset_has_to_be_added ? offset : -offset);
                 if (hex_width < min_width)
                 {
                     hex_layout.resize({min_width, hex_height, hex_depth});
@@ -494,7 +494,7 @@ class hexagonalization_impl
                 const auto num_outputs_right_to_middle_po = compute_num_outputs_right_to_middle_po(layout);
 
                 const auto min_width =
-                    middle_po.x + num_outputs_right_to_middle_po + 1 + (offset_has_to_be_added ? offset : -offset);
+                    middle_po.x + num_outputs_right_to_middle_po + 2 + (offset_has_to_be_added ? offset : -offset);
                 if (hex_width < min_width)
                 {
                     hex_layout.resize({min_width, hex_height, hex_depth});
@@ -810,7 +810,7 @@ class hexagonalization_impl
                 std::vector<routing_objective_with_fanin_update_information<HexLyt>> objectives{};
                 objectives.reserve(hex_layout.num_pos());
 
-                // process PIs from left column of the Cartesian layout
+                // process POs from left column of the Cartesian layout
                 for (const auto& c : left_pos)
                 {
                     tile<HexLyt> fanin{};
