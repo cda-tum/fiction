@@ -26,21 +26,19 @@ void random_layout_generator(pybind11::module& m)
 {
     namespace py = pybind11;
 
-    m.def("generate_random_sidb_layout", &fiction::generate_random_sidb_layout<Lyt>, py::arg("lyt_skeleton"),
+    m.def("generate_random_sidb_layout", &fiction::generate_random_sidb_layout<Lyt>,
           py::arg("params") = fiction::generate_random_sidb_layout_params<fiction::cell<Lyt>>{},
-          DOC(fiction_generate_random_sidb_layout));
+          py::arg("lyt_skeleton"), DOC(fiction_generate_random_sidb_layout));
 
     m.def("generate_multiple_random_sidb_layouts", &fiction::generate_multiple_random_sidb_layouts<Lyt>,
-          py::arg("lyt_skeleton"),
           py::arg("params") = fiction::generate_random_sidb_layout_params<fiction::cell<Lyt>>{},
-          DOC(fiction_generate_multiple_random_sidb_layouts));
+          py::arg("lyt_skeleton"), DOC(fiction_generate_multiple_random_sidb_layouts));
 }
 
 }  // namespace detail
 
 inline void random_sidb_layout_generator(pybind11::module& m)
 {
-    namespace py = pybind11;
     namespace py = pybind11;
 
     py::enum_<typename fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>::positive_charges>(
@@ -70,6 +68,9 @@ inline void random_sidb_layout_generator(pybind11::module& m)
         .def_readwrite("positive_sidbs",
                        &fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>::positive_sidbs,
                        DOC(fiction_generate_random_sidb_layout_params_positive_sidbs))
+        .def_readwrite("simulation_parameters",
+                       &fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>::simulation_parameters,
+                       DOC(fiction_generate_random_sidb_layout_params_simulation_parameters))
         .def_readwrite("maximal_attempts",
                        &fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>::maximal_attempts,
                        DOC(fiction_generate_random_sidb_layout_params_maximal_attempts))
@@ -85,6 +86,7 @@ inline void random_sidb_layout_generator(pybind11::module& m)
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
     detail::random_layout_generator<py_sidb_100_lattice>(m);
     detail::random_layout_generator<py_sidb_111_lattice>(m);
+    detail::random_layout_generator<py_sidb_layout>(m);
 }
 
 }  // namespace pyfiction
