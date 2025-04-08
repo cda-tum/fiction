@@ -13,7 +13,6 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include <string>
 #include <vector>
 
 namespace pyfiction
@@ -38,7 +37,6 @@ void minimum_energy(pybind11::module& m)
 inline void minimum_energy(pybind11::module& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
-
     detail::minimum_energy<py_charge_distribution_surface_100>(m);
     detail::minimum_energy<py_charge_distribution_surface_111>(m);
 }

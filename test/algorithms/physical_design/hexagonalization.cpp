@@ -19,12 +19,11 @@
 #include <fiction/types.hpp>
 
 #include <mockturtle/networks/aig.hpp>
-#include <mockturtle/views/names_view.hpp>
 
 using namespace fiction;
 
 template <typename Lyt, typename Ntk>
-void check_mapping_equiv(const Ntk& ntk)
+static void check_mapping_equiv(const Ntk& ntk)
 {
     const auto layout = orthogonal<Lyt>(ntk, {});
 
@@ -42,7 +41,8 @@ void check_mapping_equiv(const Ntk& ntk)
     check_eq(ntk, hex_layout_top_pis);
     check_eq(layout, hex_layout_top_pis);
 
-    hex_layout_top_pis.foreach_pi([&](const auto& gate) { CHECK(hex_layout_top_pis.get_tile(gate).y == 0); });
+    hex_layout_top_pis.foreach_pi([&hex_layout_top_pis](const auto& gate)
+                                  { CHECK(hex_layout_top_pis.get_tile(gate).y == 0); });
 
     params.input_pin_extension       = hexagonalization_params::io_pin_extension_mode::NONE;
     params.output_pin_extension      = hexagonalization_params::io_pin_extension_mode::EXTEND;
@@ -52,7 +52,7 @@ void check_mapping_equiv(const Ntk& ntk)
     check_eq(layout, hex_layout_bottom_pos);
 
     hex_layout_bottom_pos.foreach_po(
-        [&](const auto& gate)
+        [&hex_layout_bottom_pos](const auto& gate)
         {
             CHECK(hex_layout_bottom_pos.get_tile(hex_layout_bottom_pos.get_node(gate)).y == hex_layout_bottom_pos.y());
         });
@@ -63,10 +63,10 @@ void check_mapping_equiv(const Ntk& ntk)
     check_eq(ntk, hex_layout_top_pis_bottom_pos);
     check_eq(layout, hex_layout_top_pis_bottom_pos);
 
-    hex_layout_top_pis_bottom_pos.foreach_pi([&](const auto& gate)
+    hex_layout_top_pis_bottom_pos.foreach_pi([&hex_layout_top_pis_bottom_pos](const auto& gate)
                                              { CHECK(hex_layout_top_pis_bottom_pos.get_tile(gate).y == 0); });
     hex_layout_top_pis_bottom_pos.foreach_po(
-        [&](const auto& gate)
+        [&hex_layout_top_pis_bottom_pos](const auto& gate)
         {
             CHECK(hex_layout_top_pis_bottom_pos.get_tile(hex_layout_top_pis_bottom_pos.get_node(gate)).y ==
                   hex_layout_top_pis_bottom_pos.y());
@@ -74,7 +74,7 @@ void check_mapping_equiv(const Ntk& ntk)
 }
 
 template <typename Lyt>
-void check_mapping_equiv_layout(const Lyt& lyt)
+static void check_mapping_equiv_layout(const Lyt& lyt)
 {
     hexagonalization_stats  stats{};
     hexagonalization_params params{};
@@ -89,7 +89,8 @@ void check_mapping_equiv_layout(const Lyt& lyt)
     check_eq(lyt, hex_layout_top_pis);
     CHECK(lyt.get_layout_name() == hex_layout_top_pis.get_layout_name());
 
-    hex_layout_top_pis.foreach_pi([&](const auto& gate) { CHECK(hex_layout_top_pis.get_tile(gate).y == 0); });
+    hex_layout_top_pis.foreach_pi([&hex_layout_top_pis](const auto& gate)
+                                  { CHECK(hex_layout_top_pis.get_tile(gate).y == 0); });
 
     params.input_pin_extension       = hexagonalization_params::io_pin_extension_mode::NONE;
     params.output_pin_extension      = hexagonalization_params::io_pin_extension_mode::EXTEND;
@@ -99,7 +100,7 @@ void check_mapping_equiv_layout(const Lyt& lyt)
     CHECK(lyt.get_layout_name() == hex_layout_bottom_pos.get_layout_name());
 
     hex_layout_bottom_pos.foreach_po(
-        [&](const auto& gate)
+        [&hex_layout_bottom_pos](const auto& gate)
         {
             CHECK(hex_layout_bottom_pos.get_tile(hex_layout_bottom_pos.get_node(gate)).y == hex_layout_bottom_pos.y());
         });
@@ -110,10 +111,10 @@ void check_mapping_equiv_layout(const Lyt& lyt)
     check_eq(lyt, hex_layout_top_pis_bottom_pos);
     CHECK(lyt.get_layout_name() == hex_layout_top_pis_bottom_pos.get_layout_name());
 
-    hex_layout_top_pis_bottom_pos.foreach_pi([&](const auto& gate)
+    hex_layout_top_pis_bottom_pos.foreach_pi([&hex_layout_top_pis_bottom_pos](const auto& gate)
                                              { CHECK(hex_layout_top_pis_bottom_pos.get_tile(gate).y == 0); });
     hex_layout_top_pis_bottom_pos.foreach_po(
-        [&](const auto& gate)
+        [&hex_layout_top_pis_bottom_pos](const auto& gate)
         {
             CHECK(hex_layout_top_pis_bottom_pos.get_tile(hex_layout_top_pis_bottom_pos.get_node(gate)).y ==
                   hex_layout_top_pis_bottom_pos.y());
@@ -121,7 +122,7 @@ void check_mapping_equiv_layout(const Lyt& lyt)
 }
 
 template <typename Lyt>
-void check_mapping_equiv_layout_with_planar_rerouting(const Lyt& lyt)
+static void check_mapping_equiv_layout_with_planar_rerouting(const Lyt& lyt)
 {
     hexagonalization_stats  stats{};
     hexagonalization_params params{};
@@ -133,7 +134,8 @@ void check_mapping_equiv_layout_with_planar_rerouting(const Lyt& lyt)
 
     CHECK(lyt.get_layout_name() == hex_layout_top_pis.get_layout_name());
 
-    hex_layout_top_pis.foreach_pi([&](const auto& gate) { CHECK(hex_layout_top_pis.get_tile(gate).y == 0); });
+    hex_layout_top_pis.foreach_pi([&hex_layout_top_pis](const auto& gate)
+                                  { CHECK(hex_layout_top_pis.get_tile(gate).y == 0); });
 
     params.input_pin_extension       = hexagonalization_params::io_pin_extension_mode::NONE;
     params.output_pin_extension      = hexagonalization_params::io_pin_extension_mode::EXTEND_PLANAR;
@@ -144,7 +146,7 @@ void check_mapping_equiv_layout_with_planar_rerouting(const Lyt& lyt)
     CHECK(lyt.get_layout_name() == hex_layout_bottom_pos.get_layout_name());
 
     hex_layout_bottom_pos.foreach_po(
-        [&](const auto& gate)
+        [&hex_layout_bottom_pos](const auto& gate)
         {
             CHECK(hex_layout_bottom_pos.get_tile(hex_layout_bottom_pos.get_node(gate)).y == hex_layout_bottom_pos.y());
         });
@@ -157,10 +159,10 @@ void check_mapping_equiv_layout_with_planar_rerouting(const Lyt& lyt)
 
     CHECK(lyt.get_layout_name() == hex_layout_top_pis_bottom_pos.get_layout_name());
 
-    hex_layout_top_pis_bottom_pos.foreach_pi([&](const auto& gate)
+    hex_layout_top_pis_bottom_pos.foreach_pi([&hex_layout_top_pis_bottom_pos](const auto& gate)
                                              { CHECK(hex_layout_top_pis_bottom_pos.get_tile(gate).y == 0); });
     hex_layout_top_pis_bottom_pos.foreach_po(
-        [&](const auto& gate)
+        [&hex_layout_top_pis_bottom_pos](const auto& gate)
         {
             CHECK(hex_layout_top_pis_bottom_pos.get_tile(hex_layout_top_pis_bottom_pos.get_node(gate)).y ==
                   hex_layout_top_pis_bottom_pos.y());
@@ -168,7 +170,7 @@ void check_mapping_equiv_layout_with_planar_rerouting(const Lyt& lyt)
 }
 
 template <typename Lyt>
-void check_mapping_equiv_all()
+static void check_mapping_equiv_all()
 {
     check_mapping_equiv<Lyt>(blueprints::maj1_network<mockturtle::aig_network>());
     check_mapping_equiv<Lyt>(blueprints::maj4_network<mockturtle::aig_network>());

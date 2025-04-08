@@ -5,9 +5,6 @@
 #ifndef FICTION_HEXAGONALIZATION_HPP
 #define FICTION_HEXAGONALIZATION_HPP
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wconversion"
-
 #include "fiction/algorithms/path_finding/a_star.hpp"
 #include "fiction/algorithms/path_finding/cost.hpp"
 #include "fiction/algorithms/path_finding/distance.hpp"
@@ -30,6 +27,9 @@
 #include <iostream>
 #include <stdexcept>
 #include <vector>
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wconversion"
 
 namespace fiction
 {
@@ -131,7 +131,7 @@ struct routing_objective_with_fanin_update_information : public routing_objectiv
      * fanout gate is asymmetric, which means that the fanin signals need to be reordered. Defaults to false.
      */
     routing_objective_with_fanin_update_information(const coordinate<HexLyt>& src, const coordinate<HexLyt>& tgt,
-                                                    bool update = false) :
+                                                    const bool update = false) :
             routing_objective<HexLyt>{src, tgt},
             update_first_fanin{update}
     {}
@@ -188,12 +188,10 @@ template <typename CartLyt>
 
     // iterate over all primary inputs
     lyt.foreach_pi(
-        [&](const auto& gate)
+        [&lyt, &num_inputs_left_to_middle_pi](const auto& gate)
         {
-            const auto coord = lyt.get_tile(gate);
-
             // if the tile is at the western border, it is placed left of the middle PI in the hex layout
-            if (coord.x == 0 && coord.y != 0)
+            if (const auto coord = lyt.get_tile(gate); coord.x == 0 && coord.y != 0)
             {
                 ++num_inputs_left_to_middle_pi;
             }
@@ -218,12 +216,10 @@ template <typename CartLyt>
 
     // iterate over all primary inputs
     lyt.foreach_po(
-        [&](const auto& gate)
+        [&lyt, &num_outputs_left_to_middle_po](const auto& gate)
         {
-            const auto coord = lyt.get_tile(lyt.get_node(gate));
-
             // if the tile is at the southern border, it is placed left of the middle PO in the hex layout
-            if (coord.x != lyt.x() && coord.y == lyt.y())
+            if (const auto coord = lyt.get_tile(lyt.get_node(gate)); coord.x != lyt.x() && coord.y == lyt.y())
             {
                 ++num_outputs_left_to_middle_po;
             }
@@ -248,12 +244,10 @@ template <typename CartLyt>
 
     // iterate over all primary inputs
     lyt.foreach_pi(
-        [&](const auto& gate)
+        [&lyt, &num_inputs_right_to_middle_pi](const auto& gate)
         {
-            const auto coord = lyt.get_tile(gate);
-
             // if the tile is at the northern border, it is placed right of the middle PI in the hex layout
-            if (coord.x != 0 && coord.y == 0)
+            if (const auto coord = lyt.get_tile(gate); coord.x != 0 && coord.y == 0)
             {
                 ++num_inputs_right_to_middle_pi;
             }
@@ -278,12 +272,10 @@ template <typename CartLyt>
 
     // iterate over all primary inputs
     lyt.foreach_po(
-        [&](const auto& gate)
+        [&lyt, &num_outputs_right_to_middle_po](const auto& gate)
         {
-            const auto coord = lyt.get_tile(lyt.get_node(gate));
-
             // if the tile is at the eastern border, it is placed right of the middle PO in the hex layout
-            if (coord.x == lyt.x() && coord.y != lyt.y())
+            if (const auto coord = lyt.get_tile(lyt.get_node(gate)); coord.x == lyt.x() && coord.y != lyt.y())
             {
                 ++num_outputs_right_to_middle_po;
             }
@@ -347,7 +339,7 @@ template <typename HexLyt, typename CartLyt>
         const auto middle_pi = detail::to_hex<CartLyt, HexLyt>({0, 0}, cartesian_layout_height);
 
         // adjust offset based on primary inputs in the first column
-        auto num_inputs_left_to_middle_pi = compute_num_inputs_left_to_middle_pi(lyt);
+        const auto num_inputs_left_to_middle_pi = compute_num_inputs_left_to_middle_pi(lyt);
 
         // if necessary, adjust the offset to account for primary inputs
         if (static_cast<int64_t>(middle_pi.x) - offset < static_cast<int64_t>(num_inputs_left_to_middle_pi))
@@ -361,7 +353,7 @@ template <typename HexLyt, typename CartLyt>
         const auto middle_po = detail::to_hex<CartLyt, HexLyt>({lyt.x(), lyt.y()}, cartesian_layout_height);
 
         // adjust offset based on primary inputs in the first column
-        auto num_outputs_left_to_middle_po = compute_num_outputs_left_to_middle_po(lyt);
+        const auto num_outputs_left_to_middle_po = compute_num_outputs_left_to_middle_po(lyt);
 
         // if necessary, adjust the offset to account for primary outputs
         if (static_cast<int64_t>(middle_po.x) - offset < static_cast<int64_t>(num_outputs_left_to_middle_po))
@@ -454,7 +446,8 @@ class hexagonalization_impl
 
             // map primary inputs to the hexagonal layout
             layout.foreach_pi(
-                [&](const auto& gate)
+                [this, &hex_layout, &left_pis, &right_pis, layout_height, offset,
+                 offset_has_to_be_added](const auto& gate)
                 {
                     const auto old_coord = layout.get_tile(gate);
                     // convert Cartesian coordinate to hex coordinate
@@ -550,7 +543,7 @@ class hexagonalization_impl
                             // process single input signals (buffer or inverter)
                             if (signals.size() == 1)
                             {
-                                const auto hex_source = [&]()
+                                const auto hex_source = [&signals, layout_height, offset, offset_has_to_be_added]
                                 {
                                     auto t = detail::to_hex<CartLyt, HexLyt>(signals[0], layout_height);
                                     t.x += (offset_has_to_be_added ? static_cast<decltype(t.x)>(offset) :
@@ -564,7 +557,8 @@ class hexagonalization_impl
                                 // create appropriate gate in hex layout based on node type
                                 if (!layout.is_po(node))
                                 {
-                                    (void)place(hex_layout, hex_tile, layout, node, hex_signal);
+                                    [[maybe_unused]] const auto s =
+                                        place(hex_layout, hex_tile, layout, node, hex_signal);
                                 }
                             }
                             else if (signals.size() == 2)
@@ -583,7 +577,8 @@ class hexagonalization_impl
                                 const auto hex_signal_a = hex_layout.make_signal(hex_layout.get_node(hex_tile_a));
                                 const auto hex_signal_b = hex_layout.make_signal(hex_layout.get_node(hex_tile_b));
 
-                                (void)place(hex_layout, hex_tile, layout, node, hex_signal_a, hex_signal_b);
+                                [[maybe_unused]] const auto s =
+                                    place(hex_layout, hex_tile, layout, node, hex_signal_a, hex_signal_b);
                             }
                         }
                     }
@@ -592,7 +587,8 @@ class hexagonalization_impl
 
             // map primary outputs to hex layout
             layout.foreach_po(
-                [&](const auto& gate)
+                [this, &hex_layout, &left_pos, &right_pos, layout_height, offset,
+                 offset_has_to_be_added](const auto& gate)
                 {
                     // get the original Cartesian tile for the output
                     const auto old_coord = layout.get_tile(layout.get_node(gate));
@@ -638,9 +634,9 @@ class hexagonalization_impl
                 // process PIs from left column of the Cartesian layout
                 for (const auto& c : left_pis)
                 {
-                    tile<HexLyt> fanout;
-                    hex_layout.foreach_fanout(hex_layout.get_node(c),
-                                              [&](const auto& fout) { fanout = hex_layout.get_tile(fout); });
+                    tile<HexLyt> fanout{};
+                    hex_layout.foreach_fanout(hex_layout.get_node(c), [&fanout, &hex_layout](const auto& fout)
+                                              { fanout = hex_layout.get_tile(fout); });
 
                     // shift left primary input position
                     middle_pi.x -= 1;
@@ -648,32 +644,35 @@ class hexagonalization_impl
                     routing_objective_with_fanin_update_information<HexLyt> obj(middle_pi, fanout, false);
 
                     // collect fan-in signals for the fanout node
-                    std::vector<mockturtle::signal<HexLyt>> fins;
+                    std::vector<mockturtle::signal<HexLyt>> fins{};
                     fins.reserve(2);
-                    bool first            = true;
+
                     bool first_fanin_is_c = false;
-                    hex_layout.foreach_fanin(hex_layout.get_node(fanout),
-                                             [&](const auto& i)
-                                             {
-                                                 auto fout = static_cast<tile<HexLyt>>(i);
-                                                 if (first)
-                                                 {
-                                                     first = false;
-                                                     if (fout == c)
-                                                     {
-                                                         first_fanin_is_c = true;
-                                                     }
-                                                 }
-                                                 if (fout != c)
-                                                 {
-                                                     fins.push_back(hex_layout.make_signal(hex_layout.get_node(fout)));
-                                                 }
-                                             });
+
+                    hex_layout.foreach_fanin(
+                        hex_layout.get_node(fanout),
+                        [&first_fanin_is_c, &fins, &hex_layout, &c, first = true](const auto& i) mutable
+                        {
+                            const auto fout = static_cast<tile<HexLyt>>(i);
+
+                            if (first)
+                            {
+                                first = false;
+                                if (fout == c)
+                                {
+                                    first_fanin_is_c = true;
+                                }
+                            }
+                            if (fout != c)
+                            {
+                                fins.push_back(hex_layout.make_signal(hex_layout.get_node(fout)));
+                            }
+                        });
 
                     hex_layout.move_node(hex_layout.get_node(c), middle_pi);
 
-                    const auto target_node = hex_layout.get_node(fanout);
-                    if (hex_layout.is_gt(target_node) || hex_layout.is_ge(target_node) ||
+                    if (const auto target_node = hex_layout.get_node(fanout);
+                        hex_layout.is_gt(target_node) || hex_layout.is_ge(target_node) ||
                         hex_layout.is_lt(target_node) || hex_layout.is_le(target_node))
                     {
                         obj.update_first_fanin = first_fanin_is_c;
@@ -690,41 +689,44 @@ class hexagonalization_impl
                 // process PIs from top row of the Cartesian layout (similar to before)
                 for (const auto& c : right_pis)
                 {
-                    tile<HexLyt> fanout;
-                    hex_layout.foreach_fanout(hex_layout.get_node(c),
-                                              [&](const auto& fout) { fanout = hex_layout.get_tile(fout); });
+                    tile<HexLyt> fanout{};
+                    hex_layout.foreach_fanout(hex_layout.get_node(c), [&fanout, &hex_layout](const auto& fout)
+                                              { fanout = hex_layout.get_tile(fout); });
 
                     // shift top primary input position
                     middle_pi.x += 1;
                     routing_objective_with_fanin_update_information<HexLyt> obj(middle_pi, fanout, false);
 
                     // collect fan-in signals for the fanout node
-                    std::vector<mockturtle::signal<HexLyt>> fins;
+                    std::vector<mockturtle::signal<HexLyt>> fins{};
                     fins.reserve(2);
-                    bool first            = true;
+
                     bool first_fanin_is_c = false;
-                    hex_layout.foreach_fanin(hex_layout.get_node(fanout),
-                                             [&](const auto& i)
-                                             {
-                                                 auto fout = static_cast<tile<HexLyt>>(i);
-                                                 if (first)
-                                                 {
-                                                     first = false;
-                                                     if (fout == c)
-                                                     {
-                                                         first_fanin_is_c = true;
-                                                     }
-                                                 }
-                                                 if (fout != c)
-                                                 {
-                                                     fins.push_back(hex_layout.make_signal(hex_layout.get_node(fout)));
-                                                 }
-                                             });
+
+                    hex_layout.foreach_fanin(
+                        hex_layout.get_node(fanout),
+                        [&first_fanin_is_c, &c, &fins, &hex_layout, first = true](const auto& i) mutable
+                        {
+                            const auto fout = static_cast<tile<HexLyt>>(i);
+
+                            if (first)
+                            {
+                                first = false;
+                                if (fout == c)
+                                {
+                                    first_fanin_is_c = true;
+                                }
+                            }
+                            if (fout != c)
+                            {
+                                fins.push_back(hex_layout.make_signal(hex_layout.get_node(fout)));
+                            }
+                        });
 
                     hex_layout.move_node(hex_layout.get_node(c), middle_pi);
 
-                    const auto target_node = hex_layout.get_node(fanout);
-                    if (hex_layout.is_gt(target_node) || hex_layout.is_ge(target_node) ||
+                    if (const auto target_node = hex_layout.get_node(fanout);
+                        hex_layout.is_gt(target_node) || hex_layout.is_ge(target_node) ||
                         hex_layout.is_lt(target_node) || hex_layout.is_le(target_node))
                     {
                         obj.update_first_fanin = first_fanin_is_c;
@@ -756,8 +758,9 @@ class hexagonalization_impl
                         update_target = true;
                     }
 
-                    auto new_path = a_star<path>(layout_obstruct, {obj.source, target}, dist(), cost(), params_astar);
-                    if (!new_path.empty())
+                    if (auto new_path =
+                            a_star<path>(layout_obstruct, {obj.source, target}, dist(), cost(), params_astar);
+                        !new_path.empty())
                     {
                         // for planar extension, if target is in the crossing layer, update path
                         if (update_target)
@@ -766,6 +769,7 @@ class hexagonalization_impl
                         }
 
                         route_path(hex_layout, new_path);
+
                         for (const auto& t : new_path)
                         {
                             layout_obstruct.obstruct_coordinate(t);
@@ -773,15 +777,17 @@ class hexagonalization_impl
                         // if the flag is set, re-collect and update fanins
                         if (obj.update_first_fanin)
                         {
-                            std::vector<mockturtle::signal<HexLyt>> fins;
+                            std::vector<mockturtle::signal<HexLyt>> fins{};
                             fins.reserve(2);
+
                             hex_layout.foreach_fanin(hex_layout.get_node(obj.target),
-                                                     [&](const auto& i)
+                                                     [&fins, &hex_layout](const auto& i)
                                                      {
                                                          auto fout = static_cast<tile<HexLyt>>(i);
                                                          fins.push_back(
                                                              hex_layout.make_signal(hex_layout.get_node(fout)));
                                                      });
+
                             std::reverse(fins.begin(), fins.end());
                             hex_layout.move_node(hex_layout.get_node(obj.target), obj.target, fins);
                         }
@@ -799,17 +805,17 @@ class hexagonalization_impl
             if (ps.output_pin_extension != hexagonalization_params::io_pin_extension_mode::NONE)
             {
                 // adjust positions and prepare for routing
-                middle_po.x += (offset_is_negative ? static_cast<decltype(middle_po.x)>(offset) :
-                                                     -static_cast<decltype(middle_po.x)>(offset));
+                middle_po.x += (offset_has_to_be_added ? static_cast<decltype(middle_po.x)>(offset) :
+                                                         -static_cast<decltype(middle_po.x)>(offset));
                 std::vector<routing_objective_with_fanin_update_information<HexLyt>> objectives{};
                 objectives.reserve(hex_layout.num_pos());
 
                 // process PIs from left column of the Cartesian layout
                 for (const auto& c : left_pos)
                 {
-                    tile<HexLyt> fanin;
+                    tile<HexLyt> fanin{};
                     hex_layout.foreach_fanin(hex_layout.get_node(c),
-                                             [&](const auto& fin) { fanin = static_cast<tile<HexLyt>>(fin); });
+                                             [&fanin](const auto& fin) { fanin = static_cast<tile<HexLyt>>(fin); });
 
                     // shift left primary output position
                     middle_po.x -= 1;
@@ -826,9 +832,9 @@ class hexagonalization_impl
                 // process POs from bottom row of the Cartesian layout (similar to before)
                 for (const auto& c : right_pos)
                 {
-                    tile<HexLyt> fanin;
+                    tile<HexLyt> fanin{};
                     hex_layout.foreach_fanin(hex_layout.get_node(c),
-                                             [&](const auto& fin) { fanin = static_cast<tile<HexLyt>>(fin); });
+                                             [&fanin](const auto& fin) { fanin = static_cast<tile<HexLyt>>(fin); });
 
                     // shift bottom primary output position
                     middle_po.x += 1;
@@ -860,8 +866,9 @@ class hexagonalization_impl
                         update_source = true;
                     }
 
-                    auto new_path = a_star<path>(layout_obstruct, {source, obj.target}, dist(), cost(), params_astar);
-                    if (!new_path.empty())
+                    if (auto new_path =
+                            a_star<path>(layout_obstruct, {source, obj.target}, dist(), cost(), params_astar);
+                        !new_path.empty())
                     {
                         // for planar extension, if source or target are in the crossing layer, update path
                         if (update_source)
@@ -870,6 +877,7 @@ class hexagonalization_impl
                         }
 
                         route_path(hex_layout, new_path);
+
                         for (const auto& t : new_path)
                         {
                             layout_obstruct.obstruct_coordinate(t);
