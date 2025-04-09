@@ -144,8 +144,8 @@ template <typename Lyt, typename TT>
                     // The output SiDB matches the truth table entry. Hence, state is called transparent.
                     energy_and_state_type.emplace_back(energy, state_type::ACCEPTED);
 
-                is_operational_params params{};
-                params.op_condition_kinks = is_operational_params::operational_condition_kinks::REJECT_KINKS;
+                    is_operational_params params{};
+                    params.op_condition_kinks = is_operational_params::operational_condition_kinks::REJECT_KINKS;
 
                     const auto operational_status =
                         verify_logic_match(valid_layout, params, spec, input_index, input_bdl_wires, output_bdl_wires);

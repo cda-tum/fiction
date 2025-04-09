@@ -857,7 +857,7 @@ class design_sidb_gates_impl
     //         std::mt19937_64{std::random_device{}()});
     //
     //         return all_canvas_layouts;
-//     }
+    //     }
     /**
      * This function generates canvas SiDB layouts.
      *
