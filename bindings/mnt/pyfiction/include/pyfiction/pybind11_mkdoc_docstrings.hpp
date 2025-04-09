@@ -6140,12 +6140,12 @@ the ones that are operational under the given truth table
 specification and operational conditions.
 
 Parameter ``candidate_combinations``:
-    A vector of gate design candidates to extract the operational gate
-    designs from. TODO
+    A vector of canvas combination candidates to obtain the
+    operational gate designs from.
 
 Returns:
     A vector of operational gate designs that were extracted from the
-    given vector of candidates.)doc";
+    given vector of candidate canvas combinations.)doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_input_bdl_wires = R"doc(Input BDL wires.)doc";
 
@@ -6185,8 +6185,8 @@ threading to accelerate the evaluation and ensures thread-safe access
 to shared resources.
 
 Returns:
-    A vector containing the valid gate candidates that were not
-    pruned.)doc";
+    A vector containing the canvas combinations associated with valid
+    gate candidates that were not pruned.)doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_run_quickcell =
 R"doc(Design Standard Cells/gates by using the *QuickCell* algorithm.
