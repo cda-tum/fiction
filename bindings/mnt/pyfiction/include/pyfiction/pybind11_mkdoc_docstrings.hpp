@@ -4680,44 +4680,57 @@ R"doc(This struct contains parameters and settings to design SiDB gates.
 Template parameter ``Lyt``:
     SiDB cell-level layout type.)doc";
 
+static const char *__doc_fiction_design_sidb_gates_params_available_threads = R"doc(The number of threads available for the SiDB gate design process)doc";
+
 static const char *__doc_fiction_design_sidb_gates_params_design_mode = R"doc(Gate design mode.)doc";
 
 static const char *__doc_fiction_design_sidb_gates_params_design_sidb_gates_mode = R"doc(Selector for the available design approaches.)doc";
 
 static const char *__doc_fiction_design_sidb_gates_params_design_sidb_gates_mode_EXHAUSTIVE = R"doc(Gates are designed by using the *Automatic Exhaustive Gate Designer*.)doc";
 
-static const char *__doc_fiction_design_sidb_gates_params_design_sidb_gates_mode_QUICKCELL = R"doc(Gates are designed by using *QuickCell*.)doc";
+static const char *__doc_fiction_design_sidb_gates_params_design_sidb_gates_mode_QUICKCELL =
+R"doc(Gates are designed by using *QuickCell*. This is type of gate design
+is exhaustive but involves pruning prior to exhaustive enumeration.)doc";
 
 static const char *__doc_fiction_design_sidb_gates_params_design_sidb_gates_mode_RANDOM = R"doc(Gate layouts are designed randomly.)doc";
+
+static const char *__doc_fiction_design_sidb_gates_params_maximum_number_of_solutions =
+R"doc(Number of solutions that needs to be obtained before termination.
+
+@note This parameter has no effect when the gate design is exhaustive
+and all combinations are enumerated.)doc";
 
 static const char *__doc_fiction_design_sidb_gates_params_number_of_canvas_sidbs = R"doc(Number of SiDBs placed in the canvas to create a working gate.)doc";
 
 static const char *__doc_fiction_design_sidb_gates_params_operational_params = R"doc(Parameters for the `is_operational` function.)doc";
 
 static const char *__doc_fiction_design_sidb_gates_params_post_design_process =
-R"doc(After the design process, the returned gates are not sorted.
+R"doc(After the design process, the returned gates can be sorted by the
+given ordering recipe.
 
 @note This parameter has no effect unless the gate design is
 exhaustive and all combinations are enumerated.)doc";
 
 static const char *__doc_fiction_design_sidb_gates_params_termination_cond =
-R"doc(The design process is terminated after a valid SiDB gate design is
-found.
+R"doc(The design process is either terminated after all canvas layouts have
+been considered, or the given amount of valid SiDB gate designs is
+found (`maximum_number_of_solutions`).
 
 @note This parameter has no effect unless the gate design is
-exhaustive.)doc";
+exhaustive. For random gate design, termination always occurs after
+finding the given amount of solutions.)doc";
 
 static const char *__doc_fiction_design_sidb_gates_params_termination_condition =
 R"doc(Selector for the different termination conditions for the SiDB gate
 design process.)doc";
 
-static const char *__doc_fiction_design_sidb_gates_params_termination_condition_OBTAINED_N_SOLUTIONS =
-R"doc(The design process is terminated as soon as the first valid SiDB gate
-design is found.)doc";
-
 static const char *__doc_fiction_design_sidb_gates_params_termination_condition_ALL_COMBINATIONS_ENUMERATED =
 R"doc(The design process ends after all possible combinations of SiDBs
 within the canvas are enumerated.)doc";
+
+static const char *__doc_fiction_design_sidb_gates_params_termination_condition_OBTAINED_N_SOLUTIONS =
+R"doc(The design process is terminated as soon as a given amount of valid
+SiDB gate designs is found (`maximum_number_of_solutions`).)doc";
 
 static const char *__doc_fiction_design_sidb_gates_stats = R"doc(Statistics for the design of SiDB gates.)doc";
 
@@ -6095,13 +6108,13 @@ static const char *__doc_fiction_detail_design_sidb_gates_impl = R"doc()doc";
 static const char *__doc_fiction_detail_design_sidb_gates_impl_all_sidbs_in_canvas = R"doc(All cells within the canvas.)doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_convert_canvas_cell_indices_to_layout =
-R"doc(This function generates canvas SiDb layouts.
+R"doc(This function generates canvas SiDB layouts.
 
 Parameter ``cell_indices``:
     A vector of indices of cells to be added to the skeleton layout.
 
 Returns:
-    An SiDB cell-level layout consisting of canvas SidBs.)doc";
+    An SiDB cell-level layout consisting of canvas SiDBs.)doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_create_all_possible_canvas_layouts =
 R"doc(This function calculates all combinations of distributing a given
@@ -6130,7 +6143,18 @@ Parameter ``ps``:
 Parameter ``st``:
     Statistics for the gate design process.)doc";
 
-static const char *__doc_fiction_detail_design_sidb_gates_impl_extract_gate_designs = R"doc()doc";
+static const char *__doc_fiction_detail_design_sidb_gates_impl_extract_gate_designs =
+R"doc(This process filters the given candidates for an SiDB gate design for
+the ones that are operational under the given truth table
+specification and operational conditions.
+
+Parameter ``gate_candidates``:
+    A vector of gate design candidates to extract the operational gate
+    designs from.
+
+Returns:
+    A vector of operational gate designs that were extracted from the
+    given vector of candidates.)doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_input_bdl_wires = R"doc(Input BDL wires.)doc";
 
@@ -6143,8 +6167,6 @@ static const char *__doc_fiction_detail_design_sidb_gates_impl_number_of_discard
 static const char *__doc_fiction_detail_design_sidb_gates_impl_number_of_input_wires = R"doc(Number of input BDL wires.)doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_number_of_output_wires = R"doc(Number of output BDL wires.)doc";
-
-static const char *__doc_fiction_detail_design_sidb_gates_impl_number_of_threads = R"doc(Number of threads to be used for the design process.)doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_output_bdl_wires = R"doc(Output BDL wires.)doc";
 
@@ -8492,11 +8514,7 @@ Template parameter ``Lyt``:
     SiDB cell-level layout type.
 
 Template parameter ``TT``:
-    Type of the truth table.
-
-Parameter ``spec``:
-    Expected Boolean function of the layout given as a multi-output
-    truth table.)doc";
+    Type of the truth table.)doc";
 
 static const char *__doc_fiction_detail_is_operational_impl_bii = R"doc(Iterator that iterates over all possible input states.)doc";
 
@@ -8632,7 +8650,7 @@ R"doc(Constructor to initialize the algorithm with a layout and parameters.
 Parameter ``lyt``:
     The SiDB cell-level layout to be checked.
 
-Parameter ``tt``:
+Parameter ``spec``:
     Expected Boolean function of the layout given as a multi-output
     truth table.
 
@@ -8671,7 +8689,7 @@ input and output wires, and a canvas layout.
 Parameter ``lyt``:
     The SiDB cell-level layout to be checked.
 
-Parameter ``tt``:
+Parameter ``spec``:
     Expected Boolean function of the layout given as a multi-output
     truth table.
 
@@ -8693,7 +8711,7 @@ R"doc(Constructor to initialize the algorithm with a layout and parameters.
 Parameter ``lyt``:
     The SiDB cell-level layout to be checked.
 
-Parameter ``tt``:
+Parameter ``spec``:
     Expected Boolean function of the layout given as a multi-output
     truth table.
 
@@ -20377,8 +20395,8 @@ static const char *__doc_fiction_sidb_on_the_fly_gate_library_params =
 R"doc(This struct encapsulates parameters for the parameterized SiDB gate
 library.
 
-Template parameter ``CellType``:
-    SiDB cell type.)doc";
+Template parameter ``Lyt``:
+    Cell-level layout type.)doc";
 
 static const char *__doc_fiction_sidb_on_the_fly_gate_library_params_canvas_sidb_complex_gates =
 R"doc(This variable defines the number of canvas SiDBs dedicated to complex
