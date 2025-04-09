@@ -488,7 +488,6 @@ TEST_CASE("Use FO2 Bestagon gate without SiDB at {17, 11, 0} and generate origin
             {2, 19, 0}, sidb_defect{sidb_defect_type::DB, -1, params.operational_params.simulation_parameters.epsilon_r,
                                     params.operational_params.simulation_parameters.lambda_tf});
 
-        std::cout << "NOWWW" << std::endl;
         const auto found_gate_layouts_exhaustive =
             design_sidb_gates(defect_layout, std::vector<tt>{create_fan_out_tt()}, params);
 
