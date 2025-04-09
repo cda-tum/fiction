@@ -6116,15 +6116,6 @@ Parameter ``cell_indices``:
 Returns:
     An SiDB cell-level layout consisting of canvas SiDBs.)doc";
 
-static const char *__doc_fiction_detail_design_sidb_gates_impl_create_all_possible_canvas_layouts =
-R"doc(This function calculates all combinations of distributing a given
-number of SiDBs across a specified number of positions in the canvas.
-Each combination is then used to create a gate layout candidate.
-
-Returns:
-    A vector containing all possible gate layouts generated from the
-    combinations.)doc";
-
 static const char *__doc_fiction_detail_design_sidb_gates_impl_design_sidb_gates_impl =
 R"doc(This constructor initializes an instance of the *SiDB Gate Designer*
 implementation with the provided skeleton layout and configuration
@@ -6148,9 +6139,9 @@ R"doc(This process filters the given candidates for an SiDB gate design for
 the ones that are operational under the given truth table
 specification and operational conditions.
 
-Parameter ``gate_candidates``:
+Parameter ``candidate_combinations``:
     A vector of gate design candidates to extract the operational gate
-    designs from.
+    designs from. TODO
 
 Returns:
     A vector of operational gate designs that were extracted from the
@@ -6229,6 +6220,17 @@ static const char *__doc_fiction_detail_design_sidb_gates_impl_skeleton_layout =
 R"doc(The skeleton layout serves as a starting layout to which SiDBs are
 added to create unique SiDB layouts and, if possible, working gates.
 It defines input and output wires.)doc";
+
+static const char *__doc_fiction_detail_design_sidb_gates_impl_skeleton_layout_with_canvas_sidbs =
+R"doc(This function adds SiDBs (given by indices) to the skeleton layout
+that is returned afterward.
+
+Parameter ``cell_indices``:
+    A vector of indices of cells to be added to the skeleton layout.
+
+Returns:
+    A copy of the original layout (`skeleton_layout`) with SiDB cells
+    added at specified indices.)doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_stats = R"doc(The statistics of the gate design.)doc";
 
