@@ -79,7 +79,7 @@ class TestQuickExact(unittest.TestCase):
         self.assertEqual(groundstate[0].get_charge_state((2, 0)), sidb_charge_state.NEUTRAL)
         self.assertEqual(groundstate[0].get_charge_state((3, 0)), sidb_charge_state.NEGATIVE)
 
-    def test_simulate_all_inputs_of_and_gate(self):
+    def test_simulate_all_inputs_of_AND_gate(self):
         and_gate = read_sqd_layout_100(dir_path + "/../../../resources/Bestagon_AND_mu_025_v0.sqd")
         physical_parameters = sidb_simulation_parameters()
         physical_parameters.base = 2
