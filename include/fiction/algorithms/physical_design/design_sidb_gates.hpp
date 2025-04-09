@@ -391,7 +391,7 @@ class design_sidb_gates_impl
 
   private:
     /**
-     * todo
+     * A canvas combination is a combination of canvas positions as a vector of canvas position indices.
      */
     using canvas_combination = std::vector<uint64_t>;
     /**
@@ -447,9 +447,8 @@ class design_sidb_gates_impl
      * This process filters the given candidates for an SiDB gate design for the ones that are operational under the
      * given truth table specification and operational conditions.
      *
-     * @param candidate_combinations A vector of gate design candidates to extract the operational gate designs from.
-     * TODO
-     * @return A vector of operational gate designs that were extracted from the given vector of candidates.
+     * @param candidate_combinations A vector of canvas combination candidates to obtain the operational gate designs from.
+     * @return A vector of operational gate designs that were extracted from the given vector of candidate canvas combinations.
      */
     [[nodiscard]] std::vector<Lyt>
     extract_gate_designs(const std::vector<canvas_combination>& candidate_combinations) const noexcept
@@ -591,7 +590,7 @@ class design_sidb_gates_impl
      * pruned by using three distinct physically-informed pruning steps. It leverages multi-threading to accelerate the
      * evaluation and ensures thread-safe access to shared resources.
      *
-     * @return A vector containing the valid gate candidates that were not pruned.
+     * @return A vector containing the canvas combinations associated with valid gate candidates that were not pruned.
      */
     [[nodiscard]] std::vector<canvas_combination> run_pruning() noexcept
     {
