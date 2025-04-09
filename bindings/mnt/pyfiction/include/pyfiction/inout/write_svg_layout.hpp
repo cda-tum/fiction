@@ -51,9 +51,9 @@ inline void write_qca_layout_svg_impl(pybind11::module& m)
     namespace py = pybind11;
 
     // QCA plot
-    void (*write_qca_layout_svg_pointer)(const py_qca_layout&, const std::string_view&,
+    void (*write_qca_layout_svg_pointer)(const py_qca_layout<py_offset_coordinate>&, const std::string_view&,
                                          const fiction::write_qca_layout_svg_params&) =
-        &fiction::write_qca_layout_svg<py_qca_layout>;
+        &fiction::write_qca_layout_svg<py_qca_layout<py_offset_coordinate>>;
 
     m.def("write_qca_layout_svg", write_qca_layout_svg_pointer, py::arg("layout"), py::arg("filename"),
           py::arg("params") = fiction::write_qca_layout_svg_params{}, DOC(fiction_write_qca_layout_svg));
@@ -102,14 +102,18 @@ void write_svg_layout(pybind11::module& m)
                        DOC(fiction_write_qca_layout_svg_params_simple));
     ;
 
-    detail::write_sidb_layout_svg_impl<py_charge_distribution_surface_111>(m);
-    detail::write_sidb_layout_svg_impl<py_charge_distribution_surface_100>(m);
-    detail::write_sidb_layout_svg_impl<py_charge_distribution_surface>(m);
+    detail::write_sidb_layout_svg_impl<py_charge_distribution_surface_111<py_offset_coordinate>>(m);
+    detail::write_sidb_layout_svg_impl<py_charge_distribution_surface_100<py_offset_coordinate>>(m);
+    detail::write_sidb_layout_svg_impl<py_charge_distribution_surface<py_offset_coordinate>>(m);
 
-    detail::write_sidb_layout_svg_impl<py_sidb_111_lattice>(m);
-    detail::write_sidb_layout_svg_impl<py_sidb_100_lattice>(m);
-    detail::write_sidb_layout_svg_impl<py_sidb_layout>(m);
-    detail::write_qca_layout_svg_impl<py_sidb_layout>(m);
+    detail::write_sidb_layout_svg_impl<py_charge_distribution_surface_111<py_cube_coordinate>>(m);
+    detail::write_sidb_layout_svg_impl<py_charge_distribution_surface_100<py_cube_coordinate>>(m);
+    detail::write_sidb_layout_svg_impl<py_charge_distribution_surface<py_cube_coordinate>>(m);
+
+    detail::write_sidb_layout_svg_impl<py_sidb_111_lattice<py_offset_coordinate>>(m);
+    detail::write_sidb_layout_svg_impl<py_sidb_100_lattice<py_offset_coordinate>>(m);
+    detail::write_sidb_layout_svg_impl<py_sidb_layout<py_offset_coordinate>>(m);
+    detail::write_qca_layout_svg_impl<py_sidb_layout<py_offset_coordinate>>(m);
 }
 
 }  // namespace pyfiction

@@ -3,15 +3,13 @@ import unittest
 
 from mnt.pyfiction import (
     automatic_base_number_detection,
-    charge_distribution_surface_100,
-    charge_distribution_surface_111,
+    charge_distribution_surface,
     exact_sidb_simulation_engine,
     quickexact,
     quickexact_params,
     quicksim,
     quicksim_params,
-    sidb_100_lattice,
-    sidb_111_lattice,
+    sidb_lattice,
     sidb_simulation_parameters,
     sidb_technology,
     time_to_solution,
@@ -23,7 +21,7 @@ from mnt.pyfiction import (
 
 class TestTimeToSolution(unittest.TestCase):
     def test_one_sidb_100_lattice(self):
-        layout = sidb_100_lattice((0, 0))
+        layout = sidb_lattice((0, 0), orientation="100")
         layout.assign_cell_type((0, 0), sidb_technology.cell_type.NORMAL)
 
         quicksim_parameter = quicksim_params()
@@ -33,7 +31,7 @@ class TestTimeToSolution(unittest.TestCase):
         tts_params.engine = exact_sidb_simulation_engine.QUICKEXACT
         stats = time_to_solution_stats()
 
-        cds = charge_distribution_surface_100(layout)
+        cds = charge_distribution_surface(layout)
 
         time_to_solution(cds, quicksim_parameter, tts_params, stats)
 
@@ -42,7 +40,7 @@ class TestTimeToSolution(unittest.TestCase):
         self.assertGreater(stats.mean_single_runtime, 0.0)
 
     def test_one_sidb_111_lattice(self):
-        layout = sidb_111_lattice((0, 0))
+        layout = sidb_lattice((0, 0), orientation="111")
         layout.assign_cell_type((0, 0), sidb_technology.cell_type.NORMAL)
 
         quicksim_parameter = quicksim_params()
@@ -52,7 +50,7 @@ class TestTimeToSolution(unittest.TestCase):
         tts_params.engine = exact_sidb_simulation_engine.QUICKEXACT
         stats = time_to_solution_stats()
 
-        cds = charge_distribution_surface_111(layout)
+        cds = charge_distribution_surface(layout)
 
         time_to_solution(cds, quicksim_parameter, tts_params, stats)
 
@@ -61,7 +59,7 @@ class TestTimeToSolution(unittest.TestCase):
         self.assertGreater(stats.mean_single_runtime, 0.0)
 
     def test_time_to_solution_with_simulation_results(self):
-        layout = sidb_100_lattice((0, 0))
+        layout = sidb_lattice((0, 0), orientation="100")
 
         # Assign SiDBs to the layout
         layout.assign_cell_type((0, 0), sidb_technology.cell_type.NORMAL)

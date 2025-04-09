@@ -30,7 +30,7 @@ TEST_CASE("Deep copy synchronization element layout", "[synchronization-element-
 
     auto copy = original.clone();
 
-    copy.resize({10, 10, 1});
+    copy.resize(aspect_ratio_t<se_layout>{10, 10, 1});
     copy.replace_clocking_scheme(use_clocking<se_layout>());
     copy.assign_synchronization_element({0, 0}, 2);
     copy.assign_synchronization_element({1, 0}, 3);
@@ -54,7 +54,7 @@ TEST_CASE("Shifted clocking with synchronization elements", "[synchronization-el
 {
     using se_layout = synchronization_element_layout<clocked_layout<cartesian_layout<offset::ucoord_t>>>;
 
-    se_layout layout{se_layout::aspect_ratio{2, 2, 0}, twoddwave_clocking<se_layout>()};
+    se_layout layout{{2, 2, 0}, twoddwave_clocking<se_layout>()};
 
     layout.assign_synchronization_element({1, 1}, 1);
 
@@ -89,7 +89,7 @@ TEST_CASE("Iteration over synchronization elements", "[synchronization-element-l
 {
     using se_layout = synchronization_element_layout<clocked_layout<cartesian_layout<offset::ucoord_t>>>;
 
-    se_layout layout{se_layout::aspect_ratio{2, 2, 0}, twoddwave_clocking<se_layout>()};
+    se_layout layout{{2, 2, 0}, twoddwave_clocking<se_layout>()};
 
     layout.assign_synchronization_element({0, 1}, 1);
     layout.assign_synchronization_element({1, 0}, 1);
@@ -116,7 +116,7 @@ TEST_CASE("Synchronization element layout properties", "[synchronization-element
 {
     using se_layout = synchronization_element_layout<clocked_layout<cartesian_layout<offset::ucoord_t>>>;
 
-    se_layout layout{se_layout::aspect_ratio{2, 2, 0}, twoddwave_clocking<se_layout>()};
+    se_layout layout{{2, 2, 0}, twoddwave_clocking<se_layout>()};
 
     CHECK(layout.num_se() == 0);
     layout.assign_synchronization_element({0, 0}, 0);

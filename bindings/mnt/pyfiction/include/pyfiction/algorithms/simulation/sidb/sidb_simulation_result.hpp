@@ -112,8 +112,8 @@ void sidb_simulation_result(pybind11::module& m, const std::string& lattice = ""
 inline void sidb_simulation_result(pybind11::module& m)
 {
     // Define simulation result for specific lattices
-    detail::sidb_simulation_result<py_sidb_100_lattice>(m, "_100");
-    detail::sidb_simulation_result<py_sidb_111_lattice>(m, "_111");
+    detail::sidb_simulation_result<py_sidb_100_lattice<py_offset_coordinate>>(m, "_100");
+    detail::sidb_simulation_result<py_sidb_111_lattice<py_offset_coordinate>>(m, "_111");
 }
 
 }  // namespace pyfiction

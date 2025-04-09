@@ -59,8 +59,10 @@ inline void physically_valid_parameters(pybind11::module& m)
             py::arg("pp"));
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
-    detail::physically_valid_parameters<py_charge_distribution_surface_100>(m);
-    detail::physically_valid_parameters<py_charge_distribution_surface_111>(m);
+    detail::physically_valid_parameters<py_charge_distribution_surface_100<py_offset_coordinate>>(m);
+    detail::physically_valid_parameters<py_charge_distribution_surface_111<py_offset_coordinate>>(m);
+    detail::physically_valid_parameters<py_charge_distribution_surface_100<py_cube_coordinate>>(m);
+    detail::physically_valid_parameters<py_charge_distribution_surface_111<py_cube_coordinate>>(m);
 }
 
 }  // namespace pyfiction

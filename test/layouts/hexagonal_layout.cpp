@@ -101,7 +101,7 @@ TEST_CASE("Deep copy hexagonal layout", "[hexagonal-layout]")
 
     auto copy = original.clone();
 
-    copy.resize({10, 10, 1});
+    copy.resize(aspect_ratio<coordinate<decltype(original)>>{10, 10, 1});
 
     CHECK(original.x() == 5);
     CHECK(original.y() == 5);
@@ -115,7 +115,7 @@ TEST_CASE("Deep copy hexagonal layout", "[hexagonal-layout]")
 template <typename Lyt>
 void check_identity_conversion()
 {
-    Lyt layout{aspect_ratio<Lyt>{10, 10}};
+    Lyt layout{aspect_ratio_t<Lyt>{10, 10}};
 
     layout.foreach_coordinate([&layout](const auto& coord)
                               { CHECK(layout.to_offset_coordinate(layout.to_cube_coordinate(coord)) == coord); });
@@ -244,7 +244,7 @@ TEST_CASE("Coordinate conversions", "[hexagonal-layout]")
 template <typename Lyt>
 void check_visited_coordinates()
 {
-    aspect_ratio<Lyt> ar{9, 9, 1};
+    aspect_ratio_t<Lyt> ar{coordinate<Lyt>{9, 9, 1}};
 
     Lyt layout{ar};
 
@@ -252,7 +252,7 @@ void check_visited_coordinates()
 
     const auto check1 = [&visited, &ar, &layout](const auto& c)
     {
-        CHECK(c <= ar);
+        CHECK(c <= ar.max);
 
         // all coordinates are within the layout bounds
         CHECK(layout.is_within_bounds(c));
@@ -275,13 +275,13 @@ void check_visited_coordinates()
 
     visited.clear();
 
-    aspect_ratio<Lyt> ar_ground{ar.x, ar.y, 0};
+    aspect_ratio_t<Lyt> ar_ground{ar.x(), ar.y(), 0};
 
     const auto check2 = [&visited, &ar_ground, &layout](const auto& c)
     {
         // iteration stays in ground layer
         CHECK(c.z == 0);
-        CHECK(c <= ar_ground);
+        CHECK(c <= ar_ground.max);
         CHECK(layout.is_ground_layer(c));
 
         // all coordinates are within the layout bounds
