@@ -28,8 +28,7 @@ namespace detail
  * excited state.
  *
  * @tparam Lyt SiDB cell-level layout type.
- * @param sim_res Simulation results as a vector of physically valid charge distributions, sorted by energy such that
- * the first charge distribution corresponds is the ground state.
+ * @param sim_res Simulation results as a vector of physically valid charge distributions.
  * @return The energetic difference between the ground state and the first excited state.
  */
 template <typename Lyt>
@@ -40,14 +39,26 @@ template <typename Lyt>
         return std::numeric_limits<double>::infinity();
     }
 
-    phmap::btree_set<double> system_energies{};
+    double ground_state_energy = std::numeric_limits<double>::infinity();
+    double first_excited_state_energy = std::numeric_limits<double>::infinity();
 
     for (const charge_distribution_surface<Lyt>& cds : sim_res)
     {
-        system_energies.insert(cds.get_electrostatic_potential_energy());
+        const double energy = cds.get_electrostatic_potential_energy();
+
+        if (energy - ground_state_energy < 0)
+        {
+            ground_state_energy = energy;
+            continue;
+        }
+
+        if (energy - first_excited_state_energy < 0)
+        {
+            first_excited_state_energy = energy;
+        }
     }
 
-    return *system_energies.cbegin() - *std::next(system_energies.cbegin(), 1);
+    return ground_state_energy - first_excited_state_energy;
 }
 
 }  // namespace detail
