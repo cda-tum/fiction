@@ -33,17 +33,10 @@ TEST_CASE("Benchmark operational assessment using exact engines", "[benchmark]")
 
     SECTION("Bestagon half adder, filter only")
     {
-        BENCHMARK("QuickExact")
+        BENCHMARK("Filter only")
         {
             return is_operational(lyt_ha, create_half_adder_tt(), operational_params_qe);
         };
-
-#if (FICTION_ALGLIB_ENABLED)
-        BENCHMARK("ClusterComplete")
-        {
-            return is_operational(lyt_ha, create_half_adder_tt(), operational_params_cc);
-        };
-#endif  // FICTION_ALGLIB_ENABLED
     }
 
     SECTION("Bestagon half adder, filter then simulation")
@@ -78,17 +71,10 @@ TEST_CASE("Benchmark operational assessment using exact engines", "[benchmark]")
 
     SECTION("Bestagon crossing, filter only")
     {
-        BENCHMARK("QuickExact")
+        BENCHMARK("Filter only")
         {
             return is_operational(lyt_cx, create_crossing_wire_tt(), operational_params_qe);
         };
-
-#if (FICTION_ALGLIB_ENABLED)
-        BENCHMARK("ClusterComplete")
-        {
-            return is_operational(lyt_cx, create_crossing_wire_tt(), operational_params_cc);
-        };
-#endif  // FICTION_ALGLIB_ENABLED
     }
 
     SECTION("Bestagon crossing, filter then simulation")
