@@ -447,8 +447,10 @@ class design_sidb_gates_impl
      * This process filters the given candidates for an SiDB gate design for the ones that are operational under the
      * given truth table specification and operational conditions.
      *
-     * @param candidate_combinations A vector of canvas combination candidates to obtain the operational gate designs from.
-     * @return A vector of operational gate designs that were extracted from the given vector of candidate canvas combinations.
+     * @param candidate_combinations A vector of canvas combination candidates to obtain the operational gate designs
+     * from.
+     * @return A vector of operational gate designs that were extracted from the given vector of candidate canvas
+     * combinations.
      */
     [[nodiscard]] std::vector<Lyt>
     extract_gate_designs(const std::vector<canvas_combination>& candidate_combinations) const noexcept
