@@ -3119,25 +3119,107 @@ Parameter ``n``:
 Returns:
     Columnar clocking scheme.)doc";
 
-static const char *__doc_fiction_compare_by_average_ground_state_isolation = R"doc()doc";
+static const char *__doc_fiction_compare_by_average_ground_state_isolation =
+R"doc(This comparator for designed SiDB gates implements comparison by
+average ground state isolation over all input combinations.
 
-static const char *__doc_fiction_compare_by_average_ground_state_isolation_average_ground_state_isolation_over_all_inputs = R"doc()doc";
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.)doc";
 
-static const char *__doc_fiction_compare_by_average_ground_state_isolation_compare_by_average_ground_state_isolation = R"doc()doc";
+static const char *__doc_fiction_compare_by_average_ground_state_isolation_average_ground_state_isolation_over_all_inputs =
+R"doc(Obtains the average ground state isolation over all input for the
+given SiDB gate design.
 
-static const char *__doc_fiction_compare_by_average_ground_state_isolation_equals = R"doc()doc";
+Parameter ``gate_design``:
+    The SiDB gate design object with simulation results for each input
+    to obtain the average ground state isolation over all inputs of.
 
-static const char *__doc_fiction_compare_by_average_ground_state_isolation_operator_call = R"doc()doc";
+Returns:
+    The average ground state isolation over all inputs.)doc";
 
-static const char *__doc_fiction_compare_by_minimum_ground_state_isolation = R"doc()doc";
+static const char *__doc_fiction_compare_by_average_ground_state_isolation_compare_by_average_ground_state_isolation =
+R"doc(Standard constructor.
 
-static const char *__doc_fiction_compare_by_minimum_ground_state_isolation_compare_by_minimum_ground_state_isolation = R"doc()doc";
+Parameter ``sens``:
+    The sensitivity parameter determines when an energetic difference
+    it big enough to judge the left-hand right-hand side as not equal.)doc";
 
-static const char *__doc_fiction_compare_by_minimum_ground_state_isolation_equals = R"doc()doc";
+static const char *__doc_fiction_compare_by_average_ground_state_isolation_equals =
+R"doc(Implements equality comparison for average ground state isolation.
 
-static const char *__doc_fiction_compare_by_minimum_ground_state_isolation_minimum_ground_state_isolation_over_all_inputs = R"doc()doc";
+Parameter ``lhs``:
+    Left-hand side.
 
-static const char *__doc_fiction_compare_by_minimum_ground_state_isolation_operator_call = R"doc()doc";
+Parameter ``rhs``:
+    Right-hand side.
+
+Returns:
+    True if and only if the left-hand side is equal to the right-hand
+    side as determined by the sensitivity parameter.)doc";
+
+static const char *__doc_fiction_compare_by_average_ground_state_isolation_operator_call =
+R"doc(Implements strict comparison by average ground state isolation.
+
+Parameter ``lhs``:
+    Left-hand side.
+
+Parameter ``rhs``:
+    Right-hand side.
+
+Returns:
+    True if and only if the left-hand side is strictly below the
+    right-hand side.)doc";
+
+static const char *__doc_fiction_compare_by_minimum_ground_state_isolation =
+R"doc(This comparator for designed SiDB gates implements comparison by
+minimum ground state isolation over all input combinations.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.)doc";
+
+static const char *__doc_fiction_compare_by_minimum_ground_state_isolation_compare_by_minimum_ground_state_isolation =
+R"doc(Standard constructor.
+
+Parameter ``sens``:
+    The sensitivity parameter determines when an energetic difference
+    it big enough to judge the left-hand right-hand side as not equal.)doc";
+
+static const char *__doc_fiction_compare_by_minimum_ground_state_isolation_equals =
+R"doc(Implements equality comparison for minimum ground state isolation.
+
+Parameter ``lhs``:
+    Left-hand side.
+
+Parameter ``rhs``:
+    Right-hand side.
+
+Returns:
+    True if and only if the left-hand side is equal to the right-hand
+    side as determined by the sensitivity parameter.)doc";
+
+static const char *__doc_fiction_compare_by_minimum_ground_state_isolation_minimum_ground_state_isolation_over_all_inputs =
+R"doc(Obtains the minimum ground state isolation over all input for the
+given SiDB gate design.
+
+Parameter ``gate_design``:
+    The SiDB gate design object with simulation results for each input
+    to obtain the minimum ground state isolation over all inputs of.
+
+Returns:
+    The minimum ground state isolation over all inputs.)doc";
+
+static const char *__doc_fiction_compare_by_minimum_ground_state_isolation_operator_call =
+R"doc(Implements strict comparison by minimum ground state isolation.
+
+Parameter ``lhs``:
+    Left-hand side.
+
+Parameter ``rhs``:
+    Right-hand side.
+
+Returns:
+    True if and only if the left-hand side is strictly below the
+    right-hand side.)doc";
 
 static const char *__doc_fiction_convert_array =
 R"doc(Converts an array of size `N` and type `T` to an array of size `N` and
@@ -7607,7 +7689,21 @@ static const char *__doc_fiction_detail_generate_edge_intersection_graph_impl_ps
 
 static const char *__doc_fiction_detail_generate_edge_intersection_graph_impl_run = R"doc()doc";
 
-static const char *__doc_fiction_detail_get_ground_state_isolation = R"doc()doc";
+static const char *__doc_fiction_detail_get_ground_state_isolation =
+R"doc(Obtains the energetic ground state isolation; i.e., the energetic
+difference between the ground state and the first excited state.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Parameter ``sim_res``:
+    Simulation results as a vector of physically valid charge
+    distributions, sorted by energy such that the first charge
+    distribution corresponds is the ground state.
+
+Returns:
+    The energetic difference between the ground state and the first
+    excited state.)doc";
 
 static const char *__doc_fiction_detail_get_offset =
 R"doc(Utility function to calculate the offset that has to be subtracted
