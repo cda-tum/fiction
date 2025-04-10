@@ -222,8 +222,13 @@ class design_sidb_gates_impl
             return std::vector<Lyt>{};
         }
 
-        return extract_gate_designs(determine_all_combinations_of_distributing_k_entities_on_n_positions(
-            params.number_of_canvas_sidbs, static_cast<std::size_t>(all_sidbs_in_canvas.size())));
+        std::vector<canvas_combination> all_combinations =
+            determine_all_combinations_of_distributing_k_entities_on_n_positions(
+                params.number_of_canvas_sidbs, static_cast<std::size_t>(all_sidbs_in_canvas.size()));
+
+        std::shuffle(all_combinations.begin(), all_combinations.end(), std::mt19937(std::random_device()()));
+
+        return extract_gate_designs(all_combinations);
     }
     /**
      * Design Standard Cells/gates by using the *QuickCell* algorithm.
@@ -607,8 +612,11 @@ class design_sidb_gates_impl
 
         std::mutex mutex_to_protect_candidate_combinations{};  // used to control access to shared resources
 
-        const auto all_combinations = determine_all_combinations_of_distributing_k_entities_on_n_positions(
-            params.number_of_canvas_sidbs, static_cast<std::size_t>(all_sidbs_in_canvas.size()));
+        std::vector<canvas_combination> all_combinations =
+            determine_all_combinations_of_distributing_k_entities_on_n_positions(
+                params.number_of_canvas_sidbs, static_cast<std::size_t>(all_sidbs_in_canvas.size()));
+
+        std::shuffle(all_combinations.begin(), all_combinations.end(), std::mt19937(std::random_device()()));
 
         // Function to check validity and add layout to all_designs
         auto conduct_pruning_steps = [&](const canvas_combination& combination)
