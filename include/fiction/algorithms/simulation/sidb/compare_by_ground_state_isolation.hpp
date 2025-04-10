@@ -39,7 +39,7 @@ template <typename Lyt>
         return std::numeric_limits<double>::infinity();
     }
 
-    double ground_state_energy = std::numeric_limits<double>::infinity();
+    double ground_state_energy        = std::numeric_limits<double>::infinity();
     double first_excited_state_energy = std::numeric_limits<double>::infinity();
 
     for (const charge_distribution_surface<Lyt>& cds : sim_res)
