@@ -98,9 +98,9 @@ class gate_design_exception : public std::exception
 /**
  * This struct encapsulates parameters for the parameterized SiDB gate library.
  *
- * @tparam CellType SiDB cell type.
+ * @tparam Lyt Cell-level layout type.
  */
-template <typename CellType>
+template <typename Lyt>
 struct sidb_on_the_fly_gate_library_params
 {
     /**
@@ -120,7 +120,7 @@ struct sidb_on_the_fly_gate_library_params
     /**
      * This struct holds parameters to design SiDB gates.
      */
-    design_sidb_gates_params<CellType> design_gate_params{};
+    design_sidb_gates_params<sidb_defect_surface<Lyt>> design_gate_params{};
     /**
      * This variable defines the number of canvas SiDBs dedicated to complex gates, such as crossing, double wire,
      * and half-adder.
@@ -611,8 +611,7 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
             is_operational(skeleton_with_defects_copy, truth_table,
                            is_operational_params{parameters.design_gate_params.operational_params.simulation_parameters,
                                                  parameters.design_gate_params.operational_params.sim_engine})
-                .first;
-
+                .status;
         return static_cast<bool>(status == operational_status::OPERATIONAL);
     }
     /**
@@ -795,7 +794,7 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
         return lyt;
     }
     /**
-     * This function takes a defect surface and a skeleton skeleton and adds defects from the surrounding area
+     * This function takes a defect surface and a skeleton and adds defects from the surrounding area
      * to the skeleton. The defects within a specified distance from the center cell are taken into account.
      * The resulting skeleton with added defects is returned.
      *

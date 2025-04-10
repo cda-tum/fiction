@@ -26,7 +26,6 @@ namespace pyfiction
 inline void exact(pybind11::module& m)
 {
     namespace py = pybind11;
-    namespace py = pybind11;
 
     py::enum_<fiction::technology_constraints>(m, "technology_constraints", DOC(fiction_technology_constraints))
         .value("NONE", fiction::technology_constraints::NONE, DOC(fiction_technology_constraints_NONE))
