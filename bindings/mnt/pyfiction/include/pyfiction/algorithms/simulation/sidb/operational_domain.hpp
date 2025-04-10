@@ -49,21 +49,23 @@ void critical_temperature_domain(pybind11::module& m)
 {
     namespace py = pybind11;
 
-    m.def("critical_temperature_domain_grid_search", &fiction::operational_domain_grid_search<Lyt, py_tt>,
+    m.def("critical_temperature_domain_grid_search", &fiction::critical_temperature_domain_grid_search<Lyt, py_tt>,
           py::arg("lyt"), py::arg("spec"), py::arg("params") = fiction::operational_domain_params{},
-          py::arg("stats") = nullptr, DOC(fiction_operational_domain_grid_search));
+          py::arg("stats") = nullptr, DOC(fiction_critical_temperature_domain_grid_search));
 
-    m.def("critical_temperature_domain_random_sampling", &fiction::operational_domain_random_sampling<Lyt, py_tt>,
+    m.def("critical_temperature_domain_random_sampling",
+          &fiction::critical_temperature_domain_random_sampling<Lyt, py_tt>, py::arg("lyt"), py::arg("spec"),
+          py::arg("samples"), py::arg("params") = fiction::operational_domain_params{}, py::arg("stats") = nullptr,
+          DOC(fiction_critical_temperature_domain_random_sampling));
+
+    m.def("critical_temperature_domain_flood_fill", &fiction::critical_temperature_domain_flood_fill<Lyt, py_tt>,
           py::arg("lyt"), py::arg("spec"), py::arg("samples"), py::arg("params") = fiction::operational_domain_params{},
-          py::arg("stats") = nullptr, DOC(fiction_operational_domain_random_sampling));
+          py::arg("stats") = nullptr, DOC(fiction_critical_temperature_domain_flood_fill));
 
-    m.def("critical_temperature_domain_flood_fill", &fiction::operational_domain_flood_fill<Lyt, py_tt>, py::arg("lyt"),
-          py::arg("spec"), py::arg("samples"), py::arg("params") = fiction::operational_domain_params{},
-          py::arg("stats") = nullptr, DOC(fiction_operational_domain_flood_fill));
-
-    m.def("critical_temperature_domain_contour_tracing", &fiction::operational_domain_contour_tracing<Lyt, py_tt>,
-          py::arg("lyt"), py::arg("spec"), py::arg("samples"), py::arg("params") = fiction::operational_domain_params{},
-          py::arg("stats") = nullptr, DOC(fiction_operational_domain_contour_tracing));
+    m.def("critical_temperature_domain_contour_tracing",
+          &fiction::critical_temperature_domain_contour_tracing<Lyt, py_tt>, py::arg("lyt"), py::arg("spec"),
+          py::arg("samples"), py::arg("params") = fiction::operational_domain_params{}, py::arg("stats") = nullptr,
+          DOC(fiction_critical_temperature_domain_contour_tracing));
 }
 
 }  // namespace detail
@@ -92,7 +94,6 @@ inline void operational_domain(pybind11::module& m)
 
         ;
 
-    // todu update docu
     py::class_<fiction::critical_temperature_domain>(m, "critical_temperature_domain",
                                                      DOC(fiction_critical_temperature_domain))
         .def(py::init<>())
@@ -106,6 +107,10 @@ inline void operational_domain(pybind11::module& m)
         .def("contains", &fiction::critical_temperature_domain::contains, py::arg("key"))
         .def("add_value", &fiction::critical_temperature_domain::add_value, py::arg("key"), py::arg("value"))
         .def("size", &fiction::critical_temperature_domain::size)
+        .def("minimum_ct", &fiction::critical_temperature_domain::minimum_ct,
+             DOC(fiction_critical_temperature_domain_minimum_ct))
+        .def("maximum_ct", &fiction::critical_temperature_domain::maximum_ct,
+             DOC(fiction_critical_temperature_domain_maximum_ct))
 
         ;
 

@@ -408,9 +408,9 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects", "[charge-d
 
         CHECK(charge_layout.get_charge_state({7, 6}) == sidb_charge_state::NONE);
 
-        charge_layout.assign_charge_state_by_cell_index(0, sidb_charge_state::NEUTRAL);
-        charge_layout.assign_charge_state_by_cell_index(1, sidb_charge_state::POSITIVE);
-        charge_layout.assign_charge_state_by_cell_index(2, sidb_charge_state::POSITIVE);
+        charge_layout.assign_charge_state_by_index(0, sidb_charge_state::NEUTRAL);
+        charge_layout.assign_charge_state_by_index(1, sidb_charge_state::POSITIVE);
+        charge_layout.assign_charge_state_by_index(2, sidb_charge_state::POSITIVE);
         CHECK(charge_layout.get_charge_state_by_index(0) == sidb_charge_state::NEUTRAL);
         CHECK(charge_layout.get_charge_state_by_index(1) == sidb_charge_state::POSITIVE);
         CHECK(charge_layout.get_charge_state_by_index(2) == sidb_charge_state::POSITIVE);
