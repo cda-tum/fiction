@@ -7698,8 +7698,7 @@ Template parameter ``Lyt``:
 
 Parameter ``sim_res``:
     Simulation results as a vector of physically valid charge
-    distributions, sorted by energy such that the first charge
-    distribution corresponds is the ground state.
+    distributions.
 
 Returns:
     The energetic difference between the ground state and the first
@@ -17131,13 +17130,21 @@ Returns:
     A vector containing the simulation results for each respective
     input that was assessed.)doc";
 
-static const char *__doc_fiction_operational_assessment_operational_assessment = R"doc(Standard constructor that only sets the operational status.)doc";
+static const char *__doc_fiction_operational_assessment_operational_assessment =
+R"doc(Standard constructor that only sets the operational status.
+
+Parameter ``op_status``:
+    The operational status to set.)doc";
 
 static const char *__doc_fiction_operational_assessment_operational_assessment_for_input =
 R"doc(This struct collects the information for a specific input combination
 that was obtained during the assessment.)doc";
 
-static const char *__doc_fiction_operational_assessment_operational_assessment_for_input_operational_assessment_for_input = R"doc(Standard constructor that only sets the operational status.)doc";
+static const char *__doc_fiction_operational_assessment_operational_assessment_for_input_operational_assessment_for_input =
+R"doc(Standard constructor that only sets the operational status.
+
+Parameter ``op_status``:
+    The operational status to set.)doc";
 
 static const char *__doc_fiction_operational_assessment_operational_assessment_for_input_simulation_results =
 R"doc(The charge distributions obtained for one input combination that was
