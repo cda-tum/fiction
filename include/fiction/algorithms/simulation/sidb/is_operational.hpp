@@ -192,6 +192,8 @@ struct operational_assessment
     {
         /**
          * Standard constructor that only sets the operational status.
+         *
+         * @param op_status The operational status to set.
          */
         explicit operational_assessment_for_input(const operational_status op_status) noexcept : status{op_status} {}
         /**
@@ -205,6 +207,8 @@ struct operational_assessment
     };
     /**
      * Standard constructor that only sets the operational status.
+     *
+     * @param op_status The operational status to set.
      */
     explicit operational_assessment(const operational_status op_status) noexcept : status{op_status} {}
     /**
