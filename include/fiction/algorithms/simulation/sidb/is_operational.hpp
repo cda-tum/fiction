@@ -503,7 +503,7 @@ class is_operational_impl
             }
         }
 
-        operational_assessment<Lyt> assessment_results{operational_status::OPERATIONAL};
+        operational_assessment<Lyt> operational_assessment_results{operational_status::OPERATIONAL};
 
         // when `termination_condition::ALL_INPUT_COMBINATIONS_ASSESSED` is set, the results of the operational status
         // assessment are also stored for each input separately
@@ -536,12 +536,12 @@ class is_operational_impl
                     is_operational_params::operational_condition_positive_charges::REJECT_POSITIVE_CHARGES &&
                 can_positive_charges_occur(*bii, parameters.simulation_parameters))
             {
-                assessment_results.status = operational_status::NON_OPERATIONAL;
+                operational_assessment_results.status = operational_status::NON_OPERATIONAL;
 
                 if (parameters.termination_cond ==
                     is_operational_params::termination_condition::ON_FIRST_NON_OPERATIONAL)
                 {
-                    return {assessment_results, non_operationality_reason::POTENTIAL_POSITIVE_CHARGES};
+                    return {operational_assessment_results, non_operationality_reason::POTENTIAL_POSITIVE_CHARGES};
                 }
 
                 // all input combinations are assessed
@@ -553,7 +553,7 @@ class is_operational_impl
                 continue;
             }
 
-            ++assessment_results.simulator_invocations;
+            ++operational_assessment_results.simulator_invocations;
 
             // performs physical simulation of a given SiDB layout at a given input combination
             const auto simulation_results = physical_simulation_of_layout(bii);
@@ -561,12 +561,12 @@ class is_operational_impl
             // if no physically valid charge distributions were found, the layout is non-operational
             if (simulation_results.charge_distributions.empty())
             {
-                assessment_results.status = operational_status::NON_OPERATIONAL;
+                operational_assessment_results.status = operational_status::NON_OPERATIONAL;
 
                 if (parameters.termination_cond ==
                     is_operational_params::termination_condition::ON_FIRST_NON_OPERATIONAL)
                 {
-                    return {assessment_results, non_operationality_reason::LOGIC_MISMATCH};
+                    return {operational_assessment_results, non_operationality_reason::LOGIC_MISMATCH};
                 }
 
                 // all input combinations are assessed
@@ -593,21 +593,21 @@ class is_operational_impl
 
                 // op_status == operation_status::NON_OPERATIONAL
 
-                assessment_results.status = operational_status::NON_OPERATIONAL;
+                operational_assessment_results.status = operational_status::NON_OPERATIONAL;
 
                 if (parameters.termination_cond ==
                     is_operational_params::termination_condition::ON_FIRST_NON_OPERATIONAL)
                 {
                     if (non_op_reason == non_operationality_reason::LOGIC_MISMATCH)
                     {
-                        return {assessment_results, non_operationality_reason::LOGIC_MISMATCH};
+                        return {operational_assessment_results, non_operationality_reason::LOGIC_MISMATCH};
                     }
 
                     if (non_op_reason == non_operationality_reason::KINKS &&
                         parameters.op_condition_kinks ==
                             is_operational_params::operational_condition_kinks::REJECT_KINKS)
                     {
-                        return {assessment_results, non_operationality_reason::KINKS};
+                        return {operational_assessment_results, non_operationality_reason::KINKS};
                     }
                 }
 
@@ -645,12 +645,12 @@ class is_operational_impl
             parameters.simulation_results_retention ==
                 is_operational_params::simulation_results_mode::KEEP_SIMULATION_RESULTS)
         {
-            assessment_results.assessment_per_input = std::move(assessment_results_per_input);
+            operational_assessment_results.assessment_per_input = std::move(assessment_results_per_input);
         }
 
         // note: when all input combinations are assessed per termination condition, the assessment can yield the layout
         // is non-operational, yet we do not give a reason
-        return {assessment_results, non_operationality_reason::NONE};
+        return {operational_assessment_results, non_operationality_reason::NONE};
     }
     /**
      * Checks if the given charge distribution correctly encodes the expected logic for the given input pattern,
