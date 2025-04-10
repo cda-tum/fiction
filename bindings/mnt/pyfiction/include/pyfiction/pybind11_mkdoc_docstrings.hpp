@@ -7561,7 +7561,7 @@ Parameter ``output_mode``:
     Adjust offset based on POs relocated to the bottom row.
 
 Returns:
-    offset and if has to be added.)doc";
+    positive and negative offset.)doc";
 
 static const char *__doc_fiction_detail_get_path =
 R"doc(This helper function computes a path between two coordinates using the
