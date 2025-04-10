@@ -1,5 +1,5 @@
 //
-// Created by Willem Lambooy on 05/02/2025.
+// Created by Willem Lambooy on 05.02.2025.
 //
 
 #ifndef COMPARE_BY_GROUND_STATE_ISOLATION
