@@ -79,23 +79,23 @@ int main()  // NOLINT
         auto lyt = read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}/{}.sqd", folder, gate), gate);
 
         // Loop over operational conditions
-        for (const auto cond : {is_operational_params::operational_condition::TOLERATE_KINKS,
-                                is_operational_params::operational_condition::REJECT_KINKS})
+        for (const auto cond : {is_operational_params::operational_condition_kinks::TOLERATE_KINKS,
+                                is_operational_params::operational_condition_kinks::REJECT_KINKS})
         {
             operational_domain_stats op_domain_stats_gs{};
             std::string              gate_name  = gate;
             double                   ct_default = 0;
 
-            op_domain_params.operational_params.op_condition = cond;
+            op_domain_params.operational_params.op_condition_kinks = cond;
             ct_default                                       = critical_temperature_gate_based(
                 lyt, truth_table, critical_temperature_params{op_domain_params.operational_params});
 
-            op_domain_params.operational_params.op_condition =
-                is_operational_params::operational_condition::REJECT_KINKS;
+            op_domain_params.operational_params.op_condition_kinks =
+                is_operational_params::operational_condition_kinks::REJECT_KINKS;
             ct_default = critical_temperature_gate_based(
                 lyt, truth_table, critical_temperature_params{op_domain_params.operational_params});
 
-            if (cond == is_operational_params::operational_condition::REJECT_KINKS)
+            if (cond == is_operational_params::operational_condition_kinks::REJECT_KINKS)
             {
                 gate_name +=
                     " (I/O integrity)";  // Add I/O integrity to the gate name to make clear that kinks are rejected
@@ -115,7 +115,7 @@ int main()  // NOLINT
         }
     }
 
-    op_domain_params.operational_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
+    op_domain_params.operational_params.op_condition_kinks = is_operational_params::operational_condition_kinks::REJECT_KINKS;
 
     return EXIT_SUCCESS;
 }

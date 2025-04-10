@@ -371,8 +371,8 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 
             SECTION("reject kinks")
             {
-                op_domain_params.operational_params.op_condition =
-                    is_operational_params::operational_condition::REJECT_KINKS;
+                op_domain_params.operational_params.op_condition_kinks =
+                    is_operational_params::operational_condition_kinks::REJECT_KINKS;
 
                 const auto op_domain_kinks = operational_domain_grid_search(lat, std::vector<tt>{create_id_tt()},
                                                                             op_domain_params, &op_domain_stats);

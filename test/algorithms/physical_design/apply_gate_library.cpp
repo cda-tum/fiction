@@ -505,8 +505,8 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
             design_gate_params.number_of_canvas_sidbs                   = 3;
             design_gate_params.termination_cond =
                 design_sidb_gates_params<cell<cell_lyt>>::termination_condition::OBTAINED_N_SOLUTIONS;
-            design_gate_params.operational_params.op_condition =
-                is_operational_params::operational_condition::REJECT_KINKS;
+            design_gate_params.operational_params.op_condition_kinks =
+                is_operational_params::operational_condition_kinks::REJECT_KINKS;
 
             params.design_gate_params = design_gate_params;
 
