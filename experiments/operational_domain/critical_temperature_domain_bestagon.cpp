@@ -115,7 +115,8 @@ int main()  // NOLINT
         }
     }
 
-    op_domain_params.operational_params.op_condition_kinks = is_operational_params::operational_condition_kinks::REJECT_KINKS;
+    op_domain_params.operational_params.op_condition_kinks =
+        is_operational_params::operational_condition_kinks::REJECT_KINKS;
 
     return EXIT_SUCCESS;
 }
