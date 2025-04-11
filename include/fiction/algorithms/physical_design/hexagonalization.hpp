@@ -425,8 +425,10 @@ class hexagonalization_impl
             const mockturtle::stopwatch stop{stats.time_total};
 
             // calculate horizontal offset for hexagonal layout
-            const auto [offset_to_add, offset_to_subtract] = detail::get_offset<HexLyt, CartLyt>(
+            const auto offset_info = detail::get_offset<HexLyt, CartLyt>(
                 layout, layout_width, layout_height, ps.input_pin_extension, ps.output_pin_extension);
+            const auto offset_to_add      = offset_info.first;
+            const auto offset_to_subtract = offset_info.second;
 
             // determine the top primary input coordinate
             auto middle_pi = detail::to_hex<CartLyt, HexLyt>({0, 0}, layout_height);
