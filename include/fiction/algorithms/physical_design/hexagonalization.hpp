@@ -303,9 +303,9 @@ template <typename CartLyt>
  */
 template <typename HexLyt, typename CartLyt>
 [[nodiscard]] std::pair<uint64_t, uint64_t>
-get_offset(const CartLyt& lyt, uint64_t cartesian_layout_width, uint64_t cartesian_layout_height,
-           hexagonalization_params::io_pin_extension_mode input_mode,
-           hexagonalization_params::io_pin_extension_mode output_mode) noexcept
+get_offset(const CartLyt& lyt, const uint64_t cartesian_layout_width, const uint64_t cartesian_layout_height,
+           const hexagonalization_params::io_pin_extension_mode input_mode,
+           const hexagonalization_params::io_pin_extension_mode output_mode) noexcept
 {
     static_assert(is_cartesian_layout_v<CartLyt>, "CartLyt is not a Cartesian layout");
     static_assert(is_hexagonal_layout_v<HexLyt>, "HexLyt is not a hexagonal layout");
@@ -323,12 +323,10 @@ get_offset(const CartLyt& lyt, uint64_t cartesian_layout_width, uint64_t cartesi
             // 'col' is derived from current diagonal index minus the row.
             if (diagonal >= row)
             {
-                const auto col = diagonal - row;
-                if (col < cartesian_layout_width)
+                if (const auto col = diagonal - row; col < cartesian_layout_width)
                 {
-                    const tile<CartLyt> current_tile{col, cartesian_layout_height - 1 - row};
-
-                    if (!lyt.is_empty_tile(current_tile))
+                    if (const tile<CartLyt> current_tile{col, cartesian_layout_height - 1 - row};
+                        !lyt.is_empty_tile(current_tile))
                     {
                         const auto hex_coord = to_hex<CartLyt, HexLyt>(current_tile, cartesian_layout_height);
                         offset               = std::max(offset, static_cast<int64_t>(hex_coord.x));
@@ -427,10 +425,8 @@ class hexagonalization_impl
             const mockturtle::stopwatch stop{stats.time_total};
 
             // calculate horizontal offset for hexagonal layout
-            auto offset_info        = detail::get_offset<HexLyt, CartLyt>(layout, layout_width, layout_height,
-                                                                          ps.input_pin_extension, ps.output_pin_extension);
-            auto offset_to_add      = offset_info.first;
-            auto offset_to_subtract = offset_info.second;
+            const auto [offset_to_add, offset_to_subtract] = detail::get_offset<HexLyt, CartLyt>(
+                layout, layout_width, layout_height, ps.input_pin_extension, ps.output_pin_extension);
 
             // determine the top primary input coordinate
             auto middle_pi = detail::to_hex<CartLyt, HexLyt>({0, 0}, layout_height);
