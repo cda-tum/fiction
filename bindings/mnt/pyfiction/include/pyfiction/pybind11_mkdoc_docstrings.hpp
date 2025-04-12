@@ -5604,6 +5604,70 @@ Parameter ``b``:
 Returns:
     `true` iff `a < b` based on the aforementioned rule.)doc";
 
+static const char *__doc_fiction_detail_compute_num_inputs_left_to_middle_pi =
+R"doc(This function iterates over all primary inputs in the given Cartesian
+layout and counts those whose tile is at the western border. Such
+inputs are considered to be positioned left of the middle primary
+input when the layout is converted to a hexagonal format.
+
+Template parameter ``CartLyt``:
+    Type of the Cartesian layout.
+
+Parameter ``lyt``:
+    The Cartesian gate-level layout containing primary inputs.
+
+Returns:
+    The number of primary inputs that are placed to the left of the
+    middle primary input.)doc";
+
+static const char *__doc_fiction_detail_compute_num_inputs_right_to_middle_pi =
+R"doc(This function iterates over all primary inputs in the given Cartesian
+layout and counts those whose tiles are at the northern border. Such
+inputs are considered to be positioned right of the middle primary
+input when the layout is converted to a hexagonal format.
+
+Template parameter ``CartLyt``:
+    Type of the Cartesian layout.
+
+Parameter ``lyt``:
+    The Cartesian gate-level layout containing primary inputs.
+
+Returns:
+    The number of primary inputs that are placed to the right of the
+    middle primary input.)doc";
+
+static const char *__doc_fiction_detail_compute_num_outputs_left_to_middle_po =
+R"doc(This function iterates over all primary outputs in the given Cartesian
+layout and counts those whose tiles are at the southern border. Such
+outputs are considered to be positioned left of the middle primary
+output when the layout is converted to a hexagonal format.
+
+Template parameter ``CartLyt``:
+    Type of the Cartesian layout.
+
+Parameter ``lyt``:
+    The Cartesian gate-level layout containing primary outputs.
+
+Returns:
+    The number of primary outputs that are placed to the left of the
+    middle primary output.)doc";
+
+static const char *__doc_fiction_detail_compute_num_outputs_right_to_middle_po =
+R"doc(This function iterates over all primary outputs in the given Cartesian
+layout and counts those whose tile is at the eastern border. Such
+outputs are considered to be positioned right of the middle primary
+output when the layout is converted to a hexagonal format.
+
+Template parameter ``CartLyt``:
+    Type of the Cartesian layout.
+
+Parameter ``lyt``:
+    The Cartesian gate-level layout containing primary outputs.
+
+Returns:
+    The number of primary outputs that are placed to the right of the
+    middle primary output.)doc";
+
 static const char *__doc_fiction_detail_connect_and_place = R"doc()doc";
 
 static const char *__doc_fiction_detail_connect_and_place_2 = R"doc()doc";
@@ -7490,8 +7554,14 @@ Parameter ``cartesian_layout_width``:
 Parameter ``cartesian_layout_height``:
     Height of the Cartesian layout.
 
+Parameter ``input_mode``:
+    Adjust offset based on PIs relocated to the top row.
+
+Parameter ``output_mode``:
+    Adjust offset based on POs relocated to the bottom row.
+
 Returns:
-    offset.)doc";
+    positive and negative offset.)doc";
 
 static const char *__doc_fiction_detail_get_path =
 R"doc(This helper function computes a path between two coordinates using the
@@ -8325,6 +8395,18 @@ Parameter ``network``:
 Returns:
     The network with virtual primary inputs removed, or the original
     network if unsupported.)doc";
+
+static const char *__doc_fiction_detail_hexagonalization_impl = R"doc()doc";
+
+static const char *__doc_fiction_detail_hexagonalization_impl_hexagonalization_impl = R"doc()doc";
+
+static const char *__doc_fiction_detail_hexagonalization_impl_layout = R"doc(The 2DDWave-clocked layout to hexagonalize.)doc";
+
+static const char *__doc_fiction_detail_hexagonalization_impl_ps = R"doc(Hexagonalization parameters.)doc";
+
+static const char *__doc_fiction_detail_hexagonalization_impl_pst = R"doc(Hexagonalization statistics.)doc";
+
+static const char *__doc_fiction_detail_hexagonalization_impl_run = R"doc()doc";
 
 static const char *__doc_fiction_detail_is_balanced_impl = R"doc()doc";
 
@@ -10031,6 +10113,42 @@ Parameter ``cell``:
     layout against.)doc";
 
 static const char *__doc_fiction_detail_recursively_paint_edges = R"doc()doc";
+
+static const char *__doc_fiction_detail_routing_objective_with_fanin_update_information =
+R"doc(Encapsulates a routing objective with fanin update information.
+
+This struct specifies a routing objective by defining the source and
+target coordinates, and it includes a flag that indicates whether the
+primary input was the first fanin for the corresponding fanout and the
+fanout gate is asymmetric (e.g., greater than). If the flag is set to
+true, the fanin signals need to be reordered.
+
+Template parameter ``HexLyt``:
+    The type of the hexagonal layout.)doc";
+
+static const char *__doc_fiction_detail_routing_objective_with_fanin_update_information_routing_objective_with_fanin_update_information =
+R"doc(Constructs a routing objective with fanin update information.
+
+Initializes the base routing objective with the given source and
+target coordinates, and sets the update flag based on the provided
+parameter.
+
+Parameter ``src``:
+    The source coordinate of the routing objective.
+
+Parameter ``tgt``:
+    The target coordinate of the routing objective.
+
+Parameter ``update``:
+    (Optional) A flag that, if true, indicates that the primary input
+    was the first fanin and the fanout gate is asymmetric, which means
+    that the fanin signals need to be reordered. Defaults to false.)doc";
+
+static const char *__doc_fiction_detail_routing_objective_with_fanin_update_information_update_first_fanin =
+R"doc(Flag indicating whether the primary input was the first fanin and the
+fanout gate is asymmetric.
+
+If this flag is true, the fanin signals need to be reordered.)doc";
 
 static const char *__doc_fiction_detail_sat_clocking_handler = R"doc()doc";
 
@@ -15386,8 +15504,46 @@ Template parameter ``CartLyt``:
 Parameter ``lyt``:
     2DDWave-clocked Cartesian gate-level layout to hexagonalize.
 
+Parameter ``params``:
+    Parameters.
+
+Parameter ``stats``:
+    Statistics.
+
 Returns:
     Hexagonal representation of the Cartesian layout.)doc";
+
+static const char *__doc_fiction_hexagonalization_io_pin_routing_error =
+R"doc(Exception thrown when an error occurs during moving inputs/outputs to
+top/bottom border and rerouting.)doc";
+
+static const char *__doc_fiction_hexagonalization_io_pin_routing_error_hexagonalization_io_pin_routing_error =
+R"doc(Constructs a `hexagonalization_io_pin_routing_error` object with the
+given error message.
+
+Parameter ``msg``:
+    The error message describing the error.)doc";
+
+static const char *__doc_fiction_hexagonalization_params =
+R"doc(This structure encapsulates settings that determine how primary inputs
+(PIs) and primary outputs (POs) are handled during the conversion from
+a Cartesian to a hexagonal layout.)doc";
+
+static const char *__doc_fiction_hexagonalization_params_input_pin_extension = R"doc(Input extension mode. Defaults to none)doc";
+
+static const char *__doc_fiction_hexagonalization_params_io_pin_extension_mode =
+R"doc(Specifies how primary inputs/outputs should be handled in the
+hexagonalization process.)doc";
+
+static const char *__doc_fiction_hexagonalization_params_io_pin_extension_mode_EXTEND = R"doc(Extend primary inputs/outputs to the top/bottom row.)doc";
+
+static const char *__doc_fiction_hexagonalization_params_io_pin_extension_mode_EXTEND_PLANAR =
+R"doc(Extend primary inputs/outputs to the top/bottom row with planar
+rerouting (i.e., without crossings).)doc";
+
+static const char *__doc_fiction_hexagonalization_params_io_pin_extension_mode_NONE = R"doc(Do not extend primary inputs/outputs to the top/bottom row (default).)doc";
+
+static const char *__doc_fiction_hexagonalization_params_output_pin_extension = R"doc(Output extension mode. Defaults to none)doc";
 
 static const char *__doc_fiction_hexagonalization_stats = R"doc(This struct stores statistics about the hexagonalization process.)doc";
 
