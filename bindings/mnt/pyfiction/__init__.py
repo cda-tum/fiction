@@ -349,7 +349,6 @@ from .pyfiction import (  # type: ignore[import-not-found]
     yen_k_shortest_paths_params,
 )
 
-
 __all__ = [
     "__compiled_date__",
     "__compiled_time__",
