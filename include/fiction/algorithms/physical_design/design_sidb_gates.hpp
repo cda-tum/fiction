@@ -682,7 +682,7 @@ class design_sidb_gates_impl
 
         const std::size_t num_threads =
             std::min(params.available_threads, static_cast<uint64_t>(stats.number_of_layouts));
-        const std::size_t chunk_size  = (stats.number_of_layouts + num_threads - 1) / num_threads;
+        const std::size_t chunk_size = (stats.number_of_layouts + num_threads - 1) / num_threads;
 
 #if (PROGRESS_BARS)
         // initialize a progress bar
