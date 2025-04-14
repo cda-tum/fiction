@@ -482,7 +482,7 @@ class design_sidb_gates_impl
 
         uint64_t num_solutions_found = 0;
 
-        const std::size_t num_threads = std::min(params.available_threads, candidate_combinations.size());
+        const std::size_t num_threads = std::min(params.available_threads, static_cast<uint64_t>(candidate_combinations.size()));
         const std::size_t chunk_size =
             (candidate_combinations.size() + num_threads - 1) / num_threads;  // Ceiling division
 
