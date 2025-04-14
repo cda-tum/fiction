@@ -42,7 +42,6 @@ namespace fiction
  * This struct contains parameters and settings to design SiDB gates.
  *
  * @tparam Lyt SiDB cell-level layout type.
- *
  */
 template <typename Lyt>
 struct design_sidb_gates_params

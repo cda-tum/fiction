@@ -120,7 +120,7 @@ struct sidb_on_the_fly_gate_library_params
     /**
      * This struct holds parameters to design SiDB gates.
      */
-    design_sidb_gates_params<sidb_defect_surface<Lyt>> design_gate_params{};
+    design_sidb_gates_params<Lyt> design_gate_params{};
     /**
      * This variable defines the number of canvas SiDBs dedicated to complex gates, such as crossing, double wire,
      * and half-adder.
@@ -157,7 +157,7 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
      * @tparam Params Type of the parameter used for the gate library.
      * @param lyt Layout that hosts tile `t`.
      * @param t Tile to be realized as a Bestagon gate.
-     * @param parameters Parameter to design SiDB gates.
+     * @param params Parameter to design SiDB gates.
      * @param defect_surface Optional atomic defect surface in case atomic defects are present.
      * @return Bestagon gate representation of `t` including mirroring.
      */
@@ -583,8 +583,8 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
     template <typename CellLyt, typename TT>
     [[nodiscard]] static bool
     is_predefined_bestagon_gate_applicable(const CellLyt& bestagon_lyt, const CellLyt& skeleton_with_defects,
-                                           const std::vector<TT>&                                    truth_table,
-                                           const sidb_on_the_fly_gate_library_params<cell<CellLyt>>& parameters)
+                                           const std::vector<TT>&                              truth_table,
+                                           const sidb_on_the_fly_gate_library_params<CellLyt>& parameters)
     {
         static_assert(is_sidb_defect_surface_v<CellLyt>, "Lyt is not an SiDB defect surface");
 
@@ -690,7 +690,7 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
      */
     template <typename LytSkeleton, typename TT, typename CellLyt, typename GateLyt>
     [[nodiscard]] static fcn_gate design_gate(const LytSkeleton& skeleton, const std::vector<TT>& spec,
-                                              const sidb_on_the_fly_gate_library_params<cell<CellLyt>>& parameters,
+                                              const sidb_on_the_fly_gate_library_params<CellLyt>& parameters,
                                               const port_list<port_direction>& p, const tile<GateLyt>& tile)
     {
         static_assert(is_cell_level_layout_v<CellLyt>, "CellLyt is not a cell-level layout");
@@ -799,11 +799,12 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
      * The resulting skeleton with added defects is returned.
      *
      * @tparam CellLyt SiDB defect surface type.
-     * @tparam Params Type of Parameters.
+     * @param defect_surface Atomic defect surface.
      * @param skeleton The skeleton to which defects will be added.
+     * @param influence_distance The radius in nanometers around the center of the hexagon where atomic defects are
+     * incorporated into the gate design.
      * @param center_cell The coordinates of the center cell.
      * @param absolute_cell The coordinates of the skeleton's absolute cell.
-     * @param parameters Parameters for defect handling.
      * @return The updated skeleton with added defects from the surrounding area.
      */
     template <typename CellLyt>

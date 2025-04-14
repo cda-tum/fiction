@@ -136,7 +136,8 @@ int main()  // NOLINT
         // perform technology mapping
         const auto mapped_network = fiction::technology_mapping(cut_xag, tech_map_params);
 
-        fiction::on_the_fly_sidb_circuit_design_on_defective_surface_params<fiction::cell<cell_lyt>> params{};
+        fiction::on_the_fly_sidb_circuit_design_on_defective_surface_params<fiction::sidb_defect_surface<cell_lyt>>
+            params{};
 
         params.exact_design_parameters.scheme        = "ROW4";
         params.exact_design_parameters.crossings     = true;

@@ -384,7 +384,7 @@ template <typename CellLyt, typename GateLibrary, typename GateLyt, typename Par
  * @tparam Params Type of the parameter used for SiDB on-the-fly gate library.
  * @param lyt The gate-level layout.
  * @param params Parameter for the gate library.
- * @param defect_lyt Defect surface.
+ * @param defect_surface Defect surface.
  * @return A cell-level layout that implements `lyt`'s gate types with building blocks defined in `GateLibrary`.
  */
 template <typename DefectLyt, typename GateLibrary, typename GateLyt, typename Params>

@@ -48,6 +48,7 @@ template <typename Lyt>
 
         if (energy - ground_state_energy < 0)
         {
+            first_excited_state_energy = ground_state_energy;
             ground_state_energy = energy;
             continue;
         }

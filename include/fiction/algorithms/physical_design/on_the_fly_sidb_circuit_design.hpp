@@ -140,7 +140,7 @@ struct on_the_fly_circuit_design_on_defective_surface_stats
 template <typename Ntk, typename CellLyt, typename GateLyt>
 [[nodiscard]] CellLyt on_the_fly_sidb_circuit_design_on_defective_surface(
     const Ntk& ntk, const GateLyt& lattice_tiling, const CellLyt& defective_surface,
-    const on_the_fly_sidb_circuit_design_on_defective_surface_params<cell<CellLyt>>& params = {},
+    const on_the_fly_sidb_circuit_design_on_defective_surface_params<CellLyt>& params = {},
     on_the_fly_circuit_design_on_defective_surface_stats<GateLyt>*                   stats  = nullptr)
 {
     static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt is not a gate-level layout");
@@ -182,8 +182,7 @@ template <typename Ntk, typename CellLyt, typename GateLyt>
                 try
                 {
                     lyt = apply_parameterized_gate_library_to_defective_surface<
-                        CellLyt, sidb_on_the_fly_gate_library, GateLyt,
-                        sidb_on_the_fly_gate_library_params<cell<CellLyt>>>(
+                        CellLyt, sidb_on_the_fly_gate_library, GateLyt, sidb_on_the_fly_gate_library_params<CellLyt>>(
                         *gate_level_layout, params.sidb_on_the_fly_gate_library_parameters, defective_surface);
                 }
 
@@ -235,10 +234,8 @@ template <typename Ntk, typename CellLyt, typename GateLyt>
  * @tparam CellLyt SiDB cell-level layout type.
  * @tparam GateLyt Gate-level layout type.
  * @param gate_lyt Gate-level layout.
- * @param lattice_tiling The lattice tiling used for the circuit design.
  * @param params The parameters used for designing the circuit, encapsulated in an
  * `on_the_fly_sidb_circuit_design_params` object.
- * @param stats Pointer to a structure for collecting statistics. If `nullptr`, statistics are discarded.
  * @return Layout representing the designed SiDB circuit.
  */
 template <typename CellLyt, typename GateLyt>
