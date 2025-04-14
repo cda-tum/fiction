@@ -42,7 +42,7 @@ void design_sidb_gates_params(pybind11::module& m, const std::string& lattice = 
      * Design approach selector type.
      */
     py::enum_<typename fiction::design_sidb_gates_params<Lyt>::design_sidb_gates_mode>(
-        m, fmt::format("design_sidb_gates_mode{}", lattice).c_str(),
+        m, fmt::format("design_sidb_gates_params_design_sidb_gates_mode{}", lattice).c_str(),
         DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode))
         .value("QUICKCELL", fiction::design_sidb_gates_params<Lyt>::design_sidb_gates_mode::QUICKCELL,
                DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode_QUICKCELL))

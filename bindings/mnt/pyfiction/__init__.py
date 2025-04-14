@@ -18,7 +18,6 @@ if sys.platform == "win32":
             os.add_dll_directory(str(bin_path))
     if "ALGLIB_DIR" in os.environ:
         os.add_dll_directory(str(os.environ["ALGLIB_DIR"]))
-
 from .pyfiction import (  # type: ignore[import-not-found]
     __compiled_date__,
     __compiled_time__,
@@ -117,10 +116,10 @@ from .pyfiction import (  # type: ignore[import-not-found]
     defect_extent,
     dependent_cell_mode,
     design_sidb_gates,
-    design_sidb_gates_mode_100,
-    design_sidb_gates_mode_111,
     design_sidb_gates_params_100,
     design_sidb_gates_params_111,
+    design_sidb_gates_params_design_sidb_gates_mode_100,
+    design_sidb_gates_params_design_sidb_gates_mode_111,
     design_sidb_gates_params_termination_condition_100,
     design_sidb_gates_params_termination_condition_111,
     detect_bdl_pairs,
@@ -350,6 +349,7 @@ from .pyfiction import (  # type: ignore[import-not-found]
     yen_k_shortest_paths_params,
 )
 
+
 __all__ = [
     "__compiled_date__",
     "__compiled_time__",
@@ -448,10 +448,10 @@ __all__ = [
     "defect_extent",
     "dependent_cell_mode",
     "design_sidb_gates",
-    "design_sidb_gates_mode_100",
-    "design_sidb_gates_mode_111",
     "design_sidb_gates_params_100",
     "design_sidb_gates_params_111",
+    "design_sidb_gates_params_design_sidb_gates_mode_100",
+    "design_sidb_gates_params_design_sidb_gates_mode_111",
     "design_sidb_gates_params_termination_condition_100",
     "design_sidb_gates_params_termination_condition_111",
     "detect_bdl_pairs",

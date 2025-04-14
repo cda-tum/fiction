@@ -4,10 +4,10 @@ from mnt.pyfiction import (
     create_and_tt,
     create_nor_tt,
     design_sidb_gates,
-    design_sidb_gates_mode_100,
-    design_sidb_gates_mode_111,
     design_sidb_gates_params_100,
     design_sidb_gates_params_111,
+    design_sidb_gates_params_design_sidb_gates_mode_100,
+    design_sidb_gates_params_design_sidb_gates_mode_111,
     design_sidb_gates_params_termination_condition_100,
     design_sidb_gates_params_termination_condition_111,
     operational_condition_kinks,
@@ -42,7 +42,7 @@ class TestDesignSiDBGates(unittest.TestCase):
         params = design_sidb_gates_params_100()
         params.operational_params.simulation_parameters.base = 2
         params.operational_params.simulation_parameters.mu_minus = -0.28
-        params.design_mode = design_sidb_gates_mode_100.EXHAUSTIVE
+        params.design_mode = design_sidb_gates_params_design_sidb_gates_mode_100.EXHAUSTIVE
         params.termination_cond = design_sidb_gates_params_termination_condition_100.ALL_COMBINATIONS_ENUMERATED
         params.canvas = [(4, 8), (14, 11)]
         params.number_of_canvas_sidbs = 1
@@ -89,7 +89,7 @@ class TestDesignSiDBGates(unittest.TestCase):
         params = design_sidb_gates_params_111()
         params.operational_params.simulation_parameters.base = 2
         params.operational_params.simulation_parameters.mu_minus = -0.32
-        params.design_mode = design_sidb_gates_mode_111.EXHAUSTIVE
+        params.design_mode = design_sidb_gates_params_design_sidb_gates_mode_111.EXHAUSTIVE
         params.termination_cond = design_sidb_gates_params_termination_condition_111.ALL_COMBINATIONS_ENUMERATED
         params.canvas = [(10, 22), (14, 34)]
         params.number_of_canvas_sidbs = 3
@@ -141,7 +141,7 @@ class TestDesignSiDBGates(unittest.TestCase):
         params = design_sidb_gates_params_111()
         params.operational_params.simulation_parameters.base = 2
         params.operational_params.simulation_parameters.mu_minus = -0.32
-        params.design_mode = design_sidb_gates_mode_111.EXHAUSTIVE
+        params.design_mode = design_sidb_gates_params_design_sidb_gates_mode_111.EXHAUSTIVE
         params.termination_cond = design_sidb_gates_params_termination_condition_111.ALL_COMBINATIONS_ENUMERATED
 
         params.canvas = [(10, 26), (14, 34)]
@@ -188,7 +188,7 @@ class TestDesignSiDBGates(unittest.TestCase):
         params = design_sidb_gates_params_111()
         params.operational_params.simulation_parameters.base = 2
         params.operational_params.simulation_parameters.mu_minus = -0.32
-        params.design_mode = design_sidb_gates_mode_111.RANDOM
+        params.design_mode = design_sidb_gates_params_design_sidb_gates_mode_111.RANDOM
         params.termination_cond = design_sidb_gates_params_termination_condition_111.OBTAINED_N_SOLUTIONS
         params.maximum_number_of_solutions = 5
         params.available_threads = 1
