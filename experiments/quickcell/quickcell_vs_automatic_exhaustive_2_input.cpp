@@ -93,8 +93,7 @@ int main()  // NOLINT
         design_sidb_gates_params<sidb_100_cell_clk_lyt_siqad>::design_sidb_gates_mode::EXHAUSTIVE,
         {{14, 6, 0}, {24, 10, 0}},
         3,
-        design_sidb_gates_params<
-            sidb_100_cell_clk_lyt_siqad>::termination_condition::ALL_COMBINATIONS_ENUMERATED};
+        design_sidb_gates_params<sidb_100_cell_clk_lyt_siqad>::termination_condition::ALL_COMBINATIONS_ENUMERATED};
 
     design_sidb_gates_params<sidb_100_cell_clk_lyt_siqad> params_2_in_2_out{
         is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
@@ -103,8 +102,7 @@ int main()  // NOLINT
         design_sidb_gates_params<sidb_100_cell_clk_lyt_siqad>::design_sidb_gates_mode::EXHAUSTIVE,
         {{14, 6, 0}, {24, 14, 0}},
         3,
-        design_sidb_gates_params<
-            sidb_100_cell_clk_lyt_siqad>::termination_condition::ALL_COMBINATIONS_ENUMERATED};
+        design_sidb_gates_params<sidb_100_cell_clk_lyt_siqad>::termination_condition::ALL_COMBINATIONS_ENUMERATED};
 
     double sum_exhaustive_runtime = 0;
     double sum_quickcell_runtime  = 0;

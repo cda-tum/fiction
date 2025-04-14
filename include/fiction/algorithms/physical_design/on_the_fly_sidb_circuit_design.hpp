@@ -141,7 +141,7 @@ template <typename Ntk, typename CellLyt, typename GateLyt>
 [[nodiscard]] CellLyt on_the_fly_sidb_circuit_design_on_defective_surface(
     const Ntk& ntk, const GateLyt& lattice_tiling, const CellLyt& defective_surface,
     const on_the_fly_sidb_circuit_design_on_defective_surface_params<CellLyt>& params = {},
-    on_the_fly_circuit_design_on_defective_surface_stats<GateLyt>*                   stats  = nullptr)
+    on_the_fly_circuit_design_on_defective_surface_stats<GateLyt>*             stats  = nullptr)
 {
     static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt is not a gate-level layout");
     static_assert(is_hexagonal_layout_v<GateLyt>, "GateLyt is not a hexagonal");
