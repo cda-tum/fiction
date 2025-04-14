@@ -398,7 +398,7 @@ class design_sidb_gates_impl
     /**
      * A canvas combination is a combination of canvas positions as a vector of canvas position indices.
      */
-    using canvas_combination = std::vector<uint64_t>;
+    using canvas_combination = std::vector<std::size_t>;
     /**
      * The skeleton layout serves as a starting layout to which SiDBs are added to create unique SiDB layouts and, if
      * possible, working gates. It defines input and output wires.
