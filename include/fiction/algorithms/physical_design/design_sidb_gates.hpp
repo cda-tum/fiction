@@ -477,7 +477,8 @@ class design_sidb_gates_impl
 
         std::mutex mutex_to_protect_designed_gate_layouts{};
 
-        const uint64_t max_number_of_solutions = std::min(params.maximum_number_of_solutions, static_cast<uint64_t>(stats.number_of_layouts));
+        const uint64_t max_number_of_solutions =
+            std::min(params.maximum_number_of_solutions, static_cast<uint64_t>(stats.number_of_layouts));
 
         uint64_t num_solutions_found = 0;
 
@@ -679,7 +680,8 @@ class design_sidb_gates_impl
             candidate_combinations.emplace_back(combination);
         };
 
-        const std::size_t num_threads = std::min(params.available_threads, static_cast<uint64_t>(stats.number_of_layouts));
+        const std::size_t num_threads =
+            std::min(params.available_threads, static_cast<uint64_t>(stats.number_of_layouts));
         const std::size_t chunk_size  = (stats.number_of_layouts + num_threads - 1) / num_threads;
 
 #if (PROGRESS_BARS)
@@ -737,7 +739,7 @@ class design_sidb_gates_impl
      * @param cell_indices A vector of indices of cells to be added to the skeleton layout.
      * @return A copy of the original layout (`skeleton_layout`) with SiDB cells added at specified indices.
      */
-    [[nodiscard]] Lyt skeleton_layout_with_canvas_sidbs(const std::vector<std::size_t>& cell_indices) const noexcept
+    [[nodiscard]] Lyt skeleton_layout_with_canvas_sidbs(const canvas_combination& cell_indices) const noexcept
     {
         Lyt lyt_copy{skeleton_layout.clone()};
 
@@ -760,7 +762,7 @@ class design_sidb_gates_impl
      * @return An SiDB cell-level layout consisting of canvas SiDBs.
      */
     [[nodiscard]] std::optional<Lyt>
-    convert_canvas_cell_indices_to_layout(const std::vector<std::size_t>& cell_indices) const noexcept
+    convert_canvas_cell_indices_to_layout(const canvas_combination& cell_indices) const noexcept
     {
         Lyt lyt{};
 
