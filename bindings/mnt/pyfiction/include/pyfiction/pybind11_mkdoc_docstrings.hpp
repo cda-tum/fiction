@@ -351,7 +351,7 @@ Parameter ``lyt``:
 Parameter ``params``:
     Parameter for the gate library.
 
-Parameter ``defect_lyt``:
+Parameter ``defect_surface``:
     Defect surface.
 
 Returns:
@@ -17012,16 +17012,9 @@ Template parameter ``GateLyt``:
 Parameter ``gate_lyt``:
     Gate-level layout.
 
-Parameter ``lattice_tiling``:
-    The lattice tiling used for the circuit design.
-
 Parameter ``params``:
     The parameters used for designing the circuit, encapsulated in an
     `on_the_fly_sidb_circuit_design_params` object.
-
-Parameter ``stats``:
-    Pointer to a structure for collecting statistics. If `nullptr`,
-    statistics are discarded.
 
 Returns:
     Layout representing the designed SiDB circuit.)doc";
@@ -20372,20 +20365,21 @@ resulting skeleton with added defects is returned.
 Template parameter ``CellLyt``:
     SiDB defect surface type.
 
-Template parameter ``Params``:
-    Type of Parameters.
+Parameter ``defect_surface``:
+    Atomic defect surface.
 
 Parameter ``skeleton``:
     The skeleton to which defects will be added.
+
+Parameter ``influence_distance``:
+    The radius in nanometers around the center of the hexagon where
+    atomic defects are incorporated into the gate design.
 
 Parameter ``center_cell``:
     The coordinates of the center cell.
 
 Parameter ``absolute_cell``:
     The coordinates of the skeleton's absolute cell.
-
-Parameter ``parameters``:
-    Parameters for defect handling.
 
 Returns:
     The updated skeleton with added defects from the surrounding area.)doc";
@@ -20546,7 +20540,7 @@ Parameter ``lyt``:
 Parameter ``t``:
     Tile to be realized as a Bestagon gate.
 
-Parameter ``parameters``:
+Parameter ``params``:
     Parameter to design SiDB gates.
 
 Parameter ``defect_surface``:
