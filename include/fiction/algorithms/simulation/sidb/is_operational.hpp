@@ -186,6 +186,11 @@ template <typename Lyt>
 struct operational_assessment
 {
     /**
+     * Typedef for the simulation results type, i.e., all physically valid charge distributions obtained during the
+     * simulation.
+     */
+    using simulation_results_t = std::vector<charge_distribution_surface<Lyt>>;
+    /**
      * This struct collects the information for a specific input combination that was obtained during the assessment.
      */
     struct operational_assessment_for_input
@@ -203,7 +208,7 @@ struct operational_assessment
         /**
          * The charge distributions obtained for one input combination that was tested.
          */
-        std::optional<std::vector<charge_distribution_surface<Lyt>>> simulation_results{};
+        std::optional<simulation_results_t> simulation_results{};
     };
     /**
      * Standard constructor that only sets the operational status.
@@ -231,14 +236,14 @@ struct operational_assessment
      *
      * @return A vector containing the simulation results for each respective input that was assessed.
      */
-    std::vector<std::vector<charge_distribution_surface<Lyt>>> extract_simulation_results_per_input() const noexcept
+    std::vector<simulation_results_t> extract_simulation_results_per_input() const noexcept
     {
         assert(assessment_per_input.has_value() && "Assessment results per input are not present.");
         assert(!assessment_per_input.value().empty() && "No input combinations were assessed.");
         assert(assessment_per_input.value().front().simulation_results.has_value() &&
                "Simulation results were not retained during assessment.");
 
-        std::vector<std::vector<charge_distribution_surface<Lyt>>> simulation_results_per_input{};
+        std::vector<simulation_results_t> simulation_results_per_input{};
         simulation_results_per_input.reserve(assessment_per_input.value().size());
 
         for (operational_assessment_for_input assessment : assessment_per_input.value())
@@ -517,7 +522,7 @@ class is_operational_impl
 
         // when `simulation_results_mode::KEEP_SIMULATION_RESULTS` is set, the simulation results must be collected for
         // each input combination
-        std::vector<std::vector<charge_distribution_surface<Lyt>>> sim_res_per_input{};
+        std::vector<typename operational_assessment<Lyt>::simulation_results_t> sim_res_per_input{};
         if (parameters.simulation_results_retention ==
             is_operational_params::simulation_results_mode::KEEP_SIMULATION_RESULTS)
         {
@@ -544,7 +549,7 @@ class is_operational_impl
                     return {operational_assessment_results, non_operationality_reason::POTENTIAL_POSITIVE_CHARGES};
                 }
 
-                // all input combinations are assessed
+                // all input combinations are being assessed
 
                 assessment_results_for_this_input_combination.status = operational_status::NON_OPERATIONAL;
 
@@ -569,7 +574,7 @@ class is_operational_impl
                     return {operational_assessment_results, non_operationality_reason::LOGIC_MISMATCH};
                 }
 
-                // all input combinations are assessed
+                // all input combinations are being assessed
 
                 assessment_results_for_this_input_combination.status = operational_status::NON_OPERATIONAL;
 
@@ -591,7 +596,7 @@ class is_operational_impl
                     continue;
                 }
 
-                // op_status == operation_status::NON_OPERATIONAL
+                // the input combination is not operational
 
                 operational_assessment_results.status = operational_status::NON_OPERATIONAL;
 
@@ -611,7 +616,7 @@ class is_operational_impl
                     }
                 }
 
-                // all input combinations are assessed
+                // all input combinations are being assessed
 
                 assessment_results_for_this_input_combination.status = operational_status::NON_OPERATIONAL;
             }
