@@ -299,7 +299,8 @@ class design_sidb_gates_impl
 
         uint64_t num_solutions_found = 0;
 
-        const uint64_t max_number_of_solutions = std::min(params.maximum_number_of_solutions, stats.number_of_layouts);
+        const uint64_t max_number_of_solutions =
+            std::min(params.maximum_number_of_solutions, static_cast<uint64_t>(stats.number_of_layouts));
 
 #if (PROGRESS_BARS)
         // initialize a progress bar
