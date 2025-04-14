@@ -477,7 +477,7 @@ class design_sidb_gates_impl
 
         std::mutex mutex_to_protect_designed_gate_layouts{};
 
-        const uint64_t max_number_of_solutions = std::min(params.maximum_number_of_solutions, stats.number_of_layouts);
+        const uint64_t max_number_of_solutions = std::min(params.maximum_number_of_solutions, static_cast<uint64_t>(stats.number_of_layouts));
 
         uint64_t num_solutions_found = 0;
 
@@ -679,7 +679,7 @@ class design_sidb_gates_impl
             candidate_combinations.emplace_back(combination);
         };
 
-        const std::size_t num_threads = std::min(params.available_threads, stats.number_of_layouts);
+        const std::size_t num_threads = std::min(params.available_threads, static_cast<uint64_t>(stats.number_of_layouts));
         const std::size_t chunk_size  = (stats.number_of_layouts + num_threads - 1) / num_threads;
 
 #if (PROGRESS_BARS)
