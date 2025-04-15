@@ -8,8 +8,6 @@
 #include "fiction/algorithms/physical_design/compare_designed_sidb_gates.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
 
-#include <btree.h>
-
 #include <algorithm>
 #include <cmath>
 #include <cstdint>

@@ -9,8 +9,12 @@
 
 #include <fiction/algorithms/physical_design/design_sidb_gates.hpp>
 #include <fiction/algorithms/simulation/sidb/is_operational.hpp>
+#include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/layout_utils.hpp>
+#include <fiction/utils/truth_table_utils.hpp>
+
+#include <vector>
 
 using namespace fiction;
 
