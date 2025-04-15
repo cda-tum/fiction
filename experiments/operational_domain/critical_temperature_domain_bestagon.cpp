@@ -89,7 +89,7 @@ int main()  // NOLINT
             op_domain_params.operational_params.op_condition_kinks = cond;
             ct_default                                             = critical_temperature_gate_based(
                 lyt, truth_table, critical_temperature_params{op_domain_params.operational_params});
-            
+
             if (cond == is_operational_params::operational_condition_kinks::REJECT_KINKS)
             {
                 gate_name +=
