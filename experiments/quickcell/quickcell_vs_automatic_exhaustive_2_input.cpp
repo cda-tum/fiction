@@ -77,85 +77,83 @@ int main()  // NOLINT
     const auto skeleton_two_input_two_output =
         read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}/{}", folder, "skeleton_hex_inputsdbp_2i2o.sqd"));
 
-    design_sidb_gates_params<fiction::cell<sidb_100_cell_clk_lyt_siqad>> params_1_in_1_out_straight{
+    design_sidb_gates_params<sidb_100_cell_clk_lyt_siqad> params_1_in_1_out_straight{
         is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
-                              bdl_input_iterator_params{}, is_operational_params::operational_condition::REJECT_KINKS},
-        design_sidb_gates_params<
-            fiction::cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
+                              bdl_input_iterator_params{},
+                              is_operational_params::operational_condition_kinks::REJECT_KINKS},
+        design_sidb_gates_params<sidb_100_cell_clk_lyt_siqad>::design_sidb_gates_mode::EXHAUSTIVE,
         {{9, 6, 0}, {21, 14, 0}},
         3,
-        design_sidb_gates_params<
-            fiction::cell<sidb_100_cell_clk_lyt_siqad>>::termination_condition::ALL_COMBINATIONS_ENUMERATED};
+        design_sidb_gates_params<sidb_100_cell_clk_lyt_siqad>::termination_condition::ALL_COMBINATIONS_ENUMERATED};
 
-    design_sidb_gates_params<fiction::cell<sidb_100_cell_clk_lyt_siqad>> params_2_in_1_out{
+    design_sidb_gates_params<sidb_100_cell_clk_lyt_siqad> params_2_in_1_out{
         is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
-                              bdl_input_iterator_params{}, is_operational_params::operational_condition::REJECT_KINKS},
-        design_sidb_gates_params<
-            fiction::cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
+                              bdl_input_iterator_params{},
+                              is_operational_params::operational_condition_kinks::REJECT_KINKS},
+        design_sidb_gates_params<sidb_100_cell_clk_lyt_siqad>::design_sidb_gates_mode::EXHAUSTIVE,
         {{14, 6, 0}, {24, 10, 0}},
         3,
-        design_sidb_gates_params<
-            fiction::cell<sidb_100_cell_clk_lyt_siqad>>::termination_condition::ALL_COMBINATIONS_ENUMERATED};
+        design_sidb_gates_params<sidb_100_cell_clk_lyt_siqad>::termination_condition::ALL_COMBINATIONS_ENUMERATED};
 
-    design_sidb_gates_params<fiction::cell<sidb_100_cell_clk_lyt_siqad>> params_2_in_2_out{
+    design_sidb_gates_params<sidb_100_cell_clk_lyt_siqad> params_2_in_2_out{
         is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
-                              bdl_input_iterator_params{}, is_operational_params::operational_condition::REJECT_KINKS},
-        design_sidb_gates_params<
-            fiction::cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
+                              bdl_input_iterator_params{},
+                              is_operational_params::operational_condition_kinks::REJECT_KINKS},
+        design_sidb_gates_params<sidb_100_cell_clk_lyt_siqad>::design_sidb_gates_mode::EXHAUSTIVE,
         {{14, 6, 0}, {24, 14, 0}},
         3,
-        design_sidb_gates_params<
-            fiction::cell<sidb_100_cell_clk_lyt_siqad>>::termination_condition::ALL_COMBINATIONS_ENUMERATED};
+        design_sidb_gates_params<sidb_100_cell_clk_lyt_siqad>::termination_condition::ALL_COMBINATIONS_ENUMERATED};
 
     double sum_exhaustive_runtime = 0;
     double sum_quickcell_runtime  = 0;
 
     for (const auto& [truth_table, gate_name] : truth_tables_and_names)
     {
-        design_sidb_gates_stats stats_automatic_exhaustive_design{};
+        design_sidb_gates_stats stats_exhaustive_design{};
 
-        std::vector<sidb_100_cell_clk_lyt_siqad> automatic_exhaustive_design{};
+        std::vector<sidb_100_cell_clk_lyt_siqad> exhaustive_design{};
 
-        params_2_in_1_out.design_mode = design_sidb_gates_params<
-            fiction::cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER;
-        params_2_in_1_out.operational_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
-        params_2_in_2_out.design_mode                     = design_sidb_gates_params<
-                                fiction::cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER;
-        params_2_in_2_out.operational_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
+        params_2_in_1_out.design_mode =
+            design_sidb_gates_params<sidb_100_cell_clk_lyt_siqad>::design_sidb_gates_mode::EXHAUSTIVE;
+        params_2_in_1_out.operational_params.op_condition_kinks =
+            is_operational_params::operational_condition_kinks::REJECT_KINKS;
+        params_2_in_2_out.design_mode =
+            design_sidb_gates_params<sidb_100_cell_clk_lyt_siqad>::design_sidb_gates_mode::EXHAUSTIVE;
+        params_2_in_2_out.operational_params.op_condition_kinks =
+            is_operational_params::operational_condition_kinks::REJECT_KINKS;
 
-        params_1_in_1_out_straight.design_mode = design_sidb_gates_params<
-            fiction::cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER;
-        params_1_in_1_out_straight.operational_params.op_condition =
-            is_operational_params::operational_condition::REJECT_KINKS;
+        params_1_in_1_out_straight.design_mode =
+            design_sidb_gates_params<sidb_100_cell_clk_lyt_siqad>::design_sidb_gates_mode::EXHAUSTIVE;
+        params_1_in_1_out_straight.operational_params.op_condition_kinks =
+            is_operational_params::operational_condition_kinks::REJECT_KINKS;
 
         if (gate_name == "cx" || gate_name == "ha" || gate_name == "hourglass")
         {
-            automatic_exhaustive_design = design_sidb_gates(skeleton_two_input_two_output, truth_table,
-                                                            params_2_in_2_out, &stats_automatic_exhaustive_design);
+            exhaustive_design = design_sidb_gates(skeleton_two_input_two_output, truth_table, params_2_in_2_out,
+                                                  &stats_exhaustive_design);
         }
         else if (gate_name == "wire" || gate_name == "inv")
         {
-            automatic_exhaustive_design =
-                design_sidb_gates(skeleton_one_input_one_output_straight, truth_table, params_1_in_1_out_straight,
-                                  &stats_automatic_exhaustive_design);
+            exhaustive_design = design_sidb_gates(skeleton_one_input_one_output_straight, truth_table,
+                                                  params_1_in_1_out_straight, &stats_exhaustive_design);
         }
         else
         {
-            automatic_exhaustive_design = design_sidb_gates(skeleton_one_input_two_output, truth_table,
-                                                            params_2_in_1_out, &stats_automatic_exhaustive_design);
+            exhaustive_design = design_sidb_gates(skeleton_one_input_two_output, truth_table, params_2_in_1_out,
+                                                  &stats_exhaustive_design);
         }
 
         std::vector<sidb_100_cell_clk_lyt_siqad> quickcell_design{};
         design_sidb_gates_stats                  stats_quickcell{};
 
         params_2_in_1_out.design_mode =
-            design_sidb_gates_params<fiction::cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::QUICKCELL;
+            design_sidb_gates_params<sidb_100_cell_clk_lyt_siqad>::design_sidb_gates_mode::QUICKCELL;
 
         params_2_in_2_out.design_mode =
-            design_sidb_gates_params<fiction::cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::QUICKCELL;
+            design_sidb_gates_params<sidb_100_cell_clk_lyt_siqad>::design_sidb_gates_mode::QUICKCELL;
 
         params_1_in_1_out_straight.design_mode =
-            design_sidb_gates_params<fiction::cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::QUICKCELL;
+            design_sidb_gates_params<sidb_100_cell_clk_lyt_siqad>::design_sidb_gates_mode::QUICKCELL;
 
         if (gate_name == "cx" || gate_name == "ha" || gate_name == "hourglass")
         {
@@ -173,19 +171,18 @@ int main()  // NOLINT
                 design_sidb_gates(skeleton_one_input_two_output, truth_table, params_2_in_1_out, &stats_quickcell);
         }
 
-        const auto runtime_automatic_exhaustive_design =
-            mockturtle::to_seconds(stats_automatic_exhaustive_design.time_total);
-        const auto runtime_quickcell = mockturtle::to_seconds(stats_quickcell.time_total);
+        const auto runtime_exhaustive_design = mockturtle::to_seconds(stats_exhaustive_design.time_total);
+        const auto runtime_quickcell         = mockturtle::to_seconds(stats_quickcell.time_total);
 
-        sum_exhaustive_runtime += runtime_automatic_exhaustive_design;
+        sum_exhaustive_runtime += runtime_exhaustive_design;
         sum_quickcell_runtime += runtime_quickcell;
 
-        const auto time_reduction = runtime_automatic_exhaustive_design / runtime_quickcell;
+        const auto time_reduction = runtime_exhaustive_design / runtime_quickcell;
 
         const auto total_number_of_layout = stats_quickcell.number_of_layouts;
 
-        simulation_exp(gate_name, total_number_of_layout, runtime_automatic_exhaustive_design,
-                       automatic_exhaustive_design.size(), quickcell_design.size(), runtime_quickcell, time_reduction,
+        simulation_exp(gate_name, total_number_of_layout, runtime_exhaustive_design, exhaustive_design.size(),
+                       quickcell_design.size(), runtime_quickcell, time_reduction,
                        stats_quickcell.number_of_layouts_after_first_pruning,
                        static_cast<double>(stats_quickcell.number_of_layouts_after_first_pruning) /
                            static_cast<double>(total_number_of_layout) * 100,
