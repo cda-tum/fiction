@@ -5,13 +5,40 @@ All notable changes to this project will be documented in this file.
 
 The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`_.
 
+v0.6.11 - 2025-04-23
+--------------------
+
+Added
+#####
+- Algorithms:
+    - Parameters to move inputs to top border or outputs to the bottom border after ``hexagonalization``
+- Experiments:
+    - Added experiment for a comprehensive analysis of the critical temperature domain
+    - Added total simulation runtime to physical simulation experiment
+
+Changed
+#######
+- Algorithms:
+    - Refactored ``QuickSim`` to remove magic number for upper limit calculation
+    - Refactored random layout design functions
+
+Fixed
+#####
+- Fixed Readme due to migration of mqt repository
+- Exclude ``ClusterComplete`` from simulation engine selection when ALGBLIB is disabled
+- Fixed inconsistencies and various bugs in SiDB simulation/analysis
+- Fixed LT, LE, GT, and LE gate handling in the gate-level-layout and the corresponding read and write functions
+- Fixed an bug in the crossing count calculation
+- Increased floating point precision to avoid undetected degeneracy in the physical simulation of SiDB layouts
+
+
 v0.6.10 - 2025-02-21
 --------------------
 
 Added
 #####
 - Algorithms:
-    - Added parameters to extend the PIs to the first layout row or POs to the last layout row after ``hexagonalization``.
+    - Added parameters to extend the PIs to the first layout row or POs to the last layout row after ``hexagonalization``
 
 Fixed
 #####
@@ -23,7 +50,7 @@ v0.6.9 - 2025-02-12
 Added
 #####
 - Algorithms:
-    - Added ``ClusterComplete``, a novel exact physical simulator for SiDB layouts with substantially improved runtimes, allowing the simulation of multi-gate SiDB layouts.
+    - Added ``ClusterComplete``, a novel exact physical simulator for SiDB layouts with substantially improved runtimes, allowing the simulation of multi-gate SiDB layouts
     - Added temperature-aware operational domain simulation and restructured the function to simplify the integration of additional figures of merit in the future
 
 Changed
