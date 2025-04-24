@@ -232,3 +232,28 @@ TEMPLATE_TEST_CASE("time-to-solution test with simulation results", "[time-to-so
         CHECK_THAT(st.time_to_solution - tts_calculated, Catch::Matchers::WithinAbs(0.0, constants::ERROR_MARGIN));
     }
 }
+
+TEMPLATE_TEST_CASE("time-to-solution test with fewer negatively charged SiDBs in the layout", "[time-to-solution]",
+                   sidb_100_cell_clk_lyt, cds_sidb_100_cell_clk_lyt)
+{
+    TestType lyt{};
+
+    SECTION("layout with seven SiDBs placed")
+    {
+        lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({3, 0, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({6, 0, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({0, 3, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({3, 3, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({6, 3, 0}, TestType::cell_type::NORMAL);
+
+        const sidb_simulation_parameters params{2, -0.05};
+        const quicksim_params            quicksim_params{params};
+
+        auto tts_stats_quicksim = time_to_solution_stats{};
+
+        time_to_solution(lyt, quicksim_params, time_to_solution_params{}, &tts_stats_quicksim);
+
+        CHECK(tts_stats_quicksim.time_to_solution < 10.0);
+    }
+}
