@@ -19,7 +19,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void design_sidb_gates(pybind11::module& m)
+void design_sidb_gates_impl(pybind11::module& m)
 {
     namespace py = pybind11;
 
@@ -92,8 +92,8 @@ inline void design_sidb_gates(pybind11::module& m)
 
         ;
 
-    detail::design_sidb_gates<py_sidb_100_lattice>(m);
-    detail::design_sidb_gates<py_sidb_111_lattice>(m);
+    detail::design_sidb_gates_impl<py_sidb_100_lattice>(m);
+    detail::design_sidb_gates_impl<py_sidb_111_lattice>(m);
 }
 
 }  // namespace pyfiction
