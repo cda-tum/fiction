@@ -238,7 +238,7 @@ TEMPLATE_TEST_CASE("time-to-solution test with fewer negatively charged SiDBs in
 {
     TestType lyt{};
 
-    SECTION("layout with seven SiDBs placed")
+    SECTION("layout with six SiDBs placed, large µ-value")
     {
         lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({3, 0, 0}, TestType::cell_type::NORMAL);
