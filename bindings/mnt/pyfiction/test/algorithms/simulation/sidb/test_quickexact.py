@@ -1,3 +1,4 @@
+import os
 import unittest
 
 from mnt.pyfiction import (
@@ -6,11 +7,15 @@ from mnt.pyfiction import (
     charge_distribution_surface_111,
     quickexact,
     quickexact_params,
+    read_sqd_layout_100,
     sidb_100_lattice,
     sidb_111_lattice,
     sidb_charge_state,
+    sidb_simulation_parameters,
     sidb_technology,
 )
+
+dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
 class TestQuickExact(unittest.TestCase):
@@ -73,6 +78,58 @@ class TestQuickExact(unittest.TestCase):
         self.assertEqual(groundstate[0].get_charge_state((1, 0)), sidb_charge_state.NEUTRAL)
         self.assertEqual(groundstate[0].get_charge_state((2, 0)), sidb_charge_state.NEUTRAL)
         self.assertEqual(groundstate[0].get_charge_state((3, 0)), sidb_charge_state.NEGATIVE)
+
+    def test_simulate_all_inputs_of_AND_gate(self):
+        and_gate = read_sqd_layout_100(dir_path + "/../../../resources/Bestagon_AND_mu_025_v0.sqd")
+        physical_parameters = sidb_simulation_parameters()
+        physical_parameters.base = 2
+        physical_parameters.epsilon_r = 5.6
+        physical_parameters.lambda_tf = 5.0  # (nm)
+        physical_parameters.mu_minus = (
+            -0.25
+        )  # (eV) (energy threshold to change the charge state of a negatively charged SiDB to a neutrally charged SiDB)
+        quickexact_parameter = quickexact_params()
+        quickexact_parameter.simulation_parameters = physical_parameters
+
+        # input 00
+        and_gate.assign_cell_type((2, 2), sidb_technology.cell_type.EMPTY)  # delete one SiDB of the input BDL pair
+        and_gate.assign_cell_type((24, 2), sidb_technology.cell_type.EMPTY)  # delete one SiDB of the input BDL pair
+
+        self.assertGreater(len(quickexact(and_gate, quickexact_parameter).charge_distributions), 0)
+
+        and_gate.assign_cell_type(
+            (2, 2), sidb_technology.cell_type.INPUT
+        )  # add SiDB of the input BDL pair again to have the original layout
+        and_gate.assign_cell_type(
+            (24, 2), sidb_technology.cell_type.INPUT
+        )  # add SiDB of the input BDL pair again to have the original layout
+
+        # input 01
+        and_gate.assign_cell_type((2, 2), sidb_technology.cell_type.EMPTY)
+        and_gate.assign_cell_type((26, 0), sidb_technology.cell_type.EMPTY)
+
+        self.assertGreater(len(quickexact(and_gate, quickexact_parameter).charge_distributions), 0)
+
+        and_gate.assign_cell_type((2, 2), sidb_technology.cell_type.INPUT)
+        and_gate.assign_cell_type((26, 0), sidb_technology.cell_type.INPUT)
+
+        # input 10
+        and_gate.assign_cell_type((0, 0), sidb_technology.cell_type.EMPTY)
+        and_gate.assign_cell_type((24, 2), sidb_technology.cell_type.EMPTY)
+
+        self.assertGreater(len(quickexact(and_gate, quickexact_parameter).charge_distributions), 0)
+
+        and_gate.assign_cell_type((0, 0), sidb_technology.cell_type.INPUT)
+        and_gate.assign_cell_type((24, 2), sidb_technology.cell_type.INPUT)
+
+        # input 11
+        and_gate.assign_cell_type((0, 0), sidb_technology.cell_type.EMPTY)
+        and_gate.assign_cell_type((26, 0), sidb_technology.cell_type.EMPTY)
+
+        self.assertGreater(len(quickexact(and_gate, quickexact_parameter).charge_distributions), 0)
+
+        and_gate.assign_cell_type((0, 0), sidb_technology.cell_type.INPUT)
+        and_gate.assign_cell_type((26, 0), sidb_technology.cell_type.INPUT)
 
 
 if __name__ == "__main__":
