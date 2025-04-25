@@ -806,21 +806,21 @@ class design_sidb_gates_impl
     static design_sidb_gates_params<Lyt>
     set_operational_params_accordingly(const design_sidb_gates_params<Lyt>& params) noexcept
     {
-        design_sidb_gates_params<Lyt> new_params{params};
+        design_sidb_gates_params<Lyt> adapted_params{params};
 
-        if (!new_params.post_design_process.empty())
+        if (!adapted_params.post_design_process.empty())
         {
-            new_params.operational_params.simulation_results_retention =
+            adapted_params.operational_params.simulation_results_retention =
                 is_operational_params::simulation_results_mode::KEEP_SIMULATION_RESULTS;
         }
 
-        if (new_params.design_mode == design_sidb_gates_params<Lyt>::design_sidb_gates_mode::QUICKCELL)
+        if (adapted_params.design_mode == design_sidb_gates_params<Lyt>::design_sidb_gates_mode::QUICKCELL)
         {
-            new_params.operational_params.strategy_to_analyze_operational_status =
+            adapted_params.operational_params.strategy_to_analyze_operational_status =
                 is_operational_params::operational_analysis_strategy::SIMULATION_ONLY;
         }
 
-        return new_params;
+        return adapted_params;
     }
 };
 
