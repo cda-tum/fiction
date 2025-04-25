@@ -808,12 +808,16 @@ class design_sidb_gates_impl
     {
         design_sidb_gates_params<Lyt> adapted_params{params};
 
+        // when an ordering recipe to sort the designed SiDB gates is given, the simulation results need to be retained
+        // in order for the sorting procedure to work
         if (!adapted_params.post_design_process.empty())
         {
             adapted_params.operational_params.simulation_results_retention =
                 is_operational_params::simulation_results_mode::KEEP_SIMULATION_RESULTS;
         }
 
+        // when designing gates with QuickCell, the filtering steps are already applied before performing the
+        // operational assessment, thus only simulation is needed then.
         if (adapted_params.design_mode == design_sidb_gates_params<Lyt>::design_sidb_gates_mode::QUICKCELL)
         {
             adapted_params.operational_params.strategy_to_analyze_operational_status =
