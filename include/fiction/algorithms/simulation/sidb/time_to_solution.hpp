@@ -121,7 +121,8 @@ void time_to_solution(const Lyt& lyt, const quicksim_params& quicksim_params,
     sidb_simulation_result<Lyt> simulation_result{};
     if (tts_params.engine == exact_sidb_simulation_engine::QUICKEXACT)
     {
-        const quickexact_params<cell<Lyt>> params{quicksim_params.simulation_parameters};
+        const quickexact_params<cell<Lyt>> params{quicksim_params.simulation_parameters,
+                                                  quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF};
         st.algorithm      = sidb_simulation_engine_name(exact_sidb_simulation_engine::QUICKEXACT);
         simulation_result = quickexact(lyt, params);
     }
