@@ -201,7 +201,7 @@ Furthermore, if you use any of the design automation algorithms, please consider
         @inproceedings{hofmann2025scalablepostlayout,
           title={{Efficient and Scalable Post-Layout Optimization for Field-coupled Nanotechnologies}},
           author={Hofmann, Simon and Walter, Marcel and Wille, Robert},
-          journal={IEEE Transactions on Computer-Aided Design of Integrated Circuits and Systems},
+          journal={IEEE Transactions on Computer-Aided Design of Integrated Circuits and Systems (TCAD)},
           year={2025},
           doi={10.1109/TCAD.2025.3549354}
         }
@@ -240,7 +240,7 @@ Furthermore, if you use any of the design automation algorithms, please consider
         @inproceedings{hofmann2025goldcost,
           title={{Physical Design for Field-coupled Nanocomputing with Discretionary Cost Objectives}},
           author={Hofmann, Simon and Walter, Marcel and Wille, Robert},
-          booktitle={2025 IEEE 16th Latin America Symposium on Circuits and Systems (LASCAS)},
+          booktitle={IEEE CASS Latin America Symposium on Circuits and Systems (LASCAS)},
           pages={1--5},
           year={2025}
         }
