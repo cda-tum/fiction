@@ -1139,7 +1139,8 @@ class post_layout_optimization_impl
 /**
  * A post-layout optimization algorithm as originally proposed in \"Post-Layout Optimization for Field-coupled
  * Nanotechnologies\" by S. Hofmann, M. Walter, and R. Wille in NANOARCH 2023
- * (https://dl.acm.org/doi/10.1145/3611315.3633247) and extended in \"Efficient and Scalable Post-Layout Optimization for Field-coupled Nanotechnologies\" by S. Hofmann, M. Walter, and R. Wille in TCAD 2025
+ * (https://dl.acm.org/doi/10.1145/3611315.3633247) and extended in \"Efficient and Scalable Post-Layout Optimization
+ * for Field-coupled Nanotechnologies\" by S. Hofmann, M. Walter, and R. Wille in TCAD 2025
  * (https://ieeexplore.ieee.org/document/10916761). It can be used to reduce the area of a given sub-optimal Cartesian
  * gate-level layout created by heuristics or machine learning. This optimization utilizes the distinct characteristics
  * of the 2DDWave clocking scheme, which only allows information flow from top to bottom and left to right, therefore
