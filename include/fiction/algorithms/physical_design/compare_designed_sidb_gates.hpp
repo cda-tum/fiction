@@ -158,6 +158,11 @@ void order_designed_sidb_gates(const designed_sidb_gates_ordering_recipe<Lyt>& r
     assert(designed_gates.simulation_results.has_value() &&
            "Simulation results must be available for gate design ordering");
 
+    if (recipe.empty())
+    {
+        return;
+    }
+
     std::vector<typename designed_sidb_gate_comparator<Lyt>::sidb_gate_design> gate_designs_for_assessment{};
     gate_designs_for_assessment.reserve(designed_gates.gate_layouts.size());
 
