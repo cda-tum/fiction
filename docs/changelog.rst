@@ -24,6 +24,7 @@ Changed
 
 Fixed
 #####
+- Fixed issue in TTS calculation
 - Fixed Readme due to migration of mqt repository
 - Exclude ``ClusterComplete`` from simulation engine selection when ALGBLIB is disabled
 - Fixed inconsistencies and various bugs in SiDB simulation/analysis
