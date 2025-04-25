@@ -186,11 +186,6 @@ template <typename Lyt>
 struct operational_assessment
 {
     /**
-     * Typedef for the simulation results type, i.e., all physically valid charge distributions obtained during the
-     * simulation.
-     */
-    using simulation_results_t = std::vector<charge_distribution_surface<Lyt>>;
-    /**
      * This struct collects the information for a specific input combination that was obtained during the assessment.
      */
     struct operational_assessment_for_input
@@ -208,7 +203,7 @@ struct operational_assessment
         /**
          * The charge distributions obtained for one input combination that was tested.
          */
-        std::optional<simulation_results_t> simulation_results{};
+        std::optional<sidb_simulation_result<Lyt>> simulation_results{};
     };
     /**
      * Standard constructor that only sets the operational status.
@@ -236,14 +231,14 @@ struct operational_assessment
      *
      * @return A vector containing the simulation results for each respective input that was assessed.
      */
-    std::vector<simulation_results_t> extract_simulation_results_per_input() const noexcept
+    [[nodiscard]] std::vector<sidb_simulation_result<Lyt>> extract_simulation_results_per_input() const noexcept
     {
         assert(assessment_per_input.has_value() && "Assessment results per input are not present.");
         assert(!assessment_per_input.value().empty() && "No input combinations were assessed.");
         assert(assessment_per_input.value().front().simulation_results.has_value() &&
                "Simulation results were not retained during assessment.");
 
-        std::vector<simulation_results_t> simulation_results_per_input{};
+        std::vector<sidb_simulation_result<Lyt>> simulation_results_per_input{};
         simulation_results_per_input.reserve(assessment_per_input.value().size());
 
         for (operational_assessment_for_input assessment : assessment_per_input.value())
@@ -522,7 +517,7 @@ class is_operational_impl
 
         // when `simulation_results_mode::KEEP_SIMULATION_RESULTS` is set, the simulation results must be collected for
         // each input combination
-        std::vector<typename operational_assessment<Lyt>::simulation_results_t> sim_res_per_input{};
+        std::vector<sidb_simulation_result<Lyt>> sim_res_per_input{};
         if (parameters.simulation_results_retention ==
             is_operational_params::simulation_results_mode::KEEP_SIMULATION_RESULTS)
         {
@@ -634,8 +629,7 @@ class is_operational_impl
                 if (parameters.simulation_results_retention ==
                     is_operational_params::simulation_results_mode::KEEP_SIMULATION_RESULTS)
                 {
-                    assessment_results_for_this_input_combination.simulation_results =
-                        std::move(simulation_results.charge_distributions);
+                    assessment_results_for_this_input_combination.simulation_results = std::move(simulation_results);
                 }
 
                 assessment_results_per_input.push_back(std::move(assessment_results_for_this_input_combination));

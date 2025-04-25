@@ -6,6 +6,7 @@
 #define COMPARE_BY_GROUND_STATE_ISOLATION
 
 #include "fiction/algorithms/physical_design/compare_designed_sidb_gates.hpp"
+#include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
 
 #include <algorithm>
@@ -30,9 +31,9 @@ namespace detail
  * @return The energetic difference between the ground state and the first excited state.
  */
 template <typename Lyt>
-[[nodiscard]] double get_ground_state_isolation(const std::vector<charge_distribution_surface<Lyt>>& sim_res) noexcept
+[[nodiscard]] double get_ground_state_isolation(const sidb_simulation_result<Lyt>& sim_res) noexcept
 {
-    if (sim_res.size() == 1)
+    if (sim_res.charge_distributions.size() == 1)
     {
         return std::numeric_limits<double>::infinity();
     }
@@ -40,7 +41,7 @@ template <typename Lyt>
     double ground_state_energy        = std::numeric_limits<double>::infinity();
     double first_excited_state_energy = std::numeric_limits<double>::infinity();
 
-    for (const charge_distribution_surface<Lyt>& cds : sim_res)
+    for (const charge_distribution_surface<Lyt>& cds : sim_res.charge_distributions)
     {
         const double energy = cds.get_electrostatic_potential_energy();
 
@@ -194,7 +195,7 @@ class compare_by_average_ground_state_isolation final : public designed_sidb_gat
 
         for (const auto& sim_res : gate_design.simulation_results_per_input)
         {
-            if (sim_res.size() == 1)
+            if (sim_res.charge_distributions.size() == 1)
             {
                 continue;
             }

@@ -5,6 +5,7 @@
 #ifndef COMPARE_DESIGNED_SIDB_GATES_HPP
 #define COMPARE_DESIGNED_SIDB_GATES_HPP
 
+#include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
 
 #include <cassert>
@@ -26,10 +27,10 @@ template <typename Lyt>
 struct designed_sidb_gates
 {
     /**
-     * Simulation results per input is a vector of simulation results (which is a vector of charge distribution
+     * Simulation results per input is a vector of simulation results (which has a vector of charge distribution
      * surfaces) that occur in the order of the bit representation of the respectively associated inputs.
      */
-    using simulation_results_per_input = std::vector<std::vector<charge_distribution_surface<Lyt>>>;
+    using simulation_results_per_input = std::vector<sidb_simulation_result<Lyt>>;
     /**
      * The designed SiDB gate layouts are stored here.
      */
