@@ -192,7 +192,7 @@ void order_designed_sidb_gates(const designed_sidb_gates_ordering_recipe<Lyt>& r
                   }
 
                   // if all preceding comparators judge equality, the strict comparison of the last comparator is used
-                  return (*recipe.at(recipe.size() - 1))(lhs, rhs);
+                  return (*recipe.back())(lhs, rhs);
               });
 
     // put the designed gate layouts back in order
