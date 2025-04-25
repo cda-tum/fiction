@@ -175,14 +175,18 @@ void order_designed_sidb_gates(const designed_sidb_gates_ordering_recipe<Lyt>& r
     std::sort(gate_designs_for_assessment.begin(), gate_designs_for_assessment.end(),
               [&](const auto& lhs, const auto& rhs) noexcept
               {
+                  // to compare the two sides, the ordering recipe is followed in the given order
                   for (uint64_t i = 0; i < recipe.size() - 1; ++i)
                   {
+                      // if the two sides are judged equal by the current comparator, we go to the next one
                       if (!recipe.at(i)->equals(lhs, rhs))
                       {
+                          // otherwise, when the current comparator judges non-equality, we apply the strict comparison
                           return (*recipe.at(i))(lhs, rhs);
                       }
                   }
 
+                  // if all preceding comparators judge equality, the strict comparison of the last comparator is used
                   return (*recipe.at(recipe.size() - 1))(lhs, rhs);
               });
 
