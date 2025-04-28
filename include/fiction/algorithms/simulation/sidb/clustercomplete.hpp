@@ -118,6 +118,7 @@ class clustercomplete_impl
             available_threads{std::max(uint64_t{1}, params.available_threads)},
             charge_layout{initialize_charge_layout(lyt, params)},
             real_placed_defects{charge_layout.get_defects()},
+            parameters{params},
             mu_bounds_with_error{constants::ERROR_MARGIN - params.simulation_parameters.mu_minus,
                                  -constants::ERROR_MARGIN - params.simulation_parameters.mu_minus,
                                  constants::ERROR_MARGIN - params.simulation_parameters.mu_plus(),
@@ -162,40 +163,51 @@ class clustercomplete_impl
 
             if (!gss_stats.top_cluster->charge_space.empty())
             {
-                // initialization
-                initialize_worker_queues(extract_work_from_top_cluster(gss_stats.top_cluster));
-
-                // set up threads
-                std::vector<std::thread> supporting_threads{};
-                supporting_threads.reserve(available_threads);
-
-                for (uint64_t i = 1; i < available_threads; ++i)
+                if (available_threads == 1)
                 {
-                    supporting_threads.emplace_back(
-                        [&, ix = i]
-                        {
-                            worker& w = *workers.at(ix);
+                    // single-threaded execution
 
-                            // keep unfolding on this thread until no more work exists
-                            while (const std::optional<work_t>& work = w.obtain_work())
-                            {
-                                unfold_composition(w, work->get());
-                            }
-                        });
+                    collect_physically_valid_charge_distributions_single_threaded(gss_stats.top_cluster);
                 }
-
-                // keep unfolding on the main thread until no more work exists
-                while (const std::optional<work_t>& work = workers.front()->obtain_work())
+                else
                 {
-                    unfold_composition(*workers.front(), work->get());
-                }
+                    // multi-threaded execution
 
-                // wait for all threads to complete
-                for (auto& thread : supporting_threads)
-                {
-                    if (thread.joinable())
+                    // initialization
+                    initialize_worker_queues(extract_work_from_top_cluster(gss_stats.top_cluster));
+
+                    // set up threads
+                    std::vector<std::thread> supporting_threads{};
+                    supporting_threads.reserve(available_threads);
+
+                    for (uint64_t i = 1; i < available_threads; ++i)
                     {
-                        thread.join();
+                        supporting_threads.emplace_back(
+                            [&, ix = i]
+                            {
+                                worker& w = *workers.at(ix);
+
+                                // keep unfolding on this thread until no more work exists
+                                while (const std::optional<work_t>& work = w.obtain_work())
+                                {
+                                    unfold_composition(w, work->get());
+                                }
+                            });
+                    }
+
+                    // keep unfolding on the main thread until no more work exists
+                    while (const std::optional<work_t>& work = workers.front()->obtain_work())
+                    {
+                        unfold_composition(*workers.front(), work->get());
+                    }
+
+                    // wait for all threads to complete
+                    for (auto& thread : supporting_threads)
+                    {
+                        if (thread.joinable())
+                        {
+                            thread.join();
+                        }
                     }
                 }
             }
@@ -215,7 +227,8 @@ class clustercomplete_impl
     /**
      * Simulation results.
      */
-    sidb_simulation_result<Lyt> result{};
+    sidb_simulation_result<Lyt>       result{};
+    clustercomplete_params<cell<Lyt>> parameters{};
     /**
      * Number of available threads.
      */
@@ -241,6 +254,11 @@ class clustercomplete_impl
      * Globally available array of bounds that section the band gap, used for pruning.
      */
     const std::array<double, 4> mu_bounds_with_error;
+
+    ///
+    /// COMMON FUNCTIONS
+    ///
+
     /**
      * Helper function for obtaining the stored lower or upper bound on the electrostatic potential that SiDBs in the
      * given projector state--i.e., a cluster together with an associated multiset charge configuration--collectively
@@ -296,6 +314,37 @@ class clustercomplete_impl
     [[nodiscard]] constexpr bool lb_fail_onto_neutral_charge(const double pot_bound) const noexcept
     {
         return pot_bound > mu_bounds_with_error.at(2);
+    }
+    /**
+     * Function to initialize the charge layout.
+     *
+     * @param lyt Layout to simulate.
+     * @param params Parameters for ClusterComplete.
+     * @return The charge layout initializes with defects specified in the given parameters.
+     */
+    [[nodiscard]] static charge_distribution_surface<Lyt>
+    initialize_charge_layout(const Lyt& lyt, const clustercomplete_params<cell<Lyt>>& params) noexcept
+    {
+        charge_distribution_surface<Lyt> cds{lyt};
+        cds.assign_physical_parameters(params.simulation_parameters);
+
+        // assign defects if applicable
+        if constexpr (has_foreach_sidb_defect_v<Lyt>)
+        {
+            lyt.foreach_sidb_defect(
+                [&](const auto& cd)
+                {
+                    if (const auto& [cell, defect] = cd; defect.type != sidb_defect_type::NONE)
+                    {
+                        cds.add_sidb_defect_to_potential_landscape(cell, lyt.get_sidb_defect(cell));
+                    }
+                });
+        }
+
+        cds.assign_local_external_potential(params.local_external_potential);
+        cds.assign_global_external_potential(params.global_potential);
+
+        return cds;
     }
     /**
      * This function performs an analysis that is crucial to the *ClusterComplete*'s efficiency: as the *Ground State
@@ -370,9 +419,11 @@ class clustercomplete_impl
                                                             singleton_multiset_conf_to_charge_state(pst->multiset_conf),
                                                             charge_index_mode::KEEP_CHARGE_INDEX);
 
-            charge_layout_copy.assign_local_potential_by_index(
+            charge_layout_copy.assign_local_internal_potential_by_index(
                 sidb_ix, -clustering_state.pot_bounds.get<bound_direction::LOWER>(sidb_ix));
         }
+
+        charge_layout_copy.update_local_potential();
 
         charge_layout_copy.recompute_system_energy();
 
@@ -484,7 +535,6 @@ class clustercomplete_impl
     static void add_composition(sidb_clustering_state&               clustering_state,
                                 const sidb_charge_space_composition& composition) noexcept
     {
-
         clustering_state.pot_bounds += composition.pot_bounds;
 
         for (const sidb_cluster_projector_state& child_pst : composition.proj_states)
@@ -511,6 +561,94 @@ class clustercomplete_impl
 
         clustering_state.pot_bounds -= composition.pot_bounds;
     }
+
+    ///
+    /// SINGLE-THREADED FUNCTIONS
+    ///
+
+    /**
+     * This recursive function is the heart of the *ClusterComplete* destruction. The given clustering state is
+     * dissected at the largest cluster to each possible specialization of it, which then enters the recursive call with
+     * the clustering state modified to have a set of sibling children replacing their direct parent. For each
+     * specialization, appropriate updates are made to the potential bounds store that is part of the clustering state.
+     * After a specialization has been handled completely, i.e., when the recursive call for this specialization
+     * returns, the specialization to the potential bounds store is undone so that a new specialization may be applied.
+     *
+     * The two base cases to the recursion are as follows: (1) the charge distributions implied by the given clustering
+     * state do not meet the population stability, meaning that this branch of the search space may be pruned through
+     * terminating the recursion at this level, and, (2) the clustering state hold only singleton clusters and passes
+     * the population stability check. In the latter case, the configuration stability check is performed before the
+     * associated charge distribution is added to the simulation results.
+     *
+     * @param clustering_state A clustering state that holds a specific combination of multiset charge configurations as
+     * projector states of which the respectively associated clusters form a clustering in the cluster hierarchy.
+     */
+    void add_physically_valid_charge_configurations(sidb_clustering_state& clustering_state) noexcept
+    {
+        // check for pruning
+        if (!meets_population_stability_criterion(clustering_state))
+        {
+            return;
+        }
+
+        // check if all clusters are singletons
+        if (clustering_state.proj_states.size() == charge_layout.num_cells())
+        {
+            add_if_configuration_stability_is_met(clustering_state);
+            return;
+        }
+
+        // choose the biggest cluster to unfold
+        const uint64_t max_pst_ix = find_cluster_of_maximum_size(clustering_state.proj_states);
+
+        // un-apply max_pst, thereby making space for specialization
+        sidb_cluster_projector_state_ptr max_pst = take_parent_out(clustering_state, max_pst_ix);
+
+        // specialise for all compositions of max_pst
+        for (const sidb_charge_space_composition& max_pst_composition : get_projector_state_compositions(*max_pst))
+        {
+            // specialise parent to a specific composition of its children
+            add_composition(clustering_state, max_pst_composition);
+
+            // recurse with specialised composition
+            add_physically_valid_charge_configurations(clustering_state);
+
+            // undo specialization such that the specialization may consider a different children composition
+            remove_composition(clustering_state, max_pst_composition);
+        }
+
+        // apply max_pst back
+        add_parent(clustering_state, max_pst_ix, std::move(max_pst));
+    }
+    /**
+     * After the *Ground State Space* construction was completed and the top cluster was returned, this function splits
+     * the charge space of the top cluster into sections for the individual threads to handle. Each are decomposed
+     * recursively to generate physically valid charge distributions that emerge from increasingly specializing multiset
+     * charge configurations.
+     *
+     * @param top_cluster The top cluster that is returned by the *Ground State Space construction; it contains the
+     * entire cluster hierarchy construct.
+     */
+    void collect_physically_valid_charge_distributions_single_threaded(const sidb_cluster_ptr& top_cluster) noexcept
+    {
+        for (const sidb_cluster_charge_state& ccs : top_cluster->charge_space)
+        {
+            for (const sidb_charge_space_composition& composition : ccs.compositions)
+            {
+                // convert charge space composition to clustering state
+                sidb_clustering_state clustering_state{charge_layout.num_cells()};
+                add_composition(clustering_state, composition);
+
+                // unfold
+                add_physically_valid_charge_configurations(clustering_state);
+            }
+        }
+    }
+
+    ///
+    /// MULTI-THREADED FUNCTIONS
+    ///
+
     /**
      * A work item is a constant reference to SiDB charge space composition.
      */
@@ -583,7 +721,7 @@ class clustercomplete_impl
         {
             const std::lock_guard lock(mutex_to_protect_this_queue);
 
-            clustering_state_for_thieves = sidb_clustering_state{clustering_state};
+            clustering_state_for_thieves = clustering_state;
 
             thief_informants.clear();
 
@@ -818,37 +956,6 @@ class clustercomplete_impl
             return std::nullopt;
         }
     };
-    /**
-     * Function to initialize the charge layout.
-     *
-     * @param lyt Layout to simulate.
-     * @param params Parameters for ClusterComplete.
-     * @return The charge layout initializes with defects specified in the given parameters.
-     */
-    [[nodiscard]] static charge_distribution_surface<Lyt>
-    initialize_charge_layout(const Lyt& lyt, const clustercomplete_params<cell<Lyt>>& params) noexcept
-    {
-        charge_distribution_surface<Lyt> cds{lyt};
-        cds.assign_physical_parameters(params.simulation_parameters);
-
-        // assign defects if applicable
-        if constexpr (has_foreach_sidb_defect_v<Lyt>)
-        {
-            lyt.foreach_sidb_defect(
-                [&](const auto& cd)
-                {
-                    if (const auto& [cell, defect] = cd; defect.type != sidb_defect_type::NONE)
-                    {
-                        cds.add_sidb_defect_to_potential_landscape(cell, lyt.get_sidb_defect(cell));
-                    }
-                });
-        }
-
-        cds.assign_local_external_potential(params.local_external_potential);
-        cds.assign_global_external_potential(params.global_potential);
-
-        return cds;
-    }
     /**
      * Work in the form of compositions of charge space elements of the top cluster are extracted into a vector and
      * shuffled at random before being returned. The shuffling may balance the initial workload division.
@@ -1085,9 +1192,7 @@ template <typename Lyt>
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
-    detail::clustercomplete_impl<Lyt> p{lyt, params};
-
-    return p.run(params);
+    return detail::clustercomplete_impl<Lyt>{lyt, params}.run(params);
 }
 
 }  // namespace fiction
