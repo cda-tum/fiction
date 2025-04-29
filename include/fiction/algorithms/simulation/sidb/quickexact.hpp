@@ -116,7 +116,7 @@ class quickexact_impl
                 {
                     if constexpr (has_get_sidb_defect_v<Lyt>)
                     {
-                        charge_distribution_surface charge_layout{charge_lyt.clone()};
+                        charge_distribution_surface charge_layout{layout.clone()};
                         conduct_simulation(charge_layout, base_number);
                     }
                     else
@@ -252,6 +252,7 @@ class quickexact_impl
         }
         charge_layout.assign_physical_parameters(params.simulation_parameters);
         charge_layout.assign_all_charge_states(sidb_charge_state::NEUTRAL);
+        charge_layout.update_after_charge_change(dependent_cell_mode::FIXED);
         charge_layout.assign_dependent_cell(all_sidbs_in_lyt_without_negative_preassigned_ones[0]);
 
         charge_layout.assign_local_external_potential(params.local_external_potential);
@@ -263,10 +264,13 @@ class quickexact_impl
         // negative charge, this way of implementation is chosen.
         for (const auto& cell : preassigned_negative_sidbs)
         {
-            charge_layout.add_sidb_defect_to_potential_landscape(
-                cell, sidb_defect{sidb_defect_type::UNKNOWN, -1, charge_layout.get_simulation_params().epsilon_r,
-                                  charge_layout.get_simulation_params().lambda_tf});
+            charge_layout.update_potential_due_to_predefined_negatively_charged_sidbs(cell);
         }
+
+        // todo: needs to be double-checked
+        const auto internal_potential = charge_layout.get_local_internal_potential();
+
+        charge_layout.assign_internal_potential_offset(internal_potential);
 
         // Update all local potentials, system energy, and physical validity. The flag is set to
         // `dependent_cell_mode::VARIABLE` to allow the dependent cell to change its charge state based on the N-1 SiDBs
@@ -477,7 +481,7 @@ class quickexact_impl
         }
 
         charge_lyt.assign_local_external_potential(params.local_external_potential);
-        charge_lyt.assign_global_external_potential(params.global_potential, dependent_cell_mode::VARIABLE);
+        charge_lyt.assign_global_external_potential(params.global_potential);
 
         preassigned_negative_sidb_indices = charge_lyt.negative_sidb_detection();
         preassigned_negative_sidbs.reserve(preassigned_negative_sidb_indices.size());
