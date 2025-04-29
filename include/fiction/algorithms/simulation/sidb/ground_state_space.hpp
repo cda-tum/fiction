@@ -264,14 +264,10 @@ class ground_state_space_impl
         {
             const uint64_t i = get_singleton_sidb_ix(c);
 
-            const cell<Lyt>& sidb = min_loc_pot_cds.index_to_cell(i);
+            const double min_loc_pot = min_loc_pot_cds.get_local_internal_potential().at(i);
+            const double max_loc_pot = max_loc_pot_cds.get_local_internal_potential().at(i);
 
-            // separate the local potential into potential from SiDBs and external sources
-            const double loc_ext_pot = min_loc_pot_cds.get_local_defect_potentials()[sidb] +
-                                       min_loc_pot_cds.get_local_external_potentials()[sidb];
-
-            const double min_loc_pot = min_loc_pot_cds.get_local_potential_by_index(i).value() - loc_ext_pot;
-            const double max_loc_pot = max_loc_pot_cds.get_local_potential_by_index(i).value() - loc_ext_pot;
+            const double loc_ext_pot = min_loc_pot_cds.get_local_external_potential().at(i);
 
             c->initialize_singleton_cluster_charge_space(-min_loc_pot, -max_loc_pot, -loc_ext_pot,
                                                          min_loc_pot_cds.get_simulation_params().base, c);

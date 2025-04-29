@@ -118,7 +118,6 @@ class clustercomplete_impl
             available_threads{std::max(uint64_t{1}, params.available_threads)},
             charge_layout{initialize_charge_layout(lyt, params)},
             real_placed_defects{charge_layout.get_defects()},
-            parameters{params},
             mu_bounds_with_error{constants::ERROR_MARGIN - params.simulation_parameters.mu_minus,
                                  -constants::ERROR_MARGIN - params.simulation_parameters.mu_minus,
                                  constants::ERROR_MARGIN - params.simulation_parameters.mu_plus(),
@@ -228,7 +227,6 @@ class clustercomplete_impl
      * Simulation results.
      */
     sidb_simulation_result<Lyt>       result{};
-    clustercomplete_params<cell<Lyt>> parameters{};
     /**
      * Number of available threads.
      */
@@ -344,6 +342,8 @@ class clustercomplete_impl
         cds.assign_local_external_potential(params.local_external_potential);
         cds.assign_global_external_potential(params.global_potential);
 
+        cds.update_local_external_potential();
+
         return cds;
     }
     /**
@@ -420,7 +420,8 @@ class clustercomplete_impl
                                                             charge_index_mode::KEEP_CHARGE_INDEX);
 
             charge_layout_copy.assign_local_internal_potential_by_index(
-                sidb_ix, -clustering_state.pot_bounds.get<bound_direction::LOWER>(sidb_ix));
+                sidb_ix, -clustering_state.pot_bounds.get<bound_direction::LOWER>(sidb_ix) -
+                             charge_layout_copy.get_local_external_potential()[sidb_ix]);
         }
 
         charge_layout_copy.update_local_potential();
