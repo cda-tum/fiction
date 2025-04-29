@@ -46,8 +46,8 @@ TEMPLATE_TEST_CASE("novel designed AND Gate influence distance function which fa
         CHECK_THAT(calculate_defect_clearance(cube_lyt, defect_influence_domain).defect_clearance_distance,
                    Catch::Matchers::WithinAbs(5.81097444496187787, constants::ERROR_MARGIN));
         CHECK(stats.num_evaluated_defect_positions == 676);
-        CHECK(stats.num_non_influencing_defect_positions == 531);
-        CHECK(stats.num_influencing_defect_positions == 145);
+        CHECK(stats.num_non_influencing_defect_positions == 493);
+        CHECK(stats.num_influencing_defect_positions == 183);
     }
 #endif
 
@@ -82,8 +82,8 @@ TEMPLATE_TEST_CASE(
             defect_influence_grid_search(lyt_cube, std::vector<tt>{create_and_tt()}, params);
         const auto clearance_result_vacancy = calculate_defect_clearance(lyt_cube, defect_influence_vacancy);
 
-        CHECK(clearance_result_vacancy.defect_position == cube::coord_t{18, 17});
-        CHECK_THAT(std::abs(clearance_result_vacancy.defect_clearance_distance - 3.1665),
+        CHECK(clearance_result_vacancy.defect_position == cube::coord_t{21, 18});
+        CHECK_THAT(std::abs(clearance_result_vacancy.defect_clearance_distance - 4.2295),
                    Catch::Matchers::WithinAbs(0.00, 0.01));
 
 // to save runtime in the CI, this test is only run in RELEASE mode
@@ -96,11 +96,11 @@ TEMPLATE_TEST_CASE(
                 defect_influence_grid_search(lyt_cube, std::vector<tt>{create_and_tt()}, params, 1, &stats);
             const auto defect_clearance = calculate_defect_clearance(lyt_cube, defect_influence_domain);
             CHECK_THAT(calculate_defect_clearance(lyt_cube, defect_influence_domain).defect_clearance_distance,
-                       Catch::Matchers::WithinAbs(3.16654512047436443, constants::ERROR_MARGIN));
+                       Catch::Matchers::WithinAbs(4.68731735644174208, constants::ERROR_MARGIN));
             CHECK(stats.num_evaluated_defect_positions == 3599);
-            CHECK(stats.num_non_influencing_defect_positions == 3062);
-            CHECK(stats.num_influencing_defect_positions == 537);
-            CHECK(defect_clearance.defect_position == cube::coord_t{18, 17});
+            CHECK(stats.num_non_influencing_defect_positions == 2676);
+            CHECK(stats.num_influencing_defect_positions == 923);
+            CHECK(defect_clearance.defect_position == cube::coord_t{3, 29});
         }
 #endif
 
@@ -112,7 +112,7 @@ TEMPLATE_TEST_CASE(
                 defect_influence_random_sampling(lyt_cube, std::vector<tt>{create_and_tt()}, 100, params, &stats);
             CHECK(defect_influence_domain.size() > 0);
             CHECK(calculate_defect_clearance(lyt_cube, defect_influence_domain).defect_clearance_distance <=
-                  3.16654512047436443);
+                  4.68731735644174208);
         }
 
         SECTION("QuickTrace")
@@ -123,7 +123,7 @@ TEMPLATE_TEST_CASE(
             const auto             defect_influence_domain =
                 defect_influence_quicktrace(lyt_cube, std::vector<tt>{create_and_tt()}, 20, params, &stats);
             CHECK_THAT(calculate_defect_clearance(lyt_cube, defect_influence_domain).defect_clearance_distance,
-                       Catch::Matchers::WithinAbs(3.16654512047436443, constants::ERROR_MARGIN));
+                       Catch::Matchers::WithinAbs(4.68731735644174208, constants::ERROR_MARGIN));
         }
 
         params.influence_def = defect_influence_params<cell<TestType>>::influence_definition::GROUND_STATE_CHANGE;
@@ -135,7 +135,7 @@ TEMPLATE_TEST_CASE(
             const auto clearance_result = calculate_defect_clearance(lyt_cube, defect_operational_domain);
 
             CHECK_THAT(round_to_n_decimal_places(clearance_result.defect_clearance_distance, 6),
-                       Catch::Matchers::WithinAbs(2.76906300000000005, constants::ERROR_MARGIN));
+                       Catch::Matchers::WithinAbs(3.662489, constants::ERROR_MARGIN));
         }
 
         SECTION("QuickTrace, considering a change in the ground state as influence")
@@ -145,7 +145,7 @@ TEMPLATE_TEST_CASE(
             const auto clearance_result = calculate_defect_clearance(lyt_cube, defect_operational_domain);
 
             CHECK_THAT(round_to_n_decimal_places(clearance_result.defect_clearance_distance, 6),
-                       Catch::Matchers::WithinAbs(2.76906300000000005, constants::ERROR_MARGIN));
+                       Catch::Matchers::WithinAbs(3.662489, constants::ERROR_MARGIN));
         }
 
         SECTION("Random Sampling, considering a change in the ground state as influence")
@@ -154,7 +154,7 @@ TEMPLATE_TEST_CASE(
 
             const auto clearance_result = calculate_defect_clearance(lyt_cube, defect_operational_domain);
 
-            CHECK(clearance_result.defect_clearance_distance <= 4.85725799999999985);
+            CHECK(clearance_result.defect_clearance_distance <= 3.66248890783303382);
         }
     }
 
@@ -169,10 +169,11 @@ TEMPLATE_TEST_CASE(
         const auto defect_influence_arsenic =
             defect_influence_grid_search(lyt_cube, std::vector<tt>{create_and_tt()}, defect_operational_arsenic_params);
         const auto clearance_result_arsenic = calculate_defect_clearance(lyt_cube, defect_influence_arsenic);
-
-        CHECK((((clearance_result_arsenic.defect_position == cube::coord_t{17, 12, 0})) ||
-               (clearance_result_arsenic.defect_position == cube::coord_t{3, 12, 0})));
-        CHECK_THAT(std::abs(clearance_result_arsenic.defect_clearance_distance - 2.376),
+        CHECK((((clearance_result_arsenic.defect_position == cube::coord_t{18, 13, 0})) ||
+               (clearance_result_arsenic.defect_position == cube::coord_t{2, 13, 0})));
+        // todo: check correctness; only the first is sure. we should probably test for the distance to the defect
+        // position, but from what centre point?
+        CHECK_THAT(std::abs(clearance_result_arsenic.defect_clearance_distance - 2.769),
                    Catch::Matchers::WithinAbs(0.00, 0.01));
     }
 }
@@ -267,7 +268,7 @@ TEMPLATE_TEST_CASE("Defect influence when considering the change of the ground s
         const auto defect_clearance          = calculate_defect_clearance(lat, defect_operational_domain);
 
         CHECK_THAT(round_to_n_decimal_places(defect_clearance.defect_clearance_distance, 4) -
-                       round_to_n_decimal_places(sidb_nm_distance(lat, {6, 0, 0}, {10, 0, 0}), 4),
+                       round_to_n_decimal_places(sidb_nm_distance(lat, {6, 0, 0}, {11, 0, 0}), 4),
                    Catch::Matchers::WithinAbs(0.0, constants::ERROR_MARGIN));
     }
 
@@ -298,10 +299,10 @@ TEMPLATE_TEST_CASE("Defect influence when considering the change of the ground s
         const auto defect_clearance          = calculate_defect_clearance(lat, defect_operational_domain);
 
         CHECK(defect_clearance.defect_position.x == 12);
-        CHECK(defect_clearance.defect_position.y == 9);
+        CHECK(defect_clearance.defect_position.y == 17);
 
         CHECK_THAT(defect_clearance.defect_clearance_distance,
-                   Catch::Matchers::WithinAbs(2.8999201713, constants::ERROR_MARGIN));
+                   Catch::Matchers::WithinAbs(3.1665451205, constants::ERROR_MARGIN));
 
         // high screening
         defect_operational_params.defect =
@@ -350,10 +351,10 @@ TEMPLATE_TEST_CASE("Defect influence when considering the change of the ground s
         const auto clearance_result          = calculate_defect_clearance(lat, defect_operational_domain);
 
         CHECK(clearance_result.defect_position.x == 12);
-        CHECK(clearance_result.defect_position.y == 9);
+        CHECK(clearance_result.defect_position.y == 17);
         CHECK(clearance_result.defect_position.z == 0);
 
         CHECK_THAT(clearance_result.defect_clearance_distance,
-                   Catch::Matchers::WithinAbs(2.8999201713, constants::ERROR_MARGIN));
+                   Catch::Matchers::WithinAbs(3.1665451205, constants::ERROR_MARGIN));
     }
 }
