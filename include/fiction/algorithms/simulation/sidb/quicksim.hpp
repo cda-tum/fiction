@@ -45,7 +45,7 @@ struct quicksim_params
     /**
      * Number of threads to spawn. By default the number of threads is set to the number of available hardware threads.
      */
-    uint64_t number_threads{std::thread::hardware_concurrency()};
+    uint64_t number_threads{1};
     /**
      * Timeout limit (in ms).
      */
@@ -110,7 +110,7 @@ quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}) noexcept
         charge_lyt.assign_physical_parameters(ps.simulation_parameters);
         charge_lyt.assign_base_number(2);
         charge_lyt.assign_all_charge_states(sidb_charge_state::NEGATIVE);
-        charge_lyt.update_after_charge_change(dependent_cell_mode::VARIABLE);
+        charge_lyt.update_after_charge_change();
         const auto predefined_negative_sidb_indices = charge_lyt.negative_sidb_detection();
 
         // Check that the layout with all SiDBs negatively charged is physically valid.

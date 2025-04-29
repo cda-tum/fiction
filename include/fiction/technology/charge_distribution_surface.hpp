@@ -1443,6 +1443,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
             for (uint64_t i = 0u; i < strg->pot_mat.size(); ++i)
             {
+                strg->local_int_pot[i] += -(this->get_chargeless_potential_by_indices(i, random_element));
                 strg->local_pot[i] += -(this->get_chargeless_potential_by_indices(i, random_element));
             }
         }
