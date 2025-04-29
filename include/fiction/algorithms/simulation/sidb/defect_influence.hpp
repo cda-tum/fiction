@@ -645,7 +645,6 @@ class defect_influence_impl
         {
             // defect is placed on a non-empty cell
             return defect_influence_status::NON_INFLUENTIAL;
-
         }
 
         sidb_defect_surface<Lyt> lyt_defect{lyt_without_defect};
