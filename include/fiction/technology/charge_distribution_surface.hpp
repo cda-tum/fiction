@@ -229,9 +229,9 @@ class charge_distribution_surface<Lyt, false> : public Lyt
          */
         local_potential local_pot_caused_by_defects{};
         /**
-         * Global potential
+         * Global potential.
          */
-        double global_external_potential{0.0};
+        double global_external_potential{0.0};  // todo: this can go
         /**
          * Total Electrostatic potential at each SiDB position. Has to be updated when charge distribution is changed
          * (unit: V). It is the sum of `local_int_pot` and `local_ext_pot`.
@@ -1702,7 +1702,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * added to previously stored values. All important attributes of the charge layout are updated automatically.
      *
      * @param cell Cell to which the local external potential is applied.
-     * @param external_voltage External electrostatic potential in Volt applied to different cells.
+     * @param external_voltage External electrostatic potential in Volt applied to different cells. todo
      */
     void
     assign_local_external_potential(const std::unordered_map<typename Lyt::cell, double>& external_potential) noexcept
