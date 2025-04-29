@@ -822,7 +822,7 @@ class cartesian_layout
     {
         if constexpr (std::is_same_v<OffsetCoordinateType, siqad::coord_t>)
         {
-            return OffsetCoordinateType{coord.x, coord.y, 1};
+            return OffsetCoordinateType{coord.x, coord.y, coord.y > 0 ? 1 : 0};
         }
 
         return coord;
