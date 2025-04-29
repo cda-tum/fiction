@@ -5329,8 +5329,6 @@ pruning.)doc";
 
 static const char *__doc_fiction_detail_clustercomplete_impl_mutex_to_protect_the_simulation_results = R"doc(Mutex to protect the simulation results.)doc";
 
-static const char *__doc_fiction_detail_clustercomplete_impl_parameters = R"doc()doc";
-
 static const char *__doc_fiction_detail_clustercomplete_impl_real_placed_defects = R"doc(Atomic defects that are placed in the layout.)doc";
 
 static const char *__doc_fiction_detail_clustercomplete_impl_remove_composition =
