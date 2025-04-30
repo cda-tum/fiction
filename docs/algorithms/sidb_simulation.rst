@@ -346,10 +346,10 @@ Operational Domain Computation
         .. autofunction:: mnt.pyfiction.critical_temperature_domain_flood_fill
         .. autofunction:: mnt.pyfiction.critical_temperature_domain_contour_tracing
 
-        .. autoclass:: mnt.pyfiction.compute_operational_ratio_params
+        .. autoclass:: mnt.pyfiction.operational_domain_ratio_params
                 :members:
 
-        .. autofunction:: mnt.pyfiction.compute_operational_ratio
+        .. autofunction:: mnt.pyfiction.operational_domain_ratio
 
 
 Physically Valid Parameters
@@ -497,8 +497,8 @@ Assess Population Stability
             :members:
         .. autoclass:: mnt.pyfiction.physical_population_stability_params
             :members:
-        .. autofunction:: mnt.pyfiction.assess_physical_population_stability_100
-        .. autofunction:: mnt.pyfiction.assess_physical_population_stability_111
+        .. autofunction:: mnt.pyfiction.physical_population_stability_100
+        .. autofunction:: mnt.pyfiction.physical_population_stability_111
 
 
 Band-Bending Resilience
