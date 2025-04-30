@@ -10,6 +10,7 @@ build:
     python: "3.12"
   apt_packages:
     - cmake
+    - ccache
   jobs:
     pre_build:
       - echo "Reinstall pyfiction with Z3 and ALGLIB enabled"
