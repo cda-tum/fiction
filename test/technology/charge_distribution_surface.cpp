@@ -790,7 +790,6 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects", "[charge-d
         lyt.assign_cell_type({10, 5, 1}, TestType::cell_type::NORMAL);
 
         charge_distribution_surface charge_layout{lyt, params, sidb_charge_state::NEUTRAL};
-        CHECK(charge_layout.get_local_external_potentials().empty());
         charge_layout.assign_global_external_potential(-0.1);
         CHECK(!charge_layout.get_local_external_potentials().empty());
 
@@ -2047,12 +2046,16 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects, part two", 
         CHECK(loc_two_w_positive_defect > loc_two_w_neutral_defect);
         CHECK(loc_three_w_positive_defect > loc_three_w_neutral_defect);
 
-        CHECK_THAT((defect_potentials_negative[{0, 0, 0}] + defect_potentials_positive[{0, 0, 0}]),
+        CHECK_THAT((defect_potentials_negative[static_cast<uint64_t>(charge_layout.cell_to_index({0, 0, 0}))] +
+                    defect_potentials_positive[static_cast<uint64_t>(charge_layout.cell_to_index({0, 0, 0}))]),
                    Catch::Matchers::WithinAbs(0.0, 0.000001));
-        CHECK_THAT((defect_potentials_negative[{3, 0, 0}] + defect_potentials_positive[{3, 0, 0}]),
+        CHECK_THAT((defect_potentials_negative[static_cast<uint64_t>(charge_layout.cell_to_index({3, 0, 0}))] +
+                    defect_potentials_positive[static_cast<uint64_t>(charge_layout.cell_to_index({3, 0, 0}))]),
                    Catch::Matchers::WithinAbs(0.0, 0.000001));
-        CHECK_THAT((defect_potentials_negative[{5, 0, 0}] + defect_potentials_positive[{5, 0, 0}]),
+        CHECK_THAT((defect_potentials_negative[static_cast<uint64_t>(charge_layout.cell_to_index({5, 0, 0}))] +
+                    defect_potentials_positive[static_cast<uint64_t>(charge_layout.cell_to_index({5, 0, 0}))]),
                    Catch::Matchers::WithinAbs(0.0, 0.000001));
+        // todo
     }
 
     SECTION("assign defect on DB position which is not allowed")
@@ -2089,7 +2092,10 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects, part two", 
                    Catch::Matchers::WithinAbs(0, constants::ERROR_MARGIN));
 
         auto defect_potentials_negative = charge_layout.get_local_defect_potentials();
-        CHECK(defect_potentials_negative.empty());
+        REQUIRE(defect_potentials_negative.size() == 3);
+        CHECK(defect_potentials_negative.at(0) == 0.0);
+        CHECK(defect_potentials_negative.at(1) == 0.0);
+        CHECK(defect_potentials_negative.at(2) == 0.0);
     }
 
     SECTION("assign defects with different screening lengths")

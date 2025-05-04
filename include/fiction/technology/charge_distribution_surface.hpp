@@ -229,10 +229,6 @@ class charge_distribution_surface<Lyt, false> : public Lyt
          */
         local_potential local_pot_caused_by_defects{};
         /**
-         * Global potential.
-         */
-        double global_external_potential{0.0};  // todo: this can go
-        /**
          * Total Electrostatic potential at each SiDB position. Has to be updated when charge distribution is changed
          * (unit: V). It is the sum of `local_int_pot` and `local_ext_pot`.
          */
@@ -585,47 +581,48 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     void add_sidb_defect_to_potential_landscape(const typename Lyt::cell& c, const sidb_defect& defect) noexcept
     {
         // check if defect is not placed on SiDB position
-        if (std::find(strg->sidb_order.cbegin(), strg->sidb_order.cend(), c) == strg->sidb_order.end() &&
-            is_charged_defect_type(defect))
+        if (!is_charged_defect_type(defect) ||
+            std::find(strg->sidb_order.cbegin(), strg->sidb_order.cend(), c) != strg->sidb_order.end())
         {
-            // check if defect was not added yet.
-            if (strg->defects.find(c) == strg->defects.end())
-            {
-                strg->local_pot_caused_by_defects.resize(this->num_cells(), 0);
-                strg->defects.insert({c, defect});
+            return;
+        }
 
-                this->foreach_cell(
-                    [this, &c, &defect](const auto& c1)
-                    {
-                        const auto dist = sidb_nm_distance<Lyt>(*this, c1, c);
-                        const auto pot  = chargeless_potential_generated_by_defect_at_given_distance(dist, defect);
+        // check if defect was not added yet.
+        if (strg->defects.find(c) == strg->defects.end())
+        {
+            strg->defects.insert({c, defect});
 
-                        strg->local_pot_caused_by_defects[static_cast<uint64_t>(cell_to_index(c1))] +=
-                            pot * static_cast<double>(defect.charge);
-                    });
+            this->foreach_cell(
+                [this, &c, &defect](const auto& c1)
+                {
+                    const auto dist = sidb_nm_distance<Lyt>(*this, c1, c);
+                    const auto pot  = chargeless_potential_generated_by_defect_at_given_distance(dist, defect);
 
-                this->update_after_charge_change(dependent_cell_mode::FIXED);
-            }
-            else
-            {
-                Lyt::foreach_cell(
-                    [this, &c, &defect](const auto& c1)
-                    {
-                        const auto dist = sidb_nm_distance<Lyt>(*this, c1, c);
+                    strg->local_pot_caused_by_defects[static_cast<uint64_t>(cell_to_index(c1))] +=
+                        pot * static_cast<double>(defect.charge);
+                });
 
-                        strg->local_pot_caused_by_defects[static_cast<uint64_t>(cell_to_index(c1))] =
-                            strg->local_pot_caused_by_defects[static_cast<uint64_t>(cell_to_index(c1))] +
-                            chargeless_potential_generated_by_defect_at_given_distance(dist, defect) *
-                                static_cast<double>(defect.charge) -
-                            chargeless_potential_generated_by_defect_at_given_distance(dist, strg->defects[c]) *
-                                static_cast<double>(strg->defects[c].charge);
-                    });
+            this->update_after_charge_change(dependent_cell_mode::FIXED);
+        }
+        else
+        {
+            Lyt::foreach_cell(
+                [this, &c, &defect](const auto& c1)
+                {
+                    const auto dist = sidb_nm_distance<Lyt>(*this, c1, c);
 
-                strg->defects.erase(c);
-                strg->defects.insert({c, defect});
+                    strg->local_pot_caused_by_defects[static_cast<uint64_t>(cell_to_index(c1))] =
+                        strg->local_pot_caused_by_defects[static_cast<uint64_t>(cell_to_index(c1))] +
+                        chargeless_potential_generated_by_defect_at_given_distance(dist, defect) *
+                            static_cast<double>(defect.charge) -
+                        chargeless_potential_generated_by_defect_at_given_distance(dist, strg->defects[c]) *
+                            static_cast<double>(strg->defects[c].charge);
+                });
 
-                this->update_after_charge_change(dependent_cell_mode::FIXED);
-            }
+            strg->defects.erase(c);
+            strg->defects.insert({c, defect});
+
+            this->update_after_charge_change(dependent_cell_mode::FIXED);
         }
     }
     /**
@@ -635,22 +632,24 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      */
     void erase_defect(const typename Lyt::cell& c) noexcept
     {
-        if (strg->defects.find(c) != strg->defects.cend())
+        if (strg->defects.find(c) == strg->defects.cend())
         {
-            this->foreach_cell(
-                [this, &c](const auto& c1)
-                {
-                    strg->local_pot_caused_by_defects[static_cast<uint64_t>(cell_to_index(c1))] -=
-                        chargeless_potential_generated_by_defect_at_given_distance(sidb_nm_distance<Lyt>(*this, c1, c),
-                                                                                   strg->defects[c]) *
-                        static_cast<double>(strg->defects[c].charge);
-                    strg->local_ext_pot[static_cast<uint64_t>(cell_to_index(c1))] -=
-                        chargeless_potential_generated_by_defect_at_given_distance(sidb_nm_distance<Lyt>(*this, c1, c),
-                                                                                   strg->defects[c]) *
-                        static_cast<double>(strg->defects[c].charge);
-                });
-            strg->defects.erase(c);
+            return;
         }
+
+        this->foreach_cell(
+            [this, &c](const auto& c1)
+            {
+                const double defect_pot = chargeless_potential_generated_by_defect_at_given_distance(
+                                              sidb_nm_distance<Lyt>(*this, c1, c), strg->defects[c]) *
+                                          static_cast<double>(strg->defects[c].charge);
+
+                strg->local_pot_caused_by_defects[static_cast<uint64_t>(cell_to_index(c1))] -= defect_pot;
+                strg->local_ext_pot[static_cast<uint64_t>(cell_to_index(c1))] -= defect_pot;
+                strg->local_pot[static_cast<uint64_t>(cell_to_index(c1))] -= defect_pot;
+            });
+
+        strg->defects.erase(c);
     }
     /**
      * This function assigns the given charge state to the cell (accessed by `index`) of the layout.
@@ -861,7 +860,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     }
     /**
      * This function calculates the local electrostatic potential in Volt for each SiDB position, including external
-     * electrostatic potentials (generated by electrodes, defects, etc.) (unit: V).
+     * electrostatic potentials (generated by electrodes, defects, etc.) (unit: V). todo
      *
      * @param history_mode `charge_distribution_history::NEGLECT` if the information (local electrostatic energy) of the
      * previous charge distribution is used to make the update more efficient, `charge_distribution_history::CONSIDER`
@@ -922,27 +921,15 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     }
     /**
      * This function calculates the local electrostatic potential in Volt for each SiDB position, including external
-     * electrostatic potentials (generated by electrodes, defects, etc.) (unit: V).
-     *
-     * @param history_mode `charge_distribution_history::NEGLECT` if the information (local electrostatic energy) of the
-     * previous charge distribution is used to make the update more efficient, `charge_distribution_history::CONSIDER`
-     * otherwise.
+     * electrostatic potentials (generated by electrodes, defects, etc.) (unit: V). todo
      */
     void update_local_external_potential() noexcept
     {
         strg->local_ext_pot = std::vector<double>(this->num_cells(), 0.0);
 
-        for (uint64_t i = 0; i < strg->local_pot_caused_by_defects.size(); ++i)
+        for (uint64_t i = 0; i < strg->sidb_order.size(); ++i)
         {
             strg->local_ext_pot[i] = strg->local_pot_caused_by_defects[i];
-        }
-
-        if (strg->global_external_potential != 0.0)
-        {
-            for (auto i = 0u; i < strg->sidb_order.size(); ++i)
-            {
-                strg->local_ext_pot[i] += strg->global_external_potential;
-            }
         }
 
         for (const auto& [c, external_pot] : strg->local_external_potential_map)
@@ -1025,16 +1012,19 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     void assign_local_internal_potential_by_index(const uint64_t index, const double loc_pot) noexcept
     {
         assert(index < strg->local_int_pot.size());
+        const double temp          = strg->local_int_pot[index];
         strg->local_int_pot[index] = loc_pot;
         strg->local_pot[index] =
-            strg->local_pot[index] +
-            loc_pot;  // todo: we have to discuss how we deal with these function. What should we update.
+            strg->local_pot[index] + loc_pot -
+            temp;  // todo: we have to discuss how we deal with these function. What should we update.
     }
 
     void assign_local_external_potential_by_index(const uint64_t index, const double loc_pot) noexcept
     {
         assert(index < strg->local_ext_pot.size());
+        const double temp          = strg->local_ext_pot[index];
         strg->local_ext_pot[index] = loc_pot;
+        strg->local_pot[index]     = strg->local_pot[index] + loc_pot - temp;
     }
     /**
      * This function assign the electrostatic system energy to zero (unit: eV). It can be used if only one SiDB is
@@ -1052,16 +1042,25 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     {
         strg->system_energy = 0.0;
 
-        for (uint64_t i = 0; i < strg->local_pot.size(); ++i)
+        for (uint64_t i = 0; i < strg->sidb_order.size(); ++i)
         {
             strg->system_energy +=
                 0.5 * strg->local_int_pot[i] * static_cast<double>(charge_state_to_sign(strg->cell_charge[i]));
         }
 
-        for (uint64_t i = 0; i < strg->local_ext_pot.size(); ++i)
+        for (uint64_t i = 0; i < strg->sidb_order.size(); ++i)
         {
             strg->system_energy +=
                 strg->local_ext_pot[i] * static_cast<double>(charge_state_to_sign(strg->cell_charge[i]));
+        }
+
+        for (const auto& [cell1, defect1] : strg->defects)
+        {
+            for (const auto& [cell2, defect2] : strg->defects)
+            {
+                strg->system_energy +=
+                    0.5 * chargeless_potential_at_given_distance(sidb_nm_distance<Lyt>(*this, cell1, cell2));
+            }
         }
     }
     /**
@@ -1454,12 +1453,17 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      *
      * @param potential_value Value of the global external electrostatic potential in Volt (e.g. -0.3).
      * Charge-transition levels are shifted by this value.
-     * @param dep_cell `dependent_cell_mode::FIXED` if the state of the dependent cell should not change,
-     * `dependent_cell_mode::VARIABLE` if it should.
      */
     void assign_global_external_potential(const double potential_value) noexcept
     {
-        strg->global_external_potential = potential_value;
+        for (const cell<Lyt>& c : strg->sidb_order)
+        {
+            strg->local_external_potential_map[c] += potential_value;
+        }
+
+        this->update_after_charge_change();
+
+        // todo: update??
     }
     /**
      * This function determines if given layout has to be simulated with three states since positively charged SiDBs
@@ -2065,6 +2069,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         {
             this->initialize_nm_distance_matrix();
             this->initialize_potential_matrix();
+            strg->local_pot_caused_by_defects.resize(this->num_cells(), 0);
             if constexpr (is_sidb_defect_surface_v<Lyt>)
             {
                 Lyt::foreach_sidb_defect([this](const auto cd)
