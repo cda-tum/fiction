@@ -101,7 +101,7 @@ TEST_CASE("Majority", "[mincross]")
     tec.create_po(f1);
     tec.create_po(f2);
 
-    auto                                                   tec_r = fiction::mutable_rank_view(tec);
+    auto                                                       tec_r = fiction::mutable_rank_view(tec);
     std::vector<mockturtle::node<fiction::technology_network>> rank1;
     rank1.push_back(tec_r.get_node(f1));
     rank1.push_back(tec_r.get_node(f2));

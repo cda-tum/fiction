@@ -207,7 +207,7 @@ class bfs_topo_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
             [&](auto n)
             {
                 unvisited_fanin_count[n] = 0;
-                fanout_ntk.foreach_fanin(n, [&](auto const&  /*f*/) { ++unvisited_fanin_count[n]; });
+                fanout_ntk.foreach_fanin(n, [&](auto const& /*f*/) { ++unvisited_fanin_count[n]; });
             });
 
         fanout_ntk.foreach_ci(
