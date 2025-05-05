@@ -979,7 +979,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                     dist, sidb_defect{sidb_defect_type::DB, 0, strg->simulation_parameters.epsilon_r,
                                       strg->simulation_parameters.lambda_tf});
 
-                strg->local_int_pot_at_defect[c1] += pot * static_cast<double>(strg->cell_charge[i]);
+                strg->local_int_pot_at_defect[c1] +=
+                    pot * static_cast<double>(charge_state_to_sign(strg->cell_charge[i]));
             }
         }
     }
@@ -1002,6 +1003,11 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         for (auto i = 0u; i < strg->sidb_order.size(); ++i)
         {
             strg->local_pot[i] = strg->local_int_pot[i] + strg->local_ext_pot[i];
+        }
+
+        if constexpr (is_sidb_defect_surface_v<Lyt>)
+        {
+            update_local_defect_potential();
         }
     }
     /**
@@ -1137,8 +1143,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                     dist, sidb_defect{sidb_defect_type::DB, 0, strg->simulation_parameters.epsilon_r,
                                       strg->simulation_parameters.lambda_tf});
 
-                strg->system_energy +=
-                    0.5 * static_cast<double>(defect.charge) * pot * static_cast<double>(strg->cell_charge[i]);
+                strg->system_energy += 0.5 * static_cast<double>(defect.charge) * pot *
+                                       static_cast<double>(charge_state_to_sign(strg->cell_charge[i]));
             }
         }
     }
