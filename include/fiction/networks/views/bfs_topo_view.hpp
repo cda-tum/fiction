@@ -66,7 +66,7 @@ class bfs_topo_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
      *
      * @param ntk Logic network to be wrapped with a topological view.
      */
-    bfs_topo_view(Ntk const& ntk) : mockturtle::immutable_view<Ntk>(ntk), fanout_ntk(ntk)
+    explicit bfs_topo_view(Ntk const& ntk) : mockturtle::immutable_view<Ntk>(ntk), fanout_ntk(ntk)
     {
         static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
         static_assert(mockturtle::has_size_v<Ntk>, "Ntk does not implement the size method");
@@ -207,7 +207,7 @@ class bfs_topo_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
             [&](auto n)
             {
                 unvisited_fanin_count[n] = 0;
-                fanout_ntk.foreach_fanin(n, [&](auto const& f) { ++unvisited_fanin_count[n]; });
+                fanout_ntk.foreach_fanin(n, [&](auto const&  /*f*/) { ++unvisited_fanin_count[n]; });
             });
 
         fanout_ntk.foreach_ci(
@@ -230,7 +230,9 @@ class bfs_topo_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
                                       [&](auto const& child)
                                       {
                                           if (fanout_ntk.visited(child) == fanout_ntk.trav_id())
+                                          {
                                               return;
+                                          }
 
                                           if (--unvisited_fanin_count[child] == 0)
                                           {

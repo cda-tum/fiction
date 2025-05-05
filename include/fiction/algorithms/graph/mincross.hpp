@@ -181,9 +181,9 @@ class mincross_impl
 
             const int other = r - dir;
 
-            medians(r, other);
+            medians(static_cast<uint32_t>(r), static_cast<uint32_t>(other));
 
-            reorder(r, reverse);
+            reorder(static_cast<uint32_t>(r), reverse);
         }
 
         transpose(!reverse);
@@ -195,13 +195,13 @@ class mincross_impl
      * @param r0 Current rank.
      * @param r1 Adjacent rank to which connections are considered.
      */
-    void medians(int r0, int r1)
+    void medians(uint32_t r0, uint32_t r1)
     {
         median_map.clear();
 
         // Loop over all nodes in rank r0
         fanout_ntk.foreach_node_in_rank(
-            static_cast<uint32_t>(r0),
+            r0,
             [&](auto const& n)
             {
                 std::vector<uint32_t> positions;
@@ -270,7 +270,7 @@ class mincross_impl
                         else
                         {
                             const double w = (positions[lm] * static_cast<double>(rspan)) +
-                                             positions[rm] * static_cast<double>(lspan);
+                                             (positions[rm] * static_cast<double>(lspan));
                             median_map[n] = w / (lspan + rspan);
                         }
                     }
@@ -284,10 +284,10 @@ class mincross_impl
      * @param r The rank index.
      * @param reverse If true, sorts in descending order of medians.
      */
-    void reorder(int r, bool reverse)
+    void reorder(uint32_t r, bool reverse)
     {
         // Get the nodes at rank r
-        auto rank = fanout_ntk.get_ranks(static_cast<uint32_t>(r));
+        auto rank = fanout_ntk.get_ranks(r);
 
         // Sort by median value
         std::sort(rank.begin(), rank.end(),
@@ -359,9 +359,9 @@ class mincross_impl
      * @param reverse If true, applies reversed heuristic for tie-breaking.
      * @return The number of crossings reduced.
      */
-    int transpose_step(int r, bool reverse)
+    int transpose_step(uint32_t r, bool reverse)
     {
-        auto rank = fanout_ntk.get_ranks(static_cast<uint32_t>(r));
+        auto rank = fanout_ntk.get_ranks(r);
 
         if (rank.size() <= 1)
         {
@@ -370,7 +370,7 @@ class mincross_impl
 
         int rv = 0;
 
-        for (int i = 0; i < rank.size() - 1; ++i)
+        for (uint32_t i = 0; i < rank.size() - 1; ++i)
         {
             auto const& v = rank[i];
             auto const& w = rank[i + 1];
@@ -386,7 +386,7 @@ class mincross_impl
                 c1 += in_cross(w, v);
             }
 
-            if (r + 1 < static_cast<int>(fanout_ntk.depth()))
+            if (r + 1 < fanout_ntk.depth())
             {
                 c0 += out_cross(v, w);
                 c1 += out_cross(w, v);

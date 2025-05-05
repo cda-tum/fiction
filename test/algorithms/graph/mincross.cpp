@@ -89,6 +89,33 @@ TEST_CASE("Planar Network", "[mincross]")
     CHECK(st.num_crossings == 0);
 }
 
+TEST_CASE("Majority", "[mincross]")
+{
+    fiction::technology_network tec{};
+
+    const auto x1 = tec.create_pi();
+    const auto x2 = tec.create_pi();
+    const auto x3 = tec.create_pi();
+    const auto f1 = tec.create_maj(x1, x2, x3);
+    const auto f2 = tec.create_not(x1);
+    tec.create_po(f1);
+    tec.create_po(f2);
+
+    auto                                                   tec_r = fiction::mutable_rank_view(tec);
+    std::vector<mockturtle::node<fiction::technology_network>> rank1;
+    rank1.push_back(tec_r.get_node(f1));
+    rank1.push_back(tec_r.get_node(f2));
+    tec_r.set_ranks(1, rank1);
+
+    mincross_stats        st{};
+    const mincross_params p{};
+    auto                  ntk = mincross(tec_r, p, &st, false);  // counts crossings
+    CHECK(st.num_crossings == 2);
+
+    ntk = mincross(tec_r, p, &st);
+    CHECK(st.num_crossings == 0);
+}
+
 TEST_CASE("Minimize Crossings Adder", "[mincross]")
 {
     auto tec = blueprints::full_adder_network<mockturtle::names_view<technology_network>>();
