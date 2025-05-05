@@ -78,7 +78,9 @@ class mincross_impl
     [[nodiscard]] Ntk run()
     {
         if (opt)
+        {
             minimize_crossings();
+        }
         ncross();
         pst.num_crossings = total_crossings;
         return ntk;
@@ -112,7 +114,9 @@ class mincross_impl
             for (int iter = 0; iter < max_this_pass; ++iter)
             {
                 if (trying++ >= min_quit || cur_cross == 0)
+                {
                     break;
+                }
 
                 // Core step: reorder ranks to reduce crossings
                 mincross_step(iter);
@@ -125,8 +129,10 @@ class mincross_impl
                 {
                     best_ranks = fanout_ntk.get_all_ranks();
                     best_cross = cur_cross;
-                    if (static_cast<double>(cur_cross) < convergence * best_cross)
+                    if (static_cast<double>(cur_cross) < convergence * static_cast<double>(best_cross))
+                    {
                         trying = 0;
+                    }
                 }
             }
 
@@ -169,7 +175,9 @@ class mincross_impl
         for (int r = first; r != last + dir; r += dir)
         {
             if (r == 0 && ps.fixed_pis)
+            {
                 continue;
+            }
 
             const int other = r - dir;
 
@@ -193,10 +201,10 @@ class mincross_impl
 
         // Loop over all nodes in rank r0
         fanout_ntk.foreach_node_in_rank(
-            r0,
+            static_cast<uint32_t>(r0),
             [&](auto const& n)
             {
-                std::vector<int> positions;
+                std::vector<uint32_t> positions;
 
                 if (r1 > r0)
                 {
@@ -252,8 +260,8 @@ class mincross_impl
                         // Weighted median
                         const size_t rm    = j / 2;
                         const size_t lm    = rm - 1;
-                        int const    lspan = positions[lm] - positions.front();
-                        const int    rspan = positions.back() - positions[rm];
+                        const uint32_t   lspan = positions[lm] - positions.front();
+                        const uint32_t    rspan = positions.back() - positions[rm];
 
                         if (lspan == rspan)
                         {
@@ -262,7 +270,7 @@ class mincross_impl
                         else
                         {
                             const double w =
-                                positions[lm] * static_cast<double>(rspan) + positions[rm] * static_cast<double>(lspan);
+                                (positions[lm] * static_cast<double>(rspan)) + positions[rm] * static_cast<double>(lspan);
                             median_map[n] = w / (lspan + rspan);
                         }
                     }
@@ -279,7 +287,7 @@ class mincross_impl
     void reorder(int r, bool reverse)
     {
         // Get the nodes at rank r
-        auto rank = fanout_ntk.get_ranks(r);
+        auto rank = fanout_ntk.get_ranks(static_cast<uint32_t>(r));
 
         // Sort by median value
         std::sort(rank.begin(), rank.end(),
@@ -290,9 +298,13 @@ class mincross_impl
 
                       // Handle -1 (no connections) as infinity to push to the back
                       if (m1 == -1)
+                      {
                           return false;
+                      }
                       if (m2 == -1)
+                      {
                           return true;
+                      }
 
                       return reverse ? (m1 > m2) : (m1 < m2);
                   });
@@ -316,10 +328,12 @@ class mincross_impl
         {
             delta = 0;
 
-            for (int l = 0; l <= fanout_ntk.depth(); ++l)
+            for (uint32_t l = 0; l <= fanout_ntk.depth(); ++l)
             {
                 if (l == 0 && ps.fixed_pis)
+                {
                     continue;
+                }
 
                 if (candidate[l])
                 {
@@ -332,7 +346,9 @@ class mincross_impl
             ++max_iterations;
 
             if (delta < 1 || max_iterations == 1000)
+            {
                 break;
+            }
         }
     }
 
@@ -345,10 +361,12 @@ class mincross_impl
      */
     int transpose_step(int r, bool reverse)
     {
-        auto rank = fanout_ntk.get_ranks(r);
+        auto rank = fanout_ntk.get_ranks(static_cast<uint32_t>(r));
 
         if (rank.size() <= 1)
+        {
             return 0;
+        }
 
         int rv = 0;
 
@@ -393,7 +411,7 @@ class mincross_impl
      */
     int in_cross(const node& left, const node& right)
     {
-        std::vector<int> left_sources, right_sources;
+        std::vector<uint32_t> left_sources, right_sources;
 
         fanout_ntk.foreach_fanin(left,
                                  [&](auto const& f)
@@ -421,7 +439,7 @@ class mincross_impl
      */
     int out_cross(const node& left, const node& right)
     {
-        std::vector<int> left_targets, right_targets;
+        std::vector<uint32_t> left_targets, right_targets;
 
         fanout_ntk.foreach_fanout(left,
                                   [&](auto const& tgt) { left_targets.push_back(fanout_ntk.rank_position(tgt)); });
@@ -439,7 +457,7 @@ class mincross_impl
      * @param b Positions from second set of connections.
      * @return Total number of crossings between the sets.
      */
-    int count_crossings(const std::vector<int>& a, const std::vector<int>& b)
+    int count_crossings(const std::vector<uint32_t>& a, const std::vector<uint32_t>& b)
     {
         int count = 0;
         for (auto x : a)
@@ -447,7 +465,9 @@ class mincross_impl
             for (auto y : b)
             {
                 if (x > y)
+                {
                     ++count;
+                }
             }
         }
         return count;
@@ -460,7 +480,7 @@ class mincross_impl
     {
         total_crossings = 0;
 
-        for (int r = 0; r < fanout_ntk.depth(); ++r)
+        for (uint32_t r = 0; r < fanout_ntk.depth(); ++r)
         {
             std::vector<uint64_t> penalty_array(fanout_ntk.rank_width(r + 1) + 1, 0);
             uint64_t              max_pos = 0;
