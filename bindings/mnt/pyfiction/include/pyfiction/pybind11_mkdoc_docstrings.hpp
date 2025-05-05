@@ -15912,8 +15912,8 @@ Returns:
 static const char *__doc_fiction_inverter_substitution =
 R"doc(Applies an inverter substitution optimization on a logic network.
 
-Substitutes redundant inverters at fanout points with a single
-inverter at the driving node’s input. Optionally, replaces AND or OR
+Substitutes inverters at the fanouts of fanout nodes with a single
+inverter at the fanout node’s input. Optionally, replaces AND or OR
 gates with inverters on their inputs by equivalent dual gates with a
 single inverter at their output. The goal is to reduce the overall
 number of inverters in the network.
