@@ -72,13 +72,13 @@ jobs:
           version: ${{env.Z3_VERSION}}
 
       - name: Install the latest version of uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v6
         with:
           version: "latest"
           enable-cache: true
 
       - name: Setup nox
-        uses: wntrblm/nox@2024.10.09
+        uses: wntrblm/nox@2025.05.01
 
       - name: 🐍 Test
         run: nox -s tests --verbose

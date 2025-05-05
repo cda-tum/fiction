@@ -8,13 +8,16 @@ import os
 import sys
 from pathlib import Path
 
-if sys.platform == "win32" and "Z3_ROOT" in os.environ:
-    lib_path = Path(os.environ["Z3_ROOT"]) / "lib"
-    if lib_path.exists():
-        os.add_dll_directory(str(lib_path))
-    bin_path = Path(os.environ["Z3_ROOT"]) / "bin"
-    if bin_path.exists():
-        os.add_dll_directory(str(bin_path))
+if sys.platform == "win32":
+    if "Z3_ROOT" in os.environ:
+        lib_path = Path(os.environ["Z3_ROOT"]) / "lib"
+        if lib_path.exists():
+            os.add_dll_directory(str(lib_path))
+        bin_path = Path(os.environ["Z3_ROOT"]) / "bin"
+        if bin_path.exists():
+            os.add_dll_directory(str(bin_path))
+    if "ALGLIB_DIR" in os.environ:
+        os.add_dll_directory(str(os.environ["ALGLIB_DIR"]))
 
 from .pyfiction import (  # type: ignore[import-not-found]
     __compiled_date__,
@@ -46,6 +49,7 @@ from .pyfiction import (  # type: ignore[import-not-found]
     bdl_wire_selection,
     calculate_energy_and_state_type_with_kinks_accepted,
     calculate_energy_and_state_type_with_kinks_rejected,
+    calculate_energy_distribution,
     can_positive_charges_occur,
     cartesian_gate_layout,
     # Layouts
@@ -64,6 +68,8 @@ from .pyfiction import (  # type: ignore[import-not-found]
     clocked_cartesian_layout,
     clocked_hexagonal_layout,
     clocked_shifted_cartesian_layout,
+    clustercomplete,
+    clustercomplete_params,
     color_mode,
     color_routing,
     color_routing_params,
@@ -96,6 +102,11 @@ from .pyfiction import (  # type: ignore[import-not-found]
     create_xor_tt,
     ## properties
     critical_path_length_and_throughput,
+    critical_temperature_domain,
+    critical_temperature_domain_contour_tracing,
+    critical_temperature_domain_flood_fill,
+    critical_temperature_domain_grid_search,
+    critical_temperature_domain_random_sampling,
     critical_temperature_gate_based,
     critical_temperature_non_gate_based,
     critical_temperature_params,
@@ -108,6 +119,7 @@ from .pyfiction import (  # type: ignore[import-not-found]
     design_sidb_gates,
     design_sidb_gates_mode,
     design_sidb_gates_params,
+    design_sidb_gates_stats,
     detect_bdl_pairs,
     detect_bdl_pairs_params,
     detect_bdl_wires_100,
@@ -155,12 +167,17 @@ from .pyfiction import (  # type: ignore[import-not-found]
     graph_oriented_layout_design,
     graph_oriented_layout_design_params,
     graph_oriented_layout_design_stats,
-    groundstate_from_simulation_result,
+    ground_state_space_reporting,
     has_high_degree_fanin_nodes,
+    heuristic_sidb_simulation_engine,
     hexagonal_gate_layout,
     hexagonal_layout,
     hexagonal_obstruction_layout,
     hexagonalization,
+    hexagonalization_io_pin_extension_mode,
+    hexagonalization_io_pin_routing_error,
+    hexagonalization_params,
+    hexagonalization_stats,
     high_degree_fanin_exception,
     inml_layout,
     inml_technology,
@@ -194,6 +211,7 @@ from .pyfiction import (  # type: ignore[import-not-found]
     offset_area,
     offset_coordinate,
     offset_volume,
+    operational_analysis_strategy,
     operational_condition,
     operational_domain,
     operational_domain_contour_tracing,
@@ -258,6 +276,7 @@ from .pyfiction import (  # type: ignore[import-not-found]
     sidb_nm_distance_111,
     sidb_nm_position,
     sidb_simulation_engine,
+    sidb_simulation_engine_name,
     sidb_simulation_parameters,
     sidb_simulation_result_100,
     sidb_simulation_result_111,
@@ -279,6 +298,7 @@ from .pyfiction import (  # type: ignore[import-not-found]
     technology_mapping_stats,
     # Networks
     technology_network,
+    termination_condition,
     time_to_solution,
     time_to_solution_for_given_simulation_results,
     time_to_solution_params,
@@ -296,6 +316,8 @@ from .pyfiction import (  # type: ignore[import-not-found]
     wiring_reduction,
     wiring_reduction_params,
     wiring_reduction_stats,
+    write_critical_temperature_domain,
+    write_critical_temperature_domain_to_string,
     write_dot_layout,
     write_dot_network,
     write_fgl_layout,
@@ -303,6 +325,7 @@ from .pyfiction import (  # type: ignore[import-not-found]
     write_fqca_layout_params,
     write_operational_domain,
     write_operational_domain_params,
+    write_operational_domain_to_string,
     write_qca_layout,
     write_qca_layout_params,
     write_qca_layout_svg,
@@ -348,6 +371,7 @@ __all__ = [
     "bdl_wire_selection",
     "calculate_energy_and_state_type_with_kinks_accepted",
     "calculate_energy_and_state_type_with_kinks_rejected",
+    "calculate_energy_distribution",
     "can_positive_charges_occur",
     "cartesian_gate_layout",
     # Layouts
@@ -366,6 +390,8 @@ __all__ = [
     "clocked_cartesian_layout",
     "clocked_hexagonal_layout",
     "clocked_shifted_cartesian_layout",
+    "clustercomplete",
+    "clustercomplete_params",
     "color_mode",
     "color_routing",
     "color_routing_params",
@@ -398,6 +424,11 @@ __all__ = [
     "create_xor_tt",
     ## properties
     "critical_path_length_and_throughput",
+    "critical_temperature_domain",
+    "critical_temperature_domain_contour_tracing",
+    "critical_temperature_domain_flood_fill",
+    "critical_temperature_domain_grid_search",
+    "critical_temperature_domain_random_sampling",
     "critical_temperature_gate_based",
     "critical_temperature_non_gate_based",
     "critical_temperature_params",
@@ -410,6 +441,7 @@ __all__ = [
     "design_sidb_gates",
     "design_sidb_gates_mode",
     "design_sidb_gates_params",
+    "design_sidb_gates_stats",
     "detect_bdl_pairs",
     "detect_bdl_pairs_params",
     "detect_bdl_wires_100",
@@ -457,12 +489,17 @@ __all__ = [
     "graph_oriented_layout_design",
     "graph_oriented_layout_design_params",
     "graph_oriented_layout_design_stats",
-    "groundstate_from_simulation_result",
+    "ground_state_space_reporting",
     "has_high_degree_fanin_nodes",
+    "heuristic_sidb_simulation_engine",
     "hexagonal_gate_layout",
     "hexagonal_layout",
     "hexagonal_obstruction_layout",
     "hexagonalization",
+    "hexagonalization_io_pin_extension_mode",
+    "hexagonalization_io_pin_routing_error",
+    "hexagonalization_params",
+    "hexagonalization_stats",
     "high_degree_fanin_exception",
     "inml_layout",
     "inml_technology",
@@ -496,6 +533,7 @@ __all__ = [
     "offset_area",
     "offset_coordinate",
     "offset_volume",
+    "operational_analysis_strategy",
     "operational_condition",
     "operational_domain",
     "operational_domain_contour_tracing",
@@ -560,6 +598,7 @@ __all__ = [
     "sidb_nm_distance_111",
     "sidb_nm_position",
     "sidb_simulation_engine",
+    "sidb_simulation_engine_name",
     "sidb_simulation_parameters",
     "sidb_simulation_result_100",
     "sidb_simulation_result_111",
@@ -581,6 +620,7 @@ __all__ = [
     "technology_mapping_stats",
     # Networks
     "technology_network",
+    "termination_condition",
     "time_to_solution",
     "time_to_solution_for_given_simulation_results",
     "time_to_solution_params",
@@ -598,6 +638,8 @@ __all__ = [
     "wiring_reduction",
     "wiring_reduction_params",
     "wiring_reduction_stats",
+    "write_critical_temperature_domain",
+    "write_critical_temperature_domain_to_string",
     "write_dot_layout",
     "write_dot_network",
     "write_fgl_layout",
@@ -605,6 +647,7 @@ __all__ = [
     "write_fqca_layout_params",
     "write_operational_domain",
     "write_operational_domain_params",
+    "write_operational_domain_to_string",
     "write_qca_layout",
     "write_qca_layout_params",
     "write_qca_layout_svg",

@@ -25,7 +25,7 @@ jobs:
           submodules: recursive
 
       - name: Review code with Clang-Tidy
-        uses: ZedThree/clang-tidy-review@v0.20.1
+        uses: ZedThree/clang-tidy-review@v0.21.0
         id: review
         with:
           cmake_command: >
@@ -35,9 +35,10 @@ jobs:
             -DFICTION_TEST=ON
             -DFICTION_BENCHMARK=OFF
             -DFICTION_EXPERIMENTS=ON
+            -DFICTION_ALGLIB=ON
             -DMOCKTURTLE_EXAMPLES=OFF
           build_dir: build
-          apt_packages: "libreadline-dev,libtbb-dev"
+          apt_packages: "libreadline-dev,libtbb-dev,python3-dev"
           config_file: ".clang-tidy"
           exclude: "libs/*,docs/*,benchmarks/*,bib/*,*/pyfiction/pybind11_mkdoc_docstrings.hpp,*/pyfiction/documentation.hpp"
           split_workflow: true

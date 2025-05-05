@@ -60,15 +60,24 @@ Heuristic Ground State Simulation
 Exhaustive Ground State Simulation
 ##################################
 
-.. _quickexact:
-
 .. tabs::
     .. tab:: C++
+
+        .. _quickexact:
+
         **Header:** ``fiction/algorithms/simulation/sidb/quickexact.hpp``
 
         .. doxygenstruct:: fiction::quickexact_params
            :members:
         .. doxygenfunction:: fiction::quickexact
+
+        .. _clustercomplete:
+
+        **Header:** ``fiction/algorithms/simulation/sidb/clustercomplete.hpp``
+
+        .. doxygenstruct:: fiction::clustercomplete_params
+           :members:
+        .. doxygenfunction:: fiction::clustercomplete
 
         **Header:** ``fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp``
 
@@ -78,6 +87,9 @@ Exhaustive Ground State Simulation
         .. autoclass:: mnt.pyfiction.quickexact_params
             :members:
         .. autofunction:: mnt.pyfiction.quickexact
+        .. autoclass:: mnt.pyfiction.clustercomplete_params
+            :members:
+        .. autofunction:: mnt.pyfiction.clustercomplete
         .. autofunction:: mnt.pyfiction.exhaustive_ground_state_simulation
 
 
@@ -90,13 +102,17 @@ Engine Selectors
 
         .. doxygenenum:: fiction::sidb_simulation_engine
         .. doxygenenum:: fiction::exact_sidb_simulation_engine
+        .. doxygenenum:: fiction::heuristic_sidb_simulation_engine
+        .. doxygenfunction:: fiction::sidb_simulation_engine_name
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.sidb_simulation_engine
             :members:
         .. autoclass:: mnt.pyfiction.exact_sidb_simulation_engine
             :members:
-
+        .. autoclass:: mnt.pyfiction.heuristic_sidb_simulation_engine
+            :members:
+        .. autofunction:: mnt.pyfiction.sidb_simulation_engine_name
 
 Energy Calculation
 ##################
@@ -105,8 +121,11 @@ Energy Calculation
     .. tab:: C++
         **Header:** ``fiction/algorithms/simulation/sidb/energy_distribution.hpp``
 
-        .. doxygentypedef:: fiction::sidb_energy_distribution
-        .. doxygenfunction:: fiction::energy_distribution
+        .. doxygenstruct:: fiction::energy_state
+           :members:
+        .. doxygenclass:: fiction::energy_distribution
+           :members:
+        .. doxygenfunction:: fiction::calculate_energy_distribution
 
 
         **Header:** ``fiction/algorithms/simulation/sidb/minimum_energy.hpp``
@@ -120,7 +139,7 @@ Energy Calculation
         .. doxygenfunction:: fiction::is_ground_state
 
     .. tab:: Python
-        .. autofunction:: mnt.pyfiction.energy_distribution
+        .. autofunction:: mnt.pyfiction.calculate_energy_distribution
 
         .. autofunction:: mnt.pyfiction.minimum_energy
 
@@ -143,11 +162,13 @@ Temperature Behavior
 
         **Header:** ``fiction/algorithms/simulation/sidb/occupation_probability_of_excited_states.hpp``
 
+        .. doxygenfunction:: fiction::calculate_boltzmann_factor
         .. doxygenfunction:: fiction::occupation_probability_gate_based
         .. doxygenfunction:: fiction::occupation_probability_non_gate_based
 
         **Header:** ``fiction/algorithms/simulation/sidb/calculate_energy_and_state_type.hpp``
 
+        .. doxygenenum:: fiction::state_type
         .. doxygentypedef:: fiction::sidb_energy_and_state_type
         .. doxygenfunction:: fiction::calculate_energy_and_state_type_with_kinks_accepted
         .. doxygenfunction:: fiction::calculate_energy_and_state_type_with_kinks_rejected
@@ -166,6 +187,18 @@ Temperature Behavior
 
         .. autofunction:: mnt.pyfiction.calculate_energy_and_state_type_with_kinks_accepted
         .. autofunction:: mnt.pyfiction.calculate_energy_and_state_type_with_kinks_rejected
+
+Ground State Space Construction
+###############################
+
+.. _ground_state_space:
+
+**Header:** ``fiction/algorithms/simulation/sidb/ground_state_space.hpp``
+
+.. doxygenstruct:: fiction::ground_state_space_results
+   :members:
+.. doxygenfunction:: fiction::ground_state_space
+
 
 Time-to-Solution (TTS) Statistics
 #################################
@@ -209,7 +242,6 @@ Random SiDB Layout Generator
         .. autofunction:: mnt.pyfiction.generate_multiple_random_sidb_layouts
 
 
-
 Operational Domain Computation
 ##############################
 
@@ -236,7 +268,9 @@ Operational Domain Computation
         .. doxygenstruct:: fiction::parameter_point
            :members:
         .. doxygenenum:: fiction::sweep_parameter
-        .. doxygenstruct:: fiction::operational_domain
+        .. doxygenclass:: fiction::operational_domain
+           :members:
+        .. doxygenclass:: fiction::critical_temperature_domain
            :members:
         .. doxygenstruct:: fiction::operational_domain_value_range
            :members:
@@ -249,6 +283,10 @@ Operational Domain Computation
         .. doxygenfunction:: fiction::operational_domain_random_sampling
         .. doxygenfunction:: fiction::operational_domain_flood_fill
         .. doxygenfunction:: fiction::operational_domain_contour_tracing
+        .. doxygenfunction:: fiction::critical_temperature_domain_grid_search
+        .. doxygenfunction:: fiction::critical_temperature_domain_random_sampling
+        .. doxygenfunction:: fiction::critical_temperature_domain_flood_fill
+        .. doxygenfunction:: fiction::critical_temperature_domain_contour_tracing
 
         **Header:** ``fiction/algorithms/simulation/sidb/operational_domain_ratio.hpp``
 
@@ -265,6 +303,8 @@ Operational Domain Computation
             :members:
         .. autoclass:: mnt.pyfiction.operational_condition
             :members:
+        .. autoclass:: mnt.pyfiction.operational_analysis_strategy
+            :members:
         .. autoclass:: mnt.pyfiction.is_operational_params
             :members:
         .. autofunction:: mnt.pyfiction.is_operational
@@ -278,6 +318,8 @@ Operational Domain Computation
             :members:
         .. autoclass:: mnt.pyfiction.operational_domain
             :members:
+        .. autoclass:: mnt.pyfiction.critical_temperature_domain
+            :members:
         .. autoclass:: mnt.pyfiction.operational_domain_value_range
             :members:
         .. autoclass:: mnt.pyfiction.operational_domain_params
@@ -289,11 +331,15 @@ Operational Domain Computation
         .. autofunction:: mnt.pyfiction.operational_domain_random_sampling
         .. autofunction:: mnt.pyfiction.operational_domain_flood_fill
         .. autofunction:: mnt.pyfiction.operational_domain_contour_tracing
+        .. autofunction:: mnt.pyfiction.critical_temperature_domain_grid_search
+        .. autofunction:: mnt.pyfiction.critical_temperature_domain_random_sampling
+        .. autofunction:: mnt.pyfiction.critical_temperature_domain_flood_fill
+        .. autofunction:: mnt.pyfiction.critical_temperature_domain_contour_tracing
 
-        .. autoclass:: mnt.pyfiction.compute_operational_ratio_params
+        .. autoclass:: mnt.pyfiction.operational_domain_ratio_params
                 :members:
 
-        .. autofunction:: mnt.pyfiction.compute_operational_ratio
+        .. autofunction:: mnt.pyfiction.operational_domain_ratio
 
 
 Physically Valid Parameters
@@ -355,19 +401,6 @@ Simulation Equivalence Checking
 
     .. tab:: Python
         .. autofunction:: mnt.pyfiction.check_simulation_results_for_equivalence
-
-
-Determine the Ground State from Simulation Results
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. tabs::
-    .. tab:: C++
-        **Header:** ``fiction/algorithms/simulation/sidb/groundstate_from_simulation_result.hpp``
-
-        .. doxygenfunction:: fiction::groundstate_from_simulation_result
-
-    .. tab:: Python
-        .. autofunction:: mnt.pyfiction.groundstate_from_simulation_result
 
 
 Charge Detection
@@ -454,8 +487,8 @@ Assess Population Stability
             :members:
         .. autoclass:: mnt.pyfiction.physical_population_stability_params
             :members:
-        .. autofunction:: mnt.pyfiction.assess_physical_population_stability_100
-        .. autofunction:: mnt.pyfiction.assess_physical_population_stability_111
+        .. autofunction:: mnt.pyfiction.physical_population_stability_100
+        .. autofunction:: mnt.pyfiction.physical_population_stability_111
 
 
 Band-Bending Resilience
@@ -557,7 +590,7 @@ SiDB Defect Analysis
 .. doxygenstruct:: fiction::defect_influence_params
    :members:
 .. doxygenenum:: fiction::defect_influence_status
-.. doxygenstruct:: fiction::defect_influence_domain
+.. doxygenclass:: fiction::defect_influence_domain
    :members:
 
 .. doxygenstruct:: fiction::defect_influence_stats

@@ -226,17 +226,34 @@ Generates gate-level layouts from logic network specifications by spanning a sea
 
 Possible parameters:
 
-- Timeout (``-t``), in seconds.
-- Number of expansions (``-n``) for each vertex in the search space graph, defaults to 4.
-- High effort mode (``-e``), should be set if more runtime is available to find layouts with even less area, not set by default.
-- Return first (``-r``), to return the first found layout, not set by default.
-- Planar (``-p``), should be set to create layouts without crossings, not set by default.
+- Timeout (``-t``): Timeout for the algorithm in seconds.
+- Number of vertex expansions (``-n``): Specifies the number of vertex expansions during the search for each vertex in the search space graph (defaults to ``4`` if not provided).
+- Effort mode (``-e``): Determines the computational effort used by the algorithm. Possible values are:
+    - ``0`` (``high_efficiency``): Uses minimal computational resources, resulting in fewer search space graphs and potentially lower quality solutions.
+    - ``1`` (``high_effort``): Uses increased computational resources to generate more search space graphs, thereby improving the chance of finding an optimal solution.
+    - ``2`` (``highest_effort``): Utilizes maximum computational resources to produce the most search space graphs, ensuring the highest probability of obtaining the best possible layout.
+- Cost objective (``-c``): Specifies the cost objective for the layout design. Options include:
+    - ``0`` (area): Minimize the layout area.
+    - ``1`` (wires): Minimize the number of wire segments.
+    - ``2`` (crossings): Minimize the number of crossings.
+    - ``3`` (acp): Minimize the area-crossing product (ACP), balancing area and number of crossings.
+- Return first (``-r``): Terminate the search as soon as the first valid layout is found, which reduces runtime but might sacrifice result quality.
+- Planar (``-p``): Enable planar layout generation to constrain routing to be free of crossings.
+- Multithreading (``-m``): Enable multithreading (currently a beta feature) to potentially accelerate computation.
+- Verbose (``-v``): Output detailed runtime statistics after the algorithm completes.
 
 Hexagonalization (``hex``)
 ##########################
 
 Transforms a 2DDWave-clocked Cartesian layout into a hexagonal row-clocked layout suitable for SiDBs by
 remapping all gates and wires. For more information, see `the paper <https://ieeexplore.ieee.org/document/10231278>`_.
+
+Possible parameters:
+
+- Input pin extension (``-i``): Extend primary inputs to the top row.
+- Output pin extension (``-o``): Extend primary outputs to the bottom row.
+- Planar (``-p``): If ``-i`` and/or (``-o``) is set, enforce planar rerouting when extending primary inputs and/or outputs, ensuring that the routing is free of crossings.
+- Verbose (``-v``): Output detailed runtime statistics after the algorithm completes.
 
 Post-Layout Optimization (``optimize``)
 #######################################
@@ -249,10 +266,11 @@ For more information, see `this paper <https://dl.acm.org/doi/10.1145/3611315.36
 
 Possible parameters:
 
-- Timeout (``-t``), in seconds.
-- Number of maximum gate relocations (``-m``), should be set to 1 for layouts with more than 100000 tiles, defaults to the number of tiles in the layout.
-- Wiring reduction only (``-w``), should be set for layouts with more than 20000000 tiles, not set by default.
-- Planar optimization (``-p``), should be set if during optimization, gates should only be relocated if the new wiring contains no crossings, not set by default.
+- Timeout (``-t``): Timeout for the algorithm in seconds.
+- Number of maximum gate relocations (``-m``): Should be set to ``1`` for layouts with more than 100000 tiles, defaults to the number of tiles in the layout.
+- Wiring reduction only (``-w``): Should be set for layouts with more than 20000000 tiles, not set by default.
+- Planar optimization (``-p``): Only relocate gates if the new wiring contains no crossings, not set by default.
+- Verbose (``-v``): Output detailed runtime statistics after the algorithm completes.
 
 Design rule checking (``check``)
 --------------------------------
@@ -331,8 +349,8 @@ Physical Simulation of SiDBs
 Performing physical simulation of SiDB layouts is crucial for understanding layout behavior and
 facilitating rapid prototyping, eliminating the need for expensive and time-intensive fabrication processes.
 The command ``read --sqd`` (or ``read -s``) is used to import a SiDB layout from an sqd-file, a format compatible with `SiQAD <https://github.com/siqad/siqad>`_.
-The SiDB layout can be visualized using the ``print -c`` command. Currently, *fiction* provides two electrostatic physical simulators:
-the exact one *QuickExact* and the scalable one *QuickSim*.
+The SiDB layout can be visualized using the ``print -c`` command. Currently, *fiction* provides three electrostatic physical simulators:
+the two exact ones: *QuickExact* and *ClusterComplete*, and the scalable one *QuickSim*.
 
 QuickExact (``quickexact``)
 ###########################
@@ -350,6 +368,33 @@ Most important parameters:
 - Energy transition level (0/-) :math:`\mu_-` (``-m``)
 
 See ``quickexact -h`` for a full list.
+
+The simulated ground state charge distribution can be printed with ``print -c``.
+
+ClusterComplete (``clustercomplete``)
+#####################################
+
+*ClusterComplete* too serves as an exact simulator in much the same way as *QuickExact*, yet it introduces a new
+dimension of scalability for the purpose of SiDB logic simulation. For the first time, it enables exact simulation of
+layouts with multiple gates in base 3, incorporating efficient consideration of positive charges.
+Similar to *QuickExact*, it considers all possible charge distributions, though through intricate analysis of bounds on
+local potentials, it is able to prune charge assignments to clusters of SiDBs in a hierarchy, thus providing scalability
+to exact simulation of SiDB logic to an extent that was previously thought to be impossible.
+
+Most important parameters:
+
+- Relative permittivity :math:`\epsilon_r` (``-e``)
+- Thomas-Fermi screening length :math:`\lambda_{tf}` (``-l``)
+- Energy transition level (0/-) :math:`\mu_-` (``-m``)
+- Witness partitioning limits (``-w``, ``-o``)
+- Report pruning statistics (``-r``)
+
+See ``clustercomplete -h`` for a full list.
+
+Pruning statistics may be useful to optimise the efficacy of the first pruning stage with the witness partitioning
+limits to save time on time intensive simulation problems. These statistics can also provide an indication for the
+complexity of the remaining problem that is solved in the second stage. Thus, through experience with *ClusterComplete*
+and these statistics, the expected time required to terminate may be gauged.
 
 The simulated ground state charge distribution can be printed with ``print -c``.
 
@@ -389,7 +434,7 @@ Most important parameters:
 - Relative permittivity :math:`\epsilon_r` (``-e``)
 - Thomas-Fermi screening :math:`\lambda_{tf}` (``-l``)
 - Energy transition level (0/-) :math:`\mu_-` (``-m``)
-
+- SiDB simulation engine to use (``--engine``)
 
 Operational Domain (``opdom``)
 ##############################
@@ -430,6 +475,9 @@ the following options:
 - ``--flood_fill``/``-f``
 - ``--contour_tracing``/``-c``
 each of which start from a set of random samples, whose number has to be passed as an argument to the flag.
+
+Operational domain calculation may be powered by *QuickExact*, *ClusterComplete*, *ExGS* or *QuickSim*. The simulation
+engine to use can be set with ``--engine``.
 
 See ``opdom -h`` for a full list of arguments.
 

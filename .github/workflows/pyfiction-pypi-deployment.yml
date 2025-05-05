@@ -58,7 +58,7 @@ jobs:
           fetch-depth: 0
 
       - name: Install the latest version of uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v6
         with:
           version: "latest"
           enable-cache: true
@@ -99,7 +99,7 @@ jobs:
         if: matrix.runs-on != 'ubuntu-24.04-arm'
         uses: hendrikmuhs/ccache-action@v1.2
         with:
-          key: "${{matrix.config.os}}-pyfiction"
+          key: "${{matrix.runs-on}}-pyfiction"
           save: true
           max-size: 10G
 
@@ -115,18 +115,18 @@ jobs:
         uses: rui314/setup-mold@v1
 
       - name: Install the latest version of uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v6
         with:
           version: "latest"
           enable-cache: true
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.22
+        uses: pypa/cibuildwheel@v2.23
 
       - name: Upload wheel as an artifact
         uses: actions/upload-artifact@v4
         with:
-          name: cibw-wheels-${{ matrix.config.os }}
+          name: cibw-wheels-${{ matrix.runs-on }}
           path: ./wheelhouse/*.whl
           overwrite: true
 

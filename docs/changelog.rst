@@ -5,13 +5,65 @@ All notable changes to this project will be documented in this file.
 
 The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`_.
 
-Unreleased
-----------
+v0.6.10 - 2025-02-21
+--------------------
 
 Added
 #####
+- Algorithms:
+    - Added parameters to extend the PIs to the first layout row or POs to the last layout row after ``hexagonalization``.
+
+Fixed
+#####
+- Fixed the Python bindings for the critical temperature domain simulation
+
+v0.6.9 - 2025-02-12
+-------------------
+
+Added
+#####
+- Algorithms:
+    - Added ``ClusterComplete``, a novel exact physical simulator for SiDB layouts with substantially improved runtimes, allowing the simulation of multi-gate SiDB layouts.
+    - Added temperature-aware operational domain simulation and restructured the function to simplify the integration of additional figures of merit in the future
+
+Changed
+#######
+- Build and documentation:
+    - Added optional usage of `jemalloc <https://github.com/jemalloc/jemalloc>`_ to speed up certain parallelized applications
+
+Fixed
+#####
+- Algorithms:
+    - Fixed a bug in ``apply_gate_library`` that resulted in incorrect cell-level layout sizing
+- Build and documentation:
+    - Added a CMake file for detecting pre-installed jemalloc
+- Experiments:
+    - Fixed a non-critical bug that occurred when ALGLIB was disabled
+
+
+v0.6.8 - 2025-01-25
+-------------------
+
+Added
+#####
+- Data structures:
+    - ``virtual_pi_network`` that allows for the duplication of input signals
+    - ``mutable_rank_view`` that allows for the reordering of nodes
+    - ``static_depth_view`` that disables depth recomputation
+- Algorithms:
+    - Logic synthesis:
+        - Equivalence checking for networks with virtual PIs
 - Clocking schemes:
     - SRS
+- Continuous integration:
+    - Added Linux on ARM runners
+
+Fixed
+#####
+- Continuous deployment:
+    - Fixed a critical issue with wheel building and deployment to PyPI that caused some operating systems to not be served
+- Experiments:
+    - Fixed outdated paths in the ``QuickCell`` experiment script
 
 
 v0.6.7 - 2025-01-20

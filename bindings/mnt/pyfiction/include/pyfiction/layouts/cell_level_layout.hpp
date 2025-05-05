@@ -32,7 +32,6 @@ template <typename Technology>
 void fcn_technology_cell_level_layout(pybind11::module& m)
 {
     namespace py = pybind11;
-    namespace py = pybind11;
 
     // fetch technology name
     auto tech_name = std::string{fiction::tech_impl_name<Technology>};
@@ -123,6 +122,13 @@ void fcn_technology_cell_level_layout(pybind11::module& m)
         .def("num_pos", &py_cartesian_technology_cell_layout::num_pos, DOC(fiction_cell_level_layout_num_pos))
         .def("is_pi", &py_cartesian_technology_cell_layout::is_pi, py::arg("c"), DOC(fiction_cell_level_layout_is_pi))
         .def("is_po", &py_cartesian_technology_cell_layout::is_po, py::arg("c"), DOC(fiction_cell_level_layout_is_po))
+
+        .def("get_cell_type", &py_cartesian_technology_cell_layout::get_cell_type, py::arg("c"),
+             DOC(fiction_cell_level_layout_get_cell_type))
+        .def("get_cells_by_type", &py_cartesian_technology_cell_layout::get_cells_by_type, py::arg("type"),
+             DOC(fiction_cell_level_layout_get_cells_by_type))
+        .def("num_cells_of_given_type", &py_cartesian_technology_cell_layout::num_cells_of_given_type, py::arg("type"),
+             DOC(fiction_cell_level_layout_num_cells_of_given_type))
 
         .def("cells",
              [](const py_cartesian_technology_cell_layout& lyt)

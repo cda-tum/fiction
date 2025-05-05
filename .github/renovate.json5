@@ -10,7 +10,6 @@
     "github-actions",
     "pre-commit",
     "pep621",
-    "pip_requirements",
     "dockerfile",
   ],
   "git-submodules": {
@@ -62,17 +61,6 @@
     {
       matchManagers: [
         "pep621"
-      ],
-      addLabels: [
-        "dependencies",
-        "python"
-      ],
-      commitMessagePrefix: "⬆\uFE0F\uD83D\uDC0D",
-      "groupName": "Python Dependencies",
-    },
-    {
-      matchManagers: [
-        "pip_requirements"
       ],
       addLabels: [
         "dependencies",

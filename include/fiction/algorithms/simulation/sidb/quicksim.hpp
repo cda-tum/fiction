@@ -10,18 +10,21 @@
 #include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/traits.hpp"
+#include "fiction/utils/execution_utils.hpp"
 
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <algorithm>
+#include <chrono>
 #include <cstdint>
+#include <limits>
 #include <mutex>
+#include <optional>
 #include <thread>
 #include <vector>
 
 namespace fiction
 {
-
 /**
  * This struct stores the parameters for the *QuickSim* algorithm.
  */
@@ -43,6 +46,10 @@ struct quicksim_params
      * Number of threads to spawn. By default the number of threads is set to the number of available hardware threads.
      */
     uint64_t number_threads{std::thread::hardware_concurrency()};
+    /**
+     * Timeout limit (in ms).
+     */
+    uint64_t timeout = std::numeric_limits<uint64_t>::max();
 };
 
 /**
@@ -57,11 +64,12 @@ struct quicksim_params
  *
  * @tparam Lyt SiDB cell-level layout type.
  * @param lyt The layout to simulate.
- * @param ps Physical parameters. They are material-specific and may vary from experiment to experiment.
- * @return sidb_simulation_result is returned with all results.
+ * @param ps QuickSim parameters.
+ * @return `sidb_simulation_result` is returned if the simulation was successful, otherwise `std::nullopt`.
  */
 template <typename Lyt>
-sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{})
+[[nodiscard]] std::optional<sidb_simulation_result<Lyt>>
+quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt must be an SiDB layout");
@@ -70,7 +78,7 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
 
     if (ps.iteration_steps == 0)
     {
-        return sidb_simulation_result<Lyt>{};
+        return std::nullopt;
     }
 
     sidb_simulation_result<Lyt> st{};
@@ -80,7 +88,17 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
     st.simulation_parameters = ps.simulation_parameters;
     st.charge_distributions.reserve(ps.iteration_steps);
 
+    if (ps.iteration_steps == 0 || lyt.num_cells() == 0)
+    {
+        return std::nullopt;
+    }
+
+    bool timeout_limit_reached = false;
+
     mockturtle::stopwatch<>::duration time_counter{};
+
+    // Track the start time for timeout
+    const auto start_time = std::chrono::high_resolution_clock::now();
 
     // measure run time (artificial scope)
     {
@@ -93,7 +111,7 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
         charge_lyt.assign_base_number(2);
         charge_lyt.assign_all_charge_states(sidb_charge_state::NEGATIVE);
         charge_lyt.update_after_charge_change(dependent_cell_mode::VARIABLE);
-        const auto negative_sidb_indices = charge_lyt.negative_sidb_detection();
+        const auto predefined_negative_sidb_indices = charge_lyt.negative_sidb_detection();
 
         // Check that the layout with all SiDBs negatively charged is physically valid.
         if (charge_lyt.is_physically_valid())
@@ -105,7 +123,7 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
         charge_lyt.assign_all_charge_states(sidb_charge_state::NEUTRAL);
         charge_lyt.update_after_charge_change();
 
-        if (!negative_sidb_indices.empty())
+        if (!predefined_negative_sidb_indices.empty())
         {
             if (charge_lyt.is_physically_valid())
             {
@@ -115,18 +133,30 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
 
         // Check if the layout where all SiDBs that need to be negatively charged are negatively charged and the rest
         // are neutrally charged is physically valid.
-        for (const auto& index : negative_sidb_indices)
+        std::vector<uint64_t> all_sidb_indices_with_unknown_charge_state{};
+        all_sidb_indices_with_unknown_charge_state.reserve(charge_lyt.num_cells());
+
+        for (const auto& cell : charge_lyt.get_sidb_order())
         {
-            charge_lyt.assign_charge_state_by_cell_index(static_cast<uint64_t>(index), sidb_charge_state::NEGATIVE);
+            if (std::find(FICTION_EXECUTION_POLICY_PAR_UNSEQ predefined_negative_sidb_indices.cbegin(),
+                          predefined_negative_sidb_indices.cend(),
+                          charge_lyt.cell_to_index(cell)) == predefined_negative_sidb_indices.cend())
+            {
+                all_sidb_indices_with_unknown_charge_state.push_back(
+                    static_cast<uint64_t>(charge_lyt.cell_to_index(cell)));
+            }
         }
+
+        for (const auto& negative_sidb_index : predefined_negative_sidb_indices)
+        {
+            charge_lyt.assign_charge_state_by_index(negative_sidb_index, sidb_charge_state::NEGATIVE);
+        }
+
         charge_lyt.update_after_charge_change();
         if (charge_lyt.is_physically_valid())
         {
             st.charge_distributions.push_back(charge_distribution_surface<Lyt>{charge_lyt});
         }
-
-        charge_lyt.assign_all_charge_states(sidb_charge_state::NEUTRAL);
-        charge_lyt.update_after_charge_change();
 
         // If the number of threads is initially set to zero, the simulation is run with one thread.
         const uint64_t num_threads = std::max(ps.number_threads, uint64_t{1});
@@ -146,33 +176,42 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
             threads.emplace_back(
                 [&]
                 {
-                    charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt};
+                    // if all SiDBs are negatively charged, abort
+                    if (predefined_negative_sidb_indices.size() == charge_lyt.num_cells())
+                    {
+                        return;
+                    }
+
+                    charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt.clone()};
 
                     for (uint64_t l = 0ul; l < iter_per_thread; ++l)
                     {
-                        for (uint64_t i = 0ul; i < charge_lyt.num_cells(); ++i)
+                        for (const auto& sidb_index_with_unknown_charge_state :
+                             all_sidb_indices_with_unknown_charge_state)
                         {
-                            {
-                                const std::lock_guard lock{mutex};
-                                if (std::find(negative_sidb_indices.cbegin(), negative_sidb_indices.cend(), i) !=
-                                    negative_sidb_indices.cend())
-                                {
-                                    continue;
-                                }
-                            }
+                            // Check if the timeout has been reached before starting the iterations
+                            const auto current_time = std::chrono::high_resolution_clock::now();
+                            const auto elapsed_time =
+                                std::chrono::duration_cast<std::chrono::milliseconds>(current_time - start_time)
+                                    .count();
 
-                            std::vector<uint64_t> index_start{i};
+                            if (static_cast<uint64_t>(elapsed_time) >= ps.timeout)
+                            {
+                                timeout_limit_reached = true;
+                                return;  // Exit the thread if the timeout has been reached
+                            }
 
                             charge_lyt_copy.assign_all_charge_states(sidb_charge_state::NEUTRAL);
 
-                            for (const auto& index : negative_sidb_indices)
+                            auto negative_sidbs_indices = predefined_negative_sidb_indices;
+                            negative_sidbs_indices.push_back(sidb_index_with_unknown_charge_state);
+
+                            for (const auto& negative_sidb_index : negative_sidbs_indices)
                             {
-                                charge_lyt_copy.assign_charge_state_by_cell_index(static_cast<uint64_t>(index),
-                                                                                  sidb_charge_state::NEGATIVE);
-                                index_start.push_back(static_cast<uint64_t>(index));
+                                charge_lyt_copy.assign_charge_state_by_index(negative_sidb_index,
+                                                                             sidb_charge_state::NEGATIVE);
                             }
 
-                            charge_lyt_copy.assign_charge_state_by_cell_index(i, sidb_charge_state::NEGATIVE);
                             charge_lyt_copy.update_after_charge_change();
 
                             if (charge_lyt_copy.is_physically_valid())
@@ -181,13 +220,11 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
                                 st.charge_distributions.push_back(charge_distribution_surface<Lyt>{charge_lyt_copy});
                             }
 
-                            const auto upper_limit =
-                                std::min(static_cast<uint64_t>(static_cast<double>(charge_lyt_copy.num_cells()) / 1.5),
-                                         charge_lyt.num_cells() - negative_sidb_indices.size());
+                            const auto upper_limit = all_sidb_indices_with_unknown_charge_state.size() - 1;
 
                             for (uint64_t num = 0ul; num < upper_limit; num++)
                             {
-                                charge_lyt_copy.adjacent_search(ps.alpha, index_start);
+                                charge_lyt_copy.adjacent_search(ps.alpha, negative_sidbs_indices);
                                 charge_lyt_copy.validity_check();
 
                                 if (charge_lyt_copy.is_physically_valid())
@@ -209,6 +246,11 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
     }
 
     st.simulation_runtime = time_counter;
+
+    if (timeout_limit_reached || st.charge_distributions.empty())
+    {
+        return std::nullopt;
+    }
 
     return st;
 }

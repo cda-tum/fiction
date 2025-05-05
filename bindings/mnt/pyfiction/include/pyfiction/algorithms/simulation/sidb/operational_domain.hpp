@@ -8,7 +8,6 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
-#include <fiction/algorithms/simulation/sidb/is_operational.hpp>
 #include <fiction/algorithms/simulation/sidb/operational_domain.hpp>
 
 #include <pybind11/operators.h>
@@ -45,17 +44,40 @@ void operational_domain(pybind11::module& m)
           py::arg("stats") = nullptr, DOC(fiction_operational_domain_contour_tracing));
 }
 
+template <typename Lyt>
+void critical_temperature_domain(pybind11::module& m)
+{
+    namespace py = pybind11;
+
+    m.def("critical_temperature_domain_grid_search", &fiction::critical_temperature_domain_grid_search<Lyt, py_tt>,
+          py::arg("lyt"), py::arg("spec"), py::arg("params") = fiction::operational_domain_params{},
+          py::arg("stats") = nullptr, DOC(fiction_critical_temperature_domain_grid_search));
+
+    m.def("critical_temperature_domain_random_sampling",
+          &fiction::critical_temperature_domain_random_sampling<Lyt, py_tt>, py::arg("lyt"), py::arg("spec"),
+          py::arg("samples"), py::arg("params") = fiction::operational_domain_params{}, py::arg("stats") = nullptr,
+          DOC(fiction_critical_temperature_domain_random_sampling));
+
+    m.def("critical_temperature_domain_flood_fill", &fiction::critical_temperature_domain_flood_fill<Lyt, py_tt>,
+          py::arg("lyt"), py::arg("spec"), py::arg("samples"), py::arg("params") = fiction::operational_domain_params{},
+          py::arg("stats") = nullptr, DOC(fiction_critical_temperature_domain_flood_fill));
+
+    m.def("critical_temperature_domain_contour_tracing",
+          &fiction::critical_temperature_domain_contour_tracing<Lyt, py_tt>, py::arg("lyt"), py::arg("spec"),
+          py::arg("samples"), py::arg("params") = fiction::operational_domain_params{}, py::arg("stats") = nullptr,
+          DOC(fiction_critical_temperature_domain_contour_tracing));
+}
+
 }  // namespace detail
 
 inline void operational_domain(pybind11::module& m)
 {
     namespace py = pybind11;
-    namespace py = pybind11;
 
     py::class_<fiction::parameter_point>(m, "parameter_point", DOC(fiction_parameter_point))
         .def(py::init<>(), DOC(fiction_parameter_point_parameter_point))
         .def(py::init<const std::vector<double>>(), py::arg("values"), DOC(fiction_parameter_point_parameter_point_2))
-        .def_readwrite("parameters", &fiction::parameter_point::parameters, DOC(fiction_parameter_point))
+        .def("get_parameters", &fiction::parameter_point::get_parameters, DOC(fiction_parameter_point_get_parameters))
 
         .def(py::self == py::self, py::arg("other"), DOC(fiction_parameter_point_operator_eq))
         .def(py::self != py::self, py::arg("other"), DOC(fiction_parameter_point_operator_ne))
@@ -72,28 +94,39 @@ inline void operational_domain(pybind11::module& m)
 
         ;
 
-    py::class_<fiction::operational_domain<fiction::parameter_point, fiction::operational_status>>(
-        m, "operational_domain", DOC(fiction_operational_domain))
+    py::class_<fiction::critical_temperature_domain>(m, "critical_temperature_domain",
+                                                     DOC(fiction_critical_temperature_domain))
         .def(py::init<>())
-        .def_readwrite("dimensions",
-                       &fiction::operational_domain<fiction::parameter_point, fiction::operational_status>::dimensions,
-                       DOC(fiction_operational_domain_dimensions))
-        .def_readwrite(
-            "influence_information",
-            &fiction::operational_domain<fiction::parameter_point, fiction::operational_status>::operational_values,
-            DOC(fiction_operational_domain_operational_values))
+        .def(py::init<const std::vector<fiction::sweep_parameter>>(), py::arg("dims"))
+        .def("add_dimension", &fiction::critical_temperature_domain::add_dimension, py::arg("dim"),
+             DOC(fiction_critical_temperature_domain_add_dimension))
+        .def("get_dimension", &fiction::critical_temperature_domain::get_dimension, py::arg("index"),
+             DOC(fiction_critical_temperature_domain_get_dimension))
+        .def("get_number_of_dimensions", &fiction::critical_temperature_domain::get_number_of_dimensions,
+             DOC(fiction_critical_temperature_domain_get_number_of_dimensions))
+        .def("contains", &fiction::critical_temperature_domain::contains, py::arg("key"))
+        .def("add_value", &fiction::critical_temperature_domain::add_value, py::arg("key"), py::arg("value"))
+        .def("size", &fiction::critical_temperature_domain::size)
+        .def("minimum_ct", &fiction::critical_temperature_domain::minimum_ct,
+             DOC(fiction_critical_temperature_domain_minimum_ct))
+        .def("maximum_ct", &fiction::critical_temperature_domain::maximum_ct,
+             DOC(fiction_critical_temperature_domain_maximum_ct))
 
-        .def("get_value",
-             &fiction::operational_domain<fiction::parameter_point, fiction::operational_status>::get_value,
-             py::arg("point"), DOC(fiction_operational_domain_get_value))
+        ;
 
-        .def("add_value",
-             &fiction::operational_domain<fiction::parameter_point, fiction::operational_status>::add_value,
-             py::arg("key"), py::arg("value"), DOC(fiction_operational_domain_add_value))
-
-        .def("get_domain",
-             &fiction::operational_domain<fiction::parameter_point, fiction::operational_status>::get_domain,
-             DOC(fiction_operational_domain_get_domain))
+    py::class_<fiction::operational_domain>(m, "operational_domain", DOC(fiction_operational_domain))
+        .def(py::init<>(), DOC(fiction_operational_domain_operational_domain))
+        .def(py::init<const std::vector<fiction::sweep_parameter>>(), py::arg("dims"),
+             DOC(fiction_operational_domain_operational_domain_2))
+        .def("add_dimension", &fiction::operational_domain::add_dimension, py::arg("dim"),
+             DOC(fiction_operational_domain_add_dimension))
+        .def("get_dimension", &fiction::operational_domain::get_dimension, py::arg("index"),
+             DOC(fiction_operational_domain_get_dimension))
+        .def("get_number_of_dimensions", &fiction::operational_domain::get_number_of_dimensions,
+             DOC(fiction_operational_domain_get_number_of_dimensions))
+        .def("contains", &fiction::operational_domain::contains, py::arg("key"))
+        .def("add_value", &fiction::operational_domain::add_value, py::arg("key"), py::arg("value"))
+        .def("size", &fiction::operational_domain::size)
 
         ;
 
@@ -119,9 +152,7 @@ inline void operational_domain(pybind11::module& m)
         .def_readwrite("operational_params", &fiction::operational_domain_params::operational_params,
                        DOC(fiction_operational_domain_params_operational_params))
         .def_readwrite("sweep_dimensions", &fiction::operational_domain_params::sweep_dimensions,
-                       DOC(fiction_operational_domain_params_sweep_dimensions))
-
-        ;
+                       DOC(fiction_operational_domain_params_sweep_dimensions));
 
     py::class_<fiction::operational_domain_stats>(m, "operational_domain_stats", DOC(fiction_operational_domain_stats))
         .def(py::init<>())
@@ -147,6 +178,9 @@ inline void operational_domain(pybind11::module& m)
 
     detail::operational_domain<py_sidb_100_lattice>(m);
     detail::operational_domain<py_sidb_111_lattice>(m);
+
+    detail::critical_temperature_domain<py_sidb_100_lattice>(m);
+    detail::critical_temperature_domain<py_sidb_111_lattice>(m);
 }
 
 }  // namespace pyfiction

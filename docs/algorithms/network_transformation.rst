@@ -71,3 +71,12 @@ Technology Mapping
         .. autoclass:: mnt.pyfiction.technology_mapping_stats
             :members:
         .. autofunction:: mnt.pyfiction.technology_mapping
+
+Delete Virtual PIs
+------------------
+
+.. tabs::
+    .. tab:: C++
+        **Header:** ``fiction/algorithms/network_transformation/delete_virtual_pis.hpp``
+
+        .. doxygenfunction:: fiction::delete_virtual_pis
