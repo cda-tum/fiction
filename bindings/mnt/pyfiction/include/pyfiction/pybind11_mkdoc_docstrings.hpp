@@ -5711,6 +5711,36 @@ static const char *__doc_fiction_detail_connect_and_place = R"doc()doc";
 
 static const char *__doc_fiction_detail_connect_and_place_2 = R"doc()doc";
 
+static const char *__doc_fiction_detail_connect_children_to_gates_unaffected =
+R"doc(Connects gates in the destination network whose fanins and fanouts are
+not modified by inverter substitution.
+
+Template parameter ``Ntk``:
+    Type of the input logic network.
+
+Template parameter ``NtkDest``:
+    Type of the output logic network.
+
+Parameter ``ntk``:
+    Source network.
+
+Parameter ``ntk_dest``:
+    Destination network.
+
+Parameter ``old2new``:
+    Mapping from nodes in the source network to signals in the
+    destination network.
+
+Parameter ``g``:
+    Node in the source network currently being processed.
+
+Parameter ``children``:
+    Signals of the children nodes in the destination network.
+
+Returns:
+    True if the gate was successfully processed and added to the
+    destination network.)doc";
+
 static const char *__doc_fiction_detail_convert_array =
 R"doc(Based on https://stackoverflow.com/questions/57756557/initializing-a-
 stdarray-with-a-constant-value)doc";
@@ -8447,6 +8477,26 @@ static const char *__doc_fiction_detail_hexagonalization_impl_pst = R"doc(Hexago
 
 static const char *__doc_fiction_detail_hexagonalization_impl_run = R"doc()doc";
 
+static const char *__doc_fiction_detail_inverter_substitution_impl = R"doc()doc";
+
+static const char *__doc_fiction_detail_inverter_substitution_impl_connect_children_to_gates = R"doc()doc";
+
+static const char *__doc_fiction_detail_inverter_substitution_impl_fo_ntk = R"doc(This is a fan-out view of the network 'ntk'.)doc";
+
+static const char *__doc_fiction_detail_inverter_substitution_impl_gather_fanin_signals = R"doc()doc";
+
+static const char *__doc_fiction_detail_inverter_substitution_impl_inverter_substitution_impl = R"doc()doc";
+
+static const char *__doc_fiction_detail_inverter_substitution_impl_is_rerun = R"doc()doc";
+
+static const char *__doc_fiction_detail_inverter_substitution_impl_mode = R"doc(The operation mode of inverter substitution.)doc";
+
+static const char *__doc_fiction_detail_inverter_substitution_impl_ntk = R"doc(A topologically ordered input logic network.)doc";
+
+static const char *__doc_fiction_detail_inverter_substitution_impl_rerun = R"doc(An indicator to check if optimizations can be applied or not.)doc";
+
+static const char *__doc_fiction_detail_inverter_substitution_impl_run = R"doc()doc";
+
 static const char *__doc_fiction_detail_is_balanced_impl = R"doc()doc";
 
 static const char *__doc_fiction_detail_is_balanced_impl_balanced = R"doc()doc";
@@ -9041,6 +9091,18 @@ static const char *__doc_fiction_detail_non_operationality_reason_LOGIC_MISMATCH
 static const char *__doc_fiction_detail_non_operationality_reason_NONE = R"doc(No reason for non-operationality could be determined.)doc";
 
 static const char *__doc_fiction_detail_non_operationality_reason_POTENTIAL_POSITIVE_CHARGES = R"doc(Positive charges may occur but the simulation base is set to `2`.)doc";
+
+static const char *__doc_fiction_detail_operation_mode =
+R"doc(Defines the operation modes for inverter substitution.
+
+Determines which types of nodes should be considered for optimization
+during the substitution process.)doc";
+
+static const char *__doc_fiction_detail_operation_mode_ALL_NODES = R"doc(Apply all available optimizations (fanout and AND/OR structures).)doc";
+
+static const char *__doc_fiction_detail_operation_mode_AND_OR_ONLY = R"doc(Optimize only inverters at inputs of AND/OR gates.)doc";
+
+static const char *__doc_fiction_detail_operation_mode_FO_ONLY = R"doc(Optimize only inverters at fanout nodes.)doc";
 
 static const char *__doc_fiction_detail_operational_domain_impl = R"doc()doc";
 
@@ -10366,6 +10428,27 @@ R"doc(Enum indicating if primary inputs (PIs) can be placed at the top or
 left.)doc";
 
 static const char *__doc_fiction_detail_search_space_graph_planar = R"doc(Create planar layouts.)doc";
+
+static const char *__doc_fiction_detail_set_level_and_rank =
+R"doc(Sets the level and rank of a node in the destination network by
+invoking its `on_add` hook.
+
+Template parameter ``Ntk``:
+    Type of the input logic network.
+
+Template parameter ``NtkDest``:
+    Type of the output logic network.
+
+Parameter ``ntk_dest``:
+    Destination network where the node has been created.
+
+Parameter ``old2new``:
+    Mapping from nodes in the source network to signals in the
+    destination network.
+
+Parameter ``g``:
+    Node from the source network whose corresponding destination node
+    should have its level and rank set.)doc";
 
 static const char *__doc_fiction_detail_sweep_parameter_to_string =
 R"doc(Converts a sweep parameter to a string representation. This is used to
@@ -15825,6 +15908,28 @@ Returns:
     A vector of inverse levels for each node where
     `ntk.node_to_index(n)` is the position where `n`'s inverse level
     is stored.)doc";
+
+static const char *__doc_fiction_inverter_substitution =
+R"doc(Applies an inverter substitution optimization on a logic network.
+
+Substitutes redundant inverters at fanout points with a single
+inverter at the driving node’s input. Optionally, replaces AND or OR
+gates with inverters on their inputs by equivalent dual gates with a
+single inverter at their output. The goal is to reduce the overall
+number of inverters in the network.
+
+Template parameter ``Ntk``:
+    Logic network type.
+
+Parameter ``ntk``:
+    Input logic network.
+
+Parameter ``mode``:
+    Substitution mode specifying the types of structures to target
+    (fanout only, AND/OR only, or all).
+
+Returns:
+    A logically equivalent network with a reduced number of inverters.)doc";
 
 static const char *__doc_fiction_is_balanced =
 R"doc(Checks if a logic network is properly path-balanced with regard to the
