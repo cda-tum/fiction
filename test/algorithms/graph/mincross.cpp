@@ -31,9 +31,9 @@ TEST_CASE("Dummy Check", "[mincross]")
 
     const auto aig_r = fiction::mutable_rank_view(aig);
 
-    mincross_stats  st{};
+    mincross_stats        st{};
     const mincross_params p{};
-    const auto      ntk = mincross(aig_r, p, &st);
+    const auto            ntk = mincross(aig_r, p, &st);
     CHECK(st.num_crossings == 1);
 }
 
@@ -80,9 +80,9 @@ TEST_CASE("Planar Network", "[mincross]")
     rank1.push_back(aig_r.get_node(f1));
     aig_r.set_ranks(1, rank1);
 
-    mincross_stats  st{};
+    mincross_stats        st{};
     const mincross_params p{};
-    auto            ntk = mincross(aig_r, p, &st, false); // counts crossings
+    auto                  ntk = mincross(aig_r, p, &st, false);  // counts crossings
     CHECK(st.num_crossings == 3);
 
     ntk = mincross(aig_r, p, &st);
@@ -99,10 +99,10 @@ TEST_CASE("Minimize Crossings Adder", "[mincross]")
 
     auto tec_r = fiction::mutable_rank_view(tec_b);
 
-    mincross_stats  st{};
+    mincross_stats        st{};
     const mincross_params p{};
 
-    auto ntk = mincross(tec_r, p, &st, false); // counts crossings
+    auto ntk = mincross(tec_r, p, &st, false);  // counts crossings
     CHECK(st.num_crossings == 5);
 
     ntk = mincross(tec_r, p, &st);

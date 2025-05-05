@@ -168,7 +168,8 @@ class bfs_topo_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
      *
      * @tparam Fn Callable function or lambda to be applied to each gate.
      * @param fn Function to apply to each gate.
-     */    template <typename Fn>
+     */
+    template <typename Fn>
     void foreach_gate_reverse(Fn&& fn) const
     {
         uint32_t const offset = 1u + this->num_pis() +

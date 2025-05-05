@@ -43,7 +43,8 @@ struct mincross_stats
 
 /**
  * Implements the crossing minimization algorithm inspired by Graphviz's `mincross`.
- * This algorithm reorders nodes in ranks to reduce edge crossings in a leveled graph representation of the logic network.
+ * This algorithm reorders nodes in ranks to reduce edge crossings in a leveled graph representation of the logic
+ * network.
  *
  * @tparam Ntk Logic network type that models a leveled circuit with rank information.
  */
@@ -308,8 +309,8 @@ class mincross_impl
     void transpose(bool reverse)
     {
         std::vector<bool> candidate(fanout_ntk.depth(), true);
-        int               delta = 0;
-        int max_iterations = 0;
+        int               delta          = 0;
+        int               max_iterations = 0;
 
         while (true)
         {
