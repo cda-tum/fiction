@@ -182,7 +182,7 @@ enum class operation_mode : std::uint8_t
 
 /**
  * Initializes a logic network by copying a source network, including its constants and primary inputs,
- * and optionally handling virtual primary inputs.
+ * and optionally handling virtual primary inputs and ranks.
  *
  * This is used to create a destination network that will serve as the base for further optimizations.
  * A mapping from old to new signals is returned to allow reconstruction of internal logic.
@@ -657,7 +657,7 @@ class inverter_substitution_impl
 /**
  * Applies an inverter substitution optimization on a logic network.
  *
- * Substitutes redundant inverters at fanout points with a single inverter at the driving node’s input.
+ * Substitutes inverters at the fanouts of fanout nodes with a single inverter at the fanout node’s input.
  * Optionally, replaces AND or OR gates with inverters on their inputs by equivalent dual gates with
  * a single inverter at their output. The goal is to reduce the overall number of inverters in the network.
  *
