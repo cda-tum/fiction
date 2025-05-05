@@ -258,10 +258,10 @@ class mincross_impl
                     else
                     {
                         // Weighted median
-                        const size_t rm    = j / 2;
-                        const size_t lm    = rm - 1;
-                        const uint32_t   lspan = positions[lm] - positions.front();
-                        const uint32_t    rspan = positions.back() - positions[rm];
+                        const size_t   rm    = j / 2;
+                        const size_t   lm    = rm - 1;
+                        const uint32_t lspan = positions[lm] - positions.front();
+                        const uint32_t rspan = positions.back() - positions[rm];
 
                         if (lspan == rspan)
                         {
@@ -269,8 +269,8 @@ class mincross_impl
                         }
                         else
                         {
-                            const double w =
-                                (positions[lm] * static_cast<double>(rspan)) + positions[rm] * static_cast<double>(lspan);
+                            const double w = (positions[lm] * static_cast<double>(rspan)) +
+                                             positions[rm] * static_cast<double>(lspan);
                             median_map[n] = w / (lspan + rspan);
                         }
                     }
