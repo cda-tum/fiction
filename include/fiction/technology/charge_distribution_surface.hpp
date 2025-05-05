@@ -890,7 +890,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
             for (uint64_t i = 0; i < strg->sidb_order.size(); ++i)
             {
-                strg->local_ext_pot[i] = strg->local_pot_caused_by_defects[i];
+                strg->local_int_pot[i] += strg->local_pot_caused_by_defects[i];
             }
 
             for (uint64_t i = 0u; i < strg->sidb_order.size(); ++i)
@@ -1035,6 +1035,12 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         }
         return std::nullopt;
     }
+
+    [[nodiscard]] double get_local_defect_potential(const typename Lyt::cell& c) const noexcept
+    {
+        return strg->local_int_pot_at_defect[c] + strg->local_ext_pot_at_defect[c];
+    }
+
     /*
      * todo
      */
