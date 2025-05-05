@@ -976,7 +976,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             {
                 const auto dist = sidb_nm_distance<Lyt>(*this, c1, strg->sidb_order[i]);
                 const auto pot  = chargeless_potential_generated_by_defect_at_given_distance(
-                    dist, sidb_defect{sidb_defect_type::DB, 0.0, strg->simulation_parameters.epsilon_r,
+                    dist, sidb_defect{sidb_defect_type::DB, 0, strg->simulation_parameters.epsilon_r,
                                       strg->simulation_parameters.lambda_tf});
 
                 strg->local_int_pot_at_defect[c1] += pot * static_cast<double>(strg->cell_charge[i]);
@@ -1096,8 +1096,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
         for (const auto& [c, defect] : strg->defects)
         {
-            strg->system_energy +=
-                strg->local_ext_pot_at_defect[c] * static_cast<double>(charge_state_to_sign(defect.charge));
+            strg->system_energy += strg->local_ext_pot_at_defect[c] * static_cast<double>(defect.charge);
         }
 
         for (uint64_t i = 0; i < strg->sidb_order.size(); ++i)
@@ -1112,34 +1111,28 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             for (const auto& [c, defect] : strg->defects)
             {
                 strg->system_energy += 0.5 * strg->local_pot_caused_by_defects[i] *
-                                       static_cast<double>(charge_state_to_sign(defect.charge)) *
-                                       static_cast<double>(charge_state_to_sign(strg->cell_charge[i]));
+                                       static_cast<double>(charge_state_to_sign(strg->cell_charge[i])) *
+                                       static_cast<double>(defect.charge);
             }
         }
 
-        for (uint64_t i = 0; i < strg->sidb_order.size(); ++i)
+        for (const auto& [c, defect] : strg->defects)
         {
-            strg->system_energy +=
-                0.5 * strg->local_ext_pot[i] *
-                static_cast<double>(charge_state_to_sign(
-                    strg->cell_charge[i]));  // todo: use commented part. this passes the last test in design_sidb_gates
-            // strg->local_ext_pot[i] * static_cast<double>(charge_state_to_sign(strg->cell_charge[i]));
+            strg->system_energy += 0.5 * strg->local_int_pot_at_defect[c] * static_cast<double>(defect.charge);
         }
 
-        // todo: is this right? the old code has it
-        for (uint64_t i = 0; i < strg->sidb_order.size(); ++i)
+        // to compensate for the half-counting of the SiDB potential
+        for (const auto& [c, defect] : strg->defects)
         {
-            strg->system_energy += 0.5 * strg->local_pot_caused_by_defects[i] *
-                                   static_cast<double>(charge_state_to_sign(strg->cell_charge[i]));
-        }
-        // end
-
-        for (const auto& [cell1, defect1] : strg->defects)
-        {
-            for (const auto& [cell2, defect2] : strg->defects)
+            for (uint64_t i = 0; i < strg->sidb_order.size(); ++i)
             {
+                const auto dist = sidb_nm_distance<Lyt>(*this, c, strg->sidb_order[i]);
+                const auto pot  = chargeless_potential_generated_by_defect_at_given_distance(
+                    dist, sidb_defect{sidb_defect_type::DB, 0, strg->simulation_parameters.epsilon_r,
+                                      strg->simulation_parameters.lambda_tf});
+
                 strg->system_energy +=
-                    0.5 * chargeless_potential_at_given_distance(sidb_nm_distance<Lyt>(*this, cell1, cell2));
+                    0.5 * static_cast<double>(defect.charge) * pot * static_cast<double>(strg->cell_charge[i]);
             }
         }
     }
@@ -1190,11 +1183,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         const auto hop_del =
             [this](const uint64_t c1, const uint64_t c2)  // energy change when charge hops between two SiDBs.
         {
-            return strg->local_ext_pot[c1] - strg->local_ext_pot[c2] + strg->local_int_pot[c1] -
-                   strg->local_int_pot[c2] -
-                   strg->pot_mat[c1][c2];  // todo: use commented part. this passes the last test in design_sidb_gates
-            // return strg->local_ext_pot[c1] - strg->local_ext_pot[c2] +
-            //        (0.5 * (strg->local_int_pot[c1] - strg->local_int_pot[c2] - strg->pot_mat[c1][c2]));
+            return strg->local_ext_pot[c1] - strg->local_ext_pot[c2] +
+                   (0.5 * (strg->local_int_pot[c1] - strg->local_int_pot[c2] - strg->pot_mat[c1][c2]));
         };
 
         for (uint64_t i = 0u; i < strg->sidb_order.size(); ++i)
