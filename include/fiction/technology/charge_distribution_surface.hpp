@@ -1137,10 +1137,13 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
             for (uint64_t j = 0u; j < strg->sidb_order.size(); j++)
             {
-                if (const auto e_del = hop_del(i, j);
-                    (charge_state_to_sign(strg->cell_charge[j]) > charge_state_to_sign(strg->cell_charge[i])) &&
-                    (e_del < -constants::ERROR_MARGIN))  // Checks if energetically favored
-                                                         // hops exist between two SiDBs.
+                if (charge_state_to_sign(strg->cell_charge[j]) <= charge_state_to_sign(strg->cell_charge[i]))
+                {
+                    continue;
+                }
+
+                if (hop_del(i, j) <
+                    -constants::ERROR_MARGIN)  // Checks if energetically favored hops exist between two SiDBs.
                 {
                     return false;
                 }
