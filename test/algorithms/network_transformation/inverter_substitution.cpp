@@ -164,5 +164,6 @@ TEST_CASE("Propagating AND/OR inverter substitution, [inverter-substitution]")
     const auto                             cec_m = mockturtle::equivalence_checking(
         *fiction::virtual_miter<fiction::technology_network>(substituted_network, tec), {}, &eq_st);
     REQUIRE(cec_m.has_value());
-    CHECK(cec_m.value() == 1);
+    auto v = cec_m.value();
+    CHECK(v == 1);
 }
