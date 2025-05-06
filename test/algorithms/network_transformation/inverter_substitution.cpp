@@ -34,7 +34,7 @@ TEST_CASE("Early termination, [inverter-substitution]")
 
     CHECK(tec.num_gates() == 3);
     detail::operation_mode mode                = detail::operation_mode::FO_ONLY;
-    auto substituted_network = inverter_substitution(tec, mode);
+    auto                   substituted_network = inverter_substitution(tec, mode);
     CHECK(substituted_network.num_gates() == 3);
     mode                = detail::operation_mode::AND_OR_ONLY;
     substituted_network = inverter_substitution(tec, mode);
@@ -55,7 +55,7 @@ TEST_CASE("Minimal FO inverter substitution with output preservation, [inverter-
     tec.create_po(inv1);
 
     const detail::operation_mode mode                = detail::operation_mode::FO_ONLY;
-    auto substituted_network = inverter_substitution(tec, mode);
+    auto                         substituted_network = inverter_substitution(tec, mode);
 
     count_gate_types_stats st_before{};
     count_gate_types(tec, &st_before);
@@ -93,7 +93,7 @@ TEST_CASE("Ranked FO inverter substitution, [inverter-substitution]")
     CHECK(tec_rank.level(nodes[0]) == 1);
 
     const detail::operation_mode mode                = detail::operation_mode::FO_ONLY;
-    auto substituted_network = inverter_substitution(tec_rank, mode);
+    auto                         substituted_network = inverter_substitution(tec_rank, mode);
     nodes.clear();
     substituted_network.foreach_node(
         [&](const auto n)
