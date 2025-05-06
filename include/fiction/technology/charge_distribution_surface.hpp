@@ -933,11 +933,6 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 }
             }
         }
-
-        if constexpr (is_sidb_defect_surface_v<Lyt>)
-        {
-            update_local_defect_potential();
-        }
     }
     /**
      * This function calculates the local electrostatic potential in Volt for each SiDB position, including external
@@ -1125,31 +1120,9 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 0.5 * strg->local_int_pot[i] * static_cast<double>(charge_state_to_sign(strg->cell_charge[i]));
         }
 
-        // to compensate for the half-counting of the defect potential
-        for (uint64_t i = 0; i < strg->sidb_order.size(); ++i)
-        {
-                strg->system_energy += 0.5 * strg->local_pot_caused_by_defects[i] *
-                                   static_cast<double>(charge_state_to_sign(strg->cell_charge[i]));
-        }
-
         for (const auto& [c, defect] : strg->defects)
         {
             strg->system_energy += 0.5 * strg->local_int_pot_at_defect[c] * static_cast<double>(defect.charge);
-        }
-
-        // to compensate for the half-counting of the SiDB potential
-        for (const auto& [c, defect] : strg->defects)
-        {
-            for (uint64_t i = 0; i < strg->sidb_order.size(); ++i)
-            {
-                const auto dist = sidb_nm_distance<Lyt>(*this, c, strg->sidb_order[i]);
-                const auto pot  = chargeless_potential_generated_by_defect_at_given_distance(
-                    dist, sidb_defect{sidb_defect_type::DB, 0, strg->simulation_parameters.epsilon_r,
-                                      strg->simulation_parameters.lambda_tf});
-
-                strg->system_energy += 0.5 * static_cast<double>(defect.charge) * pot *
-                                       static_cast<double>(charge_state_to_sign(strg->cell_charge[i]));
-            }
         }
     }
     /**

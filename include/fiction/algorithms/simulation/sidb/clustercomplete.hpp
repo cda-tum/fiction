@@ -424,6 +424,11 @@ class clustercomplete_impl
                              charge_layout_copy.get_local_external_potential()[sidb_ix]);
         }
 
+        if constexpr (is_sidb_defect_surface_v<Lyt>)
+        {
+            charge_layout_copy.update_local_defect_potential();
+        }
+
         charge_layout_copy.recompute_system_energy();
 
         if (!charge_layout_copy.is_configuration_stable())
