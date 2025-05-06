@@ -709,10 +709,12 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      *
      * @return Vector of SiDB indices that must be negatively charged to fulfill the population stability.
      */
-    [[nodiscard]] std::vector<uint64_t> negative_sidb_detection() const noexcept
+    [[nodiscard]] std::vector<uint64_t> negative_sidb_detection() noexcept
     {
         std::vector<uint64_t> negative_sidbs{};
         negative_sidbs.reserve(this->num_cells());
+
+        // update_local_potential();
 
         for (const auto& cell : strg->sidb_order)
         {
@@ -984,8 +986,6 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         {
             strg->local_pot[i] = strg->local_int_pot[i] + strg->local_ext_pot[i];
         }
-
-        update_local_defect_potential();
     }
     /**
      * The function returns the local electrostatic potential at a given SiDB position in V.
@@ -1085,15 +1085,17 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 strg->local_ext_pot[i] * static_cast<double>(charge_state_to_sign(strg->cell_charge[i]));
         }
 
-        for (const auto& [c, defect] : strg->defects)
-        {
-            strg->system_energy += strg->local_ext_pot_at_defect[c] * static_cast<double>(defect.charge);
-        }
-
         for (uint64_t i = 0; i < strg->sidb_order.size(); ++i)
         {
             strg->system_energy +=
                 0.5 * strg->local_int_pot[i] * static_cast<double>(charge_state_to_sign(strg->cell_charge[i]));
+        }
+
+        update_local_defect_potential();
+
+        for (const auto& [c, defect] : strg->defects)
+        {
+            strg->system_energy += strg->local_ext_pot_at_defect[c] * static_cast<double>(defect.charge);
         }
 
         for (const auto& [c, defect] : strg->defects)

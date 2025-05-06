@@ -69,7 +69,9 @@ TEST_CASE("Benchmark simulators", "[benchmark]")
 
     BENCHMARK("QuickExact")
     {
-        const quickexact_params<cell<lattice_siqad>> sim_params{sidb_simulation_parameters{2, -0.32}};
+        const quickexact_params<cell<lattice_siqad>> sim_params{
+            sidb_simulation_parameters{2, -0.32},
+            quickexact_params<cell<lattice_siqad>>::automatic_base_number_detection::OFF};
         return quickexact<lattice_siqad>(lyt, sim_params);
     };
 
