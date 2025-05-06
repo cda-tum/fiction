@@ -669,7 +669,7 @@ class inverter_substitution_impl
  */
 
 template <typename Ntk>
-Ntk inverter_substitution(const Ntk& ntk, detail::operation_mode mode = detail::operation_mode::FO_ONLY)
+Ntk inverter_substitution(const Ntk& ntk, detail::operation_mode mode = detail::operation_mode::ALL_NODES)
 {
     static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
     static_assert(mockturtle::has_get_node_v<Ntk>, "Ntk does not implement the get_node function");

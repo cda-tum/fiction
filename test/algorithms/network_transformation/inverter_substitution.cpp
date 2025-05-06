@@ -19,6 +19,31 @@
 
 using namespace fiction;
 
+TEST_CASE("Early termination, [inverter-substitution]")
+{
+    technology_network tec{};
+    const auto         pi0  = tec.create_pi();
+    const auto         pi1  = tec.create_pi();
+    const auto         pi2  = tec.create_pi();
+    const auto         and0 = tec.create_and(pi0, pi1);
+    const auto         xor0 = tec.create_xor(pi0, pi1);
+    const auto         maj0 = tec.create_maj(pi0, pi1, pi2);
+    tec.create_po(and0);
+    tec.create_po(xor0);
+    tec.create_po(maj0);
+
+    CHECK(tec.num_gates() == 3);
+    detail::operation_mode mode                = detail::operation_mode::FO_ONLY;
+    auto substituted_network = inverter_substitution(tec, mode);
+    CHECK(substituted_network.num_gates() == 3);
+    mode                = detail::operation_mode::AND_OR_ONLY;
+    substituted_network = inverter_substitution(tec, mode);
+    CHECK(substituted_network.num_gates() == 3);
+    mode                = detail::operation_mode::ALL_NODES;
+    substituted_network = inverter_substitution(tec, mode);
+    CHECK(substituted_network.num_gates() == 3);
+}
+
 TEST_CASE("Minimal FO inverter substitution with output preservation, [inverter-substitution]")
 {
     technology_network tec{};
@@ -29,7 +54,8 @@ TEST_CASE("Minimal FO inverter substitution with output preservation, [inverter-
     tec.create_po(inv0);
     tec.create_po(inv1);
 
-    auto substituted_network = inverter_substitution(tec);
+    const detail::operation_mode mode                = detail::operation_mode::FO_ONLY;
+    auto substituted_network = inverter_substitution(tec, mode);
 
     count_gate_types_stats st_before{};
     count_gate_types(tec, &st_before);
@@ -66,7 +92,8 @@ TEST_CASE("Ranked FO inverter substitution, [inverter-substitution]")
         });
     CHECK(tec_rank.level(nodes[0]) == 1);
 
-    auto substituted_network = inverter_substitution(tec_rank);
+    const detail::operation_mode mode                = detail::operation_mode::FO_ONLY;
+    auto substituted_network = inverter_substitution(tec_rank, mode);
     nodes.clear();
     substituted_network.foreach_node(
         [&](const auto n)
