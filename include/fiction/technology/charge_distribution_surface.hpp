@@ -933,6 +933,11 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 }
             }
         }
+
+        if constexpr (is_sidb_defect_surface_v<Lyt>)
+        {
+            update_local_defect_potential();
+        }
     }
     /**
      * This function calculates the local electrostatic potential in Volt for each SiDB position, including external
@@ -1004,11 +1009,6 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         {
             strg->local_pot[i] = strg->local_int_pot[i] + strg->local_ext_pot[i];
         }
-
-        if constexpr (is_sidb_defect_surface_v<Lyt>)
-        {
-            update_local_defect_potential();
-        }
     }
     /**
      * The function returns the local electrostatic potential at a given SiDB position in V.
@@ -1053,6 +1053,14 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     [[nodiscard]] std::vector<double> get_local_internal_potential() const noexcept
     {
         return strg->local_int_pot;
+    }
+
+    /*
+     * todo
+     */
+    [[nodiscard]] std::vector<double> get_local_potential_caused_by_defects() const noexcept
+    {
+        return strg->local_pot_caused_by_defects;
     }
     /*
      * todo
