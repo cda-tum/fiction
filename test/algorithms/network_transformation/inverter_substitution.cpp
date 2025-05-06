@@ -4,14 +4,14 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include <fiction/algorithms/network_transformation/inverter_substitution.hpp>
 #include <fiction/algorithms/properties/count_gate_types.hpp>
 #include <fiction/algorithms/verification/virtual_miter.hpp>
-#include <fiction/networks/views/mutable_rank_view.hpp>
-#include <fiction/algorithms/network_transformation/inverter_substitution.hpp>
 #include <fiction/networks/technology_network.hpp>
+#include <fiction/networks/views/mutable_rank_view.hpp>
 
-#include <mockturtle/traits.hpp>
 #include <mockturtle/algorithms/equivalence_checking.hpp>
+#include <mockturtle/traits.hpp>
 
 #include <cassert>
 #include <cstdlib>
