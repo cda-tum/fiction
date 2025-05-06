@@ -1114,6 +1114,108 @@ static const char *__doc_fiction_bdl_wire_selection_OUTPUT = R"doc(Select only B
 
 static const char *__doc_fiction_bdl_wire_update_direction = R"doc(Update the port of the wire based on the current BDL pairs.)doc";
 
+static const char *__doc_fiction_bfs_topo_view =
+R"doc(Specialization for non-topologically sorted networks.
+
+Template parameter ``Ntk``:
+    Logic network type.)doc";
+
+static const char *__doc_fiction_bfs_topo_view_2 =
+R"doc(Deduction guide for bfs_topo_view.
+
+Template parameter ``T``:
+    Logic network type.)doc";
+
+static const char *__doc_fiction_bfs_topo_view_3 =
+R"doc(Deduction guide for bfs_topo_view from a network and signal.
+
+Template parameter ``T``:
+    Logic network type.)doc";
+
+static const char *__doc_fiction_bfs_topo_view_bfs_topo_view =
+R"doc(Constructs a breadth-first topological view from a given network.
+
+Parameter ``ntk``:
+    Logic network to be wrapped with a topological view.)doc";
+
+static const char *__doc_fiction_bfs_topo_view_fanout_ntk = R"doc(Fanout-augmented view of the original network for efficient traversal.)doc";
+
+static const char *__doc_fiction_bfs_topo_view_foreach_gate =
+R"doc(Iterates over all gates (excluding constants and primary inputs) in
+topological order.
+
+Template parameter ``Fn``:
+    Callable function or lambda to be applied to each gate.
+
+Parameter ``fn``:
+    Function to apply to each gate.)doc";
+
+static const char *__doc_fiction_bfs_topo_view_foreach_gate_reverse =
+R"doc(Iterates over all gates (excluding constants and primary inputs) in
+reverse topological order.
+
+Template parameter ``Fn``:
+    Callable function or lambda to be applied to each gate.
+
+Parameter ``fn``:
+    Function to apply to each gate.)doc";
+
+static const char *__doc_fiction_bfs_topo_view_foreach_node =
+R"doc(Iterates over all nodes in topological order.
+
+Template parameter ``Fn``:
+    Callable function or lambda to be applied to each node.
+
+Parameter ``fn``:
+    Function to apply to each node.)doc";
+
+static const char *__doc_fiction_bfs_topo_view_foreach_node_reverse =
+R"doc(Iterates over all nodes in reverse topological order.
+
+Template parameter ``Fn``:
+    Callable function or lambda to be applied to each node.
+
+Parameter ``fn``:
+    Function to apply to each node.)doc";
+
+static const char *__doc_fiction_bfs_topo_view_index_to_node =
+R"doc(Returns the node at a given topological index.
+
+Parameter ``index``:
+    Index into the topological order.
+
+Returns:
+    Node at the specified index.)doc";
+
+static const char *__doc_fiction_bfs_topo_view_node_to_index =
+R"doc(Returns the topological index of a node.
+
+Parameter ``n``:
+    Node whose index is to be determined.
+
+Returns:
+    Index of the node in the topological order.)doc";
+
+static const char *__doc_fiction_bfs_topo_view_num_gates =
+R"doc(Returns the number of gates in the topological view.
+
+Returns:
+    Number of gates excluding constants and primary inputs.)doc";
+
+static const char *__doc_fiction_bfs_topo_view_size =
+R"doc(Returns the number of nodes in the topological view.
+
+Returns:
+    Total number of visited nodes in the topological order.)doc";
+
+static const char *__doc_fiction_bfs_topo_view_topo_order =
+R"doc(Stores nodes in topological order from constants and PIs to reachable
+gates.)doc";
+
+static const char *__doc_fiction_bfs_topo_view_update_bfs_topo =
+R"doc(Updates the breadth-first topological order of the network. Called
+once during construction.)doc";
+
 static const char *__doc_fiction_binomial_coefficient =
 R"doc(Calculates the binomial coefficient :math:`\binom{n}{k}`.
 
@@ -16452,6 +16554,189 @@ Template parameter ``Dist``:
     Integral distance type.)doc";
 
 static const char *__doc_fiction_manhattan_distance_functor_manhattan_distance_functor = R"doc()doc";
+
+static const char *__doc_fiction_mincross =
+R"doc(Reimplementation of Graphviz's `crossing.c` algorithm for edge
+crossing minimization. This function reorders nodes in a leveled logic
+network to minimize the number of edge crossings using iterative
+median and transpose heuristics.
+
+Template parameter ``Ntk``:
+    A logic network type with level and fanout support.
+
+Parameter ``ntk``:
+    The input leveled network whose ranks are to be reordered.
+
+Parameter ``ps``:
+    Configuration parameters for the minimization algorithm.
+
+Parameter ``pst``:
+    Optional pointer to a statistics structure for storing the
+    resulting number of crossings.
+
+Parameter ``optimize``:
+    If false, skips optimization and only reports the current number
+    of crossings.
+
+Returns:
+    A copy of the input network with reordered ranks to reduce edge
+    crossings.)doc";
+
+static const char *__doc_fiction_mincross_impl =
+R"doc(Implements the crossing minimization algorithm inspired by Graphviz's
+`mincross`. This algorithm reorders nodes in ranks to reduce edge
+crossings in a leveled graph representation of the logic network.
+
+Template parameter ``Ntk``:
+    Logic network type that models a leveled circuit with rank
+    information.)doc";
+
+static const char *__doc_fiction_mincross_impl_count_crossings =
+R"doc(Computes the number of crossings between two sets of ranked positions.
+
+Parameter ``a``:
+    Positions from first set of connections.
+
+Parameter ``b``:
+    Positions from second set of connections.
+
+Returns:
+    Total number of crossings between the sets.)doc";
+
+static const char *__doc_fiction_mincross_impl_fanout_ntk =
+R"doc(Fanout-augmented view of the network for efficient traversal and
+connectivity queries.)doc";
+
+static const char *__doc_fiction_mincross_impl_in_cross =
+R"doc(Counts the number of edge crossings between fanins of two nodes in the
+previous rank.
+
+Parameter ``left``:
+    First node.
+
+Parameter ``right``:
+    Second node.
+
+Returns:
+    Number of crossings.)doc";
+
+static const char *__doc_fiction_mincross_impl_median_map =
+R"doc(Stores median values used to sort nodes within ranks during
+optimization.)doc";
+
+static const char *__doc_fiction_mincross_impl_medians =
+R"doc(Computes median values for the nodes in rank `r0` based on their
+connections to `r1`.
+
+Parameter ``r0``:
+    Current rank.
+
+Parameter ``r1``:
+    Adjacent rank to which connections are considered.)doc";
+
+static const char *__doc_fiction_mincross_impl_mincross_impl =
+R"doc(Constructs the crossing minimization implementation object.
+
+Parameter ``src``:
+    The logic network on which to perform crossing minimization.
+
+Parameter ``optimize``:
+    Whether to run the optimization procedure or only count current
+    crossings.
+
+Parameter ``p``:
+    Configuration parameters for the algorithm.
+
+Parameter ``st``:
+    Statistics object to store the resulting number of crossings.)doc";
+
+static const char *__doc_fiction_mincross_impl_mincross_step =
+R"doc(Executes one full up/down pass of median ordering followed by
+transposition to reduce crossings.
+
+Parameter ``pass``:
+    The current pass number, determines direction and ordering.)doc";
+
+static const char *__doc_fiction_mincross_impl_minimize_crossings =
+R"doc(Performs the main iterative crossing minimization using median and
+transpose heuristics.)doc";
+
+static const char *__doc_fiction_mincross_impl_ncross =
+R"doc(Computes the total number of edge crossings in the current network
+state.)doc";
+
+static const char *__doc_fiction_mincross_impl_ntk = R"doc(Logic network being reordered.)doc";
+
+static const char *__doc_fiction_mincross_impl_opt =
+R"doc(Flag indicating whether to perform optimization or only count
+crossings.)doc";
+
+static const char *__doc_fiction_mincross_impl_out_cross =
+R"doc(Counts the number of edge crossings between fanouts of two nodes in
+the next rank.
+
+Parameter ``left``:
+    First node.
+
+Parameter ``right``:
+    Second node.
+
+Returns:
+    Number of crossings.)doc";
+
+static const char *__doc_fiction_mincross_impl_ps = R"doc(Parameters for crossing minimization.)doc";
+
+static const char *__doc_fiction_mincross_impl_pst =
+R"doc(Statistics that store the final number of crossings after
+optimization.)doc";
+
+static const char *__doc_fiction_mincross_impl_reorder =
+R"doc(Reorders the nodes in a given rank according to computed medians.
+
+Parameter ``r``:
+    The rank index.
+
+Parameter ``reverse``:
+    If true, sorts in descending order of medians.)doc";
+
+static const char *__doc_fiction_mincross_impl_run =
+R"doc(Runs the crossing minimization algorithm and returns a reordered
+network.
+
+Returns:
+    A network with reordered nodes in ranks to reduce edge crossings.)doc";
+
+static const char *__doc_fiction_mincross_impl_total_crossings = R"doc(Current total number of edge crossings in the network.)doc";
+
+static const char *__doc_fiction_mincross_impl_transpose =
+R"doc(Performs pairwise transpositions within ranks to further reduce
+crossings.
+
+Parameter ``reverse``:
+    If true, applies reversed heuristic for tie-breaking.)doc";
+
+static const char *__doc_fiction_mincross_impl_transpose_step =
+R"doc(Performs a single transposition pass for rank `r`.
+
+Parameter ``r``:
+    Rank index.
+
+Parameter ``reverse``:
+    If true, applies reversed heuristic for tie-breaking.
+
+Returns:
+    The number of crossings reduced.)doc";
+
+static const char *__doc_fiction_mincross_params = R"doc(Parameters for the `mincross` crossing minimization algorithm.)doc";
+
+static const char *__doc_fiction_mincross_params_fixed_pis =
+R"doc(Whether the rank positions of primary inputs (PIs) should remain fixed
+during the minimization process. If set to `true`, PIs will not be
+reordered.)doc";
+
+static const char *__doc_fiction_mincross_stats = R"doc(Statistics collected during the execution of the `mincross` algorithm.)doc";
+
+static const char *__doc_fiction_mincross_stats_num_crossings = R"doc(The total number of edge crossings after optimization.)doc";
 
 static const char *__doc_fiction_minimum_energy =
 R"doc(Computes the minimum energy of a range of
