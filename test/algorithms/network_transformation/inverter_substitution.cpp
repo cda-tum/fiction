@@ -19,7 +19,7 @@
 
 using namespace fiction;
 
-TEST_CASE("Early termination, [inverter-substitution]")
+TEST_CASE("Early termination 0, [inverter-substitution]")
 {
     technology_network tec{};
     const auto         pi0  = tec.create_pi();
@@ -42,6 +42,37 @@ TEST_CASE("Early termination, [inverter-substitution]")
     mode                = detail::operation_mode::ALL_NODES;
     substituted_network = inverter_substitution(tec, mode);
     CHECK(substituted_network.num_gates() == 3);
+}
+
+TEST_CASE("Early termination 1, [inverter-substitution]")
+{
+    technology_network tec{};
+    const auto         pi0  = tec.create_pi();
+    const auto         pi1  = tec.create_pi();
+    const auto         pi2  = tec.create_pi();
+    const auto         and0 = tec.create_and(pi0, pi1);
+    const auto         xor0 = tec.create_xor(pi0, pi1);
+    const auto         maj0 = tec.create_maj(pi0, pi1, pi2);
+    const auto         inv0 = tec.create_not(pi0);
+    const auto         inv1 = tec.create_not(pi1);
+    tec.create_po(and0);
+    tec.create_po(xor0);
+    tec.create_po(maj0);
+    tec.create_po(inv0);
+    tec.create_po(inv1);
+
+    const auto tec_r = mutable_rank_view(tec);
+
+    CHECK(tec_r.num_gates() == 5);
+    detail::operation_mode mode                = detail::operation_mode::FO_ONLY;
+    auto                   substituted_network = inverter_substitution(tec_r, mode);
+    CHECK(substituted_network.num_gates() == 5);
+    mode                = detail::operation_mode::AND_OR_ONLY;
+    substituted_network = inverter_substitution(tec_r, mode);
+    CHECK(substituted_network.num_gates() == 5);
+    mode                = detail::operation_mode::ALL_NODES;
+    substituted_network = inverter_substitution(tec_r, mode);
+    CHECK(substituted_network.num_gates() == 5);
 }
 
 TEST_CASE("Minimal FO inverter substitution with output preservation, [inverter-substitution]")
