@@ -117,7 +117,7 @@ class clustercomplete_impl
     clustercomplete_impl(const Lyt& lyt, const clustercomplete_params<cell<Lyt>>& params) noexcept :
             available_threads{std::max(uint64_t{1}, params.available_threads)},
             charge_layout{initialize_charge_layout(lyt, params)},
-            real_placed_defects{charge_layout.get_defects()},
+            defects{charge_layout.get_defects()},
             mu_bounds_with_error{constants::ERROR_MARGIN - params.simulation_parameters.mu_minus,
                                  -constants::ERROR_MARGIN - params.simulation_parameters.mu_minus,
                                  constants::ERROR_MARGIN - params.simulation_parameters.mu_plus(),
@@ -226,7 +226,7 @@ class clustercomplete_impl
     /**
      * Simulation results.
      */
-    sidb_simulation_result<Lyt>       result{};
+    sidb_simulation_result<Lyt> result{};
     /**
      * Number of available threads.
      */
@@ -247,7 +247,7 @@ class clustercomplete_impl
     /**
      * Atomic defects that are placed in the layout.
      */
-    const std::unordered_map<typename Lyt::cell, const sidb_defect> real_placed_defects;
+    const std::unordered_map<typename Lyt::cell, const sidb_defect> defects;
     /**
      * Globally available array of bounds that section the band gap, used for pruning.
      */
@@ -424,6 +424,15 @@ class clustercomplete_impl
                              charge_layout_copy.get_local_external_potential()[sidb_ix]);
         }
 
+        if (!charge_layout_copy.is_configuration_stable())
+        {
+            return;
+        }
+
+        // population stability is a given when this function is called; hence the charge distribution is physically
+        // valid when configuration stability is met
+        charge_layout_copy.declare_physically_valid();
+
         if constexpr (is_sidb_defect_surface_v<Lyt>)
         {
             charge_layout_copy.update_local_defect_potential();
@@ -431,20 +440,11 @@ class clustercomplete_impl
 
         charge_layout_copy.recompute_system_energy();
 
-        if (!charge_layout_copy.is_configuration_stable())
-        {
-            return;
-        }
-
         charge_layout_copy.charge_distribution_to_index();
 
-        // population stability is a given when this function is called; hence the charge distribution is physically
-        // valid when configuration stability is met
-        charge_layout_copy.declare_physically_valid();
-
-        if constexpr (has_get_sidb_defect_v<Lyt>)
+        if constexpr (has_get_sidb_defect_v<Lyt>)  // todo: this is a bit crooked maybe
         {
-            for (const auto& [cell, defect] : real_placed_defects)
+            for (const auto& [cell, defect] : defects)
             {
                 charge_layout_copy.assign_sidb_defect(cell, defect);
             }
