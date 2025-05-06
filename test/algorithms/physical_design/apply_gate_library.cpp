@@ -572,7 +572,7 @@ TEST_CASE("Applying the QCAOne gate library", "[apply-gate-library]")
 
     SECTION("Without crossings")
     {
-        const GateLyt gate_lyt = blueprints::straight_wire_gate_layout<GateLyt>();
+        const auto gate_lyt = blueprints::straight_wire_gate_layout<GateLyt>();
 
         const auto layout = apply_gate_library<qca_cell_clk_lyt, qca_one_library, GateLyt>(gate_lyt);
 
@@ -583,7 +583,7 @@ TEST_CASE("Applying the QCAOne gate library", "[apply-gate-library]")
 
     SECTION("With crossings")
     {
-        const GateLyt gate_lyt = blueprints::optimization_layout_corner_case_outputs_2<GateLyt>();
+        const auto gate_lyt = blueprints::optimization_layout_corner_case_outputs_2<GateLyt>();
 
         const auto layout = apply_gate_library<stacked_qca_cell_clk_lyt, qca_one_library, GateLyt>(gate_lyt);
 
