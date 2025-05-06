@@ -6,11 +6,11 @@
 
 #include "utils/blueprints/network_blueprints.hpp"
 
+#include <fiction/algorithms/graph/mincross.hpp>
 #include <fiction/algorithms/network_transformation/network_balancing.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/networks/views/bfs_topo_view.hpp>
 #include <fiction/networks/views/mutable_rank_view.hpp>
-#include <fiction/algorithms/graph/mincross.hpp>
 
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/traits.hpp>
