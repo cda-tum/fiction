@@ -5,7 +5,7 @@
 #ifndef FICTION_MUTABLE_RANK_VIEW_HPP
 #define FICTION_MUTABLE_RANK_VIEW_HPP
 
-#include <fiction/networks/views/static_depth_view.hpp>
+#include "fiction/networks/views/static_depth_view.hpp"
 
 #include <mockturtle/networks/detail/foreach.hpp>
 #include <mockturtle/traits.hpp>
