@@ -344,7 +344,7 @@ class inverter_substitution_impl
                 connect_children_to_gates<TopoNtkSrc>(ntk_dest, old2new, g, children);
                 if (unplaced_nodes.find(g) != unplaced_nodes.end())
                 {
-                    for (int j = 0; j < 3; ++j)
+                    for (uint32_t j = 0; j < 3; ++j)
                     {
                         const auto child = gather_fanin_signals<TopoNtkSrc>(unplaced_nodes[g][j], old2new);
                         connect_children_to_gates<TopoNtkSrc>(ntk_dest, old2new, unplaced_nodes[g][j], child);

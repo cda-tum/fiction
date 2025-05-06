@@ -4,13 +4,13 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "fiction/algorithms/properties/count_gate_types.hpp"
-#include "fiction/algorithms/verification/virtual_miter.hpp"
-#include "fiction/networks/views/mutable_rank_view.hpp"
-
+#include <fiction/algorithms/properties/count_gate_types.hpp>
+#include <fiction/algorithms/verification/virtual_miter.hpp>
+#include <fiction/networks/views/mutable_rank_view.hpp>
 #include <fiction/algorithms/network_transformation/inverter_substitution.hpp>
 #include <fiction/networks/technology_network.hpp>
 
+#include <mockturtle/traits.hpp>
 #include <mockturtle/algorithms/equivalence_checking.hpp>
 
 #include <cassert>
@@ -151,5 +151,5 @@ TEST_CASE("Propagating AND/OR inverter substitution, [inverter-substitution]")
     const auto                             cec_m = mockturtle::equivalence_checking(
         *fiction::virtual_miter<fiction::technology_network>(substituted_network, tec), {}, &eq_st);
     REQUIRE(cec_m.has_value());
-    CHECK(cec_m == 1);
+    CHECK(cec_m.value() == 1);
 }
