@@ -1004,6 +1004,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         {
             strg->local_pot[i] = strg->local_int_pot[i] + strg->local_ext_pot[i];
         }
+
+        update_local_defect_potential();
     }
     /**
      * The function returns the local electrostatic potential at a given SiDB position in V.
@@ -1041,23 +1043,21 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     {
         return strg->local_int_pot_at_defect[c] + strg->local_ext_pot_at_defect[c];
     }
-
-    /*
+    /**
      * todo
      */
     [[nodiscard]] std::vector<double> get_local_internal_potential() const noexcept
     {
         return strg->local_int_pot;
     }
-
-    /*
+    /**
      * todo
      */
     [[nodiscard]] std::vector<double> get_local_potential_caused_by_defects() const noexcept
     {
         return strg->local_pot_caused_by_defects;
     }
-    /*
+    /**
      * todo
      */
     [[nodiscard]] std::vector<double> get_local_external_potential() const noexcept
@@ -1073,19 +1073,15 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     void assign_local_internal_potential_by_index(const uint64_t index, const double loc_pot) noexcept
     {
         assert(index < strg->local_int_pot.size());
-        const double temp          = strg->local_int_pot[index];
+        strg->local_pot[index]     = strg->local_pot[index] + loc_pot - strg->local_int_pot[index];
         strg->local_int_pot[index] = loc_pot;
-        strg->local_pot[index] =
-            strg->local_pot[index] + loc_pot -
-            temp;  // todo: we have to discuss how we deal with these function. What should we update.
     }
 
     void assign_local_external_potential_by_index(const uint64_t index, const double loc_pot) noexcept
     {
         assert(index < strg->local_ext_pot.size());
-        const double temp          = strg->local_ext_pot[index];
+        strg->local_pot[index]     = strg->local_pot[index] + loc_pot - strg->local_ext_pot[index];
         strg->local_ext_pot[index] = loc_pot;
-        strg->local_pot[index]     = strg->local_pot[index] + loc_pot - temp;
     }
     /**
      * This function assign the electrostatic system energy to zero (unit: eV). It can be used if only one SiDB is
@@ -1844,7 +1840,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 if (strg->cell_charge[strg->dependent_cell_index] != sidb_charge_state::NEGATIVE)
                 {
                     const auto charge_diff = (-charge_state_to_sign(strg->cell_charge[strg->dependent_cell_index]) - 1);
-                    for (uint64_t i = 0u; i < strg->pot_mat.size(); ++i)
+                    for (uint64_t i = 0u; i < strg->sidb_order.size(); ++i)
                     {
                         if (i != strg->dependent_cell_index)
                         {
@@ -1870,7 +1866,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                         const auto charge_diff =
                             (-charge_state_to_sign(strg->cell_charge[strg->dependent_cell_index]) + 1);
                         strg->cell_charge[strg->dependent_cell_index] = sidb_charge_state::POSITIVE;
-                        for (uint64_t i = 0u; i < strg->pot_mat.size(); ++i)
+                        for (uint64_t i = 0u; i < strg->sidb_order.size(); ++i)
                         {
                             if (i != strg->dependent_cell_index)
                             {
@@ -1885,13 +1881,12 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                     }
                 }
             }
-
             else
             {
                 if (strg->cell_charge[strg->dependent_cell_index] != sidb_charge_state::NEUTRAL)
                 {
                     const auto charge_diff = (-charge_state_to_sign(strg->cell_charge[strg->dependent_cell_index]));
-                    for (uint64_t i = 0u; i < strg->pot_mat.size(); ++i)
+                    for (uint64_t i = 0u; i < strg->sidb_order.size(); ++i)
                     {
                         if (i != strg->dependent_cell_index)
                         {
