@@ -38,7 +38,7 @@ TEST_CASE("Test Defects")
 
     REQUIRE(charge_lyt.is_physically_valid());
 
-    sidb_defect_surface<sidb_cell_clk_lyt_siqad> defect_lyt{lyt};
+    sidb_defect_surface defect_lyt{lyt};
     defect_lyt.assign_cell_type({5, 1, 0}, sidb_cell_clk_lyt_siqad::cell_type::EMPTY);
     defect_lyt.assign_sidb_defect({5, 1, 0},
                                   sidb_defect{sidb_defect_type::DB, -1, sim_params.epsilon_r, sim_params.lambda_tf});
@@ -49,6 +49,9 @@ TEST_CASE("Test Defects")
     charge_lyt_defect.update_after_charge_change();
 
     CHECK(charge_lyt_defect.is_physically_valid());
+
+    CHECK_THAT(charge_lyt_defect.get_electrostatic_potential_energy() - 0.082227626226473852,
+               Catch::Matchers::WithinAbs(0.0, constants::ERROR_MARGIN));
 
     CHECK_THAT(charge_lyt.get_electrostatic_potential_energy() - charge_lyt_defect.get_electrostatic_potential_energy(),
                Catch::Matchers::WithinAbs(0.0, constants::ERROR_MARGIN));
