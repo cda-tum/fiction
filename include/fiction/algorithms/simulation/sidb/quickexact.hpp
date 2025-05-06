@@ -264,13 +264,10 @@ class quickexact_impl
         // negative charge, this way of implementation is chosen.
         for (const auto& cell : preassigned_negative_sidbs)
         {
-            charge_layout.update_potential_due_to_predefined_negatively_charged_sidbs(cell);
+            charge_layout.add_sidb_defect_to_potential_landscape(
+                cell, sidb_defect{sidb_defect_type::UNKNOWN, -1, charge_layout.get_simulation_params().epsilon_r,
+                                  charge_layout.get_simulation_params().lambda_tf});
         }
-
-        // todo: needs to be double-checked
-        const auto internal_potential = charge_layout.get_local_internal_potential();
-
-        charge_layout.assign_internal_potential_offset(internal_potential);
 
         // Update all local potentials, system energy, and physical validity. The flag is set to
         // `dependent_cell_mode::VARIABLE` to allow the dependent cell to change its charge state based on the N-1 SiDBs

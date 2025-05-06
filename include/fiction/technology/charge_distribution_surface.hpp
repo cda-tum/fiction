@@ -246,11 +246,6 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         std::unordered_map<typename Lyt::cell, double> local_int_pot_at_defect{};
 
         std::unordered_map<typename Lyt::cell, double> local_ext_pot_at_defect{};
-
-        /*
-         * Offset that is added to the internal electrostatic potential. This is needed for `QuickExact`.
-         */
-        std::optional<local_potential> local_int_potential_offset = std::nullopt;
         /**
          * Stores the electrostatic energy of a given charge distribution (unit: eV).
          */
@@ -568,16 +563,6 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 strg->local_pot[static_cast<uint64_t>(cell_to_index(c1))] += pot * (-1.0);
             });
     }
-
-    /**
-     * // todo
-     */
-    void assign_internal_potential_offset(const std::vector<double>& offset_potential) noexcept
-    {
-        strg->local_int_potential_offset = offset_potential;
-        update_after_charge_change();
-    }
-
     /**
      * This function adds a defect to the layout.
      *
@@ -882,11 +867,6 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         if (history_mode == charge_distribution_history::NEGLECT)
         {
             strg->local_int_pot = std::vector<double>(this->num_cells(), 0.0);
-
-            if (strg->local_int_potential_offset.has_value())
-            {
-                strg->local_int_pot = *strg->local_int_potential_offset;
-            }
 
             for (uint64_t i = 0; i < strg->sidb_order.size(); ++i)
             {
