@@ -1128,12 +1128,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         // to compensate for the half-counting of the defect potential
         for (uint64_t i = 0; i < strg->sidb_order.size(); ++i)
         {
-            for (const auto& [c, defect] : strg->defects)
-            {
                 strg->system_energy += 0.5 * strg->local_pot_caused_by_defects[i] *
-                                       static_cast<double>(charge_state_to_sign(strg->cell_charge[i])) *
-                                       static_cast<double>(defect.charge);
-            }
+                                   static_cast<double>(charge_state_to_sign(strg->cell_charge[i]));
         }
 
         for (const auto& [c, defect] : strg->defects)
