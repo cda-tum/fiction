@@ -70,8 +70,8 @@ void charge_distribution_surface_layout(pybind11::module& m, const std::string& 
                fiction::charge_index_mode index_mode) { return cds.assign_charge_state(c, cs, index_mode); },
             py::arg("c"), py::arg("cs"), py::arg("index_mode") = fiction::charge_index_mode::UPDATE_CHARGE_INDEX)
         .def(
-            "assign_charge_by_cell_index", [](py_cds& cds, uint64_t i, fiction::sidb_charge_state cs)
-            { return cds.assign_charge_by_cell_index(i, cs); }, py::arg("i"), py::arg("cs"))
+            "assign_charge_by_index", [](py_cds& cds, uint64_t i, fiction::sidb_charge_state cs)
+            { return cds.assign_charge_state_by_index(i, cs); }, py::arg("i"), py::arg("cs"))
         .def(
             "assign_all_charge_states",
             [](py_cds& cds, fiction::sidb_charge_state cs) { return cds.assign_all_charge_states(cs); }, py::arg("cs"))
@@ -155,23 +155,17 @@ void charge_distribution_surface_layout(pybind11::module& m, const std::string& 
         .def("get_charge_index_and_base", &py_cds::get_charge_index_and_base)
         .def(
             "increase_charge_index_by_one",
-            [](py_cds& cds, fiction::dependent_cell_mode dependent_cell_fixed,
-               fiction::energy_calculation          recompute_system_energy,
-               fiction::charge_distribution_history consider_history, fiction::exact_sidb_simulation_engine engine)
-            {
-                return cds.increase_charge_index_by_one(dependent_cell_fixed, recompute_system_energy, consider_history,
-                                                        engine);
-            },
+            [](py_cds& cds, fiction::dependent_cell_mode dep_cell, fiction::energy_calculation energy_calculation_mode,
+               fiction::charge_distribution_history history_mode)
+            { return cds.increase_charge_index_by_one(dep_cell, energy_calculation_mode, history_mode); },
             py::arg("dependent_cell_fixed")    = fiction::dependent_cell_mode::FIXED,
             py::arg("recompute_system_energy") = fiction::energy_calculation::UPDATE_ENERGY,
-            py::arg("consider_history")        = fiction::charge_distribution_history::NEGLECT,
-            py::arg("engine")                  = fiction::exact_sidb_simulation_engine::EXGS)
+            py::arg("consider_history")        = fiction::charge_distribution_history::NEGLECT)
 
         .def("get_max_charge_index", &py_cds::get_max_charge_index)
         .def("assign_charge_index", &py_cds::assign_charge_index, py::arg("charge_index"), py::arg("cdc"))
         .def("adjacent_search", &py_cds::adjacent_search, py::arg("alpha"), py::arg("negative_indices"))
-        .def("assign_global_external_potential", &py_cds::assign_global_external_potential, py::arg("potential_value"),
-             py::arg("dependent_cell") = fiction::dependent_cell_mode::FIXED)
+        .def("assign_global_external_potential", &py_cds::assign_global_external_potential, py::arg("potential_value"))
         .def("is_three_state_simulation_required", &py_cds::is_three_state_simulation_required)
         .def("get_positive_candidates", &py_cds::get_positive_candidates)
         .def("three_state_cell_to_index", &py_cds::three_state_cell_to_index, py::arg("c"))
@@ -199,8 +193,7 @@ void charge_distribution_surface_layout(pybind11::module& m, const std::string& 
         .def("increase_charge_index_of_sub_layout_by_one", &py_cds::increase_charge_index_of_sub_layout_by_one,
              py::arg("dependent_cell_fixed")    = fiction::dependent_cell_mode::FIXED,
              py::arg("recompute_system_energy") = fiction::energy_calculation::UPDATE_ENERGY,
-             py::arg("consider_history")        = fiction::charge_distribution_history::NEGLECT,
-             py::arg("engine")                  = fiction::exact_sidb_simulation_engine::EXGS)
+             py::arg("consider_history")        = fiction::charge_distribution_history::NEGLECT)
         .def("assign_charge_index_by_gray_code", &py_cds::assign_charge_index_by_gray_code,
              py::arg("current_gray_code"), py::arg("previous_gray_code"),
              py::arg("dependent_cell")   = fiction::dependent_cell_mode::FIXED,
