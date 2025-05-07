@@ -70,9 +70,6 @@ void charge_distribution_surface_layout(pybind11::module& m, const std::string& 
                fiction::charge_index_mode index_mode) { return cds.assign_charge_state(c, cs, index_mode); },
             py::arg("c"), py::arg("cs"), py::arg("index_mode") = fiction::charge_index_mode::UPDATE_CHARGE_INDEX)
         .def(
-            "assign_charge_by_index", [](py_cds& cds, uint64_t i, fiction::sidb_charge_state cs)
-            { return cds.assign_charge_state_by_index(i, cs); }, py::arg("i"), py::arg("cs"))
-        .def(
             "assign_all_charge_states",
             [](py_cds& cds, fiction::sidb_charge_state cs) { return cds.assign_all_charge_states(cs); }, py::arg("cs"))
         .def(
