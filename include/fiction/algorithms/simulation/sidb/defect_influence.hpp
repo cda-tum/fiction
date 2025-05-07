@@ -6,8 +6,8 @@
 #define FICTION_DEFECT_INFLUENCE_HPP
 
 #include "fiction/algorithms/iter/bdl_input_iterator.hpp"
-#include "fiction/algorithms/simulation/sidb/clustercomplete.hpp"
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
+#include "fiction/algorithms/simulation/sidb/quickexact.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_domain.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "fiction/layouts/bounding_box.hpp"
@@ -632,52 +632,53 @@ class defect_influence_impl
             return defect_influence_status::INFLUENTIAL;
         }
 
-        clustercomplete_params<cell<Lyt>> cc_params{params.operational_params.simulation_parameters};
-        cc_params.available_threads = 1;
+        const quickexact_params<cell<Lyt>> qe_params{
+            params.operational_params.simulation_parameters,
+            quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF};
 
         mockturtle::stopwatch stop{stats.time_total};
 
-        const auto simulation_results = clustercomplete(lyt_without_defect, cc_params);
+        const auto simulation_results = quickexact(lyt_without_defect, qe_params);
 
         const auto ground_states = simulation_results.groundstates();
 
-        if (lyt_without_defect.get_cell_type(defect_pos) != Lyt::technology::cell_type::EMPTY)
+        if (lyt_without_defect.get_cell_type(defect_pos) == Lyt::technology::cell_type::EMPTY)
         {
-            // defect is placed on a non-empty cell
-            return defect_influence_status::NON_INFLUENTIAL;
-        }
+            sidb_defect_surface<Lyt> lyt_defect{lyt_without_defect};
 
-        sidb_defect_surface<Lyt> lyt_defect{lyt_without_defect};
+            lyt_defect.assign_sidb_defect(defect_pos, params.defect);
 
-        lyt_defect.assign_sidb_defect(defect_pos, params.defect);
-
-        if (can_positive_charges_occur(lyt_defect, params.operational_params.simulation_parameters))
-        {
-            return defect_influence_status::INFLUENTIAL;
-        }
-
-        // conduct simulation with defect
-        auto simulation_result_defect = clustercomplete(lyt_defect, cc_params);
-
-        const auto ground_states_defect = simulation_result_defect.groundstates();
-
-        if (ground_states.size() != ground_states_defect.size())
-        {
-            return defect_influence_status::INFLUENTIAL;
-        }
-
-        for (const auto& gs_defect : ground_states_defect)
-        {
-            const auto same_ground_state_was_found = std::any_of(
-                ground_states.cbegin(), ground_states.cend(), [&gs_defect](const auto& gs)
-                { return gs.get_charge_index_and_base().first == gs_defect.get_charge_index_and_base().first; });
-
-            if (!same_ground_state_was_found)
+            if (can_positive_charges_occur(lyt_defect, params.operational_params.simulation_parameters))
             {
                 return defect_influence_status::INFLUENTIAL;
             }
+
+            // conduct simulation with defect
+            auto simulation_result_defect = quickexact(lyt_defect, qe_params);
+
+            const auto ground_states_defect = simulation_result_defect.groundstates();
+
+            if (ground_states.size() != ground_states_defect.size())
+            {
+                return defect_influence_status::INFLUENTIAL;
+            }
+
+            for (const auto& gs_defect : ground_states_defect)
+            {
+                const auto same_ground_state_was_found = std::any_of(
+                    ground_states.cbegin(), ground_states.cend(), [&gs_defect](const auto& gs)
+                    { return gs.get_charge_index_and_base().first == gs_defect.get_charge_index_and_base().first; });
+
+                if (!same_ground_state_was_found)
+                {
+                    return defect_influence_status::INFLUENTIAL;
+                }
+            }
+
+            return defect_influence_status::NON_INFLUENTIAL;
         }
 
+        // defect is placed on a non-empty cell
         return defect_influence_status::NON_INFLUENTIAL;
     };
     /**
