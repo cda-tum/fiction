@@ -1404,7 +1404,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         if (strg->charge_index_and_base.first < strg->max_charge_index)
         {
             strg->charge_index_and_base.first += 1;
-            if (strg->engine == exact_sidb_simulation_engine::QUICKEXACT)
+            if (strg->engine == sidb_simulation_engine::QUICKEXACT)
             {
                 this->index_to_charge_distribution_for_quickexact_simulation();
             }
@@ -1988,7 +1988,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         if (strg->charge_index_sublayout < strg->max_charge_index_sulayout)
         {
             strg->charge_index_sublayout += 1;
-            if (strg->engine == exact_sidb_simulation_engine::QUICKEXACT)
+            if (strg->engine == sidb_simulation_engine::QUICKEXACT)
             {
                 this->index_to_charge_distribution_for_quickexact_simulation();
             }
@@ -2030,7 +2030,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     void reset_charge_index_sub_layout() noexcept
     {
         strg->charge_index_sublayout = 0;
-        if (strg->engine == exact_sidb_simulation_engine::QUICKEXACT)
+        if (strg->engine == sidb_simulation_engine::QUICKEXACT)
         {
             this->index_to_charge_distribution_for_quickexact_simulation();
         }
