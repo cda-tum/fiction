@@ -12122,9 +12122,6 @@ Parameter ``lyt``:
 Parameter ``params``:
     Simulation parameters.
 
-Parameter ``ps``:
-    Simulation statistics.
-
 Returns:
     sidb_simulation_result is returned with all results.)doc";
 
