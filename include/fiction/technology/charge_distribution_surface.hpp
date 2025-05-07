@@ -493,16 +493,22 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         }
     }
     /**
-     * This function assigns the given charge state to the cell of the layout at the specified index. It updates the
-     * `cell_charge` member of `strg` object with the new charge state of the specified cell.
+     * This function assigns the given charge state to the cell (accessed by `index`) of the layout.
      *
-     * @param index The index of the cell.
-     * @param cs The charge state to be assign to the cell.
+     * @param index The index of the cell to which a charge state is to be assigned.
+     * @param cs The charge state to be assigned to the cell.
+     * @param index_mode Mode to determine whether the charge index should be updated.
      */
-    void assign_charge_by_cell_index(const uint64_t index, const sidb_charge_state cs) noexcept
+    void
+    assign_charge_state_by_index(const uint64_t index, const sidb_charge_state cs,
+                                 const charge_index_mode index_mode = charge_index_mode::UPDATE_CHARGE_INDEX) noexcept
     {
         strg->cell_charge[index] = cs;
-        this->charge_distribution_to_index();
+
+        if (index_mode == charge_index_mode::UPDATE_CHARGE_INDEX)
+        {
+            this->charge_distribution_to_index();
+        }
     }
     /**
      * This function assigns the charge state of all SiDBs in the layout to a given charge state.
@@ -556,21 +562,6 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         {
             strg->max_charge_index = static_cast<uint64_t>(std::pow(static_cast<double>(base), this->num_cells()) - 1);
         }
-    }
-    /**
-     * // todo
-     */
-    void update_potential_due_to_predefined_negatively_charged_sidbs(const typename Lyt::cell& negative_sidb) noexcept
-    {
-        this->foreach_cell(
-            [this, &negative_sidb](const auto& c1)
-            {
-                const auto dist = sidb_nm_distance<Lyt>(*this, c1, negative_sidb);
-                const auto pot  = chargeless_potential_at_given_distance(dist);
-
-                strg->local_int_pot[static_cast<uint64_t>(cell_to_index(c1))] += pot * (-1.0);
-                strg->local_pot[static_cast<uint64_t>(cell_to_index(c1))] += pot * (-1.0);
-            });
     }
     /**
      * This function adds a defect to the layout.
@@ -654,24 +645,6 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         strg->defects.erase(c);
 
         update_local_defect_potential();
-    }
-    /**
-     * This function assigns the given charge state to the cell (accessed by `index`) of the layout.
-     *
-     * @param index The index of the cell to which a charge state is to be assigned.
-     * @param cs The charge state to be assigned to the cell.
-     * @param index_mode Mode to determine whether the charge index should be updated.
-     */
-    void
-    assign_charge_state_by_index(const uint64_t index, const sidb_charge_state cs,
-                                 const charge_index_mode index_mode = charge_index_mode::UPDATE_CHARGE_INDEX) noexcept
-    {
-        strg->cell_charge[index] = cs;
-
-        if (index_mode == charge_index_mode::UPDATE_CHARGE_INDEX)
-        {
-            this->charge_distribution_to_index();
-        }
     }
     /**
      * This function returns the charge state of a given cell.
@@ -775,7 +748,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * (unit: V).
      *
      * @param index1 The first index.
-     * @param index1 The second index.
+     * @param index2 The second index.
      * @return The chargeless electrostatic potential between `index1` and `index2` (unit: V).
      */
     [[nodiscard]] double calculate_chargeless_potential_between_sidbs_by_index(const uint64_t index1,
@@ -965,7 +938,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 strg->local_int_pot_at_defect[c1] += pot * static_cast<double>(defect2.charge);
             }
 
-            for (auto i = 0; i < strg->sidb_order.size(); ++i)
+            for (uint64_t i = 0; i < strg->sidb_order.size(); ++i)
             {
                 const auto dist = sidb_nm_distance<Lyt>(*this, c1, strg->sidb_order[i]);
                 const auto pot  = chargeless_potential_generated_by_defect_at_given_distance(
@@ -1215,7 +1188,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                                  strg->local_int_pot :
                                  strg->local_pot)  // this for-loop checks if the "population stability" is fulfilled.
         {
-            bool valid = (((strg->cell_charge[for_loop_counter] == sidb_charge_state::NEGATIVE) &&
+            const bool valid = (((strg->cell_charge[for_loop_counter] == sidb_charge_state::NEGATIVE) &&
                            (-v + strg->simulation_parameters.mu_minus < constants::ERROR_MARGIN)) ||
                           ((strg->cell_charge[for_loop_counter] == sidb_charge_state::POSITIVE) &&
                            (-v + mu_p > -constants::ERROR_MARGIN)) ||
@@ -1494,21 +1467,23 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             }
         }
 
-        if (!candidates.empty())
+        if (candidates.empty())
         {
-            static std::mt19937_64                  generator(std::random_device{}());
-            std::uniform_int_distribution<uint64_t> dist(0, candidates.size() - 1);
-            const auto                              random_element = index_vector[candidates[dist(generator)]];
-            strg->cell_charge[random_element]                      = sidb_charge_state::NEGATIVE;
-            negative_indices.push_back(random_element);
+            return;
+        }
 
-            strg->system_energy += -(*this->get_local_potential_by_index(random_element));
+        static std::mt19937_64                  generator(std::random_device{}());
+        std::uniform_int_distribution<uint64_t> dist(0, candidates.size() - 1);
+        const auto                              random_element = index_vector[candidates[dist(generator)]];
+        strg->cell_charge[random_element]                      = sidb_charge_state::NEGATIVE;
+        negative_indices.push_back(random_element);
 
-            for (uint64_t i = 0u; i < strg->pot_mat.size(); ++i)
-            {
-                strg->local_int_pot[i] += -(this->get_chargeless_potential_by_indices(i, random_element));
-                // strg->local_pot[i] += -(this->get_chargeless_potential_by_indices(i, random_element));
-            }
+        strg->system_energy += -strg->local_int_pot[random_element];
+
+        for (uint64_t i = 0u; i < strg->pot_mat.size(); ++i)
+        {
+            strg->local_int_pot[i] += -this->get_chargeless_potential_by_indices(i, random_element);
+            // strg->local_pot[i] += -(this->get_chargeless_potential_by_indices(i, random_element));
         }
     }
     /**
@@ -1687,7 +1662,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     /**
      * This function searches the cell of a given index.
      *
-     * @param c The index to find the cell of.
+     * @param index The index to find the cell of.
      * @return The cell in the layout for the given index. Returns dead-coordinate if the index is not assigned to a
      * not empty cell in the layout.
      */
@@ -1755,7 +1730,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * nanometer.
      *
      * @param distance Distance between position and defect (unit: nm.
-     * @param sidb_defect Defect (including defect specific parameters).
+     * @param defect Defect (including defect specific parameters).
      * @return The chargeless electrostatic potential in Volt generated by the defect at a given distance (unit: V).
      */
     [[nodiscard]] double
@@ -1982,8 +1957,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      */
     void increase_charge_index_of_sub_layout_by_one(
         const dependent_cell_mode         dependent_cell          = dependent_cell_mode::FIXED,
-        const energy_calculation          recompute_system_energy = energy_calculation::UPDATE_ENERGY,
-        const charge_distribution_history consider_history        = charge_distribution_history::NEGLECT) noexcept
+        const energy_calculation          energy_calculation_mode = energy_calculation::UPDATE_ENERGY,
+        const charge_distribution_history history_mode        = charge_distribution_history::NEGLECT) noexcept
     {
         if (strg->charge_index_sublayout < strg->max_charge_index_sulayout)
         {
@@ -1996,7 +1971,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             {
                 this->index_to_charge_distribution(charge_index_recomputation::IGNORE_LEADING_ZEROES);
             }
-            this->update_after_charge_change(dependent_cell, recompute_system_energy, consider_history);
+            this->update_after_charge_change(dependent_cell, energy_calculation_mode, history_mode);
         }
     }
     /**
@@ -2015,13 +1990,13 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     void assign_charge_index_by_gray_code(
         const uint64_t current_gray_code, const uint64_t previous_gray_code,
         const dependent_cell_mode         dep_cell         = dependent_cell_mode::FIXED,
-        const energy_calculation          energy_calc_mode = energy_calculation::UPDATE_ENERGY,
+        const energy_calculation          energy_calculation_mode = energy_calculation::UPDATE_ENERGY,
         const charge_distribution_history history_mode     = charge_distribution_history::NEGLECT) noexcept
     {
         if (current_gray_code <= strg->max_charge_index)
         {
             this->assign_charge_index_by_two_gray_codes(current_gray_code, previous_gray_code);
-            this->update_after_charge_change(dep_cell, energy_calc_mode, history_mode);
+            this->update_after_charge_change(dep_cell, energy_calculation_mode, history_mode);
         }
     }
     /**
@@ -2107,6 +2082,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     /**
      * Initialization function used for the construction of the charge distribution surface.
      *
+     * @param cs Charge state to assign to all SiDBs.
      * @param configuration Specifies the configuration for charge distribution settings.
      *                      Determines whether only charge locations are considered or if
      *                      both charge locations and electrostatic interactions are included.
@@ -2243,14 +2219,13 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         }
 
         auto       charge_quot_positive = strg->charge_index_sublayout;
-        const auto base_positive        = 3;
         auto       counter              = strg->three_state_cells.size() - 1;
         // Firstly, the charge distribution of the sublayout (i.e., collection of SiDBs that can be positively
         // charged) is updated.
         while (charge_quot_positive > 0)
         {
-            const auto    charge_quot_int = static_cast<int64_t>(charge_quot_positive);
-            const auto    base_int        = static_cast<int64_t>(base_positive);
+            const auto     charge_quot_int = static_cast<int64_t>(charge_quot_positive);
+            constexpr auto    base_int        = static_cast<int64_t>(3);
             const int64_t quotient_int    = charge_quot_int / base_int;
             const int64_t remainder_int   = charge_quot_int % base_int;
             charge_quot_positive          = static_cast<uint64_t>(quotient_int);
@@ -2309,7 +2284,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     /**
      *  The stored unique index is converted to a charge distribution.
      *
-     *  @param charge_index_recompuation_mode Flag that can be set to `IGNORE_LEADING_ZEROES` if the charge index
+     *  @param charge_index_recomputation_mode Flag that can be set to `IGNORE_LEADING_ZEROES` if the charge index
      * was incremented before calling this function to enable an optimization. When set to `IGNORE_LEADING_ZEROES`,
      * the leading zeroes of the charge index are ignored.
      */
