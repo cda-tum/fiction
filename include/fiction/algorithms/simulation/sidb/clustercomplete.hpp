@@ -342,8 +342,6 @@ class clustercomplete_impl
         cds.assign_local_external_potential(params.local_external_potential);
         cds.assign_global_external_potential(params.global_potential);
 
-        cds.update_local_external_potential();
-
         return cds;
     }
     /**

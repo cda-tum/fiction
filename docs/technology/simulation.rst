@@ -125,7 +125,6 @@ construction, which enables the :ref:`*ClusterComplete* <clustercomplete>` exact
    :members:
 .. doxygenstruct:: fiction::sidb_cluster_projector_state
 .. doxygentypedef:: fiction::sidb_cluster_projector_state_ptr
-   :members:
 .. doxygenenum:: fiction::bound_direction
 .. doxygenfunction:: fiction::potential_bound_top
 .. doxygenfunction:: fiction::take_meet_of_potential_bounds

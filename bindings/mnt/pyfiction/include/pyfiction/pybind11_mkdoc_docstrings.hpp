@@ -5213,8 +5213,6 @@ Parameter ``top_cluster``:
     The top cluster that is returned by the *Ground State Space
     construction; it contains the entire cluster hierarchy construct.)doc";
 
-static const char *__doc_fiction_detail_clustercomplete_impl_defects = R"doc(Atomic defects that are placed in the layout.)doc";
-
 static const char *__doc_fiction_detail_clustercomplete_impl_extract_work_from_top_cluster =
 R"doc(Work in the form of compositions of charge space elements of the top
 cluster are extracted into a vector and shuffled at random before
@@ -5330,6 +5328,8 @@ R"doc(Globally available array of bounds that section the band gap, used for
 pruning.)doc";
 
 static const char *__doc_fiction_detail_clustercomplete_impl_mutex_to_protect_the_simulation_results = R"doc(Mutex to protect the simulation results.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_real_placed_defects = R"doc(Atomic defects that are placed in the layout.)doc";
 
 static const char *__doc_fiction_detail_clustercomplete_impl_remove_composition =
 R"doc(A composition is removed from the given clustering state, i.e., the
@@ -12122,6 +12122,9 @@ Parameter ``lyt``:
 Parameter ``params``:
     Simulation parameters.
 
+Parameter ``ps``:
+    Simulation statistics.
+
 Returns:
     sidb_simulation_result is returned with all results.)doc";
 
@@ -14061,7 +14064,10 @@ Exclusively generates 2DDWave-clocked layouts.
 This algorithm was proposed in \"A* is Born: Efficient and Scalable
 Physical Design for Field-coupled Nanocomputing\" by S. Hofmann, M.
 Walter, and R. Wille in IEEE NANO 2024
-(https://ieeexplore.ieee.org/document/10628808).
+(https://ieeexplore.ieee.org/document/10628808) and extended in
+\"Physical Design for Field-coupled Nanocomputing with Discretionary
+Cost Objectives\" by S. Hofmann, M. Walter, and R. Wille in LASCAS
+2025 (https://ieeexplore.ieee.org/document/10966234).
 
 Template parameter ``Lyt``:
     Cartesian gate-level layout type.
@@ -18110,7 +18116,10 @@ static const char *__doc_fiction_post_layout_optimization =
 R"doc(A post-layout optimization algorithm as originally proposed in \"Post-
 Layout Optimization for Field-coupled Nanotechnologies\" by S.
 Hofmann, M. Walter, and R. Wille in NANOARCH 2023
-(https://dl.acm.org/doi/10.1145/3611315.3633247). It can be used to
+(https://dl.acm.org/doi/10.1145/3611315.3633247) and extended in
+\"Efficient and Scalable Post-Layout Optimization for Field-coupled
+Nanotechnologies\" by S. Hofmann, M. Walter, and R. Wille in TCAD 2025
+(https://ieeexplore.ieee.org/document/10916761). It can be used to
 reduce the area of a given sub-optimal Cartesian gate-level layout
 created by heuristics or machine learning. This optimization utilizes
 the distinct characteristics of the 2DDWave clocking scheme, which
