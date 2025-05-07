@@ -114,9 +114,8 @@ class quickexact_impl
                 // If the layout consists of SiDBs that do not need to be negatively charged.
                 if (!all_sidbs_in_lyt_without_negative_preassigned_ones.empty())
                 {
-                        charge_distribution_surface charge_layout{layout};
-                        conduct_simulation(charge_layout, base_number);
-
+                    charge_distribution_surface charge_layout{layout};
+                    conduct_simulation(charge_layout, base_number);
                 }
 
                 // If the layout consists of only pre-assigned negatively charged SiDBs
@@ -249,6 +248,19 @@ class quickexact_impl
         charge_layout.assign_local_external_potential(params.local_external_potential);
         charge_layout.assign_global_external_potential(params.global_potential);
 
+        if constexpr (is_sidb_defect_surface_v<Lyt> && is_charge_distribution_surface_v<Lyt>)
+        {
+            layout.foreach_sidb_defect(
+                [this, &charge_layout](const auto& cd)
+                {
+                    if (const auto& [cell, defect] = cd;
+                        defect.type != sidb_defect_type::NONE && is_charged_defect_type(cd.second))
+                    {
+                        charge_layout.add_sidb_defect_to_potential_landscape(cell, layout.get_sidb_defect(cell));
+                    }
+                });
+        }
+
         // IMPORTANT: The pre-assigned negatively charged SiDBs (they have to be negatively charged to
         // fulfill the population stability) are considered as negatively charged defects in the layout.
         // Hence, there are no "real" defects assigned, but in order to set some SiDBs with a fixed
@@ -310,7 +322,10 @@ class quickexact_impl
 
                 charge_layout.foreach_cell(
                     [&charge_lyt_copy, &charge_layout](const auto& c)
-                    { charge_lyt_copy.assign_charge_state(c, charge_layout.get_charge_state(c), charge_index_mode::KEEP_CHARGE_INDEX); });
+                    {
+                        charge_lyt_copy.assign_charge_state(c, charge_layout.get_charge_state(c),
+                                                            charge_index_mode::KEEP_CHARGE_INDEX);
+                    });
 
                 charge_lyt_copy.update_after_charge_change();
                 charge_lyt_copy.charge_distribution_to_index_general();
@@ -354,7 +369,10 @@ class quickexact_impl
 
                     charge_layout.foreach_cell(
                         [&charge_lyt_copy, &charge_layout](const auto& c)
-                        { charge_lyt_copy.assign_charge_state(c, charge_layout.get_charge_state(c), charge_index_mode::KEEP_CHARGE_INDEX); });
+                        {
+                            charge_lyt_copy.assign_charge_state(c, charge_layout.get_charge_state(c),
+                                                                charge_index_mode::KEEP_CHARGE_INDEX);
+                        });
 
                     charge_lyt_copy.update_after_charge_change();
                     charge_lyt_copy.charge_distribution_to_index_general();
@@ -374,7 +392,10 @@ class quickexact_impl
 
                 charge_layout.foreach_cell(
                     [&charge_lyt_copy, &charge_layout](const auto& c)
-                    { charge_lyt_copy.assign_charge_state(c, charge_layout.get_charge_state(c), charge_index_mode::KEEP_CHARGE_INDEX); });
+                    {
+                        charge_lyt_copy.assign_charge_state(c, charge_layout.get_charge_state(c),
+                                                            charge_index_mode::KEEP_CHARGE_INDEX);
+                    });
 
                 charge_lyt_copy.update_after_charge_change();
                 charge_lyt_copy.charge_distribution_to_index_general();
@@ -402,7 +423,8 @@ class quickexact_impl
 
                 charge_layout.foreach_cell(
                     [&charge_lyt_copy, &charge_layout](const auto& c)
-                    { charge_lyt_copy.assign_charge_state(c, charge_layout.get_charge_state(c), charge_index_mode::KEEP_CHARGE_INDEX); });
+                    {
+                        charge_lyt_copy.assign_charge_state(c, charge_layout.get_charge_state(c), charge_index_mode::KEEP_CHARGE_INDEX); });
 
                 charge_lyt_copy.update_after_charge_change();
                 charge_lyt_copy.charge_distribution_to_index_general();
@@ -418,8 +440,9 @@ class quickexact_impl
         {
             charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt};
 
-            charge_layout.foreach_cell([&charge_lyt_copy, &charge_layout](const auto& c)
-                                       { charge_lyt_copy.assign_charge_state(c, charge_layout.get_charge_state(c), charge_index_mode::KEEP_CHARGE_INDEX); });
+            charge_layout.foreach_cell(
+                [&charge_lyt_copy, &charge_layout](const auto& c)
+                { charge_lyt_copy.assign_charge_state(c, charge_layout.get_charge_state(c), charge_index_mode::KEEP_CHARGE_INDEX); });
 
             charge_lyt_copy.update_after_charge_change();
             charge_lyt_copy.charge_distribution_to_index_general();
@@ -453,9 +476,8 @@ class quickexact_impl
             layout.foreach_sidb_defect(
                 [this](const auto& cd)
                 {
-                    const auto& [cell, defect] = cd;
-
-                    if (defect.type != sidb_defect_type::NONE && is_charged_defect_type(cd.second))
+                    if (const auto& [cell, defect] = cd;
+                        defect.type != sidb_defect_type::NONE && is_charged_defect_type(cd.second))
                     {
                         charge_lyt.add_sidb_defect_to_potential_landscape(cell, layout.get_sidb_defect(cell));
                     }

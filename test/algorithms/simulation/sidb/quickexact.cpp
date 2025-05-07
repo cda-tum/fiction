@@ -110,7 +110,7 @@ TEMPLATE_TEST_CASE(
 }
 
 TEMPLATE_TEST_CASE(
-    "four SiDBs QuickExact simulation with one negatively charge defect (changed epsilon_r) in proximity",
+    "four SiDBs QuickExact simulation with one negatively charge defect (changed mu_m) in proximity",
     "[quickexact]", (sidb_defect_surface<sidb_100_cell_clk_lyt_siqad>),
     charge_distribution_surface<sidb_defect_surface<sidb_100_cell_clk_lyt_siqad>>,
     sidb_defect_surface<charge_distribution_surface<sidb_100_cell_clk_lyt_siqad>>)
