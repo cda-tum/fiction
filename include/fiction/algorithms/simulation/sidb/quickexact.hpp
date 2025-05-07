@@ -248,6 +248,7 @@ class quickexact_impl
         charge_layout.assign_local_external_potential(params.local_external_potential);
         charge_layout.assign_global_external_potential(params.global_potential);
 
+        // todo: this was added to fix the final QuickExact test --- why were not more tests failing?
         if constexpr (is_sidb_defect_surface_v<Lyt> && is_charge_distribution_surface_v<Lyt>)
         {
             layout.foreach_sidb_defect(
@@ -260,6 +261,7 @@ class quickexact_impl
                     }
                 });
         }
+        // todo: end section
 
         // IMPORTANT: The pre-assigned negatively charged SiDBs (they have to be negatively charged to
         // fulfill the population stability) are considered as negatively charged defects in the layout.
@@ -424,7 +426,9 @@ class quickexact_impl
                 charge_layout.foreach_cell(
                     [&charge_lyt_copy, &charge_layout](const auto& c)
                     {
-                        charge_lyt_copy.assign_charge_state(c, charge_layout.get_charge_state(c), charge_index_mode::KEEP_CHARGE_INDEX); });
+                        charge_lyt_copy.assign_charge_state(c, charge_layout.get_charge_state(c),
+                                                            charge_index_mode::KEEP_CHARGE_INDEX);
+                    });
 
                 charge_lyt_copy.update_after_charge_change();
                 charge_lyt_copy.charge_distribution_to_index_general();
@@ -442,7 +446,10 @@ class quickexact_impl
 
             charge_layout.foreach_cell(
                 [&charge_lyt_copy, &charge_layout](const auto& c)
-                { charge_lyt_copy.assign_charge_state(c, charge_layout.get_charge_state(c), charge_index_mode::KEEP_CHARGE_INDEX); });
+                {
+                    charge_lyt_copy.assign_charge_state(c, charge_layout.get_charge_state(c),
+                                                        charge_index_mode::KEEP_CHARGE_INDEX);
+                });
 
             charge_lyt_copy.update_after_charge_change();
             charge_lyt_copy.charge_distribution_to_index_general();
