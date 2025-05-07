@@ -1190,11 +1190,11 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         {
             const bool valid = (((strg->cell_charge[for_loop_counter] == sidb_charge_state::NEGATIVE) &&
                                  (-v + strg->simulation_parameters.mu_minus < constants::ERROR_MARGIN)) ||
-                          ((strg->cell_charge[for_loop_counter] == sidb_charge_state::POSITIVE) &&
-                           (-v + mu_p > -constants::ERROR_MARGIN)) ||
-                          ((strg->cell_charge[for_loop_counter] == sidb_charge_state::NEUTRAL) &&
-                           (-v + strg->simulation_parameters.mu_minus > -constants::ERROR_MARGIN) &&
-                           (-v + mu_p < constants::ERROR_MARGIN)));
+                                ((strg->cell_charge[for_loop_counter] == sidb_charge_state::POSITIVE) &&
+                                 (-v + mu_p > -constants::ERROR_MARGIN)) ||
+                                ((strg->cell_charge[for_loop_counter] == sidb_charge_state::NEUTRAL) &&
+                                 (-v + strg->simulation_parameters.mu_minus > -constants::ERROR_MARGIN) &&
+                                 (-v + mu_p < constants::ERROR_MARGIN)));
             for_loop_counter += 1;
             if (!valid)
             {
@@ -1989,9 +1989,9 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      */
     void assign_charge_index_by_gray_code(
         const uint64_t current_gray_code, const uint64_t previous_gray_code,
-        const dependent_cell_mode         dep_cell         = dependent_cell_mode::FIXED,
+        const dependent_cell_mode         dep_cell                = dependent_cell_mode::FIXED,
         const energy_calculation          energy_calculation_mode = energy_calculation::UPDATE_ENERGY,
-        const charge_distribution_history history_mode     = charge_distribution_history::NEGLECT) noexcept
+        const charge_distribution_history history_mode            = charge_distribution_history::NEGLECT) noexcept
     {
         if (current_gray_code <= strg->max_charge_index)
         {
@@ -2218,17 +2218,17 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             }
         }
 
-        auto       charge_quot_positive = strg->charge_index_sublayout;
-        auto       counter              = strg->three_state_cells.size() - 1;
+        auto charge_quot_positive = strg->charge_index_sublayout;
+        auto counter              = strg->three_state_cells.size() - 1;
         // Firstly, the charge distribution of the sublayout (i.e., collection of SiDBs that can be positively
         // charged) is updated.
         while (charge_quot_positive > 0)
         {
             const auto     charge_quot_int = static_cast<int64_t>(charge_quot_positive);
             constexpr auto base_int        = static_cast<int64_t>(3);
-            const int64_t quotient_int    = charge_quot_int / base_int;
-            const int64_t remainder_int   = charge_quot_int % base_int;
-            charge_quot_positive          = static_cast<uint64_t>(quotient_int);
+            const int64_t  quotient_int    = charge_quot_int / base_int;
+            const int64_t  remainder_int   = charge_quot_int % base_int;
+            charge_quot_positive           = static_cast<uint64_t>(quotient_int);
 
             const auto sign = sign_to_charge_state(static_cast<int8_t>(remainder_int - 1));
             if (const auto new_chargesign = this->get_charge_state_by_index(
