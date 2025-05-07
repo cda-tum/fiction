@@ -131,8 +131,7 @@ class quickexact_impl
                 // (i.e., only SiDBs that are far away from each other).
                 else if (all_sidbs_in_lyt_without_negative_preassigned_ones.empty())
                 {
-                    charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt};
-                    result.charge_distributions.push_back(charge_lyt_copy);
+                    result.charge_distributions.emplace_back(charge_lyt);
                 }
             }
             // If there is only one SiDB in the layout, this single SiDB can be neutrally or even positively charged due
@@ -154,8 +153,7 @@ class quickexact_impl
                 {
                     if (charge_lyt.is_physically_valid())
                     {
-                        charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt};
-                        result.charge_distributions.push_back(charge_lyt_copy);
+                        result.charge_distributions.emplace_back(charge_lyt);
                     }
 
                     charge_lyt.increase_charge_index_by_one(
@@ -166,8 +164,7 @@ class quickexact_impl
 
                 if (charge_lyt.is_physically_valid())
                 {
-                    charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt};
-                    result.charge_distributions.push_back(charge_lyt_copy);
+                    result.charge_distributions.emplace_back(charge_lyt);
                 }
             }
 
@@ -316,15 +313,7 @@ class quickexact_impl
 
             if (charge_layout.is_physically_valid())
             {
-                charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt};
-
-                charge_layout.foreach_cell(
-                    [&charge_lyt_copy, &charge_layout](const auto& c)
-                    { charge_lyt_copy.assign_charge_state(c, charge_layout.get_charge_state(c)); });
-
-                charge_lyt_copy.update_after_charge_change();
-                charge_lyt_copy.recompute_system_energy();
-                result.charge_distributions.push_back(charge_lyt_copy);
+                result.charge_distributions.emplace_back(charge_layout);
             }
         }
 
@@ -360,16 +349,7 @@ class quickexact_impl
             {
                 if (charge_layout.is_physically_valid())
                 {
-                    charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt};
-
-                    charge_layout.foreach_cell(
-                        [&charge_lyt_copy, &charge_layout](const auto& c)
-                        { charge_lyt_copy.assign_charge_state(c, charge_layout.get_charge_state(c)); });
-
-                    charge_lyt_copy.update_after_charge_change();
-                    charge_lyt_copy.recompute_system_energy();
-                    charge_lyt_copy.charge_distribution_to_index_general();
-                    result.charge_distributions.push_back(charge_lyt_copy);
+                    result.charge_distributions.emplace_back(charge_layout);
                 }
 
                 charge_layout.increase_charge_index_of_sub_layout_by_one(
@@ -381,16 +361,7 @@ class quickexact_impl
 
             if (charge_layout.is_physically_valid())
             {
-                charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt};
-
-                charge_layout.foreach_cell(
-                    [&charge_lyt_copy, &charge_layout](const auto& c)
-                    { charge_lyt_copy.assign_charge_state(c, charge_layout.get_charge_state(c)); });
-
-                charge_lyt_copy.update_after_charge_change();
-                charge_lyt_copy.recompute_system_energy();
-                charge_lyt_copy.charge_distribution_to_index_general();
-                result.charge_distributions.push_back(charge_lyt_copy);
+                result.charge_distributions.emplace_back(charge_layout);
             }
 
             if (charge_layout.get_max_charge_index_sub_layout() != 0)
@@ -410,16 +381,7 @@ class quickexact_impl
         {
             if (charge_layout.is_physically_valid())
             {
-                charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt};
-
-                charge_layout.foreach_cell(
-                    [&charge_lyt_copy, &charge_layout](const auto& c)
-                    { charge_lyt_copy.assign_charge_state(c, charge_layout.get_charge_state(c)); });
-
-                charge_lyt_copy.update_after_charge_change();
-                charge_lyt_copy.recompute_system_energy();
-                charge_lyt_copy.charge_distribution_to_index_general();
-                result.charge_distributions.push_back(charge_lyt_copy);
+                result.charge_distributions.emplace_back(charge_layout);
             }
 
             charge_layout.increase_charge_index_of_sub_layout_by_one(dependent_cell_mode::VARIABLE,
@@ -429,15 +391,7 @@ class quickexact_impl
 
         if (charge_layout.is_physically_valid())
         {
-            charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt};
-
-            charge_layout.foreach_cell([&charge_lyt_copy, &charge_layout](const auto& c)
-                                       { charge_lyt_copy.assign_charge_state(c, charge_layout.get_charge_state(c)); });
-
-            charge_lyt_copy.update_after_charge_change();
-            charge_lyt_copy.recompute_system_energy();
-            charge_lyt_copy.charge_distribution_to_index_general();
-            result.charge_distributions.push_back(charge_lyt_copy);
+            result.charge_distributions.emplace_back(charge_layout);
         }
 
         for (const auto& cell : preassigned_negative_sidbs)

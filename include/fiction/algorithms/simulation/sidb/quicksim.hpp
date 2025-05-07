@@ -117,7 +117,7 @@ quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}) noexcept
         // Check that the layout with all SiDBs negatively charged is physically valid.
         if (charge_lyt.is_physically_valid())
         {
-            st.charge_distributions.push_back(charge_distribution_surface<Lyt>{charge_lyt});
+            st.charge_distributions.emplace_back(charge_lyt);
         }
 
         // Check that the layout with all SiDBs neutrally charged is physically valid.
@@ -128,7 +128,7 @@ quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}) noexcept
         {
             if (charge_lyt.is_physically_valid())
             {
-                st.charge_distributions.push_back(charge_distribution_surface<Lyt>{charge_lyt});
+                st.charge_distributions.emplace_back(charge_lyt);
             }
         }
 
@@ -156,7 +156,7 @@ quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}) noexcept
         charge_lyt.update_after_charge_change();
         if (charge_lyt.is_physically_valid())
         {
-            st.charge_distributions.push_back(charge_distribution_surface<Lyt>{charge_lyt});
+            st.charge_distributions.emplace_back(charge_lyt);
         }
 
         // If the number of threads is initially set to zero, the simulation is run with one thread.
@@ -183,7 +183,7 @@ quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}) noexcept
                         return;
                     }
 
-                    charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt.clone()};
+                    auto charge_lyt_copy = charge_distribution_surface{charge_lyt};
 
                     for (uint64_t l = 0ul; l < iter_per_thread; ++l)
                     {
@@ -222,7 +222,7 @@ quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}) noexcept
                                 charge_lyt_copy.charge_distribution_to_index();
 
                                 const std::lock_guard lock{mutex};
-                                st.charge_distributions.push_back(charge_distribution_surface<Lyt>{charge_lyt_copy});
+                                st.charge_distributions.emplace_back(charge_lyt_copy);
                             }
 
                             const auto upper_limit = all_sidb_indices_with_unknown_charge_state.size() - 1;
@@ -237,8 +237,7 @@ quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}) noexcept
                                     charge_lyt_copy.charge_distribution_to_index();
 
                                     const std::lock_guard lock{mutex};
-                                    st.charge_distributions.push_back(
-                                        charge_distribution_surface<Lyt>{charge_lyt_copy});
+                                    st.charge_distributions.emplace_back(charge_lyt_copy);
                                 }
                             }
                         }
