@@ -190,19 +190,20 @@ quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}) noexcept
                         for (const auto& sidb_index_with_unknown_charge_state :
                              all_sidb_indices_with_unknown_charge_state)
                         {
-                            // Check if the timeout has been reached before starting the iterations
-                            const auto current_time = std::chrono::high_resolution_clock::now();
-                            const auto elapsed_time =
-                                std::chrono::duration_cast<std::chrono::milliseconds>(current_time - start_time)
-                                    .count();
+                            // // Check if the timeout has been reached before starting the iterations
+                            // const auto current_time = std::chrono::high_resolution_clock::now();
+                            // const auto elapsed_time =
+                            //     std::chrono::duration_cast<std::chrono::milliseconds>(current_time - start_time)
+                            //         .count();
+                            //
+                            // if (static_cast<uint64_t>(elapsed_time) >= ps.timeout)
+                            // {
+                            //     timeout_limit_reached = true;
+                            //     return;  // Exit the thread if the timeout has been reached
+                            // }
 
-                            if (static_cast<uint64_t>(elapsed_time) >= ps.timeout)
-                            {
-                                timeout_limit_reached = true;
-                                return;  // Exit the thread if the timeout has been reached
-                            }
-
-                            charge_lyt_copy.assign_all_charge_states(sidb_charge_state::NEUTRAL);
+                            charge_lyt_copy.assign_all_charge_states(sidb_charge_state::NEUTRAL,
+                                                                     charge_index_mode::KEEP_CHARGE_INDEX);
 
                             auto negative_sidbs_indices = predefined_negative_sidb_indices;
                             negative_sidbs_indices.push_back(sidb_index_with_unknown_charge_state);
@@ -210,7 +211,8 @@ quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}) noexcept
                             for (const auto& negative_sidb_index : negative_sidbs_indices)
                             {
                                 charge_lyt_copy.assign_charge_state_by_index(negative_sidb_index,
-                                                                             sidb_charge_state::NEGATIVE);
+                                                                             sidb_charge_state::NEGATIVE,
+                                                                             charge_index_mode::KEEP_CHARGE_INDEX);
                             }
 
                             charge_lyt_copy.update_after_charge_change();
@@ -230,6 +232,8 @@ quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}) noexcept
 
                                 if (charge_lyt_copy.is_physically_valid())
                                 {
+                                    charge_lyt_copy.charge_distribution_to_index();
+
                                     const std::lock_guard lock{mutex};
                                     st.charge_distributions.push_back(
                                         charge_distribution_surface<Lyt>{charge_lyt_copy});

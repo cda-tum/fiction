@@ -1189,7 +1189,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                                  strg->local_pot)  // this for-loop checks if the "population stability" is fulfilled.
         {
             const bool valid = (((strg->cell_charge[for_loop_counter] == sidb_charge_state::NEGATIVE) &&
-                           (-v + strg->simulation_parameters.mu_minus < constants::ERROR_MARGIN)) ||
+                                 (-v + strg->simulation_parameters.mu_minus < constants::ERROR_MARGIN)) ||
                           ((strg->cell_charge[for_loop_counter] == sidb_charge_state::POSITIVE) &&
                            (-v + mu_p > -constants::ERROR_MARGIN)) ||
                           ((strg->cell_charge[for_loop_counter] == sidb_charge_state::NEUTRAL) &&
@@ -1958,7 +1958,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     void increase_charge_index_of_sub_layout_by_one(
         const dependent_cell_mode         dependent_cell          = dependent_cell_mode::FIXED,
         const energy_calculation          energy_calculation_mode = energy_calculation::UPDATE_ENERGY,
-        const charge_distribution_history history_mode        = charge_distribution_history::NEGLECT) noexcept
+        const charge_distribution_history history_mode            = charge_distribution_history::NEGLECT) noexcept
     {
         if (strg->charge_index_sublayout < strg->max_charge_index_sulayout)
         {
@@ -2225,7 +2225,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         while (charge_quot_positive > 0)
         {
             const auto     charge_quot_int = static_cast<int64_t>(charge_quot_positive);
-            constexpr auto    base_int        = static_cast<int64_t>(3);
+            constexpr auto base_int        = static_cast<int64_t>(3);
             const int64_t quotient_int    = charge_quot_int / base_int;
             const int64_t remainder_int   = charge_quot_int % base_int;
             charge_quot_positive          = static_cast<uint64_t>(quotient_int);
