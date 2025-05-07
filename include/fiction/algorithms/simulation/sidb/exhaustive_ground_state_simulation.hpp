@@ -49,6 +49,7 @@ exhaustive_ground_state_simulation(const Lyt&                        lyt,
 
         charge_distribution_surface<Lyt> charge_lyt{lyt};
 
+        charge_lyt.set_sidb_simulation_engine(sidb_simulation_engine::EXGS);
         charge_lyt.assign_physical_parameters(params);
         charge_lyt.assign_all_charge_states(sidb_charge_state::NEGATIVE);
         charge_lyt.update_after_charge_change();

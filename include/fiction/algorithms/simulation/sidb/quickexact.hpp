@@ -79,6 +79,7 @@ class quickexact_impl
             charge_lyt{lyt},
             params{parameter}
     {
+        charge_lyt.set_sidb_simulation_engine(sidb_simulation_engine::QUICKEXACT);
         charge_lyt.assign_all_charge_states(sidb_charge_state::NEGATIVE);
         charge_lyt.assign_physical_parameters(parameter.simulation_parameters);
     }

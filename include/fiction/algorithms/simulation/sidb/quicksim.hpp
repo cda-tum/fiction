@@ -105,6 +105,7 @@ quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}) noexcept
         const mockturtle::stopwatch stop{time_counter};
 
         charge_distribution_surface<Lyt> charge_lyt{lyt};
+        charge_lyt.set_sidb_simulation_engine(sidb_simulation_engine::QUICKSIM);
 
         // set the given physical parameters
         charge_lyt.assign_physical_parameters(ps.simulation_parameters);
