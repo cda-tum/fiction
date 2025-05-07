@@ -709,12 +709,10 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      *
      * @return Vector of SiDB indices that must be negatively charged to fulfill the population stability.
      */
-    [[nodiscard]] std::vector<uint64_t> negative_sidb_detection() noexcept
+    [[nodiscard]] std::vector<uint64_t> negative_sidb_detection() const noexcept
     {
         std::vector<uint64_t> negative_sidbs{};
         negative_sidbs.reserve(this->num_cells());
-
-        // update_local_potential();
 
         for (const auto& cell : strg->sidb_order)
         {
