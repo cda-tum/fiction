@@ -219,6 +219,8 @@ quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}) noexcept
 
                             if (charge_lyt_copy.is_physically_valid())
                             {
+                                charge_lyt_copy.charge_distribution_to_index();
+
                                 const std::lock_guard lock{mutex};
                                 st.charge_distributions.push_back(charge_distribution_surface<Lyt>{charge_lyt_copy});
                             }
