@@ -1374,19 +1374,21 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         const energy_calculation          energy_calculation_mode = energy_calculation::UPDATE_ENERGY,
         const charge_distribution_history history_mode            = charge_distribution_history::NEGLECT) noexcept
     {
-        if (strg->charge_index_and_base.first < strg->max_charge_index)
+        if (strg->charge_index_and_base.first >= strg->max_charge_index)
         {
-            strg->charge_index_and_base.first += 1;
-            if (strg->engine == sidb_simulation_engine::QUICKEXACT)
-            {
-                this->index_to_charge_distribution_for_quickexact_simulation();
-            }
-            else
-            {
-                this->index_to_charge_distribution(charge_index_recomputation::IGNORE_LEADING_ZEROES);
-            }
-            this->update_after_charge_change(dep_cell, energy_calculation_mode, history_mode);
+            return;
         }
+
+        strg->charge_index_and_base.first += 1;
+        if (strg->engine == sidb_simulation_engine::QUICKEXACT)
+        {
+            this->index_to_charge_distribution_for_quickexact_simulation();
+        }
+        else
+        {
+            this->index_to_charge_distribution(charge_index_recomputation::IGNORE_LEADING_ZEROES);
+        }
+        this->update_after_charge_change(dep_cell, energy_calculation_mode, history_mode);
     }
     /**
      * This function returns the maximum index of the cell-level layout.
@@ -1960,19 +1962,21 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         const energy_calculation          energy_calculation_mode = energy_calculation::UPDATE_ENERGY,
         const charge_distribution_history history_mode            = charge_distribution_history::NEGLECT) noexcept
     {
-        if (strg->charge_index_sublayout < strg->max_charge_index_sulayout)
+        if (strg->charge_index_sublayout >= strg->max_charge_index_sulayout)
         {
-            strg->charge_index_sublayout += 1;
-            if (strg->engine == sidb_simulation_engine::QUICKEXACT)
-            {
-                this->index_to_charge_distribution_for_quickexact_simulation();
-            }
-            else
-            {
-                this->index_to_charge_distribution(charge_index_recomputation::IGNORE_LEADING_ZEROES);
-            }
-            this->update_after_charge_change(dependent_cell, energy_calculation_mode, history_mode);
+            return;
         }
+
+        strg->charge_index_sublayout += 1;
+        if (strg->engine == sidb_simulation_engine::QUICKEXACT)
+        {
+            this->index_to_charge_distribution_for_quickexact_simulation();
+        }
+        else
+        {
+            this->index_to_charge_distribution(charge_index_recomputation::IGNORE_LEADING_ZEROES);
+        }
+        this->update_after_charge_change(dependent_cell, energy_calculation_mode, history_mode);
     }
     /**
      * The charge index is assigned by a Gray code number in decimal.
@@ -2197,6 +2201,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      */
     void index_to_charge_distribution_for_quickexact_simulation() noexcept
     {
+        assert(this->num_cells() > 1 && "There must be multiple SiDBs");
+
         // This scope is executed if the function is used by `quickexact`.
         // Cell_history collects the cells (SiDBs) that have changed their charge state.
         strg->cell_history = {};

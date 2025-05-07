@@ -29,7 +29,6 @@ namespace fiction
  * @tparam Lyt SiDB cell-level layout type.
  * @param lyt The layout to simulate.
  * @param params Simulation parameters.
- * @param ps Simulation statistics.
  * @return sidb_simulation_result is returned with all results.
  */
 template <typename Lyt>
