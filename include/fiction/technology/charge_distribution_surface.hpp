@@ -168,7 +168,7 @@ template <typename Lyt>
 class charge_distribution_surface<Lyt, false> : public Lyt
 {
   public:
-    using charge_index_base = typename std::pair<uint64_t, uint8_t>;
+    using charge_index_base = std::pair<uint64_t, uint8_t>;
 
     struct charge_distribution_storage
     {
@@ -596,13 +596,14 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 [this, &c, &defect](const auto& c1)
                 {
                     const auto dist = sidb_nm_distance<Lyt>(*this, c1, c);
-                    const auto pot  = chargeless_potential_generated_by_defect_at_given_distance(dist, defect);
+                    const auto pot  = chargeless_potential_generated_by_defect_at_given_distance(dist, defect) *
+                                     static_cast<double>(defect.charge);
+                    const auto ix = static_cast<uint64_t>(cell_to_index(c1));
 
-                    strg->local_pot_caused_by_defects[static_cast<uint64_t>(cell_to_index(c1))] +=
-                        pot * static_cast<double>(defect.charge);
+                    strg->local_pot_caused_by_defects[ix] += pot;
+                    strg->local_int_pot[ix] += pot;
+                    strg->local_pot[ix] += pot;
                 });
-
-            this->update_after_charge_change(dependent_cell_mode::FIXED);
         }
         else
         {
@@ -610,22 +611,21 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 [this, &c, &defect](const auto& c1)
                 {
                     const auto dist = sidb_nm_distance<Lyt>(*this, c1, c);
-
-                    strg->local_pot_caused_by_defects[static_cast<uint64_t>(cell_to_index(c1))] =
-                        strg->local_pot_caused_by_defects[static_cast<uint64_t>(cell_to_index(c1))] +
+                    const auto pot_diff =
                         chargeless_potential_generated_by_defect_at_given_distance(dist, defect) *
                             static_cast<double>(defect.charge) -
                         chargeless_potential_generated_by_defect_at_given_distance(dist, strg->defects[c]) *
                             static_cast<double>(strg->defects[c].charge);
+                    const auto ix = static_cast<uint64_t>(cell_to_index(c1));
+
+                    strg->local_pot_caused_by_defects[ix] += pot_diff;
+                    strg->local_int_pot[ix] += pot_diff;
+                    strg->local_pot[ix] += pot_diff;
                 });
 
             strg->defects.erase(c);
             strg->defects.insert({c, defect});
-
-            this->update_after_charge_change(dependent_cell_mode::FIXED);
         }
-
-        update_local_defect_potential();
     }
     /**
      * This function erases a defect to the layout.
@@ -1397,8 +1397,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * otherwise.
      */
     void increase_charge_index_by_one(
-        const dependent_cell_mode          dep_cell                = dependent_cell_mode::FIXED,
-        const energy_calculation           energy_calculation_mode = energy_calculation::UPDATE_ENERGY,
+        const dependent_cell_mode         dep_cell                = dependent_cell_mode::FIXED,
+        const energy_calculation          energy_calculation_mode = energy_calculation::UPDATE_ENERGY,
         const charge_distribution_history history_mode            = charge_distribution_history::NEGLECT) noexcept
     {
         if (strg->charge_index_and_base.first < strg->max_charge_index)
@@ -1981,8 +1981,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * otherwise.
      */
     void increase_charge_index_of_sub_layout_by_one(
-        const dependent_cell_mode          dependent_cell          = dependent_cell_mode::FIXED,
-        const energy_calculation           recompute_system_energy = energy_calculation::UPDATE_ENERGY,
+        const dependent_cell_mode         dependent_cell          = dependent_cell_mode::FIXED,
+        const energy_calculation          recompute_system_energy = energy_calculation::UPDATE_ENERGY,
         const charge_distribution_history consider_history        = charge_distribution_history::NEGLECT) noexcept
     {
         if (strg->charge_index_sublayout < strg->max_charge_index_sulayout)
@@ -2138,13 +2138,13 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         this->initialize_nm_distance_matrix();
         this->initialize_potential_matrix();
         strg->local_pot_caused_by_defects.resize(this->num_cells(), 0);
+        this->update_local_external_potential();
+        this->update_local_potential();
         if constexpr (is_sidb_defect_surface_v<Lyt>)
         {
             Lyt::foreach_sidb_defect([this](const auto cd)
                                      { add_sidb_defect_to_potential_landscape(cd.first, cd.second); });
         }
-        this->update_local_external_potential();
-        this->update_local_potential();
         this->recompute_system_energy();
         this->validity_check();
     };
