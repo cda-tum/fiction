@@ -604,9 +604,9 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                     const auto dist = sidb_nm_distance<Lyt>(*this, c1, c);
                     const auto pot_diff =
                         (chargeless_potential_generated_by_defect_at_given_distance(dist, defect) *
-                            static_cast<double>(defect.charge)) -
+                         static_cast<double>(defect.charge)) -
                         (chargeless_potential_generated_by_defect_at_given_distance(dist, strg->defects[c]) *
-                            static_cast<double>(strg->defects[c].charge));
+                         static_cast<double>(strg->defects[c].charge));
                     const auto ix = static_cast<uint64_t>(cell_to_index(c1));
 
                     strg->local_pot_caused_by_defects[ix] += pot_diff;
