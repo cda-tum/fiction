@@ -5188,8 +5188,8 @@ Returns:
 static const char *__doc_fiction_detail_clustercomplete_impl_available_threads = R"doc(Number of available threads.)doc";
 
 static const char *__doc_fiction_detail_clustercomplete_impl_charge_layout =
-R"doc(The base layout, along with the map of placed defects, that are used
-to create charge distribution surface copies.)doc";
+R"doc(The base layout that is used to create charge distribution surface
+copies.)doc";
 
 static const char *__doc_fiction_detail_clustercomplete_impl_clustercomplete_impl =
 R"doc(Constructor.
@@ -5212,8 +5212,6 @@ charge configurations.
 Parameter ``top_cluster``:
     The top cluster that is returned by the *Ground State Space
     construction; it contains the entire cluster hierarchy construct.)doc";
-
-static const char *__doc_fiction_detail_clustercomplete_impl_defects = R"doc(Atomic defects that are placed in the layout.)doc";
 
 static const char *__doc_fiction_detail_clustercomplete_impl_extract_work_from_top_cluster =
 R"doc(Work in the form of compositions of charge space elements of the top
