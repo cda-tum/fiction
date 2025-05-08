@@ -2256,7 +2256,7 @@ TEMPLATE_TEST_CASE("Charge distribution surface defect vs SiDB equivalence", "[c
 
     REQUIRE(charge_lyt_defect.get_local_potential_by_index(0).has_value());
     REQUIRE(charge_lyt_defect.get_local_potential_by_index(1).has_value());
-    CHECK(!charge_lyt_defect.get_local_potential_by_index(2).has_value());
+    REQUIRE(charge_lyt_defect.get_local_defect_potential({5, 1, 0}).has_value());
 
     CHECK_THAT(charge_lyt.get_local_potential_by_index(0).value() -
                    charge_lyt_defect.get_local_potential_by_index(0).value(),
@@ -2267,7 +2267,7 @@ TEMPLATE_TEST_CASE("Charge distribution surface defect vs SiDB equivalence", "[c
                Catch::Matchers::WithinAbs(0.0, constants::ERROR_MARGIN));
 
     CHECK_THAT(charge_lyt.get_local_potential_by_index(2).value() -
-                   charge_lyt_defect.get_local_defect_potential({5, 1, 0}),
+                   charge_lyt_defect.get_local_defect_potential({5, 1, 0}).value(),
                Catch::Matchers::WithinAbs(0.0, constants::ERROR_MARGIN));
 }
 
