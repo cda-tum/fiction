@@ -411,9 +411,12 @@ class clustercomplete_impl
                                                             singleton_multiset_conf_to_charge_state(pst->multiset_conf),
                                                             charge_index_mode::KEEP_CHARGE_INDEX);
 
+            assert(charge_layout_copy.get_local_external_potential_by_index(sidb_ix).has_value() &&
+                   "Local external potential at SiDB is undefined");
+
             charge_layout_copy.assign_local_internal_potential_by_index(
                 sidb_ix, -clustering_state.pot_bounds.get<bound_direction::LOWER>(sidb_ix) -
-                             charge_layout_copy.get_local_external_potential_by_index(sidb_ix));
+                             *charge_layout_copy.get_local_external_potential_by_index(sidb_ix));
         }
 
         if (!charge_layout_copy.is_configuration_stable())
