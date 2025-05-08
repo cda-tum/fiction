@@ -459,13 +459,13 @@ TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shaped SiDB OR gate with input 01
         check_for_runtime_measurement(simulation_results.value());
         check_charge_configuration(simulation_results.value());
 
-        // SECTION("timeout with 0 ms")
-        // {
-        //     quicksim_params.timeout                 = 0;
-        //     const auto simulation_results_timeout_0 = quicksim<TestType>(lyt, quicksim_params);
-        //
-        //     CHECK(!simulation_results_timeout_0.has_value());
-        // }
+        SECTION("timeout with 0 ms")
+        {
+            quicksim_params.timeout                 = 0;
+            const auto simulation_results_timeout_0 = quicksim<TestType>(lyt, quicksim_params);
+
+            CHECK(!simulation_results_timeout_0.has_value());
+        }
     }
 }
 
@@ -1206,12 +1206,12 @@ TEMPLATE_TEST_CASE("QuickSim AND gate simulation on the Si-111 surface", "[quick
         CHECK(ground_state.front().get_charge_state({23, 29, 1}) == sidb_charge_state::NEGATIVE);
     }
 
-    // SECTION("timeout with 100 ms")
-    // {
-    //     auto                  lyt = blueprints::and_gate_111<TestType>();
-    //     const quicksim_params params{sidb_simulation_parameters{2, -0.32, 5.6, 5}, 300000, 0.5, 1, 100};
-    //     const auto            simulation_results_timeout_100 = quicksim<TestType>(lyt, params);
-    //
-    //     REQUIRE(!simulation_results_timeout_100.has_value());
-    // }
+    SECTION("timeout with 100 ms")
+    {
+        auto                  lyt = blueprints::and_gate_111<TestType>();
+        const quicksim_params params{sidb_simulation_parameters{2, -0.32, 5.6, 5}, 300000, 0.5, 1, 100};
+        const auto            simulation_results_timeout_100 = quicksim<TestType>(lyt, params);
+
+        REQUIRE(!simulation_results_timeout_100.has_value());
+    }
 }
