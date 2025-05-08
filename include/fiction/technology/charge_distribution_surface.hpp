@@ -1064,7 +1064,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @return Local potential at given index position. If there is no SiDB at the given index (which corresponds to a
      * unique cell), `std::nullopt` is returned (unit: V).
      */
-    [[nodiscard]] std::optional<double> get_local_potential_caused_by_defects(const uint64_t index) const noexcept
+    [[nodiscard]] std::optional<double>
+    get_local_potential_caused_by_defects_by_index(const uint64_t index) const noexcept
     {
         if (index < strg->sidb_order.size())
         {

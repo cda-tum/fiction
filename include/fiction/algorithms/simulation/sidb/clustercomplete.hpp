@@ -413,7 +413,7 @@ class clustercomplete_impl
 
             charge_layout_copy.assign_local_internal_potential_by_index(
                 sidb_ix, -clustering_state.pot_bounds.get<bound_direction::LOWER>(sidb_ix) -
-                             charge_layout_copy.get_local_external_potential()[sidb_ix]);
+                             charge_layout_copy.get_local_external_potential_by_index(sidb_ix));
         }
 
         if (!charge_layout_copy.is_configuration_stable())
