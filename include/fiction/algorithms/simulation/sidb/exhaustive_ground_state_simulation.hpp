@@ -5,6 +5,7 @@
 #ifndef FICTION_EXHAUSTIVE_GROUND_STATE_SIMULATION_HPP
 #define FICTION_EXHAUSTIVE_GROUND_STATE_SIMULATION_HPP
 
+#include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"

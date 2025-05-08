@@ -23,52 +23,6 @@
 
 using namespace fiction;
 
-TEST_CASE("Test Defects")
-{
-    sidb_cell_clk_lyt_siqad lyt{};
-    lyt.assign_cell_type({0, 0, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
-    lyt.assign_cell_type({0, 1, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
-    lyt.assign_cell_type({5, 1, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
-
-    const auto                  sim_params = sidb_simulation_parameters{};
-    charge_distribution_surface charge_lyt{lyt, sim_params};
-
-    charge_lyt.assign_charge_state({0, 1, 0}, sidb_charge_state::NEUTRAL);
-    charge_lyt.update_after_charge_change();
-
-    REQUIRE(charge_lyt.is_physically_valid());
-
-    sidb_defect_surface defect_lyt{lyt};
-    defect_lyt.assign_cell_type({5, 1, 0}, sidb_cell_clk_lyt_siqad::cell_type::EMPTY);
-    defect_lyt.assign_sidb_defect({5, 1, 0},
-                                  sidb_defect{sidb_defect_type::DB, -1, sim_params.epsilon_r, sim_params.lambda_tf});
-
-    charge_distribution_surface charge_lyt_defect{defect_lyt, sim_params};
-
-    charge_lyt_defect.assign_charge_state({0, 1, 0}, sidb_charge_state::NEUTRAL);
-    charge_lyt_defect.update_after_charge_change();
-
-    CHECK(charge_lyt_defect.is_physically_valid());
-
-    CHECK_THAT(charge_lyt_defect.get_electrostatic_potential_energy() - 0.082227626226473852,
-               Catch::Matchers::WithinAbs(0.0, constants::ERROR_MARGIN));
-
-    CHECK_THAT(charge_lyt.get_electrostatic_potential_energy() - charge_lyt_defect.get_electrostatic_potential_energy(),
-               Catch::Matchers::WithinAbs(0.0, constants::ERROR_MARGIN));
-
-    CHECK_THAT(charge_lyt.get_local_potential_by_index(0).value() -
-                   charge_lyt_defect.get_local_potential_by_index(0).value(),
-               Catch::Matchers::WithinAbs(0.0, constants::ERROR_MARGIN));
-
-    CHECK_THAT(charge_lyt.get_local_potential_by_index(1).value() -
-                   charge_lyt_defect.get_local_potential_by_index(1).value(),
-               Catch::Matchers::WithinAbs(0.0, constants::ERROR_MARGIN));
-
-    CHECK_THAT(charge_lyt.get_local_potential_by_index(2).value() -
-                   charge_lyt_defect.get_local_defect_potential({5, 1, 0}),
-               Catch::Matchers::WithinAbs(0.0, constants::ERROR_MARGIN));
-}
-
 TEMPLATE_TEST_CASE("Charge distribution surface traits and construction", "[charge-distribution-surface]",
                    sidb_cell_clk_lyt_siqad, sidb_cell_clk_lyt_cube, sidb_100_cell_clk_lyt_siqad,
                    sidb_100_cell_clk_lyt_cube, sidb_111_cell_clk_lyt_siqad, sidb_111_cell_clk_lyt_cube)
@@ -2259,6 +2213,60 @@ TEST_CASE("Assign charge index", "[charge-distribution-surface]")
         CHECK(charge_lyt.get_charge_state({0, 0}) == sidb_charge_state::NEGATIVE);
         CHECK(charge_lyt.get_charge_state({0, 1}) == sidb_charge_state::POSITIVE);
     }
+}
+
+TEMPLATE_TEST_CASE("Charge distribution surface defect vs SiDB equivalence", "[charge-distribution-surface]",
+                   sidb_100_cell_clk_lyt_siqad, cds_sidb_100_cell_clk_lyt_siqad)
+{
+    sidb_cell_clk_lyt_siqad lyt{};
+    lyt.assign_cell_type({0, 0, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+    lyt.assign_cell_type({0, 1, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+    lyt.assign_cell_type({5, 1, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+
+    const auto                  sim_params = sidb_simulation_parameters{};
+    charge_distribution_surface charge_lyt{lyt, sim_params};
+
+    charge_lyt.assign_charge_state({0, 1, 0}, sidb_charge_state::NEUTRAL);
+    charge_lyt.update_after_charge_change();
+
+    REQUIRE(charge_lyt.is_physically_valid());
+    REQUIRE(charge_lyt.get_local_potential_by_index(0).has_value());
+    REQUIRE(charge_lyt.get_local_potential_by_index(1).has_value());
+    REQUIRE(charge_lyt.get_local_potential_by_index(2).has_value());
+
+    sidb_defect_surface defect_lyt{lyt};
+    defect_lyt.assign_cell_type({5, 1, 0}, sidb_cell_clk_lyt_siqad::cell_type::EMPTY);
+    defect_lyt.assign_sidb_defect({5, 1, 0},
+                                  sidb_defect{sidb_defect_type::DB, -1, sim_params.epsilon_r, sim_params.lambda_tf});
+
+    charge_distribution_surface charge_lyt_defect{defect_lyt, sim_params};
+
+    charge_lyt_defect.assign_charge_state({0, 1, 0}, sidb_charge_state::NEUTRAL);
+    charge_lyt_defect.update_after_charge_change();
+
+    CHECK(charge_lyt_defect.is_physically_valid());
+
+    CHECK_THAT(charge_lyt_defect.get_electrostatic_potential_energy() - 0.082227626226473852,
+               Catch::Matchers::WithinAbs(0.0, constants::ERROR_MARGIN));
+
+    CHECK_THAT(charge_lyt.get_electrostatic_potential_energy() - charge_lyt_defect.get_electrostatic_potential_energy(),
+               Catch::Matchers::WithinAbs(0.0, constants::ERROR_MARGIN));
+
+    REQUIRE(charge_lyt_defect.get_local_potential_by_index(0).has_value());
+    REQUIRE(charge_lyt_defect.get_local_potential_by_index(1).has_value());
+    CHECK(!charge_lyt_defect.get_local_potential_by_index(2).has_value());
+
+    CHECK_THAT(charge_lyt.get_local_potential_by_index(0).value() -
+                   charge_lyt_defect.get_local_potential_by_index(0).value(),
+               Catch::Matchers::WithinAbs(0.0, constants::ERROR_MARGIN));
+
+    CHECK_THAT(charge_lyt.get_local_potential_by_index(1).value() -
+                   charge_lyt_defect.get_local_potential_by_index(1).value(),
+               Catch::Matchers::WithinAbs(0.0, constants::ERROR_MARGIN));
+
+    CHECK_THAT(charge_lyt.get_local_potential_by_index(2).value() -
+                   charge_lyt_defect.get_local_defect_potential({5, 1, 0}),
+               Catch::Matchers::WithinAbs(0.0, constants::ERROR_MARGIN));
 }
 
 TEST_CASE("Tests for Si-111 lattice orientation", "[charge-distribution-surface]")
