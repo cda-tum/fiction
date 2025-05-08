@@ -117,7 +117,6 @@ class clustercomplete_impl
     clustercomplete_impl(const Lyt& lyt, const clustercomplete_params<cell<Lyt>>& params) noexcept :
             available_threads{std::max(uint64_t{1}, params.available_threads)},
             charge_layout{initialize_charge_layout(lyt, params)},
-            defects{charge_layout.get_defects()},
             mu_bounds_with_error{constants::ERROR_MARGIN - params.simulation_parameters.mu_minus,
                                  -constants::ERROR_MARGIN - params.simulation_parameters.mu_minus,
                                  constants::ERROR_MARGIN - params.simulation_parameters.mu_plus(),
@@ -240,14 +239,9 @@ class clustercomplete_impl
      */
     std::mutex mutex_to_protect_the_simulation_results;
     /**
-     * The base layout, along with the map of placed defects, that are used to create charge distribution surface
-     * copies.
+     * The base layout that is used to create charge distribution surface copies.
      */
     const charge_distribution_surface<Lyt> charge_layout;
-    /**
-     * Atomic defects that are placed in the layout.
-     */
-    const std::unordered_map<typename Lyt::cell, const sidb_defect> defects;
     /**
      * Globally available array of bounds that section the band gap, used for pruning.
      */
@@ -439,14 +433,6 @@ class clustercomplete_impl
         charge_layout_copy.recompute_system_energy();
 
         charge_layout_copy.charge_distribution_to_index();
-
-        if constexpr (has_get_sidb_defect_v<Lyt>)  // todo: this is a bit crooked maybe
-        {
-            for (const auto& [cell, defect] : defects)
-            {
-                charge_layout_copy.assign_sidb_defect(cell, defect);
-            }
-        }
 
         {
             const std::lock_guard lock{mutex_to_protect_the_simulation_results};
