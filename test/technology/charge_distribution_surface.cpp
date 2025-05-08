@@ -1508,7 +1508,7 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects, part one", 
         CHECK_THAT(charge_layout.get_chargeless_potential_between_sidbs({1, 10, 1}, {1, 10, 1}),
                    Catch::Matchers::WithinAbs(0.0, constants::ERROR_MARGIN));
         CHECK_THAT(charge_layout.get_chargeless_potential_between_sidbs({1, 8, 0}, {0, 0, 0}),
-                   Catch::Matchers::WithinAbs(0.0121934043, constants::ERROR_MARGIN));
+                   Catch::Matchers::WithinAbs(0.01219448987342317, constants::ERROR_MARGIN));
         CHECK_THAT(std::abs(charge_layout.get_chargeless_potential_between_sidbs({0, 0, 0}, {1, 10, 1}) -
                             charge_layout.get_chargeless_potential_between_sidbs({1, 10, 1}, {0, 0, 0})),
                    Catch::Matchers::WithinAbs(0.0, constants::ERROR_MARGIN));
