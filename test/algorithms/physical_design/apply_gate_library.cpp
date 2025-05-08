@@ -566,7 +566,7 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
     }
 }
 
-TEST_CASE("Applying the QCAOne gate library", "[apply-gate-library]")
+TEST_CASE("Applying the QCA ONE gate library", "[apply-gate-library]")
 {
     using GateLyt = cart_even_row_gate_clk_lyt;
 
