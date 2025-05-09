@@ -19,7 +19,7 @@ Added
 Changed
 #######
 - Documentation:
-    - Modernized the documentation by migrating the RTD build from pip to uv.
+    - Modernized the documentation builds by migrating the RTD build from pip to uv.
 - Algorithms:
     - Refactored ``QuickSim`` to remove magic number for upper limit calculation
     - Refactored random layout design functions
