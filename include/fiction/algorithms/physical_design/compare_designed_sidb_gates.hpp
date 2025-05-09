@@ -6,7 +6,6 @@
 #define COMPARE_DESIGNED_SIDB_GATES_HPP
 
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
-#include "fiction/technology/charge_distribution_surface.hpp"
 
 #include <cassert>
 #include <cstdint>
