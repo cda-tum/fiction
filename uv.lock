@@ -361,7 +361,7 @@ wheels = [
 
 [[package]]
 name = "mnt-pyfiction"
-version = "0.6.10"
+version = "0.6.11"
 source = { editable = "." }
 dependencies = [
     { name = "z3-solver" },
