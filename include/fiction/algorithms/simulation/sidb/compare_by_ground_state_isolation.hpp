@@ -38,7 +38,7 @@ template <typename Lyt>
         return std::numeric_limits<double>::infinity();
     }
 
-    const energy_distribution dist = sim_res.charge_distributions;
+    const energy_distribution dist = calculate_energy_distribution(sim_res.charge_distributions);
 
     if (!dist.get_nth_state(1).has_value())
     {
