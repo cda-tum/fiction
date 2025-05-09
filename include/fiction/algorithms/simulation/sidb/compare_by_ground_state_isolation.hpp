@@ -6,6 +6,7 @@
 #define COMPARE_BY_GROUND_STATE_ISOLATION
 
 #include "fiction/algorithms/physical_design/compare_designed_sidb_gates.hpp"
+#include "fiction/algorithms/simulation/sidb/energy_distribution.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
 
@@ -38,27 +39,15 @@ template <typename Lyt>
         return std::numeric_limits<double>::infinity();
     }
 
-    double ground_state_energy        = std::numeric_limits<double>::infinity();
-    double first_excited_state_energy = std::numeric_limits<double>::infinity();
+    const energy_distribution dist = sim_res.charge_distribution;
 
-    for (const charge_distribution_surface<Lyt>& cds : sim_res.charge_distributions)
+    if (!dist.get_nth_state(1).has_value())
     {
-        const double energy = cds.get_electrostatic_potential_energy();
-
-        if (energy - ground_state_energy < 0)
-        {
-            first_excited_state_energy = ground_state_energy;
-            ground_state_energy        = energy;
-            continue;
-        }
-
-        if (energy - first_excited_state_energy < 0)
-        {
-            first_excited_state_energy = energy;
-        }
+        return std::numeric_limits<double>::infinity();
     }
 
-    return ground_state_energy - first_excited_state_energy;
+    return dist.get_nth_state(0)->electrostatic_potential_energy -
+           dist.get_nth_state(1)->electrostatic_potential_energy;
 }
 
 }  // namespace detail
