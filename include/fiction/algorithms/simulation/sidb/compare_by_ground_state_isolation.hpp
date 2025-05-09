@@ -8,7 +8,6 @@
 #include "fiction/algorithms/physical_design/compare_designed_sidb_gates.hpp"
 #include "fiction/algorithms/simulation/sidb/energy_distribution.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
-#include "fiction/technology/charge_distribution_surface.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -39,7 +38,7 @@ template <typename Lyt>
         return std::numeric_limits<double>::infinity();
     }
 
-    const energy_distribution dist = sim_res.charge_distribution;
+    const energy_distribution dist = sim_res.charge_distributions;
 
     if (!dist.get_nth_state(1).has_value())
     {
