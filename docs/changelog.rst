@@ -18,12 +18,15 @@ Added
 
 Changed
 #######
+- Documentation:
+    - Modernized the documentation by migrating the RTD build from pip to uv.
 - Algorithms:
     - Refactored ``QuickSim`` to remove magic number for upper limit calculation
     - Refactored random layout design functions
 
 Fixed
 #####
+- Fixed a bug in the z-dimension when determining the aspect ratio for cell-level layouts
 - Fixed issue in TTS calculation
 - Fixed Readme due to migration of mqt repository
 - Exclude ``ClusterComplete`` from simulation engine selection when ALGBLIB is disabled
