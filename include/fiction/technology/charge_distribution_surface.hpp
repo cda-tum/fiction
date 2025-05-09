@@ -856,12 +856,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     {
         if (history_mode == charge_distribution_history::NEGLECT)
         {
-            strg->local_int_pot = std::vector<double>(this->num_cells(), 0.0);
-
-            for (uint64_t i = 0; i < strg->sidb_order.size(); ++i)
-            {
-                strg->local_int_pot[i] += strg->local_pot_caused_by_defects[i];
-            }
+            strg->local_int_pot = strg->local_pot_caused_by_defects;
 
             for (uint64_t i = 0u; i < strg->sidb_order.size(); ++i)
             {
@@ -871,7 +866,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                     collect += strg->pot_mat[i][j] * static_cast<double>(charge_state_to_sign(strg->cell_charge[j]));
                 }
 
-                strg->local_int_pot[i] += collect;
+                strg->local_int_pot[i] = collect;
             }
         }
         else
@@ -1121,31 +1116,39 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      */
     void recompute_system_energy() noexcept
     {
-        strg->system_energy = 0.0;
+        double collect = 0.0;
 
-        for (uint64_t i = 0; i < strg->sidb_order.size(); ++i)
+        if (strg->engine == sidb_simulation_engine::QUICKSIM)
         {
-            strg->system_energy +=
-                strg->local_ext_pot[i] * static_cast<double>(charge_state_to_sign(strg->cell_charge[i]));
-        }
+            for (uint64_t i = 0; i < strg->sidb_order.size(); ++i)
+            {
+                collect += strg->local_int_pot[i] * static_cast<double>(charge_state_to_sign(strg->cell_charge[i]));
+            }
 
-        for (uint64_t i = 0; i < strg->sidb_order.size(); ++i)
-        {
-            strg->system_energy +=
-                0.5 * strg->local_int_pot[i] * static_cast<double>(charge_state_to_sign(strg->cell_charge[i]));
+            strg->system_energy = 0.5 * collect;
+
+            return;
         }
 
         update_local_defect_potential();
 
-        for (const auto& [c, defect] : strg->defects)
+        double collect_ext = 0.0;
+
+        for (uint64_t i = 0; i < strg->sidb_order.size(); ++i)
         {
-            strg->system_energy += strg->local_ext_pot_at_defect[c] * static_cast<double>(defect.charge);
+            collect_ext += strg->local_ext_pot[i] * static_cast<double>(charge_state_to_sign(strg->cell_charge[i]));
+
+            collect += strg->local_int_pot[i] * static_cast<double>(charge_state_to_sign(strg->cell_charge[i]));
         }
 
         for (const auto& [c, defect] : strg->defects)
         {
-            strg->system_energy += 0.5 * strg->local_int_pot_at_defect[c] * static_cast<double>(defect.charge);
+            collect_ext += strg->local_ext_pot_at_defect[c] * static_cast<double>(defect.charge);
+
+            collect += strg->local_int_pot_at_defect[c] * static_cast<double>(defect.charge);
         }
+
+        strg->system_energy = collect_ext + 0.5 * collect;
     }
     /**
      * This function returns the currently stored system's total electrostatic potential energy in eV.
@@ -1535,7 +1538,6 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         for (uint64_t i = 0u; i < strg->pot_mat.size(); ++i)
         {
             strg->local_int_pot[i] += -this->get_chargeless_potential_by_indices(i, random_element);
-            // strg->local_pot[i] += -(this->get_chargeless_potential_by_indices(i, random_element));
         }
     }
     /**
