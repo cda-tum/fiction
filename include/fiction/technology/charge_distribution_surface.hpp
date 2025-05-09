@@ -866,7 +866,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                     collect += strg->pot_mat[i][j] * static_cast<double>(charge_state_to_sign(strg->cell_charge[j]));
                 }
 
-                strg->local_int_pot[i] = collect;
+                strg->local_int_pot[i] += collect;
             }
         }
         else
