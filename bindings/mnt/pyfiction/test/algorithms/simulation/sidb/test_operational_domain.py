@@ -137,21 +137,62 @@ class TestOperationalDomain(unittest.TestCase):
         self.assertGreater(stats_contour_tracing.num_operational_parameter_combinations, 0)
 
     def test_temperature_operational_domain(self):
-        # Create an instance of temperature_operational_domain
+        # Create an instance of critical_temperature_domain
         temp_domain = critical_temperature_domain([sweep_parameter.EPSILON_R, sweep_parameter.LAMBDA_TF])
 
         # Create test key and value
-        key = parameter_point([1.0, 2.0, 3.0])  # Example parameter point
-        value = (operational_status.OPERATIONAL, 0.1)  # Example tuple value
+        key = parameter_point([1.0, 2.0])
+        value = (operational_status.OPERATIONAL, 0.1)
 
-        # Add a value to the domain
-        temp_domain.add_value(key, value)
+        # Add a value to the domain using __setitem__
+        temp_domain[key] = value
 
-        self.assertEqual(temp_domain.contains(key), value)
+        # __getitem__ should return the value for an existing key
+        self.assertEqual(temp_domain[key], value)
 
-        # Test retrieving a value that doesn't exist
-        missing_key = parameter_point([4.0, 5.0, 6.0])
-        self.assertIsNone(temp_domain.contains(missing_key))
+        # __getitem__ should raise KeyError for missing key
+        missing_key = parameter_point([4.0, 5.0])
+        with self.assertRaises(KeyError):
+            _ = temp_domain[missing_key]
+
+        # __setitem__ should add or update a value
+        new_key = parameter_point([3.3, 4.4])
+        new_value = (operational_status.NON_OPERATIONAL, 0.0)
+        temp_domain[new_key] = new_value
+        self.assertEqual(temp_domain[new_key], new_value)
+
+        # __contains__ should work for present and missing keys
+        self.assertIn(key, temp_domain)
+        self.assertIn(new_key, temp_domain)
+        self.assertNotIn(missing_key, temp_domain)
+
+        # __len__ should reflect the number of items
+        self.assertEqual(len(temp_domain), 2)
+
+        # __iter__ should yield all keys
+        keys = list(iter(temp_domain))
+        self.assertIn(key, keys)
+        self.assertIn(new_key, keys)
+        self.assertEqual(set(keys), set(temp_domain.keys()))
+
+        # keys() should return all keys
+        keys_method = temp_domain.keys()
+        self.assertEqual(set(keys_method), {key, new_key})
+
+        # values() should return all values
+        values_method = temp_domain.values()
+        self.assertIn(value, values_method)
+        self.assertIn(new_value, values_method)
+        self.assertEqual(len(values_method), 2)
+
+        # items() should return all (key, value) pairs
+        items_method = temp_domain.items()
+        self.assertIn((key, value), items_method)
+        self.assertIn((new_key, new_value), items_method)
+        self.assertEqual(len(items_method), 2)
+
+        # Test retrieving a value that doesn't exist using contains (should return None)
+        self.assertNotIn(missing_key, temp_domain)
 
         # Modify dimensions and verify
         self.assertEqual(temp_domain.get_dimension(0), sweep_parameter.EPSILON_R)
@@ -175,8 +216,6 @@ class TestOperationalDomain(unittest.TestCase):
         # Modify dimensions and verify
         self.assertEqual(op_domain.get_dimension(0), sweep_parameter.EPSILON_R)
         self.assertEqual(op_domain.get_dimension(1), sweep_parameter.LAMBDA_TF)
-
-        # --- Begin dictionary-like API tests ---
 
         # __getitem__ should return the value for an existing key
         self.assertEqual(op_domain[key], value)
@@ -220,8 +259,6 @@ class TestOperationalDomain(unittest.TestCase):
         self.assertIn((key, value), items_method)
         self.assertIn((new_key, new_value), items_method)
         self.assertEqual(len(items_method), 2)
-
-        # --- End dictionary-like API tests ---
 
     def test_operational_domain_two_bdl_pair_wire(self):
         bdl_wire = sidb_100_lattice()
