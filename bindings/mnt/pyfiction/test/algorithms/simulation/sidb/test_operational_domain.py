@@ -162,19 +162,66 @@ class TestOperationalDomain(unittest.TestCase):
         op_domain = operational_domain([sweep_parameter.EPSILON_R, sweep_parameter.LAMBDA_TF])
 
         # Create test key and value
-        key = parameter_point([10.0, 20.0, 30.0])  # Example parameter point
-        value = (operational_status.NON_OPERATIONAL,)  # Example tuple value
+        key = parameter_point([10.0, 20.0])
+        value = operational_status.NON_OPERATIONAL
 
         # Add a value to the domain
-        op_domain.add_value(key, value)
+        op_domain[key] = value
 
         # Test retrieving a value that doesn't exist
-        missing_key = parameter_point([7.0, 8.0, 9.0])
-        self.assertIsNone(op_domain.contains(missing_key))
+        missing_key = parameter_point([7.0, 8.0])
+        self.assertNotIn(missing_key, op_domain)
 
         # Modify dimensions and verify
         self.assertEqual(op_domain.get_dimension(0), sweep_parameter.EPSILON_R)
         self.assertEqual(op_domain.get_dimension(1), sweep_parameter.LAMBDA_TF)
+
+        # --- Begin dictionary-like API tests ---
+
+        # __getitem__ should return the value for an existing key
+        self.assertEqual(op_domain[key], value)
+
+        # __getitem__ should raise KeyError for missing key
+        with self.assertRaises(KeyError):
+            _ = op_domain[missing_key]
+
+        # __setitem__ should add or update a value
+        new_key = parameter_point([1.1, 2.2])
+        new_value = operational_status.OPERATIONAL
+        op_domain[new_key] = operational_status.OPERATIONAL
+        self.assertEqual(op_domain[new_key], new_value)
+
+        # __contains__ should work for present and missing keys
+        self.assertIn(key, op_domain)
+        self.assertIn(new_key, op_domain)
+        self.assertNotIn(missing_key, op_domain)
+
+        # __len__ should reflect the number of items
+        self.assertEqual(len(op_domain), 2)
+
+        # __iter__ should yield all keys
+        keys = list(iter(op_domain))
+        self.assertIn(key, keys)
+        self.assertIn(new_key, keys)
+        self.assertEqual(set(keys), set(op_domain.keys()))
+
+        # keys() should return all keys
+        keys_method = op_domain.keys()
+        self.assertEqual(set(keys_method), {key, new_key})
+
+        # values() should return all values
+        values_method = op_domain.values()
+        self.assertIn(value, values_method)
+        self.assertIn(new_value, values_method)
+        self.assertEqual(len(values_method), 2)
+
+        # items() should return all (key, value) pairs
+        items_method = op_domain.items()
+        self.assertIn((key, value), items_method)
+        self.assertIn((new_key, new_value), items_method)
+        self.assertEqual(len(items_method), 2)
+
+        # --- End dictionary-like API tests ---
 
     def test_operational_domain_two_bdl_pair_wire(self):
         bdl_wire = sidb_100_lattice()
@@ -205,7 +252,7 @@ class TestOperationalDomain(unittest.TestCase):
         stats_grid = operational_domain_stats()
         op_domain = operational_domain_grid_search(bdl_wire, [create_id_tt()], params, stats_grid)
 
-        self.assertEqual(op_domain.size(), 8281)
+        self.assertEqual(len(op_domain), 8281)
 
         self.assertEqual(stats_grid.num_simulator_invocations, 10034)
         self.assertEqual(stats_grid.num_evaluated_parameter_combinations, 8281)
