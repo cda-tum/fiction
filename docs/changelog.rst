@@ -19,7 +19,7 @@ Added
 Changed
 #######
 - Documentation:
-    - Modernized the documentation builds by migrating the RTD build from pip to uv.
+    - Modernized the documentation builds by migrating the RTD build from ``pip`` to ``uv`.
 - Algorithms:
     - Refactored ``QuickSim`` to remove magic number for upper limit calculation
     - Refactored random layout design functions
@@ -27,12 +27,12 @@ Changed
 Fixed
 #####
 - Fixed a bug in the z-dimension when determining the aspect ratio for cell-level layouts
-- Fixed issue in TTS calculation
-- Fixed Readme due to migration of mqt repository
+- Fixed issue in TTS calculation since the automatic base detection was activated
+- Fixed linkes in the README due to the migration of the ``mqt-core`` repository to a new namespace
 - Exclude ``ClusterComplete`` from simulation engine selection when ALGBLIB is disabled
 - Fixed inconsistencies and various bugs in SiDB simulation/analysis
 - Fixed LT, LE, GT, and LE gate handling in the gate-level-layout and the corresponding read and write functions
-- Fixed an bug in the crossing count calculation
+- Fixed a bug in the crossing count calculation of a gate-level layout
 - Increased floating point precision to avoid undetected degeneracy in the physical simulation of SiDB layouts
 
 
