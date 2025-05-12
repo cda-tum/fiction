@@ -67,11 +67,11 @@ TEST_CASE("Benchmark simulators", "[benchmark]")
     lyt.assign_cell_type({2, 19, 0}, sidb_technology::cell_type::NORMAL);
     lyt.assign_cell_type({36, 19, 0}, sidb_technology::cell_type::NORMAL);
 
-    // BENCHMARK("QuickExact")
-    // {
-    //     const quickexact_params<cell<lattice_siqad>> sim_params{sidb_simulation_parameters{2, -0.32}};
-    //     return quickexact<lattice_siqad>(lyt, sim_params);
-    // };
+    BENCHMARK("QuickExact")
+    {
+        const quickexact_params<cell<lattice_siqad>> sim_params{sidb_simulation_parameters{2, -0.32}};
+        return quickexact<lattice_siqad>(lyt, sim_params);
+    };
 
     BENCHMARK("QuickSim")
     {
