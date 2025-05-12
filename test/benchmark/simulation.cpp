@@ -219,8 +219,52 @@ TEST_CASE("Benchmark simulators", "[benchmark]")
 //                                         8.07302 ms      4.73162 ms         14.0938 ms
 //
 //      ClusterComplete (single-threaded)  100             1                  726.747 ms
-//                                         7.08628 ms      7.07611 ms         7.09851  ms
+//                                         7.08628 ms      7.07611 ms         7.09851 ms
 //                                         56.9189 us      47.144 us          73.1902 us
+
+//      AMD Ryzen Threadripper PRO 5955X, Ubuntu 20.04, Ubuntu clang version 18.1.3 (12.05.2025)
+//
+//      After PR #738 (without jemalloc)
+//      benchmark name                       samples         iterations       est run time
+//                                           mean            low mean         high mean
+//                                           std dev         low std dev      high std dev
+//      ------------------------------------------------------------------------------------
+//      QuickExact                           10 0             1               2.16712 m
+//                                           1.31078 s        1.30981 s       1.31264 s
+//                                           6.62473 ms       3.91083 ms      10.8364 ms
+//
+//      QuickSim                             100              1               199.548 ms
+//                                           2.03192 ms       2.0026 ms       2.09943 ms
+//                                           223.201 us       122.963 us      359.294 us
+//
+//      ClusterComplete (multi-threaded)     100              1               3.68658 s
+//                                           6.11019 ms       4.92009 ms      10.6908 ms
+//                                           10.5307 ms       2.30338 ms      24.5175 ms
+//
+//      ClusterComplete (single-threaded)    100              1               811.725 ms
+//                                           8.08429 ms       8.07517 ms      8.09434 ms
+//                                           49.0671 us       43.0763 us      56.5785 us
+//
+//      After PR #738 (with jemalloc)
+//      benchmark name                       samples         iterations       est run time
+//                                           mean            low mean         high mean
+//                                           std dev         low std dev      high std dev
+//      ------------------------------------------------------------------------------------
+//      QuickExact                           100              1               2.10867 m
+//                                           1.26906 s        1.26868 s       1.26941 s
+//                                           1.84893 ms       1.60048 ms      2.26818 ms
+//
+//      QuickSim                             100              1               269.863 ms
+//                                           2.74224 ms       2.70185 ms      2.84946 ms
+//                                           299.791 us       59.7377 us      590.461 us
+//
+//      ClusterComplete (multi-threaded)     100              1               2.66027 s
+//                                           10.4559 ms       7.44758 ms      20.0183 ms
+//                                           24.5666 ms       8.75806 ms      54.1933 ms
+//
+//      ClusterComplete (single-threaded)    100              1               688.958 ms
+//                                           6.90075 ms       6.86162 ms      6.94164 ms
+//                                           202.671 us       189.985 us      215.354 us
 
 #if (FICTION_ALGLIB_ENABLED)
 TEST_CASE("Benchmark ClusterComplete", "[benchmark]")
@@ -311,3 +355,36 @@ TEST_CASE("Benchmark ClusterComplete", "[benchmark]")
 //      (single-threaded)                   100                 1                       18.5153 s
 //                                          187.65 ms           187.029 ms              188.333 ms
 //                                          3.31611 ms          2.83437 ms              4.32337 ms
+
+//      AMD Ryzen Threadripper PRO 5955X, Ubuntu 20.04, Ubuntu clang version 18.1.3 (12.05.2025)
+//
+//      After PR #738 (without jemalloc)
+//      benchmark name                          samples      iterations      est run time
+//                                              mean         low mean        high mean
+//                                              std dev      low std dev     high std dev
+//      ----------------------------------------------------------------------------------
+//      4 Segment Diagonal Bestagon Wire
+//      (multi-threaded)                        100          1               2.46177 m
+//                                              1.48422 s    1.48029 s       1.48807 s
+//                                              19.807 ms    17.2119 ms      23.7094 ms
+//
+//      3 Segment Diagonal Bestagon Wire
+//      (single-threaded)                       100          1               26.2679 s
+//                                              263.463 ms   262.915 ms      264.53 ms
+//                                              3.77744 ms   2.35049 ms      7.229 ms
+//
+//      After PR #738 (with jemalloc)
+//
+//      benchmark name                          samples       iterations      est run time
+//                                              mean          low mean        high mean
+//                                              std dev       low std dev     high std dev
+//      ------------------------------------------------------------------------------------
+//      4 Segment Diagonal Bestagon Wire
+//      (multi-threaded)                        100           1               1.38559 m
+//                                              846.22 ms     843.736 ms      850.395 ms
+//                                              16.0761 ms    10.7879 ms      25.2111 ms
+//
+//      3 Segment Diagonal Bestagon Wire
+//      (single-threaded)                       100             1             19.1756 s
+//                                              189.633 ms    188.843 ms      190.467 ms
+//                                              4.13341 ms    3.74383 ms      4.63423 ms
