@@ -75,24 +75,24 @@ class TestOperationalDomain(unittest.TestCase):
 
         stats_grid = operational_domain_stats()
         ct_domain_grid = critical_temperature_domain_grid_search(lyt, [create_xor_tt()], params, stats_grid)
-        self.assertEqual(ct_domain_grid.contains(parameter_point([5.60, 5.00]))[0], operational_status.OPERATIONAL)
-        self.assertGreater(ct_domain_grid.contains(parameter_point([5.60, 5.00]))[1], 30)
+        self.assertEqual(ct_domain_grid[parameter_point([5.60, 5.00])][0], operational_status.OPERATIONAL)
+        self.assertGreater(ct_domain_grid[parameter_point([5.60, 5.00])][1], 30)
         self.assertGreater(stats_grid.num_operational_parameter_combinations, 0)
         self.assertGreater(ct_domain_grid.minimum_ct(), 23)
         self.assertLess(ct_domain_grid.maximum_ct(), 38)
 
         stats_flood_fill = operational_domain_stats()
         ct_domain_flood = critical_temperature_domain_flood_fill(lyt, [create_xor_tt()], 100, params, stats_flood_fill)
-        self.assertEqual(ct_domain_flood.contains(parameter_point([5.60, 5.00]))[0], operational_status.OPERATIONAL)
-        self.assertGreater(ct_domain_flood.contains(parameter_point([5.60, 5.00]))[1], 30)
+        self.assertEqual(ct_domain_flood[parameter_point([5.60, 5.00])][0], operational_status.OPERATIONAL)
+        self.assertGreater(ct_domain_flood[parameter_point([5.60, 5.00])][1], 30)
         self.assertGreater(stats_flood_fill.num_operational_parameter_combinations, 0)
 
         stats_contour_tracing = operational_domain_stats()
         ct_domain_contour = critical_temperature_domain_contour_tracing(
             lyt, [create_xor_tt()], 1000, params, stats_contour_tracing
         )
-        self.assertEqual(ct_domain_contour.contains(parameter_point([5.60, 5.00]))[0], operational_status.OPERATIONAL)
-        self.assertGreater(ct_domain_contour.contains(parameter_point([5.60, 5.00]))[1], 30)
+        self.assertEqual(ct_domain_contour[parameter_point([5.60, 5.00])][0], operational_status.OPERATIONAL)
+        self.assertGreater(ct_domain_contour[parameter_point([5.60, 5.00])][1], 30)
         self.assertGreater(stats_contour_tracing.num_operational_parameter_combinations, 0)
 
         params.sweep_dimensions = [
@@ -104,8 +104,8 @@ class TestOperationalDomain(unittest.TestCase):
         ct_domain_random = critical_temperature_domain_random_sampling(
             lyt, [create_xor_tt()], 1000, params, stats_random_sampling
         )
-        self.assertEqual(ct_domain_random.contains(parameter_point([5.60, 5.00]))[0], operational_status.OPERATIONAL)
-        self.assertGreater(ct_domain_random.contains(parameter_point([5.60, 5.00]))[1], 30)
+        self.assertEqual(ct_domain_random[parameter_point([5.60, 5.00])][0], operational_status.OPERATIONAL)
+        self.assertGreater(ct_domain_random[parameter_point([5.60, 5.00])][1], 30)
         self.assertGreater(stats_random_sampling.num_operational_parameter_combinations, 0)
 
     def test_operational_domain_AND_gate_111_lattice(self):

@@ -17,8 +17,8 @@ class TestWriteOperationalDomain(unittest.TestCase):
     def test_write_simple_operational_domain(self):
         opdom = operational_domain([sweep_parameter.EPSILON_R, sweep_parameter.LAMBDA_TF])
 
-        opdom.add_value(parameter_point([0, 0]), [operational_status.OPERATIONAL])
-        opdom.add_value(parameter_point([0, 1]), [operational_status.NON_OPERATIONAL])
+        opdom[parameter_point([0, 0])] = operational_status.OPERATIONAL
+        opdom[parameter_point([0, 1])] = operational_status.NON_OPERATIONAL
 
         expected = "epsilon_r,lambda_tf,operational status\n0,0,1\n0,1,0"
 
