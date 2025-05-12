@@ -15,6 +15,8 @@ Added
 - Experiments:
     - Added experiment for a comprehensive analysis of the critical temperature domain
     - Added total simulation runtime to physical simulation experiment
+- Python bindings:
+    - Pythonic dictionary-like interface for ``operational_domain`` and ``critical_temperature_domain``
 
 Changed
 #######
