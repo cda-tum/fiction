@@ -468,7 +468,7 @@ Removed
 
 v0.4.0 - 2022-01-27
 -------------------
-*There are people who think that things that happen in fiction do not really happen. These people are wrong.* --- Neil Gaiman
+*Fiction is about stuff that's screwed up.* --- Nancy Kress
 
 Added
 #####

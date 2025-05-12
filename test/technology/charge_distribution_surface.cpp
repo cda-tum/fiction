@@ -2225,8 +2225,8 @@ TEMPLATE_TEST_CASE("Charge distribution surface defect vs SiDB equivalence", "[c
     lyt.assign_cell_type({0, 1, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
     lyt.assign_cell_type({5, 1, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
 
-    const auto                  sim_params = sidb_simulation_parameters{};
-    charge_distribution_surface charge_lyt{lyt, sim_params};
+    const auto                                 sim_params = sidb_simulation_parameters{};
+    charge_distribution_surface<decltype(lyt)> charge_lyt{lyt, sim_params};
 
     charge_lyt.assign_charge_state({0, 1, 0}, sidb_charge_state::NEUTRAL);
     charge_lyt.update_after_charge_change();
@@ -2236,12 +2236,12 @@ TEMPLATE_TEST_CASE("Charge distribution surface defect vs SiDB equivalence", "[c
     REQUIRE(charge_lyt.get_local_potential_by_index(1).has_value());
     REQUIRE(charge_lyt.get_local_potential_by_index(2).has_value());
 
-    sidb_defect_surface defect_lyt{lyt};
+    sidb_defect_surface<decltype(lyt)> defect_lyt{lyt};
     defect_lyt.assign_cell_type({5, 1, 0}, sidb_cell_clk_lyt_siqad::cell_type::EMPTY);
     defect_lyt.assign_sidb_defect({5, 1, 0},
                                   sidb_defect{sidb_defect_type::DB, -1, sim_params.epsilon_r, sim_params.lambda_tf});
 
-    charge_distribution_surface charge_lyt_defect{defect_lyt, sim_params};
+    charge_distribution_surface<decltype(defect_lyt)> charge_lyt_defect{defect_lyt, sim_params};
 
     charge_lyt_defect.assign_charge_state({0, 1, 0}, sidb_charge_state::NEUTRAL);
     charge_lyt_defect.update_after_charge_change();
