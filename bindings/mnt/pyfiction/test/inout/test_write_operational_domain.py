@@ -42,8 +42,8 @@ class TestWriteOperationalDomain(unittest.TestCase):
         opdom = operational_domain([sweep_parameter.EPSILON_R, sweep_parameter.LAMBDA_TF])
 
         # Using floating point values for the parameter points
-        opdom.add_value(parameter_point([0.1, 0.2]), [operational_status.OPERATIONAL])
-        opdom.add_value(parameter_point([0.3, 0.4]), [operational_status.NON_OPERATIONAL])
+        opdom[parameter_point([0.1, 0.2])] = operational_status.OPERATIONAL
+        opdom[parameter_point([0.3, 0.4])] = operational_status.NON_OPERATIONAL
 
         expected = "epsilon_r,lambda_tf,operational status\n0.1,0.2,1\n0.3,0.4,0"
 
@@ -68,8 +68,8 @@ class TestWriteOperationalDomain(unittest.TestCase):
         opdom = critical_temperature_domain([sweep_parameter.EPSILON_R, sweep_parameter.LAMBDA_TF])
 
         # Adding metric values
-        opdom.add_value(parameter_point([0.1, 0.2]), [operational_status.OPERATIONAL, 50.3])
-        opdom.add_value(parameter_point([0.3, 0.4]), [operational_status.NON_OPERATIONAL, 0.0])
+        opdom[parameter_point([0.1, 0.2])] = [operational_status.OPERATIONAL, 50.3]
+        opdom[parameter_point([0.3, 0.4])] = [operational_status.NON_OPERATIONAL, 0.0]
 
         expected = "epsilon_r,lambda_tf,operational status,critical temperature\n0.1,0.2,1,50.3\n0.3,0.4,0,0"
 
@@ -96,8 +96,8 @@ class TestWriteOperationalDomain(unittest.TestCase):
     def test_skip_non_operational_samples(self):
         opdom = operational_domain([sweep_parameter.EPSILON_R, sweep_parameter.LAMBDA_TF])
 
-        opdom.add_value(parameter_point([0.1, 0.2]), [operational_status.OPERATIONAL])
-        opdom.add_value(parameter_point([0.3, 0.4]), [operational_status.NON_OPERATIONAL])
+        opdom[parameter_point([0.1, 0.2])] = operational_status.OPERATIONAL
+        opdom[parameter_point([0.3, 0.4])] = operational_status.NON_OPERATIONAL
 
         # Skip non-operational samples
         params = write_operational_domain_params()
