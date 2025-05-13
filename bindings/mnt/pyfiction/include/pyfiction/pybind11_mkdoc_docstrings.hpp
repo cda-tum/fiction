@@ -2528,6 +2528,18 @@ Parameter ``cs``:
 Returns:
     Integer representing the SiDB's charge state.)doc";
 
+static const char *__doc_fiction_charge_transition_threshold_bounds =
+R"doc(An enumeration of charge transition threshold bounds to test against
+for population stability assessment.)doc";
+
+static const char *__doc_fiction_charge_transition_threshold_bounds_NEGATIVE_UPPER_BOUND = R"doc(For the upper bound check against mu_m to validate DB-.)doc";
+
+static const char *__doc_fiction_charge_transition_threshold_bounds_NEUTRAL_LOWER_BOUND = R"doc(For the lower bound check against mu_m to validate DB0.)doc";
+
+static const char *__doc_fiction_charge_transition_threshold_bounds_NEUTRAL_UPPER_BOUND = R"doc(For the upper bound check against mu_p to validate DB0.)doc";
+
+static const char *__doc_fiction_charge_transition_threshold_bounds_POSITIVE_LOWER_BOUND = R"doc(For the lower bound check against mu_p to validate DB+.)doc";
+
 static const char *__doc_fiction_chebyshev_distance =
 R"doc(The Chebyshev distance :math:`D` between two layout coordinates
 :math:`(x_1, y_1)` and :math:`(x_2, y_2)` given by
