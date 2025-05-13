@@ -83,7 +83,7 @@ Is SiDB gate design deemed impossible
 Physical Constants
 ------------------
 
-**Header:** ``fiction/technology/physical_constants.hpp``
+**Header:** ``fiction/technology/constants.hpp``
 
 .. doxygenvariable:: fiction::constants::physical::BOLTZMANN_CONSTANT
 .. doxygenvariable:: fiction::constants::physical::EV_TO_JOULE
