@@ -461,7 +461,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      */
     std::array<double, 4> get_effective_charge_transition_thresholds(const uint64_t ix) const noexcept
     {
-        assert(i < strg->sidb_order.size() && "SiDB index out of range");
+        assert(ix < strg->sidb_order.size() && "SiDB index out of range");
         return strg->charge_transition_threshold_bounds[ix];
     }
     /**
