@@ -339,10 +339,10 @@ inline void charge_distribution_surfaces(pybind11::module& m)
                DOC(fiction_charge_distribution_history_NEGLECT));
 
     /**
-     * Charge distribution history.
+     * Charge transition threshold bounds.
      */
-    py::enum_<fiction::charge_distribution_history>(m, "charge_transition_threshold_bounds",
-                                                    DOC(fiction_charge_transition_threshold_bounds), py::module_local())
+    py::enum_<fiction::charge_transition_threshold_bounds>(
+        m, "charge_transition_threshold_bounds", DOC(fiction_charge_transition_threshold_bounds), py::module_local())
         .value("NEGATIVE_UPPER_BOUND", fiction::charge_transition_threshold_bounds::NEGATIVE_UPPER_BOUND,
                DOC(fiction_charge_transition_threshold_bounds_NEGATIVE_UPPER_BOUND))
         .value("POSITIVE_LOWER_BOUND", fiction::charge_transition_threshold_bounds::POSITIVE_LOWER_BOUND,
