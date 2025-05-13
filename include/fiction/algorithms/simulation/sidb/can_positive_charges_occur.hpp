@@ -11,6 +11,7 @@
 #include "fiction/traits.hpp"
 
 #include <cstddef>
+#include <cstdint>
 
 namespace fiction
 {
