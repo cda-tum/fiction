@@ -15,6 +15,7 @@
 #include "fiction/traits.hpp"
 
 #include <algorithm>
+#include <array>
 #include <bitset>
 #include <cassert>
 #include <cmath>
