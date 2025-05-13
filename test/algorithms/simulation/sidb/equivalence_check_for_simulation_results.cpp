@@ -45,7 +45,7 @@ TEST_CASE("Several tests", "[equivalence-check-for-simulation-results]")
 
     SECTION("non-equivalence with respect to cds with same charge state but different energy")
     {
-        cds1.assign_system_energy_to_zero();
+        cds1.assign_electrostatic_potential_energy_to_zero();
         results1.charge_distributions = {cds1, cds2};
         CHECK(!check_simulation_results_for_equivalence(results1, results2));
     }
@@ -82,8 +82,8 @@ TEST_CASE("Several tests", "[equivalence-check-for-simulation-results]")
         results1.charge_distributions = {charge_distribution_surface{lyt1}};
         results2.charge_distributions = {charge_distribution_surface{lyt1}};
         results2.charge_distributions.at(0).assign_charge_state({0, 0}, sidb_charge_state::POSITIVE);
-        results2.charge_distributions.at(0).assign_system_energy_to_zero();
-        results1.charge_distributions.at(0).assign_system_energy_to_zero();
+        results2.charge_distributions.at(0).assign_electrostatic_potential_energy_to_zero();
+        results1.charge_distributions.at(0).assign_electrostatic_potential_energy_to_zero();
         CHECK(!check_simulation_results_for_equivalence(results1, results2));
     }
 }

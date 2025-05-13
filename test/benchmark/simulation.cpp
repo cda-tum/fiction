@@ -229,42 +229,42 @@ TEST_CASE("Benchmark simulators", "[benchmark]")
 //                                           mean            low mean         high mean
 //                                           std dev         low std dev      high std dev
 //      ------------------------------------------------------------------------------------
-//      QuickExact                           10 0             1               2.16712 m
-//                                           1.31078 s        1.30981 s       1.31264 s
-//                                           6.62473 ms       3.91083 ms      10.8364 ms
+//      QuickExact                           100              1               1.62095 m
+//                                           1.0263 s         1.02484 s       1.02932 s
+//                                           10.2365 ms       6.13745 ms      16.0045 ms
 //
-//      QuickSim                             100              1               199.548 ms
-//                                           2.03192 ms       2.0026 ms       2.09943 ms
-//                                           223.201 us       122.963 us      359.294 us
+//      QuickSim                             100              1               269.557 ms
+//                                           2.74004 ms       2.71588 ms      2.80411 ms
+//                                           185.301 us       74.8133 us      370.784 us
 //
-//      ClusterComplete (multi-threaded)     100              1               3.68658 s
-//                                           6.11019 ms       4.92009 ms      10.6908 ms
-//                                           10.5307 ms       2.30338 ms      24.5175 ms
+//      ClusterComplete (multi-threaded)     100              1               2.23624 s
+//                                           9.91647 ms       7.37725 ms      15.7107 ms
+//                                           18.5248 ms       7.67377 ms      31.9493 ms
 //
-//      ClusterComplete (single-threaded)    100              1               811.725 ms
-//                                           8.08429 ms       8.07517 ms      8.09434 ms
-//                                           49.0671 us       43.0763 us      56.5785 us
+//      ClusterComplete (single-threaded)    100              1               705.844 ms
+//                                           7.06819 ms       7.05496 ms      7.08097 ms
+//                                           66.2555 us       55.7839 us      80.9501 us
 //
 //      After PR #738 (with jemalloc)
 //      benchmark name                       samples         iterations       est run time
 //                                           mean            low mean         high mean
 //                                           std dev         low std dev      high std dev
 //      ------------------------------------------------------------------------------------
-//      QuickExact                           100              1               2.10867 m
-//                                           1.26906 s        1.26868 s       1.26941 s
-//                                           1.84893 ms       1.60048 ms      2.26818 ms
+//      QuickExact                           100              1               1.61535 m
+//                                           1.02306 s        1.02131 s       1.02654 s
+//                                           12.1723 ms       6.84374 ms      22.3491 ms
 //
-//      QuickSim                             100              1               269.863 ms
-//                                           2.74224 ms       2.70185 ms      2.84946 ms
-//                                           299.791 us       59.7377 us      590.461 us
+//      QuickSim                             100              1               195.089 ms
+//                                           2.00618 ms       1.97771 ms      2.07086 ms
+//                                           211.811 us       112.749 us      346.251 us
 //
-//      ClusterComplete (multi-threaded)     100              1               2.66027 s
-//                                           10.4559 ms       7.44758 ms      20.0183 ms
-//                                           24.5666 ms       8.75806 ms      54.1933 ms
+//      ClusterComplete (multi-threaded)     100              1               791.414 ms
+//                                           7.76209 ms       6.36529 ms      10.3966 ms
+//                                           9.49968 ms       5.8101 ms       15.033 ms
 //
-//      ClusterComplete (single-threaded)    100              1               688.958 ms
-//                                           6.90075 ms       6.86162 ms      6.94164 ms
-//                                           202.671 us       189.985 us      215.354 us
+//      ClusterComplete (single-threaded)    100              1               803.497 ms
+//                                           8.06843 ms       8.05748 ms      8.07985 ms
+//                                           56.9453 us       49.6048 us      67.6442 us
 
 #if (FICTION_ALGLIB_ENABLED)
 TEST_CASE("Benchmark ClusterComplete", "[benchmark]")
@@ -308,83 +308,84 @@ TEST_CASE("Benchmark ClusterComplete", "[benchmark]")
 //      AMD Ryzen Threadripper PRO 5955X, Ubuntu 20.04, Ubuntu clang version 18.1.3 (15.01.2025)
 //
 //      Without jemalloc:
-//      benchmark name                      samples             iterations              est run time
-//                                          mean                low mean                high mean
-//                                          std dev             low std dev             high std dev
-//      ---------------------------------------------------------------------------------------------
-//      4 Segment Diagonal Bestagon Wire    100                 1                       2.39773 m
-//                                          1.44927 s           1.44573 s               1.45397 s
-//                                          20.5985 ms          16.1537 ms              32.1081 ms
+//      benchmark name                      samples             iterations       est run time
+//                                          mean                low mean         high mean
+//                                          std dev             low std dev      high std dev
+//      --------------------------------------------------------------------------------------
+//      4 Segment Diagonal Bestagon Wire    100                 1                2.39773 m
+//                                          1.44927 s           1.44573 s        1.45397 s
+//                                          20.5985 ms          16.1537 ms       32.1081 ms
 //
 //      With jemalloc:
-//      benchmark name                      samples             iterations              est run time
-//                                          mean                low mean                high mean
-//                                          std dev             low std dev             high std dev
-//      ---------------------------------------------------------------------------------------------
-//      4 Segment Diagonal Bestagon Wire    100                 1                       1.39364 m
-//                                          835.42 ms           833.679 ms              837.076 ms
-//                                          8.68306 ms          7.61487 ms              10.1187 ms
+//      benchmark name                      samples             iterations       est run time
+//                                          mean                low mean         high mean
+//                                          std dev             low std dev      high std dev
+//      --------------------------------------------------------------------------------------
+//      4 Segment Diagonal Bestagon Wire    100                 1                1.39364 m
+//                                          835.42 ms           833.679 ms       837.076 ms
+//                                          8.68306 ms          7.61487 ms       10.1187 ms
 
 //      AMD Ryzen Threadripper PRO 5955X, Ubuntu 20.04, Ubuntu clang version 18.1.3 (11.02.2025)
 //
 //      Before PR #664 (with jemalloc)
-//      benchmark name                      samples             iterations              est run time
-//                                          mean                low mean                high mean
-//                                          std dev             low std dev             high std dev
-//      ---------------------------------------------------------------------------------------------
-//      4 Segment Diagonal Bestagon Wire    100                 1                       1.38135 m
-//      (multi-threaded)                    837.966 ms          835.809 ms              841.715 ms
-//                                          14.1689 ms          9.41514 ms              24.4521 ms
+//      benchmark name                      samples             iterations       est run time
+//                                          mean                low mean         high mean
+//                                          std dev             low std dev      high std dev
+//      --------------------------------------------------------------------------------------
+//      4 Segment Diagonal Bestagon Wire    100                 1                1.38135 m
+//      (multi-threaded)                    837.966 ms          835.809 ms       841.715 ms
+//                                          14.1689 ms          9.41514 ms       24.4521 ms
 //
 //      3 Segment Diagonal Bestagon Wire
-//      (single-threaded)                   100                 1                       19.6147 s
-//                                          192.324 ms          191.795 ms              192.866 ms
-//                                          2.73183 ms          2.45956 ms              3.0714 ms
+//      (single-threaded)                   100                 1                19.6147 s
+//                                          192.324 ms          191.795 ms       192.866 ms
+//                                          2.73183 ms          2.45956 ms       3.0714 ms
 //
 //      After PR #664 (with jemalloc)
-//      benchmark name                      samples             iterations              est run time
-//                                          mean                low mean                high mean
-//                                          std dev             low std dev             high std dev
-//      ---------------------------------------------------------------------------------------------
+//      benchmark name                      samples             iterations       est run time
+//                                          mean                low mean         high mean
+//                                          std dev             low std dev      high std dev
+//      --------------------------------------------------------------------------------------
 //      4 Segment Diagonal Bestagon Wire
-//      (multi-threaded)                    100                 1                       1.35702 m
-//                                          821.239 ms          819.725 ms              822.841 ms
-//                                          7.96672 ms          7.01983 ms              9.21399 ms
+//      (multi-threaded)                    100                 1                1.35702 m
+//                                          821.239 ms          819.725 ms       822.841 ms
+//                                          7.96672 ms          7.01983 ms       9.21399 ms
 //
 //      3 Segment Diagonal Bestagon Wire
-//      (single-threaded)                   100                 1                       18.5153 s
-//                                          187.65 ms           187.029 ms              188.333 ms
-//                                          3.31611 ms          2.83437 ms              4.32337 ms
+//      (single-threaded)                   100                 1                18.5153 s
+//                                          187.65 ms           187.029 ms       188.333 ms
+//                                          3.31611 ms          2.83437 ms       4.32337 ms
 
 //      AMD Ryzen Threadripper PRO 5955X, Ubuntu 20.04, Ubuntu clang version 18.1.3 (12.05.2025)
 //
 //      After PR #738 (without jemalloc)
-//      benchmark name                          samples      iterations      est run time
-//                                              mean         low mean        high mean
-//                                              std dev      low std dev     high std dev
-//      ----------------------------------------------------------------------------------
+//      benchmark name                          samples         iterations       est run time
+//                                              mean            low mean         high mean
+//                                              std dev         low std dev      high std dev
+//      --------------------------------------------------------------------------------------
 //      4 Segment Diagonal Bestagon Wire
-//      (multi-threaded)                        100          1               2.46177 m
-//                                              1.48422 s    1.48029 s       1.48807 s
-//                                              19.807 ms    17.2119 ms      23.7094 ms
+//      (multi-threaded)                        100             1                1.39561 m
+//                                              855.996 ms      852.867 ms       863.226 ms
+//                                              22.9268 ms      12.1374 ms       45.2192 ms
 //
 //      3 Segment Diagonal Bestagon Wire
-//      (single-threaded)                       100          1               26.2679 s
-//                                              263.463 ms   262.915 ms      264.53 ms
-//                                              3.77744 ms   2.35049 ms      7.229 ms
+//      (single-threaded)                       100             1                19.4726 s
+//                                              194.102 ms      193.282 ms       194.917 ms
+//                                              4.18614 ms      3.77211 ms       4.69498 ms
 //
 //      After PR #738 (with jemalloc)
 //
-//      benchmark name                          samples       iterations      est run time
-//                                              mean          low mean        high mean
-//                                              std dev       low std dev     high std dev
-//      ------------------------------------------------------------------------------------
+//      benchmark name                          samples         iterations       est run time
+//                                              mean            low mean         high mean
+//                                              std dev         low std dev      high std dev
+//      --------------------------------------------------------------------------------------
 //      4 Segment Diagonal Bestagon Wire
-//      (multi-threaded)                        100           1               1.38559 m
-//                                              846.22 ms     843.736 ms      850.395 ms
-//                                              16.0761 ms    10.7879 ms      25.2111 ms
+//      (multi-threaded)                        100              1               2.4024 m
+//                                              1.47767 s        1.47438 s       1.48129 s
+//                                              17.6153 ms       15.1925 ms      20.6301 ms
 //
 //      3 Segment Diagonal Bestagon Wire
-//      (single-threaded)                       100             1             19.1756 s
-//                                              189.633 ms    188.843 ms      190.467 ms
-//                                              4.13341 ms    3.74383 ms      4.63423 ms
+//      (single-threaded)                       100              1               26.4334 s
+//                                              268.317 ms       267.88 ms       268.789 ms
+//                                              2.32011 ms       2.0288 ms       2.74071 ms
+

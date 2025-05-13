@@ -10,12 +10,12 @@
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
-#include "fiction/technology/constants.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/technology/sidb_defects.hpp"
 #include "fiction/traits.hpp"
 
 #include <cassert>
+#include <cstddef>
 #include <vector>
 
 namespace fiction
@@ -85,14 +85,18 @@ template <typename Lyt, typename TT>
         // checks if parts of the bdl pairs are already neutrally charged due to nearby charged atomic defects.
         for (const auto& bdl : output_pairs)
         {
-            if ((-(*charge_lyt.get_local_potential(bdl.lower)) + params.simulation_params.mu_minus) >
-                -constants::ERROR_MARGIN)
+            if (const uint64_t ix = charge_lyt.cell_to_index(bdl.lower);
+                -*charge_lyt.get_local_internal_potential_by_index(ix) >
+                charge_lyt.get_effective_charge_transition_thresholds(
+                    ix)[static_cast<std::size_t>(charge_transition_threshold_bounds::NEUTRAL_LOWER_BOUND)])
             {
                 return true;  // the lower part can never be negatively charged. Thus, BDL property is not fulfilled
                               // anymore
             }
-            if ((-(*charge_lyt.get_local_potential(bdl.upper)) + params.simulation_params.mu_minus) >
-                -constants::ERROR_MARGIN)
+            if (const uint64_t ix = charge_lyt.cell_to_index(bdl.upper);
+                -*charge_lyt.get_local_internal_potential_by_index(ix) >
+                charge_lyt.get_effective_charge_transition_thresholds(
+                    ix)[static_cast<std::size_t>(charge_transition_threshold_bounds::NEUTRAL_LOWER_BOUND)])
             {
                 return true;  // the upper part can never be negatively charged. Thus, BDL property is not fulfilled
                               // anymore

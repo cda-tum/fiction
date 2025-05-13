@@ -7,9 +7,10 @@
 
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
-#include "fiction/technology/constants.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/traits.hpp"
+
+#include <cstddef>
 
 namespace fiction
 {
@@ -28,10 +29,6 @@ template <typename Lyt>
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
-    const auto mu_plus = sim_params.mu_plus();
-
-    bool result = false;
-
     // The charge layout is initialized with negatively charged SiDBs. Therefore, the local electrostatic potentials are
     // maximal. In this extreme case, if the banding is not sufficient for any SiDB to be positively charged, it will
     // not be for any other charge distribution. Therefore, no positively charged SiDBs can occur.
@@ -39,23 +36,17 @@ template <typename Lyt>
     charge_lyt.assign_physical_parameters(sim_params);
     charge_lyt.assign_all_charge_states(sidb_charge_state::NEGATIVE);
 
-    charge_lyt.foreach_cell(
-        [&result, &mu_plus, charge_lyt](const auto& c) noexcept
+    for (uint64_t i = 0; i < lyt.num_cells(); ++i)
+    {
+        if (-charge_lyt.get_local_internal_potential_by_index(i) >
+            charge_lyt.get_effective_charge_transition_thresholds(
+                i)[static_cast<std::size_t>(charge_transition_threshold_bounds::POSITIVE_LOWER_BOUND)])
         {
-            if (const auto local_pot = charge_lyt.get_local_potential(c); local_pot.has_value())
-            {
-                if ((-(*local_pot) + mu_plus) > -constants::ERROR_MARGIN)
-                {
-                    result = true;
-
-                    return false;  // break
-                }
-            }
-
             return true;
-        });
+        }
+    }
 
-    return result;
+    return false;
 }
 
 }  // namespace fiction

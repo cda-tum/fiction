@@ -433,7 +433,7 @@ class clustercomplete_impl
             charge_layout_copy.update_local_defect_potential();
         }
 
-        charge_layout_copy.recompute_system_energy();
+        charge_layout_copy.recompute_electrostatic_potential_energy();
 
         charge_layout_copy.charge_distribution_to_index();
 

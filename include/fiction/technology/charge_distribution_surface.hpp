@@ -145,6 +145,29 @@ enum class charge_index_mode : uint8_t
 };
 
 /**
+ * An enumeration of charge transition threshold bounds to test against for population stability assessment.
+ */
+enum class charge_transition_threshold_bounds : uint8_t
+{
+    /**
+     * For the upper bound check against mu_m to validate DB-.
+     */
+    NEGATIVE_UPPER_BOUND = 0,
+    /**
+     * For the lower bound check against mu_p to validate DB+.
+     */
+    POSITIVE_LOWER_BOUND = 1,
+    /**
+     * For the lower bound check against mu_m to validate DB0.
+     */
+    NEUTRAL_LOWER_BOUND = 2,
+    /**
+     * For the upper bound check against mu_p to validate DB0.
+     */
+    NEUTRAL_UPPER_BOUND = 3
+};
+
+/**
  * A layout type to layer on top of any SiDB cell-level layout. It implements an interface to store and access
  * SiDBs' charge states.
  *
@@ -204,6 +227,15 @@ class charge_distribution_surface<Lyt, false> : public Lyt
          */
         sidb_simulation_parameters simulation_parameters{};
         /**
+         * Stores the effective charge transition thresholds, incorporating the potential shift by local external
+         * potential sources. For each SiDB, an array is stored with the 4 bounds to test against:
+         *  - [0] for the upper bound check against mu_m to validate DB-,
+         *  - [1] for the lower bound check against mu_p to validate DB+,
+         *  - [2] for the lower bound check against mu_m to validate DB0, and
+         *  - [3] for the upper bound check against mu_p to validate DB0.
+         */
+        std::vector<std::array<double, 4>> charge_transition_threshold_bounds{};
+        /**
          * All cells that are occupied by an SiDB are stored in order.
          */
         std::vector<typename Lyt::cell> sidb_order;
@@ -232,11 +264,6 @@ class charge_distribution_surface<Lyt, false> : public Lyt
          * Local electrostatic potential caused by defects in V at each SiDB position.
          */
         local_potential local_pot_caused_by_defects;
-        /**
-         * Total Electrostatic potential at each SiDB position. Has to be updated when charge distribution is changed
-         * (unit: V). It is the sum of `local_int_pot` and `local_ext_pot`.
-         */
-        local_potential local_pot;
         /**
          * Local electrostatic potential generated from external sources.
          */
@@ -401,6 +428,43 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         strg->engine = engine;
     }
     /**
+     * This function determines the effective charge transition thresholds, incorporating the potential shift by local
+     * external potential sources. For each SiDB, an array is written with the 4 bounds to test against:
+     *  - [0] for the upper bound check against mu_m to validate DB-,
+     *  - [1] for the lower bound check against mu_p to validate DB+,
+     *  - [2] for the lower bound check against mu_m to validate DB0, and
+     *  - [3] for the upper bound check against mu_p to validate DB0.
+     */
+    void determine_effective_charge_transition_thresholds() noexcept
+    {
+        strg->charge_transition_threshold_bounds.resize(strg->sidb_order.size(), std::array<double, 4>{0, 0, 0, 0});
+
+        for (uint64_t i = 0; i < strg->sidb_order.size(); ++i)
+        {
+            strg->charge_transition_threshold_bounds[i] = {
+                strg->local_ext_pot[i] - strg->simulation_parameters.mu_minus + constants::ERROR_MARGIN,   // DB- (UB)
+                strg->local_ext_pot[i] - strg->simulation_parameters.mu_plus() - constants::ERROR_MARGIN,  // DB+ (LB)
+                strg->local_ext_pot[i] - strg->simulation_parameters.mu_minus - constants::ERROR_MARGIN,   // DB0 (LB)
+                strg->local_ext_pot[i] - strg->simulation_parameters.mu_plus() + constants::ERROR_MARGIN,  // DB0 (UB)
+            };
+        }
+    }
+    /**
+     * This function obtains the effective charge transition thresholds for a given SiDB (by index), incorporating the
+     * potential shift by local external potential sources. An array is returned with the 4 bounds to test against:
+     *  - [0] for the upper bound check against mu_m to validate DB-,
+     *  - [1] for the lower bound check against mu_p to validate DB+,
+     *  - [2] for the lower bound check against mu_m to validate DB0, and
+     *  - [3] for the upper bound check against mu_p to validate DB0.
+     * @param ix The index defining the SiDB position.
+     * @return The effective charge transition thresholds.
+     */
+    std::array<double, 4> get_effective_charge_transition_thresholds(const uint64_t ix) const noexcept
+    {
+        assert(i < strg->sidb_order.size() && "SiDB index out of range");
+        return strg->charge_transition_threshold_bounds[ix];
+    }
+    /**
      * This function returns the locations of all SiDBs in nm of the form `(x,y)`.
      *
      * @return Vector of SiDB nanometer positions (unit: nm).
@@ -441,8 +505,9 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         strg->max_charge_index =
             static_cast<uint64_t>(std::pow(strg->simulation_parameters.base, this->num_cells())) - 1;
         this->initialize_potential_matrix();
-        this->update_local_potential();
-        this->recompute_system_energy();
+        this->update_local_internal_potential();
+        this->recompute_electrostatic_potential_energy();
+        this->determine_effective_charge_transition_thresholds();
         this->validity_check();
     }
     /**
@@ -601,7 +666,6 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
                     strg->local_pot_caused_by_defects[ix] += pot;
                     strg->local_int_pot[ix] += pot;
-                    strg->local_pot[ix] += pot;
                 });
         }
         else
@@ -619,7 +683,6 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
                     strg->local_pot_caused_by_defects[ix] += pot_diff;
                     strg->local_int_pot[ix] += pot_diff;
-                    strg->local_pot[ix] += pot_diff;
                 });
 
             strg->defects.erase(c);
@@ -646,8 +709,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                                           static_cast<double>(strg->defects[c].charge);
 
                 strg->local_pot_caused_by_defects[static_cast<uint64_t>(cell_to_index(c1))] -= defect_pot;
-                strg->local_ext_pot[static_cast<uint64_t>(cell_to_index(c1))] -= defect_pot;
-                strg->local_pot[static_cast<uint64_t>(cell_to_index(c1))] -= defect_pot;
+                strg->local_int_pot[static_cast<uint64_t>(cell_to_index(c1))] -= defect_pot;
             });
 
         strg->defects.erase(c);
@@ -704,19 +766,15 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         std::vector<uint64_t> negative_sidbs{};
         negative_sidbs.reserve(this->num_cells());
 
-        for (const auto& cell : strg->sidb_order)
+        for (uint64_t i = 0; i < strg->sidb_order.size(); ++i)
         {
-            if (const auto local_pot = this->get_local_potential(cell); local_pot.has_value())
+            // Check if the maximum band bending is sufficient to shift (0/-) above the Fermi level. The local
+            // potential is converted from J to eV to compare the band bending with the Fermi level (which is also
+            // given in eV).
+            if (const double local_pot = strg->local_int_pot[i] + strg->local_ext_pot[i];
+                (-local_pot + strg->simulation_parameters.mu_minus) < -constants::ERROR_MARGIN)
             {
-                // Check if the maximum band bending is sufficient to shift (0/-) above the Fermi level. The local
-                // potential is converted from J to eV to compare the band bending with the Fermi level (which is also
-                // given in eV).
-                if ((-*local_pot + strg->simulation_parameters.mu_minus) < -constants::ERROR_MARGIN)
-                {
-                    const auto cell_index = cell_to_index(cell);
-                    assert(cell_index != -1 && "Cell is not part of the layout");
-                    negative_sidbs.push_back(static_cast<uint64_t>(cell_index));
-                }
+                negative_sidbs.push_back(i);
             }
         }
 
@@ -883,7 +941,6 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                         const double pot_diff =
                             strg->pot_mat[static_cast<uint64_t>(strg->cell_history_gray_code.first)][j] * charge_diff;
                         strg->local_int_pot[j] += pot_diff;
-                        strg->local_pot[j] += pot_diff;
                     }
                 }
             }
@@ -897,7 +954,6 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                             strg->pot_mat[changed_cell][j] *
                             (static_cast<double>(charge_state_to_sign(strg->cell_charge[changed_cell])) - charge);
                         strg->local_int_pot[j] += pot_diff;
-                        strg->local_pot[j] += pot_diff;
                     }
                 }
             }
@@ -957,41 +1013,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         }
     }
     /**
-     * This function computes the local electrostatic potential in Volt for each SiDB position by summing the internal
-     * and external local electrostatic potentials.
-     */
-    void sum_internal_and_external_local_potential() noexcept
-    {
-        strg->local_pot.resize(this->num_cells(), 0);
-
-        for (auto i = 0u; i < strg->sidb_order.size(); ++i)
-        {
-            strg->local_pot[i] = strg->local_int_pot[i] + strg->local_ext_pot[i];
-        }
-    }
-    /**
-     * This function calculates the local electrostatic potential in Volt for each SiDB position, including external
-     * electrostatic potentials (generated by electrodes, defects, etc.) (unit: V).
-     *
-     * @param history_mode `charge_distribution_history::NEGLECT` if the information (local electrostatic energy) of the
-     * previous charge distribution is used to make the update more efficient, `charge_distribution_history::CONSIDER`
-     * otherwise. Since with the latter option, updates are performed dynamically, the internal and external local
-     * potentials do not need to be summed again.
-     */
-    void update_local_potential(
-        const charge_distribution_history history_mode = charge_distribution_history::NEGLECT) noexcept
-    {
-        update_local_internal_potential(history_mode);
-
-        if (history_mode == charge_distribution_history::CONSIDER || strg->engine == sidb_simulation_engine::QUICKSIM)
-        {
-            return;
-        }
-
-        sum_internal_and_external_local_potential();
-    }
-    /**
-     * The function returns the local electrostatic potential at a given SiDB position in V.
+     * The function returns the determined local electrostatic potential at a given SiDB position in V.
      *
      * @param c The cell defining the SiDB position.
      * @return Local potential at given cell position. If there is no SiDB at the given cell, `std::nullopt` is
@@ -1001,23 +1023,38 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     {
         if (const auto index = cell_to_index(c); index != -1)
         {
-            return (strg->engine == sidb_simulation_engine::QUICKSIM ? strg->local_int_pot :
-                                                                       strg->local_pot)[static_cast<uint64_t>(index)];
+            return strg->local_int_pot[static_cast<uint64_t>(index)] +
+                   strg->local_ext_pot[static_cast<uint64_t>(index)];
         }
         return std::nullopt;
     }
     /**
-     * This function returns the local electrostatic potential at a given index position in Volt (unit: V).
+     * This function returns the determined local electrostatic potential at a given index position in Volt (unit: V).
      *
      * @param index The index defining the SiDB position.
-     * @return Local potential at given index position. If there is no SiDB at the given index (which corresponds to a
-     * unique cell), `std::nullopt` is returned (unit: V).
+     * @return Local potential at given index position. If there is no SiDB at the given index (which
+     * corresponds to a unique cell), `std::nullopt` is returned (unit: V).
      */
     [[nodiscard]] std::optional<double> get_local_potential_by_index(const uint64_t index) const noexcept
     {
         if (index < strg->sidb_order.size())
         {
-            return (strg->engine == sidb_simulation_engine::QUICKSIM ? strg->local_int_pot : strg->local_pot)[index];
+            return strg->local_int_pot[index] + strg->local_ext_pot[index];
+        }
+        return std::nullopt;
+    }
+    /**
+     * The function returns the internal local electrostatic potential at a given SiDB position in V.
+     *
+     * @param c The cell defining the SiDB position.
+     * @return Internal local potential at given cell position. If there is no SiDB at the given cell, `std::nullopt` is
+     * returned (unit: V).
+     */
+    std::optional<double> get_local_internal_potential(const typename Lyt::cell& c) const noexcept
+    {
+        if (const auto index = cell_to_index(c); index != -1)
+        {
+            return strg->local_int_pot[static_cast<uint64_t>(index)];
         }
         return std::nullopt;
     }
@@ -1037,6 +1074,21 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         return std::nullopt;
     }
     /**
+     * The function returns the external local electrostatic potential at a given SiDB position in V.
+     *
+     * @param c The cell defining the SiDB position.
+     * @return External local potential at given cell position. If there is no SiDB at the given cell, `std::nullopt` is
+     * returned (unit: V).
+     */
+    std::optional<double> get_local_external_potential(const typename Lyt::cell& c) const noexcept
+    {
+        if (const auto index = cell_to_index(c); index != -1)
+        {
+            return strg->local_ext_pot[static_cast<uint64_t>(index)];
+        }
+        return std::nullopt;
+    }
+    /**
      * This function returns the external local electrostatic potential at a given index position in Volt (unit: V).
      *
      * @param index The index defining the SiDB position.
@@ -1052,12 +1104,27 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         return std::nullopt;
     }
     /**
+     * The function returns the external local electrostatic potential at a given SiDB position in V.
+     *
+     * @param c The cell defining the SiDB position.
+     * @return Local potential at given cell position as generated by defects. If there is no SiDB at the given cell,
+     * `std::nullopt` is returned (unit: V).
+     */
+    std::optional<double> get_local_potential_caused_by_defects(const typename Lyt::cell& c) const noexcept
+    {
+        if (const auto index = cell_to_index(c); index != -1)
+        {
+            return strg->local_pot_caused_by_defects[static_cast<uint64_t>(index)];
+        }
+        return std::nullopt;
+    }
+    /**
      * This function returns the local electrostatic potential generated by defects at a given index position in Volt
      * (unit: V).
      *
      * @param index The index defining the SiDB position.
-     * @return Local potential at given index position. If there is no SiDB at the given index (which corresponds to a
-     * unique cell), `std::nullopt` is returned (unit: V).
+     * @return Local potential at given index position as generated by defects. If there is no SiDB at the given index
+     * (which corresponds to a unique cell), `std::nullopt` is returned (unit: V).
      */
     [[nodiscard]] std::optional<double>
     get_local_potential_caused_by_defects_by_index(const uint64_t index) const noexcept
@@ -1092,21 +1159,13 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     void assign_local_internal_potential_by_index(const uint64_t index, const double loc_pot) noexcept
     {
         assert(index < strg->local_int_pot.size());
-        strg->local_pot[index]     = strg->local_pot[index] + loc_pot - strg->local_int_pot[index];
         strg->local_int_pot[index] = loc_pot;
-    }
-
-    void assign_local_external_potential_by_index(const uint64_t index, const double loc_pot) noexcept
-    {
-        assert(index < strg->local_ext_pot.size());
-        strg->local_pot[index]     = strg->local_pot[index] + loc_pot - strg->local_ext_pot[index];
-        strg->local_ext_pot[index] = loc_pot;
     }
     /**
      * This function assign the electrostatic system energy to zero (unit: eV). It can be used if only one SiDB is
      * charged.
      */
-    void assign_system_energy_to_zero() noexcept
+    void assign_electrostatic_potential_energy_to_zero() noexcept
     {
         strg->system_energy = 0.0;
     }
@@ -1114,7 +1173,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * This function calculates the system's total electrostatic potential energy and stores it in the storage (unit:
      * eV).
      */
-    void recompute_system_energy() noexcept
+    void recompute_electrostatic_potential_energy() noexcept
     {
         double collect = 0.0;
 
@@ -1130,6 +1189,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             return;
         }
 
+        update_local_external_potential();
         update_local_defect_potential();
 
         double collect_ext = 0.0;
@@ -1175,14 +1235,14 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         const energy_calculation          energy_calculation_mode = energy_calculation::UPDATE_ENERGY,
         const charge_distribution_history history_mode            = charge_distribution_history::NEGLECT) noexcept
     {
-        this->update_local_potential(history_mode);
+        this->update_local_internal_potential(history_mode);
         if (dep_cell == dependent_cell_mode::VARIABLE)
         {
             this->update_charge_state_of_dependent_cell();
         }
         if (energy_calculation_mode == energy_calculation::UPDATE_ENERGY)
         {
-            this->recompute_system_energy();
+            this->recompute_electrostatic_potential_energy();
         }
         this->validity_check();
     }
@@ -1233,37 +1293,32 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      */
     void validity_check() noexcept
     {
-        uint64_t   population_stability_not_fulfilled_counter = 0;
-        uint64_t   for_loop_counter                           = 0;
-        const auto mu_p                                       = strg->simulation_parameters.mu_plus();
-
-        for (const auto& v : strg->engine == sidb_simulation_engine::QUICKSIM ?
-                                 strg->local_int_pot :
-                                 strg->local_pot)  // this for-loop checks if the "population stability" is fulfilled.
+        // this for-loop checks if the "population stability" is fulfilled.
+        for (uint64_t i = 0; i < strg->sidb_order.size(); ++i)
         {
-            const bool valid = (((strg->cell_charge[for_loop_counter] == sidb_charge_state::NEGATIVE) &&
-                                 (-v + strg->simulation_parameters.mu_minus < constants::ERROR_MARGIN)) ||
-                                ((strg->cell_charge[for_loop_counter] == sidb_charge_state::POSITIVE) &&
-                                 (-v + mu_p > -constants::ERROR_MARGIN)) ||
-                                ((strg->cell_charge[for_loop_counter] == sidb_charge_state::NEUTRAL) &&
-                                 (-v + strg->simulation_parameters.mu_minus > -constants::ERROR_MARGIN) &&
-                                 (-v + mu_p < constants::ERROR_MARGIN)));
-            for_loop_counter += 1;
+            const bool valid =
+                (((strg->cell_charge[i] == sidb_charge_state::NEGATIVE) &&
+                  (-strg->local_int_pot[i] < strg->charge_transition_threshold_bounds[i][static_cast<std::size_t>(
+                                                 charge_transition_threshold_bounds::NEGATIVE_UPPER_BOUND)])) ||
+                 ((strg->cell_charge[i] == sidb_charge_state::POSITIVE) &&
+                  (-strg->local_int_pot[i] > strg->charge_transition_threshold_bounds[i][static_cast<std::size_t>(
+                                                 charge_transition_threshold_bounds::POSITIVE_LOWER_BOUND)])) ||
+                 ((strg->cell_charge[i] == sidb_charge_state::NEUTRAL) &&
+                  (-strg->local_int_pot[i] > strg->charge_transition_threshold_bounds[i][static_cast<std::size_t>(
+                                                 charge_transition_threshold_bounds::NEUTRAL_LOWER_BOUND)]) &&
+                  (-strg->local_int_pot[i] < strg->charge_transition_threshold_bounds[i][static_cast<std::size_t>(
+                                                 charge_transition_threshold_bounds::NEUTRAL_UPPER_BOUND)])));
+
             if (!valid)
             {
                 strg->validity = false;  // if at least one SiDB does not fulfill the population stability, the validity
                                          // of the given charge distribution is set to "false".
-                population_stability_not_fulfilled_counter += 1;
-                break;
+                return;
             }
         }
 
-        if ((population_stability_not_fulfilled_counter == 0) &&
-            (for_loop_counter >
-             0))  // if population stability is fulfilled for all SiDBs, the "configuration stability" is checked.
-        {
-            strg->validity = is_configuration_stable();
-        }
+        // if population stability is fulfilled for all SiDBs, the "configuration stability" is checked.
+        strg->validity = is_configuration_stable();
     }
     /**
      * This function returns the currently stored validity of the present charge distribution layout.
@@ -1541,28 +1596,6 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         }
     }
     /**
-     * This function can be used to assign a global external electrostatic potential in Volt (unit: V) to the layout
-     * (e.g this could be a planar external electrode). It is added to previously stored values.
-     *
-     * @param potential_value Value of the global external electrostatic potential in Volt (e.g. -0.3).
-     * Charge-transition levels are shifted by this value.
-     */
-    void assign_global_external_potential(const double potential_value) noexcept
-    {
-        if (potential_value == 0.0)
-        {
-            return;
-        }
-
-        for (const cell<Lyt>& c : strg->sidb_order)
-        {
-            strg->local_external_potential_map[c] += potential_value;
-        }
-
-        update_local_external_potential();
-        sum_internal_and_external_local_potential();
-    }
-    /**
      * This function determines if given layout has to be simulated with three states since positively charged SiDBs
      * can occur due to the local potential analysis. In addition, all SiDBs that can be positively charged are
      * collected.
@@ -1584,25 +1617,26 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
         // Each SiDB is checked to see if the local electrostatic potential is high enough
         // to cause a positively charged SiDB
-        this->foreach_cell(
-            [&required, this](const auto& c)
+        for (uint64_t i = 0; i < strg->sidb_order.size(); ++i)
+        {
+            if (-strg->local_int_pot[i] < strg->charge_transition_threshold_bounds[i][static_cast<std::size_t>(
+                                              charge_transition_threshold_bounds::POSITIVE_LOWER_BOUND)])
             {
-                if (const auto local_pot = this->get_local_potential(c); local_pot.has_value())
-                {
-                    if ((-(*local_pot) + strg->simulation_parameters.mu_plus()) > -constants::ERROR_MARGIN)
-                    {
-                        if (c == strg->dependent_cell)
-                        {
-                            strg->dependent_cell_in_sub_layout = true;
-                        }
-                        else
-                        {
-                            strg->three_state_cells.emplace_back(c);
-                            required = true;
-                        }
-                    }
-                }
-            });
+                continue;
+            }
+
+            const cell<Lyt> c = index_to_cell(i);
+
+            if (c == strg->dependent_cell)
+            {
+                strg->dependent_cell_in_sub_layout = true;
+            }
+            else
+            {
+                strg->three_state_cells.emplace_back(c);
+                required = true;
+            }
+        }
 
         // sort all SiDBs that can be positively charged by the defined < relation
         std::sort(strg->three_state_cells.begin(), strg->three_state_cells.end());
@@ -1800,6 +1834,28 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                (distance * 1e-9) * std::exp(-distance / defect.lambda_tf) * constants::physical::ELEMENTARY_CHARGE;
     }
     /**
+     * This function can be used to assign a global external electrostatic potential in Volt (unit: V) to the layout
+     * (e.g this could be a planar external electrode). It is added to previously stored values.
+     *
+     * @param potential_value Value of the global external electrostatic potential in Volt (e.g. -0.3).
+     * Charge-transition levels are shifted by this value.
+     */
+    void assign_global_external_potential(const double potential_value) noexcept
+    {
+        if (potential_value == 0.0)
+        {
+            return;
+        }
+
+        for (const cell<Lyt>& c : strg->sidb_order)
+        {
+            strg->local_external_potential_map[c] += potential_value;
+        }
+
+        update_local_external_potential();
+        determine_effective_charge_transition_thresholds();
+    }
+    /**
      * This function can be used to assign an external local electrostatic potential in Volt to the layout, which is
      * added to previously stored values. The SiDB local potential stores are updated automatically.
      *
@@ -1816,7 +1872,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         if (!external_potential.empty())
         {
             update_local_external_potential();
-            sum_internal_and_external_local_potential();
+            determine_effective_charge_transition_thresholds();
         }
     }
     /**
@@ -1825,7 +1881,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @return External electrostatic potential as unordered map. The cell is used as key and the external
      * electrostatic potential in Volt (unit: V) at its position as value.
      */
-    std::unordered_map<typename Lyt::cell, double> get_local_external_potentials() const noexcept
+    std::unordered_map<typename Lyt::cell, double> get_local_external_potential_map() const noexcept
     {
         return strg->local_external_potential_map;
     }
@@ -1838,7 +1894,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         strg->local_external_potential_map.clear();
 
         update_local_external_potential();
-        sum_internal_and_external_local_potential();
+        determine_effective_charge_transition_thresholds();
     }
     /**
      * This function returns the local electrostatic potentials which are generated by defects.
@@ -1867,8 +1923,10 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     {
         if (!strg->dependent_cell.is_dead())
         {
-            const auto loc_pot_cell = -strg->local_pot[strg->dependent_cell_index];
-            if ((loc_pot_cell + strg->simulation_parameters.mu_minus) < constants::ERROR_MARGIN)
+            const auto loc_pot_cell = -strg->local_int_pot[strg->dependent_cell_index];
+            if (loc_pot_cell <
+                strg->charge_transition_threshold_bounds[strg->dependent_cell_index][static_cast<std::size_t>(
+                    charge_transition_threshold_bounds::NEGATIVE_UPPER_BOUND)])
             {
                 if (strg->cell_charge[strg->dependent_cell_index] != sidb_charge_state::NEGATIVE)
                 {
@@ -1880,15 +1938,14 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                             strg->local_int_pot[i] +=
                                 (this->get_chargeless_potential_by_indices(i, strg->dependent_cell_index)) *
                                 charge_diff;
-                            strg->local_pot[i] +=
-                                (this->get_chargeless_potential_by_indices(i, strg->dependent_cell_index)) *
-                                charge_diff;
                         }
                     }
                     strg->cell_charge[strg->dependent_cell_index] = sidb_charge_state::NEGATIVE;
                 }
             }
-            else if ((loc_pot_cell + strg->simulation_parameters.mu_plus()) > -constants::ERROR_MARGIN)
+            else if (loc_pot_cell >
+                     strg->charge_transition_threshold_bounds[strg->dependent_cell_index][static_cast<std::size_t>(
+                         charge_transition_threshold_bounds::POSITIVE_LOWER_BOUND)])
             {
                 // dependent-cell can only be positively charged when the base number is set to three state
                 // simulation.
@@ -1906,9 +1963,6 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                                 strg->local_int_pot[i] +=
                                     (this->get_chargeless_potential_by_indices(i, strg->dependent_cell_index)) *
                                     charge_diff;
-                                strg->local_pot[i] +=
-                                    (this->get_chargeless_potential_by_indices(i, strg->dependent_cell_index)) *
-                                    charge_diff;
                             }
                         }
                     }
@@ -1924,9 +1978,6 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                         if (i != strg->dependent_cell_index)
                         {
                             strg->local_int_pot[i] +=
-                                (this->get_chargeless_potential_by_indices(i, strg->dependent_cell_index)) *
-                                charge_diff;
-                            strg->local_pot[i] +=
                                 (this->get_chargeless_potential_by_indices(i, strg->dependent_cell_index)) *
                                 charge_diff;
                         }
@@ -2169,14 +2220,14 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         this->initialize_nm_distance_matrix();
         this->initialize_potential_matrix();
         strg->local_pot_caused_by_defects.resize(this->num_cells(), 0);
-        this->update_local_external_potential();
-        this->update_local_potential();
+        this->update_local_internal_potential();
         if constexpr (is_sidb_defect_surface_v<Lyt>)
         {
             Lyt::foreach_sidb_defect([this](const auto cd)
                                      { add_sidb_defect_to_potential_landscape(cd.first, cd.second); });
         }
-        this->recompute_system_energy();
+        this->recompute_electrostatic_potential_energy();
+        this->determine_effective_charge_transition_thresholds();
         this->validity_check();
     };
     /**

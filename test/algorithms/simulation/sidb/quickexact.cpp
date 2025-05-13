@@ -2037,7 +2037,8 @@ TEMPLATE_TEST_CASE("Special test cases", "[quickexact]", sidb_100_cell_clk_lyt_s
     //                                           0});
     //
     //     std::sort(qe_res.charge_distributions.begin(), qe_res.charge_distributions.end(),
-    //               [](const auto& lhs, const auto& rhs) { return lhs.get_system_energy() < rhs.get_system_energy();
+    //               [](const auto& lhs, const auto& rhs) { return lhs.get_electrostatic_potential_energy() <
+    //               rhs.get_electrostatic_potential_energy();
     //               });
     //
     //     CHECK(qe_res.charge_distributions.size() == 2);

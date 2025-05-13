@@ -60,8 +60,8 @@ TEST_CASE("Test calculate_energy_distribution function", "[energy-distribution]"
                                                 charge_index_mode::KEEP_CHARGE_INDEX);
         charge_layout_first.assign_charge_state({12, 10}, sidb_charge_state::NEUTRAL,
                                                 charge_index_mode::KEEP_CHARGE_INDEX);
-        charge_layout_first.update_local_potential();
-        charge_layout_first.recompute_system_energy();
+        charge_layout_first.update_local_internal_potential();
+        charge_layout_first.recompute_electrostatic_potential_energy();
         all_lyts.push_back(charge_layout_first);
         all_lyts.push_back(charge_layout_first);
         all_lyts.push_back(charge_layout_first);
@@ -73,8 +73,8 @@ TEST_CASE("Test calculate_energy_distribution function", "[energy-distribution]"
                                                  charge_index_mode::KEEP_CHARGE_INDEX);
         charge_layout_second.assign_charge_state({12, 10}, sidb_charge_state::NEUTRAL,
                                                  charge_index_mode::KEEP_CHARGE_INDEX);
-        charge_layout_second.update_local_potential();
-        charge_layout_second.recompute_system_energy();
+        charge_layout_second.update_local_internal_potential();
+        charge_layout_second.recompute_electrostatic_potential_energy();
         all_lyts.push_back(charge_layout_second);
         all_lyts.push_back(charge_layout_second);
         all_lyts.push_back(charge_layout_second);
@@ -87,8 +87,8 @@ TEST_CASE("Test calculate_energy_distribution function", "[energy-distribution]"
                                                 charge_index_mode::KEEP_CHARGE_INDEX);
         charge_layout_third.assign_charge_state({12, 10}, sidb_charge_state::NEGATIVE,
                                                 charge_index_mode::KEEP_CHARGE_INDEX);
-        charge_layout_third.update_local_potential();
-        charge_layout_third.recompute_system_energy();
+        charge_layout_third.update_local_internal_potential();
+        charge_layout_third.recompute_electrostatic_potential_energy();
         all_lyts.push_back(charge_layout_third);
         all_lyts.push_back(charge_layout_third);
         all_lyts.push_back(charge_layout_third);

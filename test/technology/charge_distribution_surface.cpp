@@ -598,7 +598,7 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects", "[charge-d
         charge_layout.assign_charge_state({1, 8, 0}, sidb_charge_state::POSITIVE);
         charge_layout.assign_charge_state({1, 10, 1}, sidb_charge_state::POSITIVE);
 
-        charge_layout.update_local_potential();
+        charge_layout.update_local_internal_potential();
 
         // cell and index are not part of the layout.
         CHECK(!charge_layout.get_local_potential({2, 0, 0}).has_value());
@@ -616,7 +616,7 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects", "[charge-d
         charge_layout.assign_charge_state({1, 8, 0}, sidb_charge_state::NEGATIVE);
         charge_layout.assign_charge_state({1, 10, 1}, sidb_charge_state::NEGATIVE);
 
-        charge_layout.update_local_potential();
+        charge_layout.update_local_internal_potential();
 
         charge_layout.foreach_cell(
             [&charge_layout](const auto& c)
@@ -628,7 +628,7 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects", "[charge-d
 
         charge_layout.assign_all_charge_states(sidb_charge_state::NEUTRAL);
 
-        charge_layout.update_local_potential();
+        charge_layout.update_local_internal_potential();
 
         charge_layout.foreach_cell(
             [&charge_layout](const auto& c)
@@ -652,21 +652,21 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects", "[charge-d
         charge_layout.assign_charge_state({1, 1, 1}, sidb_charge_state::NEGATIVE);
 
         // system energy is zero when all SiDBs are positively charged.
-        charge_layout.update_local_potential();
-        charge_layout.recompute_system_energy();
+        charge_layout.update_local_internal_potential();
+        charge_layout.recompute_electrostatic_potential_energy();
         CHECK(charge_layout.get_electrostatic_potential_energy() > 0.0);
 
         // system energy is zero when all SiDBs are neutrally charged.
         charge_layout.assign_all_charge_states(sidb_charge_state::NEUTRAL);
-        charge_layout.update_local_potential();
-        charge_layout.recompute_system_energy();
+        charge_layout.update_local_internal_potential();
+        charge_layout.recompute_electrostatic_potential_energy();
         CHECK_THAT(charge_layout.get_electrostatic_potential_energy(),
                    Catch::Matchers::WithinAbs(0.0, constants::ERROR_MARGIN));
 
         // system energy is zero when all SiDBs are positively charged.
         charge_layout.assign_all_charge_states(sidb_charge_state::POSITIVE);
-        charge_layout.update_local_potential();
-        charge_layout.recompute_system_energy();
+        charge_layout.update_local_internal_potential();
+        charge_layout.recompute_electrostatic_potential_energy();
         CHECK(charge_layout.get_electrostatic_potential_energy() > 0.0);
     }
 
@@ -682,8 +682,8 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects", "[charge-d
         CHECK(charge_layout_five.get_charge_state({0, 2, 0}) == sidb_charge_state::NEGATIVE);
         CHECK(charge_layout_five.get_charge_state({4, 1, 1}) == sidb_charge_state::NEGATIVE);
 
-        charge_layout_five.update_local_potential();
-        charge_layout_five.recompute_system_energy();
+        charge_layout_five.update_local_internal_potential();
+        charge_layout_five.recompute_electrostatic_potential_energy();
         charge_layout_five.validity_check();
         CHECK(charge_layout_five.get_charge_index_and_base().first == 0);
 
@@ -724,8 +724,8 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects", "[charge-d
         charge_layout.assign_charge_state({0, 2, 1}, sidb_charge_state::NEGATIVE);
 
         // closely arranged SiDBs cannot be all negatively charged
-        charge_layout.update_local_potential();
-        charge_layout.recompute_system_energy();
+        charge_layout.update_local_internal_potential();
+        charge_layout.recompute_electrostatic_potential_energy();
         charge_layout.validity_check();
         CHECK(!charge_layout.is_physically_valid());
     }
@@ -741,9 +741,9 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects", "[charge-d
 
         charge_distribution_surface charge_layout_new{lyt_new, params, sidb_charge_state::NEUTRAL};
         charge_layout_new.assign_local_external_potential({{{0, 0, 1}, -0.5}});
-        REQUIRE(!charge_layout_new.get_local_external_potentials().empty());
-        CHECK(charge_layout_new.get_local_external_potentials().size() == 1);
-        CHECK(charge_layout_new.get_local_external_potentials().size() == 1);
+        REQUIRE(!charge_layout_new.get_local_external_potential_map().empty());
+        CHECK(charge_layout_new.get_local_external_potential_map().size() == 1);
+        CHECK(charge_layout_new.get_local_external_potential_map().size() == 1);
 
         REQUIRE(charge_layout_new.get_local_potential({0, 0, 1}).has_value());
         CHECK_THAT(charge_layout_new.get_local_potential({0, 0, 1}).value() + 0.5,
@@ -794,9 +794,9 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects", "[charge-d
         lyt.assign_cell_type({10, 5, 1}, TestType::cell_type::NORMAL);
 
         charge_distribution_surface charge_layout{lyt, params, sidb_charge_state::NEUTRAL};
-        CHECK(charge_layout.get_local_external_potentials().empty());
+        CHECK(charge_layout.get_local_external_potential_map().empty());
         charge_layout.assign_global_external_potential(-0.1);
-        CHECK(!charge_layout.get_local_external_potentials().empty());
+        CHECK(!charge_layout.get_local_external_potential_map().empty());
 
         REQUIRE(charge_layout.get_local_potential({0, 0, 1}).has_value());
         CHECK_THAT(charge_layout.get_local_potential({0, 0, 1}).value() + 0.1,
@@ -944,7 +944,7 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects", "[charge-d
         const auto all_charges = charge_layout.get_all_sidb_charges();
         REQUIRE(all_charges.size() == charge_layout.num_cells());
 
-        charge_layout.assign_system_energy_to_zero();
+        charge_layout.assign_electrostatic_potential_energy_to_zero();
         CHECK(charge_layout.get_electrostatic_potential_energy() == 0.0);
 
         CHECK(charge_layout.three_state_cell_to_index({0, 0, 0}) == -1);
@@ -1124,7 +1124,7 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects", "[charge-d
         CHECK(loc_one < 0);
         CHECK(loc_two < 0);
         CHECK(loc_three < 0);
-        charge_layout_new.recompute_system_energy();
+        charge_layout_new.recompute_electrostatic_potential_energy();
         auto system_energy_first = charge_layout_new.get_electrostatic_potential_energy();
 
         charge_layout_new.assign_charge_state({0, 3, 1}, sidb_charge_state::NEGATIVE);
@@ -1527,7 +1527,7 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects, part one", 
         charge_layout.assign_charge_state({1, 8, 0}, sidb_charge_state::POSITIVE);
         charge_layout.assign_charge_state({1, 10, 1}, sidb_charge_state::POSITIVE);
 
-        charge_layout.update_local_potential();
+        charge_layout.update_local_internal_potential();
 
         REQUIRE(charge_layout.get_local_potential({0, 0, 0}).has_value());
         REQUIRE(charge_layout.get_local_potential({1, 8, 0}).has_value());
@@ -1549,7 +1549,7 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects, part one", 
         charge_layout.assign_charge_state({1, 8, 0}, sidb_charge_state::NEGATIVE);
         charge_layout.assign_charge_state({1, 10, 1}, sidb_charge_state::NEGATIVE);
 
-        charge_layout.update_local_potential();
+        charge_layout.update_local_internal_potential();
 
         charge_layout.foreach_cell(
             [&charge_layout](const auto& c)
@@ -1561,7 +1561,7 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects, part one", 
 
         charge_layout.assign_all_charge_states(sidb_charge_state::NEUTRAL);
 
-        charge_layout.update_local_potential();
+        charge_layout.update_local_internal_potential();
 
         charge_layout.foreach_cell(
             [&charge_layout](const auto& c)
@@ -1592,21 +1592,21 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects, part two", 
         charge_layout.assign_charge_state({1, 1, 1}, sidb_charge_state::NEGATIVE);
 
         // system energy is zero when all SiDBs are positively charged.
-        charge_layout.update_local_potential();
-        charge_layout.recompute_system_energy();
+        charge_layout.update_local_internal_potential();
+        charge_layout.recompute_electrostatic_potential_energy();
         CHECK(charge_layout.get_electrostatic_potential_energy() > 0.0);
 
         // system energy is zero when all SiDBs are neutrally charged.
         charge_layout.assign_all_charge_states(sidb_charge_state::NEUTRAL);
-        charge_layout.update_local_potential();
-        charge_layout.recompute_system_energy();
+        charge_layout.update_local_internal_potential();
+        charge_layout.recompute_electrostatic_potential_energy();
         CHECK_THAT(charge_layout.get_electrostatic_potential_energy(),
                    Catch::Matchers::WithinAbs(0.0, constants::ERROR_MARGIN));
 
         // system energy is zero when all SiDBs are positively charged.
         charge_layout.assign_all_charge_states(sidb_charge_state::POSITIVE);
-        charge_layout.update_local_potential();
-        charge_layout.recompute_system_energy();
+        charge_layout.update_local_internal_potential();
+        charge_layout.recompute_electrostatic_potential_energy();
         CHECK(charge_layout.get_electrostatic_potential_energy() > 0.0);
     }
 
@@ -1623,8 +1623,8 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects, part two", 
         CHECK(charge_layout_five.get_charge_state({0, 2, 0}) == sidb_charge_state::NEGATIVE);
         CHECK(charge_layout_five.get_charge_state({4, 1, 1}) == sidb_charge_state::NEGATIVE);
 
-        charge_layout_five.update_local_potential();
-        charge_layout_five.recompute_system_energy();
+        charge_layout_five.update_local_internal_potential();
+        charge_layout_five.recompute_electrostatic_potential_energy();
         charge_layout_five.validity_check();
         CHECK(charge_layout_five.get_charge_index_and_base().first == 0);
 
@@ -1665,8 +1665,8 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects, part two", 
         charge_layout.assign_charge_state({0, 2, 1}, sidb_charge_state::NEGATIVE);
 
         // closely arranged SiDBs cannot be all negatively charged
-        charge_layout.update_local_potential();
-        charge_layout.recompute_system_energy();
+        charge_layout.update_local_internal_potential();
+        charge_layout.recompute_electrostatic_potential_energy();
         charge_layout.validity_check();
         CHECK(!charge_layout.is_physically_valid());
     }
@@ -1682,9 +1682,9 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects, part two", 
 
         charge_distribution_surface charge_layout_new{lyt_new, params, sidb_charge_state::NEUTRAL};
         charge_layout_new.assign_local_external_potential({{{0, 0, 1}, -0.5}});
-        REQUIRE(!charge_layout_new.get_local_external_potentials().empty());
-        CHECK(charge_layout_new.get_local_external_potentials().size() == 1);
-        CHECK(charge_layout_new.get_local_external_potentials().size() == 1);
+        REQUIRE(!charge_layout_new.get_local_external_potential_map().empty());
+        CHECK(charge_layout_new.get_local_external_potential_map().size() == 1);
+        CHECK(charge_layout_new.get_local_external_potential_map().size() == 1);
 
         REQUIRE(charge_layout_new.get_local_potential({0, 0, 1}).has_value());
         REQUIRE(charge_layout_new.get_local_potential({1, 3, 0}).has_value());
@@ -1744,9 +1744,9 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects, part two", 
         lyt.assign_cell_type({10, 5, 1}, TestType::cell_type::NORMAL);
 
         charge_distribution_surface charge_layout{lyt, params, sidb_charge_state::NEUTRAL};
-        CHECK(charge_layout.get_local_external_potentials().empty());
+        CHECK(charge_layout.get_local_external_potential_map().empty());
         charge_layout.assign_global_external_potential(-0.1);
-        CHECK(!charge_layout.get_local_external_potentials().empty());
+        CHECK(!charge_layout.get_local_external_potential_map().empty());
 
         REQUIRE(charge_layout.get_local_potential({0, 0, 1}).has_value());
         REQUIRE(charge_layout.get_local_potential({1, 3, 0}).has_value());
@@ -2289,22 +2289,22 @@ TEST_CASE("Tests for Si-111 lattice orientation", "[charge-distribution-surface]
         charge_layout.assign_charge_state({2, 0, 0}, sidb_charge_state::NEGATIVE);
 
         // system energy is zero when all SiDBs are positively charged.
-        charge_layout.update_local_potential();
-        charge_layout.recompute_system_energy();
+        charge_layout.update_local_internal_potential();
+        charge_layout.recompute_electrostatic_potential_energy();
         CHECK_THAT(charge_layout.get_electrostatic_potential_energy(),
                    Catch::Matchers::WithinAbs(0.14818, constants::ERROR_MARGIN));
 
         // system energy is zero when all SiDBs are neutrally charged.
         charge_layout.assign_all_charge_states(sidb_charge_state::NEUTRAL);
-        charge_layout.update_local_potential();
-        charge_layout.recompute_system_energy();
+        charge_layout.update_local_internal_potential();
+        charge_layout.recompute_electrostatic_potential_energy();
         CHECK_THAT(charge_layout.get_electrostatic_potential_energy(),
                    Catch::Matchers::WithinAbs(0.0, constants::ERROR_MARGIN));
 
         // system energy is zero when all SiDBs are positively charged.
         charge_layout.assign_all_charge_states(sidb_charge_state::POSITIVE);
-        charge_layout.update_local_potential();
-        charge_layout.recompute_system_energy();
+        charge_layout.update_local_internal_potential();
+        charge_layout.recompute_electrostatic_potential_energy();
         CHECK_THAT(charge_layout.get_electrostatic_potential_energy(),
                    Catch::Matchers::WithinAbs(0.14818, constants::ERROR_MARGIN));
     }

@@ -43,6 +43,12 @@ exhaustive_ground_state_simulation(const Lyt&                        lyt,
     sidb_simulation_result<Lyt> simulation_result{};
     simulation_result.algorithm_name        = "ExGS";
     simulation_result.simulation_parameters = params;
+
+    if (lyt.num_cells() == 0)
+    {
+        return simulation_result;
+    }
+
     mockturtle::stopwatch<>::duration time_counter{};
     {
         const mockturtle::stopwatch stop{time_counter};
