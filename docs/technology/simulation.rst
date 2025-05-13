@@ -45,6 +45,7 @@ distributions of the SiDBs. Charge distribution surfaces are returned by the SiD
         .. doxygenenum:: fiction::charge_index_recomputation
         .. doxygenenum:: fiction::charge_distribution_mode
         .. doxygenenum:: fiction::charge_index_mode
+        .. doxygenenum:: fiction::charge_transition_threshold_bounds
         .. doxygenclass:: fiction::charge_distribution_surface
            :members:
         .. doxygenclass:: fiction::charge_distribution_surface< Lyt, true >
