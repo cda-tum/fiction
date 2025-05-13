@@ -38,7 +38,7 @@ template <typename Lyt>
 
     for (uint64_t i = 0; i < lyt.num_cells(); ++i)
     {
-        if (-charge_lyt.get_local_internal_potential_by_index(i) >
+        if (-*charge_lyt.get_local_internal_potential_by_index(i) >
             charge_lyt.get_effective_charge_transition_thresholds(
                 i)[static_cast<std::size_t>(charge_transition_threshold_bounds::POSITIVE_LOWER_BOUND)])
         {
