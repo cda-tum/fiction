@@ -388,4 +388,3 @@ TEST_CASE("Benchmark ClusterComplete", "[benchmark]")
 //      (single-threaded)                       100              1               26.4334 s
 //                                              268.317 ms       267.88 ms       268.789 ms
 //                                              2.32011 ms       2.0288 ms       2.74071 ms
-
