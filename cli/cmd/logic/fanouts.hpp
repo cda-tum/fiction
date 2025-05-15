@@ -31,8 +31,8 @@ class fanouts_command : public command
         add_option("--degree,-d", ps.degree, "Maximum number of outputs a fan-out node can have", true)
             ->set_type_name("{2, 3}");
         add_option("--strategy,-s", ps.strategy,
-                   "Chain fan-outs in a balanced tree (breadth) or a DFS tree (depth) fashion", true)
-            ->set_type_name("{breadth=0, depth=1}");
+                   "Chain fan-outs in a balanced tree (breadth), a DFS tree (depth), or a random fashion", true)
+            ->set_type_name("{breadth=0, depth=1, random=2}");
         add_option("--threshold,-t", ps.threshold,
                    "Maximum number of outputs any gate can have before substitution applies", true);
     }

@@ -17,7 +17,9 @@
 #include <cmath>
 #include <deque>
 #include <functional>
+#include <optional>
 #include <queue>
+#include <random>
 #include <utility>
 #include <vector>
 
@@ -45,7 +47,11 @@ struct fanout_substitution_params
         /**
          * Depth-first substitution. Creates fanout trees with one deep branch.
          */
-        DEPTH
+        DEPTH,
+        /**
+         * Random substitution. Inserts buffers at random positions in the fanout tree.
+         */
+        RANDOM
     };
 
     /**
@@ -60,6 +66,10 @@ struct fanout_substitution_params
      * Maximum number of outputs any gate is allowed to have before substitution applies.
      */
     uint32_t threshold = 1ul;
+    /**
+     * Seed used for random substitution, generated randomly if not specified.
+     */
+    std::optional<uint32_t> seed = std::nullopt;
 };
 
 namespace detail
@@ -202,6 +212,53 @@ class fanout_substitution_impl
                 {
                     q.push(child);
                 }
+            }
+            available_fanouts[n] = q;
+        }
+        else if (ps.strategy == fanout_substitution_params::substitution_strategy::RANDOM)
+        {
+            // maintain a vector of available fanout nodes and randomly select one
+            std::vector<mockturtle::signal<NtkDest>> available_vec{child};
+
+            // initialize random generator (using random_device or the specified seed for seeding)
+            std::random_device rd;
+            const auto         seed = ps.seed.value_or(rd());
+
+            std::mt19937 gen(seed);
+
+            std::uniform_int_distribution<std::size_t> dist(0, available_vec.size() - 1);
+
+            for (auto f = 0u; f < num_fanouts; ++f)
+            {
+                // get a random index
+                const auto index    = dist(gen);
+                const auto selected = available_vec[index];
+
+                // remove the selected element using swap-and-pop
+                available_vec[index] = available_vec.back();
+                available_vec.pop_back();
+
+                auto new_buf = substituted.create_buf(selected);
+
+                // add 'ps.degree' copies of the new buffer into available_vec
+                for (auto i = 0u; i < ps.degree; ++i)
+                {
+                    available_vec.push_back(new_buf);
+                }
+                child = new_buf;
+
+                // update the distribution range if available_vec size has changed
+                if (!available_vec.empty())
+                {
+                    dist.param(
+                        typename std::uniform_int_distribution<std::size_t>::param_type(0, available_vec.size() - 1));
+                }
+            }
+            // transfer the available nodes to a queue for later use in get_fanout.
+            std::queue<mockturtle::signal<NtkDest>> q;
+            for (auto const& sig : available_vec)
+            {
+                q.push(sig);
             }
             available_fanouts[n] = q;
         }
