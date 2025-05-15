@@ -26,6 +26,7 @@
 #include <mockturtle/views/fanout_view.hpp>
 #include <mockturtle/views/immutable_view.hpp>
 
+#include <algorithm>
 #include <array>
 #include <atomic>
 #include <cassert>
@@ -39,6 +40,7 @@
 #include <mutex>
 #include <optional>
 #include <queue>
+#include <random>
 #include <stdexcept>
 #include <string>
 #include <tuple>
@@ -77,10 +79,18 @@ struct graph_oriented_layout_design_params
          * HIGHEST_EFFORT mode builds upon HIGH_EFFORT by duplicating the 12 search space graphs for different cost
          * objectives. If the cost objective involves layout area, number of crossings, number of wire segments, or a
          * combination of area and crossings, a total of 48 search space graphs are generated. For a custom cost
-         * objective, an additional 12 graphs are created, resulting in 60 graphs in total. This mode provides the best
-         * guarantee of finding optimal solutions but significantly increases runtime.
+         * objective, an additional 12 graphs are created, resulting in 60 graphs in total.
          */
-        HIGHEST_EFFORT
+        HIGHEST_EFFORT,
+        /**
+         * MAXIMUM_EFFORT mode builds upon HIGHEST_EFFORT by duplicating the 48 (60) search space graphs using
+         * randomized fanout substitution strategies and topological orders. If the cost objective involves layout area,
+         * number of crossings, number of wire segments, or a combination of area and crossings, a total of 96 search
+         * space graphs are generated. For a custom cost objective, an additional 12 graphs are created, resulting in
+         * 120 graphs in total. This mode provides the best guarantee of finding optimal solutions but significantly
+         * increases runtime.
+         */
+        MAXIMUM_EFFORT
     };
     /**
      * The effort mode used. Defaults to HIGH_EFFORT.
@@ -384,237 +394,201 @@ struct search_space_graph
  * @brief Custom view class derived from mockturtle::topo_view.
  *
  * This class inherits from mockturtle::topo_view and overrides certain functions
- * to provide custom behavior. The topological order is generated from COs to CIs.
+ * to provide custom behavior.
  */
-template <typename Ntk>
-class topo_view_co_to_ci : public mockturtle::immutable_view<Ntk>
+template <typename Ntk, bool CiToCo = false, bool Randomize = false>
+class topo_view : public mockturtle::immutable_view<Ntk>
 {
   public:
     using node   = typename Ntk::node;
     using signal = typename Ntk::signal;
 
-    /*! \brief Default constructor.
-     *
-     * Constructs topological view on another network.
-     */
-    explicit topo_view_co_to_ci(const Ntk& ntk) : mockturtle::immutable_view<Ntk>(ntk)
+    explicit topo_view(Ntk const& ntk) : mockturtle::immutable_view<Ntk>(ntk), rng(12345)
     {
         update_topo();
     }
-    /*! \brief Reimplementation of `size`. */
-    [[nodiscard]] auto size() const
+
+    [[nodiscard]] uint32_t size() const
     {
-        return static_cast<uint32_t>(topo_order.size());
+        return uint32_t(topo_order.size());
     }
-    /*! \brief Reimplementation of `num_gates`. */
-    [[nodiscard]] auto num_gates() const
+
+    [[nodiscard]] uint32_t num_gates() const
     {
-        uint32_t const offset = 1u + this->num_pis() +
-                                (this->get_node(this->get_constant(true)) != this->get_node(this->get_constant(false)));
-        return static_cast<uint32_t>(topo_order.size() - offset);
+        return size() - offset();
     }
-    /*! \brief Reimplementation of `node_to_index`. */
-    [[nodiscard]] uint32_t node_to_index(const node& n) const
+
+    [[nodiscard]] uint32_t node_to_index(node const& n) const
     {
-        return std::distance(std::cbegin(topo_order), std::find(std::cbegin(topo_order), std::cend(topo_order), n));
+        auto it = std::find(topo_order.begin(), topo_order.end(), n);
+        return uint32_t(std::distance(topo_order.begin(), it));
     }
-    /*! \brief Reimplementation of `index_to_node`. */
-    [[nodiscard]] node index_to_node(const uint32_t index) const
+
+    [[nodiscard]] node index_to_node(uint32_t idx) const
     {
-        return topo_order.at(index);
+        return topo_order.at(idx);
     }
-    /*! \brief Reimplementation of `foreach_node`. */
+
     template <typename Fn>
     void foreach_node(Fn&& fn) const
     {
         mockturtle::detail::foreach_element(topo_order.cbegin(), topo_order.cend(), std::forward<Fn>(fn));
     }
-    /*! \brief Reimplementation of `foreach_gate`. */
+
     template <typename Fn>
     void foreach_gate(Fn&& fn) const
     {
-        const uint32_t offset = 1u + this->num_pis() +
-                                (this->get_node(this->get_constant(true)) != this->get_node(this->get_constant(false)));
-        mockturtle::detail::foreach_element(topo_order.cbegin() + offset, topo_order.cend(), std::forward<Fn>(fn));
+        mockturtle::detail::foreach_element(topo_order.cbegin() + offset(), topo_order.cend(), std::forward<Fn>(fn));
     }
-    /*! \brief Implementation of `foreach_gate` in reverse topological order. */
+
     template <typename Fn>
     void foreach_gate_reverse(Fn&& fn) const
     {
-        const uint32_t offset = 1u + this->num_pis() +
-                                (this->get_node(this->get_constant(true)) != this->get_node(this->get_constant(false)));
-        mockturtle::detail::foreach_element(topo_order.crbegin(), topo_order.crend() - offset, std::forward<Fn>(fn));
+        mockturtle::detail::foreach_element(topo_order.crbegin(), topo_order.crend() - offset(), std::forward<Fn>(fn));
     }
+
+  private:
     void update_topo()
     {
         this->incr_trav_id();
         this->incr_trav_id();
-        topo_order.reserve(this->size());
+        topo_order.clear();
+        topo_order.reserve(this->mockturtle::immutable_view<Ntk>::size());
 
-        /* constants and PIs */
-        const auto c0 = this->get_node(this->get_constant(false));
+        // constants and PIs in fixed order
+        auto const c0 = this->get_node(this->get_constant(false));
         topo_order.push_back(c0);
         this->set_visited(c0, this->trav_id());
 
-        if (const auto c1 = this->get_node(this->get_constant(true)); this->visited(c1) != this->trav_id())
+        if (auto const c1 = this->get_node(this->get_constant(true)); this->visited(c1) != this->trav_id())
         {
             topo_order.push_back(c1);
             this->set_visited(c1, this->trav_id());
         }
 
-        Ntk::foreach_co([this](auto f) { create_topo_rec(this->get_node(f)); });
+        // collect starting points (COs or CIs)
+        if constexpr (!CiToCo)
+        {
+            std::vector<signal> starts;
+            Ntk::foreach_co([&](auto f) { starts.push_back(f); });
+            if constexpr (Randomize)
+            {
+                std::shuffle(starts.begin(), starts.end(), rng);
+            }
+            for (auto const& f : starts)
+            {
+                create_topo_rec(this->get_node(f));
+            }
+        }
+        else
+        {
+            std::vector<node> starts;
+            Ntk::foreach_ci([&](auto const& n) { starts.push_back(n); });
+            if constexpr (Randomize)
+            {
+                std::shuffle(starts.begin(), starts.end(), rng);
+            }
+            for (auto const& n : starts)
+            {
+                create_topo_rec(n);
+            }
+        }
     }
 
-  private:
     void create_topo_rec(node const& n)
     {
-        /* is permanently marked? */
-        if (this->visited(n) == this->trav_id())
+        if constexpr (!CiToCo)
         {
-            return;
+            // CO→CI DFS (post-order)
+            if (this->visited(n) == this->trav_id())
+            {
+                return;
+            }
+            assert(this->visited(n) != this->trav_id() - 1);  // no cycles
+            // temporary mark
+            this->set_visited(n, this->trav_id() - 1);
+
+            // visit children (fanins), maybe shuffled
+            if constexpr (Randomize)
+            {
+                std::vector<signal> fanins;
+                this->foreach_fanin(n, [&](signal const& f) { fanins.push_back(f); });
+                std::shuffle(fanins.begin(), fanins.end(), rng);
+                for (auto const& f : fanins)
+                {
+                    create_topo_rec(this->get_node(f));
+                }
+            }
+            else
+            {
+                this->foreach_fanin(n, [&](signal const& f) { create_topo_rec(this->get_node(f)); });
+            }
+
+            // permanent mark and append
+            this->set_visited(n, this->trav_id());
+            topo_order.push_back(n);
         }
-
-        /* ensure that the node is not temporarily marked */
-        assert(this->visited(n) != this->trav_id() - 1);
-
-        /* mark node temporarily */
-        this->set_visited(n, this->trav_id() - 1);
-
-        /* mark children */
-        this->foreach_fanin(n, [this](signal const& f) { create_topo_rec(this->get_node(f)); });
-
-        /* mark node n permanently */
-        this->set_visited(n, this->trav_id());
-
-        /* visit node */
-        topo_order.push_back(n);
-    }
-
-    std::vector<node> topo_order;
-};
-/**
- * @brief Custom view class derived from mockturtle::topo_view.
- *
- * This class inherits from mockturtle::topo_view and overrides certain functions
- * to provide custom behavior. The topological order is generated from CIs to COs.
- */
-template <typename Ntk>
-class topo_view_ci_to_co : public mockturtle::immutable_view<Ntk>
-{
-  public:
-    // use the base class constructor
-    using node   = typename Ntk::node;
-    using signal = typename Ntk::signal;
-    /*! \brief Default constructor.
-     *
-     * Constructs topological view on another network.
-     */
-    explicit topo_view_ci_to_co(const Ntk& ntk) : mockturtle::immutable_view<Ntk>(ntk)
-    {
-        update_topo();
-    }
-    /*! \brief Reimplementation of `size`. */
-    [[nodiscard]] auto size() const
-    {
-        return static_cast<uint32_t>(topo_order.size());
-    }
-    /*! \brief Reimplementation of `num_gates`. */
-    [[nodiscard]] auto num_gates() const
-    {
-        const uint32_t offset = 1u + this->num_pis() +
-                                (this->get_node(this->get_constant(true)) != this->get_node(this->get_constant(false)));
-        return static_cast<uint32_t>(topo_order.size() - offset);
-    }
-    /*! \brief Reimplementation of `node_to_index`. */
-    [[nodiscard]] uint32_t node_to_index(const node& n) const
-    {
-        return std::distance(std::cbegin(topo_order), std::find(std::cbegin(topo_order), std::cend(topo_order), n));
-    }
-    /*! \brief Reimplementation of `index_to_node`. */
-    [[nodiscard]] node index_to_node(const uint32_t index) const
-    {
-        return topo_order.at(index);
-    }
-    /*! \brief Reimplementation of `foreach_node`. */
-    template <typename Fn>
-    void foreach_node(Fn&& fn) const
-    {
-        mockturtle::detail::foreach_element(topo_order.cbegin(), topo_order.cend(), std::forward<Fn>(fn));
-    }
-    /*! \brief Reimplementation of `foreach_gate`. */
-    template <typename Fn>
-    void foreach_gate(Fn&& fn) const
-    {
-        const uint32_t offset = 1u + this->num_pis() +
-                                (this->get_node(this->get_constant(true)) != this->get_node(this->get_constant(false)));
-        mockturtle::detail::foreach_element(topo_order.cbegin() + offset, topo_order.cend(), std::forward<Fn>(fn));
-    }
-    /*! \brief Implementation of `foreach_gate` in reverse topological order. */
-    template <typename Fn>
-    void foreach_gate_reverse(Fn&& fn) const
-    {
-        const uint32_t offset = 1u + this->num_pis() +
-                                (this->get_node(this->get_constant(true)) != this->get_node(this->get_constant(false)));
-        mockturtle::detail::foreach_element(topo_order.crbegin(), topo_order.crend() - offset, std::forward<Fn>(fn));
-    }
-
-    void update_topo()
-    {
-        this->incr_trav_id();
-        this->incr_trav_id();
-        topo_order.reserve(this->size());
-
-        /* constants and PIs */
-        const auto c0 = this->get_node(this->get_constant(false));
-        topo_order.push_back(c0);
-        this->set_visited(c0, this->trav_id());
-
-        if (const auto c1 = this->get_node(this->get_constant(true)); this->visited(c1) != this->trav_id())
+        else
         {
-            topo_order.push_back(c1);
-            this->set_visited(c1, this->trav_id());
-        }
-
-        Ntk::foreach_ci([this](const auto& n) { create_topo_rec(n); });
-    }
-
-  private:
-    void create_topo_rec(const node& n)
-    {
-        /* is permanently marked? */
-        if (this->visited(n) == this->trav_id())
-        {
-            return;
-        }
-
-        bool not_visited = false;
-
-        this->foreach_fanin(n,
-                            [this, &not_visited](const signal& f)
-                            {
-                                if (this->visited(this->get_node(f)) != this->trav_id())
+            // CI→CO readiness-based
+            // skip until all fanins are done
+            bool not_ready = false;
+            this->foreach_fanin(n,
+                                [&](signal const& f)
                                 {
-                                    not_visited = true;
-                                }
-                            });
+                                    if (this->visited(this->get_node(f)) != this->trav_id())
+                                    {
+                                        not_ready = true;
+                                    }
+                                });
+            if (not_ready || this->visited(n) == this->trav_id())
+            {
+                return;
+            }
 
-        if (not_visited)
-        {
-            return;
+            // mark & emit
+            this->set_visited(n, this->trav_id());
+            topo_order.push_back(n);
+
+            // visit fanouts, maybe shuffled
+            if constexpr (Randomize)
+            {
+                std::vector<node> fanouts;
+                this->foreach_fanout(n, [&](node const& fo) { fanouts.push_back(fo); });
+                std::shuffle(fanouts.begin(), fanouts.end(), rng);
+                for (auto const& fo : fanouts)
+                {
+                    create_topo_rec(fo);
+                }
+            }
+            else
+            {
+                this->foreach_fanout(n, [&](node const& fo) { create_topo_rec(fo); });
+            }
         }
+    }
 
-        /* mark node n permanently */
-        this->set_visited(n, this->trav_id());
-
-        /* visit node */
-        topo_order.push_back(n);
-
-        /* mark children */
-        this->foreach_fanout(n, [this](const auto& fo) { create_topo_rec(fo); });
+    [[nodiscard]] uint32_t offset() const
+    {
+        // 1 constant + all PIs + maybe one more constant
+        return 1u + this->num_pis() +
+               (this->get_node(this->get_constant(true)) != this->get_node(this->get_constant(false)));
     }
 
     std::vector<node> topo_order;
+    std::mt19937      rng;
 };
+
+// convenient aliases for the four variants:
+template <typename Ntk>
+using topo_view_co_to_ci = topo_view<Ntk, false, false>;
+template <typename Ntk>
+using topo_view_ci_to_co = topo_view<Ntk, true, false>;
+template <typename Ntk>
+using topo_view_co_to_ci_random = topo_view<Ntk, false, true>;
+template <typename Ntk>
+using topo_view_ci_to_co_random = topo_view<Ntk, true, true>;
+
 /**
  * When checking for possible paths on a layout between two tiles SRC and DEST, one of them could also be the new tile
  * for the next gate to be placed and it therefore has to be checked if said tile is still empty
@@ -949,10 +923,21 @@ class graph_oriented_layout_design_impl
      */
     const uint64_t num_search_space_graphs_highest_effort = 4u * num_search_space_graphs_high_effort;
     /**
+     * In maximum-effort mode, 96 search space graphs are used.
+     * It adds another 48 search space graphs to the 48 search space graphs from highest-effort mode
+     * using randomized fanout substitution strategies and random topological orderings.
+     */
+    const uint64_t num_search_space_graphs_maximum_effort = 2u * num_search_space_graphs_highest_effort;
+    /**
      * In highest-effort mode with a custom cost function, 60 search space graphs are used (48 with the standard cost
      * objectives and 12 for the custom one).
      */
     const uint64_t num_search_space_graphs_highest_effort_custom = 5u * num_search_space_graphs_high_effort;
+    /**
+     * In maximum-effort mode with a custom cost function, 120 search space graphs are used (96 with the standard cost
+     * objectives and 24 for the custom one).
+     */
+    const uint64_t num_search_space_graphs_maximum_effort_custom = 2u * num_search_space_graphs_highest_effort_custom;
     /**
      * Determines the number of search space graphs to generate based on the selected effort mode and cost objective.
      *
@@ -964,6 +949,12 @@ class graph_oriented_layout_design_impl
     calculate_num_search_space_graphs(graph_oriented_layout_design_params::effort_mode    mode,
                                       graph_oriented_layout_design_params::cost_objective cost) noexcept
     {
+        if (mode == graph_oriented_layout_design_params::effort_mode::MAXIMUM_EFFORT)
+        {
+            return (cost == graph_oriented_layout_design_params::cost_objective::CUSTOM) ?
+                       num_search_space_graphs_maximum_effort_custom :
+                       num_search_space_graphs_maximum_effort;
+        }
         if (mode == graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT)
         {
             return (cost == graph_oriented_layout_design_params::cost_objective::CUSTOM) ?
@@ -1899,28 +1890,15 @@ class graph_oriented_layout_design_impl
      */
     void initialize_pis_cost_and_num_expansions() noexcept
     {
-        static constexpr std::array<pi_locations, 60> pi_locs = {
-            {pi_locations::TOP, pi_locations::LEFT, pi_locations::TOP_AND_LEFT,
-             pi_locations::TOP, pi_locations::LEFT, pi_locations::TOP_AND_LEFT,
-             pi_locations::TOP, pi_locations::LEFT, pi_locations::TOP_AND_LEFT,
-             pi_locations::TOP, pi_locations::LEFT, pi_locations::TOP_AND_LEFT,
-             pi_locations::TOP, pi_locations::LEFT, pi_locations::TOP_AND_LEFT,
-             pi_locations::TOP, pi_locations::LEFT, pi_locations::TOP_AND_LEFT,
-             pi_locations::TOP, pi_locations::LEFT, pi_locations::TOP_AND_LEFT,
-             pi_locations::TOP, pi_locations::LEFT, pi_locations::TOP_AND_LEFT,
-             pi_locations::TOP, pi_locations::LEFT, pi_locations::TOP_AND_LEFT,
-             pi_locations::TOP, pi_locations::LEFT, pi_locations::TOP_AND_LEFT,
-             pi_locations::TOP, pi_locations::LEFT, pi_locations::TOP_AND_LEFT,
-             pi_locations::TOP, pi_locations::LEFT, pi_locations::TOP_AND_LEFT}};
+        static constexpr std::array<pi_locations, 3> pattern{pi_locations::TOP, pi_locations::LEFT,
+                                                             pi_locations::TOP_AND_LEFT};
 
-        auto pi_loc_it = pi_locs.cbegin();
+        std::size_t idx = 0;  // index into the pattern
+
         for (auto& graph : ssg_vec)
         {
-            if (pi_loc_it != pi_locs.cend())
-            {
-                graph.pi_locs = *pi_loc_it;
-                ++pi_loc_it;
-            }
+            graph.pi_locs = pattern.at(idx++ % pattern.size());
+            ++idx;  // move to next pattern element
 
             graph.cost_so_far[graph.current_vertex] = 0;
             graph.num_expansions                    = ps.num_vertex_expansions;
@@ -1946,6 +1924,15 @@ class graph_oriented_layout_design_impl
 
             network.foreach_co([&nodes_to_place, &network](const auto& f)
                                { nodes_to_place.push_back(network.get_node(f)); });
+        };
+
+        // Set cost objectives based on effort mode and cost objective
+        auto set_costs = [&](uint64_t start_idx, uint64_t end_idx, auto cost_objective)
+        {
+            for (uint64_t i = start_idx; i < end_idx; ++i)
+            {
+                ssg_vec[i].cost = cost_objective;
+            }
         };
 
         // PIs can either be place at top, bottom, or top and bottom
@@ -1988,9 +1975,8 @@ class graph_oriented_layout_design_impl
             ssg_vec[i].cost           = ps.cost;
         }
 
-        // Further network and nodes initialization for HIGH or HIGHEST effort
-        if (ps.mode == graph_oriented_layout_design_params::effort_mode::HIGH_EFFORT ||
-            ps.mode == graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT)
+        // Further network and nodes initialization for HIGH, HIGHEST, and MAXIMUM effort
+        if (ps.mode != graph_oriented_layout_design_params::effort_mode::HIGH_EFFICIENCY)
         {
             params.strategy = fanout_substitution_params::substitution_strategy::DEPTH;
             mockturtle::fanout_view network_substituted_depth{fanout_substitution<tec_nt>(ntk, params)};
@@ -2014,7 +2000,7 @@ class graph_oriented_layout_design_impl
                                       nodes_to_place_breadth_ci_to_co, nodes_to_place_depth_co_to_ci,
                                       nodes_to_place_depth_ci_to_co);
 
-            if (ps.mode == graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT)
+            if (ps.mode != graph_oriented_layout_design_params::effort_mode::HIGH_EFFORT)
             {
                 for (uint64_t j = num_search_space_graphs_high_effort;
                      j <= (num_search_space_graphs_highest_effort - num_search_space_graphs_high_effort);
@@ -2033,16 +2019,61 @@ class graph_oriented_layout_design_impl
                                               nodes_to_place_breadth_co_to_ci, nodes_to_place_breadth_ci_to_co,
                                               nodes_to_place_depth_co_to_ci, nodes_to_place_depth_ci_to_co);
                 }
-            }
 
-            // Set cost objectives based on effort mode and cost objective
-            auto set_costs = [&](uint64_t start_idx, uint64_t end_idx, auto cost_objective)
-            {
-                for (uint64_t i = start_idx; i < end_idx; ++i)
+                if (ps.mode != graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT)
                 {
-                    ssg_vec[i].cost = cost_objective;
+                    params.strategy = fanout_substitution_params::substitution_strategy::RANDOM;
+                    params.seed     = 12345;
+                    mockturtle::fanout_view network_substituted_random{fanout_substitution<tec_nt>(ntk, params)};
+
+                    topo_view_co_to_ci_random network_breadth_co_to_ci_random{network_substituted_random};
+                    topo_view_ci_to_co_random network_breadth_ci_to_co_random{network_substituted_random};
+                    topo_view_co_to_ci_random network_depth_co_to_ci_random{network_substituted_random};
+                    topo_view_ci_to_co_random network_depth_ci_to_co_random{network_substituted_random};
+
+                    // prepare nodes to place for additional networks
+                    std::vector<mockturtle::node<decltype(network_breadth_co_to_ci_random)>>
+                        nodes_to_place_breadth_co_to_ci_random{};
+                    std::vector<mockturtle::node<decltype(network_breadth_ci_to_co_random)>>
+                        nodes_to_place_breadth_ci_to_co_random{};
+                    std::vector<mockturtle::node<decltype(network_depth_co_to_ci_random)>>
+                        nodes_to_place_depth_co_to_ci_random{};
+                    std::vector<mockturtle::node<decltype(network_depth_ci_to_co_random)>>
+                        nodes_to_place_depth_ci_to_co_random{};
+
+                    prepare_nodes_to_place(network_breadth_co_to_ci_random, nodes_to_place_breadth_co_to_ci_random);
+                    prepare_nodes_to_place(network_breadth_ci_to_co_random, nodes_to_place_breadth_ci_to_co_random);
+                    prepare_nodes_to_place(network_depth_co_to_ci_random, nodes_to_place_depth_co_to_ci_random);
+                    prepare_nodes_to_place(network_depth_ci_to_co_random, nodes_to_place_depth_ci_to_co_random);
+
+                    if (ps.cost != graph_oriented_layout_design_params::cost_objective::CUSTOM)
+                    {
+                        for (uint64_t j = num_search_space_graphs_highest_effort;
+                             j <= (num_search_space_graphs_maximum_effort - num_search_space_graphs_high_effort);
+                             j += num_search_space_graphs_high_effort)
+                        {
+                            assign_networks_and_nodes(
+                                j, network_breadth_co_to_ci_random, network_breadth_ci_to_co_random,
+                                network_depth_co_to_ci_random, network_depth_ci_to_co_random,
+                                nodes_to_place_breadth_co_to_ci_random, nodes_to_place_breadth_ci_to_co_random,
+                                nodes_to_place_depth_co_to_ci_random, nodes_to_place_depth_ci_to_co_random);
+                        }
+                    }
+                    else
+                    {
+                        for (uint64_t j = num_search_space_graphs_highest_effort_custom;
+                             j <= (num_search_space_graphs_maximum_effort_custom - num_search_space_graphs_high_effort);
+                             j += num_search_space_graphs_high_effort)
+                        {
+                            assign_networks_and_nodes(
+                                j, network_breadth_co_to_ci_random, network_breadth_ci_to_co_random,
+                                network_depth_co_to_ci_random, network_depth_ci_to_co_random,
+                                nodes_to_place_breadth_co_to_ci_random, nodes_to_place_breadth_ci_to_co_random,
+                                nodes_to_place_depth_co_to_ci_random, nodes_to_place_depth_ci_to_co_random);
+                        }
+                    }
                 }
-            };
+            }
 
             if (ps.mode == graph_oriented_layout_design_params::effort_mode::HIGH_EFFORT)
             {
@@ -2065,9 +2096,44 @@ class graph_oriented_layout_design_impl
                               graph_oriented_layout_design_params::cost_objective::CUSTOM);
                 }
             }
+            if (ps.mode == graph_oriented_layout_design_params::effort_mode::MAXIMUM_EFFORT)
+            {
+                if (ps.cost == graph_oriented_layout_design_params::cost_objective::CUSTOM)
+                {
+                    set_costs(num_search_space_graphs_highest_effort_custom,
+                              num_search_space_graphs_highest_effort_custom + num_search_space_graphs_high_effort,
+                              graph_oriented_layout_design_params::cost_objective::AREA);
+                    set_costs(num_search_space_graphs_highest_effort_custom + num_search_space_graphs_high_effort,
+                              num_search_space_graphs_highest_effort_custom + (2 * num_search_space_graphs_high_effort),
+                              graph_oriented_layout_design_params::cost_objective::WIRES);
+                    set_costs(num_search_space_graphs_highest_effort_custom + (2 * num_search_space_graphs_high_effort),
+                              num_search_space_graphs_highest_effort_custom + (3 * num_search_space_graphs_high_effort),
+                              graph_oriented_layout_design_params::cost_objective::CROSSINGS);
+                    set_costs(num_search_space_graphs_highest_effort_custom + (3 * num_search_space_graphs_high_effort),
+                              num_search_space_graphs_highest_effort_custom + (4 * num_search_space_graphs_high_effort),
+                              graph_oriented_layout_design_params::cost_objective::ACP);
+                    set_costs(num_search_space_graphs_highest_effort_custom + (4 * num_search_space_graphs_high_effort),
+                              num_search_space_graphs_maximum_effort_custom,
+                              graph_oriented_layout_design_params::cost_objective::CUSTOM);
+                }
+                else
+                {
+                    set_costs(num_search_space_graphs_highest_effort,
+                              num_search_space_graphs_highest_effort + num_search_space_graphs_high_effort,
+                              graph_oriented_layout_design_params::cost_objective::AREA);
+                    set_costs(num_search_space_graphs_highest_effort + num_search_space_graphs_high_effort,
+                              num_search_space_graphs_highest_effort + (2 * num_search_space_graphs_high_effort),
+                              graph_oriented_layout_design_params::cost_objective::WIRES);
+                    set_costs(num_search_space_graphs_highest_effort + (2 * num_search_space_graphs_high_effort),
+                              num_search_space_graphs_highest_effort + (3 * num_search_space_graphs_high_effort),
+                              graph_oriented_layout_design_params::cost_objective::CROSSINGS);
+                    set_costs(num_search_space_graphs_highest_effort + (3 * num_search_space_graphs_high_effort),
+                              num_search_space_graphs_maximum_effort,
+                              graph_oriented_layout_design_params::cost_objective::ACP);
+                }
+            }
         }
     }
-
     /**
      * Initialize the search space graphs.
      */
