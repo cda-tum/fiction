@@ -7900,6 +7900,17 @@ R"doc(In highest-effort mode with a custom cost function, 60 search space
 graphs are used (48 with the standard cost objectives and 12 for the
 custom one).)doc";
 
+static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_num_search_space_graphs_maximum_effort =
+R"doc(In maximum-effort mode, 96 search space graphs are used. It adds
+another 48 search space graphs to the 48 search space graphs from
+highest-effort mode using randomized fanout substitution strategies
+and random topological orderings.)doc";
+
+static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_num_search_space_graphs_maximum_effort_custom =
+R"doc(In maximum-effort mode with a custom cost function, 120 search space
+graphs are used (96 with the standard cost objectives and 24 for the
+custom one).)doc";
+
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_place_and_route =
 R"doc(Executes a single placement step in the layout for the given network
 node. It determines the type of the node, places it accordingly, and
@@ -10380,69 +10391,37 @@ Parameter ``cartesian_layout_height``:
 Returns:
     corresponding tile on the hexagonal grid.)doc";
 
-static const char *__doc_fiction_detail_topo_view_ci_to_co =
+static const char *__doc_fiction_detail_topo_view =
 R"doc(Custom view class derived from mockturtle::topo_view.
 
 This class inherits from mockturtle::topo_view and overrides certain
-functions to provide custom behavior. The topological order is
-generated from CIs to COs.)doc";
+functions to provide custom behavior.)doc";
 
-static const char *__doc_fiction_detail_topo_view_ci_to_co_create_topo_rec = R"doc()doc";
+static const char *__doc_fiction_detail_topo_view_create_topo_rec = R"doc()doc";
 
-static const char *__doc_fiction_detail_topo_view_ci_to_co_foreach_gate = R"doc(! Reimplementation of `foreach_gate`. */)doc";
+static const char *__doc_fiction_detail_topo_view_foreach_gate = R"doc()doc";
 
-static const char *__doc_fiction_detail_topo_view_ci_to_co_foreach_gate_reverse = R"doc(! Implementation of `foreach_gate` in reverse topological order. */)doc";
+static const char *__doc_fiction_detail_topo_view_foreach_gate_reverse = R"doc()doc";
 
-static const char *__doc_fiction_detail_topo_view_ci_to_co_foreach_node = R"doc(! Reimplementation of `foreach_node`. */)doc";
+static const char *__doc_fiction_detail_topo_view_foreach_node = R"doc()doc";
 
-static const char *__doc_fiction_detail_topo_view_ci_to_co_index_to_node = R"doc(! Reimplementation of `index_to_node`. */)doc";
+static const char *__doc_fiction_detail_topo_view_index_to_node = R"doc()doc";
 
-static const char *__doc_fiction_detail_topo_view_ci_to_co_node_to_index = R"doc(! Reimplementation of `node_to_index`. */)doc";
+static const char *__doc_fiction_detail_topo_view_node_to_index = R"doc()doc";
 
-static const char *__doc_fiction_detail_topo_view_ci_to_co_num_gates = R"doc(! Reimplementation of `num_gates`. */)doc";
+static const char *__doc_fiction_detail_topo_view_num_gates = R"doc()doc";
 
-static const char *__doc_fiction_detail_topo_view_ci_to_co_size = R"doc(! Reimplementation of `size`. */)doc";
+static const char *__doc_fiction_detail_topo_view_offset = R"doc()doc";
 
-static const char *__doc_fiction_detail_topo_view_ci_to_co_topo_order = R"doc()doc";
+static const char *__doc_fiction_detail_topo_view_rng = R"doc()doc";
 
-static const char *__doc_fiction_detail_topo_view_ci_to_co_topo_view_ci_to_co =
-R"doc(! Default constructor.
+static const char *__doc_fiction_detail_topo_view_size = R"doc()doc";
 
-Constructs topological view on another network.)doc";
+static const char *__doc_fiction_detail_topo_view_topo_order = R"doc()doc";
 
-static const char *__doc_fiction_detail_topo_view_ci_to_co_update_topo = R"doc()doc";
+static const char *__doc_fiction_detail_topo_view_topo_view = R"doc()doc";
 
-static const char *__doc_fiction_detail_topo_view_co_to_ci =
-R"doc(Custom view class derived from mockturtle::topo_view.
-
-This class inherits from mockturtle::topo_view and overrides certain
-functions to provide custom behavior. The topological order is
-generated from COs to CIs.)doc";
-
-static const char *__doc_fiction_detail_topo_view_co_to_ci_create_topo_rec = R"doc()doc";
-
-static const char *__doc_fiction_detail_topo_view_co_to_ci_foreach_gate = R"doc(! Reimplementation of `foreach_gate`. */)doc";
-
-static const char *__doc_fiction_detail_topo_view_co_to_ci_foreach_gate_reverse = R"doc(! Implementation of `foreach_gate` in reverse topological order. */)doc";
-
-static const char *__doc_fiction_detail_topo_view_co_to_ci_foreach_node = R"doc(! Reimplementation of `foreach_node`. */)doc";
-
-static const char *__doc_fiction_detail_topo_view_co_to_ci_index_to_node = R"doc(! Reimplementation of `index_to_node`. */)doc";
-
-static const char *__doc_fiction_detail_topo_view_co_to_ci_node_to_index = R"doc(! Reimplementation of `node_to_index`. */)doc";
-
-static const char *__doc_fiction_detail_topo_view_co_to_ci_num_gates = R"doc(! Reimplementation of `num_gates`. */)doc";
-
-static const char *__doc_fiction_detail_topo_view_co_to_ci_size = R"doc(! Reimplementation of `size`. */)doc";
-
-static const char *__doc_fiction_detail_topo_view_co_to_ci_topo_order = R"doc()doc";
-
-static const char *__doc_fiction_detail_topo_view_co_to_ci_topo_view_co_to_ci =
-R"doc(! Default constructor.
-
-Constructs topological view on another network.)doc";
-
-static const char *__doc_fiction_detail_topo_view_co_to_ci_update_topo = R"doc()doc";
+static const char *__doc_fiction_detail_topo_view_update_topo = R"doc()doc";
 
 static const char *__doc_fiction_detail_update_to_delete_list =
 R"doc(Update the to-delete list based on a possible path in a
@@ -14105,9 +14084,7 @@ search space graphs for different cost objectives. If the cost
 objective involves layout area, number of crossings, number of wire
 segments, or a combination of area and crossings, a total of 48 search
 space graphs are generated. For a custom cost objective, an additional
-12 graphs are created, resulting in 60 graphs in total. This mode
-provides the best guarantee of finding optimal solutions but
-significantly increases runtime.)doc";
+12 graphs are created, resulting in 60 graphs in total.)doc";
 
 static const char *__doc_fiction_graph_oriented_layout_design_params_effort_mode_HIGH_EFFICIENCY =
 R"doc(HIGH_EFFICIENCY mode generates 2 search space graphs. This option
@@ -14119,6 +14096,17 @@ substitution strategies, PI placements, and other parameters. This
 wider exploration increases the chance of finding optimal layouts but
 also extends runtime. When a solution is found in any graph, its cost
 is used to prune the remaining graphs.)doc";
+
+static const char *__doc_fiction_graph_oriented_layout_design_params_effort_mode_MAXIMUM_EFFORT =
+R"doc(MAXIMUM_EFFORT mode builds upon HIGHEST_EFFORT by duplicating the 48
+(60) search space graphs using randomized fanout substitution
+strategies and topological orders. If the cost objective involves
+layout area, number of crossings, number of wire segments, or a
+combination of area and crossings, a total of 96 search space graphs
+are generated. For a custom cost objective, an additional 12 graphs
+are created, resulting in 120 graphs in total. This mode provides the
+best guarantee of finding optimal solutions but significantly
+increases runtime.)doc";
 
 static const char *__doc_fiction_graph_oriented_layout_design_params_enable_multithreading =
 R"doc(BETA feature: Flag to enable or disable multithreading during the
