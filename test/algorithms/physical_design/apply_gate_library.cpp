@@ -5,12 +5,15 @@
 #include <catch2/catch_assertion_result.hpp>
 #include <catch2/catch_test_macros.hpp>
 
+#include "utils/blueprints/layout_blueprints.hpp"
+
 #include <fiction/algorithms/physical_design/apply_gate_library.hpp>
 #include <fiction/algorithms/physical_design/design_sidb_gates.hpp>
 #include <fiction/algorithms/simulation/sidb/is_operational.hpp>
 #include <fiction/io/read_sqd_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/technology/qca_one_library.hpp>
 #include <fiction/technology/sidb_bestagon_library.hpp>
 #include <fiction/technology/sidb_defect_surface.hpp>
 #include <fiction/technology/sidb_defects.hpp>
@@ -560,5 +563,32 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
                 xnor_layout,
                 fmt::format("{}/resources/sidb_on_the_fly_gate_library/multi_tile_layout/XNOR.sqd", TEST_PATH));
         }
+    }
+}
+
+TEST_CASE("Applying the QCA ONE gate library", "[apply-gate-library]")
+{
+    using GateLyt = cart_even_row_gate_clk_lyt;
+
+    SECTION("Without crossings")
+    {
+        const auto gate_lyt = blueprints::straight_wire_gate_layout<GateLyt>();
+
+        const auto layout = apply_gate_library<qca_cell_clk_lyt, qca_one_library, GateLyt>(gate_lyt);
+
+        CHECK(layout.x() == 16);
+        CHECK(layout.y() == 14);
+        CHECK(layout.z() == 0);
+    }
+
+    SECTION("With crossings")
+    {
+        const auto gate_lyt = blueprints::optimization_layout_corner_case_outputs_2<GateLyt>();
+
+        const auto layout = apply_gate_library<stacked_qca_cell_clk_lyt, qca_one_library, GateLyt>(gate_lyt);
+
+        CHECK(layout.x() == 21);
+        CHECK(layout.y() == 14);
+        CHECK(layout.z() == 1);
     }
 }

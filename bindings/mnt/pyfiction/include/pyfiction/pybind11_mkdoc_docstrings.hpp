@@ -5142,6 +5142,33 @@ population stability check. In the latter case, the configuration
 stability check is performed before the associated charge distribution
 is added to the simulation results.
 
+Parameter ``clustering_state``:
+    A clustering state that holds a specific combination of multiset
+    charge configurations as projector states of which the
+    respectively associated clusters form a clustering in the cluster
+    hierarchy.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_add_physically_valid_charge_configurations_2 =
+R"doc(This recursive function is the heart of the *ClusterComplete*
+destruction. The given clustering state is dissected at the largest
+cluster to each possible specialization of it, which then enters the
+recursive call with the clustering state modified to have a set of
+sibling children replacing their direct parent. For each
+specialization, appropriate updates are made to the potential bounds
+store that is part of the clustering state. After a specialization has
+been handled completely, i.e., when the recursive call for this
+specialization returns, the specialization to the potential bounds
+store is undone so that a new specialization may be applied.
+
+The two base cases to the recursion are as follows: (1) the charge
+distributions implied by the given clustering state do not meet the
+population stability, meaning that this branch of the search space may
+be pruned through terminating the recursion at this level, and, (2)
+the clustering state hold only singleton clusters and passes the
+population stability check. In the latter case, the configuration
+stability check is performed before the associated charge distribution
+is added to the simulation results.
+
 Parameter ``w``:
     The worker running on the current thread. It has a clustering
     state that holds a specific combination of multiset charge
@@ -5173,6 +5200,18 @@ Parameter ``lyt``:
 Parameter ``params``:
     Parameter required for both the invocation of *Ground State
     Space*, and the simulation following.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_collect_physically_valid_charge_distributions_single_threaded =
+R"doc(After the *Ground State Space* construction was completed and the top
+cluster was returned, this function splits the charge space of the top
+cluster into sections for the individual threads to handle. Each are
+decomposed recursively to generate physically valid charge
+distributions that emerge from increasingly specializing multiset
+charge configurations.
+
+Parameter ``top_cluster``:
+    The top cluster that is returned by the *Ground State Space
+    construction; it contains the entire cluster hierarchy construct.)doc";
 
 static const char *__doc_fiction_detail_clustercomplete_impl_extract_work_from_top_cluster =
 R"doc(Work in the form of compositions of charge space elements of the top
@@ -14012,7 +14051,10 @@ Exclusively generates 2DDWave-clocked layouts.
 This algorithm was proposed in \"A* is Born: Efficient and Scalable
 Physical Design for Field-coupled Nanocomputing\" by S. Hofmann, M.
 Walter, and R. Wille in IEEE NANO 2024
-(https://ieeexplore.ieee.org/document/10628808).
+(https://ieeexplore.ieee.org/document/10628808) and extended in
+\"Physical Design for Field-coupled Nanocomputing with Discretionary
+Cost Objectives\" by S. Hofmann, M. Walter, and R. Wille in LASCAS
+2025 (https://ieeexplore.ieee.org/document/10966234).
 
 Template parameter ``Lyt``:
     Cartesian gate-level layout type.
@@ -18070,7 +18112,10 @@ static const char *__doc_fiction_post_layout_optimization =
 R"doc(A post-layout optimization algorithm as originally proposed in \"Post-
 Layout Optimization for Field-coupled Nanotechnologies\" by S.
 Hofmann, M. Walter, and R. Wille in NANOARCH 2023
-(https://dl.acm.org/doi/10.1145/3611315.3633247). It can be used to
+(https://dl.acm.org/doi/10.1145/3611315.3633247) and extended in
+\"Efficient and Scalable Post-Layout Optimization for Field-coupled
+Nanotechnologies\" by S. Hofmann, M. Walter, and R. Wille in TCAD 2025
+(https://ieeexplore.ieee.org/document/10916761). It can be used to
 reduce the area of a given sub-optimal Cartesian gate-level layout
 created by heuristics or machine learning. This optimization utilizes
 the distinct characteristics of the 2DDWave clocking scheme, which
