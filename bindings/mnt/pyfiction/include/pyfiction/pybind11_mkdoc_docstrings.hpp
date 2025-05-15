@@ -12214,6 +12214,10 @@ static const char *__doc_fiction_fanout_substitution_params = R"doc(Parameters f
 
 static const char *__doc_fiction_fanout_substitution_params_degree = R"doc(Maximum output degree of each fan-out node.)doc";
 
+static const char *__doc_fiction_fanout_substitution_params_seed =
+R"doc(Seed used for random substitution, generated randomly if not
+specified.)doc";
+
 static const char *__doc_fiction_fanout_substitution_params_strategy =
 R"doc(Substitution strategy of high-degree fanout networks (depth-first vs.
 breadth-first).)doc";
@@ -12223,6 +12227,10 @@ static const char *__doc_fiction_fanout_substitution_params_substitution_strateg
 static const char *__doc_fiction_fanout_substitution_params_substitution_strategy_BREADTH = R"doc(Breadth-first substitution. Creates balanced fanout trees.)doc";
 
 static const char *__doc_fiction_fanout_substitution_params_substitution_strategy_DEPTH = R"doc(Depth-first substitution. Creates fanout trees with one deep branch.)doc";
+
+static const char *__doc_fiction_fanout_substitution_params_substitution_strategy_RANDOM =
+R"doc(Random substitution. Inserts buffers at random positions in the fanout
+tree.)doc";
 
 static const char *__doc_fiction_fanout_substitution_params_threshold =
 R"doc(Maximum number of outputs any gate is allowed to have before
