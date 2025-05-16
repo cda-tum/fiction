@@ -15,6 +15,7 @@
 #include "fiction/traits.hpp"
 
 #include <algorithm>
+#include <array>
 #include <bitset>
 #include <cassert>
 #include <cmath>
@@ -234,7 +235,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
          *  - [2] for the lower bound check against mu_minus to validate DB0, and
          *  - [3] for the upper bound check against mu_plus to validate DB0.
          */
-        std::vector<std::array<double, 4>> charge_transition_threshold_bounds{};
+        std::vector<std::array<double, 4>> charge_transition_threshold_bounds;
         /**
          * All cells that are occupied by an SiDB are stored in order.
          */
@@ -459,7 +460,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @param ix The index defining the SiDB position.
      * @return The effective charge transition thresholds.
      */
-    std::array<double, 4> get_effective_charge_transition_thresholds(const uint64_t ix) const noexcept
+    [[nodiscard]] std::array<double, 4> get_effective_charge_transition_thresholds(const uint64_t ix) const noexcept
     {
         assert(ix < strg->sidb_order.size() && "SiDB index out of range");
         return strg->charge_transition_threshold_bounds[ix];
