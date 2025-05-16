@@ -136,12 +136,19 @@ TEST_CASE("Different parameters", "[graph-oriented-layout-design]")
     REQUIRE(layout4.has_value());
     check_eq(ntk, *layout4);
 
-    // Highest effort mode
+    // Maximum effort mode
     params.mode        = graph_oriented_layout_design_params::effort_mode::MAXIMUM_EFFORT;
     const auto layout5 = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
 
     REQUIRE(layout5.has_value());
     check_eq(ntk, *layout5);
+
+    // Maximum effort mode with random seed
+    params.seed             = 12345;
+    const auto layout5_seed = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
+
+    REQUIRE(layout5_seed.has_value());
+    check_eq(ntk, *layout5_seed);
 
     // Full search
     params.mode         = graph_oriented_layout_design_params::effort_mode::HIGH_EFFORT;
@@ -206,6 +213,7 @@ TEST_CASE("Multithreading", "[graph-oriented-layout-design]")
 
     // Maximum effort mode
     params.mode        = graph_oriented_layout_design_params::effort_mode::MAXIMUM_EFFORT;
+    params.seed        = 12345;
     const auto layout3 = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
 
     REQUIRE(layout3.has_value());
@@ -273,6 +281,16 @@ TEST_CASE("Custom cost objective", "[graph-oriented-layout-design]")
 
     REQUIRE(layout_high_effort.has_value());
     check_eq(ntk, *layout_high_effort);
+
+    // maximum effort mode
+    params.mode = graph_oriented_layout_design_params::effort_mode::MAXIMUM_EFFORT;
+    params.seed = 12345;
+
+    const auto layout_maximum_effort =
+        graph_oriented_layout_design<gate_layout>(ntk, params, &stats, custom_cost_objective);
+
+    REQUIRE(layout_maximum_effort.has_value());
+    check_eq(ntk, *layout_maximum_effort);
 }
 
 TEST_CASE("Name conservation after graph-oriented layout design", "[graph-oriented-layout-design]")

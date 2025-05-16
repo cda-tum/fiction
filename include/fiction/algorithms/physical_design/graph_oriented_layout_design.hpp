@@ -42,7 +42,6 @@
 #include <queue>
 #include <random>
 #include <stdexcept>
-#include <string>
 #include <tuple>
 #include <unordered_map>
 #include <utility>
@@ -171,6 +170,10 @@ struct graph_oriented_layout_design_params
      * Verbosity.
      */
     bool verbose = false;
+    /**
+     * Seed used for random fanout substitution and topological ordering, generated randomly if not specified.
+     */
+    std::optional<uint32_t> seed = std::nullopt;
 };
 /**
  * This struct stores statistics about the graph-oriented layout design process.
@@ -403,7 +406,9 @@ class topo_view : public mockturtle::immutable_view<Ntk>
     using node   = typename Ntk::node;
     using signal = typename Ntk::signal;
 
-    explicit topo_view(Ntk const& ntk) : mockturtle::immutable_view<Ntk>(ntk), rng(12345)
+    explicit topo_view(Ntk const& ntk, uint32_t const seed_val = 42) :
+            mockturtle::immutable_view<Ntk>(ntk),
+            rng(seed_val)
     {
         update_topo();
     }
@@ -660,7 +665,7 @@ class graph_oriented_layout_design_impl
             custom_cost_objective{custom},
             timeout{ps.timeout},
             start{std::chrono::high_resolution_clock::now()},
-            num_search_space_graphs{0}
+            seed{p.seed.value_or(std::random_device{}())}
     {
         ntk.substitute_po_signals();
     }
@@ -842,7 +847,7 @@ class graph_oriented_layout_design_impl
     /**
      * Number of search space graphs.
      */
-    uint64_t num_search_space_graphs;
+    uint64_t num_search_space_graphs{0};
     /**
      * Vector of search space graphs.
      */
@@ -938,6 +943,10 @@ class graph_oriented_layout_design_impl
      * objectives and 24 for the custom one).
      */
     const uint64_t num_search_space_graphs_maximum_effort_custom = 2u * num_search_space_graphs_highest_effort_custom;
+    /**
+     * Random seed used for random fanout substitution and topological ordering.
+     */
+    std::uint32_t seed;
     /**
      * Determines the number of search space graphs to generate based on the selected effort mode and cost objective.
      *
@@ -1961,7 +1970,8 @@ class graph_oriented_layout_design_impl
         params.strategy = fanout_substitution_params::substitution_strategy::BREADTH;
         mockturtle::fanout_view network_substituted_breadth{fanout_substitution<tec_nt>(ntk, params)};
 
-        topo_view_co_to_ci<decltype(network_substituted_breadth)> network_breadth_co_to_ci{network_substituted_breadth};
+        topo_view_co_to_ci<decltype(network_substituted_breadth)> network_breadth_co_to_ci{network_substituted_breadth,
+                                                                                           seed};
 
         // prepare initial nodes to place
         std::vector<mockturtle::node<decltype(network_breadth_co_to_ci)>> nodes_to_place_breadth_co_to_ci{};
@@ -1982,9 +1992,11 @@ class graph_oriented_layout_design_impl
             mockturtle::fanout_view network_substituted_depth{fanout_substitution<tec_nt>(ntk, params)};
 
             topo_view_ci_to_co<decltype(network_substituted_breadth)> network_breadth_ci_to_co{
-                network_substituted_breadth};
-            topo_view_co_to_ci<decltype(network_substituted_depth)> network_depth_co_to_ci{network_substituted_depth};
-            topo_view_ci_to_co<decltype(network_substituted_depth)> network_depth_ci_to_co{network_substituted_depth};
+                network_substituted_breadth, seed};
+            topo_view_co_to_ci<decltype(network_substituted_depth)> network_depth_co_to_ci{network_substituted_depth,
+                                                                                           seed};
+            topo_view_ci_to_co<decltype(network_substituted_depth)> network_depth_ci_to_co{network_substituted_depth,
+                                                                                           seed};
 
             // prepare nodes to place for additional networks
             std::vector<mockturtle::node<decltype(network_breadth_ci_to_co)>> nodes_to_place_breadth_ci_to_co{};
@@ -2024,17 +2036,17 @@ class graph_oriented_layout_design_impl
                 if (ps.mode != graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT)
                 {
                     params.strategy = fanout_substitution_params::substitution_strategy::RANDOM;
-                    params.seed     = 12345;
+                    params.seed     = seed;
                     mockturtle::fanout_view network_substituted_random{fanout_substitution<tec_nt>(ntk, params)};
 
                     topo_view_co_to_ci_random<decltype(network_substituted_random)> network_breadth_co_to_ci_random{
-                        network_substituted_random};
+                        network_substituted_random, seed};
                     topo_view_ci_to_co_random<decltype(network_substituted_random)> network_breadth_ci_to_co_random{
-                        network_substituted_random};
+                        network_substituted_random, seed};
                     topo_view_co_to_ci_random<decltype(network_substituted_random)> network_depth_co_to_ci_random{
-                        network_substituted_random};
+                        network_substituted_random, seed};
                     topo_view_ci_to_co_random<decltype(network_substituted_random)> network_depth_ci_to_co_random{
-                        network_substituted_random};
+                        network_substituted_random, seed};
 
                     // prepare nodes to place for additional networks
                     std::vector<mockturtle::node<decltype(network_breadth_co_to_ci_random)>>
