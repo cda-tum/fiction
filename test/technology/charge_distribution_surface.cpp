@@ -670,6 +670,29 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects", "[charge-d
         CHECK(charge_layout.get_electrostatic_potential_energy() > 0.0);
     }
 
+    SECTION("Physical validity check under different physical parameters")
+    {
+        TestType layout{};
+        layout.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
+        layout.assign_cell_type({0, 2, 0}, TestType::cell_type::NORMAL);
+        layout.assign_cell_type({4, 1, 1}, TestType::cell_type::NORMAL);
+
+        charge_distribution_surface charge_layout{layout, sidb_simulation_parameters{}};
+        CHECK(charge_layout.get_charge_state({0, 0, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_layout.get_charge_state({0, 2, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_layout.get_charge_state({4, 1, 1}) == sidb_charge_state::NEGATIVE);
+
+        CHECK(charge_layout.is_physically_valid());
+
+        charge_layout.assign_all_charge_states(sidb_charge_state::NEUTRAL);
+        charge_layout.update_after_charge_change();
+
+        CHECK(!charge_layout.is_physically_valid());
+
+        charge_layout.assign_physical_parameters(sidb_simulation_parameters{2, 0.0});
+        CHECK(charge_layout.is_physically_valid());
+    }
+
     SECTION("Physical validity check, far distance of SiDBs, all NEGATIVE")
     {
         TestType layout{};
