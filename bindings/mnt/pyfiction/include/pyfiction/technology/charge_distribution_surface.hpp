@@ -63,7 +63,8 @@ void charge_distribution_surface_layout(pybind11::module& m, const std::string& 
         .def("cell_to_index", &py_cds::cell_to_index, py::arg("c"))
         .def("assign_charge_state", &py_cds::assign_charge_state, py::arg("c"), py::arg("cs"),
              py::arg("index_mode") = fiction::charge_index_mode::UPDATE_CHARGE_INDEX)
-        .def("assign_all_charge_states", &py_cds::assign_all_charge_states, py::arg("cs"))
+        .def("assign_all_charge_states", &py_cds::assign_all_charge_states, py::arg("cs"),
+             py::arg("index_mode") = fiction::charge_index_mode::UPDATE_CHARGE_INDEX)
         .def("assign_dependent_cell", &py_cds::assign_dependent_cell, py::arg("dependent_cell"))
         .def("assign_base_number", &py_cds::assign_base_number, py::arg("base"))
         .def("add_sidb_defect_to_potential_landscape", &py_cds::add_sidb_defect_to_potential_landscape, py::arg("c"),
