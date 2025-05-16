@@ -109,11 +109,10 @@ TEMPLATE_TEST_CASE(
     CHECK(simulation_results.charge_distributions.front().get_charge_state_by_index(0) == sidb_charge_state::POSITIVE);
 }
 
-TEMPLATE_TEST_CASE(
-    "four SiDBs QuickExact simulation with one negatively charge defect (changed epsilon_r) in proximity",
-    "[quickexact]", (sidb_defect_surface<sidb_100_cell_clk_lyt_siqad>),
-    charge_distribution_surface<sidb_defect_surface<sidb_100_cell_clk_lyt_siqad>>,
-    sidb_defect_surface<charge_distribution_surface<sidb_100_cell_clk_lyt_siqad>>)
+TEMPLATE_TEST_CASE("four SiDBs QuickExact simulation with one negatively charge defect (changed mu_minus) in proximity",
+                   "[quickexact]", (sidb_defect_surface<sidb_100_cell_clk_lyt_siqad>),
+                   charge_distribution_surface<sidb_defect_surface<sidb_100_cell_clk_lyt_siqad>>,
+                   sidb_defect_surface<charge_distribution_surface<sidb_100_cell_clk_lyt_siqad>>)
 {
     TestType lyt{};
     lyt.assign_cell_type({-2, 0, 1}, TestType::cell_type::NORMAL);
@@ -2038,7 +2037,8 @@ TEMPLATE_TEST_CASE("Special test cases", "[quickexact]", sidb_100_cell_clk_lyt_s
     //                                           0});
     //
     //     std::sort(qe_res.charge_distributions.begin(), qe_res.charge_distributions.end(),
-    //               [](const auto& lhs, const auto& rhs) { return lhs.get_system_energy() < rhs.get_system_energy();
+    //               [](const auto& lhs, const auto& rhs) { return lhs.get_electrostatic_potential_energy() <
+    //               rhs.get_electrostatic_potential_energy();
     //               });
     //
     //     CHECK(qe_res.charge_distributions.size() == 2);

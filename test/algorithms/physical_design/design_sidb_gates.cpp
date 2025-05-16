@@ -345,7 +345,7 @@ TEST_CASE("Use FO2 Bestagon gate without SiDB at {17, 11, 0} and generate origin
     SECTION("replace the output perturbers by equivalent negatively charged defects")
     {
         design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
-            is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT},
+            is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::CLUSTERCOMPLETE},
             design_sidb_gates_params<
                 cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
             {{17, 11, 0}, {17, 11, 0}},
@@ -416,7 +416,7 @@ TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
             {{18, 8, 1}, {22, 12, 0}},
             2};
 
-        defect_layout.assign_sidb_defect({17, 10, 0},
+        defect_layout.assign_sidb_defect({14, 10, 0},
                                          sidb_defect{sidb_defect_type::DB, -1,
                                                      params.operational_params.simulation_parameters.epsilon_r,
                                                      params.operational_params.simulation_parameters.lambda_tf});
