@@ -7320,7 +7320,11 @@ static const char *__doc_fiction_detail_fanout_substitution_impl = R"doc()doc";
 
 static const char *__doc_fiction_detail_fanout_substitution_impl_available_fanouts = R"doc()doc";
 
+static const char *__doc_fiction_detail_fanout_substitution_impl_dist = R"doc()doc";
+
 static const char *__doc_fiction_detail_fanout_substitution_impl_fanout_substitution_impl = R"doc()doc";
+
+static const char *__doc_fiction_detail_fanout_substitution_impl_gen = R"doc()doc";
 
 static const char *__doc_fiction_detail_fanout_substitution_impl_generate_fanout_tree = R"doc()doc";
 
