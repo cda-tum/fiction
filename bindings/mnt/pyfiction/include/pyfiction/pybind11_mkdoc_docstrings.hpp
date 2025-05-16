@@ -8032,6 +8032,10 @@ best found layout.
 Returns:
     The best layout found by the algorithm.)doc";
 
+static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_seed =
+R"doc(Random seed used for random fanout substitution and topological
+ordering.)doc";
+
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_ssg_vec = R"doc(Vector of search space graphs.)doc";
 
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_start = R"doc(Start time.)doc";
@@ -14195,6 +14199,10 @@ Defaults to false.)doc";
 static const char *__doc_fiction_graph_oriented_layout_design_params_return_first =
 R"doc(Return the first found layout, which might still have a high cost but
 can be found fast.)doc";
+
+static const char *__doc_fiction_graph_oriented_layout_design_params_seed =
+R"doc(Seed used for random fanout substitution and topological ordering,
+generated randomly if not specified.)doc";
 
 static const char *__doc_fiction_graph_oriented_layout_design_params_timeout = R"doc(Timeout limit (in ms).)doc";
 
