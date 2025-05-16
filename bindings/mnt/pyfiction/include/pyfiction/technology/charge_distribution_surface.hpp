@@ -52,138 +52,66 @@ void charge_distribution_surface_layout(pybind11::module& m, const std::string& 
         .def(py::init<const py_cds&>(), py::arg("lyt"))
 
         .def("determine_effective_charge_transition_thresholds",
-             [](py_cds& cds) { return cds.determine_effective_charge_transition_thresholds(); })
-        .def(
-            "get_effective_charge_transition_thresholds", [](py_cds& cds, uint64_t index)
-            { return cds.get_effective_charge_transition_thresholds(index); }, py::arg("index"))
-        .def("get_all_sidb_locations_in_nm", [](py_cds& cds) { return cds.get_all_sidb_locations_in_nm(); })
-        .def(
-            "assign_cell_type", [](py_cds& cds, fiction::cell<py_cds> c, typename py_cds::cell_type ct)
-            { return cds.assign_cell_type(c, ct); }, py::arg("c"), py::arg("ct"))
-        .def(
-            "assign_physical_parameters", [](py_cds& cds, fiction::sidb_simulation_parameters params)
-            { return cds.assign_physical_parameters(params); }, py::arg("params"))
-        .def("get_phys_params", [](py_cds& cds) { return cds.get_simulation_params(); })
-        .def(
-            "charge_exists", [](py_cds& cds, fiction::sidb_charge_state cs) { return cds.charge_exists(cs); },
-            py::arg("cs"))
-        .def(
-            "cell_to_index", [](py_cds& cds, fiction::cell<py_cds> c) { return cds.cell_to_index(c); }, py::arg("c"))
-        .def(
-            "assign_charge_state",
-            [](py_cds& cds, fiction::cell<py_cds> c, fiction::sidb_charge_state cs,
-               fiction::charge_index_mode index_mode) { return cds.assign_charge_state(c, cs, index_mode); },
-            py::arg("c"), py::arg("cs"), py::arg("index_mode") = fiction::charge_index_mode::UPDATE_CHARGE_INDEX)
-        .def(
-            "assign_all_charge_states",
-            [](py_cds& cds, fiction::sidb_charge_state cs) { return cds.assign_all_charge_states(cs); }, py::arg("cs"))
-        .def(
-            "assign_dependent_cell", [](py_cds& cds, fiction::cell<py_cds> dependent_cell)
-            { return cds.assign_dependent_cell(dependent_cell); }, py::arg("dependent_cell"))
-        .def(
-            "assign_base_number", [](py_cds& cds, uint8_t base) { return cds.assign_base_number(base); },
-            py::arg("base"))
-        .def(
-            "add_sidb_defect_to_potential_landscape",
-            [](py_cds& cds, fiction::cell<py_cds> c, fiction::sidb_defect defect)
-            { return cds.add_sidb_defect_to_potential_landscape(c, defect); }, py::arg("c"), py::arg("defect"))
-        .def(
-            "erase_defect", [](py_cds& cds, fiction::cell<py_cds> c) { return cds.erase_defect(c); }, py::arg("c"))
-
-        .def(
-            "assign_charge_state_by_index",
-            [](py_cds& cds, uint64_t index, fiction::sidb_charge_state cs, fiction::charge_index_mode index_mode)
-            { return cds.assign_charge_state_by_index(index, cs, index_mode); }, py::arg("index"), py::arg("cs"),
-            py::arg("index_mode") = fiction::charge_index_mode::UPDATE_CHARGE_INDEX)
-        .def(
-            "get_charge_state", [](py_cds& cds, fiction::cell<py_cds> c) { return cds.get_charge_state(c); },
-            py::arg("c"))
-        .def(
-            "get_charge_state_by_index",
-            [](py_cds& cds, uint64_t index) { return cds.get_charge_state_by_index(index); }, py::arg("index"))
-        .def("get_all_sidb_charges", [](py_cds& cds) { return cds.get_all_sidb_charges(); })
-
-        .def("negative_sidb_detection", [](py_cds& cds) { return cds.negative_sidb_detection(); })
-        .def(
-            "get_nm_distance_between_sidbs", [](py_cds& cds, fiction::cell<py_cds> c1, fiction::cell<py_cds> c2)
-            { return cds.get_nm_distance_between_sidbs(c1, c2); }, py::arg("c1"), py::arg("c2"))
-        .def(
-            "get_nm_distance_by_indices", [](py_cds& cds, uint64_t index1, uint64_t index2)
-            { return cds.get_nm_distance_by_indices(index1, index2); }, py::arg("index1"), py::arg("index2"))
-        .def(
-            "calculate_chargeless_potential_between_sidbs_by_index", [](py_cds& cds, uint64_t index1, uint64_t index2)
-            { return cds.calculate_chargeless_potential_between_sidbs_by_index(index1, index2); }, py::arg("index1"),
-            py::arg("index2"))
-        .def(
-            "calculate_chargeless_potential_between_sidbs",
-            [](py_cds& cds, fiction::cell<py_cds> c1, fiction::cell<py_cds> c2)
-            { return cds.calculate_chargeless_potential_between_sidbs(c1, c2); }, py::arg("c1"), py::arg("c2"))
-        .def(
-            "get_chargeless_potential_between_sidbs",
-            [](py_cds& cds, fiction::cell<py_cds> c1, fiction::cell<py_cds> c2)
-            { return cds.get_chargeless_potential_between_sidbs(c1, c2); }, py::arg("c1"), py::arg("c2"))
-        .def(
-            "get_chargeless_potential_by_indices", [](py_cds& cds, uint64_t index1, uint64_t index2)
-            { return cds.get_chargeless_potential_by_indices(index1, index2); }, py::arg("index1"), py::arg("index2"))
-        .def(
-            "get_potential_between_sidbs", [](py_cds& cds, fiction::cell<py_cds> c1, fiction::cell<py_cds> c2)
-            { return cds.get_potential_between_sidbs(c1, c2); }, py::arg("c1"), py::arg("c2"))
-        .def(
-            "update_local_internal_potential", [](py_cds& cds, fiction::charge_distribution_history history_mode)
-            { return cds.update_local_internal_potential(history_mode); }, py::arg("consider_history"))
-        .def(
-            "get_local_potential", [](py_cds& cds, fiction::cell<py_cds> c) { return cds.get_local_potential(c); },
-            py::arg("c"))
-        .def(
-            "get_local_potential_by_index",
-            [](py_cds& cds, uint64_t index) { return cds.get_local_potential_by_index(index); }, py::arg("index"))
-        .def(
-            "get_local_internal_potential",
-            [](py_cds& cds, fiction::cell<py_cds> c) { return cds.get_local_internal_potential(c); }, py::arg("c"))
-        .def(
-            "get_local_internal_potential_by_index", [](py_cds& cds, uint64_t index)
-            { return cds.get_local_internal_potential_by_index(index); }, py::arg("index"))
-        .def(
-            "get_local_external_potential",
-            [](py_cds& cds, fiction::cell<py_cds> c) { return cds.get_local_external_potential(c); }, py::arg("c"))
-        .def(
-            "get_local_external_potential_by_index", [](py_cds& cds, uint64_t index)
-            { return cds.get_local_external_potential_by_index(index); }, py::arg("index"))
-        .def(
-            "get_local_potential_caused_by_defects", [](py_cds& cds, fiction::cell<py_cds> c)
-            { return cds.get_local_potential_caused_by_defects(c); }, py::arg("c"))
-        .def(
-            "get_local_potential_caused_by_defects_by_index", [](py_cds& cds, uint64_t index)
-            { return cds.get_local_potential_caused_by_defects_by_index(index); }, py::arg("index"))
-        .def("assign_electrostatic_potential_energy_to_zero",
-             [](py_cds& cds) { return cds.assign_electrostatic_potential_energy_to_zero(); })
-        .def("recompute_electrostatic_potential_energy",
-             [](py_cds& cds) { return cds.recompute_electrostatic_potential_energy(); })
-        .def("get_electrostatic_potential_energy", [](py_cds& cds) { return cds.get_electrostatic_potential_energy(); })
-
-        .def(
-            "update_after_charge_change",
-            [](py_cds& cds, fiction::dependent_cell_mode dep_cell, fiction::energy_calculation energy_calculation_mode,
-               fiction::charge_distribution_history history_mode)
-            { return cds.update_after_charge_change(dep_cell, energy_calculation_mode, history_mode); },
-            py::arg("dep_cell")                = fiction::dependent_cell_mode::FIXED,
-            py::arg("energy_calculation_mode") = fiction::energy_calculation::UPDATE_ENERGY,
-            py::arg("history_mode")            = fiction::charge_distribution_history::NEGLECT)
-
+             &py_cds::determine_effective_charge_transition_thresholds)
+        .def("get_effective_charge_transition_thresholds", &py_cds::get_effective_charge_transition_thresholds,
+             py::arg("index"))
+        .def("get_all_sidb_locations_in_nm", &py_cds::get_all_sidb_locations_in_nm)
+        .def("assign_cell_type", &py_cds::assign_cell_type, py::arg("c"), py::arg("ct"))
+        .def("assign_physical_parameters", &py_cds::assign_physical_parameters, py::arg("params"))
+        .def("get_phys_params", &py_cds::get_simulation_params)
+        .def("charge_exists", &py_cds::charge_exists, py::arg("cs"))
+        .def("cell_to_index", &py_cds::cell_to_index, py::arg("c"))
+        .def("assign_charge_state", &py_cds::assign_charge_state, py::arg("c"), py::arg("cs"),
+             py::arg("index_mode") = fiction::charge_index_mode::UPDATE_CHARGE_INDEX)
+        .def("assign_all_charge_states", &py_cds::assign_all_charge_states, py::arg("cs"))
+        .def("assign_dependent_cell", &py_cds::assign_dependent_cell, py::arg("dependent_cell"))
+        .def("assign_base_number", &py_cds::assign_base_number, py::arg("base"))
+        .def("add_sidb_defect_to_potential_landscape", &py_cds::add_sidb_defect_to_potential_landscape, py::arg("c"),
+             py::arg("defect"))
+        .def("erase_defect", &py_cds::erase_defect, py::arg("c"))
+        .def("assign_charge_state_by_index", &py_cds::assign_charge_state_by_index, py::arg("index"), py::arg("cs"),
+             py::arg("index_mode") = fiction::charge_index_mode::UPDATE_CHARGE_INDEX)
+        .def("get_charge_state", &py_cds::get_charge_state, py::arg("c"))
+        .def("get_charge_state_by_index", &py_cds::get_charge_state_by_index, py::arg("index"))
+        .def("get_all_sidb_charges", &py_cds::get_all_sidb_charges)
+        .def("negative_sidb_detection", &py_cds::negative_sidb_detection)
+        .def("get_nm_distance_between_sidbs", &py_cds::get_nm_distance_between_sidbs, py::arg("c1"), py::arg("c2"))
+        .def("get_nm_distance_by_indices", &py_cds::get_nm_distance_by_indices, py::arg("index1"), py::arg("index2"))
+        .def("calculate_chargeless_potential_between_sidbs_by_index",
+             &py_cds::calculate_chargeless_potential_between_sidbs_by_index, py::arg("index1"), py::arg("index2"))
+        .def("calculate_chargeless_potential_between_sidbs", &py_cds::calculate_chargeless_potential_between_sidbs,
+             py::arg("c1"), py::arg("c2"))
+        .def("get_chargeless_potential_between_sidbs", &py_cds::get_chargeless_potential_between_sidbs, py::arg("c1"),
+             py::arg("c2"))
+        .def("get_chargeless_potential_by_indices", &py_cds::get_chargeless_potential_by_indices, py::arg("index1"),
+             py::arg("index2"))
+        .def("get_potential_between_sidbs", &py_cds::get_potential_between_sidbs, py::arg("c1"), py::arg("c2"))
+        .def("update_local_internal_potential", &py_cds::update_local_internal_potential, py::arg("consider_history"))
+        .def("get_local_potential", &py_cds::get_local_potential, py::arg("c"))
+        .def("get_local_potential_by_index", &py_cds::get_local_potential_by_index, py::arg("index"))
+        .def("get_local_internal_potential", &py_cds::get_local_internal_potential, py::arg("c"))
+        .def("get_local_internal_potential_by_index", &py_cds::get_local_internal_potential_by_index, py::arg("index"))
+        .def("get_local_external_potential", &py_cds::get_local_external_potential, py::arg("c"))
+        .def("get_local_external_potential_by_index", &py_cds::get_local_external_potential_by_index, py::arg("index"))
+        .def("get_local_potential_caused_by_defects", &py_cds::get_local_potential_caused_by_defects, py::arg("c"))
+        .def("get_local_potential_caused_by_defects_by_index", &py_cds::get_local_potential_caused_by_defects_by_index,
+             py::arg("index"))
+        .def("assign_electrostatic_potential_energy_to_zero", &py_cds::assign_electrostatic_potential_energy_to_zero)
+        .def("recompute_electrostatic_potential_energy", &py_cds::recompute_electrostatic_potential_energy)
+        .def("get_electrostatic_potential_energy", &py_cds::get_electrostatic_potential_energy)
+        .def("update_after_charge_change", &py_cds::update_after_charge_change,
+             py::arg("dep_cell")                = fiction::dependent_cell_mode::FIXED,
+             py::arg("energy_calculation_mode") = fiction::energy_calculation::UPDATE_ENERGY,
+             py::arg("history_mode")            = fiction::charge_distribution_history::NEGLECT)
         .def("validity_check", &py_cds::validity_check)
         .def("is_physically_valid", &py_cds::is_physically_valid)
         .def("charge_distribution_to_index_general", &py_cds::charge_distribution_to_index_general)
         .def("charge_distribution_to_index", &py_cds::charge_distribution_to_index)
         .def("get_charge_index_and_base", &py_cds::get_charge_index_and_base)
-        .def(
-            "increase_charge_index_by_one",
-            [](py_cds& cds, fiction::dependent_cell_mode dep_cell, fiction::energy_calculation energy_calculation_mode,
-               fiction::charge_distribution_history history_mode)
-            { return cds.increase_charge_index_by_one(dep_cell, energy_calculation_mode, history_mode); },
-            py::arg("dependent_cell_fixed")    = fiction::dependent_cell_mode::FIXED,
-            py::arg("recompute_system_energy") = fiction::energy_calculation::UPDATE_ENERGY,
-            py::arg("consider_history")        = fiction::charge_distribution_history::NEGLECT)
-
+        .def("increase_charge_index_by_one", &py_cds::increase_charge_index_by_one,
+             py::arg("dependent_cell_fixed")    = fiction::dependent_cell_mode::FIXED,
+             py::arg("recompute_system_energy") = fiction::energy_calculation::UPDATE_ENERGY,
+             py::arg("consider_history")        = fiction::charge_distribution_history::NEGLECT)
         .def("get_max_charge_index", &py_cds::get_max_charge_index)
         .def("assign_charge_index", &py_cds::assign_charge_index, py::arg("charge_index"), py::arg("cdc"))
         .def("adjacent_search", &py_cds::adjacent_search, py::arg("alpha"), py::arg("negative_indices"))
@@ -205,12 +133,10 @@ void charge_distribution_surface_layout(pybind11::module& m, const std::string& 
         .def("reset_local_external_potential", &py_cds::reset_local_external_potentials)
         .def("get_local_defect_potentials", &py_cds::get_local_defect_potentials)
         .def("get_defects", &py_cds::get_defects)
-        //
         .def("update_charge_state_of_dependent_cell", &py_cds::update_charge_state_of_dependent_cell)
         .def("get_charge_index_of_sub_layout", &py_cds::get_charge_index_of_sub_layout)
         .def("charge_index_gray_code_to_charge_distribution", &py_cds::charge_index_gray_code_to_charge_distribution,
              py::arg("new_gray_code"), py::arg("old_gray_code"))
-
         .def("increase_charge_index_of_sub_layout_by_one", &py_cds::increase_charge_index_of_sub_layout_by_one,
              py::arg("dependent_cell_fixed")    = fiction::dependent_cell_mode::FIXED,
              py::arg("recompute_system_energy") = fiction::energy_calculation::UPDATE_ENERGY,

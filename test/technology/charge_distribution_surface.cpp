@@ -2090,7 +2090,6 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects, part two", 
         CHECK_THAT((defect_potentials_negative[static_cast<uint64_t>(charge_layout.cell_to_index({5, 0, 0}))] +
                     defect_potentials_positive[static_cast<uint64_t>(charge_layout.cell_to_index({5, 0, 0}))]),
                    Catch::Matchers::WithinAbs(0.0, constants::ERROR_MARGIN));
-        // todo
     }
 
     SECTION("assign defect on DB position which is not allowed")

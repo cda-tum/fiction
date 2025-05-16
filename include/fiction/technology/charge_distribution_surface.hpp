@@ -150,19 +150,19 @@ enum class charge_index_mode : uint8_t
 enum class charge_transition_threshold_bounds : uint8_t
 {
     /**
-     * For the upper bound check against mu_m to validate DB-.
+     * For the upper bound check against mu_minus to validate DB-.
      */
     NEGATIVE_UPPER_BOUND = 0,
     /**
-     * For the lower bound check against mu_p to validate DB+.
+     * For the lower bound check against mu_plus to validate DB+.
      */
     POSITIVE_LOWER_BOUND = 1,
     /**
-     * For the lower bound check against mu_m to validate DB0.
+     * For the lower bound check against mu_minus to validate DB0.
      */
     NEUTRAL_LOWER_BOUND = 2,
     /**
-     * For the upper bound check against mu_p to validate DB0.
+     * For the upper bound check against mu_plus to validate DB0.
      */
     NEUTRAL_UPPER_BOUND = 3
 };
@@ -229,10 +229,10 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         /**
          * Stores the effective charge transition thresholds, incorporating the potential shift by local external
          * potential sources. For each SiDB, an array is stored with the 4 bounds to test against:
-         *  - [0] for the upper bound check against mu_m to validate DB-,
-         *  - [1] for the lower bound check against mu_p to validate DB+,
-         *  - [2] for the lower bound check against mu_m to validate DB0, and
-         *  - [3] for the upper bound check against mu_p to validate DB0.
+         *  - [0] for the upper bound check against mu_minus to validate DB-,
+         *  - [1] for the lower bound check against mu_plus to validate DB+,
+         *  - [2] for the lower bound check against mu_minus to validate DB0, and
+         *  - [3] for the upper bound check against mu_plus to validate DB0.
          */
         std::vector<std::array<double, 4>> charge_transition_threshold_bounds{};
         /**
@@ -430,10 +430,10 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     /**
      * This function determines the effective charge transition thresholds, incorporating the potential shift by local
      * external potential sources. For each SiDB, an array is written with the 4 bounds to test against:
-     *  - [0] for the upper bound check against mu_m to validate DB-,
-     *  - [1] for the lower bound check against mu_p to validate DB+,
-     *  - [2] for the lower bound check against mu_m to validate DB0, and
-     *  - [3] for the upper bound check against mu_p to validate DB0.
+     *  - [0] for the upper bound check against mu_minus to validate DB-,
+     *  - [1] for the lower bound check against mu_plus to validate DB+,
+     *  - [2] for the lower bound check against mu_minus to validate DB0, and
+     *  - [3] for the upper bound check against mu_plus to validate DB0.
      */
     void determine_effective_charge_transition_thresholds() noexcept
     {
@@ -452,10 +452,10 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     /**
      * This function obtains the effective charge transition thresholds for a given SiDB (by index), incorporating the
      * potential shift by local external potential sources. An array is returned with the 4 bounds to test against:
-     *  - [0] for the upper bound check against mu_m to validate DB-,
-     *  - [1] for the lower bound check against mu_p to validate DB+,
-     *  - [2] for the lower bound check against mu_m to validate DB0, and
-     *  - [3] for the upper bound check against mu_p to validate DB0.
+     *  - [0] for the upper bound check against mu_minus to validate DB-,
+     *  - [1] for the lower bound check against mu_plus to validate DB+,
+     *  - [2] for the lower bound check against mu_minus to validate DB0, and
+     *  - [3] for the upper bound check against mu_plus to validate DB0.
      * @param ix The index defining the SiDB position.
      * @return The effective charge transition thresholds.
      */
@@ -646,13 +646,13 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     {
         // check if defect is not placed on SiDB position
         if (!is_charged_defect_type(defect) ||
-            std::find(strg->sidb_order.cbegin(), strg->sidb_order.cend(), c) != strg->sidb_order.end())
+            std::find(strg->sidb_order.cbegin(), strg->sidb_order.cend(), c) != strg->sidb_order.cend())
         {
             return;
         }
 
         // check if defect was not added yet.
-        if (strg->defects.find(c) == strg->defects.end())
+        if (strg->defects.find(c) == strg->defects.cend())
         {
             strg->defects.insert({c, defect});
 
@@ -970,15 +970,15 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
         for (const auto& [c, external_pot] : strg->local_external_potential_map)
         {
-            if (const auto ix = cell_to_index(c); ix == -1)
+            if (strg->defects.find(c) == strg->defects.cend())
             {
-                // c is a defect
-                strg->local_ext_pot_at_defect[c] = external_pot;
+                // c is an SiDB
+                strg->local_ext_pot[static_cast<uint64_t>(cell_to_index(c))] = external_pot;
             }
             else
             {
-                // c is an SiDB
-                strg->local_ext_pot[static_cast<uint64_t>(ix)] = external_pot;
+                // c is a defect
+                strg->local_ext_pot_at_defect[c] = external_pot;
             }
         }
     }
@@ -2333,7 +2333,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         while (charge_quot_positive > 0)
         {
             const auto     charge_quot_int = static_cast<int64_t>(charge_quot_positive);
-            constexpr auto base_int        = static_cast<int64_t>(3);
+            constexpr auto base_int        = int64_t{3};
             const int64_t  quotient_int    = charge_quot_int / base_int;
             const int64_t  remainder_int   = charge_quot_int % base_int;
             charge_quot_positive           = static_cast<uint64_t>(quotient_int);

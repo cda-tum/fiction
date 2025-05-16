@@ -248,7 +248,6 @@ class quickexact_impl
         charge_layout.assign_local_external_potential(params.local_external_potential);
         charge_layout.assign_global_external_potential(params.global_potential);
 
-        // todo: this was added to fix the final QuickExact test --- why were not more tests failing?
         if constexpr (is_sidb_defect_surface_v<Lyt> && is_charge_distribution_surface_v<Lyt>)
         {
             layout.foreach_sidb_defect(
@@ -261,7 +260,6 @@ class quickexact_impl
                     }
                 });
         }
-        // todo: end section
 
         // IMPORTANT: The pre-assigned negatively charged SiDBs (they have to be negatively charged to
         // fulfill the population stability) are considered as negatively charged defects in the layout.
