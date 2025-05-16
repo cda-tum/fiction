@@ -1961,7 +1961,7 @@ class graph_oriented_layout_design_impl
         params.strategy = fanout_substitution_params::substitution_strategy::BREADTH;
         mockturtle::fanout_view network_substituted_breadth{fanout_substitution<tec_nt>(ntk, params)};
 
-        topo_view_co_to_ci network_breadth_co_to_ci{network_substituted_breadth};
+        topo_view_co_to_ci<decltype(network_substituted_breadth)> network_breadth_co_to_ci{network_substituted_breadth};
 
         // prepare initial nodes to place
         std::vector<mockturtle::node<decltype(network_breadth_co_to_ci)>> nodes_to_place_breadth_co_to_ci{};
@@ -1981,9 +1981,10 @@ class graph_oriented_layout_design_impl
             params.strategy = fanout_substitution_params::substitution_strategy::DEPTH;
             mockturtle::fanout_view network_substituted_depth{fanout_substitution<tec_nt>(ntk, params)};
 
-            topo_view_ci_to_co network_breadth_ci_to_co{network_substituted_breadth};
-            topo_view_co_to_ci network_depth_co_to_ci{network_substituted_depth};
-            topo_view_ci_to_co network_depth_ci_to_co{network_substituted_depth};
+            topo_view_ci_to_co<decltype(network_substituted_breadth)> network_breadth_ci_to_co{
+                network_substituted_breadth};
+            topo_view_co_to_ci<decltype(network_substituted_depth)> network_depth_co_to_ci{network_substituted_depth};
+            topo_view_ci_to_co<decltype(network_substituted_depth)> network_depth_ci_to_co{network_substituted_depth};
 
             // prepare nodes to place for additional networks
             std::vector<mockturtle::node<decltype(network_breadth_ci_to_co)>> nodes_to_place_breadth_ci_to_co{};

@@ -173,7 +173,7 @@ TEST_CASE("Different parameters", "[graph-oriented-layout-design]")
     const auto layout9 = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
 
     REQUIRE(layout9.has_value());
-    check_eq(ntk, *layout8);
+    check_eq(ntk, *layout9);
     CHECK(layout9->z() == 0);
 }
 

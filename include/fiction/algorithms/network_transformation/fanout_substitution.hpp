@@ -15,6 +15,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstddef>
 #include <deque>
 #include <functional>
 #include <optional>
@@ -82,7 +83,8 @@ class fanout_substitution_impl
     fanout_substitution_impl(const NtkSrc& src, const fanout_substitution_params p) :
             ntk_topo{convert_network<NtkDest>(src)},
             available_fanouts{ntk_topo},
-            ps{p}
+            ps{p},
+            gen{p.seed.value_or(std::random_device{}())}
     {}
 
     NtkDest run()
@@ -165,6 +167,9 @@ class fanout_substitution_impl
 
     const fanout_substitution_params ps;
 
+    std::mt19937                               gen;
+    std::uniform_int_distribution<std::size_t> dist;
+
     void generate_fanout_tree(NtkDest& substituted, const mockturtle::node<NtkSrc>& n, const old2new_map& old2new)
     {
         // skip fanout tree generation if n is a proper fanout node
@@ -220,13 +225,7 @@ class fanout_substitution_impl
             // maintain a vector of available fanout nodes and randomly select one
             std::vector<mockturtle::signal<NtkDest>> available_vec{child};
 
-            // initialize random generator (using random_device or the specified seed for seeding)
-            std::random_device rd;
-            const auto         seed = ps.seed.value_or(rd());
-
-            std::mt19937 gen(seed);
-
-            std::uniform_int_distribution<std::size_t> dist(0, available_vec.size() - 1);
+            dist.param(typename std::uniform_int_distribution<std::size_t>::param_type(0, available_vec.size() - 1));
 
             for (auto f = 0u; f < num_fanouts; ++f)
             {
