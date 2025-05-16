@@ -2027,10 +2027,14 @@ class graph_oriented_layout_design_impl
                     params.seed     = 12345;
                     mockturtle::fanout_view network_substituted_random{fanout_substitution<tec_nt>(ntk, params)};
 
-                    topo_view_co_to_ci_random network_breadth_co_to_ci_random{network_substituted_random};
-                    topo_view_ci_to_co_random network_breadth_ci_to_co_random{network_substituted_random};
-                    topo_view_co_to_ci_random network_depth_co_to_ci_random{network_substituted_random};
-                    topo_view_ci_to_co_random network_depth_ci_to_co_random{network_substituted_random};
+                    topo_view_co_to_ci_random<decltype(network_substituted_random)> network_breadth_co_to_ci_random{
+                        network_substituted_random};
+                    topo_view_ci_to_co_random<decltype(network_substituted_random)> network_breadth_ci_to_co_random{
+                        network_substituted_random};
+                    topo_view_co_to_ci_random<decltype(network_substituted_random)> network_depth_co_to_ci_random{
+                        network_substituted_random};
+                    topo_view_ci_to_co_random<decltype(network_substituted_random)> network_depth_ci_to_co_random{
+                        network_substituted_random};
 
                     // prepare nodes to place for additional networks
                     std::vector<mockturtle::node<decltype(network_breadth_co_to_ci_random)>>
