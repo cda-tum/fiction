@@ -136,38 +136,52 @@ TEST_CASE("Different parameters", "[graph-oriented-layout-design]")
     REQUIRE(layout4.has_value());
     check_eq(ntk, *layout4);
 
-    // Full search
-    params.mode         = graph_oriented_layout_design_params::effort_mode::HIGH_EFFORT;
-    params.return_first = false;
-    const auto layout5  = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
+    // Maximum effort mode
+    params.mode        = graph_oriented_layout_design_params::effort_mode::MAXIMUM_EFFORT;
+    const auto layout5 = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
 
     REQUIRE(layout5.has_value());
     check_eq(ntk, *layout5);
 
-    // More vertex expansions
-    params.return_first          = true;
-    params.num_vertex_expansions = 8;
-    const auto layout6           = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
+    // Maximum effort mode with random seed
+    params.seed             = 12345;
+    const auto layout5_seed = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
+
+    REQUIRE(layout5_seed.has_value());
+    check_eq(ntk, *layout5_seed);
+
+    // Full search
+    params.mode         = graph_oriented_layout_design_params::effort_mode::HIGH_EFFORT;
+    params.return_first = false;
+    const auto layout6  = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
 
     REQUIRE(layout6.has_value());
     check_eq(ntk, *layout6);
 
+    // More vertex expansions
+    params.return_first          = true;
+    params.num_vertex_expansions = 8;
+    const auto layout7           = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
+
+    REQUIRE(layout7.has_value());
+    check_eq(ntk, *layout7);
+
     // Timeout limit reached
     params.timeout     = 0;
     params.mode        = graph_oriented_layout_design_params::effort_mode::HIGH_EFFICIENCY;
-    const auto layout7 = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
+    const auto layout8 = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
 
-    CHECK(!layout7.has_value());
+    CHECK(!layout8.has_value());
 
     // Planar layout
     params.timeout     = 100000;
     params.planar      = true;
     params.mode        = graph_oriented_layout_design_params::effort_mode::HIGH_EFFORT;
-    const auto layout8 = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
+    const auto layout9 = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
 
-    REQUIRE(layout8.has_value());
-    check_eq(ntk, *layout8);
-    CHECK(layout8->z() == 0);
+    REQUIRE(layout9.has_value());
+    check_eq(ntk, *layout9);
+    CHECK(layout9->z() == 0);
 }
 
 TEST_CASE("Multithreading", "[graph-oriented-layout-design]")
@@ -196,6 +210,14 @@ TEST_CASE("Multithreading", "[graph-oriented-layout-design]")
 
     REQUIRE(layout2.has_value());
     check_eq(ntk, *layout2);
+
+    // Maximum effort mode
+    params.mode        = graph_oriented_layout_design_params::effort_mode::MAXIMUM_EFFORT;
+    params.seed        = 12345;
+    const auto layout3 = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
+
+    REQUIRE(layout3.has_value());
+    check_eq(ntk, *layout3);
 }
 
 TEST_CASE("Different cost objectives", "[graph-oriented-layout-design]")
@@ -259,6 +281,16 @@ TEST_CASE("Custom cost objective", "[graph-oriented-layout-design]")
 
     REQUIRE(layout_high_effort.has_value());
     check_eq(ntk, *layout_high_effort);
+
+    // maximum effort mode
+    params.mode = graph_oriented_layout_design_params::effort_mode::MAXIMUM_EFFORT;
+    params.seed = 12345;
+
+    const auto layout_maximum_effort =
+        graph_oriented_layout_design<gate_layout>(ntk, params, &stats, custom_cost_objective);
+
+    REQUIRE(layout_maximum_effort.has_value());
+    check_eq(ntk, *layout_maximum_effort);
 }
 
 TEST_CASE("Name conservation after graph-oriented layout design", "[graph-oriented-layout-design]")
