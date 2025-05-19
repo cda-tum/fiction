@@ -1906,7 +1906,7 @@ class graph_oriented_layout_design_impl
 
         for (auto& graph : ssg_vec)
         {
-            graph.pi_locs = pattern.at(idx++ % pattern.size());
+            graph.pi_locs = pattern.at(idx % pattern.size());
             ++idx;  // move to next pattern element
 
             graph.cost_so_far[graph.current_vertex] = 0;
