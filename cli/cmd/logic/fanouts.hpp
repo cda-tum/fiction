@@ -35,6 +35,7 @@ class fanouts_command : public command
             ->set_type_name("{breadth=0, depth=1, random=2}");
         add_option("--threshold,-t", ps.threshold,
                    "Maximum number of outputs any gate can have before substitution applies", true);
+        add_option("--seed, -r", ps.seed, "Random seed used in the random substitution strategy.", true);
     }
 
   protected:
