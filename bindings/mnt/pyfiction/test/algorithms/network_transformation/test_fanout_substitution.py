@@ -35,6 +35,19 @@ class TestFanoutSubstitution(unittest.TestCase):
         self.assertEqual(substituted_breadth.num_gates(), 6)
         self.assertTrue(is_fanout_substituted(substituted_breadth, breadth_params))
 
+        random_params = fanout_substitution_params()
+        random_params.strategy = substitution_strategy.RANDOM
+        substituted_random = fanout_substitution(network, random_params)
+        self.assertEqual(substituted_random.num_gates(), 6)
+        self.assertTrue(is_fanout_substituted(substituted_random, random_params))
+
+        random_seed_params = fanout_substitution_params()
+        random_seed_params.strategy = substitution_strategy.RANDOM
+        random_seed_params.seed = 42
+        substituted_random_seed = fanout_substitution(network, random_seed_params)
+        self.assertEqual(substituted_random_seed.num_gates(), 6)
+        self.assertTrue(is_fanout_substituted(substituted_random_seed, random_seed_params))
+
         threshold_params = fanout_substitution_params()
         threshold_params.threshold = 2
         substituted_threshold = fanout_substitution(network, threshold_params)
