@@ -67,10 +67,9 @@ class gold_command : public command
         add_flag("--planar,-p", ps.planar, "Enable planar layout generation");
         add_flag("--multithreading,-m", ps.enable_multithreading, "Enable multithreading (beta feature)");
         add_flag("--verbose,-v", ps.verbose, "Be verbose");
-        add_option("--seed, -s", ps.seed,
+        add_option("--seed, -s", seed,
                    "Random seed used for random fanout substitution and random topological ordering in"
-                   "maximum effort mode.",
-                   true);
+                   "maximum effort mode.");
     }
 
   protected:
@@ -100,6 +99,11 @@ class gold_command : public command
             ps.timeout *= 1000;
         }
 
+        if (is_set("seed"))
+        {
+            ps.seed = seed;
+        }
+
         graph_oriented_layout_design<fiction::cart_gate_clk_lyt>();
 
         ps = {};
@@ -121,6 +125,10 @@ class gold_command : public command
     }
 
   private:
+    /**
+     * Random seed for random substitution strategy.
+     */
+    uint32_t seed;
     /**
      * Parameters.
      */

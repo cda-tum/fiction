@@ -35,7 +35,7 @@ class fanouts_command : public command
             ->set_type_name("{breadth=0, depth=1, random=2}");
         add_option("--threshold,-t", ps.threshold,
                    "Maximum number of outputs any gate can have before substitution applies", true);
-        add_option("--seed, -r", ps.seed, "Random seed used in the random substitution strategy.", true);
+        add_option("--seed, -r", seed, "Random seed used in the random substitution strategy.");
     }
 
   protected:
@@ -68,6 +68,11 @@ class fanouts_command : public command
             return;
         }
 
+        if (is_set("seed"))
+        {
+            ps.seed = seed;
+        }
+
         const auto perform_substitution = [this](auto&& ntk_ptr)
         { return std::make_shared<fiction::tec_nt>(fiction::fanout_substitution<fiction::tec_nt>(*ntk_ptr, ps)); };
 
@@ -77,6 +82,10 @@ class fanouts_command : public command
     }
 
   private:
+    /**
+     * Random seed for random substitution strategy.
+     */
+    uint32_t                            seed;
     fiction::fanout_substitution_params ps{};
 };
 
