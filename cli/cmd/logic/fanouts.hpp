@@ -10,6 +10,8 @@
 
 #include <alice/alice.hpp>
 
+#include <cstdint>
+
 namespace alice
 {
 /**

@@ -12,6 +12,7 @@
 #include <alice/alice.hpp>
 #include <nlohmann/json.hpp>
 
+#include <cstdint>
 #include <iostream>
 #include <memory>
 #include <variant>
