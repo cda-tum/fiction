@@ -231,7 +231,8 @@ Possible parameters:
 - Effort mode (``-e``): Determines the computational effort used by the algorithm. Possible values are:
     - ``0`` (``high_efficiency``): Uses minimal computational resources, resulting in fewer search space graphs and potentially lower quality solutions.
     - ``1`` (``high_effort``): Uses increased computational resources to generate more search space graphs, thereby improving the chance of finding an optimal solution.
-    - ``2`` (``highest_effort``): Utilizes maximum computational resources to produce the most search space graphs, ensuring the highest probability of obtaining the best possible layout.
+    - ``2`` (``highest_effort``): Utilizes more computational resources to produce even more search space graphs, ensuring a higher probability of obtaining the best possible layout.
+    - ``3`` (``maximum_effort``): Utilizes maximum computational resources to produce the most search space graphs, including random fanout substitution strategies and topological ordering, ensuring the highest probability of obtaining the best possible layout.
 - Cost objective (``-c``): Specifies the cost objective for the layout design. Options include:
     - ``0`` (area): Minimize the layout area.
     - ``1`` (wires): Minimize the number of wire segments.
@@ -241,6 +242,7 @@ Possible parameters:
 - Planar (``-p``): Enable planar layout generation to constrain routing to be free of crossings.
 - Multithreading (``-m``): Enable multithreading (currently a beta feature) to potentially accelerate computation.
 - Verbose (``-v``): Output detailed runtime statistics after the algorithm completes.
+- Seed (``-s``): Set a random seed for random fanout substitution and random topological ordering in maximum effort mode.
 
 Hexagonalization (``hex``)
 ##########################
