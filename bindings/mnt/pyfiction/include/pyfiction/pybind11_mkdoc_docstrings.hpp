@@ -8033,8 +8033,8 @@ Returns:
     The best layout found by the algorithm.)doc";
 
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_seed =
-R"doc(Random seed used for random fanout substitution and topological
-ordering.)doc";
+R"doc(Random seed used for random fanout substitution and random topological
+ordering in maximum-effort mode.)doc";
 
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_ssg_vec = R"doc(Vector of search space graphs.)doc";
 
@@ -14150,7 +14150,7 @@ is used to prune the remaining graphs.)doc";
 static const char *__doc_fiction_graph_oriented_layout_design_params_effort_mode_MAXIMUM_EFFORT =
 R"doc(MAXIMUM_EFFORT mode builds upon HIGHEST_EFFORT by duplicating the 48
 (60) search space graphs using randomized fanout substitution
-strategies and topological orders. If the cost objective involves
+strategies and topological orderings. If the cost objective involves
 layout area, number of crossings, number of wire segments, or a
 combination of area and crossings, a total of 96 search space graphs
 are generated. For a custom cost objective, an additional 12 graphs
@@ -14201,8 +14201,8 @@ R"doc(Return the first found layout, which might still have a high cost but
 can be found fast.)doc";
 
 static const char *__doc_fiction_graph_oriented_layout_design_params_seed =
-R"doc(Seed used for random fanout substitution and topological ordering,
-generated randomly if not specified.)doc";
+R"doc(Random seed used for random fanout substitution and random topological
+ordering in maximum-effort mode, generated randomly if not specified.)doc";
 
 static const char *__doc_fiction_graph_oriented_layout_design_params_timeout = R"doc(Timeout limit (in ms).)doc";
 
