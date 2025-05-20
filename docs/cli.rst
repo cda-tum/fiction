@@ -242,7 +242,7 @@ Possible parameters:
 - Planar (``-p``): Enable planar layout generation to constrain routing to be free of crossings.
 - Multithreading (``-m``): Enable multithreading (currently a beta feature) to potentially accelerate computation.
 - Verbose (``-v``): Output detailed runtime statistics after the algorithm completes.
-- Seed (``-s``): Set a random seed for random fanout substitution and random topological ordering in maximum effort mode.
+- Seed (``-s``): Set a random seed for random fanout substitution and random topological ordering in maximum-effort mode.
 
 Hexagonalization (``hex``)
 ##########################

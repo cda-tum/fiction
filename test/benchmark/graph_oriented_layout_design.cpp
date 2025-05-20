@@ -15,7 +15,6 @@
 #include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/traits.hpp>
 
-#include <bill/sat/interface/common.hpp>
 #include <mockturtle/networks/aig.hpp>
 
 using namespace fiction;
@@ -27,28 +26,28 @@ TEST_CASE("Benchmark Graph-Oriented Layout Design", "[benchmark]")
     auto ntk    = blueprints::mux21_network<mockturtle::aig_network>();
     auto params = fiction::graph_oriented_layout_design_params{};
 
-    BENCHMARK("graph_oriented_layout_design: high effiency")
+    BENCHMARK("graph_oriented_layout_design: high-efficiency")
     {
         params.mode = graph_oriented_layout_design_params::effort_mode::HIGH_EFFICIENCY;
 
         return graph_oriented_layout_design<gate_layout>(ntk, params);
     };
 
-    BENCHMARK("graph_oriented_layout_design: high effort")
+    BENCHMARK("graph_oriented_layout_design: high-effort")
     {
         params.mode = graph_oriented_layout_design_params::effort_mode::HIGH_EFFORT;
 
         return graph_oriented_layout_design<gate_layout>(ntk, params);
     };
 
-    BENCHMARK("graph_oriented_layout_design: highest effort")
+    BENCHMARK("graph_oriented_layout_design: highest-effort")
     {
         params.mode = graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT;
 
         return graph_oriented_layout_design<gate_layout>(ntk, params);
     };
 
-    BENCHMARK("graph_oriented_layout_design: maximum effort")
+    BENCHMARK("graph_oriented_layout_design: maximum-effort")
     {
         params.mode = graph_oriented_layout_design_params::effort_mode::MAXIMUM_EFFORT;
         params.seed = 12345;
@@ -80,32 +79,32 @@ TEST_CASE("Benchmark Graph-Oriented Layout Design", "[benchmark]")
 //                                      mean          low mean      high mean
 //                                      std dev       low std dev   high std dev
 // -------------------------------------------------------------------------------
-// graph_oriented_layout_design: high efficiency
+// graph_oriented_layout_design: high-efficiency
 //
 //                                         154.203 ms    152.139 ms    157.968 ms
 //                                           13.77 ms    8.91136 ms    25.9232 ms
 //
-// graph_oriented_layout_design: high effort
+// graph_oriented_layout_design: high-effort
 //
 //                                          1.35733 s     1.32885 s     1.38707 s
 //                                         148.219 ms    132.249 ms    167.853 ms
 //
-// graph_oriented_layout_design: highest effort
+// graph_oriented_layout_design: highest-effort
 //
 //                                            5.009 s     4.84578 s     5.19168 s
 //                                         880.273 ms    771.159 ms     1.03008 s
 //
-// graph_oriented_layout_design: maximum effort
+// graph_oriented_layout_design: maximum-effort
 //
 //                                          19.0867 s      18.346 s     19.8665 s
 //                                          3.88072 s     3.37165 s     4.53847 s
 //
-// graph_oriented_layout_design: singlethreading
+// graph_oriented_layout_design: single-threading
 //
 //                                          2.30311 s     2.28982 s     2.31924 s
 //                                         74.3541 ms    61.6422 ms    101.801 ms
 //
-// graph_oriented_layout_design: multithreading
+// graph_oriented_layout_design: multi-threading
 //
 //                                         623.524 ms    614.624 ms     633.33 ms
 //                                         47.7563 ms    41.6035 ms    55.7239 ms

@@ -83,11 +83,11 @@ struct graph_oriented_layout_design_params
         HIGHEST_EFFORT,
         /**
          * MAXIMUM_EFFORT mode builds upon HIGHEST_EFFORT by duplicating the 48 (60) search space graphs using
-         * randomized fanout substitution strategies and topological orders. If the cost objective involves layout area,
-         * number of crossings, number of wire segments, or a combination of area and crossings, a total of 96 search
-         * space graphs are generated. For a custom cost objective, an additional 12 graphs are created, resulting in
-         * 120 graphs in total. This mode provides the best guarantee of finding optimal solutions but significantly
-         * increases runtime.
+         * randomized fanout substitution strategies and topological orderings. If the cost objective involves layout
+         * area, number of crossings, number of wire segments, or a combination of area and crossings, a total of 96
+         * search space graphs are generated. For a custom cost objective, an additional 12 graphs are created,
+         * resulting in 120 graphs in total. This mode provides the best guarantee of finding optimal solutions but
+         * significantly increases runtime.
          */
         MAXIMUM_EFFORT
     };
@@ -171,7 +171,8 @@ struct graph_oriented_layout_design_params
      */
     bool verbose = false;
     /**
-     * Seed used for random fanout substitution and topological ordering, generated randomly if not specified.
+     * Random seed used for random fanout substitution and random topological ordering in maximum-effort mode,
+     * generated randomly if not specified.
      */
     std::optional<uint32_t> seed = std::nullopt;
 };
@@ -791,7 +792,8 @@ class graph_oriented_layout_design_impl
 
             if (duration_ms >= timeout)
             {
-                // terminate the algorithm if the specified timeout was set or a solution was found in low-effort mode
+                // terminate the algorithm if the specified timeout was set or a solution was found in high-efficiency
+                // mode
                 if ((ps.mode == graph_oriented_layout_design_params::effort_mode::HIGH_EFFICIENCY &&
                      (improve_area_solution || improve_wire_solution || improve_crossing_solution ||
                       improve_acp_solution || improve_custom_solution)) ||
@@ -944,7 +946,7 @@ class graph_oriented_layout_design_impl
      */
     const uint64_t num_search_space_graphs_maximum_effort_custom = 2u * num_search_space_graphs_highest_effort_custom;
     /**
-     * Random seed used for random fanout substitution and topological ordering.
+     * Random seed used for random fanout substitution and random topological ordering in maximum-effort mode.
      */
     std::uint32_t seed;
     /**
@@ -1935,7 +1937,7 @@ class graph_oriented_layout_design_impl
                                { nodes_to_place.push_back(network.get_node(f)); });
         };
 
-        // Set cost objectives based on effort mode and cost objective
+        // set cost objectives based on effort mode and cost objective
         auto set_costs = [&](uint64_t start_idx, uint64_t end_idx, auto cost_objective)
         {
             for (uint64_t i = start_idx; i < end_idx; ++i)
@@ -1977,7 +1979,7 @@ class graph_oriented_layout_design_impl
         std::vector<mockturtle::node<decltype(network_breadth_co_to_ci)>> nodes_to_place_breadth_co_to_ci{};
         prepare_nodes_to_place(network_breadth_co_to_ci, nodes_to_place_breadth_co_to_ci);
 
-        // Set initial cost
+        // set initial cost
         for (uint64_t i = 0; i < num_search_space_graphs_high_efficiency; ++i)
         {
             ssg_vec[i].network        = network_breadth_co_to_ci;
@@ -1985,7 +1987,7 @@ class graph_oriented_layout_design_impl
             ssg_vec[i].cost           = ps.cost;
         }
 
-        // Further network and nodes initialization for HIGH, HIGHEST, and MAXIMUM effort
+        // further network and nodes initialization for high-, highest-, and maximum-effort
         if (ps.mode != graph_oriented_layout_design_params::effort_mode::HIGH_EFFICIENCY)
         {
             params.strategy = fanout_substitution_params::substitution_strategy::DEPTH;

@@ -50,7 +50,7 @@ class gold_command : public command
             " - `1` (high_effort): Uses more computational resources, creating more search space graphs to "
             "improve the likelihood of finding optimal solutions.\n"
             " - `2` (highest_effort): Uses even more computational resources, generating four to five times as many "
-            "search space graphs compared to high effort mode.\n"
+            "search space graphs compared to high-effort mode.\n"
             " - `3` (maximum_effort): Uses the maximum computational resources, generating the most search "
             "space graphs to ensure the highest chance of finding the best solution.",
             true)
@@ -70,7 +70,7 @@ class gold_command : public command
         add_flag("--verbose,-v", ps.verbose, "Be verbose");
         add_option("--seed, -s", seed,
                    "Random seed used for random fanout substitution and random topological ordering in"
-                   "maximum effort mode.");
+                   "maximum-effort mode.");
     }
 
   protected:
@@ -127,7 +127,7 @@ class gold_command : public command
 
   private:
     /**
-     * Random seed for random substitution strategy.
+     * Random seed used for random fanout substitution and random topological ordering in maximum-effort mode.
      */
     uint32_t seed;
     /**

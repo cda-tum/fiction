@@ -36,7 +36,9 @@ inline void graph_oriented_layout_design(pybind11::module& m)
         .value("HIGHEST_EFFORT", fiction::graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT,
                DOC(fiction_graph_oriented_layout_design_params_effort_mode_HIGHEST_EFFORT))
         .value("MAXIMUM_EFFORT", fiction::graph_oriented_layout_design_params::effort_mode::MAXIMUM_EFFORT,
-               DOC(fiction_graph_oriented_layout_design_params_effort_mode_MAXIMUM_EFFORT));
+               DOC(fiction_graph_oriented_layout_design_params_effort_mode_MAXIMUM_EFFORT))
+
+        ;
 
     py::enum_<fiction::graph_oriented_layout_design_params::cost_objective>(
         m, "gold_cost_objective", DOC(fiction_graph_oriented_layout_design_params_cost_objective))

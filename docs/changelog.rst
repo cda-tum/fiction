@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`_.
 
+Unreleased
+----------
+
+Added
+#####
+- Algorithms:
+    - Random fanout substitution strategy
+    - Maximum-effort mode in `gold` utilizing random fanout substitution strategies and random topological orderings to design high-quality layouts
+
+
 v0.6.11 - 2025-04-23
 --------------------
 

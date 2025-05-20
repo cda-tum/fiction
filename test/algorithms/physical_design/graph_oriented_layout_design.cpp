@@ -103,16 +103,16 @@ TEST_CASE("Different parameters", "[graph-oriented-layout-design]")
 
     graph_oriented_layout_design_params params{};
 
-    // Low effort mode
+    // high-efficiency mode
     params.mode = graph_oriented_layout_design_params::effort_mode::HIGH_EFFICIENCY;
-    // Return first found layout
+    // return first found layout
     params.return_first = true;
     const auto layout1  = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
 
     REQUIRE(layout1.has_value());
     check_eq(ntk, *layout1);
 
-    // Verbose mode and timeout
+    // verbose mode and timeout
     params.timeout     = 100000;
     params.verbose     = true;
     const auto layout2 = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
@@ -120,7 +120,7 @@ TEST_CASE("Different parameters", "[graph-oriented-layout-design]")
     REQUIRE(layout2.has_value());
     check_eq(ntk, *layout2);
 
-    // High effort mode
+    // high-effort mode
     params.mode        = graph_oriented_layout_design_params::effort_mode::HIGH_EFFORT;
     params.verbose     = false;
     const auto layout3 = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
@@ -128,7 +128,7 @@ TEST_CASE("Different parameters", "[graph-oriented-layout-design]")
     REQUIRE(layout3.has_value());
     check_eq(ntk, *layout3);
 
-    // Highest effort mode
+    // highest-effort mode
     params.mode        = graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT;
     params.verbose     = false;
     const auto layout4 = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
@@ -136,21 +136,21 @@ TEST_CASE("Different parameters", "[graph-oriented-layout-design]")
     REQUIRE(layout4.has_value());
     check_eq(ntk, *layout4);
 
-    // Maximum effort mode
+    // maximum-effort mode
     params.mode        = graph_oriented_layout_design_params::effort_mode::MAXIMUM_EFFORT;
     const auto layout5 = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
 
     REQUIRE(layout5.has_value());
     check_eq(ntk, *layout5);
 
-    // Maximum effort mode with random seed
+    // maximum-effort mode with random seed
     params.seed             = 12345;
     const auto layout5_seed = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
 
     REQUIRE(layout5_seed.has_value());
     check_eq(ntk, *layout5_seed);
 
-    // Full search
+    // full search
     params.mode         = graph_oriented_layout_design_params::effort_mode::HIGH_EFFORT;
     params.return_first = false;
     const auto layout6  = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
@@ -158,7 +158,7 @@ TEST_CASE("Different parameters", "[graph-oriented-layout-design]")
     REQUIRE(layout6.has_value());
     check_eq(ntk, *layout6);
 
-    // More vertex expansions
+    // more vertex expansions
     params.return_first          = true;
     params.num_vertex_expansions = 8;
     const auto layout7           = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
@@ -166,14 +166,14 @@ TEST_CASE("Different parameters", "[graph-oriented-layout-design]")
     REQUIRE(layout7.has_value());
     check_eq(ntk, *layout7);
 
-    // Timeout limit reached
+    // timeout limit reached
     params.timeout     = 0;
     params.mode        = graph_oriented_layout_design_params::effort_mode::HIGH_EFFICIENCY;
     const auto layout8 = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
 
     CHECK(!layout8.has_value());
 
-    // Planar layout
+    // planar layout
     params.timeout     = 100000;
     params.planar      = true;
     params.mode        = graph_oriented_layout_design_params::effort_mode::HIGH_EFFORT;
@@ -193,16 +193,16 @@ TEST_CASE("Multithreading", "[graph-oriented-layout-design]")
 
     graph_oriented_layout_design_params params{};
 
-    // Highest effort mode
+    // highest-effort mode
     params.mode = graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT;
-    // Enable multithreading
+    // enable multithreading
     params.enable_multithreading = true;
     const auto layout1           = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
 
     REQUIRE(layout1.has_value());
     check_eq(ntk, *layout1);
 
-    // High efficiency mode
+    // high-efficiency mode
     params.mode = graph_oriented_layout_design_params::effort_mode::HIGH_EFFICIENCY;
     // Return first found layout
     params.return_first = true;
@@ -211,7 +211,7 @@ TEST_CASE("Multithreading", "[graph-oriented-layout-design]")
     REQUIRE(layout2.has_value());
     check_eq(ntk, *layout2);
 
-    // Maximum effort mode
+    // maximum-effort mode
     params.mode        = graph_oriented_layout_design_params::effort_mode::MAXIMUM_EFFORT;
     params.seed        = 12345;
     const auto layout3 = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
@@ -231,14 +231,14 @@ TEST_CASE("Different cost objectives", "[graph-oriented-layout-design]")
 
     params.mode = graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT;
 
-    // Array of cost objectives to iterate over
+    // array of cost objectives to iterate over
     const std::array<graph_oriented_layout_design_params::cost_objective, 5> cost_objectives = {
         graph_oriented_layout_design_params::cost_objective::AREA,
         graph_oriented_layout_design_params::cost_objective::WIRES,
         graph_oriented_layout_design_params::cost_objective::CROSSINGS,
         graph_oriented_layout_design_params::cost_objective::ACP};
 
-    // Loop over each cost objective
+    // loop over each cost objective
     for (const auto& cost : cost_objectives)
     {
         params.cost       = cost;
@@ -261,7 +261,7 @@ TEST_CASE("Custom cost objective", "[graph-oriented-layout-design]")
     params.cost         = graph_oriented_layout_design_params::cost_objective::CUSTOM;
     params.return_first = true;
 
-    // Define a custom cost function
+    // define a custom cost function
     const std::function<uint64_t(const gate_layout&)> custom_cost_objective = [](const gate_layout& layout) -> uint64_t
     {
         // Example custom logic for calculating cost
@@ -273,7 +273,7 @@ TEST_CASE("Custom cost objective", "[graph-oriented-layout-design]")
     REQUIRE(layout.has_value());
     check_eq(ntk, *layout);
 
-    // high effort mode
+    // high-effort mode
     params.mode = graph_oriented_layout_design_params::effort_mode::HIGH_EFFORT;
 
     const auto layout_high_effort =
@@ -282,7 +282,7 @@ TEST_CASE("Custom cost objective", "[graph-oriented-layout-design]")
     REQUIRE(layout_high_effort.has_value());
     check_eq(ntk, *layout_high_effort);
 
-    // maximum effort mode
+    // maximum-effort mode
     params.mode = graph_oriented_layout_design_params::effort_mode::MAXIMUM_EFFORT;
     params.seed = 12345;
 
