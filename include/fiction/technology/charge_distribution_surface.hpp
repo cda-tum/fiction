@@ -220,8 +220,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 simulation_parameters{params}
         {}
         /**
-         * The SiDB simulation engine, used to determine what deviations from the core code are required. The 
-         * default simulation engine EXGS is chosen since it causes no deviations from the core code. 
+         * The SiDB simulation engine, used to determine what deviations from the core code are required. The
+         * default simulation engine EXGS is chosen since it causes no deviations from the core code.
          */
         sidb_simulation_engine engine{sidb_simulation_engine::EXGS};
         /**
