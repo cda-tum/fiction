@@ -2528,6 +2528,18 @@ Parameter ``cs``:
 Returns:
     Integer representing the SiDB's charge state.)doc";
 
+static const char *__doc_fiction_charge_transition_threshold_bounds =
+R"doc(An enumeration of charge transition threshold bounds to test against
+for population stability assessment.)doc";
+
+static const char *__doc_fiction_charge_transition_threshold_bounds_NEGATIVE_UPPER_BOUND = R"doc(For the upper bound check against mu_minus to validate DB-.)doc";
+
+static const char *__doc_fiction_charge_transition_threshold_bounds_NEUTRAL_LOWER_BOUND = R"doc(For the lower bound check against mu_minus to validate DB0.)doc";
+
+static const char *__doc_fiction_charge_transition_threshold_bounds_NEUTRAL_UPPER_BOUND = R"doc(For the upper bound check against mu_plus to validate DB0.)doc";
+
+static const char *__doc_fiction_charge_transition_threshold_bounds_POSITIVE_LOWER_BOUND = R"doc(For the lower bound check against mu_plus to validate DB+.)doc";
+
 static const char *__doc_fiction_chebyshev_distance =
 R"doc(The Chebyshev distance :math:`D` between two layout coordinates
 :math:`(x_1, y_1)` and :math:`(x_2, y_2)` given by
@@ -5188,8 +5200,8 @@ Returns:
 static const char *__doc_fiction_detail_clustercomplete_impl_available_threads = R"doc(Number of available threads.)doc";
 
 static const char *__doc_fiction_detail_clustercomplete_impl_charge_layout =
-R"doc(The base layout, along with the map of placed defects, that are used
-to create charge distribution surface copies.)doc";
+R"doc(The base layout that is used to create charge distribution surface
+copies.)doc";
 
 static const char *__doc_fiction_detail_clustercomplete_impl_clustercomplete_impl =
 R"doc(Constructor.
@@ -5328,8 +5340,6 @@ R"doc(Globally available array of bounds that section the band gap, used for
 pruning.)doc";
 
 static const char *__doc_fiction_detail_clustercomplete_impl_mutex_to_protect_the_simulation_results = R"doc(Mutex to protect the simulation results.)doc";
-
-static const char *__doc_fiction_detail_clustercomplete_impl_real_placed_defects = R"doc(Atomic defects that are placed in the layout.)doc";
 
 static const char *__doc_fiction_detail_clustercomplete_impl_remove_composition =
 R"doc(A composition is removed from the given clustering state, i.e., the
@@ -12121,9 +12131,6 @@ Parameter ``lyt``:
 
 Parameter ``params``:
     Simulation parameters.
-
-Parameter ``ps``:
-    Simulation statistics.
 
 Returns:
     sidb_simulation_result is returned with all results.)doc";
