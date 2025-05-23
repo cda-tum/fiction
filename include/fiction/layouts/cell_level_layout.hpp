@@ -167,16 +167,40 @@ class cell_level_layout : public ClockedLayout
             strg->cell_mode_map.erase(c);
             strg->inputs.erase(c);
             strg->outputs.erase(c);
-
             return;
         }
-        if (Technology::is_input_cell(ct))
+
+        const auto is_input  = Technology::is_input_cell(ct);
+        const auto is_output = Technology::is_output_cell(ct);
+
+        if (is_input)
         {
             strg->inputs.insert(c);
         }
-        else if (Technology::is_output_cell(ct))
+        else
+        {
+            strg->inputs.erase(c);
+        }
+
+        if (is_output)
         {
             strg->outputs.insert(c);
+        }
+        else
+        {
+            strg->outputs.erase(c);
+        }
+
+        if (!is_input && !is_output)
+        {
+            if (is_pi(c))
+            {
+                strg->inputs.erase(c);
+            }
+            if (is_po(c))
+            {
+                strg->outputs.erase(c);
+            }
         }
 
         strg->cell_type_map[c] = ct;
