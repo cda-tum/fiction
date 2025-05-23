@@ -175,7 +175,6 @@ class cell_level_layout : public ClockedLayout
 
         if (is_input)
         {
-            strg->inputs.erase(c);
             strg->inputs.insert(c);
         }
         else
@@ -185,7 +184,6 @@ class cell_level_layout : public ClockedLayout
 
         if (is_output)
         {
-            strg->outputs.erase(c);
             strg->outputs.insert(c);
         }
         else
