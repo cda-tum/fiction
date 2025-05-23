@@ -136,7 +136,6 @@ struct design_sidb_gates_stats
      * The number of layouts that remain after third pruning (discarding layouts with unstable I/O signals).
      */
     std::size_t number_of_layouts_after_third_pruning{0};
-
     /**
      * This function outputs the total time taken for the SiDB gate design process to the provided output stream.
      * If no output stream is provided, it defaults to standard output (`std::cout`).
@@ -283,7 +282,6 @@ class design_sidb_gates_impl
 
         return designed_gate_layouts;
     }
-
     /**
      * Design gates randomly and in parallel.
      *
@@ -540,7 +538,6 @@ class design_sidb_gates_impl
      * Number of threads to be used for the design process.
      */
     std::size_t number_of_threads{std::thread::hardware_concurrency()};
-
     /**
      * This function processes each layout to determine if it represents a valid gate implementation or if it can be
      * pruned by using three distinct physically-informed pruning steps. It leverages multi-threading to accelerate the
@@ -659,7 +656,6 @@ class design_sidb_gates_impl
 
         return gate_candidate;
     }
-
     /**
      * This function calculates all combinations of distributing a given number of SiDBs across a specified number of
      * positions in the canvas. Each combination is then used to create a gate layout candidate.
@@ -691,7 +687,6 @@ class design_sidb_gates_impl
 
         return designed_gate_layouts;
     }
-
     /**
      * This function adds SiDBs (given by indices) to the skeleton layout that is returned afterwards.
      *
@@ -721,7 +716,6 @@ class design_sidb_gates_impl
 
         return lyt_copy;
     }
-
     /**
      * This function generates canvas SiDb layouts.
      *
