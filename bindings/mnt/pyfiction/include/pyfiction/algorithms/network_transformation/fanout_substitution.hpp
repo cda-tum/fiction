@@ -43,6 +43,8 @@ inline void fanout_substitution(pybind11::module& m)
                DOC(fiction_fanout_substitution_params_substitution_strategy_BREADTH))
         .value("DEPTH", fiction::fanout_substitution_params::substitution_strategy::DEPTH,
                DOC(fiction_fanout_substitution_params_substitution_strategy_DEPTH))
+        .value("RANDOM", fiction::fanout_substitution_params::substitution_strategy::RANDOM,
+               DOC(fiction_fanout_substitution_params_substitution_strategy_RANDOM))
 
         ;
 
@@ -55,6 +57,7 @@ inline void fanout_substitution(pybind11::module& m)
                        DOC(fiction_fanout_substitution_params_degree))
         .def_readwrite("threshold", &fiction::fanout_substitution_params::threshold,
                        DOC(fiction_fanout_substitution_params_threshold))
+        .def_readwrite("seed", &fiction::fanout_substitution_params::seed, DOC(fiction_fanout_substitution_params_seed))
 
         ;
 
