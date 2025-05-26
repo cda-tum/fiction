@@ -97,7 +97,7 @@ template <typename Lyt, typename TT>
                               // anymore
             }
 
-            const int64_t ix_upper = charge_lyt.cell_to_index(bdl.lower);
+            const int64_t ix_upper = charge_lyt.cell_to_index(bdl.upper);
 
             assert(ix_upper >= 0 && "Upper cell of BDL pair is not part of the layout.");
 
