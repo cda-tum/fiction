@@ -140,6 +140,14 @@ TEST_CASE("Cell technology", "[cell-level-layout]")
 
         CHECK(lyt.num_pis() == 1);
         CHECK(lyt.num_pos() == 0);
+
+        lyt.assign_cell_type({14, 5}, sidb_technology::cell_type::OUTPUT);
+        CHECK(lyt.num_pis() == 1);
+        CHECK(lyt.num_pos() == 1);
+
+        lyt.assign_cell_type({14, 5}, sidb_technology::cell_type::INPUT);
+        CHECK(lyt.num_pis() == 2);
+        CHECK(lyt.num_pos() == 0);
     }
 }
 
