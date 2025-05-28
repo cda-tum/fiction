@@ -71,8 +71,8 @@ TEST_CASE("Test minimum energy function", "[minimum-energy]")
 
         charge_layout_first.assign_charge_state({0, 0}, sidb_charge_state::NEUTRAL);
 
-        charge_layout_first.update_local_potential();
-        charge_layout_first.recompute_system_energy();
+        charge_layout_first.update_local_internal_potential();
+        charge_layout_first.recompute_electrostatic_potential_energy();
         all_lyts.push_back(charge_layout_first);
 
         charge_distribution_surface charge_layout_second{lyt};
@@ -80,8 +80,8 @@ TEST_CASE("Test minimum energy function", "[minimum-energy]")
         charge_layout_second.assign_charge_state({10, 10}, sidb_charge_state::NEUTRAL);
         charge_layout_second.assign_charge_state({9, 9}, sidb_charge_state::NEUTRAL);
 
-        charge_layout_second.update_local_potential();
-        charge_layout_second.recompute_system_energy();
+        charge_layout_second.update_local_internal_potential();
+        charge_layout_second.recompute_electrostatic_potential_energy();
         all_lyts.push_back(charge_layout_second);
 
         CHECK_THAT(minimum_energy(all_lyts.cbegin(), all_lyts.cend()), Catch::Matchers::WithinAbs(0.0, 0.00001));
