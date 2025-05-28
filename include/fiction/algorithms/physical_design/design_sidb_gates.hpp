@@ -672,7 +672,7 @@ class design_sidb_gates_impl
 
         const auto add_cell_combination_to_layout = [this, &designed_gate_layouts](const auto& combination) noexcept
         {
-            const auto layout_with_added_cells = convert_canvas_cell_indices_to_layout(combination);
+            const auto layout_with_added_cells = design_canvas_layout(combination);
             if (!layout_with_added_cells.has_value())
             {
                 return;
@@ -717,13 +717,12 @@ class design_sidb_gates_impl
         return lyt_copy;
     }
     /**
-     * This function generates canvas SiDb layouts.
+     * This function designs canvas SiDB layouts based on given indices.
      *
      * @param cell_indices A vector of indices of cells to be added to the skeleton layout.
      * @return An SiDB cell-level layout consisting of canvas SidBs.
      */
-    [[nodiscard]] std::optional<Lyt>
-    convert_canvas_cell_indices_to_layout(const std::vector<std::size_t>& cell_indices) const noexcept
+    [[nodiscard]] std::optional<Lyt> design_canvas_layout(const std::vector<std::size_t>& cell_indices) const noexcept
     {
         Lyt lyt{};
 
