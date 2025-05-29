@@ -133,6 +133,21 @@ TEST_CASE("Cell technology", "[cell-level-layout]")
         CHECK(input_cells.size() == 2);
         CHECK(output_cells.size() == 1);
         CHECK(logic_cells.size() == 1);
+
+        lyt.assign_cell_type({0, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_cell_type({14, 5}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_cell_type({12, 4}, sidb_technology::cell_type::NORMAL);
+
+        CHECK(lyt.num_pis() == 1);
+        CHECK(lyt.num_pos() == 0);
+
+        lyt.assign_cell_type({14, 5}, sidb_technology::cell_type::OUTPUT);
+        CHECK(lyt.num_pis() == 1);
+        CHECK(lyt.num_pos() == 1);
+
+        lyt.assign_cell_type({14, 5}, sidb_technology::cell_type::INPUT);
+        CHECK(lyt.num_pis() == 2);
+        CHECK(lyt.num_pos() == 0);
     }
 }
 

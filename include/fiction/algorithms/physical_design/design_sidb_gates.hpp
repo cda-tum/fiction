@@ -637,7 +637,11 @@ class design_sidb_gates_impl
 
                     for (std::size_t j = start_index; j < end_index; ++j)
                     {
-                        conduct_pruning_steps(all_canvas_layouts[j]);
+                        const auto canvas_lyt = all_canvas_layouts[j];
+                        if (!canvas_lyt.is_empty())
+                        {
+                            conduct_pruning_steps(all_canvas_layouts[j]);
+                        }
                     }
                 });
         }
@@ -668,7 +672,7 @@ class design_sidb_gates_impl
 
         const auto add_cell_combination_to_layout = [this, &designed_gate_layouts](const auto& combination) noexcept
         {
-            const auto layout_with_added_cells = convert_canvas_cell_indices_to_layout(combination);
+            const auto layout_with_added_cells = design_canvas_layout(combination);
             if (!layout_with_added_cells.has_value())
             {
                 return;
@@ -699,6 +703,13 @@ class design_sidb_gates_impl
 
             if (lyt_copy.get_cell_type(all_sidbs_in_canvas[i]) == sidb_technology::cell_type::EMPTY)
             {
+                if constexpr (is_sidb_defect_surface_v<Lyt>)
+                {
+                    if (skeleton_layout.get_sidb_defect(all_sidbs_in_canvas[i]).type != sidb_defect_type::NONE)
+                    {
+                        continue;
+                    }
+                }
                 lyt_copy.assign_cell_type(all_sidbs_in_canvas[i], sidb_technology::cell_type::LOGIC);
             }
         }
@@ -706,13 +717,12 @@ class design_sidb_gates_impl
         return lyt_copy;
     }
     /**
-     * This function generates canvas SiDb layouts.
+     * This function designs canvas SiDB layouts based on given indices.
      *
      * @param cell_indices A vector of indices of cells to be added to the skeleton layout.
      * @return An SiDB cell-level layout consisting of canvas SidBs.
      */
-    [[nodiscard]] std::optional<Lyt>
-    convert_canvas_cell_indices_to_layout(const std::vector<std::size_t>& cell_indices) const noexcept
+    [[nodiscard]] std::optional<Lyt> design_canvas_layout(const std::vector<std::size_t>& cell_indices) const noexcept
     {
         Lyt lyt{};
 
@@ -720,15 +730,18 @@ class design_sidb_gates_impl
         {
             assert(i < all_sidbs_in_canvas.size() && "cell indices are out-of-range");
 
-            // SiDBs cannot be placed on positions which are already occupied by atomic defects.
-            if constexpr (is_sidb_defect_surface_v<Lyt>)
+            if (skeleton_layout.get_cell_type(all_sidbs_in_canvas[i]) == sidb_technology::cell_type::EMPTY)
             {
-                if (skeleton_layout.get_sidb_defect(all_sidbs_in_canvas[i]).type != sidb_defect_type::NONE)
+                // SiDBs cannot be placed on positions which are already occupied by atomic defects.
+                if constexpr (is_sidb_defect_surface_v<Lyt>)
                 {
-                    return std::nullopt;
+                    if (skeleton_layout.get_sidb_defect(all_sidbs_in_canvas[i]).type != sidb_defect_type::NONE)
+                    {
+                        return std::nullopt;
+                    }
                 }
+                lyt.assign_cell_type(all_sidbs_in_canvas[i], sidb_technology::cell_type::LOGIC);
             }
-            lyt.assign_cell_type(all_sidbs_in_canvas[i], sidb_technology::cell_type::LOGIC);
         }
 
         // the skeleton can already exhibit some canvas SiDBs (partially filled canvas)
@@ -804,12 +817,10 @@ template <typename Lyt, typename TT>
     {
         result = p.run_automatic_exhaustive_gate_designer();
     }
-
     else if (params.design_mode == design_sidb_gates_params<cell<Lyt>>::design_sidb_gates_mode::QUICKCELL)
     {
         result = p.run_quickcell();
     }
-
     else
     {
         result = p.run_random_design();
