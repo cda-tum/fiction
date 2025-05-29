@@ -6080,8 +6080,8 @@ static const char *__doc_fiction_detail_design_sidb_gates_impl_all_canvas_layout
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_all_sidbs_in_canvas = R"doc(All cells within the canvas.)doc";
 
-static const char *__doc_fiction_detail_design_sidb_gates_impl_convert_canvas_cell_indices_to_layout =
-R"doc(This function generates canvas SiDb layouts.
+static const char *__doc_fiction_detail_design_sidb_gates_impl_design_canvas_layout =
+R"doc(This function designs canvas SiDB layouts based on given indices.
 
 Parameter ``cell_indices``:
     A vector of indices of cells to be added to the skeleton layout.
