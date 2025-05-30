@@ -808,7 +808,7 @@ class is_operational_impl
 
             if (cds_layout.is_physically_valid())
             {
-                cds_layout.recompute_system_energy();
+                cds_layout.recompute_electrostatic_potential_energy();
                 return cds_layout.get_electrostatic_potential_energy();
             }
 
