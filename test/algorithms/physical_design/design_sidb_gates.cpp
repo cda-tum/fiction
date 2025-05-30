@@ -548,7 +548,7 @@ TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
             {{18, 8, 1}, {22, 12, 0}},
             2};
 
-        defect_layout.assign_sidb_defect({17, 10, 0},
+        defect_layout.assign_sidb_defect({14, 10, 0},
                                          sidb_defect{sidb_defect_type::DB, -1,
                                                      params.operational_params.simulation_parameters.epsilon_r,
                                                      params.operational_params.simulation_parameters.lambda_tf});
