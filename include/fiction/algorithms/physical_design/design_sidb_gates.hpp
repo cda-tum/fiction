@@ -752,7 +752,7 @@ class design_sidb_gates_impl
  * skeleton layout (can hold defects), canvas size, and a predetermined number of canvas SiDBs. Three different design
  * modes are implemented: `quickcell`, `exhaustive` and `random design`.
  *
- * A first version of `QuickCell` was proposed in \"Towards Fast Automatic Design of Silicon Dangling Bond Logic\" by by
+ * A first version of `QuickCell` was proposed in \"Towards Fast Automatic Design of Silicon Dangling Bond Logic\" by
  * J. Drewniok, M. Walter, S. S. H. Ng, K. Walus, and R. Wille in DATE 2025
  * (https://ieeexplore.ieee.org/abstract/document/10992885).
  *
@@ -761,7 +761,7 @@ class design_sidb_gates_impl
  * Walter, and R. Wille in NANOARCH 2023 (https://dl.acm.org/doi/10.1145/3611315.3633241).
  *
  * The `quickcell` design mode consists of two key steps:
- * 1. **Initial Pruning:** Efficient filtering techniques are applied to eliminate layouts that cannot correctly
+ * 1. **Initial Pruning:** Efficient filtering techniques are applied to discard layouts that cannot correctly
  * implement the specified logic.
  * 2. **Physical Simulation:** The remaining candidate layouts undergo physical simulation to verify their
  * operationality.
