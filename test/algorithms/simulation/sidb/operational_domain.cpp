@@ -371,8 +371,8 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 
             SECTION("reject kinks")
             {
-                op_domain_params.operational_params.op_condition =
-                    is_operational_params::operational_condition::REJECT_KINKS;
+                op_domain_params.operational_params.op_condition_kinks =
+                    is_operational_params::operational_condition_kinks::REJECT_KINKS;
 
                 const auto op_domain_kinks = operational_domain_grid_search(lat, std::vector<tt>{create_id_tt()},
                                                                             op_domain_params, &op_domain_stats);
@@ -1365,7 +1365,8 @@ TEMPLATE_TEST_CASE("AND gate with Bestagon shape and kink states at default phys
 
     SECTION("grid_search, reject kinks")
     {
-        op_domain_params.operational_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
+        op_domain_params.operational_params.op_condition_kinks =
+            is_operational_params::operational_condition_kinks::REJECT_KINKS;
 
         const auto op_domain = operational_domain_grid_search(layout, std::vector<tt>{create_and_tt()},
                                                               op_domain_params, &op_domain_stats);
@@ -1394,7 +1395,8 @@ TEMPLATE_TEST_CASE("Grid search to determine the operational domain. The operati
     op_domain_params.sweep_dimensions                         = {{sweep_parameter::EPSILON_R, 4.0, 6.0, 0.4},
                                                                  {sweep_parameter::LAMBDA_TF, 4.0, 6.0, 0.4}};
 
-    op_domain_params.operational_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
+    op_domain_params.operational_params.op_condition_kinks =
+        is_operational_params::operational_condition_kinks::REJECT_KINKS;
 
     operational_domain_stats op_domain_stats{};
 
