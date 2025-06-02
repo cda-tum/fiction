@@ -407,7 +407,7 @@ class topo_view : public mockturtle::immutable_view<Ntk>
     using node   = typename Ntk::node;
     using signal = typename Ntk::signal;
 
-    explicit topo_view(Ntk const& ntk, uint32_t const seed_val = 42) :
+    explicit topo_view(const Ntk& ntk, const uint32_t seed_val = 42) :
             mockturtle::immutable_view<Ntk>(ntk),
             rng(seed_val)
     {
@@ -424,7 +424,7 @@ class topo_view : public mockturtle::immutable_view<Ntk>
         return size() - offset();
     }
 
-    [[nodiscard]] uint32_t node_to_index(node const& n) const
+    [[nodiscard]] uint32_t node_to_index(const node& n) const
     {
         auto it = std::find(topo_order.begin(), topo_order.end(), n);
         return uint32_t(std::distance(topo_order.begin(), it));
@@ -459,21 +459,34 @@ class topo_view : public mockturtle::immutable_view<Ntk>
         this->incr_trav_id();
         this->incr_trav_id();
         topo_order.clear();
-        topo_order.reserve(this->mockturtle::immutable_view<Ntk>::size());
+        topo_order.reserve(this->size());
 
         // constants and PIs in fixed order
         auto const c0 = this->get_node(this->get_constant(false));
         topo_order.push_back(c0);
         this->set_visited(c0, this->trav_id());
 
-        if (auto const c1 = this->get_node(this->get_constant(true)); this->visited(c1) != this->trav_id())
+        if (const auto c1 = this->get_node(this->get_constant(true)); this->visited(c1) != this->trav_id())
         {
             topo_order.push_back(c1);
             this->set_visited(c1, this->trav_id());
         }
 
         // collect starting points (COs or CIs)
-        if constexpr (!CiToCo)
+        if constexpr (CiToCo)
+        {
+            std::vector<node> starts;
+            Ntk::foreach_ci([&](const auto& n) { starts.push_back(n); });
+            if constexpr (Randomize)
+            {
+                std::shuffle(starts.begin(), starts.end(), rng);
+            }
+            for (const auto& n : starts)
+            {
+                create_topo_rec(n);
+            }
+        }
+        else
         {
             std::vector<signal> starts;
             Ntk::foreach_co([&](auto f) { starts.push_back(f); });
@@ -481,66 +494,22 @@ class topo_view : public mockturtle::immutable_view<Ntk>
             {
                 std::shuffle(starts.begin(), starts.end(), rng);
             }
-            for (auto const& f : starts)
+            for (const auto& f : starts)
             {
                 create_topo_rec(this->get_node(f));
             }
         }
-        else
-        {
-            std::vector<node> starts;
-            Ntk::foreach_ci([&](auto const& n) { starts.push_back(n); });
-            if constexpr (Randomize)
-            {
-                std::shuffle(starts.begin(), starts.end(), rng);
-            }
-            for (auto const& n : starts)
-            {
-                create_topo_rec(n);
-            }
-        }
     }
 
-    void create_topo_rec(node const& n)
+    void create_topo_rec(const node& n)
     {
-        if constexpr (!CiToCo)
-        {
-            // CO→CI DFS (post-order)
-            if (this->visited(n) == this->trav_id())
-            {
-                return;
-            }
-            assert(this->visited(n) != this->trav_id() - 1);  // no cycles
-            // temporary mark
-            this->set_visited(n, this->trav_id() - 1);
-
-            // visit children (fanins), maybe shuffled
-            if constexpr (Randomize)
-            {
-                std::vector<signal> fanins;
-                this->foreach_fanin(n, [&](signal const& f) { fanins.push_back(f); });
-                std::shuffle(fanins.begin(), fanins.end(), rng);
-                for (auto const& f : fanins)
-                {
-                    create_topo_rec(this->get_node(f));
-                }
-            }
-            else
-            {
-                this->foreach_fanin(n, [&](signal const& f) { create_topo_rec(this->get_node(f)); });
-            }
-
-            // permanent mark and append
-            this->set_visited(n, this->trav_id());
-            topo_order.push_back(n);
-        }
-        else
+        if constexpr (CiToCo)
         {
             // CI→CO readiness-based
             // skip until all fanins are done
             bool not_ready = false;
             this->foreach_fanin(n,
-                                [&](signal const& f)
+                                [&](const signal& f)
                                 {
                                     if (this->visited(this->get_node(f)) != this->trav_id())
                                     {
@@ -560,17 +529,48 @@ class topo_view : public mockturtle::immutable_view<Ntk>
             if constexpr (Randomize)
             {
                 std::vector<node> fanouts;
-                this->foreach_fanout(n, [&](node const& fo) { fanouts.push_back(fo); });
+                this->foreach_fanout(n, [&](const node& fo) { fanouts.push_back(fo); });
                 std::shuffle(fanouts.begin(), fanouts.end(), rng);
-                for (auto const& fo : fanouts)
+                for (const auto& fo : fanouts)
                 {
                     create_topo_rec(fo);
                 }
             }
             else
             {
-                this->foreach_fanout(n, [&](node const& fo) { create_topo_rec(fo); });
+                this->foreach_fanout(n, [&](const node& fo) { create_topo_rec(fo); });
             }
+        }
+        else
+        {
+            // CO→CI DFS (post-order)
+            if (this->visited(n) == this->trav_id())
+            {
+                return;
+            }
+            assert(this->visited(n) != this->trav_id() - 1);  // no cycles
+            // temporary mark
+            this->set_visited(n, this->trav_id() - 1);
+
+            // visit children (fanins), maybe shuffled
+            if constexpr (Randomize)
+            {
+                std::vector<signal> fanins;
+                this->foreach_fanin(n, [&](const signal& f) { fanins.push_back(f); });
+                std::shuffle(fanins.begin(), fanins.end(), rng);
+                for (const auto& f : fanins)
+                {
+                    create_topo_rec(this->get_node(f));
+                }
+            }
+            else
+            {
+                this->foreach_fanin(n, [&](const signal& f) { create_topo_rec(this->get_node(f)); });
+            }
+
+            // permanent mark and append
+            this->set_visited(n, this->trav_id());
+            topo_order.push_back(n);
         }
     }
 

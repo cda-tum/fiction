@@ -244,7 +244,6 @@ class fanout_substitution_impl
                 {
                     available_vec.push_back(new_buf);
                 }
-                child = new_buf;
 
                 // update the distribution range if available_vec size has changed
                 if (!available_vec.empty())

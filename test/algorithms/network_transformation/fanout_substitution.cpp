@@ -13,6 +13,7 @@
 
 #include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/networks/aig.hpp>
+#include <mockturtle/views/depth_view.hpp>
 
 #include <type_traits>
 
@@ -102,6 +103,20 @@ TEST_CASE("Fixed seed in random fanout substitution", "[fanout-substitution]")
     ps.seed = 42;
 
     substitute(aig, ps, aig.size() + 41);
+}
+
+TEST_CASE("Different results for different seeds in random fanout substitution", "[fanout-substitution]")
+{
+    const auto aig = blueprints::maj4_network<mockturtle::aig_network>();
+
+    fanout_substitution_params ps{fanout_substitution_params::substitution_strategy::RANDOM};
+    ps.seed = 42;
+    mockturtle::depth_view substituted_1{fanout_substitution<technology_network>(aig, ps)};
+
+    ps.seed = 3;
+    mockturtle::depth_view substituted_2{fanout_substitution<technology_network>(aig, ps)};
+
+    CHECK(substituted_1.depth() != substituted_2.depth());
 }
 
 TEST_CASE("Consistent network size after multiple fanout substitutions", "[fanout-substitution]")
