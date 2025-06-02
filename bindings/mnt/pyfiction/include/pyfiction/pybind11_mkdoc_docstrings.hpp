@@ -2528,6 +2528,18 @@ Parameter ``cs``:
 Returns:
     Integer representing the SiDB's charge state.)doc";
 
+static const char *__doc_fiction_charge_transition_threshold_bounds =
+R"doc(An enumeration of charge transition threshold bounds to test against
+for population stability assessment.)doc";
+
+static const char *__doc_fiction_charge_transition_threshold_bounds_NEGATIVE_UPPER_BOUND = R"doc(For the upper bound check against mu_minus to validate DB-.)doc";
+
+static const char *__doc_fiction_charge_transition_threshold_bounds_NEUTRAL_LOWER_BOUND = R"doc(For the lower bound check against mu_minus to validate DB0.)doc";
+
+static const char *__doc_fiction_charge_transition_threshold_bounds_NEUTRAL_UPPER_BOUND = R"doc(For the upper bound check against mu_plus to validate DB0.)doc";
+
+static const char *__doc_fiction_charge_transition_threshold_bounds_POSITIVE_LOWER_BOUND = R"doc(For the lower bound check against mu_plus to validate DB+.)doc";
+
 static const char *__doc_fiction_chebyshev_distance =
 R"doc(The Chebyshev distance :math:`D` between two layout coordinates
 :math:`(x_1, y_1)` and :math:`(x_2, y_2)` given by
@@ -4610,8 +4622,25 @@ static const char *__doc_fiction_depth_view_params_pi_cost = R"doc(Whether PIs h
 static const char *__doc_fiction_design_sidb_gates =
 R"doc(The *SiDB Gate Designer* designs SiDB gate implementations based on a
 specified Boolean function, a skeleton layout (can hold defects),
-canvas size, and a predetermined number of canvas SiDBs. Two different
-design modes are implemented: `exhaustive` and `random design`.
+canvas size, and a predetermined number of canvas SiDBs. Three
+different design modes are implemented: `quickcell`, `exhaustive` and
+`random design`.
+
+A first version of `QuickCell` was proposed in \"Towards Fast
+Automatic Design of Silicon Dangling Bond Logic\" by J. Drewniok, M.
+Walter, S. S. H. Ng, K. Walus, and R. Wille in DATE 2025
+(https://ieeexplore.ieee.org/abstract/document/10992885).
+
+The `Automatic Exhaustive Gate Designer` was proposed in \"Minimal
+Design of SiDB Gates: An Optimal Basis for Circuits Based on Silicon
+Dangling Bonds\" by J. Drewniok, M. Walter, and R. Wille in NANOARCH
+2023 (https://dl.acm.org/doi/10.1145/3611315.3633241).
+
+The `quickcell` design mode consists of two key steps: 1. **Initial
+Pruning:** Efficient filtering techniques are applied to discard
+layouts that cannot correctly implement the specified logic. 2.
+**Physical Simulation:** The remaining candidate layouts undergo
+physical simulation to verify their operationality.
 
 The `exhaustive design` is composed of three steps: 1. In the initial
 step, all possible distributions of `number_of_canvas_sidbs` SiDBs
@@ -5188,8 +5217,8 @@ Returns:
 static const char *__doc_fiction_detail_clustercomplete_impl_available_threads = R"doc(Number of available threads.)doc";
 
 static const char *__doc_fiction_detail_clustercomplete_impl_charge_layout =
-R"doc(The base layout, along with the map of placed defects, that are used
-to create charge distribution surface copies.)doc";
+R"doc(The base layout that is used to create charge distribution surface
+copies.)doc";
 
 static const char *__doc_fiction_detail_clustercomplete_impl_clustercomplete_impl =
 R"doc(Constructor.
@@ -5328,8 +5357,6 @@ R"doc(Globally available array of bounds that section the band gap, used for
 pruning.)doc";
 
 static const char *__doc_fiction_detail_clustercomplete_impl_mutex_to_protect_the_simulation_results = R"doc(Mutex to protect the simulation results.)doc";
-
-static const char *__doc_fiction_detail_clustercomplete_impl_real_placed_defects = R"doc(Atomic defects that are placed in the layout.)doc";
 
 static const char *__doc_fiction_detail_clustercomplete_impl_remove_composition =
 R"doc(A composition is removed from the given clustering state, i.e., the
@@ -12108,9 +12135,6 @@ Parameter ``lyt``:
 
 Parameter ``params``:
     Simulation parameters.
-
-Parameter ``ps``:
-    Simulation statistics.
 
 Returns:
     sidb_simulation_result is returned with all results.)doc";
