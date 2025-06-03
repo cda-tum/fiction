@@ -167,8 +167,7 @@ class fanout_substitution_impl
 
     const fanout_substitution_params ps;
 
-    std::mt19937                               gen;
-    std::uniform_int_distribution<std::size_t> dist;
+    std::mt19937 gen;
 
     void generate_fanout_tree(NtkDest& substituted, const mockturtle::node<NtkSrc>& n, const old2new_map& old2new)
     {
@@ -225,7 +224,7 @@ class fanout_substitution_impl
             // maintain a vector of available fanout nodes and randomly select one
             std::vector<mockturtle::signal<NtkDest>> available_vec{child};
 
-            dist.param(typename std::uniform_int_distribution<std::size_t>::param_type(0, available_vec.size() - 1));
+            std::uniform_int_distribution<std::size_t> dist(0, available_vec.size() - 1);
 
             for (auto f = 0u; f < num_fanouts; ++f)
             {
@@ -248,8 +247,7 @@ class fanout_substitution_impl
                 // update the distribution range if available_vec size has changed
                 if (!available_vec.empty())
                 {
-                    dist.param(
-                        typename std::uniform_int_distribution<std::size_t>::param_type(0, available_vec.size() - 1));
+                    dist = std::uniform_int_distribution<std::size_t>(0, available_vec.size() - 1);
                 }
             }
             // transfer the available nodes to a queue for later use in get_fanout.

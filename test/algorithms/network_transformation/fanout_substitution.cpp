@@ -111,10 +111,10 @@ TEST_CASE("Different results for different seeds in random fanout substitution",
 
     fanout_substitution_params ps{fanout_substitution_params::substitution_strategy::RANDOM};
     ps.seed = 42;
-    mockturtle::depth_view substituted_1{fanout_substitution<technology_network>(aig, ps)};
+    const mockturtle::depth_view substituted_1{fanout_substitution<technology_network>(aig, ps)};
 
     ps.seed = 3;
-    mockturtle::depth_view substituted_2{fanout_substitution<technology_network>(aig, ps)};
+    const mockturtle::depth_view substituted_2{fanout_substitution<technology_network>(aig, ps)};
 
     CHECK(substituted_1.depth() != substituted_2.depth());
 }
