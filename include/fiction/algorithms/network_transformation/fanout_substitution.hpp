@@ -224,12 +224,10 @@ class fanout_substitution_impl
             // maintain a vector of available fanout nodes and randomly select one
             std::vector<mockturtle::signal<NtkDest>> available_vec{child};
 
-            std::uniform_int_distribution<std::size_t> dist(0, available_vec.size() - 1);
-
             for (auto f = 0u; f < num_fanouts; ++f)
             {
                 // get a random index
-                const auto index    = dist(gen);
+                const auto index    = static_cast<std::size_t>(gen()) % available_vec.size();
                 const auto selected = available_vec[index];
 
                 // remove the selected element using swap-and-pop
@@ -242,12 +240,6 @@ class fanout_substitution_impl
                 for (auto i = 0u; i < ps.degree; ++i)
                 {
                     available_vec.push_back(new_buf);
-                }
-
-                // update the distribution range if available_vec size has changed
-                if (!available_vec.empty())
-                {
-                    dist = std::uniform_int_distribution<std::size_t>(0, available_vec.size() - 1);
                 }
             }
             // transfer the available nodes to a queue for later use in get_fanout.
