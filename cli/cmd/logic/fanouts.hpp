@@ -87,7 +87,10 @@ class fanouts_command : public command
     /**
      * Random seed used for random fanout substitution
      */
-    uint32_t                            seed;
+    uint32_t seed;
+    /**
+     * Parameters.
+     */
     fiction::fanout_substitution_params ps{};
 };
 

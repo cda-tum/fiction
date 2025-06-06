@@ -86,7 +86,7 @@ struct graph_oriented_layout_design_params
          * randomized fanout substitution strategies and topological orderings. If the cost objective involves layout
          * area, number of crossings, number of wire segments, or a combination of area and crossings, a total of 96
          * search space graphs are generated. For a custom cost objective, an additional 12 graphs are created,
-         * resulting in 120 graphs in total. This mode provides the best guarantee of finding optimal solutions but
+         * resulting in 120 graphs in total. This mode has a higher chance of finding optimal solutions but
          * significantly increases runtime.
          */
         MAXIMUM_EFFORT
@@ -430,7 +430,7 @@ class topo_view : public mockturtle::immutable_view<Ntk>
         return uint32_t(std::distance(topo_order.begin(), it));
     }
 
-    [[nodiscard]] node index_to_node(uint32_t idx) const
+    [[nodiscard]] node index_to_node(const uint32_t idx) const
     {
         return topo_order.at(idx);
     }
@@ -476,7 +476,8 @@ class topo_view : public mockturtle::immutable_view<Ntk>
         if constexpr (CiToCo)
         {
             std::vector<node> starts{};
-            Ntk::foreach_ci([&](const auto& n) { starts.push_back(n); });
+            starts.reserve(Ntk::num_cis());
+            Ntk::foreach_ci([&starts](const auto& n) { starts.push_back(n); });
             if constexpr (Randomize)
             {
                 std::shuffle(starts.begin(), starts.end(), rng);
@@ -488,8 +489,9 @@ class topo_view : public mockturtle::immutable_view<Ntk>
         }
         else
         {
-            std::vector<signal> starts;
-            Ntk::foreach_co([&](const auto& f) { starts.push_back(f); });
+            std::vector<signal> starts{};
+            starts.reserve(Ntk::num_cos());
+            Ntk::foreach_co([&starts](const auto& f) { starts.push_back(f); });
             if constexpr (Randomize)
             {
                 std::shuffle(starts.begin(), starts.end(), rng);
@@ -509,7 +511,7 @@ class topo_view : public mockturtle::immutable_view<Ntk>
             // skip until all fanins are done
             bool not_ready = false;
             this->foreach_fanin(n,
-                                [&](const signal& f)
+                                [this, &not_ready](const signal& f)
                                 {
                                     if (this->visited(this->get_node(f)) != this->trav_id())
                                     {
@@ -528,8 +530,9 @@ class topo_view : public mockturtle::immutable_view<Ntk>
             // visit fanouts, maybe shuffled
             if constexpr (Randomize)
             {
-                std::vector<node> fanouts;
-                this->foreach_fanout(n, [&](const node& fo) { fanouts.push_back(fo); });
+                std::vector<node> fanouts{};
+                fanouts.reserve(this->fanout_size(n));
+                this->foreach_fanout(n, [&fanouts](const node& fo) { fanouts.push_back(fo); });
                 std::shuffle(fanouts.begin(), fanouts.end(), rng);
                 for (const auto& fo : fanouts)
                 {
@@ -538,7 +541,7 @@ class topo_view : public mockturtle::immutable_view<Ntk>
             }
             else
             {
-                this->foreach_fanout(n, [&](const node& fo) { create_topo_rec(fo); });
+                this->foreach_fanout(n, [this](const node& fo) { create_topo_rec(fo); });
             }
         }
         else
@@ -555,8 +558,9 @@ class topo_view : public mockturtle::immutable_view<Ntk>
             // visit children (fanins), maybe shuffled
             if constexpr (Randomize)
             {
-                std::vector<signal> fanins;
-                this->foreach_fanin(n, [&](const signal& f) { fanins.push_back(f); });
+                std::vector<signal> fanins{};
+                fanins.reserve(this->fanin_size(n));
+                this->foreach_fanin(n, [&fanins](const signal& f) { fanins.push_back(f); });
                 std::shuffle(fanins.begin(), fanins.end(), rng);
                 for (const auto& f : fanins)
                 {
@@ -565,7 +569,7 @@ class topo_view : public mockturtle::immutable_view<Ntk>
             }
             else
             {
-                this->foreach_fanin(n, [&](const signal& f) { create_topo_rec(this->get_node(f)); });
+                this->foreach_fanin(n, [this](const signal& f) { create_topo_rec(this->get_node(f)); });
             }
 
             // permanent mark and append
@@ -1923,6 +1927,7 @@ class graph_oriented_layout_design_impl
         // helper function to prepare nodes to place
         const auto prepare_nodes_to_place = [](auto& network, auto& nodes_to_place) noexcept
         {
+            nodes_to_place.reserve(network.size());
             network.foreach_node(
                 [&nodes_to_place, &network](const auto& n)
                 {
@@ -2092,62 +2097,51 @@ class graph_oriented_layout_design_impl
                     }
                 }
             }
+            const std::array core_objectives = {graph_oriented_layout_design_params::cost_objective::AREA,
+                                                graph_oriented_layout_design_params::cost_objective::WIRES,
+                                                graph_oriented_layout_design_params::cost_objective::CROSSINGS,
+                                                graph_oriented_layout_design_params::cost_objective::ACP};
+
+            // batch of 12 SSGs (all combinations of 3 different PI locations, 2 fanout substitution strategies, and 2
+            // topological orderings)
+            const auto ssg_batch = num_search_space_graphs_high_effort;
 
             if (ps.mode == graph_oriented_layout_design_params::effort_mode::HIGH_EFFORT)
             {
-                set_costs(0, num_search_space_graphs_high_effort, ps.cost);
+                set_costs(0, ssg_batch, ps.cost);
             }
             else
             {
-                set_costs(0, num_search_space_graphs_high_effort,
-                          graph_oriented_layout_design_params::cost_objective::AREA);
-                set_costs(num_search_space_graphs_high_effort, 2 * num_search_space_graphs_high_effort,
-                          graph_oriented_layout_design_params::cost_objective::WIRES);
-                set_costs(2 * num_search_space_graphs_high_effort, 3 * num_search_space_graphs_high_effort,
-                          graph_oriented_layout_design_params::cost_objective::CROSSINGS);
-                set_costs(3 * num_search_space_graphs_high_effort, num_search_space_graphs_highest_effort,
-                          graph_oriented_layout_design_params::cost_objective::ACP);
+                std::uint64_t offset = 0;
+
+                for (auto obj : core_objectives)
+                {
+                    set_costs(offset, offset + ssg_batch, obj);
+                    offset += ssg_batch;
+                }
 
                 if (ps.cost == graph_oriented_layout_design_params::cost_objective::CUSTOM)
                 {
-                    set_costs(num_search_space_graphs_highest_effort, num_search_space_graphs_highest_effort_custom,
+                    set_costs(offset, num_search_space_graphs_highest_effort_custom,
                               graph_oriented_layout_design_params::cost_objective::CUSTOM);
                 }
             }
             if (ps.mode == graph_oriented_layout_design_params::effort_mode::MAXIMUM_EFFORT)
             {
+                std::uint64_t offset = (ps.cost == graph_oriented_layout_design_params::cost_objective::CUSTOM) ?
+                                           num_search_space_graphs_highest_effort_custom :
+                                           num_search_space_graphs_highest_effort;
+
+                for (auto obj : core_objectives)
+                {
+                    set_costs(offset, offset + ssg_batch, obj);
+                    offset += ssg_batch;
+                }
+
                 if (ps.cost == graph_oriented_layout_design_params::cost_objective::CUSTOM)
                 {
-                    set_costs(num_search_space_graphs_highest_effort_custom,
-                              num_search_space_graphs_highest_effort_custom + num_search_space_graphs_high_effort,
-                              graph_oriented_layout_design_params::cost_objective::AREA);
-                    set_costs(num_search_space_graphs_highest_effort_custom + num_search_space_graphs_high_effort,
-                              num_search_space_graphs_highest_effort_custom + (2 * num_search_space_graphs_high_effort),
-                              graph_oriented_layout_design_params::cost_objective::WIRES);
-                    set_costs(num_search_space_graphs_highest_effort_custom + (2 * num_search_space_graphs_high_effort),
-                              num_search_space_graphs_highest_effort_custom + (3 * num_search_space_graphs_high_effort),
-                              graph_oriented_layout_design_params::cost_objective::CROSSINGS);
-                    set_costs(num_search_space_graphs_highest_effort_custom + (3 * num_search_space_graphs_high_effort),
-                              num_search_space_graphs_highest_effort_custom + (4 * num_search_space_graphs_high_effort),
-                              graph_oriented_layout_design_params::cost_objective::ACP);
-                    set_costs(num_search_space_graphs_highest_effort_custom + (4 * num_search_space_graphs_high_effort),
-                              num_search_space_graphs_maximum_effort_custom,
+                    set_costs(offset, num_search_space_graphs_maximum_effort_custom,
                               graph_oriented_layout_design_params::cost_objective::CUSTOM);
-                }
-                else
-                {
-                    set_costs(num_search_space_graphs_highest_effort,
-                              num_search_space_graphs_highest_effort + num_search_space_graphs_high_effort,
-                              graph_oriented_layout_design_params::cost_objective::AREA);
-                    set_costs(num_search_space_graphs_highest_effort + num_search_space_graphs_high_effort,
-                              num_search_space_graphs_highest_effort + (2 * num_search_space_graphs_high_effort),
-                              graph_oriented_layout_design_params::cost_objective::WIRES);
-                    set_costs(num_search_space_graphs_highest_effort + (2 * num_search_space_graphs_high_effort),
-                              num_search_space_graphs_highest_effort + (3 * num_search_space_graphs_high_effort),
-                              graph_oriented_layout_design_params::cost_objective::CROSSINGS);
-                    set_costs(num_search_space_graphs_highest_effort + (3 * num_search_space_graphs_high_effort),
-                              num_search_space_graphs_maximum_effort,
-                              graph_oriented_layout_design_params::cost_objective::ACP);
                 }
             }
         }

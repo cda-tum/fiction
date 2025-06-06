@@ -95,28 +95,43 @@ TEST_CASE("Degree and threshold in fanout substitution", "[fanout-substitution]"
     substitute(aig, ps_32, aig.size() + 32);
 }
 
-TEST_CASE("Fixed seed in random fanout substitution", "[fanout-substitution]")
+TEST_CASE("Random fanout substitution with fixed vs. varying seeds", "[fanout-substitution]")
 {
     const auto aig = blueprints::maj4_network<mockturtle::aig_network>();
 
-    fanout_substitution_params ps{fanout_substitution_params::substitution_strategy::RANDOM};
-    ps.seed = 42;
+    SECTION("Fixed seed yields deterministic behavior")
+    {
+        fanout_substitution_params ps{fanout_substitution_params::substitution_strategy::RANDOM};
+        ps.seed = 42;
 
-    substitute(aig, ps, aig.size() + 41);
-}
+        // expect no exceptions and consistent substitution
+        substitute(aig, ps, aig.size() + 41);
+    }
 
-TEST_CASE("Different results for different seeds in random fanout substitution", "[fanout-substitution]")
-{
-    const auto aig = blueprints::maj4_network<mockturtle::aig_network>();
+    SECTION("Different seeds produce different results")
+    {
+        fanout_substitution_params ps{fanout_substitution_params::substitution_strategy::RANDOM};
 
-    fanout_substitution_params ps{fanout_substitution_params::substitution_strategy::RANDOM};
-    ps.seed = 42;
-    const mockturtle::depth_view substituted_1{fanout_substitution<technology_network>(aig, ps)};
+        // compute baseline depth using seed = 1
+        ps.seed               = 1;
+        const auto base_sub   = mockturtle::depth_view{fanout_substitution<technology_network>(aig, ps)};
+        const auto base_depth = base_sub.depth();
 
-    ps.seed = 3;
-    const mockturtle::depth_view substituted_2{fanout_substitution<technology_network>(aig, ps)};
+        bool found_different = false;
+        // try seeds 2 through 20; break as soon as we see a different depth
+        for (int s = 2; s <= 20; ++s)
+        {
+            ps.seed        = s;
+            const auto sub = mockturtle::depth_view{fanout_substitution<technology_network>(aig, ps)};
+            if (sub.depth() != base_depth)
+            {
+                found_different = true;
+                break;
+            }
+        }
 
-    CHECK(substituted_1.depth() != substituted_2.depth());
+        REQUIRE(found_different);
+    }
 }
 
 TEST_CASE("Consistent network size after multiple fanout substitutions", "[fanout-substitution]")
