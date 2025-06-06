@@ -7345,13 +7345,23 @@ coordinates that need to be cleared or reset.)doc";
 
 static const char *__doc_fiction_detail_fanout_substitution_impl = R"doc()doc";
 
-static const char *__doc_fiction_detail_fanout_substitution_impl_available_fanouts = R"doc()doc";
+static const char *__doc_fiction_detail_fanout_substitution_impl_available_fanouts = R"doc(Queue map of available fanouts.)doc";
 
-static const char *__doc_fiction_detail_fanout_substitution_impl_dist = R"doc()doc";
+static const char *__doc_fiction_detail_fanout_substitution_impl_dist =
+R"doc(Uniform distribution over size_t indices for RANDOM fanout selection.
+
+After creating or removing elements from the working vector of
+available signals, this distribution is re-parametrized to span [0,
+available_size - 1].)doc";
 
 static const char *__doc_fiction_detail_fanout_substitution_impl_fanout_substitution_impl = R"doc()doc";
 
-static const char *__doc_fiction_detail_fanout_substitution_impl_gen = R"doc()doc";
+static const char *__doc_fiction_detail_fanout_substitution_impl_gen =
+R"doc(Pseudorandom number generator used for RANDOM strategy.
+
+Initialized with ps.seed if provided, otherwise seeded by
+std::random_device. Used to pick random positions when inserting
+buffers in the RANDOM strategy.)doc";
 
 static const char *__doc_fiction_detail_fanout_substitution_impl_generate_breadth_tree =
 R"doc(BREADTH-FIRST strategy: expand buffers level by level to create
@@ -7404,9 +7414,9 @@ Parameter ``num_fanouts``:
 
 static const char *__doc_fiction_detail_fanout_substitution_impl_get_fanout = R"doc()doc";
 
-static const char *__doc_fiction_detail_fanout_substitution_impl_ntk_topo = R"doc()doc";
+static const char *__doc_fiction_detail_fanout_substitution_impl_ntk_topo = R"doc(Topological view of the converted network.)doc";
 
-static const char *__doc_fiction_detail_fanout_substitution_impl_ps = R"doc()doc";
+static const char *__doc_fiction_detail_fanout_substitution_impl_ps = R"doc(Parameters controlling how fanout substitution is performed.)doc";
 
 static const char *__doc_fiction_detail_fanout_substitution_impl_run = R"doc()doc";
 
