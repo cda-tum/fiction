@@ -157,17 +157,40 @@ class fanout_substitution_impl
     }
 
   private:
+    /**
+     * Topological view of the converted network.
+     */
     mockturtle::topo_view<NtkDest> ntk_topo;
-
+    /**
+     * Type alias for mapping original nodes to new signals.
+     */
     using old2new_map = mockturtle::node_map<mockturtle::signal<NtkDest>, mockturtle::topo_view<NtkDest>>;
-
+    /**
+     * Type alias for mapping each node to a queue of buffer outputs.
+     */
     using old2new_queue_map =
         mockturtle::node_map<std::queue<mockturtle::signal<NtkDest>>, mockturtle::topo_view<NtkDest>>;
+    /**
+     * Queue map of available fanouts.
+     */
     old2new_queue_map available_fanouts;
-
+    /**
+     * Parameters controlling how fanout substitution is performed.
+     */
     const fanout_substitution_params ps;
-
-    std::mt19937                               gen;
+    /**
+     * Pseudorandom number generator used for RANDOM strategy.
+     *
+     * Initialized with ps.seed if provided, otherwise seeded by std::random_device.
+     * Used to pick random positions when inserting buffers in the RANDOM strategy.
+     */
+    std::mt19937 gen;
+    /**
+     * Uniform distribution over size_t indices for RANDOM fanout selection.
+     *
+     * After creating or removing elements from the working vector of available
+     * signals, this distribution is re-parametrized to span [0, available_size - 1].
+     */
     std::uniform_int_distribution<std::size_t> dist;
 
     void generate_fanout_tree(NtkDest& substituted, const mockturtle::node<NtkSrc>& n, const old2new_map& old2new)
@@ -196,16 +219,22 @@ class fanout_substitution_impl
         switch (ps.strategy)
         {
             case fanout_substitution_params::substitution_strategy::DEPTH:
+            {
                 generate_depth_tree(substituted, n, child, num_fanouts);
                 break;
+            }
 
             case fanout_substitution_params::substitution_strategy::BREADTH:
+            {
                 generate_breadth_tree(substituted, n, child, num_fanouts);
                 break;
+            }
 
             case fanout_substitution_params::substitution_strategy::RANDOM:
+            {
                 generate_random_tree(substituted, n, child, num_fanouts);
                 break;
+            }
         }
     }
 
