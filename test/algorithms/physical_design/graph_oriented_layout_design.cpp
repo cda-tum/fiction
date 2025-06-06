@@ -232,11 +232,10 @@ TEST_CASE("Different cost objectives", "[graph-oriented-layout-design]")
     params.mode = graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT;
 
     // array of cost objectives to iterate over
-    const std::array cost_objectives = {
-        graph_oriented_layout_design_params::cost_objective::AREA,
-        graph_oriented_layout_design_params::cost_objective::WIRES,
-        graph_oriented_layout_design_params::cost_objective::CROSSINGS,
-        graph_oriented_layout_design_params::cost_objective::ACP};
+    const std::array cost_objectives = {graph_oriented_layout_design_params::cost_objective::AREA,
+                                        graph_oriented_layout_design_params::cost_objective::WIRES,
+                                        graph_oriented_layout_design_params::cost_objective::CROSSINGS,
+                                        graph_oriented_layout_design_params::cost_objective::ACP};
 
     // loop over each cost objective
     for (const auto& cost : cost_objectives)

@@ -1901,8 +1901,7 @@ class graph_oriented_layout_design_impl
      */
     void initialize_pis_cost_and_num_expansions() noexcept
     {
-        static constexpr std::array pattern{pi_locations::TOP, pi_locations::LEFT,
-                                                             pi_locations::TOP_AND_LEFT};
+        static constexpr std::array pattern{pi_locations::TOP, pi_locations::LEFT, pi_locations::TOP_AND_LEFT};
 
         std::size_t idx = 0;  // index into the pattern
 
