@@ -7347,11 +7347,60 @@ static const char *__doc_fiction_detail_fanout_substitution_impl = R"doc()doc";
 
 static const char *__doc_fiction_detail_fanout_substitution_impl_available_fanouts = R"doc()doc";
 
+static const char *__doc_fiction_detail_fanout_substitution_impl_dist = R"doc()doc";
+
 static const char *__doc_fiction_detail_fanout_substitution_impl_fanout_substitution_impl = R"doc()doc";
 
 static const char *__doc_fiction_detail_fanout_substitution_impl_gen = R"doc()doc";
 
+static const char *__doc_fiction_detail_fanout_substitution_impl_generate_breadth_tree =
+R"doc(BREADTH-FIRST strategy: expand buffers level by level to create
+balanced fanout trees.
+
+Parameter ``substituted``:
+    The partially constructed destination network (NtkDest)
+
+Parameter ``n``:
+    The current node in the topological view (NtkSrc)
+
+Parameter ``child``:
+    The signal in substituted representing the output of node n.
+
+Parameter ``num_fanouts``:
+    Number of buffers to insert (chain length))doc";
+
+static const char *__doc_fiction_detail_fanout_substitution_impl_generate_depth_tree =
+R"doc(DEPTH-FIRST strategy: create a chain of buffers.
+
+Parameter ``substituted``:
+    The partially constructed destination network (NtkDest)
+
+Parameter ``n``:
+    The current node in the topological view (NtkSrc)
+
+Parameter ``child``:
+    The signal in substituted representing the output of node n.
+
+Parameter ``num_fanouts``:
+    Number of buffers to insert (chain length))doc";
+
 static const char *__doc_fiction_detail_fanout_substitution_impl_generate_fanout_tree = R"doc()doc";
+
+static const char *__doc_fiction_detail_fanout_substitution_impl_generate_random_tree =
+R"doc(RANDOM strategy: insert buffers at randomly chosen positions in the
+expanding tree.
+
+Parameter ``substituted``:
+    The partially constructed destination network (NtkDest)
+
+Parameter ``n``:
+    The current node in the topological view (NtkSrc)
+
+Parameter ``child``:
+    The signal in substituted representing the output of node n.
+
+Parameter ``num_fanouts``:
+    Number of buffers to insert (chain length))doc";
 
 static const char *__doc_fiction_detail_fanout_substitution_impl_get_fanout = R"doc()doc";
 
@@ -12277,8 +12326,8 @@ static const char *__doc_fiction_fanout_substitution_params_substitution_strateg
 static const char *__doc_fiction_fanout_substitution_params_substitution_strategy_DEPTH = R"doc(Depth-first substitution. Creates fanout trees with one deep branch.)doc";
 
 static const char *__doc_fiction_fanout_substitution_params_substitution_strategy_RANDOM =
-R"doc(Random substitution. Inserts buffers at random positions in the fanout
-tree.)doc";
+R"doc(Random substitution. Inserts fanout buffers at random positions in the
+fanout tree.)doc";
 
 static const char *__doc_fiction_fanout_substitution_params_threshold =
 R"doc(Maximum number of outputs any gate is allowed to have before
@@ -14176,9 +14225,9 @@ strategies and topological orderings. If the cost objective involves
 layout area, number of crossings, number of wire segments, or a
 combination of area and crossings, a total of 96 search space graphs
 are generated. For a custom cost objective, an additional 12 graphs
-are created, resulting in 120 graphs in total. This mode provides the
-best guarantee of finding optimal solutions but significantly
-increases runtime.)doc";
+are created, resulting in 120 graphs in total. This mode has a higher
+chance of finding optimal solutions but significantly increases
+runtime.)doc";
 
 static const char *__doc_fiction_graph_oriented_layout_design_params_enable_multithreading =
 R"doc(BETA feature: Flag to enable or disable multithreading during the
