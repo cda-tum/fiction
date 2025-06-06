@@ -462,7 +462,7 @@ class topo_view : public mockturtle::immutable_view<Ntk>
         topo_order.reserve(this->size());
 
         // constants and PIs in fixed order
-        auto const c0 = this->get_node(this->get_constant(false));
+        const auto c0 = this->get_node(this->get_constant(false));
         topo_order.push_back(c0);
         this->set_visited(c0, this->trav_id());
 
@@ -475,7 +475,7 @@ class topo_view : public mockturtle::immutable_view<Ntk>
         // collect starting points (COs or CIs)
         if constexpr (CiToCo)
         {
-            std::vector<node> starts;
+            std::vector<node> starts{};
             Ntk::foreach_ci([&](const auto& n) { starts.push_back(n); });
             if constexpr (Randomize)
             {
@@ -489,7 +489,7 @@ class topo_view : public mockturtle::immutable_view<Ntk>
         else
         {
             std::vector<signal> starts;
-            Ntk::foreach_co([&](auto f) { starts.push_back(f); });
+            Ntk::foreach_co([&](const auto& f) { starts.push_back(f); });
             if constexpr (Randomize)
             {
                 std::shuffle(starts.begin(), starts.end(), rng);
@@ -1901,7 +1901,7 @@ class graph_oriented_layout_design_impl
      */
     void initialize_pis_cost_and_num_expansions() noexcept
     {
-        static constexpr std::array<pi_locations, 3> pattern{pi_locations::TOP, pi_locations::LEFT,
+        static constexpr std::array pattern{pi_locations::TOP, pi_locations::LEFT,
                                                              pi_locations::TOP_AND_LEFT};
 
         std::size_t idx = 0;  // index into the pattern
@@ -1938,7 +1938,7 @@ class graph_oriented_layout_design_impl
         };
 
         // set cost objectives based on effort mode and cost objective
-        auto set_costs = [&](uint64_t start_idx, uint64_t end_idx, auto cost_objective)
+        const auto set_costs = [&](const uint64_t start_idx, const uint64_t end_idx, const auto cost_objective)
         {
             for (uint64_t i = start_idx; i < end_idx; ++i)
             {

@@ -234,7 +234,7 @@ class fanout_substitution_impl
                 available_vec[index] = available_vec.back();
                 available_vec.pop_back();
 
-                auto new_buf = substituted.create_buf(selected);
+                const auto new_buf = substituted.create_buf(selected);
 
                 // add 'ps.degree' copies of the new buffer into available_vec
                 for (auto i = 0u; i < ps.degree; ++i)
@@ -242,8 +242,8 @@ class fanout_substitution_impl
                     available_vec.push_back(new_buf);
                 }
             }
-            // transfer the available nodes to a queue for later use in get_fanout.
-            std::queue<mockturtle::signal<NtkDest>> q;
+            // transfer the available nodes to a queue for later use in get_fanout
+            std::queue<mockturtle::signal<NtkDest>> q{};
             for (auto const& sig : available_vec)
             {
                 q.push(sig);
