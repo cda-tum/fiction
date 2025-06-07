@@ -764,8 +764,22 @@ class design_sidb_gates_impl
 
 /**
  * The *SiDB Gate Designer* designs SiDB gate implementations based on a specified Boolean function, a
- * skeleton layout (can hold defects), canvas size, and a predetermined number of canvas SiDBs. Two different design
- * modes are implemented: `exhaustive` and `random design`.
+ * skeleton layout (can hold defects), canvas size, and a predetermined number of canvas SiDBs. Three different design
+ * modes are implemented: `quickcell`, `exhaustive` and `random design`.
+ *
+ * A first version of `QuickCell` was proposed in \"Towards Fast Automatic Design of Silicon Dangling Bond Logic\" by
+ * J. Drewniok, M. Walter, S. S. H. Ng, K. Walus, and R. Wille in DATE 2025
+ * (https://ieeexplore.ieee.org/abstract/document/10992885).
+ *
+ * The `Automatic Exhaustive Gate Designer` was proposed in
+ * \"Minimal Design of SiDB Gates: An Optimal Basis for Circuits Based on Silicon Dangling Bonds\" by J. Drewniok, M.
+ * Walter, and R. Wille in NANOARCH 2023 (https://dl.acm.org/doi/10.1145/3611315.3633241).
+ *
+ * The `quickcell` design mode consists of two key steps:
+ * 1. **Initial Pruning:** Efficient filtering techniques are applied to discard layouts that cannot correctly
+ * implement the specified logic.
+ * 2. **Physical Simulation:** The remaining candidate layouts undergo physical simulation to verify their
+ * operationality.
  *
  * The `exhaustive design` is composed of three steps:
  * 1. In the initial step, all possible distributions of `number_of_canvas_sidbs` SiDBs within a given canvas are
