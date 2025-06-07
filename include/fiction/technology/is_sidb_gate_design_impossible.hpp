@@ -69,18 +69,9 @@ template <typename Lyt, typename TT>
 
     for (auto i = 0u; i < spec.front().num_bits(); ++i, ++bdl_iter)
     {
-        auto charge_lyt = charge_distribution_surface<Lyt>{skeleton_with_defects, params.simulation_params};
+        auto charge_lyt = charge_distribution_surface<Lyt>{*bdl_iter, params.simulation_params};
         charge_lyt.assign_all_charge_states(sidb_charge_state::NEUTRAL);
         charge_lyt.update_after_charge_change();
-
-        skeleton_with_defects.foreach_sidb_defect(
-            [&charge_lyt](const auto& cd)
-            {
-                if (const auto& [defect_pos, defect] = cd; is_charged_defect_type(defect))
-                {
-                    charge_lyt.add_sidb_defect_to_potential_landscape(defect_pos, defect);
-                }
-            });
 
         // checks if parts of the bdl pairs are already neutrally charged due to nearby charged atomic defects.
         for (const auto& bdl : output_pairs)
