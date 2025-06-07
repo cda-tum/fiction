@@ -559,6 +559,12 @@ class design_sidb_gates_impl
         // Function to check validity and add layout to all_designs
         auto conduct_pruning_steps = [&](const Lyt& canvas_lyt)
         {
+            // If the canvas layout is empty, skip further processing
+            if (canvas_lyt.is_empty())
+            {
+                return;
+            }
+
             auto current_layout = skeleton_layout.clone();
 
             cell<Lyt> dependent_cell{};
@@ -637,11 +643,7 @@ class design_sidb_gates_impl
 
                     for (std::size_t j = start_index; j < end_index; ++j)
                     {
-                        const auto canvas_lyt = all_canvas_layouts[j];
-                        if (!canvas_lyt.is_empty())
-                        {
-                            conduct_pruning_steps(all_canvas_layouts[j]);
-                        }
+                        conduct_pruning_steps(all_canvas_layouts[j]);
                     }
                 });
         }
@@ -695,7 +697,7 @@ class design_sidb_gates_impl
      */
     [[nodiscard]] Lyt skeleton_layout_with_canvas_sidbs(const std::vector<std::size_t>& cell_indices) const noexcept
     {
-        Lyt lyt_copy{skeleton_layout.clone()};
+        auto lyt_copy = skeleton_layout.clone();
 
         for (const auto i : cell_indices)
         {

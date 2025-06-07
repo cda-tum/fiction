@@ -161,49 +161,27 @@ class cell_level_layout : public ClockedLayout
      */
     void assign_cell_type(const cell& c, const cell_type& ct) noexcept
     {
+        strg->inputs.erase(c);
+        strg->outputs.erase(c);
+
         if (Technology::is_empty_cell(ct))
         {
             strg->cell_type_map.erase(c);
             strg->cell_mode_map.erase(c);
-            strg->inputs.erase(c);
-            strg->outputs.erase(c);
+
             return;
         }
 
-        const auto is_input  = Technology::is_input_cell(ct);
-        const auto is_output = Technology::is_output_cell(ct);
+        strg->cell_type_map[c] = ct;
 
-        if (is_input)
+        if (Technology::is_input_cell(ct))
         {
             strg->inputs.insert(c);
         }
-        else
-        {
-            strg->inputs.erase(c);
-        }
-
-        if (is_output)
+        else if (Technology::is_output_cell(ct))
         {
             strg->outputs.insert(c);
         }
-        else
-        {
-            strg->outputs.erase(c);
-        }
-
-        if (!is_input && !is_output)
-        {
-            if (is_pi(c))
-            {
-                strg->inputs.erase(c);
-            }
-            if (is_po(c))
-            {
-                strg->outputs.erase(c);
-            }
-        }
-
-        strg->cell_type_map[c] = ct;
     }
     /**
      * Returns the cell type assigned to cell position `c`.
