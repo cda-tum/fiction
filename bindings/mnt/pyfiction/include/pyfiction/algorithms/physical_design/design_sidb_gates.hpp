@@ -57,7 +57,11 @@ inline void design_sidb_gates(pybind11::module& m)
                    fiction::offset::ucoord_t>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
                DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode_QUICKCELL))
         .value("RANDOM", fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::design_sidb_gates_mode::RANDOM,
-               DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode_RANDOM));
+               DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode_RANDOM))
+        .value("PRUNING_BASED",
+               fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::design_sidb_gates_mode::PRUNING_BASED);
+    // todo update docu
+    ;
     /**
      * Termination condition selector type.
      */

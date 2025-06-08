@@ -76,7 +76,15 @@ struct design_sidb_gates_params
         /**
          * Gate layouts are designed randomly.
          */
-        RANDOM
+        RANDOM,
+        /**
+         * This design approach adopts the three pruning techniques used by *QuickCell*
+         * to efficiently filter out non-operational layouts. Unlike *QuickCell*, the
+         * subsequent physical simulation step is skipped to enhance efficiency. As a result,
+         * the operational validity of the final layouts cannot be guaranteed, although a
+         * substantial portion of them are usually operational.
+         */
+        PRUNING_BASED
     };
     /**
      * Parameters for the `is_operational` function.
@@ -407,6 +415,13 @@ class design_sidb_gates_impl
             return gate_layouts;
         }
 
+        if (params.design_mode == design_sidb_gates_params<cell<Lyt>>::design_sidb_gates_mode::PRUNING_BASED)
+        {
+            // If the design mode is PRUNING_BASED, we only need to return the gate candidates that passed the pruning
+            // steps.
+            return gate_candidates;
+        }
+
         std::mutex mutex_to_protect_gate_designs{};
 
         gate_layouts.reserve(gate_candidates.size());
@@ -584,8 +599,7 @@ class design_sidb_gates_impl
 
             for (auto i = 0u; i < truth_table.front().num_bits(); ++i, ++bii)
             {
-                const auto reason_for_filtering =
-                    is_operational_impl.is_layout_invalid(bii.get_current_input_index(), cds_canvas);
+                const auto reason_for_filtering = is_operational_impl.is_layout_invalid(bii.get_current_input_index());
 
                 if (reason_for_filtering.has_value())
                 {
@@ -652,6 +666,7 @@ class design_sidb_gates_impl
 
         return gate_candidate;
     }
+
     /**
      * This function calculates all combinations of distributing a given number of SiDBs across a specified number of
      * positions in the canvas. Each combination is then used to create a gate layout candidate.
@@ -683,6 +698,7 @@ class design_sidb_gates_impl
 
         return designed_gate_layouts;
     }
+
     /**
      * This function adds SiDBs (given by indices) to the skeleton layout that is returned afterwards.
      *
@@ -705,6 +721,7 @@ class design_sidb_gates_impl
 
         return lyt_copy;
     }
+
     /**
      * This function generates canvas SiDb layouts.
      *
@@ -818,15 +835,13 @@ template <typename Lyt, typename TT>
     {
         result = p.run_automatic_exhaustive_gate_designer();
     }
-
-    else if (params.design_mode == design_sidb_gates_params<cell<Lyt>>::design_sidb_gates_mode::QUICKCELL)
-    {
-        result = p.run_quickcell();
-    }
-
-    else
+    else if (params.design_mode == design_sidb_gates_params<cell<Lyt>>::design_sidb_gates_mode::RANDOM)
     {
         result = p.run_random_design();
+    }
+    else
+    {
+        result = p.run_quickcell();
     }
 
     if (stats)
