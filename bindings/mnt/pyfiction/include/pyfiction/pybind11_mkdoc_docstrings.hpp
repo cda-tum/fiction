@@ -4697,6 +4697,14 @@ static const char *__doc_fiction_design_sidb_gates_params_design_sidb_gates_mode
 
 static const char *__doc_fiction_design_sidb_gates_params_design_sidb_gates_mode_AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER = R"doc(Gates are designed by using the *Automatic Exhaustive Gate Designer*.)doc";
 
+static const char *__doc_fiction_design_sidb_gates_params_design_sidb_gates_mode_PRUNING_BASED =
+R"doc(This design approach adopts the three pruning techniques used by
+*QuickCell* to efficiently filter out non-operational layouts. Unlike
+*QuickCell*, the subsequent physical simulation step is skipped to
+enhance efficiency. As a result, the operational validity of the final
+layouts cannot be guaranteed, although a substantial portion of them
+are usually operational.)doc";
+
 static const char *__doc_fiction_design_sidb_gates_params_design_sidb_gates_mode_QUICKCELL = R"doc(Gates are designed by using *QuickCell*.)doc";
 
 static const char *__doc_fiction_design_sidb_gates_params_design_sidb_gates_mode_RANDOM = R"doc(Gate layouts are designed randomly.)doc";
@@ -8564,8 +8572,6 @@ Returns:
     `true` if any output wire contains a kink (i.e., an unexpected
     charge state), `false` otherwise.)doc";
 
-static const char *__doc_fiction_detail_is_operational_impl_dependent_cell = R"doc(Dependent cell of the canvas SiDBs.)doc";
-
 static const char *__doc_fiction_detail_is_operational_impl_determine_non_operational_input_patterns_and_non_operationality_reason =
 R"doc(Determines the input combinations for which the layout is non-
 operational and the reason why the layout is non-operational.
@@ -8646,14 +8652,8 @@ identify and discard SiDB layouts that do not satisfy physical model
 constraints under the I/O pin conditions required for the desired
 Boolean function, and (3) detecting I/O signal instability.
 
-Template parameter ``ChargeLyt``:
-    The charge distribution surface layout type.
-
 Parameter ``input_pattern``:
     The current input pattern.
-
-Parameter ``cds_canvas``:
-    The charge distribution of the canvas layout.
 
 Returns:
     A `layout_invalidity_reason` object indicating why the layout is
