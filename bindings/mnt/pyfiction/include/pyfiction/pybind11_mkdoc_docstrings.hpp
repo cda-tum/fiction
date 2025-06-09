@@ -3414,6 +3414,21 @@ static const char *__doc_fiction_cp_and_tp_throughput =
 R"doc(Throughput of the layout in clock cycles as :math:`\frac{1}{x}` where
 only :math:`x` is stored.)doc";
 
+static const char *__doc_fiction_create_21_mux_tt =
+R"doc(Creates and returns a vector of truth tables for a 2-to-1 multiplexer
+function.
+
+This function generates a vector containing a single truth table
+representing the output of a 2-to-1 multiplexer with three input
+variables (A, B, S), where A and B are the data inputs and S is the
+select input. The truth table is created from the binary string
+"11100100", representing the output for all possible input
+combinations.
+
+Returns:
+    Vector containing a single truth table for the 2-to-1 multiplexer
+    function.)doc";
+
 static const char *__doc_fiction_create_and3_tt =
 R"doc(Creates and returns a truth table that implements the conjunction in
 three variables.
