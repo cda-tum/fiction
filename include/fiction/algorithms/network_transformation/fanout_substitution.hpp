@@ -76,6 +76,30 @@ struct fanout_substitution_params
 namespace detail
 {
 
+/**
+ * A lightweight container that groups together the two objects required for random fan-out selection and only lives
+ * when `strategy == RANDOM`.
+ */
+struct rng_state
+{
+    /**
+     * Random number generation engine that is seeded once in the constructor of `fanout_substitution_impl` and then
+     * reused for all random draws during fanout substitution.
+     */
+    std::mt19937 gen;
+    /**
+     * Uniform distribution whose parameter range is re-initialised (`dist.param({0, upper})`) every time the pool of
+     * candidate signals changes size.
+     */
+    std::uniform_int_distribution<size_t> dist{0, 0};
+    /**
+     * Default constructor.
+     *
+     * @param seed The seed for the random number generator.
+     */
+    explicit rng_state(const uint32_t seed) noexcept : gen{seed} {}
+};
+
 template <typename NtkDest, typename NtkSrc>
 class fanout_substitution_impl
 {
@@ -83,9 +107,13 @@ class fanout_substitution_impl
     fanout_substitution_impl(const NtkSrc& src, const fanout_substitution_params p) :
             ntk_topo{convert_network<NtkDest>(src)},
             available_fanouts{ntk_topo},
-            ps{p},
-            gen{p.seed.value_or(std::random_device{}())}
-    {}
+            ps{p}
+    {
+        if (ps.strategy == fanout_substitution_params::RANDOM)
+        {
+            rng.emplace(ps.seed.value_or(std::random_device{}()));
+        }
+    }
 
     NtkDest run()
     {
@@ -179,19 +207,9 @@ class fanout_substitution_impl
      */
     const fanout_substitution_params ps;
     /**
-     * Pseudorandom number generator used for RANDOM strategy.
-     *
-     * Initialized with ps.seed if provided, otherwise seeded by std::random_device.
-     * Used to pick random positions when inserting buffers in the RANDOM strategy.
+     * Optional helper struct holding the RNG and its distribution.
      */
-    std::mt19937 gen;
-    /**
-     * Uniform distribution over size_t indices for RANDOM fanout selection.
-     *
-     * After creating or removing elements from the working vector of available
-     * signals, this distribution is re-parametrized to span [0, available_size - 1].
-     */
-    std::uniform_int_distribution<std::size_t> dist;
+    std::optional<rng_state> rng;
 
     void generate_fanout_tree(NtkDest& substituted, const mockturtle::node<NtkSrc>& n, const old2new_map& old2new)
     {
@@ -318,6 +336,8 @@ class fanout_substitution_impl
     void generate_random_tree(NtkDest& substituted, const mockturtle::node<NtkSrc>& n,
                               mockturtle::signal<NtkDest>& child, const uint32_t num_fanouts)
     {
+        auto& gen  = rng->gen;
+        auto& dist = rng->dist;
         // maintain a vector of available fanout nodes and randomly select one
         std::vector<mockturtle::signal<NtkDest>> available_vec{child};
         dist.param(typename std::uniform_int_distribution<std::size_t>::param_type(0, available_vec.size() - 1));
