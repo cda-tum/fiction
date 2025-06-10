@@ -31,10 +31,10 @@ int main()  // NOLINT
 {
     experiments::experiment<std::string, uint64_t, uint64_t, uint64_t> simulation_exp{
         "benchmark",
-        "gate",    // std::string
-        "#d = 1",  // uint64_t
-        "d = 2",   // double
-        "d = 3"    // uint64_t
+        "gate",   // std::string
+        "d = 1",  // uint64_t
+        "d = 2",  // double
+        "d = 3"   // uint64_t
     };
 
     const auto truth_tables_and_names = std::array<std::pair<std::vector<tt>, std::string>, 18>{
