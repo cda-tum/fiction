@@ -39,7 +39,7 @@ namespace
  *
  * @return Vector of truth tables, each representing an output of the 2-input, 1-output function.
  */
-[[nodiscard]] inline static std::vector<kitty::dynamic_truth_table> create_truth_tables_2i1o()
+[[nodiscard]] inline std::vector<kitty::dynamic_truth_table> create_truth_tables_2i1o()
 {
     static constexpr const char* truth_table_string = "1110";
 
@@ -59,7 +59,7 @@ namespace
  *
  * @return Vector of truth tables, each representing an output of the 2-input, 2-output function.
  */
-[[nodiscard]] inline static std::vector<kitty::dynamic_truth_table> create_truth_tables_2i2o() noexcept
+[[nodiscard]] inline std::vector<kitty::dynamic_truth_table> create_truth_tables_2i2o() noexcept
 {
     static constexpr const char* truth_table_string1 = "1100";
     static constexpr const char* truth_table_string2 = "1010";
@@ -81,7 +81,7 @@ namespace
  *
  * @return Vector of truth tables, each representing an output of the 3-input, 1-output function.
  */
-[[nodiscard]] inline static std::vector<kitty::dynamic_truth_table> create_truth_tables_3i1o() noexcept
+[[nodiscard]] inline std::vector<kitty::dynamic_truth_table> create_truth_tables_3i1o() noexcept
 {
     static constexpr const char* truth_table_string = "11100100";
 
@@ -101,7 +101,7 @@ namespace
  *
  * @return Vector of truth tables, each representing an output of the 3-input, 2-output function.
  */
-[[nodiscard]] inline static std::vector<kitty::dynamic_truth_table> create_truth_tables_3i2o() noexcept
+[[nodiscard]] inline std::vector<kitty::dynamic_truth_table> create_truth_tables_3i2o() noexcept
 {
     static constexpr const char* truth_table_string1 = "11100100";
     static constexpr const char* truth_table_string2 = "11100100";
@@ -124,7 +124,7 @@ namespace
  *
  * @return Vector of truth tables, each representing an output of the 3-input, 3-output function.
  */
-[[nodiscard]] inline static std::vector<kitty::dynamic_truth_table> create_truth_tables_3i3o() noexcept
+[[nodiscard]] inline std::vector<kitty::dynamic_truth_table> create_truth_tables_3i3o() noexcept
 {
     static constexpr const char* truth_table_string1 = "11100100";
     static constexpr const char* truth_table_string2 = "11100100";
@@ -140,6 +140,7 @@ namespace
 
     return std::vector<kitty::dynamic_truth_table>{table1, table2, table3};
 }
+
 }  // end anonymous namespace
 
 int main()  // NOLINT
