@@ -60,7 +60,7 @@ inline void design_sidb_gates(pybind11::module& m)
                DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode_RANDOM))
         .value("PRUNING_ONLY",
                fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::design_sidb_gates_mode::PRUNING_ONLY,
-               DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode_PRUNING_BASED))
+               DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode_PRUNING_ONLY))
 
         ;
     /**
