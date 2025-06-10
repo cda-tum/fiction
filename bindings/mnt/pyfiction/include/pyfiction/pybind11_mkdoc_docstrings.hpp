@@ -4697,7 +4697,7 @@ static const char *__doc_fiction_design_sidb_gates_params_design_sidb_gates_mode
 
 static const char *__doc_fiction_design_sidb_gates_params_design_sidb_gates_mode_AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER = R"doc(Gates are designed by using the *Automatic Exhaustive Gate Designer*.)doc";
 
-static const char *__doc_fiction_design_sidb_gates_params_design_sidb_gates_mode_PRUNING_BASED =
+static const char *__doc_fiction_design_sidb_gates_params_design_sidb_gates_mode_PRUNING_ONLY =
 R"doc(This design approach adopts the three pruning techniques used by
 *QuickCell* to efficiently filter out non-operational layouts. Unlike
 *QuickCell*, the subsequent physical simulation step is skipped to
@@ -6116,7 +6116,7 @@ static const char *__doc_fiction_detail_design_sidb_gates_impl_all_canvas_layout
 static const char *__doc_fiction_detail_design_sidb_gates_impl_all_sidbs_in_canvas = R"doc(All cells within the canvas.)doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_convert_canvas_cell_indices_to_layout =
-R"doc(This function generates canvas SiDb layouts.
+R"doc(This function generates canvas SiDB layouts.
 
 Parameter ``cell_indices``:
     A vector of indices of cells to be added to the skeleton layout.
