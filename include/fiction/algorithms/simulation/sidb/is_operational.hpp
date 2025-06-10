@@ -590,19 +590,7 @@ class is_operational_impl
     [[nodiscard]] std::optional<double>
     is_physical_validity_feasible(charge_distribution_surface<Lyt>& cds_layout) const noexcept
     {
-        if (canvas_lyt.is_empty())
-        {
-            cds_layout.update_after_charge_change(dependent_cell_mode::FIXED,
-                                                  energy_calculation::KEEP_OLD_ENERGY_VALUE);
-
-            if (cds_layout.is_physically_valid())
-            {
-                cds_layout.recompute_electrostatic_potential_energy();
-                return cds_layout.get_electrostatic_potential_energy();
-            }
-
-            return std::nullopt;
-        }
+        assert(!canvas_lyt.is_empty() && "The canvas layout must not be empty.");
 
         auto min_energy = std::numeric_limits<double>::infinity();
 
