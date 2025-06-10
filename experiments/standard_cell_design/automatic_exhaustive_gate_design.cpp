@@ -14,7 +14,6 @@
 #include <fiction/utils/truth_table_utils.hpp>
 
 #include <fmt/format.h>
-#include <mockturtle/utils/stopwatch.hpp>
 
 #include <array>
 #include <cstdint>
@@ -23,7 +22,7 @@
 #include <utility>
 #include <vector>
 
-// This script uses the *Automatic Exhaustive Gate Designer* and tries to design gates with different numbers of SiDBs.
+// This script uses the *Automatic Exhaustive Gate Designer* and designs all gate implementations with up to 3 SiDBs.
 
 using namespace fiction;
 
