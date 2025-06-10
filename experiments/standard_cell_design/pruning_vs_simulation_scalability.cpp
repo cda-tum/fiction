@@ -13,6 +13,8 @@
 #include <fiction/types.hpp>
 
 #include <fmt/format.h>
+#include <kitty/constructors.hpp>
+#include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <chrono>
@@ -36,10 +38,13 @@ using namespace fiction;
  */
 [[nodiscard]] inline std::vector<kitty::dynamic_truth_table> create_truth_tables_2i1o()
 {
-    static constexpr const char* truth_table_string = "1110";  // Example: 2 inputs, 1 output
-    kitty::dynamic_truth_table   table{2};                     // 2 input variables
+    static constexpr const char* truth_table_string = "1110";
+
+    kitty::dynamic_truth_table table{2};
+
     kitty::create_from_binary_string(table, truth_table_string);
-    return {table};
+
+    return std::vector<kitty::dynamic_truth_table>{table};
 }
 
 /**
@@ -76,8 +81,11 @@ using namespace fiction;
 [[nodiscard]] inline std::vector<kitty::dynamic_truth_table> create_truth_tables_3i1o() noexcept
 {
     static constexpr const char* truth_table_string = "11100100";
-    kitty::dynamic_truth_table   table{3};
+
+    kitty::dynamic_truth_table table{3};
+
     kitty::create_from_binary_string(table, truth_table_string);
+
     return {table};
 }
 
@@ -115,9 +123,9 @@ using namespace fiction;
  */
 [[nodiscard]] inline std::vector<kitty::dynamic_truth_table> create_truth_tables_3i3o() noexcept
 {
-    static constexpr const char* truth_table_string1 = "11100100";  // Example output 1
-    static constexpr const char* truth_table_string2 = "11100100";  // Example output 2
-    static constexpr const char* truth_table_string3 = "11100100";  // Example output 3
+    static constexpr const char* truth_table_string1 = "11100100";
+    static constexpr const char* truth_table_string2 = "11100100";
+    static constexpr const char* truth_table_string3 = "11100100";
 
     kitty::dynamic_truth_table table1{3};
     kitty::dynamic_truth_table table2{3};
@@ -187,14 +195,14 @@ int main()  // NOLINT
     three_three.assign_cell_type({36, 11}, sidb_technology::cell_type::LOGIC);
     three_three.assign_cell_type({40, 7}, sidb_technology::cell_type::LOGIC);
 
-    std::vector<std::pair<sidb_100_cell_clk_lyt_siqad, std::vector<kitty::dynamic_truth_table>>> layouts_and_tt{
+    const std::vector<std::pair<sidb_100_cell_clk_lyt_siqad, std::vector<kitty::dynamic_truth_table>>> layouts_and_tt{
         {two_one, create_truth_tables_2i1o()},
         {two_two, create_truth_tables_2i2o()},
         {three_one, create_truth_tables_3i1o()},
         {three_two, create_truth_tables_3i2o()},
         {three_three, create_truth_tables_3i3o()}};
 
-    const std::vector<std::string> layout_names{"2i1o", "i2o", "i1o", "i2o", "i3o"};
+    const std::vector<std::string> layout_names{"2i1o", "2i2o", "3i1o", "3i2o", "3i3o"};
 
     is_operational_params operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
                                              bdl_input_iterator_params{detect_bdl_wires_params{3.0}},
