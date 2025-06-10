@@ -7347,21 +7347,7 @@ static const char *__doc_fiction_detail_fanout_substitution_impl = R"doc()doc";
 
 static const char *__doc_fiction_detail_fanout_substitution_impl_available_fanouts = R"doc(Queue map of available fanouts.)doc";
 
-static const char *__doc_fiction_detail_fanout_substitution_impl_dist =
-R"doc(Uniform distribution over size_t indices for RANDOM fanout selection.
-
-After creating or removing elements from the working vector of
-available signals, this distribution is re-parametrized to span [0,
-available_size - 1].)doc";
-
 static const char *__doc_fiction_detail_fanout_substitution_impl_fanout_substitution_impl = R"doc()doc";
-
-static const char *__doc_fiction_detail_fanout_substitution_impl_gen =
-R"doc(Pseudorandom number generator used for RANDOM strategy.
-
-Initialized with ps.seed if provided, otherwise seeded by
-std::random_device. Used to pick random positions when inserting
-buffers in the RANDOM strategy.)doc";
 
 static const char *__doc_fiction_detail_fanout_substitution_impl_generate_breadth_tree =
 R"doc(BREADTH-FIRST strategy: expand buffers level by level to create
@@ -7417,6 +7403,8 @@ static const char *__doc_fiction_detail_fanout_substitution_impl_get_fanout = R"
 static const char *__doc_fiction_detail_fanout_substitution_impl_ntk_topo = R"doc(Topological view of the converted network.)doc";
 
 static const char *__doc_fiction_detail_fanout_substitution_impl_ps = R"doc(Parameters controlling how fanout substitution is performed.)doc";
+
+static const char *__doc_fiction_detail_fanout_substitution_impl_rng = R"doc(Optional helper struct holding the RNG and its distribution.)doc";
 
 static const char *__doc_fiction_detail_fanout_substitution_impl_run = R"doc()doc";
 
@@ -10255,6 +10243,26 @@ Parameter ``cell``:
     layout against.)doc";
 
 static const char *__doc_fiction_detail_recursively_paint_edges = R"doc()doc";
+
+static const char *__doc_fiction_detail_rng_state =
+R"doc(A lightweight container that groups together the two objects required
+for random fan-out selection and only lives when `strategy == RANDOM`.)doc";
+
+static const char *__doc_fiction_detail_rng_state_dist =
+R"doc(Uniform distribution whose parameter range is re-initialised
+(`dist.param({0, upper})`) every time the pool of candidate signals
+changes size.)doc";
+
+static const char *__doc_fiction_detail_rng_state_gen =
+R"doc(Random number generation engine that is seeded once in the constructor
+of `fanout_substitution_impl` and then reused for all random draws
+during fanout substitution.)doc";
+
+static const char *__doc_fiction_detail_rng_state_rng_state =
+R"doc(Default constructor.
+
+Parameter ``seed``:
+    The seed for the random number generator.)doc";
 
 static const char *__doc_fiction_detail_routing_objective_with_fanin_update_information =
 R"doc(Encapsulates a routing objective with fanin update information.
