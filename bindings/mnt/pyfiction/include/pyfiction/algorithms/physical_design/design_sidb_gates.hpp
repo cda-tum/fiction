@@ -58,10 +58,11 @@ inline void design_sidb_gates(pybind11::module& m)
                DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode_QUICKCELL))
         .value("RANDOM", fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::design_sidb_gates_mode::RANDOM,
                DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode_RANDOM))
-        .value("PRUNING_BASED",
-               fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::design_sidb_gates_mode::PRUNING_BASED,
-               DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode_PRUNING_BASED));
-    ;
+        .value("PRUNING_ONLY",
+               fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::design_sidb_gates_mode::PRUNING_ONLY,
+               DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode_PRUNING_BASED))
+
+        ;
     /**
      * Termination condition selector type.
      */
@@ -72,7 +73,9 @@ inline void design_sidb_gates(pybind11::module& m)
             fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::termination_condition::AFTER_FIRST_SOLUTION)
         .value("ALL_COMBINATIONS_ENUMERATED",
                fiction::design_sidb_gates_params<
-                   fiction::offset::ucoord_t>::termination_condition::ALL_COMBINATIONS_ENUMERATED);
+                   fiction::offset::ucoord_t>::termination_condition::ALL_COMBINATIONS_ENUMERATED)
+
+        ;
 
     /**
      * Parameters.

@@ -1106,19 +1106,21 @@ is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational
 
     const auto logic_cells = lyt.get_cells_by_type(technology<Lyt>::cell_type::LOGIC);
 
+    // if there are logic cells, we can design the canvas layout consisting of all logic cells
     if (!logic_cells.empty() &&
         params.strategy_to_analyze_operational_status !=
             is_operational_params::operational_analysis_strategy::SIMULATION_ONLY &&
         params.op_condition == is_operational_params::operational_condition::REJECT_KINKS)
     {
-        Lyt c_lyt{};
+        Lyt canvas_lyt{};
 
+        // assign all logic cells to the canvas layout
         for (const auto& c : logic_cells)
         {
-            c_lyt.assign_cell_type(c, technology<Lyt>::cell_type::LOGIC);
+            canvas_lyt.assign_cell_type(c, technology<Lyt>::cell_type::LOGIC);
         }
 
-        detail::is_operational_impl<Lyt, TT> p{lyt, spec, params, c_lyt};
+        detail::is_operational_impl<Lyt, TT> p{lyt, spec, params, canvas_lyt};
 
         const auto [status, _] = p.run();
 

@@ -84,7 +84,7 @@ struct design_sidb_gates_params
          * the operational validity of the final layouts cannot be guaranteed, although a
          * substantial portion of them are usually operational.
          */
-        PRUNING_BASED
+        PRUNING_ONLY
     };
     /**
      * Parameters for the `is_operational` function.
@@ -417,7 +417,7 @@ class design_sidb_gates_impl
 
         if (params.design_mode == design_sidb_gates_params<cell<Lyt>>::design_sidb_gates_mode::PRUNING_BASED)
         {
-            // If the design mode is PRUNING_BASED, we only need to return the gate candidates that passed the pruning
+            // If the design mode is PRUNING_ONLY, we only need to return the gate candidates that passed the pruning
             // steps.
             return gate_candidates;
         }
@@ -723,7 +723,7 @@ class design_sidb_gates_impl
     }
 
     /**
-     * This function generates canvas SiDb layouts.
+     * This function generates canvas SiDB layouts.
      *
      * @param cell_indices A vector of indices of cells to be added to the skeleton layout.
      * @return An SiDB cell-level layout consisting of canvas SidBs.
