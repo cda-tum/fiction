@@ -415,7 +415,7 @@ class design_sidb_gates_impl
             return gate_layouts;
         }
 
-        if (params.design_mode == design_sidb_gates_params<cell<Lyt>>::design_sidb_gates_mode::PRUNING_BASED)
+        if (params.design_mode == design_sidb_gates_params<cell<Lyt>>::design_sidb_gates_mode::PRUNING_ONLY)
         {
             // If the design mode is PRUNING_ONLY, we only need to return the gate candidates that passed the pruning
             // steps.
