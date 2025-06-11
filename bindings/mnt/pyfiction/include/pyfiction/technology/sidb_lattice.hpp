@@ -45,7 +45,7 @@ void sidb_lattice(pybind11::module& m, const std::string& coord_type)
         .def(py::init<>())
         .def(py::init<const fiction::aspect_ratio<fiction::coordinate<SidbLyt>>&, const std::string&>(),
              py::arg("dimension"), py::arg("name") = "", DOC(fiction_sidb_lattice))
-        .def("clone", &py_sidb_lattice::clone)
+        .def("clone", &SidbLattice::clone)
 
         ;
 }
