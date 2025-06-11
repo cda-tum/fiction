@@ -23,16 +23,20 @@
 #include <vector>
 
 // This script uses the *Automatic Exhaustive Gate Designer* and designs all gate implementations with up to 3 SiDBs.
+// The results are presented in * \"Minimal Design of SiDB Gates: An Optimal Basis for Circuits Based on Silicon
+// Dangling Bonds\" by J. Drewniok, M. Walter, and R. Wille in NANOARCH 2023
+// (https://dl.acm.org/doi/10.1145/3611315.3633241).
 
 using namespace fiction;
 
 int main()  // NOLINT
 {
+    // "d" describes the number of canvas SiDBs used to design the gates.
     experiments::experiment<std::string, uint64_t, uint64_t, uint64_t> simulation_exp{
         "benchmark",
         "gate",   // std::string
         "d = 1",  // uint64_t
-        "d = 2",  // double
+        "d = 2",  // uint64_t
         "d = 3"   // uint64_t
     };
 
@@ -159,13 +163,11 @@ int main()  // NOLINT
                 automatic_exhaustive_design =
                     design_sidb_gates(skeleton_1i1o_diagonal, truth_table, params_1i1o_diagonal);
             }
-
             else if (gate_name == "f02")
             {
                 params_1i2o.number_of_canvas_sidbs = num_sidbs;
                 automatic_exhaustive_design        = design_sidb_gates(skeleton_1i2o, truth_table, params_1i2o);
             }
-
             else
             {
                 params_2i1o.number_of_canvas_sidbs = num_sidbs;
