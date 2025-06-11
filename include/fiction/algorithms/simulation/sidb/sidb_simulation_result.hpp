@@ -81,7 +81,7 @@ struct sidb_simulation_result
         // distributions.
         for (auto& cds : charge_distributions)
         {
-            cds.charge_distribution_to_index();
+            cds.charge_distribution_to_index_general();
             charge_indices.insert(cds.get_charge_index_and_base().first);
         }
 

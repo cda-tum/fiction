@@ -270,7 +270,7 @@ class apply_gate_library_impl
         const auto max_coord_odd_y  = rel_to_abs_cell_pos(gate_lyt, {gate_lyt.x(), first_odd_tile.y}, max_rel_coord);
 
         return aspect_ratio_t<CellLyt>{coordinate<CellLyt>{std::max(max_coord_even_y.x, max_coord_odd_y.x),
-                                                           std::max(max_coord_even_x.y, max_coord_odd_x.y)}};
+                                                           std::max(max_coord_even_x.y, max_coord_odd_x.y), gate_lyt.z()}};
     }
 };
 

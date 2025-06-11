@@ -169,6 +169,18 @@ Furthermore, if you use any of the design automation algorithms, please consider
           year={2023}
         }
 
+   .. code-block:: tex
+
+        @inproceedings{drewniok2025efficientgatedesign,
+          title={{Towards Fast Automatic Design of Silicon Dangling Bond Logic.}},
+          author={Drewniok, Jan and Walter, Marcel and Hang Ng, Samuel Sze and Walus, Konrad and Wille, Robert},
+          booktitle={Design, Automation and Test in Europe Conference \& Exhibition (DATE)},
+          year={2025}
+        }
+
+    `Gate design experiment scripts <https://github.com/cda-tum/fiction/tree/main/experiments/standard_cell_design>`_
+
+
 * :ref:`Mapping Cartesian to hexagonal layouts <hexagonalization>` (``hexagonalization``):
 
     .. code-block:: tex
@@ -196,6 +208,18 @@ Furthermore, if you use any of the design automation algorithms, please consider
 
     `Post-layout optimization experiment script <https://github.com/cda-tum/fiction/tree/main/experiments/post_layout_optimization>`_
 
+    .. code-block:: tex
+
+        @inproceedings{hofmann2025scalablepostlayout,
+          title={{Efficient and Scalable Post-Layout Optimization for Field-coupled Nanotechnologies}},
+          author={Hofmann, Simon and Walter, Marcel and Wille, Robert},
+          journal={IEEE Transactions on Computer-Aided Design of Integrated Circuits and Systems (TCAD)},
+          year={2025},
+          doi={10.1109/TCAD.2025.3549354}
+        }
+
+    `Scalable post-layout optimization experiment script <https://github.com/cda-tum/fiction/blob/main/experiments/post_layout_optimization/scalable_post_layout_optimization.cpp>`_
+
 * :ref:`Wiring reduction <wiring_reduction>` (``wiring_reduction``):
 
     .. code-block:: tex
@@ -222,6 +246,18 @@ Furthermore, if you use any of the design automation algorithms, please consider
         }
 
     `Graph-oriented layout design experiment script <https://github.com/cda-tum/fiction/tree/main/experiments/graph_oriented_layout_design>`_
+
+    .. code-block:: tex
+
+        @inproceedings{hofmann2025goldcost,
+          title={{Physical Design for Field-coupled Nanocomputing with Discretionary Cost Objectives}},
+          author={Hofmann, Simon and Walter, Marcel and Wille, Robert},
+          booktitle={IEEE CASS Latin America Symposium on Circuits and Systems (LASCAS)},
+          pages={1--5},
+          year={2025}
+        }
+
+    `Graph-oriented layout design with discretionary cost objectives experiment script <https://github.com/cda-tum/fiction/blob/main/experiments/graph_oriented_layout_design/gold_cost_objectives.cpp>`_
 
 * :ref:`SAT-based clock number assignment <determine_clocking>`:
 

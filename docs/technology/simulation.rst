@@ -45,6 +45,7 @@ distributions of the SiDBs. Charge distribution surfaces are returned by the SiD
         .. doxygenenum:: fiction::charge_index_recomputation
         .. doxygenenum:: fiction::charge_distribution_mode
         .. doxygenenum:: fiction::charge_index_mode
+        .. doxygenenum:: fiction::charge_transition_threshold_bounds
         .. doxygenclass:: fiction::charge_distribution_surface
            :members:
         .. doxygenclass:: fiction::charge_distribution_surface< Lyt, true >
@@ -83,7 +84,7 @@ Is SiDB gate design deemed impossible
 Physical Constants
 ------------------
 
-**Header:** ``fiction/technology/physical_constants.hpp``
+**Header:** ``fiction/technology/constants.hpp``
 
 .. doxygenvariable:: fiction::constants::physical::BOLTZMANN_CONSTANT
 .. doxygenvariable:: fiction::constants::physical::EV_TO_JOULE
@@ -125,7 +126,6 @@ construction, which enables the :ref:`*ClusterComplete* <clustercomplete>` exact
    :members:
 .. doxygenstruct:: fiction::sidb_cluster_projector_state
 .. doxygentypedef:: fiction::sidb_cluster_projector_state_ptr
-   :members:
 .. doxygenenum:: fiction::bound_direction
 .. doxygenfunction:: fiction::potential_bound_top
 .. doxygenfunction:: fiction::take_meet_of_potential_bounds

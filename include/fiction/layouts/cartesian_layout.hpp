@@ -940,8 +940,8 @@ class cartesian_layout
   private:
     storage strg;
     /*
-     * Initializer for a cartesian layout dimension. When using SiQAD coordinates, it will default the z value to 1 if
-     * the y value is greater than 0.
+     * Initializer for a cartesian layout dimension. When using SiQAD coordinates, it will default the z value to 1,
+     * such that only complete dimer rows are considered.
      */
     constexpr aspect_ratio_type initialize_dimension(const aspect_ratio_type& coord) const
     {

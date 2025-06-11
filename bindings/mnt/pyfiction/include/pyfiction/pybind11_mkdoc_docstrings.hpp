@@ -2762,6 +2762,18 @@ Parameter ``cs``:
 Returns:
     Integer representing the SiDB's charge state.)doc";
 
+static const char *__doc_fiction_charge_transition_threshold_bounds =
+R"doc(An enumeration of charge transition threshold bounds to test against
+for population stability assessment.)doc";
+
+static const char *__doc_fiction_charge_transition_threshold_bounds_NEGATIVE_UPPER_BOUND = R"doc(For the upper bound check against mu_minus to validate DB-.)doc";
+
+static const char *__doc_fiction_charge_transition_threshold_bounds_NEUTRAL_LOWER_BOUND = R"doc(For the lower bound check against mu_minus to validate DB0.)doc";
+
+static const char *__doc_fiction_charge_transition_threshold_bounds_NEUTRAL_UPPER_BOUND = R"doc(For the upper bound check against mu_plus to validate DB0.)doc";
+
+static const char *__doc_fiction_charge_transition_threshold_bounds_POSITIVE_LOWER_BOUND = R"doc(For the lower bound check against mu_plus to validate DB+.)doc";
+
 static const char *__doc_fiction_chebyshev_distance =
 R"doc(The Chebyshev distance :math:`D` between two layout coordinates
 :math:`(x_1, y_1)` and :math:`(x_2, y_2)` given by
@@ -4884,8 +4896,25 @@ static const char *__doc_fiction_depth_view_params_pi_cost = R"doc(Whether PIs h
 static const char *__doc_fiction_design_sidb_gates =
 R"doc(The *SiDB Gate Designer* designs SiDB gate implementations based on a
 specified Boolean function, a skeleton layout (can hold defects),
-canvas size, and a predetermined number of canvas SiDBs. Two different
-design modes are implemented: `exhaustive` and `random design`.
+canvas size, and a predetermined number of canvas SiDBs. Three
+different design modes are implemented: `quickcell`, `exhaustive` and
+`random design`.
+
+A first version of `QuickCell` was proposed in \"Towards Fast
+Automatic Design of Silicon Dangling Bond Logic\" by J. Drewniok, M.
+Walter, S. S. H. Ng, K. Walus, and R. Wille in DATE 2025
+(https://ieeexplore.ieee.org/abstract/document/10992885).
+
+The `Automatic Exhaustive Gate Designer` was proposed in \"Minimal
+Design of SiDB Gates: An Optimal Basis for Circuits Based on Silicon
+Dangling Bonds\" by J. Drewniok, M. Walter, and R. Wille in NANOARCH
+2023 (https://dl.acm.org/doi/10.1145/3611315.3633241).
+
+The `quickcell` design mode consists of two key steps: 1. **Initial
+Pruning:** Efficient filtering techniques are applied to discard
+layouts that cannot correctly implement the specified logic. 2.
+**Physical Simulation:** The remaining candidate layouts undergo
+physical simulation to verify their operationality.
 
 The `exhaustive design` is composed of three steps: 1. In the initial
 step, all possible distributions of `number_of_canvas_sidbs` SiDBs
@@ -5416,6 +5445,33 @@ population stability check. In the latter case, the configuration
 stability check is performed before the associated charge distribution
 is added to the simulation results.
 
+Parameter ``clustering_state``:
+    A clustering state that holds a specific combination of multiset
+    charge configurations as projector states of which the
+    respectively associated clusters form a clustering in the cluster
+    hierarchy.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_add_physically_valid_charge_configurations_2 =
+R"doc(This recursive function is the heart of the *ClusterComplete*
+destruction. The given clustering state is dissected at the largest
+cluster to each possible specialization of it, which then enters the
+recursive call with the clustering state modified to have a set of
+sibling children replacing their direct parent. For each
+specialization, appropriate updates are made to the potential bounds
+store that is part of the clustering state. After a specialization has
+been handled completely, i.e., when the recursive call for this
+specialization returns, the specialization to the potential bounds
+store is undone so that a new specialization may be applied.
+
+The two base cases to the recursion are as follows: (1) the charge
+distributions implied by the given clustering state do not meet the
+population stability, meaning that this branch of the search space may
+be pruned through terminating the recursion at this level, and, (2)
+the clustering state hold only singleton clusters and passes the
+population stability check. In the latter case, the configuration
+stability check is performed before the associated charge distribution
+is added to the simulation results.
+
 Parameter ``w``:
     The worker running on the current thread. It has a clustering
     state that holds a specific combination of multiset charge
@@ -5435,8 +5491,8 @@ Returns:
 static const char *__doc_fiction_detail_clustercomplete_impl_available_threads = R"doc(Number of available threads.)doc";
 
 static const char *__doc_fiction_detail_clustercomplete_impl_charge_layout =
-R"doc(The base layout, along with the map of placed defects, that are used
-to create charge distribution surface copies.)doc";
+R"doc(The base layout that is used to create charge distribution surface
+copies.)doc";
 
 static const char *__doc_fiction_detail_clustercomplete_impl_clustercomplete_impl =
 R"doc(Constructor.
@@ -5447,6 +5503,18 @@ Parameter ``lyt``:
 Parameter ``params``:
     Parameter required for both the invocation of *Ground State
     Space*, and the simulation following.)doc";
+
+static const char *__doc_fiction_detail_clustercomplete_impl_collect_physically_valid_charge_distributions_single_threaded =
+R"doc(After the *Ground State Space* construction was completed and the top
+cluster was returned, this function splits the charge space of the top
+cluster into sections for the individual threads to handle. Each are
+decomposed recursively to generate physically valid charge
+distributions that emerge from increasingly specializing multiset
+charge configurations.
+
+Parameter ``top_cluster``:
+    The top cluster that is returned by the *Ground State Space
+    construction; it contains the entire cluster hierarchy construct.)doc";
 
 static const char *__doc_fiction_detail_clustercomplete_impl_extract_work_from_top_cluster =
 R"doc(Work in the form of compositions of charge space elements of the top
@@ -5563,8 +5631,6 @@ R"doc(Globally available array of bounds that section the band gap, used for
 pruning.)doc";
 
 static const char *__doc_fiction_detail_clustercomplete_impl_mutex_to_protect_the_simulation_results = R"doc(Mutex to protect the simulation results.)doc";
-
-static const char *__doc_fiction_detail_clustercomplete_impl_real_placed_defects = R"doc(Atomic defects that are placed in the layout.)doc";
 
 static const char *__doc_fiction_detail_clustercomplete_impl_remove_composition =
 R"doc(A composition is removed from the given clustering state, i.e., the
@@ -5877,6 +5943,70 @@ Parameter ``b``:
 
 Returns:
     `true` iff `a < b` based on the aforementioned rule.)doc";
+
+static const char *__doc_fiction_detail_compute_num_inputs_left_to_middle_pi =
+R"doc(This function iterates over all primary inputs in the given Cartesian
+layout and counts those whose tile is at the western border. Such
+inputs are considered to be positioned left of the middle primary
+input when the layout is converted to a hexagonal format.
+
+Template parameter ``CartLyt``:
+    Type of the Cartesian layout.
+
+Parameter ``lyt``:
+    The Cartesian gate-level layout containing primary inputs.
+
+Returns:
+    The number of primary inputs that are placed to the left of the
+    middle primary input.)doc";
+
+static const char *__doc_fiction_detail_compute_num_inputs_right_to_middle_pi =
+R"doc(This function iterates over all primary inputs in the given Cartesian
+layout and counts those whose tiles are at the northern border. Such
+inputs are considered to be positioned right of the middle primary
+input when the layout is converted to a hexagonal format.
+
+Template parameter ``CartLyt``:
+    Type of the Cartesian layout.
+
+Parameter ``lyt``:
+    The Cartesian gate-level layout containing primary inputs.
+
+Returns:
+    The number of primary inputs that are placed to the right of the
+    middle primary input.)doc";
+
+static const char *__doc_fiction_detail_compute_num_outputs_left_to_middle_po =
+R"doc(This function iterates over all primary outputs in the given Cartesian
+layout and counts those whose tiles are at the southern border. Such
+outputs are considered to be positioned left of the middle primary
+output when the layout is converted to a hexagonal format.
+
+Template parameter ``CartLyt``:
+    Type of the Cartesian layout.
+
+Parameter ``lyt``:
+    The Cartesian gate-level layout containing primary outputs.
+
+Returns:
+    The number of primary outputs that are placed to the left of the
+    middle primary output.)doc";
+
+static const char *__doc_fiction_detail_compute_num_outputs_right_to_middle_po =
+R"doc(This function iterates over all primary outputs in the given Cartesian
+layout and counts those whose tile is at the eastern border. Such
+outputs are considered to be positioned right of the middle primary
+output when the layout is converted to a hexagonal format.
+
+Template parameter ``CartLyt``:
+    Type of the Cartesian layout.
+
+Parameter ``lyt``:
+    The Cartesian gate-level layout containing primary outputs.
+
+Returns:
+    The number of primary outputs that are placed to the right of the
+    middle primary output.)doc";
 
 static const char *__doc_fiction_detail_connect_and_place = R"doc()doc";
 
@@ -6251,8 +6381,8 @@ static const char *__doc_fiction_detail_design_sidb_gates_impl_all_canvas_layout
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_all_sidbs_in_canvas = R"doc(All cells within the canvas.)doc";
 
-static const char *__doc_fiction_detail_design_sidb_gates_impl_convert_canvas_cell_indices_to_layout =
-R"doc(This function generates canvas SiDb layouts.
+static const char *__doc_fiction_detail_design_sidb_gates_impl_design_canvas_layout =
+R"doc(This function designs canvas SiDB layouts based on given indices.
 
 Parameter ``cell_indices``:
     A vector of indices of cells to be added to the skeleton layout.
@@ -7764,8 +7894,14 @@ Parameter ``cartesian_layout_width``:
 Parameter ``cartesian_layout_height``:
     Height of the Cartesian layout.
 
+Parameter ``input_mode``:
+    Adjust offset based on PIs relocated to the top row.
+
+Parameter ``output_mode``:
+    Adjust offset based on POs relocated to the bottom row.
+
 Returns:
-    offset.)doc";
+    positive and negative offset.)doc";
 
 static const char *__doc_fiction_detail_get_path =
 R"doc(This helper function computes a path between two coordinates using the
@@ -8599,6 +8735,18 @@ Parameter ``network``:
 Returns:
     The network with virtual primary inputs removed, or the original
     network if unsupported.)doc";
+
+static const char *__doc_fiction_detail_hexagonalization_impl = R"doc()doc";
+
+static const char *__doc_fiction_detail_hexagonalization_impl_hexagonalization_impl = R"doc()doc";
+
+static const char *__doc_fiction_detail_hexagonalization_impl_layout = R"doc(The 2DDWave-clocked layout to hexagonalize.)doc";
+
+static const char *__doc_fiction_detail_hexagonalization_impl_ps = R"doc(Hexagonalization parameters.)doc";
+
+static const char *__doc_fiction_detail_hexagonalization_impl_pst = R"doc(Hexagonalization statistics.)doc";
+
+static const char *__doc_fiction_detail_hexagonalization_impl_run = R"doc()doc";
 
 static const char *__doc_fiction_detail_is_balanced_impl = R"doc()doc";
 
@@ -10305,6 +10453,42 @@ Parameter ``cell``:
     layout against.)doc";
 
 static const char *__doc_fiction_detail_recursively_paint_edges = R"doc()doc";
+
+static const char *__doc_fiction_detail_routing_objective_with_fanin_update_information =
+R"doc(Encapsulates a routing objective with fanin update information.
+
+This struct specifies a routing objective by defining the source and
+target coordinates, and it includes a flag that indicates whether the
+primary input was the first fanin for the corresponding fanout and the
+fanout gate is asymmetric (e.g., greater than). If the flag is set to
+true, the fanin signals need to be reordered.
+
+Template parameter ``HexLyt``:
+    The type of the hexagonal layout.)doc";
+
+static const char *__doc_fiction_detail_routing_objective_with_fanin_update_information_routing_objective_with_fanin_update_information =
+R"doc(Constructs a routing objective with fanin update information.
+
+Initializes the base routing objective with the given source and
+target coordinates, and sets the update flag based on the provided
+parameter.
+
+Parameter ``src``:
+    The source coordinate of the routing objective.
+
+Parameter ``tgt``:
+    The target coordinate of the routing objective.
+
+Parameter ``update``:
+    (Optional) A flag that, if true, indicates that the primary input
+    was the first fanin and the fanout gate is asymmetric, which means
+    that the fanin signals need to be reordered. Defaults to false.)doc";
+
+static const char *__doc_fiction_detail_routing_objective_with_fanin_update_information_update_first_fanin =
+R"doc(Flag indicating whether the primary input was the first fanin and the
+fanout gate is asymmetric.
+
+If this flag is true, the fanin signals need to be reordered.)doc";
 
 static const char *__doc_fiction_detail_sat_clocking_handler = R"doc()doc";
 
@@ -12238,9 +12422,6 @@ Parameter ``lyt``:
 
 Parameter ``params``:
     Simulation parameters.
-
-Parameter ``ps``:
-    Simulation statistics.
 
 Returns:
     sidb_simulation_result is returned with all results.)doc";
@@ -14181,7 +14362,10 @@ Exclusively generates 2DDWave-clocked layouts.
 This algorithm was proposed in \"A* is Born: Efficient and Scalable
 Physical Design for Field-coupled Nanocomputing\" by S. Hofmann, M.
 Walter, and R. Wille in IEEE NANO 2024
-(https://ieeexplore.ieee.org/document/10628808).
+(https://ieeexplore.ieee.org/document/10628808) and extended in
+\"Physical Design for Field-coupled Nanocomputing with Discretionary
+Cost Objectives\" by S. Hofmann, M. Walter, and R. Wille in LASCAS
+2025 (https://ieeexplore.ieee.org/document/10966234).
 
 Template parameter ``Lyt``:
     Cartesian gate-level layout type.
@@ -15717,8 +15901,46 @@ Template parameter ``CartLyt``:
 Parameter ``lyt``:
     2DDWave-clocked Cartesian gate-level layout to hexagonalize.
 
+Parameter ``params``:
+    Parameters.
+
+Parameter ``stats``:
+    Statistics.
+
 Returns:
     Hexagonal representation of the Cartesian layout.)doc";
+
+static const char *__doc_fiction_hexagonalization_io_pin_routing_error =
+R"doc(Exception thrown when an error occurs during moving inputs/outputs to
+top/bottom border and rerouting.)doc";
+
+static const char *__doc_fiction_hexagonalization_io_pin_routing_error_hexagonalization_io_pin_routing_error =
+R"doc(Constructs a `hexagonalization_io_pin_routing_error` object with the
+given error message.
+
+Parameter ``msg``:
+    The error message describing the error.)doc";
+
+static const char *__doc_fiction_hexagonalization_params =
+R"doc(This structure encapsulates settings that determine how primary inputs
+(PIs) and primary outputs (POs) are handled during the conversion from
+a Cartesian to a hexagonal layout.)doc";
+
+static const char *__doc_fiction_hexagonalization_params_input_pin_extension = R"doc(Input extension mode. Defaults to none)doc";
+
+static const char *__doc_fiction_hexagonalization_params_io_pin_extension_mode =
+R"doc(Specifies how primary inputs/outputs should be handled in the
+hexagonalization process.)doc";
+
+static const char *__doc_fiction_hexagonalization_params_io_pin_extension_mode_EXTEND = R"doc(Extend primary inputs/outputs to the top/bottom row.)doc";
+
+static const char *__doc_fiction_hexagonalization_params_io_pin_extension_mode_EXTEND_PLANAR =
+R"doc(Extend primary inputs/outputs to the top/bottom row with planar
+rerouting (i.e., without crossings).)doc";
+
+static const char *__doc_fiction_hexagonalization_params_io_pin_extension_mode_NONE = R"doc(Do not extend primary inputs/outputs to the top/bottom row (default).)doc";
+
+static const char *__doc_fiction_hexagonalization_params_output_pin_extension = R"doc(Output extension mode. Defaults to none)doc";
 
 static const char *__doc_fiction_hexagonalization_stats = R"doc(This struct stores statistics about the hexagonalization process.)doc";
 
@@ -18251,7 +18473,10 @@ static const char *__doc_fiction_post_layout_optimization =
 R"doc(A post-layout optimization algorithm as originally proposed in \"Post-
 Layout Optimization for Field-coupled Nanotechnologies\" by S.
 Hofmann, M. Walter, and R. Wille in NANOARCH 2023
-(https://dl.acm.org/doi/10.1145/3611315.3633247). It can be used to
+(https://dl.acm.org/doi/10.1145/3611315.3633247) and extended in
+\"Efficient and Scalable Post-Layout Optimization for Field-coupled
+Nanotechnologies\" by S. Hofmann, M. Walter, and R. Wille in TCAD 2025
+(https://ieeexplore.ieee.org/document/10916761). It can be used to
 reduce the area of a given sub-optimal Cartesian gate-level layout
 created by heuristics or machine learning. This optimization utilizes
 the distinct characteristics of the 2DDWave clocking scheme, which

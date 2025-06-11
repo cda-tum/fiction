@@ -5,8 +5,46 @@ All notable changes to this project will be documented in this file.
 
 The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`_.
 
+v0.6.11 - 2025-04-23
+--------------------
+
+Added
+#####
+- Algorithms:
+    - Parameters to move inputs to top border or outputs to the bottom border after ``hexagonalization``
+- Experiments:
+    - Added experiment for a comprehensive analysis of the critical temperature domain
+    - Added total simulation runtime to physical simulation experiment
+- Python bindings:
+    - Pythonic dictionary-like interface for ``operational_domain`` and ``critical_temperature_domain``
+
+Changed
+#######
+- Documentation:
+    - Modernized the documentation builds by migrating the RTD build from ``pip`` to ``uv``
+- Algorithms:
+    - Refactored ``QuickSim`` to remove magic number for upper limit calculation
+    - Refactored random layout design functions
+
+Fixed
+#####
+- Fixed a bug in the z-dimension when determining the aspect ratio for cell-level layouts
+- Fixed an issue in the TTS calculation caused by the automatic base detection being activated
+- Fixed links in the README due to the migration of the ``mqt-core`` repository to a new namespace
+- Exclude ``ClusterComplete`` from simulation engine selection when ALGBLIB is disabled
+- Fixed inconsistencies and various bugs in SiDB simulation/analysis
+- Fixed LT, LE, GT, and LE gate handling in the gate-level-layout and the corresponding read and write functions
+- Fixed a bug in the crossing count calculation of gate-level layouts
+- Increased floating point precision to avoid undetected degeneracy in the physical simulation of SiDB layouts
+
+
 v0.6.10 - 2025-02-21
 --------------------
+
+Added
+#####
+- Algorithms:
+    - Added parameters to extend the PIs to the first layout row or POs to the last layout row after ``hexagonalization``
 
 Fixed
 #####
@@ -18,7 +56,7 @@ v0.6.9 - 2025-02-12
 Added
 #####
 - Algorithms:
-    - Added ``ClusterComplete``, a novel exact physical simulator for SiDB layouts with substantially improved runtimes, allowing the simulation of multi-gate SiDB layouts.
+    - Added ``ClusterComplete``, a novel exact physical simulator for SiDB layouts with substantially improved runtimes, allowing the simulation of multi-gate SiDB layouts
     - Added temperature-aware operational domain simulation and restructured the function to simplify the integration of additional figures of merit in the future
 
 Changed
@@ -463,7 +501,7 @@ Removed
 
 v0.4.0 - 2022-01-27
 -------------------
-*There are people who think that things that happen in fiction do not really happen. These people are wrong.* --- Neil Gaiman
+*Fiction is about stuff that's screwed up.* --- Nancy Kress
 
 Added
 #####

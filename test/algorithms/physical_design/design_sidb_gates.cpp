@@ -345,7 +345,7 @@ TEST_CASE("Use FO2 Bestagon gate without SiDB at {17, 11, 0} and generate origin
     SECTION("replace the output perturbers by equivalent negatively charged defects")
     {
         design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
-            is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT},
+            is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::CLUSTERCOMPLETE},
             design_sidb_gates_params<
                 cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
             {{17, 11, 0}, {17, 11, 0}},
@@ -416,7 +416,7 @@ TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
             {{18, 8, 1}, {22, 12, 0}},
             2};
 
-        defect_layout.assign_sidb_defect({17, 10, 0},
+        defect_layout.assign_sidb_defect({14, 10, 0},
                                          sidb_defect{sidb_defect_type::DB, -1,
                                                      params.operational_params.simulation_parameters.epsilon_r,
                                                      params.operational_params.simulation_parameters.lambda_tf});
@@ -426,7 +426,7 @@ TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
         CHECK(found_gate_layouts.front().num_defects() == 1);
         CHECK(found_gate_layouts.front().num_cells() == lyt.num_cells() + 2);
 
-        found_gate_layouts.front().foreach_cell([](const auto& cell) { CHECK(cell != siqad::coord_t{16, 10, 0}); });
+        found_gate_layouts.front().foreach_cell([](const auto& cell) { CHECK(cell != siqad::coord_t{14, 10, 0}); });
 
         params.design_mode =
             design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::QUICKCELL;
@@ -437,7 +437,28 @@ TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
         CHECK(found_gate_layouts_quickcell.front().num_cells() == lyt.num_cells() + 2);
 
         found_gate_layouts_quickcell.front().foreach_cell([](const auto& cell)
-                                                          { CHECK(cell != siqad::coord_t{16, 10, 0}); });
+                                                          { CHECK(cell != siqad::coord_t{14, 10, 0}); });
+    }
+
+    SECTION("QuickCell with defect blocking canvas SiDB placement")
+    {
+        sidb_defect_surface defect_layout{lyt};
+
+        const design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
+            is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
+                                  bdl_input_iterator_params{},
+                                  is_operational_params::operational_condition::REJECT_KINKS},
+            design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::RANDOM,
+            {{14, 10, 0}, {14, 10, 0}},
+            1};
+
+        defect_layout.assign_sidb_defect({14, 10, 0},
+                                         sidb_defect{sidb_defect_type::DB, -1,
+                                                     params.operational_params.simulation_parameters.epsilon_r,
+                                                     params.operational_params.simulation_parameters.lambda_tf});
+
+        const auto found_gate_layouts = design_sidb_gates(defect_layout, std::vector<tt>{create_and_tt()}, params);
+        REQUIRE(found_gate_layouts.empty());
     }
 }
 

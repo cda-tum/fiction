@@ -5,6 +5,7 @@
 #ifndef FICTION_EXHAUSTIVE_GROUND_STATE_SIMULATION_HPP
 #define FICTION_EXHAUSTIVE_GROUND_STATE_SIMULATION_HPP
 
+#include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
@@ -29,7 +30,6 @@ namespace fiction
  * @tparam Lyt SiDB cell-level layout type.
  * @param lyt The layout to simulate.
  * @param params Simulation parameters.
- * @param ps Simulation statistics.
  * @return sidb_simulation_result is returned with all results.
  */
 template <typename Lyt>
@@ -43,12 +43,19 @@ exhaustive_ground_state_simulation(const Lyt&                        lyt,
     sidb_simulation_result<Lyt> simulation_result{};
     simulation_result.algorithm_name        = "ExGS";
     simulation_result.simulation_parameters = params;
+
+    if (lyt.num_cells() == 0)
+    {
+        return simulation_result;
+    }
+
     mockturtle::stopwatch<>::duration time_counter{};
     {
         const mockturtle::stopwatch stop{time_counter};
 
         charge_distribution_surface<Lyt> charge_lyt{lyt};
 
+        charge_lyt.set_sidb_simulation_engine(sidb_simulation_engine::EXGS);
         charge_lyt.assign_physical_parameters(params);
         charge_lyt.assign_all_charge_states(sidb_charge_state::NEGATIVE);
         charge_lyt.update_after_charge_change();

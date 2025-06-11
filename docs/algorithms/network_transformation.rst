@@ -80,4 +80,3 @@ Delete Virtual PIs
         **Header:** ``fiction/algorithms/network_transformation/delete_virtual_pis.hpp``
 
         .. doxygenfunction:: fiction::delete_virtual_pis
-           :members:

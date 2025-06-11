@@ -226,17 +226,34 @@ Generates gate-level layouts from logic network specifications by spanning a sea
 
 Possible parameters:
 
-- Timeout (``-t``), in seconds.
-- Number of expansions (``-n``) for each vertex in the search space graph, defaults to 4.
-- High effort mode (``-e``), should be set if more runtime is available to find layouts with even less area, not set by default.
-- Return first (``-r``), to return the first found layout, not set by default.
-- Planar (``-p``), should be set to create layouts without crossings, not set by default.
+- Timeout (``-t``): Timeout for the algorithm in seconds.
+- Number of vertex expansions (``-n``): Specifies the number of vertex expansions during the search for each vertex in the search space graph (defaults to ``4`` if not provided).
+- Effort mode (``-e``): Determines the computational effort used by the algorithm. Possible values are:
+    - ``0`` (``high_efficiency``): Uses minimal computational resources, resulting in fewer search space graphs and potentially lower quality solutions.
+    - ``1`` (``high_effort``): Uses increased computational resources to generate more search space graphs, thereby improving the chance of finding an optimal solution.
+    - ``2`` (``highest_effort``): Utilizes maximum computational resources to produce the most search space graphs, ensuring the highest probability of obtaining the best possible layout.
+- Cost objective (``-c``): Specifies the cost objective for the layout design. Options include:
+    - ``0`` (area): Minimize the layout area.
+    - ``1`` (wires): Minimize the number of wire segments.
+    - ``2`` (crossings): Minimize the number of crossings.
+    - ``3`` (acp): Minimize the area-crossing product (ACP), balancing area and number of crossings.
+- Return first (``-r``): Terminate the search as soon as the first valid layout is found, which reduces runtime but might sacrifice result quality.
+- Planar (``-p``): Enable planar layout generation to constrain routing to be free of crossings.
+- Multithreading (``-m``): Enable multithreading (currently a beta feature) to potentially accelerate computation.
+- Verbose (``-v``): Output detailed runtime statistics after the algorithm completes.
 
 Hexagonalization (``hex``)
 ##########################
 
 Transforms a 2DDWave-clocked Cartesian layout into a hexagonal row-clocked layout suitable for SiDBs by
 remapping all gates and wires. For more information, see `the paper <https://ieeexplore.ieee.org/document/10231278>`_.
+
+Possible parameters:
+
+- Input pin extension (``-i``): Extend primary inputs to the top row.
+- Output pin extension (``-o``): Extend primary outputs to the bottom row.
+- Planar (``-p``): If ``-i`` and/or (``-o``) is set, enforce planar rerouting when extending primary inputs and/or outputs, ensuring that the routing is free of crossings.
+- Verbose (``-v``): Output detailed runtime statistics after the algorithm completes.
 
 Post-Layout Optimization (``optimize``)
 #######################################
@@ -249,10 +266,11 @@ For more information, see `this paper <https://dl.acm.org/doi/10.1145/3611315.36
 
 Possible parameters:
 
-- Timeout (``-t``), in seconds.
-- Number of maximum gate relocations (``-m``), should be set to 1 for layouts with more than 100000 tiles, defaults to the number of tiles in the layout.
-- Wiring reduction only (``-w``), should be set for layouts with more than 20000000 tiles, not set by default.
-- Planar optimization (``-p``), should be set if during optimization, gates should only be relocated if the new wiring contains no crossings, not set by default.
+- Timeout (``-t``): Timeout for the algorithm in seconds.
+- Number of maximum gate relocations (``-m``): Should be set to ``1`` for layouts with more than 100000 tiles, defaults to the number of tiles in the layout.
+- Wiring reduction only (``-w``): Should be set for layouts with more than 20000000 tiles, not set by default.
+- Planar optimization (``-p``): Only relocate gates if the new wiring contains no crossings, not set by default.
+- Verbose (``-v``): Output detailed runtime statistics after the algorithm completes.
 
 Design rule checking (``check``)
 --------------------------------

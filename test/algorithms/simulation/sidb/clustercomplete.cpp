@@ -63,13 +63,29 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of a single SiDB", "[clustercompl
     TestType lyt{};
     lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
 
-    const clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{2, -0.32}};
+    clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{2, -0.32}};
 
-    const auto simulation_results = clustercomplete(lyt, params);
+    SECTION("Multiple threads")
+    {
+        const auto simulation_results = clustercomplete(lyt, params);
 
-    REQUIRE(simulation_results.charge_distributions.size() == 1);
-    REQUIRE(simulation_results.charge_distributions.front().num_cells() == 1);
-    CHECK(simulation_results.charge_distributions.front().get_charge_state_by_index(0) == sidb_charge_state::NEGATIVE);
+        REQUIRE(simulation_results.charge_distributions.size() == 1);
+        REQUIRE(simulation_results.charge_distributions.front().num_cells() == 1);
+        CHECK(simulation_results.charge_distributions.front().get_charge_state_by_index(0) ==
+              sidb_charge_state::NEGATIVE);
+    }
+
+    SECTION("Single thread")
+    {
+        params.available_threads = 1;
+
+        const auto simulation_results = clustercomplete(lyt, params);
+
+        REQUIRE(simulation_results.charge_distributions.size() == 1);
+        REQUIRE(simulation_results.charge_distributions.front().num_cells() == 1);
+        CHECK(simulation_results.charge_distributions.front().get_charge_state_by_index(0) ==
+              sidb_charge_state::NEGATIVE);
+    }
 }
 
 template <typename Lyt>
@@ -158,20 +174,47 @@ TEST_CASE("Exact Cluster Simulation of 2 Bestagon NAND gates", "[clustercomplete
 
     const sidb_cell_clk_lyt& cell_lyt{apply_gate_library<sidb_cell_clk_lyt, sidb_bestagon_library>(gate_lyt)};
 
-    SECTION("Base 2")
+    clustercomplete_params<> params{sidb_simulation_parameters{2}};
+
+    SECTION("Base 2, multiple threads")
     {
-        const sidb_simulation_result<sidb_cell_clk_lyt>& res =
-            clustercomplete(cell_lyt, clustercomplete_params<>{sidb_simulation_parameters{2}});
+        const sidb_simulation_result<sidb_cell_clk_lyt>& res = clustercomplete(cell_lyt, params);
 
         CHECK(res.charge_distributions.size() == 81);
         CHECK_THAT(minimum_energy(res.charge_distributions.cbegin(), res.charge_distributions.cend()),
                    Catch::Matchers::WithinAbs(1.3192717848, constants::ERROR_MARGIN));
     }
 
-    SECTION("Base 3")
+    SECTION("Base 3, multiple threads")
     {
-        const sidb_simulation_result<sidb_cell_clk_lyt>& res =
-            clustercomplete(cell_lyt, clustercomplete_params<>{sidb_simulation_parameters{3}});
+        params.simulation_parameters.base = 3;
+
+        const sidb_simulation_result<sidb_cell_clk_lyt>& res = clustercomplete(cell_lyt, params);
+
+        CHECK(res.charge_distributions.size() == 81);
+        CHECK_THAT(minimum_energy(res.charge_distributions.cbegin(), res.charge_distributions.cend()),
+                   Catch::Matchers::WithinAbs(1.3192717848, constants::ERROR_MARGIN));
+    }
+
+    // from now on, we use only one thread
+    params.available_threads = 1;
+
+    SECTION("Base 2, single thread")
+    {
+        params.simulation_parameters.base = 2;
+
+        const sidb_simulation_result<sidb_cell_clk_lyt>& res = clustercomplete(cell_lyt, params);
+
+        CHECK(res.charge_distributions.size() == 81);
+        CHECK_THAT(minimum_energy(res.charge_distributions.cbegin(), res.charge_distributions.cend()),
+                   Catch::Matchers::WithinAbs(1.3192717848, constants::ERROR_MARGIN));
+    }
+
+    SECTION("Base 3, single thread")
+    {
+        params.simulation_parameters.base = 3;
+
+        const sidb_simulation_result<sidb_cell_clk_lyt>& res = clustercomplete(cell_lyt, params);
 
         CHECK(res.charge_distributions.size() == 81);
         CHECK_THAT(minimum_energy(res.charge_distributions.cbegin(), res.charge_distributions.cend()),
@@ -421,7 +464,7 @@ TEMPLATE_TEST_CASE(
 }
 
 TEMPLATE_TEST_CASE(
-    "four SiDBs ClusterComplete simulation with one negatively charge defect (changed epsilon_r) in proximity",
+    "four SiDBs ClusterComplete simulation with one negatively charge defect (changed mu_minus) in proximity",
     "[clustercomplete]", (sidb_defect_surface<sidb_100_cell_clk_lyt_siqad>),
     (charge_distribution_surface<sidb_defect_surface<sidb_100_cell_clk_lyt_siqad>>))
 {
