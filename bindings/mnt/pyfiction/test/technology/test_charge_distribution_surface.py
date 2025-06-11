@@ -51,7 +51,6 @@ class TestChargeDistributionSurface(unittest.TestCase):
 
             self.assertEqual(charge_lyt.get_electrostatic_potential_energy(), 0)
 
-
     def test_initialization_111_lattice(self):
         for layout_one in [
             sidb_lattice((10, 10), orientation="111"),

@@ -7,8 +7,8 @@ from mnt.pyfiction import (
     quickexact,
     quickexact_params,
     read_sqd_layout_100,
-    sidb_lattice,
     sidb_charge_state,
+    sidb_lattice,
     sidb_simulation_parameters,
     sidb_technology,
 )

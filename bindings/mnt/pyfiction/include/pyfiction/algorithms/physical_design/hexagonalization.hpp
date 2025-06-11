@@ -52,7 +52,8 @@ inline void hexagonalization(pybind11::module& m)
         .def_readonly("time_total", &fiction::hexagonalization_stats::time_total,
                       DOC(fiction_hexagonalization_stats_duration));
 
-    m.def("hexagonalization", &fiction::hexagonalization<py_hexagonal_gate_layout, py_cartesian_gate_layout<py_offset_coordinate>>,
+    m.def("hexagonalization",
+          &fiction::hexagonalization<py_hexagonal_gate_layout, py_cartesian_gate_layout<py_offset_coordinate>>,
           py::arg("layout"), py::arg("parameters") = fiction::hexagonalization_params{},
           py::arg("statistics") = nullptr, DOC(fiction_hexagonalization));
 }
