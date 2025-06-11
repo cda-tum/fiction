@@ -361,7 +361,7 @@ TEMPLATE_TEST_CASE("aspect_ratio constructor and operator checks", "[coordinates
 
     SECTION("Default constructor: min == max == (0,0,0)")
     {
-        aspect_ratio ar;
+        const aspect_ratio ar;
         CHECK(ar.min.x == 0);
         CHECK(ar.min.y == 0);
         CHECK(ar.min.z == 0);
@@ -385,8 +385,8 @@ TEMPLATE_TEST_CASE("aspect_ratio constructor and operator checks", "[coordinates
 
     SECTION("Single-coordinate constructor (0,0,0) -> e")
     {
-        coord_t      e{1, 2, 1};
-        aspect_ratio ar(e);
+        const coord_t      e{1, 2, 1};
+        const aspect_ratio ar(e);
 
         // min should still be (0,0,0)
         CHECK(ar.min.x == 0);
@@ -413,7 +413,7 @@ TEMPLATE_TEST_CASE("aspect_ratio constructor and operator checks", "[coordinates
             mx = {4, 5, 1};
         }
 
-        aspect_ratio ar(mn, mx);
+        const aspect_ratio ar(mn, mx);
 
         CHECK(ar.min.x == mn.x);
         CHECK(ar.min.y == mn.y);
@@ -439,7 +439,7 @@ TEMPLATE_TEST_CASE("aspect_ratio constructor and operator checks", "[coordinates
     SECTION("Templated constructor (3D)")
     {
         // construct from integral x,y,z
-        aspect_ratio ar(10, 20, 1);
+        const aspect_ratio ar(10, 20, 1);
 
         CHECK(ar.min.x == 0);
         CHECK(ar.min.y == 0);
@@ -452,7 +452,7 @@ TEMPLATE_TEST_CASE("aspect_ratio constructor and operator checks", "[coordinates
 
     SECTION("Templated constructor (2D)")
     {
-        aspect_ratio ar(10, 20);
+        const aspect_ratio ar(10, 20);
 
         CHECK(ar.min.x == 0);
         CHECK(ar.min.y == 0);
@@ -465,9 +465,9 @@ TEMPLATE_TEST_CASE("aspect_ratio constructor and operator checks", "[coordinates
 
     SECTION("Equality and inequality")
     {
-        aspect_ratio ar1(5, 6, 1);
-        aspect_ratio ar2(5, 6, 1);
-        aspect_ratio ar3(1, 2, 1);
+        const aspect_ratio ar1(5, 6, 1);
+        const aspect_ratio ar2(5, 6, 1);
+        const aspect_ratio ar3(1, 2, 1);
 
         CHECK(ar1 == ar2);
         CHECK(ar1 != ar3);
