@@ -4,9 +4,13 @@
 
 #include <catch2/catch_template_test_macros.hpp>
 
+#include "catch2/catch_test_macros.hpp"
+
 #include <fiction/layouts/cartesian_layout.hpp>
+#include <fiction/layouts/coordinates.hpp>
 #include <fiction/traits.hpp>
 
+#include <cstdlib>
 #include <set>
 
 using namespace fiction;
@@ -348,8 +352,8 @@ TEMPLATE_TEST_CASE("Cartesian cardinal operations", "[cartesian-layout]", offset
     using coord  = typename Layout::coordinate;
     using ar_t   = typename Layout::aspect_ratio_type;
 
-    ar_t   ar{10, 10, 1};
-    Layout layout{ar};
+    const ar_t ar{10, 10, 1};
+    Layout     layout{ar};
 
     // A small helper lambda that runs repeated checks on 'adjacent' coordinates
     const auto check =
@@ -383,11 +387,11 @@ TEMPLATE_TEST_CASE("Cartesian cardinal operations", "[cartesian-layout]", offset
         CHECK(layout.is_at_any_border(border_twice));
     };
 
-    coord t{5, 5, 0};
+    const coord t{5, 5, 0};
 
-    auto  nt  = layout.north(t);
-    auto  net = layout.north_east(t);
-    coord bnt{5, 0, 0};
+    auto        nt  = layout.north(t);
+    auto        net = layout.north_east(t);
+    const coord bnt{5, 0, 0};
 
     check(t, nt, layout.north(t), bnt, layout.north(bnt));
     CHECK(layout.is_north_of(t, nt));
@@ -399,9 +403,9 @@ TEMPLATE_TEST_CASE("Cartesian cardinal operations", "[cartesian-layout]", offset
     CHECK(net == layout.north_east(t));
     CHECK(layout.north_east(bnt) == bnt);
 
-    auto  et  = layout.east(t);
-    auto  set = layout.south_east(t);
-    coord bet{10, 5, 0};
+    const auto  et  = layout.east(t);
+    const auto  set = layout.south_east(t);
+    const coord bet{10, 5, 0};
 
     check(t, et, layout.east(t), bet, layout.east(bet));
     CHECK(layout.is_east_of(t, et));
@@ -413,9 +417,9 @@ TEMPLATE_TEST_CASE("Cartesian cardinal operations", "[cartesian-layout]", offset
     CHECK(layout.south_east(t) == set);
     CHECK(layout.south_east(bet) == bet);
 
-    auto  st  = layout.south(t);
-    auto  swt = layout.south_west(t);
-    coord bst{5, 10, 0};
+    const auto  st  = layout.south(t);
+    const auto  swt = layout.south_west(t);
+    const coord bst{5, 10, 0};
 
     check(t, st, layout.south(t), bst, layout.south(bst));
     CHECK(layout.is_south_of(t, st));
@@ -427,9 +431,9 @@ TEMPLATE_TEST_CASE("Cartesian cardinal operations", "[cartesian-layout]", offset
     CHECK(layout.south_west(t) == swt);
     CHECK(layout.south_west(bst) == bst);
 
-    auto  wt  = layout.west(t);
-    auto  nwt = layout.north_west(t);
-    coord bwt{0, 5, 0};
+    const auto  wt  = layout.west(t);
+    const auto  nwt = layout.north_west(t);
+    const coord bwt{0, 5, 0};
 
     check(t, wt, layout.west(t), bwt, layout.west(bwt));
     CHECK(layout.is_west_of(t, wt));
@@ -441,8 +445,8 @@ TEMPLATE_TEST_CASE("Cartesian cardinal operations", "[cartesian-layout]", offset
     CHECK(layout.north_west(t) == nwt);
     CHECK(layout.north_west(bwt) == bwt);
 
-    coord at{5, 5, 1};
-    auto  bat = layout.above(at);
+    const coord at{5, 5, 1};
+    const auto  bat = layout.above(at);
 
     CHECK(!at.is_dead());
     CHECK(layout.is_above(t, at));
@@ -452,13 +456,13 @@ TEMPLATE_TEST_CASE("Cartesian cardinal operations", "[cartesian-layout]", offset
 
     // corner case: a planar layout with z=0
     {
-        Layout planar_layout{ar_t{1, 1, 0}};
-        auto   dat = planar_layout.above(coord{1, 1, 1});
+        const Layout planar_layout{ar_t{1, 1, 0}};
+        auto         dat = planar_layout.above(coord{1, 1, 1});
         CHECK(dat.is_dead());  // out of range => dead
     }
 
-    auto bt  = layout.below(at);
-    auto bbt = layout.below(bt);
+    const auto bt  = layout.below(at);
+    const auto bbt = layout.below(bt);
 
     CHECK(!bt.is_dead());
     CHECK(bt == t);
@@ -495,9 +499,9 @@ TEMPLATE_TEST_CASE("Cartesian cardinal operations with non-zero minimum", "[cart
 
     Layout layout{ar};
 
-    auto  mid_x = static_cast<decltype(coord::x)>((layout.x_min() + layout.x()) / 2);
-    auto  mid_y = static_cast<decltype(coord::y)>((layout.y_min() + layout.y()) / 2);
-    coord t{mid_x, mid_y, 0};
+    const auto  mid_x = static_cast<decltype(coord::x)>((layout.x_min() + layout.x()) / 2);
+    const auto  mid_y = static_cast<decltype(coord::y)>((layout.y_min() + layout.y()) / 2);
+    const coord t{mid_x, mid_y, 0};
 
     auto cardinal_check = [&](const auto& reference, const auto& adjacent1, const auto& adjacent2, const auto& border_c,
                               const auto& border_again)
@@ -530,10 +534,10 @@ TEMPLATE_TEST_CASE("Cartesian cardinal operations with non-zero minimum", "[cart
         CHECK(layout.is_at_any_border(border_again));
     };
 
-    auto nt  = layout.north(t);
-    auto net = layout.north_east(t);
+    const auto nt  = layout.north(t);
+    const auto net = layout.north_east(t);
 
-    coord nb{t.x, layout.y_min(), t.z};
+    const coord nb{t.x, layout.y_min(), t.z};
 
     cardinal_check(t,                // reference
                    nt,               // adjacent1
@@ -554,9 +558,9 @@ TEMPLATE_TEST_CASE("Cartesian cardinal operations with non-zero minimum", "[cart
         CHECK(layout.north_east(nb) == nb);
     }
 
-    auto  et  = layout.east(t);
-    auto  set = layout.south_east(t);
-    coord eb{layout.x(), t.y, t.z};
+    const auto  et  = layout.east(t);
+    const auto  set = layout.south_east(t);
+    const coord eb{layout.x(), t.y, t.z};
 
     cardinal_check(t, et, layout.east(t), eb, layout.east(eb));
 
@@ -572,9 +576,9 @@ TEMPLATE_TEST_CASE("Cartesian cardinal operations with non-zero minimum", "[cart
         CHECK(layout.south_east(eb) == eb);
     }
 
-    auto  st  = layout.south(t);
-    auto  swt = layout.south_west(t);
-    coord sb{t.x, layout.y(), t.z};
+    const auto  st  = layout.south(t);
+    const auto  swt = layout.south_west(t);
+    const coord sb{t.x, layout.y(), t.z};
 
     cardinal_check(t, st, layout.south(t), sb, layout.south(sb));
 
@@ -590,9 +594,9 @@ TEMPLATE_TEST_CASE("Cartesian cardinal operations with non-zero minimum", "[cart
         CHECK(layout.south_west(sb) == sb);
     }
 
-    auto  wt  = layout.west(t);
-    auto  nwt = layout.north_west(t);
-    coord wb{layout.x_min(), t.y, t.z};
+    const auto  wt  = layout.west(t);
+    const auto  nwt = layout.north_west(t);
+    const coord wb{layout.x_min(), t.y, t.z};
 
     cardinal_check(t, wt, layout.west(t), wb, layout.west(wb));
 
@@ -608,36 +612,36 @@ TEMPLATE_TEST_CASE("Cartesian cardinal operations with non-zero minimum", "[cart
         CHECK(layout.north_west(wb) == wb);
     }
 
-    coord t_above = layout.above(t);
+    const coord t_above = layout.above(t);
     if (t_above != t)
     {
         CHECK(!t_above.is_dead());
         CHECK(layout.is_above(t, t_above));
 
-        auto t2 = layout.above(t_above);
+        const auto t2 = layout.above(t_above);
         if (t2 != t_above)
         {
             CHECK(t2.is_dead());
         }
     }
 
-    coord t_below = layout.below(t_above);
+    const coord t_below = layout.below(t_above);
     if (t_below != t_above)
     {
         CHECK(!t_below.is_dead());
         CHECK(layout.is_below(t_above, t_below));
     }
 
-    auto            adj_vec = layout.adjacent_coordinates(t);
-    std::set<coord> adj_set(adj_vec.begin(), adj_vec.end());
+    const auto            adj_vec = layout.adjacent_coordinates(t);
+    const std::set<coord> adj_set(adj_vec.begin(), adj_vec.end());
 
     for (const auto& a : adj_set)
     {
         REQUIRE(!a.is_dead());
 
-        int dx = static_cast<int>(a.x) - static_cast<int>(t.x);
-        int dy = static_cast<int>(a.y) - static_cast<int>(t.y);
-        int dz = static_cast<int>(a.z) - static_cast<int>(t.z);
+        const auto dx = static_cast<int>(a.x) - static_cast<int>(t.x);
+        const auto dy = static_cast<int>(a.y) - static_cast<int>(t.y);
+        const auto dz = static_cast<int>(a.z) - static_cast<int>(t.z);
 
         CHECK(((abs(dx) == 1 && dy == 0 && dz == 0) || (abs(dy) == 1 && dx == 0 && dz == 0)));
     }
@@ -646,9 +650,9 @@ TEMPLATE_TEST_CASE("Cartesian cardinal operations with non-zero minimum", "[cart
         t,
         [&](const coord& ac)
         {
-            int dx = static_cast<int>(ac.x) - static_cast<int>(t.x);
-            int dy = static_cast<int>(ac.y) - static_cast<int>(t.y);
-            int dz = static_cast<int>(ac.z) - static_cast<int>(t.z);
+            const auto dx = static_cast<int>(ac.x) - static_cast<int>(t.x);
+            const auto dy = static_cast<int>(ac.y) - static_cast<int>(t.y);
+            const auto dz = static_cast<int>(ac.z) - static_cast<int>(t.z);
 
             CHECK(((abs(dx) == 1 && dy == 0 && dz == 0) || (abs(dy) == 1 && dx == 0 && dz == 0)));
         });

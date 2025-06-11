@@ -43,22 +43,28 @@ inline fiction::aspect_ratio_t<CoordLyt> extract_aspect_ratio(pybind11::tuple di
 
     // 4) dimension must be a Python tuple
     if (!py::isinstance<py::tuple>(dimension))
+    {
         throw std::runtime_error("dimension must be a tuple or nested tuples.");
+    }
 
     py::tuple  dimension_tuple = dimension.cast<py::tuple>();
-    const auto N               = dimension_tuple.size();
+    const auto dim             = dimension_tuple.size();
 
     // -- CASE A: Check if dimension_tuple is 2-length and each element is a sub-tuple => (min, max)
     //            i.e. dimension_tuple = ((xmin, ymin[, zmin]), (xmax, ymax[, zmax]))
-    if (N == 2 && py::isinstance<py::tuple>(dimension_tuple[0]) && py::isinstance<py::tuple>(dimension_tuple[1]))
+    if (dim == 2 && py::isinstance<py::tuple>(dimension_tuple[0]) && py::isinstance<py::tuple>(dimension_tuple[1]))
     {
         py::tuple tmin = dimension_tuple[0].cast<py::tuple>();
         py::tuple tmax = dimension_tuple[1].cast<py::tuple>();
 
         if (tmin.size() < 2 || tmin.size() > 3)
+        {
             throw std::runtime_error("Min tuple must have 2 or 3 elements.");
+        }
         if (tmax.size() < 2 || tmax.size() > 3)
+        {
             throw std::runtime_error("Max tuple must have 2 or 3 elements.");
+        }
 
         // parse min:
         auto xmin = get_val(tmin[0]);
@@ -82,12 +88,14 @@ inline fiction::aspect_ratio_t<CoordLyt> extract_aspect_ratio(pybind11::tuple di
     //            dimension_tuple = (x, y[, z])
     else
     {
-        if (N < 2 || N > 3)
+        if (dim < 2 || dim > 3)
+        {
             throw std::runtime_error("dimension must be (x,y) or (x,y,z) if passing only one tuple.");
+        }
 
         auto x = get_val(dimension_tuple[0]);
         auto y = get_val(dimension_tuple[1]);
-        auto z = (N == 3) ? get_val(dimension_tuple[2]) : parse_integral_t{0};
+        auto z = (dim == 3) ? get_val(dimension_tuple[2]) : parse_integral_t{0};
 
         // The aspect_ratio constructor template <X,Y,Z> aspect_ratio(X x, Y y, Z z)
         // sets min=(0,0,0) and max=(x,y,z).
