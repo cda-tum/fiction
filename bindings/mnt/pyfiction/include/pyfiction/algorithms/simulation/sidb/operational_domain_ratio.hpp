@@ -44,8 +44,8 @@ inline void compute_operational_ratio(pybind11::module& m)
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::compute_operational_ratio<py_sidb_100_lattice>(m);
-    detail::compute_operational_ratio<py_sidb_111_lattice>(m);
+    detail::compute_operational_ratio<py_sidb_100_lattice<py_offset_coordinate>>(m);
+    detail::compute_operational_ratio<py_sidb_111_lattice<py_offset_coordinate>>(m);
 }
 
 }  // namespace pyfiction

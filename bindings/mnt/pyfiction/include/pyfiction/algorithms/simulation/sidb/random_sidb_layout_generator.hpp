@@ -84,9 +84,9 @@ inline void random_sidb_layout_generator(pybind11::module& m)
                        DOC(fiction_generate_random_sidb_layout_params_maximal_attempts_for_multiple_layouts));
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
-    detail::random_layout_generator<py_sidb_100_lattice>(m);
-    detail::random_layout_generator<py_sidb_111_lattice>(m);
-    detail::random_layout_generator<py_sidb_layout>(m);
+    detail::random_layout_generator<py_sidb_100_lattice<py_offset_coordinate>>(m);
+    detail::random_layout_generator<py_sidb_111_lattice<py_offset_coordinate>>(m);
+    detail::random_layout_generator<py_sidb_layout<py_offset_coordinate>>(m);
 }
 
 }  // namespace pyfiction

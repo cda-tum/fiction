@@ -147,16 +147,23 @@ class read_sidb_surface_defects_impl
         max_cell_pos.y = static_cast<decltype(max_cell_pos.y)>(matrix_matches.empty() ? 0 : matrix_matches.size() - 1);
 
         // resize the layout to fit all surface defects
-        lyt.resize(max_cell_pos);
+        lyt.resize(aspect_ratio_t<Lyt>{max_cell_pos});
 
         return lyt;
     }
 
   private:
+    /*
+     * The layout to which the defects are added.
+     */
     sidb_defect_surface<Lyt> lyt;
-
+    /*
+     * The defect matrix read from the input stream.
+     */
     const std::string defect_matrix;
-
+    /*
+     * The maximum position of a cell in the layout.
+     */
     cell<Lyt> max_cell_pos{};
 };
 

@@ -164,6 +164,14 @@ TEST_CASE("SiQAD coordinate conversion", "[coordinates]")
     auto fiction_10 = siqad::to_fiction_coord<coordinate_fiction>(t10);
     CHECK(fiction_10.x == t10.x);
     CHECK(fiction_10.y == std::numeric_limits<int32_t>::min() + 2);
+
+    std::ostringstream os_siqad{};
+    os_siqad << coordinate{3, 2, 1};
+    CHECK(os_siqad.str() == "(3,2,1)");
+
+    std::ostringstream os_cube{};
+    os_cube << coordinate_fiction{3, 2, 1};
+    CHECK(os_cube.str() == "(3,2,1)");
 }
 
 TEST_CASE("Offset to cube coordinate conversion", "[coordinates]")
@@ -277,7 +285,7 @@ TEMPLATE_TEST_CASE("Coordinate iteration", "[coordinates]", offset::ucoord_t, cu
 
             using h_lyt = hexagonal_layout<TestType, even_row_hex>;
 
-            test_bounds_equal(h_lyt{aspect_ratio<h_lyt>{0, 1, 0}}, {0, 1, 1}, {});
+            test_bounds_equal(h_lyt{aspect_ratio_t<h_lyt>{0, 1, 0}}, {0, 1, 1}, {});
         }
         else
         {
@@ -286,35 +294,44 @@ TEMPLATE_TEST_CASE("Coordinate iteration", "[coordinates]", offset::ucoord_t, cu
             test_bounds_equal(lyt, {2, 1, 0}, {0, 0, 1});
             test_bounds_equal(lyt, {0, 2, 0}, {0, 0, 1});
 
-            test_bounds_equal(lyt_t{aspect_ratio<lyt_t>{0, 1, 0}}, {0, 1, 1}, {});
+            test_bounds_equal(lyt_t{aspect_ratio_t<lyt_t>{0, 1, 0}}, {0, 1, 1}, {});
         }
 
-        test_bounds_equal(lyt_t{aspect_ratio<lyt_t>{0, 0, 0}}, {9, 9, 9}, {});
+        test_bounds_equal(lyt_t{aspect_ratio_t<lyt_t>{0, 0, 0}}, {9, 9, 9}, {});
     }
 }
 
 TEST_CASE("Computing area and volume of offset coordinates", "[coordinates]")
 {
-    CHECK(area(offset::ucoord_t{1, 1, 1}) == 4);
-    CHECK(volume(offset::ucoord_t{1, 1, 1}) == 8);
+    CHECK(aspect_ratio(offset::ucoord_t{1, 1, 1}).area() == 4);
+    CHECK(aspect_ratio(offset::ucoord_t{1, 1}).area() == 4);
+    CHECK(aspect_ratio(offset::ucoord_t{1, 1, 0}, offset::ucoord_t{2, 2, 1}).area() == 4);
+
+    CHECK(aspect_ratio(offset::ucoord_t{1, 1, 1}).volume() == 8);
+    CHECK(aspect_ratio(offset::ucoord_t{1, 1}).volume() == 4);
+    CHECK(aspect_ratio(offset::ucoord_t{1, 1, 0}, offset::ucoord_t{2, 2, 1}).volume() == 8);
 }
 
 TEST_CASE("Computing area and volume of cube coordinates", "[coordinates]")
 {
-    CHECK(area(cube::coord_t{1, 1, 1}) == 4);
-    CHECK(area(cube::coord_t{-1, -1, -1}) == 4);
+    CHECK(aspect_ratio(cube::coord_t{1, 1, 1}).area() == 4);
+    CHECK(aspect_ratio(cube::coord_t{-1, -1, -1}).area() == 4);
+    CHECK(aspect_ratio(cube::coord_t{-1, -1, 0}, cube::coord_t{1, 1, 1}).area() == 9);
 
-    CHECK(volume(cube::coord_t{-1, -1, -1}) == 8);
-    CHECK(volume(cube::coord_t{1, 1, 1}) == 8);
+    CHECK(aspect_ratio(cube::coord_t{-1, -1, -1}).volume() == 8);
+    CHECK(aspect_ratio(cube::coord_t{1, 1, 1}).volume() == 8);
+    CHECK(aspect_ratio(cube::coord_t{-1, -1, 0}, cube::coord_t{1, 1, 1}).volume() == 18);
 }
 
 TEST_CASE("Computing area and volume of SiQAD coordinates", "[coordinates]")
 {
-    CHECK(area(siqad::coord_t{1, 1, 1}) == 8);
-    CHECK(area(siqad::coord_t{-1, -1, 1}) == 8);
+    CHECK(aspect_ratio(siqad::coord_t{1, 1, 1}).area() == 8);
+    CHECK(aspect_ratio(siqad::coord_t{-1, -1, 1}).area() == 8);
+    CHECK(aspect_ratio(siqad::coord_t{-1, -1, 0}, siqad::coord_t{1, 1, 1}).area() == 18);
 
-    CHECK(volume(siqad::coord_t{1, 1, 1}) == 8);
-    CHECK(volume(siqad::coord_t{-1, -1, 1}) == 8);
+    CHECK(aspect_ratio(siqad::coord_t{1, 1, 1}).volume() == 8);
+    CHECK(aspect_ratio(siqad::coord_t{-1, -1, 1}).volume() == 8);
+    CHECK(aspect_ratio(siqad::coord_t{-1, -1, 0}, siqad::coord_t{1, 1, 1}).volume() == 18);
 }
 
 TEST_CASE("Addition / subtraction of SiQAD coordinates", "[coordinates]")
@@ -334,6 +351,129 @@ TEST_CASE("Addition / subtraction of cube coordinates", "[coordinates]")
 
     CHECK(coord{-4, 4, -43} + coord{1, -7, 27} == coord{-3, -3, -16});
     CHECK(coord{-4, 4, 42} - coord{1, -7, 24} == coord{-5, 11, 18});
+}
+
+TEMPLATE_TEST_CASE("aspect_ratio constructor and operator checks", "[coordinates]", offset::ucoord_t, cube::coord_t,
+                   siqad::coord_t)
+{
+    using coord_t      = TestType;
+    using aspect_ratio = aspect_ratio<coord_t>;
+
+    SECTION("Default constructor: min == max == (0,0,0)")
+    {
+        const aspect_ratio ar;
+        CHECK(ar.min.x == 0);
+        CHECK(ar.min.y == 0);
+        CHECK(ar.min.z == 0);
+
+        CHECK(ar.max.x == 0);
+        CHECK(ar.max.y == 0);
+        CHECK(ar.max.z == 0);
+
+        CHECK(ar.x_min() == 0);
+        CHECK(ar.y_min() == 0);
+        CHECK(ar.z_min() == 0);
+
+        CHECK(ar.x() == 0);
+        CHECK(ar.y() == 0);
+        CHECK(ar.z() == 0);
+
+        CHECK(ar.x_size() == 0);
+        CHECK(ar.y_size() == 0);
+        CHECK(ar.z_size() == 0);
+    }
+
+    SECTION("Single-coordinate constructor (0,0,0) -> e")
+    {
+        const coord_t      e{1, 2, 1};
+        const aspect_ratio ar(e);
+
+        // min should still be (0,0,0)
+        CHECK(ar.min.x == 0);
+        CHECK(ar.min.y == 0);
+        CHECK(ar.min.z == 0);
+
+        // max should be e
+        CHECK(ar.max.x == e.x);
+        CHECK(ar.max.y == e.y);
+        CHECK(ar.max.z == e.z);
+    }
+
+    SECTION("Min/Max constructor")
+    {
+        // use different values for min and max
+        coord_t mn{-1, -2, -3};
+        coord_t mx{4, 5, 1};
+
+        // if the coordinate type is unsigned (offset::ucoord_t),
+        // negative initialization effectively becomes 0.
+        if constexpr (std::is_same_v<coord_t, offset::ucoord_t>)
+        {
+            mn = {0, 0, 0};
+            mx = {4, 5, 1};
+        }
+
+        const aspect_ratio ar(mn, mx);
+
+        CHECK(ar.min.x == mn.x);
+        CHECK(ar.min.y == mn.y);
+        CHECK(ar.min.z == mn.z);
+
+        CHECK(ar.max.x == mx.x);
+        CHECK(ar.max.y == mx.y);
+        CHECK(ar.max.z == mx.z);
+
+        // check dimension sizes
+        auto expected_x_size = (mx.x >= mn.x) ? static_cast<decltype(ar.x_size())>(mx.x - mn.x) :
+                                                static_cast<decltype(ar.x_size())>(mn.x - mx.x);
+        auto expected_y_size = (mx.y >= mn.y) ? static_cast<decltype(ar.y_size())>(mx.y - mn.y) :
+                                                static_cast<decltype(ar.y_size())>(mn.y - mx.y);
+        auto expected_z_size = (mx.z >= mn.z) ? static_cast<decltype(ar.z_size())>(mx.z - mn.z) :
+                                                static_cast<decltype(ar.y_size())>(mn.z - mx.z);
+
+        CHECK(ar.x_size() == expected_x_size);
+        CHECK(ar.y_size() == expected_y_size);
+        CHECK(ar.z_size() == expected_z_size);
+    }
+
+    SECTION("Templated constructor (3D)")
+    {
+        // construct from integral x,y,z
+        const aspect_ratio ar(10, 20, 1);
+
+        CHECK(ar.min.x == 0);
+        CHECK(ar.min.y == 0);
+        CHECK(ar.min.z == 0);
+
+        CHECK(ar.max.x == 10);
+        CHECK(ar.max.y == 20);
+        CHECK(ar.max.z == 1);
+    }
+
+    SECTION("Templated constructor (2D)")
+    {
+        const aspect_ratio ar(10, 20);
+
+        CHECK(ar.min.x == 0);
+        CHECK(ar.min.y == 0);
+        CHECK(ar.min.z == 0);
+
+        CHECK(ar.max.x == 10);
+        CHECK(ar.max.y == 20);
+        CHECK(ar.max.z == 0);  // z should be 0 in 2D
+    }
+
+    SECTION("Equality and inequality")
+    {
+        const aspect_ratio ar1(5, 6, 1);
+        const aspect_ratio ar2(5, 6, 1);
+        const aspect_ratio ar3(1, 2, 1);
+
+        CHECK(ar1 == ar2);
+        CHECK(ar1 != ar3);
+        CHECK_FALSE(ar1 == ar3);
+        CHECK_FALSE(ar1 != ar2);
+    }
 }
 
 #if defined(__GNUC__)
