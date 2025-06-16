@@ -17,6 +17,7 @@
 #include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 
+#include <array>
 #include <chrono>
 #include <cstdlib>
 #include <string>
@@ -26,7 +27,7 @@
 using namespace fiction;
 
 // This script compares the runtime of applying the three pruning techniques presented used in **QuickCell** with
-// physical simulation to determine the non-operationiolity of different standard cell layouts.
+// physical simulation to determine the non-operationality of different standard cell layouts.
 
 // Use an anonymous namespace to ensure these functions are only visible within this translation unit.
 namespace
@@ -207,7 +208,7 @@ int main()  // NOLINT
         {three_two, create_truth_tables_3i2o()},
         {three_three, create_truth_tables_3i3o()}};
 
-    const std::vector<std::string> layout_names{"2i1o", "2i2o", "3i1o", "3i2o", "3i3o"};
+    const std::array layout_names{"2i1o", "2i2o", "3i1o", "3i2o", "3i3o"};
 
     is_operational_params operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
                                              bdl_input_iterator_params{detect_bdl_wires_params{3.0}},

@@ -59,7 +59,7 @@ int main()  // NOLINT
                                                                  {std::vector<tt>{create_ite_tt()}, "ite"},
                                                                  {std::vector<tt>{create_and_xor_tt()}, "and_xor"},
                                                                  {std::vector<tt>{create_xor3_tt()}, "xor3"},
-                                                                 {std::vector<tt>{create_21_mux_tt()}, "21_mux"}}};
+                                                                 {std::vector<tt>{create_ite_tt()}, "21_mux"}}};
 
     static const std::string folder = fmt::format("{}/gate_skeletons/skeleton_3_input/", EXPERIMENTS_PATH);
 

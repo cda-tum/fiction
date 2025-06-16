@@ -411,29 +411,6 @@ namespace fiction
 
     return std::vector<kitty::dynamic_truth_table>{table1, table2};
 };
-
-/**
- * Creates and returns a vector of truth tables for a 2-to-1 multiplexer function.
- *
- * This function generates a vector containing a single truth table representing
- * the output of a 2-to-1 multiplexer with three input variables (A, B, S), where
- * A and B are the data inputs and S is the select input. The truth table is
- * created from the binary string "11100100", representing the output for all
- * possible input combinations.
- *
- * @return Vector containing a single truth table for the 2-to-1 multiplexer function.
- */
-[[nodiscard]] inline std::vector<kitty::dynamic_truth_table> create_21_mux_tt() noexcept
-{
-    static constexpr const char* truth_table_string = "11100100";
-
-    kitty::dynamic_truth_table table{3};  // 3 input variables: A, B, S
-
-    kitty::create_from_binary_string(table, truth_table_string);
-
-    return std::vector<kitty::dynamic_truth_table>{table};
-}
-
 /**
  * This function evaluates the given multi-output truth table at the given input index.
  *
