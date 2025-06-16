@@ -22,9 +22,9 @@
 #include <utility>
 #include <vector>
 
-// This script uses the *Automatic Exhaustive Gate Designer* and designs all gate implementations with up to 3 SiDBs.
-// The results are presented in * \"Minimal Design of SiDB Gates: An Optimal Basis for Circuits Based on Silicon
-// Dangling Bonds\" by J. Drewniok, M. Walter, and R. Wille in NANOARCH 2023
+// This script uses the *Automatic Exhaustive Gate Designer* and designs all gate implementations with up to 3 SiDBs for
+// the Bestagon template. The results are presented in * \"Minimal Design of SiDB Gates: An Optimal Basis for Circuits
+// Based on Silicon Dangling Bonds\" by J. Drewniok, M. Walter, and R. Wille in NANOARCH 2023
 // (https://dl.acm.org/doi/10.1145/3611315.3633241).
 
 using namespace fiction;
