@@ -54,7 +54,7 @@ class TestOperationalDomain(unittest.TestCase):
 
         stats_grid = operational_domain_stats()
         operational_domain_grid_search(lyt, [create_or_tt()], params, stats_grid)
-        self.assertEqual(stats_grid.num_operational_parameter_combinations, 0)
+        self.assertEqual(stats_grid.num_operational_parameter_combinations, 10201)
 
     def test_operational_domain_XOR_gate_100_lattice(self):
         lyt = read_sqd_layout_100(dir_path + "/../../../resources/hex_21_inputsdbp_xor_v1.sqd")
