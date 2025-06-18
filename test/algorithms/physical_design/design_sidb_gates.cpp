@@ -426,7 +426,7 @@ TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
         CHECK(found_gate_layouts.front().num_defects() == 1);
         CHECK(found_gate_layouts.front().num_cells() == lyt.num_cells() + 2);
 
-        found_gate_layouts.front().foreach_cell([](const auto& cell) { CHECK(cell != siqad::coord_t{16, 10, 0}); });
+        found_gate_layouts.front().foreach_cell([](const auto& cell) { CHECK(cell != siqad::coord_t{14, 10, 0}); });
 
         params.design_mode =
             design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::QUICKCELL;
@@ -437,7 +437,28 @@ TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
         CHECK(found_gate_layouts_quickcell.front().num_cells() == lyt.num_cells() + 2);
 
         found_gate_layouts_quickcell.front().foreach_cell([](const auto& cell)
-                                                          { CHECK(cell != siqad::coord_t{16, 10, 0}); });
+                                                          { CHECK(cell != siqad::coord_t{14, 10, 0}); });
+    }
+
+    SECTION("QuickCell with defect blocking canvas SiDB placement")
+    {
+        sidb_defect_surface defect_layout{lyt};
+
+        const design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
+            is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
+                                  bdl_input_iterator_params{},
+                                  is_operational_params::operational_condition::REJECT_KINKS},
+            design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::RANDOM,
+            {{14, 10, 0}, {14, 10, 0}},
+            1};
+
+        defect_layout.assign_sidb_defect({14, 10, 0},
+                                         sidb_defect{sidb_defect_type::DB, -1,
+                                                     params.operational_params.simulation_parameters.epsilon_r,
+                                                     params.operational_params.simulation_parameters.lambda_tf});
+
+        const auto found_gate_layouts = design_sidb_gates(defect_layout, std::vector<tt>{create_and_tt()}, params);
+        REQUIRE(found_gate_layouts.empty());
     }
 }
 
@@ -548,6 +569,22 @@ TEST_CASE("Design NOR Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
         REQUIRE(found_gate_layouts.size() <= std::thread::hardware_concurrency());
         CHECK(found_gate_layouts.front().num_cells() == lyt.num_cells() + 3);
     }
+}
+
+TEST_CASE("Design hexagonal CX gate with pruning only", "[design-sidb-gates]")
+{
+    const auto lyt = blueprints::two_input_two_output_bestagon_skeleton<sidb_100_cell_clk_lyt_siqad>();
+
+    const design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
+        is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
+                              bdl_input_iterator_params{}},
+        design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::PRUNING_ONLY,
+        {{16, 8, 0}, {22, 14, 0}},
+        3};
+
+    const auto found_gate_layouts = design_sidb_gates(lyt, std::vector<tt>{create_crossing_wire_tt()}, params);
+    REQUIRE(found_gate_layouts.size() == 3);
+    CHECK(found_gate_layouts.front().num_cells() == lyt.num_cells() + 3);
 }
 
 // to save runtime in the CI, this test is only run in RELEASE mode
