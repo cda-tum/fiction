@@ -32,66 +32,6 @@ using namespace fiction;
 // Use an anonymous namespace to ensure these functions are only visible within this translation unit.
 namespace
 {
-/**
- * Creates and returns a vector of truth tables for a 2-input, 1-output function.
- *
- * This function generates a vector of truth tables, each representing the output of a 2-input, 1-output Boolean
- * function. The function returns a vector containing one truth table.
- *
- * @return Vector of truth tables, each representing an output of the 2-input, 1-output function.
- */
-[[nodiscard]] inline std::vector<kitty::dynamic_truth_table> create_truth_tables_2i1o()
-{
-    static constexpr const char* truth_table_string = "1110";
-
-    kitty::dynamic_truth_table table{2};
-
-    kitty::create_from_binary_string(table, truth_table_string);
-
-    return std::vector<kitty::dynamic_truth_table>{table};
-}
-
-/**
- * Creates and returns a vector of truth tables for a 2-input, 2-output function.
- *
- * This function generates a vector of truth tables, each representing one of the outputs
- * of a 2-input, 2-output Boolean function. The function returns a vector containing
- * two truth tables.
- *
- * @return Vector of truth tables, each representing an output of the 2-input, 2-output function.
- */
-[[nodiscard]] inline std::vector<kitty::dynamic_truth_table> create_truth_tables_2i2o() noexcept
-{
-    static constexpr const char* truth_table_string1 = "1100";
-    static constexpr const char* truth_table_string2 = "1010";
-
-    kitty::dynamic_truth_table table1{2};
-    kitty::dynamic_truth_table table2{2};
-
-    kitty::create_from_binary_string(table1, truth_table_string1);
-    kitty::create_from_binary_string(table2, truth_table_string2);
-
-    return std::vector<kitty::dynamic_truth_table>{table1, table2};
-}
-
-/**
- * Creates and returns a vector of truth tables for a 3-input, 1-output function.
- *
- * This function generates a vector of truth tables, each representing the output of a 3-input, 1-output Boolean
- * function. The function returns a vector containing one truth table.
- *
- * @return Vector of truth tables, each representing an output of the 3-input, 1-output function.
- */
-[[nodiscard]] inline std::vector<kitty::dynamic_truth_table> create_truth_tables_3i1o() noexcept
-{
-    static constexpr const char* truth_table_string = "11100100";
-
-    kitty::dynamic_truth_table table{3};
-
-    kitty::create_from_binary_string(table, truth_table_string);
-
-    return {table};
-}
 
 /**
  * Creates and returns a vector of truth tables for a 3-input, 2-output function.
@@ -99,6 +39,8 @@ namespace
  * This function generates a vector of truth tables, each representing one of the outputs
  * of a 3-input, 2-output Boolean function. The function returns a vector containing
  * two truth tables.
+ *
+ * The two truth tables share the same output pattern, represented by the binary string "11100100".
  *
  * @return Vector of truth tables, each representing an output of the 3-input, 2-output function.
  */
@@ -122,6 +64,8 @@ namespace
  * This function generates a vector of truth tables, each representing one of the outputs
  * of a 3-input, 3-output Boolean function. The function returns a vector containing
  * three truth tables.
+ *
+ * The three truth tables share the same output pattern, represented by the binary string "11100100".
  *
  * @return Vector of truth tables, each representing an output of the 3-input, 3-output function.
  */
@@ -202,9 +146,9 @@ int main()  // NOLINT
     three_three.assign_cell_type({40, 7}, sidb_technology::cell_type::LOGIC);
 
     const std::vector<std::pair<sidb_100_cell_clk_lyt_siqad, std::vector<kitty::dynamic_truth_table>>> layouts_and_tt{
-        {two_one, create_truth_tables_2i1o()},
-        {two_two, create_truth_tables_2i2o()},
-        {three_one, create_truth_tables_3i1o()},
+        {two_one, create_or_tt()},
+        {two_two, create_crossing_wire_tt()},
+        {three_one, create_gamble_tt()},
         {three_two, create_truth_tables_3i2o()},
         {three_three, create_truth_tables_3i3o()}};
 
@@ -241,7 +185,7 @@ int main()  // NOLINT
         }
 
         simulation_exp(
-            layout_names[i],
+            layout_names.at(i),
             static_cast<double>(std::chrono::duration_cast<std::chrono::microseconds>(simulation_only_runtime).count()),
             static_cast<double>(std::chrono::duration_cast<std::chrono::microseconds>(filter_only_runtime).count()));
 
