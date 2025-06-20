@@ -13,6 +13,7 @@
 
 #include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/networks/aig.hpp>
+#include <mockturtle/views/depth_view.hpp>
 
 #include <type_traits>
 
@@ -54,9 +55,11 @@ TEST_CASE("Simple fanout substitution", "[fanout-substitution]")
 
     const fanout_substitution_params ps_depth{fanout_substitution_params::substitution_strategy::DEPTH};
     const fanout_substitution_params ps_breadth{fanout_substitution_params::substitution_strategy::BREADTH};
+    const fanout_substitution_params ps_random{fanout_substitution_params::substitution_strategy::RANDOM};
 
     substitute(tec, ps_depth, tec.size() + 3);
     substitute(tec, ps_breadth, tec.size() + 3);
+    substitute(tec, ps_random, tec.size() + 3);
 }
 
 TEST_CASE("Complex fanout substitution", "[fanout-substitution]")
@@ -66,13 +69,17 @@ TEST_CASE("Complex fanout substitution", "[fanout-substitution]")
 
     const fanout_substitution_params ps_depth{fanout_substitution_params::substitution_strategy::DEPTH};
     const fanout_substitution_params ps_breadth{fanout_substitution_params::substitution_strategy::BREADTH};
+    const fanout_substitution_params ps_random{fanout_substitution_params::substitution_strategy::RANDOM};
 
     substitute(tec, ps_depth, tec.size() + 7);
+    substitute(tec, ps_breadth, tec.size() + 7);
+    substitute(tec, ps_random, tec.size() + 7);
 
     const auto aig = blueprints::maj4_network<mockturtle::aig_network>();
     CHECK(!is_fanout_substituted(aig));
     substitute(aig, ps_depth, aig.size() + 41);
     substitute(aig, ps_breadth, aig.size() + 41);
+    substitute(aig, ps_random, aig.size() + 41);
 }
 
 TEST_CASE("Degree and threshold in fanout substitution", "[fanout-substitution]")
@@ -81,9 +88,50 @@ TEST_CASE("Degree and threshold in fanout substitution", "[fanout-substitution]"
 
     const fanout_substitution_params ps_31{fanout_substitution_params::substitution_strategy::BREADTH, 3, 1};
     const fanout_substitution_params ps_22{fanout_substitution_params::substitution_strategy::DEPTH, 2, 2};
+    const fanout_substitution_params ps_32{fanout_substitution_params::substitution_strategy::RANDOM, 3, 2};
 
     substitute(aig, ps_31, aig.size() + 35);
     substitute(aig, ps_22, aig.size() + 34);
+    substitute(aig, ps_32, aig.size() + 32);
+}
+
+TEST_CASE("Random fanout substitution with fixed vs. varying seeds", "[fanout-substitution]")
+{
+    const auto aig = blueprints::maj4_network<mockturtle::aig_network>();
+
+    SECTION("Fixed seed yields deterministic behavior")
+    {
+        fanout_substitution_params ps{fanout_substitution_params::substitution_strategy::RANDOM};
+        ps.seed = 42;
+
+        // expect no exceptions and consistent substitution
+        substitute(aig, ps, aig.size() + 41);
+    }
+
+    SECTION("Different seeds produce different results")
+    {
+        fanout_substitution_params ps{fanout_substitution_params::substitution_strategy::RANDOM};
+
+        // compute baseline depth using seed = 1
+        ps.seed               = 1;
+        const auto base_sub   = mockturtle::depth_view{fanout_substitution<technology_network>(aig, ps)};
+        const auto base_depth = base_sub.depth();
+
+        bool found_different = false;
+        // try seeds 2 through 20; break as soon as we see a different depth
+        for (auto s = 2u; s <= 20u; ++s)
+        {
+            ps.seed        = s;
+            const auto sub = mockturtle::depth_view{fanout_substitution<technology_network>(aig, ps)};
+            if (sub.depth() != base_depth)
+            {
+                found_different = true;
+                break;
+            }
+        }
+
+        REQUIRE(found_different);
+    }
 }
 
 TEST_CASE("Consistent network size after multiple fanout substitutions", "[fanout-substitution]")
