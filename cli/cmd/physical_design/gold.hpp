@@ -12,6 +12,7 @@
 #include <alice/alice.hpp>
 #include <nlohmann/json.hpp>
 
+#include <cstdint>
 #include <iostream>
 #include <memory>
 #include <variant>
@@ -48,10 +49,12 @@ class gold_command : public command
             "and potentially lower quality solutions.\n"
             " - `1` (high_effort): Uses more computational resources, creating more search space graphs to "
             "improve the likelihood of finding optimal solutions.\n"
-            " - `2` (highest_effort): Uses the maximum computational resources, generating the most search "
+            " - `2` (highest_effort): Uses even more computational resources, generating four to five times as many "
+            "search space graphs compared to high-effort mode.\n"
+            " - `3` (maximum_effort): Uses the maximum computational resources, generating the most search "
             "space graphs to ensure the highest chance of finding the best solution.",
             true)
-            ->set_type_name("{high_efficiency=0, high_effort=1, highest_effort=2}");
+            ->set_type_name("{high_efficiency=0, high_effort=1, highest_effort=2, maximum_effort=3}");
         add_option("--cost_objective,-c", ps.cost,
                    "Specify the cost objective for the graph-oriented layout design algorithm."
                    "Possible values for the cost objective:\n"
@@ -65,6 +68,9 @@ class gold_command : public command
         add_flag("--planar,-p", ps.planar, "Enable planar layout generation");
         add_flag("--multithreading,-m", ps.enable_multithreading, "Enable multithreading (beta feature)");
         add_flag("--verbose,-v", ps.verbose, "Be verbose");
+        add_option("--seed, -s", seed,
+                   "Random seed used for random fanout substitution and random topological ordering in"
+                   "maximum-effort mode.");
     }
 
   protected:
@@ -94,6 +100,11 @@ class gold_command : public command
             ps.timeout *= 1000;
         }
 
+        if (is_set("seed"))
+        {
+            ps.seed = seed;
+        }
+
         graph_oriented_layout_design<fiction::cart_gate_clk_lyt>();
 
         ps = {};
@@ -115,6 +126,10 @@ class gold_command : public command
     }
 
   private:
+    /**
+     * Random seed used for random fanout substitution and random topological ordering in maximum-effort mode.
+     */
+    uint32_t seed;
     /**
      * Parameters.
      */
