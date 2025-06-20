@@ -11,6 +11,7 @@
 #include <fiction/io/read_sqd_layout.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/types.hpp>
+#include <fiction/utils/truth_table_utils.hpp>
 
 #include <fmt/format.h>
 #include <kitty/constructors.hpp>
@@ -145,12 +146,12 @@ int main()  // NOLINT
     three_three.assign_cell_type({36, 11}, sidb_technology::cell_type::LOGIC);
     three_three.assign_cell_type({40, 7}, sidb_technology::cell_type::LOGIC);
 
-    const std::vector<std::pair<sidb_100_cell_clk_lyt_siqad, std::vector<kitty::dynamic_truth_table>>> layouts_and_tt{
-        {two_one, create_or_tt()},
-        {two_two, create_crossing_wire_tt()},
-        {three_one, create_gamble_tt()},
-        {three_two, create_truth_tables_3i2o()},
-        {three_three, create_truth_tables_3i3o()}};
+    const std::vector<std::pair<sidb_100_cell_clk_lyt_siqad, std::vector<kitty::dynamic_truth_table>>>
+        layout_truth_table{{two_one, {create_or_tt()}},
+                           {two_two, create_crossing_wire_tt()},
+                           {three_one, {create_gamble_tt()}},
+                           {three_two, create_truth_tables_3i2o()},
+                           {three_three, create_truth_tables_3i3o()}};
 
     const std::array layout_names{"2i1o", "2i2o", "3i1o", "3i2o", "3i3o"};
 
@@ -159,9 +160,9 @@ int main()  // NOLINT
                                              is_operational_params::operational_condition::REJECT_KINKS,
                                              is_operational_params::operational_analysis_strategy::SIMULATION_ONLY};
 
-    for (size_t i = 0; i < layouts_and_tt.size(); ++i)
+    for (size_t i = 0; i < layout_truth_table.size(); ++i)
     {
-        const auto& [layout, truth_table] = layouts_and_tt[i];
+        const auto& [layout, truth_table] = layout_truth_table[i];
 
         // Set to SIMULATION_ONLY and measure time
         operational_params.strategy_to_analyze_operational_status =
