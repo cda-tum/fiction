@@ -75,8 +75,8 @@ inline void time_to_solution(pybind11::module& m)
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::time_to_solution<py_sidb_100_lattice>(m);
-    detail::time_to_solution<py_sidb_111_lattice>(m);
+    detail::time_to_solution<py_sidb_100_lattice<py_offset_coordinate>>(m);
+    detail::time_to_solution<py_sidb_111_lattice<py_offset_coordinate>>(m);
 }
 
 }  // namespace pyfiction

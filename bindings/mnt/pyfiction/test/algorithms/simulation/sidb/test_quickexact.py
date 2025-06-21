@@ -3,14 +3,12 @@ import unittest
 
 from mnt.pyfiction import (
     automatic_base_number_detection,
-    charge_distribution_surface_100,
-    charge_distribution_surface_111,
+    charge_distribution_surface,
     quickexact,
     quickexact_params,
     read_sqd_layout_100,
-    sidb_100_lattice,
-    sidb_111_lattice,
     sidb_charge_state,
+    sidb_lattice,
     sidb_simulation_parameters,
     sidb_technology,
 )
@@ -20,7 +18,7 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 
 class TestQuickExact(unittest.TestCase):
     def test_three_sidbs(self):
-        layout = sidb_100_lattice((2, 1))
+        layout = sidb_lattice((2, 1), orientation="100")
         layout.assign_cell_type((0, 0), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((1, 0), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((2, 0), sidb_technology.cell_type.NORMAL)
@@ -32,7 +30,7 @@ class TestQuickExact(unittest.TestCase):
         self.assertEqual(params.simulation_parameters.mu_minus, -0.25)
         self.assertEqual(params.base_number_detection, automatic_base_number_detection.OFF)
 
-        cds = charge_distribution_surface_100(layout)
+        cds = charge_distribution_surface(layout)
 
         result = quickexact(cds, params)
 
@@ -51,7 +49,7 @@ class TestQuickExact(unittest.TestCase):
         self.assertLessEqual(len(result.charge_distributions), 2)
 
     def test_perturber_and_sidb_pair_111(self):
-        layout = sidb_111_lattice((4, 1))
+        layout = sidb_lattice((4, 1), orientation="111")
         layout.assign_cell_type((0, 0), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((1, 0), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((2, 0), sidb_technology.cell_type.NORMAL)
@@ -64,7 +62,7 @@ class TestQuickExact(unittest.TestCase):
         self.assertEqual(params.simulation_parameters.mu_minus, -0.32)
         self.assertEqual(params.base_number_detection, automatic_base_number_detection.OFF)
 
-        cds = charge_distribution_surface_111(layout)
+        cds = charge_distribution_surface(layout)
 
         result = quickexact(cds, params)
 

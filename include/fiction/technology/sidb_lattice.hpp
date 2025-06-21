@@ -64,7 +64,7 @@ class sidb_lattice<LatticeOrientation, Lyt, false> : public Lyt
      * @param ar Highest possible position in the layout.
      * @param name Layout name.
      */
-    explicit sidb_lattice(const aspect_ratio<Lyt>& ar, const std::string& name = "") : Lyt(ar, name)
+    explicit sidb_lattice(const aspect_ratio_t<Lyt>& ar, const std::string& name = "") : Lyt(ar, name)
     {
         static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
         static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");

@@ -37,8 +37,12 @@ void minimum_energy(pybind11::module& m)
 inline void minimum_energy(pybind11::module& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
-    detail::minimum_energy<py_charge_distribution_surface_100>(m);
-    detail::minimum_energy<py_charge_distribution_surface_111>(m);
+
+    detail::minimum_energy<py_charge_distribution_surface_100<py_offset_coordinate>>(m);
+    detail::minimum_energy<py_charge_distribution_surface_111<py_offset_coordinate>>(m);
+
+    detail::minimum_energy<py_charge_distribution_surface_100<py_cube_coordinate>>(m);
+    detail::minimum_energy<py_charge_distribution_surface_111<py_cube_coordinate>>(m);
 }
 
 }  // namespace pyfiction
