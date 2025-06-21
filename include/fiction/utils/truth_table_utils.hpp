@@ -410,8 +410,7 @@ namespace fiction
     kitty::create_from_binary_string(table2, truth_table_string2);
 
     return std::vector<kitty::dynamic_truth_table>{table1, table2};
-}
-
+};
 /**
  * This function evaluates the given multi-output truth table at the given input index.
  *
