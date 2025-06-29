@@ -4396,7 +4396,11 @@ status of the layout.)doc";
 static const char *__doc_fiction_defect_influence_params_operational_params = R"doc(Parameters for the `is_operational` algorithm.)doc";
 
 static const char *__doc_fiction_defect_influence_quicktrace =
-R"doc(Applies contour tracing to identify the boundary (contour) between
+R"doc(The *QuickTrace* algorithm which was proposed in \"QuickTrace: An
+Efficient Contour Tracing Algorithm for Defect Robustness Simulation
+of Silicon Dangling Bond Logic\" by J. Drewniok, M. Walter, and R.
+Wille in ISCAS 2025 (https://ieeexplore.ieee.org/document/11044082)
+applies contour tracing to identify the boundary (contour) between
 influencing and non-influencing defect positions for a given SiDB
 layout.
 
