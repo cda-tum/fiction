@@ -297,6 +297,28 @@ TEST_CASE("Error handling of operational domain algorithms", "[operational-domai
     }
 }
 
+TEST_CASE("SiQAD OR gate", "[operational-domain]")
+{
+    const auto lyt = blueprints::siqad_or_gate<sidb_100_cell_clk_lyt_siqad>();
+
+    operational_domain_stats op_domain_stats{};
+
+    operational_domain_params op_domain_params{};
+
+    op_domain_params.sweep_dimensions = {{sweep_parameter::EPSILON_R, 7, 8, 0.01},
+                                         {sweep_parameter::LAMBDA_TF, 5.5, 6, 0.01}};
+
+    op_domain_params.operational_params.simulation_parameters.mu_minus                                        = -0.28;
+    op_domain_params.operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance = 1.5;
+
+    op_domain_params.operational_params.op_condition = is_operational_params::operational_condition::TOLERATE_KINKS;
+
+    const auto op_domain =
+        operational_domain_grid_search(lyt, std::vector<tt>{create_or_tt()}, op_domain_params, &op_domain_stats);
+
+    check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
+}
+
 TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 {
     using layout = sidb_cell_clk_lyt_siqad;

@@ -169,6 +169,18 @@ Furthermore, if you use any of the design automation algorithms, please consider
           year={2023}
         }
 
+   .. code-block:: tex
+
+        @inproceedings{drewniok2025efficientgatedesign,
+          title={{Towards Fast Automatic Design of Silicon Dangling Bond Logic.}},
+          author={Drewniok, Jan and Walter, Marcel and Hang Ng, Samuel Sze and Walus, Konrad and Wille, Robert},
+          booktitle={Design, Automation and Test in Europe Conference \& Exhibition (DATE)},
+          year={2025}
+        }
+
+    `Gate design experiment scripts <https://github.com/cda-tum/fiction/tree/main/experiments/standard_cell_design>`_
+
+
 * :ref:`Mapping Cartesian to hexagonal layouts <hexagonalization>` (``hexagonalization``):
 
     .. code-block:: tex
@@ -274,6 +286,20 @@ Furthermore, if you use any of the design automation algorithms, please consider
         }
 
     `Towards defect-aware physical design of silicon dangling bond logic experiment script <https://github.com/cda-tum/fiction/tree/main/experiments/defect_aware_physical_design>`_
+
+* :ref:`QuickTrace: An Efficient Contour Tracing Algorithm for Defect Robustness Simulation of Silicon Dangling Bond Logic`
+
+    .. code-block:: tex
+
+        @inproceedings{drewniok2025quicktrace,
+          title={{QuickTrace: An Efficient Contour Tracing Algorithm for Defect Robustness Simulation of Silicon Dangling Bond Logic}},
+          author={Drewniok, Jan and Walter, Marcel and Wille, Robert},
+          booktitle={2025 IEEE International Symposium on Circuits and Systems (ISCAS)},
+          pages={1--5},
+          year={2025}
+        }
+
+    `QuickTrace experiment script <https://github.com/cda-tum/fiction/tree/main/experiments/quicktrace>`_
 
 * :ref:`On-the-fly Defect-Aware Design of Circuits <on_the_fly_design>`:
 

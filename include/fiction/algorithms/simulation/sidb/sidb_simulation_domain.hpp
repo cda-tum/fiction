@@ -93,7 +93,7 @@ class sidb_simulation_domain
         return result;
     }
 
-  private:
+  protected:
     /**
      * The domain values stored in a thread-safe map.
      */

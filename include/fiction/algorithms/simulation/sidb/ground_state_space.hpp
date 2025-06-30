@@ -20,6 +20,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cassert>
 #include <chrono>
 #include <cstdint>
 #include <functional>
@@ -264,14 +265,18 @@ class ground_state_space_impl
         {
             const uint64_t i = get_singleton_sidb_ix(c);
 
-            const cell<Lyt>& sidb = min_loc_pot_cds.index_to_cell(i);
+            assert(min_loc_pot_cds.get_local_potential_caused_by_defects_by_index(i).has_value() &&
+                   "SiDB i is out of range");
+            assert(min_loc_pot_cds.get_local_internal_potential_by_index(i).has_value() && "SiDB i is out of range");
+            assert(max_loc_pot_cds.get_local_internal_potential_by_index(i).has_value() && "SiDB i is out of range");
+            assert(min_loc_pot_cds.get_local_external_potential_by_index(i).has_value() && "SiDB i is out of range");
 
-            // separate the local potential into potential from SiDBs and external sources
-            const double loc_ext_pot = min_loc_pot_cds.get_local_defect_potentials()[sidb] +
-                                       min_loc_pot_cds.get_local_external_potentials()[sidb];
+            const double defect_pot = *min_loc_pot_cds.get_local_potential_caused_by_defects_by_index(i);
 
-            const double min_loc_pot = min_loc_pot_cds.get_local_potential_by_index(i).value() - loc_ext_pot;
-            const double max_loc_pot = max_loc_pot_cds.get_local_potential_by_index(i).value() - loc_ext_pot;
+            const double min_loc_pot = *min_loc_pot_cds.get_local_internal_potential_by_index(i) - defect_pot;
+            const double max_loc_pot = *max_loc_pot_cds.get_local_internal_potential_by_index(i) - defect_pot;
+
+            const double loc_ext_pot = *min_loc_pot_cds.get_local_external_potential_by_index(i) + defect_pot;
 
             c->initialize_singleton_cluster_charge_space(-min_loc_pot, -max_loc_pot, -loc_ext_pot,
                                                          min_loc_pot_cds.get_simulation_params().base, c);

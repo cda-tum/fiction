@@ -46,8 +46,8 @@ TEMPLATE_TEST_CASE("novel designed AND Gate influence distance function which fa
         CHECK_THAT(calculate_defect_clearance(cube_lyt, defect_influence_domain).defect_clearance_distance,
                    Catch::Matchers::WithinAbs(5.81097444496187787, constants::ERROR_MARGIN));
         CHECK(stats.num_evaluated_defect_positions == 676);
-        CHECK(stats.num_non_influencing_defect_positions == 531);
-        CHECK(stats.num_influencing_defect_positions == 145);
+        CHECK(stats.num_non_influencing_defect_positions == 527);
+        CHECK(stats.num_influencing_defect_positions == 149);
     }
 #endif
 
