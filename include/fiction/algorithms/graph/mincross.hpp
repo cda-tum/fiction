@@ -93,7 +93,7 @@ class mincross_impl
     void minimize_crossings()
     {
         constexpr int    max_iter    = 24;
-        constexpr int    min_quit    = 4;
+        constexpr int    min_quit    = 8;
         constexpr double convergence = 0.995;
 
         uint64_t best_cross = UINT64_MAX;
@@ -103,7 +103,7 @@ class mincross_impl
         cur_cross  = total_crossings;
         best_cross = cur_cross;
 
-        std::vector<std::vector<node>> best_ranks = fanout_ntk.get_all_ranks();
+        auto best_ranks = fanout_ntk.get_all_ranks();
 
         // Passes: 0 = init, 1 = refinement, 2 = full optimization
         for (int pass = 0; pass <= 2; ++pass)
@@ -128,11 +128,11 @@ class mincross_impl
                 if (cur_cross <= best_cross)
                 {
                     best_ranks = fanout_ntk.get_all_ranks();
-                    best_cross = cur_cross;
-                    if (static_cast<double>(cur_cross) < convergence * static_cast<double>(best_cross))
+                    if (static_cast<double>(cur_cross) < convergence * best_cross)
                     {
                         trying = 0;
                     }
+                    best_cross = cur_cross;
                 }
             }
 
@@ -143,6 +143,18 @@ class mincross_impl
                 break;
             }
         }
+
+        if (best_cross > 0)
+        {
+            transpose(false);
+            ncross();
+            cur_cross = total_crossings;
+            if (cur_cross < best_cross)
+            {
+                best_ranks = fanout_ntk.get_all_ranks();
+            }
+        }
+        fanout_ntk.set_all_ranks(best_ranks);
         ntk.set_all_ranks(best_ranks);
     }
 
@@ -153,7 +165,7 @@ class mincross_impl
      */
     void mincross_step(int pass)
     {
-        const bool reverse = pass % 4 < 2;
+        const bool reverse = false;  // pass % 4 < 2;
 
         int max_rank = static_cast<int>(fanout_ntk.depth());
 
@@ -225,7 +237,7 @@ class mincross_impl
                                              [&](auto const& fi)
                                              {
                                                  const auto src = fanout_ntk.get_node(fi);
-                                                 if (fanout_ntk.level(src) == r1)
+                                                 if (fanout_ntk.level(src) == r1 && !fanout_ntk.is_constant(src))
                                                  {
                                                      positions.push_back(fanout_ntk.rank_position(src));
                                                  }
@@ -320,7 +332,7 @@ class mincross_impl
      */
     void transpose(bool reverse)
     {
-        std::vector<bool> candidate(fanout_ntk.depth(), true);
+        std::vector<bool> candidate(fanout_ntk.depth() + 1, true);
         int               delta          = 0;
         int               max_iterations = 0;
 
@@ -417,6 +429,8 @@ class mincross_impl
                                  [&](auto const& f)
                                  {
                                      auto src = fanout_ntk.get_node(f);
+                                     if (fanout_ntk.is_constant(src))
+                                         return;
                                      left_sources.push_back(fanout_ntk.rank_position(src));
                                  });
 
@@ -424,6 +438,8 @@ class mincross_impl
                                  [&](auto const& f)
                                  {
                                      auto src = fanout_ntk.get_node(f);
+                                     if (fanout_ntk.is_constant(src))
+                                         return;
                                      right_sources.push_back(fanout_ntk.rank_position(src));
                                  });
 
