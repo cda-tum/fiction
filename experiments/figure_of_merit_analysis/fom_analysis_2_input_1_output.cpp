@@ -115,7 +115,7 @@ int main()  // NOLINT
         double  bbr_min_cost                      = 0.0;
         double  x_custom                          = std::numeric_limits<double>::max();
 
-        for (auto num_sidbs = 2u; num_sidbs < 4; num_sidbs++)
+        for (auto num_sidbs = 2u; num_sidbs < 7; num_sidbs++)
         {
             design_params.number_of_canvas_sidbs = num_sidbs;
 
@@ -196,13 +196,20 @@ int main()  // NOLINT
             auto     min_chi       = std::numeric_limits<double>::max();
             uint64_t index_min_chi = 0;
 
+            // these values are used in the paper to weight all figures of merit equally
+            const auto w_ct             = -1.0;
+            const auto w_op_domain      = -1.0;
+            const auto w_defect_arsenic = 1.0;
+            const auto w_defect_vacancy = 1.0;
+            const auto w_bbr            = -1.0;
+
             for (auto i = 0u; i < temps.size(); i++)
             {
                 const auto chi = cost_function_chi({temps.at(i) / max_temp, op_domains[i] / max_relative_op_domain,
                                                     defect_influence_arsenic.at(i) / max_defect_clearance_arsenic,
                                                     defect_influence_vacancy.at(i) / max_defect_clearance_vacancy,
                                                     bbr_all.at(i) / max_bbr},
-                                                   {-1, -1, 1, 1, -1});
+                                                   {w_ct, w_op_domain, w_defect_arsenic, w_defect_vacancy, w_bbr});
 
                 if (chi < min_chi)
                 {
