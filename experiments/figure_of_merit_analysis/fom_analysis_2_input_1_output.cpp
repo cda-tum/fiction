@@ -168,26 +168,26 @@ int main()  // NOLINT
                 for (const auto& defect : defects)
                 {
                     params.defect = defect;
-                    defect_influence_stats quicktrace_stats{};
-                    const auto             defect_inf_quicktrace =
-                        defect_influence_grid_search(gate, truth_table, params, 4, &quicktrace_stats);
-                    const auto clearance_quicktrace = calculate_defect_clearance(gate, defect_inf_quicktrace);
+                    defect_influence_stats defect_inf_stats{};
+                    const auto             defect_inf_grid =
+                        defect_influence_grid_search(gate, truth_table, params, 4, &defect_inf_stats);
+                    const auto defect_clearance = calculate_defect_clearance(gate, defect_inf_grid);
 
                     if (defect.type == sidb_defect_type::SI_VACANCY)
                     {
                         min_defect_clearance_vacancy =
-                            std::min(clearance_quicktrace.defect_clearance_distance, min_defect_clearance_vacancy);
+                            std::min(defect_clearance.defect_clearance_distance, min_defect_clearance_vacancy);
                         max_defect_clearance_vacancy =
-                            std::max(clearance_quicktrace.defect_clearance_distance, max_defect_clearance_vacancy);
-                        defect_influence_vacancy.push_back(clearance_quicktrace.defect_clearance_distance);
+                            std::max(defect_clearance.defect_clearance_distance, max_defect_clearance_vacancy);
+                        defect_influence_vacancy.push_back(defect_clearance.defect_clearance_distance);
                     }
                     else if (defect.type == sidb_defect_type::UNKNOWN)
                     {
                         min_defect_clearance_arsenic =
-                            std::min(clearance_quicktrace.defect_clearance_distance, min_defect_clearance_arsenic);
+                            std::min(defect_clearance.defect_clearance_distance, min_defect_clearance_arsenic);
                         max_defect_clearance_arsenic =
-                            std::max(clearance_quicktrace.defect_clearance_distance, max_defect_clearance_arsenic);
-                        defect_influence_arsenic.push_back(clearance_quicktrace.defect_clearance_distance);
+                            std::max(defect_clearance.defect_clearance_distance, max_defect_clearance_arsenic);
+                        defect_influence_arsenic.push_back(defect_clearance.defect_clearance_distance);
                     }
                 }
             }
