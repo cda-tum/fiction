@@ -107,13 +107,13 @@ int main()  // NOLINT
 
     for (const auto& [gate_name, truth_table] : gates)
     {
-        uint8_t number_canvas_sidbs_min_cost      = 0;
-        double  ct_min_cost                       = 0.0;
-        double  op_domain_min_cost                = 0.0;
-        double  defect_clearance_arsenic_min_cost = 0.0;
-        double  defect_clearance_vacancy_min_cost = 0.0;
-        double  bbr_min_cost                      = 0.0;
-        double  x_custom                          = std::numeric_limits<double>::max();
+        uint8_t number_of_canvas_sidbs_to_minimize_chi   = 0;
+        double  ct_to_minimize_chi                       = 0.0;
+        double  op_domain_to_minimize_chi                = 0.0;
+        double  defect_clearance_arsenic_to_minimize_chi = 0.0;
+        double  defect_clearance_vacancy_to_minimize_chi = 0.0;
+        double  bbr_to_minimize_chi                      = 0.0;
+        double  minimized_chi                            = std::numeric_limits<double>::max();
 
         for (auto num_sidbs = 2u; num_sidbs < 7; num_sidbs++)
         {
@@ -188,6 +188,8 @@ int main()  // NOLINT
                 }
             }
 
+            std::cout << fmt::format("Gate design for {} with {} canvas SiDBs done.\n", gate_name, num_sidbs) << '\n';
+
             fom_exploration(gate_name, static_cast<uint8_t>(num_sidbs), max_temp, max_relative_op_domain,
                             min_defect_clearance_arsenic, min_defect_clearance_vacancy, max_bbr);
 
@@ -218,22 +220,23 @@ int main()  // NOLINT
                 }
             }
 
-            if (min_chi < x_custom)
+            if (min_chi < minimized_chi)
             {
-                number_canvas_sidbs_min_cost      = static_cast<uint8_t>(num_sidbs);
-                ct_min_cost                       = temps.at(index_min_chi);
-                op_domain_min_cost                = op_domains.at(index_min_chi);
-                defect_clearance_arsenic_min_cost = defect_influence_arsenic.at(index_min_chi);
-                defect_clearance_vacancy_min_cost = defect_influence_vacancy.at(index_min_chi);
-                bbr_min_cost                      = bbr_all.at(index_min_chi);
-                x_custom                          = min_chi;
+                number_of_canvas_sidbs_to_minimize_chi   = static_cast<uint8_t>(num_sidbs);
+                ct_to_minimize_chi                       = temps.at(index_min_chi);
+                op_domain_to_minimize_chi                = op_domains.at(index_min_chi);
+                defect_clearance_arsenic_to_minimize_chi = defect_influence_arsenic.at(index_min_chi);
+                defect_clearance_vacancy_to_minimize_chi = defect_influence_vacancy.at(index_min_chi);
+                bbr_to_minimize_chi                      = bbr_all.at(index_min_chi);
+                minimized_chi                            = min_chi;
             }
         }
 
         fom_exploration.table();
 
-        minimal_cost(gate_name, number_canvas_sidbs_min_cost, ct_min_cost, op_domain_min_cost,
-                     defect_clearance_arsenic_min_cost, defect_clearance_vacancy_min_cost, bbr_min_cost, x_custom);
+        minimal_cost(gate_name, number_of_canvas_sidbs_to_minimize_chi, ct_to_minimize_chi, op_domain_to_minimize_chi,
+                     defect_clearance_arsenic_to_minimize_chi, defect_clearance_vacancy_to_minimize_chi,
+                     bbr_to_minimize_chi, minimized_chi);
 
         minimal_cost.save();
         minimal_cost.table();
