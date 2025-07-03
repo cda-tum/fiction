@@ -119,7 +119,7 @@ int main()  // NOLINT
         double      bbr_to_minimize_chi                      = 0.0;
         double      minimized_chi                            = std::numeric_limits<double>::max();
 
-        for (std::size_t num_sidbs = 2u; num_sidbs < 3; num_sidbs++)
+        for (std::size_t num_sidbs = 2u; num_sidbs < 7; num_sidbs++)
         {
             design_params.number_of_canvas_sidbs = num_sidbs;
 
