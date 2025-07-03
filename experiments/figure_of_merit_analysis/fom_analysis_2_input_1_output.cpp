@@ -35,6 +35,10 @@
 
 using namespace fiction;
 
+// This script summarizes all experiments presented in \"Unifying Figures of Merit: A Versatile Cost Function for
+// Silicon Dangling Bond Logic\" by J. Drewniok, M. Walter, S. S. H. Ng, K. Walus, and R. Wille in IEEE-NANO 2024
+// (https://ieeexplore.ieee.org/abstract/document/10628671).
+
 int main()  // NOLINT
 {
     using Lyt = sidb_100_cell_clk_lyt_cube;
@@ -44,11 +48,11 @@ int main()  // NOLINT
         "{}/gate_skeletons/skeleton_bestagons_with_tags/skeleton_hex_inputsdbp_2i1o.sqd", EXPERIMENTS_PATH));
 
     // This table is used to explore the figures of merit for 2-input/1-output SiDB gates.
-    experiments::experiment<std::string, uint8_t, double, double, double, double, double> fom_exploration{
+    experiments::experiment<std::string, std::size_t, double, double, double, double, double> fom_exploration{
         "Exploration", "gate", "#canvas SiDBs", "CT max", "OPD max", "MDC_ars_min", "MDC_vac_min", "BBR"};
 
     // This table is used to explore the minimal cost of 2-input/1-output SiDB gates.
-    experiments::experiment<std::string, uint8_t, double, double, double, double, double, double> minimal_cost{
+    experiments::experiment<std::string, std::size_t, double, double, double, double, double, double> minimal_cost{
         "Minimal Cost", "gate", "#canvas SiDBs", "CT", "OPD", "MDC_arsenic", "MDC_vacancy", "BBR", "X_custom,min"};
 
     const auto op_params     = is_operational_params{sidb_simulation_parameters{2, -0.32}};
@@ -107,15 +111,15 @@ int main()  // NOLINT
 
     for (const auto& [gate_name, truth_table] : gates)
     {
-        uint8_t number_of_canvas_sidbs_to_minimize_chi   = 0;
-        double  ct_to_minimize_chi                       = 0.0;
-        double  op_domain_to_minimize_chi                = 0.0;
-        double  defect_clearance_arsenic_to_minimize_chi = 0.0;
-        double  defect_clearance_vacancy_to_minimize_chi = 0.0;
-        double  bbr_to_minimize_chi                      = 0.0;
-        double  minimized_chi                            = std::numeric_limits<double>::max();
+        std::size_t number_of_canvas_sidbs_to_minimize_chi   = 0;
+        double      ct_to_minimize_chi                       = 0.0;
+        double      op_domain_to_minimize_chi                = 0.0;
+        double      defect_clearance_arsenic_to_minimize_chi = 0.0;
+        double      defect_clearance_vacancy_to_minimize_chi = 0.0;
+        double      bbr_to_minimize_chi                      = 0.0;
+        double      minimized_chi                            = std::numeric_limits<double>::max();
 
-        for (auto num_sidbs = 2u; num_sidbs < 7; num_sidbs++)
+        for (std::size_t num_sidbs = 2u; num_sidbs < 3; num_sidbs++)
         {
             design_params.number_of_canvas_sidbs = num_sidbs;
 
@@ -188,7 +192,7 @@ int main()  // NOLINT
                 }
             }
 
-            std::cout << fmt::format("Gate design for {} with {} canvas SiDBs done.\n", gate_name, num_sidbs) << '\n';
+            std::cout << fmt::format("Gate design for {} with {} canvas SiDBs done.\n", gate_name, num_sidbs);
 
             fom_exploration(gate_name, static_cast<uint8_t>(num_sidbs), max_temp, max_relative_op_domain,
                             min_defect_clearance_arsenic, min_defect_clearance_vacancy, max_bbr);
@@ -222,7 +226,7 @@ int main()  // NOLINT
 
             if (min_chi < minimized_chi)
             {
-                number_of_canvas_sidbs_to_minimize_chi   = static_cast<uint8_t>(num_sidbs);
+                number_of_canvas_sidbs_to_minimize_chi   = num_sidbs;
                 ct_to_minimize_chi                       = temps.at(index_min_chi);
                 op_domain_to_minimize_chi                = op_domains.at(index_min_chi);
                 defect_clearance_arsenic_to_minimize_chi = defect_influence_arsenic.at(index_min_chi);
