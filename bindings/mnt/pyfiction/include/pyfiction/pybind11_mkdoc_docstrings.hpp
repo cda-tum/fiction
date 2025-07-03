@@ -4396,7 +4396,11 @@ status of the layout.)doc";
 static const char *__doc_fiction_defect_influence_params_operational_params = R"doc(Parameters for the `is_operational` algorithm.)doc";
 
 static const char *__doc_fiction_defect_influence_quicktrace =
-R"doc(Applies contour tracing to identify the boundary (contour) between
+R"doc(The *QuickTrace* algorithm which was proposed in \"QuickTrace: An
+Efficient Contour Tracing Algorithm for Defect Robustness Simulation
+of Silicon Dangling Bond Logic\" by J. Drewniok, M. Walter, and R.
+Wille in ISCAS 2025 (https://ieeexplore.ieee.org/document/11044082)
+applies contour tracing to identify the boundary (contour) between
 influencing and non-influencing defect positions for a given SiDB
 layout.
 
@@ -7353,17 +7357,66 @@ coordinates that need to be cleared or reset.)doc";
 
 static const char *__doc_fiction_detail_fanout_substitution_impl = R"doc()doc";
 
-static const char *__doc_fiction_detail_fanout_substitution_impl_available_fanouts = R"doc()doc";
+static const char *__doc_fiction_detail_fanout_substitution_impl_available_fanouts = R"doc(Queue map of available fanouts.)doc";
 
 static const char *__doc_fiction_detail_fanout_substitution_impl_fanout_substitution_impl = R"doc()doc";
 
+static const char *__doc_fiction_detail_fanout_substitution_impl_generate_breadth_tree =
+R"doc(BREADTH-FIRST strategy: expand buffers level by level to create
+balanced fanout trees.
+
+Parameter ``substituted``:
+    The partially constructed destination network (NtkDest)
+
+Parameter ``n``:
+    The current node in the topological view (NtkSrc)
+
+Parameter ``child``:
+    The signal in substituted representing the output of node n.
+
+Parameter ``num_fanouts``:
+    Number of buffers to insert (chain length))doc";
+
+static const char *__doc_fiction_detail_fanout_substitution_impl_generate_depth_tree =
+R"doc(DEPTH-FIRST strategy: create a chain of buffers.
+
+Parameter ``substituted``:
+    The partially constructed destination network (NtkDest)
+
+Parameter ``n``:
+    The current node in the topological view (NtkSrc)
+
+Parameter ``child``:
+    The signal in substituted representing the output of node n.
+
+Parameter ``num_fanouts``:
+    Number of buffers to insert (chain length))doc";
+
 static const char *__doc_fiction_detail_fanout_substitution_impl_generate_fanout_tree = R"doc()doc";
+
+static const char *__doc_fiction_detail_fanout_substitution_impl_generate_random_tree =
+R"doc(RANDOM strategy: insert buffers at randomly chosen positions in the
+expanding tree.
+
+Parameter ``substituted``:
+    The partially constructed destination network (NtkDest)
+
+Parameter ``n``:
+    The current node in the topological view (NtkSrc)
+
+Parameter ``child``:
+    The signal in substituted representing the output of node n.
+
+Parameter ``num_fanouts``:
+    Number of buffers to insert (chain length))doc";
 
 static const char *__doc_fiction_detail_fanout_substitution_impl_get_fanout = R"doc()doc";
 
-static const char *__doc_fiction_detail_fanout_substitution_impl_ntk_topo = R"doc()doc";
+static const char *__doc_fiction_detail_fanout_substitution_impl_ntk_topo = R"doc(Topological view of the converted network.)doc";
 
-static const char *__doc_fiction_detail_fanout_substitution_impl_ps = R"doc()doc";
+static const char *__doc_fiction_detail_fanout_substitution_impl_ps = R"doc(Parameters controlling how fanout substitution is performed.)doc";
+
+static const char *__doc_fiction_detail_fanout_substitution_impl_rng = R"doc(Optional helper struct holding the RNG and its distribution.)doc";
 
 static const char *__doc_fiction_detail_fanout_substitution_impl_run = R"doc()doc";
 
@@ -7974,6 +8027,17 @@ R"doc(In highest-effort mode with a custom cost function, 60 search space
 graphs are used (48 with the standard cost objectives and 12 for the
 custom one).)doc";
 
+static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_num_search_space_graphs_maximum_effort =
+R"doc(In maximum-effort mode, 96 search space graphs are used. It adds
+another 48 search space graphs to the 48 search space graphs from
+highest-effort mode using randomized fanout substitution strategies
+and random topological orderings.)doc";
+
+static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_num_search_space_graphs_maximum_effort_custom =
+R"doc(In maximum-effort mode with a custom cost function, 120 search space
+graphs are used (96 with the standard cost objectives and 24 for the
+custom one).)doc";
+
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_place_and_route =
 R"doc(Executes a single placement step in the layout for the given network
 node. It determines the type of the node, places it accordingly, and
@@ -8051,6 +8115,10 @@ best found layout.
 
 Returns:
     The best layout found by the algorithm.)doc";
+
+static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_seed =
+R"doc(Random seed used for random fanout substitution and random topological
+ordering in maximum-effort mode.)doc";
 
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_ssg_vec = R"doc(Vector of search space graphs.)doc";
 
@@ -10180,6 +10248,26 @@ Parameter ``cell``:
 
 static const char *__doc_fiction_detail_recursively_paint_edges = R"doc()doc";
 
+static const char *__doc_fiction_detail_rng_state =
+R"doc(A lightweight container that groups together the two objects required
+for random fan-out selection and only lives when `strategy == RANDOM`.)doc";
+
+static const char *__doc_fiction_detail_rng_state_dist =
+R"doc(Uniform distribution whose parameter range is re-initialised
+(`dist.param({0, upper})`) every time the pool of candidate signals
+changes size.)doc";
+
+static const char *__doc_fiction_detail_rng_state_gen =
+R"doc(Random number generation engine that is seeded once in the constructor
+of `fanout_substitution_impl` and then reused for all random draws
+during fanout substitution.)doc";
+
+static const char *__doc_fiction_detail_rng_state_rng_state =
+R"doc(Default constructor.
+
+Parameter ``seed``:
+    The seed for the random number generator.)doc";
+
 static const char *__doc_fiction_detail_routing_objective_with_fanin_update_information =
 R"doc(Encapsulates a routing objective with fanin update information.
 
@@ -10446,69 +10534,37 @@ Parameter ``cartesian_layout_height``:
 Returns:
     corresponding tile on the hexagonal grid.)doc";
 
-static const char *__doc_fiction_detail_topo_view_ci_to_co =
+static const char *__doc_fiction_detail_topo_view =
 R"doc(Custom view class derived from mockturtle::topo_view.
 
 This class inherits from mockturtle::topo_view and overrides certain
-functions to provide custom behavior. The topological order is
-generated from CIs to COs.)doc";
+functions to provide custom behavior.)doc";
 
-static const char *__doc_fiction_detail_topo_view_ci_to_co_create_topo_rec = R"doc()doc";
+static const char *__doc_fiction_detail_topo_view_create_topo_rec = R"doc()doc";
 
-static const char *__doc_fiction_detail_topo_view_ci_to_co_foreach_gate = R"doc(! Reimplementation of `foreach_gate`. */)doc";
+static const char *__doc_fiction_detail_topo_view_foreach_gate = R"doc()doc";
 
-static const char *__doc_fiction_detail_topo_view_ci_to_co_foreach_gate_reverse = R"doc(! Implementation of `foreach_gate` in reverse topological order. */)doc";
+static const char *__doc_fiction_detail_topo_view_foreach_gate_reverse = R"doc()doc";
 
-static const char *__doc_fiction_detail_topo_view_ci_to_co_foreach_node = R"doc(! Reimplementation of `foreach_node`. */)doc";
+static const char *__doc_fiction_detail_topo_view_foreach_node = R"doc()doc";
 
-static const char *__doc_fiction_detail_topo_view_ci_to_co_index_to_node = R"doc(! Reimplementation of `index_to_node`. */)doc";
+static const char *__doc_fiction_detail_topo_view_index_to_node = R"doc()doc";
 
-static const char *__doc_fiction_detail_topo_view_ci_to_co_node_to_index = R"doc(! Reimplementation of `node_to_index`. */)doc";
+static const char *__doc_fiction_detail_topo_view_node_to_index = R"doc()doc";
 
-static const char *__doc_fiction_detail_topo_view_ci_to_co_num_gates = R"doc(! Reimplementation of `num_gates`. */)doc";
+static const char *__doc_fiction_detail_topo_view_num_gates = R"doc()doc";
 
-static const char *__doc_fiction_detail_topo_view_ci_to_co_size = R"doc(! Reimplementation of `size`. */)doc";
+static const char *__doc_fiction_detail_topo_view_offset = R"doc()doc";
 
-static const char *__doc_fiction_detail_topo_view_ci_to_co_topo_order = R"doc()doc";
+static const char *__doc_fiction_detail_topo_view_rng = R"doc()doc";
 
-static const char *__doc_fiction_detail_topo_view_ci_to_co_topo_view_ci_to_co =
-R"doc(! Default constructor.
+static const char *__doc_fiction_detail_topo_view_size = R"doc()doc";
 
-Constructs topological view on another network.)doc";
+static const char *__doc_fiction_detail_topo_view_topo_order = R"doc()doc";
 
-static const char *__doc_fiction_detail_topo_view_ci_to_co_update_topo = R"doc()doc";
+static const char *__doc_fiction_detail_topo_view_topo_view = R"doc()doc";
 
-static const char *__doc_fiction_detail_topo_view_co_to_ci =
-R"doc(Custom view class derived from mockturtle::topo_view.
-
-This class inherits from mockturtle::topo_view and overrides certain
-functions to provide custom behavior. The topological order is
-generated from COs to CIs.)doc";
-
-static const char *__doc_fiction_detail_topo_view_co_to_ci_create_topo_rec = R"doc()doc";
-
-static const char *__doc_fiction_detail_topo_view_co_to_ci_foreach_gate = R"doc(! Reimplementation of `foreach_gate`. */)doc";
-
-static const char *__doc_fiction_detail_topo_view_co_to_ci_foreach_gate_reverse = R"doc(! Implementation of `foreach_gate` in reverse topological order. */)doc";
-
-static const char *__doc_fiction_detail_topo_view_co_to_ci_foreach_node = R"doc(! Reimplementation of `foreach_node`. */)doc";
-
-static const char *__doc_fiction_detail_topo_view_co_to_ci_index_to_node = R"doc(! Reimplementation of `index_to_node`. */)doc";
-
-static const char *__doc_fiction_detail_topo_view_co_to_ci_node_to_index = R"doc(! Reimplementation of `node_to_index`. */)doc";
-
-static const char *__doc_fiction_detail_topo_view_co_to_ci_num_gates = R"doc(! Reimplementation of `num_gates`. */)doc";
-
-static const char *__doc_fiction_detail_topo_view_co_to_ci_size = R"doc(! Reimplementation of `size`. */)doc";
-
-static const char *__doc_fiction_detail_topo_view_co_to_ci_topo_order = R"doc()doc";
-
-static const char *__doc_fiction_detail_topo_view_co_to_ci_topo_view_co_to_ci =
-R"doc(! Default constructor.
-
-Constructs topological view on another network.)doc";
-
-static const char *__doc_fiction_detail_topo_view_co_to_ci_update_topo = R"doc()doc";
+static const char *__doc_fiction_detail_topo_view_update_topo = R"doc()doc";
 
 static const char *__doc_fiction_detail_update_to_delete_list =
 R"doc(Update the to-delete list based on a possible path in a
@@ -12277,6 +12333,10 @@ static const char *__doc_fiction_fanout_substitution_params = R"doc(Parameters f
 
 static const char *__doc_fiction_fanout_substitution_params_degree = R"doc(Maximum output degree of each fan-out node.)doc";
 
+static const char *__doc_fiction_fanout_substitution_params_seed =
+R"doc(Seed used for random substitution, generated randomly if not
+specified.)doc";
+
 static const char *__doc_fiction_fanout_substitution_params_strategy =
 R"doc(Substitution strategy of high-degree fanout networks (depth-first vs.
 breadth-first).)doc";
@@ -12286,6 +12346,10 @@ static const char *__doc_fiction_fanout_substitution_params_substitution_strateg
 static const char *__doc_fiction_fanout_substitution_params_substitution_strategy_BREADTH = R"doc(Breadth-first substitution. Creates balanced fanout trees.)doc";
 
 static const char *__doc_fiction_fanout_substitution_params_substitution_strategy_DEPTH = R"doc(Depth-first substitution. Creates fanout trees with one deep branch.)doc";
+
+static const char *__doc_fiction_fanout_substitution_params_substitution_strategy_RANDOM =
+R"doc(Random substitution. Inserts fanout buffers at random positions in the
+fanout tree.)doc";
 
 static const char *__doc_fiction_fanout_substitution_params_threshold =
 R"doc(Maximum number of outputs any gate is allowed to have before
@@ -14163,9 +14227,7 @@ search space graphs for different cost objectives. If the cost
 objective involves layout area, number of crossings, number of wire
 segments, or a combination of area and crossings, a total of 48 search
 space graphs are generated. For a custom cost objective, an additional
-12 graphs are created, resulting in 60 graphs in total. This mode
-provides the best guarantee of finding optimal solutions but
-significantly increases runtime.)doc";
+12 graphs are created, resulting in 60 graphs in total.)doc";
 
 static const char *__doc_fiction_graph_oriented_layout_design_params_effort_mode_HIGH_EFFICIENCY =
 R"doc(HIGH_EFFICIENCY mode generates 2 search space graphs. This option
@@ -14177,6 +14239,17 @@ substitution strategies, PI placements, and other parameters. This
 wider exploration increases the chance of finding optimal layouts but
 also extends runtime. When a solution is found in any graph, its cost
 is used to prune the remaining graphs.)doc";
+
+static const char *__doc_fiction_graph_oriented_layout_design_params_effort_mode_MAXIMUM_EFFORT =
+R"doc(MAXIMUM_EFFORT mode builds upon HIGHEST_EFFORT by duplicating the 48
+(60) search space graphs using randomized fanout substitution
+strategies and topological orderings. If the cost objective involves
+layout area, number of crossings, number of wire segments, or a
+combination of area and crossings, a total of 96 search space graphs
+are generated. For a custom cost objective, an additional 12 graphs
+are created, resulting in 120 graphs in total. This mode has a higher
+chance of finding optimal solutions but significantly increases
+runtime.)doc";
 
 static const char *__doc_fiction_graph_oriented_layout_design_params_enable_multithreading =
 R"doc(BETA feature: Flag to enable or disable multithreading during the
@@ -14219,6 +14292,10 @@ Defaults to false.)doc";
 static const char *__doc_fiction_graph_oriented_layout_design_params_return_first =
 R"doc(Return the first found layout, which might still have a high cost but
 can be found fast.)doc";
+
+static const char *__doc_fiction_graph_oriented_layout_design_params_seed =
+R"doc(Random seed used for random fanout substitution and random topological
+ordering in maximum-effort mode, generated randomly if not specified.)doc";
 
 static const char *__doc_fiction_graph_oriented_layout_design_params_timeout = R"doc(Timeout limit (in ms).)doc";
 

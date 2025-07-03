@@ -35,6 +35,8 @@ inline void graph_oriented_layout_design(pybind11::module& m)
                DOC(fiction_graph_oriented_layout_design_params_effort_mode_HIGH_EFFORT))
         .value("HIGHEST_EFFORT", fiction::graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT,
                DOC(fiction_graph_oriented_layout_design_params_effort_mode_HIGHEST_EFFORT))
+        .value("MAXIMUM_EFFORT", fiction::graph_oriented_layout_design_params::effort_mode::MAXIMUM_EFFORT,
+               DOC(fiction_graph_oriented_layout_design_params_effort_mode_MAXIMUM_EFFORT))
 
         ;
 
@@ -71,7 +73,9 @@ inline void graph_oriented_layout_design(pybind11::module& m)
         .def_readwrite("planar", &fiction::graph_oriented_layout_design_params::planar,
                        DOC(fiction_graph_oriented_layout_design_params_planar))
         .def_readwrite("enable_multithreading", &fiction::graph_oriented_layout_design_params::enable_multithreading,
-                       DOC(fiction_graph_oriented_layout_design_params_enable_multithreading));
+                       DOC(fiction_graph_oriented_layout_design_params_enable_multithreading))
+        .def_readwrite("seed", &fiction::graph_oriented_layout_design_params::seed,
+                       DOC(fiction_graph_oriented_layout_design_params_seed));
 
     py::class_<fiction::graph_oriented_layout_design_stats>(m, "graph_oriented_layout_design_stats",
                                                             DOC(fiction_graph_oriented_layout_design_stats))
