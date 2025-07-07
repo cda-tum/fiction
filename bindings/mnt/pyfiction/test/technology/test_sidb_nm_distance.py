@@ -1,11 +1,15 @@
 import unittest
 
-from mnt.pyfiction import sidb_100_lattice, sidb_111_lattice, sidb_nm_distance_100, sidb_nm_distance_111
+from mnt.pyfiction import (
+    sidb_lattice,
+    sidb_nm_distance_100,
+    sidb_nm_distance_111,
+)
 
 
 class TestSiDBNmDistance(unittest.TestCase):
     def test_sidb_nm_distance_100_lattice(self):
-        layout_one = sidb_100_lattice((10, 10))
+        layout_one = sidb_lattice((10, 10), orientation="100")
 
         # Replace the placeholders with actual values or function calls
         self.assertEqual(sidb_nm_distance_100(layout_one, (0, 0), (0, 0)), 0)
@@ -17,7 +21,7 @@ class TestSiDBNmDistance(unittest.TestCase):
         self.assertAlmostEqual(sidb_nm_distance_100(layout_one, (0, 0), (0, 1)), 0.225)
 
     def test_sidb_nm_distance_111_lattice(self):
-        layout_one = sidb_111_lattice((10, 10))
+        layout_one = sidb_lattice((10, 10), orientation="111")
 
         # Replace the placeholders with actual values or function calls
         self.assertEqual(sidb_nm_distance_111(layout_one, (0, 0), (0, 0)), 0)

@@ -126,8 +126,8 @@ inline void bdl_input_iterator(pybind11::module& m)
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::bdl_input_iterator<py_sidb_100_lattice>(m, "100");
-    detail::bdl_input_iterator<py_sidb_111_lattice>(m, "111");
+    detail::bdl_input_iterator<py_sidb_100_lattice<py_offset_coordinate>>(m, "100");
+    detail::bdl_input_iterator<py_sidb_111_lattice<py_offset_coordinate>>(m, "111");
 }
 
 }  // namespace pyfiction

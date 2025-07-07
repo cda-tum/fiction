@@ -184,17 +184,17 @@ class mugen_handler
      * @param ratio Aspect ratio to evaluate.
      * @return `true` iff ratio can safely be skipped because it is UNSAT anyways.
      */
-    [[nodiscard]] bool skippable(const aspect_ratio<Lyt>& ratio) const noexcept
+    [[nodiscard]] bool skippable(const aspect_ratio_t<Lyt>& ratio) const noexcept
     {
         // skip aspect ratios that extend beyond the specified upper bounds
-        if (ratio.x >= ps.upper_bound_x || ratio.y >= ps.upper_bound_y)
+        if (ratio.x() >= ps.upper_bound_x || ratio.y() >= ps.upper_bound_y)
         {
             return true;
         }
         // OPEN clocking optimization: rotated aspect ratios don't need to be explored
         if (lyt.is_clocking_scheme(clock_name::OPEN))
         {
-            if (ratio.x != ratio.y && ratio.x == lyt.y() && ratio.y == lyt.x())
+            if (ratio.x() != ratio.y() && ratio.x() == lyt.y() && ratio.y() == lyt.x())
             {
                 return true;
             }
@@ -208,7 +208,7 @@ class mugen_handler
      *
      * @param ratio Current aspect ratio to work on.
      */
-    void update_aspect_ratio(const aspect_ratio<Lyt>& ratio) noexcept
+    void update_aspect_ratio(const aspect_ratio_t<Lyt>& ratio) noexcept
     {
         lyt.resize(ratio);
     }
@@ -744,7 +744,7 @@ class one_pass_synthesis_impl
             mockturtle::progress_bar bar("[i] examining layout aspect ratios: {:>2} × {:<2}");
 #endif
 
-            const auto aspect_ratio = typename Lyt::aspect_ratio{(*ari).x, (*ari).y, ps.crossings ? 1 : 0};
+            const auto aspect_ratio = aspect_ratio_t<Lyt>{(*ari).x(), (*ari).y(), ps.crossings ? 1 : 0};
 
             if (handler.skippable(aspect_ratio))
             {
@@ -752,7 +752,7 @@ class one_pass_synthesis_impl
             }
 
 #if (PROGRESS_BARS)
-            bar(aspect_ratio.x + 1, aspect_ratio.y + 1);
+            bar(aspect_ratio.x() + 1, aspect_ratio.y() + 1);
 #endif
 
             handler.update_aspect_ratio(aspect_ratio);
@@ -817,7 +817,7 @@ class one_pass_synthesis_impl
     /**
      * Factorizes a number of layout tiles into all possible aspect ratios for iteration.
      */
-    aspect_ratio_iterator<aspect_ratio<Lyt>> ari{0};
+    aspect_ratio_iterator<aspect_ratio_t<Lyt>> ari{0};
 
     class pysat_version_mismatch_exception : public std::exception
     {

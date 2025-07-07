@@ -48,7 +48,7 @@ inline void write_fqca_layout(pybind11::module& m)
 
         ;
 
-    detail::write_fqca_layout<py_qca_layout>(m);
+    detail::write_fqca_layout<py_qca_layout<py_offset_coordinate>>(m);
 }
 
 }  // namespace pyfiction

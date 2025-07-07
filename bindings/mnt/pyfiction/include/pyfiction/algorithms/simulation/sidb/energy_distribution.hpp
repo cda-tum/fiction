@@ -60,8 +60,8 @@ inline void energy_distribution(pybind11::module& m)
         ;
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
-    detail::energy_distribution<py_sidb_100_lattice>(m);
-    detail::energy_distribution<py_sidb_111_lattice>(m);
+    detail::energy_distribution<py_sidb_100_lattice<py_offset_coordinate>>(m);
+    detail::energy_distribution<py_sidb_111_lattice<py_offset_coordinate>>(m);
 }
 
 }  // namespace pyfiction

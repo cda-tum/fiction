@@ -2,19 +2,19 @@ import unittest
 
 from mnt.pyfiction import (
     bdl_wire_selection,
-    charge_distribution_surface_100,
+    charge_distribution_surface,
     detect_bdl_wires_100,
     detect_bdl_wires_params,
-    sidb_100_lattice,
+    sidb_lattice,
     sidb_technology,
 )
 
 
 class TestDetectBDLWires(unittest.TestCase):
     def test_detect_bdl_wires_100_lattice(self):
-        lyt = sidb_100_lattice((7, 0))
+        lyt = sidb_lattice((7, 0), orientation="100")
 
-        lyt = charge_distribution_surface_100(lyt)
+        lyt = charge_distribution_surface(lyt)
 
         lyt.assign_cell_type((38, 0, 0), sidb_technology.cell_type.OUTPUT)
         lyt.assign_cell_type((0, 0, 0), sidb_technology.cell_type.OUTPUT)

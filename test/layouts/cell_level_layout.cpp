@@ -37,7 +37,7 @@ TEST_CASE("Deep copy cell-level layout", "[cell-level-layout]")
 
     auto copy = original.clone();
 
-    copy.resize({10, 10, 1});
+    copy.resize(aspect_ratio_t<cell_layout>{10, 10, 1});
     copy.replace_clocking_scheme(use_clocking<cell_layout>());
     copy.set_layout_name("Copy");
     copy.assign_cell_type({0, 2}, qca_technology::cell_type::INPUT);
@@ -158,7 +158,7 @@ TEST_CASE("Cell type assignment", "[cell-level-layout]")
     REQUIRE(has_get_layout_name_v<cell_layout>);
     REQUIRE(has_set_layout_name_v<cell_layout>);
 
-    cell_layout layout{cell_layout::aspect_ratio{4, 4}, "AND"};
+    cell_layout layout{{4, 4}, "AND"};
 
     CHECK(layout.is_empty());
 
@@ -253,7 +253,7 @@ TEST_CASE("Cell mode assignment", "[cell-level-layout]")
 {
     using cell_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
 
-    cell_layout layout{cell_layout::aspect_ratio{4, 4, 1}, "Crossover"};
+    cell_layout layout{{4, 4, 1}, "Crossover"};
 
     layout.assign_cell_type({0, 2, 0}, qca_technology::cell_type::INPUT);
     layout.assign_cell_type({2, 0, 0}, qca_technology::cell_type::INPUT);
@@ -316,7 +316,7 @@ TEST_CASE("Clock zone assignment to cells", "[cell-level-layout]")
 {
     using clk_cell_lyt = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
 
-    const clk_cell_lyt layout{clk_cell_lyt::aspect_ratio{4, 4, 0}, twoddwave_clocking<clk_cell_lyt>(), "Lyt", 2, 2};
+    const clk_cell_lyt layout{{4, 4, 0}, twoddwave_clocking<clk_cell_lyt>(), "Lyt", 2, 2};
 
     CHECK(layout.get_clock_number({0, 0}) == 0);
     CHECK(layout.get_clock_number({0, 1}) == 0);

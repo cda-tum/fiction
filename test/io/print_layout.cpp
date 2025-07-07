@@ -24,7 +24,6 @@
 #include <fiction/technology/sidb_lattice_orientations.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/layout_utils.hpp>
 
 #include <sstream>
 
@@ -34,7 +33,7 @@ TEST_CASE("Print empty gate-level layout", "[print-gate-level-layout]")
 {
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
 
-    const gate_layout layout{gate_layout::aspect_ratio{2, 2}, open_clocking<gate_layout>(num_clks::FOUR)};
+    const gate_layout layout{{2, 2}, open_clocking<gate_layout>(num_clks::FOUR)};
 
     constexpr const char* layout_print = "[i] empty layout\n";
 
@@ -55,7 +54,7 @@ TEST_CASE("Print simple gate-level layout", "[print-gate-level-layout]")
 {
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
 
-    gate_layout layout{gate_layout::aspect_ratio{3, 1, 0}, open_clocking<gate_layout>(num_clks::FOUR)};
+    gate_layout layout{{3, 1, 0}, open_clocking<gate_layout>(num_clks::FOUR)};
 
     const auto x1 = layout.create_pi("x1", {2, 0});
     const auto x2 = layout.create_pi("x2", {1, 1});
@@ -128,7 +127,7 @@ TEST_CASE("Print empty cell-level layout", "[print-cell-level-layout]")
     using cell_layout = fiction::cell_level_layout<fiction::qca_technology,
                                                    fiction::clocked_layout<cartesian_layout<offset::ucoord_t>>>;
 
-    const cell_layout layout{cell_layout::aspect_ratio{2, 2}, "Empty"};
+    const cell_layout layout{{2, 2}, "Empty"};
 
     constexpr const char* layout_print = "[i] empty layout\n";
 
@@ -150,7 +149,7 @@ TEST_CASE("Print AND gate cell-level layout", "[print-cell-level-layout]")
     using cell_layout = fiction::cell_level_layout<fiction::qca_technology,
                                                    fiction::clocked_layout<cartesian_layout<offset::ucoord_t>>>;
 
-    cell_layout layout{cell_layout::aspect_ratio{4, 4}, "AND"};
+    cell_layout layout{{4, 4}, "AND"};
 
     layout.assign_cell_type({0, 2}, fiction::qca_technology::cell_type::INPUT);
     layout.assign_cell_type({2, 4}, fiction::qca_technology::cell_type::INPUT);
@@ -185,7 +184,7 @@ TEST_CASE("Print wire crossing cell-level layout", "[print-cell-level-layout]")
     using cell_layout = fiction::cell_level_layout<fiction::qca_technology,
                                                    fiction::clocked_layout<cartesian_layout<offset::ucoord_t>>>;
 
-    cell_layout layout{cell_layout::aspect_ratio{4, 4, 1}, "Crossover"};
+    cell_layout layout{{4, 4, 1}, "Crossover"};
 
     layout.assign_cell_type({0, 2, 0}, fiction::qca_technology::cell_type::INPUT);
     layout.assign_cell_type({2, 0, 0}, fiction::qca_technology::cell_type::INPUT);
@@ -270,7 +269,7 @@ TEST_CASE("Print Bestagon OR-gate without defect", "[print-charge-layout]")
 {
     using hex_gate_lyt = hex_odd_row_gate_clk_lyt;
 
-    hex_gate_lyt layout{aspect_ratio<hex_gate_lyt>{0, 0}};
+    hex_gate_lyt layout{aspect_ratio_t<hex_gate_lyt>{0, 0}};
 
     layout.create_or({}, {}, {0, 0});
 
@@ -429,7 +428,7 @@ TEST_CASE("Print Bestagon OR-gate with defect", "[print-charge-layout]")
 {
     using hex_gate_lyt = hex_odd_row_gate_clk_lyt;
 
-    hex_gate_lyt layout{aspect_ratio<hex_gate_lyt>{0, 0}};
+    hex_gate_lyt layout{aspect_ratio_t<hex_gate_lyt>{0, 0}};
 
     layout.create_or({}, {}, {0, 0});
 
@@ -586,7 +585,7 @@ TEST_CASE("Print Bestagon OR-gate", "[print-charge-layout]")
 {
     using hex_gate_lyt = hex_odd_row_gate_clk_lyt;
 
-    hex_gate_lyt layout{aspect_ratio<hex_gate_lyt>{0, 0}};
+    hex_gate_lyt layout{aspect_ratio_t<hex_gate_lyt>{0, 0}};
 
     constexpr const char* layout_print =
         " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"

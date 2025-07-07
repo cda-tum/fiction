@@ -26,17 +26,17 @@ namespace detail
 {
 
 template <typename LytBase, typename GateLyt>
-void gate_level_layout(pybind11::module& m, const std::string& topology)
+void gate_level_layout(pybind11::module& m, const std::string& topology, const std::string& coord_type)
 {
     namespace py = pybind11;
-    namespace py = pybind11;
 
-    py::class_<GateLyt, LytBase>(m, fmt::format("{}_gate_layout", topology).c_str(), DOC(fiction_gate_level_layout))
+    py::class_<GateLyt, LytBase>(m, fmt::format("{}_gate_layout_{}", topology, coord_type).c_str(),
+                                 DOC(fiction_gate_level_layout))
         .def(py::init<>())
-        .def(py::init<const fiction::aspect_ratio<GateLyt>&>(), py::arg("dimension"),
+        .def(py::init<const fiction::aspect_ratio<fiction::coordinate<GateLyt>>&>(), py::arg("dimension"),
              DOC(fiction_gate_level_layout_gate_level_layout))
         .def(py::init(
-                 [](const fiction::aspect_ratio<GateLyt>& dimension, const std::string& scheme_name,
+                 [](const fiction::aspect_ratio<fiction::coordinate<GateLyt>>& dimension, const std::string& scheme_name,
                     const std::string& layout_name) -> GateLyt
                  {
                      if (const auto scheme = fiction::get_clocking_scheme<GateLyt>(scheme_name); scheme.has_value())
@@ -133,13 +133,14 @@ void gate_level_layout(pybind11::module& m, const std::string& topology)
             DOC(fiction_gate_level_layout_fanout_size))
 
         .def(
-            "get_node", [](const GateLyt& layout, const py_offset_coordinate& coordinate)
+            "get_node", [](const GateLyt& layout, const typename LytBase::coordinate& coordinate)
             { return layout.get_node(coordinate); }, py::arg("t"), DOC(fiction_gate_level_layout_get_node))
         .def("get_tile", &GateLyt::get_tile, py::arg("n"), DOC(fiction_gate_level_layout_get_tile))
         .def("make_signal", &GateLyt::make_signal, py::arg("n"), DOC(fiction_gate_level_layout_make_signal))
 
         .def("move_node", &GateLyt::move_node, py::arg("n"), py::arg("t"),
-             py::arg("new_children") = std::vector<py_offset_coordinate>{}, DOC(fiction_gate_level_layout_move_node))
+             py::arg("new_children") = std::vector<typename LytBase::coordinate>{},
+             DOC(fiction_gate_level_layout_move_node))
 
         .def("clear_tile", &GateLyt::clear_tile, py::arg("t"), DOC(fiction_gate_level_layout_clear_tile))
 
@@ -317,16 +318,127 @@ inline void gate_level_layouts(pybind11::module& m)
     /**
      * Gate-level clocked Cartesian layout.
      */
-    detail::gate_level_layout<py_cartesian_clocked_layout, py_cartesian_gate_layout>(m, "cartesian");
+    detail::gate_level_layout<py_cartesian_clocked_layout<py_offset_coordinate>,
+                              py_cartesian_gate_layout<py_offset_coordinate>>(m, "cartesian", "offset_coordinates");
+    detail::gate_level_layout<py_cartesian_clocked_layout<py_cube_coordinate>,
+                              py_cartesian_gate_layout<py_cube_coordinate>>(m, "cartesian", "cube_coordinates");
     /**
      * Gate-level clocked shifted Cartesian layout.
      */
     detail::gate_level_layout<py_shifted_cartesian_clocked_layout, py_shifted_cartesian_gate_layout>(
-        m, "shifted_cartesian");
+        m, "shifted_cartesian", "offset_coordinates");
     /**
      * Gate-level clocked hexagonal layout.
      */
-    detail::gate_level_layout<py_hexagonal_clocked_layout, py_hexagonal_gate_layout>(m, "hexagonal");
+    detail::gate_level_layout<py_hexagonal_clocked_layout, py_hexagonal_gate_layout>(m, "hexagonal",
+                                                                                     "offset_coordinates");
+}
+/**
+ * A "factory" function that Python users can call as
+ *   <cartesian|shifted_cartesian|hexagonal>_gate_layout(dimension, scheme_name="open", coordinate_type="offset")
+ * to create the correct layout type (offset or cube).
+ */
+inline void gate_level_layout_factory(pybind11::module& m)
+{
+    namespace py = pybind11;
+
+    m.def(
+        "cartesian_gate_layout",
+        [](const py::tuple dimension, const std::string& scheme_name, const std::string& layout_name,
+           const std::string& coordinate_type)
+        {
+            if (coordinate_type == "cube")
+            {
+                const auto ar = extract_aspect_ratio<py_cartesian_layout<py_cube_coordinate>>(dimension);
+                if (const auto scheme =
+                        fiction::get_clocking_scheme<py_cartesian_gate_layout<py_cube_coordinate>>(scheme_name);
+                    scheme.has_value())
+                {
+                    return py::cast(py_cartesian_gate_layout<py_cube_coordinate>{ar, *scheme, layout_name});
+                }
+                else
+                {
+                    throw std::runtime_error("Given name does not refer to a supported clocking scheme");
+                }
+            }
+            else  // default: offset
+            {
+                const auto ar = extract_aspect_ratio<py_cartesian_layout<py_offset_coordinate>>(dimension);
+                if (const auto scheme =
+                        fiction::get_clocking_scheme<py_cartesian_gate_layout<py_offset_coordinate>>(scheme_name);
+                    scheme.has_value())
+                {
+                    return py::cast(py_cartesian_gate_layout<py_offset_coordinate>{ar, *scheme, layout_name});
+                }
+                else
+                {
+                    throw std::runtime_error("Given name does not refer to a supported clocking scheme");
+                }
+            }
+        },
+        py::arg("dimension") = py::make_tuple(0, 0, 0), py::arg("scheme_name") = "open", py::arg("layout_name") = "",
+        py::arg("coordinate_type") = "offset",
+        R"doc(
+            Creates and returns a cartesian_gate_layout instance, choosing the coordinate system
+            based on the string argument. Valid options for `coordinate_type` are:
+              - "offset" (default)
+              - "cube"
+
+            For the dimension, you can pass either:
+              - A single tuple (x, y) or (x, y, z) to specify only the "max" coordinate, with min defaulting to (0,0,0),
+              - Two nested tuples ((xmin, ymin), (xmax, ymax)) or 3D
+                ((xmin, ymin, zmin), (xmax, ymax, zmax)) to specify min and max explicitly.
+        )doc");
+
+    m.def(
+        "shifted_cartesian_gate_layout",
+        [](const py::tuple dimension, const std::string& scheme_name, const std::string& layout_name)
+        {
+            const auto ar = extract_aspect_ratio<py_shifted_cartesian_layout>(dimension);
+            if (const auto scheme = fiction::get_clocking_scheme<py_shifted_cartesian_gate_layout>(scheme_name);
+                scheme.has_value())
+            {
+                return py::cast(py_shifted_cartesian_gate_layout{ar, *scheme, layout_name});
+            }
+            else
+            {
+                throw std::runtime_error("Given name does not refer to a supported clocking scheme");
+            }
+        },
+        py::arg("dimension") = py::make_tuple(0, 0, 0), py::arg("scheme_name") = "open", py::arg("layout_name") = "",
+        R"doc(
+            Creates and returns a shifted_cartesian_gate_layout instance.
+
+            For the dimension, you can pass either:
+              - A single tuple (x, y) or (x, y, z) to specify only the "max" coordinate, with min defaulting to (0,0,0),
+              - Two nested tuples ((xmin, ymin), (xmax, ymax)) or 3D
+                ((xmin, ymin, zmin), (xmax, ymax, zmax)) to specify min and max explicitly.
+        )doc");
+
+    m.def(
+        "hexagonal_gate_layout",
+        [](const py::tuple dimension, const std::string& scheme_name, const std::string& layout_name)
+        {
+            const auto ar = extract_aspect_ratio<py_hexagonal_layout>(dimension);
+            if (const auto scheme = fiction::get_clocking_scheme<py_hexagonal_gate_layout>(scheme_name);
+                scheme.has_value())
+            {
+                return py::cast(py_hexagonal_gate_layout{ar, *scheme, layout_name});
+            }
+            else
+            {
+                throw std::runtime_error("Given name does not refer to a supported clocking scheme");
+            }
+        },
+        py::arg("dimension") = py::make_tuple(0, 0, 0), py::arg("scheme_name") = "open", py::arg("layout_name") = "",
+        R"doc(
+            Creates and returns a hexagonal_gate_layout instance.
+
+            For the dimension, you can pass either:
+              - A single tuple (x, y) or (x, y, z) to specify only the "max" coordinate, with min defaulting to (0,0,0),
+              - Two nested tuples ((xmin, ymin), (xmax, ymax)) or 3D
+                ((xmin, ymin, zmin), (xmax, ymax, zmax)) to specify min and max explicitly.
+        )doc");
 }
 
 }  // namespace pyfiction

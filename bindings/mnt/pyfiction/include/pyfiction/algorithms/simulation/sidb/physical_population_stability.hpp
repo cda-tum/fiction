@@ -77,8 +77,8 @@ inline void physical_population_stability(pybind11::module& m)
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::physical_population_stability<py_sidb_100_lattice>(m, "100");
-    detail::physical_population_stability<py_sidb_111_lattice>(m, "111");
+    detail::physical_population_stability<py_sidb_100_lattice<py_offset_coordinate>>(m, "100");
+    detail::physical_population_stability<py_sidb_111_lattice<py_offset_coordinate>>(m, "111");
 }
 
 }  // namespace pyfiction

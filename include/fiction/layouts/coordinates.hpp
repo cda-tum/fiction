@@ -153,39 +153,46 @@ struct ucoord_t
         return ucoord_t{static_cast<uint64_t>(*this) | static_cast<uint64_t>(ucoord_t{})};
     }
     /**
-     * Wraps the coordinate with respect to the given aspect ratio by iterating over the dimensions in the order defined
-     * by the coordinate type. For any dimension of the coordinate that is strictly larger than the associated dimension
-     * of the aspect ratio, this dimension will be wrapped to zero, and the next dimension is increased. The resulting
-     * coordinate becomes a dead copy of the aspect ratio if it is not contained in the aspect ratio after iterating.
-     * An example use case of this function is the coordinate iterator, which implements iterator advancing by first
-     * incrementing the x dimension, then wrapping the coordinate to the boundary within to enumerate.
+     * Wraps this coordinate according to the given layout boundaries.
      *
-     * @param aspect_ratio Aspect ratio to wrap the coordinate to.
+     * Iterates over the x, y, and z dimensions in order:
+     * - If x exceeds \p layout_maximum.x, x is reset to \p wrap_to.x, and y is incremented.
+     * - If y exceeds \p layout_maximum.y, then:
+     *   - If z == 1, this coordinate becomes a "dead" coordinate (via \p layout_maximum.get_dead()).
+     *   - Otherwise, y is reset to \p wrap_to.y, and z is set to 1.
+     * - If z exceeds \p layout_maximum.z, this coordinate also becomes a "dead" coordinate.
+     *
+     * @param layout_maximum The maximum coordinate boundary for each dimension.
+     * @param wrap_to        The value to which x or y are reset when they exceed the maximum.
      */
-    void wrap(const ucoord_t& aspect_ratio) noexcept
+    void wrap(const ucoord_t& layout_maximum, const ucoord_t& wrap_to) noexcept
     {
-        if (x > aspect_ratio.x)
+        // Wrap along the x dimension
+        if (x > layout_maximum.x)
         {
-            x = 0;
+            x = wrap_to.x;
             ++y;
         }
 
-        if (y > aspect_ratio.y)
+        // Wrap along the y dimension
+        if (y > layout_maximum.y)
         {
+            // If z is already 1, we cannot wrap further, so we mark the coordinate as dead.
             if (z == 1)
             {
-                *this = aspect_ratio.get_dead();
+                *this = layout_maximum.get_dead();
             }
             else
             {
-                y = 0;
+                y = wrap_to.y;
                 z = 1;
             }
         }
 
-        if (z > aspect_ratio.z)
+        // Wrap along the z dimension
+        if (z > layout_maximum.z)
         {
-            *this = aspect_ratio.get_dead();
+            *this = layout_maximum.get_dead();
         }
     }
     /**
@@ -375,9 +382,36 @@ struct coord_t
             y{static_cast<decltype(y)>(y_)},
             x{static_cast<decltype(x)>(x_)}
     {}
+    /**
+     * Standard constructor. Instantiates a coordinate from an uint64_t, where the positions are encoded in the
+     * following four parts of the unsigned 64-bit integer (from MSB to LSB):
+     *  - 1 bit for the dead indicator
+     *  - 1 bit for the z position
+     *  - 31 bit for the y position
+     *  - 31 bit for the x position
+     *
+     * @param t Unsigned 64-bit integer to instantiate the coordinate from.
+     */
+    constexpr explicit coord_t(const uint64_t t) noexcept :
+            d{static_cast<decltype(d)>(t >> 63ull)},
+            z{static_cast<decltype(z)>((t << 1ull) >> 63ull)},
+            y{static_cast<decltype(y)>((t << 2ull) >> 33ull)},
+            x{static_cast<decltype(x)>((t << 33ull) >> 33ull)}
+    {}
 
     // NOLINTEND(readability-identifier-naming)
 
+    /**
+     * Allows explicit conversion to `uint64_t`. Segments an unsigned 64-bit integer into four parts (from MSB to LSB):
+     *  - 1 bit for the dead indicator
+     *  - 1 bit for the z position
+     *  - 31 bit for the y position
+     *  - 31 bit for the x position
+     */
+    explicit constexpr operator uint64_t() const noexcept
+    {
+        return (((((((static_cast<uint64_t>(d)) << 1ull) | z) << 31ull) | y) << 31ull) | x);
+    }
     /**
      * Returns whether the coordinate is dead.
      *
@@ -399,32 +433,43 @@ struct coord_t
         return dead_coord;
     }
     /**
-     * Wraps the coordinate with respect to the given aspect ratio by iterating over the dimensions in the order defined
-     * by the coordinate type. For any dimension of the coordinate that is strictly larger than the associated dimension
-     * of the aspect ratio, this dimension will be wrapped to zero, and the next dimension is increased. The resulting
-     * coordinate becomes a dead copy of the aspect ratio if it is not contained in the aspect ratio after iterating.
-     * An example use case of this function is the coordinate iterator, which implements iterator advancing by first
-     * incrementing the x dimension, then wrapping the coordinate to the boundary within to enumerate.
+     * Wraps this coordinate within the given aspect ratio.
      *
-     * @param aspect_ratio Aspect ratio to wrap the coordinate to.
+     * Iterates through x, y, and z in that order:
+     * - If x exceeds @p layout_maximum.x, x is set to @p wrap_to.x, and y is incremented.
+     * - If y exceeds @p layout_maximum.y, y is set to @p wrap_to.y, and z is incremented.
+     * - If z exceeds @p layout_maximum.z, this coordinate is marked "dead" by assigning the result of
+     *   @c layout_maximum.get_dead() to @c *this.
+     *
+     * A typical use case is an iterator over a 3D grid:
+     * 1. Increment x;
+     * 2. If x overflows, wrap x and increment y;
+     * 3. If y overflows, wrap y and increment z;
+     * 4. If z overflows, mark this coordinate as "dead."
+     *
+     * @param layout_maximum The coordinate boundaries to wrap against.
+     * @param wrap_to      The coordinate to which x or y is reset before moving on to the next dimension.
      */
-    void wrap(const coord_t& aspect_ratio) noexcept
+    void wrap(const coord_t& layout_maximum, const coord_t& wrap_to) noexcept
     {
-        if (x > aspect_ratio.x)
+        // Check x boundary
+        if (x > layout_maximum.x)
         {
-            x = 0;
+            x = wrap_to.x;
             ++y;
         }
 
-        if (y > aspect_ratio.y)
+        // Check y boundary
+        if (y > layout_maximum.y)
         {
-            y = 0;
+            y = wrap_to.y;
             ++z;
         }
 
-        if (z > aspect_ratio.z)
+        // Check z boundary
+        if (z > layout_maximum.z)
         {
-            *this = aspect_ratio.get_dead();
+            *this = layout_maximum.get_dead();
         }
     }
     /**
@@ -436,6 +481,16 @@ struct coord_t
     constexpr bool operator==(const coord_t& other) const noexcept
     {
         return d == other.d && z == other.z && y == other.y && x == other.x;
+    }
+    /**
+     * Compares against another coordinate's `uint64_t` representation for equality. Respects the dead indicator.
+     *
+     * @param other Right-hand side coordinate representation in `uint64_t` format.
+     * @return `true` iff this coordinate is equal to the converted one.
+     */
+    constexpr bool operator==(const uint64_t& other) const noexcept
+    {
+        return static_cast<uint64_t>(*this) == other;
     }
     /**
      * Compares against another coordinate for inequality. Respects the dead indicator.
@@ -541,6 +596,12 @@ struct coord_t
     }
 };
 
+inline std::ostream& operator<<(std::ostream& os, const coord_t& t)
+{
+    os << t.str();
+    return os;
+}
+
 }  // namespace cube
 
 /**
@@ -644,32 +705,41 @@ struct coord_t
         return dead_coord;
     }
     /**
-     * Wraps the coordinate with respect to the given aspect ratio by iterating over the dimensions in the order defined
-     * by the coordinate type. For any dimension of the coordinate that is strictly larger than the associated dimension
-     * of the aspect ratio, this dimension will be wrapped to zero, and the next dimension is increased. The resulting
-     * coordinate becomes a dead copy of the aspect ratio if it is not contained in the aspect ratio after iterating.
-     * An example use case of this function is the coordinate iterator, which implements iterator advancing by first
-     * incrementing the x dimension, then wrapping the coordinate to the boundary within to enumerate.
+     * Wraps this coordinate within the given aspect ratio, modifying x, y, and z as needed.
      *
-     * @param aspect_ratio Aspect ratio to wrap the coordinate to.
+     * Behavior:
+     * - If x exceeds @p layout_maximum.x, then:
+     *   1. x is set to @p wrap_to.x
+     *   2. y is incremented by the current value of z
+     *   3. z is toggled (if z was 0, it becomes 1; if it was 1, it becomes 0)
+     * - Afterward, if z exceeds @p layout_maximum.z, this coordinate becomes a "dead" coordinate by
+     *   assigning @c layout_maximum.get_dead() to @c *this.
+     * - Lastly, if y exceeds @p layout_maximum.y, @c *this is also replaced by
+     *   @c layout_maximum.get_dead().
+     *
+     * @param layout_maximum The maximum allowed boundary for each dimension.
+     * @param wrap_to      The coordinate whose x value x is reset to if it exceeds @p layout_maximum.x.
      */
-    void wrap(const coord_t& aspect_ratio) noexcept
+    void wrap(const coord_t& layout_maximum, const coord_t& wrap_to) noexcept
     {
-        if (x > aspect_ratio.x)
+        // Check the x boundary
+        if (x > layout_maximum.x)
         {
-            x = 0;
-            y += z;
-            z = !z;
+            x = wrap_to.x;  // Reset x
+            y += z;         // Add z to y
+            z = !z;         // Toggle z
         }
 
-        if (z > aspect_ratio.z)
+        // Check the z boundary
+        if (z > layout_maximum.z)
         {
-            *this = aspect_ratio.get_dead();
+            *this = layout_maximum.get_dead();
         }
 
-        if (y > aspect_ratio.y)
+        // Check the y boundary
+        if (y > layout_maximum.y)
         {
-            *this = aspect_ratio.get_dead();
+            *this = layout_maximum.get_dead();
         }
     }
     /**
@@ -825,6 +895,12 @@ constexpr coord_t to_siqad_coord(const CoordinateType& coord) noexcept
     return {coord.x, (coord.y + coord.y % 2) / 2, (-coord.y - 1) % 2 + 1};
 }
 
+inline std::ostream& operator<<(std::ostream& os, const coord_t& t)
+{
+    os << t.str();
+    return os;
+}
+
 }  // namespace siqad
 
 /**
@@ -851,44 +927,241 @@ constexpr cube::coord_t offset_to_cube_coord(const offset::ucoord_t& coord) noex
     return {static_cast<decltype(cube::coord_t::x)>(coord.x), static_cast<decltype(cube::coord_t::y)>(coord.y),
             static_cast<decltype(cube::coord_t::z)>(coord.z)};
 }
+
 /**
- * Computes the area of a given coordinate assuming its origin is (0, 0, 0). Calculates \f$(|x| + 1) \cdot (|y| + 1)\f$
- * by default. The exception is SiQAD coordinates, for which it computes \f$(|x| + 1) \cdot (2 \cdot |y| + |z| + 1)\f$.
+ * Represents the layout boundaries in a 3D coordinate system.
  *
- * @tparam CoordinateType Coordinate type.
- * @param coord Coordinate.
- * @return Area of coord.
+ * The `aspect_ratio` struct defines both minimum and maximum coordinates, effectively
+ * determining the size and position of a layout within a coordinate space.
+ *
+ * @tparam CoordinateType Type of the coordinates (e.g., cube::coord_t, siqad::coord_t, offset::ucoord_t).
  */
 template <typename CoordinateType>
-uint64_t area(const CoordinateType& coord) noexcept
+struct aspect_ratio
 {
-    if constexpr (std::is_same_v<CoordinateType, siqad::coord_t>)
+    /**
+     * Default constructor.
+     *
+     * Initializes both the minimum and maximum coordinates to (0, 0, 0).
+     * This effectively creates a layout with a single point at the origin.
+     */
+    aspect_ratio() : min{0, 0, 0}, max{0, 0, 0}
     {
-        return (static_cast<uint64_t>(integral_abs(coord.x)) + 1) *
-               (2 * static_cast<uint64_t>(integral_abs(coord.y)) + static_cast<uint64_t>(integral_abs(coord.z)) + 1);
+        static_assert(std::is_same_v<CoordinateType, cube::coord_t> || std::is_same_v<CoordinateType, siqad::coord_t> ||
+                          std::is_same_v<CoordinateType, offset::ucoord_t>,
+                      "CoordinateType is not supported");
     }
-
-    return (static_cast<uint64_t>(integral_abs(coord.x)) + 1) * (static_cast<uint64_t>(integral_abs(coord.y)) + 1);
-}
-/**
- * Computes the volume of a given coordinate assuming its origin is (0, 0, 0). Calculates \f$(|x| + 1) \cdot (|y| + 1)
- * \cdot (|z| + 1)\f$ by default. For SiQAD coordinates, which are planar by definition, the area is returned.
- *
- * @tparam CoordinateType Coordinate type.
- * @param coord Coordinate.
- * @return Volume of coord.
- */
-template <typename CoordinateType>
-uint64_t volume(const CoordinateType& coord) noexcept
-{
-    if constexpr (std::is_same_v<CoordinateType, siqad::coord_t>)
+    /**
+     * Constructs an aspect_ratio from a single end coordinate.
+     *
+     * The minimum coordinate is set to (0, 0, 0), and the maximum coordinate is set to \p e.
+     *
+     * @param e The maximum coordinate defining the layout's size.
+     */
+    explicit aspect_ratio(const CoordinateType& e) : min{0, 0, 0}, max{e}
     {
-        return area(coord);
+        static_assert(std::is_same_v<CoordinateType, cube::coord_t> || std::is_same_v<CoordinateType, siqad::coord_t> ||
+                          std::is_same_v<CoordinateType, offset::ucoord_t>,
+                      "CoordinateType is not supported");
     }
-
-    return (static_cast<uint64_t>(integral_abs(coord.x)) + 1) * (static_cast<uint64_t>(integral_abs(coord.y)) + 1) *
-           (static_cast<uint64_t>(integral_abs(coord.z)) + 1);
-}
+    /**
+     * Constructs an aspect_ratio from specified start and end coordinates.
+     *
+     * @param minimum The minimum coordinate of the layout.
+     * @param maximum The maximum coordinate of the layout.
+     */
+    aspect_ratio(const CoordinateType& minimum, const CoordinateType& maximum) : min{minimum}, max{maximum}
+    {
+        static_assert(std::is_same_v<CoordinateType, cube::coord_t> || std::is_same_v<CoordinateType, siqad::coord_t> ||
+                          std::is_same_v<CoordinateType, offset::ucoord_t>,
+                      "CoordinateType is not supported");
+        assert(minimum <= maximum && "Minimum coordinate must not exceed maximum coordinate.");
+    }
+    /**
+     * Templated constructor for initializing aspect_ratio with three integral coordinates.
+     *
+     * The minimum coordinate is set to (0, 0, 0) and the maximum to (x, y, z).
+     *
+     * @tparam X Type of the x-coordinate. Must be integral.
+     * @tparam Y Type of the y-coordinate. Must be integral.
+     * @tparam Z Type of the z-coordinate. Must be integral.
+     * @param x The x-coordinate value.
+     * @param y The y-coordinate value.
+     * @param z The z-coordinate value.
+     */
+    template <typename X, typename Y, typename Z>
+    aspect_ratio(X x, Y y, Z z) :
+            min{0, 0, 0},
+            max{static_cast<decltype(max.x)>(x), static_cast<decltype(max.y)>(y), static_cast<decltype(max.z)>(z)}
+    {
+        static_assert(std::is_integral_v<X> && std::is_integral_v<Y> && std::is_integral_v<Z>,
+                      "Coordinates must be integral.");
+    }
+    /**
+     * Templated constructor for initializing aspect_ratio with two integral coordinates.
+     *
+     * The minimum coordinate is set to (0, 0, 0) and the maximum to (x, y, 0).
+     *
+     * @tparam X Type of the x-coordinate. Must be integral.
+     * @tparam Y Type of the y-coordinate. Must be integral.
+     * @param x The x-coordinate value.
+     * @param y The y-coordinate value.
+     */
+    template <typename X, typename Y>
+    aspect_ratio(X x, Y y) : min{0, 0, 0}, max{static_cast<decltype(max.x)>(x), static_cast<decltype(max.y)>(y), 0}
+    {
+        static_assert(std::is_integral_v<X> && std::is_integral_v<Y>, "Coordinates must be integral.");
+    }
+    /**
+     * Gets the x-coordinate of the minimum.
+     *
+     * @return The x-coordinate of the minimum boundary.
+     */
+    [[nodiscard]] auto x_min() const noexcept
+    {
+        return min.x;
+    }
+    /**
+     * Gets the x-coordinate of the maximum.
+     *
+     * @return The x-coordinate of the maximum boundary.
+     */
+    [[nodiscard]] auto x() const noexcept
+    {
+        return max.x;
+    }
+    /**
+     * Computes the size (absolute difference) in the x dimension.
+     *
+     * @return |x() - x_min()|.
+     */
+    [[nodiscard]] auto x_size() const noexcept
+    {
+        return static_cast<decltype(max.x)>(integral_abs(max.x - min.x));
+    }
+    /**
+     * Gets the y-coordinate of the minimum.
+     *
+     * @return The y-coordinate of the minimum boundary.
+     */
+    [[nodiscard]] auto y_min() const noexcept
+    {
+        return min.y;
+    }
+    /**
+     * Gets the y-coordinate of the maximum.
+     *
+     * @return The y-coordinate of the maximum boundary.
+     */
+    [[nodiscard]] auto y() const noexcept
+    {
+        return max.y;
+    }
+    /**
+     * Computes the size (absolute difference) in the y dimension.
+     *
+     * @return |y() - y_min()|.
+     */
+    [[nodiscard]] auto y_size() const noexcept
+    {
+        return static_cast<decltype(max.y)>(integral_abs(max.y - min.y));
+    }
+    /**
+     * Gets the z-coordinate of the minimum.
+     *
+     * @return The z-coordinate of the minimum boundary.
+     */
+    [[nodiscard]] auto z_min() const noexcept
+    {
+        return min.z;
+    }
+    /**
+     * Gets the z-coordinate of the maximum.
+     *
+     * @return The z-coordinate of the maximum boundary.
+     */
+    [[nodiscard]] auto z() const noexcept
+    {
+        return max.z;
+    }
+    /**
+     * Computes the size (absolute difference) in the z dimension.
+     *
+     * @return |z() - z_min()|.
+     */
+    [[nodiscard]] auto z_size() const noexcept
+    {
+        return static_cast<decltype(max.z)>(integral_abs(max.z - min.z));
+    }
+    /**
+     * Equality operator for `aspect_ratio`.
+     *
+     * Compares two `aspect_ratio` instances for equality based on their min and max coordinates.
+     *
+     * @param other The other aspect_ratio instance to compare against.
+     * @return `true` if both aspect_ratios have identical min and max coordinates; `false` otherwise.
+     */
+    [[nodiscard]] bool operator==(const aspect_ratio& other) const noexcept
+    {
+        return ((min == other.min) && (max == other.max));
+    }
+    /**
+     * Inequality operator for `aspect_ratio`.
+     *
+     * Compares two `aspect_ratio` instances for inequality based on their min and max coordinates.
+     *
+     * @param other The other aspect_ratio instance to compare against.
+     * @return `true` if the two aspect_ratios differ in either min or max coordinates; `false` otherwise.
+     */
+    [[nodiscard]] bool operator!=(const aspect_ratio& other) const noexcept
+    {
+        return !(*this == other);
+    }
+    /**
+     * Computes the "area" of this aspect_ratio.
+     *
+     * - For `siqad::coord_t`, returns \f$(x\_size + 1) \times (2 \times y\_size + z\_size + 1)\f$.
+     * - Otherwise, returns \f$(x\_size + 1) \times (y\_size + 1)\f$.
+     *
+     * @return The computed area as a 64-bit unsigned value.
+     */
+    uint64_t area() noexcept
+    {
+        if constexpr (std::is_same_v<CoordinateType, siqad::coord_t>)
+        {
+            return static_cast<uint64_t>(
+                (static_cast<uint64_t>(x_size()) + 1ULL) *
+                (2ULL * static_cast<uint64_t>(y_size()) + static_cast<uint64_t>(z_size()) + 1ULL));
+        }
+        return static_cast<uint64_t>((static_cast<uint64_t>(x_size()) + 1ULL) *
+                                     (static_cast<uint64_t>(y_size()) + 1ULL));
+    }
+    /**
+     * Computes the "volume" of this aspect_ratio.
+     *
+     * - For `siqad::coord_t`, which is effectively planar, the result is the same as `area()`.
+     * - Otherwise, returns \f$area \times (z\_size + 1)\f$.
+     *
+     * @return The computed volume as a 64-bit unsigned value.
+     */
+    uint64_t volume() noexcept
+    {
+        if constexpr (std::is_same_v<CoordinateType, siqad::coord_t>)
+        {
+            // For planar SiQAD coordinates, just return area
+            return area();
+        }
+        return area() * (static_cast<uint64_t>(z_size()) + 1ULL);
+    }
+    /**
+     * The minimum coordinate boundary (inclusive).
+     */
+    CoordinateType min;
+    /**
+     * The maximum coordinate boundary (inclusive).
+     */
+    CoordinateType max;
+};
 
 /**
  * An iterator type that allows to enumerate coordinates in order within a boundary.
@@ -938,10 +1211,13 @@ class coord_iterator
      *
      * @param dimension Boundary within to enumerate. Iteration wraps at its limits.
      * @param start Starting coordinate to enumerate first.
+     * @param wrap_to The minimum coordinate of the layout which the coord_iterator wraps to when exceeding it limits.
      */
-    constexpr explicit coord_iterator(const CoordinateType& dimension, const CoordinateType& start) noexcept :
-            aspect_ratio{dimension},
-            coord{start}
+    constexpr explicit coord_iterator(const CoordinateType& dimension, const CoordinateType& start,
+                                      const CoordinateType& wrap_to) noexcept :
+            layout_maximum{dimension},
+            coord{start},
+            wrap_to{wrap_to}
     {
         static_assert(std::is_same_v<CoordinateType, offset::ucoord_t> ||
                           std::is_same_v<CoordinateType, cube::coord_t> ||
@@ -949,12 +1225,21 @@ class coord_iterator
                       "CoordinateType must be a supported coordinate");
 
         // Make sure the start iterator is within the given boundary; first handle negative coordinates ...
-        coord.x = std::max(coord.x, static_cast<decltype(coord.x)>(0));
-        coord.y = std::max(coord.y, static_cast<decltype(coord.y)>(0));
-        coord.z = std::max(coord.z, static_cast<decltype(coord.z)>(0));
+        if (std::is_same_v<CoordinateType, fiction::offset::ucoord_t>)
+        {
+            coord.x = std::max(coord.x, static_cast<decltype(coord.x)>(0));
+            coord.y = std::max(coord.y, static_cast<decltype(coord.y)>(0));
+            coord.z = std::max(coord.z, static_cast<decltype(coord.z)>(0));
+        }
+        else
+        {
+            coord.x = std::max(coord.x, static_cast<decltype(coord.x)>(wrap_to.x));
+            coord.y = std::max(coord.y, static_cast<decltype(coord.y)>(wrap_to.y));
+            coord.z = std::max(coord.z, static_cast<decltype(coord.z)>(wrap_to.z));
+        }
 
         // ... then handle coordinates that are beyond the given boundary.
-        coord.wrap(aspect_ratio);
+        coord.wrap(layout_maximum, wrap_to);
     }
     /**
      * Increments the iterator, while keeping it within the boundary. Also defined on iterators that are out of bounds.
@@ -963,11 +1248,11 @@ class coord_iterator
      */
     constexpr coord_iterator& operator++() noexcept
     {
-        if (coord != aspect_ratio)
+        if (coord != layout_maximum)
         {
             ++coord.x;
 
-            coord.wrap(aspect_ratio);
+            coord.wrap(layout_maximum, wrap_to);
         }
         else
         {
@@ -1012,9 +1297,10 @@ class coord_iterator
     }
 
   private:
-    const CoordinateType aspect_ratio;
+    const CoordinateType layout_maximum;
 
     CoordinateType coord;
+    CoordinateType wrap_to;
 };
 
 }  // namespace fiction

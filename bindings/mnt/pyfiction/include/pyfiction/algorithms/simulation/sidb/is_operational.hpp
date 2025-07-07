@@ -126,8 +126,8 @@ inline void is_operational(pybind11::module& m)
                        DOC(fiction_is_operational_params_strategy_to_analyze_operational_status));
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
-    detail::is_operational<py_sidb_100_lattice>(m);
-    detail::is_operational<py_sidb_111_lattice>(m);
+    detail::is_operational<py_sidb_100_lattice<py_offset_coordinate>>(m);
+    detail::is_operational<py_sidb_111_lattice<py_offset_coordinate>>(m);
 }
 
 }  // namespace pyfiction

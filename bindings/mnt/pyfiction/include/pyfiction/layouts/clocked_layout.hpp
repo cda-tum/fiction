@@ -25,19 +25,21 @@ namespace detail
 {
 
 template <typename LytBase, typename ClockedLyt>
-void clocked_layout(pybind11::module& m, const std::string& topology)
+void clocked_layout(pybind11::module& m, const std::string& topology, const std::string& coord_type)
 {
     namespace py = pybind11;
 
     /**
-     * Clocked Cartesian layout.
+     * Clocked layout.
      */
-    py::class_<ClockedLyt, LytBase>(m, fmt::format("clocked_{}_layout", topology).c_str(), DOC(fiction_clocked_layout))
+    py::class_<ClockedLyt, LytBase>(m, fmt::format("clocked_{}_layout_{}", topology, coord_type).c_str(),
+                                    DOC(fiction_clocked_layout))
         .def(py::init<>())
-        .def(py::init<const fiction::aspect_ratio<ClockedLyt>&>(), py::arg("dimension"),
+        .def(py::init<const fiction::aspect_ratio<fiction::coordinate<ClockedLyt>>&>(), py::arg("dimension"),
              DOC(fiction_clocked_layout_clocked_layout))
         .def(py::init(
-                 [](const fiction::aspect_ratio<ClockedLyt>& dimension, const std::string& scheme_name)
+                 [](const fiction::aspect_ratio<fiction::coordinate<ClockedLyt>>& dimension,
+                    const std::string&                                            scheme_name)
                  {
                      if (const auto scheme = fiction::get_clocking_scheme<ClockedLyt>(scheme_name); scheme.has_value())
                      {
@@ -88,9 +90,120 @@ void clocked_layout(pybind11::module& m, const std::string& topology)
 
 void clocked_layouts(pybind11::module& m)
 {
-    detail::clocked_layout<py_cartesian_layout, py_cartesian_clocked_layout>(m, "cartesian");
-    detail::clocked_layout<py_shifted_cartesian_layout, py_shifted_cartesian_clocked_layout>(m, "shifted_cartesian");
-    detail::clocked_layout<py_hexagonal_layout, py_hexagonal_clocked_layout>(m, "hexagonal");
+    detail::clocked_layout<py_cartesian_layout<py_offset_coordinate>,
+                           py_cartesian_clocked_layout<py_offset_coordinate>>(m, "cartesian", "offset_coordinates");
+    detail::clocked_layout<py_cartesian_layout<py_cube_coordinate>, py_cartesian_clocked_layout<py_cube_coordinate>>(
+        m, "cartesian", "cube_coordinates");
+    detail::clocked_layout<py_shifted_cartesian_layout, py_shifted_cartesian_clocked_layout>(m, "shifted_cartesian",
+                                                                                             "offset_coordinates");
+    detail::clocked_layout<py_hexagonal_layout, py_hexagonal_clocked_layout>(m, "hexagonal", "offset_coordinates");
+}
+/**
+ * A "factory" function that Python users can call as
+ *   <cartesian|shifted_cartesian|hexagonal>_clocked_layout(dimension, scheme_name="open", coordinate_type="offset")
+ * to create the correct layout type (offset or cube).
+ */
+inline void clocked_layout_factory(pybind11::module& m)
+{
+    namespace py = pybind11;
+
+    m.def(
+        "clocked_cartesian_layout",
+        [](const py::tuple dimension, const std::string& scheme_name, const std::string& coordinate_type)
+        {
+            if (coordinate_type == "cube")
+            {
+                const auto ar = extract_aspect_ratio<py_cartesian_layout<py_cube_coordinate>>(dimension);
+                if (const auto scheme =
+                        fiction::get_clocking_scheme<py_cartesian_clocked_layout<py_cube_coordinate>>(scheme_name);
+                    scheme.has_value())
+                {
+                    return py::cast(py_cartesian_clocked_layout<py_cube_coordinate>{ar, *scheme});
+                }
+                else
+                {
+                    throw std::runtime_error("Given name does not refer to a supported clocking scheme");
+                }
+            }
+            else  // default: offset
+            {
+                const auto ar = extract_aspect_ratio<py_cartesian_layout<py_offset_coordinate>>(dimension);
+                if (const auto scheme =
+                        fiction::get_clocking_scheme<py_cartesian_clocked_layout<py_offset_coordinate>>(scheme_name);
+                    scheme.has_value())
+                {
+                    return py::cast(py_cartesian_clocked_layout<py_offset_coordinate>{ar, *scheme});
+                }
+                else
+                {
+                    throw std::runtime_error("Given name does not refer to a supported clocking scheme");
+                }
+            }
+        },
+        py::arg("dimension") = py::make_tuple(0, 0, 0), py::arg("scheme_name") = "open",
+        py::arg("coordinate_type") = "offset",  // default
+        R"doc(
+            Creates and returns a clocked_cartesian_layout instance, choosing the coordinate system
+            based on the string argument. Valid options for `coordinate_type` are:
+
+                - "offset" (default)
+                - "cube"
+
+            For the dimension, you can pass either:
+              - A single tuple (x, y) or (x, y, z) to specify only the "max" coordinate, with min defaulting to (0,0,0),
+              - Two nested tuples ((xmin, ymin), (xmax, ymax)) or 3D
+                ((xmin, ymin, zmin), (xmax, ymax, zmax)) to specify min and max explicitly.
+        )doc");
+
+    m.def(
+        "clocked_shifted_cartesian_layout",
+        [](const py::tuple dimension, const std::string& scheme_name)
+        {
+            const auto ar = extract_aspect_ratio<py_shifted_cartesian_layout>(dimension);
+            if (const auto scheme = fiction::get_clocking_scheme<py_shifted_cartesian_clocked_layout>(scheme_name);
+                scheme.has_value())
+            {
+                return py::cast(py_shifted_cartesian_clocked_layout{ar, *scheme});
+            }
+            else
+            {
+                throw std::runtime_error("Given name does not refer to a supported clocking scheme");
+            }
+        },
+        py::arg("dimension") = py::make_tuple(0, 0, 0), py::arg("scheme_name") = "open",
+        R"doc(
+            Creates and returns a clocked_shifted_cartesian_layout instance.
+
+            For the dimension, you can pass either:
+              - A single tuple (x, y) or (x, y, z) to specify only the "max" coordinate, with min defaulting to (0,0,0),
+              - Two nested tuples ((xmin, ymin), (xmax, ymax)) or 3D
+                ((xmin, ymin, zmin), (xmax, ymax, zmax)) to specify min and max explicitly.
+        )doc");
+
+    m.def(
+        "clocked_hexagonal_layout",
+        [](const py::tuple dimension, const std::string& scheme_name)
+        {
+            const auto ar = extract_aspect_ratio<py_hexagonal_layout>(dimension);
+            if (const auto scheme = fiction::get_clocking_scheme<py_hexagonal_clocked_layout>(scheme_name);
+                scheme.has_value())
+            {
+                return py::cast(py_hexagonal_clocked_layout{ar, *scheme});
+            }
+            else
+            {
+                throw std::runtime_error("Given name does not refer to a supported clocking scheme");
+            }
+        },
+        py::arg("dimension") = py::make_tuple(0, 0, 0), py::arg("scheme_name") = "open",
+        R"doc(
+            Creates and returns a clocked_hexagonal_layout instance.
+
+            For the dimension, you can pass either:
+              - A single tuple (x, y) or (x, y, z) to specify only the "max" coordinate, with min defaulting to (0,0,0),
+              - Two nested tuples ((xmin, ymin), (xmax, ymax)) or 3D
+                ((xmin, ymin, zmin), (xmax, ymax, zmax)) to specify min and max explicitly.
+        )doc");
 }
 
 }  // namespace pyfiction

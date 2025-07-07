@@ -47,27 +47,29 @@ An iterator type that allows to enumerate coordinates in order within a boundary
 
 .. doxygenclass:: fiction::coord_iterator
 
+Aspect ratio
+------------
+
+The ``aspect_ratio`` defines layout boundaries via minimum and maximum 2D or 3D coordinates. It supports querying dimension sizes, computing an ``area()`` and ``volume()``, and more.
+In Python, three specialized classes are provided depending on your coordinate type (offset, cube, siqad):
+
+.. tabs::
+    .. tab:: C++
+        .. doxygenstruct:: fiction::aspect_ratio
+    .. tab:: Python
+        .. autoclass:: mnt.pyfiction.aspect_ratio_offset
+        .. autoclass:: mnt.pyfiction.aspect_ratio_cube
+        .. autoclass:: mnt.pyfiction.aspect_ratio_siqad
+
 Utility functions
 -----------------
 
 .. tabs::
     .. tab:: C++
-        .. doxygenfunction:: fiction::area(const CoordinateType& coord) noexcept
-        .. doxygenfunction:: fiction::volume(const CoordinateType& coord) noexcept
-
         .. doxygenfunction:: fiction::siqad::to_fiction_coord
         .. doxygenfunction:: fiction::siqad::to_siqad_coord
 
     .. tab:: Python
-        .. autofunction:: mnt.pyfiction.offset_area
-        .. autofunction:: mnt.pyfiction.cube_area
-        .. autofunction:: mnt.pyfiction.siqad_area
-
-        .. autofunction:: mnt.pyfiction.offset_volume
-        .. autofunction:: mnt.pyfiction.cube_volume
-        .. autofunction:: mnt.pyfiction.siqad_volume
-
         .. autofunction:: mnt.pyfiction.to_offset_coord
         .. autofunction:: mnt.pyfiction.to_cube_coord
-
         .. autofunction:: mnt.pyfiction.to_siqad_coord

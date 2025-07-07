@@ -66,10 +66,14 @@ inline void enumerate_all_paths(pybind11::module& m)
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::enumerate_all_paths<py_cartesian_obstruction_layout>(m);
-    detail::enumerate_all_paths<py_cartesian_gate_layout>(m);
-    detail::enumerate_all_paths<py_cartesian_clocked_layout>(m);
-    detail::enumerate_all_paths<py_cartesian_layout>(m);
+    detail::enumerate_all_paths<py_cartesian_obstruction_layout<py_offset_coordinate>>(m);
+    detail::enumerate_all_paths<py_cartesian_obstruction_layout<py_cube_coordinate>>(m);
+    detail::enumerate_all_paths<py_cartesian_gate_layout<py_offset_coordinate>>(m);
+    detail::enumerate_all_paths<py_cartesian_gate_layout<py_cube_coordinate>>(m);
+    detail::enumerate_all_paths<py_cartesian_clocked_layout<py_offset_coordinate>>(m);
+    detail::enumerate_all_paths<py_cartesian_clocked_layout<py_cube_coordinate>>(m);
+    detail::enumerate_all_paths<py_cartesian_layout<py_offset_coordinate>>(m);
+    detail::enumerate_all_paths<py_cartesian_layout<py_cube_coordinate>>(m);
     detail::enumerate_all_paths<py_shifted_cartesian_obstruction_layout>(m);
     detail::enumerate_all_paths<py_shifted_cartesian_gate_layout>(m);
     detail::enumerate_all_paths<py_shifted_cartesian_clocked_layout>(m);

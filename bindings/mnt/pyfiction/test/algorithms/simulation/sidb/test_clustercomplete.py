@@ -2,14 +2,12 @@ import os
 import unittest
 
 from mnt.pyfiction import (
-    charge_distribution_surface_100,
-    charge_distribution_surface_111,
+    charge_distribution_surface,
     clustercomplete,
     clustercomplete_params,
     ground_state_space_reporting,
-    sidb_100_lattice,
-    sidb_111_lattice,
     sidb_charge_state,
+    sidb_lattice,
     sidb_technology,
 )
 
@@ -18,7 +16,7 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 
 class TestClusterComplete(unittest.TestCase):
     def test_three_sidbs(self):
-        layout = sidb_100_lattice((2, 1))
+        layout = sidb_lattice((2, 1), orientation="100")
         layout.assign_cell_type((0, 0), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((1, 0), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((2, 0), sidb_technology.cell_type.NORMAL)
@@ -37,7 +35,7 @@ class TestClusterComplete(unittest.TestCase):
         self.assertEqual(params.available_threads, 4)
         self.assertEqual(params.report_gss_stats, ground_state_space_reporting.ON)
 
-        cds = charge_distribution_surface_100(layout)
+        cds = charge_distribution_surface(layout)
 
         result = clustercomplete(cds, params)
 
@@ -56,7 +54,7 @@ class TestClusterComplete(unittest.TestCase):
         self.assertLessEqual(len(result.charge_distributions), 2)
 
     def test_perturber_and_sidb_pair_111(self):
-        layout = sidb_111_lattice((4, 1))
+        layout = sidb_lattice((4, 1), orientation="111")
         layout.assign_cell_type((0, 0), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((1, 0), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((2, 0), sidb_technology.cell_type.NORMAL)
@@ -67,7 +65,7 @@ class TestClusterComplete(unittest.TestCase):
         params.simulation_parameters.mu_minus = -0.32
         self.assertEqual(params.simulation_parameters.mu_minus, -0.32)
 
-        cds = charge_distribution_surface_111(layout)
+        cds = charge_distribution_surface(layout)
 
         result = clustercomplete(cds, params)
 

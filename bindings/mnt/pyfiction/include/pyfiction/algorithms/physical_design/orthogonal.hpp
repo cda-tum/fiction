@@ -59,9 +59,9 @@ inline void orthogonal(pybind11::module& m)
 
         ;
 
-    m.def("orthogonal", &fiction::orthogonal<py_cartesian_gate_layout, py_logic_network>, py::arg("network"),
-          py::arg("parameters") = fiction::orthogonal_physical_design_params{}, py::arg("statistics") = nullptr,
-          DOC(fiction_orthogonal));
+    m.def("orthogonal", &fiction::orthogonal<py_cartesian_gate_layout<py_offset_coordinate>, py_logic_network>,
+          py::arg("network"), py::arg("parameters") = fiction::orthogonal_physical_design_params{},
+          py::arg("statistics") = nullptr, DOC(fiction_orthogonal));
 }
 
 }  // namespace pyfiction

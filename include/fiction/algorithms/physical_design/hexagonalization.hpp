@@ -486,7 +486,7 @@ class hexagonalization_impl
                     middle_pi.x + num_inputs_right_to_middle_pi + 2 + offset_to_add - offset_to_subtract;
                 if (hex_width < min_width)
                 {
-                    hex_layout.resize({min_width, hex_height, hex_depth});
+                    hex_layout.resize(aspect_ratio_t<CartLyt>{min_width, hex_height, hex_depth});
                 }
             }
 
@@ -500,7 +500,7 @@ class hexagonalization_impl
                     middle_po.x + num_outputs_right_to_middle_po + 2 + offset_to_add - offset_to_subtract;
                 if (hex_width < min_width)
                 {
-                    hex_layout.resize({min_width, hex_height, hex_depth});
+                    hex_layout.resize(aspect_ratio_t<CartLyt>{min_width, hex_height, hex_depth});
                 }
             }
 
@@ -891,7 +891,7 @@ class hexagonalization_impl
             // adjust the layout size to its bounding box
             const auto bbox       = bounding_box_2d(hex_layout);
             const auto layout_max = bbox.get_max();
-            hex_layout.resize({layout_max.x, layout_max.y, hex_layout.z()});
+            hex_layout.resize(aspect_ratio_t<CartLyt>{layout_max.x, layout_max.y, hex_layout.z()});
 
             // restore original names from the Cartesian layout
             restore_names<CartLyt, HexLyt>(layout, hex_layout);
