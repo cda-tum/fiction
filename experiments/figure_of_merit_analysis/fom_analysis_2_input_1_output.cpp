@@ -69,6 +69,9 @@ int main()  // NOLINT
     // the results.
     design_params.operational_params.sim_engine = sidb_simulation_engine::CLUSTERCOMPLETE;
 
+    const std::size_t minimum_number_of_canvas_sidbs = 2;
+    const std::size_t maximum_number_of_canvas_sidbs = 6;
+
     static const std::array<std::pair<std::string, std::vector<tt>>, 10> gates = {
         std::make_pair("and", std::vector<tt>{create_and_tt()}),
         std::make_pair("nand", std::vector<tt>{create_nand_tt()}),
@@ -99,14 +102,15 @@ int main()  // NOLINT
         physical_population_stability_params{op_params.simulation_parameters}};
 
     // for this experiment, we use two different defects: a vacancy in the Si lattice and an arsenic atom.
+    // The physical properties are taken from the paper "Electrostatic landscape of a Hydrogen-terminated Silicon
+    // Surface Probed by a Moveable Quantum Dot" by T. R. Huff et al.
     const auto si_vacancy = fiction::sidb_defect{fiction::sidb_defect_type::SI_VACANCY, -1, 10.6, 5.9};
-    const auto arsenic    = fiction::sidb_defect{fiction::sidb_defect_type::UNKNOWN, 1, 9.7, 2.1};
+    const auto arsenic    = fiction::sidb_defect{fiction::sidb_defect_type::ARSENIC, 1, 9.7, 2.1};
 
     const std::vector<sidb_defect> defects = {si_vacancy, arsenic};
 
     defect_influence_params<fiction::cell<sidb_100_cell_clk_lyt_cube>> params{};
     params.additional_scanning_area = {20, 20};
-    params.defect                   = si_vacancy;
     params.operational_params       = op_params;
 
     for (const auto& [gate_name, truth_table] : gates)
@@ -119,15 +123,16 @@ int main()  // NOLINT
         double      bbr_to_minimize_chi                      = 0.0;
         double      minimized_chi                            = std::numeric_limits<double>::max();
 
-        for (std::size_t num_sidbs = 2u; num_sidbs < 7; num_sidbs++)
+        for (std::size_t num_sidbs = minimum_number_of_canvas_sidbs; num_sidbs < maximum_number_of_canvas_sidbs + 1;
+             num_sidbs++)
         {
             design_params.number_of_canvas_sidbs = num_sidbs;
 
-            std::vector<double> temps                    = {};
-            std::vector<double> op_domains               = {};
-            std::vector<double> defect_influence_arsenic = {};
-            std::vector<double> defect_influence_vacancy = {};
-            std::vector<double> bbr_all                  = {};
+            std::vector<double> temps                         = {};
+            std::vector<double> percentual_operational_domain = {};
+            std::vector<double> defect_influence_arsenic      = {};
+            std::vector<double> defect_influence_vacancy      = {};
+            std::vector<double> bbr_all                       = {};
 
             std::vector<Lyt>        all_gates{};
             design_sidb_gates_stats efficent_stats{};
@@ -153,7 +158,7 @@ int main()  // NOLINT
                 const auto op_domain = operational_domain_grid_search(gate, truth_table, op_domain_params, &op_stats);
                 const auto percentual_op_area = static_cast<double>(op_stats.num_operational_parameter_combinations) /
                                                 static_cast<double>(op_stats.num_total_parameter_points);
-                op_domains.push_back(percentual_op_area);
+                percentual_operational_domain.push_back(percentual_op_area);
 
                 max_relative_op_domain = std::max(percentual_op_area, max_relative_op_domain);
 
@@ -181,7 +186,7 @@ int main()  // NOLINT
                             std::max(defect_clearance.defect_clearance_distance, max_defect_clearance_vacancy);
                         defect_influence_vacancy.push_back(defect_clearance.defect_clearance_distance);
                     }
-                    else if (defect.type == sidb_defect_type::UNKNOWN)
+                    else if (defect.type == sidb_defect_type::ARSENIC)
                     {
                         min_defect_clearance_arsenic =
                             std::min(defect_clearance.defect_clearance_distance, min_defect_clearance_arsenic);
@@ -211,11 +216,11 @@ int main()  // NOLINT
 
             for (auto i = 0u; i < temps.size(); i++)
             {
-                const auto chi = cost_function_chi({temps.at(i) / max_temp, op_domains[i] / max_relative_op_domain,
-                                                    defect_influence_arsenic.at(i) / max_defect_clearance_arsenic,
-                                                    defect_influence_vacancy.at(i) / max_defect_clearance_vacancy,
-                                                    bbr_all.at(i) / max_bbr},
-                                                   {w_ct, w_op_domain, w_defect_arsenic, w_defect_vacancy, w_bbr});
+                const auto chi = cost_function_chi(
+                    {temps.at(i) / max_temp, percentual_operational_domain[i] / max_relative_op_domain,
+                     defect_influence_arsenic.at(i) / max_defect_clearance_arsenic,
+                     defect_influence_vacancy.at(i) / max_defect_clearance_vacancy, bbr_all.at(i) / max_bbr},
+                    {w_ct, w_op_domain, w_defect_arsenic, w_defect_vacancy, w_bbr});
 
                 if (chi < min_chi)
                 {
@@ -228,7 +233,7 @@ int main()  // NOLINT
             {
                 number_of_canvas_sidbs_to_minimize_chi   = num_sidbs;
                 ct_to_minimize_chi                       = temps.at(index_min_chi);
-                op_domain_to_minimize_chi                = op_domains.at(index_min_chi);
+                op_domain_to_minimize_chi                = percentual_operational_domain.at(index_min_chi);
                 defect_clearance_arsenic_to_minimize_chi = defect_influence_arsenic.at(index_min_chi);
                 defect_clearance_vacancy_to_minimize_chi = defect_influence_vacancy.at(index_min_chi);
                 bbr_to_minimize_chi                      = bbr_all.at(index_min_chi);

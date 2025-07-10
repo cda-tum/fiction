@@ -73,6 +73,12 @@ enum class sidb_defect_type : uint8_t
      */
     GUNK,
     /**
+     * Ionized arsenic atom as mentioned in \"Electrostatic landscape of a Hydrogen-terminated Silicon Surface Probed by
+     * a Moveable Quantum Dot\" by T. R. Huff, T. Dienel, M. Rashidi, R. Achal, L. Livadaru, J. Croshaw, and R. A.
+     * Wolkow in ACS Nano in 2019.
+     */
+    ARSENIC,
+    /**
      * Unknown defect.
      */
     UNKNOWN
