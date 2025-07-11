@@ -15950,9 +15950,9 @@ static const char *__doc_fiction_is_cell_level_layout = R"doc()doc";
 static const char *__doc_fiction_is_charge_distribution_surface = R"doc()doc";
 
 static const char *__doc_fiction_is_charged_defect_type =
-R"doc(Checks whether the given defect type is a charged one. `DB` and
-`SI_VACANCY` types are charged. Those charged defects are to be
-avoided by a larger distance.
+R"doc(Checks whether the given defect type is a charged one. `DB`,
+`SI_VACANCY` and `Arsenic` types are charged. Those charged defects
+are to be avoided by a larger distance.
 
 Parameter ``defect``:
     Defect to check.
