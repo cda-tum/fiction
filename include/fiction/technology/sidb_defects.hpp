@@ -147,7 +147,7 @@ struct sidb_defect
 };
 
 /**
- * Checks whether the given defect type is a charged one. `DB`, `SI_VACANCY` and `Arsenic` types are charged. Those
+ * Checks whether the given defect type is a charged one. `DB`, `SI_VACANCY` and `ARSENIC` types are charged. Those
  * charged defects are to be avoided by a larger distance.
  *
  * @param defect Defect to check.
