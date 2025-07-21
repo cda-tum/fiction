@@ -7829,9 +7829,6 @@ Parameter ``new_gate_loc``:
     Enum indicating if the src or dest have to host a new gate and
     therefore have to be empty. Defaults to `new_gate_location::NONE`.
 
-Parameter ``planar``:
-    Only consider crossing-free paths.
-
 Returns:
     A path from `src` to `dest` if one exists.)doc";
 
@@ -7870,14 +7867,8 @@ Parameter ``place_info``:
     The placement context containing current node, primary output
     index, node to position mapping, and PI to node mapping.
 
-Parameter ``num_expansions``:
-    The maximum number of positions to be returned.
-
 Parameter ``fc``:
     A vector of nodes that precede the double fanin node.
-
-Parameter ``planar``:
-    Only consider crossing-free paths.
 
 Returns:
     A vector of tiles representing the possible positions for a double
@@ -7899,9 +7890,6 @@ Parameter ``num_expansions``:
     The maximum number of positions to be returned (is doubled for
     PIs).
 
-Parameter ``planar``:
-    Only consider crossing-free paths.
-
 Returns:
     A vector of tiles representing the possible positions for PIs.)doc";
 
@@ -7919,9 +7907,6 @@ Parameter ``place_info``:
 Parameter ``fc``:
     A vector of nodes that precede the PO nodes.
 
-Parameter ``planar``:
-    Only consider crossing-free paths.
-
 Returns:
     A vector of tiles representing the possible positions for POs.)doc";
 
@@ -7938,14 +7923,8 @@ Parameter ``place_info``:
     The placement context containing current node, primary output
     index, node to position mapping, and PI to node mapping.
 
-Parameter ``num_expansions``:
-    The maximum number of positions to be returned.
-
 Parameter ``fc``:
     A vector of nodes that precede the single fanin node.
-
-Parameter ``planar``:
-    Only consider crossing-free paths.
 
 Returns:
     A vector of tiles representing the possible positions for a single
@@ -7996,9 +7975,6 @@ R"doc(Initializes the layout with minimum width
 
 Parameter ``min_layout_width``:
     The minimum width of the layout.
-
-Parameter ``planar``:
-    Create planar layouts with a depth of 0.
 
 Returns:
     The initialized layout.)doc";
@@ -8085,10 +8061,7 @@ Parameter ``node2pos``:
     layout.
 
 Parameter ``fc``:
-    A vector of nodes that precede the double fanin node.
-
-Parameter ``planar``:
-    Only consider crossing-free paths.)doc";
+    A vector of nodes that precede the double fanin node.)doc";
 
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_route_single_input_node =
 R"doc(Places a node with a single input in the layout and routes it.
@@ -8104,10 +8077,7 @@ Parameter ``node2pos``:
     layout.
 
 Parameter ``fc``:
-    A vector of nodes that precede the single fanin node.
-
-Parameter ``planar``:
-    Only consider crossing-free paths.)doc";
+    A vector of nodes that precede the single fanin node.)doc";
 
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_run =
 R"doc(Executes the graph-oriented layout design algorithm and returns the
@@ -10474,13 +10444,9 @@ static const char *__doc_fiction_detail_search_space_graph_frontier_flag = R"doc
 
 static const char *__doc_fiction_detail_search_space_graph_network = R"doc(The network associated with this search space graph.)doc";
 
-static const char *__doc_fiction_detail_search_space_graph_num_expansions = R"doc(The maximum number of positions to be considered for expansions.)doc";
-
 static const char *__doc_fiction_detail_search_space_graph_pi_locs =
 R"doc(Enum indicating if primary inputs (PIs) can be placed at the top or
 left.)doc";
-
-static const char *__doc_fiction_detail_search_space_graph_planar = R"doc(Create planar layouts.)doc";
 
 static const char *__doc_fiction_detail_sweep_parameter_to_string =
 R"doc(Converts a sweep parameter to a string representation. This is used to
@@ -14296,6 +14262,8 @@ can be found fast.)doc";
 static const char *__doc_fiction_graph_oriented_layout_design_params_seed =
 R"doc(Random seed used for random fanout substitution and random topological
 ordering in maximum-effort mode, generated randomly if not specified.)doc";
+
+static const char *__doc_fiction_graph_oriented_layout_design_params_straight_inverters = R"doc(Enforce NOT gates to be routed non-bending only.)doc";
 
 static const char *__doc_fiction_graph_oriented_layout_design_params_timeout = R"doc(Timeout limit (in ms).)doc";
 
