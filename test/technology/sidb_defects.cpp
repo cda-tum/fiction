@@ -6,6 +6,9 @@
 
 #include <fiction/technology/sidb_defects.hpp>
 
+#include <cstdint>
+#include <utility>
+
 using namespace fiction;
 
 TEST_CASE("Charged and uncharged defect types", "[sidb-defects]")
@@ -13,6 +16,7 @@ TEST_CASE("Charged and uncharged defect types", "[sidb-defects]")
     CHECK(!is_charged_defect_type(sidb_defect{sidb_defect_type::NONE}));
     CHECK(is_charged_defect_type(sidb_defect{sidb_defect_type::DB}));
     CHECK(is_charged_defect_type(sidb_defect{sidb_defect_type::SI_VACANCY}));
+    CHECK(is_charged_defect_type(sidb_defect{sidb_defect_type::ARSENIC}));
     CHECK(!is_charged_defect_type(sidb_defect{sidb_defect_type::SINGLE_DIHYDRIDE}));
     CHECK(!is_charged_defect_type(sidb_defect{sidb_defect_type::DIHYDRIDE_PAIR}));
     CHECK(!is_charged_defect_type(sidb_defect{sidb_defect_type::ONE_BY_ONE}));
@@ -55,6 +59,7 @@ TEST_CASE("Defect extent", "[sidb-defects]")
     CHECK(defect_extent(sidb_defect{sidb_defect_type::NONE}) == no_spacing);
     CHECK(defect_extent(sidb_defect{sidb_defect_type::DB}) == charged_spacing);
     CHECK(defect_extent(sidb_defect{sidb_defect_type::SI_VACANCY}) == charged_spacing);
+    CHECK(defect_extent(sidb_defect{sidb_defect_type::ARSENIC}) == charged_spacing);
     CHECK(defect_extent(sidb_defect{sidb_defect_type::SINGLE_DIHYDRIDE}) == neutral_spacing);
     CHECK(defect_extent(sidb_defect{sidb_defect_type::DIHYDRIDE_PAIR}) == neutral_spacing);
     CHECK(defect_extent(sidb_defect{sidb_defect_type::ONE_BY_ONE}) == neutral_spacing);
