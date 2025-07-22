@@ -47,7 +47,7 @@ def _run_tests(
     extras: Sequence[str] = (),
 ) -> None:
     posargs = list(session.posargs)
-    env = {}
+    env: dict[str, str] = {}
     if os.environ.get("CI", None) and sys.platform == "win32":
         env["SKBUILD_CMAKE_ARGS"] = "-T ClangCL"
 
