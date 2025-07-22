@@ -171,7 +171,7 @@ TEST_CASE("Different parameters", "[graph-oriented-layout-design]")
         check_eq(ntk, *layout);
     }
 
-    SECTION("Straight inverters.")
+    SECTION("Straight inverters")
     {
         params.mode                  = graph_oriented_layout_design_params::effort_mode::MAXIMUM_EFFORT;
         params.enable_multithreading = true;

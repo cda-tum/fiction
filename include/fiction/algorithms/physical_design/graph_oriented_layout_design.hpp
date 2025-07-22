@@ -1395,7 +1395,7 @@ class graph_oriented_layout_design_impl
                     {
                         return false;
                     }
-                    if ((fanin.y == layout_tile.y) && !(is_empty_tile_or_crossable(right_tile)))
+                    if ((fanin.y == layout_tile.y) && !is_empty_tile_or_crossable(right_tile))
                     {
                         return false;
                     }
