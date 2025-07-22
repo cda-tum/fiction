@@ -15950,9 +15950,9 @@ static const char *__doc_fiction_is_cell_level_layout = R"doc()doc";
 static const char *__doc_fiction_is_charge_distribution_surface = R"doc()doc";
 
 static const char *__doc_fiction_is_charged_defect_type =
-R"doc(Checks whether the given defect type is a charged one. `DB` and
-`SI_VACANCY` types are charged. Those charged defects are to be
-avoided by a larger distance.
+R"doc(Checks whether the given defect type is a charged one. `DB`,
+`SI_VACANCY` and `ARSENIC` types are charged. Those charged defects
+are to be avoided by a larger distance.
 
 Parameter ``defect``:
     Defect to check.
@@ -20243,6 +20243,12 @@ by Jeremiah Croshaw, Thomas Dienel, Taleana Huff, and Robert Wolkow in
 Journal of Nanotechnology in 2020.)doc";
 
 static const char *__doc_fiction_sidb_defect_type_2 = R"doc(Type of defect.)doc";
+
+static const char *__doc_fiction_sidb_defect_type_ARSENIC =
+R"doc(Ionized arsenic atom as mentioned in \"Electrostatic landscape of a
+Hydrogen-terminated Silicon Surface Probed by a Moveable Quantum Dot\"
+by T. R. Huff, T. Dienel, M. Rashidi, R. Achal, L. Livadaru, J.
+Croshaw, and R. A. Wolkow in ACS Nano in 2019.)doc";
 
 static const char *__doc_fiction_sidb_defect_type_DB = R"doc(A stray dangling bond.)doc";
 
