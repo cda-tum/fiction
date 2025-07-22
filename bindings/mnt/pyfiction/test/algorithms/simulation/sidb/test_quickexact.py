@@ -98,10 +98,12 @@ class TestQuickExact(unittest.TestCase):
         self.assertGreater(len(quickexact(and_gate, quickexact_parameter).charge_distributions), 0)
 
         and_gate.assign_cell_type(
-            (2, 2), sidb_technology.cell_type.INPUT
+            (2, 2),
+            sidb_technology.cell_type.INPUT,
         )  # add SiDB of the input BDL pair again to have the original layout
         and_gate.assign_cell_type(
-            (24, 2), sidb_technology.cell_type.INPUT
+            (24, 2),
+            sidb_technology.cell_type.INPUT,
         )  # add SiDB of the input BDL pair again to have the original layout
 
         # input 01
