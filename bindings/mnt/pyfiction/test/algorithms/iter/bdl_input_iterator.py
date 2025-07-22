@@ -55,7 +55,8 @@ class TestBDLInputIterator(unittest.TestCase):
         bii = bdl_input_iterator_100(layout)
 
         self.assertEqual(
-            bii.get_layout().num_cells(), 7
+            bii.get_layout().num_cells(),
+            7,
         )  # 2 inputs (1 already deleted for input pattern 0), 4 normal, 2 outputs
         self.assertEqual(bii.num_input_pairs(), 1)
         self.assertEqual(bii, 0)

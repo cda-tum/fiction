@@ -93,7 +93,10 @@ class TestTimeToSolution(unittest.TestCase):
         # Calculate time-to-solution using the simulation results
         st = time_to_solution_stats()
         time_to_solution_for_given_simulation_results(
-            simulation_results_quickexact, simulation_results_quicksim, 0.997, st
+            simulation_results_quickexact,
+            simulation_results_quicksim,
+            0.997,
+            st,
         )
 
         self.assertGreater(st.time_to_solution, 0.0)

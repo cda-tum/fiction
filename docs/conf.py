@@ -110,7 +110,7 @@ html_sidebars = {
         "relations.html",  # needs 'show_related': True theme option to display
         "searchbox.html",
         "donate.html",
-    ]
+    ],
 }
 
 # -- Options for HTMLHelp output ------------------------------------------
@@ -202,7 +202,8 @@ class DocOverviewTableDirective(Directive):
         # header
         colname = self.options.get("column", "Function")
         tgroup += nodes.thead(
-            "", nodes.row("", *[nodes.entry("", nodes.line(text=c)) for c in [colname, "Description"]])
+            "",
+            nodes.row("", *[nodes.entry("", nodes.line(text=c)) for c in [colname, "Description"]]),
         )
 
         # rows

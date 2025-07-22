@@ -31,10 +31,12 @@ class TestEnumerateAllPaths(unittest.TestCase):
         ]:
             self.assertEqual(enumerate_all_paths(lyt, offset_coordinate(0, 0), offset_coordinate(0, 0)), [[(0, 0)]])
             self.assertEqual(
-                enumerate_all_paths(lyt, offset_coordinate(0, 0), offset_coordinate(1, 0)), [[(0, 0), (1, 0)]]
+                enumerate_all_paths(lyt, offset_coordinate(0, 0), offset_coordinate(1, 0)),
+                [[(0, 0), (1, 0)]],
             )
             self.assertEqual(
-                enumerate_all_paths(lyt, offset_coordinate(0, 0), offset_coordinate(0, 1)), [[(0, 0), (0, 1)]]
+                enumerate_all_paths(lyt, offset_coordinate(0, 0), offset_coordinate(0, 1)),
+                [[(0, 0), (0, 1)]],
             )
 
             paths = enumerate_all_paths(lyt, offset_coordinate(0, 0), offset_coordinate(1, 1))

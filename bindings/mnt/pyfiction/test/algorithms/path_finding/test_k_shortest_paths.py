@@ -19,7 +19,8 @@ class TestKShortestPaths(unittest.TestCase):
     def test_non_clocked_yen_paths(self):
         for lyt in [cartesian_layout((4, 4)), shifted_cartesian_layout((4, 4)), hexagonal_layout((4, 4))]:
             self.assertListEqual(
-                yen_k_shortest_paths(lyt, offset_coordinate(0, 0), offset_coordinate(0, 0), 1), [[(0, 0)]]
+                yen_k_shortest_paths(lyt, offset_coordinate(0, 0), offset_coordinate(0, 0), 1),
+                [[(0, 0)]],
             )
 
     def test_clocked_yen_paths(self):
@@ -33,10 +34,12 @@ class TestKShortestPaths(unittest.TestCase):
         ]:
             self.assertEqual(yen_k_shortest_paths(lyt, offset_coordinate(0, 0), offset_coordinate(0, 0), 1), [[(0, 0)]])
             self.assertEqual(
-                yen_k_shortest_paths(lyt, offset_coordinate(0, 0), offset_coordinate(1, 0), 1), [[(0, 0), (1, 0)]]
+                yen_k_shortest_paths(lyt, offset_coordinate(0, 0), offset_coordinate(1, 0), 1),
+                [[(0, 0), (1, 0)]],
             )
             self.assertEqual(
-                yen_k_shortest_paths(lyt, offset_coordinate(0, 0), offset_coordinate(0, 1), 1), [[(0, 0), (0, 1)]]
+                yen_k_shortest_paths(lyt, offset_coordinate(0, 0), offset_coordinate(0, 1), 1),
+                [[(0, 0), (0, 1)]],
             )
 
             paths = yen_k_shortest_paths(lyt, offset_coordinate(0, 0), offset_coordinate(1, 1), 2)

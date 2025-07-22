@@ -100,12 +100,14 @@ class defect_surface:
                 else:
                     if np.all(
                         self.surface_lattice[
-                            random_height : random_height + defect[2], random_width : random_width + defect[1]
+                            random_height : random_height + defect[2],
+                            random_width : random_width + defect[1],
                         ]
-                        == 0
+                        == 0,
                     ):
                         self.surface_lattice[
-                            random_height : random_height + defect[2], random_width : random_width + defect[1]
+                            random_height : random_height + defect[2],
+                            random_width : random_width + defect[1],
                         ] = defect[0]
 
                     else:

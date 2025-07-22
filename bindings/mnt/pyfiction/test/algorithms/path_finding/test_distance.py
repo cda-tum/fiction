@@ -57,13 +57,16 @@ class TestDistance(unittest.TestCase):
             self.assertEqual(euclidean_distance(lyt, offset_coordinate(0, 0), offset_coordinate(0, 1)), 1)
             self.assertAlmostEqual(euclidean_distance(lyt, offset_coordinate(0, 0), offset_coordinate(1, 1)), 2**0.5)
             self.assertAlmostEqual(
-                euclidean_distance(lyt, offset_coordinate(0, 0), offset_coordinate(2, 2)), 2 * 2**0.5
+                euclidean_distance(lyt, offset_coordinate(0, 0), offset_coordinate(2, 2)),
+                2 * 2**0.5,
             )
             self.assertAlmostEqual(
-                euclidean_distance(lyt, offset_coordinate(0, 0), offset_coordinate(3, 3)), 3 * 2**0.5
+                euclidean_distance(lyt, offset_coordinate(0, 0), offset_coordinate(3, 3)),
+                3 * 2**0.5,
             )
             self.assertAlmostEqual(
-                euclidean_distance(lyt, offset_coordinate(0, 0), offset_coordinate(4, 4)), 4 * 2**0.5
+                euclidean_distance(lyt, offset_coordinate(0, 0), offset_coordinate(4, 4)),
+                4 * 2**0.5,
             )
 
     def test_squared_euclidean(self):
