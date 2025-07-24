@@ -171,6 +171,40 @@ TEST_CASE("Different parameters", "[graph-oriented-layout-design]")
         check_eq(ntk, *layout);
     }
 
+    SECTION("Straight inverters")
+    {
+        params.mode                  = graph_oriented_layout_design_params::effort_mode::MAXIMUM_EFFORT;
+        params.enable_multithreading = true;
+        params.straight_inverters    = true;
+
+        for (const auto& network :
+             {blueprints::mux21_network<technology_network>(), blueprints::inverter_network<technology_network>(),
+              blueprints::parity_network<technology_network>()})
+        {
+            const auto layout = graph_oriented_layout_design<gate_layout>(network, params, &stats);
+            REQUIRE(layout.has_value());
+            check_eq(network, *layout);
+
+            layout->foreach_gate(
+                [&layout](const auto& gate)
+                {
+                    if (layout->is_inv(gate))
+                    {
+                        const auto layout_tile = layout->get_tile(gate);
+                        const auto fanin       = layout->incoming_data_flow(layout_tile).front();
+                        const auto fanout      = layout->outgoing_data_flow(layout_tile).front();
+
+                        const bool vertical_straight_inverter = (fanin.x == layout_tile.x && layout_tile.x == fanout.x);
+                        const bool horizontal_straight_inverter =
+                            (fanin.y == layout_tile.y && layout_tile.y == fanout.y);
+                        const bool straight_inverter = vertical_straight_inverter || horizontal_straight_inverter;
+
+                        CHECK(straight_inverter);
+                    }
+                });
+        }
+    }
+
     params.return_first = false;
 
     SECTION("Full search (return_first = false)")

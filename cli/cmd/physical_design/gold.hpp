@@ -70,7 +70,8 @@ class gold_command : public command
         add_flag("--verbose,-v", ps.verbose, "Be verbose");
         add_option("--seed, -s", seed,
                    "Random seed used for random fanout substitution and random topological ordering in"
-                   "maximum-effort mode.");
+                   "maximum-effort mode");
+        add_flag("--straight_inverters,-i", ps.straight_inverters, "Enforce NOT gates to be routed non-bending only");
     }
 
   protected:
