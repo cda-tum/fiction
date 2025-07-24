@@ -26,12 +26,16 @@ class TestDesignRuleViolations(unittest.TestCase):
         layout.create_buf(layout.make_signal(layout.get_node((0, 2, 0))), (1, 2))
         # AND
         layout.create_and(
-            layout.make_signal(layout.get_node((0, 3, 0))), layout.make_signal(layout.get_node((1, 2, 0))), (1, 3)
+            layout.make_signal(layout.get_node((0, 3, 0))),
+            layout.make_signal(layout.get_node((1, 2, 0))),
+            (1, 3),
         )
 
         # AND
         layout.create_and(
-            layout.make_signal(layout.get_node((1, 1, 0))), layout.make_signal(layout.get_node((2, 0, 0))), (2, 1)
+            layout.make_signal(layout.get_node((1, 1, 0))),
+            layout.make_signal(layout.get_node((2, 0, 0))),
+            (2, 1),
         )
 
         # Wires
@@ -39,7 +43,9 @@ class TestDesignRuleViolations(unittest.TestCase):
 
         # OR
         layout.create_or(
-            layout.make_signal(layout.get_node((1, 3, 0))), layout.make_signal(layout.get_node((2, 2, 0))), (2, 3)
+            layout.make_signal(layout.get_node((1, 3, 0))),
+            layout.make_signal(layout.get_node((2, 2, 0))),
+            (2, 3),
         )
 
         # Outputs

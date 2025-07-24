@@ -99,7 +99,9 @@ class TestSiDBSimulationResult(unittest.TestCase):
 
         cds1 = charge_distribution_surface_100(layout)  # all negative
         cds2 = charge_distribution_surface_100(
-            layout, sidb_simulation_parameters(), sidb_charge_state.NEUTRAL
+            layout,
+            sidb_simulation_parameters(),
+            sidb_charge_state.NEUTRAL,
         )  # all neutral
         cds3 = charge_distribution_surface_100(layout)
         cds3.assign_charge_state((6, 1), sidb_charge_state.NEUTRAL)  # only two SiDBs are negative
@@ -124,7 +126,9 @@ class TestSiDBSimulationResult(unittest.TestCase):
 
         cds1 = charge_distribution_surface_111(layout)  # all negative
         cds2 = charge_distribution_surface_111(
-            layout, sidb_simulation_parameters(), sidb_charge_state.NEUTRAL
+            layout,
+            sidb_simulation_parameters(),
+            sidb_charge_state.NEUTRAL,
         )  # all neutral
         cds3 = charge_distribution_surface_111(layout)
         cds3.assign_charge_state((6, 1), sidb_charge_state.NEUTRAL)  # only two SiDBs are negative
