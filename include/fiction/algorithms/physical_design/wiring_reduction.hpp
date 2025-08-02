@@ -973,14 +973,16 @@ void adjust_tile(Lyt& lyt, const LytCpy& layout_copy, const WiringReductionLyt& 
         {
             if ((wiring_reduction_lyt.get_search_direction() == search_direction::HORIZONTAL) &&
                 !lyt.is_empty_tile({new_coord.x + 1, new_coord.y, new_coord.z}) &&
-                lyt.has_western_incoming_signal({new_coord.x + 1, new_coord.y, new_coord.z}))
+                (lyt.has_western_incoming_signal({new_coord.x + 1, new_coord.y, new_coord.z}) ||
+                 lyt.is_po(lyt.get_node({new_coord.x + 1, new_coord.y, new_coord.z}))))
             {
                 lyt.move_node(lyt.get_node({new_coord.x + 1, new_coord.y, new_coord.z}),
                               {new_coord.x + 1, new_coord.y, new_coord.z}, {});
             }
             if ((wiring_reduction_lyt.get_search_direction() == search_direction::VERTICAL) &&
                 !lyt.is_empty_tile({new_coord.x, new_coord.y + 1, new_coord.z}) &&
-                lyt.has_northern_incoming_signal({new_coord.x, new_coord.y + 1, new_coord.z}))
+                (lyt.has_northern_incoming_signal({new_coord.x, new_coord.y + 1, new_coord.z}) ||
+                 lyt.is_po(lyt.get_node({new_coord.x, new_coord.y + 1, new_coord.z}))))
             {
                 lyt.move_node(lyt.get_node({new_coord.x, new_coord.y + 1, new_coord.z}),
                               {new_coord.x, new_coord.y + 1, new_coord.z}, {});
