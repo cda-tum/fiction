@@ -973,15 +973,13 @@ void adjust_tile(Lyt& lyt, const LytCpy& layout_copy, const WiringReductionLyt& 
         {
             const auto east_of_new_coord = tile<Lyt>{new_coord.x + 1, new_coord.y, new_coord.z};
             if ((wiring_reduction_lyt.get_search_direction() == search_direction::HORIZONTAL) &&
-                !lyt.is_empty_tile(east_of_new_coord) &&
-                (lyt.has_western_incoming_signal(east_of_new_coord) || lyt.is_po(lyt.get_node(east_of_new_coord))))
+                !lyt.is_empty_tile(east_of_new_coord))
             {
                 lyt.move_node(lyt.get_node(east_of_new_coord), east_of_new_coord, {});
             }
             const auto south_of_new_coord = tile<Lyt>{new_coord.x, new_coord.y + 1, new_coord.z};
             if ((wiring_reduction_lyt.get_search_direction() == search_direction::VERTICAL) &&
-                !lyt.is_empty_tile(south_of_new_coord) &&
-                (lyt.has_northern_incoming_signal(south_of_new_coord) || lyt.is_po(lyt.get_node(south_of_new_coord))))
+                !lyt.is_empty_tile(south_of_new_coord))
             {
                 lyt.move_node(lyt.get_node(south_of_new_coord), south_of_new_coord, {});
             }
