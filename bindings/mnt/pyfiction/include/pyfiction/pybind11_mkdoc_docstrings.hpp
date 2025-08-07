@@ -10851,6 +10851,37 @@ static const char *__doc_fiction_detail_write_location_and_ground_state_impl_sim
 
 static const char *__doc_fiction_detail_write_location_and_ground_state_impl_write_location_and_ground_state_impl = R"doc()doc";
 
+static const char *__doc_fiction_detail_write_mol_qca_layout_svg_impl = R"doc()doc";
+
+static const char *__doc_fiction_detail_write_mol_qca_layout_svg_impl_generate_cell_based_svg =
+R"doc(Generates an SVG string representing the cell-based clocked cell
+layout and appends it to the output stream.)doc";
+
+static const char *__doc_fiction_detail_write_mol_qca_layout_svg_impl_generate_description_color =
+R"doc(Generates and returns a pair of strings representing the description
+and color of the given cell.
+
+Parameter ``c``:
+    The cell for which to generate the description and color.
+
+Returns:
+    A pair of strings representing the description and color of the
+    given cell `c`.)doc";
+
+static const char *__doc_fiction_detail_write_mol_qca_layout_svg_impl_generate_tile_based_svg =
+R"doc(Generates an SVG string representing the tile-based clocked cell
+layout and appends it to the output stream.)doc";
+
+static const char *__doc_fiction_detail_write_mol_qca_layout_svg_impl_lyt = R"doc()doc";
+
+static const char *__doc_fiction_detail_write_mol_qca_layout_svg_impl_os = R"doc()doc";
+
+static const char *__doc_fiction_detail_write_mol_qca_layout_svg_impl_ps = R"doc()doc";
+
+static const char *__doc_fiction_detail_write_mol_qca_layout_svg_impl_run = R"doc()doc";
+
+static const char *__doc_fiction_detail_write_mol_qca_layout_svg_impl_write_mol_qca_layout_svg_impl = R"doc(Default constructor.)doc";
+
 static const char *__doc_fiction_detail_write_qca_layout_impl = R"doc()doc";
 
 static const char *__doc_fiction_detail_write_qca_layout_impl_lyt = R"doc()doc";
@@ -16600,6 +16631,125 @@ static const char *__doc_fiction_missing_sidb_position_exception_missing_sidb_po
 
 static const char *__doc_fiction_missing_sidb_position_exception_where = R"doc()doc";
 
+static const char *__doc_fiction_mol_qca_technology = R"doc()doc";
+
+static const char *__doc_fiction_mol_qca_technology_cell_mark = R"doc(Possible marks to be applied to a cell to change its type.)doc";
+
+static const char *__doc_fiction_mol_qca_technology_cell_mark_EMPTY = R"doc()doc";
+
+static const char *__doc_fiction_mol_qca_technology_cell_mark_INPUT = R"doc()doc";
+
+static const char *__doc_fiction_mol_qca_technology_cell_mark_OUTPUT = R"doc()doc";
+
+static const char *__doc_fiction_mol_qca_technology_cell_mode = R"doc(Possible cell modes for QCA cells.)doc";
+
+static const char *__doc_fiction_mol_qca_technology_cell_mode_CROSSOVER = R"doc()doc";
+
+static const char *__doc_fiction_mol_qca_technology_cell_mode_NORMAL = R"doc()doc";
+
+static const char *__doc_fiction_mol_qca_technology_cell_mode_ROTATED = R"doc()doc";
+
+static const char *__doc_fiction_mol_qca_technology_cell_mode_VERTICAL = R"doc()doc";
+
+static const char *__doc_fiction_mol_qca_technology_cell_type = R"doc(Possible types of QCA cells.)doc";
+
+static const char *__doc_fiction_mol_qca_technology_cell_type_CONST_0 = R"doc(Symbol used for constant 0 input QCA cells.)doc";
+
+static const char *__doc_fiction_mol_qca_technology_cell_type_CONST_1 = R"doc(Symbol used for constant 1 input QCA cells.)doc";
+
+static const char *__doc_fiction_mol_qca_technology_cell_type_EMPTY = R"doc(Symbol used for empty QCA cells.)doc";
+
+static const char *__doc_fiction_mol_qca_technology_cell_type_INPUT = R"doc(Symbol used for input QCA cells.)doc";
+
+static const char *__doc_fiction_mol_qca_technology_cell_type_NORMAL = R"doc(Symbol used for normal QCA cells.)doc";
+
+static const char *__doc_fiction_mol_qca_technology_cell_type_NORMAL1 = R"doc(Symbol used for normal QCA cells.)doc";
+
+static const char *__doc_fiction_mol_qca_technology_cell_type_NORMAL2 = R"doc(Symbol used for normal QCA cells.)doc";
+
+static const char *__doc_fiction_mol_qca_technology_cell_type_NORMAL3 = R"doc(Symbol used for normal QCA cells.)doc";
+
+static const char *__doc_fiction_mol_qca_technology_cell_type_NORMAL4 = R"doc(Symbol used for normal QCA cells.)doc";
+
+static const char *__doc_fiction_mol_qca_technology_cell_type_OUTPUT = R"doc(Symbol used for output QCA cells.)doc";
+
+static const char *__doc_fiction_mol_qca_technology_is_const_0_cell = R"doc()doc";
+
+static const char *__doc_fiction_mol_qca_technology_is_const_1_cell = R"doc()doc";
+
+static const char *__doc_fiction_mol_qca_technology_is_constant_cell = R"doc()doc";
+
+static const char *__doc_fiction_mol_qca_technology_is_crossover_cell_mode = R"doc()doc";
+
+static const char *__doc_fiction_mol_qca_technology_is_empty_cell = R"doc()doc";
+
+static const char *__doc_fiction_mol_qca_technology_is_input_cell = R"doc()doc";
+
+static const char *__doc_fiction_mol_qca_technology_is_normal_cell = R"doc()doc";
+
+static const char *__doc_fiction_mol_qca_technology_is_normal_cell1 = R"doc()doc";
+
+static const char *__doc_fiction_mol_qca_technology_is_normal_cell2 = R"doc()doc";
+
+static const char *__doc_fiction_mol_qca_technology_is_normal_cell3 = R"doc()doc";
+
+static const char *__doc_fiction_mol_qca_technology_is_normal_cell4 = R"doc()doc";
+
+static const char *__doc_fiction_mol_qca_technology_is_normal_cell_mode = R"doc()doc";
+
+static const char *__doc_fiction_mol_qca_technology_is_output_cell = R"doc()doc";
+
+static const char *__doc_fiction_mol_qca_technology_is_rotated_cell_mode = R"doc()doc";
+
+static const char *__doc_fiction_mol_qca_technology_is_vertical_cell_mode = R"doc()doc";
+
+static const char *__doc_fiction_mol_qca_technology_mol_qca_technology = R"doc()doc";
+
+static const char *__doc_fiction_molecular_qca_library =
+R"doc(A concrete FCN gate library based on QCA ONE proposed in \"A
+Methodology for Standard Cell Design for QCA\" by Dayane Alfenas Reis,
+Caio Araújo T. Campos, Thiago Rodrigues B. S. Soares, Omar Paranaiba
+V. Neto, and Frank Sill Torres in IEEE International Symposium on
+Circuits and Systems, 2016. QCA ONE was originally proposed for the
+USE clocking scheme. The version used here is an extension to the
+original QCA ONE by also theoretically allowing multiple wires in the
+same tile. Furthermore, it can be used for a range of clocking
+schemes. Tiles in QCA ONE are :math:`5 \times 5` QCA cells.)doc";
+
+static const char *__doc_fiction_molecular_qca_library_determine_port_routing = R"doc()doc";
+
+static const char *__doc_fiction_molecular_qca_library_molecular_qca_library = R"doc()doc";
+
+static const char *__doc_fiction_molecular_qca_library_post_layout_optimization =
+R"doc(Post-layout optimization that assigns via cell mode to wire crossings.
+
+Template parameter ``CellLyt``:
+    Cell-level layout type.
+
+Parameter ``lyt``:
+    The cell-level layout that has been created via application of
+    `set_up_gate`.)doc";
+
+static const char *__doc_fiction_molecular_qca_library_set_up_gate =
+R"doc(Overrides the corresponding function in fcn_gate_library. Given a tile
+`t`, this function takes all necessary information from the stored
+grid into account to choose the correct fcn_gate representation for
+that tile. May it be a gate or wires. Rotation and special marks like
+input and output, const cells etc. are computed additionally.
+
+Template parameter ``GateLyt``:
+    Cartesian gate-level layout type.
+
+Parameter ``lyt``:
+    Layout that hosts tile `t`.
+
+Parameter ``t``:
+    Tile to be realized as a QCA ONE gate.
+
+Returns:
+    QCA ONE gate representation of `t` including I/Os, rotation, const
+    cells, etc.)doc";
+
 static const char *__doc_fiction_mutable_rank_view =
 R"doc(@class mutable_rank_view<Ntk, true>
 
@@ -19653,6 +19803,51 @@ Parameter ``ntk_or_lyt``:
 
 Parameter ``name``:
     Name to assign to given network or layout.)doc";
+
+static const char *__doc_fiction_seven_library =
+R"doc(A concrete FCN gate library based on QCA ONE proposed in \"A
+Methodology for Standard Cell Design for QCA\" by Dayane Alfenas Reis,
+Caio Araújo T. Campos, Thiago Rodrigues B. S. Soares, Omar Paranaiba
+V. Neto, and Frank Sill Torres in IEEE International Symposium on
+Circuits and Systems, 2016. QCA ONE was originally proposed for the
+USE clocking scheme. The version used here is an extension to the
+original QCA ONE by also theoretically allowing multiple wires in the
+same tile. Furthermore, it can be used for a range of clocking
+schemes. Tiles in QCA ONE are :math:`5 \times 5` QCA cells.)doc";
+
+static const char *__doc_fiction_seven_library_determine_port_routing = R"doc()doc";
+
+static const char *__doc_fiction_seven_library_post_layout_optimization =
+R"doc(Post-layout optimization that assigns via cell mode to wire crossings.
+
+Template parameter ``CellLyt``:
+    Cell-level layout type.
+
+Parameter ``lyt``:
+    The cell-level layout that has been created via application of
+    `set_up_gate`.)doc";
+
+static const char *__doc_fiction_seven_library_set_up_gate =
+R"doc(Overrides the corresponding function in fcn_gate_library. Given a tile
+`t`, this function takes all necessary information from the stored
+grid into account to choose the correct fcn_gate representation for
+that tile. May it be a gate or wires. Rotation and special marks like
+input and output, const cells etc. are computed additionally.
+
+Template parameter ``GateLyt``:
+    Cartesian gate-level layout type.
+
+Parameter ``lyt``:
+    Layout that hosts tile `t`.
+
+Parameter ``t``:
+    Tile to be realized as a QCA ONE gate.
+
+Returns:
+    QCA ONE gate representation of `t` including I/Os, rotation, const
+    cells, etc.)doc";
+
+static const char *__doc_fiction_seven_library_seven_library = R"doc()doc";
 
 static const char *__doc_fiction_shifted_cartesian_layout =
 R"doc(A layout type that utilizes offset coordinates to represent a
@@ -22756,6 +22951,56 @@ Template parameter ``sim_result``:
 
 Parameter ``filename``:
     The file name to create and write into.)doc";
+
+static const char *__doc_fiction_write_mol_qca_layout_svg =
+R"doc(Writes an SVG representation of a cell-level QCA layout into an output
+stream. Both tile- and cell-based layouts are supported. For tile-
+based layouts, QCA layouts of tile size :math:`5 \times 5` are
+supported exclusively so far.
+
+The utilized color scheme is based on the standard scheme used in
+QCADesigner (https://waluslab.ece.ubc.ca/qcadesigner/).
+
+May throw an `unsupported_cell_type_exception` if it encounters
+unsupported cell types in the layout.
+
+Template parameter ``Lyt``:
+    Cell-level QCA layout type.
+
+Parameter ``lyt``:
+    The layout to be written.
+
+Parameter ``os``:
+    The output stream to write into.
+
+Parameter ``ps``:
+    Parameters.)doc";
+
+static const char *__doc_fiction_write_mol_qca_layout_svg_2 =
+R"doc(Writes an SVG representation of a cell-level QCA layout into a file.
+Both tile- and cell-based layouts are supported. For tile-based
+layouts, QCA layouts of tile size :math:`5 \times 5` are supported
+exclusively so far.
+
+The utilized color scheme is based on the standard scheme used in
+QCADesigner (https://waluslab.ece.ubc.ca/qcadesigner/).
+
+May throw an `unsupported_cell_type_exception` if it encounters
+unsupported cell types in the layout. May throw an
+`std::ofstream::failure` if it cannot open the file.
+
+Template parameter ``Lyt``:
+    Cell-level QCA layout type.
+
+Parameter ``lyt``:
+    The layout to be written.
+
+Parameter ``filename``:
+    The file name to create and write into. Should preferably use the
+    `.svg` extension.
+
+Parameter ``ps``:
+    Parameters.)doc";
 
 static const char *__doc_fiction_write_operational_domain =
 R"doc(Writes a CSV representation of an operational domain to the specified
