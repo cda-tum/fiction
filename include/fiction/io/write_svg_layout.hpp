@@ -446,6 +446,148 @@ inline constexpr const char* SIMPLE_CELL = "<g\n"
                                            "style=\"fill:#{0};stroke:#000000;\" />\n"
                                            "</g>";
 
+// MOL QCA
+inline constexpr const char* MOL_QCA_CLOCK_ZONE_1_CELL     = "ffe700";
+inline constexpr const char* MOL_QCA_CLOCK_ZONE_2_CELL     = "65ff00";
+inline constexpr const char* MOL_QCA_CLOCK_ZONE_3_CELL     = "0071ff";
+inline constexpr const char* MOL_QCA_CLOCK_ZONE_4_CELL     = "f800ff";
+inline constexpr const char* PI_CELL_MOL_QCA               = "f800ff";
+inline constexpr const char* PO_CELL_MOL_QCA               = "ffe700";
+
+inline constexpr const double MOL_QCA_CELL_DISTANCE = 11.5;
+
+inline constexpr const double MOL_QCA_STARTING_OFFSET_CELL_X = 3.5 + 92.5;
+inline constexpr const double MOL_QCA_STARTING_OFFSET_CELL_Y = -40.25 + 56;
+
+inline constexpr const char* MOL_QCA_VIA = "<g\n"
+                                   "    style=\"fill:#{0};\"\n"
+                                   "    transform=\"translate({1},{2})\">\n"
+                                   "  <g>\n"
+                                   "    <rect\n"
+                                   "      transform=\"rotate(90)\"\n"
+                                   "      ry=\"1.07143\"\n"
+                                   "      y=\"-147.04862\"\n"
+                                   "      x=\"80.65737\"\n"
+                                   "      width=\"14.2857\"\n"
+                                   "      height=\"14.2857\"\n"
+                                   "      style=\"fill:#{0};stroke:#000000;\" />\n"
+                                   "    <circle\n"
+                                   "      r=\"5.31886\"\n"
+                                   "      transform=\"rotate(90)\"\n"
+                                   "      cx=\"87.80023\"\n"
+                                   "      cy=\"-139.90576\"\n"
+                                   "      style=\"fill:none;stroke:#000000;\" />\n"
+                                   "  </g>\n"
+                                   "</g>";
+
+
+inline constexpr const char* MOL_QCA_CROSS = "<g\n"
+                                     "    style=\"fill:#{0};fill-opacity:1\"\n"
+                                     "    transform=\"translate({1},{2})\">\n"
+                                     "  <g>\n"
+                                     "    <rect\n"
+                                     "      transform=\"rotate(90)\"\n"
+                                     "      ry=\"1.07143\"\n"
+                                     "      y=\"-147.7629\"\n"
+                                     "      x=\"80.6574\"\n"
+                                     "      width=\"14.2857\"\n"
+                                     "      height=\"14.2857\"\n"
+                                     "      style=\"fill:#{0};stroke:#000000;\" />\n"
+                                     "    <g\n"
+                                     "      style=\"stroke-width:0.756;stroke-miterlimit:4;stroke-dasharray:none\"\n"
+                                     "      transform=\"matrix(0.94695856,0,0,0.94341063,22.3802,6.02821)\">\n"
+                                     "      <path\n"
+                                     "        style=\"stroke:#000000;\"\n"
+                                     "        d=\"m 118.4472,81.0158 c 11.3080,11.3079 11.3225,11.3224 11.3225,11.3224\" />\n"
+                                     "      <path\n"
+                                     "        style=\"stroke:#000000;\"\n"
+                                     "        d=\"m 129.7697,81.0158 c -11.3079,11.3079 -11.3225,11.3224 -11.3225,11.3224\" />\n"
+                                     "    </g>\n"
+                                     "  </g>\n"
+                                     "</g>";
+
+inline constexpr const char* MOL_QCA_CONST0 =
+    "<g\n"
+    "    transform=\"translate({1},{2})\">\n"
+    "\n"
+    "  <rect\n"
+    "    style=\"fill:#000000;stroke:#000000;\"\n"
+    "    width=\"10\"\n"
+    "    height=\"10\"\n"
+    "    x=\"92.93404\"\n"
+    "    y=\"56.46016\" />\n"
+    "\n"
+    "  <text\n"
+    "    x=\"97.93404\"\n"
+    "    y=\"63.46016\"\n"
+    "    style=\"font-family:Arial, sans-serif;font-size:6px;fill:#ffffff;\"\n"
+    "    text-anchor=\"middle\"\n"
+    "    alignment-baseline=\"central\">\n"
+    "    C0\n"
+    "  </text>\n"
+    "</g>";
+
+inline constexpr const char* MOL_QCA_CONST1 =
+    "<g\n"
+    "    transform=\"translate({1},{2})\">\n"
+    "\n"
+    "  <rect\n"
+    "    style=\"fill:#000000;stroke:#000000;\"\n"
+    "    width=\"10\"\n"
+    "    height=\"10\"\n"
+    "    x=\"92.93404\"\n"
+    "    y=\"56.46016\" />\n"
+    "\n"
+    "  <text\n"
+    "    x=\"97.93404\"\n"
+    "    y=\"63.46016\"\n"
+    "    style=\"font-family:Arial, sans-serif;font-size:6px;fill:#ffffff;\"\n"
+    "    text-anchor=\"middle\"\n"
+    "    alignment-baseline=\"central\">\n"
+    "    C1\n"
+    "  </text>\n"
+    "</g>";
+
+inline constexpr const char* MOL_QCA_CELL =
+    "<g\n"
+    "    style=\"fill:#{0};\"\n"
+    "    transform=\"translate({1},{2})\">\n"
+    "\n"
+    "  <rect\n"
+    "    style=\"fill:#{0};stroke:#{0};\"\n"
+    "    width=\"10\"\n"
+    "    height=\"10\"\n"
+    "    x=\"92.93404\"\n"
+    "    y=\"56.46016\" />\n"
+    "\n"
+    "  <g style=\"stroke:#000000;stroke-width:0.5;fill:#{0};\">\n"
+    "    <!-- left molecule -->\n"
+    "    <line x1=\"95.43404\" y1=\"58.96016\" x2=\"95.43404\" y2=\"63.96016\" />\n"
+    "    <circle r=\"0.97553\" cx=\"95.43404\" cy=\"58.96016\" />\n"
+    "    <circle r=\"0.50000\" cx=\"95.43404\" cy=\"61.46016\" />\n"
+    "    <circle r=\"0.97553\" cx=\"95.43404\" cy=\"63.96016\" />\n"
+    "\n"
+    "    <!-- right molecule -->\n"
+    "    <line x1=\"100.43404\" y1=\"58.96016\" x2=\"100.43404\" y2=\"63.96016\" />\n"
+    "    <circle r=\"0.97553\" cx=\"100.43404\" cy=\"58.96016\" />\n"
+    "    <circle r=\"0.50000\" cx=\"100.43404\" cy=\"61.46016\" />\n"
+    "    <circle r=\"0.97553\" cx=\"100.43404\" cy=\"63.96016\" />\n"
+    "  </g>\n"
+    "</g>";
+
+// ToDo: adjust this
+inline constexpr const char* MOL_QCA_SIMPLE_CELL = "<g\n"
+                                           "transform=\"translate({1},{2})\">\n"
+                                           "<rect\n"
+                                           "ry=\"0.75\"\n"
+                                           "y=\"56.46016\"\n"
+                                           "x=\"92.93404\"\n"
+                                           "height=\"10\"\n"
+                                           "width=\"10\"\n"
+                                           "style=\"fill:#{0};stroke:#000000;\" />\n"
+                                           "</g>";
+
+
 }  // namespace svg
 
 template <typename Lyt>
@@ -1089,6 +1231,392 @@ class write_qca_layout_svg_impl
     }
 };
 
+template <typename Lyt>
+class write_mol_qca_layout_svg_impl
+{
+  public:
+    /**
+     * Default constructor.
+     */
+    write_mol_qca_layout_svg_impl(const Lyt& layout, std::ostream& stream, const write_qca_layout_svg_params& p = {}) :
+            lyt{layout},
+            os{stream},
+            ps{p}
+    {}
+
+    void run()
+    {
+        if (lyt.get_tile_size_x() == 1 && lyt.get_tile_size_y() == 1)
+        {
+            generate_tile_based_svg();
+        }
+        else
+        {
+            generate_cell_based_svg();
+        }
+    }
+
+  private:
+    Lyt lyt;
+
+    std::ostream& os;
+
+    write_qca_layout_svg_params ps;
+
+    /**
+     * Alias for an SVG description of a tile containing also its clock zone.
+     */
+    using tile_description = std::pair<std::string, typename Lyt::clock_number_t>;
+    /**
+     * Maps coordinates of tiles to their string representation and their clock zone.
+     */
+    using coord_to_tile_mapping = std::unordered_map<coordinate<Lyt>, tile_description>;
+    /**
+     * Maps coordinates of tiles to a string representation of the cells contained within them.
+     */
+    using coord_to_cell_list_mapping = std::unordered_map<coordinate<Lyt>, std::string>;
+    /**
+     * Alias for an SVG description of a latch tile containing also its clock zone and its offset.
+     */
+    using svg_latch = std::tuple<std::string, typename Lyt::clock_number_t, uint32_t>;
+    /**
+     * Maps coordinates of latch tiles to tuples containing their string representation, their clock zone,
+     * and their latch offset.
+     */
+    using coord_to_latch_mapping = std::unordered_map<coordinate<Lyt>, svg_latch>;
+
+    /**
+     * Generates and returns a pair of strings representing the description and color of the given cell.
+     *
+     * @param c The cell for which to generate the description and color.
+     * @return A pair of strings representing the description and color of the given cell `c`.
+     */
+    std::pair<std::string, std::string> generate_description_color(const cell<Lyt>& c)
+    {
+        std::string cell_description, cell_color{};
+
+        static constexpr const std::array<const char*, 4> cell_colors{
+            {svg::MOL_QCA_CLOCK_ZONE_1_CELL, svg::MOL_QCA_CLOCK_ZONE_2_CELL, svg::MOL_QCA_CLOCK_ZONE_3_CELL, svg::MOL_QCA_CLOCK_ZONE_4_CELL}};
+
+        bool is_sync_elem = false;
+
+        if (lyt.is_empty_cell(c))
+        {
+            // skip empty cells
+        }
+        else if (const auto ct = lyt.get_cell_type(c); Lyt::technology::is_normal_cell(ct))
+        {
+            if constexpr (has_synchronization_elements_v<Lyt>)
+            {
+                if (lyt.is_synchronization_element(c))
+                {
+                    cell_color = svg::CLOCK_ZONE_LATCH_CELL;
+
+                    is_sync_elem = true;
+                }
+            }
+            if (!is_sync_elem)
+            {
+                int idx =
+                    Lyt::technology::is_normal_cell1(ct) ? 0 :
+                    Lyt::technology::is_normal_cell2(ct) ? 1 :
+                    Lyt::technology::is_normal_cell3(ct) ? 2 :
+                    Lyt::technology::is_normal_cell4(ct) ? 3 :
+                                                           0;
+
+                cell_color = cell_colors[idx];
+
+            }
+
+            if (ps.simple)
+            {
+                cell_description = svg::MOL_QCA_SIMPLE_CELL;
+            }
+            else if (c.z != 0 && Lyt::technology::is_vertical_cell_mode(lyt.get_cell_mode(c)))
+            {
+                cell_description = svg::MOL_QCA_VIA;
+            }
+            else if (const auto ac = lyt.above(c), bc = lyt.below(c);
+                     ((c != ac) && !lyt.is_empty_cell(ac)) || ((c != bc) && lyt.is_empty_cell(bc)))
+            {
+                cell_description = svg::MOL_QCA_CROSS;
+            }
+            else if (c.z != 0)
+            {
+                // skip non-ground layer cells
+            }
+            else
+            {
+                cell_description = svg::MOL_QCA_CELL;
+            }
+        }
+        else if (Lyt::technology::is_input_cell(ct))
+        {
+            cell_color       = svg::PI_CELL_MOL_QCA;
+            cell_description = ps.simple ? svg::MOL_QCA_SIMPLE_CELL : svg::MOL_QCA_CELL;
+        }
+        else if (Lyt::technology::is_output_cell(ct))
+        {
+            cell_color       = svg::PO_CELL_MOL_QCA;
+            cell_description = ps.simple ? svg::MOL_QCA_SIMPLE_CELL : svg::MOL_QCA_CELL;
+        }
+        else if (Lyt::technology::is_const_0_cell(ct))
+        {
+            cell_color       = "#000000";
+            cell_description = ps.simple ? svg::MOL_QCA_SIMPLE_CELL : svg::MOL_QCA_CONST0;
+        }
+        else if (Lyt::technology::is_const_1_cell(ct))
+        {
+            cell_color       = "#000000";
+            cell_description = ps.simple ? svg::MOL_QCA_SIMPLE_CELL : svg::MOL_QCA_CONST1;
+        }
+        else
+        {
+            throw unsupported_cell_type_exception(c);
+        }
+
+        return std::make_pair(cell_description, cell_color);
+    }
+
+    /**
+     * Generates an SVG string representing the cell-based clocked cell layout and appends it to the output stream.
+     */
+    void generate_cell_based_svg()
+    {
+        std::stringstream cell_descriptions{};
+
+        lyt.foreach_cell_position(
+            [this, &cell_descriptions](const auto& c)
+            {
+                if (!lyt.is_empty_cell(c))
+                {
+                    // Determines cell type and color
+                    const auto desc_col = generate_description_color(c);
+
+                    bool is_sync_elem = false;
+                    // Current cell-description can now be appended to the description of all cells
+                    if constexpr (has_synchronization_elements_v<Lyt>)
+                    {
+                        if (lyt.is_synchronization_element(c))
+                        {
+                            cell_descriptions
+                                << fmt::format(fmt::runtime(desc_col.first), desc_col.second,
+                                               svg::STARTING_OFFSET_TILE_X + svg::STARTING_OFFSET_LATCH_CELL_X +
+                                                   (c.x * svg::MOL_QCA_CELL_DISTANCE),
+                                               svg::STARTING_OFFSET_TILE_Y + svg::STARTING_OFFSET_LATCH_CELL_Y +
+                                                   (c.y * svg::MOL_QCA_CELL_DISTANCE));
+
+                            is_sync_elem = true;
+                        }
+                    }
+                    if (!is_sync_elem)
+                    {
+                        cell_descriptions << fmt::format(
+                            fmt::runtime(desc_col.first), desc_col.second,
+                            svg::STARTING_OFFSET_TILE_X + svg::MOL_QCA_STARTING_OFFSET_CELL_X + (c.x * svg::MOL_QCA_CELL_DISTANCE),
+                            svg::STARTING_OFFSET_TILE_Y + svg::MOL_QCA_STARTING_OFFSET_CELL_Y + (c.y * svg::MOL_QCA_CELL_DISTANCE));
+                    }
+                }
+            });
+
+        const double viewbox_x = (2 * svg::VIEWBOX_DISTANCE) + (static_cast<double>(lyt.x() + 1) * svg::MOL_QCA_CELL_DISTANCE);
+        const double viewbox_y = (2 * svg::VIEWBOX_DISTANCE) + (static_cast<double>(lyt.y() + 1) * svg::MOL_QCA_CELL_DISTANCE);
+
+        os << fmt::format(svg::HEADER, FICTION_VERSION, FICTION_REPO, viewbox_x, viewbox_y, cell_descriptions.str());
+    }
+
+    /**
+     * Generates an SVG string representing the tile-based clocked cell layout and appends it to the output stream.
+     */
+    void generate_tile_based_svg()
+    {
+        // Collects ALL tile-descriptions
+        std::stringstream tile_descriptions{};
+
+        // Used for generating tile-descriptions with information about the tile's coordinates and clock zone
+        // It is needed because cells may not be in "tile-order" when read from a cell layout
+        coord_to_tile_mapping      coord_to_tile{};
+        coord_to_cell_list_mapping coord_to_cells{};
+        coord_to_latch_mapping     coord_to_latch_tile{};
+        coord_to_cell_list_mapping coord_to_latch_cells{};
+
+        // Used to determine the color of cells, tiles and text based on its clock zone
+        static constexpr const std::array<const char*, 4> tile_colors{
+            {svg::CLOCK_ZONE_1_TILE, svg::CLOCK_ZONE_2_TILE, svg::CLOCK_ZONE_3_TILE, svg::CLOCK_ZONE_4_TILE}};
+        static constexpr const std::array<const char*, 4> text_colors{
+            {svg::CLOCK_ZONE_12_TEXT, svg::CLOCK_ZONE_12_TEXT, svg::CLOCK_ZONE_34_TEXT, svg::CLOCK_ZONE_34_TEXT}};
+
+        // Adds all non-empty cells from the layout to their correct tiles; it generates the "body"
+        // of all the tile-descriptions to be used later
+        lyt.foreach_cell_position(
+            [this, &coord_to_tile, &coord_to_cells, &coord_to_latch_cells, &coord_to_latch_tile](const auto& c)
+            {
+                const auto clock_zone = lyt.get_clock_number(c);
+                const auto tile_coords =
+                    coordinate<Lyt>{std::ceil(c.x / lyt.get_tile_size_x()), std::ceil(c.y / lyt.get_tile_size_y())};
+                std::string current_cells{};
+
+                bool is_sync_elem = false;
+
+                if constexpr (has_synchronization_elements_v<Lyt>)
+                {
+                    if (const auto latch_delay = lyt.get_synchronization_element(c); latch_delay > 0)
+                    {
+                        if (auto latch_it = coord_to_latch_cells.find(tile_coords);
+                            latch_it != coord_to_latch_cells.end())
+                        {
+                            current_cells = latch_it->second;
+                        }
+                        else
+                        {
+                            // If this is called then there is no tile for the current cell yet
+                            // It also makes sure that all required tiles are created
+                            coord_to_latch_tile[tile_coords] = {svg::LATCH, clock_zone,
+                                                                static_cast<uint32_t>(latch_delay)};
+                        }
+
+                        is_sync_elem = true;
+                    }
+                }
+
+                if (!is_sync_elem)
+                {
+                    if (auto cell_it = coord_to_cells.find(tile_coords); cell_it != coord_to_cells.end())
+                    {
+                        current_cells = cell_it->second;
+                    }
+                    else
+                    {
+                        // If this is called, then there is no tile for the current cell yet
+                        // It also makes sure that all required tiles are created
+                        coord_to_tile[tile_coords] = {svg::TILE, clock_zone};
+                    }
+                }
+
+                // Represent the x- and y-coordinates inside the c's tile
+                const coordinate<Lyt> in_tile{c.x % lyt.get_tile_size_x(), c.y % lyt.get_tile_size_y()};
+
+                // Determines cell type and color
+                const auto desc_col = generate_description_color(c);
+
+                // Only add cell description if the cell is not empty
+                if (!(lyt.is_empty_cell(c)))
+                {
+                    //  Current cell-description can now be appended to the description of all cells in the current tile
+                    if constexpr (has_synchronization_elements_v<Lyt>)
+                    {
+                        if (const auto latch_delay = lyt.get_synchronization_element(c); latch_delay > 0)
+                        {
+                            coord_to_latch_cells[tile_coords] = current_cells.append(
+                                fmt::format(fmt::runtime(desc_col.first), desc_col.second,
+                                            svg::STARTING_OFFSET_LATCH_CELL_X + (in_tile.x * svg::MOL_QCA_CELL_DISTANCE),
+                                            svg::STARTING_OFFSET_LATCH_CELL_Y + (in_tile.y * svg::MOL_QCA_CELL_DISTANCE)));
+
+                            is_sync_elem = true;
+                        }
+                    }
+
+                    if (!is_sync_elem)
+                    {
+                        coord_to_cells[tile_coords] = current_cells.append(
+                            fmt::format(fmt::runtime(desc_col.first), desc_col.second,
+                                        svg::MOL_QCA_STARTING_OFFSET_CELL_X + (in_tile.x * svg::MOL_QCA_CELL_DISTANCE),
+                                        svg::MOL_QCA_STARTING_OFFSET_CELL_Y + (in_tile.y * svg::MOL_QCA_CELL_DISTANCE)));
+                    }
+                }
+            });
+
+        // All cell-descriptions are done and tiles have been created
+
+        // Delete empty tiles in simple designs
+        if (ps.simple)
+        {
+            std::vector<coordinate<Lyt>> empty_tiles{};
+
+            // Find empty tiles via missing cell-descriptions for their coordinates
+            for (const auto& [coord, tdscr] : coord_to_tile)
+            {
+                if (coord_to_cells.count(coord) == 0)
+                {
+                    empty_tiles.emplace_back(coord);
+                }
+            }
+
+            // Delete empty tiles
+            for (const auto& coord : empty_tiles)
+            {
+                coord_to_tile.erase(coord);
+            }
+
+            if constexpr (has_synchronization_elements_v<Lyt>)
+            {
+                std::vector<coordinate<Lyt>> empty_latches{};
+
+                // Find empty latches via missing cell-descriptions for their coordinates
+                for (const auto& [coord, ldscr] : coord_to_latch_tile)
+                {
+                    if (auto cell_it = coord_to_latch_cells.find(coord); cell_it == coord_to_latch_cells.end())
+                    {
+                        empty_latches.emplace_back(coord);
+                    }
+                }
+
+                // Delete empty latches
+                for (const auto& coord : empty_latches)
+                {
+                    coord_to_latch_tile.erase(coord);
+                }
+            }
+        }
+
+        // Associate tiles with cell-descriptions now; coordinates of tiles are used for tile- and cell-descriptions
+        for (const auto& [coord, tdscr] : coord_to_tile)
+        {
+            const auto [descr, czone] = tdscr;
+
+            const auto cell_descriptions = coord_to_cells[coord];
+
+            const double x_pos = svg::STARTING_OFFSET_TILE_X + (coord.x * svg::TILE_DISTANCE);
+            const double y_pos = svg::STARTING_OFFSET_TILE_Y + (coord.y * svg::TILE_DISTANCE);
+
+            const auto c_descr =
+                fmt::format(fmt::runtime(descr), x_pos, y_pos, tile_colors[czone], cell_descriptions,
+                            ps.simple ? "" : text_colors[czone], ps.simple ? "" : std::to_string(czone + 1));
+
+            tile_descriptions << c_descr;
+        }
+
+        if constexpr (has_synchronization_elements_v<Lyt>)
+        {
+            // Add the descriptions of latch-tiles to the whole image
+            for (const auto& [coord, ldscr] : coord_to_latch_tile)
+            {
+                const auto [descr, czone_up, latch_delay] = ldscr;
+                const auto czone_lo                       = czone_up + (latch_delay % lyt.num_clocks());
+
+                const auto cell_descriptions = coord_to_latch_cells[coord];
+
+                const double x_pos = svg::STARTING_OFFSET_LATCH_X + (coord.x * svg::TILE_DISTANCE);
+                const double y_pos = svg::STARTING_OFFSET_LATCH_Y + (coord.y * svg::TILE_DISTANCE);
+
+                const auto t_descr =
+                    fmt::format(fmt::runtime(descr), x_pos, y_pos, tile_colors[czone_lo], tile_colors[czone_up],
+                                cell_descriptions, text_colors[czone_up], ps.simple ? "" : std::to_string(czone_up + 1),
+                                text_colors[czone_lo], ps.simple ? "" : std::to_string(czone_lo + 1));
+
+                tile_descriptions << t_descr;
+            }
+        }
+
+        const coordinate<Lyt> length = {(lyt.x() + 1) / lyt.get_tile_size_x(), (lyt.y() + 1) / lyt.get_tile_size_y()};
+
+        const double viewbox_x = (2 * svg::VIEWBOX_DISTANCE) + (length.x * svg::TILE_DISTANCE);
+        const double viewbox_y = (2 * svg::VIEWBOX_DISTANCE) + (length.y * svg::TILE_DISTANCE);
+
+        os << fmt::format(svg::HEADER, FICTION_VERSION, FICTION_REPO, viewbox_x, viewbox_y, tile_descriptions.str());
+    }
+};
+
 }  // namespace detail
 
 /**
@@ -1142,6 +1670,60 @@ void write_qca_layout_svg(const Lyt& lyt, const std::string_view& filename, cons
     }
 
     write_qca_layout_svg(lyt, os, ps);
+    os.close();
+}
+
+/**
+ * Writes an SVG representation of a cell-level QCA layout into an output stream. Both tile- and cell-based layouts are
+ * supported. For tile-based layouts, QCA layouts of tile size \f$5 \times 5\f$ are supported exclusively so far.
+ *
+ * The utilized color scheme is based on the standard scheme used in QCADesigner
+ * (https://waluslab.ece.ubc.ca/qcadesigner/).
+ *
+ * May throw an `unsupported_cell_type_exception` if it encounters unsupported cell types in the layout.
+ *
+ * @tparam Lyt Cell-level QCA layout type.
+ * @param lyt The layout to be written.
+ * @param os The output stream to write into.
+ * @param ps Parameters.
+ */
+template <typename Lyt>
+void write_mol_qca_layout_svg(const Lyt& lyt, std::ostream& os, const write_qca_layout_svg_params& ps = {})
+{
+    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    // static_assert(has_qca_technology_v<Lyt>, "Lyt must be a QCA layout");
+    static_assert(std::is_same_v<coordinate<Lyt>, offset::ucoord_t>, "Lyt must use unsigned Cartesian coordinates");
+
+    detail::write_mol_qca_layout_svg_impl<Lyt> p{lyt, os, ps};
+
+    p.run();
+}
+/**
+ * Writes an SVG representation of a cell-level QCA layout into a file. Both tile- and cell-based layouts are supported.
+ * For tile-based layouts, QCA layouts of tile size \f$5 \times 5\f$ are supported exclusively so far.
+ *
+ * The utilized color scheme is based on the standard scheme used in QCADesigner
+ * (https://waluslab.ece.ubc.ca/qcadesigner/).
+ *
+ * May throw an `unsupported_cell_type_exception` if it encounters unsupported cell types in the layout. May throw an
+ * `std::ofstream::failure` if it cannot open the file.
+ *
+ * @tparam Lyt Cell-level QCA layout type.
+ * @param lyt The layout to be written.
+ * @param filename The file name to create and write into. Should preferably use the `.svg` extension.
+ * @param ps Parameters.
+ */
+template <typename Lyt>
+void write_mol_qca_layout_svg(const Lyt& lyt, const std::string_view& filename, const write_qca_layout_svg_params& ps = {})
+{
+    std::ofstream os{filename.data(), std::ofstream::out};
+
+    if (!os.is_open())
+    {
+        throw std::ofstream::failure("could not open file");
+    }
+
+    write_mol_qca_layout_svg(lyt, os, ps);
     os.close();
 }
 
