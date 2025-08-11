@@ -576,11 +576,11 @@ TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
     {
         sidb_defect_surface defect_layout{lyt};
 
-        const design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
+        const design_sidb_gates_params<sidb_defect_surface<sidb_100_cell_clk_lyt_siqad>> params{
             is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
                                   bdl_input_iterator_params{},
-                                  is_operational_params::operational_condition::REJECT_KINKS},
-            design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::RANDOM,
+                                  is_operational_params::operational_condition_kinks::REJECT_KINKS},
+            design_sidb_gates_params<sidb_defect_surface<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::RANDOM,
             {{14, 10, 0}, {14, 10, 0}},
             1};
 
@@ -702,10 +702,10 @@ TEST_CASE("Design hexagonal CX gate with pruning only", "[design-sidb-gates]")
 {
     const auto lyt = blueprints::two_input_two_output_bestagon_skeleton<sidb_100_cell_clk_lyt_siqad>();
 
-    const design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
+    const design_sidb_gates_params<sidb_100_cell_clk_lyt_siqad> params{
         is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
                               bdl_input_iterator_params{}},
-        design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::PRUNING_ONLY,
+        design_sidb_gates_params<sidb_100_cell_clk_lyt_siqad>::design_sidb_gates_mode::PRUNING_ONLY,
         {{16, 8, 0}, {22, 14, 0}},
         3};
 
