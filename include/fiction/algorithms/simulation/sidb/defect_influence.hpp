@@ -987,8 +987,10 @@ defect_influence_random_sampling(const Lyt& lyt, std::size_t samples,
 }
 
 /**
- * Applies contour tracing to identify the boundary (contour) between influencing and
- * non-influencing defect positions for a given SiDB layout.
+ * The *QuickTrace* algorithm which was proposed in \"QuickTrace: An Efficient Contour Tracing Algorithm for Defect
+ * Robustness Simulation of Silicon Dangling Bond Logic\" by J. Drewniok, M. Walter, and R. Wille in ISCAS 2025
+ * (https://ieeexplore.ieee.org/document/11044082) applies contour tracing to identify the boundary (contour) between
+ * influencing and non-influencing defect positions for a given SiDB layout.
  *
  * The algorithm leverages the concept of a screened Coulomb potential, where the electrostatic interaction weakens
  * as distance increases. If a defect at position `p` causes the SiDB layout to be non-influential, then defects

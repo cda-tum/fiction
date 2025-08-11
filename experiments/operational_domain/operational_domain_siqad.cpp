@@ -58,14 +58,17 @@ int main()  // NOLINT
     // operational domain parameters
     operational_domain_params op_domain_params{};
     op_domain_params.operational_params.simulation_parameters = sim_params;
-    op_domain_params.operational_params.sim_engine            = sidb_simulation_engine::QUICKEXACT;
-    op_domain_params.sweep_dimensions         = {{sweep_parameter::EPSILON_R}, {sweep_parameter::LAMBDA_TF}};
-    op_domain_params.sweep_dimensions[0].min  = 1.0;
-    op_domain_params.sweep_dimensions[0].max  = 10.0;
-    op_domain_params.sweep_dimensions[0].step = 0.05;
-    op_domain_params.sweep_dimensions[1].min  = 1.0;
-    op_domain_params.sweep_dimensions[1].max  = 10.0;
-    op_domain_params.sweep_dimensions[1].step = 0.05;
+    // reducing the threshold for the interdistance between two BDL wires makes sure that not both BDL pairs of the
+    // SiQAD OR gate are put inside the same detected I/O pin.
+    op_domain_params.operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance = 1.5;
+    op_domain_params.operational_params.sim_engine = sidb_simulation_engine::QUICKEXACT;
+    op_domain_params.sweep_dimensions              = {{sweep_parameter::EPSILON_R}, {sweep_parameter::LAMBDA_TF}};
+    op_domain_params.sweep_dimensions[0].min       = 1.0;
+    op_domain_params.sweep_dimensions[0].max       = 10.0;
+    op_domain_params.sweep_dimensions[0].step      = 0.05;
+    op_domain_params.sweep_dimensions[1].min       = 1.0;
+    op_domain_params.sweep_dimensions[1].max       = 10.0;
+    op_domain_params.sweep_dimensions[1].step      = 0.05;
 
     // write operational domain parameters
     write_operational_domain_params write_op_domain_params{};
@@ -188,7 +191,7 @@ int main()  // NOLINT
         );
 
         opdomain_exp.save();
-        // opdomain_exp.table();
+        opdomain_exp.table();
     }
 
     // log the total number of samples and simulator calls
@@ -211,7 +214,7 @@ int main()  // NOLINT
     );
 
     opdomain_exp.save();
-    // opdomain_exp.table();
+    opdomain_exp.table();
 
     return EXIT_SUCCESS;
 }

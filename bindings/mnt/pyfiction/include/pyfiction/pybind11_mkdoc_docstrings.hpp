@@ -351,7 +351,7 @@ Parameter ``lyt``:
 Parameter ``params``:
     Parameter for the gate library.
 
-Parameter ``defect_surface``:
+Parameter ``defect_lyt``:
     Defect surface.
 
 Returns:
@@ -3131,108 +3131,6 @@ Parameter ``n``:
 Returns:
     Columnar clocking scheme.)doc";
 
-static const char *__doc_fiction_compare_by_average_ground_state_isolation =
-R"doc(This comparator for designed SiDB gates implements comparison by
-average ground state isolation over all input combinations.
-
-Template parameter ``Lyt``:
-    SiDB cell-level layout type.)doc";
-
-static const char *__doc_fiction_compare_by_average_ground_state_isolation_average_ground_state_isolation_over_all_inputs =
-R"doc(Obtains the average ground state isolation over all input for the
-given SiDB gate design.
-
-Parameter ``gate_design``:
-    The SiDB gate design object with simulation results for each input
-    to obtain the average ground state isolation over all inputs of.
-
-Returns:
-    The average ground state isolation over all inputs.)doc";
-
-static const char *__doc_fiction_compare_by_average_ground_state_isolation_compare_by_average_ground_state_isolation =
-R"doc(Standard constructor.
-
-Parameter ``sens``:
-    The sensitivity parameter determines when an energetic difference
-    it big enough to judge the left-hand right-hand side as not equal.)doc";
-
-static const char *__doc_fiction_compare_by_average_ground_state_isolation_equals =
-R"doc(Implements equality comparison for average ground state isolation.
-
-Parameter ``lhs``:
-    Left-hand side.
-
-Parameter ``rhs``:
-    Right-hand side.
-
-Returns:
-    True if and only if the left-hand side is equal to the right-hand
-    side as determined by the sensitivity parameter.)doc";
-
-static const char *__doc_fiction_compare_by_average_ground_state_isolation_operator_call =
-R"doc(Implements strict comparison by average ground state isolation.
-
-Parameter ``lhs``:
-    Left-hand side.
-
-Parameter ``rhs``:
-    Right-hand side.
-
-Returns:
-    True if and only if the left-hand side is strictly below the
-    right-hand side.)doc";
-
-static const char *__doc_fiction_compare_by_minimum_ground_state_isolation =
-R"doc(This comparator for designed SiDB gates implements comparison by
-minimum ground state isolation over all input combinations.
-
-Template parameter ``Lyt``:
-    SiDB cell-level layout type.)doc";
-
-static const char *__doc_fiction_compare_by_minimum_ground_state_isolation_compare_by_minimum_ground_state_isolation =
-R"doc(Standard constructor.
-
-Parameter ``sens``:
-    The sensitivity parameter determines when an energetic difference
-    it big enough to judge the left-hand right-hand side as not equal.)doc";
-
-static const char *__doc_fiction_compare_by_minimum_ground_state_isolation_equals =
-R"doc(Implements equality comparison for minimum ground state isolation.
-
-Parameter ``lhs``:
-    Left-hand side.
-
-Parameter ``rhs``:
-    Right-hand side.
-
-Returns:
-    True if and only if the left-hand side is equal to the right-hand
-    side as determined by the sensitivity parameter.)doc";
-
-static const char *__doc_fiction_compare_by_minimum_ground_state_isolation_minimum_ground_state_isolation_over_all_inputs =
-R"doc(Obtains the minimum ground state isolation over all input for the
-given SiDB gate design.
-
-Parameter ``gate_design``:
-    The SiDB gate design object with simulation results for each input
-    to obtain the minimum ground state isolation over all inputs of.
-
-Returns:
-    The minimum ground state isolation over all inputs.)doc";
-
-static const char *__doc_fiction_compare_by_minimum_ground_state_isolation_operator_call =
-R"doc(Implements strict comparison by minimum ground state isolation.
-
-Parameter ``lhs``:
-    Left-hand side.
-
-Parameter ``rhs``:
-    Right-hand side.
-
-Returns:
-    True if and only if the left-hand side is strictly below the
-    right-hand side.)doc";
-
 static const char *__doc_fiction_convert_array =
 R"doc(Converts an array of size `N` and type `T` to an array of size `N` and
 type `ElementType` by applying `static_cast` at compile time.
@@ -4498,7 +4396,11 @@ status of the layout.)doc";
 static const char *__doc_fiction_defect_influence_params_operational_params = R"doc(Parameters for the `is_operational` algorithm.)doc";
 
 static const char *__doc_fiction_defect_influence_quicktrace =
-R"doc(Applies contour tracing to identify the boundary (contour) between
+R"doc(The *QuickTrace* algorithm which was proposed in \"QuickTrace: An
+Efficient Contour Tracing Algorithm for Defect Robustness Simulation
+of Silicon Dangling Bond Logic\" by J. Drewniok, M. Walter, and R.
+Wille in ISCAS 2025 (https://ieeexplore.ieee.org/document/11044082)
+applies contour tracing to identify the boundary (contour) between
 influencing and non-influencing defect positions for a given SiDB
 layout.
 
@@ -4724,8 +4626,25 @@ static const char *__doc_fiction_depth_view_params_pi_cost = R"doc(Whether PIs h
 static const char *__doc_fiction_design_sidb_gates =
 R"doc(The *SiDB Gate Designer* designs SiDB gate implementations based on a
 specified Boolean function, a skeleton layout (can hold defects),
-canvas size, and a predetermined number of canvas SiDBs. Two different
-design modes are implemented: `exhaustive` and `random design`.
+canvas size, and a predetermined number of canvas SiDBs. Three
+different design modes are implemented: `quickcell`, `exhaustive` and
+`random design`.
+
+A first version of `QuickCell` was proposed in \"Towards Fast
+Automatic Design of Silicon Dangling Bond Logic\" by J. Drewniok, M.
+Walter, S. S. H. Ng, K. Walus, and R. Wille in DATE 2025
+(https://ieeexplore.ieee.org/abstract/document/10992885).
+
+The `Automatic Exhaustive Gate Designer` was proposed in \"Minimal
+Design of SiDB Gates: An Optimal Basis for Circuits Based on Silicon
+Dangling Bonds\" by J. Drewniok, M. Walter, and R. Wille in NANOARCH
+2023 (https://dl.acm.org/doi/10.1145/3611315.3633241).
+
+The `quickcell` design mode consists of two key steps: 1. **Initial
+Pruning:** Efficient filtering techniques are applied to discard
+layouts that cannot correctly implement the specified logic. 2.
+**Physical Simulation:** The remaining candidate layouts undergo
+physical simulation to verify their operationality.
 
 The `exhaustive design` is composed of three steps: 1. In the initial
 step, all possible distributions of `number_of_canvas_sidbs` SiDBs
@@ -4771,64 +4690,55 @@ Returns:
 static const char *__doc_fiction_design_sidb_gates_params =
 R"doc(This struct contains parameters and settings to design SiDB gates.
 
-Template parameter ``Lyt``:
-    SiDB cell-level layout type.)doc";
+Template parameter ``CellType``:
+    Cell type.)doc";
 
-static const char *__doc_fiction_design_sidb_gates_params_available_threads = R"doc(The number of threads available for the SiDB gate design process)doc";
+static const char *__doc_fiction_design_sidb_gates_params_canvas = R"doc(Canvas spanned by the northwest and southeast cell.)doc";
 
 static const char *__doc_fiction_design_sidb_gates_params_design_mode = R"doc(Gate design mode.)doc";
 
 static const char *__doc_fiction_design_sidb_gates_params_design_sidb_gates_mode = R"doc(Selector for the available design approaches.)doc";
 
-static const char *__doc_fiction_design_sidb_gates_params_design_sidb_gates_mode_EXHAUSTIVE = R"doc(Gates are designed by using the *Automatic Exhaustive Gate Designer*.)doc";
+static const char *__doc_fiction_design_sidb_gates_params_design_sidb_gates_mode_AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER = R"doc(Gates are designed by using the *Automatic Exhaustive Gate Designer*.)doc";
 
-static const char *__doc_fiction_design_sidb_gates_params_design_sidb_gates_mode_QUICKCELL =
-R"doc(Gates are designed by using *QuickCell*. This is type of gate design
-is exhaustive but involves pruning prior to exhaustive enumeration.)doc";
+static const char *__doc_fiction_design_sidb_gates_params_design_sidb_gates_mode_PRUNING_ONLY =
+R"doc(This design approach adopts the three pruning techniques used by
+*QuickCell* to efficiently filter out non-operational layouts. Unlike
+*QuickCell*, the subsequent physical simulation step is skipped to
+enhance efficiency. As a result, the operational validity of the final
+layouts cannot be guaranteed, although a substantial portion of them
+are usually operational.)doc";
+
+static const char *__doc_fiction_design_sidb_gates_params_design_sidb_gates_mode_QUICKCELL = R"doc(Gates are designed by using *QuickCell*.)doc";
 
 static const char *__doc_fiction_design_sidb_gates_params_design_sidb_gates_mode_RANDOM = R"doc(Gate layouts are designed randomly.)doc";
-
-static const char *__doc_fiction_design_sidb_gates_params_maximum_number_of_solutions =
-R"doc(Number of solutions that needs to be obtained before termination.
-
-@note This parameter has no effect when the gate design is exhaustive
-and all combinations are enumerated.)doc";
 
 static const char *__doc_fiction_design_sidb_gates_params_number_of_canvas_sidbs = R"doc(Number of SiDBs placed in the canvas to create a working gate.)doc";
 
 static const char *__doc_fiction_design_sidb_gates_params_operational_params = R"doc(Parameters for the `is_operational` function.)doc";
 
-static const char *__doc_fiction_design_sidb_gates_params_post_design_process =
-R"doc(After the design process, the returned gates can be sorted by the
-given ordering recipe.
-
-@note This parameter has no effect unless the gate design is
-exhaustive and all combinations are enumerated.)doc";
-
 static const char *__doc_fiction_design_sidb_gates_params_termination_cond =
-R"doc(The design process is either terminated after all canvas layouts have
-been considered, or the given amount of valid SiDB gate designs is
-found (`maximum_number_of_solutions`).
+R"doc(The design process is terminated after a valid SiDB gate design is
+found.
 
 @note This parameter has no effect unless the gate design is
-exhaustive. For random gate design, termination always occurs after
-finding the given amount of solutions.)doc";
+exhaustive.)doc";
 
 static const char *__doc_fiction_design_sidb_gates_params_termination_condition =
 R"doc(Selector for the different termination conditions for the SiDB gate
 design process.)doc";
 
+static const char *__doc_fiction_design_sidb_gates_params_termination_condition_AFTER_FIRST_SOLUTION =
+R"doc(The design process is terminated as soon as the first valid SiDB gate
+design is found.)doc";
+
 static const char *__doc_fiction_design_sidb_gates_params_termination_condition_ALL_COMBINATIONS_ENUMERATED =
 R"doc(The design process ends after all possible combinations of SiDBs
 within the canvas are enumerated.)doc";
 
-static const char *__doc_fiction_design_sidb_gates_params_termination_condition_OBTAINED_N_SOLUTIONS =
-R"doc(The design process is terminated as soon as a given amount of valid
-SiDB gate designs is found (`maximum_number_of_solutions`).)doc";
-
 static const char *__doc_fiction_design_sidb_gates_stats = R"doc(Statistics for the design of SiDB gates.)doc";
 
-static const char *__doc_fiction_design_sidb_gates_stats_duration = R"doc(The total runtime of the SiDB gate design process.)doc";
+static const char *__doc_fiction_design_sidb_gates_stats_duration = R"doc(The total runtime of SiDB gate design process.)doc";
 
 static const char *__doc_fiction_design_sidb_gates_stats_number_of_layouts = R"doc(The number of all possible layouts.)doc";
 
@@ -4855,101 +4765,6 @@ Parameter ``out``:
 static const char *__doc_fiction_design_sidb_gates_stats_sim_engine =
 R"doc(The simulation engine to be used for the operational domain
 computation.)doc";
-
-static const char *__doc_fiction_designed_sidb_gate_comparator =
-R"doc(A designed SiDB gate comparator is used to compare two designed SiDB
-gates. It offers an equality comparison, of which the sensitivity
-depends on the `sensitivity` parameter given to the comparator, and a
-strict comparator. These ingredients allow a chaining of comparators,
-in which the result of the strict comparison is returned of the first
-comparator in the chain that judges that the two designed SiDB gates
-to compare are not equal, as determined by its respective sensitivity
-parameter.
-
-Template parameter ``Lyt``:
-    SiDB cell-level layout.)doc";
-
-static const char *__doc_fiction_designed_sidb_gate_comparator_designed_sidb_gate_comparator = R"doc(The default no-arguments constructor is deleted.)doc";
-
-static const char *__doc_fiction_designed_sidb_gate_comparator_designed_sidb_gate_comparator_2 =
-R"doc(Standard constructor.
-
-Parameter ``sens``:
-    Determines the sensitivity of the equality comparison.)doc";
-
-static const char *__doc_fiction_designed_sidb_gate_comparator_designed_sidb_gate_comparator_3 =
-R"doc(Copy constructor.
-
-Parameter ``other``:
-    Other comparator to copy.)doc";
-
-static const char *__doc_fiction_designed_sidb_gate_comparator_designed_sidb_gate_comparator_4 =
-R"doc(Move constructor.
-
-Parameter ``other``:
-    Other comparator to move to this one.)doc";
-
-static const char *__doc_fiction_designed_sidb_gate_comparator_equals =
-R"doc(Each designed SiDB gate comparator must implement an equality
-comparison.
-
-Parameter ``lhs``:
-    Left hand side argument.
-
-Parameter ``rhs``:
-    Right hand side argument.
-
-Returns:
-    `lhs = rhs`)doc";
-
-static const char *__doc_fiction_designed_sidb_gate_comparator_operator_assign =
-R"doc(Copy assignment operator.
-
-Parameter ``other``:
-    Other comparator to copy.)doc";
-
-static const char *__doc_fiction_designed_sidb_gate_comparator_operator_assign_2 =
-R"doc(Move assignment operator.
-
-Parameter ``other``:
-    Other comparator to move to this one.)doc";
-
-static const char *__doc_fiction_designed_sidb_gate_comparator_operator_call =
-R"doc(Each designed SiDB gate comparator must implement a strict comparator.
-
-Parameter ``lhs``:
-    Left hand side argument.
-
-Parameter ``rhs``:
-    Right hand side argument.
-
-Returns:
-    `lhs < rhs`)doc";
-
-static const char *__doc_fiction_designed_sidb_gate_comparator_sensitivity =
-R"doc(Each designed SiDB gate comparator depends on a sensitivity parameter,
-which determines the sensitivity of the equality comparison.)doc";
-
-static const char *__doc_fiction_designed_sidb_gate_comparator_sidb_gate_design =
-R"doc(This struct is used to pair a gate design with its respective
-simulation results per input.)doc";
-
-static const char *__doc_fiction_designed_sidb_gate_comparator_sidb_gate_design_gate_design = R"doc(The designed SiDB gate layout.)doc";
-
-static const char *__doc_fiction_designed_sidb_gate_comparator_sidb_gate_design_simulation_results_per_input = R"doc(The respectively associated simulation results per input.)doc";
-
-static const char *__doc_fiction_designed_sidb_gates =
-R"doc(This struct is used to store designed gate layouts, optionally along
-with their respective simulation results for each input.
-
-Template parameter ``Lyt``:
-    SiDB cell-level layout)doc";
-
-static const char *__doc_fiction_designed_sidb_gates_gate_layouts = R"doc(The designed SiDB gate layouts are stored here.)doc";
-
-static const char *__doc_fiction_designed_sidb_gates_simulation_results =
-R"doc(Optionally, the respectively associated simulation results for each
-input are stored here.)doc";
 
 static const char *__doc_fiction_detail_a_star_impl = R"doc()doc";
 
@@ -6300,16 +6115,18 @@ Parameter ``to_delete``:
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl = R"doc()doc";
 
+static const char *__doc_fiction_detail_design_sidb_gates_impl_all_canvas_layouts = R"doc(All Canvas SiDB layout (without I/O pins).)doc";
+
 static const char *__doc_fiction_detail_design_sidb_gates_impl_all_sidbs_in_canvas = R"doc(All cells within the canvas.)doc";
 
-static const char *__doc_fiction_detail_design_sidb_gates_impl_convert_canvas_cell_indices_to_layout =
-R"doc(This function generates canvas SiDB layouts.
+static const char *__doc_fiction_detail_design_sidb_gates_impl_design_canvas_layout =
+R"doc(This function designs canvas SiDB layouts based on given indices.
 
 Parameter ``cell_indices``:
     A vector of indices of cells to be added to the skeleton layout.
 
 Returns:
-    An SiDB cell-level layout consisting of canvas SiDBs.)doc";
+    An SiDB cell-level layout consisting of canvas SidBs.)doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_design_sidb_gates_impl =
 R"doc(This constructor initializes an instance of the *SiDB Gate Designer*
@@ -6329,18 +6146,14 @@ Parameter ``ps``:
 Parameter ``st``:
     Statistics for the gate design process.)doc";
 
-static const char *__doc_fiction_detail_design_sidb_gates_impl_extract_gate_designs =
-R"doc(This process filters the given candidates for an SiDB gate design for
-the ones that are operational under the given truth table
-specification and operational conditions.
-
-Parameter ``candidate_combinations``:
-    A vector of canvas combination candidates to obtain the
-    operational gate designs from.
+static const char *__doc_fiction_detail_design_sidb_gates_impl_determine_all_possible_canvas_layouts =
+R"doc(This function calculates all combinations of distributing a given
+number of SiDBs across a specified number of positions in the canvas.
+Each combination is then used to create a gate layout candidate.
 
 Returns:
-    A vector of operational gate designs that were extracted from the
-    given vector of candidate canvas combinations.)doc";
+    A vector containing all possible gate layouts generated from the
+    combinations.)doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_input_bdl_wires = R"doc(Input BDL wires.)doc";
 
@@ -6354,12 +6167,14 @@ static const char *__doc_fiction_detail_design_sidb_gates_impl_number_of_input_w
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_number_of_output_wires = R"doc(Number of output BDL wires.)doc";
 
+static const char *__doc_fiction_detail_design_sidb_gates_impl_number_of_threads = R"doc(Number of threads to be used for the design process.)doc";
+
 static const char *__doc_fiction_detail_design_sidb_gates_impl_output_bdl_wires = R"doc(Output BDL wires.)doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_params = R"doc(Parameters for the *SiDB Gate Designer*.)doc";
 
-static const char *__doc_fiction_detail_design_sidb_gates_impl_run_exhaustive_gate_designer =
-R"doc(Design gates by using the *Automatic Exhaustive Gate Designer*. This
+static const char *__doc_fiction_detail_design_sidb_gates_impl_run_automatic_exhaustive_gate_designer =
+R"doc(Design gates by using the *Automatic Exhaustive Gate Desginer*. This
 algorithm was proposed in \"Minimal Design of SiDB Gates: An Optimal
 Basis for Circuits Based on Silicon Dangling Bonds\" by J. Drewniok,
 M. Walter, and R. Wille in NANOARCH 2023
@@ -6380,8 +6195,8 @@ threading to accelerate the evaluation and ensures thread-safe access
 to shared resources.
 
 Returns:
-    A vector containing the canvas combinations associated with valid
-    gate candidates that were not pruned.)doc";
+    A vector containing the valid gate candidates that were not
+    pruned.)doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_run_quickcell =
 R"doc(Design Standard Cells/gates by using the *QuickCell* algorithm.
@@ -6399,18 +6214,6 @@ parameters. The design process is parallelized to improve performance.
 Returns:
     A vector of designed SiDB gate layouts.)doc";
 
-static const char *__doc_fiction_detail_design_sidb_gates_impl_set_operational_params_accordingly =
-R"doc(This function makes sure that underlying parameters for
-`is_operational` are set according to the given parameters for
-`design_sidb_gates`.
-
-Parameter ``params``:
-    The given parameters for `design_sidb_gates`.
-
-Returns:
-    The same parameters, but now the underlying parameters for
-    `is_operational` are adjusted accordingly.)doc";
-
 static const char *__doc_fiction_detail_design_sidb_gates_impl_skeleton_layout =
 R"doc(The skeleton layout serves as a starting layout to which SiDBs are
 added to create unique SiDB layouts and, if possible, working gates.
@@ -6418,7 +6221,7 @@ It defines input and output wires.)doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_skeleton_layout_with_canvas_sidbs =
 R"doc(This function adds SiDBs (given by indices) to the skeleton layout
-that is returned afterward.
+that is returned afterwards.
 
 Parameter ``cell_indices``:
     A vector of indices of cells to be added to the skeleton layout.
@@ -7554,17 +7357,66 @@ coordinates that need to be cleared or reset.)doc";
 
 static const char *__doc_fiction_detail_fanout_substitution_impl = R"doc()doc";
 
-static const char *__doc_fiction_detail_fanout_substitution_impl_available_fanouts = R"doc()doc";
+static const char *__doc_fiction_detail_fanout_substitution_impl_available_fanouts = R"doc(Queue map of available fanouts.)doc";
 
 static const char *__doc_fiction_detail_fanout_substitution_impl_fanout_substitution_impl = R"doc()doc";
 
+static const char *__doc_fiction_detail_fanout_substitution_impl_generate_breadth_tree =
+R"doc(BREADTH-FIRST strategy: expand buffers level by level to create
+balanced fanout trees.
+
+Parameter ``substituted``:
+    The partially constructed destination network (NtkDest)
+
+Parameter ``n``:
+    The current node in the topological view (NtkSrc)
+
+Parameter ``child``:
+    The signal in substituted representing the output of node n.
+
+Parameter ``num_fanouts``:
+    Number of buffers to insert (chain length))doc";
+
+static const char *__doc_fiction_detail_fanout_substitution_impl_generate_depth_tree =
+R"doc(DEPTH-FIRST strategy: create a chain of buffers.
+
+Parameter ``substituted``:
+    The partially constructed destination network (NtkDest)
+
+Parameter ``n``:
+    The current node in the topological view (NtkSrc)
+
+Parameter ``child``:
+    The signal in substituted representing the output of node n.
+
+Parameter ``num_fanouts``:
+    Number of buffers to insert (chain length))doc";
+
 static const char *__doc_fiction_detail_fanout_substitution_impl_generate_fanout_tree = R"doc()doc";
+
+static const char *__doc_fiction_detail_fanout_substitution_impl_generate_random_tree =
+R"doc(RANDOM strategy: insert buffers at randomly chosen positions in the
+expanding tree.
+
+Parameter ``substituted``:
+    The partially constructed destination network (NtkDest)
+
+Parameter ``n``:
+    The current node in the topological view (NtkSrc)
+
+Parameter ``child``:
+    The signal in substituted representing the output of node n.
+
+Parameter ``num_fanouts``:
+    Number of buffers to insert (chain length))doc";
 
 static const char *__doc_fiction_detail_fanout_substitution_impl_get_fanout = R"doc()doc";
 
-static const char *__doc_fiction_detail_fanout_substitution_impl_ntk_topo = R"doc()doc";
+static const char *__doc_fiction_detail_fanout_substitution_impl_ntk_topo = R"doc(Topological view of the converted network.)doc";
 
-static const char *__doc_fiction_detail_fanout_substitution_impl_ps = R"doc()doc";
+static const char *__doc_fiction_detail_fanout_substitution_impl_ps = R"doc(Parameters controlling how fanout substitution is performed.)doc";
+
+static const char *__doc_fiction_detail_fanout_substitution_impl_rng = R"doc(Optional helper struct holding the RNG and its distribution.)doc";
 
 static const char *__doc_fiction_detail_fanout_substitution_impl_run = R"doc()doc";
 
@@ -7802,21 +7654,6 @@ static const char *__doc_fiction_detail_generate_edge_intersection_graph_impl_ps
 
 static const char *__doc_fiction_detail_generate_edge_intersection_graph_impl_run = R"doc()doc";
 
-static const char *__doc_fiction_detail_get_ground_state_isolation =
-R"doc(Obtains the energetic ground state isolation; i.e., the energetic
-difference between the ground state and the first excited state.
-
-Template parameter ``Lyt``:
-    SiDB cell-level layout type.
-
-Parameter ``sim_res``:
-    Simulation results as a vector of physically valid charge
-    distributions.
-
-Returns:
-    The energetic difference between the ground state and the first
-    excited state.)doc";
-
 static const char *__doc_fiction_detail_get_offset =
 R"doc(Utility function to calculate the offset that has to be subtracted
 from any x-coordinate on the hexagonal layout.
@@ -7992,9 +7829,6 @@ Parameter ``new_gate_loc``:
     Enum indicating if the src or dest have to host a new gate and
     therefore have to be empty. Defaults to `new_gate_location::NONE`.
 
-Parameter ``planar``:
-    Only consider crossing-free paths.
-
 Returns:
     A path from `src` to `dest` if one exists.)doc";
 
@@ -8033,14 +7867,8 @@ Parameter ``place_info``:
     The placement context containing current node, primary output
     index, node to position mapping, and PI to node mapping.
 
-Parameter ``num_expansions``:
-    The maximum number of positions to be returned.
-
 Parameter ``fc``:
     A vector of nodes that precede the double fanin node.
-
-Parameter ``planar``:
-    Only consider crossing-free paths.
 
 Returns:
     A vector of tiles representing the possible positions for a double
@@ -8062,9 +7890,6 @@ Parameter ``num_expansions``:
     The maximum number of positions to be returned (is doubled for
     PIs).
 
-Parameter ``planar``:
-    Only consider crossing-free paths.
-
 Returns:
     A vector of tiles representing the possible positions for PIs.)doc";
 
@@ -8082,9 +7907,6 @@ Parameter ``place_info``:
 Parameter ``fc``:
     A vector of nodes that precede the PO nodes.
 
-Parameter ``planar``:
-    Only consider crossing-free paths.
-
 Returns:
     A vector of tiles representing the possible positions for POs.)doc";
 
@@ -8101,14 +7923,8 @@ Parameter ``place_info``:
     The placement context containing current node, primary output
     index, node to position mapping, and PI to node mapping.
 
-Parameter ``num_expansions``:
-    The maximum number of positions to be returned.
-
 Parameter ``fc``:
     A vector of nodes that precede the single fanin node.
-
-Parameter ``planar``:
-    Only consider crossing-free paths.
 
 Returns:
     A vector of tiles representing the possible positions for a single
@@ -8160,9 +7976,6 @@ R"doc(Initializes the layout with minimum width
 Parameter ``min_layout_width``:
     The minimum width of the layout.
 
-Parameter ``planar``:
-    Create planar layouts with a depth of 0.
-
 Returns:
     The initialized layout.)doc";
 
@@ -8188,6 +8001,17 @@ area-crossing product.)doc";
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_num_search_space_graphs_highest_effort_custom =
 R"doc(In highest-effort mode with a custom cost function, 60 search space
 graphs are used (48 with the standard cost objectives and 12 for the
+custom one).)doc";
+
+static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_num_search_space_graphs_maximum_effort =
+R"doc(In maximum-effort mode, 96 search space graphs are used. It adds
+another 48 search space graphs to the 48 search space graphs from
+highest-effort mode using randomized fanout substitution strategies
+and random topological orderings.)doc";
+
+static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_num_search_space_graphs_maximum_effort_custom =
+R"doc(In maximum-effort mode with a custom cost function, 120 search space
+graphs are used (96 with the standard cost objectives and 24 for the
 custom one).)doc";
 
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_place_and_route =
@@ -8237,10 +8061,7 @@ Parameter ``node2pos``:
     layout.
 
 Parameter ``fc``:
-    A vector of nodes that precede the double fanin node.
-
-Parameter ``planar``:
-    Only consider crossing-free paths.)doc";
+    A vector of nodes that precede the double fanin node.)doc";
 
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_route_single_input_node =
 R"doc(Places a node with a single input in the layout and routes it.
@@ -8256,10 +8077,7 @@ Parameter ``node2pos``:
     layout.
 
 Parameter ``fc``:
-    A vector of nodes that precede the single fanin node.
-
-Parameter ``planar``:
-    Only consider crossing-free paths.)doc";
+    A vector of nodes that precede the single fanin node.)doc";
 
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_run =
 R"doc(Executes the graph-oriented layout design algorithm and returns the
@@ -8267,6 +8085,10 @@ best found layout.
 
 Returns:
     The best layout found by the algorithm.)doc";
+
+static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_seed =
+R"doc(Random seed used for random fanout substitution and random topological
+ordering in maximum-effort mode.)doc";
 
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_ssg_vec = R"doc(Vector of search space graphs.)doc";
 
@@ -8742,7 +8564,11 @@ Template parameter ``Lyt``:
     SiDB cell-level layout type.
 
 Template parameter ``TT``:
-    Type of the truth table.)doc";
+    Type of the truth table.
+
+Parameter ``spec``:
+    Expected Boolean function of the layout given as a multi-output
+    truth table.)doc";
 
 static const char *__doc_fiction_detail_is_operational_impl_bii = R"doc(Iterator that iterates over all possible input states.)doc";
 
@@ -8805,9 +8631,6 @@ Parameter ``ground_state``:
 Parameter ``bdl``:
     BDL pair to be evaluated.
 
-Parameter ``port``:
-    Port direction where the BDL pair to be evaluated is.
-
 Returns:
     `true` if `1` is encoded, `false` otherwise.)doc";
 
@@ -8821,11 +8644,14 @@ Parameter ``ground_state``:
 Parameter ``bdl``:
     BDL pair to be evaluated.
 
-Parameter ``port``:
-    Port direction where the BDL pair to be evaluated is.
-
 Returns:
     `true` if `0` is encoded, `false` otherwise.)doc";
+
+static const char *__doc_fiction_detail_is_operational_impl_get_number_of_simulator_invocations =
+R"doc(Returns the total number of simulator invocations.
+
+Returns:
+    The number of simulator invocations.)doc";
 
 static const char *__doc_fiction_detail_is_operational_impl_input_bdl_wires = R"doc(Input BDL wires.)doc";
 
@@ -8878,7 +8704,7 @@ R"doc(Constructor to initialize the algorithm with a layout and parameters.
 Parameter ``lyt``:
     The SiDB cell-level layout to be checked.
 
-Parameter ``spec``:
+Parameter ``tt``:
     Expected Boolean function of the layout given as a multi-output
     truth table.
 
@@ -8944,10 +8770,7 @@ Parameter ``spec``:
     truth table.
 
 Parameter ``params``:
-    Parameters for the `is_operational` algorithm.
-
-Parameter ``c_lyt``:
-    Canvas layout.)doc";
+    Parameters for the `is_operational` algorithm.)doc";
 
 static const char *__doc_fiction_detail_is_operational_impl_is_physical_validity_feasible =
 R"doc(This function determines if there is a charge distribution of the
@@ -9017,6 +8840,8 @@ Parameter ``cds``:
 Parameter ``output_wire_index``:
     The index representing the current input pattern of the output
     wire.)doc";
+
+static const char *__doc_fiction_detail_is_operational_impl_simulator_invocations = R"doc(Number of simulator invocations.)doc";
 
 static const char *__doc_fiction_detail_is_operational_impl_truth_table = R"doc(The specification of the layout.)doc";
 
@@ -10393,6 +10218,26 @@ Parameter ``cell``:
 
 static const char *__doc_fiction_detail_recursively_paint_edges = R"doc()doc";
 
+static const char *__doc_fiction_detail_rng_state =
+R"doc(A lightweight container that groups together the two objects required
+for random fan-out selection and only lives when `strategy == RANDOM`.)doc";
+
+static const char *__doc_fiction_detail_rng_state_dist =
+R"doc(Uniform distribution whose parameter range is re-initialised
+(`dist.param({0, upper})`) every time the pool of candidate signals
+changes size.)doc";
+
+static const char *__doc_fiction_detail_rng_state_gen =
+R"doc(Random number generation engine that is seeded once in the constructor
+of `fanout_substitution_impl` and then reused for all random draws
+during fanout substitution.)doc";
+
+static const char *__doc_fiction_detail_rng_state_rng_state =
+R"doc(Default constructor.
+
+Parameter ``seed``:
+    The seed for the random number generator.)doc";
+
 static const char *__doc_fiction_detail_routing_objective_with_fanin_update_information =
 R"doc(Encapsulates a routing objective with fanin update information.
 
@@ -10599,13 +10444,9 @@ static const char *__doc_fiction_detail_search_space_graph_frontier_flag = R"doc
 
 static const char *__doc_fiction_detail_search_space_graph_network = R"doc(The network associated with this search space graph.)doc";
 
-static const char *__doc_fiction_detail_search_space_graph_num_expansions = R"doc(The maximum number of positions to be considered for expansions.)doc";
-
 static const char *__doc_fiction_detail_search_space_graph_pi_locs =
 R"doc(Enum indicating if primary inputs (PIs) can be placed at the top or
 left.)doc";
-
-static const char *__doc_fiction_detail_search_space_graph_planar = R"doc(Create planar layouts.)doc";
 
 static const char *__doc_fiction_detail_sweep_parameter_to_string =
 R"doc(Converts a sweep parameter to a string representation. This is used to
@@ -10659,69 +10500,37 @@ Parameter ``cartesian_layout_height``:
 Returns:
     corresponding tile on the hexagonal grid.)doc";
 
-static const char *__doc_fiction_detail_topo_view_ci_to_co =
+static const char *__doc_fiction_detail_topo_view =
 R"doc(Custom view class derived from mockturtle::topo_view.
 
 This class inherits from mockturtle::topo_view and overrides certain
-functions to provide custom behavior. The topological order is
-generated from CIs to COs.)doc";
+functions to provide custom behavior.)doc";
 
-static const char *__doc_fiction_detail_topo_view_ci_to_co_create_topo_rec = R"doc()doc";
+static const char *__doc_fiction_detail_topo_view_create_topo_rec = R"doc()doc";
 
-static const char *__doc_fiction_detail_topo_view_ci_to_co_foreach_gate = R"doc(! Reimplementation of `foreach_gate`. */)doc";
+static const char *__doc_fiction_detail_topo_view_foreach_gate = R"doc()doc";
 
-static const char *__doc_fiction_detail_topo_view_ci_to_co_foreach_gate_reverse = R"doc(! Implementation of `foreach_gate` in reverse topological order. */)doc";
+static const char *__doc_fiction_detail_topo_view_foreach_gate_reverse = R"doc()doc";
 
-static const char *__doc_fiction_detail_topo_view_ci_to_co_foreach_node = R"doc(! Reimplementation of `foreach_node`. */)doc";
+static const char *__doc_fiction_detail_topo_view_foreach_node = R"doc()doc";
 
-static const char *__doc_fiction_detail_topo_view_ci_to_co_index_to_node = R"doc(! Reimplementation of `index_to_node`. */)doc";
+static const char *__doc_fiction_detail_topo_view_index_to_node = R"doc()doc";
 
-static const char *__doc_fiction_detail_topo_view_ci_to_co_node_to_index = R"doc(! Reimplementation of `node_to_index`. */)doc";
+static const char *__doc_fiction_detail_topo_view_node_to_index = R"doc()doc";
 
-static const char *__doc_fiction_detail_topo_view_ci_to_co_num_gates = R"doc(! Reimplementation of `num_gates`. */)doc";
+static const char *__doc_fiction_detail_topo_view_num_gates = R"doc()doc";
 
-static const char *__doc_fiction_detail_topo_view_ci_to_co_size = R"doc(! Reimplementation of `size`. */)doc";
+static const char *__doc_fiction_detail_topo_view_offset = R"doc()doc";
 
-static const char *__doc_fiction_detail_topo_view_ci_to_co_topo_order = R"doc()doc";
+static const char *__doc_fiction_detail_topo_view_rng = R"doc()doc";
 
-static const char *__doc_fiction_detail_topo_view_ci_to_co_topo_view_ci_to_co =
-R"doc(! Default constructor.
+static const char *__doc_fiction_detail_topo_view_size = R"doc()doc";
 
-Constructs topological view on another network.)doc";
+static const char *__doc_fiction_detail_topo_view_topo_order = R"doc()doc";
 
-static const char *__doc_fiction_detail_topo_view_ci_to_co_update_topo = R"doc()doc";
+static const char *__doc_fiction_detail_topo_view_topo_view = R"doc()doc";
 
-static const char *__doc_fiction_detail_topo_view_co_to_ci =
-R"doc(Custom view class derived from mockturtle::topo_view.
-
-This class inherits from mockturtle::topo_view and overrides certain
-functions to provide custom behavior. The topological order is
-generated from COs to CIs.)doc";
-
-static const char *__doc_fiction_detail_topo_view_co_to_ci_create_topo_rec = R"doc()doc";
-
-static const char *__doc_fiction_detail_topo_view_co_to_ci_foreach_gate = R"doc(! Reimplementation of `foreach_gate`. */)doc";
-
-static const char *__doc_fiction_detail_topo_view_co_to_ci_foreach_gate_reverse = R"doc(! Implementation of `foreach_gate` in reverse topological order. */)doc";
-
-static const char *__doc_fiction_detail_topo_view_co_to_ci_foreach_node = R"doc(! Reimplementation of `foreach_node`. */)doc";
-
-static const char *__doc_fiction_detail_topo_view_co_to_ci_index_to_node = R"doc(! Reimplementation of `index_to_node`. */)doc";
-
-static const char *__doc_fiction_detail_topo_view_co_to_ci_node_to_index = R"doc(! Reimplementation of `node_to_index`. */)doc";
-
-static const char *__doc_fiction_detail_topo_view_co_to_ci_num_gates = R"doc(! Reimplementation of `num_gates`. */)doc";
-
-static const char *__doc_fiction_detail_topo_view_co_to_ci_size = R"doc(! Reimplementation of `size`. */)doc";
-
-static const char *__doc_fiction_detail_topo_view_co_to_ci_topo_order = R"doc()doc";
-
-static const char *__doc_fiction_detail_topo_view_co_to_ci_topo_view_co_to_ci =
-R"doc(! Default constructor.
-
-Constructs topological view on another network.)doc";
-
-static const char *__doc_fiction_detail_topo_view_co_to_ci_update_topo = R"doc()doc";
+static const char *__doc_fiction_detail_topo_view_update_topo = R"doc()doc";
 
 static const char *__doc_fiction_detail_update_to_delete_list =
 R"doc(Update the to-delete list based on a possible path in a
@@ -12490,6 +12299,10 @@ static const char *__doc_fiction_fanout_substitution_params = R"doc(Parameters f
 
 static const char *__doc_fiction_fanout_substitution_params_degree = R"doc(Maximum output degree of each fan-out node.)doc";
 
+static const char *__doc_fiction_fanout_substitution_params_seed =
+R"doc(Seed used for random substitution, generated randomly if not
+specified.)doc";
+
 static const char *__doc_fiction_fanout_substitution_params_strategy =
 R"doc(Substitution strategy of high-degree fanout networks (depth-first vs.
 breadth-first).)doc";
@@ -12499,6 +12312,10 @@ static const char *__doc_fiction_fanout_substitution_params_substitution_strateg
 static const char *__doc_fiction_fanout_substitution_params_substitution_strategy_BREADTH = R"doc(Breadth-first substitution. Creates balanced fanout trees.)doc";
 
 static const char *__doc_fiction_fanout_substitution_params_substitution_strategy_DEPTH = R"doc(Depth-first substitution. Creates fanout trees with one deep branch.)doc";
+
+static const char *__doc_fiction_fanout_substitution_params_substitution_strategy_RANDOM =
+R"doc(Random substitution. Inserts fanout buffers at random positions in the
+fanout tree.)doc";
 
 static const char *__doc_fiction_fanout_substitution_params_threshold =
 R"doc(Maximum number of outputs any gate is allowed to have before
@@ -14376,9 +14193,7 @@ search space graphs for different cost objectives. If the cost
 objective involves layout area, number of crossings, number of wire
 segments, or a combination of area and crossings, a total of 48 search
 space graphs are generated. For a custom cost objective, an additional
-12 graphs are created, resulting in 60 graphs in total. This mode
-provides the best guarantee of finding optimal solutions but
-significantly increases runtime.)doc";
+12 graphs are created, resulting in 60 graphs in total.)doc";
 
 static const char *__doc_fiction_graph_oriented_layout_design_params_effort_mode_HIGH_EFFICIENCY =
 R"doc(HIGH_EFFICIENCY mode generates 2 search space graphs. This option
@@ -14390,6 +14205,17 @@ substitution strategies, PI placements, and other parameters. This
 wider exploration increases the chance of finding optimal layouts but
 also extends runtime. When a solution is found in any graph, its cost
 is used to prune the remaining graphs.)doc";
+
+static const char *__doc_fiction_graph_oriented_layout_design_params_effort_mode_MAXIMUM_EFFORT =
+R"doc(MAXIMUM_EFFORT mode builds upon HIGHEST_EFFORT by duplicating the 48
+(60) search space graphs using randomized fanout substitution
+strategies and topological orderings. If the cost objective involves
+layout area, number of crossings, number of wire segments, or a
+combination of area and crossings, a total of 96 search space graphs
+are generated. For a custom cost objective, an additional 12 graphs
+are created, resulting in 120 graphs in total. This mode has a higher
+chance of finding optimal solutions but significantly increases
+runtime.)doc";
 
 static const char *__doc_fiction_graph_oriented_layout_design_params_enable_multithreading =
 R"doc(BETA feature: Flag to enable or disable multithreading during the
@@ -14432,6 +14258,12 @@ Defaults to false.)doc";
 static const char *__doc_fiction_graph_oriented_layout_design_params_return_first =
 R"doc(Return the first found layout, which might still have a high cost but
 can be found fast.)doc";
+
+static const char *__doc_fiction_graph_oriented_layout_design_params_seed =
+R"doc(Random seed used for random fanout substitution and random topological
+ordering in maximum-effort mode, generated randomly if not specified.)doc";
+
+static const char *__doc_fiction_graph_oriented_layout_design_params_straight_inverters = R"doc(Enforce NOT gates to be routed non-bending only.)doc";
 
 static const char *__doc_fiction_graph_oriented_layout_design_params_timeout = R"doc(Timeout limit (in ms).)doc";
 
@@ -16086,9 +15918,9 @@ static const char *__doc_fiction_is_cell_level_layout = R"doc()doc";
 static const char *__doc_fiction_is_charge_distribution_surface = R"doc()doc";
 
 static const char *__doc_fiction_is_charged_defect_type =
-R"doc(Checks whether the given defect type is a charged one. `DB` and
-`SI_VACANCY` types are charged. Those charged defects are to be
-avoided by a larger distance.
+R"doc(Checks whether the given defect type is a charged one. `DB`,
+`SI_VACANCY` and `ARSENIC` types are charged. Those charged defects
+are to be avoided by a larger distance.
 
 Parameter ``defect``:
     Defect to check.
@@ -16315,9 +16147,9 @@ Parameter ``params``:
     Parameters for the `is_operational` algorithm.
 
 Returns:
-    A datatype containing the operational status of the gate-level
-    layout (either `OPERATIONAL` or `NON_OPERATIONAL`) along with
-    auxiliary statistics.)doc";
+    A pair containing the operational status of the SiDB layout
+    (either `OPERATIONAL` or `NON_OPERATIONAL`) and the number of
+    input combinations tested.)doc";
 
 static const char *__doc_fiction_is_operational_2 =
 R"doc(Determine the operational status of an SiDB layout.
@@ -16353,33 +16185,42 @@ Parameter ``canvas_lyt``:
     Optional canvas layout.
 
 Returns:
-    A datatype containing the operational status of the gate-level
-    layout (either `OPERATIONAL` or `NON_OPERATIONAL`) along with
-    auxiliary statistics.)doc";
+    A pair containing the operational status of the SiDB layout
+    (either `OPERATIONAL` or `NON_OPERATIONAL`) and the number of
+    input combinations tested.)doc";
 
 static const char *__doc_fiction_is_operational_params = R"doc(Parameters for the `is_operational` algorithm.)doc";
 
 static const char *__doc_fiction_is_operational_params_input_bdl_iterator_params = R"doc(Parameters for the BDL input iterator.)doc";
 
-static const char *__doc_fiction_is_operational_params_op_condition_kinks =
+static const char *__doc_fiction_is_operational_params_op_condition =
 R"doc(Condition to decide whether a layout is operational or non-
-operational, relating to kinks.)doc";
-
-static const char *__doc_fiction_is_operational_params_op_condition_positive_charges =
-R"doc(Condition to decide whether a layout is operational or non-
-operational, relating to kinks.)doc";
+operational.)doc";
 
 static const char *__doc_fiction_is_operational_params_operational_analysis_strategy =
 R"doc(Simulation method to determine if the layout is operational or non-
-operational.)doc";
+operational. There are three possible strategies:
+
+- `SIMULATION_ONLY`: This setting does not apply any filtering
+strategies to determine if the layout is operational. Instead, it
+relies solely on physical simulation to make this determination. -
+`FILTER_ONLY`: This setting does only apply filtering strategies to
+determine if the layout is non-operational. If the layout passes all
+filtering strategies, it is considered operational. This is only an
+approximation. It may be possible that the layout is non-operational,
+but the filtering strategies do not detect it. -
+`FILTER_THEN_SIMULATION`: Before a physical simulation is conducted,
+the algorithm checks if filtering strategies have detected whether the
+layout is non-operational. This only provides any runtime benefits if
+kinks are rejected.)doc";
 
 static const char *__doc_fiction_is_operational_params_operational_analysis_strategy_FILTER_ONLY =
 R"doc(Apply filtering exclusively to determine whether the layout is non-
 operational. If the layout passes all filter steps, it is considered
 operational.
 
-@note This is an extremely fast approximation that may lead to false
-positives.)doc";
+@note This is an extremely fast approximation that may sometimes lead
+to false positives.)doc";
 
 static const char *__doc_fiction_is_operational_params_operational_analysis_strategy_FILTER_THEN_SIMULATION =
 R"doc(Before a physical simulation is conducted, the algorithm checks if
@@ -16390,28 +16231,16 @@ static const char *__doc_fiction_is_operational_params_operational_analysis_stra
 R"doc(Do not apply filter strategies to determine whether the layout is
 operational. Instead, rely solely on physical simulation.)doc";
 
-static const char *__doc_fiction_is_operational_params_operational_condition_kinks =
+static const char *__doc_fiction_is_operational_params_operational_condition =
 R"doc(Condition to decide whether a layout is operational or non-
-operational, relating to kinks.)doc";
+operational.)doc";
 
-static const char *__doc_fiction_is_operational_params_operational_condition_kinks_REJECT_KINKS =
+static const char *__doc_fiction_is_operational_params_operational_condition_REJECT_KINKS =
 R"doc(The I/O pins are not allowed to show kinks. If kinks exist, the layout
 is considered non-operational.)doc";
 
-static const char *__doc_fiction_is_operational_params_operational_condition_kinks_TOLERATE_KINKS =
+static const char *__doc_fiction_is_operational_params_operational_condition_TOLERATE_KINKS =
 R"doc(Even if the I/O pins show kinks, the layout is still considered as
-operational.)doc";
-
-static const char *__doc_fiction_is_operational_params_operational_condition_positive_charges =
-R"doc(Condition to decide whether a layout is operational or non-
-operational, relating to positive charges.)doc";
-
-static const char *__doc_fiction_is_operational_params_operational_condition_positive_charges_REJECT_POSITIVE_CHARGES =
-R"doc(Positive charges may not be able to occur. In the case of the converse
-being true, the layout is considered as non-operational.)doc";
-
-static const char *__doc_fiction_is_operational_params_operational_condition_positive_charges_TOLERATE_POSITIVE_CHARGES =
-R"doc(Even if positive charges can occur, the layout is still considered as
 operational.)doc";
 
 static const char *__doc_fiction_is_operational_params_sim_engine =
@@ -16422,38 +16251,9 @@ static const char *__doc_fiction_is_operational_params_simulation_parameters =
 R"doc(The simulation parameters for the physical simulation of the ground
 state.)doc";
 
-static const char *__doc_fiction_is_operational_params_simulation_results_mode = R"doc(Selector for the different ways to handle obtained simulation results.)doc";
-
-static const char *__doc_fiction_is_operational_params_simulation_results_mode_DISCARD_SIMULATION_RESULTS =
-R"doc(The simulation results are discarded after the operational status was
-assessed.)doc";
-
-static const char *__doc_fiction_is_operational_params_simulation_results_mode_KEEP_SIMULATION_RESULTS =
-R"doc(The simulation results for each input pattern are returned for
-operational gates.)doc";
-
-static const char *__doc_fiction_is_operational_params_simulation_results_retention =
-R"doc(Simulation results that are used to certify the status `OPERATIONAL`
-are not kept by default.)doc";
-
 static const char *__doc_fiction_is_operational_params_strategy_to_analyze_operational_status =
 R"doc(Strategy to determine whether a layout is operational or non-
 operational.)doc";
-
-static const char *__doc_fiction_is_operational_params_termination_cond =
-R"doc(Condition to decide when to terminate the assessment of the
-operational status of the given layout.)doc";
-
-static const char *__doc_fiction_is_operational_params_termination_condition =
-R"doc(The termination condition for assessment of the operational status of
-the given layout.)doc";
-
-static const char *__doc_fiction_is_operational_params_termination_condition_ALL_INPUT_COMBINATIONS_ASSESSED = R"doc(The operational status is assessed for all input combinations.)doc";
-
-static const char *__doc_fiction_is_operational_params_termination_condition_ON_FIRST_NON_OPERATIONAL =
-R"doc(The assessment for the given layout terminates either when it is found
-to be operational for all input combinations, or an input combination
-is found for which the layout is not operational.)doc";
 
 static const char *__doc_fiction_is_positively_charged_defect =
 R"doc(Checks whether the given defect has a positive charge value assigned
@@ -16731,7 +16531,7 @@ Template parameter ``InputIt``:
     Must meet the requirements of `LegacyInputIterator`.
 
 Parameter ``first``:
-    Begin of the range to examine.
+    Begin of the range to examime.
 
 Parameter ``last``:
     End of the range to examine.
@@ -16749,7 +16549,7 @@ Template parameter ``InputIt``:
     Must meet the requirements of `LegacyInputIterator`.
 
 Parameter ``first``:
-    Begin of the range to examine.
+    Begin of the range to examime.
 
 Parameter ``last``:
     End of the range to examine.
@@ -17217,9 +17017,16 @@ Template parameter ``GateLyt``:
 Parameter ``gate_lyt``:
     Gate-level layout.
 
+Parameter ``lattice_tiling``:
+    The lattice tiling used for the circuit design.
+
 Parameter ``params``:
     The parameters used for designing the circuit, encapsulated in an
     `on_the_fly_sidb_circuit_design_params` object.
+
+Parameter ``stats``:
+    Pointer to a structure for collecting statistics. If `nullptr`,
+    statistics are discarded.
 
 Returns:
     Layout representing the designed SiDB circuit.)doc";
@@ -17305,59 +17112,6 @@ Parameter ``n``:
 
 Returns:
     Irregular clocking scheme.)doc";
-
-static const char *__doc_fiction_operational_assessment =
-R"doc(This struct is used to collect results from the operational status
-assessment.
-
-Template parameter ``Lyt``:
-    SiDB cell-level layout type.)doc";
-
-static const char *__doc_fiction_operational_assessment_assessment_per_input =
-R"doc(When the termination condition is set to
-`ALL_INPUT_COMBINATIONS_ASSESSED`, the operational status for each
-respective input combination is stored here, sorted by their binary
-representation. When the simulation retention is set to
-`KEEP_SIMULATION_RESULTS`, this optional structure is also populated.)doc";
-
-static const char *__doc_fiction_operational_assessment_extract_simulation_results_per_input =
-R"doc(Extracts the simulation results contained in this operational
-assessment through moves.
-
-Returns:
-    A vector containing the simulation results for each respective
-    input that was assessed.)doc";
-
-static const char *__doc_fiction_operational_assessment_operational_assessment =
-R"doc(Standard constructor that only sets the operational status.
-
-Parameter ``op_status``:
-    The operational status to set.)doc";
-
-static const char *__doc_fiction_operational_assessment_operational_assessment_for_input =
-R"doc(This struct collects the information for a specific input combination
-that was obtained during the assessment.)doc";
-
-static const char *__doc_fiction_operational_assessment_operational_assessment_for_input_operational_assessment_for_input =
-R"doc(Standard constructor that only sets the operational status.
-
-Parameter ``op_status``:
-    The operational status to set.)doc";
-
-static const char *__doc_fiction_operational_assessment_operational_assessment_for_input_simulation_results =
-R"doc(The charge distributions obtained for one input combination that was
-tested.)doc";
-
-static const char *__doc_fiction_operational_assessment_operational_assessment_for_input_status =
-R"doc(The assessed operational status of the given layout under one input
-combination.)doc";
-
-static const char *__doc_fiction_operational_assessment_simulator_invocations = R"doc(The number of input combinations tested.)doc";
-
-static const char *__doc_fiction_operational_assessment_status =
-R"doc(The assessed operational status of the given layout. The status
-`OPERATIONAL` is given if and only the layout is operational under all
-input combinations.)doc";
 
 static const char *__doc_fiction_operational_domain =
 R"doc(An operational domain is a set of simulation parameter values for
@@ -17733,7 +17487,7 @@ Parameter ``spec``:
     Vector of truth table specifications.
 
 Parameter ``params``:
-    Parameters to simulate if an input combination is operational.
+    Parameters to simulate if a input combination is operational.
 
 Returns:
     The operational input combinations.)doc";
@@ -17755,7 +17509,7 @@ Parameter ``spec``:
     Vector of truth table specifications.
 
 Parameter ``params``:
-    Parameters to simulate if an input combination is operational.
+    Parameters to simulate if a input combination is operational.
 
 Parameter ``input_bdl_wire``:
     Optional BDL input wires of lyt.
@@ -17774,29 +17528,6 @@ static const char *__doc_fiction_operational_status = R"doc(Possible operational
 static const char *__doc_fiction_operational_status_NON_OPERATIONAL = R"doc(The layout is non-operational.)doc";
 
 static const char *__doc_fiction_operational_status_OPERATIONAL = R"doc(The layout is operational.)doc";
-
-static const char *__doc_fiction_order_designed_sidb_gates =
-R"doc(The designed SiDB gates are ordered inplace according to the given
-ordering recipe. Comparators that occur earlier in the recipe have a
-higher precedence. Two designed gates are compared using the recipe as
-follows: iterating through the comparators in the order of precedence,
-the `equals` function is invoked. When the current comparator judges
-the two gate implementations to be equal, we move on to the next
-comparator. This proceeds until one comparator judges non-equality, in
-which case `operator()` is invoked, which implements `<`. If all
-comparators judge the two gate implementations to be equal,
-`operator()` is invoked on the last in the recipe.
-
-Template parameter ``Lyt``:
-    SiDB cell-level layout.
-
-Parameter ``recipe``:
-    A list of comparators that compose a recipe for determining an
-    ordering of the designed SiDB gates.
-
-Parameter ``designed_gates``:
-    The gates that were designed that are to be ordered by the given
-    ordering recipe.)doc";
 
 static const char *__doc_fiction_orthogonal =
 R"doc(A scalable placement & routing approach based on orthogonal graph
@@ -20481,6 +20212,12 @@ Journal of Nanotechnology in 2020.)doc";
 
 static const char *__doc_fiction_sidb_defect_type_2 = R"doc(Type of defect.)doc";
 
+static const char *__doc_fiction_sidb_defect_type_ARSENIC =
+R"doc(Ionized arsenic atom as mentioned in \"Electrostatic landscape of a
+Hydrogen-terminated Silicon Surface Probed by a Moveable Quantum Dot\"
+by T. R. Huff, T. Dienel, M. Rashidi, R. Achal, L. Livadaru, J.
+Croshaw, and R. A. Wolkow in ACS Nano in 2019.)doc";
+
 static const char *__doc_fiction_sidb_defect_type_DB = R"doc(A stray dangling bond.)doc";
 
 static const char *__doc_fiction_sidb_defect_type_DIHYDRIDE_PAIR =
@@ -20565,29 +20302,28 @@ skeleton (i.e., the pre-defined input and output wires) are hexagonal
 in shape.)doc";
 
 static const char *__doc_fiction_sidb_on_the_fly_gate_library_add_defect_to_skeleton =
-R"doc(This function takes a defect surface and a skeleton and adds defects
-from the surrounding area to the skeleton. The defects within a
-specified distance from the center cell are taken into account. The
+R"doc(This function takes a defect surface and a skeleton skeleton and adds
+defects from the surrounding area to the skeleton. The defects within
+a specified distance from the center cell are taken into account. The
 resulting skeleton with added defects is returned.
 
 Template parameter ``CellLyt``:
     SiDB defect surface type.
 
-Parameter ``defect_surface``:
-    Atomic defect surface.
+Template parameter ``Params``:
+    Type of Parameters.
 
 Parameter ``skeleton``:
     The skeleton to which defects will be added.
-
-Parameter ``influence_distance``:
-    The radius in nanometers around the center of the hexagon where
-    atomic defects are incorporated into the gate design.
 
 Parameter ``center_cell``:
     The coordinates of the center cell.
 
 Parameter ``absolute_cell``:
     The coordinates of the skeleton's absolute cell.
+
+Parameter ``parameters``:
+    Parameters for defect handling.
 
 Returns:
     The updated skeleton with added defects from the surrounding area.)doc";
@@ -20702,8 +20438,8 @@ static const char *__doc_fiction_sidb_on_the_fly_gate_library_params =
 R"doc(This struct encapsulates parameters for the parameterized SiDB gate
 library.
 
-Template parameter ``Lyt``:
-    Cell-level layout type.)doc";
+Template parameter ``CellType``:
+    SiDB cell type.)doc";
 
 static const char *__doc_fiction_sidb_on_the_fly_gate_library_params_canvas_sidb_complex_gates =
 R"doc(This variable defines the number of canvas SiDBs dedicated to complex
@@ -20748,7 +20484,7 @@ Parameter ``lyt``:
 Parameter ``t``:
     Tile to be realized as a Bestagon gate.
 
-Parameter ``params``:
+Parameter ``parameters``:
     Parameter to design SiDB gates.
 
 Parameter ``defect_surface``:

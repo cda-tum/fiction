@@ -473,7 +473,7 @@ class is_operational_impl
                  parameters.strategy_to_analyze_operational_status ==
                      is_operational_params::operational_analysis_strategy::FILTER_THEN_SIMULATION) ||
                 parameters.strategy_to_analyze_operational_status ==
-                    is_operational_params::operational_analysis_strategy::FILTER_ONLY)
+                     is_operational_params::operational_analysis_strategy::FILTER_ONLY)
             {
                 // number of different input combinations
                 for (auto i = 0u; i < truth_table.front().num_bits(); ++i, ++bii)
@@ -1321,6 +1321,28 @@ template <typename Lyt, typename TT>
     // all elements in spec must have the same number of variables
     assert(std::adjacent_find(spec.cbegin(), spec.cend(), [](const auto& a, const auto& b)
                               { return a.num_vars() != b.num_vars(); }) == spec.cend());
+
+    // if there are logic cells, we can design the canvas layout consisting of all logic cells
+    if (const auto logic_cells = lyt.get_cells_by_type(technology<Lyt>::cell_type::LOGIC);
+        !logic_cells.empty() &&
+        params.strategy_to_analyze_operational_status !=
+            is_operational_params::operational_analysis_strategy::SIMULATION_ONLY &&
+        params.op_condition_kinks == is_operational_params::operational_condition_kinks::REJECT_KINKS)
+    {
+        Lyt canvas_lyt{};
+
+        // assign all logic cells to the canvas layout
+        for (const auto& c : logic_cells)
+        {
+            canvas_lyt.assign_cell_type(c, technology<Lyt>::cell_type::LOGIC);
+        }
+
+        detail::is_operational_impl<Lyt, TT> p{lyt, spec, params, canvas_lyt};
+
+        const auto [status, _] = p.run();
+
+        return {status, p.get_number_of_simulator_invocations()};
+    }
 
     detail::is_operational_impl<Lyt, TT> p{lyt, spec, params};
 

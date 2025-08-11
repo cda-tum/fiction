@@ -15,7 +15,6 @@
 #include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/traits.hpp>
 
-#include <bill/sat/interface/common.hpp>
 #include <mockturtle/networks/aig.hpp>
 
 using namespace fiction;
@@ -27,23 +26,31 @@ TEST_CASE("Benchmark Graph-Oriented Layout Design", "[benchmark]")
     auto ntk    = blueprints::mux21_network<mockturtle::aig_network>();
     auto params = fiction::graph_oriented_layout_design_params{};
 
-    BENCHMARK("graph_oriented_layout_design: high effiency")
+    BENCHMARK("graph_oriented_layout_design: high-efficiency")
     {
         params.mode = graph_oriented_layout_design_params::effort_mode::HIGH_EFFICIENCY;
 
         return graph_oriented_layout_design<gate_layout>(ntk, params);
     };
 
-    BENCHMARK("graph_oriented_layout_design: high effort")
+    BENCHMARK("graph_oriented_layout_design: high-effort")
     {
         params.mode = graph_oriented_layout_design_params::effort_mode::HIGH_EFFORT;
 
         return graph_oriented_layout_design<gate_layout>(ntk, params);
     };
 
-    BENCHMARK("graph_oriented_layout_design: highest effort")
+    BENCHMARK("graph_oriented_layout_design: highest-effort")
     {
         params.mode = graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT;
+
+        return graph_oriented_layout_design<gate_layout>(ntk, params);
+    };
+
+    BENCHMARK("graph_oriented_layout_design: maximum-effort")
+    {
+        params.mode = graph_oriented_layout_design_params::effort_mode::MAXIMUM_EFFORT;
+        params.seed = 12345;
 
         return graph_oriented_layout_design<gate_layout>(ntk, params);
     };
@@ -63,41 +70,44 @@ TEST_CASE("Benchmark Graph-Oriented Layout Design", "[benchmark]")
     };
 }
 
-//  Mac M1, Sonoma 14.6.1, Apple clang version 15.0.0 (25.09.24)
+//  Mac M1, Sequoia 15.5, Apple clang version 17.0.0 (19.05.25)
 // -------------------------------------------------------------------------------
 // Benchmark Graph-Oriented Layout Design
 // -------------------------------------------------------------------------------
-// /Users/simonhofmann/Documents/fiction_fork/fiction/test/benchmark/graph_oriented_layout_design.cpp:23
-// ...............................................................................
 //
 // benchmark name                       samples       iterations    est run time
 //                                      mean          low mean      high mean
 //                                      std dev       low std dev   high std dev
 // -------------------------------------------------------------------------------
-// graph_oriented_layout_design: high efficiency
+// graph_oriented_layout_design: high-efficiency
 //
-//                                         148.492 ms    146.396 ms    150.925 ms
-//                                         11.4994 ms    9.88837 ms    13.6356 ms
+//                                         154.203 ms    152.139 ms    157.968 ms
+//                                           13.77 ms    8.91136 ms    25.9232 ms
 //
-// graph_oriented_layout_design: high effort
+// graph_oriented_layout_design: high-effort
 //
-//                                          1.23503 s     1.20168 s     1.27147 s
-//                                         178.104 ms    159.325 ms    202.161 ms
+//                                          1.35733 s     1.32885 s     1.38707 s
+//                                         148.219 ms    132.249 ms    167.853 ms
 //
-// graph_oriented_layout_design: highest effort
+// graph_oriented_layout_design: highest-effort
 //
-//                                           3.2585 s      3.0587 s     3.47545 s
-//                                          1.06581 s    963.829 ms     1.19622 s
+//                                            5.009 s     4.84578 s     5.19168 s
+//                                         880.273 ms    771.159 ms     1.03008 s
 //
-// graph_oriented_layout_design: singlethreading
+// graph_oriented_layout_design: maximum-effort
 //
-//                                          2.49857 s     2.46866 s     2.52899 s
-//                                         152.931 ms     137.96 ms     170.69 ms
+//                                          19.0867 s      18.346 s     19.8665 s
+//                                          3.88072 s     3.37165 s     4.53847 s
 //
-// graph_oriented_layout_design: multithreading
+// graph_oriented_layout_design: single-threading
 //
-//                                         601.433 ms    593.498 ms    609.969 ms
-//                                         42.0223 ms    36.1444 ms    50.4232 ms
+//                                          2.30311 s     2.28982 s     2.31924 s
+//                                         74.3541 ms    61.6422 ms    101.801 ms
+//
+// graph_oriented_layout_design: multi-threading
+//
+//                                         623.524 ms    614.624 ms     633.33 ms
+//                                         47.7563 ms    41.6035 ms    55.7239 ms
 //
 //
 // ===============================================================================

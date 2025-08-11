@@ -134,7 +134,8 @@ class TestIsOperational(unittest.TestCase):
         # filer then simulation
         params.strategy_to_analyze_operational_status = operational_analysis_strategy.FILTER_THEN_SIMULATION
         self.assertEqual(
-            params.strategy_to_analyze_operational_status, operational_analysis_strategy.FILTER_THEN_SIMULATION
+            params.strategy_to_analyze_operational_status,
+            operational_analysis_strategy.FILTER_THEN_SIMULATION,
         )
         assessment_results = is_operational(lyt, [create_and_tt()], params)
         self.assertEqual(assessment_results.status, operational_status.NON_OPERATIONAL)

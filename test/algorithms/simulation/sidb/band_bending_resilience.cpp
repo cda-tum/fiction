@@ -20,7 +20,7 @@ using namespace fiction;
 
 using layout = sidb_cell_clk_lyt_siqad;
 
-TEST_CASE("Single SiDB", "[calculate-min-bbr-for-all-inputs]")
+TEST_CASE("Single SiDB", "[band-bending-resilience]")
 {
     const auto lyt = blueprints::bestagon_and_gate<layout>();
 
@@ -49,5 +49,13 @@ TEST_CASE("Single SiDB", "[calculate-min-bbr-for-all-inputs]")
                                                            transition_type::NEUTRAL_TO_POSITIVE);
 
         CHECK_THAT(min_potential, Catch::Matchers::WithinAbs(0.413859, constants::ERROR_MARGIN));
+    }
+
+    SECTION("Minimal potential required to conduct a charge change")
+    {
+        const auto min_potential = band_bending_resilience(lyt, std::vector<tt>{create_and_tt()}, params);
+
+        // the minimal potential for any charge change is the same as for neutral to negative
+        CHECK_THAT(min_potential, Catch::Matchers::WithinAbs(0.020652, constants::ERROR_MARGIN));
     }
 }
