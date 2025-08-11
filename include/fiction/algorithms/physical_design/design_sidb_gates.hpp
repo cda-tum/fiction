@@ -781,8 +781,7 @@ class design_sidb_gates_impl
      * @param cell_indices A vector of indices of cells to be added to the skeleton layout.
      * @return An SiDB cell-level layout consisting of canvas SiDBs.
      */
-    [[nodiscard]] std::optional<Lyt>
-    design_canvas_layout(const canvas_combination& cell_indices) const noexcept
+    [[nodiscard]] std::optional<Lyt> design_canvas_layout(const canvas_combination& cell_indices) const noexcept
     {
         Lyt lyt{};
 
