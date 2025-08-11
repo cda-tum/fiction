@@ -1339,9 +1339,9 @@ template <typename Lyt, typename TT>
 
         detail::is_operational_impl<Lyt, TT> p{lyt, spec, params, canvas_lyt};
 
-        const auto [status, _] = p.run();
+        const auto [assessment_result, _] = p.run();
 
-        return {status, p.get_number_of_simulator_invocations()};
+        return assessment_result;
     }
 
     detail::is_operational_impl<Lyt, TT> p{lyt, spec, params};
