@@ -520,14 +520,16 @@ class design_sidb_gates_impl
             // canvas SiDBs are added to the skeleton
             const auto layout_with_added_cells = skeleton_layout_with_canvas_sidbs(combination);
 
-            if (const operational_assessment<Lyt>& assessment_results = is_operational(
-                    layout_with_added_cells, truth_table, params.operational_params, input_bdl_wires, output_bdl_wires);
-                assessment_results.status == operational_status::OPERATIONAL)
+            if (params.design_mode == design_sidb_gates_params<cell<Lyt>>::design_sidb_gates_mode::PRUNING_ONLY)
             {
-                const std::lock_guard lock_vector{mutex_to_protect_designed_gate_layouts};
-
-                designed_gate_layouts.gate_layouts.emplace_back(std::move(layout_with_added_cells));
-
+                // If the design mode is PRUNING_ONLY, we only need to return the gate candidates that passed the
+                // pruning steps.
+            }
+            else if (const operational_assessment<Lyt>& assessment_results =
+                         is_operational(layout_with_added_cells, truth_table, params.operational_params,
+                                        input_bdl_wires, output_bdl_wires);
+                     assessment_results.status == operational_status::OPERATIONAL)
+            {
                 if (designed_gate_layouts.simulation_results.has_value())
                 {
                     designed_gate_layouts.simulation_results.value().push_back(
@@ -535,17 +537,24 @@ class design_sidb_gates_impl
                 }
 
                 ++num_solutions_found;
+            }
+            else
+            {
+                return;
+            }
+
+            const std::lock_guard lock_vector{mutex_to_protect_designed_gate_layouts};
+
+            designed_gate_layouts.gate_layouts.emplace_back(std::move(layout_with_added_cells));
 
 #if (PROGRESS_BARS)
-                if (params.termination_cond ==
-                        design_sidb_gates_params<Lyt>::termination_condition::OBTAINED_N_SOLUTIONS &&
-                    num_solutions_found < params.maximum_number_of_solutions)
-                {
-                    // update the progress bar
-                    bar(num_solutions_found);
-                }
-#endif
+            if (params.termination_cond == design_sidb_gates_params<Lyt>::termination_condition::OBTAINED_N_SOLUTIONS &&
+                num_solutions_found < params.maximum_number_of_solutions)
+            {
+                // update the progress bar
+                bar(num_solutions_found);
             }
+#endif
         };
 
         std::vector<std::thread> threads{};
