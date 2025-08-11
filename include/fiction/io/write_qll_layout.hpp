@@ -420,7 +420,7 @@ class write_qll_layout_impl
 }  // namespace detail
 
 /**
- * Writes a cell-level QCA or iNML layout to a qll file that is used by ToPoliNano & MagCAD
+ * Writes a cell-level QCA, molQCA or iNML layout to a qll file that is used by ToPoliNano & MagCAD
  * (https://topolinano.polito.it/), an EDA tool and a physical simulator for the iNML technology platform as well as
  * SCERPA (https://ieeexplore.ieee.org/document/8935211), a physical simulator for the mQCA technology platform.
  *
@@ -442,7 +442,7 @@ void write_qll_layout(const Lyt& lyt, std::ostream& os)
     p.run();
 }
 /**
- * Writes a cell-level QCA or iNML layout to a qll file that is used by ToPoliNano & MagCAD
+ * Writes a cell-level QCA, molQCA or iNML layout to a qll file that is used by ToPoliNano & MagCAD
  * (https://topolinano.polito.it/), an EDA tool and a physical simulator for the iNML technology platform as well as
  * SCERPA (https://ieeexplore.ieee.org/document/8935211), a physical simulator for the mQCA technology platform.
  *

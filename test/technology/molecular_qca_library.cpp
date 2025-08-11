@@ -2,129 +2,183 @@
 // Created by benjamin on 7/21/25.
 //
 
-#include "fiction/technology/molecular_qca_library.hpp"
-
 #include <catch2/catch_test_macros.hpp>
 
-#include "fiction/algorithms/physical_design/apply_gate_library.hpp"
-#include "fiction/algorithms/physical_design/graph_oriented_layout_design.hpp"
-#include "fiction/algorithms/physical_design/orthogonal.hpp"
-#include "fiction/io/write_qll_layout.hpp"
-#include "fiction/io/write_svg_layout.hpp"
-#include "fiction/networks/technology_network.hpp"
-#include "fiction/networks/technology_network.hpp"
-#include "fiction/technology/molqca.hpp"
-#include "fiction/technology/qca_one_library.hpp"
-#include "utils/blueprints/network_blueprints.hpp"
+#include "../utils/blueprints/layout_blueprints.hpp"
 
-#include <fiction/algorithms/physical_design/exact.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
-#include <fiction/technology/cell_technologies.hpp>
-
-#include <fmt/format.h>
-
-#include <sstream>
-#include <string>
+#include <fiction/layouts/coordinates.hpp>
+#include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/tile_based_layout.hpp>
+#include <fiction/technology/molecular_qca_library.hpp>
+#include <fiction/traits.hpp>
+#include <fiction/types.hpp>
 
 using namespace fiction;
 
-TEST_CASE("Test molQCA", "[molqca]")
+TEST_CASE("QCA ONE library traits", "[molecular-qca-library]")
 {
-    /*fiction::technology_network tec{};
-    const auto pi1 = tec.create_pi();
-    const auto not1 = tec.create_not(pi1);
-    const auto buf = tec.create_buf(not1);
-    const auto pi2 = tec.create_pi();
-    const auto n_and = tec.create_or(pi2, buf);
-    tec.create_po(n_and);*/
+    CHECK(has_post_layout_optimization_v<molecular_qca_library, mol_qca_cell_clk_lyt>);
+    CHECK(!has_post_layout_optimization_v<molecular_qca_library, qca_cell_clk_lyt>);
+    CHECK(!has_post_layout_optimization_v<molecular_qca_library, inml_cell_clk_lyt>);
+    CHECK(!has_post_layout_optimization_v<molecular_qca_library, sidb_cell_clk_lyt>);
+    CHECK(!has_post_layout_optimization_v<molecular_qca_library, cart_gate_clk_lyt>);
+    CHECK(!has_get_functional_implementations_v<molecular_qca_library>);
+    CHECK(!has_get_gate_ports_v<molecular_qca_library>);
+}
 
-    /*fiction::technology_network tec{};
-
-    const auto x1 = tec.create_pi();
-    const auto x2 = tec.create_pi();
-
-    // build XOR = (x1 OR x2) AND NOT(x1 AND x2)
-    // 1) a ∨ b
-    const auto a_or_b    = tec.create_or(x1, x2);
-    // 2) a ∧ b
-    const auto carry   = tec.create_and(x1, x2);
-    // 3) ¬(a ∧ b)
-    const auto not_and   = tec.create_not(carry);
-    // 4) (a ∨ b) ∧ ¬(a ∧ b)
-    const auto sum       = tec.create_and(a_or_b, not_and);
-
-    // outputs
-    tec.create_po(sum);
-    tec.create_po(carry);*/
-
-    const auto tec = blueprints::mux21_network<fiction::technology_network>();
-
-    /*fiction::technology_network tec{};
-    const auto pi1 = tec.create_pi();
-    const auto buf = tec.create_buf(pi1);
-    tec.create_po(buf);*/
-
-    orthogonal_physical_design_stats stats{};
-
+TEST_CASE("Setting up input ports and gates", "[molecular-qca-library]")
+{
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
 
-    // auto gate_lyt = orthogonal<gate_layout>(tec, {}, &stats);
+    auto layout = blueprints::or_not_gate_layout<gate_layout>();
 
-    /*fiction::graph_oriented_layout_design_stats  graph_oriented_layout_design_stats{};
-    fiction::graph_oriented_layout_design_params graph_oriented_layout_design_params{};
+    // clang-format off
 
-    auto gate_layout_opt = fiction::graph_oriented_layout_design<gate_layout, technology_network>(
-        tec, graph_oriented_layout_design_params, &graph_oriented_layout_design_stats);
+    static constexpr const molecular_qca_library::fcn_gate primary_input_port{
+    molecular_qca_library::cell_list_to_gate<char>(
+    {{
+        {' ', ' ', ' ', ' ', 'i', 'i', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
+    }})};
 
-    if (!gate_layout_opt) {
-        throw std::runtime_error("layout design failed");
-    }
+    static constexpr const molecular_qca_library::fcn_gate primary_output_port{
+    molecular_qca_library::cell_list_to_gate<char>(
+    {{
+        {' ', ' ', ' ', ' ', 'o', 'o', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
+    }})};
 
-    const auto& gate_lyt = *gate_layout_opt;*/
+    static constexpr const molecular_qca_library::fcn_gate disjunction{
+    molecular_qca_library::cell_list_to_gate<char>(
+    {{
+        {' ', ' ', ' ', ' ', '1', '1', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', 'b', 'b', 'b', 'b', ' ', ' ', ' '},
+        {'a', 'a', 'a', 'b', 'b', 'b', 'b', 'c', 'd', 'd'},
+        {'a', 'a', 'a', 'b', 'b', 'b', 'b', 'c', 'd', 'd'},
+        {' ', ' ', ' ', 'b', 'b', 'b', 'b', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '}
+    }})};
 
-    exact_physical_design_params ps_exact{};
-    ps_exact.straight_inverters = true;
-    ps_exact.scheme = "2DDWave";
-    ps_exact.border_io = false;
-    //ps_exact.crossings;
-    const auto gate_layout_opt = exact<gate_layout>(tec, ps_exact);
+    // clang-format on
 
-    std::cout << "Exact finished\n";
+    CHECK(molecular_qca_library::set_up_gate(layout, {0, 1}) == molecular_qca_library::rotate_90(primary_input_port));
+    CHECK(molecular_qca_library::set_up_gate(layout, {1, 0}) == molecular_qca_library::rotate_180(primary_input_port));
+    CHECK(molecular_qca_library::set_up_gate(layout, {1, 1}) == molecular_qca_library::rotate_90(disjunction));
+    CHECK(molecular_qca_library::set_up_gate(layout, {2, 2}) == molecular_qca_library::rotate_270(primary_output_port));
+}
 
-    if (!gate_layout_opt) {
-        throw std::runtime_error("layout design failed");
-    }
+TEST_CASE("Setting up fanouts", "[molecular-qca-library]")
+{
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
 
-    std::cout << "Start applying library\n";
+    auto layout = blueprints::fanout_layout<gate_layout>();
 
-    const auto& gate_lyt = *gate_layout_opt;
+    // clang-format off
 
-    using qca_cell_clk_lyt =
-        cell_level_layout<qca_technology,
-                          synchronization_element_layout  // se_layouts have only been investigated for QCA technologies
-                          <clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
+    static constexpr const molecular_qca_library::fcn_gate primary_input_port{
+    molecular_qca_library::cell_list_to_gate<char>(
+    {{
+        {' ', ' ', ' ', ' ', 'i', 'i', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
+    }})};
 
-    const auto layout = apply_gate_library<qca_cell_clk_lyt, qca_one_library>(gate_lyt);
+    static constexpr const molecular_qca_library::fcn_gate primary_output_port{
+    molecular_qca_library::cell_list_to_gate<char>(
+    {{
+        {' ', ' ', ' ', ' ', 'o', 'o', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
+    }})};
 
-    std::string filename_qca = "lyt.svg";
+    static constexpr const molecular_qca_library::fcn_gate fanout{
+    molecular_qca_library::cell_list_to_gate<char>(
+    {{
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {'d', 'd', 'd', 'd', 'c', 'c', 'b', 'b', 'a', 'a'},
+        {'d', 'd', 'd', 'd', 'c', 'c', 'b', 'b', 'a', 'a'},
+        {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '}
+    }})};
 
-    fiction::write_qca_layout_svg(layout, filename_qca);
+    static constexpr const molecular_qca_library::fcn_gate fanout_d{
+    molecular_qca_library::cell_list_to_gate<char>(
+    {{
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {'d', 'd', 'd', 'd', 'c', 'c', 'd', 'd', 'd', 'd'},
+        {'d', 'd', 'd', 'd', 'c', 'c', 'd', 'd', 'd', 'd'},
+        {' ', ' ', ' ', ' ', 'b', 'b', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'b', 'b', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '}
+    }})};
 
-    fiction::write_qll_layout(layout, "lyt.qll");
+    static constexpr const molecular_qca_library::fcn_gate bent_wire{
+    molecular_qca_library::cell_list_to_gate<char>(
+    {{
+        {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'c', 'c', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'c', 'c', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'b', 'b', 'b', 'a', 'a', 'a'},
+        {' ', ' ', ' ', ' ', 'b', 'b', 'b', 'a', 'a', 'a'},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
+    }})};
 
-    using mol_qca_cell_clk_lyt =
-        cell_level_layout<mol_qca_technology,
-                          synchronization_element_layout  // se_layouts have only been investigated for QCA technologies
-                          <clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
+    // clang-format on
 
-    // apply here the molecular_qca_library
-    const auto layout_mol_qca = apply_gate_library<mol_qca_cell_clk_lyt, molecular_qca_library>(gate_lyt);
-
-    std::string filename_mol = "lyt_mol_qca.svg";
-
-    fiction::write_mol_qca_layout_svg(layout_mol_qca, filename_mol);
-
-    fiction::write_qll_layout(layout_mol_qca, "lyt_mol_qca.qll");
+    CHECK(molecular_qca_library::set_up_gate(layout, {0, 1}) == molecular_qca_library::rotate_90(primary_input_port));
+    CHECK(molecular_qca_library::set_up_gate(layout, {1, 0}) == molecular_qca_library::rotate_180(primary_output_port));
+    CHECK(molecular_qca_library::set_up_gate(layout, {2, 0}) == molecular_qca_library::rotate_180(primary_output_port));
+    CHECK(molecular_qca_library::set_up_gate(layout, {1, 2}) == molecular_qca_library::rotate_90(primary_output_port));
+    CHECK(molecular_qca_library::set_up_gate(layout, {1, 1}) == molecular_qca_library::rotate_180(fanout));
+    CHECK(molecular_qca_library::set_up_gate(layout, {2, 1}) == molecular_qca_library::rotate_90(fanout_d));
+    CHECK(molecular_qca_library::set_up_gate(layout, {2, 2}) == molecular_qca_library::rotate_270(bent_wire));
 }

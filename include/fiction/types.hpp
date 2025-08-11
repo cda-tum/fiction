@@ -169,6 +169,11 @@ using qca_cell_clk_lyt_ptr = std::shared_ptr<qca_cell_clk_lyt>;
 using stacked_qca_cell_clk_lyt     = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<cube::coord_t>>>;
 using stacked_qca_cell_clk_lyt_ptr = std::shared_ptr<stacked_qca_cell_clk_lyt>;
 
+using mol_qca_cell_clk_lyt =
+    cell_level_layout<mol_qca_technology,
+                      synchronization_element_layout  // se_layouts have only been investigated for QCA technologies
+                      <clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
+
 using inml_cell_clk_lyt     = cell_level_layout<inml_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
 using inml_cell_clk_lyt_ptr = std::shared_ptr<inml_cell_clk_lyt>;
 

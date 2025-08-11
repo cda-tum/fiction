@@ -9,24 +9,17 @@
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/fcn_gate_library.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/utils/array_utils.hpp"
 
 #include <fmt/format.h>
 #include <mockturtle/traits.hpp>
 #include <phmap.h>
 
-#include <vector>
-
 namespace fiction
 {
 
 /**
- * A concrete FCN gate library based on QCA ONE proposed in \"A Methodology for Standard Cell Design for QCA\" by Dayane
- * Alfenas Reis, Caio Araújo T. Campos, Thiago Rodrigues B. S. Soares, Omar Paranaiba V. Neto, and Frank Sill Torres in
- * IEEE International Symposium on Circuits and Systems, 2016. QCA ONE was originally proposed for the USE clocking
- * scheme. The version used here is an extension to the original QCA ONE by also theoretically allowing multiple wires
- * in the same tile. Furthermore, it can be used for a range of clocking schemes. Tiles in QCA ONE are \f$5 \times 5\f$
- * QCA cells.
+ * A concrete molQCA gate library was proposed by the Politecnico di Torino and is based on simulations using the SCERPA
+ * tool. Tiles in the molQCA library are \f$10 \times 10\f$ molQCA cells.
  */
 class molecular_qca_library : public fcn_gate_library<mol_qca_technology, 10, 10>
 {
@@ -40,7 +33,7 @@ class molecular_qca_library : public fcn_gate_library<mol_qca_technology, 10, 10
      * @tparam GateLyt Cartesian gate-level layout type.
      * @param lyt Layout that hosts tile `t`.
      * @param t Tile to be realized as a QCA ONE gate.
-     * @return QCA ONE gate representation of `t` including I/Os, rotation, const cells, etc.
+     * @return MolQCA gate representation of `t` including I/Os, rotation, const cells, etc.
      */
     template <typename GateLyt>
     [[nodiscard]] static fcn_gate set_up_gate(const GateLyt& lyt, const tile<GateLyt>& t)
@@ -138,7 +131,6 @@ class molecular_qca_library : public fcn_gate_library<mol_qca_technology, 10, 10
                             lyt.assign_cell_mode(c, mol_qca_technology::cell_mode::VERTICAL);
                             // create a corresponding via ground cell
                             const cell<CellLyt> ground_via_cell{c.x, c.y, 0};
-                            // ToDo: Normal does not exist anymore: Adjust so that the clocking is correct
                             lyt.assign_cell_type(ground_via_cell, mol_qca_technology::cell_type::NORMAL);
                             lyt.assign_cell_mode(ground_via_cell, mol_qca_technology::cell_mode::VERTICAL);
                         }
@@ -157,21 +149,17 @@ class molecular_qca_library : public fcn_gate_library<mol_qca_technology, 10, 10
         if (lyt.has_northern_incoming_signal(t))
         {
             p.inp.emplace(4u, 0u);
-            // p.inp.emplace(5u, 0u);
         }
         if (lyt.has_eastern_incoming_signal(t))
         {
             p.inp.emplace(9u, 4u);
-            // p.inp.emplace(9u, 5u);
         }
         if (lyt.has_southern_incoming_signal(t))
         {
-            // p.inp.emplace(4u, 9u);
             p.inp.emplace(5u, 9u);
         }
         if (lyt.has_western_incoming_signal(t))
         {
-            // p.inp.emplace(0u, 4u);
             p.inp.emplace(0u, 5u);
         }
 
@@ -179,21 +167,17 @@ class molecular_qca_library : public fcn_gate_library<mol_qca_technology, 10, 10
         if (lyt.has_northern_outgoing_signal(t))
         {
             p.out.emplace(4u, 0u);
-            // p.out.emplace(5u, 0u);
         }
         if (lyt.has_eastern_outgoing_signal(t))
         {
             p.out.emplace(9u, 4u);
-            // p.out.emplace(9u, 5u);
         }
         if (lyt.has_southern_outgoing_signal(t))
         {
-            // p.out.emplace(4u, 9u);
             p.out.emplace(5u, 9u);
         }
         if (lyt.has_western_outgoing_signal(t))
         {
-            // p.out.emplace(0u, 4u);
             p.out.emplace(0u, 5u);
         }
 
@@ -203,14 +187,12 @@ class molecular_qca_library : public fcn_gate_library<mol_qca_technology, 10, 10
             if (lyt.has_no_incoming_signal(t))
             {
                 // place on left edge
-                // p.inp.emplace(0u, 4u);
                 p.inp.emplace(0u, 5u);
             }
             if (lyt.has_no_outgoing_signal(t))
             {
                 // place on right edge
                 p.out.emplace(9u, 4u);
-                // p.out.emplace(9u, 5u);
             }
         }
 
@@ -223,7 +205,7 @@ class molecular_qca_library : public fcn_gate_library<mol_qca_technology, 10, 10
     // ************************** Gates ***************************
     // ************************************************************
 
-static constexpr const fcn_gate CENTER_WIRE{cell_list_to_gate<char>(
+    static constexpr const fcn_gate CENTER_WIRE{cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
@@ -251,7 +233,6 @@ static constexpr const fcn_gate CENTER_WIRE{cell_list_to_gate<char>(
         {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '}
     }})};
 
-    // OUT
     /*static constexpr const fcn_gate BENT_INVERTER{cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', 'x', 'x', ' ', ' ', ' ', ' '},
@@ -280,7 +261,7 @@ static constexpr const fcn_gate CENTER_WIRE{cell_list_to_gate<char>(
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '}
     }})};
 
-static constexpr const fcn_gate CONJUNCTION_D{cell_list_to_gate<char>(
+    static constexpr const fcn_gate CONJUNCTION_D{cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', '0', '0', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
@@ -294,7 +275,7 @@ static constexpr const fcn_gate CONJUNCTION_D{cell_list_to_gate<char>(
         {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '}
     }})};
 
-static constexpr const fcn_gate CONJUNCTION_R{cell_list_to_gate<char>(
+    static constexpr const fcn_gate CONJUNCTION_R{cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', '0', '0', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
@@ -309,46 +290,46 @@ static constexpr const fcn_gate CONJUNCTION_R{cell_list_to_gate<char>(
     }})};
 
     static constexpr const fcn_gate DISJUNCTION{cell_list_to_gate<char>(
-{{
-    {' ', ' ', ' ', ' ', '1', '1', ' ', ' ', ' ', ' '},
-    {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
-    {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
-    {' ', ' ', ' ', 'b', 'b', 'b', 'b', ' ', ' ', ' '},
-    {'d', 'd', 'c', 'b', 'b', 'b', 'b', 'a', 'a', 'a'},
-    {'d', 'd', 'c', 'b', 'b', 'b', 'b', 'a', 'a', 'a'},
-    {' ', ' ', ' ', 'b', 'b', 'b', 'b', ' ', ' ', ' '},
-    {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
-    {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
-    {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '}
-}})};
+    {{
+        {' ', ' ', ' ', ' ', '1', '1', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', 'b', 'b', 'b', 'b', ' ', ' ', ' '},
+        {'d', 'd', 'c', 'b', 'b', 'b', 'b', 'a', 'a', 'a'},
+        {'d', 'd', 'c', 'b', 'b', 'b', 'b', 'a', 'a', 'a'},
+        {' ', ' ', ' ', 'b', 'b', 'b', 'b', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '}
+    }})};
 
-static constexpr const fcn_gate DISJUNCTION_D{cell_list_to_gate<char>(
-{{
-    {' ', ' ', ' ', ' ', '1', '1', ' ', ' ', ' ', ' '},
-    {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
-    {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
-    {' ', ' ', ' ', 'b', 'b', 'b', 'b', ' ', ' ', ' '},
-    {'a', 'a', 'a', 'b', 'b', 'b', 'b', 'a', 'a', 'a'},
-    {'a', 'a', 'a', 'b', 'b', 'b', 'b', 'a', 'a', 'a'},
-    {' ', ' ', ' ', 'b', 'b', 'b', 'b', ' ', ' ', ' '},
-    {' ', ' ', ' ', ' ', 'c', 'c', ' ', ' ', ' ', ' '},
-    {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '},
-    {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '}
-}})};
+    static constexpr const fcn_gate DISJUNCTION_D{cell_list_to_gate<char>(
+    {{
+        {' ', ' ', ' ', ' ', '1', '1', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', 'b', 'b', 'b', 'b', ' ', ' ', ' '},
+        {'a', 'a', 'a', 'b', 'b', 'b', 'b', 'a', 'a', 'a'},
+        {'a', 'a', 'a', 'b', 'b', 'b', 'b', 'a', 'a', 'a'},
+        {' ', ' ', ' ', 'b', 'b', 'b', 'b', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'c', 'c', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '}
+    }})};
 
-static constexpr const fcn_gate DISJUNCTION_R{cell_list_to_gate<char>(
-{{
-    {' ', ' ', ' ', ' ', '1', '1', ' ', ' ', ' ', ' '},
-    {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
-    {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
-    {' ', ' ', ' ', 'b', 'b', 'b', 'b', ' ', ' ', ' '},
-    {'a', 'a', 'a', 'b', 'b', 'b', 'b', 'c', 'd', 'd'},
-    {'a', 'a', 'a', 'b', 'b', 'b', 'b', 'c', 'd', 'd'},
-    {' ', ' ', ' ', 'b', 'b', 'b', 'b', ' ', ' ', ' '},
-    {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
-    {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
-    {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '}
-}})};
+    static constexpr const fcn_gate DISJUNCTION_R{cell_list_to_gate<char>(
+    {{
+        {' ', ' ', ' ', ' ', '1', '1', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', 'b', 'b', 'b', 'b', ' ', ' ', ' '},
+        {'a', 'a', 'a', 'b', 'b', 'b', 'b', 'c', 'd', 'd'},
+        {'a', 'a', 'a', 'b', 'b', 'b', 'b', 'c', 'd', 'd'},
+        {' ', ' ', ' ', 'b', 'b', 'b', 'b', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '}
+    }})};
 
     static constexpr const fcn_gate MAJORITY{cell_list_to_gate<char>(
     {{
@@ -364,7 +345,6 @@ static constexpr const fcn_gate DISJUNCTION_R{cell_list_to_gate<char>(
         {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '}
     }})};
 
-    // IN
     static constexpr const fcn_gate FAN_OUT_1_2{cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
@@ -379,7 +359,7 @@ static constexpr const fcn_gate DISJUNCTION_R{cell_list_to_gate<char>(
         {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '}
     }})};
 
-static constexpr const fcn_gate FAN_OUT_1_2_R{cell_list_to_gate<char>(
+    static constexpr const fcn_gate FAN_OUT_1_2_R{cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
@@ -393,7 +373,7 @@ static constexpr const fcn_gate FAN_OUT_1_2_R{cell_list_to_gate<char>(
         {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '}
     }})};
 
-static constexpr const fcn_gate FAN_OUT_1_2_D{cell_list_to_gate<char>(
+    static constexpr const fcn_gate FAN_OUT_1_2_D{cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
@@ -407,7 +387,6 @@ static constexpr const fcn_gate FAN_OUT_1_2_D{cell_list_to_gate<char>(
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '}
     }})};
 
-    // OUT
     /*static constexpr const fcn_gate FAN_OUT_1_3{cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', 'x', 'x', ' ', ' ', ' ', ' '},
@@ -468,7 +447,7 @@ static constexpr const fcn_gate FAN_OUT_1_2_D{cell_list_to_gate<char>(
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
     }})};
 
-static constexpr const fcn_gate CENTER_BENT_WIRE_R{cell_list_to_gate<char>(
+    static constexpr const fcn_gate CENTER_BENT_WIRE_R{cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '},
@@ -612,9 +591,10 @@ static constexpr const fcn_gate CENTER_BENT_WIRE_R{cell_list_to_gate<char>(
         // identity orientation
         {{{port_position(0, 5), port_position(4, 0), port_position(9, 4)}, {port_position(5, 9)}}, MAJORITY},
         {{{port_position(4, 0), port_position(9, 4), port_position(5, 9)}, {port_position(0, 5)}}, rotate_90(MAJORITY)},
-        {{{port_position(9, 4), port_position(5, 9), port_position(0, 5)}, {port_position(4, 0)}}, rotate_180(MAJORITY)},
-        {{{port_position(5, 9), port_position(0, 5), port_position(4, 0)}, {port_position(9, 4)}}, rotate_270(MAJORITY)}
-    };
+        {{{port_position(9, 4), port_position(5, 9), port_position(0, 5)}, {port_position(4, 0)}},
+         rotate_180(MAJORITY)},
+        {{{port_position(5, 9), port_position(0, 5), port_position(4, 0)}, {port_position(9, 4)}},
+         rotate_270(MAJORITY)}};
 };
 
 }  // namespace fiction

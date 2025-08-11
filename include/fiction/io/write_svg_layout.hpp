@@ -447,12 +447,12 @@ inline constexpr const char* SIMPLE_CELL = "<g\n"
                                            "</g>";
 
 // MOL QCA
-inline constexpr const char* MOL_QCA_CLOCK_ZONE_1_CELL     = "ffe700";
-inline constexpr const char* MOL_QCA_CLOCK_ZONE_2_CELL     = "65ff00";
-inline constexpr const char* MOL_QCA_CLOCK_ZONE_3_CELL     = "0071ff";
-inline constexpr const char* MOL_QCA_CLOCK_ZONE_4_CELL     = "f800ff";
-inline constexpr const char* PI_CELL_MOL_QCA               = "f800ff";
-inline constexpr const char* PO_CELL_MOL_QCA               = "ffe700";
+inline constexpr const char* MOL_QCA_CLOCK_ZONE_1_CELL = "ffe700";
+inline constexpr const char* MOL_QCA_CLOCK_ZONE_2_CELL = "65ff00";
+inline constexpr const char* MOL_QCA_CLOCK_ZONE_3_CELL = "0071ff";
+inline constexpr const char* MOL_QCA_CLOCK_ZONE_4_CELL = "f800ff";
+inline constexpr const char* PI_CELL_MOL_QCA           = "f800ff";
+inline constexpr const char* PO_CELL_MOL_QCA           = "ffe700";
 
 inline constexpr const double MOL_QCA_CELL_DISTANCE = 11.5;
 
@@ -460,51 +460,25 @@ inline constexpr const double MOL_QCA_STARTING_OFFSET_CELL_X = 3.5 + 92.5;
 inline constexpr const double MOL_QCA_STARTING_OFFSET_CELL_Y = -40.25 + 56;
 
 inline constexpr const char* MOL_QCA_VIA = "<g\n"
-                                   "    style=\"fill:#{0};\"\n"
-                                   "    transform=\"translate({1},{2})\">\n"
-                                   "  <g>\n"
-                                   "    <rect\n"
-                                   "      transform=\"rotate(90)\"\n"
-                                   "      ry=\"1.07143\"\n"
-                                   "      y=\"-147.04862\"\n"
-                                   "      x=\"80.65737\"\n"
-                                   "      width=\"14.2857\"\n"
-                                   "      height=\"14.2857\"\n"
-                                   "      style=\"fill:#{0};stroke:#000000;\" />\n"
-                                   "    <circle\n"
-                                   "      r=\"5.31886\"\n"
-                                   "      transform=\"rotate(90)\"\n"
-                                   "      cx=\"87.80023\"\n"
-                                   "      cy=\"-139.90576\"\n"
-                                   "      style=\"fill:none;stroke:#000000;\" />\n"
-                                   "  </g>\n"
-                                   "</g>";
-
-
-inline constexpr const char* MOL_QCA_CROSS = "<g\n"
-                                     "    style=\"fill:#{0};fill-opacity:1\"\n"
-                                     "    transform=\"translate({1},{2})\">\n"
-                                     "  <g>\n"
-                                     "    <rect\n"
-                                     "      transform=\"rotate(90)\"\n"
-                                     "      ry=\"1.07143\"\n"
-                                     "      y=\"-147.7629\"\n"
-                                     "      x=\"80.6574\"\n"
-                                     "      width=\"14.2857\"\n"
-                                     "      height=\"14.2857\"\n"
-                                     "      style=\"fill:#{0};stroke:#000000;\" />\n"
-                                     "    <g\n"
-                                     "      style=\"stroke-width:0.756;stroke-miterlimit:4;stroke-dasharray:none\"\n"
-                                     "      transform=\"matrix(0.94695856,0,0,0.94341063,22.3802,6.02821)\">\n"
-                                     "      <path\n"
-                                     "        style=\"stroke:#000000;\"\n"
-                                     "        d=\"m 118.4472,81.0158 c 11.3080,11.3079 11.3225,11.3224 11.3225,11.3224\" />\n"
-                                     "      <path\n"
-                                     "        style=\"stroke:#000000;\"\n"
-                                     "        d=\"m 129.7697,81.0158 c -11.3079,11.3079 -11.3225,11.3224 -11.3225,11.3224\" />\n"
-                                     "    </g>\n"
-                                     "  </g>\n"
-                                     "</g>";
+                                           "    style=\"fill:#{0};\"\n"
+                                           "    transform=\"translate({1},{2})\">\n"
+                                           "  <g>\n"
+                                           "    <rect\n"
+                                           "      transform=\"rotate(90)\"\n"
+                                           "      ry=\"1.07143\"\n"
+                                           "      y=\"-147.04862\"\n"
+                                           "      x=\"80.65737\"\n"
+                                           "      width=\"14.2857\"\n"
+                                           "      height=\"14.2857\"\n"
+                                           "      style=\"fill:#{0};stroke:#000000;\" />\n"
+                                           "    <circle\n"
+                                           "      r=\"5.31886\"\n"
+                                           "      transform=\"rotate(90)\"\n"
+                                           "      cx=\"87.80023\"\n"
+                                           "      cy=\"-139.90576\"\n"
+                                           "      style=\"fill:none;stroke:#000000;\" />\n"
+                                           "  </g>\n"
+                                           "</g>";
 
 inline constexpr const char* MOL_QCA_CONST0 =
     "<g\n"
@@ -577,16 +551,15 @@ inline constexpr const char* MOL_QCA_CELL =
 
 // ToDo: adjust this
 inline constexpr const char* MOL_QCA_SIMPLE_CELL = "<g\n"
-                                           "transform=\"translate({1},{2})\">\n"
-                                           "<rect\n"
-                                           "ry=\"0.75\"\n"
-                                           "y=\"56.46016\"\n"
-                                           "x=\"92.93404\"\n"
-                                           "height=\"10\"\n"
-                                           "width=\"10\"\n"
-                                           "style=\"fill:#{0};stroke:#000000;\" />\n"
-                                           "</g>";
-
+                                                   "transform=\"translate({1},{2})\">\n"
+                                                   "<rect\n"
+                                                   "ry=\"0.75\"\n"
+                                                   "y=\"56.46016\"\n"
+                                                   "x=\"92.93404\"\n"
+                                                   "height=\"10\"\n"
+                                                   "width=\"10\"\n"
+                                                   "style=\"fill:#{0};stroke:#000000;\" />\n"
+                                                   "</g>";
 
 }  // namespace svg
 
@@ -1246,14 +1219,7 @@ class write_mol_qca_layout_svg_impl
 
     void run()
     {
-        if (lyt.get_tile_size_x() == 1 && lyt.get_tile_size_y() == 1)
-        {
-            generate_tile_based_svg();
-        }
-        else
-        {
-            generate_cell_based_svg();
-        }
+        generate_cell_based_svg();
     }
 
   private:
@@ -1296,7 +1262,8 @@ class write_mol_qca_layout_svg_impl
         std::string cell_description, cell_color{};
 
         static constexpr const std::array<const char*, 4> cell_colors{
-            {svg::MOL_QCA_CLOCK_ZONE_1_CELL, svg::MOL_QCA_CLOCK_ZONE_2_CELL, svg::MOL_QCA_CLOCK_ZONE_3_CELL, svg::MOL_QCA_CLOCK_ZONE_4_CELL}};
+            {svg::MOL_QCA_CLOCK_ZONE_1_CELL, svg::MOL_QCA_CLOCK_ZONE_2_CELL, svg::MOL_QCA_CLOCK_ZONE_3_CELL,
+             svg::MOL_QCA_CLOCK_ZONE_4_CELL}};
 
         bool is_sync_elem = false;
 
@@ -1317,15 +1284,13 @@ class write_mol_qca_layout_svg_impl
             }
             if (!is_sync_elem)
             {
-                int idx =
-                    Lyt::technology::is_normal_cell1(ct) ? 0 :
-                    Lyt::technology::is_normal_cell2(ct) ? 1 :
-                    Lyt::technology::is_normal_cell3(ct) ? 2 :
-                    Lyt::technology::is_normal_cell4(ct) ? 3 :
-                                                           0;
+                uint64_t idx = Lyt::technology::is_normal_cell1(ct) ? 0 :
+                               Lyt::technology::is_normal_cell2(ct) ? 1 :
+                               Lyt::technology::is_normal_cell3(ct) ? 2 :
+                               Lyt::technology::is_normal_cell4(ct) ? 3 :
+                                                                      0;
 
-                cell_color = cell_colors[idx];
-
+                cell_color = cell_colors.at(idx);
             }
 
             if (ps.simple)
@@ -1336,11 +1301,11 @@ class write_mol_qca_layout_svg_impl
             {
                 cell_description = svg::MOL_QCA_VIA;
             }
-            else if (const auto ac = lyt.above(c), bc = lyt.below(c);
+            /*else if (const auto ac = lyt.above(c), bc = lyt.below(c);
                      ((c != ac) && !lyt.is_empty_cell(ac)) || ((c != bc) && lyt.is_empty_cell(bc)))
             {
                 cell_description = svg::MOL_QCA_CROSS;
-            }
+            }*/
             else if (c.z != 0)
             {
                 // skip non-ground layer cells
@@ -1411,16 +1376,20 @@ class write_mol_qca_layout_svg_impl
                     }
                     if (!is_sync_elem)
                     {
-                        cell_descriptions << fmt::format(
-                            fmt::runtime(desc_col.first), desc_col.second,
-                            svg::STARTING_OFFSET_TILE_X + svg::MOL_QCA_STARTING_OFFSET_CELL_X + (c.x * svg::MOL_QCA_CELL_DISTANCE),
-                            svg::STARTING_OFFSET_TILE_Y + svg::MOL_QCA_STARTING_OFFSET_CELL_Y + (c.y * svg::MOL_QCA_CELL_DISTANCE));
+                        cell_descriptions
+                            << fmt::format(fmt::runtime(desc_col.first), desc_col.second,
+                                           svg::STARTING_OFFSET_TILE_X + svg::MOL_QCA_STARTING_OFFSET_CELL_X +
+                                               (c.x * svg::MOL_QCA_CELL_DISTANCE),
+                                           svg::STARTING_OFFSET_TILE_Y + svg::MOL_QCA_STARTING_OFFSET_CELL_Y +
+                                               (c.y * svg::MOL_QCA_CELL_DISTANCE));
                     }
                 }
             });
 
-        const double viewbox_x = (2 * svg::VIEWBOX_DISTANCE) + (static_cast<double>(lyt.x() + 1) * svg::MOL_QCA_CELL_DISTANCE);
-        const double viewbox_y = (2 * svg::VIEWBOX_DISTANCE) + (static_cast<double>(lyt.y() + 1) * svg::MOL_QCA_CELL_DISTANCE);
+        const double viewbox_x =
+            (2 * svg::VIEWBOX_DISTANCE) + (static_cast<double>(lyt.x() + 1) * svg::MOL_QCA_CELL_DISTANCE);
+        const double viewbox_y =
+            (2 * svg::VIEWBOX_DISTANCE) + (static_cast<double>(lyt.y() + 1) * svg::MOL_QCA_CELL_DISTANCE);
 
         os << fmt::format(svg::HEADER, FICTION_VERSION, FICTION_REPO, viewbox_x, viewbox_y, cell_descriptions.str());
     }
@@ -1507,10 +1476,10 @@ class write_mol_qca_layout_svg_impl
                     {
                         if (const auto latch_delay = lyt.get_synchronization_element(c); latch_delay > 0)
                         {
-                            coord_to_latch_cells[tile_coords] = current_cells.append(
-                                fmt::format(fmt::runtime(desc_col.first), desc_col.second,
-                                            svg::STARTING_OFFSET_LATCH_CELL_X + (in_tile.x * svg::MOL_QCA_CELL_DISTANCE),
-                                            svg::STARTING_OFFSET_LATCH_CELL_Y + (in_tile.y * svg::MOL_QCA_CELL_DISTANCE)));
+                            coord_to_latch_cells[tile_coords] = current_cells.append(fmt::format(
+                                fmt::runtime(desc_col.first), desc_col.second,
+                                svg::STARTING_OFFSET_LATCH_CELL_X + (in_tile.x * svg::MOL_QCA_CELL_DISTANCE),
+                                svg::STARTING_OFFSET_LATCH_CELL_Y + (in_tile.y * svg::MOL_QCA_CELL_DISTANCE)));
 
                             is_sync_elem = true;
                         }
@@ -1518,10 +1487,10 @@ class write_mol_qca_layout_svg_impl
 
                     if (!is_sync_elem)
                     {
-                        coord_to_cells[tile_coords] = current_cells.append(
-                            fmt::format(fmt::runtime(desc_col.first), desc_col.second,
-                                        svg::MOL_QCA_STARTING_OFFSET_CELL_X + (in_tile.x * svg::MOL_QCA_CELL_DISTANCE),
-                                        svg::MOL_QCA_STARTING_OFFSET_CELL_Y + (in_tile.y * svg::MOL_QCA_CELL_DISTANCE)));
+                        coord_to_cells[tile_coords] = current_cells.append(fmt::format(
+                            fmt::runtime(desc_col.first), desc_col.second,
+                            svg::MOL_QCA_STARTING_OFFSET_CELL_X + (in_tile.x * svg::MOL_QCA_CELL_DISTANCE),
+                            svg::MOL_QCA_STARTING_OFFSET_CELL_Y + (in_tile.y * svg::MOL_QCA_CELL_DISTANCE)));
                     }
                 }
             });
@@ -1699,22 +1668,20 @@ void write_mol_qca_layout_svg(const Lyt& lyt, std::ostream& os, const write_qca_
     p.run();
 }
 /**
- * Writes an SVG representation of a cell-level QCA layout into a file. Both tile- and cell-based layouts are supported.
- * For tile-based layouts, QCA layouts of tile size \f$5 \times 5\f$ are supported exclusively so far.
- *
- * The utilized color scheme is based on the standard scheme used in QCADesigner
- * (https://waluslab.ece.ubc.ca/qcadesigner/).
+ * Writes an SVG representation of a cell-level molQCA layout into a file. Cell-based layouts are supported.
+ * Still the cells are part of uniform \f$10 \times 10\f$ gates, which are supported.
  *
  * May throw an `unsupported_cell_type_exception` if it encounters unsupported cell types in the layout. May throw an
  * `std::ofstream::failure` if it cannot open the file.
  *
- * @tparam Lyt Cell-level QCA layout type.
+ * @tparam Lyt Cell-level molQCA layout type.
  * @param lyt The layout to be written.
  * @param filename The file name to create and write into. Should preferably use the `.svg` extension.
  * @param ps Parameters.
  */
 template <typename Lyt>
-void write_mol_qca_layout_svg(const Lyt& lyt, const std::string_view& filename, const write_qca_layout_svg_params& ps = {})
+void write_mol_qca_layout_svg(const Lyt& lyt, const std::string_view& filename,
+                              const write_qca_layout_svg_params& ps = {})
 {
     std::ofstream os{filename.data(), std::ofstream::out};
 
