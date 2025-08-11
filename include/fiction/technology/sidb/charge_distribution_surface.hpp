@@ -5,13 +5,13 @@
 #ifndef FICTION_CHARGE_DISTRIBUTION_SURFACE_HPP
 #define FICTION_CHARGE_DISTRIBUTION_SURFACE_HPP
 
-#include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
-#include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
+#include "fiction/verification/analysis/sidb/engines/sidb_simulation_engine.hpp"
+#include "fiction/verification/analysis/sidb/engines/sidb_simulation_parameters.hpp"
 #include "fiction/technology/physical_constants.hpp"
-#include "fiction/technology/sidb_charge_state.hpp"
-#include "fiction/technology/sidb_defects.hpp"
-#include "fiction/technology/sidb_nm_distance.hpp"
-#include "fiction/technology/sidb_nm_position.hpp"
+#include "fiction/technology/sidb/sidb_charge_state.hpp"
+#include "fiction/technology/sidb/sidb_defects.hpp"
+#include "fiction/technology/sidb/sidb_nm_distance.hpp"
+#include "fiction/technology/sidb/sidb_nm_position.hpp"
 #include "fiction/traits.hpp"
 
 #include <algorithm>

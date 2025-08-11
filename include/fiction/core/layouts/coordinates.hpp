@@ -5,7 +5,7 @@
 #ifndef FICTION_COORDINATES_HPP
 #define FICTION_COORDINATES_HPP
 
-#include "fiction/utils/math_utils.hpp"
+#include "fiction/utils/math/math_utils.hpp"
 
 #include <fmt/format.h>
 

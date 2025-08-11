@@ -5,7 +5,7 @@
 #ifndef FICTION_SIDB_NM_DISTANCE_HPP
 #define FICTION_SIDB_NM_DISTANCE_HPP
 
-#include "fiction/technology/sidb_nm_position.hpp"
+#include "fiction/technology/sidb/sidb_nm_position.hpp"
 #include "fiction/traits.hpp"
 
 #include <cmath>

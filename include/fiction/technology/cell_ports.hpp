@@ -5,7 +5,7 @@
 #ifndef FICTION_CELL_PORTS_HPP
 #define FICTION_CELL_PORTS_HPP
 
-#include "fiction/utils/hash.hpp"
+#include "fiction/utils/general/hash.hpp"
 
 #include <fmt/format.h>
 #include <fmt/ranges.h>

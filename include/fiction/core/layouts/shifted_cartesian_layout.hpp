@@ -5,8 +5,8 @@
 #ifndef FICTION_SHIFTED_CARTESIAN_LAYOUT_HPP
 #define FICTION_SHIFTED_CARTESIAN_LAYOUT_HPP
 
-#include "fiction/layouts/coordinates.hpp"
-#include "fiction/layouts/hexagonal_layout.hpp"
+#include "fiction/core/layouts/coordinates.hpp"
+#include "fiction/core/layouts/hexagonal_layout.hpp"
 
 #include <type_traits>
 
