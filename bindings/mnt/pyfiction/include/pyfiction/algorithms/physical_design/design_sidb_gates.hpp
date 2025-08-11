@@ -50,8 +50,7 @@ void design_sidb_gates_params(pybind11::module& m, const std::string& lattice = 
                DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode_QUICKCELL))
         .value("RANDOM", fiction::design_sidb_gates_params<Lyt>::design_sidb_gates_mode::RANDOM,
                DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode_RANDOM))
-        .value("PRUNING_ONLY",
-               fiction::design_sidb_gates_params<Lyt>::design_sidb_gates_mode::PRUNING_ONLY,
+        .value("PRUNING_ONLY", fiction::design_sidb_gates_params<Lyt>::design_sidb_gates_mode::PRUNING_ONLY,
                DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode_PRUNING_ONLY))
 
         ;
