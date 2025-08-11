@@ -12,7 +12,7 @@ from mnt.pyfiction import (
     critical_temperature_domain_grid_search,
     critical_temperature_domain_random_sampling,
     input_bdl_configuration,
-    operational_condition,
+    operational_condition_kinks,
     operational_domain,
     operational_domain_contour_tracing,
     operational_domain_flood_fill,
