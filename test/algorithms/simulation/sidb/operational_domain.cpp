@@ -311,7 +311,8 @@ TEST_CASE("SiQAD OR gate", "[operational-domain]")
     op_domain_params.operational_params.simulation_parameters.mu_minus                                        = -0.28;
     op_domain_params.operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance = 1.5;
 
-    op_domain_params.operational_params.op_condition = is_operational_params::operational_condition::TOLERATE_KINKS;
+    op_domain_params.operational_params.op_condition_kinks =
+        is_operational_params::operational_condition_kinks::TOLERATE_KINKS;
 
     const auto op_domain =
         operational_domain_grid_search(lyt, std::vector<tt>{create_or_tt()}, op_domain_params, &op_domain_stats);
