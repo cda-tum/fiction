@@ -45,7 +45,7 @@ class TestOperationalDomain(unittest.TestCase):
         params.operational_params.simulation_parameters.mu_minus = -0.28
         params.operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance = 1.5
 
-        params.operational_params.op_condition = operational_condition.TOLERATE_KINKS
+        params.operational_params.op_condition = operational_condition_kinks.TOLERATE_KINKS
 
         params.sweep_dimensions = [
             operational_domain_value_range(sweep_parameter.EPSILON_R, 5.70, 6.70, 0.01),
