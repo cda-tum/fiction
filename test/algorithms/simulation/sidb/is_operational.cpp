@@ -47,7 +47,7 @@ TEST_CASE("SiQAD OR gate", "[is-operational]")
 
     SECTION("determine if layout is operational, accept kinks")
     {
-        CHECK(is_operational(lat, std::vector<tt>{create_and_tt()}, op_params).first ==
+        CHECK(is_operational(lat, std::vector<tt>{create_or_tt()}, op_params).first ==
               operational_status::NON_OPERATIONAL);
     }
 
@@ -90,6 +90,18 @@ TEST_CASE("SiQAD OR gate", "[is-operational]")
         op_params.op_condition = is_operational_params::operational_condition::TOLERATE_KINKS;
         CHECK(is_operational(lat, std::vector<tt>{create_or_tt()}, op_params).first == operational_status::OPERATIONAL);
     }
+}
+
+TEST_CASE("Test is_physical_validity_feasible for empty canvas", "[is-operational]")
+{
+    const auto lyt = blueprints::two_input_two_output_bestagon_skeleton<sidb_cell_clk_lyt_siqad>();
+
+    const auto op_params =
+        is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
+                              bdl_input_iterator_params{}, is_operational_params::operational_condition::REJECT_KINKS,
+                              is_operational_params::operational_analysis_strategy::FILTER_THEN_SIMULATION};
+
+    CHECK(is_operational(lyt, create_crossing_wire_tt(), op_params).first == operational_status::NON_OPERATIONAL);
 }
 
 TEST_CASE("SiQAD NAND gate", "[is-operational]")
@@ -286,6 +298,51 @@ TEST_CASE("Bestagon AND gate", "[is-operational]")
             is_operational_params{sidb_simulation_parameters{2, -0.30}, sidb_simulation_engine::QUICKEXACT});
         CHECK(op_inputs.size() == 1);
         CHECK(op_inputs == std::set<uint64_t>{3});
+    }
+}
+
+TEST_CASE("SiQAD AND gate", "[is-operational]")
+{
+    auto lyt = blueprints::siqad_and_gate<sidb_defect_cell_clk_lyt_siqad>();
+
+    sidb_simulation_parameters params{2, -0.28};
+
+    SECTION("check in regime with positive charges")
+    {
+        SECTION("base 2")
+        {
+            params.base      = 2;
+            params.epsilon_r = 1.7;
+            params.lambda_tf = 6.9;
+            CHECK(is_operational(lyt, std::vector<tt>{create_and_tt()}, is_operational_params{params}).first ==
+                  operational_status::NON_OPERATIONAL);
+            CHECK(operational_input_patterns(lyt, std::vector<tt>{create_and_tt()}, is_operational_params{params})
+                      .empty());
+
+            params.epsilon_r = 3.5;
+            params.lambda_tf = 5.9;
+            CHECK(is_operational(lyt, std::vector<tt>{create_and_tt()}, is_operational_params{params}).first ==
+                  operational_status::NON_OPERATIONAL);
+            CHECK(operational_input_patterns(lyt, std::vector<tt>{create_and_tt()}, is_operational_params{params})
+                      .empty());
+        }
+        SECTION("base 3")
+        {
+            params.base      = 3;
+            params.epsilon_r = 1.7;
+            params.lambda_tf = 6.9;
+            CHECK(is_operational(lyt, std::vector<tt>{create_and_tt()}, is_operational_params{params}).first ==
+                  operational_status::NON_OPERATIONAL);
+            CHECK(operational_input_patterns(lyt, std::vector<tt>{create_and_tt()}, is_operational_params{params})
+                      .empty());
+
+            params.epsilon_r = 3.5;
+            params.lambda_tf = 5.9;
+            CHECK(is_operational(lyt, std::vector<tt>{create_and_tt()}, is_operational_params{params}).first ==
+                  operational_status::NON_OPERATIONAL);
+            CHECK(operational_input_patterns(lyt, std::vector<tt>{create_and_tt()}, is_operational_params{params})
+                      .size() == 2);
+        }
     }
 }
 

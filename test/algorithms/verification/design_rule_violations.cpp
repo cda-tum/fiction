@@ -64,5 +64,5 @@ TEST_CASE("Warnings", "[drv]")
 
 TEST_CASE("DRVs", "[drv]")
 {
-    check_for_drvs(blueprints::non_structural_all_function_gate_layout<cart_gate_clk_lyt>(), 30, 1);
+    check_for_drvs(blueprints::non_structural_all_function_gate_layout<cart_gate_clk_lyt>(), 50, 1);
 }

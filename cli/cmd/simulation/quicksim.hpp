@@ -117,7 +117,15 @@ class quicksim_command : public command
             // To aid the compiler
             if constexpr (fiction::has_sidb_technology_v<Lyt> && !fiction::is_charge_distribution_surface_v<Lyt>)
             {
-                sim_result = fiction::quicksim(*lyt_ptr, qs_params);
+                if (const auto result = fiction::quicksim(*lyt_ptr, qs_params); result.has_value())
+                {
+                    sim_result = *result;
+                }
+                else
+                {
+                    env->out() << fmt::format("[e] no stable charge distribution could be determined for '{}'\n",
+                                              get_name(lyt_ptr));
+                }
 
                 if constexpr (fiction::is_sidb_lattice_100_v<Lyt>)
                 {
@@ -133,7 +141,7 @@ class quicksim_command : public command
                         minimum_energy_distribution(std::get<sim_result_100>(sim_result).charge_distributions.cbegin(),
                                                     std::get<sim_result_100>(sim_result).charge_distributions.cend());
 
-                    min_energy = min_energy_distr->get_system_energy();
+                    min_energy = min_energy_distr->get_electrostatic_potential_energy();
                     store<fiction::cell_layout_t>().extend() =
                         std::make_shared<fiction::cds_sidb_100_cell_clk_lyt>(*min_energy_distr);
                 }
@@ -150,7 +158,7 @@ class quicksim_command : public command
                         minimum_energy_distribution(std::get<sim_result_111>(sim_result).charge_distributions.cbegin(),
                                                     std::get<sim_result_111>(sim_result).charge_distributions.cend());
 
-                    min_energy = min_energy_distr->get_system_energy();
+                    min_energy = min_energy_distr->get_electrostatic_potential_energy();
                     store<fiction::cell_layout_t>().extend() =
                         std::make_shared<fiction::cds_sidb_111_cell_clk_lyt>(*min_energy_distr);
                 }

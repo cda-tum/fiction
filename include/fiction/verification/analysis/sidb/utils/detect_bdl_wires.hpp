@@ -489,12 +489,12 @@ class detect_bdl_wires_impl
         {
             case bdl_wire_selection::INPUT:
             {
-                return filter_wires_by_type(sidb_technology::cell_type::INPUT);
+                return filter_wires_by_type(technology<Lyt>::cell_type::INPUT);
             }
 
             case bdl_wire_selection::OUTPUT:
             {
-                return filter_wires_by_type(sidb_technology::cell_type::OUTPUT);
+                return filter_wires_by_type(technology<Lyt>::cell_type::OUTPUT);
             }
 
             default:
@@ -592,11 +592,11 @@ class detect_bdl_wires_impl
         return std::nullopt;
     }
     /**
-     * This function scans through the `bdl_wires` and selects those containing a cell of the specified type.
+     * This function scans through the `bdl_wires` and selects those containing BDL pair cells of the specified type.
      * It also checks that all selected wires have the same length and triggers an assertion if wires of different
      * lengths are found.
      *
-     * @param type The type of the cell to filter by.
+     * @param type The type of the BDL pair cells to filter by.
      * @return A vector of `bdl_wire` objects containing cells of the specified type. If no such wires are found,
      *         an empty vector is returned.
      */
@@ -606,24 +606,72 @@ class detect_bdl_wires_impl
         std::vector<bdl_wire<Lyt>> filtered_wires{};
         std::optional<std::size_t> wire_length_of_the_first_wire{};  // Track the length of the first wire
 
+        // Filter out the BDL pairs of the opposite type. This is needed if a wire contains both input and output cells.
+        // Example: If an input wire is selected, the output cells are removed and vice versa.
+        std::optional<typename technology<Lyt>::cell_type> filtered_out_bdl_pair_type{};
+        if (type == technology<Lyt>::cell_type::INPUT)
+        {
+            filtered_out_bdl_pair_type = technology<Lyt>::cell_type::OUTPUT;
+        }
+        else if (type == technology<Lyt>::cell_type::OUTPUT)
+        {
+            filtered_out_bdl_pair_type = technology<Lyt>::cell_type::INPUT;
+        }
+
         for (const auto& wire : bdl_wires)
         {
             if (std::any_of(wire.pairs.cbegin(), wire.pairs.cend(),
                             [&type](const auto& bdl) { return bdl.type == type; }))
             {
-                filtered_wires.push_back(wire);
-
-                std::size_t current_wire_length = wire.pairs.size();
-
-                // Store the length of the first wire
-                if (!wire_length_of_the_first_wire)
+                if (filtered_out_bdl_pair_type.has_value())
                 {
-                    wire_length_of_the_first_wire = current_wire_length;
+                    if (std::any_of(wire.pairs.cbegin(), wire.pairs.cend(),
+                                    [&filtered_out_bdl_pair_type](const auto& bdl)
+                                    { return bdl.type == filtered_out_bdl_pair_type.value(); }))
+                    {
+                        auto wire_copy = wire;
+                        wire_copy.pairs.erase(
+                            std::remove_if(wire_copy.pairs.begin(), wire_copy.pairs.end(),
+                                           [&filtered_out_bdl_pair_type](const auto& bdl)
+                                           { return bdl.type == filtered_out_bdl_pair_type.value(); }),
+                            wire_copy.pairs.cend());
+                        filtered_wires.push_back(wire_copy);
+                    }
+                    else
+                    {
+                        filtered_wires.push_back(wire);
+
+                        std::size_t current_wire_length = wire.pairs.size();
+
+                        // Store the length of the first wire
+                        if (!wire_length_of_the_first_wire)
+                        {
+                            wire_length_of_the_first_wire = current_wire_length;
+                        }
+                        else
+                        {
+                            assert(*wire_length_of_the_first_wire == current_wire_length &&
+                                   "input or output wires have different lengths");
+                        }
+                    }
                 }
+
                 else
                 {
-                    assert(*wire_length_of_the_first_wire == current_wire_length &&
-                           "input or output wires have different lengths");
+                    filtered_wires.push_back(wire);
+
+                    std::size_t current_wire_length = wire.pairs.size();
+
+                    // Store the length of the first wire
+                    if (!wire_length_of_the_first_wire)
+                    {
+                        wire_length_of_the_first_wire = current_wire_length;
+                    }
+                    else
+                    {
+                        assert(*wire_length_of_the_first_wire == current_wire_length &&
+                               "input or output wires have different lengths");
+                    }
                 }
             }
         }

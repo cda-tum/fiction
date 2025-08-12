@@ -7,18 +7,33 @@
 
 #include "fiction/algorithms/simulation/sidb/calculate_energy_and_state_type.hpp"
 #include "fiction/algorithms/simulation/sidb/energy_distribution.hpp"
-#include "fiction/technology/physical_constants.hpp"
+#include "fiction/technology/constants.hpp"
 #include "fiction/utils/math_utils.hpp"
 
 #include <algorithm>
 #include <cassert>
 #include <cmath>
-#include <map>
+#include <cstdint>
 #include <numeric>
 #include <utility>
 
 namespace fiction
 {
+
+/**
+ * This function computes the Boltzmann factor for a given energy, the minimal energy, and the temperature.
+ *
+ * @param energy Boltzmann factor for the given energy is calculated.
+ * @param min_energy Minimum energy of the system.
+ * @param temperature Temperature of the system (unit: K).
+ * @return Boltzmann factor.
+ */
+[[nodiscard]] inline double calculate_boltzmann_factor(const double energy, const double min_energy,
+                                                       const double temperature) noexcept
+{
+    return std::exp(-((energy - min_energy) * constants::physical::EV_TO_JOULE /
+                      (constants::physical::BOLTZMANN_CONSTANT * temperature)));
+}
 
 /**
  * This function computes the occupation probability of erroneous charge distributions (output charge does not match the
@@ -42,22 +57,24 @@ namespace fiction
     // Determine the minimal energy.
     const auto [energy, state_type] = *std::min_element(energy_and_state_type.cbegin(), energy_and_state_type.cend(),
                                                         [](const auto& a, const auto& b) { return a.first < b.first; });
-    const auto min_energy           = energy;
+
+    const auto min_energy = energy;
 
     // The partition function is obtained by summing up all the Boltzmann factors.
-    const double partition_function = std::accumulate(
-        energy_and_state_type.cbegin(), energy_and_state_type.cend(), 0.0, [&](const double sum, const auto& it)
-        { return sum + std::exp(-((it.first - min_energy) * 12'000 / temperature)); });
+    const double partition_function =
+        std::accumulate(energy_and_state_type.cbegin(), energy_and_state_type.cend(), 0.0,
+                        [min_energy, temperature](const double sum, const auto& it)
+                        { return sum + calculate_boltzmann_factor(it.first, min_energy, temperature); });
 
     // All Boltzmann factors of the erroneous states are summed.
     double p = 0;
 
     // The Boltzmann factors of all erroneous excited states are accumulated.
-    for (const auto& [energies, state_transparent_erroneous] : energy_and_state_type)
+    for (const auto& [energies, state_type] : energy_and_state_type)
     {
-        if (!state_transparent_erroneous)
+        if (state_type == state_type::REJECTED)
         {
-            p += std::exp(-((energies - min_energy) * 12'000 / temperature));
+            p += calculate_boltzmann_factor(energies, min_energy, temperature);
         }
     }
 
@@ -72,8 +89,8 @@ namespace fiction
  * @param temperature System temperature to assume (unit: K).
  * @return The total occupation probability of all excited states is returned.
  */
-[[nodiscard]] inline double occupation_probability_non_gate_based(const sidb_energy_distribution& energy_distribution,
-                                                                  const double                    temperature) noexcept
+[[nodiscard]] inline double occupation_probability_non_gate_based(const energy_distribution& energy_distribution,
+                                                                  const double               temperature) noexcept
 {
     assert((temperature > 0.0) && "Temperature should be slightly above 0 K");
 
@@ -82,26 +99,29 @@ namespace fiction
         return 0.0;
     }
 
-    const auto& [energy, degeneracy] = *(energy_distribution.begin());
-    const auto min_energy            = energy;  // unit: eV
+    const auto min_energy = energy_distribution.min_energy();  // unit: eV
 
     // The partition function is obtained by summing up all the Boltzmann factors.
-    const double partition_function = std::accumulate(
-        energy_distribution.cbegin(), energy_distribution.cend(), 0.0, [&](const double sum, const auto& it)
-        { return sum + std::exp(-((it.first - min_energy) * 12'000 / temperature)); });
 
-    // All Boltzmann factors of the excited states are summed.
-    const double p = std::accumulate(
-        energy_distribution.cbegin(), energy_distribution.cend(), 0.0,
-        [&](const double sum, const auto& it)
+    double partition_function = 0.0;
+
+    energy_distribution.for_each(
+        [&partition_function, min_energy, temperature](const double energy, const uint64_t degeneracy)
         {
-            // round the energy value of the given valid_layout to six decimal places and check if they are different
-            if (std::abs(round_to_n_decimal_places(it.first, 6) - round_to_n_decimal_places(min_energy, 6)) >
-                physical_constants::POP_STABILITY_ERR)
+            partition_function +=
+                static_cast<double>(degeneracy) * calculate_boltzmann_factor(energy, min_energy, temperature);
+        });
+
+    double p = 0;
+
+    energy_distribution.for_each(
+        [&p, min_energy, temperature](const double energy, const uint64_t degeneracy)
+        {
+            if (std::abs(round_to_n_decimal_places(energy, 6) - round_to_n_decimal_places(min_energy, 6)) >
+                constants::ERROR_MARGIN)
             {
-                return sum + std::exp(-((it.first - min_energy) * 12'000 / temperature));
+                p += static_cast<double>(degeneracy) * calculate_boltzmann_factor(energy, min_energy, temperature);
             }
-            return sum;
         });
 
     return p / partition_function;  // Occupation probability of the excited states.

@@ -23,10 +23,15 @@ The respective coordinates on the hexagonal grid are calculated as follows:
     .. tab:: C++
         **Header:** ``fiction/algorithms/physical_design/hexagonalization.hpp``
 
+        .. doxygenstruct:: fiction::hexagonalization_params
+           :members:
         .. doxygenstruct:: fiction::hexagonalization_stats
            :members:
         .. doxygenfunction:: fiction::hexagonalization
 
-
     .. tab:: Python
+        .. autoclass:: mnt.pyfiction.hexagonalization_params
+            :members:
+        .. autoclass:: mnt.pyfiction.hexagonalization_stats
+            :members:
         .. autofunction:: mnt.pyfiction.hexagonalization

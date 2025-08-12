@@ -10,7 +10,6 @@
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
 #include "fiction/algorithms/simulation/sidb/random_sidb_layout_generator.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
-#include "fiction/technology/cell_ports.hpp"
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
@@ -20,7 +19,6 @@
 #include "fiction/utils/math_utils.hpp"
 
 #include <fmt/format.h>
-#include <kitty/dynamic_truth_table.hpp>
 #include <kitty/traits.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 
@@ -31,9 +29,9 @@
 #include <cstdlib>
 #include <iostream>
 #include <mutex>
+#include <optional>
 #include <random>
 #include <thread>
-#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -44,7 +42,6 @@ namespace fiction
  * This struct contains parameters and settings to design SiDB gates.
  *
  * @tparam CellType Cell type.
- *
  */
 template <typename CellType>
 struct design_sidb_gates_params
@@ -79,7 +76,15 @@ struct design_sidb_gates_params
         /**
          * Gate layouts are designed randomly.
          */
-        RANDOM
+        RANDOM,
+        /**
+         * This design approach adopts the three pruning techniques used by *QuickCell*
+         * to efficiently filter out non-operational layouts. Unlike *QuickCell*, the
+         * subsequent physical simulation step is skipped to enhance efficiency. As a result,
+         * the operational validity of the final layouts cannot be guaranteed, although a
+         * substantial portion of them are usually operational.
+         */
+        PRUNING_ONLY
     };
     /**
      * Parameters for the `is_operational` function.
@@ -92,17 +97,17 @@ struct design_sidb_gates_params
     /**
      * Canvas spanned by the northwest and southeast cell.
      */
-    std::pair<CellType, CellType> canvas{};
+    std::pair<CellType, CellType> canvas = {{24, 17}, {34, 28}};
     /**
      * Number of SiDBs placed in the canvas to create a working gate.
      */
-    std::size_t number_of_sidbs = 1;
+    std::size_t number_of_canvas_sidbs = 1;
     /**
      * The design process is terminated after a valid SiDB gate design is found.
      *
      * @note This parameter has no effect unless the gate design is exhaustive.
      */
-    termination_condition termination_cond = termination_condition::ALL_COMBINATIONS_ENUMERATED;
+    termination_condition termination_cond = termination_condition::AFTER_FIRST_SOLUTION;
 };
 
 /**
@@ -203,21 +208,13 @@ class design_sidb_gates_impl
         mockturtle::stopwatch stop{stats.time_total};
 
         auto all_combinations = determine_all_combinations_of_distributing_k_entities_on_n_positions(
-            params.number_of_sidbs, static_cast<std::size_t>(all_sidbs_in_canvas.size()));
+            params.number_of_canvas_sidbs, static_cast<std::size_t>(all_sidbs_in_canvas.size()));
 
         std::vector<Lyt> designed_gate_layouts = {};
 
         if (all_combinations.empty())
         {
             return designed_gate_layouts;
-        }
-
-        std::unordered_set<coordinate<Lyt>> sidbs_affected_by_defects = {};
-
-        // used to collect all SiDBs that are affected due to neutrally charged defects.
-        if constexpr (has_get_sidb_defect_v<Lyt>)
-        {
-            sidbs_affected_by_defects = skeleton_layout.all_affected_sidbs(std::make_pair(0, 0));
         }
 
         std::mutex mutex_to_protect_designed_gate_layouts{};
@@ -308,7 +305,7 @@ class design_sidb_gates_impl
         // Allow positive charges here, as a layout that displays positive charges without inputs may not exhibit them
         // once inputs are applied.
         const generate_random_sidb_layout_params<cell<Lyt>> parameter{
-            params.canvas, params.number_of_sidbs,
+            params.canvas, params.number_of_canvas_sidbs,
             generate_random_sidb_layout_params<cell<Lyt>>::positive_charges::ALLOWED};
 
         const auto num_threads = std::min(number_of_threads, all_canvas_layouts.size());
@@ -328,23 +325,33 @@ class design_sidb_gates_impl
                 {
                     while (!gate_layout_is_found)
                     {
-                        auto result_lyt = generate_random_sidb_layout<Lyt>(skeleton_layout, parameter);
+                        auto result_lyt = generate_random_sidb_layout<Lyt>(parameter, skeleton_layout);
+
+                        if (!result_lyt.has_value())
+                        {
+                            continue;
+                        }
+
                         if constexpr (has_get_sidb_defect_v<Lyt>)
                         {
-                            result_lyt.foreach_sidb_defect(
+                            result_lyt.value().foreach_sidb_defect(
                                 [&result_lyt](const auto& cd)
                                 {
                                     if (is_neutrally_charged_defect(cd.second))
                                     {
-                                        result_lyt.assign_sidb_defect(cd.first, sidb_defect{sidb_defect_type::NONE});
+                                        result_lyt.value().assign_sidb_defect(cd.first,
+                                                                              sidb_defect{sidb_defect_type::NONE});
                                     }
                                 });
                         }
-                        if (const auto [status, sim_calls] = is_operational(
-                                result_lyt, truth_table, params.operational_params, input_bdl_wires, output_bdl_wires);
+
+                        if (const auto [status, sim_calls] =
+                                is_operational(result_lyt.value(), truth_table, params.operational_params,
+                                               input_bdl_wires, output_bdl_wires);
                             status == operational_status::OPERATIONAL)
                         {
                             const std::lock_guard lock{mutex_to_protect_designed_gate_layouts};
+
                             if constexpr (has_get_sidb_defect_v<Lyt>)
                             {
                                 skeleton_layout.foreach_sidb_defect(
@@ -352,12 +359,12 @@ class design_sidb_gates_impl
                                     {
                                         if (is_neutrally_charged_defect(cd.second))
                                         {
-                                            result_lyt.assign_sidb_defect(cd.first, cd.second);
+                                            result_lyt.value().assign_sidb_defect(cd.first, cd.second);
                                         }
                                     });
                             }
 
-                            randomly_designed_gate_layouts.push_back(result_lyt);
+                            randomly_designed_gate_layouts.push_back(result_lyt.value());
                             gate_layout_is_found = true;
                             break;
                         }
@@ -406,6 +413,13 @@ class design_sidb_gates_impl
         if (gate_candidates.empty())
         {
             return gate_layouts;
+        }
+
+        if (params.design_mode == design_sidb_gates_params<cell<Lyt>>::design_sidb_gates_mode::PRUNING_ONLY)
+        {
+            // If the design mode is PRUNING_ONLY, we only need to return the gate candidates that passed the pruning
+            // steps.
+            return gate_candidates;
         }
 
         std::mutex mutex_to_protect_gate_designs{};
@@ -560,6 +574,12 @@ class design_sidb_gates_impl
         // Function to check validity and add layout to all_designs
         auto conduct_pruning_steps = [&](const Lyt& canvas_lyt)
         {
+            // If the canvas layout is empty, skip further processing
+            if (canvas_lyt.is_empty())
+            {
+                return;
+            }
+
             auto current_layout = skeleton_layout.clone();
 
             cell<Lyt> dependent_cell{};
@@ -585,8 +605,7 @@ class design_sidb_gates_impl
 
             for (auto i = 0u; i < truth_table.front().num_bits(); ++i, ++bii)
             {
-                const auto reason_for_filtering =
-                    is_operational_impl.is_layout_invalid(bii.get_current_input_index(), cds_canvas);
+                const auto reason_for_filtering = is_operational_impl.is_layout_invalid(bii.get_current_input_index());
 
                 if (reason_for_filtering.has_value())
                 {
@@ -653,6 +672,7 @@ class design_sidb_gates_impl
 
         return gate_candidate;
     }
+
     /**
      * This function calculates all combinations of distributing a given number of SiDBs across a specified number of
      * positions in the canvas. Each combination is then used to create a gate layout candidate.
@@ -662,15 +682,19 @@ class design_sidb_gates_impl
     [[nodiscard]] std::vector<Lyt> determine_all_possible_canvas_layouts() const noexcept
     {
         const auto all_combinations = determine_all_combinations_of_distributing_k_entities_on_n_positions(
-            params.number_of_sidbs, static_cast<std::size_t>(all_sidbs_in_canvas.size()));
+            params.number_of_canvas_sidbs, static_cast<std::size_t>(all_sidbs_in_canvas.size()));
 
         std::vector<Lyt> designed_gate_layouts = {};
         designed_gate_layouts.reserve(all_combinations.size());
 
         const auto add_cell_combination_to_layout = [this, &designed_gate_layouts](const auto& combination) noexcept
         {
-            const auto layout_with_added_cells = convert_canvas_cell_indices_to_layout(combination);
-            designed_gate_layouts.push_back(layout_with_added_cells);
+            const auto layout_with_added_cells = design_canvas_layout(combination);
+            if (!layout_with_added_cells.has_value())
+            {
+                return;
+            }
+            designed_gate_layouts.push_back(layout_with_added_cells.value());
         };
 
         for (const auto& combination : all_combinations)
@@ -680,6 +704,7 @@ class design_sidb_gates_impl
 
         return designed_gate_layouts;
     }
+
     /**
      * This function adds SiDBs (given by indices) to the skeleton layout that is returned afterwards.
      *
@@ -688,7 +713,7 @@ class design_sidb_gates_impl
      */
     [[nodiscard]] Lyt skeleton_layout_with_canvas_sidbs(const std::vector<std::size_t>& cell_indices) const noexcept
     {
-        Lyt lyt_copy{skeleton_layout.clone()};
+        auto lyt_copy = skeleton_layout.clone();
 
         for (const auto i : cell_indices)
         {
@@ -696,19 +721,27 @@ class design_sidb_gates_impl
 
             if (lyt_copy.get_cell_type(all_sidbs_in_canvas[i]) == sidb_technology::cell_type::EMPTY)
             {
+                if constexpr (is_sidb_defect_surface_v<Lyt>)
+                {
+                    if (skeleton_layout.get_sidb_defect(all_sidbs_in_canvas[i]).type != sidb_defect_type::NONE)
+                    {
+                        continue;
+                    }
+                }
                 lyt_copy.assign_cell_type(all_sidbs_in_canvas[i], sidb_technology::cell_type::LOGIC);
             }
         }
 
         return lyt_copy;
     }
+
     /**
-     * This function generates canvas SiDb layouts.
+     * This function designs canvas SiDB layouts based on given indices.
      *
      * @param cell_indices A vector of indices of cells to be added to the skeleton layout.
      * @return An SiDB cell-level layout consisting of canvas SidBs.
      */
-    [[nodiscard]] Lyt convert_canvas_cell_indices_to_layout(const std::vector<std::size_t>& cell_indices) const noexcept
+    [[nodiscard]] std::optional<Lyt> design_canvas_layout(const std::vector<std::size_t>& cell_indices) const noexcept
     {
         Lyt lyt{};
 
@@ -716,15 +749,18 @@ class design_sidb_gates_impl
         {
             assert(i < all_sidbs_in_canvas.size() && "cell indices are out-of-range");
 
-            // SiDBs cannot be placed on positions which are already occupied by atomic defects.
-            if constexpr (is_sidb_defect_surface_v<Lyt>)
+            if (skeleton_layout.get_cell_type(all_sidbs_in_canvas[i]) == sidb_technology::cell_type::EMPTY)
             {
-                if (skeleton_layout.get_sidb_defect(all_sidbs_in_canvas[i]).type != sidb_defect_type::NONE)
+                // SiDBs cannot be placed on positions which are already occupied by atomic defects.
+                if constexpr (is_sidb_defect_surface_v<Lyt>)
                 {
-                    continue;
+                    if (skeleton_layout.get_sidb_defect(all_sidbs_in_canvas[i]).type != sidb_defect_type::NONE)
+                    {
+                        return std::nullopt;
+                    }
                 }
+                lyt.assign_cell_type(all_sidbs_in_canvas[i], sidb_technology::cell_type::LOGIC);
             }
-            lyt.assign_cell_type(all_sidbs_in_canvas[i], sidb_technology::cell_type::LOGIC);
         }
 
         // the skeleton can already exhibit some canvas SiDBs (partially filled canvas)
@@ -745,20 +781,34 @@ class design_sidb_gates_impl
 
 /**
  * The *SiDB Gate Designer* designs SiDB gate implementations based on a specified Boolean function, a
- * skeleton layout (can hold defects), canvas size, and a predetermined number of canvas SiDBs. Two different design
- * modes are implemented: `exhaustive` and `random design`.
+ * skeleton layout (can hold defects), canvas size, and a predetermined number of canvas SiDBs. Three different design
+ * modes are implemented: `quickcell`, `exhaustive` and `random design`.
+ *
+ * A first version of `QuickCell` was proposed in \"Towards Fast Automatic Design of Silicon Dangling Bond Logic\" by
+ * J. Drewniok, M. Walter, S. S. H. Ng, K. Walus, and R. Wille in DATE 2025
+ * (https://ieeexplore.ieee.org/abstract/document/10992885).
+ *
+ * The `Automatic Exhaustive Gate Designer` was proposed in
+ * \"Minimal Design of SiDB Gates: An Optimal Basis for Circuits Based on Silicon Dangling Bonds\" by J. Drewniok, M.
+ * Walter, and R. Wille in NANOARCH 2023 (https://dl.acm.org/doi/10.1145/3611315.3633241).
+ *
+ * The `quickcell` design mode consists of two key steps:
+ * 1. **Initial Pruning:** Efficient filtering techniques are applied to discard layouts that cannot correctly
+ * implement the specified logic.
+ * 2. **Physical Simulation:** The remaining candidate layouts undergo physical simulation to verify their
+ * operationality.
  *
  * The `exhaustive design` is composed of three steps:
- * 1. In the initial step, all possible distributions of `number_of_sidbs` SiDBs within a given canvas are
- * exhaustively determined. This ensures exhaustive coverage of every potential arrangement of ``number_of_sidbs`` SiDBs
- * across the canvas.
+ * 1. In the initial step, all possible distributions of `number_of_canvas_sidbs` SiDBs within a given canvas are
+ * exhaustively determined. This ensures exhaustive coverage of every potential arrangement of `number_of_canvas_sidbs`
+ * SiDBs across the canvas.
  * 2. The calculated SiDB distributions are then incorporated into the skeleton, resulting in the generation of distinct
  * SiDB layouts.
  * 3. The generated SiDB layouts then undergo an extensive simulation process. All input combinations possible for the
  * given Boolean function are used to verify if the logic is fulfilled.
  *
  * The `random design` is composed of four steps:
- * 1. A specified number of canvas SiDBs (`number_of_sidbs`) are randomly added to the skeleton layout.
+ * 1. A specified number of canvas SiDBs (`number_of_canvas_sidbs`) are randomly added to the skeleton layout.
  * 2. The operation status of the layout is simulated based on a given Boolean function.
  * 3. If the layout is `operational`, it is returned as the result, and the process terminates successfully.
  * 4. If the layout is `non-operational`, the process is repeated from the first step until an operational layout is
@@ -800,15 +850,13 @@ template <typename Lyt, typename TT>
     {
         result = p.run_automatic_exhaustive_gate_designer();
     }
-
-    else if (params.design_mode == design_sidb_gates_params<cell<Lyt>>::design_sidb_gates_mode::QUICKCELL)
-    {
-        result = p.run_quickcell();
-    }
-
-    else
+    else if (params.design_mode == design_sidb_gates_params<cell<Lyt>>::design_sidb_gates_mode::RANDOM)
     {
         result = p.run_random_design();
+    }
+    else
+    {
+        result = p.run_quickcell();
     }
 
     if (stats)

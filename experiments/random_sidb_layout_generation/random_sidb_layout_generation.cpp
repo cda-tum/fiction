@@ -181,10 +181,15 @@ int main(int argc, const char* argv[])  // NOLINT
                 const generate_random_sidb_layout_params<offset::ucoord_t> params{
                     {{nw_x, nw_y}, {se_x, se_y}},         number_of_placed_sidbs,      charges,
                     sidb_simulation_parameters{3, -0.32}, static_cast<uint64_t>(10E6), number_of_layouts};
-                const auto unique_lyts = generate_multiple_random_sidb_layouts(sidb_100_cell_clk_lyt{}, params);
-                for (auto i = 0u; i < unique_lyts.size(); i++)
+                const auto unique_lyts = generate_multiple_random_sidb_layouts<sidb_100_cell_clk_lyt>(params);
+
+                if (unique_lyts.has_value())
                 {
-                    write_sqd_layout(unique_lyts[i], fmt::format("{}/layout_{}.sqd", dir_path_sqd.string(), i));
+                    for (auto i = 0u; i < unique_lyts.value().size(); i++)
+                    {
+                        write_sqd_layout(unique_lyts.value()[i],
+                                         fmt::format("{}/layout_{}.sqd", dir_path_sqd.string(), i));
+                    }
                 }
             }
             catch (const std::filesystem::filesystem_error& ex)

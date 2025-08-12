@@ -15,9 +15,12 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstddef>
 #include <deque>
 #include <functional>
+#include <optional>
 #include <queue>
+#include <random>
 #include <utility>
 #include <vector>
 
@@ -45,7 +48,11 @@ struct fanout_substitution_params
         /**
          * Depth-first substitution. Creates fanout trees with one deep branch.
          */
-        DEPTH
+        DEPTH,
+        /**
+         * Random substitution. Inserts fanout buffers at random positions in the fanout tree.
+         */
+        RANDOM
     };
 
     /**
@@ -60,10 +67,38 @@ struct fanout_substitution_params
      * Maximum number of outputs any gate is allowed to have before substitution applies.
      */
     uint32_t threshold = 1ul;
+    /**
+     * Seed used for random substitution, generated randomly if not specified.
+     */
+    std::optional<uint32_t> seed = std::nullopt;
 };
 
 namespace detail
 {
+
+/**
+ * A lightweight container that groups together the two objects required for random fan-out selection and only lives
+ * when `strategy == RANDOM`.
+ */
+struct rng_state
+{
+    /**
+     * Random number generation engine that is seeded once in the constructor of `fanout_substitution_impl` and then
+     * reused for all random draws during fanout substitution.
+     */
+    std::mt19937 gen;
+    /**
+     * Uniform distribution whose parameter range is re-initialised (`dist.param({0, upper})`) every time the pool of
+     * candidate signals changes size.
+     */
+    std::uniform_int_distribution<size_t> dist{0, 0};
+    /**
+     * Default constructor.
+     *
+     * @param seed The seed for the random number generator.
+     */
+    explicit rng_state(const uint32_t seed) noexcept : gen{seed} {}
+};
 
 template <typename NtkDest, typename NtkSrc>
 class fanout_substitution_impl
@@ -73,7 +108,12 @@ class fanout_substitution_impl
             ntk_topo{convert_network<NtkDest>(src)},
             available_fanouts{ntk_topo},
             ps{p}
-    {}
+    {
+        if (ps.strategy == fanout_substitution_params::RANDOM)
+        {
+            rng.emplace(ps.seed.value_or(std::random_device{}()));
+        }
+    }
 
     NtkDest run()
     {
@@ -145,15 +185,31 @@ class fanout_substitution_impl
     }
 
   private:
+    /**
+     * Topological view of the converted network.
+     */
     mockturtle::topo_view<NtkDest> ntk_topo;
-
+    /**
+     * Type alias for mapping original nodes to new signals.
+     */
     using old2new_map = mockturtle::node_map<mockturtle::signal<NtkDest>, mockturtle::topo_view<NtkDest>>;
-
+    /**
+     * Type alias for mapping each node to a queue of buffer outputs.
+     */
     using old2new_queue_map =
         mockturtle::node_map<std::queue<mockturtle::signal<NtkDest>>, mockturtle::topo_view<NtkDest>>;
+    /**
+     * Queue map of available fanouts.
+     */
     old2new_queue_map available_fanouts;
-
+    /**
+     * Parameters controlling how fanout substitution is performed.
+     */
     const fanout_substitution_params ps;
+    /**
+     * Optional helper struct holding the RNG and its distribution.
+     */
+    std::optional<rng_state> rng;
 
     void generate_fanout_tree(NtkDest& substituted, const mockturtle::node<NtkSrc>& n, const old2new_map& old2new)
     {
@@ -178,32 +234,25 @@ class fanout_substitution_impl
             return;
         }
 
-        if (ps.strategy == fanout_substitution_params::substitution_strategy::DEPTH)
+        switch (ps.strategy)
         {
-            std::queue<mockturtle::signal<NtkDest>> q{};
-            for (auto i = 0u; i < num_fanouts; ++i)
+            case fanout_substitution_params::substitution_strategy::DEPTH:
             {
-                child = substituted.create_buf(child);
-                q.push(child);
+                generate_depth_tree(substituted, n, child, num_fanouts);
+                break;
             }
-            available_fanouts[n] = q;
-        }
-        else if (ps.strategy == fanout_substitution_params::substitution_strategy::BREADTH)
-        {
-            std::queue<mockturtle::signal<NtkDest>> q{{child}};
 
-            for (auto f = 0ul; f < num_fanouts; ++f)
+            case fanout_substitution_params::substitution_strategy::BREADTH:
             {
-                child = q.front();
-                q.pop();
-                child = substituted.create_buf(child);
-
-                for (auto i = 0u; i < ps.degree; ++i)
-                {
-                    q.push(child);
-                }
+                generate_breadth_tree(substituted, n, child, num_fanouts);
+                break;
             }
-            available_fanouts[n] = q;
+
+            case fanout_substitution_params::substitution_strategy::RANDOM:
+            {
+                generate_random_tree(substituted, n, child, num_fanouts);
+                break;
+            }
         }
     }
 
@@ -230,6 +279,100 @@ class fanout_substitution_impl
         }
 
         return child;
+    }
+    /**
+     * DEPTH-FIRST strategy: create a chain of buffers.
+     *
+     * @param substituted  The partially constructed destination network (NtkDest)
+     * @param n            The current node in the topological view (NtkSrc)
+     * @param child        The signal in substituted representing the output of node n.
+     * @param num_fanouts  Number of buffers to insert (chain length)
+     */
+    void generate_depth_tree(NtkDest& substituted, const mockturtle::node<NtkSrc>& n,
+                             mockturtle::signal<NtkDest>& child, const uint32_t num_fanouts)
+    {
+        std::queue<mockturtle::signal<NtkDest>> q{};
+        for (auto i = 0u; i < num_fanouts; ++i)
+        {
+            child = substituted.create_buf(child);
+            q.push(child);
+        }
+        available_fanouts[n] = std::move(q);
+    }
+    /**
+     * BREADTH-FIRST strategy: expand buffers level by level to create balanced fanout trees.
+     *
+     * @param substituted  The partially constructed destination network (NtkDest)
+     * @param n            The current node in the topological view (NtkSrc)
+     * @param child        The signal in substituted representing the output of node n.
+     * @param num_fanouts  Number of buffers to insert (chain length)
+     */
+    void generate_breadth_tree(NtkDest& substituted, const mockturtle::node<NtkSrc>& n,
+                               mockturtle::signal<NtkDest>& child, const uint32_t num_fanouts)
+    {
+        std::queue<mockturtle::signal<NtkDest>> q{{child}};
+
+        for (auto f = 0ul; f < num_fanouts; ++f)
+        {
+            child = q.front();
+            q.pop();
+            child = substituted.create_buf(child);
+
+            for (auto i = 0u; i < ps.degree; ++i)
+            {
+                q.push(child);
+            }
+        }
+        available_fanouts[n] = std::move(q);
+    }
+    /**
+     * RANDOM strategy: insert buffers at randomly chosen positions in the expanding tree.
+     *
+     * @param substituted  The partially constructed destination network (NtkDest)
+     * @param n            The current node in the topological view (NtkSrc)
+     * @param child        The signal in substituted representing the output of node n.
+     * @param num_fanouts  Number of buffers to insert (chain length)
+     */
+    void generate_random_tree(NtkDest& substituted, const mockturtle::node<NtkSrc>& n,
+                              mockturtle::signal<NtkDest>& child, const uint32_t num_fanouts)
+    {
+        auto& gen  = rng->gen;
+        auto& dist = rng->dist;
+        // maintain a vector of available fanout nodes and randomly select one
+        std::vector<mockturtle::signal<NtkDest>> available_vec{child};
+        dist.param(typename std::uniform_int_distribution<std::size_t>::param_type(0, available_vec.size() - 1));
+
+        for (auto f = 0u; f < num_fanouts; ++f)
+        {
+            // get a random index
+            const auto index    = dist(gen);
+            const auto selected = available_vec[index];
+
+            // remove the selected element using swap-and-pop
+            std::swap(available_vec[index], available_vec.back());
+            available_vec.pop_back();
+
+            const auto new_buf = substituted.create_buf(selected);
+
+            // add 'ps.degree' copies of the new buffer into available_vec
+            for (auto i = 0u; i < ps.degree; ++i)
+            {
+                available_vec.push_back(new_buf);
+            }
+
+            if (!available_vec.empty())
+            {
+                dist.param(
+                    typename std::uniform_int_distribution<std::size_t>::param_type(0, available_vec.size() - 1));
+            }
+        }
+        // transfer the available nodes to a queue for later use in get_fanout
+        std::queue<mockturtle::signal<NtkDest>> q{};
+        for (auto const& sig : available_vec)
+        {
+            q.push(sig);
+        }
+        available_fanouts[n] = std::move(q);
     }
 };
 

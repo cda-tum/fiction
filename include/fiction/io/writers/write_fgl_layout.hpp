@@ -247,6 +247,22 @@ class write_fgl_layout_impl
                     {
                         os << fmt::format(fcn::GATE, gate_id, "XNOR", "", coord.x, coord.y, coord.z);
                     }
+                    else if (lyt.is_lt(gate))
+                    {
+                        os << fmt::format(fcn::GATE, gate_id, "LT", "", coord.x, coord.y, coord.z);
+                    }
+                    else if (lyt.is_gt(gate))
+                    {
+                        os << fmt::format(fcn::GATE, gate_id, "GT", "", coord.x, coord.y, coord.z);
+                    }
+                    else if (lyt.is_le(gate))
+                    {
+                        os << fmt::format(fcn::GATE, gate_id, "LE", "", coord.x, coord.y, coord.z);
+                    }
+                    else if (lyt.is_ge(gate))
+                    {
+                        os << fmt::format(fcn::GATE, gate_id, "GE", "", coord.x, coord.y, coord.z);
+                    }
                     else if (lyt.is_function(gate))
                     {
                         const auto node_fun = lyt.node_function(gate);

@@ -80,7 +80,7 @@ TEMPLATE_TEST_CASE("check if ground state is found", "[is-ground-state]", sidb_1
         const quicksim_params quicksim_params{params};
         const auto            simulation_results_quicksim = quicksim<TestType>(charge_layout, quicksim_params);
 
-        CHECK(!is_ground_state(simulation_results_exgs, simulation_results_quicksim));
+        REQUIRE(!simulation_results_quicksim.has_value());
     }
 
     SECTION("Layout with seven SiDBs placed, verify independence from charge index")
@@ -116,17 +116,19 @@ TEMPLATE_TEST_CASE("check if ground state is found", "[is-ground-state]", sidb_1
         const quicksim_params quicksim_params{params};
         auto                  simulation_results_quicksim = quicksim<TestType>(charge_layout, quicksim_params);
 
+        REQUIRE(simulation_results_quicksim.has_value());
+
         // assign different charge index on purpose to see if the algorithm still works as desired
-        for (auto& cds : simulation_results_quicksim.charge_distributions)
+        for (auto& cds : simulation_results_quicksim.value().charge_distributions)
         {
             cds.assign_charge_index(0, charge_distribution_mode::KEEP_CHARGE_DISTRIBUTION);
         }
 
-        for (auto& cds : simulation_results_quicksim.charge_distributions)
+        for (auto& cds : simulation_results_quicksim.value().charge_distributions)
         {
             CHECK(cds.get_charge_index_and_base().first == 0);
         }
 
-        CHECK(is_ground_state(simulation_results_exgs, simulation_results_quicksim));
+        CHECK(is_ground_state(simulation_results_exgs, simulation_results_quicksim.value()));
     }
 }

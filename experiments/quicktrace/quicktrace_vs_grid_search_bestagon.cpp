@@ -1,3 +1,7 @@
+//
+// Created by Jan Drewniok on 30.11.24.
+//
+
 #include "fiction/algorithms/simulation/sidb/defect_clearance.hpp"
 #include "fiction/algorithms/simulation/sidb/defect_influence.hpp"
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
@@ -83,7 +87,8 @@ int main()  // NOLINT
         total_number_of_samples_grid += grid_stats.num_evaluated_defect_positions;
 
         // Write the defect influence domain to a CSV file
-        write_defect_influence_domain(defect_inf_grid, fmt::format("{}{}_grid.csv", plot_folder_for_given_gate, gate));
+        write_defect_influence_domain<sidb_100_cell_clk_lyt_cube>(
+            defect_inf_grid, fmt::format("{}{}_grid.csv", plot_folder_for_given_gate, gate));
         const auto clearance_grid_search = calculate_defect_clearance(layout, defect_inf_grid);
 
         // random sampling
@@ -91,8 +96,8 @@ int main()  // NOLINT
         const auto             defect_inf_random =
             defect_influence_random_sampling(layout, truth_table, 100, params, &random_stats);
         const auto clearance_random = calculate_defect_clearance(layout, defect_inf_random);
-        write_defect_influence_domain(defect_inf_random,
-                                      fmt::format("{}{}_random.csv", plot_folder_for_given_gate, gate));
+        write_defect_influence_domain<sidb_100_cell_clk_lyt_cube>(
+            defect_inf_random, fmt::format("{}{}_random.csv", plot_folder_for_given_gate, gate));
 
         // quicktrace
         defect_influence_stats quicktrace_stats{};
@@ -100,8 +105,8 @@ int main()  // NOLINT
             defect_influence_quicktrace(layout, truth_table, 20, params, &quicktrace_stats);
         total_number_of_samples_quicktrace += quicktrace_stats.num_evaluated_defect_positions;
         const auto clearance_quicktrace = calculate_defect_clearance(layout, defect_inf_quicktrace);
-        write_defect_influence_domain(defect_inf_quicktrace,
-                                      fmt::format("{}{}_quicktrace.csv", plot_folder_for_given_gate, gate));
+        write_defect_influence_domain<sidb_100_cell_clk_lyt_cube>(
+            defect_inf_quicktrace, fmt::format("{}{}_quicktrace.csv", plot_folder_for_given_gate, gate));
 
         // Log the simulation results
         simulation_exp(gate, layout.num_cells(), clearance_grid_search.defect_position.x,

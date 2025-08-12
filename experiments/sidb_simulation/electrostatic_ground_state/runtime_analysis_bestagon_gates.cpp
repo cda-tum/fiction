@@ -60,6 +60,13 @@ int main()  // NOLINT
     const quickexact_params<siqad::coord_t> qe_params{sim_params};
     const time_to_solution_params           tts_params{};
 
+    double      total_runtime_exhaustive      = 0.0;
+    double      total_runtime_quickexact      = 0.0;
+    double      average_accuracy_quicksim     = 0.0;
+    double      total_single_rumtime_quicksim = 0.0;
+    double      total_tts_quicksim            = 0.0;
+    std::size_t total_number_of_instances     = 0;
+
     for (const auto& [gate, truth_table] : gates)
     {
         const auto layout = read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}{}.sqd", folder, gate));
@@ -81,6 +88,7 @@ int main()  // NOLINT
         runtime_quickexact += mockturtle::to_seconds(quickexact_results_layout.simulation_runtime);
         tts_quicksim += stats.time_to_solution;
         instances += 1;
+        total_number_of_instances += 1;
         quicksim_accuracy_mean += stats.acc;
         quicksim_single_runtime += stats.mean_single_runtime;
 
@@ -100,14 +108,28 @@ int main()  // NOLINT
             tts_quicksim += stats.time_to_solution;
 
             instances += 1;
+            total_number_of_instances += 1;
             quicksim_accuracy_mean += stats.acc;
             quicksim_single_runtime += stats.mean_single_runtime;
         }
         quicksim_accuracy_mean = quicksim_accuracy_mean / static_cast<double>(instances);
+
+        total_runtime_exhaustive += runtime_exhaustive;
+        total_runtime_quickexact += runtime_quickexact;
+        average_accuracy_quicksim += quicksim_accuracy_mean;
+        total_single_rumtime_quicksim += quicksim_single_runtime;
+        total_tts_quicksim += tts_quicksim;
+
         simulation_exp(gate, instances, runtime_exhaustive, runtime_quickexact, quicksim_accuracy_mean,
                        quicksim_single_runtime, tts_quicksim);
         simulation_exp.save();
         simulation_exp.table();
     }
+
+    simulation_exp("Total", total_number_of_instances, total_runtime_exhaustive, total_runtime_quickexact,
+                   average_accuracy_quicksim / gates.size(), total_single_rumtime_quicksim, total_tts_quicksim);
+    simulation_exp.save();
+    simulation_exp.table();
+
     return EXIT_SUCCESS;
 }

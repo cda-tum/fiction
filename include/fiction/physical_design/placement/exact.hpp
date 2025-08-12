@@ -43,6 +43,7 @@
 #include <cstdlib>
 #include <functional>
 #include <future>
+#include <iostream>
 #include <limits>
 #include <memory>
 #include <mutex>

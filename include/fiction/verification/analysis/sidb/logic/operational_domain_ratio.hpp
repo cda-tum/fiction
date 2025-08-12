@@ -5,7 +5,6 @@
 #ifndef FICTION_OPERATIONAL_DOMAIN_RATIO_HPP
 #define FICTION_OPERATIONAL_DOMAIN_RATIO_HPP
 
-#include "fiction/algorithms/simulation/sidb/is_operational.hpp"
 #include "fiction/algorithms/simulation/sidb/operational_domain.hpp"
 
 #include <kitty/traits.hpp>
@@ -54,8 +53,7 @@ template <typename Lyt, typename TT>
 
     operational_domain_stats stats{};
 
-    detail::operational_domain_impl<Lyt, TT, operational_domain<parameter_point, operational_status>> p{
-        lyt, spec, params.op_domain_params, stats};
+    detail::operational_domain_impl<Lyt, TT, operational_domain> p{lyt, spec, params.op_domain_params, stats};
 
     const auto op_domain = p.flood_fill(0, pp);
 

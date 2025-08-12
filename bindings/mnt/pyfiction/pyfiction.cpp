@@ -41,7 +41,6 @@
 #include "pyfiction/algorithms/simulation/sidb/check_simulation_result_for_equivalence.hpp"
 #include "pyfiction/algorithms/simulation/sidb/clustercomplete.hpp"
 #include "pyfiction/algorithms/simulation/sidb/displacement_robustness_domain.hpp"
-#include "pyfiction/algorithms/simulation/sidb/groundstate_from_simulation_result.hpp"
 #include "pyfiction/algorithms/simulation/sidb/minimum_energy.hpp"
 #include "pyfiction/algorithms/simulation/sidb/occupation_probability_of_excited_states.hpp"
 #include "pyfiction/algorithms/simulation/sidb/operational_domain.hpp"
@@ -70,7 +69,6 @@
 #include "pyfiction/inout/write_qll_layout.hpp"
 #include "pyfiction/inout/write_sqd_layout.hpp"
 #include "pyfiction/inout/write_sqd_sim_result.hpp"
-#include "pyfiction/inout/write_svg_layout.hpp"
 #include "pyfiction/layouts/cartesian_layout.hpp"
 #include "pyfiction/layouts/cell_level_layout.hpp"
 #include "pyfiction/layouts/clocked_layout.hpp"
@@ -151,7 +149,6 @@ PYBIND11_MODULE(pyfiction, m, pybind11::mod_gil_not_used())
     pyfiction::critical_temperature(m);
     pyfiction::random_sidb_layout_generator(m);
     pyfiction::time_to_solution(m);
-    pyfiction::groundstate_from_simulation_result(m);
     pyfiction::check_simulation_results_for_equivalence(m);
     pyfiction::physically_valid_parameters(m);
     pyfiction::determine_displacement_robustness_domain(m);

@@ -37,21 +37,20 @@ inline void physically_valid_parameters(pybind11::module& m)
 {
     namespace py = pybind11;
 
-    py::class_<fiction::operational_domain<fiction::parameter_point, uint64_t>>(m, "physically_valid_parameters_domain")
+    py::class_<fiction::sidb_simulation_domain<fiction::parameter_point, uint64_t>>(
+        m, "physically_valid_parameters_domain")
         .def(py::init<>())
-        .def_readwrite("dimensions", &fiction::operational_domain<fiction::parameter_point, uint64_t>::dimensions)
-
         .def(
             "get_excited_state_number_for_parameter",
-            [](const fiction::operational_domain<fiction::parameter_point, uint64_t>& domain,
-               const fiction::parameter_point&                                        pp)
+            [](const fiction::sidb_simulation_domain<fiction::parameter_point, uint64_t>& domain,
+               const fiction::parameter_point&                                            pp)
             {
-                const auto result = domain.get_value(pp);
+                const auto result = domain.contains(pp);
 
                 // Check if the result has a value
                 if (result.has_value())
                 {
-                    return result.value();
+                    return std::get<0>(result.value());
                 }
                 // If no value is present, raise a Python ValueError
                 throw py::value_error(

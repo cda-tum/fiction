@@ -38,26 +38,27 @@ struct write_defect_influence_domain_params
  * X_DIMENSION, Y_DIMENSION, Influence STATUS
  * ... subsequent rows for each set of simulation parameters.
  *
- * @param defect_infdom The defect influence domain to be written. It contains a mapping from sets of simulation
- * parameters (represented as a pair of sweep parameters for the X and Y dimensions) to their influence status.
+ * @param defect_infdom The defect influence domain to be written. It contains a mapping from defect positions to their
+ * influence status.
  * @param os The output stream where the CSV representation of the defect influence domain is written to.
  * @param params The parameters used for writing, including the influential and non-influential tags. Defaults to an
  * empty `write_defect_influence_domain_params` object, which provides standard tags.
  */
 template <typename Lyt>
-inline void write_defect_influence_domain(const defect_influence_domain<Lyt>& defect_infdom, std::ostream& os,
-                                          const write_defect_influence_domain_params& params = {})
+void write_defect_influence_domain(const defect_influence_domain<Lyt>& defect_infdom, std::ostream& os,
+                                   const write_defect_influence_domain_params& params = {})
 {
     csv_writer writer{os};
 
     writer.write_line("x", "y", "operational status");
 
-    for (const auto& [sim_param, op_val] : defect_infdom.influence_information)
-    {
-        writer.write_line(sim_param.x, sim_param.y,
-                          op_val == defect_influence_status::INFLUENTIAL ? params.influential_tag :
-                                                                           params.non_influential_tag);
-    }
+    defect_infdom.for_each(
+        [&params, &writer](const auto& sim_param, const auto& op_val)
+        {
+            writer.write_line(sim_param.x, sim_param.y,
+                              std::get<0>(op_val) == defect_influence_status::INFLUENTIAL ? params.influential_tag :
+                                                                                            params.non_influential_tag);
+        });
 }
 /**
  * Writes a CSV representation of an defect influence domain to the specified file. The data are written
@@ -67,16 +68,15 @@ inline void write_defect_influence_domain(const defect_influence_domain<Lyt>& de
  * X_DIMENSION, Y_DIMENSION, Influence STATUS
  * ... subsequent rows for each set of simulation parameters.
  *
- * @param defect_infdom The defect influence domain to be written. It contains a mapping from sets of simulation
- * parameters (represented as a pair of sweep parameters for the X and Y dimensions) to their influence status.
+ * @param defect_infdom The defect influence domain to be written. It contains a mapping from defect positions to their
+ * influence status.
  * @param filename The filename where the CSV representation of the defect influence domain is written to.
  * @param params The parameters used for writing, including the influential and non-influential tags. Defaults to an
  * empty `write_defect_influence_domain_params` object, which provides standard tags.
  */
 template <typename Lyt>
-inline void write_defect_influence_domain(const defect_influence_domain<Lyt>&         defect_infdom,
-                                          const std::string_view&                     filename,
-                                          const write_defect_influence_domain_params& params = {})
+void write_defect_influence_domain(const defect_influence_domain<Lyt>& defect_infdom, const std::string_view& filename,
+                                   const write_defect_influence_domain_params& params = {})
 {
     std::ofstream os{filename.data(), std::ofstream::out};
 
@@ -85,7 +85,7 @@ inline void write_defect_influence_domain(const defect_influence_domain<Lyt>&   
         throw std::ofstream::failure("could not open file");
     }
 
-    write_defect_influence_domain(defect_infdom, os, params);
+    write_defect_influence_domain<Lyt>(defect_infdom, os, params);
     os.close();
 }
 

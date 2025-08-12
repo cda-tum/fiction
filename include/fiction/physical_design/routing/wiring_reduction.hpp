@@ -1076,13 +1076,13 @@ class wiring_reduction_impl
         bool found_wires = true;
 
         // lambda to update the timeout status and calculate remaining time
-        const auto update_timeout = [start = this->start, &ps = this->ps,
-                                     &timeout_limit_reached = this->timeout_limit_reached]() noexcept -> void
+        const auto update_timeout = [start_time = this->start, &params = this->ps,
+                                     &timeout_limit_is_reached = this->timeout_limit_reached]() noexcept -> void
         {
             const auto current_time = std::chrono::high_resolution_clock::now();
             const auto elapsed_ms   = static_cast<uint64_t>(
-                std::chrono::duration_cast<std::chrono::milliseconds>(current_time - start).count());
-            timeout_limit_reached = (elapsed_ms >= ps.timeout);
+                std::chrono::duration_cast<std::chrono::milliseconds>(current_time - start_time).count());
+            timeout_limit_is_reached = (elapsed_ms >= params.timeout);
         };
 
         // perform wiring reduction iteratively until no further wires can be deleted
