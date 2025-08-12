@@ -25,7 +25,6 @@ namespace pyfiction
 inline void graph_oriented_layout_design(pybind11::module& m)
 {
     namespace py = pybind11;
-    namespace py = pybind11;
 
     py::enum_<fiction::graph_oriented_layout_design_params::effort_mode>(
         m, "gold_effort_mode", DOC(fiction_graph_oriented_layout_design_params_effort_mode))

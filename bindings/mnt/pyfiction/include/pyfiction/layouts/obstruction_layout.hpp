@@ -22,7 +22,6 @@ template <typename LytBase, typename ObstrLyt>
 void obstruction_layout(pybind11::module& m, const std::string& topology)
 {
     namespace py = pybind11;
-    namespace py = pybind11;
 
     py::class_<ObstrLyt, LytBase>(m, fmt::format("{}_obstruction_layout", topology).c_str(),
                                   DOC(fiction_obstruction_layout))

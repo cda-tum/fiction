@@ -254,6 +254,8 @@ Operational Domain Computation
         .. doxygenenum:: fiction::operational_status
         .. doxygenstruct:: fiction::is_operational_params
            :members:
+        .. doxygenstruct:: fiction::operational_assessment
+            :members:
         .. doxygenfunction:: fiction::is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params = {})
         .. doxygenfunction:: fiction::is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params, const std::vector<bdl_wire<Lyt>>& input_bdl_wire, const std::vector<bdl_wire<Lyt>>& output_bdl_wire, const std::optional<Lyt>& canvas_lyt = std::nullopt)
         .. doxygenfunction:: fiction::operational_input_patterns(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params = {})
@@ -306,6 +308,14 @@ Operational Domain Computation
         .. autoclass:: mnt.pyfiction.operational_analysis_strategy
             :members:
         .. autoclass:: mnt.pyfiction.is_operational_params
+            :members:
+        .. autoclass:: mnt.pyfiction.operational_assessment_100
+            :members:
+        .. autoclass:: mnt.pyfiction.operational_assessment_111
+            :members:
+        .. autoclass:: mnt.pyfiction.operational_assessment_for_input_100
+            :members:
+        .. autoclass:: mnt.pyfiction.operational_assessment_for_input_111
             :members:
         .. autofunction:: mnt.pyfiction.is_operational
         .. autofunction:: mnt.pyfiction.operational_input_patterns
