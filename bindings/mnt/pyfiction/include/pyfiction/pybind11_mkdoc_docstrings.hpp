@@ -23231,9 +23231,9 @@ static const char *__doc_fmt_formatter_parse = R"doc()doc";
 
 static const char *__doc_fmt_formatter_parse_2 = R"doc()doc";
 
-static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_layouts_coordinates_hpp_1090_8 = R"doc()doc";
+static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_core_layouts_coordinates_hpp_1090_8 = R"doc()doc";
 
-static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_layouts_coordinates_hpp_1106_8 = R"doc()doc";
+static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_core_layouts_coordinates_hpp_1106_8 = R"doc()doc";
 
 static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_technology_cell_ports_hpp_291_8 = R"doc()doc";
 

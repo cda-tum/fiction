@@ -5,8 +5,8 @@
 #ifndef FICTION_CARTESIAN_LAYOUT_HPP
 #define FICTION_CARTESIAN_LAYOUT_HPP
 
-#include "fiction/layouts/coordinates.hpp"
-#include "fiction/utils/range.hpp"
+#include "fiction/core/layouts/coordinates.hpp"
+#include "fiction/utils/general/range.hpp"
 
 #include <mockturtle/networks/detail/foreach.hpp>
 

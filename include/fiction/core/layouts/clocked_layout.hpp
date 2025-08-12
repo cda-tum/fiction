@@ -5,7 +5,7 @@
 #ifndef FICTION_CLOCKED_LAYOUT_HPP
 #define FICTION_CLOCKED_LAYOUT_HPP
 
-#include "fiction/layouts/clocking_scheme.hpp"
+#include "fiction/core/layouts/clocking_scheme.hpp"
 #include "fiction/traits.hpp"
 
 #include <mockturtle/networks/detail/foreach.hpp>

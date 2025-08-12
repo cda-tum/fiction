@@ -15,5 +15,5 @@ set_target_properties(
              VISIBILITY_INLINES_HIDDEN YES)
 
 # Add configuration file
-configure_file(${PROJECT_SOURCE_DIR}/include/fiction/utils/version_info.hpp.in
+configure_file(${PROJECT_SOURCE_DIR}/include/fiction/utils/general/version_info.hpp.in
                utils/version_info.hpp)

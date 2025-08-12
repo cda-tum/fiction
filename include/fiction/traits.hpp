@@ -5,14 +5,14 @@
 #ifndef FICTION_TRAITS_HPP
 #define FICTION_TRAITS_HPP
 
-#include "fiction/layouts/coordinates.hpp"
-#include "fiction/layouts/hexagonal_layout.hpp"
-#include "fiction/layouts/shifted_cartesian_layout.hpp"
+#include "fiction/core/layouts/coordinates.hpp"
+#include "fiction/core/layouts/hexagonal_layout.hpp"
+#include "fiction/core/layouts/shifted_cartesian_layout.hpp"
 #include "fiction/technology/cell_ports.hpp"
 #include "fiction/technology/cell_technologies.hpp"
-#include "fiction/technology/sidb_charge_state.hpp"
-#include "fiction/technology/sidb_defects.hpp"
-#include "fiction/technology/sidb_lattice_orientations.hpp"
+#include "fiction/technology/sidb/sidb_charge_state.hpp"
+#include "fiction/technology/sidb/sidb_defects.hpp"
+#include "fiction/technology/sidb/sidb_lattice_orientations.hpp"
 
 #include <mockturtle/traits.hpp>
 

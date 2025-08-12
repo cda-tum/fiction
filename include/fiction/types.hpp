@@ -5,21 +5,21 @@
 #ifndef FICTION_TYPES_HPP
 #define FICTION_TYPES_HPP
 
-#include "fiction/layouts/cartesian_layout.hpp"
-#include "fiction/layouts/cell_level_layout.hpp"
-#include "fiction/layouts/clocked_layout.hpp"
-#include "fiction/layouts/coordinates.hpp"
-#include "fiction/layouts/gate_level_layout.hpp"
-#include "fiction/layouts/hexagonal_layout.hpp"
-#include "fiction/layouts/shifted_cartesian_layout.hpp"
-#include "fiction/layouts/synchronization_element_layout.hpp"
-#include "fiction/layouts/tile_based_layout.hpp"
-#include "fiction/networks/technology_network.hpp"
+#include "fiction/core/layouts/cartesian_layout.hpp"
+#include "fiction/core/layouts/cell_level_layout.hpp"
+#include "fiction/core/layouts/clocked_layout.hpp"
+#include "fiction/core/layouts/coordinates.hpp"
+#include "fiction/core/layouts/gate_level_layout.hpp"
+#include "fiction/core/layouts/hexagonal_layout.hpp"
+#include "fiction/core/layouts/shifted_cartesian_layout.hpp"
+#include "fiction/core/layouts/synchronization_element_layout.hpp"
+#include "fiction/core/layouts/tile_based_layout.hpp"
+#include "fiction/core/networks/technology_network.hpp"
 #include "fiction/technology/cell_technologies.hpp"
-#include "fiction/technology/charge_distribution_surface.hpp"
-#include "fiction/technology/sidb_defect_surface.hpp"
-#include "fiction/technology/sidb_lattice.hpp"
-#include "fiction/technology/sidb_lattice_orientations.hpp"
+#include "fiction/technology/sidb/charge_distribution_surface.hpp"
+#include "fiction/technology/sidb/sidb_defect_surface.hpp"
+#include "fiction/technology/sidb/sidb_lattice.hpp"
+#include "fiction/technology/sidb/sidb_lattice_orientations.hpp"
 
 #include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/io/write_dot.hpp>
