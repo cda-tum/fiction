@@ -520,7 +520,7 @@ class design_sidb_gates_impl
             // canvas SiDBs are added to the skeleton
             const auto layout_with_added_cells = skeleton_layout_with_canvas_sidbs(combination);
 
-            if (params.design_mode == design_sidb_gates_params<cell<Lyt>>::design_sidb_gates_mode::PRUNING_ONLY)
+            if (params.design_mode == design_sidb_gates_params<Lyt>::design_sidb_gates_mode::PRUNING_ONLY)
             {
                 // If the design mode is PRUNING_ONLY, we only need to return the gate candidates that passed the
                 // pruning steps.
