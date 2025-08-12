@@ -928,12 +928,11 @@ template <typename Lyt, typename TT>
     {
         result = p.run_exhaustive_gate_designer();
     }
-
-    else if (params.design_mode == design_sidb_gates_params<Lyt>::design_sidb_gates_mode::QUICKCELL)
+    else if (params.design_mode == design_sidb_gates_params<Lyt>::design_sidb_gates_mode::QUICKCELL ||
+             params.design_mode == design_sidb_gates_params<Lyt>::design_sidb_gates_mode::PRUNING_ONLY)
     {
         result = p.run_quickcell();
     }
-
     else
     {
         result = p.run_random_design();
