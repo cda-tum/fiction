@@ -110,7 +110,7 @@ class TestDesignSiDBGates(unittest.TestCase):
 
         # tolerate kink states
         params.design_mode = design_sidb_gates_params_design_sidb_gates_mode_111.EXHAUSTIVE
-        params.operational_params.op_condition = operational_condition_kinks.TOLERATE_KINKS
+        params.operational_params.op_condition_kinks = operational_condition_kinks.TOLERATE_KINKS
         designed_gates = design_sidb_gates(layout, [create_nor_tt()], params)
         self.assertEqual(len(designed_gates), 175)
 
