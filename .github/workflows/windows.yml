@@ -38,8 +38,8 @@ jobs:
   build_and_test:
     strategy:
       matrix:
-        os: [ windows-2022, windows-2025 ]
-        toolset: [ v143, ClangCL ]
+        os: [windows-2022, windows-2025]
+        toolset: [v143, ClangCL]
         include:
           - os: windows-2022
             env: "Visual Studio 17 2022"

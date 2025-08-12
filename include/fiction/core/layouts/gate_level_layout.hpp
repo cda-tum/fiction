@@ -5,11 +5,11 @@
 #ifndef FICTION_GATE_LEVEL_LAYOUT_HPP
 #define FICTION_GATE_LEVEL_LAYOUT_HPP
 
-#include "fiction/verification/design_rule_violations.hpp"
 #include "fiction/core/layouts/clocking_scheme.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/utils/network/mockturtle_utils.hpp"
 #include "fiction/utils/general/range.hpp"
+#include "fiction/utils/network/mockturtle_utils.hpp"
+#include "fiction/verification/design_rule_violations.hpp"
 
 #include <kitty/constructors.hpp>
 #include <kitty/dynamic_truth_table.hpp>
