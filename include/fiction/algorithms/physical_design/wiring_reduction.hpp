@@ -968,22 +968,6 @@ void adjust_tile(Lyt& lyt, const LytCpy& layout_copy, const WiringReductionLyt& 
                 }
             });
 
-        // make sure PO does not die when moving it
-        if (lyt.is_po(lyt.get_node(old_coord)))
-        {
-            const auto east_of_new_coord = tile<Lyt>{new_coord.x + 1, new_coord.y, new_coord.z};
-            if ((wiring_reduction_lyt.get_search_direction() == search_direction::HORIZONTAL) &&
-                !lyt.is_empty_tile(east_of_new_coord))
-            {
-                lyt.move_node(lyt.get_node(east_of_new_coord), east_of_new_coord, {});
-            }
-            const auto south_of_new_coord = tile<Lyt>{new_coord.x, new_coord.y + 1, new_coord.z};
-            if ((wiring_reduction_lyt.get_search_direction() == search_direction::VERTICAL) &&
-                !lyt.is_empty_tile(south_of_new_coord))
-            {
-                lyt.move_node(lyt.get_node(south_of_new_coord), south_of_new_coord, {});
-            }
-        }
         // move the node to the new coordinates
         lyt.move_node(lyt.get_node(old_coord), new_coord, signals);
     }
@@ -1224,6 +1208,30 @@ void wiring_reduction(const Lyt& lyt, wiring_reduction_params ps = {}, wiring_re
         std::cout << "[e] the given layout has to be 2DDWave-clocked\n";
         return;
     }
+
+    // check all PIs are in left (x=0) or top (y=0) row
+    lyt.foreach_pi(
+        [&lyt](const auto& pi) noexcept
+        {
+            if (const auto tile = lyt.get_tile(pi); tile.x != 0 && tile.y != 0)
+            {
+                std::cout << "[e] Invalid layout: All PIs must be located in the left (x=0) or top (y=0) border\n";
+                return;
+            }
+        });
+
+    // check all POs are in right (x=lyt.x()) or bottom (y=lyt.y()) border
+    lyt.foreach_po(
+        [&lyt](const auto& po) noexcept
+        {
+            if (const auto tile = lyt.get_tile(lyt.get_node(po)); tile.x != lyt.x() && tile.y != lyt.y())
+            {
+                std::cout << fmt::format(
+                    "[e] Invalid layout: All POs must be located in the right (x={}) or bottom (y={}) border\n",
+                    lyt.x(), lyt.y());
+                return;
+            }
+        });
 
     // initialize stats for runtime measurement
     wiring_reduction_stats             st{};
