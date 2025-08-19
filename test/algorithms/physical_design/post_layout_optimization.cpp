@@ -124,6 +124,22 @@ TEST_CASE("Layout equivalence", "[post_layout_optimization]")
             check_eq(blueprints::optimization_layout_corner_case_outputs_2<gate_layout>(), layout_corner_case_2);
         }
 
+        SECTION("optimization_layout_corner_case_outputs_3")
+        {
+            const auto layout_corner_case_3 = blueprints::optimization_layout_corner_case_outputs_3<gate_layout>();
+            post_layout_optimization_stats stats_corner_case_3{};
+            post_layout_optimization<gate_layout>(layout_corner_case_3, {}, &stats_corner_case_3);
+            check_eq(blueprints::optimization_layout_corner_case_outputs_3<gate_layout>(), layout_corner_case_3);
+        }
+
+        SECTION("optimization_layout_corner_case_outputs_4")
+        {
+            const auto layout_corner_case_4 = blueprints::optimization_layout_corner_case_outputs_4<gate_layout>();
+            post_layout_optimization_stats stats_corner_case_4{};
+            post_layout_optimization<gate_layout>(layout_corner_case_4, {}, &stats_corner_case_4);
+            check_eq(blueprints::optimization_layout_corner_case_outputs_4<gate_layout>(), layout_corner_case_4);
+        }
+
         SECTION("optimization_layout_corner_case_inputs")
         {
             const auto layout_corner_case_3 = blueprints::optimization_layout_corner_case_inputs<gate_layout>();
@@ -239,5 +255,28 @@ TEST_CASE("Wrong clocking scheme", "[post_layout_optimization]")
         post_layout_optimization_stats stats_wrong_clocking_scheme{};
 
         CHECK_NOTHROW(post_layout_optimization<gate_layout>(obstr_lyt, {}, &stats_wrong_clocking_scheme));
+    }
+}
+
+TEST_CASE("PI and PO border validation", "[post_layout_optimization]")
+{
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<>>>>;
+
+    SECTION("Invalid layout with PI not in borders")
+    {
+        auto layout = blueprints::pi_not_in_border_optimization_layout<gate_layout>();
+        CHECK_NOTHROW(post_layout_optimization<gate_layout>(layout));
+    }
+
+    SECTION("Invalid layout with PO not in borders")
+    {
+        auto layout = blueprints::po_not_in_border_optimization_layout<gate_layout>();
+        CHECK_NOTHROW(post_layout_optimization<gate_layout>(layout));
+    }
+
+    SECTION("PO have to be moved to borders during optimization")
+    {
+        auto layout = blueprints::po_not_in_border_optimization_layout<gate_layout>();
+        CHECK_NOTHROW(post_layout_optimization<gate_layout>(layout));
     }
 }

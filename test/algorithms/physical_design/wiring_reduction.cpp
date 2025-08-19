@@ -114,10 +114,20 @@ TEST_CASE("Layout equivalence", "[wiring_reduction]")
         wiring_reduction<gate_layout>(layout_corner_case_2, {}, &stats_corner_case_2);
         check_eq(blueprints::optimization_layout_corner_case_outputs_2<gate_layout>(), layout_corner_case_2);
 
-        const auto             layout_corner_case_3 = blueprints::optimization_layout_corner_case_inputs<gate_layout>();
+        const auto layout_corner_case_3 = blueprints::optimization_layout_corner_case_outputs_3<gate_layout>();
         wiring_reduction_stats stats_corner_case_3{};
         wiring_reduction<gate_layout>(layout_corner_case_3, {}, &stats_corner_case_3);
-        check_eq(blueprints::optimization_layout_corner_case_inputs<gate_layout>(), layout_corner_case_3);
+        check_eq(blueprints::optimization_layout_corner_case_outputs_3<gate_layout>(), layout_corner_case_3);
+
+        const auto layout_corner_case_4 = blueprints::optimization_layout_corner_case_outputs_4<gate_layout>();
+        wiring_reduction_stats stats_corner_case_4{};
+        wiring_reduction<gate_layout>(layout_corner_case_4, {}, &stats_corner_case_4);
+        check_eq(blueprints::optimization_layout_corner_case_outputs_4<gate_layout>(), layout_corner_case_4);
+
+        const auto layout_corner_case_inputs = blueprints::optimization_layout_corner_case_inputs<gate_layout>();
+        wiring_reduction_stats stats_corner_case_inputs{};
+        wiring_reduction<gate_layout>(layout_corner_case_inputs, {}, &stats_corner_case_inputs);
+        check_eq(blueprints::optimization_layout_corner_case_inputs<gate_layout>(), layout_corner_case_inputs);
     }
 
     SECTION("Timeout")
@@ -178,5 +188,22 @@ TEST_CASE("Search Direction", "[wiring_reduction]")
     {
         auto lyt = detail::create_wiring_reduction_layout(obstr_lyt, 1, 1, detail::search_direction::HORIZONTAL);
         CHECK(lyt.get_search_direction() == detail::search_direction::HORIZONTAL);
+    }
+}
+
+TEST_CASE("PI and PO border validation", "[wiring_reduction]")
+{
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<>>>>;
+
+    SECTION("Invalid layout with PI not in borders")
+    {
+        auto layout = blueprints::pi_not_in_border_optimization_layout<gate_layout>();
+        CHECK_NOTHROW(wiring_reduction<gate_layout>(layout));
+    }
+
+    SECTION("Invalid layout with PO not in borders")
+    {
+        auto layout = blueprints::po_not_in_border_optimization_layout<gate_layout>();
+        CHECK_NOTHROW(wiring_reduction<gate_layout>(layout));
     }
 }
