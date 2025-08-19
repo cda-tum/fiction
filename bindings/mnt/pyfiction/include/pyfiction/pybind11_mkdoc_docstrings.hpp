@@ -5116,6 +5116,22 @@ Parameter ``to_delete``:
 Returns:
     A 2D vector representing the calculated offset matrix.)doc";
 
+static const char *__doc_fiction_detail_check_and_optimize_po_positions =
+R"doc(Utility function that checks and optimizes PO positions after each
+gate relocation iteration. This function moves POs that are not
+optimally positioned (e.g., in second rightmost or second bottom
+positions) to the optimal border positions by inserting buffer gates
+where the POs were.
+
+Template parameter ``Lyt``:
+    Cartesian gate-level layout type.
+
+Parameter ``lyt``:
+    Gate-level layout.
+
+Parameter ``moved_gates``:
+    Moved gates counter to decrement if PO is moved.)doc";
+
 static const char *__doc_fiction_detail_clustercomplete_impl = R"doc()doc";
 
 static const char *__doc_fiction_detail_clustercomplete_impl_add_composition =
