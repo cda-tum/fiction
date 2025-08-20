@@ -33,14 +33,17 @@ TEST_CASE("Early termination 0, [inverter-substitution]")
     tec.create_po(maj0);
 
     CHECK(tec.num_gates() == 3);
-    detail::operation_mode mode                = detail::operation_mode::FO_ONLY;
-    auto                   substituted_network = inverter_substitution(tec, mode);
+
+    inverter_substitution_params ps{};
+    ps.mode = inverter_substitution_params::operation_mode::FO_ONLY;
+
+    auto substituted_network = inverter_substitution(tec, ps);
     CHECK(substituted_network.num_gates() == 3);
-    mode                = detail::operation_mode::AND_OR_ONLY;
-    substituted_network = inverter_substitution(tec, mode);
+    ps.mode             = inverter_substitution_params::operation_mode::AND_OR_ONLY;
+    substituted_network = inverter_substitution(tec, ps);
     CHECK(substituted_network.num_gates() == 3);
-    mode                = detail::operation_mode::ALL_NODES;
-    substituted_network = inverter_substitution(tec, mode);
+    ps.mode             = inverter_substitution_params::operation_mode::ALL_NODES;
+    substituted_network = inverter_substitution(tec, ps);
     CHECK(substituted_network.num_gates() == 3);
 }
 
@@ -64,14 +67,19 @@ TEST_CASE("Early termination 1, [inverter-substitution]")
     const auto tec_r = mutable_rank_view(tec);
 
     CHECK(tec_r.num_gates() == 5);
-    detail::operation_mode mode                = detail::operation_mode::FO_ONLY;
-    auto                   substituted_network = inverter_substitution(tec_r, mode);
+
+    inverter_substitution_params ps{};
+    ps.mode = inverter_substitution_params::operation_mode::FO_ONLY;
+
+    auto substituted_network = inverter_substitution(tec_r, ps);
     CHECK(substituted_network.num_gates() == 5);
-    mode                = detail::operation_mode::AND_OR_ONLY;
-    substituted_network = inverter_substitution(tec_r, mode);
+
+    ps.mode             = inverter_substitution_params::operation_mode::AND_OR_ONLY;
+    substituted_network = inverter_substitution(tec_r, ps);
     CHECK(substituted_network.num_gates() == 5);
-    mode                = detail::operation_mode::ALL_NODES;
-    substituted_network = inverter_substitution(tec_r, mode);
+
+    ps.mode             = inverter_substitution_params::operation_mode::ALL_NODES;
+    substituted_network = inverter_substitution(tec_r, ps);
     CHECK(substituted_network.num_gates() == 5);
 }
 
@@ -85,8 +93,9 @@ TEST_CASE("Minimal FO inverter substitution with output preservation, [inverter-
     tec.create_po(inv0);
     tec.create_po(inv1);
 
-    const detail::operation_mode mode                = detail::operation_mode::FO_ONLY;
-    auto                         substituted_network = inverter_substitution(tec, mode);
+    inverter_substitution_params ps{};
+    ps.mode                  = inverter_substitution_params::operation_mode::FO_ONLY;
+    auto substituted_network = inverter_substitution(tec, ps);
 
     count_gate_types_stats st_before{};
     count_gate_types(tec, &st_before);
@@ -123,8 +132,9 @@ TEST_CASE("Ranked FO inverter substitution, [inverter-substitution]")
         });
     CHECK(tec_rank.level(nodes[0]) == 1);
 
-    const detail::operation_mode mode                = detail::operation_mode::FO_ONLY;
-    auto                         substituted_network = inverter_substitution(tec_rank, mode);
+    inverter_substitution_params ps{};
+    ps.mode                  = inverter_substitution_params::operation_mode::FO_ONLY;
+    auto substituted_network = inverter_substitution(tec_rank, ps);
     nodes.clear();
     substituted_network.foreach_node(
         [&](const auto n)
@@ -157,8 +167,10 @@ TEST_CASE("Minimal AND/OR inverter substitution, [inverter-substitution]")
     const auto         inv1 = tec_and.create_not(pi1);
     const auto         and0 = tec_and.create_and(inv0, inv1);
     tec_and.create_po(and0);
-    detail::operation_mode mode                = detail::operation_mode::AND_OR_ONLY;
-    auto                   substituted_network = inverter_substitution(tec_and, mode);
+
+    inverter_substitution_params ps{};
+    ps.mode                  = inverter_substitution_params::operation_mode::AND_OR_ONLY;
+    auto substituted_network = inverter_substitution(tec_and, ps);
 
     count_gate_types_stats st_before{};
     count_gate_types(tec_and, &st_before);
@@ -179,8 +191,7 @@ TEST_CASE("Minimal AND/OR inverter substitution, [inverter-substitution]")
 
     tec_or.create_po(and0_or);
 
-    mode                = detail::operation_mode::AND_OR_ONLY;
-    substituted_network = inverter_substitution(tec_or, mode);
+    substituted_network = inverter_substitution(tec_or, ps);
 
     count_gate_types(tec_or, &st_before);
     count_gate_types(substituted_network, &st_after);
@@ -204,8 +215,9 @@ TEST_CASE("Propagating AND/OR inverter substitution, [inverter-substitution]")
     const auto         or0  = tec.create_or(and0, inv2);
     tec.create_po(or0);
 
-    const detail::operation_mode mode                = detail::operation_mode::AND_OR_ONLY;
-    auto                         substituted_network = inverter_substitution(tec, mode);
+    inverter_substitution_params ps{};
+    ps.mode                  = inverter_substitution_params::operation_mode::AND_OR_ONLY;
+    auto substituted_network = inverter_substitution(tec, ps);
 
     count_gate_types_stats st_before{};
     count_gate_types(tec, &st_before);

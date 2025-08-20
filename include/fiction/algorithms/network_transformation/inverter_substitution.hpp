@@ -19,6 +19,7 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -28,6 +29,32 @@
 
 namespace fiction
 {
+
+struct inverter_substitution_params
+{
+    /**
+     * Defines the operation modes for inverter substitution.
+     *
+     * Determines which types of nodes should be considered for optimization during the substitution process.
+     */
+    enum operation_mode : std::uint8_t
+    {
+        /**
+         * Optimize only inverters at fanout nodes.
+         */
+        FO_ONLY,
+        /**
+         * Optimize only inverters at inputs of AND/OR gates.
+         */
+        AND_OR_ONLY,
+        /**
+         * Apply all available optimizations (fanout and AND/OR structures).
+         */
+        ALL_NODES
+    };
+
+    operation_mode mode = ALL_NODES;
+};
 
 namespace detail
 {
@@ -160,27 +187,6 @@ bool connect_children_to_gates_unaffected(const Ntk& ntk, NtkDest& ntk_dest,
 }
 
 /**
- * Defines the operation modes for inverter substitution.
- *
- * Determines which types of nodes should be considered for optimization during the substitution process.
- */
-enum class operation_mode : std::uint8_t
-{
-    /**
-     * Optimize only inverters at fanout nodes.
-     */
-    FO_ONLY,
-    /**
-     * Optimize only inverters at inputs of AND/OR gates.
-     */
-    AND_OR_ONLY,
-    /**
-     * Apply all available optimizations (fanout and AND/OR structures).
-     */
-    ALL_NODES
-};
-
-/**
  * Initializes a logic network by copying a source network, including its constants and primary inputs,
  * and optionally handling virtual primary inputs and ranks.
  *
@@ -265,9 +271,7 @@ template <typename Ntk>
 class inverter_substitution_impl
 {
   public:
-    explicit inverter_substitution_impl(const Ntk& ntk_src, operation_mode substitution_mode) :
-            ntk{ntk_src},
-            mode{substitution_mode}
+    explicit inverter_substitution_impl(const Ntk& ntk_src, const inverter_substitution_params& p) : ntk{ntk_src}, ps{p}
     {
         // compute maximum sizes for vectors
         count_gate_types_stats st{};
@@ -277,21 +281,21 @@ class inverter_substitution_impl
         fo_nodes.reserve(st.num_fanout);
 
         // enable premature termination, when no optimizations are possible
-        if (substitution_mode == operation_mode::FO_ONLY)
+        if (ps.mode == inverter_substitution_params::operation_mode::FO_ONLY)
         {
             if (st.num_fanout == 0 || st.num_inv < 2)
             {
                 rerun = false;
             }
         }
-        if (substitution_mode == operation_mode::AND_OR_ONLY)
+        if (ps.mode == inverter_substitution_params::operation_mode::AND_OR_ONLY)
         {
             if ((st.num_and2 == 0 && st.num_or2 == 0) || st.num_inv < 2)
             {
                 rerun = false;
             }
         }
-        if (substitution_mode == operation_mode::ALL_NODES)
+        if (ps.mode == inverter_substitution_params::operation_mode::ALL_NODES)
         {
             if ((st.num_fanout == 0 || st.num_inv < 2) && ((st.num_and2 == 0 && st.num_or2 == 0) || st.num_inv < 2))
             {
@@ -342,14 +346,33 @@ class inverter_substitution_impl
 #endif
 
                 connect_children_to_gates<TopoNtkSrc>(ntk_dest, old2new, g, children);
-                if (unplaced_nodes.find(g) != unplaced_nodes.end())
+                resolve_unplaced_nodes_rec<TopoNtkSrc>(ntk_dest, old2new, g);
+                /*if (unplaced_nodes.find(g) != unplaced_nodes.end())
                 {
                     for (uint32_t j = 0; j < 3; ++j)
                     {
-                        const auto child = gather_fanin_signals<TopoNtkSrc>(unplaced_nodes[g][j], old2new);
-                        connect_children_to_gates<TopoNtkSrc>(ntk_dest, old2new, unplaced_nodes[g][j], child);
+                        const auto g_u = unplaced_nodes[g][j];
+
+                        const auto child = gather_fanin_signals<TopoNtkSrc>(g_u, old2new);
+                        connect_children_to_gates<TopoNtkSrc>(ntk_dest, old2new, g_u, child);
+                        std::cout << "Connect uno: " << g_u << std::endl;
+
+                        // here the same thing can happen that if have unplaced nodes
+                        if (unplaced_nodes.find(g_u) != unplaced_nodes.end())
+                        {
+                            for (uint32_t k = 0; k < 3; ++k)
+                            {
+                                const auto g_u_u = unplaced_nodes[g_u][k];
+
+                                const auto child_u_u = gather_fanin_signals<TopoNtkSrc>(g_u_u, old2new);
+                                connect_children_to_gates<TopoNtkSrc>(ntk_dest, old2new, g_u_u, child_u_u);
+                                std::cout << "Connect due: " << g_u_u << std::endl;
+
+                                // here the same thing can happen that if have unplaced nodes and so on
+                            }
+                        }
                     }
-                }
+                }*/
 
                 return true;  // keep looping
             });
@@ -373,21 +396,21 @@ class inverter_substitution_impl
         restore_names(ntk, ntk_dest, old2new);
 
         // check if any optimizations were made
-        if (mode == operation_mode::FO_ONLY)
+        if (ps.mode == inverter_substitution_params::operation_mode::FO_ONLY)
         {
             if (fo_nodes.empty())
             {
                 rerun = false;
             }
         }
-        else if (mode == operation_mode::AND_OR_ONLY)
+        else if (ps.mode == inverter_substitution_params::operation_mode::AND_OR_ONLY)
         {
             if (and_or_nodes.empty())
             {
                 rerun = false;
             }
         }
-        else if (mode == operation_mode::ALL_NODES)
+        else if (ps.mode == inverter_substitution_params::operation_mode::ALL_NODES)
         {
             if (and_or_nodes.empty() && fo_nodes.empty())
             {
@@ -448,9 +471,28 @@ class inverter_substitution_impl
      */
     bool rerun{true};
     /**
-     * The operation mode of inverter substitution.
-     * */
-    detail::operation_mode mode;
+     * Parameters.
+     */
+    inverter_substitution_params ps;
+
+    template <typename NtkSrc>
+    void resolve_unplaced_nodes_rec(Ntk& ntk_dest, mockturtle::node_map<mockturtle::signal<Ntk>, NtkSrc>& old2new,
+                                    const mockturtle::node<Ntk>& g)
+    {
+        const auto it = unplaced_nodes.find(g);
+        if (it == unplaced_nodes.end())
+        {
+            return;
+        }
+
+        for (const auto& g_u : it->second)
+        {
+            const auto child_signal = gather_fanin_signals<TopoNtkSrc>(g_u, old2new);
+            connect_children_to_gates<TopoNtkSrc>(ntk_dest, old2new, g_u, child_signal);
+
+            resolve_unplaced_nodes_rec<NtkSrc>(ntk_dest, old2new, g_u);
+        }
+    }
 
     template <typename NtkSrc>
     auto gather_fanin_signals(const typename Ntk::node&                              n,
@@ -459,7 +501,8 @@ class inverter_substitution_impl
         std::vector<typename Ntk::signal> children{};
 
         // store affected nodes fo
-        if (fo_ntk.is_fanout(n) && (mode == operation_mode::FO_ONLY || mode == operation_mode::ALL_NODES))
+        if (fo_ntk.is_fanout(n) && (ps.mode == inverter_substitution_params::operation_mode::FO_ONLY ||
+                                    ps.mode == inverter_substitution_params::operation_mode::ALL_NODES))
         {
             const auto fanout_inv    = fanouts(fo_ntk, n);
             const auto do_substitute = std::all_of(fanout_inv.cbegin(), fanout_inv.cend(),
@@ -474,17 +517,19 @@ class inverter_substitution_impl
         }
         // store affected nodes and/or
         if (fo_ntk.is_inv(n) && !fo_ntk.is_po(n) &&
-            (mode == operation_mode::AND_OR_ONLY || mode == operation_mode::ALL_NODES))
+            (ps.mode == inverter_substitution_params::operation_mode::AND_OR_ONLY ||
+             ps.mode == inverter_substitution_params::operation_mode::ALL_NODES))
         {
             const auto inv_fanout = fanouts(fo_ntk, n);
-            assert(inv_fanout.size() == 1);
-            if ((fo_ntk.is_and(inv_fanout[0]) || fo_ntk.is_or(inv_fanout[0])) &&
+            // assert(inv_fanout.size() == 1);
+            if ((inv_fanout.size() == 1) && (fo_ntk.is_and(inv_fanout[0]) || fo_ntk.is_or(inv_fanout[0])) &&
                 std::find(and_or_nodes.cbegin(), and_or_nodes.cend(), inv_fanout[0]) == and_or_nodes.cend())
             {
-                const auto fc            = fanins(fo_ntk, inv_fanout[0]);
-                const auto fanin_inv     = fc.fanin_nodes;
-                const auto do_substitute = std::all_of(fanin_inv.cbegin(), fanin_inv.cend(),
-                                                       [this](const auto& fi_node) { return fo_ntk.is_inv(fi_node); });
+                const auto fc        = fanins(fo_ntk, inv_fanout[0]);
+                const auto fanin_inv = fc.fanin_nodes;
+                const auto do_substitute =
+                    std::all_of(fanin_inv.cbegin(), fanin_inv.cend(), [this](const auto& fi_node)
+                                { return (fo_ntk.is_inv(fi_node) && fo_ntk.fanout_size(fi_node) == 1); });
 
                 if (do_substitute && fanin_inv.size() > 1)
                 {
@@ -495,7 +540,8 @@ class inverter_substitution_impl
             }
         }
 
-        if (mode == operation_mode::AND_OR_ONLY || mode == operation_mode::ALL_NODES)
+        if (ps.mode == inverter_substitution_params::operation_mode::AND_OR_ONLY ||
+            ps.mode == inverter_substitution_params::operation_mode::ALL_NODES)
         {
             /*
              * If n = m_inv_ao: use children of and_or_nodes
@@ -550,7 +596,8 @@ class inverter_substitution_impl
                           {
                               auto fn = ntk.get_node(f);
 
-                              if (mode == operation_mode::FO_ONLY || mode == operation_mode::ALL_NODES)
+                              if (ps.mode == inverter_substitution_params::operation_mode::FO_ONLY ||
+                                  ps.mode == inverter_substitution_params::operation_mode::ALL_NODES)
                               {
                                   for (std::size_t i = 0; i < fo_nodes.size(); ++i)
                                   {
@@ -629,7 +676,7 @@ class inverter_substitution_impl
             }
             if (ntk.is_inv(g) && std::find(x_inv_ao.cbegin(), x_inv_ao.cend(), g) != x_inv_ao.cend())
             {
-                // inverter can be safely deleted, since it has the and/ornode as fanout
+                // inverter can be safely deleted, since it has the and/or node as fanout
                 return;  // keep looping
             }
         }
@@ -669,7 +716,7 @@ class inverter_substitution_impl
  */
 
 template <typename Ntk>
-Ntk inverter_substitution(const Ntk& ntk, detail::operation_mode mode = detail::operation_mode::ALL_NODES)
+Ntk inverter_substitution(const Ntk& ntk, inverter_substitution_params ps = {})
 {
     static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
     static_assert(mockturtle::has_get_node_v<Ntk>, "Ntk does not implement the get_node function");
@@ -691,7 +738,7 @@ Ntk inverter_substitution(const Ntk& ntk, detail::operation_mode mode = detail::
     auto result = ntk;
     while (run)
     {
-        detail::inverter_substitution_impl<Ntk> p{result, mode};
+        detail::inverter_substitution_impl<Ntk> p{result, ps};
         if (!p.is_rerun())
         {
             break;  // premature termination
