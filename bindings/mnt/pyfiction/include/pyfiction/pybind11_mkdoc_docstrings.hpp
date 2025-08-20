@@ -8489,11 +8489,13 @@ static const char *__doc_fiction_detail_inverter_substitution_impl_inverter_subs
 
 static const char *__doc_fiction_detail_inverter_substitution_impl_is_rerun = R"doc()doc";
 
-static const char *__doc_fiction_detail_inverter_substitution_impl_mode = R"doc(The operation mode of inverter substitution.)doc";
-
 static const char *__doc_fiction_detail_inverter_substitution_impl_ntk = R"doc(A topologically ordered input logic network.)doc";
 
+static const char *__doc_fiction_detail_inverter_substitution_impl_ps = R"doc(Parameters.)doc";
+
 static const char *__doc_fiction_detail_inverter_substitution_impl_rerun = R"doc(An indicator to check if optimizations can be applied or not.)doc";
+
+static const char *__doc_fiction_detail_inverter_substitution_impl_resolve_unplaced_nodes_rec = R"doc()doc";
 
 static const char *__doc_fiction_detail_inverter_substitution_impl_run = R"doc()doc";
 
@@ -9091,18 +9093,6 @@ static const char *__doc_fiction_detail_non_operationality_reason_LOGIC_MISMATCH
 static const char *__doc_fiction_detail_non_operationality_reason_NONE = R"doc(No reason for non-operationality could be determined.)doc";
 
 static const char *__doc_fiction_detail_non_operationality_reason_POTENTIAL_POSITIVE_CHARGES = R"doc(Positive charges may occur but the simulation base is set to `2`.)doc";
-
-static const char *__doc_fiction_detail_operation_mode =
-R"doc(Defines the operation modes for inverter substitution.
-
-Determines which types of nodes should be considered for optimization
-during the substitution process.)doc";
-
-static const char *__doc_fiction_detail_operation_mode_ALL_NODES = R"doc(Apply all available optimizations (fanout and AND/OR structures).)doc";
-
-static const char *__doc_fiction_detail_operation_mode_AND_OR_ONLY = R"doc(Optimize only inverters at inputs of AND/OR gates.)doc";
-
-static const char *__doc_fiction_detail_operation_mode_FO_ONLY = R"doc(Optimize only inverters at fanout nodes.)doc";
 
 static const char *__doc_fiction_detail_operational_domain_impl = R"doc()doc";
 
@@ -15930,6 +15920,22 @@ Parameter ``mode``:
 
 Returns:
     A logically equivalent network with a reduced number of inverters.)doc";
+
+static const char *__doc_fiction_inverter_substitution_params = R"doc()doc";
+
+static const char *__doc_fiction_inverter_substitution_params_mode = R"doc()doc";
+
+static const char *__doc_fiction_inverter_substitution_params_operation_mode =
+R"doc(Defines the operation modes for inverter substitution.
+
+Determines which types of nodes should be considered for optimization
+during the substitution process.)doc";
+
+static const char *__doc_fiction_inverter_substitution_params_operation_mode_ALL_NODES = R"doc(Apply all available optimizations (fanout and AND/OR structures).)doc";
+
+static const char *__doc_fiction_inverter_substitution_params_operation_mode_AND_OR_ONLY = R"doc(Optimize only inverters at inputs of AND/OR gates.)doc";
+
+static const char *__doc_fiction_inverter_substitution_params_operation_mode_FO_ONLY = R"doc(Optimize only inverters at fanout nodes.)doc";
 
 static const char *__doc_fiction_is_balanced =
 R"doc(Checks if a logic network is properly path-balanced with regard to the
