@@ -1258,8 +1258,6 @@ void post_layout_optimization(const Lyt& lyt, post_layout_optimization_params ps
             if (const auto tile = lyt.get_tile(pi);
                 !(lyt.is_at_northern_border(tile) || lyt.is_at_western_border(tile)))
             {
-                fiction::print_gate_level_layout(std::cout, lyt);
-
                 std::cout << "[e] Invalid layout: All PIs must be located in the left (x=0) or top (y=0) border\n";
                 return;
             }
@@ -1272,8 +1270,6 @@ void post_layout_optimization(const Lyt& lyt, post_layout_optimization_params ps
             if (const auto tile = lyt.get_tile(lyt.get_node(po));
                 !(lyt.is_at_eastern_border(tile) || lyt.is_at_southern_border(tile)))
             {
-                fiction::print_gate_level_layout(std::cout, lyt);
-
                 std::cout << fmt::format(
                     "[e] Invalid layout: All POs must be located in the right (x={}) or bottom (y={}) border\n",
                     lyt.x(), lyt.y());
