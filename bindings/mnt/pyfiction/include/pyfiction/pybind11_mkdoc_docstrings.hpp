@@ -16706,15 +16706,9 @@ static const char *__doc_fiction_mol_qca_technology_is_vertical_cell_mode = R"do
 static const char *__doc_fiction_mol_qca_technology_mol_qca_technology = R"doc()doc";
 
 static const char *__doc_fiction_molecular_qca_library =
-R"doc(A concrete FCN gate library based on QCA ONE proposed in \"A
-Methodology for Standard Cell Design for QCA\" by Dayane Alfenas Reis,
-Caio Araújo T. Campos, Thiago Rodrigues B. S. Soares, Omar Paranaiba
-V. Neto, and Frank Sill Torres in IEEE International Symposium on
-Circuits and Systems, 2016. QCA ONE was originally proposed for the
-USE clocking scheme. The version used here is an extension to the
-original QCA ONE by also theoretically allowing multiple wires in the
-same tile. Furthermore, it can be used for a range of clocking
-schemes. Tiles in QCA ONE are :math:`5 \times 5` QCA cells.)doc";
+R"doc(A concrete molQCA gate library was proposed by the Politecnico di
+Torino and is based on simulations using the SCERPA tool. Tiles in the
+molQCA library are :math:`10 \times 10` molQCA cells.)doc";
 
 static const char *__doc_fiction_molecular_qca_library_determine_port_routing = R"doc()doc";
 
@@ -16747,7 +16741,7 @@ Parameter ``t``:
     Tile to be realized as a QCA ONE gate.
 
 Returns:
-    QCA ONE gate representation of `t` including I/Os, rotation, const
+    MolQCA gate representation of `t` including I/Os, rotation, const
     cells, etc.)doc";
 
 static const char *__doc_fiction_mutable_rank_view =
@@ -19803,51 +19797,6 @@ Parameter ``ntk_or_lyt``:
 
 Parameter ``name``:
     Name to assign to given network or layout.)doc";
-
-static const char *__doc_fiction_seven_library =
-R"doc(A concrete FCN gate library based on QCA ONE proposed in \"A
-Methodology for Standard Cell Design for QCA\" by Dayane Alfenas Reis,
-Caio Araújo T. Campos, Thiago Rodrigues B. S. Soares, Omar Paranaiba
-V. Neto, and Frank Sill Torres in IEEE International Symposium on
-Circuits and Systems, 2016. QCA ONE was originally proposed for the
-USE clocking scheme. The version used here is an extension to the
-original QCA ONE by also theoretically allowing multiple wires in the
-same tile. Furthermore, it can be used for a range of clocking
-schemes. Tiles in QCA ONE are :math:`5 \times 5` QCA cells.)doc";
-
-static const char *__doc_fiction_seven_library_determine_port_routing = R"doc()doc";
-
-static const char *__doc_fiction_seven_library_post_layout_optimization =
-R"doc(Post-layout optimization that assigns via cell mode to wire crossings.
-
-Template parameter ``CellLyt``:
-    Cell-level layout type.
-
-Parameter ``lyt``:
-    The cell-level layout that has been created via application of
-    `set_up_gate`.)doc";
-
-static const char *__doc_fiction_seven_library_set_up_gate =
-R"doc(Overrides the corresponding function in fcn_gate_library. Given a tile
-`t`, this function takes all necessary information from the stored
-grid into account to choose the correct fcn_gate representation for
-that tile. May it be a gate or wires. Rotation and special marks like
-input and output, const cells etc. are computed additionally.
-
-Template parameter ``GateLyt``:
-    Cartesian gate-level layout type.
-
-Parameter ``lyt``:
-    Layout that hosts tile `t`.
-
-Parameter ``t``:
-    Tile to be realized as a QCA ONE gate.
-
-Returns:
-    QCA ONE gate representation of `t` including I/Os, rotation, const
-    cells, etc.)doc";
-
-static const char *__doc_fiction_seven_library_seven_library = R"doc()doc";
 
 static const char *__doc_fiction_shifted_cartesian_layout =
 R"doc(A layout type that utilizes offset coordinates to represent a
@@ -22977,20 +22926,16 @@ Parameter ``ps``:
     Parameters.)doc";
 
 static const char *__doc_fiction_write_mol_qca_layout_svg_2 =
-R"doc(Writes an SVG representation of a cell-level QCA layout into a file.
-Both tile- and cell-based layouts are supported. For tile-based
-layouts, QCA layouts of tile size :math:`5 \times 5` are supported
-exclusively so far.
-
-The utilized color scheme is based on the standard scheme used in
-QCADesigner (https://waluslab.ece.ubc.ca/qcadesigner/).
+R"doc(Writes an SVG representation of a cell-level molQCA layout into a
+file. Cell-based layouts are supported. Still the cells are part of
+uniform :math:`10 \times 10` gates, which are supported.
 
 May throw an `unsupported_cell_type_exception` if it encounters
 unsupported cell types in the layout. May throw an
 `std::ofstream::failure` if it cannot open the file.
 
 Template parameter ``Lyt``:
-    Cell-level QCA layout type.
+    Cell-level molQCA layout type.
 
 Parameter ``lyt``:
     The layout to be written.
@@ -23248,11 +23193,11 @@ static const char *__doc_fiction_write_qcc_layout_params_filename = R"doc(Filena
 static const char *__doc_fiction_write_qcc_layout_params_use_filename_as_component_name = R"doc(Use the given filename as the component name inside the QCC file.)doc";
 
 static const char *__doc_fiction_write_qll_layout =
-R"doc(Writes a cell-level QCA or iNML layout to a qll file that is used by
-ToPoliNano & MagCAD (https://topolinano.polito.it/), an EDA tool and a
-physical simulator for the iNML technology platform as well as SCERPA
-(https://ieeexplore.ieee.org/document/8935211), a physical simulator
-for the mQCA technology platform.
+R"doc(Writes a cell-level QCA, molQCA or iNML layout to a qll file that is
+used by ToPoliNano & MagCAD (https://topolinano.polito.it/), an EDA
+tool and a physical simulator for the iNML technology platform as well
+as SCERPA (https://ieeexplore.ieee.org/document/8935211), a physical
+simulator for the mQCA technology platform.
 
 This overload uses an output stream to write into.
 
@@ -23269,11 +23214,11 @@ Parameter ``ps``:
     Parameters.)doc";
 
 static const char *__doc_fiction_write_qll_layout_2 =
-R"doc(Writes a cell-level QCA or iNML layout to a qll file that is used by
-ToPoliNano & MagCAD (https://topolinano.polito.it/), an EDA tool and a
-physical simulator for the iNML technology platform as well as SCERPA
-(https://ieeexplore.ieee.org/document/8935211), a physical simulator
-for the mQCA technology platform.
+R"doc(Writes a cell-level QCA, molQCA or iNML layout to a qll file that is
+used by ToPoliNano & MagCAD (https://topolinano.polito.it/), an EDA
+tool and a physical simulator for the iNML technology platform as well
+as SCERPA (https://ieeexplore.ieee.org/document/8935211), a physical
+simulator for the mQCA technology platform.
 
 This overload uses a file name to create and write into.
 
