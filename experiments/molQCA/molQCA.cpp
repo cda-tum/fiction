@@ -2,13 +2,14 @@
 #include "fiction/algorithms/physical_design/exact.hpp"
 #include "fiction/io/write_qll_layout.hpp"
 #include "fiction/io/write_svg_layout.hpp"
-#include "fiction/layouts/bounding_box.hpp"
+#include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/molecular_qca_library.hpp"
 #include "fiction/technology/qca_one_library.hpp"
 #include "fiction/utils/debug/network_writer.hpp"
 #include "fiction_experiments.hpp"
 
 #include <fiction/algorithms/physical_design/exact.hpp>
+#include <fiction/algorithms/physical_design/graph_oriented_layout_design.hpp>  // graph-oriented layout design algorithm
 #include <fiction/algorithms/physical_design/orthogonal.hpp>
 #include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 #include <fiction/algorithms/verification/equivalence_checking.hpp>               // SAT-based equivalence checking
@@ -209,7 +210,7 @@ mockturtle::names_view<Ntk> nand()
     const auto x1 = ntk.create_pi("a");
     const auto x2 = ntk.create_pi("b");
 
-    const auto and2   = ntk.create_and(x1, x2);
+    const auto and2    = ntk.create_and(x1, x2);
     const auto not_and = ntk.create_not(and2);
 
     ntk.create_po(not_and, "nand");
@@ -225,10 +226,36 @@ mockturtle::names_view<Ntk> nor()
     const auto x1 = ntk.create_pi("a");
     const auto x2 = ntk.create_pi("b");
 
-    const auto or2   = ntk.create_or(x1, x2);
+    const auto or2    = ntk.create_or(x1, x2);
     const auto not_or = ntk.create_not(or2);
 
     ntk.create_po(not_or, "nor");
+
+    return ntk;
+}
+
+template <typename Ntk>
+mockturtle::names_view<Ntk> c17()
+{
+    mockturtle::names_view<Ntk> ntk{};
+
+    const auto x1 = ntk.create_pi("2");
+    const auto x2 = ntk.create_pi("3");
+    const auto x3 = ntk.create_pi("4");
+    const auto x4 = ntk.create_pi("4_c");
+    const auto x5 = ntk.create_pi("5");
+    const auto x6 = ntk.create_pi("6");
+
+    const auto a1    = ntk.create_and(x4, x1);
+    const auto a2    = ntk.create_and(x3, x5);
+    const auto na2 = ntk.create_not(a2);
+    const auto a3    = ntk.create_and(na2, x2);
+    const auto a4    = ntk.create_and(na2, x6);
+    const auto o1    = ntk.create_or(a3, a4);
+    const auto o2    = ntk.create_or(a1, a3);
+
+    ntk.create_po(o1, "po1");
+    ntk.create_po(o2, "po2");
 
     return ntk;
 }
@@ -570,7 +597,8 @@ compute_layout_extension(const Lyt& gate_lyt, const std::unordered_map<mockturtl
 
 template <typename Lyt>
 void move_nodes(Lyt& gate_lyt, fiction::tile<Lyt> tile,
-                std::unordered_map<uint64_t, std::vector<mockturtle::signal<Lyt>>>& relations, uint64_t dx, uint64_t dy, bool dz = false)
+                std::unordered_map<uint64_t, std::vector<mockturtle::signal<Lyt>>>& relations, uint64_t dx, uint64_t dy,
+                bool dz = false)
 {
     auto node = gate_lyt.get_node(tile);
 
@@ -593,25 +621,26 @@ std::unordered_map<mockturtle::node<Lyt>, uint8_t> get_po_border_orientation_map
 
     std::unordered_map<mockturtle::node<Lyt>, uint8_t> po_orientation;
 
-    gate_lyt.foreach_po([&](const auto& po)
-                        {
-                            const auto po_node = gate_lyt.get_node(po);
-                            const auto po_tile = static_cast<fiction::tile<Lyt>>(po);
+    gate_lyt.foreach_po(
+        [&](const auto& po)
+        {
+            const auto po_node = gate_lyt.get_node(po);
+            const auto po_tile = static_cast<fiction::tile<Lyt>>(po);
 
-                            if (gate_lyt.is_at_eastern_border(po_tile))
-                            {
-                                po_orientation[po_node] = 0;  // East
-                            }
-                            else if (gate_lyt.is_at_southern_border(po_tile))
-                            {
-                                po_orientation[po_node] = 1;  // South
-                            }
-                            else
-                            {
-                                // Optional: warn or assign an invalid marker if neither border applies
-                                // po_orientation[po_node] = 255;
-                            }
-                        });
+            if (gate_lyt.is_at_eastern_border(po_tile))
+            {
+                po_orientation[po_node] = 0;  // East
+            }
+            else if (gate_lyt.is_at_southern_border(po_tile))
+            {
+                po_orientation[po_node] = 1;  // South
+            }
+            else
+            {
+                // Optional: warn or assign an invalid marker if neither border applies
+                // po_orientation[po_node] = 255;
+            }
+        });
 
     return po_orientation;
 }
@@ -619,8 +648,8 @@ std::unordered_map<mockturtle::node<Lyt>, uint8_t> get_po_border_orientation_map
 template <typename Lyt>
 void synchronize_pis_pos(Lyt& gate_lyt)
 {
-    const auto                                          paths  = path_lengths_grid(gate_lyt);
-    auto                                                slacks = compute_slacks<Lyt>(paths);
+    const auto                                          paths          = path_lengths_grid(gate_lyt);
+    auto                                                slacks         = compute_slacks<Lyt>(paths);
     auto                                                po_orientation = get_po_border_orientation_map(gate_lyt);
     std::unordered_map<mockturtle::node<Lyt>, uint64_t> border_properties;
     const auto extension   = compute_layout_extension(gate_lyt, slacks, border_properties);
@@ -636,9 +665,7 @@ void synchronize_pis_pos(Lyt& gate_lyt)
         [&](const auto& n)
         {
             std::vector<mockturtle::signal<Lyt>> fanins;
-            gate_lyt.foreach_fanin(n, [&fanins](const auto fi) {
-                                       fanins.push_back(fi);
-                                   });
+            gate_lyt.foreach_fanin(n, [&fanins](const auto fi) { fanins.push_back(fi); });
             fanin_relations[n] = fanins;
         });
 
@@ -672,8 +699,11 @@ void synchronize_pis_pos(Lyt& gate_lyt)
         const auto pi_node = entry.first;
         const auto slack   = entry.second;
 
-        std::vector<mockturtle::node<Lyt>> fanouts{};
-        gate_lyt.foreach_fanout(pi_node, [&fanouts](const auto& fo) { fanouts.push_back(fo); });
+        if(slack == 0)
+        {
+            continue;
+        }
+
         // wire this PI north
         if (border_properties[pi_node] == 0)
         {
@@ -694,92 +724,91 @@ void synchronize_pis_pos(Lyt& gate_lyt)
             ++t.x;
             fiction::detail::wire_east(gate_lyt, new_t, t);
         }
-        else
+        if(gate_lyt.is_dead(pi_node))
         {
-            assert(false);
+            gate_lyt.revive_from_dead(pi_node);
         }
     }
 
     // also synchronize the POs
-    const auto longest_path =
-        std::max_element(paths.begin(), paths.end(), [](const auto& a, const auto& b) { return a.first < b.first; })
-            ->first;
-
-    uint64_t x_slack_po = 0;
-    uint64_t y_slack_po = 0;
+    uint64_t x_slack_po   = 0;
+    uint64_t y_slack_po   = 0;
     uint64_t max_diagonal = 0;
-    gate_lyt.foreach_po([&gate_lyt, &max_diagonal](const auto& po)
-                        {
-                            auto po_tile = static_cast<fiction::tile<Lyt>>(po);
-                            max_diagonal = std::max(max_diagonal, static_cast<uint64_t>(po_tile.x + po_tile.y));
-                        });
+    gate_lyt.foreach_po(
+        [&max_diagonal](const auto& po)
+        {
+            auto po_tile = static_cast<fiction::tile<Lyt>>(po);
+            max_diagonal = std::max(max_diagonal, static_cast<uint64_t>(po_tile.x + po_tile.y));
+        });
 
-    gate_lyt.foreach_po([&gate_lyt, &max_diagonal, &po_orientation, &x_slack_po, &y_slack_po](const auto& po)
-                        {
-                            const auto po_node = gate_lyt.get_node(po);
-                            auto po_tile = static_cast<fiction::tile<Lyt>>(po);
-                            uint64_t po_diagonal = static_cast<uint64_t>(po_tile.x + po_tile.y);
-                            const auto slack = max_diagonal - po_diagonal;
+    gate_lyt.foreach_po(
+        [&gate_lyt, &max_diagonal, &po_orientation, &x_slack_po, &y_slack_po](const auto& po)
+        {
+            const auto po_node     = gate_lyt.get_node(po);
+            auto       po_tile     = static_cast<fiction::tile<Lyt>>(po);
+            uint64_t   po_diagonal = static_cast<uint64_t>(po_tile.x + po_tile.y);
+            const auto slack       = max_diagonal - po_diagonal;
 
-                            if (slack == 0)
-                            {
-                                return;
-                            }
+            if (slack == 0)
+            {
+                return;
+            }
 
-                            std::vector<mockturtle::node<Lyt>> fanins{};
-                            gate_lyt.foreach_fanin(po_node, [&gate_lyt, &fanins](const auto& fi) { fanins.push_back(gate_lyt.get_node(fi)); });
+            std::vector<mockturtle::node<Lyt>> fanins{};
+            gate_lyt.foreach_fanin(po_node,
+                                   [&gate_lyt, &fanins](const auto& fi) { fanins.push_back(gate_lyt.get_node(fi)); });
 
-                            if (po_orientation[po_node] == 0)
-                            {
-                                x_slack_po = std::max(x_slack_po, slack);
-                                auto new_t = po_tile;
-                                new_t.x += slack;
-                                gate_lyt.move_node(po_node, new_t);
+            if (po_orientation[po_node] == 0)
+            {
+                x_slack_po = std::max(x_slack_po, slack);
+                auto new_t = po_tile;
+                new_t.x += slack;
+                gate_lyt.move_node(po_node, new_t);
 
-                                const auto fanin_tile = gate_lyt.get_tile(fanins[0]);
-                                if(fanin_tile.x < po_tile.x)
-                                {
-                                    ++po_tile.x;
-                                    fiction::detail::wire_east(gate_lyt, fanin_tile, po_tile);
-                                    --po_tile.x;
-                                }
-                                else
-                                {
-                                    ++po_tile.y;
-                                    fiction::detail::wire_south(gate_lyt, fanin_tile, po_tile);
-                                    --po_tile.y;
-                                }
-                                const auto sig = fiction::detail::wire_east(gate_lyt, po_tile, new_t);
+                const auto fanin_tile = gate_lyt.get_tile(fanins[0]);
+                if (fanin_tile.x < po_tile.x)
+                {
+                    ++po_tile.x;
+                    fiction::detail::wire_east(gate_lyt, fanin_tile, po_tile);
+                    --po_tile.x;
+                }
+                else
+                {
+                    ++po_tile.y;
+                    fiction::detail::wire_south(gate_lyt, fanin_tile, po_tile);
+                    --po_tile.y;
+                }
+                const auto sig = fiction::detail::wire_east(gate_lyt, po_tile, new_t);
 
-                                gate_lyt.connect(sig, po_node);
-                            }
-                            else if (po_orientation[po_node] == 1)
-                            {
-                                y_slack_po = std::max(y_slack_po, slack);
-                                auto new_t = po_tile;
-                                new_t.y += slack;
-                                gate_lyt.move_node(po_node, new_t);
+                gate_lyt.connect(sig, po_node);
+            }
+            else if (po_orientation[po_node] == 1)
+            {
+                y_slack_po = std::max(y_slack_po, slack);
+                auto new_t = po_tile;
+                new_t.y += slack;
+                gate_lyt.move_node(po_node, new_t);
 
-                                const auto fanin_tile = gate_lyt.get_tile(fanins[0]);
-                                if(fanin_tile.x < po_tile.x)
-                                {
-                                    ++po_tile.x;
-                                    fiction::detail::wire_east(gate_lyt, fanin_tile, po_tile);
-                                    --po_tile.x;
-                                }
-                                else
-                                {
-                                    ++po_tile.y;
-                                    fiction::detail::wire_south(gate_lyt, fanin_tile, po_tile);
-                                    --po_tile.y;
-                                }
-                                const auto sig = fiction::detail::wire_south(gate_lyt, po_tile, new_t);
+                const auto fanin_tile = gate_lyt.get_tile(fanins[0]);
+                if (fanin_tile.x < po_tile.x)
+                {
+                    ++po_tile.x;
+                    fiction::detail::wire_east(gate_lyt, fanin_tile, po_tile);
+                    --po_tile.x;
+                }
+                else
+                {
+                    ++po_tile.y;
+                    fiction::detail::wire_south(gate_lyt, fanin_tile, po_tile);
+                    --po_tile.y;
+                }
+                const auto sig = fiction::detail::wire_south(gate_lyt, po_tile, new_t);
 
-                                gate_lyt.connect(sig, po_node);
-                            }
-                        });
+                gate_lyt.connect(sig, po_node);
+            }
+        });
 
-    gate_lyt.resize({gate_lyt.x() + x_extension + x_slack_po, gate_lyt.y() + y_extension + y_slack_po, gate_lyt.z()});
+    gate_lyt.resize({gate_lyt.x() + x_extension + x_slack_po, gate_lyt.y() + y_extension + y_slack_po, 1});
 }
 
 int main()  // NOLINT
@@ -813,25 +842,40 @@ int main()  // NOLINT
     using gate_layout = fiction::gate_level_layout<
         fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<fiction::offset::ucoord_t>>>>;
 
-    static constexpr const uint64_t bench_select = fiction_experiments::mux21;
+    using gate_layout_gold =
+        fiction::gate_level_layout<fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<>>>>;
+
+    static constexpr const uint64_t bench_select = fiction_experiments::c17;
 
     for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
     {
-        const auto benchmark_network = read_ntk<fiction::tec_nt>(benchmark);
+        //auto benchmark_network = read_ntk<fiction::tec_nt>(benchmark);
 
-        std::string bench_name = "mux";
-        //const auto benchmark_network = mux21<fiction::technology_network>();
+        std::string bench_name = "c17";
+        auto benchmark_network = c17<fiction::tec_nt>();
 
         fiction::debug::write_dot_network(benchmark_network);
 
-        fiction::exact_physical_design_params ps_exact{};
+        std::cout << "Layout started\n";
+        /*fiction::exact_physical_design_params ps_exact{};
         ps_exact.straight_inverters = true;
         ps_exact.scheme             = "2DDWave";
         ps_exact.border_io          = true;
         ps_exact.crossings          = false;
-        auto gate_layout_opt        = fiction::exact<gate_layout>(benchmark_network, ps_exact);
+        auto gate_layout_opt        = fiction::exact<gate_layout>(benchmark_network, ps_exact);*/
 
-        std::cout << "Exact finished\n";
+        fiction::graph_oriented_layout_design_stats  graph_oriented_layout_design_stats{};
+        fiction::graph_oriented_layout_design_params graph_oriented_layout_design_params{};
+        graph_oriented_layout_design_params.mode =
+            fiction::graph_oriented_layout_design_params::effort_mode::MAXIMUM_EFFORT;
+        graph_oriented_layout_design_params.return_first = true;
+        graph_oriented_layout_design_params.enable_multithreading = true;
+        graph_oriented_layout_design_params.planar = true;
+
+        auto gate_layout_opt = fiction::graph_oriented_layout_design<gate_layout, fiction::tec_nt>(
+            benchmark_network, graph_oriented_layout_design_params, &graph_oriented_layout_design_stats);
+
+        std::cout << "Layout finished\n";
 
         if (!gate_layout_opt)
         {

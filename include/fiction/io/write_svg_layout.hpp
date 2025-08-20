@@ -451,8 +451,8 @@ inline constexpr const char* MOL_QCA_CLOCK_ZONE_1_CELL = "ffe700";
 inline constexpr const char* MOL_QCA_CLOCK_ZONE_2_CELL = "65ff00";
 inline constexpr const char* MOL_QCA_CLOCK_ZONE_3_CELL = "0071ff";
 inline constexpr const char* MOL_QCA_CLOCK_ZONE_4_CELL = "f800ff";
-inline constexpr const char* PI_CELL_MOL_QCA           = "f800ff";
-inline constexpr const char* PO_CELL_MOL_QCA           = "ffe700";
+inline constexpr const char* PI_CELL_MOL_QCA           = "cccccc";
+inline constexpr const char* PO_CELL_MOL_QCA           = "4a4a4a";
 
 inline constexpr const double MOL_QCA_CELL_DISTANCE = 11.5;
 
