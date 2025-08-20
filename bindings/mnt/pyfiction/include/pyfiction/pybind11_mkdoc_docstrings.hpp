@@ -16657,7 +16657,7 @@ Template parameter ``Dist``:
 static const char *__doc_fiction_manhattan_distance_functor_manhattan_distance_functor = R"doc()doc";
 
 static const char *__doc_fiction_mincross =
-R"doc(Reimplementation of Graphviz's `crossing.c` algorithm for edge
+R"doc(Reimplementation of Graphviz's `mincross.c` algorithm for edge
 crossing minimization. This function reorders nodes in a leveled logic
 network to minimize the number of edge crossings using iterative
 median and transpose heuristics.
@@ -16674,10 +16674,6 @@ Parameter ``ps``:
 Parameter ``pst``:
     Optional pointer to a statistics structure for storing the
     resulting number of crossings.
-
-Parameter ``optimize``:
-    If false, skips optimization and only reports the current number
-    of crossings.
 
 Returns:
     A copy of the input network with reordered ranks to reduce edge
@@ -16768,10 +16764,6 @@ state.)doc";
 
 static const char *__doc_fiction_mincross_impl_ntk = R"doc(Logic network being reordered.)doc";
 
-static const char *__doc_fiction_mincross_impl_opt =
-R"doc(Flag indicating whether to perform optimization or only count
-crossings.)doc";
-
 static const char *__doc_fiction_mincross_impl_out_cross =
 R"doc(Counts the number of edge crossings between fanouts of two nodes in
 the next rank.
@@ -16830,10 +16822,37 @@ Returns:
 
 static const char *__doc_fiction_mincross_params = R"doc(Parameters for the `mincross` crossing minimization algorithm.)doc";
 
+static const char *__doc_fiction_mincross_params_convergence =
+R"doc(Convergence threshold: relative improvement factor required to reset
+the early-quit counter (heuristic from graphviz). If the current
+crossing count drops below (convergence * best_cross), the process
+continues. Default is 0.995 (i.e., at least 0.5% improvement
+required).)doc";
+
 static const char *__doc_fiction_mincross_params_fixed_pis =
 R"doc(Whether the rank positions of primary inputs (PIs) should remain fixed
 during the minimization process. If set to `true`, PIs will not be
 reordered.)doc";
+
+static const char *__doc_fiction_mincross_params_init_refine_max_iters =
+R"doc(Maximum number of iterations allowed in the initial and refinement
+passes (heuristic from graphviz). Limited to 4 unless overridden by
+ps.max_iter)doc";
+
+static const char *__doc_fiction_mincross_params_max_iter =
+R"doc(Maximum number of iterations per optimization pass (heuristic from
+graphviz). Larger values allow more refinement but increase runtime.
+Default (24) works well for small and medium-sized networks (networks
+that are visualizable).)doc";
+
+static const char *__doc_fiction_mincross_params_min_quit =
+R"doc(Minimum number of consecutive iterations without sufficient
+improvement before quitting early (heuristic from graphviz). Prevents
+wasting time when the number of crossings no longer decreases.)doc";
+
+static const char *__doc_fiction_mincross_params_optimize =
+R"doc(If false, skips optimization and only reports the current number of
+crossings.)doc";
 
 static const char *__doc_fiction_mincross_stats = R"doc(Statistics collected during the execution of the `mincross` algorithm.)doc";
 
