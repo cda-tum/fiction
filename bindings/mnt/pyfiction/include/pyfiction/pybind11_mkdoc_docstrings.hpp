@@ -13848,6 +13848,8 @@ static const char *__doc_fiction_gate_level_layout_pi_at = R"doc()doc";
 
 static const char *__doc_fiction_gate_level_layout_po_at = R"doc()doc";
 
+static const char *__doc_fiction_gate_level_layout_revive_from_dead = R"doc()doc";
+
 static const char *__doc_fiction_gate_level_layout_revive_node = R"doc()doc";
 
 static const char *__doc_fiction_gate_level_layout_set_input_name = R"doc()doc";
