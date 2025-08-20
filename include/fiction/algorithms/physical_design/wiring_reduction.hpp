@@ -991,7 +991,8 @@ void adjust_tile(Lyt& lyt, const LytCpy& layout_copy, const WiringReductionLyt& 
                 lyt.move_node(lyt.get_node(south_of_new_coord), south_of_new_coord, {});
             }
             const auto above_south_of_new_coord = lyt.above(south_of_new_coord);
-            if (!lyt.is_empty_tile(above_south_of_new_coord) && lyt.has_northern_incoming_signal(above_south_of_new_coord))
+            if (!lyt.is_empty_tile(above_south_of_new_coord) &&
+                lyt.has_northern_incoming_signal(above_south_of_new_coord))
             {
                 lyt.move_node(lyt.get_node(above_south_of_new_coord), above_south_of_new_coord, {});
             }
