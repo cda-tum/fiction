@@ -357,7 +357,8 @@ void check_and_optimize_po_positions(Lyt& lyt, uint64_t& moved_gates) noexcept
     lyt.foreach_po(
         [&lyt, &moved_gates](const auto& po) noexcept
         {
-            if (const auto tile = lyt.get_tile(lyt.get_node(po)); tile.x != lyt.x() && tile.y != lyt.y())
+            if (const auto tile = lyt.get_tile(lyt.get_node(po));
+                !(lyt.is_at_eastern_border(tile) || lyt.is_at_southern_border(tile)))
             {
                 if ((tile.x == lyt.x() - 1) && (lyt.is_empty_tile({lyt.x(), tile.y})))
                 {
@@ -493,7 +494,7 @@ class post_layout_optimization_impl
 
                 // gather all relevant gate tiles for relocation
                 std::vector<tile<Lyt>> gate_tiles{};
-                gate_tiles.reserve(layout.num_gates() + layout.num_pis() - layout.num_pos());
+                gate_tiles.reserve(layout.num_gates() + layout.num_pis() + layout.num_pos());
                 layout.foreach_node(
                     [&layout, &gate_tiles](const auto& node) noexcept
                     {
@@ -1255,7 +1256,8 @@ void post_layout_optimization(const Lyt& lyt, post_layout_optimization_params ps
     lyt.foreach_pi(
         [&lyt](const auto& pi) noexcept
         {
-            if (const auto tile = lyt.get_tile(pi); tile.x != 0 && tile.y != 0)
+            if (const auto tile = lyt.get_tile(pi);
+                !(lyt.is_at_northern_border(tile) || lyt.is_at_western_border(tile)))
             {
                 fiction::print_gate_level_layout(std::cout, lyt);
 
@@ -1268,7 +1270,8 @@ void post_layout_optimization(const Lyt& lyt, post_layout_optimization_params ps
     lyt.foreach_po(
         [&lyt](const auto& po) noexcept
         {
-            if (const auto tile = lyt.get_tile(lyt.get_node(po)); tile.x != lyt.x() && tile.y != lyt.y())
+            if (const auto tile = lyt.get_tile(lyt.get_node(po));
+                !(lyt.is_at_eastern_border(tile) || lyt.is_at_southern_border(tile)))
             {
                 fiction::print_gate_level_layout(std::cout, lyt);
 

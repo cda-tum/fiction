@@ -276,7 +276,21 @@ TEST_CASE("PI and PO border validation", "[post_layout_optimization]")
 
     SECTION("PO have to be moved to borders during optimization")
     {
-        auto layout = blueprints::po_not_in_border_optimization_layout<gate_layout>();
-        CHECK_NOTHROW(post_layout_optimization<gate_layout>(layout));
+        auto layout = blueprints::po_have_to_be_moved_to_border_optimization_layout<gate_layout>();
+        post_layout_optimization<gate_layout>(layout);
+
+        layout.foreach_pi(
+            [&layout](const auto& pi) noexcept
+            {
+                const auto tile = layout.get_tile(pi);
+                CHECK((layout.is_at_northern_border(tile) || layout.is_at_western_border(tile)));
+            });
+
+        layout.foreach_po(
+            [&layout](const auto& po) noexcept
+            {
+                const auto tile = layout.get_tile(layout.get_node(po));
+                CHECK((layout.is_at_eastern_border(tile) || layout.is_at_southern_border(tile)));
+            });
     }
 }

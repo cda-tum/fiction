@@ -1213,7 +1213,8 @@ void wiring_reduction(const Lyt& lyt, wiring_reduction_params ps = {}, wiring_re
     lyt.foreach_pi(
         [&lyt](const auto& pi) noexcept
         {
-            if (const auto tile = lyt.get_tile(pi); tile.x != 0 && tile.y != 0)
+            if (const auto tile = lyt.get_tile(pi);
+                !(lyt.is_at_northern_border(tile) || lyt.is_at_western_border(tile)))
             {
                 std::cout << "[e] Invalid layout: All PIs must be located in the left (x=0) or top (y=0) border\n";
                 return;
@@ -1224,7 +1225,8 @@ void wiring_reduction(const Lyt& lyt, wiring_reduction_params ps = {}, wiring_re
     lyt.foreach_po(
         [&lyt](const auto& po) noexcept
         {
-            if (const auto tile = lyt.get_tile(lyt.get_node(po)); tile.x != lyt.x() && tile.y != lyt.y())
+            if (const auto tile = lyt.get_tile(lyt.get_node(po));
+                !(lyt.is_at_eastern_border(tile) || lyt.is_at_southern_border(tile)))
             {
                 std::cout << fmt::format(
                     "[e] Invalid layout: All POs must be located in the right (x={}) or bottom (y={}) border\n",
