@@ -948,6 +948,7 @@ void adjust_tile(Lyt& lyt, const LytCpy& layout_copy, const WiringReductionLyt& 
     if (!(lyt.is_empty_tile(old_coord)) && (offset != 0))
     {
         const auto new_coord = determine_new_coord<Lyt, WiringReductionLyt>(wiring_reduction_lyt, x, y, z, offset);
+        lyt.move_node(lyt.get_node(new_coord), new_coord, {});
         std::vector<mockturtle::signal<Lyt>> signals{};
         signals.reserve(layout_copy.fanin_size(layout_copy.get_node(old_coord)));
 
@@ -967,6 +968,34 @@ void adjust_tile(Lyt& lyt, const LytCpy& layout_copy, const WiringReductionLyt& 
                     adjust_tile_vertical_search_dir(lyt, layout_copy, fanin, offset_mtrx, old_coord, offset, signals);
                 }
             });
+
+        if (wiring_reduction_lyt.get_search_direction() == search_direction::HORIZONTAL)
+        {
+            const auto east_of_new_coord = tile<Lyt>{new_coord.x + 1, new_coord.y};
+            if (!lyt.is_empty_tile(east_of_new_coord) && lyt.has_western_incoming_signal(east_of_new_coord))
+            {
+                lyt.move_node(lyt.get_node(east_of_new_coord), east_of_new_coord, {});
+            }
+            const auto above_east_of_new_coord = lyt.above(east_of_new_coord);
+            if (!lyt.is_empty_tile(above_east_of_new_coord) && lyt.has_western_incoming_signal(above_east_of_new_coord))
+            {
+                lyt.move_node(lyt.get_node(above_east_of_new_coord), above_east_of_new_coord, {});
+            }
+        }
+
+        if (wiring_reduction_lyt.get_search_direction() == search_direction::VERTICAL)
+        {
+            const auto south_of_new_coord = tile<Lyt>{new_coord.x, new_coord.y + 1, new_coord.z};
+            if (!lyt.is_empty_tile(south_of_new_coord) && lyt.has_northern_incoming_signal(south_of_new_coord))
+            {
+                lyt.move_node(lyt.get_node(south_of_new_coord), south_of_new_coord, {});
+            }
+            const auto above_south_of_new_coord = lyt.above(south_of_new_coord);
+            if (!lyt.is_empty_tile(above_south_of_new_coord) && lyt.has_northern_incoming_signal(above_south_of_new_coord))
+            {
+                lyt.move_node(lyt.get_node(above_south_of_new_coord), above_south_of_new_coord, {});
+            }
+        }
 
         // move the node to the new coordinates
         lyt.move_node(lyt.get_node(old_coord), new_coord, signals);

@@ -140,6 +140,14 @@ TEST_CASE("Layout equivalence", "[post_layout_optimization]")
             check_eq(blueprints::optimization_layout_corner_case_outputs_4<gate_layout>(), layout_corner_case_4);
         }
 
+        SECTION("optimization_layout_corner_case_outputs_5")
+        {
+            const auto layout_corner_case_5 = blueprints::optimization_layout_corner_case_outputs_5<gate_layout>();
+            post_layout_optimization_stats stats_corner_case_5{};
+            post_layout_optimization<gate_layout>(layout_corner_case_5, {}, &stats_corner_case_5);
+            check_eq(blueprints::optimization_layout_corner_case_outputs_5<gate_layout>(), layout_corner_case_5);
+        }
+
         SECTION("optimization_layout_corner_case_inputs")
         {
             const auto layout_corner_case_3 = blueprints::optimization_layout_corner_case_inputs<gate_layout>();
