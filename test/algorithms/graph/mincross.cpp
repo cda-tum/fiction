@@ -80,12 +80,15 @@ TEST_CASE("Planar Network", "[mincross]")
     rank1.push_back(aig_r.get_node(f1));
     aig_r.set_ranks(1, rank1);
 
-    mincross_stats        st{};
-    const mincross_params p{};
-    auto                  ntk = mincross(aig_r, p, &st, false);  // counts crossings
+    mincross_stats  st{};
+    mincross_params p{};
+    p.optimize = false;
+
+    auto ntk = mincross(aig_r, p, &st);  // counts crossings
     CHECK(st.num_crossings == 3);
 
-    ntk = mincross(aig_r, p, &st);
+    p.optimize = true;
+    ntk        = mincross(aig_r, p, &st);
     CHECK(st.num_crossings == 0);
 }
 
@@ -107,16 +110,19 @@ TEST_CASE("Majority", "[mincross]")
     rank1.push_back(tec_r.get_node(f2));
     tec_r.set_ranks(1, rank1);
 
-    mincross_stats        st{};
-    const mincross_params p{};
-    auto                  ntk = mincross(tec_r, p, &st, false);  // counts crossings
+    mincross_stats  st{};
+    mincross_params p{};
+    p.optimize = false;
+
+    auto ntk = mincross(tec_r, p, &st);  // counts crossings
     CHECK(st.num_crossings == 2);
 
-    ntk = mincross(tec_r, p, &st);
+    p.optimize = true;
+    ntk        = mincross(tec_r, p, &st);
     CHECK(st.num_crossings == 0);
 }
 
-TEST_CASE("Minimize Crossings Adder", "[mincross]")
+TEST_CASE("Adder", "[mincross]")
 {
     auto tec = blueprints::full_adder_network<mockturtle::names_view<technology_network>>();
 
@@ -126,12 +132,14 @@ TEST_CASE("Minimize Crossings Adder", "[mincross]")
 
     auto tec_r = fiction::mutable_rank_view(tec_b);
 
-    mincross_stats        st{};
-    const mincross_params p{};
+    mincross_stats  st{};
+    mincross_params p{};
+    p.optimize = false;
 
-    auto ntk = mincross(tec_r, p, &st, false);  // counts crossings
+    auto ntk = mincross(tec_r, p, &st);  // counts crossings
     CHECK(st.num_crossings == 5);
 
-    ntk = mincross(tec_r, p, &st);
+    p.optimize = true;
+    ntk        = mincross(tec_r, p, &st);
     CHECK(st.num_crossings == 2);
 }
