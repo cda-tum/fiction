@@ -483,15 +483,13 @@ class mincross_impl
     {
         std::vector<uint32_t> left_targets{};
         left_targets.reserve(fanout_ntk.fanout_size(left));
-        fanout_ntk.foreach_fanout(left, [&](auto const& tgt) {
-                                      left_targets.push_back(fanout_ntk.rank_position(tgt));
-                                  });
+        fanout_ntk.foreach_fanout(left,
+                                  [&](auto const& tgt) { left_targets.push_back(fanout_ntk.rank_position(tgt)); });
 
         std::vector<uint32_t> right_targets{};
         right_targets.reserve(fanout_ntk.fanout_size(right));
-        fanout_ntk.foreach_fanout(right, [&](auto const& tgt) {
-                                      right_targets.push_back(fanout_ntk.rank_position(tgt));
-                                  });
+        fanout_ntk.foreach_fanout(right,
+                                  [&](auto const& tgt) { right_targets.push_back(fanout_ntk.rank_position(tgt)); });
 
         return count_crossings(left_targets, right_targets);
     }
