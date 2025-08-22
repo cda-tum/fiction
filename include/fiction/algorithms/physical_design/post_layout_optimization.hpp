@@ -363,7 +363,6 @@ void check_and_optimize_po_positions(Lyt& lyt, uint64_t& moved_gates) noexcept
                 {
                     // get fanin signal of the PO
                     std::vector<mockturtle::signal<Lyt>> signals{};
-                    signals.reserve(1);
                     lyt.foreach_fanin(lyt.get_node(tile), [&signals](const auto& fanin) { signals.push_back(fanin); });
 
                     // move PO to the rightmost border
@@ -382,7 +381,6 @@ void check_and_optimize_po_positions(Lyt& lyt, uint64_t& moved_gates) noexcept
                 {
                     // get fanin signal of the PO
                     std::vector<mockturtle::signal<Lyt>> signals{};
-                    signals.reserve(1);
                     lyt.foreach_fanin(lyt.get_node(tile), [&signals](const auto& fanin) { signals.push_back(fanin); });
 
                     // move PO to the bottom border
