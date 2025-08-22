@@ -352,7 +352,7 @@ void optimize_output_positions(Lyt& lyt) noexcept
 template <typename Lyt>
 void check_and_optimize_po_positions(Lyt& lyt, uint64_t& moved_gates) noexcept
 {
-    // check all POs are in right (x=lyt.x()) or bottom (y=lyt.y()) border
+    // check that all POs are at the right (x = lyt.x()) or bottom (y = lyt.y()) border
     lyt.foreach_po(
         [&lyt, &moved_gates](const auto& po) noexcept
         {
@@ -401,7 +401,7 @@ void check_and_optimize_po_positions(Lyt& lyt, uint64_t& moved_gates) noexcept
         });
 
     // update bounding box after PO optimizations
-    auto bounding_box = bounding_box_2d(lyt);
+    const auto bounding_box = bounding_box_2d(lyt);
     lyt.resize({bounding_box.get_max().x, bounding_box.get_max().y, lyt.z()});
 }
 /**
@@ -1251,19 +1251,19 @@ void post_layout_optimization(const Lyt& lyt, post_layout_optimization_params ps
         return;
     }
 
-    // check all PIs are in left (x=0) or top (y=0) row
+    // check that all PIs are at the left (x = 0) or top (y = 0) border
     lyt.foreach_pi(
         [&lyt](const auto& pi) noexcept
         {
             if (const auto tile = lyt.get_tile(pi);
                 !(lyt.is_at_northern_border(tile) || lyt.is_at_western_border(tile)))
             {
-                std::cout << "[e] Invalid layout: All PIs must be located in the left (x=0) or top (y=0) border\n";
+                std::cout << "[e] Invalid layout: All PIs must be located at the left (x = 0) or top (y = 0) border\n";
                 return;
             }
         });
 
-    // check all POs are in right (x=lyt.x()) or bottom (y=lyt.y()) border
+    // check all POs are at the right (x = lyt.x()) or bottom (y = lyt.y()) border
     lyt.foreach_po(
         [&lyt](const auto& po) noexcept
         {
@@ -1271,7 +1271,7 @@ void post_layout_optimization(const Lyt& lyt, post_layout_optimization_params ps
                 !(lyt.is_at_eastern_border(tile) || lyt.is_at_southern_border(tile)))
             {
                 std::cout << fmt::format(
-                    "[e] Invalid layout: All POs must be located in the right (x={}) or bottom (y={}) border\n",
+                    "[e] Invalid layout: All POs must be located at the right (x = {}) or bottom (y = {}) border\n",
                     lyt.x(), lyt.y());
                 return;
             }

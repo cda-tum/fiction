@@ -127,7 +127,7 @@ TEST_CASE("Layout equivalence", "[wiring_reduction]")
         const auto layout_corner_case_5 = blueprints::optimization_layout_corner_case_outputs_5<gate_layout>();
         wiring_reduction_stats stats_corner_case_5{};
         wiring_reduction<gate_layout>(layout_corner_case_5, {}, &stats_corner_case_5);
-        check_eq(blueprints::optimization_layout_corner_case_outputs_4<gate_layout>(), layout_corner_case_5);
+        check_eq(blueprints::optimization_layout_corner_case_outputs_5<gate_layout>(), layout_corner_case_5);
 
         const auto layout_corner_case_inputs = blueprints::optimization_layout_corner_case_inputs<gate_layout>();
         wiring_reduction_stats stats_corner_case_inputs{};
