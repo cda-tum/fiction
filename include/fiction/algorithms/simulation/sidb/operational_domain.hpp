@@ -1190,12 +1190,12 @@ class operational_domain_impl
         auto op_params_set_dimension_values                  = params.operational_params;
         op_params_set_dimension_values.simulation_parameters = sim_params;
 
-        const auto& [status, sim_calls] = is_operational(layout, truth_table, op_params_set_dimension_values,
-                                                         input_bdl_wires, output_bdl_wires, std::optional{canvas_lyt});
+        const auto& assessment_results = is_operational(layout, truth_table, op_params_set_dimension_values,
+                                                        input_bdl_wires, output_bdl_wires, std::optional{canvas_lyt});
 
-        num_simulator_invocations += sim_calls;
+        num_simulator_invocations += assessment_results.simulator_invocations;
 
-        if (status == operational_status::NON_OPERATIONAL)
+        if (assessment_results.status == operational_status::NON_OPERATIONAL)
         {
             return non_operational();
         }

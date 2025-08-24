@@ -155,10 +155,13 @@ int main()  // NOLINT
 
     const std::array layout_names{"2i1o", "2i2o", "3i1o", "3i2o", "3i3o"};
 
-    is_operational_params operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
-                                             bdl_input_iterator_params{detect_bdl_wires_params{3.0}},
-                                             is_operational_params::operational_condition::REJECT_KINKS,
-                                             is_operational_params::operational_analysis_strategy::SIMULATION_ONLY};
+    is_operational_params operational_params{
+        sidb_simulation_parameters{2, -0.32},
+        sidb_simulation_engine::QUICKEXACT,
+        bdl_input_iterator_params{detect_bdl_wires_params{3.0}},
+        is_operational_params::operational_condition_kinks::REJECT_KINKS,
+        is_operational_params::operational_condition_positive_charges::REJECT_POSITIVE_CHARGES,
+        is_operational_params::operational_analysis_strategy::SIMULATION_ONLY};
 
     for (size_t i = 0; i < layout_truth_table.size(); ++i)
     {
