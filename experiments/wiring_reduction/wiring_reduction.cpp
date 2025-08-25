@@ -67,8 +67,7 @@ int main()  // NOLINT
     fiction::orthogonal_physical_design_stats orthogonal_stats{};
     fiction::wiring_reduction_stats           wiring_reduction_stats{};
 
-    static constexpr const uint64_t bench_select =
-        (fiction_experiments::trindade16 | fiction_experiments::fontes18) & ~fiction_experiments::clpl;
+    static constexpr const uint64_t bench_select = fiction_experiments::trindade16 | fiction_experiments::fontes18;
 
     for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
     {
