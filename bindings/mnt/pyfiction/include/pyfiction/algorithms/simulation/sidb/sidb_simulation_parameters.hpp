@@ -22,7 +22,6 @@ namespace pyfiction
 inline void sidb_simulation_parameters(pybind11::module& m)
 {
     namespace py = pybind11;
-    namespace py = pybind11;
 
     py::class_<fiction::sidb_simulation_parameters>(m, "sidb_simulation_parameters",
                                                     DOC(fiction_sidb_simulation_parameters))
