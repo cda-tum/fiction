@@ -541,6 +541,61 @@ GateLyt optimization_layout_corner_case_outputs_2() noexcept
 }
 
 template <typename GateLyt>
+GateLyt optimization_layout_corner_case_outputs_3() noexcept
+{
+    GateLyt layout{{4, 1, 0}, fiction::twoddwave_clocking<GateLyt>()};
+
+    const auto x1 = layout.create_pi("x1", {0, 0});
+    const auto x2 = layout.create_pi("x2", {0, 1});
+
+    const auto w1 = layout.create_buf(x1, {1, 0});
+    const auto w2 = layout.create_buf(w1, {2, 0});
+    const auto w3 = layout.create_buf(w2, {3, 0});
+    const auto w4 = layout.create_not(x2, {1, 1});
+
+    layout.create_po(w3, "f1", {4, 0});
+    layout.create_po(w4, "f2", {2, 1});
+
+    return layout;
+}
+
+template <typename GateLyt>
+GateLyt optimization_layout_corner_case_outputs_4() noexcept
+{
+    GateLyt layout{{2, 2, 0}, fiction::twoddwave_clocking<GateLyt>()};
+
+    const auto x1 = layout.create_pi("x1", {0, 0});
+    const auto x2 = layout.create_pi("x2", {0, 1});
+
+    const auto w1 = layout.create_buf(x1, {1, 0});
+    const auto w2 = layout.create_not(x2, {1, 1});
+
+    layout.create_po(w1, "f1", {2, 0});
+    layout.create_po(w2, "f2", {1, 2});
+
+    return layout;
+}
+
+template <typename GateLyt>
+GateLyt optimization_layout_corner_case_outputs_5() noexcept
+{
+    GateLyt layout{{2, 4, 1}, fiction::twoddwave_clocking<GateLyt>()};
+
+    const auto x1 = layout.create_pi("x1", {0, 2});
+    const auto x2 = layout.create_pi("x2", {1, 0});
+
+    const auto w1 = layout.create_buf(x1, {1, 2});
+    const auto w2 = layout.create_buf(x2, {1, 1});
+    const auto w3 = layout.create_buf(w2, {1, 2, 1});
+    const auto w4 = layout.create_not(w3, {1, 3});
+
+    layout.create_po(w1, "f1", {2, 2});
+    layout.create_po(w4, "f2", {1, 4});
+
+    return layout;
+}
+
+template <typename GateLyt>
 GateLyt optimization_layout_corner_case_inputs() noexcept
 {
     GateLyt layout{{3, 2, 0}, fiction::twoddwave_clocking<GateLyt>()};
@@ -591,6 +646,49 @@ GateLyt planar_optimization_layout() noexcept
 
     layout.create_po(w2, "f1", {2, 1});
     layout.create_po(not1, "f2", {2, 2});
+
+    return layout;
+}
+
+template <typename GateLyt>
+GateLyt pi_not_in_border_optimization_layout() noexcept
+{
+    GateLyt layout{{2, 1, 0}, fiction::twoddwave_clocking<GateLyt>()};
+
+    const auto x1 = layout.create_pi("x1", {1, 1});
+    layout.create_po(x1, "f1", {2, 1});
+
+    return layout;
+}
+
+template <typename GateLyt>
+GateLyt po_not_in_border_optimization_layout() noexcept
+{
+    GateLyt layout{{1, 2, 0}, fiction::twoddwave_clocking<GateLyt>()};
+
+    const auto x1 = layout.create_pi("x1", {0, 0});
+    layout.create_po(x1, "f1", {0, 1});
+
+    return layout;
+}
+
+template <typename GateLyt>
+GateLyt po_have_to_be_moved_to_border_optimization_layout() noexcept
+{
+    GateLyt layout{{2, 3, 0}, fiction::twoddwave_clocking<GateLyt>()};
+
+    const auto x1 = layout.create_pi("x1", {0, 0});
+    const auto x2 = layout.create_pi("x2", {0, 1});
+    const auto x3 = layout.create_pi("x3", {0, 2});
+
+    const auto w1 = layout.create_buf(x1, {1, 0});
+    const auto w2 = layout.create_buf(x2, {1, 1});
+    const auto w3 = layout.create_buf(w2, {1, 2});
+
+    layout.create_po(w1, "f1", {2, 0});
+    layout.create_po(w2, "f2", {2, 1});
+    layout.create_po(w3, "f3", {1, 3});
+    layout.create_po(x3, "f4", {0, 3});
 
     return layout;
 }
