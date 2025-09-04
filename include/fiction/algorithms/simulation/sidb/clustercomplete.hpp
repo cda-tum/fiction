@@ -117,7 +117,6 @@ class clustercomplete_impl
     clustercomplete_impl(const Lyt& lyt, const clustercomplete_params<cell<Lyt>>& params) noexcept :
             available_threads{std::max(uint64_t{1}, params.available_threads)},
             charge_layout{initialize_charge_layout(lyt, params)},
-            real_placed_defects{charge_layout.get_defects()},
             mu_bounds_with_error{constants::ERROR_MARGIN - params.simulation_parameters.mu_minus,
                                  -constants::ERROR_MARGIN - params.simulation_parameters.mu_minus,
                                  constants::ERROR_MARGIN - params.simulation_parameters.mu_plus(),
@@ -240,14 +239,9 @@ class clustercomplete_impl
      */
     std::mutex mutex_to_protect_the_simulation_results;
     /**
-     * The base layout, along with the map of placed defects, that are used to create charge distribution surface
-     * copies.
+     * The base layout that is used to create charge distribution surface copies.
      */
     const charge_distribution_surface<Lyt> charge_layout;
-    /**
-     * Atomic defects that are placed in the layout.
-     */
-    const std::unordered_map<typename Lyt::cell, const sidb_defect> real_placed_defects;
     /**
      * Globally available array of bounds that section the band gap, used for pruning.
      */
@@ -417,30 +411,31 @@ class clustercomplete_impl
                                                             singleton_multiset_conf_to_charge_state(pst->multiset_conf),
                                                             charge_index_mode::KEEP_CHARGE_INDEX);
 
-            charge_layout_copy.assign_local_potential_by_index(
-                sidb_ix, -clustering_state.pot_bounds.get<bound_direction::LOWER>(sidb_ix));
-        }
+            assert(charge_layout_copy.get_local_external_potential_by_index(sidb_ix).has_value() &&
+                   "Local external potential at SiDB is undefined");
 
-        charge_layout_copy.recompute_system_energy();
+            charge_layout_copy.assign_local_internal_potential_by_index(
+                sidb_ix, -clustering_state.pot_bounds.get<bound_direction::LOWER>(sidb_ix) -
+                             *charge_layout_copy.get_local_external_potential_by_index(sidb_ix));
+        }
 
         if (!charge_layout_copy.is_configuration_stable())
         {
             return;
         }
 
-        charge_layout_copy.charge_distribution_to_index();
-
         // population stability is a given when this function is called; hence the charge distribution is physically
         // valid when configuration stability is met
         charge_layout_copy.declare_physically_valid();
 
-        if constexpr (has_get_sidb_defect_v<Lyt>)
+        if constexpr (is_sidb_defect_surface_v<Lyt>)
         {
-            for (const auto& [cell, defect] : real_placed_defects)
-            {
-                charge_layout_copy.assign_sidb_defect(cell, defect);
-            }
+            charge_layout_copy.update_local_defect_potential();
         }
+
+        charge_layout_copy.recompute_electrostatic_potential_energy();
+
+        charge_layout_copy.charge_distribution_to_index();
 
         {
             const std::lock_guard lock{mutex_to_protect_the_simulation_results};

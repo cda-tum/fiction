@@ -1,7 +1,7 @@
 name: Clang-Tidy Review
 
 on:
-  pull_request:
+  pull_request_target:
     paths:
       - "**/*.hpp"
       - "**/*.cpp"
@@ -13,6 +13,10 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   clangtidy:
     runs-on: ubuntu-latest
@@ -20,40 +24,41 @@ jobs:
 
     steps:
       - name: Clone Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
+          # Check out the PR's code, not the base branch's code
+          ref: ${{ github.event.pull_request.head.sha }}
           submodules: recursive
+          fetch-depth: 0
 
-      - name: Review code with Clang-Tidy
-        uses: ZedThree/clang-tidy-review@v0.21.0
-        id: review
-        with:
-          cmake_command: >
-            cmake . -B build
-            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
-            -DFICTION_CLI=ON
-            -DFICTION_TEST=ON
-            -DFICTION_BENCHMARK=OFF
-            -DFICTION_EXPERIMENTS=ON
-            -DFICTION_ALGLIB=ON
-            -DMOCKTURTLE_EXAMPLES=OFF
-          build_dir: build
-          apt_packages: "libreadline-dev,libtbb-dev,python3-dev"
-          config_file: ".clang-tidy"
-          exclude: "libs/*,docs/*,benchmarks/*,bib/*,*/pyfiction/pybind11_mkdoc_docstrings.hpp,*/pyfiction/documentation.hpp"
-          split_workflow: true
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y cmake libreadline-dev libtbb-dev python3-dev
 
-      - name: Make sure that the review file exists
-        id: check-review-output
-        uses: andstor/file-existence-action@v3.0.0
-        with:
-          files: "clang-tidy-review-output.json"
-          ignore_case: true
+      - name: Generate compilation database
+        run: >
+          cmake -B build -S .
+          -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+          -DFICTION_CLI=ON
+          -DFICTION_TEST=ON
+          -DFICTION_BENCHMARK=OFF
+          -DFICTION_EXPERIMENTS=ON
+          -DFICTION_ALGLIB=ON
+          -DMOCKTURTLE_EXAMPLES=OFF
 
-      - name: Upload review artifact
-        uses: actions/upload-artifact@v4
+      - name: Run clang-tidy
+        id: linter
+        uses: cpp-linter/cpp-linter-action@v2.16.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: clang-tidy-review
-          path: |
-            clang-tidy-review-output.json
-            clang-tidy-review-metadata.json
+          style: ""
+          tidy-checks: ""
+          database: "build"
+          files-changed-only: "true"
+          thread-comments: ${{ github.event_name == 'pull_request' && 'update' }}
+          file-annotations: "true"
+          ignore-tidy: "build|libs/*|docs/*|benchmarks/*|bib/*|*/pyfiction/pybind11_mkdoc_docstrings.hpp|*/pyfiction/documentation.hpp"
+          version: "20"
+
+      - if: steps.linter.outputs.checks-failed > 0
+        run: exit 1

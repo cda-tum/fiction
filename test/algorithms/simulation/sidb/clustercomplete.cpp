@@ -464,7 +464,7 @@ TEMPLATE_TEST_CASE(
 }
 
 TEMPLATE_TEST_CASE(
-    "four SiDBs ClusterComplete simulation with one negatively charge defect (changed epsilon_r) in proximity",
+    "four SiDBs ClusterComplete simulation with one negatively charge defect (changed mu_minus) in proximity",
     "[clustercomplete]", (sidb_defect_surface<sidb_100_cell_clk_lyt_siqad>),
     (charge_distribution_surface<sidb_defect_surface<sidb_100_cell_clk_lyt_siqad>>))
 {

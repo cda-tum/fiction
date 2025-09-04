@@ -92,6 +92,18 @@ TEST_CASE("SiQAD OR gate", "[is-operational]")
     }
 }
 
+TEST_CASE("Test is_physical_validity_feasible for empty canvas", "[is-operational]")
+{
+    const auto lyt = blueprints::two_input_two_output_bestagon_skeleton<sidb_cell_clk_lyt_siqad>();
+
+    const auto op_params =
+        is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
+                              bdl_input_iterator_params{}, is_operational_params::operational_condition::REJECT_KINKS,
+                              is_operational_params::operational_analysis_strategy::FILTER_THEN_SIMULATION};
+
+    CHECK(is_operational(lyt, create_crossing_wire_tt(), op_params).first == operational_status::NON_OPERATIONAL);
+}
+
 TEST_CASE("SiQAD NAND gate", "[is-operational]")
 {
     const auto nand_gate = blueprints::siqad_nand_gate<sidb_cell_clk_lyt_siqad>();

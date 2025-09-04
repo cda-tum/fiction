@@ -101,7 +101,12 @@ class TestDesignSiDBGates(unittest.TestCase):
         designed_gates = design_sidb_gates(layout, [create_nor_tt()], params)
         self.assertEqual(len(designed_gates), 44)
 
+        params.design_mode = design_sidb_gates_mode.PRUNING_ONLY
+        designed_gate_candidates = design_sidb_gates(layout, [create_nor_tt()], params)
+        self.assertEqual(len(designed_gate_candidates), 44)
+
         # tolerate kink states
+        params.design_mode = design_sidb_gates_mode.AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER
         params.operational_params.op_condition = operational_condition.TOLERATE_KINKS
         designed_gates = design_sidb_gates(layout, [create_nor_tt()], params)
         self.assertEqual(len(designed_gates), 175)

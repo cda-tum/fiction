@@ -82,6 +82,18 @@ band_bending_resilience(const Lyt& lyt, const std::vector<TT>& spec, const band_
                     minimal_pop_stability_for_all_inputs = potential_required_for_considered_transition;
                 }
             }
+            else
+            {
+                // if no transition type is specified, we take the minimum potential required for any transition
+                for (const auto& transition : ground_state_stability_for_given_input.transition_potentials)
+                {
+                    const auto potential_required_for_transition = transition.second.second;
+                    if (potential_required_for_transition < minimal_pop_stability_for_all_inputs)
+                    {
+                        minimal_pop_stability_for_all_inputs = potential_required_for_transition;
+                    }
+                }
+            }
         }
     }
     return minimal_pop_stability_for_all_inputs;

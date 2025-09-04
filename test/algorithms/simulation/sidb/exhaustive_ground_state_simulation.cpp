@@ -453,3 +453,24 @@ TEMPLATE_TEST_CASE("ExGS gate simulation of Si-111 surface", "[exhaustive-ground
     CHECK(ground_state.front().get_charge_state({4, 10, 0}) == sidb_charge_state::NEGATIVE);
     CHECK(ground_state.front().get_charge_state({4, 14, 0}) == sidb_charge_state::NEGATIVE);
 }
+
+TEMPLATE_TEST_CASE("7 SiDB layout", "[exhaustive-ground-state-simulation]", (sidb_100_cell_clk_lyt_siqad))
+{
+    TestType lyt{};
+
+    lyt.assign_cell_type({-6, 1, 1}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({2, 4, 1}, TestType::cell_type::NORMAL);
+
+    lyt.assign_cell_type({4, 6, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 3, 1}, TestType::cell_type::NORMAL);
+
+    lyt.assign_cell_type({-8, -3, 1}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({-1, -1, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({0, 2, 0}, TestType::cell_type::NORMAL);
+
+    const sidb_simulation_parameters params{2, -0.25};
+
+    const auto simulation_results = exhaustive_ground_state_simulation<TestType>(lyt, params);
+
+    CHECK(simulation_results.charge_distributions.size() == 1);
+}

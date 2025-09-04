@@ -219,8 +219,52 @@ TEST_CASE("Benchmark simulators", "[benchmark]")
 //                                         8.07302 ms      4.73162 ms         14.0938 ms
 //
 //      ClusterComplete (single-threaded)  100             1                  726.747 ms
-//                                         7.08628 ms      7.07611 ms         7.09851  ms
+//                                         7.08628 ms      7.07611 ms         7.09851 ms
 //                                         56.9189 us      47.144 us          73.1902 us
+
+//      AMD Ryzen Threadripper PRO 5955X, Ubuntu 20.04, Ubuntu clang version 18.1.3 (12.05.2025)
+//
+//      After PR #738 (without jemalloc)
+//      benchmark name                       samples         iterations       est run time
+//                                           mean            low mean         high mean
+//                                           std dev         low std dev      high std dev
+//      ------------------------------------------------------------------------------------
+//      QuickExact                           100              1               1.62095 m
+//                                           1.0263 s         1.02484 s       1.02932 s
+//                                           10.2365 ms       6.13745 ms      16.0045 ms
+//
+//      QuickSim                             100              1               269.557 ms
+//                                           2.74004 ms       2.71588 ms      2.80411 ms
+//                                           185.301 us       74.8133 us      370.784 us
+//
+//      ClusterComplete (multi-threaded)     100              1               2.23624 s
+//                                           9.91647 ms       7.37725 ms      15.7107 ms
+//                                           18.5248 ms       7.67377 ms      31.9493 ms
+//
+//      ClusterComplete (single-threaded)    100              1               705.844 ms
+//                                           7.06819 ms       7.05496 ms      7.08097 ms
+//                                           66.2555 us       55.7839 us      80.9501 us
+//
+//      After PR #738 (with jemalloc)
+//      benchmark name                       samples         iterations       est run time
+//                                           mean            low mean         high mean
+//                                           std dev         low std dev      high std dev
+//      ------------------------------------------------------------------------------------
+//      QuickExact                           100              1               1.61535 m
+//                                           1.02306 s        1.02131 s       1.02654 s
+//                                           12.1723 ms       6.84374 ms      22.3491 ms
+//
+//      QuickSim                             100              1               195.089 ms
+//                                           2.00618 ms       1.97771 ms      2.07086 ms
+//                                           211.811 us       112.749 us      346.251 us
+//
+//      ClusterComplete (multi-threaded)     100              1               791.414 ms
+//                                           7.76209 ms       6.36529 ms      10.3966 ms
+//                                           9.49968 ms       5.8101 ms       15.033 ms
+//
+//      ClusterComplete (single-threaded)    100              1               803.497 ms
+//                                           8.06843 ms       8.05748 ms      8.07985 ms
+//                                           56.9453 us       49.6048 us      67.6442 us
 
 #if (FICTION_ALGLIB_ENABLED)
 TEST_CASE("Benchmark ClusterComplete", "[benchmark]")
@@ -264,50 +308,83 @@ TEST_CASE("Benchmark ClusterComplete", "[benchmark]")
 //      AMD Ryzen Threadripper PRO 5955X, Ubuntu 20.04, Ubuntu clang version 18.1.3 (15.01.2025)
 //
 //      Without jemalloc:
-//      benchmark name                      samples             iterations              est run time
-//                                          mean                low mean                high mean
-//                                          std dev             low std dev             high std dev
-//      ---------------------------------------------------------------------------------------------
-//      4 Segment Diagonal Bestagon Wire    100                 1                       2.39773 m
-//                                          1.44927 s           1.44573 s               1.45397 s
-//                                          20.5985 ms          16.1537 ms              32.1081 ms
+//      benchmark name                      samples             iterations       est run time
+//                                          mean                low mean         high mean
+//                                          std dev             low std dev      high std dev
+//      --------------------------------------------------------------------------------------
+//      4 Segment Diagonal Bestagon Wire    100                 1                2.39773 m
+//                                          1.44927 s           1.44573 s        1.45397 s
+//                                          20.5985 ms          16.1537 ms       32.1081 ms
 //
 //      With jemalloc:
-//      benchmark name                      samples             iterations              est run time
-//                                          mean                low mean                high mean
-//                                          std dev             low std dev             high std dev
-//      ---------------------------------------------------------------------------------------------
-//      4 Segment Diagonal Bestagon Wire    100                 1                       1.39364 m
-//                                          835.42 ms           833.679 ms              837.076 ms
-//                                          8.68306 ms          7.61487 ms              10.1187 ms
+//      benchmark name                      samples             iterations       est run time
+//                                          mean                low mean         high mean
+//                                          std dev             low std dev      high std dev
+//      --------------------------------------------------------------------------------------
+//      4 Segment Diagonal Bestagon Wire    100                 1                1.39364 m
+//                                          835.42 ms           833.679 ms       837.076 ms
+//                                          8.68306 ms          7.61487 ms       10.1187 ms
 
 //      AMD Ryzen Threadripper PRO 5955X, Ubuntu 20.04, Ubuntu clang version 18.1.3 (11.02.2025)
 //
 //      Before PR #664 (with jemalloc)
-//      benchmark name                      samples             iterations              est run time
-//                                          mean                low mean                high mean
-//                                          std dev             low std dev             high std dev
-//      ---------------------------------------------------------------------------------------------
-//      4 Segment Diagonal Bestagon Wire    100                 1                       1.38135 m
-//      (multi-threaded)                    837.966 ms          835.809 ms              841.715 ms
-//                                          14.1689 ms          9.41514 ms              24.4521 ms
+//      benchmark name                      samples             iterations       est run time
+//                                          mean                low mean         high mean
+//                                          std dev             low std dev      high std dev
+//      --------------------------------------------------------------------------------------
+//      4 Segment Diagonal Bestagon Wire    100                 1                1.38135 m
+//      (multi-threaded)                    837.966 ms          835.809 ms       841.715 ms
+//                                          14.1689 ms          9.41514 ms       24.4521 ms
 //
 //      3 Segment Diagonal Bestagon Wire
-//      (single-threaded)                   100                 1                       19.6147 s
-//                                          192.324 ms          191.795 ms              192.866 ms
-//                                          2.73183 ms          2.45956 ms              3.0714 ms
+//      (single-threaded)                   100                 1                19.6147 s
+//                                          192.324 ms          191.795 ms       192.866 ms
+//                                          2.73183 ms          2.45956 ms       3.0714 ms
 //
 //      After PR #664 (with jemalloc)
-//      benchmark name                      samples             iterations              est run time
-//                                          mean                low mean                high mean
-//                                          std dev             low std dev             high std dev
-//      ---------------------------------------------------------------------------------------------
+//      benchmark name                      samples             iterations       est run time
+//                                          mean                low mean         high mean
+//                                          std dev             low std dev      high std dev
+//      --------------------------------------------------------------------------------------
 //      4 Segment Diagonal Bestagon Wire
-//      (multi-threaded)                    100                 1                       1.35702 m
-//                                          821.239 ms          819.725 ms              822.841 ms
-//                                          7.96672 ms          7.01983 ms              9.21399 ms
+//      (multi-threaded)                    100                 1                1.35702 m
+//                                          821.239 ms          819.725 ms       822.841 ms
+//                                          7.96672 ms          7.01983 ms       9.21399 ms
 //
 //      3 Segment Diagonal Bestagon Wire
-//      (single-threaded)                   100                 1                       18.5153 s
-//                                          187.65 ms           187.029 ms              188.333 ms
-//                                          3.31611 ms          2.83437 ms              4.32337 ms
+//      (single-threaded)                   100                 1                18.5153 s
+//                                          187.65 ms           187.029 ms       188.333 ms
+//                                          3.31611 ms          2.83437 ms       4.32337 ms
+
+//      AMD Ryzen Threadripper PRO 5955X, Ubuntu 20.04, Ubuntu clang version 18.1.3 (12.05.2025)
+//
+//      After PR #738 (without jemalloc)
+//      benchmark name                          samples         iterations       est run time
+//                                              mean            low mean         high mean
+//                                              std dev         low std dev      high std dev
+//      --------------------------------------------------------------------------------------
+//      4 Segment Diagonal Bestagon Wire
+//      (multi-threaded)                        100             1                1.39561 m
+//                                              855.996 ms      852.867 ms       863.226 ms
+//                                              22.9268 ms      12.1374 ms       45.2192 ms
+//
+//      3 Segment Diagonal Bestagon Wire
+//      (single-threaded)                       100             1                19.4726 s
+//                                              194.102 ms      193.282 ms       194.917 ms
+//                                              4.18614 ms      3.77211 ms       4.69498 ms
+//
+//      After PR #738 (with jemalloc)
+//
+//      benchmark name                          samples         iterations       est run time
+//                                              mean            low mean         high mean
+//                                              std dev         low std dev      high std dev
+//      --------------------------------------------------------------------------------------
+//      4 Segment Diagonal Bestagon Wire
+//      (multi-threaded)                        100              1               2.4024 m
+//                                              1.47767 s        1.47438 s       1.48129 s
+//                                              17.6153 ms       15.1925 ms      20.6301 ms
+//
+//      3 Segment Diagonal Bestagon Wire
+//      (single-threaded)                       100              1               26.4334 s
+//                                              268.317 ms       267.88 ms       268.789 ms
+//                                              2.32011 ms       2.0288 ms       2.74071 ms
