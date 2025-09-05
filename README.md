@@ -114,6 +114,24 @@ from mnt import pyfiction
 For a full getting started guide, please refer to
 the [documentation](https://fiction.readthedocs.io/en/latest/getting_started.html).
 
+## 🐳 Quick Start (Docker)
+
+Use the pre-built container image to run the CLI without installing any dependencies locally.
+
+> Pull the latest image (hosted at DockerHub under `mawalter/fiction`):
+
+```bash
+docker pull mawalter/fiction:latest
+```
+
+> Launch an interactive CLI session (the default CMD starts the CLI):
+
+```bash
+docker run --rm -it mawalter/fiction
+```
+
+Inside the container, the repository lives at `/app/fiction`.
+
 ## 🧪 Supported Technologies
 
 Physical design in _fiction_ can be performed technology-independent. Only if resulted layouts are to be physically,
