@@ -135,7 +135,7 @@ Furthermore, if you use any of the design automation algorithms, please consider
 
     .. code-block:: tex
 
-        @inproceedings{lambooy2025clustercomplete,
+        @inproceedings{lambooy2026clustercomplete,
           title={{Mastering the Exponential Complexity of Exact Physical Simulation of Silicon Dangling Bonds}},
           author={Lambooy, Willem and Drewniok, Jan and Walter, Marcel and Wille, Robert},
           booktitle={Asia and South Pacific Design Automation Conference (ASP-DAC)},
@@ -193,17 +193,17 @@ Furthermore, if you use any of the design automation algorithms, please consider
 
         @inproceedings{drewniok2025efficientgatedesign,
           title={{Towards Fast Automatic Design of Silicon Dangling Bond Logic}},
-          author={Drewniok, Jan and Walter, Marcel and Hang Ng, Samuel Sze and Walus, Konrad and Wille, Robert},
+          author={Drewniok, Jan and Walter, Marcel and Ng, Samuel Sze Hang and Walus, Konrad and Wille, Robert},
           booktitle={Design, Automation and Test in Europe Conference \& Exhibition (DATE)},
           year={2025}
         }
 
     .. code-block:: tex
 
-        @inproceedings{drewniok2025quickcell,
+        @article{drewniok2025quickcell,
           title={{QuickCell: Fast Automatic Design of Standard Cells for Silicon Dangling Bond Logic}},
-          author={Drewniok, Jan and Walter, Marcel and Hang Ng, Samuel Sze and Walus, Konrad and Wille, Robert},
-          booktitle={IEEE Transactions on Computer Aided Design of Integrated Circuits and Systems (TCAD)},
+          author={Drewniok, Jan and Walter, Marcel and Ng, Samuel Sze and Walus, Konrad and Wille, Robert},
+          journal={IEEE Transactions on Computer Aided Design of Integrated Circuits and Systems (TCAD)},
           year={2025}
         }
 
@@ -308,7 +308,7 @@ Furthermore, if you use any of the design automation algorithms, please consider
 
         @inproceedings{walter2024defectaware,
           title={{Towards Atomic Defect-Aware Physical Design of Silicon Dangling Bond Logic on the H-Si(100)-$2\times1$ Surface}},
-          author={Walter, Marcel and Croshaw, Jeremiah and Hang Ng, Samuel Sze and Walus, Konrad and Wolkow, Robert and Wille, Robert},
+          author={Walter, Marcel and Croshaw, Jeremiah and Ng, Samuel Sze Hang and Walus, Konrad and Wolkow, Robert and Wille, Robert},
           booktitle={Design, Automation and Test in Europe Conference \& Exhibition (DATE)},
           pages={1--2},
           year={2024}
@@ -336,7 +336,7 @@ Furthermore, if you use any of the design automation algorithms, please consider
 
         @inproceedings{drewniok2024ontheflydesign,
           title={{On-the-fly Defect-Aware Design of Circuits based on Silicon Dangling Bond Logic}},
-          author={Drewniok, Jan and Walter, Marcel and Hang Ng, Samuel Sze and Walus, Konrad and Wille, Robert},
+          author={Drewniok, Jan and Walter, Marcel and Ng, Samuel Sze Hang and Walus, Konrad and Wille, Robert},
           booktitle={IEEE International Conference on Nanotechnology (IEEE NANO)},
           pages={30--35},
           year={2024}
@@ -350,7 +350,7 @@ Furthermore, if you use any of the design automation algorithms, please consider
 
         @inproceedings{drewniok2024figuresofmerit,
           title={{Unifying Figures of Merit: A Versatile Cost Function for Silicon Dangling Bond Logic}},
-          author={Drewniok, Jan and Walter, Marcel and Hang Ng, Samuel Sze and Walus, Konrad and Wille, Robert},
+          author={Drewniok, Jan and Walter, Marcel and Ng, Samuel Sze Hang and Walus, Konrad and Wille, Robert},
           booktitle={IEEE International Conference on Nanotechnology (IEEE NANO)},
           pages={91--96},
           year={2024}
