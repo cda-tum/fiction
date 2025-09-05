@@ -788,6 +788,10 @@ class design_sidb_gates_impl
  * J. Drewniok, M. Walter, S. S. H. Ng, K. Walus, and R. Wille in DATE 2025
  * (https://ieeexplore.ieee.org/abstract/document/10992885).
  *
+ * An extended version of `QuickCell` was proposed in \"QuickCell: Fast Automatic Design of Standard Cells for Silicon
+ * Dangling Bond Logic\" by J. Drewniok, M. Walter, S. S. H. Ng, K. Walus, and R. Wille in TCAD 2025
+ * (https://ieeexplore.ieee.org/document/11146893).
+ *
  * The `Automatic Exhaustive Gate Designer` was proposed in
  * \"Minimal Design of SiDB Gates: An Optimal Basis for Circuits Based on Silicon Dangling Bonds\" by J. Drewniok, M.
  * Walter, and R. Wille in NANOARCH 2023 (https://dl.acm.org/doi/10.1145/3611315.3633241).

@@ -1171,6 +1171,9 @@ class clustercomplete_impl
  * simulator, now applying to all charge states equally, and, most importantly, it lifts the associated potential
  * equations to higher order, allowing us to reason over potential bounds in a cluster hierarchy.
  *
+ * *ClusterComplete* was proposed in \"Mastering the Exponential Complexity of Exact Physical Simulation of Silicon
+ * Dangling Bonds\" by W. Lambooy, J. Drewniok, M. Walter, and R. Wille in ASP-DAC 2026.
+ *
  * @tparam Lyt SiDB cell-level layout type.
  * @param lyt Layout to simulate.
  * @param params Parameter required for both the invocation of *Ground State Space*, and the simulation following.
