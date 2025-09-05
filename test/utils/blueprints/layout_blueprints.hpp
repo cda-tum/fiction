@@ -741,7 +741,7 @@ GateLyt po_extension_corner_case_layout() noexcept
     const auto w8 = layout.create_buf(w7, {2, 2, 1});
     layout.create_po(w8, "f3", {2, 3});
 
-    const auto x4  = layout.create_pi("x3", {3, 0});
+    const auto x4  = layout.create_pi("x4", {3, 0});
     const auto w9  = layout.create_buf(x4, {3, 1, 1});
     const auto w10 = layout.create_buf(w9, {3, 2, 1});
     layout.create_po(w10, "f4", {3, 3});
