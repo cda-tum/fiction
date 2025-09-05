@@ -267,11 +267,11 @@ simulated using a physical model. Currently, the following simulation algorithms
 - Silicon Dangling Bonds (SiDBs)
   - Electrostatic Ground State Simulation
     - [_ClusterComplete_](https://fiction.readthedocs.io/en/latest/algorithms/sidb_simulation.html#_CPPv4I0EN7fiction15clustercompleteE22sidb_simulation_resultI3LytERK3LytRK22clustercomplete_paramsI4cellI3LytEE)
-    - [_QuickExact_](https://arxiv.org/abs/2308.04487)
+    - [_QuickExact_](https://dl.acm.org/doi/10.1109/ASP-DAC58780.2024.10473946)
     - [_QuickSim_](https://ieeexplore.ieee.org/document/10231266)
     - [Exhaustive _(ExGS)_](https://open.library.ubc.ca/soa/cIRcle/collections/ubctheses/24/items/1.0392909)
   - [Critical Temperature Simulation](https://ieeexplore.ieee.org/document/10231259)
-  - [Operational Domain Computation](https://www.cda.cit.tum.de/files/eda/2023_nanoarch_reducing_the_complexity_of_operational_domain_computation_in_silicon_dangling_bond_logic.pdf)
+  - [Operational Domain Computation](https://dl.acm.org/doi/10.1145/3611315.3633246)
 
 ## ⏰ Clocking Schemes
 
