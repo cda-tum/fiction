@@ -131,6 +131,17 @@ Furthermore, if you use any of the design automation algorithms, please consider
 
     `QuickExact experiment script <https://github.com/cda-tum/fiction/tree/main/experiments/sidb_simulation/electrostatic_ground_state>`_
 
+* :ref:`ClusterComplete <clustercomplete>` (``clustercomplete``):
+
+    .. code-block:: tex
+
+        @inproceedings{lambooy2025clustercomplete,
+          title={{Mastering the Exponential Complexity of Exact Physical Simulation of Silicon Dangling Bonds}},
+          author={Lambooy, Willem and Drewniok, Jan and Walter, Marcel and Wille, Robert},
+          booktitle={Asia and South Pacific Design Automation Conference (ASP-DAC)},
+          year={2026}
+        }
+
 * :ref:`Critical temperature simulation <critical_temperature>` (``critical_temperature``):
 
     .. code-block:: tex
@@ -156,6 +167,15 @@ Furthermore, if you use any of the design automation algorithms, please consider
           year={2023}
         }
 
+    .. code-block:: tex
+
+        @inproceedings{walter2025domainexplorer,
+          title={{The Operational Domain Explorer: A Comprehensive Framework to Unveil the Thermal Landscape of Silicon Dangling Bond Logic Beyond Conventional Operability}},
+          author={Walter, Marcel and Drewniok, Jan and Wille, Robert},
+          booktitle={IEEE International Conference on Nanotechnology (IEEE NANO)},
+          year={2023}
+        }
+
     `Operational domain experiment scripts <https://github.com/cda-tum/fiction/tree/main/experiments/operational_domain>`_
 
 * :ref:`SiDB gate design <gate_design>` (``gate_design``):
@@ -163,18 +183,27 @@ Furthermore, if you use any of the design automation algorithms, please consider
     .. code-block:: tex
 
         @inproceedings{drewniok2023gatedesigner,
-          title={{Minimal Design of SiDB Gates: An Optimal Basis for Circuits Based on Silicon Dangling Bonds.}},
+          title={{Minimal Design of SiDB Gates: An Optimal Basis for Circuits Based on Silicon Dangling Bonds}},
           author={Drewniok, Jan and Walter, Marcel and Wille, Robert},
           booktitle={International Symposium on Nanoscale Architectures (NANOARCH)},
           year={2023}
         }
 
-   .. code-block:: tex
+    .. code-block:: tex
 
         @inproceedings{drewniok2025efficientgatedesign,
-          title={{Towards Fast Automatic Design of Silicon Dangling Bond Logic.}},
+          title={{Towards Fast Automatic Design of Silicon Dangling Bond Logic}},
           author={Drewniok, Jan and Walter, Marcel and Hang Ng, Samuel Sze and Walus, Konrad and Wille, Robert},
           booktitle={Design, Automation and Test in Europe Conference \& Exhibition (DATE)},
+          year={2025}
+        }
+
+    .. code-block:: tex
+
+        @inproceedings{drewniok2025quickcell,
+          title={{QuickCell: Fast Automatic Design of Standard Cells for Silicon Dangling Bond Logic}},
+          author={Drewniok, Jan and Walter, Marcel and Hang Ng, Samuel Sze and Walus, Konrad and Wille, Robert},
+          booktitle={IEEE Transactions on Computer Aided Design of Integrated Circuits and Systems (TCAD)},
           year={2025}
         }
 
