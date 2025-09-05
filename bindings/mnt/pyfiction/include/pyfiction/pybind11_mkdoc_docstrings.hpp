@@ -3682,7 +3682,13 @@ physical parameters of a given SiDB layout. It allows for the
 evaluation of how the critical temperature depends on variations in
 the underlying parameter points. This enables simulations to explore
 the critical temperature's behavior across different conditions and
-configurations.)doc";
+configurations.
+
+It was proposed in \"The Operational Domain Explorer: A Comprehensive
+Framework to Unveil the Thermal Landscape of Silicon Dangling Bond
+Logic Beyond Conventional Operability\" by M. Walter, J. Drewniok, and
+R. Wille in IEEE-NANO 2025
+(https://ieeexplore.ieee.org/abstract/document/11113672).)doc";
 
 static const char *__doc_fiction_critical_temperature_domain_add_dimension =
 R"doc(Adds a dimension to sweep over. The first dimension is the x
