@@ -729,25 +729,25 @@ class graph_oriented_layout_design_impl
                 for (auto& ssg : ssg_vec)
                 {
                     auto* ssg_ptr = &ssg;
-                    futures.emplace_back(std::async(std::launch::async,
+                    futures.emplace_back(
+                        std::async(std::launch::async,
                                    [this, ssg_ptr, &update_best_layout_mutex, &best_lyt]() -> std::optional<Lyt>
                                    {
                                        auto result = process_ssg(*ssg_ptr);
                                        if (result)
-                                                        {
-                                                            const std::lock_guard<std::mutex> lock(
-                                                                update_best_layout_mutex);
-                                                            best_lyt = std::move(*result);
-                                                            restore_names(ssg_ptr->network, best_lyt);
-                                                            update_stats(best_lyt);
+                                       {
+                                           const std::lock_guard<std::mutex> lock(update_best_layout_mutex);
+                                           best_lyt = std::move(*result);
+                                           restore_names(ssg_ptr->network, best_lyt);
+                                           update_stats(best_lyt);
 
-                                                            if (ps.return_first)
-                                                            {
-                                                                return best_lyt;
-                                                            }
-                                                        }
-                                                        return std::nullopt;
-                                                    }));
+                                           if (ps.return_first)
+                                           {
+                                               return best_lyt;
+                                           }
+                                       }
+                                       return std::nullopt;
+                                   }));
                 }
 
                 // check the futures for the result
