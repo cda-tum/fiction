@@ -179,6 +179,19 @@ struct graph_oriented_layout_design_params
      * Enforce NOT gates to be routed non-bending only.
      */
     bool straight_inverters = false;
+    /**
+     * For each primary input (PI) considered during placement, reserve this many
+     * empty tiles *after* the current frontier:
+     *  - Top edge (row 0): leave `skip_tiles_pi_placement` empty tiles to the right
+     *    of the rightmost occupied tile before proposing a new PI position.
+     *  - Left edge (column 0): leave `skip_tiles_pi_placement` empty tiles below
+     *    the bottommost occupied tile before proposing a new PI position.
+     *
+     * This soft margin can reduce local congestion and increase the probability of
+     * finding a routable layout at the expense of a temporarily larger footprint,
+     * which post-layout optimization may later shrink. Defaults to 0.
+     */
+    uint64_t skip_tiles_pi_placement = 0;
 };
 /**
  * This struct stores statistics about the graph-oriented layout design process.
@@ -715,16 +728,17 @@ class graph_oriented_layout_design_impl
                 // process `ssg_vec` in parallel using std::async
                 for (auto& ssg : ssg_vec)
                 {
+                    auto* ssg_ptr = &ssg;
                     futures.emplace_back(std::async(std::launch::async,
-                                                    [&]() -> std::optional<Lyt>
-                                                    {
-                                                        auto result = process_ssg(ssg);
-                                                        if (result)
+                                   [this, ssg_ptr, &update_best_layout_mutex, &best_lyt]() -> std::optional<Lyt>
+                                   {
+                                       auto result = process_ssg(*ssg_ptr);
+                                       if (result)
                                                         {
                                                             const std::lock_guard<std::mutex> lock(
                                                                 update_best_layout_mutex);
-                                                            best_lyt = *result;
-                                                            restore_names(ssg.network, best_lyt);
+                                                            best_lyt = std::move(*result);
+                                                            restore_names(ssg_ptr->network, best_lyt);
                                                             update_stats(best_lyt);
 
                                                             if (ps.return_first)
@@ -1014,7 +1028,7 @@ class graph_oriented_layout_design_impl
             using dist = twoddwave_distance_functor<ObstrLyt, uint64_t>;
             using cost = unit_cost_functor<ObstrLyt, uint8_t>;
 
-            static a_star_params a_star_crossing_params{};
+            a_star_params a_star_crossing_params{};
             a_star_crossing_params.crossings = !ps.planar;
 
             const auto path =
@@ -1059,8 +1073,40 @@ class graph_oriented_layout_design_impl
 
         coord_vec_type<ObstrLyt> possible_positions{};
 
-        layout.resize({layout.x() + 1, layout.y() + 1, 1});
+        // if no PIs yet, no skipping; otherwise use user setting.
+        const auto skip_tiles = (layout.num_pis() == 0) ? 0 : ps.skip_tiles_pi_placement;
+        auto       skip_top   = skip_tiles + 1;
+        auto       skip_left  = skip_tiles + 1;
+
+        // make sure we have enough margin in both directions.
+        const uint64_t resize = skip_tiles + 1;
+
+        layout.resize({layout.x() + resize, layout.y() + resize, layout.z()});
         const tile<ObstrLyt> drain{layout.x(), layout.y(), 0};
+
+        uint64_t min_x = 0;
+        uint64_t min_y = 0;
+
+        if (skip_tiles != 0)
+        {
+            for (auto x = static_cast<int64_t>(layout.x()); x >= 0; --x)
+            {
+                if (!layout.is_empty_tile({static_cast<uint64_t>(x), 0}))
+                {
+                    min_x = static_cast<uint64_t>(x);
+                    break;  // first non-empty from the right
+                }
+            }
+
+            for (auto y = static_cast<int64_t>(layout.y()); y >= 0; --y)
+            {
+                if (!layout.is_empty_tile({0, static_cast<uint64_t>(y)}))
+                {
+                    min_y = static_cast<uint64_t>(y);
+                    break;  // first non-empty from the bottom
+                }
+            }
+        }
 
         // check if a path from the input to the drain exists
         const auto check_tile = [&](const uint64_t x, const uint64_t y) noexcept
@@ -1077,15 +1123,15 @@ class graph_oriented_layout_design_impl
 
         if (pi_locs == pi_locations::TOP_AND_LEFT)
         {
-            max_iterations = std::max(layout.x(), layout.y());
+            max_iterations = std::max(layout.x() - min_x, layout.y() - min_y);
         }
         else if (pi_locs == pi_locations::TOP)
         {
-            max_iterations = layout.x();
+            max_iterations = layout.x() - min_x;
         }
         else
         {
-            max_iterations = layout.y();
+            max_iterations = layout.y() - min_y;
         }
 
         const uint64_t expansion_limit = (pi_locs == pi_locations::TOP_AND_LEFT) ? 2 * num_expansions : num_expansions;
@@ -1093,23 +1139,37 @@ class graph_oriented_layout_design_impl
 
         for (uint64_t k = 0ul; k < max_iterations; k++)
         {
-            if (((pi_locs == pi_locations::TOP) || (pi_locs == pi_locations::TOP_AND_LEFT)) && k < layout.x())
+            if (((pi_locs == pi_locations::TOP) || (pi_locs == pi_locations::TOP_AND_LEFT)) && min_x + k < layout.x())
             {
-                check_tile(k, 0);
+                if (skip_top == 0)
+                {
+                    check_tile(min_x + k, 0);
+                }
+                else
+                {
+                    skip_top--;
+                }
             }
-            if (((pi_locs == pi_locations::LEFT) || (pi_locs == pi_locations::TOP_AND_LEFT)) && k < layout.y())
+            if (((pi_locs == pi_locations::LEFT) || (pi_locs == pi_locations::TOP_AND_LEFT)) && min_y + k < layout.y())
             {
-                check_tile(0, k);
+                if (skip_left == 0)
+                {
+                    check_tile(0, min_y + k);
+                }
+                else
+                {
+                    skip_left--;
+                }
             }
             if (count_expansions >= expansion_limit)
             {
-                layout.resize({layout.x() - 1, layout.y() - 1, 1});
+                layout.resize({layout.x() - resize, layout.y() - resize, layout.z()});
 
                 return possible_positions;
             }
         }
 
-        layout.resize({layout.x() - 1, layout.y() - 1, 1});
+        layout.resize({layout.x() - resize, layout.y() - resize, layout.z()});
 
         return possible_positions;
     }
@@ -1502,6 +1562,14 @@ class graph_oriented_layout_design_impl
 
         if (ssg.network.is_pi(ssg.nodes_to_place[place_info.current_node]))
         {
+            if (position.x > layout.x())
+            {
+                layout.resize({position.x, layout.y(), layout.z()});
+            }
+            if (position.y > layout.y())
+            {
+                layout.resize({layout.x(), position.y, layout.z()});
+            }
             // place primary input node
             place_info.node2pos[ssg.nodes_to_place[place_info.current_node]] =
                 layout.move_node(place_info.pi2node[ssg.nodes_to_place[place_info.current_node]], position);
