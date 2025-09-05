@@ -48,7 +48,7 @@ that allows quick access to its core functionality.
 If you have any questions, feel free to contact us via [nanotech.cda@xcit.tum.de](mailto:nanotech.cda@xcit.tum.de) or by
 creating an [issue on GitHub](https://github.com/cda-tum/fiction/issues).
 
-## Quick Start (C++)
+## 🚀 Quick Start (C++)
 
 > Clone the repository and its submodules:
 
@@ -56,7 +56,7 @@ creating an [issue on GitHub](https://github.com/cda-tum/fiction/issues).
 git clone --recursive https://github.com/cda-tum/fiction.git
 ```
 
-### The CLI
+### 💻 The CLI
 
 > Inside the newly cloned `fiction` folder, trigger the build process:
 
@@ -77,7 +77,7 @@ cli/fiction
 
 ![CLI example](https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/fiction_cli_example.gif)
 
-### The Header-only Library
+### 📚 The Header-only Library
 
 > Add `fiction` as a sub-directory to your CMake project and link against `libfiction` (assuming your project is
 > called `fanfiction`):
@@ -97,7 +97,7 @@ target_link_libraries(fanfiction libfiction)
 #include <fiction/...>
 ```
 
-## Quick Start (Python)
+## 🐍 Quick Start (Python)
 
 > Install the Python bindings from [PyPI](https://pypi.org/project/mnt.pyfiction/):
 
@@ -114,7 +114,7 @@ from mnt import pyfiction
 For a full getting started guide, please refer to
 the [documentation](https://fiction.readthedocs.io/en/latest/getting_started.html).
 
-## Supported Technologies
+## 🧪 Supported Technologies
 
 Physical design in _fiction_ can be performed technology-independent. Only if resulted layouts are to be physically,
 simulated, a specific technology implementation is required. To this end, _fiction_ supports various potential FCN
@@ -168,7 +168,7 @@ File formats:
 
 Many thanks to Samuel Sze Hang Ng for his support!
 
-## Implemented Design Automation Algorithms
+## ⚙️ Implemented Design Automation Algorithms
 
 The _fiction_ framework provides implementations of state-of-the-art design automation algorithms for FCN technologies.
 These algorithms can be used in evaluation scripts to perform logic synthesis, physical design, layout verification, and
@@ -234,7 +234,7 @@ simulated using a physical model. Currently, the following simulation algorithms
   - [Critical Temperature Simulation](https://ieeexplore.ieee.org/document/10231259)
   - [Operational Domain Computation](https://www.cda.cit.tum.de/files/eda/2023_nanoarch_reducing_the_complexity_of_operational_domain_computation_in_silicon_dangling_bond_logic.pdf)
 
-## Clocking Schemes
+## ⏰ Clocking Schemes
 
 Regular clocking schemes have been proposed in the FCN literature, which can be used as a floor plans for physical
 design. However, sometimes it can make sense to have more freedom and assign clock numbers on the fly. That is
@@ -262,7 +262,7 @@ Built-in schemes are
 
 plus the mentioned irregular open clocking that works via a clock map instead of a regular extrapolated cutout.
 
-## Wire Crossings
+## ❎ Wire Crossings
 
 <img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/cross.png" alt="Second layer crossing" align="left" width="200"/>
 
@@ -275,24 +275,7 @@ co-planar.
 
 Wires are only allowed to cross other wires! Wires crossing gates is considered to lead to unstable signals.
 
-## Gate Pins vs. Designated I/Os
-
-<img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/io.png" alt="Input pin and cell output" align="right" width="200"/>
-
-In the literature, both are seen: having input cells (pins) directly located in the gate structure or using designated
-I/O elements that are located outside of gates. This distinction only makes sense on the gate level and _fiction_
-supports both approaches and offers usage in the implemented physical design algorithms.
-
-## Multi Wires
-
-<img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/multi.png" alt="Multi wires" align="left" width="200"/>
-
-Gate-level abstraction has its limits. Often, chip area is wasted when only using a single wire per tile. In _fiction_,
-cell-level layouts allow for precise control over cell placement and can, thus, also create multiple wire segments per
-clock zone. Physical simulation can give an indication of whether the built structures are implementing the intended
-functionality.
-
-## Synchronization Elements
+## ⏳ Synchronization Elements
 
 <img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/se.png" alt="Synchronization element" align="right" width="150"/>
 
@@ -302,7 +285,7 @@ tiles, [synchronization elements](https://ieeexplore.ieee.org/document/8626294) 
 multiple clock cycles. These artificial latches are able to feed information to any other clock number, but their usage
 reduces the overall throughput of the layout. In return, long wire detours for signal synchronization can be prevented.
 
-## Cost Metrics
+## 💰 Cost Metrics
 
 Designed layouts can be evaluated with regard to several cost functions. The following metrics are currently
 implemented:
@@ -326,7 +309,7 @@ Cell-level layouts:
 - Bounding box
 - Area usage in nm²
 
-## Benchmark Library
+## 📊 Benchmark Library
 
 To objectively evaluate and compare software and design automation
 tools, [MNT Bench](https://www.cda.cit.tum.de/mntbench/) provides gate-level
@@ -338,7 +321,7 @@ Additionally, the [benchmarks](https://github.com/cda-tum/fiction/tree/main/benc
 descriptions of frequently used benchmark sets in Verilog format (`.v`) provided
 by [MNT Bench](https://www.cda.cit.tum.de/mntbench/).
 
-## Reference
+## 📜 Reference
 
 Since _fiction_ is academic software, we would be thankful if you referred to it by citing the following publications:
 
@@ -369,7 +352,7 @@ and
 Additionally, many algorithms implemented in _fiction_ have been published individually. For a full list of
 publications, please refer to the [documentation](https://fiction.readthedocs.io/en/latest/publications.html).
 
-## Acknowledgements
+## 🙏 Acknowledgements
 
 The Munich Nanotech Toolkit has been supported by the Bavarian State Ministry for Science and Arts through the
 Distinguished Professorship Program.
