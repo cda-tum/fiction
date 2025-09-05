@@ -48,48 +48,85 @@ that allows quick access to its core functionality.
 If you have any questions, feel free to contact us via [nanotech.cda@xcit.tum.de](mailto:nanotech.cda@xcit.tum.de) or by
 creating an [issue on GitHub](https://github.com/cda-tum/fiction/issues).
 
-## 🚀 Quick Start (C++)
+## 🚀 Getting Started
 
-> Clone the repository and its submodules:
+To help you getting started with _fiction_, tick the interface that best fits your use case:
+
+| Goal                                   | Recommended Path          | Section                              |
+| -------------------------------------- | ------------------------- | ------------------------------------ |
+| Try the tool immediately               | 🐳 Docker CLI image       | [CLI (Docker)](#-cli-docker)         |
+| Full-featured local CLI build          | 💻 Native build           | [CLI (Source)](#-cli-source)         |
+| Integrate into a C++ project           | 📚 Header-only library    | [C++ Library](#-c-library)           |
+| Script / notebooks / rapid prototyping | 🐍 Python bindings (PyPI) | [Python Bindings](#-python-bindings) |
+
+For a
+full [getting started guide](https://fiction.readthedocs.io/en/latest/getting_started.html), [CLI command list](https://fiction.readthedocs.io/en/latest/cli.html),
+or API reference, see the [documentation](https://fiction.readthedocs.io/en/latest/index.html).
+
+### 🐳 CLI (Docker)
+
+This is the fastest zero-install path. We release pre-built images of the latest CLI
+on [Docker Hub](https://hub.docker.com/r/mawalter/fiction). Make sure you
+have [Docker installed](https://docs.docker.com/get-docker/) on your local system.
+
+Pull the latest image:
+
+```bash
+docker pull mawalter/fiction:latest
+```
+
+Run the interactive CLI session:
+
+```bash
+docker run --rm -it mawalter/fiction
+```
+
+Internally, the repository lives at `/app/fiction`.
+
+### 💻 CLI (Source)
+
+When you want to add your own algorithms or contribute to the project, you should build _fiction_ from source.
+
+Clone the project with its submodules:
 
 ```bash
 git clone --recursive https://github.com/cda-tum/fiction.git
+cd fiction
 ```
 
-### 💻 The CLI
-
-> Inside the newly cloned `fiction` folder, trigger the build process:
+Configure and build with CMake:
 
 ```bash
-cmake . -B build
-cd build
-cmake --build . -j4
+cmake -S . -B build
+cmake --build build -j$(nproc)
 ```
 
-> Run the CLI tool:
+Run the CLI:
 
 ```bash
-cli/fiction
+build/cli/fiction
 ```
 
-> Here is an example of running _fiction_ to perform a full physical design flow on a QCA circuit layout that can
-> afterward be simulated in QCADesigner:
+Here is an example of running _fiction_ to perform a full physical design flow on a QCA circuit layout that can
+afterward be simulated in QCADesigner:
 
 ![CLI example](https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/fiction_cli_example.gif)
 
-### 📚 The Header-only Library
+### 📚 C++ Library
 
-> Add `fiction` as a sub-directory to your CMake project and link against `libfiction` (assuming your project is
-> called `fanfiction`):
+If you want to use _fiction_ as a dependency in your project to utilize its header-only library for your own tool.
+
+Add `fiction` as a sub-directory to your CMake project and link against `libfiction` (assuming your project is
+called `fanfiction`):
 
 ```CMake
-add_subdirectory(fiction/)
-target_link_libraries(fanfiction libfiction)
+add_subdirectory(fiction)
+target_link_libraries(fanfiction PRIVATE libfiction)
 ```
 
-> Include the headers you need:
+Then include what you need:
 
-```C++
+```c++
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/technology/qca_one_library.hpp>
@@ -97,40 +134,23 @@ target_link_libraries(fanfiction libfiction)
 #include <fiction/...>
 ```
 
-## 🐍 Quick Start (Python)
+### 🐍 Python Bindings
 
-> Install the Python bindings from [PyPI](https://pypi.org/project/mnt.pyfiction/):
+Ideal for notebooks, exploratory scripts, and integration with Python tooling.
+
+Install the library from PyPI:
 
 ```bash
 pip install mnt.pyfiction
 ```
 
-> Import the bindings:
+Import it in your script:
 
 ```python
 from mnt import pyfiction
 ```
 
-For a full getting started guide, please refer to
-the [documentation](https://fiction.readthedocs.io/en/latest/getting_started.html).
-
-## 🐳 Quick Start (Docker)
-
-Use the pre-built container image to run the CLI without installing any dependencies locally.
-
-> Pull the latest image (hosted at DockerHub under `mawalter/fiction`):
-
-```bash
-docker pull mawalter/fiction:latest
-```
-
-> Launch an interactive CLI session (the default CMD starts the CLI):
-
-```bash
-docker run --rm -it mawalter/fiction
-```
-
-Inside the container, the repository lives at `/app/fiction`.
+---
 
 ## 🧪 Supported Technologies
 
@@ -194,7 +214,8 @@ physical simulation.
 
 ### Logic Synthesis
 
-For logic synthesis, _fiction_ utilizes [ABC](https://github.com/berkeley-abc/abc) and the [mockturtle library](https://github.com/lsils/mockturtle) that
+For logic synthesis, _fiction_ utilizes [ABC](https://github.com/berkeley-abc/abc) and
+the [mockturtle library](https://github.com/lsils/mockturtle) that
 offer a multitude of logic network types and optimization algorithms. Logic synthesis can be performed in external tools
 and resulting Verilog/AIGER/BLIF/... files can be parsed by _fiction_. Alternatively, since _mockturtle_ is included in
 _fiction_, synthesis can be applied in the same evaluation script.
