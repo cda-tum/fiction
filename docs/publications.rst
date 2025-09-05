@@ -173,7 +173,7 @@ Furthermore, if you use any of the design automation algorithms, please consider
           title={{The Operational Domain Explorer: A Comprehensive Framework to Unveil the Thermal Landscape of Silicon Dangling Bond Logic Beyond Conventional Operability}},
           author={Walter, Marcel and Drewniok, Jan and Wille, Robert},
           booktitle={IEEE International Conference on Nanotechnology (IEEE NANO)},
-          year={2023}
+          year={2025}
         }
 
     `Operational domain experiment scripts <https://github.com/cda-tum/fiction/tree/main/experiments/operational_domain>`_
