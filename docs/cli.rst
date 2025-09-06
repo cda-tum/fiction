@@ -244,6 +244,7 @@ Possible parameters:
 - Verbose (``-v``): Output detailed runtime statistics after the algorithm completes.
 - Seed (``-s``): Set a random seed for random fanout substitution and random topological ordering in maximum-effort mode.
 - Straight inverters (``-i``): Enforce NOT gates to be routed non-bending only.
+- Skip tiles when placing PIs (``-k``):  For each primary input (PI) considered during placement, reserve this many empty tiles after the current frontier.
 
 Hexagonalization (``hex``)
 ##########################

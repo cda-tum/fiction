@@ -69,9 +69,16 @@ class gold_command : public command
         add_flag("--multithreading,-m", ps.enable_multithreading, "Enable multithreading (beta feature)");
         add_flag("--verbose,-v", ps.verbose, "Be verbose");
         add_option("--seed, -s", seed,
-                   "Random seed used for random fanout substitution and random topological ordering in"
+                   "Random seed used for random fanout substitution and random topological ordering in "
                    "maximum-effort mode");
         add_flag("--straight_inverters,-i", ps.straight_inverters, "Enforce NOT gates to be routed non-bending only");
+        add_option(
+            "--skip_tiles_pi_placement, -k", ps.skip_tiles_pi_placement,
+            "For each primary input (PI) considered during placement, reserve this many empty tiles after the current "
+            "frontier to the right of the rightmost occupied tile or below the bottommost occupied tile before "
+            "proposing a new PI position. This soft margin can reduce local congestion and increase the probability of "
+            "finding a routable layout at the expense of a temporarily larger footprint, which post-layout "
+            "optimization may later shrink. Defaults to 0.");
     }
 
   protected:

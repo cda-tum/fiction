@@ -14279,6 +14279,19 @@ static const char *__doc_fiction_graph_oriented_layout_design_params_seed =
 R"doc(Random seed used for random fanout substitution and random topological
 ordering in maximum-effort mode, generated randomly if not specified.)doc";
 
+static const char *__doc_fiction_graph_oriented_layout_design_params_skip_tiles_pi_placement =
+R"doc(For each primary input (PI) considered during placement, reserve this
+many empty tiles *after* the current frontier: - Top edge (row 0):
+leave `skip_tiles_pi_placement` empty tiles to the right of the
+rightmost occupied tile before proposing a new PI position. - Left
+edge (column 0): leave `skip_tiles_pi_placement` empty tiles below the
+bottommost occupied tile before proposing a new PI position.
+
+This soft margin can reduce local congestion and increase the
+probability of finding a routable layout at the expense of a
+temporarily larger footprint, which post-layout optimization may later
+shrink. Defaults to 0.)doc";
+
 static const char *__doc_fiction_graph_oriented_layout_design_params_straight_inverters = R"doc(Enforce NOT gates to be routed non-bending only.)doc";
 
 static const char *__doc_fiction_graph_oriented_layout_design_params_timeout = R"doc(Timeout limit (in ms).)doc";
