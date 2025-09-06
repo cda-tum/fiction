@@ -1074,7 +1074,7 @@ class graph_oriented_layout_design_impl
         coord_vec_type<ObstrLyt> possible_positions{};
 
         // if no PIs yet, no skipping; otherwise use user setting.
-        const auto skip_tiles = (layout.num_pis() == 0) ? 0 : ps.skip_tiles_pi_placement;
+        const auto skip_tiles = layout.is_empty() ? 0 : ps.skip_tiles_pi_placement;
         auto       skip_top   = skip_tiles;
         auto       skip_left  = skip_tiles;
 
