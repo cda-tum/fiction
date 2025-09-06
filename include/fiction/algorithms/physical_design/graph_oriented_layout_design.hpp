@@ -1075,8 +1075,8 @@ class graph_oriented_layout_design_impl
 
         // if no PIs yet, no skipping; otherwise use user setting.
         const auto skip_tiles = (layout.num_pis() == 0) ? 0 : ps.skip_tiles_pi_placement;
-        auto       skip_top   = skip_tiles + 1;
-        auto       skip_left  = skip_tiles + 1;
+        auto       skip_top   = skip_tiles;
+        auto       skip_left  = skip_tiles;
 
         // make sure we have enough margin in both directions.
         const uint64_t resize = skip_tiles + 1;
@@ -1093,7 +1093,7 @@ class graph_oriented_layout_design_impl
             {
                 if (!layout.is_empty_tile({static_cast<uint64_t>(x), 0}))
                 {
-                    min_x = static_cast<uint64_t>(x);
+                    min_x = static_cast<uint64_t>(x) + 1;
                     break;  // first non-empty from the right
                 }
             }
@@ -1102,7 +1102,7 @@ class graph_oriented_layout_design_impl
             {
                 if (!layout.is_empty_tile({0, static_cast<uint64_t>(y)}))
                 {
-                    min_y = static_cast<uint64_t>(y);
+                    min_y = static_cast<uint64_t>(y) + 1;
                     break;  // first non-empty from the bottom
                 }
             }
