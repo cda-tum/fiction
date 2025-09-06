@@ -1672,16 +1672,11 @@ class graph_oriented_layout_design_impl
     void adjust_layout_size(const tile<ObstrLyt>& position, ObstrLyt& layout, const search_space_graph<ObstrLyt>& ssg,
                             const placement_info<ObstrLyt>& place_info)
     {
-        const auto max_layout_width  = ssg.nodes_to_place.size();
-        const auto max_layout_height = ssg.nodes_to_place.size();
-
-        if (position.x == layout.x() && layout.x() < (max_layout_width - 1) &&
-            !ssg.network.is_po(ssg.nodes_to_place[place_info.current_node - 1]))
+        if (position.x == layout.x() && !ssg.network.is_po(ssg.nodes_to_place[place_info.current_node - 1]))
         {
             layout.resize({layout.x() + 1, layout.y(), layout.z()});
         }
-        if (position.y == layout.y() && layout.y() < (max_layout_height - 1) &&
-            !ssg.network.is_po(ssg.nodes_to_place[place_info.current_node - 1]))
+        if (position.y == layout.y() && !ssg.network.is_po(ssg.nodes_to_place[place_info.current_node - 1]))
         {
             layout.resize({layout.x(), layout.y() + 1, layout.z()});
         }
