@@ -719,6 +719,36 @@ GateLyt ge_gt_le_lt_layout() noexcept
     return layout;
 }
 
+template <typename GateLyt>
+GateLyt po_extension_corner_case_layout() noexcept
+{
+    GateLyt layout{{4, 3, 1}, fiction::twoddwave_clocking<GateLyt>()};
+
+    const auto x1 = layout.create_pi("x1", {0, 1});
+    const auto w1 = layout.create_buf(x1, {1, 1});
+    const auto w2 = layout.create_buf(w1, {2, 1});
+    const auto w3 = layout.create_buf(w2, {3, 1});
+    layout.create_po(w3, "f1", {4, 1});
+
+    const auto x2 = layout.create_pi("x2", {0, 2});
+    const auto w4 = layout.create_buf(x2, {1, 2});
+    const auto w5 = layout.create_buf(w4, {2, 2});
+    const auto w6 = layout.create_buf(w5, {3, 2});
+    layout.create_po(w6, "f2", {4, 2});
+
+    const auto x3 = layout.create_pi("x3", {2, 0});
+    const auto w7 = layout.create_buf(x3, {2, 1, 1});
+    const auto w8 = layout.create_buf(w7, {2, 2, 1});
+    layout.create_po(w8, "f3", {2, 3});
+
+    const auto x4  = layout.create_pi("x4", {3, 0});
+    const auto w9  = layout.create_buf(x4, {3, 1, 1});
+    const auto w10 = layout.create_buf(w9, {3, 2, 1});
+    layout.create_po(w10, "f4", {3, 3});
+
+    return layout;
+}
+
 template <typename CellLyt>
 CellLyt single_layer_qca_and_gate() noexcept
 {

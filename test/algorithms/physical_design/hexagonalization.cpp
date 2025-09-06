@@ -193,6 +193,7 @@ static void check_mapping_equiv_all()
     check_mapping_equiv_layout(blueprints::crossing_layout<cart_gate_clk_lyt>());
     check_mapping_equiv_layout(blueprints::tautology_gate_layout<cart_gate_clk_lyt>());
     check_mapping_equiv_layout(blueprints::ge_gt_le_lt_layout<cart_gate_clk_lyt>());
+    check_mapping_equiv_layout(blueprints::po_extension_corner_case_layout<cart_gate_clk_lyt>());
 
     check_mapping_equiv_layout_with_planar_rerouting(blueprints::straight_wire_gate_layout<cart_gate_clk_lyt>());
     check_mapping_equiv_layout_with_planar_rerouting(blueprints::or_not_gate_layout<cart_gate_clk_lyt>());
