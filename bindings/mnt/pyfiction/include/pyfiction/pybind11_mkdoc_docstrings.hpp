@@ -7946,6 +7946,15 @@ Returns:
     A vector of tiles representing the possible positions for a single
     fan-in node.)doc";
 
+static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_get_thread_local_dist =
+R"doc(Get thread-local distribution for generating random
+skip_tiles_pi_placement values.)doc";
+
+static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_get_thread_local_rng =
+R"doc(Get thread-local random number generator for skip_tiles_pi_placement
+randomization. Each thread will have its own RNG to avoid mutex
+contention.)doc";
+
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_graph_oriented_layout_design_impl =
 R"doc(Constructor for the graph-oriented layout design algorithm.
 
@@ -14269,6 +14278,14 @@ vertex.)doc";
 static const char *__doc_fiction_graph_oriented_layout_design_params_planar =
 R"doc(Disable the creation of crossings during layout generation. If set to
 true, gates will only be placed if a crossing-free wiring is found.
+Defaults to false.)doc";
+
+static const char *__doc_fiction_graph_oriented_layout_design_params_randomize_skip_tiles_pi_placement =
+R"doc(When enabled, randomizes the skip_tiles_pi_placement value for each PI
+placement. The random value will be chosen from 0 to
+skip_tiles_pi_placement (inclusive). This can help explore different
+placement strategies and potentially find better layouts. Uses the
+same random seed as other randomization features for reproducibility.
 Defaults to false.)doc";
 
 static const char *__doc_fiction_graph_oriented_layout_design_params_return_first =
