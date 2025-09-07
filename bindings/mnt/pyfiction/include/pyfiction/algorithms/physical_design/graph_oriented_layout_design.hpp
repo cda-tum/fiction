@@ -80,7 +80,10 @@ inline void graph_oriented_layout_design(pybind11::module& m)
                        DOC(fiction_graph_oriented_layout_design_params_straight_inverters))
         .def_readwrite("skip_tiles_pi_placement",
                        &fiction::graph_oriented_layout_design_params::skip_tiles_pi_placement,
-                       DOC(fiction_graph_oriented_layout_design_params_skip_tiles_pi_placement));
+                       DOC(fiction_graph_oriented_layout_design_params_skip_tiles_pi_placement))
+        .def_readwrite("randomize_skip_tiles_pi_placement",
+                       &fiction::graph_oriented_layout_design_params::randomize_skip_tiles_pi_placement,
+                       DOC(fiction_graph_oriented_layout_design_params_randomize_skip_tiles_pi_placement));
 
     py::class_<fiction::graph_oriented_layout_design_stats>(m, "graph_oriented_layout_design_stats",
                                                             DOC(fiction_graph_oriented_layout_design_stats))

@@ -68,6 +68,7 @@ class TestGraphOrientedLayoutDesign(unittest.TestCase):
         params.enable_multithreading = False
         params.straight_inverters = True
         params.skip_tiles_pi_placement = 1
+        params.randomize_skip_tiles_pi_placement = True
 
         layout = graph_oriented_layout_design(network, params)
 
