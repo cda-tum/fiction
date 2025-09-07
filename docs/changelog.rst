@@ -15,6 +15,7 @@ Added
     - Maximum-effort mode in ``gold`` utilizing random fanout substitution strategies and random topological orderings to design high-quality layouts
     - Flag in ``gold`` to enforce NOT gates to be routed non-bending only
     - Parameter in ``gold`` to skip tiles when placing PIs, leading to higher success probabilities in discovering layouts
+    - Flag in ``gold`` to randomize the number of skipped tiles when placing PIs
 
 Fixed
 #####

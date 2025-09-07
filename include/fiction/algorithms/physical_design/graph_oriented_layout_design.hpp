@@ -42,6 +42,7 @@
 #include <queue>
 #include <random>
 #include <stdexcept>
+#include <thread>
 #include <tuple>
 #include <unordered_map>
 #include <utility>
@@ -192,6 +193,14 @@ struct graph_oriented_layout_design_params
      * which post-layout optimization may later shrink. Defaults to 0.
      */
     uint64_t skip_tiles_pi_placement = 0;
+    /**
+     * When enabled, randomizes the skip_tiles_pi_placement value for each PI placement.
+     * The random value will be chosen from 0 to skip_tiles_pi_placement (inclusive).
+     * This can help explore different placement strategies and potentially find better layouts.
+     * Uses the same random seed as other randomization features for reproducibility.
+     * Defaults to false.
+     */
+    bool randomize_skip_tiles_pi_placement = false;
 };
 /**
  * This struct stores statistics about the graph-oriented layout design process.
@@ -720,16 +729,18 @@ class graph_oriented_layout_design_impl
             // if multithreading is enabled
             if (ps.enable_multithreading)
             {
-                // mutex to protect the best found layout and statistics
+                // separate mutexes for better concurrency
                 std::mutex                                   update_best_layout_mutex{};
-                std::vector<std::future<std::optional<Lyt>>> futures{};
-                futures.reserve(ssg_vec.size());
+
+                // reuse futures pool to avoid allocation overhead
+                futures_pool.clear();
+                futures_pool.reserve(ssg_vec.size());
 
                 // process `ssg_vec` in parallel using std::async
                 for (auto& ssg : ssg_vec)
                 {
                     auto* ssg_ptr = &ssg;
-                    futures.emplace_back(
+                    futures_pool.emplace_back(
                         std::async(std::launch::async,
                                    [this, ssg_ptr, &update_best_layout_mutex, &best_lyt]() -> std::optional<Lyt>
                                    {
@@ -750,14 +761,49 @@ class graph_oriented_layout_design_impl
                                    }));
                 }
 
-                // check the futures for the result
-                for (auto& future : futures)
+                // check the futures for the result - poll for readiness to support return_first
+                while (true)
                 {
-                    const auto result = future.get();  // blocking wait to get the result from the future
-                    if (result)
+                    bool all_done = true;
+                    for (auto& f : futures_pool)
                     {
-                        return *result;  // return the first found layout if ps.return_first is true
+                        if (f.valid())
+                        {
+                            using namespace std::chrono_literals;
+                            if (f.wait_for(0ms) == std::future_status::ready)
+                            {
+                                if (auto r = f.get())
+                                {
+                                    // cancel remaining futures if return_first is enabled
+                                    if (ps.return_first)
+                                    {
+                                        for (auto& remaining_future : futures_pool)
+                                        {
+                                            if (remaining_future.valid())
+                                            {
+                                                remaining_future.wait();
+                                            }
+                                        }
+                                    }
+                                    return *r;  // return immediately when first result is ready
+                                }
+                            }
+                            else
+                            {
+                                all_done = false;
+                            }
+                        }
                     }
+                    if (all_done)
+                    {
+                        break;
+                    }
+                    // adaptive sleep: shorter sleep when more futures are active
+                    const auto active_futures = std::count_if(futures_pool.begin(), futures_pool.end(), 
+                        [](const auto& f) { return f.valid(); });
+                    const auto sleep_duration = active_futures > 4 ? 
+                        std::chrono::microseconds(100) : std::chrono::milliseconds(1);
+                    std::this_thread::sleep_for(sleep_duration);
                 }
             }
             else
@@ -964,6 +1010,29 @@ class graph_oriented_layout_design_impl
      */
     std::uint32_t seed;
     /**
+     * Get thread-local random number generator for skip_tiles_pi_placement randomization.
+     * Each thread will have its own RNG to avoid mutex contention.
+     */
+    std::mt19937& get_thread_local_rng() const
+    {
+        thread_local std::mt19937 rng{seed};
+        return rng;
+    }
+    /**
+     * Get thread-local distribution for generating random skip_tiles_pi_placement values.
+     */
+    std::uniform_int_distribution<uint64_t>& get_thread_local_dist() const
+    {
+        // Handle edge case where skip_tiles_pi_placement is 0
+        const auto min_val = ps.skip_tiles_pi_placement > 0 ? ps.skip_tiles_pi_placement - 1 : 0;
+        thread_local std::uniform_int_distribution<uint64_t> dist{min_val, ps.skip_tiles_pi_placement};
+        return dist;
+    }
+    /**
+     * Thread pool for multithreaded execution to avoid thread creation overhead.
+     */
+    mutable std::vector<std::future<std::optional<Lyt>>> futures_pool{};
+    /**
      * Determines the number of search space graphs to generate based on the selected effort mode and cost objective.
      *
      * @param mode The effort mode chosen for the layout design, determining the level of computational effort.
@@ -1073,8 +1142,20 @@ class graph_oriented_layout_design_impl
 
         coord_vec_type<ObstrLyt> possible_positions{};
 
-        // if no PIs yet, no skipping; otherwise use user setting.
-        const auto skip_tiles = layout.is_empty() ? 0 : ps.skip_tiles_pi_placement;
+        // if no PIs yet, no skipping; otherwise use appropriate setting.
+        uint64_t skip_tiles = 0;
+        if (!layout.is_empty())
+        {
+            if (ps.randomize_skip_tiles_pi_placement)
+            {
+                // generate random skip_tiles for each PI placement using thread-local RNG
+                skip_tiles = get_thread_local_dist()(get_thread_local_rng());
+            }
+            else
+            {
+                skip_tiles = ps.skip_tiles_pi_placement;
+            }
+        }
         auto       skip_top   = skip_tiles;
         auto       skip_left  = skip_tiles;
 
