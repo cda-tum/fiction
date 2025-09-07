@@ -239,10 +239,10 @@ TEST_CASE("Different parameters", "[graph-oriented-layout-design]")
 
     SECTION("Randomize skip tiles PI placement")
     {
-        params.mode                            = graph_oriented_layout_design_params::effort_mode::HIGH_EFFORT;
-        params.skip_tiles_pi_placement         = 3;
+        params.mode                              = graph_oriented_layout_design_params::effort_mode::HIGH_EFFORT;
+        params.skip_tiles_pi_placement           = 3;
         params.randomize_skip_tiles_pi_placement = true;
-        params.seed                            = 42;
+        params.seed                              = 42;
 
         const auto layout = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
         REQUIRE(layout.has_value());
@@ -251,10 +251,10 @@ TEST_CASE("Different parameters", "[graph-oriented-layout-design]")
 
     SECTION("Randomize skip tiles PI placement with zero value")
     {
-        params.mode                            = graph_oriented_layout_design_params::effort_mode::HIGH_EFFORT;
-        params.skip_tiles_pi_placement         = 0;
+        params.mode                              = graph_oriented_layout_design_params::effort_mode::HIGH_EFFORT;
+        params.skip_tiles_pi_placement           = 0;
         params.randomize_skip_tiles_pi_placement = true;
-        params.seed                            = 42;
+        params.seed                              = 42;
 
         const auto layout = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
         REQUIRE(layout.has_value());

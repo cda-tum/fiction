@@ -730,7 +730,7 @@ class graph_oriented_layout_design_impl
             if (ps.enable_multithreading)
             {
                 // separate mutexes for better concurrency
-                std::mutex                                   update_best_layout_mutex{};
+                std::mutex update_best_layout_mutex{};
 
                 // reuse futures pool to avoid allocation overhead
                 futures_pool.clear();
@@ -799,10 +799,10 @@ class graph_oriented_layout_design_impl
                         break;
                     }
                     // adaptive sleep: shorter sleep when more futures are active
-                    const auto active_futures = std::count_if(futures_pool.begin(), futures_pool.end(), 
-                        [](const auto& f) { return f.valid(); });
-                    const auto sleep_duration = active_futures > 4 ? 
-                        std::chrono::microseconds(100) : std::chrono::milliseconds(1);
+                    const auto active_futures = std::count_if(futures_pool.begin(), futures_pool.end(),
+                                                              [](const auto& f) { return f.valid(); });
+                    const auto sleep_duration =
+                        active_futures > 4 ? std::chrono::microseconds(100) : std::chrono::milliseconds(1);
                     std::this_thread::sleep_for(sleep_duration);
                 }
             }
@@ -1156,8 +1156,8 @@ class graph_oriented_layout_design_impl
                 skip_tiles = ps.skip_tiles_pi_placement;
             }
         }
-        auto       skip_top   = skip_tiles;
-        auto       skip_left  = skip_tiles;
+        auto skip_top  = skip_tiles;
+        auto skip_left = skip_tiles;
 
         // make sure we have enough margin in both directions.
         const uint64_t resize = skip_tiles + 1;
