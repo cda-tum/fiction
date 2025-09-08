@@ -7948,12 +7948,20 @@ Returns:
 
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_get_thread_local_dist =
 R"doc(Get thread-local distribution for generating random
-tiles_to_skip_between_pis values.)doc";
+tiles_to_skip_between_pis values.
+
+Returns:
+    Reference to a thread-local uniform integer distribution for
+    generating random skip values.)doc";
 
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_get_thread_local_rng =
 R"doc(Get thread-local random number generator for
 `tiles_to_skip_between_pis` randomization. Each thread will have its
-own RNG to avoid mutex contention.)doc";
+own RNG to avoid mutex contention.
+
+Returns:
+    Reference to a thread-local Mersenne Twister random number
+    generator.)doc";
 
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_graph_oriented_layout_design_impl =
 R"doc(Constructor for the graph-oriented layout design algorithm.
