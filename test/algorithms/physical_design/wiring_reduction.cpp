@@ -14,15 +14,17 @@
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/obstruction_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/networks/technology_network.hpp>
 
 #include <mockturtle/networks/aig.hpp>
+#include <mockturtle/utils/stopwatch.hpp>
 
 using namespace fiction;
 
 template <typename Lyt, typename Ntk>
-void check_layout_equiv(const Ntk& ntk)
+static void check_layout_equiv(const Ntk& ntk)
 {
     const auto layout = orthogonal<Lyt>(ntk, {});
 
@@ -35,7 +37,7 @@ void check_layout_equiv(const Ntk& ntk)
 }
 
 template <typename Lyt>
-void check_layout_equiv_all()
+static void check_layout_equiv_all()
 {
     SECTION("Maj1 Network")
     {
