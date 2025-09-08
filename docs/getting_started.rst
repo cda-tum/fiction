@@ -28,7 +28,7 @@ To help you getting started with *fiction*, pick the interface that best fits yo
      - :ref:`CLI (Source) <cli-source>`
    * - Integrate into a C++ project
      - 📚 Header-only library
-     - :ref:`C++ Library <cpp-library>`
+     - :ref:`C++ Library <header-only>`
    * - Script / notebooks / rapid prototyping
      - 🐍 Python bindings (PyPI)
      - :ref:`Python Bindings <python-bindings>`
@@ -36,6 +36,7 @@ To help you getting started with *fiction*, pick the interface that best fits yo
 For a full CLI command list or API reference, see the respective documentation sections.
 
 .. _cli:
+.. _cli-docker:
 
 CLI (Docker)
 ------------
@@ -57,6 +58,9 @@ Run the interactive CLI session:
   $ docker run --rm -it mawalter/fiction
 
 Internally, the repository lives at ``/app/fiction``.
+
+
+.. _cli-source
 
 CLI (Source)
 ------------
@@ -87,7 +91,7 @@ preferred compiler, see the current implementation state of `P0024R2 <https://en
 
 On Ubuntu, all required and optional dependencies can be installed via::
 
-  sudo apt-get install build-essential cmake Python3 libreadline-dev libtbb-dev
+  sudo apt-get install build-essential cmake python3 libreadline-dev libtbb-dev
 
 Building the CLI
 ################
@@ -99,7 +103,7 @@ Configure and build with CMake:
 .. code-block:: console
 
   $ cmake -S . -B build
-  $ cmake --build build -j$(nproc)
+  $ cmake --build build --parallel
 
 Several options can be toggled during the build. For a more interactive interface, please refer to ``ccmake`` for a
 full list of supported customizations.
@@ -300,7 +304,7 @@ Each file can be built individually via CMake:
 .. code-block:: console
 
   $ cmake -S . -B build -DFICTION_EXPERIMENTS=ON
-  $ cmake --build build -j$(nproc)
+  $ cmake --build build --parallel
 
 
 Building tests
@@ -311,7 +315,7 @@ Unit tests can be built with CMake via a respective flag on the command line and
 .. code-block:: console
 
   $ cmake -S . -B build -DFICTION_TEST=ON
-  $ cmake --build build -j$(nproc)
+  $ cmake --build build --parallel
   $ ctest
 
 
@@ -327,7 +331,7 @@ linked against *fiction* and compiled as a stand-alone binary using the followin
 .. code-block:: console
 
   $ cmake -S . -B build -DFICTION_BENCHMARK=ON
-  $ cmake --build build -j$(nproc)
+  $ cmake --build build --parallel
 
 
 Noteworthy CMake options

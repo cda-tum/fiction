@@ -50,7 +50,7 @@ creating an [issue on GitHub](https://github.com/cda-tum/fiction/issues).
 
 ## 🚀 Getting Started
 
-To help you getting started with _fiction_, tick the interface that best fits your use case:
+To help you getting started with _fiction_, pick the interface that best fits your use case:
 
 | Goal                                   | Recommended Path          | Section                              |
 | -------------------------------------- | ------------------------- | ------------------------------------ |
@@ -98,7 +98,7 @@ Configure and build with CMake:
 
 ```bash
 cmake -S . -B build
-cmake --build build -j$(nproc)
+cmake --build build --parallel
 ```
 
 Run the CLI:
