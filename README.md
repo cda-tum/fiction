@@ -50,7 +50,7 @@ creating an [issue on GitHub](https://github.com/cda-tum/fiction/issues).
 
 ## 🚀 Getting Started
 
-To help you getting started with _fiction_, pick the interface that best fits your use case:
+To help you get started with _fiction_, pick the interface that best fits your use case:
 
 | Goal                                   | Recommended Path          | Section                              |
 | -------------------------------------- | ------------------------- | ------------------------------------ |
@@ -114,7 +114,7 @@ afterward be simulated in QCADesigner:
 
 ### 📚 C++ Library
 
-If you want to use _fiction_ as a dependency in your project to utilize its header-only library for your own tool.
+If you want to use _fiction_ as a dependency in your project, use its header-only library.
 
 Add `fiction` as a sub-directory to your CMake project and link against `libfiction` (assuming your project is
 called `fanfiction`):
@@ -154,8 +154,8 @@ from mnt import pyfiction
 
 ## 🧪 Supported Technologies
 
-Physical design in _fiction_ can be performed technology-independent. Only if resulted layouts are to be physically,
-simulated, a specific technology implementation is required. To this end, _fiction_ supports various potential FCN
+Physical design in _fiction_ can be performed technology-independently. Only if the resulting layouts are to be
+physically simulated is a specific technology implementation required. To this end, _fiction_ supports various FCN
 implementations together with gate libraries to compile gate-level layout abstractions down to the cell level.
 Additionally, output formats for external physical simulator engines are also supported.
 
@@ -245,7 +245,7 @@ On top, there is a [hexagonalization algorithm](https://ieeexplore.ieee.org/docu
 layouts suitable for QCA into hexagonal layouts suitable for SiDBs,
 and multiple algorithms to optimize gate-level layouts post-placement:
 
-- [post-layout optimzation](https://dl.acm.org/doi/10.1145/3611315.3633247)
+- [post-layout optimization](https://dl.acm.org/doi/10.1145/3611315.3633247)
 - [wiring reduction](https://www.cda.cit.tum.de/files/eda/2024_dac_wiring_reduction_for_field-coupled_nanotechnologies.pdf)
 
 ### Verification
@@ -275,11 +275,10 @@ simulated using a physical model. Currently, the following simulation algorithms
 
 ## ⏰ Clocking Schemes
 
-Regular clocking schemes have been proposed in the FCN literature, which can be used as a floor plans for physical
-design. However, sometimes it can make sense to have more freedom and assign clock numbers on the fly. That is
-why _fiction_ supports both
+Regular clocking schemes have been proposed in the FCN literature and can be used as floor plans for physical
+design. However, sometimes it makes sense to assign clock numbers on the fly. Therefore, _fiction_ supports both
 [regular and irregular clocking schemes](https://fiction.readthedocs.io/en/latest/layouts/clocking_scheme.html)
-with variable amounts of clock numbers as QCA for instance uses four clock phases but iNML needs only three.
+with variable numbers of clock phases: for instance, QCA uses four phases, whereas iNML needs only three.
 
 Built-in schemes are
 
