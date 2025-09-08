@@ -1175,7 +1175,7 @@ class graph_oriented_layout_design_impl
         {
             for (auto x = static_cast<int64_t>(layout.x()); x >= 0; --x)
             {
-                if (!layout.is_empty_tile({static_cast<uint64_t>(x), 0}))
+                if (!layout.is_empty_tile({static_cast<uint64_t>(x), 0, 0}))
                 {
                     min_x = static_cast<uint64_t>(x) + 1;
                     break;  // first non-empty from the right
@@ -1184,7 +1184,7 @@ class graph_oriented_layout_design_impl
 
             for (auto y = static_cast<int64_t>(layout.y()); y >= 0; --y)
             {
-                if (!layout.is_empty_tile({0, static_cast<uint64_t>(y)}))
+                if (!layout.is_empty_tile({0, static_cast<uint64_t>(y), 0}))
                 {
                     min_y = static_cast<uint64_t>(y) + 1;
                     break;  // first non-empty from the bottom
