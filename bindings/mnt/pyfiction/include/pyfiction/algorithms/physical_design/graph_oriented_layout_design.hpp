@@ -78,12 +78,12 @@ inline void graph_oriented_layout_design(pybind11::module& m)
                        DOC(fiction_graph_oriented_layout_design_params_seed))
         .def_readwrite("straight_inverters", &fiction::graph_oriented_layout_design_params::straight_inverters,
                        DOC(fiction_graph_oriented_layout_design_params_straight_inverters))
-        .def_readwrite("skip_tiles_pi_placement",
-                       &fiction::graph_oriented_layout_design_params::skip_tiles_pi_placement,
-                       DOC(fiction_graph_oriented_layout_design_params_skip_tiles_pi_placement))
-        .def_readwrite("randomize_skip_tiles_pi_placement",
-                       &fiction::graph_oriented_layout_design_params::randomize_skip_tiles_pi_placement,
-                       DOC(fiction_graph_oriented_layout_design_params_randomize_skip_tiles_pi_placement));
+        .def_readwrite("tiles_to_skip_between_pis",
+                       &fiction::graph_oriented_layout_design_params::tiles_to_skip_between_pis,
+                       DOC(fiction_graph_oriented_layout_design_params_tiles_to_skip_between_pis))
+        .def_readwrite("randomize_tiles_to_skip_between_pis",
+                       &fiction::graph_oriented_layout_design_params::randomize_tiles_to_skip_between_pis,
+                       DOC(fiction_graph_oriented_layout_design_params_randomize_tiles_to_skip_between_pis));
 
     py::class_<fiction::graph_oriented_layout_design_stats>(m, "graph_oriented_layout_design_stats",
                                                             DOC(fiction_graph_oriented_layout_design_stats))

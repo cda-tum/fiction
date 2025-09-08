@@ -73,17 +73,17 @@ class gold_command : public command
                    "maximum-effort mode");
         add_flag("--straight_inverters,-i", ps.straight_inverters, "Enforce NOT gates to be routed non-bending only");
         add_option(
-            "--skip_tiles_pi_placement, -g", ps.skip_tiles_pi_placement,
+            "--tiles_to_skip_between_pis, -g", ps.tiles_to_skip_between_pis,
             "For each primary input (PI) considered during placement, reserve this many empty tiles after the current "
             "frontier to the right of the rightmost occupied tile or below the bottommost occupied tile before "
             "proposing a new PI position. This soft margin can reduce local congestion and increase the probability of "
             "finding a routable layout at the expense of a temporarily larger footprint, which post-layout "
             "optimization may later shrink. Defaults to 0.");
         add_flag(
-            "--randomize_skip_tiles_pi_placement,-j", ps.randomize_skip_tiles_pi_placement,
+            "--randomize_tiles_to_skip_between_pis,-j", ps.randomize_tiles_to_skip_between_pis,
             "Randomize the number of skipped tiles for each PI placement. When enabled, each PI will use a "
-            "random number of skipped tiles between skip_tiles_pi_placement-1 and skip_tiles_pi_placement (inclusive). "
-            "When skip_tiles_pi_placement is 0, only 0 will be used. This can help explore different placement "
+            "random number of skipped tiles between tiles_to_skip_between_pis-1 and tiles_to_skip_between_pis (inclusive). "
+            "When tiles_to_skip_between_pis is 0, only 0 will be used. This can help explore different placement "
             "strategies "
             "and potentially find better layouts. Requires a valid seed to be set for reproducible results.");
     }

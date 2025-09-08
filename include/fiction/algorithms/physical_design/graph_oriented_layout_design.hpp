@@ -183,24 +183,24 @@ struct graph_oriented_layout_design_params
     /**
      * For each primary input (PI) considered during placement, reserve this many
      * empty tiles *after* the current frontier:
-     *  - Top edge (row 0): leave `skip_tiles_pi_placement` empty tiles to the right
+     *  - Top edge (row 0): leave `tiles_to_skip_between_pis` empty tiles to the right
      *    of the rightmost occupied tile before proposing a new PI position.
-     *  - Left edge (column 0): leave `skip_tiles_pi_placement` empty tiles below
+     *  - Left edge (column 0): leave `tiles_to_skip_between_pis` empty tiles below
      *    the bottommost occupied tile before proposing a new PI position.
      *
      * This soft margin can reduce local congestion and increase the probability of
      * finding a routable layout at the expense of a temporarily larger footprint,
      * which post-layout optimization may later shrink. Defaults to `0`.
      */
-    uint64_t skip_tiles_pi_placement = 0;
+    uint64_t tiles_to_skip_between_pis = 0;
     /**
-     * When enabled, randomizes the skip_tiles_pi_placement value for each PI placement.
-     * The random value will be chosen from `0` to `skip_tiles_pi_placement` (inclusive).
+     * When enabled, randomizes the tiles_to_skip_between_pis value for each PI placement.
+     * The random value will be chosen from `0` to `tiles_to_skip_between_pis` (inclusive).
      * This can help explore different placement strategies and potentially find better layouts.
      * Uses the same random seed as other randomization features for reproducibility.
      * Defaults to `false`.
      */
-    bool randomize_skip_tiles_pi_placement = false;
+    bool randomize_tiles_to_skip_between_pis = false;
 };
 /**
  * This struct stores statistics about the graph-oriented layout design process.
@@ -1009,7 +1009,7 @@ class graph_oriented_layout_design_impl
      */
     std::uint32_t seed;
     /**
-     * Get thread-local random number generator for `skip_tiles_pi_placement` randomization.
+     * Get thread-local random number generator for `tiles_to_skip_between_pis` randomization.
      * Each thread will have its own RNG to avoid mutex contention.
      */
     [[nodiscard]] std::mt19937& get_thread_local_rng() const
@@ -1018,13 +1018,13 @@ class graph_oriented_layout_design_impl
         return rng;
     }
     /**
-     * Get thread-local distribution for generating random skip_tiles_pi_placement values.
+     * Get thread-local distribution for generating random tiles_to_skip_between_pis values.
      */
     [[nodiscard]] std::uniform_int_distribution<uint64_t>& get_thread_local_dist() const
     {
-        // Handle edge case where skip_tiles_pi_placement is 0
-        const auto min_val = ps.skip_tiles_pi_placement > 0 ? ps.skip_tiles_pi_placement - 1 : 0;
-        thread_local std::uniform_int_distribution<uint64_t> dist{min_val, ps.skip_tiles_pi_placement};
+        // Handle edge case where tiles_to_skip_between_pis is 0
+        const auto min_val = ps.tiles_to_skip_between_pis > 0 ? ps.tiles_to_skip_between_pis - 1 : 0;
+        thread_local std::uniform_int_distribution<uint64_t> dist{min_val, ps.tiles_to_skip_between_pis};
         return dist;
     }
     /**
@@ -1145,14 +1145,14 @@ class graph_oriented_layout_design_impl
         uint64_t skip_tiles = 0;
         if (!layout.is_empty())
         {
-            if (ps.randomize_skip_tiles_pi_placement)
+            if (ps.randomize_tiles_to_skip_between_pis)
             {
                 // generate random skip_tiles for each PI placement using thread-local RNG
                 skip_tiles = get_thread_local_dist()(get_thread_local_rng());
             }
             else
             {
-                skip_tiles = ps.skip_tiles_pi_placement;
+                skip_tiles = ps.tiles_to_skip_between_pis;
             }
         }
         auto skip_top  = skip_tiles;
