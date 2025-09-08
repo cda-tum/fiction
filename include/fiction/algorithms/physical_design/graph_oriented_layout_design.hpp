@@ -1009,8 +1009,14 @@ class graph_oriented_layout_design_impl
      */
     std::uint32_t seed;
     /**
+     * Thread pool for multithreaded execution to avoid thread creation overhead.
+     */
+    mutable std::vector<std::future<std::optional<Lyt>>> futures_pool{};
+    /**
      * Get thread-local random number generator for `tiles_to_skip_between_pis` randomization.
      * Each thread will have its own RNG to avoid mutex contention.
+     *
+     * @return Reference to a thread-local Mersenne Twister random number generator.
      */
     [[nodiscard]] std::mt19937& get_thread_local_rng() const
     {
@@ -1019,6 +1025,8 @@ class graph_oriented_layout_design_impl
     }
     /**
      * Get thread-local distribution for generating random tiles_to_skip_between_pis values.
+     *
+     * @return Reference to a thread-local uniform integer distribution for generating random skip values.
      */
     [[nodiscard]] std::uniform_int_distribution<uint64_t>& get_thread_local_dist() const
     {
@@ -1027,10 +1035,6 @@ class graph_oriented_layout_design_impl
         thread_local std::uniform_int_distribution<uint64_t> dist{min_val, ps.tiles_to_skip_between_pis};
         return dist;
     }
-    /**
-     * Thread pool for multithreaded execution to avoid thread creation overhead.
-     */
-    mutable std::vector<std::future<std::optional<Lyt>>> futures_pool{};
     /**
      * Determines the number of search space graphs to generate based on the selected effort mode and cost objective.
      *
@@ -1699,6 +1703,7 @@ class graph_oriented_layout_design_impl
         if (place_info.current_node > max_placed_nodes)
         {
             max_placed_nodes = place_info.current_node;
+            std::cout << max_placed_nodes << std::endl;
         }
 
         return found_solution;
