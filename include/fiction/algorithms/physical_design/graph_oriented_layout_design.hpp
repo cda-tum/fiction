@@ -190,15 +190,15 @@ struct graph_oriented_layout_design_params
      *
      * This soft margin can reduce local congestion and increase the probability of
      * finding a routable layout at the expense of a temporarily larger footprint,
-     * which post-layout optimization may later shrink. Defaults to 0.
+     * which post-layout optimization may later shrink. Defaults to `0`.
      */
     uint64_t skip_tiles_pi_placement = 0;
     /**
      * When enabled, randomizes the skip_tiles_pi_placement value for each PI placement.
-     * The random value will be chosen from 0 to skip_tiles_pi_placement (inclusive).
+     * The random value will be chosen from `0` to `skip_tiles_pi_placement` (inclusive).
      * This can help explore different placement strategies and potentially find better layouts.
      * Uses the same random seed as other randomization features for reproducibility.
-     * Defaults to false.
+     * Defaults to `false`.
      */
     bool randomize_skip_tiles_pi_placement = false;
 };
@@ -744,8 +744,7 @@ class graph_oriented_layout_design_impl
                         std::async(std::launch::async,
                                    [this, ssg_ptr, &update_best_layout_mutex, &best_lyt]() -> std::optional<Lyt>
                                    {
-                                       auto result = process_ssg(*ssg_ptr);
-                                       if (result)
+                                       if (auto result = process_ssg(*ssg_ptr); result)
                                        {
                                            const std::lock_guard<std::mutex> lock(update_best_layout_mutex);
                                            best_lyt = std::move(*result);
@@ -799,7 +798,7 @@ class graph_oriented_layout_design_impl
                         break;
                     }
                     // adaptive sleep: shorter sleep when more futures are active
-                    const auto active_futures = std::count_if(futures_pool.begin(), futures_pool.end(),
+                    const auto active_futures = std::count_if(futures_pool.cbegin(), futures_pool.cend(),
                                                               [](const auto& f) { return f.valid(); });
                     const auto sleep_duration =
                         active_futures > 4 ? std::chrono::microseconds(100) : std::chrono::milliseconds(1);
@@ -1010,10 +1009,10 @@ class graph_oriented_layout_design_impl
      */
     std::uint32_t seed;
     /**
-     * Get thread-local random number generator for skip_tiles_pi_placement randomization.
+     * Get thread-local random number generator for `skip_tiles_pi_placement` randomization.
      * Each thread will have its own RNG to avoid mutex contention.
      */
-    std::mt19937& get_thread_local_rng() const
+    [[nodiscard]] std::mt19937& get_thread_local_rng() const
     {
         thread_local std::mt19937 rng{seed};
         return rng;
@@ -1021,7 +1020,7 @@ class graph_oriented_layout_design_impl
     /**
      * Get thread-local distribution for generating random skip_tiles_pi_placement values.
      */
-    std::uniform_int_distribution<uint64_t>& get_thread_local_dist() const
+    [[nodiscard]] std::uniform_int_distribution<uint64_t>& get_thread_local_dist() const
     {
         // Handle edge case where skip_tiles_pi_placement is 0
         const auto min_val = ps.skip_tiles_pi_placement > 0 ? ps.skip_tiles_pi_placement - 1 : 0;
@@ -1228,7 +1227,7 @@ class graph_oriented_layout_design_impl
                 }
                 else
                 {
-                    skip_top--;
+                    --skip_top;
                 }
             }
             if (((pi_locs == pi_locations::LEFT) || (pi_locs == pi_locations::TOP_AND_LEFT)) && min_y + k < layout.y())
@@ -1239,7 +1238,7 @@ class graph_oriented_layout_design_impl
                 }
                 else
                 {
-                    skip_left--;
+                    --skip_left;
                 }
             }
             if (count_expansions >= expansion_limit)
