@@ -472,9 +472,10 @@ class hexagonalization_impl
                 });
 
             // sort primary inputs by y-coordinate for consistency
-            std::sort(left_pis.begin(), left_pis.end(), [](const auto& lhs, const auto& rhs) { return lhs.y < rhs.y; });
-            std::sort(right_pis.begin(), right_pis.end(),
-                      [](const auto& lhs, const auto& rhs) { return lhs.y < rhs.y; });
+            std::sort(left_pis.begin(), left_pis.end(), [](const auto& lhs, const auto& rhs)
+                      { return (lhs.y < rhs.y) || (lhs.y == rhs.y && lhs.x < rhs.x); });
+            std::sort(right_pis.begin(), right_pis.end(), [](const auto& lhs, const auto& rhs)
+                      { return (lhs.y < rhs.y) || (lhs.y == rhs.y && lhs.x < rhs.x); });
 
             // adjust hex layout width if necessary (only if all inputs placed in top row)
             if (ps.input_pin_extension != hexagonalization_params::io_pin_extension_mode::NONE)
@@ -616,9 +617,10 @@ class hexagonalization_impl
                     }
                 });
 
-            std::sort(left_pos.begin(), left_pos.end(), [](const auto& lhs, const auto& rhs) { return lhs.y > rhs.y; });
-            std::sort(right_pos.begin(), right_pos.end(),
-                      [](const auto& lhs, const auto& rhs) { return lhs.y > rhs.y; });
+            std::sort(left_pos.begin(), left_pos.end(), [](const auto& lhs, const auto& rhs)
+                      { return (lhs.y > rhs.y) || (lhs.y == rhs.y && lhs.x < rhs.x); });
+            std::sort(right_pos.begin(), right_pos.end(), [](const auto& lhs, const auto& rhs)
+                      { return (lhs.y > rhs.y) || (lhs.y == rhs.y && lhs.x < rhs.x); });
 
             if (ps.input_pin_extension != hexagonalization_params::io_pin_extension_mode::NONE)
             {

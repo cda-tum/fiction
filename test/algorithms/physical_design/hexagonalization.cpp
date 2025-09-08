@@ -200,6 +200,7 @@ static void check_mapping_equiv_all()
     check_mapping_equiv_layout_with_planar_rerouting(blueprints::crossing_layout<cart_gate_clk_lyt>());
     check_mapping_equiv_layout_with_planar_rerouting(blueprints::tautology_gate_layout<cart_gate_clk_lyt>());
     check_mapping_equiv_layout_with_planar_rerouting(blueprints::ge_gt_le_lt_layout<cart_gate_clk_lyt>());
+    check_mapping_equiv_layout_with_planar_rerouting(blueprints::po_extension_corner_case_layout<cart_gate_clk_lyt>());
 }
 
 TEST_CASE("Layout equivalence", "[hexagonalization]")
