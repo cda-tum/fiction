@@ -1024,7 +1024,7 @@ class graph_oriented_layout_design_impl
         return rng;
     }
     /**
-     * Get thread-local distribution for generating random tiles_to_skip_between_pis values.
+     * Get thread-local distribution for generating random `tiles_to_skip_between_pis` values.
      *
      * @return Reference to a thread-local uniform integer distribution for generating random skip values.
      */

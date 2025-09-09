@@ -245,7 +245,7 @@ Possible parameters:
 - Seed (``-s``): Set a random seed for random fanout substitution, random topological ordering in maximum-effort mode, and randomized skip tile placement.
 - Straight inverters (``-i``): Enforce NOT gates to be routed non-bending only.
 - Skip tiles when placing PIs (``-g``):  For each primary input (PI) considered during placement, reserve this many empty tiles after the current frontier.
-- Randomize skip tiles PI placement (``-j``): Randomize the number of skipped tiles for each PI placement. When enabled, each PI will use a random number of skipped tiles between tiles_to_skip_between_pis-1 and tiles_to_skip_between_pis (inclusive). When tiles_to_skip_between_pis is 0, only 0 will be used. This can help explore different placement strategies and potentially find better layouts.
+- Randomize skip tiles PI placement (``-j``): Randomize the number of skipped tiles for each PI placement. When enabled, each PI will use a random number of skipped tiles between ``tiles_to_skip_between_pis - 1`` and ``tiles_to_skip_between_pis`` (inclusive). When ``tiles_to_skip_between_pis`` is 0, only 0 will be used. This can help explore different placement strategies and potentially find better layouts.
 
 Hexagonalization (``hex``)
 ##########################
