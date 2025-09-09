@@ -19,7 +19,9 @@ Added
 
 Fixed
 #####
-- Fixed a bug in ``post_layout_optimization`` and ``wiring_reduction`` that lead to POs not being placed at the borders and possibly dying
+- Algorithms:
+    - Fixed a corner case in ``hexagonalization`` when extending POs to the bottom border
+    - Fixed a bug in ``post_layout_optimization`` and ``wiring_reduction`` that lead to POs not being placed at the borders and possibly dying
 
 v0.6.11 - 2025-04-23
 --------------------
