@@ -472,9 +472,10 @@ class hexagonalization_impl
                 });
 
             // sort primary inputs by y-coordinate for consistency
-            std::sort(left_pis.begin(), left_pis.end(), [](const auto& lhs, const auto& rhs) { return lhs.y < rhs.y; });
-            std::sort(right_pis.begin(), right_pis.end(),
-                      [](const auto& lhs, const auto& rhs) { return lhs.x < rhs.x; });
+            std::sort(left_pis.begin(), left_pis.end(), [](const auto& lhs, const auto& rhs)
+                      { return (lhs.y < rhs.y) || (lhs.y == rhs.y && lhs.x < rhs.x); });
+            std::sort(right_pis.begin(), right_pis.end(), [](const auto& lhs, const auto& rhs)
+                      { return (lhs.y < rhs.y) || (lhs.y == rhs.y && lhs.x < rhs.x); });
 
             // adjust hex layout width if necessary (only if all inputs placed in top row)
             if (ps.input_pin_extension != hexagonalization_params::io_pin_extension_mode::NONE)
@@ -616,9 +617,10 @@ class hexagonalization_impl
                     }
                 });
 
-            std::sort(left_pos.begin(), left_pos.end(), [](const auto& lhs, const auto& rhs) { return lhs.x > rhs.x; });
-            std::sort(right_pos.begin(), right_pos.end(),
-                      [](const auto& lhs, const auto& rhs) { return lhs.y > rhs.y; });
+            std::sort(left_pos.begin(), left_pos.end(), [](const auto& lhs, const auto& rhs)
+                      { return (lhs.y > rhs.y) || (lhs.y == rhs.y && lhs.x < rhs.x); });
+            std::sort(right_pos.begin(), right_pos.end(), [](const auto& lhs, const auto& rhs)
+                      { return (lhs.y > rhs.y) || (lhs.y == rhs.y && lhs.x < rhs.x); });
 
             if (ps.input_pin_extension != hexagonalization_params::io_pin_extension_mode::NONE)
             {
@@ -853,6 +855,40 @@ class hexagonalization_impl
                 {
                     auto source        = obj.source;
                     auto update_source = false;
+
+                    const auto above_coord = layout_obstruct.above(obj.source);
+                    if (!layout_obstruct.is_empty_tile(above_coord))
+                    {
+                        const auto below_coord      = layout_obstruct.below(obj.source);
+                        const auto south_east_coord = layout_obstruct.south_east(below_coord);
+                        const auto south_west_coord = layout_obstruct.south_west(below_coord);
+
+                        if (layout_obstruct.is_empty_tile(south_west_coord) &&
+                            !layout_obstruct.is_empty_tile(south_east_coord))
+                        {
+                            if (!layout_obstruct.is_po(layout_obstruct.get_node(south_east_coord)))
+                            {
+                                const auto above_south_east_coord = layout_obstruct.above(south_east_coord);
+                                layout_obstruct.obstruct_connection(below_coord, south_east_coord);
+                                layout_obstruct.obstruct_connection(above_coord, south_east_coord);
+                                layout_obstruct.obstruct_connection(below_coord, above_south_east_coord);
+                                layout_obstruct.obstruct_connection(above_coord, above_south_east_coord);
+                            }
+                        }
+
+                        if (layout_obstruct.is_empty_tile(south_east_coord) &&
+                            !layout_obstruct.is_empty_tile(south_west_coord))
+                        {
+                            if (!layout_obstruct.is_po(layout_obstruct.get_node(south_west_coord)))
+                            {
+                                const auto above_south_west_coord = layout_obstruct.above(south_west_coord);
+                                layout_obstruct.obstruct_connection(below_coord, south_west_coord);
+                                layout_obstruct.obstruct_connection(above_coord, south_west_coord);
+                                layout_obstruct.obstruct_connection(below_coord, above_south_west_coord);
+                                layout_obstruct.obstruct_connection(above_coord, above_south_west_coord);
+                            }
+                        }
+                    }
 
                     // for planar extension, check if source is in the crossing layer
                     if (!crossings && obj.source.z == 1)
