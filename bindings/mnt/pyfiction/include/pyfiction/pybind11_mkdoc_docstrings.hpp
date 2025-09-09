@@ -7946,6 +7946,23 @@ Returns:
     A vector of tiles representing the possible positions for a single
     fan-in node.)doc";
 
+static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_get_thread_local_dist =
+R"doc(Get thread-local distribution for generating random
+`tiles_to_skip_between_pis` values.
+
+Returns:
+    Reference to a thread-local uniform integer distribution for
+    generating random skip values.)doc";
+
+static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_get_thread_local_rng =
+R"doc(Get thread-local random number generator for
+`tiles_to_skip_between_pis` randomization. Each thread will have its
+own RNG to avoid mutex contention.
+
+Returns:
+    Reference to a thread-local Mersenne Twister random number
+    generator.)doc";
+
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_graph_oriented_layout_design_impl =
 R"doc(Constructor for the graph-oriented layout design algorithm.
 
@@ -14271,6 +14288,14 @@ R"doc(Disable the creation of crossings during layout generation. If set to
 true, gates will only be placed if a crossing-free wiring is found.
 Defaults to false.)doc";
 
+static const char *__doc_fiction_graph_oriented_layout_design_params_randomize_tiles_to_skip_between_pis =
+R"doc(When enabled, randomizes the tiles_to_skip_between_pis value for each
+PI placement. The random value will be chosen from `0` to
+`tiles_to_skip_between_pis` (inclusive). This can help explore
+different placement strategies and potentially find better layouts.
+Uses the same random seed as other randomization features for
+reproducibility. Defaults to `false`.)doc";
+
 static const char *__doc_fiction_graph_oriented_layout_design_params_return_first =
 R"doc(Return the first found layout, which might still have a high cost but
 can be found fast.)doc";
@@ -14280,6 +14305,19 @@ R"doc(Random seed used for random fanout substitution and random topological
 ordering in maximum-effort mode, generated randomly if not specified.)doc";
 
 static const char *__doc_fiction_graph_oriented_layout_design_params_straight_inverters = R"doc(Enforce NOT gates to be routed non-bending only.)doc";
+
+static const char *__doc_fiction_graph_oriented_layout_design_params_tiles_to_skip_between_pis =
+R"doc(For each primary input (PI) considered during placement, reserve this
+many empty tiles *after* the current frontier: - Top edge (row 0):
+leave `tiles_to_skip_between_pis` empty tiles to the right of the
+rightmost occupied tile before proposing a new PI position. - Left
+edge (column 0): leave `tiles_to_skip_between_pis` empty tiles below
+the bottommost occupied tile before proposing a new PI position.
+
+This soft margin can reduce local congestion and increase the
+probability of finding a routable layout at the expense of a
+temporarily larger footprint, which post-layout optimization may later
+shrink. Defaults to `0`.)doc";
 
 static const char *__doc_fiction_graph_oriented_layout_design_params_timeout = R"doc(Timeout limit (in ms).)doc";
 
