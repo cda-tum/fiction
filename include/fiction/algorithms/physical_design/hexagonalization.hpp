@@ -11,7 +11,6 @@
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/layouts/obstruction_layout.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/types.hpp"
 #include "fiction/utils/name_utils.hpp"
 #include "fiction/utils/placement_utils.hpp"
 #include "fiction/utils/routing_utils.hpp"
@@ -26,6 +25,9 @@
 #include <cstdint>
 #include <iostream>
 #include <stdexcept>
+#include <string>
+#include <string_view>
+#include <utility>
 #include <vector>
 
 #pragma GCC diagnostic push
@@ -45,9 +47,7 @@ class hexagonalization_io_pin_routing_error : public std::runtime_error
      *
      * @param msg The error message describing the error.
      */
-    explicit hexagonalization_io_pin_routing_error(const std::string_view& msg) noexcept :
-            std::runtime_error(msg.data())
-    {}
+    explicit hexagonalization_io_pin_routing_error(const std::string_view msg) : std::runtime_error(std::string{msg}) {}
 };
 
 /**
