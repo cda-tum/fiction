@@ -1703,7 +1703,6 @@ class graph_oriented_layout_design_impl
         if (place_info.current_node > max_placed_nodes)
         {
             max_placed_nodes = place_info.current_node;
-            std::cout << max_placed_nodes << std::endl;
         }
 
         return found_solution;
