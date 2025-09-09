@@ -15,6 +15,10 @@ Added
     - Maximum-effort mode in `gold` utilizing random fanout substitution strategies and random topological orderings to design high-quality layouts
     - Flag in `gold` to enforce NOT gates to be routed non-bending only
 
+Fixed
+#####
+- Algorithms:
+    - Fixed a corner case in ``hexagonalization`` when extending POs to the bottom border
 
 v0.6.11 - 2025-04-23
 --------------------
