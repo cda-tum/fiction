@@ -7948,7 +7948,7 @@ Returns:
 
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_get_thread_local_dist =
 R"doc(Get thread-local distribution for generating random
-tiles_to_skip_between_pis values.
+`tiles_to_skip_between_pis` values.
 
 Returns:
     Reference to a thread-local uniform integer distribution for
