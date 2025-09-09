@@ -23,10 +23,10 @@
 #include <cassert>
 #include <cmath>
 #include <cstdint>
-#include <string>
-#include <string_view>
 #include <iostream>
 #include <stdexcept>
+#include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 
@@ -47,8 +47,7 @@ class hexagonalization_io_pin_routing_error : public std::runtime_error
      *
      * @param msg The error message describing the error.
      */
-    explicit hexagonalization_io_pin_routing_error(std::string_view msg) noexcept :
-           std::runtime_error(std::string{msg})
+    explicit hexagonalization_io_pin_routing_error(std::string_view msg) noexcept : std::runtime_error(std::string{msg})
     {}
 };
 
