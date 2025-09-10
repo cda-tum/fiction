@@ -78,7 +78,7 @@ class area_command : public command
                 vspace = tech::CELL_VSPACE;
             }
 
-            fiction::area_params<tech, double> ps{width, height, hspace, vspace};
+            fiction::area_params<tech> ps{width, height, hspace, vspace};
 
             fiction::area(*lyt_ptr, ps, &st);
         };
@@ -92,15 +92,23 @@ class area_command : public command
     /**
      * Layout area in nm².
      */
-    fiction::area_stats<double> st{};
+    fiction::area_stats st{};
     /**
-     * Width and height of each cell.
+     * Width of each cell.
      */
-    double width{0.0}, height{0.0};
+    double width{0.0};
     /**
-     * Horizontal and vertical spacing between cells.
+     * Height of each cell.
      */
-    double hspace{0.0}, vspace{0.0};
+    double height{0.0};
+    /**
+     * Horizontal spacing between cells.
+     */
+    double hspace{0.0};
+    /**
+     * Vertical spacing between cells.
+     */
+    double vspace{0.0};
     /**
      * Logs the resulting information in a log file.
      *
