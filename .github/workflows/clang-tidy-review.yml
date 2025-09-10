@@ -54,9 +54,7 @@ jobs:
           style: ""
           tidy-checks: ""
           database: "build"
-          files-changed-only: "true"
           thread-comments: ${{ github.event_name == 'pull_request' && 'update' }}
-          file-annotations: "true"
           ignore-tidy: "build|libs/*|docs/*|benchmarks/*|bib/*|*/pyfiction/pybind11_mkdoc_docstrings.hpp|*/pyfiction/documentation.hpp"
           version: "20"
 
