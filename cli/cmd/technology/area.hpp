@@ -116,7 +116,7 @@ class area_command : public command
      */
     nlohmann::json log() const override
     {
-        return {{"area (nm²)", st.area}};
+        return {{"width (nm)", st.width}, {"height (nm)", st.height}, {"area (nm²)", st.area}};
     }
 };
 
