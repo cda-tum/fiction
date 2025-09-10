@@ -10,8 +10,7 @@
 
 #include <fmt/format.h>
 
-#include <cstdint>
-#include <ostream>
+#include <iostream>
 
 namespace fiction
 {
