@@ -84,7 +84,7 @@ struct area_stats
  * @return Area requirements in nm².
  */
 template <typename Lyt>
-double area(const Lyt& lyt, area_params<technology<Lyt>>& ps = {}, area_stats* pst = nullptr) noexcept
+double area(const Lyt& lyt, const area_params<technology<Lyt>>& ps = {}, area_stats* pst = nullptr) noexcept
 {
     static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
 
@@ -113,7 +113,8 @@ double area(const Lyt& lyt, area_params<technology<Lyt>>& ps = {}, area_stats* p
  * @return Area requirements in nm².
  */
 template <typename Lyt>
-double area(const bounding_box_2d<Lyt>& bb, area_params<technology<Lyt>>& ps = {}, area_stats* pst = nullptr) noexcept
+double area(const bounding_box_2d<Lyt>& bb, const area_params<technology<Lyt>>& ps = {},
+            area_stats* pst = nullptr) noexcept
 {
     static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
 
