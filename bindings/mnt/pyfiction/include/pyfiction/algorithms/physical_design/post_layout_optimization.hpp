@@ -21,7 +21,6 @@ namespace pyfiction
 inline void post_layout_optimization(pybind11::module& m)
 {
     namespace py = pybind11;
-    namespace py = pybind11;
 
     py::class_<fiction::post_layout_optimization_params>(m, "post_layout_optimization_params",
                                                          DOC(fiction_post_layout_optimization_params))

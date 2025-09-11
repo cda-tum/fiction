@@ -24,7 +24,6 @@ namespace pyfiction
 inline void orthogonal(pybind11::module& m)
 {
     namespace py = pybind11;
-    namespace py = pybind11;
 
     py::class_<fiction::orthogonal_physical_design_params>(m, "orthogonal_params",
                                                            DOC(fiction_orthogonal_physical_design_params))

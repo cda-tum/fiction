@@ -159,9 +159,9 @@ class displacement_robustness_domain_impl
             truth_table{spec},
             generator(rd())
     {
-        assert(
-            (is_operational(layout, truth_table, params.operational_params).first == operational_status::OPERATIONAL) &&
-            "The given layout is not a valid SiDB layout for the given Boolean function");
+        assert((is_operational(layout, truth_table, params.operational_params).status ==
+                operational_status::OPERATIONAL) &&
+               "The given layout is not a valid SiDB layout for the given Boolean function");
 
         if (params.analysis_mode ==
             displacement_robustness_domain_params<cell<Lyt>>::displacement_analysis_mode::RANDOM)
@@ -204,7 +204,7 @@ class displacement_robustness_domain_impl
             const auto op_status = is_operational(lyt, truth_table, params.operational_params);
             {
                 const std::lock_guard lock_domain{mutex_to_protect_displacement_robustness_domain};
-                update_displacement_robustness_domain(domain, lyt, op_status.first);
+                update_displacement_robustness_domain(domain, lyt, op_status.status);
             }
         };
 

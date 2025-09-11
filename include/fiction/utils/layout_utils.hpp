@@ -622,7 +622,7 @@ CoordinateType random_coordinate(CoordinateType coordinate1, CoordinateType coor
  * @return A vector containing all cells within the specified area.
  */
 template <typename CoordinateType>
-[[nodiscard]] inline std::vector<CoordinateType>
+[[nodiscard]] std::vector<CoordinateType>
 all_coordinates_in_spanned_area(const CoordinateType& cell_first_corner,
                                 const CoordinateType& cell_second_corner) noexcept
 {
@@ -632,10 +632,10 @@ all_coordinates_in_spanned_area(const CoordinateType& cell_first_corner,
         auto cell_first_corner_cube  = siqad::to_fiction_coord<cube::coord_t>(cell_first_corner);
         auto cell_second_corner_cube = siqad::to_fiction_coord<cube::coord_t>(cell_second_corner);
 
-        cube::coord_t nw_cell{std::min(cell_first_corner_cube.x, cell_second_corner_cube.x),
-                              std::min(cell_first_corner_cube.y, cell_second_corner_cube.y)};
-        cube::coord_t se_cell{std::max(cell_first_corner_cube.x, cell_second_corner_cube.x),
-                              std::max(cell_first_corner_cube.y, cell_second_corner_cube.y)};
+        const cube::coord_t nw_cell{std::min(cell_first_corner_cube.x, cell_second_corner_cube.x),
+                                    std::min(cell_first_corner_cube.y, cell_second_corner_cube.y)};
+        const cube::coord_t se_cell{std::max(cell_first_corner_cube.x, cell_second_corner_cube.x),
+                                    std::max(cell_first_corner_cube.y, cell_second_corner_cube.y)};
 
         const auto total_cell_count = static_cast<uint64_t>(std::abs(nw_cell.x - se_cell.x) + 1) *
                                       static_cast<uint64_t>(std::abs(nw_cell.y - se_cell.y) + 1);
@@ -713,7 +713,7 @@ all_coordinates_in_spanned_area(const CoordinateType& cell_first_corner,
  * @return `true` if the layouts are identical, `false` otherwise.
  */
 template <typename Lyt>
-[[nodiscard]] inline bool are_cell_layouts_identical(const Lyt& first_lyt, const Lyt& second_lyt) noexcept
+[[nodiscard]] bool are_cell_layouts_identical(const Lyt& first_lyt, const Lyt& second_lyt) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
 

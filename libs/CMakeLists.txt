@@ -125,7 +125,7 @@ endif ()
 # Enable the usage of ALGLIB by the ALGLIB Project
 option(FICTION_ALGLIB "Automatically download, include, and utilize ALGLIB by the ALGLIB project.")
 if (FICTION_ALGLIB)
-    message(STATUS "Usage of the Z3 solver was enabled.")
+    message(STATUS "Usage of ALGLIB was enabled.")
 
     # Compile definition to guard include files
     target_compile_definitions(libfiction INTERFACE FICTION_ALGLIB_ENABLED)

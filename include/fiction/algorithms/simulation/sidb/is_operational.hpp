@@ -61,9 +61,9 @@ enum class operational_status : uint8_t
 struct is_operational_params
 {
     /**
-     * Condition to decide whether a layout is operational or non-operational.
+     * Condition to decide whether a layout is operational or non-operational, relating to kinks.
      */
-    enum class operational_condition : uint8_t
+    enum class operational_condition_kinks : uint8_t
     {
         /**
          * Even if the I/O pins show kinks, the layout is still considered as operational.
@@ -74,20 +74,23 @@ struct is_operational_params
          */
         REJECT_KINKS
     };
-
     /**
-     * Simulation method to determine if the layout is operational or non-operational. There are three possible
-     * strategies:
-     *
-     * - `SIMULATION_ONLY`: This setting does not apply any filtering strategies to determine if the layout is
-     * operational. Instead, it relies solely on physical simulation to make this determination.
-     * - `FILTER_ONLY`: This setting does only apply filtering strategies to determine if the layout is
-     * non-operational. If the layout passes all filtering strategies, it is considered operational. This is only an
-     * approximation. It may be possible that the layout is non-operational, but the filtering strategies do not detect
-     * it.
-     * - `FILTER_THEN_SIMULATION`: Before a physical simulation is conducted, the algorithm checks if filtering
-     * strategies have detected whether the layout is non-operational. This only provides any runtime benefits if kinks
-     * are rejected.
+     * Condition to decide whether a layout is operational or non-operational, relating to positive charges.
+     */
+    enum class operational_condition_positive_charges : uint8_t
+    {
+        /**
+         * Positive charges may not be able to occur. In the case of the converse being true, the layout is considered
+         * as non-operational.
+         */
+        REJECT_POSITIVE_CHARGES,
+        /**
+         * Even if positive charges can occur, the layout is still considered as operational.
+         */
+        TOLERATE_POSITIVE_CHARGES,
+    };
+    /**
+     * Simulation method to determine if the layout is operational or non-operational.
      */
     enum class operational_analysis_strategy : uint8_t
     {
@@ -100,7 +103,7 @@ struct is_operational_params
          * Apply filtering exclusively to determine whether the layout is non-operational. If the layout
          * passes all filter steps, it is considered operational.
          *
-         * @note This is an extremely fast approximation that may sometimes lead to false positives.
+         * @note This is an extremely fast approximation that may lead to false positives.
          */
         FILTER_ONLY,
         /**
@@ -108,6 +111,35 @@ struct is_operational_params
          * layout is non-operational. This only provides any runtime benefits if kinks are rejected.
          */
         FILTER_THEN_SIMULATION
+    };
+    /**
+     * The termination condition for assessment of the operational status of the given layout.
+     */
+    enum class termination_condition : uint8_t
+    {
+        /**
+         * The assessment for the given layout terminates either when it is found to be operational for all input
+         * combinations, or an input combination is found for which the layout is not operational.
+         */
+        ON_FIRST_NON_OPERATIONAL,
+        /**
+         * The operational status is assessed for all input combinations.
+         */
+        ALL_INPUT_COMBINATIONS_ASSESSED
+    };
+    /**
+     * Selector for the different ways to handle obtained simulation results.
+     */
+    enum class simulation_results_mode : uint8_t
+    {
+        /**
+         * The simulation results for each input pattern are returned for operational gates.
+         */
+        KEEP_SIMULATION_RESULTS,
+        /**
+         * The simulation results are discarded after the operational status was assessed.
+         */
+        DISCARD_SIMULATION_RESULTS
     };
     /**
      * The simulation parameters for the physical simulation of the ground state.
@@ -122,14 +154,100 @@ struct is_operational_params
      */
     bdl_input_iterator_params input_bdl_iterator_params{};
     /**
-     * Condition to decide whether a layout is operational or non-operational.
+     * Condition to decide whether a layout is operational or non-operational, relating to kinks.
      */
-    operational_condition op_condition = operational_condition::TOLERATE_KINKS;
+    operational_condition_kinks op_condition_kinks = operational_condition_kinks::TOLERATE_KINKS;
+    /**
+     * Condition to decide whether a layout is operational or non-operational, relating to kinks.
+     */
+    operational_condition_positive_charges op_condition_positive_charges =
+        operational_condition_positive_charges::REJECT_POSITIVE_CHARGES;
     /**
      * Strategy to determine whether a layout is operational or non-operational.
      */
     operational_analysis_strategy strategy_to_analyze_operational_status =
         operational_analysis_strategy::SIMULATION_ONLY;
+    /**
+     * Condition to decide when to terminate the assessment of the operational status of the given layout.
+     */
+    termination_condition termination_cond = termination_condition::ON_FIRST_NON_OPERATIONAL;
+    /**
+     * Simulation results that are used to certify the status `OPERATIONAL` are not kept by default.
+     */
+    simulation_results_mode simulation_results_retention = simulation_results_mode::DISCARD_SIMULATION_RESULTS;
+};
+
+/**
+ * This struct is used to collect results from the operational status assessment.
+ *
+ * @tparam Lyt SiDB cell-level layout type.
+ */
+template <typename Lyt>
+struct operational_assessment
+{
+    /**
+     * This struct collects the information for a specific input combination that was obtained during the assessment.
+     */
+    struct operational_assessment_for_input
+    {
+        /**
+         * Standard constructor that only sets the operational status.
+         *
+         * @param op_status The operational status to set.
+         */
+        explicit operational_assessment_for_input(const operational_status op_status) noexcept : status{op_status} {}
+        /**
+         * The assessed operational status of the given layout under one input combination.
+         */
+        operational_status status;
+        /**
+         * The charge distributions obtained for one input combination that was tested.
+         */
+        std::optional<sidb_simulation_result<Lyt>> simulation_results{};
+    };
+    /**
+     * Standard constructor that only sets the operational status.
+     *
+     * @param op_status The operational status to set.
+     */
+    explicit operational_assessment(const operational_status op_status) noexcept : status{op_status} {}
+    /**
+     * The assessed operational status of the given layout. The status `OPERATIONAL` is given if and only the layout is
+     * operational under all input combinations.
+     */
+    operational_status status;
+    /**
+     * When the termination condition is set to `ALL_INPUT_COMBINATIONS_ASSESSED`, the operational status for each
+     * respective input combination is stored here, sorted by their binary representation. When the simulation retention
+     * is set to `KEEP_SIMULATION_RESULTS`, this optional structure is also populated.
+     */
+    std::optional<std::vector<operational_assessment_for_input>> assessment_per_input{};
+    /**
+     * The number of input combinations tested.
+     */
+    std::size_t simulator_invocations{0};
+    /**
+     * Extracts the simulation results contained in this operational assessment through moves.
+     *
+     * @return A vector containing the simulation results for each respective input that was assessed.
+     */
+    [[nodiscard]] std::vector<sidb_simulation_result<Lyt>> extract_simulation_results_per_input() const noexcept
+    {
+        assert(assessment_per_input.has_value() && "Assessment results per input are not present.");
+        assert(!assessment_per_input.value().empty() && "No input combinations were assessed.");
+        assert(assessment_per_input.value().front().simulation_results.has_value() &&
+               "Simulation results were not retained during assessment.");
+
+        std::vector<sidb_simulation_result<Lyt>> simulation_results_per_input{};
+        simulation_results_per_input.reserve(assessment_per_input.value().size());
+
+        for (operational_assessment_for_input assessment : assessment_per_input.value())
+        {
+            simulation_results_per_input.push_back(std::move(assessment.simulation_results.value()));
+        }
+
+        return simulation_results_per_input;
+    }
 };
 
 namespace detail
@@ -187,7 +305,6 @@ enum class layout_invalidity_reason : uint8_t
  *
  * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT Type of the truth table.
- * @param spec Expected Boolean function of the layout given as a multi-output truth table.
  */
 template <typename Lyt, typename TT>
 class is_operational_impl
@@ -197,7 +314,7 @@ class is_operational_impl
      * Constructor to initialize the algorithm with a layout and parameters.
      *
      * @param lyt The SiDB cell-level layout to be checked.
-     * @param tt Expected Boolean function of the layout given as a multi-output truth table.
+     * @param spec Expected Boolean function of the layout given as a multi-output truth table.
      * @param params Parameters for the `is_operational` algorithm.
      */
     is_operational_impl(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params) :
@@ -240,7 +357,6 @@ class is_operational_impl
             number_of_output_wires{output_bdl_wires.size()},
             number_of_input_wires{input_bdl_wires.size()}
     {}
-
     /**
      * Constructor to initialize the algorithm with a layout, parameters, input and output wires, and a canvas layout.
      *
@@ -266,19 +382,19 @@ class is_operational_impl
             number_of_input_wires{input_bdl_wires.size()},
             canvas_lyt{c_lyt}
     {
-        if (params.op_condition == is_operational_params::operational_condition::TOLERATE_KINKS)
+        if (params.op_condition_kinks == is_operational_params::operational_condition_kinks::TOLERATE_KINKS)
         {
             output_bdl_pairs = detect_bdl_pairs(layout, sidb_technology::cell_type::OUTPUT,
                                                 params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params);
         }
     }
-
     /**
      * Constructor to initialize the algorithm with a layout and parameters.
      *
      * @param lyt The SiDB cell-level layout to be checked.
      * @param spec Expected Boolean function of the layout given as a multi-output truth table.
      * @param params Parameters for the `is_operational` algorithm.
+     * @param c_lyt Canvas layout.
      */
     is_operational_impl(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params,
                         const Lyt& c_lyt) :
@@ -296,7 +412,6 @@ class is_operational_impl
             number_of_input_wires{input_bdl_wires.size()},
             canvas_lyt{c_lyt}
     {}
-
     /**
      * This function evaluates whether the given layout is invalid, i.e., it cannot implement the given Boolean
      * function. This is done in three separate filtering steps: (1) discarding SiDB layouts with
@@ -316,8 +431,9 @@ class is_operational_impl
         cds_layout.assign_all_charge_states(sidb_charge_state::NEGATIVE);
         cds_layout.assign_physical_parameters(parameters.simulation_parameters);
 
-        if ((parameters.simulation_parameters.base == 2) &&
-            (can_positive_charges_occur(*bii, parameters.simulation_parameters)))
+        if (parameters.op_condition_positive_charges ==
+                is_operational_params::operational_condition_positive_charges::REJECT_POSITIVE_CHARGES &&
+            can_positive_charges_occur(cds_layout, parameters.simulation_parameters))
         {
             return layout_invalidity_reason::POTENTIAL_POSITIVE_CHARGES;
         }
@@ -340,7 +456,6 @@ class is_operational_impl
 
         return layout_invalidity_reason::PHYSICAL_INFEASIBILITY;
     }
-
     /**
      * Run the `is_operational` algorithm.
      *
@@ -350,85 +465,191 @@ class is_operational_impl
      * @return Pair with the first element indicating the operational status (either `OPERATIONAL` or `NON_OPERATIONAL`)
      * and the second element indicating the reason if it is non-operational.
      */
-    [[nodiscard]] std::pair<operational_status, non_operationality_reason> run() noexcept
+    [[nodiscard]] std::pair<operational_assessment<Lyt>, non_operationality_reason> run() noexcept
     {
         if (!canvas_lyt.is_empty())
         {
-            if ((parameters.op_condition == is_operational_params::operational_condition::REJECT_KINKS &&
+            if ((parameters.op_condition_kinks == is_operational_params::operational_condition_kinks::REJECT_KINKS &&
                  parameters.strategy_to_analyze_operational_status ==
                      is_operational_params::operational_analysis_strategy::FILTER_THEN_SIMULATION) ||
-                (parameters.strategy_to_analyze_operational_status ==
-                     is_operational_params::operational_analysis_strategy::FILTER_ONLY &&
-                 parameters.op_condition == is_operational_params::operational_condition::REJECT_KINKS))
+                parameters.strategy_to_analyze_operational_status ==
+                    is_operational_params::operational_analysis_strategy::FILTER_ONLY)
             {
                 // number of different input combinations
                 for (auto i = 0u; i < truth_table.front().num_bits(); ++i, ++bii)
                 {
                     if (is_layout_invalid(bii.get_current_input_index()))
                     {
-                        return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
+                        return {operational_assessment<Lyt>{operational_status::NON_OPERATIONAL},
+                                non_operationality_reason::LOGIC_MISMATCH};
                     }
                 }
             }
-        }
-        // if the layout is not discarded during the three filtering steps, it is considered operational.
-        // This is only an approximation.
-        if (parameters.strategy_to_analyze_operational_status ==
-                is_operational_params::operational_analysis_strategy::FILTER_ONLY &&
-            !canvas_lyt.is_empty())
-        {
-            return {operational_status::OPERATIONAL, non_operationality_reason::NONE};
-        }
 
-        if (parameters.strategy_to_analyze_operational_status ==
-                is_operational_params::operational_analysis_strategy::SIMULATION_ONLY ||
-            parameters.strategy_to_analyze_operational_status ==
-                is_operational_params::operational_analysis_strategy::FILTER_THEN_SIMULATION ||
-            canvas_lyt.is_empty())
-        {
-            bii = 0;
-            // number of different input combinations
-            for (auto i = 0u; i < truth_table.front().num_bits(); ++i, ++bii)
+            // if the layout is not discarded during the three filtering steps, it is considered operational.
+            // This is only an approximation.
+            if (parameters.strategy_to_analyze_operational_status ==
+                is_operational_params::operational_analysis_strategy::FILTER_ONLY)
             {
-                // if positively charged SiDBs can occur, the SiDB layout is considered non-operational
-                if ((parameters.simulation_parameters.base == 2) &&
-                    (can_positive_charges_occur(*bii, parameters.simulation_parameters)))
-                {
-                    return {operational_status::NON_OPERATIONAL, non_operationality_reason::POTENTIAL_POSITIVE_CHARGES};
-                }
+                return {operational_assessment<Lyt>{operational_status::OPERATIONAL}, non_operationality_reason::NONE};
+            }
 
-                ++simulator_invocations;
-                // performs physical simulation of a given SiDB layout at a given input combination
-                const auto simulation_results = physical_simulation_of_layout(bii);
-
-                // if no physically valid charge distributions were found, the layout is non-operational
-                if (simulation_results.charge_distributions.empty())
-                {
-                    return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
-                }
-
-                const auto ground_states = simulation_results.groundstates();
-
-                for (const auto& gs : ground_states)
-                {
-                    const auto [op_status, non_op_reason] = verify_logic_match_of_cds(gs, i);
-                    if (op_status == operational_status::NON_OPERATIONAL &&
-                        non_op_reason == non_operationality_reason::LOGIC_MISMATCH)
-                    {
-                        return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
-                    }
-                    if (op_status == operational_status::NON_OPERATIONAL &&
-                        non_op_reason == non_operationality_reason::KINKS &&
-                        parameters.op_condition == is_operational_params::operational_condition::REJECT_KINKS)
-                    {
-                        return {operational_status::NON_OPERATIONAL, non_operationality_reason::KINKS};
-                    }
-                }
+            if (parameters.strategy_to_analyze_operational_status !=
+                    is_operational_params::operational_analysis_strategy::SIMULATION_ONLY &&
+                parameters.strategy_to_analyze_operational_status !=
+                    is_operational_params::operational_analysis_strategy::FILTER_THEN_SIMULATION)
+            {
+                return {operational_assessment<Lyt>{operational_status::OPERATIONAL}, non_operationality_reason::NONE};
             }
         }
 
-        // if we made it here, the layout is operational
-        return {operational_status::OPERATIONAL, non_operationality_reason::NONE};
+        operational_assessment<Lyt> operational_assessment_results{operational_status::OPERATIONAL};
+
+        // when `termination_condition::ALL_INPUT_COMBINATIONS_ASSESSED` is set, the results of the operational status
+        // assessment are also stored for each input separately
+        std::vector<typename operational_assessment<Lyt>::operational_assessment_for_input>
+            assessment_results_per_input{};
+        if (parameters.termination_cond ==
+            is_operational_params::termination_condition::ALL_INPUT_COMBINATIONS_ASSESSED)
+        {
+            assessment_results_per_input.reserve(truth_table.front().num_bits());
+        }
+
+        // when `simulation_results_mode::KEEP_SIMULATION_RESULTS` is set, the simulation results must be collected for
+        // each input combination
+        std::vector<sidb_simulation_result<Lyt>> sim_res_per_input{};
+        if (parameters.simulation_results_retention ==
+            is_operational_params::simulation_results_mode::KEEP_SIMULATION_RESULTS)
+        {
+            sim_res_per_input.reserve(truth_table.front().num_bits());
+        }
+
+        bii = 0;
+        // number of different input combinations
+        for (auto i = 0u; i < truth_table.front().num_bits(); ++i, ++bii)
+        {
+            typename operational_assessment<Lyt>::operational_assessment_for_input
+                assessment_results_for_this_input_combination{operational_status::OPERATIONAL};
+
+            // if positively charged SiDBs can occur, the SiDB layout is considered non-operational
+            if (parameters.op_condition_positive_charges ==
+                    is_operational_params::operational_condition_positive_charges::REJECT_POSITIVE_CHARGES &&
+                can_positive_charges_occur(*bii, parameters.simulation_parameters))
+            {
+                operational_assessment_results.status = operational_status::NON_OPERATIONAL;
+
+                if (parameters.termination_cond ==
+                    is_operational_params::termination_condition::ON_FIRST_NON_OPERATIONAL)
+                {
+                    return {operational_assessment_results, non_operationality_reason::POTENTIAL_POSITIVE_CHARGES};
+                }
+
+                // all input combinations are being assessed
+
+                assessment_results_for_this_input_combination.status = operational_status::NON_OPERATIONAL;
+
+                assessment_results_per_input.push_back(std::move(assessment_results_for_this_input_combination));
+
+                continue;
+            }
+
+            ++operational_assessment_results.simulator_invocations;
+
+            // performs physical simulation of a given SiDB layout at a given input combination
+            const auto simulation_results = physical_simulation_of_layout(bii);
+
+            // if no physically valid charge distributions were found, the layout is non-operational
+            if (simulation_results.charge_distributions.empty())
+            {
+                operational_assessment_results.status = operational_status::NON_OPERATIONAL;
+
+                if (parameters.termination_cond ==
+                    is_operational_params::termination_condition::ON_FIRST_NON_OPERATIONAL)
+                {
+                    return {operational_assessment_results, non_operationality_reason::LOGIC_MISMATCH};
+                }
+
+                // all input combinations are being assessed
+
+                assessment_results_for_this_input_combination.status = operational_status::NON_OPERATIONAL;
+
+                assessment_results_for_this_input_combination.simulation_results.emplace();
+
+                assessment_results_per_input.push_back(std::move(assessment_results_for_this_input_combination));
+
+                continue;
+            }
+
+            const auto ground_states = simulation_results.groundstates();
+
+            for (const auto& gs : ground_states)
+            {
+                const auto [op_status, non_op_reason] = verify_logic_match_of_cds(gs, i);
+
+                if (op_status == operational_status::OPERATIONAL)
+                {
+                    continue;
+                }
+
+                // the input combination is not operational
+
+                operational_assessment_results.status = operational_status::NON_OPERATIONAL;
+
+                if (parameters.termination_cond ==
+                    is_operational_params::termination_condition::ON_FIRST_NON_OPERATIONAL)
+                {
+                    if (non_op_reason == non_operationality_reason::LOGIC_MISMATCH)
+                    {
+                        return {operational_assessment_results, non_operationality_reason::LOGIC_MISMATCH};
+                    }
+
+                    if (non_op_reason == non_operationality_reason::KINKS &&
+                        parameters.op_condition_kinks ==
+                            is_operational_params::operational_condition_kinks::REJECT_KINKS)
+                    {
+                        return {operational_assessment_results, non_operationality_reason::KINKS};
+                    }
+                }
+
+                // all input combinations are being assessed
+
+                assessment_results_for_this_input_combination.status = operational_status::NON_OPERATIONAL;
+            }
+
+            // store the assessment results for this input combination when the termination condition is set to
+            // `termination_condition::ALL_INPUT_COMBINATION_ASSESSED` or the simulation result retention is set to
+            // `simulation_results_mode::KEEP_SIMULATION_RESULTS`
+            if (parameters.termination_cond ==
+                    is_operational_params::termination_condition::ALL_INPUT_COMBINATIONS_ASSESSED ||
+                parameters.simulation_results_retention ==
+                    is_operational_params::simulation_results_mode::KEEP_SIMULATION_RESULTS)
+            {
+                // save simulation results when the simulation result retention is set to
+                // `simulation_results_mode::KEEP_SIMULATION_RESULTS`
+                if (parameters.simulation_results_retention ==
+                    is_operational_params::simulation_results_mode::KEEP_SIMULATION_RESULTS)
+                {
+                    assessment_results_for_this_input_combination.simulation_results = std::move(simulation_results);
+                }
+
+                assessment_results_per_input.push_back(std::move(assessment_results_for_this_input_combination));
+            }
+        }
+
+        // store the assessment results for all input combinations when the termination condition is set to
+        // `termination_condition::ALL_INPUT_COMBINATION_ASSESSED` or the simulation result retention is set to
+        // `simulation_results_mode::KEEP_SIMULATION_RESULTS`
+        if (parameters.termination_cond ==
+                is_operational_params::termination_condition::ALL_INPUT_COMBINATIONS_ASSESSED ||
+            parameters.simulation_results_retention ==
+                is_operational_params::simulation_results_mode::KEEP_SIMULATION_RESULTS)
+        {
+            operational_assessment_results.assessment_per_input = std::move(assessment_results_per_input);
+        }
+
+        // note: when all input combinations are assessed per termination condition, the assessment can yield the layout
+        // is non-operational, yet we do not give a reason
+        return {operational_assessment_results, non_operationality_reason::NONE};
     }
     /**
      * Checks if the given charge distribution correctly encodes the expected logic for the given input pattern,
@@ -454,7 +675,8 @@ class is_operational_impl
         auto non_operational_reason = non_operationality_reason::LOGIC_MISMATCH;
 
         // if positively charged SiDBs can occur, the SiDB layout is considered non-operational
-        if (parameters.simulation_parameters.base == 2 &&
+        if (parameters.op_condition_positive_charges ==
+                is_operational_params::operational_condition_positive_charges::REJECT_POSITIVE_CHARGES &&
             can_positive_charges_occur(given_cds, parameters.simulation_parameters))
         {
             return {operational_status::NON_OPERATIONAL, non_operationality_reason::POTENTIAL_POSITIVE_CHARGES};
@@ -492,7 +714,7 @@ class is_operational_impl
             }
         }
 
-        if (parameters.op_condition == is_operational_params::operational_condition::REJECT_KINKS)
+        if (parameters.op_condition_kinks == is_operational_params::operational_condition_kinks::REJECT_KINKS)
         {
             assert(!input_bdl_wires.empty() && "No input wires provided.");
             assert(!output_bdl_wires.empty() && "No output wires provided.");
@@ -528,17 +750,16 @@ class is_operational_impl
         assert((truth_table.size() == output_bdl_wires.size()) &&
                "Number of truth tables and output BDL pairs does not match");
 
-        std::vector<std::pair<uint64_t, detail::non_operationality_reason>>
+        std::vector<std::pair<uint64_t, non_operationality_reason>>
             non_operational_input_pattern_and_non_operationality_reason{};
 
         // number of different input combinations
         for (auto i = 0u; i < truth_table.front().num_bits(); ++i, ++bii)
         {
-            ++simulator_invocations;
-
             // if positively charged SiDBs can occur, the SiDB layout is considered non-operational
-            if ((parameters.simulation_parameters.base == 2) &&
-                (can_positive_charges_occur(*bii, parameters.simulation_parameters)))
+            if (parameters.op_condition_positive_charges ==
+                    is_operational_params::operational_condition_positive_charges::REJECT_POSITIVE_CHARGES &&
+                can_positive_charges_occur(*bii, parameters.simulation_parameters))
             {
                 non_operational_input_pattern_and_non_operationality_reason.emplace_back(
                     i, non_operationality_reason::POTENTIAL_POSITIVE_CHARGES);
@@ -570,16 +791,6 @@ class is_operational_impl
         return non_operational_input_pattern_and_non_operationality_reason;
     }
     /**
-     * Returns the total number of simulator invocations.
-     *
-     * @return The number of simulator invocations.
-     */
-    [[nodiscard]] std::size_t get_number_of_simulator_invocations() const noexcept
-    {
-        return simulator_invocations;
-    }
-
-    /**
      * This function determines if there is a charge distribution of the canvas SiDBs for which the charge distribution
      * of the whole layout is physically valid.
      *
@@ -590,7 +801,19 @@ class is_operational_impl
     [[nodiscard]] std::optional<double>
     is_physical_validity_feasible(charge_distribution_surface<Lyt>& cds_layout) const noexcept
     {
-        assert(!canvas_lyt.is_empty() && "The canvas layout must not be empty.");
+        if (canvas_lyt.num_cells() == 0)
+        {
+            cds_layout.update_after_charge_change(dependent_cell_mode::FIXED,
+                                                  energy_calculation::KEEP_OLD_ENERGY_VALUE);
+
+            if (cds_layout.is_physically_valid())
+            {
+                cds_layout.recompute_electrostatic_potential_energy();
+                return cds_layout.get_electrostatic_potential_energy();
+            }
+
+            return std::nullopt;
+        }
 
         auto min_energy = std::numeric_limits<double>::infinity();
 
@@ -847,9 +1070,8 @@ class is_operational_impl
                 set_charge_distribution_of_input_pins(cds_layout, kink_states_input);
                 set_charge_distribution_of_output_pins(cds_layout, output_wire_index);
 
-                const auto physical_validity = is_physical_validity_feasible(cds_layout);
-
-                if (physical_validity.has_value())
+                if (const auto physical_validity = is_physical_validity_feasible(cds_layout);
+                    physical_validity.has_value())
                 {
                     if (physical_validity.value() + constants::ERROR_MARGIN < minimal_energy_of_physically_valid_layout)
                     {
@@ -892,11 +1114,6 @@ class is_operational_impl
      */
     std::vector<bdl_wire<Lyt>> output_bdl_wires;
     /**
-     * Number of simulator invocations.
-     */
-    std::size_t simulator_invocations{0};
-
-    /**
      * Number of output BDL wires.
      */
     const std::size_t number_of_output_wires;
@@ -908,7 +1125,6 @@ class is_operational_impl
      * Layout consisting of all canvas SiDBs.
      */
     Lyt canvas_lyt{};
-
     /**
      * This function conducts physical simulation of the given SiDB layout.
      * The simulation results are stored in the `sim_result` variable.
@@ -1036,6 +1252,7 @@ class is_operational_impl
      *
      * @param ground_state The ground state charge distribution surface.
      * @param bdl BDL pair to be evaluated.
+     * @param port Port direction where the BDL pair to be evaluated is.
      * @return `true` if `0` is encoded, `false` otherwise.
      */
     [[nodiscard]] bool encodes_bit_zero(const charge_distribution_surface<Lyt>& ground_state,
@@ -1055,6 +1272,7 @@ class is_operational_impl
      *
      * @param ground_state The ground state charge distribution surface.
      * @param bdl BDL pair to be evaluated.
+     * @param port Port direction where the BDL pair to be evaluated is.
      * @return `true` if `1` is encoded, `false` otherwise.
      */
     [[nodiscard]] bool encodes_bit_one(const charge_distribution_surface<Lyt>& ground_state,
@@ -1085,12 +1303,12 @@ class is_operational_impl
  * @param lyt The SiDB cell-level layout to be checked.
  * @param spec Expected Boolean function of the layout given as a multi-output truth table.
  * @param params Parameters for the `is_operational` algorithm.
- * @return A pair containing the operational status of the SiDB layout (either `OPERATIONAL` or `NON_OPERATIONAL`) and
- * the number of input combinations tested.
+ * @return A datatype containing the operational status of the gate-level layout (either `OPERATIONAL` or
+ * `NON_OPERATIONAL`) along with auxiliary statistics.
  */
 template <typename Lyt, typename TT>
-[[nodiscard]] std::pair<operational_status, std::size_t>
-is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params = {}) noexcept
+[[nodiscard]] operational_assessment<Lyt> is_operational(const Lyt& lyt, const std::vector<TT>& spec,
+                                                         const is_operational_params& params = {}) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -1104,13 +1322,12 @@ is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational
     assert(std::adjacent_find(spec.cbegin(), spec.cend(), [](const auto& a, const auto& b)
                               { return a.num_vars() != b.num_vars(); }) == spec.cend());
 
-    const auto logic_cells = lyt.get_cells_by_type(technology<Lyt>::cell_type::LOGIC);
-
     // if there are logic cells, we can design the canvas layout consisting of all logic cells
-    if (!logic_cells.empty() &&
+    if (const auto logic_cells = lyt.get_cells_by_type(technology<Lyt>::cell_type::LOGIC);
+        !logic_cells.empty() &&
         params.strategy_to_analyze_operational_status !=
             is_operational_params::operational_analysis_strategy::SIMULATION_ONLY &&
-        params.op_condition == is_operational_params::operational_condition::REJECT_KINKS)
+        params.op_condition_kinks == is_operational_params::operational_condition_kinks::REJECT_KINKS)
     {
         Lyt canvas_lyt{};
 
@@ -1122,18 +1339,17 @@ is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational
 
         detail::is_operational_impl<Lyt, TT> p{lyt, spec, params, canvas_lyt};
 
-        const auto [status, _] = p.run();
+        const auto [assessment_result, _] = p.run();
 
-        return {status, p.get_number_of_simulator_invocations()};
+        return assessment_result;
     }
 
     detail::is_operational_impl<Lyt, TT> p{lyt, spec, params};
 
-    const auto [status, _] = p.run();
+    const auto [assessment_result, _] = p.run();
 
-    return {status, p.get_number_of_simulator_invocations()};
+    return assessment_result;
 }
-
 /**
  * Determine the operational status of an SiDB layout.
  *
@@ -1149,11 +1365,11 @@ is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational
  * @param input_bdl_wire Optional BDL input wires of lyt.
  * @param output_bdl_wire Optional BDL output wires of lyt.
  * @param canvas_lyt Optional canvas layout.
- * @return A pair containing the operational status of the SiDB layout (either `OPERATIONAL` or `NON_OPERATIONAL`) and
- * the number of input combinations tested.
+ * @return A datatype containing the operational status of the gate-level layout (either `OPERATIONAL` or
+ * `NON_OPERATIONAL`) along with auxiliary statistics.
  */
 template <typename Lyt, typename TT>
-[[nodiscard]] std::pair<operational_status, std::size_t>
+[[nodiscard]] operational_assessment<Lyt>
 is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params,
                const std::vector<bdl_wire<Lyt>>& input_bdl_wire, const std::vector<bdl_wire<Lyt>>& output_bdl_wire,
                const std::optional<Lyt>& canvas_lyt = std::nullopt) noexcept
@@ -1174,14 +1390,12 @@ is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational
     {
         detail::is_operational_impl<Lyt, TT> p{lyt, spec, params, input_bdl_wire, output_bdl_wire, canvas_lyt.value()};
 
-        const auto [status, _] = p.run();
+        const auto [assessment_result, _] = p.run();
 
-        return {status, p.get_number_of_simulator_invocations()};
+        return assessment_result;
     }
 
-    const auto logic_cells = lyt.get_cells_by_type(technology<Lyt>::cell_type::LOGIC);
-
-    if (!logic_cells.empty())
+    if (const auto logic_cells = lyt.get_cells_by_type(technology<Lyt>::cell_type::LOGIC); !logic_cells.empty())
     {
         Lyt c_lyt{};
 
@@ -1192,16 +1406,16 @@ is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational
 
         detail::is_operational_impl<Lyt, TT> p{lyt, spec, params, input_bdl_wire, output_bdl_wire, c_lyt};
 
-        const auto [status, _] = p.run();
+        const auto [assessment_result, _] = p.run();
 
-        return {status, p.get_number_of_simulator_invocations()};
+        return assessment_result;
     }
 
     detail::is_operational_impl<Lyt, TT> p{lyt, spec, params, input_bdl_wire, output_bdl_wire};
 
-    const auto [status, _] = p.run();
+    const auto [assessment_result, _] = p.run();
 
-    return {status, p.get_number_of_simulator_invocations()};
+    return assessment_result;
 }
 /**
  * This function determines the input combinations for which the layout is operational.
@@ -1210,7 +1424,7 @@ is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational
  * @tparam TT Type of the truth table.
  * @param lyt The SiDB layout.
  * @param spec Vector of truth table specifications.
- * @param params Parameters to simulate if a input combination is operational.
+ * @param params Parameters to simulate if an input combination is operational.
  * @return The operational input combinations.
  */
 template <typename Lyt, typename TT>
@@ -1256,7 +1470,7 @@ template <typename Lyt, typename TT>
  * @tparam TT Type of the truth table.
  * @param lyt The SiDB layout.
  * @param spec Vector of truth table specifications.
- * @param params Parameters to simulate if a input combination is operational.
+ * @param params Parameters to simulate if an input combination is operational.
  * @param input_bdl_wire Optional BDL input wires of lyt.
  * @param output_bdl_wire Optional BDL output wires of lyt.
  * @param canvas_lyt Optional canvas layout.
@@ -1324,7 +1538,6 @@ operational_input_patterns(const Lyt& lyt, const std::vector<TT>& spec, const is
 
     return input_patterns;
 }
-
 /**
  * This function determines all input combinations for which kinks induce the SiDB layout to become non-operational.
  * This means that the layout is operational if kinks would be accepted.
@@ -1358,7 +1571,7 @@ kink_induced_non_operational_input_patterns(const Lyt& lyt, const std::vector<TT
 
     is_operational_params params_with_rejecting_kinks = params;
 
-    params_with_rejecting_kinks.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
+    params_with_rejecting_kinks.op_condition_kinks = is_operational_params::operational_condition_kinks::REJECT_KINKS;
 
     detail::is_operational_impl<Lyt, TT> p{lyt, spec, params_with_rejecting_kinks};
 
@@ -1414,7 +1627,7 @@ template <typename Lyt, typename TT>
 
     is_operational_params params_with_rejecting_kinks = params;
 
-    params_with_rejecting_kinks.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
+    params_with_rejecting_kinks.op_condition_kinks = is_operational_params::operational_condition_kinks::REJECT_KINKS;
 
     if (canvas_lyt.has_value())
     {
@@ -1486,13 +1699,13 @@ template <typename Lyt, typename TT>
                               { return a.num_vars() != b.num_vars(); }) == spec.cend());
 
     is_operational_params params_with_rejecting_kinks = params;
-    params_with_rejecting_kinks.op_condition          = is_operational_params::operational_condition::REJECT_KINKS;
+    params_with_rejecting_kinks.op_condition_kinks = is_operational_params::operational_condition_kinks::REJECT_KINKS;
 
     detail::is_operational_impl<Lyt, TT> p{lyt, spec, params_with_rejecting_kinks};
 
-    const auto [op_status, non_op_reason] = p.run();
+    const auto [assessment_result, non_op_reason] = p.run();
 
-    return op_status == operational_status::NON_OPERATIONAL &&
+    return assessment_result.status == operational_status::NON_OPERATIONAL &&
            non_op_reason == detail::non_operationality_reason::KINKS;
 }
 
@@ -1534,24 +1747,24 @@ template <typename Lyt, typename TT>
                               { return a.num_vars() != b.num_vars(); }) == spec.cend());
 
     is_operational_params params_with_rejecting_kinks = params;
-    params_with_rejecting_kinks.op_condition          = is_operational_params::operational_condition::REJECT_KINKS;
+    params_with_rejecting_kinks.op_condition_kinks = is_operational_params::operational_condition_kinks::REJECT_KINKS;
 
     if (canvas_lyt.has_value())
     {
         detail::is_operational_impl<Lyt, TT> p{
             lyt, spec, params_with_rejecting_kinks, input_bdl_wire, output_bdl_wire, canvas_lyt.value()};
 
-        const auto [op_status, non_op_reason] = p.run();
+        const auto [assessment_result, non_op_reason] = p.run();
 
-        return op_status == operational_status::NON_OPERATIONAL &&
+        return assessment_result.status == operational_status::NON_OPERATIONAL &&
                non_op_reason == detail::non_operationality_reason::KINKS;
     }
 
     detail::is_operational_impl<Lyt, TT> p{lyt, spec, params_with_rejecting_kinks, input_bdl_wire, output_bdl_wire};
 
-    const auto [op_status, non_op_reason] = p.run();
+    const auto [assessment_result, non_op_reason] = p.run();
 
-    return op_status == operational_status::NON_OPERATIONAL &&
+    return assessment_result.status == operational_status::NON_OPERATIONAL &&
            non_op_reason == detail::non_operationality_reason::KINKS;
 }
 
