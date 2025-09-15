@@ -176,7 +176,9 @@ Furthermore, if you use any of the design automation algorithms, please consider
           year={2025}
         }
 
-    `Operational domain experiment scripts <https://github.com/cda-tum/fiction/tree/main/experiments/operational_domain>`_
+    - `Operational domain experiment scripts <https://github.com/cda-tum/fiction/tree/main/experiments/operational_domain>`_
+
+    - `Operational Domain Explorer <https://github.com/cda-tum/mnt-opdom-explorer>`_
 
 * :ref:`SiDB gate design <gate_design>` (``gate_design``):
 
