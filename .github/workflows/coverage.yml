@@ -50,7 +50,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -yq ${{matrix.compiler}}
 
       - name: Clone Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           submodules: recursive
 
@@ -63,7 +63,7 @@ jobs:
           max-size: 10G
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.13.x"
           cache: "pip"

@@ -264,7 +264,8 @@ class fanout_substitution_impl
             if (auto fanouts = available_fanouts[n]; !fanouts.empty())
             {
                 // find non-overfull fanout node
-                do {
+                do
+                {
                     child = fanouts.front();
                     if (substituted.fanout_size(child) >= ps.degree)
                     {
