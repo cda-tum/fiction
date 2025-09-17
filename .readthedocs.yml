@@ -26,4 +26,10 @@ build:
       - asdf global uv latest
     build:
       html:
-        - uv run --frozen --no-dev --group docs -m sphinx -T -b html -d docs/_build/doctrees -D language=en docs $READTHEDOCS_OUTPUT/html
+        - |
+          for i in {1..5}; do
+            uv pip config set global.extra-index-url https://test.pypi.org/simple/
+            uv run --frozen --no-dev --group docs -m sphinx -T -b html -d docs/_build/doctrees -D language=en docs $READTHEDOCS_OUTPUT/html && break
+            echo "Retrying in 10s... ($i/5)"
+            sleep 10
+          done
