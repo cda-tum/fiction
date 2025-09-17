@@ -67,6 +67,8 @@ class TestGraphOrientedLayoutDesign(unittest.TestCase):
         params.cost = gold_cost_objective.WIRES
         params.enable_multithreading = False
         params.straight_inverters = True
+        params.tiles_to_skip_between_pis = 1
+        params.randomize_tiles_to_skip_between_pis = True
 
         layout = graph_oriented_layout_design(network, params)
 
