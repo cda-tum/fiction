@@ -27,9 +27,17 @@ build:
     build:
       html:
         - |
+          set -euo pipefail
           for i in {1..5}; do
             uv pip config set global.extra-index-url https://test.pypi.org/simple/
-            uv run --frozen --no-dev --group docs -m sphinx -T -b html -d docs/_build/doctrees -D language=en docs $READTHEDOCS_OUTPUT/html && break
+            if uv run --frozen --no-dev --group docs -m sphinx -T -b html -d docs/_build/doctrees -D language=en docs "$READTHEDOCS_OUTPUT/html"; then
+              break
+            fi
             echo "Retrying in 10s... ($i/5)"
             sleep 10
           done
+          # If we didn't break early, fail explicitly
+          if [ "${i:-5}" -eq 5 ]; then
+            echo "Sphinx failed after 5 attempts."
+            exit 1
+          fi
