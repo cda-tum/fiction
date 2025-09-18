@@ -11,7 +11,7 @@ namespace fiction
 {
 
 /**
- * Quantum-dot Cellular Automata (QCA) technology implementation of the FCN concept.>>>REMOVETHIS_ONLYFORTRIGGER<<<
+ * Quantum-dot Cellular Automata (QCA) technology implementation of the FCN concept.
  */
 struct qca_technology
 {
