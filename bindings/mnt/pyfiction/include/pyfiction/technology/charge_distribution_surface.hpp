@@ -29,7 +29,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void charge_distribution_surface_layout(pybind11::module& m, const std::string& lattice = "TRIGGER")
+void charge_distribution_surface_layout(pybind11::module& m, const std::string& lattice = "")
 {
     namespace py = pybind11;
 
