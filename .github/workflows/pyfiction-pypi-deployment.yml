@@ -4,10 +4,10 @@ name: 🐍 • Packaging
 
 on:
   release:
-    types: [ published ]
+    types: [published]
   merge_group:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
     paths:
       - "bindings/pyfiction/**"
       - "**/*.py"
@@ -18,7 +18,7 @@ on:
       - "libs/**"
       - ".github/workflows/pyfiction-pypi-deployment.yml"
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
     paths:
       - "bindings/pyfiction/**"
       - "**/*.py"
@@ -30,7 +30,7 @@ on:
       - ".github/workflows/pyfiction-pypi-deployment.yml"
   workflow_dispatch:
   workflow_run:
-    workflows: [ "pyfiction Docstring Generator" ]
+    workflows: ["pyfiction Docstring Generator"]
     types:
       - completed
 
@@ -84,7 +84,7 @@ jobs:
       fail-fast: false
       matrix:
         runs-on:
-          [ ubuntu-24.04, ubuntu-24.04-arm, macos-13, macos-14, windows-latest ]
+          [ubuntu-24.04, ubuntu-24.04-arm, macos-13, macos-14, windows-latest]
 
     steps:
       - uses: actions/checkout@v5
@@ -151,7 +151,7 @@ jobs:
           verbose: true
 
   publish_to_pypi:
-    needs: [ build_wheels, build_sdist ]
+    needs: [build_wheels, build_sdist]
     runs-on: ubuntu-latest
     name: 🚀 Publish to PyPI
     if: github.event_name == 'release' && github.event.action == 'published'
