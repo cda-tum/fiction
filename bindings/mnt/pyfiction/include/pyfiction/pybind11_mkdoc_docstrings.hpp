@@ -18809,7 +18809,7 @@ Returns:
 
 static const char *__doc_fiction_qca_technology =
 R"doc(Quantum-dot Cellular Automata (QCA) technology implementation of the
-FCN concept.)doc";
+FCN concept.>>>REMOVETHIS_ONLYFORTRIGGER<<<)doc";
 
 static const char *__doc_fiction_qca_technology_cell_mark = R"doc(Possible marks to be applied to a cell to change its type.)doc";
 
