@@ -9,4 +9,4 @@ You can save time by following this procedure when reporting a problem:
 - Search through past `Issues <https://github.com/cda-tum/fiction/issues>`_ to see if someone else already had the same problem.
 - Before filing a bug report, try to create a minimal working example (MWE) that reproduces the problem. It's much easier to identify the cause for the problem if a handful of lines suffice to show that something isn't working.
 
-You can also always reach us at `fcn.cda@xcit.tum.de <mailto:fcn.cda@xcit.tum.de>`_.
+You can also always reach us at `nanotech.cda@xcit.tum.de <mailto:nanotech.cda@xcit.tum.de>`_.
