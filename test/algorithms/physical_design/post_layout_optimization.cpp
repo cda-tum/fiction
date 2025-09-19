@@ -19,6 +19,7 @@
 #include <fiction/networks/technology_network.hpp>
 
 #include <mockturtle/networks/aig.hpp>
+#include <mockturtle/utils/stopwatch.hpp>
 
 #include <cstdint>
 
