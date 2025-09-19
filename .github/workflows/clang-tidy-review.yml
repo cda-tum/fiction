@@ -2,6 +2,15 @@ name: Clang-Tidy Review
 
 on:
   pull_request_target:
+    branches: ["main"]
+    paths:
+      - "**/*.hpp"
+      - "**/*.cpp"
+      - "libs/**"
+      - ".github/workflows/clang-tidy-review.yml"
+      - "!bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp"
+  push:
+    branches: ["main"]
     paths:
       - "**/*.hpp"
       - "**/*.cpp"
