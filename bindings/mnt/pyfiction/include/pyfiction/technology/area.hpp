@@ -31,11 +31,10 @@ void area(pybind11::module& m)
         [](const Lyt& lyt, const double width = tech::CELL_WIDTH, const double height = tech::CELL_HEIGHT,
            const double hspace = tech::CELL_HSPACE, const double vspace = tech::CELL_VSPACE)
         {
-            fiction::area_stats<double>        stats{};
-            fiction::area_params<tech, double> params{width, height, hspace, vspace};
-            fiction::area<Lyt, double>(lyt, params, &stats);
+            fiction::area_stats        stats{};
+            fiction::area_params<tech> params{width, height, hspace, vspace};
 
-            return stats.area;
+            return fiction::area<Lyt>(lyt, params, &stats);
         },
         py::arg("layout"), py::arg("width") = tech::CELL_WIDTH, py::arg("height") = tech::CELL_HEIGHT,
         py::arg("hspace") = tech::CELL_HSPACE, py::arg("vspace") = tech::CELL_VSPACE, DOC(fiction_area));

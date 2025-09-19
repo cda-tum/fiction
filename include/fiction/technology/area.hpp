@@ -8,38 +8,66 @@
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/traits.hpp"
 
-#include <cstdint>
-#include <ostream>
+#include <fmt/format.h>
+
+#include <iostream>
 
 namespace fiction
 {
 
-template <typename Technology, typename AreaType = double>
+/**
+ * Parameters for area computation of cell-level layouts. Default parameters are loaded from the given cell technology.
+ *
+ * @tparam Technology Cell technology.
+ */
+template <typename Technology>
 struct area_params
 {
     /**
-     * Width and height of each cell.
+     * Width of each cell.
      */
-    AreaType width{static_cast<AreaType>(Technology::CELL_WIDTH)},
-        height{static_cast<AreaType>(Technology::CELL_HEIGHT)};
+    double width{static_cast<double>(Technology::CELL_WIDTH)};
     /**
-     * Horizontal and vertical spacing between cells.
+     * Height of each cell.
      */
-    AreaType hspace{static_cast<AreaType>(Technology::CELL_HSPACE)},
-        vspace{static_cast<AreaType>(Technology::CELL_VSPACE)};
+    double height{static_cast<double>(Technology::CELL_HEIGHT)};
+    /**
+     * Horizontal spacing between cells.
+     */
+    double hspace{static_cast<double>(Technology::CELL_HSPACE)};
+    /**
+     * Vertical spacing between cells.
+     */
+    double vspace{static_cast<double>(Technology::CELL_VSPACE)};
 };
-
-template <typename AreaType = double>
+/**
+ * Statistics class to store area-related information including width, height, and area of a layout.
+ * Additionally, it provides a method to print a formatted report of these statistics to an output stream.
+ */
 struct area_stats
 {
     /**
-     * Area requirements in nm².
+     * Layout width in nm.
      */
-    AreaType area{0.0};
-
+    double width{0.0};
+    /**
+     * Layout height in nm.
+     */
+    double height{0.0};
+    /**
+     * Layout area in nm².
+     */
+    double area{0.0};
+    /**
+     * Prints a report of the area statistics to the given output stream.
+     *
+     * @param out Output stream to write the report to. Defaults to `std::cout`.
+     */
     void report(std::ostream& out = std::cout) const
     {
-        out << fmt::format("[i] {} nm²", area) << std::endl;
+        out << fmt::format("[i] Width  = {:.2f} nm", width) << std::endl;
+        out << fmt::format("[i] Height = {:.2f} nm", height) << std::endl;
+        out << fmt::format("[i] Area   = {:.2f} nm²", area) << std::endl;
     }
 };
 
@@ -49,22 +77,21 @@ struct area_stats
  * and vertical direction is taken into account.
  *
  * @tparam Lyt Cell-level layout type.
- * @tparam AreaType Type for area representation.
  * @param lyt The cell-level layout whose area is desired.
  * @param ps Area parameters.
  * @param pst Area statistics.
  * @return Area requirements in nm².
  */
-template <typename Lyt, typename AreaType = double>
-AreaType area(const Lyt& lyt, area_params<technology<Lyt>, AreaType>& ps = {},
-              area_stats<AreaType>* pst = nullptr) noexcept
+template <typename Lyt>
+double area(const Lyt& lyt, const area_params<technology<Lyt>>& ps = {}, area_stats* pst = nullptr) noexcept
 {
     static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
 
     area_stats st{};
 
-    st.area = (static_cast<AreaType>(lyt.x() + 1) * ps.width + static_cast<AreaType>(lyt.x()) * ps.hspace) *
-              (static_cast<AreaType>(lyt.y() + 1) * ps.height + static_cast<AreaType>(lyt.y()) * ps.vspace);
+    st.width  = static_cast<double>(lyt.x() + 1) * ps.width + static_cast<double>(lyt.x()) * ps.hspace;
+    st.height = static_cast<double>(lyt.y() + 1) * ps.height + static_cast<double>(lyt.y()) * ps.vspace;
+    st.area   = st.width * st.height;
 
     if (pst)
     {
@@ -79,23 +106,22 @@ AreaType area(const Lyt& lyt, area_params<technology<Lyt>, AreaType>& ps = {},
  * positions in horizontal and vertical direction is taken into account.
  *
  * @tparam Lyt Cell-level layout type.
- * @tparam AreaType Type for area representation.
  * @param bb The bounding box of the cell-level layout whose area is desired.
  * @param ps Area parameters.
  * @param pst Area statistics.
  * @return Area requirements in nm².
  */
-template <typename Lyt, typename AreaType = double>
-AreaType area(const bounding_box_2d<Lyt>& bb, area_params<technology<Lyt>, AreaType>& ps = {},
-              area_stats<AreaType>* pst = nullptr) noexcept
+template <typename Lyt>
+double area(const bounding_box_2d<Lyt>& bb, const area_params<technology<Lyt>>& ps = {},
+            area_stats* pst = nullptr) noexcept
 {
     static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
 
     area_stats st{};
 
-    st.area =
-        (static_cast<AreaType>(bb.get_x_size() + 1) * ps.width + static_cast<AreaType>(bb.get_x_size()) * ps.hspace) *
-        (static_cast<AreaType>(bb.get_y_size() + 1) * ps.height + static_cast<AreaType>(bb.get_y_size()) * ps.vspace);
+    st.width  = static_cast<double>(bb.get_x_size() + 1) * ps.width + static_cast<double>(bb.get_x_size()) * ps.hspace;
+    st.height = static_cast<double>(bb.get_y_size() + 1) * ps.height + static_cast<double>(bb.get_y_size()) * ps.vspace;
+    st.area   = st.width * st.height;
 
     if (pst)
     {
