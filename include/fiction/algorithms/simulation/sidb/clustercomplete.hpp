@@ -1049,8 +1049,8 @@ class clustercomplete_impl
      * @return `false` if and only if queue of this worker is found to be completely empty and thus backtracking is
      * not required.
      */
-    [[nodiscard]] bool
-    add_physically_valid_charge_configurations(worker& w, const sidb_charge_space_composition& composition) noexcept
+    [[nodiscard]] bool add_physically_valid_charge_configurations(worker&                              w,
+                                                                  const sidb_charge_space_composition& composition)
     {
         // check for pruning
         if (!meets_population_stability_criterion(w.clustering_state))

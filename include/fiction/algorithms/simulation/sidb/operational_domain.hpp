@@ -33,6 +33,7 @@
 #include <cmath>
 #include <cstdint>
 #include <cstdlib>
+#include <functional>
 #include <iterator>
 #include <limits>
 #include <numeric>
@@ -1105,9 +1106,7 @@ class operational_domain_impl
     void set_dimension_value(sidb_simulation_parameters& sim_parameters, const double val,
                              const std::size_t dim) const noexcept
     {
-        const sweep_parameter sweep_parameter = params.sweep_dimensions[dim].dimension;
-
-        switch (sweep_parameter)
+        switch (params.sweep_dimensions[dim].dimension)
         {
             case sweep_parameter::EPSILON_R:
             {
@@ -1708,10 +1707,9 @@ class operational_domain_impl
  * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT Truth table type.
  * @param lyt Layout to compute the operational domain for.
- * @param spec Expected vector of truth tables of the layout. Each truth table represents an output of the Boolean
- * function.
- * @param params Operational domain computation parameters.
- * @param stats Operational domain computation statistics.
+ * @param tt Expected Boolean function of the lyt given as a multi-output truth table.
+ * @param ps Parameters for the operational domain computation.
+ * @param st Statistics of the process.
  * @return The operational domain of the layout.
  * @throws std::invalid_argument if the given sweep parameters are invalid.
  */
@@ -1867,10 +1865,6 @@ operational_domain_flood_fill(const Lyt& lyt, const std::vector<TT>& spec, const
  * up to \f$2^n\f$ exact ground state simulations, where \f$n\f$ is the number of inputs of the layout. Each exact
  * ground state simulation has exponential complexity in of itself. Therefore, the algorithm is only feasible for small
  * layouts with few inputs.
- *
- * This flavor of operational domain computation was proposed in \"Reducing the Complexity of Operational Domain
- * Computation in Silicon Dangling Bond Logic\" by M. Walter, J. Drewniok, S. S. H. Ng, K. Walus, and R. Wille in
- * NANOARCH 2023.
  *
  * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT Truth table type.
