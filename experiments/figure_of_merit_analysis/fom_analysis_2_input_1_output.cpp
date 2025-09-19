@@ -2,6 +2,8 @@
 // Created by Jan Drewniok 01.01.23
 //
 
+#if (FICTION_ALGLIB_ENABLED)
+
 #include "fiction_experiments.hpp"
 
 #include <fiction/algorithms/physical_design/design_sidb_gates.hpp>
@@ -253,3 +255,17 @@ int main()  // NOLINT
 
     return EXIT_SUCCESS;
 }
+
+#else  // FICTION_ALGLIB_ENABLED
+
+#include <cstdlib>
+#include <iostream>
+
+int main()  // NOLINT
+{
+    std::cerr << "[e] ALGLIB library is not enabled, please enable ALGLIB and recompile the code" << std::endl;
+
+    return EXIT_FAILURE;
+}
+
+#endif  // FICTION_ALGLIB_ENABLED
