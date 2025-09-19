@@ -43,6 +43,7 @@
 #include <thread>
 #include <tuple>
 #include <type_traits>
+#include <utility>
 #include <vector>
 
 namespace fiction
@@ -1086,7 +1087,7 @@ class operational_domain_impl
      *
      * @return The number of steps in the given dimension.
      */
-    [[nodiscard]] inline std::size_t num_steps(const std::size_t dimension) const noexcept
+    [[nodiscard]] std::size_t num_steps(const std::size_t dimension) const noexcept
     {
         assert(dimension < num_dimensions && "Invalid dimension");
 
@@ -1101,8 +1102,8 @@ class operational_domain_impl
      * @param val Value to set the dimension `dim` to.
      * @param dim Sweep dimension to set the value `val` to.
      */
-    inline void set_dimension_value(sidb_simulation_parameters& sim_parameters, const double val,
-                                    const std::size_t dim) const noexcept
+    void set_dimension_value(sidb_simulation_parameters& sim_parameters, const double val,
+                             const std::size_t dim) const noexcept
     {
         const sweep_parameter sweep_parameter = params.sweep_dimensions[dim].dimension;
 
@@ -1277,7 +1278,7 @@ class operational_domain_impl
      * @param sp Step point to check for inferred operational status.
      * @return `true` iff `sp` is contained in `inferred_op_domain`.
      */
-    [[nodiscard]] inline bool is_step_point_inferred_operational(const step_point& sp) const noexcept
+    [[nodiscard]] bool is_step_point_inferred_operational(const step_point& sp) const noexcept
     {
         return inferred_op_domain.count(sp) > 0;
     }
@@ -2143,14 +2144,14 @@ struct hash<fiction::parameter_point>
 {
     size_t operator()(const fiction::parameter_point& pp) const noexcept
     {
-        size_t h = 0;
-        for (const auto& param : pp.get_parameters())
+        size_t hash_value = 0;
+        for (const auto& parameter : pp.get_parameters())
         {
             // hash the double values with tolerance
-            fiction::hash_combine(h, static_cast<size_t>(param / fiction::constants::ERROR_MARGIN));
+            fiction::hash_combine(hash_value, static_cast<size_t>(parameter / fiction::constants::ERROR_MARGIN));
         }
 
-        return h;
+        return hash_value;
     }
 };
 

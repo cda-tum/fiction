@@ -574,7 +574,7 @@ class clustercomplete_impl
      * @param clustering_state A clustering state that holds a specific combination of multiset charge configurations as
      * projector states of which the respectively associated clusters form a clustering in the cluster hierarchy.
      */
-    void add_physically_valid_charge_configurations(sidb_clustering_state& clustering_state) noexcept
+    void add_physically_valid_charge_configurations(sidb_clustering_state& clustering_state)
     {
         // check for pruning
         if (!meets_population_stability_criterion(clustering_state))
