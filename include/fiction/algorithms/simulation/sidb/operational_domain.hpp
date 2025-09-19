@@ -133,7 +133,7 @@ struct parameter_point
     /**
      * Parameter values for each dimension.
      */
-    std::vector<double> parameters{};
+    std::vector<double> parameters;
 };
 /**
  * Possible sweep parameters for the operational domain computation.
@@ -215,7 +215,7 @@ class operational_domain : public sidb_simulation_domain<parameter_point, operat
      * The dimensions to sweep over. The first dimension is the x dimension, the second dimension is the y dimension,
      * etc.
      */
-    std::vector<sweep_parameter> dimensions{};
+    std::vector<sweep_parameter> dimensions;
 };
 /**
  * The `critical_temperature_domain` class collects the critical temperature and the operational status for a range of
@@ -317,7 +317,7 @@ class critical_temperature_domain : public sidb_simulation_domain<parameter_poin
      * The dimensions to sweep over, ordered by priority. The first dimension is the x dimension, the second dimension
      * is the y dimension, etc.
      */
-    std::vector<sweep_parameter> dimensions{};
+    std::vector<sweep_parameter> dimensions;
 };
 
 /**
@@ -502,11 +502,10 @@ class operational_domain_impl
      * @param ps Parameters for the operational domain computation.
      * @param st Statistics of the process.
      */
-    operational_domain_impl(const Lyt& lyt, const operational_domain_params& ps, operational_domain_stats& st) noexcept
-            :
+    operational_domain_impl(const Lyt& lyt, operational_domain_params ps, operational_domain_stats& st) noexcept :
             layout{lyt},
             truth_table{std::vector<TT>{}},
-            params{ps},
+            params{std::move(ps)},
             stats{st},
             num_dimensions{params.sweep_dimensions.size()}
     {

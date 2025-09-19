@@ -66,7 +66,7 @@ struct clustercomplete_params
     /**
      * Physical simulation parameters.
      */
-    sidb_simulation_parameters simulation_parameters{};
+    sidb_simulation_parameters simulation_parameters;
     /**
      * Local external electrostatic potentials (e.g., locally applied electrodes).
      */
@@ -904,7 +904,7 @@ class clustercomplete_impl
          * @return Either nothing, if no work was found (and this thread can thus terminate), or the work that was
          * obtained.
          */
-        [[nodiscard]] std::optional<work_t> obtain_work() noexcept
+        [[nodiscard]] std::optional<work_t> obtain_work()
         {
             if (const std::variant<work_t, bool>& work = work_stealing_queue.get_from_this_queue();
                 std::holds_alternative<work_t>(work))
@@ -1101,7 +1101,7 @@ class clustercomplete_impl
      */
     [[nodiscard]] bool unfold_all_compositions(worker&                                           w,
                                                const std::vector<sidb_charge_space_composition>& compositions,
-                                               typename worker_queue::mole&&                     informant) noexcept
+                                               typename worker_queue::mole&&                     informant)
     {
         w.work_stealing_queue.add_to_queue(compositions, std::move(informant));
 
