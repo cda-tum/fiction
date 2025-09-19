@@ -192,7 +192,7 @@ class clustercomplete_command : public command
     /**
      * ClusterComplete parameters.
      */
-    fiction::clustercomplete_params<> cc_params;
+    fiction::clustercomplete_params<> cc_params{};
     /**
      * Type alias for H-Si(100)-2x1 simulation result.
      */
@@ -266,7 +266,7 @@ class clustercomplete_command : public command
     void reset_params()
     {
         physical_params = fiction::sidb_simulation_parameters{3, -0.32, 5.6, 5.0};
-        cc_params       = fiction::clustercomplete_params<>();
+        cc_params       = {};
         sim_result      = {};
     }
 };
