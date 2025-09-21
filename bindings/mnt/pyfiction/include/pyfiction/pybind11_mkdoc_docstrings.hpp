@@ -15729,11 +15729,11 @@ static const char *__doc_fiction_hexagonalization_stats = R"doc(This struct stor
 
 static const char *__doc_fiction_hexagonalization_stats_duration = R"doc(Runtime of the hexagonalization process.)doc";
 
-static const char *__doc_fiction_hexagonalization_stats_num_crossings = R"doc()doc";
+static const char *__doc_fiction_hexagonalization_stats_num_crossings = R"doc(Number of crossings.)doc";
 
-static const char *__doc_fiction_hexagonalization_stats_num_gates = R"doc()doc";
+static const char *__doc_fiction_hexagonalization_stats_num_gates = R"doc(Number of gates.)doc";
 
-static const char *__doc_fiction_hexagonalization_stats_num_wires = R"doc()doc";
+static const char *__doc_fiction_hexagonalization_stats_num_wires = R"doc(Number of wires.)doc";
 
 static const char *__doc_fiction_hexagonalization_stats_report =
 R"doc(Reports the statistics to the given output stream.
@@ -15741,9 +15741,9 @@ R"doc(Reports the statistics to the given output stream.
 Parameter ``out``:
     Output stream.)doc";
 
-static const char *__doc_fiction_hexagonalization_stats_x_size = R"doc()doc";
+static const char *__doc_fiction_hexagonalization_stats_x_size = R"doc(Layout width.)doc";
 
-static const char *__doc_fiction_hexagonalization_stats_y_size = R"doc()doc";
+static const char *__doc_fiction_hexagonalization_stats_y_size = R"doc(Layout height.)doc";
 
 static const char *__doc_fiction_high_degree_fanin_exception =
 R"doc(Exception class that can be thrown if some network exceeds a legal
