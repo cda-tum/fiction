@@ -487,8 +487,8 @@ class hexagonalization_impl
                     // create primary input in hex layout
                     hex_layout.create_pi(layout.get_name(layout.get_node(old_coord)), hex_coord);
 
-                    x_max = std::max(hex_coord.x, x_max);
-                    y_max = std::max(hex_coord.y, y_max);
+                    x_max = std::max(static_cast<uint64_t>(hex_coord.x), x_max);
+                    y_max = std::max(static_cast<uint64_t>(hex_coord.y), y_max);
 
                     // collect PIs to the left and to the right of the middle PI
                     if (old_coord.x == 0 && old_coord.y != 0)
@@ -570,8 +570,8 @@ class hexagonalization_impl
                             auto hex_tile = detail::to_hex<CartLyt, HexLyt>(old_tile, layout_height);
                             hex_tile.x += offset_to_add - offset_to_subtract;
 
-                            x_max = std::max(hex_tile.x, x_max);
-                            y_max = std::max(hex_tile.y, y_max);
+                            x_max = std::max(static_cast<uint64_t>(hex_tile.x), x_max);
+                            y_max = std::max(static_cast<uint64_t>(hex_tile.y), y_max);
 
                             // get incoming data flow signals for the tile
                             const auto signals = layout.incoming_data_flow(old_tile);
@@ -635,8 +635,8 @@ class hexagonalization_impl
                     auto hex_tile = detail::to_hex<CartLyt, HexLyt>(signal, layout_height);
                     hex_tile.x += offset_to_add - offset_to_subtract;
 
-                    x_max = std::max(hex_tile.x, x_max);
-                    y_max = std::max(hex_tile.y, y_max);
+                    x_max = std::max(static_cast<uint64_t>(hex_tile.x), x_max);
+                    y_max = std::max(static_cast<uint64_t>(hex_tile.y), y_max);
 
                     // create the primary output in the hex layout
                     const auto hex_signal = hex_layout.make_signal(hex_layout.get_node(hex_tile));
@@ -712,8 +712,8 @@ class hexagonalization_impl
                         obj.update_first_fanin = first_fanin_is_c;
                     }
 
-                    x_max = std::max(middle_pi.x, x_max);
-                    y_max = std::max(middle_pi.y, y_max);
+                    x_max = std::max(static_cast<uint64_t>(middle_pi.x), x_max);
+                    y_max = std::max(static_cast<uint64_t>(middle_pi.y), y_max);
                     hex_layout.move_node(hex_layout.get_node(fanout), fanout, fins);
 
                     objectives.push_back(obj);
@@ -759,8 +759,8 @@ class hexagonalization_impl
                             }
                         });
 
-                    x_max = std::max(middle_pi.x, x_max);
-                    y_max = std::max(middle_pi.y, y_max);
+                    x_max = std::max(static_cast<uint64_t>(middle_pi.x), x_max);
+                    y_max = std::max(static_cast<uint64_t>(middle_pi.y), y_max);
                     hex_layout.move_node(hex_layout.get_node(c), middle_pi);
 
                     if (const auto target_node = hex_layout.get_node(fanout);
@@ -810,8 +810,8 @@ class hexagonalization_impl
 
                         for (const auto& t : new_path)
                         {
-                            x_max = std::max(t.x, x_max);
-                            y_max = std::max(t.y, y_max);
+                            x_max = std::max(static_cast<uint64_t>(t.x), x_max);
+                            y_max = std::max(static_cast<uint64_t>(t.y), y_max);
                             layout_obstruct.obstruct_coordinate(t);
                         }
                         // if the flag is set, re-collect and update fanins
@@ -861,8 +861,8 @@ class hexagonalization_impl
 
                     routing_objective_with_fanin_update_information<HexLyt> obj{fanin, middle_po, false};
 
-                    x_max = std::max(middle_po.x, x_max);
-                    y_max = std::max(middle_po.y, y_max);
+                    x_max = std::max(static_cast<uint64_t>(middle_po.x), x_max);
+                    y_max = std::max(static_cast<uint64_t>(middle_po.y), y_max);
                     hex_layout.move_node(hex_layout.get_node(c), middle_po);
                     objectives.push_back(obj);
                 }
@@ -881,8 +881,8 @@ class hexagonalization_impl
                     middle_po.x += 1;
                     routing_objective_with_fanin_update_information<HexLyt> obj{fanin, middle_po, false};
 
-                    x_max = std::max(middle_po.x, x_max);
-                    y_max = std::max(middle_po.y, y_max);
+                    x_max = std::max(static_cast<uint64_t>(middle_po.x), x_max);
+                    y_max = std::max(static_cast<uint64_t>(middle_po.y), y_max);
                     hex_layout.move_node(hex_layout.get_node(c), middle_po);
                     objectives.push_back(obj);
                 }
@@ -957,8 +957,8 @@ class hexagonalization_impl
 
                         for (const auto& t : new_path)
                         {
-                            x_max = std::max(t.x, x_max);
-                            y_max = std::max(t.y, y_max);
+                            x_max = std::max(static_cast<uint64_t>(t.x), x_max);
+                            y_max = std::max(static_cast<uint64_t>(t.y), y_max);
                             layout_obstruct.obstruct_coordinate(t);
                         }
                     }
@@ -973,7 +973,7 @@ class hexagonalization_impl
             }
 
             // adjust the layout size
-            hex_layout.resize({x_max, y_max, hex_layout.z()});
+            hex_layout.resize({static_cast<decltype(hex_layout.x())>(x_max), static_cast<decltype(hex_layout.y())>(y_max), hex_layout.z()});
 
             // restore original names from the Cartesian layout
             restore_names<CartLyt, HexLyt>(layout, hex_layout);
