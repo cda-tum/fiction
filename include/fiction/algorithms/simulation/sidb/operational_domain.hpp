@@ -504,10 +504,12 @@ class operational_domain_impl
      * @param ps Parameters for the operational domain computation.
      * @param st Statistics of the process.
      */
-    operational_domain_impl(const Lyt& lyt, operational_domain_params ps, operational_domain_stats& st) noexcept :
+    // NOLINTNEXTLINE(modernize-pass-by-value)
+    operational_domain_impl(const Lyt& lyt, const operational_domain_params& ps, operational_domain_stats& st) noexcept
+            :
             layout{lyt},
             truth_table{std::vector<TT>{}},
-            params{std::move(ps)},
+            params{ps},
             stats{st},
             num_dimensions{params.sweep_dimensions.size()}
     {
