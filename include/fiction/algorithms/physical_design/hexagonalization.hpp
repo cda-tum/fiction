@@ -635,8 +635,8 @@ class hexagonalization_impl
                     auto hex_tile = detail::to_hex<CartLyt, HexLyt>(signal, layout_height);
                     hex_tile.x += offset_to_add - offset_to_subtract;
 
-                    x_max = std::max(static_cast<uint64_t>(hex_tile.x), x_max);
-                    y_max = std::max(static_cast<uint64_t>(hex_tile.y), y_max);
+                    x_max = std::max(static_cast<uint64_t>(hex_coord.x), x_max);
+                    y_max = std::max(static_cast<uint64_t>(hex_coord.y), y_max);
 
                     // create the primary output in the hex layout
                     const auto hex_signal = hex_layout.make_signal(hex_layout.get_node(hex_tile));
