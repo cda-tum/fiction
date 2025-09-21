@@ -93,9 +93,26 @@ struct hexagonalization_stats
      * Runtime of the hexagonalization process.
      */
     mockturtle::stopwatch<>::duration time_total{0};
-
-    uint64_t x_size{0ull}, y_size{0ull};
-    uint64_t num_gates{0ull}, num_wires{0ull}, num_crossings{0ull};
+    /**
+     * Layout width.
+     */
+    uint64_t x_size{0ull};
+    /**
+     * Layout height.
+     */
+    uint64_t y_size{0ull};
+    /**
+     * Number of gates.
+     */
+    uint64_t num_gates{0ull};
+    /**
+     * Number of wires.
+     */
+    uint64_t num_wires{0ull};
+    /**
+     * Number of crossings.
+     */
+    uint64_t num_crossings{0ull};
     /**
      * Reports the statistics to the given output stream.
      *
@@ -455,9 +472,13 @@ class hexagonalization_impl
             left_pos.reserve(layout.num_pos());
             right_pos.reserve(layout.num_pos());
 
+            // keep track of maximum coordinates
+            uint64_t x_max = 0;
+            uint64_t y_max = 0;
+
             // map primary inputs to the hexagonal layout
             layout.foreach_pi(
-                [this, &hex_layout, &left_pis, &right_pis, layout_height, offset_to_add,
+                [this, &hex_layout, &left_pis, &right_pis, &x_max, &y_max, layout_height, offset_to_add,
                  offset_to_subtract](const auto& gate)
                 {
                     const auto old_coord = layout.get_tile(gate);
@@ -466,6 +487,9 @@ class hexagonalization_impl
                     hex_coord.x += offset_to_add - offset_to_subtract;
                     // create primary input in hex layout
                     hex_layout.create_pi(layout.get_name(layout.get_node(old_coord)), hex_coord);
+
+                    x_max = std::max(hex_coord.x, x_max);
+                    y_max = std::max(hex_coord.y, y_max);
 
                     // collect PIs to the left and to the right of the middle PI
                     if (old_coord.x == 0 && old_coord.y != 0)
@@ -512,16 +536,9 @@ class hexagonalization_impl
                 }
             }
 
-            uint64_t x_max = 0;
-            uint64_t y_max = 0;
-
             // process internal nodes by iterating diagonally over the Cartesian layout
             for (uint64_t k = 0; k < layout_width + layout_height - 1; ++k)
             {
-                if (k%1000==0)
-                {
-                    std::cout << k << "/" << layout_height+layout_width << std::endl;
-                }
                 for (uint64_t x = 0; x <= k; ++x)
                 {
                     const auto y = k - x;
@@ -541,13 +558,6 @@ class hexagonalization_impl
                                 continue;
                             }
 
-                            // convert the Cartesian tile to a hexagonal tile and adjust x-coordinate
-                            auto hex_tile = detail::to_hex<CartLyt, HexLyt>(old_tile, layout_height);
-                            hex_tile.x += offset_to_add - offset_to_subtract;
-
-                            x_max = std::max(hex_tile.x, x_max);
-                            y_max = std::max(hex_tile.y, y_max);
-
                             // retrieve node associated with the current tile
                             const auto node = layout.get_node(old_tile);
 
@@ -556,6 +566,13 @@ class hexagonalization_impl
                             {
                                 continue;
                             }
+
+                            // convert the Cartesian tile to a hexagonal tile and adjust x-coordinate
+                            auto hex_tile = detail::to_hex<CartLyt, HexLyt>(old_tile, layout_height);
+                            hex_tile.x += offset_to_add - offset_to_subtract;
+
+                            x_max = std::max(hex_tile.x, x_max);
+                            y_max = std::max(hex_tile.y, y_max);
 
                             // get incoming data flow signals for the tile
                             const auto signals = layout.incoming_data_flow(old_tile);
