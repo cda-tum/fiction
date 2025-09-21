@@ -973,7 +973,8 @@ class hexagonalization_impl
             }
 
             // adjust the layout size
-            hex_layout.resize({static_cast<decltype(hex_layout.x())>(x_max), static_cast<decltype(hex_layout.y())>(y_max), hex_layout.z()});
+            hex_layout.resize({static_cast<decltype(hex_layout.x())>(x_max),
+                               static_cast<decltype(hex_layout.y())>(y_max), hex_layout.z()});
 
             // restore original names from the Cartesian layout
             restore_names<CartLyt, HexLyt>(layout, hex_layout);
