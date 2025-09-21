@@ -50,8 +50,8 @@ inline void hexagonalization(pybind11::module& m)
                  return stream.str();
              })
         .def_readonly("time_total", &fiction::hexagonalization_stats::time_total,
-                      DOC(fiction_hexagonalization_stats_duration));
-    .def_readonly("x_size", &fiction::hexagonalization_stats::x_size, DOC(fiction_hexagonalization_stats_x_size))
+                      DOC(fiction_hexagonalization_stats_duration))
+        .def_readonly("x_size", &fiction::hexagonalization_stats::x_size, DOC(fiction_hexagonalization_stats_x_size))
         .def_readonly("y_size", &fiction::hexagonalization_stats::y_size, DOC(fiction_hexagonalization_stats_y_size))
         .def_readonly("num_gates", &fiction::hexagonalization_stats::num_gates,
                       DOC(fiction_hexagonalization_stats_num_gates))
