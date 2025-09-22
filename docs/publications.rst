@@ -246,6 +246,9 @@ Furthermore, if you use any of the design automation algorithms, please consider
           author={Hofmann, Simon and Walter, Marcel and Wille, Robert},
           journal={IEEE Transactions on Computer-Aided Design of Integrated Circuits and Systems (TCAD)},
           year={2025},
+          volume={44},
+          number={10},
+          pages={3790-3803},
           doi={10.1109/TCAD.2025.3549354}
         }
 
