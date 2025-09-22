@@ -39,7 +39,7 @@ class area_command : public command
 
   protected:
     /**
-     * Function to perform the energy call. Prints estimated energy consumption for QCA-ONE library.
+     * Computes and reports layout area. Prints width, height, and area for the current cell layout.
      */
     void execute() override
     {
@@ -61,24 +61,12 @@ class area_command : public command
         {
             using tech = typename std::decay_t<decltype(lyt_ptr)>::element_type::technology;
 
-            if (!is_set("width"))
-            {
-                width = tech::CELL_WIDTH;
-            }
-            if (!is_set("height"))
-            {
-                height = tech::CELL_HEIGHT;
-            }
-            if (!is_set("hspace"))
-            {
-                hspace = tech::CELL_HSPACE;
-            }
-            if (!is_set("vspace"))
-            {
-                vspace = tech::CELL_VSPACE;
-            }
+            const double width_nm  = is_set("width") ? width : static_cast<double>(tech::CELL_WIDTH);
+            const double height_nm = is_set("height") ? height : static_cast<double>(tech::CELL_HEIGHT);
+            const double hspace_nm = is_set("hspace") ? hspace : static_cast<double>(tech::CELL_HSPACE);
+            const double vspace_nm = is_set("vspace") ? vspace : static_cast<double>(tech::CELL_VSPACE);
 
-            fiction::area_params<tech> ps{width, height, hspace, vspace};
+            fiction::area_params<tech> ps{width_nm, height_nm, hspace_nm, vspace_nm};
 
             fiction::area(*lyt_ptr, ps, &st);
         };
