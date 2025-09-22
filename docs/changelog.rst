@@ -17,6 +17,11 @@ Added
     - Parameter in ``gold`` to skip tiles when placing PIs, leading to higher success probabilities in discovering layouts
     - Flag in ``gold`` to randomize the number of skipped tiles when placing PIs
 
+Changed
+#######
+- CLI:
+    - ``area`` now outputs the layout width and height in addition to the area
+
 Fixed
 #####
 - Algorithms:
