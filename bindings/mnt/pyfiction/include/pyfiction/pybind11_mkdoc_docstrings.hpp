@@ -2955,6 +2955,10 @@ equally, and, most importantly, it lifts the associated potential
 equations to higher order, allowing us to reason over potential bounds
 in a cluster hierarchy.
 
+*ClusterComplete* was proposed in \"Mastering the Exponential
+Complexity of Exact Physical Simulation of Silicon Dangling Bonds\" by
+W. Lambooy, J. Drewniok, M. Walter, and R. Wille in ASP-DAC 2026.
+
 Template parameter ``Lyt``:
     SiDB cell-level layout type.
 
@@ -3688,7 +3692,13 @@ physical parameters of a given SiDB layout. It allows for the
 evaluation of how the critical temperature depends on variations in
 the underlying parameter points. This enables simulations to explore
 the critical temperature's behavior across different conditions and
-configurations.)doc";
+configurations.
+
+It was proposed in \"The Operational Domain Explorer: A Comprehensive
+Framework to Unveil the Thermal Landscape of Silicon Dangling Bond
+Logic Beyond Conventional Operability\" by M. Walter, J. Drewniok, and
+R. Wille in IEEE-NANO 2025
+(https://ieeexplore.ieee.org/abstract/document/11113672).)doc";
 
 static const char *__doc_fiction_critical_temperature_domain_add_dimension =
 R"doc(Adds a dimension to sweep over. The first dimension is the x
@@ -4644,6 +4654,11 @@ A first version of `QuickCell` was proposed in \"Towards Fast
 Automatic Design of Silicon Dangling Bond Logic\" by J. Drewniok, M.
 Walter, S. S. H. Ng, K. Walus, and R. Wille in DATE 2025
 (https://ieeexplore.ieee.org/abstract/document/10992885).
+
+An extended version of `QuickCell` was proposed in \"QuickCell: Fast
+Automatic Design of Standard Cells for Silicon Dangling Bond Logic\"
+by J. Drewniok, M. Walter, S. S. H. Ng, K. Walus, and R. Wille in TCAD
+2025 (https://ieeexplore.ieee.org/document/11146893).
 
 The `Automatic Exhaustive Gate Designer` was proposed in \"Minimal
 Design of SiDB Gates: An Optimal Basis for Circuits Based on Silicon
@@ -17233,11 +17248,6 @@ the layout. Each exact ground state simulation has exponential
 complexity in of itself. Therefore, the algorithm is only feasible for
 small layouts with few inputs.
 
-This flavor of operational domain computation was proposed in
-\"Reducing the Complexity of Operational Domain Computation in Silicon
-Dangling Bond Logic\" by M. Walter, J. Drewniok, S. S. H. Ng, K.
-Walus, and R. Wille in NANOARCH 2023.
-
 Template parameter ``Lyt``:
     SiDB cell-level layout type.
 
@@ -17377,15 +17387,15 @@ Template parameter ``TT``:
 Parameter ``lyt``:
     Layout to compute the operational domain for.
 
-Parameter ``spec``:
-    Expected vector of truth tables of the layout. Each truth table
-    represents an output of the Boolean function.
+Parameter ``tt``:
+    Expected Boolean function of the lyt given as a multi-output truth
+    table.
 
-Parameter ``params``:
-    Operational domain computation parameters.
+Parameter ``ps``:
+    Parameters for the operational domain computation.
 
-Parameter ``stats``:
-    Operational domain computation statistics.
+Parameter ``st``:
+    Statistics of the process.
 
 Returns:
     The operational domain of the layout.
