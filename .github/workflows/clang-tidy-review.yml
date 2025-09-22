@@ -2,6 +2,15 @@ name: Clang-Tidy Review
 
 on:
   pull_request_target:
+    branches: ["main"]
+    paths:
+      - "**/*.hpp"
+      - "**/*.cpp"
+      - "libs/**"
+      - ".github/workflows/clang-tidy-review.yml"
+      - "!bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp"
+  push:
+    branches: ["main"]
     paths:
       - "**/*.hpp"
       - "**/*.cpp"
@@ -47,16 +56,14 @@ jobs:
 
       - name: Run clang-tidy
         id: linter
-        uses: cpp-linter/cpp-linter-action@v2.16.2
+        uses: cpp-linter/cpp-linter-action@v2.16.3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           style: ""
           tidy-checks: ""
           database: "build"
-          files-changed-only: "true"
           thread-comments: ${{ github.event_name == 'pull_request' && 'update' }}
-          file-annotations: "true"
           ignore-tidy: "build|libs/*|docs/*|benchmarks/*|bib/*|*/pyfiction/pybind11_mkdoc_docstrings.hpp|*/pyfiction/documentation.hpp"
           version: "20"
 

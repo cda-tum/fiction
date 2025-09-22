@@ -19,14 +19,14 @@
 #include <fiction/networks/technology_network.hpp>
 
 #include <mockturtle/networks/aig.hpp>
-#include <mockturtle/views/names_view.hpp>
+#include <mockturtle/utils/stopwatch.hpp>
 
 #include <cstdint>
 
 using namespace fiction;
 
 template <typename Lyt, typename Ntk>
-void check_layout_equiv(const Ntk& ntk)
+static void check_layout_equiv(const Ntk& ntk)
 {
     const auto layout = orthogonal<Lyt>(ntk, {});
 
@@ -39,7 +39,7 @@ void check_layout_equiv(const Ntk& ntk)
 }
 
 template <typename Lyt>
-void check_layout_equiv_all()
+static void check_layout_equiv_all()
 {
     SECTION("maj1_network")
     {
