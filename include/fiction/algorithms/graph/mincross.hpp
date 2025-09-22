@@ -608,7 +608,7 @@ class mincross_impl
  * Reference implementation:
  * https://gitlab.com/graphviz/graphviz/-/blob/main/lib/dotgen/mincross.c
  *
- * For more on Graphviz’s `dot` layout generation:
+ * For more on Graphviz's `dot` layout generation:
  * https://graphviz.org/docs/layouts/dot/
  *
  * @tparam Ntk A logic network type with level and fanout support.
