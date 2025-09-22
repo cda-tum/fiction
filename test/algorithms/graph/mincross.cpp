@@ -130,14 +130,14 @@ TEST_CASE("Adder", "[mincross]")
 
     auto tec_topo = fiction::bfs_topo_view(tec_b);
 
-    auto tec_r = fiction::mutable_rank_view(tec_b);
+    auto tec_r = fiction::mutable_rank_view(tec_topo);
 
     mincross_stats  st{};
     mincross_params p{};
     p.optimize = false;
 
     auto ntk = mincross(tec_r, p, &st);  // counts crossings
-    CHECK(st.num_crossings == 5);
+    CHECK(st.num_crossings == 4);
 
     p.optimize = true;
     ntk        = mincross(tec_r, p, &st);
