@@ -15,7 +15,7 @@ target_include_directories(pyfiction
                            PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 set_property(TARGET pyfiction PROPERTY POSITION_INDEPENDENT_CODE ON)
 
-# Collect CLI headers under cmd/
+# Collect pyfiction headers under bindings/mnt/pyfiction/
 file(GLOB_RECURSE FICTION_PYFICTION_HEADERS CONFIGURE_DEPENDS
         RELATIVE ${PROJECT_SOURCE_DIR}/bindings/mnt/pyfiction/
         ${PROJECT_SOURCE_DIR}/bindings/mnt/pyfiction/include/*.hpp)
