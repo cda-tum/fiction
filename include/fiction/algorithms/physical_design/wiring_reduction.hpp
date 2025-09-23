@@ -656,7 +656,7 @@ void add_obstructions(WiringReductionLyt& lyt) noexcept
         for (uint64_t y = 0; y < lyt.y(); y++)
         {
             lyt.obstruct_coordinate({lyt.x(), y, 0});
-            lyt.obstruct_coordinate({lyt.y(), y, 1});
+            lyt.obstruct_coordinate({lyt.x(), y, 1});
         }
     }
 }
