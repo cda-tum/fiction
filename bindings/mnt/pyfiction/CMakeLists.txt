@@ -15,6 +15,32 @@ target_include_directories(pyfiction
                            PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 set_property(TARGET pyfiction PROPERTY POSITION_INDEPENDENT_CODE ON)
 
+# Collect CLI headers under cmd/
+file(GLOB_RECURSE FICTION_PYFICTION_HEADERS CONFIGURE_DEPENDS
+        RELATIVE ${PROJECT_SOURCE_DIR}/bindings/mnt/pyfiction/
+        ${PROJECT_SOURCE_DIR}/bindings/mnt/pyfiction/include/*.hpp)
+
+# Register header file set for IDE integration and installation metadata
+# Multiple BASE_DIRS so CMake knows how to layout the installed tree
+#
+# Using a FILE_SET ensures proper exposure in CMake package exports later
+# if export() logic is added.
+#
+# (GLOB with CONFIGURE_DEPENDS keeps IDE view in sync when adding headers.)
+target_sources(pyfiction
+        INTERFACE
+        FILE_SET HEADERS
+        BASE_DIRS
+        ${PROJECT_SOURCE_DIR}/bindings/mnt/pyfiction/include/
+        FILES
+        ${FICTION_PYFICTION_HEADERS}
+)
+# Ensure header verification is enabled for this target
+set_property(TARGET pyfiction PROPERTY VERIFY_INTERFACE_HEADER_SETS ON)
+
+# Enforce project-wide C++ standard feature requirement (redundant but explicit)
+target_compile_features(pyfiction INTERFACE cxx_std_${CMAKE_CXX_STANDARD})
+
 if (MSVC)
     target_compile_options(pyfiction PRIVATE /utf-8)
     add_definitions(-DUNICODE -D_UNICODE)
