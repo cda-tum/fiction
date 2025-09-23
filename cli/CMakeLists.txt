@@ -9,6 +9,34 @@ add_executable(fiction ${SOURCES})
 # Link against the project settings, libfiction and alice
 target_link_libraries(fiction PRIVATE libfiction alice)
 
+# Collect CLI headers under cmd/
+file(GLOB_RECURSE FICTION_CLI_HEADERS CONFIGURE_DEPENDS
+        RELATIVE ${PROJECT_SOURCE_DIR}/cli/
+        ${PROJECT_SOURCE_DIR}/cli/cmd/*.hpp
+        ${PROJECT_SOURCE_DIR}/cli/commands.hpp
+        ${PROJECT_SOURCE_DIR}/cli/stores.hpp)
+
+# Register header file set for IDE integration and installation metadata
+# Multiple BASE_DIRS so CMake knows how to layout the installed tree
+#
+# Using a FILE_SET ensures proper exposure in CMake package exports later
+# if export() logic is added.
+#
+# (GLOB with CONFIGURE_DEPENDS keeps IDE view in sync when adding headers.)
+target_sources(fiction
+        INTERFACE
+        FILE_SET HEADERS
+        BASE_DIRS
+        ${PROJECT_SOURCE_DIR}/cli
+        FILES
+        ${FICTION_CLI_HEADERS}
+)
+# Ensure header verification is enabled for this target
+set_property(TARGET fiction PROPERTY VERIFY_INTERFACE_HEADER_SETS ON)
+
+# Enforce project-wide C++ standard feature requirement (redundant but explicit)
+target_compile_features(fiction INTERFACE cxx_std_${CMAKE_CXX_STANDARD})
+
 # Compile-time decisions on which flows to compile
 
 # Logic synthesis flow
@@ -72,19 +100,3 @@ if (CMAKE_BUILD_TYPE STREQUAL "Release")
                 "Strip command is not available. The executables will not be stripped.")
     endif ()
 endif ()
-
-# Package the CLI executable
-include(../cmake/PackageProject.cmake)
-
-# Add other targets that you want installed here, by default we just package the
-# one executable we know we want to ship
-fiction_package_project(TARGETS fiction fiction_options fiction_warnings)
-
-# Experience shows that explicit package naming can help make it easier to sort
-# out potential ABI related issues before they start, while helping you track a
-# build to a specific GIT SHA
-set(CPACK_PACKAGE_FILE_NAME
-        "${CMAKE_PROJECT_NAME}-${CMAKE_PROJECT_VERSION}-${GIT_SHORT_SHA}-${CMAKE_SYSTEM_NAME}-${CMAKE_BUILD_TYPE}-${CMAKE_CXX_COMPILER_ID}-${CMAKE_CXX_COMPILER_VERSION}"
-)
-
-include(CPack)
