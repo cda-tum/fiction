@@ -56,16 +56,16 @@ jobs:
 
       - name: Run clang-tidy
         id: linter
-        uses: cpp-linter/cpp-linter-action@v2.16.3
+        uses: cpp-linter/cpp-linter-action@v2.16
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           style: ""
           tidy-checks: ""
           database: "build"
-          thread-comments: ${{ github.event_name == 'pull_request' && 'update' }}
+          thread-comments: ${{ (github.event_name == 'pull_request' || github.event_name == 'pull_request_target') && 'update' || 'false' }}
           ignore-tidy: "build|libs/*|docs/*|benchmarks/*|bib/*|*/pyfiction/pybind11_mkdoc_docstrings.hpp|*/pyfiction/documentation.hpp"
-          version: "20"
+          version: "21"
 
       - if: steps.linter.outputs.checks-failed > 0
         run: exit 1
