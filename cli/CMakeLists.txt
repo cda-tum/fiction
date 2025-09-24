@@ -24,7 +24,7 @@ file(GLOB_RECURSE FICTION_CLI_HEADERS CONFIGURE_DEPENDS
 #
 # (GLOB with CONFIGURE_DEPENDS keeps IDE view in sync when adding headers.)
 target_sources(fiction
-        INTERFACE
+        PRIVATE
         FILE_SET HEADERS
         BASE_DIRS
         ${PROJECT_SOURCE_DIR}/cli
@@ -35,7 +35,7 @@ target_sources(fiction
 set_property(TARGET fiction PROPERTY VERIFY_INTERFACE_HEADER_SETS ON)
 
 # Enforce project-wide C++ standard feature requirement (redundant but explicit)
-target_compile_features(fiction INTERFACE cxx_std_${CMAKE_CXX_STANDARD})
+target_compile_features(fiction PRIVATE cxx_std_${CMAKE_CXX_STANDARD})
 
 # Compile-time decisions on which flows to compile
 

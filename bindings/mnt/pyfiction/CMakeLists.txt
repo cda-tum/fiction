@@ -28,7 +28,7 @@ file(GLOB_RECURSE FICTION_PYFICTION_HEADERS CONFIGURE_DEPENDS
 #
 # (GLOB with CONFIGURE_DEPENDS keeps IDE view in sync when adding headers.)
 target_sources(pyfiction
-        INTERFACE
+        PRIVATE
         FILE_SET HEADERS
         BASE_DIRS
         ${PROJECT_SOURCE_DIR}/bindings/mnt/pyfiction/include/
@@ -39,7 +39,7 @@ target_sources(pyfiction
 set_property(TARGET pyfiction PROPERTY VERIFY_INTERFACE_HEADER_SETS ON)
 
 # Enforce project-wide C++ standard feature requirement (redundant but explicit)
-target_compile_features(pyfiction INTERFACE cxx_std_${CMAKE_CXX_STANDARD})
+target_compile_features(pyfiction PRIVATE cxx_std_${CMAKE_CXX_STANDARD})
 
 if (MSVC)
     target_compile_options(pyfiction PRIVATE /utf-8)
