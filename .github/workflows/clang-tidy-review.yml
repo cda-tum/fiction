@@ -35,8 +35,6 @@ jobs:
       - name: Clone Repository
         uses: actions/checkout@v5
         with:
-          # Check out the PR's code, not the base branch's code
-          ref: ${{ github.event.pull_request.head.sha }}
           submodules: recursive
           fetch-depth: 0
 
