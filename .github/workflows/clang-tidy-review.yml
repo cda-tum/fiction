@@ -1,7 +1,7 @@
 name: Clang-Tidy Review
 
 on:
-  pull_request_target:
+  pull_request:
     branches: ["main"]
     paths:
       - "**/*.hpp"
@@ -63,7 +63,7 @@ jobs:
           style: ""
           tidy-checks: ""
           database: "build"
-          thread-comments: ${{ (github.event_name == 'pull_request' || github.event_name == 'pull_request_target') && 'update' || 'false' }}
+          thread-comments: ${{ github.event_name == 'pull_request' && 'update' }}
           ignore-tidy: "build|libs/*|docs/*|benchmarks/*|bib/*|*/pyfiction/pybind11_mkdoc_docstrings.hpp|*/pyfiction/documentation.hpp"
           version: "21"
 
