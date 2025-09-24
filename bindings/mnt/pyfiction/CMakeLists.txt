@@ -31,7 +31,7 @@ target_sources(pyfiction
         PRIVATE
         FILE_SET HEADERS
         BASE_DIRS
-        ${PROJECT_SOURCE_DIR}/bindings/mnt/pyfiction/include/
+        ${PROJECT_SOURCE_DIR}/bindings/mnt/pyfiction/
         FILES
         ${FICTION_PYFICTION_HEADERS}
 )
