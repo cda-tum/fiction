@@ -60,7 +60,7 @@ class area_command : public command
 
         const auto calculate_area = [this](auto&& lyt_ptr)
         {
-            using tech = typename std::decay_t<decltype(lyt_ptr)>::element_type::technology;
+            using tech = typename std::decay<decltype(lyt_ptr)>::type::element_type::technology;
 
             const double width_nm  = is_set("width") ? width : tech::CELL_WIDTH;
             const double height_nm = is_set("height") ? height : tech::CELL_HEIGHT;
