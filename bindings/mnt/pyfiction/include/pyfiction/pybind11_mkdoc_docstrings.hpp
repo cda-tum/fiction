@@ -21589,8 +21589,8 @@ static const char *__doc_fiction_technology_dot_drawer_node_label_callback = R"d
 
 static const char *__doc_fiction_technology_mapping =
 R"doc(Performs technology mapping on the given network. Technology mapping
-is the process of replacing the gates in a network with gates from a
-given technology library. This function utilizes `mockturtle::map` to
+is the process of sreplacing the gates in a network with gates from a
+given technology library. This function utilizes `mockturtle::emap` to
 perform the technology mapping. This function is a wrapper around that
 interface to provide a more convenient usage.
 
@@ -21629,7 +21629,7 @@ static const char *__doc_fiction_technology_mapping_params_ge2 = R"doc(2-input g
 
 static const char *__doc_fiction_technology_mapping_params_gt2 = R"doc(2-input greater-than gate.)doc";
 
-static const char *__doc_fiction_technology_mapping_params_inv = R"doc()doc";
+static const char *__doc_fiction_technology_mapping_params_inv = R"doc(1-input NOT gate (inverter).)doc";
 
 static const char *__doc_fiction_technology_mapping_params_le2 = R"doc(2-input less-or-equal gate.)doc";
 
@@ -21639,7 +21639,7 @@ static const char *__doc_fiction_technology_mapping_params_maj3 = R"doc(3-input 
 
 static const char *__doc_fiction_technology_mapping_params_mapper_params = R"doc(mockturtle's mapper parameters.)doc";
 
-static const char *__doc_fiction_technology_mapping_params_mux = R"doc(3-input MUX gate.)doc";
+static const char *__doc_fiction_technology_mapping_params_mux = R"doc(3-input MUX gate (ITE).)doc";
 
 static const char *__doc_fiction_technology_mapping_params_nand2 = R"doc(2-input NAND gate.)doc";
 
