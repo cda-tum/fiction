@@ -18,6 +18,9 @@ permissions:
   contents: write
   pull-requests: write
 
+env:
+  Z3_VERSION: 4.13.0
+
 jobs:
   clangtidy:
     runs-on: ubuntu-latest
@@ -33,15 +36,29 @@ jobs:
       - name: Install dependencies
         run: sudo apt-get update && sudo apt-get install -y cmake libreadline-dev libtbb-dev python3-dev
 
+      - name: Setup Z3 Solver
+        id: z3
+        uses: cda-tum/setup-z3@v1
+        with:
+          version: ${{env.Z3_VERSION}}
+          platform: linux
+          architecture: x64
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
       - name: Generate compilation database
         run: >
           cmake -B build -S .
           -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
           -DFICTION_CLI=ON
           -DFICTION_TEST=ON
-          -DFICTION_BENCHMARK=OFF
+          -DFICTION_BENCHMARK=ON
           -DFICTION_EXPERIMENTS=ON
+          -DFICTION_PROGRESS_BARS=ON
+          -DFICTION_Z3=ON
+          -DFICTION_ENABLE_MUGEN=ON
           -DFICTION_ALGLIB=ON
+          -DFICTION_ENABLE_MUGEN=ON
           -DMOCKTURTLE_EXAMPLES=OFF
 
       - name: Run clang-tidy
