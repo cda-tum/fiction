@@ -20,7 +20,7 @@ namespace fiction
 {
 
 /**
- * Computes a breadth-first topological order (whereas Mockturtle’s topo_view implements a depth-first search) for all
+ * Computes a breadth-first topological order (whereas Mockturtle's topo_view implements a depth-first search) for all
  * nodes reachable from the outputs of a logic network.
  *
  * Overrides the methods `foreach_node`, `foreach_gate`, `size`, and `num_gates`.
@@ -60,7 +60,7 @@ class bfs_topo_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
     using storage                                 = typename Ntk::storage;
     using node                                    = typename Ntk::node;
     using signal                                  = typename Ntk::signal;
-    static constexpr bool is_topologically_sorted = true; // NOLINT(readability-identifier-naming)
+    static constexpr bool is_topologically_sorted = true;  // NOLINT(readability-identifier-naming)
 
     /**
      * Constructs a breadth-first topological view from a given network.
