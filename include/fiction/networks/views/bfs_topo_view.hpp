@@ -20,7 +20,8 @@ namespace fiction
 {
 
 /**
- * Computes a breadth-first topological order for all nodes reachable from the outputs of a logic network.
+ * Computes a breadth-first topological order (whereas Mockturtle’s topo_view implements a depth-first search) for all
+ * nodes reachable from the outputs of a logic network.
  *
  * Overrides the methods `foreach_node`, `foreach_gate`, `size`, and `num_gates`.
  * The topological order is computed once upon construction and remains fixed for the lifetime of the view.
@@ -59,14 +60,14 @@ class bfs_topo_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
     using storage                                 = typename Ntk::storage;
     using node                                    = typename Ntk::node;
     using signal                                  = typename Ntk::signal;
-    static constexpr bool is_topologically_sorted = true;
+    static constexpr bool is_topologically_sorted = true; // NOLINT(readability-identifier-naming)
 
     /**
      * Constructs a breadth-first topological view from a given network.
      *
      * @param ntk Logic network to be wrapped with a topological view.
      */
-    explicit bfs_topo_view(Ntk const& ntk) : mockturtle::immutable_view<Ntk>(ntk), fanout_ntk(ntk)
+    explicit bfs_topo_view(const Ntk& ntk) : mockturtle::immutable_view<Ntk>(ntk), fanout_ntk(ntk)
     {
         static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
         static_assert(mockturtle::has_size_v<Ntk>, "Ntk does not implement the size method");
@@ -98,7 +99,7 @@ class bfs_topo_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
      */
     auto num_gates() const
     {
-        uint32_t const offset = 1u + this->num_pis() +
+        const uint32_t offset = 1u + this->num_pis() +
                                 (this->get_node(this->get_constant(true)) != this->get_node(this->get_constant(false)));
         return static_cast<uint32_t>(topo_order.size() - offset);
     }
@@ -109,9 +110,9 @@ class bfs_topo_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
      * @param n Node whose index is to be determined.
      * @return Index of the node in the topological order.
      */
-    uint32_t node_to_index(node const& n) const
+    uint32_t node_to_index(const node& n) const
     {
-        return std::distance(std::begin(topo_order), std::find(std::begin(topo_order), std::end(topo_order), n));
+        return std::distance(std::cbegin(topo_order), std::find(std::cbegin(topo_order), std::cend(topo_order), n));
     }
 
     /**
@@ -134,7 +135,7 @@ class bfs_topo_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
     template <typename Fn>
     void foreach_node(Fn&& fn) const
     {
-        mockturtle::detail::foreach_element(topo_order.begin(), topo_order.end(), fn);
+        mockturtle::detail::foreach_element(topo_order.cbegin(), topo_order.cend(), std::forward<Fn>(fn));
     }
 
     /**
@@ -146,7 +147,7 @@ class bfs_topo_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
     template <typename Fn>
     void foreach_node_reverse(Fn&& fn) const
     {
-        mockturtle::detail::foreach_element(topo_order.rbegin(), topo_order.rend(), fn);
+        mockturtle::detail::foreach_element(topo_order.rbegin(), topo_order.rend(), std::forward<Fn>(fn));
     }
 
     /**
@@ -158,9 +159,9 @@ class bfs_topo_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
     template <typename Fn>
     void foreach_gate(Fn&& fn) const
     {
-        uint32_t const offset = 1u + this->num_pis() +
+        const uint32_t offset = 1u + this->num_pis() +
                                 (this->get_node(this->get_constant(true)) != this->get_node(this->get_constant(false)));
-        mockturtle::detail::foreach_element(topo_order.begin() + offset, topo_order.end(), fn);
+        mockturtle::detail::foreach_element(topo_order.cbegin() + offset, topo_order.cend(), std::forward<Fn>(fn));
     }
 
     /**
@@ -172,9 +173,9 @@ class bfs_topo_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
     template <typename Fn>
     void foreach_gate_reverse(Fn&& fn) const
     {
-        uint32_t const offset = 1u + this->num_pis() +
+        const uint32_t offset = 1u + this->num_pis() +
                                 (this->get_node(this->get_constant(true)) != this->get_node(this->get_constant(false)));
-        mockturtle::detail::foreach_element(topo_order.rbegin(), topo_order.rend() - offset, fn);
+        mockturtle::detail::foreach_element(topo_order.rbegin(), topo_order.rend() - offset, std::forward<Fn>(fn));
     }
 
     /**
@@ -187,8 +188,8 @@ class bfs_topo_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
         topo_order.clear();
         topo_order.reserve(fanout_ntk.size());
 
-        std::queue<node>                   q;
-        std::unordered_map<node, uint32_t> unvisited_fanin_count;
+        std::queue<node>                   q{};
+        std::unordered_map<node, uint32_t> unvisited_fanin_count{};
 
         const auto c0 = fanout_ntk.get_node(fanout_ntk.get_constant(false));
         q.push(c0);
@@ -207,7 +208,7 @@ class bfs_topo_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
             [&](auto n)
             {
                 unvisited_fanin_count[n] = 0;
-                fanout_ntk.foreach_fanin(n, [&](auto const& /*f*/) { ++unvisited_fanin_count[n]; });
+                fanout_ntk.foreach_fanin(n, [&](const auto& /*f*/) { ++unvisited_fanin_count[n]; });
             });
 
         fanout_ntk.foreach_ci(
@@ -227,7 +228,7 @@ class bfs_topo_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
             q.pop();
 
             fanout_ntk.foreach_fanout(n,
-                                      [&](auto const& child)
+                                      [&](const auto& child)
                                       {
                                           if (fanout_ntk.visited(child) == fanout_ntk.trav_id())
                                           {
@@ -271,7 +272,7 @@ class bfs_topo_view<Ntk, true> : public Ntk
      *
      * @param ntk Topologically sorted network.
      */
-    explicit bfs_topo_view(Ntk const& ntk) : Ntk(ntk) {}
+    explicit bfs_topo_view(const Ntk& ntk) : Ntk(ntk) {}
 };
 
 /**
@@ -280,7 +281,7 @@ class bfs_topo_view<Ntk, true> : public Ntk
  * @tparam T Logic network type.
  */
 template <class T>
-bfs_topo_view(T const&) -> bfs_topo_view<T>;
+bfs_topo_view(const T&) -> bfs_topo_view<T>;
 
 /**
  * Deduction guide for bfs_topo_view from a network and signal.
@@ -288,7 +289,7 @@ bfs_topo_view(T const&) -> bfs_topo_view<T>;
  * @tparam T Logic network type.
  */
 template <class T>
-bfs_topo_view(T const&, typename T::signal const&) -> bfs_topo_view<T>;
+bfs_topo_view(const T&, const typename T::signal&) -> bfs_topo_view<T>;
 
 }  // namespace fiction
 
