@@ -11,7 +11,7 @@
 #include "fiction/utils/name_utils.hpp"
 
 #include <lorina/genlib.hpp>
-#include <mockturtle/algorithms/mapper.hpp>
+#include <mockturtle/algorithms/emap.hpp>
 #include <mockturtle/io/genlib_reader.hpp>
 #include <mockturtle/utils/tech_library.hpp>
 
@@ -27,7 +27,7 @@ struct technology_mapping_params
     /**
      * mockturtle's mapper parameters.
      */
-    mockturtle::map_params mapper_params{};
+    mockturtle::emap_params mapper_params{};
 
     /**
      * Enforce the application of at least one constant input to three-input gates.
@@ -36,6 +36,9 @@ struct technology_mapping_params
 
     // 1-input functions
 
+    /**
+     * 1-input NOT gate (inverter).
+     */
     bool inv{false};
 
     // 2-input functions
@@ -112,7 +115,7 @@ struct technology_mapping_params
      */
     bool dot{false};
     /**
-     * 3-input MUX gate.
+     * 3-input MUX gate (ITE).
      */
     bool mux{false};
     /**
@@ -292,7 +295,7 @@ struct technology_mapping_stats
     /**
      * Statistics for mockturtle's mapper.
      */
-    mockturtle::map_stats mapper_stats{};
+    mockturtle::emap_stats mapper_stats{};
     /**
      * Report statistics.
      */
@@ -315,7 +318,7 @@ class technology_mapping_impl
             stats{st}
     {}
 
-    tec_nt run()
+    [[nodiscard]] tec_nt run() const
     {
         const auto gate_library = set_up_gates();
 
@@ -513,7 +516,7 @@ class technology_mapping_impl
     {
         mockturtle::tech_library<NumInp> lib{gates};
 
-        const auto mapped_ntk = mockturtle::map(ntk, lib, params.mapper_params, &stats.mapper_stats);
+        const auto mapped_ntk = mockturtle::emap(ntk, lib, params.mapper_params, &stats.mapper_stats);
 
         tec_nt converted_ntk{};
 
@@ -531,8 +534,8 @@ class technology_mapping_impl
 }  // namespace detail
 
 /**
- * Performs technology mapping on the given network. Technology mapping is the process of replacing the gates in a
- * network with gates from a given technology library. This function utilizes `mockturtle::map` to perform the
+ * Performs technology mapping on the given network. Technology mapping is the process of sreplacing the gates in a
+ * network with gates from a given technology library. This function utilizes `mockturtle::emap` to perform the
  * technology mapping. This function is a wrapper around that interface to provide a more convenient usage.
  *
  * @tparam Ntk Input logic network type.

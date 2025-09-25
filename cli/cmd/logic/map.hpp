@@ -59,13 +59,12 @@ class map_command : public command
         add_flag("--all", "Enable the use of all supported gates");
 
         add_flag("--decay", ps.decay, "Enforce the application of at least one constant input to three-input gates");
-        add_flag("--logic_sharing,-s", ps.mapper_params.enable_logic_sharing, "Enable logic sharing optimization");
         add_flag("--verbose,-v", ps.mapper_params.verbose, "Be verbose");
     }
 
   protected:
     /**
-     * Function to perform the map call. Generates a logic network from another one.
+     * Function to perform the mockturtle::emap call. Generates a logic network from another one.
      */
     void execute() override
     {
