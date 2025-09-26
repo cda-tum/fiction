@@ -26,7 +26,7 @@ from .pyfiction import (  # type: ignore[import-not-found]
     __version__,
     a_star,
     a_star_distance,
-    ## path_finding
+    # path_finding
     a_star_params,
     all_standard_2_input_functions,
     all_standard_3_input_functions,
@@ -34,7 +34,7 @@ from .pyfiction import (  # type: ignore[import-not-found]
     and_or_not,
     and_or_not_maj,
     apply_bestagon_library,
-    ## physical_design
+    # physical_design
     apply_qca_one_library,
     apply_topolinano_library,
     # Technology
@@ -100,7 +100,7 @@ from .pyfiction import (  # type: ignore[import-not-found]
     create_xor3_tt,
     create_xor_and_tt,
     create_xor_tt,
-    ## properties
+    # properties
     critical_path_length_and_throughput,
     critical_temperature_domain,
     critical_temperature_domain_contour_tracing,
@@ -154,7 +154,7 @@ from .pyfiction import (  # type: ignore[import-not-found]
     fanout_substitution_params,
     # Inout
     fgl_parsing_error,
-    ## verfication
+    # verfication
     gate_level_drv_params,
     gate_level_drvs,
     generate_multiple_random_sidb_layouts,
@@ -182,7 +182,7 @@ from .pyfiction import (  # type: ignore[import-not-found]
     inml_layout,
     inml_technology,
     # Algorithms
-    ## iter
+    # iter
     input_bdl_configuration,
     is_balanced,
     is_charged_defect_type,
@@ -282,14 +282,14 @@ from .pyfiction import (  # type: ignore[import-not-found]
     sidb_simulation_result_111,
     sidb_technology,
     sign_to_charge_state,
-    ### logic
+    # logic
     simulate,
     siqad_area,
     siqad_coordinate,
     siqad_volume,
     sqd_parsing_error,
     squared_euclidean_distance,
-    ## network_transformation
+    # network_transformation
     substitution_strategy,
     sweep_parameter,
     technology_constraints,
@@ -306,8 +306,8 @@ from .pyfiction import (  # type: ignore[import-not-found]
     to_cube_coord,
     to_offset_coord,
     to_siqad_coord,
-    ## simulation
-    ### sidb
+    # simulation
+    # sidb
     transition_type,
     twoddwave_distance,
     undefined_cell_label_exception,
@@ -348,7 +348,7 @@ __all__ = [
     "__version__",
     "a_star",
     "a_star_distance",
-    ## path_finding
+    # path_finding
     "a_star_params",
     "all_standard_2_input_functions",
     "all_standard_3_input_functions",
@@ -356,7 +356,7 @@ __all__ = [
     "and_or_not",
     "and_or_not_maj",
     "apply_bestagon_library",
-    ## physical_design
+    # physical_design
     "apply_qca_one_library",
     "apply_topolinano_library",
     # Technology
@@ -422,7 +422,7 @@ __all__ = [
     "create_xor3_tt",
     "create_xor_and_tt",
     "create_xor_tt",
-    ## properties
+    # properties
     "critical_path_length_and_throughput",
     "critical_temperature_domain",
     "critical_temperature_domain_contour_tracing",
@@ -476,7 +476,7 @@ __all__ = [
     "fanout_substitution_params",
     # Inout
     "fgl_parsing_error",
-    ## verfication
+    # verfication
     "gate_level_drv_params",
     "gate_level_drvs",
     "generate_multiple_random_sidb_layouts",
@@ -504,7 +504,7 @@ __all__ = [
     "inml_layout",
     "inml_technology",
     # Algorithms
-    ## iter
+    # iter
     "input_bdl_configuration",
     "is_balanced",
     "is_charged_defect_type",
@@ -604,14 +604,14 @@ __all__ = [
     "sidb_simulation_result_111",
     "sidb_technology",
     "sign_to_charge_state",
-    ### logic
+    # logic
     "simulate",
     "siqad_area",
     "siqad_coordinate",
     "siqad_volume",
     "sqd_parsing_error",
     "squared_euclidean_distance",
-    ## network_transformation
+    # network_transformation
     "substitution_strategy",
     "sweep_parameter",
     "technology_constraints",
@@ -628,8 +628,8 @@ __all__ = [
     "to_cube_coord",
     "to_offset_coord",
     "to_siqad_coord",
-    ## simulation
-    ### sidb
+    # simulation
+    # sidb
     "transition_type",
     "twoddwave_distance",
     "undefined_cell_label_exception",

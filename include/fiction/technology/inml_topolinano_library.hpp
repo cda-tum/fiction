@@ -212,7 +212,8 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
             }
         };
 
-        do {
+        do
+        {
             status st = status::SEARCH;
 
             improvement_found = false;

@@ -61,7 +61,8 @@ class TestWriteOperationalDomain(unittest.TestCase):
         operational_domain_custom_as_string = write_operational_domain_to_string(opdom, params)
 
         self.assertEqual(
-            sorted(operational_domain_custom_as_string.strip().split("\n")), sorted(expected_custom.strip().split("\n"))
+            sorted(operational_domain_custom_as_string.strip().split("\n")),
+            sorted(expected_custom.strip().split("\n")),
         )
 
     def test_write_operational_domain_with_metric_values(self):
@@ -77,7 +78,8 @@ class TestWriteOperationalDomain(unittest.TestCase):
         temperature_operational_domain_as_string = write_critical_temperature_domain_to_string(opdom)
 
         self.assertEqual(
-            sorted(temperature_operational_domain_as_string.strip().split("\n")), sorted(expected.strip().split("\n"))
+            sorted(temperature_operational_domain_as_string.strip().split("\n")),
+            sorted(expected.strip().split("\n")),
         )
 
         # Custom operational tags
