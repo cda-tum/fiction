@@ -1,15 +1,7 @@
 name: Clang-Tidy Review
 
 on:
-  pull_request_target:
-    branches: ["main"]
-    paths:
-      - "**/*.hpp"
-      - "**/*.cpp"
-      - "libs/**"
-      - ".github/workflows/clang-tidy-review.yml"
-      - "!bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp"
-  push:
+  pull_request:
     branches: ["main"]
     paths:
       - "**/*.hpp"
@@ -26,6 +18,9 @@ permissions:
   contents: write
   pull-requests: write
 
+env:
+  Z3_VERSION: 4.13.0
+
 jobs:
   clangtidy:
     runs-on: ubuntu-latest
@@ -35,13 +30,21 @@ jobs:
       - name: Clone Repository
         uses: actions/checkout@v5
         with:
-          # Check out the PR's code, not the base branch's code
-          ref: ${{ github.event.pull_request.head.sha }}
           submodules: recursive
           fetch-depth: 0
 
       - name: Install dependencies
         run: sudo apt-get update && sudo apt-get install -y cmake libreadline-dev libtbb-dev python3-dev
+
+      - name: Setup Z3 Solver
+        id: z3
+        uses: cda-tum/setup-z3@v1
+        with:
+          version: ${{env.Z3_VERSION}}
+          platform: linux
+          architecture: x64
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
       - name: Generate compilation database
         run: >
@@ -49,9 +52,13 @@ jobs:
           -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
           -DFICTION_CLI=ON
           -DFICTION_TEST=ON
-          -DFICTION_BENCHMARK=OFF
+          -DFICTION_BENCHMARK=ON
           -DFICTION_EXPERIMENTS=ON
+          -DFICTION_PROGRESS_BARS=ON
+          -DFICTION_Z3=ON
+          -DFICTION_ENABLE_MUGEN=ON
           -DFICTION_ALGLIB=ON
+          -DFICTION_ENABLE_MUGEN=ON
           -DMOCKTURTLE_EXAMPLES=OFF
 
       - name: Run clang-tidy
@@ -65,7 +72,7 @@ jobs:
           database: "build"
           thread-comments: ${{ github.event_name == 'pull_request' && 'update' }}
           ignore-tidy: "build|libs/*|docs/*|benchmarks/*|bib/*|*/pyfiction/pybind11_mkdoc_docstrings.hpp|*/pyfiction/documentation.hpp"
-          version: "20"
+          version: "21"
 
       - if: steps.linter.outputs.checks-failed > 0
         run: exit 1

@@ -43,7 +43,3 @@ endif()
 if(MSVC)
   add_compile_options(/bigobj)
 endif()
-
-# run vcvarsall when msvc is used
-include(${CMAKE_CURRENT_LIST_DIR}/VCEnvironment.cmake)
-run_vcvarsall()
