@@ -656,7 +656,7 @@ void add_obstructions(WiringReductionLyt& lyt) noexcept
         for (uint64_t y = 0; y < lyt.y(); y++)
         {
             lyt.obstruct_coordinate({lyt.x(), y, 0});
-            lyt.obstruct_coordinate({lyt.y(), y, 1});
+            lyt.obstruct_coordinate({lyt.x(), y, 1});
         }
     }
 }
@@ -1211,7 +1211,11 @@ class wiring_reduction_impl
 }  // namespace detail
 
 /**
- * A scalable wiring reduction algorithm for 2DDWave-clocked layouts based on A* path finding.
+ * A scalable wiring reduction algorithm for 2DDWave-clocked layouts based on A* path finding as originally proposed in
+ * \"Late Breaking Results: Wiring Reduction for Field-coupled Nanotechnologies\" by S. Hofmann, M. Walter, and R. Wille
+ * in DAC 2024 (https://dl.acm.org/doi/10.1145/3649329.3663491) and extended in \"Efficient and Scalable Post-Layout
+ * Optimization for Field-coupled Nanotechnologies\" by S. Hofmann, M. Walter, and R. Wille in TCAD 2025
+ * (https://ieeexplore.ieee.org/document/10916761).
  *
  * The core concept revolves around the selective removal of excess wiring by cutting them from a layout, contingent
  * upon the ability to restore functional correctness by realigning the remaining layout fragments. Given the complexity
