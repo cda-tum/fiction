@@ -42,6 +42,7 @@
 #include <queue>
 #include <random>
 #include <stdexcept>
+#include <thread>
 #include <tuple>
 #include <unordered_map>
 #include <utility>
@@ -175,6 +176,31 @@ struct graph_oriented_layout_design_params
      * generated randomly if not specified.
      */
     std::optional<uint32_t> seed = std::nullopt;
+    /**
+     * Enforce NOT gates to be routed non-bending only.
+     */
+    bool straight_inverters = false;
+    /**
+     * For each primary input (PI) considered during placement, reserve this many
+     * empty tiles *after* the current frontier:
+     *  - Top edge (row 0): leave `tiles_to_skip_between_pis` empty tiles to the right
+     *    of the rightmost occupied tile before proposing a new PI position.
+     *  - Left edge (column 0): leave `tiles_to_skip_between_pis` empty tiles below
+     *    the bottommost occupied tile before proposing a new PI position.
+     *
+     * This soft margin can reduce local congestion and increase the probability of
+     * finding a routable layout at the expense of a temporarily larger footprint,
+     * which post-layout optimization may later shrink. Defaults to `0`.
+     */
+    uint64_t tiles_to_skip_between_pis = 0;
+    /**
+     * When enabled, randomizes the tiles_to_skip_between_pis value for each PI placement.
+     * The random value will be chosen from `0` to `tiles_to_skip_between_pis` (inclusive).
+     * This can help explore different placement strategies and potentially find better layouts.
+     * Uses the same random seed as other randomization features for reproducibility.
+     * Defaults to `false`.
+     */
+    bool randomize_tiles_to_skip_between_pis = false;
 };
 /**
  * This struct stores statistics about the graph-oriented layout design process.
@@ -377,17 +403,9 @@ struct search_space_graph
      */
     std::unordered_map<coord_vec_type<Lyt>, double, detail::nested_vector_hash<Lyt>> cost_so_far{};
     /**
-     * The maximum number of positions to be considered for expansions.
-     */
-    uint64_t num_expansions = 4u;
-    /**
      * Priority queue containing vertices of the search space graph.
      */
     detail::priority_queue<Lyt> frontier{};
-    /**
-     * Create planar layouts.
-     */
-    bool planar = false;
     /**
      * The cost objective used to expand a vertex in the search space graph.
      */
@@ -711,43 +729,80 @@ class graph_oriented_layout_design_impl
             // if multithreading is enabled
             if (ps.enable_multithreading)
             {
-                // mutex to protect the best found layout and statistics
-                std::mutex                                   update_best_layout_mutex{};
-                std::vector<std::future<std::optional<Lyt>>> futures{};
-                futures.reserve(ssg_vec.size());
+                // separate mutexes for better concurrency
+                std::mutex update_best_layout_mutex{};
+
+                // reuse futures pool to avoid allocation overhead
+                futures_pool.clear();
+                futures_pool.reserve(ssg_vec.size());
 
                 // process `ssg_vec` in parallel using std::async
                 for (auto& ssg : ssg_vec)
                 {
-                    futures.emplace_back(std::async(std::launch::async,
-                                                    [&]() -> std::optional<Lyt>
-                                                    {
-                                                        auto result = process_ssg(ssg);
-                                                        if (result)
-                                                        {
-                                                            const std::lock_guard<std::mutex> lock(
-                                                                update_best_layout_mutex);
-                                                            best_lyt = *result;
-                                                            restore_names(ssg.network, best_lyt);
-                                                            update_stats(best_lyt);
+                    auto* ssg_ptr = &ssg;
+                    futures_pool.emplace_back(
+                        std::async(std::launch::async,
+                                   [this, ssg_ptr, &update_best_layout_mutex, &best_lyt]() -> std::optional<Lyt>
+                                   {
+                                       if (auto result = process_ssg(*ssg_ptr); result)
+                                       {
+                                           const std::lock_guard<std::mutex> lock(update_best_layout_mutex);
+                                           best_lyt = std::move(*result);
+                                           restore_names(ssg_ptr->network, best_lyt);
+                                           update_stats(best_lyt);
 
-                                                            if (ps.return_first)
-                                                            {
-                                                                return best_lyt;
-                                                            }
-                                                        }
-                                                        return std::nullopt;
-                                                    }));
+                                           if (ps.return_first)
+                                           {
+                                               return best_lyt;
+                                           }
+                                       }
+                                       return std::nullopt;
+                                   }));
                 }
 
-                // check the futures for the result
-                for (auto& future : futures)
+                // check the futures for the result - poll for readiness to support return_first
+                while (true)
                 {
-                    const auto result = future.get();  // blocking wait to get the result from the future
-                    if (result)
+                    bool all_done = true;
+                    for (auto& f : futures_pool)
                     {
-                        return *result;  // return the first found layout if ps.return_first is true
+                        if (f.valid())
+                        {
+                            using namespace std::chrono_literals;
+                            if (f.wait_for(0ms) == std::future_status::ready)
+                            {
+                                if (auto r = f.get())
+                                {
+                                    // cancel remaining futures if return_first is enabled
+                                    if (ps.return_first)
+                                    {
+                                        for (auto& remaining_future : futures_pool)
+                                        {
+                                            if (remaining_future.valid())
+                                            {
+                                                remaining_future.wait();
+                                            }
+                                        }
+                                    }
+                                    return *r;  // return immediately when first result is ready
+                                }
+                            }
+                            else
+                            {
+                                all_done = false;
+                            }
+                        }
                     }
+                    if (all_done)
+                    {
+                        break;
+                    }
+                    // adaptive sleep: shorter sleep when more futures are active
+                    const auto active_futures = std::count_if(futures_pool.cbegin(), futures_pool.cend(),
+                                                              [](const auto& f) { return f.valid(); });
+                    const auto sleep_duration =
+                        active_futures > 4 ? std::chrono::microseconds(100) : std::chrono::milliseconds(1);
+                    std::this_thread::sleep_for(sleep_duration);
                 }
             }
             else
@@ -954,6 +1009,33 @@ class graph_oriented_layout_design_impl
      */
     std::uint32_t seed;
     /**
+     * Thread pool for multithreaded execution to avoid thread creation overhead.
+     */
+    mutable std::vector<std::future<std::optional<Lyt>>> futures_pool{};
+    /**
+     * Get thread-local random number generator for `tiles_to_skip_between_pis` randomization.
+     * Each thread will have its own RNG to avoid mutex contention.
+     *
+     * @return Reference to a thread-local Mersenne Twister random number generator.
+     */
+    [[nodiscard]] std::mt19937& get_thread_local_rng() const
+    {
+        thread_local std::mt19937 rng{seed};
+        return rng;
+    }
+    /**
+     * Get thread-local distribution for generating random `tiles_to_skip_between_pis` values.
+     *
+     * @return Reference to a thread-local uniform integer distribution for generating random skip values.
+     */
+    [[nodiscard]] std::uniform_int_distribution<uint64_t>& get_thread_local_dist() const
+    {
+        // Handle edge case where tiles_to_skip_between_pis is 0
+        const auto min_val = ps.tiles_to_skip_between_pis > 0 ? ps.tiles_to_skip_between_pis - 1 : 0;
+        thread_local std::uniform_int_distribution<uint64_t> dist{min_val, ps.tiles_to_skip_between_pis};
+        return dist;
+    }
+    /**
      * Determines the number of search space graphs to generate based on the selected effort mode and cost objective.
      *
      * @param mode The effort mode chosen for the layout design, determining the level of computational effort.
@@ -1002,12 +1084,12 @@ class graph_oriented_layout_design_impl
      * @param dest The destination tile.
      * @param new_gate_loc Enum indicating if the src or dest have to host a new gate and therefore have to be empty.
      * Defaults to `new_gate_location::NONE`.
-     * @param planar Only consider crossing-free paths.
      * @return A path from `src` to `dest` if one exists.
      */
     [[nodiscard]] layout_coordinate_path<ObstrLyt>
     check_path(const ObstrLyt& layout, const tile<ObstrLyt>& src, const tile<ObstrLyt>& dest,
-               const new_gate_location new_gate_loc = new_gate_location::NONE, const bool planar = false) noexcept
+               const new_gate_location new_gate_loc            = new_gate_location::NONE,
+               const bool              check_straight_inverter = false) noexcept
     {
         const bool src_is_new_pos  = (new_gate_loc == new_gate_location::SRC);
         const bool dest_is_new_pos = (new_gate_loc == new_gate_location::DEST);
@@ -1018,11 +1100,31 @@ class graph_oriented_layout_design_impl
             using dist = twoddwave_distance_functor<ObstrLyt, uint64_t>;
             using cost = unit_cost_functor<ObstrLyt, uint8_t>;
 
-            static a_star_params a_star_crossing_params{};
-            a_star_crossing_params.crossings = !planar;
+            a_star_params a_star_crossing_params{};
+            a_star_crossing_params.crossings = !ps.planar;
 
-            return a_star<layout_coordinate_path<ObstrLyt>>(layout, {src, dest}, dist(), cost(),
-                                                            a_star_crossing_params);
+            const auto path =
+                a_star<layout_coordinate_path<ObstrLyt>>(layout, {src, dest}, dist(), cost(), a_star_crossing_params);
+
+            if (path.size() < 2)
+            {
+                return {};
+            }
+
+            if (!check_straight_inverter)
+            {
+                return path;
+            }
+
+            const auto fanin                        = layout.incoming_data_flow(src).front();
+            const bool vertical_straight_inverter   = (fanin.x == src.x && src.x == path[1].x);
+            const bool horizontal_straight_inverter = (fanin.y == src.y && src.y == path[1].y);
+            const bool straight_inverter            = vertical_straight_inverter || horizontal_straight_inverter;
+
+            if (straight_inverter)
+            {
+                return path;
+            }
         }
 
         return {};
@@ -1034,25 +1136,67 @@ class graph_oriented_layout_design_impl
      * @param layout The layout in which to find the possible positions for PIs.
      * @param pi_locs Struct indicating if PIs are allowed at the top or left side of the layout.
      * @param num_expansions The maximum number of positions to be returned (is doubled for PIs).
-     * @param planar Only consider crossing-free paths.
      * @return A vector of tiles representing the possible positions for PIs.
      */
     [[nodiscard]] coord_vec_type<ObstrLyt> get_possible_positions_pis(ObstrLyt& layout, const pi_locations& pi_locs,
-                                                                      const uint64_t num_expansions,
-                                                                      const bool     planar = false) noexcept
+                                                                      const uint64_t num_expansions) noexcept
     {
         uint64_t count_expansions = 0ul;
 
         coord_vec_type<ObstrLyt> possible_positions{};
 
-        layout.resize({layout.x() + 1, layout.y() + 1, 1});
+        // if no PIs yet, no skipping; otherwise use appropriate setting.
+        uint64_t skip_tiles = 0;
+        if (!layout.is_empty())
+        {
+            if (ps.randomize_tiles_to_skip_between_pis)
+            {
+                // generate random skip_tiles for each PI placement using thread-local RNG
+                skip_tiles = get_thread_local_dist()(get_thread_local_rng());
+            }
+            else
+            {
+                skip_tiles = ps.tiles_to_skip_between_pis;
+            }
+        }
+        auto skip_top  = skip_tiles;
+        auto skip_left = skip_tiles;
+
+        // make sure we have enough margin in both directions.
+        const uint64_t resize = skip_tiles + 1;
+
+        layout.resize({layout.x() + resize, layout.y() + resize, layout.z()});
         const tile<ObstrLyt> drain{layout.x(), layout.y(), 0};
+
+        uint64_t min_x = 0;
+        uint64_t min_y = 0;
+
+        if (skip_tiles != 0)
+        {
+            for (auto x = static_cast<int64_t>(layout.x()); x >= 0; --x)
+            {
+                if (!layout.is_empty_tile({static_cast<uint64_t>(x), 0, 0}))
+                {
+                    min_x = static_cast<uint64_t>(x) + 1;
+                    break;  // first non-empty from the right
+                }
+            }
+
+            for (auto y = static_cast<int64_t>(layout.y()); y >= 0; --y)
+            {
+                if (!layout.is_empty_tile({0, static_cast<uint64_t>(y), 0}))
+                {
+                    min_y = static_cast<uint64_t>(y) + 1;
+                    break;  // first non-empty from the bottom
+                }
+            }
+        }
 
         // check if a path from the input to the drain exists
         const auto check_tile = [&](const uint64_t x, const uint64_t y) noexcept
         {
             const tile<ObstrLyt> tile{x, y, 0};
-            if (!check_path(layout, tile, drain, new_gate_location::SRC, planar).empty())
+            if (!check_path(layout, tile, drain, new_gate_location::SRC).empty())
             {
                 count_expansions++;
                 possible_positions.push_back(tile);
@@ -1063,15 +1207,15 @@ class graph_oriented_layout_design_impl
 
         if (pi_locs == pi_locations::TOP_AND_LEFT)
         {
-            max_iterations = std::max(layout.x(), layout.y());
+            max_iterations = std::max(layout.x() - min_x, layout.y() - min_y);
         }
         else if (pi_locs == pi_locations::TOP)
         {
-            max_iterations = layout.x();
+            max_iterations = layout.x() - min_x;
         }
         else
         {
-            max_iterations = layout.y();
+            max_iterations = layout.y() - min_y;
         }
 
         const uint64_t expansion_limit = (pi_locs == pi_locations::TOP_AND_LEFT) ? 2 * num_expansions : num_expansions;
@@ -1079,23 +1223,37 @@ class graph_oriented_layout_design_impl
 
         for (uint64_t k = 0ul; k < max_iterations; k++)
         {
-            if (((pi_locs == pi_locations::TOP) || (pi_locs == pi_locations::TOP_AND_LEFT)) && k < layout.x())
+            if (((pi_locs == pi_locations::TOP) || (pi_locs == pi_locations::TOP_AND_LEFT)) && min_x + k < layout.x())
             {
-                check_tile(k, 0);
+                if (skip_top == 0)
+                {
+                    check_tile(min_x + k, 0);
+                }
+                else
+                {
+                    --skip_top;
+                }
             }
-            if (((pi_locs == pi_locations::LEFT) || (pi_locs == pi_locations::TOP_AND_LEFT)) && k < layout.y())
+            if (((pi_locs == pi_locations::LEFT) || (pi_locs == pi_locations::TOP_AND_LEFT)) && min_y + k < layout.y())
             {
-                check_tile(0, k);
+                if (skip_left == 0)
+                {
+                    check_tile(0, min_y + k);
+                }
+                else
+                {
+                    --skip_left;
+                }
             }
             if (count_expansions >= expansion_limit)
             {
-                layout.resize({layout.x() - 1, layout.y() - 1, 1});
+                layout.resize({layout.x() - resize, layout.y() - resize, layout.z()});
 
                 return possible_positions;
             }
         }
 
-        layout.resize({layout.x() - 1, layout.y() - 1, 1});
+        layout.resize({layout.x() - resize, layout.y() - resize, layout.z()});
 
         return possible_positions;
     }
@@ -1107,13 +1265,11 @@ class graph_oriented_layout_design_impl
      * @param place_info The placement context containing current node, primary output index, node to position mapping,
      * and PI to node mapping.
      * @param fc A vector of nodes that precede the PO nodes.
-     * @param planar Only consider crossing-free paths.
      * @return A vector of tiles representing the possible positions for POs.
      */
     [[nodiscard]] coord_vec_type<ObstrLyt> get_possible_positions_pos(const ObstrLyt&                 layout,
                                                                       const placement_info<ObstrLyt>& place_info,
-                                                                      const fanin_container<tec_nt>&  fc,
-                                                                      const bool planar = false) noexcept
+                                                                      const fanin_container<tec_nt>&  fc) noexcept
     {
         coord_vec_type<ObstrLyt> possible_positions{};
 
@@ -1127,7 +1283,9 @@ class graph_oriented_layout_design_impl
         auto check_tile = [&](const uint64_t x, const uint64_t y)
         {
             const tile<ObstrLyt> tile{x, y, 0};
-            if (!check_path(layout, pre_t, tile, new_gate_location::DEST, planar).empty())
+            const auto check_straight_inverter = ps.straight_inverters && layout.is_inv(layout.get_node(pre_t));
+
+            if (!check_path(layout, pre_t, tile, new_gate_location::DEST, check_straight_inverter).empty())
             {
                 possible_positions.push_back(tile);
             }
@@ -1154,18 +1312,15 @@ class graph_oriented_layout_design_impl
      * @param layout The layout in which to find the possible positions for a single fan-in node.
      * @param place_info The placement context containing current node, primary output index, node to position mapping,
      * and PI to node mapping.
-     * @param num_expansions The maximum number of positions to be returned.
      * @param fc A vector of nodes that precede the single fanin node.
-     * @param planar Only consider crossing-free paths.
      * @return A vector of tiles representing the possible positions for a single fan-in node.
      */
     [[nodiscard]] coord_vec_type<ObstrLyt>
     get_possible_positions_single_fanin(ObstrLyt& layout, const placement_info<ObstrLyt>& place_info,
-                                        const uint64_t num_expansions, const fanin_container<tec_nt>& fc,
-                                        const bool planar = false) noexcept
+                                        const fanin_container<tec_nt>& fc) noexcept
     {
         coord_vec_type<ObstrLyt> possible_positions{};
-        possible_positions.reserve(num_expansions);
+        possible_positions.reserve(ps.num_vertex_expansions);
 
         uint64_t count_expansions = 0ul;
 
@@ -1176,13 +1331,14 @@ class graph_oriented_layout_design_impl
         const auto check_tile = [&](const uint64_t x, const uint64_t y) noexcept
         {
             const tile<ObstrLyt> new_pos{pre_t.x + x, pre_t.y + y, 0};
+            const auto check_straight_inverter = ps.straight_inverters && layout.is_inv(layout.get_node(pre_t));
 
-            if (!check_path(layout, pre_t, new_pos, new_gate_location::DEST, planar).empty())
+            if (!check_path(layout, pre_t, new_pos, new_gate_location::DEST, check_straight_inverter).empty())
             {
                 layout.resize({layout.x() + 1, layout.y() + 1, 1});
                 const tile<ObstrLyt> drain{layout.x(), layout.y(), 0};
 
-                if (!check_path(layout, new_pos, drain, new_gate_location::SRC, planar).empty())
+                if (!check_path(layout, new_pos, drain, new_gate_location::SRC).empty())
                 {
                     possible_positions.push_back(new_pos);
                     count_expansions++;
@@ -1202,7 +1358,7 @@ class graph_oriented_layout_design_impl
                 {
                     check_tile(x, y);
                 }
-                if (count_expansions >= num_expansions)
+                if (count_expansions >= ps.num_vertex_expansions)
                 {
                     return possible_positions;
                 }
@@ -1218,18 +1374,15 @@ class graph_oriented_layout_design_impl
      * @param layout The layout in which to find the possible positions for a double fan-in node.
      * @param place_info The placement context containing current node, primary output index, node to position mapping,
      * and PI to node mapping.
-     * @param num_expansions The maximum number of positions to be returned.
      * @param fc A vector of nodes that precede the double fanin node.
-     * @param planar Only consider crossing-free paths.
      * @return A vector of tiles representing the possible positions for a double fan-in node.
      */
     [[nodiscard]] coord_vec_type<ObstrLyt>
     get_possible_positions_double_fanin(ObstrLyt& layout, const placement_info<ObstrLyt>& place_info,
-                                        const uint64_t num_expansions, const fanin_container<tec_nt>& fc,
-                                        const bool planar = false) noexcept
+                                        const fanin_container<tec_nt>& fc) noexcept
     {
         coord_vec_type<ObstrLyt> possible_positions{};
-        possible_positions.reserve(num_expansions);
+        possible_positions.reserve(ps.num_vertex_expansions);
         uint64_t count_expansions = 0ul;
 
         const auto& pre1 = fc.fanin_nodes[0];
@@ -1245,8 +1398,9 @@ class graph_oriented_layout_design_impl
         auto check_tile = [&](uint64_t x, uint64_t y)
         {
             const tile<ObstrLyt> new_pos{min_x + x, min_y + y, 0};
+            auto check_straight_inverter = ps.straight_inverters && layout.is_inv(layout.get_node(pre1_t));
 
-            const auto path = check_path(layout, pre1_t, new_pos, new_gate_location::DEST, planar);
+            const auto path = check_path(layout, pre1_t, new_pos, new_gate_location::DEST, check_straight_inverter);
             if (!path.empty())
             {
                 for (const auto& el : path)
@@ -1254,12 +1408,13 @@ class graph_oriented_layout_design_impl
                     layout.obstruct_coordinate(el);
                 }
 
-                if (!check_path(layout, pre2_t, new_pos, new_gate_location::DEST, planar).empty())
+                check_straight_inverter = ps.straight_inverters && layout.is_inv(layout.get_node(pre2_t));
+                if (!check_path(layout, pre2_t, new_pos, new_gate_location::DEST, check_straight_inverter).empty())
                 {
                     layout.resize({layout.x() + 1, layout.y() + 1, 1});
                     const tile<ObstrLyt> drain{layout.x(), layout.y(), 0};
 
-                    if (!check_path(layout, new_pos, drain, new_gate_location::SRC, planar).empty())
+                    if (!check_path(layout, new_pos, drain, new_gate_location::SRC).empty())
                     {
                         possible_positions.push_back(new_pos);
                         count_expansions++;
@@ -1285,7 +1440,7 @@ class graph_oriented_layout_design_impl
                 {
                     check_tile(x, y);
                 }
-                if (count_expansions >= num_expansions)
+                if (count_expansions >= ps.num_vertex_expansions)
                 {
                     return possible_positions;
                 }
@@ -1313,18 +1468,18 @@ class graph_oriented_layout_design_impl
 
         if (ssg.network.is_pi(ssg.nodes_to_place[place_info.current_node]))
         {
-            return get_possible_positions_pis(layout, ssg.pi_locs, ssg.network.num_pis(), ssg.planar);
+            return get_possible_positions_pis(layout, ssg.pi_locs, ssg.network.num_pis());
         }
         if (ssg.network.is_po(ssg.nodes_to_place[place_info.current_node]))
         {
-            return get_possible_positions_pos(layout, place_info, fc, ssg.planar);
+            return get_possible_positions_pos(layout, place_info, fc);
         }
         if (fc.fanin_nodes.size() == 1)
         {
-            return get_possible_positions_single_fanin(layout, place_info, ssg.num_expansions, fc, ssg.planar);
+            return get_possible_positions_single_fanin(layout, place_info, fc);
         }
 
-        return get_possible_positions_double_fanin(layout, place_info, ssg.num_expansions, fc, ssg.planar);
+        return get_possible_positions_double_fanin(layout, place_info, fc);
     }
     /**
      * Validates the given layout based on the nodes in the network and their mappings in the node dictionary.
@@ -1344,7 +1499,7 @@ class graph_oriented_layout_design_impl
             layout.resize({layout.x() + 1, layout.y() + 1, 1});
             const tile<ObstrLyt> drain{layout.x(), layout.y(), 0};
 
-            const bool path_exists = !check_path(layout, t, drain, new_gate_location::DEST, ssg.planar).empty();
+            const bool path_exists = !check_path(layout, t, drain, new_gate_location::DEST).empty();
             layout.resize({layout.x() - 1, layout.y() - 1, 1});
 
             return path_exists;
@@ -1370,6 +1525,25 @@ class graph_oriented_layout_design_impl
                 {
                     return false;
                 }
+
+                const bool check_straight_inverter =
+                    layout.is_inv(layout.get_node(layout_tile)) && ps.straight_inverters;
+
+                if (check_straight_inverter)
+                {
+                    const tile<ObstrLyt> right_tile{layout_tile.x + 1, layout_tile.y, 0};
+                    const tile<ObstrLyt> bottom_tile{layout_tile.x, layout_tile.y + 1, 0};
+
+                    const auto fanin = layout.incoming_data_flow(layout_tile).front();
+                    if ((fanin.x == layout_tile.x) && !is_empty_tile_or_crossable(bottom_tile))
+                    {
+                        return false;
+                    }
+                    if ((fanin.y == layout_tile.y) && !is_empty_tile_or_crossable(right_tile))
+                    {
+                        return false;
+                    }
+                }
             }
 
             const bool two_dangling_fanouts = (layout.fanout_size(layout.get_node(layout_tile)) == 0) &&
@@ -1377,8 +1551,8 @@ class graph_oriented_layout_design_impl
 
             if (two_dangling_fanouts)
             {
-                tile<ObstrLyt> right_tile{layout_tile.x + 1, layout_tile.y, 0};
-                tile<ObstrLyt> bottom_tile{layout_tile.x, layout_tile.y + 1, 0};
+                const tile<ObstrLyt> right_tile{layout_tile.x + 1, layout_tile.y, 0};
+                const tile<ObstrLyt> bottom_tile{layout_tile.x, layout_tile.y + 1, 0};
 
                 if (!(is_empty_tile_or_crossable(right_tile) && is_empty_tile_or_crossable(bottom_tile)))
                 {
@@ -1396,18 +1570,16 @@ class graph_oriented_layout_design_impl
      * @param layout The layout in which to place the node.
      * @param node2pos A dictionary mapping nodes from the network to signals in the layout.
      * @param fc A vector of nodes that precede the single fanin node.
-     * @param planar Only consider crossing-free paths.
      */
     void route_single_input_node(const tile<ObstrLyt>& position, ObstrLyt& layout,
-                                 node_dict_type<ObstrLyt, tec_nt>& node2pos, const fanin_container<tec_nt>& fc,
-                                 const bool planar = false) noexcept
+                                 node_dict_type<ObstrLyt, tec_nt>& node2pos, const fanin_container<tec_nt>& fc) noexcept
     {
         const auto& pre   = fc.fanin_nodes[0];
         const auto  pre_t = static_cast<tile<ObstrLyt>>(node2pos[pre]);
 
         layout.move_node(layout.get_node(position), position, {});
 
-        const auto path = check_path(layout, pre_t, position, new_gate_location::NONE, planar);
+        const auto path = check_path(layout, pre_t, position, new_gate_location::NONE);
         assert(!path.empty());
 
         route_path(layout, path);
@@ -1424,11 +1596,9 @@ class graph_oriented_layout_design_impl
      * @param layout The layout in which to place the node.
      * @param node2pos A dictionary mapping nodes from the network to signals in the layout.
      * @param fc A vector of nodes that precede the double fanin node.
-     * @param planar Only consider crossing-free paths.
      */
     void route_double_input_node(const tile<ObstrLyt>& position, ObstrLyt& layout,
-                                 node_dict_type<ObstrLyt, tec_nt>& node2pos, const fanin_container<tec_nt>& fc,
-                                 const bool planar = false) noexcept
+                                 node_dict_type<ObstrLyt, tec_nt>& node2pos, const fanin_container<tec_nt>& fc) noexcept
     {
         const auto& pre1 = fc.fanin_nodes[0];
         const auto& pre2 = fc.fanin_nodes[1];
@@ -1438,7 +1608,7 @@ class graph_oriented_layout_design_impl
 
         layout.move_node(layout.get_node(position), position, {});
 
-        const auto path_1 = check_path(layout, pre1_t, position, new_gate_location::NONE, planar);
+        const auto path_1 = check_path(layout, pre1_t, position, new_gate_location::NONE);
         assert(!path_1.empty());
 
         for (const auto& el : path_1)
@@ -1446,7 +1616,7 @@ class graph_oriented_layout_design_impl
             layout.obstruct_coordinate(el);
         }
 
-        const auto path_2 = check_path(layout, pre2_t, position, new_gate_location::NONE, planar);
+        const auto path_2 = check_path(layout, pre2_t, position, new_gate_location::NONE);
         assert(!path_2.empty());
 
         for (const auto& el : path_2)
@@ -1476,6 +1646,14 @@ class graph_oriented_layout_design_impl
 
         if (ssg.network.is_pi(ssg.nodes_to_place[place_info.current_node]))
         {
+            if (position.x > layout.x())
+            {
+                layout.resize({position.x, layout.y(), layout.z()});
+            }
+            if (position.y > layout.y())
+            {
+                layout.resize({layout.x(), position.y, layout.z()});
+            }
             // place primary input node
             place_info.node2pos[ssg.nodes_to_place[place_info.current_node]] =
                 layout.move_node(place_info.pi2node[ssg.nodes_to_place[place_info.current_node]], position);
@@ -1499,7 +1677,7 @@ class graph_oriented_layout_design_impl
                     place(layout, position, ssg.network, ssg.nodes_to_place[place_info.current_node], a);
             }
 
-            route_single_input_node(position, layout, place_info.node2pos, fc, ssg.planar);
+            route_single_input_node(position, layout, place_info.node2pos, fc);
         }
         else
         {
@@ -1513,7 +1691,7 @@ class graph_oriented_layout_design_impl
             place_info.node2pos[ssg.nodes_to_place[place_info.current_node]] = place(
                 layout, position, ssg.network, ssg.nodes_to_place[place_info.current_node], a1, a2, fc.constant_fanin);
 
-            route_double_input_node(position, layout, place_info.node2pos, fc, ssg.planar);
+            route_double_input_node(position, layout, place_info.node2pos, fc);
         }
 
         place_info.current_node++;
@@ -1559,12 +1737,11 @@ class graph_oriented_layout_design_impl
      * Initializes the layout with minimum width
      *
      * @param min_layout_width The minimum width of the layout.
-     * @param planar Create planar layouts with a depth of 0.
      * @return The initialized layout.
      */
-    ObstrLyt initialize_layout(uint64_t min_layout_width, const bool planar = false)
+    ObstrLyt initialize_layout(uint64_t min_layout_width)
     {
-        const auto layout_depth = planar ? 0 : 1;
+        const auto layout_depth = ps.planar ? 0 : 1;
         Lyt        lyt{{min_layout_width - 1, 0, layout_depth}, twoddwave_clocking<Lyt>()};
         return obstruction_layout<Lyt>(lyt);
     }
@@ -1579,16 +1756,11 @@ class graph_oriented_layout_design_impl
     void adjust_layout_size(const tile<ObstrLyt>& position, ObstrLyt& layout, const search_space_graph<ObstrLyt>& ssg,
                             const placement_info<ObstrLyt>& place_info)
     {
-        const auto max_layout_width  = ssg.nodes_to_place.size();
-        const auto max_layout_height = ssg.nodes_to_place.size();
-
-        if (position.x == layout.x() && layout.x() < (max_layout_width - 1) &&
-            !ssg.network.is_po(ssg.nodes_to_place[place_info.current_node - 1]))
+        if (position.x == layout.x() && !ssg.network.is_po(ssg.nodes_to_place[place_info.current_node - 1]))
         {
             layout.resize({layout.x() + 1, layout.y(), layout.z()});
         }
-        if (position.y == layout.y() && layout.y() < (max_layout_height - 1) &&
-            !ssg.network.is_po(ssg.nodes_to_place[place_info.current_node - 1]))
+        if (position.y == layout.y() && !ssg.network.is_po(ssg.nodes_to_place[place_info.current_node - 1]))
         {
             layout.resize({layout.x(), layout.y() + 1, layout.z()});
         }
@@ -1634,7 +1806,7 @@ class graph_oriented_layout_design_impl
                             const search_space_graph<ObstrLyt>& ssg)
     {
         std::vector<std::pair<coord_vec_type<ObstrLyt>, double>> next_positions;
-        next_positions.reserve(2 * ssg.num_expansions);
+        next_positions.reserve(2 * ps.num_vertex_expansions);
 
         for (const auto& position : possible_positions)
         {
@@ -1687,16 +1859,16 @@ class graph_oriented_layout_design_impl
         const auto min_layout_width = ssg.network.num_pis();
 
         std::vector<std::pair<coord_vec_type<ObstrLyt>, double>> next_positions;
-        next_positions.reserve(2 * ssg.num_expansions);
+        next_positions.reserve(2 * ps.num_vertex_expansions);
 
-        auto layout = initialize_layout(min_layout_width, ssg.planar);
+        auto layout = initialize_layout(min_layout_width);
 
         auto                             pi2node = reserve_input_nodes(layout, ssg.network);
         node_dict_type<ObstrLyt, tec_nt> node2pos{ssg.network};
         placement_info<ObstrLyt>         place_info{0ul, 0ul, node2pos, pi2node};
 
         coord_vec_type<ObstrLyt> possible_positions{};
-        possible_positions.reserve(2 * ssg.num_expansions);
+        possible_positions.reserve(2 * ps.num_vertex_expansions);
 
         if (ssg.current_vertex.empty())
         {
@@ -1790,11 +1962,28 @@ class graph_oriented_layout_design_impl
                     }
                 }
 
-                fiction::post_layout_optimization_params plo_params{};
-                plo_params.optimize_pos_only   = true;
-                plo_params.planar_optimization = ssg.planar;
+                auto apply_plo = true;
+                if (ps.straight_inverters)
+                {
+                    layout.foreach_po(
+                        [&layout, &apply_plo](const auto& gate)
+                        {
+                            if (const auto coord = layout.get_tile(layout.get_node(gate));
+                                layout.is_inv(layout.get_node(layout.incoming_data_flow(coord).front())))
+                            {
+                                apply_plo = false;
+                            }
+                        });
+                }
 
-                fiction::post_layout_optimization(layout, plo_params);
+                if (apply_plo)
+                {
+                    fiction::post_layout_optimization_params plo_params{};
+                    plo_params.optimize_pos_only   = true;
+                    plo_params.planar_optimization = ps.planar;
+
+                    fiction::post_layout_optimization(layout, plo_params);
+                }
 
                 const auto bb_after_plo = fiction::bounding_box_2d(layout);
                 layout.resize({bb_after_plo.get_max().x, bb_after_plo.get_max().y, layout.z()});
@@ -1915,8 +2104,6 @@ class graph_oriented_layout_design_impl
             ++idx;  // move to next pattern element
 
             graph.cost_so_far[graph.current_vertex] = 0;
-            graph.num_expansions                    = ps.num_vertex_expansions;
-            graph.planar                            = ps.planar;
         }
     }
     /**

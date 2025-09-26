@@ -948,6 +948,7 @@ void adjust_tile(Lyt& lyt, const LytCpy& layout_copy, const WiringReductionLyt& 
     if (!(lyt.is_empty_tile(old_coord)) && (offset != 0))
     {
         const auto new_coord = determine_new_coord<Lyt, WiringReductionLyt>(wiring_reduction_lyt, x, y, z, offset);
+        lyt.move_node(lyt.get_node(new_coord), new_coord, {});
         std::vector<mockturtle::signal<Lyt>> signals{};
         signals.reserve(layout_copy.fanin_size(layout_copy.get_node(old_coord)));
 
@@ -968,24 +969,35 @@ void adjust_tile(Lyt& lyt, const LytCpy& layout_copy, const WiringReductionLyt& 
                 }
             });
 
-        // make sure PO does not die when moving it
-        if (lyt.is_po(lyt.get_node(old_coord)))
+        if (wiring_reduction_lyt.get_search_direction() == search_direction::HORIZONTAL)
         {
-            if ((wiring_reduction_lyt.get_search_direction() == search_direction::HORIZONTAL) &&
-                !lyt.is_empty_tile({new_coord.x + 1, new_coord.y, new_coord.z}) &&
-                lyt.has_western_incoming_signal({new_coord.x + 1, new_coord.y, new_coord.z}))
+            const auto east_of_new_coord = tile<Lyt>{new_coord.x + 1, new_coord.y};
+            if (!lyt.is_empty_tile(east_of_new_coord) && lyt.has_western_incoming_signal(east_of_new_coord))
             {
-                lyt.move_node(lyt.get_node({new_coord.x + 1, new_coord.y, new_coord.z}),
-                              {new_coord.x + 1, new_coord.y, new_coord.z}, {});
+                lyt.move_node(lyt.get_node(east_of_new_coord), east_of_new_coord, {});
             }
-            if ((wiring_reduction_lyt.get_search_direction() == search_direction::VERTICAL) &&
-                !lyt.is_empty_tile({new_coord.x, new_coord.y + 1, new_coord.z}) &&
-                lyt.has_northern_incoming_signal({new_coord.x, new_coord.y + 1, new_coord.z}))
+            const auto above_east_of_new_coord = lyt.above(east_of_new_coord);
+            if (!lyt.is_empty_tile(above_east_of_new_coord) && lyt.has_western_incoming_signal(above_east_of_new_coord))
             {
-                lyt.move_node(lyt.get_node({new_coord.x, new_coord.y + 1, new_coord.z}),
-                              {new_coord.x, new_coord.y + 1, new_coord.z}, {});
+                lyt.move_node(lyt.get_node(above_east_of_new_coord), above_east_of_new_coord, {});
             }
         }
+
+        if (wiring_reduction_lyt.get_search_direction() == search_direction::VERTICAL)
+        {
+            const auto south_of_new_coord = tile<Lyt>{new_coord.x, new_coord.y + 1, new_coord.z};
+            if (!lyt.is_empty_tile(south_of_new_coord) && lyt.has_northern_incoming_signal(south_of_new_coord))
+            {
+                lyt.move_node(lyt.get_node(south_of_new_coord), south_of_new_coord, {});
+            }
+            const auto above_south_of_new_coord = lyt.above(south_of_new_coord);
+            if (!lyt.is_empty_tile(above_south_of_new_coord) &&
+                lyt.has_northern_incoming_signal(above_south_of_new_coord))
+            {
+                lyt.move_node(lyt.get_node(above_south_of_new_coord), above_south_of_new_coord, {});
+            }
+        }
+
         // move the node to the new coordinates
         lyt.move_node(lyt.get_node(old_coord), new_coord, signals);
     }
@@ -1226,6 +1238,32 @@ void wiring_reduction(const Lyt& lyt, wiring_reduction_params ps = {}, wiring_re
         std::cout << "[e] the given layout has to be 2DDWave-clocked\n";
         return;
     }
+
+    // check that all PIs are at the left (x = 0) or top (y = 0) border
+    lyt.foreach_pi(
+        [&lyt](const auto& pi) noexcept
+        {
+            if (const auto tile = lyt.get_tile(pi);
+                !(lyt.is_at_northern_border(tile) || lyt.is_at_western_border(tile)))
+            {
+                std::cout << "[e] Invalid layout: All PIs must be located at the left (x = 0) or top (y = 0) border\n";
+                return;
+            }
+        });
+
+    // check all POs are at the right (x = lyt.x()) or bottom (y = lyt.y()) border
+    lyt.foreach_po(
+        [&lyt](const auto& po) noexcept
+        {
+            if (const auto tile = lyt.get_tile(lyt.get_node(po));
+                !(lyt.is_at_eastern_border(tile) || lyt.is_at_southern_border(tile)))
+            {
+                std::cout << fmt::format(
+                    "[e] Invalid layout: All POs must be located at the right (x = {}) or bottom (y = {}) border\n",
+                    lyt.x(), lyt.y());
+                return;
+            }
+        });
 
     // initialize stats for runtime measurement
     wiring_reduction_stats             st{};

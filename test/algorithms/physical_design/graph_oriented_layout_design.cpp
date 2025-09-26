@@ -171,6 +171,40 @@ TEST_CASE("Different parameters", "[graph-oriented-layout-design]")
         check_eq(ntk, *layout);
     }
 
+    SECTION("Straight inverters")
+    {
+        params.mode                  = graph_oriented_layout_design_params::effort_mode::MAXIMUM_EFFORT;
+        params.enable_multithreading = true;
+        params.straight_inverters    = true;
+
+        for (const auto& network :
+             {blueprints::mux21_network<technology_network>(), blueprints::inverter_network<technology_network>(),
+              blueprints::parity_network<technology_network>()})
+        {
+            const auto layout = graph_oriented_layout_design<gate_layout>(network, params, &stats);
+            REQUIRE(layout.has_value());
+            check_eq(network, *layout);
+
+            layout->foreach_gate(
+                [&layout](const auto& gate)
+                {
+                    if (layout->is_inv(gate))
+                    {
+                        const auto layout_tile = layout->get_tile(gate);
+                        const auto fanin       = layout->incoming_data_flow(layout_tile).front();
+                        const auto fanout      = layout->outgoing_data_flow(layout_tile).front();
+
+                        const bool vertical_straight_inverter = (fanin.x == layout_tile.x && layout_tile.x == fanout.x);
+                        const bool horizontal_straight_inverter =
+                            (fanin.y == layout_tile.y && layout_tile.y == fanout.y);
+                        const bool straight_inverter = vertical_straight_inverter || horizontal_straight_inverter;
+
+                        CHECK(straight_inverter);
+                    }
+                });
+        }
+    }
+
     params.return_first = false;
 
     SECTION("Full search (return_first = false)")
@@ -201,6 +235,30 @@ TEST_CASE("Different parameters", "[graph-oriented-layout-design]")
         REQUIRE(layout.has_value());
         check_eq(ntk, *layout);
         CHECK(layout->z() == 0);
+    }
+
+    SECTION("Randomize skip tiles PI placement")
+    {
+        params.mode                                = graph_oriented_layout_design_params::effort_mode::HIGH_EFFORT;
+        params.tiles_to_skip_between_pis           = 3;
+        params.randomize_tiles_to_skip_between_pis = true;
+        params.seed                                = 42;
+
+        const auto layout = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
+        REQUIRE(layout.has_value());
+        check_eq(ntk, *layout);
+    }
+
+    SECTION("Randomize skip tiles PI placement with zero value")
+    {
+        params.mode                                = graph_oriented_layout_design_params::effort_mode::HIGH_EFFORT;
+        params.tiles_to_skip_between_pis           = 0;
+        params.randomize_tiles_to_skip_between_pis = true;
+        params.seed                                = 42;
+
+        const auto layout = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
+        REQUIRE(layout.has_value());
+        check_eq(ntk, *layout);
     }
 }
 
@@ -266,6 +324,61 @@ TEST_CASE("Different cost objectives", "[graph-oriented-layout-design]")
 
         REQUIRE(layout.has_value());
         check_eq(ntk, *layout);
+    }
+}
+
+TEST_CASE("Skip tiles for PI placement", "[graph-oriented-layout-design]")
+{
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+
+    const auto ntk = blueprints::clpl<technology_network>();
+
+    graph_oriented_layout_design_stats  stats{};
+    graph_oriented_layout_design_params params{};
+
+    params.mode         = graph_oriented_layout_design_params::effort_mode::HIGH_EFFICIENCY;
+    params.return_first = true;
+
+    for (uint64_t skip = 0; skip < 5; ++skip)
+    {
+        SECTION(fmt::format("tiles_to_skip_between_pis = {}", skip))
+        {
+            params.tiles_to_skip_between_pis = skip;
+
+            const auto layout_opt = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
+            REQUIRE(layout_opt.has_value());
+            const auto& lyt = *layout_opt;
+            check_eq(ntk, lyt);
+
+            // collect PI coordinates along top (y=0) and left (x=0)
+            std::vector<uint64_t> top_x, left_y;
+            lyt.foreach_pi(
+                [&](auto const& gate)
+                {
+                    const auto c = lyt.get_tile(gate);
+                    if (c.y == 0)
+                        top_x.push_back(c.x);
+                    if (c.x == 0)
+                        left_y.push_back(c.y);
+                });
+
+            std::sort(top_x.begin(), top_x.end());
+            std::sort(left_y.begin(), left_y.end());
+
+            // check gaps between consecutive PIs on each edge
+            const auto min_gap = skip + 1;  // after placing a PI, leave `skip` empty tiles before next
+
+            for (size_t i = 1; i < top_x.size(); ++i)
+            {
+                CAPTURE(skip, top_x);
+                CHECK(top_x[i] >= top_x[i - 1] + min_gap);
+            }
+            for (size_t i = 1; i < left_y.size(); ++i)
+            {
+                CAPTURE(skip, left_y);
+                CHECK(left_y[i] >= left_y[i - 1] + min_gap);
+            }
+        }
     }
 }
 

@@ -5,8 +5,13 @@
 #include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 #include <fiction/algorithms/verification/equivalence_checking.hpp>               // SAT-based equivalence checking
 #include <fiction/io/network_reader.hpp>                                          // read networks from files
+#include <fiction/layouts/bounding_box.hpp>                                       // bounding box
+#include <fiction/layouts/cartesian_layout.hpp>                                   // Cartesian layout
+#include <fiction/layouts/clocked_layout.hpp>                                     // clocked layout
+#include <fiction/layouts/gate_level_layout.hpp>                                  // gate-level layout
+#include <fiction/layouts/tile_based_layout.hpp>                                  // tile-based layout
+#include <fiction/types.hpp>                                                      // tec_nt, tec_ptr
 
-#include <fmt/core.h>
 #include <fmt/format.h>  // output formatting
 #include <mockturtle/utils/stopwatch.hpp>
 
@@ -16,7 +21,7 @@
 #include <string>
 
 template <typename Ntk>
-Ntk read_ntk(const std::string& name)
+static Ntk read_ntk(const std::string& name)
 {
     fmt::print("[i] processing {}\n", name);
 
@@ -67,8 +72,7 @@ int main()  // NOLINT
     fiction::orthogonal_physical_design_stats orthogonal_stats{};
     fiction::wiring_reduction_stats           wiring_reduction_stats{};
 
-    static constexpr const uint64_t bench_select =
-        (fiction_experiments::trindade16 | fiction_experiments::fontes18) & ~fiction_experiments::clpl;
+    static constexpr const uint64_t bench_select = fiction_experiments::trindade16 | fiction_experiments::fontes18;
 
     for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
     {
@@ -101,9 +105,20 @@ int main()  // NOLINT
         // check equivalence
         const auto eq_stats = fiction::equivalence_checking<gate_lyt, gate_lyt>(layout_copy, gate_level_layout);
 
-        const std::string eq_result = eq_stats == fiction::eq_type::STRONG ? "STRONG" :
-                                      eq_stats == fiction::eq_type::WEAK   ? "WEAK" :
-                                                                             "NO";
+        std::string eq_result;
+
+        if (eq_stats == fiction::eq_type::STRONG)
+        {
+            eq_result = "STRONG";
+        }
+        else if (eq_stats == fiction::eq_type::WEAK)
+        {
+            eq_result = "WEAK";
+        }
+        else
+        {
+            eq_result = "NO";
+        }
 
         // calculate bounding box
         const auto bounding_box_after_wiring_reduction = fiction::bounding_box_2d(gate_level_layout);
