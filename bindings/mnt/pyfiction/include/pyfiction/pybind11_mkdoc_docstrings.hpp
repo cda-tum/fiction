@@ -403,9 +403,6 @@ positions in horizontal and vertical direction is taken into account.
 Template parameter ``Lyt``:
     Cell-level layout type.
 
-Template parameter ``AreaType``:
-    Type for area representation.
-
 Parameter ``lyt``:
     The cell-level layout whose area is desired.
 
@@ -428,9 +425,6 @@ taken into account.
 Template parameter ``Lyt``:
     Cell-level layout type.
 
-Template parameter ``AreaType``:
-    Type for area representation.
-
 Parameter ``bb``:
     The bounding box of the cell-level layout whose area is desired.
 
@@ -443,21 +437,37 @@ Parameter ``pst``:
 Returns:
     Area requirements in nm².)doc";
 
-static const char *__doc_fiction_area_params = R"doc()doc";
+static const char *__doc_fiction_area_params =
+R"doc(Parameters for area computation of cell-level layouts. Default
+parameters are loaded from the given cell technology.
 
-static const char *__doc_fiction_area_params_height = R"doc()doc";
+Template parameter ``Technology``:
+    Cell technology.)doc";
 
-static const char *__doc_fiction_area_params_hspace = R"doc(Horizontal and vertical spacing between cells.)doc";
+static const char *__doc_fiction_area_params_height = R"doc(Height of each cell.)doc";
 
-static const char *__doc_fiction_area_params_vspace = R"doc()doc";
+static const char *__doc_fiction_area_params_hspace = R"doc(Horizontal spacing between cells.)doc";
 
-static const char *__doc_fiction_area_params_width = R"doc(Width and height of each cell.)doc";
+static const char *__doc_fiction_area_params_vspace = R"doc(Vertical spacing between cells.)doc";
 
-static const char *__doc_fiction_area_stats = R"doc()doc";
+static const char *__doc_fiction_area_params_width = R"doc(Width of each cell.)doc";
 
-static const char *__doc_fiction_area_stats_area = R"doc(Area requirements in nm².)doc";
+static const char *__doc_fiction_area_stats =
+R"doc(Statistics class to store area-related information including width,
+height, and area of a layout. Additionally, it provides a method to
+print a formatted report of these statistics to an output stream.)doc";
 
-static const char *__doc_fiction_area_stats_report = R"doc()doc";
+static const char *__doc_fiction_area_stats_area = R"doc(Layout area in nm².)doc";
+
+static const char *__doc_fiction_area_stats_height = R"doc(Layout height in nm.)doc";
+
+static const char *__doc_fiction_area_stats_report =
+R"doc(Prints a report of the area statistics to the given output stream.
+
+Parameter ``out``:
+    Output stream to write the report to. Defaults to `std::cout`.)doc";
+
+static const char *__doc_fiction_area_stats_width = R"doc(Layout width in nm.)doc";
 
 static const char *__doc_fiction_aspect_ratio_iterator =
 R"doc(An iterator type that iterates over increasingly larger 2D aspect
@@ -17248,11 +17258,6 @@ the layout. Each exact ground state simulation has exponential
 complexity in of itself. Therefore, the algorithm is only feasible for
 small layouts with few inputs.
 
-This flavor of operational domain computation was proposed in
-\"Reducing the Complexity of Operational Domain Computation in Silicon
-Dangling Bond Logic\" by M. Walter, J. Drewniok, S. S. H. Ng, K.
-Walus, and R. Wille in NANOARCH 2023.
-
 Template parameter ``Lyt``:
     SiDB cell-level layout type.
 
@@ -17392,15 +17397,15 @@ Template parameter ``TT``:
 Parameter ``lyt``:
     Layout to compute the operational domain for.
 
-Parameter ``spec``:
-    Expected vector of truth tables of the layout. Each truth table
-    represents an output of the Boolean function.
+Parameter ``tt``:
+    Expected Boolean function of the lyt given as a multi-output truth
+    table.
 
-Parameter ``params``:
-    Operational domain computation parameters.
+Parameter ``ps``:
+    Parameters for the operational domain computation.
 
-Parameter ``stats``:
-    Operational domain computation statistics.
+Parameter ``st``:
+    Statistics of the process.
 
 Returns:
     The operational domain of the layout.
