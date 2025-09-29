@@ -246,13 +246,13 @@ mockturtle::names_view<Ntk> c17()
     const auto x5 = ntk.create_pi("5");
     const auto x6 = ntk.create_pi("6");
 
-    const auto a1    = ntk.create_and(x4, x1);
-    const auto a2    = ntk.create_and(x3, x5);
+    const auto a1  = ntk.create_and(x4, x1);
+    const auto a2  = ntk.create_and(x3, x5);
     const auto na2 = ntk.create_not(a2);
-    const auto a3    = ntk.create_and(na2, x2);
-    const auto a4    = ntk.create_and(na2, x6);
-    const auto o1    = ntk.create_or(a3, a4);
-    const auto o2    = ntk.create_or(a1, a3);
+    const auto a3  = ntk.create_and(na2, x2);
+    const auto a4  = ntk.create_and(na2, x6);
+    const auto o1  = ntk.create_or(a3, a4);
+    const auto o2  = ntk.create_or(a1, a3);
 
     ntk.create_po(o1, "po1");
     ntk.create_po(o2, "po2");
@@ -322,280 +322,6 @@ struct cp_and_tp
 };
 
 template <typename Lyt>
-uint64_t critical_path_length_grid(const Lyt& lyt)
-{
-    static_assert(fiction::is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
-
-    using tile_t = fiction::tile<Lyt>;
-
-    // reachability cache: tile  ➜  1 = already explored
-    phmap::flat_hash_set<tile_t> visited;
-
-    uint64_t crit_len = 0;
-
-    /* ---------- 1. iterate over every primary output ---------- */
-    lyt.foreach_po(
-        [&](const auto& po)
-        {
-            // BFS queue holds <current tile , accumulated geometric length>
-            std::queue<std::pair<tile_t, uint64_t>> q;
-            q.emplace(po, 0);
-            visited.insert(static_cast<tile_t>(po));
-
-            /* ---------- 2. reverse walk until we hit the driving PI ---------- */
-            while (!q.empty())
-            {
-                auto [t, len] = q.front();
-                q.pop();
-
-                /* 2a. PI reached → update candidate for critical path length */
-                if (lyt.is_pi_tile(t))
-                {
-                    crit_len = std::max(crit_len, len);
-                    continue;  // done with this branch
-                }
-
-                /* 2b. enqueue all fan-ins that have not been explored yet */
-                for (const tile_t& src : lyt.incoming_data_flow(t))
-                {
-                    if (visited.insert(src).second)  // 1st time we see this tile?
-                    {
-                        // add Manhattan distance from t to src (|Δx|+|Δy|) to current length
-                        const uint64_t step = std::abs(int(src.x) - int(t.x)) + std::abs(int(src.y) - int(t.y));
-
-                        q.emplace(src, len + step);
-                    }
-                }
-            }
-        });
-
-    return crit_len + 1;  // ← critical path in *tiles*
-}
-
-template <typename Lyt>
-auto path_lengths_grid(const Lyt& lyt)
-{
-    static_assert(fiction::is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
-
-    using tile_t = fiction::tile<Lyt>;
-    using node_t = mockturtle::node<Lyt>;
-
-    // for each output on vector entry with
-    //   first:  the length of the longest path,
-    //   second: a pair of vectors: {PI node IDs}, {corresponding path lengths}
-    std::vector<std::pair<uint64_t, std::pair<std::vector<node_t>, std::vector<uint64_t>>>> paths_per_output;
-
-    // Iterate over every primary output
-    lyt.foreach_po(
-        [&](const auto& po)
-        {
-            tile_t out_tile = static_cast<tile_t>(po);
-            node_t po_node  = static_cast<node_t>(po);
-
-            // Track visited tiles
-            phmap::flat_hash_set<tile_t> visited;
-
-            // BFS queue: <current tile, accumulated distance>
-            std::queue<std::pair<tile_t, uint64_t>> q;
-            q.emplace(out_tile, 0);
-            visited.insert(out_tile);
-
-            // Temporary storage of PI nodes and their path lengths
-            std::vector<node_t>   pi_nodes;
-            std::vector<uint64_t> pi_lengths;
-
-            // Reverse-walk until reaching all PIs
-            while (!q.empty())
-            {
-                auto [t, len] = q.front();
-                q.pop();
-
-                if (lyt.is_pi_tile(t))
-                {
-                    // Record this PI's node ID and length (+1 counts the PI tile)
-                    pi_nodes.push_back(lyt.get_node(t));
-                    pi_lengths.push_back(len + 1);
-                    continue;
-                }
-
-                // Explore all fan-in tiles
-                for (const tile_t& src : lyt.incoming_data_flow(t))
-                {
-                    if (visited.insert(src).second)
-                    {
-                        uint64_t step = std::abs(int(src.x) - int(t.x)) + std::abs(int(src.y) - int(t.y));
-                        q.emplace(src, len + step);
-                    }
-                }
-            }
-
-            // Determine the longest path length
-            uint64_t max_len = 0;
-            if (!pi_lengths.empty())
-            {
-                max_len = *std::max_element(pi_lengths.begin(), pi_lengths.end());
-            }
-
-            // Store for this output
-            paths_per_output.push_back({max_len, {std::move(pi_nodes), std::move(pi_lengths)}});
-        });
-
-    return paths_per_output;
-}
-
-/**
- * Compute per-PI slack amounts given per-PO path data.
- * @param paths_per_output  A vector per-output, where each entry holds:
- *   - first:  u_x = the (original) max_path length for PO x
- *   - second: a pair of:
- *       * vector<node_t>    pi_ids = the PI node IDs feeding PO x
- *       * vector<uint64_t>  lens   = the corresponding path lengths ℓ_{i,x}
- * @return  map from each PI node to its computed slack s_i
- */
-template <typename Lyt>
-std::unordered_map<mockturtle::node<Lyt>, uint64_t> compute_slacks(
-    const std::vector<std::pair<uint64_t, std::pair<std::vector<mockturtle::node<Lyt>>, std::vector<uint64_t>>>>&
-        paths_per_output)
-{
-    const size_t P = paths_per_output.size();
-
-    // u[x] = current adjusted max_path for output x
-    std::vector<uint64_t> u(P);
-    // per-PO PI lists and lengths
-    std::vector<std::vector<mockturtle::node<Lyt>>> pi_ids(P);
-    std::vector<std::vector<uint64_t>>              lens(P);
-
-    // initialize from input
-    for (size_t x = 0; x < P; ++x)
-    {
-        u[x]      = paths_per_output[x].first;
-        pi_ids[x] = paths_per_output[x].second.first;
-        lens[x]   = paths_per_output[x].second.second;
-    }
-
-    // slack map: s[i] = current best guess for PI i
-    std::unordered_map<mockturtle::node<Lyt>, uint64_t> s;
-
-    // initial slack estimates
-    for (size_t x = 0; x < P; ++x)
-    {
-        for (size_t j = 0; j < pi_ids[x].size(); ++j)
-        {
-            auto     i     = pi_ids[x][j];
-            uint64_t l     = lens[x][j];
-            uint64_t slack = (u[x] >= l ? u[x] - l : 0);
-            auto     it    = s.find(i);
-            if (it == s.end() || slack > it->second)
-                s[i] = slack;
-        }
-    }
-
-    // iterative fixpoint
-    bool changed = true;
-    while (changed)
-    {
-        changed = false;
-
-        // A) adjust each u[x]
-        for (size_t x = 0; x < P; ++x)
-        {
-            uint64_t new_u = 0;
-            for (size_t j = 0; j < pi_ids[x].size(); ++j)
-            {
-                auto     i    = pi_ids[x][j];
-                uint64_t l    = lens[x][j];
-                uint64_t cand = s[i] + l;
-                new_u         = std::max(new_u, cand);
-            }
-            if (new_u > u[x])
-            {
-                u[x]    = new_u;
-                changed = true;
-            }
-        }
-
-        // B) adjust each s[i]
-        for (size_t x = 0; x < P; ++x)
-        {
-            for (size_t j = 0; j < pi_ids[x].size(); ++j)
-            {
-                auto     i     = pi_ids[x][j];
-                uint64_t l     = lens[x][j];
-                uint64_t slack = (u[x] >= l ? u[x] - l : 0);
-                auto     it    = s.find(i);
-                if (it == s.end() || slack > it->second)
-                {
-                    s[i]    = slack;
-                    changed = true;
-                }
-            }
-        }
-    }
-
-    return s;
-}
-
-template <typename Lyt>
-std::pair<uint64_t, uint64_t>
-compute_layout_extension(const Lyt& gate_lyt, const std::unordered_map<mockturtle::node<Lyt>, uint64_t>& slacks,
-                         std::unordered_map<mockturtle::node<Lyt>, uint64_t>& border_properties)
-{
-    uint64_t              max_x_ext    = 0;
-    uint64_t              max_y_ext    = 0;
-    uint64_t              corner_slack = 0;
-    mockturtle::node<Lyt> corner_node;
-    bool                  has_corner = false;
-
-    // First pass: handle pure-border PIs and capture the corner PI
-    for (const auto& entry : slacks)
-    {
-        auto     pi_node = entry.first;
-        uint64_t slack   = entry.second;
-
-        auto tile     = gate_lyt.get_tile(pi_node);
-        bool at_north = gate_lyt.is_at_northern_border(tile);
-        bool at_west  = gate_lyt.is_at_western_border(tile);
-
-        if (at_north && !at_west)
-        {
-            max_y_ext                  = std::max(max_y_ext, slack);
-            border_properties[pi_node] = 0;
-        }
-        else if (at_west && !at_north)
-        {
-            max_x_ext                  = std::max(max_x_ext, slack);
-            border_properties[pi_node] = 1;
-        }
-        else if (at_north && at_west)
-        {
-            corner_slack = slack;
-            has_corner   = true;
-            corner_node  = pi_node;
-        }
-    }
-
-    // Second pass: decide where to apply the corner PI’s slack
-    if (has_corner)
-    {
-        uint64_t dx = (corner_slack > max_x_ext) ? (corner_slack - max_x_ext) : 0;
-        uint64_t dy = (corner_slack > max_y_ext) ? (corner_slack - max_y_ext) : 0;
-
-        if (dx < dy)
-        {
-            max_x_ext                      = std::max(max_x_ext, corner_slack);
-            border_properties[corner_node] = 1;
-        }
-        else
-        {
-            max_y_ext                      = std::max(max_y_ext, corner_slack);
-            border_properties[corner_node] = 0;
-        }
-    }
-
-    return {max_x_ext, max_y_ext};
-}
-
-template <typename Lyt>
 void move_nodes(Lyt& gate_lyt, fiction::tile<Lyt> tile,
                 std::unordered_map<uint64_t, std::vector<mockturtle::signal<Lyt>>>& relations, uint64_t dx, uint64_t dy,
                 bool dz = false)
@@ -615,50 +341,99 @@ void move_nodes(Lyt& gate_lyt, fiction::tile<Lyt> tile,
 }
 
 template <typename Lyt>
-std::unordered_map<mockturtle::node<Lyt>, uint8_t> get_po_border_orientation_map(const Lyt& gate_lyt)
+auto compute_slacks_and_layout_extension(Lyt& gate_lyt)
 {
-    static_assert(fiction::is_gate_level_layout_v<Lyt>, "Lyt must be a gate-level layout");
+    using node = mockturtle::node<Lyt>;
 
-    std::unordered_map<mockturtle::node<Lyt>, uint8_t> po_orientation;
+    // Save orientations of POs and PIs
+    std::unordered_map<node, uint8_t> border_properties;
 
-    gate_lyt.foreach_po(
-        [&](const auto& po)
+    // Handle PIs
+    std::unordered_map<node, uint64_t> slack_pis{};
+    uint64_t                           x_slack_pi   = 0;
+    uint64_t                           y_slack_pi   = 0;
+    uint64_t                           min_diagonal = 0;
+
+    // First pass: find the minimum diagonal distance among all PIs
+    gate_lyt.foreach_pi(
+        [&min_diagonal](const auto& pi)
         {
-            const auto po_node = gate_lyt.get_node(po);
-            const auto po_tile = static_cast<fiction::tile<Lyt>>(po);
+            const auto pi_tile = static_cast<fiction::tile<Lyt>>(pi);
+            const auto diag    = static_cast<uint64_t>(pi_tile.x + pi_tile.y);
+            min_diagonal       = std::min(min_diagonal, diag);
+        });
 
-            if (gate_lyt.is_at_eastern_border(po_tile))
+    // Second pass: compute slacks and per-node slack values for PIs
+    gate_lyt.foreach_pi(
+        [&gate_lyt, &slack_pis, &x_slack_pi, &y_slack_pi, &min_diagonal, &border_properties](const auto& pi)
+        {
+            const auto pi_tile = gate_lyt.get_tile(pi);
+            const auto diag    = static_cast<uint64_t>(pi_tile.x + pi_tile.y);
+            const auto slack   = diag - min_diagonal;
+
+            slack_pis[pi] = slack;
+
+            if (gate_lyt.is_at_western_border(pi_tile))
             {
-                po_orientation[po_node] = 0;  // East
+                x_slack_pi      = std::max(x_slack_pi, slack);
+                border_properties[pi] = 0;
             }
-            else if (gate_lyt.is_at_southern_border(po_tile))
+            else if (gate_lyt.is_at_northern_border(pi_tile))
             {
-                po_orientation[po_node] = 1;  // South
-            }
-            else
-            {
-                // Optional: warn or assign an invalid marker if neither border applies
-                // po_orientation[po_node] = 255;
+                y_slack_pi      = std::max(y_slack_pi, slack);
+                border_properties[pi] = 1;
             }
         });
 
-    return po_orientation;
+    // Handle POs
+    std::unordered_map<node, uint64_t> slack_pos{};
+    uint64_t                           x_slack_po   = 0;
+    uint64_t                           y_slack_po   = 0;
+    uint64_t                           max_diagonal = 0;
+
+    // First pass: find the maximum diagonal distance among all POs
+    gate_lyt.foreach_po(
+        [&max_diagonal](const auto& po)
+        {
+            const auto po_tile = static_cast<fiction::tile<Lyt>>(po);
+            const auto diag    = static_cast<uint64_t>(po_tile.x + po_tile.y);
+            max_diagonal       = std::max(max_diagonal, diag);
+        });
+
+    // Second pass: compute slacks and per-node slack values for POs
+    gate_lyt.foreach_po(
+        [&gate_lyt, &slack_pos, &max_diagonal, &x_slack_po, &y_slack_po, &border_properties](const auto& po)
+        {
+            const auto po_node = gate_lyt.get_node(po);
+            const auto po_tile = static_cast<fiction::tile<Lyt>>(po);
+            const auto diag    = static_cast<uint64_t>(po_tile.x + po_tile.y);
+            const auto slack   = max_diagonal - diag;
+
+            slack_pos[po_node] = slack;
+
+            if (gate_lyt.is_at_eastern_border(po_tile))
+            {
+                x_slack_po           = std::max(x_slack_po, slack);
+                border_properties[po_node] = 2;
+            }
+            else if (gate_lyt.is_at_southern_border(po_tile))
+            {
+                y_slack_po           = std::max(y_slack_po, slack);
+                border_properties[po_node] = 3;
+            }
+        });
+
+    const auto x_extension = static_cast<uint32_t>(x_slack_pi + x_slack_po);
+    const auto y_extension = static_cast<uint32_t>(y_slack_pi + y_slack_po);
+
+    return std::tuple{slack_pis,  slack_pos,   x_slack_pi,  y_slack_pi, x_slack_po,
+                      y_slack_po, x_extension, y_extension, border_properties};
 }
 
 template <typename Lyt>
-void synchronize_pis_pos(Lyt& gate_lyt)
+void move_and_extend_layout(Lyt& gate_lyt, uint64_t x_extension, uint64_t y_extension, uint64_t x_slack_pi,
+                            uint64_t y_slack_pi)
 {
-    const auto                                          paths          = path_lengths_grid(gate_lyt);
-    auto                                                slacks         = compute_slacks<Lyt>(paths);
-    auto                                                po_orientation = get_po_border_orientation_map(gate_lyt);
-    std::unordered_map<mockturtle::node<Lyt>, uint64_t> border_properties;
-    const auto extension   = compute_layout_extension(gate_lyt, slacks, border_properties);
-    const auto x_extension = extension.first;
-    const auto y_extension = extension.second;
-
-    const auto orig_x = gate_lyt.x();
-    const auto orig_y = gate_lyt.y();
-
     // first save the old relations
     std::unordered_map<uint64_t, std::vector<mockturtle::signal<Lyt>>> fanin_relations;
     gate_lyt.foreach_node(
@@ -669,18 +444,18 @@ void synchronize_pis_pos(Lyt& gate_lyt)
             fanin_relations[n] = fanins;
         });
 
-    for (auto x = static_cast<int64_t>(orig_x); x >= 0; --x)
+    for (auto x = static_cast<int64_t>(gate_lyt.x()); x >= 0; --x)
     {
-        for (auto y = static_cast<int64_t>(orig_y); y >= 0; --y)
+        for (auto y = static_cast<int64_t>(gate_lyt.y()); y >= 0; --y)
         {
             fiction::tile<Lyt> tile = {x, y};
 
-            move_nodes(gate_lyt, tile, fanin_relations, x_extension, y_extension);
+            move_nodes(gate_lyt, tile, fanin_relations, x_slack_pi, y_slack_pi);
 
             ++tile.z;
             if (gate_lyt.get_node(tile))
             {
-                move_nodes(gate_lyt, tile, fanin_relations, x_extension, y_extension, true);
+                move_nodes(gate_lyt, tile, fanin_relations, x_slack_pi, y_slack_pi, true);
             }
         }
     }
@@ -693,19 +468,27 @@ void synchronize_pis_pos(Lyt& gate_lyt)
             gate_lyt.connect(fi, node);
         }
     }
+    gate_lyt.resize({gate_lyt.x() + x_extension, gate_lyt.y() + y_extension, gate_lyt.z()});
+}
 
-    for (const auto& entry : slacks)
+template <typename Lyt>
+void move_and_reconnect_pis_and_pos(Lyt& gate_lyt, std::unordered_map<mockturtle::node<Lyt>, uint64_t> slack_pis,
+                                    std::unordered_map<mockturtle::node<Lyt>, uint64_t> slack_pos,
+                                    std::unordered_map<mockturtle::node<Lyt>, uint8_t>  border_properties)
+{
+    // Handle Pis
+    for (const auto& entry : slack_pis)
     {
         const auto pi_node = entry.first;
         const auto slack   = entry.second;
 
-        if(slack == 0)
+        if (slack == 0)
         {
             continue;
         }
 
-        // wire this PI north
-        if (border_properties[pi_node] == 0)
+        // move this PI north and wire south to old position
+        if (border_properties[pi_node] == 1)
         {
             auto t     = gate_lyt.get_tile(pi_node);
             auto new_t = t;
@@ -714,8 +497,8 @@ void synchronize_pis_pos(Lyt& gate_lyt)
             ++t.y;
             fiction::detail::wire_south(gate_lyt, new_t, t);
         }
-        // wire this PI west
-        else if (border_properties[pi_node] == 1)
+        // move this PI west and wire east to old position
+        else if (border_properties[pi_node] == 0)
         {
             auto t     = gate_lyt.get_tile(pi_node);
             auto new_t = t;
@@ -724,91 +507,67 @@ void synchronize_pis_pos(Lyt& gate_lyt)
             ++t.x;
             fiction::detail::wire_east(gate_lyt, new_t, t);
         }
-        if(gate_lyt.is_dead(pi_node))
+        if (gate_lyt.is_dead(pi_node))
         {
             gate_lyt.revive_from_dead(pi_node);
         }
     }
 
-    // also synchronize the POs
-    uint64_t x_slack_po   = 0;
-    uint64_t y_slack_po   = 0;
-    uint64_t max_diagonal = 0;
-    gate_lyt.foreach_po(
-        [&max_diagonal](const auto& po)
+    // handle pos
+    for (const auto& entry : slack_pos)
+    {
+        const auto po_node = entry.first;
+        const auto slack   = entry.second;
+
+        if (slack == 0)
         {
-            auto po_tile = static_cast<fiction::tile<Lyt>>(po);
-            max_diagonal = std::max(max_diagonal, static_cast<uint64_t>(po_tile.x + po_tile.y));
-        });
+            continue;
+        }
 
-    gate_lyt.foreach_po(
-        [&gate_lyt, &max_diagonal, &po_orientation, &x_slack_po, &y_slack_po](const auto& po)
+        std::vector<mockturtle::signal<Lyt>> fanin{};
+        gate_lyt.foreach_fanin(po_node,
+                               [&fanin](auto const& fi)
+                               {
+                                   fanin.push_back(fi);
+                               });
+
+        // move this PO south and wire south to new position
+        if (border_properties[po_node] == 3)
         {
-            const auto po_node     = gate_lyt.get_node(po);
-            auto       po_tile     = static_cast<fiction::tile<Lyt>>(po);
-            uint64_t   po_diagonal = static_cast<uint64_t>(po_tile.x + po_tile.y);
-            const auto slack       = max_diagonal - po_diagonal;
+            auto t     = gate_lyt.get_tile(po_node);
+            auto new_t = t;
+            new_t.y += slack;
+            gate_lyt.move_node(po_node, new_t);
+            auto sig_buf = gate_lyt.create_buf(fanin[0], t);
+            auto buf_tile = gate_lyt.get_tile(gate_lyt.get_node(sig_buf));
+            auto sig = fiction::detail::wire_south(gate_lyt, buf_tile, new_t);
+            gate_lyt.connect(sig, po_node);
+        }
+        // move this PO east and wire east to new position
+        else if (border_properties[po_node] == 2)
+        {
+            auto t     = gate_lyt.get_tile(po_node);
+            auto new_t = t;
+            new_t.x += slack;
+            gate_lyt.move_node(po_node, new_t);
+            auto sig_buf = gate_lyt.create_buf(fanin[0], t);
+            auto buf_tile = gate_lyt.get_tile(gate_lyt.get_node(sig_buf));
+            auto sig = fiction::detail::wire_east(gate_lyt, t, new_t);
+            gate_lyt.connect(sig, po_node);
+        }
+    }
+}
 
-            if (slack == 0)
-            {
-                return;
-            }
-
-            std::vector<mockturtle::node<Lyt>> fanins{};
-            gate_lyt.foreach_fanin(po_node,
-                                   [&gate_lyt, &fanins](const auto& fi) { fanins.push_back(gate_lyt.get_node(fi)); });
-
-            if (po_orientation[po_node] == 0)
-            {
-                x_slack_po = std::max(x_slack_po, slack);
-                auto new_t = po_tile;
-                new_t.x += slack;
-                gate_lyt.move_node(po_node, new_t);
-
-                const auto fanin_tile = gate_lyt.get_tile(fanins[0]);
-                if (fanin_tile.x < po_tile.x)
-                {
-                    ++po_tile.x;
-                    fiction::detail::wire_east(gate_lyt, fanin_tile, po_tile);
-                    --po_tile.x;
-                }
-                else
-                {
-                    ++po_tile.y;
-                    fiction::detail::wire_south(gate_lyt, fanin_tile, po_tile);
-                    --po_tile.y;
-                }
-                const auto sig = fiction::detail::wire_east(gate_lyt, po_tile, new_t);
-
-                gate_lyt.connect(sig, po_node);
-            }
-            else if (po_orientation[po_node] == 1)
-            {
-                y_slack_po = std::max(y_slack_po, slack);
-                auto new_t = po_tile;
-                new_t.y += slack;
-                gate_lyt.move_node(po_node, new_t);
-
-                const auto fanin_tile = gate_lyt.get_tile(fanins[0]);
-                if (fanin_tile.x < po_tile.x)
-                {
-                    ++po_tile.x;
-                    fiction::detail::wire_east(gate_lyt, fanin_tile, po_tile);
-                    --po_tile.x;
-                }
-                else
-                {
-                    ++po_tile.y;
-                    fiction::detail::wire_south(gate_lyt, fanin_tile, po_tile);
-                    --po_tile.y;
-                }
-                const auto sig = fiction::detail::wire_south(gate_lyt, po_tile, new_t);
-
-                gate_lyt.connect(sig, po_node);
-            }
-        });
-
-    gate_lyt.resize({gate_lyt.x() + x_extension + x_slack_po, gate_lyt.y() + y_extension + y_slack_po, 1});
+template <typename Lyt>
+void synchronize_pis_pos(Lyt& gate_lyt)
+{
+    // Returns [slack_pis, slack_pos, x_slack_pi, y_slack_pi, x_slack_po, y_slack_po, x_extension, y_extension,
+    // border_properties]
+    auto value_container = compute_slacks_and_layout_extension(gate_lyt);
+    move_and_extend_layout(gate_lyt, std::get<6>(value_container), std::get<7>(value_container),
+                           std::get<2>(value_container), std::get<3>(value_container));
+    move_and_reconnect_pis_and_pos(gate_lyt, std::get<0>(value_container), std::get<1>(value_container),
+                                   std::get<8>(value_container));
 }
 
 int main()  // NOLINT
@@ -849,10 +608,10 @@ int main()  // NOLINT
 
     for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
     {
-        //auto benchmark_network = read_ntk<fiction::tec_nt>(benchmark);
+        // auto benchmark_network = read_ntk<fiction::tec_nt>(benchmark);
 
-        std::string bench_name = "c17";
-        auto benchmark_network = c17<fiction::tec_nt>();
+        std::string bench_name        = "half_adder";
+        auto        benchmark_network = half_adder<fiction::tec_nt>();
 
         fiction::debug::write_dot_network(benchmark_network);
 
@@ -868,9 +627,9 @@ int main()  // NOLINT
         fiction::graph_oriented_layout_design_params graph_oriented_layout_design_params{};
         graph_oriented_layout_design_params.mode =
             fiction::graph_oriented_layout_design_params::effort_mode::MAXIMUM_EFFORT;
-        graph_oriented_layout_design_params.return_first = true;
+        graph_oriented_layout_design_params.return_first          = true;
         graph_oriented_layout_design_params.enable_multithreading = true;
-        graph_oriented_layout_design_params.planar = true;
+        graph_oriented_layout_design_params.planar                = true;
 
         auto gate_layout_opt = fiction::graph_oriented_layout_design<gate_layout, fiction::tec_nt>(
             benchmark_network, graph_oriented_layout_design_params, &graph_oriented_layout_design_stats);
@@ -889,6 +648,7 @@ int main()  // NOLINT
         fiction::debug::write_dot_layout(gate_lyt, "gate_lyt");
 
         synchronize_pis_pos(gate_lyt);
+        // synchronize_pis_pos_old(gate_lyt);
 
         fiction::debug::write_dot_layout(gate_lyt, "gate_lyt_moved");
 

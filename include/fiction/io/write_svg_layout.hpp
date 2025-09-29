@@ -1,5 +1,5 @@
 //
-// Created by sophia on 12/30/18.
+// Created by sophia on 30.12.18.
 //
 
 #ifndef FICTION_WRITE_SVG_LAYOUT_HPP
@@ -1301,6 +1301,7 @@ class write_mol_qca_layout_svg_impl
             {
                 cell_description = svg::MOL_QCA_VIA;
             }
+            // crossings are not yet implemented in this technology
             /*else if (const auto ac = lyt.above(c), bc = lyt.below(c);
                      ((c != ac) && !lyt.is_empty_cell(ac)) || ((c != bc) && lyt.is_empty_cell(bc)))
             {
@@ -1396,6 +1397,7 @@ class write_mol_qca_layout_svg_impl
 
     /**
      * Generates an SVG string representing the tile-based clocked cell layout and appends it to the output stream.
+     * Unused.
      */
     void generate_tile_based_svg()
     {

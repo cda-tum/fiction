@@ -18,8 +18,8 @@ namespace fiction
 {
 
 /**
- * A concrete molQCA gate library was proposed by the Politecnico di Torino and is based on simulations using the SCERPA
- * tool. Tiles in the molQCA library are \f$10 \times 10\f$ molQCA cells.
+ * This concrete molQCA gate library was proposed by the Politecnico di Torino and is based on physical simulations
+ * using the SCERPA tool. Tiles in the molQCA library are \f$10 \times 10\f$ molQCA cells.
  */
 class molecular_qca_library : public fcn_gate_library<mol_qca_technology, 10, 10>
 {
@@ -53,10 +53,6 @@ class molecular_qca_library : public fcn_gate_library<mol_qca_technology, 10, 10
                     {
                         return FANOUT_MAP.at(p);
                     }
-                    /*if (lyt.fanout_size(n) == 3)
-                    {
-                        return FAN_OUT_1_3;
-                    }*/
                 }
             }
             if constexpr (fiction::has_is_buf_v<GateLyt>)
@@ -205,20 +201,6 @@ class molecular_qca_library : public fcn_gate_library<mol_qca_technology, 10, 10
     // ************************** Gates ***************************
     // ************************************************************
 
-    static constexpr const fcn_gate CENTER_WIRE{cell_list_to_gate<char>(
-    {{
-        {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', 'b', 'b', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', 'b', 'b', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', 'c', 'c', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', 'c', 'c', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '}
-    }})};
-
     static constexpr const fcn_gate STRAIGHT_INVERTER{cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
@@ -232,20 +214,6 @@ class molecular_qca_library : public fcn_gate_library<mol_qca_technology, 10, 10
         {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '}
     }})};
-
-    /*static constexpr const fcn_gate BENT_INVERTER{cell_list_to_gate<char>(
-    {{
-        {' ', ' ', ' ', ' ', 'x', 'x', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', 'x', 'x', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', 'x', 'x', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', 'x', 'x', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', 'x', 'x', 'x', 'x'},
-        {' ', ' ', ' ', ' ', ' ', ' ', 'x', 'x', 'x', 'x'},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
-    }})};*/
 
     static constexpr const fcn_gate CONJUNCTION{cell_list_to_gate<char>(
     {{
@@ -387,20 +355,6 @@ class molecular_qca_library : public fcn_gate_library<mol_qca_technology, 10, 10
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '}
     }})};
 
-    /*static constexpr const fcn_gate FAN_OUT_1_3{cell_list_to_gate<char>(
-    {{
-        {' ', ' ', ' ', ' ', 'x', 'x', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', 'x', 'x', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', 'x', 'x', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', 'x', 'x', ' ', ' ', ' ', ' '},
-        {'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x'},
-        {'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x'},
-        {' ', ' ', ' ', ' ', 'x', 'x', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', 'x', 'x', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', 'x', 'x', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', 'x', 'x', ' ', ' ', ' ', ' '}
-    }})};*/
-
     // ************************************************************
     // ************************** Wires ***************************
     // ************************************************************
@@ -431,6 +385,20 @@ class molecular_qca_library : public fcn_gate_library<mol_qca_technology, 10, 10
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
+    }})};
+
+    static constexpr const fcn_gate CENTER_WIRE{cell_list_to_gate<char>(
+    {{
+        {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'b', 'b', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'b', 'b', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'c', 'c', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'c', 'c', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '}
     }})};
 
     static constexpr const fcn_gate CENTER_BENT_WIRE{cell_list_to_gate<char>(
@@ -492,7 +460,6 @@ class molecular_qca_library : public fcn_gate_library<mol_qca_technology, 10, 10
         {{{port_position(5, 9)}, {port_position(0, 5)}}, rotate_180(CENTER_BENT_WIRE)},
         {{{port_position(4, 0)}, {port_position(0, 5)}}, rotate_270(CENTER_BENT_WIRE_R)},
         {{{port_position(0, 5)}, {port_position(4, 0)}}, rotate_270(CENTER_BENT_WIRE)}
-        // TODO more wires go here!
     };
     /**
      * Lookup table for inverter rotations. Maps ports to corresponding inverters.
