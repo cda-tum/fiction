@@ -698,7 +698,6 @@ class gate_level_layout : public ClockedLayout
     {
         return static_cast<signal>(get_tile(n));
     }
-
     /**
      * Moves a given node to a new position and also updates its children, i.e., incoming signals.
      *
