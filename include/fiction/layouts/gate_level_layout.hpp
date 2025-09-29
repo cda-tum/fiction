@@ -698,14 +698,7 @@ class gate_level_layout : public ClockedLayout
     {
         return static_cast<signal>(get_tile(n));
     }
-    // ToDo: This should not exist. The function invoking this should be inside here.
-    void revive_from_dead(const node n)
-    {
-        if (!is_constant(n) && is_dead(n))
-        {
-            revive_node(n);
-        }
-    }
+
     /**
      * Moves a given node to a new position and also updates its children, i.e., incoming signals.
      *
