@@ -8,9 +8,10 @@
 #include "pyfiction/documentation.hpp"
 
 #include <fiction/algorithms/physical_design/hexagonalization.hpp>
-#include <fiction/types.hpp>
 
 #include <pybind11/pybind11.h>
+
+#include <sstream>
 
 namespace pyfiction
 {
@@ -50,7 +51,15 @@ inline void hexagonalization(pybind11::module& m)
                  return stream.str();
              })
         .def_readonly("time_total", &fiction::hexagonalization_stats::time_total,
-                      DOC(fiction_hexagonalization_stats_duration));
+                      DOC(fiction_hexagonalization_stats_duration))
+        .def_readonly("x_size", &fiction::hexagonalization_stats::x_size, DOC(fiction_hexagonalization_stats_x_size))
+        .def_readonly("y_size", &fiction::hexagonalization_stats::y_size, DOC(fiction_hexagonalization_stats_y_size))
+        .def_readonly("num_gates", &fiction::hexagonalization_stats::num_gates,
+                      DOC(fiction_hexagonalization_stats_num_gates))
+        .def_readonly("num_wires", &fiction::hexagonalization_stats::num_wires,
+                      DOC(fiction_hexagonalization_stats_num_wires))
+        .def_readonly("num_crossings", &fiction::hexagonalization_stats::num_crossings,
+                      DOC(fiction_hexagonalization_stats_num_crossings));
 
     m.def("hexagonalization", &fiction::hexagonalization<py_hexagonal_gate_layout, py_cartesian_gate_layout>,
           py::arg("layout"), py::arg("parameters") = fiction::hexagonalization_params{},
