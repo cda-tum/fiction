@@ -58,7 +58,7 @@ struct hexagonalization_params
     /**
      * Specifies how primary inputs/outputs should be handled in the hexagonalization process.
      */
-    enum io_pin_extension_mode : std::uint8_t
+    enum class io_pin_extension_mode : std::uint8_t
     {
         /**
          * Do not extend primary inputs/outputs to the top/bottom row (default).
@@ -76,11 +76,11 @@ struct hexagonalization_params
     /**
      * Input extension mode. Defaults to none
      */
-    io_pin_extension_mode input_pin_extension = NONE;
+    io_pin_extension_mode input_pin_extension = io_pin_extension_mode::NONE;
     /**
      * Output extension mode. Defaults to none
      */
-    io_pin_extension_mode output_pin_extension = NONE;
+    io_pin_extension_mode output_pin_extension = io_pin_extension_mode::NONE;
 };
 
 /**

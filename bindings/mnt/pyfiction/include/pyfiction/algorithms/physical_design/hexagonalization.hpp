@@ -8,9 +8,9 @@
 #include "pyfiction/documentation.hpp"
 
 #include <fiction/algorithms/physical_design/hexagonalization.hpp>
-#include <fiction/types.hpp>
 
 #include <pybind11/pybind11.h>
+#include <sstream>
 
 namespace pyfiction
 {
