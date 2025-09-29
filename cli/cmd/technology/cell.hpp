@@ -7,8 +7,8 @@
 
 #include <fiction/algorithms/physical_design/apply_gate_library.hpp>
 #include <fiction/technology/inml_topolinano_library.hpp>
-#include <fiction/technology/qca_one_library.hpp>
 #include <fiction/technology/molecular_qca_library.hpp>
+#include <fiction/technology/qca_one_library.hpp>
 #include <fiction/technology/sidb_bestagon_library.hpp>
 #include <fiction/types.hpp>
 
@@ -88,7 +88,8 @@ class cell_command : public command
             const auto apply_mol_qca = [](auto&& lyt_ptr)
             {
                 return std::make_shared<fiction::mol_qca_cell_clk_lyt>(
-                    fiction::apply_gate_library<fiction::mol_qca_cell_clk_lyt, fiction::molecular_qca_library>(*lyt_ptr));
+                    fiction::apply_gate_library<fiction::mol_qca_cell_clk_lyt, fiction::molecular_qca_library>(
+                        *lyt_ptr));
             };
 
             try
