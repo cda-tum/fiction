@@ -10,6 +10,7 @@
 #include <fiction/algorithms/physical_design/hexagonalization.hpp>
 
 #include <pybind11/pybind11.h>
+
 #include <sstream>
 
 namespace pyfiction
