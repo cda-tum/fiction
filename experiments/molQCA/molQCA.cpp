@@ -375,12 +375,12 @@ auto compute_slacks_and_layout_extension(Lyt& gate_lyt)
 
             if (gate_lyt.is_at_western_border(pi_tile))
             {
-                x_slack_pi      = std::max(x_slack_pi, slack);
+                x_slack_pi            = std::max(x_slack_pi, slack);
                 border_properties[pi] = 0;
             }
             else if (gate_lyt.is_at_northern_border(pi_tile))
             {
-                y_slack_pi      = std::max(y_slack_pi, slack);
+                y_slack_pi            = std::max(y_slack_pi, slack);
                 border_properties[pi] = 1;
             }
         });
@@ -413,12 +413,12 @@ auto compute_slacks_and_layout_extension(Lyt& gate_lyt)
 
             if (gate_lyt.is_at_eastern_border(po_tile))
             {
-                x_slack_po           = std::max(x_slack_po, slack);
+                x_slack_po                 = std::max(x_slack_po, slack);
                 border_properties[po_node] = 2;
             }
             else if (gate_lyt.is_at_southern_border(po_tile))
             {
-                y_slack_po           = std::max(y_slack_po, slack);
+                y_slack_po                 = std::max(y_slack_po, slack);
                 border_properties[po_node] = 3;
             }
         });
@@ -426,7 +426,7 @@ auto compute_slacks_and_layout_extension(Lyt& gate_lyt)
     const auto x_extension = static_cast<uint32_t>(x_slack_pi + x_slack_po);
     const auto y_extension = static_cast<uint32_t>(y_slack_pi + y_slack_po);
 
-    return std::tuple{slack_pis,  slack_pos,   x_slack_pi,  y_slack_pi, x_slack_po,
+    return std::tuple{slack_pis,  slack_pos,   x_slack_pi,  y_slack_pi,       x_slack_po,
                       y_slack_po, x_extension, y_extension, border_properties};
 }
 
@@ -525,11 +525,7 @@ void move_and_reconnect_pis_and_pos(Lyt& gate_lyt, std::unordered_map<mockturtle
         }
 
         std::vector<mockturtle::signal<Lyt>> fanin{};
-        gate_lyt.foreach_fanin(po_node,
-                               [&fanin](auto const& fi)
-                               {
-                                   fanin.push_back(fi);
-                               });
+        gate_lyt.foreach_fanin(po_node, [&fanin](auto const& fi) { fanin.push_back(fi); });
 
         // move this PO south and wire south to new position
         if (border_properties[po_node] == 3)
@@ -538,9 +534,9 @@ void move_and_reconnect_pis_and_pos(Lyt& gate_lyt, std::unordered_map<mockturtle
             auto new_t = t;
             new_t.y += slack;
             gate_lyt.move_node(po_node, new_t);
-            auto sig_buf = gate_lyt.create_buf(fanin[0], t);
+            auto sig_buf  = gate_lyt.create_buf(fanin[0], t);
             auto buf_tile = gate_lyt.get_tile(gate_lyt.get_node(sig_buf));
-            auto sig = fiction::detail::wire_south(gate_lyt, buf_tile, new_t);
+            auto sig      = fiction::detail::wire_south(gate_lyt, buf_tile, new_t);
             gate_lyt.connect(sig, po_node);
         }
         // move this PO east and wire east to new position
@@ -550,9 +546,9 @@ void move_and_reconnect_pis_and_pos(Lyt& gate_lyt, std::unordered_map<mockturtle
             auto new_t = t;
             new_t.x += slack;
             gate_lyt.move_node(po_node, new_t);
-            auto sig_buf = gate_lyt.create_buf(fanin[0], t);
+            auto sig_buf  = gate_lyt.create_buf(fanin[0], t);
             auto buf_tile = gate_lyt.get_tile(gate_lyt.get_node(sig_buf));
-            auto sig = fiction::detail::wire_east(gate_lyt, t, new_t);
+            auto sig      = fiction::detail::wire_east(gate_lyt, t, new_t);
             gate_lyt.connect(sig, po_node);
         }
     }

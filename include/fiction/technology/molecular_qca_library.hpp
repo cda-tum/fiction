@@ -459,8 +459,7 @@ class molecular_qca_library : public fcn_gate_library<mol_qca_technology, 10, 10
         {{{port_position(0, 5)}, {port_position(5, 9)}}, rotate_180(CENTER_BENT_WIRE_R)},
         {{{port_position(5, 9)}, {port_position(0, 5)}}, rotate_180(CENTER_BENT_WIRE)},
         {{{port_position(4, 0)}, {port_position(0, 5)}}, rotate_270(CENTER_BENT_WIRE_R)},
-        {{{port_position(0, 5)}, {port_position(4, 0)}}, rotate_270(CENTER_BENT_WIRE)}
-    };
+        {{{port_position(0, 5)}, {port_position(4, 0)}}, rotate_270(CENTER_BENT_WIRE)}};
     /**
      * Lookup table for inverter rotations. Maps ports to corresponding inverters.
      */

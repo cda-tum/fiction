@@ -144,7 +144,10 @@ class write_qll_layout_impl
 
     uint64_t cell_id{1};
 
-    const char* tech_name{has_inml_technology_v<Lyt> ? "iNML" : has_qca_technology_v<Lyt> ? "MolFCN" : has_mol_qca_technology_v<Lyt> ? "MolFCN" : "?"};
+    const char* tech_name{has_inml_technology_v<Lyt>    ? "iNML" :
+                          has_qca_technology_v<Lyt>     ? "MolFCN" :
+                          has_mol_qca_technology_v<Lyt> ? "MolFCN" :
+                                                          "?"};
 
     [[nodiscard]] std::vector<cell<Lyt>> sorted_pis() const noexcept
     {
@@ -377,12 +380,11 @@ class write_qll_layout_impl
                     {
                         const auto mode = lyt.get_cell_mode(c);
 
-                        int idx =
-                            Lyt::technology::is_normal_cell1(type) ? 0 :
-                            Lyt::technology::is_normal_cell2(type) ? 1 :
-                            Lyt::technology::is_normal_cell3(type) ? 2 :
-                            Lyt::technology::is_normal_cell4(type) ? 3 :
-                                                                   0;
+                        int idx = Lyt::technology::is_normal_cell1(type) ? 0 :
+                                  Lyt::technology::is_normal_cell2(type) ? 1 :
+                                  Lyt::technology::is_normal_cell3(type) ? 2 :
+                                  Lyt::technology::is_normal_cell4(type) ? 3 :
+                                                                           0;
 
                         // write normal cell
                         if (mol_qca_technology::is_normal_cell(type))
@@ -435,7 +437,8 @@ template <typename Lyt>
 void write_qll_layout(const Lyt& lyt, std::ostream& os)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(has_inml_technology_v<Lyt> || has_qca_technology_v<Lyt> || has_mol_qca_technology_v<Lyt>, "Lyt must be an iNML, QCA or a molQCA layout");
+    static_assert(has_inml_technology_v<Lyt> || has_qca_technology_v<Lyt> || has_mol_qca_technology_v<Lyt>,
+                  "Lyt must be an iNML, QCA or a molQCA layout");
 
     detail::write_qll_layout_impl p{lyt, os};
 
