@@ -173,6 +173,7 @@ using mol_qca_cell_clk_lyt =
     cell_level_layout<mol_qca_technology,
                       synchronization_element_layout  // se_layouts have only been investigated for QCA technologies
                       <clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
+using mol_qca_cell_clk_lyt_ptr = std::shared_ptr<mol_qca_cell_clk_lyt>;
 
 using inml_cell_clk_lyt     = cell_level_layout<inml_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
 using inml_cell_clk_lyt_ptr = std::shared_ptr<inml_cell_clk_lyt>;
@@ -260,9 +261,9 @@ using cds_sidb_defect_100_cell_clk_lyt_cube =
     charge_distribution_surface<sidb_defect_surface<sidb_100_cell_clk_lyt_cube>>;
 using cds_sidb_defect_100_cell_clk_lyt_cube_ptr = std::shared_ptr<cds_sidb_defect_100_cell_clk_lyt_cube>;
 
-using cell_layout_t =
-    std::variant<qca_cell_clk_lyt_ptr, stacked_qca_cell_clk_lyt_ptr, inml_cell_clk_lyt_ptr, sidb_100_cell_clk_lyt_ptr,
-                 sidb_111_cell_clk_lyt_ptr, cds_sidb_100_cell_clk_lyt_ptr, cds_sidb_111_cell_clk_lyt_ptr>;
+using cell_layout_t = std::variant<qca_cell_clk_lyt_ptr, stacked_qca_cell_clk_lyt_ptr, mol_qca_cell_clk_lyt_ptr,
+                                   inml_cell_clk_lyt_ptr, sidb_100_cell_clk_lyt_ptr, sidb_111_cell_clk_lyt_ptr,
+                                   cds_sidb_100_cell_clk_lyt_ptr, cds_sidb_111_cell_clk_lyt_ptr>;
 
 }  // namespace fiction
 

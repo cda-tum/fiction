@@ -8,6 +8,7 @@
 #include <fiction/algorithms/physical_design/apply_gate_library.hpp>
 #include <fiction/technology/inml_topolinano_library.hpp>
 #include <fiction/technology/qca_one_library.hpp>
+#include <fiction/technology/molecular_qca_library.hpp>
 #include <fiction/technology/sidb_bestagon_library.hpp>
 #include <fiction/types.hpp>
 
@@ -35,7 +36,8 @@ class cell_command : public command
             command(e, "Compiles the current gate layout in store down to a cell-level layout. A gate library must be "
                        "specified in order to instruct the algorithm how to map gate tiles to cell blocks.")
     {
-        add_option("--library,-l", library, "Gate library to use for mapping {QCA-ONE, ToPoliNano, Bestagon}", true);
+        add_option("--library,-l", library, "Gate library to use for mapping {QCA-ONE, MolQCA, ToPoliNano, Bestagon}",
+                   true);
     }
 
   protected:
@@ -68,6 +70,30 @@ class cell_command : public command
             try
             {
                 store<fiction::cell_layout_t>().extend() = std::visit(apply_qca_one, s.current());
+            }
+            catch (const fiction::unsupported_gate_type_exception<fiction::offset::ucoord_t>& e)
+            {
+                std::cout << fmt::format("[e] unsupported gate type at tile position {}", e.where()) << std::endl;
+            }
+            catch (const fiction::unsupported_gate_orientation_exception<fiction::offset::ucoord_t,
+                                                                         fiction::port_position>& e)
+            {
+                std::cout << fmt::format("[e] unsupported gate orientation at tile position {} with ports {}",
+                                         e.where(), e.which_ports())
+                          << std::endl;
+            }
+        }
+        else if (library == "MolQCA" || library == "molQCA" || library == "MOLQCA")
+        {
+            const auto apply_mol_qca = [](auto&& lyt_ptr)
+            {
+                return std::make_shared<fiction::mol_qca_cell_clk_lyt>(
+                    fiction::apply_gate_library<fiction::mol_qca_cell_clk_lyt, fiction::molecular_qca_library>(*lyt_ptr));
+            };
+
+            try
+            {
+                store<fiction::cell_layout_t>().extend() = std::visit(apply_mol_qca, s.current());
             }
             catch (const fiction::unsupported_gate_type_exception<fiction::offset::ucoord_t>& e)
             {
