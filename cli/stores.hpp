@@ -118,7 +118,7 @@ ALICE_LOG_STORE_STATISTICS(fiction::logic_network_t, ln)
 }
 
 template <>
-bool can_show<fiction::logic_network_t>(std::string& extension, [[maybe_unused]] command& cmd)
+inline bool can_show<fiction::logic_network_t>(std::string& extension, [[maybe_unused]] command& cmd)
 {
     extension = "dot";
 
@@ -130,7 +130,8 @@ bool can_show<fiction::logic_network_t>(std::string& extension, [[maybe_unused]]
 
 template <>
 // NOLINTNEXTLINE
-void show<fiction::logic_network_t>(std::ostream& os, const fiction::logic_network_t& element, const command& cmd)
+inline void show<fiction::logic_network_t>(std::ostream& os, const fiction::logic_network_t& element,
+                                           const command& cmd)
 {
     const auto show_ntk = [&os, &cmd](auto&& ntk_ptr)
     {
@@ -255,7 +256,7 @@ ALICE_LOG_STORE_STATISTICS(fiction::gate_layout_t, layout)
 }
 
 template <>
-bool can_show<fiction::gate_layout_t>(std::string& extension, [[maybe_unused]] command& cmd)
+inline bool can_show<fiction::gate_layout_t>(std::string& extension, [[maybe_unused]] command& cmd)
 {
     extension = "dot";
 
@@ -269,7 +270,7 @@ bool can_show<fiction::gate_layout_t>(std::string& extension, [[maybe_unused]] c
 
 template <>
 // NOLINTNEXTLINE
-void show<fiction::gate_layout_t>(std::ostream& os, const fiction::gate_layout_t& element, const command& cmd)
+inline void show<fiction::gate_layout_t>(std::ostream& os, const fiction::gate_layout_t& element, const command& cmd)
 {
     const auto show_lyt = [&os, &cmd](auto&& lyt_ptr)
     {
@@ -444,7 +445,7 @@ ALICE_LOG_STORE_STATISTICS(fiction::cell_layout_t, layout)
 }
 
 template <>
-bool can_show<fiction::cell_layout_t>(std::string& extension, [[maybe_unused]] command& cmd)
+inline bool can_show<fiction::cell_layout_t>(std::string& extension, [[maybe_unused]] command& cmd)
 {
     cmd.add_flag("--simple,-s", "Simplified depiction abstracting from details")->group("cell_layout (-c)");
 
@@ -455,8 +456,8 @@ bool can_show<fiction::cell_layout_t>(std::string& extension, [[maybe_unused]] c
 
 template <>
 // NOLINTNEXTLINE
-void show<fiction::cell_layout_t>(std::ostream& os, const fiction::cell_layout_t& element,
-                                  const command& cmd)  // const & for pointer because alice says so...
+inline void show<fiction::cell_layout_t>(std::ostream& os, const fiction::cell_layout_t& element,
+                                         const command& cmd)  // const & for pointer because alice says so...
 {
     const auto show_lyt = [&os, &cmd](auto&& lyt_ptr)
     {

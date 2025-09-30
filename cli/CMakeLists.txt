@@ -1,10 +1,19 @@
-set(SOURCES ${PROJECT_SOURCE_DIR}/cli/fiction.cpp)
+add_executable(fiction)
+
+file(GLOB_RECURSE FICTION_CMD_SOURCES CONFIGURE_DEPENDS
+    "cmd/*/src/*.cpp"
+)
+
+target_sources(fiction PRIVATE
+    ${PROJECT_SOURCE_DIR}/cli/fiction.cpp
+    ${FICTION_CMD_SOURCES}
+)
 
 # Include configuration file
 include_directories(${PROJECT_BINARY_DIR}/include/)
 
-# Build executable
-add_executable(fiction ${SOURCES})
+# Add include directory for command headers
+target_include_directories(fiction PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 # Link against the project settings, libfiction and alice
 target_link_libraries(fiction PRIVATE libfiction alice)
@@ -12,7 +21,7 @@ target_link_libraries(fiction PRIVATE libfiction alice)
 # Collect CLI headers under cmd/
 file(GLOB_RECURSE FICTION_CLI_HEADERS CONFIGURE_DEPENDS
         RELATIVE ${PROJECT_SOURCE_DIR}/cli/
-        ${PROJECT_SOURCE_DIR}/cli/cmd/*.hpp
+        ${PROJECT_SOURCE_DIR}/cli/cmd/*/include/*.hpp
         ${PROJECT_SOURCE_DIR}/cli/commands.hpp
         ${PROJECT_SOURCE_DIR}/cli/stores.hpp)
 
