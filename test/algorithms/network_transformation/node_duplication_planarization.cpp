@@ -6,6 +6,8 @@
 
 #include "fiction/algorithms/network_transformation/fanout_substitution.hpp"
 #include "fiction/algorithms/network_transformation/network_balancing.hpp"
+#include "fiction/algorithms/properties/check_planarity.hpp"
+#include "fiction/networks/views/mutable_rank_view.hpp"
 
 #include <fiction/algorithms/network_transformation/node_duplication_planarization.hpp>
 #include <fiction/algorithms/verification/virtual_miter.hpp>
@@ -40,11 +42,13 @@ TEST_CASE("Planarize technology ntk", "[node-duplication-planarization]")
 
     const auto vpi_r = fiction::mutable_rank_view(tec_b);
 
-    auto planarized_maj = node_duplication_planarization(vpi_r);
+    auto planarized_ntk = node_duplication_planarization(vpi_r);
+
+    CHECK(check_planarity(planarized_ntk) == 1);
 
     mockturtle::equivalence_checking_stats st;
     const auto                             cec_m =
-        mockturtle::equivalence_checking(*fiction::virtual_miter<technology_network>(tec, planarized_maj), {}, &st);
+        mockturtle::equivalence_checking(*fiction::virtual_miter<technology_network>(tec, planarized_ntk), {}, &st);
     REQUIRE(cec_m.has_value());
     CHECK(*cec_m == 1);
 }
@@ -75,11 +79,13 @@ TEST_CASE("Planarize ntk with 3-ary node", "[node-duplication-planarization]")
 
     const auto vpi_r = fiction::mutable_rank_view(tec_b);
 
-    auto planarized_maj = node_duplication_planarization(vpi_r);
+    auto planarized_ntk = node_duplication_planarization(vpi_r);
+
+    CHECK(check_planarity(planarized_ntk) == 1);
 
     mockturtle::equivalence_checking_stats st;
     const auto                             cec_m =
-        mockturtle::equivalence_checking(*fiction::virtual_miter<technology_network>(tec, planarized_maj), {}, &st);
+        mockturtle::equivalence_checking(*fiction::virtual_miter<technology_network>(tec, planarized_ntk), {}, &st);
     REQUIRE(cec_m.has_value());
     CHECK(*cec_m == 1);
 }
@@ -110,11 +116,13 @@ TEST_CASE("Buffer AIG and planarize technology_network", "[node-duplication-plan
 
     const auto vpi_r = fiction::mutable_rank_view(aig_b);
 
-    auto planarized_maj = node_duplication_planarization(vpi_r);
+    auto planarized_ntk = node_duplication_planarization(vpi_r);
+
+    CHECK(check_planarity(planarized_ntk) == 1);
 
     mockturtle::equivalence_checking_stats st;
     const auto                             cec_m =
-        mockturtle::equivalence_checking(*fiction::virtual_miter<technology_network>(aig, planarized_maj), {}, &st);
+        mockturtle::equivalence_checking(*fiction::virtual_miter<technology_network>(aig, planarized_ntk), {}, &st);
     REQUIRE(cec_m.has_value());
     CHECK(*cec_m == 1);
 }
@@ -138,11 +146,13 @@ TEST_CASE("Buffer AIG and planarize technology_network 2", "[node-duplication-pl
 
     const auto vpi_r = fiction::mutable_rank_view(aig_b);
 
-    auto planarized_maj = node_duplication_planarization(vpi_r);
+    auto planarized_ntk = node_duplication_planarization(vpi_r);
+
+    CHECK(check_planarity(planarized_ntk) == 1);
 
     mockturtle::equivalence_checking_stats st;
     const auto                             cec_m =
-        mockturtle::equivalence_checking(*fiction::virtual_miter<technology_network>(aig, planarized_maj), {}, &st);
+        mockturtle::equivalence_checking(*fiction::virtual_miter<technology_network>(aig, planarized_ntk), {}, &st);
     REQUIRE(cec_m.has_value());
     CHECK(*cec_m == 1);
 }
@@ -169,11 +179,13 @@ TEST_CASE("Planarize multi output network", "[node-duplication-planarization]")
 
     const auto vpi_r = fiction::mutable_rank_view(aig_b);
 
-    auto planarized_maj = node_duplication_planarization(vpi_r);
+    auto planarized_ntk = node_duplication_planarization(vpi_r);
+
+    CHECK(check_planarity(planarized_ntk) == 1);
 
     mockturtle::equivalence_checking_stats st;
     const auto                             cec_m =
-        mockturtle::equivalence_checking(*fiction::virtual_miter<technology_network>(aig, planarized_maj), {}, &st);
+        mockturtle::equivalence_checking(*fiction::virtual_miter<technology_network>(aig, planarized_ntk), {}, &st);
     REQUIRE(cec_m.has_value());
     CHECK(*cec_m == 1);
 }

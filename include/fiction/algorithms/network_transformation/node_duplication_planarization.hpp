@@ -6,7 +6,6 @@
 #define FICTION_NODE_DUPLICATION_PLANARIZATION_HPP
 
 #include "fiction/algorithms/properties/check_planarity.hpp"
-#include "fiction/networks/views/mutable_rank_view.hpp"
 #include "fiction/networks/virtual_pi_network.hpp"
 
 #include <mockturtle/traits.hpp>
@@ -50,7 +49,6 @@ struct node_duplication_planarization_params
          */
         RANDOM_PO_ORDER
     };
-    // bool random_output_order = false;
     output_order po_order = output_order::KEEP_PO_ORDER;
 };
 
@@ -65,7 +63,7 @@ namespace detail
  * These two outer nodes are connected through zero or more 'middle_nodes'.
  * The fanin order starts with the first node in 'pair', then proceeds through the 'middle_nodes', and ends with the
  * second node in 'pair'. The order of 'middle_nodes' is arbitrary as they cannot be further connected to any other
- * nodes. For the planarization, only the nodes inside the 'pair' are relevant.
+ * nodes.
  *
  * @tparam Ntk Network type for the nodes in the pair.
  */
@@ -77,6 +75,10 @@ struct node_pair
      */
     std::pair<mockturtle::node<Ntk>, mockturtle::node<Ntk>> pair;
     /**
+     * Specifies the delay value for the node.
+     */
+    uint64_t delay;
+    /**
      * Contains the nodes between the fanin-edges node; cannot be connected to any other node.
      */
     std::vector<mockturtle::node<Ntk>> middle_nodes;
@@ -84,10 +86,6 @@ struct node_pair
      * Shared pointer to another instance of node_pair detailing fanin-edge alignment.
      */
     node_pair<Ntk>* fanin_pair;
-    /**
-     * Specifies the delay value for the node.
-     */
-    uint64_t delay;
     /**
      * Standard constructor.
      *
@@ -120,20 +118,13 @@ template <typename Ntk>
 std::pair<virtual_pi_network<Ntk>, mockturtle::node_map<std::vector<mockturtle::signal<virtual_pi_network<Ntk>>>, Ntk>>
 initialize_copy_network_duplicates(Ntk const& src)
 {
-    static_assert(mockturtle::is_network_type_v<virtual_pi_network<Ntk>>, "Ntk is not a network type");
     static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
+    static_assert(mockturtle::has_get_constant_v<Ntk>, "Ntk does not implement the get_constant method");
     static_assert(mockturtle::has_get_constant_v<virtual_pi_network<Ntk>>,
                   "Ntk does not implement the get_constant method");
-    static_assert(mockturtle::has_create_pi_v<virtual_pi_network<Ntk>>, "Ntk does not implement the create_pi method");
-    static_assert(mockturtle::has_is_pi_v<virtual_pi_network<Ntk>>, "Ntk does not implement the is_pi method");
-    static_assert(mockturtle::has_create_not_v<virtual_pi_network<Ntk>>,
-                  "Ntk does not implement the create_not method");
-    static_assert(mockturtle::has_get_constant_v<Ntk>, "Ntk does not implement the get_constant method");
     static_assert(mockturtle::has_get_node_v<Ntk>, "Ntk does not implement the get_node method");
     static_assert(mockturtle::has_foreach_pi_v<Ntk>, "Ntk does not implement the foreach_pi method");
-    static_assert(mockturtle::has_foreach_po_v<Ntk>, "Ntk does not implement the foreach_po method");
-    static_assert(mockturtle::has_is_complemented_v<Ntk>, "Ntk does not implement the is_complemented method");
-    static_assert(mockturtle::has_foreach_fanin_v<Ntk>, "Ntk does not implement the foreach_fanin method");
+    static_assert(mockturtle::has_create_pi_v<virtual_pi_network<Ntk>>, "Ntk does not implement the create_pi method");
 
     mockturtle::node_map<std::vector<mockturtle::signal<virtual_pi_network<Ntk>>>, Ntk> old2new(src);
     virtual_pi_network<Ntk>                                                             dest;
@@ -163,9 +154,9 @@ initialize_copy_network_duplicates(Ntk const& src)
  */
 template <typename Ntk, typename NtkDest>
 std::vector<mockturtle::signal<Ntk>>
-gather_fanin_signals(Ntk& ntk, NtkDest& ntk_dest_v, mockturtle::node<Ntk> n,
-                     mockturtle::node_map<std::vector<mockturtle::signal<Ntk>>, Ntk>& old2new_v,
-                     std::vector<mockturtle::node<Ntk>>& lvl, std::size_t& node_index)
+gather_fanin_signals(const Ntk& ntk, const NtkDest& ntk_dest_v, const mockturtle::node<Ntk> n,
+                     const mockturtle::node_map<std::vector<mockturtle::signal<Ntk>>, Ntk>& old2new_v,
+                     const std::vector<mockturtle::node<Ntk>>& lvl, std::size_t& node_index)
 {
     // Initialize variables
     std::vector<mockturtle::signal<Ntk>> children{};
@@ -179,20 +170,20 @@ gather_fanin_signals(Ntk& ntk, NtkDest& ntk_dest_v, mockturtle::node<Ntk> n,
         {
             // Get the vector of duplicated nodes of the original fan-in node fn.
             const auto fn           = ntk.get_node(f);
-            auto       tgt_signal_v = old2new_v[fn];
+            const auto tgt_signal_v = old2new_v[fn];
 
             assert(node_index < lvl.size() && "The fanin iterator is out of scope");
 
             // The range indicates the number of candidate fan-ins.
-            std::size_t range = ntk.fanin_size(n) + 1;
+            const std::size_t range = ntk.fanin_size(n) + 1;
 
             // Iterate through the candidate fan-ins. If a candidate fan-in matches the original fan-in or is a
             // duplicate of it, add it to the children of the node n.
-            std::size_t end_index = std::min(node_index + range, lvl.size());
-            for (std::size_t j = node_index; j < end_index; ++j)
+            const std::size_t end_index = std::min(node_index + range, lvl.size());
+            for (auto j = node_index; j < end_index; ++j)
             {
                 // get the node from the newly generated network.
-                auto node_at_index = lvl[j];
+                const auto node_at_index = lvl[j];
 
                 // Check if the candidate matches the original fan-in or a duplicate.
                 // Also, verify if the candidate has already reached its fan-out limit.
@@ -243,8 +234,9 @@ gather_fanin_signals(Ntk& ntk, NtkDest& ntk_dest_v, mockturtle::node<Ntk> n,
  */
 template <typename Ntk>
 virtual_pi_network<Ntk>
-create_virtual_pi_ntk_from_duplicated_nodes(Ntk& ntk, std::vector<std::vector<mockturtle::node<Ntk>>>& ntk_lvls,
-                                            std::vector<std::vector<mockturtle::node<Ntk>>>& ntk_lvls_new)
+create_virtual_pi_ntk_from_duplicated_nodes(const Ntk&                                             ntk,
+                                            const std::vector<std::vector<mockturtle::node<Ntk>>>& ntk_lvls,
+                                            std::vector<std::vector<mockturtle::node<Ntk>>>&       ntk_lvls_new)
 {
     std::unordered_map<mockturtle::node<Ntk>, bool> node_status;
     ntk_lvls_new.resize(ntk_lvls.size());
@@ -253,7 +245,7 @@ create_virtual_pi_ntk_from_duplicated_nodes(Ntk& ntk, std::vector<std::vector<mo
     auto& ntk_dest_v = init_v.first;
     auto& old2new_v  = init_v.second;
 
-    for (std::size_t i = ntk_lvls.size(); i-- > 0;)
+    for (auto i = ntk_lvls.size(); i-- > 0;)
     {
         // The index of the node in the current node level.
         std::size_t node_index = 0;
@@ -375,15 +367,15 @@ template <typename Ntk>
 class node_duplication_planarization_impl
 {
   public:
-    node_duplication_planarization_impl(const Ntk& src, const node_duplication_planarization_params& p) :
+    [[maybe_unused]] node_duplication_planarization_impl(const Ntk& src, const node_duplication_planarization_params& p) :
             ntk(src),
             ps{p}
     {}
 
     /**
-     * The H-graph represents all possible orderings of node pairs within a single network level.
-     * A "slice" is created by adding all possible combinations of a `node_pair` to the H-graph of the level.
-     * These combinations are formed by selecting pairs of nodes from the fan-ins of the input node:
+     * A "slice" describes one vertical layer in the H-graph. It is created by adding all possible combinations of a
+     * `node_pair` to the H-graph of the level. These combinations are formed by selecting pairs of nodes from the
+     * fan-ins of the input node:
      * - If the input node has only one fan-in, it is treated as a single combination.
      * - If the input node has two fan-ins, there are two possible combinations.
      *
@@ -405,7 +397,6 @@ class node_duplication_planarization_impl
      * @param nd Node in the H-graph.
      * @param border_pis A boolean indicating whether the input PIs (Primary Inputs) should be propagated to the next
      */
-
     void compute_slice_delays(const mockturtle::node<Ntk>& nd)
     {
         // Pis need to be propagated into the next level, since they have to be connected without crossings
@@ -423,7 +414,7 @@ class node_duplication_planarization_impl
                               }
                           });
 
-        assert(fis.empty() == 0 && "Node is a buffered PI that is a PO");
+        assert(fis.empty() == 0 && "There has to be at least one node in this level");
 
         // Compute the combinations in one slice
         auto combinations = calculate_pairs<Ntk>(fis);
@@ -452,8 +443,6 @@ class node_duplication_planarization_impl
                     }
                     else if (node_pair_last.delay + 2 == node_pair_cur.delay)
                     {
-                        // ToDo: If order doesnt matter, decide on minimal crossing view (mincross.c from graphviz)
-
                         // This solves equal path delays, if they are connected in the next layer via a fanout
                         const auto fc0 = fanins(ntk, node_pair_last.pair.first);
                         if (node_pair_last.fanin_pair != nullptr)
@@ -497,9 +486,12 @@ class node_duplication_planarization_impl
      *
      * @param node The node to be inserted.
      * @param vec The vector to insert the node into.
+     * @param saturated_fanout_flag The flag which indicates that the maximum number of fanouts for this node is
+     * reached.
+     * @param position The position of the node (terminal node or not).
      */
     void insert_if_not_first(const mockturtle::node<Ntk>& node, std::vector<mockturtle::node<Ntk>>& vec,
-                             int& saturated_fanout_flag, int position)
+                             int& saturated_fanout_flag, const int position)
     {
         if (vec.empty() || vec.front() != node)
         {
@@ -583,9 +575,6 @@ class node_duplication_planarization_impl
     /**
      * Checks if the given vector of nodes contains any non-primary inputs.
      *
-     * This function iterates through each node in the vector and checks if it is a primary input.
-     * If a non-primary input is found, the `f_final_level` parameter is set to false and the loop is exited.
-     *
      * @param v_next_level The vector of nodes to be checked.
      */
     [[nodiscard]] bool check_final_level(const std::vector<mockturtle::node<Ntk>>& v_next_level)
@@ -600,8 +589,7 @@ class node_duplication_planarization_impl
         return true;
     }
 
-    [[nodiscard]] virtual_pi_network<Ntk>
-    run(std::vector<std::vector<mockturtle::node<Ntk>>>& ntk_lvls_new)
+    [[nodiscard]] virtual_pi_network<Ntk> run(std::vector<std::vector<mockturtle::node<Ntk>>>& ntk_lvls_new)
     {
         // Initialize the POs
         std::vector<mockturtle::node<Ntk>> pos{};
@@ -609,7 +597,7 @@ class node_duplication_planarization_impl
         ntk.foreach_node(
             [this, &pos](const auto n)
             {
-                if(ntk.is_po(n))
+                if (ntk.is_po(n))
                 {
                     const auto po = ntk.get_node(n);
                     if (std::find(pos.begin(), pos.end(), po) == pos.end())
@@ -686,6 +674,10 @@ class node_duplication_planarization_impl
         virtual_ntk.update_ranks();
         virtual_ntk.set_all_ranks(ntk_lvls_new);
 
+        // restore possibly set signal names
+        restore_network_name(ntk, virtual_ntk);
+        restore_output_names(ntk, virtual_ntk);
+
         return virtual_ntk;
     }
 
@@ -715,14 +707,15 @@ class node_duplication_planarization_impl
 }  // namespace detail
 
 /**
- * Implements a planarization mechanism for networks using a H-Graph strategy for node duplication.
+ * Implements a planarization mechanism for networks from the paper \"Fabricatable Interconnect and Molecular QCA
+ * Circuits\" by Amitabh Chaudhary, Danny Ziyi Chen, Xiaobo Sharon Hu, Michael T. Niemier, Ramprasad Ravichandran and
+ * Kevin Whitton in IEEE TRANSACTIONS ON COMPUTER-AIDED DESIGN OF INTEGRATED CIRCUITS AND SYSTEMS, Volume 26, 2007.
  *
  * The planarization achieved by this function solves the Node Duplication Crossing Minimization (NDCE) problem by
  * finding the shortest x-y path in the H-graph for every level in the network. An H-graph describes edge relations
  * between two levels in a network, with one level assumed as fixed, starting at the Primary Outputs (POs). By finding
  * the shortest path from the source (x) to the sink (y) in this H-graph, an optimal solution for the NDCE problem for
- * each level is found. The function constructs an H-graph that captures edge relations between two levels within the
- * graph and computes the shortest x-y paths on the H-graph, traversing from the POs towards the Primary Inputs (PIs).
+ * each level is found. The function traverses from the Primary Outputs (POs) towards the Primary Inputs (PIs).
  *
  * @tparam NtkDest Destination network type.
  * @tparam NtkSrc Source network type.
@@ -733,7 +726,7 @@ class node_duplication_planarization_impl
  */
 template <typename NtkSrc>
 [[nodiscard]] virtual_pi_network<NtkSrc>
-node_duplication_planarization(const NtkSrc& ntk_src, const node_duplication_planarization_params& ps = {})
+node_duplication_planarization(const NtkSrc& ntk_src, node_duplication_planarization_params ps = {})
 {
     static_assert(mockturtle::is_network_type_v<NtkSrc>, "NtkSrc is not a network type");
     static_assert(mockturtle::has_create_node_v<NtkSrc>, "NtkSrc does not implement the create_node function");

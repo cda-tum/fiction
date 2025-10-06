@@ -5,12 +5,11 @@
 #ifndef FICTION_ORTHOGONAL_PLANAR_HPP
 #define FICTION_ORTHOGONAL_PLANAR_HPP
 
+#include "fiction/algorithms/physical_design/orthogonal.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/network_utils.hpp"
 #include "fiction/utils/placement_utils.hpp"
-
-#include <fiction/algorithms/physical_design/orthogonal.hpp>
 
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/node_map.hpp>
@@ -25,6 +24,7 @@
 #include <cstdint>
 #include <iterator>
 #include <numeric>
+#include <stdexcept>
 #include <tuple>
 #include <unordered_map>
 #include <utility>
@@ -40,7 +40,11 @@ namespace fiction
 namespace detail
 {
 
-// Define a 3D array using std::array and encapsulate it in a function
+/**
+ * Defines a 3D lookup table using `std::array` and encapsulates it within a function. This table encodes all possible
+ * combinations of the previous level, connection type, orientations, and surrounding spacing (gaps). Based on these
+ * inputs, it returns the corresponding orientation and spacing configuration for the current buffer.
+ */
 std::array<std::array<std::array<std::array<std::pair<uint64_t, uint64_t>, 4>, 3>, 3>, 2>& get_buffer_lookup()
 {
     static std::array<std::array<std::array<std::array<std::pair<uint64_t, uint64_t>, 4>, 3>, 3>, 2> array = {
@@ -86,7 +90,11 @@ std::array<std::array<std::array<std::array<std::pair<uint64_t, uint64_t>, 4>, 3
     return array;
 }
 
-// Define a 3D array using std::array and encapsulate it in a function
+/**
+ * Defines a 3D lookup table using `std::array` and encapsulates it within a function. This table encodes all possible
+ * combinations of the previous level, connection type, orientations, and surrounding spacing (gaps). Based on these
+ * inputs, it returns the corresponding orientation and spacing configuration for the current fanout.
+ */
 std::array<std::array<std::array<std::array<std::pair<uint64_t, uint64_t>, 4>, 3>, 3>, 4>& get_fanout_lookup()
 {
     static std::array<std::array<std::array<std::array<std::pair<uint64_t, uint64_t>, 4>, 3>, 3>, 4> array = {
@@ -170,8 +178,23 @@ std::array<std::array<std::array<std::array<std::pair<uint64_t, uint64_t>, 4>, 3
     return array;
 }
 
+/**
+ * Computes the fan-out connection type of a node based on its successors' fan-in structures.
+ * Assumes exactly two fan-outs, which are ordered by rank position.
+ *
+ * Returns:
+ *  - 0: Both fan-outs have a single fan-in.
+ *  - 1: First fan-out has one fan-in, second has multiple.
+ *  - 2: Second fan-out has one fan-in, first has multiple.
+ *  - 3: Both fan-outs have multiple fan-ins.
+ *
+ * @tparam Ntk Logic network type.
+ * @param ntk  Logic network containing the node.
+ * @param n    Node for which to determine the fan-out connection type.
+ * @return     Integer code (0–3) indicating the fan-out connection pattern.
+ */
 template <typename Ntk>
-uint64_t calculate_fanout_connection_type(const Ntk& ntk, mockturtle::node<Ntk> n)
+uint64_t calculate_fanout_connection_type(const Ntk& ntk, const mockturtle::node<Ntk>& n)
 {
     // order the POs
     if (ntk.is_po(n))
@@ -197,9 +220,22 @@ uint64_t calculate_fanout_connection_type(const Ntk& ntk, mockturtle::node<Ntk> 
     return 3;
 }
 
+/**
+ * Computes the gap between the fan-in node and its preceding node, i.e., the node with a rank position one less than
+ * the current node. This value indicates the available spacing for placement.
+ *
+ * @tparam Ntk Logic network type.
+ * @tparam Lyt Layout type.
+ * @param ntk       Logic network containing the node.
+ * @param node2pos  Mapping from network nodes to layout tile positions.
+ * @param lvl       Current level index of the node.
+ * @param n         Node for which to compute the predecessor gap.
+ * @return          Gap size (clamped to a maximum of 2).
+ */
+
 template <typename Ntk, typename Lyt>
-uint64_t calculate_predecessor_gap(const Ntk& ntk, mockturtle::node_map<mockturtle::signal<Lyt>, Ntk>& node2pos,
-                                   uint64_t lvl, mockturtle::node<Ntk> n)
+uint64_t calculate_predecessor_gap(const Ntk& ntk, const mockturtle::node_map<mockturtle::signal<Lyt>, Ntk>& node2pos,
+                                   const uint64_t lvl, const mockturtle::node<Ntk>& n)
 {
     // return if in the PI level
     if (lvl == 0)
@@ -210,7 +246,6 @@ uint64_t calculate_predecessor_gap(const Ntk& ntk, mockturtle::node_map<mockturt
     // calculate the rank of the predecessor node
     auto fc = fanins(ntk, n);
 
-    mockturtle::node<Ntk> nd = n;
     if (fc.fanin_nodes.size() == 2)
     {
         std::sort(fc.fanin_nodes.begin(), fc.fanin_nodes.end(),
@@ -232,15 +267,24 @@ uint64_t calculate_predecessor_gap(const Ntk& ntk, mockturtle::node_map<mockturt
     const auto pre_neighbour = ntk.at_rank_position(l, r - 1);
 
     // calculate the gap size
-    auto pre1_t = static_cast<tile<Lyt>>(node2pos[pre]);
-    auto pre2_t = static_cast<tile<Lyt>>(node2pos[pre_neighbour]);
+    const auto pre1_t = static_cast<tile<Lyt>>(node2pos[pre]);
+    const auto pre2_t = static_cast<tile<Lyt>>(node2pos[pre_neighbour]);
 
     assert(pre1_t.y > pre2_t.y);
     return std::min(pre1_t.y - pre2_t.y - 1, 2);
 }
 
+/**
+ * Computes the buffer connection type for a given node.
+ * Determines whether the node serves as the second (rightmost) fan-in of its successor node.
+ *
+ * @tparam Ntk Logic network type.
+ * @param ntk  Logic network containing the node.
+ * @param n    Node to analyze.
+ * @return     1 if the node is the rightmost fan-in of its successor, otherwise 0.
+ */
 template <typename Ntk>
-uint64_t calculate_connection(const Ntk& ntk, mockturtle::node<Ntk> n)
+uint64_t calculate_buffer_connection_type(const Ntk& ntk, const mockturtle::node<Ntk>& n)
 {
     if (ntk.is_po(n))
     {
@@ -262,8 +306,23 @@ uint64_t calculate_connection(const Ntk& ntk, mockturtle::node<Ntk> n)
     return 0;
 }
 
+/**
+ * Determines the allowed orientation of a node based on its predecessor.
+ * For nodes driven by a fan-out, the orientation is defined by their relative rank position among the fan-out’s
+ * successors.
+ *
+ * Returns:
+ *  - 0: Node is the first (east) successor of its predecessor.
+ *  - 1: Node is the second (west) successor of its predecessor.
+ *  - 2: Node is not driven by a fan-out.
+ *
+ * @tparam Ntk Logic network type.
+ * @param ntk  Logic network containing the node.
+ * @param n    Node for which to determine the allowed orientation.
+ * @return     Orientation code (0–2) describing the node’s relative position.
+ */
 template <typename Ntk>
-uint64_t calculate_allowed_orientation(const Ntk& ntk, mockturtle::node<Ntk> n)
+uint64_t calculate_allowed_orientation(const Ntk& ntk, const mockturtle::node<Ntk>& n)
 {
     auto fc = fanins(ntk, n);
     assert(fc.fanin_nodes.size() == 1);
@@ -283,8 +342,23 @@ uint64_t calculate_allowed_orientation(const Ntk& ntk, mockturtle::node<Ntk> n)
     return 2;
 }
 
+/**
+ * Determines the initial orientation for a given network level.
+ * The orientation is inferred from the structural pattern of nodes within the specified level, considering their fan-in
+ * and fan-out relationships.
+ *
+ * Returns:
+ *  - 0: Default orientation (no specific structure found).
+ *  - 1: Level starts with a fan-out or buffer structure.
+ *  - 3: Level starts with a two-input (binary) gate.
+ *
+ * @tparam Ntk Logic network type.
+ * @param ntk  Logic network to analyze.
+ * @param lvl  Level index for which to compute the starting orientation.
+ * @return     Orientation code (0, 1, or 3) defining the level’s initial direction.
+ */
 template <typename Ntk>
-int calculate_start_orientation(Ntk& ntk, uint32_t lvl)
+int calculate_start_orientation(const Ntk& ntk, const uint32_t& lvl)
 {
     int orientation = 0;
     if (lvl == 0)
@@ -300,7 +374,6 @@ int calculate_start_orientation(Ntk& ntk, uint32_t lvl)
                                  }
                                  if (ntk.fanin_size(n) == 2)
                                  {
-                                     // it is 3 but return makes -1
                                      orientation = 4;
                                      return;
                                  }
@@ -309,14 +382,12 @@ int calculate_start_orientation(Ntk& ntk, uint32_t lvl)
                                      const auto& pre = fc.fanin_nodes[0];
                                      if (ntk.is_fanout(pre) && ntk.fanout_size(pre) == 2)
                                      {
-                                         // it is 0 but return makes -1
                                          orientation = 1;
                                          return;
                                      }
                                  }
                                  if (ntk.fanout_size(n) == 2)
                                  {
-                                     // it is 0 but return makes -1
                                      orientation = 1;
                                      return;
                                  }
@@ -326,12 +397,27 @@ int calculate_start_orientation(Ntk& ntk, uint32_t lvl)
     // produced by two input nodes is reduced
 }
 
+/**
+ * Computes orientation and routing line variables for a given network level.
+ *
+ * For each node in the specified level, the function determines:
+ *  - The node’s orientation, based on its fan-in structure, gap spacing, and connection type.
+ *  - Whether new routing lines must be introduced, derived from lookup tables for buffer and fan-out configurations.
+ *
+ * @tparam Ntk  Logic network type.
+ * @tparam Lyt  Layout type.
+ * @param ntk       Logic network to analyze.
+ * @param node2pos  Mapping from network nodes to layout tile positions.
+ * @param lvl       Level index for which to compute the variables.
+ * @return          Tuple containing:
+ *                   - `orientation`: orientation values for each node in the level.
+ *                   - `new_lines`: flags indicating newly added routing lines.
+ */
 template <typename Ntk, typename Lyt>
 std::tuple<std::vector<uint64_t>, std::vector<uint64_t>>
-compute_pr_variables(const Ntk& ntk, const Lyt& lyt, mockturtle::node_map<mockturtle::signal<Lyt>, Ntk> node2pos,
-                     uint32_t lvl)
+compute_pr_variables(const Ntk& ntk, const mockturtle::node_map<mockturtle::signal<Lyt>, Ntk>& node2pos,
+                     const uint32_t& lvl)
 {
-    // ToDo: compute the starting orientation
     std::vector<uint64_t> orientation(ntk.rank_width(lvl));
     std::vector<uint64_t> new_lines(ntk.rank_width(lvl));
     // get the lookup tables for the gate types
@@ -340,10 +426,10 @@ compute_pr_variables(const Ntk& ntk, const Lyt& lyt, mockturtle::node_map<mocktu
 
     ntk.foreach_node_in_rank(
         lvl,
-        [&ntk, &node2pos, &lvl, &orientation, &new_lines, &buffer_lu, &fanout_lu](const auto& n, const auto& i)
+        [&ntk, &node2pos, &lvl, &orientation, &new_lines, &buffer_lu, &fanout_lu](const auto& n, const auto i)
         {
             // calculate the gap between the predecessors
-            uint64_t gap = calculate_predecessor_gap<Ntk, Lyt>(ntk, node2pos, lvl, n);
+            const auto gap = calculate_predecessor_gap<Ntk, Lyt>(ntk, node2pos, lvl, n);
 
             // needs gap and orientation as input
             if (ntk.fanin_size(n) == 2)  // complete
@@ -359,7 +445,7 @@ compute_pr_variables(const Ntk& ntk, const Lyt& lyt, mockturtle::node_map<mocktu
             else if (ntk.fanin_size(n) == 1)
             {
                 // allowed orientation Flag e = 0, s = 1, free = 2
-                const uint64_t allowed_orientation = calculate_allowed_orientation(ntk, n);
+                const auto allowed_orientation = calculate_allowed_orientation(ntk, n);
                 assert(allowed_orientation < 3);
 
                 // needs the type of connection (F1+2, F1, F2), allowed_orientation, gap,
@@ -367,18 +453,17 @@ compute_pr_variables(const Ntk& ntk, const Lyt& lyt, mockturtle::node_map<mocktu
                 if (ntk.is_fanout(n))
                 {
                     // calculate the type of connection F1+2 = 0, F1 = 1, F2 = 2, F0 = 3;
-                    const uint64_t fanout_connection_type = calculate_fanout_connection_type(ntk, n);
+                    const auto fanout_connection_type = calculate_fanout_connection_type(ntk, n);
                     assert(fanout_connection_type < 4);
                     if (i != 0)
                     {
-                        const std::pair<uint64_t, uint64_t> pair =
-                            fanout_lu[fanout_connection_type][allowed_orientation][gap][orientation[i - 1]];
+                        const auto& pair =
+                            fanout_lu.at(fanout_connection_type).at(allowed_orientation).at(gap).at(orientation[i - 1]);
                         orientation[i] = pair.first;
                         new_lines[i]   = pair.second;
                     }
                     else if (fanout_connection_type == 0 || fanout_connection_type == 2)
                     {
-                        // i == 0
                         orientation[i] = 1;
                     }
                 }
@@ -389,15 +474,15 @@ compute_pr_variables(const Ntk& ntk, const Lyt& lyt, mockturtle::node_map<mocktu
                     if (i != 0)
                     {
                         // Connected Flag
-                        uint64_t                            connected = calculate_connection(ntk, n);
-                        const std::pair<uint64_t, uint64_t> pair =
-                            buffer_lu[connected][allowed_orientation][gap][orientation[i - 1]];
+                        const auto  buffer_connection_type = calculate_buffer_connection_type(ntk, n);
+                        const auto& pair =
+                            buffer_lu.at(buffer_connection_type).at(allowed_orientation).at(gap).at(orientation[i - 1]);
+
                         orientation[i] = pair.first;
                         new_lines[i]   = pair.second;
                     }
                     else
                     {
-                        // i == 0
                         orientation[i] = calculate_start_orientation(ntk, lvl);
                     }
                 }
@@ -408,10 +493,19 @@ compute_pr_variables(const Ntk& ntk, const Lyt& lyt, mockturtle::node_map<mocktu
     return ret;
 }
 
+/**
+ * Collects the indices of all two-input nodes in a given level.
+ *
+ * @tparam Ntk Logic network type.
+ * @param ntk  Logic network to analyze.
+ * @param lvl  Level index to inspect.
+ * @return     Vector of node indices with two fan-ins in the specified level.
+ */
 template <typename Ntk>
-std::vector<std::size_t> compute_two_input_indices(const Ntk& ntk, uint64_t lvl)
+std::vector<std::size_t> compute_two_input_indices(const Ntk& ntk, const uint64_t& lvl)
 {
-    std::vector<std::size_t> two_input_indices;
+    std::vector<std::size_t> two_input_indices{};
+    two_input_indices.reserve(ntk.rank_width(lvl));
     ntk.foreach_node_in_rank(lvl,
                              [&ntk, &two_input_indices, &lvl](const auto& n, const auto& i)
                              {
@@ -423,12 +517,23 @@ std::vector<std::size_t> compute_two_input_indices(const Ntk& ntk, uint64_t lvl)
     return two_input_indices;
 }
 
+/**
+ * Computes the number of new routing lines required.
+ *
+ * @tparam Ntk  Logic network type.
+ * @tparam Lyt  Layout type.
+ * @param ntk       Logic network to analyze.
+ * @param node2pos  Mapping from network nodes to layout tile positions.
+ * @param lvl       Level index to inspect.
+ * @return          Vector of gap sizes (new line counts) for all two-input nodes in the level.
+ */
 template <typename Ntk, typename Lyt>
-std::vector<uint64_t> calculate_two_input_new_lines(const Ntk&                                          ntk,
-                                                    mockturtle::node_map<mockturtle::signal<Lyt>, Ntk>& node2pos,
-                                                    uint32_t                                            lvl)
+std::vector<uint64_t> calculate_two_input_new_lines(const Ntk&                                                ntk,
+                                                    const mockturtle::node_map<mockturtle::signal<Lyt>, Ntk>& node2pos,
+                                                    const uint32_t&                                           lvl)
 {
-    std::vector<uint64_t> cluster_new_lines;
+    std::vector<uint64_t> cluster_new_lines{};
+    cluster_new_lines.reserve(ntk.rank_width(lvl));
     ntk.foreach_node_in_rank(lvl,
                              [&ntk, &node2pos, &cluster_new_lines](const auto& n)
                              {
@@ -441,8 +546,8 @@ std::vector<uint64_t> calculate_two_input_new_lines(const Ntk&                  
                                      // compute the max_gap for two fan-ins of  anode
                                      const auto &pre1 = fc.fanin_nodes[0], &pre2 = fc.fanin_nodes[1];
 
-                                     auto pre1_t = static_cast<tile<Lyt>>(node2pos[pre1]),
-                                          pre2_t = static_cast<tile<Lyt>>(node2pos[pre2]);
+                                     const auto pre1_t = static_cast<tile<Lyt>>(node2pos[pre1]),
+                                                pre2_t = static_cast<tile<Lyt>>(node2pos[pre2]);
 
                                      cluster_new_lines.emplace_back(static_cast<uint64_t>(pre2_t.y - pre1_t.y - 1));
                                  }
@@ -450,22 +555,34 @@ std::vector<uint64_t> calculate_two_input_new_lines(const Ntk&                  
     return cluster_new_lines;
 }
 
+/**
+ * Balances the final x and y wiring coordinates across all nodes in a level.
+ *
+ * The function identifies the center node or cluster with the maximum routing demand and adjusts all x and y
+ * coordinates such that the total wiring length is symmetric around this center.
+ *
+ * @param x                     Vector of x-coordinates to be adjusted.
+ * @param y                     Vector of y-coordinates to be adjusted.
+ * @param two_input_indices     Indices of two-input nodes within the level.
+ * @param two_input_new_lines   Number of new routing lines associated with each two-input node.
+ */
+
 void adjust_final_values(std::vector<uint64_t>& x, std::vector<uint64_t>& y,
                          const std::vector<uint64_t>&    two_input_indices,
                          const std::vector<std::size_t>& two_input_new_lines)
 {
     // Find the max element in two_input_new_lines and its index
-    auto           max_it                   = std::max_element(two_input_new_lines.begin(), two_input_new_lines.end());
-    const uint64_t max_new_lines_two_inputs = *max_it;
-    const auto     max_new_lines_two_inputs_index =
-        static_cast<const size_t>(std::distance(two_input_new_lines.begin(), max_it));
+    const auto max_it                   = std::max_element(two_input_new_lines.begin(), two_input_new_lines.end());
+    const auto max_new_lines_two_inputs = *max_it;
+    const auto max_new_lines_two_inputs_index =
+        static_cast<const std::size_t>(std::distance(two_input_new_lines.begin(), max_it));
 
     // Find max sum in x + y and its index
-    auto max_xy_it = std::max_element(x.begin(), x.end(),
-                                      [&](std::size_t i, std::size_t j) { return (x[i] + y[i]) < (x[j] + y[j]); });
+    const auto max_xy_it = std::max_element(x.begin(), x.end(), [&](std::size_t i, std::size_t j)
+                                            { return (x[i] + y[i]) < (x[j] + y[j]); });
 
-    const uint64_t    max_new_lines = x[*max_xy_it] + y[*max_xy_it];
-    const std::size_t mnl_iterator  = *max_xy_it;
+    const auto max_new_lines = x[*max_xy_it] + y[*max_xy_it];
+    const auto mnl_iterator  = *max_xy_it;
 
     // Determine the center index
     uint64_t center = 0, max = 0;
@@ -493,8 +610,8 @@ void adjust_final_values(std::vector<uint64_t>& x, std::vector<uint64_t>& y,
         auto it = two_input_map.find(i);
         if (it != two_input_map.end())  // Two fan-in node (found in two_input_indices)
         {
-            const std::size_t idx  = it->second;  // Get the corresponding index
-            const uint64_t    diff = max - x[i] - y[i] - two_input_new_lines[idx];
+            const auto idx  = it->second;  // Get the corresponding index
+            const auto diff = max - x[i] - y[i] - two_input_new_lines[idx];
 
             if (i < center)
             {
@@ -511,7 +628,7 @@ void adjust_final_values(std::vector<uint64_t>& x, std::vector<uint64_t>& y,
         }
         else  // One fan-in node
         {
-            const uint64_t diff = max - x[i] - y[i];
+            const auto diff = max - x[i] - y[i];
 
             if (i < center)
             {
@@ -529,10 +646,25 @@ void adjust_final_values(std::vector<uint64_t>& x, std::vector<uint64_t>& y,
     }
 }
 
+/**
+ * Computes the x and y wiring coordinates for nodes in a given level.
+ *
+ * The function divides the level into clusters separated by two-input gates and computes the relative wire offsets
+ * within and between these clusters. It accounts for new routing lines, right and left propagation, and spacing
+ * adjustments between connected clusters.
+ *
+ * @tparam Ntk  Logic network type.
+ * @tparam Lyt  Layout type.
+ * @param ntk       Logic network to analyze.
+ * @param node2pos  Mapping from network nodes to layout tile positions.
+ * @param new_lines Vector of newly introduced routing lines for each node.
+ * @param lvl       Level index to process.
+ * @return          Pair of vectors representing x and y wiring coordinates for each node in the level.
+ */
 template <typename Ntk, typename Lyt>
 std::pair<std::vector<uint64_t>, std::vector<uint64_t>>
-compute_wiring(const Ntk& ntk, mockturtle::node_map<mockturtle::signal<Lyt>, Ntk>& node2pos,
-               const std::vector<uint64_t>& new_lines, uint64_t lvl)
+compute_wiring(const Ntk& ntk, const mockturtle::node_map<mockturtle::signal<Lyt>, Ntk>& node2pos,
+               const std::vector<uint64_t>& new_lines, const uint64_t& lvl)
 {
     // Initialize 2-input indices
     const auto two_input_indices   = compute_two_input_indices(ntk, lvl);
@@ -547,15 +679,6 @@ compute_wiring(const Ntk& ntk, mockturtle::node_map<mockturtle::signal<Lyt>, Ntk
 
     // Initialize the x and y vectors
     std::vector<uint64_t> cluster_new_lines(two_input_indices.size() + 1);
-
-    // Example
-    /*std::vector<uint64_t> two_input_indices = {0, 4, 9, 16, 20};
-    std::vector<uint64_t> two_input_new_lines = {0, 0, 2, 5, 0};
-    std::vector<uint64_t> x(21);
-    std::vector<uint64_t> y(21);
-    std::vector<uint64_t> cluster_new_lines(two_input_indices.size() + 1);
-    std::size_t cluster_index_start = 0;
-    std::vector<uint64_t> new_lines = {0, 0, 1, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0};*/
 
     // if there is no two input gate, then there is only one cluster
     if (two_input_indices.empty())
@@ -584,7 +707,7 @@ compute_wiring(const Ntk& ntk, mockturtle::node_map<mockturtle::signal<Lyt>, Ntk
         }
 
         // Compute x and y for the current cluster
-        for (std::size_t j = cluster_index_start; j < cluster_index_end; ++j)
+        for (auto j = cluster_index_start; j < cluster_index_end; ++j)
         {
             // adjust x values
             x[j] = std::accumulate(new_lines.begin() + static_cast<int>(j) + 1,
@@ -618,11 +741,9 @@ compute_wiring(const Ntk& ntk, mockturtle::node_map<mockturtle::signal<Lyt>, Ntk
 
     uint64_t propagate_left = 0;
     // propagate left (direction based on a 1D vector)
-    for (std::size_t i = two_input_indices.size(); i > 0; --i)
+    for (auto i = two_input_indices.size(); i > 0; --i)
     {
-        std::size_t cluster_index_end = 0;
-
-        cluster_index_end = two_input_indices[i - 1];
+         std::size_t cluster_index_end = two_input_indices[i - 1];
 
         if (i == 1)
         {
@@ -644,7 +765,7 @@ compute_wiring(const Ntk& ntk, mockturtle::node_map<mockturtle::signal<Lyt>, Ntk
             x[cluster_index_end] += propagate_left;
         }
 
-        for (std::size_t j = cluster_index_start; j < cluster_index_end; ++j)
+        for (auto j = cluster_index_start; j < cluster_index_end; ++j)
         {
             x[j] += propagate_left;
         }
@@ -656,29 +777,28 @@ compute_wiring(const Ntk& ntk, mockturtle::node_map<mockturtle::signal<Lyt>, Ntk
 }
 
 template <typename Lyt, typename Ntk>
-class orthogonal_planar_v2_impl
+class orthogonal_planar_impl
 {
   public:
-    orthogonal_planar_v2_impl(const Ntk& src, const orthogonal_physical_design_params& p,
-                              orthogonal_physical_design_stats& st) :
-            ntk{mockturtle::names_view(mockturtle::fanout_view(src))},
+    orthogonal_planar_impl(const Ntk& src, const orthogonal_physical_design_params& p,
+                           orthogonal_physical_design_stats& st) :
+            ntk{mockturtle::fanout_view(src)},
             ps{p},
             pst{st}
     {}
 
     Lyt run()
     {
+        using node = typename Ntk::node;
         // measure run time
         mockturtle::stopwatch stop{pst.time_total};
-        //
-        using node = typename Ntk::node;
 
         mockturtle::node_map<mockturtle::signal<Lyt>, decltype(ntk)> node2pos{ntk};
 
-        aspect_ratio<Lyt> size_ = {0, 0};
+        aspect_ratio<Lyt> aspect_ratio = {0, 0};
 
         // instantiate the layout
-        Lyt layout{size_, twoddwave_clocking<Lyt>(ps.number_of_clock_phases)};
+        Lyt layout{aspect_ratio, twoddwave_clocking<Lyt>(ps.number_of_clock_phases)};
 
         // reserve PI nodes without positions
         auto pi2node = reserve_input_nodes(layout, ntk);
@@ -696,9 +816,10 @@ class orthogonal_planar_v2_impl
 
         for (uint32_t lvl = 0; lvl < ntk.depth() + 1; lvl++)
         {
-            const auto variable_tuple = compute_pr_variables(ntk, layout, node2pos, lvl);
-            const auto orientation    = std::get<0>(variable_tuple);
-            const auto new_lines      = std::get<1>(variable_tuple);
+            const auto variable_tuple =
+                compute_pr_variables<mockturtle::fanout_view<Ntk>, Lyt>(ntk, node2pos, lvl);
+            const auto orientation = std::get<0>(variable_tuple);
+            const auto new_lines   = std::get<1>(variable_tuple);
 
             const auto  wiring = compute_wiring<decltype(ntk), Lyt>(ntk, node2pos, new_lines, lvl);
             const auto& x      = wiring.first;
@@ -840,23 +961,20 @@ class orthogonal_planar_v2_impl
                 });
         }
 
-        // layout.resize({first_pos.x + 1, place_t.y +3, 0});
-        // debug::write_dot_layout(layout);
-
-        std::unordered_map<int, int> countMap;
+        std::unordered_map<int, int> count_map;
         int                          add_line = 0;
         // the number of outputs on a node is limited to 2, due to fanout substitution
         ntk.foreach_po(
-            [&](const auto& po)
+            [this, &layout, &first_pos, &place_t, &node2pos, &count_map, &add_line](const auto& po)
             {
                 if (!ntk.is_constant(po))
                 {
                     const auto n_s     = node2pos[po];
                     auto       po_tile = static_cast<tile<Lyt>>(n_s);
-                    if (countMap[po] < 2)  // Check if the count is less than 2
+                    if (count_map[po] < 2)  // Check if the count is less than 2
                     {
                         // Adjust the position based on whether it's the first or second occurrence
-                        if (countMap[po] == 1)
+                        if (count_map[po] == 1)
                         {
                             if (po_tile.y == place_t.y)
                             {
@@ -872,7 +990,7 @@ class orthogonal_planar_v2_impl
                                          ntk.has_output_name(po_counter) ? ntk.get_output_name(po_counter++) :
                                                                            fmt::format("po{}", po_counter++),
                                          po_tile);
-                        countMap[po]++;
+                        count_map[po]++;
                     }
                     else
                     {
@@ -882,8 +1000,6 @@ class orthogonal_planar_v2_impl
             });
 
         layout.resize({first_pos.x + 1, place_t.y + add_line, 0});
-
-        // layout.resize({10, 10, 0});
 
         // restore possibly set signal names
         restore_names(ntk, layout, node2pos);
@@ -898,7 +1014,7 @@ class orthogonal_planar_v2_impl
     }
 
   private:
-    mockturtle::names_view<mockturtle::fanout_view<Ntk>> ntk;
+    mockturtle::fanout_view<Ntk> ntk;
 
     orthogonal_physical_design_params ps;
     orthogonal_physical_design_stats& pst;
@@ -909,11 +1025,24 @@ class orthogonal_planar_v2_impl
 }  // namespace detail
 
 /**
- * Description
+ * This algorithm performs a fully planar physical design flow for Field-Coupled Nanocomputing (FCN) circuits. It takes
+ * as input a logic network with a planar embedding, represented as a `mutable_rank_view`, and preserves this embedding
+ * during placement and routing.
+ *
+ * In this approach, each logic level of the network is mapped to a diagonal in the layout, while nodes within the same
+ * level are placed according to their rank positions in the planar embedding. This ensures a crossing-free, scalable,
+ * and layout-consistent mapping from logic to physical design.
+ *
+ * @tparam Lyt  Gate-level layout type.
+ * @tparam Ntk  Logic network type.
+ * @param ntk   Planar logic network to be placed and routed.
+ * @param ps    Configuration parameters for the physical design process.
+ * @param pst   Optional statistics object to collect runtime and layout metrics.
+ * @return      A fully planar gate-level layout of type `Lyt`.
  */
 template <typename Lyt, typename Ntk>
-Lyt orthogonal_planar_v2(const Ntk& ntk, orthogonal_physical_design_params ps = {},
-                         orthogonal_physical_design_stats* pst = nullptr)
+Lyt orthogonal_planar(const Ntk& ntk, orthogonal_physical_design_params ps = {},
+                      orthogonal_physical_design_stats* pst = nullptr)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
     static_assert(mockturtle::is_network_type_v<Ntk>,
@@ -929,11 +1058,11 @@ Lyt orthogonal_planar_v2(const Ntk& ntk, orthogonal_physical_design_params ps = 
     // check for planarity
     if (!check_planarity(ntk))
     {
-        throw std::runtime_error("Input network has to be planar");
+        throw std::invalid_argument("Input network has to be planar");
     }
 
-    orthogonal_physical_design_stats            st{};
-    detail::orthogonal_planar_v2_impl<Lyt, Ntk> p{ntk, ps, st};
+    orthogonal_physical_design_stats         st{};
+    detail::orthogonal_planar_impl<Lyt, Ntk> p{ntk, ps, st};
 
     auto result = p.run();
 
