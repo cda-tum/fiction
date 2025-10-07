@@ -5186,7 +5186,7 @@ Returns:
 static const char *__doc_fiction_detail_calculate_allowed_orientation =
 R"doc(Determines the allowed orientation of a node based on its predecessor.
 For nodes driven by a fan-out, the orientation is defined by their
-relative rank position among the fan-out’s successors.
+relative rank position among the fan-out's successors.
 
 Returns: - 0: Node is the first (east) successor of its predecessor. -
 1: Node is the second (west) successor of its predecessor. - 2: Node
@@ -5202,7 +5202,7 @@ Parameter ``n``:
     Node for which to determine the allowed orientation.
 
 Returns:
-    Orientation code (0–2) describing the node’s relative position.)doc";
+    Orientation code (0–2) describing the node's relative position.)doc";
 
 static const char *__doc_fiction_detail_calculate_buffer_connection_type =
 R"doc(Computes the buffer connection type for a given node. Determines
@@ -5332,7 +5332,7 @@ Parameter ``lvl``:
     Level index for which to compute the starting orientation.
 
 Returns:
-    Orientation code (0, 1, or 3) defining the level’s initial
+    Orientation code (0, 1, or 3) defining the level's initial
     direction.)doc";
 
 static const char *__doc_fiction_detail_calculate_two_input_new_lines =
