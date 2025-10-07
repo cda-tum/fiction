@@ -308,7 +308,7 @@ uint64_t calculate_buffer_connection_type(const Ntk& ntk, const mockturtle::node
 
 /**
  * Determines the allowed orientation of a node based on its predecessor.
- * For nodes driven by a fan-out, the orientation is defined by their relative rank position among the fan-out’s
+ * For nodes driven by a fan-out, the orientation is defined by their relative rank position among the fan-out's
  * successors.
  *
  * Returns:
@@ -319,7 +319,7 @@ uint64_t calculate_buffer_connection_type(const Ntk& ntk, const mockturtle::node
  * @tparam Ntk Logic network type.
  * @param ntk  Logic network containing the node.
  * @param n    Node for which to determine the allowed orientation.
- * @return     Orientation code (0–2) describing the node’s relative position.
+ * @return     Orientation code (0–2) describing the node's relative position.
  */
 template <typename Ntk>
 uint64_t calculate_allowed_orientation(const Ntk& ntk, const mockturtle::node<Ntk>& n)
@@ -355,7 +355,7 @@ uint64_t calculate_allowed_orientation(const Ntk& ntk, const mockturtle::node<Nt
  * @tparam Ntk Logic network type.
  * @param ntk  Logic network to analyze.
  * @param lvl  Level index for which to compute the starting orientation.
- * @return     Orientation code (0, 1, or 3) defining the level’s initial direction.
+ * @return     Orientation code (0, 1, or 3) defining the level's initial direction.
  */
 template <typename Ntk>
 int calculate_start_orientation(const Ntk& ntk, const uint32_t& lvl)
@@ -401,7 +401,7 @@ int calculate_start_orientation(const Ntk& ntk, const uint32_t& lvl)
  * Computes orientation and routing line variables for a given network level.
  *
  * For each node in the specified level, the function determines:
- *  - The node’s orientation, based on its fan-in structure, gap spacing, and connection type.
+ *  - The node's orientation, based on its fan-in structure, gap spacing, and connection type.
  *  - Whether new routing lines must be introduced, derived from lookup tables for buffer and fan-out configurations.
  *
  * @tparam Ntk  Logic network type.
