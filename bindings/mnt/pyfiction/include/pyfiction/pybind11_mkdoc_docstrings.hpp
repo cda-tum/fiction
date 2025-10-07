@@ -9944,7 +9944,31 @@ static const char *__doc_fiction_detail_orthogonal_impl_pst = R"doc()doc";
 
 static const char *__doc_fiction_detail_orthogonal_impl_run = R"doc()doc";
 
-static const char *__doc_fiction_detail_orthogonal_planar_impl = R"doc()doc";
+static const char *__doc_fiction_detail_orthogonal_planar_impl =
+R"doc(Implements the general planar layout generation algorithm.
+
+The algorithm performs placement and routing level by level, starting
+from the primary inputs and proceeding toward the outputs. For each
+level, node placement depends on the orientation and excess wiring
+computed in auxiliary routines such as `compute_pr_variables` and
+`compute_wiring`. Nodes are positioned according to their fan-in
+structure and routing constraints to ensure planarity of the resulting
+layout.
+
+Template parameter ``Lyt``:
+    Gate-level layout type.
+
+Template parameter ``Ntk``:
+    Logic network type.
+
+Parameter ``src``:
+    Source network to be placed and routed.
+
+Parameter ``p``:
+    Parameters controlling layout generation and clocking.
+
+Parameter ``st``:
+    Statistics object used to collect runtime and layout information.)doc";
 
 static const char *__doc_fiction_detail_orthogonal_planar_impl_ntk = R"doc()doc";
 
