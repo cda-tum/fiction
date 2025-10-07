@@ -16749,12 +16749,8 @@ R"doc(Constructs the crossing minimization implementation object.
 Parameter ``src``:
     The logic network on which to perform crossing minimization.
 
-Parameter ``optimize``:
-    Whether to run the optimization procedure or only count current
-    crossings.
-
 Parameter ``p``:
-    Configuration parameters for the algorithm.
+    Configuration parameters for the algorithm (e.g., `optimize`)
 
 Parameter ``st``:
     Statistics object to store the resulting number of crossings.)doc";
