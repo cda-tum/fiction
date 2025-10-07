@@ -367,7 +367,8 @@ template <typename Ntk>
 class node_duplication_planarization_impl
 {
   public:
-    [[maybe_unused]] node_duplication_planarization_impl(const Ntk& src, const node_duplication_planarization_params& p) :
+    [[maybe_unused]] node_duplication_planarization_impl(const Ntk&                                   src,
+                                                         const node_duplication_planarization_params& p) :
             ntk(src),
             ps{p}
     {}
@@ -675,8 +676,7 @@ class node_duplication_planarization_impl
         virtual_ntk.set_all_ranks(ntk_lvls_new);
 
         // restore possibly set signal names
-        restore_network_name(ntk, virtual_ntk);
-        restore_output_names(ntk, virtual_ntk);
+        restore_names(ntk, virtual_ntk);
 
         return virtual_ntk;
     }
@@ -725,8 +725,8 @@ class node_duplication_planarization_impl
  * @return A view of the planarized virtual_pi_network created in the format of mutable_rank_view.
  */
 template <typename NtkSrc>
-[[nodiscard]] virtual_pi_network<NtkSrc>
-node_duplication_planarization(const NtkSrc& ntk_src, node_duplication_planarization_params ps = {})
+[[nodiscard]] virtual_pi_network<NtkSrc> node_duplication_planarization(const NtkSrc&                         ntk_src,
+                                                                        node_duplication_planarization_params ps = {})
 {
     static_assert(mockturtle::is_network_type_v<NtkSrc>, "NtkSrc is not a network type");
     static_assert(mockturtle::has_create_node_v<NtkSrc>, "NtkSrc does not implement the create_node function");
