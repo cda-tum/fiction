@@ -12,6 +12,7 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
+#include <limits>
 #include <unordered_map>
 #include <vector>
 
@@ -93,8 +94,7 @@ class mincross_impl
      * Constructs the crossing minimization implementation object.
      *
      * @param src The logic network on which to perform crossing minimization.
-     * @param optimize Whether to run the optimization procedure or only count current crossings.
-     * @param p Configuration parameters for the algorithm.
+     * @param p Configuration parameters for the algorithm (e.g., `optimize`)
      * @param st Statistics object to store the resulting number of crossings.
      */
     mincross_impl(const Ntk& src, const mincross_params p, mincross_stats& st) :
