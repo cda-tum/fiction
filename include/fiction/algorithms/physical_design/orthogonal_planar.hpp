@@ -430,9 +430,8 @@ compute_pr_variables(const Ntk& ntk, const mockturtle::node_map<mockturtle::sign
         {
             // calculate the gap between the predecessors
             const auto gap = calculate_predecessor_gap<Ntk, Lyt>(ntk, node2pos, lvl, n);
-
-            // needs gap and orientation as input
-            if (ntk.fanin_size(n) == 2)  // complete
+            // calculate the orientation and new_lines depending on the type of nodes and available space
+            if (ntk.fanin_size(n) == 2)
             {
                 if (i != 0)
                 {
@@ -558,15 +557,14 @@ std::vector<uint64_t> calculate_two_input_new_lines(const Ntk&                  
 /**
  * Balances the final x and y wiring coordinates across all nodes in a level.
  *
- * The function identifies the center node or cluster with the maximum routing demand and adjusts all x and y
- * coordinates such that the total wiring length is symmetric around this center.
+ * The function identifies the minimal routing demand, which means the closest diagonal, where all nodes can be placed
+ * and can be routed without conflicts.
  *
  * @param x                     Vector of x-coordinates to be adjusted.
  * @param y                     Vector of y-coordinates to be adjusted.
  * @param two_input_indices     Indices of two-input nodes within the level.
  * @param two_input_new_lines   Number of new routing lines associated with each two-input node.
  */
-
 void adjust_final_values(std::vector<uint64_t>& x, std::vector<uint64_t>& y,
                          const std::vector<uint64_t>&    two_input_indices,
                          const std::vector<std::size_t>& two_input_new_lines)
@@ -807,17 +805,14 @@ class orthogonal_planar_impl
         using node = typename Ntk::node;
         // measure run time
         mockturtle::stopwatch stop{pst.time_total};
-
+        // initialize mapping from nodes to positions
         mockturtle::node_map<mockturtle::signal<Lyt>, decltype(ntk)> node2pos{ntk};
-
+        // initialize the aspect ratio
         aspect_ratio<Lyt> aspect_ratio = {0, 0};
-
         // instantiate the layout
         Lyt layout{aspect_ratio, twoddwave_clocking<Lyt>(ps.number_of_clock_phases)};
-
         // reserve PI nodes without positions
         auto pi2node = reserve_input_nodes(layout, ntk);
-
         // first x-pos to use for gates is 1 because PIs take up the 0th column
         tile<Lyt> latest_pos{1, 0};
 
@@ -828,7 +823,7 @@ class orthogonal_planar_impl
 
         tile<Lyt> place_t{0, 0};
         tile<Lyt> first_pos = {ntk.num_pis() - 1, 0};
-
+        // place and route the nodes in ascending level order
         for (uint32_t lvl = 0; lvl < ntk.depth() + 1; lvl++)
         {
             const auto variable_tuple = compute_pr_variables<mockturtle::fanout_view<Ntk>, Lyt>(ntk, node2pos, lvl);
@@ -838,7 +833,7 @@ class orthogonal_planar_impl
             const auto  wiring = compute_wiring<decltype(ntk), Lyt>(ntk, node2pos, new_lines, lvl);
             const auto& x      = wiring.first;
             const auto& y      = wiring.second;
-
+            // place and route the nodes in ascending rank order
             ntk.foreach_node_in_rank(
                 lvl,
                 [this, &layout, &pi2node, &node2pos, &orientation, &first_pos, &place_t, &x, &y](const auto& n,
@@ -933,7 +928,8 @@ class orthogonal_planar_impl
                                 first_pos = place_t;
                             }
                         }
-                        else  // if node has two fanins (or three fanins with one of them being constant)
+                        // if node has two fanins (or three fanins with one of them being constant)
+                        else
                         {
                             const auto &pre1 = fc.fanin_nodes[0], pre2 = fc.fanin_nodes[1];
 
@@ -975,6 +971,7 @@ class orthogonal_planar_impl
                 });
         }
 
+        // place and route POs
         std::unordered_map<int, int> count_map;
         int                          add_line = 0;
         // the number of outputs on a node is limited to 2, due to fanout substitution
