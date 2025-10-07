@@ -4982,9 +4982,9 @@ static const char *__doc_fiction_detail_adjust_final_values =
 R"doc(Balances the final x and y wiring coordinates across all nodes in a
 level.
 
-The function identifies the center node or cluster with the maximum
-routing demand and adjusts all x and y coordinates such that the total
-wiring length is symmetric around this center.
+The function identifies the minimal routing demand, which means the
+closest diagonal, where all nodes can be placed and can be routed
+without conflicts.
 
 Parameter ``x``:
     Vector of x-coordinates to be adjusted.
