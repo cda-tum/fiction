@@ -743,7 +743,7 @@ compute_wiring(const Ntk& ntk, const mockturtle::node_map<mockturtle::signal<Lyt
     // propagate left (direction based on a 1D vector)
     for (auto i = two_input_indices.size(); i > 0; --i)
     {
-         std::size_t cluster_index_end = two_input_indices[i - 1];
+        std::size_t cluster_index_end = two_input_indices[i - 1];
 
         if (i == 1)
         {
@@ -775,6 +775,21 @@ compute_wiring(const Ntk& ntk, const mockturtle::node_map<mockturtle::signal<Lyt
 
     return std::make_pair(x, y);
 }
+
+/**
+ * Implements the general planar layout generation algorithm.
+ *
+ * The algorithm performs placement and routing level by level, starting from the primary inputs and proceeding toward
+ * the outputs. For each level, node placement depends on the orientation and excess wiring computed in auxiliary
+ * routines such as `compute_pr_variables` and `compute_wiring`. Nodes are positioned according to their fan-in
+ * structure and routing constraints to ensure planarity of the resulting layout.
+ *
+ * @tparam Lyt Gate-level layout type.
+ * @tparam Ntk Logic network type.
+ * @param src Source network to be placed and routed.
+ * @param p Parameters controlling layout generation and clocking.
+ * @param st Statistics object used to collect runtime and layout information.
+ */
 
 template <typename Lyt, typename Ntk>
 class orthogonal_planar_impl
@@ -816,10 +831,9 @@ class orthogonal_planar_impl
 
         for (uint32_t lvl = 0; lvl < ntk.depth() + 1; lvl++)
         {
-            const auto variable_tuple =
-                compute_pr_variables<mockturtle::fanout_view<Ntk>, Lyt>(ntk, node2pos, lvl);
-            const auto orientation = std::get<0>(variable_tuple);
-            const auto new_lines   = std::get<1>(variable_tuple);
+            const auto variable_tuple = compute_pr_variables<mockturtle::fanout_view<Ntk>, Lyt>(ntk, node2pos, lvl);
+            const auto orientation    = std::get<0>(variable_tuple);
+            const auto new_lines      = std::get<1>(variable_tuple);
 
             const auto  wiring = compute_wiring<decltype(ntk), Lyt>(ntk, node2pos, new_lines, lvl);
             const auto& x      = wiring.first;
