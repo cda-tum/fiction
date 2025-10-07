@@ -1662,7 +1662,7 @@ template <typename Lyt>
 void write_mol_qca_layout_svg(const Lyt& lyt, std::ostream& os, const write_qca_layout_svg_params& ps = {})
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    // static_assert(has_qca_technology_v<Lyt>, "Lyt must be a QCA layout");
+    static_assert(has_mol_qca_technology_v<Lyt>, "Lyt must be a molQCA layout");
     static_assert(std::is_same_v<coordinate<Lyt>, offset::ucoord_t>, "Lyt must use unsigned Cartesian coordinates");
 
     detail::write_mol_qca_layout_svg_impl<Lyt> p{lyt, os, ps};
