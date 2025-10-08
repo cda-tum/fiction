@@ -15770,11 +15770,21 @@ static const char *__doc_fiction_hexagonalization_stats = R"doc(This struct stor
 
 static const char *__doc_fiction_hexagonalization_stats_duration = R"doc(Runtime of the hexagonalization process.)doc";
 
+static const char *__doc_fiction_hexagonalization_stats_num_crossings = R"doc(Number of crossings.)doc";
+
+static const char *__doc_fiction_hexagonalization_stats_num_gates = R"doc(Number of gates.)doc";
+
+static const char *__doc_fiction_hexagonalization_stats_num_wires = R"doc(Number of wires.)doc";
+
 static const char *__doc_fiction_hexagonalization_stats_report =
 R"doc(Reports the statistics to the given output stream.
 
 Parameter ``out``:
     Output stream.)doc";
+
+static const char *__doc_fiction_hexagonalization_stats_x_size = R"doc(Layout width.)doc";
+
+static const char *__doc_fiction_hexagonalization_stats_y_size = R"doc(Layout height.)doc";
 
 static const char *__doc_fiction_high_degree_fanin_exception =
 R"doc(Exception class that can be thrown if some network exceeds a legal
@@ -22693,7 +22703,13 @@ Returns:
 
 static const char *__doc_fiction_wiring_reduction =
 R"doc(A scalable wiring reduction algorithm for 2DDWave-clocked layouts
-based on A* path finding.
+based on A* path finding as originally proposed in \"Late Breaking
+Results: Wiring Reduction for Field-coupled Nanotechnologies\" by S.
+Hofmann, M. Walter, and R. Wille in DAC 2024
+(https://dl.acm.org/doi/10.1145/3649329.3663491) and extended in
+\"Efficient and Scalable Post-Layout Optimization for Field-coupled
+Nanotechnologies\" by S. Hofmann, M. Walter, and R. Wille in TCAD 2025
+(https://ieeexplore.ieee.org/document/10916761).
 
 The core concept revolves around the selective removal of excess
 wiring by cutting them from a layout, contingent upon the ability to

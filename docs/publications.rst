@@ -205,7 +205,7 @@ Furthermore, if you use any of the design automation algorithms, please consider
         @article{drewniok2025quickcell,
           title={{QuickCell: Fast Automatic Design of Standard Cells for Silicon Dangling Bond Logic}},
           author={Drewniok, Jan and Walter, Marcel and Ng, Samuel Sze and Walus, Konrad and Wille, Robert},
-          journal={IEEE Transactions on Computer Aided Design of Integrated Circuits and Systems (TCAD)},
+          journal={IEEE Transactions on Computer-Aided Design of Integrated Circuits and Systems (TCAD)},
           year={2025}
         }
 
@@ -241,11 +241,14 @@ Furthermore, if you use any of the design automation algorithms, please consider
 
     .. code-block:: tex
 
-        @inproceedings{hofmann2025scalablepostlayout,
+        @article{hofmann2025scalablepostlayout,
           title={{Efficient and Scalable Post-Layout Optimization for Field-coupled Nanotechnologies}},
           author={Hofmann, Simon and Walter, Marcel and Wille, Robert},
           journal={IEEE Transactions on Computer-Aided Design of Integrated Circuits and Systems (TCAD)},
           year={2025},
+          volume={44},
+          number={10},
+          pages={3790--3803},
           doi={10.1109/TCAD.2025.3549354}
         }
 
