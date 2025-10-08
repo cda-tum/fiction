@@ -145,6 +145,31 @@ GateLyt or_not_gate_layout() noexcept
 }
 
 template <typename GateLyt>
+GateLyt and_or_inv_gate_layout() noexcept
+{
+    GateLyt layout{typename GateLyt::aspect_ratio{4, 2, 0}, fiction::twoddwave_clocking<GateLyt>()};
+
+    const auto x1 = layout.create_pi("x1", {0, 2});
+    const auto x2 = layout.create_pi("x2", {1, 0});
+    const auto x3 = layout.create_pi("x3", {2, 0});
+
+    const auto n1 = layout.create_not(x1, {1, 2});
+
+    const auto b1 = layout.create_buf(x2, {1, 1});
+    const auto b2 = layout.create_buf(b1, {2, 1});
+
+    const auto n2 = layout.create_not(x3, {3, 0});
+
+    const auto o1 = layout.create_or(n1, b2, {2, 2});
+    const auto a1 = layout.create_and(n2, b2, {3, 1});
+    const auto a2 = layout.create_and(o1, a1, {3, 2});
+
+    layout.create_po(a2, "f1", {4, 2});
+
+    return layout;
+}
+
+template <typename GateLyt>
 GateLyt use_and_gate_layout() noexcept
 {
     GateLyt layout{typename GateLyt::aspect_ratio{3, 3, 0}, fiction::use_clocking<GateLyt>()};

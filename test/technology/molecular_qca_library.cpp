@@ -5,6 +5,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "../utils/blueprints/layout_blueprints.hpp"
+#include "fiction/utils/debug/network_writer.hpp"
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
@@ -81,11 +82,27 @@ TEST_CASE("Setting up input ports and gates", "[molecular-qca-library]")
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '}
     }})};
 
+    static constexpr const molecular_qca_library::fcn_gate bent_inverter{
+    molecular_qca_library::cell_list_to_gate<char>(
+    {{
+        {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'a', 'a', 'b', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'a', 'a', 'b', ' ', 'd', 'd'},
+        {' ', ' ', ' ', ' ', 'a', 'a', ' ', 'c', 'c', 'd'},
+        {' ', ' ', ' ', ' ', 'b', 'b', ' ', 'c', 'c', 'd'},
+        {' ', ' ', ' ', ' ', 'b', 'b', 'b', ' ', 'd', 'd'},
+        {' ', ' ', ' ', ' ', 'b', 'b', 'b', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
+    }})};
+
     // clang-format on
 
     CHECK(molecular_qca_library::set_up_gate(layout, {0, 1}) == molecular_qca_library::rotate_90(primary_input_port));
     CHECK(molecular_qca_library::set_up_gate(layout, {1, 0}) == molecular_qca_library::rotate_180(primary_input_port));
     CHECK(molecular_qca_library::set_up_gate(layout, {1, 1}) == molecular_qca_library::rotate_90(disjunction));
+    CHECK(molecular_qca_library::set_up_gate(layout, {1, 2}) == bent_inverter);
     CHECK(molecular_qca_library::set_up_gate(layout, {2, 2}) == molecular_qca_library::rotate_270(primary_output_port));
 }
 
@@ -242,4 +259,165 @@ TEST_CASE("Setting up fanouts", "[molecular-qca-library]")
     CHECK(molecular_qca_library::set_up_gate(layout, {1, 1}) == molecular_qca_library::rotate_180(fanout));
     CHECK(molecular_qca_library::set_up_gate(layout, {2, 1}) == molecular_qca_library::rotate_90(fanout_d));
     CHECK(molecular_qca_library::set_up_gate(layout, {2, 2}) == molecular_qca_library::rotate_270(bent_wire));
+}
+
+TEST_CASE("Setting up and or inv", "[molecular-qca-library]")
+{
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+
+    auto layout = blueprints::and_or_inv_gate_layout<gate_layout>();
+
+    fiction::debug::write_dot_layout(layout);
+
+    // clang-format off
+
+    static constexpr const molecular_qca_library::fcn_gate primary_input_port{
+    molecular_qca_library::cell_list_to_gate<char>(
+    {{
+        {' ', ' ', ' ', ' ', 'i', 'i', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
+    }})};
+
+    static constexpr const molecular_qca_library::fcn_gate primary_output_port{
+    molecular_qca_library::cell_list_to_gate<char>(
+    {{
+        {' ', ' ', ' ', ' ', 'o', 'o', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
+    }})};
+
+    static constexpr const molecular_qca_library::fcn_gate straight_inverter{
+    molecular_qca_library::cell_list_to_gate<char>(
+    {{
+        {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
+        {' ', ' ', 'b', 'b', 'a', 'a', 'b', 'b', ' ', ' '},
+        {' ', ' ', 'b', 'b', 'a', 'a', 'b', 'b', ' ', ' '},
+        {' ', ' ', 'b', 'b', ' ', ' ', 'b', 'b', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'c', 'c', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', 'd', 'c', 'c', 'd', ' ', ' ', ' '},
+        {' ', ' ', ' ', 'd', 'd', 'd', 'd', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '}
+    }})};
+
+    static constexpr const molecular_qca_library::fcn_gate bent_inverter{
+    molecular_qca_library::cell_list_to_gate<char>(
+    {{
+        {' ', ' ', ' ', 'd', 'd', 'd', 'd', ' ', ' ', ' '},
+        {' ', ' ', ' ', 'd', 'c', 'c', 'd', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'c', 'c', ' ', ' ', ' ', ' '},
+        {' ', ' ', 'b', 'b', ' ', ' ', 'b', 'b', ' ', ' '},
+        {' ', ' ', 'b', 'b', 'b', 'a', 'a', 'a', 'a', 'a'},
+        {' ', ' ', 'b', 'b', 'b', 'a', 'a', 'a', 'a', 'a'},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
+    }})};
+
+    static constexpr const molecular_qca_library::fcn_gate conjunction{
+    molecular_qca_library::cell_list_to_gate<char>(
+    {{
+        {' ', ' ', ' ', ' ', '0', '0', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', 'b', 'b', 'b', 'b', ' ', ' ', ' '},
+        {'d', 'd', 'c', 'b', 'b', 'b', 'b', 'a', 'a', 'a'},
+        {'d', 'd', 'c', 'b', 'b', 'b', 'b', 'a', 'a', 'a'},
+        {' ', ' ', ' ', 'b', 'b', 'b', 'b', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '}
+    }})};
+
+    static constexpr const molecular_qca_library::fcn_gate conjunction_r{
+    molecular_qca_library::cell_list_to_gate<char>(
+    {{
+        {' ', ' ', ' ', ' ', '0', '0', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', 'b', 'b', 'b', 'b', ' ', ' ', ' '},
+        {'a', 'a', 'a', 'b', 'b', 'b', 'b', 'c', 'd', 'd'},
+        {'a', 'a', 'a', 'b', 'b', 'b', 'b', 'c', 'd', 'd'},
+        {' ', ' ', ' ', 'b', 'b', 'b', 'b', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '}
+    }})};
+
+    static constexpr const molecular_qca_library::fcn_gate disjunction{
+    molecular_qca_library::cell_list_to_gate<char>(
+    {{
+        {' ', ' ', ' ', ' ', '1', '1', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', 'b', 'b', 'b', 'b', ' ', ' ', ' '},
+        {'d', 'd', 'c', 'b', 'b', 'b', 'b', 'a', 'a', 'a'},
+        {'d', 'd', 'c', 'b', 'b', 'b', 'b', 'a', 'a', 'a'},
+        {' ', ' ', ' ', 'b', 'b', 'b', 'b', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '}
+    }})};
+
+    static constexpr const molecular_qca_library::fcn_gate fanout{
+    molecular_qca_library::cell_list_to_gate<char>(
+    {{
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {'a', 'a', 'b', 'b', 'c', 'c', 'd', 'd', 'd', 'd'},
+        {'a', 'a', 'b', 'b', 'c', 'c', 'd', 'd', 'd', 'd'},
+        {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '}
+    }})};
+
+    static constexpr const molecular_qca_library::fcn_gate bent_wire{
+    molecular_qca_library::cell_list_to_gate<char>(
+    {{
+        {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'b', 'b', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'b', 'b', 'c', 'c', 'd', 'd'},
+        {' ', ' ', ' ', ' ', 'b', 'b', 'c', 'c', 'd', 'd'},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
+    }})};
+
+    // clang-format on
+
+    CHECK(molecular_qca_library::set_up_gate(layout, {0, 2}) == molecular_qca_library::rotate_90(primary_input_port));
+    CHECK(molecular_qca_library::set_up_gate(layout, {1, 0}) == molecular_qca_library::rotate_180(primary_input_port));
+    CHECK(molecular_qca_library::set_up_gate(layout, {2, 0}) == molecular_qca_library::rotate_90(primary_input_port));
+
+    CHECK(molecular_qca_library::set_up_gate(layout, {1, 2}) == molecular_qca_library::rotate_270(straight_inverter));
+    CHECK(molecular_qca_library::set_up_gate(layout, {1, 1}) == bent_wire);
+    CHECK(molecular_qca_library::set_up_gate(layout, {2, 1}) == fanout);
+    CHECK(molecular_qca_library::set_up_gate(layout, {3, 0}) == molecular_qca_library::rotate_180(bent_inverter));
+    CHECK(molecular_qca_library::set_up_gate(layout, {2, 2}) == molecular_qca_library::rotate_180(disjunction));
+    CHECK(molecular_qca_library::set_up_gate(layout, {3, 1}) == molecular_qca_library::rotate_90(conjunction_r));
+    CHECK(molecular_qca_library::set_up_gate(layout, {3, 2}) == molecular_qca_library::rotate_180(conjunction));
+    CHECK(molecular_qca_library::set_up_gate(layout, {4, 2}) == molecular_qca_library::rotate_270(primary_output_port));
 }

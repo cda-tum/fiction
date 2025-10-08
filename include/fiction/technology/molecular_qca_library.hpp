@@ -215,6 +215,34 @@ class molecular_qca_library : public fcn_gate_library<mol_qca_technology, 10, 10
         {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '}
     }})};
 
+    static constexpr const fcn_gate BENT_INVERTER{cell_list_to_gate<char>(
+    {{
+        {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'a', 'a', 'b', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'a', 'a', 'b', ' ', 'd', 'd'},
+        {' ', ' ', ' ', ' ', 'a', 'a', ' ', 'c', 'c', 'd'},
+        {' ', ' ', ' ', ' ', 'b', 'b', ' ', 'c', 'c', 'd'},
+        {' ', ' ', ' ', ' ', 'b', 'b', 'b', ' ', 'd', 'd'},
+        {' ', ' ', ' ', ' ', 'b', 'b', 'b', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
+    }})};
+
+    static constexpr const fcn_gate BENT_INVERTER_R{cell_list_to_gate<char>(
+    {{
+        {' ', ' ', ' ', 'd', 'd', 'd', 'd', ' ', ' ', ' '},
+        {' ', ' ', ' ', 'd', 'c', 'c', 'd', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'c', 'c', ' ', ' ', ' ', ' '},
+        {' ', ' ', 'b', 'b', ' ', ' ', 'b', 'b', ' ', ' '},
+        {' ', ' ', 'b', 'b', 'b', 'a', 'a', 'a', 'a', 'a'},
+        {' ', ' ', 'b', 'b', 'b', 'a', 'a', 'a', 'a', 'a'},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
+    }})};
+
     static constexpr const fcn_gate CONJUNCTION{cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', '0', '0', ' ', ' ', ' ', ' '},
@@ -478,7 +506,16 @@ class molecular_qca_library : public fcn_gate_library<mol_qca_technology, 10, 10
         {{{}, {port_position(5, 9)}}, STRAIGHT_INVERTER},
         {{{}, {port_position(0, 5)}}, rotate_90(STRAIGHT_INVERTER)},
         {{{}, {port_position(4, 0)}}, rotate_180(STRAIGHT_INVERTER)},
-        {{{}, {port_position(9, 4)}}, rotate_270(STRAIGHT_INVERTER)}};
+        {{{}, {port_position(9, 4)}}, rotate_270(STRAIGHT_INVERTER)},
+        // bent inverter
+        {{{port_position(4, 0)}, {port_position(9, 4)}}, BENT_INVERTER},
+        {{{port_position(9, 4)}, {port_position(4, 0)}}, BENT_INVERTER_R},
+        {{{port_position(9, 4)}, {port_position(5, 9)}}, rotate_90(BENT_INVERTER)},
+        {{{port_position(5, 9)}, {port_position(9, 4)}}, rotate_90(BENT_INVERTER_R)},
+        {{{port_position(0, 5)}, {port_position(5, 9)}}, rotate_180(BENT_INVERTER_R)},
+        {{{port_position(5, 9)}, {port_position(0, 5)}}, rotate_180(BENT_INVERTER)},
+        {{{port_position(4, 0)}, {port_position(0, 5)}}, rotate_270(BENT_INVERTER_R)},
+        {{{port_position(0, 5)}, {port_position(4, 0)}}, rotate_270(BENT_INVERTER)}};
     /**
      * Lookup table for conjunction rotations. Maps ports to corresponding AND gates.
      */
