@@ -465,7 +465,7 @@ void show<fiction::cell_layout_t>(std::ostream& os, const fiction::cell_layout_t
         if constexpr (!fiction::has_qca_technology_v<Lyt> && !fiction::has_mol_qca_technology_v<Lyt> &&
                       !fiction::has_sidb_technology_v<Lyt>)
         {
-            cmd.env->out() << fmt::format("[e] {} is neither a QCA layout nor an SiDB layout",
+            cmd.env->out() << fmt::format("[e] {} is neither a QCA, MolQCA, nor an SiDB layout",
                                           lyt_ptr->get_layout_name())
                            << std::endl;
         }
