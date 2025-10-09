@@ -7,13 +7,16 @@
 
 #include <fiction/algorithms/network_transformation/technology_mapping.hpp>
 #include <fiction/types.hpp>
+#include <fiction/utils/name_utils.hpp>
 
 #include <alice/alice.hpp>
+#include <fmt/format.h>
 
 #include <algorithm>
 #include <array>
 #include <iostream>
 #include <memory>
+#include <type_traits>
 #include <variant>
 
 namespace alice
@@ -113,6 +116,17 @@ class map_command : public command
 
         const auto perform_mapping = [this, &s](auto&& ntk_ptr)
         {
+            using Ntk = typename std::decay_t<decltype(ntk_ptr)>::element_type;
+
+            if (std::is_same_v<Ntk, fiction::tec_nt>)
+            {
+                env->out()
+                    << fmt::format(
+                           "[w] network '{}' is already mapped; you might encounter mapping errors during remapping",
+                           fiction::get_name(*ntk_ptr))
+                    << std::endl;
+            }
+
             fiction::technology_mapping_stats st{};
 
             const auto mapped_ntk = fiction::technology_mapping(*ntk_ptr, ps, &st);
