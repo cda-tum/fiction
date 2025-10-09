@@ -466,7 +466,7 @@ struct sidb_technology
         EMPTY  = static_cast<uint8_t>(cell_type::EMPTY),
         INPUT  = static_cast<uint8_t>(cell_type::INPUT),
         OUTPUT = static_cast<uint8_t>(cell_type::OUTPUT),
-        LOGIC = static_cast<uint8_t>(cell_type::LOGIC)
+        LOGIC  = static_cast<uint8_t>(cell_type::LOGIC)
     };
 
     [[nodiscard]] static constexpr bool is_empty_cell(const cell_type& c) noexcept
