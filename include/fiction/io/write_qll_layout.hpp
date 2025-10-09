@@ -7,21 +7,18 @@
 
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/technology/cell_technologies.hpp"
-#include "fiction/technology/magcad_magnet_count.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/types.hpp"
 #include "utils/version_info.hpp"
 
 #include <fmt/format.h>
 
 #include <algorithm>
 #include <array>
-#include <filesystem>
+#include <cstdint>
 #include <fstream>
-#include <functional>
+#include <iostream>
 #include <ostream>
 #include <stdexcept>
-#include <string>
 #include <string_view>
 #include <unordered_map>
 #include <unordered_set>
@@ -224,11 +221,7 @@ class write_qll_layout_impl
         {
             os << qll::INML_SETTINGS;
         }
-        else if constexpr (has_qca_technology_v<Lyt>)
-        {
-            os << qll::MQCA_SETTINGS;
-        }
-        else if constexpr (has_mol_qca_technology_v<Lyt>)
+        else if constexpr (has_qca_technology_v<Lyt> || has_mol_qca_technology_v<Lyt>)
         {
             os << qll::MQCA_SETTINGS;
         }
@@ -248,11 +241,7 @@ class write_qll_layout_impl
                 os << fmt::format(qll::INML_COMPONENT_ITEM, tech_name, comp);
             }
         }
-        else if constexpr (has_qca_technology_v<Lyt>)
-        {
-            os << qll::MQCA_COMPONENT_ITEM;
-        }
-        else if constexpr (has_mol_qca_technology_v<Lyt>)
+        else if constexpr (has_qca_technology_v<Lyt> || has_mol_qca_technology_v<Lyt>)
         {
             os << qll::MQCA_COMPONENT_ITEM;
         }

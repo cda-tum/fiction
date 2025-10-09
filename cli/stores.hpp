@@ -20,6 +20,7 @@
 
 #include <cstdint>
 #include <stdexcept>
+#include <string>
 #include <type_traits>
 #include <variant>
 
@@ -118,6 +119,7 @@ ALICE_LOG_STORE_STATISTICS(fiction::logic_network_t, ln)
 }
 
 template <>
+// NOLINTNEXTLINE
 bool can_show<fiction::logic_network_t>(std::string& extension, [[maybe_unused]] command& cmd)
 {
     extension = "dot";
@@ -151,7 +153,7 @@ void show<fiction::logic_network_t>(std::ostream& os, const fiction::logic_netwo
         }
         catch (const std::invalid_argument& e)
         {
-            cmd.env->out() << "[e] " << e.what() << std::endl;
+            cmd.env->out() << "[e] " << e.what() << '\n';
         }
     };
 
@@ -255,6 +257,7 @@ ALICE_LOG_STORE_STATISTICS(fiction::gate_layout_t, layout)
 }
 
 template <>
+// NOLINTNEXTLINE
 bool can_show<fiction::gate_layout_t>(std::string& extension, [[maybe_unused]] command& cmd)
 {
     extension = "dot";
@@ -359,7 +362,7 @@ void show<fiction::gate_layout_t>(std::ostream& os, const fiction::gate_layout_t
         }
         else
         {
-            cmd.env->out() << "[e] unsupported layout topology" << std::endl;
+            cmd.env->out() << "[e] unsupported layout topology" << '\n';
         }
     };
 
@@ -444,6 +447,7 @@ ALICE_LOG_STORE_STATISTICS(fiction::cell_layout_t, layout)
 }
 
 template <>
+// NOLINTNEXTLINE
 bool can_show<fiction::cell_layout_t>(std::string& extension, [[maybe_unused]] command& cmd)
 {
     cmd.add_flag("--simple,-s", "Simplified depiction abstracting from details")->group("cell_layout (-c)");
@@ -498,7 +502,7 @@ void show<fiction::cell_layout_t>(std::ostream& os, const fiction::cell_layout_t
             catch (...)
             {
                 cmd.env->out() << "[e] an error occurred while writing the SVG description to the output stream"
-                               << std::endl;
+                               << '\n';
             }
         }
     };
