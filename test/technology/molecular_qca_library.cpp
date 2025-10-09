@@ -16,8 +16,6 @@
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
-#include <stdexcept>
-
 using namespace fiction;
 
 TEST_CASE("Molecular QCA library traits", "[molecular-qca-library]")
