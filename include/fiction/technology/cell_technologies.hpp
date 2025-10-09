@@ -18,7 +18,7 @@ struct qca_technology
     /**
      * Possible types of QCA cells.
      */
-    enum cell_type : uint8_t
+    enum class cell_type : uint8_t
     {
         /**
          * Symbol used for empty QCA cells.
@@ -60,62 +60,62 @@ struct qca_technology
      */
     enum class cell_mark : uint8_t
     {
-        EMPTY  = cell_type::EMPTY,
-        INPUT  = cell_type::INPUT,
-        OUTPUT = cell_type::OUTPUT
+        EMPTY  = static_cast<uint8_t>(cell_type::EMPTY),
+        INPUT  = static_cast<uint8_t>(cell_type::INPUT),
+        OUTPUT = static_cast<uint8_t>(cell_type::OUTPUT)
     };
 
-    [[nodiscard]] static constexpr bool is_empty_cell(const cell_type& c) noexcept
+    [[nodiscard]] static constexpr bool is_empty_cell(cell_type c) noexcept
     {
-        return c == EMPTY;
+        return c == cell_type::EMPTY;
     }
 
-    [[nodiscard]] static constexpr bool is_normal_cell(const cell_type& c) noexcept
+    [[nodiscard]] static constexpr bool is_normal_cell(cell_type c) noexcept
     {
-        return c == NORMAL;
+        return c == cell_type::NORMAL;
     }
 
-    [[nodiscard]] static constexpr bool is_input_cell(const cell_type& c) noexcept
+    [[nodiscard]] static constexpr bool is_input_cell(cell_type c) noexcept
     {
-        return c == INPUT;
+        return c == cell_type::INPUT;
     }
 
-    [[nodiscard]] static constexpr bool is_output_cell(const cell_type& c) noexcept
+    [[nodiscard]] static constexpr bool is_output_cell(cell_type c) noexcept
     {
-        return c == OUTPUT;
+        return c == cell_type::OUTPUT;
     }
 
-    [[nodiscard]] static constexpr bool is_const_0_cell(const cell_type& c) noexcept
+    [[nodiscard]] static constexpr bool is_const_0_cell(cell_type c) noexcept
     {
-        return c == CONST_0;
+        return c == cell_type::CONST_0;
     }
 
-    [[nodiscard]] static constexpr bool is_const_1_cell(const cell_type& c) noexcept
+    [[nodiscard]] static constexpr bool is_const_1_cell(cell_type c) noexcept
     {
-        return c == CONST_1;
+        return c == cell_type::CONST_1;
     }
 
-    [[nodiscard]] static constexpr bool is_constant_cell(const cell_type& c) noexcept
+    [[nodiscard]] static constexpr bool is_constant_cell(cell_type c) noexcept
     {
         return is_const_0_cell(c) || is_const_1_cell(c);
     }
 
-    [[nodiscard]] static constexpr bool is_normal_cell_mode(const cell_mode& m) noexcept
+    [[nodiscard]] static constexpr bool is_normal_cell_mode(cell_mode m) noexcept
     {
         return m == cell_mode::NORMAL;
     }
 
-    [[nodiscard]] static constexpr bool is_rotated_cell_mode(const cell_mode& m) noexcept
+    [[nodiscard]] static constexpr bool is_rotated_cell_mode(cell_mode m) noexcept
     {
         return m == cell_mode::ROTATED;
     }
 
-    [[nodiscard]] static constexpr bool is_vertical_cell_mode(const cell_mode& m) noexcept
+    [[nodiscard]] static constexpr bool is_vertical_cell_mode(cell_mode m) noexcept
     {
         return m == cell_mode::VERTICAL;
     }
 
-    [[nodiscard]] static constexpr bool is_crossover_cell_mode(const cell_mode& m) noexcept
+    [[nodiscard]] static constexpr bool is_crossover_cell_mode(cell_mode m) noexcept
     {
         return m == cell_mode::CROSSOVER;
     }
@@ -145,7 +145,7 @@ struct mol_qca_technology
     /**
      * Possible types of QCA cells.
      */
-    enum cell_type : uint8_t
+    enum class cell_type : uint8_t
     {
         /**
          * Symbol used for empty QCA cells.
@@ -203,82 +203,62 @@ struct mol_qca_technology
      */
     enum class cell_mark : uint8_t
     {
-        EMPTY  = cell_type::EMPTY,
-        INPUT  = cell_type::INPUT,
-        OUTPUT = cell_type::OUTPUT
+        EMPTY  = static_cast<uint8_t>(cell_type::EMPTY),
+        INPUT  = static_cast<uint8_t>(cell_type::INPUT),
+        OUTPUT = static_cast<uint8_t>(cell_type::OUTPUT)
     };
 
-    [[nodiscard]] static constexpr bool is_empty_cell(const cell_type& c) noexcept
+    [[nodiscard]] static constexpr bool is_empty_cell(cell_type c) noexcept
     {
-        return c == EMPTY;
+        return c == cell_type::EMPTY;
     }
 
-    [[nodiscard]] static constexpr bool is_normal_cell(const cell_type& c) noexcept
+    [[nodiscard]] static constexpr bool is_normal_cell(cell_type c) noexcept
     {
-        return (c == NORMAL1 || c == NORMAL2 || c == NORMAL3 || c == NORMAL4);
+        return c == cell_type::NORMAL;
     }
 
-    [[nodiscard]] static constexpr bool is_normal_cell1(const cell_type& c) noexcept
+    [[nodiscard]] static constexpr bool is_input_cell(cell_type c) noexcept
     {
-        return c == NORMAL1;
+        return c == cell_type::INPUT;
     }
 
-    [[nodiscard]] static constexpr bool is_normal_cell2(const cell_type& c) noexcept
+    [[nodiscard]] static constexpr bool is_output_cell(cell_type c) noexcept
     {
-        return c == NORMAL2;
+        return c == cell_type::OUTPUT;
     }
 
-    [[nodiscard]] static constexpr bool is_normal_cell3(const cell_type& c) noexcept
+    [[nodiscard]] static constexpr bool is_const_0_cell(cell_type c) noexcept
     {
-        return c == NORMAL3;
+        return c == cell_type::CONST_0;
     }
 
-    [[nodiscard]] static constexpr bool is_normal_cell4(const cell_type& c) noexcept
+    [[nodiscard]] static constexpr bool is_const_1_cell(cell_type c) noexcept
     {
-        return c == NORMAL4;
+        return c == cell_type::CONST_1;
     }
 
-    [[nodiscard]] static constexpr bool is_input_cell(const cell_type& c) noexcept
-    {
-        return c == INPUT;
-    }
-
-    [[nodiscard]] static constexpr bool is_output_cell(const cell_type& c) noexcept
-    {
-        return c == OUTPUT;
-    }
-
-    [[nodiscard]] static constexpr bool is_const_0_cell(const cell_type& c) noexcept
-    {
-        return c == CONST_0;
-    }
-
-    [[nodiscard]] static constexpr bool is_const_1_cell(const cell_type& c) noexcept
-    {
-        return c == CONST_1;
-    }
-
-    [[nodiscard]] static constexpr bool is_constant_cell(const cell_type& c) noexcept
+    [[nodiscard]] static constexpr bool is_constant_cell(cell_type c) noexcept
     {
         return is_const_0_cell(c) || is_const_1_cell(c);
     }
 
-    [[nodiscard]] static constexpr bool is_normal_cell_mode(const cell_mode& m) noexcept
+    [[nodiscard]] static constexpr bool is_normal_cell_mode(cell_mode m) noexcept
     {
         return m == cell_mode::NORMAL;
     }
 
-    [[nodiscard]] static constexpr bool is_rotated_cell_mode(const cell_mode& m) noexcept
+    [[nodiscard]] static constexpr bool is_rotated_cell_mode(cell_mode m) noexcept
     {
         return m == cell_mode::ROTATED;
     }
 
-    [[nodiscard]] static constexpr bool is_vertical_cell_mode(const cell_mode& m) noexcept
+    [[nodiscard]] static constexpr bool is_vertical_cell_mode(cell_mode m) noexcept
     {
         return m == cell_mode::VERTICAL;
     }
 
-    [[nodiscard]] static constexpr bool is_crossover_cell_mode(const cell_mode& m) noexcept
+    [[nodiscard]] static constexpr bool is_crossover_cell_mode(cell_mode m) noexcept
     {
         return m == cell_mode::CROSSOVER;
     }
@@ -311,7 +291,7 @@ struct inml_technology
     /**
      * Possible types of iNML cells.
      */
-    enum cell_type : uint8_t
+    enum class cell_type : uint8_t
     {
         /**
          * Symbol used for empty iNML cells.
@@ -361,39 +341,39 @@ struct inml_technology
      */
     enum class cell_mark : uint8_t
     {
-        EMPTY  = cell_type::EMPTY,
-        INPUT  = cell_type::INPUT,
-        OUTPUT = cell_type::OUTPUT
+        EMPTY  = static_cast<uint8_t>(cell_type::EMPTY),
+        INPUT  = static_cast<uint8_t>(cell_type::INPUT),
+        OUTPUT = static_cast<uint8_t>(cell_type::OUTPUT)
     };
 
-    [[nodiscard]] static constexpr bool is_empty_cell(const cell_type& c) noexcept
+    [[nodiscard]] static constexpr bool is_empty_cell(cell_type c) noexcept
     {
-        return c == EMPTY;
+        return c == cell_type::EMPTY;
     }
 
-    [[nodiscard]] static constexpr bool is_normal_cell(const cell_type& c) noexcept
+    [[nodiscard]] static constexpr bool is_normal_cell(cell_type c) noexcept
     {
-        return c == NORMAL;
+        return c == cell_type::NORMAL;
     }
 
-    [[nodiscard]] static constexpr bool is_input_cell(const cell_type& c) noexcept
+    [[nodiscard]] static constexpr bool is_input_cell(cell_type c) noexcept
     {
-        return c == INPUT;
+        return c == cell_type::INPUT;
     }
 
-    [[nodiscard]] static constexpr bool is_output_cell(const cell_type& c) noexcept
+    [[nodiscard]] static constexpr bool is_output_cell(cell_type c) noexcept
     {
-        return c == OUTPUT;
+        return c == cell_type::OUTPUT;
     }
 
     [[nodiscard]] static constexpr bool is_slanted_edge_up_magnet(const cell_type& c) noexcept
     {
-        return c == SLANTED_EDGE_UP_MAGNET;
+        return c == cell_type::SLANTED_EDGE_UP_MAGNET;
     }
 
     [[nodiscard]] static constexpr bool is_slanted_edge_down_magnet(const cell_type& c) noexcept
     {
-        return c == SLANTED_EDGE_DOWN_MAGNET;
+        return c == cell_type::SLANTED_EDGE_DOWN_MAGNET;
     }
 
     [[nodiscard]] static constexpr bool is_slanted_edge_magnet(const cell_type& c) noexcept
@@ -403,24 +383,23 @@ struct inml_technology
 
     [[nodiscard]] static constexpr bool is_inverter_magnet(const cell_type& c) noexcept
     {
-        return c == INVERTER_MAGNET;
+        return c == cell_type::INVERTER_MAGNET;
     }
 
     [[nodiscard]] static constexpr bool is_crosswire_magnet(const cell_type& c) noexcept
     {
-        return c == CROSSWIRE_MAGNET;
+        return c == cell_type::CROSSWIRE_MAGNET;
     }
 
     [[nodiscard]] static constexpr bool is_fanout_coupler_magnet(const cell_type& c) noexcept
     {
-        return c == FANOUT_COUPLER_MAGNET;
+        return c == cell_type::FANOUT_COUPLER_MAGNET;
     }
 
     [[nodiscard]] static constexpr bool is_normal_cell_mode([[maybe_unused]] const cell_mode& m) noexcept
     {
         return true;
     }
-
     /**
      * Default width of a iNML cell in NMLSim.
      */
@@ -450,7 +429,7 @@ struct sidb_technology
     /**
      * Possible types of SiDB cells.
      */
-    enum cell_type : uint8_t
+    enum class cell_type : uint8_t
     {
         /**
          * Symbol used for empty SiDB cells.
@@ -484,42 +463,41 @@ struct sidb_technology
      */
     enum class cell_mark : uint8_t
     {
-        EMPTY  = cell_type::EMPTY,
-        INPUT  = cell_type::INPUT,
-        OUTPUT = cell_type::OUTPUT,
-        LOGIC  = cell_type::LOGIC
+        EMPTY  = static_cast<uint8_t>(cell_type::EMPTY),
+        INPUT  = static_cast<uint8_t>(cell_type::INPUT),
+        OUTPUT = static_cast<uint8_t>(cell_type::OUTPUT),
+        LOGIC = static_cast<uint8_t>(cell_type::LOGIC)
     };
 
     [[nodiscard]] static constexpr bool is_empty_cell(const cell_type& c) noexcept
     {
-        return c == EMPTY;
+        return c == cell_type::EMPTY;
     }
 
     [[nodiscard]] static constexpr bool is_normal_cell(const cell_type& c) noexcept
     {
-        return c == NORMAL;
+        return c == cell_type::NORMAL;
     }
 
     [[nodiscard]] static constexpr bool is_input_cell(const cell_type& c) noexcept
     {
-        return c == INPUT;
+        return c == cell_type::INPUT;
     }
 
     [[nodiscard]] static constexpr bool is_output_cell(const cell_type& c) noexcept
     {
-        return c == OUTPUT;
+        return c == cell_type::OUTPUT;
     }
 
     [[nodiscard]] static constexpr bool is_logic_cell(const cell_type& c) noexcept
     {
-        return c == LOGIC;
+        return c == cell_type::LOGIC;
     }
 
     [[nodiscard]] static constexpr bool is_normal_cell_mode([[maybe_unused]] const cell_mode& m) noexcept
     {
         return true;
     }
-
     /**
      * Default width of a SiDB in SiQAD (https://github.com/siqad/siqad).
      * Dots are considered to be 0-dimensional entities for simulation purposes.
