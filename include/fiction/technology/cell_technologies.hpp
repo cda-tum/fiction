@@ -218,6 +218,26 @@ struct mol_qca_technology
         return c == cell_type::NORMAL;
     }
 
+    [[nodiscard]] static constexpr bool is_normal_cell1(cell_type c) noexcept
+    {
+        return c == cell_type::NORMAL1;
+    }
+
+    [[nodiscard]] static constexpr bool is_normal_cell2(cell_type c) noexcept
+    {
+        return c == cell_type::NORMAL2;
+    }
+
+    [[nodiscard]] static constexpr bool is_normal_cell3(cell_type c) noexcept
+    {
+        return c == cell_type::NORMAL3;
+    }
+
+    [[nodiscard]] static constexpr bool is_normal_cell4(cell_type c) noexcept
+    {
+        return c == cell_type::NORMAL4;
+    }
+
     [[nodiscard]] static constexpr bool is_input_cell(cell_type c) noexcept
     {
         return c == cell_type::INPUT;
@@ -466,7 +486,7 @@ struct sidb_technology
         EMPTY  = static_cast<uint8_t>(cell_type::EMPTY),
         INPUT  = static_cast<uint8_t>(cell_type::INPUT),
         OUTPUT = static_cast<uint8_t>(cell_type::OUTPUT),
-        LOGIC = static_cast<uint8_t>(cell_type::LOGIC)
+        LOGIC  = static_cast<uint8_t>(cell_type::LOGIC)
     };
 
     [[nodiscard]] static constexpr bool is_empty_cell(const cell_type& c) noexcept
