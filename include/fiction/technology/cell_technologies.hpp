@@ -215,8 +215,8 @@ struct mol_qca_technology
 
     [[nodiscard]] static constexpr bool is_normal_cell(cell_type c) noexcept
     {
-        return c == cell_type::NORMAL || c == cell_type::NORMAL1 || c == cell_type::NORMAL2 ||
-               c == cell_type::NORMAL3 || c == cell_type::NORMAL4;
+        return (c == cell_type::NORMAL1 || c == cell_type::NORMAL2 || c == cell_type::NORMAL3 ||
+                c == cell_type::NORMAL4);
     }
 
     [[nodiscard]] static constexpr bool is_normal_cell1(cell_type c) noexcept
