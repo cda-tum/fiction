@@ -19,6 +19,7 @@
 #include <iostream>
 #include <ostream>
 #include <stdexcept>
+#include <string>
 #include <string_view>
 #include <unordered_map>
 #include <unordered_set>
@@ -141,10 +142,21 @@ class write_qll_layout_impl
 
     uint64_t cell_id{1};
 
-    const char* tech_name{has_inml_technology_v<Lyt>    ? "iNML" :
-                          has_qca_technology_v<Lyt>     ? "MolFCN" :
-                          has_mol_qca_technology_v<Lyt> ? "MolFCN" :
-                                                          "?"};
+    const char* tech_name = []
+    {
+        if constexpr (has_inml_technology_v<Lyt>)
+        {
+            return "iNML";
+        }
+        else if constexpr (has_qca_technology_v<Lyt> || has_mol_qca_technology_v<Lyt>)
+        {
+            return "MolFCN";
+        }
+        else
+        {
+            return "?";
+        }
+    }();
 
     [[nodiscard]] std::vector<cell<Lyt>> sorted_pis() const noexcept
     {
@@ -359,7 +371,8 @@ class write_qll_layout_impl
                         // write via cell
                         if (qca_technology::is_vertical_cell_mode(mode) && c.z != lyt.z())
                         {
-                            os << fmt::format(qll::OPEN_MQCA_LAYOUT_ITEM, 0, cell_id++, bb_x(c), bb_y(c), c.z * 2 + 1);
+                            os << fmt::format(qll::OPEN_MQCA_LAYOUT_ITEM, 0, cell_id++, bb_x(c), bb_y(c),
+                                              (c.z * 2) + 1);
                             os << fmt::format(qll::LAYOUT_ITEM_PROPERTY, qll::PROPERTY_PHASE, lyt.get_clock_number(c));
                             os << qll::CLOSE_LAYOUT_ITEM;
                         }
@@ -369,11 +382,26 @@ class write_qll_layout_impl
                     {
                         const auto mode = lyt.get_cell_mode(c);
 
-                        int idx = Lyt::technology::is_normal_cell1(type) ? 0 :
-                                  Lyt::technology::is_normal_cell2(type) ? 1 :
-                                  Lyt::technology::is_normal_cell3(type) ? 2 :
-                                  Lyt::technology::is_normal_cell4(type) ? 3 :
-                                                                           0;
+                        const int idx = [&type]
+                        {
+                            if (Lyt::technology::is_normal_cell1(type))
+                            {
+                                return 0;
+                            }
+                            if (Lyt::technology::is_normal_cell2(type))
+                            {
+                                return 1;
+                            }
+                            if (Lyt::technology::is_normal_cell3(type))
+                            {
+                                return 2;
+                            }
+                            if (Lyt::technology::is_normal_cell4(type))
+                            {
+                                return 3;
+                            }
+                            return 0;
+                        }();
 
                         // write normal cell
                         if (mol_qca_technology::is_normal_cell(type))
@@ -392,7 +420,8 @@ class write_qll_layout_impl
                         // write via cell
                         if (mol_qca_technology::is_vertical_cell_mode(mode) && c.z != lyt.z())
                         {
-                            os << fmt::format(qll::OPEN_MQCA_LAYOUT_ITEM, 0, cell_id++, bb_x(c), bb_y(c), c.z * 2 + 1);
+                            os << fmt::format(qll::OPEN_MQCA_LAYOUT_ITEM, 0, cell_id++, bb_x(c), bb_y(c),
+                                              (c.z * 2) + 1);
                             os << fmt::format(qll::LAYOUT_ITEM_PROPERTY, qll::PROPERTY_PHASE, idx);
                             os << qll::CLOSE_LAYOUT_ITEM;
                         }
@@ -448,7 +477,7 @@ void write_qll_layout(const Lyt& lyt, std::ostream& os)
 template <typename Lyt>
 void write_qll_layout(const Lyt& lyt, const std::string_view& filename)
 {
-    std::ofstream os{filename.data(), std::ofstream::out};
+    std::ofstream os{std::string(filename), std::ofstream::out};
 
     if (!os.is_open())
     {
