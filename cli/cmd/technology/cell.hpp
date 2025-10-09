@@ -5,9 +5,10 @@
 #ifndef FICTION_CMD_CELL_HPP
 #define FICTION_CMD_CELL_HPP
 
-#include "fiction/technology/cell_ports.hpp"
 #include "fiction/layouts/coordinates.hpp"
+#include "fiction/technology/cell_ports.hpp"
 #include "fiction/technology/fcn_gate_library.hpp"
+
 #include <fiction/algorithms/physical_design/apply_gate_library.hpp>
 #include <fiction/technology/inml_topolinano_library.hpp>
 #include <fiction/technology/molecular_qca_library.hpp>
