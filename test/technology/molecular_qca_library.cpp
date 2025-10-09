@@ -16,6 +16,8 @@
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
+#include <stdexcept>
+
 using namespace fiction;
 
 TEST_CASE("Molecular QCA library traits", "[molecular-qca-library]")
@@ -261,6 +263,68 @@ TEST_CASE("Setting up fanouts", "[molecular-qca-library]")
     CHECK(molecular_qca_library::set_up_gate(layout, {2, 2}) == molecular_qca_library::rotate_270(bent_wire));
 }
 
+TEST_CASE("Setting up majority gate", "[molecular-qca-library]")
+{
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+
+    auto layout = blueprints::res_maj_gate_layout<gate_layout>();
+
+    // clang-format off
+
+    static constexpr const molecular_qca_library::fcn_gate primary_input_port{
+    molecular_qca_library::cell_list_to_gate<char>(
+    {{
+        {' ', ' ', ' ', ' ', 'i', 'i', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
+    }})};
+
+    static constexpr const molecular_qca_library::fcn_gate primary_output_port{
+    molecular_qca_library::cell_list_to_gate<char>(
+    {{
+        {' ', ' ', ' ', ' ', 'o', 'o', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
+    }})};
+
+    static constexpr const molecular_qca_library::fcn_gate majority{
+    molecular_qca_library::cell_list_to_gate<char>(
+    {{
+        {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', 'b', 'b', 'b', 'b', ' ', ' ', ' '},
+        {'a', 'a', 'a', 'b', 'b', 'b', 'b', 'a', 'a', 'a'},
+        {'a', 'a', 'a', 'b', 'b', 'b', 'b', 'a', 'a', 'a'},
+        {' ', ' ', ' ', 'b', 'b', 'b', 'b', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'c', 'c', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '}
+    }})};
+
+    // clang-format on
+
+    CHECK(molecular_qca_library::set_up_gate(layout, {0, 1}) == molecular_qca_library::rotate_90(primary_input_port));
+    CHECK(molecular_qca_library::set_up_gate(layout, {1, 0}) == molecular_qca_library::rotate_180(primary_input_port));
+    CHECK(molecular_qca_library::set_up_gate(layout, {2, 1}) == molecular_qca_library::rotate_270(primary_input_port));
+    CHECK(molecular_qca_library::set_up_gate(layout, {1, 1}) == majority);
+    CHECK(molecular_qca_library::set_up_gate(layout, {1, 2}) == primary_output_port);
+}
+
 TEST_CASE("Setting up and or inv", "[molecular-qca-library]")
 {
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
@@ -420,4 +484,15 @@ TEST_CASE("Setting up and or inv", "[molecular-qca-library]")
     CHECK(molecular_qca_library::set_up_gate(layout, {3, 1}) == molecular_qca_library::rotate_90(conjunction_r));
     CHECK(molecular_qca_library::set_up_gate(layout, {3, 2}) == molecular_qca_library::rotate_180(conjunction));
     CHECK(molecular_qca_library::set_up_gate(layout, {4, 2}) == molecular_qca_library::rotate_270(primary_output_port));
+}
+
+TEST_CASE("Check unsupported gate type", "[molecular-qca-library]")
+{
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+
+    auto layout = blueprints::row_clocked_and_xor_gate_layout<gate_layout>();
+
+    debug::write_dot_layout(layout);
+
+    REQUIRE_THROWS_AS(molecular_qca_library::set_up_gate(layout, {1, 2}), std::exception);
 }
