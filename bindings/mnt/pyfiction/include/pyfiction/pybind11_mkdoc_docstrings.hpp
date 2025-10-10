@@ -16744,6 +16744,14 @@ static const char *__doc_fiction_mol_qca_technology_is_input_cell = R"doc()doc";
 
 static const char *__doc_fiction_mol_qca_technology_is_normal_cell = R"doc()doc";
 
+static const char *__doc_fiction_mol_qca_technology_is_normal_cell1 = R"doc()doc";
+
+static const char *__doc_fiction_mol_qca_technology_is_normal_cell2 = R"doc()doc";
+
+static const char *__doc_fiction_mol_qca_technology_is_normal_cell3 = R"doc()doc";
+
+static const char *__doc_fiction_mol_qca_technology_is_normal_cell4 = R"doc()doc";
+
 static const char *__doc_fiction_mol_qca_technology_is_normal_cell_mode = R"doc()doc";
 
 static const char *__doc_fiction_mol_qca_technology_is_output_cell = R"doc()doc";
