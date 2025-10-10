@@ -202,6 +202,11 @@ void read_command::execute()
                                     store<fiction::cell_layout_t>().extend() =
                                         std::make_shared<fiction::sidb_111_cell_clk_lyt>(layout);
                                 }
+
+                                else
+                                {
+                                    env->out() << "[e] 'lattice_orientation' must be either '100' or '111'\n";
+                                }
                             }
                             catch (const fiction::sqd_parsing_error& e)
                             {

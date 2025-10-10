@@ -63,6 +63,12 @@ void quicksim_command::execute()
         reset_params();
         return;
     }
+    if (qs_params.iteration_steps == 0)
+    {
+        env->out() << "[e] iterations must be > 0\n";
+        reset_params();
+        return;
+    }
 
     auto& s = store<fiction::cell_layout_t>();
 
@@ -106,6 +112,7 @@ void quicksim_command::execute()
             {
                 env->out() << fmt::format("[e] no stable charge distribution could be determined for '{}'\n",
                                           get_name(lyt_ptr));
+                return;
             }
 
             if constexpr (fiction::is_sidb_lattice_100_v<Lyt>)

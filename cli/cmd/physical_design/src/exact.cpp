@@ -28,7 +28,7 @@ exact_command::exact_command(const environment::ptr& e) :
                    "A minimum FCN layout will be found that meets all given constraints.")
 {
     add_option("--clk_scheme,-s", ps.scheme,
-               "Clocking scheme to use {OPEN[3|4], COLUMNAR[3|4], ROW[3|4] 2DDWAVE[3|4], 2DDWAVEHEX[3|4], USE, "
+               "Clocking scheme to use {OPEN[3|4], COLUMNAR[3|4], ROW[3|4], 2DDWAVE[3|4], 2DDWAVEHEX[3|4], USE, "
                "RES, ESR, CFE, RIPPLE, SRS, BANCS}",
                true);
     add_option("--upper_area", ps.upper_bound_area, "Upper bound for the total number of tiles");
@@ -39,7 +39,7 @@ exact_command::exact_command(const environment::ptr& e) :
     add_option("--timeout,-t", ps.timeout, "Timeout in seconds");
     add_option("--async,-a", ps.num_threads, "Number of layout dimensions to examine in parallel (beta feature)");
 
-    add_flag("--async_max,", "Examine as many layout dimensions in parallel as threads are available (beta feature)");
+    add_flag("--async_max", "Examine as many layout dimensions in parallel as threads are available (beta feature)");
     add_option("--hex", hexagonal_tile_shift,
                "Use hexagonal tiles and specify tile shift. Possible values are 'odd_row', 'even_row', "
                "'odd_column', or 'even_column'");

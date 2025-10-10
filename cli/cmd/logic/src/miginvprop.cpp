@@ -63,7 +63,7 @@ void miginvprop_command::execute()
         }
         else  // not an MIG
         {
-            env->out() << fmt::format("[e] {} is not an MIG\n", fiction::get_name(ntk_ptr));
+            env->out() << fmt::format("[e] {} is not an MIG\n", fiction::get_name(*ntk_ptr));
         }
     };
 

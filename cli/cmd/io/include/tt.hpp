@@ -28,7 +28,7 @@ class tt_command final : public command
 
   protected:
     /**
-     * Function to perform the read call. Reads Verilog and creates a logic_network.
+     * Executes the command: creates a truth table from a binary/hex string, an expression, or randomly.
      */
     void execute() override;
 

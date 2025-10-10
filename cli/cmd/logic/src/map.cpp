@@ -84,10 +84,11 @@ void map_command::execute()
         ps = fiction::all_supported_standard_functions();
     }
 
-    const std::array gate_flags{is_set("and"),     is_set("nand"),   is_set("or"),     is_set("nor"),    is_set("xor"),
-                                is_set("xnor"),    is_set("inv"),    is_set("maj"),    is_set("dot"),    is_set("and3"),
-                                is_set("xor_and"), is_set("or_and"), is_set("onehot"), is_set("gamble"), is_set("mux"),
-                                is_set("and_xor"), is_set("all2"),   is_set("all3"),   is_set("all")};
+    const std::array gate_flags{is_set("inv"),    is_set("and"),    is_set("nand"),   is_set("or"),   is_set("nor"),
+                                is_set("xor"),    is_set("xnor"),   is_set("lt"),     is_set("gt"),   is_set("le"),
+                                is_set("ge"),     is_set("maj"),    is_set("dot"),    is_set("and3"), is_set("xor_and"),
+                                is_set("or_and"), is_set("onehot"), is_set("gamble"), is_set("mux"),  is_set("and_xor"),
+                                is_set("all2"),   is_set("all3"),   is_set("all")};
 
     if (std::none_of(gate_flags.cbegin(), gate_flags.cend(), [](const auto f) { return f; }))
     {

@@ -10,7 +10,7 @@
 namespace alice
 {
 /**
- * Optimizes inverter costs of the current MIG in store.
+ * Propagates inverting edges in the current MIG to the primary inputs to reduce inverter cost (may duplicate logic).
  */
 class miginvprop_command final : public command
 {
@@ -24,7 +24,7 @@ class miginvprop_command final : public command
 
   protected:
     /**
-     * Function to perform the balancing call. Inserts buffer nodes to equalize path lengths.
+     * Executes inverter propagation on the current MIG and pushes the result to the logic-network store.
      */
     void execute() override;
 };

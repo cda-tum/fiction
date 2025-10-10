@@ -45,7 +45,7 @@ class gold_command final : public command
     /**
      * Random seed used for random fanout substitution and random topological ordering in maximum-effort mode.
      */
-    uint32_t seed;
+    uint32_t seed{0u};
     /**
      * Parameters.
      */

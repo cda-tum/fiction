@@ -9,7 +9,7 @@
 
 // NOLINTBEGIN(misc-include-cleaner)
 #if (FICTION_ABC)
-#include "cmd/logic/include/abc.hpp"
+#include "include/abc.hpp"
 #endif
 #include "include/akers.hpp"
 #include "include/balance.hpp"
@@ -40,8 +40,9 @@ ALICE_ADD_COMMAND(miginvopt, FICTION_CLI_CATEGORY_LOGIC)
 ALICE_ADD_COMMAND(miginvprop, FICTION_CLI_CATEGORY_LOGIC)
 ALICE_ADD_COMMAND(random, FICTION_CLI_CATEGORY_LOGIC)
 ALICE_ADD_COMMAND(simulate, FICTION_CLI_CATEGORY_LOGIC)
-#endif
 
 }  // namespace alice
+
+#endif
 
 #endif  // FICTION_CMD_LOGIC_HPP

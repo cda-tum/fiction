@@ -14,7 +14,7 @@
 #include "include/gold.hpp"
 #include "include/hex.hpp"
 #if (MUGEN)
-#include "cmd/physical_design/include/onepass.hpp"
+#include "include/onepass.hpp"
 #endif
 #include "include/optimize.hpp"
 #include "include/ortho.hpp"

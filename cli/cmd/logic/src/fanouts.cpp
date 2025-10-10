@@ -48,7 +48,7 @@ void fanouts_command::execute()
         return;
     }
 
-    if (ps.strategy != 0 && ps.strategy != 1)
+    if (ps.strategy > 2)
     {
         env->out() << "[w] " << ps.strategy << " does not refer to a valid strategy\n";
         ps = {};

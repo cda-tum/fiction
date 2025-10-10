@@ -127,6 +127,8 @@ void clustercomplete_command::execute()
                 if (std::get<sim_result_100>(sim_result).charge_distributions.empty())
                 {
                     env->out() << fmt::format("[e] ground state of '{}' could not be determined\n", get_name(lyt_ptr));
+                    reset_params();
+                    return;
                 }
 
                 const auto min_energy_distr =
@@ -142,6 +144,8 @@ void clustercomplete_command::execute()
                 if (std::get<sim_result_111>(sim_result).charge_distributions.empty())
                 {
                     env->out() << fmt::format("[e] ground state of '{}' could not be determined\n", get_name(lyt_ptr));
+                    reset_params();
+                    return;
                 }
 
                 const auto min_energy_distr =

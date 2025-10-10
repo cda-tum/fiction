@@ -31,7 +31,7 @@ class abc_command final : public command
 
   protected:
     /**
-     * Function to perform the synth call. Generates a logic network from a truth table.
+     * Executes the ABC callback: runs ABC on the current network and writes results back to the store..
      */
     void execute() override;
 

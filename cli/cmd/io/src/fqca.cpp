@@ -98,6 +98,7 @@ void fqca_command::execute()
     }
 
     ps = {};
+    filename.clear();
 }
 
 }  // namespace alice

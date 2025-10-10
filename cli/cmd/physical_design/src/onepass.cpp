@@ -133,6 +133,7 @@ void onepass_command::execute()
         {
             env->out() << fmt::format("[e] {} has too many inputs to store its truth table\n",
                                       std::visit(get_name, ntk));
+            reset_flags();
             return;
         }
     }

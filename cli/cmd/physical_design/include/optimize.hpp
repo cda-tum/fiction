@@ -31,7 +31,7 @@ class optimize_command final : public command
     /**
      * Maximum number of relocations to try for each gate.
      */
-    uint64_t max_gate_relocations;
+    uint64_t max_gate_relocations{0ull};
     /**
      * Post-layout optimization parameters.
      */

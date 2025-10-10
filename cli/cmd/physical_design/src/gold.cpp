@@ -57,12 +57,12 @@ gold_command::gold_command(const environment::ptr& e) :
     add_flag("--planar,-p", ps.planar, "Enable planar layout generation");
     add_flag("--multithreading,-m", ps.enable_multithreading, "Enable multithreading (beta feature)");
     add_flag("--verbose,-v", ps.verbose, "Be verbose");
-    add_option("--seed, -s", seed,
+    add_option("--seed,-s", seed,
                "Random seed used for random fanout substitution and random topological ordering in "
                "maximum-effort mode");
     add_flag("--straight_inverters,-i", ps.straight_inverters, "Enforce NOT gates to be routed non-bending only");
     add_option(
-        "--tiles_to_skip_between_pis, -g", ps.tiles_to_skip_between_pis,
+        "--tiles_to_skip_between_pis,-g", ps.tiles_to_skip_between_pis,
         "For each primary input (PI) considered during placement, reserve this many empty tiles after the current "
         "frontier to the right of the rightmost occupied tile or below the bottommost occupied tile before "
         "proposing a new PI position. This soft margin can reduce local congestion and increase the probability of "
@@ -71,10 +71,9 @@ gold_command::gold_command(const environment::ptr& e) :
     add_flag("--randomize_tiles_to_skip_between_pis,-j", ps.randomize_tiles_to_skip_between_pis,
              "Randomize the number of skipped tiles for each PI placement. When enabled, each PI will use a "
              "random number of skipped tiles between tiles_to_skip_between_pis-1 and tiles_to_skip_between_pis "
-             "(inclusive). "
-             "When tiles_to_skip_between_pis is 0, only 0 will be used. This can help explore different placement "
-             "strategies "
-             "and potentially find better layouts. Requires a valid seed to be set for reproducible results.");
+             "(inclusive). When tiles_to_skip_between_pis is 0, only 0 will be used. This can help explore different "
+             "placement strategies and potentially find better layouts. Requires a valid seed to be set for "
+             "reproducible results.");
 }
 
 void gold_command::execute()
