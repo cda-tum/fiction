@@ -4,8 +4,6 @@
 
 #include "cmd/technology/include/area.hpp"
 
-#include "stores.hpp"
-
 #include <fiction/technology/area.hpp>
 #include <fiction/types.hpp>
 

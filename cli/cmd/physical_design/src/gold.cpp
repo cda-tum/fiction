@@ -4,8 +4,6 @@
 
 #include "cmd/physical_design/include/gold.hpp"
 
-#include "stores.hpp"
-
 #include <fiction/algorithms/physical_design/graph_oriented_layout_design.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>

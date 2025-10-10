@@ -4,8 +4,6 @@
 
 #include "cmd/io/include/verilog.hpp"
 
-#include "stores.hpp"
-
 #include <fiction/types.hpp>
 #include <fiction/utils/name_utils.hpp>
 
@@ -14,6 +12,7 @@
 #include <mockturtle/traits.hpp>
 
 #include <filesystem>
+#include <fstream>
 #include <ostream>
 #include <string>
 #include <type_traits>

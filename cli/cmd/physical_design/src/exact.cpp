@@ -4,8 +4,6 @@
 
 #include "cmd/physical_design/include/exact.hpp"
 
-#include "stores.hpp"
-
 #if (FICTION_Z3_SOLVER)
 
 #include <fiction/algorithms/physical_design/exact.hpp>

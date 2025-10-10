@@ -7,9 +7,11 @@
 
 #ifdef FICTION_PHYSICAL_DESIGN_FLOW
 
+// NOLINTBEGIN(misc-include-cleaner)
 #include "include/area.hpp"
 #include "include/cell.hpp"
 #include "include/energy.hpp"
+// NOLINTEND(misc-include-cleaner)
 
 namespace alice
 {

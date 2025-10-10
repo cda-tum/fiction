@@ -4,8 +4,6 @@
 
 #include "cmd/simulation/include/clustercomplete.hpp"
 
-#include "stores.hpp"
-
 #if (FICTION_ALGLIB_ENABLED)
 
 #include <fiction/algorithms/simulation/sidb/clustercomplete.hpp>

@@ -4,8 +4,6 @@
 
 #include "cmd/logic/include/gates.hpp"
 
-#include "stores.hpp"
-
 #include <fiction/algorithms/properties/count_gate_types.hpp>
 #include <fiction/types.hpp>
 

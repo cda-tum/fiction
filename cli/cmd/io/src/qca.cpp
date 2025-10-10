@@ -4,10 +4,7 @@
 
 #include "cmd/io/include/qca.hpp"
 
-#include "stores.hpp"
-
 #include <fiction/io/write_qca_layout.hpp>
-#include <fiction/technology/cell_technologies.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/name_utils.hpp>
@@ -15,8 +12,10 @@
 #include <alice/alice.hpp>
 
 #include <filesystem>
+#include <fstream>
 #include <ostream>
 #include <string>
+#include <type_traits>
 #include <variant>
 
 namespace alice

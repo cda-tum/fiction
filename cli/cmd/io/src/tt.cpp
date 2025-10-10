@@ -4,8 +4,6 @@
 
 #include "cmd/io/include/tt.hpp"
 
-#include "stores.hpp"
-
 #include <fiction/types.hpp>
 
 #include <alice/alice.hpp>
@@ -13,6 +11,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <cmath>
 #include <cstdint>
 #include <memory>
 #include <string>

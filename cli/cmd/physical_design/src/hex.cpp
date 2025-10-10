@@ -4,8 +4,6 @@
 
 #include "cmd/physical_design/include/hex.hpp"
 
-#include "stores.hpp"
-
 #include <fiction/algorithms/physical_design/hexagonalization.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/traits.hpp>

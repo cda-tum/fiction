@@ -11,6 +11,8 @@
 #ifndef FICTION_PCH_CLI_HPP
 #define FICTION_PCH_CLI_HPP
 
+// NOLINTBEGIN(misc-include-cleaner)
+
 // ============================================================================
 // Standard Library (stable, frequently used)
 // ============================================================================
@@ -57,5 +59,7 @@
 // CLI: Stores (used in 100% of commands, but may change during development)
 // ============================================================================
 #include "stores.hpp"
+
+// NOLINTEND(misc-include-cleaner)
 
 #endif  // FICTION_PCH_CLI_HPP

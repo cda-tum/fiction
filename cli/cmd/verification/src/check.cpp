@@ -4,8 +4,6 @@
 
 #include "cmd/verification/include/check.hpp"
 
-#include "stores.hpp"
-
 #include <fiction/algorithms/verification/design_rule_violations.hpp>
 #include <fiction/types.hpp>
 

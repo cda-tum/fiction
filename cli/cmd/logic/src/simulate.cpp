@@ -4,8 +4,6 @@
 
 #include "cmd/logic/include/simulate.hpp"
 
-#include "stores.hpp"
-
 #include <fiction/types.hpp>
 #include <fiction/utils/name_utils.hpp>
 

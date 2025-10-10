@@ -4,8 +4,6 @@
 
 #include "cmd/technology/include/energy.hpp"
 
-#include "stores.hpp"
-
 #include <fiction/technology/energy_model.hpp>
 #include <fiction/types.hpp>
 

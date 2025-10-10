@@ -7,6 +7,7 @@
 
 #ifdef FICTION_SIMULATION_FLOW
 
+// NOLINTBEGIN(misc-include-cleaner)
 #if (FICTION_ALGLIB_ENABLED)
 #include "include/clustercomplete.hpp"
 #endif
@@ -14,6 +15,7 @@
 #include "include/quickexact.hpp"
 #include "include/quicksim.hpp"
 #include "include/temp.hpp"
+// NOLINTEND(misc-include-cleaner)
 
 namespace alice
 {

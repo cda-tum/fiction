@@ -8,8 +8,8 @@
 #include <alice/alice.hpp>
 #include <mockturtle/generators/random_network.hpp>
 
+#include <chrono>
 #include <cstdint>
-#include <random>
 
 namespace alice
 {

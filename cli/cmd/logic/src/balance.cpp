@@ -4,8 +4,6 @@
 
 #include "cmd/logic/include/balance.hpp"
 
-#include "stores.hpp"
-
 #include <fiction/algorithms/network_transformation/network_balancing.hpp>
 #include <fiction/types.hpp>
 

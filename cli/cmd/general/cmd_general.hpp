@@ -5,8 +5,10 @@
 #ifndef FICTION_CMD_GENERAL_HPP
 #define FICTION_CMD_GENERAL_HPP
 
+// NOLINTBEGIN(misc-include-cleaner)
 #include "include/clear.hpp"
 #include "include/version.hpp"
+// NOLINTEND(misc-include-cleaner)
 
 namespace alice
 {

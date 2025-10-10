@@ -5,6 +5,7 @@
 #ifndef FICTION_CMD_IO_HPP
 #define FICTION_CMD_IO_HPP
 
+// NOLINTBEGIN(misc-include-cleaner)
 #include "include/blif.hpp"
 #include "include/fgl.hpp"
 #include "include/fqca.hpp"
@@ -15,6 +16,7 @@
 #include "include/sqd.hpp"
 #include "include/tt.hpp"
 #include "include/verilog.hpp"
+// NOLINTEND(misc-include-cleaner)
 
 namespace alice
 {

@@ -4,8 +4,6 @@
 
 #include "cmd/logic/include/akers.hpp"
 
-#include "stores.hpp"
-
 #include <fiction/types.hpp>
 
 #include <alice/alice.hpp>

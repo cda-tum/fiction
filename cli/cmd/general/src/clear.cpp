@@ -4,8 +4,6 @@
 
 #include "cmd/general/include/clear.hpp"
 
-#include "stores.hpp"
-
 #include <fiction/types.hpp>
 
 namespace alice

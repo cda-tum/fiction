@@ -4,8 +4,6 @@
 
 #include "cmd/physical_design/include/ortho.hpp"
 
-#include "stores.hpp"
-
 #include <fiction/algorithms/physical_design/orthogonal.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>

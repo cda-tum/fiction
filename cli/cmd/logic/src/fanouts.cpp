@@ -4,14 +4,12 @@
 
 #include "cmd/logic/include/fanouts.hpp"
 
-#include "stores.hpp"
-
 #include <fiction/algorithms/network_transformation/fanout_substitution.hpp>
 #include <fiction/types.hpp>
 
 #include <alice/alice.hpp>
 
-#include <cstdint>
+#include <variant>
 
 namespace alice
 {

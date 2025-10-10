@@ -7,6 +7,7 @@
 
 #ifdef FICTION_PHYSICAL_DESIGN_FLOW
 
+// NOLINTBEGIN(misc-include-cleaner)
 #if (FICTION_Z3_SOLVER)
 #include "include/exact.hpp"
 #endif
@@ -17,6 +18,7 @@
 #endif
 #include "include/optimize.hpp"
 #include "include/ortho.hpp"
+// NOLINTEND(misc-include-cleaner)
 
 namespace alice
 {

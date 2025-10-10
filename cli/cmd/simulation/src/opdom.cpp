@@ -4,8 +4,6 @@
 
 #include "cmd/simulation/include/opdom.hpp"
 
-#include "stores.hpp"
-
 #include <fiction/algorithms/simulation/sidb/operational_domain.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
 #include <fiction/io/write_operational_domain.hpp>

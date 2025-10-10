@@ -14,7 +14,9 @@ constexpr inline auto FICTION_CLI_CATEGORY_VERIFICATION = "Verification";
 
 // equiv is useful for both the logic synthesis and physical design flow
 #if defined(FICTION_LOGIC_SYNTHESIS_FLOW) || defined(FICTION_PHYSICAL_DESIGN_FLOW)
+// NOLINTBEGIN(misc-include-cleaner)
 #include "include/equiv.hpp"
+// NOLINTEND(misc-include-cleaner)
 
 namespace alice
 {
@@ -26,8 +28,10 @@ ALICE_ADD_COMMAND(equiv, FICTION_CLI_CATEGORY_VERIFICATION)
 
 #endif
 
+// NOLINTBEGIN(misc-include-cleaner)
 #ifdef FICTION_PHYSICAL_DESIGN_FLOW
 #include "include/check.hpp"
+// NOLINTEND(misc-include-cleaner)
 
 namespace alice
 {

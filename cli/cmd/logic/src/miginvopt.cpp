@@ -4,16 +4,12 @@
 
 #include "cmd/logic/include/miginvopt.hpp"
 
-#include "stores.hpp"
-
-#include <fiction/algorithms/network_transformation/network_conversion.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/name_utils.hpp>
 
 #include <alice/alice.hpp>
 #include <fmt/format.h>
 #include <mockturtle/algorithms/mig_inv_optimization.hpp>
-#include <mockturtle/views/fanout_view.hpp>
 
 #include <type_traits>
 #include <variant>

@@ -4,8 +4,6 @@
 
 #include "cmd/logic/include/map.hpp"
 
-#include "stores.hpp"
-
 #include <fiction/algorithms/network_transformation/technology_mapping.hpp>
 #include <fiction/types.hpp>
 

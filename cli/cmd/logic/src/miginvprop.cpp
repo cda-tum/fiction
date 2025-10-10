@@ -4,9 +4,6 @@
 
 #include "cmd/logic/include/miginvprop.hpp"
 
-#include "stores.hpp"
-
-#include <fiction/algorithms/network_transformation/network_conversion.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/name_utils.hpp>
 

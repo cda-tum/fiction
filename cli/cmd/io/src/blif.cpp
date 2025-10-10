@@ -4,8 +4,6 @@
 
 #include "cmd/io/include/blif.hpp"
 
-#include "stores.hpp"
-
 #include <fiction/types.hpp>
 #include <fiction/utils/name_utils.hpp>
 
@@ -13,6 +11,7 @@
 #include <mockturtle/io/write_blif.hpp>
 
 #include <filesystem>
+#include <fstream>
 #include <ostream>
 #include <string>
 #include <type_traits>

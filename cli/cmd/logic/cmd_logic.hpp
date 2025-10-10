@@ -7,6 +7,7 @@
 
 #ifdef FICTION_LOGIC_SYNTHESIS_FLOW
 
+// NOLINTBEGIN(misc-include-cleaner)
 #if (FICTION_ABC)
 #include "cmd/logic/include/abc.hpp"
 #endif
@@ -19,6 +20,7 @@
 #include "include/miginvprop.hpp"
 #include "include/random.hpp"
 #include "include/simulate.hpp"
+// NOLINTEND(misc-include-cleaner)
 
 namespace alice
 {

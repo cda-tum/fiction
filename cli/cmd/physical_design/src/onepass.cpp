@@ -4,8 +4,6 @@
 
 #include "cmd/physical_design/include/onepass.hpp"
 
-#include "stores.hpp"
-
 #if (MUGEN)
 
 #include <fiction/algorithms/physical_design/one_pass_synthesis.hpp>
