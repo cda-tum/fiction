@@ -18,7 +18,7 @@ version_command::version_command(const environment::ptr& e) :
 
 void version_command::execute()
 {
-    env->out() << fmt::format("[i] {} - compiled on {} at \n", fiction::FICTION_VERSION, fiction::COMPILED_DATE,
+    env->out() << fmt::format("[i] {} - compiled on {} at {}\n", fiction::FICTION_VERSION, fiction::COMPILED_DATE,
                               fiction::COMPILED_TIME)
                << fmt::format("[i] {}\n", fiction::FICTION_REPO);
 }
