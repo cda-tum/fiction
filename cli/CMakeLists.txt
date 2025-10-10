@@ -1,10 +1,19 @@
-set(SOURCES ${PROJECT_SOURCE_DIR}/cli/fiction.cpp)
+add_executable(fiction)
+
+file(GLOB_RECURSE FICTION_CMD_SOURCES CONFIGURE_DEPENDS
+    "cmd/*/src/*.cpp"
+)
+
+target_sources(fiction PRIVATE
+    ${PROJECT_SOURCE_DIR}/cli/fiction.cpp
+    ${FICTION_CMD_SOURCES}
+)
 
 # Include configuration file
 include_directories(${PROJECT_BINARY_DIR}/include/)
 
-# Build executable
-add_executable(fiction ${SOURCES})
+# Add include directory for command headers
+target_include_directories(fiction PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 # Link against the project settings, libfiction and alice
 target_link_libraries(fiction PRIVATE libfiction alice)
@@ -12,9 +21,9 @@ target_link_libraries(fiction PRIVATE libfiction alice)
 # Collect CLI headers under cmd/
 file(GLOB_RECURSE FICTION_CLI_HEADERS CONFIGURE_DEPENDS
         RELATIVE ${PROJECT_SOURCE_DIR}/cli/
-        ${PROJECT_SOURCE_DIR}/cli/cmd/*.hpp
-        ${PROJECT_SOURCE_DIR}/cli/commands.hpp
-        ${PROJECT_SOURCE_DIR}/cli/stores.hpp)
+        ${PROJECT_SOURCE_DIR}/cli/cmd/*/*.hpp
+        ${PROJECT_SOURCE_DIR}/cli/stores.hpp
+        ${PROJECT_SOURCE_DIR}/cli/pch_cli.hpp)
 
 # Register header file set for IDE integration and installation metadata
 # Multiple BASE_DIRS so CMake knows how to layout the installed tree
@@ -36,6 +45,15 @@ set_property(TARGET fiction PROPERTY VERIFY_INTERFACE_HEADER_SETS ON)
 
 # Enforce project-wide C++ standard feature requirement (redundant but explicit)
 target_compile_features(fiction PRIVATE cxx_std_${CMAKE_CXX_STANDARD})
+
+# ============================================================================
+# Pre-Compiled Headers (PCH) for faster compilation
+# ============================================================================
+# Enable PCH for the fiction CLI to speed up compilation of all command files.
+# The PCH includes stable, expensive headers like alice, fiction types, etc.
+if (FICTION_ENABLE_PCH)
+    target_precompile_headers(fiction PRIVATE pch_cli.hpp)
+endif ()
 
 # Compile-time decisions on which flows to compile
 
