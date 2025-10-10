@@ -21,9 +21,9 @@ target_link_libraries(fiction PRIVATE libfiction alice)
 # Collect CLI headers under cmd/
 file(GLOB_RECURSE FICTION_CLI_HEADERS CONFIGURE_DEPENDS
         RELATIVE ${PROJECT_SOURCE_DIR}/cli/
-        ${PROJECT_SOURCE_DIR}/cli/cmd/*/include/*.hpp
-        ${PROJECT_SOURCE_DIR}/cli/commands.hpp
-        ${PROJECT_SOURCE_DIR}/cli/stores.hpp)
+        ${PROJECT_SOURCE_DIR}/cli/cmd/*/*.hpp
+        ${PROJECT_SOURCE_DIR}/cli/stores.hpp
+        ${PROJECT_SOURCE_DIR}/cli/pch_cli.hpp)
 
 # Register header file set for IDE integration and installation metadata
 # Multiple BASE_DIRS so CMake knows how to layout the installed tree
@@ -45,6 +45,15 @@ set_property(TARGET fiction PROPERTY VERIFY_INTERFACE_HEADER_SETS ON)
 
 # Enforce project-wide C++ standard feature requirement (redundant but explicit)
 target_compile_features(fiction PRIVATE cxx_std_${CMAKE_CXX_STANDARD})
+
+# ============================================================================
+# Pre-Compiled Headers (PCH) for faster compilation
+# ============================================================================
+# Enable PCH for the fiction CLI to speed up compilation of all command files.
+# The PCH includes stable, expensive headers like alice, fiction types, etc.
+if (FICTION_ENABLE_PCH)
+    target_precompile_headers(fiction PRIVATE pch_cli.hpp)
+endif ()
 
 # Compile-time decisions on which flows to compile
 
