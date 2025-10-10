@@ -20,7 +20,7 @@ void version_command::execute()
 {
     env->out() << fmt::format("[i] {} - compiled on {} at \n", fiction::FICTION_VERSION, fiction::COMPILED_DATE,
                               fiction::COMPILED_TIME)
-               << fmt::format("[i] {}", fiction::FICTION_REPO) << std::endl;
+               << fmt::format("[i] {}\n", fiction::FICTION_REPO);
 }
 
 }  // namespace alice

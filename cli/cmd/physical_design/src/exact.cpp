@@ -68,7 +68,7 @@ void exact_command::execute()
     // error case: empty logic network store
     if (s.empty())
     {
-        env->out() << "[w] no logic network in store" << std::endl;
+        env->out() << "[w] no logic network in store\n";
         reset_flags();
         return;
     }
@@ -78,7 +78,7 @@ void exact_command::execute()
     {
         if (auto threads_available = std::thread::hardware_concurrency(); threads_available == 0)
         {
-            env->out() << "[w] could not detect the number of threads available to your system" << std::endl;
+            env->out() << "[w] could not detect the number of threads available to your system\n";
         }
         else
         {
@@ -121,8 +121,7 @@ void exact_command::execute()
         else
         {
             env->out() << "[e] possible values for the hexagonal tile shift are 'odd_row', 'even_row', "
-                          "'odd_column', and 'even_column'"
-                       << std::endl;
+                          "'odd_column', and 'even_column'\n";
         }
     }
     else  // Cartesian layout
@@ -168,24 +167,22 @@ void exact_command::exact_physical_design()
         }
         else
         {
-            env->out() << fmt::format("[e] impossible to place and route '{}' within the given parameters",
-                                      std::visit(get_name, ntk_ptr))
-                       << std::endl;
+            env->out() << fmt::format("[e] impossible to place and route '{}' within the given parameters\n",
+                                      std::visit(get_name, ntk_ptr));
         }
     }
     catch (const fiction::unsupported_clocking_scheme_exception&)
     {
-        env->out() << fmt::format("\"{}\" does not refer to a supported clocking scheme", ps.scheme) << std::endl;
+        env->out() << fmt::format("\"{}\" does not refer to a supported clocking scheme\n", ps.scheme);
     }
     catch (const fiction::high_degree_fanin_exception& e)
     {
-        env->out() << fmt::format("[e] {} of the given clocking scheme", e.what()) << std::endl;
+        env->out() << fmt::format("[e] {} of the given clocking scheme\n", e.what());
     }
     catch (...)
     {
-        env->out() << fmt::format("[e] an error occurred while placing and routing '{}' with the given parameters",
-                                  std::visit(get_name, ntk_ptr))
-                   << std::endl;
+        env->out() << fmt::format("[e] an error occurred while placing and routing '{}' with the given parameters\n",
+                                  std::visit(get_name, ntk_ptr));
     }
 }
 

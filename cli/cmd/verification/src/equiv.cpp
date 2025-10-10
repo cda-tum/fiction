@@ -37,7 +37,7 @@ void equiv_command::execute()
 
         if (lns.empty())
         {
-            env->out() << "[w] no logic network in store" << std::endl;
+            env->out() << "[w] no logic network in store\n";
             return;
         }
 
@@ -45,7 +45,7 @@ void equiv_command::execute()
 
         if (gls.empty())
         {
-            env->out() << "[w] no gate layout in store" << std::endl;
+            env->out() << "[w] no gate layout in store\n";
             return;
         }
 
@@ -57,7 +57,7 @@ void equiv_command::execute()
 
         if (lns.size() < 2)
         {
-            env->out() << "[w] need at least two logic networks in store" << std::endl;
+            env->out() << "[w] need at least two logic networks in store\n";
             return;
         }
 
@@ -69,7 +69,7 @@ void equiv_command::execute()
 
         if (gls.size() < 2)
         {
-            env->out() << "[w] need at least two gate layouts in store" << std::endl;
+            env->out() << "[w] need at least two gate layouts in store\n";
             return;
         }
 
@@ -77,7 +77,7 @@ void equiv_command::execute()
     }
     else
     {
-        env->out() << "[w] at least one store must be specified" << std::endl;
+        env->out() << "[w] at least one store must be specified\n";
     }
 }
 
@@ -106,13 +106,11 @@ void equiv_command::equivalence_checking(const NtkOrLytVariant1& ntk_or_lyt_vari
 
     if (result.spec_drv_stats.drvs > 0)
     {
-        env->out() << "[e] the layout given as specification has DRVs and, thus, cannot be checked for equivalence"
-                   << std::endl;
+        env->out() << "[e] the layout given as specification has DRVs and, thus, cannot be checked for equivalence\n";
     }
     else if (result.impl_drv_stats.drvs > 0)
     {
-        env->out() << "[e] the layout given as implementation has DRVs and, thus, cannot be checked for equivalence"
-                   << std::endl;
+        env->out() << "[e] the layout given as implementation has DRVs and, thus, cannot be checked for equivalence\n";
     }
     else
     {
@@ -122,9 +120,8 @@ void equiv_command::equivalence_checking(const NtkOrLytVariant1& ntk_or_lyt_vari
                                   result.eq == fiction::eq_type::WEAK ? "WEAKLY" :
                                                                         "STRONGLY",
                                   result.eq == fiction::eq_type::WEAK ?
-                                      fmt::format(" with a delay difference of {} clock cycles", result.tp_diff) :
-                                      "")
-                   << std::endl;
+                                      fmt::format(" with a delay difference of {} clock cycles\n", result.tp_diff) :
+                                      "");
     }
 }
 

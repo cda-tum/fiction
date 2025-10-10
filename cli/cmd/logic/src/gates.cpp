@@ -27,7 +27,7 @@ void gates_command::execute()
 {
     if (!is_set("gate_layout") && !is_set("network"))
     {
-        env->out() << "[w] at least one store must be specified" << std::endl;
+        env->out() << "[w] at least one store must be specified\n";
         return;
     }
 
@@ -46,7 +46,7 @@ void gates_command::execute()
         // error case: empty gate-level layout store
         if (s.empty())
         {
-            env->out() << "[w] no gate layout in store" << std::endl;
+            env->out() << "[w] no gate layout in store\n";
             return;
         }
 
@@ -60,7 +60,7 @@ void gates_command::execute()
         // error case: empty logic network store
         if (s.empty())
         {
-            env->out() << "[w] no logic network in store" << std::endl;
+            env->out() << "[w] no logic network in store\n";
             return;
         }
 

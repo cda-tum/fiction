@@ -34,7 +34,7 @@ void verilog_command::execute()
     // error case: empty logic network store
     if (s.empty())
     {
-        env->out() << "[w] no logic network in store" << std::endl;
+        env->out() << "[w] no logic network in store\n";
         return;
     }
 
@@ -81,7 +81,7 @@ void verilog_command::write_verilog_callback(const NtkOrLytVariant& ntk_or_lyt_v
     // error case: do not override directories
     if (std::filesystem::is_directory(filename))
     {
-        env->out() << "[e] cannot override a directory" << std::endl;
+        env->out() << "[e] cannot override a directory\n";
         return;
     }
     // if filename was not given, use stored layout name
@@ -101,11 +101,11 @@ void verilog_command::write_verilog_callback(const NtkOrLytVariant& ntk_or_lyt_v
     }
     catch (const std::ofstream::failure& e)
     {
-        env->out() << fmt::format("[e] {}", e.what()) << std::endl;
+        env->out() << fmt::format("[e] {}\n", e.what());
     }
     catch (...)
     {
-        env->out() << "[e] an error occurred while the file was being written; it could be corrupted" << std::endl;
+        env->out() << "[e] an error occurred while the file was being written; it could be corrupted\n";
     }
 }
 

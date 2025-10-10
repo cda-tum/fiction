@@ -59,14 +59,14 @@ void map_command::execute()
     // error case: empty logic network store
     if (s.empty())
     {
-        env->out() << "[w] no logic network in store" << std::endl;
+        env->out() << "[w] no logic network in store\n";
         ps = {};
         return;
     }
 
     if (static_cast<int>(is_set("all2")) + static_cast<int>(is_set("all3")) + static_cast<int>(is_set("all")) > 1)
     {
-        env->out() << "[w] only one of '--all2', '--all3', or '--all' must be set" << std::endl;
+        env->out() << "[w] only one of '--all2', '--all3', or '--all' must be set\n";
         ps = {};
         return;
     }
@@ -91,7 +91,7 @@ void map_command::execute()
 
     if (std::none_of(gate_flags.cbegin(), gate_flags.cend(), [](const auto f) { return f; }))
     {
-        env->out() << "[e] no gates specified; cannot perform technology mapping" << std::endl;
+        env->out() << "[e] no gates specified; cannot perform technology mapping\n";
         ps = {};
         return;
     }
@@ -104,7 +104,7 @@ void map_command::execute()
 
         if (st.mapper_stats.mapping_error)
         {
-            env->out() << "[e] an error occurred in mockturtle's technology mapper" << std::endl;
+            env->out() << "[e] an error occurred in mockturtle's technology mapper\n";
             return;
         }
 

@@ -77,7 +77,7 @@ void onepass_command::execute()
     {
         if (auto threads_available = std::thread::hardware_concurrency(); threads_available == 0)
         {
-            env->out() << "[w] could not detect the number of threads available to the system" << std::endl;
+            env->out() << "[w] could not detect the number of threads available to the system\n";
         }
         else
         {
@@ -93,7 +93,7 @@ void onepass_command::execute()
         // error case: empty logic network store
         if (s.empty())
         {
-            env->out() << "[w] no logic network in store" << std::endl;
+            env->out() << "[w] no logic network in store\n";
 
             reset_flags();
             return;
@@ -117,24 +117,22 @@ void onepass_command::execute()
             }
             else
             {
-                env->out() << fmt::format("[e] impossible to synthesize {} within the given parameters", ps.name)
-                           << std::endl;
+                env->out() << fmt::format("[e] impossible to synthesize {} within the given parameters\n", ps.name);
             }
         }
         catch (const fiction::unsupported_clocking_scheme_exception&)
         {
             env->out() << fmt::format("[e] \"{}\" does not refer to a supported clocking scheme or the selected "
-                                      "clocking scheme is not supported by this approach",
-                                      ps.scheme)
-                       << std::endl;
+                                      "clocking scheme is not supported by this approach\n",
+                                      ps.scheme);
 
             reset_flags();
             return;
         }
         catch (const std::bad_alloc&)
         {
-            env->out() << fmt::format("[e] {} has too many inputs to store its truth table", std::visit(get_name, ntk))
-                       << std::endl;
+            env->out() << fmt::format("[e] {} has too many inputs to store its truth table\n",
+                                      std::visit(get_name, ntk));
             return;
         }
     }
@@ -145,7 +143,7 @@ void onepass_command::execute()
         // error case: empty truth table store
         if (s.empty())
         {
-            env->out() << "[w] no truth table in store" << std::endl;
+            env->out() << "[w] no truth table in store\n";
 
             reset_flags();
             return;
@@ -162,8 +160,7 @@ void onepass_command::execute()
         }
         else
         {
-            env->out() << fmt::format("[e] impossible to synthesize {} within the given parameters", ps.name)
-                       << std::endl;
+            env->out() << fmt::format("[e] impossible to synthesize {} within the given parameters\n", ps.name);
         }
     }
 

@@ -39,7 +39,7 @@ void ortho_command::execute()
     // error case: empty logic network store
     if (store<fiction::logic_network_t>().empty())
     {
-        env->out() << "[w] no logic network in store" << std::endl;
+        env->out() << "[w] no logic network in store\n";
         ps                   = {};
         hexagonal_tile_shift = "";
         return;
@@ -47,7 +47,7 @@ void ortho_command::execute()
     // error case: phases out of range
     if (num_clock_phases != 3u && num_clock_phases != 4u)
     {
-        env->out() << "[e] only 3- and 4-phase clocking schemes are supported" << std::endl;
+        env->out() << "[e] only 3- and 4-phase clocking schemes are supported\n";
         ps                   = {};
         hexagonal_tile_shift = "";
         return;
@@ -76,8 +76,7 @@ void ortho_command::execute()
         else
         {
             env->out() << "[e] possible values for the hexagonal tile shift are 'odd_row', 'even_row', "
-                          "'odd_column', and 'even_column'"
-                       << std::endl;
+                          "'odd_column', and 'even_column'\n";
         }
     }
     else  // Cartesian layout
@@ -118,7 +117,7 @@ void ortho_command::orthogonal_physical_design()
     }
     catch (const fiction::high_degree_fanin_exception& e)
     {
-        env->out() << fmt::format("[e] {}", e.what()) << std::endl;
+        env->out() << fmt::format("[e] {}\n", e.what());
     }
 }
 

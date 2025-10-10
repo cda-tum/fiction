@@ -41,7 +41,7 @@ void abc_command::execute()
 {
     if constexpr (ABC == nullptr)
     {
-        env->out() << "[e] `ABC_EXECUTABLE` environment variable is not set. Cannot launch ABC." << std::endl;
+        env->out() << "[e] `ABC_EXECUTABLE` environment variable is not set. Cannot launch ABC.\n";
         return;
     }
 
@@ -50,7 +50,7 @@ void abc_command::execute()
     // error case: empty logic network store
     if (s.empty())
     {
-        env->out() << "[w] no logic network in store" << std::endl;
+        env->out() << "[w] no logic network in store\n";
         return;
     }
 
@@ -59,7 +59,7 @@ void abc_command::execute()
 
     if (std::visit(is_tech_ntk, s.current()))
     {
-        env->out() << "[w] ABC callback does not support technology networks. Use AIGs or XAGs instead." << std::endl;
+        env->out() << "[w] ABC callback does not support technology networks. Use AIGs or XAGs instead.\n";
         return;
     }
 
@@ -68,7 +68,7 @@ void abc_command::execute()
 
     if (std::visit(is_maj_ntk, s.current()))
     {
-        env->out() << "[w] ABC callback does not support MIGs. Use AIGs or XAGs instead." << std::endl;
+        env->out() << "[w] ABC callback does not support MIGs. Use AIGs or XAGs instead.\n";
         return;
     }
 
@@ -89,7 +89,7 @@ void abc_command::execute()
 
         if (const auto ret = std::system(abc_call.c_str()); ret != 0)
         {
-            env->out() << "[e] Failed to execute ABC command." << std::endl;
+            env->out() << "[e] Failed to execute ABC command.\n";
             return;
         }
 
@@ -99,7 +99,7 @@ void abc_command::execute()
     }
     catch (const std::exception& e)
     {
-        env->out() << fmt::format("[e] {}", e.what()) << std::endl;
+        env->out() << fmt::format("[e] {}\n", e.what());
     }
 }
 

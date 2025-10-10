@@ -27,7 +27,7 @@ void check_command::execute()
     // error case: empty gate-level layout store
     if (s.empty())
     {
-        env->out() << "[w] no gate layout in store" << std::endl;
+        env->out() << "[w] no gate layout in store\n";
         return;
     }
 

@@ -36,7 +36,7 @@ void qca_command::execute()
     // error case: empty cell layout store
     if (s.empty())
     {
-        env->out() << "[w] no cell layout in store" << std::endl;
+        env->out() << "[w] no cell layout in store\n";
 
         ps = {};
         return;
@@ -59,9 +59,8 @@ void qca_command::execute()
         }
         else
         {
-            env->out() << fmt::format("[e] {}'s cell technology is not QCA but {}", get_name(lyt_ptr),
-                                      fiction::tech_impl_name<fiction::technology<Lyt>>)
-                       << std::endl;
+            env->out() << fmt::format("[e] {}'s cell technology is not QCA but {}\n", get_name(lyt_ptr),
+                                      fiction::tech_impl_name<fiction::technology<Lyt>>);
         }
     };
 
@@ -70,7 +69,7 @@ void qca_command::execute()
     // error case: do not override directories
     if (std::filesystem::is_directory(filename))
     {
-        env->out() << "[e] cannot override a directory" << std::endl;
+        env->out() << "[e] cannot override a directory\n";
 
         ps = {};
         return;
@@ -92,11 +91,11 @@ void qca_command::execute()
     }
     catch (const std::ofstream::failure& e)
     {
-        env->out() << fmt::format("[e] {}", e.what()) << std::endl;
+        env->out() << fmt::format("[e] {}\n", e.what());
     }
     catch (...)
     {
-        env->out() << "[e] an error occurred while the file was being written; it could be corrupted" << std::endl;
+        env->out() << "[e] an error occurred while the file was being written; it could be corrupted\n";
     }
 
     ps = {};

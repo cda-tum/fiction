@@ -28,7 +28,7 @@ void miginvopt_command::execute()
     // error case: empty logic network store
     if (s.empty())
     {
-        env->out() << "[w] no logic network in store" << std::endl;
+        env->out() << "[w] no logic network in store\n";
 
         return;
     }
@@ -50,7 +50,7 @@ void miginvopt_command::execute()
 
             const auto mig_ptr = std::make_shared<fiction::mig_nt>(ntk_clone);
 
-            env->out() << "[i] inverter cost reduction: " << st.total_gain << std::endl;
+            env->out() << fmt::format("[i] inverter cost reduction: {}\n", st.total_gain);
 
             fiction::restore_names(*ntk_ptr, *mig_ptr);
 
@@ -58,7 +58,7 @@ void miginvopt_command::execute()
         }
         else  // not an MIG
         {
-            env->out() << fmt::format("[e] {} is not an MIG", fiction::get_name(ntk_ptr)) << std::endl;
+            env->out() << fmt::format("[e] {} is not an MIG\n", fiction::get_name(*ntk_ptr));
         }
     };
 

@@ -82,14 +82,14 @@ void gold_command::execute()
     // error case: empty logic network store
     if (store<fiction::logic_network_t>().empty())
     {
-        env->out() << "[w] no logic network in store" << std::endl;
+        env->out() << "[w] no logic network in store\n";
         ps = {};
         return;
     }
 
     if (ps.num_vertex_expansions == 0)
     {
-        env->out() << "[w] the number of vertex expansions has to be at least 1" << std::endl;
+        env->out() << "[w] the number of vertex expansions has to be at least 1\n";
         ps = {};
         return;
     }
@@ -139,20 +139,18 @@ void gold_command::graph_oriented_layout_design()
         }
         else
         {
-            env->out() << fmt::format("[e] impossible to place and route '{}' within the given parameters",
-                                      std::visit(get_name, ntk_ptr))
-                       << std::endl;
+            env->out() << fmt::format("[e] impossible to place and route '{}' within the given parameters\n",
+                                      std::visit(get_name, ntk_ptr));
         }
     }
     catch (const fiction::high_degree_fanin_exception& e)
     {
-        env->out() << fmt::format("[e] {}", e.what()) << std::endl;
+        env->out() << fmt::format("[e] {}\n", e.what());
     }
     catch (...)
     {
-        env->out() << fmt::format("[e] an error occurred while placing and routing '{}' with the given parameters",
-                                  std::visit(get_name, ntk_ptr))
-                   << std::endl;
+        env->out() << fmt::format("[e] an error occurred while placing and routing '{}' with the given parameters\n",
+                                  std::visit(get_name, ntk_ptr));
     }
 }
 

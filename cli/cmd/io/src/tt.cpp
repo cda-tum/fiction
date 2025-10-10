@@ -38,19 +38,19 @@ void tt_command::execute()
 {
     if (is_set("table") && is_set("expression"))
     {
-        env->out() << "[e] 'table' and 'expression' cannot be set at the same time" << std::endl;
+        env->out() << "[e] 'table' and 'expression' cannot be set at the same time\n";
         reset_flags();
         return;
     }
     if (is_set("table") && is_set("random"))
     {
-        env->out() << "[e] 'table' and 'random' cannot be set at the same time" << std::endl;
+        env->out() << "[e] 'table' and 'random' cannot be set at the same time\n";
         reset_flags();
         return;
     }
     if (is_set("expression") && is_set("random"))
     {
-        env->out() << "[e] 'expression' and 'random' cannot be set at the same time" << std::endl;
+        env->out() << "[e] 'expression' and 'random' cannot be set at the same time\n";
         reset_flags();
         return;
     }
@@ -73,7 +73,7 @@ void tt_command::execute()
             }
             else
             {
-                env->out() << "[e] " << table << " is not a hex string" << std::endl;
+                env->out() << "[e] " << table << " is not a hex string\n";
             }
         }
         else if ((size & (size - 1)) == 0)  // size is power of 2
@@ -89,12 +89,12 @@ void tt_command::execute()
             }
             else
             {
-                env->out() << "[e] " << table << " is not a binary string" << std::endl;
+                env->out() << "[e] " << table << " is not a binary string\n";
             }
         }
         else
         {
-            env->out() << "[e] number of bits is not a power of 2" << std::endl;
+            env->out() << "[e] number of bits is not a power of 2\n";
         }
     }
     else if (is_set("expression"))
@@ -124,7 +124,7 @@ void tt_command::execute()
     }
     else
     {
-        env->out() << "[e] no truth table generation approach specified" << std::endl;
+        env->out() << "[e] no truth table generation approach specified\n";
     }
 
     reset_flags();

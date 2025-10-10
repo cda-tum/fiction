@@ -49,19 +49,19 @@ void read_command::execute()
     if (!is_set("aig") && !is_set("xag") && !is_set("mig") && !is_set("tec") && !is_set("fgl") && !is_set("sqd") &&
         !is_set("fqca"))
     {
-        env->out() << "[e] at least one network or layout type must be specified" << std::endl;
+        env->out() << "[e] at least one network or layout type must be specified\n";
     }
     else if ((is_set("aig") || is_set("xag") || is_set("mig") || is_set("tec")) && is_set("fgl"))
     {
-        env->out() << "[e] cannot parse files as both logic networks and gate-level layouts" << std::endl;
+        env->out() << "[e] cannot parse files as both logic networks and gate-level layouts\n";
     }
     else if ((is_set("aig") || is_set("xag") || is_set("mig") || is_set("tec")) && (is_set("sqd") || is_set("fqca")))
     {
-        env->out() << "[e] cannot parse files as both logic networks and cell-level layouts" << std::endl;
+        env->out() << "[e] cannot parse files as both logic networks and cell-level layouts\n";
     }
     else if (is_set("fgl") && (is_set("sqd") || is_set("fqca")))
     {
-        env->out() << "[e] cannot parse files as both gate-level and cell-level layouts" << std::endl;
+        env->out() << "[e] cannot parse files as both gate-level and cell-level layouts\n";
     }
     else
     {
@@ -169,19 +169,17 @@ void read_command::execute()
                                     }
                                     else
                                     {
-                                        env->out() << fmt::format("[e] given topology does not exist: {}", topology)
-                                                   << std::endl;
+                                        env->out() << fmt::format("[e] given topology does not exist: {}\n", topology);
                                     }
                                 }
                                 catch (const fiction::fgl_parsing_error& e)
                                 {
-                                    env->out() << e.what() << std::endl;
+                                    env->out() << fmt::format("[e] {}\n", e.what());
                                 }
                             }
                             else
                             {
-                                env->out()
-                                    << "[e] for reading gate-level layouts, the topology has to be set" << std::endl;
+                                env->out() << "[e] for reading gate-level layouts, the topology has to be set\n";
                             }
                         }
                         else if (is_set("sqd"))
@@ -207,7 +205,7 @@ void read_command::execute()
                             }
                             catch (const fiction::sqd_parsing_error& e)
                             {
-                                env->out() << e.what() << std::endl;
+                                env->out() << fmt::format("[e] {}\n", e.what());
                             }
                         }
                         else if (is_set("fqca"))
@@ -223,38 +221,36 @@ void read_command::execute()
                             }
                             catch (const fiction::unsupported_character_exception& e)
                             {
-                                env->out()
-                                    << fmt::format("character '{}' is not supported as a cell designator", e.which())
-                                    << std::endl;
+                                env->out() << fmt::format("[e] character '{}' is not supported as a cell designator\n",
+                                                          e.which());
                             }
                             catch (const fiction::undefined_cell_label_exception& e)
                             {
-                                env->out() << fmt::format("cell label '{}' was used in the cell definition section but "
-                                                          "never defined above",
-                                                          e.which())
-                                           << std::endl;
+                                env->out()
+                                    << fmt::format("[e] cell label '{}' was used in the cell definition section but "
+                                                   "never defined above\n",
+                                                   e.which());
                             }
                             catch (const fiction::unrecognized_cell_definition_exception& e)
                             {
-                                env->out()
-                                    << fmt::format("unsupported cell definition in line {}", e.where()) << std::endl;
+                                env->out() << fmt::format("[e] unsupported cell definition in line {}\n", e.where());
                             }
                         }
                     }
                     else
                     {
-                        env->out() << "[e] given file name does not point to a regular file" << std::endl;
+                        env->out() << "[e] given file name does not point to a regular file\n";
                     }
                 }
                 else
                 {
-                    env->out() << "[e] given file name does not exist" << std::endl;
+                    env->out() << "[e] given file name does not exist\n";
                 }
             }
         }
         catch (...)
         {
-            env->out() << "[e] I/O error: no file could be read" << std::endl;
+            env->out() << "[e] I/O error: no file could be read\n";
         }
     }
 

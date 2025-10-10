@@ -34,7 +34,7 @@ void random_command::execute()
 {
     if (!is_set("aig") && !is_set("xag") && !is_set("mig") && !is_set("tec"))
     {
-        env->out() << "[e] at least one network type must be specified" << std::endl;
+        env->out() << "[e] at least one network type must be specified\n";
     }
     else
     {

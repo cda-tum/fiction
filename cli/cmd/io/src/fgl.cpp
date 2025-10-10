@@ -34,7 +34,7 @@ void fgl_command::execute()
     // error case: empty gate-level layout store
     if (s.empty())
     {
-        env->out() << "[w] no gate-level layout in store" << std::endl;
+        env->out() << "[w] no gate-level layout in store\n";
         return;
     }
 
@@ -50,7 +50,7 @@ void fgl_command::execute()
         }
         else
         {
-            env->out() << fmt::format("[e] {} is not a gate-level layout", get_name(lyt_ptr)) << std::endl;
+            env->out() << fmt::format("[e] {} is not a gate-level layout\n", get_name(lyt_ptr));
         }
     };
 
@@ -59,7 +59,7 @@ void fgl_command::execute()
     // error case: do not override directories
     if (std::filesystem::is_directory(filename))
     {
-        env->out() << "[e] cannot override a directory" << std::endl;
+        env->out() << "[e] cannot override a directory\n";
         return;
     }
     // if filename was not given, use stored layout name
@@ -79,11 +79,11 @@ void fgl_command::execute()
     }
     catch (const std::ofstream::failure& e)
     {
-        env->out() << fmt::format("[e] {}", e.what()) << std::endl;
+        env->out() << fmt::format("[e] {}\n", e.what());
     }
     catch (...)
     {
-        env->out() << "[e] an error occurred while the file was being written; it could be corrupted" << std::endl;
+        env->out() << "[e] an error occurred while the file was being written; it could be corrupted\n";
     }
 }
 

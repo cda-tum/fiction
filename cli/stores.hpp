@@ -152,7 +152,7 @@ inline void show<fiction::logic_network_t>(std::ostream& os, const fiction::logi
         }
         catch (const std::invalid_argument& e)
         {
-            cmd.env->out() << "[e] " << e.what() << std::endl;
+            cmd.env->out() << fmt::format("[e] {}\n", e.what());
         }
     };
 
@@ -360,7 +360,7 @@ inline void show<fiction::gate_layout_t>(std::ostream& os, const fiction::gate_l
         }
         else
         {
-            cmd.env->out() << "[e] unsupported layout topology" << std::endl;
+            cmd.env->out() << "[e] unsupported layout topology\n";
         }
     };
 
@@ -465,13 +465,12 @@ inline void show<fiction::cell_layout_t>(std::ostream& os, const fiction::cell_l
 
         if constexpr (!fiction::has_qca_technology_v<Lyt> && !fiction::has_sidb_technology_v<Lyt>)
         {
-            cmd.env->out() << fmt::format("[e] {} is neither a QCA layout nor an SiDB layout",
-                                          lyt_ptr->get_layout_name())
-                           << std::endl;
+            cmd.env->out() << fmt::format("[e] {} is neither a QCA layout nor an SiDB layout\n",
+                                          lyt_ptr->get_layout_name());
         }
         else if constexpr (fiction::has_qca_technology_v<Lyt> && !fiction::has_offset_ucoord_v<Lyt>)
         {
-            cmd.env->out() << fmt::format("[e] {} is not a Cartesian layout", lyt_ptr->get_layout_name()) << std::endl;
+            cmd.env->out() << fmt::format("[e] {} is not a Cartesian layout\n", lyt_ptr->get_layout_name());
         }
         else
         {
@@ -488,12 +487,11 @@ inline void show<fiction::cell_layout_t>(std::ostream& os, const fiction::cell_l
             }
             catch (const fiction::unsupported_cell_type_exception<fiction::coordinate<Lyt>>& e)
             {
-                cmd.env->out() << fmt::format("[e] unsupported cell type at cell position {}", e.where()) << std::endl;
+                cmd.env->out() << fmt::format("[e] unsupported cell type at cell position {}\n", e.where());
             }
             catch (...)
             {
-                cmd.env->out() << "[e] an error occurred while writing the SVG description to the output stream"
-                               << std::endl;
+                cmd.env->out() << "[e] an error occurred while writing the SVG description to the output stream\n";
             }
         }
     };

@@ -36,21 +36,21 @@ void fanouts_command::execute()
     // error case: empty logic network store
     if (s.empty())
     {
-        env->out() << "[w] no logic network in store" << std::endl;
+        env->out() << "[w] no logic network in store\n";
         ps = {};
         return;
     }
 
     if (ps.degree < 2 || ps.degree > 3)
     {
-        env->out() << "[w] " << ps.degree << " outputs per fan-out are not supported" << std::endl;
+        env->out() << "[w] " << ps.degree << " outputs per fan-out are not supported\n";
         ps = {};
         return;
     }
 
     if (ps.strategy != 0 && ps.strategy != 1)
     {
-        env->out() << "[w] " << ps.strategy << " does not refer to a valid strategy" << std::endl;
+        env->out() << "[w] " << ps.strategy << " does not refer to a valid strategy\n";
         ps = {};
         return;
     }

@@ -32,7 +32,7 @@ void simulate_command::execute()
 {
     if (is_set("gate_layout") == is_set("network"))
     {
-        env->out() << "[w] exactly one store needs to be specified" << std::endl;
+        env->out() << "[w] exactly one store needs to be specified\n";
         return;
     }
 
@@ -46,7 +46,7 @@ void simulate_command::execute()
         // error case: empty gate layout store
         if (gls.empty())
         {
-            env->out() << "[w] no gate layout in store" << std::endl;
+            env->out() << "[w] no gate layout in store\n";
             return;
         }
 
@@ -59,7 +59,7 @@ void simulate_command::execute()
         // error case: empty logic network store
         if (lns.empty())
         {
-            env->out() << "[w] no logic network in store" << std::endl;
+            env->out() << "[w] no logic network in store\n";
             return;
         }
 
@@ -75,9 +75,8 @@ void simulate_command::execute()
         }
         if (!is_set("silent"))
         {
-            env->out() << fmt::format("[i] {} - hex: {}, bin: {}", po_names[i], kitty::to_hex(tables[i]),
-                                      kitty::to_binary(tables[i]))
-                       << std::endl;
+            env->out() << fmt::format("[i] {} - hex: {}, bin: {}\n", po_names[i], kitty::to_hex(tables[i]),
+                                      kitty::to_binary(tables[i]));
         }
     }
 }
@@ -128,7 +127,7 @@ void simulate_command::perform_simulation(const NtkOrLytVariant& network_or_layo
     catch (const std::bad_alloc&)
     {
         env->out() << "[e] " << std::visit(get_name, network_or_layout_variant)
-                   << " has too many inputs to store its truth table" << std::endl;
+                   << " has too many inputs to store its truth table\n";
         return;
     }
 }

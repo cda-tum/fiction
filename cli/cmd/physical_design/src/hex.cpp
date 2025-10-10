@@ -36,7 +36,7 @@ void hex_command::execute()
     // error case: empty gate-level layout store
     if (gls.empty())
     {
-        env->out() << "[w] no gate layout in store" << std::endl;
+        env->out() << "[w] no gate layout in store\n";
         ps = {};
         return;
     }
@@ -49,15 +49,15 @@ void hex_command::execute()
     // error case: layout is not 2DDWave-clocked
     if (const auto is_2ddwave_clocked = std::visit(check_clocking_scheme_2ddwave, lyt); !is_2ddwave_clocked)
     {
-        env->out() << "[e] layout has to be 2DDWave-clocked" << std::endl;
+        env->out() << "[e] layout has to be 2DDWave-clocked\n";
         ps = {};
         return;
     }
 
     if (this->is_set("planar") && !(this->is_set("input_pin_extension") || this->is_set("output_pin_extension")))
     {
-        env->out() << "[w] planar rerouting is only possible when extending inputs and/or outputs (using -i and/or -o)"
-                   << std::endl;
+        env->out()
+            << "[w] planar rerouting is only possible when extending inputs and/or outputs (using -i and/or -o)\n";
     }
 
     if (this->is_set("input_pin_extension"))
@@ -95,7 +95,7 @@ void hex_command::execute()
         else
         {
             ps = {};
-            std::cout << "[e] layout has to be Cartesian" << std::endl;
+            std::cout << "[e] layout has to be Cartesian\n";
         }
 
         return std::nullopt;
@@ -116,12 +116,12 @@ void hex_command::execute()
     catch (const fiction::hexagonalization_io_pin_routing_error& e)
     {
         ps = {};
-        env->out() << fmt::format("[e] {}", e.what()) << std::endl;
+        env->out() << fmt::format("[e] {}\n", e.what());
     }
     catch (...)
     {
         ps = {};
-        env->out() << "[e] an error occurred while mapping" << std::endl;
+        env->out() << "[e] an error occurred while mapping\n";
     }
 }
 

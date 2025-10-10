@@ -29,7 +29,7 @@ void akers_command::execute()
 {
     if (!is_set("aig") && !is_set("xag") && !is_set("mig") && !is_set("tec"))
     {
-        env->out() << "[e] at least one network type must be specified" << std::endl;
+        env->out() << "[e] at least one network type must be specified\n";
         return;
     }
 
@@ -38,7 +38,7 @@ void akers_command::execute()
     // error case: empty truth table store
     if (s.empty())
     {
-        env->out() << "[w] no truth table in store" << std::endl;
+        env->out() << "[w] no truth table in store\n";
         return;
     }
 

@@ -29,7 +29,7 @@ void balance_command::execute()
     // error case: empty logic network store
     if (s.empty())
     {
-        env->out() << "[w] no logic network in store" << std::endl;
+        env->out() << "[w] no logic network in store\n";
 
         ps = {};
         return;
