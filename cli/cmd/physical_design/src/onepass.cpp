@@ -77,7 +77,7 @@ void onepass_command::execute()
     // fetch number of threads available on the system
     if (this->is_set("async_max"))
     {
-        if (auto threads_available = std::thread::hardware_concurrency(); threads_available == 0)
+        if (const auto threads_available = std::thread::hardware_concurrency(); threads_available == 0)
         {
             env->out() << "[w] could not detect the number of threads available to the system\n";
         }
@@ -106,12 +106,12 @@ void onepass_command::execute()
         const auto one_pass_with_ntk = [this](auto&& ntk_ptr)
         { return fiction::one_pass_synthesis<fiction::cart_gate_clk_lyt>(*ntk_ptr, ps, &st); };
 
-        auto ntk = s.current();
-        ps.name  = std::visit(get_name, ntk);
+        const auto ntk = s.current();
+        ps.name        = std::visit(get_name, ntk);
 
         try
         {
-            auto lyt = std::visit(one_pass_with_ntk, ntk);
+            const auto lyt = std::visit(one_pass_with_ntk, ntk);
 
             if (lyt.has_value())
             {
@@ -152,18 +152,30 @@ void onepass_command::execute()
             return;
         }
 
-        auto tt = s.current();
-        ps.name = kitty::to_hex(*tt);
-
-        auto lyt = fiction::one_pass_synthesis<fiction::cart_gate_clk_lyt>(std::vector<fiction::tt>{*tt}, ps, &st);
-
-        if (lyt.has_value())
+        try
         {
-            store<fiction::gate_layout_t>().extend() = std::make_shared<fiction::cart_gate_clk_lyt>(*lyt);
+            const auto tt = s.current();
+            ps.name       = kitty::to_hex(*tt);
+
+            const auto lyt =
+                fiction::one_pass_synthesis<fiction::cart_gate_clk_lyt>(std::vector<fiction::tt>{*tt}, ps, &st);
+
+            if (lyt.has_value())
+            {
+                store<fiction::gate_layout_t>().extend() = std::make_shared<fiction::cart_gate_clk_lyt>(*lyt);
+            }
+            else
+            {
+                env->out() << fmt::format("[e] impossible to synthesize {} within the given parameters\n", ps.name);
+            }
         }
-        else
+        catch (const fiction::unsupported_clocking_scheme_exception&)
         {
-            env->out() << fmt::format("[e] impossible to synthesize {} within the given parameters\n", ps.name);
+            env->out() << fmt::format("[e] \"{}\" does not refer to a supported clocking scheme or the selected "
+                                      "clocking scheme is not supported by this approach\n",
+                                      ps.scheme);
+            reset_flags();
+            return;
         }
     }
 

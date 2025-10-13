@@ -15,6 +15,7 @@
 #include <mockturtle/algorithms/simulation.hpp>
 #include <nlohmann/json.hpp>
 
+#include <cstdlib>
 #include <memory>
 #include <stdexcept>
 #include <string>
@@ -71,7 +72,7 @@ void simulate_command::execute()
     }
 
     auto& tts = store<fiction::truth_table_t>();
-    for (auto i = 0ul; i < tables.size(); ++i)
+    for (std::size_t i = 0; i < tables.size(); ++i)
     {
         if (is_set("store"))
         {
@@ -88,7 +89,7 @@ void simulate_command::execute()
 nlohmann::json simulate_command::log() const
 {
     nlohmann::json j;
-    for (auto i = 0ul; i < tables.size(); ++i)
+    for (std::size_t i = 0; i < tables.size(); ++i)
     {
         j.push_back({{"po", po_names[i]},
                      {"vars", tables[i].num_vars()},
@@ -130,9 +131,8 @@ void simulate_command::perform_simulation(const NtkOrLytVariant& network_or_layo
     }
     catch (const std::bad_alloc&)
     {
-        env->out() << "[e] " << std::visit(get_name, network_or_layout_variant)
-                   << " has too many inputs to store its truth table\n";
-        return;
+        env->out() << fmt::format("[e] {} has too many inputs to store its truth table\n",
+                                  std::visit(get_name, network_or_layout_variant));
     }
 }
 

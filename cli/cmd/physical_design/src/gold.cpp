@@ -45,7 +45,7 @@ gold_command::gold_command(const environment::ptr& e) :
                true)
         ->set_type_name("{high_efficiency=0, high_effort=1, highest_effort=2, maximum_effort=3}");
     add_option("--cost_objective,-c", ps.cost,
-               "Specify the cost objective for the graph-oriented layout design algorithm."
+               "Specify the cost objective for the graph-oriented layout design algorithm. "
                "Possible values for the cost objective:\n"
                " - `0` (area): Minimize the layout area.\n- `1` (wires): Minimize the number of wire segments.\n"
                " - `2` (crossings): Minimize the number of crossings.\n"

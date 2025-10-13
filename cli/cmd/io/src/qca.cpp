@@ -41,6 +41,7 @@ void qca_command::execute()
         env->out() << "[w] no cell layout in store\n";
 
         ps = {};
+        filename.clear();
         return;
     }
 
@@ -74,6 +75,7 @@ void qca_command::execute()
         env->out() << "[e] cannot override a directory\n";
 
         ps = {};
+        filename.clear();
         return;
     }
     // if filename was not given, use stored layout name
@@ -101,6 +103,7 @@ void qca_command::execute()
     }
 
     ps = {};
+    filename.clear();
 }
 
 }  // namespace alice

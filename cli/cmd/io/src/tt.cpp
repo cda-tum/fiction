@@ -78,7 +78,7 @@ void tt_command::execute()
                 env->out() << "[e] " << table << " is not a hex string\n";
             }
         }
-        else if ((size & (size - 1)) == 0)  // size is power of 2
+        else if (size >= 2u && (size & (size - 1)) == 0)  // size is power of 2 and at least 2
         {
             if (is_bin_string(table))
             {
@@ -122,6 +122,13 @@ void tt_command::execute()
     }
     else if (is_set("random"))
     {
+        if (random_vars == 0u)
+        {
+            env->out() << "[e] number of variables must be positive\n";
+            reset_flags();
+            return;
+        }
+
         fiction::tt tt{random_vars};
         kitty::create_random(tt);
 

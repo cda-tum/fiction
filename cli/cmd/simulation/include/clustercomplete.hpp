@@ -10,6 +10,7 @@
 #include <alice/alice.hpp>
 #include <nlohmann/json.hpp>
 
+#include <limits>
 #include <variant>
 
 namespace alice
@@ -73,6 +74,6 @@ class clustercomplete_command final : public command
 
 }  // namespace alice
 
-#endif  // FICTION_ALGLIB_ENABLED
-
 #endif  // FICTION_CMD_CLUSTERCOMPLETE_HPP
+
+#endif  // FICTION_ALGLIB_ENABLED

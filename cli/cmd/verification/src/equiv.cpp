@@ -116,13 +116,13 @@ void equiv_command::equivalence_checking(const NtkOrLytVariant1& ntk_or_lyt_vari
     }
     else
     {
-        env->out() << fmt::format("[i] {} and {} are {} equivalent{}", std::visit(get_name, ntk_or_lyt_variant1),
+        env->out() << fmt::format("[i] {} and {} are {} equivalent{}\n", std::visit(get_name, ntk_or_lyt_variant1),
                                   std::visit(get_name, ntk_or_lyt_variant_2),
                                   result.eq == fiction::eq_type::NO   ? "NOT" :
                                   result.eq == fiction::eq_type::WEAK ? "WEAKLY" :
                                                                         "STRONGLY",
                                   result.eq == fiction::eq_type::WEAK ?
-                                      fmt::format(" with a delay difference of {} clock cycles\n", result.tp_diff) :
+                                      fmt::format(" with a delay difference of {} clock cycles", result.tp_diff) :
                                       "");
     }
 }

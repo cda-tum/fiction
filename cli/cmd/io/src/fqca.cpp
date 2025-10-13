@@ -76,7 +76,7 @@ void fqca_command::execute()
     {
         filename = std::visit(get_name, lyt);
     }
-    // add .qca file extension if necessary
+    // add .fqca file extension if necessary
     if (std::filesystem::path(filename).extension() != ".fqca")
     {
         filename += ".fqca";

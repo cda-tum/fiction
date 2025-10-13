@@ -64,6 +64,12 @@ void read_command::execute()
     {
         env->out() << "[e] cannot parse files as both gate-level and cell-level layouts\n";
     }
+    else if (static_cast<int>(is_set("aig")) + static_cast<int>(is_set("xag")) + static_cast<int>(is_set("mig")) +
+                 static_cast<int>(is_set("tec")) >
+             1)
+    {
+        env->out() << "[e] select exactly one logic network type (-a/-x/-m/-t)\n";
+    }
     else
     {
         const auto store_ntks = [&](auto&& reader)

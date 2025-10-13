@@ -50,7 +50,10 @@ void optimize_command::execute()
     if (gls.empty())
     {
         env->out() << "[w] no gate layout in store\n";
-        ps = {};
+        ps  = {};
+        psw = {};
+        st  = {};
+        stw = {};
         return;
     }
 
@@ -63,7 +66,10 @@ void optimize_command::execute()
     if (!std::visit(is_twoddwave_clocked, lyt))
     {
         env->out() << "[e] layout has to be 2DDWave-clocked\n";
-        ps = {};
+        ps  = {};
+        psw = {};
+        st  = {};
+        stw = {};
         return;
     }
 
@@ -113,8 +119,13 @@ void optimize_command::execute()
     {
         ps.max_gate_relocations = max_gate_relocations;
     }
+
     std::visit(apply_optimization, lyt);
-    ps = {};
+
+    ps  = {};
+    psw = {};
+    st  = {};
+    stw = {};
 }
 
 }  // namespace alice

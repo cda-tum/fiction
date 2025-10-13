@@ -21,7 +21,6 @@
 
 #include <algorithm>
 #include <cctype>
-#include <iostream>
 #include <optional>
 #include <string>
 #include <type_traits>
@@ -66,18 +65,18 @@ void cell_command::execute()
         }
         catch (const fiction::unsupported_gate_type_exception<fiction::offset::ucoord_t>& e)
         {
-            std::cout << fmt::format("[e] unsupported gate type at tile position {}\n", e.where());
+            env->out() << fmt::format("[e] unsupported gate type at tile position {}\n", e.where());
         }
         catch (
             const fiction::unsupported_gate_orientation_exception<fiction::offset::ucoord_t, fiction::port_position>& e)
         {
-            std::cout << fmt::format("[e] unsupported gate orientation at tile position {} with ports {}\n", e.where(),
-                                     e.which_ports());
+            env->out() << fmt::format("[e] unsupported gate orientation at tile position {} with ports {}\n", e.where(),
+                                      e.which_ports());
         }
     }
     else if (library == "TOPOLINANO")
     {
-        const auto apply_inml_topolinano = [](auto&& lyt_ptr) -> std::optional<fiction::inml_cell_clk_lyt_ptr>
+        const auto apply_inml_topolinano = [this](auto&& lyt_ptr) -> std::optional<fiction::inml_cell_clk_lyt_ptr>
         {
             using Lyt = typename std::decay_t<decltype(lyt_ptr)>::element_type;
 
@@ -91,12 +90,12 @@ void cell_command::execute()
                 }
                 else
                 {
-                    std::cout << "[e] Cartesian shift must be vertical\n";
+                    env->out() << "[e] Cartesian shift must be vertical\n";
                 }
             }
             else
             {
-                std::cout << "[e] layout topology must be shifted Cartesian\n";
+                env->out() << "[e] layout topology must be shifted Cartesian\n";
             }
 
             return std::nullopt;
@@ -111,18 +110,18 @@ void cell_command::execute()
         }
         catch (const fiction::unsupported_gate_type_exception<fiction::offset::ucoord_t>& e)
         {
-            std::cout << fmt::format("[e] unsupported gate type at tile position {}\n", e.where());
+            env->out() << fmt::format("[e] unsupported gate type at tile position {}\n", e.where());
         }
         catch (
             const fiction::unsupported_gate_orientation_exception<fiction::offset::ucoord_t, fiction::port_position>& e)
         {
-            std::cout << fmt::format("[e] unsupported gate orientation at tile position {} with ports {}\n", e.where(),
-                                     e.which_ports());
+            env->out() << fmt::format("[e] unsupported gate orientation at tile position {} with ports {}\n", e.where(),
+                                      e.which_ports());
         }
     }
     else if (library == "BESTAGON")
     {
-        const auto apply_sidb_bestagon = [](auto&& lyt_ptr) -> std::optional<fiction::sidb_100_cell_clk_lyt_ptr>
+        const auto apply_sidb_bestagon = [this](auto&& lyt_ptr) -> std::optional<fiction::sidb_100_cell_clk_lyt_ptr>
         {
             using Lyt = typename std::decay_t<decltype(lyt_ptr)>::element_type;
 
@@ -136,12 +135,12 @@ void cell_command::execute()
                 }
                 else
                 {
-                    std::cout << "[e] hexagonal orientation must be pointy-top\n";
+                    env->out() << "[e] hexagonal orientation must be pointy-top\n";
                 }
             }
             else
             {
-                std::cout << "[e] layout topology must be hexagonal\n";
+                env->out() << "[e] layout topology must be hexagonal\n";
             }
 
             return std::nullopt;
@@ -156,19 +155,19 @@ void cell_command::execute()
         }
         catch (const fiction::unsupported_gate_type_exception<fiction::offset::ucoord_t>& e)
         {
-            std::cout << fmt::format("[e] unsupported gate type at tile position {}\n", e.where());
+            env->out() << fmt::format("[e] unsupported gate type at tile position {}\n", e.where());
         }
         catch (
             const fiction::unsupported_gate_orientation_exception<fiction::offset::ucoord_t, fiction::port_position>& e)
         {
-            std::cout << fmt::format("[e] unsupported gate orientation at tile position {} with ports {}\n", e.where(),
-                                     e.which_ports());
+            env->out() << fmt::format("[e] unsupported gate orientation at tile position {} with ports {}\n", e.where(),
+                                      e.which_ports());
         }
         catch (const fiction::unsupported_gate_orientation_exception<fiction::offset::ucoord_t,
                                                                      fiction::port_direction>& e)
         {
-            std::cout << fmt::format("[e] unsupported gate orientation at tile position {} with port directions {}\n",
-                                     e.where(), e.which_ports());
+            env->out() << fmt::format("[e] unsupported gate orientation at tile position {} with port directions {}\n",
+                                      e.where(), e.which_ports());
         }
     }
     // more libraries go here

@@ -77,6 +77,9 @@ void ortho_command::execute()
         {
             env->out() << "[e] possible values for the hexagonal tile shift are 'odd_row', 'even_row', "
                           "'odd_column', and 'even_column'\n";
+            ps                   = {};
+            hexagonal_tile_shift = "";
+            return;
         }
     }
     else  // Cartesian layout

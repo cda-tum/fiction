@@ -37,25 +37,24 @@ void random_command::execute()
     if (!is_set("aig") && !is_set("xag") && !is_set("mig") && !is_set("tec"))
     {
         env->out() << "[e] at least one network type must be specified\n";
+        return;
     }
-    else
+
+    if (is_set("aig"))
     {
-        if (is_set("aig"))
-        {
-            generate<fiction::aig_nt>(mockturtle::random_aig_generator(ps));
-        }
-        if (is_set("xag"))
-        {
-            generate<fiction::xag_nt>(mockturtle::random_xag_generator(ps));
-        }
-        if (is_set("mig"))
-        {
-            generate<fiction::mig_nt>(mockturtle::random_mig_generator(ps));
-        }
-        if (is_set("tec"))
-        {
-            generate<fiction::tec_nt>(mockturtle::mixed_random_mig_generator(ps));
-        }
+        generate<fiction::aig_nt>(mockturtle::random_aig_generator(ps));
+    }
+    if (is_set("xag"))
+    {
+        generate<fiction::xag_nt>(mockturtle::random_xag_generator(ps));
+    }
+    if (is_set("mig"))
+    {
+        generate<fiction::mig_nt>(mockturtle::random_mig_generator(ps));
+    }
+    if (is_set("tec"))
+    {
+        generate<fiction::tec_nt>(mockturtle::mixed_random_mig_generator(ps));
     }
 
     reset_flags();

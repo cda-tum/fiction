@@ -13,7 +13,6 @@
 
 #include <alice/alice.hpp>
 
-#include <iostream>
 #include <memory>
 #include <optional>
 #include <type_traits>
@@ -98,7 +97,7 @@ void hex_command::execute()
         else
         {
             ps = {};
-            std::cout << "[e] layout has to be Cartesian\n";
+            env->out() << "[e] layout has to be Cartesian\n";
         }
 
         return std::nullopt;

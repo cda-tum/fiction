@@ -72,6 +72,11 @@ void map_command::execute()
         return;
     }
 
+    // Save control flags before applying aggregate selections
+    const auto decay_flag         = ps.decay;
+    const auto logic_sharing_flag = ps.mapper_params.enable_logic_sharing;
+    const auto verbose_flag       = ps.mapper_params.verbose;
+
     if (is_set("all2"))
     {
         ps = fiction::all_standard_2_input_functions();
@@ -83,6 +88,14 @@ void map_command::execute()
     else if (is_set("all"))
     {
         ps = fiction::all_supported_standard_functions();
+    }
+
+    // Restore control flags after aggregate selection
+    if (is_set("all2") || is_set("all3") || is_set("all"))
+    {
+        ps.decay                              = decay_flag;
+        ps.mapper_params.enable_logic_sharing = logic_sharing_flag;
+        ps.mapper_params.verbose              = verbose_flag;
     }
 
     const std::array gate_flags{is_set("inv"),    is_set("and"),    is_set("nand"),   is_set("or"),   is_set("nor"),

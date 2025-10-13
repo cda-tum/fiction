@@ -19,7 +19,7 @@ namespace alice
  * Executes a SAT-driven topology-based logic re-synthesis, i.e., a one-pass synthesis. Utilizes the synthesis tool
  * Mugen by Winston Haaswijk.
  *
- * See fiction/algorithms/one_pass_synthesis.hpp for more details.
+ * See include/fiction/algorithms/physical_design/one_pass_synthesis.hpp for more details.
  */
 class onepass_command final : public command
 {

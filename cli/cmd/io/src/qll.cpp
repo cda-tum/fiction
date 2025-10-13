@@ -25,7 +25,7 @@ namespace alice
 {
 
 qll_command::qll_command(const environment::ptr& e) :
-        command(e, "Generates a ToPoliNano/MagCAD layout file for the current iNML cell layout in store. "
+        command(e, "Generates a ToPoliNano/MagCAD layout file for the current iNML or QCA cell layout in store. "
                    "ToPoliNano can reuse the layout while MagCAD is able to perform physical simulations.")
 {
     add_option("filename", filename, "QLL file name");
@@ -72,7 +72,7 @@ void qll_command::execute()
     {
         filename = std::visit(get_name, lyt);
     }
-    // add .qca file extension if necessary
+    // add .qll file extension if necessary
     if (std::filesystem::path(filename).extension() != ".qll")
     {
         filename += ".qll";
@@ -88,7 +88,7 @@ void qll_command::execute()
     }
     catch (const std::invalid_argument& e)
     {
-        env->out() << fmt::format("[e] {}", e.what());
+        env->out() << fmt::format("[e] {}\n", e.what());
     }
     catch (...)
     {
