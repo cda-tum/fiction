@@ -39,7 +39,7 @@ void miginvopt_command::execute()
     {
         using Ntk = typename std::decay_t<decltype(ntk_ptr)>::element_type;
 
-        mockturtle::mig_inv_optimization_stats st{};
+        mockturtle::mig_inv_optimization_stats st{};  // NOLINT(misc-const-correctness)
 
         // if the current logic network is an MIG
         if constexpr (std::is_same_v<Ntk, fiction::mig_nt>)

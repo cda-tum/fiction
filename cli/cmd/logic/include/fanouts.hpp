@@ -37,7 +37,7 @@ class fanouts_command final : public command
     /**
      * Random seed used for random fanout substitution
      */
-    uint32_t seed;
+    uint32_t seed{0u};
     /**
      * Parameters.
      */

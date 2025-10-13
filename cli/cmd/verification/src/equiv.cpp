@@ -85,14 +85,24 @@ void equiv_command::execute()
 
 nlohmann::json equiv_command::log() const
 {
-    return nlohmann::json{{"equivalence type", result.eq == fiction::eq_type::NO   ? "NOT EQ" :
-                                               result.eq == fiction::eq_type::WEAK ? "WEAK" :
-                                                                                     "STRONG"},
-                          {"counter example", result.counter_example},
-                          {"specification's throughput", result.tp_spec},
-                          {"implementation's throughput", result.tp_impl},
-                          {"throughput difference", result.tp_diff},
-                          {"runtime (s)", mockturtle::to_seconds(result.runtime)}};
+    const auto get_eq_type_string = [this]() -> std::string
+    {
+        if (result.eq == fiction::eq_type::NO)
+        {
+            return "NOT EQ";
+        }
+        if (result.eq == fiction::eq_type::WEAK)
+        {
+            return "WEAK";
+        }
+
+        return "STRONG";
+    };
+
+    return nlohmann::json{
+        {"equivalence type", get_eq_type_string()},     {"counter example", result.counter_example},
+        {"specification's throughput", result.tp_spec}, {"implementation's throughput", result.tp_impl},
+        {"throughput difference", result.tp_diff},      {"runtime (s)", mockturtle::to_seconds(result.runtime)}};
 }
 
 template <typename NtkOrLytVariant1, typename NtkOrLytVariant2>
@@ -116,11 +126,22 @@ void equiv_command::equivalence_checking(const NtkOrLytVariant1& ntk_or_lyt_vari
     }
     else
     {
+        const auto get_eq_type_adverb = [this]() -> std::string
+        {
+            if (result.eq == fiction::eq_type::NO)
+            {
+                return "NOT";
+            }
+            if (result.eq == fiction::eq_type::WEAK)
+            {
+                return "WEAKLY";
+            }
+
+            return "STRONGLY";
+        };
+
         env->out() << fmt::format("[i] {} and {} are {} equivalent{}\n", std::visit(get_name, ntk_or_lyt_variant1),
-                                  std::visit(get_name, ntk_or_lyt_variant_2),
-                                  result.eq == fiction::eq_type::NO   ? "NOT" :
-                                  result.eq == fiction::eq_type::WEAK ? "WEAKLY" :
-                                                                        "STRONGLY",
+                                  std::visit(get_name, ntk_or_lyt_variant_2), get_eq_type_adverb(),
                                   result.eq == fiction::eq_type::WEAK ?
                                       fmt::format(" with a delay difference of {} clock cycles", result.tp_diff) :
                                       "");
