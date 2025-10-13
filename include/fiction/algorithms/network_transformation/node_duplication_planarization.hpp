@@ -268,14 +268,15 @@ virtual_pi_network<Ntk> create_virtual_pi_ntk_from_duplicated_nodes(
             {
                 if (node_status[nd])
                 {
-                    const auto& new_signal = ntk_dest_v.create_virtual_pi(nd);
-                    const auto& new_node   = ntk_dest_v.get_node(new_signal);
-                    lvl_new.push_back(new_node);
-                    old2new_v[nd].push_back(new_node);
+                    const auto new_sig = ntk_dest_v.create_virtual_pi(nd);
+                    lvl_new.push_back(ntk_dest_v.get_node(new_sig));
+                    old2new_v[nd].push_back(new_sig);
                 }
                 else
                 {
-                    lvl_new.push_back(nd);
+                    const auto& sigs = old2new_v[nd];
+                    assert(!sigs.empty());
+                    lvl_new.push_back(ntk_dest_v.get_node(sigs.front()));
                     node_status[nd] = true;
                 }
             }
@@ -288,9 +289,9 @@ virtual_pi_network<Ntk> create_virtual_pi_ntk_from_duplicated_nodes(
 
                 assert(!children.empty() && "The node has to have children");
 
-                const auto& new_node = ntk_dest_v.create_node(children, ntk.node_function(nd));
-                lvl_new.push_back(new_node);
-                old2new_v[nd].push_back(new_node);
+                const auto new_sig = ntk_dest_v.create_node(children, ntk.node_function(nd));
+                lvl_new.push_back(ntk_dest_v.get_node(new_sig));
+                old2new_v[nd].push_back(new_sig);
             }
         }
     }
@@ -415,7 +416,7 @@ class node_duplication_planarization_impl
                           {
                               if (!ntk.is_constant(fi))
                               {
-                                  fis.push_back(fi);
+                                  fis.push_back(ntk.get_node(fi));
                               }
                           });
 
@@ -484,7 +485,7 @@ class node_duplication_planarization_impl
     /**
      * Inserts a node into a vector if it is unique.
      *
-     * `This function inserts a node into a vector only if the vector is empty or the node is not equal to the first
+     * This function inserts a node into a vector only if the vector is empty or the node is not equal to the first
      * element of the vector. If the vector is not empty and the node is equal to the first element, it does nothing.
      * An exception occurs if the node was skipped on the previous insertion attempt due to `vec.front() == node`; in
      * that case, the node will be inserted this time.

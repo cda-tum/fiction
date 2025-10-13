@@ -52,6 +52,7 @@ void check_ortho_planar(const Ntk& ntk)
     const auto                             cec_m = mockturtle::equivalence_checking(
         *fiction::virtual_miter<fiction::technology_network>(ntk, planarized_b), {}, &eq_st);
     REQUIRE(cec_m.has_value());
+    CHECK(*cec_m == 1);
 
     orthogonal_physical_design_stats orthogonal_planar_stats{};
 

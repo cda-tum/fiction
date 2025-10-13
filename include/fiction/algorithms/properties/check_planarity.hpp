@@ -36,7 +36,7 @@ class check_planarity_impl
      * @return `true` if the network is planar, `false` otherwise.
      */
 
-    bool run()
+    [[nodiscard]] bool run() const
     {
         bool return_false = false;
         for (uint32_t r = 1; r < ntk.depth() + 1; r++)
@@ -78,7 +78,7 @@ class check_planarity_impl
     }
 
   private:
-    const Ntk ntk;
+    const Ntk& ntk;
 };
 
 /**
@@ -107,8 +107,12 @@ template <typename Ntk>
     static_assert(mockturtle::has_rank_position_v<Ntk>, "Ntk does not implement the rank_position function");
     static_assert(mockturtle::has_foreach_node_in_rank_v<Ntk>,
                   "Ntk does not implement the foreach_node_in_rank function");
+    static_assert(mockturtle::has_is_constant_v<Ntk>, "Ntk does not implement the is_constant function");
 
-    assert(is_balanced(ntk) && "Network must be balanced");
+    if (!is_balanced(ntk))
+    {
+        throw std::invalid_argument("Network must be balanced");
+    }
 
     check_planarity_impl<Ntk> p{ntk};
 

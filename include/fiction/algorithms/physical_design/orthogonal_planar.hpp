@@ -6,11 +6,13 @@
 #define FICTION_ORTHOGONAL_PLANAR_HPP
 
 #include "fiction/algorithms/physical_design/orthogonal.hpp"
+#include "fiction/algorithms/properties/check_planarity.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/network_utils.hpp"
 #include "fiction/utils/placement_utils.hpp"
 
+#include <fmt/format.h>
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/node_map.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
@@ -566,51 +568,55 @@ std::vector<uint64_t> calculate_two_input_new_lines(const Ntk&                  
  * @param two_input_new_lines   Number of new routing lines associated with each two-input node.
  */
 void adjust_final_values(std::vector<uint64_t>& x, std::vector<uint64_t>& y,
-                         const std::vector<uint64_t>&    two_input_indices,
-                         const std::vector<std::size_t>& two_input_new_lines)
+                         const std::vector<std::size_t>& two_input_indices,
+                         const std::vector<uint64_t>&    two_input_new_lines)
 {
-    // Find the max element in two_input_new_lines and its index
-    const auto max_it                   = std::max_element(two_input_new_lines.begin(), two_input_new_lines.end());
-    const auto max_new_lines_two_inputs = *max_it;
-    const auto max_new_lines_two_inputs_index =
-        static_cast<const std::size_t>(std::distance(two_input_new_lines.begin(), max_it));
-
-    // Find max sum in x + y and its index
-    const auto max_xy_it = std::max_element(x.begin(), x.end(), [&](std::size_t i, std::size_t j)
-                                            { return (x[i] + y[i]) < (x[j] + y[j]); });
-
-    const auto max_new_lines = x[*max_xy_it] + y[*max_xy_it];
-    const auto mnl_iterator  = *max_xy_it;
-
-    // Determine the center index
-    uint64_t center = 0, max = 0;
-    if (max_new_lines > max_new_lines_two_inputs)
+    // Max element in two_input_new_lines and its index
+    const auto        max_it = std::max_element(two_input_new_lines.begin(), two_input_new_lines.end());
+    const uint64_t    max_new_lines_two_inputs = (max_it != two_input_new_lines.end()) ? *max_it : 0;
+    const std::size_t max_two_inputs_idx =
+        (max_it != two_input_new_lines.end()) ?
+            static_cast<std::size_t>(std::distance(two_input_new_lines.begin(), max_it)) :
+            0;
+    // Find index with max x+y
+    std::size_t max_xy_idx = 0;
+    uint64_t    max_xy_sum = 0;
+    for (std::size_t i = 0; i < x.size(); ++i)
     {
-        center = mnl_iterator;
-        max    = max_new_lines;
+        const uint64_t s = x[i] + y[i];
+        if (i == 0 || s > max_xy_sum)
+        {
+            max_xy_sum = s;
+            max_xy_idx = i;
+        }
+    }
+    // Determine the center index
+    std::size_t center = 0;
+    uint64_t    max    = 0;
+    if (max_xy_sum > max_new_lines_two_inputs)
+    {
+        center = max_xy_idx;
+        max    = max_xy_sum;
     }
     else
     {
-        center = two_input_indices[max_new_lines_two_inputs_index];
+        center = two_input_indices.empty() ? 0 : two_input_indices[max_two_inputs_idx];
         max    = max_new_lines_two_inputs;
     }
-
     // Create a lookup map for O(1) access instead of O(n) std::find()
     std::unordered_map<std::size_t, std::size_t> two_input_map;
     for (std::size_t i = 0; i < two_input_indices.size(); ++i)
     {
         two_input_map[two_input_indices[i]] = i;
     }
-
     // Iterate through x and y to update values efficiently
     for (std::size_t i = 0; i < x.size(); ++i)
     {
         auto it = two_input_map.find(i);
-        if (it != two_input_map.end())  // Two fan-in node (found in two_input_indices)
-        {
-            const auto idx  = it->second;  // Get the corresponding index
+        if (it != two_input_map.end())
+        {  // Two fan-in node
+            const auto idx  = it->second;
             const auto diff = max - x[i] - y[i] - two_input_new_lines[idx];
-
             if (i < center)
             {
                 y[i] += diff;
@@ -624,10 +630,9 @@ void adjust_final_values(std::vector<uint64_t>& x, std::vector<uint64_t>& y,
                 assert(x[i] + y[i] + two_input_new_lines[idx] == max);
             }
         }
-        else  // One fan-in node
-        {
+        else
+        {  // One fan-in node
             const auto diff = max - x[i] - y[i];
-
             if (i < center)
             {
                 y[i] += diff;
@@ -729,9 +734,9 @@ compute_wiring(const Ntk& ntk, const mockturtle::node_map<mockturtle::signal<Lyt
         }
 
         // Save the right propagated new_lines
-        propagate_right = (two_input_new_lines[i] > cluster_new_lines[i] + propagate_right) ?
-                              0 :
-                              propagate_right + cluster_new_lines[i] - two_input_new_lines[i];
+        const uint64_t til = (i < two_input_new_lines.size()) ? two_input_new_lines[i] : 0;
+        propagate_right =
+            (til > cluster_new_lines[i] + propagate_right) ? 0 : propagate_right + cluster_new_lines[i] - til;
 
         // Move to the next cluster
         cluster_index_start = cluster_index_end + 1;
@@ -795,7 +800,7 @@ class orthogonal_planar_impl
   public:
     orthogonal_planar_impl(const Ntk& src, const orthogonal_physical_design_params& p,
                            orthogonal_physical_design_stats& st) :
-            ntk{mockturtle::fanout_view(src)},
+            ntk{mockturtle::fanout_view{mockturtle::names_view{src}}},
             ps{p},
             pst{st}
     {}
@@ -818,17 +823,19 @@ class orthogonal_planar_impl
 
 #if (PROGRESS_BARS)
         // initialize a progress bar
-        mockturtle::progress_bar bar{ctn.color_ntk.size(), "[i] arranging layout: |{0}|"};
+        mockturtle::progress_bar bar{ntk.depth() + 1, "[i] arranging layout: |{0}|"};
 #endif
 
         tile<Lyt> place_t{0, 0};
+        assert(ntk.num_pis() > 0);
         tile<Lyt> first_pos = {ntk.num_pis() - 1, 0};
         // place and route the nodes in ascending level order
         for (uint32_t lvl = 0; lvl < ntk.depth() + 1; lvl++)
         {
-            const auto variable_tuple = compute_pr_variables<mockturtle::fanout_view<Ntk>, Lyt>(ntk, node2pos, lvl);
-            const auto orientation    = std::get<0>(variable_tuple);
-            const auto new_lines      = std::get<1>(variable_tuple);
+            const auto variable_tuple =
+                compute_pr_variables<mockturtle::fanout_view<mockturtle::names_view<Ntk>>, Lyt>(ntk, node2pos, lvl);
+            const auto orientation = std::get<0>(variable_tuple);
+            const auto new_lines   = std::get<1>(variable_tuple);
 
             const auto  wiring = compute_wiring<decltype(ntk), Lyt>(ntk, node2pos, new_lines, lvl);
             const auto& x      = wiring.first;
@@ -972,20 +979,21 @@ class orthogonal_planar_impl
         }
 
         // place and route POs
-        std::unordered_map<int, int> count_map;
-        int                          add_line = 0;
+        std::unordered_map<typename mockturtle::fanout_view<Ntk>::node, int> count_map;
+        int                                                                  add_line = 0;
         // the number of outputs on a node is limited to 2, due to fanout substitution
         ntk.foreach_po(
             [this, &layout, &first_pos, &place_t, &node2pos, &count_map, &add_line](const auto& po)
             {
                 if (!ntk.is_constant(po))
                 {
-                    const auto n_s     = node2pos[po];
-                    auto       po_tile = static_cast<tile<Lyt>>(n_s);
-                    if (count_map[po] < 2)  // Check if the count is less than 2
+                    const auto drv     = ntk.get_node(po);
+                    auto       po_tile = static_cast<tile<Lyt>>(node2pos[drv]);
+                    auto&      cnt     = count_map[drv];
+                    if (cnt < 2)  // Check if the count is less than 2
                     {
                         // Adjust the position based on whether it's the first or second occurrence
-                        if (count_map[po] == 1)
+                        if (cnt == 1)
                         {
                             if (po_tile.y == place_t.y)
                             {
@@ -1001,7 +1009,7 @@ class orthogonal_planar_impl
                                          ntk.has_output_name(po_counter) ? ntk.get_output_name(po_counter++) :
                                                                            fmt::format("po{}", po_counter++),
                                          po_tile);
-                        count_map[po]++;
+                        ++cnt;
                     }
                     else
                     {
@@ -1025,7 +1033,7 @@ class orthogonal_planar_impl
     }
 
   private:
-    mockturtle::fanout_view<Ntk> ntk;
+    mockturtle::fanout_view<mockturtle::names_view<Ntk>> ntk;
 
     orthogonal_physical_design_params ps;
     orthogonal_physical_design_stats& pst;
