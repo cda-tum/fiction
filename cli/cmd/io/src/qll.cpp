@@ -73,7 +73,6 @@ void qll_command::execute()
     if (filename.empty())
     {
         filename = std::visit(get_name, lyt);
-        c
     }
     // add .qll file extension if necessary
     if (std::filesystem::path(filename).extension() != ".qll")
