@@ -4,6 +4,8 @@
 
 #include "cmd/logic/include/map.hpp"
 
+#include "stores.hpp"  // NOLINT(misc-include-cleaner)
+
 #include <fiction/algorithms/network_transformation/technology_mapping.hpp>
 #include <fiction/types.hpp>
 

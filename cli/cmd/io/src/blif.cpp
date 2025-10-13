@@ -4,6 +4,8 @@
 
 #include "cmd/io/include/blif.hpp"
 
+#include "stores.hpp"  // NOLINT(misc-include-cleaner)
+
 #include <fiction/types.hpp>
 #include <fiction/utils/name_utils.hpp>
 

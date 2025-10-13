@@ -11,6 +11,7 @@
 
 namespace alice
 {
+
 /**
  * Generates a Verilog file for the current logic network or gate-level layout in store and writes it to the given path.
  */

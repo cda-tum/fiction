@@ -6,6 +6,8 @@
 
 #include "cmd/simulation/include/clustercomplete.hpp"
 
+#include "stores.hpp"  // NOLINT(misc-include-cleaner)
+
 #include <fiction/algorithms/simulation/sidb/clustercomplete.hpp>
 #include <fiction/algorithms/simulation/sidb/minimum_energy.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>

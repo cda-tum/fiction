@@ -11,6 +11,7 @@
 
 namespace alice
 {
+
 /**
  * Creates a new technology network of the current logic network in store and performs a path balancing.
  */

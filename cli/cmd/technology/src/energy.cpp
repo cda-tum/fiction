@@ -4,6 +4,8 @@
 
 #include "cmd/technology/include/energy.hpp"
 
+#include "stores.hpp"  // NOLINT(misc-include-cleaner)
+
 #include <fiction/technology/energy_model.hpp>
 #include <fiction/types.hpp>
 

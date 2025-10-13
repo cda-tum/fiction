@@ -13,6 +13,7 @@
 
 namespace alice
 {
+
 /**
  * Generates a QCADesigner file for the current cell layout in store and writes it to the given path.
  *

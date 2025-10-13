@@ -9,6 +9,7 @@
 
 namespace alice
 {
+
 /**
  * Prints numbers of gates for a current logic network.
  */

@@ -4,6 +4,8 @@
 
 #include "cmd/io/include/verilog.hpp"
 
+#include "stores.hpp"  // NOLINT(misc-include-cleaner)
+
 #include <fiction/types.hpp>
 #include <fiction/utils/name_utils.hpp>
 
@@ -67,8 +69,21 @@ void verilog_command::write_verilog_callback(const NtkOrLytVariant& ntk_or_lyt_v
         }
 
         // write verilog file
-        mockturtle::write_verilog(*ntk_or_lyt_ptr, filename);
-
+        try
+        {
+            mockturtle::write_verilog(*ntk_or_lyt_ptr, filename);
+        }
+        catch (...)
+        {
+            if constexpr (mockturtle::has_set_network_name_v<Ntk>)
+            {
+                if (!name.empty())
+                {
+                    ntk_or_lyt_ptr->set_network_name(name);
+                }
+            }
+            throw;
+        }
         // restore network name
         if constexpr (mockturtle::has_set_network_name_v<Ntk>)
         {

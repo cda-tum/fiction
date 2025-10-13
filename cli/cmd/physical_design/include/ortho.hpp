@@ -15,6 +15,7 @@
 
 namespace alice
 {
+
 /**
  * Executes a heuristic physical approach based on "Improved Orthogonal Drawing of 3-graphs" by Therese Biedl, 1996.
  * See algo/orthogonal.hpp for more details.

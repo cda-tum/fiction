@@ -11,6 +11,7 @@
 
 namespace alice
 {
+
 /**
  * Converts a gate-level layout to a cell-level layout. The conversion process allows to choose from supported FCN gate
  * libraries.

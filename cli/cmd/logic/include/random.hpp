@@ -13,6 +13,7 @@
 
 namespace alice
 {
+
 /**
  * Generates a random logic network.
  */

@@ -4,6 +4,8 @@
 
 #include "cmd/logic/include/fanouts.hpp"
 
+#include "stores.hpp"  // NOLINT(misc-include-cleaner)
+
 #include <fiction/algorithms/network_transformation/fanout_substitution.hpp>
 #include <fiction/types.hpp>
 

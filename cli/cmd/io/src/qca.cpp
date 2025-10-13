@@ -4,6 +4,8 @@
 
 #include "cmd/io/include/qca.hpp"
 
+#include "stores.hpp"  // NOLINT(misc-include-cleaner)
+
 #include <fiction/io/write_qca_layout.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>

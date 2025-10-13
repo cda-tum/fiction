@@ -11,6 +11,7 @@
 
 namespace alice
 {
+
 /**
  * Performs logic synthesis to generate a network from a truth table.
  */

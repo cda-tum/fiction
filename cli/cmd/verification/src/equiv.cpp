@@ -4,6 +4,8 @@
 
 #include "cmd/verification/include/equiv.hpp"
 
+#include "stores.hpp"  // NOLINT(misc-include-cleaner)
+
 #include <fiction/algorithms/verification/equivalence_checking.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/name_utils.hpp>

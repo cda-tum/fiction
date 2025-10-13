@@ -4,6 +4,8 @@
 
 #include "cmd/io/include/read.hpp"
 
+#include "stores.hpp"  // NOLINT(misc-include-cleaner)
+
 #include <fiction/io/network_reader.hpp>
 #include <fiction/io/read_fgl_layout.hpp>
 #include <fiction/io/read_fqca_layout.hpp>

@@ -4,6 +4,8 @@
 
 #include "cmd/logic/include/gates.hpp"
 
+#include "stores.hpp"  // NOLINT(misc-include-cleaner)
+
 #include <fiction/algorithms/properties/count_gate_types.hpp>
 #include <fiction/types.hpp>
 

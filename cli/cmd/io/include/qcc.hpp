@@ -13,6 +13,7 @@
 
 namespace alice
 {
+
 /**
  * Generates a ToPoliNano/MagCAD component file for the current cell layout in store and writes it to the given path.
  *

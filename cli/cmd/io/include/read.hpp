@@ -11,6 +11,7 @@
 
 namespace alice
 {
+
 /**
  * Shorthand for all read commands. Chooses the proper function by the file ending.
  *

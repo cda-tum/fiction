@@ -4,6 +4,8 @@
 
 #include "cmd/io/include/qcc.hpp"
 
+#include "stores.hpp"  // NOLINT(misc-include-cleaner)
+
 #include <fiction/io/write_qcc_layout.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>

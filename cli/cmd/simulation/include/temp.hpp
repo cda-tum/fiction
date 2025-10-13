@@ -15,6 +15,7 @@
 
 namespace alice
 {
+
 /**
  * Executes temperature simulation for the current SiDB cell-level layout in store.
  */

@@ -4,6 +4,8 @@
 
 #include "cmd/verification/include/check.hpp"
 
+#include "stores.hpp"  // NOLINT(misc-include-cleaner)
+
 #include <fiction/algorithms/verification/design_rule_violations.hpp>
 #include <fiction/types.hpp>
 

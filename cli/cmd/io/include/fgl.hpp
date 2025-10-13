@@ -11,6 +11,7 @@
 
 namespace alice
 {
+
 /**
  * Generates a FGL file for the current gate-level layout in store and writes it to the given path.
  */

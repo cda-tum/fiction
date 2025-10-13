@@ -2,14 +2,17 @@
 // Created by marcel on 04.12.24.
 //
 
+#if (FICTION_ABC)
+
 #include "cmd/logic/include/abc.hpp"
 
-#if (FICTION_ABC)
+#include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
 #include <fiction/io/network_reader.hpp>
 #include <fiction/types.hpp>
 
 #include <alice/alice.hpp>
+#include <fmt/format.h>
 #include <mockturtle/io/write_aiger.hpp>
 
 #include <cstdlib>
@@ -103,7 +106,7 @@ void abc_command::execute()
     }
 }
 
-std::filesystem::path abc_command::get_temp_directory() const
+std::filesystem::path abc_command::get_temp_directory()
 {
     // Check common environment variables for the temporary directory
     if (auto* const tempdir = std::getenv("TMPDIR"); tempdir != nullptr)
@@ -127,7 +130,7 @@ std::filesystem::path abc_command::get_temp_directory() const
 #endif
 }
 
-std::filesystem::path abc_command::get_temp_fiction_directory() const
+std::filesystem::path abc_command::get_temp_fiction_directory()
 {
     // get the temporary directory
     const auto temp_dir = get_temp_directory();
@@ -149,7 +152,7 @@ std::filesystem::path abc_command::get_temp_fiction_directory() const
 
 std::filesystem::path abc_command::write_current_network_to_temp_file() const
 {
-    const auto write = [this](auto&& ntk_ptr) -> std::filesystem::path
+    const auto write = [](auto&& ntk_ptr) -> std::filesystem::path
     {
         const auto temp_file = get_temp_fiction_directory() / fmt::format("{}.aig", ntk_ptr->get_network_name());
 

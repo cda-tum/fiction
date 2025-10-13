@@ -4,6 +4,8 @@
 
 #include "cmd/io/include/tt.hpp"
 
+#include "stores.hpp"  // NOLINT(misc-include-cleaner)
+
 #include <fiction/types.hpp>
 
 #include <alice/alice.hpp>

@@ -12,6 +12,7 @@
 
 namespace alice
 {
+
 /**
  * Performs design rule checks on the active gate-level layout. Checks for various design rule validations like crossing
  * gates, non-adjacent connections, wrongly assigned clock zones, etc.

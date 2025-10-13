@@ -4,6 +4,8 @@
 
 #include "cmd/logic/include/random.hpp"
 
+#include "stores.hpp"  // NOLINT(misc-include-cleaner)
+
 #include <fiction/algorithms/network_transformation/network_conversion.hpp>
 #include <fiction/types.hpp>
 

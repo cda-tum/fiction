@@ -11,6 +11,7 @@
 
 namespace alice
 {
+
 /**
  * Command to create a truth table either from a binary string, a hex string, or an expression.
  *

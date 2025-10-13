@@ -13,6 +13,7 @@
 
 namespace alice
 {
+
 /**
  * Substitutes multi-outputs of gate vertices and replaces them with fan-out ones.
  */

@@ -4,6 +4,8 @@
 
 #include "cmd/io/include/qll.hpp"
 
+#include "stores.hpp"  // NOLINT(misc-include-cleaner)
+
 #include <fiction/io/write_qll_layout.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>

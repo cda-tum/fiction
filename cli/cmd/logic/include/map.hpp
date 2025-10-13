@@ -11,6 +11,7 @@
 
 namespace alice
 {
+
 /**
  * Performs technology mapping to transform a network into another one using specific gates.
  */

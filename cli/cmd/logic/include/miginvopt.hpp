@@ -9,6 +9,7 @@
 
 namespace alice
 {
+
 /**
  * Optimizes inverter costs of the current MIG in store.
  */

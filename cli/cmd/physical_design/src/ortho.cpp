@@ -4,6 +4,8 @@
 
 #include "cmd/physical_design/include/ortho.hpp"
 
+#include "stores.hpp"  // NOLINT(misc-include-cleaner)
+
 #include <fiction/algorithms/physical_design/orthogonal.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/traits.hpp>

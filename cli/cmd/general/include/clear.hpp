@@ -9,6 +9,7 @@
 
 namespace alice
 {
+
 /**
  * Clears all stores by removing all their entries.
  */

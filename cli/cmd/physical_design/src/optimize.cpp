@@ -4,6 +4,8 @@
 
 #include "cmd/physical_design/include/optimize.hpp"
 
+#include "stores.hpp"  // NOLINT(misc-include-cleaner)
+
 #include <fiction/algorithms/physical_design/post_layout_optimization.hpp>
 #include <fiction/algorithms/physical_design/wiring_reduction.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>

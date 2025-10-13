@@ -18,6 +18,7 @@
 
 namespace alice
 {
+
 /**
  * Executes *QuickSim* heuristic simulation for the current SiDB cell-level layout in store.
  */

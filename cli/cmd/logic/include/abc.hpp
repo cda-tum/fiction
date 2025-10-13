@@ -14,6 +14,7 @@
 
 namespace alice
 {
+
 /**
  * Callback command for ABC. Calls the ABC binary with a given command string and the current logic network in store.
  *

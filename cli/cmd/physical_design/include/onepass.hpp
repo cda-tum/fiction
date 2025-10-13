@@ -14,6 +14,7 @@
 
 namespace alice
 {
+
 /**
  * Executes a SAT-driven topology-based logic re-synthesis, i.e., a one-pass synthesis. Utilizes the synthesis tool
  * Mugen by Winston Haaswijk.

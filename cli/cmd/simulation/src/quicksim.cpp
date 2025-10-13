@@ -4,6 +4,8 @@
 
 #include "cmd/simulation/include/quicksim.hpp"
 
+#include "stores.hpp"  // NOLINT(misc-include-cleaner)
+
 #include <fiction/algorithms/simulation/sidb/minimum_energy.hpp>
 #include <fiction/algorithms/simulation/sidb/quicksim.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>

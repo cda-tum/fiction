@@ -11,6 +11,7 @@
 
 namespace alice
 {
+
 /**
  * Transforms a 2DDWave-clocked Cartesian layout into a hexagonal one.
  */

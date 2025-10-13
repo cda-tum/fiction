@@ -4,6 +4,8 @@
 
 #include "cmd/logic/include/balance.hpp"
 
+#include "stores.hpp"  // NOLINT(misc-include-cleaner)
+
 #include <fiction/algorithms/network_transformation/network_balancing.hpp>
 #include <fiction/types.hpp>
 

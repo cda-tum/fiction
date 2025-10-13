@@ -9,6 +9,7 @@
 
 namespace alice
 {
+
 /**
  * Propagates inverting edges in the current MIG to the primary inputs to reduce inverter cost (may duplicate logic).
  */

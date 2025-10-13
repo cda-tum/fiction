@@ -9,6 +9,7 @@
 
 namespace alice
 {
+
 /**
  * Outputs version and build information.
  */

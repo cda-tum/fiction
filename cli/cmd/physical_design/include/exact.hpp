@@ -16,6 +16,7 @@
 
 namespace alice
 {
+
 /**
  * Executes an exact physical design approach utilizing the SMT solver Z3.
  * See algo/exact.h for more details.

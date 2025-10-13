@@ -14,6 +14,7 @@
 
 namespace alice
 {
+
 /**
  * Executes a physical design approach utilizing A* path finding in a search space graph.
  * See algorithms/physical_design/graph_oriented_layout_search.hpp for more details.

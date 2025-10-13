@@ -15,6 +15,7 @@
 
 namespace alice
 {
+
 /**
  * Simulates network or gate-level layout into truth tables.
  *

@@ -4,6 +4,8 @@
 
 #include "cmd/logic/include/miginvopt.hpp"
 
+#include "stores.hpp"  // NOLINT(misc-include-cleaner)
+
 #include <fiction/types.hpp>
 #include <fiction/utils/name_utils.hpp>
 

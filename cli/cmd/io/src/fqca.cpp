@@ -4,6 +4,8 @@
 
 #include "cmd/io/include/fqca.hpp"
 
+#include "stores.hpp"  // NOLINT(misc-include-cleaner)
+
 #include <fiction/io/write_fqca_layout.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>

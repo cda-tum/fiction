@@ -12,6 +12,7 @@
 
 namespace alice
 {
+
 /**
  * Prints QCA energy dissipation for current gate-level layout. Calculations are based upon
  * 'An Energy-aware Model for the Logic Synthesis of Quantum-Dot Cellular Automata' by Frank Sill Torres, et al.

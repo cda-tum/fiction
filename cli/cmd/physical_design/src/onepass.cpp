@@ -6,6 +6,8 @@
 
 #include "cmd/physical_design/include/onepass.hpp"
 
+#include "stores.hpp"  // NOLINT(misc-include-cleaner)
+
 #include <fiction/algorithms/physical_design/one_pass_synthesis.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/types.hpp>

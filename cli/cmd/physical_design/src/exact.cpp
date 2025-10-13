@@ -6,6 +6,8 @@
 
 #include "cmd/physical_design/include/exact.hpp"
 
+#include "stores.hpp"  // NOLINT(misc-include-cleaner)
+
 #include <fiction/algorithms/physical_design/exact.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/types.hpp>

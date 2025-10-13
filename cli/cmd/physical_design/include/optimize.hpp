@@ -14,6 +14,7 @@
 
 namespace alice
 {
+
 /**
  * Optimizes a 2DDWave-clocked Cartesian layout.
  */

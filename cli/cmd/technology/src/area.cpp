@@ -4,6 +4,8 @@
 
 #include "cmd/technology/include/area.hpp"
 
+#include "stores.hpp"  // NOLINT(misc-include-cleaner)
+
 #include <fiction/technology/area.hpp>
 #include <fiction/types.hpp>
 

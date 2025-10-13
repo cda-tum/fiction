@@ -4,6 +4,8 @@
 
 #include "cmd/simulation/include/temp.hpp"
 
+#include "stores.hpp"  // NOLINT(misc-include-cleaner)
+
 #include <fiction/algorithms/simulation/sidb/critical_temperature.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
 #include <fiction/traits.hpp>

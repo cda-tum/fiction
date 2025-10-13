@@ -12,6 +12,7 @@
 
 namespace alice
 {
+
 /**
  * Prints the area usage of the current cell layout in nm². Uses standard values or given ones.
  */
