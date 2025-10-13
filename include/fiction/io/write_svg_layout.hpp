@@ -21,7 +21,6 @@
 #include <iostream>
 #include <optional>
 #include <sstream>
-#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <tuple>
@@ -1284,11 +1283,26 @@ class write_mol_qca_layout_svg_impl
             }
             if (!is_sync_elem)
             {
-                uint64_t idx = Lyt::technology::is_normal_cell1(ct) ? 0 :
-                               Lyt::technology::is_normal_cell2(ct) ? 1 :
-                               Lyt::technology::is_normal_cell3(ct) ? 2 :
-                               Lyt::technology::is_normal_cell4(ct) ? 3 :
-                                                                      0;
+                const uint64_t idx = [&ct]
+                {
+                    if (Lyt::technology::is_normal_cell1(ct))
+                    {
+                        return uint64_t{0};
+                    }
+                    if (Lyt::technology::is_normal_cell2(ct))
+                    {
+                        return uint64_t{1};
+                    }
+                    if (Lyt::technology::is_normal_cell3(ct))
+                    {
+                        return uint64_t{2};
+                    }
+                    if (Lyt::technology::is_normal_cell4(ct))
+                    {
+                        return uint64_t{3};
+                    }
+                    return uint64_t{0};
+                }();
 
                 cell_color = cell_colors.at(idx);
             }
@@ -1633,7 +1647,7 @@ void write_qca_layout_svg(const Lyt& lyt, std::ostream& os, const write_qca_layo
 template <typename Lyt>
 void write_qca_layout_svg(const Lyt& lyt, const std::string_view& filename, const write_qca_layout_svg_params& ps = {})
 {
-    std::ofstream os{filename.data(), std::ofstream::out};
+    std::ofstream os{std::string(filename), std::ofstream::out};
 
     if (!os.is_open())
     {
@@ -1685,7 +1699,7 @@ template <typename Lyt>
 void write_mol_qca_layout_svg(const Lyt& lyt, const std::string_view& filename,
                               const write_qca_layout_svg_params& ps = {})
 {
-    std::ofstream os{filename.data(), std::ofstream::out};
+    std::ofstream os{std::string(filename), std::ofstream::out};
 
     if (!os.is_open())
     {
@@ -1735,7 +1749,7 @@ void write_sidb_layout_svg(const Lyt& lyt, const std::string_view& filename,
     static_assert(has_sidb_technology_v<Lyt>, "Lyt must be a SiDB layout");
     static_assert(!is_sidb_defect_surface_v<Lyt>, "SiDB defects are not supported");
 
-    std::ofstream os{filename.data(), std::ofstream::out};
+    std::ofstream os{std::string(filename), std::ofstream::out};
 
     if (!os.is_open())
     {
