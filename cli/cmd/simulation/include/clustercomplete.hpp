@@ -4,6 +4,7 @@
 #define FICTION_CMD_CLUSTERCOMPLETE_HPP
 
 #include <fiction/algorithms/simulation/sidb/clustercomplete.hpp>
+#include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
 #include <fiction/types.hpp>
 

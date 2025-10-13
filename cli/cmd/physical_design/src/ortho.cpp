@@ -8,7 +8,6 @@
 
 #include <fiction/algorithms/physical_design/orthogonal.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
-#include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/network_utils.hpp>
 

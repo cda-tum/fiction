@@ -19,7 +19,7 @@
 #include <nlohmann/json.hpp>
 
 #include <memory>
-#include <stdexcept>
+#include <new>
 #include <string>
 #include <variant>
 #include <vector>
