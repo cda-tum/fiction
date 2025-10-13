@@ -4,7 +4,6 @@
 #include "fiction/layouts/cell_level_layout.hpp"
 #include "fiction/layouts/coordinates.hpp"
 #include "fiction/technology/cell_technologies.hpp"
-#include "fiction/utils/debug/network_writer.hpp"
 #include "utils/blueprints/network_blueprints.hpp"
 
 #include <fiction/algorithms/network_transformation/fanout_substitution.hpp>
@@ -90,23 +89,16 @@ TEST_CASE("Name conservation after planar orthogonal physical design", "[orthogo
     const auto topolinano_balanced = fiction::network_balancing<mockturtle::names_view<technology_network>>(
         fiction::fanout_substitution<mockturtle::names_view<technology_network>>(topolinano), b_ps);
 
-    debug::write_dot_network(topolinano_balanced, "balanced");
-
     auto topolinano_ranked = fiction::mutable_rank_view(topolinano_balanced);
     auto planarized_b      = fiction::node_duplication_planarization(topolinano_ranked);
 
     CHECK(planarized_b.get_name(2) == "x1");
     CHECK(planarized_b.get_name(3) == "x2");
-
-    debug::write_dot_network(planarized_b, "planarized");
-
     CHECK(planarized_b.get_network_name() == "topolinano");
 
     orthogonal_physical_design_stats orthogonal_planar_stats{};
 
     const auto layout = fiction::orthogonal_planar<gate_lyt>(planarized_b, {}, &orthogonal_planar_stats);
-
-    debug::write_dot_layout(layout);
 
     // network name
     CHECK(layout.get_layout_name() == "topolinano");

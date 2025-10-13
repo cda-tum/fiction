@@ -44,7 +44,7 @@ TEST_CASE("Planarize technology ntk", "[node-duplication-planarization]")
 
     auto planarized_ntk = node_duplication_planarization(vpi_r);
 
-    CHECK(check_planarity(planarized_ntk) == 1);
+    CHECK(check_planarity(planarized_ntk));
 
     mockturtle::equivalence_checking_stats st;
     const auto                             cec_m =
@@ -81,7 +81,7 @@ TEST_CASE("Planarize ntk with 3-ary node", "[node-duplication-planarization]")
 
     auto planarized_ntk = node_duplication_planarization(vpi_r);
 
-    CHECK(check_planarity(planarized_ntk) == 1);
+    CHECK(check_planarity(planarized_ntk));
 
     mockturtle::equivalence_checking_stats st;
     const auto                             cec_m =
@@ -118,7 +118,7 @@ TEST_CASE("Buffer AIG and planarize technology_network", "[node-duplication-plan
 
     auto planarized_ntk = node_duplication_planarization(vpi_r);
 
-    CHECK(check_planarity(planarized_ntk) == 1);
+    CHECK(check_planarity(planarized_ntk));
 
     mockturtle::equivalence_checking_stats st;
     const auto                             cec_m =
@@ -148,7 +148,7 @@ TEST_CASE("Buffer AIG and planarize technology_network 2", "[node-duplication-pl
 
     auto planarized_ntk = node_duplication_planarization(vpi_r);
 
-    CHECK(check_planarity(planarized_ntk) == 1);
+    CHECK(check_planarity(planarized_ntk));
 
     mockturtle::equivalence_checking_stats st;
     const auto                             cec_m =
@@ -181,7 +181,7 @@ TEST_CASE("Planarize multi output network", "[node-duplication-planarization]")
 
     auto planarized_ntk = node_duplication_planarization(vpi_r);
 
-    CHECK(check_planarity(planarized_ntk) == 1);
+    CHECK(check_planarity(planarized_ntk));
 
     mockturtle::equivalence_checking_stats st;
     const auto                             cec_m =

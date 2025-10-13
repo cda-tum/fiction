@@ -683,8 +683,8 @@ compute_wiring(const Ntk& ntk, const mockturtle::node_map<mockturtle::signal<Lyt
     {
         for (std::size_t j = 0; j < ntk.rank_width(lvl); ++j)
         {
-            x[j] = std::accumulate(new_lines.begin() + static_cast<int>(j) + 1,
-                                   new_lines.begin() + static_cast<int>(ntk.rank_width(lvl)), 0UL);
+            x[j] = std::accumulate(new_lines.begin() + static_cast<std::ptrdiff_t>(j + 1),
+                                   new_lines.begin() + ntk.rank_width(lvl), 0UL);
             y[j] = (j == 0) ? new_lines[j] : y[j - 1] + new_lines[j];
         }
         return std::make_pair(x, y);
@@ -708,8 +708,8 @@ compute_wiring(const Ntk& ntk, const mockturtle::node_map<mockturtle::signal<Lyt
         for (auto j = cluster_index_start; j < cluster_index_end; ++j)
         {
             // adjust x values
-            x[j] = std::accumulate(new_lines.begin() + static_cast<int>(j) + 1,
-                                   new_lines.begin() + static_cast<int>(cluster_index_end), 0UL);
+            x[j] = std::accumulate(new_lines.begin() + static_cast<std::ptrdiff_t>(j + 1),
+                                   new_lines.begin() + static_cast<std::ptrdiff_t>(cluster_index_end), 0UL);
 
             // adjust y values with propagation to the right (direction based on a 1D vector)
             y[j] = (j == 0) ? new_lines[j] : y[j - 1] + new_lines[j];
