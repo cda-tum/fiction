@@ -22,6 +22,17 @@
 #include <string>
 #include <type_traits>
 #include <variant>
+#include <vector>
+
+// Platform-specific headers for safe process execution
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <spawn.h>
+#include <sys/wait.h>
+#include <unistd.h>
+extern char** environ;
+#endif
 
 namespace alice
 {
@@ -80,17 +91,30 @@ void abc_command::execute()
         const auto fiction_network_path = write_current_network_to_temp_file();
         const auto abc_network_path     = abc_output_temp_file();
 
-        const auto read_cmd =
-            fmt::format("{}", is_set("dont_read") ? "" : fmt::format("read {}; ", fiction_network_path.string()));
-        const auto strash_cmd = is_set("dont_strash") ? "" : "strash; ";
-        const auto write_cmd =
-            is_set("dont_write") ? "" : fmt::format("; write_aiger -s {}", abc_network_path.string());
+        // Build the ABC command string without shell metacharacters
+        std::string abc_cmd_sequence;
 
-        // call the ABC binary
-        const auto abc_call =
-            fmt::format("{0} -q \"{1}{2}{3}{4}\"", ABC, read_cmd, strash_cmd, abc_command_str, write_cmd);
+        if (!is_set("dont_read"))
+        {
+            abc_cmd_sequence += fmt::format("read {}; ", fiction_network_path.string());
+        }
 
-        if (const auto ret = std::system(abc_call.c_str()); ret != 0)
+        if (!is_set("dont_strash"))
+        {
+            abc_cmd_sequence += "strash; ";
+        }
+
+        abc_cmd_sequence += abc_command_str;
+
+        if (!is_set("dont_write"))
+        {
+            abc_cmd_sequence += fmt::format("; write_aiger -s {}", abc_network_path.string());
+        }
+
+        // Safely execute ABC without invoking a shell
+        const std::vector<std::string> abc_args = {"-q", abc_cmd_sequence};
+
+        if (const auto ret = safe_execute_abc(ABC, abc_args); ret != 0)
         {
             env->out() << "[e] Failed to execute ABC command.\n";
             return;
@@ -170,6 +194,107 @@ std::filesystem::path abc_command::abc_output_temp_file() const
 
     return get_temp_fiction_directory() /
            fmt::format("{}.aig", std::visit(get_name, store<fiction::logic_network_t>().current()));
+}
+
+int abc_command::safe_execute_abc(const std::string& abc_path, const std::vector<std::string>& abc_args)
+{
+#ifdef _WIN32
+    // Windows implementation using CreateProcess
+    std::string command_line = abc_path;
+    for (const auto& arg : abc_args)
+    {
+        command_line += " \"";
+        // Escape quotes in the argument
+        for (const char c : arg)
+        {
+            if (c == '"')
+            {
+                command_line += "\\\"";
+            }
+            else if (c == '\\')
+            {
+                command_line += "\\\\";
+            }
+            else
+            {
+                command_line += c;
+            }
+        }
+        command_line += "\"";
+    }
+
+    STARTUPINFOA        si{};
+    PROCESS_INFORMATION pi{};
+    si.cb = sizeof(si);
+
+    // CreateProcessA requires a non-const char*, so we need to copy the string
+    std::vector<char> cmd_line(command_line.begin(), command_line.end());
+    cmd_line.push_back('\0');
+
+    if (!CreateProcessA(nullptr,          // Application name (use command line)
+                        cmd_line.data(),  // Command line
+                        nullptr,          // Process security attributes
+                        nullptr,          // Thread security attributes
+                        FALSE,            // Inherit handles
+                        0,                // Creation flags
+                        nullptr,          // Environment
+                        nullptr,          // Current directory
+                        &si,              // Startup info
+                        &pi))             // Process information
+    {
+        return -1;  // Failed to create process
+    }
+
+    // Wait for the process to complete
+    WaitForSingleObject(pi.hProcess, INFINITE);
+
+    DWORD exit_code = 0;
+    GetExitCodeProcess(pi.hProcess, &exit_code);
+
+    // Clean up handles
+    CloseHandle(pi.hProcess);
+    CloseHandle(pi.hThread);
+
+    return static_cast<int>(exit_code);
+#else
+    // POSIX implementation using posix_spawn
+    std::vector<char*> argv;
+    argv.push_back(const_cast<char*>(abc_path.c_str()));
+
+    // Store string copies to ensure pointers remain valid
+    std::vector<std::string> arg_storage;
+    arg_storage.reserve(abc_args.size());
+
+    for (const auto& arg : abc_args)
+    {
+        arg_storage.push_back(arg);
+        argv.push_back(const_cast<char*>(arg_storage.back().c_str()));
+    }
+    argv.push_back(nullptr);
+
+    pid_t     pid          = 0;
+    const int spawn_result = posix_spawn(&pid, abc_path.c_str(), nullptr, nullptr, argv.data(), environ);
+
+    if (spawn_result != 0)
+    {
+        return -1;  // Failed to spawn process
+    }
+
+    // Wait for the child process to complete
+    int status = 0;
+    if (waitpid(pid, &status, 0) == -1)
+    {
+        return -1;  // Failed to wait for process
+    }
+
+    // Return the exit code
+    if (WIFEXITED(status))
+    {
+        return WEXITSTATUS(status);
+    }
+
+    return -1;  // Process terminated abnormally
+#endif
 }
 
 }  // namespace alice

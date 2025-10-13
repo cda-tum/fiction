@@ -11,6 +11,7 @@
 
 #include <filesystem>
 #include <string>
+#include <vector>
 
 namespace alice
 {
@@ -71,6 +72,14 @@ class abc_command final : public command
      * @return Path to the temporary file where ABC is supposed to write its output.
      */
     std::filesystem::path abc_output_temp_file() const;
+    /**
+     * Safely execute ABC without invoking a shell to prevent command injection.
+     *
+     * @param abc_path Path to the ABC executable.
+     * @param abc_args Arguments to pass to ABC.
+     * @return Exit code of the ABC process.
+     */
+    static int safe_execute_abc(const std::string& abc_path, const std::vector<std::string>& abc_args);
 };
 
 }  // namespace alice
