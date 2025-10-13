@@ -5,6 +5,9 @@
 #include "cmd/technology/include/cell.hpp"
 
 #include <fiction/algorithms/physical_design/apply_gate_library.hpp>
+#include <fiction/layouts/coordinates.hpp>
+#include <fiction/technology/cell_ports.hpp>
+#include <fiction/technology/fcn_gate_library.hpp>
 #include <fiction/technology/inml_topolinano_library.hpp>
 #include <fiction/technology/qca_one_library.hpp>
 #include <fiction/technology/sidb_bestagon_library.hpp>
@@ -15,9 +18,11 @@
 #include <fmt/format.h>
 
 #include <algorithm>
+#include <cctype>
 #include <iostream>
 #include <optional>
 #include <string>
+#include <type_traits>
 #include <variant>
 
 namespace alice

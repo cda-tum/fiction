@@ -8,11 +8,13 @@
 #include <fiction/utils/name_utils.hpp>
 
 #include <alice/alice.hpp>
+#include <fmt/format.h>
 #include <kitty/print.hpp>
 #include <mockturtle/algorithms/simulation.hpp>
 #include <nlohmann/json.hpp>
 
 #include <memory>
+#include <stdexcept>
 #include <string>
 #include <variant>
 

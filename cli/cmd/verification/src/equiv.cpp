@@ -10,9 +10,9 @@
 
 #include <alice/alice.hpp>
 #include <fmt/format.h>
+#include <mockturtle/utils/stopwatch.hpp>
 #include <nlohmann/json.hpp>
 
-#include <cstdint>
 #include <string>
 #include <variant>
 

@@ -5,15 +5,16 @@
 #include "cmd/physical_design/include/hex.hpp"
 
 #include <fiction/algorithms/physical_design/hexagonalization.hpp>
-#include <fiction/layouts/clocked_layout.hpp>
+#include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/name_utils.hpp>
 
 #include <alice/alice.hpp>
 
 #include <iostream>
+#include <memory>
 #include <optional>
+#include <type_traits>
 #include <variant>
 
 namespace alice

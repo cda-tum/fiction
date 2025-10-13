@@ -2,9 +2,9 @@
 // Created by marcel on 09.04.20.
 //
 
-#include "cmd/physical_design/include/onepass.hpp"
-
 #if (MUGEN)
+
+#include "cmd/physical_design/include/onepass.hpp"
 
 #include <fiction/algorithms/physical_design/one_pass_synthesis.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
@@ -16,13 +16,13 @@
 #include <mockturtle/utils/stopwatch.hpp>
 #include <nlohmann/json.hpp>
 
-#include <iostream>
 #include <memory>
+#include <stdexcept>
 #include <string>
 #include <variant>
 #include <vector>
 
-#if !defined(__APPLE__)
+#ifndef __APPLE__
 #include <thread>
 #endif
 
@@ -44,7 +44,7 @@ onepass_command::onepass_command(const environment::ptr& e) :
     add_option("--fixed_size,-f", ps.fixed_size,
                "Execute only one iteration with the given number of upper bound tiles");
     add_option("--timeout,-t", ps.timeout, "Timeout in seconds");
-#if !defined(__APPLE__)
+#ifndef __APPLE__
     add_option("--async,-a", ps.num_threads, "Number of threads to use for parallel solving (beta feature)");
     add_flag("--async_max", "Use the maximum number of threads available to the system (beta feature)");
 #endif
@@ -71,7 +71,7 @@ void onepass_command::execute()
         ps.enable_wires = true;
     }
 
-#if !defined(__APPLE__)
+#ifndef __APPLE__
     // fetch number of threads available on the system
     if (this->is_set("async_max"))
     {

@@ -2,14 +2,15 @@
 // Created by marcel on 06.01.20.
 //
 
-#include "cmd/physical_design/include/exact.hpp"
-
 #if (FICTION_Z3_SOLVER)
+
+#include "cmd/physical_design/include/exact.hpp"
 
 #include <fiction/algorithms/physical_design/exact.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/name_utils.hpp>
+#include <fiction/utils/network_utils.hpp>
 
 #include <alice/alice.hpp>
 #include <mockturtle/utils/stopwatch.hpp>

@@ -8,7 +8,6 @@
 #include <fiction/io/read_fgl_layout.hpp>
 #include <fiction/io/read_fqca_layout.hpp>
 #include <fiction/io/read_sqd_layout.hpp>
-#include <fiction/technology/sidb_lattice.hpp>
 #include <fiction/types.hpp>
 
 #include <alice/alice.hpp>

@@ -6,17 +6,16 @@
 
 #include <fiction/algorithms/physical_design/post_layout_optimization.hpp>
 #include <fiction/algorithms/physical_design/wiring_reduction.hpp>
-#include <fiction/layouts/clocked_layout.hpp>
-#include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/name_utils.hpp>
 
 #include <alice/alice.hpp>
 
-#include <cstdint>
 #include <iostream>
 #include <optional>
+#include <type_traits>
 #include <variant>
 
 namespace alice

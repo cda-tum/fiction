@@ -2,12 +2,13 @@
 // Created by Willem Lambooy on 07.03.2024.
 //
 
-#include "cmd/simulation/include/clustercomplete.hpp"
-
 #if (FICTION_ALGLIB_ENABLED)
+
+#include "cmd/simulation/include/clustercomplete.hpp"
 
 #include <fiction/algorithms/simulation/sidb/clustercomplete.hpp>
 #include <fiction/algorithms/simulation/sidb/minimum_energy.hpp>
+#include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
@@ -18,7 +19,6 @@
 
 #include <any>
 #include <cstdint>
-#include <iostream>
 #include <limits>
 #include <memory>
 #include <string>

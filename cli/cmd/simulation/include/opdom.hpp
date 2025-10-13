@@ -6,16 +6,18 @@
 #define FICTION_CMD_OPDOM_HPP
 
 #include <fiction/algorithms/simulation/sidb/operational_domain.hpp>
-#include <fiction/io/write_operational_domain.hpp>
+#include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 
 #include <alice/alice.hpp>
 #include <nlohmann/json.hpp>
 
+#include <cstdlib>
 #include <string>
 #include <vector>
 
 namespace alice
 {
+
 /**
  * Executes operational domain computation for the current SiDB cell-level layout in store. The operational domain is a
  * set of simulation parameter values for which a given SiDB layout is logically operational. This means that a layout
@@ -33,10 +35,6 @@ namespace alice
  * The operational domain is written to a CSV file, which can be used for further analysis or visualization.
  *
  * For more information, see algorithms/simulation/sidb/operational_domain.hpp.
- *
- * BUG: Currently, the manual parameter reset (which is necessary due to an alice issue) triggers a different alice
- * problem: data is not read from the CLI properly after the manual reset. This causes error messages to be displayed
- * only once even if the same misconfigured command is executed twice in a row.
  */
 class opdom_command final : public command
 {

@@ -9,9 +9,9 @@
 
 #include <alice/alice.hpp>
 #include <mockturtle/generators/random_network.hpp>
-#include <mockturtle/traits.hpp>
 
 #include <chrono>
+#include <cstdint>
 #include <memory>
 #include <string>
 

@@ -5,16 +5,14 @@
 #include "cmd/physical_design/include/gold.hpp"
 
 #include <fiction/algorithms/physical_design/graph_oriented_layout_design.hpp>
-#include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/name_utils.hpp>
+#include <fiction/utils/network_utils.hpp>
 
 #include <alice/alice.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 #include <nlohmann/json.hpp>
 
-#include <cstdint>
-#include <iostream>
 #include <memory>
 #include <variant>
 

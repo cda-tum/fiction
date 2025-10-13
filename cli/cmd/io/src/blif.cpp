@@ -14,7 +14,6 @@
 #include <fstream>
 #include <ostream>
 #include <string>
-#include <type_traits>
 #include <variant>
 
 namespace alice

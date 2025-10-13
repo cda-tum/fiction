@@ -5,17 +5,15 @@
 #include "cmd/physical_design/include/ortho.hpp"
 
 #include <fiction/algorithms/physical_design/orthogonal.hpp>
+#include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/name_utils.hpp>
 #include <fiction/utils/network_utils.hpp>
 
 #include <alice/alice.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
-#include <mockturtle/views/names_view.hpp>
 #include <nlohmann/json.hpp>
 
-#include <cstdint>
 #include <memory>
 #include <string>
 #include <variant>
