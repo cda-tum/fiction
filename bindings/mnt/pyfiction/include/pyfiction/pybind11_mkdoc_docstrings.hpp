@@ -9460,11 +9460,7 @@ Processed node_pairs are stored in the `lvl_pairs` member for
 subsequent delay calculations.
 
 Parameter ``nd``:
-    Node in the H-graph.
-
-Parameter ``border_pis``:
-    A boolean indicating whether the input PIs (Primary Inputs) should
-    be propagated to the next)doc";
+    Node in the H-graph.)doc";
 
 static const char *__doc_fiction_detail_node_duplication_planarization_impl_insert_if_not_first =
 R"doc(Inserts a node into a vector if it is unique.
