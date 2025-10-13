@@ -33,6 +33,7 @@ void blif_command::execute()
     if (s.empty())
     {
         env->out() << "[w] no logic network in store\n";
+        filename.clear();
         return;
     }
 
@@ -50,6 +51,7 @@ void blif_command::write_blif_callback(const NtkOrLytVariant& ntk_or_lyt_variant
     if (std::filesystem::is_directory(filename))
     {
         env->out() << "[e] cannot override a directory\n";
+        filename.clear();
         return;
     }
     // if filename was not given, use stored layout name
@@ -75,6 +77,8 @@ void blif_command::write_blif_callback(const NtkOrLytVariant& ntk_or_lyt_variant
     {
         env->out() << "[e] an error occurred while the file was being written; it could be corrupted\n";
     }
+
+    filename.clear();
 }
 
 }  // namespace alice

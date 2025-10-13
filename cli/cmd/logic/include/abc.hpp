@@ -31,7 +31,7 @@ class abc_command final : public command
 
   protected:
     /**
-     * Executes the ABC callback: runs ABC on the current network and writes results back to the store..
+     * Executes the ABC callback: runs ABC on the current network and writes results back to the store.
      */
     void execute() override;
 

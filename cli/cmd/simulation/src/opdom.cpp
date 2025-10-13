@@ -125,6 +125,14 @@ void opdom_command::execute()
         return;
     }
 
+    // require positive number of samples for sampling-based algorithms
+    if ((is_set("random_sampling") || is_set("flood_fill") || is_set("contour_tracing")) && num_random_samples == 0)
+    {
+        env->out() << "[e] number of samples must be > 0 for the selected algorithm\n";
+        reset_params();
+        return;
+    }
+
     // make sure that z is not set if y is not, and that y is not set if x is not
     if (is_set("z_sweep") && !is_set("y_sweep"))
     {
@@ -344,7 +352,7 @@ void opdom_command::write_op_domain()
 nlohmann::json opdom_command::log() const
 {
     return nlohmann::json{
-        {"Algorithm name", sidb_simulation_engine_name(params.operational_params.sim_engine)},
+        {"Algorithm name", fiction::sidb_simulation_engine_name(params.operational_params.sim_engine)},
         {"Runtime in seconds", mockturtle::to_seconds(stats.time_total)},
         {"Number of simulator invocations", stats.num_simulator_invocations},
         {"Number of evaluated parameter combinations", stats.num_evaluated_parameter_combinations},

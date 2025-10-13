@@ -59,12 +59,12 @@ void tt_command::execute()
 
     if (is_set("table"))
     {
-        if (auto size = table.size(); size > 2u && table[0] == '0' && table[1] == 'x')
+        if (const auto size = table.size(); size > 2u && table[0] == '0' && table[1] == 'x')
         {
             table = table.substr(2u);
             if (is_hex_string(table))
             {
-                auto num_vars = static_cast<uint32_t>(std::log2(table.size() << 2ul));
+                const auto num_vars = static_cast<uint32_t>(std::log2(table.size() << 2ul));
 
                 fiction::tt tt(num_vars);
                 kitty::create_from_hex_string(tt, table);
@@ -80,7 +80,7 @@ void tt_command::execute()
         {
             if (is_bin_string(table))
             {
-                auto num_vars = static_cast<uint32_t>(std::log2(table.size()));
+                const auto num_vars = static_cast<uint32_t>(std::log2(table.size()));
 
                 fiction::tt tt(num_vars);
                 kitty::create_from_binary_string(tt, table);
@@ -101,7 +101,7 @@ void tt_command::execute()
     {
         /* find max var */
         uint32_t num_vars{0u};
-        for (auto c : expression)
+        for (const auto c : expression)
         {
             if (c >= 'a' && c <= 'p')
             {
@@ -109,10 +109,13 @@ void tt_command::execute()
             }
         }
 
-        fiction::tt tt(num_vars);
-        if (kitty::create_from_expression(tt, expression))
+        if (fiction::tt tt(num_vars); kitty::create_from_expression(tt, expression))
         {
             s.extend() = std::make_shared<fiction::tt>(tt);
+        }
+        else
+        {
+            env->out() << "[e] expression could not be parsed\n";
         }
     }
     else if (is_set("random"))
@@ -139,7 +142,7 @@ void tt_command::reset_flags()
 
 bool tt_command::is_hex_string(const std::string& s) noexcept
 {
-    return std::all_of(s.begin(), s.end(), [](const auto c) { return std::isxdigit(c); });
+    return std::all_of(s.begin(), s.end(), [](const unsigned char c) { return std::isxdigit(c) != 0; });
 }
 
 bool tt_command::is_bin_string(const std::string& s) noexcept

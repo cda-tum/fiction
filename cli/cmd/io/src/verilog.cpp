@@ -35,6 +35,7 @@ void verilog_command::execute()
     if (s.empty())
     {
         env->out() << "[w] no logic network in store\n";
+        filename.clear();
         return;
     }
 
@@ -82,6 +83,7 @@ void verilog_command::write_verilog_callback(const NtkOrLytVariant& ntk_or_lyt_v
     if (std::filesystem::is_directory(filename))
     {
         env->out() << "[e] cannot override a directory\n";
+        filename.clear();
         return;
     }
     // if filename was not given, use stored layout name
@@ -107,6 +109,8 @@ void verilog_command::write_verilog_callback(const NtkOrLytVariant& ntk_or_lyt_v
     {
         env->out() << "[e] an error occurred while the file was being written; it could be corrupted\n";
     }
+
+    filename.clear();
 }
 
 }  // namespace alice

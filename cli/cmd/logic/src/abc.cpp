@@ -103,7 +103,7 @@ void abc_command::execute()
     }
 }
 
-std::filesystem::path abc_command::get_temp_directory()
+std::filesystem::path abc_command::get_temp_directory() const
 {
     // Check common environment variables for the temporary directory
     if (auto* const tempdir = std::getenv("TMPDIR"); tempdir != nullptr)
@@ -127,7 +127,7 @@ std::filesystem::path abc_command::get_temp_directory()
 #endif
 }
 
-std::filesystem::path abc_command::get_temp_fiction_directory()
+std::filesystem::path abc_command::get_temp_fiction_directory() const
 {
     // get the temporary directory
     const auto temp_dir = get_temp_directory();
@@ -149,7 +149,7 @@ std::filesystem::path abc_command::get_temp_fiction_directory()
 
 std::filesystem::path abc_command::write_current_network_to_temp_file() const
 {
-    const auto write = [](auto&& ntk_ptr) -> std::filesystem::path
+    const auto write = [this](auto&& ntk_ptr) -> std::filesystem::path
     {
         const auto temp_file = get_temp_fiction_directory() / fmt::format("{}.aig", ntk_ptr->get_network_name());
 

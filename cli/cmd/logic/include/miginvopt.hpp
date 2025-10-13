@@ -24,7 +24,7 @@ class miginvopt_command final : public command
 
   protected:
     /**
-     * Function to perform the balancing call. Inserts buffer nodes to equalize path lengths.
+     * Executes inverter cost optimization on the current MIG and pushes the result to the logic-network store.
      */
     void execute() override;
 };

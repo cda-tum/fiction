@@ -69,6 +69,6 @@ class exact_command final : public command
 
 }  // namespace alice
 
-#endif  // FICTION_Z3_SOLVER
-
 #endif  // FICTION_CMD_EXACT_HPP
+
+#endif  // FICTION_Z3_SOLVER

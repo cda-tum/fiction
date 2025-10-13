@@ -209,7 +209,6 @@ void quicksim_command::reset_params()
 {
     physical_params = fiction::sidb_simulation_parameters{2, -0.32, 5.6, 5.0};
     qs_params       = {};
-    sim_result      = {};
 }
 
 }  // namespace alice
