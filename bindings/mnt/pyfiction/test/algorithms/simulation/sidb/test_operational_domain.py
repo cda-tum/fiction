@@ -112,7 +112,11 @@ class TestOperationalDomain(unittest.TestCase):
 
         stats_contour_tracing = operational_domain_stats()
         ct_domain_contour = critical_temperature_domain_contour_tracing(
-            lyt, [create_xor_tt()], 1000, params, stats_contour_tracing
+            lyt,
+            [create_xor_tt()],
+            1000,
+            params,
+            stats_contour_tracing,
         )
         self.assertEqual(ct_domain_contour[parameter_point([5.60, 5.00])][0], operational_status.OPERATIONAL)
         self.assertGreater(ct_domain_contour[parameter_point([5.60, 5.00])][1], 30)
@@ -125,7 +129,11 @@ class TestOperationalDomain(unittest.TestCase):
 
         stats_random_sampling = operational_domain_stats()
         ct_domain_random = critical_temperature_domain_random_sampling(
-            lyt, [create_xor_tt()], 1000, params, stats_random_sampling
+            lyt,
+            [create_xor_tt()],
+            1000,
+            params,
+            stats_random_sampling,
         )
         self.assertEqual(ct_domain_random[parameter_point([5.60, 5.00])][0], operational_status.OPERATIONAL)
         self.assertGreater(ct_domain_random[parameter_point([5.60, 5.00])][1], 30)

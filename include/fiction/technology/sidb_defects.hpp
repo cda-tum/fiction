@@ -73,6 +73,12 @@ enum class sidb_defect_type : uint8_t
      */
     GUNK,
     /**
+     * Ionized arsenic atom as mentioned in \"Electrostatic landscape of a Hydrogen-terminated Silicon Surface Probed by
+     * a Moveable Quantum Dot\" by T. R. Huff, T. Dienel, M. Rashidi, R. Achal, L. Livadaru, J. Croshaw, and R. A.
+     * Wolkow in ACS Nano in 2019.
+     */
+    ARSENIC,
+    /**
      * Unknown defect.
      */
     UNKNOWN
@@ -139,16 +145,18 @@ struct sidb_defect
         return !(*this == rhs);
     }
 };
+
 /**
- * Checks whether the given defect type is a charged one. `DB` and `SI_VACANCY` types are charged. Those charged defects
- * are to be avoided by a larger distance.
+ * Checks whether the given defect type is a charged one. `DB`, `SI_VACANCY` and `ARSENIC` types are charged. Those
+ * charged defects are to be avoided by a larger distance.
  *
  * @param defect Defect to check.
  * @return `true` iff `defect` is of a charged type.
  */
 [[nodiscard]] static constexpr bool is_charged_defect_type(const sidb_defect& defect) noexcept
 {
-    return defect.charge != 0 || defect.type == sidb_defect_type::DB || defect.type == sidb_defect_type::SI_VACANCY;
+    return defect.charge != 0 || defect.type == sidb_defect_type::DB || defect.type == sidb_defect_type::SI_VACANCY ||
+           defect.type == sidb_defect_type::ARSENIC;
 }
 /**
  * Checks whether the given defect type is not a charged one. Neutral defects are to be avoided as well, but not by such

@@ -75,7 +75,15 @@ inline void graph_oriented_layout_design(pybind11::module& m)
         .def_readwrite("enable_multithreading", &fiction::graph_oriented_layout_design_params::enable_multithreading,
                        DOC(fiction_graph_oriented_layout_design_params_enable_multithreading))
         .def_readwrite("seed", &fiction::graph_oriented_layout_design_params::seed,
-                       DOC(fiction_graph_oriented_layout_design_params_seed));
+                       DOC(fiction_graph_oriented_layout_design_params_seed))
+        .def_readwrite("straight_inverters", &fiction::graph_oriented_layout_design_params::straight_inverters,
+                       DOC(fiction_graph_oriented_layout_design_params_straight_inverters))
+        .def_readwrite("tiles_to_skip_between_pis",
+                       &fiction::graph_oriented_layout_design_params::tiles_to_skip_between_pis,
+                       DOC(fiction_graph_oriented_layout_design_params_tiles_to_skip_between_pis))
+        .def_readwrite("randomize_tiles_to_skip_between_pis",
+                       &fiction::graph_oriented_layout_design_params::randomize_tiles_to_skip_between_pis,
+                       DOC(fiction_graph_oriented_layout_design_params_randomize_tiles_to_skip_between_pis));
 
     py::class_<fiction::graph_oriented_layout_design_stats>(m, "graph_oriented_layout_design_stats",
                                                             DOC(fiction_graph_oriented_layout_design_stats))

@@ -403,9 +403,6 @@ positions in horizontal and vertical direction is taken into account.
 Template parameter ``Lyt``:
     Cell-level layout type.
 
-Template parameter ``AreaType``:
-    Type for area representation.
-
 Parameter ``lyt``:
     The cell-level layout whose area is desired.
 
@@ -428,9 +425,6 @@ taken into account.
 Template parameter ``Lyt``:
     Cell-level layout type.
 
-Template parameter ``AreaType``:
-    Type for area representation.
-
 Parameter ``bb``:
     The bounding box of the cell-level layout whose area is desired.
 
@@ -443,21 +437,37 @@ Parameter ``pst``:
 Returns:
     Area requirements in nm².)doc";
 
-static const char *__doc_fiction_area_params = R"doc()doc";
+static const char *__doc_fiction_area_params =
+R"doc(Parameters for area computation of cell-level layouts. Default
+parameters are loaded from the given cell technology.
 
-static const char *__doc_fiction_area_params_height = R"doc()doc";
+Template parameter ``Technology``:
+    Cell technology.)doc";
 
-static const char *__doc_fiction_area_params_hspace = R"doc(Horizontal and vertical spacing between cells.)doc";
+static const char *__doc_fiction_area_params_height = R"doc(Height of each cell.)doc";
 
-static const char *__doc_fiction_area_params_vspace = R"doc()doc";
+static const char *__doc_fiction_area_params_hspace = R"doc(Horizontal spacing between cells.)doc";
 
-static const char *__doc_fiction_area_params_width = R"doc(Width and height of each cell.)doc";
+static const char *__doc_fiction_area_params_vspace = R"doc(Vertical spacing between cells.)doc";
 
-static const char *__doc_fiction_area_stats = R"doc()doc";
+static const char *__doc_fiction_area_params_width = R"doc(Width of each cell.)doc";
 
-static const char *__doc_fiction_area_stats_area = R"doc(Area requirements in nm².)doc";
+static const char *__doc_fiction_area_stats =
+R"doc(Statistics class to store area-related information including width,
+height, and area of a layout. Additionally, it provides a method to
+print a formatted report of these statistics to an output stream.)doc";
 
-static const char *__doc_fiction_area_stats_report = R"doc()doc";
+static const char *__doc_fiction_area_stats_area = R"doc(Layout area in nm².)doc";
+
+static const char *__doc_fiction_area_stats_height = R"doc(Layout height in nm.)doc";
+
+static const char *__doc_fiction_area_stats_report =
+R"doc(Prints a report of the area statistics to the given output stream.
+
+Parameter ``out``:
+    Output stream to write the report to. Defaults to `std::cout`.)doc";
+
+static const char *__doc_fiction_area_stats_width = R"doc(Layout width in nm.)doc";
 
 static const char *__doc_fiction_aspect_ratio_iterator =
 R"doc(An iterator type that iterates over increasingly larger 2D aspect
@@ -3047,6 +3057,10 @@ equally, and, most importantly, it lifts the associated potential
 equations to higher order, allowing us to reason over potential bounds
 in a cluster hierarchy.
 
+*ClusterComplete* was proposed in \"Mastering the Exponential
+Complexity of Exact Physical Simulation of Silicon Dangling Bonds\" by
+W. Lambooy, J. Drewniok, M. Walter, and R. Wille in ASP-DAC 2026.
+
 Template parameter ``Lyt``:
     SiDB cell-level layout type.
 
@@ -3780,7 +3794,13 @@ physical parameters of a given SiDB layout. It allows for the
 evaluation of how the critical temperature depends on variations in
 the underlying parameter points. This enables simulations to explore
 the critical temperature's behavior across different conditions and
-configurations.)doc";
+configurations.
+
+It was proposed in \"The Operational Domain Explorer: A Comprehensive
+Framework to Unveil the Thermal Landscape of Silicon Dangling Bond
+Logic Beyond Conventional Operability\" by M. Walter, J. Drewniok, and
+R. Wille in IEEE-NANO 2025
+(https://ieeexplore.ieee.org/abstract/document/11113672).)doc";
 
 static const char *__doc_fiction_critical_temperature_domain_add_dimension =
 R"doc(Adds a dimension to sweep over. The first dimension is the x
@@ -4737,6 +4757,11 @@ Automatic Design of Silicon Dangling Bond Logic\" by J. Drewniok, M.
 Walter, S. S. H. Ng, K. Walus, and R. Wille in DATE 2025
 (https://ieeexplore.ieee.org/abstract/document/10992885).
 
+An extended version of `QuickCell` was proposed in \"QuickCell: Fast
+Automatic Design of Standard Cells for Silicon Dangling Bond Logic\"
+by J. Drewniok, M. Walter, S. S. H. Ng, K. Walus, and R. Wille in TCAD
+2025 (https://ieeexplore.ieee.org/document/11146893).
+
 The `Automatic Exhaustive Gate Designer` was proposed in \"Minimal
 Design of SiDB Gates: An Optimal Basis for Circuits Based on Silicon
 Dangling Bonds\" by J. Drewniok, M. Walter, and R. Wille in NANOARCH
@@ -5217,6 +5242,22 @@ Parameter ``to_delete``:
 
 Returns:
     A 2D vector representing the calculated offset matrix.)doc";
+
+static const char *__doc_fiction_detail_check_and_optimize_po_positions =
+R"doc(Utility function that checks and optimizes PO positions after each
+gate relocation iteration. This function moves POs that are not
+optimally positioned (e.g., in second rightmost or second bottom
+positions) to the optimal border positions by inserting buffer gates
+where the POs were.
+
+Template parameter ``Lyt``:
+    Cartesian gate-level layout type.
+
+Parameter ``lyt``:
+    Gate-level layout.
+
+Parameter ``moved_gates``:
+    Moved gates counter to decrement if PO is moved.)doc";
 
 static const char *__doc_fiction_detail_clustercomplete_impl = R"doc()doc";
 
@@ -7931,9 +7972,6 @@ Parameter ``new_gate_loc``:
     Enum indicating if the src or dest have to host a new gate and
     therefore have to be empty. Defaults to `new_gate_location::NONE`.
 
-Parameter ``planar``:
-    Only consider crossing-free paths.
-
 Returns:
     A path from `src` to `dest` if one exists.)doc";
 
@@ -7972,14 +8010,8 @@ Parameter ``place_info``:
     The placement context containing current node, primary output
     index, node to position mapping, and PI to node mapping.
 
-Parameter ``num_expansions``:
-    The maximum number of positions to be returned.
-
 Parameter ``fc``:
     A vector of nodes that precede the double fanin node.
-
-Parameter ``planar``:
-    Only consider crossing-free paths.
 
 Returns:
     A vector of tiles representing the possible positions for a double
@@ -8001,9 +8033,6 @@ Parameter ``num_expansions``:
     The maximum number of positions to be returned (is doubled for
     PIs).
 
-Parameter ``planar``:
-    Only consider crossing-free paths.
-
 Returns:
     A vector of tiles representing the possible positions for PIs.)doc";
 
@@ -8021,9 +8050,6 @@ Parameter ``place_info``:
 Parameter ``fc``:
     A vector of nodes that precede the PO nodes.
 
-Parameter ``planar``:
-    Only consider crossing-free paths.
-
 Returns:
     A vector of tiles representing the possible positions for POs.)doc";
 
@@ -8040,18 +8066,29 @@ Parameter ``place_info``:
     The placement context containing current node, primary output
     index, node to position mapping, and PI to node mapping.
 
-Parameter ``num_expansions``:
-    The maximum number of positions to be returned.
-
 Parameter ``fc``:
     A vector of nodes that precede the single fanin node.
-
-Parameter ``planar``:
-    Only consider crossing-free paths.
 
 Returns:
     A vector of tiles representing the possible positions for a single
     fan-in node.)doc";
+
+static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_get_thread_local_dist =
+R"doc(Get thread-local distribution for generating random
+`tiles_to_skip_between_pis` values.
+
+Returns:
+    Reference to a thread-local uniform integer distribution for
+    generating random skip values.)doc";
+
+static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_get_thread_local_rng =
+R"doc(Get thread-local random number generator for
+`tiles_to_skip_between_pis` randomization. Each thread will have its
+own RNG to avoid mutex contention.
+
+Returns:
+    Reference to a thread-local Mersenne Twister random number
+    generator.)doc";
 
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_graph_oriented_layout_design_impl =
 R"doc(Constructor for the graph-oriented layout design algorithm.
@@ -8098,9 +8135,6 @@ R"doc(Initializes the layout with minimum width
 
 Parameter ``min_layout_width``:
     The minimum width of the layout.
-
-Parameter ``planar``:
-    Create planar layouts with a depth of 0.
 
 Returns:
     The initialized layout.)doc";
@@ -8187,10 +8221,7 @@ Parameter ``node2pos``:
     layout.
 
 Parameter ``fc``:
-    A vector of nodes that precede the double fanin node.
-
-Parameter ``planar``:
-    Only consider crossing-free paths.)doc";
+    A vector of nodes that precede the double fanin node.)doc";
 
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_route_single_input_node =
 R"doc(Places a node with a single input in the layout and routes it.
@@ -8206,10 +8237,7 @@ Parameter ``node2pos``:
     layout.
 
 Parameter ``fc``:
-    A vector of nodes that precede the single fanin node.
-
-Parameter ``planar``:
-    Only consider crossing-free paths.)doc";
+    A vector of nodes that precede the single fanin node.)doc";
 
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_run =
 R"doc(Executes the graph-oriented layout design algorithm and returns the
@@ -10576,13 +10604,9 @@ static const char *__doc_fiction_detail_search_space_graph_frontier_flag = R"doc
 
 static const char *__doc_fiction_detail_search_space_graph_network = R"doc(The network associated with this search space graph.)doc";
 
-static const char *__doc_fiction_detail_search_space_graph_num_expansions = R"doc(The maximum number of positions to be considered for expansions.)doc";
-
 static const char *__doc_fiction_detail_search_space_graph_pi_locs =
 R"doc(Enum indicating if primary inputs (PIs) can be placed at the top or
 left.)doc";
-
-static const char *__doc_fiction_detail_search_space_graph_planar = R"doc(Create planar layouts.)doc";
 
 static const char *__doc_fiction_detail_sweep_parameter_to_string =
 R"doc(Converts a sweep parameter to a string representation. This is used to
@@ -14391,6 +14415,14 @@ R"doc(Disable the creation of crossings during layout generation. If set to
 true, gates will only be placed if a crossing-free wiring is found.
 Defaults to false.)doc";
 
+static const char *__doc_fiction_graph_oriented_layout_design_params_randomize_tiles_to_skip_between_pis =
+R"doc(When enabled, randomizes the tiles_to_skip_between_pis value for each
+PI placement. The random value will be chosen from `0` to
+`tiles_to_skip_between_pis` (inclusive). This can help explore
+different placement strategies and potentially find better layouts.
+Uses the same random seed as other randomization features for
+reproducibility. Defaults to `false`.)doc";
+
 static const char *__doc_fiction_graph_oriented_layout_design_params_return_first =
 R"doc(Return the first found layout, which might still have a high cost but
 can be found fast.)doc";
@@ -14398,6 +14430,21 @@ can be found fast.)doc";
 static const char *__doc_fiction_graph_oriented_layout_design_params_seed =
 R"doc(Random seed used for random fanout substitution and random topological
 ordering in maximum-effort mode, generated randomly if not specified.)doc";
+
+static const char *__doc_fiction_graph_oriented_layout_design_params_straight_inverters = R"doc(Enforce NOT gates to be routed non-bending only.)doc";
+
+static const char *__doc_fiction_graph_oriented_layout_design_params_tiles_to_skip_between_pis =
+R"doc(For each primary input (PI) considered during placement, reserve this
+many empty tiles *after* the current frontier: - Top edge (row 0):
+leave `tiles_to_skip_between_pis` empty tiles to the right of the
+rightmost occupied tile before proposing a new PI position. - Left
+edge (column 0): leave `tiles_to_skip_between_pis` empty tiles below
+the bottommost occupied tile before proposing a new PI position.
+
+This soft margin can reduce local congestion and increase the
+probability of finding a routable layout at the expense of a
+temporarily larger footprint, which post-layout optimization may later
+shrink. Defaults to `0`.)doc";
 
 static const char *__doc_fiction_graph_oriented_layout_design_params_timeout = R"doc(Timeout limit (in ms).)doc";
 
@@ -15794,11 +15841,21 @@ static const char *__doc_fiction_hexagonalization_stats = R"doc(This struct stor
 
 static const char *__doc_fiction_hexagonalization_stats_duration = R"doc(Runtime of the hexagonalization process.)doc";
 
+static const char *__doc_fiction_hexagonalization_stats_num_crossings = R"doc(Number of crossings.)doc";
+
+static const char *__doc_fiction_hexagonalization_stats_num_gates = R"doc(Number of gates.)doc";
+
+static const char *__doc_fiction_hexagonalization_stats_num_wires = R"doc(Number of wires.)doc";
+
 static const char *__doc_fiction_hexagonalization_stats_report =
 R"doc(Reports the statistics to the given output stream.
 
 Parameter ``out``:
     Output stream.)doc";
+
+static const char *__doc_fiction_hexagonalization_stats_x_size = R"doc(Layout width.)doc";
+
+static const char *__doc_fiction_hexagonalization_stats_y_size = R"doc(Layout height.)doc";
 
 static const char *__doc_fiction_high_degree_fanin_exception =
 R"doc(Exception class that can be thrown if some network exceeds a legal
@@ -16052,9 +16109,9 @@ static const char *__doc_fiction_is_cell_level_layout = R"doc()doc";
 static const char *__doc_fiction_is_charge_distribution_surface = R"doc()doc";
 
 static const char *__doc_fiction_is_charged_defect_type =
-R"doc(Checks whether the given defect type is a charged one. `DB` and
-`SI_VACANCY` types are charged. Those charged defects are to be
-avoided by a larger distance.
+R"doc(Checks whether the given defect type is a charged one. `DB`,
+`SI_VACANCY` and `ARSENIC` types are charged. Those charged defects
+are to be avoided by a larger distance.
 
 Parameter ``defect``:
     Defect to check.
@@ -17521,11 +17578,6 @@ the layout. Each exact ground state simulation has exponential
 complexity in of itself. Therefore, the algorithm is only feasible for
 small layouts with few inputs.
 
-This flavor of operational domain computation was proposed in
-\"Reducing the Complexity of Operational Domain Computation in Silicon
-Dangling Bond Logic\" by M. Walter, J. Drewniok, S. S. H. Ng, K.
-Walus, and R. Wille in NANOARCH 2023.
-
 Template parameter ``Lyt``:
     SiDB cell-level layout type.
 
@@ -17665,15 +17717,15 @@ Template parameter ``TT``:
 Parameter ``lyt``:
     Layout to compute the operational domain for.
 
-Parameter ``spec``:
-    Expected vector of truth tables of the layout. Each truth table
-    represents an output of the Boolean function.
+Parameter ``tt``:
+    Expected Boolean function of the lyt given as a multi-output truth
+    table.
 
-Parameter ``params``:
-    Operational domain computation parameters.
+Parameter ``ps``:
+    Parameters for the operational domain computation.
 
-Parameter ``stats``:
-    Operational domain computation statistics.
+Parameter ``st``:
+    Statistics of the process.
 
 Returns:
     The operational domain of the layout.
@@ -20564,6 +20616,12 @@ Journal of Nanotechnology in 2020.)doc";
 
 static const char *__doc_fiction_sidb_defect_type_2 = R"doc(Type of defect.)doc";
 
+static const char *__doc_fiction_sidb_defect_type_ARSENIC =
+R"doc(Ionized arsenic atom as mentioned in \"Electrostatic landscape of a
+Hydrogen-terminated Silicon Surface Probed by a Moveable Quantum Dot\"
+by T. R. Huff, T. Dienel, M. Rashidi, R. Achal, L. Livadaru, J.
+Croshaw, and R. A. Wolkow in ACS Nano in 2019.)doc";
+
 static const char *__doc_fiction_sidb_defect_type_DB = R"doc(A stray dangling bond.)doc";
 
 static const char *__doc_fiction_sidb_defect_type_DIHYDRIDE_PAIR =
@@ -22821,7 +22879,13 @@ Returns:
 
 static const char *__doc_fiction_wiring_reduction =
 R"doc(A scalable wiring reduction algorithm for 2DDWave-clocked layouts
-based on A* path finding.
+based on A* path finding as originally proposed in \"Late Breaking
+Results: Wiring Reduction for Field-coupled Nanotechnologies\" by S.
+Hofmann, M. Walter, and R. Wille in DAC 2024
+(https://dl.acm.org/doi/10.1145/3649329.3663491) and extended in
+\"Efficient and Scalable Post-Layout Optimization for Field-coupled
+Nanotechnologies\" by S. Hofmann, M. Walter, and R. Wille in TCAD 2025
+(https://ieeexplore.ieee.org/document/10916761).
 
 The core concept revolves around the selective removal of excess
 wiring by cutting them from a layout, contingent upon the ability to
