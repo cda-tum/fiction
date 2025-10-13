@@ -39,6 +39,7 @@ void qll_command::execute()
     if (s.empty())
     {
         env->out() << "[w] no cell layout in store\n";
+        filename.clear();
         return;
     }
 
@@ -65,12 +66,14 @@ void qll_command::execute()
     if (std::filesystem::is_directory(filename))
     {
         env->out() << "[e] cannot override a directory\n";
+        filename.clear();
         return;
     }
     // if filename was not given, use stored layout name
     if (filename.empty())
     {
         filename = std::visit(get_name, lyt);
+        c
     }
     // add .qll file extension if necessary
     if (std::filesystem::path(filename).extension() != ".qll")
@@ -94,6 +97,8 @@ void qll_command::execute()
     {
         env->out() << "[e] an error occurred while the file was being written; it could be corrupted\n";
     }
+
+    filename.clear();
 }
 
 }  // namespace alice

@@ -111,7 +111,7 @@ void optimize_command::execute()
         }
         else
         {
-            std::cout << "[e] layout has to be Cartesian\n";
+            env->out() << "[e] layout has to be Cartesian\n";
         }
     };
 

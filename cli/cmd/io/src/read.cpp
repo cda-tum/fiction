@@ -70,6 +70,10 @@ void read_command::execute()
     {
         env->out() << "[e] select exactly one logic network type (-a/-x/-m/-t)\n";
     }
+    else if (is_set("sqd") && is_set("fqca"))
+    {
+        env->out() << "[e] select exactly one cell-level layout type (--sqd or --fqca)\n";
+    }
     else
     {
         const auto store_ntks = [&](auto&& reader)

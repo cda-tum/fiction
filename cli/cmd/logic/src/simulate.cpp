@@ -37,7 +37,7 @@ void simulate_command::execute()
 {
     if (is_set("gate_layout") == is_set("network"))
     {
-        env->out() << "[w] exactly one store needs to be specified\n";
+        env->out() << "[w] exactly one of --gate_layout or --network must be specified\n";
         return;
     }
 
