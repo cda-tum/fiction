@@ -5,7 +5,7 @@
 #ifndef FICTION_MUTABLE_RANK_VIEW_HPP
 #define FICTION_MUTABLE_RANK_VIEW_HPP
 
-#include <fiction/networks/views/static_depth_view.hpp>
+#include "fiction/networks/views/static_depth_view.hpp"
 
 #include <mockturtle/networks/detail/foreach.hpp>
 #include <mockturtle/traits.hpp>
@@ -72,6 +72,7 @@ template <class Ntk>
 class mutable_rank_view<Ntk, false> : public fiction::static_depth_view<Ntk>
 {
   public:
+    // NOLINTNEXTLINE(readability-identifier-naming)
     static constexpr bool is_topologically_sorted = true;
     using storage                                 = typename Ntk::storage;
     using node                                    = typename Ntk::node;
@@ -184,6 +185,22 @@ class mutable_rank_view<Ntk, false> : public fiction::static_depth_view<Ntk>
     }
 
     /**
+     * Move constructor for `mutable_rank_view`.
+     *
+     * @param other The `mutable_rank_view` object to move from.
+     */
+    mutable_rank_view(mutable_rank_view&&) noexcept = default;
+
+    /**
+     * Move assignment operator for `mutable_rank_view`.
+     * Transfers ownership of resources from another `mutable_rank_view` object.
+     *
+     * @param other The `mutable_rank_view` object to move from.
+     * @return A reference to this object after assignment.
+     */
+    mutable_rank_view& operator=(mutable_rank_view&&) noexcept = default;
+
+    /**
      * Destructor for `mutable_rank_view`.
      */
     ~mutable_rank_view() = default;
@@ -257,6 +274,21 @@ class mutable_rank_view<Ntk, false> : public fiction::static_depth_view<Ntk>
     }
 
     /**
+     * Sets the associated rank positions for all nodes in the network.
+     *
+     * @param new_ranks A vector of vectors specifying the new node order for each level.
+     */
+    void set_all_ranks(const std::vector<std::vector<node>>& new_ranks)
+    {
+        assert(new_ranks.size() == ranks.size());
+
+        for (uint32_t level = 0; level < new_ranks.size(); ++level)
+        {
+            set_ranks(level, new_ranks[level]);
+        }
+    }
+
+    /**
      * Gets the associated nodes in rank order in a specific `level`.
      *
      * @param level Level at which to return the nodes.
@@ -267,6 +299,16 @@ class mutable_rank_view<Ntk, false> : public fiction::static_depth_view<Ntk>
         assert(level < ranks.size() && "level must be less than the number of ranks");
 
         return ranks[level];
+    }
+
+    /**
+     * Gets all associated nodes in rank order across all levels.
+     *
+     * @return A vector of vectors containing the node order for each level.
+     */
+    [[nodiscard]] std::vector<std::vector<node>> get_all_ranks() const noexcept
+    {
+        return ranks;
     }
 
     /**
