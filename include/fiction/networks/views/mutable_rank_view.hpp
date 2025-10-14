@@ -257,6 +257,22 @@ class mutable_rank_view<Ntk, false> : public fiction::static_depth_view<Ntk>
     }
 
     /**
+     * Sets the associated rank positions for nodes in the network, given the order of `nodes`.
+     *
+     * @param level Level at which to replace nodes.
+     * @param nodes The new node order to be set at the given level.
+     */
+    void set_all_ranks(const std::vector<std::vector<node>>& new_ranks)
+    {
+        assert(new_ranks.size() == ranks.size());
+
+        for (uint32_t level = 0; level < new_ranks.size(); ++level)
+        {
+            set_ranks(level, new_ranks[level]);
+        }
+    }
+
+    /**
      * Gets the associated nodes in rank order in a specific `level`.
      *
      * @param level Level at which to return the nodes.
@@ -267,6 +283,17 @@ class mutable_rank_view<Ntk, false> : public fiction::static_depth_view<Ntk>
         assert(level < ranks.size() && "level must be less than the number of ranks");
 
         return ranks[level];
+    }
+
+    /**
+     * Gets the associated nodes in rank order in a specific `level`.
+     *
+     * @param level Level at which to return the nodes.
+     * @return The node order at the given level.
+     */
+    [[nodiscard]] std::vector<std::vector<node>> get_all_ranks() const noexcept
+    {
+        return ranks;
     }
 
     /**
