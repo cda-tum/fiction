@@ -60,13 +60,6 @@ void random_command::execute()
     reset_flags();
 }
 
-template <typename Ntk, typename Generator>
-void random_command::generate(Generator gen) const
-{
-    store<fiction::logic_network_t>().extend() =
-        std::make_shared<Ntk>(fiction::convert_network<Ntk>(gen.generate()), std::to_string(ps.seed));
-}
-
 void random_command::reset_flags()
 {
     ps      = {};

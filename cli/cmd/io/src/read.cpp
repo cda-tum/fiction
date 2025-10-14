@@ -92,19 +92,19 @@ void read_command::execute()
 
                 store_ntks(reader);
             }
-            if (is_set("xag"))
+            else if (is_set("xag"))
             {
                 fiction::network_reader<fiction::xag_ptr> reader{filename, env->out()};
 
                 store_ntks(reader);
             }
-            if (is_set("mig"))
+            else if (is_set("mig"))
             {
                 fiction::network_reader<fiction::mig_ptr> reader{filename, env->out()};
 
                 store_ntks(reader);
             }
-            if (is_set("tec"))
+            else if (is_set("tec"))
             {
                 fiction::network_reader<fiction::tec_ptr> reader{filename, env->out()};
 
@@ -190,7 +190,10 @@ void read_command::execute()
                             }
                             else
                             {
-                                env->out() << "[e] for reading gate-level layouts, the topology has to be set\n";
+                                env->out() << "[e] for reading gate-level layouts, the topology has to be set. "
+                                           << "Valid values: 'cartesian', 'odd_row_cartesian', 'even_row_cartesian', "
+                                           << "'odd_column_cartesian', 'even_column_cartesian', 'odd_row_hex', "
+                                           << "'even_row_hex', 'odd_column_hex', 'even_column_hex'\n";
                             }
                         }
                         else if (is_set("sqd"))

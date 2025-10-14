@@ -270,10 +270,12 @@ void opdom_command::execute()
         }
 
         // set parameters
-        params.operational_params.simulation_parameters = simulation_params;
-        params.operational_params.sim_engine            = fiction::sidb_simulation_engine::QUICKEXACT;
-        params.sweep_dimensions                         = sweep_dimensions;
-        params.operational_params.sim_engine            = engine.value();
+        params.operational_params.simulation_parameters.base = simulation_params.base;
+        params.sweep_dimensions                              = sweep_dimensions;
+        params.operational_params.sim_engine                 = engine.value();
+
+        // Cache the engine name for logging before any potential reset
+        last_engine_name = fiction::sidb_simulation_engine_name(params.operational_params.sim_engine);
 
         // To aid the compiler
         if constexpr (fiction::has_sidb_technology_v<Lyt>)
@@ -354,7 +356,7 @@ void opdom_command::write_op_domain()
 nlohmann::json opdom_command::log() const
 {
     return nlohmann::json{
-        {"Algorithm name", fiction::sidb_simulation_engine_name(params.operational_params.sim_engine)},
+        {"Algorithm name", last_engine_name},
         {"Runtime in seconds", mockturtle::to_seconds(stats.time_total)},
         {"Number of simulator invocations", stats.num_simulator_invocations},
         {"Number of evaluated parameter combinations", stats.num_evaluated_parameter_combinations},

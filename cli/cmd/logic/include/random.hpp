@@ -5,11 +5,16 @@
 #ifndef FICTION_CMD_RANDOM_HPP
 #define FICTION_CMD_RANDOM_HPP
 
+#include <fiction/algorithms/network_transformation/network_conversion.hpp>
+#include <fiction/types.hpp>
+
 #include <alice/alice.hpp>
 #include <mockturtle/generators/random_network.hpp>
 
 #include <chrono>
 #include <cstdint>
+#include <memory>
+#include <string>
 
 namespace alice
 {
@@ -45,7 +50,11 @@ class random_command final : public command
      * @tparam Ntk Network type to generate.
      */
     template <typename Ntk, typename Generator>
-    void generate(Generator gen) const;
+    void generate(Generator gen) const
+    {
+        store<fiction::logic_network_t>().extend() =
+            std::make_shared<Ntk>(fiction::convert_network<Ntk>(gen.generate()), std::to_string(ps.seed));
+    }
     /**
      * Reset all flags, necessary for some reason... alice bug?
      */

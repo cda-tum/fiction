@@ -93,6 +93,10 @@ class opdom_command final : public command
      */
     std::string sim_engine_str{"QuickExact"};
     /**
+     * Cached engine name for logging (preserves the engine name after params reset).
+     */
+    std::string last_engine_name{};
+    /**
      * CSV filename to write the operational domain to.
      */
     std::string filename{};

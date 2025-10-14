@@ -59,19 +59,11 @@ void cell_command::execute()
                 fiction::apply_gate_library<fiction::qca_cell_clk_lyt, fiction::qca_one_library>(*lyt_ptr));
         };
 
-        try
+        const auto visitor = [&apply_qca_one](auto&& source) { return std::visit(apply_qca_one, source); };
+
+        if (const auto result = apply_with_error_handling(visitor, s.current()); result.has_value())
         {
-            store<fiction::cell_layout_t>().extend() = std::visit(apply_qca_one, s.current());
-        }
-        catch (const fiction::unsupported_gate_type_exception<fiction::offset::ucoord_t>& e)
-        {
-            env->out() << fmt::format("[e] unsupported gate type at tile position {}\n", e.where());
-        }
-        catch (
-            const fiction::unsupported_gate_orientation_exception<fiction::offset::ucoord_t, fiction::port_position>& e)
-        {
-            env->out() << fmt::format("[e] unsupported gate orientation at tile position {} with ports {}\n", e.where(),
-                                      e.which_ports());
+            store<fiction::cell_layout_t>().extend() = *result;
         }
     }
     else if (library == "TOPOLINANO")
@@ -101,22 +93,12 @@ void cell_command::execute()
             return std::nullopt;
         };
 
-        try
+        if (const auto result =
+                apply_with_error_handling([&apply_inml_topolinano](auto&& source)
+                                          { return std::visit(apply_inml_topolinano, source); }, s.current());
+            result.has_value() && result->has_value())
         {
-            if (const auto cell_lyt = std::visit(apply_inml_topolinano, s.current()); cell_lyt.has_value())
-            {
-                store<fiction::cell_layout_t>().extend() = *cell_lyt;
-            }
-        }
-        catch (const fiction::unsupported_gate_type_exception<fiction::offset::ucoord_t>& e)
-        {
-            env->out() << fmt::format("[e] unsupported gate type at tile position {}\n", e.where());
-        }
-        catch (
-            const fiction::unsupported_gate_orientation_exception<fiction::offset::ucoord_t, fiction::port_position>& e)
-        {
-            env->out() << fmt::format("[e] unsupported gate orientation at tile position {} with ports {}\n", e.where(),
-                                      e.which_ports());
+            store<fiction::cell_layout_t>().extend() = **result;
         }
     }
     else if (library == "BESTAGON")
@@ -146,28 +128,11 @@ void cell_command::execute()
             return std::nullopt;
         };
 
-        try
+        if (const auto result = apply_with_error_handling(
+                [&apply_sidb_bestagon](auto&& source) { return std::visit(apply_sidb_bestagon, source); }, s.current());
+            result.has_value() && result->has_value())
         {
-            if (const auto cell_lyt = std::visit(apply_sidb_bestagon, s.current()); cell_lyt.has_value())
-            {
-                store<fiction::cell_layout_t>().extend() = *cell_lyt;
-            }
-        }
-        catch (const fiction::unsupported_gate_type_exception<fiction::offset::ucoord_t>& e)
-        {
-            env->out() << fmt::format("[e] unsupported gate type at tile position {}\n", e.where());
-        }
-        catch (
-            const fiction::unsupported_gate_orientation_exception<fiction::offset::ucoord_t, fiction::port_position>& e)
-        {
-            env->out() << fmt::format("[e] unsupported gate orientation at tile position {} with ports {}\n", e.where(),
-                                      e.which_ports());
-        }
-        catch (const fiction::unsupported_gate_orientation_exception<fiction::offset::ucoord_t,
-                                                                     fiction::port_direction>& e)
-        {
-            env->out() << fmt::format("[e] unsupported gate orientation at tile position {} with port directions {}\n",
-                                      e.where(), e.which_ports());
+            store<fiction::cell_layout_t>().extend() = **result;
         }
     }
     // more libraries go here
