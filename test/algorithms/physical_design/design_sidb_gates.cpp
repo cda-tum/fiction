@@ -134,8 +134,8 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
 
         REQUIRE(found_gate_layouts_cube.size() == 1);
         CHECK(found_gate_layouts_cube[0].num_cells() == 14);
-        CHECK(found_gate_layouts_cube[0].get_cell_type(
-                  siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{10, 4, 0})) == siqad_layout::technology::cell_type::LOGIC);
+        CHECK(found_gate_layouts_cube[0].get_cell_type(siqad::to_fiction_coord<cube::coord_t>(
+                  siqad::coord_t{10, 4, 0})) == siqad_layout::technology::cell_type::LOGIC);
 
         // using offset coordinates
         const auto lyt_in_offset_coord = convert_layout_to_fiction_coordinates<offset_layout>(lyt);
@@ -339,7 +339,8 @@ TEST_CASE("Use FO2 Bestagon gate without SiDB at {17, 11, 0} and generate origin
 
         REQUIRE(found_gate_layouts.size() == 1);
         CHECK(found_gate_layouts[0].num_cells() == 21);
-        CHECK(found_gate_layouts[0].get_cell_type({17, 11, 0}) == sidb_100_cell_clk_lyt_siqad::technology::cell_type::LOGIC);
+        CHECK(found_gate_layouts[0].get_cell_type({17, 11, 0}) ==
+              sidb_100_cell_clk_lyt_siqad::technology::cell_type::LOGIC);
     }
 
 #if (FICTION_ALGLIB_ENABLED)
