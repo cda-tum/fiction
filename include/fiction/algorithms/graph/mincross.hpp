@@ -161,6 +161,7 @@ class mincross_impl
                 if (cur_cross <= best_cross)
                 {
                     best_ranks = fanout_ntk.get_all_ranks();
+                    // Note: Conversion to double is safe here since best_cross < 2^53 in all practical cases.
                     if (static_cast<double>(cur_cross) < ps.convergence * static_cast<double>(best_cross))
                     {
                         trying = 0;

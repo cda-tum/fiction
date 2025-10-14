@@ -72,6 +72,7 @@ template <class Ntk>
 class mutable_rank_view<Ntk, false> : public fiction::static_depth_view<Ntk>
 {
   public:
+    // NOLINTNEXTLINE(readability-identifier-naming)
     static constexpr bool is_topologically_sorted = true;
     using storage                                 = typename Ntk::storage;
     using node                                    = typename Ntk::node;
@@ -182,6 +183,20 @@ class mutable_rank_view<Ntk, false> : public fiction::static_depth_view<Ntk>
 
         return *this;
     }
+
+    /**
+     * Move constructor for `mutable_rank_view`.
+     *
+     * @param other The `mutable_rank_view` object to move from.
+     */
+    mutable_rank_view(mutable_rank_view&&) noexcept = default;
+
+    /**
+     *
+     * @param other The `mutable_rank_view` object to move from.
+     * @return A reference to this object after assignment.
+     */
+    mutable_rank_view& operator=(mutable_rank_view&&) noexcept = default;
 
     /**
      * Destructor for `mutable_rank_view`.
