@@ -5,7 +5,6 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "../utils/blueprints/layout_blueprints.hpp"
-#include "fiction/utils/debug/network_writer.hpp"
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
@@ -15,6 +14,8 @@
 #include <fiction/technology/molecular_qca_library.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
+
+#include <exception>
 
 using namespace fiction;
 
@@ -329,8 +330,6 @@ TEST_CASE("Setting up and or inv", "[molecular-qca-library]")
 
     auto layout = blueprints::and_or_inv_gate_layout<gate_layout>();
 
-    fiction::debug::write_dot_layout(layout);
-
     // clang-format off
 
     static constexpr const molecular_qca_library::fcn_gate primary_input_port{
@@ -489,8 +488,6 @@ TEST_CASE("Check unsupported gate type", "[molecular-qca-library]")
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
 
     auto layout = blueprints::row_clocked_and_xor_gate_layout<gate_layout>();
-
-    debug::write_dot_layout(layout);
 
     REQUIRE_THROWS_AS(molecular_qca_library::set_up_gate(layout, {1, 2}), std::exception);
 }
