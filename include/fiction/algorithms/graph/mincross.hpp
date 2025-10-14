@@ -386,7 +386,7 @@ class mincross_impl
                     continue;
                 }
 
-                if (candidate[l])
+                if (candidate[l] != 0u)
                 {
                     auto d = transpose_step(l, order);
                     delta += d;
