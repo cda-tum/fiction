@@ -192,6 +192,8 @@ class mutable_rank_view<Ntk, false> : public fiction::static_depth_view<Ntk>
     mutable_rank_view(mutable_rank_view&&) noexcept = default;
 
     /**
+     * Move assignment operator for `mutable_rank_view`.
+     * Transfers ownership of resources from another `mutable_rank_view` object.
      *
      * @param other The `mutable_rank_view` object to move from.
      * @return A reference to this object after assignment.
@@ -272,10 +274,9 @@ class mutable_rank_view<Ntk, false> : public fiction::static_depth_view<Ntk>
     }
 
     /**
-     * Sets the associated rank positions for nodes in the network, given the order of `nodes`.
+     * Sets the associated rank positions for all nodes in the network.
      *
-     * @param level Level at which to replace nodes.
-     * @param nodes The new node order to be set at the given level.
+     * @param new_ranks A vector of vectors specifying the new node order for each level.
      */
     void set_all_ranks(const std::vector<std::vector<node>>& new_ranks)
     {
@@ -301,10 +302,9 @@ class mutable_rank_view<Ntk, false> : public fiction::static_depth_view<Ntk>
     }
 
     /**
-     * Gets the associated nodes in rank order in a specific `level`.
+     * Gets all associated nodes in rank order across all levels.
      *
-     * @param level Level at which to return the nodes.
-     * @return The node order at the given level.
+     * @return A vector of vectors containing the node order for each level.
      */
     [[nodiscard]] std::vector<std::vector<node>> get_all_ranks() const noexcept
     {

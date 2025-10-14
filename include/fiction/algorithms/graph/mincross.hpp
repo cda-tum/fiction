@@ -121,6 +121,8 @@ class mincross_impl
     }
 
   private:
+    static constexpr uint32_t MAX_TRANSPOSE_ITERATIONS = 1000;
+
     enum class median_sorting : uint8_t
     {
         ASCENDING,
@@ -369,9 +371,9 @@ class mincross_impl
      */
     void transpose(median_sorting order)
     {
-        std::vector<bool> candidate(fanout_ntk.depth() + 1, true);
-        uint32_t          delta          = 0;
-        uint32_t          max_iterations = 0;
+        std::vector<uint8_t> candidate(fanout_ntk.depth() + 1, 1);
+        uint32_t             delta          = 0;
+        uint32_t             max_iterations = 0;
 
         while (true)
         {
@@ -389,12 +391,12 @@ class mincross_impl
                     auto d = transpose_step(l, order);
                     delta += d;
 
-                    candidate[l] = (d > 0);  // if changed, keep candidate
+                    candidate[l] = (d > 0) ? 1 : 0;  // if changed, keep candidate
                 }
             }
             ++max_iterations;
 
-            if (delta < 1 || max_iterations == 1000)
+            if (delta < 1 || max_iterations == MAX_TRANSPOSE_ITERATIONS)
             {
                 break;
             }
@@ -462,7 +464,9 @@ class mincross_impl
     uint32_t in_cross(const node& left, const node& right)
     {
         std::vector<uint32_t> left_sources{};
+        left_sources.reserve(fanout_ntk.fanin_size(left));
         std::vector<uint32_t> right_sources{};
+        right_sources.reserve(fanout_ntk.fanin_size(right));
 
         fanout_ntk.foreach_fanin(left,
                                  [this, &left_sources](auto const& f)
@@ -521,9 +525,9 @@ class mincross_impl
     uint32_t count_crossings(const std::vector<uint32_t>& a, const std::vector<uint32_t>& b)
     {
         uint32_t count = 0;
-        for (const auto& x : a)
+        for (const auto x : a)
         {
-            for (const auto& y : b)
+            for (const auto y : b)
             {
                 if (x > y)
                 {
@@ -549,7 +553,8 @@ class mincross_impl
             fanout_ntk.foreach_node_in_rank(r,
                                             [this, &penalty_array, &max_pos](auto const& n)
                                             {
-                                                std::vector<uint64_t> targets;
+                                                std::vector<uint64_t> targets{};
+                                                targets.reserve(fanout_ntk.fanout_size(n));
 
                                                 fanout_ntk.foreach_fanout(n,
                                                                           [this, &targets](auto const& fanout)
