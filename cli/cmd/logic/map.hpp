@@ -129,15 +129,22 @@ class map_command : public command
 
             fiction::technology_mapping_stats st{};
 
-            const auto mapped_ntk = fiction::technology_mapping(*ntk_ptr, ps, &st);
-
-            if (st.mapper_stats.mapping_error)
+            try
             {
-                env->out() << "[e] an error occurred in mockturtle's technology mapper" << std::endl;
-                return;
-            }
+                const auto mapped_ntk = fiction::technology_mapping(*ntk_ptr, ps, &st);
 
-            s.extend() = std::make_shared<fiction::tec_nt>(mapped_ntk);
+                if (st.mapper_stats.mapping_error)
+                {
+                    env->out() << "[e] an error occurred in mockturtle's technology mapper" << std::endl;
+                    return;
+                }
+
+                s.extend() = std::make_shared<fiction::tec_nt>(mapped_ntk);
+            }
+            catch (const fiction::missing_required_gates_exception& e)
+            {
+                env->out() << fmt::format("[e] {}", e.what()) << std::endl;
+            }
         };
 
         std::visit(perform_mapping, s.current());

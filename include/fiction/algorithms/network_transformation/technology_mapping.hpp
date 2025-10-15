@@ -17,10 +17,24 @@
 
 #include <cassert>
 #include <sstream>
+#include <stdexcept>
+#include <string>
 #include <vector>
 
 namespace fiction
 {
+
+/**
+ * Exception thrown when a technology mapping library does not contain the required gates for the base network type.
+ */
+class missing_required_gates_exception final : public std::logic_error
+{
+  public:
+    explicit missing_required_gates_exception(const std::string& network_type, const std::string& missing_gates) :
+            std::logic_error("Technology library is missing required gates for " + network_type +
+                             " network: " + missing_gates)
+    {}
+};
 
 struct technology_mapping_params
 {
@@ -320,6 +334,9 @@ class technology_mapping_impl
 
     [[nodiscard]] tec_nt run() const
     {
+        // Validate that the library contains required gates for the base network type
+        validate_required_gates();
+
         const auto gate_library = set_up_gates();
 
         tec_nt mapped_ntk{};
@@ -354,7 +371,76 @@ class technology_mapping_impl
      * Technology mapping statistics.
      */
     technology_mapping_stats& stats;
+    /**
+     * Validate that the technology library contains the required gates for the base network type.
+     *
+     * @throws missing_required_gates_exception if required gates are missing.
+     */
+    void validate_required_gates() const
+    {
+        std::string              network_type{};
+        std::vector<std::string> missing_gates{};
 
+        // Check for AIG network (requires AND and INV)
+        if constexpr (std::is_same_v<typename Ntk::base_type, mockturtle::aig_network>)
+        {
+            network_type = aig_name;
+            if (!params.inv)
+            {
+                missing_gates.push_back("INV");
+            }
+            if (!params.and2)
+            {
+                missing_gates.push_back("AND");
+            }
+        }
+        // Check for XAG network (requires AND, XOR, and INV)
+        else if constexpr (std::is_same_v<typename Ntk::base_type, mockturtle::xag_network>)
+        {
+            network_type = xag_name;
+            if (!params.inv)
+            {
+                missing_gates.push_back("INV");
+            }
+            if (!params.and2)
+            {
+                missing_gates.push_back("AND");
+            }
+            if (!params.xor2)
+            {
+                missing_gates.push_back("XOR");
+            }
+        }
+        // Check for MIG network (requires MAJ and INV)
+        else if constexpr (std::is_same_v<typename Ntk::base_type, mockturtle::mig_network>)
+        {
+            network_type = mig_name;
+            if (!params.inv)
+            {
+                missing_gates.push_back("INV");
+            }
+            if (!params.maj3)
+            {
+                missing_gates.push_back("MAJ");
+            }
+        }
+
+        // Throw exception if any required gates are missing
+        if (!missing_gates.empty())
+        {
+            std::string missing_list{};
+            for (std::size_t i = 0; i < missing_gates.size(); ++i)
+            {
+                missing_list += missing_gates[i];
+                if (i < missing_gates.size() - 1)
+                {
+                    missing_list += ", ";
+                }
+            }
+
+            throw missing_required_gates_exception(network_type, missing_list);
+        }
+    }
     /**
      * Create a mockturtle gate library from the given parameters.
      *
