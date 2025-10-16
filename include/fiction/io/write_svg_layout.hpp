@@ -953,13 +953,17 @@ class write_qca_layout_svg_impl
                     }
                     else
                     {
+                        // If this is called, then there is no tile for the current cell yet
+                        // It also makes sure that all required tiles are created
                         coord_to_tile[tile_coords] = {svg::TILE, clock_zone};
                     }
                 }
 
+                // Represent the x- and y-coordinates inside the c's tile
                 const coordinate<Lyt> in_tile{c.x % lyt.get_tile_size_x(), c.y % lyt.get_tile_size_y()};
                 const auto            desc_col = generate_description_color(c);
 
+                // Only add a cell description if the cell is not empty
                 if (!lyt.is_empty_cell(c))
                 {
                     if constexpr (has_synchronization_elements_v<Lyt>)
