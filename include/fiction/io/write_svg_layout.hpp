@@ -866,7 +866,7 @@ class write_qca_layout_svg_impl
                     const auto desc_col = generate_description_color(c);
 
                     bool is_sync_elem = false;
-                    // Current cell-description can now be appended to the description of all cells
+                    // The current cell-description can now be appended to the description of all cells
                     if constexpr (has_synchronization_elements_v<Lyt>)
                     {
                         if (lyt.is_synchronization_element(c))
@@ -918,30 +918,27 @@ class write_qca_layout_svg_impl
         static constexpr const std::array<const char*, 4> text_colors{
             {svg::CLOCK_ZONE_12_TEXT, svg::CLOCK_ZONE_12_TEXT, svg::CLOCK_ZONE_34_TEXT, svg::CLOCK_ZONE_34_TEXT}};
 
-        // Precompute any info outside the lambda
-        auto& tiles       = coord_to_tile;
-        auto& cells       = coord_to_cells;
-        auto& latch_cells = coord_to_latch_cells;
-        auto& latch_tile  = coord_to_latch_tile;
-
+        // Capture only references that are actually used
         lyt.foreach_cell_position(
-            [this, &tiles, &cells, &latch_cells, &latch_tile](const auto& c)
+            [this, &coord_to_tile, &coord_to_cells, &coord_to_latch_cells](const auto& c)
             {
                 const auto clock_zone = lyt.get_clock_number(c);
                 const auto tile_coords =
                     coordinate<Lyt>{std::ceil(c.x / lyt.get_tile_size_x()), std::ceil(c.y / lyt.get_tile_size_y())};
 
-                bool is_sync_elem = false;
+                std::string current_cells{};
+                bool        is_sync_elem = false;
 
                 // Handle synchronization elements
                 if constexpr (has_synchronization_elements_v<Lyt>)
                 {
-                    if (const auto latch_delay = lyt.get_synchronization_element(c); latch_delay > 0)
+                    const auto latch_delay = lyt.get_synchronization_element(c);
+                    if (latch_delay > 0)
                     {
-                        auto latch_it = latch_cells.find(tile_coords);
-                        if (latch_it == latch_cells.end())
+                        if (auto latch_it = coord_to_latch_cells.find(tile_coords);
+                            latch_it != coord_to_latch_cells.end())
                         {
-                            latch_tile[tile_coords] = {svg::LATCH, clock_zone, static_cast<uint32_t>(latch_delay)};
+                            current_cells = latch_it->second;
                         }
                         is_sync_elem = true;
                     }
@@ -950,10 +947,13 @@ class write_qca_layout_svg_impl
                 // Handle normal cells
                 if (!is_sync_elem)
                 {
-                    auto cell_it = cells.find(tile_coords);
-                    if (cell_it == cells.end())
+                    if (auto cell_it = coord_to_cells.find(tile_coords); cell_it != coord_to_cells.end())
                     {
-                        tiles[tile_coords] = {svg::TILE, clock_zone};
+                        current_cells = cell_it->second;
+                    }
+                    else
+                    {
+                        coord_to_tile[tile_coords] = {svg::TILE, clock_zone};
                     }
                 }
 
@@ -964,22 +964,23 @@ class write_qca_layout_svg_impl
                 {
                     if constexpr (has_synchronization_elements_v<Lyt>)
                     {
-                        if (const auto latch_delay = lyt.get_synchronization_element(c); latch_delay > 0)
+                        const auto latch_delay = lyt.get_synchronization_element(c);
+                        if (latch_delay > 0)
                         {
-                            latch_cells[tile_coords] +=
+                            coord_to_latch_cells[tile_coords] = current_cells.append(
                                 fmt::format(fmt::runtime(desc_col.first), desc_col.second,
                                             svg::STARTING_OFFSET_LATCH_CELL_X + (in_tile.x * svg::CELL_DISTANCE),
-                                            svg::STARTING_OFFSET_LATCH_CELL_Y + (in_tile.y * svg::CELL_DISTANCE));
+                                            svg::STARTING_OFFSET_LATCH_CELL_Y + (in_tile.y * svg::CELL_DISTANCE)));
                             is_sync_elem = true;
                         }
                     }
 
                     if (!is_sync_elem)
                     {
-                        cells[tile_coords] +=
+                        coord_to_cells[tile_coords] = current_cells.append(
                             fmt::format(fmt::runtime(desc_col.first), desc_col.second,
                                         svg::STARTING_OFFSET_CELL_X + (in_tile.x * svg::CELL_DISTANCE),
-                                        svg::STARTING_OFFSET_CELL_Y + (in_tile.y * svg::CELL_DISTANCE));
+                                        svg::STARTING_OFFSET_CELL_Y + (in_tile.y * svg::CELL_DISTANCE)));
                     }
                 }
             });
@@ -1013,7 +1014,7 @@ class write_qca_layout_svg_impl
                 // Find empty latches via missing cell-descriptions for their coordinates
                 for (const auto& [coord, ldscr] : coord_to_latch_tile)
                 {
-                    if (auto cell_it = coord_to_latch_cells.find(coord); cell_it == coord_to_latch_cells.end())
+                    if (coord_to_latch_cells.count(coord) == 0)
                     {
                         empty_latches.emplace_back(coord);
                     }
