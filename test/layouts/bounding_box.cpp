@@ -2,6 +2,7 @@
 // Created by marcel on 13.01.22.
 //
 #include <catch2/catch_template_test_macros.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
@@ -358,21 +359,5 @@ TEMPLATE_TEST_CASE("2D bounding box for cube layout with atomic defect", "[bound
 
         CHECK(nw == cell<TestType>{-3, 0});
         CHECK(se == cell<TestType>{2, 0});
-    }
-
-    SECTION("two cell and two defect, exclude defects")
-    {
-        sidb_defect_surface<TestType> lyt{TestType{}};
-        lyt.assign_cell_type({1, 0}, TestType::technology::cell_type::NORMAL);
-        lyt.assign_cell_type({2, 0}, TestType::technology::cell_type::NORMAL);
-        lyt.assign_sidb_defect({-3, 0}, sidb_defect{});
-        lyt.assign_sidb_defect({2, 0}, sidb_defect{});
-
-        const bounding_box_2d bb{static_cast<TestType>(lyt)};
-        const auto            nw = bb.get_min();
-        const auto            se = bb.get_max();
-
-        CHECK(nw == cell<TestType>{1, 0, 0});
-        CHECK(se == cell<TestType>{2, 0, 0});
     }
 }

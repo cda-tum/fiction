@@ -22,9 +22,10 @@
 #include <fiction/technology/sidb_bestagon_library.hpp>
 #include <fiction/technology/sidb_lattice.hpp>
 #include <fiction/technology/sidb_lattice_orientations.hpp>
+#include <fiction/technology/cell_technologies.hpp>
+#include <fiction/technology/sidb_charge_state.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/layout_utils.hpp>
 
 #include <sstream>
 

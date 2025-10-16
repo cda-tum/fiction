@@ -16,6 +16,7 @@
 #include <fiction/utils/layout_utils.hpp>
 
 #include <cstdint>
+#include <optional>
 
 using namespace fiction;
 
@@ -25,12 +26,14 @@ TEST_CASE("Random cube::coord_t layout generation", "[random-sidb-layout-generat
     {
         const generate_random_sidb_layout_params<cube::coord_t> params{};
 
-        const auto lyt = generate_random_sidb_layout<sidb_cell_clk_lyt_cube>(params);
+        const auto lyt_opt = generate_random_sidb_layout<sidb_cell_clk_lyt_cube>(params);
 
-        REQUIRE(lyt.has_value());
-        CHECK(lyt.value().num_cells() == 0);
-        CHECK(lyt.value().x() == 0);
-        CHECK(lyt.value().y() == 0);
+        REQUIRE(lyt_opt.has_value());
+        const auto& lyt = *lyt_opt;
+
+        CHECK(lyt.num_cells() == 0);
+        CHECK(lyt.x() == 0);
+        CHECK(lyt.y() == 0);
     }
 
     SECTION("given corner coordinates, wrong order")
@@ -40,9 +43,10 @@ TEST_CASE("Random cube::coord_t layout generation", "[random-sidb-layout-generat
         const auto result_lyt = generate_random_sidb_layout<sidb_cell_clk_lyt_cube>(params);
 
         REQUIRE(result_lyt.has_value());
+        const auto& lyt = *result_lyt;
 
-        CHECK(result_lyt.value().num_cells() == 0);
-        result_lyt.value().foreach_cell(
+        CHECK(lyt.num_cells() == 0);
+        lyt.foreach_cell(
             [](const auto& cell)
             {
                 CHECK(cell.x == 0);
@@ -57,9 +61,10 @@ TEST_CASE("Random cube::coord_t layout generation", "[random-sidb-layout-generat
 
         const auto result_lyt = generate_random_sidb_layout<sidb_cell_clk_lyt_cube>(params);
         REQUIRE(result_lyt.has_value());
+        const auto& lyt = *result_lyt;
 
-        CHECK(result_lyt.value().num_cells() == 0);
-        result_lyt.value().foreach_cell(
+        CHECK(lyt.num_cells() == 0);
+        lyt.foreach_cell(
             [](const auto& cell)
             {
                 CHECK(cell.x == 0);
@@ -74,9 +79,10 @@ TEST_CASE("Random cube::coord_t layout generation", "[random-sidb-layout-generat
 
         const auto result_lyt = generate_random_sidb_layout<sidb_cell_clk_lyt_cube>(params);
         REQUIRE(result_lyt.has_value());
+        const auto& lyt = *result_lyt;
 
-        CHECK(result_lyt.value().num_cells() == 1);
-        result_lyt.value().foreach_cell(
+        CHECK(lyt.num_cells() == 1);
+        lyt.foreach_cell(
             [](const auto& cell)
             {
                 CHECK(cell.x == -10);
@@ -91,9 +97,10 @@ TEST_CASE("Random cube::coord_t layout generation", "[random-sidb-layout-generat
 
         const auto result_lyt = generate_random_sidb_layout<sidb_cell_clk_lyt_cube>(params);
         REQUIRE(result_lyt.has_value());
+        const auto& lyt = *result_lyt;
 
-        CHECK(result_lyt.value().num_cells() == 10);
-        result_lyt.value().foreach_cell(
+        CHECK(lyt.num_cells() == 10);
+        lyt.foreach_cell(
             [&](const auto& cell)
             {
                 CHECK(cell.x < 6);
@@ -114,9 +121,10 @@ TEST_CASE("Random cube::coord_t layout generation", "[random-sidb-layout-generat
 
         const auto result_lyt = generate_random_sidb_layout<sidb_cell_clk_lyt_cube>(params);
         REQUIRE(result_lyt.has_value());
+        const auto& lyt = *result_lyt;
 
-        CHECK(result_lyt.value().num_cells() == 100);
-        result_lyt.value().foreach_cell(
+        CHECK(lyt.num_cells() == 100);
+        lyt.foreach_cell(
             [](const auto& cell)
             {
                 CHECK(cell.x < 91);
@@ -133,16 +141,17 @@ TEST_CASE("Random cube::coord_t layout generation", "[random-sidb-layout-generat
 
         const auto result_lyt = generate_random_sidb_layout<sidb_cell_clk_lyt_cube>(params);
         REQUIRE(result_lyt.has_value());
+        const auto& lyt = *result_lyt;
 
-        CHECK(result_lyt.value().num_cells() == 50);
-        result_lyt.value().foreach_cell(
+        CHECK(lyt.num_cells() == 50);
+        lyt.foreach_cell(
             [](const auto& cell)
             {
                 CHECK(cell.x <= 200);
                 CHECK(cell.y <= 200);
             });
 
-        CHECK(!can_positive_charges_occur(result_lyt.value(), sidb_simulation_parameters{}));
+        CHECK(!can_positive_charges_occur(lyt, sidb_simulation_parameters{}));
     }
 
     SECTION("given previous layouts")
@@ -157,10 +166,11 @@ TEST_CASE("Random cube::coord_t layout generation", "[random-sidb-layout-generat
 
         const auto result_lyts = generate_multiple_random_sidb_layouts<sidb_cell_clk_lyt_cube>(params);
         REQUIRE(result_lyts.has_value());
+        const auto& lyts = *result_lyts;
 
-        CHECK(result_lyts.value().size() == 3);
+        CHECK(lyts.size() == 3);
 
-        for (const auto& lyt : result_lyts.value())
+        for (const auto& lyt : lyts)
         {
             lyt.foreach_cell(
                 [](const auto& cell)
@@ -185,11 +195,12 @@ TEST_CASE("Random cube::coord_t layout generation", "[random-sidb-layout-generat
 
         const auto result_lyts = generate_multiple_random_sidb_layouts<sidb_cell_clk_lyt_cube>(params);
         REQUIRE(result_lyts.has_value());
+        const auto& lyts = *result_lyts;
 
-        REQUIRE(result_lyts.value().size() == 2);
+        REQUIRE(lyts.size() == 2);
 
-        const auto& first_lyt  = result_lyts.value().front();
-        const auto& second_lyt = result_lyts.value().back();
+        const auto& first_lyt  = lyts.front();
+        const auto& second_lyt = lyts.back();
 
         CHECK(!are_cell_layouts_identical(first_lyt, second_lyt));
     }
@@ -206,9 +217,11 @@ TEST_CASE("Random cube::coord_t layout generation", "[random-sidb-layout-generat
 
         const auto result_lyts = generate_multiple_random_sidb_layouts<sidb_cell_clk_lyt_cube>(params);
         REQUIRE(result_lyts.has_value());
-        REQUIRE(result_lyts.value().size() == 10);
+        const auto& lyts = *result_lyts;
 
-        for (const auto& lyt : result_lyts.value())
+        REQUIRE(lyts.size() == 10);
+
+        for (const auto& lyt : lyts)
         {
             CHECK(!can_positive_charges_occur(lyt, sidb_simulation_parameters{}));
         }
@@ -221,12 +234,13 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[random-sidb-layout-gene
     {
         const generate_random_sidb_layout_params<offset::ucoord_t> params{};
 
-        const auto lyt = generate_random_sidb_layout<sidb_100_cell_clk_lyt>(params);
-        REQUIRE(lyt.has_value());
+        const auto lyt_opt = generate_random_sidb_layout<sidb_100_cell_clk_lyt>(params);
+        REQUIRE(lyt_opt.has_value());
+        const auto& lyt = *lyt_opt;
 
-        CHECK(lyt.value().num_cells() == 0);
-        CHECK(lyt.value().x() == 0);
-        CHECK(lyt.value().y() == 0);
+        CHECK(lyt.num_cells() == 0);
+        CHECK(lyt.x() == 0);
+        CHECK(lyt.y() == 0);
     }
 
     SECTION("design is impossible")
@@ -244,9 +258,10 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[random-sidb-layout-gene
 
         const auto result_lyt = generate_random_sidb_layout<sidb_100_cell_clk_lyt>(params);
         REQUIRE(result_lyt.has_value());
+        const auto& lyt = *result_lyt;
 
-        CHECK(result_lyt.value().num_cells() == 0);
-        result_lyt.value().foreach_cell(
+        CHECK(lyt.num_cells() == 0);
+        lyt.foreach_cell(
             [&](const auto& cell)
             {
                 CHECK(cell.x == 0);
@@ -261,9 +276,10 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[random-sidb-layout-gene
 
         const auto result_lyt = generate_random_sidb_layout<sidb_100_cell_clk_lyt>(params);
         REQUIRE(result_lyt.has_value());
+        const auto& lyt = *result_lyt;
 
-        CHECK(result_lyt.value().num_cells() == 1);
-        result_lyt.value().foreach_cell(
+        CHECK(lyt.num_cells() == 1);
+        lyt.foreach_cell(
             [](const auto& cell)
             {
                 CHECK(cell.x == 5);
@@ -278,9 +294,10 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[random-sidb-layout-gene
 
         const auto result_lyt = generate_random_sidb_layout<sidb_100_cell_clk_lyt>(params);
         REQUIRE(result_lyt.has_value());
+        const auto& lyt = *result_lyt;
 
-        CHECK(result_lyt.value().num_cells() == 10);
-        result_lyt.value().foreach_cell(
+        CHECK(lyt.num_cells() == 10);
+        lyt.foreach_cell(
             [](const auto& cell)
             {
                 CHECK(cell.x < 51);
@@ -301,9 +318,10 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[random-sidb-layout-gene
 
         const auto result_lyt = generate_random_sidb_layout<sidb_100_cell_clk_lyt>(params);
         REQUIRE(result_lyt.has_value());
+        const auto& lyt = *result_lyt;
 
-        CHECK(result_lyt.value().num_cells() == 100);
-        result_lyt.value().foreach_cell(
+        CHECK(lyt.num_cells() == 100);
+        lyt.foreach_cell(
             [](const auto& cell)
             {
                 CHECK(cell.x < 91);
@@ -320,16 +338,17 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[random-sidb-layout-gene
 
         const auto result_lyt = generate_random_sidb_layout<sidb_100_cell_clk_lyt>(params);
         REQUIRE(result_lyt.has_value());
+        const auto& lyt = *result_lyt;
 
-        CHECK(result_lyt.value().num_cells() == 100);
-        result_lyt.value().foreach_cell(
+        CHECK(lyt.num_cells() == 100);
+        lyt.foreach_cell(
             [](const auto& cell)
             {
                 CHECK(cell.x <= 200);
                 CHECK(cell.y <= 200);
             });
 
-        CHECK(!can_positive_charges_occur(result_lyt.value(), sidb_simulation_parameters{}));
+        CHECK(!can_positive_charges_occur(lyt, sidb_simulation_parameters{}));
     }
 
     SECTION("given previous layouts")
@@ -344,9 +363,11 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[random-sidb-layout-gene
 
         const auto result_lyts = generate_multiple_random_sidb_layouts<sidb_100_cell_clk_lyt>(params);
         REQUIRE(result_lyts.has_value());
-        CHECK(result_lyts.value().size() == 3);
+        const auto& lyts = *result_lyts;
 
-        for (const auto& lyt : result_lyts.value())
+        CHECK(lyts.size() == 3);
+
+        for (const auto& lyt : lyts)
         {
             lyt.foreach_cell(
                 [](const auto& cell)
@@ -369,10 +390,12 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[random-sidb-layout-gene
 
         const auto result_lyts = generate_multiple_random_sidb_layouts<sidb_100_cell_clk_lyt>(params);
         REQUIRE(result_lyts.has_value());
-        REQUIRE(result_lyts.value().size() == 2);
+        const auto& lyts = *result_lyts;
 
-        const auto& first_lyt  = result_lyts.value().front();
-        const auto& second_lyt = result_lyts.value().back();
+        REQUIRE(lyts.size() == 2);
+
+        const auto& first_lyt  = lyts.front();
+        const auto& second_lyt = lyts.back();
 
         CHECK(!are_cell_layouts_identical(first_lyt, second_lyt));
     }
@@ -389,7 +412,9 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[random-sidb-layout-gene
         const auto result_lyt = generate_random_sidb_layout(params, std::optional{skeleton_layout});
 
         REQUIRE(result_lyt.has_value());
-        CHECK(result_lyt.value().num_cells() == 13);
+        const auto& lyt = *result_lyt;
+
+        CHECK(lyt.num_cells() == 13);
     }
 
     SECTION("Check correct use of skeleton layout when generating multiple random layouts")
@@ -410,10 +435,12 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[random-sidb-layout-gene
 
         const auto result_lyts = generate_multiple_random_sidb_layouts(params, std::optional{skeleton_layout});
         REQUIRE(result_lyts.has_value());
-        REQUIRE(result_lyts.value().size() == 2);
+        const auto& lyts = *result_lyts;
 
-        CHECK(result_lyts.value().front().num_cells() == 13);
-        CHECK(result_lyts.value().back().num_cells() == 13);
+        REQUIRE(lyts.size() == 2);
+
+        CHECK(lyts.front().num_cells() == 13);
+        CHECK(lyts.back().num_cells() == 13);
     }
 
     SECTION("Check if std::nullptr_t is returned when no layout can be designed")
