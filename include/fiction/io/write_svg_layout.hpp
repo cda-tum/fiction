@@ -21,7 +21,6 @@
 #include <iostream>
 #include <optional>
 #include <sstream>
-#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <tuple>
@@ -866,7 +865,7 @@ class write_qca_layout_svg_impl
                     const auto desc_col = generate_description_color(c);
 
                     bool is_sync_elem = false;
-                    // Current cell-description can now be appended to the description of all cells
+                    // The current cell-description can now be appended to the description of all cells
                     if constexpr (has_synchronization_elements_v<Lyt>)
                     {
                         if (lyt.is_synchronization_element(c))
@@ -918,39 +917,33 @@ class write_qca_layout_svg_impl
         static constexpr const std::array<const char*, 4> text_colors{
             {svg::CLOCK_ZONE_12_TEXT, svg::CLOCK_ZONE_12_TEXT, svg::CLOCK_ZONE_34_TEXT, svg::CLOCK_ZONE_34_TEXT}};
 
-        // Adds all non-empty cells from the layout to their correct tiles; it generates the "body"
-        // of all the tile-descriptions to be used later
+        // Capture only references that are actually used
         lyt.foreach_cell_position(
-            [this, &coord_to_tile, &coord_to_cells, &coord_to_latch_cells, &coord_to_latch_tile](const auto& c)
+            [this, &coord_to_tile, &coord_to_cells, &coord_to_latch_cells](const auto& c)
             {
                 const auto clock_zone = lyt.get_clock_number(c);
                 const auto tile_coords =
                     coordinate<Lyt>{std::ceil(c.x / lyt.get_tile_size_x()), std::ceil(c.y / lyt.get_tile_size_y())};
+
                 std::string current_cells{};
+                bool        is_sync_elem = false;
 
-                bool is_sync_elem = false;
-
+                // Handle synchronization elements
                 if constexpr (has_synchronization_elements_v<Lyt>)
                 {
-                    if (const auto latch_delay = lyt.get_synchronization_element(c); latch_delay > 0)
+                    const auto latch_delay = lyt.get_synchronization_element(c);
+                    if (latch_delay > 0)
                     {
                         if (auto latch_it = coord_to_latch_cells.find(tile_coords);
                             latch_it != coord_to_latch_cells.end())
                         {
                             current_cells = latch_it->second;
                         }
-                        else
-                        {
-                            // If this is called then there is no tile for the current cell yet
-                            // It also makes sure that all required tiles are created
-                            coord_to_latch_tile[tile_coords] = {svg::LATCH, clock_zone,
-                                                                static_cast<uint32_t>(latch_delay)};
-                        }
-
                         is_sync_elem = true;
                     }
                 }
 
+                // Handle normal cells
                 if (!is_sync_elem)
                 {
                     if (auto cell_it = coord_to_cells.find(tile_coords); cell_it != coord_to_cells.end())
@@ -967,23 +960,20 @@ class write_qca_layout_svg_impl
 
                 // Represent the x- and y-coordinates inside the c's tile
                 const coordinate<Lyt> in_tile{c.x % lyt.get_tile_size_x(), c.y % lyt.get_tile_size_y()};
+                const auto            desc_col = generate_description_color(c);
 
-                // Determines cell type and color
-                const auto desc_col = generate_description_color(c);
-
-                // Only add cell description if the cell is not empty
-                if (!(lyt.is_empty_cell(c)))
+                // Only add a cell description if the cell is not empty
+                if (!lyt.is_empty_cell(c))
                 {
-                    //  Current cell-description can now be appended to the description of all cells in the current tile
                     if constexpr (has_synchronization_elements_v<Lyt>)
                     {
-                        if (const auto latch_delay = lyt.get_synchronization_element(c); latch_delay > 0)
+                        const auto latch_delay = lyt.get_synchronization_element(c);
+                        if (latch_delay > 0)
                         {
                             coord_to_latch_cells[tile_coords] = current_cells.append(
                                 fmt::format(fmt::runtime(desc_col.first), desc_col.second,
                                             svg::STARTING_OFFSET_LATCH_CELL_X + (in_tile.x * svg::CELL_DISTANCE),
                                             svg::STARTING_OFFSET_LATCH_CELL_Y + (in_tile.y * svg::CELL_DISTANCE)));
-
                             is_sync_elem = true;
                         }
                     }
@@ -1027,7 +1017,7 @@ class write_qca_layout_svg_impl
                 // Find empty latches via missing cell-descriptions for their coordinates
                 for (const auto& [coord, ldscr] : coord_to_latch_tile)
                 {
-                    if (auto cell_it = coord_to_latch_cells.find(coord); cell_it == coord_to_latch_cells.end())
+                    if (coord_to_latch_cells.count(coord) == 0)
                     {
                         empty_latches.emplace_back(coord);
                     }
@@ -1134,7 +1124,7 @@ void write_qca_layout_svg(const Lyt& lyt, std::ostream& os, const write_qca_layo
 template <typename Lyt>
 void write_qca_layout_svg(const Lyt& lyt, const std::string_view& filename, const write_qca_layout_svg_params& ps = {})
 {
-    std::ofstream os{filename.data(), std::ofstream::out};
+    std::ofstream os{std::string(filename), std::ofstream::out};
 
     if (!os.is_open())
     {
@@ -1184,7 +1174,7 @@ void write_sidb_layout_svg(const Lyt& lyt, const std::string_view& filename,
     static_assert(has_sidb_technology_v<Lyt>, "Lyt must be a SiDB layout");
     static_assert(!is_sidb_defect_surface_v<Lyt>, "SiDB defects are not supported");
 
-    std::ofstream os{filename.data(), std::ofstream::out};
+    std::ofstream os{std::string(filename), std::ofstream::out};
 
     if (!os.is_open())
     {
