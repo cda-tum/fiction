@@ -931,8 +931,7 @@ class write_qca_layout_svg_impl
                 const auto tile_coords =
                     coordinate<Lyt>{std::ceil(c.x / lyt.get_tile_size_x()), std::ceil(c.y / lyt.get_tile_size_y())};
 
-                std::string current_cells{};
-                bool        is_sync_elem = false;
+                bool is_sync_elem = false;
 
                 // Handle synchronization elements
                 if constexpr (has_synchronization_elements_v<Lyt>)
@@ -940,11 +939,7 @@ class write_qca_layout_svg_impl
                     if (const auto latch_delay = lyt.get_synchronization_element(c); latch_delay > 0)
                     {
                         auto latch_it = latch_cells.find(tile_coords);
-                        if (latch_it != latch_cells.end())
-                        {
-                            current_cells = latch_it->second;
-                        }
-                        else
+                        if (latch_it == latch_cells.end())
                         {
                             latch_tile[tile_coords] = {svg::LATCH, clock_zone, static_cast<uint32_t>(latch_delay)};
                         }
@@ -956,11 +951,7 @@ class write_qca_layout_svg_impl
                 if (!is_sync_elem)
                 {
                     auto cell_it = cells.find(tile_coords);
-                    if (cell_it != cells.end())
-                    {
-                        current_cells = cell_it->second;
-                    }
-                    else
+                    if (cell_it == cells.end())
                     {
                         tiles[tile_coords] = {svg::TILE, clock_zone};
                     }
