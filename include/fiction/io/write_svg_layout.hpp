@@ -919,13 +919,13 @@ class write_qca_layout_svg_impl
             {svg::CLOCK_ZONE_12_TEXT, svg::CLOCK_ZONE_12_TEXT, svg::CLOCK_ZONE_34_TEXT, svg::CLOCK_ZONE_34_TEXT}};
 
         // Precompute any info outside the lambda
-        auto& tiles      = coord_to_tile;
-        auto& cells      = coord_to_cells;
-        auto& latchCells = coord_to_latch_cells;
-        auto& latchTile  = coord_to_latch_tile;
+        auto& tiles       = coord_to_tile;
+        auto& cells       = coord_to_cells;
+        auto& latch_cells = coord_to_latch_cells;
+        auto& latch_tile  = coord_to_latch_tile;
 
         lyt.foreach_cell_position(
-            [this, &tiles, &cells, &latchCells, &latchTile](const auto& c)
+            [this, &tiles, &cells, &latch_cells, &latch_tile](const auto& c)
             {
                 const auto clock_zone = lyt.get_clock_number(c);
                 const auto tile_coords =
@@ -939,14 +939,14 @@ class write_qca_layout_svg_impl
                 {
                     if (const auto latch_delay = lyt.get_synchronization_element(c); latch_delay > 0)
                     {
-                        auto latch_it = latchCells.find(tile_coords);
-                        if (latch_it != latchCells.end())
+                        auto latch_it = latch_cells.find(tile_coords);
+                        if (latch_it != latch_cells.end())
                         {
                             current_cells = latch_it->second;
                         }
                         else
                         {
-                            latchTile[tile_coords] = {svg::LATCH, clock_zone, static_cast<uint32_t>(latch_delay)};
+                            latch_tile[tile_coords] = {svg::LATCH, clock_zone, static_cast<uint32_t>(latch_delay)};
                         }
                         is_sync_elem = true;
                     }
@@ -975,7 +975,7 @@ class write_qca_layout_svg_impl
                     {
                         if (const auto latch_delay = lyt.get_synchronization_element(c); latch_delay > 0)
                         {
-                            latchCells[tile_coords] +=
+                            latch_cells[tile_coords] +=
                                 fmt::format(fmt::runtime(desc_col.first), desc_col.second,
                                             svg::STARTING_OFFSET_LATCH_CELL_X + (in_tile.x * svg::CELL_DISTANCE),
                                             svg::STARTING_OFFSET_LATCH_CELL_Y + (in_tile.y * svg::CELL_DISTANCE));
@@ -1129,7 +1129,7 @@ void write_qca_layout_svg(const Lyt& lyt, std::ostream& os, const write_qca_layo
 template <typename Lyt>
 void write_qca_layout_svg(const Lyt& lyt, const std::string_view& filename, const write_qca_layout_svg_params& ps = {})
 {
-    std::ofstream os{filename.data(), std::ofstream::out};
+    std::ofstream os{std::string(filename), std::ofstream::out};
 
     if (!os.is_open())
     {
@@ -1179,7 +1179,7 @@ void write_sidb_layout_svg(const Lyt& lyt, const std::string_view& filename,
     static_assert(has_sidb_technology_v<Lyt>, "Lyt must be a SiDB layout");
     static_assert(!is_sidb_defect_surface_v<Lyt>, "SiDB defects are not supported");
 
-    std::ofstream os{filename.data(), std::ofstream::out};
+    std::ofstream os{std::string(filename), std::ofstream::out};
 
     if (!os.is_open())
     {
