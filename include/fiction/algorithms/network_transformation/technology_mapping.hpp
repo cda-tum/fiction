@@ -387,11 +387,11 @@ class technology_mapping_impl
             network_type = aig_name;
             if (!params.inv)
             {
-                missing_gates.push_back("INV");
+                missing_gates.emplace_back("INV");
             }
             if (!params.and2)
             {
-                missing_gates.push_back("AND");
+                missing_gates.emplace_back("AND");
             }
         }
         // Check for XAG network (requires AND, XOR, and INV)
@@ -400,15 +400,15 @@ class technology_mapping_impl
             network_type = xag_name;
             if (!params.inv)
             {
-                missing_gates.push_back("INV");
+                missing_gates.emplace_back("INV");
             }
             if (!params.and2)
             {
-                missing_gates.push_back("AND");
+                missing_gates.emplace_back("AND");
             }
             if (!params.xor2)
             {
-                missing_gates.push_back("XOR");
+                missing_gates.emplace_back("XOR");
             }
         }
         // Check for MIG network (requires MAJ and INV)
@@ -417,11 +417,11 @@ class technology_mapping_impl
             network_type = mig_name;
             if (!params.inv)
             {
-                missing_gates.push_back("INV");
+                missing_gates.emplace_back("INV");
             }
             if (!params.maj3)
             {
-                missing_gates.push_back("MAJ");
+                missing_gates.emplace_back("MAJ");
             }
         }
 
@@ -620,7 +620,7 @@ class technology_mapping_impl
 }  // namespace detail
 
 /**
- * Performs technology mapping on the given network. Technology mapping is the process of sreplacing the gates in a
+ * Performs technology mapping on the given network. Technology mapping is the process of replacing the gates in a
  * network with gates from a given technology library. This function utilizes `mockturtle::emap` to perform the
  * technology mapping. This function is a wrapper around that interface to provide a more convenient usage.
  *
