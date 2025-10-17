@@ -58,7 +58,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v6
         with:
-          python-version: "3.13.x"
+          python-version: "3.14.x"
 
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1.2
