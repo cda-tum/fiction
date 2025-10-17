@@ -78,7 +78,7 @@ jobs:
           enable-cache: true
 
       - name: Setup nox
-        uses: wntrblm/nox@2025.05.01
+        uses: wntrblm/nox@2025.10.16
 
       - name: 🐍 Test
         run: nox -s tests --verbose
