@@ -7,9 +7,6 @@
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
 #include <fiction/algorithms/physical_design/apply_gate_library.hpp>
-#include <fiction/layouts/coordinates.hpp>
-#include <fiction/technology/cell_ports.hpp>
-#include <fiction/technology/fcn_gate_library.hpp>
 #include <fiction/technology/inml_topolinano_library.hpp>
 #include <fiction/technology/qca_one_library.hpp>
 #include <fiction/technology/sidb_bestagon_library.hpp>

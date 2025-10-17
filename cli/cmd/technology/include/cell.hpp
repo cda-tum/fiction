@@ -5,7 +5,6 @@
 #ifndef FICTION_CMD_CELL_HPP
 #define FICTION_CMD_CELL_HPP
 
-#include <fiction/algorithms/physical_design/apply_gate_library.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/cell_ports.hpp>
 #include <fiction/technology/fcn_gate_library.hpp>
@@ -61,7 +60,7 @@ class cell_command final : public command
     {
         try
         {
-            return apply_func(std::forward<Source>(source));
+            return std::forward<ApplyFunc>(apply_func)(std::forward<Source>(source));
         }
         catch (const fiction::unsupported_gate_type_exception<fiction::offset::ucoord_t>& e)
         {

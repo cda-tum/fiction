@@ -6,7 +6,6 @@
 
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
-#include <fiction/algorithms/network_transformation/network_conversion.hpp>
 #include <fiction/types.hpp>
 
 #include <alice/alice.hpp>
@@ -14,7 +13,6 @@
 
 #include <chrono>
 #include <cstdint>
-#include <memory>
 #include <string>
 
 namespace alice
