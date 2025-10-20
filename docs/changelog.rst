@@ -16,6 +16,8 @@ Added
     - Flag in ``gold`` to enforce NOT gates to be routed non-bending only
     - Parameter in ``gold`` to skip tiles when placing PIs, leading to higher success probabilities in discovering layouts
     - Flag in ``gold`` to randomize the number of skipped tiles when placing PIs
+- Continuous integration:
+    - Python 3.14 support
 
 Changed
 #######
@@ -27,6 +29,11 @@ Fixed
 - Algorithms:
     - Fixed a corner case in ``hexagonalization`` when extending POs to the bottom border
     - Fixed a bug in ``post_layout_optimization`` and ``wiring_reduction`` that lead to POs not being placed at the borders and possibly dying
+
+Removed
+#######
+- Continuous integration:
+    - Dropped Python 3.9 support due to its end-of-life status
 
 v0.6.11 - 2025-04-23
 --------------------
