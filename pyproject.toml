@@ -229,7 +229,6 @@ convention = "google"
 
 [dependency-groups]
 build = [
-    "pybind11>=2.13.6",
     "scikit-build-core>=0.11.0",
     "setuptools-scm>=8.1",
 ]
