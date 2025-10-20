@@ -242,8 +242,6 @@ docs = [
 ]
 test = [
     "pytest>=8.3.3",
-    "pytest-console-scripts>=1.4.1",
-    "pytest-cov>=6",
 ]
 dev = [
     { include-group = "build" },
