@@ -64,8 +64,6 @@ jobs:
 
       - name: Set up MSVC development environment
         uses: ilammy/msvc-dev-cmd@v1
-        with:
-          toolset: ${{ matrix.toolset == 'v143' && '14.3' || '' }}
 
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1.2
