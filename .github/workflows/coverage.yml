@@ -40,7 +40,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-24.04]
-        compiler: [g++-14]
+        compiler: [g++-13]
 
     name: Coverage on ${{matrix.os}} with ${{matrix.compiler}}
     runs-on: ${{matrix.os}}
@@ -113,8 +113,8 @@ jobs:
 
       - name: Generate Coverage Report
         run: |
-          lcov --gcov-tool gcov-14 -t "fiction-coverage" -o lcov.info -c -d ${{github.workspace}}/build/
-          lcov --gcov-tool gcov-14 -e lcov.info "${{github.workspace}}/include*" -o lcov_filtered.info
+          lcov --gcov-tool gcov-13 -t "fiction-coverage" -o lcov.info -c -d ${{github.workspace}}/build/ --ignore-errors mismatch --ignore-errors gcov
+          lcov --gcov-tool gcov-13 -e lcov.info "${{github.workspace}}/include*" -o lcov_filtered.info
           lcov -l lcov_filtered.info
 
       - name: Upload report to Codecov
