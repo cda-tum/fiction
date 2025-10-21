@@ -10546,6 +10546,13 @@ static const char *__doc_fiction_detail_technology_mapping_impl_stats = R"doc(Te
 
 static const char *__doc_fiction_detail_technology_mapping_impl_technology_mapping_impl = R"doc()doc";
 
+static const char *__doc_fiction_detail_technology_mapping_impl_validate_required_gates =
+R"doc(Validate that the technology library contains the required gates for
+the base network type.
+
+Throws:
+    missing_required_gates_exception if required gates are missing.)doc";
+
 static const char *__doc_fiction_detail_to_hex =
 R"doc(Utility function to transform a Cartesian tile into a hexagonal one.
 
@@ -16636,6 +16643,12 @@ Parameter ``last``:
 Returns:
     Iterator to the minimum energy charge distribution found in the
     input range, or `last` if the range is empty.)doc";
+
+static const char *__doc_fiction_missing_required_gates_exception =
+R"doc(Exception thrown when a technology mapping library does not contain
+the required gates for the base network type.)doc";
+
+static const char *__doc_fiction_missing_required_gates_exception_missing_required_gates_exception = R"doc()doc";
 
 static const char *__doc_fiction_missing_sidb_position_exception =
 R"doc(Exception thrown when a missing SiDB position is encountered in the
