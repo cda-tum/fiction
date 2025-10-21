@@ -19,7 +19,7 @@ Typical use cases include:
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/views/bfs_topo_view.hpp``
+        **Header:** ``fiction/networks/views/bfs_topo_view.hpp``
 
         .. doxygenclass:: fiction::bfs_topo_view
            :members:
