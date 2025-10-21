@@ -1,4 +1,4 @@
-. _mincross:
+.. _mincross:
 
 Crossing Minimization (MinCross)
 --------------------------------

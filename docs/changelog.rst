@@ -16,7 +16,7 @@ Added
     - Flag in ``gold`` to enforce NOT gates to be routed non-bending only
     - Parameter in ``gold`` to skip tiles when placing PIs, leading to higher success probabilities in discovering layouts
     - Flag in ``gold`` to randomize the number of skipped tiles when placing PIs
-    - Reimplementation of GraphViz's "Mincross" algorithm
+    - Reimplementation of Graphviz’s "Mincross" algorithm
     - Breadth-first topological view
 
 Changed
