@@ -30,7 +30,6 @@
 #include <limits>
 #include <optional>
 #include <ostream>
-#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -339,6 +338,69 @@ void optimize_output_positions(Lyt& lyt) noexcept
         }
     }
 }
+
+/**
+ * Utility function that checks and optimizes PO positions after each gate relocation iteration.
+ * This function moves POs that are not optimally positioned (e.g., in second rightmost or second bottom positions)
+ * to the optimal border positions by inserting buffer gates where the POs were.
+ *
+ * @tparam Lyt Cartesian gate-level layout type.
+ * @param lyt Gate-level layout.
+ * @param moved_gates Moved gates counter to decrement if PO is moved.
+ */
+template <typename Lyt>
+void check_and_optimize_po_positions(Lyt& lyt, uint64_t& moved_gates) noexcept
+{
+    // check that all POs are at the right (x = lyt.x()) or bottom (y = lyt.y()) border
+    lyt.foreach_po(
+        [&lyt, &moved_gates](const auto& po) noexcept
+        {
+            if (const auto tile = lyt.get_tile(lyt.get_node(po));
+                !(lyt.is_at_eastern_border(tile) || lyt.is_at_southern_border(tile)))
+            {
+                if ((tile.x == lyt.x() - 1) && (lyt.is_empty_tile({lyt.x(), tile.y})))
+                {
+                    // get fanin signal of the PO
+                    std::vector<mockturtle::signal<Lyt>> signals{};
+                    lyt.foreach_fanin(lyt.get_node(tile), [&signals](const auto& fanin) { signals.push_back(fanin); });
+
+                    // move PO to the rightmost border
+                    lyt.move_node(lyt.get_node(tile), {lyt.x(), tile.y, 0}, {});
+
+                    // create a buffer at the previous location of the PO and connect it with its fanin
+                    lyt.create_buf(signals[0], {lyt.x() - 1, tile.y});
+
+                    // connect the PO with the new buffer
+                    lyt.move_node(lyt.get_node({lyt.x(), tile.y}), {lyt.x(), tile.y, 0},
+                                  {lyt.make_signal(lyt.get_node({lyt.x() - 1, tile.y}))});
+
+                    --moved_gates;
+                }
+                else if ((tile.y == lyt.y() - 1) && (lyt.is_empty_tile({tile.x, lyt.y()})))
+                {
+                    // get fanin signal of the PO
+                    std::vector<mockturtle::signal<Lyt>> signals{};
+                    lyt.foreach_fanin(lyt.get_node(tile), [&signals](const auto& fanin) { signals.push_back(fanin); });
+
+                    // move PO to the bottom border
+                    lyt.move_node(lyt.get_node(tile), {tile.x, lyt.y(), 0}, {});
+
+                    // create a buffer at the previous location of the PO and connect it with its fanin
+                    lyt.create_buf(signals[0], {tile.x, lyt.y() - 1});
+
+                    // connect the PO with the new buffer
+                    lyt.move_node(lyt.get_node({tile.x, lyt.y()}), {tile.x, lyt.y(), 0},
+                                  {lyt.make_signal(lyt.get_node({tile.x, lyt.y() - 1}))});
+
+                    --moved_gates;
+                }
+            }
+        });
+
+    // update bounding box after PO optimizations
+    const auto bounding_box = bounding_box_2d(lyt);
+    lyt.resize({bounding_box.get_max().x, bounding_box.get_max().y, lyt.z()});
+}
 /**
  * Custom comparison function for sorting tiles based on the sum of their coordinates that breaks ties based on the
  * x-coordinate.
@@ -428,7 +490,7 @@ class post_layout_optimization_impl
 
                 // gather all relevant gate tiles for relocation
                 std::vector<tile<Lyt>> gate_tiles{};
-                gate_tiles.reserve(layout.num_gates() + layout.num_pis() - layout.num_pos());
+                gate_tiles.reserve(layout.num_gates() + layout.num_pis() + layout.num_pos());
                 layout.foreach_node(
                     [&layout, &gate_tiles](const auto& node) noexcept
                     {
@@ -457,6 +519,7 @@ class post_layout_optimization_impl
 
                 // reset the gate movement flag
                 moved_at_least_one_gate = false;
+                uint64_t moved_gates    = 0;
 
                 // attempt to relocate each gate tile
                 for (const auto& gate_tile : gate_tiles)
@@ -467,7 +530,7 @@ class post_layout_optimization_impl
                         {
                             if (improve_gate_location(layout, gate_tile))
                             {
-                                moved_at_least_one_gate = true;
+                                ++moved_gates;
                             }
                         }
 
@@ -479,6 +542,14 @@ class post_layout_optimization_impl
                 // resize the layout to fit within the new bounding box after relocations
                 const auto bounding_box = bounding_box_2d(layout);
                 layout.resize({bounding_box.get_max().x, bounding_box.get_max().y, layout.z()});
+
+                // check and optimize PO positions after each full gate relocation iteration
+                check_and_optimize_po_positions(layout, moved_gates);
+
+                if (moved_gates > 0)
+                {
+                    moved_at_least_one_gate = true;
+                }
             }
         }
 
@@ -1139,7 +1210,9 @@ class post_layout_optimization_impl
 /**
  * A post-layout optimization algorithm as originally proposed in \"Post-Layout Optimization for Field-coupled
  * Nanotechnologies\" by S. Hofmann, M. Walter, and R. Wille in NANOARCH 2023
- * (https://dl.acm.org/doi/10.1145/3611315.3633247). It can be used to reduce the area of a given sub-optimal Cartesian
+ * (https://dl.acm.org/doi/10.1145/3611315.3633247) and extended in \"Efficient and Scalable Post-Layout Optimization
+ * for Field-coupled Nanotechnologies\" by S. Hofmann, M. Walter, and R. Wille in TCAD 2025
+ * (https://ieeexplore.ieee.org/document/10916761). It can be used to reduce the area of a given sub-optimal Cartesian
  * gate-level layout created by heuristics or machine learning. This optimization utilizes the distinct characteristics
  * of the 2DDWave clocking scheme, which only allows information flow from top to bottom and left to right, therefore
  * only aforementioned clocking scheme is supported.
@@ -1174,6 +1247,32 @@ void post_layout_optimization(const Lyt& lyt, post_layout_optimization_params ps
         std::cout << "[e] the given layout has to be 2DDWave-clocked\n";
         return;
     }
+
+    // check that all PIs are at the left (x = 0) or top (y = 0) border
+    lyt.foreach_pi(
+        [&lyt](const auto& pi) noexcept
+        {
+            if (const auto tile = lyt.get_tile(pi);
+                !(lyt.is_at_northern_border(tile) || lyt.is_at_western_border(tile)))
+            {
+                std::cout << "[e] Invalid layout: All PIs must be located at the left (x = 0) or top (y = 0) border\n";
+                return;
+            }
+        });
+
+    // check all POs are at the right (x = lyt.x()) or bottom (y = lyt.y()) border
+    lyt.foreach_po(
+        [&lyt](const auto& po) noexcept
+        {
+            if (const auto tile = lyt.get_tile(lyt.get_node(po));
+                !(lyt.is_at_eastern_border(tile) || lyt.is_at_southern_border(tile)))
+            {
+                std::cout << fmt::format(
+                    "[e] Invalid layout: All POs must be located at the right (x = {}) or bottom (y = {}) border\n",
+                    lyt.x(), lyt.y());
+                return;
+            }
+        });
 
     // initialize stats for runtime measurement
     post_layout_optimization_stats             st{};

@@ -70,7 +70,7 @@ struct is_operational_params
          */
         TOLERATE_KINKS,
         /**
-         * The I/O pins are not allowed to show kinks. If kinks exist, the layout is considered as non-operational.
+         * The I/O pins are not allowed to show kinks. If kinks exist, the layout is considered non-operational.
          */
         REJECT_KINKS
     };
@@ -149,6 +149,10 @@ enum class non_operationality_reason : uint8_t
      */
     LOGIC_MISMATCH,
     /**
+     * Positive charges may occur but the simulation base is set to `2`.
+     */
+    POTENTIAL_POSITIVE_CHARGES,
+    /**
      * No reason for non-operationality could be determined.
      */
     NONE,
@@ -183,6 +187,7 @@ enum class layout_invalidity_reason : uint8_t
  *
  * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT Type of the truth table.
+ * @param spec Expected Boolean function of the layout given as a multi-output truth table.
  */
 template <typename Lyt, typename TT>
 class is_operational_impl
@@ -192,12 +197,12 @@ class is_operational_impl
      * Constructor to initialize the algorithm with a layout and parameters.
      *
      * @param lyt The SiDB cell-level layout to be checked.
-     * @param spec Expected Boolean function of the layout given as a multi-output truth table.
+     * @param tt Expected Boolean function of the layout given as a multi-output truth table.
      * @param params Parameters for the `is_operational` algorithm.
      */
-    is_operational_impl(const Lyt& lyt, const std::vector<TT>& tt, const is_operational_params& params) :
+    is_operational_impl(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params) :
             layout{lyt},
-            truth_table{tt},
+            truth_table{spec},
             parameters{params},
             output_bdl_pairs(detect_bdl_pairs(lyt, sidb_technology::cell_type::OUTPUT,
                                               params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)),
@@ -246,11 +251,11 @@ class is_operational_impl
      * @param output_wires BDL output wires of lyt.
      * @param c_lyt Canvas layout.
      */
-    is_operational_impl(const Lyt& lyt, const std::vector<TT>& tt, const is_operational_params& params,
+    is_operational_impl(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params,
                         const std::vector<bdl_wire<Lyt>>& input_wires, const std::vector<bdl_wire<Lyt>>& output_wires,
                         const Lyt& c_lyt) :
             layout{lyt},
-            truth_table{tt},
+            truth_table{spec},
             parameters{params},
             output_bdl_pairs(detect_bdl_pairs(lyt, sidb_technology::cell_type::OUTPUT,
                                               params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)),
@@ -266,12 +271,6 @@ class is_operational_impl
             output_bdl_pairs = detect_bdl_pairs(layout, sidb_technology::cell_type::OUTPUT,
                                                 params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params);
         }
-        canvas_lyt.foreach_cell(
-            [this](const auto& c)
-            {
-                dependent_cell = c;
-                return false;
-            });
     }
 
     /**
@@ -281,10 +280,10 @@ class is_operational_impl
      * @param spec Expected Boolean function of the layout given as a multi-output truth table.
      * @param params Parameters for the `is_operational` algorithm.
      */
-    is_operational_impl(const Lyt& lyt, const std::vector<TT>& tt, const is_operational_params& params,
+    is_operational_impl(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params,
                         const Lyt& c_lyt) :
             layout{lyt},
-            truth_table{tt},
+            truth_table{spec},
             parameters{params},
             output_bdl_pairs(detect_bdl_pairs(lyt, sidb_technology::cell_type::OUTPUT,
                                               params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)),
@@ -305,46 +304,33 @@ class is_operational_impl
      * do not satisfy physical model constraints under the I/O pin conditions required for the desired Boolean function,
      * and (3) detecting I/O signal instability.
      *
-     * @tparam ChargeLyt The charge distribution surface layout type.
      * @param input_pattern The current input pattern.
-     * @param cds_canvas The charge distribution of the canvas layout.
-     * @param dependent_cell A dependent-cell of the canvas SiDBs.
      * @return A `layout_invalidity_reason` object indicating why the layout is non-operational; or `std::nullopt` if it
      * could not certainly be determined to be in fact non-operational.
      */
-    template <typename ChargeLyt>
-    [[nodiscard]] std::optional<layout_invalidity_reason> is_layout_invalid(const uint64_t input_pattern,
-                                                                            ChargeLyt&     cds_canvas) noexcept
+    [[nodiscard]] std::optional<layout_invalidity_reason> is_layout_invalid(const uint64_t input_pattern) noexcept
     {
-        static_assert(is_charge_distribution_surface_v<ChargeLyt>, "ChargeLyt is not a charge distribution surface");
-
         bii = input_pattern;
 
-        ChargeLyt cds_layout{*bii};
+        charge_distribution_surface<Lyt> cds_layout{*bii};
         cds_layout.assign_all_charge_states(sidb_charge_state::NEGATIVE);
         cds_layout.assign_physical_parameters(parameters.simulation_parameters);
 
-        if (can_positive_charges_occur(cds_layout, parameters.simulation_parameters))
+        if ((parameters.simulation_parameters.base == 2) &&
+            (can_positive_charges_occur(*bii, parameters.simulation_parameters)))
         {
             return layout_invalidity_reason::POTENTIAL_POSITIVE_CHARGES;
         }
-
-        cds_layout.assign_dependent_cell(dependent_cell);
-        cds_canvas.assign_dependent_cell(dependent_cell);
 
         const auto input_index = bii.get_current_input_index();
 
         set_charge_distribution_of_input_pins(cds_layout, bii.get_current_input_index());
         set_charge_distribution_of_output_pins(cds_layout, evaluate_output(truth_table, input_index));
 
-        const auto physical_validity = is_physical_validity_feasible(cds_layout);
-
-        if (physical_validity.has_value())
+        if (const auto physical_validity = is_physical_validity_feasible(cds_layout); physical_validity.has_value())
         {
-            const auto output_index = evaluate_output(truth_table, input_index);
-
-            if (is_io_signal_unstable(cds_layout, truth_table.front().num_bits(), input_index, output_index,
-                                      physical_validity.value()))
+            if (const auto output_index = evaluate_output(truth_table, input_index); is_io_signal_unstable(
+                    cds_layout, truth_table.front().num_bits(), input_index, output_index, physical_validity.value()))
             {
                 return layout_invalidity_reason::IO_INSTABILITY;
             };
@@ -368,28 +354,23 @@ class is_operational_impl
     {
         if (!canvas_lyt.is_empty())
         {
-            charge_distribution_surface<Lyt> cds_canvas{canvas_lyt};
-
-            cds_canvas.assign_dependent_cell(dependent_cell);
-            cds_canvas.assign_physical_parameters(parameters.simulation_parameters);
-
             if ((parameters.op_condition == is_operational_params::operational_condition::REJECT_KINKS &&
                  parameters.strategy_to_analyze_operational_status ==
                      is_operational_params::operational_analysis_strategy::FILTER_THEN_SIMULATION) ||
-                parameters.strategy_to_analyze_operational_status ==
-                    is_operational_params::operational_analysis_strategy::FILTER_ONLY)
+                (parameters.strategy_to_analyze_operational_status ==
+                     is_operational_params::operational_analysis_strategy::FILTER_ONLY &&
+                 parameters.op_condition == is_operational_params::operational_condition::REJECT_KINKS))
             {
                 // number of different input combinations
                 for (auto i = 0u; i < truth_table.front().num_bits(); ++i, ++bii)
                 {
-                    if (is_layout_invalid(bii.get_current_input_index(), cds_canvas))
+                    if (is_layout_invalid(bii.get_current_input_index()))
                     {
                         return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
                     }
                 }
             }
         }
-
         // if the layout is not discarded during the three filtering steps, it is considered operational.
         // This is only an approximation.
         if (parameters.strategy_to_analyze_operational_status ==
@@ -409,10 +390,11 @@ class is_operational_impl
             // number of different input combinations
             for (auto i = 0u; i < truth_table.front().num_bits(); ++i, ++bii)
             {
-                // if positively charged SiDBs can occur, the SiDB layout is considered as non-operational
-                if (can_positive_charges_occur(*bii, parameters.simulation_parameters))
+                // if positively charged SiDBs can occur, the SiDB layout is considered non-operational
+                if ((parameters.simulation_parameters.base == 2) &&
+                    (can_positive_charges_occur(*bii, parameters.simulation_parameters)))
                 {
-                    return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
+                    return {operational_status::NON_OPERATIONAL, non_operationality_reason::POTENTIAL_POSITIVE_CHARGES};
                 }
 
                 ++simulator_invocations;
@@ -471,10 +453,11 @@ class is_operational_impl
     {
         auto non_operational_reason = non_operationality_reason::LOGIC_MISMATCH;
 
-        // if positively charged SiDBs can occur, the SiDB layout is considered as non-operational
-        if (can_positive_charges_occur(given_cds, parameters.simulation_parameters))
+        // if positively charged SiDBs can occur, the SiDB layout is considered non-operational
+        if (parameters.simulation_parameters.base == 2 &&
+            can_positive_charges_occur(given_cds, parameters.simulation_parameters))
         {
-            return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
+            return {operational_status::NON_OPERATIONAL, non_operationality_reason::POTENTIAL_POSITIVE_CHARGES};
         }
 
         assert(!output_bdl_pairs.empty() && "No output cell provided.");
@@ -553,9 +536,12 @@ class is_operational_impl
         {
             ++simulator_invocations;
 
-            // if positively charged SiDBs can occur, the SiDB layout is considered as non-operational
-            if (can_positive_charges_occur(*bii, parameters.simulation_parameters))
+            // if positively charged SiDBs can occur, the SiDB layout is considered non-operational
+            if ((parameters.simulation_parameters.base == 2) &&
+                (can_positive_charges_occur(*bii, parameters.simulation_parameters)))
             {
+                non_operational_input_pattern_and_non_operationality_reason.emplace_back(
+                    i, non_operationality_reason::POTENTIAL_POSITIVE_CHARGES);
                 continue;
             }
 
@@ -604,6 +590,8 @@ class is_operational_impl
     [[nodiscard]] std::optional<double>
     is_physical_validity_feasible(charge_distribution_surface<Lyt>& cds_layout) const noexcept
     {
+        assert(!canvas_lyt.is_empty() && "The canvas layout must not be empty.");
+
         auto min_energy = std::numeric_limits<double>::infinity();
 
         uint64_t canvas_charge_index = 0;
@@ -611,7 +599,8 @@ class is_operational_impl
         charge_distribution_surface<Lyt> cds_canvas_copy{canvas_lyt};
         cds_canvas_copy.assign_base_number(2);
         cds_canvas_copy.assign_charge_index(canvas_charge_index);
-        cds_canvas_copy.assign_dependent_cell(dependent_cell);
+        cds_canvas_copy.assign_dependent_cell(cds_canvas_copy.get_sidb_order().front());
+        cds_layout.assign_dependent_cell(cds_canvas_copy.get_sidb_order().front());
 
         const auto max_index = cds_canvas_copy.get_max_charge_index();
 
@@ -631,10 +620,10 @@ class is_operational_impl
 
             if (cds_layout.is_physically_valid())
             {
-                cds_layout.recompute_system_energy();
-                if (cds_layout.get_system_energy() + constants::ERROR_MARGIN < min_energy)
+                cds_layout.recompute_electrostatic_potential_energy();
+                if (cds_layout.get_electrostatic_potential_energy() + constants::ERROR_MARGIN < min_energy)
                 {
-                    min_energy = cds_layout.get_system_energy();
+                    min_energy = cds_layout.get_electrostatic_potential_energy();
                 }
             }
 
@@ -919,10 +908,7 @@ class is_operational_impl
      * Layout consisting of all canvas SiDBs.
      */
     Lyt canvas_lyt{};
-    /**
-     * Dependent cell of the canvas SiDBs.
-     */
-    cell<Lyt> dependent_cell{};
+
     /**
      * This function conducts physical simulation of the given SiDB layout.
      * The simulation results are stored in the `sim_result` variable.
@@ -947,16 +933,14 @@ class is_operational_impl
                 fiction::quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF};
             return quickexact(*bdl_iterator, quickexact_params);
         }
+#if (FICTION_ALGLIB_ENABLED)
         if (parameters.sim_engine == sidb_simulation_engine::CLUSTERCOMPLETE)
         {
-#if (FICTION_ALGLIB_ENABLED)
             // perform ClusterComplete exact simulation
             const clustercomplete_params<cell<Lyt>> cc_params{parameters.simulation_parameters};
             return clustercomplete(*bdl_iterator, cc_params);
-#else   // FICTION_ALGLIB_ENABLED
-            assert(false && "ALGLIB must be enabled if ClusterComplete is to be used");
-#endif  // FICTION_ALGLIB_ENABLED
         }
+#endif  // FICTION_ALGLIB_ENABLED
         if constexpr (!is_sidb_defect_surface_v<Lyt>)
         {
             if (parameters.sim_engine == sidb_simulation_engine::QUICKSIM)
@@ -1120,6 +1104,29 @@ is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational
     assert(std::adjacent_find(spec.cbegin(), spec.cend(), [](const auto& a, const auto& b)
                               { return a.num_vars() != b.num_vars(); }) == spec.cend());
 
+    const auto logic_cells = lyt.get_cells_by_type(technology<Lyt>::cell_type::LOGIC);
+
+    // if there are logic cells, we can design the canvas layout consisting of all logic cells
+    if (!logic_cells.empty() &&
+        params.strategy_to_analyze_operational_status !=
+            is_operational_params::operational_analysis_strategy::SIMULATION_ONLY &&
+        params.op_condition == is_operational_params::operational_condition::REJECT_KINKS)
+    {
+        Lyt canvas_lyt{};
+
+        // assign all logic cells to the canvas layout
+        for (const auto& c : logic_cells)
+        {
+            canvas_lyt.assign_cell_type(c, technology<Lyt>::cell_type::LOGIC);
+        }
+
+        detail::is_operational_impl<Lyt, TT> p{lyt, spec, params, canvas_lyt};
+
+        const auto [status, _] = p.run();
+
+        return {status, p.get_number_of_simulator_invocations()};
+    }
+
     detail::is_operational_impl<Lyt, TT> p{lyt, spec, params};
 
     const auto [status, _] = p.run();
@@ -1204,7 +1211,7 @@ is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational
  * @param lyt The SiDB layout.
  * @param spec Vector of truth table specifications.
  * @param params Parameters to simulate if a input combination is operational.
- * @return The count of operational input combinations.
+ * @return The operational input combinations.
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] std::set<uint64_t> operational_input_patterns(const Lyt& lyt, const std::vector<TT>& spec,
@@ -1448,7 +1455,7 @@ template <typename Lyt, typename TT>
     return kink_induced_non_op_patterns;
 }
 /**
- * This function determines if the layout is only considered as non-operational because of kinks. This means that
+ * This function determines if the layout is only considered non-operational because of kinks. This means that
  * the layout would be considered as operational, if kinks were accepted.
  *
  * @note "Kink induced non-operational" refers to the non-operational status being exclusively caused by kinks with an
@@ -1490,7 +1497,7 @@ template <typename Lyt, typename TT>
 }
 
 /**
- * This function determines if the layout is only considered as non-operational because of kinks. This means that
+ * This function determines if the layout is only considered non-operational because of kinks. This means that
  * the layout would be considered as operational, if kinks were accepted.
  *
  * @note "Kink induced non-operational" refers to the non-operational status being exclusively caused by kinks with an
@@ -1546,38 +1553,6 @@ template <typename Lyt, typename TT>
 
     return op_status == operational_status::NON_OPERATIONAL &&
            non_op_reason == detail::non_operationality_reason::KINKS;
-}
-/**
- * This function calculates the count of input combinations for which the SiDB-based logic, represented by the
- * provided layout (`lyt`) and truth table specifications (`spec`), produces the correct output.
- *
- * @tparam Lyt Type of the cell-level layout.
- * @tparam TT Type of the truth table.
- * @param lyt The SiDB layout.
- * @param spec Vector of truth table specifications.
- * @param params Parameters to simualte if a input combination is operational.
- * @return The count of operational input combinations.
- *
- */
-template <typename Lyt, typename TT>
-[[nodiscard]] std::size_t number_of_operational_input_combinations(const Lyt& lyt, const std::vector<TT>& spec,
-                                                                   const is_operational_params& params = {}) noexcept
-{
-    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
-
-    assert(lyt.num_pis() > 0 && "skeleton needs input cells");
-    assert(lyt.num_pos() > 0 && "skeleton needs output cells");
-
-    assert(!spec.empty());
-    // all elements in tts must have the same number of variables
-    assert(std::adjacent_find(spec.begin(), spec.end(),
-                              [](const auto& a, const auto& b) { return a.num_vars() != b.num_vars(); }) == spec.end());
-
-    detail::is_operational_impl<Lyt, TT> p{lyt, spec, params};
-
-    return p.count_number_of_non_operational_input_combinations();
 }
 
 }  // namespace fiction

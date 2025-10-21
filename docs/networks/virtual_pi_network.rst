@@ -14,7 +14,3 @@ the ``node_map``.
 
         .. doxygenclass:: fiction::virtual_pi_network
            :members:
-
-    .. tab:: Python
-        .. autoclass:: mnt.pyfiction.virtual_pi_network
-           :members:

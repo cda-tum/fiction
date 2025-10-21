@@ -295,9 +295,21 @@ class sidb_bestagon_library : public fcn_gate_library<sidb_technology, 60, 46>  
     }
 
   private:
-    template <typename Lyt>
-    [[nodiscard]] static port_list<port_direction> determine_port_routing(const Lyt& lyt, const tile<Lyt>& t) noexcept
+    /**
+     * Determines the port directions of a given tile.
+     *
+     * @tparam GateLyt Pointy-top hexagonal gate-level layout type.
+     * @param lyt Given tile `t` for which the port directions are determined.
+     * @return port directions of the given tile are returned as `port_list`.
+     */
+    template <typename GateLyt>
+    [[nodiscard]] static port_list<port_direction> determine_port_routing(const GateLyt&       lyt,
+                                                                          const tile<GateLyt>& t) noexcept
     {
+        static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt must be a gate-level layout");
+        static_assert(is_hexagonal_layout_v<GateLyt>, "GateLyt must be a hexagonal layout");
+        static_assert(has_pointy_top_hex_orientation_v<GateLyt>, "GateLyt must be a pointy-top hexagonal layout");
+
         port_list<port_direction> p{};
 
         // determine incoming connector ports

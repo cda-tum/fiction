@@ -66,6 +66,21 @@ class TestGraphOrientedLayoutDesign(unittest.TestCase):
         params.planar = False
         params.cost = gold_cost_objective.WIRES
         params.enable_multithreading = False
+        params.straight_inverters = True
+        params.tiles_to_skip_between_pis = 1
+        params.randomize_tiles_to_skip_between_pis = True
+
+        layout = graph_oriented_layout_design(network, params)
+
+        self.assertNotEqual(equivalence_checking(network, layout), eq_type.NO)
+
+        params.mode = gold_effort_mode.MAXIMUM_EFFORT
+
+        layout = graph_oriented_layout_design(network, params)
+
+        self.assertNotEqual(equivalence_checking(network, layout), eq_type.NO)
+
+        params.seed = 42
 
         layout = graph_oriented_layout_design(network, params)
 

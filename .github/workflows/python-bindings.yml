@@ -11,6 +11,9 @@ on:
       - "**/*.cmake"
       - "**/CMakeLists.txt"
       - "libs/**"
+      - "noxfile.py"
+      - "pyproject.toml"
+      - ".uv.lock"
       - ".github/workflows/python-bindings.yml"
   pull_request:
     branches: ["main"]
@@ -22,6 +25,9 @@ on:
       - "**/*.cmake"
       - "**/CMakeLists.txt"
       - "libs/**"
+      - "noxfile.py"
+      - "pyproject.toml"
+      - ".uv.lock"
       - ".github/workflows/python-bindings.yml"
   workflow_run:
     workflows: ["pyfiction Docstring Generator"]
@@ -49,7 +55,7 @@ jobs:
         runs-on: [ubuntu-latest, macos-13, macos-15, windows-latest]
     steps:
       - name: Clone Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           submodules: recursive
           fetch-depth: 0
@@ -72,13 +78,13 @@ jobs:
           version: ${{env.Z3_VERSION}}
 
       - name: Install the latest version of uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v7
         with:
           version: "latest"
           enable-cache: true
 
       - name: Setup nox
-        uses: wntrblm/nox@2025.02.09
+        uses: wntrblm/nox@2025.10.16
 
       - name: 🐍 Test
         run: nox -s tests --verbose

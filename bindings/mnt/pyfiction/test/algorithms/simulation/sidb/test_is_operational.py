@@ -62,7 +62,11 @@ class TestIsOperational(unittest.TestCase):
         output_bdl_wires = detect_bdl_wires_100(lyt, detect_bdl_wires_params(), bdl_wire_selection.OUTPUT)
         input_bdl_wires = detect_bdl_wires_100(lyt, detect_bdl_wires_params(), bdl_wire_selection.INPUT)
         [op_status, _evaluated_input_combinations] = is_operational(
-            lyt, [create_and_tt()], params, input_bdl_wires, output_bdl_wires
+            lyt,
+            [create_and_tt()],
+            params,
+            input_bdl_wires,
+            output_bdl_wires,
         )
         self.assertEqual(op_status, operational_status.NON_OPERATIONAL)
 
@@ -71,7 +75,11 @@ class TestIsOperational(unittest.TestCase):
         canvas_lyt.assign_cell_type((4, 5), sidb_technology.cell_type.LOGIC)
         canvas_lyt.assign_cell_type((6, 7), sidb_technology.cell_type.LOGIC)
         [op_status, _evaluated_input_combinations] = is_operational(
-            lyt, [create_and_tt()], params, input_bdl_wires, output_bdl_wires
+            lyt,
+            [create_and_tt()],
+            params,
+            input_bdl_wires,
+            output_bdl_wires,
         )
         self.assertEqual(op_status, operational_status.NON_OPERATIONAL)
 
@@ -138,7 +146,8 @@ class TestIsOperational(unittest.TestCase):
         # filer then simulation
         params.strategy_to_analyze_operational_status = operational_analysis_strategy.FILTER_THEN_SIMULATION
         self.assertEqual(
-            params.strategy_to_analyze_operational_status, operational_analysis_strategy.FILTER_THEN_SIMULATION
+            params.strategy_to_analyze_operational_status,
+            operational_analysis_strategy.FILTER_THEN_SIMULATION,
         )
         [op_status, _evaluated_input_combinations] = is_operational(lyt, [create_and_tt()], params)
         self.assertEqual(op_status, operational_status.NON_OPERATIONAL)

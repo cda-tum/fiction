@@ -201,6 +201,34 @@ place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>&
             return lyt.create_nor(a, b, t);
         }
     }
+    if constexpr (fiction::has_is_lt_v<Ntk>)
+    {
+        if (ntk.is_lt(n))
+        {
+            return lyt.create_lt(a, b, t);
+        }
+    }
+    if constexpr (fiction::has_is_le_v<Ntk>)
+    {
+        if (ntk.is_le(n))
+        {
+            return lyt.create_le(a, b, t);
+        }
+    }
+    if constexpr (fiction::has_is_gt_v<Ntk>)
+    {
+        if (ntk.is_gt(n))
+        {
+            return lyt.create_gt(a, b, t);
+        }
+    }
+    if constexpr (fiction::has_is_ge_v<Ntk>)
+    {
+        if (ntk.is_ge(n))
+        {
+            return lyt.create_ge(a, b, t);
+        }
+    }
     if constexpr (mockturtle::has_is_maj_v<Ntk>)
     {
         if (ntk.is_maj(n))

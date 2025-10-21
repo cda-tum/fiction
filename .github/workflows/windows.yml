@@ -38,36 +38,27 @@ jobs:
   build_and_test:
     strategy:
       matrix:
-        os: [windows-2019, windows-2022, windows-2025]
-        toolset: [v142, v143, ClangCL]
+        os: [windows-2022, windows-2025]
+        toolset: [v143, ClangCL]
         include:
-          - os: windows-2019
-            env: "Visual Studio 16 2019"
           - os: windows-2022
             env: "Visual Studio 17 2022"
           - os: windows-2025
             env: "Visual Studio 17 2022"
-        exclude:
-          - os: windows-2019
-            toolset: v143
-          - os: windows-2022
-            toolset: v142
-          - os: windows-2025
-            toolset: v142
 
     name: 🪟 ${{matrix.os}} with ${{matrix.env}} and ${{matrix.toolset}} toolset
     runs-on: ${{matrix.os}}
 
     steps:
       - name: Clone Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           submodules: recursive
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
-          python-version: "3.13.x"
+          python-version: "3.14.x"
 
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1.2

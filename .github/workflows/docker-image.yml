@@ -45,7 +45,7 @@ jobs:
       id-token: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: recursive
 
@@ -87,7 +87,7 @@ jobs:
 
       - name: Push README as DockerHub project description
         if: github.event_name == 'release' && github.event.action == 'published'
-        uses: peter-evans/dockerhub-description@v4
+        uses: peter-evans/dockerhub-description@v5
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
@@ -97,7 +97,7 @@ jobs:
 
       - name: Generate artifact attestation
         if: github.event_name == 'release' && github.event.action == 'published'
-        uses: actions/attest-build-provenance@v2
+        uses: actions/attest-build-provenance@v3
         with:
           subject-name: docker.io/${{ secrets.DOCKER_USERNAME }}/fiction
           subject-digest: ${{ steps.push.outputs.digest }}
