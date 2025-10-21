@@ -3,9 +3,9 @@
 Crossing Minimization (MinCross)
 --------------------------------
 
-Reimplementation of Graphviz’s ``mincross`` algorithm for edge crossing minimization in leveled logic networks.
+Reimplementation of Graphviz's ``mincross`` algorithm for edge crossing minimization in leveled logic networks.
 This algorithm iteratively reorders nodes within ranks to reduce the total number of edge crossings, using the **median**
-and **transpose** heuristics originally described in Graphviz’s `dot` layout engine.
+and **transpose** heuristics originally described in Graphviz's `dot` layout engine.
 It operates on networks with explicit rank information (e.g., ``mutable_rank_view``) and produces a layout-friendly node
 ordering that improves readability and wire routing efficiency.
 
