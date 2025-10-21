@@ -23,6 +23,8 @@ Changed
 #######
 - CLI:
     - ``area`` now outputs the layout width and height in addition to the area
+- Continuous integration:
+    - Switched to the `Ninja` generator for Windows CI builds
 
 Fixed
 #####
