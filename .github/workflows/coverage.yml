@@ -113,8 +113,8 @@ jobs:
 
       - name: Generate Coverage Report
         run: |
-          lcov -t "fiction-coverage" -o lcov.info -c -d ${{github.workspace}}/build/
-          lcov -e lcov.info "${{github.workspace}}/include*" -o lcov_filtered.info
+          lcov --gcov-tool gcov-14 -t "fiction-coverage" -o lcov.info -c -d ${{github.workspace}}/build/
+          lcov --gcov-tool gcov-14 -e lcov.info "${{github.workspace}}/include*" -o lcov_filtered.info
           lcov -l lcov_filtered.info
 
       - name: Upload report to Codecov
