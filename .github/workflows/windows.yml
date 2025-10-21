@@ -84,6 +84,7 @@ jobs:
         run: >
           cmake ${{github.workspace}} -G "${{matrix.env}}" -A x64 -T ${{matrix.toolset}}
           -DCMAKE_BUILD_TYPE=Debug
+          -DCACHE_OPTION=sccache
           -DFICTION_ENABLE_UNITY_BUILD=ON
           -DFICTION_ENABLE_PCH=ON
           -DFICTION_CLI=ON
@@ -113,6 +114,7 @@ jobs:
         run: >
           cmake ${{github.workspace}} -G "${{matrix.env}}" -A x64 -T ${{matrix.toolset}}
           -DCMAKE_BUILD_TYPE=Release
+          -DCACHE_OPTION=sccache
           -DFICTION_ENABLE_UNITY_BUILD=ON
           -DFICTION_ENABLE_PCH=ON
           -DFICTION_CLI=ON
