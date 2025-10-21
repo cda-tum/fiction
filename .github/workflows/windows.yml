@@ -60,11 +60,11 @@ jobs:
         with:
           python-version: "3.13.x"
 
-      - name: Setup ccache
+      - name: Setup sccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
           key: "${{matrix.os}}-${{matrix.toolset}}"
-          variant: ccache
+          variant: sccache
           save: true
           max-size: 10G
 
