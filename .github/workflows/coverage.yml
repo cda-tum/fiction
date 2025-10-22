@@ -39,15 +39,15 @@ jobs:
   build_and_test:
     strategy:
       matrix:
-        os: [ubuntu-22.04]
-        compiler: [g++-11]
+        os: [ubuntu-24.04]
+        compiler: [g++-13]
 
     name: Coverage on ${{matrix.os}} with ${{matrix.compiler}}
     runs-on: ${{matrix.os}}
 
     steps:
-      - name: Install the Compiler
-        run: sudo apt-get update && sudo apt-get install -yq ${{matrix.compiler}}
+      - name: Install Dependencies
+        run: sudo apt-get update && sudo apt-get install -yq ${{matrix.compiler}} lcov ninja-build
 
       - name: Clone Repository
         uses: actions/checkout@v5
@@ -86,13 +86,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
-      - name: Create Build Environment
-        run: cmake -E make_directory ${{github.workspace}}/build
-
       - name: Configure CMake
-        working-directory: ${{github.workspace}}/build
         run: >
-          cmake ${{github.workspace}}
+          cmake -S ${{github.workspace}} -B ${{github.workspace}}/build -G Ninja
           -DCMAKE_CXX_COMPILER=${{matrix.compiler}}
           -DCMAKE_BUILD_TYPE=$BUILD_TYPE
           -DFICTION_ENABLE_UNITY_BUILD=ON
@@ -109,19 +105,16 @@ jobs:
           -DMOCKTURTLE_EXAMPLES=OFF
 
       - name: Build
-        working-directory: ${{github.workspace}}/build
-        run: cmake --build . --config $BUILD_TYPE -j4
+        run: cmake --build ${{github.workspace}}/build --config $BUILD_TYPE --parallel
 
       - name: Test
         working-directory: ${{github.workspace}}/build
+        run: ctest -C $BUILD_TYPE --output-on-failure --repeat until-pass:3 --parallel
 
-        run: ctest -C $BUILD_TYPE --verbose --output-on-failure --repeat until-pass:3 --parallel 4
-
-      - name: Setup and run lcov
+      - name: Generate Coverage Report
         run: |
-          sudo apt-get install lcov
-          lcov -t "result" -o lcov.info -c -d ${{github.workspace}}/build/
-          lcov -e lcov.info "${{github.workspace}}/include*" -o lcov_filtered.info
+          lcov --gcov-tool gcov-13 -t "fiction-coverage" -o lcov.info -c -d ${{github.workspace}}/build/ --ignore-errors mismatch --ignore-errors gcov
+          lcov --gcov-tool gcov-13 -e lcov.info "${{github.workspace}}/include*" -o lcov_filtered.info
           lcov -l lcov_filtered.info
 
       - name: Upload report to Codecov
