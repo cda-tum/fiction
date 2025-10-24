@@ -9567,9 +9567,9 @@ Parameter ``nd``:
 static const char *__doc_fiction_detail_node_duplication_planarization_impl_insert_if_not_first =
 R"doc(Inserts a node into a vector if it is unique.
 
-`This function inserts a node into a vector only if the vector is
-empty or the node is not equal to the first element of the vector. If
-the vector is not empty and the node is equal to the first element, it
+This function inserts a node into a vector only if the vector is empty
+or the node is not equal to the first element of the vector. If the
+vector is not empty and the node is equal to the first element, it
 does nothing. An exception occurs if the node was skipped on the
 previous insertion attempt due to `vec.front() == node`; in that case,
 the node will be inserted this time.
@@ -10067,8 +10067,6 @@ Parameter ``p``:
 
 Parameter ``st``:
     Statistics object used to collect runtime and layout information.)doc";
-
-static const char *__doc_fiction_detail_orthogonal_planar_impl_ntk = R"doc()doc";
 
 static const char *__doc_fiction_detail_orthogonal_planar_impl_orthogonal_planar_impl = R"doc()doc";
 
