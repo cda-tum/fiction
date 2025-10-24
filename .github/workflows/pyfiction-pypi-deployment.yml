@@ -16,6 +16,9 @@ on:
       - "**/*.cmake"
       - "**/CMakeLists.txt"
       - "libs/**"
+      - "noxfile.py"
+      - "pyproject.toml"
+      - ".uv.lock"
       - ".github/workflows/pyfiction-pypi-deployment.yml"
   pull_request:
     branches: ["main"]
@@ -27,6 +30,9 @@ on:
       - "**/*.cmake"
       - "**/CMakeLists.txt"
       - "libs/**"
+      - "noxfile.py"
+      - "pyproject.toml"
+      - ".uv.lock"
       - ".github/workflows/pyfiction-pypi-deployment.yml"
   workflow_dispatch:
   workflow_run:
@@ -58,7 +64,7 @@ jobs:
           fetch-depth: 0
 
       - name: Install the latest version of uv
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@v7
         with:
           version: "latest"
           enable-cache: true
@@ -115,7 +121,7 @@ jobs:
         uses: rui314/setup-mold@v1
 
       - name: Install the latest version of uv
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@v7
         with:
           version: "latest"
           enable-cache: true
