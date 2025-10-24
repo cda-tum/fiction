@@ -35,6 +35,9 @@ inline void technology_mapping(pybind11::module& m)
 {
     namespace py = pybind11;
 
+    // Expose the exception
+    py::register_exception<fiction::missing_required_gates_exception>(m, "missing_required_gates_exception");
+
     py::class_<fiction::technology_mapping_params>(m, "technology_mapping_params",
                                                    DOC(fiction_technology_mapping_params))
         .def(py::init<>())
