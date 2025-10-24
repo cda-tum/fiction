@@ -9,6 +9,7 @@
 #include <fiction/types.hpp>
 
 #include <alice/alice.hpp>
+#include <nlohmann/json.hpp>
 
 #include <type_traits>
 #include <variant>
@@ -51,7 +52,7 @@ class area_command : public command
         // error case: empty cell layout store
         if (s.empty())
         {
-            env->out() << "[w] no cell layout in store" << std::endl;
+            env->out() << "[w] no cell layout in store\n";
             return;
         }
 
@@ -59,14 +60,14 @@ class area_command : public command
 
         const auto calculate_area = [this](auto&& lyt_ptr)
         {
-            using tech = typename std::decay_t<decltype(lyt_ptr)>::element_type::technology;
+            using tech = typename std::decay<decltype(lyt_ptr)>::type::element_type::technology;
 
-            const double width_nm  = is_set("width") ? width : static_cast<double>(tech::CELL_WIDTH);
-            const double height_nm = is_set("height") ? height : static_cast<double>(tech::CELL_HEIGHT);
-            const double hspace_nm = is_set("hspace") ? hspace : static_cast<double>(tech::CELL_HSPACE);
-            const double vspace_nm = is_set("vspace") ? vspace : static_cast<double>(tech::CELL_VSPACE);
+            const double width_nm  = is_set("width") ? width : tech::CELL_WIDTH;
+            const double height_nm = is_set("height") ? height : tech::CELL_HEIGHT;
+            const double hspace_nm = is_set("hspace") ? hspace : tech::CELL_HSPACE;
+            const double vspace_nm = is_set("vspace") ? vspace : tech::CELL_VSPACE;
 
-            fiction::area_params<tech> ps{width_nm, height_nm, hspace_nm, vspace_nm};
+            const fiction::area_params<tech> ps{width_nm, height_nm, hspace_nm, vspace_nm};
 
             fiction::area(*lyt_ptr, ps, &st);
         };
@@ -102,7 +103,7 @@ class area_command : public command
      *
      * @return JSON object containing details about the area usage.
      */
-    nlohmann::json log() const override
+    [[nodiscard]] nlohmann::json log() const override
     {
         return {{"width (nm)", st.width}, {"height (nm)", st.height}, {"area (nm²)", st.area}};
     }

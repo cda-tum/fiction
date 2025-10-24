@@ -16,6 +16,10 @@ Added
     - Flag in ``gold`` to enforce NOT gates to be routed non-bending only
     - Parameter in ``gold`` to skip tiles when placing PIs, leading to higher success probabilities in discovering layouts
     - Flag in ``gold`` to randomize the number of skipped tiles when placing PIs
+    - Reimplementation of Graphviz's "Mincross" algorithm
+    - Breadth-first topological view
+- Continuous integration:
+    - Python 3.14 support
 
 Changed
 #######
@@ -23,6 +27,8 @@ Changed
     - Switched the default technology mapper in the ``map`` command and the ``technology_mapping`` function from ``mockturtle::map`` to ``mockturtle::emap``
 - CLI:
     - ``area`` now outputs the layout width and height in addition to the area
+- Continuous integration:
+    - Switched to the `Ninja` generator for Windows CI builds
 
 Fixed
 #####
@@ -34,6 +40,8 @@ Removed
 #######
 - CLI:
     - Removed the ``--logic_sharing`` flag from ``map`` as ``mockturtle::emap`` does not support it
+- Continuous integration:
+    - Dropped Python 3.9 support due to its end-of-life status
 
 
 v0.6.11 - 2025-04-23
