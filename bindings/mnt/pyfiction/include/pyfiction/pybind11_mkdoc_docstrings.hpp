@@ -21932,7 +21932,7 @@ static const char *__doc_fiction_technology_dot_drawer_node_label_callback = R"d
 
 static const char *__doc_fiction_technology_mapping =
 R"doc(Performs technology mapping on the given network. Technology mapping
-is the process of sreplacing the gates in a network with gates from a
+is the process of replacing the gates in a network with gates from a
 given technology library. This function utilizes `mockturtle::emap` to
 perform the technology mapping. This function is a wrapper around that
 interface to provide a more convenient usage.
