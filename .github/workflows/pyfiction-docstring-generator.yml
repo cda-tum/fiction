@@ -43,7 +43,7 @@ jobs:
           `find ${{ github.workspace }}/include/fiction -name "*.hpp" -print`
 
       - name: Upload docstrings as an artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           path: ${{ github.workspace }}/bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp
           overwrite: true
