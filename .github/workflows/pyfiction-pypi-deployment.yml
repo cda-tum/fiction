@@ -16,6 +16,9 @@ on:
       - "**/*.cmake"
       - "**/CMakeLists.txt"
       - "libs/**"
+      - "noxfile.py"
+      - "pyproject.toml"
+      - ".uv.lock"
       - ".github/workflows/pyfiction-pypi-deployment.yml"
   pull_request:
     branches: ["main"]
@@ -27,6 +30,9 @@ on:
       - "**/*.cmake"
       - "**/CMakeLists.txt"
       - "libs/**"
+      - "noxfile.py"
+      - "pyproject.toml"
+      - ".uv.lock"
       - ".github/workflows/pyfiction-pypi-deployment.yml"
   workflow_dispatch:
   workflow_run:
