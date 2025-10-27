@@ -6,7 +6,7 @@
 #define FICTION_ORTHOGONAL_PLANAR_HPP
 
 #include "fiction/algorithms/physical_design/orthogonal.hpp"
-#include "fiction/algorithms/properties/check_planarity.hpp"
+#include "fiction/algorithms/graph/mincross.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/network_utils.hpp"
@@ -1075,7 +1075,12 @@ Lyt orthogonal_planar(const Ntk& ntk, orthogonal_physical_design_params ps = {},
     }
 
     // check for planarity
-    if (!check_planarity(ntk))
+    mincross_stats  st_min{};
+    mincross_params p_min{};
+    p_min.optimize = false;
+
+    auto ntk_min = mincross(ntk, p_min, &st_min);  // counts crossings
+    if (st_min.num_crossings != 0)
     {
         throw std::invalid_argument("Input network has to be planar");
     }

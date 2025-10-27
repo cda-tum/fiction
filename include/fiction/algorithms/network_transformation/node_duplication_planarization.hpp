@@ -6,7 +6,7 @@
 #define FICTION_NODE_DUPLICATION_PLANARIZATION_HPP
 
 #include "fiction/algorithms/network_transformation/network_balancing.hpp"
-#include "fiction/algorithms/properties/check_planarity.hpp"
+#include "fiction/algorithms/graph/mincross.hpp"
 #include "fiction/networks/virtual_pi_network.hpp"
 
 #include <mockturtle/traits.hpp>
@@ -746,7 +746,13 @@ template <typename NtkSrc>
 
     auto result = p.run();
 
-    if (!check_planarity(result))
+    // check for planarity
+    mincross_stats  st_min{};
+    mincross_params p_min{};
+    p_min.optimize = false;
+
+    auto ntk_min = mincross(result, p_min, &st_min);  // counts crossings
+    if (st_min.num_crossings != 0)
     {
         throw std::runtime_error("Planarization failed: resulting network is not planar");
     }

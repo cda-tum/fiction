@@ -6,7 +6,7 @@
 
 #include "fiction/algorithms/network_transformation/fanout_substitution.hpp"
 #include "fiction/algorithms/network_transformation/network_balancing.hpp"
-#include "fiction/algorithms/properties/check_planarity.hpp"
+#include "fiction/algorithms/graph/mincross.hpp"
 #include "fiction/networks/views/mutable_rank_view.hpp"
 
 #include <fiction/algorithms/network_transformation/node_duplication_planarization.hpp>
@@ -44,7 +44,12 @@ TEST_CASE("Planarize technology ntk", "[node-duplication-planarization]")
 
     auto planarized_ntk = node_duplication_planarization(vpi_r);
 
-    CHECK(check_planarity(planarized_ntk));
+    mincross_stats  st_min{};
+    mincross_params p_min{};
+    p_min.optimize = false;
+
+    auto ntk = mincross(planarized_ntk, p_min, &st_min);  // counts crossings
+    CHECK(st_min.num_crossings == 0);
 
     mockturtle::equivalence_checking_stats st;
     const auto                             cec_m =
@@ -81,7 +86,12 @@ TEST_CASE("Planarize ntk with 3-ary node", "[node-duplication-planarization]")
 
     auto planarized_ntk = node_duplication_planarization(vpi_r);
 
-    CHECK(check_planarity(planarized_ntk));
+    mincross_stats  st_min{};
+    mincross_params p_min{};
+    p_min.optimize = false;
+
+    auto ntk = mincross(planarized_ntk, p_min, &st_min);  // counts crossings
+    CHECK(st_min.num_crossings == 0);
 
     mockturtle::equivalence_checking_stats st;
     const auto                             cec_m =
@@ -118,7 +128,12 @@ TEST_CASE("Buffer AIG and planarize technology_network", "[node-duplication-plan
 
     auto planarized_ntk = node_duplication_planarization(vpi_r);
 
-    CHECK(check_planarity(planarized_ntk));
+    mincross_stats  st_min{};
+    mincross_params p_min{};
+    p_min.optimize = false;
+
+    auto ntk = mincross(planarized_ntk, p_min, &st_min);  // counts crossings
+    CHECK(st_min.num_crossings == 0);
 
     mockturtle::equivalence_checking_stats st;
     const auto                             cec_m =
@@ -148,7 +163,12 @@ TEST_CASE("Buffer AIG and planarize technology_network 2", "[node-duplication-pl
 
     auto planarized_ntk = node_duplication_planarization(vpi_r);
 
-    CHECK(check_planarity(planarized_ntk));
+    mincross_stats  st_min{};
+    mincross_params p_min{};
+    p_min.optimize = false;
+
+    auto ntk = mincross(planarized_ntk, p_min, &st_min);  // counts crossings
+    CHECK(st_min.num_crossings == 0);
 
     mockturtle::equivalence_checking_stats st;
     const auto                             cec_m =
@@ -181,7 +201,12 @@ TEST_CASE("Planarize multi output network", "[node-duplication-planarization]")
 
     auto planarized_ntk = node_duplication_planarization(vpi_r);
 
-    CHECK(check_planarity(planarized_ntk));
+    mincross_stats  st_min{};
+    mincross_params p_min{};
+    p_min.optimize = false;
+
+    auto ntk = mincross(planarized_ntk, p_min, &st_min);  // counts crossings
+    CHECK(st_min.num_crossings == 0);
 
     mockturtle::equivalence_checking_stats st;
     const auto                             cec_m =
