@@ -2690,54 +2690,6 @@ Template parameter ``Dist``:
 
 static const char *__doc_fiction_chebyshev_distance_functor_chebyshev_distance_functor = R"doc()doc";
 
-static const char *__doc_fiction_check_planarity =
-R"doc(Checks if a logic network is planar for a network that is path
-balanced and has ranks assigned.
-
-If the network is not balanced, an exception is thrown. To balance the
-network, insert buffers to divide multi-level edges.
-
-It checks if the network represented by the variable `ntk` is planar.
-The network is planar if, for any edge with starting point :math:`m`
-and endpoint :math:`n` (represented by the node ranks), there is never
-another edge with starting point :math:`m' > m` and endpoint :math:`n'
-< n`, or vice versa. When iterating through the ranks of one level,
-the endpoints are always increasing. Therefore, only the starting
-points need to be checked. Thus, the highest connected starting point
-in the fan-in gives a border :math:`m_{\text{max}}` for every
-subsequent edge.
-
-Template parameter ``Ntk``:
-    Logic network type.
-
-Parameter ``ntk``:
-    The logic network to check for planarity.
-
-Returns:
-    `true` if the network is planar, `false` otherwise.)doc";
-
-static const char *__doc_fiction_check_planarity_impl = R"doc()doc";
-
-static const char *__doc_fiction_check_planarity_impl_check_planarity_impl = R"doc()doc";
-
-static const char *__doc_fiction_check_planarity_impl_ntk = R"doc()doc";
-
-static const char *__doc_fiction_check_planarity_impl_run =
-R"doc(Checks if a given network is planar.
-
-This function checks if the network represented by the variable `ntk`
-is planar. The network is planar if, for any edge with starting point
-:math:`m` and endpoint :math:`n` (represented by the node ranks),
-there is never another edge with starting point :math:`m' > m` and
-endpoint :math:`n' < n`, or vice versa. When iterating through the
-ranks of one level, the endpoints are always increasing. Therefore,
-only the starting points need to be checked. Thus, the highest
-connected starting point in the fan-in gives a border
-:math:`m_{\text{max}}` for every subsequent edge.
-
-Returns:
-    `true` if the network is planar, `false` otherwise.)doc";
-
 static const char *__doc_fiction_check_simulation_results_for_equivalence =
 R"doc(This function compares two SiDB simulation results for equivalence.
 Two results are considered equivalent if they have the same number of

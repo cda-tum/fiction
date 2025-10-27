@@ -5,8 +5,8 @@
 #ifndef FICTION_ORTHOGONAL_PLANAR_HPP
 #define FICTION_ORTHOGONAL_PLANAR_HPP
 
-#include "fiction/algorithms/physical_design/orthogonal.hpp"
 #include "fiction/algorithms/graph/mincross.hpp"
+#include "fiction/algorithms/physical_design/orthogonal.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/network_utils.hpp"
