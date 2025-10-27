@@ -9573,7 +9573,7 @@ Template parameter ``Ntk``:
 
 static const char *__doc_fiction_detail_node_pair_delay = R"doc(Specifies the delay value for the node.)doc";
 
-static const char *__doc_fiction_detail_node_pair_fanin_pair =
+static const char *__doc_fiction_detail_node_pair_fanin_it =
 R"doc(Shared pointer to another instance of node_pair detailing fanin-edge
 alignment.)doc";
 
@@ -10031,6 +10031,8 @@ Parameter ``p``:
 
 Parameter ``st``:
     Statistics object used to collect runtime and layout information.)doc";
+
+static const char *__doc_fiction_detail_orthogonal_planar_impl_ntk = R"doc()doc";
 
 static const char *__doc_fiction_detail_orthogonal_planar_impl_orthogonal_planar_impl = R"doc()doc";
 
