@@ -39,7 +39,7 @@ jobs:
     strategy:
       matrix:
         os: [macos-14, macos-15]
-        compiler: [g++-13, g++-14, g++-15, clang++]
+        compiler: [clang++]
 
     name: 🍎 ${{matrix.os}} with ${{matrix.compiler}}
     runs-on: ${{matrix.os}}

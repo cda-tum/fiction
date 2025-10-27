@@ -19,10 +19,13 @@ Added
 
 Changed
 #######
-- Continuous integration:
-    - MacOS 13 has been removed, along with support for the x86_64 (Intel) architecture
 - CLI:
     - ``area`` now outputs the layout width and height in addition to the area
+
+Removed
+#######
+- Continuous integration:
+    - macOS 13 has been removed, along with support for the x86_64 (Intel) architecture
 
 Fixed
 #####
