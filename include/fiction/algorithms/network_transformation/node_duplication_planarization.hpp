@@ -286,7 +286,6 @@ virtual_pi_network<Ntk> create_virtual_pi_ntk_from_duplicated_nodes(
             }
             else
             {
-                assert(i != ntk_lvls.size() && "Node, which is not marked as PI is in the PI rank");
                 assert(i + 1 < ntk_lvls_new.size() && "Next level does not exist");
 
                 const auto children =

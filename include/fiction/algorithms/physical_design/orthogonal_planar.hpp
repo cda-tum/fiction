@@ -831,10 +831,9 @@ class orthogonal_planar_impl
         // place and route the nodes in ascending level order
         for (uint32_t lvl = 0; lvl < ntk.depth() + 1; lvl++)
         {
-            const auto variable_tuple =
-                compute_pr_variables<mockturtle::fanout_view<Ntk>, Lyt>(ntk, node2pos, lvl);
-            const auto orientation = std::get<0>(variable_tuple);
-            const auto new_lines   = std::get<1>(variable_tuple);
+            const auto variable_tuple = compute_pr_variables<mockturtle::fanout_view<Ntk>, Lyt>(ntk, node2pos, lvl);
+            const auto orientation    = std::get<0>(variable_tuple);
+            const auto new_lines      = std::get<1>(variable_tuple);
 
             const auto  wiring = compute_wiring<decltype(ntk), Lyt>(ntk, node2pos, new_lines, lvl);
             const auto& x      = wiring.first;
