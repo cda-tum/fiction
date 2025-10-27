@@ -492,7 +492,7 @@ class node_duplication_planarization_impl
      *
      * This function inserts a node into a vector only if the vector is empty or the node is not equal to the first
      * element of the vector. If the vector is not empty and the node is equal to the first element, insertion depends
-     * on the `saturated_fanout_flag` and the node’s `position`: when `position == 0`, a repeated insertion attempt will
+     * on the `saturated_fanout_flag` and the node's `position`: when `position == 0`, a repeated insertion attempt will
      * succeed only if the node was previously skipped (indicated by `saturated_fanout_flag == 1`); otherwise, the flag
      * is set to 1 and the node is skipped for this call. No exception is thrown during this process.
      *
