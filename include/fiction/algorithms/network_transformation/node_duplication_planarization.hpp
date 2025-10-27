@@ -87,7 +87,7 @@ struct node_pair
     /**
      * Shared pointer to another instance of node_pair detailing fanin-edge alignment.
      */
-    node_pair<Ntk>* fanin_pair;
+    std::size_t fanin_it{};
     /**
      * Standard constructor.
      *
@@ -97,8 +97,7 @@ struct node_pair
      */
     node_pair(mockturtle::node<Ntk> node1, mockturtle::node<Ntk> node2, uint64_t delay_value) :
             pair(node1, node2),
-            delay(delay_value),
-            fanin_pair(nullptr)
+            delay(delay_value)
     {}
 };
 
@@ -288,6 +287,7 @@ virtual_pi_network<Ntk> create_virtual_pi_ntk_from_duplicated_nodes(
             else
             {
                 assert(i != ntk_lvls.size() && "Node, which is not marked as PI is in the PI rank");
+                assert(i + 1 < ntk_lvls_new.size() && "Next level does not exist");
 
                 const auto children =
                     gather_fanin_signals(ntk, ntk_dest_v, nd, old2new_v, ntk_lvls_new[i + 1], node_index);
@@ -435,44 +435,51 @@ class node_duplication_planarization_impl
         {
             std::vector<node_pair<Ntk>>* combinations_last = &lvl_pairs.back();
 
-            for (auto& node_pair_cur : combinations)
+            for (std::size_t cur_idx = 0; cur_idx < combinations.size(); ++cur_idx)
             {
-                for (auto& node_pair_last : *combinations_last)
+                auto& node_pair_cur = combinations[cur_idx];
+
+                for (std::size_t last_idx = 0; last_idx < combinations_last->size(); ++last_idx)
                 {
+                    auto& node_pair_last = (*combinations_last)[last_idx];
+
                     // If there is a connection between the two node pairs the delay is calculated like this
                     if ((node_pair_cur.pair.first == node_pair_last.pair.second &&
                          node_pair_last.delay + 1 < node_pair_cur.delay))
                     {
-                        node_pair_cur.fanin_pair = &node_pair_last;
-                        node_pair_cur.delay      = node_pair_last.delay + 1;
+                        node_pair_cur.fanin_it = last_idx;
+                        node_pair_cur.delay    = node_pair_last.delay + 1;
                     }
                     // If there is no connection between the two node pairs the delay is calculated like this
                     else if (node_pair_last.delay + 2 < node_pair_cur.delay)
                     {
-                        node_pair_cur.fanin_pair = &node_pair_last;
-                        node_pair_cur.delay      = node_pair_last.delay + 2;
+                        node_pair_cur.fanin_it = last_idx;
+                        node_pair_cur.delay    = node_pair_last.delay + 2;
                     }
                     else if (node_pair_last.delay + 2 == node_pair_cur.delay)
                     {
                         // This solves equal path delays, if they are connected in the next layer via a fanout
                         const auto fc0 = fanins(ntk, node_pair_last.pair.first);
-                        if (node_pair_last.fanin_pair != nullptr)
+                        if (node_pair_last.fanin_it < combinations_last->size())
                         {
-                            const auto fc1 = fanins(ntk, node_pair_last.fanin_pair->pair.second);
+                            const auto& parent_pair = (*combinations_last)[node_pair_last.fanin_it];
+                            const auto  fc1         = fanins(ntk, parent_pair.pair.second);
+
                             for (const auto f0 : fc0.fanin_nodes)
                             {
                                 for (const auto f1 : fc1.fanin_nodes)
                                 {
                                     if (f0 == f1)
                                     {
-                                        node_pair_cur.fanin_pair = &node_pair_last;
-                                        break;
+                                        node_pair_cur.fanin_it = last_idx;
+                                        goto next_combination;
                                     }
                                 }
                             }
                         }
                     }
                 }
+            next_combination:;
             }
         }
         else
@@ -535,11 +542,14 @@ class node_duplication_planarization_impl
     {
         std::vector<mockturtle::node<Ntk>> next_level;
         int                                saturated_fanout_flag = 0;
-        const auto&                        combinations          = lvl_pairs.back();
-        // select the path with the least delay and follow it via fanin relations
+
+        const auto& combinations = lvl_pairs.back();
+
+        // Select the path with the least delay and follow it via fanin relations
         const auto minimum_it =
             std::min_element(combinations.cbegin(), combinations.cend(),
                              [](const node_pair<Ntk>& a, const node_pair<Ntk>& b) { return a.delay < b.delay; });
+
         if (minimum_it != combinations.cend())
         {
             const auto& min_combination = *minimum_it;
@@ -547,7 +557,7 @@ class node_duplication_planarization_impl
             // Insert the terminal node
             insert_if_not_first(min_combination.pair.second, next_level, saturated_fanout_flag, 0);
 
-            // insert middle_nodes
+            // Insert middle_nodes
             for (const auto& node : min_combination.middle_nodes)
             {
                 insert_if_not_first(node, next_level, saturated_fanout_flag, 1);
@@ -556,29 +566,37 @@ class node_duplication_planarization_impl
             // Insert the first node
             insert_if_not_first(min_combination.pair.first, next_level, saturated_fanout_flag, 1);
 
-            auto fanin_combination = minimum_it->fanin_pair;
+            // Start with index instead of pointer
+            std::size_t level    = lvl_pairs.size() - 1;
+            std::size_t fanin_it = minimum_it->fanin_it;
 
-            while (fanin_combination)
+            // Follow chain while index is valid
+            while (level > 0 && fanin_it < lvl_pairs[level - 1].size())
             {
+                const auto& fanin_combination = lvl_pairs[level - 1][fanin_it];
+
                 // Insert the terminal node
-                if (ntk.is_pi(fanin_combination->pair.second))
+                if (ntk.is_pi(fanin_combination.pair.second))
                 {
                     saturated_fanout_flag = 1;
                 }
-                insert_if_not_first(fanin_combination->pair.second, next_level, saturated_fanout_flag, 0);
+                insert_if_not_first(fanin_combination.pair.second, next_level, saturated_fanout_flag, 0);
 
                 // Insert middle_nodes
-                for (const auto& node : fanin_combination->middle_nodes)
+                for (const auto& node : fanin_combination.middle_nodes)
                 {
                     insert_if_not_first(node, next_level, saturated_fanout_flag, 1);
                 }
 
-                // insert the first node
-                insert_if_not_first(fanin_combination->pair.first, next_level, saturated_fanout_flag, 1);
+                // Insert the first node
+                insert_if_not_first(fanin_combination.pair.first, next_level, saturated_fanout_flag, 1);
 
-                fanin_combination = fanin_combination->fanin_pair;
+                // Move one level up
+                --level;
+                fanin_it = fanin_combination.fanin_it;
             }
         }
+
         return next_level;
     }
 

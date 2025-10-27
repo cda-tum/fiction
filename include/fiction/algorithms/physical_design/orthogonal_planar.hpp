@@ -17,7 +17,6 @@
 #include <mockturtle/utils/node_map.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 #include <mockturtle/views/fanout_view.hpp>
-#include <mockturtle/views/names_view.hpp>
 
 #include <algorithm>
 #include <array>
@@ -800,7 +799,7 @@ class orthogonal_planar_impl
   public:
     orthogonal_planar_impl(const Ntk& src, const orthogonal_physical_design_params& p,
                            orthogonal_physical_design_stats& st) :
-            ntk{mockturtle::fanout_view{mockturtle::names_view{src}}},
+            ntk{mockturtle::fanout_view{src}},
             ps{p},
             pst{st}
     {}
@@ -811,7 +810,7 @@ class orthogonal_planar_impl
         // measure run time
         mockturtle::stopwatch stop{pst.time_total};
         // initialize mapping from nodes to positions
-        mockturtle::node_map<mockturtle::signal<Lyt>, decltype(ntk)> node2pos{ntk};
+        mockturtle::node_map<mockturtle::signal<Lyt>, mockturtle::fanout_view<Ntk>> node2pos{ntk};
         // initialize the aspect ratio
         aspect_ratio<Lyt> aspect_ratio = {0, 0};
         // instantiate the layout
@@ -833,7 +832,7 @@ class orthogonal_planar_impl
         for (uint32_t lvl = 0; lvl < ntk.depth() + 1; lvl++)
         {
             const auto variable_tuple =
-                compute_pr_variables<mockturtle::fanout_view<mockturtle::names_view<Ntk>>, Lyt>(ntk, node2pos, lvl);
+                compute_pr_variables<mockturtle::fanout_view<Ntk>, Lyt>(ntk, node2pos, lvl);
             const auto orientation = std::get<0>(variable_tuple);
             const auto new_lines   = std::get<1>(variable_tuple);
 
@@ -1033,7 +1032,7 @@ class orthogonal_planar_impl
     }
 
   private:
-    mockturtle::fanout_view<mockturtle::names_view<Ntk>> ntk;
+    mockturtle::fanout_view<Ntk> ntk;
 
     orthogonal_physical_design_params ps;
     orthogonal_physical_design_stats& pst;

@@ -96,6 +96,9 @@ TEST_CASE("Name conservation after planar orthogonal physical design", "[orthogo
     CHECK(planarized_b.get_name(2) == "x1");
     CHECK(planarized_b.get_name(3) == "x2");
     CHECK(planarized_b.get_network_name() == "topolinano");
+    CHECK(planarized_b.get_output_name(0) == "f1");
+    CHECK(planarized_b.get_output_name(1) == "f2");
+    CHECK(planarized_b.get_output_name(2) == "f3");
 
     orthogonal_physical_design_stats orthogonal_planar_stats{};
 
@@ -104,8 +107,8 @@ TEST_CASE("Name conservation after planar orthogonal physical design", "[orthogo
     // network name
     CHECK(layout.get_layout_name() == "topolinano");
     // PI names (they are ordered corresponding to their placement in the layout)
-    CHECK(layout.get_input_name(1) == "x1");
-    CHECK(layout.get_input_name(0) == "x2");
+    CHECK(layout.get_input_name(0) == "x1");
+    CHECK(layout.get_input_name(1) == "x2");
     // PO names
     CHECK(layout.get_output_name(0) == "f1");
     CHECK(layout.get_output_name(1) == "f2");
