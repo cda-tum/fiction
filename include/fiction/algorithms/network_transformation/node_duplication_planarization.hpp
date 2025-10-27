@@ -5,8 +5,8 @@
 #ifndef FICTION_NODE_DUPLICATION_PLANARIZATION_HPP
 #define FICTION_NODE_DUPLICATION_PLANARIZATION_HPP
 
-#include "fiction/algorithms/network_transformation/network_balancing.hpp"
 #include "fiction/algorithms/graph/mincross.hpp"
+#include "fiction/algorithms/network_transformation/network_balancing.hpp"
 #include "fiction/networks/virtual_pi_network.hpp"
 
 #include <mockturtle/traits.hpp>

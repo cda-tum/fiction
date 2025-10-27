@@ -4,9 +4,9 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "fiction/algorithms/graph/mincross.hpp"
 #include "fiction/algorithms/network_transformation/fanout_substitution.hpp"
 #include "fiction/algorithms/network_transformation/network_balancing.hpp"
-#include "fiction/algorithms/graph/mincross.hpp"
 #include "fiction/networks/views/mutable_rank_view.hpp"
 
 #include <fiction/algorithms/network_transformation/node_duplication_planarization.hpp>
