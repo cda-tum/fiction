@@ -5,8 +5,8 @@
 #ifndef FICTION_NODE_DUPLICATION_PLANARIZATION_HPP
 #define FICTION_NODE_DUPLICATION_PLANARIZATION_HPP
 
-#include "fiction/algorithms/network_transformation/network_balancing.hpp"
 #include "fiction/algorithms/graph/mincross.hpp"
+#include "fiction/algorithms/network_transformation/network_balancing.hpp"
 #include "fiction/networks/virtual_pi_network.hpp"
 
 #include <mockturtle/traits.hpp>
@@ -156,7 +156,7 @@ initialize_copy_network_duplicates(Ntk const& src)
  */
 template <typename Ntk, typename NtkDest>
 std::vector<mockturtle::signal<NtkDest>>
-gather_fanin_signals(const Ntk& ntk, const NtkDest& ntk_dest_v, const mockturtle::node<Ntk> n,
+gather_fanin_signals(const Ntk& ntk, NtkDest& ntk_dest_v, const mockturtle::node<Ntk> n,
                      const mockturtle::node_map<std::vector<mockturtle::signal<NtkDest>>, Ntk>& old2new_v,
                      const std::vector<mockturtle::node<NtkDest>>& lvl, std::size_t& node_index)
 {
@@ -204,7 +204,8 @@ gather_fanin_signals(const Ntk& ntk, const NtkDest& ntk_dest_v, const mockturtle
                     }
 
                     // Add the matched candidate fan-in to the children.
-                    children.emplace_back(candidate_sig);
+                    children.emplace_back(ntk.is_complemented(f) ? ntk_dest_v.create_not(candidate_sig) :
+                                                                   candidate_sig);
                     break;
                 }
             }
@@ -218,22 +219,26 @@ gather_fanin_signals(const Ntk& ntk, const NtkDest& ntk_dest_v, const mockturtle
 };
 
 /**
- * Constructs a planar `virtual_pi_network` based on the `ntk_lvls` array, which holds the ranks of the duplicated nodes
- * for each level in the new network. This function creates new nodes for the duplicated ones and restores their fanin
- * relations using the `gather_fanin_signals` function.
+ * Constructs a planar `virtual_pi_network` based on duplicated nodes derived from the source network.
  *
- * For duplicated PIs (Primary Inputs), virtual PIs are created, and the original PI is stored in a map.
+ * The input `ntk_lvls` contains per-level vectors of original node ranks in the source network. For each level, this
+ * function creates corresponding nodes (including duplicates) in a new `virtual_pi_network` and restores their fanin
+ * relations using the `gather_fanin_signals` helper function.
  *
- * The auxiliary function `gather_fanin_signals` collects fanin data for a node and matches it in the
- * `virtual_pi_network`.
+ * For duplicated PIs (Primary Inputs), virtual PIs are created, and the original PI is stored in a mapping structure.
+ * The auxiliary function `gather_fanin_signals` collects fanin data for each node and matches it to its corresponding
+ * nodes in the `virtual_pi_network`.
  *
- * Example: For a level (2, 3, 2, 4, 2), new nodes are created for duplications (e.g., 2) and stored in the `old2new_v`
- * node_map. This map is used by `gather_fanin_signals` to establish the correct fanin relations.
+ * Example: For a level {2, 3, 2, 4, 2}, new nodes are created for each duplicated occurrence (e.g., node 2) and stored
+ * in the `old2new_v` node map. This map is then used by `gather_fanin_signals` to correctly establish fanin
+ * relationships between newly created nodes.
  *
  * @tparam Ntk Network type.
- * @param ntk Source network to be utilized for the creation of the virtual_pi_network.
- * @param ntk_lvls Levels of nodes in the source network.
- * @param ntk_lvls_new Levels of newly created nodes in the virtual_pi_network.
+ * @param ntk Source network used to construct the `virtual_pi_network`.
+ * @param ntk_lvls Per-level vectors of original node ranks in the source network used to derive node duplications.
+ * @param ntk_lvls_new Per-level vectors of newly created nodes' ranks in the constructed `virtual_pi_network`.
+ * @return The constructed planar `virtual_pi_network` containing duplicated nodes with restored fanin and fanout
+ * relations.
  */
 template <typename Ntk>
 virtual_pi_network<Ntk> create_virtual_pi_ntk_from_duplicated_nodes(
@@ -486,15 +491,16 @@ class node_duplication_planarization_impl
      * Inserts a node into a vector if it is unique.
      *
      * This function inserts a node into a vector only if the vector is empty or the node is not equal to the first
-     * element of the vector. If the vector is not empty and the node is equal to the first element, it does nothing.
-     * An exception occurs if the node was skipped on the previous insertion attempt due to `vec.front() == node`; in
-     * that case, the node will be inserted this time.
+     * element of the vector. If the vector is not empty and the node is equal to the first element, insertion depends
+     * on the `saturated_fanout_flag` and the node’s `position`: when `position == 0`, a repeated insertion attempt will
+     * succeed only if the node was previously skipped (indicated by `saturated_fanout_flag == 1`); otherwise, the flag
+     * is set to 1 and the node is skipped for this call. No exception is thrown during this process.
      *
      * @param node The node to be inserted.
      * @param vec The vector to insert the node into.
-     * @param saturated_fanout_flag The flag which indicates that the maximum number of fanouts for this node is
-     * reached.
-     * @param position The position of the node (terminal node or not).
+     * @param saturated_fanout_flag A state flag toggled when consecutive duplicate insertions occur. Set to 1 when a
+     * node is skipped and reset to 0 when a node is successfully inserted.
+     * @param position The position of the node (0 indicates a terminal node; controls duplicate insertion behavior).
      */
     void insert_if_not_first(const mockturtle::node<Ntk>& node, std::vector<mockturtle::node<Ntk>>& vec,
                              int& saturated_fanout_flag, const int position)
