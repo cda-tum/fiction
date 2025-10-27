@@ -6107,35 +6107,42 @@ R"doc(From https://stackoverflow.com/questions/57756557/initializing-a-
 stdarray-with-a-constant-value)doc";
 
 static const char *__doc_fiction_detail_create_virtual_pi_ntk_from_duplicated_nodes =
-R"doc(Constructs a planar `virtual_pi_network` based on the `ntk_lvls`
-array, which holds the ranks of the duplicated nodes for each level in
-the new network. This function creates new nodes for the duplicated
-ones and restores their fanin relations using the
-`gather_fanin_signals` function.
+R"doc(Constructs a planar `virtual_pi_network` based on duplicated nodes
+derived from the source network.
+
+The input `ntk_lvls` contains per-level vectors of original node ranks
+in the source network. For each level, this function creates
+corresponding nodes (including duplicates) in a new
+`virtual_pi_network` and restores their fanin relations using the
+`gather_fanin_signals` helper function.
 
 For duplicated PIs (Primary Inputs), virtual PIs are created, and the
-original PI is stored in a map.
+original PI is stored in a mapping structure. The auxiliary function
+`gather_fanin_signals` collects fanin data for each node and matches
+it to its corresponding nodes in the `virtual_pi_network`.
 
-The auxiliary function `gather_fanin_signals` collects fanin data for
-a node and matches it in the `virtual_pi_network`.
-
-Example: For a level (2, 3, 2, 4, 2), new nodes are created for
-duplications (e.g., 2) and stored in the `old2new_v` node_map. This
-map is used by `gather_fanin_signals` to establish the correct fanin
-relations.
+Example: For a level {2, 3, 2, 4, 2}, new nodes are created for each
+duplicated occurrence (e.g., node 2) and stored in the `old2new_v`
+node map. This map is then used by `gather_fanin_signals` to correctly
+establish fanin relationships between newly created nodes.
 
 Template parameter ``Ntk``:
     Network type.
 
 Parameter ``ntk``:
-    Source network to be utilized for the creation of the
-    virtual_pi_network.
+    Source network used to construct the `virtual_pi_network`.
 
 Parameter ``ntk_lvls``:
-    Levels of nodes in the source network.
+    Per-level vectors of original node ranks in the source network
+    used to derive node duplications.
 
 Parameter ``ntk_lvls_new``:
-    Levels of newly created nodes in the virtual_pi_network.)doc";
+    Per-level vectors of newly created nodes' ranks in the constructed
+    `virtual_pi_network`.
+
+Returns:
+    The constructed planar `virtual_pi_network` containing duplicated
+    nodes with restored fanin and fanout relations.)doc";
 
 static const char *__doc_fiction_detail_create_wiring_reduction_layout =
 R"doc(Create a wiring_reduction_layout suitable for finding excess wiring
@@ -9521,10 +9528,13 @@ R"doc(Inserts a node into a vector if it is unique.
 
 This function inserts a node into a vector only if the vector is empty
 or the node is not equal to the first element of the vector. If the
-vector is not empty and the node is equal to the first element, it
-does nothing. An exception occurs if the node was skipped on the
-previous insertion attempt due to `vec.front() == node`; in that case,
-the node will be inserted this time.
+vector is not empty and the node is equal to the first element,
+insertion depends on the `saturated_fanout_flag` and the node's
+`position`: when `position == 0`, a repeated insertion attempt will
+succeed only if the node was previously skipped (indicated by
+`saturated_fanout_flag == 1`); otherwise, the flag is set to 1 and the
+node is skipped for this call. No exception is thrown during this
+process.
 
 Parameter ``node``:
     The node to be inserted.
@@ -9533,11 +9543,13 @@ Parameter ``vec``:
     The vector to insert the node into.
 
 Parameter ``saturated_fanout_flag``:
-    The flag which indicates that the maximum number of fanouts for
-    this node is reached.
+    A state flag toggled when consecutive duplicate insertions occur.
+    Set to 1 when a node is skipped and reset to 0 when a node is
+    successfully inserted.
 
 Parameter ``position``:
-    The position of the node (terminal node or not).)doc";
+    The position of the node (0 indicates a terminal node; controls
+    duplicate insertion behavior).)doc";
 
 static const char *__doc_fiction_detail_node_duplication_planarization_impl_lvl_pairs = R"doc()doc";
 
