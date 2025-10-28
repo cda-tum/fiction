@@ -769,7 +769,7 @@ class clustercomplete_impl
             // add all composition except first to queue
             for (uint64_t i = 1; i < compositions.size(); ++i)
             {
-                queue.front().emplace_front(std::ref(compositions.at(i)));
+                queue.front().emplace_front(std::ref(compositions[i]));
             }
 
             work_in_queue_count += compositions.size() - 1;
@@ -904,6 +904,7 @@ class clustercomplete_impl
          * @return Either nothing, if no work was found (and this thread can thus terminate), or the work that was
          * obtained.
          */
+        // NOLINTNEXTLINE(bugprone-exception-escape): std::get is safely guarded
         [[nodiscard]] std::optional<work_t> obtain_work() noexcept
         {
             if (const std::variant<work_t, bool>& work = work_stealing_queue.get_from_this_queue();
@@ -928,7 +929,7 @@ class clustercomplete_impl
                     }
 
                     std::variant<bool, std::pair<sidb_clustering_state, work_t>> work =
-                        all_workers.at(i)->work_stealing_queue.try_steal_from_this_queue();
+                        all_workers[i]->work_stealing_queue.try_steal_from_this_queue();
 
                     if (!std::holds_alternative<bool>(work))
                     {
@@ -1099,10 +1100,16 @@ class clustercomplete_impl
      * @return `false` if and only if the queue of this worker is found to be completely empty and thus backtracking is
      * not required.
      */
+    // NOLINTNEXTLINE(bugprone-exception-escape): std::get is safely guarded
     [[nodiscard]] bool unfold_all_compositions(worker&                                           w,
                                                const std::vector<sidb_charge_space_composition>& compositions,
                                                typename worker_queue::mole&&                     informant) noexcept
     {
+        if (compositions.empty())
+        {
+            return true;
+        }
+
         w.work_stealing_queue.add_to_queue(compositions, std::move(informant));
 
         // unfold first composition
@@ -1170,6 +1177,9 @@ class clustercomplete_impl
  * particular, it generalizes physically informed space pruning that contributes to the capabilities of the *QuickExact*
  * simulator, now applying to all charge states equally, and, most importantly, it lifts the associated potential
  * equations to higher order, allowing us to reason over potential bounds in a cluster hierarchy.
+ *
+ * *ClusterComplete* was proposed in \"Mastering the Exponential Complexity of Exact Physical Simulation of Silicon
+ * Dangling Bonds\" by W. Lambooy, J. Drewniok, M. Walter, and R. Wille in ASP-DAC 2026.
  *
  * @tparam Lyt SiDB cell-level layout type.
  * @param lyt Layout to simulate.

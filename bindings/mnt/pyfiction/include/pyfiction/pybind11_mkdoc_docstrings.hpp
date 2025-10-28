@@ -403,9 +403,6 @@ positions in horizontal and vertical direction is taken into account.
 Template parameter ``Lyt``:
     Cell-level layout type.
 
-Template parameter ``AreaType``:
-    Type for area representation.
-
 Parameter ``lyt``:
     The cell-level layout whose area is desired.
 
@@ -428,9 +425,6 @@ taken into account.
 Template parameter ``Lyt``:
     Cell-level layout type.
 
-Template parameter ``AreaType``:
-    Type for area representation.
-
 Parameter ``bb``:
     The bounding box of the cell-level layout whose area is desired.
 
@@ -443,21 +437,37 @@ Parameter ``pst``:
 Returns:
     Area requirements in nm².)doc";
 
-static const char *__doc_fiction_area_params = R"doc()doc";
+static const char *__doc_fiction_area_params =
+R"doc(Parameters for area computation of cell-level layouts. Default
+parameters are loaded from the given cell technology.
 
-static const char *__doc_fiction_area_params_height = R"doc()doc";
+Template parameter ``Technology``:
+    Cell technology.)doc";
 
-static const char *__doc_fiction_area_params_hspace = R"doc(Horizontal and vertical spacing between cells.)doc";
+static const char *__doc_fiction_area_params_height = R"doc(Height of each cell.)doc";
 
-static const char *__doc_fiction_area_params_vspace = R"doc()doc";
+static const char *__doc_fiction_area_params_hspace = R"doc(Horizontal spacing between cells.)doc";
 
-static const char *__doc_fiction_area_params_width = R"doc(Width and height of each cell.)doc";
+static const char *__doc_fiction_area_params_vspace = R"doc(Vertical spacing between cells.)doc";
 
-static const char *__doc_fiction_area_stats = R"doc()doc";
+static const char *__doc_fiction_area_params_width = R"doc(Width of each cell.)doc";
 
-static const char *__doc_fiction_area_stats_area = R"doc(Area requirements in nm².)doc";
+static const char *__doc_fiction_area_stats =
+R"doc(Statistics class to store area-related information including width,
+height, and area of a layout. Additionally, it provides a method to
+print a formatted report of these statistics to an output stream.)doc";
 
-static const char *__doc_fiction_area_stats_report = R"doc()doc";
+static const char *__doc_fiction_area_stats_area = R"doc(Layout area in nm².)doc";
+
+static const char *__doc_fiction_area_stats_height = R"doc(Layout height in nm.)doc";
+
+static const char *__doc_fiction_area_stats_report =
+R"doc(Prints a report of the area statistics to the given output stream.
+
+Parameter ``out``:
+    Output stream to write the report to. Defaults to `std::cout`.)doc";
+
+static const char *__doc_fiction_area_stats_width = R"doc(Layout width in nm.)doc";
 
 static const char *__doc_fiction_aspect_ratio_iterator =
 R"doc(An iterator type that iterates over increasingly larger 2D aspect
@@ -1113,6 +1123,108 @@ static const char *__doc_fiction_bdl_wire_selection_INPUT = R"doc(Select only BD
 static const char *__doc_fiction_bdl_wire_selection_OUTPUT = R"doc(Select only BDL wires that end with output cells.)doc";
 
 static const char *__doc_fiction_bdl_wire_update_direction = R"doc(Update the port of the wire based on the current BDL pairs.)doc";
+
+static const char *__doc_fiction_bfs_topo_view =
+R"doc(Specialization for non-topologically sorted networks.
+
+Template parameter ``Ntk``:
+    Logic network type.)doc";
+
+static const char *__doc_fiction_bfs_topo_view_2 =
+R"doc(Deduction guide for bfs_topo_view.
+
+Template parameter ``T``:
+    Logic network type.)doc";
+
+static const char *__doc_fiction_bfs_topo_view_3 =
+R"doc(Deduction guide for bfs_topo_view from a network and signal.
+
+Template parameter ``T``:
+    Logic network type.)doc";
+
+static const char *__doc_fiction_bfs_topo_view_bfs_topo_view =
+R"doc(Constructs a breadth-first topological view from a given network.
+
+Parameter ``ntk``:
+    Logic network to be wrapped with a topological view.)doc";
+
+static const char *__doc_fiction_bfs_topo_view_fanout_ntk = R"doc(Fanout-augmented view of the original network for efficient traversal.)doc";
+
+static const char *__doc_fiction_bfs_topo_view_foreach_gate =
+R"doc(Iterates over all gates (excluding constants and primary inputs) in
+topological order.
+
+Template parameter ``Fn``:
+    Callable function or lambda to be applied to each gate.
+
+Parameter ``fn``:
+    Function to apply to each gate.)doc";
+
+static const char *__doc_fiction_bfs_topo_view_foreach_gate_reverse =
+R"doc(Iterates over all gates (excluding constants and primary inputs) in
+reverse topological order.
+
+Template parameter ``Fn``:
+    Callable function or lambda to be applied to each gate.
+
+Parameter ``fn``:
+    Function to apply to each gate.)doc";
+
+static const char *__doc_fiction_bfs_topo_view_foreach_node =
+R"doc(Iterates over all nodes in topological order.
+
+Template parameter ``Fn``:
+    Callable function or lambda to be applied to each node.
+
+Parameter ``fn``:
+    Function to apply to each node.)doc";
+
+static const char *__doc_fiction_bfs_topo_view_foreach_node_reverse =
+R"doc(Iterates over all nodes in reverse topological order.
+
+Template parameter ``Fn``:
+    Callable function or lambda to be applied to each node.
+
+Parameter ``fn``:
+    Function to apply to each node.)doc";
+
+static const char *__doc_fiction_bfs_topo_view_index_to_node =
+R"doc(Returns the node at a given topological index.
+
+Parameter ``index``:
+    Index into the topological order.
+
+Returns:
+    Node at the specified index.)doc";
+
+static const char *__doc_fiction_bfs_topo_view_node_to_index =
+R"doc(Returns the topological index of a node.
+
+Parameter ``n``:
+    Node whose index is to be determined.
+
+Returns:
+    Index of the node in the topological order.)doc";
+
+static const char *__doc_fiction_bfs_topo_view_num_gates =
+R"doc(Returns the number of gates in the topological view.
+
+Returns:
+    Number of gates excluding constants and primary inputs.)doc";
+
+static const char *__doc_fiction_bfs_topo_view_size =
+R"doc(Returns the number of nodes in the topological view.
+
+Returns:
+    Total number of visited nodes in the topological order.)doc";
+
+static const char *__doc_fiction_bfs_topo_view_topo_order =
+R"doc(Stores nodes in topological order from constants and PIs to reachable
+gates.)doc";
+
+static const char *__doc_fiction_bfs_topo_view_update_bfs_topo =
+R"doc(Updates the breadth-first topological order of the network. Called
+once during construction.)doc";
 
 static const char *__doc_fiction_binomial_coefficient =
 R"doc(Calculates the binomial coefficient :math:`\binom{n}{k}`.
@@ -2945,6 +3057,10 @@ equally, and, most importantly, it lifts the associated potential
 equations to higher order, allowing us to reason over potential bounds
 in a cluster hierarchy.
 
+*ClusterComplete* was proposed in \"Mastering the Exponential
+Complexity of Exact Physical Simulation of Silicon Dangling Bonds\" by
+W. Lambooy, J. Drewniok, M. Walter, and R. Wille in ASP-DAC 2026.
+
 Template parameter ``Lyt``:
     SiDB cell-level layout type.
 
@@ -3678,7 +3794,13 @@ physical parameters of a given SiDB layout. It allows for the
 evaluation of how the critical temperature depends on variations in
 the underlying parameter points. This enables simulations to explore
 the critical temperature's behavior across different conditions and
-configurations.)doc";
+configurations.
+
+It was proposed in \"The Operational Domain Explorer: A Comprehensive
+Framework to Unveil the Thermal Landscape of Silicon Dangling Bond
+Logic Beyond Conventional Operability\" by M. Walter, J. Drewniok, and
+R. Wille in IEEE-NANO 2025
+(https://ieeexplore.ieee.org/abstract/document/11113672).)doc";
 
 static const char *__doc_fiction_critical_temperature_domain_add_dimension =
 R"doc(Adds a dimension to sweep over. The first dimension is the x
@@ -4634,6 +4756,11 @@ A first version of `QuickCell` was proposed in \"Towards Fast
 Automatic Design of Silicon Dangling Bond Logic\" by J. Drewniok, M.
 Walter, S. S. H. Ng, K. Walus, and R. Wille in DATE 2025
 (https://ieeexplore.ieee.org/abstract/document/10992885).
+
+An extended version of `QuickCell` was proposed in \"QuickCell: Fast
+Automatic Design of Standard Cells for Silicon Dangling Bond Logic\"
+by J. Drewniok, M. Walter, S. S. H. Ng, K. Walus, and R. Wille in TCAD
+2025 (https://ieeexplore.ieee.org/document/11146893).
 
 The `Automatic Exhaustive Gate Designer` was proposed in \"Minimal
 Design of SiDB Gates: An Optimal Basis for Circuits Based on Silicon
@@ -7945,6 +8072,23 @@ Parameter ``fc``:
 Returns:
     A vector of tiles representing the possible positions for a single
     fan-in node.)doc";
+
+static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_get_thread_local_dist =
+R"doc(Get thread-local distribution for generating random
+`tiles_to_skip_between_pis` values.
+
+Returns:
+    Reference to a thread-local uniform integer distribution for
+    generating random skip values.)doc";
+
+static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_get_thread_local_rng =
+R"doc(Get thread-local random number generator for
+`tiles_to_skip_between_pis` randomization. Each thread will have its
+own RNG to avoid mutex contention.
+
+Returns:
+    Reference to a thread-local Mersenne Twister random number
+    generator.)doc";
 
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_graph_oriented_layout_design_impl =
 R"doc(Constructor for the graph-oriented layout design algorithm.
@@ -14271,6 +14415,14 @@ R"doc(Disable the creation of crossings during layout generation. If set to
 true, gates will only be placed if a crossing-free wiring is found.
 Defaults to false.)doc";
 
+static const char *__doc_fiction_graph_oriented_layout_design_params_randomize_tiles_to_skip_between_pis =
+R"doc(When enabled, randomizes the tiles_to_skip_between_pis value for each
+PI placement. The random value will be chosen from `0` to
+`tiles_to_skip_between_pis` (inclusive). This can help explore
+different placement strategies and potentially find better layouts.
+Uses the same random seed as other randomization features for
+reproducibility. Defaults to `false`.)doc";
+
 static const char *__doc_fiction_graph_oriented_layout_design_params_return_first =
 R"doc(Return the first found layout, which might still have a high cost but
 can be found fast.)doc";
@@ -14280,6 +14432,19 @@ R"doc(Random seed used for random fanout substitution and random topological
 ordering in maximum-effort mode, generated randomly if not specified.)doc";
 
 static const char *__doc_fiction_graph_oriented_layout_design_params_straight_inverters = R"doc(Enforce NOT gates to be routed non-bending only.)doc";
+
+static const char *__doc_fiction_graph_oriented_layout_design_params_tiles_to_skip_between_pis =
+R"doc(For each primary input (PI) considered during placement, reserve this
+many empty tiles *after* the current frontier: - Top edge (row 0):
+leave `tiles_to_skip_between_pis` empty tiles to the right of the
+rightmost occupied tile before proposing a new PI position. - Left
+edge (column 0): leave `tiles_to_skip_between_pis` empty tiles below
+the bottommost occupied tile before proposing a new PI position.
+
+This soft margin can reduce local congestion and increase the
+probability of finding a routable layout at the expense of a
+temporarily larger footprint, which post-layout optimization may later
+shrink. Defaults to `0`.)doc";
 
 static const char *__doc_fiction_graph_oriented_layout_design_params_timeout = R"doc(Timeout limit (in ms).)doc";
 
@@ -15676,11 +15841,21 @@ static const char *__doc_fiction_hexagonalization_stats = R"doc(This struct stor
 
 static const char *__doc_fiction_hexagonalization_stats_duration = R"doc(Runtime of the hexagonalization process.)doc";
 
+static const char *__doc_fiction_hexagonalization_stats_num_crossings = R"doc(Number of crossings.)doc";
+
+static const char *__doc_fiction_hexagonalization_stats_num_gates = R"doc(Number of gates.)doc";
+
+static const char *__doc_fiction_hexagonalization_stats_num_wires = R"doc(Number of wires.)doc";
+
 static const char *__doc_fiction_hexagonalization_stats_report =
 R"doc(Reports the statistics to the given output stream.
 
 Parameter ``out``:
     Output stream.)doc";
+
+static const char *__doc_fiction_hexagonalization_stats_x_size = R"doc(Layout width.)doc";
+
+static const char *__doc_fiction_hexagonalization_stats_y_size = R"doc(Layout height.)doc";
 
 static const char *__doc_fiction_high_degree_fanin_exception =
 R"doc(Exception class that can be thrown if some network exceeds a legal
@@ -16538,6 +16713,224 @@ Template parameter ``Dist``:
 
 static const char *__doc_fiction_manhattan_distance_functor_manhattan_distance_functor = R"doc()doc";
 
+static const char *__doc_fiction_mincross =
+R"doc(Reimplementation of Graphviz's `mincross` algorithm for edge crossing
+minimization. This function reorders nodes in a leveled logic network
+to minimize the number of edge crossings using iterative median and
+transpose heuristics.
+
+Reference implementation:
+https://gitlab.com/graphviz/graphviz/-/blob/main/lib/dotgen/mincross.c
+
+For more on Graphviz's `dot` layout generation:
+https://graphviz.org/docs/layouts/dot/
+
+Template parameter ``Ntk``:
+    A logic network type with level and fanout support.
+
+Parameter ``ntk``:
+    The input leveled network whose ranks are to be reordered.
+
+Parameter ``ps``:
+    Configuration parameters for the minimization algorithm.
+
+Parameter ``pst``:
+    Optional pointer to a statistics structure for storing the
+    resulting number of crossings.
+
+Returns:
+    A copy of the input network with reordered ranks to reduce edge
+    crossings.)doc";
+
+static const char *__doc_fiction_mincross_impl =
+R"doc(Implements the crossing minimization algorithm inspired by Graphviz's
+`mincross`. This algorithm reorders nodes in ranks to reduce edge
+crossings in a leveled graph representation of the logic network.
+
+Template parameter ``Ntk``:
+    Logic network type that models a leveled circuit with rank
+    information.)doc";
+
+static const char *__doc_fiction_mincross_impl_count_crossings =
+R"doc(Computes the number of crossings between two sets of ranked positions.
+
+Parameter ``a``:
+    Positions from first set of connections.
+
+Parameter ``b``:
+    Positions from second set of connections.
+
+Returns:
+    Total number of crossings between the sets.)doc";
+
+static const char *__doc_fiction_mincross_impl_fanout_ntk =
+R"doc(Fanout-augmented view of the network for efficient traversal and
+connectivity queries.)doc";
+
+static const char *__doc_fiction_mincross_impl_in_cross =
+R"doc(Counts the number of edge crossings between fanins of two nodes in the
+previous rank.
+
+Parameter ``left``:
+    First node.
+
+Parameter ``right``:
+    Second node.
+
+Returns:
+    Number of crossings.)doc";
+
+static const char *__doc_fiction_mincross_impl_median_map =
+R"doc(Stores median values used to sort nodes within ranks during
+optimization.)doc";
+
+static const char *__doc_fiction_mincross_impl_median_sorting = R"doc()doc";
+
+static const char *__doc_fiction_mincross_impl_median_sorting_ASCENDING = R"doc()doc";
+
+static const char *__doc_fiction_mincross_impl_median_sorting_DESCENDING = R"doc()doc";
+
+static const char *__doc_fiction_mincross_impl_medians =
+R"doc(Computes median values for the nodes in rank `r0` based on their
+connections to `r1`.
+
+Parameter ``r0``:
+    Current rank.
+
+Parameter ``r1``:
+    Adjacent rank to which connections are considered.)doc";
+
+static const char *__doc_fiction_mincross_impl_mincross_impl =
+R"doc(Constructs the crossing minimization implementation object.
+
+Parameter ``src``:
+    The logic network on which to perform crossing minimization.
+
+Parameter ``p``:
+    Configuration parameters for the algorithm (e.g., `optimize`)
+
+Parameter ``st``:
+    Statistics object to store the resulting number of crossings.)doc";
+
+static const char *__doc_fiction_mincross_impl_mincross_step =
+R"doc(Executes one full up/down pass of median ordering followed by
+transposition to reduce crossings.
+
+Parameter ``pass``:
+    The current pass number, determines direction and ordering.)doc";
+
+static const char *__doc_fiction_mincross_impl_minimize_crossings =
+R"doc(Performs the main iterative crossing minimization using median and
+transpose heuristics.)doc";
+
+static const char *__doc_fiction_mincross_impl_ncross =
+R"doc(Computes the total number of edge crossings in the current network
+state.)doc";
+
+static const char *__doc_fiction_mincross_impl_ntk = R"doc(Logic network being reordered.)doc";
+
+static const char *__doc_fiction_mincross_impl_out_cross =
+R"doc(Counts the number of edge crossings between fanouts of two nodes in
+the next rank.
+
+Parameter ``left``:
+    First node.
+
+Parameter ``right``:
+    Second node.
+
+Returns:
+    Number of crossings.)doc";
+
+static const char *__doc_fiction_mincross_impl_ps = R"doc(Parameters for crossing minimization.)doc";
+
+static const char *__doc_fiction_mincross_impl_pst =
+R"doc(Statistics that store the final number of crossings after
+optimization.)doc";
+
+static const char *__doc_fiction_mincross_impl_reorder =
+R"doc(Reorders the nodes in a given rank according to computed medians.
+
+Parameter ``r``:
+    The rank index.
+
+Parameter ``reverse``:
+    If `true`, sorts in descending order of medians.)doc";
+
+static const char *__doc_fiction_mincross_impl_run =
+R"doc(Runs the crossing minimization algorithm and returns a reordered
+network.
+
+Returns:
+    A network with reordered nodes in ranks to reduce edge crossings.)doc";
+
+static const char *__doc_fiction_mincross_impl_total_crossings = R"doc(Current total number of edge crossings in the network.)doc";
+
+static const char *__doc_fiction_mincross_impl_transpose =
+R"doc(Performs pairwise transpositions within ranks to further reduce
+crossings.
+
+Parameter ``reverse``:
+    If `true`, applies reversed heuristic for tie-breaking.)doc";
+
+static const char *__doc_fiction_mincross_impl_transpose_step =
+R"doc(Performs a single transposition pass for rank `r`.
+
+Parameter ``r``:
+    Rank index.
+
+Parameter ``reverse``:
+    If `true`, applies reversed heuristic for tie-breaking.
+
+Returns:
+    The number of crossings reduced.)doc";
+
+static const char *__doc_fiction_mincross_params = R"doc(Parameters for the `mincross` crossing minimization algorithm.)doc";
+
+static const char *__doc_fiction_mincross_params_convergence =
+R"doc(Convergence threshold: relative improvement factor required to reset
+the early-quit counter (heuristic from Graphviz). If the current
+crossing count drops below (`convergence` * `best_cross`), where
+`best_cross` is the best/lowest crossing count found so far, the
+process continues. Default is `0.995` (i.e., at least 0.5% improvement
+required).)doc";
+
+static const char *__doc_fiction_mincross_params_fixed_pis =
+R"doc(Whether the rank positions of primary inputs (PIs) should remain fixed
+during the minimization process. If set to `true`, PIs will not be
+reordered.)doc";
+
+static const char *__doc_fiction_mincross_params_init_refine_max_iters =
+R"doc(Maximum number of iterations in the initial (pass 0) and refinement
+(pass 1) phases of the crossing minimization procedure (heuristic from
+Graphviz).
+
+- In these early passes, the algorithm explores simple reorderings to
+quickly reduce crossings without investing in the full optimization
+effort. - By default, the number of iterations is capped at `4` to
+prevent excessive runtime during initialization and refinement. This
+cap can be lifted if a larger global maximum (`ps.max_iter`) is set. -
+In the full optimization pass (pass 2), `ps.max_iter` is always used
+instead.)doc";
+
+static const char *__doc_fiction_mincross_params_max_iter =
+R"doc(Maximum number of iterations per optimization pass (heuristic from
+Graphviz). Larger values allow more refinement but increase runtime.
+Default (`24`) works well for small and medium-sized networks.)doc";
+
+static const char *__doc_fiction_mincross_params_min_quit =
+R"doc(Minimum number of consecutive iterations without sufficient
+improvement before quitting early (heuristic from Graphviz). Prevents
+wasting time when the number of crossings no longer decreases.)doc";
+
+static const char *__doc_fiction_mincross_params_optimize =
+R"doc(If `false`, skips optimization and only reports the current number of
+crossings.)doc";
+
+static const char *__doc_fiction_mincross_stats = R"doc(Statistics collected during the execution of the `mincross` algorithm.)doc";
+
+static const char *__doc_fiction_mincross_stats_num_crossings = R"doc(The total number of edge crossings after optimization.)doc";
+
 static const char *__doc_fiction_minimum_energy =
 R"doc(Computes the minimum energy of a range of
 `charge_distribution_surface` objects. If the range is empty, infinity
@@ -17185,11 +17578,6 @@ the layout. Each exact ground state simulation has exponential
 complexity in of itself. Therefore, the algorithm is only feasible for
 small layouts with few inputs.
 
-This flavor of operational domain computation was proposed in
-\"Reducing the Complexity of Operational Domain Computation in Silicon
-Dangling Bond Logic\" by M. Walter, J. Drewniok, S. S. H. Ng, K.
-Walus, and R. Wille in NANOARCH 2023.
-
 Template parameter ``Lyt``:
     SiDB cell-level layout type.
 
@@ -17329,15 +17717,15 @@ Template parameter ``TT``:
 Parameter ``lyt``:
     Layout to compute the operational domain for.
 
-Parameter ``spec``:
-    Expected vector of truth tables of the layout. Each truth table
-    represents an output of the Boolean function.
+Parameter ``tt``:
+    Expected Boolean function of the lyt given as a multi-output truth
+    table.
 
-Parameter ``params``:
-    Operational domain computation parameters.
+Parameter ``ps``:
+    Parameters for the operational domain computation.
 
-Parameter ``stats``:
-    Operational domain computation statistics.
+Parameter ``st``:
+    Statistics of the process.
 
 Returns:
     The operational domain of the layout.
@@ -22491,7 +22879,13 @@ Returns:
 
 static const char *__doc_fiction_wiring_reduction =
 R"doc(A scalable wiring reduction algorithm for 2DDWave-clocked layouts
-based on A* path finding.
+based on A* path finding as originally proposed in \"Late Breaking
+Results: Wiring Reduction for Field-coupled Nanotechnologies\" by S.
+Hofmann, M. Walter, and R. Wille in DAC 2024
+(https://dl.acm.org/doi/10.1145/3649329.3663491) and extended in
+\"Efficient and Scalable Post-Layout Optimization for Field-coupled
+Nanotechnologies\" by S. Hofmann, M. Walter, and R. Wille in TCAD 2025
+(https://ieeexplore.ieee.org/document/10916761).
 
 The core concept revolves around the selective removal of excess
 wiring by cutting them from a layout, contingent upon the ability to

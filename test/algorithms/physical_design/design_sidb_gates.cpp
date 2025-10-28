@@ -342,6 +342,7 @@ TEST_CASE("Use FO2 Bestagon gate without SiDB at {17, 11, 0} and generate origin
         CHECK(found_gate_layouts[0].get_cell_type({17, 11, 0}) == sidb_100_cell_clk_lyt_siqad::technology::LOGIC);
     }
 
+#if (FICTION_ALGLIB_ENABLED)
     SECTION("replace the output perturbers by equivalent negatively charged defects")
     {
         design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
@@ -383,6 +384,7 @@ TEST_CASE("Use FO2 Bestagon gate without SiDB at {17, 11, 0} and generate origin
         CHECK(found_gate_layouts_quickcell[0].get_cell_type({17, 11, 0}) ==
               sidb_100_cell_clk_lyt_siqad::cell_type::LOGIC);
     }
+#endif  // FICTION_ALGLIB_ENABLED
 }
 
 TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")

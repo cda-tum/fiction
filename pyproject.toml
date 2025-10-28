@@ -24,11 +24,11 @@ classifiers = [
     'Development Status :: 4 - Beta',
     'Programming Language :: Python :: 3',
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     'Programming Language :: C++',
     'Environment :: Console',
     'License :: OSI Approved :: MIT License',
@@ -40,7 +40,7 @@ classifiers = [
     'Topic :: Scientific/Engineering :: Electronic Design Automation (EDA)',
 ]
 
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dependencies = [
     "z3-solver>=4.8.0"
 ]
@@ -243,8 +243,6 @@ docs = [
 ]
 test = [
     "pytest>=8.3.3",
-    "pytest-console-scripts>=1.4.1",
-    "pytest-cov>=6",
 ]
 dev = [
     { include-group = "build" },

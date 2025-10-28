@@ -8,6 +8,7 @@ set(ALICE_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(ALICE_TEST OFF CACHE BOOL "" FORCE)
 check_if_present(alice)
 add_subdirectory(alice)
+target_link_system_libraries(libfiction INTERFACE alice)
 
 # Include mockturtle
 set(MOCKTURTLE_EXAMPLES OFF CACHE BOOL "" FORCE)

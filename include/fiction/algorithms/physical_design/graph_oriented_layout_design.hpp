@@ -42,6 +42,7 @@
 #include <queue>
 #include <random>
 #include <stdexcept>
+#include <thread>
 #include <tuple>
 #include <unordered_map>
 #include <utility>
@@ -179,6 +180,27 @@ struct graph_oriented_layout_design_params
      * Enforce NOT gates to be routed non-bending only.
      */
     bool straight_inverters = false;
+    /**
+     * For each primary input (PI) considered during placement, reserve this many
+     * empty tiles *after* the current frontier:
+     *  - Top edge (row 0): leave `tiles_to_skip_between_pis` empty tiles to the right
+     *    of the rightmost occupied tile before proposing a new PI position.
+     *  - Left edge (column 0): leave `tiles_to_skip_between_pis` empty tiles below
+     *    the bottommost occupied tile before proposing a new PI position.
+     *
+     * This soft margin can reduce local congestion and increase the probability of
+     * finding a routable layout at the expense of a temporarily larger footprint,
+     * which post-layout optimization may later shrink. Defaults to `0`.
+     */
+    uint64_t tiles_to_skip_between_pis = 0;
+    /**
+     * When enabled, randomizes the tiles_to_skip_between_pis value for each PI placement.
+     * The random value will be chosen from `0` to `tiles_to_skip_between_pis` (inclusive).
+     * This can help explore different placement strategies and potentially find better layouts.
+     * Uses the same random seed as other randomization features for reproducibility.
+     * Defaults to `false`.
+     */
+    bool randomize_tiles_to_skip_between_pis = false;
 };
 /**
  * This struct stores statistics about the graph-oriented layout design process.
@@ -707,43 +729,80 @@ class graph_oriented_layout_design_impl
             // if multithreading is enabled
             if (ps.enable_multithreading)
             {
-                // mutex to protect the best found layout and statistics
-                std::mutex                                   update_best_layout_mutex{};
-                std::vector<std::future<std::optional<Lyt>>> futures{};
-                futures.reserve(ssg_vec.size());
+                // separate mutexes for better concurrency
+                std::mutex update_best_layout_mutex{};
+
+                // reuse futures pool to avoid allocation overhead
+                futures_pool.clear();
+                futures_pool.reserve(ssg_vec.size());
 
                 // process `ssg_vec` in parallel using std::async
                 for (auto& ssg : ssg_vec)
                 {
-                    futures.emplace_back(std::async(std::launch::async,
-                                                    [&]() -> std::optional<Lyt>
-                                                    {
-                                                        auto result = process_ssg(ssg);
-                                                        if (result)
-                                                        {
-                                                            const std::lock_guard<std::mutex> lock(
-                                                                update_best_layout_mutex);
-                                                            best_lyt = *result;
-                                                            restore_names(ssg.network, best_lyt);
-                                                            update_stats(best_lyt);
+                    auto* ssg_ptr = &ssg;
+                    futures_pool.emplace_back(
+                        std::async(std::launch::async,
+                                   [this, ssg_ptr, &update_best_layout_mutex, &best_lyt]() -> std::optional<Lyt>
+                                   {
+                                       if (auto result = process_ssg(*ssg_ptr); result)
+                                       {
+                                           const std::lock_guard<std::mutex> lock(update_best_layout_mutex);
+                                           best_lyt = std::move(*result);
+                                           restore_names(ssg_ptr->network, best_lyt);
+                                           update_stats(best_lyt);
 
-                                                            if (ps.return_first)
-                                                            {
-                                                                return best_lyt;
-                                                            }
-                                                        }
-                                                        return std::nullopt;
-                                                    }));
+                                           if (ps.return_first)
+                                           {
+                                               return best_lyt;
+                                           }
+                                       }
+                                       return std::nullopt;
+                                   }));
                 }
 
-                // check the futures for the result
-                for (auto& future : futures)
+                // check the futures for the result - poll for readiness to support return_first
+                while (true)
                 {
-                    const auto result = future.get();  // blocking wait to get the result from the future
-                    if (result)
+                    bool all_done = true;
+                    for (auto& f : futures_pool)
                     {
-                        return *result;  // return the first found layout if ps.return_first is true
+                        if (f.valid())
+                        {
+                            using namespace std::chrono_literals;
+                            if (f.wait_for(0ms) == std::future_status::ready)
+                            {
+                                if (auto r = f.get())
+                                {
+                                    // cancel remaining futures if return_first is enabled
+                                    if (ps.return_first)
+                                    {
+                                        for (auto& remaining_future : futures_pool)
+                                        {
+                                            if (remaining_future.valid())
+                                            {
+                                                remaining_future.wait();
+                                            }
+                                        }
+                                    }
+                                    return *r;  // return immediately when first result is ready
+                                }
+                            }
+                            else
+                            {
+                                all_done = false;
+                            }
+                        }
                     }
+                    if (all_done)
+                    {
+                        break;
+                    }
+                    // adaptive sleep: shorter sleep when more futures are active
+                    const auto active_futures = std::count_if(futures_pool.cbegin(), futures_pool.cend(),
+                                                              [](const auto& f) { return f.valid(); });
+                    const auto sleep_duration =
+                        active_futures > 4 ? std::chrono::microseconds(100) : std::chrono::milliseconds(1);
+                    std::this_thread::sleep_for(sleep_duration);
                 }
             }
             else
@@ -950,6 +1009,33 @@ class graph_oriented_layout_design_impl
      */
     std::uint32_t seed;
     /**
+     * Thread pool for multithreaded execution to avoid thread creation overhead.
+     */
+    mutable std::vector<std::future<std::optional<Lyt>>> futures_pool{};
+    /**
+     * Get thread-local random number generator for `tiles_to_skip_between_pis` randomization.
+     * Each thread will have its own RNG to avoid mutex contention.
+     *
+     * @return Reference to a thread-local Mersenne Twister random number generator.
+     */
+    [[nodiscard]] std::mt19937& get_thread_local_rng() const
+    {
+        thread_local std::mt19937 rng{seed};
+        return rng;
+    }
+    /**
+     * Get thread-local distribution for generating random `tiles_to_skip_between_pis` values.
+     *
+     * @return Reference to a thread-local uniform integer distribution for generating random skip values.
+     */
+    [[nodiscard]] std::uniform_int_distribution<uint64_t>& get_thread_local_dist() const
+    {
+        // Handle edge case where tiles_to_skip_between_pis is 0
+        const auto min_val = ps.tiles_to_skip_between_pis > 0 ? ps.tiles_to_skip_between_pis - 1 : 0;
+        thread_local std::uniform_int_distribution<uint64_t> dist{min_val, ps.tiles_to_skip_between_pis};
+        return dist;
+    }
+    /**
      * Determines the number of search space graphs to generate based on the selected effort mode and cost objective.
      *
      * @param mode The effort mode chosen for the layout design, determining the level of computational effort.
@@ -1014,7 +1100,7 @@ class graph_oriented_layout_design_impl
             using dist = twoddwave_distance_functor<ObstrLyt, uint64_t>;
             using cost = unit_cost_functor<ObstrLyt, uint8_t>;
 
-            static a_star_params a_star_crossing_params{};
+            a_star_params a_star_crossing_params{};
             a_star_crossing_params.crossings = !ps.planar;
 
             const auto path =
@@ -1059,8 +1145,52 @@ class graph_oriented_layout_design_impl
 
         coord_vec_type<ObstrLyt> possible_positions{};
 
-        layout.resize({layout.x() + 1, layout.y() + 1, 1});
+        // if no PIs yet, no skipping; otherwise use appropriate setting.
+        uint64_t skip_tiles = 0;
+        if (!layout.is_empty())
+        {
+            if (ps.randomize_tiles_to_skip_between_pis)
+            {
+                // generate random skip_tiles for each PI placement using thread-local RNG
+                skip_tiles = get_thread_local_dist()(get_thread_local_rng());
+            }
+            else
+            {
+                skip_tiles = ps.tiles_to_skip_between_pis;
+            }
+        }
+        auto skip_top  = skip_tiles;
+        auto skip_left = skip_tiles;
+
+        // make sure we have enough margin in both directions.
+        const uint64_t resize = skip_tiles + 1;
+
+        layout.resize({layout.x() + resize, layout.y() + resize, layout.z()});
         const tile<ObstrLyt> drain{layout.x(), layout.y(), 0};
+
+        uint64_t min_x = 0;
+        uint64_t min_y = 0;
+
+        if (skip_tiles != 0)
+        {
+            for (auto x = static_cast<int64_t>(layout.x()); x >= 0; --x)
+            {
+                if (!layout.is_empty_tile({static_cast<uint64_t>(x), 0, 0}))
+                {
+                    min_x = static_cast<uint64_t>(x) + 1;
+                    break;  // first non-empty from the right
+                }
+            }
+
+            for (auto y = static_cast<int64_t>(layout.y()); y >= 0; --y)
+            {
+                if (!layout.is_empty_tile({0, static_cast<uint64_t>(y), 0}))
+                {
+                    min_y = static_cast<uint64_t>(y) + 1;
+                    break;  // first non-empty from the bottom
+                }
+            }
+        }
 
         // check if a path from the input to the drain exists
         const auto check_tile = [&](const uint64_t x, const uint64_t y) noexcept
@@ -1077,15 +1207,15 @@ class graph_oriented_layout_design_impl
 
         if (pi_locs == pi_locations::TOP_AND_LEFT)
         {
-            max_iterations = std::max(layout.x(), layout.y());
+            max_iterations = std::max(layout.x() - min_x, layout.y() - min_y);
         }
         else if (pi_locs == pi_locations::TOP)
         {
-            max_iterations = layout.x();
+            max_iterations = layout.x() - min_x;
         }
         else
         {
-            max_iterations = layout.y();
+            max_iterations = layout.y() - min_y;
         }
 
         const uint64_t expansion_limit = (pi_locs == pi_locations::TOP_AND_LEFT) ? 2 * num_expansions : num_expansions;
@@ -1093,23 +1223,37 @@ class graph_oriented_layout_design_impl
 
         for (uint64_t k = 0ul; k < max_iterations; k++)
         {
-            if (((pi_locs == pi_locations::TOP) || (pi_locs == pi_locations::TOP_AND_LEFT)) && k < layout.x())
+            if (((pi_locs == pi_locations::TOP) || (pi_locs == pi_locations::TOP_AND_LEFT)) && min_x + k < layout.x())
             {
-                check_tile(k, 0);
+                if (skip_top == 0)
+                {
+                    check_tile(min_x + k, 0);
+                }
+                else
+                {
+                    --skip_top;
+                }
             }
-            if (((pi_locs == pi_locations::LEFT) || (pi_locs == pi_locations::TOP_AND_LEFT)) && k < layout.y())
+            if (((pi_locs == pi_locations::LEFT) || (pi_locs == pi_locations::TOP_AND_LEFT)) && min_y + k < layout.y())
             {
-                check_tile(0, k);
+                if (skip_left == 0)
+                {
+                    check_tile(0, min_y + k);
+                }
+                else
+                {
+                    --skip_left;
+                }
             }
             if (count_expansions >= expansion_limit)
             {
-                layout.resize({layout.x() - 1, layout.y() - 1, 1});
+                layout.resize({layout.x() - resize, layout.y() - resize, layout.z()});
 
                 return possible_positions;
             }
         }
 
-        layout.resize({layout.x() - 1, layout.y() - 1, 1});
+        layout.resize({layout.x() - resize, layout.y() - resize, layout.z()});
 
         return possible_positions;
     }
@@ -1502,6 +1646,14 @@ class graph_oriented_layout_design_impl
 
         if (ssg.network.is_pi(ssg.nodes_to_place[place_info.current_node]))
         {
+            if (position.x > layout.x())
+            {
+                layout.resize({position.x, layout.y(), layout.z()});
+            }
+            if (position.y > layout.y())
+            {
+                layout.resize({layout.x(), position.y, layout.z()});
+            }
             // place primary input node
             place_info.node2pos[ssg.nodes_to_place[place_info.current_node]] =
                 layout.move_node(place_info.pi2node[ssg.nodes_to_place[place_info.current_node]], position);
@@ -1604,16 +1756,11 @@ class graph_oriented_layout_design_impl
     void adjust_layout_size(const tile<ObstrLyt>& position, ObstrLyt& layout, const search_space_graph<ObstrLyt>& ssg,
                             const placement_info<ObstrLyt>& place_info)
     {
-        const auto max_layout_width  = ssg.nodes_to_place.size();
-        const auto max_layout_height = ssg.nodes_to_place.size();
-
-        if (position.x == layout.x() && layout.x() < (max_layout_width - 1) &&
-            !ssg.network.is_po(ssg.nodes_to_place[place_info.current_node - 1]))
+        if (position.x == layout.x() && !ssg.network.is_po(ssg.nodes_to_place[place_info.current_node - 1]))
         {
             layout.resize({layout.x() + 1, layout.y(), layout.z()});
         }
-        if (position.y == layout.y() && layout.y() < (max_layout_height - 1) &&
-            !ssg.network.is_po(ssg.nodes_to_place[place_info.current_node - 1]))
+        if (position.y == layout.y() && !ssg.network.is_po(ssg.nodes_to_place[place_info.current_node - 1]))
         {
             layout.resize({layout.x(), layout.y() + 1, layout.z()});
         }
