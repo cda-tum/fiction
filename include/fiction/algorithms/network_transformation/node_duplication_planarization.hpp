@@ -122,10 +122,11 @@ initialize_copy_network_duplicates(Ntk const& src)
     static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
     static_assert(mockturtle::has_get_constant_v<Ntk>, "Ntk does not implement the get_constant method");
     static_assert(mockturtle::has_get_constant_v<virtual_pi_network<Ntk>>,
-                  "Ntk does not implement the get_constant method");
+                  "virtual_pi_network<Ntk> does not implement get_constant");
     static_assert(mockturtle::has_get_node_v<Ntk>, "Ntk does not implement the get_node method");
     static_assert(mockturtle::has_foreach_pi_v<Ntk>, "Ntk does not implement the foreach_pi method");
-    static_assert(mockturtle::has_create_pi_v<virtual_pi_network<Ntk>>, "Ntk does not implement the create_pi method");
+    static_assert(mockturtle::has_create_pi_v<virtual_pi_network<Ntk>>,
+                  "virtual_pi_network<Ntk> does not implement create_pi");
 
     mockturtle::node_map<std::vector<mockturtle::signal<virtual_pi_network<Ntk>>>, Ntk> old2new(src);
     virtual_pi_network<Ntk>                                                             dest;
@@ -244,6 +245,12 @@ virtual_pi_network<Ntk> create_virtual_pi_ntk_from_duplicated_nodes(
     const Ntk& ntk, const std::vector<std::vector<mockturtle::node<Ntk>>>& ntk_lvls,
     std::vector<std::vector<mockturtle::node<virtual_pi_network<Ntk>>>>& ntk_lvls_new)
 {
+    static_assert(mockturtle::has_create_node_v<virtual_pi_network<Ntk>>, "virtual_pi_network<Ntk> lacks create_node");
+    static_assert(mockturtle::has_get_node_v<virtual_pi_network<Ntk>>, "virtual_pi_network<Ntk> lacks get_node");
+    static_assert(mockturtle::has_fanout_size_v<virtual_pi_network<Ntk>>, "virtual_pi_network<Ntk> lacks fanout_size");
+    static_assert(mockturtle::has_create_po_v<virtual_pi_network<Ntk>>, "virtual_pi_network<Ntk> lacks create_po");
+    static_assert(mockturtle::has_create_not_v<virtual_pi_network<Ntk>>, "virtual_pi_network<Ntk> lacks create_not");
+
     std::unordered_map<mockturtle::node<Ntk>, bool> node_status;
     ntk_lvls_new.resize(ntk_lvls.size());
 
@@ -291,7 +298,9 @@ virtual_pi_network<Ntk> create_virtual_pi_ntk_from_duplicated_nodes(
                 const auto children =
                     gather_fanin_signals(ntk, ntk_dest_v, nd, old2new_v, ntk_lvls_new[i + 1], node_index);
 
-                assert(!children.empty() && "The node has to have children");
+                // Ensure child count matches function arity (including 0-fanin constants)
+                assert(children.size() == ntk.fanin_size(nd) &&
+                       "Mismatch between gathered children and node fanin count");
 
                 const auto new_sig = ntk_dest_v.create_node(children, ntk.node_function(nd));
                 lvl_new.push_back(ntk_dest_v.get_node(new_sig));
