@@ -26,7 +26,7 @@
 
 using namespace fiction;
 
-void check_stats(const orthogonal_physical_design_stats& st) noexcept
+static void check_stats(const orthogonal_physical_design_stats& st) noexcept
 {
     CHECK(st.x_size > 0);
     CHECK(st.y_size > 0);
@@ -35,7 +35,7 @@ void check_stats(const orthogonal_physical_design_stats& st) noexcept
 }
 
 template <typename Ntk>
-void check_ortho_planar(const Ntk& ntk)
+static void check_ortho_planar(const Ntk& ntk)
 {
     using gate_lyt =
         fiction::gate_level_layout<fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<>>>>;

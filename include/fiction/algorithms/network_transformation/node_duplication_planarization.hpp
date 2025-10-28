@@ -24,10 +24,6 @@
 #include <utility>
 #include <vector>
 
-#if (PROGRESS_BARS)
-#include <mockturtle/utils/progress_bar.hpp>
-#endif
-
 namespace fiction
 {
 

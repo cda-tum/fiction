@@ -806,7 +806,6 @@ class orthogonal_planar_impl
 
     Lyt run()
     {
-        using node = typename Ntk::node;
         // measure run time
         mockturtle::stopwatch stop{pst.time_total};
         // initialize mapping from nodes to positions
@@ -974,6 +973,10 @@ class orthogonal_planar_impl
                         }
                     }
                 });
+#if (PROGRESS_BARS)
+            // update progress
+            bar(i);
+#endif
         }
 
         // place and route POs
