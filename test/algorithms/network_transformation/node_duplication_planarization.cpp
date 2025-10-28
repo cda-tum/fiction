@@ -108,7 +108,7 @@ TEST_CASE("Planarize ntk with 3-ary node", "[node-duplication-planarization]")
     node_duplication_planarization_params params;
     params.po_order = node_duplication_planarization_params::output_order::RANDOM_PO_ORDER;
 
-    auto planarized_ntk = node_duplication_planarization(vpi_r);
+    auto planarized_ntk = node_duplication_planarization(vpi_r, params);
 
     mincross_stats  st_min{};
     mincross_params p_min{};
