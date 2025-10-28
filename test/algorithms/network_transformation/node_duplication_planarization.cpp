@@ -72,6 +72,7 @@ TEST_CASE("Planarize technology ntk", "[node-duplication-planarization]")
     const auto                             cec_m =
         mockturtle::equivalence_checking(*fiction::virtual_miter<technology_network>(tec, planarized_ntk), {}, &st);
     REQUIRE(cec_m.has_value());
+    // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
     CHECK(*cec_m == 1);
 }
 
@@ -117,6 +118,7 @@ TEST_CASE("Planarize ntk with 3-ary node", "[node-duplication-planarization]")
     const auto                             cec_m =
         mockturtle::equivalence_checking(*fiction::virtual_miter<technology_network>(tec, planarized_ntk), {}, &st);
     REQUIRE(cec_m.has_value());
+    // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
     CHECK(*cec_m == 1);
 }
 
@@ -159,6 +161,7 @@ TEST_CASE("Buffer AIG and planarize technology_network", "[node-duplication-plan
     const auto                             cec_m =
         mockturtle::equivalence_checking(*fiction::virtual_miter<technology_network>(aig, planarized_ntk), {}, &st);
     REQUIRE(cec_m.has_value());
+    // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
     CHECK(*cec_m == 1);
 }
 
@@ -194,6 +197,7 @@ TEST_CASE("Buffer AIG and planarize technology_network 2", "[node-duplication-pl
     const auto                             cec_m =
         mockturtle::equivalence_checking(*fiction::virtual_miter<technology_network>(aig, planarized_ntk), {}, &st);
     REQUIRE(cec_m.has_value());
+    // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
     CHECK(*cec_m == 1);
 }
 
@@ -232,5 +236,6 @@ TEST_CASE("Planarize multi output network", "[node-duplication-planarization]")
     const auto                             cec_m =
         mockturtle::equivalence_checking(*fiction::virtual_miter<technology_network>(aig, planarized_ntk), {}, &st);
     REQUIRE(cec_m.has_value());
+    // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
     CHECK(*cec_m == 1);
 }
