@@ -60,7 +60,7 @@ Run the interactive CLI session:
 Internally, the repository lives at ``/app/fiction``.
 
 
-.. _cli-source
+.. _cli-source:
 
 CLI (Source)
 ------------
