@@ -49,11 +49,11 @@ void check_ortho_planar(const Ntk& ntk)
     auto tec_ranked   = fiction::mutable_rank_view(tec_balanced);
     auto planarized_b = fiction::node_duplication_planarization(tec_ranked);
 
+    // clang-tidy bugprone-unchecked-optional-access false positive in tests
+    // NOLINTBEGIN(bugprone-unchecked-optional-access)
     mockturtle::equivalence_checking_stats eq_st;
     const auto                             cec_m = mockturtle::equivalence_checking(
         *fiction::virtual_miter<fiction::technology_network>(ntk, planarized_b), {}, &eq_st);
-    // clang-tidy bugprone-unchecked-optional-access false positive in tests
-    // NOLINTBEGIN(bugprone-unchecked-optional-access)
     REQUIRE(cec_m.has_value());
     const auto result = *cec_m;
     CHECK(result == 1);

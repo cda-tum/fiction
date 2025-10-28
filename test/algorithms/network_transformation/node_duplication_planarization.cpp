@@ -68,11 +68,11 @@ TEST_CASE("Planarize technology ntk", "[node-duplication-planarization]")
     auto ntk = mincross(planarized_ntk, p_min, &st_min);  // counts crossings
     CHECK(st_min.num_crossings == 0);
 
+    // clang-tidy bugprone-unchecked-optional-access false positive in tests
+    // NOLINTBEGIN(bugprone-unchecked-optional-access)
     mockturtle::equivalence_checking_stats st;
     const auto                             cec_m =
         mockturtle::equivalence_checking(*fiction::virtual_miter<technology_network>(tec, planarized_ntk), {}, &st);
-    // clang-tidy bugprone-unchecked-optional-access false positive in tests
-    // NOLINTBEGIN(bugprone-unchecked-optional-access)
     REQUIRE(cec_m.has_value());
     const auto result = *cec_m;
     CHECK(result == 1);
@@ -117,11 +117,11 @@ TEST_CASE("Planarize ntk with 3-ary node", "[node-duplication-planarization]")
     auto ntk = mincross(planarized_ntk, p_min, &st_min);  // counts crossings
     CHECK(st_min.num_crossings == 0);
 
+    // clang-tidy bugprone-unchecked-optional-access false positive in tests
+    // NOLINTBEGIN(bugprone-unchecked-optional-access)
     mockturtle::equivalence_checking_stats st;
     const auto                             cec_m =
         mockturtle::equivalence_checking(*fiction::virtual_miter<technology_network>(tec, planarized_ntk), {}, &st);
-    // clang-tidy bugprone-unchecked-optional-access false positive in tests
-    // NOLINTBEGIN(bugprone-unchecked-optional-access)
     REQUIRE(cec_m.has_value());
     const auto result = *cec_m;
     CHECK(result == 1);
@@ -163,11 +163,11 @@ TEST_CASE("Buffer AIG and planarize technology_network", "[node-duplication-plan
     auto ntk = mincross(planarized_ntk, p_min, &st_min);  // counts crossings
     CHECK(st_min.num_crossings == 0);
 
+    // clang-tidy bugprone-unchecked-optional-access false positive in tests
+    // NOLINTBEGIN(bugprone-unchecked-optional-access)
     mockturtle::equivalence_checking_stats st;
     const auto                             cec_m =
         mockturtle::equivalence_checking(*fiction::virtual_miter<technology_network>(aig, planarized_ntk), {}, &st);
-    // clang-tidy bugprone-unchecked-optional-access false positive in tests
-    // NOLINTBEGIN(bugprone-unchecked-optional-access)
     REQUIRE(cec_m.has_value());
     const auto result = *cec_m;
     CHECK(result == 1);
@@ -202,11 +202,11 @@ TEST_CASE("Buffer AIG and planarize technology_network 2", "[node-duplication-pl
     auto ntk = mincross(planarized_ntk, p_min, &st_min);  // counts crossings
     CHECK(st_min.num_crossings == 0);
 
+    // clang-tidy bugprone-unchecked-optional-access false positive in tests
+    // NOLINTBEGIN(bugprone-unchecked-optional-access)
     mockturtle::equivalence_checking_stats st;
     const auto                             cec_m =
         mockturtle::equivalence_checking(*fiction::virtual_miter<technology_network>(aig, planarized_ntk), {}, &st);
-    // clang-tidy bugprone-unchecked-optional-access false positive in tests
-    // NOLINTBEGIN(bugprone-unchecked-optional-access)
     REQUIRE(cec_m.has_value());
     const auto result = *cec_m;
     CHECK(result == 1);
@@ -244,11 +244,11 @@ TEST_CASE("Planarize multi output network", "[node-duplication-planarization]")
     auto ntk = mincross(planarized_ntk, p_min, &st_min);  // counts crossings
     CHECK(st_min.num_crossings == 0);
 
+    // clang-tidy bugprone-unchecked-optional-access false positive in tests
+    // NOLINTBEGIN(bugprone-unchecked-optional-access)
     mockturtle::equivalence_checking_stats st;
     const auto                             cec_m =
         mockturtle::equivalence_checking(*fiction::virtual_miter<technology_network>(aig, planarized_ntk), {}, &st);
-    // clang-tidy bugprone-unchecked-optional-access false positive in tests
-    // NOLINTBEGIN(bugprone-unchecked-optional-access)
     REQUIRE(cec_m.has_value());
     const auto result = *cec_m;
     CHECK(result == 1);
