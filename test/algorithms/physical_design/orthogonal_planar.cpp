@@ -52,6 +52,7 @@ void check_ortho_planar(const Ntk& ntk)
     mockturtle::equivalence_checking_stats eq_st;
     const auto                             cec_m = mockturtle::equivalence_checking(
         *fiction::virtual_miter<fiction::technology_network>(ntk, planarized_b), {}, &eq_st);
+    // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
     REQUIRE(cec_m.has_value());
     // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
     CHECK(*cec_m == 1);
