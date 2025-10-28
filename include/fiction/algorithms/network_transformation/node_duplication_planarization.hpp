@@ -704,7 +704,8 @@ class node_duplication_planarization_impl
         virtual_ntk.set_all_ranks(ntk_lvls_new);
 
         // restore possibly set signal names
-        restore_names(ntk, virtual_ntk);
+        restore_network_name(ntk, virtual_ntk);
+        restore_output_names(ntk, virtual_ntk);
 
         return virtual_ntk;
     }

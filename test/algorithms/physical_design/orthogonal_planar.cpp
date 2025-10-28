@@ -1,5 +1,6 @@
 #include <catch2/catch_test_macros.hpp>
 
+#include "catch2/matchers/catch_matchers.hpp"
 #include "fiction/algorithms/physical_design/apply_gate_library.hpp"
 #include "fiction/layouts/cell_level_layout.hpp"
 #include "fiction/layouts/coordinates.hpp"
@@ -63,6 +64,25 @@ void check_ortho_planar(const Ntk& ntk)
     CHECK_NOTHROW(apply_gate_library<cell_layout, qca_one_library>(gate_level_layout));
 }
 
+TEST_CASE("Check exceptions", "[orthogonal-planar]")
+{
+    using gate_lyt =
+        fiction::gate_level_layout<fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<>>>>;
+    fiction::network_balancing_params b_ps;
+    b_ps.unify_outputs = true;
+
+    auto                             maj        = blueprints::maj1_network<technology_network>();
+    auto                             maj_ranked = fiction::mutable_rank_view(maj);
+    orthogonal_physical_design_stats orthogonal_planar_stats{};
+    CHECK_THROWS_WITH(fiction::orthogonal_planar<gate_lyt>(maj_ranked, {}, &orthogonal_planar_stats),
+                      "network contains nodes that exceed the supported fanin size");
+
+    auto ao        = blueprints::and_or_network<technology_network>();
+    auto ao_ranked = fiction::mutable_rank_view(ao);
+    CHECK_THROWS_WITH(fiction::orthogonal_planar<gate_lyt>(ao_ranked, {}, &orthogonal_planar_stats),
+                      "Input network has to be planar");
+}
+
 TEST_CASE("Orthogonal planar layout tests", "[orthogonal-planar]")
 {
     // Simple correctness and corner-case networks
@@ -75,6 +95,9 @@ TEST_CASE("Orthogonal planar layout tests", "[orthogonal-planar]")
 
     // Multi-output network
     check_ortho_planar(blueprints::multi_output_network<technology_network>());
+
+    // Parity network
+    check_ortho_planar(blueprints::parity_network<technology_network>());
 }
 
 TEST_CASE("Name conservation after planar orthogonal physical design", "[orthogonal-planar]")
@@ -93,8 +116,6 @@ TEST_CASE("Name conservation after planar orthogonal physical design", "[orthogo
     auto topolinano_ranked = fiction::mutable_rank_view(topolinano_balanced);
     auto planarized_b      = fiction::node_duplication_planarization(topolinano_ranked);
 
-    CHECK(planarized_b.get_name(2) == "x1");
-    CHECK(planarized_b.get_name(3) == "x2");
     CHECK(planarized_b.get_network_name() == "topolinano");
     CHECK(planarized_b.get_output_name(0) == "f1");
     CHECK(planarized_b.get_output_name(1) == "f2");
@@ -106,9 +127,6 @@ TEST_CASE("Name conservation after planar orthogonal physical design", "[orthogo
 
     // network name
     CHECK(layout.get_layout_name() == "topolinano");
-    // PI names (they are ordered corresponding to their placement in the layout)
-    CHECK(layout.get_input_name(0) == "x1");
-    CHECK(layout.get_input_name(1) == "x2");
     // PO names
     CHECK(layout.get_output_name(0) == "f1");
     CHECK(layout.get_output_name(1) == "f2");
