@@ -32,8 +32,7 @@ TEST_CASE("Check exceptions", "[node-duplication-planarization]")
 
     const auto vpi_r = fiction::mutable_rank_view(tec);
 
-    CHECK_THROWS_WITH(node_duplication_planarization(vpi_r),
-                      "Networks have to be balanced for this duplication");
+    CHECK_THROWS_WITH(node_duplication_planarization(vpi_r), "Networks have to be balanced for this duplication");
 }
 
 TEST_CASE("Planarize technology ntk", "[node-duplication-planarization]")
