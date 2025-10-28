@@ -116,7 +116,7 @@ afterward be simulated in QCADesigner:
 
 If you want to use _fiction_ as a dependency in your project, use its header-only library.
 
-Add `fiction` as a sub-directory to your CMake project and link against `libfiction` (assuming your project is
+Add `fiction` as a subdirectory to your CMake project and link against `libfiction` (assuming your project is
 called `fanfiction`):
 
 ```CMake
