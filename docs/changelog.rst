@@ -27,6 +27,8 @@ Changed
     - ``area`` now outputs the layout width and height in addition to the area
 - Continuous integration:
     - Switched to the `Ninja` generator for Windows CI builds
+- Documentation:
+    - Modernized README and Getting Started section of the documentation
 
 Removed
 #######
@@ -43,6 +45,7 @@ Removed
 #######
 - Continuous integration:
     - Dropped Python 3.9 support due to its end-of-life status
+
 
 v0.6.11 - 2025-04-23
 --------------------
