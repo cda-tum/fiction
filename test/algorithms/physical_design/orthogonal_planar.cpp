@@ -52,10 +52,12 @@ void check_ortho_planar(const Ntk& ntk)
     mockturtle::equivalence_checking_stats eq_st;
     const auto                             cec_m = mockturtle::equivalence_checking(
         *fiction::virtual_miter<fiction::technology_network>(ntk, planarized_b), {}, &eq_st);
-    // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
+    // clang-tidy bugprone-unchecked-optional-access false positive in tests
+    // NOLINTBEGIN(bugprone-unchecked-optional-access)
     REQUIRE(cec_m.has_value());
-    // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-    CHECK(*cec_m == 1);
+    const auto result = *cec_m;
+    CHECK(result == 1);
+    // NOLINTEND(bugprone-unchecked-optional-access)
 
     orthogonal_physical_design_stats orthogonal_planar_stats{};
 
