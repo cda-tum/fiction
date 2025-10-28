@@ -1020,7 +1020,7 @@ class orthogonal_planar_impl
                     }
                     else
                     {
-                        assert(false);
+                        throw std::logic_error("Node has more than 2 primary outputs after fanout substitution");
                     }
                 }
             });
