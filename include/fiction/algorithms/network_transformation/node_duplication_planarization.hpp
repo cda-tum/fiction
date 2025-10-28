@@ -85,7 +85,7 @@ struct node_pair
      */
     std::vector<mockturtle::node<Ntk>> middle_nodes;
     /**
-     * Shared pointer to another instance of node_pair detailing fanin-edge alignment.
+     * Index into the previous level's node_pair vector, used to track fanin-edge alignment.
      */
     std::size_t fanin_it{};
     /**
