@@ -975,7 +975,7 @@ class orthogonal_planar_impl
                 });
 #if (PROGRESS_BARS)
             // update progress
-            bar(i);
+            bar(lvl);
 #endif
         }
 
