@@ -46,7 +46,7 @@ namespace detail
  * combinations of the previous level, connection type, orientations, and surrounding spacing (gaps). Based on these
  * inputs, it returns the corresponding orientation and spacing configuration for the current buffer.
  */
-std::array<std::array<std::array<std::array<std::pair<uint64_t, uint64_t>, 4>, 3>, 3>, 2>& get_buffer_lookup()
+inline std::array<std::array<std::array<std::array<std::pair<uint64_t, uint64_t>, 4>, 3>, 3>, 2>& get_buffer_lookup()
 {
     static std::array<std::array<std::array<std::array<std::pair<uint64_t, uint64_t>, 4>, 3>, 3>, 2> array = {
         {  // Array
@@ -96,7 +96,7 @@ std::array<std::array<std::array<std::array<std::pair<uint64_t, uint64_t>, 4>, 3
  * combinations of the previous level, connection type, orientations, and surrounding spacing (gaps). Based on these
  * inputs, it returns the corresponding orientation and spacing configuration for the current fanout.
  */
-std::array<std::array<std::array<std::array<std::pair<uint64_t, uint64_t>, 4>, 3>, 3>, 4>& get_fanout_lookup()
+inline std::array<std::array<std::array<std::array<std::pair<uint64_t, uint64_t>, 4>, 3>, 3>, 4>& get_fanout_lookup()
 {
     static std::array<std::array<std::array<std::array<std::pair<uint64_t, uint64_t>, 4>, 3>, 3>, 4> array = {
         {  // Array
@@ -566,9 +566,9 @@ std::vector<uint64_t> calculate_two_input_new_lines(const Ntk&                  
  * @param two_input_indices     Indices of two-input nodes within the level.
  * @param two_input_new_lines   Number of new routing lines associated with each two-input node.
  */
-void adjust_final_values(std::vector<uint64_t>& x, std::vector<uint64_t>& y,
-                         const std::vector<std::size_t>& two_input_indices,
-                         const std::vector<uint64_t>&    two_input_new_lines)
+inline void adjust_final_values(std::vector<uint64_t>& x, std::vector<uint64_t>& y,
+                                const std::vector<std::size_t>& two_input_indices,
+                                const std::vector<uint64_t>&    two_input_new_lines)
 {
     // Max element in two_input_new_lines and its index
     const auto        max_it = std::max_element(two_input_new_lines.begin(), two_input_new_lines.end());
@@ -1003,10 +1003,19 @@ class orthogonal_planar_impl
                         po_tile.x = first_pos.x + 1;
 
                         // Create PO and increment the count
-                        layout.create_po(wire_east(layout, anker, po_tile),
-                                         ntk.has_output_name(po_counter) ? ntk.get_output_name(po_counter++) :
-                                                                           fmt::format("po{}", po_counter++),
-                                         po_tile);
+                        if constexpr (mockturtle::has_has_output_name_v<Ntk>)
+                        {
+                            layout.create_po(wire_east(layout, anker, po_tile),
+                                             ntk.has_output_name(po_counter) ? ntk.get_output_name(po_counter++) :
+                                                                               fmt::format("po{}", po_counter++),
+                                             po_tile);
+                        }
+                        else
+                        {
+                            layout.create_po(wire_east(layout, anker, po_tile), fmt::format("po{}", po_counter++),
+                                             po_tile);
+                        }
+
                         ++cnt;
                     }
                     else
