@@ -9574,8 +9574,8 @@ Template parameter ``Ntk``:
 static const char *__doc_fiction_detail_node_pair_delay = R"doc(Specifies the delay value for the node.)doc";
 
 static const char *__doc_fiction_detail_node_pair_fanin_it =
-R"doc(Shared pointer to another instance of node_pair detailing fanin-edge
-alignment.)doc";
+R"doc(Index into the previous level's node_pair vector, used to track fanin-
+edge alignment.)doc";
 
 static const char *__doc_fiction_detail_node_pair_node_pair =
 R"doc(Standard constructor.
