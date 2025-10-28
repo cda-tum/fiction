@@ -215,7 +215,7 @@ gather_fanin_signals(const Ntk& ntk, NtkDest& ntk_dest_v, const mockturtle::node
 
     // Return the children of the node.
     return children;
-};
+}
 
 /**
  * Constructs a planar `virtual_pi_network` based on duplicated nodes derived from the source network.

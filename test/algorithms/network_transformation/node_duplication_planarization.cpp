@@ -4,6 +4,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "catch2/matchers/catch_matchers.hpp"
 #include "fiction/algorithms/graph/mincross.hpp"
 #include "fiction/algorithms/network_transformation/fanout_substitution.hpp"
 #include "fiction/algorithms/network_transformation/network_balancing.hpp"
@@ -17,6 +18,23 @@
 #include <mockturtle/networks/aig.hpp>
 
 using namespace fiction;
+
+TEST_CASE("Check exceptions", "[node-duplication-planarization]")
+{
+    technology_network tec{};
+
+    const auto x1 = tec.create_pi();
+    const auto x2 = tec.create_pi();
+    const auto b1 = tec.create_buf(x2);
+    const auto f1 = tec.create_and(x1, b1);
+
+    tec.create_po(f1);
+
+    const auto vpi_r = fiction::mutable_rank_view(tec);
+
+    CHECK_THROWS_WITH(node_duplication_planarization(vpi_r),
+                      "Networks have to be balanced for this duplication");
+}
 
 TEST_CASE("Planarize technology ntk", "[node-duplication-planarization]")
 {
@@ -83,6 +101,9 @@ TEST_CASE("Planarize ntk with 3-ary node", "[node-duplication-planarization]")
         fiction::fanout_substitution<fiction::technology_network>(tec), ps);
 
     const auto vpi_r = fiction::mutable_rank_view(tec_b);
+
+    node_duplication_planarization_params params;
+    params.po_order = node_duplication_planarization_params::output_order::RANDOM_PO_ORDER;
 
     auto planarized_ntk = node_duplication_planarization(vpi_r);
 
