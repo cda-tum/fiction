@@ -133,6 +133,7 @@ addopts = ["-ra", "--strict-markers", "--strict-config", "--showlocals"]
 log_cli_level = "INFO"
 xfail_strict = true
 
+
 [tool.cibuildwheel]
 build = "cp3*"
 enable = ["cpython-freethreading"]
