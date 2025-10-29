@@ -7,7 +7,7 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "mnt.pyfiction"
-version = "0.6.11"
+version = "0.6.12"
 description = "Design Automation for Field-coupled Nanotechnologies"
 readme = "README.md"
 authors = [
@@ -128,11 +128,11 @@ cmake.define.DISABLE_GIL = "1"
 
 [tool.pytest.ini_options]
 minversion = "7.2"
-testpaths = ["bindings/mnt/pyfiction/test/"]
+#addopts = ["-ra", "--strict-markers", "--strict-config", "--showlocals", "--pyargs", "mnt.pyfiction.test"]
 addopts = ["-ra", "--strict-markers", "--strict-config", "--showlocals"]
 log_cli_level = "INFO"
 xfail_strict = true
-
+testpaths = ["bindings/mnt/pyfiction/test"]
 
 [tool.cibuildwheel]
 build = "cp3*"
