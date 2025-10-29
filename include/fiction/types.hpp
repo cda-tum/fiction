@@ -55,31 +55,31 @@ using truth_table_t = tt_ptr;
 using aig_nt  = mockturtle::names_view<mockturtle::aig_network>;
 using aig_ptr = std::shared_ptr<aig_nt>;
 
-inline constexpr const char* aig_name = "AIG";
+inline constexpr auto aig_name = "AIG";
 
 using xag_nt  = mockturtle::names_view<mockturtle::xag_network>;
 using xag_ptr = std::shared_ptr<xag_nt>;
 
-inline constexpr const char* xag_name = "XAG";
+inline constexpr auto xag_name = "XAG";
 
 using mig_nt  = mockturtle::names_view<mockturtle::mig_network>;
 using mig_ptr = std::shared_ptr<mig_nt>;
 
-inline constexpr const char* mig_name = "MIG";
+inline constexpr auto mig_name = "MIG";
 
 using tec_nt  = mockturtle::names_view<fiction::technology_network>;
 using tec_ptr = std::shared_ptr<tec_nt>;
 
-inline constexpr const char* tec_name = "TEC";
+inline constexpr auto tec_name = "TEC";
 
 using logic_network_t = std::variant<aig_ptr, xag_ptr, mig_ptr, tec_ptr>;
 
 template <class Ntk>
-inline constexpr const char* ntk_type_name = std::is_same_v<std::decay_t<Ntk>, aig_nt> ? aig_name :
-                                             std::is_same_v<std::decay_t<Ntk>, xag_nt> ? xag_name :
-                                             std::is_same_v<std::decay_t<Ntk>, mig_nt> ? mig_name :
-                                             std::is_same_v<std::decay_t<Ntk>, tec_nt> ? tec_name :
-                                                                                         "?";
+inline constexpr auto ntk_type_name = std::is_same_v<std::decay_t<Ntk>, aig_nt> ? aig_name :
+                                      std::is_same_v<std::decay_t<Ntk>, xag_nt> ? xag_name :
+                                      std::is_same_v<std::decay_t<Ntk>, mig_nt> ? mig_name :
+                                      std::is_same_v<std::decay_t<Ntk>, tec_nt> ? tec_name :
+                                                                                  "?";
 
 /**
  * FCN gate-level layouts.
