@@ -128,11 +128,10 @@ cmake.define.DISABLE_GIL = "1"
 
 [tool.pytest.ini_options]
 minversion = "7.2"
-#addopts = ["-ra", "--strict-markers", "--strict-config", "--showlocals", "--pyargs", "mnt.pyfiction.test"]
+testpaths = ["bindings/mnt/pyfiction/test/"]
 addopts = ["-ra", "--strict-markers", "--strict-config", "--showlocals"]
 log_cli_level = "INFO"
 xfail_strict = true
-testpaths = ["bindings/mnt/pyfiction/test"]
 
 [tool.cibuildwheel]
 build = "cp3*"
