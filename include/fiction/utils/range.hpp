@@ -14,10 +14,12 @@ namespace fiction
  * Defines a range type utilizing iterators. It implements `begin()` and `end()` as well as `cbegin()` and `cend()` as
  * member functions to work for range based for-loops.
  *
- * @tparam Iterator type for which the range should be created.
+ * @tparam I type for which the range should be created.
+ *
+ * @deprecated range_t is deprecated since version 0.7.0 and will be removed in version 0.8.0.
  */
 template <typename I>
-struct range_t
+struct [[deprecated("range_t is deprecated")]] range_t
 {
   private:
     /**
