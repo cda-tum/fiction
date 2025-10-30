@@ -61,8 +61,12 @@ namespace fiction
 
 /**
  * Parameters for the one-pass synthesis algorithm.
+ *
+ * @deprecated one_pass_synthesis() is deprecated since version 0.7.0 and will be removed in version 0.8.0.
+ *             Please use @ref exact_physical_design() instead.
  */
-struct one_pass_synthesis_params
+struct [[deprecated("one_pass_synthesis() is deprecated; use exact_physical_design() instead")]]
+one_pass_synthesis_params
 {
     /**
      * Clocking scheme to be used.
@@ -125,8 +129,14 @@ struct one_pass_synthesis_params
      */
     std::string name{};
 };
-
-struct one_pass_synthesis_stats
+/**
+ * Statistics for the one-pass synthesis algorithm.
+ *
+ * @deprecated one_pass_synthesis() is deprecated since version 0.7.0 and will be removed in version 0.8.0.
+ *             Please use @ref exact_physical_design() instead.
+ */
+struct [[deprecated("one_pass_synthesis() is deprecated; use exact_physical_design() instead")]]
+one_pass_synthesis_stats
 {
     mockturtle::stopwatch<>::duration time_total{0};
 
@@ -956,6 +966,9 @@ class one_pass_synthesis_impl
  * Due to the integration hassle, possible performance issues, and its experimental status this approach is excluded
  * from (CLI) compilation by default. To enable it, pass `-DFICTION_ENABLE_MUGEN=ON` to the cmake call.
  *
+ * @deprecated one_pass_synthesis() is deprecated since version 0.7.0 and will be removed in version 0.8.0.
+ *             Please use @ref exact_physical_design() instead.
+ *
  * @tparam Lyt Gate-level layout type to generate.
  * @tparam TT Truth table type used as specification.
  * @param tts A vector of truth tables where table at index `i` specifies the Boolean function for output `i`.
@@ -965,6 +978,7 @@ class one_pass_synthesis_impl
  * parameters; `std::nullopt`, otherwise.
  */
 template <typename Lyt, typename TT>
+[[deprecated("one_pass_synthesis() is deprecated; use exact_physical_design() instead")]]
 std::optional<Lyt> one_pass_synthesis(const std::vector<TT>& tts, one_pass_synthesis_params ps = {},
                                       one_pass_synthesis_stats* pst = nullptr)
 {
@@ -1010,6 +1024,9 @@ std::optional<Lyt> one_pass_synthesis(const std::vector<TT>& tts, one_pass_synth
  *
  * This function might throw an `std::bad_alloc` exception if the provided logic network has too many inputs.
  *
+ * @deprecated one_pass_synthesis() is deprecated since version 0.7.0 and will be removed in version 0.8.0.
+ *             Please use @ref exact_physical_design() instead.
+ *
  * @tparam Lyt Gate-level layout type to generate.
  * @tparam Ntk Logic network type used as specification.
  * @param ntk The network whose function is to be realized as an FCN circuit.
@@ -1019,6 +1036,7 @@ std::optional<Lyt> one_pass_synthesis(const std::vector<TT>& tts, one_pass_synth
  * parameters; `std::nullopt`, otherwise.
  */
 template <typename Lyt, typename Ntk>
+[[deprecated("one_pass_synthesis() is deprecated; use exact_physical_design() instead")]]
 std::optional<Lyt> one_pass_synthesis(const Ntk& ntk, const one_pass_synthesis_params& ps = {},
                                       one_pass_synthesis_stats* pst = nullptr)
 {
