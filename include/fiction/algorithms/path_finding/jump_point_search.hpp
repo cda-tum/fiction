@@ -522,6 +522,9 @@ class jump_point_search_impl
  *
  * @note JPS does not support wire crossings.
  *
+ * @deprecated jump_point_search() is deprecated since version 0.7.0 and will be removed in version 0.8.0.
+ *             Please use @ref a_star() instead.
+ *
  * @tparam Path Type of the returned path.
  * @tparam Lyt Type of the layout to perform path finding on.
  * @tparam Dist Distance value type to be used in the heuristic estimation function.
@@ -531,7 +534,7 @@ class jump_point_search_impl
  * @return The shortest loop-less path in `layout` from `objective.source` to `objective.target`.
  */
 template <typename Path, typename Lyt, typename Dist = uint64_t>
-[[nodiscard]] Path
+[[deprecated("jump_point_search() is deprecated; use a_star() instead")]] [[nodiscard]] Path
 jump_point_search(const Lyt& layout, const routing_objective<Lyt>& objective,
                   const distance_functor<Lyt, Dist>& dist_fn = manhattan_distance_functor<Lyt, Dist>()) noexcept
 {
