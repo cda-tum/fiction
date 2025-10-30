@@ -19,7 +19,12 @@
 namespace fiction
 {
 
-struct energy_dissipation_stats
+/**
+ * Statistics for energy dissipation calculation.
+ *
+ * @deprecated qca_energy_dissipation() is deprecated since version 0.7.0 and will be removed in version 0.8.0.
+ */
+struct [[deprecated("energy dissipation calculation is deprecated")]] energy_dissipation_stats
 {
     /**
      * Energy dissipation information in meV for slow (25 GHz) and fast (100 GHz) clocking.
@@ -242,11 +247,14 @@ class qca_energy_dissipation_impl
  * As done in that publication, energy dissipation values are being given in meV for slow (25 GHz) and fast (100 GHz)
  * clocking.
  *
+ * @deprecated qca_energy_dissipation() is deprecated since version 0.7.0 and will be removed in version 0.8.0.
+ *
  * @tparam Lyt Gate-level layout type.
  * @param lyt The gate-level layout whose energy dissipation is to be calculated.
  * @param pst Statistics.
  */
 template <typename Lyt>
+[[deprecated("qca_energy_dissipation() is deprecated")]]
 void qca_energy_dissipation(const Lyt& lyt, energy_dissipation_stats* pst = nullptr)
 {
     static_assert(fiction::is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
