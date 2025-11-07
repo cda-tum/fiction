@@ -53,8 +53,12 @@ enum class exact_sidb_simulation_engine : uint8_t
 {
     /**
      * *Exhaustive Ground State Search* (EXGS) is an exact simulation engine that always has exponential runtime.
+     *
+     * @deprecated exhaustive_ground_state_simulation() is deprecated since version 0.7.0 and will be moved to
+     * experiments/ in version 0.8.0 to ensure continued reproducibility of old results. Please use quickexact()
+     * instead.
      */
-    EXGS,
+    EXGS [[deprecated("EXGS is deprecated; use QUICKEXACT instead")]],
     /**
      * *QuickExact* is also an exact simulation engine that requires exponential runtime, but it scales a lot better
      * than ExGS due to its effective search-space pruning.

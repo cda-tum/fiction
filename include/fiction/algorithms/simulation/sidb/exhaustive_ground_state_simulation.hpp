@@ -27,12 +27,16 @@ namespace fiction
  * @note This was the first exact simulation approach. However, it is replaced by *QuickExact* and *ClusterComplete* due
  * to the much better runtimes and more functionality.
  *
+ * @deprecated exhaustive_ground_state_simulation() is deprecated since version 0.7.0 and will be moved to experiments/
+ * in version 0.8.0 to ensure continued reproducibility of old results. Please use quickexact() instead.
+ *
  * @tparam Lyt SiDB cell-level layout type.
  * @param lyt The layout to simulate.
  * @param params Simulation parameters.
  * @return sidb_simulation_result is returned with all results.
  */
 template <typename Lyt>
+[[deprecated("exhaustive_ground_state_simulation() is deprecated; use quickexact() instead")]]
 sidb_simulation_result<Lyt>
 exhaustive_ground_state_simulation(const Lyt&                        lyt,
                                    const sidb_simulation_parameters& params = sidb_simulation_parameters{}) noexcept

@@ -18,7 +18,8 @@ void exhaustive_ground_state_simulation_impl(pybind11::module& m)
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     m.def("exhaustive_ground_state_simulation", &fiction::exhaustive_ground_state_simulation<Lyt>, py::arg("lyt"),
-          py::arg("params") = fiction::sidb_simulation_parameters{}, DOC(fiction_exhaustive_ground_state_simulation));
+          py::arg("params") = fiction::sidb_simulation_parameters{}, DOC(fiction_exhaustive_ground_state_simulation),
+          py::deprecated("exhaustive_ground_state_simulation() is deprecated; use quickexact() instead"));
 }
 
 }  // namespace detail
