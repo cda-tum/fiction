@@ -12272,7 +12272,13 @@ base, it simulates very effectively for either base number (2 or 3).)doc";
 
 static const char *__doc_fiction_exact_sidb_simulation_engine_EXGS =
 R"doc(*Exhaustive Ground State Search* (EXGS) is an exact simulation engine
-that always has exponential runtime.)doc";
+that always has exponential runtime.
+
+.. deprecated::
+    exhaustive_ground_state_simulation() is deprecated since version
+    0.7.0 and will be moved to experiments/ in version 0.8.0 to ensure
+    continued reproducibility of old results. Please use quickexact()
+    instead.)doc";
 
 static const char *__doc_fiction_exact_sidb_simulation_engine_QUICKEXACT =
 R"doc(*QuickExact* is also an exact simulation engine that requires
@@ -12326,6 +12332,12 @@ guaranteed.
 @note This was the first exact simulation approach. However, it is
 replaced by *QuickExact* and *ClusterComplete* due to the much better
 runtimes and more functionality.
+
+.. deprecated::
+    exhaustive_ground_state_simulation() is deprecated since version
+    0.7.0 and will be moved to experiments/ in version 0.8.0 to ensure
+    continued reproducibility of old results. Please use quickexact()
+    instead.
 
 Template parameter ``Lyt``:
     SiDB cell-level layout type.
