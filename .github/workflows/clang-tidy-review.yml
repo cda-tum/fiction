@@ -6,9 +6,9 @@ on:
     paths:
       - "**/*.hpp"
       - "**/*.cpp"
-      - "libs/**"
       - ".github/workflows/clang-tidy-review.yml"
       - "!bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp"
+      - "!bindings/mnt/pyfiction/include/pyfiction/documentation.hpp"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
@@ -63,15 +63,16 @@ jobs:
 
       - name: Run clang-tidy
         id: linter
-        uses: cpp-linter/cpp-linter-action@v2.16.3
+        uses: cpp-linter/cpp-linter-action@v2.16.6
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           style: ""
           tidy-checks: ""
           database: "build"
-          thread-comments: ${{ github.event_name == 'pull_request' && 'update' }}
-          ignore-tidy: "build|libs/*|docs/*|benchmarks/*|bib/*|*/pyfiction/pybind11_mkdoc_docstrings.hpp|*/pyfiction/documentation.hpp"
+          step-summary: true
+          thread-comments: ${{ ((github.event_name == 'pull_request' && !github.event.pull_request.head.repo.fork) && 'update') || 'false' }}
+          ignore-tidy: "build|libs/*|docs/*|benchmarks/*|bib/*|bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp|bindings/mnt/pyfiction/include/pyfiction/documentation.hpp"
           version: "21"
 
       - if: steps.linter.outputs.checks-failed > 0

@@ -48,48 +48,85 @@ that allows quick access to its core functionality.
 If you have any questions, feel free to contact us via [nanotech.cda@xcit.tum.de](mailto:nanotech.cda@xcit.tum.de) or by
 creating an [issue on GitHub](https://github.com/cda-tum/fiction/issues).
 
-## Quick Start (C++)
+## 🚀 Getting Started
 
-> Clone the repository and its submodules:
+To help you get started with _fiction_, pick the interface that best fits your use case:
+
+| Goal                                   | Recommended Path          | Section                              |
+| -------------------------------------- | ------------------------- | ------------------------------------ |
+| Try the tool immediately               | 🐳 Docker CLI image       | [CLI (Docker)](#-cli-docker)         |
+| Full-featured local CLI build          | 💻 Native build           | [CLI (Source)](#-cli-source)         |
+| Integrate into a C++ project           | 📚 Header-only library    | [C++ Library](#-c-library)           |
+| Script / notebooks / rapid prototyping | 🐍 Python bindings (PyPI) | [Python Bindings](#-python-bindings) |
+
+For a
+full [getting started guide](https://fiction.readthedocs.io/en/latest/getting_started.html), [CLI command list](https://fiction.readthedocs.io/en/latest/cli.html),
+or API reference, see the [documentation](https://fiction.readthedocs.io/en/latest/index.html).
+
+### 🐳 CLI (Docker)
+
+This is the fastest zero-install path. We release pre-built images of the latest CLI
+on [Docker Hub](https://hub.docker.com/r/mawalter/fiction). Make sure you
+have [Docker installed](https://docs.docker.com/get-docker/) on your local system.
+
+Pull the latest image:
+
+```bash
+docker pull mawalter/fiction:latest
+```
+
+Run the interactive CLI session:
+
+```bash
+docker run --rm -it mawalter/fiction
+```
+
+Internally, the repository lives at `/app/fiction`.
+
+### 💻 CLI (Source)
+
+When you want to add your own algorithms or contribute to the project, you should build _fiction_ from source.
+
+Clone the project with its submodules:
 
 ```bash
 git clone --recursive https://github.com/cda-tum/fiction.git
+cd fiction
 ```
 
-### The CLI
-
-> Inside the newly cloned `fiction` folder, trigger the build process:
+Configure and build with CMake:
 
 ```bash
-cmake . -B build
-cd build
-cmake --build . -j4
+cmake -S . -B build
+cmake --build build --parallel
 ```
 
-> Run the CLI tool:
+Run the CLI:
 
 ```bash
-cli/fiction
+build/cli/fiction
 ```
 
-> Here is an example of running _fiction_ to perform a full physical design flow on a QCA circuit layout that can
-> afterward be simulated in QCADesigner:
+Here is an example of running _fiction_ to perform a full physical design flow on a QCA circuit layout that can
+afterward be simulated in QCADesigner:
 
 ![CLI example](https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/fiction_cli_example.gif)
 
-### The Header-only Library
+### 📚 C++ Library
 
-> Add `fiction` as a sub-directory to your CMake project and link against `libfiction` (assuming your project is
-> called `fanfiction`):
+If you want to use _fiction_ as a dependency in your project, use its header-only library.
+
+Add `fiction` as a subdirectory to your CMake project and link against `libfiction` (assuming your project is
+called `fanfiction`):
 
 ```CMake
-add_subdirectory(fiction/)
-target_link_libraries(fanfiction libfiction)
+add_subdirectory(fiction)
+target_link_libraries(fanfiction PRIVATE libfiction)
 ```
 
-> Include the headers you need:
+Then include what you need:
 
-```C++
+```c++
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/technology/qca_one_library.hpp>
@@ -97,27 +134,28 @@ target_link_libraries(fanfiction libfiction)
 #include <fiction/...>
 ```
 
-## Quick Start (Python)
+### 🐍 Python Bindings
 
-> Install the Python bindings from [PyPI](https://pypi.org/project/mnt.pyfiction/):
+Ideal for notebooks, exploratory scripts, and integration with Python tooling.
+
+Install the library from PyPI:
 
 ```bash
 pip install mnt.pyfiction
 ```
 
-> Import the bindings:
+Import it in your script:
 
 ```python
 from mnt import pyfiction
 ```
 
-For a full getting started guide, please refer to
-the [documentation](https://fiction.readthedocs.io/en/latest/getting_started.html).
+---
 
-## Supported Technologies
+## 🧪 Supported Technologies
 
-Physical design in _fiction_ can be performed technology-independent. Only if resulted layouts are to be physically,
-simulated, a specific technology implementation is required. To this end, _fiction_ supports various potential FCN
+Physical design in _fiction_ can be performed technology-independently. Only if the resulting layouts are to be
+physically simulated is a specific technology implementation required. To this end, _fiction_ supports various FCN
 implementations together with gate libraries to compile gate-level layout abstractions down to the cell level.
 Additionally, output formats for external physical simulator engines are also supported.
 
@@ -168,7 +206,7 @@ File formats:
 
 Many thanks to Samuel Sze Hang Ng for his support!
 
-## Implemented Design Automation Algorithms
+## ⚙️ Implemented Design Automation Algorithms
 
 The _fiction_ framework provides implementations of state-of-the-art design automation algorithms for FCN technologies.
 These algorithms can be used in evaluation scripts to perform logic synthesis, physical design, layout verification, and
@@ -176,7 +214,8 @@ physical simulation.
 
 ### Logic Synthesis
 
-For logic synthesis, _fiction_ utilizes [ABC](https://github.com/berkeley-abc/abc) and the [mockturtle library](https://github.com/lsils/mockturtle) that
+For logic synthesis, _fiction_ utilizes [ABC](https://github.com/berkeley-abc/abc) and
+the [mockturtle library](https://github.com/lsils/mockturtle) that
 offer a multitude of logic network types and optimization algorithms. Logic synthesis can be performed in external tools
 and resulting Verilog/AIGER/BLIF/... files can be parsed by _fiction_. Alternatively, since _mockturtle_ is included in
 _fiction_, synthesis can be applied in the same evaluation script.
@@ -206,7 +245,7 @@ On top, there is a [hexagonalization algorithm](https://ieeexplore.ieee.org/docu
 layouts suitable for QCA into hexagonal layouts suitable for SiDBs,
 and multiple algorithms to optimize gate-level layouts post-placement:
 
-- [post-layout optimzation](https://dl.acm.org/doi/10.1145/3611315.3633247)
+- [post-layout optimization](https://dl.acm.org/doi/10.1145/3611315.3633247)
 - [wiring reduction](https://www.cda.cit.tum.de/files/eda/2024_dac_wiring_reduction_for_field-coupled_nanotechnologies.pdf)
 
 ### Verification
@@ -228,19 +267,18 @@ simulated using a physical model. Currently, the following simulation algorithms
 - Silicon Dangling Bonds (SiDBs)
   - Electrostatic Ground State Simulation
     - [_ClusterComplete_](https://fiction.readthedocs.io/en/latest/algorithms/sidb_simulation.html#_CPPv4I0EN7fiction15clustercompleteE22sidb_simulation_resultI3LytERK3LytRK22clustercomplete_paramsI4cellI3LytEE)
-    - [_QuickExact_](https://arxiv.org/abs/2308.04487)
+    - [_QuickExact_](https://dl.acm.org/doi/10.1109/ASP-DAC58780.2024.10473946)
     - [_QuickSim_](https://ieeexplore.ieee.org/document/10231266)
     - [Exhaustive _(ExGS)_](https://open.library.ubc.ca/soa/cIRcle/collections/ubctheses/24/items/1.0392909)
   - [Critical Temperature Simulation](https://ieeexplore.ieee.org/document/10231259)
-  - [Operational Domain Computation](https://www.cda.cit.tum.de/files/eda/2023_nanoarch_reducing_the_complexity_of_operational_domain_computation_in_silicon_dangling_bond_logic.pdf)
+  - [Operational Domain Computation](https://dl.acm.org/doi/10.1145/3611315.3633246)
 
-## Clocking Schemes
+## ⏰ Clocking Schemes
 
-Regular clocking schemes have been proposed in the FCN literature, which can be used as a floor plans for physical
-design. However, sometimes it can make sense to have more freedom and assign clock numbers on the fly. That is
-why _fiction_ supports both
+Regular clocking schemes have been proposed in the FCN literature and can be used as floor plans for physical
+design. However, sometimes it makes sense to assign clock numbers on the fly. Therefore, _fiction_ supports both
 [regular and irregular clocking schemes](https://fiction.readthedocs.io/en/latest/layouts/clocking_scheme.html)
-with variable amounts of clock numbers as QCA for instance uses four clock phases but iNML needs only three.
+with variable numbers of clock phases: for instance, QCA uses four phases, whereas iNML needs only three.
 
 Built-in schemes are
 
@@ -262,7 +300,7 @@ Built-in schemes are
 
 plus the mentioned irregular open clocking that works via a clock map instead of a regular extrapolated cutout.
 
-## Wire Crossings
+## ❎ Wire Crossings
 
 <img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/cross.png" alt="Second layer crossing" align="left" width="200"/>
 
@@ -275,24 +313,7 @@ co-planar.
 
 Wires are only allowed to cross other wires! Wires crossing gates is considered to lead to unstable signals.
 
-## Gate Pins vs. Designated I/Os
-
-<img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/io.png" alt="Input pin and cell output" align="right" width="200"/>
-
-In the literature, both are seen: having input cells (pins) directly located in the gate structure or using designated
-I/O elements that are located outside of gates. This distinction only makes sense on the gate level and _fiction_
-supports both approaches and offers usage in the implemented physical design algorithms.
-
-## Multi Wires
-
-<img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/multi.png" alt="Multi wires" align="left" width="200"/>
-
-Gate-level abstraction has its limits. Often, chip area is wasted when only using a single wire per tile. In _fiction_,
-cell-level layouts allow for precise control over cell placement and can, thus, also create multiple wire segments per
-clock zone. Physical simulation can give an indication of whether the built structures are implementing the intended
-functionality.
-
-## Synchronization Elements
+## ⏳ Synchronization Elements
 
 <img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/se.png" alt="Synchronization element" align="right" width="150"/>
 
@@ -302,7 +323,7 @@ tiles, [synchronization elements](https://ieeexplore.ieee.org/document/8626294) 
 multiple clock cycles. These artificial latches are able to feed information to any other clock number, but their usage
 reduces the overall throughput of the layout. In return, long wire detours for signal synchronization can be prevented.
 
-## Cost Metrics
+## 💰 Cost Metrics
 
 Designed layouts can be evaluated with regard to several cost functions. The following metrics are currently
 implemented:
@@ -326,7 +347,7 @@ Cell-level layouts:
 - Bounding box
 - Area usage in nm²
 
-## Benchmark Library
+## 📊 Benchmark Library
 
 To objectively evaluate and compare software and design automation
 tools, [MNT Bench](https://www.cda.cit.tum.de/mntbench/) provides gate-level
@@ -338,7 +359,7 @@ Additionally, the [benchmarks](https://github.com/cda-tum/fiction/tree/main/benc
 descriptions of frequently used benchmark sets in Verilog format (`.v`) provided
 by [MNT Bench](https://www.cda.cit.tum.de/mntbench/).
 
-## Reference
+## 📜 Reference
 
 Since _fiction_ is academic software, we would be thankful if you referred to it by citing the following publications:
 
@@ -369,7 +390,7 @@ and
 Additionally, many algorithms implemented in _fiction_ have been published individually. For a full list of
 publications, please refer to the [documentation](https://fiction.readthedocs.io/en/latest/publications.html).
 
-## Acknowledgements
+## 🙏 Acknowledgements
 
 The Munich Nanotech Toolkit has been supported by the Bavarian State Ministry for Science and Arts through the
 Distinguished Professorship Program.
