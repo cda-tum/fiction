@@ -7,13 +7,16 @@
 
 #include <fiction/algorithms/network_transformation/technology_mapping.hpp>
 #include <fiction/types.hpp>
+#include <fiction/utils/name_utils.hpp>
 
 #include <alice/alice.hpp>
+#include <fmt/format.h>
 
 #include <algorithm>
 #include <array>
 #include <iostream>
 #include <memory>
+#include <type_traits>
 #include <variant>
 
 namespace alice
@@ -59,13 +62,12 @@ class map_command : public command
         add_flag("--all", "Enable the use of all supported gates");
 
         add_flag("--decay", ps.decay, "Enforce the application of at least one constant input to three-input gates");
-        add_flag("--logic_sharing,-s", ps.mapper_params.enable_logic_sharing, "Enable logic sharing optimization");
         add_flag("--verbose,-v", ps.mapper_params.verbose, "Be verbose");
     }
 
   protected:
     /**
-     * Function to perform the map call. Generates a logic network from another one.
+     * Function to perform the mockturtle::emap call. Generates a logic network from another one.
      */
     void execute() override
     {
@@ -114,17 +116,35 @@ class map_command : public command
 
         const auto perform_mapping = [this, &s](auto&& ntk_ptr)
         {
-            fiction::technology_mapping_stats st{};
+            using Ntk = typename std::decay_t<decltype(ntk_ptr)>::element_type;
 
-            const auto mapped_ntk = fiction::technology_mapping(*ntk_ptr, ps, &st);
-
-            if (st.mapper_stats.mapping_error)
+            if (std::is_same_v<Ntk, fiction::tec_nt>)
             {
-                env->out() << "[e] an error occurred in mockturtle's technology mapper" << std::endl;
-                return;
+                env->out()
+                    << fmt::format(
+                           "[w] network '{}' is already mapped; you might encounter mapping errors during remapping",
+                           fiction::get_name(*ntk_ptr))
+                    << std::endl;
             }
 
-            s.extend() = std::make_shared<fiction::tec_nt>(mapped_ntk);
+            fiction::technology_mapping_stats st{};
+
+            try
+            {
+                const auto mapped_ntk = fiction::technology_mapping(*ntk_ptr, ps, &st);
+
+                if (st.mapper_stats.mapping_error)
+                {
+                    env->out() << "[e] an error occurred in mockturtle's technology mapper" << std::endl;
+                    return;
+                }
+
+                s.extend() = std::make_shared<fiction::tec_nt>(mapped_ntk);
+            }
+            catch (const fiction::missing_required_gates_exception& e)
+            {
+                env->out() << fmt::format("[e] {}", e.what()) << std::endl;
+            }
         };
 
         std::visit(perform_mapping, s.current());

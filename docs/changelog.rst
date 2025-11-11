@@ -32,6 +32,8 @@ Added
 
 Changed
 #######
+- Algorithms:
+    - Switched the default technology mapper in the ``map`` command and the ``technology_mapping`` function from ``mockturtle::map`` to ``mockturtle::emap``
 - CLI:
     - ``area`` now outputs the layout width and height in addition to the area
 - Continuous integration:
@@ -60,6 +62,8 @@ Fixed
 
 Removed
 #######
+- CLI:
+    - Removed the ``--logic_sharing`` flag from ``map`` as ``mockturtle::emap`` does not support it
 - Continuous integration:
     - Dropped Windows 2019 and v142 support
     - Dropped Python 3.9 support due to its end-of-life status
