@@ -1,5 +1,9 @@
 include(${PROJECT_SOURCE_DIR}/cmake/CheckSubmodules.cmake)
 
+# Prevent CMake from finding a system-installed fmt package to avoid version conflicts
+# We use the bundled fmt version from alice/mockturtle submodules
+set(CMAKE_DISABLE_FIND_PACKAGE_fmt TRUE)
+
 # Include pybind11
 add_subdirectory(pybind11)
 
