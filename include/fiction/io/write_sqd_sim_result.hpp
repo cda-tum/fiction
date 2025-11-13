@@ -178,8 +178,9 @@ class write_sqd_sim_result_impl
      */
     void write_engine_info()
     {
+        const auto current_time = std::time(nullptr);
         os << fmt::format(siqad::ENG_INFO_BLOCK, sim_result.algorithm_name, FICTION_VERSION, FICTION_REPO, 0,
-                          fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(std::time(nullptr))),
+                          fmt::format("{:%Y-%m-%d %H:%M:%S}", *std::localtime(&current_time)),
                           sim_result.simulation_runtime.count());
     }
 

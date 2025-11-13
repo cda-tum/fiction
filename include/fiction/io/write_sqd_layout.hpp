@@ -193,7 +193,8 @@ class write_sqd_layout_impl
 
         header << siqad::SQD_HEADER << siqad::OPEN_SIQAD;
 
-        const auto time_str = fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(std::time(nullptr)));
+        const auto current_time = std::time(nullptr);
+        const auto time_str     = fmt::format("{:%Y-%m-%d %H:%M:%S}", *std::localtime(&current_time));
 
         header << fmt::format(siqad::PROGRAM_BLOCK, "layout simulation", FICTION_VERSION, FICTION_REPO, time_str);
 
