@@ -43,6 +43,3 @@ Virtual Miter
         **Header:** ``fiction/algorithms/verification/virtual_miter.hpp``
 
         .. doxygenfunction:: fiction::virtual_miter
-
-    .. tab:: Python
-        .. autofunction:: mnt.pyfiction.virtual_miter

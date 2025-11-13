@@ -20,7 +20,6 @@
 #include "fiction/technology/constants.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/hash.hpp"
-#include "fiction/utils/map_utils.hpp"
 #include "fiction/utils/math_utils.hpp"
 
 #include <btree.h>
@@ -34,6 +33,7 @@
 #include <cmath>
 #include <cstdint>
 #include <cstdlib>
+#include <functional>
 #include <iterator>
 #include <limits>
 #include <numeric>
@@ -44,6 +44,7 @@
 #include <thread>
 #include <tuple>
 #include <type_traits>
+#include <utility>
 #include <vector>
 
 namespace fiction
@@ -134,7 +135,7 @@ struct parameter_point
     /**
      * Parameter values for each dimension.
      */
-    std::vector<double> parameters{};
+    std::vector<double> parameters;
 };
 /**
  * Possible sweep parameters for the operational domain computation.
@@ -216,13 +217,17 @@ class operational_domain : public sidb_simulation_domain<parameter_point, operat
      * The dimensions to sweep over. The first dimension is the x dimension, the second dimension is the y dimension,
      * etc.
      */
-    std::vector<sweep_parameter> dimensions{};
+    std::vector<sweep_parameter> dimensions;
 };
 /**
  * The `critical_temperature_domain` class collects the critical temperature and the operational status for a range of
  * different physical parameters of a given SiDB layout. It allows for the evaluation of how the critical temperature
  * depends on variations in the underlying parameter points. This enables simulations to explore the critical
  * temperature's behavior across different conditions and configurations.
+ *
+ * It was proposed in \"The Operational Domain Explorer: A Comprehensive Framework to Unveil the Thermal Landscape of
+ * Silicon Dangling Bond Logic Beyond Conventional Operability\" by M. Walter, J. Drewniok, and R. Wille in IEEE-NANO
+ * 2025 (https://ieeexplore.ieee.org/abstract/document/11113672).
  */
 class critical_temperature_domain : public sidb_simulation_domain<parameter_point, operational_status, double>
 {
@@ -314,7 +319,7 @@ class critical_temperature_domain : public sidb_simulation_domain<parameter_poin
      * The dimensions to sweep over, ordered by priority. The first dimension is the x dimension, the second dimension
      * is the y dimension, etc.
      */
-    std::vector<sweep_parameter> dimensions{};
+    std::vector<sweep_parameter> dimensions;
 };
 
 /**
@@ -499,6 +504,7 @@ class operational_domain_impl
      * @param ps Parameters for the operational domain computation.
      * @param st Statistics of the process.
      */
+    // NOLINTNEXTLINE(modernize-pass-by-value)
     operational_domain_impl(const Lyt& lyt, const operational_domain_params& ps, operational_domain_stats& st) noexcept
             :
             layout{lyt},
@@ -893,17 +899,18 @@ class operational_domain_impl
                         assert(false && "unsupported simulation engine");
                     }
 
-                    const auto energy_dist = energy_distribution(sim_results.charge_distributions);
+                    const auto energy_dist = calculate_energy_distribution(sim_results.charge_distributions);
 
                     lyt.assign_physical_parameters(simulation_parameters);
-                    const auto position = find_key_with_tolerance(energy_dist, lyt.get_system_energy());
+                    const auto degeneracy_of_layout_energy =
+                        energy_dist.degeneracy(lyt.get_electrostatic_potential_energy());
 
-                    if (position == energy_dist.cend())
+                    if (!degeneracy_of_layout_energy.has_value())
                     {
                         return;
                     }
 
-                    const auto excited_state_number = std::distance(energy_dist.cbegin(), position);
+                    const auto excited_state_number = degeneracy_of_layout_energy.value();
                     suitable_params_domain.add_value(param_point, std::make_tuple(excited_state_number));
                 }
             });
@@ -1083,7 +1090,7 @@ class operational_domain_impl
      *
      * @return The number of steps in the given dimension.
      */
-    [[nodiscard]] inline std::size_t num_steps(const std::size_t dimension) const noexcept
+    [[nodiscard]] std::size_t num_steps(const std::size_t dimension) const noexcept
     {
         assert(dimension < num_dimensions && "Invalid dimension");
 
@@ -1098,12 +1105,10 @@ class operational_domain_impl
      * @param val Value to set the dimension `dim` to.
      * @param dim Sweep dimension to set the value `val` to.
      */
-    inline void set_dimension_value(sidb_simulation_parameters& sim_parameters, const double val,
-                                    const std::size_t dim) const noexcept
+    void set_dimension_value(sidb_simulation_parameters& sim_parameters, const double val,
+                             const std::size_t dim) const noexcept
     {
-        const sweep_parameter sweep_parameter = params.sweep_dimensions[dim].dimension;
-
-        switch (sweep_parameter)
+        switch (params.sweep_dimensions[dim].dimension)
         {
             case sweep_parameter::EPSILON_R:
             {
@@ -1274,7 +1279,7 @@ class operational_domain_impl
      * @param sp Step point to check for inferred operational status.
      * @return `true` iff `sp` is contained in `inferred_op_domain`.
      */
-    [[nodiscard]] inline bool is_step_point_inferred_operational(const step_point& sp) const noexcept
+    [[nodiscard]] bool is_step_point_inferred_operational(const step_point& sp) const noexcept
     {
         return inferred_op_domain.count(sp) > 0;
     }
@@ -1704,10 +1709,9 @@ class operational_domain_impl
  * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT Truth table type.
  * @param lyt Layout to compute the operational domain for.
- * @param spec Expected vector of truth tables of the layout. Each truth table represents an output of the Boolean
- * function.
- * @param params Operational domain computation parameters.
- * @param stats Operational domain computation statistics.
+ * @param tt Expected Boolean function of the lyt given as a multi-output truth table.
+ * @param ps Parameters for the operational domain computation.
+ * @param st Statistics of the process.
  * @return The operational domain of the layout.
  * @throws std::invalid_argument if the given sweep parameters are invalid.
  */
@@ -1863,10 +1867,6 @@ operational_domain_flood_fill(const Lyt& lyt, const std::vector<TT>& spec, const
  * up to \f$2^n\f$ exact ground state simulations, where \f$n\f$ is the number of inputs of the layout. Each exact
  * ground state simulation has exponential complexity in of itself. Therefore, the algorithm is only feasible for small
  * layouts with few inputs.
- *
- * This flavor of operational domain computation was proposed in \"Reducing the Complexity of Operational Domain
- * Computation in Silicon Dangling Bond Logic\" by M. Walter, J. Drewniok, S. S. H. Ng, K. Walus, and R. Wille in
- * NANOARCH 2023.
  *
  * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT Truth table type.
@@ -2140,14 +2140,14 @@ struct hash<fiction::parameter_point>
 {
     size_t operator()(const fiction::parameter_point& pp) const noexcept
     {
-        size_t h = 0;
-        for (const auto& param : pp.get_parameters())
+        size_t hash_value = 0;
+        for (const auto& parameter : pp.get_parameters())
         {
             // hash the double values with tolerance
-            fiction::hash_combine(h, static_cast<size_t>(param / fiction::constants::ERROR_MARGIN));
+            fiction::hash_combine(hash_value, static_cast<size_t>(parameter / fiction::constants::ERROR_MARGIN));
         }
 
-        return h;
+        return hash_value;
     }
 };
 

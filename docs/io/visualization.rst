@@ -45,8 +45,8 @@ SVG Images
         .. doxygenstruct:: fiction::write_qca_layout_svg_params
            :members:
 
-        .. doxygenfunction:: fiction::write_qca_layout_svg(const Lyt& lyt, std::ostream& os, write_qca_layout_svg_params ps = {})
-        .. doxygenfunction:: fiction::write_qca_layout_svg(const Lyt& lyt, const std::string_view& filename, write_qca_layout_svg_params ps = {})
+        .. doxygenfunction:: fiction::write_qca_layout_svg(const Lyt& lyt, std::ostream& os, const write_qca_layout_svg_params& ps = {})
+        .. doxygenfunction:: fiction::write_qca_layout_svg(const Lyt& lyt, const std::string_view& filename, const write_qca_layout_svg_params& ps = {})
 
         .. doxygenclass:: fiction::unsupported_cell_type_exception
 
@@ -54,8 +54,7 @@ SVG Images
            :members:
 
         .. doxygenfunction:: fiction::write_sidb_layout_svg(const Lyt& lyt, std::ostream& os, const write_sidb_layout_svg_params& ps = {})
-        .. doxygenfunction:: fiction::write_sidb_layout_svg(const Lyt& lyt, const std::string_view& filename,
-                           const write_sidb_layout_svg_params& ps = {})
+        .. doxygenfunction:: fiction::write_sidb_layout_svg(const Lyt& lyt, const std::string_view& filename, const write_sidb_layout_svg_params& ps = {})
 
 
     .. tab:: Python

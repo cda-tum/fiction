@@ -36,6 +36,7 @@ enum class sidb_simulation_engine : uint8_t
      * than *ExGS* due to its effective search-space pruning.
      */
     QUICKEXACT,
+#if (FICTION_ALGLIB_ENABLED)
     /**
      * *ClusterComplete* is a novel exact simulation engine that requires exponential runtime, though, depending on the
      * simulation problem, it effectively reduces the base number by a real number, thus allowing problem sizes that
@@ -43,6 +44,7 @@ enum class sidb_simulation_engine : uint8_t
      * the simulation base, it simulates very effectively for either base number (2 or 3).
      */
     CLUSTERCOMPLETE
+#endif  // FICTION_ALGLIB_ENABLED
 };
 /**
  * Selector exclusively for exact SiDB simulation engines.
@@ -58,6 +60,7 @@ enum class exact_sidb_simulation_engine : uint8_t
      * than ExGS due to its effective search-space pruning.
      */
     QUICKEXACT,
+#if (FICTION_ALGLIB_ENABLED)
     /**
      * *ClusterComplete* is a novel exact simulation engine that requires exponential runtime, though, depending on the
      * simulation problem, it effectively reduces the base number by a real number, thus allowing problem sizes that
@@ -65,6 +68,7 @@ enum class exact_sidb_simulation_engine : uint8_t
      * the simulation base, it simulates very effectively for either base number (2 or 3).
      */
     CLUSTERCOMPLETE
+#endif  // FICTION_ALGLIB_ENABLED
 };
 /**
  * Selector exclusively for heuristic SiDB simulation engines.
@@ -104,10 +108,12 @@ template <typename EngineType>
             {
                 return "QuickExact";
             }
+#if (FICTION_ALGLIB_ENABLED)
             case EngineType::CLUSTERCOMPLETE:
             {
                 return "ClusterComplete";
             }
+#endif  // FICTION_ALGLIB_ENABLED
             case EngineType::QUICKSIM:
             {
                 return "QuickSim";
@@ -132,10 +138,12 @@ template <typename EngineType>
             {
                 return "QuickExact";
             }
+#if (FICTION_ALGLIB_ENABLED)
             case EngineType::CLUSTERCOMPLETE:
             {
                 return "ClusterComplete";
             }
+#endif  // FICTION_ALGLIB_ENABLED
             default:
             {
                 return "unsupported simulation engine";
@@ -172,7 +180,9 @@ get_sidb_simulation_engine(const std::string_view& name) noexcept
     static const phmap::flat_hash_map<std::string, sidb_simulation_engine> engine_lookup{
         {"EXGS", sidb_simulation_engine::EXGS},
         {"QUICKEXACT", sidb_simulation_engine::QUICKEXACT},
+#if (FICTION_ALGLIB_ENABLED)
         {"CLUSTERCOMPLETE", sidb_simulation_engine::CLUSTERCOMPLETE},
+#endif  // FICTION_ALGLIB_ENABLED
         {"QUICKSIM", sidb_simulation_engine::QUICKSIM}};
 
     std::string upper_name = name.data();

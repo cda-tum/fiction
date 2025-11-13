@@ -37,12 +37,13 @@ Checks: |
   -readability-magic-numbers,
   -readability-named-parameter,
   -readability-uppercase-literal-suffix
+  -readability-redundant-member-init
 
 CheckOptions:
   - key: cppcoreguidelines-avoid-do-while.IgnoreMacros
     value: "true"
   - key: misc-include-cleaner.IgnoreHeaders
-    value: "cmake/try_z3.cpp;.*/experiments.hpp;.*/fiction_experiments.hpp;.*/fmt/.*"
+    value: "cmake/try_z3.cpp;.*/experiments.hpp;.*/fiction_experiments.hpp;.*/fmt/.*;.*/alice/.*;.*nlohmann/.*;.*pybind11/.*"
   - key: readability-identifier-naming.NamespaceCase
     value: lower_case
   - key: readability-identifier-naming.ClassCase

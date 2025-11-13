@@ -121,8 +121,11 @@ Energy Calculation
     .. tab:: C++
         **Header:** ``fiction/algorithms/simulation/sidb/energy_distribution.hpp``
 
-        .. doxygentypedef:: fiction::sidb_energy_distribution
-        .. doxygenfunction:: fiction::energy_distribution
+        .. doxygenstruct:: fiction::energy_state
+           :members:
+        .. doxygenclass:: fiction::energy_distribution
+           :members:
+        .. doxygenfunction:: fiction::calculate_energy_distribution
 
 
         **Header:** ``fiction/algorithms/simulation/sidb/minimum_energy.hpp``
@@ -136,7 +139,7 @@ Energy Calculation
         .. doxygenfunction:: fiction::is_ground_state
 
     .. tab:: Python
-        .. autofunction:: mnt.pyfiction.energy_distribution
+        .. autofunction:: mnt.pyfiction.calculate_energy_distribution
 
         .. autofunction:: mnt.pyfiction.minimum_energy
 
@@ -159,11 +162,13 @@ Temperature Behavior
 
         **Header:** ``fiction/algorithms/simulation/sidb/occupation_probability_of_excited_states.hpp``
 
+        .. doxygenfunction:: fiction::calculate_boltzmann_factor
         .. doxygenfunction:: fiction::occupation_probability_gate_based
         .. doxygenfunction:: fiction::occupation_probability_non_gate_based
 
         **Header:** ``fiction/algorithms/simulation/sidb/calculate_energy_and_state_type.hpp``
 
+        .. doxygenenum:: fiction::state_type
         .. doxygentypedef:: fiction::sidb_energy_and_state_type
         .. doxygenfunction:: fiction::calculate_energy_and_state_type_with_kinks_accepted
         .. doxygenfunction:: fiction::calculate_energy_and_state_type_with_kinks_rejected
@@ -331,10 +336,10 @@ Operational Domain Computation
         .. autofunction:: mnt.pyfiction.critical_temperature_domain_flood_fill
         .. autofunction:: mnt.pyfiction.critical_temperature_domain_contour_tracing
 
-        .. autoclass:: mnt.pyfiction.compute_operational_ratio_params
+        .. autoclass:: mnt.pyfiction.operational_domain_ratio_params
                 :members:
 
-        .. autofunction:: mnt.pyfiction.compute_operational_ratio
+        .. autofunction:: mnt.pyfiction.operational_domain_ratio
 
 
 Physically Valid Parameters
@@ -482,8 +487,8 @@ Assess Population Stability
             :members:
         .. autoclass:: mnt.pyfiction.physical_population_stability_params
             :members:
-        .. autofunction:: mnt.pyfiction.assess_physical_population_stability_100
-        .. autofunction:: mnt.pyfiction.assess_physical_population_stability_111
+        .. autofunction:: mnt.pyfiction.physical_population_stability_100
+        .. autofunction:: mnt.pyfiction.physical_population_stability_111
 
 
 Band-Bending Resilience

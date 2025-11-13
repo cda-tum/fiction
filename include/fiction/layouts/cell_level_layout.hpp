@@ -161,15 +161,19 @@ class cell_level_layout : public ClockedLayout
      */
     void assign_cell_type(const cell& c, const cell_type& ct) noexcept
     {
+        strg->inputs.erase(c);
+        strg->outputs.erase(c);
+
         if (Technology::is_empty_cell(ct))
         {
             strg->cell_type_map.erase(c);
             strg->cell_mode_map.erase(c);
-            strg->inputs.erase(c);
-            strg->outputs.erase(c);
 
             return;
         }
+
+        strg->cell_type_map[c] = ct;
+
         if (Technology::is_input_cell(ct))
         {
             strg->inputs.insert(c);
@@ -178,8 +182,6 @@ class cell_level_layout : public ClockedLayout
         {
             strg->outputs.insert(c);
         }
-
-        strg->cell_type_map[c] = ct;
     }
     /**
      * Returns the cell type assigned to cell position `c`.
@@ -219,6 +221,16 @@ class cell_level_layout : public ClockedLayout
             });
 
         return cells;
+    }
+    /**
+     * Returns the numbers of cells of the given type.
+     *
+     * @param type Type of cells which are counted.
+     * @return Number of the cells with the given type.
+     */
+    [[nodiscard]] uint64_t num_cells_of_given_type(const typename Technology::cell_type type) const noexcept
+    {
+        return get_cells_by_type(type).size();
     }
     /**
      * Returns `true` if no cell type is assigned to cell position `c` or if the empty type was assigned.

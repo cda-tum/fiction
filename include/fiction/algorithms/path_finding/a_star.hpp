@@ -66,7 +66,8 @@ class a_star_impl
         assert(layout.is_within_bounds(objective.source) && layout.is_within_bounds(objective.target) &&
                "Both source and target coordinate have to be within the layout bounds");
 
-        do {
+        do
+        {
             // get coordinate with lowest f-value
             const auto current = get_lowest_f_coord();
 
@@ -202,12 +203,13 @@ class a_star_impl
                 if (layout.is_obstructed_coordinate(successor) && successor != objective.target)
                 {
                     // if crossings are enabled, check if it is possible to switch to the crossing layer
-                    if (params.crossings && is_crossable_wire(layout, current, successor))
+                    if (params.crossings &&
+                        (is_crossable_wire(layout, current, successor) || layout.above(successor) == objective.target))
                     {
                         // if the crossing layer is not obstructed
                         if (const auto above_successor = layout.above(successor);
-                            above_successor != successor && above_successor != objective.target &&
-                            !layout.is_obstructed_coordinate(above_successor))
+                            above_successor != successor &&
+                            (!layout.is_obstructed_coordinate(above_successor) || above_successor == objective.target))
                         {
                             // allow exploring the crossing layer
                             successor = above_successor;

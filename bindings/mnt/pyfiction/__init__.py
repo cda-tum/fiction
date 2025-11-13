@@ -26,7 +26,6 @@ from .pyfiction import (  # type: ignore[import-not-found]
     __version__,
     a_star,
     a_star_distance,
-    ## path_finding
     a_star_params,
     all_standard_2_input_functions,
     all_standard_3_input_functions,
@@ -34,10 +33,8 @@ from .pyfiction import (  # type: ignore[import-not-found]
     and_or_not,
     and_or_not_maj,
     apply_bestagon_library,
-    ## physical_design
     apply_qca_one_library,
     apply_topolinano_library,
-    # Technology
     area,
     automatic_base_number_detection,
     bdl_input_iterator_100,
@@ -49,9 +46,9 @@ from .pyfiction import (  # type: ignore[import-not-found]
     bdl_wire_selection,
     calculate_energy_and_state_type_with_kinks_accepted,
     calculate_energy_and_state_type_with_kinks_rejected,
+    calculate_energy_distribution,
     can_positive_charges_occur,
     cartesian_gate_layout,
-    # Layouts
     cartesian_layout,
     cartesian_obstruction_layout,
     charge_configuration_to_string,
@@ -99,7 +96,6 @@ from .pyfiction import (  # type: ignore[import-not-found]
     create_xor3_tt,
     create_xor_and_tt,
     create_xor_tt,
-    ## properties
     critical_path_length_and_throughput,
     critical_temperature_domain,
     critical_temperature_domain_contour_tracing,
@@ -118,6 +114,7 @@ from .pyfiction import (  # type: ignore[import-not-found]
     design_sidb_gates,
     design_sidb_gates_mode,
     design_sidb_gates_params,
+    design_sidb_gates_stats,
     detect_bdl_pairs,
     detect_bdl_pairs_params,
     detect_bdl_wires_100,
@@ -150,9 +147,7 @@ from .pyfiction import (  # type: ignore[import-not-found]
     extract_routing_objectives,
     fanout_substitution,
     fanout_substitution_params,
-    # Inout
     fgl_parsing_error,
-    ## verfication
     gate_level_drv_params,
     gate_level_drvs,
     generate_multiple_random_sidb_layouts,
@@ -172,11 +167,13 @@ from .pyfiction import (  # type: ignore[import-not-found]
     hexagonal_layout,
     hexagonal_obstruction_layout,
     hexagonalization,
+    hexagonalization_io_pin_extension_mode,
+    hexagonalization_io_pin_routing_error,
+    hexagonalization_params,
+    hexagonalization_stats,
     high_degree_fanin_exception,
     inml_layout,
     inml_technology,
-    # Algorithms
-    ## iter
     input_bdl_configuration,
     is_balanced,
     is_charged_defect_type,
@@ -198,7 +195,6 @@ from .pyfiction import (  # type: ignore[import-not-found]
     network_balancing,
     network_balancing_params,
     normalize_layout_coordinates,
-    # Utils
     num_adjacent_coordinates,
     occupation_probability_gate_based,
     occupation_probability_non_gate_based,
@@ -276,22 +272,20 @@ from .pyfiction import (  # type: ignore[import-not-found]
     sidb_simulation_result_111,
     sidb_technology,
     sign_to_charge_state,
-    ### logic
     simulate,
     siqad_area,
     siqad_coordinate,
     siqad_volume,
     sqd_parsing_error,
     squared_euclidean_distance,
-    ## network_transformation
     substitution_strategy,
     sweep_parameter,
     technology_constraints,
     technology_mapping,
     technology_mapping_params,
     technology_mapping_stats,
-    # Networks
     technology_network,
+    termination_condition,
     time_to_solution,
     time_to_solution_for_given_simulation_results,
     time_to_solution_params,
@@ -299,8 +293,6 @@ from .pyfiction import (  # type: ignore[import-not-found]
     to_cube_coord,
     to_offset_coord,
     to_siqad_coord,
-    ## simulation
-    ### sidb
     transition_type,
     twoddwave_distance,
     undefined_cell_label_exception,
@@ -341,7 +333,6 @@ __all__ = [
     "__version__",
     "a_star",
     "a_star_distance",
-    ## path_finding
     "a_star_params",
     "all_standard_2_input_functions",
     "all_standard_3_input_functions",
@@ -349,10 +340,8 @@ __all__ = [
     "and_or_not",
     "and_or_not_maj",
     "apply_bestagon_library",
-    ## physical_design
     "apply_qca_one_library",
     "apply_topolinano_library",
-    # Technology
     "area",
     "automatic_base_number_detection",
     "bdl_input_iterator_100",
@@ -364,9 +353,9 @@ __all__ = [
     "bdl_wire_selection",
     "calculate_energy_and_state_type_with_kinks_accepted",
     "calculate_energy_and_state_type_with_kinks_rejected",
+    "calculate_energy_distribution",
     "can_positive_charges_occur",
     "cartesian_gate_layout",
-    # Layouts
     "cartesian_layout",
     "cartesian_obstruction_layout",
     "charge_configuration_to_string",
@@ -414,7 +403,6 @@ __all__ = [
     "create_xor3_tt",
     "create_xor_and_tt",
     "create_xor_tt",
-    ## properties
     "critical_path_length_and_throughput",
     "critical_temperature_domain",
     "critical_temperature_domain_contour_tracing",
@@ -433,6 +421,7 @@ __all__ = [
     "design_sidb_gates",
     "design_sidb_gates_mode",
     "design_sidb_gates_params",
+    "design_sidb_gates_stats",
     "detect_bdl_pairs",
     "detect_bdl_pairs_params",
     "detect_bdl_wires_100",
@@ -465,9 +454,7 @@ __all__ = [
     "extract_routing_objectives",
     "fanout_substitution",
     "fanout_substitution_params",
-    # Inout
     "fgl_parsing_error",
-    ## verfication
     "gate_level_drv_params",
     "gate_level_drvs",
     "generate_multiple_random_sidb_layouts",
@@ -487,11 +474,13 @@ __all__ = [
     "hexagonal_layout",
     "hexagonal_obstruction_layout",
     "hexagonalization",
+    "hexagonalization_io_pin_extension_mode",
+    "hexagonalization_io_pin_routing_error",
+    "hexagonalization_params",
+    "hexagonalization_stats",
     "high_degree_fanin_exception",
     "inml_layout",
     "inml_technology",
-    # Algorithms
-    ## iter
     "input_bdl_configuration",
     "is_balanced",
     "is_charged_defect_type",
@@ -513,7 +502,6 @@ __all__ = [
     "network_balancing",
     "network_balancing_params",
     "normalize_layout_coordinates",
-    # Utils
     "num_adjacent_coordinates",
     "occupation_probability_gate_based",
     "occupation_probability_non_gate_based",
@@ -591,22 +579,20 @@ __all__ = [
     "sidb_simulation_result_111",
     "sidb_technology",
     "sign_to_charge_state",
-    ### logic
     "simulate",
     "siqad_area",
     "siqad_coordinate",
     "siqad_volume",
     "sqd_parsing_error",
     "squared_euclidean_distance",
-    ## network_transformation
     "substitution_strategy",
     "sweep_parameter",
     "technology_constraints",
     "technology_mapping",
     "technology_mapping_params",
     "technology_mapping_stats",
-    # Networks
     "technology_network",
+    "termination_condition",
     "time_to_solution",
     "time_to_solution_for_given_simulation_results",
     "time_to_solution_params",
@@ -614,8 +600,6 @@ __all__ = [
     "to_cube_coord",
     "to_offset_coord",
     "to_siqad_coord",
-    ## simulation
-    ### sidb
     "transition_type",
     "twoddwave_distance",
     "undefined_cell_label_exception",
