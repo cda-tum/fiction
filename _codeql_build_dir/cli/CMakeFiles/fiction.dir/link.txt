@@ -1,0 +1,1 @@
+/home/runner/work/fiction/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -O3 -DNDEBUG -Wl,--dependency-file=CMakeFiles/fiction.dir/link.d CMakeFiles/fiction.dir/fiction.cpp.o -o fiction  ../libs/mockturtle/lib/abcsat/liblibabcsat.a ../libs/mockturtle/lib/abcesop/liblibabcesop.a ../libs/graph-coloring/libgraph-coloring.a ../libs/tinyxml2/libtinyxml2.a

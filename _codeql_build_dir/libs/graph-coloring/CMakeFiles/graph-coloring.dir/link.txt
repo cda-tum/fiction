@@ -1,0 +1,2 @@
+/usr/bin/ar qc libgraph-coloring.a "CMakeFiles/graph-coloring.dir/Source/coloring_algorithm.cpp.o" "CMakeFiles/graph-coloring.dir/Source/dsatur.cpp.o" "CMakeFiles/graph-coloring.dir/Source/mcs.cpp.o" "CMakeFiles/graph-coloring.dir/Source/lmxrlf.cpp.o" "CMakeFiles/graph-coloring.dir/Source/tabucol.cpp.o" "CMakeFiles/graph-coloring.dir/Source/hybrid_dsatur.cpp.o" "CMakeFiles/graph-coloring.dir/Source/hybrid_lmxrlf.cpp.o"
+/usr/bin/ranlib libgraph-coloring.a
