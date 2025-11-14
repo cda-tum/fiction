@@ -178,10 +178,12 @@ class write_sqd_sim_result_impl
      */
     void write_engine_info()
     {
-        const auto current_time = std::time(nullptr);
+        const auto  current_time = std::time(nullptr);
+        const auto* local_time   = std::localtime(&current_time);
+        const auto  time_str =
+            local_time != nullptr ? fmt::format("{:%Y-%m-%d %H:%M:%S}", *local_time) : "1970-01-01 00:00:00";
         os << fmt::format(siqad::ENG_INFO_BLOCK, sim_result.algorithm_name, FICTION_VERSION, FICTION_REPO, 0,
-                          fmt::format("{:%Y-%m-%d %H:%M:%S}", *std::localtime(&current_time)),
-                          sim_result.simulation_runtime.count());
+                          time_str, sim_result.simulation_runtime.count());
     }
 
     /**

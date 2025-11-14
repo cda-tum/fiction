@@ -94,8 +94,10 @@ class write_fgl_layout_impl
     {
         // metadata
         os << fcn::FGL_HEADER << fcn::OPEN_FGL;
-        const auto current_time = std::time(nullptr);
-        const auto time_str     = fmt::format("{:%Y-%m-%d %H:%M:%S}", *std::localtime(&current_time));
+        const auto  current_time = std::time(nullptr);
+        const auto* local_time   = std::localtime(&current_time);
+        const auto  time_str =
+            local_time != nullptr ? fmt::format("{:%Y-%m-%d %H:%M:%S}", *local_time) : "1970-01-01 00:00:00";
         os << fmt::format(fcn::FICTION_METADATA, FICTION_VERSION, FICTION_REPO, time_str);
 
         os << fcn::OPEN_LAYOUT_METADATA;

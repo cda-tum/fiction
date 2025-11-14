@@ -167,7 +167,10 @@ TEST_CASE("Write empty simulation result", "[sqd-sim-result]")
 
     SECTION("without additional parameters")
     {
-        const auto        current_time   = std::time(nullptr);
+        const auto        current_time = std::time(nullptr);
+        const auto*       local_time   = std::localtime(&current_time);
+        const auto        time_str =
+            local_time != nullptr ? fmt::format("{:%Y-%m-%d %H:%M:%S}", *local_time) : "1970-01-01 00:00:00";
         const std::string sim_result_str = fmt::format(
             "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
             "<sim_out>\n"
@@ -189,9 +192,8 @@ TEST_CASE("Write empty simulation result", "[sqd-sim-result]")
             "    <elec_dist>\n"
             "    </elec_dist>\n"
             "</sim_out>\n",
-            FICTION_VERSION, FICTION_REPO, fmt::format("{:%Y-%m-%d %H:%M:%S}", *std::localtime(&current_time)),
-            sim_result.simulation_parameters.lambda_tf, sim_result.simulation_parameters.epsilon_r,
-            sim_result.simulation_parameters.mu_minus);
+            FICTION_VERSION, FICTION_REPO, time_str, sim_result.simulation_parameters.lambda_tf,
+            sim_result.simulation_parameters.epsilon_r, sim_result.simulation_parameters.mu_minus);
 
         write_sqd_sim_result(sim_result, simulation_stream);
 
@@ -199,7 +201,10 @@ TEST_CASE("Write empty simulation result", "[sqd-sim-result]")
     }
     SECTION("with additional parameter (string)")
     {
-        const auto        current_time   = std::time(nullptr);
+        const auto        current_time = std::time(nullptr);
+        const auto*       local_time   = std::localtime(&current_time);
+        const auto        time_str =
+            local_time != nullptr ? fmt::format("{:%Y-%m-%d %H:%M:%S}", *local_time) : "1970-01-01 00:00:00";
         const std::string sim_result_str = fmt::format(
             "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
             "<sim_out>\n"
@@ -222,9 +227,8 @@ TEST_CASE("Write empty simulation result", "[sqd-sim-result]")
             "    <elec_dist>\n"
             "    </elec_dist>\n"
             "</sim_out>\n",
-            FICTION_VERSION, FICTION_REPO, fmt::format("{:%Y-%m-%d %H:%M:%S}", *std::localtime(&current_time)),
-            sim_result.simulation_parameters.lambda_tf, sim_result.simulation_parameters.epsilon_r,
-            sim_result.simulation_parameters.mu_minus);
+            FICTION_VERSION, FICTION_REPO, time_str, sim_result.simulation_parameters.lambda_tf,
+            sim_result.simulation_parameters.epsilon_r, sim_result.simulation_parameters.mu_minus);
 
         sim_result.additional_simulation_parameters.emplace("param1", "value1");
 
@@ -235,7 +239,10 @@ TEST_CASE("Write empty simulation result", "[sqd-sim-result]")
 
     SECTION("with additional parameters (double)")
     {
-        const auto        current_time   = std::time(nullptr);
+        const auto        current_time = std::time(nullptr);
+        const auto*       local_time   = std::localtime(&current_time);
+        const auto        time_str =
+            local_time != nullptr ? fmt::format("{:%Y-%m-%d %H:%M:%S}", *local_time) : "1970-01-01 00:00:00";
         const std::string sim_result_str = fmt::format(
             "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
             "<sim_out>\n"
@@ -258,9 +265,8 @@ TEST_CASE("Write empty simulation result", "[sqd-sim-result]")
             "    <elec_dist>\n"
             "    </elec_dist>\n"
             "</sim_out>\n",
-            FICTION_VERSION, FICTION_REPO, fmt::format("{:%Y-%m-%d %H:%M:%S}", *std::localtime(&current_time)),
-            sim_result.simulation_parameters.lambda_tf, sim_result.simulation_parameters.epsilon_r,
-            sim_result.simulation_parameters.mu_minus);
+            FICTION_VERSION, FICTION_REPO, time_str, sim_result.simulation_parameters.lambda_tf,
+            sim_result.simulation_parameters.epsilon_r, sim_result.simulation_parameters.mu_minus);
 
         sim_result.additional_simulation_parameters.emplace("param3", 3.14);
 
@@ -299,6 +305,9 @@ TEST_CASE("Write simulation result with ExGS simulation", "[sqd-sim-result]")
     std::stringstream simulation_stream{};
 
     const auto        current_time = std::time(nullptr);
+    const auto*       local_time   = std::localtime(&current_time);
+    const auto        time_str =
+        local_time != nullptr ? fmt::format("{:%Y-%m-%d %H:%M:%S}", *local_time) : "1970-01-01 00:00:00";
     const std::string sim_result_str =
         fmt::format("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                     "<sim_out>\n"
@@ -329,9 +338,9 @@ TEST_CASE("Write simulation result with ExGS simulation", "[sqd-sim-result]")
                     "state_count=\"3\">-0-0-0-</dist>\n"
                     "    </elec_dist>\n"
                     "</sim_out>\n",
-                    FICTION_VERSION, FICTION_REPO, fmt::format("{:%Y-%m-%d %H:%M:%S}", *std::localtime(&current_time)),
-                    sim_result.simulation_runtime.count(), sim_result.simulation_parameters.lambda_tf,
-                    sim_result.simulation_parameters.epsilon_r, sim_result.simulation_parameters.mu_minus);
+                    FICTION_VERSION, FICTION_REPO, time_str, sim_result.simulation_runtime.count(),
+                    sim_result.simulation_parameters.lambda_tf, sim_result.simulation_parameters.epsilon_r,
+                    sim_result.simulation_parameters.mu_minus);
 
     write_sqd_sim_result(sim_result, simulation_stream);
 
@@ -359,7 +368,10 @@ TEST_CASE("Write simulation result with ExGS simulation and positive DBs", "[sqd
     sim_result.algorithm_name = "ExGS";
     std::stringstream simulation_stream{};
 
-    const auto        current_time   = std::time(nullptr);
+    const auto        current_time = std::time(nullptr);
+    const auto*       local_time   = std::localtime(&current_time);
+    const auto        time_str =
+        local_time != nullptr ? fmt::format("{:%Y-%m-%d %H:%M:%S}", *local_time) : "1970-01-01 00:00:00";
     const std::string sim_result_str = fmt::format(
         "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
         "<sim_out>\n"
@@ -386,9 +398,9 @@ TEST_CASE("Write simulation result with ExGS simulation and positive DBs", "[sqd
         "        <dist energy=\"0.000000\" count=\"1\" physically_valid=\"1\" state_count=\"3\">0-0</dist>\n"
         "    </elec_dist>\n"
         "</sim_out>\n",
-        FICTION_VERSION, FICTION_REPO, fmt::format("{:%Y-%m-%d %H:%M:%S}", *std::localtime(&current_time)),
-        sim_result.simulation_runtime.count(), sim_result.simulation_parameters.lambda_tf,
-        sim_result.simulation_parameters.epsilon_r, sim_result.simulation_parameters.mu_minus);
+        FICTION_VERSION, FICTION_REPO, time_str, sim_result.simulation_runtime.count(),
+        sim_result.simulation_parameters.lambda_tf, sim_result.simulation_parameters.epsilon_r,
+        sim_result.simulation_parameters.mu_minus);
 
     write_sqd_sim_result(sim_result, simulation_stream);
 
