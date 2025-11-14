@@ -163,7 +163,7 @@ class searchable_priority_queue : public std::priority_queue<T, Container, Compa
 [[nodiscard]] inline std::tm safe_localtime(const std::time_t time) noexcept
 {
     std::tm tm_snapshot{};
-#if defined(_WIN32)
+#ifdef _WIN32
     localtime_s(&tm_snapshot, &time);
 #else
     localtime_r(&time, &tm_snapshot);
