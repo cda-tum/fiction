@@ -41,11 +41,6 @@ set_property(TARGET pyfiction PROPERTY VERIFY_INTERFACE_HEADER_SETS ON)
 # Enforce project-wide C++ standard feature requirement (redundant but explicit)
 target_compile_features(pyfiction PRIVATE cxx_std_${CMAKE_CXX_STANDARD})
 
-if (MSVC)
-    target_compile_options(pyfiction PRIVATE /utf-8)
-    add_definitions(-DUNICODE -D_UNICODE)
-endif ()
-
 # Install directive for scikit-build-core
 install(TARGETS pyfiction
         DESTINATION .

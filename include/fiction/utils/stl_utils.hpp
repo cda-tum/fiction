@@ -5,6 +5,7 @@
 #ifndef FICTION_STL_UTILS_HPP
 #define FICTION_STL_UTILS_HPP
 
+#include <ctime>
 #include <functional>
 #include <iterator>
 #include <queue>
@@ -153,6 +154,22 @@ class searchable_priority_queue : public std::priority_queue<T, Container, Compa
         return find(val) != this->c.cend();
     }
 };
+/**
+ * Thread-safe version of `std::localtime`.
+ *
+ * @param time The time to convert.
+ * @return The `std::tm` representation of the given time.
+ */
+[[nodiscard]] inline std::tm safe_localtime(const std::time_t time) noexcept
+{
+    std::tm tm_snapshot{};
+#ifdef _WIN32
+    localtime_s(&tm_snapshot, &time);
+#else
+    localtime_r(&time, &tm_snapshot);
+#endif
+    return tm_snapshot;
+}
 
 }  // namespace fiction
 
