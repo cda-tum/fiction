@@ -32,5 +32,11 @@ foreach (FILE IN LISTS FILENAMES)
     # Make Catch2 ignore SIGTERMs sent to applications when timeouts are reached
     target_compile_definitions(${TEST_NAME} INTERFACE CATCH_CONFIG_NO_POSIX_SIGNALS)
 
+    # Set UTF-8 encoding for MSVC
+    if (MSVC)
+        target_compile_options(${TEST_NAME} PRIVATE /utf-8)
+        add_definitions(-DUNICODE -D_UNICODE)
+    endif ()
+
     add_test(NAME ${NAME} COMMAND ${TEST_NAME}) # group tests by file
 endforeach ()
