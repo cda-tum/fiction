@@ -18,13 +18,14 @@
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
+#include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/charge_distribution_surface.hpp>
 #include <fiction/technology/sidb_bestagon_library.hpp>
+#include <fiction/technology/sidb_charge_state.hpp>
 #include <fiction/technology/sidb_lattice.hpp>
 #include <fiction/technology/sidb_lattice_orientations.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/layout_utils.hpp>
 
 #include <sstream>
 
@@ -541,9 +542,9 @@ TEST_CASE("Print layout without charges but defects", "[print-charge-layout]")
 
     sidb_defect_surface<sidb_cell_clk_lyt_siqad> cl{convert_layout_to_siqad_coordinates(layout)};
 
-    cl.assign_cell_type({0, 0, 0}, sidb_cell_clk_lyt_siqad::technology::NORMAL);
-    cl.assign_cell_type({1, 0, 1}, sidb_cell_clk_lyt_siqad::technology::NORMAL);
-    cl.assign_cell_type({4, 0, 1}, sidb_cell_clk_lyt_siqad::technology::NORMAL);
+    cl.assign_cell_type({0, 0, 0}, sidb_cell_clk_lyt_siqad::technology::cell_type::NORMAL);
+    cl.assign_cell_type({1, 0, 1}, sidb_cell_clk_lyt_siqad::technology::cell_type::NORMAL);
+    cl.assign_cell_type({4, 0, 1}, sidb_cell_clk_lyt_siqad::technology::cell_type::NORMAL);
 
     cl.assign_sidb_defect({0, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, 1});
     cl.assign_sidb_defect({1, 0, 1}, sidb_defect{sidb_defect_type::UNKNOWN, 0});
