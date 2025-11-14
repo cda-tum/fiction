@@ -9,6 +9,7 @@
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
 #include <fiction/io/write_sqd_sim_result.hpp>
 #include <fiction/technology/sidb_lattice.hpp>
+#include <fiction/technology/sidb_lattice_orientations.hpp>
 #include <fiction/types.hpp>
 
 #include <any>
@@ -162,7 +163,7 @@ TEST_CASE("Write empty simulation result", "[sqd-sim-result]")
     sidb_simulation_result<lattice> sim_result{};
 
     sim_result.algorithm_name     = "TestSim";
-    sim_result.simulation_runtime = 42s;
+    sim_result.simulation_runtime = 42s;  // NOLINT(misc-include-cleaner)
 
     std::stringstream simulation_stream{};
 
