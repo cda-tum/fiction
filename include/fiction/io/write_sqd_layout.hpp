@@ -15,7 +15,6 @@
 #include <fmt/ranges.h>
 
 #include <cassert>
-#include <chrono>
 #include <ctime>
 #include <fstream>
 #include <ostream>
@@ -194,7 +193,8 @@ class write_sqd_layout_impl
         header << siqad::SQD_HEADER << siqad::OPEN_SIQAD;
 
         const auto current_time = std::time(nullptr);
-        const auto time_str     = fmt::format("{:%Y-%m-%d %H:%M:%S}", *std::localtime(&current_time));
+        const auto time_str =
+            fmt::format("{:%Y-%m-%d %H:%M:%S}", *std::localtime(&current_time));  // NOLINT(concurrency-mt-unsafe)
 
         header << fmt::format(siqad::PROGRAM_BLOCK, "layout simulation", FICTION_VERSION, FICTION_REPO, time_str);
 
@@ -439,7 +439,7 @@ void write_sqd_layout(const Lyt& lyt, std::ostream& os)
 template <typename Lyt>
 void write_sqd_layout(const Lyt& lyt, const std::string_view& filename)
 {
-    std::ofstream os{filename.data(), std::ofstream::out};
+    std::ofstream os{std::string{filename}, std::ofstream::out};
 
     if (!os.is_open())
     {
