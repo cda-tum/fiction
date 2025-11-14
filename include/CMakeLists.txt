@@ -14,6 +14,12 @@ set_target_properties(
              CXX_VISIBILITY_PRESET hidden
              VISIBILITY_INLINES_HIDDEN YES)
 
+# Set UTF-8 encoding for MSVC
+if (MSVC)
+    target_compile_options(libfiction INTERFACE /utf-8)
+    add_definitions(-DUNICODE -D_UNICODE)
+endif ()
+
 # Add configuration file
 configure_file(${PROJECT_SOURCE_DIR}/include/fiction/utils/version_info.hpp.in
                utils/version_info.hpp)
