@@ -34,78 +34,78 @@ TEST_CASE("Utility function: any_to_string", "[sqd-sim-result]")
     }
     SECTION("int8_t")
     {
-        const int8_t value  = -42;
-        const auto   result = detail::any_to_string(value);
+        constexpr int8_t value  = -42;
+        const auto       result = detail::any_to_string(value);
 
         CHECK(result == "-42");
     }
     SECTION("uint8_t")
     {
-        const uint8_t value  = 42;
-        const auto    result = detail::any_to_string(value);
+        constexpr uint8_t value  = 42;
+        const auto        result = detail::any_to_string(value);
 
         CHECK(result == "42");
     }
     SECTION("int16_t")
     {
-        const int16_t value  = -32768;
-        const auto    result = detail::any_to_string(value);
+        constexpr int16_t value  = -32768;
+        const auto        result = detail::any_to_string(value);
 
         CHECK(result == "-32768");
     }
     SECTION("uint16_t")
     {
-        const uint16_t value  = 65535;
-        const auto     result = detail::any_to_string(value);
+        constexpr uint16_t value  = 65535;
+        const auto         result = detail::any_to_string(value);
 
         CHECK(result == "65535");
     }
     SECTION("int32_t")
     {
-        const int32_t value  = -2'147'483'648;
-        const auto    result = detail::any_to_string(value);
+        constexpr int32_t value  = -2'147'483'648;
+        const auto        result = detail::any_to_string(value);
 
         CHECK(result == "-2147483648");
     }
     SECTION("uint32_t")
     {
-        const uint32_t value  = 4'294'967'295ul;
-        const auto     result = detail::any_to_string(value);
+        constexpr uint32_t value  = 4'294'967'295ul;
+        const auto         result = detail::any_to_string(value);
 
         CHECK(result == "4294967295");
     }
     SECTION("int64_t")
     {
-        const int64_t value  = -9'223'372'036'854'775'807;
-        const auto    result = detail::any_to_string(value);
+        constexpr int64_t value  = -9'223'372'036'854'775'807;
+        const auto        result = detail::any_to_string(value);
 
         CHECK(result == "-9223372036854775807");
     }
     SECTION("uint64_t")
     {
-        const uint64_t value  = 18'446'744'073'709'551'615ull;
-        const auto     result = detail::any_to_string(value);
+        constexpr uint64_t value  = 18'446'744'073'709'551'615ull;
+        const auto         result = detail::any_to_string(value);
 
         CHECK(result == "18446744073709551615");
     }
     SECTION("float")
     {
-        const float value  = -3.141593f;
-        const auto  result = detail::any_to_string(value);
+        constexpr float value  = -3.141593f;
+        const auto      result = detail::any_to_string(value);
 
         CHECK(result == "-3.141593");
     }
     SECTION("double")
     {
-        const double value  = 3.14159265359;
-        const auto   result = detail::any_to_string(value);
+        constexpr double value  = 3.14159265359;
+        const auto       result = detail::any_to_string(value);
 
         CHECK(result == "3.141593");  // will be rounded by std::to_string
     }
     SECTION("long double")
     {
-        const long double value  = 2.7182818284590452353602874l;
-        const auto        result = detail::any_to_string(value);
+        constexpr long double value  = 2.7182818284590452353602874l;
+        const auto            result = detail::any_to_string(value);
 
         CHECK(result == "2.718282");  // will be rounded by std::to_string
     }
@@ -125,15 +125,15 @@ TEST_CASE("Utility function: any_to_string", "[sqd-sim-result]")
     }
     SECTION("char")
     {
-        const char value  = 'X';
-        const auto result = detail::any_to_string(value);
+        constexpr char value  = 'X';
+        const auto     result = detail::any_to_string(value);
 
         CHECK(result == "X");
     }
     SECTION("unsupported type")
     {
-        const std::vector<int> value{1, 2, 3};
-        const auto             result = detail::any_to_string(value);
+        const std::vector value{1, 2, 3};
+        const auto        result = detail::any_to_string(value);
 
         CHECK(result.empty());
     }
