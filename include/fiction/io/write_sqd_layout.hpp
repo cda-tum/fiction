@@ -8,6 +8,7 @@
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/sidb_defects.hpp"
 #include "fiction/traits.hpp"
+#include "fiction/utils/stl_utils.hpp"
 #include "utils/version_info.hpp"
 
 #include <fmt/chrono.h>
@@ -193,8 +194,7 @@ class write_sqd_layout_impl
         header << siqad::SQD_HEADER << siqad::OPEN_SIQAD;
 
         const auto current_time = std::time(nullptr);
-        const auto time_str =
-            fmt::format("{:%Y-%m-%d %H:%M:%S}", *std::localtime(&current_time));  // NOLINT(concurrency-mt-unsafe)
+        const auto time_str     = fmt::format("{:%Y-%m-%d %H:%M:%S}", safe_localtime(current_time));
 
         header << fmt::format(siqad::PROGRAM_BLOCK, "layout simulation", FICTION_VERSION, FICTION_REPO, time_str);
 

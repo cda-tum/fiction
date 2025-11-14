@@ -10,6 +10,7 @@
 #include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/technology/sidb_nm_position.hpp"
 #include "fiction/traits.hpp"
+#include "fiction/utils/stl_utils.hpp"
 #include "utils/version_info.hpp"
 
 #include <fmt/chrono.h>
@@ -176,10 +177,9 @@ class write_sqd_sim_result_impl
     void write_engine_info()
     {
         const auto current_time = std::time(nullptr);
-        os << fmt::format(
-            siqad::ENG_INFO_BLOCK, sim_result.algorithm_name, FICTION_VERSION, FICTION_REPO, 0,
-            fmt::format("{:%Y-%m-%d %H:%M:%S}", *std::localtime(&current_time)),  // NOLINT(concurrency-mt-unsafe)
-            sim_result.simulation_runtime.count());
+        os << fmt::format(siqad::ENG_INFO_BLOCK, sim_result.algorithm_name, FICTION_VERSION, FICTION_REPO, 0,
+                          fmt::format("{:%Y-%m-%d %H:%M:%S}", safe_localtime(current_time)),
+                          sim_result.simulation_runtime.count());
     }
 
     /**
