@@ -63,7 +63,7 @@ jobs:
 
       - name: Run clang-tidy
         id: linter
-        uses: cpp-linter/cpp-linter-action@v2.16.5
+        uses: cpp-linter/cpp-linter-action@v2.16.6
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
