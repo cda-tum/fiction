@@ -21,7 +21,8 @@ energy_command::energy_command(const environment::ptr& e) :
         command(e, "Prints the energy dissipation for the current gate-level layout in store that would "
                    "occur if it was compiled using the QCA-ONE library. Calculations are based upon "
                    "'An Energy-aware Model for the Logic Synthesis of Quantum-Dot Cellular Automata' "
-                   "by Frank Sill Torres, et al. in TCAD 2018.")
+                   "by Frank Sill Torres, et al. in TCAD 2018.\n\n"
+                   "This command is deprecated since version 0.7.0 and will be removed in version 0.8.0.")
 {}
 
 void energy_command::execute()

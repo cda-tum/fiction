@@ -37,7 +37,9 @@ onepass_command::onepass_command(const environment::ptr& e) :
                    "logic network onto a given clocking scheme. Gate types to be used can be specified. If "
                    "none are given, all are enabled, because synthesis without gates cannot work. Layouts "
                    "resulting from this approach might be desynchronized. I/Os are always located at the "
-                   "layout's borders.")
+                   "layout's borders.\n\n"
+                   "This command is deprecated since version 0.7.0 and will be removed in version 0.8.0."
+                   "Please use command 'exact' instead.")
 {
     add_option("--clk_scheme,-s", ps.scheme, "Clocking scheme to use {2DDWAVE[3|4], USE, RES, ESR, CFE, SRS, BANCS}",
                true);
