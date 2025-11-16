@@ -10,10 +10,12 @@
 #include <fiction/types.hpp>
 
 #include <alice/alice.hpp>
+#include <fmt/format.h>
 
 #include <algorithm>
 #include <array>
 #include <memory>
+#include <type_traits>
 #include <variant>
 
 namespace alice
@@ -49,7 +51,6 @@ map_command::map_command(const environment::ptr& e) :
     add_flag("--all", "Enable the use of all supported gates");
 
     add_flag("--decay", ps.decay, "Enforce the application of at least one constant input to three-input gates");
-    add_flag("--logic_sharing,-s", ps.mapper_params.enable_logic_sharing, "Enable logic sharing optimization");
     add_flag("--verbose,-v", ps.mapper_params.verbose, "Be verbose");
 }
 
@@ -73,9 +74,8 @@ void map_command::execute()
     }
 
     // Save control flags before applying aggregate selections
-    const auto decay_flag         = ps.decay;
-    const auto logic_sharing_flag = ps.mapper_params.enable_logic_sharing;
-    const auto verbose_flag       = ps.mapper_params.verbose;
+    const auto decay_flag   = ps.decay;
+    const auto verbose_flag = ps.mapper_params.verbose;
 
     if (is_set("all2"))
     {
@@ -93,14 +93,13 @@ void map_command::execute()
     // Restore control flags after aggregate selection
     if (is_set("all2") || is_set("all3") || is_set("all"))
     {
-        ps.decay                              = decay_flag;
-        ps.mapper_params.enable_logic_sharing = logic_sharing_flag;
-        ps.mapper_params.verbose              = verbose_flag;
+        ps.decay                 = decay_flag;
+        ps.mapper_params.verbose = verbose_flag;
     }
 
-    const std::array gate_flags{is_set("inv"),    is_set("and"),    is_set("nand"),   is_set("or"),   is_set("nor"),
-                                is_set("xor"),    is_set("xnor"),   is_set("lt"),     is_set("gt"),   is_set("le"),
-                                is_set("ge"),     is_set("maj"),    is_set("dot"),    is_set("and3"), is_set("xor_and"),
+    const std::array gate_flags{is_set("and"),    is_set("nand"),   is_set("or"),     is_set("nor"),  is_set("xor"),
+                                is_set("xnor"),   is_set("lt"),     is_set("gt"),     is_set("le"),   is_set("ge"),
+                                is_set("inv"),    is_set("maj"),    is_set("dot"),    is_set("and3"), is_set("xor_and"),
                                 is_set("or_and"), is_set("onehot"), is_set("gamble"), is_set("mux"),  is_set("and_xor"),
                                 is_set("all2"),   is_set("all3"),   is_set("all")};
 
@@ -113,17 +112,33 @@ void map_command::execute()
 
     const auto perform_mapping = [this, &s](auto&& ntk_ptr)
     {
-        fiction::technology_mapping_stats st{};
+        using Ntk = typename std::decay_t<decltype(ntk_ptr)>::element_type;
 
-        const auto mapped_ntk = fiction::technology_mapping(*ntk_ptr, ps, &st);
-
-        if (st.mapper_stats.mapping_error)
+        if (std::is_same_v<Ntk, fiction::tec_nt>)
         {
-            env->out() << "[e] an error occurred in mockturtle's technology mapper\n";
-            return;
+            env->out() << fmt::format(
+                "[w] network '{}' is already mapped; you might encounter mapping errors during remapping\n",
+                fiction::get_name(*ntk_ptr));
         }
 
-        s.extend() = std::make_shared<fiction::tec_nt>(mapped_ntk);
+        fiction::technology_mapping_stats st{};
+
+        try
+        {
+            const auto mapped_ntk = fiction::technology_mapping(*ntk_ptr, ps, &st);
+
+            if (st.mapper_stats.mapping_error)
+            {
+                env->out() << "[e] an error occurred in mockturtle's technology mapper\n";
+                return;
+            }
+
+            s.extend() = std::make_shared<fiction::tec_nt>(mapped_ntk);
+        }
+        catch (const fiction::missing_required_gates_exception& e)
+        {
+            env->out() << fmt::format("[e] {}\n", e.what());
+        }
     };
 
     std::visit(perform_mapping, s.current());

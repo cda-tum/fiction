@@ -12,6 +12,14 @@ Changed
 #######
 - Build system:
     - Restructured the CLI command implementation to improve code organization, modularity, and compilation speed
+- Algorithms:
+    - Switched the default technology mapper in the ``map`` command and the ``technology_mapping`` function from ``mockturtle::map`` to ``mockturtle::emap``
+
+
+Removed
+#######
+- CLI:
+    - Removed the ``--logic_sharing`` flag from ``map`` as ``mockturtle::emap`` does not support it
 
 
 v0.6.12 - 2025-10-29
@@ -41,8 +49,6 @@ Added
 
 Changed
 #######
-- Algorithms:
-    - Switched the default technology mapper in the ``map`` command and the ``technology_mapping`` function from ``mockturtle::map`` to ``mockturtle::emap``
 - CLI:
     - ``area`` now outputs the layout width and height in addition to the area
 - Continuous integration:
