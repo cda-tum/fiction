@@ -10,6 +10,7 @@
 #include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/technology/sidb_nm_position.hpp"
 #include "fiction/traits.hpp"
+#include "fiction/utils/stl_utils.hpp"
 #include "utils/version_info.hpp"
 
 #include <fmt/chrono.h>
@@ -17,17 +18,14 @@
 
 #include <algorithm>
 #include <any>
-#include <chrono>
 #include <cstdint>
 #include <ctime>
 #include <fstream>
 #include <functional>
 #include <ostream>
-#include <sstream>
 #include <string>
 #include <string_view>
 #include <typeindex>
-#include <typeinfo>
 #include <unordered_map>
 #include <vector>
 
@@ -178,8 +176,9 @@ class write_sqd_sim_result_impl
      */
     void write_engine_info()
     {
+        const auto current_time = std::time(nullptr);
         os << fmt::format(siqad::ENG_INFO_BLOCK, sim_result.algorithm_name, FICTION_VERSION, FICTION_REPO, 0,
-                          fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(std::time(nullptr))),
+                          fmt::format("{:%Y-%m-%d %H:%M:%S}", safe_localtime(current_time)),
                           sim_result.simulation_runtime.count());
     }
 
@@ -314,7 +313,7 @@ void write_sqd_sim_result(const sidb_simulation_result<Lyt>& sim_result, const s
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt must be an SiDB layout");
 
-    std::ofstream os{filename.data(), std::ofstream::out};
+    std::ofstream os{std::string{filename}, std::ofstream::out};
 
     if (!os.is_open())
     {

@@ -76,7 +76,7 @@ jobs:
         run: uvx twine check dist/*
 
       - name: Upload sdist as an artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: cibw-sdist
           path: dist/*.tar.gz
@@ -127,10 +127,10 @@ jobs:
           enable-cache: true
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v3.2
+        uses: pypa/cibuildwheel@v3.3
 
       - name: Upload wheel as an artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: cibw-wheels-${{ matrix.runs-on }}
           path: ./wheelhouse/*.whl
@@ -143,7 +143,7 @@ jobs:
     if: github.event_name == 'release' && github.event.action == 'published'
     steps:
       - name: Download the previously stored artifacts
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           pattern: cibw-*
           path: dist

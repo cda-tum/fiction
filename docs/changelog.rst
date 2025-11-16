@@ -8,6 +8,15 @@ The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`
 Unreleased
 ----------
 
+Changed
+#######
+- Build system:
+    - Restructured the CLI command implementation to improve code organization, modularity, and compilation speed
+
+
+v0.6.12 - 2025-10-29
+--------------------
+
 Added
 #####
 - Algorithms:
@@ -16,10 +25,19 @@ Added
     - Flag in ``gold`` to enforce NOT gates to be routed non-bending only
     - Parameter in ``gold`` to skip tiles when placing PIs, leading to higher success probabilities in discovering layouts
     - Flag in ``gold`` to randomize the number of skipped tiles when placing PIs
+    - Improved performance of ``hexagonalization``
+    - Improved performance of SiDB simulation algorithms through changes in the underlying data structures
     - Reimplementation of Graphviz's "Mincross" algorithm
     - Breadth-first topological view
+    - ``PRUNING_BASED`` option for SiDB gate design to speed up the design process by pruning non-operational layouts
+- Experiments:
+    - Figures-of-Merit (FoM) SiDB layout analysis experiment script
+    - QuickCell experiment script
+    - Minimal SiDB gate design experiment script
 - Continuous integration:
     - Python 3.14 support
+- Documentation:
+    - References to newly published papers
 
 Changed
 #######
@@ -29,18 +47,34 @@ Changed
     - ``area`` now outputs the layout width and height in addition to the area
 - Continuous integration:
     - Switched to the `Ninja` generator for Windows CI builds
+- Documentation:
+    - Modernized README and Getting Started section of the documentation
+- Dependencies:
+    - Updated all dependencies to their latest versions
 
 Fixed
 #####
+- Data structures:
+    - Fixed I/O cell handling in ``cell_level_layout``'s ``assign_cell_type`` member function
+    - Fixed system energy calculation in ``charge_distribution_surface`` in corner cases
+    - Added missing ``clone`` member functions to *pyfiction*'s SiDB lattices
 - Algorithms:
     - Fixed a corner case in ``hexagonalization`` when extending POs to the bottom border
     - Fixed a bug in ``post_layout_optimization`` and ``wiring_reduction`` that lead to POs not being placed at the borders and possibly dying
+    - Fixed ``band_bending_resilience`` calculation of SiDB layouts for unspecified transition types
+- Experiments:
+    - Experiment scripts requiring ``ALGLIB`` now prompt an error message instead of failing to compile when the library is not found
+- Continuous integration:
+    - ``clang-tidy`` CI workflow no longer fails when run from forks
+- Code quality:
+    - Addressed several ``clang-tidy`` warnings throughout the code base
 
 Removed
 #######
 - CLI:
     - Removed the ``--logic_sharing`` flag from ``map`` as ``mockturtle::emap`` does not support it
 - Continuous integration:
+    - Dropped Windows 2019 and v142 support
     - Dropped Python 3.9 support due to its end-of-life status
 
 
