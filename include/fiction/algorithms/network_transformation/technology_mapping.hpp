@@ -31,8 +31,8 @@ class missing_required_gates_exception final : public std::logic_error
 {
   public:
     explicit missing_required_gates_exception(const std::string& network_type, const std::string& missing_gates) :
-            std::logic_error("Technology library is missing required gates for " + network_type +
-                             " network: " + missing_gates)
+            std::logic_error(fmt::format("Technology library is missing required gates for {} networks: {}",
+                                         network_type, missing_gates))
     {}
 };
 
