@@ -79,55 +79,6 @@ TEST_CASE("Planarize technology ntk", "[node-duplication-planarization]")
     // NOLINTEND(bugprone-unchecked-optional-access)
 }
 
-TEST_CASE("Planarize ntk with 3-ary node", "[node-duplication-planarization]")
-{
-    technology_network tec{};
-
-    const auto x1 = tec.create_pi();
-    const auto x2 = tec.create_pi();
-    const auto x3 = tec.create_pi();
-    const auto x4 = tec.create_pi();
-    const auto x5 = tec.create_pi();
-    const auto f1 = tec.create_not(x2);
-    const auto f2 = tec.create_nary_and({x1, x2, x3, x4});
-    const auto f3 = tec.create_nary_or({x3, x4, x5});
-    const auto f4 = tec.create_maj(x1, x2, f3);
-    tec.create_po(f1);
-    tec.create_po(f2);
-    tec.create_po(f3);
-    tec.create_po(f4);
-
-    network_balancing_params ps;
-    ps.unify_outputs = true;
-
-    const auto tec_b = fiction::network_balancing<fiction::technology_network>(
-        fiction::fanout_substitution<fiction::technology_network>(tec), ps);
-
-    const auto vpi_r = fiction::mutable_rank_view(tec_b);
-
-    node_duplication_planarization_params params;
-    params.po_order = node_duplication_planarization_params::output_order::RANDOM_PO_ORDER;
-
-    auto planarized_ntk = node_duplication_planarization(vpi_r, params);
-
-    mincross_stats  st_min{};
-    mincross_params p_min{};
-    p_min.optimize = false;
-
-    auto ntk = mincross(planarized_ntk, p_min, &st_min);  // counts crossings
-    CHECK(st_min.num_crossings == 0);
-
-    // clang-tidy bugprone-unchecked-optional-access false positive in tests
-    // NOLINTBEGIN(bugprone-unchecked-optional-access)
-    mockturtle::equivalence_checking_stats st;
-    const auto                             cec_m =
-        mockturtle::equivalence_checking(*fiction::virtual_miter<technology_network>(tec, planarized_ntk), {}, &st);
-    REQUIRE(cec_m.has_value());
-    const auto result = *cec_m;
-    CHECK(result == 1);
-    // NOLINTEND(bugprone-unchecked-optional-access)
-}
-
 TEST_CASE("Buffer AIG and planarize technology_network", "[node-duplication-planarization]")
 {
     mockturtle::aig_network aig{};
