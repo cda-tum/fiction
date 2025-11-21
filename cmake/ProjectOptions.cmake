@@ -20,13 +20,7 @@ macro(fiction_supports_sanitizers)
 endmacro()
 
 macro(fiction_setup_options)
-  option(FICTION_ENABLE_HARDENING "Enable hardening" OFF)
   option(FICTION_ENABLE_COVERAGE "Enable coverage reporting" OFF)
-  cmake_dependent_option(
-    FICTION_ENABLE_GLOBAL_HARDENING
-    "Attempt to push hardening options to built dependencies" ON
-    FICTION_ENABLE_HARDENING OFF)
-
   option(FICTION_ENABLE_IPO "Enable IPO/LTO" OFF)
   option(FICTION_WARNINGS_AS_ERRORS "Treat Warnings As Errors" OFF)
   option(FICTION_ENABLE_SANITIZER_ADDRESS "Enable address sanitizer" OFF)
@@ -64,20 +58,6 @@ macro(fiction_global_options)
   endif()
 
   fiction_supports_sanitizers()
-
-  if(FICTION_ENABLE_HARDENING AND FICTION_ENABLE_GLOBAL_HARDENING)
-    include(cmake/Hardening.cmake)
-    if(NOT SUPPORTS_UBSAN
-       OR FICTION_ENABLE_SANITIZER_UNDEFINED
-       OR FICTION_ENABLE_SANITIZER_ADDRESS
-       OR FICTION_ENABLE_SANITIZER_THREAD
-       OR FICTION_ENABLE_SANITIZER_LEAK)
-      set(ENABLE_UBSAN_MINIMAL_RUNTIME FALSE)
-    else()
-      set(ENABLE_UBSAN_MINIMAL_RUNTIME TRUE)
-    endif()
-    fiction_enable_hardening(fiction_options ON ${ENABLE_UBSAN_MINIMAL_RUNTIME})
-  endif()
 endmacro()
 
 macro(fiction_local_options)
@@ -101,11 +81,6 @@ macro(fiction_local_options)
   set_target_properties(fiction_options
                         PROPERTIES UNITY_BUILD ${FICTION_ENABLE_UNITY_BUILD})
 
-  if(FICTION_ENABLE_PCH)
-    target_precompile_headers(fiction_options INTERFACE <vector> <string>
-                              <utility>)
-  endif()
-
   if(FICTION_ENABLE_CACHE)
     include(cmake/Cache.cmake)
     fiction_enable_cache()
@@ -122,21 +97,6 @@ macro(fiction_local_options)
       # This is not working consistently, so disabling for now
       # target_link_options(fiction_options INTERFACE -Wl,--fatal-warnings)
     endif()
-  endif()
-
-  if(FICTION_ENABLE_HARDENING AND NOT FICTION_ENABLE_GLOBAL_HARDENING)
-    include(cmake/Hardening.cmake)
-    if(NOT SUPPORTS_UBSAN
-       OR FICTION_ENABLE_SANITIZER_UNDEFINED
-       OR FICTION_ENABLE_SANITIZER_ADDRESS
-       OR FICTION_ENABLE_SANITIZER_THREAD
-       OR FICTION_ENABLE_SANITIZER_LEAK)
-      set(ENABLE_UBSAN_MINIMAL_RUNTIME FALSE)
-    else()
-      set(ENABLE_UBSAN_MINIMAL_RUNTIME TRUE)
-    endif()
-    fiction_enable_hardening(fiction_options OFF
-                             ${ENABLE_UBSAN_MINIMAL_RUNTIME})
   endif()
 
   # This applies a memory optimization for Debug builds which may be used to conform to memory limitations

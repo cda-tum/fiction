@@ -5,9 +5,8 @@
 #ifndef FICTION_WRITE_FGL_LAYOUT_HPP
 #define FICTION_WRITE_FGL_LAYOUT_HPP
 
-#include "fiction/layouts/clocked_layout.hpp"
-#include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/traits.hpp"
+#include "fiction/utils/stl_utils.hpp"
 #include "utils/version_info.hpp"
 
 #include <fmt/chrono.h>
@@ -15,12 +14,10 @@
 #include <kitty/print.hpp>
 #include <mockturtle/views/topo_view.hpp>
 
-#include <chrono>
-#include <cstdlib>
+#include <cstdint>
 #include <ctime>
 #include <fstream>
 #include <ostream>
-#include <sstream>
 #include <string>
 #include <string_view>
 
@@ -94,14 +91,15 @@ class write_fgl_layout_impl
     {
         // metadata
         os << fcn::FGL_HEADER << fcn::OPEN_FGL;
-        const auto time_str = fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(std::time(nullptr)));
+        const auto current_time = std::time(nullptr);
+        const auto time_str     = fmt::format("{:%Y-%m-%d %H:%M:%S}", safe_localtime(current_time));
         os << fmt::format(fcn::FICTION_METADATA, FICTION_VERSION, FICTION_REPO, time_str);
 
         os << fcn::OPEN_LAYOUT_METADATA;
         std::string layout_name = get_name(lyt);
 
         // check if topology matches Lyt
-        std::string topology = "";
+        std::string topology{};
         if constexpr (is_cartesian_layout_v<Lyt>)
         {
             topology = "cartesian";
@@ -360,7 +358,7 @@ void write_fgl_layout(const Lyt& lyt, std::ostream& os)
 template <typename Lyt>
 void write_fgl_layout(const Lyt& lyt, const std::string_view& filename)
 {
-    std::ofstream os{filename.data(), std::ofstream::out};
+    std::ofstream os{std::string{filename}, std::ofstream::out};
 
     if (!os.is_open())
     {

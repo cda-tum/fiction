@@ -20400,6 +20400,15 @@ Parameter ``n``:
 Returns:
     Row-based clocking scheme.)doc";
 
+static const char *__doc_fiction_safe_localtime =
+R"doc(Thread-safe version of `std::localtime`.
+
+Parameter ``time``:
+    The time to convert.
+
+Returns:
+    The `std::tm` representation of the given time.)doc";
+
 static const char *__doc_fiction_searchable_priority_queue =
 R"doc(An extension of `std::priority_queue` that allows searching the
 underlying container. The implementation is based on

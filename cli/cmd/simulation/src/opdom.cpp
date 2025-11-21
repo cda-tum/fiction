@@ -1,0 +1,384 @@
+//
+// Created by marcel on 12.12.23.
+//
+
+#include "cmd/simulation/include/opdom.hpp"
+
+#include "stores.hpp"  // NOLINT(misc-include-cleaner)
+
+#include <fiction/algorithms/simulation/sidb/operational_domain.hpp>
+#include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
+#include <fiction/io/write_operational_domain.hpp>
+#include <fiction/traits.hpp>
+#include <fiction/types.hpp>
+#include <fiction/utils/name_utils.hpp>
+
+#include <alice/alice.hpp>
+#include <mockturtle/utils/stopwatch.hpp>
+#include <nlohmann/json.hpp>
+
+#include <algorithm>
+#include <array>
+#include <cctype>
+#include <cstdlib>
+#include <exception>
+#include <optional>
+#include <stdexcept>
+#include <string>
+#include <type_traits>
+#include <variant>
+#include <vector>
+
+namespace alice
+{
+
+opdom_command::opdom_command(const environment::ptr& e) :
+        command(e,
+                "Computes the operational domain for the current SiDB cell-level layout in store. An operational "
+                "domain is a set of simulation parameter values for which a given SiDB layout is logically operational."
+                "This means that a layout is deemed operational if the layout's ground state corresponds with a given "
+                "Boolean function at the layout's outputs for all possible input combinations.")
+{
+    add_option("--random_sampling,-r", num_random_samples,
+               "Use random sampling instead of grid search with this many random samples");
+    add_option("--flood_fill,-f", num_random_samples,
+               "Use flood fill instead of grid search with this many initial random samples");
+    add_option("--contour_tracing,-c", num_random_samples,
+               "Use contour tracing instead of grid search with this many random samples");
+
+    add_option("filename", filename, "CSV filename to write the operational domain to")->required();
+    add_flag("--omit_non_op_samples,-o", omit_non_operational_samples,
+             "Omit non-operational samples in the CSV file to reduce file size and increase visibility in 3D plots");
+
+    add_option("--epsilon_r,-e", params.operational_params.simulation_parameters.epsilon_r,
+               "Electric permittivity of the substrate (unit-less)", true);
+    add_option("--lambda_tf,-l", params.operational_params.simulation_parameters.lambda_tf,
+               "Thomas-Fermi screening distance (unit: nm)", true);
+    add_option("--mu_minus,-m", params.operational_params.simulation_parameters.mu_minus,
+               "Energy transition level (0/-) (unit: eV)", true);
+
+    add_option("--x_sweep,-x", x_sweep, "Sweep parameter of the x dimension [epsilon_r, lambda_tf, mu_minus]", true);
+    add_option("--y_sweep,-y", y_sweep, "Sweep parameter of the y dimension [epsilon_r, lambda_tf, mu_minus]", true);
+    add_option("--z_sweep,-z", z_sweep,
+               "Sweep parameter of the z dimension (optional) [epsilon_r, lambda_tf, mu_minus]");
+
+    add_option("--x_min", sweep_dimensions[0].min, "Minimum value of the x dimension sweep", true);
+    add_option("--x_max", sweep_dimensions[0].max, "Maximum value of the x dimension sweep", true);
+    add_option("--x_step", sweep_dimensions[0].step, "Step size of the x dimension sweep", true);
+    add_option("--y_min", sweep_dimensions[1].min, "Minimum value of the y dimension sweep", true);
+    add_option("--y_max", sweep_dimensions[1].max, "Maximum value of the y dimension sweep", true);
+    add_option("--y_step", sweep_dimensions[1].step, "Step size of the y dimension sweep", true);
+    add_option("--z_min", sweep_dimensions[2].min, "Minimum value of the z dimension sweep");
+    add_option("--z_max", sweep_dimensions[2].max, "Maximum value of the z dimension sweep");
+    add_option("--z_step", sweep_dimensions[2].step, "Step size of the z dimension sweep");
+
+    add_option("--base", simulation_params.base,
+               "The simulation base, can be 2 or 3 (only ClusterComplete supports base-3 simulation)", true);
+    add_option("--engine", sim_engine_str,
+               "The simulation engine to use {QuickExact [default], ClusterComplete, QuickSim, ExGS}", true);
+}
+
+void opdom_command::execute()
+{
+    // reset operational domain and stats
+    op_domain = {};
+    stats     = {};
+
+    auto& cs = store<fiction::cell_layout_t>();
+
+    // error case: empty cell layout store
+    if (cs.empty())
+    {
+        env->out() << "[w] no cell layout in store\n";
+        reset_params();
+        return;
+    }
+
+    auto& ts = store<fiction::truth_table_t>();
+
+    // error case: empty truth table store
+    if (ts.empty())
+    {
+        env->out() << "[w] no truth table in store\n";
+        reset_params();
+        return;
+    }
+
+    if (params.operational_params.simulation_parameters.epsilon_r <= 0)
+    {
+        env->out() << "[e] epsilon_r must be positive\n";
+        reset_params();
+        return;
+    }
+    if (params.operational_params.simulation_parameters.lambda_tf <= 0)
+    {
+        env->out() << "[e] lambda_tf must be positive\n";
+        reset_params();
+        return;
+    }
+
+    // make sure that at most one algorithm is selected
+    const std::array algorithm_selections = {is_set("random_sampling"), is_set("flood_fill"),
+                                             is_set("contour_tracing")};
+    if (std::count(algorithm_selections.cbegin(), algorithm_selections.cend(), true) > 1)
+    {
+        env->out() << "[e] only one algorithm can be selected at a time\n";
+        reset_params();
+        return;
+    }
+
+    // require positive number of samples for sampling-based algorithms
+    if ((is_set("random_sampling") || is_set("flood_fill") || is_set("contour_tracing")) && num_random_samples == 0)
+    {
+        env->out() << "[e] number of samples must be > 0 for the selected algorithm\n";
+        reset_params();
+        return;
+    }
+
+    // make sure that z is not set if y is not, and that y is not set if x is not
+    if (is_set("z_sweep") && !is_set("y_sweep"))
+    {
+        env->out() << "[e] z sweep parameter cannot be set if y sweep parameter is not set\n";
+        reset_params();
+        return;
+    }
+    if (is_set("y_sweep") && !is_set("x_sweep"))
+    {
+        env->out() << "[e] y sweep parameter cannot be set if x sweep parameter is not set\n";
+        reset_params();
+        return;
+    }
+
+    // overwrite the sweeps with their respective lower-case string representations
+    std::transform(x_sweep.begin(), x_sweep.end(), x_sweep.begin(), ::tolower);
+    std::transform(y_sweep.begin(), y_sweep.end(), y_sweep.begin(), ::tolower);
+    std::transform(z_sweep.begin(), z_sweep.end(), z_sweep.begin(), ::tolower);
+
+    static constexpr const std::array valid_sweep_params = {"epsilon_r", "lambda_tf", "mu_minus"};
+
+    // check if x sweep parameter is valid
+    if (std::find(valid_sweep_params.cbegin(), valid_sweep_params.cend(), x_sweep) == valid_sweep_params.cend())
+    {
+        env->out() << "[e] invalid x sweep parameter \"" << x_sweep
+                   << "\". Has to be one of [epsilon_r, lambda_tf, "
+                      "mu_minus]\n";
+        reset_params();
+        return;
+    }
+
+    // check if y sweep parameter is valid
+    if (std::find(valid_sweep_params.cbegin(), valid_sweep_params.cend(), y_sweep) == valid_sweep_params.cend())
+    {
+        env->out() << "[e] invalid y sweep parameter \"" << y_sweep
+                   << "\". Has to be one of [epsilon_r, lambda_tf, "
+                      "mu_minus]\n";
+        reset_params();
+        return;
+    }
+
+    // check if z sweep parameter is valid if set
+    if (is_set("z_sweep"))
+    {
+        if (std::find(valid_sweep_params.cbegin(), valid_sweep_params.cend(), z_sweep) == valid_sweep_params.cend())
+        {
+            env->out() << "[e] invalid z sweep parameter \"" << z_sweep
+                       << "\". Has to be one of [epsilon_r, lambda_tf, "
+                          "mu_minus]\n";
+            reset_params();
+            return;
+        }
+    }
+
+    // assign x sweep parameters
+    if (x_sweep == "epsilon_r")
+    {
+        sweep_dimensions[0].dimension = fiction::sweep_parameter::EPSILON_R;
+    }
+    else if (x_sweep == "lambda_tf")
+    {
+        sweep_dimensions[0].dimension = fiction::sweep_parameter::LAMBDA_TF;
+    }
+    else if (x_sweep == "mu_minus")
+    {
+        sweep_dimensions[0].dimension = fiction::sweep_parameter::MU_MINUS;
+    }
+
+    // assign y sweep parameters
+    if (y_sweep == "epsilon_r")
+    {
+        sweep_dimensions[1].dimension = fiction::sweep_parameter::EPSILON_R;
+    }
+    else if (y_sweep == "lambda_tf")
+    {
+        sweep_dimensions[1].dimension = fiction::sweep_parameter::LAMBDA_TF;
+    }
+    else if (y_sweep == "mu_minus")
+    {
+        sweep_dimensions[1].dimension = fiction::sweep_parameter::MU_MINUS;
+    }
+
+    if (is_set("z_sweep"))
+    {
+        // assign z sweep parameters
+        if (z_sweep == "epsilon_r")
+        {
+            sweep_dimensions[2].dimension = fiction::sweep_parameter::EPSILON_R;
+        }
+        else if (z_sweep == "lambda_tf")
+        {
+            sweep_dimensions[2].dimension = fiction::sweep_parameter::LAMBDA_TF;
+        }
+        else if (z_sweep == "mu_minus")
+        {
+            sweep_dimensions[2].dimension = fiction::sweep_parameter::MU_MINUS;
+        }
+    }
+    else
+    {
+        // remove z sweep parameter if not set
+        sweep_dimensions.pop_back();
+    }
+
+    const auto get_name = [](auto&& lyt_ptr) -> std::string { return fiction::get_name(*lyt_ptr); };
+
+    const auto opdom = [this, &ts, &get_name](auto&& lyt_ptr)
+    {
+        const auto tt_ptr = ts.current();
+
+        using Lyt = typename std::decay_t<decltype(lyt_ptr)>::element_type;
+
+        if constexpr (!fiction::has_sidb_technology_v<Lyt>)
+        {
+            env->out() << fmt::format("[e] '{}' is not an SiDB layout\n", get_name(lyt_ptr));
+        }
+
+        if (lyt_ptr->num_pis() == 0 || lyt_ptr->num_pos() == 0)
+        {
+            env->out() << fmt::format("[e] '{}' requires primary input and output cells to simulate its "
+                                      "Boolean function\n",
+                                      get_name(lyt_ptr));
+            reset_params();
+            return;
+        }
+
+        const auto engine = fiction::get_sidb_simulation_engine(sim_engine_str);
+
+        if (!engine.has_value())
+        {
+            env->out() << fmt::format("[e] {} is not a supported SiDB simulation engine\n", sim_engine_str);
+            return;
+        }
+
+        // set parameters
+        params.operational_params.simulation_parameters.base = simulation_params.base;
+        params.sweep_dimensions                              = sweep_dimensions;
+        params.operational_params.sim_engine                 = engine.value();
+
+        // Cache the engine name for logging before any potential reset
+        last_engine_name = fiction::sidb_simulation_engine_name(params.operational_params.sim_engine);
+
+        // To aid the compiler
+        if constexpr (fiction::has_sidb_technology_v<Lyt>)
+        {
+            try
+            {
+                if (is_set("random_sampling"))
+                {
+                    op_domain = fiction::operational_domain_random_sampling(*lyt_ptr, std::vector{*tt_ptr},
+                                                                            num_random_samples, params, &stats);
+                }
+                else if (is_set("flood_fill"))
+                {
+                    op_domain = fiction::operational_domain_flood_fill(*lyt_ptr, std::vector{*tt_ptr},
+                                                                       num_random_samples, params, &stats);
+                }
+                else if (is_set("contour_tracing"))
+                {
+                    op_domain = fiction::operational_domain_contour_tracing(*lyt_ptr, std::vector{*tt_ptr},
+                                                                            num_random_samples, params, &stats);
+                }
+                else
+                {
+                    op_domain = fiction::operational_domain_grid_search(*lyt_ptr, std::vector{*tt_ptr}, params, &stats);
+                }
+            }
+            catch (std::invalid_argument& e)
+            {
+                env->out() << fmt::format("[e] {}\n", e.what());
+            }
+            catch (...)
+            {
+                env->out() << "[e] an unknown error occurred during operational domain computation\n";
+            }
+        }
+    };
+
+    std::visit(opdom, cs.current());
+
+    write_op_domain();
+
+    reset_params();
+}
+
+void opdom_command::write_op_domain()
+{
+    // if the operational domain call was unsuccessful, do not attempt to write anything
+    if (op_domain.empty())
+    {
+        reset_params();
+        return;
+    }
+
+    // set up parameters
+    fiction::write_operational_domain_params write_opdom_params{};
+    write_opdom_params.non_operational_tag = "0";
+    write_opdom_params.operational_tag     = "1";
+    write_opdom_params.writing_mode =
+        omit_non_operational_samples ? fiction::write_operational_domain_params::sample_writing_mode::OPERATIONAL_ONLY :
+                                       fiction::write_operational_domain_params::sample_writing_mode::ALL_SAMPLES;
+
+    try
+    {
+        write_operational_domain(op_domain, filename, write_opdom_params);
+    }
+    catch (const std::exception& e)
+    {
+        env->out() << fmt::format("[e] {}\n", e.what());
+        reset_params();
+    }
+    catch (...)
+    {
+        env->out() << "[e] an unknown error occurred while writing the operational domain data\n";
+        reset_params();
+    }
+}
+
+nlohmann::json opdom_command::log() const
+{
+    return nlohmann::json{
+        {"Algorithm name", last_engine_name},
+        {"Runtime in seconds", mockturtle::to_seconds(stats.time_total)},
+        {"Number of simulator invocations", stats.num_simulator_invocations},
+        {"Number of evaluated parameter combinations", stats.num_evaluated_parameter_combinations},
+        {"Number of operational parameter combinations", stats.num_operational_parameter_combinations},
+        {"Number of non-operational parameter combinations", stats.num_non_operational_parameter_combinations}};
+}
+
+void opdom_command::reset_params()
+{
+    simulation_params = fiction::sidb_simulation_parameters{2, -0.32, 5.6, 5.0};
+    sweep_dimensions =
+        std::vector<fiction::operational_domain_value_range>{{fiction::sweep_parameter::EPSILON_R, 1.0, 10.0, 0.1},
+                                                             {fiction::sweep_parameter::LAMBDA_TF, 1.0, 10.0, 0.1},
+                                                             {fiction::sweep_parameter::MU_MINUS, -0.50, -0.10, 0.025}};
+    params = {};
+
+    x_sweep  = "epsilon_r";
+    y_sweep  = "lambda_tf";
+    z_sweep  = "";
+    filename = "";
+
+    omit_non_operational_samples = false;
+}
+
+}  // namespace alice
