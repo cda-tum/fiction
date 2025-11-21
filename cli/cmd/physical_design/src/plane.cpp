@@ -19,6 +19,7 @@
 #include <fmt/format.h>
 #include <nlohmann/json.hpp>
 
+#include <exception>
 #include <memory>
 #include <stdexcept>
 #include <string>
