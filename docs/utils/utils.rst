@@ -227,8 +227,9 @@ STL Extensions
 **Header:** ``fiction/utils/stl_utils.hpp``
 
 .. doxygenfunction:: fiction::find_first_two_of
-
 .. doxygenclass:: fiction::searchable_priority_queue
+    :members:
+.. doxygenfunction:: fiction::safe_localtime
 
 
 Execution Policy Macros

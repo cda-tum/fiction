@@ -12,7 +12,6 @@ namespace fiction::constants
  * A value of \f$\pi\f$ that is accurate to 11 decimal places.
  */
 inline constexpr double PI = 3.14159265359;
-
 /**
  * This error margin is used for the comparison of floating-point numbers.
  */
@@ -20,28 +19,27 @@ inline constexpr double ERROR_MARGIN = 1E-6;
 
 namespace physical
 {
+
 /**
  * The vacuum permittivity \f$\epsilon_0\f$ in \f$F \cdot m^{-1}\f$.
  */
-constexpr double EPSILON = 8.8541878 * 1E-12;
+inline constexpr double EPSILON = 8.8541878 * 1E-12;
 /**
  * The elementary charge \f$e\f$ in \f$C\f$.
  */
-constexpr double ELEMENTARY_CHARGE = 1.6021766 * 1E-19;
+inline constexpr double ELEMENTARY_CHARGE = 1.6021766 * 1E-19;
 /**
  * The Coulomb constant \f$k\f$ in \f$N \cdot m^{2} \cdot C^{-2}\f$.
  */
-constexpr double K_E = 8.987552 * 1E9;
-
+inline constexpr double K_E = 8.987552 * 1E9;
 /**
  * The Boltzmann constant \f$k_B\f$ in \f$J \cdot K^{-1}\f$.
  */
-constexpr double BOLTZMANN_CONSTANT = 1.38064852 * 1E-23;
-
+inline constexpr double BOLTZMANN_CONSTANT = 1.38064852 * 1E-23;
 /**
  * The conversion factor from electronvolts to joules.
  */
-constexpr double EV_TO_JOULE = ELEMENTARY_CHARGE;
+inline constexpr double EV_TO_JOULE = ELEMENTARY_CHARGE;
 
 }  // namespace physical
 
