@@ -21967,7 +21967,13 @@ Parameter ``pst``:
     Technology mapping statistics.
 
 Returns:
-    Mapped network exclusively using gates from the provided library.)doc";
+    Mapped network exclusively using gates from the provided library.
+
+Throws:
+    missing_required_gates_exception if the technology library does
+    not contain required gates for the base network type (e.g., AIG
+    requires INV and AND; XAG requires INV, AND, and XOR; MIG requires
+    INV and MAJ).)doc";
 
 static const char *__doc_fiction_technology_mapping_params = R"doc()doc";
 
