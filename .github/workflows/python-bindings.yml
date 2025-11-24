@@ -13,7 +13,7 @@ on:
       - "libs/**"
       - "noxfile.py"
       - "pyproject.toml"
-      - ".uv.lock"
+      - "uv.lock"
       - ".github/workflows/python-bindings.yml"
   pull_request:
     branches: ["main"]
@@ -27,7 +27,7 @@ on:
       - "libs/**"
       - "noxfile.py"
       - "pyproject.toml"
-      - ".uv.lock"
+      - "uv.lock"
       - ".github/workflows/python-bindings.yml"
   workflow_run:
     workflows: ["pyfiction Docstring Generator"]
