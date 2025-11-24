@@ -42,7 +42,12 @@
 
 # Build directories
 cmake-build-*
-build/
+build*
+docs/_build/
+docs/html/
+
+# Cache files
+.cache/
 
 # IDE files
 *.directory
@@ -51,7 +56,11 @@ build/
 
 # Experiment files
 *.json
+!CMakePresets.json
 *.csv
+
+# Library artifacts
+libs/alglib-cmake/
 
 # Coverage files
 lcov.info
