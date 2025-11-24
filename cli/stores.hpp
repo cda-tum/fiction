@@ -470,8 +470,8 @@ inline void show<fiction::cell_layout_t>(std::ostream& os, const fiction::cell_l
             cmd.env->out() << fmt::format("[e] {} is neither a QCA layout nor an SiDB layout\n",
                                           lyt_ptr->get_layout_name());
         }
-        else if constexpr ((fiction::has_qca_technology_v<Lyt> ||
-                            fiction::has_mol_qca_technology_v<Lyt>)&&!fiction::has_offset_ucoord_v<Lyt>)
+        else if constexpr ((fiction::has_qca_technology_v<Lyt> || fiction::has_mol_qca_technology_v<Lyt>) &&
+                           !fiction::has_offset_ucoord_v<Lyt>)
         {
             cmd.env->out() << fmt::format("[e] {} is not a Cartesian layout\n", lyt_ptr->get_layout_name());
         }
