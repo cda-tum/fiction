@@ -10,6 +10,7 @@
 #include "fiction/types.hpp"
 #include "fiction/utils/name_utils.hpp"
 
+#include <fmt/format.h>
 #include <lorina/genlib.hpp>
 #include <mockturtle/algorithms/emap.hpp>
 #include <mockturtle/io/genlib_reader.hpp>
