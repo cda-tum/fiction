@@ -14,6 +14,7 @@
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
+#include <fiction/networks/netlist.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/technology/qca_one_library.hpp>
 
@@ -82,6 +83,14 @@ void check_ortho_equiv_all()
     check_ortho_equiv<Lyt>(blueprints::fanout_substitution_corner_case_network<technology_network>());
     check_ortho_equiv<Lyt>(blueprints::nary_operation_network<technology_network>());
     check_ortho_equiv<Lyt>(blueprints::clpl<technology_network>());
+
+    check_ortho_equiv<Lyt>(blueprints::unbalanced_and_inv_network<netlist>());
+    // check_ortho_equiv<Lyt>(blueprints::maj1_network<netlist>());
+    // check_ortho_equiv<Lyt>(blueprints::maj4_network<netlist>());
+    check_ortho_equiv<Lyt>(blueprints::se_coloring_corner_case_network<netlist>());
+    check_ortho_equiv<Lyt>(blueprints::fanout_substitution_corner_case_network<netlist>());
+    // check_ortho_equiv<Lyt>(blueprints::nary_operation_network<netlist>());
+    check_ortho_equiv<Lyt>(blueprints::clpl<netlist>());
 
     // constant input network
     check_ortho_equiv<Lyt>(blueprints::unbalanced_and_inv_network<mockturtle::mig_network>());
