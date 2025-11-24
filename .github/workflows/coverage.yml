@@ -50,7 +50,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -yq ${{matrix.compiler}} lcov ninja-build
 
       - name: Clone Repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           submodules: recursive
 
