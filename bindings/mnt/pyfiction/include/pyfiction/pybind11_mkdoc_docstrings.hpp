@@ -14170,6 +14170,8 @@ Parameter ``ntk_or_lyt``:
 Returns:
     Name of given network or layout.)doc";
 
+static const char *__doc_fiction_get_ntk_type_name = R"doc()doc";
+
 static const char *__doc_fiction_get_projector_state_compositions =
 R"doc(This function is used to obtain the cluster charge state compositions
 of the multiset charge configuration in a projector state. The
@@ -14183,6 +14185,8 @@ Parameter ``pst``:
 Returns:
     The compositions associated with the multiset charge configuration
     of the projecting cluster.)doc";
+
+static const char *__doc_fiction_get_sidb_lattice_name = R"doc()doc";
 
 static const char *__doc_fiction_get_sidb_simulation_engine =
 R"doc(Returns a simulation engine by name.
@@ -14201,6 +14205,10 @@ recursive structure in this file.)doc";
 static const char *__doc_fiction_get_singleton_sidb_ix_2 =
 R"doc(Forward declaration. Required for compilation due to the mutually
 recursive structure in this file.)doc";
+
+static const char *__doc_fiction_get_tech_cell_name = R"doc()doc";
+
+static const char *__doc_fiction_get_tech_impl_name = R"doc()doc";
 
 static const char *__doc_fiction_get_unique_cluster_id =
 R"doc(Forward declaration. Required for compilation due to the mutually
