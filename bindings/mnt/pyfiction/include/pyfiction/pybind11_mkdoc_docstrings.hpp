@@ -17080,8 +17080,8 @@ static const char *__doc_fiction_mol_qca_technology_mol_qca_technology = R"doc()
 
 static const char *__doc_fiction_molecular_qca_library =
 R"doc(This MolQCA gate library corresponds to the physically simulated
-standard-cell library **SIM(7)-MolPDK**, introduced in \"Bridging the
-Gap Between Molecular FCN and Design Automation with SIM(7)-MolPDK: A
+standard-cell library SIM(7)-MolPDK, introduced in \"Bridging the Gap
+Between Molecular FCN and Design Automation with SIM(7)-MolPDK: A
 Physically Simulated Standard-Cell Library\" by B. Hien, D. Quinci, Y.
 Ardesi, G. Beretta, F. Ravera, M. Walter, and R. Wille, published at
 IEEE LANANO 2025 in Cusco, Peru. It is based on detailed physical
@@ -17089,7 +17089,7 @@ simulations using the SCERPA tool, and tiles represent uniform
 :math:`10 \times 10` MolQCA cell blocks.
 
 More information and the open-source implementation are available at
-\url{https://github.com/vlsi-nanocomputing/The-OpenSource-MolPDK}.)doc";
+https://github.com/vlsi-nanocomputing/The-OpenSource-MolPDK.)doc";
 
 static const char *__doc_fiction_molecular_qca_library_determine_port_routing = R"doc()doc";
 
@@ -17109,7 +17109,7 @@ Parameter ``lyt``:
     Layout that hosts tile `t`.
 
 Parameter ``t``:
-    Tile to be realized as a QCA ONE gate.
+    Tile to be realized as a molQCA gate.
 
 Returns:
     molQCA gate representation of `t` including I/Os, rotation, const
