@@ -17078,18 +17078,7 @@ static const char *__doc_fiction_mol_qca_technology_is_vertical_cell_mode = R"do
 
 static const char *__doc_fiction_mol_qca_technology_mol_qca_technology = R"doc()doc";
 
-static const char *__doc_fiction_molecular_qca_library =
-R"doc(This MolQCA gate library corresponds to the physically simulated
-standard-cell library SIM(7)-MolPDK, introduced in \"Bridging the Gap
-Between Molecular FCN and Design Automation with SIM(7)-MolPDK: A
-Physically Simulated Standard-Cell Library\" by B. Hien, D. Quinci, Y.
-Ardesi, G. Beretta, F. Ravera, M. Walter, and R. Wille, published at
-IEEE LANANO 2025 in Cusco, Peru. It is based on detailed physical
-simulations using the SCERPA tool, and tiles represent uniform
-:math:`10 \times 10` MolQCA cell blocks.
-
-More information and the open-source implementation are available at
-https://github.com/vlsi-nanocomputing/The-OpenSource-MolPDK.)doc";
+static const char *__doc_fiction_molecular_qca_library = R"doc()doc";
 
 static const char *__doc_fiction_molecular_qca_library_determine_port_routing = R"doc()doc";
 
