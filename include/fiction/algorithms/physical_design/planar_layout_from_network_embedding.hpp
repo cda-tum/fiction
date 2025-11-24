@@ -1053,10 +1053,10 @@ class plane_impl
 }  // namespace detail
 
 /**
- * This algorithm constructs a planar layout from a planar embedding of a logic network. Ehcne, the name "planar_layout
- * form entwork embedding" (PLANE). This algorithm performs a fully planar physical design flow for Field-Coupled
- * Nanocomputing (FCN) circuits. It takes as input a logic network with a planar embedding, represented as a
- * `mutable_rank_view`, and preserves this embedding during placement and routing.
+ * This algorithm constructs a planar layout from the planar embedding of a logic network, forming the Planar Layout
+ * from Network Embedding (PLANE) methodology. It provides a fully planar physical design flow for Field-Coupled
+ * Nanocomputing (FCN) circuits. The algorithm operates on a logic network with an existing planar embedding,
+ * represented as a `mutable_rank_view`, and preserves this embedding during placement and routing.
  *
  * In this approach, each logic level of the network is mapped to a diagonal in the layout, while nodes within the same
  * level are placed according to their rank positions in the planar embedding. This ensures a crossing-free, scalable,
