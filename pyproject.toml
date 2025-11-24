@@ -129,7 +129,12 @@ cmake.define.DISABLE_GIL = "1"
 [tool.pytest.ini_options]
 minversion = "7.2"
 testpaths = ["bindings/mnt/pyfiction/test/"]
-addopts = ["-ra", "--strict-markers", "--strict-config", "--showlocals"]
+addopts = [
+    "-ra",
+    "--strict-markers",
+    "--strict-config",
+    "--numprocesses=auto", # Automatically use all available CPU cores for parallel testing
+]
 log_cli_level = "INFO"
 xfail_strict = true
 
@@ -240,7 +245,9 @@ docs = [
     "sphinx-tabs==3.4.7",
 ]
 test = [
-    "pytest>=8.3.3",
+    "pytest>=8.3.5",
+    "pytest-xdist>=3.7.0",
+    "pytest-sugar>=1.0.0",
 ]
 dev = [
     { include-group = "build" },
