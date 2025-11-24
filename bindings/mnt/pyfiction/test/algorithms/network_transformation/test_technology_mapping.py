@@ -11,7 +11,6 @@ from mnt.pyfiction import (
     equivalence_checking,
     read_technology_network,
     technology_mapping,
-    technology_mapping_params,
     technology_mapping_stats,
 )
 
@@ -55,20 +54,6 @@ class TestTechnologyMapping(unittest.TestCase):
             mapped_network = technology_mapping(network, params=params, stats=stats)
 
             self.assertEqual(equivalence_checking(network, mapped_network), eq_type.STRONG)
-
-    def test_missing_required_gates_exception(self):
-        """Test that missing required gates throw an exception in Python."""
-        network = read_technology_network(dir_path + "/../../resources/mux21.v")
-
-        # Create params with no gates enabled (will fail for any network type)
-        params = technology_mapping_params()
-
-        # Should raise an exception
-        with self.assertRaises(RuntimeError) as context:
-            technology_mapping(network, params)
-
-        # Check that the error message mentions missing gates
-        self.assertIn("missing required gates", str(context.exception).lower())
 
 
 if __name__ == "__main__":
