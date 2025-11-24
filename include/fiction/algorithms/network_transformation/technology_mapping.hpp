@@ -633,6 +633,8 @@ class technology_mapping_impl
  * @param params Technology mapping parameters.
  * @param pst Technology mapping statistics.
  * @return Mapped network exclusively using gates from the provided library.
+ * @throws missing_required_gates_exception if the technology library does not contain required gates for the base
+ *         network type (e.g., AIG requires INV and AND; XAG requires INV, AND, and XOR; MIG requires INV and MAJ).
  */
 template <typename Ntk>
 [[nodiscard]] tec_nt technology_mapping(const Ntk& ntk, const technology_mapping_params& params = {},
