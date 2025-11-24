@@ -11141,8 +11141,6 @@ static const char *__doc_fiction_detail_write_qll_layout_impl_sorted_po_list = R
 
 static const char *__doc_fiction_detail_write_qll_layout_impl_sorted_pos = R"doc()doc";
 
-static const char *__doc_fiction_detail_write_qll_layout_impl_tech_name = R"doc()doc";
-
 static const char *__doc_fiction_detail_write_qll_layout_impl_write_components = R"doc()doc";
 
 static const char *__doc_fiction_detail_write_qll_layout_impl_write_header = R"doc()doc";
@@ -17018,7 +17016,7 @@ static const char *__doc_fiction_mol_qca_technology_cell_mark_INPUT = R"doc()doc
 
 static const char *__doc_fiction_mol_qca_technology_cell_mark_OUTPUT = R"doc()doc";
 
-static const char *__doc_fiction_mol_qca_technology_cell_mode = R"doc(Possible cell modes for QCA cells.)doc";
+static const char *__doc_fiction_mol_qca_technology_cell_mode = R"doc(Possible cell modes for molQCA cells.)doc";
 
 static const char *__doc_fiction_mol_qca_technology_cell_mode_CROSSOVER = R"doc()doc";
 
@@ -17028,27 +17026,25 @@ static const char *__doc_fiction_mol_qca_technology_cell_mode_ROTATED = R"doc()d
 
 static const char *__doc_fiction_mol_qca_technology_cell_mode_VERTICAL = R"doc()doc";
 
-static const char *__doc_fiction_mol_qca_technology_cell_type = R"doc(Possible types of QCA cells.)doc";
+static const char *__doc_fiction_mol_qca_technology_cell_type = R"doc(Possible types of molQCA cells.)doc";
 
-static const char *__doc_fiction_mol_qca_technology_cell_type_CONST_0 = R"doc(Symbol used for constant 0 input QCA cells.)doc";
+static const char *__doc_fiction_mol_qca_technology_cell_type_CONST_0 = R"doc(Symbol used for constant 0 input molQCA cells.)doc";
 
-static const char *__doc_fiction_mol_qca_technology_cell_type_CONST_1 = R"doc(Symbol used for constant 1 input QCA cells.)doc";
+static const char *__doc_fiction_mol_qca_technology_cell_type_CONST_1 = R"doc(Symbol used for constant 1 input molQCA cells.)doc";
 
-static const char *__doc_fiction_mol_qca_technology_cell_type_EMPTY = R"doc(Symbol used for empty QCA cells.)doc";
+static const char *__doc_fiction_mol_qca_technology_cell_type_EMPTY = R"doc(Symbol used for empty molQCA cells.)doc";
 
-static const char *__doc_fiction_mol_qca_technology_cell_type_INPUT = R"doc(Symbol used for input QCA cells.)doc";
+static const char *__doc_fiction_mol_qca_technology_cell_type_INPUT = R"doc(Symbol used for input molQCA cells.)doc";
 
-static const char *__doc_fiction_mol_qca_technology_cell_type_NORMAL = R"doc(Symbol used for normal QCA cells.)doc";
+static const char *__doc_fiction_mol_qca_technology_cell_type_NORMAL1 = R"doc(Symbol used for normal molQCA cells with clocking 0.)doc";
 
-static const char *__doc_fiction_mol_qca_technology_cell_type_NORMAL1 = R"doc(Symbol used for normal QCA cells.)doc";
+static const char *__doc_fiction_mol_qca_technology_cell_type_NORMAL2 = R"doc(Symbol used for normal molQCA cells with clocking 1.)doc";
 
-static const char *__doc_fiction_mol_qca_technology_cell_type_NORMAL2 = R"doc(Symbol used for normal QCA cells.)doc";
+static const char *__doc_fiction_mol_qca_technology_cell_type_NORMAL3 = R"doc(Symbol used for normal molQCA cells with clocking 2.)doc";
 
-static const char *__doc_fiction_mol_qca_technology_cell_type_NORMAL3 = R"doc(Symbol used for normal QCA cells.)doc";
+static const char *__doc_fiction_mol_qca_technology_cell_type_NORMAL4 = R"doc(Symbol used for normal molQCA cells with clocking 3.)doc";
 
-static const char *__doc_fiction_mol_qca_technology_cell_type_NORMAL4 = R"doc(Symbol used for normal QCA cells.)doc";
-
-static const char *__doc_fiction_mol_qca_technology_cell_type_OUTPUT = R"doc(Symbol used for output QCA cells.)doc";
+static const char *__doc_fiction_mol_qca_technology_cell_type_OUTPUT = R"doc(Symbol used for output molQCA cells.)doc";
 
 static const char *__doc_fiction_mol_qca_technology_is_const_0_cell = R"doc()doc";
 
@@ -17083,23 +17079,21 @@ static const char *__doc_fiction_mol_qca_technology_is_vertical_cell_mode = R"do
 static const char *__doc_fiction_mol_qca_technology_mol_qca_technology = R"doc()doc";
 
 static const char *__doc_fiction_molecular_qca_library =
-R"doc(This concrete molQCA gate library was proposed by the Politecnico di
-Torino and is based on physical simulations using the SCERPA tool.
-Tiles in the molQCA library are :math:`10 \times 10` molQCA cells.)doc";
+R"doc(This MolQCA gate library corresponds to the physically simulated
+standard-cell library **SIM(7)-MolPDK**, introduced in \"Bridging the
+Gap Between Molecular FCN and Design Automation with SIM(7)-MolPDK: A
+Physically Simulated Standard-Cell Library\" by B. Hien, D. Quinci, Y.
+Ardesi, G. Beretta, F. Ravera, M. Walter, and R. Wille, published at
+IEEE LANANO 2025 in Cusco, Peru. It is based on detailed physical
+simulations using the SCERPA tool, and tiles represent uniform
+:math:`10 \times 10` MolQCA cell blocks.
+
+More information and the open-source implementation are available at
+\url{https://github.com/vlsi-nanocomputing/The-OpenSource-MolPDK}.)doc";
 
 static const char *__doc_fiction_molecular_qca_library_determine_port_routing = R"doc()doc";
 
 static const char *__doc_fiction_molecular_qca_library_molecular_qca_library = R"doc()doc";
-
-static const char *__doc_fiction_molecular_qca_library_post_layout_optimization =
-R"doc(Post-layout optimization that assigns via cell mode to wire crossings.
-
-Template parameter ``CellLyt``:
-    Cell-level layout type.
-
-Parameter ``lyt``:
-    The cell-level layout that has been created via application of
-    `set_up_gate`.)doc";
 
 static const char *__doc_fiction_molecular_qca_library_set_up_gate =
 R"doc(Overrides the corresponding function in fcn_gate_library. Given a tile
@@ -17118,7 +17112,7 @@ Parameter ``t``:
     Tile to be realized as a QCA ONE gate.
 
 Returns:
-    MolQCA gate representation of `t` including I/Os, rotation, const
+    molQCA gate representation of `t` including I/Os, rotation, const
     cells, etc.)doc";
 
 static const char *__doc_fiction_mutable_rank_view =
@@ -19270,7 +19264,8 @@ schemes. Tiles in QCA ONE are :math:`5 \times 5` QCA cells.)doc";
 static const char *__doc_fiction_qca_one_library_determine_port_routing = R"doc()doc";
 
 static const char *__doc_fiction_qca_one_library_post_layout_optimization =
-R"doc(Post-layout optimization that assigns via cell mode to wire crossings.
+R"doc(Post-layout optimization that assigns the via cell mode to wire
+crossings.
 
 Template parameter ``CellLyt``:
     Cell-level layout type.
@@ -23289,13 +23284,10 @@ Parameter ``filename``:
     The file name to create and write into.)doc";
 
 static const char *__doc_fiction_write_mol_qca_layout_svg =
-R"doc(Writes an SVG representation of a cell-level QCA layout into an output
-stream. Both tile- and cell-based layouts are supported. For tile-
-based layouts, QCA layouts of tile size :math:`5 \times 5` are
-supported exclusively so far.
-
-The utilized color scheme is based on the standard scheme used in
-QCADesigner (https://waluslab.ece.ubc.ca/qcadesigner/).
+R"doc(Writes an SVG representation of a cell-level MolQCA layout to an
+output stream. Only cell-based layouts are supported, since the
+clocking scheme is not uniform at the gate level. Currently, only a
+uniform gate size of :math:`10 \times 10` is supported.
 
 May throw an `unsupported_cell_type_exception` if it encounters
 unsupported cell types in the layout.
@@ -23313,9 +23305,10 @@ Parameter ``ps``:
     Parameters.)doc";
 
 static const char *__doc_fiction_write_mol_qca_layout_svg_2 =
-R"doc(Writes an SVG representation of a cell-level molQCA layout into a
-file. Cell-based layouts are supported. Still the cells are part of
-uniform :math:`10 \times 10` gates, which are supported.
+R"doc(Writes an SVG representation of a cell-level MolQCA layout to a file.
+Only cell-based layouts are supported, since the clocking scheme is
+not uniform at the gate level. Currently, only a uniform gate size of
+:math:`10 \times 10` is supported.
 
 May throw an `unsupported_cell_type_exception` if it encounters
 unsupported cell types in the layout. May throw an
