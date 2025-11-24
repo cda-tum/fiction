@@ -10,7 +10,7 @@
 #include <fiction/algorithms/network_transformation/network_balancing.hpp>
 #include <fiction/algorithms/network_transformation/node_duplication_planarization.hpp>
 #include <fiction/algorithms/physical_design/orthogonal.hpp>
-#include <fiction/algorithms/physical_design/orthogonal_planar.hpp>
+#include <fiction/algorithms/physical_design/planar_layout_from_network_embedding.hpp>
 #include <fiction/networks/views/mutable_rank_view.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/network_utils.hpp>

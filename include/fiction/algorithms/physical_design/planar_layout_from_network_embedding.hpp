@@ -2,8 +2,8 @@
 // Created by benjamin on 21.01.25.
 //
 
-#ifndef FICTION_ORTHOGONAL_PLANAR_HPP
-#define FICTION_ORTHOGONAL_PLANAR_HPP
+#ifndef FICTION_PLANAR_LAYOUT_FROM_NETWORK_EMBEDDING_HPP
+#define FICTION_PLANAR_LAYOUT_FROM_NETWORK_EMBEDDING_HPP
 
 #include "fiction/algorithms/graph/mincross.hpp"
 #include "fiction/algorithms/physical_design/orthogonal.hpp"
@@ -272,7 +272,7 @@ uint64_t calculate_predecessor_gap(const Ntk& ntk, const mockturtle::node_map<mo
     const auto pre2_t = static_cast<tile<Lyt>>(node2pos[pre_neighbour]);
 
     assert(pre1_t.y > pre2_t.y);
-    return std::min(pre1_t.y - pre2_t.y - 1, 2);
+    return std::min<uint64_t>(pre1_t.y - pre2_t.y - 1, 2);
 }
 
 /**
@@ -794,10 +794,10 @@ compute_wiring(const Ntk& ntk, const mockturtle::node_map<mockturtle::signal<Lyt
  */
 
 template <typename Lyt, typename Ntk>
-class orthogonal_planar_impl
+class plane_impl
 {
   public:
-    orthogonal_planar_impl(const Ntk& src, const orthogonal_physical_design_params& p,
+    plane_impl(const Ntk& src, const orthogonal_physical_design_params& p,
                            orthogonal_physical_design_stats& st) :
             ntk{mockturtle::fanout_view{src}},
             ps{p},
@@ -1054,6 +1054,7 @@ class orthogonal_planar_impl
 }  // namespace detail
 
 /**
+ * This algorithm constructs a planar layout from a planar embedding of a logic network. Ehcne, the name "planar_layout form entwork embedding" (PLANE).
  * This algorithm performs a fully planar physical design flow for Field-Coupled Nanocomputing (FCN) circuits. It takes
  * as input a logic network with a planar embedding, represented as a `mutable_rank_view`, and preserves this embedding
  * during placement and routing.
@@ -1070,7 +1071,7 @@ class orthogonal_planar_impl
  * @return      A fully planar gate-level layout of type `Lyt`.
  */
 template <typename Lyt, typename Ntk>
-Lyt orthogonal_planar(const Ntk& ntk, orthogonal_physical_design_params ps = {},
+Lyt plane(const Ntk& ntk, orthogonal_physical_design_params ps = {},
                       orthogonal_physical_design_stats* pst = nullptr)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
@@ -1096,7 +1097,7 @@ Lyt orthogonal_planar(const Ntk& ntk, orthogonal_physical_design_params ps = {},
     }
 
     orthogonal_physical_design_stats         st{};
-    detail::orthogonal_planar_impl<Lyt, Ntk> p{ntk, ps, st};
+    detail::plane_impl<Lyt, Ntk> p{ntk, ps, st};
 
     auto result = p.run();
 
@@ -1109,4 +1110,4 @@ Lyt orthogonal_planar(const Ntk& ntk, orthogonal_physical_design_params ps = {},
 }
 
 }  // namespace fiction
-#endif  // FICTION_ORTHOGONAL_PLANAR_HPP
+#endif  // FICTION_PLANAR_LAYOUT_FROM_NETWORK_EMBEDDING_HPP

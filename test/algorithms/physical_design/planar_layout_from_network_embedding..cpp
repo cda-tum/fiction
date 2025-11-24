@@ -11,7 +11,7 @@
 #include <fiction/algorithms/network_transformation/network_balancing.hpp>
 #include <fiction/algorithms/network_transformation/node_duplication_planarization.hpp>
 #include <fiction/algorithms/physical_design/orthogonal.hpp>
-#include <fiction/algorithms/physical_design/orthogonal_planar.hpp>
+#include <fiction/algorithms/physical_design/planar_layout_from_network_embedding.hpp>
 #include <fiction/algorithms/verification/virtual_miter.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
@@ -35,7 +35,7 @@ static void check_stats(const orthogonal_physical_design_stats& st) noexcept
 }
 
 template <typename Ntk>
-static void check_ortho_planar(const Ntk& ntk)
+static void check_plane(const Ntk& ntk)
 {
     using gate_lyt =
         fiction::gate_level_layout<fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<>>>>;
@@ -61,14 +61,14 @@ static void check_ortho_planar(const Ntk& ntk)
 
     orthogonal_physical_design_stats orthogonal_planar_stats{};
 
-    const auto gate_level_layout = fiction::orthogonal_planar<gate_lyt>(planarized_b, {}, &orthogonal_planar_stats);
+    const auto gate_level_layout = fiction::plane<gate_lyt>(planarized_b, {}, &orthogonal_planar_stats);
 
     CHECK(gate_level_layout.num_crossings() == 0);
     check_stats(orthogonal_planar_stats);
     CHECK_NOTHROW(apply_gate_library<cell_layout, qca_one_library>(gate_level_layout));
 }
 
-TEST_CASE("Check exceptions", "[orthogonal-planar]")
+TEST_CASE("Check exceptions", "[planar-layout-from-network-embedding]")
 {
     using gate_lyt =
         fiction::gate_level_layout<fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<>>>>;
@@ -78,33 +78,33 @@ TEST_CASE("Check exceptions", "[orthogonal-planar]")
     auto                             maj        = blueprints::maj1_network<technology_network>();
     auto                             maj_ranked = fiction::mutable_rank_view(maj);
     orthogonal_physical_design_stats orthogonal_planar_stats{};
-    CHECK_THROWS_WITH(fiction::orthogonal_planar<gate_lyt>(maj_ranked, {}, &orthogonal_planar_stats),
+    CHECK_THROWS_WITH(fiction::plane<gate_lyt>(maj_ranked, {}, &orthogonal_planar_stats),
                       "network contains nodes that exceed the supported fanin size");
 
     auto ao        = blueprints::and_or_network<technology_network>();
     auto ao_ranked = fiction::mutable_rank_view(ao);
-    CHECK_THROWS_WITH(fiction::orthogonal_planar<gate_lyt>(ao_ranked, {}, &orthogonal_planar_stats),
+    CHECK_THROWS_WITH(fiction::plane<gate_lyt>(ao_ranked, {}, &orthogonal_planar_stats),
                       "Input network has to be planar");
 }
 
-TEST_CASE("Orthogonal planar layout tests", "[orthogonal-planar]")
+TEST_CASE("Orthogonal planar layout tests", "[planar-layout-from-network-embedding]")
 {
     // Simple correctness and corner-case networks
-    check_ortho_planar(blueprints::se_coloring_corner_case_network<technology_network>());
-    check_ortho_planar(blueprints::fanout_substitution_corner_case_network<technology_network>());
-    check_ortho_planar(blueprints::clpl<technology_network>());
+    check_plane(blueprints::se_coloring_corner_case_network<technology_network>());
+    check_plane(blueprints::fanout_substitution_corner_case_network<technology_network>());
+    check_plane(blueprints::clpl<technology_network>());
 
     // Network with constant inputs
-    check_ortho_planar(blueprints::unbalanced_and_inv_network<technology_network>());
+    check_plane(blueprints::unbalanced_and_inv_network<technology_network>());
 
     // Multi-output network
-    check_ortho_planar(blueprints::multi_output_network<technology_network>());
+    check_plane(blueprints::multi_output_network<technology_network>());
 
     // Parity network
-    check_ortho_planar(blueprints::parity_network<technology_network>());
+    check_plane(blueprints::parity_network<technology_network>());
 }
 
-TEST_CASE("Name conservation after planar orthogonal physical design", "[orthogonal-planar]")
+TEST_CASE("Name conservation after planar orthogonal physical design", "[planar-layout-from-network-embedding]")
 {
     using gate_lyt = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
 
@@ -127,7 +127,7 @@ TEST_CASE("Name conservation after planar orthogonal physical design", "[orthogo
 
     orthogonal_physical_design_stats orthogonal_planar_stats{};
 
-    const auto layout = fiction::orthogonal_planar<gate_lyt>(planarized_b, {}, &orthogonal_planar_stats);
+    const auto layout = fiction::plane<gate_lyt>(planarized_b, {}, &orthogonal_planar_stats);
 
     // network name
     CHECK(layout.get_layout_name() == "topolinano");
