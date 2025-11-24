@@ -3,6 +3,7 @@
 //
 
 #include <catch2/catch_template_test_macros.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
@@ -16,6 +17,9 @@
 #include <mockturtle/networks/xmg.hpp>
 
 using namespace fiction;
+
+namespace
+{
 
 template <typename Ntk>
 void map_and_check_aoi(const Ntk& ntk)
@@ -218,6 +222,8 @@ void map_and_check_all_standard_func(const Ntk& ntk)
     CHECK(gt_stats.num_xor2 == 0);
     CHECK(gt_stats.num_xnor2 == 0);
 }
+
+}  // namespace
 
 TEMPLATE_TEST_CASE("Simple AOI network mapping", "[technology-mapping]", mockturtle::aig_network)
 {

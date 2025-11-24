@@ -13,9 +13,13 @@
 #include <lorina/genlib.hpp>
 #include <mockturtle/algorithms/emap.hpp>
 #include <mockturtle/io/genlib_reader.hpp>
+#include <mockturtle/networks/aig.hpp>
+#include <mockturtle/networks/mig.hpp>
+#include <mockturtle/networks/xag.hpp>
 #include <mockturtle/utils/tech_library.hpp>
 
 #include <cassert>
+#include <cstdlib>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -326,9 +330,9 @@ template <typename Ntk>
 class technology_mapping_impl
 {
   public:
-    technology_mapping_impl(const Ntk& src, const technology_mapping_params& ps, technology_mapping_stats& st) :
+    technology_mapping_impl(const Ntk& src, technology_mapping_params ps, technology_mapping_stats& st) :
             ntk{src},
-            params{ps},
+            params{std::move(ps)},
             stats{st}
     {}
 

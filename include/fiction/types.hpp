@@ -22,7 +22,6 @@
 #include "fiction/technology/sidb_lattice_orientations.hpp"
 
 #include <kitty/dynamic_truth_table.hpp>
-#include <mockturtle/io/write_dot.hpp>
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/mig.hpp>
 #include <mockturtle/networks/xag.hpp>
@@ -75,11 +74,32 @@ inline constexpr auto tec_name = "TEC";
 using logic_network_t = std::variant<aig_ptr, xag_ptr, mig_ptr, tec_ptr>;
 
 template <class Ntk>
-inline constexpr auto ntk_type_name = std::is_same_v<std::decay_t<Ntk>, aig_nt> ? aig_name :
-                                      std::is_same_v<std::decay_t<Ntk>, xag_nt> ? xag_name :
-                                      std::is_same_v<std::decay_t<Ntk>, mig_nt> ? mig_name :
-                                      std::is_same_v<std::decay_t<Ntk>, tec_nt> ? tec_name :
-                                                                                  "?";
+constexpr const char* get_ntk_type_name()
+{
+    if constexpr (std::is_same_v<std::decay_t<Ntk>, aig_nt>)
+    {
+        return aig_name;
+    }
+    else if constexpr (std::is_same_v<std::decay_t<Ntk>, xag_nt>)
+    {
+        return xag_name;
+    }
+    else if constexpr (std::is_same_v<std::decay_t<Ntk>, mig_nt>)
+    {
+        return mig_name;
+    }
+    else if constexpr (std::is_same_v<std::decay_t<Ntk>, tec_nt>)
+    {
+        return tec_name;
+    }
+    else
+    {
+        return "?";
+    }
+}
+
+template <class Ntk>
+inline constexpr auto ntk_type_name = get_ntk_type_name<Ntk>();
 
 /**
  * FCN gate-level layouts.
@@ -128,34 +148,84 @@ using gate_layout_t =
 /**
  * FCN technologies.
  */
-constexpr const char* qca_name  = "QCA";
-constexpr const char* inml_name = "iNML";
-constexpr const char* sidb_name = "SiDB";
+inline constexpr auto qca_name  = "QCA";
+inline constexpr auto inml_name = "iNML";
+inline constexpr auto sidb_name = "SiDB";
 
 template <class Tech>
-inline constexpr const char* tech_impl_name = std::is_same_v<std::decay_t<Tech>, qca_technology>  ? qca_name :
-                                              std::is_same_v<std::decay_t<Tech>, inml_technology> ? inml_name :
-                                              std::is_same_v<std::decay_t<Tech>, sidb_technology> ? sidb_name :
-                                                                                                    "?";
-
-constexpr const char* qca_cell_name  = "cells";
-constexpr const char* inml_cell_name = "magnets";
-constexpr const char* sidb_cell_name = "dots";
+constexpr const char* get_tech_impl_name()
+{
+    if constexpr (std::is_same_v<std::decay_t<Tech>, qca_technology>)
+    {
+        return qca_name;
+    }
+    else if constexpr (std::is_same_v<std::decay_t<Tech>, inml_technology>)
+    {
+        return inml_name;
+    }
+    else if constexpr (std::is_same_v<std::decay_t<Tech>, sidb_technology>)
+    {
+        return sidb_name;
+    }
+    else
+    {
+        return "?";
+    }
+}
 
 template <class Tech>
-inline constexpr const char* tech_cell_name = std::is_same_v<std::decay_t<Tech>, qca_technology>  ? qca_cell_name :
-                                              std::is_same_v<std::decay_t<Tech>, inml_technology> ? inml_cell_name :
-                                              std::is_same_v<std::decay_t<Tech>, sidb_technology> ? sidb_cell_name :
-                                                                                                    "?";
+inline constexpr auto tech_impl_name = get_tech_impl_name<Tech>();
+
+inline constexpr auto qca_cell_name  = "cells";
+inline constexpr auto inml_cell_name = "magnets";
+inline constexpr auto sidb_cell_name = "dots";
+
+template <class Tech>
+constexpr const char* get_tech_cell_name()
+{
+    if constexpr (std::is_same_v<std::decay_t<Tech>, qca_technology>)
+    {
+        return qca_cell_name;
+    }
+    else if constexpr (std::is_same_v<std::decay_t<Tech>, inml_technology>)
+    {
+        return inml_cell_name;
+    }
+    else if constexpr (std::is_same_v<std::decay_t<Tech>, sidb_technology>)
+    {
+        return sidb_cell_name;
+    }
+    else
+    {
+        return "?";
+    }
+}
+
+template <class Tech>
+inline constexpr const char* tech_cell_name = get_tech_cell_name<Tech>();
 
 constexpr const char* sidb_100_name = "100";
 constexpr const char* sidb_111_name = "111";
 
 template <class Orientation>
-inline constexpr const char* sidb_lattice_name =
-    std::is_same_v<std::decay_t<Orientation>, sidb_100_lattice> ? sidb_100_name :
-    std::is_same_v<std::decay_t<Orientation>, sidb_111_lattice> ? sidb_111_name :
-                                                                  "?";
+constexpr const char* get_sidb_lattice_name()
+{
+    if constexpr (std::is_same_v<std::decay_t<Orientation>, sidb_100_lattice>)
+    {
+        return sidb_100_name;
+    }
+    else if constexpr (std::is_same_v<std::decay_t<Orientation>, sidb_111_lattice>)
+    {
+        return sidb_111_name;
+    }
+    else
+    {
+        return "?";
+    }
+}
+
+template <class Orientation>
+inline constexpr const char* sidb_lattice_name = get_sidb_lattice_name<Orientation>();
 
 /**
  * FCN cell-level layouts.
