@@ -1658,6 +1658,18 @@ void write_qca_layout_svg(const Lyt& lyt, const std::string_view& filename, cons
     os.close();
 }
 
+/**
+ * Writes an SVG representation of a cell-level MolQCA layout to an output stream.
+ * Only cell-based layouts are supported, since the clocking scheme is not uniform at the gate level.
+ * Currently, only a uniform gate size of \f$10 \times 10\f$ is supported.
+ *
+ * May throw an `unsupported_cell_type_exception` if it encounters unsupported cell types in the layout.
+ *
+ * @tparam Lyt Cell-level QCA layout type.
+ * @param lyt The layout to be written.
+ * @param os The output stream to write into.
+ * @param ps Parameters.
+ */
 template <typename Lyt>
 void write_mol_qca_layout_svg(const Lyt& lyt, std::ostream& os, const write_qca_layout_svg_params& ps = {})
 {
@@ -1670,6 +1682,19 @@ void write_mol_qca_layout_svg(const Lyt& lyt, std::ostream& os, const write_qca_
     p.run();
 }
 
+/**
+ * Writes an SVG representation of a cell-level MolQCA layout to a file.
+ * Only cell-based layouts are supported, since the clocking scheme is not uniform at the gate level.
+ * Currently, only a uniform gate size of \f$10 \times 10\f$ is supported.
+ *
+ * May throw an `unsupported_cell_type_exception` if it encounters unsupported cell types in the layout. May throw an
+ * `std::ofstream::failure` if it cannot open the file.
+ *
+ * @tparam Lyt Cell-level molQCA layout type.
+ * @param lyt The layout to be written.
+ * @param filename The file name to create and write into. Should preferably use the `.svg` extension.
+ * @param ps Parameters.
+ */
 template <typename Lyt>
 void write_mol_qca_layout_svg(const Lyt& lyt, const std::string_view& filename,
                               const write_qca_layout_svg_params& ps = {})

@@ -152,19 +152,19 @@ struct mol_qca_technology
          */
         EMPTY = ' ',
         /**
-         * Symbol used for normal molQCA cells with clocking.
+         * Symbol used for normal molQCA cells with clocking 0.
          */
         NORMAL1 = 'a',
         /**
-         * Symbol used for normal molQCA cells with clocking.
+         * Symbol used for normal molQCA cells with clocking 1.
          */
         NORMAL2 = 'b',
         /**
-         * Symbol used for normal molQCA cells with clocking.
+         * Symbol used for normal molQCA cells with clocking 2.
          */
         NORMAL3 = 'c',
         /**
-         * Symbol used for normal molQCA cells with clocking.
+         * Symbol used for normal molQCA cells with clocking 3.
          */
         NORMAL4 = 'd',
         /**
