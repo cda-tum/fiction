@@ -20,14 +20,14 @@ namespace fiction
 {
 
 /**
- * This MolQCA gate library corresponds to the physically simulated standard-cell library **SIM(7)-MolPDK**, introduced
+ * This MolQCA gate library corresponds to the physically simulated standard-cell library SIM(7)-MolPDK, introduced
  * in \"Bridging the Gap Between Molecular FCN and Design Automation with SIM(7)-MolPDK: A Physically Simulated
  * Standard-Cell Library\" by B. Hien, D. Quinci, Y. Ardesi, G. Beretta, F. Ravera, M. Walter, and R. Wille, published
  * at IEEE LANANO 2025 in Cusco, Peru. It is based on detailed physical simulations using the SCERPA tool, and tiles
  * represent uniform \f$10 \times 10\f$ MolQCA cell blocks.
  *
  * More information and the open-source implementation are available at
- * \url{https://github.com/vlsi-nanocomputing/The-OpenSource-MolPDK}.
+ * https://github.com/vlsi-nanocomputing/The-OpenSource-MolPDK.
  */
 class molecular_qca_library : public fcn_gate_library<mol_qca_technology, 10, 10>
 {
@@ -40,7 +40,7 @@ class molecular_qca_library : public fcn_gate_library<mol_qca_technology, 10, 10
      *
      * @tparam GateLyt Cartesian gate-level layout type.
      * @param lyt Layout that hosts tile `t`.
-     * @param t Tile to be realized as a QCA ONE gate.
+     * @param t Tile to be realized as a molQCA gate.
      * @return molQCA gate representation of `t` including I/Os, rotation, const cells, etc.
      */
     template <typename GateLyt>
