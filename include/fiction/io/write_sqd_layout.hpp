@@ -8,6 +8,7 @@
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/sidb_defects.hpp"
 #include "fiction/traits.hpp"
+#include "fiction/utils/stl_utils.hpp"
 #include "utils/version_info.hpp"
 
 #include <fmt/chrono.h>
@@ -15,7 +16,6 @@
 #include <fmt/ranges.h>
 
 #include <cassert>
-#include <chrono>
 #include <ctime>
 #include <fstream>
 #include <ostream>
@@ -193,7 +193,8 @@ class write_sqd_layout_impl
 
         header << siqad::SQD_HEADER << siqad::OPEN_SIQAD;
 
-        const auto time_str = fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(std::time(nullptr)));
+        const auto current_time = std::time(nullptr);
+        const auto time_str     = fmt::format("{:%Y-%m-%d %H:%M:%S}", safe_localtime(current_time));
 
         header << fmt::format(siqad::PROGRAM_BLOCK, "layout simulation", FICTION_VERSION, FICTION_REPO, time_str);
 
@@ -438,7 +439,7 @@ void write_sqd_layout(const Lyt& lyt, std::ostream& os)
 template <typename Lyt>
 void write_sqd_layout(const Lyt& lyt, const std::string_view& filename)
 {
-    std::ofstream os{filename.data(), std::ofstream::out};
+    std::ofstream os{std::string{filename}, std::ofstream::out};
 
     if (!os.is_open())
     {

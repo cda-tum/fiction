@@ -119,8 +119,7 @@ ALICE_LOG_STORE_STATISTICS(fiction::logic_network_t, ln)
 }
 
 template <>
-// NOLINTNEXTLINE
-bool can_show<fiction::logic_network_t>(std::string& extension, [[maybe_unused]] command& cmd)
+inline bool can_show<fiction::logic_network_t>(std::string& extension, [[maybe_unused]] command& cmd)
 {
     extension = "dot";
 
@@ -132,7 +131,8 @@ bool can_show<fiction::logic_network_t>(std::string& extension, [[maybe_unused]]
 
 template <>
 // NOLINTNEXTLINE
-void show<fiction::logic_network_t>(std::ostream& os, const fiction::logic_network_t& element, const command& cmd)
+inline void show<fiction::logic_network_t>(std::ostream& os, const fiction::logic_network_t& element,
+                                           const command& cmd)
 {
     const auto show_ntk = [&os, &cmd](auto&& ntk_ptr)
     {
@@ -153,7 +153,7 @@ void show<fiction::logic_network_t>(std::ostream& os, const fiction::logic_netwo
         }
         catch (const std::invalid_argument& e)
         {
-            cmd.env->out() << "[e] " << e.what() << '\n';
+            cmd.env->out() << fmt::format("[e] {}\n", e.what());
         }
     };
 
@@ -257,8 +257,7 @@ ALICE_LOG_STORE_STATISTICS(fiction::gate_layout_t, layout)
 }
 
 template <>
-// NOLINTNEXTLINE
-bool can_show<fiction::gate_layout_t>(std::string& extension, [[maybe_unused]] command& cmd)
+inline bool can_show<fiction::gate_layout_t>(std::string& extension, [[maybe_unused]] command& cmd)
 {
     extension = "dot";
 
@@ -272,7 +271,7 @@ bool can_show<fiction::gate_layout_t>(std::string& extension, [[maybe_unused]] c
 
 template <>
 // NOLINTNEXTLINE
-void show<fiction::gate_layout_t>(std::ostream& os, const fiction::gate_layout_t& element, const command& cmd)
+inline void show<fiction::gate_layout_t>(std::ostream& os, const fiction::gate_layout_t& element, const command& cmd)
 {
     const auto show_lyt = [&os, &cmd](auto&& lyt_ptr)
     {
@@ -362,7 +361,7 @@ void show<fiction::gate_layout_t>(std::ostream& os, const fiction::gate_layout_t
         }
         else
         {
-            cmd.env->out() << "[e] unsupported layout topology" << '\n';
+            cmd.env->out() << "[e] unsupported layout topology\n";
         }
     };
 
@@ -447,8 +446,7 @@ ALICE_LOG_STORE_STATISTICS(fiction::cell_layout_t, layout)
 }
 
 template <>
-// NOLINTNEXTLINE
-bool can_show<fiction::cell_layout_t>(std::string& extension, [[maybe_unused]] command& cmd)
+inline bool can_show<fiction::cell_layout_t>(std::string& extension, [[maybe_unused]] command& cmd)
 {
     cmd.add_flag("--simple,-s", "Simplified depiction abstracting from details")->group("cell_layout (-c)");
 
@@ -459,24 +457,21 @@ bool can_show<fiction::cell_layout_t>(std::string& extension, [[maybe_unused]] c
 
 template <>
 // NOLINTNEXTLINE
-void show<fiction::cell_layout_t>(std::ostream& os, const fiction::cell_layout_t& element,
-                                  const command& cmd)  // const & for pointer because alice says so...
+inline void show<fiction::cell_layout_t>(std::ostream& os, const fiction::cell_layout_t& element,
+                                         const command& cmd)  // const & for pointer because alice says so...
 {
     const auto show_lyt = [&os, &cmd](auto&& lyt_ptr)
     {
         using Lyt = typename std::decay_t<decltype(lyt_ptr)>::element_type;
 
-        if constexpr (!fiction::has_qca_technology_v<Lyt> && !fiction::has_mol_qca_technology_v<Lyt> &&
-                      !fiction::has_sidb_technology_v<Lyt>)
+        if constexpr (!fiction::has_qca_technology_v<Lyt> && !fiction::has_sidb_technology_v<Lyt>)
         {
-            cmd.env->out() << fmt::format("[e] {} is neither a QCA, MolQCA, nor an SiDB layout",
-                                          lyt_ptr->get_layout_name())
-                           << std::endl;
+            cmd.env->out() << fmt::format("[e] {} is neither a QCA layout nor an SiDB layout\n",
+                                          lyt_ptr->get_layout_name());
         }
-        else if constexpr ((fiction::has_qca_technology_v<Lyt> || fiction::has_mol_qca_technology_v<Lyt>) &&
-                           !fiction::has_offset_ucoord_v<Lyt>)
+        else if constexpr (fiction::has_qca_technology_v<Lyt> && !fiction::has_offset_ucoord_v<Lyt>)
         {
-            cmd.env->out() << fmt::format("[e] {} is not a Cartesian layout", lyt_ptr->get_layout_name()) << std::endl;
+            cmd.env->out() << fmt::format("[e] {} is not a Cartesian layout\n", lyt_ptr->get_layout_name());
         }
         else
         {
@@ -497,12 +492,11 @@ void show<fiction::cell_layout_t>(std::ostream& os, const fiction::cell_layout_t
             }
             catch (const fiction::unsupported_cell_type_exception<fiction::coordinate<Lyt>>& e)
             {
-                cmd.env->out() << fmt::format("[e] unsupported cell type at cell position {}", e.where()) << std::endl;
+                cmd.env->out() << fmt::format("[e] unsupported cell type at cell position {}\n", e.where());
             }
             catch (...)
             {
-                cmd.env->out() << "[e] an error occurred while writing the SVG description to the output stream"
-                               << '\n';
+                cmd.env->out() << "[e] an error occurred while writing the SVG description to the output stream\n";
             }
         }
     };

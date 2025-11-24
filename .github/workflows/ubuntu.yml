@@ -77,7 +77,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -yq libtbb-dev ${{matrix.compiler}}
 
       - name: Clone Repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           submodules: recursive
 
@@ -94,7 +94,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v6
         with:
-          python-version: "3.13.x"
+          python-version: "3.14.x"
           cache: "pip"
 
       - name: Install pip packages
