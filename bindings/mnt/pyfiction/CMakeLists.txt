@@ -9,8 +9,11 @@ set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 
 # Create an INTERFACE library for pyfiction headers (for clang-tidy and IDE support)
 add_library(libpyfiction INTERFACE)
-target_include_directories(libpyfiction INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
-target_link_libraries(libpyfiction INTERFACE libfiction)
+target_include_directories(libpyfiction INTERFACE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${PROJECT_SOURCE_DIR}/libs/pybind11/include
+)
+target_link_libraries(libpyfiction INTERFACE libfiction pybind11::pybind11)
 
 # Collect pyfiction headers under bindings/mnt/pyfiction/
 file(GLOB_RECURSE FICTION_PYFICTION_HEADERS CONFIGURE_DEPENDS
