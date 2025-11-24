@@ -15,6 +15,7 @@
 #include <mockturtle/networks/mig.hpp>
 #include <mockturtle/networks/xag.hpp>
 #include <mockturtle/networks/xmg.hpp>
+#include <mockturtle/views/names_view.hpp>
 
 using namespace fiction;
 
