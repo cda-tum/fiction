@@ -17036,13 +17036,13 @@ static const char *__doc_fiction_mol_qca_technology_cell_type_EMPTY = R"doc(Symb
 
 static const char *__doc_fiction_mol_qca_technology_cell_type_INPUT = R"doc(Symbol used for input molQCA cells.)doc";
 
-static const char *__doc_fiction_mol_qca_technology_cell_type_NORMAL1 = R"doc(Symbol used for normal molQCA cells with clocking 0.)doc";
+static const char *__doc_fiction_mol_qca_technology_cell_type_NORMAL1 = R"doc(Symbol used for normal molQCA cells with clocking.)doc";
 
-static const char *__doc_fiction_mol_qca_technology_cell_type_NORMAL2 = R"doc(Symbol used for normal molQCA cells with clocking 1.)doc";
+static const char *__doc_fiction_mol_qca_technology_cell_type_NORMAL2 = R"doc(Symbol used for normal molQCA cells with clocking.)doc";
 
-static const char *__doc_fiction_mol_qca_technology_cell_type_NORMAL3 = R"doc(Symbol used for normal molQCA cells with clocking 2.)doc";
+static const char *__doc_fiction_mol_qca_technology_cell_type_NORMAL3 = R"doc(Symbol used for normal molQCA cells with clocking.)doc";
 
-static const char *__doc_fiction_mol_qca_technology_cell_type_NORMAL4 = R"doc(Symbol used for normal molQCA cells with clocking 3.)doc";
+static const char *__doc_fiction_mol_qca_technology_cell_type_NORMAL4 = R"doc(Symbol used for normal molQCA cells with clocking.)doc";
 
 static const char *__doc_fiction_mol_qca_technology_cell_type_OUTPUT = R"doc(Symbol used for output molQCA cells.)doc";
 
@@ -23272,49 +23272,9 @@ Template parameter ``sim_result``:
 Parameter ``filename``:
     The file name to create and write into.)doc";
 
-static const char *__doc_fiction_write_mol_qca_layout_svg =
-R"doc(Writes an SVG representation of a cell-level MolQCA layout to an
-output stream. Only cell-based layouts are supported, since the
-clocking scheme is not uniform at the gate level. Currently, only a
-uniform gate size of :math:`10 \times 10` is supported.
+static const char *__doc_fiction_write_mol_qca_layout_svg = R"doc()doc";
 
-May throw an `unsupported_cell_type_exception` if it encounters
-unsupported cell types in the layout.
-
-Template parameter ``Lyt``:
-    Cell-level QCA layout type.
-
-Parameter ``lyt``:
-    The layout to be written.
-
-Parameter ``os``:
-    The output stream to write into.
-
-Parameter ``ps``:
-    Parameters.)doc";
-
-static const char *__doc_fiction_write_mol_qca_layout_svg_2 =
-R"doc(Writes an SVG representation of a cell-level MolQCA layout to a file.
-Only cell-based layouts are supported, since the clocking scheme is
-not uniform at the gate level. Currently, only a uniform gate size of
-:math:`10 \times 10` is supported.
-
-May throw an `unsupported_cell_type_exception` if it encounters
-unsupported cell types in the layout. May throw an
-`std::ofstream::failure` if it cannot open the file.
-
-Template parameter ``Lyt``:
-    Cell-level molQCA layout type.
-
-Parameter ``lyt``:
-    The layout to be written.
-
-Parameter ``filename``:
-    The file name to create and write into. Should preferably use the
-    `.svg` extension.
-
-Parameter ``ps``:
-    Parameters.)doc";
+static const char *__doc_fiction_write_mol_qca_layout_svg_2 = R"doc()doc";
 
 static const char *__doc_fiction_write_operational_domain =
 R"doc(Writes a CSV representation of an operational domain to the specified
