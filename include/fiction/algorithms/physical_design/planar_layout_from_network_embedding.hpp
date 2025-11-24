@@ -797,8 +797,7 @@ template <typename Lyt, typename Ntk>
 class plane_impl
 {
   public:
-    plane_impl(const Ntk& src, const orthogonal_physical_design_params& p,
-                           orthogonal_physical_design_stats& st) :
+    plane_impl(const Ntk& src, const orthogonal_physical_design_params& p, orthogonal_physical_design_stats& st) :
             ntk{mockturtle::fanout_view{src}},
             ps{p},
             pst{st}
@@ -1054,10 +1053,10 @@ class plane_impl
 }  // namespace detail
 
 /**
- * This algorithm constructs a planar layout from a planar embedding of a logic network. Ehcne, the name "planar_layout form entwork embedding" (PLANE).
- * This algorithm performs a fully planar physical design flow for Field-Coupled Nanocomputing (FCN) circuits. It takes
- * as input a logic network with a planar embedding, represented as a `mutable_rank_view`, and preserves this embedding
- * during placement and routing.
+ * This algorithm constructs a planar layout from a planar embedding of a logic network. Ehcne, the name "planar_layout
+ * form entwork embedding" (PLANE). This algorithm performs a fully planar physical design flow for Field-Coupled
+ * Nanocomputing (FCN) circuits. It takes as input a logic network with a planar embedding, represented as a
+ * `mutable_rank_view`, and preserves this embedding during placement and routing.
  *
  * In this approach, each logic level of the network is mapped to a diagonal in the layout, while nodes within the same
  * level are placed according to their rank positions in the planar embedding. This ensures a crossing-free, scalable,
@@ -1071,8 +1070,7 @@ class plane_impl
  * @return      A fully planar gate-level layout of type `Lyt`.
  */
 template <typename Lyt, typename Ntk>
-Lyt plane(const Ntk& ntk, orthogonal_physical_design_params ps = {},
-                      orthogonal_physical_design_stats* pst = nullptr)
+Lyt plane(const Ntk& ntk, orthogonal_physical_design_params ps = {}, orthogonal_physical_design_stats* pst = nullptr)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
     static_assert(mockturtle::is_network_type_v<Ntk>,
@@ -1096,8 +1094,8 @@ Lyt plane(const Ntk& ntk, orthogonal_physical_design_params ps = {},
         throw std::invalid_argument("Input network has to be planar");
     }
 
-    orthogonal_physical_design_stats         st{};
-    detail::plane_impl<Lyt, Ntk> p{ntk, ps, st};
+    orthogonal_physical_design_stats st{};
+    detail::plane_impl<Lyt, Ntk>     p{ntk, ps, st};
 
     auto result = p.run();
 

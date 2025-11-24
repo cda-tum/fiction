@@ -94,7 +94,7 @@ void plane_command::execute()
     try
     {
         ls.extend() = std::make_shared<fiction::cart_gate_clk_lyt>(
-            fiction::orthogonal_planar<fiction::cart_gate_clk_lyt>(planarized_ntk, {}, &orth_stats));
+            fiction::plane<fiction::cart_gate_clk_lyt>(planarized_ntk, {}, &orth_stats));
 
         env->out() << fmt::format("[i] Layout generated: {} × {} | gates: {} | wires: {} | crossings: {}\n",
                                   orth_stats.x_size, orth_stats.y_size, orth_stats.num_gates, orth_stats.num_wires,
