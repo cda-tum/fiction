@@ -146,7 +146,7 @@ using gate_layout_t =
  * FCN technologies.
  */
 constexpr const char* qca_name     = "QCA";
-constexpr const char* mol_qca_name = "MolQCA";
+constexpr const char* mol_qca_name = "molQCA";
 constexpr const char* inml_name    = "iNML";
 constexpr const char* sidb_name    = "SiDB";
 

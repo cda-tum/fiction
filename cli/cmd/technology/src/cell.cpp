@@ -31,7 +31,7 @@ cell_command::cell_command(const environment::ptr& e) :
         command(e, "Compiles the current gate layout in store down to a cell-level layout. A gate library must be "
                    "specified in order to instruct the algorithm how to map gate tiles to cell blocks.")
 {
-    add_option("--library,-l", library, "Gate library to use for mapping {QCA-ONE, MolQCA, ToPoliNano, Bestagon}",
+    add_option("--library,-l", library, "Gate library to use for mapping {QCA-ONE, molQCA, ToPoliNano, Bestagon}",
                true);
 }
 
@@ -65,7 +65,7 @@ void cell_command::execute()
             store<fiction::cell_layout_t>().extend() = *result;
         }
     }
-    else if (library == "MolQCA" || library == "molQCA" || library == "MOLQCA")
+    else if (library == "MOLQCA" || library == "MOL-QCA" || library == "MOL QCA")
     {
         const auto apply_mol_qca = [](auto&& lyt_ptr)
         {

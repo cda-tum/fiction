@@ -142,19 +142,19 @@ class write_qll_layout_impl
 
     uint64_t cell_id{1};
 
-    const char* tech_name = []
+    static constexpr std::string_view tech_name = []
     {
         if constexpr (has_inml_technology_v<Lyt>)
         {
-            return "iNML";
+            return std::string_view{"iNML"};
         }
         else if constexpr (has_qca_technology_v<Lyt> || has_mol_qca_technology_v<Lyt>)
         {
-            return "MolFCN";
+            return std::string_view{"MolFCN"};
         }
         else
         {
-            return "?";
+            return std::string_view{"?"};
         }
     }();
 

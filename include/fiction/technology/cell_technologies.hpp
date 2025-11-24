@@ -65,57 +65,57 @@ struct qca_technology
         OUTPUT = static_cast<uint8_t>(cell_type::OUTPUT)
     };
 
-    [[nodiscard]] static constexpr bool is_empty_cell(cell_type c) noexcept
+    [[nodiscard]] static constexpr bool is_empty_cell(const cell_type& c) noexcept
     {
         return c == cell_type::EMPTY;
     }
 
-    [[nodiscard]] static constexpr bool is_normal_cell(cell_type c) noexcept
+    [[nodiscard]] static constexpr bool is_normal_cell(const cell_type& c) noexcept
     {
         return c == cell_type::NORMAL;
     }
 
-    [[nodiscard]] static constexpr bool is_input_cell(cell_type c) noexcept
+    [[nodiscard]] static constexpr bool is_input_cell(const cell_type& c) noexcept
     {
         return c == cell_type::INPUT;
     }
 
-    [[nodiscard]] static constexpr bool is_output_cell(cell_type c) noexcept
+    [[nodiscard]] static constexpr bool is_output_cell(const cell_type& c) noexcept
     {
         return c == cell_type::OUTPUT;
     }
 
-    [[nodiscard]] static constexpr bool is_const_0_cell(cell_type c) noexcept
+    [[nodiscard]] static constexpr bool is_const_0_cell(const cell_type& c) noexcept
     {
         return c == cell_type::CONST_0;
     }
 
-    [[nodiscard]] static constexpr bool is_const_1_cell(cell_type c) noexcept
+    [[nodiscard]] static constexpr bool is_const_1_cell(const cell_type& c) noexcept
     {
         return c == cell_type::CONST_1;
     }
 
-    [[nodiscard]] static constexpr bool is_constant_cell(cell_type c) noexcept
+    [[nodiscard]] static constexpr bool is_constant_cell(const cell_type& c) noexcept
     {
         return is_const_0_cell(c) || is_const_1_cell(c);
     }
 
-    [[nodiscard]] static constexpr bool is_normal_cell_mode(cell_mode m) noexcept
+    [[nodiscard]] static constexpr bool is_normal_cell_mode(const cell_mode& m) noexcept
     {
         return m == cell_mode::NORMAL;
     }
 
-    [[nodiscard]] static constexpr bool is_rotated_cell_mode(cell_mode m) noexcept
+    [[nodiscard]] static constexpr bool is_rotated_cell_mode(const cell_mode& m) noexcept
     {
         return m == cell_mode::ROTATED;
     }
 
-    [[nodiscard]] static constexpr bool is_vertical_cell_mode(cell_mode m) noexcept
+    [[nodiscard]] static constexpr bool is_vertical_cell_mode(const cell_mode& m) noexcept
     {
         return m == cell_mode::VERTICAL;
     }
 
-    [[nodiscard]] static constexpr bool is_crossover_cell_mode(cell_mode m) noexcept
+    [[nodiscard]] static constexpr bool is_crossover_cell_mode(const cell_mode& m) noexcept
     {
         return m == cell_mode::CROSSOVER;
     }
@@ -143,53 +143,49 @@ struct qca_technology
 struct mol_qca_technology
 {
     /**
-     * Possible types of QCA cells.
+     * Possible types of molQCA cells.
      */
     enum class cell_type : uint8_t
     {
         /**
-         * Symbol used for empty QCA cells.
+         * Symbol used for empty molQCA cells.
          */
         EMPTY = ' ',
         /**
-         * Symbol used for normal QCA cells.
-         */
-        NORMAL = 'x',
-        /**
-         * Symbol used for normal QCA cells.
+         * Symbol used for normal molQCA cells with clocking 0.
          */
         NORMAL1 = 'a',
         /**
-         * Symbol used for normal QCA cells.
+         * Symbol used for normal molQCA cells with clocking 1.
          */
         NORMAL2 = 'b',
         /**
-         * Symbol used for normal QCA cells.
+         * Symbol used for normal molQCA cells with clocking 2.
          */
         NORMAL3 = 'c',
         /**
-         * Symbol used for normal QCA cells.
+         * Symbol used for normal molQCA cells with clocking 3.
          */
         NORMAL4 = 'd',
         /**
-         * Symbol used for input QCA cells.
+         * Symbol used for input molQCA cells.
          */
         INPUT = 'i',
         /**
-         * Symbol used for output QCA cells.
+         * Symbol used for output molQCA cells.
          */
         OUTPUT = 'o',
         /**
-         * Symbol used for constant 0 input QCA cells.
+         * Symbol used for constant 0 input molQCA cells.
          */
         CONST_0 = '0',
         /**
-         * Symbol used for constant 1 input QCA cells.
+         * Symbol used for constant 1 input molQCA cells.
          */
         CONST_1 = '1'
     };
     /**
-     * Possible cell modes for QCA cells.
+     * Possible cell modes for molQCA cells.
      */
     enum class cell_mode : uint8_t
     {
@@ -208,95 +204,94 @@ struct mol_qca_technology
         OUTPUT = static_cast<uint8_t>(cell_type::OUTPUT)
     };
 
-    [[nodiscard]] static constexpr bool is_empty_cell(cell_type c) noexcept
+    [[nodiscard]] static constexpr bool is_empty_cell(const cell_type& c) noexcept
     {
         return c == cell_type::EMPTY;
     }
 
-    [[nodiscard]] static constexpr bool is_normal_cell(cell_type c) noexcept
+    [[nodiscard]] static constexpr bool is_normal_cell(const cell_type& c) noexcept
     {
-        return (c == cell_type::NORMAL1 || c == cell_type::NORMAL2 || c == cell_type::NORMAL3 ||
-                c == cell_type::NORMAL4);
+        return is_normal_cell1(c) || is_normal_cell2(c) || is_normal_cell3(c) || is_normal_cell4(c);
     }
 
-    [[nodiscard]] static constexpr bool is_normal_cell1(cell_type c) noexcept
+    [[nodiscard]] static constexpr bool is_normal_cell1(const cell_type& c) noexcept
     {
         return c == cell_type::NORMAL1;
     }
 
-    [[nodiscard]] static constexpr bool is_normal_cell2(cell_type c) noexcept
+    [[nodiscard]] static constexpr bool is_normal_cell2(const cell_type& c) noexcept
     {
         return c == cell_type::NORMAL2;
     }
 
-    [[nodiscard]] static constexpr bool is_normal_cell3(cell_type c) noexcept
+    [[nodiscard]] static constexpr bool is_normal_cell3(const cell_type& c) noexcept
     {
         return c == cell_type::NORMAL3;
     }
 
-    [[nodiscard]] static constexpr bool is_normal_cell4(cell_type c) noexcept
+    [[nodiscard]] static constexpr bool is_normal_cell4(const cell_type& c) noexcept
     {
         return c == cell_type::NORMAL4;
     }
 
-    [[nodiscard]] static constexpr bool is_input_cell(cell_type c) noexcept
+    [[nodiscard]] static constexpr bool is_input_cell(const cell_type& c) noexcept
     {
         return c == cell_type::INPUT;
     }
 
-    [[nodiscard]] static constexpr bool is_output_cell(cell_type c) noexcept
+    [[nodiscard]] static constexpr bool is_output_cell(const cell_type& c) noexcept
     {
         return c == cell_type::OUTPUT;
     }
 
-    [[nodiscard]] static constexpr bool is_const_0_cell(cell_type c) noexcept
+    [[nodiscard]] static constexpr bool is_const_0_cell(const cell_type& c) noexcept
     {
         return c == cell_type::CONST_0;
     }
 
-    [[nodiscard]] static constexpr bool is_const_1_cell(cell_type c) noexcept
+    [[nodiscard]] static constexpr bool is_const_1_cell(const cell_type& c) noexcept
     {
         return c == cell_type::CONST_1;
     }
 
-    [[nodiscard]] static constexpr bool is_constant_cell(cell_type c) noexcept
+    [[nodiscard]] static constexpr bool is_constant_cell(const cell_type& c) noexcept
     {
         return is_const_0_cell(c) || is_const_1_cell(c);
     }
 
-    [[nodiscard]] static constexpr bool is_normal_cell_mode(cell_mode m) noexcept
+    [[nodiscard]] static constexpr bool is_normal_cell_mode(const cell_mode& m) noexcept
     {
         return m == cell_mode::NORMAL;
     }
 
-    [[nodiscard]] static constexpr bool is_rotated_cell_mode(cell_mode m) noexcept
+    [[nodiscard]] static constexpr bool is_rotated_cell_mode(const cell_mode& m) noexcept
     {
         return m == cell_mode::ROTATED;
     }
 
-    [[nodiscard]] static constexpr bool is_vertical_cell_mode(cell_mode m) noexcept
+    [[nodiscard]] static constexpr bool is_vertical_cell_mode(const cell_mode& m) noexcept
     {
         return m == cell_mode::VERTICAL;
     }
 
-    [[nodiscard]] static constexpr bool is_crossover_cell_mode(cell_mode m) noexcept
+    [[nodiscard]] static constexpr bool is_crossover_cell_mode(const cell_mode& m) noexcept
     {
         return m == cell_mode::CROSSOVER;
     }
     /**
-     * Default width of a QCA cell in QCADesigner (https://waluslab.ece.ubc.ca/qcadesigner/).
+     * Default width of a molQCA cell.
      */
     static constexpr uint64_t CELL_WIDTH = 18ul;
     /**
-     * Default height of a QCA cell in QCADesigner.
+     * Default height of a molQCA cell.
      */
     static constexpr uint64_t CELL_HEIGHT = 18ul;
     /**
-     * Default horizontal spacing between two QCA cells in QCADesigner.
+     * Default horizontal spacing between two molQCA cells.
      */
     static constexpr uint64_t CELL_HSPACE = 2ul;
     /**
-     * Default vertical spacing between two QCA cells in QCADesigner.
+     * Default vertical spacing between two molQCA cells.
      */
     static constexpr uint64_t CELL_VSPACE = 2ul;
 
@@ -367,22 +362,22 @@ struct inml_technology
         OUTPUT = static_cast<uint8_t>(cell_type::OUTPUT)
     };
 
-    [[nodiscard]] static constexpr bool is_empty_cell(cell_type c) noexcept
+    [[nodiscard]] static constexpr bool is_empty_cell(const cell_type& c) noexcept
     {
         return c == cell_type::EMPTY;
     }
 
-    [[nodiscard]] static constexpr bool is_normal_cell(cell_type c) noexcept
+    [[nodiscard]] static constexpr bool is_normal_cell(const cell_type& c) noexcept
     {
         return c == cell_type::NORMAL;
     }
 
-    [[nodiscard]] static constexpr bool is_input_cell(cell_type c) noexcept
+    [[nodiscard]] static constexpr bool is_input_cell(const cell_type& c) noexcept
     {
         return c == cell_type::INPUT;
     }
 
-    [[nodiscard]] static constexpr bool is_output_cell(cell_type c) noexcept
+    [[nodiscard]] static constexpr bool is_output_cell(const cell_type& c) noexcept
     {
         return c == cell_type::OUTPUT;
     }

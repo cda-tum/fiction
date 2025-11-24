@@ -445,13 +445,14 @@ inline constexpr const char* SIMPLE_CELL = "<g\n"
                                            "style=\"fill:#{0};stroke:#000000;\" />\n"
                                            "</g>";
 
-// MOL QCA
-inline constexpr const char* MOL_QCA_CLOCK_ZONE_1_CELL = "ffe700";
-inline constexpr const char* MOL_QCA_CLOCK_ZONE_2_CELL = "65ff00";
-inline constexpr const char* MOL_QCA_CLOCK_ZONE_3_CELL = "0071ff";
-inline constexpr const char* MOL_QCA_CLOCK_ZONE_4_CELL = "f800ff";
-inline constexpr const char* PI_CELL_MOL_QCA           = "cccccc";
-inline constexpr const char* PO_CELL_MOL_QCA           = "4a4a4a";
+// molQCA
+inline constexpr const char* MOL_QCA_CLOCK_ZONE_1_CELL     = "ffe700";
+inline constexpr const char* MOL_QCA_CLOCK_ZONE_2_CELL     = "65ff00";
+inline constexpr const char* MOL_QCA_CLOCK_ZONE_3_CELL     = "0071ff";
+inline constexpr const char* MOL_QCA_CLOCK_ZONE_4_CELL     = "f800ff";
+inline constexpr const char* MOL_QCA_CLOCK_ZONE_LATCH_CELL = "ff00f9";
+inline constexpr const char* PI_CELL_MOL_QCA               = "cccccc";
+inline constexpr const char* PO_CELL_MOL_QCA               = "4a4a4a";
 
 inline constexpr const double MOL_QCA_CELL_DISTANCE = 11.5;
 
@@ -548,7 +549,6 @@ inline constexpr const char* MOL_QCA_CELL =
     "  </g>\n"
     "</g>";
 
-// ToDo: adjust this
 inline constexpr const char* MOL_QCA_SIMPLE_CELL = "<g\n"
                                                    "transform=\"translate({1},{2})\">\n"
                                                    "<rect\n"
@@ -1276,7 +1276,7 @@ class write_mol_qca_layout_svg_impl
             {
                 if (lyt.is_synchronization_element(c))
                 {
-                    cell_color = svg::CLOCK_ZONE_LATCH_CELL;
+                    cell_color = svg::MOL_QCA_CLOCK_ZONE_LATCH_CELL;
 
                     is_sync_elem = true;
                 }
@@ -1659,11 +1659,9 @@ void write_qca_layout_svg(const Lyt& lyt, const std::string_view& filename, cons
 }
 
 /**
- * Writes an SVG representation of a cell-level QCA layout into an output stream. Both tile- and cell-based layouts are
- * supported. For tile-based layouts, QCA layouts of tile size \f$5 \times 5\f$ are supported exclusively so far.
- *
- * The utilized color scheme is based on the standard scheme used in QCADesigner
- * (https://waluslab.ece.ubc.ca/qcadesigner/).
+ * Writes an SVG representation of a cell-level MolQCA layout to an output stream.
+ * Only cell-based layouts are supported, since the clocking scheme is not uniform at the gate level.
+ * Currently, only a uniform gate size of \f$10 \times 10\f$ is supported.
  *
  * May throw an `unsupported_cell_type_exception` if it encounters unsupported cell types in the layout.
  *
@@ -1684,8 +1682,9 @@ void write_mol_qca_layout_svg(const Lyt& lyt, std::ostream& os, const write_qca_
     p.run();
 }
 /**
- * Writes an SVG representation of a cell-level molQCA layout into a file. Cell-based layouts are supported.
- * Still the cells are part of uniform \f$10 \times 10\f$ gates, which are supported.
+ * Writes an SVG representation of a cell-level MolQCA layout to a file.
+ * Only cell-based layouts are supported, since the clocking scheme is not uniform at the gate level.
+ * Currently, only a uniform gate size of \f$10 \times 10\f$ is supported.
  *
  * May throw an `unsupported_cell_type_exception` if it encounters unsupported cell types in the layout. May throw an
  * `std::ofstream::failure` if it cannot open the file.
