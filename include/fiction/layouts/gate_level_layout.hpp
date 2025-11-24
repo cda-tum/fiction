@@ -9,7 +9,6 @@
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/mockturtle_utils.hpp"
-#include "fiction/utils/range.hpp"
 
 #include <kitty/constructors.hpp>
 #include <kitty/dynamic_truth_table.hpp>
@@ -24,7 +23,6 @@
 #include <algorithm>
 #include <cstdint>
 #include <functional>
-#include <initializer_list>
 #include <memory>
 #include <utility>
 #include <vector>
@@ -115,19 +113,35 @@ class gate_level_layout : public ClockedLayout
      *
      * `data[0].h1`: Internal (data-flow independent) fan-out size (MSB indicates dead nodes)
      * `data[0].h2`: Application-specific value
-     * `data[1].h1`: Function literal in truth table cache
-     * `data[2].h2`: Visited flags
+     * `data[1].h1`: Total fan-out size (not used, kept for compatibility)
+     * `data[1].h2`: Visited flags
+     * `data[2+i].h1`: Function literal in truth table cache for the i-th output
+     * `data[2+i].h2`: Fan-out size for the i-th output (not used, kept for compatibility)
      */
-    struct gate_level_layout_storage_node : mockturtle::mixed_fanin_node<2>
+    struct gate_level_layout_storage_node : mockturtle::block_fanin_node<0>
     {
+        gate_level_layout_storage_node()
+        {
+            data = decltype(data)(3);
+        }
+
         bool operator==(const gate_level_layout_storage_node& other) const
         {
-            return data[1].h1 == other.data[1].h1 && children == other.children;
+            if (data.size() != other.data.size())
+                return false;
+
+            for (auto i = 2u; i < data.size(); ++i)
+                if (data[i].h1 != other.data[i].h1)
+                    return false;
+
+            return children == other.children;
         }
     };
 
     static constexpr auto min_fanin_size = std::max(ClockedLayout::min_fanin_size, 1u);  // NOLINT(*-identifier-naming)
     static constexpr auto max_fanin_size = ClockedLayout::max_fanin_size;                // NOLINT(*-identifier-naming)
+    static constexpr auto min_gate_output_size = 1u;                                     // NOLINT(*-identifier-naming)
+    static constexpr auto max_gate_output_size = 2u;                                     // NOLINT(*-identifier-naming)
 
     using base_type = gate_level_layout;
     using node      = uint32_t;
@@ -248,7 +262,7 @@ class gate_level_layout : public ClockedLayout
     {
         const auto n = static_cast<node>(strg->nodes.size());
         strg->nodes.emplace_back();     // empty node data
-        strg->nodes[n].data[1].h1 = 2;  // assign identity function
+        strg->nodes[n].data[2].h1 = 2;  // assign identity function
         strg->inputs.emplace_back(n);
         strg->data.node_names[n] = name.empty() ? fmt::format("pi{}", num_pis()) : name;
         assign_node(t, n);
@@ -260,14 +274,16 @@ class gate_level_layout : public ClockedLayout
     {
         const auto n = static_cast<node>(strg->nodes.size());
         strg->nodes.emplace_back();     // empty node data
-        strg->nodes[n].data[1].h1 = 2;  // assign identity function
+        strg->nodes[n].data[2].h1 = 2;  // assign identity function
+        // Store output tile as node_pointer with the full signal value
         strg->outputs.emplace_back(static_cast<signal>(t));
         strg->data.node_names[n] = name.empty() ? fmt::format("po{}", num_pos()) : name;
         assign_node(t, n);
 
         /* increase ref-count to child */
         strg->nodes[get_node(s)].data[0].h1++;
-        strg->nodes[n].children.push_back(s);
+        // Store signal as node_pointer with the full signal value
+        strg->nodes[n].children.emplace_back(s);
 
         return static_cast<signal>(t);
     }
@@ -293,8 +309,8 @@ class gate_level_layout : public ClockedLayout
 
     [[nodiscard]] bool is_po(const node n) const noexcept
     {
-        return std::find_if(strg->outputs.cbegin(), strg->outputs.cend(),
-                            [this, &n](const auto& p) { return this->get_node(p.index) == n; }) != strg->outputs.cend();
+        return std::find_if(strg->outputs.cbegin(), strg->outputs.cend(), [this, &n](const auto& p)
+                            { return this->get_node(static_cast<signal>(p.index)) == n; }) != strg->outputs.cend();
     }
 
     [[nodiscard]] bool is_co(const node n) const noexcept
@@ -505,13 +521,44 @@ class gate_level_layout : public ClockedLayout
         return create_node_from_literal(children, strg->data.fn_cache.insert(function), t);
     }
 
+    signal create_node(const std::vector<signal>& children, const std::vector<kitty::dynamic_truth_table>& functions,
+                       const tile& t = {})
+    {
+        assert(!functions.empty());
+
+        if (children.empty())
+        {
+            assert(functions[0].num_vars() == 0u);
+            return get_constant(!kitty::is_const0(functions[0]));
+        }
+
+        std::vector<uint32_t> literals;
+        literals.reserve(functions.size());
+        for (const auto& tt : functions)
+        {
+            literals.push_back(strg->data.fn_cache.insert(tt));
+        }
+
+        return create_node_from_literals(children, literals, t);
+    }
+
 #pragma endregion
 
 #pragma region Functional properties
 
     [[nodiscard]] kitty::dynamic_truth_table node_function(const node n) const
     {
-        return strg->data.fn_cache[strg->nodes[n].data[1].h1];
+        return strg->data.fn_cache[strg->nodes[n].data[2].h1];
+    }
+
+    [[nodiscard]] kitty::dynamic_truth_table node_function_pin(const node n, uint32_t pin_index) const
+    {
+        return strg->data.fn_cache[strg->nodes[n].data[2 + pin_index].h1];
+    }
+
+    [[nodiscard]] bool is_multioutput(const node n) const
+    {
+        return strg->nodes[n].data.size() > 3;
     }
 
 #pragma endregion
@@ -724,8 +771,13 @@ class gate_level_layout : public ClockedLayout
             if (!t.is_dead())
             {
                 // if n lived on a tile that was marked as PO, update it with the new tile t
-                std::replace(strg->outputs.begin(), strg->outputs.end(), static_cast<signal>(old_t),
-                             static_cast<signal>(t));
+                for (auto& out : strg->outputs)
+                {
+                    if (out.index == static_cast<signal>(old_t))
+                    {
+                        out = typename storage::element_type::node_type::pointer_type(static_cast<signal>(t));
+                    }
+                }
             }
 
             // clear n's position
@@ -851,7 +903,7 @@ class gate_level_layout : public ClockedLayout
      */
     [[nodiscard]] bool is_gate(const node n) const noexcept
     {
-        return strg->nodes[n].data[1].h1 >= 2 && !is_pi(n);
+        return strg->nodes[n].data[2].h1 >= 2 && !is_pi(n);
     }
     /**
      * Returns whether `n` computes the identity function.
@@ -861,7 +913,7 @@ class gate_level_layout : public ClockedLayout
      */
     [[nodiscard]] bool is_buf(const node n) const noexcept
     {
-        return strg->nodes[n].data[1].h1 == 2;
+        return strg->nodes[n].data[2].h1 == 2;
     }
     /**
      * Equivalent to `is_buf`.
@@ -878,62 +930,62 @@ class gate_level_layout : public ClockedLayout
      */
     [[nodiscard]] bool is_inv(const node n) const noexcept
     {
-        return strg->nodes[n].data[1].h1 == 3;
+        return strg->nodes[n].data[2].h1 == 3;
     }
 
     [[nodiscard]] bool is_and(const node n) const noexcept
     {
-        return strg->nodes[n].data[1].h1 == 4;
+        return strg->nodes[n].data[2].h1 == 4;
     }
 
     [[nodiscard]] bool is_nand(const node n) const noexcept
     {
-        return strg->nodes[n].data[1].h1 == 5;
+        return strg->nodes[n].data[2].h1 == 5;
     }
 
     [[nodiscard]] bool is_or(const node n) const noexcept
     {
-        return strg->nodes[n].data[1].h1 == 6;
+        return strg->nodes[n].data[2].h1 == 6;
     }
 
     [[nodiscard]] bool is_nor(const node n) const noexcept
     {
-        return strg->nodes[n].data[1].h1 == 7;
+        return strg->nodes[n].data[2].h1 == 7;
     }
 
     [[nodiscard]] bool is_lt(const node n) const noexcept
     {
-        return strg->nodes[n].data[1].h1 == 8;
+        return strg->nodes[n].data[2].h1 == 8;
     }
 
     [[nodiscard]] bool is_ge(const node n) const noexcept
     {
-        return strg->nodes[n].data[1].h1 == 9;
+        return strg->nodes[n].data[2].h1 == 9;
     }
 
     [[nodiscard]] bool is_gt(const node n) const noexcept
     {
-        return strg->nodes[n].data[1].h1 == 10;
+        return strg->nodes[n].data[2].h1 == 10;
     }
 
     [[nodiscard]] bool is_le(const node n) const noexcept
     {
-        return strg->nodes[n].data[1].h1 == 11;
+        return strg->nodes[n].data[2].h1 == 11;
     }
 
     [[nodiscard]] bool is_xor(const node n) const noexcept
     {
-        return strg->nodes[n].data[1].h1 == 12;
+        return strg->nodes[n].data[2].h1 == 12;
     }
 
     [[nodiscard]] bool is_xnor(const node n) const noexcept
     {
-        return strg->nodes[n].data[1].h1 == 13;
+        return strg->nodes[n].data[2].h1 == 13;
     }
 
     [[nodiscard]] bool is_maj(const node n) const noexcept
     {
-        return strg->nodes[n].data[1].h1 == 14;
+        return strg->nodes[n].data[2].h1 == 14;
     }
     /**
      * Returns whether `n` is a wire and has multiple outputs, thereby, acting as a fanout gate. Note that a fanout will
@@ -1092,7 +1144,8 @@ class gate_level_layout : public ClockedLayout
             strg->nodes[n].children.cbegin(), strg->nodes[n].children.cend(),
             [this, &nt](const auto& c)
             {
-                const auto ct = get_tile(get_node(c.index));
+                // c.index is the signal/tile directly
+                const auto ct = static_cast<tile>(c.index);
 
                 if constexpr (RespectClocking)
                 {
@@ -1104,7 +1157,7 @@ class gate_level_layout : public ClockedLayout
                     return ClockedLayout::is_adjacent_elevation_of(nt, ct);
                 }
             },
-            [this](const auto& c) -> signal { return make_signal(get_node(c.index)); }, std::forward<Fn>(fn));
+            [](const auto& c) -> signal { return c.index; }, std::forward<Fn>(fn));
     }
     /**
      * Returns a container that contains all tiles that feed information to the given one. Thereby, only
@@ -1241,7 +1294,7 @@ class gate_level_layout : public ClockedLayout
             index ^= *begin++ ? 1 : 0;
         }
 
-        return kitty::get_bit(strg->data.cache[strg->nodes[n].data[1].h1], index);
+        return kitty::get_bit(strg->data.fn_cache[strg->nodes[n].data[2].h1], index);
     }
 
     template <typename Iterator>
@@ -1255,7 +1308,7 @@ class gate_level_layout : public ClockedLayout
 
         /* resulting truth table has the same size as any of the children */
         auto       result  = tts.front().construct();
-        const auto gate_tt = strg->data.fn_cache[strg->nodes[n].data[1].h1];
+        const auto gate_tt = strg->data.fn_cache[strg->nodes[n].data[2].h1];
 
         for (uint32_t i = 0u; i < static_cast<uint32_t>(result.num_bits()); ++i)
         {
@@ -1673,8 +1726,8 @@ class gate_level_layout : public ClockedLayout
         kitty::dynamic_truth_table tt_zero(0);
         strg->data.fn_cache.insert(tt_zero);
 
-        strg->nodes[0].data[1].h1 = 0;
-        strg->nodes[1].data[1].h1 = 1;
+        strg->nodes[0].data[2].h1 = 0;
+        strg->nodes[1].data[2].h1 = 1;
 
         /* reserve some truth tables for nodes */
         const auto create_and_cache = [this](const auto& literal, auto n)
@@ -1747,9 +1800,53 @@ class gate_level_layout : public ClockedLayout
 
     signal create_node_from_literal(const std::vector<signal>& children, uint32_t literal, const tile& t)
     {
-        typename storage::element_type::node_type node_data;
-        std::copy(children.begin(), children.end(), std::back_inserter(node_data.children));
-        node_data.data[1].h1 = literal;
+        typename storage::element_type::node_type node_data{};
+
+        // Store each signal as node_pointer with full signal value
+        for (const auto& c : children)
+        {
+            node_data.children.emplace_back(c);
+        }
+        node_data.data[2].h1 = literal;
+
+        const auto n = static_cast<node>(strg->nodes.size());
+        strg->nodes.push_back(node_data);
+
+        /* increase ref-count to children */
+        for (const auto& c : children)
+        {
+            strg->nodes[get_node(c)].data[0].h1++;
+        }
+
+        set_value(n, 0);
+
+        assign_node(t, n);
+
+        for (auto const& fn : evnts->on_add)
+        {
+            (*fn)(n);
+        }
+
+        return static_cast<signal>(t);
+    }
+
+    signal create_node_from_literals(const std::vector<signal>& children, const std::vector<uint32_t>& literals,
+                                     const tile& t)
+    {
+        typename storage::element_type::node_type node_data{};
+
+        // Store each signal as node_pointer with full signal value
+        for (const auto& c : children)
+        {
+            node_data.children.emplace_back(c);
+        }
+
+        node_data.data = decltype(node_data.data)(2 + literals.size());
+
+        for (auto i = 0u; i < literals.size(); ++i)
+        {
+            node_data.data[2 + i].h1 = literals[i];
+        }
 
         const auto n = static_cast<node>(strg->nodes.size());
         strg->nodes.push_back(node_data);
@@ -1775,7 +1872,8 @@ class gate_level_layout : public ClockedLayout
     [[nodiscard]] bool is_child(const node n, const signal& s) const noexcept
     {
         const auto& node_data = strg->nodes[n];
-        return std::find(node_data.children.cbegin(), node_data.children.cend(), s) != node_data.children.cend();
+        return std::find_if(node_data.children.cbegin(), node_data.children.cend(),
+                            [&s](const auto& c) { return c.index == s; }) != node_data.children.cend();
     }
 };
 
