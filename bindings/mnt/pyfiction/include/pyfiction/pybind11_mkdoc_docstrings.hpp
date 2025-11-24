@@ -10006,44 +10006,6 @@ static const char *__doc_fiction_detail_orthogonal_impl_pst = R"doc()doc";
 
 static const char *__doc_fiction_detail_orthogonal_impl_run = R"doc()doc";
 
-static const char *__doc_fiction_detail_orthogonal_planar_impl =
-R"doc(Implements the general planar layout generation algorithm.
-
-The algorithm performs placement and routing level by level, starting
-from the primary inputs and proceeding toward the outputs. For each
-level, node placement depends on the orientation and excess wiring
-computed in auxiliary routines such as `compute_pr_variables` and
-`compute_wiring`. Nodes are positioned according to their fan-in
-structure and routing constraints to ensure planarity of the resulting
-layout.
-
-Template parameter ``Lyt``:
-    Gate-level layout type.
-
-Template parameter ``Ntk``:
-    Logic network type.
-
-Parameter ``src``:
-    Source network to be placed and routed.
-
-Parameter ``p``:
-    Parameters controlling layout generation and clocking.
-
-Parameter ``st``:
-    Statistics object used to collect runtime and layout information.)doc";
-
-static const char *__doc_fiction_detail_orthogonal_planar_impl_ntk = R"doc()doc";
-
-static const char *__doc_fiction_detail_orthogonal_planar_impl_orthogonal_planar_impl = R"doc()doc";
-
-static const char *__doc_fiction_detail_orthogonal_planar_impl_po_counter = R"doc()doc";
-
-static const char *__doc_fiction_detail_orthogonal_planar_impl_ps = R"doc()doc";
-
-static const char *__doc_fiction_detail_orthogonal_planar_impl_pst = R"doc()doc";
-
-static const char *__doc_fiction_detail_orthogonal_planar_impl_run = R"doc()doc";
-
 static const char *__doc_fiction_detail_physical_population_stability_impl =
 R"doc(This class implements the simulation of the population stability for a
 given SiDB layout. It determines the minimum electrostatic potential
@@ -10220,6 +10182,44 @@ static const char *__doc_fiction_detail_placement_info_current_node = R"doc(The 
 static const char *__doc_fiction_detail_placement_info_current_po = R"doc(The index of the current primary output.)doc";
 
 static const char *__doc_fiction_detail_placement_info_node2pos = R"doc(Mapping of nodes to their positions in the layout.)doc";
+
+static const char *__doc_fiction_detail_plane_impl =
+R"doc(Implements the general planar layout generation algorithm.
+
+The algorithm performs placement and routing level by level, starting
+from the primary inputs and proceeding toward the outputs. For each
+level, node placement depends on the orientation and excess wiring
+computed in auxiliary routines such as `compute_pr_variables` and
+`compute_wiring`. Nodes are positioned according to their fan-in
+structure and routing constraints to ensure planarity of the resulting
+layout.
+
+Template parameter ``Lyt``:
+    Gate-level layout type.
+
+Template parameter ``Ntk``:
+    Logic network type.
+
+Parameter ``src``:
+    Source network to be placed and routed.
+
+Parameter ``p``:
+    Parameters controlling layout generation and clocking.
+
+Parameter ``st``:
+    Statistics object used to collect runtime and layout information.)doc";
+
+static const char *__doc_fiction_detail_plane_impl_ntk = R"doc()doc";
+
+static const char *__doc_fiction_detail_plane_impl_plane_impl = R"doc()doc";
+
+static const char *__doc_fiction_detail_plane_impl_po_counter = R"doc()doc";
+
+static const char *__doc_fiction_detail_plane_impl_ps = R"doc()doc";
+
+static const char *__doc_fiction_detail_plane_impl_pst = R"doc()doc";
+
+static const char *__doc_fiction_detail_plane_impl_run = R"doc()doc";
 
 static const char *__doc_fiction_detail_post_layout_optimization_impl = R"doc()doc";
 
@@ -18428,36 +18428,6 @@ static const char *__doc_fiction_orthogonal_physical_design_stats_x_size = R"doc
 
 static const char *__doc_fiction_orthogonal_physical_design_stats_y_size = R"doc()doc";
 
-static const char *__doc_fiction_orthogonal_planar =
-R"doc(This algorithm performs a fully planar physical design flow for Field-
-Coupled Nanocomputing (FCN) circuits. It takes as input a logic
-network with a planar embedding, represented as a `mutable_rank_view`,
-and preserves this embedding during placement and routing.
-
-In this approach, each logic level of the network is mapped to a
-diagonal in the layout, while nodes within the same level are placed
-according to their rank positions in the planar embedding. This
-ensures a crossing-free, scalable, and layout-consistent mapping from
-logic to physical design.
-
-Template parameter ``Lyt``:
-    Gate-level layout type.
-
-Template parameter ``Ntk``:
-    Logic network type.
-
-Parameter ``ntk``:
-    Planar logic network to be placed and routed.
-
-Parameter ``ps``:
-    Configuration parameters for the physical design process.
-
-Parameter ``pst``:
-    Optional statistics object to collect runtime and layout metrics.
-
-Returns:
-    A fully planar gate-level layout of type `Lyt`.)doc";
-
 static const char *__doc_fiction_out_of_cell_names_exception = R"doc()doc";
 
 static const char *__doc_fiction_out_of_cell_names_exception_out_of_cell_names_exception = R"doc()doc";
@@ -18863,6 +18833,39 @@ Parameter ``node2pos``:
 
 Returns:
     Signal to the newly placed gate in `lyt`.)doc";
+
+static const char *__doc_fiction_plane =
+R"doc(This algorithm constructs a planar layout from the planar embedding of
+a logic network, forming the Planar Layout from Network Embedding
+(PLANE) methodology. It provides a fully planar physical design flow
+for Field-Coupled Nanocomputing (FCN) circuits. The algorithm operates
+on a logic network with an existing planar embedding, represented as a
+`mutable_rank_view`, and preserves this embedding during placement and
+routing.
+
+In this approach, each logic level of the network is mapped to a
+diagonal in the layout, while nodes within the same level are placed
+according to their rank positions in the planar embedding. This
+ensures a crossing-free, scalable, and layout-consistent mapping from
+logic to physical design.
+
+Template parameter ``Lyt``:
+    Gate-level layout type.
+
+Template parameter ``Ntk``:
+    Logic network type.
+
+Parameter ``ntk``:
+    Planar logic network to be placed and routed.
+
+Parameter ``ps``:
+    Configuration parameters for the physical design process.
+
+Parameter ``pst``:
+    Optional statistics object to collect runtime and layout metrics.
+
+Returns:
+    A fully planar gate-level layout of type `Lyt`.)doc";
 
 static const char *__doc_fiction_pointy_top_hex = R"doc(\verbatim / \ / \ | | | | \ / \ / \endverbatim)doc";
 
