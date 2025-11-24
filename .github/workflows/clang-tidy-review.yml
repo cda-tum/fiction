@@ -59,6 +59,7 @@ jobs:
           -DFICTION_ENABLE_MUGEN=ON
           -DFICTION_ALGLIB=ON
           -DFICTION_ENABLE_MUGEN=ON
+          -DFICTION_PYTHON_BINDINGS=ON
           -DMOCKTURTLE_EXAMPLES=OFF
 
       - name: Run clang-tidy
