@@ -1316,11 +1316,11 @@ class write_mol_qca_layout_svg_impl
                 cell_description = svg::MOL_QCA_VIA;
             }
             // crossings are not yet implemented in this technology
-            /*else if (const auto ac = lyt.above(c), bc = lyt.below(c);
+            else if (const auto ac = lyt.above(c), bc = lyt.below(c);
                      ((c != ac) && !lyt.is_empty_cell(ac)) || ((c != bc) && lyt.is_empty_cell(bc)))
             {
-                cell_description = svg::MOL_QCA_CROSS;
-            }*/
+                throw unsupported_cell_type_exception(c);
+            }
             else if (c.z != 0)
             {
                 // skip non-ground layer cells
