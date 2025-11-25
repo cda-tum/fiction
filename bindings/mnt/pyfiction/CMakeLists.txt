@@ -29,8 +29,21 @@ target_sources(libpyfiction
         FILES
         ${FICTION_PYFICTION_HEADERS}
 )
-# Ensure header verification is enabled for this target
+# Ensure header verification is enabled for this target.
+# This generates wrapper .cxx files in the build directory that include each header,
+# providing compilation database entries that clang-tidy can use.
 set_property(TARGET libpyfiction PROPERTY VERIFY_INTERFACE_HEADER_SETS ON)
+
+# Workaround for clang-tidy in CI: pybind11_add_module creates a MODULE library whose
+# compilation commands may not be properly discovered by cpp-linter when analyzing headers.
+# Create an additional OBJECT library that compiles the same source file, ensuring
+# pyfiction.cpp appears in compile_commands.json in a form that cpp-linter can discover.
+# This library is not built by default and only exists for compilation database generation.
+if(CMAKE_EXPORT_COMPILE_COMMANDS)
+    add_library(pyfiction_compile_commands OBJECT EXCLUDE_FROM_ALL pyfiction.cpp)
+    target_link_libraries(pyfiction_compile_commands PRIVATE libpyfiction)
+    target_compile_features(pyfiction_compile_commands PRIVATE cxx_std_${CMAKE_CXX_STANDARD})
+endif()
 
 pybind11_add_module(pyfiction
         # Prefer thin LTO if available
