@@ -73,7 +73,7 @@ jobs:
           step-summary: true
           thread-comments: ${{ ((github.event_name == 'pull_request' && !github.event.pull_request.head.repo.fork) && 'update') || 'false' }}
           ignore-tidy: "build|libs/*|docs/*|benchmarks/*|bib/*|bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp"
-          version: "20"
+          version: "21"
 
       - if: steps.linter.outputs.checks-failed > 0
         run: exit 1
