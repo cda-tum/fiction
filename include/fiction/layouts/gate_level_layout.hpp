@@ -444,69 +444,75 @@ class gate_level_layout : public ClockedLayout
 
 #pragma region Create function tiles
 
-    signal create_buf(signal const& a, const tile& t = {})
+    signal create_buf(const signal a, const tile& t = {})
     {
         return create_node_from_literal({a}, 2, t);
     }
 
-    signal create_not(signal const& a, const tile& t = {})
+    signal create_not(const signal a, const tile& t = {})
     {
         return create_node_from_literal({a}, 3, t);
     }
 
-    signal create_and(signal a, signal b, const tile& t = {})
+    signal create_and(const signal a, const signal b, const tile& t = {})
     {
         return create_node_from_literal({a, b}, 4, t);
     }
 
-    signal create_nand(signal a, signal b, const tile& t = {})
+    signal create_nand(const signal a, const signal b, const tile& t = {})
     {
         return create_node_from_literal({a, b}, 5, t);
     }
 
-    signal create_or(signal a, signal b, const tile& t = {})
+    signal create_or(const signal a, const signal b, const tile& t = {})
     {
         return create_node_from_literal({a, b}, 6, t);
     }
 
-    signal create_nor(signal a, signal b, const tile& t = {})
+    signal create_nor(const signal a, const signal b, const tile& t = {})
     {
         return create_node_from_literal({a, b}, 7, t);
     }
 
-    signal create_lt(signal a, signal b, const tile& t = {})
+    signal create_lt(const signal a, const signal b, const tile& t = {})
     {
         return create_node_from_literal({a, b}, 8, t);
     }
 
-    signal create_ge(signal a, signal b, const tile& t = {})
+    signal create_ge(const signal a, const signal b, const tile& t = {})
     {
         return create_node_from_literal({a, b}, 9, t);
     }
 
-    signal create_gt(signal a, signal b, const tile& t = {})
+    signal create_gt(const signal a, const signal b, const tile& t = {})
     {
         return create_node_from_literal({a, b}, 10, t);
     }
 
-    signal create_le(signal a, signal b, const tile& t = {})
+    signal create_le(const signal a, const signal b, const tile& t = {})
     {
         return create_node_from_literal({a, b}, 11, t);
     }
 
-    signal create_xor(signal a, signal b, const tile& t = {})
+    signal create_xor(const signal a, const signal b, const tile& t = {})
     {
         return create_node_from_literal({a, b}, 12, t);
     }
 
-    signal create_xnor(signal a, signal b, const tile& t = {})
+    signal create_xnor(const signal a, const signal b, const tile& t = {})
     {
         return create_node_from_literal({a, b}, 13, t);
     }
 
-    signal create_maj(signal a, signal b, signal c, const tile& t = {})
+    signal create_maj(const signal a, const signal b, const signal c, const tile& t = {})
     {
         return create_node_from_literal({a, b, c}, 14, t);
+    }
+
+    signal create_ha(const signal a, const signal b, const tile& t = {})
+    {
+        /* PO0: carry, PO1: sum */
+        return create_node_from_literals({a, b}, {4, 12}, t);
     }
 
     signal create_node(const std::vector<signal>& children, const kitty::dynamic_truth_table& function,
@@ -1718,7 +1724,7 @@ class gate_level_layout : public ClockedLayout
     template <typename>
     friend class detail::gate_level_drvs_impl;
 
-    inline void initialize_truth_table_cache()
+    void initialize_truth_table_cache()
     {
         /* reserve the second node for constant 1 */
         strg->nodes.emplace_back();
@@ -1737,8 +1743,8 @@ class gate_level_layout : public ClockedLayout
             strg->data.fn_cache.insert(tt);
         };
 
-        static constexpr const uint64_t lit_not = 0x1, lit_and = 0x8, lit_or = 0xe, lit_lt = 0x2, lit_le = 0xb,
-                                        lit_xor = 0x6, lit_maj = 0xe8;
+        static constexpr uint64_t lit_not = 0x1, lit_and = 0x8, lit_or = 0xe, lit_lt = 0x2, lit_le = 0xb, lit_xor = 0x6,
+                                  lit_maj = 0xe8;
 
         create_and_cache(lit_not, 1);  // since NOT is not normal, its complement, i.e., the identity, is stored
         create_and_cache(lit_and, 2);
@@ -1819,7 +1825,6 @@ class gate_level_layout : public ClockedLayout
         }
 
         set_value(n, 0);
-
         assign_node(t, n);
 
         for (auto const& fn : evnts->on_add)
@@ -1858,7 +1863,6 @@ class gate_level_layout : public ClockedLayout
         }
 
         set_value(n, 0);
-
         assign_node(t, n);
 
         for (auto const& fn : evnts->on_add)
