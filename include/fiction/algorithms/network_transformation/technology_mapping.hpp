@@ -20,11 +20,9 @@
 #include <mockturtle/utils/tech_library.hpp>
 
 #include <cassert>
-#include <cstdlib>
 #include <sstream>
 #include <stdexcept>
 #include <string>
-#include <utility>
 #include <vector>
 
 namespace fiction
@@ -332,9 +330,10 @@ template <typename Ntk>
 class technology_mapping_impl
 {
   public:
-    technology_mapping_impl(const Ntk& src, technology_mapping_params ps, technology_mapping_stats& st) :
+    // NOLINTNEXTLINE(modernize-pass-by-value)
+    technology_mapping_impl(const Ntk& src, const technology_mapping_params& ps, technology_mapping_stats& st) :
             ntk{src},
-            params{std::move(ps)},
+            params{ps},
             stats{st}
     {}
 
@@ -434,17 +433,9 @@ class technology_mapping_impl
         // Throw exception if any required gates are missing
         if (!missing_gates.empty())
         {
-            std::string missing_list{};
-            for (std::size_t i = 0; i < missing_gates.size(); ++i)
-            {
-                missing_list += missing_gates[i];
-                if (i < missing_gates.size() - 1)
-                {
-                    missing_list += ", ";
-                }
-            }
+            const auto missing_gate_list = fmt::format("{}", fmt::join(missing_gates, ", "));
 
-            throw missing_required_gates_exception(network_type, missing_list);
+            throw missing_required_gates_exception(network_type, missing_gate_list);
         }
     }
     /**
