@@ -13059,6 +13059,8 @@ static const char *__doc_fiction_gate_level_layout_create_ge = R"doc()doc";
 
 static const char *__doc_fiction_gate_level_layout_create_gt = R"doc()doc";
 
+static const char *__doc_fiction_gate_level_layout_create_ha = R"doc()doc";
+
 static const char *__doc_fiction_gate_level_layout_create_le = R"doc()doc";
 
 static const char *__doc_fiction_gate_level_layout_create_lt = R"doc()doc";
@@ -13069,7 +13071,11 @@ static const char *__doc_fiction_gate_level_layout_create_nand = R"doc()doc";
 
 static const char *__doc_fiction_gate_level_layout_create_node = R"doc()doc";
 
+static const char *__doc_fiction_gate_level_layout_create_node_2 = R"doc()doc";
+
 static const char *__doc_fiction_gate_level_layout_create_node_from_literal = R"doc()doc";
+
+static const char *__doc_fiction_gate_level_layout_create_node_from_literals = R"doc()doc";
 
 static const char *__doc_fiction_gate_level_layout_create_nor = R"doc()doc";
 
@@ -13299,8 +13305,12 @@ R"doc(! gate-level layout node
 
 `data[0].h1`: Internal (data-flow independent) fan-out size (MSB
 indicates dead nodes) `data[0].h2`: Application-specific value
-`data[1].h1`: Function literal in truth table cache `data[2].h2`:
-Visited flags)doc";
+`data[1].h1`: Total fan-out size (not used, kept for compatibility)
+`data[1].h2`: Visited flags `data[2+i].h1`: Function literal in truth
+table cache for the i-th output `data[2+i].h2`: Fan-out size for the
+i-th output (not used, kept for compatibility))doc";
+
+static const char *__doc_fiction_gate_level_layout_gate_level_layout_storage_node_gate_level_layout_storage_node = R"doc()doc";
 
 static const char *__doc_fiction_gate_level_layout_gate_level_layout_storage_node_operator_eq = R"doc()doc";
 
@@ -13761,6 +13771,8 @@ static const char *__doc_fiction_gate_level_layout_is_ge = R"doc()doc";
 
 static const char *__doc_fiction_gate_level_layout_is_gt = R"doc()doc";
 
+static const char *__doc_fiction_gate_level_layout_is_ha = R"doc()doc";
+
 static const char *__doc_fiction_gate_level_layout_is_incoming_signal =
 R"doc(Checks whether signal `s` is incoming to tile `t`. That is, whether
 tile `t` hosts a node that has a fanin assigned to the tile that
@@ -13793,6 +13805,8 @@ static const char *__doc_fiction_gate_level_layout_is_le = R"doc()doc";
 static const char *__doc_fiction_gate_level_layout_is_lt = R"doc()doc";
 
 static const char *__doc_fiction_gate_level_layout_is_maj = R"doc()doc";
+
+static const char *__doc_fiction_gate_level_layout_is_multioutput = R"doc()doc";
 
 static const char *__doc_fiction_gate_level_layout_is_nand = R"doc()doc";
 
@@ -13885,6 +13899,8 @@ Returns:
     Signal pointing to `n`'s new tile.)doc";
 
 static const char *__doc_fiction_gate_level_layout_node_function = R"doc()doc";
+
+static const char *__doc_fiction_gate_level_layout_node_function_pin = R"doc()doc";
 
 static const char *__doc_fiction_gate_level_layout_node_to_index = R"doc()doc";
 
