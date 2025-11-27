@@ -12,6 +12,14 @@ Changed
 #######
 - Build system:
     - Restructured the CLI command implementation to improve code organization, modularity, and compilation speed
+- Algorithms:
+    - Switched the default technology mapper in the ``map`` command and the ``technology_mapping`` function from ``mockturtle::map`` to ``mockturtle::emap``
+
+
+Removed
+#######
+- CLI:
+    - Removed the ``--logic_sharing`` flag from ``map`` as ``mockturtle::emap`` does not support it
 
 
 v0.6.12 - 2025-10-29
@@ -69,6 +77,8 @@ Fixed
 
 Removed
 #######
+- CLI:
+    - Removed the ``--logic_sharing`` flag from ``map`` as ``mockturtle::emap`` does not support it
 - Continuous integration:
     - Dropped Windows 2019 and v142 support
     - Dropped Python 3.9 support due to its end-of-life status

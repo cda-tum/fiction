@@ -24,6 +24,9 @@ project(
   HOMEPAGE_URL "https://github.com/cda-tum/fiction"
   LANGUAGES CXX C)
 
+# Export compile commands for clang-tidy and other tools
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 include(cmake/PreventInSourceBuilds.cmake)
 include(cmake/ProjectOptions.cmake)
 include(cmake/Utilities.cmake)
