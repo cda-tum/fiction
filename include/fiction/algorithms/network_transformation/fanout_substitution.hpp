@@ -259,7 +259,7 @@ class fanout_substitution_impl
     mockturtle::signal<NtkDest> get_fanout(const NtkDest& substituted, const mockturtle::node<NtkSrc>& n,
                                            mockturtle::signal<NtkDest>& child)
     {
-        if (substituted.fanout_size(child) >= ps.threshold)
+        if (substituted.fanout_size(substituted.get_node(child)) >= ps.threshold)
         {
             if (auto fanouts = available_fanouts[n]; !fanouts.empty())
             {
@@ -267,7 +267,7 @@ class fanout_substitution_impl
                 do
                 {
                     child = fanouts.front();
-                    if (substituted.fanout_size(child) >= ps.degree)
+                    if (substituted.fanout_size(substituted.get_node(child)) >= ps.degree)
                     {
                         fanouts.pop();
                     }

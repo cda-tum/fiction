@@ -148,9 +148,9 @@ TEST_CASE("Random fanout substitution with fixed vs. varying seeds", "[fanout-su
         // try seeds 2 through 20; break as soon as we see a different depth
         for (auto s = 2u; s <= 20u; ++s)
         {
-            ps.seed        = s;
-            const auto sub = mockturtle::depth_view{fanout_substitution<technology_network>(aig, ps)};
-            if (sub.depth() != base_depth)
+            ps.seed = s;
+            if (const auto sub = mockturtle::depth_view{fanout_substitution<technology_network>(aig, ps)};
+                sub.depth() != base_depth)
             {
                 found_different = true;
                 break;
