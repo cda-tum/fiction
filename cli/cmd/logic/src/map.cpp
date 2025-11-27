@@ -34,6 +34,7 @@ map_command::map_command(const environment::ptr& e) :
     add_flag("--gt", ps.gt2, "Enable the use of GT gates");
     add_flag("--le", ps.le2, "Enable the use of LE gates");
     add_flag("--ge", ps.ge2, "Enable the use of GE gates");
+    add_flag("--ha", ps.ha, "Enable the use of half-adder gates");
     add_flag("--inv,-i", ps.inv, "Enable the use of NOT gates");
 
     add_flag("--maj,-m", ps.maj3, "Enable the use of MAJ gates");
@@ -97,11 +98,11 @@ void map_command::execute()
         ps.mapper_params.verbose = verbose_flag;
     }
 
-    const std::array gate_flags{is_set("and"),    is_set("nand"),   is_set("or"),     is_set("nor"),  is_set("xor"),
-                                is_set("xnor"),   is_set("lt"),     is_set("gt"),     is_set("le"),   is_set("ge"),
-                                is_set("inv"),    is_set("maj"),    is_set("dot"),    is_set("and3"), is_set("xor_and"),
-                                is_set("or_and"), is_set("onehot"), is_set("gamble"), is_set("mux"),  is_set("and_xor"),
-                                is_set("all2"),   is_set("all3"),   is_set("all")};
+    const std::array gate_flags{is_set("and"),     is_set("nand"),   is_set("or"),     is_set("nor"),    is_set("xor"),
+                                is_set("xnor"),    is_set("lt"),     is_set("gt"),     is_set("le"),     is_set("ge"),
+                                is_set("ha"),      is_set("inv"),    is_set("maj"),    is_set("dot"),    is_set("and3"),
+                                is_set("xor_and"), is_set("or_and"), is_set("onehot"), is_set("gamble"), is_set("mux"),
+                                is_set("and_xor"), is_set("all2"),   is_set("all3"),   is_set("all")};
 
     if (std::none_of(gate_flags.cbegin(), gate_flags.cend(), [](const auto f) { return f; }))
     {
