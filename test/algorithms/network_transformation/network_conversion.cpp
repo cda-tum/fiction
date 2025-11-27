@@ -15,6 +15,7 @@
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
+#include <fiction/networks/netlist.hpp>
 #include <fiction/networks/technology_network.hpp>
 
 #include <kitty/dynamic_truth_table.hpp>
@@ -22,8 +23,6 @@
 #include <mockturtle/networks/mig.hpp>
 #include <mockturtle/networks/xag.hpp>
 #include <mockturtle/traits.hpp>
-
-#include <type_traits>
 
 using namespace fiction;
 
@@ -56,6 +55,12 @@ void to_x(const Ntk& ntk)
         const auto converted_tec = convert_network<technology_network>(ntk);
 
         check_eq(ntk, converted_tec);
+    }
+    SECTION("NET")
+    {
+        const auto converted_net = convert_network<netlist>(ntk);
+
+        check_eq(ntk, converted_net);
     }
 }
 
@@ -104,6 +109,12 @@ TEST_CASE("Simple network conversion", "[network-conversion]")
 
         to_x(tec);
     }
+    SECTION("NET to X")
+    {
+        const auto net = blueprints::maj1_network<netlist>();
+
+        to_x(net);
+    }
 }
 
 TEST_CASE("Complex network conversion", "[network-conversion]")
@@ -127,6 +138,11 @@ TEST_CASE("Complex network conversion", "[network-conversion]")
     {
         to_x(blueprints::maj4_network<fiction::technology_network>());
         to_x(blueprints::nary_operation_network<fiction::technology_network>());
+    }
+    SECTION("NET to X")
+    {
+        to_x(blueprints::maj4_network<netlist>());
+        to_x(blueprints::nary_operation_network<netlist>());
     }
 }
 
