@@ -508,6 +508,30 @@ TEST_CASE("Creation of ternary operations", "[gate-level-layout]")
     CHECK(!layout.is_wire(layout.get_node({1, 1})));
 }
 
+TEST_CASE("Creation of multi-output operations", "[gate-level-layout]")
+{
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+
+    gate_layout layout{gate_layout::aspect_ratio{2, 2, 0}};
+
+    const auto x1 = layout.create_pi("x1", {1, 0});
+    const auto x2 = layout.create_pi("x2", {0, 1});
+
+    const auto ha = layout.create_ha(x1, x2, {1, 1});
+
+    layout.create_po(ha, "sum", {2, 1});
+    layout.create_po(ha, "carry", {1, 2});
+
+    CHECK(layout.num_gates() == 1);
+    CHECK(layout.size() == 7);
+
+    CHECK(layout.is_gate_tile({1, 1}));
+    CHECK(layout.is_gate(layout.get_node({1, 1})));
+    CHECK(!layout.is_wire_tile({1, 1}));
+    CHECK(!layout.is_wire(layout.get_node({1, 1})));
+    CHECK(layout.is_ha(layout.get_node({1, 1})));
+}
+
 TEST_CASE("compute functions from AND and NOT gates", "[gate-level-layout]")
 {
     // adapted from mockturtle/test/networks/klut.cpp

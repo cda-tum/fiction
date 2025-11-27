@@ -993,6 +993,11 @@ class gate_level_layout : public ClockedLayout
     {
         return strg->nodes[n].data[2].h1 == 14;
     }
+    [[nodiscard]] bool is_ha(const node n) const noexcept
+    {
+        return strg->nodes[n].data[2].h1 == 4 && strg->nodes[n].data[3].h1 == 12;
+    }
+
     /**
      * Returns whether `n` is a wire and has multiple outputs, thereby, acting as a fanout gate. Note that a fanout will
      * return `true` for both `is_wire` and `is_fanout`.
