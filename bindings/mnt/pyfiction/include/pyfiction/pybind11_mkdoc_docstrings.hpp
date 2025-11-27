@@ -21995,6 +21995,8 @@ static const char *__doc_fiction_technology_mapping_params_ge2 = R"doc(2-input g
 
 static const char *__doc_fiction_technology_mapping_params_gt2 = R"doc(2-input greater-than gate.)doc";
 
+static const char *__doc_fiction_technology_mapping_params_ha = R"doc(Half-adder gate.)doc";
+
 static const char *__doc_fiction_technology_mapping_params_inv = R"doc(1-input NOT gate (inverter).)doc";
 
 static const char *__doc_fiction_technology_mapping_params_le2 = R"doc(2-input less-or-equal gate.)doc";
