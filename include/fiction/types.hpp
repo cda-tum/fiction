@@ -14,7 +14,7 @@
 #include "fiction/layouts/shifted_cartesian_layout.hpp"
 #include "fiction/layouts/synchronization_element_layout.hpp"
 #include "fiction/layouts/tile_based_layout.hpp"
-#include "fiction/networks/technology_network.hpp"
+#include "fiction/networks/netlist.hpp"
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/technology/sidb_defect_surface.hpp"
@@ -66,7 +66,7 @@ using mig_ptr = std::shared_ptr<mig_nt>;
 
 inline constexpr auto mig_name = "MIG";
 
-using tec_nt  = mockturtle::names_view<fiction::technology_network>;
+using tec_nt  = mockturtle::names_view<fiction::netlist>;
 using tec_ptr = std::shared_ptr<tec_nt>;
 
 inline constexpr auto tec_name = "TEC";
