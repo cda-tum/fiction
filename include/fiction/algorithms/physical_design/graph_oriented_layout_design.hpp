@@ -272,14 +272,16 @@ struct nested_vector_hash
      */
     std::size_t operator()(const coord_vec_type<Lyt>& vec) const
     {
-        std::size_t       hash  = 0ul;
-        const std::size_t prime = 0x9e3779b9;
+        constexpr std::size_t prime = 0x9e3779b9;
+
+        std::size_t hash = 0ul;
         for (const auto& tile : vec)
         {
             hash ^= std::hash<uint64_t>{}(tile.x) + prime + (hash << 6u) + (hash >> 2u);
             hash ^= std::hash<uint64_t>{}(tile.y) + prime + (hash << 6u) + (hash >> 2u);
             hash ^= std::hash<uint64_t>{}(tile.z) + prime + (hash << 6u) + (hash >> 2u);
         }
+
         return hash;
     }
 };
@@ -373,7 +375,6 @@ enum class pi_locations : std::uint8_t
  * network, nodes to be placed, and other relevant information.
  *
  * @tparam Lyt The layout type.
- * @tparam Ntk The network type.
  */
 template <typename Lyt>
 struct search_space_graph
@@ -678,6 +679,7 @@ class graph_oriented_layout_design_impl
      * @param src The source network to be placed.
      * @param p The parameters for the graph-enhanced layout search algorithm.
      * @param st The statistics object to record execution details.
+     * @param custom A custom cost objective function.
      */
     graph_oriented_layout_design_impl(const Ntk& src, const graph_oriented_layout_design_params& p,
                                       graph_oriented_layout_design_stats&       st,
