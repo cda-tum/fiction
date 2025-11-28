@@ -629,6 +629,20 @@ class netlist : public mockturtle::block_network
     }
 
     /**
+     * Returns whether the given node `n` is a half-adder (HA) gate.
+     *
+     * A half-adder produces two outputs: sum and carry. In this representation, the sum output uses literal 12 (XOR)
+     * and the carry output uses literal 4 (AND). Therefore, both conditions must be met to identify a half-adder.
+     *
+     * @param n Node to consider.
+     * @return `true` iff `n` implements the HA function (literals 4 and 12).
+     */
+    [[nodiscard]] bool is_ha(const node& n) const noexcept
+    {
+        return _storage->nodes[n].data[2].h1 == 4 && _storage->nodes[n].data[3].h1 == 12;
+    }
+
+    /**
      * Returns whether the given node `n` is an if-then-else (multiplexer) gate.
      *
      * @param n Node to consider.
