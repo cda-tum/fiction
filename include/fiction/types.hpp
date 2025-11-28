@@ -74,7 +74,7 @@ inline constexpr auto tec_name = "TEC";
 using logic_network_t = std::variant<aig_ptr, xag_ptr, mig_ptr, tec_ptr>;
 
 template <class Ntk>
-constexpr const char* get_ntk_type_name()
+constexpr auto get_ntk_type_name()
 {
     if constexpr (std::is_same_v<std::decay_t<Ntk>, aig_nt>)
     {
@@ -153,7 +153,7 @@ inline constexpr auto inml_name = "iNML";
 inline constexpr auto sidb_name = "SiDB";
 
 template <class Tech>
-constexpr const char* get_tech_impl_name()
+constexpr auto get_tech_impl_name()
 {
     if constexpr (std::is_same_v<std::decay_t<Tech>, qca_technology>)
     {
@@ -181,7 +181,7 @@ inline constexpr auto inml_cell_name = "magnets";
 inline constexpr auto sidb_cell_name = "dots";
 
 template <class Tech>
-constexpr const char* get_tech_cell_name()
+constexpr auto get_tech_cell_name()
 {
     if constexpr (std::is_same_v<std::decay_t<Tech>, qca_technology>)
     {
@@ -202,13 +202,13 @@ constexpr const char* get_tech_cell_name()
 }
 
 template <class Tech>
-inline constexpr const char* tech_cell_name = get_tech_cell_name<Tech>();
+inline constexpr auto tech_cell_name = get_tech_cell_name<Tech>();
 
-constexpr const char* sidb_100_name = "100";
-constexpr const char* sidb_111_name = "111";
+constexpr auto sidb_100_name = "100";
+constexpr auto sidb_111_name = "111";
 
 template <class Orientation>
-constexpr const char* get_sidb_lattice_name()
+constexpr auto get_sidb_lattice_name()
 {
     if constexpr (std::is_same_v<std::decay_t<Orientation>, sidb_100_lattice>)
     {
@@ -225,7 +225,7 @@ constexpr const char* get_sidb_lattice_name()
 }
 
 template <class Orientation>
-inline constexpr const char* sidb_lattice_name = get_sidb_lattice_name<Orientation>();
+inline constexpr auto sidb_lattice_name = get_sidb_lattice_name<Orientation>();
 
 /**
  * FCN cell-level layouts.
