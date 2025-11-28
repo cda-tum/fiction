@@ -11,6 +11,7 @@
 #include <fiction/algorithms/network_transformation/technology_mapping.hpp>
 #include <fiction/algorithms/properties/count_gate_types.hpp>
 
+#include <mockturtle/generators/arithmetic.hpp>
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/mig.hpp>
 #include <mockturtle/networks/xag.hpp>
@@ -180,50 +181,6 @@ void map_and_check_all_3_inp(const Ntk& ntk)
     CHECK(gt_stats.num_xnor2 == 0);
 }
 
-template <typename Ntk>
-void map_and_check_all_func(const Ntk& ntk)
-{
-    technology_mapping_stats stats{};
-
-    const auto mapped_ntk = technology_mapping(ntk, all_standard_3_input_functions(), &stats);
-
-    REQUIRE(!stats.mapper_stats.mapping_error);
-
-    check_eq(ntk, mapped_ntk);
-
-    count_gate_types_stats gt_stats{};
-    count_gate_types(mapped_ntk, &gt_stats);
-
-    CHECK(gt_stats.num_and2 == 0);
-    CHECK(gt_stats.num_or2 == 0);
-    CHECK(gt_stats.num_nand2 == 0);
-    CHECK(gt_stats.num_nor2 == 0);
-    CHECK(gt_stats.num_xor2 == 0);
-    CHECK(gt_stats.num_xnor2 == 0);
-}
-
-template <typename Ntk>
-void map_and_check_all_standard_func(const Ntk& ntk)
-{
-    technology_mapping_stats stats{};
-
-    const auto mapped_ntk = technology_mapping(ntk, all_standard_3_input_functions(), &stats);
-
-    REQUIRE(!stats.mapper_stats.mapping_error);
-
-    check_eq(ntk, mapped_ntk);
-
-    count_gate_types_stats gt_stats{};
-    count_gate_types(mapped_ntk, &gt_stats);
-
-    CHECK(gt_stats.num_and2 == 0);
-    CHECK(gt_stats.num_or2 == 0);
-    CHECK(gt_stats.num_nand2 == 0);
-    CHECK(gt_stats.num_nor2 == 0);
-    CHECK(gt_stats.num_xor2 == 0);
-    CHECK(gt_stats.num_xnor2 == 0);
-}
-
 }  // namespace
 
 TEMPLATE_TEST_CASE("Simple AOI network mapping", "[technology-mapping]", mockturtle::aig_network)
@@ -275,6 +232,34 @@ TEMPLATE_TEST_CASE("Complex all function network mapping", "[technology-mapping]
         technology_mapping(blueprints::maj4_network<TestType>(), all_supported_standard_functions(), &stats);
     REQUIRE(!stats.mapper_stats.mapping_error);
     check_eq(blueprints::maj4_network<TestType>(), mapped_ntk);
+}
+
+TEMPLATE_TEST_CASE("Multi-output cell mapping", "[technology-mapping]", mockturtle::aig_network,
+                   mockturtle::xag_network)
+{
+    technology_mapping_stats stats{};
+
+    technology_mapping_params params{};
+    params.inv  = true;
+    params.and2 = true;
+    params.xor2 = true;
+    params.ha   = true;
+
+    params.mapper_params.map_multioutput = true;
+
+    TestType                                  ntk{};
+    std::vector<mockturtle::signal<TestType>> a{8}, b{8};
+    std::generate(a.begin(), a.end(), [&ntk] { return ntk.create_pi(); });
+    std::generate(b.begin(), b.end(), [&ntk] { return ntk.create_pi(); });
+    auto carry = ntk.get_constant(false);
+    mockturtle::carry_ripple_adder_inplace(ntk, a, b, carry);
+    std::for_each(a.begin(), a.end(), [&](auto f) { ntk.create_po(f); });
+    ntk.create_po(carry);
+
+    const auto mapped_ntk = technology_mapping(blueprints::full_adder_network<TestType>(), params, &stats);
+
+    REQUIRE(!stats.mapper_stats.mapping_error);
+    CHECK(stats.mapper_stats.multioutput_gates > 0);
 }
 
 TEMPLATE_TEST_CASE("Name conservation after technology mapping", "[technology-mapping]", mockturtle::mig_network)
