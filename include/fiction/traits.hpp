@@ -1302,6 +1302,35 @@ template <class Ntk>
 inline constexpr bool has_is_and_xor_v = has_is_and_xor<Ntk>::value;
 #pragma endregion
 
+#pragma region has_create_ha
+template <class Ntk, class = void>
+struct has_create_ha : std::false_type
+{};
+
+template <class Ntk>
+struct has_create_ha<Ntk, std::void_t<decltype(std::declval<Ntk>().create_ha(std::declval<mockturtle::signal<Ntk>>(),
+                                                                             std::declval<mockturtle::signal<Ntk>>()))>>
+        : std::true_type
+{};
+
+template <class Ntk>
+inline constexpr bool has_create_ha_v = has_create_ha<Ntk>::value;
+#pragma endregion
+
+#pragma region has_is_ha
+template <class Ntk, class = void>
+struct has_is_ha : std::false_type
+{};
+
+template <class Ntk>
+struct has_is_ha<Ntk, std::void_t<decltype(std::declval<Ntk>().is_ha(std::declval<mockturtle::node<Ntk>>()))>>
+        : std::true_type
+{};
+
+template <class Ntk>
+inline constexpr bool has_is_ha_v = has_is_ha<Ntk>::value;
+#pragma endregion
+
 #pragma region has_foreach_pi
 template <class Ntk, class = void>
 struct has_foreach_real_pi : std::false_type

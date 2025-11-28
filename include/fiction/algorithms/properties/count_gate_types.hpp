@@ -22,8 +22,8 @@ struct count_gate_types_stats
 {
 
     uint64_t num_fanout{0}, num_buf{0}, num_inv{0}, num_and2{0}, num_or2{0}, num_nand2{0}, num_nor2{0}, num_xor2{0},
-        num_xnor2{0}, num_lt2{0}, num_gt2{0}, num_le2{0}, num_ge2{0}, num_and3{0}, num_xor_and{0}, num_or_and{0},
-        num_onehot{0}, num_maj3{0}, num_gamble{0}, num_dot{0}, num_mux{0}, num_and_xor{0}, num_other{0};
+        num_xnor2{0}, num_lt2{0}, num_gt2{0}, num_le2{0}, num_ge2{0}, num_ha{0}, num_and3{0}, num_xor_and{0},
+        num_or_and{0}, num_onehot{0}, num_maj3{0}, num_gamble{0}, num_dot{0}, num_mux{0}, num_and_xor{0}, num_other{0};
 
     void report(std::ostream& out = std::cout, const bool detailed = false) const
     {
@@ -44,6 +44,7 @@ struct count_gate_types_stats
             out << fmt::format("[i] GT2    = {}\n", num_gt2);
             out << fmt::format("[i] LE2    = {}\n", num_le2);
             out << fmt::format("[i] GE2    = {}\n", num_ge2);
+            out << fmt::format("[i] HA     = {}\n", num_ha);
 
             out << fmt::format("[i] AND3   = {}\n", num_and3);
             out << fmt::format("[i] XORAND = {}\n", num_xor_and);
@@ -58,15 +59,16 @@ struct count_gate_types_stats
         }
         else
         {
-            out << fmt::format("[i] other  = {}\n", num_le2 + num_ge2 + num_gt2 + num_lt2 + num_and3 + num_xor_and +
-                                                        num_or_and + num_onehot + num_gamble + num_dot + num_mux +
-                                                        num_and_xor + num_other);
+            out << fmt::format("[i] other  = {}\n", num_le2 + num_ge2 + num_gt2 + num_lt2 + num_ha + num_and3 +
+                                                        num_xor_and + num_or_and + num_onehot + num_gamble + num_dot +
+                                                        num_mux + num_and_xor + num_other);
         }
 
-        out << fmt::format("[i] total  = {}\n",
-                           num_fanout + num_buf + num_inv + num_and2 + num_or2 + num_nand2 + num_nor2 + num_xor2 +
-                               num_xnor2 + num_le2 + num_ge2 + num_gt2 + num_lt2 + num_and3 + num_xor_and + num_or_and +
-                               num_onehot + num_maj3 + num_gamble + num_dot + num_mux + num_and_xor + num_other);
+        out << fmt::format("[i] total  = {}\n", num_fanout + num_buf + num_inv + num_and2 + num_or2 + num_nand2 +
+                                                    num_nor2 + num_xor2 + num_xnor2 + num_le2 + num_ge2 + num_gt2 +
+                                                    num_lt2 + num_ha + num_and3 + num_xor_and + num_or_and +
+                                                    num_onehot + num_maj3 + num_gamble + num_dot + num_mux +
+                                                    num_and_xor + num_other);
     }
 };
 
@@ -108,6 +110,14 @@ class count_gate_types_impl
                         if (ntk.is_buf(n))
                         {
                             ++pst.num_buf;
+                            return true;
+                        }
+                    }
+                    if constexpr (fiction::has_is_ha_v<Ntk>)
+                    {
+                        if (ntk.is_ha(n))
+                        {
+                            ++pst.num_ha;
                             return true;
                         }
                     }
