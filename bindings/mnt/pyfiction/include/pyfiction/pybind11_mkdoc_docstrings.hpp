@@ -3492,6 +3492,8 @@ static const char *__doc_fiction_count_gate_types_stats_num_ge2 = R"doc()doc";
 
 static const char *__doc_fiction_count_gate_types_stats_num_gt2 = R"doc()doc";
 
+static const char *__doc_fiction_count_gate_types_stats_num_ha = R"doc()doc";
+
 static const char *__doc_fiction_count_gate_types_stats_num_inv = R"doc()doc";
 
 static const char *__doc_fiction_count_gate_types_stats_num_le2 = R"doc()doc";
@@ -8100,7 +8102,10 @@ Parameter ``p``:
     The parameters for the graph-enhanced layout search algorithm.
 
 Parameter ``st``:
-    The statistics object to record execution details.)doc";
+    The statistics object to record execution details.
+
+Parameter ``custom``:
+    A custom cost objective function.)doc";
 
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_improve_acp_solution =
 R"doc(Flag indicating that an initial solution has been found with the area-
@@ -10589,10 +10594,7 @@ the current vertex, network, nodes to be placed, and other relevant
 information.
 
 Template parameter ``Lyt``:
-    The layout type.
-
-Template parameter ``Ntk``:
-    The network type.)doc";
+    The layout type.)doc";
 
 static const char *__doc_fiction_detail_search_space_graph_cost = R"doc(The cost objective used to expand a vertex in the search space graph.)doc";
 
@@ -14893,6 +14895,8 @@ static const char *__doc_fiction_has_cardinal_operations = R"doc()doc";
 
 static const char *__doc_fiction_has_create_dot = R"doc()doc";
 
+static const char *__doc_fiction_has_create_ha = R"doc()doc";
+
 static const char *__doc_fiction_has_dimensions = R"doc()doc";
 
 static const char *__doc_fiction_has_east = R"doc()doc";
@@ -14988,6 +14992,8 @@ static const char *__doc_fiction_has_is_gate_tile = R"doc()doc";
 static const char *__doc_fiction_has_is_ge = R"doc()doc";
 
 static const char *__doc_fiction_has_is_gt = R"doc()doc";
+
+static const char *__doc_fiction_has_is_ha = R"doc()doc";
 
 static const char *__doc_fiction_has_is_incoming_clocked = R"doc()doc";
 
@@ -17571,6 +17577,20 @@ Parameter ``n``:
 
 Returns:
     `true` iff `n` implements the GT function (literal 10).)doc";
+
+static const char *__doc_fiction_netlist_is_ha =
+R"doc(Returns whether the given node `n` is a half-adder (HA) gate.
+
+A half-adder produces two outputs: sum and carry. In this
+representation, the sum output uses literal 12 (XOR) and the carry
+output uses literal 4 (AND). Therefore, both conditions must be met to
+identify a half-adder.
+
+Parameter ``n``:
+    Node to consider.
+
+Returns:
+    `true` iff `n` implements the HA function (literals 4 and 12).)doc";
 
 static const char *__doc_fiction_netlist_is_inv =
 R"doc(Returns whether the given node `n` is an inverter node.
@@ -22729,6 +22749,8 @@ static const char *__doc_fiction_technology_mapping_params_gamble = R"doc(3-inpu
 static const char *__doc_fiction_technology_mapping_params_ge2 = R"doc(2-input greater-or-equal gate.)doc";
 
 static const char *__doc_fiction_technology_mapping_params_gt2 = R"doc(2-input greater-than gate.)doc";
+
+static const char *__doc_fiction_technology_mapping_params_ha = R"doc(Half-adder gate.)doc";
 
 static const char *__doc_fiction_technology_mapping_params_inv = R"doc(1-input NOT gate (inverter).)doc";
 
