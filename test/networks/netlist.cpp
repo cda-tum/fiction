@@ -309,6 +309,24 @@ TEST_CASE("create n-ary operations in a netlist", "[netlist]")
     CHECK(ntl.size() == 13);
 }
 
+TEST_CASE("create half adder in a netlist", "[netlist]")
+{
+    netlist ntl{};
+
+    CHECK(fiction::has_create_ha_v<netlist>);
+
+    const auto a = ntl.create_pi();
+    const auto b = ntl.create_pi();
+
+    CHECK(ntl.size() == 4);
+
+    const auto ha = ntl.create_ha(a, b);
+    CHECK(ntl.size() == 5);
+
+    CHECK(ntl.is_multioutput(ntl.get_node(ha)));
+    CHECK(ntl.is_ha(ntl.get_node(ha)));
+}
+
 TEST_CASE("clone a node in a netlist", "[netlist]")
 {
     netlist ntl1, ntl2;
