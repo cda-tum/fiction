@@ -606,16 +606,23 @@ class technology_mapping_impl
     template <unsigned NumInp>
     [[nodiscard]] tec_nt perform_mapping(const std::vector<mockturtle::gate>& gates) const noexcept
     {
-        mockturtle::tech_library<NumInp> lib{gates};
+        mockturtle::tech_library_params lib_params{};
+        lib_params.load_multioutput_gates        = true;
+        lib_params.load_multioutput_gates_single = true;
+
+        mockturtle::tech_library<NumInp> lib{gates, lib_params};
 
         const auto mapped_ntk = mockturtle::emap(ntk, lib, params.mapper_params, &stats.mapper_stats);
+
+        // mapped_ntk.report_cells_usage(std::cout);
 
         tec_nt converted_ntk{};
 
         if (!stats.mapper_stats.mapping_error)
         {
             // convert network
-            converted_ntk = convert_network<tec_nt>(mapped_ntk);
+            const auto net = netlist{mapped_ntk._storage};
+            converted_ntk  = mockturtle::names_view{net};
             restore_names(ntk, converted_ntk);
         }
 
