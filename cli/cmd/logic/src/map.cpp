@@ -111,6 +111,11 @@ void map_command::execute()
         return;
     }
 
+    if (is_set("ha"))
+    {
+        ps.mapper_params.map_multioutput = true;
+    }
+
     const auto perform_mapping = [this, &s](auto&& ntk_ptr)
     {
         using Ntk = typename std::decay_t<decltype(ntk_ptr)>::element_type;
