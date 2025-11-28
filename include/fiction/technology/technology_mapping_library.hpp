@@ -44,8 +44,8 @@ inline constexpr auto GATE_GE2 = "GATE  ge2  1 O=!(!a*b);     PIN * NONINV 1 999
 /**
  * Asymmetrical 2-output 2-ary functions.
  */
-inline constexpr auto GATE_HA = "GATE   ha      5 C=a*b;           PIN * INV 1 999 1.0 1.0 1.0 1.0\n"
-                                "GATE   ha      5 S=!a*b+a*!b;     PIN * INV 1 999 1.0 1.0 1.0 1.0\n";
+inline constexpr auto GATE_HA = "GATE   ha  1 C=a*b;          PIN * INV 1 999 1.0 1.0 1.0 1.0\n"
+                                "GATE   ha  1 S=!a*b+a*!b;    PIN * INV 1 999 1.0 1.0 1.0 1.0\n";
 
 /**
  * 3-ary functions.
