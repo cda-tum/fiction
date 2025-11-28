@@ -89,6 +89,14 @@ class convert_network_impl<NtkDest, NtkSrc, false>
                 bar(i);
 #endif
 
+                if constexpr (fiction::has_is_ha_v<TopoNtkSrc> && fiction::has_create_ha_v<NtkDest>)
+                {
+                    if (ntk.is_ha(g))
+                    {
+                        old2new[g] = ntk_dest.create_ha(children[0], children[1]);
+                        return true;
+                    }
+                }
                 if constexpr (mockturtle::has_is_and_v<TopoNtkSrc> && mockturtle::has_create_and_v<NtkDest>)
                 {
                     if (ntk.is_and(g))
@@ -142,6 +150,14 @@ class convert_network_impl<NtkDest, NtkSrc, false>
                     if (ntk.is_nary_xor(g))
                     {
                         old2new[g] = ntk_dest.create_nary_xor(children);
+                        return true;
+                    }
+                }
+                if constexpr (fiction::has_is_inv_v<TopoNtkSrc> && mockturtle::has_create_not_v<NtkDest>)
+                {
+                    if (ntk.is_inv(g))
+                    {
+                        old2new[g] = ntk_dest.create_not(children[0]);
                         return true;
                     }
                 }
