@@ -111,14 +111,9 @@ jobs:
           config-file: .github/codeql-config.yml
 
       - if: matrix.language == 'cpp'
-        name: Create Build Environment
-        run: cmake -E make_directory ${{github.workspace}}/build
-
-      - if: matrix.language == 'cpp'
         name: Configure CMake
-        working-directory: ${{github.workspace}}/build
         run: >
-          cmake ${{github.workspace}}
+          cmake -S ${{github.workspace}} -B ${{github.workspace}}/build
           -DCMAKE_CXX_COMPILER=${{matrix.compiler}}
           -DCMAKE_BUILD_TYPE=${{matrix.build_type}}
           -DFICTION_ENABLE_UNITY_BUILD=ON
@@ -136,8 +131,7 @@ jobs:
 
       - if: matrix.language == 'cpp'
         name: Build fiction
-        working-directory: ${{github.workspace}}/build
-        run: cmake --build . --config ${{matrix.build_type}} -j4
+        run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} --parallel
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v4
