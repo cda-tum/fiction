@@ -1229,28 +1229,6 @@ class write_mol_qca_layout_svg_impl
     write_qca_layout_svg_params ps;
 
     /**
-     * Alias for an SVG description of a tile containing also its clock zone.
-     */
-    using tile_description = std::pair<std::string, typename Lyt::clock_number_t>;
-    /**
-     * Maps coordinates of tiles to their string representation and their clock zone.
-     */
-    using coord_to_tile_mapping = std::unordered_map<coordinate<Lyt>, tile_description>;
-    /**
-     * Maps coordinates of tiles to a string representation of the cells contained within them.
-     */
-    using coord_to_cell_list_mapping = std::unordered_map<coordinate<Lyt>, std::string>;
-    /**
-     * Alias for an SVG description of a latch tile containing also its clock zone and its offset.
-     */
-    using svg_latch = std::tuple<std::string, typename Lyt::clock_number_t, uint32_t>;
-    /**
-     * Maps coordinates of latch tiles to tuples containing their string representation, their clock zone,
-     * and their latch offset.
-     */
-    using coord_to_latch_mapping = std::unordered_map<coordinate<Lyt>, svg_latch>;
-
-    /**
      * Generates and returns a pair of strings representing the description and color of the given cell.
      *
      * @param c The cell for which to generate the description and color.

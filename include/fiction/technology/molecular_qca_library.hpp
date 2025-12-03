@@ -57,14 +57,7 @@ class molecular_qca_library : public fcn_gate_library<mol_qca_technology, 10, 10
             {
                 if (lyt.is_fanout(n))
                 {
-                    if (lyt.fanout_size(n) == 2)
-                    {
-                        return FANOUT_MAP.at(p);
-                    }
-                    if (lyt.fanout_size(n) == 3)
-                    {
-                        return FANOUT_MAP.at(p);
-                    }
+                    return FANOUT_MAP.at(p);
                 }
             }
             if constexpr (fiction::has_is_buf_v<GateLyt>)
