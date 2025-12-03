@@ -83,8 +83,7 @@ Follow these patterns strictly.
   - Apply to **ALL** new and edited code.
   - Doxygen style `/** ... */` before **ALL** symbols (members, aliases, functions, classes, etc.).
   - Use modern Doxygen commands (`@brief`, `@param`, `@return`, `@tparam`, `@file`, `@author`, `@ref`, `@see`, `@throws` etc.).
-  - **Do NOT** use `// Created by ...` comments. Use `@author` tags per file with full name and GitHub handle.
-  - Always provide a full description in addition to `@brief`.
+  - The current codebase uses `// Created by ...` comments. A migration to using `@file` and `@author` tags per file (with full name and GitHub handle) is planned. After migration, the new convention will be enforced and `// Created by ...` comments should no longer be used.
 
 **Example (C++):**
 
