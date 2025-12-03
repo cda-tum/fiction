@@ -10994,10 +10994,6 @@ Returns:
     A pair of strings representing the description and color of the
     given cell `c`.)doc";
 
-static const char *__doc_fiction_detail_write_mol_qca_layout_svg_impl_generate_tile_based_svg =
-R"doc(Generates an SVG string representing the tile-based clocked cell
-layout and appends it to the output stream. Unused.)doc";
-
 static const char *__doc_fiction_detail_write_mol_qca_layout_svg_impl_lyt = R"doc()doc";
 
 static const char *__doc_fiction_detail_write_mol_qca_layout_svg_impl_os = R"doc()doc";
