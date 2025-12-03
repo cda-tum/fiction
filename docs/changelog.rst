@@ -8,6 +8,12 @@ The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`
 Unreleased
 ----------
 
+Added
+#####
+- Documentation:
+    - Added ``AGENTS.md`` to guide AI agents in the repository
+
+
 Changed
 #######
 - Build system:
