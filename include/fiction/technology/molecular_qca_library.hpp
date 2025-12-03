@@ -61,6 +61,10 @@ class molecular_qca_library : public fcn_gate_library<mol_qca_technology, 10, 10
                     {
                         return FANOUT_MAP.at(p);
                     }
+                    if (lyt.fanout_size(n) == 3)
+                    {
+                        return FANOUT_MAP.at(p);
+                    }
                 }
             }
             if constexpr (fiction::has_is_buf_v<GateLyt>)
@@ -355,6 +359,20 @@ class molecular_qca_library : public fcn_gate_library<mol_qca_technology, 10, 10
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '}
     }})};
 
+    static constexpr const fcn_gate FAN_OUT_1_3{cell_list_to_gate<char>(
+    {{
+        {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', 'b', 'b', 'b', 'b', ' ', ' ', ' '},
+        {'d', 'd', 'c', 'b', 'b', 'b', 'b', 'c', 'd', 'd'},
+        {'d', 'd', 'c', 'b', 'b', 'b', 'b', 'c', 'd', 'd'},
+        {' ', ' ', ' ', 'b', 'b', 'b', 'b', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'c', 'c', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '}
+    }})};
+
     // ************************************************************
     // ************************** Wires ***************************
     // ************************************************************
@@ -539,6 +557,7 @@ class molecular_qca_library : public fcn_gate_library<mol_qca_technology, 10, 10
      * Lookup table for fan-out rotations. Maps ports to corresponding fan-out gates.
      */
     static inline const port_gate_map FANOUT_MAP = {
+        // fanout 2
         // identity orientation
         {{{port_position(0, 5)}, {port_position(5, 9), port_position(9, 4)}}, FAN_OUT_1_2},
         {{{port_position(9, 4)}, {port_position(0, 5), port_position(5, 9)}}, FAN_OUT_1_2_R},
@@ -557,7 +576,18 @@ class molecular_qca_library : public fcn_gate_library<mol_qca_technology, 10, 10
         // rotated 270°
         {{{port_position(5, 9)}, {port_position(9, 4), port_position(4, 0)}}, rotate_270(FAN_OUT_1_2)},
         {{{port_position(4, 0)}, {port_position(5, 9), port_position(9, 4)}}, rotate_270(FAN_OUT_1_2_R)},
-        {{{port_position(9, 4)}, {port_position(5, 9), port_position(4, 0)}}, rotate_270(FAN_OUT_1_2_D)}};
+        {{{port_position(9, 4)}, {port_position(5, 9), port_position(4, 0)}}, rotate_270(FAN_OUT_1_2_D)},
+
+        // fanout 3
+        // identity orientation
+        {{{port_position(4, 0)}, {port_position(9, 4), port_position(5, 9), port_position(0, 5)}}, FAN_OUT_1_3},
+        // rotated 90°
+        {{{port_position(9, 4)}, {port_position(5, 9), port_position(0, 5), port_position(4, 0)}}, FAN_OUT_1_3},
+        // rotated 180°
+        {{{port_position(5, 9)}, {port_position(0, 5), port_position(4, 0), port_position(9, 4)}}, FAN_OUT_1_3},
+        // rotated 270°
+        {{{port_position(0, 5)}, {port_position(4, 0), port_position(9, 4), port_position(5, 9)}}, FAN_OUT_1_3},
+    };
 
     /**
      * Lookup table for majority rotations. Maps ports to corresponding majority gates.
