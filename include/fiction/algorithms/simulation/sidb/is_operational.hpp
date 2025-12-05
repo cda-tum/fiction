@@ -666,7 +666,7 @@ class is_operational_impl
                 {
                     for (const auto& bdl : input_bdl_wires[number_of_input_wires - 1 - i].pairs)
                     {
-                        if (bdl.type == sidb_technology::INPUT)
+                        if (bdl.type == sidb_technology::cell_type::INPUT)
                         {
                             continue;
                         }
@@ -680,7 +680,7 @@ class is_operational_impl
                 {
                     for (const auto& bdl : input_bdl_wires[number_of_input_wires - 1 - i].pairs)
                     {
-                        if (bdl.type == sidb_technology::INPUT)
+                        if (bdl.type == sidb_technology::cell_type::INPUT)
                         {
                             continue;
                         }
@@ -697,7 +697,7 @@ class is_operational_impl
                 {
                     for (const auto& bdl : input_bdl_wires[number_of_input_wires - 1 - i].pairs)
                     {
-                        if (bdl.type == sidb_technology::INPUT)
+                        if (bdl.type == sidb_technology::cell_type::INPUT)
                         {
                             continue;
                         }
@@ -711,7 +711,7 @@ class is_operational_impl
                 {
                     for (const auto& bdl : input_bdl_wires[number_of_input_wires - 1 - i].pairs)
                     {
-                        if (bdl.type == sidb_technology::INPUT)
+                        if (bdl.type == sidb_technology::cell_type::INPUT)
                         {
                             continue;
                         }
@@ -767,7 +767,7 @@ class is_operational_impl
                 {
                     for (const auto& bdl : output_bdl_wires[i].pairs)
                     {
-                        if (bdl.type == sidb_technology::INPUT)
+                        if (bdl.type == sidb_technology::cell_type::INPUT)
                         {
                             continue;
                         }
@@ -794,7 +794,7 @@ class is_operational_impl
                 {
                     for (const auto& bdl : output_bdl_wires[i].pairs)
                     {
-                        if (bdl.type == sidb_technology::INPUT)
+                        if (bdl.type == sidb_technology::cell_type::INPUT)
                         {
                             continue;
                         }
@@ -981,7 +981,7 @@ class is_operational_impl
                                return std::any_of(wire.pairs.cbegin(), wire.pairs.cend(),
                                                   [this, &ground_state, &current_bit_set, &wire](const auto& bdl)
                                                   {
-                                                      if (bdl.type == sidb_technology::INPUT)
+                                                      if (bdl.type == sidb_technology::cell_type::INPUT)
                                                       {
                                                           return false;  // Skip processing for input type.
                                                       }
