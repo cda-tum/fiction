@@ -11,7 +11,7 @@ Unreleased
 Added
 #####
 - Algorithms:
-    - Node Duplication Planarization, reimplemented from “Fabricatable Interconnect and Molecular QCA Circuits” by Amitabh Chaudhary, Danny Ziyi Chen, Xiaobo Sharon Hu, Michael T. Niemier, Ramprasad Ravichandran, and Kevin Whitton.
+    - Node Duplication Planarization, reimplemented from "Fabricatable Interconnect and Molecular QCA Circuits" by Amitabh Chaudhary, Danny Ziyi Chen, Xiaobo Sharon Hu, Michael T. Niemier, Ramprasad Ravichandran, and Kevin Whitton.
     - Planar Layout from Network Embedding (PLANE) for generating planar 2DDWave-clocked Cartesian gate-level layouts in a fast and scalable fashion.
 - Documentation:
     - Added ``AGENTS.md`` to guide AI agents in the repository
