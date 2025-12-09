@@ -9,14 +9,15 @@
 #include <fiction/algorithms/network_transformation/fanout_substitution.hpp>
 #include <fiction/algorithms/network_transformation/network_balancing.hpp>
 #include <fiction/algorithms/network_transformation/node_duplication_planarization.hpp>
-#include <fiction/algorithms/physical_design/orthogonal.hpp>
 #include <fiction/algorithms/physical_design/planar_layout_from_network_embedding.hpp>
+#include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/networks/views/mutable_rank_view.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/network_utils.hpp>
 
 #include <alice/alice.hpp>
 #include <fmt/format.h>
+#include <mockturtle/utils/stopwatch.hpp>
 #include <nlohmann/json.hpp>
 
 #include <exception>
@@ -29,27 +30,20 @@ namespace alice
 {
 
 plane_command::plane_command(const environment::ptr& e) :
-        command(e, "Performs fanout substitution, path balancing, planarization (node duplication), "
-                   "and produces an orthogonal planar layout.")
+        command(e, "First, a planar embedding is obtained by performing fanout substitution, path balancing, and "
+                   "planarization (node duplication). Then, scalable placement and routing are carried out on the "
+                   "planar layout of the current logic network in store. Compared to the gold algorithm, the "
+                   "resulting layout may occupy more area, but it is generated in reasonable runtime.")
 {
     // fanout substitution options
-    add_option("--degree,-d", fan_ps.degree, "Maximum number of outputs a fan-out node can have", true)
-        ->set_type_name("{2, 3}");
-
-    add_option("--strategy,-s", fan_ps.strategy,
-               "Chain fan-outs in balanced tree (breadth=0), DFS tree (depth=1), or random (2)", true)
-        ->set_type_name("{0,1,2}");
-
-    add_option("--threshold,-t", fan_ps.threshold,
-               "Maximum number of outputs any gate can have before substitution applies", true);
-
-    add_option("--seed,-r", seed, "Random seed used for random fanout substitution.");
-
+    fan_ps.degree = 2;
     // balancing option
     bal_ps.unify_outputs = true;
-
     // planarization option
     add_option("--po-order, -p", po_order, "PO order: keep=0, random=1")->set_type_name("{0,1}");
+    // plane options
+    add_option("--clock_numbers,-n", num_clock_phases, "Number of clock phases to be used {3 or 4}");
+    add_flag("--verbose,-v", ps.verbose, "Be verbose");
 }
 
 void plane_command::execute()
@@ -62,21 +56,37 @@ void plane_command::execute()
         env->out() << "[w] no logic network in store\n";
         return;
     }
-
-    if (is_set("seed"))
+    // error case: phases out of range
+    if (num_clock_phases != 3u && num_clock_phases != 4u)
     {
-        fan_ps.seed = seed;
+        env->out() << "[e] only 3- and 4-phase clocking schemes are supported\n";
+        ps = {};
+        return;
     }
 
+    ps.number_of_clock_phases = num_clock_phases == 3 ? fiction::num_clks::THREE : fiction::num_clks::FOUR;
+
     using po_enum = decltype(dup_ps.po_order);
+    using po_enum = decltype(dup_ps.po_order);
+
     switch (po_order)
     {
-        case 0u: dup_ps.po_order = po_enum::KEEP_PO_ORDER; break;
-        case 1u: dup_ps.po_order = po_enum::RANDOM_PO_ORDER; break;
+        case 0u:
+        {
+            dup_ps.po_order = po_enum::KEEP_PO_ORDER;
+            break;
+        }
+        case 1u:
+        {
+            dup_ps.po_order = po_enum::RANDOM_PO_ORDER;
+            break;
+        }
         default:
+        {
             env->out() << "[w] invalid --po-order, defaulting to keep\n";
             dup_ps.po_order = po_enum::KEEP_PO_ORDER;
             break;
+        }
     }
 
     const auto perform_fanouts_and_balance = [this](auto&& ntk_ptr)
@@ -94,11 +104,7 @@ void plane_command::execute()
     try
     {
         ls.extend() = std::make_shared<fiction::cart_gate_clk_lyt>(
-            fiction::plane<fiction::cart_gate_clk_lyt>(planarized_ntk, {}, &orth_stats));
-
-        env->out() << fmt::format("[i] Layout generated: {} × {} | gates: {} | wires: {} | crossings: {}\n",
-                                  orth_stats.x_size, orth_stats.y_size, orth_stats.num_gates, orth_stats.num_wires,
-                                  orth_stats.num_crossings);
+            fiction::plane<fiction::cart_gate_clk_lyt>(planarized_ntk, ps, &st));
     }
     catch (const fiction::high_degree_fanin_exception& e)
     {
@@ -116,6 +122,15 @@ void plane_command::execute()
     fan_ps = {};
     bal_ps = {};
     dup_ps = {};
+}
+
+nlohmann::json plane_command::log() const
+{
+    return nlohmann::json{{"runtime in seconds", mockturtle::to_seconds(st.time_total)},
+                          {"number of gates", st.num_gates},
+                          {"number of wires", st.num_wires},
+                          {"number of crossings", st.num_crossings},
+                          {"layout", {{"x-size", st.x_size}, {"y-size", st.y_size}, {"area", st.x_size * st.y_size}}}};
 }
 
 }  // namespace alice

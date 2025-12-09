@@ -33,8 +33,7 @@ namespace fiction
 struct node_duplication_planarization_params
 {
     /**
-     * The output order determines the starting layer for this algorithm. If this option is turned off, the output order
-     * remains the same as in the provided network. If it is turned on, the outputs are ordered randomly.
+     * Controls how output nodes are ordered before starting the algorithm.
      */
     enum class output_order : uint8_t
     {
@@ -47,6 +46,9 @@ struct node_duplication_planarization_params
          */
         RANDOM_PO_ORDER
     };
+    /**
+     * The output order used. Defaults to KEEP_PO_ORDER.
+     */
     output_order po_order = output_order::KEEP_PO_ORDER;
 };
 
@@ -54,53 +56,51 @@ namespace detail
 {
 
 /**
- * A structure representing a pair of nodes in an H-graph.
+ * Represents one node in the H-graph used for crossing minimization.
  *
- * The nodes stored in this struct describe the fanin-edges of a node in an H-graph.
- * A node pair object holds two nodes, which are saved in the member 'pair'.
- * These two outer nodes are connected through zero or more 'middle_nodes'.
- * The fanin order starts with the first node in 'pair', then proceeds through the 'middle_nodes', and ends with the
- * second node in 'pair'. The order of 'middle_nodes' is arbitrary as they cannot be further connected to any other
- * nodes.
+ * For a node in level l of the input network, all possible orderings of its fanins from layer l−1 are enumerated.
+ * Each such ordering is represented by an H-graph node. The first and last fanins of the ordering are stored, since
+ * these determine the delay in the H-graph. The remaining fanins are placed in middle. Their mutual order is irrelevant
+ * for this algorithm.
  *
- * @tparam Ntk Network type for the nodes in the pair.
+ * @tparam Ntk Network type from which node types are drawn.
  */
 template <typename Ntk>
-struct node_pair
+struct hgraph_node
 {
     /**
-     * Defines the beginning and end of the fanin-edged node.
+     * First and last fanin.
      */
-    std::pair<mockturtle::node<Ntk>, mockturtle::node<Ntk>> pair;
+    std::pair<mockturtle::node<Ntk>, mockturtle::node<Ntk>> outer_fanins;
     /**
-     * Specifies the delay value for the node.
+     * All remaining fanins.
+     */
+    std::vector<mockturtle::node<Ntk>> middle_fanins;
+    /**
+     * Specifies the delay value for the hgraph_node.
      */
     uint64_t delay;
     /**
-     * Contains the nodes between the fanin-edges node; cannot be connected to any other node.
-     */
-    std::vector<mockturtle::node<Ntk>> middle_nodes;
-    /**
-     * Index into the previous level's node_pair vector, used to track fanin-edge alignment.
+     * Index of the predecessor H-graph node.
      */
     std::size_t fanin_it{};
     /**
-     * Standard constructor.
+     * Constructs an H-graph node with given first and last fanins and delay.
      *
-     * @param node1 The first node of the fanin-edged node.
-     * @param node2 The second node of the fanin-edged node.
+     * @param first The first (leftmost) fanin in the ordering.
+     * @param last  The last (rightmost) fanin in the ordering.
      * @param delay_value The delay value for the node.
      */
-    node_pair(mockturtle::node<Ntk> node1, mockturtle::node<Ntk> node2, uint64_t delay_value) :
-            pair(node1, node2),
+    hgraph_node(const mockturtle::node<Ntk>& first, const mockturtle::node<Ntk>& last, const uint64_t delay_value) :
+            outer_fanins(first, last),
             delay(delay_value)
     {}
 };
 
 /**
- * Variant of the mockturtle::initialize_copy_network. This function helps with creating new networks from old
+ * Variant of the `mockturtle::initialize_copy_network`. This function helps with creating new networks from old
  * networks. In the mockturtle/original version `old2new` is used to map nodes from the old network to nodes in the new
- * network in a one to one relation. This variant allows old nodes to map to multiple nodes in order to represent
+ * network in a one-to-one relation. This variant allows old nodes to map to multiple nodes in order to represent
  * relations to dulicated nodes.
 
  * A map (old2new) is created where old nodes from source network are mapped to new nodes in destination network.
@@ -173,11 +173,11 @@ gather_fanin_signals(const Ntk& ntk, NtkDest& ntk_dest_v, const mockturtle::node
             assert(node_index < lvl.size() && "The fanin iterator is out of scope");
 
             // The range indicates the number of candidate fan-ins.
-            const std::size_t range = ntk.fanin_size(n) + 1;
+            const std::size_t max_candidates = ntk.fanin_size(n) + 1;
 
             // Iterate through the candidate fan-ins. If a candidate fan-in matches the original fan-in or is a
             // duplicate of it, add it to the children of the node n.
-            const std::size_t end_index = std::min(node_index + range, lvl.size());
+            const std::size_t end_index = std::min(node_index + max_candidates, lvl.size());
             for (auto j = node_index; j < end_index; ++j)
             {
                 // get the node from the newly generated network.
@@ -334,15 +334,15 @@ virtual_pi_network<Ntk> create_virtual_pi_ntk_from_duplicated_nodes(
  * @return The vector of node pairs.
  */
 template <typename Ntk>
-[[nodiscard]] std::vector<node_pair<Ntk>> calculate_pairs(const std::vector<mockturtle::node<Ntk>>& nodes) noexcept
+[[nodiscard]] std::vector<hgraph_node<Ntk>> calculate_pairs(const std::vector<mockturtle::node<Ntk>>& nodes) noexcept
 {
-    std::vector<node_pair<Ntk>> pairwise_combinations{};
+    std::vector<hgraph_node<Ntk>> pairwise_combinations{};
     pairwise_combinations.reserve(nodes.size() * (nodes.size() - 1));
 
     if (nodes.size() == 1)
     {
-        const node_pair<Ntk> pair = {nodes[0], nodes[0],
-                                     std::numeric_limits<uint64_t>::max()};  // Initialize delay to inf
+        const hgraph_node<Ntk> pair = {nodes[0], nodes[0],
+                                       std::numeric_limits<uint64_t>::max()};  // Initialize delay to inf
         pairwise_combinations.push_back(pair);
         return pairwise_combinations;
     }
@@ -351,24 +351,24 @@ template <typename Ntk>
     {
         for (auto it2 = it1 + 1; it2 != nodes.cend(); ++it2)
         {
-            std::vector<mockturtle::node<Ntk>> middle_nodes{};
-            middle_nodes.reserve(nodes.size() - 2);
+            std::vector<mockturtle::node<Ntk>> middle_fanins{};
+            middle_fanins.reserve(nodes.size() - 2);
 
-            // fill middle_nodes with non-pair members
+            // fill middle_fanins with non-pair members
             for (auto it = nodes.cbegin(); it != nodes.cend(); ++it)
             {
                 if (it != it1 && it != it2)
                 {
-                    middle_nodes.push_back(*it);
+                    middle_fanins.push_back(*it);
                 }
             }
 
-            node_pair<Ntk> pair1 = {*it1, *it2, std::numeric_limits<uint64_t>::max()};  // Initialize delay to inf
-            node_pair<Ntk> pair2 = {*it2, *it1, std::numeric_limits<uint64_t>::max()};  // Initialize delay to inf
+            hgraph_node<Ntk> pair1 = {*it1, *it2, std::numeric_limits<uint64_t>::max()};  // Initialize delay to inf
+            hgraph_node<Ntk> pair2 = {*it2, *it1, std::numeric_limits<uint64_t>::max()};  // Initialize delay to inf
 
-            // Add middle_nodes to pairs
-            pair1.middle_nodes = middle_nodes;
-            pair2.middle_nodes = middle_nodes;
+            // Add middle_fanins to pairs
+            pair1.middle_fanins = middle_fanins;
+            pair2.middle_fanins = middle_fanins;
 
             pairwise_combinations.push_back(pair1);
             pairwise_combinations.push_back(pair2);
@@ -437,7 +437,7 @@ class node_duplication_planarization_impl
 
         if (!lvl_pairs.empty())
         {
-            std::vector<node_pair<Ntk>>* combinations_last = &lvl_pairs.back();
+            std::vector<hgraph_node<Ntk>>* combinations_last = &lvl_pairs.back();
 
             for (std::size_t cur_idx = 0; cur_idx < combinations.size(); ++cur_idx)
             {
@@ -448,7 +448,7 @@ class node_duplication_planarization_impl
                     auto& node_pair_last = (*combinations_last)[last_idx];
 
                     // If there is a connection between the two node pairs the delay is calculated like this
-                    if ((node_pair_cur.pair.first == node_pair_last.pair.second &&
+                    if ((node_pair_cur.outer_fanins.first == node_pair_last.outer_fanins.second &&
                          node_pair_last.delay + 1 < node_pair_cur.delay))
                     {
                         node_pair_cur.fanin_it = last_idx;
@@ -463,11 +463,11 @@ class node_duplication_planarization_impl
                     else if (node_pair_last.delay + 2 == node_pair_cur.delay)
                     {
                         // This solves equal path delays, if they are connected in the next layer via a fanout
-                        const auto fc0 = fanins(ntk, node_pair_last.pair.first);
+                        const auto fc0 = fanins(ntk, node_pair_last.outer_fanins.first);
                         if (node_pair_last.fanin_it < combinations_last->size())
                         {
                             const auto& parent_pair = (*combinations_last)[node_pair_last.fanin_it];
-                            const auto  fc1         = fanins(ntk, parent_pair.pair.second);
+                            const auto  fc1         = fanins(ntk, parent_pair.outer_fanins.second);
 
                             for (const auto f0 : fc0.fanin_nodes)
                             {
@@ -552,23 +552,23 @@ class node_duplication_planarization_impl
         // Select the path with the least delay and follow it via fanin relations
         const auto minimum_it =
             std::min_element(combinations.cbegin(), combinations.cend(),
-                             [](const node_pair<Ntk>& a, const node_pair<Ntk>& b) { return a.delay < b.delay; });
+                             [](const hgraph_node<Ntk>& a, const hgraph_node<Ntk>& b) { return a.delay < b.delay; });
 
         if (minimum_it != combinations.cend())
         {
             const auto& min_combination = *minimum_it;
 
             // Insert the terminal node
-            insert_if_not_first(min_combination.pair.second, next_level, saturated_fanout_flag, 0);
+            insert_if_not_first(min_combination.outer_fanins.second, next_level, saturated_fanout_flag, 0);
 
-            // Insert middle_nodes
-            for (const auto& node : min_combination.middle_nodes)
+            // Insert middle_fanins
+            for (const auto& node : min_combination.middle_fanins)
             {
                 insert_if_not_first(node, next_level, saturated_fanout_flag, 1);
             }
 
             // Insert the first node
-            insert_if_not_first(min_combination.pair.first, next_level, saturated_fanout_flag, 1);
+            insert_if_not_first(min_combination.outer_fanins.first, next_level, saturated_fanout_flag, 1);
 
             // Start with index instead of pointer
             std::size_t level    = lvl_pairs.size() - 1;
@@ -580,20 +580,20 @@ class node_duplication_planarization_impl
                 const auto& fanin_combination = lvl_pairs[level - 1][fanin_it];
 
                 // Insert the terminal node
-                if (ntk.is_pi(fanin_combination.pair.second))
+                if (ntk.is_pi(fanin_combination.outer_fanins.second))
                 {
                     saturated_fanout_flag = 1;
                 }
-                insert_if_not_first(fanin_combination.pair.second, next_level, saturated_fanout_flag, 0);
+                insert_if_not_first(fanin_combination.outer_fanins.second, next_level, saturated_fanout_flag, 0);
 
-                // Insert middle_nodes
-                for (const auto& node : fanin_combination.middle_nodes)
+                // Insert middle_fanins
+                for (const auto& node : fanin_combination.middle_fanins)
                 {
                     insert_if_not_first(node, next_level, saturated_fanout_flag, 1);
                 }
 
                 // Insert the first node
-                insert_if_not_first(fanin_combination.pair.first, next_level, saturated_fanout_flag, 1);
+                insert_if_not_first(fanin_combination.outer_fanins.first, next_level, saturated_fanout_flag, 1);
 
                 // Move one level up
                 --level;
@@ -723,7 +723,7 @@ class node_duplication_planarization_impl
     /*
      * The currently node_pairs used in the current level.
      */
-    std::vector<std::vector<node_pair<Ntk>>> lvl_pairs{};
+    std::vector<std::vector<hgraph_node<Ntk>>> lvl_pairs{};
     /*
      * The fanin nodes.
      */
@@ -743,7 +743,7 @@ class node_duplication_planarization_impl
 /**
  * Implements a planarization mechanism for networks from the paper \"Fabricatable Interconnect and Molecular QCA
  * Circuits\" by Amitabh Chaudhary, Danny Ziyi Chen, Xiaobo Sharon Hu, Michael T. Niemier, Ramprasad Ravichandran and
- * Kevin Whitton in IEEE TRANSACTIONS ON COMPUTER-AIDED DESIGN OF INTEGRATED CIRCUITS AND SYSTEMS, Volume 26, 2007.
+ * Kevin Whitton in IEEE Transactions on Computer-Aided Design of Integrated Circuits and Systems, Volume 26, 2007.
  *
  * The planarization achieved by this function solves the Node Duplication Crossing Minimization (NDCE) problem by
  * finding the shortest x-y path in the H-graph for every level in the network. An H-graph describes edge relations

@@ -10,7 +10,6 @@
 #include <fiction/algorithms/network_transformation/fanout_substitution.hpp>
 #include <fiction/algorithms/network_transformation/network_balancing.hpp>
 #include <fiction/algorithms/network_transformation/node_duplication_planarization.hpp>
-#include <fiction/algorithms/physical_design/orthogonal.hpp>
 #include <fiction/algorithms/physical_design/planar_layout_from_network_embedding.hpp>
 #include <fiction/algorithms/verification/virtual_miter.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
@@ -26,7 +25,7 @@
 
 using namespace fiction;
 
-static void check_stats(const orthogonal_physical_design_stats& st) noexcept
+static void check_stats(const planar_layout_from_network_embedding_stats& st) noexcept
 {
     CHECK(st.x_size > 0);
     CHECK(st.y_size > 0);
@@ -59,12 +58,12 @@ static void check_plane(const Ntk& ntk)
     CHECK(result == 1);
     // NOLINTEND(bugprone-unchecked-optional-access)
 
-    orthogonal_physical_design_stats orthogonal_planar_stats{};
+    planar_layout_from_network_embedding_stats planar_layout_from_network_embedding_stats{};
 
-    const auto gate_level_layout = fiction::plane<gate_lyt>(planarized_b, {}, &orthogonal_planar_stats);
+    const auto gate_level_layout = fiction::plane<gate_lyt>(planarized_b, {}, &planar_layout_from_network_embedding_stats);
 
     CHECK(gate_level_layout.num_crossings() == 0);
-    check_stats(orthogonal_planar_stats);
+    check_stats(planar_layout_from_network_embedding_stats);
     CHECK_NOTHROW(apply_gate_library<cell_layout, qca_one_library>(gate_level_layout));
 }
 
@@ -77,17 +76,17 @@ TEST_CASE("Check exceptions", "[planar-layout-from-network-embedding]")
 
     auto                             maj        = blueprints::maj1_network<technology_network>();
     auto                             maj_ranked = fiction::mutable_rank_view(maj);
-    orthogonal_physical_design_stats orthogonal_planar_stats{};
-    CHECK_THROWS_WITH(fiction::plane<gate_lyt>(maj_ranked, {}, &orthogonal_planar_stats),
+    planar_layout_from_network_embedding_stats planar_layout_from_network_embedding_stats{};
+    CHECK_THROWS_WITH(fiction::plane<gate_lyt>(maj_ranked, {}, &planar_layout_from_network_embedding_stats),
                       "network contains nodes that exceed the supported fanin size");
 
     auto ao        = blueprints::and_or_network<technology_network>();
     auto ao_ranked = fiction::mutable_rank_view(ao);
-    CHECK_THROWS_WITH(fiction::plane<gate_lyt>(ao_ranked, {}, &orthogonal_planar_stats),
+    CHECK_THROWS_WITH(fiction::plane<gate_lyt>(ao_ranked, {}, &planar_layout_from_network_embedding_stats),
                       "Input network has to be planar");
 }
 
-TEST_CASE("Orthogonal planar layout tests", "[planar-layout-from-network-embedding]")
+TEST_CASE("Planar layout tests", "[planar-layout-from-network-embedding]")
 {
     // Simple correctness and corner-case networks
     check_plane(blueprints::se_coloring_corner_case_network<technology_network>());
@@ -104,7 +103,7 @@ TEST_CASE("Orthogonal planar layout tests", "[planar-layout-from-network-embeddi
     check_plane(blueprints::parity_network<technology_network>());
 }
 
-TEST_CASE("Name conservation after planar orthogonal physical design", "[planar-layout-from-network-embedding]")
+TEST_CASE("Name conservation after planar physical design", "[planar-layout-from-network-embedding]")
 {
     using gate_lyt = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
 
@@ -125,9 +124,11 @@ TEST_CASE("Name conservation after planar orthogonal physical design", "[planar-
     CHECK(planarized_b.get_output_name(1) == "f2");
     CHECK(planarized_b.get_output_name(2) == "f3");
 
-    orthogonal_physical_design_stats orthogonal_planar_stats{};
+    planar_layout_from_network_embedding_stats planar_layout_from_network_embedding_stats{};
+    planar_layout_from_network_embedding_params ps{};
+    ps.verbose = true;
 
-    const auto layout = fiction::plane<gate_lyt>(planarized_b, {}, &orthogonal_planar_stats);
+    const auto layout = fiction::plane<gate_lyt>(planarized_b, ps, &planar_layout_from_network_embedding_stats);
 
     // network name
     CHECK(layout.get_layout_name() == "topolinano");

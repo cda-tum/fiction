@@ -11,8 +11,8 @@ Unreleased
 Added
 #####
 - Algorithms:
-    - Node Duplication Planarization
-    - PLANE: Planar Layout from Network Embedding
+    - Node Duplication Planarization, reimplemented from “Fabricatable Interconnect and Molecular QCA Circuits” by Amitabh Chaudhary, Danny Ziyi Chen, Xiaobo Sharon Hu, Michael T. Niemier, Ramprasad Ravichandran, and Kevin Whitton.
+    - Planar Layout from Network Embedding (PLANE) for generating planar 2DDWave-clocked Cartesian gate-level layouts in a fast and scalable fashion.
 
 Changed
 #######

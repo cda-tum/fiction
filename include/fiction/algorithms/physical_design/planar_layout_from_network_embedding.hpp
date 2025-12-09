@@ -38,6 +38,64 @@
 namespace fiction
 {
 
+/**
+ * Parameters for the planar layout from network embedding algorithm.
+ */
+struct planar_layout_from_network_embedding_params
+{
+    /**
+     * Number of clock phases to use. 3 and 4 are supported.
+     */
+    num_clks number_of_clock_phases = num_clks::FOUR;
+    /**
+     * Verbosity.
+     */
+    bool verbose = false;
+};
+/**
+ * This struct stores statistics about the planar layout design process.
+ */
+struct planar_layout_from_network_embedding_stats
+{
+    /**
+     * Runtime of the planar layout design process.
+     */
+    mockturtle::stopwatch<>::duration time_total{};
+    /**
+     * Layout width.
+     */
+    uint64_t x_size{0ull};
+    /**
+     * Layout height.
+     */
+    uint64_t y_size{0ull};
+    /**
+     * Number of gates.
+     */
+    uint64_t num_gates{0ull};
+    /**
+     * Number of wires.
+     */
+    uint64_t num_wires{0ull};
+    /**
+     * Number of crossings.
+     */
+    uint64_t num_crossings{0ull};
+    /**
+     * Reports the statistics to the given output stream.
+     *
+     * @param out Output stream.
+     */
+    void report(std::ostream& out = std::cout) const
+    {
+        out << fmt::format("[i] total time      = {:.2f} secs\n", mockturtle::to_seconds(time_total));
+        out << fmt::format("[i] layout size     = {} × {}\n", x_size, y_size);
+        out << fmt::format("[i] num. gates      = {}\n", num_gates);
+        out << fmt::format("[i] num. wires      = {}\n", num_wires);
+        out << fmt::format("[i] num. crossings  = {}\n", num_crossings);
+    }
+};
+
 namespace detail
 {
 
@@ -797,7 +855,8 @@ template <typename Lyt, typename Ntk>
 class plane_impl
 {
   public:
-    plane_impl(const Ntk& src, const orthogonal_physical_design_params& p, orthogonal_physical_design_stats& st) :
+    plane_impl(const Ntk& src, const planar_layout_from_network_embedding_params& p,
+               planar_layout_from_network_embedding_stats& st) :
             ntk{mockturtle::fanout_view{src}},
             ps{p},
             pst{st}
@@ -1038,14 +1097,26 @@ class plane_impl
         pst.num_gates = layout.num_gates();
         pst.num_wires = layout.num_wires();
 
+        if (ps.verbose)
+        {
+            std::cout << "\n[i] Layout generated:\n";
+
+            std::cout << fmt::format("[i]   Layout dimension: {} × {} = {}\n", pst.x_size, pst.y_size,
+                                     pst.x_size * pst.y_size);
+
+            std::cout << fmt::format("[i]   #Gates:      {}\n", pst.num_gates);
+            std::cout << fmt::format("[i]   #Wires:      {}\n", pst.num_wires);
+            std::cout << fmt::format("[i]   #Crossings:  {}\n", pst.num_crossings);
+        }
+
         return layout;
     }
 
   private:
     mockturtle::fanout_view<Ntk> ntk;
 
-    orthogonal_physical_design_params ps;
-    orthogonal_physical_design_stats& pst;
+    planar_layout_from_network_embedding_params ps;
+    planar_layout_from_network_embedding_stats& pst;
 
     uint32_t po_counter{0};
 };
@@ -1070,7 +1141,8 @@ class plane_impl
  * @return      A fully planar gate-level layout of type `Lyt`.
  */
 template <typename Lyt, typename Ntk>
-Lyt plane(const Ntk& ntk, orthogonal_physical_design_params ps = {}, orthogonal_physical_design_stats* pst = nullptr)
+Lyt plane(const Ntk& ntk, planar_layout_from_network_embedding_params ps = {},
+          planar_layout_from_network_embedding_stats* pst = nullptr)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
     static_assert(mockturtle::is_network_type_v<Ntk>,
@@ -1094,8 +1166,8 @@ Lyt plane(const Ntk& ntk, orthogonal_physical_design_params ps = {}, orthogonal_
         throw std::invalid_argument("Input network has to be planar");
     }
 
-    orthogonal_physical_design_stats st{};
-    detail::plane_impl<Lyt, Ntk>     p{ntk, ps, st};
+    planar_layout_from_network_embedding_stats st{};
+    detail::plane_impl<Lyt, Ntk>               p{ntk, ps, st};
 
     auto result = p.run();
 
