@@ -8,6 +8,12 @@ The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`
 Unreleased
 ----------
 
+Added
+#####
+- Documentation:
+    - Added ``AGENTS.md`` to guide AI agents in the repository
+
+
 Changed
 #######
 - Build system:
@@ -49,6 +55,11 @@ Changed
     - Modernized README and Getting Started section of the documentation
 - Dependencies:
     - Updated all dependencies to their latest versions
+
+Removed
+#######
+- Continuous integration:
+    - macOS 13 has been removed, along with support for the x86_64 (Intel) architecture
 
 Fixed
 #####
