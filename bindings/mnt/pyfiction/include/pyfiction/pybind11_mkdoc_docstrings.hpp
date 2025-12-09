@@ -9580,11 +9580,11 @@ Parameter ``position``:
     The position of the node (0 indicates a terminal node; controls
     duplicate insertion behavior).)doc";
 
-static const char *__doc_fiction_detail_node_duplication_planarization_impl_lvl_pairs = R"doc()doc";
+static const char *__doc_fiction_detail_node_duplication_planarization_impl_lvl_pairs = R"doc(The currently node_pairs used in the current level.)doc";
 
 static const char *__doc_fiction_detail_node_duplication_planarization_impl_node_duplication_planarization_impl = R"doc()doc";
 
-static const char *__doc_fiction_detail_node_duplication_planarization_impl_ps = R"doc()doc";
+static const char *__doc_fiction_detail_node_duplication_planarization_impl_ps = R"doc(The stats of the node_duplication class.)doc";
 
 static const char *__doc_fiction_detail_non_operationality_reason = R"doc(Reason why a layout is non-operational.)doc";
 
