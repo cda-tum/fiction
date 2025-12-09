@@ -8915,6 +8915,35 @@ static const char *__doc_fiction_detail_hexagonalization_impl_pst = R"doc(Hexago
 
 static const char *__doc_fiction_detail_hexagonalization_impl_run = R"doc()doc";
 
+static const char *__doc_fiction_detail_hgraph_node =
+R"doc(Represents one node in the H-graph used for crossing minimization.
+
+For a node in level l of the input network, all possible orderings of
+its fanins from layer l−1 are enumerated. Each such ordering is
+represented by an H-graph node. The first and last fanins of the
+ordering are stored, since these determine the delay in the H-graph.
+The remaining fanins are placed in middle. Their mutual order is
+irrelevant for this algorithm.
+
+Template parameter ``Ntk``:
+    Network type from which node types are drawn.)doc";
+
+static const char *__doc_fiction_detail_hgraph_node_delay = R"doc(Specifies the delay value for the hgraph_node.)doc";
+
+static const char *__doc_fiction_detail_hgraph_node_fanin_it = R"doc(Index of the predecessor H-graph node.)doc";
+
+static const char *__doc_fiction_detail_hgraph_node_hgraph_node =
+R"doc(Constructs an H-graph node with given first and last fanins and delay.
+
+Parameter ``first``:
+    The first (leftmost) fanin in the ordering.
+
+Parameter ``last``:
+    The last (rightmost) fanin in the ordering.
+
+Parameter ``delay_value``:
+    The delay value for the node.)doc";
+
 static const char *__doc_fiction_detail_is_balanced_impl = R"doc()doc";
 
 static const char *__doc_fiction_detail_is_balanced_impl_balanced = R"doc()doc";
@@ -9556,38 +9585,6 @@ static const char *__doc_fiction_detail_node_duplication_planarization_impl_lvl_
 static const char *__doc_fiction_detail_node_duplication_planarization_impl_node_duplication_planarization_impl = R"doc()doc";
 
 static const char *__doc_fiction_detail_node_duplication_planarization_impl_ps = R"doc()doc";
-
-static const char *__doc_fiction_detail_node_pair =
-R"doc(A structure representing a pair of nodes in an H-graph.
-
-The nodes stored in this struct describe the fanin-edges of a node in
-an H-graph. A node pair object holds two nodes, which are saved in the
-member 'pair'. These two outer nodes are connected through zero or
-more 'middle_nodes'. The fanin order starts with the first node in
-'pair', then proceeds through the 'middle_nodes', and ends with the
-second node in 'pair'. The order of 'middle_nodes' is arbitrary as
-they cannot be further connected to any other nodes.
-
-Template parameter ``Ntk``:
-    Network type for the nodes in the pair.)doc";
-
-static const char *__doc_fiction_detail_node_pair_delay = R"doc(Specifies the delay value for the node.)doc";
-
-static const char *__doc_fiction_detail_node_pair_fanin_it =
-R"doc(Index into the previous level's node_pair vector, used to track fanin-
-edge alignment.)doc";
-
-static const char *__doc_fiction_detail_node_pair_node_pair =
-R"doc(Standard constructor.
-
-Parameter ``node1``:
-    The first node of the fanin-edged node.
-
-Parameter ``node2``:
-    The second node of the fanin-edged node.
-
-Parameter ``delay_value``:
-    The delay value for the node.)doc";
 
 static const char *__doc_fiction_detail_non_operationality_reason = R"doc(Reason why a layout is non-operational.)doc";
 
@@ -17461,8 +17458,8 @@ static const char *__doc_fiction_node_duplication_planarization =
 R"doc(Implements a planarization mechanism for networks from the paper
 \"Fabricatable Interconnect and Molecular QCA Circuits\" by Amitabh
 Chaudhary, Danny Ziyi Chen, Xiaobo Sharon Hu, Michael T. Niemier,
-Ramprasad Ravichandran and Kevin Whitton in IEEE TRANSACTIONS ON
-COMPUTER-AIDED DESIGN OF INTEGRATED CIRCUITS AND SYSTEMS, Volume 26,
+Ramprasad Ravichandran and Kevin Whitton in IEEE Transactions on
+Computer-Aided Design of Integrated Circuits and Systems, Volume 26,
 2007.
 
 The planarization achieved by this function solves the Node
@@ -17493,17 +17490,13 @@ Returns:
 
 static const char *__doc_fiction_node_duplication_planarization_params = R"doc(Parameters for the node duplication algorithm.)doc";
 
-static const char *__doc_fiction_node_duplication_planarization_params_output_order =
-R"doc(The output order determines the starting layer for this algorithm. If
-this option is turned off, the output order remains the same as in the
-provided network. If it is turned on, the outputs are ordered
-randomly.)doc";
+static const char *__doc_fiction_node_duplication_planarization_params_output_order = R"doc(Controls how output nodes are ordered before starting the algorithm.)doc";
 
 static const char *__doc_fiction_node_duplication_planarization_params_output_order_KEEP_PO_ORDER = R"doc(Keep the PO order from the input network.)doc";
 
 static const char *__doc_fiction_node_duplication_planarization_params_output_order_RANDOM_PO_ORDER = R"doc(Randomize the PO order.)doc";
 
-static const char *__doc_fiction_node_duplication_planarization_params_po_order = R"doc()doc";
+static const char *__doc_fiction_node_duplication_planarization_params_po_order = R"doc(The output order used. Defaults to KEEP_PO_ORDER.)doc";
 
 static const char *__doc_fiction_normalize_layout_coordinates =
 R"doc(A new layout is constructed and returned that is equivalent to the
@@ -18833,6 +18826,32 @@ Parameter ``node2pos``:
 
 Returns:
     Signal to the newly placed gate in `lyt`.)doc";
+
+static const char *__doc_fiction_planar_layout_from_network_embedding_params = R"doc(Parameters for the planar layout from network embedding algorithm.)doc";
+
+static const char *__doc_fiction_planar_layout_from_network_embedding_params_number_of_clock_phases = R"doc(Number of clock phases to use. 3 and 4 are supported.)doc";
+
+static const char *__doc_fiction_planar_layout_from_network_embedding_params_verbose = R"doc(Verbosity.)doc";
+
+static const char *__doc_fiction_planar_layout_from_network_embedding_stats = R"doc(This struct stores statistics about the planar layout design process.)doc";
+
+static const char *__doc_fiction_planar_layout_from_network_embedding_stats_duration = R"doc(Runtime of the planar layout design process.)doc";
+
+static const char *__doc_fiction_planar_layout_from_network_embedding_stats_num_crossings = R"doc(Number of crossings.)doc";
+
+static const char *__doc_fiction_planar_layout_from_network_embedding_stats_num_gates = R"doc(Number of gates.)doc";
+
+static const char *__doc_fiction_planar_layout_from_network_embedding_stats_num_wires = R"doc(Number of wires.)doc";
+
+static const char *__doc_fiction_planar_layout_from_network_embedding_stats_report =
+R"doc(Reports the statistics to the given output stream.
+
+Parameter ``out``:
+    Output stream.)doc";
+
+static const char *__doc_fiction_planar_layout_from_network_embedding_stats_x_size = R"doc(Layout width.)doc";
+
+static const char *__doc_fiction_planar_layout_from_network_embedding_stats_y_size = R"doc(Layout height.)doc";
 
 static const char *__doc_fiction_plane =
 R"doc(This algorithm constructs a planar layout from the planar embedding of
