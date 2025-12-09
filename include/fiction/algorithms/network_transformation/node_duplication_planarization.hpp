@@ -420,12 +420,20 @@ class node_duplication_planarization_impl
             fis.push_back(nd);
         }
 
+        // Respect the rank order. If two combinations have the same delay and have no seen advantage then the one from
+        // the original ranking is used, since it is inserted and not overwritten afterward.
         ntk.foreach_fanin(nd,
-                          [this](auto fi)
+                          [&](auto fi)
                           {
                               if (!ntk.is_constant(fi))
                               {
-                                  fis.push_back(ntk.get_node(fi));
+                                  auto n = ntk.get_node(fi);
+
+                                  auto it =
+                                      std::lower_bound(fis.begin(), fis.end(), n, [&](auto const& a, auto const& b)
+                                                       { return ntk.rank_position(a) < ntk.rank_position(b); });
+
+                                  fis.insert(it, n);
                               }
                           });
 
@@ -463,11 +471,10 @@ class node_duplication_planarization_impl
                     else if (node_pair_last.delay + 2 == node_pair_cur.delay)
                     {
                         // This solves equal path delays, if they are connected in the next layer via a fanout
-                        const auto fc0 = fanins(ntk, node_pair_last.outer_fanins.first);
+                        const auto fc0 = fanins(ntk, node_pair_cur.outer_fanins.first);
                         if (node_pair_last.fanin_it < combinations_last->size())
                         {
-                            const auto& parent_pair = (*combinations_last)[node_pair_last.fanin_it];
-                            const auto  fc1         = fanins(ntk, parent_pair.outer_fanins.second);
+                            const auto fc1 = fanins(ntk, node_pair_last.outer_fanins.second);
 
                             for (const auto f0 : fc0.fanin_nodes)
                             {
