@@ -1,27 +1,27 @@
 #include <catch2/catch_test_macros.hpp>
-
-#include "catch2/matchers/catch_matchers.hpp"
-#include "fiction/algorithms/physical_design/apply_gate_library.hpp"
-#include "fiction/layouts/cell_level_layout.hpp"
-#include "fiction/layouts/coordinates.hpp"
-#include "fiction/technology/cell_technologies.hpp"
-#include "utils/blueprints/network_blueprints.hpp"
+#include <catch2/matchers/catch_matchers.hpp>
 
 #include <fiction/algorithms/network_transformation/fanout_substitution.hpp>
 #include <fiction/algorithms/network_transformation/network_balancing.hpp>
 #include <fiction/algorithms/network_transformation/node_duplication_planarization.hpp>
+#include <fiction/algorithms/physical_design/apply_gate_library.hpp>
 #include <fiction/algorithms/physical_design/planar_layout_from_network_embedding.hpp>
 #include <fiction/algorithms/verification/virtual_miter.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
+#include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
+#include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/networks/views/mutable_rank_view.hpp>
+#include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/qca_one_library.hpp>
 
 #include <mockturtle/algorithms/equivalence_checking.hpp>
 #include <mockturtle/views/names_view.hpp>
+
+#include <utils/blueprints/network_blueprints.hpp>
 
 using namespace fiction;
 
@@ -60,7 +60,8 @@ static void check_plane(const Ntk& ntk)
 
     planar_layout_from_network_embedding_stats planar_layout_from_network_embedding_stats{};
 
-    const auto gate_level_layout = fiction::plane<gate_lyt>(planarized_b, {}, &planar_layout_from_network_embedding_stats);
+    const auto gate_level_layout =
+        fiction::plane<gate_lyt>(planarized_b, {}, &planar_layout_from_network_embedding_stats);
 
     CHECK(gate_level_layout.num_crossings() == 0);
     check_stats(planar_layout_from_network_embedding_stats);
@@ -74,8 +75,8 @@ TEST_CASE("Check exceptions", "[planar-layout-from-network-embedding]")
     fiction::network_balancing_params b_ps;
     b_ps.unify_outputs = true;
 
-    auto                             maj        = blueprints::maj1_network<technology_network>();
-    auto                             maj_ranked = fiction::mutable_rank_view(maj);
+    auto                                       maj        = blueprints::maj1_network<technology_network>();
+    auto                                       maj_ranked = fiction::mutable_rank_view(maj);
     planar_layout_from_network_embedding_stats planar_layout_from_network_embedding_stats{};
     CHECK_THROWS_WITH(fiction::plane<gate_lyt>(maj_ranked, {}, &planar_layout_from_network_embedding_stats),
                       "network contains nodes that exceed the supported fanin size");
@@ -124,7 +125,7 @@ TEST_CASE("Name conservation after planar physical design", "[planar-layout-from
     CHECK(planarized_b.get_output_name(1) == "f2");
     CHECK(planarized_b.get_output_name(2) == "f3");
 
-    planar_layout_from_network_embedding_stats planar_layout_from_network_embedding_stats{};
+    planar_layout_from_network_embedding_stats  planar_layout_from_network_embedding_stats{};
     planar_layout_from_network_embedding_params ps{};
     ps.verbose = true;
 

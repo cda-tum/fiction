@@ -347,7 +347,7 @@ uint64_t calculate_buffer_connection_type(const Ntk& ntk, const mockturtle::node
 {
     if (ntk.is_po(n))
     {
-        return false;
+        return 0;
     }
     auto fo = ntk.fanout(n);
     assert(fo.size() == 1);
@@ -417,7 +417,7 @@ uint64_t calculate_allowed_orientation(const Ntk& ntk, const mockturtle::node<Nt
  * @return     Orientation code (0, 1, or 3) defining the level's initial direction.
  */
 template <typename Ntk>
-int calculate_start_orientation(const Ntk& ntk, const uint32_t& lvl)
+int calculate_start_orientation(const Ntk& ntk, const uint32_t lvl)
 {
     int orientation = 0;
     if (lvl == 0)

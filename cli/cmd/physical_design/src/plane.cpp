@@ -67,8 +67,6 @@ void plane_command::execute()
     ps.number_of_clock_phases = num_clock_phases == 3 ? fiction::num_clks::THREE : fiction::num_clks::FOUR;
 
     using po_enum = decltype(dup_ps.po_order);
-    using po_enum = decltype(dup_ps.po_order);
-
     switch (po_order)
     {
         case 0u:

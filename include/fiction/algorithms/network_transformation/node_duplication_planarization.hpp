@@ -723,23 +723,23 @@ class node_duplication_planarization_impl
     }
 
   private:
-    /*
+    /**
      * The input network.
      */
     Ntk ntk{};
-    /*
+    /**
      * The currently node_pairs used in the current level.
      */
     std::vector<std::vector<hgraph_node<Ntk>>> lvl_pairs{};
-    /*
+    /**
      * The fanin nodes.
      */
     std::vector<mockturtle::node<Ntk>> fis{};
-    /*
+    /**
      * The network stored as levels.
      */
     std::vector<std::vector<mockturtle::node<Ntk>>> ntk_lvls{};
-    /*
+    /**
      * The stats of the node_duplication class.
      */
     node_duplication_planarization_params ps{};
