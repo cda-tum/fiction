@@ -7,18 +7,16 @@
 
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/technology/cell_technologies.hpp"
-#include "fiction/technology/magcad_magnet_count.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/types.hpp"
 #include "utils/version_info.hpp"
 
 #include <fmt/format.h>
 
 #include <algorithm>
 #include <array>
-#include <filesystem>
+#include <cstdint>
 #include <fstream>
-#include <functional>
+#include <iostream>
 #include <ostream>
 #include <stdexcept>
 #include <string>
@@ -144,7 +142,21 @@ class write_qll_layout_impl
 
     uint64_t cell_id{1};
 
-    const char* tech_name{has_inml_technology_v<Lyt> ? "iNML" : has_qca_technology_v<Lyt> ? "MolFCN" : "?"};
+    static constexpr std::string_view tech_name = []
+    {
+        if constexpr (has_inml_technology_v<Lyt>)
+        {
+            return std::string_view{"iNML"};
+        }
+        else if constexpr (has_qca_technology_v<Lyt> || has_mol_qca_technology_v<Lyt>)
+        {
+            return std::string_view{"MolFCN"};
+        }
+        else
+        {
+            return std::string_view{"?"};
+        }
+    }();
 
     [[nodiscard]] std::vector<cell<Lyt>> sorted_pis() const noexcept
     {
@@ -221,7 +233,7 @@ class write_qll_layout_impl
         {
             os << qll::INML_SETTINGS;
         }
-        else if constexpr (has_qca_technology_v<Lyt>)
+        else if constexpr (has_qca_technology_v<Lyt> || has_mol_qca_technology_v<Lyt>)
         {
             os << qll::MQCA_SETTINGS;
         }
@@ -241,7 +253,7 @@ class write_qll_layout_impl
                 os << fmt::format(qll::INML_COMPONENT_ITEM, tech_name, comp);
             }
         }
-        else if constexpr (has_qca_technology_v<Lyt>)
+        else if constexpr (has_qca_technology_v<Lyt> || has_mol_qca_technology_v<Lyt>)
         {
             os << qll::MQCA_COMPONENT_ITEM;
         }
@@ -359,8 +371,58 @@ class write_qll_layout_impl
                         // write via cell
                         if (qca_technology::is_vertical_cell_mode(mode) && c.z != lyt.z())
                         {
-                            os << fmt::format(qll::OPEN_MQCA_LAYOUT_ITEM, 0, cell_id++, bb_x(c), bb_y(c), c.z * 2 + 1);
+                            os << fmt::format(qll::OPEN_MQCA_LAYOUT_ITEM, 0, cell_id++, bb_x(c), bb_y(c),
+                                              (c.z * 2) + 1);
                             os << fmt::format(qll::LAYOUT_ITEM_PROPERTY, qll::PROPERTY_PHASE, lyt.get_clock_number(c));
+                            os << qll::CLOSE_LAYOUT_ITEM;
+                        }
+                    }
+                    // write molQCA cell
+                    else if constexpr (has_mol_qca_technology_v<Lyt>)
+                    {
+                        const auto mode = lyt.get_cell_mode(c);
+
+                        const int idx = [&type]
+                        {
+                            if (Lyt::technology::is_normal_cell1(type))
+                            {
+                                return 0;
+                            }
+                            if (Lyt::technology::is_normal_cell2(type))
+                            {
+                                return 1;
+                            }
+                            if (Lyt::technology::is_normal_cell3(type))
+                            {
+                                return 2;
+                            }
+                            if (Lyt::technology::is_normal_cell4(type))
+                            {
+                                return 3;
+                            }
+                            return 0;
+                        }();
+
+                        // write normal cell
+                        if (mol_qca_technology::is_normal_cell(type))
+                        {
+                            os << fmt::format(qll::OPEN_MQCA_LAYOUT_ITEM, 0, cell_id++, bb_x(c), bb_y(c), c.z * 2);
+                            os << fmt::format(qll::LAYOUT_ITEM_PROPERTY, qll::PROPERTY_PHASE, idx);
+                            os << qll::CLOSE_LAYOUT_ITEM;
+                        }
+                        // constant cells are handled as input pins
+                        else if (mol_qca_technology::is_constant_cell(type))
+                        {
+                            const auto const_name = mol_qca_technology::is_const_0_cell(type) ? "const0" : "const1";
+                            os << fmt::format(qll::PIN, tech_name, const_name, 0, cell_id++, bb_x(c), bb_y(c), c.z * 2);
+                        }
+
+                        // write via cell
+                        if (mol_qca_technology::is_vertical_cell_mode(mode) && c.z != lyt.z())
+                        {
+                            os << fmt::format(qll::OPEN_MQCA_LAYOUT_ITEM, 0, cell_id++, bb_x(c), bb_y(c),
+                                              (c.z * 2) + 1);
+                            os << fmt::format(qll::LAYOUT_ITEM_PROPERTY, qll::PROPERTY_PHASE, idx);
                             os << qll::CLOSE_LAYOUT_ITEM;
                         }
                     }
@@ -378,7 +440,7 @@ class write_qll_layout_impl
 }  // namespace detail
 
 /**
- * Writes a cell-level QCA or iNML layout to a qll file that is used by ToPoliNano & MagCAD
+ * Writes a cell-level QCA, molQCA or iNML layout to a qll file that is used by ToPoliNano & MagCAD
  * (https://topolinano.polito.it/), an EDA tool and a physical simulator for the iNML technology platform as well as
  * SCERPA (https://ieeexplore.ieee.org/document/8935211), a physical simulator for the mQCA technology platform.
  *
@@ -393,14 +455,15 @@ template <typename Lyt>
 void write_qll_layout(const Lyt& lyt, std::ostream& os)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(has_inml_technology_v<Lyt> || has_qca_technology_v<Lyt>, "Lyt must be an iNML or a QCA layout");
+    static_assert(has_inml_technology_v<Lyt> || has_qca_technology_v<Lyt> || has_mol_qca_technology_v<Lyt>,
+                  "Lyt must be an iNML, QCA or a molQCA layout");
 
     detail::write_qll_layout_impl p{lyt, os};
 
     p.run();
 }
 /**
- * Writes a cell-level QCA or iNML layout to a qll file that is used by ToPoliNano & MagCAD
+ * Writes a cell-level QCA, molQCA or iNML layout to a qll file that is used by ToPoliNano & MagCAD
  * (https://topolinano.polito.it/), an EDA tool and a physical simulator for the iNML technology platform as well as
  * SCERPA (https://ieeexplore.ieee.org/document/8935211), a physical simulator for the mQCA technology platform.
  *
@@ -414,7 +477,7 @@ void write_qll_layout(const Lyt& lyt, std::ostream& os)
 template <typename Lyt>
 void write_qll_layout(const Lyt& lyt, const std::string_view& filename)
 {
-    std::ofstream os{filename.data(), std::ofstream::out};
+    std::ofstream os{std::string(filename), std::ofstream::out};
 
     if (!os.is_open())
     {

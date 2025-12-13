@@ -22,7 +22,6 @@
 #include "fiction/technology/sidb_lattice_orientations.hpp"
 
 #include <kitty/dynamic_truth_table.hpp>
-#include <mockturtle/io/write_dot.hpp>
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/mig.hpp>
 #include <mockturtle/networks/xag.hpp>
@@ -75,11 +74,29 @@ inline constexpr const char* tec_name = "TEC";
 using logic_network_t = std::variant<aig_ptr, xag_ptr, mig_ptr, tec_ptr>;
 
 template <class Ntk>
-inline constexpr const char* ntk_type_name = std::is_same_v<std::decay_t<Ntk>, aig_nt> ? aig_name :
-                                             std::is_same_v<std::decay_t<Ntk>, xag_nt> ? xag_name :
-                                             std::is_same_v<std::decay_t<Ntk>, mig_nt> ? mig_name :
-                                             std::is_same_v<std::decay_t<Ntk>, tec_nt> ? tec_name :
-                                                                                         "?";
+inline constexpr const char* ntk_type_name = []
+{
+    if constexpr (std::is_same_v<std::decay_t<Ntk>, aig_nt>)
+    {
+        return aig_name;
+    }
+    else if constexpr (std::is_same_v<std::decay_t<Ntk>, xag_nt>)
+    {
+        return xag_name;
+    }
+    else if constexpr (std::is_same_v<std::decay_t<Ntk>, mig_nt>)
+    {
+        return mig_name;
+    }
+    else if constexpr (std::is_same_v<std::decay_t<Ntk>, tec_nt>)
+    {
+        return tec_name;
+    }
+    else
+    {
+        return "?";
+    }
+}();
 
 /**
  * FCN gate-level layouts.
@@ -128,34 +145,80 @@ using gate_layout_t =
 /**
  * FCN technologies.
  */
-constexpr const char* qca_name  = "QCA";
-constexpr const char* inml_name = "iNML";
-constexpr const char* sidb_name = "SiDB";
+constexpr const char* qca_name     = "QCA";
+constexpr const char* mol_qca_name = "molQCA";
+constexpr const char* inml_name    = "iNML";
+constexpr const char* sidb_name    = "SiDB";
 
 template <class Tech>
-inline constexpr const char* tech_impl_name = std::is_same_v<std::decay_t<Tech>, qca_technology>  ? qca_name :
-                                              std::is_same_v<std::decay_t<Tech>, inml_technology> ? inml_name :
-                                              std::is_same_v<std::decay_t<Tech>, sidb_technology> ? sidb_name :
-                                                                                                    "?";
+inline constexpr const char* tech_impl_name = []
+{
+    if constexpr (std::is_same_v<std::decay_t<Tech>, qca_technology>)
+    {
+        return qca_name;
+    }
+    else if constexpr (std::is_same_v<std::decay_t<Tech>, mol_qca_technology>)
+    {
+        return mol_qca_name;
+    }
+    else if constexpr (std::is_same_v<std::decay_t<Tech>, inml_technology>)
+    {
+        return inml_name;
+    }
+    else if constexpr (std::is_same_v<std::decay_t<Tech>, sidb_technology>)
+    {
+        return sidb_name;
+    }
+    else
+    {
+        return "?";
+    }
+}();
 
 constexpr const char* qca_cell_name  = "cells";
 constexpr const char* inml_cell_name = "magnets";
 constexpr const char* sidb_cell_name = "dots";
 
 template <class Tech>
-inline constexpr const char* tech_cell_name = std::is_same_v<std::decay_t<Tech>, qca_technology>  ? qca_cell_name :
-                                              std::is_same_v<std::decay_t<Tech>, inml_technology> ? inml_cell_name :
-                                              std::is_same_v<std::decay_t<Tech>, sidb_technology> ? sidb_cell_name :
-                                                                                                    "?";
+inline constexpr const char* tech_cell_name = []
+{
+    if constexpr (std::is_same_v<std::decay_t<Tech>, qca_technology>)
+    {
+        return qca_cell_name;
+    }
+    else if constexpr (std::is_same_v<std::decay_t<Tech>, inml_technology>)
+    {
+        return inml_cell_name;
+    }
+    else if constexpr (std::is_same_v<std::decay_t<Tech>, sidb_technology>)
+    {
+        return sidb_cell_name;
+    }
+    else
+    {
+        return "?";
+    }
+}();
 
 constexpr const char* sidb_100_name = "100";
 constexpr const char* sidb_111_name = "111";
 
 template <class Orientation>
-inline constexpr const char* sidb_lattice_name =
-    std::is_same_v<std::decay_t<Orientation>, sidb_100_lattice> ? sidb_100_name :
-    std::is_same_v<std::decay_t<Orientation>, sidb_111_lattice> ? sidb_111_name :
-                                                                  "?";
+inline constexpr const char* sidb_lattice_name = []
+{
+    if constexpr (std::is_same_v<std::decay_t<Orientation>, sidb_100_lattice>)
+    {
+        return sidb_100_name;
+    }
+    else if constexpr (std::is_same_v<std::decay_t<Orientation>, sidb_111_lattice>)
+    {
+        return sidb_111_name;
+    }
+    else
+    {
+        return "?";
+    }
+}();
 
 /**
  * FCN cell-level layouts.
@@ -168,6 +231,12 @@ using qca_cell_clk_lyt_ptr = std::shared_ptr<qca_cell_clk_lyt>;
 
 using stacked_qca_cell_clk_lyt     = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<cube::coord_t>>>;
 using stacked_qca_cell_clk_lyt_ptr = std::shared_ptr<stacked_qca_cell_clk_lyt>;
+
+using mol_qca_cell_clk_lyt =
+    cell_level_layout<mol_qca_technology,
+                      synchronization_element_layout  // se_layouts have only been investigated for QCA technologies
+                      <clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
+using mol_qca_cell_clk_lyt_ptr = std::shared_ptr<mol_qca_cell_clk_lyt>;
 
 using inml_cell_clk_lyt     = cell_level_layout<inml_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
 using inml_cell_clk_lyt_ptr = std::shared_ptr<inml_cell_clk_lyt>;
@@ -255,9 +324,9 @@ using cds_sidb_defect_100_cell_clk_lyt_cube =
     charge_distribution_surface<sidb_defect_surface<sidb_100_cell_clk_lyt_cube>>;
 using cds_sidb_defect_100_cell_clk_lyt_cube_ptr = std::shared_ptr<cds_sidb_defect_100_cell_clk_lyt_cube>;
 
-using cell_layout_t =
-    std::variant<qca_cell_clk_lyt_ptr, stacked_qca_cell_clk_lyt_ptr, inml_cell_clk_lyt_ptr, sidb_100_cell_clk_lyt_ptr,
-                 sidb_111_cell_clk_lyt_ptr, cds_sidb_100_cell_clk_lyt_ptr, cds_sidb_111_cell_clk_lyt_ptr>;
+using cell_layout_t = std::variant<qca_cell_clk_lyt_ptr, stacked_qca_cell_clk_lyt_ptr, mol_qca_cell_clk_lyt_ptr,
+                                   inml_cell_clk_lyt_ptr, sidb_100_cell_clk_lyt_ptr, sidb_111_cell_clk_lyt_ptr,
+                                   cds_sidb_100_cell_clk_lyt_ptr, cds_sidb_111_cell_clk_lyt_ptr>;
 
 }  // namespace fiction
 
