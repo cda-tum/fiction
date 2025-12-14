@@ -110,7 +110,7 @@ class qca_one_library : public fcn_gate_library<qca_technology, 5, 5>
         throw unsupported_gate_type_exception(t);
     }
     /**
-     * Post-layout optimization that assigns via cell mode to wire crossings.
+     * Post-layout optimization that assigns the via cell mode to wire crossings.
      *
      * @tparam CellLyt Cell-level layout type.
      * @param lyt The cell-level layout that has been created via application of `set_up_gate`.
