@@ -106,22 +106,18 @@ set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT fiction)
 include(CMakePackageConfigHelpers)
 
 write_basic_package_version_file(
-    fictionConfigVersion.cmake
-    VERSION ${PROJECT_VERSION}
-    COMPATIBILITY SameMajorVersion
-)
+  fictionConfigVersion.cmake
+  VERSION ${PROJECT_VERSION}
+  COMPATIBILITY SameMajorVersion)
 
 configure_package_config_file(
-    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/fictionConfig.cmake.in
-    ${CMAKE_CURRENT_BINARY_DIR}/fictionConfig.cmake
-    INSTALL_DESTINATION lib/cmake/fiction
-)
+  ${CMAKE_CURRENT_SOURCE_DIR}/cmake/fictionConfig.cmake.in
+  ${CMAKE_CURRENT_BINARY_DIR}/fictionConfig.cmake
+  INSTALL_DESTINATION lib/cmake/fiction)
 
-install(FILES
-    ${CMAKE_CURRENT_BINARY_DIR}/fictionConfig.cmake
-    ${CMAKE_CURRENT_BINARY_DIR}/fictionConfigVersion.cmake
-    DESTINATION lib/cmake/fiction
-)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/fictionConfig.cmake
+              ${CMAKE_CURRENT_BINARY_DIR}/fictionConfigVersion.cmake
+        DESTINATION lib/cmake/fiction)
 
 if(CMAKE_SKIP_INSTALL_RULES)
   return()

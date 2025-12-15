@@ -1603,7 +1603,7 @@ TEST_CASE("Two BDL pair wire with degeneracy for input 1", "[operational-domain]
         CHECK(op_domain_stats.num_operational_parameter_combinations == 0);
         CHECK(op_domain_stats.num_non_operational_parameter_combinations == 8281);
     }
-    SECTION("grid search, input is set via the absense of perturbers")
+    SECTION("grid search, input is set via the absence of perturbers")
     {
         operational_domain_stats op_domain_stats{};
 

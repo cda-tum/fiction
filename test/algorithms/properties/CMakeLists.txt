@@ -1,3 +1,1 @@
-target_sources(fiction_tests PRIVATE
-    critical_path_length_and_throughput.cpp
-)
+target_sources(fiction_tests PRIVATE critical_path_length_and_throughput.cpp)

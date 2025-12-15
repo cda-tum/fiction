@@ -18,7 +18,7 @@ namespace alice
 
 constexpr inline auto FICTION_CLI_CATEGORY_TECHNOLOGY = "Technology";
 
-// technlogy commands
+// technology commands
 ALICE_ADD_COMMAND(area, FICTION_CLI_CATEGORY_TECHNOLOGY)
 ALICE_ADD_COMMAND(cell, FICTION_CLI_CATEGORY_TECHNOLOGY)
 ALICE_ADD_COMMAND(energy, FICTION_CLI_CATEGORY_TECHNOLOGY)

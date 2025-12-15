@@ -4,12 +4,13 @@ include("${CMAKE_CURRENT_LIST_DIR}/fictionTargets.cmake")
 
 # Helper macro to define imported interface library
 macro(fiction_define_imported_target target_name include_subdir)
-    if(NOT TARGET ${target_name})
-        add_library(${target_name} INTERFACE IMPORTED)
-        set_target_properties(${target_name} PROPERTIES
-            INTERFACE_INCLUDE_DIRECTORIES "${PACKAGE_PREFIX_DIR}/include/${include_subdir}"
-        )
-    endif()
+  if(NOT TARGET ${target_name})
+    add_library(${target_name} INTERFACE IMPORTED)
+    set_target_properties(
+      ${target_name}
+      PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
+                 "${PACKAGE_PREFIX_DIR}/include/${include_subdir}")
+  endif()
 endmacro()
 
 # Define dependencies
@@ -23,7 +24,7 @@ fiction_define_imported_target(fiction::tinyxml2 "")
 
 # ALGLIB (Optional)
 if(EXISTS "${PACKAGE_PREFIX_DIR}/include/alglib")
-    fiction_define_imported_target(fiction::alglib "alglib")
+  fiction_define_imported_target(fiction::alglib "alglib")
 endif()
 
 check_required_components(fiction)

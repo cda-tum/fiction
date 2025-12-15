@@ -14,7 +14,7 @@ from mnt.pyfiction import (
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
-class TestPostLayoutOptimiztaion(unittest.TestCase):
+class TestPostLayoutOptimization(unittest.TestCase):
     def test_post_layout_optimization_default(self):
         network = read_technology_network(dir_path + "/../../resources/mux21.v")
 

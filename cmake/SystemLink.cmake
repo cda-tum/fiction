@@ -38,7 +38,8 @@ function(target_include_system_library target scope lib)
 
   # check if this is a target
   if(TARGET ${check_target})
-    get_target_property(lib_include_dirs ${check_target} INTERFACE_INCLUDE_DIRECTORIES)
+    get_target_property(lib_include_dirs ${check_target}
+                        INTERFACE_INCLUDE_DIRECTORIES)
     if(lib_include_dirs)
       target_include_system_directories(${target} ${scope} ${lib_include_dirs})
     else()

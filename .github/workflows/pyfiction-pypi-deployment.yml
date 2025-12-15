@@ -57,7 +57,7 @@ jobs:
     name: 📦 Build Source Distribution
     runs-on: ubuntu-latest
     steps:
-      - name: Clone respository
+      - name: Clone repository
         uses: actions/checkout@v6
         with:
           submodules: recursive

@@ -1,6 +1,4 @@
-target_sources(fiction_tests PRIVATE
-    mockturtle.cpp
-)
+target_sources(fiction_tests PRIVATE mockturtle.cpp)
 
 add_subdirectory(graph)
 add_subdirectory(iter)

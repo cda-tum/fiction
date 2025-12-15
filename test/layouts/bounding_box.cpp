@@ -137,7 +137,7 @@ TEST_CASE("Update 2D cell-level bounding box", "[bounding-box]")
 TEMPLATE_TEST_CASE("2D bounding box for siqad layout", "[bounding-box]", sidb_cell_clk_lyt_siqad,
                    sidb_111_cell_clk_lyt_siqad, sidb_100_cell_clk_lyt_siqad)
 {
-    SECTION("empyt layout")
+    SECTION("empty layout")
     {
         const TestType lyt{};
 
@@ -227,7 +227,7 @@ TEMPLATE_TEST_CASE("2D bounding box for siqad layout", "[bounding-box]", sidb_ce
 TEMPLATE_TEST_CASE("2D bounding box for siqad layout with atomic defect", "[bounding-box]",
                    sidb_defect_cell_clk_lyt_siqad, sidb_111_cell_clk_lyt_siqad, sidb_defect_100_cell_clk_lyt_siqad)
 {
-    SECTION("empyt layout")
+    SECTION("empty layout")
     {
         const TestType lyt{};
 
@@ -272,7 +272,7 @@ TEMPLATE_TEST_CASE("2D bounding box for siqad layout with atomic defect", "[boun
 
 TEMPLATE_TEST_CASE("2D bounding box for layout with atomic defect", "[bounding-box]", sidb_defect_cell_clk_lyt)
 {
-    SECTION("empyt layout")
+    SECTION("empty layout")
     {
         const TestType lyt{};
 
@@ -318,7 +318,7 @@ TEMPLATE_TEST_CASE("2D bounding box for layout with atomic defect", "[bounding-b
 TEMPLATE_TEST_CASE("2D bounding box for cube layout with atomic defect", "[bounding-box]", sidb_cell_clk_lyt_cube,
                    sidb_111_cell_clk_lyt_cube, sidb_100_cell_clk_lyt_cube)
 {
-    SECTION("empyt layout")
+    SECTION("empty layout")
     {
         const TestType lyt{};
 

@@ -224,7 +224,7 @@ Added
 - I/O:
     - SVG drawer for SiDB layouts
 - Experiments:
-    - Ship the SiQAD and Bestagon gate libraries als SQD files
+    - Ship the SiQAD and Bestagon gate libraries as SQD files
 - Documentation:
     - Added wiring reduction paper to publication list
     - Added Willem Lambooy to the authors list

@@ -63,7 +63,7 @@ int main()  // NOLINT
     double      total_runtime_exhaustive      = 0.0;
     double      total_runtime_quickexact      = 0.0;
     double      average_accuracy_quicksim     = 0.0;
-    double      total_single_rumtime_quicksim = 0.0;
+    double      total_single_runtime_quicksim = 0.0;
     double      total_tts_quicksim            = 0.0;
     std::size_t total_number_of_instances     = 0;
 
@@ -117,7 +117,7 @@ int main()  // NOLINT
         total_runtime_exhaustive += runtime_exhaustive;
         total_runtime_quickexact += runtime_quickexact;
         average_accuracy_quicksim += quicksim_accuracy_mean;
-        total_single_rumtime_quicksim += quicksim_single_runtime;
+        total_single_runtime_quicksim += quicksim_single_runtime;
         total_tts_quicksim += tts_quicksim;
 
         simulation_exp(gate, instances, runtime_exhaustive, runtime_quickexact, quicksim_accuracy_mean,
@@ -127,7 +127,7 @@ int main()  // NOLINT
     }
 
     simulation_exp("Total", total_number_of_instances, total_runtime_exhaustive, total_runtime_quickexact,
-                   average_accuracy_quicksim / gates.size(), total_single_rumtime_quicksim, total_tts_quicksim);
+                   average_accuracy_quicksim / gates.size(), total_single_runtime_quicksim, total_tts_quicksim);
     simulation_exp.save();
     simulation_exp.table();
 
