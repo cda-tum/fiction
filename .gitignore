@@ -45,6 +45,7 @@ cmake-build-*
 build*
 docs/_build/
 docs/html/
+*/_dep/
 
 # Cache files
 .cache/
@@ -58,9 +59,6 @@ docs/html/
 *.json
 !CMakePresets.json
 *.csv
-
-# Library artifacts
-libs/alglib-cmake/
 
 # Coverage files
 lcov.info
