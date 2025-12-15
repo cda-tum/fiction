@@ -29,6 +29,7 @@ FetchContent_Declare(
 if(POLICY CMP0148)
   set(CMAKE_POLICY_DEFAULT_CMP0148 OLD)
 endif()
+set(PYBIND11_FINDPYTHON ON)
 FetchContent_MakeAvailable(pybind11)
 
 # parallel-hashmap

@@ -58,7 +58,6 @@ if (FICTION_ALGLIB)
     install(DIRECTORY ${alglib-cmake_SOURCE_DIR}/src/cpp/src/headers/ DESTINATION include/alglib)
 endif ()
 
-# pybind11 is embedded via mugen or used for bindings, handled via FetchContent target where needed
 
 ################################################################################
 # Vendored Dependencies (Shipped with fiction in vendors/)
@@ -68,11 +67,17 @@ endif ()
 target_include_directories(libfiction SYSTEM INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/undirected_graph/source>
 )
+target_link_libraries(libfiction INTERFACE
+    $<INSTALL_INTERFACE:fiction::undirected_graph>
+)
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/undirected_graph/source/ DESTINATION include/undirected_graph)
 
 # Combinations (Header-only)
 target_include_directories(libfiction SYSTEM INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/combinations>
+)
+target_link_libraries(libfiction INTERFACE
+    $<INSTALL_INTERFACE:fiction::combinations>
 )
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/combinations/ DESTINATION include/combinations FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp")
 
