@@ -1,44 +1,33 @@
 add_executable(fiction)
 
-file(GLOB_RECURSE FICTION_CMD_SOURCES CONFIGURE_DEPENDS
-    "cmd/*/src/*.cpp"
-)
-
 target_sources(fiction PRIVATE
-    ${PROJECT_SOURCE_DIR}/cli/fiction.cpp
-    ${FICTION_CMD_SOURCES}
+    fiction.cpp
 )
 
-# Include configuration file
-include_directories(${PROJECT_BINARY_DIR}/include/)
+# Add command subdirectories
+add_subdirectory(cmd/general)
+add_subdirectory(cmd/io)
+add_subdirectory(cmd/logic)
+add_subdirectory(cmd/physical_design)
+add_subdirectory(cmd/simulation)
+add_subdirectory(cmd/technology)
+add_subdirectory(cmd/verification)
 
 # Add include directory for command headers
 target_include_directories(fiction PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 # Link against the project settings, libfiction and alice
-target_link_libraries(fiction PRIVATE libfiction alice)
-
-# Collect CLI headers under cmd/
-file(GLOB_RECURSE FICTION_CLI_HEADERS CONFIGURE_DEPENDS
-        RELATIVE ${PROJECT_SOURCE_DIR}/cli/
-        ${PROJECT_SOURCE_DIR}/cli/cmd/*/*.hpp
-        ${PROJECT_SOURCE_DIR}/cli/stores.hpp
-        ${PROJECT_SOURCE_DIR}/cli/pch_cli.hpp)
+target_link_libraries(fiction PRIVATE fiction::libfiction alice)
 
 # Register header file set for IDE integration and installation metadata
-# Multiple BASE_DIRS so CMake knows how to layout the installed tree
-#
-# Using a FILE_SET ensures proper exposure in CMake package exports later
-# if export() logic is added.
-#
-# (GLOB with CONFIGURE_DEPENDS keeps IDE view in sync when adding headers.)
 target_sources(fiction
         PRIVATE
         FILE_SET HEADERS
         BASE_DIRS
         ${PROJECT_SOURCE_DIR}/cli
         FILES
-        ${FICTION_CLI_HEADERS}
+        stores.hpp
+        pch_cli.hpp
 )
 # Ensure header verification is enabled for this target
 set_property(TARGET fiction PROPERTY VERIFY_INTERFACE_HEADER_SETS ON)
