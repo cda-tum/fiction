@@ -1,0 +1,20 @@
+target_sources(fiction_tests PRIVATE
+    csv_writer.cpp
+    dot_drawers.cpp
+    network_reader.cpp
+    print_layout.cpp
+    read_fgl_layout.cpp
+    read_fqca_layout.cpp
+    read_sidb_surface_defects.cpp
+    read_sqd_layout.cpp
+    tt_reader.cpp
+    write_fgl_layout.cpp
+    write_fqca_layout.cpp
+    write_location_and_ground_state.cpp
+    write_operational_domain.cpp
+    write_qca_layout.cpp
+    write_qll_layout.cpp
+    write_sqd_layout.cpp
+    write_sqd_sim_result.cpp
+    write_svg_layout.cpp
+)

@@ -16,21 +16,25 @@ target_compile_definitions(
         libfiction_test
         INTERFACE "TEST_PATH=\"${CMAKE_CURRENT_SOURCE_DIR}/\"")
 
-include_directories(.)
+target_include_directories(libfiction_test INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 
-file(GLOB_RECURSE FILENAMES */*.cpp)
-list(FILTER FILENAMES EXCLUDE REGEX "benchmark/.*$")
+add_executable(fiction_tests)
 
-foreach (FILE IN LISTS FILENAMES)
-    get_filename_component(NAME ${FILE} NAME_WE)
-    set(TEST_NAME test_${NAME})
-    add_executable(${TEST_NAME} ${FILE})
+# Add test subdirectories (populates fiction_tests sources)
+add_subdirectory(algorithms)
+add_subdirectory(io)
+add_subdirectory(layouts)
+add_subdirectory(networks)
+add_subdirectory(technology)
+add_subdirectory(utils)
 
-    # Link the test executable against libfiction and Catch2
-    target_link_libraries(${TEST_NAME} PRIVATE libfiction_test libfiction Catch2::Catch2WithMain)
+# Link the test executable against libfiction and Catch2
+target_link_libraries(fiction_tests PRIVATE libfiction_test fiction::libfiction Catch2::Catch2WithMain)
 
-    # Make Catch2 ignore SIGTERMs sent to applications when timeouts are reached
-    target_compile_definitions(${TEST_NAME} INTERFACE CATCH_CONFIG_NO_POSIX_SIGNALS)
+# Make Catch2 ignore SIGTERMs sent to applications when timeouts are reached
+target_compile_definitions(fiction_tests PRIVATE CATCH_CONFIG_NO_POSIX_SIGNALS)
 
-    add_test(NAME ${NAME} COMMAND ${TEST_NAME}) # group tests by file
-endforeach ()
+# Register tests
+list(APPEND CMAKE_MODULE_PATH "${Catch2_SOURCE_DIR}/extras")
+include(Catch)
+catch_discover_tests(fiction_tests)

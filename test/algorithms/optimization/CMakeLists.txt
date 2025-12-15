@@ -1,0 +1,3 @@
+target_sources(fiction_tests PRIVATE
+    simulated_annealing.cpp
+)

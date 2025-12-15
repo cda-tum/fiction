@@ -12,7 +12,7 @@
 
 using namespace fiction;
 
-TEST_CASE("Traits", "[bdl-input-iterator]")
+TEST_CASE("Aspect Ratio Iterator Traits", "[bdl-input-iterator]")
 {
     CHECK(std::is_same_v<std::iterator_traits<aspect_ratio_iterator<offset::ucoord_t>>::iterator_category,
                          std::forward_iterator_tag>);
