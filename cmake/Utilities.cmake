@@ -99,3 +99,19 @@ function(is_verbose var)
         PARENT_SCOPE)
   endif()
 endfunction()
+
+function(fiction_strip_target target_name)
+  if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    if(CMAKE_STRIP)
+      add_custom_command(
+        TARGET ${target_name}
+        POST_BUILD
+        COMMAND ${CMAKE_STRIP} $<TARGET_FILE:${target_name}>)
+    else()
+      message(
+        WARNING
+          "Strip command is not available. The executables will not be stripped."
+      )
+    endif()
+  endif()
+endfunction()

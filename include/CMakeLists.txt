@@ -57,3 +57,20 @@ set_property(TARGET libfiction PROPERTY VERIFY_INTERFACE_HEADER_SETS ON)
 
 # Enforce project-wide C++ standard feature requirement (redundant but explicit)
 target_compile_features(libfiction INTERFACE cxx_std_${CMAKE_CXX_STANDARD})
+
+# Installation
+install(TARGETS libfiction
+    EXPORT fictionTargets
+    FILE_SET HEADERS
+)
+
+# Install internal targets to satisfy export set requirements
+install(TARGETS fiction_options fiction_warnings
+    EXPORT fictionTargets
+)
+
+install(EXPORT fictionTargets
+    FILE fictionTargets.cmake
+    NAMESPACE fiction::
+    DESTINATION lib/cmake/fiction
+)

@@ -94,14 +94,34 @@ endif()
 # target from visual studio
 if(MSVC)
   get_all_installable_targets(all_targets)
-  message("all_targets=${all_targets}")
   set_target_properties(
     ${all_targets} PROPERTIES VS_DEBUGGER_ENVIRONMENT
                               "PATH=$(VC_ExecutablePath_x64);%PATH%")
 endif()
 
 # set the startup project for the "play" button in MSVC
-set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT intro)
+set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT fiction)
+
+# Package Configuration Generation
+include(CMakePackageConfigHelpers)
+
+write_basic_package_version_file(
+    fictionConfigVersion.cmake
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY SameMajorVersion
+)
+
+configure_package_config_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/fictionConfig.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/fictionConfig.cmake
+    INSTALL_DESTINATION lib/cmake/fiction
+)
+
+install(FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/fictionConfig.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/fictionConfigVersion.cmake
+    DESTINATION lib/cmake/fiction
+)
 
 if(CMAKE_SKIP_INSTALL_RULES)
   return()

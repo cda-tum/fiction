@@ -95,15 +95,9 @@ if (FICTION_LOGIC_SYNTHESIS_FLOW)
 endif ()
 
 # Strip the executable if we are in Release mode
-if (CMAKE_BUILD_TYPE STREQUAL "Release")
-    if (CMAKE_STRIP)
-        add_custom_command(
-                TARGET fiction
-                POST_BUILD
-                COMMAND ${CMAKE_STRIP} $<TARGET_FILE:fiction>)
-    else ()
-        message(
-                WARNING
-                "Strip command is not available. The executables will not be stripped.")
-    endif ()
-endif ()
+fiction_strip_target(fiction)
+
+# Installation
+install(TARGETS fiction
+    RUNTIME DESTINATION bin
+)

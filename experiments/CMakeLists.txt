@@ -30,6 +30,7 @@ target_compile_definitions(
   fiction_experiments
   INTERFACE "EXPERIMENTS_PATH=\"${CMAKE_CURRENT_SOURCE_DIR}/\"")
 
+# Recursing is fine here to reduce config overhead
 file(GLOB_RECURSE FILENAMES *.cpp)
 
 foreach(filename ${FILENAMES})
@@ -38,17 +39,5 @@ foreach(filename ${FILENAMES})
   target_link_libraries(${expname} PUBLIC fiction_experiments)
 
   # Strip the executable if we are in Release mode
-  if(CMAKE_BUILD_TYPE STREQUAL "Release")
-    if(CMAKE_STRIP)
-      add_custom_command(
-        TARGET ${expname}
-        POST_BUILD
-        COMMAND ${CMAKE_STRIP} $<TARGET_FILE:${expname}>)
-    else()
-      message(
-        WARNING
-          "Strip command is not available. The executables will not be stripped."
-      )
-    endif()
-  endif()
+  fiction_strip_target(${expname})
 endforeach()
