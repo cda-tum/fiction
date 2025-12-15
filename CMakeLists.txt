@@ -48,8 +48,8 @@ add_library(fiction::fiction_warnings ALIAS fiction_warnings)
 # Include header files
 add_subdirectory(include)
 
-# Include libraries
-add_subdirectory(libs)
+# Add vendors (formerly libs)
+add_subdirectory(vendors)
 
 # Enable progress bars
 if(NOT WIN32)

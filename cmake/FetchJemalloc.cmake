@@ -7,8 +7,8 @@ endif ()
 include(ExternalProject)
 
 set(JEMALLOC_TAG "5.3.0" CACHE STRING "Which tag/revision of jemalloc to use")
-set(JEMALLOC_SOURCE_DIR "${CMAKE_SOURCE_DIR}/libs/jemalloc")
-set(JEMALLOC_PREFIX_DIR "${CMAKE_BINARY_DIR}/libs/jemalloc")
+set(JEMALLOC_SOURCE_DIR "${CMAKE_BINARY_DIR}/_deps/jemalloc-src")
+set(JEMALLOC_PREFIX_DIR "${CMAKE_BINARY_DIR}/_deps/jemalloc-build")
 set(JEMALLOC_INSTALL_DIR "${JEMALLOC_PREFIX_DIR}/install")
 
 # Decide parallel build args, if no jobserver is in MAKEFLAGS.

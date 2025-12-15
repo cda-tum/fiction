@@ -88,7 +88,6 @@ sdist.exclude = [
     "**/experiments",
     "**/examples",
     "**/include",
-    "**/libs",
     "**/cmake-build-**",
     "**/plots",
     "**/test",
@@ -149,7 +148,7 @@ build-frontend = "build[uv]"
 manylinux-x86_64-image = "manylinux_2_28"
 
 [tool.cibuildwheel.linux]
-environment = { Z3_ROOT = "/opt/python/cp311-cp311/lib/python3.11/site-packages/z3", ALGLIB_DIR = "libs/alglib-cmake/src/cpp/src" }
+environment = { Z3_ROOT = "/opt/python/cp311-cp311/lib/python3.11/site-packages/z3" }
 before-all = "/opt/python/cp311-cp311/bin/pip install z3-solver>=4.8.0"
 repair-wheel-command = [
     "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/python/cp311-cp311/lib/python3.11/site-packages/z3/lib",
