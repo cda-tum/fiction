@@ -5,7 +5,7 @@
 #ifndef PYFICTION_VERSION_INFO_HPP
 #define PYFICTION_VERSION_INFO_HPP
 
-#include <fiction/utils/version_info.hpp.in>
+#include <fiction/utils/version_info.hpp>
 
 #include <pybind11/pybind11.h>
 

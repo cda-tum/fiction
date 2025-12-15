@@ -28,15 +28,23 @@ endfunction()
 # Include the directories of a library target as system directories (which
 # suppresses their warnings).
 function(target_include_system_library target scope lib)
+  # Check if lib contains a generator expression for BUILD_INTERFACE
+  string(REGEX MATCH "\\$<BUILD_INTERFACE:(.+)>" match "${lib}")
+  if(CMAKE_MATCH_1)
+    set(check_target ${CMAKE_MATCH_1})
+  else()
+    set(check_target ${lib})
+  endif()
+
   # check if this is a target
-  if(TARGET ${lib})
-    get_target_property(lib_include_dirs ${lib} INTERFACE_INCLUDE_DIRECTORIES)
+  if(TARGET ${check_target})
+    get_target_property(lib_include_dirs ${check_target} INTERFACE_INCLUDE_DIRECTORIES)
     if(lib_include_dirs)
       target_include_system_directories(${target} ${scope} ${lib_include_dirs})
     else()
       message(
         TRACE
-        "${lib} library does not have the INTERFACE_INCLUDE_DIRECTORIES property."
+        "${check_target} library does not have the INTERFACE_INCLUDE_DIRECTORIES property."
       )
     endif()
   endif()

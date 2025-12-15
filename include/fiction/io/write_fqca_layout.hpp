@@ -7,7 +7,7 @@
 
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/traits.hpp"
-#include "utils/version_info.hpp"
+#include "fiction/utils/version_info.hpp"
 
 #include <fmt/format.h>
 

@@ -72,6 +72,13 @@ macro(fiction_local_options)
   fiction_set_project_warnings(fiction_warnings ${FICTION_WARNINGS_AS_ERRORS}
                                "" "" "" "")
 
+  target_compile_options(fiction_options INTERFACE
+    $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:
+        -fvisibility=hidden
+        -fvisibility-inlines-hidden
+    >
+  )
+
   include(cmake/Sanitizers.cmake)
   fiction_enable_sanitizers(
     fiction_options ${FICTION_ENABLE_SANITIZER_ADDRESS}

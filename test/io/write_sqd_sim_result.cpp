@@ -12,6 +12,7 @@
 #include <fiction/technology/sidb_lattice_orientations.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/stl_utils.hpp>
+#include <fiction/utils/version_info.hpp>
 
 #include <any>
 #include <chrono>
@@ -20,8 +21,6 @@
 #include <sstream>
 #include <string>
 #include <vector>
-
-#include <utils/version_info.hpp>
 
 using namespace fiction;
 

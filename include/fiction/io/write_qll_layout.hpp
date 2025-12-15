@@ -10,7 +10,7 @@
 #include "fiction/technology/magcad_magnet_count.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
-#include "utils/version_info.hpp"
+#include "fiction/utils/version_info.hpp"
 
 #include <fmt/format.h>
 

@@ -7,7 +7,7 @@
 
 #include "fiction/traits.hpp"
 #include "fiction/utils/network_utils.hpp"
-#include "utils/version_info.hpp"
+#include "fiction/utils/version_info.hpp"
 
 #include <fiction/layouts/hexagonal_layout.hpp>
 

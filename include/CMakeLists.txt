@@ -1,7 +1,12 @@
 add_library(libfiction INTERFACE)
+add_library(fiction::libfiction ALIAS libfiction)
 
-target_include_directories(libfiction INTERFACE ${PROJECT_SOURCE_DIR}/include
-                                                ${PROJECT_BINARY_DIR}/include/)
+target_include_directories(libfiction INTERFACE
+    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+    $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>
+    $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/generated/include>
+    $<INSTALL_INTERFACE:include>
+)
 
 target_compile_features(libfiction INTERFACE cxx_std_${CMAKE_CXX_STANDARD})
 
@@ -22,7 +27,7 @@ endif ()
 
 # Add configuration file
 configure_file(${PROJECT_SOURCE_DIR}/include/fiction/utils/version_info.hpp.in
-               utils/version_info.hpp)
+               ${PROJECT_BINARY_DIR}/generated/include/fiction/utils/version_info.hpp)
 
 # Collect top-level public headers under include/
 file(GLOB_RECURSE FICTION_PUBLIC_HEADERS CONFIGURE_DEPENDS
@@ -42,9 +47,10 @@ target_sources(libfiction
       BASE_DIRS
         ${PROJECT_SOURCE_DIR}/include
         ${PROJECT_BINARY_DIR}/include
+        ${PROJECT_BINARY_DIR}/generated/include
       FILES
         ${FICTION_PUBLIC_HEADERS}
-        ${PROJECT_BINARY_DIR}/include/utils/version_info.hpp
+        ${PROJECT_BINARY_DIR}/generated/include/fiction/utils/version_info.hpp
 )
 # Ensure header verification is enabled for this target
 set_property(TARGET libfiction PROPERTY VERIFY_INTERFACE_HEADER_SETS ON)
