@@ -8,8 +8,7 @@ function(
   WARNINGS_AS_ERRORS
   MSVC_WARNINGS
   CLANG_WARNINGS
-  GCC_WARNINGS
-  CUDA_WARNINGS)
+  GCC_WARNINGS)
   if("${MSVC_WARNINGS}" STREQUAL "")
     set(MSVC_WARNINGS
         /W4     # Baseline reasonable warnings
@@ -93,12 +92,6 @@ function(
     )
   endif()
 
-  if("${CUDA_WARNINGS}" STREQUAL "")
-    set(CUDA_WARNINGS -Wall -Wextra -Wunused -Wconversion -Wshadow
-                      # TODO add more Cuda warnings
-    )
-  endif()
-
   if(WARNINGS_AS_ERRORS)
     message(TRACE "Warnings are treated as errors")
     list(APPEND CLANG_WARNINGS -Werror)
@@ -116,20 +109,15 @@ function(
     message(
       AUTHOR_WARNING
         "No compiler warnings set for CXX compiler: '${CMAKE_CXX_COMPILER_ID}'")
-    # TODO support Intel compiler
   endif()
 
   # use the same warning flags for C
   set(PROJECT_WARNINGS_C "${PROJECT_WARNINGS_CXX}")
-
-  set(PROJECT_WARNINGS_CUDA "${CUDA_WARNINGS}")
 
   target_compile_options(
     ${project_name}
     INTERFACE # C++ warnings
               $<$<COMPILE_LANGUAGE:CXX>:${PROJECT_WARNINGS_CXX}>
               # C warnings
-              $<$<COMPILE_LANGUAGE:C>:${PROJECT_WARNINGS_C}>
-              # Cuda warnings
-              $<$<COMPILE_LANGUAGE:CUDA>:${PROJECT_WARNINGS_CUDA}>)
+              $<$<COMPILE_LANGUAGE:C>:${PROJECT_WARNINGS_C}>)
 endfunction()

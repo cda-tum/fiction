@@ -70,7 +70,7 @@ macro(fiction_local_options)
 
   include(cmake/CompilerWarnings.cmake)
   fiction_set_project_warnings(fiction_warnings ${FICTION_WARNINGS_AS_ERRORS}
-                               "" "" "" "")
+                               "" "" "")
 
   target_compile_options(fiction_options INTERFACE
     $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:
