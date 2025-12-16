@@ -160,9 +160,9 @@ def create_logic_network(filename: str) -> LogicNetwork:
   - Prefer STL over custom algorithms.
   - Use braced initialization.
 - ⚠️ **Ask First**:
-  - Before adding new third-party dependencies to `libs/` or `CMakeLists.txt`.
+  - Before adding new third-party dependencies to `vendors/` or `CMakeLists.txt`.
   - Before changing major build configurations.
 - 🚫 **Never**:
-  - Modify files in `libs/`.
+  - Modify files in `vendors/`.
   - Commit secrets or large binary files.
   - Use `using namespace std;`.
