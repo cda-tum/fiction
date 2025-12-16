@@ -60,6 +60,11 @@ Changed
 - Dependencies:
     - Updated all dependencies to their latest versions
 
+Removed
+#######
+- Continuous integration:
+    - macOS 13 has been removed, along with support for the x86_64 (Intel) architecture
+
 Fixed
 #####
 - Data structures:
