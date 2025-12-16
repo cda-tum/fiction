@@ -45,7 +45,7 @@ You are an expert software architect and engineer specializing in **C++17**, **P
   - `bindings/mnt/pyfiction/`: **Read/Write**. Python bindings and tests.
   - `cli/`: **Read/Write**. Command-line interface.
   - `docs/`: **Read/Write**. Documentation (Sphinx/Doxygen).
-  - `libs/`: **ReadOnly**. Third-party libraries (NEVER modify).
+  - `vendors/`: **ReadOnly**. Third-party libraries (NEVER modify).
   - `experiments/`: **Read/Write**. Scientific experiments for reproducibility of papers.
 
 ## Commands
