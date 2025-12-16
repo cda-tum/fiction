@@ -18,6 +18,10 @@ Changed
 #######
 - Build system:
     - Restructured the CLI command implementation to improve code organization, modularity, and compilation speed
+    - Refactored the entire CMake build system to use ``FetchContent`` for dependency management instead of git submodules
+    - Moved vendored libraries from ``libs/`` to ``vendors/``
+    - Improved build configuration and option handling for better modularity
+    - Addressed several CMake and compiler warnings (including CMP0148 and Pybind11 compatibility)
 
 
 v0.6.12 - 2025-10-29
