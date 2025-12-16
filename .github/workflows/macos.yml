@@ -45,8 +45,6 @@ jobs:
     steps:
       - name: Clone Repository
         uses: actions/checkout@v6
-        with:
-          submodules: recursive
 
       - name: Setup Python
         uses: actions/setup-python@v6

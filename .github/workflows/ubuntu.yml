@@ -76,8 +76,6 @@ jobs:
 
       - name: Clone Repository
         uses: actions/checkout@v6
-        with:
-          submodules: recursive
 
       - name: Setup ccache
         # ccache is not supported on ARM yet
