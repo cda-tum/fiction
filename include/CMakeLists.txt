@@ -59,7 +59,7 @@ endif()
 # system headers that are not needed and that may conflict with other headers.
 # This is only supported by libc++.
 if(CMAKE_CXX_COMPILER_ID MATCHES ".*Clang")
-  target_compile_definitions(${target_name}
+  target_compile_definitions(libfiction
                              INTERFACE _LIBCPP_REMOVE_TRANSITIVE_INCLUDES)
 endif()
 
