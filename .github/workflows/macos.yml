@@ -8,7 +8,6 @@ on:
       - "**/*.cpp"
       - "**/*.cmake"
       - "**/CMakeLists.txt"
-      - "libs/**"
       - ".github/workflows/macos.yml"
       - "!bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp"
   pull_request:
@@ -18,7 +17,6 @@ on:
       - "**/*.cpp"
       - "**/*.cmake"
       - "**/CMakeLists.txt"
-      - "libs/**"
       - ".github/workflows/macos.yml"
       - "!bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp"
   merge_group:

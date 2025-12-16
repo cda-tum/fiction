@@ -9,7 +9,6 @@ on:
       - "**/*.cmake"
       - "**/CMakeLists.txt"
       - "**/*.py"
-      - "libs/**"
       - ".github/workflows/codeql-analysis.yml"
       - "!bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp"
   pull_request:
@@ -20,7 +19,6 @@ on:
       - "**/*.cmake"
       - "**/CMakeLists.txt"
       - "**/*.py"
-      - "libs/**"
       - ".github/workflows/codeql-analysis.yml"
       - "!bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp"
   merge_group:

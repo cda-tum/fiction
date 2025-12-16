@@ -8,7 +8,6 @@ on:
       - "**/*.cpp"
       - "**/*.cmake"
       - "**/CMakeLists.txt"
-      - "libs/**"
       - ".github/workflows/ubuntu.yml"
       - "!bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp"
   pull_request:
@@ -18,7 +17,6 @@ on:
       - "**/*.cpp"
       - "**/*.cmake"
       - "**/CMakeLists.txt"
-      - "libs/**"
       - ".github/workflows/ubuntu.yml"
       - "!bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp"
   merge_group:
@@ -100,7 +98,7 @@ jobs:
       - name: Install pip packages
         uses: BSFishy/pip-action@v1
         with:
-          requirements: ${{github.workspace}}/libs/mugen/requirements.txt
+          requirements: ${{github.workspace}}/vendors/mugen/requirements.txt
 
       - name: Setup mold
         uses: rui314/setup-mold@v1
