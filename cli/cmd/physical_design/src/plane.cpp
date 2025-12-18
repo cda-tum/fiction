@@ -48,10 +48,10 @@ plane_command::plane_command(const environment::ptr& e) :
 
 void plane_command::execute()
 {
-    auto& ns = store<fiction::logic_network_t>();
-    auto& ls = store<fiction::gate_layout_t>();
+    auto& lns = store<fiction::logic_network_t>();
+    auto& gls = store<fiction::gate_layout_t>();
 
-    if (ns.empty())
+    if (lns.empty())
     {
         env->out() << "[w] no logic network in store\n";
         return;
@@ -93,7 +93,7 @@ void plane_command::execute()
         return std::make_shared<fiction::tec_nt>(fiction::network_balancing<fiction::tec_nt>(tec_f, bal_ps));
     };
 
-    auto tec_b = std::visit(perform_fanouts_and_balance, ns.current());
+    auto tec_b = std::visit(perform_fanouts_and_balance, lns.current());
 
     const fiction::mutable_rank_view vpi_r(*tec_b);
 
@@ -101,7 +101,7 @@ void plane_command::execute()
 
     try
     {
-        ls.extend() = std::make_shared<fiction::cart_gate_clk_lyt>(
+        gls.extend() = std::make_shared<fiction::cart_gate_clk_lyt>(
             fiction::plane<fiction::cart_gate_clk_lyt>(planarized_ntk, ps, &st));
     }
     catch (const fiction::high_degree_fanin_exception& e)
