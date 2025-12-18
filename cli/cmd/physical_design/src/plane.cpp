@@ -66,23 +66,22 @@ void plane_command::execute()
 
     ps.number_of_clock_phases = num_clock_phases == 3 ? fiction::num_clks::THREE : fiction::num_clks::FOUR;
 
-    using po_enum = decltype(dup_ps.po_order);
     switch (po_order)
     {
         case 0u:
         {
-            dup_ps.po_order = po_enum::KEEP_PO_ORDER;
+            dup_ps.po_order = fiction::node_duplication_planarization_params::output_order::KEEP_PO_ORDER;
             break;
         }
         case 1u:
         {
-            dup_ps.po_order = po_enum::RANDOM_PO_ORDER;
+            dup_ps.po_order = fiction::node_duplication_planarization_params::output_order::RANDOM_PO_ORDER;
             break;
         }
         default:
         {
             env->out() << "[w] invalid --po-order, defaulting to keep\n";
-            dup_ps.po_order = po_enum::KEEP_PO_ORDER;
+            dup_ps.po_order = fiction::node_duplication_planarization_params::output_order::KEEP_PO_ORDER;
             break;
         }
     }
