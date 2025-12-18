@@ -4,7 +4,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "utils/version_info.hpp"
+#include "fiction/utils/version_info.hpp"
 
 #include <fiction/io/write_qca_layout.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>

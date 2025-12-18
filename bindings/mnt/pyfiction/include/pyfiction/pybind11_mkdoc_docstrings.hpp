@@ -6317,7 +6317,7 @@ static const char *__doc_fiction_detail_design_sidb_gates_impl_output_bdl_wires 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_params = R"doc(Parameters for the *SiDB Gate Designer*.)doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_run_automatic_exhaustive_gate_designer =
-R"doc(Design gates by using the *Automatic Exhaustive Gate Desginer*. This
+R"doc(Design gates by using the *Automatic Exhaustive Gate Designer*. This
 algorithm was proposed in \"Minimal Design of SiDB Gates: An Optimal
 Basis for Circuits Based on Silicon Dangling Bonds\" by J. Drewniok,
 M. Walter, and R. Wille in NANOARCH 2023
@@ -14107,7 +14107,7 @@ each other).)doc";
 
 static const char *__doc_fiction_generate_random_sidb_layout_params_positive_charges_FORBIDDEN =
 R"doc(Positive charges are not allowed to occur (i.e. SiDBs need to be
-seperated by a few lattice points).)doc";
+separated by a few lattice points).)doc";
 
 static const char *__doc_fiction_generate_random_sidb_layout_params_positive_charges_MAY_OCCUR =
 R"doc(Positive charges can occur, which means that the
@@ -16940,7 +16940,7 @@ Template parameter ``InputIt``:
     Must meet the requirements of `LegacyInputIterator`.
 
 Parameter ``first``:
-    Begin of the range to examime.
+    Begin of the range to examine.
 
 Parameter ``last``:
     End of the range to examine.
@@ -16958,7 +16958,7 @@ Template parameter ``InputIt``:
     Must meet the requirements of `LegacyInputIterator`.
 
 Parameter ``first``:
-    Begin of the range to examime.
+    Begin of the range to examine.
 
 Parameter ``last``:
     End of the range to examine.

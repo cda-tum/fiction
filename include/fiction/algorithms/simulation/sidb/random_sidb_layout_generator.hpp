@@ -38,7 +38,7 @@ struct generate_random_sidb_layout_params
          */
         ALLOWED,
         /**
-         * Positive charges are not allowed to occur (i.e. SiDBs need to be seperated by a few lattice points).
+         * Positive charges are not allowed to occur (i.e. SiDBs need to be separated by a few lattice points).
          */
         FORBIDDEN,
         /**
@@ -132,16 +132,16 @@ generate_random_sidb_layout(const generate_random_sidb_layout_params<coordinate<
             next_to_neutral_defect = true;
         }
 
-        bool random_cell_is_identical_wih_defect = false;
+        bool random_cell_is_identical_with_defect = false;
         // check if a defect does not yet occupy random coordinate.
         if constexpr (has_get_sidb_defect_v<Lyt>)
         {
-            random_cell_is_identical_wih_defect = (lyt.get_sidb_defect(random_coord).type != sidb_defect_type::NONE);
+            random_cell_is_identical_with_defect = (lyt.get_sidb_defect(random_coord).type != sidb_defect_type::NONE);
         }
 
         // if the constraints that no positive SiDBs occur and the cell is not yet occupied by a defect are satisfied,
         // the SiDB is added to the layout
-        if (!random_cell_is_identical_wih_defect && !next_to_neutral_defect)
+        if (!random_cell_is_identical_with_defect && !next_to_neutral_defect)
         {
             if (skeleton.has_value())
             {

@@ -31,6 +31,9 @@
 
 using namespace fiction;
 
+namespace
+{
+
 exact_physical_design_params configuration() noexcept
 {
     return {};
@@ -326,6 +329,8 @@ bool has_straight_inverters(const Lyt& lyt) noexcept
 
     return only_straight_inverters;
 }
+
+}  // namespace
 
 TEST_CASE("Exact Cartesian physical design", "[exact]")
 {

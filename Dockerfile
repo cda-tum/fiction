@@ -32,7 +32,7 @@ USER appuser
 RUN python3 -m venv venv && \
     . venv/bin/activate && \
     pip install --upgrade --no-cache-dir pip setuptools && \
-    pip install --no-cache-dir z3-solver==4.13.0
+    pip install --no-cache-dir z3-solver==4.15.4
 
 # Add the virtual environment to the PATH
 ENV PATH="/app/venv/bin:$PATH"

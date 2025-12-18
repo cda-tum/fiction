@@ -8,7 +8,6 @@
 #include "fiction/algorithms/network_transformation/network_conversion.hpp"
 #include "fiction/traits.hpp"
 
-#include <mockturtle/algorithms/cleanup.hpp>
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/node_map.hpp>
 #include <mockturtle/views/topo_view.hpp>
@@ -16,8 +15,6 @@
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
-#include <deque>
-#include <functional>
 #include <optional>
 #include <queue>
 #include <random>
@@ -39,7 +36,7 @@ struct fanout_substitution_params
     /**
      * Breadth-first vs. depth-first fanout-tree substitution strategies.
      */
-    enum substitution_strategy
+    enum substitution_strategy : uint8_t
     {
         /**
          * Breadth-first substitution. Creates balanced fanout trees.
@@ -109,7 +106,7 @@ class fanout_substitution_impl
             available_fanouts{ntk_topo},
             ps{p}
     {
-        if (ps.strategy == fanout_substitution_params::RANDOM)
+        if (ps.strategy == fanout_substitution_params::substitution_strategy::RANDOM)
         {
             rng.emplace(ps.seed.value_or(std::random_device{}()));
         }
@@ -259,7 +256,7 @@ class fanout_substitution_impl
     mockturtle::signal<NtkDest> get_fanout(const NtkDest& substituted, const mockturtle::node<NtkSrc>& n,
                                            mockturtle::signal<NtkDest>& child)
     {
-        if (substituted.fanout_size(child) >= ps.threshold)
+        if (substituted.fanout_size(substituted.get_node(child)) >= ps.threshold)
         {
             if (auto fanouts = available_fanouts[n]; !fanouts.empty())
             {
@@ -267,7 +264,7 @@ class fanout_substitution_impl
                 do
                 {
                     child = fanouts.front();
-                    if (substituted.fanout_size(child) >= ps.degree)
+                    if (substituted.fanout_size(substituted.get_node(child)) >= ps.degree)
                     {
                         fanouts.pop();
                     }
@@ -341,7 +338,7 @@ class fanout_substitution_impl
         auto& dist = rng->dist;
         // maintain a vector of available fanout nodes and randomly select one
         std::vector<mockturtle::signal<NtkDest>> available_vec{child};
-        dist.param(typename std::uniform_int_distribution<std::size_t>::param_type(0, available_vec.size() - 1));
+        dist.param(std::uniform_int_distribution<std::size_t>::param_type(0, available_vec.size() - 1));
 
         for (auto f = 0u; f < num_fanouts; ++f)
         {
@@ -363,8 +360,7 @@ class fanout_substitution_impl
 
             if (!available_vec.empty())
             {
-                dist.param(
-                    typename std::uniform_int_distribution<std::size_t>::param_type(0, available_vec.size() - 1));
+                dist.param(std::uniform_int_distribution<std::size_t>::param_type(0, available_vec.size() - 1));
             }
         }
         // transfer the available nodes to a queue for later use in get_fanout
