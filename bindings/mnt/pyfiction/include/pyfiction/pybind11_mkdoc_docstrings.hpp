@@ -9552,6 +9552,15 @@ subsequent delay calculations.
 Parameter ``nd``:
     Node in the H-graph.)doc";
 
+static const char *__doc_fiction_detail_node_duplication_planarization_impl_fanout_state =
+R"doc(Represents the current state of fanout saturation during node
+insertion. A fanout is saturated if it has reached its maximum fanout
+limit.)doc";
+
+static const char *__doc_fiction_detail_node_duplication_planarization_impl_fanout_state_NORMAL = R"doc(No fanout saturation is active.)doc";
+
+static const char *__doc_fiction_detail_node_duplication_planarization_impl_fanout_state_SATURATED = R"doc(Fanout saturation is active.)doc";
+
 static const char *__doc_fiction_detail_node_duplication_planarization_impl_insert_if_not_first =
 R"doc(Inserts a node into a vector if it is unique.
 
@@ -9580,9 +9589,17 @@ Parameter ``position``:
     The position of the node (0 indicates a terminal node; controls
     duplicate insertion behavior).)doc";
 
+static const char *__doc_fiction_detail_node_duplication_planarization_impl_insertion_position = R"doc(Specifies the position of a node during insertion.)doc";
+
+static const char *__doc_fiction_detail_node_duplication_planarization_impl_insertion_position_INNER = R"doc(The node is an inner (non-terminal) fanin node.)doc";
+
+static const char *__doc_fiction_detail_node_duplication_planarization_impl_insertion_position_TERMINAL = R"doc(The node is a terminal node of a fanin relation.)doc";
+
 static const char *__doc_fiction_detail_node_duplication_planarization_impl_lvl_pairs = R"doc(The currently node_pairs used in the current level.)doc";
 
 static const char *__doc_fiction_detail_node_duplication_planarization_impl_node_duplication_planarization_impl = R"doc()doc";
+
+static const char *__doc_fiction_detail_node_duplication_planarization_impl_ntk_lvls = R"doc(The network stored as levels.)doc";
 
 static const char *__doc_fiction_detail_node_duplication_planarization_impl_ps = R"doc(The stats of the node_duplication class.)doc";
 
@@ -17472,21 +17489,17 @@ H-graph, an optimal solution for the NDCE problem for each level is
 found. The function traverses from the Primary Outputs (POs) towards
 the Primary Inputs (PIs).
 
-Template parameter ``NtkDest``:
-    Destination network type.
-
-Template parameter ``NtkSrc``:
+Template parameter ``Ntk``:
     Source network type.
 
-Parameter ``ntk_src``:
+Parameter ``ntk``:
     Source network to be utilized for the planarization.
 
 Parameter ``ps``:
     Node duplication parameters used in the computation.
 
 Returns:
-    A view of the planarized virtual_pi_network created in the format
-    of mutable_rank_view.)doc";
+    A planarized virtual_pi_network.)doc";
 
 static const char *__doc_fiction_node_duplication_planarization_params = R"doc(Parameters for the node duplication algorithm.)doc";
 
