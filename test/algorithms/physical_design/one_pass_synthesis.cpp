@@ -27,6 +27,9 @@
 
 using namespace fiction;
 
+namespace
+{
+
 one_pass_synthesis_params configuration() noexcept
 {
     one_pass_synthesis_params ps{};
@@ -121,6 +124,8 @@ void check(const Ntk& ntk, const one_pass_synthesis_params& ps)
     check_eq(ntk, layout);
     apply_gate_library(layout);
 }
+
+}  // namespace
 
 TEST_CASE("One-pass synthesis", "[one-pass]")
 {
