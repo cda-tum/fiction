@@ -420,17 +420,17 @@ class node_duplication_planarization_impl
      *
      * @param nd Node in the H-graph.
      */
-    void compute_slice_delays(const mockturtle::node<Ntk>& nd)
+    void compute_slice_delays(const mockturtle::node<Ntk>& n)
     {
         // Pis need to be propagated into the next level, since they have to be connected without crossings
-        if (ntk.is_pi(nd))
+        if (ntk.is_pi(n))
         {
-            fis.push_back(nd);
+            fis.push_back(n);
         }
 
         // Respect the rank order. If two combinations have the same delay and have no seen advantage then the one from
         // the original ranking is used, since it is inserted and not overwritten afterward.
-        ntk.foreach_fanin(nd,
+        ntk.foreach_fanin(n,
                           [&](auto fi)
                           {
                               if (!ntk.is_constant(fi))
@@ -513,15 +513,36 @@ class node_duplication_planarization_impl
         lvl_pairs.push_back(combinations);
     }
 
+    /**
+     * Represents the current state of fanout saturation during node insertion.
+     * A fanout is saturated if it has reached its maximum fanout limit.
+     */
     enum class fanout_state : uint8_t
     {
+        /**
+         * No fanout saturation is active.
+         */
         NORMAL,
+
+        /**
+         * Fanout saturation is active.
+         */
         SATURATED
     };
 
+    /**
+     * Specifies the position of a node during insertion.
+     */
     enum class insertion_position : uint8_t
     {
+        /**
+         * The node is a terminal node of a fanin relation.
+         */
         TERMINAL,
+
+        /**
+         * The node is an inner (non-terminal) fanin node.
+         */
         INNER
     };
 
@@ -572,7 +593,7 @@ class node_duplication_planarization_impl
     std::vector<mockturtle::node<Ntk>> compute_node_order()
     {
         std::vector<mockturtle::node<Ntk>> next_level;
-        fanout_state fo_st = fanout_state::NORMAL;
+        fanout_state                       fo_st = fanout_state::NORMAL;
 
         const auto& combinations = lvl_pairs.back();
 
@@ -611,7 +632,8 @@ class node_duplication_planarization_impl
                 {
                     fo_st = fanout_state::SATURATED;
                 }
-                insert_if_not_first(fanin_combination.outer_fanins.second, next_level, fo_st, insertion_position::TERMINAL);
+                insert_if_not_first(fanin_combination.outer_fanins.second, next_level, fo_st,
+                                    insertion_position::TERMINAL);
 
                 // Insert middle_fanins
                 for (const auto& node : fanin_combination.middle_fanins)
