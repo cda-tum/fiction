@@ -18,7 +18,8 @@
 namespace alice
 {
 /**
- * Executes a physical design approach using a planar embedding of a logic network.
+ * Executes the physical design approach Planar Layout from Network Embedding (PLANE), which finds a valid placement and
+ * routing without crossings given a planar network embedding.
  *
  * See include/fiction/algorithms/physical_design/planar_layout_from_network_embedding.hpp for more details.
  */
