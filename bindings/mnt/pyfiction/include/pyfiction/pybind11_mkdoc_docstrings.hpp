@@ -8018,20 +8018,6 @@ static const char *__doc_fiction_detail_generate_edge_intersection_graph_impl_ps
 
 static const char *__doc_fiction_detail_generate_edge_intersection_graph_impl_run = R"doc()doc";
 
-static const char *__doc_fiction_detail_get_buffer_lookup =
-R"doc(Defines a 3D lookup table using `std::array` and encapsulates it
-within a function. This table encodes all possible combinations of the
-previous level, connection type, orientations, and surrounding spacing
-(gaps). Based on these inputs, it returns the corresponding
-orientation and spacing configuration for the current buffer.)doc";
-
-static const char *__doc_fiction_detail_get_fanout_lookup =
-R"doc(Defines a 3D lookup table using `std::array` and encapsulates it
-within a function. This table encodes all possible combinations of the
-previous level, connection type, orientations, and surrounding spacing
-(gaps). Based on these inputs, it returns the corresponding
-orientation and spacing configuration for the current fanout.)doc";
-
 static const char *__doc_fiction_detail_get_offset =
 R"doc(Utility function to calculate the offset that has to be subtracted
 from any x-coordinate on the hexagonal layout.
@@ -10223,15 +10209,15 @@ Parameter ``p``:
 Parameter ``st``:
     Statistics object used to collect runtime and layout information.)doc";
 
-static const char *__doc_fiction_detail_plane_impl_ntk = R"doc()doc";
+static const char *__doc_fiction_detail_plane_impl_ntk = R"doc(The input network wrapped in a fanout view.)doc";
 
 static const char *__doc_fiction_detail_plane_impl_plane_impl = R"doc()doc";
 
-static const char *__doc_fiction_detail_plane_impl_po_counter = R"doc()doc";
+static const char *__doc_fiction_detail_plane_impl_po_counter = R"doc(Primary output counter.)doc";
 
-static const char *__doc_fiction_detail_plane_impl_ps = R"doc()doc";
+static const char *__doc_fiction_detail_plane_impl_ps = R"doc(The parameters controlling the planar layout from a network embedding.)doc";
 
-static const char *__doc_fiction_detail_plane_impl_pst = R"doc()doc";
+static const char *__doc_fiction_detail_plane_impl_pst = R"doc(Reference to the statistics collected during planar layout generation.)doc";
 
 static const char *__doc_fiction_detail_plane_impl_run = R"doc()doc";
 
