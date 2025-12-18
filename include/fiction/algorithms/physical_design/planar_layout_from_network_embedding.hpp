@@ -105,138 +105,130 @@ namespace detail
  * combinations of the previous level, connection type, orientations, and surrounding spacing (gaps). Based on these
  * inputs, it returns the corresponding orientation and spacing configuration for the current buffer.
  */
-inline std::array<std::array<std::array<std::array<std::pair<uint64_t, uint64_t>, 4>, 3>, 3>, 2>& get_buffer_lookup()
-{
-    static std::array<std::array<std::array<std::array<std::pair<uint64_t, uint64_t>, 4>, 3>, 3>, 2> array = {
-        {  // Array
-         {{// Unconnected
-           {{
-               // East
-               {{{0, 0}, {1, 0}, {1, 1}, {0, 1}}},  // gap 0
-               {{{0, 0}, {0, 0}, {1, 0}, {0, 0}}},  // gap 1
-               {{{0, 0}, {0, 0}, {0, 0}, {0, 0}}}   // gap 2 and higher
-           }},
-           {{
-               // South
-               {{{3, 0}, {2, 0}, {0, 0}, {0, 0}}},  // gap 0; only first two entries used
-               {{{3, 0}, {2, 0}, {0, 0}, {0, 0}}},  // gap 1
-               {{{3, 0}, {2, 0}, {0, 0}, {0, 0}}}   // gap 2
-           }},
-           {{
-               // Free
-               {{{0, 0}, {1, 0}, {2, 0}, {3, 0}}},  // gap 0
-               {{{0, 0}, {0, 0}, {1, 0}, {0, 0}}},  // gap 1
-               {{{0, 0}, {0, 0}, {0, 0}, {0, 0}}}   // gap 2 and higher
-           }}}},
-         {{// Connected
-           {{
-               // East
-               {{{0, 0}, {0, 0}, {0, 1}, {0, 1}}},  // gap 0
-               {{{0, 0}, {0, 0}, {0, 0}, {0, 0}}},  // gap 1
-               {{{0, 0}, {0, 0}, {0, 0}, {0, 0}}}   // gap 2 and higher
-           }},
-           {{
-               // South
-               {{{3, 0}, {3, 0}, {0, 0}, {0, 0}}},  // gap 0
-               {{{3, 0}, {3, 0}, {0, 0}, {0, 0}}},  // gap 1
-               {{{3, 0}, {3, 0}, {0, 0}, {0, 0}}}   // gap 2 and higher
-           }},
-           {{
-               // Free
-               {{{0, 0}, {0, 0}, {3, 0}, {3, 0}}},  // gap 0
-               {{{0, 0}, {0, 0}, {0, 0}, {0, 0}}},  // gap 1
-               {{{0, 0}, {0, 0}, {0, 0}, {0, 0}}}   // gap 2
-           }}}}}};
-    return array;
-}
+inline constexpr std::array<std::array<std::array<std::array<std::pair<uint64_t, uint64_t>, 4>, 3>, 3>, 2>
+    BUFFER_LOOKUP = {{  // Array
+                      {{// Unconnected
+                        {{
+                            // East
+                            {{{0, 0}, {1, 0}, {1, 1}, {0, 1}}},  // gap 0
+                            {{{0, 0}, {0, 0}, {1, 0}, {0, 0}}},  // gap 1
+                            {{{0, 0}, {0, 0}, {0, 0}, {0, 0}}}   // gap 2 and higher
+                        }},
+                        {{
+                            // South
+                            {{{3, 0}, {2, 0}, {0, 0}, {0, 0}}},  // gap 0; only first two entries used
+                            {{{3, 0}, {2, 0}, {0, 0}, {0, 0}}},  // gap 1
+                            {{{3, 0}, {2, 0}, {0, 0}, {0, 0}}}   // gap 2
+                        }},
+                        {{
+                            // Free
+                            {{{0, 0}, {1, 0}, {2, 0}, {3, 0}}},  // gap 0
+                            {{{0, 0}, {0, 0}, {1, 0}, {0, 0}}},  // gap 1
+                            {{{0, 0}, {0, 0}, {0, 0}, {0, 0}}}   // gap 2 and higher
+                        }}}},
+                      {{// Connected
+                        {{
+                            // East
+                            {{{0, 0}, {0, 0}, {0, 1}, {0, 1}}},  // gap 0
+                            {{{0, 0}, {0, 0}, {0, 0}, {0, 0}}},  // gap 1
+                            {{{0, 0}, {0, 0}, {0, 0}, {0, 0}}}   // gap 2 and higher
+                        }},
+                        {{
+                            // South
+                            {{{3, 0}, {3, 0}, {0, 0}, {0, 0}}},  // gap 0
+                            {{{3, 0}, {3, 0}, {0, 0}, {0, 0}}},  // gap 1
+                            {{{3, 0}, {3, 0}, {0, 0}, {0, 0}}}   // gap 2 and higher
+                        }},
+                        {{
+                            // Free
+                            {{{0, 0}, {0, 0}, {3, 0}, {3, 0}}},  // gap 0
+                            {{{0, 0}, {0, 0}, {0, 0}, {0, 0}}},  // gap 1
+                            {{{0, 0}, {0, 0}, {0, 0}, {0, 0}}}   // gap 2
+                        }}}}}};
 
 /**
  * Defines a 3D lookup table using `std::array` and encapsulates it within a function. This table encodes all possible
  * combinations of the previous level, connection type, orientations, and surrounding spacing (gaps). Based on these
  * inputs, it returns the corresponding orientation and spacing configuration for the current fanout.
  */
-inline std::array<std::array<std::array<std::array<std::pair<uint64_t, uint64_t>, 4>, 3>, 3>, 4>& get_fanout_lookup()
-{
-    static std::array<std::array<std::array<std::array<std::pair<uint64_t, uint64_t>, 4>, 3>, 3>, 4> array = {
-        {  // Array
-         {{// Type Fo 1+2
-           {{
-               // East
-               {{{1, 0}, {1, 1}, {1, 2}, {1, 1}}},  // gap 0
-               {{{1, 0}, {1, 0}, {1, 1}, {1, 0}}},  // gap 1
-               {{{1, 0}, {1, 0}, {1, 0}, {1, 0}}}   // gap 2
-           }},
-           {{
-               // South
-               {{{2, 0}, {2, 1}, {0, 0}, {0, 0}}},  // gap 0
-               {{{2, 0}, {2, 1}, {0, 0}, {0, 0}}},  // gap 1
-               {{{2, 0}, {2, 1}, {0, 0}, {0, 0}}}   // gap 2
-           }},
-           {{
-               // Free
-               {{{1, 0}, {2, 0}, {2, 1}, {2, 0}}},  // gap 0
-               {{{1, 0}, {1, 0}, {2, 0}, {1, 0}}},  // gap 1
-               {{{1, 0}, {1, 0}, {1, 0}, {1, 0}}}   // gap 2
-           }}}},
-         {{// Type F1
-           {{
-               // East
-               {{{0, 0}, {0, 1}, {0, 2}, {0, 1}}},  // gap 0
-               {{{0, 0}, {0, 0}, {0, 1}, {0, 0}}},  // gap 1
-               {{{0, 0}, {0, 0}, {0, 0}, {0, 0}}}   // gap 2
-           }},
-           {{
-               // South
-               {{{3, 0}, {3, 1}, {0, 0}, {0, 0}}},  // gap 0
-               {{{3, 0}, {3, 1}, {0, 0}, {0, 0}}},  // gap 1
-               {{{3, 0}, {3, 1}, {0, 0}, {0, 0}}}   // gap 2
-           }},
-           {{
-               // Free
-               {{{0, 0}, {3, 0}, {3, 1}, {3, 0}}},  // gap 0
-               {{{0, 0}, {0, 0}, {3, 0}, {0, 0}}},  // gap 1
-               {{{0, 0}, {0, 0}, {0, 0}, {0, 0}}}   // gap 2
-           }}}},
-         {{// Type F2
-           {{
-               // East
-               {{{1, 0}, {1, 0}, {1, 1}, {1, 1}}},  // gap 0
-               {{{1, 0}, {1, 0}, {1, 0}, {1, 0}}},  // gap 1
-               {{{1, 0}, {1, 0}, {1, 0}, {1, 0}}}   // gap 2
-           }},
-           {{
-               // South
-               {{{2, 0}, {2, 0}, {0, 0}, {0, 0}}},  // gap 0
-               {{{2, 0}, {2, 0}, {0, 0}, {0, 0}}},  // gap 1
-               {{{2, 0}, {2, 0}, {0, 0}, {0, 0}}}   // gap 2
-           }},
-           {{
-               // Free
-               {{{1, 0}, {1, 0}, {2, 0}, {2, 0}}},  // gap 0
-               {{{1, 0}, {1, 0}, {1, 0}, {1, 0}}},  // gap 1
-               {{{1, 0}, {1, 0}, {1, 0}, {1, 0}}}   // gap 2
-           }}}},
-         {{// Type F3
-           {{
-               // East
-               {{{0, 0}, {0, 0}, {0, 0}, {0, 0}}},  // gap 0
-               {{{0, 0}, {0, 0}, {0, 0}, {0, 0}}},  // gap 1
-               {{{0, 0}, {0, 0}, {0, 0}, {0, 0}}}   // gap 2
-           }},
-           {{
-               // South
-               {{{3, 0}, {3, 0}, {0, 0}, {0, 0}}},  // gap 0
-               {{{3, 0}, {3, 0}, {0, 0}, {0, 0}}},  // gap 1
-               {{{3, 0}, {3, 0}, {0, 0}, {0, 0}}}   // gap 2
-           }},
-           {{
-               // Free
-               {{{0, 0}, {0, 0}, {3, 0}, {3, 0}}},  // gap 0
-               {{{0, 0}, {0, 0}, {0, 0}, {0, 0}}},  // gap 1
-               {{{0, 0}, {0, 0}, {0, 0}, {0, 0}}}   // gap 2
-           }}}}}};
-    return array;
-}
+inline constexpr std::array<std::array<std::array<std::array<std::pair<uint64_t, uint64_t>, 4>, 3>, 3>, 4>
+    FANOUT_LOOKUP = {{  // Array
+                      {{// Type Fo 1+2
+                        {{
+                            // East
+                            {{{1, 0}, {1, 1}, {1, 2}, {1, 1}}},  // gap 0
+                            {{{1, 0}, {1, 0}, {1, 1}, {1, 0}}},  // gap 1
+                            {{{1, 0}, {1, 0}, {1, 0}, {1, 0}}}   // gap 2
+                        }},
+                        {{
+                            // South
+                            {{{2, 0}, {2, 1}, {0, 0}, {0, 0}}},  // gap 0
+                            {{{2, 0}, {2, 1}, {0, 0}, {0, 0}}},  // gap 1
+                            {{{2, 0}, {2, 1}, {0, 0}, {0, 0}}}   // gap 2
+                        }},
+                        {{
+                            // Free
+                            {{{1, 0}, {2, 0}, {2, 1}, {2, 0}}},  // gap 0
+                            {{{1, 0}, {1, 0}, {2, 0}, {1, 0}}},  // gap 1
+                            {{{1, 0}, {1, 0}, {1, 0}, {1, 0}}}   // gap 2
+                        }}}},
+                      {{// Type F1
+                        {{
+                            // East
+                            {{{0, 0}, {0, 1}, {0, 2}, {0, 1}}},  // gap 0
+                            {{{0, 0}, {0, 0}, {0, 1}, {0, 0}}},  // gap 1
+                            {{{0, 0}, {0, 0}, {0, 0}, {0, 0}}}   // gap 2
+                        }},
+                        {{
+                            // South
+                            {{{3, 0}, {3, 1}, {0, 0}, {0, 0}}},  // gap 0
+                            {{{3, 0}, {3, 1}, {0, 0}, {0, 0}}},  // gap 1
+                            {{{3, 0}, {3, 1}, {0, 0}, {0, 0}}}   // gap 2
+                        }},
+                        {{
+                            // Free
+                            {{{0, 0}, {3, 0}, {3, 1}, {3, 0}}},  // gap 0
+                            {{{0, 0}, {0, 0}, {3, 0}, {0, 0}}},  // gap 1
+                            {{{0, 0}, {0, 0}, {0, 0}, {0, 0}}}   // gap 2
+                        }}}},
+                      {{// Type F2
+                        {{
+                            // East
+                            {{{1, 0}, {1, 0}, {1, 1}, {1, 1}}},  // gap 0
+                            {{{1, 0}, {1, 0}, {1, 0}, {1, 0}}},  // gap 1
+                            {{{1, 0}, {1, 0}, {1, 0}, {1, 0}}}   // gap 2
+                        }},
+                        {{
+                            // South
+                            {{{2, 0}, {2, 0}, {0, 0}, {0, 0}}},  // gap 0
+                            {{{2, 0}, {2, 0}, {0, 0}, {0, 0}}},  // gap 1
+                            {{{2, 0}, {2, 0}, {0, 0}, {0, 0}}}   // gap 2
+                        }},
+                        {{
+                            // Free
+                            {{{1, 0}, {1, 0}, {2, 0}, {2, 0}}},  // gap 0
+                            {{{1, 0}, {1, 0}, {1, 0}, {1, 0}}},  // gap 1
+                            {{{1, 0}, {1, 0}, {1, 0}, {1, 0}}}   // gap 2
+                        }}}},
+                      {{// Type F3
+                        {{
+                            // East
+                            {{{0, 0}, {0, 0}, {0, 0}, {0, 0}}},  // gap 0
+                            {{{0, 0}, {0, 0}, {0, 0}, {0, 0}}},  // gap 1
+                            {{{0, 0}, {0, 0}, {0, 0}, {0, 0}}}   // gap 2
+                        }},
+                        {{
+                            // South
+                            {{{3, 0}, {3, 0}, {0, 0}, {0, 0}}},  // gap 0
+                            {{{3, 0}, {3, 0}, {0, 0}, {0, 0}}},  // gap 1
+                            {{{3, 0}, {3, 0}, {0, 0}, {0, 0}}}   // gap 2
+                        }},
+                        {{
+                            // Free
+                            {{{0, 0}, {0, 0}, {3, 0}, {3, 0}}},  // gap 0
+                            {{{0, 0}, {0, 0}, {0, 0}, {0, 0}}},  // gap 1
+                            {{{0, 0}, {0, 0}, {0, 0}, {0, 0}}}   // gap 2
+                        }}}}}};
 
 /**
  * Computes the fan-out connection type of a node based on its successors' fan-in structures.
@@ -254,7 +246,7 @@ inline std::array<std::array<std::array<std::array<std::pair<uint64_t, uint64_t>
  * @return     Integer code (0–3) indicating the fan-out connection pattern.
  */
 template <typename Ntk>
-uint64_t calculate_fanout_connection_type(const Ntk& ntk, const mockturtle::node<Ntk>& n)
+uint8_t calculate_fanout_connection_type(const Ntk& ntk, const mockturtle::node<Ntk>& n)
 {
     // order the POs
     if (ntk.is_po(n))
@@ -276,7 +268,7 @@ uint64_t calculate_fanout_connection_type(const Ntk& ntk, const mockturtle::node
     {
         return 2;
     }
-    // both fan-puts are connected with a neighbour
+    // both fan-outs are connected with a neighbor
     return 3;
 }
 
@@ -292,10 +284,9 @@ uint64_t calculate_fanout_connection_type(const Ntk& ntk, const mockturtle::node
  * @param n         Node for which to compute the predecessor gap.
  * @return          Gap size (clamped to a maximum of 2).
  */
-
 template <typename Ntk, typename Lyt>
-uint64_t calculate_predecessor_gap(const Ntk& ntk, const mockturtle::node_map<mockturtle::signal<Lyt>, Ntk>& node2pos,
-                                   const uint64_t lvl, const mockturtle::node<Ntk>& n)
+uint8_t calculate_predecessor_gap(const Ntk& ntk, const mockturtle::node_map<mockturtle::signal<Lyt>, Ntk>& node2pos,
+                                  const uint64_t lvl, const mockturtle::node<Ntk>& n)
 {
     // return if in the PI level
     if (lvl == 0)
@@ -314,7 +305,7 @@ uint64_t calculate_predecessor_gap(const Ntk& ntk, const mockturtle::node_map<mo
     auto       pre = fc.fanin_nodes[0];
     const auto r   = ntk.rank_position(pre);
 
-    // return if no neighbour
+    // return if no neighbor
     if (r == 0)
     {
         return 0;
@@ -323,12 +314,12 @@ uint64_t calculate_predecessor_gap(const Ntk& ntk, const mockturtle::node_map<mo
     // calculate the level of the predecessor node
     const auto l = lvl - 1;
 
-    // get the neighbour with lower rank of the predecessor
-    const auto pre_neighbour = ntk.at_rank_position(l, r - 1);
+    // get the neighbor with lower rank of the predecessor
+    const auto pre_neighbor = ntk.at_rank_position(l, r - 1);
 
     // calculate the gap size
     const auto pre1_t = static_cast<tile<Lyt>>(node2pos[pre]);
-    const auto pre2_t = static_cast<tile<Lyt>>(node2pos[pre_neighbour]);
+    const auto pre2_t = static_cast<tile<Lyt>>(node2pos[pre_neighbor]);
 
     assert(pre1_t.y > pre2_t.y);
     return std::min<uint64_t>(pre1_t.y - pre2_t.y - 1, 2);
@@ -382,7 +373,7 @@ uint64_t calculate_buffer_connection_type(const Ntk& ntk, const mockturtle::node
  * @return     Orientation code (0–2) describing the node's relative position.
  */
 template <typename Ntk>
-uint64_t calculate_allowed_orientation(const Ntk& ntk, const mockturtle::node<Ntk>& n)
+uint8_t calculate_allowed_orientation(const Ntk& ntk, const mockturtle::node<Ntk>& n)
 {
     auto fc = fanins(ntk, n);
     assert(fc.fanin_nodes.size() == 1);
@@ -476,13 +467,13 @@ int calculate_start_orientation(const Ntk& ntk, const uint32_t lvl)
 template <typename Ntk, typename Lyt>
 std::tuple<std::vector<uint64_t>, std::vector<uint64_t>>
 compute_pr_variables(const Ntk& ntk, const mockturtle::node_map<mockturtle::signal<Lyt>, Ntk>& node2pos,
-                     const uint32_t& lvl)
+                     const uint32_t lvl)
 {
     std::vector<uint64_t> orientation(ntk.rank_width(lvl));
     std::vector<uint64_t> new_lines(ntk.rank_width(lvl));
     // get the lookup tables for the gate types
-    const auto& buffer_lu = get_buffer_lookup();
-    const auto& fanout_lu = get_fanout_lookup();
+    const auto& buffer_lu = BUFFER_LOOKUP;
+    const auto& fanout_lu = FANOUT_LOOKUP;
 
     ntk.foreach_node_in_rank(
         lvl,
@@ -548,8 +539,7 @@ compute_pr_variables(const Ntk& ntk, const mockturtle::node_map<mockturtle::sign
             }
         });
 
-    const auto ret = std::make_tuple(orientation, new_lines);
-    return ret;
+    return std::make_tuple(orientation, new_lines);
 }
 
 /**
@@ -561,7 +551,7 @@ compute_pr_variables(const Ntk& ntk, const mockturtle::node_map<mockturtle::sign
  * @return     Vector of node indices with two fan-ins in the specified level.
  */
 template <typename Ntk>
-std::vector<std::size_t> compute_two_input_indices(const Ntk& ntk, const uint64_t& lvl)
+std::vector<std::size_t> compute_two_input_indices(const Ntk& ntk, const uint64_t lvl)
 {
     std::vector<std::size_t> two_input_indices{};
     two_input_indices.reserve(ntk.rank_width(lvl));
@@ -589,7 +579,7 @@ std::vector<std::size_t> compute_two_input_indices(const Ntk& ntk, const uint64_
 template <typename Ntk, typename Lyt>
 std::vector<uint64_t> calculate_two_input_new_lines(const Ntk&                                                ntk,
                                                     const mockturtle::node_map<mockturtle::signal<Lyt>, Ntk>& node2pos,
-                                                    const uint32_t&                                           lvl)
+                                                    const uint32_t                                            lvl)
 {
     std::vector<uint64_t> cluster_new_lines{};
     cluster_new_lines.reserve(ntk.rank_width(lvl));
@@ -605,8 +595,8 @@ std::vector<uint64_t> calculate_two_input_new_lines(const Ntk&                  
                                      // compute the max_gap for two fan-ins of  anode
                                      const auto &pre1 = fc.fanin_nodes[0], &pre2 = fc.fanin_nodes[1];
 
-                                     const auto pre1_t = static_cast<tile<Lyt>>(node2pos[pre1]),
-                                                pre2_t = static_cast<tile<Lyt>>(node2pos[pre2]);
+                                     const auto pre1_t = static_cast<tile<Lyt>>(node2pos[pre1]);
+                                     const auto pre2_t = static_cast<tile<Lyt>>(node2pos[pre2]);
 
                                      cluster_new_lines.emplace_back(static_cast<uint64_t>(pre2_t.y - pre1_t.y - 1));
                                  }
@@ -725,7 +715,7 @@ inline void adjust_final_values(std::vector<uint64_t>& x, std::vector<uint64_t>&
 template <typename Ntk, typename Lyt>
 std::pair<std::vector<uint64_t>, std::vector<uint64_t>>
 compute_wiring(const Ntk& ntk, const mockturtle::node_map<mockturtle::signal<Lyt>, Ntk>& node2pos,
-               const std::vector<uint64_t>& new_lines, const uint64_t& lvl)
+               const std::vector<uint64_t>& new_lines, const uint64_t lvl)
 {
     // Initialize 2-input indices
     const auto two_input_indices   = compute_two_input_indices(ntk, lvl);
@@ -851,7 +841,6 @@ compute_wiring(const Ntk& ntk, const mockturtle::node_map<mockturtle::signal<Lyt
  * @param p Parameters controlling layout generation and clocking.
  * @param st Statistics object used to collect runtime and layout information.
  */
-
 template <typename Lyt, typename Ntk>
 class plane_impl
 {
@@ -915,7 +904,6 @@ class plane_impl
                             else
                             {
                                 place_t = {place_t.x - 1, place_t.y + 1};
-                                // node2pos[n] = layout.move_node(pi2node[n], prec_pos);
                                 if (place_t.x == 0)
                                 {
                                     node2pos[n] = layout.move_node(pi2node[n], place_t);
@@ -994,10 +982,11 @@ class plane_impl
                         // if node has two fanins (or three fanins with one of them being constant)
                         else
                         {
-                            const auto &pre1 = fc.fanin_nodes[0], pre2 = fc.fanin_nodes[1];
+                            const auto& pre1 = fc.fanin_nodes[0];
+                            const auto& pre2 = fc.fanin_nodes[1];
 
-                            auto pre1_t = static_cast<tile<Lyt>>(node2pos[pre1]),
-                                 pre2_t = static_cast<tile<Lyt>>(node2pos[pre2]);
+                            auto pre1_t = static_cast<tile<Lyt>>(node2pos[pre1]);
+                            auto pre2_t = static_cast<tile<Lyt>>(node2pos[pre2]);
 
                             // Resolve new lines
                             if (x[i] != 0)
@@ -1039,8 +1028,8 @@ class plane_impl
         }
 
         // place and route POs
-        std::unordered_map<typename mockturtle::fanout_view<Ntk>::node, int> count_map;
-        int                                                                  add_line = 0;
+        mockturtle::node_map<uint8_t, Ntk> count_map{ntk, 0};
+        int                                add_line = 0;
         // the number of outputs on a node is limited to 2, due to fanout substitution
         ntk.foreach_po(
             [this, &layout, &first_pos, &place_t, &node2pos, &count_map, &add_line](const auto& po)
@@ -1114,11 +1103,21 @@ class plane_impl
     }
 
   private:
+    /**
+     * The input network wrapped in a fanout view.
+     */
     mockturtle::fanout_view<Ntk> ntk;
-
+    /**
+     * The parameters controlling the planar layout from a network embedding.
+     */
     planar_layout_from_network_embedding_params ps;
+    /**
+     * Reference to the statistics collected during planar layout generation.
+     */
     planar_layout_from_network_embedding_stats& pst;
-
+    /**
+     * Primary output counter.
+     */
     uint32_t po_counter{0};
 };
 
@@ -1161,7 +1160,7 @@ Lyt plane(const Ntk& ntk, planar_layout_from_network_embedding_params ps = {},
     mincross_params p_min{};
     p_min.optimize = false;
 
-    auto ntk_min = mincross(ntk, p_min, &st_min);  // counts crossings
+    mincross(ntk, p_min, &st_min);  // counts crossings
     if (st_min.num_crossings != 0)
     {
         throw std::invalid_argument("Input network has to be planar");
@@ -1181,4 +1180,5 @@ Lyt plane(const Ntk& ntk, planar_layout_from_network_embedding_params ps = {},
 }
 
 }  // namespace fiction
+
 #endif  // FICTION_PLANAR_LAYOUT_FROM_NETWORK_EMBEDDING_HPP
