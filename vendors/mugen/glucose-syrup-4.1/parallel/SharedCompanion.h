@@ -63,6 +63,7 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 namespace Glucose
 {
 
+class ParallelSolver;
 class SharedCompanion : public SolverCompanion
 {
     friend class MultiSolvers;

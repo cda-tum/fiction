@@ -69,9 +69,9 @@ enum ParallelStats
 #define parallelStatsSize (coreStatsSize + 6)
 
 //=================================================================================================
-// class MultiSolvers;
-// class SolverCompanion;
-//   class MultiSolvers;
+class MultiSolvers;
+class SolverCompanion;
+class SharedCompanion;
 
 class ParallelSolver : public SimpSolver
 {
