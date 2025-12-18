@@ -45,9 +45,6 @@ dependencies = [
     "z3-solver>=4.8.0"
 ]
 
-[project.optional-dependencies]
-test = ["pytest>=7.2", "mnt.pyfiction"]
-
 [project.urls]
 Source = 'https://github.com/cda-tum/fiction'
 Tracker = 'https://github.com/cda-tum/fiction/issues'
@@ -125,17 +122,15 @@ inherit.cmake.define = "append"
 cmake.define.DISABLE_GIL = "1"
 
 
-[tool.pytest.ini_options]
-minversion = "7.2"
-testpaths = ["bindings/mnt/pyfiction/test/"]
+[tool.pytest]
+minversion = "9.0"
+strict = true
 addopts = [
     "-ra",
-    "--strict-markers",
-    "--strict-config",
     "--numprocesses=auto", # Automatically use all available CPU cores for parallel testing
 ]
-log_cli_level = "INFO"
-xfail_strict = true
+log_level = "INFO"
+testpaths = ["bindings/mnt/pyfiction/test"]
 
 
 [tool.cibuildwheel]
@@ -244,12 +239,12 @@ docs = [
     "sphinx-tabs==3.4.7",
 ]
 test = [
-    "pytest>=8.3.5",
-    "pytest-xdist>=3.7.0",
-    "pytest-sugar>=1.0.0",
+    "pytest>=9.0.1",
+    "pytest-sugar>=1.1.1",
+    "pytest-xdist>=3.8.0",
 ]
 dev = [
     { include-group = "build" },
-    { include-group = "docs" },
     { include-group = "test" },
+    "nox>=2025.11.12",
 ]
