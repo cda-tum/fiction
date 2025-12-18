@@ -88,7 +88,7 @@ jobs:
       - name: Install pip packages
         uses: BSFishy/pip-action@v1
         with:
-          requirements: ${{github.workspace}}/libs/mugen/requirements.txt
+          requirements: ${{github.workspace}}/vendors/mugen/requirements.txt
 
       - name: Setup Z3 Solver
         id: z3
@@ -140,7 +140,7 @@ jobs:
         uses: advanced-security/filter-sarif@main
         with:
           patterns: |
-            -**/libs/**
+            -**/vendors/**
             -**/docs/**
             -**/experiments/**
           input: sarif-results/${{ matrix.language }}.sarif
