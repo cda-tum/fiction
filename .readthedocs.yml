@@ -26,4 +26,18 @@ build:
       - asdf global uv latest
     build:
       html:
-        - uv run --frozen --no-dev --group docs -m sphinx -T -b html -d docs/_build/doctrees -D language=en docs $READTHEDOCS_OUTPUT/html
+        - |
+          set -euo pipefail
+          for i in {1..300}; do
+            uv pip config set global.extra-index-url https://test.pypi.org/simple/
+            if uv run --frozen --no-dev --group docs -m sphinx -T -b html -d docs/_build/doctrees -D language=en docs "$READTHEDOCS_OUTPUT/html"; then
+              break
+            fi
+            echo "Retrying in 30s... ($i/300)"
+            sleep 30
+          done
+          # If we didn't break early, fail explicitly
+          if [ "${i:-300}" -eq 300 ]; then
+            echo "Obtaining bindings from TestPyPI failed after 300 attempts."
+            exit 1
+          fi

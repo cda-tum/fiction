@@ -135,6 +135,26 @@ jobs:
           path: ./wheelhouse/*.whl
           overwrite: true
 
+  publish_to_testpypi:
+    runs-on: ubuntu-latest
+    name: 🧪 Publish to TestPyPI
+    needs: [build_wheels, build_sdist]
+    steps:
+      - name: Download the previously stored artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: cibw-*
+          path: dist
+          merge-multiple: true
+
+      - name: Deploy to TestPyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+          password: ${{ secrets.TEST_PYPI_DEPLOY_TOKEN }}
+          skip-existing: true
+          verbose: true
+
   publish_to_pypi:
     needs: [build_wheels, build_sdist]
     runs-on: ubuntu-latest
