@@ -118,7 +118,7 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
 
         REQUIRE(found_gate_layouts.size() == 1);
         CHECK(found_gate_layouts[0].num_cells() == 14);
-        CHECK(found_gate_layouts[0].get_cell_type({10, 4, 0}) == siqad_layout::technology::LOGIC);
+        CHECK(found_gate_layouts[0].get_cell_type({10, 4, 0}) == siqad_layout::technology::cell_type::LOGIC);
 
         // using cube coordinates
         const auto lyt_in_cube_coord = convert_layout_to_fiction_coordinates<cube_layout>(lyt);
@@ -134,8 +134,8 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
 
         REQUIRE(found_gate_layouts_cube.size() == 1);
         CHECK(found_gate_layouts_cube[0].num_cells() == 14);
-        CHECK(found_gate_layouts_cube[0].get_cell_type(
-                  siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{10, 4, 0})) == siqad_layout::technology::LOGIC);
+        CHECK(found_gate_layouts_cube[0].get_cell_type(siqad::to_fiction_coord<cube::coord_t>(
+                  siqad::coord_t{10, 4, 0})) == siqad_layout::technology::cell_type::LOGIC);
 
         // using offset coordinates
         const auto lyt_in_offset_coord = convert_layout_to_fiction_coordinates<offset_layout>(lyt);
@@ -152,7 +152,7 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
         REQUIRE(found_gate_layouts_offset.size() == 1);
         CHECK(found_gate_layouts_offset[0].num_cells() == 14);
         CHECK(found_gate_layouts_offset[0].get_cell_type(siqad::to_fiction_coord<offset::ucoord_t>(
-                  siqad::coord_t{10, 4, 0})) == offset_layout::technology::LOGIC);
+                  siqad::coord_t{10, 4, 0})) == offset_layout::technology::cell_type::LOGIC);
     }
     SECTION("Four cells in canvas, design all gates with one SiDB in the canvas")
     {
@@ -182,7 +182,7 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
 
         REQUIRE(found_gate_layouts.size() == 1);
         CHECK(found_gate_layouts[0].num_cells() == 14);
-        CHECK(found_gate_layouts[0].get_cell_type({10, 4, 0}) == siqad_layout::technology::LOGIC);
+        CHECK(found_gate_layouts[0].get_cell_type({10, 4, 0}) == siqad_layout::technology::cell_type::LOGIC);
         CHECK(mockturtle::to_seconds(stats.time_total) > 0.0);
         CHECK(stats.sim_engine == sidb_simulation_engine::QUICKEXACT);
     }
@@ -201,7 +201,7 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
 
         REQUIRE(found_gate_layouts.size() == 1);
         CHECK(found_gate_layouts[0].num_cells() == 14);
-        CHECK(found_gate_layouts[0].get_cell_type({10, 4, 0}) == siqad_layout::technology::LOGIC);
+        CHECK(found_gate_layouts[0].get_cell_type({10, 4, 0}) == siqad_layout::technology::cell_type::LOGIC);
         CHECK(mockturtle::to_seconds(stats.time_total) > 0.0);
         CHECK(stats.sim_engine == sidb_simulation_engine::QUICKSIM);
     }
@@ -332,14 +332,15 @@ TEST_CASE("Use FO2 Bestagon gate without SiDB at {17, 11, 0} and generate origin
             {{17, 11, 0}, {17, 11, 0}},
             1};
 
-        CHECK(lyt.get_cell_type({17, 11, 0}) == sidb_100_cell_clk_lyt_siqad::technology::EMPTY);
+        CHECK(lyt.get_cell_type({17, 11, 0}) == sidb_100_cell_clk_lyt_siqad::technology::cell_type::EMPTY);
 
         // generate gate by placing one SiDB
         const auto found_gate_layouts = design_sidb_gates(lyt, std::vector<tt>{create_fan_out_tt()}, params);
 
         REQUIRE(found_gate_layouts.size() == 1);
         CHECK(found_gate_layouts[0].num_cells() == 21);
-        CHECK(found_gate_layouts[0].get_cell_type({17, 11, 0}) == sidb_100_cell_clk_lyt_siqad::technology::LOGIC);
+        CHECK(found_gate_layouts[0].get_cell_type({17, 11, 0}) ==
+              sidb_100_cell_clk_lyt_siqad::technology::cell_type::LOGIC);
     }
 
 #if (FICTION_ALGLIB_ENABLED)
@@ -472,9 +473,9 @@ TEST_CASE("Design NOR Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
     lyt.foreach_cell(
         [&lyt](const auto& c)
         {
-            if (lyt.get_cell_type(c) == sidb_technology::LOGIC)
+            if (lyt.get_cell_type(c) == sidb_technology::cell_type::LOGIC)
             {
-                lyt.assign_cell_type(c, sidb_technology::EMPTY);
+                lyt.assign_cell_type(c, sidb_technology::cell_type::EMPTY);
             }
         });
 
