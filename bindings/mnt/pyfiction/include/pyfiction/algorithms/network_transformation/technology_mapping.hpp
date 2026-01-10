@@ -35,6 +35,9 @@ inline void technology_mapping(pybind11::module& m)
 {
     namespace py = pybind11;
 
+    // Expose the exception
+    py::register_exception<fiction::missing_required_gates_exception>(m, "missing_required_gates_exception");
+
     py::class_<fiction::technology_mapping_params>(m, "technology_mapping_params",
                                                    DOC(fiction_technology_mapping_params))
         .def(py::init<>())
@@ -72,7 +75,6 @@ inline void technology_mapping(pybind11::module& m)
 
     py::class_<fiction::technology_mapping_stats>(m, "technology_mapping_stats", DOC(fiction_technology_mapping_stats))
         .def(py::init<>())
-        .def("__repr__", [](const fiction::technology_mapping_stats& stats) { return stats.report(); })
         .def("report", &fiction::technology_mapping_stats::report, DOC(fiction_technology_mapping_stats_report))
         .def_readonly("mapper_stats", &fiction::technology_mapping_stats::mapper_stats,
                       DOC(fiction_technology_mapping_stats_mapper_stats));
