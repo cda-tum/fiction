@@ -12,8 +12,6 @@
 namespace pyfiction
 {
 
-namespace py = pybind11;
-
 inline void version_info(pybind11::module& m)
 {
     m.attr("__version__")       = fiction::FICTION_VERSION;

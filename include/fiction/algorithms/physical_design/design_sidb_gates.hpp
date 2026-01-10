@@ -237,7 +237,7 @@ class design_sidb_gates_impl
                 status == operational_status::OPERATIONAL)
             {
                 {
-                    const std::lock_guard lock_vector{mutex_to_protect_designed_gate_layouts};
+                    const std::scoped_lock lock_vector{mutex_to_protect_designed_gate_layouts};
                     designed_gate_layouts.push_back(layout_with_added_cells);
                 }
 
@@ -350,7 +350,7 @@ class design_sidb_gates_impl
                                                input_bdl_wires, output_bdl_wires);
                             status == operational_status::OPERATIONAL)
                         {
-                            const std::lock_guard lock{mutex_to_protect_designed_gate_layouts};
+                            const std::scoped_lock lock{mutex_to_protect_designed_gate_layouts};
 
                             if constexpr (has_get_sidb_defect_v<Lyt>)
                             {
@@ -455,7 +455,7 @@ class design_sidb_gates_impl
             {
                 // Lock and update shared resources
                 {
-                    const std::lock_guard lock{mutex_to_protect_gate_designs};
+                    const std::scoped_lock lock{mutex_to_protect_gate_designs};
                     gate_layouts.push_back(candidate);
                 }
                 gate_design_found = true;  // Notify all threads that a solution has been found
@@ -635,7 +635,7 @@ class design_sidb_gates_impl
                 }
             }
 
-            const std::lock_guard lock{mutex_to_protect_gate_candidates};
+            const std::scoped_lock lock{mutex_to_protect_gate_candidates};
             gate_candidate.push_back(current_layout);
         };
 

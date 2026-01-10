@@ -14,6 +14,7 @@
 #include <kitty/operations.hpp>
 #include <kitty/operators.hpp>
 #include <mockturtle/networks/sequential.hpp>
+#include <mockturtle/traits.hpp>
 
 #include <vector>
 

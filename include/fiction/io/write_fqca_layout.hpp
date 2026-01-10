@@ -322,7 +322,7 @@ void write_fqca_layout(const Lyt& lyt, std::ostream& os, write_fqca_layout_param
 template <typename Lyt>
 void write_fqca_layout(const Lyt& lyt, const std::string_view& filename, write_fqca_layout_params ps = {})
 {
-    std::ofstream os{filename.data(), std::ofstream::out};
+    std::ofstream os{std::string{filename}, std::ofstream::out};
 
     if (!os.is_open())
     {

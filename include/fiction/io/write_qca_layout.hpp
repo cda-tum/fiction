@@ -11,6 +11,8 @@
 
 #include <fmt/format.h>
 
+#include <cmath>
+#include <cstdint>
 #include <fstream>
 #include <ostream>
 #include <string>
@@ -358,13 +360,13 @@ class write_qca_layout_impl
         {
             for (int j2 = 1; j2 > -2; j2 -= 2)
             {
-                int j = i == 1 ? -j2 : j2;
+                const int j = (i == 1) ? -j2 : j2;
 
                 // open dot
                 os << qcad::OPEN_CELL_DOT;
 
-                os << qcad::X_POS << std::to_string(pos.x + (qcad::CELL_SIZE / 4.0f) * static_cast<float>(i)) << '\n';
-                os << qcad::Y_POS << std::to_string(pos.y + (qcad::CELL_SIZE / 4.0f) * static_cast<float>(j)) << '\n';
+                os << qcad::X_POS << std::to_string(pos.x + ((qcad::CELL_SIZE / 4.0f) * static_cast<float>(i))) << '\n';
+                os << qcad::Y_POS << std::to_string(pos.y + ((qcad::CELL_SIZE / 4.0f) * static_cast<float>(j))) << '\n';
                 os << qcad::DIAMETER << qcad::DOT_SIZE << '\n';
 
                 // determine charge
@@ -410,10 +412,17 @@ class write_qca_layout_impl
         const auto cell_type = lyt.get_cell_type(c);
 
         // override cell_name if cell is constant; if cell has a name
-        if (auto cell_name = qca_technology::is_const_0_cell(cell_type) ? "-1.00" :
-                             qca_technology::is_const_1_cell(cell_type) ? "1.00" :
-                                                                          lyt.get_cell_name(c);
-            !cell_name.empty())
+        auto cell_name = lyt.get_cell_name(c);
+        if (qca_technology::is_const_0_cell(cell_type))
+        {
+            cell_name = "-1.00";
+        }
+        else if (qca_technology::is_const_1_cell(cell_type))
+        {
+            cell_name = "1.00";
+        }
+
+        if (!cell_name.empty())
         {
             // open label
             os << qcad::OPEN_QCAD_LABEL;
@@ -427,7 +436,7 @@ class write_qca_layout_impl
             os << qcad::BOUNDING_BOX_X << std::to_string(pos.x - qcad::BB_X_OFFSET) << '\n';
             os << qcad::BOUNDING_BOX_Y << std::to_string(pos.y - qcad::BB_Y_OFFSET) << '\n';
             os << qcad::BOUNDING_BOX_CX
-               << std::to_string(static_cast<float>(cell_name.size()) * qcad::CHARACTER_WIDTH + qcad::BB_CX_OFFSET)
+               << std::to_string((static_cast<float>(cell_name.size()) * qcad::CHARACTER_WIDTH) + qcad::BB_CX_OFFSET)
                << '\n';
             os << qcad::BOUNDING_BOX_CY << qcad::BB_CY_OFFSET << '\n';
 
@@ -450,8 +459,8 @@ class write_qca_layout_impl
 
         // calculate cell position
         const qcad::cell_pos pos{
-            static_cast<float>(c.x * static_cast<decltype(c.x)>(qcad::CELL_DISTANCE) + qcad::X_Y_OFFSET),
-            static_cast<float>(c.y * static_cast<decltype(c.y)>(qcad::CELL_DISTANCE) + qcad::X_Y_OFFSET)};
+            static_cast<float>((c.x * static_cast<decltype(c.x)>(qcad::CELL_DISTANCE)) + qcad::X_Y_OFFSET),
+            static_cast<float>((c.y * static_cast<decltype(c.y)>(qcad::CELL_DISTANCE)) + qcad::X_Y_OFFSET)};
 
         // write cell position
         os << qcad::X_POS << std::to_string(pos.x) << '\n';
@@ -462,8 +471,8 @@ class write_qca_layout_impl
         const auto color = write_cell_colors(c);
 
         // write cell bounding box
-        os << qcad::BOUNDING_BOX_X << std::to_string(pos.x - qcad::CELL_SIZE / 2.0f) << '\n';
-        os << qcad::BOUNDING_BOX_Y << std::to_string(pos.y - qcad::CELL_SIZE / 2.0f) << '\n';
+        os << qcad::BOUNDING_BOX_X << std::to_string(pos.x - (qcad::CELL_SIZE / 2.0f)) << '\n';
+        os << qcad::BOUNDING_BOX_Y << std::to_string(pos.y - (qcad::CELL_SIZE / 2.0f)) << '\n';
         os << qcad::BOUNDING_BOX_CX << qcad::CELL_SIZE << '\n';
         os << qcad::BOUNDING_BOX_CY << qcad::CELL_SIZE << '\n';
 
@@ -554,7 +563,7 @@ void write_qca_layout(const Lyt& lyt, std::ostream& os, write_qca_layout_params 
 template <typename Lyt>
 void write_qca_layout(const Lyt& lyt, const std::string_view& filename, write_qca_layout_params ps = {})
 {
-    std::ofstream os{filename.data(), std::ofstream::out};
+    std::ofstream os{std::string{filename}, std::ofstream::out};
 
     if (!os.is_open())
     {

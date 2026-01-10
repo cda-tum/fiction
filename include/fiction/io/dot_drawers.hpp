@@ -9,8 +9,6 @@
 #include "fiction/utils/network_utils.hpp"
 #include "fiction/utils/version_info.hpp"
 
-#include <fiction/layouts/hexagonal_layout.hpp>
-
 #include <fmt/format.h>
 #include <fmt/ranges.h>
 #include <kitty/print.hpp>
@@ -19,7 +17,10 @@
 
 #include <algorithm>
 #include <array>
-#include <iterator>
+#include <cctype>
+#include <cstdint>
+#include <fstream>
+#include <ostream>
 #include <sstream>
 #include <string>
 #include <string_view>
@@ -1127,7 +1128,7 @@ void write_dot_layout(const Lyt& lyt, std::ostream& os, const Drawer& drawer = {
 template <class Lyt, class Drawer>
 void write_dot_layout(const Lyt& lyt, const std::string_view& filename, const Drawer& drawer = {})
 {
-    std::ofstream os{filename.data(), std::ofstream::out};
+    std::ofstream os{std::string{filename}, std::ofstream::out};
 
     if (!os.is_open())
     {

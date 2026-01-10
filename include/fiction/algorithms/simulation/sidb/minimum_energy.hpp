@@ -36,7 +36,7 @@ template <typename InputIt>
         return minimum_energy_distribution(first, last)->get_electrostatic_potential_energy();
     }
 
-    return std::numeric_limits<double>::infinity();
+    return std::numeric_limits<double>::max();
 }
 /**
  * Returns an iterator to the charge distribution of minimum energy contained in a range of

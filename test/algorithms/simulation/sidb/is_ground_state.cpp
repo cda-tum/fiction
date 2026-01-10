@@ -3,13 +3,13 @@
 //
 
 #include <catch2/catch_template_test_macros.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 #include <fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp>
 #include <fiction/algorithms/simulation/sidb/is_ground_state.hpp>
 #include <fiction/algorithms/simulation/sidb/quicksim.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
-#include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/charge_distribution_surface.hpp>
 #include <fiction/technology/sidb_charge_state.hpp>
 #include <fiction/types.hpp>
@@ -117,18 +117,19 @@ TEMPLATE_TEST_CASE("check if ground state is found", "[is-ground-state]", sidb_1
         auto                  simulation_results_quicksim = quicksim<TestType>(charge_layout, quicksim_params);
 
         REQUIRE(simulation_results_quicksim.has_value());
+        const auto& quicksim_res = *simulation_results_quicksim;
 
         // assign different charge index on purpose to see if the algorithm still works as desired
-        for (auto& cds : simulation_results_quicksim.value().charge_distributions)
+        for (auto& cds : quicksim_res.charge_distributions)
         {
             cds.assign_charge_index(0, charge_distribution_mode::KEEP_CHARGE_DISTRIBUTION);
         }
 
-        for (auto& cds : simulation_results_quicksim.value().charge_distributions)
+        for (auto& cds : quicksim_res.charge_distributions)
         {
             CHECK(cds.get_charge_index_and_base().first == 0);
         }
 
-        CHECK(is_ground_state(simulation_results_exgs, simulation_results_quicksim.value()));
+        CHECK(is_ground_state(simulation_results_exgs, quicksim_res));
     }
 }

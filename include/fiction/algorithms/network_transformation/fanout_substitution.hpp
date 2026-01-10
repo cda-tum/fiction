@@ -15,6 +15,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
+#include <cstdint>
 #include <optional>
 #include <queue>
 #include <random>
@@ -36,7 +37,7 @@ struct fanout_substitution_params
     /**
      * Breadth-first vs. depth-first fanout-tree substitution strategies.
      */
-    enum substitution_strategy : uint8_t
+    enum class substitution_strategy : uint8_t
     {
         /**
          * Breadth-first substitution. Creates balanced fanout trees.
@@ -55,7 +56,7 @@ struct fanout_substitution_params
     /**
      * Substitution strategy of high-degree fanout networks (depth-first vs. breadth-first).
      */
-    substitution_strategy strategy = BREADTH;
+    substitution_strategy strategy = substitution_strategy::BREADTH;
     /**
      * Maximum output degree of each fan-out node.
      */
@@ -261,7 +262,7 @@ class fanout_substitution_impl
             if (auto fanouts = available_fanouts[n]; !fanouts.empty())
             {
                 // find non-overfull fanout node
-                do
+                while (true)
                 {
                     child = fanouts.front();
                     if (substituted.fanout_size(substituted.get_node(child)) >= ps.degree)
@@ -272,7 +273,7 @@ class fanout_substitution_impl
                     {
                         break;
                     }
-                } while (true);
+                }
             }
         }
 

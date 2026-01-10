@@ -9,7 +9,6 @@
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
 
-#include <fiction/algorithms/physical_design/apply_gate_library.hpp>
 #include <fiction/algorithms/physical_design/one_pass_synthesis.hpp>
 #include <fiction/io/print_layout.hpp>
 #include <fiction/technology/qca_one_library.hpp>
@@ -22,7 +21,6 @@
 #include <chrono>
 #include <cstddef>
 #include <iostream>
-#include <type_traits>
 #include <utility>
 
 using namespace fiction;
@@ -78,14 +76,6 @@ one_pass_synthesis_params&& maj(one_pass_synthesis_params&& ps) noexcept
     return std::move(ps);
 }
 
-one_pass_synthesis_params&& async(const std::size_t t, one_pass_synthesis_params&& ps) noexcept
-{
-#if !defined(__APPLE__)
-    ps.num_threads = t;
-#endif
-    return std::move(ps);
-}
-
 void check_stats(const one_pass_synthesis_stats& st) noexcept
 {
     CHECK(std::chrono::duration_cast<std::chrono::milliseconds>(st.time_total).count() > 0);
@@ -105,9 +95,9 @@ Lyt generate_layout(const Ntk& ntk, const one_pass_synthesis_params& ps)
     REQUIRE(layout.has_value());
     check_stats(stats);
 
-    print_gate_level_layout(std::cout, *layout);
+    print_gate_level_layout(std::cout, layout.value());
 
-    return *layout;
+    return layout.value();
 }
 
 template <typename Lyt>

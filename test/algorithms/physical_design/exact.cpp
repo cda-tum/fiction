@@ -14,19 +14,25 @@
 #include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>
 #include <fiction/algorithms/verification/design_rule_violations.hpp>
 #include <fiction/networks/technology_network.hpp>
+#include <fiction/technology/cell_ports.hpp>
 #include <fiction/technology/inml_topolinano_library.hpp>
 #include <fiction/technology/qca_one_library.hpp>
 #include <fiction/technology/sidb_bestagon_library.hpp>
+#include <fiction/technology/sidb_surface_analysis.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/network_utils.hpp>
+#include <fiction/utils/truth_table_utils.hpp>
 
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/mig.hpp>
+#include <mockturtle/views/names_view.hpp>
 
 #include <chrono>
-#include <memory>
-#include <type_traits>
+#include <cstddef>
+#include <cstdint>
+#include <sstream>
+#include <utility>
 #include <vector>
 
 using namespace fiction;
@@ -180,13 +186,6 @@ surface_black_list<Lyt, port_direction>&& blacklist_or(const tile<Lyt>&         
     return std::move(sbl);
 }
 
-exact_physical_design_params&& async(const std::size_t t, exact_physical_design_params&& ps) noexcept
-{
-    ps.num_threads = t;
-
-    return std::move(ps);
-}
-
 exact_physical_design_params&& minimize_wires(exact_physical_design_params&& ps) noexcept
 {
     ps.minimize_wires = true;
@@ -239,10 +238,10 @@ Lyt generate_layout(const Ntk& ntk, const exact_physical_design_params& ps)
 
     REQUIRE(layout.has_value());
 
-    check_drvs(*layout);
+    check_drvs(layout.value());
     check_stats(stats);
 
-    return *layout;
+    return layout.value();
 }
 template <typename Lyt, typename Ntk>
 Lyt generate_layout_with_black_list(const Ntk& ntk, const surface_black_list<Lyt, port_direction>& black_list,
@@ -254,10 +253,10 @@ Lyt generate_layout_with_black_list(const Ntk& ntk, const surface_black_list<Lyt
 
     REQUIRE(layout.has_value());
 
-    check_drvs(*layout);
+    check_drvs(layout.value());
     check_stats(stats);
 
-    return *layout;
+    return layout.value();
 }
 
 template <typename CellLyt, typename Lib, typename GateLyt>

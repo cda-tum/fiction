@@ -3,6 +3,7 @@
 //
 
 #include <catch2/catch_template_test_macros.hpp>
+#include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
@@ -1451,7 +1452,7 @@ TEMPLATE_TEST_CASE("Grid search to determine the operational domain. The operati
         // this test was created to cover a special case: Strange behavior was observed when no clone was used in the
         // `is_physical_validity_feasible` function.
         op_domain.for_each(
-            [](const auto& pp, const auto& status)
+            [](const auto& pp, [[maybe_unused]] const auto& status)
             {
                 CHECK(pp.get_parameters()[0] >= 4.0);
                 CHECK(pp.get_parameters()[1] >= 4.0);
