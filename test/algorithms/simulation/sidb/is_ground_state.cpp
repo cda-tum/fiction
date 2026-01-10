@@ -118,7 +118,7 @@ TEMPLATE_TEST_CASE("check if ground state is found", "[is-ground-state]", sidb_1
         auto                  simulation_results_quicksim = quicksim<TestType>(charge_layout, quicksim_params);
 
         REQUIRE(simulation_results_quicksim.has_value());
-        const auto& quicksim_res = *simulation_results_quicksim;
+        auto& quicksim_res = *simulation_results_quicksim;
 
         // assign different charge index on purpose to see if the algorithm still works as desired
         for (auto& cds : quicksim_res.charge_distributions)

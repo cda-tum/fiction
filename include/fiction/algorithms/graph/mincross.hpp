@@ -208,7 +208,7 @@ class mincross_impl
         if (pass % 2 == 0)
         {
             // Upward pass: from rank 1 to max_rank
-            for (auto r = 1; r <= max_rank; ++r)
+            for (uint32_t r = 1; r <= max_rank; ++r)
             {
                 if (r == 0 && ps.fixed_pis)
                 {

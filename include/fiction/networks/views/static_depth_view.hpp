@@ -68,9 +68,9 @@ template <typename Ntk, typename NodeCostFn>
 class static_depth_view<Ntk, NodeCostFn, true> : public Ntk
 {
   public:
-    explicit static_depth_view(Ntk const& ntk, depth_view_params const& ps = {}) : Ntk(ntk)
+    explicit static_depth_view(Ntk const& ntk, depth_view_params const& params = {}) : Ntk(ntk)
     {
-        (void)ps;
+        (void)params;
     }
 };
 
@@ -97,10 +97,10 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
      * @param cost_fn Optional cost function to compute node costs.
      * @param ps Optional parameters for depth view construction
      */
-    explicit static_depth_view(NodeCostFn const& cost_fn = {}, depth_view_params const& ps = {}) :
+    explicit static_depth_view(NodeCostFn const& node_cost_fn = {}, depth_view_params const& params = {}) :
             Ntk(),
-            ps(ps),
-            cost_fn(cost_fn)
+            ps(params),
+            cost_fn(node_cost_fn)
     {
         static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
         static_assert(mockturtle::has_size_v<Ntk>, "Ntk does not implement the size method");
@@ -124,10 +124,11 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
      * @param cost_fn Optional function to compute node costs.
      * @param ps Optional parameters for depth view construction.
      */
-    explicit static_depth_view(Ntk const& ntk, NodeCostFn const& cost_fn = {}, depth_view_params const& ps = {}) :
+    explicit static_depth_view(Ntk const& ntk, NodeCostFn const& node_cost_fn = {},
+                               depth_view_params const& params = {}) :
             Ntk(ntk),
-            ps(ps),
-            cost_fn(cost_fn)
+            ps(params),
+            cost_fn(node_cost_fn)
     {
         static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
         static_assert(mockturtle::has_size_v<Ntk>, "Ntk does not implement the size method");

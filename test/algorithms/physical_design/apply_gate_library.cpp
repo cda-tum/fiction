@@ -27,6 +27,8 @@
 
 using namespace fiction;
 
+namespace
+{
 template <typename Lyt>
 void check_equivalence(const Lyt& layout_designed, const std::string& path_layout_correct)
 {
@@ -48,6 +50,7 @@ void check_equivalence(const Lyt& layout_designed, const std::string& path_layou
             }
         });
 }
+}  // namespace
 
 using cell_lyt = sidb_100_cell_clk_lyt_cube;
 

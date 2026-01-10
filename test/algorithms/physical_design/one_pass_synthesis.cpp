@@ -9,6 +9,7 @@
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
 
+#include <fiction/algorithms/physical_design/apply_gate_library.hpp>
 #include <fiction/algorithms/physical_design/one_pass_synthesis.hpp>
 #include <fiction/io/print_layout.hpp>
 #include <fiction/technology/qca_one_library.hpp>
@@ -102,7 +103,7 @@ Lyt generate_layout(const Ntk& ntk, const one_pass_synthesis_params& ps)
 template <typename Lyt>
 void apply_gate_library(const Lyt& lyt)
 {
-    CHECK_NOTHROW(fiction::apply_gate_library<qca_cell_clk_lyt, qca_one_library>(lyt));
+    CHECK_NOTHROW((fiction::apply_gate_library<qca_cell_clk_lyt, qca_one_library>(lyt)));
 }
 
 template <typename Lyt, typename Ntk>

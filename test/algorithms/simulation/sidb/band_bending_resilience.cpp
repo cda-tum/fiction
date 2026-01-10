@@ -18,11 +18,11 @@
 
 using namespace fiction;
 
-using layout = sidb_cell_clk_lyt_siqad;
+using test_layout = sidb_cell_clk_lyt_siqad;
 
 TEST_CASE("Single SiDB", "[band-bending-resilience]")
 {
-    const auto lyt = blueprints::bestagon_and_gate<layout>();
+    const auto lyt = blueprints::bestagon_and_gate<test_layout>();
 
     const auto params =
         band_bending_resilience_params{physical_population_stability_params{sidb_simulation_parameters{2, -0.32}, 2}};
