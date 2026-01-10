@@ -29,7 +29,6 @@
 #include <mockturtle/views/names_view.hpp>
 
 #include <chrono>
-#include <cstddef>
 #include <cstdint>
 #include <sstream>
 #include <utility>
@@ -238,10 +237,10 @@ Lyt generate_layout(const Ntk& ntk, const exact_physical_design_params& ps)
 
     REQUIRE(layout.has_value());
 
-    check_drvs(layout.value());
+    check_drvs(*layout);
     check_stats(stats);
 
-    return layout.value();
+    return *layout;
 }
 template <typename Lyt, typename Ntk>
 Lyt generate_layout_with_black_list(const Ntk& ntk, const surface_black_list<Lyt, port_direction>& black_list,
@@ -253,10 +252,10 @@ Lyt generate_layout_with_black_list(const Ntk& ntk, const surface_black_list<Lyt
 
     REQUIRE(layout.has_value());
 
-    check_drvs(layout.value());
+    check_drvs(*layout);
     check_stats(stats);
 
-    return layout.value();
+    return *layout;
 }
 
 template <typename CellLyt, typename Lib, typename GateLyt>
@@ -694,7 +693,10 @@ TEST_CASE("Exact physical design with upper bounds", "[exact]")
 
         REQUIRE(layout.has_value());
 
-        CHECK(layout->y() <= 3);
+        if (layout)
+        {
+            CHECK(layout->y() <= 3);
+        }
 
         upper_bound_config.upper_bound_x = 2u;  // additionally, allow only 2 tiles in x direction; this will now fail
 
@@ -725,16 +727,19 @@ TEST_CASE("Name conservation after exact physical design", "[exact]")
 
     REQUIRE(layout.has_value());
 
-    // network name
-    CHECK(layout->get_layout_name() == "maj");
+    if (layout)
+    {
+        // network name
+        CHECK(layout->get_layout_name() == "maj");
 
-    // PI names
-    CHECK(layout->get_name(layout->pi_at(0)) == "a");  // first PI
-    CHECK(layout->get_name(layout->pi_at(1)) == "b");  // second PI
-    CHECK(layout->get_name(layout->pi_at(2)) == "c");  // third PI
+        // PI names
+        CHECK(layout->get_name(layout->pi_at(0)) == "a");  // first PI
+        CHECK(layout->get_name(layout->pi_at(1)) == "b");  // second PI
+        CHECK(layout->get_name(layout->pi_at(2)) == "c");  // third PI
 
-    // PO names
-    CHECK(layout->get_output_name(0) == "f");
+        // PO names
+        CHECK(layout->get_output_name(0) == "f");
+    }
 }
 
 #else  // FICTION_Z3_SOLVER

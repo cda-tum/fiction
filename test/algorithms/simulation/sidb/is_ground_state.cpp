@@ -100,7 +100,8 @@ TEMPLATE_TEST_CASE("check if ground state is found", "[is-ground-state]", sidb_1
         const charge_distribution_surface charge_layout{lyt};
         const sidb_simulation_parameters  params{2, -0.32};
 
-        auto simulation_results_exgs = exhaustive_ground_state_simulation<TestType>(charge_layout, params);
+        sidb_simulation_result<TestType> simulation_results_exgs =
+            exhaustive_ground_state_simulation<TestType>(charge_layout, params);
 
         // assign different charge index on purpose to see if the algorithm still works as desired
         for (auto& cds : simulation_results_exgs.charge_distributions)

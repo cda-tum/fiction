@@ -7,9 +7,7 @@
 
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/technology/cell_technologies.hpp"
-#include "fiction/technology/magcad_magnet_count.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/types.hpp"
 #include "fiction/utils/version_info.hpp"
 
 #include <fmt/format.h>
@@ -144,7 +142,21 @@ class write_qll_layout_impl
 
     uint64_t cell_id{1};
 
-    const char* tech_name = has_inml_technology_v<Lyt> ? "iNML" : (has_qca_technology_v<Lyt> ? "MolFCN" : "?");
+    const char* tech_name = []()
+    {
+        if constexpr (has_inml_technology_v<Lyt>)
+        {
+            return "iNML";
+        }
+        else if constexpr (has_qca_technology_v<Lyt>)
+        {
+            return "MolFCN";
+        }
+        else
+        {
+            return "?";
+        }
+    }();
 
     [[nodiscard]] std::vector<cell<Lyt>> sorted_pis() const noexcept
     {

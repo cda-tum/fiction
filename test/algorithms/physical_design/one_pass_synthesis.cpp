@@ -19,7 +19,6 @@
 #include <mockturtle/views/names_view.hpp>
 
 #include <chrono>
-#include <cstddef>
 #include <iostream>
 #include <utility>
 
@@ -103,7 +102,7 @@ Lyt generate_layout(const Ntk& ntk, const one_pass_synthesis_params& ps)
 template <typename Lyt>
 void apply_gate_library(const Lyt& lyt)
 {
-    CHECK_NOTHROW(apply_gate_library<qca_cell_clk_lyt, qca_one_library>(lyt));
+    CHECK_NOTHROW(fiction::apply_gate_library<qca_cell_clk_lyt, qca_one_library>(lyt));
 }
 
 template <typename Lyt, typename Ntk>

@@ -4,6 +4,7 @@
 
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
@@ -40,6 +41,7 @@ static void check_op_domain_params_and_operational_status(const OpDomain&       
     op_domain.for_each(
         [&op_domain, &params, &status](const auto& coord, const auto& op_value [[maybe_unused]])
         {
+            (void)op_domain;
             for (auto d = 0u; d < params.sweep_dimensions.size(); ++d)
             {
                 const auto& sweep_param = params.sweep_dimensions[d];

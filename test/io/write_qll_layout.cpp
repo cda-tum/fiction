@@ -14,6 +14,7 @@
 #include <fmt/format.h>
 
 #include <sstream>
+#include <stdexcept>
 #include <string>
 
 using namespace fiction;
