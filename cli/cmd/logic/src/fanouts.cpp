@@ -23,7 +23,7 @@ fanouts_command::fanouts_command(const environment::ptr& e) :
 {
     add_option("--degree,-d", ps.degree, "Maximum number of outputs a fan-out node can have", true)
         ->set_type_name("{2, 3}");
-    add_option("--strategy,-s", ps.strategy,
+    add_option("--strategy,-s", strategy_int,
                "Chain fan-outs in a balanced tree (breadth), a DFS tree (depth), or a random fashion", true)
         ->set_type_name("{breadth=0, depth=1, random=2}");
     add_option("--threshold,-t", ps.threshold,
@@ -50,12 +50,15 @@ void fanouts_command::execute()
         return;
     }
 
-    if (static_cast<int>(ps.strategy) > 2)
+    if (strategy_int < 0 || strategy_int > 2)
     {
-        env->out() << "[w] " << static_cast<int>(ps.strategy) << " does not refer to a valid strategy\n";
+        env->out() << "[w] " << strategy_int << " does not refer to a valid strategy\n";
         ps = {};
         return;
     }
+
+    // Convert integer to enum
+    ps.strategy = static_cast<fiction::fanout_substitution_params::substitution_strategy>(strategy_int);
 
     if (is_set("seed"))
     {
