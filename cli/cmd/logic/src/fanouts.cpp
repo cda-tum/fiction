@@ -50,9 +50,9 @@ void fanouts_command::execute()
         return;
     }
 
-    if (ps.strategy > 2)
+    if (static_cast<int>(ps.strategy) > 2)
     {
-        env->out() << "[w] " << ps.strategy << " does not refer to a valid strategy\n";
+        env->out() << "[w] " << static_cast<int>(ps.strategy) << " does not refer to a valid strategy\n";
         ps = {};
         return;
     }
