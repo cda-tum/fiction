@@ -86,6 +86,10 @@ function(fiction_set_project_warnings project_name WARNINGS_AS_ERRORS
                      # were probably wanted
         -Wuseless-cast # warn if you perform a cast to the same type
     )
+    # Remove -Wnull-dereference from GCC warnings as it doesn't respect
+    # -Wno-system-headers and causes warnings in standard library headers (e.g.,
+    # libstdc++)
+    list(REMOVE_ITEM GCC_WARNINGS -Wnull-dereference)
   endif()
 
   if(WARNINGS_AS_ERRORS)
