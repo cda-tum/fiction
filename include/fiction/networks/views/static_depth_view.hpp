@@ -12,6 +12,7 @@
 
 #include <cassert>
 #include <cstdint>
+#include <utility>
 
 #include <parallel_hashmap/phmap.h>
 
@@ -199,7 +200,7 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
      */
     static_depth_view(static_depth_view&& other) noexcept :
             Ntk(std::move(other)),
-            ps(std::move(other.ps)),
+            ps(other.ps),  // trivially copyable
             levels(std::move(other.levels)),
             crit_path(std::move(other.crit_path)),
             ntk_depth(other.ntk_depth),
@@ -232,7 +233,7 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
         }
 
         // move
-        ps        = std::move(other.ps);
+        ps        = other.ps;  // trivially copyable
         levels    = std::move(other.levels);
         crit_path = std::move(other.crit_path);
         ntk_depth = other.ntk_depth;
