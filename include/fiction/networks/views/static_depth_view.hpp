@@ -68,10 +68,7 @@ template <typename Ntk, typename NodeCostFn>
 class static_depth_view<Ntk, NodeCostFn, true> : public Ntk
 {
   public:
-    explicit static_depth_view(Ntk const& ntk, depth_view_params const& params = {}) : Ntk(ntk)
-    {
-        (void)params;
-    }
+    explicit static_depth_view(Ntk const& ntk, [[maybe_unused]] depth_view_params const& params = {}) : Ntk(ntk) {}
 };
 
 /**
@@ -94,8 +91,8 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
      * Initializes an empty `fiction::static_depth_view` object, sets up base class properties,
      * and ensures that the network type (Ntk) satisfies required interface methods.
      *
-     * @param cost_fn Optional cost function to compute node costs.
-     * @param ps Optional parameters for depth view construction
+     * @param node_cost_fn Optional cost function to compute node costs.
+     * @param params Optional parameters for depth view construction
      */
     explicit static_depth_view(NodeCostFn const& node_cost_fn = {}, depth_view_params const& params = {}) :
             Ntk(),
@@ -121,8 +118,8 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
      * interface methods.
      *
      * @param ntk The network on which to construct the depth view.
-     * @param cost_fn Optional function to compute node costs.
-     * @param ps Optional parameters for depth view construction.
+     * @param node_cost_fn Optional function to compute node costs.
+     * @param params Optional parameters for depth view construction.
      */
     explicit static_depth_view(Ntk const& ntk, NodeCostFn const& node_cost_fn = {},
                                depth_view_params const& params = {}) :
@@ -149,7 +146,7 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
      *
      * @param other The other `fiction::static_depth_view` object to be copied.
      */
-    static_depth_view(static_depth_view<Ntk, NodeCostFn, false> const& other) :
+    static_depth_view(static_depth_view const& other) :
             Ntk(other),
             ps(other.ps),
             levels(other.levels),
@@ -165,7 +162,7 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
      * @param other The source `fiction::static_depth_view` object whose contents are being copied.
      * @return A reference to the current object, enabling chain assignments.
      */
-    static_depth_view<Ntk, NodeCostFn, false>& operator=(static_depth_view<Ntk, NodeCostFn, false> const& other)
+    static_depth_view& operator=(static_depth_view const& other)
     {
         // Check for self-assignment
         if (this == &other)
@@ -234,7 +231,7 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
     /**
      * Set the depth of the network.
      */
-    void set_depth(uint32_t level)
+    void set_depth(const uint32_t level)
     {
         ntk_depth = level;
     }
@@ -269,7 +266,7 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
                                 auto clevel = levels[f];
                                 if (ps.count_complements && this->is_complemented(f))
                                 {
-                                    clevel++;
+                                    ++clevel;
                                 }
                                 level = std::max(level, clevel);
                             });
@@ -313,7 +310,7 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
                                 auto clevel = compute_levels(this->get_node(f));
                                 if (ps.count_complements && this->is_complemented(f))
                                 {
-                                    clevel++;
+                                    ++clevel;
                                 }
                                 level = std::max(level, clevel);
                             });
@@ -333,7 +330,7 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
                 auto clevel = compute_levels(this->get_node(f));
                 if (ps.count_complements && this->is_complemented(f))
                 {
-                    clevel++;
+                    ++clevel;
                 }
                 ntk_depth = std::max(ntk_depth, clevel);
             });
@@ -346,7 +343,7 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
                     auto clevel = compute_levels(this->get_node(f));
                     if (ps.count_complements && this->is_complemented(f))
                     {
-                        clevel++;
+                        ++clevel;
                     }
                     ntk_depth = std::max(ntk_depth, clevel);
                 });
@@ -392,7 +389,7 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
                                     auto       offset = cost_fn(*this, n);
                                     if (ps.count_complements && this->is_complemented(f))
                                     {
-                                        offset++;
+                                        ++offset;
                                     }
                                     if (levels[cn] + offset == lvl && !crit_path[cn])
                                     {

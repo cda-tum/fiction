@@ -39,9 +39,8 @@ static void check_op_domain_params_and_operational_status(const OpDomain&       
     }
 
     op_domain.for_each(
-        [&op_domain, &params, &status](const auto& coord, const auto& op_value [[maybe_unused]])
+        [&op_domain, &params, &status](const auto& coord, const auto& op_value)
         {
-            (void)op_domain;
             for (auto d = 0u; d < params.sweep_dimensions.size(); ++d)
             {
                 const auto& sweep_param = params.sweep_dimensions[d];

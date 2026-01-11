@@ -10,6 +10,7 @@
 #include <fiction/types.hpp>
 
 #include <alice/alice.hpp>
+#include <fmt/format.h>
 
 #include <variant>
 
@@ -45,14 +46,14 @@ void fanouts_command::execute()
 
     if (ps.degree < 2 || ps.degree > 3)
     {
-        env->out() << "[w] " << ps.degree << " outputs per fan-out are not supported\n";
+        env->out() << fmt::format("[w] {} outputs per fan-out are not supported\n", ps.degree);
         ps = {};
         return;
     }
 
     if (strategy_int < 0 || strategy_int > 2)
     {
-        env->out() << "[w] " << strategy_int << " does not refer to a valid strategy\n";
+        env->out() << fmt::format("[w] does not refer to a valid strategy\n", strategy_int);
         ps = {};
         return;
     }

@@ -237,10 +237,10 @@ Lyt generate_layout(const Ntk& ntk, const exact_physical_design_params& ps)
 
     REQUIRE(layout.has_value());
 
-    check_drvs(*layout);
+    check_drvs(layout.value());
     check_stats(stats);
 
-    return *layout;
+    return layout.value();
 }
 template <typename Lyt, typename Ntk>
 Lyt generate_layout_with_black_list(const Ntk& ntk, const surface_black_list<Lyt, port_direction>& black_list,
@@ -252,10 +252,10 @@ Lyt generate_layout_with_black_list(const Ntk& ntk, const surface_black_list<Lyt
 
     REQUIRE(layout.has_value());
 
-    check_drvs(*layout);
+    check_drvs(layout.value());
     check_stats(stats);
 
-    return *layout;
+    return layout.value();
 }
 
 template <typename CellLyt, typename Lib, typename GateLyt>

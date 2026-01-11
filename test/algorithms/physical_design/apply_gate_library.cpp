@@ -2,7 +2,6 @@
 // Created by Jan Drewniok on 08.01.25.
 //
 
-#include <catch2/catch_assertion_result.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"

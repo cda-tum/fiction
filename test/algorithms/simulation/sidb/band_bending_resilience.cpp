@@ -3,6 +3,7 @@
 //
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
@@ -24,36 +25,36 @@ TEST_CASE("Single SiDB", "[band-bending-resilience]")
 {
     const auto lyt = blueprints::bestagon_and_gate<test_layout>();
 
-    const auto params =
+    constexpr auto params =
         band_bending_resilience_params{physical_population_stability_params{sidb_simulation_parameters{2, -0.32}, 2}};
 
     SECTION("Minimal potential required to conduct a charge change from neutral to negative")
     {
-        const auto min_potential = band_bending_resilience(lyt, std::vector<tt>{create_and_tt()}, params,
-                                                           transition_type::NEUTRAL_TO_NEGATIVE);
+        const auto min_potential =
+            band_bending_resilience(lyt, std::vector{create_and_tt()}, params, transition_type::NEUTRAL_TO_NEGATIVE);
 
         CHECK_THAT(min_potential, Catch::Matchers::WithinAbs(0.020652, constants::ERROR_MARGIN));
     }
 
     SECTION("Minimal potential required to conduct a charge change from negative to neutral")
     {
-        const auto min_potential = band_bending_resilience(lyt, std::vector<tt>{create_and_tt()}, params,
-                                                           transition_type::NEGATIVE_TO_NEUTRAL);
+        const auto min_potential =
+            band_bending_resilience(lyt, std::vector{create_and_tt()}, params, transition_type::NEGATIVE_TO_NEUTRAL);
 
         CHECK_THAT(min_potential, Catch::Matchers::WithinAbs(0.087417, constants::ERROR_MARGIN));
     }
 
     SECTION("Minimal potential required to conduct a charge change from positive to neutral")
     {
-        const auto min_potential = band_bending_resilience(lyt, std::vector<tt>{create_and_tt()}, params,
-                                                           transition_type::NEUTRAL_TO_POSITIVE);
+        const auto min_potential =
+            band_bending_resilience(lyt, std::vector{create_and_tt()}, params, transition_type::NEUTRAL_TO_POSITIVE);
 
         CHECK_THAT(min_potential, Catch::Matchers::WithinAbs(0.413859, constants::ERROR_MARGIN));
     }
 
     SECTION("Minimal potential required to conduct a charge change")
     {
-        const auto min_potential = band_bending_resilience(lyt, std::vector<tt>{create_and_tt()}, params);
+        const auto min_potential = band_bending_resilience(lyt, std::vector{create_and_tt()}, params);
 
         // the minimal potential for any charge change is the same as for neutral to negative
         CHECK_THAT(min_potential, Catch::Matchers::WithinAbs(0.020652, constants::ERROR_MARGIN));
