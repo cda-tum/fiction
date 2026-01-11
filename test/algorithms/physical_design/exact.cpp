@@ -237,10 +237,10 @@ Lyt generate_layout(const Ntk& ntk, const exact_physical_design_params& ps)
 
     REQUIRE(layout.has_value());
 
-    check_drvs(layout.value());
+    check_drvs(layout.value());  // NOLINT(bugprone-unchecked-optional-access)
     check_stats(stats);
 
-    return layout.value();
+    return layout.value();  // NOLINT(bugprone-unchecked-optional-access)
 }
 template <typename Lyt, typename Ntk>
 Lyt generate_layout_with_black_list(const Ntk& ntk, const surface_black_list<Lyt, port_direction>& black_list,
@@ -252,10 +252,10 @@ Lyt generate_layout_with_black_list(const Ntk& ntk, const surface_black_list<Lyt
 
     REQUIRE(layout.has_value());
 
-    check_drvs(layout.value());
+    check_drvs(layout.value());  // NOLINT(bugprone-unchecked-optional-access)
     check_stats(stats);
 
-    return layout.value();
+    return layout.value();  // NOLINT(bugprone-unchecked-optional-access)
 }
 
 template <typename CellLyt, typename Lib, typename GateLyt>

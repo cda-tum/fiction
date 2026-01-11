@@ -95,9 +95,9 @@ Lyt generate_layout(const Ntk& ntk, const one_pass_synthesis_params& ps)
     REQUIRE(layout.has_value());
     check_stats(stats);
 
-    print_gate_level_layout(std::cout, layout.value());
+    print_gate_level_layout(std::cout, layout.value());  // NOLINT(bugprone-unchecked-optional-access)
 
-    return layout.value();
+    return layout.value();  // NOLINT(bugprone-unchecked-optional-access)
 }
 
 template <typename Lyt>
@@ -183,6 +183,8 @@ TEST_CASE("Name conservation after one-pass synthesis", "[one-pass]")
 
     REQUIRE(layout.has_value());
 
+    // NOLINTBEGIN(bugprone-unchecked-optional-access)
+
     // network name
     CHECK(layout->get_layout_name() == "maj");
 
@@ -193,6 +195,8 @@ TEST_CASE("Name conservation after one-pass synthesis", "[one-pass]")
 
     // PO names
     CHECK(layout->get_output_name(0) == "f");
+
+    // NOLINTEND(bugprone-unchecked-optional-access)
 }
 
 #else  // MUGEN

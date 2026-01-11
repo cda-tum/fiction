@@ -192,6 +192,57 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
     }
 
     /**
+     * Move constructor creates a new `fiction::static_depth_view` by moving the content of another
+     * `fiction::static_depth_view`.
+     *
+     * @param other The other `fiction::static_depth_view` object to be moved.
+     */
+    static_depth_view(static_depth_view&& other) noexcept :
+            Ntk(std::move(other)),
+            ps(std::move(other.ps)),
+            levels(std::move(other.levels)),
+            crit_path(std::move(other.crit_path)),
+            ntk_depth(other.ntk_depth),
+            cost_fn(std::move(other.cost_fn))
+    {}
+
+    /**
+     * Move assignment operator for moving `fiction::static_depth_view` content of another
+     * `fiction::static_depth_view` object.
+     *
+     * @param other The source `fiction::static_depth_view` object whose contents are being moved.
+     * @return A reference to the current object, enabling chain assignments.
+     */
+    static_depth_view& operator=(static_depth_view&& other) noexcept
+    {
+        // Check for self-assignment
+        if (this == &other)
+        {
+            return *this;
+        }
+
+        // move the base class
+        this->_storage = std::move(other._storage);
+        this->_events  = std::move(other._events);
+
+        // move the virtual storage
+        if constexpr (has_is_virtual_pi_v<Ntk>)
+        {
+            this->v_storage = std::move(other.v_storage);
+        }
+
+        // move
+        ps        = std::move(other.ps);
+        levels    = std::move(other.levels);
+        crit_path = std::move(other.crit_path);
+        ntk_depth = other.ntk_depth;
+        cost_fn   = std::move(other.cost_fn);
+
+        // Return the current object
+        return *this;
+    }
+
+    /**
      * Destructor for `fiction::static_depth_view`.
      */
     ~static_depth_view() = default;

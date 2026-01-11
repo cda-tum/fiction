@@ -73,9 +73,9 @@ TEMPLATE_TEST_CASE("check if ground state is found", "[is-ground-state]", sidb_1
 
     SECTION("layout with no SiDB placed")
     {
-        TestType                          lyt{};
-        const charge_distribution_surface charge_layout{lyt};
-        const sidb_simulation_parameters  params{2, -0.32};
+        TestType                             lyt{};
+        const charge_distribution_surface    charge_layout{lyt};
+        constexpr sidb_simulation_parameters params{2, -0.32};
         const auto simulation_results_exgs = exhaustive_ground_state_simulation<TestType>(charge_layout, params);
         const quicksim_params quicksim_params{params};
         const auto            simulation_results_quicksim = quicksim<TestType>(charge_layout, quicksim_params);
@@ -97,8 +97,8 @@ TEMPLATE_TEST_CASE("check if ground state is found", "[is-ground-state]", sidb_1
         lyt.assign_cell_type({6, 10, 0}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({7, 10, 0}, TestType::cell_type::NORMAL);
 
-        const charge_distribution_surface charge_layout{lyt};
-        const sidb_simulation_parameters  params{2, -0.32};
+        const charge_distribution_surface    charge_layout{lyt};
+        constexpr sidb_simulation_parameters params{2, -0.32};
 
         sidb_simulation_result<TestType> simulation_results_exgs =
             exhaustive_ground_state_simulation<TestType>(charge_layout, params);
@@ -118,7 +118,7 @@ TEMPLATE_TEST_CASE("check if ground state is found", "[is-ground-state]", sidb_1
         auto                  simulation_results_quicksim = quicksim<TestType>(charge_layout, quicksim_params);
 
         REQUIRE(simulation_results_quicksim.has_value());
-        auto& quicksim_res = *simulation_results_quicksim;
+        auto& quicksim_res = simulation_results_quicksim.value();  // NOLINT(bugprone-unchecked-optional-access)
 
         // assign different charge index on purpose to see if the algorithm still works as desired
         for (auto& cds : quicksim_res.charge_distributions)
