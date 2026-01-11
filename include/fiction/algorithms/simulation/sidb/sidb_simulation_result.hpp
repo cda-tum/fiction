@@ -86,7 +86,7 @@ struct sidb_simulation_result
         }
 
         // Find the minimum energy
-        double min_energy = std::numeric_limits<double>::infinity();
+        double min_energy = std::numeric_limits<double>::max();
         if (!charge_distributions.empty())
         {
             min_energy = minimum_energy(charge_distributions.cbegin(), charge_distributions.cend());

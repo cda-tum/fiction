@@ -333,9 +333,9 @@ class mincross_impl
      * Reorders the nodes in a given rank according to computed medians.
      *
      * @param r The rank index.
-     * @param reverse If `true`, sorts in descending order of medians.
+     * @param order Sorting order of medians.
      */
-    void reorder(const uint32_t r, median_sorting order)
+    void reorder(const uint32_t r, const median_sorting order)
     {
         // Get the nodes at rank r
         auto rank = fanout_ntk.get_ranks(r);
@@ -367,9 +367,9 @@ class mincross_impl
     /**
      * Performs pairwise transpositions within ranks to further reduce crossings.
      *
-     * @param reverse If `true`, applies reversed heuristic for tie-breaking.
+     * @param order Sorting heuristic for tie-breaking.
      */
-    void transpose(median_sorting order)
+    void transpose(const median_sorting order)
     {
         std::vector<uint8_t> candidate(fanout_ntk.depth() + 1, 1);
         uint32_t             delta          = 0;
@@ -407,10 +407,10 @@ class mincross_impl
      * Performs a single transposition pass for rank `r`.
      *
      * @param r Rank index.
-     * @param reverse If `true`, applies reversed heuristic for tie-breaking.
+     * @param order Sorting heuristic for tie-breaking.
      * @return The number of crossings reduced.
      */
-    uint32_t transpose_step(const uint32_t r, median_sorting order)
+    uint32_t transpose_step(const uint32_t r, const median_sorting order)
     {
         auto rank = fanout_ntk.get_ranks(r);
 
