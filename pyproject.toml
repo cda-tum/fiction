@@ -165,8 +165,11 @@ environment = { MACOSX_DEPLOYMENT_TARGET = "13.0" }
 
 [tool.uv]
 required-version = ">=0.5.20"
-reinstall-package = ["mnt.pyfiction"]
-
+cache-keys = [
+    { file = "pyproject.toml" },
+    { git = { commit = true, tags = true } },
+    { file = "bindings/**/*.hpp" },
+]
 
 [tool.mypy]
 files = ["bindings/mnt/pyfiction", "noxfile.py"]
