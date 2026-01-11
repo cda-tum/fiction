@@ -24,25 +24,6 @@ if(MSVC)
   target_compile_options(libfiction INTERFACE /utf-8 /Zm10)
   add_definitions(-DUNICODE -D_UNICODE)
 else()
-  if(NOT DEPLOY)
-    # only include machine-specific optimizations when building for the host
-    # machine
-    check_cxx_compiler_flag(-mtune=native HAS_MTUNE_NATIVE)
-    if(HAS_MTUNE_NATIVE)
-      target_compile_options(libfiction INTERFACE -mtune=native)
-    endif()
-
-    check_cxx_compiler_flag(-march=native HAS_MARCH_NATIVE)
-    if(HAS_MARCH_NATIVE)
-      if(CMAKE_CXX_COMPILER_ID MATCHES ".*Clang"
-         OR CMAKE_SYSTEM_PROCESSOR MATCHES "(x86)|(x86_64)|(AMD64)|(amd64)")
-        target_compile_options(libfiction INTERFACE -march=native)
-      else()
-        target_compile_options(libfiction INTERFACE -mcpu=native)
-      endif()
-    endif()
-  endif()
-
   # enable some more optimizations in release mode
   target_compile_options(
     libfiction INTERFACE $<$<CONFIG:RELEASE>:-fno-math-errno -ffinite-math-only
