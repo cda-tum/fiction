@@ -12,7 +12,6 @@
 #include <fiction/types.hpp>
 
 #include <cmath>
-#include <limits>
 #include <vector>
 
 using namespace fiction;

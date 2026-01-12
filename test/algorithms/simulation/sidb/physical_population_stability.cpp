@@ -15,6 +15,8 @@
 #include <fiction/technology/sidb_lattice_orientations.hpp>
 #include <fiction/types.hpp>
 
+#include <cmath>
+
 using namespace fiction;
 
 TEST_CASE("Single SiDB", "[assess-physical-population-stability]")

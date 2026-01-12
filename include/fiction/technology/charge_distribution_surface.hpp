@@ -409,6 +409,22 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         return *this;
     }
     /**
+     * Move constructor.
+     *
+     * @param other charge_distribution_surface to move from.
+     */
+    charge_distribution_surface(charge_distribution_surface&& other) noexcept = default;
+    /**
+     * Move assignment operator.
+     *
+     * @param other charge_distribution_surface to move from.
+     */
+    charge_distribution_surface& operator=(charge_distribution_surface&& other) noexcept = default;
+    /**
+     * Destructor.
+     */
+    ~charge_distribution_surface() = default;
+    /**
      * Clones the current charge distribution surface and returns a deep copy.
      *
      * @return A deep copy of the current charge_distribution_surface, preserving all its properties.
@@ -1210,7 +1226,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             collect += strg->local_int_pot_at_defect[c] * static_cast<double>(defect.charge);
         }
 
-        strg->system_energy = collect_ext + 0.5 * collect;
+        strg->system_energy = collect_ext + (0.5 * collect);
     }
     /**
      * This function returns the currently stored system's total electrostatic potential energy in eV.
