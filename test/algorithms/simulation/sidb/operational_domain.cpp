@@ -321,7 +321,7 @@ TEST_CASE("SiQAD OR gate", "[operational-domain]")
     check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
 }
 
-// NOLINTNEXTLINE(google-readability-function-size, hicpp-function-size)
+// NOLINTNEXTLINE(*-function-size)
 TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 {
     using layout = sidb_cell_clk_lyt_siqad;
