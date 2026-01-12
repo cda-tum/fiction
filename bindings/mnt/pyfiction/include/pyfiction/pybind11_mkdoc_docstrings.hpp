@@ -113,7 +113,9 @@ this function cannot be evaluated in :math:`\mathcal{O}(1)`, but has
 the polynomial complexity of A*.
 
 If no path between `source` and `target` exists in `layout`, the
-returned distance is `std::numeric_limits<Dist>::max()`.
+returned distance is `std::numeric_limits<Dist>::infinity()` for
+floating-point types or `std::numeric_limits<Dist>::max()` for
+integral types.
 
 Template parameter ``Lyt``:
     Coordinate layout type.
@@ -16931,8 +16933,8 @@ static const char *__doc_fiction_mincross_stats_num_crossings = R"doc(The total 
 
 static const char *__doc_fiction_minimum_energy =
 R"doc(Computes the minimum energy of a range of
-`charge_distribution_surface` objects. If the range is empty, the
-maximum representable double value is returned.
+`charge_distribution_surface` objects. If the range is empty, infinity
+is returned to indicate no valid energy value exists.
 
 Template parameter ``InputIt``:
     Must meet the requirements of `LegacyInputIterator`.
@@ -16945,7 +16947,8 @@ Parameter ``last``:
 
 Returns:
     Value of the minimum energy found in the input range (unit: eV),
-    or `std::numeric_limits<double>::max()` if the range is empty.)doc";
+    or `std::numeric_limits<double>::infinity()` if the range is
+    empty.)doc";
 
 static const char *__doc_fiction_minimum_energy_distribution =
 R"doc(Returns an iterator to the charge distribution of minimum energy
