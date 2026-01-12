@@ -91,7 +91,7 @@ struct critical_temperature_stats
     /**
      * Energy difference between the ground state and the first (erroneous) excited state (unit: meV).
      */
-    double energy_between_ground_state_and_first_erroneous = std::numeric_limits<double>::max();
+    double energy_between_ground_state_and_first_erroneous = std::numeric_limits<double>::infinity();
     /**
      * Prints the simulation results to the given output stream.
      *

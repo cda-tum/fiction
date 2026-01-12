@@ -28,8 +28,7 @@ TEST_CASE("Test minimum energy function", "[minimum-energy]")
         const charge_distribution_surface                 charge_layout{lyt};
         std::vector<charge_distribution_surface<lattice>> all_lyts{};
 
-        CHECK_THAT(minimum_energy(all_lyts.begin(), all_lyts.end()),
-                   Catch::Matchers::WithinAbs(std::numeric_limits<double>::max(), 0.00001));
+        CHECK(std::isinf(minimum_energy(all_lyts.begin(), all_lyts.end())));
 
         all_lyts.push_back(charge_layout);
 
@@ -43,8 +42,7 @@ TEST_CASE("Test minimum energy function", "[minimum-energy]")
         const charge_distribution_surface                 charge_layout{lyt};
         std::vector<charge_distribution_surface<lattice>> all_lyts{};
 
-        CHECK_THAT(minimum_energy(all_lyts.cbegin(), all_lyts.cend()),
-                   Catch::Matchers::WithinAbs(std::numeric_limits<double>::max(), 0.00001));
+        CHECK(std::isinf(minimum_energy(all_lyts.cbegin(), all_lyts.cend())));
 
         all_lyts.push_back(charge_layout);
 
@@ -60,8 +58,7 @@ TEST_CASE("Test minimum energy function", "[minimum-energy]")
         charge_distribution_surface                       charge_layout_first{lyt};
         std::vector<charge_distribution_surface<lattice>> all_lyts{};
 
-        CHECK_THAT(minimum_energy(all_lyts.cbegin(), all_lyts.cend()),
-                   Catch::Matchers::WithinAbs(std::numeric_limits<double>::max(), 0.00001));
+        CHECK(std::isinf(minimum_energy(all_lyts.cbegin(), all_lyts.cend())));
 
         charge_layout_first.assign_charge_state({0, 0}, sidb_charge_state::NEUTRAL);
 

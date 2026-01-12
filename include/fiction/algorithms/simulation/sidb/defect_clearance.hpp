@@ -57,7 +57,7 @@ calculate_defect_clearance(const Lyt& lyt, const defect_influence_domain<Lyt>& d
                 return;
             }
 
-            auto      min_distance          = std::numeric_limits<double>::max();
+            auto      min_distance          = std::numeric_limits<double>::infinity();
             cell<Lyt> min_distance_position = {};
 
             lyt.foreach_cell(

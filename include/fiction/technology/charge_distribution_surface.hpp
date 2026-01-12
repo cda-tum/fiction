@@ -1555,8 +1555,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             }
 
             const auto dist_min =
-                std::accumulate(negative_indices.begin(), negative_indices.end(), std::numeric_limits<double>::max(),
-                                [&](const double acc, const uint64_t occ)
+                std::accumulate(negative_indices.begin(), negative_indices.end(),
+                                std::numeric_limits<double>::infinity(), [&](const double acc, const uint64_t occ)
                                 { return std::min(acc, this->get_nm_distance_by_indices(unocc, occ)); });
 
             index_vector.push_back(unocc);

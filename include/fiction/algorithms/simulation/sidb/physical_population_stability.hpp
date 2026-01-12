@@ -162,13 +162,13 @@ class physical_population_stability_impl
             population_stability_information<Lyt> population_stability_info{};
 
             population_stability_info.transition_potentials.insert(
-                {transition_type::NEUTRAL_TO_NEGATIVE, {cell<Lyt>{}, std::numeric_limits<double>::max()}});
+                {transition_type::NEUTRAL_TO_NEGATIVE, {cell<Lyt>{}, std::numeric_limits<double>::infinity()}});
             population_stability_info.transition_potentials.insert(
-                {transition_type::NEGATIVE_TO_NEUTRAL, {cell<Lyt>{}, std::numeric_limits<double>::max()}});
+                {transition_type::NEGATIVE_TO_NEUTRAL, {cell<Lyt>{}, std::numeric_limits<double>::infinity()}});
             population_stability_info.transition_potentials.insert(
-                {transition_type::NEUTRAL_TO_POSITIVE, {cell<Lyt>{}, std::numeric_limits<double>::max()}});
+                {transition_type::NEUTRAL_TO_POSITIVE, {cell<Lyt>{}, std::numeric_limits<double>::infinity()}});
             population_stability_info.transition_potentials.insert(
-                {transition_type::POSITIVE_TO_NEUTRAL, {cell<Lyt>{}, std::numeric_limits<double>::max()}});
+                {transition_type::POSITIVE_TO_NEUTRAL, {cell<Lyt>{}, std::numeric_limits<double>::infinity()}});
 
             charge_lyt.foreach_cell(
                 [this, &charge_lyt, &population_stability_info](const auto& c)
@@ -201,7 +201,7 @@ class physical_population_stability_impl
                 });
             population_stability_info.system_energy = charge_lyt.get_electrostatic_potential_energy();
 
-            auto minimum_potential_difference = std::numeric_limits<double>::max();
+            auto minimum_potential_difference = std::numeric_limits<double>::infinity();
 
             for (const auto& transition : population_stability_info.transition_potentials)
             {

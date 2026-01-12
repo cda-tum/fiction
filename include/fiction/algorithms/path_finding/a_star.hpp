@@ -411,7 +411,8 @@ template <typename Path, typename Lyt, typename Dist = uint64_t, typename Cost =
  * of A*.
  *
  * If no path between `source` and `target` exists in `layout`, the returned distance is
- * `std::numeric_limits<Dist>::max()`.
+ * `std::numeric_limits<Dist>::infinity()` for floating-point types or `std::numeric_limits<Dist>::max()` for integral
+ * types.
  *
  * @tparam Lyt Coordinate layout type.
  * @tparam Dist Distance type.
@@ -431,8 +432,14 @@ template <typename Lyt, typename Dist = uint64_t>
 
     if (path_length == 0ul)
     {
-
-        return std::numeric_limits<Dist>::max();
+        if constexpr (std::is_floating_point_v<Dist>)
+        {
+            return std::numeric_limits<Dist>::infinity();
+        }
+        else
+        {
+            return std::numeric_limits<Dist>::max();
+        }
     }
 
     return static_cast<Dist>(path_length - 1);

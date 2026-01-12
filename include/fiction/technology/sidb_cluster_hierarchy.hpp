@@ -305,11 +305,11 @@ template <bound_direction bound>
 {
     if constexpr (bound == bound_direction::LOWER)
     {
-        return std::numeric_limits<double>::max();
+        return std::numeric_limits<double>::infinity();
     }
     else if constexpr (bound == bound_direction::UPPER)
     {
-        return -std::numeric_limits<double>::max();
+        return -std::numeric_limits<double>::infinity();
     }
 }
 /**

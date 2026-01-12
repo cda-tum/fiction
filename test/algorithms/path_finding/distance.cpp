@@ -534,20 +534,14 @@ TEST_CASE("A* distance", "[distance]")
                     CHECK_THAT((a_star_distance<clk_lyt, double>(layout, {0, 0}, {0, 1})), WithinAbs(1.0, 0.00001));
                     CHECK_THAT((a_star_distance<clk_lyt, double>(layout, {0, 0}, {1, 1})), WithinAbs(2.0, 0.00001));
 
-                    CHECK_THAT((a_star_distance<clk_lyt, double>(layout, {9, 1}, {6, 2})),
-                               WithinAbs(std::numeric_limits<double>::max(), 0.1));
-                    CHECK_THAT((a_star_distance<clk_lyt, double>(layout, {6, 2}, {0, 4})),
-                               WithinAbs(std::numeric_limits<double>::max(), 0.1));
-                    CHECK_THAT((a_star_distance<clk_lyt, double>(layout, {0, 4}, {9, 1})),
-                               WithinAbs(std::numeric_limits<double>::max(), 0.1));
+                    CHECK(std::isinf(a_star_distance<clk_lyt, double>(layout, {9, 1}, {6, 2})));
+                    CHECK(std::isinf(a_star_distance<clk_lyt, double>(layout, {6, 2}, {0, 4})));
+                    CHECK(std::isinf(a_star_distance<clk_lyt, double>(layout, {0, 4}, {9, 1})));
 
                     // A* is not meant for routing in the z-layer
-                    CHECK_THAT((a_star_distance<clk_lyt, double>(layout, {6, 2, 1}, {0, 4, 0})),
-                               WithinAbs(std::numeric_limits<double>::max(), 0.1));
-                    CHECK_THAT((a_star_distance<clk_lyt, double>(layout, {6, 2, 0}, {0, 4, 1})),
-                               WithinAbs(std::numeric_limits<double>::max(), 0.1));
-                    CHECK_THAT((a_star_distance<clk_lyt, double>(layout, {0, 4, 1}, {9, 1, 1})),
-                               WithinAbs(std::numeric_limits<double>::max(), 0.1));
+                    CHECK(std::isinf(a_star_distance<clk_lyt, double>(layout, {6, 2, 1}, {0, 4, 0})));
+                    CHECK(std::isinf(a_star_distance<clk_lyt, double>(layout, {6, 2, 0}, {0, 4, 1})));
+                    CHECK(std::isinf(a_star_distance<clk_lyt, double>(layout, {0, 4, 1}, {9, 1, 1})));
                 }
             }
         }
@@ -613,15 +607,13 @@ TEST_CASE("A* distance functor", "[distance]")
                     CHECK_THAT(distance(layout, {0, 0}, {0, 1}), WithinAbs(1.0, 0.00001));
                     CHECK_THAT(distance(layout, {0, 0}, {1, 1}), WithinAbs(2.0, 0.00001));
 
-                    CHECK_THAT(distance(layout, {9, 1}, {6, 2}), WithinAbs(std::numeric_limits<double>::max(), 0.1));
-                    CHECK_THAT(distance(layout, {6, 2}, {0, 4}), WithinAbs(std::numeric_limits<double>::max(), 0.1));
-                    CHECK_THAT(distance(layout, {0, 4}, {9, 1}), WithinAbs(std::numeric_limits<double>::max(), 0.1));
+                    CHECK(std::isinf(distance(layout, {9, 1}, {6, 2})));
+                    CHECK(std::isinf(distance(layout, {6, 2}, {0, 4})));
+                    CHECK(std::isinf(distance(layout, {0, 4}, {9, 1})));
 
                     // A* is not meant for routing to the z-layer
-                    CHECK_THAT(distance(layout, {6, 2, 0}, {0, 4, 1}),
-                               WithinAbs(std::numeric_limits<double>::max(), 0.1));
-                    CHECK_THAT(distance(layout, {0, 4, 1}, {9, 1, 1}),
-                               WithinAbs(std::numeric_limits<double>::max(), 0.1));
+                    CHECK(std::isinf(distance(layout, {6, 2, 0}, {0, 4, 1})));
+                    CHECK(std::isinf(distance(layout, {0, 4, 1}, {9, 1, 1})));
                 }
             }
         }

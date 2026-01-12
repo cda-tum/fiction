@@ -64,7 +64,7 @@ band_bending_resilience(const Lyt& lyt, const std::vector<TT>& spec, const band_
 
     bdl_input_iterator<Lyt> bii{lyt, params.bdl_iterator_params};
 
-    double minimal_pop_stability_for_all_inputs = std::numeric_limits<double>::max();
+    double minimal_pop_stability_for_all_inputs = std::numeric_limits<double>::infinity();
     // number of different input combinations
     for (auto i = 0u; i < spec.front().num_bits(); ++i, ++bii)
     {

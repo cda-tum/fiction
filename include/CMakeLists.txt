@@ -26,8 +26,8 @@ if(MSVC)
 else()
   # enable some more optimizations in release mode
   target_compile_options(
-    libfiction INTERFACE $<$<CONFIG:RELEASE>:-fno-math-errno -ffinite-math-only
-                         -fno-trapping-math -fno-stack-protector>)
+    libfiction INTERFACE $<$<CONFIG:RELEASE>:-fno-math-errno -fno-trapping-math
+                         -fno-stack-protector>)
 
   # enable some more options for better debugging
   target_compile_options(

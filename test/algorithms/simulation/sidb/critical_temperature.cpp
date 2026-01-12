@@ -18,7 +18,6 @@
 #include <fiction/utils/truth_table_utils.hpp>
 
 #include <cmath>
-#include <limits>
 #include <vector>
 
 using namespace fiction;
@@ -143,8 +142,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         const auto ct_qe = critical_temperature_non_gate_based(lyt, params, &critical_stats);
 
         CHECK(critical_stats.num_valid_lyt == 2);
-        CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous),
-                   Catch::Matchers::WithinAbs(std::numeric_limits<double>::max(), 0.01));
+        CHECK(std::isinf(critical_stats.energy_between_ground_state_and_first_erroneous));
         CHECK(ct_qe == 350);
 
 #if (FICTION_ALGLIB_ENABLED)
@@ -154,8 +152,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         const auto ct_cc = critical_temperature_non_gate_based(lyt, params, &critical_stats);
 
         CHECK(critical_stats.num_valid_lyt == 2);
-        CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous),
-                   Catch::Matchers::WithinAbs(std::numeric_limits<double>::max(), 0.01));
+        CHECK(std::isinf(critical_stats.energy_between_ground_state_and_first_erroneous));
         CHECK(ct_cc == 350);
 
 #endif  // FICTION_ALGLIB_ENABLED
@@ -191,8 +188,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
 
         const auto ct_qe = critical_temperature_gate_based(lyt, std::vector{create_and_tt()}, params, &critical_stats);
 
-        CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous),
-                   Catch::Matchers::WithinAbs(std::numeric_limits<double>::max(), 0.01));
+        CHECK(std::isinf(critical_stats.energy_between_ground_state_and_first_erroneous));
         CHECK(ct_qe == 350);
 
 #if (FICTION_ALGLIB_ENABLED)
@@ -201,8 +197,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
 
         const auto ct_cc = critical_temperature_gate_based(lyt, std::vector{create_and_tt()}, params, &critical_stats);
 
-        CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous),
-                   Catch::Matchers::WithinAbs(std::numeric_limits<double>::max(), 0.01));
+        CHECK(std::isinf(critical_stats.energy_between_ground_state_and_first_erroneous));
         CHECK(ct_cc == 350);
 
 #endif  // FICTION_ALGLIB_ENABLED
@@ -223,8 +218,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         const auto ct_qe =
             critical_temperature_gate_based(lyt_or_gate, std::vector{create_or_tt()}, params, &critical_stats);
 
-        CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous),
-                   Catch::Matchers::WithinAbs(std::numeric_limits<double>::max(), 0.01));
+        CHECK(std::isinf(critical_stats.energy_between_ground_state_and_first_erroneous));
         CHECK(ct_qe == 400);
 
 #if (FICTION_ALGLIB_ENABLED)
@@ -234,8 +228,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         const auto ct_cc =
             critical_temperature_gate_based(lyt_or_gate, std::vector{create_or_tt()}, params, &critical_stats);
 
-        CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous),
-                   Catch::Matchers::WithinAbs(std::numeric_limits<double>::max(), 0.01));
+        CHECK(std::isinf(critical_stats.energy_between_ground_state_and_first_erroneous));
         CHECK(ct_cc == 400);
 
 #endif  // FICTION_ALGLIB_ENABLED
@@ -773,8 +766,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function, using offset coordinates
         CHECK(critical_stats.algorithm_name == "QuickExact");
 
         CHECK(critical_stats.num_valid_lyt == 2);
-        CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous),
-                   Catch::Matchers::WithinAbs(std::numeric_limits<double>::max(), 0.01));
+        CHECK(std::isinf(critical_stats.energy_between_ground_state_and_first_erroneous));
         CHECK(ct_qe == 350);
 
 #if (FICTION_ALGLIB_ENABLED)
@@ -786,8 +778,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function, using offset coordinates
         CHECK(critical_stats.algorithm_name == "ClusterComplete");
 
         CHECK(critical_stats.num_valid_lyt == 2);
-        CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous),
-                   Catch::Matchers::WithinAbs(std::numeric_limits<double>::max(), 0.01));
+        CHECK(std::isinf(critical_stats.energy_between_ground_state_and_first_erroneous));
         CHECK(ct_cc == 350);
 
 #endif  // FICTION_ALGLIB_ENABLED
@@ -824,8 +815,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function, using offset coordinates
 
         CHECK(critical_stats.algorithm_name == "QuickExact");
 
-        CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous),
-                   Catch::Matchers::WithinAbs(std::numeric_limits<double>::max(), 0.01));
+        CHECK(std::isinf(critical_stats.energy_between_ground_state_and_first_erroneous));
         CHECK(ct_qe == 350);
 
 #if (FICTION_ALGLIB_ENABLED)
@@ -836,8 +826,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function, using offset coordinates
 
         CHECK(critical_stats.algorithm_name == "ClusterComplete");
 
-        CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous),
-                   Catch::Matchers::WithinAbs(std::numeric_limits<double>::max(), 0.01));
+        CHECK(std::isinf(critical_stats.energy_between_ground_state_and_first_erroneous));
         CHECK(ct_cc == 350);
 
 #endif  // FICTION_ALGLIB_ENABLED

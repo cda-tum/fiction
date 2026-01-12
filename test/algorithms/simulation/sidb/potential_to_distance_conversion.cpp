@@ -72,7 +72,7 @@ TEST_CASE("Conversion of potential to distance", "[potential_to_distance_convers
     SECTION("Conversion with infinite potential")
     {
         constexpr uint64_t precision         = 3;
-        constexpr double   potential_value   = std::numeric_limits<double>::max();
+        constexpr double   potential_value   = std::numeric_limits<double>::infinity();
         constexpr double   expected_distance = 0.001;
         REQUIRE_THAT(potential_to_distance_conversion(potential_value, params, precision),
                      Catch::Matchers::WithinAbs(expected_distance, 1e-5));
