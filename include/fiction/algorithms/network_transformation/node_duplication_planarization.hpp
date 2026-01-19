@@ -126,6 +126,7 @@ initialize_copy_network_duplicates(Ntk const& src)
     static_assert(mockturtle::has_foreach_pi_v<Ntk>, "Ntk does not implement the foreach_pi method");
     static_assert(mockturtle::has_create_pi_v<virtual_pi_network<Ntk>>,
                   "virtual_pi_network<Ntk> does not implement create_pi");
+    static_assert(mockturtle::has_rank_position_v<Ntk> && "Ntk does not implement the rank_position function");
 
     mockturtle::node_map<std::vector<mockturtle::signal<virtual_pi_network<Ntk>>>, Ntk> old2new(src);
     virtual_pi_network<Ntk>                                                             dest;
@@ -135,7 +136,22 @@ initialize_copy_network_duplicates(Ntk const& src)
     {
         old2new[src.get_constant(true)].push_back(dest.get_constant(true));
     }
-    src.foreach_pi([&](auto const& n) { old2new[n].push_back(dest.create_pi()); });
+    if constexpr (has_is_real_pi_v<Ntk>)
+    {
+        src.foreach_pi_unranked(
+            [&](auto const& n)
+            {
+                if (src.is_real_pi(n))
+                {
+                    old2new[n].push_back(dest.create_pi());
+                }
+            });
+    }
+    else
+    {
+        src.foreach_pi_unranked([&](auto const& n) { old2new[n].push_back(dest.create_pi()); });
+    }
+
     return {dest, old2new};
 }
 
@@ -196,8 +212,10 @@ gather_fanin_signals(const Ntk& ntk, NtkDest& ntk_dest_v, const mockturtle::node
 
                 // Check if the candidate matches the original fan-in or a duplicate.
                 // Also, verify if the candidate has already reached its fan-out limit.
+                // THis adjusts for virtual PIS
+                const auto fanout_limit = ntk.is_pi(fn) ? 1 : ntk.fanout_size(fn);
                 if ((std::find(tgt_signal_v.cbegin(), tgt_signal_v.cend(), candidate_sig) != tgt_signal_v.cend()) &&
-                    (ntk_dest_v.fanout_size(node_at_index) < ntk.fanout_size(fn)))
+                    (ntk_dest_v.fanout_size(node_at_index) < fanout_limit))
                 {
                     // Set the local node_index.
                     if (i == 0)
@@ -283,18 +301,27 @@ create_virtual_pi_ntk_from_duplicated_nodes(const Ntk& ntk, const levelized_node
             // If the node is a PI create virtual PIs for duplicates.
             if (ntk.is_pi(nd))
             {
-                if (node_status[nd])
+                mockturtle::node<Ntk> pi = nd;
+                if constexpr (has_is_virtual_pi_v<Ntk>)
                 {
-                    const auto new_sig = ntk_dest_v.create_virtual_pi(nd);
+                    if (ntk.is_virtual_pi(pi))
+                    {
+                        pi              = ntk.get_real_pi(pi);
+                        node_status[pi] = true;
+                    }
+                }
+                if (node_status[pi])
+                {
+                    const auto new_sig = ntk_dest_v.create_virtual_pi(pi);
                     lvl_new.push_back(ntk_dest_v.get_node(new_sig));
                     old2new_v[nd].push_back(new_sig);
                 }
                 else
                 {
-                    const auto& sigs = old2new_v[nd];
+                    const auto& sigs = old2new_v[pi];
                     assert(!sigs.empty());
                     lvl_new.push_back(ntk_dest_v.get_node(sigs.front()));
-                    node_status[nd] = true;
+                    node_status[pi] = true;
                 }
             }
             else
@@ -578,6 +605,10 @@ class node_duplication_planarization_impl
             }
             else
             {
+                if (ntk.fanout_size(node) == 1)
+                {
+                    vec.insert(vec.begin(), node);
+                }
                 fo_st = fanout_state::SATURATED;
             }
         }
