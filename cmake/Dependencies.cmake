@@ -79,9 +79,5 @@ FetchContent_MakeAvailable(mockturtle)
 
 # ALGLIB
 if(FICTION_ALGLIB)
-  FetchContent_Declare(
-    alglib-cmake
-    GIT_REPOSITORY https://github.com/wlambooy/alglib-cmake.git
-    GIT_TAG master)
-  FetchContent_MakeAvailable(alglib-cmake)
+  include(${PROJECT_SOURCE_DIR}/cmake/FetchALGLIB.cmake)
 endif()
