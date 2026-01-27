@@ -390,17 +390,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      *
      * @param cds Other `charge_distribution_surface`.
      */
-    charge_distribution_surface(const charge_distribution_surface& cds) :
-            Lyt(cds),
-            strg{std::make_shared<charge_distribution_storage>(*cds.strg)}
-    {}
-    /**
-     * Conversion constructor from the generic charge_distribution_surface.
-     *
-     * @param cds Other `charge_distribution_surface`.
-     */
-    explicit charge_distribution_surface(
-        const charge_distribution_surface<Lyt>& cds) :  // NOLINT(google-explicit-constructor)
+    charge_distribution_surface(const charge_distribution_surface<Lyt>& cds) :
             Lyt(cds),
             strg{std::make_shared<charge_distribution_storage>(*cds.strg)}
     {}
