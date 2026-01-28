@@ -95,7 +95,6 @@ def _run_tests(
         "pytest",
         *pytest_run_args,
         *session.posargs,
-        "--cov-config=pyproject.toml",
         env=env,
     )
 
