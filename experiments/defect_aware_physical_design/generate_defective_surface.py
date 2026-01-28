@@ -39,7 +39,7 @@ class defect_surface:
 
     # add_defects function allows you to choose total coverage of defects (fully defected surface is coverage = 1.)
     # self.defect_params is array used for configuration of ratio and size of defects on the surface
-    # each entry is formated as [array_value,width,height,ratio]
+    # each entry is formatted as [array_value,width,height,ratio]
     # array_value is number assigned to each lattice point in the self.surface_lattice
     # width and height are how many HSi atoms are used (note this different than surface_height in init)
     # ratio is given as fractional percent (0.05 = 5%)
@@ -114,7 +114,7 @@ class defect_surface:
                         i = i - 1
 
     def draw_panels(self) -> None:  # DB_panels,DB_pattern_extended, pattern):
-        # draws the DB_pattern_extended with rectangles to show each pannel
+        # draws the DB_pattern_extended with rectangles to show each panel
 
         width_nm = self.a1 * self.surface_width
         height_nm = self.a2 * self.surface_height

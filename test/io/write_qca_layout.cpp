@@ -4,12 +4,13 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "utils/version_info.hpp"
+#include "fiction/utils/version_info.hpp"
 
 #include <fiction/io/write_qca_layout.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
+#include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 
 #include <fmt/format.h>
@@ -23,7 +24,7 @@ TEST_CASE("Write empty QCAD layout", "[qcad]")
 {
     using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
 
-    qca_layout layout{{2, 2, 1}, "empty layout"};
+    const qca_layout layout{{2, 2, 1}, "empty layout"};
 
     SECTION("with vias")
     {

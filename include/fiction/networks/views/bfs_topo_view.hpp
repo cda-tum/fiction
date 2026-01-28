@@ -112,7 +112,8 @@ class bfs_topo_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
      */
     uint32_t node_to_index(const node& n) const
     {
-        return std::distance(std::cbegin(topo_order), std::find(std::cbegin(topo_order), std::cend(topo_order), n));
+        return static_cast<uint32_t>(
+            std::distance(std::cbegin(topo_order), std::find(std::cbegin(topo_order), std::cend(topo_order), n)));
     }
 
     /**

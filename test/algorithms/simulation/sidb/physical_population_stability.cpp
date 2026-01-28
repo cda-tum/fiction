@@ -3,6 +3,7 @@
 //
 
 #include <catch2/catch_template_test_macros.hpp>
+#include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
@@ -14,7 +15,7 @@
 #include <fiction/technology/sidb_lattice_orientations.hpp>
 #include <fiction/types.hpp>
 
-#include <limits>
+#include <cmath>
 
 using namespace fiction;
 
@@ -25,8 +26,8 @@ TEST_CASE("Single SiDB", "[assess-physical-population-stability]")
 
     SECTION("Precision of distance_corresponding_to_potential is two")
     {
-        const auto params = physical_population_stability_params{sidb_simulation_parameters{2, -0.29}, 2};
-        const auto result = physical_population_stability(lyt, params);
+        constexpr auto params = physical_population_stability_params{sidb_simulation_parameters{2, -0.29}, 2};
+        const auto     result = physical_population_stability(lyt, params);
         REQUIRE(result.size() == 1);
         const auto& population_stability_detail = result[0];
         CHECK(population_stability_detail.critical_cell == siqad::coord_t{1, 1, 0});
@@ -35,10 +36,10 @@ TEST_CASE("Single SiDB", "[assess-physical-population-stability]")
               siqad::coord_t{1, 1, 0});
         CHECK(population_stability_detail.transition_potentials.at(transition_type::NEGATIVE_TO_NEUTRAL).second ==
               0.29);
-        CHECK(population_stability_detail.transition_potentials.at(transition_type::NEUTRAL_TO_POSITIVE).second ==
-              std::numeric_limits<double>::infinity());
-        CHECK(population_stability_detail.transition_potentials.at(transition_type::POSITIVE_TO_NEUTRAL).second ==
-              std::numeric_limits<double>::infinity());
+        CHECK(std::isinf(
+            population_stability_detail.transition_potentials.at(transition_type::NEUTRAL_TO_POSITIVE).second));
+        CHECK(std::isinf(
+            population_stability_detail.transition_potentials.at(transition_type::POSITIVE_TO_NEUTRAL).second));
 
         REQUIRE_THAT(
             population_stability_detail.distance_corresponding_to_potential.at(transition_type::NEGATIVE_TO_NEUTRAL),
@@ -47,8 +48,8 @@ TEST_CASE("Single SiDB", "[assess-physical-population-stability]")
 
     SECTION("Precision of distance_corresponding_to_potential is three")
     {
-        const auto params = physical_population_stability_params{sidb_simulation_parameters{2, -0.29}, 3};
-        const auto result = physical_population_stability(lyt, params);
+        constexpr auto params = physical_population_stability_params{sidb_simulation_parameters{2, -0.29}, 3};
+        const auto     result = physical_population_stability(lyt, params);
         REQUIRE(result.size() == 1);
         const auto& population_stability_detail = result[0];
         REQUIRE_THAT(
@@ -62,7 +63,7 @@ TEMPLATE_TEST_CASE("Three SiDBs with positive charge states", "[assess-physical-
 {
     TestType lyt{};
 
-    const auto params = physical_population_stability_params{};
+    constexpr auto params = physical_population_stability_params{};
     lyt.assign_cell_type({1, 1, 0}, sidb_technology::cell_type::NORMAL);
     lyt.assign_cell_type({1, 1, 1}, sidb_technology::cell_type::NORMAL);
     lyt.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::NORMAL);
@@ -117,7 +118,7 @@ TEMPLATE_TEST_CASE("Bestagon AND gate", "[assess-physical-population-stability]"
 {
     TestType lyt{};
 
-    const auto params = physical_population_stability_params{};
+    constexpr auto params = physical_population_stability_params{};
 
     lyt.assign_cell_type({36, 1, 0}, sidb_technology::cell_type::INPUT);
     lyt.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::INPUT);
@@ -226,7 +227,7 @@ TEMPLATE_TEST_CASE("Bestagon AND gate", "[assess-physical-population-stability]"
 
 TEST_CASE("Bestagon CX gate input 11", "[assess-physical-population-stability], [quality]")
 {
-    const auto population_stability_params = physical_population_stability_params{};
+    constexpr auto population_stability_params = physical_population_stability_params{};
 
     SECTION("using cube coordinates")
     {
@@ -313,7 +314,7 @@ TEST_CASE("Bestagon CX gate input 11", "[assess-physical-population-stability], 
     {
         sidb_100_cell_clk_lyt lyt{};
 
-        const auto params = physical_population_stability_params{};
+        constexpr auto params = physical_population_stability_params{};
         lyt.assign_cell_type(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{36, 1, 0}),
                              sidb_technology::cell_type::INPUT);
         lyt.assign_cell_type(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{2, 1, 0}),

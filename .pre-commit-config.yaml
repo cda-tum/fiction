@@ -12,7 +12,7 @@ ci:
   autofix_commit_msg: "🎨 Incorporated pre-commit fixes"
   autoupdate_schedule: quarterly
 
-exclude: "^libs/|^benchmarks/|bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp"
+exclude: "^vendors/|^benchmarks/|bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp"
 
 repos:
   # Standard hooks
@@ -21,8 +21,10 @@ repos:
     hooks:
       - id: check-added-large-files
       - id: check-case-conflict
-      - id: check-docstring-first
+      - id: check-vcs-permalinks
       - id: check-merge-conflict
+      - id: check-symlinks
+      - id: check-json
       - id: check-toml
       - id: check-yaml
       - id: debug-statements
@@ -45,6 +47,15 @@ repos:
       - id: rst-directive-colons
       - id: rst-inline-touching-normal
 
+  # CMake format and lint the CMakeLists.txt files
+  - repo: https://github.com/cheshirekow/cmake-format-precommit
+    rev: v0.6.13
+    hooks:
+      - id: cmake-format
+        additional_dependencies: [pyyaml]
+        types: [file]
+        files: (\.cmake|CMakeLists.txt)(.in)?$
+
   # clang-format the C++ part of the code base
   - repo: https://github.com/pre-commit/mirrors-clang-format
     rev: v21.1.8
@@ -52,6 +63,12 @@ repos:
       - id: clang-format
         types_or: [c++, c]
         args: ["-style=file"]
+
+  # Ensure uv lock file is up-to-date
+  - repo: https://github.com/astral-sh/uv-pre-commit
+    rev: 0.9.16
+    hooks:
+      - id: uv-lock
 
   # Python linting using ruff
   - repo: https://github.com/astral-sh/ruff-pre-commit

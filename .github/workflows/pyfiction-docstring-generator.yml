@@ -15,7 +15,6 @@ jobs:
       - name: Clone Repository
         uses: actions/checkout@v6
         with:
-          submodules: recursive
           fetch-depth: 0 # Fetch all history for all branches and tags
 
       - name: Setup Python

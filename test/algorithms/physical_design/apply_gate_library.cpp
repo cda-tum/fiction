@@ -2,7 +2,6 @@
 // Created by Jan Drewniok on 08.01.25.
 //
 
-#include <catch2/catch_assertion_result.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
@@ -27,6 +26,8 @@
 
 using namespace fiction;
 
+namespace
+{
 template <typename Lyt>
 void check_equivalence(const Lyt& layout_designed, const std::string& path_layout_correct)
 {
@@ -48,6 +49,7 @@ void check_equivalence(const Lyt& layout_designed, const std::string& path_layou
             }
         });
 }
+}  // namespace
 
 using cell_lyt = sidb_100_cell_clk_lyt_cube;
 
