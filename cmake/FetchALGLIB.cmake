@@ -2,6 +2,11 @@
 
 include(FetchContent)
 
+# Set policy to allow FetchContent_Populate with declared content
+if(POLICY CMP0169)
+  cmake_policy(SET CMP0169 OLD)
+endif()
+
 set(ALGLIB_VERSION "3.14.0")
 set(ALGLIB_FILE "alglib-${ALGLIB_VERSION}.cpp.gpl.tgz")
 
@@ -108,13 +113,67 @@ else()
   message(STATUS "ALGLIB tarball already cached at ${ALGLIB_TARBALL_PATH}")
 endif()
 
-# Now fetch alglib-cmake using modern FetchContent
+# Now fetch alglib-cmake using modern FetchContent. Note: We need to handle the
+# extraction ourselves because alglib-cmake has a waiting loop that can cause
+# timeouts in CI when the tarball exists but hasn't been extracted yet.
 FetchContent_Declare(
   alglib-cmake
   GIT_REPOSITORY https://github.com/wlambooy/alglib-cmake.git
-  GIT_TAG master
-  PATCH_COMMAND ${CMAKE_COMMAND} -E copy_if_different "${ALGLIB_TARBALL_PATH}"
-                "<SOURCE_DIR>/${ALGLIB_FILE}")
+  GIT_TAG master)
 
-# Use modern FetchContent_MakeAvailable
-FetchContent_MakeAvailable(alglib-cmake)
+# Populate alglib-cmake manually so we can prepare the files before it processes
+FetchContent_GetProperties(alglib-cmake)
+if(NOT alglib-cmake_POPULATED)
+  FetchContent_Populate(alglib-cmake)
+
+  # Copy the tarball to the source directory
+  file(COPY "${ALGLIB_TARBALL_PATH}" DESTINATION "${alglib-cmake_SOURCE_DIR}")
+
+  # Extract the tarball and prepare files to avoid the waiting loop
+  set(ALGLIB_UNZIP_DIR "${alglib-cmake_SOURCE_DIR}/src")
+  set(ALGLIB_EXTRACTED_SRC_DIR "${ALGLIB_UNZIP_DIR}/cpp/src")
+
+  if(NOT EXISTS "${ALGLIB_EXTRACTED_SRC_DIR}")
+    message(STATUS "Extracting ALGLIB tarball...")
+    file(REMOVE_RECURSE "${ALGLIB_UNZIP_DIR}")
+    file(MAKE_DIRECTORY "${ALGLIB_UNZIP_DIR}")
+
+    execute_process(
+      COMMAND ${CMAKE_COMMAND} -E tar xfz
+              "${alglib-cmake_SOURCE_DIR}/${ALGLIB_FILE}"
+      WORKING_DIRECTORY "${ALGLIB_UNZIP_DIR}"
+      RESULT_VARIABLE extract_result)
+
+    if(NOT extract_result EQUAL 0)
+      message(FATAL_ERROR "Failed to extract ALGLIB tarball")
+    endif()
+
+    # Reorganize headers as alglib-cmake expects
+    file(GLOB ALGLIB_HEADERS "${ALGLIB_EXTRACTED_SRC_DIR}/*.h")
+    file(GLOB ALGLIB_SOURCES "${ALGLIB_EXTRACTED_SRC_DIR}/*.cpp")
+
+    set(HEADER_OUTPUT_DIR "${ALGLIB_EXTRACTED_SRC_DIR}/headers")
+    file(MAKE_DIRECTORY "${HEADER_OUTPUT_DIR}")
+
+    foreach(header ${ALGLIB_HEADERS})
+      get_filename_component(header_filename ${header} NAME)
+      file(RENAME ${header} "${HEADER_OUTPUT_DIR}/${header_filename}")
+    endforeach()
+
+    foreach(source_file ${ALGLIB_SOURCES})
+      file(READ "${source_file}" file_content)
+      string(REGEX
+             REPLACE "#include \"([^\"]+)\\.h\"" "#include \"headers/\\1.h\""
+                     modified_content "${file_content}")
+      file(WRITE "${source_file}" "${modified_content}")
+    endforeach()
+
+    message(STATUS "ALGLIB extraction and preparation complete")
+  endif()
+
+  # Create the success file to signal completion
+  file(TOUCH "${alglib-cmake_SOURCE_DIR}/success")
+
+  # Now add the subdirectory
+  add_subdirectory(${alglib-cmake_SOURCE_DIR} ${alglib-cmake_BINARY_DIR})
+endif()
