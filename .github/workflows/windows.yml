@@ -83,8 +83,6 @@ jobs:
           -DCMAKE_CXX_COMPILER=${{matrix.cxx_compiler}}
           -DCMAKE_C_COMPILER=${{matrix.c_compiler}}
           -DCMAKE_BUILD_TYPE=Debug
-          -DFICTION_ENABLE_UNITY_BUILD=ON
-          -DFICTION_ENABLE_PCH=ON
           -DFICTION_CLI=ON
           -DFICTION_TEST=ON
           -DFICTION_BENCHMARK=OFF
@@ -95,10 +93,10 @@ jobs:
           -DMOCKTURTLE_EXAMPLES=OFF
 
       - name: Build (Debug)
-        run: cmake --build ${{github.workspace}}/build_debug --config Debug --parallel
+        run: cmake --build ${{github.workspace}}/build_debug --config Debug --parallel 4
 
       - name: Test (Debug)
-        run: ctest --test-dir ${{github.workspace}}/build_debug -C Debug --verbose --output-on-failure --repeat until-pass:3 --parallel --exclude-regex "quality"
+        run: ctest --test-dir ${{github.workspace}}/build_debug -C Debug --verbose --output-on-failure --repeat until-pass:3 --parallel 4
 
       # Build and test pipeline for Release mode
 
@@ -108,8 +106,6 @@ jobs:
           -DCMAKE_CXX_COMPILER=${{matrix.cxx_compiler}}
           -DCMAKE_C_COMPILER=${{matrix.c_compiler}}
           -DCMAKE_BUILD_TYPE=Release
-          -DFICTION_ENABLE_UNITY_BUILD=ON
-          -DFICTION_ENABLE_PCH=ON
           -DFICTION_CLI=ON
           -DFICTION_TEST=ON
           -DFICTION_BENCHMARK=OFF
@@ -120,7 +116,7 @@ jobs:
           -DMOCKTURTLE_EXAMPLES=OFF
 
       - name: Build (Release)
-        run: cmake --build ${{github.workspace}}/build_release --config Release --parallel
+        run: cmake --build ${{github.workspace}}/build_release --config Release --parallel 4
 
       - name: Test (Release)
-        run: ctest --test-dir ${{github.workspace}}/build_release -C Release --verbose --output-on-failure --repeat until-pass:3 --parallel
+        run: ctest --test-dir ${{github.workspace}}/build_release -C Release --verbose --output-on-failure --repeat until-pass:3 --parallel 4

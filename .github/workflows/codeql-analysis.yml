@@ -113,8 +113,6 @@ jobs:
           cmake -S ${{github.workspace}} -B ${{github.workspace}}/build
           -DCMAKE_CXX_COMPILER=${{matrix.compiler}}
           -DCMAKE_BUILD_TYPE=${{matrix.build_type}}
-          -DFICTION_ENABLE_UNITY_BUILD=ON
-          -DFICTION_ENABLE_PCH=ON
           -DFICTION_CLI=OFF
           -DFICTION_TEST=ON
           -DFICTION_BENCHMARK=OFF
@@ -128,7 +126,7 @@ jobs:
 
       - if: matrix.language == 'cpp'
         name: Build fiction
-        run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} --parallel
+        run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} --parallel 4
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v4

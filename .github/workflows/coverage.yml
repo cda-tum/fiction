@@ -87,8 +87,6 @@ jobs:
           cmake -S ${{github.workspace}} -B ${{github.workspace}}/build -G Ninja
           -DCMAKE_CXX_COMPILER=${{matrix.compiler}}
           -DCMAKE_BUILD_TYPE=$BUILD_TYPE
-          -DFICTION_ENABLE_UNITY_BUILD=ON
-          -DFICTION_ENABLE_PCH=ON
           -DFICTION_CLI=OFF
           -DFICTION_TEST=ON
           -DFICTION_BENCHMARK=OFF
@@ -102,11 +100,11 @@ jobs:
           -DMOCKTURTLE_EXAMPLES=OFF
 
       - name: Build
-        run: cmake --build ${{github.workspace}}/build --config $BUILD_TYPE --parallel
+        run: cmake --build ${{github.workspace}}/build --config $BUILD_TYPE --parallel 4
 
       - name: Test
         working-directory: ${{github.workspace}}/build
-        run: ctest -C $BUILD_TYPE --output-on-failure --repeat until-pass:3 --parallel
+        run: ctest -C $BUILD_TYPE --output-on-failure --repeat until-pass:3 --parallel 4
 
       - name: Generate Coverage Report
         run: |

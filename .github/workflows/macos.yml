@@ -79,8 +79,6 @@ jobs:
           cmake -S ${{github.workspace}} -B ${{github.workspace}}/build_debug
           -DCMAKE_CXX_COMPILER=${{matrix.compiler}}
           -DCMAKE_BUILD_TYPE=Debug
-          -DFICTION_ENABLE_UNITY_BUILD=ON
-          -DFICTION_ENABLE_PCH=ON
           -DFICTION_CLI=ON
           -DFICTION_TEST=ON
           -DFICTION_BENCHMARK=OFF
@@ -92,10 +90,10 @@ jobs:
           -DMOCKTURTLE_EXAMPLES=OFF
 
       - name: Build (Debug)
-        run: cmake --build ${{github.workspace}}/build_debug --config Debug --parallel # all macOS runners provide at least 3 cores
+        run: cmake --build ${{github.workspace}}/build_debug --config Debug --parallel 3
 
       - name: Test (Debug)
-        run: ctest --test-dir ${{github.workspace}}/build_debug -C Debug --verbose --output-on-failure --repeat until-pass:3 --parallel
+        run: ctest --test-dir ${{github.workspace}}/build_debug -C Debug --verbose --output-on-failure --repeat until-pass:3 --parallel 3
 
       # Build and test pipeline for Release mode
 
@@ -104,8 +102,6 @@ jobs:
           cmake -S ${{github.workspace}} -B ${{github.workspace}}/build_release
           -DCMAKE_CXX_COMPILER=${{matrix.compiler}}
           -DCMAKE_BUILD_TYPE=Release
-          -DFICTION_ENABLE_UNITY_BUILD=ON
-          -DFICTION_ENABLE_PCH=ON
           -DFICTION_ENABLE_JEMALLOC=ON
           -DFICTION_CLI=ON
           -DFICTION_TEST=ON
@@ -118,7 +114,7 @@ jobs:
           -DMOCKTURTLE_EXAMPLES=OFF
 
       - name: Build (Release)
-        run: cmake --build ${{github.workspace}}/build_release --config Release --parallel # all macOS runners provide at least 3 cores
+        run: cmake --build ${{github.workspace}}/build_release --config Release --parallel 3
 
       - name: Test (Release)
-        run: ctest --test-dir ${{github.workspace}}/build_release -C Release --verbose --output-on-failure --repeat until-pass:3 --parallel
+        run: ctest --test-dir ${{github.workspace}}/build_release -C Release --verbose --output-on-failure --repeat until-pass:3 --parallel 3
