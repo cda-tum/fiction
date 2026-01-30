@@ -1,5 +1,5 @@
-# Prevent CMake from finding a system-installed fmt package to avoid version conflicts
-# We use the bundled fmt version from alice/mockturtle submodules (now fetched)
+# Prevent CMake from finding a system-installed fmt package to avoid version conflicts.
+# We use the bundled fmt version from alice/mockturtle submodules.
 set(CMAKE_DISABLE_FIND_PACKAGE_fmt TRUE)
 
 # Include Dependencies (FetchContent) configuration
@@ -114,12 +114,6 @@ if (NOT WIN32)
         target_link_system_libraries(libfiction INTERFACE pybind11::embed)
 
         configure_file(${CMAKE_CURRENT_SOURCE_DIR}/mugen/mugen_info.hpp.in utils/mugen_info.hpp)
-        # Note: vendors/ path usage because we are in vendors/CMakeLists.txt, so CMAKE_CURRENT_SOURCE_DIR isvendors/
-        # But we need to include generated header which is in PROJECT_BINARY_DIR/vendors/utils (actually generated to utils/ in configure_file above relative to binary dir?)
-        # configure_file dst is "utils/mugen_info.hpp". Since we are in sub dir, it is relative to CMAKE_CURRENT_BINARY_DIR which is build/vendors.
-        # So header is at build/vendors/utils/mugen_info.hpp.
-        # Previous cmake code used ${PROJECT_BINARY_DIR}/libs/. since we are now in vendors, relative path utils/ goes to build/vendors/utils/.
-        # We should include build/vendors/.
         target_include_directories(libfiction INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 
         message(STATUS "Mugen was enabled. Please note that it relies on the Python3 libraries 'graphviz', 'PySAT v0.1.6.dev6', and 'wrapt_timeout_decorator' to be properly installed")
