@@ -13,12 +13,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Clone Repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
         with:
           fetch-depth: 0 # Fetch all history for all branches and tags
 
       - name: Setup Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
         with:
           python-version: "3.14.x"
           cache: "pip"
@@ -42,13 +42,13 @@ jobs:
           `find ${{ github.workspace }}/include/fiction -name "*.hpp" -print`
 
       - name: Upload docstrings as an artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           path: ${{ github.workspace }}/bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp
           overwrite: true
 
       - name: Commit docstrings
-        uses: EndBug/add-and-commit@v9
+        uses: EndBug/add-and-commit@a94899bca583c204427a224a7af87c02f9b325d5 # v9
         with:
           add: "bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp"
           commit: "--signoff"

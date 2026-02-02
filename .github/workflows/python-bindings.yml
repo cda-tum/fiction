@@ -53,12 +53,12 @@ jobs:
         runs-on: [ubuntu-latest, macos-latest, windows-latest]
     steps:
       - name: Clone Repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
         with:
           fetch-depth: 0
 
       - name: Setup ccache
-        uses: hendrikmuhs/ccache-action@v1.2
+        uses: hendrikmuhs/ccache-action@5ebbd400eff9e74630f759d94ddd7b6c26299639 # v1.2
         with:
           key: "${{matrix.runs-on}}-pyfiction"
           save: true
@@ -70,18 +70,18 @@ jobs:
 
       - name: Setup Z3 Solver
         id: z3
-        uses: cda-tum/setup-z3@v1
+        uses: cda-tum/setup-z3@8156b32632230f11cf9c5a50becb33d73e2fb4e5 # v1
         with:
           version: ${{env.Z3_VERSION}}
 
       - name: Install the latest version of uv
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@803947b9bd8e9f986429fa0c5a41c367cd732b41 # v7
         with:
           version: "latest"
           enable-cache: true
 
       - name: Setup nox
-        uses: wntrblm/nox@2025.11.12
+        uses: wntrblm/nox@0eee2e45758dbd06d48ebb23476439f0f00e5cbd # 2025.11.12
 
       - name: 🐍 Test
         run: nox -s tests --verbose

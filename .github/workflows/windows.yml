@@ -51,18 +51,18 @@ jobs:
 
     steps:
       - name: Clone Repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
 
       - name: Setup Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
         with:
           python-version: "3.14.x"
 
       - name: Set up MSVC development environment
-        uses: ilammy/msvc-dev-cmd@v1
+        uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1
 
       - name: Setup ccache
-        uses: hendrikmuhs/ccache-action@v1.2
+        uses: hendrikmuhs/ccache-action@5ebbd400eff9e74630f759d94ddd7b6c26299639 # v1.2
         with:
           key: "${{matrix.os}}-${{matrix.toolset}}"
           variant: ccache
@@ -71,7 +71,7 @@ jobs:
 
       - name: Setup Z3 Solver
         id: z3
-        uses: cda-tum/setup-z3@v1
+        uses: cda-tum/setup-z3@8156b32632230f11cf9c5a50becb33d73e2fb4e5 # v1
         with:
           version: ${{env.Z3_VERSION}}
 
