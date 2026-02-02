@@ -12,7 +12,16 @@ Added
 #####
 - Documentation:
     - Added ``AGENTS.md`` to guide AI agents in the repository
-
+- Build system:
+    - Added `CMakePresets.json` to offer default CMake configurations
+    - Added support for CMake version 4+
+- Tooling:
+    - Added the following `pre-commit` hooks:
+        - `check-vcs-permalinks`
+        - `check-symlinks`
+        - `check-json`
+        - `cmake-format-precommit`
+        - `uv-pre-commit`
 
 Changed
 #######
@@ -21,8 +30,13 @@ Changed
     - Refactored the entire CMake build system to use ``FetchContent`` for dependency management instead of git submodules
     - Moved vendored libraries from ``libs/`` to ``vendors/``
     - Improved build configuration and option handling for better modularity
-    - Addressed several CMake and compiler warnings (including CMP0148 and Pybind11 compatibility)
+    - Addressed several CMake and compiler warnings (including CMP0148 and Pybind11 compatibility) as well as CMake code smells
+    - Streamlined package installation and discovery process#
 
+Fixed
+#####
+- Code quality:
+    - Addressed several ``clang-tidy`` warnings throughout the code base
 
 v0.6.12 - 2025-10-29
 --------------------
