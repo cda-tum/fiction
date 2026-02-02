@@ -2,42 +2,30 @@
   $schema: "https://docs.renovatebot.com/renovate-schema.json",
   extends: [
     "config:recommended",
-    ":gitSignOff"
+    ":gitSignOff",
+    "helpers:pinGitHubActionDigestsToSemver",
+    ":automergeDigest",
+    ":automergeStableNonMajor",
+    ":combinePatchMinorReleases",
+    ":configMigration",
+    ":enablePreCommit",
+    ":prConcurrentLimitNone",
+    ":prHourlyLimitNone"
   ],
-  prHourlyLimit: 10,
   enabledManagers: [
-    "git-submodules",
     "github-actions",
     "pre-commit",
     "pep621",
     "dockerfile",
   ],
-  "git-submodules": {
-    "enabled": true
-  },
-  "pre-commit": {
-    enabled: true
-  },
   lockFileMaintenance: {
-    "enabled": true
-    // "automerge": true, disabled due to endless update loops caused by setuptools_scm
+    enabled: true,
+    automerge: true
   },
-  configMigration: true,
   schedule: [
     "every weekend"
   ],
   packageRules: [
-    {
-      matchManagers: [
-        "git-submodules"
-      ],
-      addLabels: [
-        "dependencies",
-        "submodules"
-      ],
-      commitMessagePrefix: "⬆\uFE0F\uD83D\uDC68\u200D\uD83D\uDCBB",
-      "groupName": "Submodules",
-    },
     {
       matchManagers: [
         "github-actions"
@@ -57,6 +45,7 @@
       ],
       commitMessagePrefix: "⬆\uFE0F\uD83E\uDE9D",
       "groupName": "Pre-Commit Hooks",
+      versioning: "pep440"
     },
     {
       matchManagers: [
@@ -80,11 +69,13 @@
       "groupName": "Dockerfile",
     },
     {
-      "description": "Automerge patch updates",
-      "matchUpdateTypes": [
+      description: "Group and automerge all patch updates",
+      groupName: "patch versions",
+      groupSlug: "all-patch",
+      matchUpdateTypes: [
         "patch"
       ],
-      "automerge": true
+      automerge: true
     }
   ]
 }
