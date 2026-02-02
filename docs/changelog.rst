@@ -31,7 +31,7 @@ Changed
     - Moved vendored libraries from ``libs/`` to ``vendors/``
     - Improved build configuration and option handling for better modularity
     - Addressed several CMake and compiler warnings (including CMP0148 and Pybind11 compatibility) as well as CMake code smells
-    - Streamlined package installation and discovery process#
+    - Streamlined package installation and discovery process
 
 Fixed
 #####
