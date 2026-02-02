@@ -34,7 +34,6 @@
         "github_actions"
       ],
       commitMessagePrefix: "⬆\uFE0F\uD83D\uDC68\u200D\uD83D\uDCBB",
-      groupName: "GitHub Actions",
     },
     {
       matchManagers: [
@@ -44,7 +43,6 @@
         "pre-commit"
       ],
       commitMessagePrefix: "⬆\uFE0F\uD83E\uDE9D",
-      groupName: "Pre-Commit Hooks",
       versioning: "pep440"
     },
     {
@@ -56,7 +54,6 @@
         "python"
       ],
       commitMessagePrefix: "⬆\uFE0F\uD83D\uDC0D",
-      groupName: "Python Dependencies",
     },
     {
       matchManagers: [
@@ -66,7 +63,6 @@
         "docker"
       ],
       commitMessagePrefix: "⬆\uD83D\uDC0B",
-      groupName: "Dockerfile",
     },
     {
       description: "Group and automerge all patch updates",
