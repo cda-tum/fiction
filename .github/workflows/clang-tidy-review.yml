@@ -72,7 +72,7 @@ jobs:
           database: "build"
           step-summary: true
           thread-comments: ${{ ((github.event_name == 'pull_request' && !github.event.pull_request.head.repo.fork) && 'update') || 'false' }}
-          ignore: "build|vendors/*|docs/*|benchmarks/*|bib/*|bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp|bindings/mnt/pyfiction/include/pyfiction/documentation.hpp"
+          ignore: "build|libs/*|vendors/*|docs/*|benchmarks/*|bib/*|bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp|bindings/mnt/pyfiction/include/pyfiction/documentation.hpp"
           version: "21"
 
       - if: steps.linter.outputs.checks-failed > 0
