@@ -45,9 +45,6 @@ dependencies = [
     "z3-solver>=4.8.0"
 ]
 
-[project.optional-dependencies]
-test = ["pytest>=7.2", "mnt.pyfiction"]
-
 [project.urls]
 Source = 'https://github.com/cda-tum/fiction'
 Tracker = 'https://github.com/cda-tum/fiction/issues'
@@ -88,7 +85,6 @@ sdist.exclude = [
     "**/experiments",
     "**/examples",
     "**/include",
-    "**/libs",
     "**/cmake-build-**",
     "**/plots",
     "**/test",
@@ -112,8 +108,8 @@ FICTION_CLI = "OFF"
 FICTION_TEST = "OFF"
 FICTION_EXPERIMENTS = "OFF"
 FICTION_ENABLE_IPO = "ON"
-FICTION_ENABLE_PCH = "ON"
-FICTION_ENABLE_UNITY_BUILD = "ON"
+FICTION_ENABLE_PCH = "OFF"
+FICTION_ENABLE_UNITY_BUILD = "OFF"
 FICTION_Z3 = "ON"
 FICTION_ALGLIB = "ON"
 FICTION_PYTHON_BINDINGS = "ON"
@@ -126,12 +122,15 @@ inherit.cmake.define = "append"
 cmake.define.DISABLE_GIL = "1"
 
 
-[tool.pytest.ini_options]
-minversion = "7.2"
-testpaths = ["bindings/mnt/pyfiction/test/"]
-addopts = ["-ra", "--strict-markers", "--strict-config", "--showlocals"]
-log_cli_level = "INFO"
-xfail_strict = true
+[tool.pytest]
+minversion = "9.0"
+strict = true
+addopts = [
+    "-ra",
+    "--numprocesses=auto", # Automatically use all available CPU cores for parallel testing
+]
+log_level = "INFO"
+testpaths = ["bindings/mnt/pyfiction/test"]
 
 
 [tool.cibuildwheel]
@@ -144,7 +143,7 @@ build-frontend = "build[uv]"
 manylinux-x86_64-image = "manylinux_2_28"
 
 [tool.cibuildwheel.linux]
-environment = { Z3_ROOT = "/opt/python/cp311-cp311/lib/python3.11/site-packages/z3", ALGLIB_DIR = "libs/alglib-cmake/src/cpp/src" }
+environment = { Z3_ROOT = "/opt/python/cp311-cp311/lib/python3.11/site-packages/z3" }
 before-all = "/opt/python/cp311-cp311/bin/pip install z3-solver>=4.8.0"
 repair-wheel-command = [
     "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/python/cp311-cp311/lib/python3.11/site-packages/z3/lib",
@@ -152,7 +151,7 @@ repair-wheel-command = [
 ]
 
 [tool.cibuildwheel.macos]
-environment = { MACOSX_DEPLOYMENT_TARGET = "11.0" }
+environment = { MACOSX_DEPLOYMENT_TARGET = "13.0" }
 
 [tool.cibuildwheel.windows]
 before-build = "pip install delvewheel>=1.7.3"
@@ -161,13 +160,16 @@ environment = { CMAKE_GENERATOR = "Ninja" }
 
 [[tool.cibuildwheel.overrides]]
 select = "*-macosx_arm64"
-environment = { MACOSX_DEPLOYMENT_TARGET = "11.0" }
+environment = { MACOSX_DEPLOYMENT_TARGET = "13.0" }
 
 
 [tool.uv]
 required-version = ">=0.5.20"
-reinstall-package = ["mnt.pyfiction"]
-
+cache-keys = [
+    { file = "pyproject.toml" },
+    { git = { commit = true, tags = true } },
+    { file = "bindings/**/*.hpp" },
+]
 
 [tool.mypy]
 files = ["bindings/mnt/pyfiction", "noxfile.py"]
@@ -240,10 +242,12 @@ docs = [
     "sphinx-tabs==3.4.7",
 ]
 test = [
-    "pytest>=8.3.3",
+    "pytest>=9.0.1",
+    "pytest-sugar>=1.1.1",
+    "pytest-xdist>=3.8.0",
 ]
 dev = [
     { include-group = "build" },
-    { include-group = "docs" },
     { include-group = "test" },
+    "nox>=2025.11.12",
 ]

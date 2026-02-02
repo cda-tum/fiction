@@ -10,6 +10,7 @@
 #include <fiction/types.hpp>
 
 #include <alice/alice.hpp>
+#include <fmt/format.h>
 
 #include <variant>
 
@@ -23,7 +24,7 @@ fanouts_command::fanouts_command(const environment::ptr& e) :
 {
     add_option("--degree,-d", ps.degree, "Maximum number of outputs a fan-out node can have", true)
         ->set_type_name("{2, 3}");
-    add_option("--strategy,-s", ps.strategy,
+    add_option("--strategy,-s", strategy_int,
                "Chain fan-outs in a balanced tree (breadth), a DFS tree (depth), or a random fashion", true)
         ->set_type_name("{breadth=0, depth=1, random=2}");
     add_option("--threshold,-t", ps.threshold,
@@ -45,17 +46,20 @@ void fanouts_command::execute()
 
     if (ps.degree < 2 || ps.degree > 3)
     {
-        env->out() << "[w] " << ps.degree << " outputs per fan-out are not supported\n";
+        env->out() << fmt::format("[w] {} outputs per fan-out are not supported\n", ps.degree);
         ps = {};
         return;
     }
 
-    if (ps.strategy > 2)
+    if (strategy_int < 0 || strategy_int > 2)
     {
-        env->out() << "[w] " << ps.strategy << " does not refer to a valid strategy\n";
+        env->out() << fmt::format("[w] does not refer to a valid strategy\n", strategy_int);
         ps = {};
         return;
     }
+
+    // Convert integer to enum
+    ps.strategy = static_cast<fiction::fanout_substitution_params::substitution_strategy>(strategy_int);
 
     if (is_set("seed"))
     {

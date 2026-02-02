@@ -8,7 +8,6 @@ on:
       - "**/*.cpp"
       - "**/*.cmake"
       - "**/CMakeLists.txt"
-      - "libs/**"
       - ".github/workflows/coverage.yml"
       - "!bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp"
   pull_request:
@@ -18,7 +17,6 @@ on:
       - "**/*.cpp"
       - "**/*.cmake"
       - "**/CMakeLists.txt"
-      - "libs/**"
       - ".github/workflows/coverage.yml"
       - "!bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp"
   merge_group:
@@ -33,7 +31,7 @@ defaults:
 
 env:
   BUILD_TYPE: Debug
-  Z3_VERSION: 4.13.0
+  Z3_VERSION: 4.13.4
 
 jobs:
   build_and_test:
@@ -51,8 +49,6 @@ jobs:
 
       - name: Clone Repository
         uses: actions/checkout@v6
-        with:
-          submodules: recursive
 
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1.2
@@ -74,7 +70,7 @@ jobs:
       - name: Install pip packages
         uses: BSFishy/pip-action@v1
         with:
-          requirements: ${{github.workspace}}/libs/mugen/requirements.txt
+          requirements: ${{github.workspace}}/vendors/mugen/requirements.txt
 
       - name: Setup Z3 Solver
         id: z3
@@ -91,11 +87,10 @@ jobs:
           cmake -S ${{github.workspace}} -B ${{github.workspace}}/build -G Ninja
           -DCMAKE_CXX_COMPILER=${{matrix.compiler}}
           -DCMAKE_BUILD_TYPE=$BUILD_TYPE
-          -DFICTION_ENABLE_UNITY_BUILD=ON
-          -DFICTION_ENABLE_PCH=ON
           -DFICTION_CLI=OFF
           -DFICTION_TEST=ON
           -DFICTION_BENCHMARK=OFF
+          -DFICTION_EXPERIMENTS=OFF
           -DFICTION_Z3=ON
           -DFICTION_ALGLIB=ON
           -DFICTION_ENABLE_MUGEN=ON
@@ -105,11 +100,11 @@ jobs:
           -DMOCKTURTLE_EXAMPLES=OFF
 
       - name: Build
-        run: cmake --build ${{github.workspace}}/build --config $BUILD_TYPE --parallel
+        run: cmake --build ${{github.workspace}}/build --config $BUILD_TYPE --parallel 4
 
       - name: Test
         working-directory: ${{github.workspace}}/build
-        run: ctest -C $BUILD_TYPE --output-on-failure --repeat until-pass:3 --parallel
+        run: ctest -C $BUILD_TYPE --output-on-failure --repeat until-pass:3 --parallel 4
 
       - name: Generate Coverage Report
         run: |

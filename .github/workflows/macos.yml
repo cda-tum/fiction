@@ -8,7 +8,6 @@ on:
       - "**/*.cpp"
       - "**/*.cmake"
       - "**/CMakeLists.txt"
-      - "libs/**"
       - ".github/workflows/macos.yml"
       - "!bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp"
   pull_request:
@@ -18,7 +17,6 @@ on:
       - "**/*.cpp"
       - "**/*.cmake"
       - "**/CMakeLists.txt"
-      - "libs/**"
       - ".github/workflows/macos.yml"
       - "!bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp"
   merge_group:
@@ -32,7 +30,7 @@ defaults:
     shell: bash
 
 env:
-  Z3_VERSION: 4.13.0
+  Z3_VERSION: 4.13.4
 
 jobs:
   build_and_test:
@@ -47,8 +45,6 @@ jobs:
     steps:
       - name: Clone Repository
         uses: actions/checkout@v6
-        with:
-          submodules: recursive
 
       - name: Setup Python
         uses: actions/setup-python@v6
@@ -77,17 +73,12 @@ jobs:
           version: ${{env.Z3_VERSION}}
 
       # Build and test pipeline for Debug mode
-      - name: Create Build Environment (Debug)
-        run: cmake -E make_directory ${{github.workspace}}/build_debug
 
       - name: Configure CMake (Debug)
-        working-directory: ${{github.workspace}}/build_debug
         run: >
-          cmake ${{github.workspace}}
+          cmake -S ${{github.workspace}} -B ${{github.workspace}}/build_debug
           -DCMAKE_CXX_COMPILER=${{matrix.compiler}}
           -DCMAKE_BUILD_TYPE=Debug
-          -DFICTION_ENABLE_UNITY_BUILD=ON
-          -DFICTION_ENABLE_PCH=ON
           -DFICTION_CLI=ON
           -DFICTION_TEST=ON
           -DFICTION_BENCHMARK=OFF
@@ -99,25 +90,18 @@ jobs:
           -DMOCKTURTLE_EXAMPLES=OFF
 
       - name: Build (Debug)
-        working-directory: ${{github.workspace}}/build_debug
-        run: cmake --build . --config Debug -j4 # all macOS runners provide at least 3 cores
+        run: cmake --build ${{github.workspace}}/build_debug --config Debug --parallel 3
 
       - name: Test (Debug)
-        working-directory: ${{github.workspace}}/build_debug
-        run: ctest -C Debug --verbose --output-on-failure --repeat until-pass:3 --parallel 4
+        run: ctest --test-dir ${{github.workspace}}/build_debug -C Debug --verbose --output-on-failure --repeat until-pass:3 --parallel 3
 
       # Build and test pipeline for Release mode
-      - name: Create Build Environment (Release)
-        run: cmake -E make_directory ${{github.workspace}}/build_release
 
       - name: Configure CMake (Release)
-        working-directory: ${{github.workspace}}/build_release
         run: >
-          cmake ${{github.workspace}}
+          cmake -S ${{github.workspace}} -B ${{github.workspace}}/build_release
           -DCMAKE_CXX_COMPILER=${{matrix.compiler}}
           -DCMAKE_BUILD_TYPE=Release
-          -DFICTION_ENABLE_UNITY_BUILD=ON
-          -DFICTION_ENABLE_PCH=ON
           -DFICTION_ENABLE_JEMALLOC=ON
           -DFICTION_CLI=ON
           -DFICTION_TEST=ON
@@ -130,9 +114,7 @@ jobs:
           -DMOCKTURTLE_EXAMPLES=OFF
 
       - name: Build (Release)
-        working-directory: ${{github.workspace}}/build_release
-        run: cmake --build . --config Release -j4 # all macOS runners provide at least 3 cores
+        run: cmake --build ${{github.workspace}}/build_release --config Release --parallel 3
 
       - name: Test (Release)
-        working-directory: ${{github.workspace}}/build_release
-        run: ctest -C Release --verbose --output-on-failure --repeat until-pass:3 --parallel 4
+        run: ctest --test-dir ${{github.workspace}}/build_release -C Release --verbose --output-on-failure --repeat until-pass:3 --parallel 3

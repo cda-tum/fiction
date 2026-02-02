@@ -4,8 +4,8 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "fiction/utils/version_info.hpp"
 #include "utils/blueprints/layout_blueprints.hpp"
-#include "utils/version_info.hpp"
 
 #include <fiction/io/write_qll_layout.hpp>
 #include <fiction/technology/cell_technologies.hpp>
@@ -14,6 +14,7 @@
 #include <fmt/format.h>
 
 #include <sstream>
+#include <stdexcept>
 #include <string>
 
 using namespace fiction;

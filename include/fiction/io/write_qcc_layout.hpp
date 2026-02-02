@@ -10,16 +10,19 @@
 #include "fiction/technology/magcad_magnet_count.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
-#include "utils/version_info.hpp"
+#include "fiction/utils/version_info.hpp"
 
 #include <fmt/format.h>
 
 #include <algorithm>
 #include <array>
+#include <cstdint>
 #include <filesystem>
 #include <fstream>
 #include <functional>
+#include <iostream>
 #include <ostream>
+#include <sstream>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -102,7 +105,7 @@ class write_qcc_layout_impl
             sorted_po_list{sorted_pos()},
             num_magnets{magcad_magnet_count(lyt)},
             os{s},
-            ps{std::move(p)}
+            ps{p}
     {}
 
     void run()
@@ -376,7 +379,7 @@ void write_qcc_layout(const Lyt& lyt, std::ostream& os, write_qcc_layout_params 
 template <typename Lyt>
 void write_qcc_layout(const Lyt& lyt, const std::string_view& filename, write_qcc_layout_params ps = {})
 {
-    std::ofstream os{filename.data(), std::ofstream::out};
+    std::ofstream os{std::string{filename}, std::ofstream::out};
 
     if (!os.is_open())
     {

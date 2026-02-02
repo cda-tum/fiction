@@ -242,7 +242,7 @@ It has some further Python dependencies that can be installed via ``pip3``:
 
 .. code-block:: console
 
-    (venv) $ pip install -r libs/mugen/requirements.txt
+    (venv) $ pip install -r vendors/mugen/requirements.txt
 
 The Python integration is experimental and may cause issues on some systems. It is currently not available on Windows
 and some macOS versions due to issues with ``python-sat``. Mugen requires at least Python 3.7!

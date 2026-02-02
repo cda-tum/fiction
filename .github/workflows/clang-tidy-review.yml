@@ -19,7 +19,7 @@ permissions:
   pull-requests: write
 
 env:
-  Z3_VERSION: 4.13.0
+  Z3_VERSION: 4.13.4
 
 jobs:
   clangtidy:
@@ -30,7 +30,6 @@ jobs:
       - name: Clone Repository
         uses: actions/checkout@v6
         with:
-          submodules: recursive
           fetch-depth: 0
 
       - name: Install dependencies
@@ -57,6 +56,7 @@ jobs:
           -DFICTION_PROGRESS_BARS=ON
           -DFICTION_Z3=ON
           -DFICTION_ENABLE_MUGEN=ON
+          -DFICTION_PYTHON_BINDINGS=ON
           -DFICTION_ALGLIB=ON
           -DFICTION_ENABLE_MUGEN=ON
           -DMOCKTURTLE_EXAMPLES=OFF
@@ -72,7 +72,7 @@ jobs:
           database: "build"
           step-summary: true
           thread-comments: ${{ ((github.event_name == 'pull_request' && !github.event.pull_request.head.repo.fork) && 'update') || 'false' }}
-          ignore-tidy: "build|libs/*|docs/*|benchmarks/*|bib/*|bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp|bindings/mnt/pyfiction/include/pyfiction/documentation.hpp"
+          ignore: "build|libs/*|vendors/*|docs/*|benchmarks/*|bib/*|bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp|bindings/mnt/pyfiction/include/pyfiction/documentation.hpp"
           version: "21"
 
       - if: steps.linter.outputs.checks-failed > 0

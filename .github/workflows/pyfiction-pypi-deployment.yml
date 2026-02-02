@@ -15,10 +15,9 @@ on:
       - "**/*.cpp"
       - "**/*.cmake"
       - "**/CMakeLists.txt"
-      - "libs/**"
       - "noxfile.py"
       - "pyproject.toml"
-      - ".uv.lock"
+      - "uv.lock"
       - ".github/workflows/pyfiction-pypi-deployment.yml"
   pull_request:
     branches: ["main"]
@@ -29,10 +28,9 @@ on:
       - "**/*.cpp"
       - "**/*.cmake"
       - "**/CMakeLists.txt"
-      - "libs/**"
       - "noxfile.py"
       - "pyproject.toml"
-      - ".uv.lock"
+      - "uv.lock"
       - ".github/workflows/pyfiction-pypi-deployment.yml"
   workflow_dispatch:
   workflow_run:
@@ -50,17 +48,16 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  Z3_VERSION: 4.13.0
+  Z3_VERSION: 4.13.4
 
 jobs:
   build_sdist:
     name: 📦 Build Source Distribution
     runs-on: ubuntu-latest
     steps:
-      - name: Clone respository
+      - name: Clone repository
         uses: actions/checkout@v6
         with:
-          submodules: recursive
           fetch-depth: 0
 
       - name: Install the latest version of uv

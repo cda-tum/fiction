@@ -10,10 +10,9 @@ on:
       - "**/*.cpp"
       - "**/*.cmake"
       - "**/CMakeLists.txt"
-      - "libs/**"
       - "noxfile.py"
       - "pyproject.toml"
-      - ".uv.lock"
+      - "uv.lock"
       - ".github/workflows/python-bindings.yml"
   pull_request:
     branches: ["main"]
@@ -24,10 +23,9 @@ on:
       - "**/*.cpp"
       - "**/*.cmake"
       - "**/CMakeLists.txt"
-      - "libs/**"
       - "noxfile.py"
       - "pyproject.toml"
-      - ".uv.lock"
+      - "uv.lock"
       - ".github/workflows/python-bindings.yml"
   workflow_run:
     workflows: ["pyfiction Docstring Generator"]
@@ -43,7 +41,7 @@ defaults:
     shell: bash
 
 env:
-  Z3_VERSION: 4.13.0
+  Z3_VERSION: 4.13.4
 
 jobs:
   python-tests:
@@ -52,12 +50,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        runs-on: [ubuntu-latest, macos-13, macos-15, windows-latest]
+        runs-on: [ubuntu-latest, macos-latest, windows-latest]
     steps:
       - name: Clone Repository
         uses: actions/checkout@v6
         with:
-          submodules: recursive
           fetch-depth: 0
 
       - name: Setup ccache

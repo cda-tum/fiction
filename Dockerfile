@@ -32,7 +32,7 @@ USER appuser
 RUN python3 -m venv venv && \
     . venv/bin/activate && \
     pip install --upgrade --no-cache-dir pip setuptools && \
-    pip install --no-cache-dir z3-solver==4.13.0
+    pip install --no-cache-dir z3-solver==4.13.4
 
 # Add the virtual environment to the PATH
 ENV PATH="/app/venv/bin:$PATH"
@@ -47,8 +47,6 @@ COPY --chown=appuser:appuser . fiction/
 RUN . venv/bin/activate \
     && cmake -S fiction -B fiction/build \
       -DCMAKE_BUILD_TYPE=Release \
-      -DFICTION_ENABLE_UNITY_BUILD=ON \
-      -DFICTION_ENABLE_PCH=ON \
       -DFICTION_CLI=ON \
       -DFICTION_TEST=OFF \
       -DFICTION_EXPERIMENTS=OFF \

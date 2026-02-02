@@ -8,7 +8,6 @@ on:
       - "**/*.cpp"
       - "**/*.cmake"
       - "**/CMakeLists.txt"
-      - "libs/**"
       - ".github/workflows/ubuntu.yml"
       - "!bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp"
   pull_request:
@@ -18,7 +17,6 @@ on:
       - "**/*.cpp"
       - "**/*.cmake"
       - "**/CMakeLists.txt"
-      - "libs/**"
       - ".github/workflows/ubuntu.yml"
       - "!bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp"
   merge_group:
@@ -32,7 +30,7 @@ defaults:
     shell: bash
 
 env:
-  Z3_VERSION: 4.13.0
+  Z3_VERSION: 4.13.4
 
 jobs:
   build_and_test:
@@ -78,8 +76,6 @@ jobs:
 
       - name: Clone Repository
         uses: actions/checkout@v6
-        with:
-          submodules: recursive
 
       - name: Setup ccache
         # ccache is not supported on ARM yet
@@ -100,7 +96,7 @@ jobs:
       - name: Install pip packages
         uses: BSFishy/pip-action@v1
         with:
-          requirements: ${{github.workspace}}/libs/mugen/requirements.txt
+          requirements: ${{github.workspace}}/vendors/mugen/requirements.txt
 
       - name: Setup mold
         uses: rui314/setup-mold@v1
@@ -118,17 +114,11 @@ jobs:
 
       # Build and test pipeline for Debug mode
 
-      - name: Create Build Environment (Debug)
-        run: cmake -E make_directory ${{github.workspace}}/build_debug
-
       - name: Configure CMake (Debug)
-        working-directory: ${{github.workspace}}/build_debug
         run: >
-          cmake ${{github.workspace}} ${{matrix.cppstandard}}
+          cmake -S ${{github.workspace}} -B ${{github.workspace}}/build_debug ${{matrix.cppstandard}}
           -DCMAKE_CXX_COMPILER=${{matrix.compiler}}
           -DCMAKE_BUILD_TYPE=Debug
-          -DFICTION_ENABLE_UNITY_BUILD=ON
-          -DFICTION_ENABLE_PCH=ON
           -DFICTION_CLI=ON
           -DFICTION_TEST=ON
           -DFICTION_BENCHMARK=OFF
@@ -142,42 +132,32 @@ jobs:
           -DFICTION_LIGHTWEIGHT_DEBUG_BUILDS=ON
 
       - name: Build (Debug)
-        working-directory: ${{github.workspace}}/build_debug
-        run: cmake --build . --config Debug -j4
+        run: cmake --build ${{github.workspace}}/build_debug --config Debug --parallel 4
 
       - name: Test (Debug)
-        working-directory: ${{github.workspace}}/build_debug
-        run: ctest -C Debug --verbose --output-on-failure --repeat until-pass:3 --parallel 4
+        run: ctest --test-dir ${{github.workspace}}/build_debug -C Debug --verbose --output-on-failure --repeat until-pass:3 --parallel 4
 
       # Build and test pipeline for Release mode
 
-      - name: Create Build Environment (Release)
-        run: cmake -E make_directory ${{github.workspace}}/build_release
-
       - name: Configure CMake (Release)
-        working-directory: ${{github.workspace}}/build_release
         run: >
-          cmake ${{github.workspace}} ${{matrix.cppstandard}}
+          cmake -S ${{github.workspace}} -B ${{github.workspace}}/build_release ${{matrix.cppstandard}}
           -DCMAKE_CXX_COMPILER=${{matrix.compiler}}
           -DCMAKE_BUILD_TYPE=Release
-          -DFICTION_ENABLE_UNITY_BUILD=ON
-          -DFICTION_ENABLE_PCH=ON
-          -DFICTION_ENABLE_JEMALLOC=ON
           -DFICTION_CLI=ON
           -DFICTION_TEST=ON
           -DFICTION_BENCHMARK=OFF
           -DFICTION_EXPERIMENTS=ON
           ${{ matrix.os != 'ubuntu-24.04-arm' && '-DFICTION_Z3=ON' || '' }}
           -DFICTION_ALGLIB=ON
+          -DFICTION_ENABLE_JEMALLOC=ON
           -DFICTION_ENABLE_MUGEN=ON
           -DFICTION_PROGRESS_BARS=OFF
           -DFICTION_WARNINGS_AS_ERRORS=OFF
           -DMOCKTURTLE_EXAMPLES=OFF
 
       - name: Build (Release)
-        working-directory: ${{github.workspace}}/build_release
-        run: cmake --build . --config Release -j4
+        run: cmake --build ${{github.workspace}}/build_release --config Release --parallel 4
 
       - name: Test (Release)
-        working-directory: ${{github.workspace}}/build_release
-        run: ctest -C Release --verbose --output-on-failure --repeat until-pass:3 --parallel 4
+        run: ctest --test-dir ${{github.workspace}}/build_release -C Release --verbose --output-on-failure --repeat until-pass:3 --parallel 4

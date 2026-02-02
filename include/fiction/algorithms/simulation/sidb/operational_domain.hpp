@@ -280,7 +280,7 @@ class critical_temperature_domain : public sidb_simulation_domain<parameter_poin
      */
     [[nodiscard]] double minimum_ct() const noexcept
     {
-        double min_ct = std::numeric_limits<double>::max();
+        double min_ct = std::numeric_limits<double>::infinity();
 
         this->for_each(
             [&min_ct](const auto&, const auto& op_value)

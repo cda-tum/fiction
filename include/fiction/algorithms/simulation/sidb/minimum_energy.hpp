@@ -16,12 +16,13 @@ namespace fiction
 
 /**
  * Computes the minimum energy of a range of `charge_distribution_surface` objects. If the range is empty, infinity is
- * returned.
+ * returned to indicate no valid energy value exists.
  *
  * @tparam InputIt Must meet the requirements of `LegacyInputIterator`.
- * @param first Begin of the range to examime.
+ * @param first Begin of the range to examine.
  * @param last End of the range to examine.
- * @return Value of the minimum energy found in the input range (unit: eV), or infinity if the range is empty.
+ * @return Value of the minimum energy found in the input range (unit: eV), or `std::numeric_limits<double>::infinity()`
+ * if the range is empty.
  */
 template <typename InputIt>
 [[nodiscard]] double minimum_energy(const InputIt first, const InputIt last) noexcept
@@ -43,7 +44,7 @@ template <typename InputIt>
  * `charge_distribution_surface` objects. If the range is empty, `last` is returned.
  *
  * @tparam InputIt Must meet the requirements of `LegacyInputIterator`.
- * @param first Begin of the range to examime.
+ * @param first Begin of the range to examine.
  * @param last End of the range to examine.
  * @return Iterator to the minimum energy charge distribution found in the input range, or `last` if the range is empty.
  */
