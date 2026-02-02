@@ -22,6 +22,7 @@ Added
         - `check-json`
         - `cmake-format-precommit`
         - `uv-pre-commit`
+    - Enable auto-merging stable non-major dependency releases via Renovate
 
 Changed
 #######
