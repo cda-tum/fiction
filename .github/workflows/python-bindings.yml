@@ -75,7 +75,7 @@ jobs:
           version: ${{env.Z3_VERSION}}
 
       - name: Install the latest version of uv
-        uses: astral-sh/setup-uv@803947b9bd8e9f986429fa0c5a41c367cd732b41 # v7
+        uses: astral-sh/setup-uv@803947b9bd8e9f986429fa0c5a41c367cd732b41 # v7.2.1
         with:
           version: "latest"
           enable-cache: true
