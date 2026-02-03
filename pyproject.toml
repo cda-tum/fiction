@@ -184,13 +184,16 @@ warn_unreachable = true
 
 [tool.ruff]
 line-length = 120
+namespace-packages = ["mnt"]
 preview = true
+fix = true
 unsafe-fixes = true
+show-fixes = true
+src = ["bindings"]
 
 
 [tool.ruff.lint]
 select = ["ALL"]
-
 ignore = [
     "ISC001", # Conflicts with formatter
     "PLR09", # Too many <...>
@@ -213,7 +216,12 @@ ignore = [
     "TD003", # Missing issue link in TODO
     "TD004", # Missing colon in TODO
     "FIX002", # Line contains TODO
+    "RUF067", # `__init__` module should only contain docstrings and re-exports
 ]
+future-annotations = true
+
+[tool.ruff.lint.isort]
+known-first-party = ["mnt.pyfiction"]
 
 [tool.ruff.lint.per-file-ignores]
 "bindings/mnt/pyfiction/test/**" = ["T20", "ANN", "D"]
@@ -228,6 +236,9 @@ ignore = [
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
+
+[tool.ruff.format]
+docstring-code-format = true
 
 [dependency-groups]
 build = [
