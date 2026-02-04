@@ -113,7 +113,7 @@ jobs:
           lcov -l lcov_filtered.info
 
       - name: Upload report to Codecov
-        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5
+        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5.5.2
         with:
           files: ${{github.workspace}}/lcov_filtered.info
           fail_ci_if_error: true
