@@ -67,7 +67,7 @@ jobs:
       - name: Extract metadata (tags, labels) for Docker
         if: github.event_name == 'release' && github.event.action == 'published'
         id: meta
-        uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5
+        uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5.10.0
         with:
           images: |
             ${{ secrets.DOCKER_USERNAME }}/fiction
