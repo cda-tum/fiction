@@ -48,7 +48,7 @@ jobs:
           overwrite: true
 
       - name: Commit docstrings
-        uses: EndBug/add-and-commit@a94899bca583c204427a224a7af87c02f9b325d5 # v9
+        uses: EndBug/add-and-commit@a94899bca583c204427a224a7af87c02f9b325d5 # v9.1.4
         with:
           add: "bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp"
           commit: "--signoff"
