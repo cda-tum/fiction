@@ -27,4 +27,4 @@ build:
       - asdf global uv latest
     build:
       html:
-        - uv run --frozen --no-dev --group docs -m sphinx -T -b html -d docs/_build/doctrees -D language=en docs $READTHEDOCS_OUTPUT/html
+        - SKBUILD_CMAKE_DEFINE="FICTION_ENABLE_IPO=OFF" uv run --frozen --no-dev --group docs -m sphinx -T -b html -d docs/_build/doctrees -D language=en docs $READTHEDOCS_OUTPUT/html

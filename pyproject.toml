@@ -59,6 +59,8 @@ minimum-version = "build-system.requires"
 wheel.install-dir = "mnt/pyfiction"
 # Set required Ninja version
 ninja.version = ">=1.10"
+# Set default build type to Release
+cmake.build-type = "Release"
 # Setuptools-style build caching in a local directory
 build-dir = "build/{wheel_tag}/{build_type}"
 # Explicitly set the package directory
