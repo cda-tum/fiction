@@ -5,6 +5,8 @@ sphinx:
 
 build:
   os: ubuntu-24.04
+  apt_packages:
+    - mold
   tools:
     python: "3.12"
 
@@ -27,4 +29,4 @@ build:
       - asdf global uv latest
     build:
       html:
-        - SKBUILD_CMAKE_DEFINE="FICTION_ENABLE_IPO=OFF" uv run --frozen --no-dev --group docs -m sphinx -T -b html -d docs/_build/doctrees -D language=en docs $READTHEDOCS_OUTPUT/html
+        - SKBUILD_CMAKE_DEFINE="FICTION_ENABLE_IPO=OFF" SKBUILD_CMAKE_ARGS="-DCMAKE_MODULE_LINKER_FLAGS=-fuse-ld=mold;-DCMAKE_SHARED_LINKER_FLAGS=-fuse-ld=mold;-DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=mold" uv run --frozen --no-dev --group docs -m sphinx -T -b html -d docs/_build/doctrees -D language=en docs $READTHEDOCS_OUTPUT/html
