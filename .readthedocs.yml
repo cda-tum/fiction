@@ -30,11 +30,21 @@ build:
     build:
       html:
         - |
+          # Start heartbeat to prevent timeout
+          (while true; do echo "[$(date +%H:%M:%S)] Build in progress..."; sleep 20; done) &
+          HEARTBEAT_PID=$!
+
+          # Trap to ensure heartbeat is killed on exit
+          trap "kill $HEARTBEAT_PID 2>/dev/null || true" EXIT
+
+          echo "=== Starting build at $(date) ==="
           PYTHONUNBUFFERED=1 \
           SKBUILD_LOGGING_LEVEL=INFO \
           SKBUILD_CMAKE_DEFINE="FICTION_ENABLE_IPO=OFF" \
           SKBUILD_CMAKE_ARGS="-DCMAKE_MODULE_LINKER_FLAGS=-fuse-ld=mold -DCMAKE_SHARED_LINKER_FLAGS=-fuse-ld=mold -DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=mold" \
           uv run -v --frozen --no-dev --group docs \
-          python -u -m sphinx -T -v -b html \
+          -m sphinx -T -v -b html \
           -d docs/_build/doctrees -D language=en \
           docs $READTHEDOCS_OUTPUT/html
+
+          echo "=== Build completed at $(date) ==="
