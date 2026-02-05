@@ -22,7 +22,7 @@ namespace detail
 template <typename Ntk>
 void technology_mapping(pybind11::module& m)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     m.def("technology_mapping", &fiction::technology_mapping<Ntk>, py::arg("network"),
           py::arg("params") = fiction::technology_mapping_params{}, py::arg("stats") = nullptr,
@@ -33,7 +33,7 @@ void technology_mapping(pybind11::module& m)
 
 inline void technology_mapping(pybind11::module& m)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     // Expose the exception
     py::register_exception<fiction::missing_required_gates_exception>(m, "missing_required_gates_exception");
