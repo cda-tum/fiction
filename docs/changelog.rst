@@ -8,18 +8,45 @@ The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`
 Unreleased
 ----------
 
+Added
+#####
+- Documentation:
+    - Added ``AGENTS.md`` to guide AI agents in the repository
+- Build system:
+    - Added `CMakePresets.json` to offer default CMake configurations
+    - Added support for CMake version 4+
+- Tooling:
+    - Added the following `pre-commit` hooks:
+        - `check-vcs-permalinks`
+        - `check-symlinks`
+        - `check-json`
+        - `cmake-format-precommit`
+        - `uv-pre-commit`
+    - Enabled auto-merging stable non-major dependency releases via Renovate
+
 Changed
 #######
-- Build system:
-    - Restructured the CLI command implementation to improve code organization, modularity, and compilation speed
 - Algorithms:
     - Switched the default technology mapper in the ``map`` command and the ``technology_mapping`` function from ``mockturtle::map`` to ``mockturtle::emap``
+- Build system:
+    - Restructured the CLI command implementation to improve code organization, modularity, and compilation speed
+    - Refactored the entire CMake build system to use ``FetchContent`` for dependency management instead of git submodules
+    - Moved vendored libraries from ``libs/`` to ``vendors/``
+    - Improved build configuration and option handling for better modularity
+    - Addressed several CMake and compiler warnings (including CMP0148 and Pybind11 compatibility) as well as CMake code smells
+    - Streamlined package installation and discovery process
 
+Fixed
+#####
+- Code quality:
+    - Addressed several ``clang-tidy`` warnings throughout the code base
 
 Removed
 #######
 - CLI:
     - Removed the ``--logic_sharing`` flag from ``map`` as ``mockturtle::emap`` does not support it
+- Continuous integration:
+    - macOS 13 has been removed, along with support for the x86_64 (Intel) architecture
 
 
 v0.6.12 - 2025-10-29
@@ -77,8 +104,6 @@ Fixed
 
 Removed
 #######
-- CLI:
-    - Removed the ``--logic_sharing`` flag from ``map`` as ``mockturtle::emap`` does not support it
 - Continuous integration:
     - Dropped Windows 2019 and v142 support
     - Dropped Python 3.9 support due to its end-of-life status
@@ -228,7 +253,7 @@ Added
 - I/O:
     - SVG drawer for SiDB layouts
 - Experiments:
-    - Ship the SiQAD and Bestagon gate libraries als SQD files
+    - Ship the SiQAD and Bestagon gate libraries as SQD files
 - Documentation:
     - Added wiring reduction paper to publication list
     - Added Willem Lambooy to the authors list

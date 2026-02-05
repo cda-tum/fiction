@@ -2,7 +2,7 @@
 # Project (https://github.com/lefticus/cpp_starter_project) and CMake Template
 # (https://github.com/cpp-best-practices/cmake_template)
 
-cmake_minimum_required(VERSION 3.23...3.29)
+cmake_minimum_required(VERSION 3.23...4.2)
 
 # Only set the CMAKE_CXX_STANDARD if it is not set by someone else
 if(NOT DEFINED CMAKE_CXX_STANDARD)
@@ -30,13 +30,11 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 include(cmake/PreventInSourceBuilds.cmake)
 include(cmake/ProjectOptions.cmake)
 include(cmake/Utilities.cmake)
+include(cmake/SystemLink.cmake)
 
 fiction_setup_options()
 fiction_global_options()
 fiction_local_options()
-
-# don't know if this should be set globally from here or not...
-set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 
 set(GIT_SHA
     "Unknown"
@@ -53,8 +51,8 @@ add_library(fiction::fiction_warnings ALIAS fiction_warnings)
 # Include header files
 add_subdirectory(include)
 
-# Include libraries
-add_subdirectory(libs)
+# Add vendors
+add_subdirectory(vendors)
 
 # Enable progress bars
 if(NOT WIN32)
@@ -99,14 +97,30 @@ endif()
 # target from visual studio
 if(MSVC)
   get_all_installable_targets(all_targets)
-  message("all_targets=${all_targets}")
   set_target_properties(
     ${all_targets} PROPERTIES VS_DEBUGGER_ENVIRONMENT
                               "PATH=$(VC_ExecutablePath_x64);%PATH%")
 endif()
 
 # set the startup project for the "play" button in MSVC
-set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT intro)
+set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT fiction)
+
+# Package Configuration Generation
+include(CMakePackageConfigHelpers)
+
+write_basic_package_version_file(
+  fictionConfigVersion.cmake
+  VERSION ${PROJECT_VERSION}
+  COMPATIBILITY SameMajorVersion)
+
+configure_package_config_file(
+  ${CMAKE_CURRENT_SOURCE_DIR}/cmake/fictionConfig.cmake.in
+  ${CMAKE_CURRENT_BINARY_DIR}/fictionConfig.cmake
+  INSTALL_DESTINATION lib/cmake/fiction)
+
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/fictionConfig.cmake
+              ${CMAKE_CURRENT_BINARY_DIR}/fictionConfigVersion.cmake
+        DESTINATION lib/cmake/fiction)
 
 if(CMAKE_SKIP_INSTALL_RULES)
   return()

@@ -16,6 +16,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cstdint>
+#include <functional>
 #include <iterator>
 #include <limits>
 #include <type_traits>
@@ -66,7 +67,7 @@ class a_star_impl
         assert(layout.is_within_bounds(objective.source) && layout.is_within_bounds(objective.target) &&
                "Both source and target coordinate have to be within the layout bounds");
 
-        do
+        while (!open_list.empty())  // until the open list is empty
         {
             // get coordinate with lowest f-value
             const auto current = get_lowest_f_coord();
@@ -81,8 +82,7 @@ class a_star_impl
 
             // expand from current coordinate
             expand(current);
-
-        } while (!open_list.empty());  // until the open list is empty
+        }
 
         return {};  // open list is empty, no path has been found
     }
@@ -411,8 +411,8 @@ template <typename Path, typename Lyt, typename Dist = uint64_t, typename Cost =
  * of A*.
  *
  * If no path between `source` and `target` exists in `layout`, the returned distance is
- * `std::numeric_limits<Dist>::infinity()` if that value is supported by `Dist`, or `std::numeric_limits<Dist>::max()`,
- * otherwise.
+ * `std::numeric_limits<Dist>::infinity()` for floating-point types or `std::numeric_limits<Dist>::max()` for integral
+ * types.
  *
  * @tparam Lyt Coordinate layout type.
  * @tparam Dist Distance type.
@@ -432,12 +432,14 @@ template <typename Lyt, typename Dist = uint64_t>
 
     if (path_length == 0ul)
     {
-        if constexpr (std::numeric_limits<Dist>::has_infinity)
+        if constexpr (std::is_floating_point_v<Dist>)
         {
             return std::numeric_limits<Dist>::infinity();
         }
-
-        return std::numeric_limits<Dist>::max();
+        else
+        {
+            return std::numeric_limits<Dist>::max();
+        }
     }
 
     return static_cast<Dist>(path_length - 1);

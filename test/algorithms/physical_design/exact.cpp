@@ -14,22 +14,30 @@
 #include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>
 #include <fiction/algorithms/verification/design_rule_violations.hpp>
 #include <fiction/networks/technology_network.hpp>
+#include <fiction/technology/cell_ports.hpp>
 #include <fiction/technology/inml_topolinano_library.hpp>
 #include <fiction/technology/qca_one_library.hpp>
 #include <fiction/technology/sidb_bestagon_library.hpp>
+#include <fiction/technology/sidb_surface_analysis.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/network_utils.hpp>
+#include <fiction/utils/truth_table_utils.hpp>
 
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/mig.hpp>
+#include <mockturtle/views/names_view.hpp>
 
 #include <chrono>
-#include <memory>
-#include <type_traits>
+#include <cstdint>
+#include <sstream>
+#include <utility>
 #include <vector>
 
 using namespace fiction;
+
+namespace
+{
 
 exact_physical_design_params configuration() noexcept
 {
@@ -177,13 +185,6 @@ surface_black_list<Lyt, port_direction>&& blacklist_or(const tile<Lyt>&         
     return std::move(sbl);
 }
 
-exact_physical_design_params&& async(const std::size_t t, exact_physical_design_params&& ps) noexcept
-{
-    ps.num_threads = t;
-
-    return std::move(ps);
-}
-
 exact_physical_design_params&& minimize_wires(exact_physical_design_params&& ps) noexcept
 {
     ps.minimize_wires = true;
@@ -236,10 +237,10 @@ Lyt generate_layout(const Ntk& ntk, const exact_physical_design_params& ps)
 
     REQUIRE(layout.has_value());
 
-    check_drvs(*layout);
+    check_drvs(layout.value());  // NOLINT(bugprone-unchecked-optional-access)
     check_stats(stats);
 
-    return *layout;
+    return layout.value();  // NOLINT(bugprone-unchecked-optional-access)
 }
 template <typename Lyt, typename Ntk>
 Lyt generate_layout_with_black_list(const Ntk& ntk, const surface_black_list<Lyt, port_direction>& black_list,
@@ -251,10 +252,10 @@ Lyt generate_layout_with_black_list(const Ntk& ntk, const surface_black_list<Lyt
 
     REQUIRE(layout.has_value());
 
-    check_drvs(*layout);
+    check_drvs(layout.value());  // NOLINT(bugprone-unchecked-optional-access)
     check_stats(stats);
 
-    return *layout;
+    return layout.value();  // NOLINT(bugprone-unchecked-optional-access)
 }
 
 template <typename CellLyt, typename Lib, typename GateLyt>
@@ -326,6 +327,8 @@ bool has_straight_inverters(const Lyt& lyt) noexcept
 
     return only_straight_inverters;
 }
+
+}  // namespace
 
 TEST_CASE("Exact Cartesian physical design", "[exact]")
 {
@@ -690,7 +693,10 @@ TEST_CASE("Exact physical design with upper bounds", "[exact]")
 
         REQUIRE(layout.has_value());
 
-        CHECK(layout->y() <= 3);
+        if (layout)
+        {
+            CHECK(layout->y() <= 3);
+        }
 
         upper_bound_config.upper_bound_x = 2u;  // additionally, allow only 2 tiles in x direction; this will now fail
 
@@ -721,16 +727,19 @@ TEST_CASE("Name conservation after exact physical design", "[exact]")
 
     REQUIRE(layout.has_value());
 
-    // network name
-    CHECK(layout->get_layout_name() == "maj");
+    if (layout)
+    {
+        // network name
+        CHECK(layout->get_layout_name() == "maj");
 
-    // PI names
-    CHECK(layout->get_name(layout->pi_at(0)) == "a");  // first PI
-    CHECK(layout->get_name(layout->pi_at(1)) == "b");  // second PI
-    CHECK(layout->get_name(layout->pi_at(2)) == "c");  // third PI
+        // PI names
+        CHECK(layout->get_name(layout->pi_at(0)) == "a");  // first PI
+        CHECK(layout->get_name(layout->pi_at(1)) == "b");  // second PI
+        CHECK(layout->get_name(layout->pi_at(2)) == "c");  // third PI
 
-    // PO names
-    CHECK(layout->get_output_name(0) == "f");
+        // PO names
+        CHECK(layout->get_output_name(0) == "f");
+    }
 }
 
 #else  // FICTION_Z3_SOLVER

@@ -126,7 +126,7 @@ class mutable_rank_view<Ntk, false> : public fiction::static_depth_view<Ntk>
      * @param ntk Reference to the network.
      * @param ranks A vector of vectors specifying initial ranks for the nodes within the network.
      */
-    explicit mutable_rank_view(const Ntk& ntk, const std::vector<std::vector<node>>& ranks) :
+    explicit mutable_rank_view(const Ntk& ntk, const std::vector<std::vector<node>>& init_ranks_vec) :
             fiction::static_depth_view<Ntk>{ntk},
             ranks{this->depth() + 1},
             max_rank_width{0}
@@ -140,7 +140,7 @@ class mutable_rank_view<Ntk, false> : public fiction::static_depth_view<Ntk>
 
         rank_pos.rehash(this->size());
 
-        init_ranks(ranks);
+        init_ranks(init_ranks_vec);
     }
 
     /**

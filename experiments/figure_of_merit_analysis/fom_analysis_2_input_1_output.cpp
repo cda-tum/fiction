@@ -137,9 +137,9 @@ int main()  // NOLINT
             std::vector<double> bbr_all                       = {};
 
             std::vector<Lyt>        all_gates{};
-            design_sidb_gates_stats efficent_stats{};
+            design_sidb_gates_stats efficient_stats{};
 
-            all_gates = design_sidb_gates(skeleton, truth_table, design_params, &efficent_stats);
+            all_gates = design_sidb_gates(skeleton, truth_table, design_params, &efficient_stats);
 
             if (all_gates.empty())
             {

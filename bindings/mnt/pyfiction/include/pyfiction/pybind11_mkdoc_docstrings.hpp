@@ -113,9 +113,9 @@ this function cannot be evaluated in :math:`\mathcal{O}(1)`, but has
 the polynomial complexity of A*.
 
 If no path between `source` and `target` exists in `layout`, the
-returned distance is `std::numeric_limits<Dist>::infinity()` if that
-value is supported by `Dist`, or `std::numeric_limits<Dist>::max()`,
-otherwise.
+returned distance is `std::numeric_limits<Dist>::infinity()` for
+floating-point types or `std::numeric_limits<Dist>::max()` for
+integral types.
 
 Template parameter ``Lyt``:
     Coordinate layout type.
@@ -6317,7 +6317,7 @@ static const char *__doc_fiction_detail_design_sidb_gates_impl_output_bdl_wires 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_params = R"doc(Parameters for the *SiDB Gate Designer*.)doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_run_automatic_exhaustive_gate_designer =
-R"doc(Design gates by using the *Automatic Exhaustive Gate Desginer*. This
+R"doc(Design gates by using the *Automatic Exhaustive Gate Designer*. This
 algorithm was proposed in \"Minimal Design of SiDB Gates: An Optimal
 Basis for Circuits Based on Silicon Dangling Bonds\" by J. Drewniok,
 M. Walter, and R. Wille in NANOARCH 2023
@@ -14114,7 +14114,7 @@ each other).)doc";
 
 static const char *__doc_fiction_generate_random_sidb_layout_params_positive_charges_FORBIDDEN =
 R"doc(Positive charges are not allowed to occur (i.e. SiDBs need to be
-seperated by a few lattice points).)doc";
+separated by a few lattice points).)doc";
 
 static const char *__doc_fiction_generate_random_sidb_layout_params_positive_charges_MAY_OCCUR =
 R"doc(Positive charges can occur, which means that the
@@ -16869,8 +16869,8 @@ R"doc(Reorders the nodes in a given rank according to computed medians.
 Parameter ``r``:
     The rank index.
 
-Parameter ``reverse``:
-    If `true`, sorts in descending order of medians.)doc";
+Parameter ``order``:
+    Sorting order of medians.)doc";
 
 static const char *__doc_fiction_mincross_impl_run =
 R"doc(Runs the crossing minimization algorithm and returns a reordered
@@ -16885,8 +16885,8 @@ static const char *__doc_fiction_mincross_impl_transpose =
 R"doc(Performs pairwise transpositions within ranks to further reduce
 crossings.
 
-Parameter ``reverse``:
-    If `true`, applies reversed heuristic for tie-breaking.)doc";
+Parameter ``order``:
+    Sorting heuristic for tie-breaking.)doc";
 
 static const char *__doc_fiction_mincross_impl_transpose_step =
 R"doc(Performs a single transposition pass for rank `r`.
@@ -16894,8 +16894,8 @@ R"doc(Performs a single transposition pass for rank `r`.
 Parameter ``r``:
     Rank index.
 
-Parameter ``reverse``:
-    If `true`, applies reversed heuristic for tie-breaking.
+Parameter ``order``:
+    Sorting heuristic for tie-breaking.
 
 Returns:
     The number of crossings reduced.)doc";
@@ -16949,20 +16949,21 @@ static const char *__doc_fiction_mincross_stats_num_crossings = R"doc(The total 
 static const char *__doc_fiction_minimum_energy =
 R"doc(Computes the minimum energy of a range of
 `charge_distribution_surface` objects. If the range is empty, infinity
-is returned.
+is returned to indicate no valid energy value exists.
 
 Template parameter ``InputIt``:
     Must meet the requirements of `LegacyInputIterator`.
 
 Parameter ``first``:
-    Begin of the range to examime.
+    Begin of the range to examine.
 
 Parameter ``last``:
     End of the range to examine.
 
 Returns:
     Value of the minimum energy found in the input range (unit: eV),
-    or infinity if the range is empty.)doc";
+    or `std::numeric_limits<double>::infinity()` if the range is
+    empty.)doc";
 
 static const char *__doc_fiction_minimum_energy_distribution =
 R"doc(Returns an iterator to the charge distribution of minimum energy
@@ -16973,7 +16974,7 @@ Template parameter ``InputIt``:
     Must meet the requirements of `LegacyInputIterator`.
 
 Parameter ``first``:
-    Begin of the range to examime.
+    Begin of the range to examine.
 
 Parameter ``last``:
     End of the range to examine.

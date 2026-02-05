@@ -5,14 +5,12 @@
 #ifndef PYFICTION_VERSION_INFO_HPP
 #define PYFICTION_VERSION_INFO_HPP
 
-#include <fiction/utils/version_info.hpp.in>
+#include <fiction/utils/version_info.hpp>
 
 #include <pybind11/pybind11.h>
 
 namespace pyfiction
 {
-
-namespace py = pybind11;
 
 inline void version_info(pybind11::module& m)
 {
