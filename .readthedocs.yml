@@ -1,5 +1,8 @@
 version: 2
 
+sphinx:
+  configuration: docs/conf.py
+
 build:
   os: ubuntu-24.04
   tools:
@@ -17,8 +20,6 @@ build:
         fi
       # Unshallow the git clone and fetch tags to get proper version information
       - git fetch --unshallow --tags
-      # Ensure submodules are checked out
-      - git submodule update --init --recursive
     pre_build:
       # Set up uv
       - asdf plugin add uv
