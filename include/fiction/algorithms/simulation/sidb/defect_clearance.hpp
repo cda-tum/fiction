@@ -46,11 +46,11 @@ template <typename Lyt>
 [[nodiscard]] defect_clearance<cell<Lyt>>
 calculate_defect_clearance(const Lyt& lyt, const defect_influence_domain<Lyt>& defect_inf_domain) noexcept
 {
-    double    max_distance         = 0;
-    cell<Lyt> max_distance_postion = {};
+    double    max_distance          = 0;
+    cell<Lyt> max_distance_position = {};
 
     defect_inf_domain.for_each(
-        [&lyt, &max_distance, &max_distance_postion](const auto& defect_pos, const auto& val)
+        [&lyt, &max_distance, &max_distance_position](const auto& defect_pos, const auto& val)
         {
             if (std::get<0>(val) == defect_influence_status::NON_INFLUENTIAL)
             {
@@ -72,12 +72,12 @@ calculate_defect_clearance(const Lyt& lyt, const defect_influence_domain<Lyt>& d
 
             if (min_distance > max_distance)
             {
-                max_distance         = min_distance;
-                max_distance_postion = min_distance_position;
+                max_distance          = min_distance;
+                max_distance_position = min_distance_position;
             }
         });
 
-    return defect_clearance<cell<Lyt>>{max_distance_postion, max_distance};
+    return defect_clearance<cell<Lyt>>{max_distance_position, max_distance};
 }
 
 }  // namespace fiction

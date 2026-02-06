@@ -29,6 +29,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <limits>
@@ -637,12 +638,12 @@ class is_operational_impl
                                                 charge_distribution_mode::UPDATE_CHARGE_DISTRIBUTION);
         }
 
-        if (min_energy < std::numeric_limits<double>::infinity())
+        if (std::isinf(min_energy))
         {
-            return min_energy;
+            return std::nullopt;
         }
 
-        return std::nullopt;
+        return min_energy;
     }
 
     /**

@@ -1155,7 +1155,7 @@ struct sidb_cluster
  * @param pst Projector state of which the corresponding compositions are requested.
  * @return The compositions associated with the multiset charge configuration of the projecting cluster.
  */
-[[nodiscard]] static const std::vector<sidb_charge_space_composition>&
+[[nodiscard]] inline const std::vector<sidb_charge_space_composition>&
 get_projector_state_compositions(const sidb_cluster_projector_state& pst) noexcept
 {
     return std::ref(pst.cluster->charge_space.find(sidb_cluster_charge_state{pst.multiset_conf})->compositions);
@@ -1219,17 +1219,16 @@ to_unique_sidb_cluster(const uint64_t total_sidbs, const sidb_binary_cluster_hie
  * @param n A node from a binary cluster hierarchy, as for instance returned by parsing ALGLIB's result.
  * @return A uniquely identified node in a decorated cluster hierarchy that follows the "general tree" structure.
  */
-[[nodiscard]] static sidb_cluster_ptr to_sidb_cluster(const sidb_binary_cluster_hierarchy_node& n) noexcept
+[[nodiscard]] inline sidb_cluster_ptr to_sidb_cluster(const sidb_binary_cluster_hierarchy_node& n) noexcept
 {
-    uint64_t uid = n.c.size();
 
-    if (uid != 1)
+    if (uint64_t uid = n.c.size(); uid != 1)
     {
         return to_unique_sidb_cluster(n.c.size(), n, uid);
     }
 
     // to avoid weird shared pointer deallocation behaviour, give a parent to a singleton cluster hierarchy
-    sidb_cluster_ptr parent =
+    auto parent =
         std::make_shared<sidb_cluster>(std::vector{*n.c.cbegin()}, std::vector<uint64_t>{},
                                        sidb_clustering{std::make_shared<sidb_cluster>(
                                            std::vector{*n.c.cbegin()}, std::vector<uint64_t>{}, sidb_clustering{}, 0)},

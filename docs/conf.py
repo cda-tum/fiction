@@ -14,16 +14,18 @@
 # import os
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
-
+from __future__ import annotations
 
 import os
 import subprocess
 import xml.etree.ElementTree as ET
-from typing import ClassVar
+from typing import TYPE_CHECKING, ClassVar
 
 from docutils import nodes
 from docutils.parsers.rst import Directive
-from sphinx.application import Sphinx
+
+if TYPE_CHECKING:
+    from sphinx.application import Sphinx
 
 # -- General configuration ------------------------------------------------
 

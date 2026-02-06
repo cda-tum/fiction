@@ -9,7 +9,6 @@ on:
       - "**/*.cmake"
       - "**/CMakeLists.txt"
       - "**/*.py"
-      - "libs/**"
       - ".github/workflows/codeql-analysis.yml"
       - "!bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp"
   pull_request:
@@ -20,7 +19,6 @@ on:
       - "**/*.cmake"
       - "**/CMakeLists.txt"
       - "**/*.py"
-      - "libs/**"
       - ".github/workflows/codeql-analysis.yml"
       - "!bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp"
   merge_group:
@@ -32,7 +30,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  Z3_VERSION: 4.13.0
+  Z3_VERSION: 4.13.4
 
 jobs:
   analyze:
@@ -66,13 +64,12 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -yq libtbb-dev ${{matrix.compiler}}
 
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          submodules: recursive
           fetch-depth: 0
 
       - name: Setup ccache
-        uses: hendrikmuhs/ccache-action@v1.2
+        uses: hendrikmuhs/ccache-action@5ebbd400eff9e74630f759d94ddd7b6c26299639 # v1.2
         with:
           key: "${{matrix.os}}-${{matrix.compiler}}"
           variant: ccache
@@ -80,7 +77,7 @@ jobs:
           max-size: 10G
 
       - name: Setup Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
           python-version: "3.14.x"
           cache: "pip"
@@ -91,11 +88,11 @@ jobs:
       - name: Install pip packages
         uses: BSFishy/pip-action@v1
         with:
-          requirements: ${{github.workspace}}/libs/mugen/requirements.txt
+          requirements: ${{github.workspace}}/vendors/mugen/requirements.txt
 
       - name: Setup Z3 Solver
         id: z3
-        uses: cda-tum/setup-z3@v1
+        uses: cda-tum/setup-z3@8156b32632230f11cf9c5a50becb33d73e2fb4e5 # v1.7.1
         with:
           version: ${{env.Z3_VERSION}}
           platform: linux
@@ -105,24 +102,17 @@ jobs:
 
       # Initializes the CodeQL tools for scanning.
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v4
+        uses: github/codeql-action/init@6bc82e05fd0ea64601dd4b465378bbcf57de0314 # v4.32.1
         with:
           languages: ${{ matrix.language }}
           config-file: .github/codeql-config.yml
 
       - if: matrix.language == 'cpp'
-        name: Create Build Environment
-        run: cmake -E make_directory ${{github.workspace}}/build
-
-      - if: matrix.language == 'cpp'
         name: Configure CMake
-        working-directory: ${{github.workspace}}/build
         run: >
-          cmake ${{github.workspace}}
+          cmake -S ${{github.workspace}} -B ${{github.workspace}}/build
           -DCMAKE_CXX_COMPILER=${{matrix.compiler}}
           -DCMAKE_BUILD_TYPE=${{matrix.build_type}}
-          -DFICTION_ENABLE_UNITY_BUILD=ON
-          -DFICTION_ENABLE_PCH=ON
           -DFICTION_CLI=OFF
           -DFICTION_TEST=ON
           -DFICTION_BENCHMARK=OFF
@@ -136,11 +126,10 @@ jobs:
 
       - if: matrix.language == 'cpp'
         name: Build fiction
-        working-directory: ${{github.workspace}}/build
-        run: cmake --build . --config ${{matrix.build_type}} -j4
+        run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} --parallel 4
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v4
+        uses: github/codeql-action/analyze@6bc82e05fd0ea64601dd4b465378bbcf57de0314 # v4.32.1
         with:
           upload: false
           output: sarif-results
@@ -149,13 +138,13 @@ jobs:
         uses: advanced-security/filter-sarif@main
         with:
           patterns: |
-            -**/libs/**
+            -**/vendors/**
             -**/docs/**
             -**/experiments/**
           input: sarif-results/${{ matrix.language }}.sarif
           output: sarif-results/${{ matrix.language }}.sarif
 
       - name: Upload SARIF to GitHub
-        uses: github/codeql-action/upload-sarif@v4
+        uses: github/codeql-action/upload-sarif@6bc82e05fd0ea64601dd4b465378bbcf57de0314 # v4.32.1
         with:
           sarif_file: sarif-results/${{ matrix.language }}.sarif

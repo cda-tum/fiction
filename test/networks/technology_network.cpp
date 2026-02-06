@@ -14,7 +14,9 @@
 #include <kitty/operations.hpp>
 #include <kitty/operators.hpp>
 #include <mockturtle/networks/sequential.hpp>
+#include <mockturtle/traits.hpp>
 
+#include <cstdint>
 #include <vector>
 
 using namespace fiction;
@@ -453,7 +455,7 @@ TEST_CASE("hash nodes in technology network", "[technology-network]")
     CHECK(tec.size() == 8);  // no structural hashing
 }
 
-TEST_CASE("subsitute node by another", "[technology-network]")
+TEST_CASE("substitute node by another", "[technology-network]")
 {
     technology_network tec{};
 

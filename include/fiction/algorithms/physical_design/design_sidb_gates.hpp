@@ -194,7 +194,7 @@ class design_sidb_gates_impl
     }
 
     /**
-     * Design gates by using the *Automatic Exhaustive Gate Desginer*. This algorithm was proposed in \"Minimal
+     * Design gates by using the *Automatic Exhaustive Gate Designer*. This algorithm was proposed in \"Minimal
      * Design of SiDB Gates: An Optimal Basis for Circuits Based on Silicon Dangling Bonds\" by J. Drewniok, M. Walter,
      * and R. Wille in NANOARCH 2023 (https://dl.acm.org/doi/10.1145/3611315.3633241).
      *
@@ -237,7 +237,7 @@ class design_sidb_gates_impl
                 status == operational_status::OPERATIONAL)
             {
                 {
-                    const std::lock_guard lock_vector{mutex_to_protect_designed_gate_layouts};
+                    const std::scoped_lock lock_vector{mutex_to_protect_designed_gate_layouts};
                     designed_gate_layouts.push_back(layout_with_added_cells);
                 }
 
@@ -350,7 +350,7 @@ class design_sidb_gates_impl
                                                input_bdl_wires, output_bdl_wires);
                             status == operational_status::OPERATIONAL)
                         {
-                            const std::lock_guard lock{mutex_to_protect_designed_gate_layouts};
+                            const std::scoped_lock lock{mutex_to_protect_designed_gate_layouts};
 
                             if constexpr (has_get_sidb_defect_v<Lyt>)
                             {
@@ -455,7 +455,7 @@ class design_sidb_gates_impl
             {
                 // Lock and update shared resources
                 {
-                    const std::lock_guard lock{mutex_to_protect_gate_designs};
+                    const std::scoped_lock lock{mutex_to_protect_gate_designs};
                     gate_layouts.push_back(candidate);
                 }
                 gate_design_found = true;  // Notify all threads that a solution has been found
@@ -635,7 +635,7 @@ class design_sidb_gates_impl
                 }
             }
 
-            const std::lock_guard lock{mutex_to_protect_gate_candidates};
+            const std::scoped_lock lock{mutex_to_protect_gate_candidates};
             gate_candidate.push_back(current_layout);
         };
 

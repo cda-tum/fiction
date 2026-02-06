@@ -1,0 +1,119 @@
+{
+  "version": 4,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 23,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "base",
+      "hidden": true,
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "FICTION_ENABLE_CACHE": "ON"
+      }
+    },
+    {
+      "name": "dev",
+      "displayName": "Development",
+      "description": "Debug build for development",
+      "inherits": "base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "FICTION_WARNINGS_AS_ERRORS": "OFF"
+      }
+    },
+    {
+      "name": "dev-asan",
+      "displayName": "Development (ASan)",
+      "description": "Debug build with Address Sanitizer",
+      "inherits": "dev",
+      "cacheVariables": {
+        "FICTION_ENABLE_SANITIZER_ADDRESS": "ON",
+        "FICTION_ENABLE_SANITIZER_LEAK": "ON",
+        "FICTION_ENABLE_SANITIZER_UNDEFINED": "ON"
+      }
+    },
+    {
+      "name": "release",
+      "displayName": "Release",
+      "description": "Release build with optimizations",
+      "inherits": "base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "FICTION_WARNINGS_AS_ERRORS": "ON",
+        "FICTION_ENABLE_IPO": "ON"
+      }
+    },
+    {
+      "name": "ci",
+      "displayName": "CI",
+      "description": "Configuration for Continuous Integration",
+      "inherits": "base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "FICTION_WARNINGS_AS_ERRORS": "ON",
+        "FICTION_ENABLE_IPO": "OFF"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "dev",
+      "configurePreset": "dev"
+    },
+    {
+      "name": "dev-asan",
+      "configurePreset": "dev-asan"
+    },
+    {
+      "name": "release",
+      "configurePreset": "release"
+    },
+    {
+      "name": "ci",
+      "configurePreset": "ci"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "dev",
+      "configurePreset": "dev",
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "noTestsAction": "error",
+        "stopOnFailure": false
+      }
+    },
+    {
+      "name": "dev-asan",
+      "configurePreset": "dev-asan",
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "noTestsAction": "error",
+        "stopOnFailure": true
+      }
+    },
+    {
+      "name": "release",
+      "configurePreset": "release",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "ci",
+      "configurePreset": "ci",
+      "output": {
+        "outputOnFailure": true
+      }
+    }
+  ]
+}

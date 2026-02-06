@@ -8,7 +8,6 @@ on:
       - "**/*.cpp"
       - "**/*.cmake"
       - "**/CMakeLists.txt"
-      - "libs/**"
       - ".github/workflows/coverage.yml"
       - "!bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp"
   pull_request:
@@ -18,7 +17,6 @@ on:
       - "**/*.cpp"
       - "**/*.cmake"
       - "**/CMakeLists.txt"
-      - "libs/**"
       - ".github/workflows/coverage.yml"
       - "!bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp"
   merge_group:
@@ -33,7 +31,7 @@ defaults:
 
 env:
   BUILD_TYPE: Debug
-  Z3_VERSION: 4.13.0
+  Z3_VERSION: 4.13.4
 
 jobs:
   build_and_test:
@@ -50,12 +48,10 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -yq ${{matrix.compiler}} lcov ninja-build
 
       - name: Clone Repository
-        uses: actions/checkout@v6
-        with:
-          submodules: recursive
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Setup ccache
-        uses: hendrikmuhs/ccache-action@v1.2
+        uses: hendrikmuhs/ccache-action@5ebbd400eff9e74630f759d94ddd7b6c26299639 # v1.2
         with:
           key: "${{matrix.os}}-${{matrix.compiler}}"
           variant: ccache
@@ -63,7 +59,7 @@ jobs:
           max-size: 10G
 
       - name: Setup Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
           python-version: "3.14.x"
           cache: "pip"
@@ -74,11 +70,11 @@ jobs:
       - name: Install pip packages
         uses: BSFishy/pip-action@v1
         with:
-          requirements: ${{github.workspace}}/libs/mugen/requirements.txt
+          requirements: ${{github.workspace}}/vendors/mugen/requirements.txt
 
       - name: Setup Z3 Solver
         id: z3
-        uses: cda-tum/setup-z3@v1
+        uses: cda-tum/setup-z3@8156b32632230f11cf9c5a50becb33d73e2fb4e5 # v1.7.1
         with:
           version: ${{env.Z3_VERSION}}
           platform: linux
@@ -91,11 +87,10 @@ jobs:
           cmake -S ${{github.workspace}} -B ${{github.workspace}}/build -G Ninja
           -DCMAKE_CXX_COMPILER=${{matrix.compiler}}
           -DCMAKE_BUILD_TYPE=$BUILD_TYPE
-          -DFICTION_ENABLE_UNITY_BUILD=ON
-          -DFICTION_ENABLE_PCH=ON
           -DFICTION_CLI=OFF
           -DFICTION_TEST=ON
           -DFICTION_BENCHMARK=OFF
+          -DFICTION_EXPERIMENTS=OFF
           -DFICTION_Z3=ON
           -DFICTION_ALGLIB=ON
           -DFICTION_ENABLE_MUGEN=ON
@@ -105,11 +100,11 @@ jobs:
           -DMOCKTURTLE_EXAMPLES=OFF
 
       - name: Build
-        run: cmake --build ${{github.workspace}}/build --config $BUILD_TYPE --parallel
+        run: cmake --build ${{github.workspace}}/build --config $BUILD_TYPE --parallel 4
 
       - name: Test
         working-directory: ${{github.workspace}}/build
-        run: ctest -C $BUILD_TYPE --output-on-failure --repeat until-pass:3 --parallel
+        run: ctest -C $BUILD_TYPE --output-on-failure --repeat until-pass:3 --parallel 4
 
       - name: Generate Coverage Report
         run: |
@@ -118,7 +113,7 @@ jobs:
           lcov -l lcov_filtered.info
 
       - name: Upload report to Codecov
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5.5.2
         with:
           files: ${{github.workspace}}/lcov_filtered.info
           fail_ci_if_error: true

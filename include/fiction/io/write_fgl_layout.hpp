@@ -7,7 +7,7 @@
 
 #include "fiction/traits.hpp"
 #include "fiction/utils/stl_utils.hpp"
-#include "utils/version_info.hpp"
+#include "fiction/utils/version_info.hpp"
 
 #include <fmt/chrono.h>
 #include <fmt/format.h>
