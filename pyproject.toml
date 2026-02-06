@@ -118,6 +118,7 @@ FICTION_PYTHON_BINDINGS = "ON"
 
 [[tool.scikit-build.overrides]]
 if.env.READTHEDOCS = "True"
+inherit.cmake.define = "append"
 cmake.define.FICTION_ENABLE_IPO = "OFF"
 cmake.args = [
     "-DCMAKE_VERBOSE_MAKEFILE=ON",
