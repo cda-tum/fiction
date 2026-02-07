@@ -10,6 +10,7 @@
 #include <fiction/algorithms/physical_design/wiring_reduction.hpp>
 #include <fiction/types.hpp>
 
+#include <pybind11/chrono.h>
 #include <pybind11/pybind11.h>
 
 namespace pyfiction

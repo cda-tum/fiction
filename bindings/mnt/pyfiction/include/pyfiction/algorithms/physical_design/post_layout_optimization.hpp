@@ -10,6 +10,7 @@
 #include <fiction/algorithms/physical_design/post_layout_optimization.hpp>
 #include <fiction/types.hpp>
 
+#include <pybind11/chrono.h>
 #include <pybind11/pybind11.h>
 
 namespace pyfiction
@@ -20,7 +21,6 @@ namespace pyfiction
  */
 inline void post_layout_optimization(pybind11::module& m)
 {
-    namespace py = pybind11;
     namespace py = pybind11;
 
     py::class_<fiction::post_layout_optimization_params>(m, "post_layout_optimization_params",
