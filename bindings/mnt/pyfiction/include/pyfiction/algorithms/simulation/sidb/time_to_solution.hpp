@@ -20,7 +20,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void time_to_solution(pybind11::module& m)
+void time_to_solution_impl(pybind11::module& m)
 {
     namespace py = pybind11;
 
@@ -75,8 +75,8 @@ inline void time_to_solution(pybind11::module& m)
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::time_to_solution<py_sidb_100_lattice>(m);
-    detail::time_to_solution<py_sidb_111_lattice>(m);
+    detail::time_to_solution_impl<py_sidb_100_lattice>(m);
+    detail::time_to_solution_impl<py_sidb_111_lattice>(m);
 }
 
 }  // namespace pyfiction
