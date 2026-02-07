@@ -1,10 +1,3 @@
-//
-// Created by marcel on 21.11.23.
-//
-
-#ifndef PYFICTION_POTENTIAL_TO_DISTANCE_CONVERSION_HPP
-#define PYFICTION_POTENTIAL_TO_DISTANCE_CONVERSION_HPP
-
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
@@ -16,7 +9,7 @@
 namespace pyfiction
 {
 
-inline void potential_to_distance_conversion(pybind11::module& m)
+void potential_to_distance_conversion(pybind11::module& m)
 {
     namespace py = pybind11;
 
@@ -25,5 +18,3 @@ inline void potential_to_distance_conversion(pybind11::module& m)
 }
 
 }  // namespace pyfiction
-
-#endif  // PYFICTION_POTENTIAL_TO_DISTANCE_CONVERSION_HPP

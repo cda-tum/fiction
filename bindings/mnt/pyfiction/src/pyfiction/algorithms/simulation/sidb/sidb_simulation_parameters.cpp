@@ -1,10 +1,3 @@
-//
-// Created by marcel on 22.05.23.
-//
-
-#ifndef PYFICTION_SIDB_SIMULATION_PARAMETERS_HPP
-#define PYFICTION_SIDB_SIMULATION_PARAMETERS_HPP
-
 #include "pyfiction/documentation.hpp"
 
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
@@ -19,9 +12,8 @@
 namespace pyfiction
 {
 
-inline void sidb_simulation_parameters(pybind11::module& m)
+void sidb_simulation_parameters(pybind11::module& m)
 {
-    namespace py = pybind11;
     namespace py = pybind11;
 
     py::class_<fiction::sidb_simulation_parameters>(m, "sidb_simulation_parameters",
@@ -42,5 +34,3 @@ inline void sidb_simulation_parameters(pybind11::module& m)
 }
 
 }  // namespace pyfiction
-
-#endif  // PYFICTION_SIDB_SIMULATION_PARAMETERS_HPP

@@ -1,10 +1,3 @@
-//
-// Created by marcel on 21.11.23.
-//
-
-#ifndef PYFICTION_OPERATIONAL_DOMAIN_HPP
-#define PYFICTION_OPERATIONAL_DOMAIN_HPP
-
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
@@ -24,7 +17,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void operational_domain(pybind11::module& m)
+void operational_domain_impl(pybind11::module& m)
 {
     namespace py = pybind11;
 
@@ -46,7 +39,7 @@ void operational_domain(pybind11::module& m)
 }
 
 template <typename Lyt>
-void critical_temperature_domain(pybind11::module& m)
+void critical_temperature_domain_impl(pybind11::module& m)
 {
     namespace py = pybind11;
 
@@ -71,7 +64,7 @@ void critical_temperature_domain(pybind11::module& m)
 
 }  // namespace detail
 
-inline void operational_domain(pybind11::module& m)
+void operational_domain(pybind11::module& m)
 {
     namespace py = pybind11;
 
@@ -278,13 +271,11 @@ inline void operational_domain(pybind11::module& m)
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::operational_domain<py_sidb_100_lattice>(m);
-    detail::operational_domain<py_sidb_111_lattice>(m);
+    detail::operational_domain_impl<py_sidb_100_lattice>(m);
+    detail::operational_domain_impl<py_sidb_111_lattice>(m);
 
-    detail::critical_temperature_domain<py_sidb_100_lattice>(m);
-    detail::critical_temperature_domain<py_sidb_111_lattice>(m);
+    detail::critical_temperature_domain_impl<py_sidb_100_lattice>(m);
+    detail::critical_temperature_domain_impl<py_sidb_111_lattice>(m);
 }
 
 }  // namespace pyfiction
-
-#endif  // PYFICTION_OPERATIONAL_DOMAIN_HPP

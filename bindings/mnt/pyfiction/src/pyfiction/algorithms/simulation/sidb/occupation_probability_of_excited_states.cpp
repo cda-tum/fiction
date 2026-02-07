@@ -1,10 +1,3 @@
-//
-// Created by marcel on 14.06.23.
-//
-
-#ifndef PYFICTION_OCCUPATION_PROBABILITY_OF_EXCITED_STATES_HPP
-#define PYFICTION_OCCUPATION_PROBABILITY_OF_EXCITED_STATES_HPP
-
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
@@ -19,7 +12,7 @@ namespace pyfiction
 namespace detail
 {
 
-void occupation_probability_of_excited_states(pybind11::module& m)
+void occupation_probability_of_excited_states_impl(pybind11::module& m)
 {
     namespace py = pybind11;
 
@@ -33,13 +26,11 @@ void occupation_probability_of_excited_states(pybind11::module& m)
 
 }  // namespace detail
 
-inline void occupation_probability_of_excited_states(pybind11::module& m)
+void occupation_probability_of_excited_states(pybind11::module& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::occupation_probability_of_excited_states(m);
+    detail::occupation_probability_of_excited_states_impl(m);
 }
 
 }  // namespace pyfiction
-
-#endif  // PYFICTION_OCCUPATION_PROBABILITY_OF_EXCITED_STATES_HPP

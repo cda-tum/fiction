@@ -1,10 +1,3 @@
-//
-// Created by marcel on 21.11.23.
-//
-
-#ifndef PYFICTION_CLUSTERCOMPLETE_HPP
-#define PYFICTION_CLUSTERCOMPLETE_HPP
-
 #if (FICTION_ALGLIB_ENABLED)
 
 #include "pyfiction/documentation.hpp"
@@ -23,7 +16,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void clustercomplete(pybind11::module& m)
+void clustercomplete_impl(pybind11::module& m)
 {
     namespace py = pybind11;
 
@@ -33,7 +26,7 @@ void clustercomplete(pybind11::module& m)
 
 }  // namespace detail
 
-inline void clustercomplete(pybind11::module& m)
+void clustercomplete(pybind11::module& m)
 {
     namespace py = pybind11;
 
@@ -71,8 +64,8 @@ inline void clustercomplete(pybind11::module& m)
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::clustercomplete<py_sidb_100_lattice>(m);
-    detail::clustercomplete<py_sidb_111_lattice>(m);
+    detail::clustercomplete_impl<py_sidb_100_lattice>(m);
+    detail::clustercomplete_impl<py_sidb_111_lattice>(m);
 }
 
 }  // namespace pyfiction
@@ -87,10 +80,8 @@ namespace pyfiction
 /**
  * Disable ClusterComplete.
  */
-inline void clustercomplete([[maybe_unused]] pybind11::module& m) {}
+void clustercomplete([[maybe_unused]] pybind11::module& m) {}
 
 }  // namespace pyfiction
 
 #endif  // FICTION_ALGLIB_ENABLED
-
-#endif  // PYFICTION_CLUSTERCOMPLETE_HPP

@@ -1,10 +1,3 @@
-//
-// Created by marcel on 21.11.23.
-//
-
-#ifndef PYFICTION_IS_OPERATIONAL_HPP
-#define PYFICTION_IS_OPERATIONAL_HPP
-
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
@@ -24,7 +17,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void is_operational(pybind11::module& m)
+void is_operational_impl(pybind11::module& m)
 {
     namespace py = pybind11;
 
@@ -85,7 +78,7 @@ void is_operational(pybind11::module& m)
 
 }  // namespace detail
 
-inline void is_operational(pybind11::module& m)
+void is_operational(pybind11::module& m)
 {
     namespace py = pybind11;
 
@@ -126,10 +119,8 @@ inline void is_operational(pybind11::module& m)
                        DOC(fiction_is_operational_params_strategy_to_analyze_operational_status));
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
-    detail::is_operational<py_sidb_100_lattice>(m);
-    detail::is_operational<py_sidb_111_lattice>(m);
+    detail::is_operational_impl<py_sidb_100_lattice>(m);
+    detail::is_operational_impl<py_sidb_111_lattice>(m);
 }
 
 }  // namespace pyfiction
-
-#endif  // PYFICTION_IS_OPERATIONAL_HPP

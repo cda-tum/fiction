@@ -1,10 +1,3 @@
-//
-// Created by Jan Drewniok on 13.09.24.
-//
-
-#ifndef PYFICTION_COMPUTE_OPERATIONAL_RATIO_HPP
-#define PYFICTION_COMPUTE_OPERATIONAL_RATIO_HPP
-
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
@@ -21,7 +14,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void compute_operational_ratio(pybind11::module& m)
+void compute_operational_ratio_impl(pybind11::module& m)
 {
     namespace py = pybind11;
 
@@ -32,7 +25,7 @@ void compute_operational_ratio(pybind11::module& m)
 
 }  // namespace detail
 
-inline void compute_operational_ratio(pybind11::module& m)
+void compute_operational_ratio(pybind11::module& m)
 {
     namespace py = pybind11;
 
@@ -43,11 +36,8 @@ inline void compute_operational_ratio(pybind11::module& m)
                        DOC(fiction_operational_domain_ratio_params_op_domain_params));
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
-
-    detail::compute_operational_ratio<py_sidb_100_lattice>(m);
-    detail::compute_operational_ratio<py_sidb_111_lattice>(m);
+    detail::compute_operational_ratio_impl<py_sidb_100_lattice>(m);
+    detail::compute_operational_ratio_impl<py_sidb_111_lattice>(m);
 }
 
 }  // namespace pyfiction
-
-#endif  // PYFICTION_COMPUTE_OPERATIONAL_RATIO_HPP

@@ -1,12 +1,7 @@
-//
-// Created by Jan Drewniok on 17.07.24.
-//
-
-#ifndef PYFICTION_DETECT_BDL_WIRES_HPP
-#define PYFICTION_DETECT_BDL_WIRES_HPP
-
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
+
+#include <fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp>
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
@@ -21,7 +16,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void detect_bdl_wires(pybind11::module& m, const std::string& lattice)
+void detect_bdl_wires_impl(pybind11::module& m, const std::string& lattice)
 {
     namespace py = pybind11;
 
@@ -48,7 +43,7 @@ void detect_bdl_wires(pybind11::module& m, const std::string& lattice)
  *
  * @param m The pybind11 module.
  */
-inline void detect_bdl_wires(pybind11::module& m)
+void detect_bdl_wires(pybind11::module& m)
 {
     namespace py = pybind11;
 
@@ -68,10 +63,8 @@ inline void detect_bdl_wires(pybind11::module& m)
                        DOC(fiction_detect_bdl_wires_params_bdl_pairs_params));
 
     // Register different lattice types with appropriate suffixes
-    detail::detect_bdl_wires<py_sidb_100_lattice>(m, "100");
-    detail::detect_bdl_wires<py_sidb_111_lattice>(m, "111");
+    detail::detect_bdl_wires_impl<py_sidb_100_lattice>(m, "100");
+    detail::detect_bdl_wires_impl<py_sidb_111_lattice>(m, "111");
 }
 
 }  // namespace pyfiction
-
-#endif  // PYFICTION_DETECT_BDL_WIRES_HPP

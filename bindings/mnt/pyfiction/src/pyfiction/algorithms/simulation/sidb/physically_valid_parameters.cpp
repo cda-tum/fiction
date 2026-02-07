@@ -1,10 +1,3 @@
-//
-// Created by Jan Drewniok on 07.05.24.
-//
-
-#ifndef PYFICTION_PHYSICALLY_VALID_PARAMETERS_HPP
-#define PYFICTION_PHYSICALLY_VALID_PARAMETERS_HPP
-
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
@@ -23,7 +16,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void physically_valid_parameters(pybind11::module& m)
+void physically_valid_parameters_impl(pybind11::module& m)
 {
     namespace py = pybind11;
 
@@ -33,7 +26,7 @@ void physically_valid_parameters(pybind11::module& m)
 
 }  // namespace detail
 
-inline void physically_valid_parameters(pybind11::module& m)
+void physically_valid_parameters(pybind11::module& m)
 {
     namespace py = pybind11;
 
@@ -45,10 +38,7 @@ inline void physically_valid_parameters(pybind11::module& m)
             [](const fiction::sidb_simulation_domain<fiction::parameter_point, uint64_t>& domain,
                const fiction::parameter_point&                                            pp)
             {
-                const auto result = domain.contains(pp);
-
-                // Check if the result has a value
-                if (result.has_value())
+                if (const auto result = domain.contains(pp); result.has_value())
                 {
                     return std::get<0>(result.value());
                 }
@@ -59,10 +49,8 @@ inline void physically_valid_parameters(pybind11::module& m)
             py::arg("pp"));
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
-    detail::physically_valid_parameters<py_charge_distribution_surface_100>(m);
-    detail::physically_valid_parameters<py_charge_distribution_surface_111>(m);
+    detail::physically_valid_parameters_impl<py_charge_distribution_surface_100>(m);
+    detail::physically_valid_parameters_impl<py_charge_distribution_surface_111>(m);
 }
 
 }  // namespace pyfiction
-
-#endif  // FICTION_PHYSICALLY_VALID_PARAMETERS_HPP

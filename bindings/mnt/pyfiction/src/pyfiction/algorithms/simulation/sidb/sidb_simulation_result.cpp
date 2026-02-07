@@ -1,10 +1,3 @@
-//
-// Created by marcel on 22.05.23.
-//
-
-#ifndef PYFICTION_SIDB_SIMULATION_RESULT_HPP
-#define PYFICTION_SIDB_SIMULATION_RESULT_HPP
-
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
@@ -82,7 +75,7 @@ inline py::dict convert_map_to_py(const std::unordered_map<std::string, std::any
 }
 
 template <typename Lyt>
-void sidb_simulation_result(pybind11::module& m, const std::string& lattice = "")
+void sidb_simulation_result_impl(pybind11::module& m, const std::string& lattice = "")
 {
     namespace py = pybind11;
 
@@ -109,13 +102,11 @@ void sidb_simulation_result(pybind11::module& m, const std::string& lattice = ""
 
 }  // namespace detail
 
-inline void sidb_simulation_result(pybind11::module& m)
+void sidb_simulation_result(pybind11::module& m)
 {
     // Define simulation result for specific lattices
-    detail::sidb_simulation_result<py_sidb_100_lattice>(m, "_100");
-    detail::sidb_simulation_result<py_sidb_111_lattice>(m, "_111");
+    detail::sidb_simulation_result_impl<py_sidb_100_lattice>(m, "_100");
+    detail::sidb_simulation_result_impl<py_sidb_111_lattice>(m, "_111");
 }
 
 }  // namespace pyfiction
-
-#endif  // PYFICTION_SIDB_SIMULATION_RESULT_HPP

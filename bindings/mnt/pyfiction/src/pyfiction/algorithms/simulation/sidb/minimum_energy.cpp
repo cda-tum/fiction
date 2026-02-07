@@ -1,10 +1,3 @@
-//
-// Created by marcel on 22.05.23.
-//
-
-#ifndef PYFICTION_MINIMUM_ENERGY_HPP
-#define PYFICTION_MINIMUM_ENERGY_HPP
-
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
@@ -22,7 +15,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void minimum_energy(pybind11::module& m)
+void minimum_energy_impl(pybind11::module& m)
 {
     namespace py = pybind11;
 
@@ -34,13 +27,11 @@ void minimum_energy(pybind11::module& m)
 
 }  // namespace detail
 
-inline void minimum_energy(pybind11::module& m)
+void minimum_energy(pybind11::module& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
-    detail::minimum_energy<py_charge_distribution_surface_100>(m);
-    detail::minimum_energy<py_charge_distribution_surface_111>(m);
+    detail::minimum_energy_impl<py_charge_distribution_surface_100>(m);
+    detail::minimum_energy_impl<py_charge_distribution_surface_111>(m);
 }
 
 }  // namespace pyfiction
-
-#endif  // PYFICTION_MINIMUM_ENERGY_HPP

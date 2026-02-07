@@ -1,10 +1,3 @@
-//
-// Created by marcel on 22.05.23.
-//
-
-#ifndef PYFICTION_IS_GROUND_STATE_HPP
-#define PYFICTION_IS_GROUND_STATE_HPP
-
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
@@ -20,7 +13,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void is_ground_state(pybind11::module& m)
+void is_ground_state_impl(pybind11::module& m)
 {
     namespace py = pybind11;
 
@@ -30,14 +23,12 @@ void is_ground_state(pybind11::module& m)
 
 }  // namespace detail
 
-inline void is_ground_state(pybind11::module& m)
+void is_ground_state(pybind11::module& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::is_ground_state<py_sidb_100_lattice>(m);
-    detail::is_ground_state<py_sidb_111_lattice>(m);
+    detail::is_ground_state_impl<py_sidb_100_lattice>(m);
+    detail::is_ground_state_impl<py_sidb_111_lattice>(m);
 }
 
 }  // namespace pyfiction
-
-#endif  // PYFICTION_IS_GROUND_STATE_HPP

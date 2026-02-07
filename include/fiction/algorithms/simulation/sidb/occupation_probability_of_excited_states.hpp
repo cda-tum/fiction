@@ -55,10 +55,10 @@ namespace fiction
     }
 
     // Determine the minimal energy.
-    const auto [energy, state_type] = *std::min_element(energy_and_state_type.cbegin(), energy_and_state_type.cend(),
+    const auto [min_e_val, st_type] = *std::min_element(energy_and_state_type.cbegin(), energy_and_state_type.cend(),
                                                         [](const auto& a, const auto& b) { return a.first < b.first; });
 
-    const auto min_energy = energy;
+    const auto min_energy = min_e_val;
 
     // The partition function is obtained by summing up all the Boltzmann factors.
     const double partition_function =

@@ -1,10 +1,3 @@
-//
-// Created by marcel on 18.09.23.
-//
-
-#ifndef PYFICTION_SIDB_SIMULATION_ENGINE_HPP
-#define PYFICTION_SIDB_SIMULATION_ENGINE_HPP
-
 #include "pyfiction/documentation.hpp"
 
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
@@ -20,7 +13,7 @@ namespace detail
 {
 
 template <typename EngineType>
-void sidb_simulation_engine_name(pybind11::module& m)
+void sidb_simulation_engine_name_impl(pybind11::module& m)
 {
     namespace py = pybind11;
 
@@ -32,7 +25,7 @@ void sidb_simulation_engine_name(pybind11::module& m)
 
 }  // namespace detail
 
-inline void sidb_simulation_engine(pybind11::module& m)
+void sidb_simulation_engine(pybind11::module& m)
 {
     namespace py = pybind11;
 
@@ -67,11 +60,9 @@ inline void sidb_simulation_engine(pybind11::module& m)
 
         ;
 
-    detail::sidb_simulation_engine_name<fiction::sidb_simulation_engine>(m);
-    detail::sidb_simulation_engine_name<fiction::exact_sidb_simulation_engine>(m);
-    detail::sidb_simulation_engine_name<fiction::heuristic_sidb_simulation_engine>(m);
+    detail::sidb_simulation_engine_name_impl<fiction::sidb_simulation_engine>(m);
+    detail::sidb_simulation_engine_name_impl<fiction::exact_sidb_simulation_engine>(m);
+    detail::sidb_simulation_engine_name_impl<fiction::heuristic_sidb_simulation_engine>(m);
 }
 
 }  // namespace pyfiction
-
-#endif  // PYFICTION_SIDB_SIMULATION_ENGINE_HPP

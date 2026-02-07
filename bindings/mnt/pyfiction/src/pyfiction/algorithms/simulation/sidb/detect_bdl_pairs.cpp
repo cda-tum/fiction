@@ -1,10 +1,3 @@
-//
-// Created by marcel on 21.11.23.
-//
-
-#ifndef PYFICTION_DETECT_BDL_PAIRS_HPP
-#define PYFICTION_DETECT_BDL_PAIRS_HPP
-
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
@@ -25,7 +18,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void detect_bdl_pairs(pybind11::module& m)
+void detect_bdl_pairs_impl(pybind11::module& m)
 {
     namespace py = pybind11;
 
@@ -35,7 +28,7 @@ void detect_bdl_pairs(pybind11::module& m)
 
 }  // namespace detail
 
-inline void detect_bdl_pairs(pybind11::module& m)
+void detect_bdl_pairs(pybind11::module& m)
 {
     namespace py = pybind11;
 
@@ -58,10 +51,8 @@ inline void detect_bdl_pairs(pybind11::module& m)
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::detect_bdl_pairs<py_sidb_100_lattice>(m);
-    detail::detect_bdl_pairs<py_sidb_111_lattice>(m);
+    detail::detect_bdl_pairs_impl<py_sidb_100_lattice>(m);
+    detail::detect_bdl_pairs_impl<py_sidb_111_lattice>(m);
 }
 
 }  // namespace pyfiction
-
-#endif  // PYFICTION_DETECT_BDL_PAIRS_HPP

@@ -1,10 +1,3 @@
-//
-// Created by marcel on 23.01.23.
-//
-
-#ifndef PYFICTION_LOGIC_SIMULATION_HPP
-#define PYFICTION_LOGIC_SIMULATION_HPP
-
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
@@ -27,7 +20,7 @@ namespace detail
 {
 
 template <typename NtkOrLyt>
-void logic_simulation(pybind11::module& m, const std::string& type_name)
+void logic_simulation_impl(pybind11::module& m, const std::string& type_name)
 {
     namespace py = pybind11;
 
@@ -103,14 +96,12 @@ void logic_simulation(pybind11::module& m, const std::string& type_name)
 
 }  // namespace detail
 
-inline void logic_simulation(pybind11::module& m)
+void logic_simulation(pybind11::module& m)
 {
-    detail::logic_simulation<py_logic_network>(m, "network");
-    detail::logic_simulation<py_cartesian_gate_layout>(m, "layout");
-    detail::logic_simulation<py_shifted_cartesian_gate_layout>(m, "layout");
-    detail::logic_simulation<py_hexagonal_gate_layout>(m, "layout");
+    detail::logic_simulation_impl<py_logic_network>(m, "network");
+    detail::logic_simulation_impl<py_cartesian_gate_layout>(m, "layout");
+    detail::logic_simulation_impl<py_shifted_cartesian_gate_layout>(m, "layout");
+    detail::logic_simulation_impl<py_hexagonal_gate_layout>(m, "layout");
 }
 
 }  // namespace pyfiction
-
-#endif  // PYFICTION_LOGIC_SIMULATION_HPP

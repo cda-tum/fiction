@@ -1,10 +1,3 @@
-//
-// Created by marcel on 21.11.23.
-//
-
-#ifndef PYFICTION_QUICKEXACT_HPP
-#define PYFICTION_QUICKEXACT_HPP
-
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
@@ -21,7 +14,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void quickexact(pybind11::module& m)
+void quickexact_impl(pybind11::module& m)
 {
     namespace py = pybind11;
 
@@ -31,7 +24,7 @@ void quickexact(pybind11::module& m)
 
 }  // namespace detail
 
-inline void quickexact(pybind11::module& m)
+void quickexact(pybind11::module& m)
 {
     namespace py = pybind11;
 
@@ -57,11 +50,8 @@ inline void quickexact(pybind11::module& m)
                        DOC(fiction_quickexact_params_global_potential));
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
-
-    detail::quickexact<py_sidb_100_lattice>(m);
-    detail::quickexact<py_sidb_111_lattice>(m);
+    detail::quickexact_impl<py_sidb_100_lattice>(m);
+    detail::quickexact_impl<py_sidb_111_lattice>(m);
 }
 
 }  // namespace pyfiction
-
-#endif  // PYFICTION_QUICKEXACT_HPP

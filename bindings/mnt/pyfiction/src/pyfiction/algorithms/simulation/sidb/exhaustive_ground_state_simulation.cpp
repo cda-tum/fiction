@@ -1,10 +1,3 @@
-//
-// Created by marcel on 22.05.23.
-//
-
-#ifndef PYFICTION_EXHAUSTIVE_GROUND_STATE_SIMULATION_HPP
-#define PYFICTION_EXHAUSTIVE_GROUND_STATE_SIMULATION_HPP
-
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
@@ -22,7 +15,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void exhaustive_ground_state_simulation(pybind11::module& m)
+void exhaustive_ground_state_simulation_impl(pybind11::module& m)
 {
     namespace py = pybind11;
 
@@ -32,14 +25,12 @@ void exhaustive_ground_state_simulation(pybind11::module& m)
 
 }  // namespace detail
 
-inline void exhaustive_ground_state_simulation(pybind11::module& m)
+void exhaustive_ground_state_simulation(pybind11::module& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::exhaustive_ground_state_simulation<py_sidb_100_lattice>(m);
-    detail::exhaustive_ground_state_simulation<py_sidb_111_lattice>(m);
+    detail::exhaustive_ground_state_simulation_impl<py_sidb_100_lattice>(m);
+    detail::exhaustive_ground_state_simulation_impl<py_sidb_111_lattice>(m);
 }
 
 }  // namespace pyfiction
-
-#endif  // PYFICTION_EXHAUSTIVE_GROUND_STATE_SIMULATION_HPP

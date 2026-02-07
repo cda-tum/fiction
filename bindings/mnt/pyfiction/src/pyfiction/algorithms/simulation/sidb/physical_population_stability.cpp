@@ -1,10 +1,3 @@
-//
-// Created by marcel on 21.11.23.
-//
-
-#ifndef PYFICTION_PHYSICAL_POPULATION_STABILITY_HPP
-#define PYFICTION_PHYSICAL_POPULATION_STABILITY_HPP
-
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
@@ -22,7 +15,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void physical_population_stability(pybind11::module& m, const std::string& lattice)
+void physical_population_stability_impl(pybind11::module& m, const std::string& lattice)
 {
     namespace py = pybind11;
 
@@ -48,7 +41,7 @@ void physical_population_stability(pybind11::module& m, const std::string& latti
 
 }  // namespace detail
 
-inline void physical_population_stability(pybind11::module& m)
+void physical_population_stability(pybind11::module& m)
 {
     namespace py = pybind11;
 
@@ -76,11 +69,8 @@ inline void physical_population_stability(pybind11::module& m)
             DOC(fiction_physical_population_stability_params_precision_for_distance_corresponding_to_potential));
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
-
-    detail::physical_population_stability<py_sidb_100_lattice>(m, "100");
-    detail::physical_population_stability<py_sidb_111_lattice>(m, "111");
+    detail::physical_population_stability_impl<py_sidb_100_lattice>(m, "100");
+    detail::physical_population_stability_impl<py_sidb_111_lattice>(m, "111");
 }
 
 }  // namespace pyfiction
-
-#endif  // PYFICTION_PHYSICAL_POPULATION_STABILITY_HPP

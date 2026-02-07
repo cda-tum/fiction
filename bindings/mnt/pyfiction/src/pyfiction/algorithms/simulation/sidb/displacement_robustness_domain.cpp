@@ -1,10 +1,3 @@
-//
-// Created by Jan Drewniok on 01.08.24.
-//
-
-#ifndef PYFICTION_DISPLACEMENT_ROBUSTNESS_DOMAIN_HPP
-#define PYFICTION_DISPLACEMENT_ROBUSTNESS_DOMAIN_HPP
-
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
@@ -23,7 +16,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void determine_displacement_robustness_domain(pybind11::module& m, const std::string& lattice = "")
+void determine_displacement_robustness_domain_impl(pybind11::module& m, const std::string& lattice = "")
 {
     namespace py = pybind11;
 
@@ -39,7 +32,7 @@ void determine_displacement_robustness_domain(pybind11::module& m, const std::st
 
 }  // namespace detail
 
-inline void determine_displacement_robustness_domain(pybind11::module& m)
+void determine_displacement_robustness_domain(pybind11::module& m)
 {
     namespace py = pybind11;
 
@@ -85,10 +78,8 @@ inline void determine_displacement_robustness_domain(pybind11::module& m)
                        &fiction::displacement_robustness_domain_stats::num_non_operational_sidb_displacements);
 
     // NOTE: be careful with the order of the following calls! Python will resolve the first matching overload!
-    detail::determine_displacement_robustness_domain<py_sidb_100_lattice>(m, "100");
-    detail::determine_displacement_robustness_domain<py_sidb_111_lattice>(m, "111");
+    detail::determine_displacement_robustness_domain_impl<py_sidb_100_lattice>(m, "100");
+    detail::determine_displacement_robustness_domain_impl<py_sidb_111_lattice>(m, "111");
 }
 
 }  // namespace pyfiction
-
-#endif  // PYFICTION_DISPLACEMENT_ROBUSTNESS_DOMAIN_HPP

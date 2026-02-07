@@ -1,10 +1,3 @@
-//
-// Created by marcel on 24.05.23.
-//
-
-#ifndef PYFICTION_CALCULATE_ENERGY_AND_STATE_TYPE_HPP
-#define PYFICTION_CALCULATE_ENERGY_AND_STATE_TYPE_HPP
-
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
@@ -22,7 +15,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void calculate_energy_and_state_type(pybind11::module& m)
+void calculate_energy_and_state_type_impl(pybind11::module& m)
 {
     namespace py = pybind11;
 
@@ -39,13 +32,11 @@ void calculate_energy_and_state_type(pybind11::module& m)
 
 }  // namespace detail
 
-inline void calculate_energy_and_state_type(pybind11::module& m)
+void calculate_energy_and_state_type(pybind11::module& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
-    detail::calculate_energy_and_state_type<py_sidb_100_lattice>(m);
-    detail::calculate_energy_and_state_type<py_sidb_111_lattice>(m);
+    detail::calculate_energy_and_state_type_impl<py_sidb_100_lattice>(m);
+    detail::calculate_energy_and_state_type_impl<py_sidb_111_lattice>(m);
 }
 
 }  // namespace pyfiction
-
-#endif  // PYFICTION_CALCULATE_ENERGY_AND_STATE_TYPE_HPP
