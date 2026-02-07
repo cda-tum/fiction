@@ -1,10 +1,3 @@
-//
-// Created by marcel on 25.01.23.
-//
-
-#ifndef PYFICTION_TECHNOLOGY_MAPPING_HPP
-#define PYFICTION_TECHNOLOGY_MAPPING_HPP
-
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
@@ -20,7 +13,7 @@ namespace detail
 {
 
 template <typename Ntk>
-void technology_mapping(pybind11::module& m)
+void technology_mapping_impl(pybind11::module& m)
 {
     namespace py = pybind11;
 
@@ -31,7 +24,7 @@ void technology_mapping(pybind11::module& m)
 
 }  // namespace detail
 
-inline void technology_mapping(pybind11::module& m)
+void technology_mapping(pybind11::module& m)
 {
     namespace py = pybind11;
 
@@ -90,9 +83,7 @@ inline void technology_mapping(pybind11::module& m)
     m.def("all_supported_standard_functions", &fiction::all_supported_standard_functions,
           DOC(fiction_all_supported_standard_functions));
 
-    detail::technology_mapping<py_logic_network>(m);
+    detail::technology_mapping_impl<py_logic_network>(m);
 }
 
 }  // namespace pyfiction
-
-#endif  // PYFICTION_TECHNOLOGY_MAPPING_HPP

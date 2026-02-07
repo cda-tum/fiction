@@ -1,10 +1,3 @@
-//
-// Created by marcel on 25.01.23.
-//
-
-#ifndef PYFICTION_NETWORK_BALANCING_HPP
-#define PYFICTION_NETWORK_BALANCING_HPP
-
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
@@ -19,7 +12,7 @@ namespace detail
 {
 
 template <typename Ntk>
-void network_balancing(pybind11::module& m)
+void network_balancing_impl(pybind11::module& m)
 {
     namespace py = pybind11;
 
@@ -32,7 +25,7 @@ void network_balancing(pybind11::module& m)
 
 }  // namespace detail
 
-inline void network_balancing(pybind11::module& m)
+void network_balancing(pybind11::module& m)
 {
     namespace py = pybind11;
 
@@ -43,9 +36,7 @@ inline void network_balancing(pybind11::module& m)
 
         ;
 
-    detail::network_balancing<py_logic_network>(m);
+    detail::network_balancing_impl<py_logic_network>(m);
 }
 
 }  // namespace pyfiction
-
-#endif  // PYFICTION_NETWORK_BALANCING_HPP

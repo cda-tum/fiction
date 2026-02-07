@@ -1,10 +1,3 @@
-//
-// Created by marcel on 10.01.23.
-//
-
-#ifndef PYFICTION_FANOUT_SUBSTITUTION_HPP
-#define PYFICTION_FANOUT_SUBSTITUTION_HPP
-
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
@@ -12,6 +5,7 @@
 
 #include <pybind11/cast.h>
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
 namespace pyfiction
 {
@@ -20,7 +14,7 @@ namespace detail
 {
 
 template <typename Ntk>
-void fanout_substitution(pybind11::module& m)
+void fanout_substitution_impl(pybind11::module& m)
 {
     namespace py = pybind11;
 
@@ -33,7 +27,7 @@ void fanout_substitution(pybind11::module& m)
 
 }  // namespace detail
 
-inline void fanout_substitution(pybind11::module& m)
+void fanout_substitution(pybind11::module& m)
 {
     namespace py = pybind11;
 
@@ -61,9 +55,7 @@ inline void fanout_substitution(pybind11::module& m)
 
         ;
 
-    detail::fanout_substitution<py_logic_network>(m);
+    detail::fanout_substitution_impl<py_logic_network>(m);
 }
 
 }  // namespace pyfiction
-
-#endif  // PYFICTION_FANOUT_SUBSTITUTION_HPP

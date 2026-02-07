@@ -8,9 +8,6 @@
 #pragma GCC diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
 
 #include "pyfiction/algorithms/iter/bdl_input_iterator.hpp"
-#include "pyfiction/algorithms/network_transformation/fanout_substitution.hpp"
-#include "pyfiction/algorithms/network_transformation/network_balancing.hpp"
-#include "pyfiction/algorithms/network_transformation/technology_mapping.hpp"
 #include "pyfiction/algorithms/physical_design/apply_gate_library.hpp"
 #include "pyfiction/algorithms/physical_design/color_routing.hpp"
 #include "pyfiction/algorithms/physical_design/design_sidb_gates.hpp"
@@ -155,19 +152,13 @@ PYBIND11_MODULE(pyfiction, m, pybind11::mod_gil_not_used())
     pyfiction::determine_displacement_robustness_domain(m);
     pyfiction::compute_operational_ratio(m);
     /**
+     * Algorithms
+     */
+    pyfiction::register_algorithms(m);
+    /**
      * Algorithms: Iterators
      */
     pyfiction::bdl_input_iterator(m);
-    /**
-     * Algorithms: Network Transformation
-     */
-    pyfiction::fanout_substitution(m);
-    pyfiction::network_balancing(m);
-    pyfiction::technology_mapping(m);
-    /**
-     * Algorithms: Path Finding
-     */
-    pyfiction::register_algorithms(m);
     /**
      * Algorithms: Physical Design
      */
