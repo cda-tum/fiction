@@ -1,33 +1,46 @@
-//
-// Created by simon on 22.09.23.
-//
-
-#ifndef PYFICTION_POST_LAYOUT_OPTIMIZATION_HPP
-#define PYFICTION_POST_LAYOUT_OPTIMIZATION_HPP
-
 #include "pyfiction/documentation.hpp"
+#include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/physical_design/post_layout_optimization.hpp>
-#include <fiction/types.hpp>
 
 #include <pybind11/chrono.h>
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
+
+#include <sstream>
 
 namespace pyfiction
 {
 
-/**
- * Post-layout optimization.
- */
-inline void post_layout_optimization(pybind11::module& m)
+void post_layout_optimization(pybind11::module& m)
 {
     namespace py = pybind11;
 
     py::class_<fiction::post_layout_optimization_params>(m, "post_layout_optimization_params",
                                                          DOC(fiction_post_layout_optimization_params))
         .def(py::init<>())
-        .def_readwrite("max_gate_relocations", &fiction::post_layout_optimization_params::max_gate_relocations,
-                       DOC(fiction_post_layout_optimization_params_max_gate_relocations))
+        .def_property(
+            "max_gate_relocations",
+            [](const fiction::post_layout_optimization_params& p) -> py::object
+            {
+                if (p.max_gate_relocations.has_value())
+                {
+                    return py::cast(p.max_gate_relocations.value());
+                }
+                return py::none();
+            },
+            [](fiction::post_layout_optimization_params& p, const py::object& value)
+            {
+                if (value.is_none())
+                {
+                    p.max_gate_relocations = std::nullopt;
+                }
+                else
+                {
+                    p.max_gate_relocations = py::cast<uint64_t>(value);
+                }
+            },
+            DOC(fiction_post_layout_optimization_params_max_gate_relocations))
         .def_readwrite("optimize_pos_only", &fiction::post_layout_optimization_params::optimize_pos_only,
                        DOC(fiction_post_layout_optimization_params_optimize_pos_only))
         .def_readwrite("planar_optimization", &fiction::post_layout_optimization_params::planar_optimization,
@@ -66,9 +79,7 @@ inline void post_layout_optimization(pybind11::module& m)
         .def_readonly("num_crossings_before", &fiction::post_layout_optimization_stats::num_crossings_before,
                       DOC(fiction_post_layout_optimization_stats_num_crossings_before))
         .def_readonly("num_crossings_after", &fiction::post_layout_optimization_stats::num_crossings_after,
-                      DOC(fiction_post_layout_optimization_stats_num_crossings_after))
-
-        ;
+                      DOC(fiction_post_layout_optimization_stats_num_crossings_after));
 
     m.def("post_layout_optimization", &fiction::post_layout_optimization<py_cartesian_gate_layout>, py::arg("layout"),
           py::arg("parameters") = fiction::post_layout_optimization_params{}, py::arg("statistics") = nullptr,
@@ -76,5 +87,3 @@ inline void post_layout_optimization(pybind11::module& m)
 }
 
 }  // namespace pyfiction
-
-#endif  // PYFICTION_POST_LAYOUT_OPTIMIZATION_HPP

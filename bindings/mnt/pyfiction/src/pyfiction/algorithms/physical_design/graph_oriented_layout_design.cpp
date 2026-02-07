@@ -1,16 +1,10 @@
-//
-// Created by simon on 13.06.24.
-//
-
-#ifndef PYFICTION_GRAPH_ORIENTED_LAYOUT_DESIGN_HPP
-#define PYFICTION_GRAPH_ORIENTED_LAYOUT_DESIGN_HPP
-
 #include "pyfiction/documentation.hpp"
+#include "pyfiction/networks/logic_networks.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/physical_design/graph_oriented_layout_design.hpp>
 
-#include <pybind11/functional.h>  // Needed for std::function bindings
+#include <pybind11/functional.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
@@ -19,12 +13,8 @@
 namespace pyfiction
 {
 
-/**
- * Graph-oriented layout design.
- */
-inline void graph_oriented_layout_design(pybind11::module& m)
+void graph_oriented_layout_design(pybind11::module& m)
 {
-    namespace py = pybind11;
     namespace py = pybind11;
 
     py::enum_<fiction::graph_oriented_layout_design_params::effort_mode>(
@@ -36,9 +26,7 @@ inline void graph_oriented_layout_design(pybind11::module& m)
         .value("HIGHEST_EFFORT", fiction::graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT,
                DOC(fiction_graph_oriented_layout_design_params_effort_mode_HIGHEST_EFFORT))
         .value("MAXIMUM_EFFORT", fiction::graph_oriented_layout_design_params::effort_mode::MAXIMUM_EFFORT,
-               DOC(fiction_graph_oriented_layout_design_params_effort_mode_MAXIMUM_EFFORT))
-
-        ;
+               DOC(fiction_graph_oriented_layout_design_params_effort_mode_MAXIMUM_EFFORT));
 
     py::enum_<fiction::graph_oriented_layout_design_params::cost_objective>(
         m, "gold_cost_objective", DOC(fiction_graph_oriented_layout_design_params_cost_objective))
@@ -51,9 +39,7 @@ inline void graph_oriented_layout_design(pybind11::module& m)
         .value("ACP", fiction::graph_oriented_layout_design_params::cost_objective::ACP,
                DOC(fiction_graph_oriented_layout_design_params_cost_objective_ACP))
         .value("CUSTOM", fiction::graph_oriented_layout_design_params::cost_objective::CUSTOM,
-               DOC(fiction_graph_oriented_layout_design_params_cost_objective_CUSTOM))
-
-        ;
+               DOC(fiction_graph_oriented_layout_design_params_cost_objective_CUSTOM));
 
     py::class_<fiction::graph_oriented_layout_design_params>(m, "graph_oriented_layout_design_params",
                                                              DOC(fiction_graph_oriented_layout_design_params))
@@ -115,5 +101,3 @@ inline void graph_oriented_layout_design(pybind11::module& m)
 }
 
 }  // namespace pyfiction
-
-#endif  // PYFICTION_GRAPH_ORIENTED_LAYOUT_DESIGN_HPP

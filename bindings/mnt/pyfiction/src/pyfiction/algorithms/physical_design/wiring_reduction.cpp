@@ -1,27 +1,18 @@
-//
-// Created by simon on 23.04.24.
-//
-
-#ifndef PYFICTION_WIRING_REDUCTION_HPP
-#define PYFICTION_WIRING_REDUCTION_HPP
-
 #include "pyfiction/documentation.hpp"
+#include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/physical_design/wiring_reduction.hpp>
-#include <fiction/types.hpp>
 
 #include <pybind11/chrono.h>
 #include <pybind11/pybind11.h>
 
+#include <sstream>
+
 namespace pyfiction
 {
 
-/**
- * Wiring reduction.
- */
-inline void wiring_reduction(pybind11::module& m)
+void wiring_reduction(pybind11::module& m)
 {
-    namespace py = pybind11;
     namespace py = pybind11;
 
     py::class_<fiction::wiring_reduction_params>(m, "wiring_reduction_params", DOC(fiction_wiring_reduction_params))
@@ -66,5 +57,3 @@ inline void wiring_reduction(pybind11::module& m)
 }
 
 }  // namespace pyfiction
-
-#endif  // PYFICTION_POST_LAYOUT_OPTIMIZATION_HPP

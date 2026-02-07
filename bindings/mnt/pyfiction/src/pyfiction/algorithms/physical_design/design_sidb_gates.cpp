@@ -1,16 +1,13 @@
-//
-// Created by marcel on 15.11.23.
-//
-
-#ifndef PYFICTION_DESIGN_SIDB_GATES_HPP
-#define PYFICTION_DESIGN_SIDB_GATES_HPP
-
 #include "pyfiction/documentation.hpp"
+#include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/physical_design/design_sidb_gates.hpp>
 #include <fiction/types.hpp>
 
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
+
+#include <sstream>
 
 namespace pyfiction
 {
@@ -30,7 +27,7 @@ void design_sidb_gates(pybind11::module& m)
 
 }  // namespace detail
 
-inline void design_sidb_gates(pybind11::module& m)
+void design_sidb_gates(pybind11::module& m)
 {
     namespace py = pybind11;
 
@@ -60,9 +57,7 @@ inline void design_sidb_gates(pybind11::module& m)
                DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode_RANDOM))
         .value("PRUNING_ONLY",
                fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::design_sidb_gates_mode::PRUNING_ONLY,
-               DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode_PRUNING_ONLY))
-
-        ;
+               DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode_PRUNING_ONLY));
     /**
      * Termination condition selector type.
      */
@@ -73,9 +68,7 @@ inline void design_sidb_gates(pybind11::module& m)
             fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::termination_condition::AFTER_FIRST_SOLUTION)
         .value("ALL_COMBINATIONS_ENUMERATED",
                fiction::design_sidb_gates_params<
-                   fiction::offset::ucoord_t>::termination_condition::ALL_COMBINATIONS_ENUMERATED)
-
-        ;
+                   fiction::offset::ucoord_t>::termination_condition::ALL_COMBINATIONS_ENUMERATED);
 
     /**
      * Parameters.
@@ -102,5 +95,3 @@ inline void design_sidb_gates(pybind11::module& m)
 }
 
 }  // namespace pyfiction
-
-#endif  // PYFICTION_DESIGN_SIDB_GATES_HPP

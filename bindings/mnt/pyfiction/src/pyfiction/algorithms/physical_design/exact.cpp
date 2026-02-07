@@ -1,13 +1,9 @@
-//
-// Created by marcel on 08.06.22.
-//
 
-#ifndef PYFICTION_EXACT_HPP
-#define PYFICTION_EXACT_HPP
 
 #if (FICTION_Z3_SOLVER)
 
 #include "pyfiction/documentation.hpp"
+#include "pyfiction/networks/logic_networks.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/physical_design/exact.hpp>
@@ -20,20 +16,14 @@
 namespace pyfiction
 {
 
-/**
- * SMT-based exact physical design.
- */
-inline void exact(pybind11::module& m)
+void exact(pybind11::module& m)
 {
-    namespace py = pybind11;
     namespace py = pybind11;
 
     py::enum_<fiction::technology_constraints>(m, "technology_constraints", DOC(fiction_technology_constraints))
         .value("NONE", fiction::technology_constraints::NONE, DOC(fiction_technology_constraints_NONE))
         .value("TOPOLINANO", fiction::technology_constraints::TOPOLINANO,
-               DOC(fiction_technology_constraints_TOPOLINANO))
-
-        ;
+               DOC(fiction_technology_constraints_TOPOLINANO));
 
     py::class_<fiction::exact_physical_design_params>(m, "exact_params", DOC(fiction_exact_physical_design_params))
         .def(py::init<>())
@@ -62,9 +52,7 @@ inline void exact(pybind11::module& m)
         .def_readwrite("timeout", &fiction::exact_physical_design_params::timeout,
                        DOC(fiction_exact_physical_design_params_timeout))
         .def_readwrite("technology_specifics", &fiction::exact_physical_design_params::technology_specifics,
-                       DOC(fiction_exact_physical_design_params_technology_specifics))
-
-        ;
+                       DOC(fiction_exact_physical_design_params_technology_specifics));
 
     py::class_<fiction::exact_physical_design_stats>(m, "exact_stats", DOC(fiction_exact_physical_design_stats))
         .def(py::init<>())
@@ -89,9 +77,7 @@ inline void exact(pybind11::module& m)
         .def_readonly("num_crossings", &fiction::exact_physical_design_stats::num_crossings,
                       DOC(fiction_exact_physical_design_stats_num_crossings))
         .def_readonly("num_aspect_ratios", &fiction::exact_physical_design_stats::num_aspect_ratios,
-                      DOC(fiction_exact_physical_design_stats_num_aspect_ratios))
-
-        ;
+                      DOC(fiction_exact_physical_design_stats_num_aspect_ratios));
 
     m.def("exact_cartesian", &fiction::exact<py_cartesian_gate_layout, py_logic_network>, py::arg("network"),
           py::arg("parameters") = fiction::exact_physical_design_params{}, py::arg("statistics") = nullptr,
@@ -99,7 +85,7 @@ inline void exact(pybind11::module& m)
 
     m.def("exact_shifted_cartesian", &fiction::exact<py_shifted_cartesian_gate_layout, py_logic_network>,
           py::arg("network"), py::arg("parameters") = fiction::exact_physical_design_params{},
-          py::arg("statistics") = nullptr);
+          py::arg("statistics") = nullptr, DOC(fiction_exact));
 
     m.def("exact_hexagonal", &fiction::exact<py_hexagonal_gate_layout, py_logic_network>, py::arg("network"),
           py::arg("parameters") = fiction::exact_physical_design_params{}, py::arg("statistics") = nullptr,
@@ -110,18 +96,11 @@ inline void exact(pybind11::module& m)
 
 #else  // FICTION_Z3_SOLVER
 
-#include <pybind11/pybind11.h>
-
 namespace pyfiction
 {
 
-/**
- * Disable SMT-based exact physical design.
- */
-inline void exact([[maybe_unused]] pybind11::module& m) {}
+void exact([[maybe_unused]] pybind11::module& m) {}
 
 }  // namespace pyfiction
 
 #endif  // FICTION_Z3_SOLVER
-
-#endif  // PYFICTION_EXACT_HPP

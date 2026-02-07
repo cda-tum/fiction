@@ -1,23 +1,18 @@
-//
-// Created by simon on 22.09.23.
-//
-
-#ifndef PYFICTION_HEXAGONALIZATION_HPP
-#define PYFICTION_HEXAGONALIZATION_HPP
-
 #include "pyfiction/documentation.hpp"
+#include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/physical_design/hexagonalization.hpp>
 
 #include <pybind11/chrono.h>
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
 #include <sstream>
 
 namespace pyfiction
 {
 
-inline void hexagonalization(pybind11::module& m)
+void hexagonalization(pybind11::module& m)
 {
     namespace py = pybind11;
 
@@ -31,9 +26,7 @@ inline void hexagonalization(pybind11::module& m)
         .value("EXTEND", fiction::hexagonalization_params::io_pin_extension_mode::EXTEND,
                DOC(fiction_hexagonalization_params_io_pin_extension_mode_EXTEND))
         .value("EXTEND_PLANAR", fiction::hexagonalization_params::io_pin_extension_mode::EXTEND_PLANAR,
-               DOC(fiction_hexagonalization_params_io_pin_extension_mode_EXTEND_PLANAR))
-
-        ;
+               DOC(fiction_hexagonalization_params_io_pin_extension_mode_EXTEND_PLANAR));
 
     py::class_<fiction::hexagonalization_params>(m, "hexagonalization_params", DOC(fiction_hexagonalization_params))
         .def(py::init<>())
@@ -68,5 +61,3 @@ inline void hexagonalization(pybind11::module& m)
 }
 
 }  // namespace pyfiction
-
-#endif  // PYFICTION_HEXAGONALIZATION_HPP

@@ -1,11 +1,5 @@
-//
-// Created by marcel on 08.06.22.
-//
-
-#ifndef PYFICTION_ORTHOGONAL_HPP
-#define PYFICTION_ORTHOGONAL_HPP
-
 #include "pyfiction/documentation.hpp"
+#include "pyfiction/networks/logic_networks.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/physical_design/orthogonal.hpp>
@@ -18,19 +12,13 @@
 namespace pyfiction
 {
 
-/**
- * OGD-based physical design.
- */
-inline void orthogonal(pybind11::module& m)
+void orthogonal(pybind11::module& m)
 {
-    namespace py = pybind11;
     namespace py = pybind11;
 
     py::class_<fiction::orthogonal_physical_design_params>(m, "orthogonal_params",
                                                            DOC(fiction_orthogonal_physical_design_params))
-        .def(py::init<>())
-
-        ;
+        .def(py::init<>());
 
     py::class_<fiction::orthogonal_physical_design_stats>(m, "orthogonal_stats",
                                                           DOC(fiction_orthogonal_physical_design_stats))
@@ -55,9 +43,7 @@ inline void orthogonal(pybind11::module& m)
         .def_readonly("num_wires", &fiction::orthogonal_physical_design_stats::num_wires,
                       DOC(fiction_orthogonal_physical_design_stats_num_wires))
         .def_readonly("num_crossings", &fiction::orthogonal_physical_design_stats::num_crossings,
-                      DOC(fiction_orthogonal_physical_design_stats_num_crossings))
-
-        ;
+                      DOC(fiction_orthogonal_physical_design_stats_num_crossings));
 
     m.def("orthogonal", &fiction::orthogonal<py_cartesian_gate_layout, py_logic_network>, py::arg("network"),
           py::arg("parameters") = fiction::orthogonal_physical_design_params{}, py::arg("statistics") = nullptr,
@@ -65,5 +51,3 @@ inline void orthogonal(pybind11::module& m)
 }
 
 }  // namespace pyfiction
-
-#endif  // PYFICTION_ORTHOGONAL_HPP

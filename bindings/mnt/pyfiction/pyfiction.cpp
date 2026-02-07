@@ -7,15 +7,6 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
 
-#include "pyfiction/algorithms/physical_design/apply_gate_library.hpp"
-#include "pyfiction/algorithms/physical_design/color_routing.hpp"
-#include "pyfiction/algorithms/physical_design/design_sidb_gates.hpp"
-#include "pyfiction/algorithms/physical_design/exact.hpp"
-#include "pyfiction/algorithms/physical_design/graph_oriented_layout_design.hpp"
-#include "pyfiction/algorithms/physical_design/hexagonalization.hpp"
-#include "pyfiction/algorithms/physical_design/orthogonal.hpp"
-#include "pyfiction/algorithms/physical_design/post_layout_optimization.hpp"
-#include "pyfiction/algorithms/physical_design/wiring_reduction.hpp"
 #include "pyfiction/algorithms/simulation/sidb/random_sidb_layout_generator.hpp"
 #include "pyfiction/algorithms/simulation/sidb/time_to_solution.hpp"
 #include "pyfiction/inout/read_fgl_layout.hpp"
@@ -92,18 +83,6 @@ PYBIND11_MODULE(pyfiction, m, pybind11::mod_gil_not_used())
     pyfiction::gate_level_layouts(m);
     pyfiction::cell_level_layouts(m);
     pyfiction::obstruction_layouts(m);
-    /**
-     * Algorithms: Physical Design
-     */
-    pyfiction::exact(m);
-    pyfiction::orthogonal(m);
-    pyfiction::graph_oriented_layout_design(m);
-    pyfiction::apply_gate_library(m);
-    pyfiction::color_routing(m);
-    pyfiction::hexagonalization(m);
-    pyfiction::post_layout_optimization(m);
-    pyfiction::wiring_reduction(m);
-    pyfiction::design_sidb_gates(m);
     /**
      * Algorithms: Simulation
      */

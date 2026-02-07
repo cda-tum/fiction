@@ -1,19 +1,10 @@
-//
-// Created by marcel on 20.06.22.
-//
-
-#ifndef PYFICTION_APPLY_GATE_LIBRARY_HPP
-#define PYFICTION_APPLY_GATE_LIBRARY_HPP
-
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/physical_design/apply_gate_library.hpp>
-#include <fiction/technology/fcn_gate_library.hpp>
 #include <fiction/technology/inml_topolinano_library.hpp>
 #include <fiction/technology/qca_one_library.hpp>
 #include <fiction/technology/sidb_bestagon_library.hpp>
-#include <fiction/types.hpp>
 
 #include <fmt/format.h>
 #include <pybind11/pybind11.h>
@@ -41,7 +32,7 @@ void apply_fcn_gate_library(pybind11::module& m, const std::string& lib_name)
 
 }  // namespace detail
 
-inline void apply_gate_library(pybind11::module& m)
+void apply_gate_library(pybind11::module& m)
 {
     detail::apply_fcn_gate_library<fiction::qca_one_library, py_cartesian_gate_layout>(m, "qca_one");
     detail::apply_fcn_gate_library<fiction::inml_topolinano_library, py_shifted_cartesian_gate_layout>(m, "topolinano");
@@ -49,5 +40,3 @@ inline void apply_gate_library(pybind11::module& m)
 }
 
 }  // namespace pyfiction
-
-#endif  // PYFICTION_APPLY_GATE_LIBRARY_HPP
