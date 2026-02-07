@@ -1,10 +1,3 @@
-//
-// Created by marcel on 15.12.22.
-//
-
-#ifndef PYFICTION_K_SHORTEST_PATHS_HPP
-#define PYFICTION_K_SHORTEST_PATHS_HPP
-
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
@@ -25,7 +18,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void yen_k_shortest_paths(pybind11::module& m)
+void yen_k_shortest_paths_impl(pybind11::module& m)
 {
     namespace py = pybind11;
 
@@ -53,7 +46,7 @@ void yen_k_shortest_paths(pybind11::module& m)
 
 }  // namespace detail
 
-inline void yen_k_shortest_paths(pybind11::module& m)
+void yen_k_shortest_paths(pybind11::module& m)
 {
     namespace py = pybind11;
 
@@ -67,20 +60,18 @@ inline void yen_k_shortest_paths(pybind11::module& m)
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::yen_k_shortest_paths<py_cartesian_obstruction_layout>(m);
-    detail::yen_k_shortest_paths<py_cartesian_gate_layout>(m);
-    detail::yen_k_shortest_paths<py_cartesian_clocked_layout>(m);
-    detail::yen_k_shortest_paths<py_cartesian_layout>(m);
-    detail::yen_k_shortest_paths<py_shifted_cartesian_obstruction_layout>(m);
-    detail::yen_k_shortest_paths<py_shifted_cartesian_gate_layout>(m);
-    detail::yen_k_shortest_paths<py_shifted_cartesian_clocked_layout>(m);
-    detail::yen_k_shortest_paths<py_shifted_cartesian_layout>(m);
-    detail::yen_k_shortest_paths<py_hexagonal_obstruction_layout>(m);
-    detail::yen_k_shortest_paths<py_hexagonal_gate_layout>(m);
-    detail::yen_k_shortest_paths<py_hexagonal_clocked_layout>(m);
-    detail::yen_k_shortest_paths<py_hexagonal_layout>(m);
+    detail::yen_k_shortest_paths_impl<py_cartesian_obstruction_layout>(m);
+    detail::yen_k_shortest_paths_impl<py_cartesian_gate_layout>(m);
+    detail::yen_k_shortest_paths_impl<py_cartesian_clocked_layout>(m);
+    detail::yen_k_shortest_paths_impl<py_cartesian_layout>(m);
+    detail::yen_k_shortest_paths_impl<py_shifted_cartesian_obstruction_layout>(m);
+    detail::yen_k_shortest_paths_impl<py_shifted_cartesian_gate_layout>(m);
+    detail::yen_k_shortest_paths_impl<py_shifted_cartesian_clocked_layout>(m);
+    detail::yen_k_shortest_paths_impl<py_shifted_cartesian_layout>(m);
+    detail::yen_k_shortest_paths_impl<py_hexagonal_obstruction_layout>(m);
+    detail::yen_k_shortest_paths_impl<py_hexagonal_gate_layout>(m);
+    detail::yen_k_shortest_paths_impl<py_hexagonal_clocked_layout>(m);
+    detail::yen_k_shortest_paths_impl<py_hexagonal_layout>(m);
 }
 
 }  // namespace pyfiction
-
-#endif  // PYFICTION_K_SHORTEST_PATHS_HPP

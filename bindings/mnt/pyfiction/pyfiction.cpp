@@ -11,10 +11,6 @@
 #include "pyfiction/algorithms/network_transformation/fanout_substitution.hpp"
 #include "pyfiction/algorithms/network_transformation/network_balancing.hpp"
 #include "pyfiction/algorithms/network_transformation/technology_mapping.hpp"
-#include "pyfiction/algorithms/path_finding/a_star.hpp"
-#include "pyfiction/algorithms/path_finding/distance.hpp"
-#include "pyfiction/algorithms/path_finding/enumerate_all_paths.hpp"
-#include "pyfiction/algorithms/path_finding/k_shortest_paths.hpp"
 #include "pyfiction/algorithms/physical_design/apply_gate_library.hpp"
 #include "pyfiction/algorithms/physical_design/color_routing.hpp"
 #include "pyfiction/algorithms/physical_design/design_sidb_gates.hpp"
@@ -96,6 +92,11 @@
 
 #include <pybind11/pybind11.h>
 
+namespace pyfiction
+{
+void register_algorithms(pybind11::module& m);
+}
+
 PYBIND11_MODULE(pyfiction, m, pybind11::mod_gil_not_used())
 {
     // docstring
@@ -166,10 +167,7 @@ PYBIND11_MODULE(pyfiction, m, pybind11::mod_gil_not_used())
     /**
      * Algorithms: Path Finding
      */
-    pyfiction::distance(m);
-    pyfiction::a_star(m);
-    pyfiction::yen_k_shortest_paths(m);
-    pyfiction::enumerate_all_paths(m);
+    pyfiction::register_algorithms(m);
     /**
      * Algorithms: Physical Design
      */

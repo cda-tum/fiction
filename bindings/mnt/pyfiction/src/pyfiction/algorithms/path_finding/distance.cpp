@@ -1,10 +1,3 @@
-//
-// Created by marcel on 15.12.22.
-//
-
-#ifndef PYFICTION_DISTANCE_HPP
-#define PYFICTION_DISTANCE_HPP
-
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
@@ -19,7 +12,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void distance(pybind11::module& m)
+void distance_impl(pybind11::module& m)
 {
     namespace py = pybind11;
 
@@ -37,13 +30,11 @@ void distance(pybind11::module& m)
 
 }  // namespace detail
 
-inline void distance(pybind11::module& m)
+void distance(pybind11::module& m)
 {
-    detail::distance<py_cartesian_layout>(m);
-    detail::distance<py_shifted_cartesian_layout>(m);
-    detail::distance<py_hexagonal_layout>(m);
+    detail::distance_impl<py_cartesian_layout>(m);
+    detail::distance_impl<py_shifted_cartesian_layout>(m);
+    detail::distance_impl<py_hexagonal_layout>(m);
 }
 
 }  // namespace pyfiction
-
-#endif  // PYFICTION_DISTANCE_HPP
