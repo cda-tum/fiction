@@ -14,7 +14,7 @@ namespace detail
 template <typename Lyt>
 void distance_impl(pybind11::module& m)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     m.def("manhattan_distance", &fiction::manhattan_distance<Lyt>, py::arg("layout"), py::arg("source"),
           py::arg("target"), DOC(fiction_manhattan_distance));

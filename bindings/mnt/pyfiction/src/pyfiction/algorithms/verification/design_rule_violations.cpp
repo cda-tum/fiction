@@ -6,7 +6,9 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
+#include <cstddef>
 #include <sstream>
+#include <utility>
 
 namespace pyfiction
 {
@@ -17,7 +19,7 @@ namespace detail
 template <typename Lyt>
 void gate_level_drvs_impl(pybind11::module& m)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     m.def(
         "gate_level_drvs",

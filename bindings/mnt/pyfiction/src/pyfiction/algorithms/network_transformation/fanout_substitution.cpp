@@ -16,7 +16,7 @@ namespace detail
 template <typename Ntk>
 void fanout_substitution_impl(pybind11::module& m)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     m.def("fanout_substitution", &fiction::fanout_substitution<py_logic_network, Ntk>, py::arg("network"),
           py::arg("params") = fiction::fanout_substitution_params{}, DOC(fiction_fanout_substitution));

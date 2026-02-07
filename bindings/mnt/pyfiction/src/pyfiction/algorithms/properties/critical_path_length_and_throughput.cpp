@@ -6,6 +6,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
+#include <cstdint>
 #include <utility>
 
 namespace pyfiction
@@ -17,7 +18,7 @@ namespace detail
 template <typename Lyt>
 void critical_path_length_and_throughput_impl(pybind11::module& m)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     m.def(
         "critical_path_length_and_throughput",

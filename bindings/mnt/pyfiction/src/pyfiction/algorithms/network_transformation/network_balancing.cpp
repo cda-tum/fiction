@@ -14,7 +14,7 @@ namespace detail
 template <typename Ntk>
 void network_balancing_impl(pybind11::module& m)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     m.def("network_balancing", &fiction::network_balancing<py_logic_network, Ntk>, py::arg("network"),
           py::arg("params") = fiction::network_balancing_params{}, DOC(fiction_network_balancing));

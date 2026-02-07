@@ -1,5 +1,4 @@
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/physical_design/post_layout_optimization.hpp>
 

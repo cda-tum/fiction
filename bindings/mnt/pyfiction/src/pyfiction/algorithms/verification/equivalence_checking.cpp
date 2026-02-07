@@ -15,7 +15,7 @@ namespace detail
 template <typename Spec, typename Impl>
 void equivalence_checking_impl(pybind11::module& m)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     m.def(
         "equivalence_checking",

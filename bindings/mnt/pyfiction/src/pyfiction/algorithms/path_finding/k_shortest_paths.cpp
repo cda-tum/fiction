@@ -20,7 +20,7 @@ namespace detail
 template <typename Lyt>
 void yen_k_shortest_paths_impl(pybind11::module& m)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     m.def(
         "yen_k_shortest_paths",
