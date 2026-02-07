@@ -1,16 +1,12 @@
-//
-// Created by marcel on 15.12.22.
-//
-
-#ifndef PYFICTION_DESIGN_RULE_VIOLATIONS_HPP
-#define PYFICTION_DESIGN_RULE_VIOLATIONS_HPP
-
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/verification/design_rule_violations.hpp>
 
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
+
+#include <sstream>
 
 namespace pyfiction
 {
@@ -19,7 +15,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void gate_level_drvs(pybind11::module& m)
+void gate_level_drvs_impl(pybind11::module& m)
 {
     namespace py = pybind11;
 
@@ -48,7 +44,7 @@ void gate_level_drvs(pybind11::module& m)
 
 }  // namespace detail
 
-inline void design_rule_violations(pybind11::module& m)
+void design_rule_violations(pybind11::module& m)
 {
     namespace py = pybind11;
 
@@ -75,11 +71,9 @@ inline void design_rule_violations(pybind11::module& m)
 
         ;
 
-    detail::gate_level_drvs<py_cartesian_gate_layout>(m);
-    detail::gate_level_drvs<py_shifted_cartesian_gate_layout>(m);
-    detail::gate_level_drvs<py_hexagonal_gate_layout>(m);
+    detail::gate_level_drvs_impl<py_cartesian_gate_layout>(m);
+    detail::gate_level_drvs_impl<py_shifted_cartesian_gate_layout>(m);
+    detail::gate_level_drvs_impl<py_hexagonal_gate_layout>(m);
 }
 
 }  // namespace pyfiction
-
-#endif  // PYFICTION_DESIGN_RULE_VIOLATIONS_HPP

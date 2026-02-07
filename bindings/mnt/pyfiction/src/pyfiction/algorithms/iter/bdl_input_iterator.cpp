@@ -1,10 +1,3 @@
-//
-// Created by marcel on 19.05.24.
-//
-
-#ifndef PYFICTION_BDL_INPUT_ITERATOR_HPP
-#define PYFICTION_BDL_INPUT_ITERATOR_HPP
-
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
@@ -24,7 +17,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void bdl_input_iterator(pybind11::module& m, const std::string& lattice)
+void bdl_input_iterator_impl(pybind11::module& m, const std::string& lattice)
 {
     namespace py = pybind11;
 
@@ -99,7 +92,7 @@ void bdl_input_iterator(pybind11::module& m, const std::string& lattice)
 
 }  // namespace detail
 
-inline void bdl_input_iterator(pybind11::module& m)
+void bdl_input_iterator(pybind11::module& m)
 {
     namespace py = pybind11;
 
@@ -126,10 +119,8 @@ inline void bdl_input_iterator(pybind11::module& m)
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::bdl_input_iterator<py_sidb_100_lattice>(m, "100");
-    detail::bdl_input_iterator<py_sidb_111_lattice>(m, "111");
+    detail::bdl_input_iterator_impl<py_sidb_100_lattice>(m, "100");
+    detail::bdl_input_iterator_impl<py_sidb_111_lattice>(m, "111");
 }
 
 }  // namespace pyfiction
-
-#endif  // PYFICTION_BDL_INPUT_ITERATOR_HPP

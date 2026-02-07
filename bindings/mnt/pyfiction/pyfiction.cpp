@@ -7,7 +7,6 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
 
-#include "pyfiction/algorithms/iter/bdl_input_iterator.hpp"
 #include "pyfiction/algorithms/physical_design/apply_gate_library.hpp"
 #include "pyfiction/algorithms/physical_design/color_routing.hpp"
 #include "pyfiction/algorithms/physical_design/design_sidb_gates.hpp"
@@ -17,7 +16,6 @@
 #include "pyfiction/algorithms/physical_design/orthogonal.hpp"
 #include "pyfiction/algorithms/physical_design/post_layout_optimization.hpp"
 #include "pyfiction/algorithms/physical_design/wiring_reduction.hpp"
-#include "pyfiction/algorithms/properties/critical_path_length_and_throughput.hpp"
 #include "pyfiction/algorithms/simulation/logic_simulation.hpp"
 #include "pyfiction/algorithms/simulation/sidb/calculate_energy_and_state_type.hpp"
 #include "pyfiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp"
@@ -46,8 +44,6 @@
 #include "pyfiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "pyfiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "pyfiction/algorithms/simulation/sidb/time_to_solution.hpp"
-#include "pyfiction/algorithms/verification/design_rule_violations.hpp"
-#include "pyfiction/algorithms/verification/equivalence_checking.hpp"
 #include "pyfiction/inout/read_fgl_layout.hpp"
 #include "pyfiction/inout/read_fqca_layout.hpp"
 #include "pyfiction/inout/read_sqd_layout.hpp"
@@ -156,10 +152,6 @@ PYBIND11_MODULE(pyfiction, m, pybind11::mod_gil_not_used())
      */
     pyfiction::register_algorithms(m);
     /**
-     * Algorithms: Iterators
-     */
-    pyfiction::bdl_input_iterator(m);
-    /**
      * Algorithms: Physical Design
      */
     pyfiction::exact(m);
@@ -171,15 +163,6 @@ PYBIND11_MODULE(pyfiction, m, pybind11::mod_gil_not_used())
     pyfiction::post_layout_optimization(m);
     pyfiction::wiring_reduction(m);
     pyfiction::design_sidb_gates(m);
-    /**
-     * Algorithms: Properties
-     */
-    pyfiction::critical_path_length_and_throughput(m);
-    /*
-     * Algorithms: Verification
-     */
-    pyfiction::equivalence_checking(m);
-    pyfiction::design_rule_violations(m);
     /**
      * Technology
      */
