@@ -6,7 +6,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include <string>
+#include <sstream>
 
 namespace pyfiction
 {
@@ -15,9 +15,9 @@ namespace detail
 {
 
 template <typename Lyt>
-void critical_temperature_impl(pybind11::module& m)
+void critical_temperature_impl(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     m.def("critical_temperature_gate_based", &fiction::critical_temperature_gate_based<Lyt, py_tt>, py::arg("lyt"),
           py::arg("spec"), py::arg("params") = fiction::critical_temperature_params{}, py::arg("stats") = nullptr,
@@ -30,7 +30,7 @@ void critical_temperature_impl(pybind11::module& m)
 
 }  // namespace detail
 
-void critical_temperature(pybind11::module& m)
+void critical_temperature(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
     namespace py = pybind11;
 

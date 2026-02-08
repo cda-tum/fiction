@@ -1,4 +1,3 @@
-#include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/utils/name_utils.hpp>
@@ -9,6 +8,9 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
+#include <cassert>
+#include <iostream>
+#include <new>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -20,9 +22,9 @@ namespace detail
 {
 
 template <typename NtkOrLyt>
-void logic_simulation_impl(pybind11::module& m, const std::string& type_name)
+void logic_simulation_impl(pybind11::module& m, const std::string& type_name)  // NOLINT(misc-use-internal-linkage)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     m.def(
         "simulate",
@@ -96,7 +98,7 @@ void logic_simulation_impl(pybind11::module& m, const std::string& type_name)
 
 }  // namespace detail
 
-void logic_simulation(pybind11::module& m)
+void logic_simulation(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
     detail::logic_simulation_impl<py_logic_network>(m, "network");
     detail::logic_simulation_impl<py_cartesian_gate_layout>(m, "layout");

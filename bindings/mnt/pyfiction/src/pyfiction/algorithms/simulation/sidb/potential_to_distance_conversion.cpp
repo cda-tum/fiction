@@ -1,5 +1,4 @@
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/simulation/sidb/potential_to_distance_conversion.hpp>
 
@@ -9,9 +8,9 @@
 namespace pyfiction
 {
 
-void potential_to_distance_conversion(pybind11::module& m)
+void potential_to_distance_conversion(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     m.def("potential_to_distance_conversion", &fiction::potential_to_distance_conversion, py::arg("potential"),
           py::arg("params"), py::arg("precision"), DOC(fiction_potential_to_distance_conversion));

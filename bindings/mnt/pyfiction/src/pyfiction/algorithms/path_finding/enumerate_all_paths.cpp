@@ -17,7 +17,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void enumerate_all_paths_impl(pybind11::module& m)
+void enumerate_all_paths_impl(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
@@ -45,7 +45,7 @@ void enumerate_all_paths_impl(pybind11::module& m)
 
 }  // namespace detail
 
-void enumerate_all_paths(pybind11::module& m)
+void enumerate_all_paths(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
     namespace py = pybind11;
 

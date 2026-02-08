@@ -17,9 +17,9 @@ namespace detail
 {
 
 template <typename Lyt>
-void is_operational_impl(pybind11::module& m)
+void is_operational_impl(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     m.def("is_operational",
           py::overload_cast<const Lyt&, const std::vector<py_tt>&, const fiction::is_operational_params&>(
@@ -78,9 +78,9 @@ void is_operational_impl(pybind11::module& m)
 
 }  // namespace detail
 
-void is_operational(pybind11::module& m)
+void is_operational(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     py::enum_<fiction::operational_status>(m, "operational_status", DOC(fiction_operational_status))
         .value("OPERATIONAL", fiction::operational_status::OPERATIONAL, DOC(fiction_operational_status_OPERATIONAL))

@@ -17,7 +17,7 @@ namespace detail
 template <typename Lyt>
 void physical_population_stability_impl(pybind11::module& m, const std::string& lattice)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     py::class_<fiction::population_stability_information<Lyt>>(
         m, fmt::format("population_stability_information_{}", lattice).c_str(),
@@ -41,9 +41,9 @@ void physical_population_stability_impl(pybind11::module& m, const std::string& 
 
 }  // namespace detail
 
-void physical_population_stability(pybind11::module& m)
+void physical_population_stability(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     py::enum_<fiction::transition_type>(m, "transition_type", DOC(fiction_transition_type))
         .value("NEUTRAL_TO_NEGATIVE", fiction::transition_type::NEUTRAL_TO_NEGATIVE,

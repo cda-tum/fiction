@@ -1,5 +1,4 @@
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/networks/logic_networks.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/physical_design/graph_oriented_layout_design.hpp>
@@ -13,7 +12,7 @@
 namespace pyfiction
 {
 
-void graph_oriented_layout_design(pybind11::module& m)
+void graph_oriented_layout_design(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
     namespace py = pybind11;
 

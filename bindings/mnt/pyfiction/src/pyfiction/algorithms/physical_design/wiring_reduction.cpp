@@ -11,7 +11,7 @@
 namespace pyfiction
 {
 
-void wiring_reduction(pybind11::module& m)
+void wiring_reduction(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
     namespace py = pybind11;
 

@@ -26,7 +26,7 @@ void clustercomplete_impl(pybind11::module& m)
 
 }  // namespace detail
 
-void clustercomplete(pybind11::module& m)
+void clustercomplete(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
     namespace py = pybind11;
 

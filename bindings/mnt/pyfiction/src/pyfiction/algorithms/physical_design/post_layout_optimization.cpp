@@ -7,12 +7,14 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
+#include <cstdint>
+#include <optional>
 #include <sstream>
 
 namespace pyfiction
 {
 
-void post_layout_optimization(pybind11::module& m)
+void post_layout_optimization(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
     namespace py = pybind11;
 

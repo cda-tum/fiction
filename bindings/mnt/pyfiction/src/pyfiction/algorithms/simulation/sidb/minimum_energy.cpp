@@ -15,9 +15,9 @@ namespace detail
 {
 
 template <typename Lyt>
-void minimum_energy_impl(pybind11::module& m)
+void minimum_energy_impl(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     m.def(
         "minimum_energy", [](const std::vector<Lyt>& layouts) -> double
@@ -27,7 +27,7 @@ void minimum_energy_impl(pybind11::module& m)
 
 }  // namespace detail
 
-void minimum_energy(pybind11::module& m)
+void minimum_energy(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
     detail::minimum_energy_impl<py_charge_distribution_surface_100>(m);

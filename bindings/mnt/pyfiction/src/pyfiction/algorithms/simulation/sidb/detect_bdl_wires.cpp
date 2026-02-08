@@ -1,8 +1,11 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
+#include <fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp>
 #include <fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp>
+#include <fiction/layouts/cartesian_layout.hpp>
 
+#include <fmt/format.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
@@ -18,7 +21,7 @@ namespace detail
 template <typename Lyt>
 void detect_bdl_wires_impl(pybind11::module& m, const std::string& lattice)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     using bdl_wire_t = fiction::bdl_wire<Lyt>;
 
@@ -43,7 +46,7 @@ void detect_bdl_wires_impl(pybind11::module& m, const std::string& lattice)
  *
  * @param m The pybind11 module.
  */
-void detect_bdl_wires(pybind11::module& m)
+void detect_bdl_wires(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
     namespace py = pybind11;
 

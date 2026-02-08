@@ -5,7 +5,7 @@ namespace pyfiction
 
 void critical_path_length_and_throughput(pybind11::module& m);
 
-void register_properties(pybind11::module& m)
+void register_properties(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
     critical_path_length_and_throughput(m);
 }

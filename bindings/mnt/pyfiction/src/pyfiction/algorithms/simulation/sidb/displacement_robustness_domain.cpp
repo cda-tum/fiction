@@ -1,7 +1,7 @@
-#include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/simulation/sidb/displacement_robustness_domain.hpp>
+#include <fiction/layouts/cartesian_layout.hpp>
 
 #include <fmt/format.h>
 #include <pybind11/pybind11.h>
@@ -18,7 +18,7 @@ namespace detail
 template <typename Lyt>
 void determine_displacement_robustness_domain_impl(pybind11::module& m, const std::string& lattice = "")
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     py::class_<fiction::displacement_robustness_domain<Lyt>>(
         m, fmt::format("displacement_robustness_domain_{}", lattice).c_str())
@@ -32,9 +32,9 @@ void determine_displacement_robustness_domain_impl(pybind11::module& m, const st
 
 }  // namespace detail
 
-void determine_displacement_robustness_domain(pybind11::module& m)
+void determine_displacement_robustness_domain(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     py::enum_<fiction::displacement_robustness_domain_params<fiction::offset::ucoord_t>::dimer_displacement_policy>(
         m, "dimer_displacement_policy")

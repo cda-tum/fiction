@@ -1,12 +1,16 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
+#include <fiction/algorithms/graph/graph_coloring.hpp>
 #include <fiction/algorithms/physical_design/color_routing.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/utils/routing_utils.hpp>
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+
+#include <utility>
+#include <vector>
 
 namespace pyfiction
 {
@@ -15,9 +19,9 @@ namespace detail
 {
 
 template <typename Lyt>
-void color_routing(pybind11::module& m)
+void color_routing(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     m.def(
         "color_routing",
@@ -40,7 +44,7 @@ void color_routing(pybind11::module& m)
 
 }  // namespace detail
 
-void color_routing(pybind11::module& m)
+void color_routing(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
     namespace py = pybind11;
 

@@ -3,6 +3,7 @@
 
 #include <fiction/algorithms/simulation/sidb/operational_domain.hpp>
 #include <fiction/algorithms/simulation/sidb/physically_valid_parameters.hpp>
+#include <fiction/algorithms/simulation/sidb/sidb_simulation_domain.hpp>
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
@@ -16,9 +17,9 @@ namespace detail
 {
 
 template <typename Lyt>
-void physically_valid_parameters_impl(pybind11::module& m)
+void physically_valid_parameters_impl(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     m.def("physically_valid_parameters", &fiction::physically_valid_parameters<Lyt>, py::arg("cds"),
           py::arg("params") = fiction::operational_domain_params{}, DOC(fiction_physically_valid_parameters));
@@ -26,9 +27,9 @@ void physically_valid_parameters_impl(pybind11::module& m)
 
 }  // namespace detail
 
-void physically_valid_parameters(pybind11::module& m)
+void physically_valid_parameters(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     py::class_<fiction::sidb_simulation_domain<fiction::parameter_point, uint64_t>>(
         m, "physically_valid_parameters_domain")

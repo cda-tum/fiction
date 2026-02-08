@@ -12,7 +12,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void distance_impl(pybind11::module& m)
+void distance_impl(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
@@ -30,7 +30,7 @@ void distance_impl(pybind11::module& m)
 
 }  // namespace detail
 
-void distance(pybind11::module& m)
+void distance(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
     detail::distance_impl<py_cartesian_layout>(m);
     detail::distance_impl<py_shifted_cartesian_layout>(m);

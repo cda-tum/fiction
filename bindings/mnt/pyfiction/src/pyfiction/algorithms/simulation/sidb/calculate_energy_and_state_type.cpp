@@ -6,8 +6,6 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include <string>
-
 namespace pyfiction
 {
 
@@ -15,9 +13,9 @@ namespace detail
 {
 
 template <typename Lyt>
-void calculate_energy_and_state_type_impl(pybind11::module& m)
+void calculate_energy_and_state_type_impl(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     m.def("calculate_energy_and_state_type_with_kinks_accepted",
           &fiction::calculate_energy_and_state_type_with_kinks_accepted<Lyt, py_tt>, py::arg("energy_distribution"),
@@ -32,7 +30,7 @@ void calculate_energy_and_state_type_impl(pybind11::module& m)
 
 }  // namespace detail
 
-void calculate_energy_and_state_type(pybind11::module& m)
+void calculate_energy_and_state_type(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
     detail::calculate_energy_and_state_type_impl<py_sidb_100_lattice>(m);

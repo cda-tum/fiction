@@ -13,9 +13,9 @@ namespace detail
 {
 
 template <typename Lyt>
-void is_ground_state_impl(pybind11::module& m)
+void is_ground_state_impl(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     m.def("is_ground_state", &fiction::is_ground_state<Lyt>, py::arg("heuristic_results"),
           py::arg("exhaustive_results"), DOC(fiction_is_ground_state));
@@ -23,7 +23,7 @@ void is_ground_state_impl(pybind11::module& m)
 
 }  // namespace detail
 
-void is_ground_state(pybind11::module& m)
+void is_ground_state(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 

@@ -14,7 +14,7 @@ void orthogonal(pybind11::module& m);
 void post_layout_optimization(pybind11::module& m);
 void wiring_reduction(pybind11::module& m);
 
-void register_physical_design(pybind11::module& m)
+void register_physical_design(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
     exact(m);
     orthogonal(m);

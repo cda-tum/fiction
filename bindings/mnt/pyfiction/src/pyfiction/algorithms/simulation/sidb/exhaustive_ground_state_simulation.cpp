@@ -6,8 +6,6 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include <string>
-
 namespace pyfiction
 {
 
@@ -15,9 +13,9 @@ namespace detail
 {
 
 template <typename Lyt>
-void exhaustive_ground_state_simulation_impl(pybind11::module& m)
+void exhaustive_ground_state_simulation_impl(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     m.def("exhaustive_ground_state_simulation", &fiction::exhaustive_ground_state_simulation<Lyt>, py::arg("lyt"),
           py::arg("params") = fiction::sidb_simulation_parameters{}, DOC(fiction_exhaustive_ground_state_simulation));
@@ -25,7 +23,7 @@ void exhaustive_ground_state_simulation_impl(pybind11::module& m)
 
 }  // namespace detail
 
-void exhaustive_ground_state_simulation(pybind11::module& m)
+void exhaustive_ground_state_simulation(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 

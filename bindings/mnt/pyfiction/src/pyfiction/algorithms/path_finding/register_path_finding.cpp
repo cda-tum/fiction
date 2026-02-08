@@ -9,7 +9,7 @@ void distance(pybind11::module& m);
 void enumerate_all_paths(pybind11::module& m);
 void yen_k_shortest_paths(pybind11::module& m);
 
-void register_path_finding(pybind11::module& m)
+void register_path_finding(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
     distance(m);
     a_star(m);

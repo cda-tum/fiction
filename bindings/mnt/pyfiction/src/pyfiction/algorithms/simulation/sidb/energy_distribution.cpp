@@ -15,9 +15,9 @@ namespace detail
 {
 
 template <typename Lyt>
-void energy_distribution_impl(pybind11::module& m)
+void energy_distribution_impl(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     m.def("calculate_energy_distribution", &fiction::calculate_energy_distribution<Lyt>,
           py::arg("charge_distributions"), DOC(fiction_energy_distribution));
@@ -25,9 +25,9 @@ void energy_distribution_impl(pybind11::module& m)
 
 }  // namespace detail
 
-void energy_distribution(pybind11::module& m)
+void energy_distribution(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     py::class_<fiction::energy_state>(m, "energy_state")
         .def(py::init<double, uint64_t>(), py::arg("electrostatic_potential_energy"), py::arg("degeneracy"),

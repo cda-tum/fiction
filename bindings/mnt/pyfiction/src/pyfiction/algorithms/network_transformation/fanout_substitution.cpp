@@ -14,7 +14,7 @@ namespace detail
 {
 
 template <typename Ntk>
-void fanout_substitution_impl(pybind11::module& m)
+void fanout_substitution_impl(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
@@ -27,7 +27,7 @@ void fanout_substitution_impl(pybind11::module& m)
 
 }  // namespace detail
 
-void fanout_substitution(pybind11::module& m)
+void fanout_substitution(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
     namespace py = pybind11;
 

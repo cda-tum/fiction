@@ -14,9 +14,9 @@ namespace detail
 {
 
 template <typename Lyt>
-void compute_operational_ratio_impl(pybind11::module& m)
+void compute_operational_ratio_impl(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     m.def("operational_domain_ratio", &fiction::operational_domain_ratio<Lyt, py_tt>, py::arg("lyt"), py::arg("spec"),
           py::arg("pp"), py::arg("params") = fiction::operational_domain_ratio_params{},
@@ -25,9 +25,9 @@ void compute_operational_ratio_impl(pybind11::module& m)
 
 }  // namespace detail
 
-void compute_operational_ratio(pybind11::module& m)
+void compute_operational_ratio(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     py::class_<fiction::operational_domain_ratio_params>(m, "operational_domain_ratio_params",
                                                          DOC(fiction_operational_domain_ratio_params))

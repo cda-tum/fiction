@@ -18,7 +18,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void yen_k_shortest_paths_impl(pybind11::module& m)
+void yen_k_shortest_paths_impl(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
@@ -46,7 +46,7 @@ void yen_k_shortest_paths_impl(pybind11::module& m)
 
 }  // namespace detail
 
-void yen_k_shortest_paths(pybind11::module& m)
+void yen_k_shortest_paths(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
     namespace py = pybind11;
 

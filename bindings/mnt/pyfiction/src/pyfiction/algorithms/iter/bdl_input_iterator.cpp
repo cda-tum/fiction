@@ -17,7 +17,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void bdl_input_iterator_impl(pybind11::module& m, const std::string& lattice)
+void bdl_input_iterator_impl(pybind11::module& m, const std::string& lattice)  // NOLINT(misc-use-internal-linkage)
 {
     namespace py = pybind11;
 
@@ -92,7 +92,7 @@ void bdl_input_iterator_impl(pybind11::module& m, const std::string& lattice)
 
 }  // namespace detail
 
-void bdl_input_iterator(pybind11::module& m)
+void bdl_input_iterator(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
     namespace py = pybind11;
 

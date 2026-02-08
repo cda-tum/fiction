@@ -13,7 +13,7 @@ void register_simulation(pybind11::module& m);
 void register_physical_design(pybind11::module& m);
 // ... add others as we migrate them
 
-void register_algorithms(pybind11::module& m)
+void register_algorithms(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
     register_path_finding(m);
     register_network_transformation(m);

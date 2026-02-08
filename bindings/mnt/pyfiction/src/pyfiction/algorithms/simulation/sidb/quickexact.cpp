@@ -2,7 +2,6 @@
 #include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/simulation/sidb/quickexact.hpp>
-#include <fiction/layouts/coordinates.hpp>
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
@@ -14,9 +13,9 @@ namespace detail
 {
 
 template <typename Lyt>
-void quickexact_impl(pybind11::module& m)
+void quickexact_impl(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     m.def("quickexact", &fiction::quickexact<Lyt>, py::arg("lyt"), py::arg("params") = fiction::quickexact_params<>{},
           DOC(fiction_quickexact));
@@ -24,9 +23,9 @@ void quickexact_impl(pybind11::module& m)
 
 }  // namespace detail
 
-void quickexact(pybind11::module& m)
+void quickexact(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     py::enum_<fiction::quickexact_params<>::automatic_base_number_detection>(
         m, "automatic_base_number_detection", DOC(fiction_quickexact_params_automatic_base_number_detection))

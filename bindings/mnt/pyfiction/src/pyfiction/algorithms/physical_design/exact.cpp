@@ -3,7 +3,6 @@
 #if (FICTION_Z3_SOLVER)
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/networks/logic_networks.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/physical_design/exact.hpp>
@@ -16,7 +15,7 @@
 namespace pyfiction
 {
 
-void exact(pybind11::module& m)
+void exact(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
     namespace py = pybind11;
 

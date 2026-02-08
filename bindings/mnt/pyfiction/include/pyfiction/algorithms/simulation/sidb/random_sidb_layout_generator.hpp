@@ -10,7 +10,6 @@
 
 #include <fiction/algorithms/simulation/sidb/random_sidb_layout_generator.hpp>
 #include <fiction/layouts/coordinates.hpp>
-#include <fiction/traits.hpp>
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>

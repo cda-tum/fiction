@@ -2,6 +2,7 @@
 #include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/path_finding/a_star.hpp>
+#include <fiction/algorithms/path_finding/cost.hpp>
 #include <fiction/algorithms/path_finding/distance.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/utils/routing_utils.hpp>
@@ -18,7 +19,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void a_star_impl(pybind11::module& m)
+void a_star_impl(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
@@ -41,7 +42,7 @@ void a_star_impl(pybind11::module& m)
 
 }  // namespace detail
 
-void a_star(pybind11::module& m)
+void a_star(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
     namespace py = pybind11;
 

@@ -8,6 +8,9 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
+#include <cstddef>
+#include <tuple>
+#include <utility>
 #include <vector>
 
 namespace pyfiction
@@ -17,9 +20,9 @@ namespace detail
 {
 
 template <typename Lyt>
-void operational_domain_impl(pybind11::module& m)
+void operational_domain_impl(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     m.def("operational_domain_grid_search", &fiction::operational_domain_grid_search<Lyt, py_tt>, py::arg("lyt"),
           py::arg("spec"), py::arg("params") = fiction::operational_domain_params{}, py::arg("stats") = nullptr,
@@ -39,9 +42,9 @@ void operational_domain_impl(pybind11::module& m)
 }
 
 template <typename Lyt>
-void critical_temperature_domain_impl(pybind11::module& m)
+void critical_temperature_domain_impl(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     m.def("critical_temperature_domain_grid_search", &fiction::critical_temperature_domain_grid_search<Lyt, py_tt>,
           py::arg("lyt"), py::arg("spec"), py::arg("params") = fiction::operational_domain_params{},
@@ -64,9 +67,9 @@ void critical_temperature_domain_impl(pybind11::module& m)
 
 }  // namespace detail
 
-void operational_domain(pybind11::module& m)
+void operational_domain(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     py::class_<fiction::parameter_point>(m, "parameter_point", DOC(fiction_parameter_point))
         .def(py::init<>(), DOC(fiction_parameter_point_parameter_point))

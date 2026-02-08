@@ -2,7 +2,8 @@
 #include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/physical_design/design_sidb_gates.hpp>
-#include <fiction/types.hpp>
+#include <fiction/layouts/cartesian_layout.hpp>
+#include <fiction/layouts/cell_level_layout.hpp>
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
@@ -16,9 +17,9 @@ namespace detail
 {
 
 template <typename Lyt>
-void design_sidb_gates(pybind11::module& m)
+void design_sidb_gates(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     m.def("design_sidb_gates", &fiction::design_sidb_gates<Lyt, py_tt>, py::arg("skeleton"), py::arg("spec"),
           py::arg("params") = fiction::design_sidb_gates_params<fiction::cell<Lyt>>{}, py::arg("stats") = nullptr,
@@ -27,7 +28,7 @@ void design_sidb_gates(pybind11::module& m)
 
 }  // namespace detail
 
-void design_sidb_gates(pybind11::module& m)
+void design_sidb_gates(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
     namespace py = pybind11;
 
