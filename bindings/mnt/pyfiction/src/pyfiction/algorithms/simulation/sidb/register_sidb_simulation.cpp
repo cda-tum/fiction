@@ -24,12 +24,10 @@ void physically_valid_parameters(pybind11::module& m);
 void potential_to_distance_conversion(pybind11::module& m);
 void quickexact(pybind11::module& m);
 void quicksim(pybind11::module& m);
-void quicksim(pybind11::module& m);
 void sidb_simulation_engine(pybind11::module& m);
-void sidb_simulation_parameters(pybind11::module& m);
 void sidb_simulation_result(pybind11::module& m);
 
-void register_sidb_simulation(pybind11::module& m)
+void register_sidb_simulation(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
     sidb_simulation_engine(m);
     sidb_simulation_result(m);

@@ -95,6 +95,8 @@ void exact(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 
 #else  // FICTION_Z3_SOLVER
 
+#include <pybind11/pybind11.h>
+
 namespace pyfiction
 {
 
