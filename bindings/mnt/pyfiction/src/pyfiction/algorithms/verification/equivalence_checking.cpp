@@ -13,7 +13,7 @@ namespace detail
 {
 
 template <typename Spec, typename Impl>
-void equivalence_checking_impl(pybind11::module& m)
+void equivalence_checking_impl(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
@@ -37,9 +37,9 @@ void equivalence_checking_impl(pybind11::module& m)
 
 }  // namespace detail
 
-void equivalence_checking(pybind11::module& m)
+void equivalence_checking(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     /**
      * Result type for equivalence checking.

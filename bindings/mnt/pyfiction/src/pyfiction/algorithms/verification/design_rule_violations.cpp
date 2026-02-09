@@ -17,7 +17,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void gate_level_drvs_impl(pybind11::module& m)
+void gate_level_drvs_impl(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
@@ -46,9 +46,9 @@ void gate_level_drvs_impl(pybind11::module& m)
 
 }  // namespace detail
 
-void design_rule_violations(pybind11::module& m)
+void design_rule_violations(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     py::class_<fiction::gate_level_drv_params>(m, "gate_level_drv_params", DOC(fiction_gate_level_drv_params))
         .def(py::init<>())

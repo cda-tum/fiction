@@ -4,7 +4,6 @@
 #include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/simulation/sidb/clustercomplete.hpp>
-#include <fiction/layouts/coordinates.hpp>
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
@@ -18,7 +17,7 @@ namespace detail
 template <typename Lyt>
 void clustercomplete_impl(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     m.def("clustercomplete", &fiction::clustercomplete<Lyt>, py::arg("lyt"),
           py::arg("params") = fiction::clustercomplete_params<>{}, DOC(fiction_clustercomplete));

@@ -1,7 +1,6 @@
 #include "pyfiction/documentation.hpp"
 
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
-#include <fiction/technology/sidb_lattice_orientations.hpp>
 
 #include <fmt/format.h>
 #include <pybind11/pybind11.h>
@@ -12,9 +11,9 @@
 namespace pyfiction
 {
 
-void sidb_simulation_parameters(pybind11::module& m)
+void sidb_simulation_parameters(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     py::class_<fiction::sidb_simulation_parameters>(m, "sidb_simulation_parameters",
                                                     DOC(fiction_sidb_simulation_parameters))

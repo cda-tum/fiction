@@ -13,9 +13,9 @@ namespace detail
 {
 
 template <typename Lyt>
-void quicksim_impl(pybind11::module& m)
+void quicksim_impl(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     m.def("quicksim", &fiction::quicksim<Lyt>, py::arg("lyt"), py::arg("params") = fiction::quicksim_params{},
           DOC(fiction_quicksim));
@@ -23,9 +23,9 @@ void quicksim_impl(pybind11::module& m)
 
 }  // namespace detail
 
-void quicksim(pybind11::module& m)
+void quicksim(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     /**
      * QuickSim parameters.

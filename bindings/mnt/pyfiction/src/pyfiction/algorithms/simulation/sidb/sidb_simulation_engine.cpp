@@ -13,9 +13,9 @@ namespace detail
 {
 
 template <typename EngineType>
-void sidb_simulation_engine_name_impl(pybind11::module& m)
+void sidb_simulation_engine_name_impl(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     m.def(
         "sidb_simulation_engine_name",
@@ -25,9 +25,9 @@ void sidb_simulation_engine_name_impl(pybind11::module& m)
 
 }  // namespace detail
 
-void sidb_simulation_engine(pybind11::module& m)
+void sidb_simulation_engine(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     py::enum_<fiction::sidb_simulation_engine>(m, "sidb_simulation_engine", DOC(fiction_sidb_simulation_engine))
         .value("EXGS", fiction::sidb_simulation_engine::EXGS, DOC(fiction_sidb_simulation_engine_EXGS))

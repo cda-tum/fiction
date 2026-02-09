@@ -9,6 +9,7 @@
 
 #include <any>
 #include <cstdint>
+#include <exception>
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
@@ -22,7 +23,7 @@ namespace detail
 namespace py = pybind11;
 
 // Helper function to convert std::any to Python objects
-inline py::object convert_any_to_py(const std::any& value)
+inline py::object convert_any_to_py(const std::any& value)  // NOLINT(misc-use-internal-linkage)
 {
     try
     {
@@ -30,26 +31,24 @@ inline py::object convert_any_to_py(const std::any& value)
         {
             return py::int_(std::any_cast<int>(value));
         }
-        else if (value.type() == typeid(double))
+        if (value.type() == typeid(double))
         {
             return py::float_(std::any_cast<double>(value));
         }
-        else if (value.type() == typeid(bool))
+        if (value.type() == typeid(bool))
         {
             return py::bool_(std::any_cast<bool>(value));
         }
-        else if (value.type() == typeid(std::string))
+        if (value.type() == typeid(std::string))
         {
             return py::str(std::any_cast<std::string>(value));
         }
-        else if (value.type() == typeid(uint64_t))
+        if (value.type() == typeid(uint64_t))
         {
             return pybind11::int_(std::any_cast<uint64_t>(value));
         }
-        else
-        {
-            throw std::runtime_error(std::string("Unsupported type in std::any: ") + value.type().name());
-        }
+
+        throw std::runtime_error(std::string("Unsupported type in std::any: ") + value.type().name());
     }
     catch (const std::exception& e)
     {
@@ -57,6 +56,7 @@ inline py::object convert_any_to_py(const std::any& value)
     }
 }
 
+// NOLINTNEXTLINE(misc-use-internal-linkage)
 inline py::dict convert_map_to_py(const std::unordered_map<std::string, std::any>& map)
 {
     pybind11::dict result;
@@ -75,9 +75,10 @@ inline py::dict convert_map_to_py(const std::unordered_map<std::string, std::any
 }
 
 template <typename Lyt>
+// NOLINTNEXTLINE(misc-use-internal-linkage)
 void sidb_simulation_result_impl(pybind11::module& m, const std::string& lattice = "")
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     py::class_<fiction::sidb_simulation_result<Lyt>>(m, fmt::format("sidb_simulation_result{}", lattice).c_str(),
                                                      DOC(fiction_sidb_simulation_result))
@@ -102,7 +103,7 @@ void sidb_simulation_result_impl(pybind11::module& m, const std::string& lattice
 
 }  // namespace detail
 
-void sidb_simulation_result(pybind11::module& m)
+void sidb_simulation_result(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
     // Define simulation result for specific lattices
     detail::sidb_simulation_result_impl<py_sidb_100_lattice>(m, "_100");
