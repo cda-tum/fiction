@@ -10,10 +10,11 @@
 
 #include <fiction/algorithms/simulation/sidb/random_sidb_layout_generator.hpp>
 #include <fiction/layouts/coordinates.hpp>
-#include <fiction/traits.hpp>
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+
+#include <optional>
 
 namespace pyfiction
 {
@@ -22,17 +23,16 @@ namespace detail
 {
 
 template <typename Lyt>
-void random_layout_generator(pybind11::module& m)
+void random_layout_generator_impl(pybind11::module& m)
 {
     namespace py = pybind11;
 
-    m.def("generate_random_sidb_layout", &fiction::generate_random_sidb_layout<Lyt>,
-          py::arg("params") = fiction::generate_random_sidb_layout_params<fiction::cell<Lyt>>{},
-          py::arg("lyt_skeleton"), DOC(fiction_generate_random_sidb_layout));
+    m.def("generate_random_sidb_layout", &fiction::generate_random_sidb_layout<Lyt>, py::arg("params"),
+          py::arg("lyt_skeleton") = std::nullopt, DOC(fiction_generate_random_sidb_layout));
 
     m.def("generate_multiple_random_sidb_layouts", &fiction::generate_multiple_random_sidb_layouts<Lyt>,
-          py::arg("params") = fiction::generate_random_sidb_layout_params<fiction::cell<Lyt>>{},
-          py::arg("lyt_skeleton"), DOC(fiction_generate_multiple_random_sidb_layouts));
+          py::arg("params"), py::arg("lyt_skeleton") = std::nullopt,
+          DOC(fiction_generate_multiple_random_sidb_layouts));
 }
 
 }  // namespace detail
@@ -84,9 +84,9 @@ inline void random_sidb_layout_generator(pybind11::module& m)
                        DOC(fiction_generate_random_sidb_layout_params_maximal_attempts_for_multiple_layouts));
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
-    detail::random_layout_generator<py_sidb_100_lattice>(m);
-    detail::random_layout_generator<py_sidb_111_lattice>(m);
-    detail::random_layout_generator<py_sidb_layout>(m);
+    detail::random_layout_generator_impl<py_sidb_100_lattice>(m);
+    detail::random_layout_generator_impl<py_sidb_111_lattice>(m);
+    detail::random_layout_generator_impl<py_sidb_layout>(m);
 }
 
 }  // namespace pyfiction
