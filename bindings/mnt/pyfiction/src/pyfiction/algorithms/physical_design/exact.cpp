@@ -100,7 +100,10 @@ void exact(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 namespace pyfiction
 {
 
-void exact([[maybe_unused]] pybind11::module& m) {}
+/**
+ * Disable SMT-based exact physical design.
+ */
+void exact([[maybe_unused]] pybind11::module& m) {}  // NOLINT(misc-use-internal-linkage)
 
 }  // namespace pyfiction
 

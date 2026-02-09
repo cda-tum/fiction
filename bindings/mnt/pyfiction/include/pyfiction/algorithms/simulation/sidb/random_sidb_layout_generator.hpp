@@ -14,6 +14,8 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
+#include <optional>
+
 namespace pyfiction
 {
 
@@ -26,10 +28,11 @@ void random_layout_generator_impl(pybind11::module& m)
     namespace py = pybind11;
 
     m.def("generate_random_sidb_layout", &fiction::generate_random_sidb_layout<Lyt>, py::arg("params"),
-          py::arg("lyt_skeleton"), DOC(fiction_generate_random_sidb_layout));
+          py::arg("lyt_skeleton") = std::nullopt, DOC(fiction_generate_random_sidb_layout));
 
     m.def("generate_multiple_random_sidb_layouts", &fiction::generate_multiple_random_sidb_layouts<Lyt>,
-          py::arg("params"), py::arg("lyt_skeleton"), DOC(fiction_generate_multiple_random_sidb_layouts));
+          py::arg("params"), py::arg("lyt_skeleton") = std::nullopt,
+          DOC(fiction_generate_multiple_random_sidb_layouts));
 }
 
 }  // namespace detail

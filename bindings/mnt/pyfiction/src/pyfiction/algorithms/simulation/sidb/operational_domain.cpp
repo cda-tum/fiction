@@ -236,7 +236,7 @@ void operational_domain(pybind11::module& m)  // NOLINT(misc-use-internal-linkag
         .def_readwrite("dimension", &fiction::operational_domain_value_range::dimension,
                        DOC(fiction_operational_domain_value_range_dimension))
         .def_readwrite("min", &fiction::operational_domain_value_range::min,
-                       DOC(fiction_operational_domain_value_range_dimension))
+                       DOC(fiction_operational_domain_value_range_min))
         .def_readwrite("max", &fiction::operational_domain_value_range::max,
                        DOC(fiction_operational_domain_value_range_max))
         .def_readwrite("step", &fiction::operational_domain_value_range::step,

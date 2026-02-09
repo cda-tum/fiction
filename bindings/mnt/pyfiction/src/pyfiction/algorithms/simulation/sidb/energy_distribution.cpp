@@ -47,8 +47,7 @@ void energy_distribution(pybind11::module& m)  // NOLINT(misc-use-internal-linka
         .def("size", &fiction::energy_distribution::size, DOC(fiction_energy_distribution_size))
         .def("empty", &fiction::energy_distribution::empty, DOC(fiction_energy_distribution_empty))
         .def("max_energy", &fiction::energy_distribution::max_energy, DOC(fiction_energy_distribution_max_energy))
-        .def("min_energy", &fiction::energy_distribution::min_energy, DOC(fiction_energy_distribution_min_energy),
-             DOC(fiction_energy_distribution_min_energy))
+        .def("min_energy", &fiction::energy_distribution::min_energy, DOC(fiction_energy_distribution_min_energy))
 
         ;
 

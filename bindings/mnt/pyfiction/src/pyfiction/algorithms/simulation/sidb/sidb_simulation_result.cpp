@@ -45,7 +45,7 @@ inline py::object convert_any_to_py(const std::any& value)  // NOLINT(misc-use-i
         }
         if (value.type() == typeid(uint64_t))
         {
-            return pybind11::int_(std::any_cast<uint64_t>(value));
+            return py::int_(std::any_cast<uint64_t>(value));
         }
 
         throw std::runtime_error(std::string("Unsupported type in std::any: ") + value.type().name());

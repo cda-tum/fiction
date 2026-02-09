@@ -13,7 +13,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void check_for_equivalence(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void check_for_equivalence_impl(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
@@ -27,8 +27,8 @@ void check_simulation_results_for_equivalence(pybind11::module& m)  // NOLINT(mi
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::check_for_equivalence<py_sidb_100_lattice>(m);
-    detail::check_for_equivalence<py_sidb_111_lattice>(m);
+    detail::check_for_equivalence_impl<py_sidb_100_lattice>(m);
+    detail::check_for_equivalence_impl<py_sidb_111_lattice>(m);
 }
 
 }  // namespace pyfiction
