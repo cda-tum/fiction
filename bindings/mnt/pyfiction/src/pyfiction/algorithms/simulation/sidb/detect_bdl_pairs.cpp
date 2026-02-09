@@ -2,6 +2,7 @@
 #include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp>
+#include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 
 #include <fmt/format.h>

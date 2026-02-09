@@ -10,8 +10,6 @@
 
 #include <sstream>
 
-#include <Python.h>
-
 namespace pyfiction
 {
 
@@ -19,8 +17,9 @@ void hexagonalization(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
     namespace py = pybind11;
 
-    py::register_exception<fiction::hexagonalization_io_pin_routing_error>(m, "hexagonalization_io_pin_routing_error",
-                                                                           PyExc_RuntimeError);
+    py::register_exception<fiction::hexagonalization_io_pin_routing_error>(
+        m, "hexagonalization_io_pin_routing_error",
+        PyExc_RuntimeError);  // NOLINT(misc-include-cleaner): Included through pybind11.h
 
     py::enum_<fiction::hexagonalization_params::io_pin_extension_mode>(
         m, "hexagonalization_io_pin_extension_mode", DOC(fiction_hexagonalization_params_io_pin_extension_mode))

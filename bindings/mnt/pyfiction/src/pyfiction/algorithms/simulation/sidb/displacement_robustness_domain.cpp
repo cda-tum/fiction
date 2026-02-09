@@ -1,6 +1,7 @@
 #include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/simulation/sidb/displacement_robustness_domain.hpp>
+#include <fiction/layouts/coordinates.hpp>
 
 #include <fmt/format.h>
 #include <pybind11/pybind11.h>
@@ -15,8 +16,8 @@ namespace detail
 {
 
 template <typename Lyt>
-void determine_displacement_robustness_domain_impl(
-    pybind11::module& m, const std::string& lattice = "")  // NOLINT(misc-use-internal-linkage)
+// NOLINTNEXTLINE(misc-use-internal-linkage)
+void determine_displacement_robustness_domain_impl(pybind11::module& m, const std::string& lattice = "")
 {
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 

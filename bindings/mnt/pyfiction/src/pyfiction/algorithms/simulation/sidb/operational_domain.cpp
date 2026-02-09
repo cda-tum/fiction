@@ -1,6 +1,7 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
+#include <fiction/algorithms/simulation/sidb/is_operational.hpp>
 #include <fiction/algorithms/simulation/sidb/operational_domain.hpp>
 
 #include <fmt/format.h>
@@ -76,8 +77,10 @@ void operational_domain(pybind11::module& m)  // NOLINT(misc-use-internal-linkag
         .def(py::init<const std::vector<double>>(), py::arg("values"), DOC(fiction_parameter_point_parameter_point_2))
         .def("get_parameters", &fiction::parameter_point::get_parameters, DOC(fiction_parameter_point_get_parameters))
 
+        // NOLINTBEGIN(misc-redundant-expression)
         .def(py::self == py::self, py::arg("other"), DOC(fiction_parameter_point_operator_eq))
         .def(py::self != py::self, py::arg("other"), DOC(fiction_parameter_point_operator_ne))
+        // NOLINTEND(misc-redundant-expression)
 
         .def("__hash__",
              [](const fiction::parameter_point& self) { return std::hash<fiction::parameter_point>{}(self); })

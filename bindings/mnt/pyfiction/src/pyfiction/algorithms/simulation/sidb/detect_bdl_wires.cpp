@@ -3,6 +3,7 @@
 
 #include <fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp>
 #include <fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp>
+#include <fiction/layouts/coordinates.hpp>
 
 #include <fmt/format.h>
 #include <pybind11/pybind11.h>
