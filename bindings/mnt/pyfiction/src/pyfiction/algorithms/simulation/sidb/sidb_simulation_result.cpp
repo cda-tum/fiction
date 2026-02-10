@@ -47,13 +47,13 @@ inline py::object convert_any_to_py(const std::any& value)  // NOLINT(misc-use-i
         {
             return py::int_(std::any_cast<uint64_t>(value));
         }
-
-        throw std::runtime_error(std::string("Unsupported type in std::any: ") + value.type().name());
     }
-    catch (const std::exception& e)
+    catch (const std::bad_any_cast& e)
     {
-        throw std::runtime_error(std::string("Error in convert_any_to_py: ") + e.what());
+        throw std::runtime_error(std::string("Error casting std::any: ") + e.what());
     }
+
+    throw std::runtime_error(std::string("Unsupported type in std::any: ") + value.type().name());
 }
 
 // NOLINTNEXTLINE(misc-use-internal-linkage)

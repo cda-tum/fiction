@@ -49,7 +49,7 @@ void color_routing(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
     namespace py = pybind11;
 
     /**
-     * SAT engine selector type.
+     * Graph coloring engine selector type.
      */
     pybind11::enum_<fiction::graph_coloring_engine>(m, "graph_coloring_engine", DOC(fiction_graph_coloring_engine))
         .value("MCS", fiction::graph_coloring_engine::MCS, DOC(fiction_graph_coloring_engine_MCS))
