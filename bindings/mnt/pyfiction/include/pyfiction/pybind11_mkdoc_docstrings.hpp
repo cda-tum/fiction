@@ -5032,6 +5032,26 @@ Template parameter ``WiringReductionLyt``:
 Parameter ``lyt``:
     The wiring_reduction_layout to which obstructions will be added.)doc";
 
+static const char *__doc_fiction_detail_adjust_final_values =
+R"doc(Balances the final x and y wiring coordinates across all nodes in a
+level.
+
+The function identifies the minimal routing demand, which means the
+closest diagonal, where all nodes can be placed and can be routed
+without conflicts.
+
+Parameter ``x``:
+    Vector of x-coordinates to be adjusted.
+
+Parameter ``y``:
+    Vector of y-coordinates to be adjusted.
+
+Parameter ``two_input_indices``:
+    Indices of two-input nodes within the level.
+
+Parameter ``two_input_new_lines``:
+    Number of new routing lines associated with each two-input node.)doc";
+
 static const char *__doc_fiction_detail_adjust_tile =
 R"doc(This function adjusts the tile and gates in the layout after deleting
 wires. It shifts gates to fill the empty coordinates and adjusts the
@@ -5217,6 +5237,66 @@ Parameter ``defect_lyt``:
 Returns:
     A `CellLyt` object representing the generated cell layout.)doc";
 
+static const char *__doc_fiction_detail_calculate_allowed_orientation =
+R"doc(Determines the allowed orientation of a node based on its predecessor.
+For nodes driven by a fan-out, the orientation is defined by their
+relative rank position among the fan-out's successors.
+
+Returns: - 0: Node is the first (east) successor of its predecessor. -
+1: Node is the second (west) successor of its predecessor. - 2: Node
+is not driven by a fan-out.
+
+Template parameter ``Ntk``:
+    Logic network type.
+
+Parameter ``ntk``:
+    Logic network containing the node.
+
+Parameter ``n``:
+    Node for which to determine the allowed orientation.
+
+Returns:
+    Orientation code (0–2) describing the node's relative position.)doc";
+
+static const char *__doc_fiction_detail_calculate_buffer_connection_type =
+R"doc(Computes the buffer connection type for a given node. Determines
+whether the node serves as the second (rightmost) fan-in of its
+successor node.
+
+Template parameter ``Ntk``:
+    Logic network type.
+
+Parameter ``ntk``:
+    Logic network containing the node.
+
+Parameter ``n``:
+    Node to analyze.
+
+Returns:
+    1 if the node is the rightmost fan-in of its successor, otherwise
+    0.)doc";
+
+static const char *__doc_fiction_detail_calculate_fanout_connection_type =
+R"doc(Computes the fan-out connection type of a node based on its
+successors' fan-in structures. Assumes exactly two fan-outs, which are
+ordered by rank position.
+
+Returns: - 0: Both fan-outs have a single fan-in. - 1: First fan-out
+has one fan-in, second has multiple. - 2: Second fan-out has one fan-
+in, first has multiple. - 3: Both fan-outs have multiple fan-ins.
+
+Template parameter ``Ntk``:
+    Logic network type.
+
+Parameter ``ntk``:
+    Logic network containing the node.
+
+Parameter ``n``:
+    Node for which to determine the fan-out connection type.
+
+Returns:
+    Integer code (0–3) indicating the fan-out connection pattern.)doc";
+
 static const char *__doc_fiction_detail_calculate_offset_matrix =
 R"doc(Calculate an offset matrix based on a to-delete list in a
 `wiring_reduction_layout`.
@@ -5242,6 +5322,94 @@ Parameter ``to_delete``:
 
 Returns:
     A 2D vector representing the calculated offset matrix.)doc";
+
+static const char *__doc_fiction_detail_calculate_pairs =
+R"doc(Calculates pairs of nodes from a given vector of nodes.
+
+This function takes a vector of nodes and returns a vector of node
+pairs. Each node pair consists of two nodes from the input vector and
+an optional vector of middle nodes. The delay of each node pair is
+initialized to infinity.
+
+Template parameter ``Ntk``:
+    The network type.
+
+Parameter ``nodes``:
+    The vector of nodes.
+
+Returns:
+    The vector of node pairs.)doc";
+
+static const char *__doc_fiction_detail_calculate_predecessor_gap =
+R"doc(Computes the gap between the fan-in node and its preceding node, i.e.,
+the node with a rank position one less than the current node. This
+value indicates the available spacing for placement.
+
+Template parameter ``Ntk``:
+    Logic network type.
+
+Template parameter ``Lyt``:
+    Layout type.
+
+Parameter ``ntk``:
+    Logic network containing the node.
+
+Parameter ``node2pos``:
+    Mapping from network nodes to layout tile positions.
+
+Parameter ``lvl``:
+    Current level index of the node.
+
+Parameter ``n``:
+    Node for which to compute the predecessor gap.
+
+Returns:
+    Gap size (clamped to a maximum of 2).)doc";
+
+static const char *__doc_fiction_detail_calculate_start_orientation =
+R"doc(Determines the initial orientation for a given network level. The
+orientation is inferred from the structural pattern of nodes within
+the specified level, considering their fan-in and fan-out
+relationships.
+
+Returns: - 0: Default orientation (no specific structure found). - 1:
+Level starts with a fan-out or buffer structure. - 3: Level starts
+with a two-input (binary) gate.
+
+Template parameter ``Ntk``:
+    Logic network type.
+
+Parameter ``ntk``:
+    Logic network to analyze.
+
+Parameter ``lvl``:
+    Level index for which to compute the starting orientation.
+
+Returns:
+    Orientation code (0, 1, or 3) defining the level's initial
+    direction.)doc";
+
+static const char *__doc_fiction_detail_calculate_two_input_new_lines =
+R"doc(Computes the number of new routing lines required.
+
+Template parameter ``Ntk``:
+    Logic network type.
+
+Template parameter ``Lyt``:
+    Layout type.
+
+Parameter ``ntk``:
+    Logic network to analyze.
+
+Parameter ``node2pos``:
+    Mapping from network nodes to layout tile positions.
+
+Parameter ``lvl``:
+    Level index to inspect.
+
+Returns:
+    Vector of gap sizes (new line counts) for all two-input nodes in
+    the level.)doc";
 
 static const char *__doc_fiction_detail_check_and_optimize_po_positions =
 R"doc(Utility function that checks and optimizes PO positions after each
@@ -5889,6 +6057,21 @@ Returns:
     The number of primary outputs that are placed to the right of the
     middle primary output.)doc";
 
+static const char *__doc_fiction_detail_compute_two_input_indices =
+R"doc(Collects the indices of all two-input nodes in a given level.
+
+Template parameter ``Ntk``:
+    Logic network type.
+
+Parameter ``ntk``:
+    Logic network to analyze.
+
+Parameter ``lvl``:
+    Level index to inspect.
+
+Returns:
+    Vector of node indices with two fan-ins in the specified level.)doc";
+
 static const char *__doc_fiction_detail_connect_and_place = R"doc()doc";
 
 static const char *__doc_fiction_detail_connect_and_place_2 = R"doc()doc";
@@ -5922,6 +6105,44 @@ static const char *__doc_fiction_detail_count_gate_types_impl_run = R"doc()doc";
 static const char *__doc_fiction_detail_create_array =
 R"doc(From https://stackoverflow.com/questions/57756557/initializing-a-
 stdarray-with-a-constant-value)doc";
+
+static const char *__doc_fiction_detail_create_virtual_pi_ntk_from_duplicated_nodes =
+R"doc(Constructs a planar `virtual_pi_network` based on duplicated nodes
+derived from the source network.
+
+The input `ntk_lvls` contains per-level vectors of original node ranks
+in the source network. For each level, this function creates
+corresponding nodes (including duplicates) in a new
+`virtual_pi_network` and restores their fanin relations using the
+`gather_fanin_signals` helper function.
+
+For duplicated PIs (Primary Inputs), virtual PIs are created, and the
+original PI is stored in a mapping structure. The auxiliary function
+`gather_fanin_signals` collects fanin data for each node and matches
+it to its corresponding nodes in the `virtual_pi_network`.
+
+Example: For a level {2, 3, 2, 4, 2}, new nodes are created for each
+duplicated occurrence (e.g., node 2) and stored in the `old2new_v`
+node map. This map is then used by `gather_fanin_signals` to correctly
+establish fanin relationships between newly created nodes.
+
+Template parameter ``Ntk``:
+    Network type.
+
+Parameter ``ntk``:
+    Source network used to construct the `virtual_pi_network`.
+
+Parameter ``ntk_lvls``:
+    Per-level vectors of original node ranks in the source network
+    used to derive node duplications.
+
+Parameter ``ntk_lvls_new``:
+    Per-level vectors of newly created nodes' ranks in the constructed
+    `virtual_pi_network`.
+
+Returns:
+    The constructed planar `virtual_pi_network` containing duplicated
+    nodes with restored fanin and fanout relations.)doc";
 
 static const char *__doc_fiction_detail_create_wiring_reduction_layout =
 R"doc(Create a wiring_reduction_layout suitable for finding excess wiring
@@ -8680,6 +8901,35 @@ static const char *__doc_fiction_detail_hexagonalization_impl_pst = R"doc(Hexago
 
 static const char *__doc_fiction_detail_hexagonalization_impl_run = R"doc()doc";
 
+static const char *__doc_fiction_detail_hgraph_node =
+R"doc(Represents one node in the H-graph used for crossing minimization.
+
+For a node in level l of the input network, all possible orderings of
+its fanins from layer l−1 are enumerated. Each such ordering is
+represented by an H-graph node. The first and last fanins of the
+ordering are stored, since these determine the delay in the H-graph.
+The remaining fanins are placed in middle. Their mutual order is
+irrelevant for this algorithm.
+
+Template parameter ``Ntk``:
+    Network type from which node types are drawn.)doc";
+
+static const char *__doc_fiction_detail_hgraph_node_delay = R"doc(Specifies the delay value for the hgraph_node.)doc";
+
+static const char *__doc_fiction_detail_hgraph_node_fanin_it = R"doc(Index of the predecessor H-graph node.)doc";
+
+static const char *__doc_fiction_detail_hgraph_node_hgraph_node =
+R"doc(Constructs an H-graph node with given first and last fanins and delay.
+
+Parameter ``first``:
+    The first (leftmost) fanin in the ordering.
+
+Parameter ``last``:
+    The last (rightmost) fanin in the ordering.
+
+Parameter ``delay_value``:
+    The delay value for the node.)doc";
+
 static const char *__doc_fiction_detail_is_balanced_impl = R"doc()doc";
 
 static const char *__doc_fiction_detail_is_balanced_impl_balanced = R"doc()doc";
@@ -9256,6 +9506,88 @@ static const char *__doc_fiction_detail_new_gate_location_DEST = R"doc(Check if 
 static const char *__doc_fiction_detail_new_gate_location_NONE = R"doc(Do not check any tiles.)doc";
 
 static const char *__doc_fiction_detail_new_gate_location_SRC = R"doc(Check if the source tile is empty.)doc";
+
+static const char *__doc_fiction_detail_node_duplication_planarization_impl = R"doc()doc";
+
+static const char *__doc_fiction_detail_node_duplication_planarization_impl_compute_slice_delays =
+R"doc(A "slice" describes one vertical layer in the H-graph. It is created
+by adding all possible combinations of a `node_pair` to the H-graph of
+the level. These combinations are formed by selecting pairs of nodes
+from the fan-ins of the input node: - If the input node has only one
+fan-in, it is treated as a single combination. - If the input node has
+two fan-ins, there are two possible combinations.
+
+Each `node_pair` consists of a first and second element. The objective
+is to find an ordering of node pairs that maximizes the instances
+where the first element of a node_pair matches the second element of
+the preceding node_pair. This ordering is given as a linked list.
+
+This function computes the optimal ordering by calculating delays as
+follows: - All combinations of node pairs are iteratively added to a
+linked list. - For each combination, the first element of the current
+node_pair is compared with the last element of the preceding
+node_pairs. - If a connection exists between two node_pairs, the delay
+increases by 1; otherwise, it increases by 2. The default delay for
+the first node is 1. - If a node_pair lacks a connection, and its
+updated delay (increased by 2) is less than the existing delay, the
+node_pair's delay is updated accordingly.
+
+Processed node_pairs are stored in the `lvl_pairs` member for
+subsequent delay calculations.
+
+Parameter ``nd``:
+    Node in the H-graph.)doc";
+
+static const char *__doc_fiction_detail_node_duplication_planarization_impl_fanout_state =
+R"doc(Represents the current state of fanout saturation during node
+insertion. A fanout is saturated if it has reached its maximum fanout
+limit.)doc";
+
+static const char *__doc_fiction_detail_node_duplication_planarization_impl_fanout_state_NORMAL = R"doc(No fanout saturation is active.)doc";
+
+static const char *__doc_fiction_detail_node_duplication_planarization_impl_fanout_state_SATURATED = R"doc(Fanout saturation is active.)doc";
+
+static const char *__doc_fiction_detail_node_duplication_planarization_impl_insert_if_not_first =
+R"doc(Inserts a node into a vector if it is unique.
+
+This function inserts a node into a vector only if the vector is empty
+or the node is not equal to the first element of the vector. If the
+vector is not empty and the node is equal to the first element,
+insertion depends on the `saturated_fanout_flag` and the node's
+`position`: when `position == 0`, a repeated insertion attempt will
+succeed only if the node was previously skipped (indicated by
+`saturated_fanout_flag == 1`); otherwise, the flag is set to 1 and the
+node is skipped for this call. No exception is thrown during this
+process.
+
+Parameter ``node``:
+    The node to be inserted.
+
+Parameter ``vec``:
+    The vector to insert the node into.
+
+Parameter ``saturated_fanout_flag``:
+    A state flag toggled when consecutive duplicate insertions occur.
+    Set to 1 when a node is skipped and reset to 0 when a node is
+    successfully inserted.
+
+Parameter ``position``:
+    The position of the node (0 indicates a terminal node; controls
+    duplicate insertion behavior).)doc";
+
+static const char *__doc_fiction_detail_node_duplication_planarization_impl_insertion_position = R"doc(Specifies the position of a node during insertion.)doc";
+
+static const char *__doc_fiction_detail_node_duplication_planarization_impl_insertion_position_INNER = R"doc(The node is an inner (non-terminal) fanin node.)doc";
+
+static const char *__doc_fiction_detail_node_duplication_planarization_impl_insertion_position_TERMINAL = R"doc(The node is a terminal node of a fanin relation.)doc";
+
+static const char *__doc_fiction_detail_node_duplication_planarization_impl_lvl_pairs = R"doc(The currently node_pairs used in the current level.)doc";
+
+static const char *__doc_fiction_detail_node_duplication_planarization_impl_node_duplication_planarization_impl = R"doc()doc";
+
+static const char *__doc_fiction_detail_node_duplication_planarization_impl_ntk_lvls = R"doc(The network stored as levels.)doc";
+
+static const char *__doc_fiction_detail_node_duplication_planarization_impl_ps = R"doc(The stats of the node_duplication class.)doc";
 
 static const char *__doc_fiction_detail_non_operationality_reason = R"doc(Reason why a layout is non-operational.)doc";
 
@@ -9850,6 +10182,44 @@ static const char *__doc_fiction_detail_placement_info_current_node = R"doc(The 
 static const char *__doc_fiction_detail_placement_info_current_po = R"doc(The index of the current primary output.)doc";
 
 static const char *__doc_fiction_detail_placement_info_node2pos = R"doc(Mapping of nodes to their positions in the layout.)doc";
+
+static const char *__doc_fiction_detail_plane_impl =
+R"doc(Implements the general planar layout generation algorithm.
+
+The algorithm performs placement and routing level by level, starting
+from the primary inputs and proceeding toward the outputs. For each
+level, node placement depends on the orientation and excess wiring
+computed in auxiliary routines such as `compute_pr_variables` and
+`compute_wiring`. Nodes are positioned according to their fan-in
+structure and routing constraints to ensure planarity of the resulting
+layout.
+
+Template parameter ``Lyt``:
+    Gate-level layout type.
+
+Template parameter ``Ntk``:
+    Logic network type.
+
+Parameter ``src``:
+    Source network to be placed and routed.
+
+Parameter ``p``:
+    Parameters controlling layout generation and clocking.
+
+Parameter ``st``:
+    Statistics object used to collect runtime and layout information.)doc";
+
+static const char *__doc_fiction_detail_plane_impl_ntk = R"doc(The input network wrapped in a fanout view.)doc";
+
+static const char *__doc_fiction_detail_plane_impl_plane_impl = R"doc()doc";
+
+static const char *__doc_fiction_detail_plane_impl_po_counter = R"doc(Primary output counter.)doc";
+
+static const char *__doc_fiction_detail_plane_impl_ps = R"doc(The parameters controlling the planar layout from a network embedding.)doc";
+
+static const char *__doc_fiction_detail_plane_impl_pst = R"doc(Reference to the statistics collected during planar layout generation.)doc";
+
+static const char *__doc_fiction_detail_plane_impl_run = R"doc()doc";
 
 static const char *__doc_fiction_detail_post_layout_optimization_impl = R"doc()doc";
 
@@ -17088,6 +17458,46 @@ Parameter ``file``:
 Parameter ``rfun``:
     The actual parsing function.)doc";
 
+static const char *__doc_fiction_node_duplication_planarization =
+R"doc(Implements a planarization mechanism for networks from the paper
+\"Fabricatable Interconnect and Molecular QCA Circuits\" by Amitabh
+Chaudhary, Danny Ziyi Chen, Xiaobo Sharon Hu, Michael T. Niemier,
+Ramprasad Ravichandran and Kevin Whitton in IEEE Transactions on
+Computer-Aided Design of Integrated Circuits and Systems, Volume 26,
+2007.
+
+The planarization achieved by this function solves the Node
+Duplication Crossing Minimization (NDCE) problem by finding the
+shortest x-y path in the H-graph for every level in the network. An
+H-graph describes edge relations between two levels in a network, with
+one level assumed as fixed, starting at the Primary Outputs (POs). By
+finding the shortest path from the source (x) to the sink (y) in this
+H-graph, an optimal solution for the NDCE problem for each level is
+found. The function traverses from the Primary Outputs (POs) towards
+the Primary Inputs (PIs).
+
+Template parameter ``Ntk``:
+    Source network type.
+
+Parameter ``ntk``:
+    Source network to be utilized for the planarization.
+
+Parameter ``ps``:
+    Node duplication parameters used in the computation.
+
+Returns:
+    A planarized virtual_pi_network.)doc";
+
+static const char *__doc_fiction_node_duplication_planarization_params = R"doc(Parameters for the node duplication algorithm.)doc";
+
+static const char *__doc_fiction_node_duplication_planarization_params_output_order = R"doc(Controls how output nodes are ordered before starting the algorithm.)doc";
+
+static const char *__doc_fiction_node_duplication_planarization_params_output_order_KEEP_PO_ORDER = R"doc(Keep the PO order from the input network.)doc";
+
+static const char *__doc_fiction_node_duplication_planarization_params_output_order_RANDOM_PO_ORDER = R"doc(Randomize the PO order.)doc";
+
+static const char *__doc_fiction_node_duplication_planarization_params_po_order = R"doc(The output order used. Defaults to KEEP_PO_ORDER.)doc";
+
 static const char *__doc_fiction_normalize_layout_coordinates =
 R"doc(A new layout is constructed and returned that is equivalent to the
 given cell-level layout. However, its coordinates are normalized,
@@ -18416,6 +18826,65 @@ Parameter ``node2pos``:
 
 Returns:
     Signal to the newly placed gate in `lyt`.)doc";
+
+static const char *__doc_fiction_planar_layout_from_network_embedding_params = R"doc(Parameters for the planar layout from network embedding algorithm.)doc";
+
+static const char *__doc_fiction_planar_layout_from_network_embedding_params_number_of_clock_phases = R"doc(Number of clock phases to use. 3 and 4 are supported.)doc";
+
+static const char *__doc_fiction_planar_layout_from_network_embedding_params_verbose = R"doc(Verbosity.)doc";
+
+static const char *__doc_fiction_planar_layout_from_network_embedding_stats = R"doc(This struct stores statistics about the planar layout design process.)doc";
+
+static const char *__doc_fiction_planar_layout_from_network_embedding_stats_duration = R"doc(Runtime of the planar layout design process.)doc";
+
+static const char *__doc_fiction_planar_layout_from_network_embedding_stats_num_crossings = R"doc(Number of crossings.)doc";
+
+static const char *__doc_fiction_planar_layout_from_network_embedding_stats_num_gates = R"doc(Number of gates.)doc";
+
+static const char *__doc_fiction_planar_layout_from_network_embedding_stats_num_wires = R"doc(Number of wires.)doc";
+
+static const char *__doc_fiction_planar_layout_from_network_embedding_stats_report =
+R"doc(Reports the statistics to the given output stream.
+
+Parameter ``out``:
+    Output stream.)doc";
+
+static const char *__doc_fiction_planar_layout_from_network_embedding_stats_x_size = R"doc(Layout width.)doc";
+
+static const char *__doc_fiction_planar_layout_from_network_embedding_stats_y_size = R"doc(Layout height.)doc";
+
+static const char *__doc_fiction_plane =
+R"doc(This algorithm constructs a planar layout from the planar embedding of
+a logic network, forming the Planar Layout from Network Embedding
+(PLANE) methodology. It provides a fully planar physical design flow
+for Field-Coupled Nanocomputing (FCN) circuits. The algorithm operates
+on a logic network with an existing planar embedding, represented as a
+`mutable_rank_view`, and preserves this embedding during placement and
+routing.
+
+In this approach, each logic level of the network is mapped to a
+diagonal in the layout, while nodes within the same level are placed
+according to their rank positions in the planar embedding. This
+ensures a crossing-free, scalable, and layout-consistent mapping from
+logic to physical design.
+
+Template parameter ``Lyt``:
+    Gate-level layout type.
+
+Template parameter ``Ntk``:
+    Logic network type.
+
+Parameter ``ntk``:
+    Planar logic network to be placed and routed.
+
+Parameter ``ps``:
+    Configuration parameters for the physical design process.
+
+Parameter ``pst``:
+    Optional statistics object to collect runtime and layout metrics.
+
+Returns:
+    A fully planar gate-level layout of type `Lyt`.)doc";
 
 static const char *__doc_fiction_pointy_top_hex = R"doc(\verbatim / \ / \ | | | | \ / \ / \endverbatim)doc";
 
