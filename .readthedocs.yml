@@ -5,6 +5,8 @@ sphinx:
 
 build:
   os: ubuntu-24.04
+  apt_packages:
+    - mold
   tools:
     python: "3.12"
 
@@ -25,6 +27,9 @@ build:
       - asdf plugin add uv
       - asdf install uv latest
       - asdf global uv latest
+      # Build mnt.pyfiction and install its dependencies
+      - PYTHONMALLOC=malloc uv sync --frozen --no-dev --group docs
     build:
       html:
-        - uv run --frozen --no-dev --group docs -m sphinx -T -b html -d docs/_build/doctrees -D language=en docs $READTHEDOCS_OUTPUT/html
+        # Build the HTML documentation using Sphinx
+        - uv run -m sphinx -T -b html -d docs/_build/doctrees -D language=en docs $READTHEDOCS_OUTPUT/html

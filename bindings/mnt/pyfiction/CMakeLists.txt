@@ -8,10 +8,15 @@ list(APPEND CMAKE_INSTALL_RPATH ${BASEPOINT}
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 
+set(PYFICTION_LTO_OPTIONS "")
+if(FICTION_ENABLE_IPO)
+  set(PYFICTION_LTO_OPTIONS THIN_LTO)
+endif()
+
 pybind11_add_module(
   pyfiction
-  # Prefer thin LTO if available
-  THIN_LTO pyfiction.cpp)
+  # Prefer thin LTO if available AND if IPO is enabled globally
+  ${PYFICTION_LTO_OPTIONS} pyfiction.cpp)
 target_link_libraries(pyfiction PRIVATE libfiction)
 target_include_directories(pyfiction
                            PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
