@@ -1,5 +1,8 @@
 version: 2
 
+sphinx:
+  configuration: docs/conf.py
+
 build:
   os: ubuntu-24.04
   tools:
@@ -11,14 +14,12 @@ build:
       - (git --no-pager log --pretty="tformat:%s -- %b" -1 | grep -viq "skip ci") || exit 183
       # Skip docs build if there are no changes related to docs
       - |
-        if [ "$READTHEDOCS_VERSION_TYPE" = "external" ] && git diff --quiet origin/main -- docs/ .readthedocs.yaml include/fiction/ bindings/mnt/ .github/contributing* .github/support*;
+        if [ "$READTHEDOCS_VERSION_TYPE" = "external" ] && git diff --quiet origin/main -- docs/ .readthedocs.yaml pyproject.toml include/fiction/ bindings/mnt/;
         then
           exit 183;
         fi
       # Unshallow the git clone and fetch tags to get proper version information
       - git fetch --unshallow --tags
-      # Ensure submodules are checked out
-      - git submodule update --init --recursive
     pre_build:
       # Set up uv
       - asdf plugin add uv
