@@ -17,11 +17,11 @@
 using namespace fiction;
 
 /**
- * @brief Creates a 4-pair BDL wire layout with 1 perturber, where each pair belongs to a different clock phase.
+ * @brief Creates a 5-pair BDL wire layout with 1 perturber, where each pair belongs to one clock phase.
  *
- * @return Pre-configured SiDB layout with 9 cells across 4 clock zones.
+ * @return Pre-configured SiDB layout with 11 cells across 5 clock zones.
  */
-static sidb_100_cell_clk_lyt_siqad create_4_pair_bdl_wire_layout()
+static sidb_100_cell_clk_lyt_siqad create_5_pair_bdl_wire_layout()
 {
     sidb_100_cell_clk_lyt_siqad lyt{};
 
@@ -47,6 +47,11 @@ static sidb_100_cell_clk_lyt_siqad create_4_pair_bdl_wire_layout()
     lyt.assign_cell_type({23, 0, 0}, sidb_technology::NORMAL);
     lyt.assign_clock_number({23, 0, 0}, 3);
 
+    lyt.assign_cell_type({27, 0, 0}, sidb_technology::NORMAL);
+    lyt.assign_clock_number({27, 0, 0}, 0);
+    lyt.assign_cell_type({29, 0, 0}, sidb_technology::NORMAL);
+    lyt.assign_clock_number({29, 0, 0}, 0);
+
     return lyt;
 }
 
@@ -67,25 +72,25 @@ create_default_params(const sidb_simulation_engine engine = sidb_simulation_engi
     return params;
 }
 
-// All 9 cell positions used in the layout, ordered by x-coordinate
-static constexpr std::array<std::pair<int32_t, int32_t>, 9> ALL_CELLS = {
-    {{0, 0}, {3, 0}, {5, 0}, {9, 0}, {11, 0}, {15, 0}, {17, 0}, {21, 0}, {23, 0}}};
+// All 11 cell positions used in the layout, ordered by x-coordinate
+static constexpr std::array<std::pair<int32_t, int32_t>, 11> ALL_CELLS = {
+    {{0, 0}, {3, 0}, {5, 0}, {9, 0}, {11, 0}, {15, 0}, {17, 0}, {21, 0}, {23, 0}, {27, 0}, {29, 0}}};
 
 // Expected charge states for each of the 8 clock phases
 // Phases 0-3 form one full cycle, phases 4-7 repeat it
 static constexpr auto NEG = sidb_charge_state::NEGATIVE;
 static constexpr auto NEU = sidb_charge_state::NEUTRAL;
 // clang-format off
-static constexpr std::array<std::array<sidb_charge_state, 9>, 8> EXPECTED_CHARGES = {{
-    //  (0,0) (3,0) (5,0) (9,0) (11,0) (15,0) (17,0) (21,0) (23,0)
-    {   NEG,  NEU,  NEG,  NEU,  NEU,   NEU,   NEU,   NEU,   NEU },  // phase 0
-    {   NEG,  NEU,  NEG,  NEU,  NEG,   NEU,   NEU,   NEU,   NEU },  // phase 1
-    {   NEU,  NEU,  NEU,  NEU,  NEG,   NEU,   NEG,   NEU,   NEU },  // phase 2
-    {   NEU,  NEU,  NEU,  NEU,  NEU,   NEU,   NEG,   NEU,   NEG },  // phase 3
-    {   NEG,  NEU,  NEG,  NEU,  NEU,   NEU,   NEU,   NEU,   NEG },  // phase 4
-    {   NEG,  NEU,  NEG,  NEU,  NEG,   NEU,   NEU,   NEU,   NEU },  // phase 5
-    {   NEU,  NEU,  NEU,  NEU,  NEG,   NEU,   NEG,   NEU,   NEU },  // phase 6
-    {   NEU,  NEU,  NEU,  NEU,  NEU,   NEU,   NEG,   NEU,   NEG },  // phase 7
+static constexpr std::array<std::array<sidb_charge_state, 11>, 8> EXPECTED_CHARGES = {{
+    //  (0,0) (3,0) (5,0) (9,0) (11,0) (15,0) (17,0) (21,0) (23,0) (27,0) (29,0)
+    {   NEG,  NEU,  NEG,  NEU,  NEU,   NEU,   NEU,   NEU,   NEU,   NEU,   NEG },  // phase 0
+    {   NEG,  NEU,  NEG,  NEU,  NEG,   NEU,   NEU,   NEU,   NEU,   NEU,   NEG },  // phase 1
+    {   NEU,  NEU,  NEU,  NEU,  NEG,   NEU,   NEG,   NEU,   NEU,   NEU,   NEU },  // phase 2
+    {   NEU,  NEU,  NEU,  NEU,  NEU,   NEU,   NEG,   NEU,   NEG,   NEU,   NEU },  // phase 3
+    {   NEG,  NEU,  NEG,  NEU,  NEU,   NEU,   NEU,   NEU,   NEG,   NEU,   NEG },  // phase 4
+    {   NEG,  NEU,  NEG,  NEU,  NEG,   NEU,   NEU,   NEU,   NEU,   NEU,   NEG },  // phase 5
+    {   NEU,  NEU,  NEU,  NEU,  NEG,   NEU,   NEG,   NEU,   NEU,   NEU,   NEU },  // phase 6
+    {   NEU,  NEU,  NEU,  NEU,  NEU,   NEU,   NEG,   NEU,   NEG,   NEU,   NEU },  // phase 7
 }};
 // clang-format on
 
@@ -108,7 +113,7 @@ static void validate_emulation_result(const clock_emulator_result<Lyt>& result, 
         // the latter is crucial because the emulation process utilizes temporary defects
         // as fixed static charges to emulate Hold phase behavior
         REQUIRE(phase_result.charge_distributions.size() == 1);
-        CHECK(phase_result.charge_distributions.front().num_cells() == 9);
+        CHECK(phase_result.charge_distributions.front().num_cells() == 11);
         CHECK(phase_result.charge_distributions.front().num_defects() == 0);
 
         // metadata should be intact
@@ -143,7 +148,7 @@ TEST_CASE("Clock emulator instantiation test", "[clock-emulator]")
 
 TEST_CASE("4-pair BDL wire emulation test with QuickExact", "[clock-emulator]")
 {
-    const auto lyt    = create_4_pair_bdl_wire_layout();
+    const auto lyt    = create_5_pair_bdl_wire_layout();
     const auto params = create_default_params(sidb_simulation_engine::QUICKEXACT);
 
     const auto result = emulate_clocks(lyt, 8, params);
@@ -152,12 +157,14 @@ TEST_CASE("4-pair BDL wire emulation test with QuickExact", "[clock-emulator]")
 
     // pretty print the results for visual inspection
     result.pretty_print();
+
+    // result.animate(300, 10);
 }
 
 #if (FICTION_ALGLIB_ENABLED)
 TEST_CASE("4-pair BDL wire emulation test with ClusterComplete", "[clock-emulator]")
 {
-    const auto lyt    = create_4_pair_bdl_wire_layout();
+    const auto lyt    = create_5_pair_bdl_wire_layout();
     const auto params = create_default_params(sidb_simulation_engine::CLUSTERCOMPLETE);
 
     const auto result = emulate_clocks(lyt, 8, params);
