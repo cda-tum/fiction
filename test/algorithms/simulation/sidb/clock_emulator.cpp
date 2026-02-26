@@ -83,14 +83,14 @@ static constexpr auto NEU = sidb_charge_state::NEUTRAL;
 // clang-format off
 static constexpr std::array<std::array<sidb_charge_state, 11>, 8> EXPECTED_CHARGES = {{
     //  (0,0) (3,0) (5,0) (9,0) (11,0) (15,0) (17,0) (21,0) (23,0) (27,0) (29,0)
-    {   NEG,  NEU,  NEG,  NEU,  NEU,   NEU,   NEU,   NEU,   NEU,   NEU,   NEG },  // phase 0
-    {   NEG,  NEU,  NEG,  NEU,  NEG,   NEU,   NEU,   NEU,   NEU,   NEU,   NEG },  // phase 1
-    {   NEU,  NEU,  NEU,  NEU,  NEG,   NEU,   NEG,   NEU,   NEU,   NEU,   NEU },  // phase 2
-    {   NEU,  NEU,  NEU,  NEU,  NEU,   NEU,   NEG,   NEU,   NEG,   NEU,   NEU },  // phase 3
-    {   NEG,  NEU,  NEG,  NEU,  NEU,   NEU,   NEU,   NEU,   NEG,   NEU,   NEG },  // phase 4
-    {   NEG,  NEU,  NEG,  NEU,  NEG,   NEU,   NEU,   NEU,   NEU,   NEU,   NEG },  // phase 5
-    {   NEU,  NEU,  NEU,  NEU,  NEG,   NEU,   NEG,   NEU,   NEU,   NEU,   NEU },  // phase 6
-    {   NEU,  NEU,  NEU,  NEU,  NEU,   NEU,   NEG,   NEU,   NEG,   NEU,   NEU },  // phase 7
+    { NEG,  NEU,  NEG,  NEU,  NEU,  NEU,  NEU,  NEU,  NEU,  NEU,  NEG },  // phase 0
+    { NEG,  NEU,  NEG,  NEU,  NEG,  NEU,  NEU,  NEU,  NEU,  NEU,  NEG },  // phase 1
+    { NEU,  NEU,  NEU,  NEU,  NEG,  NEU,  NEG,  NEU,  NEU,  NEU,  NEU },  // phase 2
+    { NEU,  NEU,  NEU,  NEU,  NEU,  NEU,  NEG,  NEU,  NEG,  NEU,  NEU },  // phase 3
+    { NEG,  NEU,  NEG,  NEU,  NEU,  NEU,  NEU,  NEU,  NEG,  NEU,  NEG },  // phase 4
+    { NEG,  NEU,  NEG,  NEU,  NEG,  NEU,  NEU,  NEU,  NEU,  NEU,  NEG },  // phase 5
+    { NEU,  NEU,  NEU,  NEU,  NEG,  NEU,  NEG,  NEU,  NEU,  NEU,  NEU },  // phase 6
+    { NEU,  NEU,  NEU,  NEU,  NEU,  NEU,  NEG,  NEU,  NEG,  NEU,  NEU },  // phase 7
 }};
 // clang-format on
 
