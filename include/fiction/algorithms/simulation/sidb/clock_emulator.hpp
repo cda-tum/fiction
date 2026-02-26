@@ -5,6 +5,7 @@
 #ifndef FICTION_CLOCK_EMULATOR_HPP
 #define FICTION_CLOCK_EMULATOR_HPP
 
+#include <ctime>
 #if (FICTION_ALGLIB_ENABLED)
 #include "fiction/algorithms/simulation/sidb/clustercomplete.hpp"
 #endif  // FICTION_ALGLIB_ENABLED
@@ -13,8 +14,12 @@
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
+#include "fiction/io/print_layout.hpp"
+#include "fiction/technology/cell_technologies.hpp"
+#include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/traits.hpp"
 
+#include <any>
 #include <cassert>
 #include <cstdint>
 #include <stdexcept>
@@ -32,7 +37,19 @@ struct clock_emulator_result
     void pretty_print() const
     {
         // TODO: print every clock phase result on the console with a small delay in between to simulate the clock
-        // phases. This is just a placeholder for now.
+        // phases.
+        for (const auto& result : clock_phase_results)
+        {
+            if (!result.charge_distributions.empty())
+            {
+                std::cout << "Clock phase: "
+                          << std::to_string(
+                                 std::any_cast<uint8_t>(result.additional_simulation_parameters.at("clock_phase")))
+                          << "\n";
+                print_layout(result.charge_distributions[0]);
+                std::cout << "-----------------------------\n";
+            }
+        }
     }
 };
 
@@ -87,14 +104,58 @@ class clock_emulator_impl
         // reserve space for each clock phase result
         emulation_result.clock_phase_results.reserve(num_clock_phases);
 
+        // std::cout << "Initial layout:\n";
+        // print_layout(layout);
+        // std::cout << "-----------------------------\n";
+
         // perform clock simulation for each time step
         for (std::size_t i = 0; i < num_clock_phases; ++i)
         {
-            // TODO: extract the SiDBs of the current clock phase and put them in a new layout
+            // current clock phase is determined by the current time step modulo the maximum number of clock phases
+            const auto current_clock_phase = static_cast<uint8_t>(i % layout.num_clocks());
+            // extract only the SiDBs of the current clock phase and put them in a new layout
+            const auto layout_of_clock_i = extract_sidbs_of_clock_phase(current_clock_phase);
+
+            // std::cout << "Simulating clock phase " << current_clock_phase << "...\n";
+            // print_layout(layout_of_clock_i);
+
             // TODO: assign the static charges of the previous simulation to the new layout
 
-            // simulate the new layout
-            const auto simulation_result = physical_simulation_of_layout(layout);
+            // simulate the new layout with the user-selected simulation engine and parameters
+            auto simulation_result = physical_simulation_of_layout(layout_of_clock_i);
+            simulation_result.additional_simulation_parameters["clock_phase"] = current_clock_phase;
+            // NOTE: the simulation can yield multiple ground states in case of degenerate states. In this case, we just
+            // take the first ground state for the emulation result. This is a simplification that can be improved in
+            // the future by taking all ground states and simulating the next clock phase for each of them. This would
+            // lead to a tree of possible clock phase evolutions, which could be interesting to analyze.
+
+            // remove all charge distributions from the simulation result except the first groundstate
+            if (const auto groundstates = simulation_result.groundstates(); !groundstates.empty())
+            {
+                // std::cout << "Ground state:\n";
+                // print_layout(groundstates[0]);
+
+                simulation_result.charge_distributions = {groundstates[0]};
+            }
+            else
+            {
+                // std::cout << "No ground state found for clock phase " << current_clock_phase << "!\n";
+            }
+
+            // FIXME: This fails when the groundstate is empty, because there was no layout to simulate, i.e., no clocks
+            // of phase i assigned. add all previously removed SiDBs back to the layout as neutral charges
+            layout.foreach_cell(
+                [this, &simulation_result, current_clock_phase](const auto& cell)
+                {
+                    auto& cds = simulation_result.charge_distributions[0];
+                    if (layout.get_clock_number(cell) != current_clock_phase)
+                    {
+                        cds.assign_cell_type(cell, layout.get_cell_type(cell),
+                                             false);  // TODO: refactor bool as enum class
+                        cds.assign_charge_state(cell, sidb_charge_state::NEUTRAL, charge_index_mode::KEEP_CHARGE_INDEX);
+                        // TODO also restore cell modes, cell names, etc.
+                    }
+                });
 
             // TODO: take the the charge states of the current simulation result and store them as static charges for
             // the next clock phase
@@ -126,6 +187,27 @@ class clock_emulator_impl
      */
     clock_emulator_result<Lyt> emulation_result{};
 
+    /**
+     * @brief Extracts the SiDBs of the current clock phase and puts them in a new layout.
+     *
+     * @param clock_phase The current clock phase index.
+     * @return A new layout containing only the SiDBs of the current clock phase.
+     */
+    [[nodiscard]] Lyt extract_sidbs_of_clock_phase(const std::size_t clock_phase) const
+    {
+        auto new_layout = layout.clone();
+
+        layout.foreach_cell(
+            [&new_layout, clock_phase](const auto& cell)
+            {
+                if (new_layout.get_clock_number(cell) != clock_phase)
+                {
+                    new_layout.assign_cell_type(cell, sidb_technology::EMPTY);
+                }
+            });
+
+        return new_layout;
+    }
     /**
      * This function conducts physical simulation of the given SiDB layout.
      *
@@ -178,7 +260,7 @@ class clock_emulator_impl
  * @param num_clock_phases The number of clock phases to simulate.
  * @param ps Clock emulation parameters.
  * @return Placeholder simulation result for the scaffold.
- * @throw std::invalid_argument if an unsupported simulation engine is selected in the parameters.
+ * @throw std::invalid_argument if an unsupported simulation engine is selected via the parameters.
  */
 template <typename Lyt>
 [[nodiscard]] clock_emulator_result<Lyt> emulate_clocks(const Lyt& lyt, const std::size_t num_clock_phases,
