@@ -5,7 +5,6 @@
 #ifndef FICTION_CLOCK_EMULATOR_HPP
 #define FICTION_CLOCK_EMULATOR_HPP
 
-#include <ctime>
 #if (FICTION_ALGLIB_ENABLED)
 #include "fiction/algorithms/simulation/sidb/clustercomplete.hpp"
 #endif  // FICTION_ALGLIB_ENABLED
@@ -23,39 +22,124 @@
 
 #include <fmt/format.h>
 
+#include <algorithm>
 #include <any>
 #include <cassert>
+#include <chrono>
 #include <cstdint>
-#include <cstdlib>
 #include <iostream>
+#include <sstream>
 #include <stdexcept>
+#include <string>
+#include <thread>
 #include <utility>
 #include <vector>
 
 namespace fiction
 {
 
+/**
+ * @brief Result type for the clock emulation algorithm.
+ *
+ * Holds the simulation results for each clock phase, and provides utilities
+ * for printing and animating them on the console.
+ *
+ * @tparam Lyt SiDB cell-level layout type.
+ */
 template <typename Lyt>
 struct clock_emulator_result
 {
+    /// Simulation results for each clock phase.
     std::vector<sidb_simulation_result<Lyt>> clock_phase_results{};
 
+    /**
+     * @brief Prints all clock phase results to the console sequentially.
+     *
+     * Each phase is printed with a header showing the clock phase index, the charge distribution, and a separator.
+     */
     void pretty_print() const
     {
-        // TODO: print every clock phase result on the console with a small delay in between to simulate the clock
-        // phases.
-        for (const auto& result : clock_phase_results)
+        for (std::size_t i = 0; i < clock_phase_results.size(); ++i)
         {
+            const auto& result = clock_phase_results[i];
+
             if (!result.charge_distributions.empty())
             {
-                std::cout << fmt::format(
-                    "Clock phase: {}\n",
-                    std::any_cast<uint8_t>(result.additional_simulation_parameters.at("clock_phase")));
+                const auto phase = std::any_cast<uint8_t>(result.additional_simulation_parameters.at("clock_phase"));
+
+                std::cout << fmt::format("Step {}/{} — Clock phase: {}\n", i + 1, clock_phase_results.size(), phase);
                 print_layout(result.charge_distributions[0]);
-                std::cout << fmt::format(
-                    "{}", "------------------------------------------------------------------------------\n");
+                std::cout << std::string(80, '-') << '\n';
             }
         }
+    }
+    /**
+     * @brief Animates the clock phase results on the console by overwriting the previous frame.
+     *
+     * Uses ANSI escape codes to move the cursor up and overwrite the previous output,
+     * creating a terminal animation effect. A configurable delay between frames controls playback speed.
+     *
+     * @param delay_ms Delay between frames in milliseconds (default: 500).
+     * @param repetitions Number of times to loop through the full animation (default: 1).
+     */
+    void animate(const std::size_t delay_ms = 500, const std::size_t repetitions = 1) const
+    {
+        if (clock_phase_results.empty() || repetitions == 0)
+        {
+            return;
+        }
+
+        // number of lines in the previous frame (used to overwrite)
+        std::size_t previous_line_count = 0;
+        // global step counter across all repetitions
+        std::size_t step        = 0;
+        const auto  total_steps = clock_phase_results.size() * repetitions;
+
+        for (std::size_t r = 0; r < repetitions; ++r)
+        {
+            for (std::size_t i = 0; i < clock_phase_results.size(); ++i)
+            {
+                const auto& result = clock_phase_results[i];
+
+                if (result.charge_distributions.empty())
+                {
+                    ++step;
+                    continue;
+                }
+
+                // render the frame to a string to count lines
+                std::ostringstream frame_stream;
+
+                const auto phase = std::any_cast<uint8_t>(result.additional_simulation_parameters.at("clock_phase"));
+
+                frame_stream << fmt::format("Step {}/{} — Clock phase: {}\n", step + 1, total_steps, phase);
+                print_layout(result.charge_distributions[0], frame_stream);
+
+                const auto frame = frame_stream.str();
+
+                // count lines in the frame
+                const auto line_count = static_cast<std::size_t>(std::count(frame.begin(), frame.end(), '\n'));
+
+                // move cursor up to overwrite the previous frame (skip for the first frame)
+                if (previous_line_count > 0)
+                {
+                    std::cout << fmt::format("\033[{}A\033[J", previous_line_count);
+                }
+
+                std::cout << frame << std::flush;
+                previous_line_count = line_count;
+
+                ++step;
+
+                // wait before the next frame (skip after the very last one)
+                if (step < total_steps)
+                {
+                    std::this_thread::sleep_for(std::chrono::milliseconds(delay_ms));
+                }
+            }
+        }
+
+        std::cout << '\n';
     }
 };
 
@@ -113,11 +197,6 @@ class clock_emulator_impl
     {
         // reserve space for each clock phase result
         emulation_result.clock_phase_results.reserve(num_clock_phases);
-
-        std::cout << fmt::format("{}", "Initial layout:\n");
-        print_layout(layout);
-        std::cout << fmt::format("{}",
-                                 "------------------------------------------------------------------------------\n");
 
         cell_charge_assignments charges_from_previous_phase{};
 
