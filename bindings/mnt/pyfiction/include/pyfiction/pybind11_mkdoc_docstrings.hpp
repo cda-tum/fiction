@@ -2721,6 +2721,23 @@ Template parameter ``Lyt``:
 Parameter ``lyt``:
     The layout whose routing is to be deleted.)doc";
 
+static const char *__doc_fiction_clock_emulator_params = R"doc(Parameter bundle for the clock emulation algorithm.)doc";
+
+static const char *__doc_fiction_clock_emulator_params_sim_engine =
+R"doc(The simulation engine to be used for each step of the clock emulation.
+$.. warning::
+
+ExGS and QuickSim are not supported in clock emulation, because they
+do not support static charges.)doc";
+
+static const char *__doc_fiction_clock_emulator_params_sim_params = R"doc(Physical simulation parameters used during clock emulation.)doc";
+
+static const char *__doc_fiction_clock_emulator_result = R"doc()doc";
+
+static const char *__doc_fiction_clock_emulator_result_clock_phase_results = R"doc()doc";
+
+static const char *__doc_fiction_clock_emulator_result_pretty_print = R"doc()doc";
+
 static const char *__doc_fiction_clocked_layout =
 R"doc(A layout type to layer on top of a coordinate layout, e.g.,
 `cartesian_layout`, `hexagonal_layout`, or `tile_based_layout`. This
@@ -5258,6 +5275,94 @@ Parameter ``lyt``:
 
 Parameter ``moved_gates``:
     Moved gates counter to decrement if PO is moved.)doc";
+
+static const char *__doc_fiction_detail_clock_emulator_impl =
+R"doc(Implementation class for the clock emulation algorithm.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.)doc";
+
+static const char *__doc_fiction_detail_clock_emulator_impl_apply_charge_states =
+R"doc(Applies the given charge states to the given layout.
+
+Parameter ``lyt``:
+    The layout to apply charges to.
+
+Parameter ``charges``:
+    The charge states to apply.)doc";
+
+static const char *__doc_fiction_detail_clock_emulator_impl_assign_charges_as_defects =
+R"doc(Assigns the given charge states as defects to the given layout.
+
+Parameter ``lyt``:
+    The layout to assign charges to.
+
+Parameter ``charges``:
+    The charge states to assign.)doc";
+
+static const char *__doc_fiction_detail_clock_emulator_impl_clock_emulator_impl =
+R"doc(Constructs the clock emulation implementation.
+
+Parameter ``lyt``:
+    Layout to emulate clocks on.
+
+Parameter ``num_phases``:
+    The number of clock phases to simulate.
+
+Parameter ``ps``:
+    Clock emulation parameters.)doc";
+
+static const char *__doc_fiction_detail_clock_emulator_impl_emulation_result = R"doc(Struct to gather simulation results.)doc";
+
+static const char *__doc_fiction_detail_clock_emulator_impl_extract_non_neutral_charges_of_phase =
+R"doc(Extracts all non-neutral charge states of a given clock phase.
+
+Parameter ``lyt``:
+    The layout to extract charges from.
+
+Parameter ``clock_phase``:
+    The clock phase to extract charges from.
+
+Returns:
+    The extracted charge states.)doc";
+
+static const char *__doc_fiction_detail_clock_emulator_impl_extract_sidbs_of_clock_phase =
+R"doc(Extracts the SiDBs of the current clock phase and puts them in a new
+layout.
+
+Parameter ``clock_phase``:
+    The current clock phase index.
+
+Returns:
+    A new layout containing only the SiDBs of the current clock phase.)doc";
+
+static const char *__doc_fiction_detail_clock_emulator_impl_layout = R"doc(Layout to emulate clocking behavior of.)doc";
+
+static const char *__doc_fiction_detail_clock_emulator_impl_num_clock_phases = R"doc(The number of clock phases to simulate.)doc";
+
+static const char *__doc_fiction_detail_clock_emulator_impl_params = R"doc(Clock emulation parameters.)doc";
+
+static const char *__doc_fiction_detail_clock_emulator_impl_physical_simulation_of_layout =
+R"doc(Conduct physical simulation of the given SiDB layout with a user-
+selected simulation engine.
+
+Parameter ``lyt``:
+    SiDB layout to simulate.
+
+Returns:
+    Simulation results.)doc";
+
+static const char *__doc_fiction_detail_clock_emulator_impl_remove_all_defects =
+R"doc(Removes all defects from the given layout.
+
+Parameter ``lyt``:
+    The layout to remove defects from.)doc";
+
+static const char *__doc_fiction_detail_clock_emulator_impl_run =
+R"doc(Executes the clock emulation algorithm.
+
+Returns:
+    Placeholder simulation result for the scaffold.)doc";
 
 static const char *__doc_fiction_detail_clustercomplete_impl = R"doc()doc";
 
@@ -11752,6 +11857,32 @@ information on the target node. This is a little bit hacky and depends
 on the way mockturtle's dot drawer works.)doc";
 
 static const char *__doc_fiction_edge_color_view_drawer_signal_style = R"doc()doc";
+
+static const char *__doc_fiction_emulate_clocks =
+R"doc(Emulates clocking behavior of a given SiDB layout.
+
+.. warning::
+    ExGS and QuickSim cannot be used as simulation engines for clock
+    emulation, because they do not support static charges.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Parameter ``lyt``:
+    The layout to emulate clocks on.
+
+Parameter ``num_clock_phases``:
+    The number of clock phases to simulate.
+
+Parameter ``ps``:
+    Clock emulation parameters.
+
+Returns:
+    Placeholder simulation result for the scaffold.
+
+Throws:
+    std::invalid_argument if an unsupported simulation engine is
+    selected via the parameters.)doc";
 
 static const char *__doc_fiction_energy_calculation =
 R"doc(An enumeration of modes for calculation of the electrostatic potential
