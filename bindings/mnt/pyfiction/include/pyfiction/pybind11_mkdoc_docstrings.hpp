@@ -2732,11 +2732,36 @@ do not support static charges.)doc";
 
 static const char *__doc_fiction_clock_emulator_params_sim_params = R"doc(Physical simulation parameters used during clock emulation.)doc";
 
-static const char *__doc_fiction_clock_emulator_result = R"doc()doc";
+static const char *__doc_fiction_clock_emulator_result =
+R"doc(Result type for the clock emulation algorithm.
 
-static const char *__doc_fiction_clock_emulator_result_clock_phase_results = R"doc()doc";
+Holds the simulation results for each clock phase, and provides
+utilities for printing and animating them on the console.
 
-static const char *__doc_fiction_clock_emulator_result_pretty_print = R"doc()doc";
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.)doc";
+
+static const char *__doc_fiction_clock_emulator_result_animate =
+R"doc(Animates the clock phase results on the console by overwriting the
+previous frame.
+
+Uses ANSI escape codes to move the cursor up and overwrite the
+previous output, creating a terminal animation effect. A configurable
+delay between frames controls playback speed.
+
+Parameter ``delay_ms``:
+    Delay between frames in milliseconds (default: 500).
+
+Parameter ``repetitions``:
+    Number of times to loop through the full animation (default: 1).)doc";
+
+static const char *__doc_fiction_clock_emulator_result_clock_phase_results = R"doc(Simulation results for each clock phase.)doc";
+
+static const char *__doc_fiction_clock_emulator_result_pretty_print =
+R"doc(Prints all clock phase results to the console sequentially.
+
+Each phase is printed with a header showing the clock phase index, the
+charge distribution, and a separator.)doc";
 
 static const char *__doc_fiction_clocked_layout =
 R"doc(A layout type to layer on top of a coordinate layout, e.g.,
