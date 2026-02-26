@@ -207,7 +207,7 @@ void charge_distribution_surface_layout(pybind11::module& m, const std::string& 
 
 }  // namespace detail
 
-inline void charge_distribution_surfaces(pybind11::module& m)
+void charge_distribution_surfaces(pybind11::module& m)
 {
     namespace py = pybind11;
 

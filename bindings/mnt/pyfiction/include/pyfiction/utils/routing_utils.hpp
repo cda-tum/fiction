@@ -81,7 +81,7 @@ void clear_routing(pybind11::module& m)
 
 }  // namespace detail
 
-inline void routing_utils(pybind11::module& m)
+void routing_utils(pybind11::module& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 

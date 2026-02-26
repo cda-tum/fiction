@@ -12,7 +12,7 @@
 namespace pyfiction
 {
 
-inline void version_info(pybind11::module& m)
+void version_info(pybind11::module& m)
 {
     m.attr("__version__")       = fiction::FICTION_VERSION;
     m.attr("__repo__")          = fiction::FICTION_REPO;

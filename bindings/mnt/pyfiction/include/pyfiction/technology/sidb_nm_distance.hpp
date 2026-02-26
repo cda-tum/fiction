@@ -31,7 +31,7 @@ void nanometer_distance(pybind11::module& m, const std::string& lattice = "")
 
 }  // namespace detail
 
-inline void sidb_nm_distance(pybind11::module& m)
+void sidb_nm_distance(pybind11::module& m)
 {
     detail::nanometer_distance<py_sidb_100_lattice>(m, "_100");
     detail::nanometer_distance<py_sidb_111_lattice>(m, "_111");

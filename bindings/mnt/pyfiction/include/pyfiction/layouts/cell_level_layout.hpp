@@ -185,7 +185,7 @@ void fcn_technology_cell_level_layout(pybind11::module& m)
 
 }  // namespace detail
 
-inline void cell_level_layouts(pybind11::module& m)
+void cell_level_layouts(pybind11::module& m)
 {
     detail::fcn_technology_cell_level_layout<fiction::qca_technology>(m);
     detail::fcn_technology_cell_level_layout<fiction::inml_technology>(m);

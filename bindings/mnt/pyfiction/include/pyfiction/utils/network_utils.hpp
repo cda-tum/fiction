@@ -32,7 +32,7 @@ void has_high_degree_fanin_nodes(pybind11::module& m)
 
 }  // namespace detail
 
-inline void network_utils(pybind11::module& m)
+void network_utils(pybind11::module& m)
 {
     namespace py = pybind11;
 

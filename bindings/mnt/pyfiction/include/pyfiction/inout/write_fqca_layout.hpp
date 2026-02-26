@@ -35,7 +35,7 @@ void write_fqca_layout(pybind11::module& m)
 
 }  // namespace detail
 
-inline void write_fqca_layout(pybind11::module& m)
+void write_fqca_layout(pybind11::module& m)
 {
     namespace py = pybind11;
 

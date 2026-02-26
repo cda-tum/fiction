@@ -29,7 +29,7 @@ namespace pyfiction
 /**
  * Unsigned offset coordinates.
  */
-inline void offset_coordinate(pybind11::module& m)
+void offset_coordinate(pybind11::module& m)
 {
     namespace py = pybind11;
     namespace py = pybind11;
@@ -90,7 +90,7 @@ inline void offset_coordinate(pybind11::module& m)
 /**
  * Signed cube coordinates.
  */
-inline void cube_coordinate(pybind11::module& m)
+void cube_coordinate(pybind11::module& m)
 {
     namespace py = pybind11;
     namespace py = pybind11;
@@ -147,7 +147,7 @@ inline void cube_coordinate(pybind11::module& m)
 /**
  * Signed SiQAD coordinates.
  */
-inline void siqad_coordinate(pybind11::module& m)
+void siqad_coordinate(pybind11::module& m)
 {
     namespace py = pybind11;
     namespace py = pybind11;
@@ -204,7 +204,7 @@ inline void siqad_coordinate(pybind11::module& m)
     py::implicitly_convertible<py::tuple, py_siqad_coordinate>();
 }
 
-inline void coordinate_utility(pybind11::module& m)
+void coordinate_utility(pybind11::module& m)
 {
     namespace py = pybind11;
 

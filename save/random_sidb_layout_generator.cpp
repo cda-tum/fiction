@@ -2,9 +2,6 @@
 // Created by marcel on 21.11.23.
 //
 
-#ifndef PYFICTION_RANDOM_SIDB_LAYOUT_GENERATOR_HPP
-#define PYFICTION_RANDOM_SIDB_LAYOUT_GENERATOR_HPP
-
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
@@ -37,7 +34,7 @@ void random_layout_generator_impl(pybind11::module& m)
 
 }  // namespace detail
 
-void random_sidb_layout_generator(pybind11::module& m)
+void random_sidb_layout_generator(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
     namespace py = pybind11;
 
@@ -90,5 +87,3 @@ void random_sidb_layout_generator(pybind11::module& m)
 }
 
 }  // namespace pyfiction
-
-#endif  // PYFICTION_RANDOM_SIDB_LAYOUT_GENERATOR_HPP

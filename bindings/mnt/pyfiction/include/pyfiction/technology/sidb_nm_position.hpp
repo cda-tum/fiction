@@ -30,7 +30,7 @@ void sidb_nm_position(pybind11::module& m)
 
 }  // namespace detail
 
-inline void sidb_nm_position(pybind11::module& m)
+void sidb_nm_position(pybind11::module& m)
 {
     detail::sidb_nm_position<py_charge_distribution_surface>(m);
     detail::sidb_nm_position<py_sidb_layout>(m);

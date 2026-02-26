@@ -20,7 +20,7 @@
 namespace pyfiction
 {
 
-inline void shifted_cartesian_layout(pybind11::module& m)
+void shifted_cartesian_layout(pybind11::module& m)
 {
     namespace py = pybind11;
     namespace py = pybind11;

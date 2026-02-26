@@ -19,7 +19,7 @@
 namespace pyfiction
 {
 
-inline void hexagonal_layout(pybind11::module& m)
+void hexagonal_layout(pybind11::module& m)
 {
     namespace py = pybind11;
     namespace py = pybind11;

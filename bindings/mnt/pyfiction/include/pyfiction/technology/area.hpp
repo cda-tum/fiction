@@ -42,7 +42,7 @@ void area(pybind11::module& m)
 
 }  // namespace detail
 
-inline void area(pybind11::module& m)
+void area(pybind11::module& m)
 {
     detail::area<py_qca_layout>(m);
     detail::area<py_inml_layout>(m);

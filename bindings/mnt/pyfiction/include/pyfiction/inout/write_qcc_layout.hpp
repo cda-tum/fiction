@@ -17,7 +17,7 @@
 namespace pyfiction
 {
 
-inline void write_qcc_layout(pybind11::module& m)
+void write_qcc_layout(pybind11::module& m)
 {
     namespace py = pybind11;
 

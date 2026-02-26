@@ -63,7 +63,7 @@ void place(pybind11::module& m)
 
 }  // namespace detail
 
-inline void placement_utils(pybind11::module& m)
+void placement_utils(pybind11::module& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 

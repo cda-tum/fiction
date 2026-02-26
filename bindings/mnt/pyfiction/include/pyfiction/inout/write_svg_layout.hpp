@@ -20,7 +20,7 @@ namespace pyfiction
 namespace detail
 {
 template <typename Lyt>
-inline void write_sidb_layout_svg_impl(pybind11::module& m)
+void write_sidb_layout_svg_impl(pybind11::module& m)
 {
     namespace py = pybind11;
 
@@ -46,7 +46,7 @@ inline void write_sidb_layout_svg_impl(pybind11::module& m)
 }
 
 template <typename Lyt>
-inline void write_qca_layout_svg_impl(pybind11::module& m)
+void write_qca_layout_svg_impl(pybind11::module& m)
 {
     namespace py = pybind11;
 

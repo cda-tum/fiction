@@ -44,7 +44,7 @@ void read_sqd_layout_111(pybind11::module& m)
 
 }  // namespace detail
 
-inline void read_sqd_layout(pybind11::module& m)
+void read_sqd_layout(pybind11::module& m)
 {
     namespace py = pybind11;
 

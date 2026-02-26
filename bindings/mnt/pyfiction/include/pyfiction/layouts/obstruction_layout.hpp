@@ -43,7 +43,7 @@ void obstruction_layout(pybind11::module& m, const std::string& topology)
 
 }  // namespace detail
 
-inline void obstruction_layouts(pybind11::module& m)
+void obstruction_layouts(pybind11::module& m)
 {
     /**
      * Cartesian obstruction layout.

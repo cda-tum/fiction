@@ -17,7 +17,7 @@
 namespace pyfiction
 {
 
-inline void sidb_defects(pybind11::module& m)
+void sidb_defects(pybind11::module& m)
 {
     namespace py = pybind11;
 

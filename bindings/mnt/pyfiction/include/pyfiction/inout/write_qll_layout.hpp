@@ -33,7 +33,7 @@ void write_qll_layout(pybind11::module& m)
 
 }  // namespace detail
 
-inline void write_qll_layout(pybind11::module& m)
+void write_qll_layout(pybind11::module& m)
 {
     detail::write_qll_layout<py_qca_layout>(m);
     detail::write_qll_layout<py_inml_layout>(m);

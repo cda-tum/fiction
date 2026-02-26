@@ -14,7 +14,7 @@
 namespace pyfiction
 {
 
-inline void sidb_charge_state(pybind11::module& m)
+void sidb_charge_state(pybind11::module& m)
 {
     namespace py = pybind11;
 

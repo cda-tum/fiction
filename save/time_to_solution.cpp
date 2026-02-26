@@ -2,9 +2,6 @@
 // Created by marcel on 14.06.23.
 //
 
-#ifndef PYFICTION_TIME_TO_SOLUTION_HPP
-#define PYFICTION_TIME_TO_SOLUTION_HPP
-
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
@@ -36,7 +33,7 @@ void time_to_solution_impl(pybind11::module& m)
 
 }  // namespace detail
 
-void time_to_solution(pybind11::module& m)
+void time_to_solution(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
     namespace py = pybind11;
 
@@ -82,5 +79,3 @@ void time_to_solution(pybind11::module& m)
 }
 
 }  // namespace pyfiction
-
-#endif  // PYFICTION_TIME_TO_SOLUTION_HPP

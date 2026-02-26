@@ -59,7 +59,7 @@ void random_coordinate(pybind11::module& m)
 
 }  // namespace detail
 
-inline void layout_utils(pybind11::module& m)
+void layout_utils(pybind11::module& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 

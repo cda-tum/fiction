@@ -54,7 +54,7 @@ void sidb_lattice_cell_level_layout(pybind11::module& m)
 
 }  // namespace detail
 
-inline void sidb_lattices(pybind11::module& m)
+void sidb_lattices(pybind11::module& m)
 {
     detail::sidb_lattice_cell_level_layout<fiction::sidb_100_lattice>(m);
     detail::sidb_lattice_cell_level_layout<fiction::sidb_111_lattice>(m);

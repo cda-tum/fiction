@@ -34,7 +34,7 @@ void write_sqd_sim_result(pybind11::module& m)
 
 }  // namespace detail
 
-inline void write_sqd_sim_result(pybind11::module& m)
+void write_sqd_sim_result(pybind11::module& m)
 {
     detail::write_sqd_sim_result<py_sidb_layout>(m);
 }

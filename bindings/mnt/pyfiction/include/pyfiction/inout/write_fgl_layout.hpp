@@ -34,7 +34,7 @@ void write_fgl_layout(pybind11::module& m)
 
 }  // namespace detail
 
-inline void write_fgl_layout(pybind11::module& m)
+void write_fgl_layout(pybind11::module& m)
 {
     detail::write_fgl_layout<py_cartesian_gate_layout>(m);
     detail::write_fgl_layout<py_shifted_cartesian_gate_layout>(m);

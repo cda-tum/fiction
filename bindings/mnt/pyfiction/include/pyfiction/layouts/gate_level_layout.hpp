@@ -312,7 +312,7 @@ void gate_level_layout(pybind11::module& m, const std::string& topology)
 
 }  // namespace detail
 
-inline void gate_level_layouts(pybind11::module& m)
+void gate_level_layouts(pybind11::module& m)
 {
     /**
      * Gate-level clocked Cartesian layout.

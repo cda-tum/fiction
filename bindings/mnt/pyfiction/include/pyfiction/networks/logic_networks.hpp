@@ -173,7 +173,7 @@ void network(pybind11::module& m, const std::string& network_name)
 
 }  // namespace detail
 
-inline void logic_networks(pybind11::module& m)
+void logic_networks(pybind11::module& m)
 {
     /**
      * Logic networks.

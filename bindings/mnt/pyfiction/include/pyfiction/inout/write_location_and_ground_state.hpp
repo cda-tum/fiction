@@ -36,7 +36,7 @@ void write_location_and_ground_state(pybind11::module& m)
 
 }  // namespace detail
 
-inline void write_location_and_ground_state(pybind11::module& m)
+void write_location_and_ground_state(pybind11::module& m)
 {
     detail::write_location_and_ground_state<py_sidb_layout>(m);
 }
