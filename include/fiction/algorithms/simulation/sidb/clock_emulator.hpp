@@ -26,8 +26,10 @@
 #include <any>
 #include <cassert>
 #include <cstdint>
+#include <cstdlib>
 #include <iostream>
 #include <stdexcept>
+#include <utility>
 #include <vector>
 
 namespace fiction
@@ -57,14 +59,10 @@ struct clock_emulator_result
     }
 };
 
-/**
- * @brief Parameter bundle for the clock emulation algorithm.
- */
+/// Parameter bundle for the clock emulation algorithm.
 struct clock_emulator_params
 {
-    /**
-     * @brief Physical simulation parameters used during clock emulation.
-     */
+    /// Physical simulation parameters used during clock emulation.
     sidb_simulation_parameters sim_params{};
     /**
      * @brief The simulation engine to be used for each step of the clock emulation.
@@ -84,9 +82,14 @@ namespace detail
 template <typename Lyt>
 class clock_emulator_impl
 {
-    using sim_lyt      = charge_distribution_surface<sidb_defect_surface<Lyt>>;
+    /// Simulation layout type wrapping the defect surface with charge distributions.
+    using sim_lyt = charge_distribution_surface<sidb_defect_surface<Lyt>>;
+    /// Simulation result type for the simulation layout.
     using sim_result_t = sidb_simulation_result<sim_lyt>;
-    using phase_lyt    = charge_distribution_surface<sim_lyt>;
+    /// Phase layout type: a charge distribution surface on top of the simulation layout.
+    using phase_lyt = charge_distribution_surface<sim_lyt>;
+    /// A collection of cell-charge-state pairs, used to transfer charges between clock phases.
+    using cell_charge_assignments = std::vector<std::pair<cell<sim_lyt>, sidb_charge_state>>;
 
   public:
     /**
@@ -101,7 +104,6 @@ class clock_emulator_impl
             params{ps},
             num_clock_phases{num_phases}
     {}
-
     /**
      * @brief Executes the clock emulation algorithm.
      *
@@ -117,7 +119,7 @@ class clock_emulator_impl
         std::cout << fmt::format("{}",
                                  "------------------------------------------------------------------------------\n");
 
-        std::vector<std::pair<cell<sim_lyt>, sidb_charge_state>> charges_from_previous_phase{};
+        cell_charge_assignments charges_from_previous_phase{};
 
         // perform clock simulation for each time step
         for (std::size_t i = 0; i < num_clock_phases; ++i)
@@ -184,21 +186,13 @@ class clock_emulator_impl
     }
 
   private:
-    /**
-     * @brief Layout to emulate clocking behavior of.
-     */
+    /// Layout to emulate clocking behavior of.
     const Lyt& layout;
-    /**
-     * @brief Clock emulation parameters.
-     */
+    /// Clock emulation parameters.
     clock_emulator_params params{};
-    /**
-     * @brief The number of clock phases to simulate.
-     */
+    /// The number of clock phases to simulate.
     std::size_t num_clock_phases{0};
-    /**
-     * @brief Struct to gather simulation results.
-     */
+    /// Struct to gather simulation results.
     clock_emulator_result<sim_lyt> emulation_result{};
 
     /**
@@ -238,8 +232,7 @@ class clock_emulator_impl
      * @param lyt The layout to assign charges to.
      * @param charges The charge states to assign.
      */
-    void assign_charges_as_defects(sim_lyt&                                                        lyt,
-                                   const std::vector<std::pair<cell<sim_lyt>, sidb_charge_state>>& charges) const
+    void assign_charges_as_defects(sim_lyt& lyt, const cell_charge_assignments& charges) const
     {
         for (const auto& [cell, charge_state] : charges)
         {
@@ -255,8 +248,7 @@ class clock_emulator_impl
      * @param lyt The layout to apply charges to.
      * @param charges The charge states to apply.
      */
-    void apply_charge_states(phase_lyt&                                                      lyt,
-                             const std::vector<std::pair<cell<sim_lyt>, sidb_charge_state>>& charges) const
+    void apply_charge_states(phase_lyt& lyt, const cell_charge_assignments& charges) const
     {
         for (const auto& [cell, charge_state] : charges)
         {
@@ -270,10 +262,10 @@ class clock_emulator_impl
      * @param clock_phase The clock phase to extract charges from.
      * @return The extracted charge states.
      */
-    [[nodiscard]] std::vector<std::pair<cell<sim_lyt>, sidb_charge_state>>
-    extract_non_neutral_charges_of_phase(const phase_lyt& lyt, const uint8_t clock_phase) const
+    [[nodiscard]] cell_charge_assignments extract_non_neutral_charges_of_phase(const phase_lyt& lyt,
+                                                                               const uint8_t    clock_phase) const
     {
-        auto phase_charges = std::vector<std::pair<cell<sim_lyt>, sidb_charge_state>>{};
+        cell_charge_assignments phase_charges{};
 
         layout.foreach_cell(
             [this, &lyt, &phase_charges, clock_phase](const auto& cell)
