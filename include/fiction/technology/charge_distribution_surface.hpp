@@ -505,11 +505,18 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      *
      * @param c Cell whose type is changed.
      * @param ct Cell type which is assigned to the given cell.
+     * @param initialize_charge If `true`, the charge distribution is initialized with the given charge state after the
+     * cell type is assigned. If `false`, the charge distribution is not initialized after the cell type is assigned.
+     * Default is `true`.
      */
-    void assign_cell_type(const typename Lyt::cell& c, const typename Lyt::cell_type& ct) noexcept
+    void assign_cell_type(const typename Lyt::cell& c, const typename Lyt::cell_type& ct,
+                          const bool initialize_charge = true) noexcept  // TODO: refactor bool as enum class
     {
         Lyt::assign_cell_type(c, ct);
-        initialize(sidb_charge_state::NEGATIVE);
+        if (initialize_charge)
+        {
+            initialize(sidb_charge_state::NEGATIVE);
+        }
     }
     /**
      * This function assigns the physical parameters for the simulation.
