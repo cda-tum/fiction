@@ -129,38 +129,42 @@ class clock_emulator_impl
             // the future by taking all ground states and simulating the next clock phase for each of them. This would
             // lead to a tree of possible clock phase evolutions, which could be interesting to analyze.
 
-            // remove all charge distributions from the simulation result except the first groundstate
+            // if at least one ground state is found
             if (const auto groundstates = simulation_result.groundstates(); !groundstates.empty())
             {
                 // std::cout << "Ground state:\n";
                 // print_layout(groundstates[0]);
 
+                // remove all charge distributions from the simulation result except the first groundstate
                 simulation_result.charge_distributions = {groundstates[0]};
+
+                // restore all other SiDBs that were not part of the current clock phase as neutral charges in the
+                // simulation result layout
+                layout.foreach_cell(
+                    [this, &simulation_result, current_clock_phase](const auto& cell)
+                    {
+                        auto& cds = simulation_result.charge_distributions[0];
+                        if (layout.get_clock_number(cell) != current_clock_phase)
+                        {
+                            cds.assign_cell_type(cell, layout.get_cell_type(cell),
+                                                 false);  // TODO: refactor bool as enum class
+                            cds.assign_charge_state(cell, sidb_charge_state::NEUTRAL,
+                                                    charge_index_mode::KEEP_CHARGE_INDEX);
+                            // TODO also restore cell modes, cell names, etc.
+                        }
+                    });
             }
-            else
+            else  // no simulation result found
             {
                 // std::cout << "No ground state found for clock phase " << current_clock_phase << "!\n";
-            }
 
-            // FIXME: This fails when the groundstate is empty, because there was no layout to simulate, i.e., no clocks
-            // of phase i assigned. add all previously removed SiDBs back to the layout as neutral charges
-            layout.foreach_cell(
-                [this, &simulation_result, current_clock_phase](const auto& cell)
-                {
-                    auto& cds = simulation_result.charge_distributions[0];
-                    if (layout.get_clock_number(cell) != current_clock_phase)
-                    {
-                        cds.assign_cell_type(cell, layout.get_cell_type(cell),
-                                             false);  // TODO: refactor bool as enum class
-                        cds.assign_charge_state(cell, sidb_charge_state::NEUTRAL, charge_index_mode::KEEP_CHARGE_INDEX);
-                        // TODO also restore cell modes, cell names, etc.
-                    }
-                });
+                // push a charge distribution surface with all SiDBs neutral
+                simulation_result.charge_distributions.push_back(charge_distribution_surface{layout.clone()});
+            }
 
             // TODO: take the the charge states of the current simulation result and store them as static charges for
             // the next clock phase
             // TODO: assign those charges to a copy of the layout for the current simulation result
-            // TODO: store the simulation result in the emulation result struct
 
             // FIXME: not correct yet!!
             emulation_result.clock_phase_results.push_back(simulation_result);
