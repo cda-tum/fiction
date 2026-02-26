@@ -175,3 +175,83 @@ TEST_CASE("4-pair BDL wire emulation test with ClusterComplete", "[clock-emulato
     result.pretty_print();
 }
 #endif  // FICTION_ALGLIB_ENABLED
+
+TEST_CASE("Zero clock phases", "[clock-emulator]")
+{
+    const auto lyt    = create_5_pair_bdl_wire_layout();
+    const auto params = create_default_params();
+
+    const auto result = emulate_clocks(lyt, 0, params);
+
+    CHECK(result.clock_phase_results.empty());
+}
+
+TEST_CASE("Empty layout", "[clock-emulator]")
+{
+    sidb_100_cell_clk_lyt_siqad lyt{};
+
+    const auto params = create_default_params();
+    const auto result = emulate_clocks(lyt, 4, params);
+
+    REQUIRE(result.clock_phase_results.size() == 4);
+
+    for (const auto& phase_result : result.clock_phase_results)
+    {
+        REQUIRE(phase_result.charge_distributions.size() == 1);
+        CHECK(phase_result.charge_distributions.front().num_cells() == 0);
+        CHECK(phase_result.charge_distributions.front().num_defects() == 0);
+    }
+}
+
+TEST_CASE("Single SiDB", "[clock-emulator]")
+{
+    sidb_100_cell_clk_lyt_siqad lyt{};
+
+    lyt.assign_cell_type({0, 0, 0}, sidb_technology::NORMAL);
+    lyt.assign_clock_number({0, 0, 0}, 0);
+
+    const auto params = create_default_params();
+    const auto result = emulate_clocks(lyt, 4, params);
+
+    REQUIRE(result.clock_phase_results.size() == 4);
+
+    // phase 0: the single SiDB should be simulated
+    REQUIRE(result.clock_phase_results[0].charge_distributions.size() == 1);
+    CHECK(result.clock_phase_results[0].charge_distributions.front().num_cells() == 1);
+    CHECK(result.clock_phase_results[0].charge_distributions.front().num_defects() == 0);
+    CHECK(result.clock_phase_results[0].charge_distributions.front().get_charge_state({0, 0, 0}) ==
+          sidb_charge_state::NEGATIVE);
+}
+
+TEST_CASE("All SiDBs in one clock zone", "[clock-emulator]")
+{
+    sidb_100_cell_clk_lyt_siqad lyt{};
+
+    // place two SiDBs, both in clock zone 0
+    lyt.assign_cell_type({0, 0, 0}, sidb_technology::NORMAL);
+    lyt.assign_clock_number({0, 0, 0}, 0);
+    lyt.assign_cell_type({5, 0, 0}, sidb_technology::NORMAL);
+    lyt.assign_clock_number({5, 0, 0}, 0);
+
+    const auto params = create_default_params();
+    const auto result = emulate_clocks(lyt, 4, params);
+
+    REQUIRE(result.clock_phase_results.size() == 4);
+
+    for (const auto& phase_result : result.clock_phase_results)
+    {
+        REQUIRE(phase_result.charge_distributions.size() == 1);
+        CHECK(phase_result.charge_distributions.front().num_cells() == 2);
+        CHECK(phase_result.charge_distributions.front().num_defects() == 0);
+    }
+}
+
+TEST_CASE("Unsupported simulation engine throws", "[clock-emulator]")
+{
+    const auto lyt = create_5_pair_bdl_wire_layout();
+
+    clock_emulator_params params{};
+    params.sim_engine = sidb_simulation_engine::EXGS;
+
+    CHECK_THROWS_AS(emulate_clocks(lyt, 1, params), std::invalid_argument);
+}
