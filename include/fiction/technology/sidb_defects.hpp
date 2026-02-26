@@ -98,7 +98,7 @@ struct sidb_defect
      * Standard constructor.
      */
     constexpr explicit sidb_defect(const sidb_defect_type defect_type = sidb_defect_type::UNKNOWN,
-                                   const int64_t electric_charge = 0.0, const double relative_permittivity = 0.0,
+                                   const int64_t electric_charge = 0, const double relative_permittivity = 0.0,
                                    const double screening_distance = 0.0) noexcept :
             type{defect_type},
             charge{electric_charge},
