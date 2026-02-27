@@ -5317,13 +5317,16 @@ Parameter ``charges``:
     The charge states to apply.)doc";
 
 static const char *__doc_fiction_detail_clock_emulator_impl_assign_charges_as_defects =
-R"doc(Assigns the given charge states as defects to the given layout.
+R"doc(Assigns the given charge states as proxy defects to the given layout.
 
 Parameter ``lyt``:
     The layout to assign charges to.
 
 Parameter ``charges``:
-    The charge states to assign.)doc";
+    The charge states to assign.
+
+Returns:
+    The cells where proxy defects were placed (for later removal).)doc";
 
 static const char *__doc_fiction_detail_clock_emulator_impl_clock_emulator_impl =
 R"doc(Constructs the clock emulation implementation.
@@ -5377,11 +5380,17 @@ Parameter ``lyt``:
 Returns:
     Simulation results.)doc";
 
-static const char *__doc_fiction_detail_clock_emulator_impl_remove_all_defects =
-R"doc(Removes all defects from the given layout.
+static const char *__doc_fiction_detail_clock_emulator_impl_remove_proxy_defects =
+R"doc(Removes only the proxy defects that were injected by
+assign_charges_as_defects.
+
+Pre-existing defects on the input layout are preserved.
 
 Parameter ``lyt``:
-    The layout to remove defects from.)doc";
+    The layout to remove proxy defects from.
+
+Parameter ``proxy_cells``:
+    The cells where proxy defects were placed.)doc";
 
 static const char *__doc_fiction_detail_clock_emulator_impl_run =
 R"doc(Executes the clock emulation algorithm.
@@ -11882,32 +11891,6 @@ information on the target node. This is a little bit hacky and depends
 on the way mockturtle's dot drawer works.)doc";
 
 static const char *__doc_fiction_edge_color_view_drawer_signal_style = R"doc()doc";
-
-static const char *__doc_fiction_emulate_clocks =
-R"doc(Emulates clocking behavior of a given SiDB layout.
-
-.. warning::
-    ExGS and QuickSim cannot be used as simulation engines for clock
-    emulation, because they do not support static charges.
-
-Template parameter ``Lyt``:
-    SiDB cell-level layout type.
-
-Parameter ``lyt``:
-    The layout to emulate clocks on.
-
-Parameter ``num_clock_phases``:
-    The number of clock phases to simulate.
-
-Parameter ``ps``:
-    Clock emulation parameters.
-
-Returns:
-    Placeholder simulation result for the scaffold.
-
-Throws:
-    std::invalid_argument if an unsupported simulation engine is
-    selected via the parameters.)doc";
 
 static const char *__doc_fiction_energy_calculation =
 R"doc(An enumeration of modes for calculation of the electrostatic potential
