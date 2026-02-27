@@ -32,6 +32,7 @@
 #include <stdexcept>
 #include <string>
 #include <thread>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -166,8 +167,9 @@ namespace detail
 template <typename Lyt>
 class clock_emulator_impl
 {
-    /// Simulation layout type wrapping the defect surface with charge distributions.
-    using sim_lyt = charge_distribution_surface<sidb_defect_surface<Lyt>>;
+    /// Simulation layout type: wraps in defect surface only if Lyt isn't already one, then adds charge distributions.
+    using sim_lyt =
+        charge_distribution_surface<std::conditional_t<is_sidb_defect_surface_v<Lyt>, Lyt, sidb_defect_surface<Lyt>>>;
     /// Simulation result type for the simulation layout.
     using sim_result_t = sidb_simulation_result<sim_lyt>;
     /// Phase layout type: a charge distribution surface on top of the simulation layout.
@@ -208,8 +210,8 @@ class clock_emulator_impl
             // extract only the SiDBs of the current clock phase and put them in a new layout
             auto layout_of_clock_i = extract_sidbs_of_clock_phase(current_clock_phase);
 
-            // assign the static charges of the previous simulation to the new layout
-            assign_charges_as_defects(layout_of_clock_i, charges_from_previous_phase);
+            // assign the static charges of the previous simulation to the new layout as proxy defects
+            const auto proxy_defect_cells = assign_charges_as_defects(layout_of_clock_i, charges_from_previous_phase);
 
             // simulate the new layout with the user-selected simulation engine and parameters
             auto simulation_result = physical_simulation_of_layout(layout_of_clock_i);
@@ -247,8 +249,8 @@ class clock_emulator_impl
                     }
                 });
 
-            // ensure all temporary defects used for simulation are removed from the returned layout
-            remove_all_defects(full_phase_layout);
+            // remove only the proxy defects that were injected for simulation, preserving any pre-existing defects
+            remove_proxy_defects(full_phase_layout, proxy_defect_cells);
 
             full_phase_layout.update_after_charge_change();
 
@@ -295,31 +297,31 @@ class clock_emulator_impl
 
         new_layout.assign_all_charge_states(sidb_charge_state::NEUTRAL);
 
-        // // print the charge state of each cell in the new layout for debugging
-        // new_layout.foreach_cell(
-        //     [&new_layout](const auto& cell)
-        //     {
-        //         std::cout << fmt::format("Cell {}: charge state {}\n", cell,
-        //                                  charge_state_to_sign(new_layout.get_charge_state(cell)));
-        //     });
-
         return new_layout;
     }
     /**
-     * @brief Assigns the given charge states as defects to the given layout.
+     * @brief Assigns the given charge states as proxy defects to the given layout.
      *
      * @param lyt The layout to assign charges to.
      * @param charges The charge states to assign.
+     * @return The cells where proxy defects were placed (for later removal).
      */
-    void assign_charges_as_defects(sim_lyt& lyt, const cell_charge_assignments& charges) const
+    [[nodiscard]] std::vector<cell<sim_lyt>> assign_charges_as_defects(sim_lyt&                       lyt,
+                                                                       const cell_charge_assignments& charges) const
     {
+        std::vector<cell<sim_lyt>> proxy_cells;
+        proxy_cells.reserve(charges.size());
+
         for (const auto& [cell, charge_state] : charges)
         {
             const auto defect =
                 sidb_defect{sidb_defect_type::DB, static_cast<int8_t>(charge_state_to_sign(charge_state)),
                             params.sim_params.epsilon_r, params.sim_params.lambda_tf};
             lyt.assign_sidb_defect(cell, defect);
+            proxy_cells.push_back(cell);
         }
+
+        return proxy_cells;
     }
     /**
      * @brief Applies the given charge states to the given layout.
@@ -362,25 +364,16 @@ class clock_emulator_impl
         return phase_charges;
     }
     /**
-     * @brief Removes all defects from the given layout.
+     * @brief Removes only the proxy defects that were injected by assign_charges_as_defects.
      *
-     * @param lyt The layout to remove defects from.
+     * Pre-existing defects on the input layout are preserved.
+     *
+     * @param lyt The layout to remove proxy defects from.
+     * @param proxy_cells The cells where proxy defects were placed.
      */
-    void remove_all_defects(phase_lyt& lyt) const
+    void remove_proxy_defects(phase_lyt& lyt, const std::vector<cell<sim_lyt>>& proxy_cells) const
     {
-        auto defect_cells = std::vector<cell<sim_lyt>>{};
-
-        lyt.foreach_sidb_defect(
-            [&defect_cells](const auto& cd)
-            {
-                if (const auto& [cell, defect] = cd;
-                    defect.type != sidb_defect_type::NONE && is_charged_defect_type(defect))
-                {
-                    defect_cells.push_back(cell);
-                }
-            });
-
-        for (const auto& cell : defect_cells)
+        for (const auto& cell : proxy_cells)
         {
             lyt.assign_sidb_defect(cell, sidb_defect{sidb_defect_type::NONE});
         }
@@ -431,7 +424,8 @@ class clock_emulator_impl
  * @throw std::invalid_argument if an unsupported simulation engine is selected via the parameters.
  */
 template <typename Lyt>
-[[nodiscard]] clock_emulator_result<charge_distribution_surface<sidb_defect_surface<Lyt>>>
+[[nodiscard]] clock_emulator_result<
+    charge_distribution_surface<std::conditional_t<is_sidb_defect_surface_v<Lyt>, Lyt, sidb_defect_surface<Lyt>>>>
 emulate_clocks(const Lyt& lyt, const std::size_t num_clock_phases,
                const clock_emulator_params& ps = clock_emulator_params{})
 {
