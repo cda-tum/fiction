@@ -1785,7 +1785,7 @@ class graph_oriented_layout_design_impl
         {
             const auto bb = bounding_box_2d(layout);
             cost          = (layout.num_crossings() + 1) *
-                   (static_cast<uint64_t>(bb.get_max().x + 1u) * static_cast<uint64_t>(bb.get_max().y + 1u));
+                            (static_cast<uint64_t>(bb.get_max().x + 1u) * static_cast<uint64_t>(bb.get_max().y + 1u));
         }
         else if (cost_function == graph_oriented_layout_design_params::cost_objective::CUSTOM)
         {
