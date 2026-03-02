@@ -42,6 +42,7 @@
 #include <queue>
 #include <random>
 #include <stdexcept>
+#include <string_view>
 #include <thread>
 #include <tuple>
 #include <unordered_map>
@@ -202,6 +203,93 @@ struct graph_oriented_layout_design_params
      */
     bool randomize_tiles_to_skip_between_pis = false;
 };
+
+/**
+ * Converts an effort mode to a string representation.
+ *
+ * @param mode Effort mode to convert.
+ * @return String representation of the effort mode.
+ */
+[[nodiscard]] inline std::string_view to_string(const graph_oriented_layout_design_params::effort_mode mode) noexcept
+{
+    switch (mode)
+    {
+        case graph_oriented_layout_design_params::effort_mode::HIGH_EFFICIENCY:
+        {
+            return "HIGH_EFFICIENCY";
+        }
+        case graph_oriented_layout_design_params::effort_mode::HIGH_EFFORT:
+        {
+            return "HIGH_EFFORT";
+        }
+        case graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT:
+        {
+            return "HIGHEST_EFFORT";
+        }
+        case graph_oriented_layout_design_params::effort_mode::MAXIMUM_EFFORT:
+        {
+            return "MAXIMUM_EFFORT";
+        }
+    }
+
+    return "";
+}
+/**
+ * Streams an effort mode to an output stream.
+ *
+ * @param os Output stream.
+ * @param mode Effort mode to stream.
+ * @return Output stream.
+ */
+inline std::ostream& operator<<(std::ostream& os, const graph_oriented_layout_design_params::effort_mode mode)
+{
+    return os << to_string(mode);
+}
+/**
+ * Converts a cost objective to a string representation.
+ *
+ * @param cost Cost objective to convert.
+ * @return String representation of the cost objective.
+ */
+[[nodiscard]] inline std::string_view to_string(const graph_oriented_layout_design_params::cost_objective cost) noexcept
+{
+    switch (cost)
+    {
+        case graph_oriented_layout_design_params::cost_objective::AREA:
+        {
+            return "AREA";
+        }
+        case graph_oriented_layout_design_params::cost_objective::WIRES:
+        {
+            return "WIRES";
+        }
+        case graph_oriented_layout_design_params::cost_objective::CROSSINGS:
+        {
+            return "CROSSINGS";
+        }
+        case graph_oriented_layout_design_params::cost_objective::ACP:
+        {
+            return "ACP";
+        }
+        case graph_oriented_layout_design_params::cost_objective::CUSTOM:
+        {
+            return "CUSTOM";
+        }
+    }
+
+    return "";
+}
+/**
+ * Streams a cost objective to an output stream.
+ *
+ * @param os Output stream.
+ * @param cost Cost objective to stream.
+ * @return Output stream.
+ */
+inline std::ostream& operator<<(std::ostream& os, const graph_oriented_layout_design_params::cost_objective cost)
+{
+    return os << to_string(cost);
+}
 /**
  * This struct stores statistics about the graph-oriented layout design process.
  */
@@ -272,14 +360,16 @@ struct nested_vector_hash
      */
     std::size_t operator()(const coord_vec_type<Lyt>& vec) const
     {
-        std::size_t       hash  = 0ul;
-        const std::size_t prime = 0x9e3779b9;
+        static constexpr std::size_t prime = 0x9e3779b9;
+
+        std::size_t hash = 0ul;
         for (const auto& tile : vec)
         {
             hash ^= std::hash<uint64_t>{}(tile.x) + prime + (hash << 6u) + (hash >> 2u);
             hash ^= std::hash<uint64_t>{}(tile.y) + prime + (hash << 6u) + (hash >> 2u);
             hash ^= std::hash<uint64_t>{}(tile.z) + prime + (hash << 6u) + (hash >> 2u);
         }
+
         return hash;
     }
 };
