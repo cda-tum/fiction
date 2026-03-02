@@ -62,7 +62,7 @@ struct graph_oriented_layout_design_params
      * generated and the strategies employed, balancing between runtime efficiency and the likelihood of finding optimal
      * solutions.
      */
-    enum effort_mode : std::uint8_t
+    enum class effort_mode : std::uint8_t
     {
         /**
          * HIGH_EFFICIENCY mode generates 2 search space graphs. This option minimizes runtime but may not always yield
@@ -95,7 +95,7 @@ struct graph_oriented_layout_design_params
     /**
      * The effort mode used. Defaults to HIGH_EFFORT.
      */
-    effort_mode mode = HIGH_EFFORT;
+    effort_mode mode = effort_mode::HIGH_EFFORT;
     /**
      * Number of expansions for each vertex that should be explored. For each partial layout, `num_vertex_expansions`
      * positions will be checked for the next node/gate to be placed. A lower value requires less runtime, but the
@@ -121,7 +121,7 @@ struct graph_oriented_layout_design_params
      * The `cost_objective` enum defines various cost objectives that can be used in the graph-oriented layout design
      * process. Each cost objective represents a different metric used to expand a vertex in the search space graph.
      */
-    enum cost_objective : std::uint8_t
+    enum class cost_objective : std::uint8_t
     {
         /**
          * AREA: Optimizes for the total area of the layout, aiming to minimize the space required for the design.
@@ -148,7 +148,7 @@ struct graph_oriented_layout_design_params
     /**
      * The cost objective used. Defaults to AREA
      */
-    cost_objective cost = AREA;
+    cost_objective cost = cost_objective::AREA;
     /**
      * BETA feature:
      * Flag to enable or disable multithreading during the execution of the layout design algorithm.
@@ -746,7 +746,7 @@ class graph_oriented_layout_design_impl
                                    {
                                        if (auto result = process_ssg(*ssg_ptr); result)
                                        {
-                                           const std::lock_guard<std::mutex> lock(update_best_layout_mutex);
+                                           const std::scoped_lock lock(update_best_layout_mutex);
                                            best_lyt = std::move(*result);
                                            restore_names(ssg_ptr->network, best_lyt);
                                            update_stats(best_lyt);
@@ -768,8 +768,7 @@ class graph_oriented_layout_design_impl
                     {
                         if (f.valid())
                         {
-                            using namespace std::chrono_literals;
-                            if (f.wait_for(0ms) == std::future_status::ready)
+                            if (f.wait_for(std::chrono::milliseconds{0}) == std::future_status::ready)
                             {
                                 if (auto r = f.get())
                                 {
