@@ -17955,6 +17955,30 @@ static const char *__doc_fiction_operational_status_NON_OPERATIONAL = R"doc(The 
 
 static const char *__doc_fiction_operational_status_OPERATIONAL = R"doc(The layout is operational.)doc";
 
+static const char *__doc_fiction_operator_lshift =
+R"doc(Streams an effort mode to an output stream.
+
+Parameter ``os``:
+    Output stream.
+
+Parameter ``mode``:
+    Effort mode to stream.
+
+Returns:
+    Output stream.)doc";
+
+static const char *__doc_fiction_operator_lshift_2 =
+R"doc(Streams a cost objective to an output stream.
+
+Parameter ``os``:
+    Output stream.
+
+Parameter ``cost``:
+    Cost objective to stream.
+
+Returns:
+    Output stream.)doc";
+
 static const char *__doc_fiction_orthogonal =
 R"doc(A scalable placement & routing approach based on orthogonal graph
 drawing as originally proposed in \"Scalable Design for Field-coupled
@@ -22339,6 +22363,24 @@ Parameter ``n``:
 Returns:
     A uniquely identified node in a decorated cluster hierarchy that
     follows the "general tree" structure.)doc";
+
+static const char *__doc_fiction_to_string =
+R"doc(Converts an effort mode to a string representation.
+
+Parameter ``mode``:
+    Effort mode to convert.
+
+Returns:
+    String representation of the effort mode.)doc";
+
+static const char *__doc_fiction_to_string_2 =
+R"doc(Converts a cost objective to a string representation.
+
+Parameter ``cost``:
+    Cost objective to convert.
+
+Returns:
+    String representation of the cost objective.)doc";
 
 static const char *__doc_fiction_to_unique_sidb_cluster =
 R"doc(This recursive function is used to convert a binary cluster hierarchy,
