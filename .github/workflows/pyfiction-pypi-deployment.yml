@@ -108,7 +108,7 @@ jobs:
       # on Linux, the action does not work because it can't install to the manylinux container
       - if: runner.os != 'Linux'
         name: Install Z3
-        uses: cda-tum/setup-z3@8156b32632230f11cf9c5a50becb33d73e2fb4e5 # v1.7.1
+        uses: cda-tum/setup-z3@7bfe87519f27304460db44284cb8cc59f50f5fc9 # v1.7.2
         with:
           version: ${{ env.Z3_VERSION }}
 
@@ -139,7 +139,7 @@ jobs:
     if: github.event_name == 'release' && github.event.action == 'published'
     steps:
       - name: Download the previously stored artifacts
-        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           pattern: cibw-*
           path: dist
