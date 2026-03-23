@@ -59,6 +59,8 @@ minimum-version = "build-system.requires"
 wheel.install-dir = "mnt/pyfiction"
 # Set required Ninja version
 ninja.version = ">=1.10"
+# Set default build type to Release
+cmake.build-type = "Release"
 # Setuptools-style build caching in a local directory
 build-dir = "build/{wheel_tag}/{build_type}"
 # Explicitly set the package directory
@@ -113,6 +115,18 @@ FICTION_ENABLE_UNITY_BUILD = "OFF"
 FICTION_Z3 = "ON"
 FICTION_ALGLIB = "ON"
 FICTION_PYTHON_BINDINGS = "ON"
+
+[[tool.scikit-build.overrides]]
+if.env.READTHEDOCS = "True"
+inherit.cmake.define = "append"
+cmake.define.FICTION_ENABLE_IPO = "OFF"
+cmake.args = [
+    "-DCMAKE_VERBOSE_MAKEFILE=ON",
+    "-DCMAKE_CXX_FLAGS=-O0",
+    "-DCMAKE_MODULE_LINKER_FLAGS=-fuse-ld=mold",
+    "-DCMAKE_SHARED_LINKER_FLAGS=-fuse-ld=mold",
+    "-DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=mold"
+]
 
 [[tool.scikit-build.overrides]]
 if.python-version = ">=3.13"
