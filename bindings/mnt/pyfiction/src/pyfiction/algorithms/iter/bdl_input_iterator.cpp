@@ -1,0 +1,126 @@
+#include "pyfiction/documentation.hpp"
+#include "pyfiction/types.hpp"
+
+#include <fiction/algorithms/iter/bdl_input_iterator.hpp>
+
+#include <fmt/format.h>
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
+
+#include <cstdint>
+#include <string>
+
+namespace pyfiction
+{
+
+namespace detail
+{
+
+template <typename Lyt>
+void bdl_input_iterator_impl(pybind11::module& m, const std::string& lattice)  // NOLINT(misc-use-internal-linkage)
+{
+    namespace py = pybind11;
+
+    py::class_<fiction::bdl_input_iterator<Lyt>>(m, fmt::format("bdl_input_iterator_{}", lattice).c_str(),
+                                                 DOC(fiction_bdl_input_iterator))
+        .def(py::init<const Lyt&, const fiction::bdl_input_iterator_params&>(), py::arg("lyt"),
+             py::arg("params") = fiction::bdl_input_iterator_params{},
+             DOC(fiction_bdl_input_iterator_bdl_input_iterator))
+        .def(
+            "__next__",
+            [](fiction::bdl_input_iterator<Lyt>& self) -> Lyt
+            {
+                if (self >= ((1ull << self.num_input_pairs()) - 1))
+                {
+                    throw py::stop_iteration();
+                }
+
+                auto result = *self;
+                ++self;
+                return result;
+            },
+            DOC(fiction_bdl_input_iterator_operator_mul))
+        .def(
+            "__eq__", [](const fiction::bdl_input_iterator<Lyt>& self, const uint64_t n) -> bool { return self == n; },
+            py::arg("m"), DOC(fiction_bdl_input_iterator_operator_eq))
+        .def(
+            "__ne__", [](const fiction::bdl_input_iterator<Lyt>& self, const uint64_t n) -> bool { return self != n; },
+            py::arg("m"), DOC(fiction_bdl_input_iterator_operator_ne))
+        .def(
+            "__lt__", [](const fiction::bdl_input_iterator<Lyt>& self, const uint64_t n) -> bool { return self < n; },
+            py::arg("m"), DOC(fiction_bdl_input_iterator_operator_lt))
+        .def(
+            "__le__", [](const fiction::bdl_input_iterator<Lyt>& self, const uint64_t n) -> bool { return self <= n; },
+            py::arg("m"), DOC(fiction_bdl_input_iterator_operator_le))
+        .def(
+            "__gt__", [](const fiction::bdl_input_iterator<Lyt>& self, const uint64_t n) -> bool { return self > n; },
+            py::arg("m"), DOC(fiction_bdl_input_iterator_operator_gt))
+        .def(
+            "__ge__", [](const fiction::bdl_input_iterator<Lyt>& self, const uint64_t n) -> bool { return self >= n; },
+            py::arg("m"), DOC(fiction_bdl_input_iterator_operator_ge))
+        .def(
+            "__add__", [](const fiction::bdl_input_iterator<Lyt>& self, const int n) -> fiction::bdl_input_iterator<Lyt>
+            { return self + n; }, py::arg("m"), DOC(fiction_bdl_input_iterator_operator_add))
+        .def(
+            "__iadd__",
+            [](fiction::bdl_input_iterator<Lyt>& self, const int n) -> fiction::bdl_input_iterator<Lyt>&
+            {
+                self += n;
+                return self;
+            },
+            py::arg("m"), DOC(fiction_bdl_input_iterator_operator_iadd))
+        .def(
+            "__sub__", [](const fiction::bdl_input_iterator<Lyt>& self, const int n) { return self - n; }, py::arg("m"),
+            DOC(fiction_bdl_input_iterator_operator_sub))
+        .def(
+            "__isub__",
+            [](fiction::bdl_input_iterator<Lyt>& self, const int n) -> fiction::bdl_input_iterator<Lyt>&
+            {
+                self -= n;
+                return self;
+            },
+            py::arg("m"), DOC(fiction_bdl_input_iterator_operator_isub))
+        .def(
+            "__getitem__", [](const fiction::bdl_input_iterator<Lyt>& self, int n) -> fiction::bdl_input_iterator<Lyt>
+            { return self[n]; }, py::arg("m"), DOC(fiction_bdl_input_iterator_operator_array))
+
+        .def("num_input_pairs", &fiction::bdl_input_iterator<Lyt>::num_input_pairs)
+        .def("get_layout", [](const fiction::bdl_input_iterator<Lyt>& self) -> const Lyt& { return *self; })
+
+        ;
+}
+
+}  // namespace detail
+
+void bdl_input_iterator(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+{
+    namespace py = pybind11;
+
+    /**
+     * Input BDL configuration
+     */
+    py::enum_<typename fiction::bdl_input_iterator_params::input_bdl_configuration>(m, "input_bdl_configuration")
+        .value("PERTURBER_ABSENCE_ENCODED",
+               fiction::bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED,
+               DOC(fiction_bdl_input_iterator_params_input_bdl_configuration_PERTURBER_ABSENCE_ENCODED))
+        .value("PERTURBER_DISTANCE_ENCODED",
+               fiction::bdl_input_iterator_params::input_bdl_configuration::PERTURBER_DISTANCE_ENCODED,
+               DOC(fiction_bdl_input_iterator_params_input_bdl_configuration_PERTURBER_DISTANCE_ENCODED));
+
+    /**
+     * BDL input iterator parameters.
+     */
+    py::class_<fiction::bdl_input_iterator_params>(m, "bdl_input_iterator_params")
+        .def(py::init<>())
+        .def_readwrite("bdl_wire_params", &fiction::bdl_input_iterator_params::bdl_wire_params,
+                       DOC(fiction_bdl_input_iterator_params_bdl_wire_params))
+        .def_readwrite("input_bdl_config", &fiction::bdl_input_iterator_params::input_bdl_config,
+                       DOC(fiction_bdl_input_iterator_params_input_bdl_config));
+
+    // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
+
+    detail::bdl_input_iterator_impl<py_sidb_100_lattice>(m, "100");
+    detail::bdl_input_iterator_impl<py_sidb_111_lattice>(m, "111");
+}
+
+}  // namespace pyfiction
