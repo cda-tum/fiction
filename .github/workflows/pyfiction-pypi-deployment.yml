@@ -151,7 +151,7 @@ jobs:
           subject-path: "dist/*"
 
       - name: Deploy to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
+        uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b # release/v1
         with:
           password: ${{ secrets.PYPI_DEPLOY_TOKEN }}
           attestations: true
