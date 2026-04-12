@@ -81,7 +81,7 @@ jobs:
           enable-cache: true
 
       - name: Setup nox
-        uses: wntrblm/nox@5a277b752f6094150e25237d47c34168e2b7526e # 2026.02.09
+        uses: wntrblm/nox@97e345e6a26bb2c5aacff9cc4327bd4ac1b00ce6 # 2026.04.10
 
       - name: 🐍 Test
         run: nox -s tests --verbose
