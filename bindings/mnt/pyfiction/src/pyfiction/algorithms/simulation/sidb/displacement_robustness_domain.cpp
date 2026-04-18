@@ -1,0 +1,86 @@
+#include "pyfiction/types.hpp"
+
+#include <fiction/algorithms/simulation/sidb/displacement_robustness_domain.hpp>
+#include <fiction/layouts/coordinates.hpp>
+
+#include <fmt/format.h>
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
+
+#include <string>
+
+namespace pyfiction
+{
+
+namespace detail
+{
+
+template <typename Lyt>
+// NOLINTNEXTLINE(misc-use-internal-linkage)
+void determine_displacement_robustness_domain_impl(pybind11::module& m, const std::string& lattice = "")
+{
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
+
+    py::class_<fiction::displacement_robustness_domain<Lyt>>(
+        m, fmt::format("displacement_robustness_domain_{}", lattice).c_str())
+        .def(py::init<>())
+        .def_readwrite("influence_information", &fiction::displacement_robustness_domain<Lyt>::operational_values);
+
+    m.def(fmt::format("determine_displacement_robustness_domain_{}", lattice).c_str(),
+          &fiction::determine_displacement_robustness_domain<Lyt, py_tt>, py::arg("layout"), py::arg("spec"),
+          py::arg("params"), py::arg("stats") = nullptr);
+}
+
+}  // namespace detail
+
+void determine_displacement_robustness_domain(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+{
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
+
+    py::enum_<fiction::displacement_robustness_domain_params<fiction::offset::ucoord_t>::dimer_displacement_policy>(
+        m, "dimer_displacement_policy")
+        .value("STAY_ON_ORIGINAL_DIMER",
+               fiction::displacement_robustness_domain_params<
+                   fiction::offset::ucoord_t>::dimer_displacement_policy::STAY_ON_ORIGINAL_DIMER)
+        .value("ALLOW_OTHER_DIMER", fiction::displacement_robustness_domain_params<
+                                        fiction::offset::ucoord_t>::dimer_displacement_policy::ALLOW_OTHER_DIMER);
+
+    py::enum_<fiction::displacement_robustness_domain_params<fiction::offset::ucoord_t>::displacement_analysis_mode>(
+        m, "displacement_analysis_mode")
+        .value("EXHAUSTIVE", fiction::displacement_robustness_domain_params<
+                                 fiction::offset::ucoord_t>::displacement_analysis_mode::EXHAUSTIVE)
+        .value("RANDOM", fiction::displacement_robustness_domain_params<
+                             fiction::offset::ucoord_t>::displacement_analysis_mode::RANDOM);
+
+    py::class_<fiction::displacement_robustness_domain_params<fiction::offset::ucoord_t>>(
+        m, "displacement_robustness_domain_params")
+        .def(py::init<>())
+        .def_readwrite("analysis_mode",
+                       &fiction::displacement_robustness_domain_params<fiction::offset::ucoord_t>::analysis_mode)
+        .def_readwrite("percentage_of_analyzed_displaced_layouts",
+                       &fiction::displacement_robustness_domain_params<
+                           fiction::offset::ucoord_t>::percentage_of_analyzed_displaced_layouts)
+        .def_readwrite(
+            "displacement_variations",
+            &fiction::displacement_robustness_domain_params<fiction::offset::ucoord_t>::displacement_variations)
+        .def_readwrite("operational_params",
+                       &fiction::displacement_robustness_domain_params<fiction::offset::ucoord_t>::operational_params)
+        .def_readwrite("fixed_sidbs",
+                       &fiction::displacement_robustness_domain_params<fiction::offset::ucoord_t>::fixed_sidbs)
+        .def_readwrite("dimer_policy",
+                       &fiction::displacement_robustness_domain_params<fiction::offset::ucoord_t>::dimer_policy);
+
+    py::class_<fiction::displacement_robustness_domain_stats>(m, "displacement_robustness_domain_stats")
+        .def(py::init<>())
+        .def_readwrite("time_total", &fiction::displacement_robustness_domain_stats::time_total)
+        .def_readwrite("num_operational_sidb_displacements",
+                       &fiction::displacement_robustness_domain_stats::num_operational_sidb_displacements)
+        .def_readwrite("num_non_operational_sidb_displacements",
+                       &fiction::displacement_robustness_domain_stats::num_non_operational_sidb_displacements);
+
+    // NOTE: be careful with the order of the following calls! Python will resolve the first matching overload!
+    detail::determine_displacement_robustness_domain_impl<py_sidb_100_lattice>(m, "100");
+    detail::determine_displacement_robustness_domain_impl<py_sidb_111_lattice>(m, "111");
+}
+
+}  // namespace pyfiction
