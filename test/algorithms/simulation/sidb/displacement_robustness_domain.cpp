@@ -3,6 +3,7 @@
 //
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
@@ -22,6 +23,9 @@
 
 using namespace fiction;
 
+namespace
+{
+
 template <typename Lyt>
 void check_identical_information_of_stats_and_domain(const displacement_robustness_domain<Lyt>&  domain,
                                                      const displacement_robustness_domain_stats& stats)
@@ -36,6 +40,8 @@ void check_identical_information_of_stats_and_domain(const displacement_robustne
     CHECK(num_operational_layouts == stats.num_operational_sidb_displacements);
     CHECK(num_non_operational_layouts == stats.num_non_operational_sidb_displacements);
 }
+
+}  // namespace
 
 TEST_CASE("Determine the SiDB gate displacement robustness of the Y-shaped SiDB AND gate",
           "[displacement-robustness-domain]")
@@ -63,10 +69,10 @@ TEST_CASE("Determine the SiDB gate displacement robustness of the Y-shaped SiDB 
         const auto robustness_domain =
             determine_displacement_robustness_domain(lyt, std::vector<tt>{create_and_tt()}, params, &stats);
         CHECK((stats.num_non_operational_sidb_displacements + stats.num_operational_sidb_displacements) ==
-              static_cast<std::size_t>(0.1 * std::pow(9, lyt.num_cells() - params.fixed_sidbs.size()) +
+              static_cast<std::size_t>((0.1 * std::pow(9, lyt.num_cells() - params.fixed_sidbs.size())) +
                                        1));  // +1 since the not displaced (aka original layout) is also stored
         CHECK(robustness_domain.operational_values.size() ==
-              static_cast<std::size_t>(0.1 * std::pow(9, lyt.num_cells() - params.fixed_sidbs.size()) +
+              static_cast<std::size_t>((0.1 * std::pow(9, lyt.num_cells() - params.fixed_sidbs.size())) +
                                        1));  // +1 since the not displaced (aka original layout) is also stored
         check_identical_information_of_stats_and_domain(robustness_domain, stats);
     }
@@ -76,7 +82,7 @@ TEST_CASE("Determine the SiDB gate displacement robustness of the Y-shaped SiDB 
         displacement_robustness_domain_stats stats{};
         params.displacement_variations = {0, 2};
         params.dimer_policy            = displacement_robustness_domain_params<
-                       cell<sidb_cell_clk_lyt_siqad>>::dimer_displacement_policy::STAY_ON_ORIGINAL_DIMER;
+            cell<sidb_cell_clk_lyt_siqad>>::dimer_displacement_policy::STAY_ON_ORIGINAL_DIMER;
         params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance = 3.0;
         params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance = 0.2;
 

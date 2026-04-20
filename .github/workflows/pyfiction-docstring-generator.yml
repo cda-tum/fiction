@@ -42,13 +42,13 @@ jobs:
           `find ${{ github.workspace }}/include/fiction -name "*.hpp" -print`
 
       - name: Upload docstrings as an artifact
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           path: ${{ github.workspace }}/bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp
           overwrite: true
 
       - name: Commit docstrings
-        uses: EndBug/add-and-commit@a94899bca583c204427a224a7af87c02f9b325d5 # v9.1.4
+        uses: EndBug/add-and-commit@290ea2c423ad77ca9c62ae0f5b224379612c0321 # v10.0.0
         with:
           add: "bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp"
           commit: "--signoff"

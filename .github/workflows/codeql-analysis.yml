@@ -50,7 +50,7 @@ jobs:
 
     steps:
       - name: Free Disk Space (Ubuntu)
-        uses: jlumbroso/free-disk-space@main
+        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # main
         with:
           tool-cache: true
           android: true
@@ -92,7 +92,7 @@ jobs:
 
       - name: Setup Z3 Solver
         id: z3
-        uses: cda-tum/setup-z3@8156b32632230f11cf9c5a50becb33d73e2fb4e5 # v1.7.1
+        uses: cda-tum/setup-z3@7bfe87519f27304460db44284cb8cc59f50f5fc9 # v1.7.2
         with:
           version: ${{env.Z3_VERSION}}
           platform: linux
@@ -102,7 +102,7 @@ jobs:
 
       # Initializes the CodeQL tools for scanning.
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@89a39a4e59826350b863aa6b6252a07ad50cf83e # v4.32.4
+        uses: github/codeql-action/init@95e58e9a2cdfd71adc6e0353d5c52f41a045d225 # v4.35.2
         with:
           languages: ${{ matrix.language }}
           config-file: .github/codeql-config.yml
@@ -129,13 +129,13 @@ jobs:
         run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} --parallel 4
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@89a39a4e59826350b863aa6b6252a07ad50cf83e # v4.32.4
+        uses: github/codeql-action/analyze@95e58e9a2cdfd71adc6e0353d5c52f41a045d225 # v4.35.2
         with:
           upload: false
           output: sarif-results
 
       - name: Filter SARIF file to exclude library warnings
-        uses: advanced-security/filter-sarif@main
+        uses: advanced-security/filter-sarif@83be8931196fc98d9c506ff10e17763fed75bd1b # main
         with:
           patterns: |
             -**/vendors/**
@@ -145,6 +145,6 @@ jobs:
           output: sarif-results/${{ matrix.language }}.sarif
 
       - name: Upload SARIF to GitHub
-        uses: github/codeql-action/upload-sarif@89a39a4e59826350b863aa6b6252a07ad50cf83e # v4.32.4
+        uses: github/codeql-action/upload-sarif@95e58e9a2cdfd71adc6e0353d5c52f41a045d225 # v4.35.2
         with:
           sarif_file: sarif-results/${{ matrix.language }}.sarif
