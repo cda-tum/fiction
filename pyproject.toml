@@ -7,7 +7,7 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "mnt.pyfiction"
-version = "0.6.12"
+version = "0.6.12.dev58"
 description = "Design Automation for Field-coupled Nanotechnologies"
 readme = "README.md"
 authors = [
@@ -107,7 +107,7 @@ FICTION_PROGRESS_BARS = "OFF"
 FICTION_CLI = "OFF"
 FICTION_TEST = "OFF"
 FICTION_EXPERIMENTS = "OFF"
-FICTION_ENABLE_IPO = "ON"
+FICTION_ENABLE_IPO = "OFF"
 FICTION_ENABLE_PCH = "OFF"
 FICTION_ENABLE_UNITY_BUILD = "OFF"
 FICTION_Z3 = "ON"
@@ -143,20 +143,16 @@ build-frontend = "build[uv]"
 manylinux-x86_64-image = "manylinux_2_28"
 
 [tool.cibuildwheel.linux]
-environment = { Z3_ROOT = "/opt/python/cp311-cp311/lib/python3.11/site-packages/z3" }
-before-all = "/opt/python/cp311-cp311/bin/pip install z3-solver>=4.8.0"
-repair-wheel-command = [
-    "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/python/cp311-cp311/lib/python3.11/site-packages/z3/lib",
-    "auditwheel repair -w {dest_dir} {wheel}",
-]
+before-all = "uv tool install sccache>=0.10.0"
+environment = { PATH = "$PATH:/root/.local/bin" }
+before-test = "uvx sccache --show-stats"
 
 [tool.cibuildwheel.macos]
 environment = { MACOSX_DEPLOYMENT_TARGET = "13.0" }
 
 [tool.cibuildwheel.windows]
-before-build = "pip install delvewheel>=1.7.3"
-repair-wheel-command = "delvewheel repair -v -w {dest_dir} {wheel} --namespace-pkg mnt"
-environment = { CMAKE_GENERATOR = "Ninja" }
+before-build = "uv pip install delvewheel>=1.11.2"
+repair-wheel-command = "delvewheel repair -w {dest_dir} {wheel} --namespace-pkg mnt --ignore-existing"
 
 [[tool.cibuildwheel.overrides]]
 select = "*-macosx_arm64"
@@ -217,6 +213,7 @@ ignore = [
     "TD004", # Missing colon in TODO
     "FIX002", # Line contains TODO
     "RUF067", # `__init__` module should only contain docstrings and re-exports
+    "COM812", # rule may cause conflicts when used with the formatter
 ]
 future-annotations = true
 
