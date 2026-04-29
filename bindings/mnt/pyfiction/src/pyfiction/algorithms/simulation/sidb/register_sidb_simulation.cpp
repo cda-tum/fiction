@@ -24,13 +24,11 @@ void physically_valid_parameters(pybind11::module& m);
 void potential_to_distance_conversion(pybind11::module& m);
 void quickexact(pybind11::module& m);
 void quicksim(pybind11::module& m);
-void sidb_simulation_engine(pybind11::module& m);
-void sidb_simulation_result(pybind11::module& m);
+void random_sidb_layout_generator(pybind11::module& m);
+void time_to_solution(pybind11::module& m);
 
 void register_sidb_simulation(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
-    sidb_simulation_engine(m);
-    sidb_simulation_result(m);
     calculate_energy_and_state_type(m);
     can_positive_charges_occur(m);
     check_simulation_results_for_equivalence(m);
@@ -52,6 +50,8 @@ void register_sidb_simulation(pybind11::module& m)  // NOLINT(misc-use-internal-
     potential_to_distance_conversion(m);
     quickexact(m);
     quicksim(m);
+    random_sidb_layout_generator(m);
+    time_to_solution(m);
 }
 
 }  // namespace pyfiction
