@@ -19,9 +19,9 @@ namespace detail
 {
 
 template <typename Lyt>
-void write_sqd_sim_result(pybind11::module& m)
+void write_sqd_sim_result(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     m.def(
         "write_sqd_sim_result", [](const fiction::sidb_simulation_result<Lyt>& lyt, const std::string_view& filename)
@@ -31,7 +31,7 @@ void write_sqd_sim_result(pybind11::module& m)
 
 }  // namespace detail
 
-void write_sqd_sim_result(pybind11::module& m)
+void write_sqd_sim_result(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
     detail::write_sqd_sim_result<py_sidb_layout>(m);
 }

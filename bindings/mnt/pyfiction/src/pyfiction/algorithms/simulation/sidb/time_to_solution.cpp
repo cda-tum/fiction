@@ -19,9 +19,9 @@ namespace detail
 {
 
 template <typename Lyt>
-void time_to_solution_impl(pybind11::module& m)
+void time_to_solution_impl(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     m.def("time_to_solution", &fiction::time_to_solution<Lyt>, py::arg("lyt"), py::arg("quicksim_params"),
           py::arg("tts_params") = fiction::time_to_solution_params{}, py::arg("ps") = nullptr,
@@ -33,7 +33,7 @@ void time_to_solution_impl(pybind11::module& m)
 
 }  // namespace detail
 
-void time_to_solution(pybind11::module& m)
+void time_to_solution(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
     namespace py = pybind11;
 

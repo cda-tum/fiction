@@ -15,7 +15,7 @@
 
 // data types cannot properly be converted to bit field types
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wuseless-cast"
+#pragma GCC diagnostic ignored "-Wuseless-cast"  // NOLINT(clang-diagnostic-unknown-warning-option)
 #pragma GCC diagnostic ignored "-Wconversion"
 
 namespace pyfiction
@@ -24,10 +24,9 @@ namespace pyfiction
 /**
  * Unsigned offset coordinates.
  */
-void offset_coordinate(pybind11::module& m)
+void offset_coordinate(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
-    namespace py = pybind11;
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     py::class_<py_offset_coordinate>(m, "offset_coordinate", DOC(fiction_offset_ucoord_t))
         .def(py::init<>(), DOC(fiction_offset_ucoord_t_ucoord_t))
@@ -67,12 +66,14 @@ void offset_coordinate(pybind11::module& m)
             [](py_offset_coordinate& self, const decltype(self.z) value) { self.z = value; },
             DOC(fiction_offset_ucoord_t_z))
 
+        // NOLINTBEGIN(misc-redundant-expression): pybind11 operator bindings intentionally compare placeholder objects.
         .def(py::self == py::self, py::arg("other"), DOC(fiction_offset_ucoord_t_operator_eq))
         .def(py::self != py::self, py::arg("other"), DOC(fiction_offset_ucoord_t_operator_ne))
         .def(py::self < py::self, py::arg("other"), DOC(fiction_offset_ucoord_t_operator_lt))
         .def(py::self > py::self, py::arg("other"), DOC(fiction_offset_ucoord_t_operator_gt))
         .def(py::self <= py::self, py::arg("other"), DOC(fiction_offset_ucoord_t_operator_le))
         .def(py::self >= py::self, py::arg("other"), DOC(fiction_offset_ucoord_t_operator_ge))
+        // NOLINTEND(misc-redundant-expression)
 
         .def("__repr__", &py_offset_coordinate::str, DOC(fiction_offset_ucoord_t_str))
         .def("__hash__", [](const py_offset_coordinate& self) { return std::hash<py_offset_coordinate>{}(self); })
@@ -85,10 +86,9 @@ void offset_coordinate(pybind11::module& m)
 /**
  * Signed cube coordinates.
  */
-void cube_coordinate(pybind11::module& m)
+void cube_coordinate(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
-    namespace py = pybind11;
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     py::class_<py_cube_coordinate>(m, "cube_coordinate", DOC(fiction_cube_coord_t))
         .def(py::init<>(), DOC(fiction_cube_coord_t_coord_t))
@@ -124,12 +124,14 @@ void cube_coordinate(pybind11::module& m)
             "z", [](py_cube_coordinate& self) -> decltype(self.z) { return self.z; },
             [](py_cube_coordinate& self, const decltype(self.z) value) { self.z = value; }, DOC(fiction_cube_coord_t_z))
 
+        // NOLINTBEGIN(misc-redundant-expression): pybind11 operator bindings intentionally compare placeholder objects.
         .def(py::self == py::self, py::arg("other"), DOC(fiction_cube_coord_t_operator_eq))
         .def(py::self != py::self, py::arg("other"), DOC(fiction_cube_coord_t_operator_ne))
         .def(py::self < py::self, py::arg("other"), DOC(fiction_cube_coord_t_operator_lt))
         .def(py::self > py::self, py::arg("other"), DOC(fiction_cube_coord_t_operator_gt))
         .def(py::self <= py::self, py::arg("other"), DOC(fiction_cube_coord_t_operator_le))
         .def(py::self >= py::self, py::arg("other"), DOC(fiction_cube_coord_t_operator_ge))
+        // NOLINTEND(misc-redundant-expression)
 
         .def("__repr__", &py_cube_coordinate::str, DOC(fiction_cube_coord_t_str))
         .def("__hash__", [](const py_cube_coordinate& self) { return std::hash<py_cube_coordinate>{}(self); })
@@ -142,10 +144,9 @@ void cube_coordinate(pybind11::module& m)
 /**
  * Signed SiQAD coordinates.
  */
-void siqad_coordinate(pybind11::module& m)
+void siqad_coordinate(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
-    namespace py = pybind11;
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     py::class_<py_siqad_coordinate>(m, "siqad_coordinate", DOC(fiction_siqad_coord_t))
         .def(py::init<>(), DOC(fiction_siqad_coord_t_coord_t))
@@ -184,12 +185,14 @@ void siqad_coordinate(pybind11::module& m)
             [](py_siqad_coordinate& self, const decltype(self.z) value) { self.z = value; },
             DOC(fiction_siqad_coord_t_z))
 
+        // NOLINTBEGIN(misc-redundant-expression): pybind11 operator bindings intentionally compare placeholder objects.
         .def(py::self == py::self, py::arg("other"), DOC(fiction_siqad_coord_t_operator_eq))
         .def(py::self != py::self, py::arg("other"), DOC(fiction_siqad_coord_t_operator_ne))
         .def(py::self < py::self, py::arg("other"), DOC(fiction_siqad_coord_t_operator_lt))
         .def(py::self > py::self, py::arg("other"), DOC(fiction_siqad_coord_t_operator_gt))
         .def(py::self <= py::self, py::arg("other"), DOC(fiction_siqad_coord_t_operator_le))
         .def(py::self >= py::self, py::arg("other"), DOC(fiction_siqad_coord_t_operator_ge))
+        // NOLINTEND(misc-redundant-expression)
 
         .def("__repr__", &py_siqad_coordinate::str, DOC(fiction_siqad_coord_t_str))
         .def("__hash__", [](const py_siqad_coordinate& self) { return std::hash<py_siqad_coordinate>{}(self); })
@@ -199,7 +202,7 @@ void siqad_coordinate(pybind11::module& m)
     py::implicitly_convertible<py::tuple, py_siqad_coordinate>();
 }
 
-void coordinate_utility(pybind11::module& m)
+void coordinate_utility(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
     namespace py = pybind11;
 

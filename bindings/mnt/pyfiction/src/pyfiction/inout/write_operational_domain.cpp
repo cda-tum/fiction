@@ -3,9 +3,7 @@
 //
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
 
-#include <fiction/algorithms/simulation/sidb/is_operational.hpp>
 #include <fiction/algorithms/simulation/sidb/operational_domain.hpp>
 #include <fiction/io/write_operational_domain.hpp>
 
@@ -21,13 +19,13 @@ namespace pyfiction
 
 namespace detail
 {
-void write_operational_domain(pybind11::module& m)
+void write_operational_domain(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
     namespace py = pybind11;
 
     // Function pointer for writing to a file
-    void (*write_operational_domain_pointer)(const fiction::operational_domain&, const std::string_view&,
-                                             const fiction::write_operational_domain_params&) =
+    void (*const write_operational_domain_pointer)(const fiction::operational_domain&, const std::string_view&,
+                                                   const fiction::write_operational_domain_params&) =
         &fiction::write_operational_domain;
 
     // Define function using function pointer
@@ -46,12 +44,12 @@ void write_operational_domain(pybind11::module& m)
         py::arg("opdom"), py::arg("params") = fiction::write_operational_domain_params{});
 }
 
-void write_critical_temperature_domain(pybind11::module& m)
+void write_critical_temperature_domain(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
     namespace py = pybind11;
 
     // Function pointer for writing to a file
-    void (*write_critical_temperature_domain_pointer)(
+    void (*const write_critical_temperature_domain_pointer)(
         const fiction::critical_temperature_domain&, const std::string_view&,
         const fiction::write_operational_domain_params&) = &fiction::write_operational_domain;
 
@@ -73,7 +71,7 @@ void write_critical_temperature_domain(pybind11::module& m)
 
 }  // namespace detail
 
-void write_operational_domain(pybind11::module& m)
+void write_operational_domain(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
     namespace py = pybind11;
 

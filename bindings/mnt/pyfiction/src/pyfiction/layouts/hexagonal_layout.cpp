@@ -13,15 +13,15 @@
 
 #include <cstdint>
 #include <sstream>
+#include <string>
 #include <vector>
 
 namespace pyfiction
 {
 
-void hexagonal_layout(pybind11::module& m)
+void hexagonal_layout(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
-    namespace py = pybind11;
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     /**
      * Hexagonal layout.

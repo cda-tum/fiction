@@ -5,7 +5,7 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
-#include <fiction/io/print_layout.hpp>
+#include <fiction/io/print_layout.hpp>  // NOLINT(misc-include-cleaner): Used in dependent template contexts below.
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/traits.hpp>
 
@@ -13,8 +13,8 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include <set>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 
 namespace pyfiction
@@ -24,7 +24,7 @@ namespace detail
 {
 
 template <typename LytBase, typename ClockedLyt>
-void clocked_layout(pybind11::module& m, const std::string& topology)
+void clocked_layout(pybind11::module& m, const std::string& topology)  // NOLINT(misc-use-internal-linkage)
 {
     namespace py = pybind11;
 
@@ -85,7 +85,7 @@ void clocked_layout(pybind11::module& m, const std::string& topology)
 
 }  // namespace detail
 
-void clocked_layouts(pybind11::module& m)
+void clocked_layouts(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
     detail::clocked_layout<py_cartesian_layout, py_cartesian_clocked_layout>(m, "cartesian");
     detail::clocked_layout<py_shifted_cartesian_layout, py_shifted_cartesian_clocked_layout>(m, "shifted_cartesian");

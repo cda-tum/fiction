@@ -18,11 +18,11 @@ namespace detail
 {
 
 template <typename Lyt>
-void read_fqca_layout(pybind11::module& m)
+void read_fqca_layout(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
-    Lyt (*read_fqca_layout_function_pointer)(const std::string_view&, const std::string_view&) =
+    Lyt (*const read_fqca_layout_function_pointer)(const std::string_view&, const std::string_view&) =
         &fiction::read_fqca_layout<Lyt>;
 
     m.def("read_fqca_layout", read_fqca_layout_function_pointer, py::arg("filename"), py::arg("layout_name") = "",
@@ -31,7 +31,7 @@ void read_fqca_layout(pybind11::module& m)
 
 }  // namespace detail
 
-void read_fqca_layout(pybind11::module& m)
+void read_fqca_layout(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
     namespace py = pybind11;
 

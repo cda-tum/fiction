@@ -5,10 +5,15 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
-#include <fiction/io/print_layout.hpp>
+#include <fiction/io/print_layout.hpp>  // NOLINT(misc-include-cleaner): Used in dependent template contexts below.
+#include <fiction/layouts/bounding_box.hpp>
+#include <fiction/layouts/cartesian_layout.hpp>
+#include <fiction/layouts/clocked_layout.hpp>
+#include <fiction/layouts/coordinates.hpp>
+#include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/traits.hpp>
-#include <fiction/utils/layout_utils.hpp>
+#include <fiction/utils/layout_utils.hpp>  // NOLINT(misc-include-cleaner): Used in dependent template contexts below.
 
 #include <fmt/format.h>
 #include <pybind11/pybind11.h>
@@ -17,6 +22,7 @@
 #include <algorithm>
 #include <cctype>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <type_traits>
 #include <utility>
@@ -29,7 +35,7 @@ namespace detail
 {
 
 template <typename Technology>
-void fcn_technology_cell_level_layout(pybind11::module& m)
+void fcn_technology_cell_level_layout(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
     namespace py = pybind11;
 
@@ -185,7 +191,7 @@ void fcn_technology_cell_level_layout(pybind11::module& m)
 
 }  // namespace detail
 
-void cell_level_layouts(pybind11::module& m)
+void cell_level_layouts(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
     detail::fcn_technology_cell_level_layout<fiction::qca_technology>(m);
     detail::fcn_technology_cell_level_layout<fiction::inml_technology>(m);

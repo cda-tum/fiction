@@ -6,8 +6,7 @@
 #include "pyfiction/types.hpp"
 
 #include <fiction/io/write_fgl_layout.hpp>
-#include <fiction/traits.hpp>
-#include <fiction/utils/name_utils.hpp>
+#include <fiction/utils/name_utils.hpp>  // NOLINT(misc-include-cleaner): Required by write_fgl_layout.hpp.
 
 #include <pybind11/pybind11.h>
 
@@ -20,9 +19,9 @@ namespace detail
 {
 
 template <typename Lyt>
-void write_fgl_layout(pybind11::module& m)
+void write_fgl_layout(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     m.def(
         "write_fgl_layout",
@@ -32,7 +31,7 @@ void write_fgl_layout(pybind11::module& m)
 
 }  // namespace detail
 
-void write_fgl_layout(pybind11::module& m)
+void write_fgl_layout(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
     detail::write_fgl_layout<py_cartesian_gate_layout>(m);
     detail::write_fgl_layout<py_shifted_cartesian_gate_layout>(m);

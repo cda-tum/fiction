@@ -17,9 +17,9 @@ namespace detail
 {
 
 template <typename Lyt>
-void area(pybind11::module& m)
+void area(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     using tech = fiction::technology<Lyt>;
 
@@ -28,8 +28,8 @@ void area(pybind11::module& m)
         [](const Lyt& lyt, const double width = tech::CELL_WIDTH, const double height = tech::CELL_HEIGHT,
            const double hspace = tech::CELL_HSPACE, const double vspace = tech::CELL_VSPACE)
         {
-            fiction::area_stats        stats{};
-            fiction::area_params<tech> params{width, height, hspace, vspace};
+            fiction::area_stats              stats{};
+            const fiction::area_params<tech> params{width, height, hspace, vspace};
 
             return fiction::area<Lyt>(lyt, params, &stats);
         },
@@ -39,7 +39,7 @@ void area(pybind11::module& m)
 
 }  // namespace detail
 
-void area(pybind11::module& m)
+void area(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
     detail::area<py_qca_layout>(m);
     detail::area<py_inml_layout>(m);

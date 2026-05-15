@@ -5,8 +5,6 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
-#include <fiction/layouts/obstruction_layout.hpp>
-
 #include <fmt/format.h>
 #include <pybind11/pybind11.h>
 
@@ -19,10 +17,9 @@ namespace detail
 {
 
 template <typename LytBase, typename ObstrLyt>
-void obstruction_layout(pybind11::module& m, const std::string& topology)
+void obstruction_layout(pybind11::module& m, const std::string& topology)  // NOLINT(misc-use-internal-linkage)
 {
-    namespace py = pybind11;
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     py::class_<ObstrLyt, LytBase>(m, fmt::format("{}_obstruction_layout", topology).c_str(),
                                   DOC(fiction_obstruction_layout))
@@ -43,7 +40,7 @@ void obstruction_layout(pybind11::module& m, const std::string& topology)
 
 }  // namespace detail
 
-void obstruction_layouts(pybind11::module& m)
+void obstruction_layouts(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
     /**
      * Cartesian obstruction layout.

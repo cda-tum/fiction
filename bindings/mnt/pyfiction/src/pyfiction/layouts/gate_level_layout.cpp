@@ -6,15 +6,19 @@
 #include "pyfiction/types.hpp"
 
 #include <fiction/io/print_layout.hpp>
+#include <fiction/layouts/bounding_box.hpp>
 #include <fiction/traits.hpp>
 
 #include <fmt/format.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
+#include <cstdint>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <utility>
+#include <vector>
 
 namespace pyfiction
 {
@@ -23,10 +27,9 @@ namespace detail
 {
 
 template <typename LytBase, typename GateLyt>
-void gate_level_layout(pybind11::module& m, const std::string& topology)
+void gate_level_layout(pybind11::module& m, const std::string& topology)  // NOLINT(misc-use-internal-linkage)
 {
-    namespace py = pybind11;
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     py::class_<GateLyt, LytBase>(m, fmt::format("{}_gate_layout", topology).c_str(), DOC(fiction_gate_level_layout))
         .def(py::init<>())
@@ -309,7 +312,7 @@ void gate_level_layout(pybind11::module& m, const std::string& topology)
 
 }  // namespace detail
 
-void gate_level_layouts(pybind11::module& m)
+void gate_level_layouts(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
     /**
      * Gate-level clocked Cartesian layout.

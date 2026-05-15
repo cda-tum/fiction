@@ -5,8 +5,8 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
+#include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
 #include <fiction/io/write_location_and_ground_state.hpp>
-#include <fiction/utils/layout_utils.hpp>
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
@@ -20,9 +20,9 @@ namespace detail
 {
 
 template <typename Lyt>
-void write_location_and_ground_state(pybind11::module& m)
+void write_location_and_ground_state(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     m.def(
         "write_location_and_ground_state",
@@ -33,7 +33,7 @@ void write_location_and_ground_state(pybind11::module& m)
 
 }  // namespace detail
 
-void write_location_and_ground_state(pybind11::module& m)
+void write_location_and_ground_state(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
     detail::write_location_and_ground_state<py_sidb_layout>(m);
 }

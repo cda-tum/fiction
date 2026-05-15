@@ -19,10 +19,9 @@
 namespace pyfiction
 {
 
-void shifted_cartesian_layout(pybind11::module& m)
+void shifted_cartesian_layout(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
-    namespace py = pybind11;
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     /**
      * Shifted Cartesian layout.

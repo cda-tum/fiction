@@ -18,11 +18,12 @@ namespace detail
 {
 
 template <typename Lyt>
-void write_qll_layout(pybind11::module& m)
+void write_qll_layout(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
-    void (*write_qll_layout_function_pointer)(const Lyt&, const std::string_view&) = &fiction::write_qll_layout<Lyt>;
+    void (*const write_qll_layout_function_pointer)(const Lyt&, const std::string_view&) =
+        &fiction::write_qll_layout<Lyt>;
 
     m.def("write_qll_layout", write_qll_layout_function_pointer, py::arg("layout"), py::arg("filename"),
           DOC(fiction_write_qll_layout));
@@ -30,7 +31,7 @@ void write_qll_layout(pybind11::module& m)
 
 }  // namespace detail
 
-void write_qll_layout(pybind11::module& m)
+void write_qll_layout(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
     detail::write_qll_layout<py_qca_layout>(m);
     detail::write_qll_layout<py_inml_layout>(m);

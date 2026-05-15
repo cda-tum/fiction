@@ -11,6 +11,7 @@
 #include <mockturtle/io/write_dot.hpp>
 #include <pybind11/pybind11.h>
 
+#include <string>
 #include <string_view>
 
 namespace pyfiction
@@ -20,9 +21,9 @@ namespace detail
 {
 
 template <typename Lyt>
-void write_dot_layout(pybind11::module& m)
+void write_dot_layout(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     m.def(
         "write_dot_layout",
@@ -41,19 +42,19 @@ void write_dot_layout(pybind11::module& m)
 }
 
 template <typename Ntk>
-void write_dot_network(pybind11::module& m)
+void write_dot_network(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     m.def(
         "write_dot_network", [](const Ntk& ntk, const std::string_view& filename)
-        { mockturtle::write_dot(ntk, filename.data(), fiction::technology_dot_drawer<Ntk>{}); }, py::arg("network"),
-        py::arg("filename"));
+        { mockturtle::write_dot(ntk, std::string{filename}, fiction::technology_dot_drawer<Ntk>{}); },
+        py::arg("network"), py::arg("filename"));
 }
 
 }  // namespace detail
 
-void write_dot_layout(pybind11::module& m)
+void write_dot_layout(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
     detail::write_dot_layout<py_cartesian_gate_layout>(m);
     detail::write_dot_layout<py_shifted_cartesian_gate_layout>(m);

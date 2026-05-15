@@ -6,7 +6,6 @@
 #include "pyfiction/types.hpp"
 
 #include <fiction/io/network_reader.hpp>
-#include <fiction/traits.hpp>
 
 #include <fmt/format.h>
 #include <mockturtle/traits.hpp>
@@ -18,9 +17,11 @@
 // #include <mockturtle/networks/mig.hpp>
 // #include <mockturtle/networks/xag.hpp>
 
+#include <cstdint>
 #include <functional>
 #include <iostream>
 #include <memory>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -31,7 +32,7 @@ namespace detail
 {
 
 template <typename Ntk>
-void network(pybind11::module& m, const std::string& network_name)
+void network(pybind11::module& m, const std::string& network_name)  // NOLINT(misc-use-internal-linkage)
 {
     namespace py = pybind11;
 
@@ -173,7 +174,7 @@ void network(pybind11::module& m, const std::string& network_name)
 
 }  // namespace detail
 
-void logic_networks(pybind11::module& m)
+void logic_networks(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
     /**
      * Logic networks.
