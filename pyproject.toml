@@ -1,7 +1,8 @@
 [build-system]
 requires = [
     "scikit-build-core>=0.10.1",
-    "setuptools-scm>=8.1"
+    "setuptools-scm>=8.1",
+    "z3-solver>=4.8.0"
 ]
 build-backend = "scikit_build_core.build"
 
