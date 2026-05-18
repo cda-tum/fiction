@@ -386,3 +386,15 @@ Furthermore, if you use any of the design automation algorithms, please consider
         }
 
     `Bestagon experiment script <https://github.com/cda-tum/fiction/tree/main/experiments/bestagon>`_
+
+* :ref:`Molecular QCA library <molQCA>`:
+
+    .. code-block:: tex
+
+        @inproceedings{hien2025molqca,
+          title={Bridging the Gap Between Molecular FCN and Design Automation with SIM(7)-MolPDK: A Physically Simulated Standard-Cell Library},
+          author={Hien, Benjamin and Quinci, Danilo and Ardesi, Yuri and Beretta, Giuliana and Ravera, Federico and Walter, Marcel and Wille, Robert},
+          booktitle={2025 IEEE Latin American Conference on Nanotechnology (LANANO)},
+          pages={19--24},
+          year={2025}
+        }
