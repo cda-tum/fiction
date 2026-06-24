@@ -49,6 +49,8 @@ Technology Mapping
     .. tab:: C++
         **Header:** ``fiction/algorithms/network_transformation/technology_mapping.hpp``
 
+        .. doxygenclass:: fiction::missing_required_gates_exception
+           :members:
         .. doxygenstruct:: fiction::technology_mapping_params
            :members:
         .. doxygenfunction:: fiction::and_or_not
@@ -61,6 +63,8 @@ Technology Mapping
         .. doxygenfunction:: fiction::technology_mapping
 
     .. tab:: Python
+        .. autoclass:: mnt.pyfiction.missing_required_gates_exception
+            :members:
         .. autoclass:: mnt.pyfiction.technology_mapping_params
             :members:
         .. autofunction:: mnt.pyfiction.and_or_not

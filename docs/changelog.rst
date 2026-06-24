@@ -26,6 +26,8 @@ Added
 
 Changed
 #######
+- Algorithms:
+    - Switched the default technology mapper in the ``map`` command and the ``technology_mapping`` function from ``mockturtle::map`` to ``mockturtle::emap``
 - Build system:
     - Restructured the CLI command implementation to improve code organization, modularity, and compilation speed
     - Refactored the entire CMake build system to use ``FetchContent`` for dependency management instead of git submodules
@@ -38,6 +40,14 @@ Fixed
 #####
 - Code quality:
     - Addressed several ``clang-tidy`` warnings throughout the code base
+
+Removed
+#######
+- CLI:
+    - Removed the ``--logic_sharing`` flag from ``map`` as ``mockturtle::emap`` does not support it
+- Continuous integration:
+    - macOS 13 has been removed, along with support for the x86_64 (Intel) architecture
+
 
 v0.6.12 - 2025-10-29
 --------------------
@@ -74,11 +84,6 @@ Changed
     - Modernized README and Getting Started section of the documentation
 - Dependencies:
     - Updated all dependencies to their latest versions
-
-Removed
-#######
-- Continuous integration:
-    - macOS 13 has been removed, along with support for the x86_64 (Intel) architecture
 
 Fixed
 #####
