@@ -135,7 +135,6 @@ testpaths = ["bindings/mnt/pyfiction/test"]
 
 [tool.cibuildwheel]
 build = "cp3*"
-enable = ["cpython-freethreading"]
 archs = "auto64"
 skip = "*-musllinux*"
 test-command = "python -c \"from mnt import pyfiction\""
