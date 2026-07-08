@@ -3,7 +3,6 @@
 //
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
 
 #include <fiction/utils/truth_table_utils.hpp>
 

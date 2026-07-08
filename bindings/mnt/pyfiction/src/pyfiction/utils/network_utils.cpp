@@ -10,8 +10,6 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include <vector>
-
 namespace pyfiction
 {
 
@@ -21,7 +19,7 @@ namespace detail
 template <typename Ntk>
 void has_high_degree_fanin_nodes(pybind11::module& m)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     m.def("has_high_degree_fanin_nodes", &fiction::has_high_degree_fanin_nodes<Ntk>, py::arg("ntk"),
           py::arg("threshold") = 2, DOC(fiction_has_high_degree_fanin_nodes));
@@ -33,7 +31,9 @@ void network_utils(pybind11::module& m)
 {
     namespace py = pybind11;
 
-    py::register_exception<fiction::high_degree_fanin_exception>(m, "high_degree_fanin_exception", PyExc_ValueError);
+    py::register_exception<fiction::high_degree_fanin_exception>(
+        m, "high_degree_fanin_exception",
+        PyExc_ValueError);  // NOLINT(misc-include-cleaner): included through pybind11.h
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 

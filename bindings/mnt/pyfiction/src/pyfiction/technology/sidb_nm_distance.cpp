@@ -21,7 +21,7 @@ namespace detail
 template <typename Lyt>
 void nanometer_distance(pybind11::module& m, const std::string& lattice = "")
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     m.def(fmt::format("sidb_nm_distance{}", lattice).c_str(), &fiction::sidb_nm_distance<Lyt>, py::arg("lyt"),
           py::arg("source"), py::arg("target"), DOC(fiction_sidb_nm_distance));

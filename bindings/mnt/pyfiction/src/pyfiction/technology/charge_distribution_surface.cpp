@@ -5,9 +5,9 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
-#include <fiction/io/print_layout.hpp>
+#include <fiction/io/print_layout.hpp>  // NOLINT(misc-include-cleaner): used via ADL for print_layout(...)
+#include <fiction/layouts/bounding_box.hpp>
 #include <fiction/technology/charge_distribution_surface.hpp>
 #include <fiction/technology/sidb_charge_state.hpp>
 #include <fiction/technology/sidb_defects.hpp>
@@ -18,7 +18,6 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include <cstdint>
 #include <sstream>
 #include <string>
 #include <utility>
@@ -31,7 +30,8 @@ namespace detail
 {
 
 template <typename Lyt>
-void charge_distribution_surface_layout(pybind11::module& m, const std::string& lattice = "")
+void charge_distribution_surface_layout(pybind11::module&  m,
+                                        const std::string& lattice = "")  // NOLINT(misc-use-internal-linkage)
 {
     namespace py = pybind11;
 
@@ -209,7 +209,7 @@ void charge_distribution_surface_layout(pybind11::module& m, const std::string& 
 
 }  // namespace detail
 
-void charge_distribution_surfaces(pybind11::module& m)
+void charge_distribution_surfaces(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
     namespace py = pybind11;
 

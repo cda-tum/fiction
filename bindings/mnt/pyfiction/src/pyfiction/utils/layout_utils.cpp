@@ -5,12 +5,11 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
+#include <fiction/traits.hpp>
 #include <fiction/utils/layout_utils.hpp>
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-
-#include <vector>
 
 namespace pyfiction
 {
@@ -21,7 +20,7 @@ namespace detail
 template <typename Lyt>
 void num_adjacent_coordinates(pybind11::module& m)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     m.def("num_adjacent_coordinates", &fiction::num_adjacent_coordinates<Lyt>, py::arg("lyt"), py::arg("c"),
           DOC(fiction_num_adjacent_coordinates));
@@ -30,7 +29,7 @@ void num_adjacent_coordinates(pybind11::module& m)
 template <typename Lyt>
 void normalize_layout_coordinates(pybind11::module& m)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     m.def("normalize_layout_coordinates", &fiction::normalize_layout_coordinates<Lyt>, py::arg("lyt"),
           DOC(fiction_normalize_layout_coordinates));
@@ -39,7 +38,7 @@ void normalize_layout_coordinates(pybind11::module& m)
 template <typename Lyt>
 void convert_layout_to_siqad_coordinates(pybind11::module& m)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     m.def("convert_layout_to_siqad_coordinates", &fiction::convert_layout_to_siqad_coordinates<Lyt>, py::arg("lyt"),
           DOC(fiction_convert_layout_to_siqad_coordinates));
@@ -48,7 +47,7 @@ void convert_layout_to_siqad_coordinates(pybind11::module& m)
 template <typename Lyt>
 void random_coordinate(pybind11::module& m)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     m.def("random_coordinate", &fiction::random_coordinate<fiction::coordinate<Lyt>>, py::arg("coordinate1"),
           py::arg("coordinate_2"), DOC(fiction_random_coordinate));

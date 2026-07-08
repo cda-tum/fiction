@@ -2,12 +2,12 @@
 // Created by marcel on 13.02.23.
 //
 
-#include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/traits.hpp>
 #include <fiction/utils/placement_utils.hpp>
 
+#include <mockturtle/traits.hpp>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
@@ -22,7 +22,7 @@ namespace detail
 template <typename Lyt, typename Ntk>
 void reserve_input_nodes(pybind11::module& m)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     m.def("reserve_input_nodes", &fiction::reserve_input_nodes<Lyt, Ntk>, py::arg("lyt"), py::arg("ntk"));
 }
@@ -30,7 +30,7 @@ void reserve_input_nodes(pybind11::module& m)
 template <typename Lyt, typename Ntk>
 void place(pybind11::module& m)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     m.def(
         "place", [](Lyt& lyt, const fiction::tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n)

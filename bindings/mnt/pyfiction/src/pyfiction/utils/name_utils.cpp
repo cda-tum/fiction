@@ -10,8 +10,6 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include <vector>
-
 namespace pyfiction
 {
 
@@ -21,7 +19,7 @@ namespace detail
 template <typename NtkOrLyt>
 void get_name(pybind11::module& m)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     m.def("get_name", &fiction::get_name<NtkOrLyt>, py::arg("ntk_or_lyt"), DOC(fiction_get_name));
 }
@@ -29,7 +27,7 @@ void get_name(pybind11::module& m)
 template <typename NtkOrLyt>
 void set_name(pybind11::module& m)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     m.def("set_name", &fiction::set_name<NtkOrLyt>, py::arg("ntk_or_lyt"), py::arg("name"), DOC(fiction_set_name));
 }

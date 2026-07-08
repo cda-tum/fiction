@@ -24,7 +24,7 @@ namespace detail
 template <typename Lyt>
 void is_crossable_wire(pybind11::module& m)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     m.def("is_crossable_wire", &fiction::is_crossable_wire<Lyt>, py::arg("lyt"), py::arg("src"), py::arg("successor"),
           DOC(fiction_is_crossable_wire));
@@ -33,7 +33,7 @@ void is_crossable_wire(pybind11::module& m)
 template <typename Lyt>
 void route_path(pybind11::module& m)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     m.def(
         "route_path",
@@ -51,7 +51,7 @@ void route_path(pybind11::module& m)
 template <typename Lyt>
 void extract_routing_objectives(pybind11::module& m)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     m.def(
         "extract_routing_objectives",
@@ -72,7 +72,7 @@ void extract_routing_objectives(pybind11::module& m)
 template <typename Lyt>
 void clear_routing(pybind11::module& m)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     m.def("clear_routing", &fiction::clear_routing<Lyt>, py::arg("lyt"), DOC(fiction_clear_routing));
 }

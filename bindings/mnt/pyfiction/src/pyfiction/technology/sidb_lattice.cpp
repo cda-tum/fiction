@@ -5,10 +5,9 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
-#include <fiction/io/print_layout.hpp>
-#include <fiction/technology/sidb_lattice.hpp>
 #include <fiction/technology/sidb_lattice_orientations.hpp>
 #include <fiction/traits.hpp>
+#include <fiction/types.hpp>
 
 #include <fmt/format.h>
 #include <pybind11/pybind11.h>
@@ -16,9 +15,7 @@
 
 #include <algorithm>
 #include <cctype>
-#include <cstdint>
 #include <string>
-#include <vector>
 
 namespace pyfiction
 {

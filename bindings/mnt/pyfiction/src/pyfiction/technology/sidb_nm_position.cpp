@@ -5,6 +5,7 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
+#include <fiction/technology/sidb_lattice_orientations.hpp>
 #include <fiction/technology/sidb_nm_position.hpp>
 
 #include <pybind11/pybind11.h>
@@ -19,7 +20,7 @@ namespace detail
 template <typename Lyt>
 void sidb_nm_position(pybind11::module& m)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     m.def("sidb_nm_position", &fiction::sidb_nm_position<Lyt>, py::arg("lyt"), py::arg("c"),
           DOC(fiction_sidb_nm_position));
