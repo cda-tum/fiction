@@ -24,8 +24,9 @@ void write_sidb_layout_svg_impl(pybind11::module& m)  // NOLINT(misc-use-interna
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     // Pointers to the original functions
-    void (*const write_sidb_layout_svg_pointer)(  // NOLINT(misc-const-correctness)
-        const Lyt&, const std::string_view&, const fiction::write_sidb_layout_svg_params&) =
+    // NOLINTNEXTLINE(misc-const-correctness)
+    void (*const write_sidb_layout_svg_pointer)(const Lyt&, const std::string_view&,
+                                                const fiction::write_sidb_layout_svg_params&) =
         &fiction::write_sidb_layout_svg<Lyt>;
 
     // SiDB plot
@@ -50,8 +51,9 @@ void write_qca_layout_svg_impl(pybind11::module& m)  // NOLINT(misc-use-internal
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     // QCA plot
-    void (*const write_qca_layout_svg_pointer)(  // NOLINT(misc-const-correctness)
-        const py_qca_layout&, const std::string_view&, const fiction::write_qca_layout_svg_params&) =
+    // NOLINTNEXTLINE(misc-const-correctness)
+    void (*const write_qca_layout_svg_pointer)(const py_qca_layout&, const std::string_view&,
+                                               const fiction::write_qca_layout_svg_params&) =
         &fiction::write_qca_layout_svg<py_qca_layout>;
 
     m.def("write_qca_layout_svg", write_qca_layout_svg_pointer, py::arg("layout"), py::arg("filename"),

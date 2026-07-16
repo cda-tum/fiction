@@ -21,8 +21,9 @@ void write_sqd_layout(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 {
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
-    void (*const write_sqd_layout_function_pointer)(const Lyt&,  // NOLINT(misc-const-correctness)
-                                                    const std::string_view&) = &fiction::write_sqd_layout<Lyt>;
+    // NOLINTNEXTLINE(misc-const-correctness)
+    void (*const write_sqd_layout_function_pointer)(const Lyt&, const std::string_view&) =
+        &fiction::write_sqd_layout<Lyt>;
 
     m.def("write_sqd_layout", write_sqd_layout_function_pointer, py::arg("layout"), py::arg("filename"),
           DOC(fiction_write_sqd_layout));
