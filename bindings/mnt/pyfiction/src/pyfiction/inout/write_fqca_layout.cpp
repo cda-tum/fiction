@@ -22,8 +22,8 @@ void write_fqca_layout(pybind11::module& m)  // NOLINT(misc-use-internal-linkage
 {
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
-    void (*const write_fqca_layout_function_pointer)(const Lyt&, const std::string_view&,
-                                                     const fiction::write_fqca_layout_params) =
+    void (*const write_fqca_layout_function_pointer)(  // NOLINT(misc-const-correctness)
+        const Lyt&, const std::string_view&, const fiction::write_fqca_layout_params) =
         &fiction::write_fqca_layout<Lyt>;
 
     m.def("write_fqca_layout", write_fqca_layout_function_pointer, py::arg("layout"), py::arg("filename"),

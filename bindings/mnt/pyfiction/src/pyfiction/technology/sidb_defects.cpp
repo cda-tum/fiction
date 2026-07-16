@@ -48,8 +48,10 @@ void sidb_defects(pybind11::module& m)
         .def_readonly("epsilon_r", &fiction::sidb_defect::epsilon_r, DOC(fiction_sidb_defect_epsilon_r))
         .def_readonly("lambda_tf", &fiction::sidb_defect::lambda_tf, DOC(fiction_sidb_defect_lambda_tf))
 
-        .def(py::self == py::self, py::arg("rhs"), DOC(fiction_sidb_defect_operator_eq))
-        .def(py::self != py::self, py::arg("rhs"), DOC(fiction_sidb_defect_operator_ne))
+        .def(py::self == py::self, py::arg("rhs"),
+             DOC(fiction_sidb_defect_operator_eq))  // NOLINT(misc-redundant-expression)
+        .def(py::self != py::self, py::arg("rhs"),
+             DOC(fiction_sidb_defect_operator_ne))  // NOLINT(misc-redundant-expression)
 
         ;
 

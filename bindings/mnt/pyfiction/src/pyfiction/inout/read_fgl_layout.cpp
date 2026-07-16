@@ -22,11 +22,12 @@ void read_fgl_layout(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
         m, "fgl_parsing_error",
         PyExc_RuntimeError);  // NOLINT(misc-include-cleaner): Included through pybind11.h
 
-    py_cartesian_gate_layout (*const read_cartesian_fgl_layout_function_pointer)(
+    py_cartesian_gate_layout (*const read_cartesian_fgl_layout_function_pointer)(  // NOLINT(misc-const-correctness)
         const std::string_view&, const std::string_view&) = &fiction::read_fgl_layout<py_cartesian_gate_layout>;
-    py_shifted_cartesian_gate_layout (*const read_shifted_cartesian_fgl_layout_function_pointer)(
+    py_shifted_cartesian_gate_layout (*const
+                                          read_shifted_cartesian_fgl_layout_function_pointer)(  // NOLINT(misc-const-correctness)
         const std::string_view&, const std::string_view&) = &fiction::read_fgl_layout<py_shifted_cartesian_gate_layout>;
-    py_hexagonal_gate_layout (*const read_hexagonal_fgl_layout_function_pointer)(
+    py_hexagonal_gate_layout (*const read_hexagonal_fgl_layout_function_pointer)(  // NOLINT(misc-const-correctness)
         const std::string_view&, const std::string_view&) = &fiction::read_fgl_layout<py_hexagonal_gate_layout>;
 
     m.def("read_cartesian_fgl_layout", read_cartesian_fgl_layout_function_pointer, py::arg("filename"),

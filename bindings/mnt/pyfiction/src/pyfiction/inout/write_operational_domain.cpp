@@ -24,8 +24,8 @@ void write_operational_domain(pybind11::module& m)  // NOLINT(misc-use-internal-
     namespace py = pybind11;
 
     // Function pointer for writing to a file
-    void (*const write_operational_domain_pointer)(const fiction::operational_domain&, const std::string_view&,
-                                                   const fiction::write_operational_domain_params&) =
+    void (*const write_operational_domain_pointer)(  // NOLINT(misc-const-correctness)
+        const fiction::operational_domain&, const std::string_view&, const fiction::write_operational_domain_params&) =
         &fiction::write_operational_domain;
 
     // Define function using function pointer
@@ -49,7 +49,7 @@ void write_critical_temperature_domain(pybind11::module& m)  // NOLINT(misc-use-
     namespace py = pybind11;
 
     // Function pointer for writing to a file
-    void (*const write_critical_temperature_domain_pointer)(
+    void (*const write_critical_temperature_domain_pointer)(  // NOLINT(misc-const-correctness)
         const fiction::critical_temperature_domain&, const std::string_view&,
         const fiction::write_operational_domain_params&) = &fiction::write_operational_domain;
 
