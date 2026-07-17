@@ -207,6 +207,48 @@ If you are using Windows, you can use the following commands instead:
     $ python3 -m venv venv
     $ venv\Scripts\activate.bat
 
+.. _bindings-architecture:
+
+Bindings Architecture
+#####################
+
+If you want to add or extend Python bindings, the code under ``bindings/mnt/pyfiction/`` follows a source-based
+layout, one translation unit per binding, chosen to keep compile time and memory usage manageable as the number of
+bindings grows:
+
+.. code-block:: text
+
+    bindings/mnt/pyfiction/
+    ├── CMakeLists.txt
+    ├── pyfiction.cpp                              # top-level PYBIND11_MODULE entry point
+    └── src/pyfiction/
+        ├── algorithms/
+        │   ├── register_algorithms.cpp             # calls register_path_finding(m), etc.
+        │   ├── path_finding/
+        │   │   ├── a_star.cpp                      # defines a_star(pybind11::module&)
+        │   │   └── register_path_finding.cpp        # calls a_star(m), distance(m), ...
+        │   └── ...
+        ├── layouts/
+        │   └── ...
+        └── ...
+
+Each leaf ``.cpp`` file under ``src/pyfiction/<module>/<submodule>/`` defines exactly one binding function (e.g.
+``void a_star(pybind11::module& m)``) that binds a single class, function, or closely related group thereof. Each
+directory has a ``register_<name>.cpp`` that forward-declares and calls the binding functions of its leaf files (and
+the ``register_<name>`` functions of any nested submodule directories); the top-level ``pyfiction.cpp`` calls each
+top-level module's ``register_<module>(m)`` from its ``PYBIND11_MODULE`` block. New source files do not need to be
+added anywhere manually: ``CMakeLists.txt`` collects them automatically via ``file(GLOB_RECURSE
+FICTION_PYFICTION_SOURCES CONFIGURE_DEPENDS "src/*.cpp")``, so re-running ``cmake`` picks up new files on its own —
+you only need to wire the new function into the relevant ``register_<name>.cpp`` and, if needed, forward-declare it
+there.
+
+.. note::
+
+   The Python-facing ``mnt.pyfiction`` namespace must not change shape when adding new bindings. In particular, do
+   not introduce new Python-level submodules (e.g. ``mnt.pyfiction.algorithms``) — all registration functions attach
+   their bindings to the single top-level module object that is threaded through the call chain, matching the
+   existing flat API that user scripts depend on.
+
 ---
 
 Advanced Configuration

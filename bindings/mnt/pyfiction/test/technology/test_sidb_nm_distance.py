@@ -10,6 +10,8 @@ class TestSiDBNmDistance(unittest.TestCase):
         # Replace the placeholders with actual values or function calls
         self.assertEqual(sidb_nm_distance_100(layout_one, (0, 0), (0, 0)), 0)
         self.assertEqual(sidb_nm_distance_100(layout_one, (1, 0), (1, 0)), 0)
+        # (1, 1) is off-axis: pins down the source == target short-circuit that avoids
+        # architecture-dependent float noise (exact 0.0 on x86, ~8.88e-19 on ARM) without it.
         self.assertEqual(sidb_nm_distance_100(layout_one, (1, 1), (1, 1)), 0)
 
         # Replace the placeholders with actual values or function calls
@@ -22,6 +24,8 @@ class TestSiDBNmDistance(unittest.TestCase):
         # Replace the placeholders with actual values or function calls
         self.assertEqual(sidb_nm_distance_111(layout_one, (0, 0), (0, 0)), 0)
         self.assertEqual(sidb_nm_distance_111(layout_one, (1, 0), (1, 0)), 0)
+        # (1, 1) is off-axis: pins down the source == target short-circuit that avoids
+        # architecture-dependent float noise (exact 0.0 on x86, ~8.88e-19 on ARM) without it.
         self.assertEqual(sidb_nm_distance_111(layout_one, (1, 1), (1, 1)), 0)
 
         # Replace the placeholders with actual values or function calls

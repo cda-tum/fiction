@@ -74,3 +74,6 @@ venv/
 *.tar.*
 *.7z
 *.rar
+
+# AI agent scratch files (plans, tech-debt notes, review write-ups) - never tracked
+.ai/

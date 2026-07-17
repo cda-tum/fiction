@@ -50,14 +50,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        runs-on: [ubuntu-latest, macos-latest, windows-latest]
+        runs-on: [ubuntu-latest, ubuntu-24.04-arm, macos-latest, windows-latest]
     steps:
       - name: Clone Repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           fetch-depth: 0
 
       - name: Setup ccache
+        if: matrix.runs-on != 'ubuntu-24.04-arm'
         uses: hendrikmuhs/ccache-action@5ebbd400eff9e74630f759d94ddd7b6c26299639 # v1.2
         with:
           key: "${{matrix.runs-on}}-pyfiction"
@@ -70,18 +71,18 @@ jobs:
 
       - name: Setup Z3 Solver
         id: z3
-        uses: cda-tum/setup-z3@8156b32632230f11cf9c5a50becb33d73e2fb4e5 # v1.7.1
+        uses: cda-tum/setup-z3@7bfe87519f27304460db44284cb8cc59f50f5fc9 # v1.7.2
         with:
           version: ${{env.Z3_VERSION}}
 
       - name: Install the latest version of uv
-        uses: astral-sh/setup-uv@eac588ad8def6316056a12d4907a9d4d84ff7a3b # v7.3.0
+        uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
         with:
           version: "latest"
           enable-cache: true
 
       - name: Setup nox
-        uses: wntrblm/nox@5a277b752f6094150e25237d47c34168e2b7526e # 2026.02.09
+        uses: wntrblm/nox@3284968a16fa5bd7fc0cc64a69a531404ccb4756 # 2026.07.11
 
       - name: 🐍 Test
         run: nox -s tests --verbose

@@ -56,12 +56,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Clone repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           fetch-depth: 0
 
       - name: Install the latest version of uv
-        uses: astral-sh/setup-uv@eac588ad8def6316056a12d4907a9d4d84ff7a3b # v7.3.0
+        uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
         with:
           version: "latest"
           enable-cache: true
@@ -73,7 +73,7 @@ jobs:
         run: uvx twine check dist/*
 
       - name: Upload sdist as an artifact
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: cibw-sdist
           path: dist/*.tar.gz
@@ -89,7 +89,7 @@ jobs:
         runs-on: [ubuntu-24.04, ubuntu-24.04-arm, macos-15, windows-latest]
 
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           submodules: recursive
           fetch-depth: 0
@@ -108,7 +108,7 @@ jobs:
       # on Linux, the action does not work because it can't install to the manylinux container
       - if: runner.os != 'Linux'
         name: Install Z3
-        uses: cda-tum/setup-z3@8156b32632230f11cf9c5a50becb33d73e2fb4e5 # v1.7.1
+        uses: cda-tum/setup-z3@7bfe87519f27304460db44284cb8cc59f50f5fc9 # v1.7.2
         with:
           version: ${{ env.Z3_VERSION }}
 
@@ -117,7 +117,7 @@ jobs:
         uses: rui314/setup-mold@v1
 
       - name: Install the latest version of uv
-        uses: astral-sh/setup-uv@eac588ad8def6316056a12d4907a9d4d84ff7a3b # v7.3.0
+        uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
         with:
           version: "latest"
           enable-cache: true
@@ -126,7 +126,7 @@ jobs:
         uses: pypa/cibuildwheel@298ed2fb2c105540f5ed055e8a6ad78d82dd3a7e # v3.3
 
       - name: Upload wheel as an artifact
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: cibw-wheels-${{ matrix.runs-on }}
           path: ./wheelhouse/*.whl
@@ -139,19 +139,19 @@ jobs:
     if: github.event_name == 'release' && github.event.action == 'published'
     steps:
       - name: Download the previously stored artifacts
-        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           pattern: cibw-*
           path: dist
           merge-multiple: true
 
       - name: Generate artifact attestation for sdist and wheel(s)
-        uses: actions/attest-build-provenance@a2bbfa25375fe432b6a289bc6b6cd05ecd0c4c32 # v4.1.0
+        uses: actions/attest-build-provenance@0f67c3f4856b2e3261c31976d6725780e5e4c373 # v4.1.1
         with:
           subject-path: "dist/*"
 
       - name: Deploy to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
+        uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b # release/v1
         with:
           password: ${{ secrets.PYPI_DEPLOY_TOKEN }}
           attestations: true

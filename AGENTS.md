@@ -43,6 +43,16 @@ You are an expert software architect and engineer specializing in **C++17**, **P
   - `include/fiction/`: **Read/Write**. Main library headers.
   - `test/`: **Read/Write**. C++ unit tests (Catch2).
   - `bindings/mnt/pyfiction/`: **Read/Write**. Python bindings and tests.
+    Bindings are source-based, one translation unit per binding: each new Python-exposed feature gets its own
+    `.cpp` file under `src/pyfiction/<module>/<submodule>/` that defines a single `void xxx(pybind11::module& m)`
+    binding function; that function is forward-declared and called from the enclosing `register_<name>.cpp`, whose
+    own `register_<name>(m)` is in turn called either by a parent `register_<name>.cpp` or, for top-level modules,
+    directly from `pyfiction.cpp`'s `PYBIND11_MODULE` block. Sources are picked up automatically via
+    `file(GLOB_RECURSE ... src/*.cpp)` in `CMakeLists.txt` — do not add files to a manual list, just wire the new
+    function into its `register_<name>.cpp`. Do **not** add bindings via a monolithic header included into
+    `pyfiction.cpp` (the old pattern); do not introduce new Python-level submodules — the
+    `mnt.pyfiction` namespace shape must stay unchanged. See `docs/getting_started.rst` ("Bindings Architecture")
+    for details.
   - `cli/`: **Read/Write**. Command-line interface.
   - `docs/`: **Read/Write**. Documentation (Sphinx/Doxygen).
   - `vendors/`: **ReadOnly**. Third-party libraries (NEVER modify).
