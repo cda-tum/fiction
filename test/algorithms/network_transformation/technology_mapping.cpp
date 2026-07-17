@@ -10,6 +10,7 @@
 
 #include <fiction/algorithms/network_transformation/technology_mapping.hpp>
 #include <fiction/algorithms/properties/count_gate_types.hpp>
+#include <fiction/networks/technology_network.hpp>
 
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/mig.hpp>
@@ -181,47 +182,20 @@ void map_and_check_all_3_inp(const Ntk& ntk)
 }
 
 template <typename Ntk>
-void map_and_check_all_func(const Ntk& ntk)
+void map_and_check_ha(const Ntk& ntk)
 {
+    // the half-adder gates are only added on top of the standard 2-input functions; enabling them must neither
+    // break the mapping nor change its functionality
+    auto params = all_standard_2_input_functions();
+    params.ha   = true;
+
     technology_mapping_stats stats{};
 
-    const auto mapped_ntk = technology_mapping(ntk, all_standard_3_input_functions(), &stats);
+    const auto mapped_ntk = technology_mapping(ntk, params, &stats);
 
     REQUIRE(!stats.mapper_stats.mapping_error);
 
     check_eq(ntk, mapped_ntk);
-
-    count_gate_types_stats gt_stats{};
-    count_gate_types(mapped_ntk, &gt_stats);
-
-    CHECK(gt_stats.num_and2 == 0);
-    CHECK(gt_stats.num_or2 == 0);
-    CHECK(gt_stats.num_nand2 == 0);
-    CHECK(gt_stats.num_nor2 == 0);
-    CHECK(gt_stats.num_xor2 == 0);
-    CHECK(gt_stats.num_xnor2 == 0);
-}
-
-template <typename Ntk>
-void map_and_check_all_standard_func(const Ntk& ntk)
-{
-    technology_mapping_stats stats{};
-
-    const auto mapped_ntk = technology_mapping(ntk, all_standard_3_input_functions(), &stats);
-
-    REQUIRE(!stats.mapper_stats.mapping_error);
-
-    check_eq(ntk, mapped_ntk);
-
-    count_gate_types_stats gt_stats{};
-    count_gate_types(mapped_ntk, &gt_stats);
-
-    CHECK(gt_stats.num_and2 == 0);
-    CHECK(gt_stats.num_or2 == 0);
-    CHECK(gt_stats.num_nand2 == 0);
-    CHECK(gt_stats.num_nor2 == 0);
-    CHECK(gt_stats.num_xor2 == 0);
-    CHECK(gt_stats.num_xnor2 == 0);
 }
 
 }  // namespace
@@ -233,7 +207,10 @@ TEMPLATE_TEST_CASE("Simple AOI network mapping", "[technology-mapping]", mocktur
     map_and_check_aoi(blueprints::inverter_network<TestType>());
 }
 
-TEMPLATE_TEST_CASE("Simple AOIM network mapping", "[technology-mapping]", mockturtle::mig_network)
+// XAG is intentionally excluded: `and_or_not_maj()` does not enable XOR, which XAG networks require, so mapping them
+// would (correctly) throw `missing_required_gates_exception`.
+TEMPLATE_TEST_CASE("Simple AOIM network mapping", "[technology-mapping]", mockturtle::aig_network,
+                   mockturtle::mig_network, mockturtle::xmg_network)
 {
     map_and_check_aoim(blueprints::maj1_network<TestType>());
     map_and_check_aoim(blueprints::and_or_network<TestType>());
@@ -260,7 +237,11 @@ TEMPLATE_TEST_CASE("Complex 2-input network mapping", "[technology-mapping]", mo
     map_and_check_all_2_inp(blueprints::maj4_network<TestType>());
 }
 
-TEMPLATE_TEST_CASE("Complex 3-input network mapping", "[technology-mapping]", mockturtle::mig_network)
+// AIG and XAG are intentionally excluded: `all_standard_3_input_functions()` enables neither AND nor XOR, which AIG
+// (AND) and XAG (AND, XOR) networks require, so mapping them would (correctly) throw
+// `missing_required_gates_exception`.
+TEMPLATE_TEST_CASE("Complex 3-input network mapping", "[technology-mapping]", mockturtle::mig_network,
+                   mockturtle::xmg_network)
 {
     map_and_check_all_3_inp(blueprints::maj4_network<TestType>());
     map_and_check_all_standard_3_inp(blueprints::maj4_network<TestType>());
@@ -277,7 +258,10 @@ TEMPLATE_TEST_CASE("Complex all function network mapping", "[technology-mapping]
     check_eq(blueprints::maj4_network<TestType>(), mapped_ntk);
 }
 
-TEMPLATE_TEST_CASE("Name conservation after technology mapping", "[technology-mapping]", mockturtle::mig_network)
+// XAG is intentionally excluded: `and_or_not_maj()` does not enable XOR, which XAG networks require, so mapping them
+// would (correctly) throw `missing_required_gates_exception`.
+TEMPLATE_TEST_CASE("Name conservation after technology mapping", "[technology-mapping]", mockturtle::aig_network,
+                   mockturtle::mig_network, mockturtle::xmg_network)
 {
     auto maj = blueprints::maj1_network<mockturtle::names_view<TestType>>();
     maj.set_network_name("maj");
@@ -414,5 +398,56 @@ TEST_CASE("No exception when all required gates are present", "[technology-mappi
         params.inv  = true;
 
         CHECK_NOTHROW(technology_mapping(mig, params));
+    }
+}
+
+TEST_CASE("Technology mapping with half-adder gates", "[technology-mapping]")
+{
+    SECTION("Half-adder gates are added to the library and used when they are the only 2-input option")
+    {
+        // a technology_network base type skips the required-gate validation, allowing a mapping that relies
+        // exclusively on the half-adder's sum and carry gates
+        const auto ha_ntk = blueprints::half_adder_network<technology_network>();
+
+        technology_mapping_params params{};
+        params.inv = true;
+        params.ha  = true;
+
+        technology_mapping_stats stats{};
+        const auto               mapped_ntk = technology_mapping(ha_ntk, params, &stats);
+
+        REQUIRE(!stats.mapper_stats.mapping_error);
+        check_eq(ha_ntk, mapped_ntk);
+
+        count_gate_types_stats gt_stats{};
+        count_gate_types(mapped_ntk, &gt_stats);
+
+        // the half-adder's carry (a*b) and sum (a^b) gates must both have been used
+        CHECK(gt_stats.num_and2 >= 1);
+        CHECK(gt_stats.num_xor2 >= 1);
+    }
+
+    SECTION("Half-adder gates map a full-adder together with an OR gate")
+    {
+        // the full-adder additionally requires an OR gate for the carry-out
+        const auto fa_ntk = blueprints::full_adder_network<technology_network>();
+
+        technology_mapping_params params{};
+        params.inv = true;
+        params.or2 = true;
+        params.ha  = true;
+
+        technology_mapping_stats stats{};
+        const auto               mapped_ntk = technology_mapping(fa_ntk, params, &stats);
+
+        REQUIRE(!stats.mapper_stats.mapping_error);
+        check_eq(fa_ntk, mapped_ntk);
+    }
+
+    SECTION("Half-adder gates can be combined with the standard 2-input gates")
+    {
+        map_and_check_ha(blueprints::half_adder_network<technology_network>());
+        map_and_check_ha(blueprints::and_or_network<mockturtle::aig_network>());
+        map_and_check_ha(blueprints::maj1_network<mockturtle::aig_network>());
     }
 }

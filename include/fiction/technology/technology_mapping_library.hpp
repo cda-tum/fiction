@@ -42,10 +42,12 @@ inline constexpr auto GATE_LE2 = "GATE  le2  1 O=!(a*!b);     PIN * NONINV 1 999
 inline constexpr auto GATE_GE2 = "GATE  ge2  1 O=!(!a*b);     PIN * NONINV 1 999 1.0 1.0 1.0 1.0\n";
 
 /**
- * Asymmetrical 2-output 2-ary functions.
+ * Half-adder represented as two separate single-output gates (carry and sum). The two gates must carry distinct names;
+ * otherwise `mockturtle`'s technology library detects them as a single multi-output cell and (with the default library
+ * settings) excludes them from the single-output library, rendering them unusable during mapping.
  */
-inline constexpr auto GATE_HA = "GATE   ha      5 C=a*b;           PIN * INV 1 999 1.0 1.0 1.0 1.0\n"
-                                "GATE   ha      5 S=!a*b+a*!b;     PIN * INV 1 999 1.0 1.0 1.0 1.0\n";
+inline constexpr auto GATE_HA = "GATE   ha_carry  5 C=a*b;          PIN * INV 1 999 1.0 1.0 1.0 1.0\n"
+                                "GATE   ha_sum    5 S=!a*b+a*!b;    PIN * INV 1 999 1.0 1.0 1.0 1.0\n";
 
 /**
  * 3-ary functions.
