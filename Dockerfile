@@ -1,4 +1,4 @@
-FROM ubuntu:24.04
+FROM ubuntu:26.04
 
 # Optional argument to run the "make" command in parallel with the specified NUMBER_OF_JOBS
 ARG NUMBER_OF_JOBS=4

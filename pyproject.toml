@@ -140,7 +140,6 @@ testpaths = ["bindings/mnt/pyfiction/test"]
 
 [tool.cibuildwheel]
 build = "cp3*"
-enable = ["cpython-freethreading"]
 archs = "auto64"
 skip = "*-musllinux*"
 test-command = "python -c \"from mnt import pyfiction\""
@@ -256,7 +255,7 @@ docs = [
     "sphinx==8.2.3; python_version >= '3.11'",
     "breathe==4.36.0",
     "sphinx-rtd-theme==3.1.0",
-    "sphinx-tabs==3.4.7",
+    "sphinx-tabs==3.5.0",
 ]
 test = [
     "pytest>=9.0.1",
