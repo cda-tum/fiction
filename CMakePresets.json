@@ -23,7 +23,8 @@
       "inherits": "base",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
-        "FICTION_WARNINGS_AS_ERRORS": "OFF"
+        "FICTION_WARNINGS_AS_ERRORS": "OFF",
+        "FICTION_TEST": "ON"
       }
     },
     {

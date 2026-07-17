@@ -23,6 +23,10 @@ file(
   RELATIVE ${PROJECT_SOURCE_DIR}/bindings/mnt/pyfiction/
   ${PROJECT_SOURCE_DIR}/bindings/mnt/pyfiction/include/*.hpp)
 
+# Collect pyfiction sources under bindings/mnt/pyfiction/src
+file(GLOB_RECURSE FICTION_PYFICTION_SOURCES CONFIGURE_DEPENDS
+     ${PROJECT_SOURCE_DIR}/bindings/mnt/pyfiction/src/*.cpp)
+
 # Register header file set for IDE integration and installation metadata
 # Multiple BASE_DIRS so CMake knows how to layout the installed tree
 #
@@ -32,6 +36,7 @@ file(
 # (GLOB with CONFIGURE_DEPENDS keeps IDE view in sync when adding headers.)
 target_sources(
   pyfiction
+  PRIVATE ${FICTION_PYFICTION_SOURCES}
   PRIVATE FILE_SET HEADERS BASE_DIRS
           ${PROJECT_SOURCE_DIR}/bindings/mnt/pyfiction/ FILES
           ${FICTION_PYFICTION_HEADERS})
