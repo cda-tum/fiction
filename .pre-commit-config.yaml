@@ -66,11 +66,7 @@ repos:
 
   # Ensure uv lock file is up-to-date
   - repo: https://github.com/astral-sh/uv-pre-commit
-<<<<<<< HEAD
-    rev: 0.11.26
-=======
     rev: 0.11.29
->>>>>>> origin/main
     hooks:
       - id: uv-lock
 
@@ -95,11 +91,7 @@ repos:
 
   # Format configuration files with prettier
   - repo: https://github.com/rbubley/mirrors-prettier
-<<<<<<< HEAD
-    rev: v3.9.4
-=======
     rev: v3.9.5
->>>>>>> origin/main
     hooks:
       - id: prettier
         types_or: [yaml, markdown, html, css, scss, javascript, json]
@@ -115,11 +107,7 @@ repos:
 
   # Check the pyproject.toml file
   - repo: https://github.com/henryiii/validate-pyproject-schema-store
-<<<<<<< HEAD
-    rev: 2026.07.06
-=======
     rev: 2026.07.17
->>>>>>> origin/main
     hooks:
       - id: validate-pyproject
 
