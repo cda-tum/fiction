@@ -14,7 +14,7 @@
 namespace pyfiction
 {
 
-void post_layout_optimization(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void post_layout_optimization(pybind11::module& m)
 {
     namespace py = pybind11;
 

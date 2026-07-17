@@ -17,7 +17,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void physically_valid_parameters_impl(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void physically_valid_parameters_impl(pybind11::module& m)
 {
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
@@ -27,7 +27,7 @@ void physically_valid_parameters_impl(pybind11::module& m)  // NOLINT(misc-use-i
 
 }  // namespace detail
 
-void physically_valid_parameters(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void physically_valid_parameters(pybind11::module& m)
 {
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 

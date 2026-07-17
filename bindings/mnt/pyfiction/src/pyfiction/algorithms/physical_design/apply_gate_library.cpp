@@ -20,7 +20,7 @@ namespace detail
 {
 
 template <typename GateLibrary, typename GateLyt>
-void apply_fcn_gate_library(pybind11::module& m, const std::string& lib_name)  // NOLINT(misc-use-internal-linkage)
+void apply_fcn_gate_library(pybind11::module& m, const std::string& lib_name)
 {
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
@@ -33,7 +33,7 @@ void apply_fcn_gate_library(pybind11::module& m, const std::string& lib_name)  /
 
 }  // namespace detail
 
-void apply_gate_library(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void apply_gate_library(pybind11::module& m)
 {
     detail::apply_fcn_gate_library<fiction::qca_one_library, py_cartesian_gate_layout>(m, "qca_one");
     detail::apply_fcn_gate_library<fiction::inml_topolinano_library, py_shifted_cartesian_gate_layout>(m, "topolinano");

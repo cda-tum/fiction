@@ -12,7 +12,7 @@
 namespace pyfiction
 {
 
-void truth_tables(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void truth_tables(pybind11::module& m)
 {
     namespace py = pybind11;
 

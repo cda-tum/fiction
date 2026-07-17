@@ -13,7 +13,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void can_positive_charges_occur_impl(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void can_positive_charges_occur_impl(pybind11::module& m)
 {
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
@@ -23,7 +23,7 @@ void can_positive_charges_occur_impl(pybind11::module& m)  // NOLINT(misc-use-in
 
 }  // namespace detail
 
-void can_positive_charges_occur(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void can_positive_charges_occur(pybind11::module& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 

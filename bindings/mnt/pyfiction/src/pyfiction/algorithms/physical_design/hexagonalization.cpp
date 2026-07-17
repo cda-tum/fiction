@@ -13,7 +13,7 @@
 namespace pyfiction
 {
 
-void hexagonalization(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void hexagonalization(pybind11::module& m)
 {
     namespace py = pybind11;
 

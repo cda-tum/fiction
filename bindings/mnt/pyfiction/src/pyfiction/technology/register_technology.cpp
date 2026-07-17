@@ -11,7 +11,7 @@ void sidb_lattices(pybind11::module& m);
 void sidb_nm_distance(pybind11::module& m);
 void sidb_nm_position(pybind11::module& m);
 
-void register_technology(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void register_technology(pybind11::module& m)
 {
     area(m);
     sidb_defects(m);

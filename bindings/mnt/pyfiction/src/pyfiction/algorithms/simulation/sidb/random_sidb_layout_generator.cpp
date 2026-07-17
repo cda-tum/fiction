@@ -20,7 +20,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void random_layout_generator_impl(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void random_layout_generator_impl(pybind11::module& m)
 {
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
@@ -34,7 +34,7 @@ void random_layout_generator_impl(pybind11::module& m)  // NOLINT(misc-use-inter
 
 }  // namespace detail
 
-void random_sidb_layout_generator(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void random_sidb_layout_generator(pybind11::module& m)
 {
     namespace py = pybind11;
 

@@ -11,7 +11,7 @@ namespace pyfiction
 namespace detail
 {
 
-void occupation_probability_of_excited_states_impl(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void occupation_probability_of_excited_states_impl(pybind11::module& m)
 {
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
@@ -25,7 +25,7 @@ void occupation_probability_of_excited_states_impl(pybind11::module& m)  // NOLI
 
 }  // namespace detail
 
-void occupation_probability_of_excited_states(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void occupation_probability_of_excited_states(pybind11::module& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 

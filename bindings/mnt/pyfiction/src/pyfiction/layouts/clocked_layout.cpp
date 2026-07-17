@@ -24,7 +24,7 @@ namespace detail
 {
 
 template <typename LytBase, typename ClockedLyt>
-void clocked_layout(pybind11::module& m, const std::string& topology)  // NOLINT(misc-use-internal-linkage)
+void clocked_layout(pybind11::module& m, const std::string& topology)
 {
     namespace py = pybind11;
 
@@ -85,7 +85,7 @@ void clocked_layout(pybind11::module& m, const std::string& topology)  // NOLINT
 
 }  // namespace detail
 
-void clocked_layouts(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void clocked_layouts(pybind11::module& m)
 {
     detail::clocked_layout<py_cartesian_layout, py_cartesian_clocked_layout>(m, "cartesian");
     detail::clocked_layout<py_shifted_cartesian_layout, py_shifted_cartesian_clocked_layout>(m, "shifted_cartesian");

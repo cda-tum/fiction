@@ -12,7 +12,7 @@
 namespace pyfiction
 {
 
-void graph_oriented_layout_design(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void graph_oriented_layout_design(pybind11::module& m)
 {
     namespace py = pybind11;
 

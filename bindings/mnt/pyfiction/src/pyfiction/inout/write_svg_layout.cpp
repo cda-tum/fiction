@@ -19,7 +19,7 @@ namespace pyfiction
 namespace detail
 {
 template <typename Lyt>
-void write_sidb_layout_svg_impl(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void write_sidb_layout_svg_impl(pybind11::module& m)
 {
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
@@ -46,7 +46,7 @@ void write_sidb_layout_svg_impl(pybind11::module& m)  // NOLINT(misc-use-interna
 }
 
 template <typename Lyt>
-void write_qca_layout_svg_impl(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void write_qca_layout_svg_impl(pybind11::module& m)
 {
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
@@ -62,7 +62,7 @@ void write_qca_layout_svg_impl(pybind11::module& m)  // NOLINT(misc-use-internal
 
 }  // namespace detail
 
-void write_svg_layout(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void write_svg_layout(pybind11::module& m)
 {
     namespace py = pybind11;
 

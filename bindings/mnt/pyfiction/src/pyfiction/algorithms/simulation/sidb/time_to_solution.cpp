@@ -19,7 +19,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void time_to_solution_impl(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void time_to_solution_impl(pybind11::module& m)
 {
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
@@ -33,7 +33,7 @@ void time_to_solution_impl(pybind11::module& m)  // NOLINT(misc-use-internal-lin
 
 }  // namespace detail
 
-void time_to_solution(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void time_to_solution(pybind11::module& m)
 {
     namespace py = pybind11;
 

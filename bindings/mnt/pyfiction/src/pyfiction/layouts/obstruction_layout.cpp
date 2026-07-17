@@ -17,7 +17,7 @@ namespace detail
 {
 
 template <typename LytBase, typename ObstrLyt>
-void obstruction_layout(pybind11::module& m, const std::string& topology)  // NOLINT(misc-use-internal-linkage)
+void obstruction_layout(pybind11::module& m, const std::string& topology)
 {
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
@@ -40,7 +40,7 @@ void obstruction_layout(pybind11::module& m, const std::string& topology)  // NO
 
 }  // namespace detail
 
-void obstruction_layouts(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void obstruction_layouts(pybind11::module& m)
 {
     /**
      * Cartesian obstruction layout.

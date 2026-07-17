@@ -13,7 +13,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void quickexact_impl(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void quickexact_impl(pybind11::module& m)
 {
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
@@ -23,7 +23,7 @@ void quickexact_impl(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 
 }  // namespace detail
 
-void quickexact(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void quickexact(pybind11::module& m)
 {
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 

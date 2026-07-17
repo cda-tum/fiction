@@ -17,7 +17,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void design_sidb_gates_impl(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void design_sidb_gates_impl(pybind11::module& m)
 {
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
@@ -28,7 +28,7 @@ void design_sidb_gates_impl(pybind11::module& m)  // NOLINT(misc-use-internal-li
 
 }  // namespace detail
 
-void design_sidb_gates(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void design_sidb_gates(pybind11::module& m)
 {
     namespace py = pybind11;
 

@@ -11,7 +11,7 @@
 namespace pyfiction
 {
 
-void sidb_simulation_parameters(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void sidb_simulation_parameters(pybind11::module& m)
 {
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 

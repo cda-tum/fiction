@@ -13,7 +13,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void quicksim_impl(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void quicksim_impl(pybind11::module& m)
 {
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
@@ -23,7 +23,7 @@ void quicksim_impl(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 
 }  // namespace detail
 
-void quicksim(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void quicksim(pybind11::module& m)
 {
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 

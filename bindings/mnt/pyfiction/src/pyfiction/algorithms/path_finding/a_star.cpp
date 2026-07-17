@@ -19,7 +19,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void a_star_impl(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void a_star_impl(pybind11::module& m)
 {
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
@@ -42,7 +42,7 @@ void a_star_impl(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 
 }  // namespace detail
 
-void a_star(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void a_star(pybind11::module& m)
 {
     namespace py = pybind11;
 

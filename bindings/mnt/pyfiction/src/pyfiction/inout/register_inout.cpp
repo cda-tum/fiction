@@ -17,7 +17,7 @@ void write_sqd_layout(pybind11::module& m);
 void write_sqd_sim_result(pybind11::module& m);
 void write_svg_layout(pybind11::module& m);
 
-void register_inout(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void register_inout(pybind11::module& m)
 {
     write_dot_layout(m);
     write_fgl_layout(m);

@@ -14,7 +14,7 @@
 namespace pyfiction
 {
 
-void read_fgl_layout(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void read_fgl_layout(pybind11::module& m)
 {
     namespace py = pybind11;
 

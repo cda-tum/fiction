@@ -20,7 +20,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void write_location_and_ground_state(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void write_location_and_ground_state(pybind11::module& m)
 {
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
@@ -33,7 +33,7 @@ void write_location_and_ground_state(pybind11::module& m)  // NOLINT(misc-use-in
 
 }  // namespace detail
 
-void write_location_and_ground_state(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void write_location_and_ground_state(pybind11::module& m)
 {
     detail::write_location_and_ground_state<py_sidb_layout>(m);
 }

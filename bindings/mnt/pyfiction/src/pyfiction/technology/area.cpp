@@ -17,7 +17,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void area(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void area(pybind11::module& m)
 {
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
@@ -39,7 +39,7 @@ void area(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 
 }  // namespace detail
 
-void area(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void area(pybind11::module& m)
 {
     detail::area<py_qca_layout>(m);
     detail::area<py_inml_layout>(m);

@@ -14,7 +14,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void compute_operational_ratio_impl(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void compute_operational_ratio_impl(pybind11::module& m)
 {
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
@@ -25,7 +25,7 @@ void compute_operational_ratio_impl(pybind11::module& m)  // NOLINT(misc-use-int
 
 }  // namespace detail
 
-void compute_operational_ratio(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void compute_operational_ratio(pybind11::module& m)
 {
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 

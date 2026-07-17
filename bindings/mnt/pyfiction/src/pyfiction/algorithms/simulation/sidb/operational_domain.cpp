@@ -21,7 +21,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void operational_domain_impl(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void operational_domain_impl(pybind11::module& m)
 {
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
@@ -43,7 +43,7 @@ void operational_domain_impl(pybind11::module& m)  // NOLINT(misc-use-internal-l
 }
 
 template <typename Lyt>
-void critical_temperature_domain_impl(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void critical_temperature_domain_impl(pybind11::module& m)
 {
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
@@ -68,7 +68,7 @@ void critical_temperature_domain_impl(pybind11::module& m)  // NOLINT(misc-use-i
 
 }  // namespace detail
 
-void operational_domain(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void operational_domain(pybind11::module& m)
 {
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 

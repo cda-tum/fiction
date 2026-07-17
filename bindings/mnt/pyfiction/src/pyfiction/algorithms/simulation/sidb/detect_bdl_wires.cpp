@@ -19,7 +19,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void detect_bdl_wires_impl(pybind11::module& m, const std::string& lattice)  // NOLINT(misc-use-internal-linkage)
+void detect_bdl_wires_impl(pybind11::module& m, const std::string& lattice)
 {
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
@@ -46,7 +46,7 @@ void detect_bdl_wires_impl(pybind11::module& m, const std::string& lattice)  // 
  *
  * @param m The pybind11 module.
  */
-void detect_bdl_wires(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void detect_bdl_wires(pybind11::module& m)
 {
     namespace py = pybind11;
 

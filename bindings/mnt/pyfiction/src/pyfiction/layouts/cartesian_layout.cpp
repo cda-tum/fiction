@@ -19,7 +19,7 @@
 namespace pyfiction
 {
 
-void cartesian_layout(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void cartesian_layout(pybind11::module& m)
 {
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 

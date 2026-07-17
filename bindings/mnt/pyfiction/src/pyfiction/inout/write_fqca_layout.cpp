@@ -18,7 +18,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void write_fqca_layout(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void write_fqca_layout(pybind11::module& m)
 {
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
@@ -33,7 +33,7 @@ void write_fqca_layout(pybind11::module& m)  // NOLINT(misc-use-internal-linkage
 
 }  // namespace detail
 
-void write_fqca_layout(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void write_fqca_layout(pybind11::module& m)
 {
     namespace py = pybind11;
 

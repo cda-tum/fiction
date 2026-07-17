@@ -13,7 +13,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void calculate_energy_and_state_type_impl(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void calculate_energy_and_state_type_impl(pybind11::module& m)
 {
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
@@ -30,7 +30,7 @@ void calculate_energy_and_state_type_impl(pybind11::module& m)  // NOLINT(misc-u
 
 }  // namespace detail
 
-void calculate_energy_and_state_type(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void calculate_energy_and_state_type(pybind11::module& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
     detail::calculate_energy_and_state_type_impl<py_sidb_100_lattice>(m);

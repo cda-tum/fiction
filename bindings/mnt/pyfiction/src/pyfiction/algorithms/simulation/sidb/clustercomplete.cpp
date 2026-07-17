@@ -15,7 +15,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void clustercomplete_impl(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void clustercomplete_impl(pybind11::module& m)
 {
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
@@ -25,7 +25,7 @@ void clustercomplete_impl(pybind11::module& m)  // NOLINT(misc-use-internal-link
 
 }  // namespace detail
 
-void clustercomplete(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void clustercomplete(pybind11::module& m)
 {
     namespace py = pybind11;
 
@@ -79,7 +79,7 @@ namespace pyfiction
 /**
  * Disable ClusterComplete.
  */
-void clustercomplete([[maybe_unused]] pybind11::module& m) {}  // NOLINT(misc-use-internal-linkage)
+void clustercomplete([[maybe_unused]] pybind11::module& m) {}
 
 }  // namespace pyfiction
 

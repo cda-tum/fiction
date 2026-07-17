@@ -19,7 +19,7 @@ namespace pyfiction
 
 namespace detail
 {
-void write_operational_domain(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void write_operational_domain(pybind11::module& m)
 {
     namespace py = pybind11;
 
@@ -45,7 +45,7 @@ void write_operational_domain(pybind11::module& m)  // NOLINT(misc-use-internal-
         py::arg("opdom"), py::arg("params") = fiction::write_operational_domain_params{});
 }
 
-void write_critical_temperature_domain(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void write_critical_temperature_domain(pybind11::module& m)
 {
     namespace py = pybind11;
 
@@ -73,7 +73,7 @@ void write_critical_temperature_domain(pybind11::module& m)  // NOLINT(misc-use-
 
 }  // namespace detail
 
-void write_operational_domain(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void write_operational_domain(pybind11::module& m)
 {
     namespace py = pybind11;
 

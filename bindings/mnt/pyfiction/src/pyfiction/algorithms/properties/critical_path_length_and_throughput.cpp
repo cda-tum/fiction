@@ -16,7 +16,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void critical_path_length_and_throughput_impl(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void critical_path_length_and_throughput_impl(pybind11::module& m)
 {
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
@@ -33,7 +33,7 @@ void critical_path_length_and_throughput_impl(pybind11::module& m)  // NOLINT(mi
 
 }  // namespace detail
 
-void critical_path_length_and_throughput(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void critical_path_length_and_throughput(pybind11::module& m)
 {
     detail::critical_path_length_and_throughput_impl<py_cartesian_gate_layout>(m);
     detail::critical_path_length_and_throughput_impl<py_shifted_cartesian_gate_layout>(m);

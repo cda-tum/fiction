@@ -15,7 +15,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void critical_temperature_impl(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void critical_temperature_impl(pybind11::module& m)
 {
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
@@ -30,7 +30,7 @@ void critical_temperature_impl(pybind11::module& m)  // NOLINT(misc-use-internal
 
 }  // namespace detail
 
-void critical_temperature(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void critical_temperature(pybind11::module& m)
 {
     namespace py = pybind11;
 

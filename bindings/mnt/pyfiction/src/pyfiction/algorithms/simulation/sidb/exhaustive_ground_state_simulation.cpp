@@ -13,7 +13,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void exhaustive_ground_state_simulation_impl(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void exhaustive_ground_state_simulation_impl(pybind11::module& m)
 {
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
@@ -23,7 +23,7 @@ void exhaustive_ground_state_simulation_impl(pybind11::module& m)  // NOLINT(mis
 
 }  // namespace detail
 
-void exhaustive_ground_state_simulation(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void exhaustive_ground_state_simulation(pybind11::module& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 

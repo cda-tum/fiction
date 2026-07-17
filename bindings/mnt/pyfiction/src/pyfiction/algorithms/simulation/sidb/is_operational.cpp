@@ -17,7 +17,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void is_operational_impl(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void is_operational_impl(pybind11::module& m)
 {
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
@@ -78,7 +78,7 @@ void is_operational_impl(pybind11::module& m)  // NOLINT(misc-use-internal-linka
 
 }  // namespace detail
 
-void is_operational(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void is_operational(pybind11::module& m)
 {
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 

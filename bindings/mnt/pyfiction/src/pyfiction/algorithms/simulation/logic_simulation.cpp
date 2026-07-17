@@ -22,7 +22,7 @@ namespace detail
 {
 
 template <typename NtkOrLyt>
-void logic_simulation_impl(pybind11::module& m, const std::string& type_name)  // NOLINT(misc-use-internal-linkage)
+void logic_simulation_impl(pybind11::module& m, const std::string& type_name)
 {
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
@@ -98,7 +98,7 @@ void logic_simulation_impl(pybind11::module& m, const std::string& type_name)  /
 
 }  // namespace detail
 
-void logic_simulation(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void logic_simulation(pybind11::module& m)
 {
     detail::logic_simulation_impl<py_logic_network>(m, "network");
     detail::logic_simulation_impl<py_cartesian_gate_layout>(m, "layout");

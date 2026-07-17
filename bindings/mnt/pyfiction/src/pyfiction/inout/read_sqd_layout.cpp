@@ -17,7 +17,7 @@ namespace pyfiction
 namespace detail
 {
 
-void read_sqd_layout_100(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void read_sqd_layout_100(pybind11::module& m)
 {
     namespace py = pybind11;
 
@@ -29,7 +29,7 @@ void read_sqd_layout_100(pybind11::module& m)  // NOLINT(misc-use-internal-linka
           DOC(fiction_read_sqd_layout_3));
 }
 
-void read_sqd_layout_111(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void read_sqd_layout_111(pybind11::module& m)
 {
     namespace py = pybind11;
 
@@ -43,7 +43,7 @@ void read_sqd_layout_111(pybind11::module& m)  // NOLINT(misc-use-internal-linka
 
 }  // namespace detail
 
-void read_sqd_layout(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void read_sqd_layout(pybind11::module& m)
 {
     namespace py = pybind11;
 

@@ -32,7 +32,7 @@ namespace detail
 {
 
 template <typename Ntk>
-void network(pybind11::module& m, const std::string& network_name)  // NOLINT(misc-use-internal-linkage)
+void network(pybind11::module& m, const std::string& network_name)
 {
     namespace py = pybind11;
 
@@ -174,7 +174,7 @@ void network(pybind11::module& m, const std::string& network_name)  // NOLINT(mi
 
 }  // namespace detail
 
-void logic_networks(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void logic_networks(pybind11::module& m)
 {
     /**
      * Logic networks.

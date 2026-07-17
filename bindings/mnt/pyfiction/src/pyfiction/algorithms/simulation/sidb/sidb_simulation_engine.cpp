@@ -13,7 +13,7 @@ namespace detail
 {
 
 template <typename EngineType>
-void sidb_simulation_engine_name_impl(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void sidb_simulation_engine_name_impl(pybind11::module& m)
 {
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
@@ -25,7 +25,7 @@ void sidb_simulation_engine_name_impl(pybind11::module& m)  // NOLINT(misc-use-i
 
 }  // namespace detail
 
-void sidb_simulation_engine(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void sidb_simulation_engine(pybind11::module& m)
 {
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 

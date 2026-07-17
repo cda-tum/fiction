@@ -27,7 +27,7 @@ namespace detail
 {
 
 template <typename LytBase, typename GateLyt>
-void gate_level_layout(pybind11::module& m, const std::string& topology)  // NOLINT(misc-use-internal-linkage)
+void gate_level_layout(pybind11::module& m, const std::string& topology)
 {
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
@@ -312,7 +312,7 @@ void gate_level_layout(pybind11::module& m, const std::string& topology)  // NOL
 
 }  // namespace detail
 
-void gate_level_layouts(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void gate_level_layouts(pybind11::module& m)
 {
     /**
      * Gate-level clocked Cartesian layout.

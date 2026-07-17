@@ -15,7 +15,6 @@ namespace detail
 {
 
 template <typename Lyt>
-// NOLINTNEXTLINE(misc-use-internal-linkage)
 void physical_population_stability_impl(pybind11::module& m, const std::string& lattice)
 {
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
@@ -42,7 +41,7 @@ void physical_population_stability_impl(pybind11::module& m, const std::string& 
 
 }  // namespace detail
 
-void physical_population_stability(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void physical_population_stability(pybind11::module& m)
 {
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 

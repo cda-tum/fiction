@@ -13,7 +13,7 @@ namespace detail
 {
 
 template <typename Ntk>
-void technology_mapping_impl(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void technology_mapping_impl(pybind11::module& m)
 {
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
@@ -24,7 +24,7 @@ void technology_mapping_impl(pybind11::module& m)  // NOLINT(misc-use-internal-l
 
 }  // namespace detail
 
-void technology_mapping(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void technology_mapping(pybind11::module& m)
 {
     namespace py = pybind11;
 

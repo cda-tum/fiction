@@ -12,7 +12,7 @@ namespace detail
 {
 
 template <typename Ntk>
-void network_balancing_impl(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void network_balancing_impl(pybind11::module& m)
 {
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
@@ -25,7 +25,7 @@ void network_balancing_impl(pybind11::module& m)  // NOLINT(misc-use-internal-li
 
 }  // namespace detail
 
-void network_balancing(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void network_balancing(pybind11::module& m)
 {
     namespace py = pybind11;
 

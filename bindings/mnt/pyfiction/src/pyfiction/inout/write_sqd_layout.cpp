@@ -17,7 +17,7 @@ namespace pyfiction
 namespace detail
 {
 template <typename Lyt>
-void write_sqd_layout(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void write_sqd_layout(pybind11::module& m)
 {
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
@@ -30,7 +30,7 @@ void write_sqd_layout(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 }
 }  // namespace detail
 
-void write_sqd_layout(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void write_sqd_layout(pybind11::module& m)
 {
     detail::write_sqd_layout<py_sidb_111_lattice>(m);
     detail::write_sqd_layout<py_sidb_100_lattice>(m);

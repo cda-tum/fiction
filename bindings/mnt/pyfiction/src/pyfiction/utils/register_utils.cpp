@@ -11,7 +11,7 @@ void routing_utils(pybind11::module& m);
 void truth_table_utils(pybind11::module& m);
 void version_info(pybind11::module& m);
 
-void register_utils(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void register_utils(pybind11::module& m)
 {
     layout_utils(m);
     routing_utils(m);

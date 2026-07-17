@@ -19,7 +19,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void write_fgl_layout(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void write_fgl_layout(pybind11::module& m)
 {
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
@@ -31,7 +31,7 @@ void write_fgl_layout(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
 
 }  // namespace detail
 
-void write_fgl_layout(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void write_fgl_layout(pybind11::module& m)
 {
     detail::write_fgl_layout<py_cartesian_gate_layout>(m);
     detail::write_fgl_layout<py_shifted_cartesian_gate_layout>(m);

@@ -11,7 +11,7 @@
 namespace pyfiction
 {
 
-void orthogonal(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void orthogonal(pybind11::module& m)
 {
     namespace py = pybind11;
 

@@ -23,7 +23,7 @@ namespace detail
 namespace py = pybind11;
 
 // Helper function to convert std::any to Python objects
-inline py::object convert_any_to_py(const std::any& value)  // NOLINT(misc-use-internal-linkage)
+inline py::object convert_any_to_py(const std::any& value)
 {
     try
     {
@@ -56,7 +56,6 @@ inline py::object convert_any_to_py(const std::any& value)  // NOLINT(misc-use-i
     throw std::runtime_error(std::string("Unsupported type in std::any: ") + value.type().name());
 }
 
-// NOLINTNEXTLINE(misc-use-internal-linkage)
 inline py::dict convert_map_to_py(const std::unordered_map<std::string, std::any>& map)
 {
     pybind11::dict result;
@@ -75,7 +74,6 @@ inline py::dict convert_map_to_py(const std::unordered_map<std::string, std::any
 }
 
 template <typename Lyt>
-// NOLINTNEXTLINE(misc-use-internal-linkage)
 void sidb_simulation_result_impl(pybind11::module& m, const std::string& lattice = "")
 {
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
@@ -103,7 +101,7 @@ void sidb_simulation_result_impl(pybind11::module& m, const std::string& lattice
 
 }  // namespace detail
 
-void sidb_simulation_result(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void sidb_simulation_result(pybind11::module& m)
 {
     // Define simulation result for specific lattices
     detail::sidb_simulation_result_impl<py_sidb_100_lattice>(m, "_100");

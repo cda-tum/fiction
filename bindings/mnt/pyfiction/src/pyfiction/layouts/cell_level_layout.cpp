@@ -35,7 +35,7 @@ namespace detail
 {
 
 template <typename Technology>
-void fcn_technology_cell_level_layout(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void fcn_technology_cell_level_layout(pybind11::module& m)
 {
     namespace py = pybind11;
 
@@ -191,7 +191,7 @@ void fcn_technology_cell_level_layout(pybind11::module& m)  // NOLINT(misc-use-i
 
 }  // namespace detail
 
-void cell_level_layouts(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void cell_level_layouts(pybind11::module& m)
 {
     detail::fcn_technology_cell_level_layout<fiction::qca_technology>(m);
     detail::fcn_technology_cell_level_layout<fiction::inml_technology>(m);

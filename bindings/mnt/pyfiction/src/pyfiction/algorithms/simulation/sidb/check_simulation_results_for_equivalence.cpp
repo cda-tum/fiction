@@ -13,7 +13,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void check_for_equivalence_impl(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void check_for_equivalence_impl(pybind11::module& m)
 {
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
@@ -23,7 +23,7 @@ void check_for_equivalence_impl(pybind11::module& m)  // NOLINT(misc-use-interna
 
 }  // namespace detail
 
-void check_simulation_results_for_equivalence(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void check_simulation_results_for_equivalence(pybind11::module& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 

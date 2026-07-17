@@ -19,7 +19,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void color_routing_impl(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void color_routing_impl(pybind11::module& m)
 {
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
@@ -44,7 +44,7 @@ void color_routing_impl(pybind11::module& m)  // NOLINT(misc-use-internal-linkag
 
 }  // namespace detail
 
-void color_routing(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void color_routing(pybind11::module& m)
 {
     namespace py = pybind11;
 

@@ -5,7 +5,7 @@ namespace pyfiction
 
 void bdl_input_iterator(pybind11::module& m);
 
-void register_iter(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void register_iter(pybind11::module& m)
 {
     bdl_input_iterator(m);
 }

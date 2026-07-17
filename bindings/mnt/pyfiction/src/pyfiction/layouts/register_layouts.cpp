@@ -15,7 +15,7 @@ void offset_coordinate(pybind11::module& m);
 void shifted_cartesian_layout(pybind11::module& m);
 void siqad_coordinate(pybind11::module& m);
 
-void register_layouts(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void register_layouts(pybind11::module& m)
 {
     offset_coordinate(m);
     cube_coordinate(m);

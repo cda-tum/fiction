@@ -30,8 +30,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void charge_distribution_surface_layout(pybind11::module&  m,
-                                        const std::string& lattice = "")  // NOLINT(misc-use-internal-linkage)
+void charge_distribution_surface_layout(pybind11::module& m, const std::string& lattice = "")
 {
     namespace py = pybind11;
 
@@ -209,7 +208,7 @@ void charge_distribution_surface_layout(pybind11::module&  m,
 
 }  // namespace detail
 
-void charge_distribution_surfaces(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void charge_distribution_surfaces(pybind11::module& m)
 {
     namespace py = pybind11;
 

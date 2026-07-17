@@ -15,7 +15,7 @@
 namespace pyfiction
 {
 
-void exact(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void exact(pybind11::module& m)
 {
     namespace py = pybind11;
 
@@ -103,7 +103,7 @@ namespace pyfiction
 /**
  * Disable SMT-based exact physical design.
  */
-void exact([[maybe_unused]] pybind11::module& m) {}  // NOLINT(misc-use-internal-linkage)
+void exact([[maybe_unused]] pybind11::module& m) {}
 
 }  // namespace pyfiction
 

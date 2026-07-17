@@ -18,7 +18,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void detect_bdl_pairs_impl(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void detect_bdl_pairs_impl(pybind11::module& m)
 {
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
@@ -28,7 +28,7 @@ void detect_bdl_pairs_impl(pybind11::module& m)  // NOLINT(misc-use-internal-lin
 
 }  // namespace detail
 
-void detect_bdl_pairs(pybind11::module& m)  // NOLINT(misc-use-internal-linkage)
+void detect_bdl_pairs(pybind11::module& m)
 {
     namespace py = pybind11;
 
