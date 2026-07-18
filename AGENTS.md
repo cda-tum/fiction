@@ -79,6 +79,30 @@ Use these commands to validate your work.
 
 - **Prek**: `prek run -a` (Runs all checks: formatting, linting, static analysis)
 
+## Git Conventions
+
+Every commit subject and every PR title must start with a [gitmoji](https://gitmoji.dev) matching the change's
+primary nature, e.g. `🐛 Fix off-by-one error in hexagonalization`. Pick the single emoji that best matches the
+_dominant_ change; don't stack multiple emoji (dependency-bump commits like `⬆️🪝 ...` are an automated Renovate
+convention, not one to imitate by hand). Commonly used ones in this repo:
+
+| Emoji | Meaning                                                                                 |
+| ----- | --------------------------------------------------------------------------------------- |
+| 🐛    | Fix a bug                                                                               |
+| ✨    | Introduce a new feature                                                                 |
+| ♻️    | Refactor code (no behavior change)                                                      |
+| ⚡️    | Improve performance                                                                     |
+| 👷    | Add or update the CI build system                                                       |
+| 💚    | Fix a broken CI build                                                                   |
+| 🔧    | Add or update configuration files (e.g. `.pre-commit-config.yaml`, `CMakePresets.json`) |
+| 📝    | Add or update documentation                                                             |
+| ✅    | Add or update tests                                                                     |
+| 🚨    | Fix compiler/linter warnings                                                            |
+| 🎨    | Improve structure/format without changing behavior                                      |
+| 🔥    | Remove code or files                                                                    |
+| 🔖    | Release / bump version                                                                  |
+| 🚧    | Work in progress                                                                        |
+
 ## Code Style
 
 Follow these patterns strictly.
