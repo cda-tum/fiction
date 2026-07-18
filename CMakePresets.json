@@ -126,12 +126,11 @@
     {
       "name": "ci-release",
       "displayName": "CI (Release)",
-      "description": "Release configuration used by the 🐧/🍎/🪟 CI workflows",
+      "description": "Release configuration used by the 🐧/🍎/🪟 CI workflows (jemalloc is Linux/macOS-only, layered on top via -D since it isn't supported on Windows)",
       "inherits": "ci-common",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
-        "FICTION_Z3": "ON",
-        "FICTION_ENABLE_JEMALLOC": "ON"
+        "FICTION_Z3": "ON"
       }
     },
     {
