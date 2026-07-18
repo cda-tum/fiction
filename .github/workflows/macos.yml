@@ -76,45 +76,24 @@ jobs:
 
       - name: Configure CMake (Debug)
         run: >
-          cmake -S ${{github.workspace}} -B ${{github.workspace}}/build_debug
+          cmake -S ${{github.workspace}} --preset ci-debug
           -DCMAKE_CXX_COMPILER=${{matrix.compiler}}
-          -DCMAKE_BUILD_TYPE=Debug
-          -DFICTION_CLI=ON
-          -DFICTION_TEST=ON
-          -DFICTION_BENCHMARK=OFF
-          -DFICTION_EXPERIMENTS=ON
-          -DFICTION_Z3=ON
-          -DFICTION_ALGLIB=ON
-          -DFICTION_PROGRESS_BARS=OFF
-          -DFICTION_WARNINGS_AS_ERRORS=OFF
-          -DMOCKTURTLE_EXAMPLES=OFF
 
       - name: Build (Debug)
-        run: cmake --build ${{github.workspace}}/build_debug --config Debug --parallel 3
+        run: cmake --build --preset ci-debug --parallel 3
 
       - name: Test (Debug)
-        run: ctest --test-dir ${{github.workspace}}/build_debug -C Debug --verbose --output-on-failure --repeat until-pass:3 --parallel 3
+        run: ctest --preset ci-debug --verbose --repeat until-pass:3 --parallel 3
 
       # Build and test pipeline for Release mode
 
       - name: Configure CMake (Release)
         run: >
-          cmake -S ${{github.workspace}} -B ${{github.workspace}}/build_release
+          cmake -S ${{github.workspace}} --preset ci-release
           -DCMAKE_CXX_COMPILER=${{matrix.compiler}}
-          -DCMAKE_BUILD_TYPE=Release
-          -DFICTION_ENABLE_JEMALLOC=ON
-          -DFICTION_CLI=ON
-          -DFICTION_TEST=ON
-          -DFICTION_BENCHMARK=OFF
-          -DFICTION_EXPERIMENTS=ON
-          -DFICTION_Z3=ON
-          -DFICTION_ALGLIB=ON
-          -DFICTION_PROGRESS_BARS=OFF
-          -DFICTION_WARNINGS_AS_ERRORS=OFF
-          -DMOCKTURTLE_EXAMPLES=OFF
 
       - name: Build (Release)
-        run: cmake --build ${{github.workspace}}/build_release --config Release --parallel 3
+        run: cmake --build --preset ci-release --parallel 3
 
       - name: Test (Release)
-        run: ctest --test-dir ${{github.workspace}}/build_release -C Release --verbose --output-on-failure --repeat until-pass:3 --parallel 3
+        run: ctest --preset ci-release --verbose --repeat until-pass:3 --parallel 3

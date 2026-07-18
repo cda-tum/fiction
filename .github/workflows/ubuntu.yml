@@ -116,48 +116,29 @@ jobs:
 
       - name: Configure CMake (Debug)
         run: >
-          cmake -S ${{github.workspace}} -B ${{github.workspace}}/build_debug ${{matrix.cppstandard}}
+          cmake -S ${{github.workspace}} --preset ci-debug ${{matrix.cppstandard}}
           -DCMAKE_CXX_COMPILER=${{matrix.compiler}}
-          -DCMAKE_BUILD_TYPE=Debug
-          -DFICTION_CLI=ON
-          -DFICTION_TEST=ON
-          -DFICTION_BENCHMARK=OFF
-          -DFICTION_EXPERIMENTS=ON
-          ${{ matrix.os != 'ubuntu-24.04-arm' && '-DFICTION_Z3=ON' || '' }}
-          -DFICTION_ALGLIB=ON
           -DFICTION_ENABLE_MUGEN=ON
-          -DFICTION_PROGRESS_BARS=OFF
-          -DFICTION_WARNINGS_AS_ERRORS=OFF
-          -DMOCKTURTLE_EXAMPLES=OFF
           -DFICTION_LIGHTWEIGHT_DEBUG_BUILDS=ON
+          ${{ matrix.os == 'ubuntu-24.04-arm' && '-DFICTION_Z3=OFF' || '' }}
 
       - name: Build (Debug)
-        run: cmake --build ${{github.workspace}}/build_debug --config Debug --parallel 4
+        run: cmake --build --preset ci-debug --parallel 4
 
       - name: Test (Debug)
-        run: ctest --test-dir ${{github.workspace}}/build_debug -C Debug --verbose --output-on-failure --repeat until-pass:3 --parallel 4
+        run: ctest --preset ci-debug --verbose --repeat until-pass:3 --parallel 4
 
       # Build and test pipeline for Release mode
 
       - name: Configure CMake (Release)
         run: >
-          cmake -S ${{github.workspace}} -B ${{github.workspace}}/build_release ${{matrix.cppstandard}}
+          cmake -S ${{github.workspace}} --preset ci-release ${{matrix.cppstandard}}
           -DCMAKE_CXX_COMPILER=${{matrix.compiler}}
-          -DCMAKE_BUILD_TYPE=Release
-          -DFICTION_CLI=ON
-          -DFICTION_TEST=ON
-          -DFICTION_BENCHMARK=OFF
-          -DFICTION_EXPERIMENTS=ON
-          ${{ matrix.os != 'ubuntu-24.04-arm' && '-DFICTION_Z3=ON' || '' }}
-          -DFICTION_ALGLIB=ON
-          -DFICTION_ENABLE_JEMALLOC=ON
           -DFICTION_ENABLE_MUGEN=ON
-          -DFICTION_PROGRESS_BARS=OFF
-          -DFICTION_WARNINGS_AS_ERRORS=OFF
-          -DMOCKTURTLE_EXAMPLES=OFF
+          ${{ matrix.os == 'ubuntu-24.04-arm' && '-DFICTION_Z3=OFF' || '' }}
 
       - name: Build (Release)
-        run: cmake --build ${{github.workspace}}/build_release --config Release --parallel 4
+        run: cmake --build --preset ci-release --parallel 4
 
       - name: Test (Release)
-        run: ctest --test-dir ${{github.workspace}}/build_release -C Release --verbose --output-on-failure --repeat until-pass:3 --parallel 4
+        run: ctest --preset ci-release --verbose --repeat until-pass:3 --parallel 4

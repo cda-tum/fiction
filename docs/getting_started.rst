@@ -108,6 +108,32 @@ Configure and build with CMake:
 Several options can be toggled during the build. For a more interactive interface, please refer to ``ccmake`` for a
 full list of supported customizations.
 
+.. _cmake-presets:
+
+CMake Presets
+#############
+
+The repository ships a `CMakePresets.json <https://github.com/cda-tum/fiction/blob/main/CMakePresets.json>`_ with a
+curated set of configurations for common tasks, so that you do not have to remember all relevant ``-D`` flags
+yourself. List them with:
+
+.. code-block:: console
+
+  $ cmake --list-presets
+
+Noteworthy presets include ``dev`` (a quick Debug build with only the CLI and tests enabled), ``dev-full`` (the same,
+but with Z3, ALGLIB, and Mugen also enabled), ``dev-asan`` (``dev`` with sanitizers), and ``release`` (an optimized,
+IPO-enabled build). The ``ci-*`` and ``coverage`` presets mirror the exact configurations used by the corresponding
+GitHub Actions workflows, so that CI failures can be reproduced locally, e.g.:
+
+.. code-block:: console
+
+  $ cmake -S . --preset ci-debug
+  $ cmake --build --preset ci-debug
+  $ ctest --preset ci-debug
+
+Any preset can still be combined with additional ``-D`` overrides on the command line.
+
 Run the CLI:
 
 .. code-block:: console

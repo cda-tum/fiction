@@ -64,9 +64,9 @@ Use these commands to validate your work.
 
 ### C++ (Primary)
 
-- **Configure**: `cmake -B build -S . -DFICTION_TEST=ON -DFICTION_Z3=ON -DFICTION_ALGLIB=ON`
-- **Build**: `cmake --build build -j`
-- **Test**: `ctest --test-dir build --output-on-failure`
+- **Configure**: `cmake -S . --preset dev-full` (or `cmake -B build -S . -DFICTION_TEST=ON -DFICTION_Z3=ON -DFICTION_ALGLIB=ON`)
+- **Build**: `cmake --build --preset dev-full -j`
+- **Test**: `ctest --preset dev-full --output-on-failure`
 - **Format**: `prek run clang-format --all-files` (or let prek handle it)
 
 ### Python (Bindings)
