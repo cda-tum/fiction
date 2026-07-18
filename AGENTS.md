@@ -67,17 +67,17 @@ Use these commands to validate your work.
 - **Configure**: `cmake -B build -S . -DFICTION_TEST=ON -DFICTION_Z3=ON -DFICTION_ALGLIB=ON`
 - **Build**: `cmake --build build -j`
 - **Test**: `ctest --test-dir build --output-on-failure`
-- **Format**: `pre-commit run clang-format --all-files` (or let pre-commit handle it)
+- **Format**: `prek run clang-format --all-files` (or let prek handle it)
 
 ### Python (Bindings)
 
 - **Test (Full)**: `nox -s tests` (Runs pytest in isolated environments)
 - **Test (Quick)**: `pytest` (Use if only Python code changed to avoid C++ rebuilds)
-- **Lint**: `nox -s lint` (Runs pre-commit hooks including ruff and mypy)
+- **Lint**: `nox -s lint` (Runs prek hooks including ruff and mypy)
 
 ### General
 
-- **Pre-commit**: `pre-commit run -a` (Runs all checks: formatting, linting, static analysis)
+- **Prek**: `prek run -a` (Runs all checks: formatting, linting, static analysis)
 
 ## Code Style
 
@@ -164,7 +164,7 @@ def create_logic_network(filename: str) -> LogicNetwork:
 ## Boundaries
 
 - ✅ **Always**:
-  - Run `pre-commit run -a` before finishing a task.
+  - Run `prek run -a` before finishing a task.
   - Write tests for new functionality (`test/` for C++, `bindings/mnt/pyfiction/test/` for Python).
   - Use `const` correctness.
   - Prefer STL over custom algorithms.
