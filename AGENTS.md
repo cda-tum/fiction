@@ -181,6 +181,8 @@ def create_logic_network(filename: str) -> LogicNetwork:
 - ✅ **Always**:
   - Run `prek run -a` before finishing a task.
   - Write tests for new functionality (`test/` for C++, `bindings/mnt/pyfiction/test/` for Python).
+  - Update `docs/changelog.rst`'s `Unreleased` section for any user-facing change (Added/Changed/Removed/
+    Fixed, following the existing category and bullet style).
   - Check for and consolidate open reviewer comments before considering a PR done (see Code Review above).
   - Use `const` correctness.
   - Prefer STL over custom algorithms.
