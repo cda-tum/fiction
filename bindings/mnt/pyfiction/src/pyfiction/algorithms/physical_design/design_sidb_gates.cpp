@@ -2,8 +2,6 @@
 #include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/physical_design/design_sidb_gates.hpp>
-#include <fiction/layouts/coordinates.hpp>
-#include <fiction/traits.hpp>
 
 #include <fmt/format.h>
 #include <pybind11/pybind11.h>

@@ -15,11 +15,10 @@
 #include <fiction/layouts/bounding_box.hpp>
 #include <fiction/technology/sidb_defect_surface.hpp>
 #include <fiction/technology/sidb_defects.hpp>
-#include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
 #include <fmt/format.h>
-#include <lorina/lorina.hpp>
+#include <lorina/verilog.hpp>
 #include <mockturtle/algorithms/cut_rewriting.hpp>
 #include <mockturtle/algorithms/equivalence_checking.hpp>
 #include <mockturtle/algorithms/miter.hpp>
@@ -161,12 +160,14 @@ int main()  // NOLINT
             write_sqd_layout(result, fmt::format("{}/{}.sqd", layouts_folder, benchmark));
 
             // check equivalence
-            const auto miter = mockturtle::miter<mockturtle::klut_network>(mapped_network, st.gate_layout.value());
-            const auto eq    = mockturtle::equivalence_checking(*miter);
+            const auto& gate_layout = st.gate_layout.value();  // NOLINT(bugprone-unchecked-optional-access)
+            const auto  miter       = mockturtle::miter<mockturtle::klut_network>(mapped_network, gate_layout);
+            const auto  eq = mockturtle::equivalence_checking(*miter);  // NOLINT(bugprone-unchecked-optional-access)
             assert(eq.has_value());
+            const auto eq_result = *eq;  // NOLINT(bugprone-unchecked-optional-access)
 
             sidb_circuits_with_defects(benchmark, mockturtle::to_seconds(st.time_total),
-                                       st.exact_stats.num_aspect_ratios, *eq, result.num_cells());
+                                       st.exact_stats.num_aspect_ratios, eq_result, result.num_cells());
 
             sidb_circuits_with_defects.save();
             sidb_circuits_with_defects.table();
