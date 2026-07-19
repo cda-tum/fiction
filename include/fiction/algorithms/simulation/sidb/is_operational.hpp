@@ -240,11 +240,14 @@ struct operational_assessment
                "Simulation results were not retained during assessment.");
 
         std::vector<sidb_simulation_result<Lyt>> simulation_results_per_input{};
-        simulation_results_per_input.reserve(assessment_per_input.value().size());
+        simulation_results_per_input.reserve(
+            assessment_per_input.value().size());  // NOLINT(bugprone-unchecked-optional-access)
 
-        for (operational_assessment_for_input assessment : assessment_per_input.value())
+        for (operational_assessment_for_input assessment :
+             assessment_per_input.value())  // NOLINT(bugprone-unchecked-optional-access)
         {
-            simulation_results_per_input.push_back(std::move(assessment.simulation_results.value()));
+            simulation_results_per_input.push_back(
+                std::move(assessment.simulation_results.value()));  // NOLINT(bugprone-unchecked-optional-access)
         }
 
         return simulation_results_per_input;

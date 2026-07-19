@@ -3,6 +3,7 @@
 //
 
 #include <catch2/catch_template_test_macros.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
@@ -14,7 +15,6 @@
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/sidb_defects.hpp>
-#include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/truth_table_utils.hpp>
 
@@ -48,8 +48,10 @@ TEST_CASE("SiQAD OR gate", "[is-operational]")
         const auto assessment_results = is_operational(lat, std::vector<tt>{create_or_tt()}, op_params);
         CHECK(assessment_results.status == operational_status::OPERATIONAL);
         REQUIRE(assessment_results.assessment_per_input.has_value());
-        REQUIRE(!assessment_results.assessment_per_input.value().empty());
-        CHECK(assessment_results.assessment_per_input.value().front().simulation_results.has_value());
+        const auto& per_input =
+            assessment_results.assessment_per_input.value();  // NOLINT(bugprone-unchecked-optional-access)
+        REQUIRE(!per_input.empty());
+        CHECK(per_input.front().simulation_results.has_value());
     }
 
     // from now on, we will discard simulation results
@@ -61,21 +63,25 @@ TEST_CASE("SiQAD OR gate", "[is-operational]")
         const auto assessment_results = is_operational(lat, std::vector<tt>{create_or_tt()}, op_params);
         CHECK(assessment_results.status == operational_status::OPERATIONAL);
         REQUIRE(assessment_results.assessment_per_input.has_value());
-        REQUIRE(assessment_results.assessment_per_input.value().size() == 4);
+        const auto& per_input =
+            assessment_results.assessment_per_input.value();  // NOLINT(bugprone-unchecked-optional-access)
+        REQUIRE(per_input.size() == 4);
         for (uint64_t i = 0; i < 4; ++i)
         {
-            CHECK(assessment_results.assessment_per_input.value().at(i).status == operational_status::OPERATIONAL);
-            CHECK(!assessment_results.assessment_per_input.value().at(i).simulation_results.has_value());
+            CHECK(per_input.at(i).status == operational_status::OPERATIONAL);
+            CHECK(!per_input.at(i).simulation_results.has_value());
         }
 
         const auto assessment_results_and = is_operational(lat, std::vector<tt>{create_and_tt()}, op_params);
         CHECK(assessment_results_and.status == operational_status::NON_OPERATIONAL);
         REQUIRE(assessment_results_and.assessment_per_input.has_value());
-        REQUIRE(assessment_results_and.assessment_per_input.value().size() == 4);
-        CHECK(assessment_results_and.assessment_per_input.value().at(0).status == operational_status::OPERATIONAL);
-        CHECK(assessment_results_and.assessment_per_input.value().at(1).status == operational_status::NON_OPERATIONAL);
-        CHECK(assessment_results_and.assessment_per_input.value().at(2).status == operational_status::NON_OPERATIONAL);
-        CHECK(assessment_results_and.assessment_per_input.value().at(3).status == operational_status::OPERATIONAL);
+        const auto& per_input_and =
+            assessment_results_and.assessment_per_input.value();  // NOLINT(bugprone-unchecked-optional-access)
+        REQUIRE(per_input_and.size() == 4);
+        CHECK(per_input_and.at(0).status == operational_status::OPERATIONAL);
+        CHECK(per_input_and.at(1).status == operational_status::NON_OPERATIONAL);
+        CHECK(per_input_and.at(2).status == operational_status::NON_OPERATIONAL);
+        CHECK(per_input_and.at(3).status == operational_status::OPERATIONAL);
     }
 
     SECTION("determine if layout is operational under non-realistic physical parameters, assess all input combinations")

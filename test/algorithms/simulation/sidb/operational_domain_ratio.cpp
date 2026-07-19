@@ -2,6 +2,8 @@
 // Created by Jan Drewniok on 13.09.24.
 //
 
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"

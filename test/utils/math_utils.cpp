@@ -3,9 +3,11 @@
 //
 
 #include <catch2/catch_template_test_macros.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 #include <fiction/utils/math_utils.hpp>
 
+#include <cstddef>
 #include <cstdint>
 #include <string>
 #include <vector>

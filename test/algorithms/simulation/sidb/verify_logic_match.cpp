@@ -2,6 +2,8 @@
 // Created by Jan Drewniok on 12.11.24.
 //
 
+#include <catch2/catch_test_macros.hpp>
+
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/algorithms/iter/bdl_input_iterator.hpp>

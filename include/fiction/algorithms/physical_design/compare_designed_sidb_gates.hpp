@@ -170,7 +170,8 @@ void order_designed_sidb_gates(const designed_sidb_gates_ordering_recipe<Lyt>& r
     for (uint64_t i = 0; i < designed_gates.gate_layouts.size(); ++i)
     {
         gate_designs_for_assessment.emplace_back(typename designed_sidb_gate_comparator<Lyt>::sidb_gate_design{
-            std::move(designed_gates.gate_layouts.at(i)), std::move(designed_gates.simulation_results.value().at(i))});
+            std::move(designed_gates.gate_layouts.at(i)),
+            std::move(designed_gates.simulation_results.value().at(i))});  // NOLINT(bugprone-unchecked-optional-access)
     }
 
     // clear the gate_layouts vector so that we may reenter the elements in order later

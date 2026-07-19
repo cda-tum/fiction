@@ -45,8 +45,8 @@ template <typename Lyt>
         return std::numeric_limits<double>::infinity();
     }
 
-    return dist.get_nth_state(0)->electrostatic_potential_energy -
-           dist.get_nth_state(1)->electrostatic_potential_energy;
+    return dist.get_nth_state(0)->electrostatic_potential_energy -  // NOLINT(bugprone-unchecked-optional-access)
+           dist.get_nth_state(1)->electrostatic_potential_energy;   // NOLINT(bugprone-unchecked-optional-access)
 }
 
 }  // namespace detail
