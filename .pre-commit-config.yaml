@@ -1,10 +1,11 @@
 # To run all pre-commit checks, use:
 #
-#     pre-commit run -a
+#     uvx prek run -a
 #
 # To install pre-commit hooks that run every time you commit:
 #
-#     pre-commit install
+#     uv tool install prek
+#     prek install
 #
 
 ci:
@@ -12,7 +13,7 @@ ci:
   autofix_commit_msg: "🎨 Incorporated pre-commit fixes"
   autoupdate_schedule: quarterly
 
-exclude: "^libs/|^benchmarks/|bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp"
+exclude: "^vendors/|^benchmarks/|bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp"
 
 repos:
   # Standard hooks
@@ -21,8 +22,10 @@ repos:
     hooks:
       - id: check-added-large-files
       - id: check-case-conflict
-      - id: check-docstring-first
+      - id: check-vcs-permalinks
       - id: check-merge-conflict
+      - id: check-symlinks
+      - id: check-json
       - id: check-toml
       - id: check-yaml
       - id: debug-statements
@@ -45,27 +48,40 @@ repos:
       - id: rst-directive-colons
       - id: rst-inline-touching-normal
 
+  # CMake format and lint the CMakeLists.txt files
+  - repo: https://github.com/cheshirekow/cmake-format-precommit
+    rev: v0.6.13
+    hooks:
+      - id: cmake-format
+        additional_dependencies: [pyyaml]
+        types: [file]
+        files: (\.cmake|CMakeLists.txt)(.in)?$
+
   # clang-format the C++ part of the code base
   - repo: https://github.com/pre-commit/mirrors-clang-format
-    rev: v20.1.8
+    rev: v22.1.8
     hooks:
       - id: clang-format
         types_or: [c++, c]
         args: ["-style=file"]
 
+  # Ensure uv lock file is up-to-date
+  - repo: https://github.com/astral-sh/uv-pre-commit
+    rev: 0.11.29
+    hooks:
+      - id: uv-lock
+
   # Python linting using ruff
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.12.8
+    rev: v0.15.22
     hooks:
-      - id: ruff
-        args: ["--fix", "--show-fixes"]
-        types_or: [python, pyi, jupyter]
       - id: ruff-format
-        types_or: [python, pyi, jupyter]
+      - id: ruff-check
+        require_serial: true
 
   # Check static types with mypy
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.17.1
+    rev: v2.3.0
     hooks:
       - id: mypy
         files: ^(bindings/mnt/pyfiction|noxfile.py)
@@ -76,14 +92,14 @@ repos:
 
   # Format configuration files with prettier
   - repo: https://github.com/rbubley/mirrors-prettier
-    rev: v3.6.2
+    rev: v3.9.5
     hooks:
       - id: prettier
         types_or: [yaml, markdown, html, css, scss, javascript, json]
 
   # Check JSON schemata
   - repo: https://github.com/python-jsonschema/check-jsonschema
-    rev: 0.33.2
+    rev: 0.37.4
     hooks:
       - id: check-github-workflows
       - id: check-readthedocs
@@ -92,7 +108,7 @@ repos:
 
   # Check the pyproject.toml file
   - repo: https://github.com/henryiii/validate-pyproject-schema-store
-    rev: 2025.07.14
+    rev: 2026.07.17
     hooks:
       - id: validate-pyproject
 

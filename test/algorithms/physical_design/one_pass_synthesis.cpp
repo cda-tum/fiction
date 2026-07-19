@@ -20,12 +20,13 @@
 #include <mockturtle/views/names_view.hpp>
 
 #include <chrono>
-#include <cstddef>
 #include <iostream>
-#include <type_traits>
 #include <utility>
 
 using namespace fiction;
+
+namespace
+{
 
 one_pass_synthesis_params configuration() noexcept
 {
@@ -75,14 +76,6 @@ one_pass_synthesis_params&& maj(one_pass_synthesis_params&& ps) noexcept
     return std::move(ps);
 }
 
-one_pass_synthesis_params&& async(const std::size_t t, one_pass_synthesis_params&& ps) noexcept
-{
-#if !defined(__APPLE__)
-    ps.num_threads = t;
-#endif
-    return std::move(ps);
-}
-
 void check_stats(const one_pass_synthesis_stats& st) noexcept
 {
     CHECK(std::chrono::duration_cast<std::chrono::milliseconds>(st.time_total).count() > 0);
@@ -102,15 +95,15 @@ Lyt generate_layout(const Ntk& ntk, const one_pass_synthesis_params& ps)
     REQUIRE(layout.has_value());
     check_stats(stats);
 
-    print_gate_level_layout(std::cout, *layout);
+    print_gate_level_layout(std::cout, layout.value());  // NOLINT(bugprone-unchecked-optional-access)
 
-    return *layout;
+    return layout.value();  // NOLINT(bugprone-unchecked-optional-access)
 }
 
 template <typename Lyt>
 void apply_gate_library(const Lyt& lyt)
 {
-    CHECK_NOTHROW(apply_gate_library<qca_cell_clk_lyt, qca_one_library>(lyt));
+    CHECK_NOTHROW((fiction::apply_gate_library<qca_cell_clk_lyt, qca_one_library>(lyt)));
 }
 
 template <typename Lyt, typename Ntk>
@@ -121,6 +114,8 @@ void check(const Ntk& ntk, const one_pass_synthesis_params& ps)
     check_eq(ntk, layout);
     apply_gate_library(layout);
 }
+
+}  // namespace
 
 TEST_CASE("One-pass synthesis", "[one-pass]")
 {
@@ -188,6 +183,8 @@ TEST_CASE("Name conservation after one-pass synthesis", "[one-pass]")
 
     REQUIRE(layout.has_value());
 
+    // NOLINTBEGIN(bugprone-unchecked-optional-access)
+
     // network name
     CHECK(layout->get_layout_name() == "maj");
 
@@ -198,6 +195,8 @@ TEST_CASE("Name conservation after one-pass synthesis", "[one-pass]")
 
     // PO names
     CHECK(layout->get_output_name(0) == "f");
+
+    // NOLINTEND(bugprone-unchecked-optional-access)
 }
 
 #else  // MUGEN

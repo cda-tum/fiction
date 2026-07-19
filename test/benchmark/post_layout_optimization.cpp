@@ -63,14 +63,14 @@ TEST_CASE("Benchmark Post-Layout Optimization", "[benchmark]")
 //                                      std dev       low std dev   high std dev
 // -------------------------------------------------------------------------------
 // post_layout_optimization: full
-// optimization                                   100             1     2.94146 m
-//                                          1.77164 s     1.76488 s     1.78234 s
-//                                         42.7398 ms    30.7818 ms    67.1015 ms
+// optimization                                   100             1     2.72845 m
+//                                           1.6211 s     1.61291 s     1.64963 s
+//                                          69.565 ms    21.7338 ms    158.472 ms
 //
 // post_layout_optimization: wiring
-// reduction only                                 100             1     3.18196 s
-//                                         31.6457 ms    31.5807 ms    31.7191 ms
-//                                         352.788 us    307.317 us    418.116 us
+// reduction only                                 100             1     2.89888 s
+//                                         30.5434 ms    30.3498 ms    30.9227 ms
+//                                         1.32943 ms    827.313 us    2.53012 ms
 //
 //
 // ===============================================================================

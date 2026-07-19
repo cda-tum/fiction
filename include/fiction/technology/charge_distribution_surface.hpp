@@ -390,7 +390,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      *
      * @param cds Other `charge_distribution_surface`.
      */
-    charge_distribution_surface(const charge_distribution_surface<Lyt>& cds) :
+    charge_distribution_surface(const charge_distribution_surface& cds) :  // NOLINT(*-explicit-constructor)
             Lyt(cds),
             strg{std::make_shared<charge_distribution_storage>(*cds.strg)}
     {}
@@ -408,6 +408,22 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
         return *this;
     }
+    /**
+     * Move constructor.
+     *
+     * @param other charge_distribution_surface to move from.
+     */
+    charge_distribution_surface(charge_distribution_surface&& other) noexcept = default;
+    /**
+     * Move assignment operator.
+     *
+     * @param other charge_distribution_surface to move from.
+     */
+    charge_distribution_surface& operator=(charge_distribution_surface&& other) noexcept = default;
+    /**
+     * Destructor.
+     */
+    ~charge_distribution_surface() = default;
     /**
      * Clones the current charge distribution surface and returns a deep copy.
      *
@@ -663,8 +679,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 {
                     const auto dist = sidb_nm_distance<Lyt>(*this, c1, c);
                     const auto pot  = chargeless_potential_generated_by_defect_at_given_distance(dist, defect) *
-                                     static_cast<double>(defect.charge);
-                    const auto ix = static_cast<uint64_t>(cell_to_index(c1));
+                                      static_cast<double>(defect.charge);
+                    const auto ix   = static_cast<uint64_t>(cell_to_index(c1));
 
                     strg->local_pot_caused_by_defects[ix] += pot;
                     strg->local_int_pot[ix] += pot;
@@ -1210,7 +1226,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             collect += strg->local_int_pot_at_defect[c] * static_cast<double>(defect.charge);
         }
 
-        strg->system_energy = collect_ext + 0.5 * collect;
+        strg->system_energy = collect_ext + (0.5 * collect);
     }
     /**
      * This function returns the currently stored system's total electrostatic potential energy in eV.
@@ -1555,8 +1571,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             }
 
             const auto dist_min =
-                std::accumulate(negative_indices.begin(), negative_indices.end(), std::numeric_limits<double>::max(),
-                                [&](const double acc, const uint64_t occ)
+                std::accumulate(negative_indices.begin(), negative_indices.end(),
+                                std::numeric_limits<double>::infinity(), [&](const double acc, const uint64_t occ)
                                 { return std::min(acc, this->get_nm_distance_by_indices(unocc, occ)); });
 
             index_vector.push_back(unocc);

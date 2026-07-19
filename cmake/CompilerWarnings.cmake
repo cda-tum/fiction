@@ -2,17 +2,11 @@
 #
 # https://github.com/lefticus/cppbestpractices/blob/master/02-Use_the_Tools_Available.md
 
-function(
-  fiction_set_project_warnings
-  project_name
-  WARNINGS_AS_ERRORS
-  MSVC_WARNINGS
-  CLANG_WARNINGS
-  GCC_WARNINGS
-  CUDA_WARNINGS)
+function(fiction_set_project_warnings project_name WARNINGS_AS_ERRORS
+         MSVC_WARNINGS CLANG_WARNINGS GCC_WARNINGS)
   if("${MSVC_WARNINGS}" STREQUAL "")
     set(MSVC_WARNINGS
-        /W4     # Baseline reasonable warnings
+        /W4 # Baseline reasonable warnings
         /w14242 # 'identifier': conversion from 'type1' to 'type2', possible
                 # loss of data
         /w14254 # 'operator': conversion from 'type1:field_bits' to
@@ -73,6 +67,8 @@ function(
                                # explicit annotation
         -Wno-unknown-pragmas # do not warn if encountering unknown pragmas
         -Wno-pragmas # do not warn if encountering unknown pragma options
+        -Wno-system-headers # do not emit diagnostics originating from
+                            # STL/system headers
         -Wno-gnu-zero-variadic-macro-arguments # do not warn if zero variadic
                                                # macro arguments are passed to a
                                                # GNU user-defined macro
@@ -90,12 +86,10 @@ function(
                      # were probably wanted
         -Wuseless-cast # warn if you perform a cast to the same type
     )
-  endif()
-
-  if("${CUDA_WARNINGS}" STREQUAL "")
-    set(CUDA_WARNINGS -Wall -Wextra -Wunused -Wconversion -Wshadow
-                      # TODO add more Cuda warnings
-    )
+    # Remove -Wnull-dereference from GCC warnings as it doesn't respect
+    # -Wno-system-headers and causes warnings in standard library headers (e.g.,
+    # libstdc++)
+    list(REMOVE_ITEM GCC_WARNINGS -Wnull-dereference)
   endif()
 
   if(WARNINGS_AS_ERRORS)
@@ -115,20 +109,15 @@ function(
     message(
       AUTHOR_WARNING
         "No compiler warnings set for CXX compiler: '${CMAKE_CXX_COMPILER_ID}'")
-    # TODO support Intel compiler
   endif()
 
   # use the same warning flags for C
   set(PROJECT_WARNINGS_C "${PROJECT_WARNINGS_CXX}")
-
-  set(PROJECT_WARNINGS_CUDA "${CUDA_WARNINGS}")
 
   target_compile_options(
     ${project_name}
     INTERFACE # C++ warnings
               $<$<COMPILE_LANGUAGE:CXX>:${PROJECT_WARNINGS_CXX}>
               # C warnings
-              $<$<COMPILE_LANGUAGE:C>:${PROJECT_WARNINGS_C}>
-              # Cuda warnings
-              $<$<COMPILE_LANGUAGE:CUDA>:${PROJECT_WARNINGS_CUDA}>)
+              $<$<COMPILE_LANGUAGE:C>:${PROJECT_WARNINGS_C}>)
 endfunction()

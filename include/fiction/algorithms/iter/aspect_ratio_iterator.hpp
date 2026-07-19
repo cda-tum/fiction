@@ -165,7 +165,8 @@ class aspect_ratio_iterator
      */
     void next() noexcept
     {
-        do {
+        do
+        {
             ++num;
             factorize();
         } while (factors.empty());

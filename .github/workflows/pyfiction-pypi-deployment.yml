@@ -15,7 +15,9 @@ on:
       - "**/*.cpp"
       - "**/*.cmake"
       - "**/CMakeLists.txt"
-      - "libs/**"
+      - "noxfile.py"
+      - "pyproject.toml"
+      - "uv.lock"
       - ".github/workflows/pyfiction-pypi-deployment.yml"
   pull_request:
     branches: ["main"]
@@ -26,7 +28,9 @@ on:
       - "**/*.cpp"
       - "**/*.cmake"
       - "**/CMakeLists.txt"
-      - "libs/**"
+      - "noxfile.py"
+      - "pyproject.toml"
+      - "uv.lock"
       - ".github/workflows/pyfiction-pypi-deployment.yml"
   workflow_dispatch:
   workflow_run:
@@ -44,21 +48,20 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  Z3_VERSION: 4.13.0
+  Z3_VERSION: 4.13.4
 
 jobs:
   build_sdist:
     name: 📦 Build Source Distribution
     runs-on: ubuntu-latest
     steps:
-      - name: Clone respository
-        uses: actions/checkout@v4
+      - name: Clone repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
-          submodules: recursive
           fetch-depth: 0
 
       - name: Install the latest version of uv
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
         with:
           version: "latest"
           enable-cache: true
@@ -70,7 +73,7 @@ jobs:
         run: uvx twine check dist/*
 
       - name: Upload sdist as an artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: cibw-sdist
           path: dist/*.tar.gz
@@ -83,21 +86,20 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        runs-on:
-          [ubuntu-24.04, ubuntu-24.04-arm, macos-13, macos-14, windows-latest]
+        runs-on: [ubuntu-24.04, ubuntu-24.04-arm, macos-15, windows-latest]
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           submodules: recursive
           fetch-depth: 0
 
       - name: Set up MSVC development environment (Windows only)
-        uses: ilammy/msvc-dev-cmd@v1
+        uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
 
       - name: Setup ccache
         if: matrix.runs-on != 'ubuntu-24.04-arm'
-        uses: hendrikmuhs/ccache-action@v1.2
+        uses: hendrikmuhs/ccache-action@5ebbd400eff9e74630f759d94ddd7b6c26299639 # v1.2
         with:
           key: "${{matrix.runs-on}}-pyfiction"
           save: true
@@ -106,7 +108,7 @@ jobs:
       # on Linux, the action does not work because it can't install to the manylinux container
       - if: runner.os != 'Linux'
         name: Install Z3
-        uses: cda-tum/setup-z3@v1
+        uses: cda-tum/setup-z3@7bfe87519f27304460db44284cb8cc59f50f5fc9 # v1.7.2
         with:
           version: ${{ env.Z3_VERSION }}
 
@@ -115,16 +117,16 @@ jobs:
         uses: rui314/setup-mold@v1
 
       - name: Install the latest version of uv
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
         with:
           version: "latest"
           enable-cache: true
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v3.1
+        uses: pypa/cibuildwheel@298ed2fb2c105540f5ed055e8a6ad78d82dd3a7e # v3.3
 
       - name: Upload wheel as an artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: cibw-wheels-${{ matrix.runs-on }}
           path: ./wheelhouse/*.whl
@@ -137,19 +139,19 @@ jobs:
     if: github.event_name == 'release' && github.event.action == 'published'
     steps:
       - name: Download the previously stored artifacts
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           pattern: cibw-*
           path: dist
           merge-multiple: true
 
       - name: Generate artifact attestation for sdist and wheel(s)
-        uses: actions/attest-build-provenance@v2
+        uses: actions/attest-build-provenance@0f67c3f4856b2e3261c31976d6725780e5e4c373 # v4.1.1
         with:
           subject-path: "dist/*"
 
       - name: Deploy to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
+        uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b # release/v1
         with:
           password: ${{ secrets.PYPI_DEPLOY_TOKEN }}
           attestations: true

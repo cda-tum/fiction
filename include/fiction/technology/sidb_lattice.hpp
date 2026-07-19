@@ -53,7 +53,7 @@ class sidb_lattice<LatticeOrientation, Lyt, false> : public Lyt
      *
      * @param layout SiDB Cell-level layout.
      */
-    explicit sidb_lattice(const Lyt& layout) : Lyt(layout)
+    explicit sidb_lattice(const Lyt& lyt) : Lyt(lyt)
     {
         static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
         static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");

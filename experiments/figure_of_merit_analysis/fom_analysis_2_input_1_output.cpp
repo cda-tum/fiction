@@ -2,6 +2,8 @@
 // Created by Jan Drewniok 01.01.23
 //
 
+#if (FICTION_ALGLIB_ENABLED)
+
 #include "fiction_experiments.hpp"
 
 #include <fiction/algorithms/physical_design/design_sidb_gates.hpp>
@@ -133,9 +135,9 @@ int main()  // NOLINT
             std::vector<double> bbr_all                       = {};
 
             std::vector<Lyt>        all_gates{};
-            design_sidb_gates_stats efficent_stats{};
+            design_sidb_gates_stats efficient_stats{};
 
-            all_gates = design_sidb_gates(skeleton, truth_table, design_params, &efficent_stats);
+            all_gates = design_sidb_gates(skeleton, truth_table, design_params, &efficient_stats);
 
             if (all_gates.empty())
             {
@@ -251,3 +253,17 @@ int main()  // NOLINT
 
     return EXIT_SUCCESS;
 }
+
+#else  // FICTION_ALGLIB_ENABLED
+
+#include <cstdlib>
+#include <iostream>
+
+int main()  // NOLINT
+{
+    std::cerr << "[e] ALGLIB library is not enabled, please enable ALGLIB and recompile the code" << std::endl;
+
+    return EXIT_FAILURE;
+}
+
+#endif  // FICTION_ALGLIB_ENABLED

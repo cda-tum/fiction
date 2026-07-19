@@ -8,13 +8,74 @@ prototype new ideas or script evaluations.
 We are continuously testing on Ubuntu, macOS, and Windows with multiple compilers and various Python versions.
 See the badges in the README file for more information.
 
+Quick Start
+-----------
+
+To help you getting started with *fiction*, pick the interface that best fits your use case:
+
+.. list-table::
+   :widths: 40 25 35
+   :header-rows: 1
+
+   * - Goal
+     - Recommended Path
+     - Section
+   * - Try the tool immediately
+     - 🐳 Docker CLI image
+     - :ref:`CLI (Docker) <cli-docker>`
+   * - Full-featured local CLI build
+     - 💻 Native build
+     - :ref:`CLI (Source) <cli-source>`
+   * - Integrate into a C++ project
+     - 📚 Header-only library
+     - :ref:`C++ Library <header-only>`
+   * - Script / notebooks / rapid prototyping
+     - 🐍 Python bindings (PyPI)
+     - :ref:`Python Bindings <python-bindings>`
+
+For a full CLI command list or API reference, see the respective documentation sections.
+
+.. _cli:
+.. _cli-docker:
+
+CLI (Docker)
+------------
+
+This is the fastest zero-install path. We release pre-built images of the latest CLI
+on `Docker Hub <https://hub.docker.com/r/mawalter/fiction>`_. Make sure you
+have `Docker installed <https://docs.docker.com/get-docker/>`_ on your local system.
+
+Pull the latest image:
+
+.. code-block:: console
+
+  $ docker pull mawalter/fiction:latest
+
+Run the interactive CLI session:
+
+.. code-block:: console
+
+  $ docker run --rm -it mawalter/fiction
+
+Internally, the repository lives at ``/app/fiction``.
+
+
+.. _cli-source:
+
+CLI (Source)
+------------
+
+When you want to add your own algorithms or contribute to the project, you should build *fiction* from source.
 
 Compilation requirements
-------------------------
+########################
 
-The repository should always be cloned recursively with all submodules::
+The repository should always be cloned recursively with all submodules:
 
-  git clone --recursive https://github.com/cda-tum/fiction.git
+.. code-block:: console
+
+  $ git clone --recursive https://github.com/cda-tum/fiction.git
+  $ cd fiction
 
 Several third-party libraries will be cloned within the ``libs`` folder. The ``cmake`` build process will take care of
 them automatically. Should the repository have been cloned before, the commands::
@@ -30,33 +91,28 @@ preferred compiler, see the current implementation state of `P0024R2 <https://en
 
 On Ubuntu, all required and optional dependencies can be installed via::
 
-  sudo apt-get install build-essential cmake Python3 libreadline-dev libtbb-dev
+  sudo apt-get install build-essential cmake python3 libreadline-dev libtbb-dev
 
+Building the CLI
+################
 
-.. _cli:
+For auto-completion in the CLI, it is recommended but not required to install the ``libreadline-dev`` package (see above).
 
-Using *fiction* as a stand-alone CLI tool
------------------------------------------
-
-It is possible to compile *fiction* as a stand-alone CLI tool. For auto-completion in the CLI, it is recommended but not
-required to install the ``libreadline-dev`` package (see above).
-The build system CMake can be invoked from the command line as follows:
+Configure and build with CMake:
 
 .. code-block:: console
 
-  $ cmake . -B build
-  $ cd build
-  $ cmake --build . -j4
+  $ cmake -S . -B build
+  $ cmake --build build --parallel
 
 Several options can be toggled during the build. For a more interactive interface, please refer to ``ccmake`` for a
 full list of supported customizations.
 
-The CLI tool can then be run using:
+Run the CLI:
 
 .. code-block:: console
 
-  $ cli/fiction
-
+  $ build/cli/fiction
 
 Here is an example of running *fiction* to perform a full physical design flow on a QCA circuit layout that can
 afterward be simulated in QCADesigner:
@@ -67,25 +123,20 @@ afterward be simulated in QCADesigner:
 
 See :ref:`cli` for a full user guide.
 
-
-As an alternative to this build workflow, the CLI tool is also available as an image for a
-`Docker container <https://www.docker.com/>`_. The respective ``Dockerfile`` is available in the base directory.
-
 .. _header-only:
 
+C++ Library
+-----------
 
-Using *fiction* as a header-only library
-----------------------------------------
+If you want to use *fiction* as a dependency in your project to utilize its header-only library for your own tool.
 
-All data types and algorithms provided by *fiction* can be used independently to build custom projects. The following
-snippets illustrate how *fiction* can be included and linked against your project. Assume, the project
-is called *fanfiction*. Clone *fiction* within the project folder ``fanfiction/`` and add the following lines of code
-to your ``CMakeLists.txt``:
+Add *fiction* as a sub-directory to your CMake project and link against ``libfiction`` (assuming your project is
+called *fanfiction*):
 
 .. code-block:: cmake
 
-    add_subdirectory(fiction/)
-    target_link_libraries(fanfiction libfiction)
+    add_subdirectory(fiction)
+    target_link_libraries(fanfiction PRIVATE libfiction)
 
 .. note::
 
@@ -96,7 +147,7 @@ to your ``CMakeLists.txt``:
     disable it by passing ``-DFICTION_CLI=OFF`` to your ``cmake`` call or adding
     ``set(FICTION_CLI OFF CACHE BOOL "" FORCE)`` **before** ``add_subdirectory(fiction/)``.
 
-Within your code files, you can then call
+Then include what you need:
 
 .. code-block:: c++
 
@@ -106,39 +157,22 @@ Within your code files, you can then call
    #include <fiction/io/write_qca_layout.hpp>
    #include <fiction/...>
 
-for each used header file to include *fiction*'s data types and algorithms. Everything that can safely be used is
-directly located inside the ``fiction`` namespace.
+Everything that can safely be used is directly located inside the ``fiction`` namespace.
 
+.. _python-bindings:
 
 Python Bindings
 ---------------
 
-The Python bindings can be installed via ``pip`` from `PyPI <https://pypi.org/project/mnt.pyfiction/>`_ where we publish
-wheels for every new release:
+Ideal for notebooks, exploratory scripts, and integration with Python tooling.
+
+Install the library from PyPI:
 
 .. code-block:: console
 
-  (venv) $ pip install mnt.pyfiction
+  $ pip install mnt.pyfiction
 
-In most practical cases (under 64-bit Linux, macOS incl. Apple Silicon, and Windows), this requires no compilation and
-merely downloads and installs a platform-specific pre-built wheel.
-
-.. note::
-    In order to set up a virtual environment on UNIX-like systems, you can use the following commands:
-
-    .. code-block:: console
-
-        $ python3 -m venv venv
-        $ source venv/bin/activate
-
-    If you are using Windows, you can use the following commands instead:
-
-    .. code-block:: console
-
-        $ python3 -m venv venv
-        $ venv\Scripts\activate.bat
-
-You can then import the bindings in your Python project:
+Import it in your script:
 
 .. code-block:: python
 
@@ -156,6 +190,69 @@ module, you can toggle between the two languages using the tabs.
     features that are not (yet) available in *pyfiction*, please open
     an `issue on GitHub <https://github.com/cda-tum/fiction/issues>`_.
 
+Virtual Environment Setup
+##########################
+
+In order to set up a virtual environment on UNIX-like systems, you can use the following commands:
+
+.. code-block:: console
+
+    $ python3 -m venv venv
+    $ source venv/bin/activate
+
+If you are using Windows, you can use the following commands instead:
+
+.. code-block:: console
+
+    $ python3 -m venv venv
+    $ venv\Scripts\activate.bat
+
+.. _bindings-architecture:
+
+Bindings Architecture
+#####################
+
+If you want to add or extend Python bindings, the code under ``bindings/mnt/pyfiction/`` follows a source-based
+layout, one translation unit per binding, chosen to keep compile time and memory usage manageable as the number of
+bindings grows:
+
+.. code-block:: text
+
+    bindings/mnt/pyfiction/
+    ├── CMakeLists.txt
+    ├── pyfiction.cpp                              # top-level PYBIND11_MODULE entry point
+    └── src/pyfiction/
+        ├── algorithms/
+        │   ├── register_algorithms.cpp             # calls register_path_finding(m), etc.
+        │   ├── path_finding/
+        │   │   ├── a_star.cpp                      # defines a_star(pybind11::module&)
+        │   │   └── register_path_finding.cpp        # calls a_star(m), distance(m), ...
+        │   └── ...
+        ├── layouts/
+        │   └── ...
+        └── ...
+
+Each leaf ``.cpp`` file under ``src/pyfiction/<module>/<submodule>/`` defines exactly one binding function (e.g.
+``void a_star(pybind11::module& m)``) that binds a single class, function, or closely related group thereof. Each
+directory has a ``register_<name>.cpp`` that forward-declares and calls the binding functions of its leaf files (and
+the ``register_<name>`` functions of any nested submodule directories); the top-level ``pyfiction.cpp`` calls each
+top-level module's ``register_<module>(m)`` from its ``PYBIND11_MODULE`` block. New source files do not need to be
+added anywhere manually: ``CMakeLists.txt`` collects them automatically via ``file(GLOB_RECURSE
+FICTION_PYFICTION_SOURCES CONFIGURE_DEPENDS "src/*.cpp")``, so re-running ``cmake`` picks up new files on its own —
+you only need to wire the new function into the relevant ``register_<name>.cpp`` and, if needed, forward-declare it
+there.
+
+.. note::
+
+   The Python-facing ``mnt.pyfiction`` namespace must not change shape when adding new bindings. In particular, do
+   not introduce new Python-level submodules (e.g. ``mnt.pyfiction.algorithms``) — all registration functions attach
+   their bindings to the single top-level module object that is threaded through the call chain, matching the
+   existing flat API that user scripts depend on.
+
+---
+
+Advanced Configuration
+======================
 
 Enabling dependent functions
 ----------------------------
@@ -187,7 +284,7 @@ It has some further Python dependencies that can be installed via ``pip3``:
 
 .. code-block:: console
 
-    (venv) $ pip install -r libs/mugen/requirements.txt
+    (venv) $ pip install -r vendors/mugen/requirements.txt
 
 The Python integration is experimental and may cause issues on some systems. It is currently not available on Windows
 and some macOS versions due to issues with ``python-sat``. Mugen requires at least Python 3.7!
@@ -248,9 +345,8 @@ Each file can be built individually via CMake:
 
 .. code-block:: console
 
-  $ cmake . -B build -DFICTION_EXPERIMENTS=ON
-  $ cd build
-  $ cmake --build . -j4
+  $ cmake -S . -B build -DFICTION_EXPERIMENTS=ON
+  $ cmake --build build --parallel
 
 
 Building tests
@@ -260,9 +356,8 @@ Unit tests can be built with CMake via a respective flag on the command line and
 
 .. code-block:: console
 
-  $ cmake . -B build -DFICTION_TEST=ON
-  $ cd build
-  $ cmake --build . -j4
+  $ cmake -S . -B build -DFICTION_TEST=ON
+  $ cmake --build build --parallel
   $ ctest
 
 
@@ -277,9 +372,8 @@ linked against *fiction* and compiled as a stand-alone binary using the followin
 
 .. code-block:: console
 
-  $ cmake . -B build -DFICTION_BENCHMARK=ON
-  $ cd build
-  $ cmake --build . -j4
+  $ cmake -S . -B build -DFICTION_BENCHMARK=ON
+  $ cmake --build build --parallel
 
 
 Noteworthy CMake options
@@ -305,9 +399,6 @@ While enabling jemalloc through the above CMake is not beneficial to every appli
 
 .. note::
    Windows users need to install jemalloc manually. It can be done by following `these steps <https://github.com/jemalloc/jemalloc/blob/dev/INSTALL.md#building-for-windows>`_.
-
-.. note::
-   Usage of jemalloc in *fiction* is not tested on macOS with the g++ compiler.
 
 Uninstall
 ---------

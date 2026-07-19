@@ -2,7 +2,6 @@
 // Created by Jan Drewniok on 08.01.25.
 //
 
-#include <catch2/catch_assertion_result.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
@@ -27,6 +26,8 @@
 
 using namespace fiction;
 
+namespace
+{
 template <typename Lyt>
 void check_equivalence(const Lyt& layout_designed, const std::string& path_layout_correct)
 {
@@ -48,6 +49,7 @@ void check_equivalence(const Lyt& layout_designed, const std::string& path_layou
             }
         });
 }
+}  // namespace
 
 using cell_lyt = sidb_100_cell_clk_lyt_cube;
 
@@ -360,7 +362,7 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
                 design_gate_defect_params.canvas                 = {{24, 17}, {34, 28}};
                 design_gate_defect_params.number_of_canvas_sidbs = 3;
                 design_gate_defect_params.termination_cond       = design_sidb_gates_params<
-                          sidb_defect_surface<cell_lyt>>::termination_condition::OBTAINED_N_SOLUTIONS;
+                    sidb_defect_surface<cell_lyt>>::termination_condition::OBTAINED_N_SOLUTIONS;
 
                 defect_params.design_gate_params = design_gate_defect_params;
 
@@ -434,7 +436,7 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
                 design_gate_defect_params.canvas                 = {{24, 17}, {34, 28}};
                 design_gate_defect_params.number_of_canvas_sidbs = 3;
                 design_gate_defect_params.termination_cond       = design_sidb_gates_params<
-                          sidb_defect_surface<cell_lyt>>::termination_condition::OBTAINED_N_SOLUTIONS;
+                    sidb_defect_surface<cell_lyt>>::termination_condition::OBTAINED_N_SOLUTIONS;
 
                 defect_params.design_gate_params = design_gate_defect_params;
 

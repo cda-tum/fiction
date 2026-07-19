@@ -48,7 +48,8 @@ class jump_point_search_impl
         assert(layout.is_within_bounds(objective.source) && layout.is_within_bounds(objective.target) &&
                "Both source and target coordinate have to be within the layout bounds");
 
-        do {
+        do
+        {
             // get coordinate with lowest f-value
             const auto current = get_lowest_f_coord();
 

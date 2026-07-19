@@ -358,7 +358,7 @@ class design_sidb_gates_impl
                                                input_bdl_wires, output_bdl_wires);
                             assessment_results.status == operational_status::OPERATIONAL)
                         {
-                            const std::lock_guard lock{mutex_to_protect_designed_gate_layouts};
+                            const std::scoped_lock lock{mutex_to_protect_designed_gate_layouts};
 
                             if (check_if_gate_design_is_already_present(result_lyt.value()))
                             {
@@ -543,7 +543,7 @@ class design_sidb_gates_impl
                 return;
             }
 
-            const std::lock_guard lock_vector{mutex_to_protect_designed_gate_layouts};
+            const std::scoped_lock lock_vector{mutex_to_protect_designed_gate_layouts};
 
             designed_gate_layouts.gate_layouts.emplace_back(std::move(layout_with_added_cells));
 
@@ -696,7 +696,7 @@ class design_sidb_gates_impl
                 }
             }
 
-            const std::lock_guard lock{mutex_to_protect_candidate_combinations};
+            const std::scoped_lock lock{mutex_to_protect_candidate_combinations};
             candidate_combinations.emplace_back(combination);
         };
 
@@ -866,6 +866,10 @@ class design_sidb_gates_impl
  * A first version of `QuickCell` was proposed in \"Towards Fast Automatic Design of Silicon Dangling Bond Logic\" by
  * J. Drewniok, M. Walter, S. S. H. Ng, K. Walus, and R. Wille in DATE 2025
  * (https://ieeexplore.ieee.org/abstract/document/10992885).
+ *
+ * An extended version of `QuickCell` was proposed in \"QuickCell: Fast Automatic Design of Standard Cells for Silicon
+ * Dangling Bond Logic\" by J. Drewniok, M. Walter, S. S. H. Ng, K. Walus, and R. Wille in TCAD 2025
+ * (https://ieeexplore.ieee.org/document/11146893).
  *
  * The `Automatic Exhaustive Gate Designer` was proposed in
  * \"Minimal Design of SiDB Gates: An Optimal Basis for Circuits Based on Silicon Dangling Bonds\" by J. Drewniok, M.

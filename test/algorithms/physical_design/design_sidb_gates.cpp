@@ -391,7 +391,7 @@ TEST_CASE("Use SiQAD's AND gate skeleton to generate all possible AND gates", "[
         params_for_lyt_with_defects.canvas                 = {{4, 2, 0}, {14, 8, 1}};
         params_for_lyt_with_defects.number_of_canvas_sidbs = 2;
         params_for_lyt_with_defects.design_mode            = design_sidb_gates_params<
-                       sidb_defect_surface<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::EXHAUSTIVE;
+            sidb_defect_surface<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::EXHAUSTIVE;
 
         sidb_defect_surface defect_layout{lyt};
         defect_layout.assign_sidb_defect(
@@ -465,6 +465,7 @@ TEST_CASE("Use FO2 Bestagon gate without SiDB at {17, 11, 0} and generate origin
         CHECK(found_gate_layouts[0].get_cell_type({17, 11, 0}) == sidb_100_cell_clk_lyt_siqad::technology::LOGIC);
     }
 
+#if (FICTION_ALGLIB_ENABLED)
     SECTION("replace the output perturbers by equivalent negatively charged defects")
     {
         design_sidb_gates_params<sidb_defect_surface<sidb_100_cell_clk_lyt_siqad>> params{
@@ -515,6 +516,7 @@ TEST_CASE("Use FO2 Bestagon gate without SiDB at {17, 11, 0} and generate origin
         CHECK(found_gate_layouts_random[0].num_cells() == 19);
         CHECK(found_gate_layouts_random[0].get_cell_type({17, 11, 0}) == sidb_100_cell_clk_lyt_siqad::cell_type::LOGIC);
     }
+#endif  // FICTION_ALGLIB_ENABLED
 }
 
 TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")

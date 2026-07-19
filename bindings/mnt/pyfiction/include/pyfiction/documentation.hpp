@@ -1,9 +1,9 @@
-#ifndef FICTION_DOCSTRINGS_HPP
-#define FICTION_DOCSTRINGS_HPP
+#ifndef PYFICTION_DOCSTRINGS_HPP
+#define PYFICTION_DOCSTRINGS_HPP
 
 #include "pyfiction/pybind11_mkdoc_docstrings.hpp"
 
-static const char* __doc_fiction_cartesian_layout_overridden =
+inline constexpr auto __doc_fiction_cartesian_layout_overridden =
     R"doc(A layout type that utilizes offset coordinates to represent a
 Cartesian grid. Its faces are organized in the following way:
 
@@ -25,7 +25,7 @@ Cartesian grid. Its faces are organized in the following way:
 
 )doc";
 
-static const char* __doc_fiction_shifted_cartesian_layout_overridden =
+inline constexpr auto __doc_fiction_shifted_cartesian_layout_overridden =
     R"doc(A layout type that utilizes offset coordinates to represent a
 Cartesian layout with shifted coordinates. In this implementation, odd
 columns are vertically shifted. Its faces are organized in the following
@@ -49,7 +49,7 @@ way:
 
 )doc";
 
-static const char* __doc_fiction_hexagonal_layout_overridden =
+inline constexpr auto __doc_fiction_hexagonal_layout_overridden =
     R"doc(A layout type that utilizes offset coordinates to represent a
 hexagonal grid. In this implementation, the hexagons are in the pointy-top
 orientation with even rows horizontally shifted. Its faces are organized
@@ -79,7 +79,7 @@ coordinates make the most sense here.
 https://www.redblobgames.com/grids/hexagons/ is a wonderful resource
 on the topic.)doc";
 
-static const char* __doc_fiction_bounding_box_2d_overridden =
+inline constexpr auto __doc_fiction_bounding_box_2d_overridden =
     R"doc(Returns the minimum and maximum corner of the bounding box.
 A 2D bounding box object computes a minimum-sized box around all
 non-empty coordinates in a given layout. Layouts can be of arbitrary
@@ -92,13 +92,13 @@ empty layout coordinates.
 Returns:
     The minimum  and maximum enclosing coordinate in the associated layout.)doc";
 
-static const char* __doc_fiction_design_sidb_gates_params_canvas_overridden =
+inline constexpr auto __doc_fiction_design_sidb_gates_params_canvas_overridden =
     R"doc(Canvas spanned by the northwest and southeast cell.)doc";
 
-static const char* __doc_fiction_design_sidb_gates_stats_pruning_total_overridden =
+inline constexpr auto __doc_fiction_design_sidb_gates_stats_pruning_total_overridden =
     R"doc(The total runtime of the process.)doc";
 
-static const char* __doc_fiction_design_sidb_gates_stats_time_total_overridden =
+inline constexpr auto __doc_fiction_design_sidb_gates_stats_time_total_overridden =
     R"doc(The total runtime of the SiDB gate design process.)doc";
 
-#endif  // FICTION_DOCSTRINGS_HPP
+#endif  // PYFICTION_DOCSTRINGS_HPP

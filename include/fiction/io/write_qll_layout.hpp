@@ -7,18 +7,16 @@
 
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/technology/cell_technologies.hpp"
-#include "fiction/technology/magcad_magnet_count.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/types.hpp"
-#include "utils/version_info.hpp"
+#include "fiction/utils/version_info.hpp"
 
 #include <fmt/format.h>
 
 #include <algorithm>
 #include <array>
-#include <filesystem>
+#include <cstdint>
 #include <fstream>
-#include <functional>
+#include <iostream>
 #include <ostream>
 #include <stdexcept>
 #include <string>
@@ -144,7 +142,21 @@ class write_qll_layout_impl
 
     uint64_t cell_id{1};
 
-    const char* tech_name{has_inml_technology_v<Lyt> ? "iNML" : has_qca_technology_v<Lyt> ? "MolFCN" : "?"};
+    const char* tech_name = []()
+    {
+        if constexpr (has_inml_technology_v<Lyt>)
+        {
+            return "iNML";
+        }
+        else if constexpr (has_qca_technology_v<Lyt>)
+        {
+            return "MolFCN";
+        }
+        else
+        {
+            return "?";
+        }
+    }();
 
     [[nodiscard]] std::vector<cell<Lyt>> sorted_pis() const noexcept
     {
@@ -359,7 +371,8 @@ class write_qll_layout_impl
                         // write via cell
                         if (qca_technology::is_vertical_cell_mode(mode) && c.z != lyt.z())
                         {
-                            os << fmt::format(qll::OPEN_MQCA_LAYOUT_ITEM, 0, cell_id++, bb_x(c), bb_y(c), c.z * 2 + 1);
+                            os << fmt::format(qll::OPEN_MQCA_LAYOUT_ITEM, 0, cell_id++, bb_x(c), bb_y(c),
+                                              (c.z * 2) + 1);
                             os << fmt::format(qll::LAYOUT_ITEM_PROPERTY, qll::PROPERTY_PHASE, lyt.get_clock_number(c));
                             os << qll::CLOSE_LAYOUT_ITEM;
                         }
@@ -414,7 +427,7 @@ void write_qll_layout(const Lyt& lyt, std::ostream& os)
 template <typename Lyt>
 void write_qll_layout(const Lyt& lyt, const std::string_view& filename)
 {
-    std::ofstream os{filename.data(), std::ofstream::out};
+    std::ofstream os{std::string{filename}, std::ofstream::out};
 
     if (!os.is_open())
     {
