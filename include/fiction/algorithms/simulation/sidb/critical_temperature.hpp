@@ -160,7 +160,8 @@ class critical_temperature_impl
             auto input_bdl_wires  = std::vector<bdl_wire<Lyt>>{};
             auto output_bdl_wires = std::vector<bdl_wire<Lyt>>{};
 
-            if (params.operational_params.op_condition == is_operational_params::operational_condition::REJECT_KINKS)
+            if (params.operational_params.op_condition_kinks ==
+                is_operational_params::operational_condition_kinks::REJECT_KINKS)
             {
                 input_bdl_wires =
                     detect_bdl_wires(layout, params.operational_params.input_bdl_iterator_params.bdl_wire_params,
@@ -195,8 +196,8 @@ class critical_temperature_impl
 
                 sidb_energy_and_state_type energy_state_type{};
 
-                if (params.operational_params.op_condition ==
-                    is_operational_params::operational_condition::REJECT_KINKS)
+                if (params.operational_params.op_condition_kinks ==
+                    is_operational_params::operational_condition_kinks::REJECT_KINKS)
                 {
                     energy_state_type = calculate_energy_and_state_type_with_kinks_rejected<Lyt>(
                         distribution, sim_result.charge_distributions, spec, i, input_bdl_wires, output_bdl_wires);
@@ -283,9 +284,14 @@ class critical_temperature_impl
         // if there is more than one metastable state
         if (distribution.size() > 1)
         {
-            const auto ground_state_energy = distribution.get_nth_state(0).value().electrostatic_potential_energy;
+            const auto ground_state_energy =
+                distribution.get_nth_state(0)
+                    .value()
+                    .electrostatic_potential_energy;  // NOLINT(bugprone-unchecked-optional-access)
             const auto first_excited_state_energy =
-                distribution.get_nth_state(1).value().electrostatic_potential_energy;
+                distribution.get_nth_state(1)
+                    .value()
+                    .electrostatic_potential_energy;  // NOLINT(bugprone-unchecked-optional-access)
 
             // The energy difference between the first excited and the ground state in meV.
             if (stats.energy_between_ground_state_and_first_erroneous >

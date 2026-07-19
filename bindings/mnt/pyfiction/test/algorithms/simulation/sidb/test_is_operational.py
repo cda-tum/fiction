@@ -11,7 +11,7 @@ from mnt.pyfiction import (
     is_operational_params,
     kink_induced_non_operational_input_patterns,
     operational_analysis_strategy,
-    operational_condition,
+    operational_condition_kinks,
     operational_input_patterns,
     operational_status,
     read_sqd_layout_100,
@@ -48,40 +48,28 @@ class TestIsOperational(unittest.TestCase):
         params = is_operational_params()
         params.simulation_parameters = sidb_simulation_parameters(2, -0.28)
 
-        [op_status, _evaluated_input_combinations] = is_operational(lyt, [create_and_tt()], params)
+        assessment_results = is_operational(lyt, [create_and_tt()], params)
 
-        self.assertEqual(op_status, operational_status.OPERATIONAL)
+        self.assertEqual(assessment_results.status, operational_status.OPERATIONAL)
 
         params.simulation_parameters = sidb_simulation_parameters(2, -0.1)
 
-        [op_status, _evaluated_input_combinations] = is_operational(lyt, [create_and_tt()], params)
+        assessment_results = is_operational(lyt, [create_and_tt()], params)
 
-        self.assertEqual(op_status, operational_status.NON_OPERATIONAL)
+        self.assertEqual(assessment_results.status, operational_status.NON_OPERATIONAL)
 
         # pre-determined I/O pins
         output_bdl_wires = detect_bdl_wires_100(lyt, detect_bdl_wires_params(), bdl_wire_selection.OUTPUT)
         input_bdl_wires = detect_bdl_wires_100(lyt, detect_bdl_wires_params(), bdl_wire_selection.INPUT)
-        [op_status, _evaluated_input_combinations] = is_operational(
-            lyt,
-            [create_and_tt()],
-            params,
-            input_bdl_wires,
-            output_bdl_wires,
-        )
-        self.assertEqual(op_status, operational_status.NON_OPERATIONAL)
+        assessment_results = is_operational(lyt, [create_and_tt()], params, input_bdl_wires, output_bdl_wires)
+        self.assertEqual(assessment_results.status, operational_status.NON_OPERATIONAL)
 
         # pre-determined I/O pins and canvas layout
         canvas_lyt = sidb_100_lattice()
         canvas_lyt.assign_cell_type((4, 5), sidb_technology.cell_type.LOGIC)
         canvas_lyt.assign_cell_type((6, 7), sidb_technology.cell_type.LOGIC)
-        [op_status, _evaluated_input_combinations] = is_operational(
-            lyt,
-            [create_and_tt()],
-            params,
-            input_bdl_wires,
-            output_bdl_wires,
-        )
-        self.assertEqual(op_status, operational_status.NON_OPERATIONAL)
+        assessment_results = is_operational(lyt, [create_and_tt()], params, input_bdl_wires, output_bdl_wires)
+        self.assertEqual(assessment_results.status, operational_status.NON_OPERATIONAL)
 
     def test_and_gate_kinks(self):
         lyt = read_sqd_layout_100(dir_path + "/../../../resources/AND_mu_032_kinks.sqd")
@@ -89,15 +77,15 @@ class TestIsOperational(unittest.TestCase):
         params = is_operational_params()
         params.simulation_parameters = sidb_simulation_parameters(2, -0.32)
 
-        [op_status, _evaluated_input_combinations] = is_operational(lyt, [create_and_tt()], params)
+        assessment_results = is_operational(lyt, [create_and_tt()], params)
 
-        self.assertEqual(op_status, operational_status.OPERATIONAL)
+        self.assertEqual(assessment_results.status, operational_status.OPERATIONAL)
 
-        params.op_condition = operational_condition.REJECT_KINKS
+        params.op_condition_kinks = operational_condition_kinks.REJECT_KINKS
 
-        [op_status, _evaluated_input_combinations] = is_operational(lyt, [create_and_tt()], params)
+        assessment_results = is_operational(lyt, [create_and_tt()], params)
 
-        self.assertEqual(op_status, operational_status.NON_OPERATIONAL)
+        self.assertEqual(assessment_results.status, operational_status.NON_OPERATIONAL)
 
     def test_and_gate_non_operational_due_to_kinks(self):
         lyt = read_sqd_layout_100(dir_path + "/../../../resources/AND_mu_032_kinks.sqd")
@@ -125,23 +113,23 @@ class TestIsOperational(unittest.TestCase):
         params = is_operational_params()
         params.simulation_parameters = sidb_simulation_parameters(2, -0.32)
 
-        [op_status, _evaluated_input_combinations] = is_operational(lyt, [create_and_tt()], params)
+        assessment_results = is_operational(lyt, [create_and_tt()], params)
 
-        self.assertEqual(op_status, operational_status.OPERATIONAL)
+        self.assertEqual(assessment_results.status, operational_status.OPERATIONAL)
 
         params.simulation_parameters = sidb_simulation_parameters(2, -0.1)
 
         self.assertEqual(params.simulation_parameters.mu_minus, -0.1)
 
-        [op_status, _evaluated_input_combinations] = is_operational(lyt, [create_and_tt()], params)
+        assessment_results = is_operational(lyt, [create_and_tt()], params)
 
-        self.assertEqual(op_status, operational_status.NON_OPERATIONAL)
+        self.assertEqual(assessment_results.status, operational_status.NON_OPERATIONAL)
 
         # filer only
         params.strategy_to_analyze_operational_status = operational_analysis_strategy.FILTER_ONLY
         self.assertEqual(params.strategy_to_analyze_operational_status, operational_analysis_strategy.FILTER_ONLY)
-        [op_status, _evaluated_input_combinations] = is_operational(lyt, [create_and_tt()], params)
-        self.assertEqual(op_status, operational_status.NON_OPERATIONAL)
+        assessment_results = is_operational(lyt, [create_and_tt()], params)
+        self.assertEqual(assessment_results.status, operational_status.NON_OPERATIONAL)
 
         # filer then simulation
         params.strategy_to_analyze_operational_status = operational_analysis_strategy.FILTER_THEN_SIMULATION
@@ -149,8 +137,8 @@ class TestIsOperational(unittest.TestCase):
             params.strategy_to_analyze_operational_status,
             operational_analysis_strategy.FILTER_THEN_SIMULATION,
         )
-        [op_status, _evaluated_input_combinations] = is_operational(lyt, [create_and_tt()], params)
-        self.assertEqual(op_status, operational_status.NON_OPERATIONAL)
+        assessment_results = is_operational(lyt, [create_and_tt()], params)
+        self.assertEqual(assessment_results.status, operational_status.NON_OPERATIONAL)
 
     def test_and_gate_111_lattice_operational_input_pattern(self):
         lyt = read_sqd_layout_111(dir_path + "/../../../resources/AND_mu_032_111_surface.sqd")

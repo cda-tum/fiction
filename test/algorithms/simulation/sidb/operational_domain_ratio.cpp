@@ -2,6 +2,8 @@
 // Created by Jan Drewniok on 13.09.24.
 //
 
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
@@ -109,7 +111,8 @@ TEST_CASE("SiQAD NAND gate", "[compute-operational-ratio]")
     op_domain_params.sweep_dimensions = {{sweep_parameter::EPSILON_R}, {sweep_parameter::LAMBDA_TF}};
     op_domain_params.operational_params.strategy_to_analyze_operational_status =
         is_operational_params::operational_analysis_strategy::FILTER_THEN_SIMULATION;
-    op_domain_params.operational_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
+    op_domain_params.operational_params.op_condition_kinks =
+        is_operational_params::operational_condition_kinks::REJECT_KINKS;
     op_domain_params.operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance = 1.5;
 
     // set x-dimension
@@ -182,7 +185,8 @@ TEST_CASE("Bestagon AND gate", "[compute-operational-ratio]")
     SECTION("semi-operational domain, reject kinks")
     {
         op_domain_params.sweep_dimensions.push_back(z_dimension);
-        op_domain_params.operational_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
+        op_domain_params.operational_params.op_condition_kinks =
+            is_operational_params::operational_condition_kinks::REJECT_KINKS;
 
         const operational_domain_ratio_params op_ratio_params{op_domain_params};
 
@@ -197,7 +201,8 @@ TEST_CASE("Bestagon AND gate", "[compute-operational-ratio]")
         "semi-operational domain, reject kinks, only pruning is used to determine the operational status of the layout")
     {
         op_domain_params.sweep_dimensions.push_back(z_dimension);
-        op_domain_params.operational_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
+        op_domain_params.operational_params.op_condition_kinks =
+            is_operational_params::operational_condition_kinks::REJECT_KINKS;
         op_domain_params.operational_params.strategy_to_analyze_operational_status =
             is_operational_params::operational_analysis_strategy::FILTER_ONLY;
 

@@ -10,7 +10,6 @@
 #include <fiction/algorithms/simulation/sidb/is_operational.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
 #include <fiction/io/read_sqd_layout.hpp>
-#include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/truth_table_utils.hpp>
 
@@ -71,11 +70,11 @@ int main()  // NOLINT
     const auto skeleton_two =
         read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}/{}", folder, "3_in_1_out_skeleton_two.sqd"));
 
-    const design_sidb_gates_params<fiction::cell<sidb_100_cell_clk_lyt_siqad>> params{
+    const design_sidb_gates_params<sidb_100_cell_clk_lyt_siqad> params{
         is_operational_params{sidb_simulation_parameters{2, -0.31}, sidb_simulation_engine::QUICKEXACT,
                               bdl_input_iterator_params{detect_bdl_wires_params{3.0}},
-                              is_operational_params::operational_condition::REJECT_KINKS},
-        design_sidb_gates_params<fiction::cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::QUICKCELL,
+                              is_operational_params::operational_condition_kinks::REJECT_KINKS},
+        design_sidb_gates_params<sidb_100_cell_clk_lyt_siqad>::design_sidb_gates_mode::QUICKCELL,
         {{22, 6, 0}, {32, 12, 0}},
         4};
 

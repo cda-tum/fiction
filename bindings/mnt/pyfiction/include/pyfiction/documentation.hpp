@@ -92,4 +92,13 @@ empty layout coordinates.
 Returns:
     The minimum  and maximum enclosing coordinate in the associated layout.)doc";
 
+inline constexpr auto __doc_fiction_design_sidb_gates_params_canvas_overridden =
+    R"doc(Canvas spanned by the northwest and southeast cell.)doc";
+
+inline constexpr auto __doc_fiction_design_sidb_gates_stats_pruning_total_overridden =
+    R"doc(The total runtime of the process.)doc";
+
+inline constexpr auto __doc_fiction_design_sidb_gates_stats_time_total_overridden =
+    R"doc(The total runtime of the SiDB gate design process.)doc";
+
 #endif  // PYFICTION_DOCSTRINGS_HPP

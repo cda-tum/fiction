@@ -15,11 +15,10 @@
 #include <fiction/layouts/bounding_box.hpp>
 #include <fiction/technology/sidb_defect_surface.hpp>
 #include <fiction/technology/sidb_defects.hpp>
-#include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
 #include <fmt/format.h>
-#include <lorina/lorina.hpp>
+#include <lorina/verilog.hpp>
 #include <mockturtle/algorithms/cut_rewriting.hpp>
 #include <mockturtle/algorithms/equivalence_checking.hpp>
 #include <mockturtle/algorithms/miter.hpp>
@@ -47,15 +46,15 @@ int main()  // NOLINT
     using gate_lyt = fiction::hex_even_row_gate_clk_lyt;
     using cell_lyt = fiction::sidb_cell_clk_lyt_cube;
 
-    fiction::design_sidb_gates_params<fiction::cell<cell_lyt>> design_gate_params{};
+    fiction::design_sidb_gates_params<fiction::sidb_defect_surface<cell_lyt>> design_gate_params{};
     design_gate_params.operational_params.simulation_parameters = fiction::sidb_simulation_parameters{2, -0.32};
     // needs to be changed if a different skeleton is used.
     design_gate_params.canvas = {{24, 17}, {34, 28}};
 
     design_gate_params.number_of_canvas_sidbs        = 3;
     design_gate_params.operational_params.sim_engine = fiction::sidb_simulation_engine::QUICKEXACT;
-    design_gate_params.termination_cond =
-        fiction::design_sidb_gates_params<fiction::cell<cell_lyt>>::termination_condition::AFTER_FIRST_SOLUTION;
+    design_gate_params.termination_cond              = fiction::design_sidb_gates_params<
+        fiction::sidb_defect_surface<cell_lyt>>::termination_condition::OBTAINED_N_SOLUTIONS;
 
     // save atomic defects which their respective physical parameters as experimentally determined by T. R. Huff, T.
     // Dienel, M. Rashidi, R. Achal, L. Livadaru, J. Croshaw, and R. A. Wolkow, "Electrostatic landscape of a
@@ -136,7 +135,8 @@ int main()  // NOLINT
         // perform technology mapping
         const auto mapped_network = fiction::technology_mapping(cut_xag, tech_map_params);
 
-        fiction::on_the_fly_sidb_circuit_design_on_defective_surface_params<fiction::cell<cell_lyt>> params{};
+        fiction::on_the_fly_sidb_circuit_design_on_defective_surface_params<fiction::sidb_defect_surface<cell_lyt>>
+            params{};
 
         params.exact_design_parameters.scheme        = "ROW4";
         params.exact_design_parameters.crossings     = true;
@@ -160,12 +160,14 @@ int main()  // NOLINT
             write_sqd_layout(result, fmt::format("{}/{}.sqd", layouts_folder, benchmark));
 
             // check equivalence
-            const auto miter = mockturtle::miter<mockturtle::klut_network>(mapped_network, st.gate_layout.value());
-            const auto eq    = mockturtle::equivalence_checking(*miter);
+            const auto& gate_layout = st.gate_layout.value();  // NOLINT(bugprone-unchecked-optional-access)
+            const auto  miter       = mockturtle::miter<mockturtle::klut_network>(mapped_network, gate_layout);
+            const auto  eq = mockturtle::equivalence_checking(*miter);  // NOLINT(bugprone-unchecked-optional-access)
             assert(eq.has_value());
+            const auto eq_result = *eq;  // NOLINT(bugprone-unchecked-optional-access)
 
             sidb_circuits_with_defects(benchmark, mockturtle::to_seconds(st.time_total),
-                                       st.exact_stats.num_aspect_ratios, *eq, result.num_cells());
+                                       st.exact_stats.num_aspect_ratios, eq_result, result.num_cells());
 
             sidb_circuits_with_defects.save();
             sidb_circuits_with_defects.table();

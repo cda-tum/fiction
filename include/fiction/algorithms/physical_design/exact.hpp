@@ -20,12 +20,10 @@
 #include "fiction/utils/truth_table_utils.hpp"
 
 #include <fmt/format.h>
-#include <kitty/dynamic_truth_table.hpp>
 #include <kitty/operations.hpp>
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/node_map.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
-#include <mockturtle/views/color_view.hpp>
 #include <mockturtle/views/depth_view.hpp>
 #include <mockturtle/views/fanout_view.hpp>
 #include <mockturtle/views/topo_view.hpp>
@@ -36,7 +34,6 @@
 #include <z3++.h>
 
 #include <algorithm>
-#include <atomic>
 #include <cassert>
 #include <chrono>
 #include <cstdint>
@@ -49,7 +46,6 @@
 #include <mutex>
 #include <optional>
 #include <string>
-#include <thread>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
@@ -182,7 +178,7 @@ class exact_impl
                exact_physical_design_stats& st, const surface_black_list<Lyt, port_direction>& sbl = {}) :
             ps{p},
             pst{st},
-            scheme{*get_clocking_scheme<Lyt>(ps.scheme)},
+            scheme{*get_clocking_scheme<Lyt>(ps.scheme)},  // NOLINT(bugprone-unchecked-optional-access)
             black_list{sbl}
     {
         // create PO nodes in the network
@@ -853,7 +849,7 @@ class exact_impl
             z3::expr_vector eq{*ctx};
             for (int i = 1; static_cast<decltype(v.size())>(i) < v.size(); ++i)
             {
-                eq.push_back(v[static_cast<unsigned int>(i - 1)] == v[static_cast<unsigned int>(i)]);
+                eq.push_back(v[i - 1] == v[i]);
             }
 
             return z3::mk_and(eq);

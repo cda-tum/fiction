@@ -18,8 +18,6 @@
 #include <array>
 #include <cstdint>
 #include <cstdlib>
-#include <filesystem>
-#include <iostream>
 #include <string>
 #include <utility>
 #include <vector>
@@ -62,7 +60,8 @@ int main()  // NOLINT
     op_domain_params.operational_params.simulation_parameters = sim_params;
     op_domain_params.operational_params.sim_engine            = sidb_simulation_engine::QUICKEXACT;
 
-    op_domain_params.operational_params.op_condition = is_operational_params::operational_condition::TOLERATE_KINKS;
+    op_domain_params.operational_params.op_condition_kinks =
+        is_operational_params::operational_condition_kinks::TOLERATE_KINKS;
 
     op_domain_params.sweep_dimensions         = {{sweep_parameter::EPSILON_R}, {sweep_parameter::LAMBDA_TF}};
     op_domain_params.sweep_dimensions[0].min  = 1.0;
