@@ -51,6 +51,46 @@
       }
     },
     {
+      "name": "tests-slim",
+      "displayName": "Tests (slim)",
+      "description": "Fastest test-only iteration loop: no CLI, no optional third-party solvers",
+      "inherits": "base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "FICTION_CLI": "OFF",
+        "FICTION_TEST": "ON",
+        "FICTION_WARNINGS_AS_ERRORS": "OFF"
+      }
+    },
+    {
+      "name": "tests-full",
+      "displayName": "Tests (full)",
+      "description": "Test-only build with all optional components enabled (Z3 must be installed manually, see the docs)",
+      "inherits": "tests-slim",
+      "cacheVariables": {
+        "FICTION_EXPERIMENTS": "ON",
+        "FICTION_Z3": "ON",
+        "FICTION_ALGLIB": "ON",
+        "FICTION_ENABLE_MUGEN": "ON"
+      }
+    },
+    {
+      "name": "pyfiction",
+      "displayName": "Python Bindings",
+      "description": "Mirrors the scikit-build-core configuration in pyproject.toml, for iterating on pyfiction bindings directly with CMake/an IDE without a full pip install",
+      "inherits": "base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "MOCKTURTLE_EXAMPLES": "OFF",
+        "FICTION_PROGRESS_BARS": "OFF",
+        "FICTION_CLI": "OFF",
+        "FICTION_TEST": "OFF",
+        "FICTION_Z3": "ON",
+        "FICTION_ALGLIB": "ON",
+        "FICTION_PYTHON_BINDINGS": "ON"
+      }
+    },
+    {
       "name": "release",
       "displayName": "Release",
       "description": "Optimized Release build (with IPO/LTO) for everyday usage or performance testing",
@@ -176,6 +216,18 @@
       "configurePreset": "dev-full"
     },
     {
+      "name": "tests-slim",
+      "configurePreset": "tests-slim"
+    },
+    {
+      "name": "tests-full",
+      "configurePreset": "tests-full"
+    },
+    {
+      "name": "pyfiction",
+      "configurePreset": "pyfiction"
+    },
+    {
       "name": "release",
       "configurePreset": "release"
     },
@@ -230,6 +282,28 @@
     {
       "name": "dev-full",
       "configurePreset": "dev-full",
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "noTestsAction": "error",
+        "stopOnFailure": false
+      }
+    },
+    {
+      "name": "tests-slim",
+      "configurePreset": "tests-slim",
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "noTestsAction": "error",
+        "stopOnFailure": false
+      }
+    },
+    {
+      "name": "tests-full",
+      "configurePreset": "tests-full",
       "output": {
         "outputOnFailure": true
       },

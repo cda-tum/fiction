@@ -116,7 +116,7 @@ jobs:
 
       - name: Configure CMake (Debug)
         run: >
-          cmake -S ${{github.workspace}} --preset ci-debug ${{matrix.cppstandard}}
+          cmake -S ${{github.workspace}} --preset ci-debug
           -DCMAKE_CXX_COMPILER=${{matrix.compiler}}
           -DFICTION_ENABLE_MUGEN=ON
           -DFICTION_LIGHTWEIGHT_DEBUG_BUILDS=ON
@@ -132,7 +132,7 @@ jobs:
 
       - name: Configure CMake (Release)
         run: >
-          cmake -S ${{github.workspace}} --preset ci-release ${{matrix.cppstandard}}
+          cmake -S ${{github.workspace}} --preset ci-release
           -DCMAKE_CXX_COMPILER=${{matrix.compiler}}
           -DFICTION_ENABLE_MUGEN=ON
           -DFICTION_ENABLE_JEMALLOC=ON

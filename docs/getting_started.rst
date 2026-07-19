@@ -122,9 +122,13 @@ yourself. List them with:
   $ cmake --list-presets
 
 Noteworthy presets include ``dev`` (a quick Debug build with only the CLI and tests enabled), ``dev-full`` (the same,
-but with Z3, ALGLIB, and Mugen also enabled), ``dev-asan`` (``dev`` with sanitizers), and ``release`` (an optimized,
-IPO-enabled build). The ``ci-*`` and ``coverage`` presets mirror the exact configurations used by the corresponding
-GitHub Actions workflows, so that CI failures can be reproduced locally, e.g.:
+but with Z3, ALGLIB, and Mugen also enabled), ``dev-asan`` (``dev`` with sanitizers), ``tests-slim``/``tests-full``
+(test-only builds, without/with all optional components, for the fastest edit-compile-test loop), ``pyfiction``
+(mirrors the ``pyproject.toml`` configuration for iterating on the Python bindings directly with CMake), and
+``release`` (an optimized, IPO-enabled build). The ``ci-*`` and ``coverage`` presets provide the shared baseline
+configuration used by the corresponding GitHub Actions workflows; each job layers a few compiler- and
+platform-specific ``-D`` overrides on top, so reproducing a specific failing job locally may require adding those
+too, e.g.:
 
 .. code-block:: console
 
