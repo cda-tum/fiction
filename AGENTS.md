@@ -64,9 +64,9 @@ Use these commands to validate your work.
 
 ### C++ (Primary)
 
-- **Configure**: `cmake -B build -S . -DFICTION_TEST=ON -DFICTION_Z3=ON -DFICTION_ALGLIB=ON`
-- **Build**: `cmake --build build -j`
-- **Test**: `ctest --test-dir build --output-on-failure`
+- **Configure**: `cmake -S . --preset dev-full` (see `cmake --list-presets` for `tests-slim`/`tests-full`/`pyfiction`/etc.)
+- **Build**: `cmake --build --preset dev-full -j`
+- **Test**: `ctest --preset dev-full --output-on-failure`
 - **Format**: `prek run clang-format --all-files` (or let prek handle it)
 
 ### Python (Bindings)
@@ -78,6 +78,21 @@ Use these commands to validate your work.
 ### General
 
 - **Prek**: `prek run -a` (Runs all checks: formatting, linting, static analysis)
+
+### Code Review
+
+- Before considering a PR done, fetch and address open reviewer comments (CodeRabbit and humans):
+  `gh api repos/{owner}/{repo}/pulls/<PR>/comments`.
+- Verify each against the current code first — some may already be stale, resolved by a later commit, or
+  not actually applicable — then fix or reply to the rest, and consolidate duplicates.
+
+## Git Conventions
+
+Prefix every commit subject and PR title with a single plain [gitmoji](https://gitmoji.dev) emoji character (not the
+`:shortcode:` text form) matching the change's _dominant_ nature, e.g. `🐛 Fix off-by-one error in hexagonalization`.
+A few common ones: `🐛` bug fix, `✨` new feature, `♻️` refactor, `⚡️` perf, `👷`/`💚` CI, `🔧` config (e.g.
+`CMakePresets.json`), `📝` docs, `✅` tests, `🚨` fix warnings, `🔥` remove code. Don't stack multiple emoji by hand —
+`⬆️🪝 ...` dependency-bump commits are Renovate's own automated convention, not one to imitate.
 
 ## Code Style
 
@@ -166,6 +181,7 @@ def create_logic_network(filename: str) -> LogicNetwork:
 - ✅ **Always**:
   - Run `prek run -a` before finishing a task.
   - Write tests for new functionality (`test/` for C++, `bindings/mnt/pyfiction/test/` for Python).
+  - Check for and consolidate open reviewer comments before considering a PR done (see Code Review above).
   - Use `const` correctness.
   - Prefer STL over custom algorithms.
   - Use braced initialization.

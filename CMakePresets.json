@@ -10,7 +10,7 @@
       "name": "base",
       "hidden": true,
       "generator": "Ninja",
-      "binaryDir": "${sourceDir}/build/${presetName}",
+      "binaryDir": "${sourceDir}/build-${presetName}",
       "cacheVariables": {
         "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
         "FICTION_ENABLE_CACHE": "ON"
@@ -19,18 +19,18 @@
     {
       "name": "dev",
       "displayName": "Development",
-      "description": "Debug build for development",
+      "description": "Quick Debug build for local development: CLI + tests only, no optional third-party solvers",
       "inherits": "base",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
-        "FICTION_WARNINGS_AS_ERRORS": "OFF",
-        "FICTION_TEST": "ON"
+        "FICTION_TEST": "ON",
+        "FICTION_WARNINGS_AS_ERRORS": "OFF"
       }
     },
     {
       "name": "dev-asan",
       "displayName": "Development (ASan)",
-      "description": "Debug build with Address Sanitizer",
+      "description": "Debug build with the address, leak, and undefined behavior sanitizers enabled",
       "inherits": "dev",
       "cacheVariables": {
         "FICTION_ENABLE_SANITIZER_ADDRESS": "ON",
@@ -39,25 +39,166 @@
       }
     },
     {
+      "name": "dev-full",
+      "displayName": "Development (full)",
+      "description": "Debug build with all optional components enabled (Z3 must be installed manually, see the docs)",
+      "inherits": "dev",
+      "cacheVariables": {
+        "FICTION_EXPERIMENTS": "ON",
+        "FICTION_Z3": "ON",
+        "FICTION_ALGLIB": "ON",
+        "FICTION_ENABLE_MUGEN": "ON"
+      }
+    },
+    {
+      "name": "tests-slim",
+      "displayName": "Tests (slim)",
+      "description": "Fastest test-only iteration loop: no CLI, no optional third-party solvers",
+      "inherits": "base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "FICTION_CLI": "OFF",
+        "FICTION_TEST": "ON",
+        "FICTION_WARNINGS_AS_ERRORS": "OFF"
+      }
+    },
+    {
+      "name": "tests-full",
+      "displayName": "Tests (full)",
+      "description": "Test-only build with all optional components enabled (Z3 must be installed manually, see the docs)",
+      "inherits": "tests-slim",
+      "cacheVariables": {
+        "FICTION_EXPERIMENTS": "ON",
+        "FICTION_Z3": "ON",
+        "FICTION_ALGLIB": "ON",
+        "FICTION_ENABLE_MUGEN": "ON"
+      }
+    },
+    {
+      "name": "pyfiction",
+      "displayName": "Python Bindings",
+      "description": "Mirrors the scikit-build-core configuration in pyproject.toml, for iterating on pyfiction bindings directly with CMake/an IDE without a full pip install",
+      "inherits": "base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "MOCKTURTLE_EXAMPLES": "OFF",
+        "FICTION_PROGRESS_BARS": "OFF",
+        "FICTION_CLI": "OFF",
+        "FICTION_TEST": "OFF",
+        "FICTION_Z3": "ON",
+        "FICTION_ALGLIB": "ON",
+        "FICTION_PYTHON_BINDINGS": "ON"
+      }
+    },
+    {
       "name": "release",
       "displayName": "Release",
-      "description": "Release build with optimizations",
+      "description": "Optimized Release build (with IPO/LTO) for everyday usage or performance testing",
       "inherits": "base",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
-        "FICTION_WARNINGS_AS_ERRORS": "ON",
+        "FICTION_TEST": "ON",
+        "FICTION_WARNINGS_AS_ERRORS": "OFF",
         "FICTION_ENABLE_IPO": "ON"
       }
     },
     {
-      "name": "ci",
-      "displayName": "CI",
-      "description": "Configuration for Continuous Integration",
-      "inherits": "base",
+      "name": "deploy",
+      "displayName": "Deploy",
+      "description": "Mirrors the Dockerfile: lean Release build of the CLI only, without tests, experiments, or Mugen",
+      "binaryDir": "${sourceDir}/build",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
-        "FICTION_WARNINGS_AS_ERRORS": "ON",
-        "FICTION_ENABLE_IPO": "OFF"
+        "FICTION_CLI": "ON",
+        "FICTION_TEST": "OFF",
+        "FICTION_EXPERIMENTS": "OFF",
+        "FICTION_Z3": "ON",
+        "FICTION_ALGLIB": "ON",
+        "FICTION_ENABLE_MUGEN": "OFF",
+        "FICTION_PROGRESS_BARS": "ON",
+        "FICTION_WARNINGS_AS_ERRORS": "OFF",
+        "MOCKTURTLE_EXAMPLES": "OFF"
+      }
+    },
+    {
+      "name": "coverage",
+      "displayName": "Coverage",
+      "description": "Mirrors the ☂️ Coverage CI workflow: Debug build instrumented for lcov-based coverage reporting",
+      "inherits": "base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "FICTION_CLI": "OFF",
+        "FICTION_TEST": "ON",
+        "FICTION_Z3": "ON",
+        "FICTION_ALGLIB": "ON",
+        "FICTION_ENABLE_MUGEN": "ON",
+        "FICTION_PROGRESS_BARS": "OFF",
+        "FICTION_WARNINGS_AS_ERRORS": "OFF",
+        "FICTION_ENABLE_COVERAGE": "ON"
+      }
+    },
+    {
+      "name": "ci-common",
+      "hidden": true,
+      "description": "Baseline shared by all 🐧/🍎/🪟 CI workflows; each job layers its own compiler and platform-specific flags (e.g. Z3 on ARM, Mugen, jemalloc) on top via -D overrides",
+      "inherits": "base",
+      "cacheVariables": {
+        "FICTION_CLI": "ON",
+        "FICTION_TEST": "ON",
+        "FICTION_BENCHMARK": "OFF",
+        "FICTION_EXPERIMENTS": "ON",
+        "FICTION_ALGLIB": "ON",
+        "FICTION_PROGRESS_BARS": "OFF",
+        "FICTION_WARNINGS_AS_ERRORS": "OFF",
+        "MOCKTURTLE_EXAMPLES": "OFF"
+      }
+    },
+    {
+      "name": "ci-debug",
+      "displayName": "CI (Debug)",
+      "description": "Debug configuration used by the 🐧/🍎/🪟 CI workflows",
+      "inherits": "ci-common",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "FICTION_Z3": "ON"
+      }
+    },
+    {
+      "name": "ci-release",
+      "displayName": "CI (Release)",
+      "description": "Release configuration used by the 🐧/🍎/🪟 CI workflows (jemalloc is Linux/macOS-only, layered on top via -D since it isn't supported on Windows)",
+      "inherits": "ci-common",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "FICTION_Z3": "ON"
+      }
+    },
+    {
+      "name": "ci-codeql",
+      "displayName": "CI (CodeQL)",
+      "description": "Mirrors the 📝 CodeQL CI workflow: no CLI, Mugen enabled",
+      "inherits": "ci-debug",
+      "cacheVariables": {
+        "FICTION_CLI": "OFF",
+        "FICTION_ENABLE_MUGEN": "ON"
+      }
+    },
+    {
+      "name": "ci-tidy",
+      "displayName": "CI (Clang-Tidy)",
+      "description": "Mirrors the Clang-Tidy Review CI workflow: everything enabled to maximize static analysis coverage",
+      "inherits": "base",
+      "cacheVariables": {
+        "FICTION_CLI": "ON",
+        "FICTION_TEST": "ON",
+        "FICTION_BENCHMARK": "ON",
+        "FICTION_EXPERIMENTS": "ON",
+        "FICTION_PROGRESS_BARS": "ON",
+        "FICTION_Z3": "ON",
+        "FICTION_ALGLIB": "ON",
+        "FICTION_ENABLE_MUGEN": "ON",
+        "FICTION_PYTHON_BINDINGS": "ON",
+        "MOCKTURTLE_EXAMPLES": "OFF"
       }
     }
   ],
@@ -71,12 +212,48 @@
       "configurePreset": "dev-asan"
     },
     {
+      "name": "dev-full",
+      "configurePreset": "dev-full"
+    },
+    {
+      "name": "tests-slim",
+      "configurePreset": "tests-slim"
+    },
+    {
+      "name": "tests-full",
+      "configurePreset": "tests-full"
+    },
+    {
+      "name": "pyfiction",
+      "configurePreset": "pyfiction"
+    },
+    {
       "name": "release",
       "configurePreset": "release"
     },
     {
-      "name": "ci",
-      "configurePreset": "ci"
+      "name": "deploy",
+      "configurePreset": "deploy"
+    },
+    {
+      "name": "coverage",
+      "configurePreset": "coverage"
+    },
+    {
+      "name": "ci-debug",
+      "configurePreset": "ci-debug"
+    },
+    {
+      "name": "ci-release",
+      "configurePreset": "ci-release"
+    },
+    {
+      "name": "ci-codeql",
+      "configurePreset": "ci-codeql"
+    },
+    {
+      "name": "ci-tidy",
+      "configurePreset": "ci-tidy"
     }
   ],
   "testPresets": [
@@ -103,6 +280,39 @@
       }
     },
     {
+      "name": "dev-full",
+      "configurePreset": "dev-full",
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "noTestsAction": "error",
+        "stopOnFailure": false
+      }
+    },
+    {
+      "name": "tests-slim",
+      "configurePreset": "tests-slim",
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "noTestsAction": "error",
+        "stopOnFailure": false
+      }
+    },
+    {
+      "name": "tests-full",
+      "configurePreset": "tests-full",
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "noTestsAction": "error",
+        "stopOnFailure": false
+      }
+    },
+    {
       "name": "release",
       "configurePreset": "release",
       "output": {
@@ -110,8 +320,22 @@
       }
     },
     {
-      "name": "ci",
-      "configurePreset": "ci",
+      "name": "coverage",
+      "configurePreset": "coverage",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "ci-debug",
+      "configurePreset": "ci-debug",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "ci-release",
+      "configurePreset": "ci-release",
       "output": {
         "outputOnFailure": true
       }

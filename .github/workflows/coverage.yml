@@ -30,7 +30,6 @@ defaults:
     shell: bash
 
 env:
-  BUILD_TYPE: Debug
   Z3_VERSION: 4.13.4
 
 jobs:
@@ -84,31 +83,18 @@ jobs:
 
       - name: Configure CMake
         run: >
-          cmake -S ${{github.workspace}} -B ${{github.workspace}}/build -G Ninja
+          cmake -S ${{github.workspace}} --preset coverage
           -DCMAKE_CXX_COMPILER=${{matrix.compiler}}
-          -DCMAKE_BUILD_TYPE=$BUILD_TYPE
-          -DFICTION_CLI=OFF
-          -DFICTION_TEST=ON
-          -DFICTION_BENCHMARK=OFF
-          -DFICTION_EXPERIMENTS=OFF
-          -DFICTION_Z3=ON
-          -DFICTION_ALGLIB=ON
-          -DFICTION_ENABLE_MUGEN=ON
-          -DFICTION_PROGRESS_BARS=OFF
-          -DFICTION_WARNINGS_AS_ERRORS=OFF
-          -DFICTION_ENABLE_COVERAGE=ON
-          -DMOCKTURTLE_EXAMPLES=OFF
 
       - name: Build
-        run: cmake --build ${{github.workspace}}/build --config $BUILD_TYPE --parallel 4
+        run: cmake --build --preset coverage --parallel 4
 
       - name: Test
-        working-directory: ${{github.workspace}}/build
-        run: ctest -C $BUILD_TYPE --output-on-failure --repeat until-pass:3 --parallel 4
+        run: ctest --preset coverage --repeat until-pass:3 --parallel 4
 
       - name: Generate Coverage Report
         run: |
-          lcov --gcov-tool gcov-13 -t "fiction-coverage" -o lcov.info -c -d ${{github.workspace}}/build/ --ignore-errors mismatch --ignore-errors gcov
+          lcov --gcov-tool gcov-13 -t "fiction-coverage" -o lcov.info -c -d ${{github.workspace}}/build-coverage/ --ignore-errors mismatch --ignore-errors gcov
           lcov --gcov-tool gcov-13 -e lcov.info "${{github.workspace}}/include*" -o lcov_filtered.info
           lcov -l lcov_filtered.info
 
