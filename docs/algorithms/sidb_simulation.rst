@@ -362,15 +362,13 @@ Displacement Robustness Domain
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/algorithms/simulation/sidb/determine_displacement_robustness.hpp``
+        **Header:** ``fiction/algorithms/simulation/sidb/displacement_robustness_domain.hpp``
 
         .. doxygenstruct:: fiction::displacement_robustness_domain
            :members:
         .. doxygenstruct:: fiction::displacement_robustness_domain_params
            :members:
         .. doxygenstruct:: fiction::displacement_robustness_domain_stats
-           :members:
-        .. doxygenstruct:: fiction::displacement_robustness_domain
            :members:
         .. doxygenfunction:: fiction::determine_displacement_robustness_domain
         .. doxygenfunction:: fiction::determine_probability_of_fabricating_operational_gate
@@ -395,7 +393,7 @@ Simulation Equivalence Checking
 
 .. tabs::
     .. tab:: C++
-       **Header:** ``fiction/algorithms/simulation/sidb/check_simulation_results_for_equivalence.hpp``
+       **Header:** ``fiction/algorithms/simulation/sidb/equivalence_check_for_simulation_results.hpp``
 
         .. doxygenfunction:: fiction::check_simulation_results_for_equivalence
 
@@ -494,6 +492,8 @@ Assess Population Stability
 Band-Bending Resilience
 ^^^^^^^^^^^^^^^^^^^^^^^
 
+.. _band_bending_resilience:
+
 **Header:** ``fiction/algorithms/simulation/sidb/band_bending_resilience.hpp``
 
 .. doxygenstruct:: fiction::band_bending_resilience_params
@@ -580,6 +580,8 @@ fabrication defects on the H-Si(100) 2x1 surface.
 SiDB Defect Analysis
 ^^^^^^^^^^^^^^^^^^^^
 
+.. _defect_influence:
+
 **Header:** ``fiction/technology/sidb_surface_analysis.hpp``
 
 .. doxygenfunction:: fiction::sidb_surface_analysis
@@ -601,7 +603,7 @@ SiDB Defect Analysis
 .. doxygenfunction:: fiction::defect_influence_quicktrace(const Lyt& lyt, const std::vector<TT>& spec, const std::size_t samples, const defect_influence_params<cell<Lyt>>& params = {}, defect_influence_stats*                   stats  = nullptr)
 .. doxygenfunction:: fiction::defect_influence_quicktrace(const Lyt& lyt, const std::size_t samples, const defect_influence_params<cell<Lyt>>& params = {}, defect_influence_stats*                   stats  = nullptr)
 
-**Header:** ``fiction/algorithms/simulation/sidb/calculate_defect_clearance.hpp``
+**Header:** ``fiction/algorithms/simulation/sidb/defect_clearance.hpp``
 
 .. doxygenstruct:: fiction::defect_clearance
    :members:

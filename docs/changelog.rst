@@ -55,6 +55,13 @@ Fixed
 - Continuous integration:
     - Fixed Renovate attempting to bump the ``sphinx`` pin used for Python <3.11, which is unsupported by
       Sphinx 8.2+
+- Documentation:
+    - Fixed several stale ``**Header:**`` references pointing at renamed header files
+    - Fixed an inconsistent ``fiction::`` namespace omission in a ``doxygenfunction`` directive
+    - Fixed a duplicated ``doxygenstruct`` directive for ``displacement_robustness_domain``
+    - Fixed broken ``:ref:`` links in the publications list
+    - Added missing Python binding exports (``charge_distribution_history``,
+      ``sidb_charge_states_for_base_number``) that were referenced by the documentation but not importable
 
 v0.6.12 - 2025-10-29
 --------------------
