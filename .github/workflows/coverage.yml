@@ -67,9 +67,7 @@ jobs:
         uses: rui314/setup-mold@9c9c13bf4c3f1adef0cc596abc155580bcb04444 # v1
 
       - name: Install pip packages
-        uses: BSFishy/pip-action@8f2d471d809dc20b6ada98c91910b6ae6243f318 # v1
-        with:
-          requirements: ${{github.workspace}}/vendors/mugen/requirements.txt
+        run: python -m pip install --disable-pip-version-check -r ${{github.workspace}}/vendors/mugen/requirements.txt
 
       - name: Setup Z3 Solver
         id: z3
