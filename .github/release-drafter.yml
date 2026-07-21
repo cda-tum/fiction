@@ -88,6 +88,22 @@ autolabeler:
     title:
       - "/^:zap:/"
       - "/^⚡️/"
+  - label: "experiment"
+    title:
+      - "/^:alembic:/"
+      - "/^⚗️/"
+  - label: "test"
+    title:
+      - "/^:white_check_mark:/"
+      - "/^✅/"
+  - label: "docker"
+    title:
+      - "/^:whale:/"
+      - "/^🐋/"
+  - label: "dependencies"
+    title:
+      - "/^:arrow_up:/"
+      - "/^⬆️/"
 footer: |
   Many thanks to all contributors!
 
