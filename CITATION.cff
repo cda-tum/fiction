@@ -85,10 +85,13 @@ references:
         orcid: "https://orcid.org/0000-0002-4993-7860"
       - family-names: "Sill Torres"
         given-names: "Frank"
+        orcid: "https://orcid.org/0000-0002-4028-455X"
       - family-names: "Große"
         given-names: "Daniel"
+        orcid: "https://orcid.org/0000-0002-1490-6175"
       - family-names: "Drechsler"
         given-names: "Rolf"
+        orcid: "https://orcid.org/0000-0002-9872-1740"
     year: 2019
     month: 5
     doi: 10.48550/arXiv.1905.02477
