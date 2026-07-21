@@ -4,12 +4,13 @@ message: >-
   design automation algorithms provided by fiction, please additionally cite
   their respective papers as listed at
   https://fiction.readthedocs.io/en/latest/publications.html.
-title: "fiction: The Munich Nanotech Toolkit (MNT)"
+title: "The Munich Nanotech Toolkit (MNT)"
 abstract: >-
   fiction is an open-source design automation framework for Field-coupled
   Nanocomputing (FCN) circuits, providing data structures and algorithms for
   the physical design and verification of FCN technologies such as
   Quantum-dot Cellular Automata (QCA) and Silicon Dangling Bonds (SiDB).
+  It forms the backbone of the Munich Nanotech Toolkit (MNT).
 type: software
 license: MIT
 repository-code: "https://github.com/cda-tum/fiction"
