@@ -67,7 +67,7 @@ jobs:
 
       - if: runner.os == 'Linux'
         name: Setup mold
-        uses: rui314/setup-mold@v1
+        uses: rui314/setup-mold@9c9c13bf4c3f1adef0cc596abc155580bcb04444 # v1
 
       - name: Setup Z3 Solver
         id: z3
