@@ -13,22 +13,40 @@ categories:
       - "bug"
       - "compiler issue"
       - "small fix"
+  - title: "♻️ Refactoring"
+    labels:
+      - "refactoring"
+  - title: "⚗️ Experiments"
+    labels:
+      - "experiment"
   - title: "📝 Documentation"
     labels:
       - "documentation"
   - title: "✅ Testing"
     labels:
       - "test"
+  - title: "🔧 Build System and Tooling"
+    labels:
+      - "build system"
+      - "tooling"
   - title: "👷 CI"
     labels:
       - "github_actions"
+  - title: "🐋 Docker"
+    labels:
+      - "docker"
   - title: "⬆️ Dependencies"
     collapse-after: 5
     labels:
       - "dependencies"
       - "submodules"
+      - "pre-commit"
+      - "python:uv"
+exclude-labels:
+  - "versioning"
+  - "skip-changelog"
 change-template: "- $TITLE @$AUTHOR (#$NUMBER)"
-change-title-escapes: '\<*&'
+change-title-escapes: '\<*_&'
 version-resolver:
   major:
     labels:
@@ -44,6 +62,32 @@ autolabeler:
   - label: "dependencies"
     title:
       - "/update pre-commit hooks/i"
+  # Gitmoji-based fallbacks (https://gitmoji.dev) for PRs that were merged
+  # without an explicit label, so they still land in the right section.
+  - label: "documentation"
+    title:
+      - "/^:memo:/"
+      - "/^📝/"
+  - label: "tooling"
+    title:
+      - "/^:wrench:/"
+      - "/^🔧/"
+  - label: "github_actions"
+    title:
+      - "/^:construction_worker:/"
+      - "/^👷/"
+  - label: "refactoring"
+    title:
+      - "/^:recycle:/"
+      - "/^♻️/"
+  - label: "bug"
+    title:
+      - "/^:bug:/"
+      - "/^🐛/"
+  - label: "performance"
+    title:
+      - "/^:zap:/"
+      - "/^⚡️/"
 footer: |
   Many thanks to all contributors!
 

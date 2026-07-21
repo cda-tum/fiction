@@ -1,22 +1,70 @@
 cff-version: 1.2.0
-message: "If you use this software, please cite it as below."
+message: >-
+  If you use this software, please cite it as below. If you use any of the
+  design automation algorithms provided by fiction, please additionally cite
+  their respective papers as listed at
+  https://fiction.readthedocs.io/en/latest/publications.html.
+title: "fiction: The Munich Nanotech Toolkit (MNT)"
+abstract: >-
+  fiction is an open-source design automation framework for Field-coupled
+  Nanocomputing (FCN) circuits, providing data structures and algorithms for
+  the physical design and verification of FCN technologies such as
+  Quantum-dot Cellular Automata (QCA) and Silicon Dangling Bonds (SiDB).
+type: software
+license: MIT
+repository-code: "https://github.com/cda-tum/fiction"
+url: "https://fiction.readthedocs.io"
+keywords:
+  - field-coupled nanocomputing
+  - design automation
+  - electronic design automation
+  - quantum-dot cellular automata
+  - silicon dangling bonds
 authors:
-- family-names: "Walter"
-  given-names: "Marcel"
-  orcid: "0000-0001-5660-9518"
-- family-names: "Drewniok"
-  given-names: "Jan"
-  orcid: "0000-0002-7545-159X"
-- family-names: "Hofmann"
-  given-names: "Simon"
-  orcid: "0009-0003-8575-9998"
-- family-names: "Hien"
-  given-names: "Benjamin"
-  orcid: "0000-0002-6878-8063"
-- family-names: "Wille"
-  given-names: "Robert"
-  orcid: "0000-0002-4993-7860"
-title: "The Munich Nanotech Toolkit (MNT)"
-version: 0.6.12
-doi: 10.1109/NANO61778.2024.10628747
-url: "https://github.com/cda-tum/fiction"
+  - family-names: "Walter"
+    given-names: "Marcel"
+    orcid: "https://orcid.org/0000-0001-5660-9518"
+  - family-names: "Drewniok"
+    given-names: "Jan"
+    orcid: "https://orcid.org/0000-0002-7545-159X"
+  - family-names: "Hofmann"
+    given-names: "Simon"
+    orcid: "https://orcid.org/0009-0003-8575-9998"
+  - family-names: "Hien"
+    given-names: "Benjamin"
+    orcid: "https://orcid.org/0000-0002-6878-8063"
+  - family-names: "Wille"
+    given-names: "Robert"
+    orcid: "https://orcid.org/0000-0002-4993-7860"
+contact:
+  - family-names: "Walter"
+    given-names: "Marcel"
+    orcid: "https://orcid.org/0000-0001-5660-9518"
+preferred-citation:
+  type: conference-paper
+  title: "The Munich Nanotech Toolkit (MNT)"
+  authors:
+    - family-names: "Walter"
+      given-names: "Marcel"
+      orcid: "https://orcid.org/0000-0001-5660-9518"
+    - family-names: "Drewniok"
+      given-names: "Jan"
+      orcid: "https://orcid.org/0000-0002-7545-159X"
+    - family-names: "Hofmann"
+      given-names: "Simon"
+      orcid: "https://orcid.org/0009-0003-8575-9998"
+    - family-names: "Hien"
+      given-names: "Benjamin"
+      orcid: "https://orcid.org/0000-0002-6878-8063"
+    - family-names: "Wille"
+      given-names: "Robert"
+      orcid: "https://orcid.org/0000-0002-4993-7860"
+  collection-title: "2024 IEEE International Conference on Nanotechnology (IEEE NANO)"
+  conference:
+    name: "2024 IEEE International Conference on Nanotechnology (IEEE NANO)"
+  year: 2024
+  start: 454
+  end: 459
+  doi: 10.1109/NANO61778.2024.10628747
+  publisher:
+    name: IEEE
