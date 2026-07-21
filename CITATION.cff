@@ -16,10 +16,14 @@ repository-code: "https://github.com/cda-tum/fiction"
 url: "https://fiction.readthedocs.io"
 keywords:
   - field-coupled nanocomputing
-  - design automation
-  - electronic design automation
   - quantum-dot cellular automata
   - silicon dangling bonds
+  - design automation
+  - logic synthesis
+  - placement
+  - routing
+  - verification
+  - simulation
 authors:
   - family-names: "Walter"
     given-names: "Marcel"
