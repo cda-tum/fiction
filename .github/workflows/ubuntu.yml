@@ -94,12 +94,12 @@ jobs:
           cache: "pip"
 
       - name: Install pip packages
-        uses: BSFishy/pip-action@v1
+        uses: BSFishy/pip-action@8f2d471d809dc20b6ada98c91910b6ae6243f318 # v1
         with:
           requirements: ${{github.workspace}}/vendors/mugen/requirements.txt
 
       - name: Setup mold
-        uses: rui314/setup-mold@v1
+        uses: rui314/setup-mold@9c9c13bf4c3f1adef0cc596abc155580bcb04444 # v1
 
       - name: Setup Z3 Solver
         if: matrix.os != 'ubuntu-24.04-arm'
