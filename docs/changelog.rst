@@ -10,6 +10,9 @@ Unreleased
 
 Added
 #####
+- Algorithms:
+    - Added half-adder gate support (``ha`` parameter and ``--ha`` CLI flag) to ``technology_mapping`` and the ``map`` command, exposed through the new ``mockturtle::emap`` mapper
+    - Added the ``missing_required_gates_exception`` that is thrown by ``technology_mapping`` when the technology library is missing the gates required by the base network type (AIG requires INV and AND; XAG requires INV, AND, and XOR; MIG requires INV and MAJ)
 - Documentation:
     - Added ``AGENTS.md`` to guide AI agents in the repository
 - Build system:
@@ -29,6 +32,10 @@ Added
 
 Changed
 #######
+- Algorithms:
+    - Switched the default technology mapper in the ``map`` command and the ``technology_mapping`` function from ``mockturtle::map`` to ``mockturtle::emap``
+    - **Breaking:** ``technology_mapping_params::mapper_params`` is now a ``mockturtle::emap_params`` (was ``mockturtle::map_params``) and ``technology_mapping_stats::mapper_stats`` is now a ``mockturtle::emap_stats`` (was ``mockturtle::map_stats``)
+    - **Breaking:** the ``map`` command now warns when remapping an already-mapped network and reports mapping errors instead of silently storing a failed mapping
 - Build system:
     - Restructured the CLI command implementation to improve code organization, modularity, and compilation speed
     - Refactored the entire CMake build system to use ``FetchContent`` for dependency management instead of git submodules
@@ -62,6 +69,12 @@ Fixed
     - Fixed broken ``:ref:`` links in the publications list
     - Added missing Python binding exports (``charge_distribution_history``,
       ``sidb_charge_states_for_base_number``) that were referenced by the documentation but not importable
+
+Removed
+#######
+- CLI:
+    - Removed the ``--logic_sharing`` flag from ``map`` as ``mockturtle::emap`` does not support it
+
 
 v0.6.12 - 2025-10-29
 --------------------
@@ -99,11 +112,6 @@ Changed
 - Dependencies:
     - Updated all dependencies to their latest versions
 
-Removed
-#######
-- Continuous integration:
-    - macOS 13 has been removed, along with support for the x86_64 (Intel) architecture
-
 Fixed
 #####
 - Data structures:
@@ -124,6 +132,7 @@ Fixed
 Removed
 #######
 - Continuous integration:
+    - macOS 13 has been removed, along with support for the x86_64 (Intel) architecture
     - Dropped Windows 2019 and v142 support
     - Dropped Python 3.9 support due to its end-of-life status
 
