@@ -72,3 +72,24 @@ preferred-citation:
   doi: 10.1109/NANO61778.2024.10628747
   publisher:
     name: IEEE
+references:
+  - type: generic
+    title: "fiction: An Open Source Framework for the Design of Field-coupled Nanocomputing Circuits"
+    authors:
+      - family-names: "Walter"
+        given-names: "Marcel"
+        orcid: "https://orcid.org/0000-0001-5660-9518"
+      - family-names: "Wille"
+        given-names: "Robert"
+        orcid: "https://orcid.org/0000-0002-4993-7860"
+      - family-names: "Sill Torres"
+        given-names: "Frank"
+      - family-names: "Große"
+        given-names: "Daniel"
+      - family-names: "Drechsler"
+        given-names: "Rolf"
+    year: 2019
+    month: 5
+    doi: 10.48550/arXiv.1905.02477
+    url: "https://arxiv.org/abs/1905.02477"
+    notes: "arXiv:1905.02477"
