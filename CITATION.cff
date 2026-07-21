@@ -1,22 +1,99 @@
 cff-version: 1.2.0
-message: "If you use this software, please cite it as below."
-authors:
-- family-names: "Walter"
-  given-names: "Marcel"
-  orcid: "0000-0001-5660-9518"
-- family-names: "Drewniok"
-  given-names: "Jan"
-  orcid: "0000-0002-7545-159X"
-- family-names: "Hofmann"
-  given-names: "Simon"
-  orcid: "0009-0003-8575-9998"
-- family-names: "Hien"
-  given-names: "Benjamin"
-  orcid: "0000-0002-6878-8063"
-- family-names: "Wille"
-  given-names: "Robert"
-  orcid: "0000-0002-4993-7860"
+message: >-
+  If you use this software, please cite it as below. If you use any of the
+  design automation algorithms provided by fiction, please additionally cite
+  their respective papers as listed at
+  https://fiction.readthedocs.io/en/latest/publications.html.
 title: "The Munich Nanotech Toolkit (MNT)"
-version: 0.6.12
-doi: 10.1109/NANO61778.2024.10628747
-url: "https://github.com/cda-tum/fiction"
+abstract: >-
+  fiction is an open-source design automation framework for Field-coupled
+  Nanocomputing (FCN) circuits, providing data structures and algorithms for
+  the physical design and verification of FCN technologies such as
+  Quantum-dot Cellular Automata (QCA) and Silicon Dangling Bonds (SiDB).
+  It forms the backbone of the Munich Nanotech Toolkit (MNT).
+type: software
+license: MIT
+repository-code: "https://github.com/cda-tum/fiction"
+url: "https://fiction.readthedocs.io"
+keywords:
+  - field-coupled nanocomputing
+  - quantum-dot cellular automata
+  - silicon dangling bonds
+  - design automation
+  - logic synthesis
+  - placement
+  - routing
+  - verification
+  - simulation
+authors:
+  - family-names: "Walter"
+    given-names: "Marcel"
+    orcid: "https://orcid.org/0000-0001-5660-9518"
+  - family-names: "Drewniok"
+    given-names: "Jan"
+    orcid: "https://orcid.org/0000-0002-7545-159X"
+  - family-names: "Hofmann"
+    given-names: "Simon"
+    orcid: "https://orcid.org/0009-0003-8575-9998"
+  - family-names: "Hien"
+    given-names: "Benjamin"
+    orcid: "https://orcid.org/0000-0002-6878-8063"
+  - family-names: "Wille"
+    given-names: "Robert"
+    orcid: "https://orcid.org/0000-0002-4993-7860"
+contact:
+  - family-names: "Walter"
+    given-names: "Marcel"
+    orcid: "https://orcid.org/0000-0001-5660-9518"
+preferred-citation:
+  type: conference-paper
+  title: "The Munich Nanotech Toolkit (MNT)"
+  authors:
+    - family-names: "Walter"
+      given-names: "Marcel"
+      orcid: "https://orcid.org/0000-0001-5660-9518"
+    - family-names: "Drewniok"
+      given-names: "Jan"
+      orcid: "https://orcid.org/0000-0002-7545-159X"
+    - family-names: "Hofmann"
+      given-names: "Simon"
+      orcid: "https://orcid.org/0009-0003-8575-9998"
+    - family-names: "Hien"
+      given-names: "Benjamin"
+      orcid: "https://orcid.org/0000-0002-6878-8063"
+    - family-names: "Wille"
+      given-names: "Robert"
+      orcid: "https://orcid.org/0000-0002-4993-7860"
+  collection-title: "2024 IEEE International Conference on Nanotechnology (IEEE NANO)"
+  conference:
+    name: "2024 IEEE International Conference on Nanotechnology (IEEE NANO)"
+  year: 2024
+  start: 454
+  end: 459
+  doi: 10.1109/NANO61778.2024.10628747
+  publisher:
+    name: IEEE
+references:
+  - type: generic
+    title: "fiction: An Open Source Framework for the Design of Field-coupled Nanocomputing Circuits"
+    authors:
+      - family-names: "Walter"
+        given-names: "Marcel"
+        orcid: "https://orcid.org/0000-0001-5660-9518"
+      - family-names: "Wille"
+        given-names: "Robert"
+        orcid: "https://orcid.org/0000-0002-4993-7860"
+      - family-names: "Sill Torres"
+        given-names: "Frank"
+        orcid: "https://orcid.org/0000-0002-4028-455X"
+      - family-names: "Große"
+        given-names: "Daniel"
+        orcid: "https://orcid.org/0000-0002-1490-6175"
+      - family-names: "Drechsler"
+        given-names: "Rolf"
+        orcid: "https://orcid.org/0000-0002-9872-1740"
+    year: 2019
+    month: 5
+    doi: 10.48550/arXiv.1905.02477
+    url: "https://arxiv.org/abs/1905.02477"
+    notes: "arXiv:1905.02477"
