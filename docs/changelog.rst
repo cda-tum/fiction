@@ -16,7 +16,10 @@ Added
 - Documentation:
     - Added ``AGENTS.md`` to guide AI agents in the repository
 - Build system:
-    - Added `CMakePresets.json` to offer default CMake configurations
+    - Added ``CMakePresets.json`` with presets for common local development workflows (``dev``,
+      ``dev-asan``, ``dev-full``, ``release``, ``deploy``, ``coverage``) as well as CI-mirroring presets
+      (``ci-debug``, ``ci-release``, ``ci-codeql``, ``ci-tidy``) that let CI failures be reproduced locally
+      with a single ``cmake --preset <name>`` invocation
     - Added support for CMake version 4+
 - Tooling:
     - Added the following `pre-commit` hooks:
@@ -40,11 +43,32 @@ Changed
     - Improved build configuration and option handling for better modularity
     - Addressed several CMake and compiler warnings (including CMP0148 and Pybind11 compatibility) as well as CMake code smells
     - Streamlined package installation and discovery process
+- Continuous integration:
+    - The 🐧/🍎/🪟 CI, ☂️ Coverage, and 📝 CodeQL workflows, the Clang-Tidy Review workflow, and the Docker
+      build now configure via the new CMake presets instead of hand-rolled ``-D`` flag lists
+- Python bindings:
+    - Restructured the ``pyfiction`` bindings to use multiple translation units (one ``.cpp`` file per
+      binding) for better modularity and faster incremental compilation
+- Tooling:
+    - Replaced ``pre-commit`` with ``prek``, a faster Rust reimplementation that stays compatible with
+      ``pre-commit.ci``
+- Dependencies:
+    - Updated all dependencies to their latest versions
 
 Fixed
 #####
 - Code quality:
     - Addressed several ``clang-tidy`` warnings throughout the code base
+- Continuous integration:
+    - Fixed Renovate attempting to bump the ``sphinx`` pin used for Python <3.11, which is unsupported by
+      Sphinx 8.2+
+- Documentation:
+    - Fixed several stale ``**Header:**`` references pointing at renamed header files
+    - Fixed an inconsistent ``fiction::`` namespace omission in a ``doxygenfunction`` directive
+    - Fixed a duplicated ``doxygenstruct`` directive for ``displacement_robustness_domain``
+    - Fixed broken ``:ref:`` links in the publications list
+    - Added missing Python binding exports (``charge_distribution_history``,
+      ``sidb_charge_states_for_base_number``) that were referenced by the documentation but not importable
 
 Removed
 #######

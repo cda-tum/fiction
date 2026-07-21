@@ -46,7 +46,6 @@ jobs:
       matrix:
         language: ["cpp", "python"]
         compiler: [clang++-17]
-        build_type: [Debug]
 
     steps:
       - name: Free Disk Space (Ubuntu)
@@ -83,12 +82,10 @@ jobs:
           cache: "pip"
 
       - name: Setup mold
-        uses: rui314/setup-mold@v1
+        uses: rui314/setup-mold@9c9c13bf4c3f1adef0cc596abc155580bcb04444 # v1
 
       - name: Install pip packages
-        uses: BSFishy/pip-action@v1
-        with:
-          requirements: ${{github.workspace}}/vendors/mugen/requirements.txt
+        run: python -m pip install --disable-pip-version-check -r ${{github.workspace}}/vendors/mugen/requirements.txt
 
       - name: Setup Z3 Solver
         id: z3
@@ -110,23 +107,12 @@ jobs:
       - if: matrix.language == 'cpp'
         name: Configure CMake
         run: >
-          cmake -S ${{github.workspace}} -B ${{github.workspace}}/build
+          cmake -S ${{github.workspace}} --preset ci-codeql
           -DCMAKE_CXX_COMPILER=${{matrix.compiler}}
-          -DCMAKE_BUILD_TYPE=${{matrix.build_type}}
-          -DFICTION_CLI=OFF
-          -DFICTION_TEST=ON
-          -DFICTION_BENCHMARK=OFF
-          -DFICTION_EXPERIMENTS=ON
-          -DFICTION_Z3=ON
-          -DFICTION_ALGLIB=ON
-          -DFICTION_ENABLE_MUGEN=ON
-          -DFICTION_PROGRESS_BARS=OFF
-          -DFICTION_WARNINGS_AS_ERRORS=OFF
-          -DMOCKTURTLE_EXAMPLES=OFF
 
       - if: matrix.language == 'cpp'
         name: Build fiction
-        run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} --parallel 4
+        run: cmake --build --preset ci-codeql --parallel 4
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@7188fc363630916deb702c7fdcf4e481b751f97a # v4.37.1

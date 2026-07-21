@@ -307,7 +307,7 @@ Furthermore, if you use any of the design automation algorithms, please consider
 
     `Clock number assignment experiment script <https://github.com/cda-tum/fiction/tree/main/experiments/clock_number_assignment>`_
 
-* :ref:`Towards Defect-Aware Physical Design of Silicon Dangling Bond Logic`:
+* Towards Defect-Aware Physical Design of Silicon Dangling Bond Logic:
 
     .. code-block:: tex
 
@@ -321,7 +321,7 @@ Furthermore, if you use any of the design automation algorithms, please consider
 
     `Towards defect-aware physical design of silicon dangling bond logic experiment script <https://github.com/cda-tum/fiction/tree/main/experiments/defect_aware_physical_design>`_
 
-* :ref:`QuickTrace: An Efficient Contour Tracing Algorithm for Defect Robustness Simulation of Silicon Dangling Bond Logic`
+* :ref:`QuickTrace: An Efficient Contour Tracing Algorithm for Defect Robustness Simulation of Silicon Dangling Bond Logic <defect_influence>`
 
     .. code-block:: tex
 
@@ -349,7 +349,7 @@ Furthermore, if you use any of the design automation algorithms, please consider
 
     `On-the-fly defect-aware design of circuits experiment script <https://github.com/cda-tum/fiction/tree/main/experiments/physical_design_with_on_the_fly_gate_design>`_
 
-* :ref:`Unifying Figures of Merit for Silicon Dangling Bond Logic`:
+* :ref:`Unifying Figures of Merit for Silicon Dangling Bond Logic <band_bending_resilience>`:
 
     .. code-block:: tex
 
