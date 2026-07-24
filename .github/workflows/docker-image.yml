@@ -34,20 +34,23 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
+permissions: {}
+
 jobs:
   build:
     name: 🐳 Build and publish Docker image
     runs-on: ubuntu-latest
     permissions:
-      packages: write
-      contents: read
-      attestations: write
-      id-token: write
+      packages: write # required to push the image to ghcr.io on release
+      contents: read # required to check out the repository
+      attestations: write # required to publish the build provenance attestation on release
+      id-token: write # required by actions/attest-build-provenance to mint the attestation
 
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           submodules: recursive
+          persist-credentials: false
 
       - name: Log in to Docker Hub
         if: github.event_name == 'release' && github.event.action == 'published'

@@ -28,6 +28,8 @@ on:
       - "uv.lock"
       - ".github/workflows/python-bindings.yml"
   workflow_run:
+    # zizmor: ignore[dangerous-triggers] no step here checks out the completed run's head SHA;
+    # the checkout below always resolves to this workflow's own trigger ref
     workflows: ["pyfiction Docstring Generator"]
     types:
       - completed
@@ -35,6 +37,8 @@ on:
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
+
+permissions: {}
 
 defaults:
   run:
@@ -47,6 +51,8 @@ jobs:
   python-tests:
     name: 🐍 ${{ matrix.runs-on }}
     runs-on: ${{ matrix.runs-on }}
+    permissions:
+      contents: read # required to check out the repository
     strategy:
       fail-fast: false
       matrix:
@@ -56,6 +62,7 @@ jobs:
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Setup ccache
         if: matrix.runs-on != 'ubuntu-24.04-arm'

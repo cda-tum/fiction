@@ -1,0 +1,39 @@
+name: 🌈 • Zizmor
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - ".github/workflows/**"
+  pull_request:
+    branches: ["main"]
+    paths:
+      - ".github/workflows/**"
+  merge_group:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  zizmor:
+    name: 🌈 Zizmor
+    # zizmor-action shells out to Docker, which ubuntu-slim's unprivileged container does not support
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write # required to upload results to the code scanning API
+
+    steps:
+      - name: Clone Repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Run zizmor 🌈
+        uses: zizmorcore/zizmor-action@6fc4b006235f201fdab3722e17240ab420d580e5 # v0.6.1
+        with:
+          persona: pedantic
+          # fork PRs get a read-only GITHUB_TOKEN and cannot upload SARIF to code scanning
+          advanced-security: ${{ !(github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork) }}
