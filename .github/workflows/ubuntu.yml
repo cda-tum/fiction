@@ -25,6 +25,8 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
+permissions: {}
+
 defaults:
   run:
     shell: bash
@@ -34,6 +36,9 @@ env:
 
 jobs:
   build_and_test:
+    permissions:
+      contents: read # required to check out the repository
+
     strategy:
       matrix:
         os: [ubuntu-22.04, ubuntu-24.04, ubuntu-24.04-arm]
@@ -72,10 +77,14 @@ jobs:
 
     steps:
       - name: Install libraries and the respective compiler
-        run: sudo apt-get update && sudo apt-get install -yq libtbb-dev ${{matrix.compiler}}
+        env:
+          COMPILER: ${{ matrix.compiler }}
+        run: sudo apt-get update && sudo apt-get install -yq libtbb-dev "$COMPILER"
 
       - name: Clone Repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
 
       - name: Setup ccache
         # ccache is not supported on ARM yet
@@ -94,7 +103,7 @@ jobs:
           cache: "pip"
 
       - name: Install pip packages
-        run: python -m pip install --disable-pip-version-check -r ${{github.workspace}}/vendors/mugen/requirements.txt
+        run: python -m pip install --disable-pip-version-check -r vendors/mugen/requirements.txt
 
       - name: Setup mold
         uses: rui314/setup-mold@9c9c13bf4c3f1adef0cc596abc155580bcb04444 # v1
@@ -113,12 +122,15 @@ jobs:
       # Build and test pipeline for Debug mode
 
       - name: Configure CMake (Debug)
+        env:
+          COMPILER: ${{ matrix.compiler }}
+          EXTRA_CMAKE_ARGS: ${{ matrix.os == 'ubuntu-24.04-arm' && '-DFICTION_Z3=OFF' || '' }}
         run: >
-          cmake -S ${{github.workspace}} --preset ci-debug
-          -DCMAKE_CXX_COMPILER=${{matrix.compiler}}
+          cmake -S . --preset ci-debug
+          -DCMAKE_CXX_COMPILER="$COMPILER"
           -DFICTION_ENABLE_MUGEN=ON
           -DFICTION_LIGHTWEIGHT_DEBUG_BUILDS=ON
-          ${{ matrix.os == 'ubuntu-24.04-arm' && '-DFICTION_Z3=OFF' || '' }}
+          $EXTRA_CMAKE_ARGS
 
       - name: Build (Debug)
         run: cmake --build --preset ci-debug --parallel 4
@@ -129,12 +141,15 @@ jobs:
       # Build and test pipeline for Release mode
 
       - name: Configure CMake (Release)
+        env:
+          COMPILER: ${{ matrix.compiler }}
+          EXTRA_CMAKE_ARGS: ${{ matrix.os == 'ubuntu-24.04-arm' && '-DFICTION_Z3=OFF' || '' }}
         run: >
-          cmake -S ${{github.workspace}} --preset ci-release
-          -DCMAKE_CXX_COMPILER=${{matrix.compiler}}
+          cmake -S . --preset ci-release
+          -DCMAKE_CXX_COMPILER="$COMPILER"
           -DFICTION_ENABLE_MUGEN=ON
           -DFICTION_ENABLE_JEMALLOC=ON
-          ${{ matrix.os == 'ubuntu-24.04-arm' && '-DFICTION_Z3=OFF' || '' }}
+          $EXTRA_CMAKE_ARGS
 
       - name: Build (Release)
         run: cmake --build --preset ci-release --parallel 4
