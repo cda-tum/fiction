@@ -31,7 +31,7 @@ void compute_operational_ratio(pybind11::module& m)
 
     py::class_<fiction::operational_domain_ratio_params>(m, "operational_domain_ratio_params",
                                                          DOC(fiction_operational_domain_ratio_params))
-        .def(py::init<>())
+        .def(py::init<>(), "Default constructor.")
         .def_readwrite("op_domain_params", &fiction::operational_domain_ratio_params::op_domain_params,
                        DOC(fiction_operational_domain_ratio_params_op_domain_params));
 

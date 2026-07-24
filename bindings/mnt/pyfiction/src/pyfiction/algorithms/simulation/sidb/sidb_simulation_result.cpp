@@ -80,7 +80,7 @@ void sidb_simulation_result_impl(pybind11::module& m, const std::string& lattice
 
     py::class_<fiction::sidb_simulation_result<Lyt>>(m, fmt::format("sidb_simulation_result{}", lattice).c_str(),
                                                      DOC(fiction_sidb_simulation_result))
-        .def(py::init<>())
+        .def(py::init<>(), "Default constructor.")
         .def_readwrite("algorithm_name", &fiction::sidb_simulation_result<Lyt>::algorithm_name,
                        DOC(fiction_sidb_simulation_result_algorithm_name))
         .def_readwrite("simulation_runtime", &fiction::sidb_simulation_result<Lyt>::simulation_runtime,

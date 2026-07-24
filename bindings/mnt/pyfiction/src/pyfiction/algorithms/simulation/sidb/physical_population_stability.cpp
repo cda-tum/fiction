@@ -22,7 +22,7 @@ void physical_population_stability_impl(pybind11::module& m, const std::string& 
     py::class_<fiction::population_stability_information<Lyt>>(
         m, fmt::format("population_stability_information_{}", lattice).c_str(),
         DOC(fiction_population_stability_information))
-        .def(py::init<>())
+        .def(py::init<>(), "Default constructor.")
         .def_readwrite("critical_cell", &fiction::population_stability_information<Lyt>::critical_cell,
                        DOC(fiction_population_stability_information_critical_cell))
         .def_readwrite("transition_potentials", &fiction::population_stability_information<Lyt>::transition_potentials,
@@ -60,7 +60,7 @@ void physical_population_stability(pybind11::module& m)
      */
     py::class_<fiction::physical_population_stability_params>(m, "physical_population_stability_params",
                                                               DOC(fiction_physical_population_stability_params))
-        .def(py::init<>())
+        .def(py::init<>(), "Default constructor.")
         .def_readwrite("simulation_parameters", &fiction::physical_population_stability_params::simulation_parameters,
                        DOC(fiction_physical_population_stability_params))
         .def_readwrite(

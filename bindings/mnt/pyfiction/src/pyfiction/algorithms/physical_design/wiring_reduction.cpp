@@ -16,19 +16,21 @@ void wiring_reduction(pybind11::module& m)
     namespace py = pybind11;
 
     py::class_<fiction::wiring_reduction_params>(m, "wiring_reduction_params", DOC(fiction_wiring_reduction_params))
-        .def(py::init<>())
+        .def(py::init<>(), "Default constructor.")
         .def_readwrite("timeout", &fiction::wiring_reduction_params::timeout,
                        DOC(fiction_wiring_reduction_params_timeout));
 
     py::class_<fiction::wiring_reduction_stats>(m, "wiring_reduction_stats", DOC(fiction_wiring_reduction_stats))
-        .def(py::init<>())
-        .def("__repr__",
-             [](const fiction::wiring_reduction_stats& stats)
-             {
-                 std::stringstream stream{};
-                 stats.report(stream);
-                 return stream.str();
-             })
+        .def(py::init<>(), "Default constructor.")
+        .def(
+            "__repr__",
+            [](const fiction::wiring_reduction_stats& stats)
+            {
+                std::stringstream stream{};
+                stats.report(stream);
+                return stream.str();
+            },
+            "Returns a string representation of the statistics.")
         .def("report", &fiction::wiring_reduction_stats::report, DOC(fiction_wiring_reduction_stats_report))
         .def_readonly("time_total", &fiction::wiring_reduction_stats::time_total,
                       DOC(fiction_wiring_reduction_stats_duration))

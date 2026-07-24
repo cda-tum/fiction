@@ -27,7 +27,7 @@ void cartesian_layout(pybind11::module& m)
      * Cartesian layout.
      */
     py::class_<py_cartesian_layout>(m, "cartesian_layout", DOC(fiction_cartesian_layout_overridden))
-        .def(py::init<>())
+        .def(py::init<>(), DOC(fiction_cartesian_layout_cartesian_layout))
         .def(py::init<const fiction::aspect_ratio<py_cartesian_layout>&>(), py::arg("dimension"),
              DOC(fiction_cartesian_layout_cartesian_layout))
         .def(
@@ -129,13 +129,15 @@ void cartesian_layout(pybind11::module& m)
         .def("adjacent_opposite_coordinates", &py_cartesian_layout::adjacent_opposite_coordinates, py::arg("c"),
              DOC(fiction_cartesian_layout_adjacent_opposite_coordinates))
 
-        .def("__repr__",
-             [](const py_cartesian_layout& lyt) -> std::string
-             {
-                 std::stringstream stream{};
-                 print_layout(lyt, stream);
-                 return stream.str();
-             })
+        .def(
+            "__repr__",
+            [](const py_cartesian_layout& lyt) -> std::string
+            {
+                std::stringstream stream{};
+                print_layout(lyt, stream);
+                return stream.str();
+            },
+            "Returns a string representation of the layout.")
 
         ;
 }

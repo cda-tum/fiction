@@ -76,7 +76,9 @@ void offset_coordinate(pybind11::module& m)
         // NOLINTEND(misc-redundant-expression)
 
         .def("__repr__", &py_offset_coordinate::str, DOC(fiction_offset_ucoord_t_str))
-        .def("__hash__", [](const py_offset_coordinate& self) { return std::hash<py_offset_coordinate>{}(self); })
+        .def(
+            "__hash__", [](const py_offset_coordinate& self) { return std::hash<py_offset_coordinate>{}(self); },
+            "Returns a hash value of the coordinate.")
 
         ;
 
@@ -134,7 +136,9 @@ void cube_coordinate(pybind11::module& m)
         // NOLINTEND(misc-redundant-expression)
 
         .def("__repr__", &py_cube_coordinate::str, DOC(fiction_cube_coord_t_str))
-        .def("__hash__", [](const py_cube_coordinate& self) { return std::hash<py_cube_coordinate>{}(self); })
+        .def(
+            "__hash__", [](const py_cube_coordinate& self) { return std::hash<py_cube_coordinate>{}(self); },
+            "Returns a hash value of the coordinate.")
 
         ;
 
@@ -195,7 +199,9 @@ void siqad_coordinate(pybind11::module& m)
         // NOLINTEND(misc-redundant-expression)
 
         .def("__repr__", &py_siqad_coordinate::str, DOC(fiction_siqad_coord_t_str))
-        .def("__hash__", [](const py_siqad_coordinate& self) { return std::hash<py_siqad_coordinate>{}(self); })
+        .def(
+            "__hash__", [](const py_siqad_coordinate& self) { return std::hash<py_siqad_coordinate>{}(self); },
+            "Returns a hash value of the coordinate.")
 
         ;
 

@@ -53,7 +53,7 @@ void equivalence_checking(pybind11::module& m)
 
     py::class_<fiction::equivalence_checking_stats>(m, "equivalence_checking_stats",
                                                     DOC(fiction_equivalence_checking_stats))
-        .def(py::init<>())
+        .def(py::init<>(), "Default constructor.")
         .def_readonly("eq", &fiction::equivalence_checking_stats::eq, DOC(fiction_equivalence_checking_stats_eq))
         .def_readonly("tp_spec", &fiction::equivalence_checking_stats::tp_spec,
                       DOC(fiction_equivalence_checking_stats_tp_spec))

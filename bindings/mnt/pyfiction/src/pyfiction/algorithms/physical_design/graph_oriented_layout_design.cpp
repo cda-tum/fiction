@@ -42,7 +42,7 @@ void graph_oriented_layout_design(pybind11::module& m)
 
     py::class_<fiction::graph_oriented_layout_design_params>(m, "graph_oriented_layout_design_params",
                                                              DOC(fiction_graph_oriented_layout_design_params))
-        .def(py::init<>())
+        .def(py::init<>(), "Default constructor.")
         .def_readwrite("timeout", &fiction::graph_oriented_layout_design_params::timeout,
                        DOC(fiction_graph_oriented_layout_design_params_timeout))
         .def_readwrite("num_vertex_expansions", &fiction::graph_oriented_layout_design_params::num_vertex_expansions,
@@ -72,14 +72,16 @@ void graph_oriented_layout_design(pybind11::module& m)
 
     py::class_<fiction::graph_oriented_layout_design_stats>(m, "graph_oriented_layout_design_stats",
                                                             DOC(fiction_graph_oriented_layout_design_stats))
-        .def(py::init<>())
-        .def("__repr__",
-             [](const fiction::graph_oriented_layout_design_stats& stats)
-             {
-                 std::stringstream stream{};
-                 stats.report(stream);
-                 return stream.str();
-             })
+        .def(py::init<>(), "Default constructor.")
+        .def(
+            "__repr__",
+            [](const fiction::graph_oriented_layout_design_stats& stats)
+            {
+                std::stringstream stream{};
+                stats.report(stream);
+                return stream.str();
+            },
+            "Returns a string representation of the statistics.")
         .def_readonly("time_total", &fiction::graph_oriented_layout_design_stats::time_total,
                       DOC(fiction_graph_oriented_layout_design_stats_duration))
         .def_readonly("x_size", &fiction::graph_oriented_layout_design_stats::x_size,

@@ -39,14 +39,16 @@ void critical_temperature(pybind11::module& m)
      */
     py::class_<fiction::critical_temperature_stats>(m, "critical_temperature_stats",
                                                     DOC(fiction_critical_temperature_stats))
-        .def(py::init<>())
-        .def("__repr__",
-             [](const fiction::critical_temperature_stats& stats)
-             {
-                 std::stringstream stream{};
-                 stats.report(stream);
-                 return stream.str();
-             })
+        .def(py::init<>(), "Default constructor.")
+        .def(
+            "__repr__",
+            [](const fiction::critical_temperature_stats& stats)
+            {
+                std::stringstream stream{};
+                stats.report(stream);
+                return stream.str();
+            },
+            "Returns a string representation of the statistics.")
         .def("report", &fiction::critical_temperature_stats::report, DOC(fiction_critical_temperature_stats_report))
         .def_readonly("algorithm_name", &fiction::critical_temperature_stats::algorithm_name,
                       DOC(fiction_critical_temperature_stats_algorithm_name))
@@ -63,7 +65,7 @@ void critical_temperature(pybind11::module& m)
      */
     py::class_<fiction::critical_temperature_params>(m, "critical_temperature_params",
                                                      DOC(fiction_critical_temperature_params))
-        .def(py::init<>())
+        .def(py::init<>(), "Default constructor.")
         .def_readwrite("operational_params", &fiction::critical_temperature_params::operational_params,
                        DOC(fiction_critical_temperature_params))
         .def_readwrite("confidence_level", &fiction::critical_temperature_params::confidence_level,

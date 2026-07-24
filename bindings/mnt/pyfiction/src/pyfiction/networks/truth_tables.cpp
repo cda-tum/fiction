@@ -17,8 +17,8 @@ void truth_tables(pybind11::module& m)
     namespace py = pybind11;
 
     py::class_<py_tt>(m, "dynamic_truth_table")
-        .def(py::init<>())
-        .def(py::init<uint32_t>())
+        .def(py::init<>(), "Default constructor. Constructs a truth table of 0 variables.")
+        .def(py::init<uint32_t>(), py::arg("num_vars"), "Constructs a truth table of the given number of variables.")
 
         .def("num_vars", &py_tt::num_vars)
         .def("num_blocks", &py_tt::num_blocks)

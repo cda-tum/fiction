@@ -32,7 +32,7 @@ void gate_level_layout(pybind11::module& m, const std::string& topology)
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     py::class_<GateLyt, LytBase>(m, fmt::format("{}_gate_layout", topology).c_str(), DOC(fiction_gate_level_layout))
-        .def(py::init<>())
+        .def(py::init<>(), DOC(fiction_gate_level_layout_gate_level_layout))
         .def(py::init<const fiction::aspect_ratio<GateLyt>&>(), py::arg("dimension"),
              DOC(fiction_gate_level_layout_gate_level_layout))
         .def(py::init(
@@ -299,13 +299,15 @@ void gate_level_layout(pybind11::module& m, const std::string& topology)
             },
             DOC(fiction_bounding_box_2d_overridden))
         .def("is_dead", &GateLyt::is_dead, py::arg("n"), DOC(fiction_gate_level_layout_is_dead))
-        .def("__repr__",
-             [](const GateLyt& lyt) -> std::string
-             {
-                 std::stringstream stream{};
-                 fiction::print_layout(lyt, stream);
-                 return stream.str();
-             })
+        .def(
+            "__repr__",
+            [](const GateLyt& lyt) -> std::string
+            {
+                std::stringstream stream{};
+                fiction::print_layout(lyt, stream);
+                return stream.str();
+            },
+            "Returns a string representation of the layout.")
 
         ;
 }

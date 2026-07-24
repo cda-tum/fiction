@@ -69,6 +69,11 @@ Fixed
     - Fixed broken ``:ref:`` links in the publications list
     - Added missing Python binding exports (``charge_distribution_history``,
       ``sidb_charge_states_for_base_number``) that were referenced by the documentation but not importable
+- Python bindings:
+    - Added missing docstrings for numerous ``pyfiction`` constructors (e.g., ``cartesian_gate_layout``) that
+      were previously undocumented despite an equivalent, documented constructor overload existing
+    - Added missing docstrings for several dunder/operator methods (e.g., ``bdl_input_iterator_params``,
+      ``__repr__``, ``__hash__``, ``__getitem__``) across the layout, network, and SiDB simulation bindings
 
 v0.6.12 - 2025-10-29
 --------------------

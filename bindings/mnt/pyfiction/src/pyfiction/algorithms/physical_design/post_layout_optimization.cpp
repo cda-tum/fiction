@@ -20,7 +20,7 @@ void post_layout_optimization(pybind11::module& m)
 
     py::class_<fiction::post_layout_optimization_params>(m, "post_layout_optimization_params",
                                                          DOC(fiction_post_layout_optimization_params))
-        .def(py::init<>())
+        .def(py::init<>(), "Default constructor.")
         .def_property(
             "max_gate_relocations",
             [](const fiction::post_layout_optimization_params& p) -> py::object
@@ -52,14 +52,16 @@ void post_layout_optimization(pybind11::module& m)
 
     py::class_<fiction::post_layout_optimization_stats>(m, "post_layout_optimization_stats",
                                                         DOC(fiction_post_layout_optimization_stats))
-        .def(py::init<>())
-        .def("__repr__",
-             [](const fiction::post_layout_optimization_stats& stats)
-             {
-                 std::stringstream stream{};
-                 stats.report(stream);
-                 return stream.str();
-             })
+        .def(py::init<>(), "Default constructor.")
+        .def(
+            "__repr__",
+            [](const fiction::post_layout_optimization_stats& stats)
+            {
+                std::stringstream stream{};
+                stats.report(stream);
+                return stream.str();
+            },
+            "Returns a string representation of the statistics.")
         .def("report", &fiction::post_layout_optimization_stats::report,
              DOC(fiction_post_layout_optimization_stats_report))
         .def_readonly("time_total", &fiction::post_layout_optimization_stats::time_total,

@@ -32,7 +32,7 @@ void clocked_layout(pybind11::module& m, const std::string& topology)
      * Clocked Cartesian layout.
      */
     py::class_<ClockedLyt, LytBase>(m, fmt::format("clocked_{}_layout", topology).c_str(), DOC(fiction_clocked_layout))
-        .def(py::init<>())
+        .def(py::init<>(), DOC(fiction_clocked_layout_clocked_layout))
         .def(py::init<const fiction::aspect_ratio<ClockedLyt>&>(), py::arg("dimension"),
              DOC(fiction_clocked_layout_clocked_layout))
         .def(py::init(
@@ -72,13 +72,15 @@ void clocked_layout(pybind11::module& m, const std::string& topology)
         .def("out_degree", &ClockedLyt::out_degree, py::arg("cz"), DOC(fiction_clocked_layout_out_degree))
         .def("degree", &ClockedLyt::degree, py::arg("cz"), DOC(fiction_clocked_layout_degree))
 
-        .def("__repr__",
-             [](const ClockedLyt& lyt) -> std::string
-             {
-                 std::stringstream stream{};
-                 print_layout(lyt, stream);
-                 return stream.str();
-             })
+        .def(
+            "__repr__",
+            [](const ClockedLyt& lyt) -> std::string
+            {
+                std::stringstream stream{};
+                print_layout(lyt, stream);
+                return stream.str();
+            },
+            "Returns a string representation of the layout.")
 
         ;
 }

@@ -88,7 +88,7 @@ void fcn_technology_cell_level_layout(pybind11::module& m)
         py_cartesian_technology_cell_layout,
         fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<fiction::offset::ucoord_t>>>>(
         m, fmt::format("{}_layout", tech_name).c_str(), DOC(fiction_cell_level_layout))
-        .def(py::init<>())
+        .def(py::init<>(), DOC(fiction_cell_level_layout_cell_level_layout))
         .def(py::init<const fiction::aspect_ratio<py_cartesian_technology_cell_layout>&>(), py::arg("dimension"),
              DOC(fiction_cell_level_layout_cell_level_layout))
         .def(py::init(
@@ -169,22 +169,24 @@ void fcn_technology_cell_level_layout(pybind11::module& m)
             },
             DOC(fiction_bounding_box_2d_overridden))
 
-        .def("__repr__",
-             [](const py_cartesian_technology_cell_layout& lyt) -> std::string
-             {
-                 std::stringstream stream{};
+        .def(
+            "__repr__",
+            [](const py_cartesian_technology_cell_layout& lyt) -> std::string
+            {
+                std::stringstream stream{};
 
-                 if constexpr (std::is_same_v<Technology, fiction::sidb_technology>)
-                 {
-                     print_layout(convert_layout_to_siqad_coordinates(lyt), stream);
-                 }
-                 else
-                 {
-                     print_layout(lyt, stream);
-                 }
+                if constexpr (std::is_same_v<Technology, fiction::sidb_technology>)
+                {
+                    print_layout(convert_layout_to_siqad_coordinates(lyt), stream);
+                }
+                else
+                {
+                    print_layout(lyt, stream);
+                }
 
-                 return stream.str();
-             })
+                return stream.str();
+            },
+            "Returns a string representation of the layout.")
 
         ;
 }

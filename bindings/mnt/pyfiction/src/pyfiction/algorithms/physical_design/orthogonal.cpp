@@ -17,18 +17,20 @@ void orthogonal(pybind11::module& m)
 
     py::class_<fiction::orthogonal_physical_design_params>(m, "orthogonal_params",
                                                            DOC(fiction_orthogonal_physical_design_params))
-        .def(py::init<>());
+        .def(py::init<>(), "Default constructor.");
 
     py::class_<fiction::orthogonal_physical_design_stats>(m, "orthogonal_stats",
                                                           DOC(fiction_orthogonal_physical_design_stats))
-        .def(py::init<>())
-        .def("__repr__",
-             [](const fiction::orthogonal_physical_design_stats& stats)
-             {
-                 std::stringstream stream{};
-                 stats.report(stream);
-                 return stream.str();
-             })
+        .def(py::init<>(), "Default constructor.")
+        .def(
+            "__repr__",
+            [](const fiction::orthogonal_physical_design_stats& stats)
+            {
+                std::stringstream stream{};
+                stats.report(stream);
+                return stream.str();
+            },
+            "Returns a string representation of the statistics.")
         .def("report", &fiction::orthogonal_physical_design_stats::report,
              DOC(fiction_orthogonal_physical_design_stats_report))
         .def_readonly("time_total", &fiction::orthogonal_physical_design_stats::time_total,

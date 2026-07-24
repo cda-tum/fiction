@@ -31,21 +31,23 @@ void hexagonalization(pybind11::module& m)
                DOC(fiction_hexagonalization_params_io_pin_extension_mode_EXTEND_PLANAR));
 
     py::class_<fiction::hexagonalization_params>(m, "hexagonalization_params", DOC(fiction_hexagonalization_params))
-        .def(py::init<>())
+        .def(py::init<>(), "Default constructor.")
         .def_readwrite("input_pin_extension", &fiction::hexagonalization_params::input_pin_extension,
                        DOC(fiction_hexagonalization_params_input_pin_extension))
         .def_readwrite("output_pin_extension", &fiction::hexagonalization_params::output_pin_extension,
                        DOC(fiction_hexagonalization_params_output_pin_extension));
 
     py::class_<fiction::hexagonalization_stats>(m, "hexagonalization_stats", DOC(fiction_hexagonalization_stats))
-        .def(py::init<>())
-        .def("__repr__",
-             [](const fiction::hexagonalization_stats& stats)
-             {
-                 std::stringstream stream{};
-                 stats.report(stream);
-                 return stream.str();
-             })
+        .def(py::init<>(), "Default constructor.")
+        .def(
+            "__repr__",
+            [](const fiction::hexagonalization_stats& stats)
+            {
+                std::stringstream stream{};
+                stats.report(stream);
+                return stream.str();
+            },
+            "Returns a string representation of the statistics.")
         .def_readonly("time_total", &fiction::hexagonalization_stats::time_total,
                       DOC(fiction_hexagonalization_stats_duration))
         .def_readonly("x_size", &fiction::hexagonalization_stats::x_size, DOC(fiction_hexagonalization_stats_x_size))

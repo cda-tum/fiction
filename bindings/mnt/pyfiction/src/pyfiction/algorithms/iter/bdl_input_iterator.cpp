@@ -84,8 +84,12 @@ void bdl_input_iterator_impl(pybind11::module& m, const std::string& lattice)
             "__getitem__", [](const fiction::bdl_input_iterator<Lyt>& self, int n) -> fiction::bdl_input_iterator<Lyt>
             { return self[n]; }, py::arg("m"), DOC(fiction_bdl_input_iterator_operator_array))
 
-        .def("num_input_pairs", &fiction::bdl_input_iterator<Lyt>::num_input_pairs)
-        .def("get_layout", [](const fiction::bdl_input_iterator<Lyt>& self) -> const Lyt& { return *self; })
+        .def("num_input_pairs", &fiction::bdl_input_iterator<Lyt>::num_input_pairs,
+             "Returns the number of input BDL pairs the iterator was constructed with.")
+        .def(
+            "get_layout", [](const fiction::bdl_input_iterator<Lyt>& self) -> const Lyt& { return *self; },
+            "Returns the layout that represents the current input state, equivalent to dereferencing the "
+            "iterator.")
 
         ;
 }
@@ -110,8 +114,9 @@ void bdl_input_iterator(pybind11::module& m)
     /**
      * BDL input iterator parameters.
      */
-    py::class_<fiction::bdl_input_iterator_params>(m, "bdl_input_iterator_params")
-        .def(py::init<>())
+    py::class_<fiction::bdl_input_iterator_params>(m, "bdl_input_iterator_params",
+                                                   DOC(fiction_bdl_input_iterator_params))
+        .def(py::init<>(), "Default constructor.")
         .def_readwrite("bdl_wire_params", &fiction::bdl_input_iterator_params::bdl_wire_params,
                        DOC(fiction_bdl_input_iterator_params_bdl_wire_params))
         .def_readwrite("input_bdl_config", &fiction::bdl_input_iterator_params::input_bdl_config,

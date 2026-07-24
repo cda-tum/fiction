@@ -82,7 +82,7 @@ void write_svg_layout(pybind11::module& m)
 
     py::class_<fiction::write_sidb_layout_svg_params>(m, "write_sidb_layout_svg_params",
                                                       DOC(fiction_write_sidb_layout_svg_params))
-        .def(py::init<>())
+        .def(py::init<>(), "Default constructor.")
         .def_readwrite("lattice_point_size", &fiction::write_sidb_layout_svg_params::lattice_point_size,
                        DOC(fiction_write_sidb_layout_svg_params_lattice_point_size))
         .def_readwrite("sidb_size", &fiction::write_sidb_layout_svg_params::sidb_size,
@@ -98,7 +98,7 @@ void write_svg_layout(pybind11::module& m)
 
     py::class_<fiction::write_qca_layout_svg_params>(m, "write_qca_layout_svg_params",
                                                      DOC(fiction_write_qca_layout_svg_params))
-        .def(py::init<>())
+        .def(py::init<>(), "Default constructor.")
         .def_readwrite("simple", &fiction::write_qca_layout_svg_params::simple,
                        DOC(fiction_write_qca_layout_svg_params_simple));
     ;

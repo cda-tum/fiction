@@ -51,7 +51,7 @@ void design_rule_violations(pybind11::module& m)
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     py::class_<fiction::gate_level_drv_params>(m, "gate_level_drv_params", DOC(fiction_gate_level_drv_params))
-        .def(py::init<>())
+        .def(py::init<>(), "Default constructor.")
         .def_readwrite("unplaced_nodes", &fiction::gate_level_drv_params::unplaced_nodes,
                        DOC(fiction_gate_level_drv_params_unplaced_nodes))
         .def_readwrite("placed_dead_nodes", &fiction::gate_level_drv_params::placed_dead_nodes,

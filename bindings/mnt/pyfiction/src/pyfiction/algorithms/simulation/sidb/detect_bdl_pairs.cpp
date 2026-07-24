@@ -41,7 +41,7 @@ void detect_bdl_pairs(pybind11::module& m)
         .def_readonly("lower", &fiction::bdl_pair<fiction::offset::ucoord_t>::lower, DOC(fiction_bdl_pair_lower));
 
     py::class_<fiction::detect_bdl_pairs_params>(m, "detect_bdl_pairs_params", DOC(fiction_detect_bdl_pairs_params))
-        .def(py::init<>())
+        .def(py::init<>(), "Default constructor.")
         .def_readwrite("minimum_distance", &fiction::detect_bdl_pairs_params::minimum_distance,
                        DOC(fiction_detect_bdl_pairs_params_minimum_distance))
         .def_readwrite("maximum_distance", &fiction::detect_bdl_pairs_params::maximum_distance,

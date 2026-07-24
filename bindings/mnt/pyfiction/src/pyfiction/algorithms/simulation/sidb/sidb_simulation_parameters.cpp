@@ -20,7 +20,7 @@ void sidb_simulation_parameters(pybind11::module& m)
         .def(py::init<const uint8_t, const double, const double, const double>(), py::arg("base_number") = 3,
              py::arg("mu_minus") = -0.32, py::arg("relative_permittivity") = 5.6, py::arg("screening_distance") = 5.0,
              DOC(fiction_sidb_simulation_parameters_sidb_simulation_parameters))
-        .def(py::init<>())
+        .def(py::init<>(), DOC(fiction_sidb_simulation_parameters_sidb_simulation_parameters))
         .def_readwrite("epsilon_r", &fiction::sidb_simulation_parameters::epsilon_r,
                        DOC(fiction_sidb_simulation_parameters_epsilon_r))
         .def_readwrite("lambda_tf", &fiction::sidb_simulation_parameters::lambda_tf,
