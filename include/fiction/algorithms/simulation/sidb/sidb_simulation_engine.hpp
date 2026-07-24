@@ -154,17 +154,12 @@ template <typename EngineType>
     // heuristic SiDB simulation engines
     if constexpr (std::is_same_v<EngineType, heuristic_sidb_simulation_engine>)
     {
-        switch (engine)
+        if (engine == EngineType::QUICKSIM)
         {
-            case EngineType::QUICKSIM:
-            {
-                return "QuickSim";
-            }
-            default:
-            {
-                return "unsupported simulation engine";
-            }
+            return "QuickSim";
         }
+
+        return "unsupported simulation engine";
     }
 }
 /**
