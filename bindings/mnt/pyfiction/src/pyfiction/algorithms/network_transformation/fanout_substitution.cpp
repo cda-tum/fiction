@@ -44,7 +44,7 @@ void fanout_substitution(pybind11::module& m)
 
     py::class_<fiction::fanout_substitution_params>(m, "fanout_substitution_params",
                                                     DOC(fiction_fanout_substitution_params))
-        .def(py::init<>())
+        .def(py::init<>(), "Default constructor.")
         .def_readwrite("strategy", &fiction::fanout_substitution_params::strategy,
                        DOC(fiction_fanout_substitution_params_strategy))
         .def_readwrite("degree", &fiction::fanout_substitution_params::degree,

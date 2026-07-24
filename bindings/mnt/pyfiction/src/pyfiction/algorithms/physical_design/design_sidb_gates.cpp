@@ -33,14 +33,16 @@ void design_sidb_gates(pybind11::module& m)
     namespace py = pybind11;
 
     py::class_<fiction::design_sidb_gates_stats>(m, "design_sidb_gates_stats", DOC(fiction_design_sidb_gates_stats))
-        .def(py::init<>())
-        .def("__repr__",
-             [](const fiction::design_sidb_gates_stats& stats)
-             {
-                 std::stringstream stream{};
-                 stats.report(stream);
-                 return stream.str();
-             });
+        .def(py::init<>(), "Default constructor.")
+        .def(
+            "__repr__",
+            [](const fiction::design_sidb_gates_stats& stats)
+            {
+                std::stringstream stream{};
+                stats.report(stream);
+                return stream.str();
+            },
+            "Returns a string representation of the statistics.");
 
     /**
      * Design approach selector type.
@@ -76,7 +78,7 @@ void design_sidb_gates(pybind11::module& m)
      */
     py::class_<fiction::design_sidb_gates_params<fiction::offset::ucoord_t>>(m, "design_sidb_gates_params",
                                                                              DOC(fiction_design_sidb_gates_params))
-        .def(py::init<>())
+        .def(py::init<>(), "Default constructor.")
         .def_readwrite("operational_params",
                        &fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::operational_params,
                        DOC(fiction_design_sidb_gates_params_operational_params))

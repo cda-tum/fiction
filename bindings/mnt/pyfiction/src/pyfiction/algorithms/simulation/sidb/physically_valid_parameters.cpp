@@ -33,7 +33,7 @@ void physically_valid_parameters(pybind11::module& m)
 
     py::class_<fiction::sidb_simulation_domain<fiction::parameter_point, uint64_t>>(
         m, "physically_valid_parameters_domain")
-        .def(py::init<>())
+        .def(py::init<>(), "Default constructor.")
         .def(
             "get_excited_state_number_for_parameter",
             [](const fiction::sidb_simulation_domain<fiction::parameter_point, uint64_t>& domain,

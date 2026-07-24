@@ -43,7 +43,7 @@ void clustercomplete(pybind11::module& m)
      * ClusterComplete parameters.
      */
     py::class_<fiction::clustercomplete_params<>>(m, "clustercomplete_params", DOC(fiction_clustercomplete_params))
-        .def(py::init<>())
+        .def(py::init<>(), "Default constructor.")
         .def_readwrite("simulation_parameters", &fiction::clustercomplete_params<>::simulation_parameters,
                        DOC(fiction_clustercomplete_params_simulation_parameters))
         .def_readwrite("local_external_potential", &fiction::clustercomplete_params<>::local_external_potential,

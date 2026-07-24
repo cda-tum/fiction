@@ -88,7 +88,7 @@ void write_operational_domain(pybind11::module& m)
 
     py::class_<fiction::write_operational_domain_params>(m, "write_operational_domain_params",
                                                          DOC(fiction_write_operational_domain_params))
-        .def(py::init<>())
+        .def(py::init<>(), "Default constructor.")
         .def_readwrite("operational_tag", &fiction::write_operational_domain_params::operational_tag,
                        DOC(fiction_write_operational_domain_params_operational_tag))
         .def_readwrite("non_operational_tag", &fiction::write_operational_domain_params::non_operational_tag,

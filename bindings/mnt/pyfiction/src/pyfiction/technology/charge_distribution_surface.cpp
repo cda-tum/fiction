@@ -195,13 +195,15 @@ void charge_distribution_surface_layout(pybind11::module& m, const std::string& 
             },
             DOC(fiction_bounding_box_2d_overridden))
 
-        .def("__repr__",
-             [](const py_cds& lyt)
-             {
-                 std::stringstream ss;
-                 print_layout(fiction::convert_layout_to_siqad_coordinates(lyt), ss);
-                 return ss.str();
-             })
+        .def(
+            "__repr__",
+            [](const py_cds& lyt)
+            {
+                std::stringstream ss;
+                print_layout(fiction::convert_layout_to_siqad_coordinates(lyt), ss);
+                return ss.str();
+            },
+            "Returns a string representation of the layout.")
 
         ;
 }

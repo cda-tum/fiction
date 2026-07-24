@@ -23,7 +23,7 @@ void obstruction_layout(pybind11::module& m, const std::string& topology)
 
     py::class_<ObstrLyt, LytBase>(m, fmt::format("{}_obstruction_layout", topology).c_str(),
                                   DOC(fiction_obstruction_layout))
-        .def(py::init<>())
+        .def(py::init<>(), "Default constructor.")
         .def(py::init<const LytBase&>(), py::arg("layout"), DOC(fiction_obstruction_layout_obstruction_layout))
 
         .def("obstruct_coordinate", &ObstrLyt::obstruct_coordinate, py::arg("c"))

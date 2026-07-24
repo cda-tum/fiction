@@ -47,7 +47,7 @@ void a_star(pybind11::module& m)
     namespace py = pybind11;
 
     py::class_<fiction::a_star_params>(m, "a_star_params", DOC(fiction_a_star_params))
-        .def(py::init<>())
+        .def(py::init<>(), "Default constructor.")
         .def_readwrite("crossings", &fiction::a_star_params::crossings, DOC(fiction_a_star_params_crossings));
 
     detail::a_star_impl<py_cartesian_obstruction_layout>(m);

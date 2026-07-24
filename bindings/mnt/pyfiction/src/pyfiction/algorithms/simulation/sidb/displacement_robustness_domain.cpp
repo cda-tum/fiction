@@ -22,7 +22,7 @@ void determine_displacement_robustness_domain_impl(pybind11::module& m, const st
 
     py::class_<fiction::displacement_robustness_domain<Lyt>>(
         m, fmt::format("displacement_robustness_domain_{}", lattice).c_str())
-        .def(py::init<>())
+        .def(py::init<>(), "Default constructor.")
         .def_readwrite("influence_information", &fiction::displacement_robustness_domain<Lyt>::operational_values);
 
     m.def(fmt::format("determine_displacement_robustness_domain_{}", lattice).c_str(),
@@ -53,7 +53,7 @@ void determine_displacement_robustness_domain(pybind11::module& m)
 
     py::class_<fiction::displacement_robustness_domain_params<fiction::offset::ucoord_t>>(
         m, "displacement_robustness_domain_params")
-        .def(py::init<>())
+        .def(py::init<>(), "Default constructor.")
         .def_readwrite("analysis_mode",
                        &fiction::displacement_robustness_domain_params<fiction::offset::ucoord_t>::analysis_mode)
         .def_readwrite("percentage_of_analyzed_displaced_layouts",
@@ -70,7 +70,7 @@ void determine_displacement_robustness_domain(pybind11::module& m)
                        &fiction::displacement_robustness_domain_params<fiction::offset::ucoord_t>::dimer_policy);
 
     py::class_<fiction::displacement_robustness_domain_stats>(m, "displacement_robustness_domain_stats")
-        .def(py::init<>())
+        .def(py::init<>(), "Default constructor.")
         .def_readwrite("time_total", &fiction::displacement_robustness_domain_stats::time_total)
         .def_readwrite("num_operational_sidb_displacements",
                        &fiction::displacement_robustness_domain_stats::num_operational_sidb_displacements)

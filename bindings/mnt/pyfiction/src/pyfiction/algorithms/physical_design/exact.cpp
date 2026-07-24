@@ -25,7 +25,7 @@ void exact(pybind11::module& m)
                DOC(fiction_technology_constraints_TOPOLINANO));
 
     py::class_<fiction::exact_physical_design_params>(m, "exact_params", DOC(fiction_exact_physical_design_params))
-        .def(py::init<>())
+        .def(py::init<>(), "Default constructor.")
         .def_readwrite("scheme", &fiction::exact_physical_design_params::scheme,
                        DOC(fiction_exact_physical_design_params_scheme))
         .def_readwrite("upper_bound_x", &fiction::exact_physical_design_params::upper_bound_x,
@@ -54,14 +54,16 @@ void exact(pybind11::module& m)
                        DOC(fiction_exact_physical_design_params_technology_specifics));
 
     py::class_<fiction::exact_physical_design_stats>(m, "exact_stats", DOC(fiction_exact_physical_design_stats))
-        .def(py::init<>())
-        .def("__repr__",
-             [](const fiction::exact_physical_design_stats& stats)
-             {
-                 std::stringstream stream{};
-                 stats.report(stream);
-                 return stream.str();
-             })
+        .def(py::init<>(), "Default constructor.")
+        .def(
+            "__repr__",
+            [](const fiction::exact_physical_design_stats& stats)
+            {
+                std::stringstream stream{};
+                stats.report(stream);
+                return stream.str();
+            },
+            "Returns a string representation of the statistics.")
         .def("report", &fiction::exact_physical_design_stats::report, DOC(fiction_exact_physical_design_stats_report))
         .def_readonly("time_total", &fiction::exact_physical_design_stats::time_total,
                       DOC(fiction_exact_physical_design_stats_duration))

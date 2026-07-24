@@ -19,7 +19,7 @@ void write_qca_layout(pybind11::module& m)
     namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
 
     py::class_<fiction::write_qca_layout_params>(m, "write_qca_layout_params", DOC(fiction_write_qca_layout_params))
-        .def(py::init<>())
+        .def(py::init<>(), "Default constructor.")
         .def_readwrite("create_inter_layer_via_cells", &fiction::write_qca_layout_params::create_inter_layer_via_cells,
                        DOC(fiction_write_qca_layout_params_create_inter_layer_via_cells))
 

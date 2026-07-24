@@ -55,7 +55,7 @@ void random_sidb_layout_generator(pybind11::module& m)
      */
     py::class_<fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>>(
         m, "generate_random_sidb_layout_params", DOC(fiction_generate_random_sidb_layout_params))
-        .def(py::init<>())
+        .def(py::init<>(), "Default constructor.")
         .def_readwrite("coordinate_pair",
                        &fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>::coordinate_pair,
                        DOC(fiction_generate_random_sidb_layout_params_coordinate_pair))

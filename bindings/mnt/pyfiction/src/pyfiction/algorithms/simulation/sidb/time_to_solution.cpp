@@ -41,7 +41,7 @@ void time_to_solution(pybind11::module& m)
      * Parameters.
      */
     py::class_<fiction::time_to_solution_params>(m, "time_to_solution_params", DOC(fiction_time_to_solution_params))
-        .def(py::init<>())
+        .def(py::init<>(), "Default constructor.")
         .def_readwrite("engine", &fiction::time_to_solution_params::engine, DOC(fiction_time_to_solution_params_engine))
         .def_readwrite("repetitions", &fiction::time_to_solution_params::repetitions,
                        DOC(fiction_time_to_solution_params_repetitions))
@@ -51,14 +51,16 @@ void time_to_solution(pybind11::module& m)
      * Statistics.
      */
     py::class_<fiction::time_to_solution_stats>(m, "time_to_solution_stats", DOC(fiction_time_to_solution_stats))
-        .def(py::init<>())
-        .def("__repr__",
-             [](const fiction::time_to_solution_stats& stats)
-             {
-                 std::stringstream stream{};
-                 stats.report(stream);
-                 return stream.str();
-             })
+        .def(py::init<>(), "Default constructor.")
+        .def(
+            "__repr__",
+            [](const fiction::time_to_solution_stats& stats)
+            {
+                std::stringstream stream{};
+                stats.report(stream);
+                return stream.str();
+            },
+            "Returns a string representation of the statistics.")
         .def("report", &fiction::time_to_solution_stats::report, DOC(fiction_time_to_solution_stats_report))
         .def_readonly("time_to_solution", &fiction::time_to_solution_stats::time_to_solution,
                       DOC(fiction_time_to_solution_stats_time_to_solution))

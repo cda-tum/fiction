@@ -38,7 +38,7 @@ void quickexact(pybind11::module& m)
      * QuickExact parameters.
      */
     py::class_<fiction::quickexact_params<>>(m, "quickexact_params", DOC(fiction_quickexact_params))
-        .def(py::init<>())
+        .def(py::init<>(), "Default constructor.")
         .def_readwrite("simulation_parameters", &fiction::quickexact_params<>::simulation_parameters,
                        DOC(fiction_quickexact_params_simulation_parameters))
         .def_readwrite("base_number_detection", &fiction::quickexact_params<>::base_number_detection,

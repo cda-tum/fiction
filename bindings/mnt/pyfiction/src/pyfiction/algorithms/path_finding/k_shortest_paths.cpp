@@ -52,7 +52,7 @@ void yen_k_shortest_paths(pybind11::module& m)
 
     py::class_<fiction::yen_k_shortest_paths_params>(m, "yen_k_shortest_paths_params",
                                                      DOC(fiction_yen_k_shortest_paths_params))
-        .def(py::init<>())
+        .def(py::init<>(), "Default constructor.")
         .def_readwrite("a_star_params", &fiction::yen_k_shortest_paths_params::astar_params,
                        DOC(fiction_yen_k_shortest_paths_params_astar_params))
 

@@ -105,7 +105,7 @@ void is_operational(pybind11::module& m)
                DOC(fiction_is_operational_params_operational_analysis_strategy_FILTER_THEN_SIMULATION));
 
     py::class_<fiction::is_operational_params>(m, "is_operational_params", DOC(fiction_is_operational_params))
-        .def(py::init<>())
+        .def(py::init<>(), "Default constructor.")
         .def_readwrite("simulation_parameters", &fiction::is_operational_params::simulation_parameters,
                        DOC(fiction_is_operational_params_simulation_parameters))
         .def_readwrite("sim_engine", &fiction::is_operational_params::sim_engine,

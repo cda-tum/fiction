@@ -31,7 +31,7 @@ void shifted_cartesian_layout(pybind11::module& m)
      */
     py::class_<py_shifted_cartesian_layout>(m, "shifted_cartesian_layout",
                                             DOC(fiction_shifted_cartesian_layout_overridden))
-        .def(py::init<>())
+        .def(py::init<>(), DOC(fiction_shifted_cartesian_layout_shifted_cartesian_layout))
         .def(py::init<const fiction::aspect_ratio<py_shifted_cartesian_layout>&>(), py::arg("dimension"),
              DOC(fiction_shifted_cartesian_layout_shifted_cartesian_layout))
         .def(
@@ -206,13 +206,15 @@ void shifted_cartesian_layout(pybind11::module& m)
             { return lyt.adjacent_opposite_coordinates(c); }, py::arg("c"),
             DOC(fiction_cartesian_layout_adjacent_opposite_coordinates))
 
-        .def("__repr__",
-             [](const py_shifted_cartesian_layout& lyt) -> std::string
-             {
-                 std::stringstream stream{};
-                 print_layout(lyt, stream);
-                 return stream.str();
-             })
+        .def(
+            "__repr__",
+            [](const py_shifted_cartesian_layout& lyt) -> std::string
+            {
+                std::stringstream stream{};
+                print_layout(lyt, stream);
+                return stream.str();
+            },
+            "Returns a string representation of the layout.")
 
         ;
 }

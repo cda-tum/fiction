@@ -27,7 +27,7 @@ void hexagonal_layout(pybind11::module& m)
      * Hexagonal layout.
      */
     py::class_<py_hexagonal_layout>(m, "hexagonal_layout", DOC(fiction_hexagonal_layout_overridden))
-        .def(py::init<>())
+        .def(py::init<>(), DOC(fiction_hexagonal_layout_hexagonal_layout))
         .def(py::init<const fiction::aspect_ratio<py_hexagonal_layout>&>(), py::arg("dimension"),
              DOC(fiction_hexagonal_layout_hexagonal_layout))
         .def(
@@ -129,13 +129,15 @@ void hexagonal_layout(pybind11::module& m)
         .def("adjacent_opposite_coordinates", &py_hexagonal_layout::adjacent_opposite_coordinates, py::arg("c"),
              DOC(fiction_hexagonal_layout_adjacent_opposite_coordinates))
 
-        .def("__repr__",
-             [](const py_hexagonal_layout& lyt) -> std::string
-             {
-                 std::stringstream stream{};
-                 print_layout(lyt, stream);
-                 return stream.str();
-             })
+        .def(
+            "__repr__",
+            [](const py_hexagonal_layout& lyt) -> std::string
+            {
+                std::stringstream stream{};
+                print_layout(lyt, stream);
+                return stream.str();
+            },
+            "Returns a string representation of the layout.")
 
         ;
 }

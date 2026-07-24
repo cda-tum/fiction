@@ -40,7 +40,9 @@ void network(pybind11::module& m, const std::string& network_name)
      * Network node.
      */
     py::class_<mockturtle::node<Ntk>>(m, fmt::format("{}_node", network_name).c_str())
-        .def("__hash__", [](const mockturtle::node<Ntk>& n) { return std::hash<mockturtle::node<Ntk>>{}(n); })
+        .def(
+            "__hash__", [](const mockturtle::node<Ntk>& n) { return std::hash<mockturtle::node<Ntk>>{}(n); },
+            "Returns a hash value of the node.")
 
         ;
 
@@ -50,7 +52,7 @@ void network(pybind11::module& m, const std::string& network_name)
      * Network.
      */
     py::class_<Ntk>(m, network_name.c_str(), DOC(fiction_technology_network))
-        .def(py::init<>())
+        .def(py::init<>(), "Default constructor.")
 
         .def("size", &Ntk::size)
         .def("num_gates", &Ntk::num_gates)

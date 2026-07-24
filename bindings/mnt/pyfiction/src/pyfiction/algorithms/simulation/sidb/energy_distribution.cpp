@@ -37,7 +37,7 @@ void energy_distribution(pybind11::module& m)
         .def_readwrite("degeneracy", &fiction::energy_state::degeneracy, DOC(fiction_energy_state_degeneracy));
 
     py::class_<fiction::energy_distribution>(m, "energy_distribution")
-        .def(py::init<>())
+        .def(py::init<>(), "Default constructor.")
         .def("get_nth_state", &fiction::energy_distribution::get_nth_state, py::arg("state_index"),
              DOC(fiction_energy_distribution_get_nth_state))
         .def("degeneracy", &fiction::energy_distribution::degeneracy, py::arg("energy"),
