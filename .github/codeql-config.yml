@@ -12,3 +12,8 @@ query-filters:
       id: cpp/unused-local-variable
   - exclude:
       id: cpp/commented-out-code
+  - exclude:
+      id: cpp/poorly-documented-function
+
+paths-ignore:
+  - "**/_deps/**"

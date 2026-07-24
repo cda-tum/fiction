@@ -154,17 +154,12 @@ template <typename EngineType>
     // heuristic SiDB simulation engines
     if constexpr (std::is_same_v<EngineType, heuristic_sidb_simulation_engine>)
     {
-        switch (engine)
+        if (engine == EngineType::QUICKSIM)
         {
-            case EngineType::QUICKSIM:
-            {
-                return "QuickSim";
-            }
-            default:
-            {
-                return "unsupported simulation engine";
-            }
+            return "QuickSim";
         }
+
+        return "unsupported simulation engine";
     }
 }
 /**
@@ -185,7 +180,7 @@ get_sidb_simulation_engine(const std::string_view& name) noexcept
 #endif  // FICTION_ALGLIB_ENABLED
         {"QUICKSIM", sidb_simulation_engine::QUICKSIM}};
 
-    std::string upper_name = name.data();
+    std::string upper_name{name};
     std::transform(upper_name.begin(), upper_name.end(), upper_name.begin(), ::toupper);
 
     if (const auto it = engine_lookup.find(upper_name); it != engine_lookup.cend())
