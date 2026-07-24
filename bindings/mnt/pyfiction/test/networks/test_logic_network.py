@@ -54,7 +54,7 @@ class TestLogicNetwork(unittest.TestCase):
         self.assertEqual(network.fanins(9), [8])
 
         with self.assertRaises(RuntimeError):
-            network = read_technology_network(dir_path + "/mux41.v")
+            read_technology_network(dir_path + "/mux41.v")
 
     def test_is_gate_functions(self):
         network = read_technology_network(dir_path + "/../resources/mux21.v")
