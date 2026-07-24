@@ -15,8 +15,8 @@ concurrency:
 jobs:
   update_release_draft:
     permissions:
-      contents: write
-      pull-requests: write
+      contents: write # required to create/update the draft release
+      pull-requests: write # required to label pull requests based on release-drafter.yml rules
 
     runs-on: ubuntu-slim
     name: Draft Release
