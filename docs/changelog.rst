@@ -28,7 +28,9 @@ Added
     - Enabled auto-merging stable non-major dependency releases via Renovate
 - Continuous integration:
     - Added a 🌈 Zizmor workflow that statically analyzes the GitHub Actions workflows for security
-      issues on every push, pull request, and merge group, and uploads findings to the code scanning API
+      issues on every push, pull request, and merge group, and uploads findings to the code scanning
+      API; fork pull requests print findings to the log instead, since their read-only token can't
+      upload to it
 
 Changed
 #######

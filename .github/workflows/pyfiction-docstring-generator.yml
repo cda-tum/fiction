@@ -8,7 +8,11 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  # head_ref is always empty for this workflow's push/workflow_dispatch triggers (it's only set
+  # for pull_request events), so fall back to github.ref rather than the always-unique run_id --
+  # otherwise concurrent runs on the same branch would never actually be serialized, and could
+  # race on the "Commit docstrings" push below
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
 
 permissions: {}
