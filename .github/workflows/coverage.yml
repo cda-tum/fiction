@@ -25,6 +25,8 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
+permissions: {}
+
 defaults:
   run:
     shell: bash
@@ -34,6 +36,9 @@ env:
 
 jobs:
   build_and_test:
+    permissions:
+      contents: read # required to check out the repository
+
     strategy:
       matrix:
         os: [ubuntu-24.04]
@@ -44,10 +49,14 @@ jobs:
 
     steps:
       - name: Install Dependencies
-        run: sudo apt-get update && sudo apt-get install -yq ${{matrix.compiler}} lcov ninja-build
+        env:
+          COMPILER: ${{ matrix.compiler }}
+        run: sudo apt-get update && sudo apt-get install -yq "$COMPILER" lcov ninja-build
 
       - name: Clone Repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
 
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@5ebbd400eff9e74630f759d94ddd7b6c26299639 # v1.2
@@ -67,7 +76,7 @@ jobs:
         uses: rui314/setup-mold@9c9c13bf4c3f1adef0cc596abc155580bcb04444 # v1
 
       - name: Install pip packages
-        run: python -m pip install --disable-pip-version-check -r ${{github.workspace}}/vendors/mugen/requirements.txt
+        run: python -m pip install --disable-pip-version-check -r vendors/mugen/requirements.txt
 
       - name: Setup Z3 Solver
         id: z3
@@ -80,9 +89,11 @@ jobs:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
       - name: Configure CMake
+        env:
+          COMPILER: ${{ matrix.compiler }}
         run: >
-          cmake -S ${{github.workspace}} --preset coverage
-          -DCMAKE_CXX_COMPILER=${{matrix.compiler}}
+          cmake -S . --preset coverage
+          -DCMAKE_CXX_COMPILER="$COMPILER"
 
       - name: Build
         run: cmake --build --preset coverage --parallel 4
@@ -92,14 +103,14 @@ jobs:
 
       - name: Generate Coverage Report
         run: |
-          lcov --gcov-tool gcov-13 -t "fiction-coverage" -o lcov.info -c -d ${{github.workspace}}/build-coverage/ --ignore-errors mismatch --ignore-errors gcov
-          lcov --gcov-tool gcov-13 -e lcov.info "${{github.workspace}}/include*" -o lcov_filtered.info
+          lcov --gcov-tool gcov-13 -t "fiction-coverage" -o lcov.info -c -d build-coverage/ --ignore-errors mismatch --ignore-errors gcov
+          lcov --gcov-tool gcov-13 -e lcov.info "$GITHUB_WORKSPACE/include*" -o lcov_filtered.info
           lcov -l lcov_filtered.info
 
       - name: Upload report to Codecov
         uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
         with:
-          files: ${{github.workspace}}/lcov_filtered.info
+          files: lcov_filtered.info
           fail_ci_if_error: true
           verbose: true
           token: ${{ secrets.CODECOV_TOKEN }}

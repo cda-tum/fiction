@@ -25,6 +25,8 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
+permissions: {}
+
 defaults:
   run:
     shell: pwsh # use pwsh as directory handling does not seem to work with bash
@@ -34,6 +36,9 @@ env:
 
 jobs:
   build_and_test:
+    permissions:
+      contents: read # required to check out the repository
+
     strategy:
       matrix:
         os: [windows-2022, windows-2025]
@@ -52,6 +57,8 @@ jobs:
     steps:
       - name: Clone Repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
 
       - name: Setup Python
         uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
@@ -78,10 +85,13 @@ jobs:
       # Build and test pipeline for Debug mode
 
       - name: Configure CMake (Debug)
+        env:
+          CXX_COMPILER: ${{ matrix.cxx_compiler }}
+          C_COMPILER: ${{ matrix.c_compiler }}
         run: >
-          cmake -S ${{github.workspace}} --preset ci-debug
-          -DCMAKE_CXX_COMPILER=${{matrix.cxx_compiler}}
-          -DCMAKE_C_COMPILER=${{matrix.c_compiler}}
+          cmake -S . --preset ci-debug
+          -DCMAKE_CXX_COMPILER="$env:CXX_COMPILER"
+          -DCMAKE_C_COMPILER="$env:C_COMPILER"
 
       - name: Build (Debug)
         run: cmake --build --preset ci-debug --parallel 4
@@ -92,10 +102,13 @@ jobs:
       # Build and test pipeline for Release mode
 
       - name: Configure CMake (Release)
+        env:
+          CXX_COMPILER: ${{ matrix.cxx_compiler }}
+          C_COMPILER: ${{ matrix.c_compiler }}
         run: >
-          cmake -S ${{github.workspace}} --preset ci-release
-          -DCMAKE_CXX_COMPILER=${{matrix.cxx_compiler}}
-          -DCMAKE_C_COMPILER=${{matrix.c_compiler}}
+          cmake -S . --preset ci-release
+          -DCMAKE_CXX_COMPILER="$env:CXX_COMPILER"
+          -DCMAKE_C_COMPILER="$env:C_COMPILER"
 
       - name: Build (Release)
         run: cmake --build --preset ci-release --parallel 4

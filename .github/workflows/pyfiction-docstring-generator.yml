@@ -7,12 +7,26 @@ on:
       - ".github/workflows/pyfiction-docstring-generator.yml"
   workflow_dispatch:
 
+concurrency:
+  # head_ref is always empty for this workflow's push/workflow_dispatch triggers (it's only set
+  # for pull_request events), so fall back to github.ref rather than the always-unique run_id --
+  # otherwise concurrent runs on the same branch would never actually be serialized, and could
+  # race on the "Commit docstrings" push below
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
+
 jobs:
   get_docstrings:
     name: 🐍 Auto-generate docstrings for pyfiction from C++ code
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # required to commit and push the generated docstrings
     steps:
       - name: Clone Repository
+        # zizmor: ignore[artipacked] persisted credentials are required so the later "Commit
+        # docstrings" step (EndBug/add-and-commit) can push; that action doesn't accept a token
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           fetch-depth: 0 # Fetch all history for all branches and tags
@@ -29,17 +43,17 @@ jobs:
 
       - name: Create docstrings file
         working-directory: ${{ github.workspace }}
-        run: touch ${{ github.workspace }}/pybind11_mkdoc_docstrings.hpp
+        run: touch pybind11_mkdoc_docstrings.hpp
 
       - name: Run pybind11_mkdoc
         working-directory: ${{ github.workspace }}
         run: >
           python3
           -m pybind11_mkdoc
-          -o ${{ github.workspace }}/bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp
+          -o bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp
           -D FICTION_Z3_SOLVER
           -D FICTION_ALGLIB_ENABLED
-          `find ${{ github.workspace }}/include/fiction -name "*.hpp" -print`
+          `find include/fiction -name "*.hpp" -print`
 
       - name: Upload docstrings as an artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -48,6 +62,8 @@ jobs:
           overwrite: true
 
       - name: Commit docstrings
+        # zizmor: ignore[superfluous-actions] keeping the well-tested action (handles the
+        # no-changes-to-commit case, author fallback, etc.) instead of hand-rolled git scripting
         uses: EndBug/add-and-commit@290ea2c423ad77ca9c62ae0f5b224379612c0321 # v10.0.0
         with:
           add: "bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp"
