@@ -52,9 +52,16 @@ Fixed
 #####
 - Code quality:
     - Addressed several ``clang-tidy`` warnings throughout the code base
+    - Addressed several CodeQL findings: a potential unsigned-subtraction underflow in a test assertion, an
+      unnecessarily nested ``switch`` over a single-valued enum, imprecise ``assertTrue(a == b)``-style
+      Python test assertions, a duplicate ``import``/``from ... import`` of the same module, an unused
+      local variable, and dead code
 - Continuous integration:
     - Fixed Renovate attempting to bump the ``sphinx`` pin used for Python <3.11, which is unsupported by
       Sphinx 8.2+
+    - Excluded vendored third-party dependencies (fetched via CMake ``FetchContent``) and the purely
+      stylistic ``cpp/poorly-documented-function`` query from CodeQL analysis, removing hundreds of
+      alerts this project cannot act on
 - Documentation:
     - Fixed several stale ``**Header:**`` references pointing at renamed header files
     - Fixed an inconsistent ``fiction::`` namespace omission in a ``doxygenfunction`` directive
