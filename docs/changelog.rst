@@ -26,6 +26,9 @@ Added
         - `cmake-format-precommit`
         - `uv-pre-commit`
     - Enabled auto-merging stable non-major dependency releases via Renovate
+- Continuous integration:
+    - Added a 🌈 Zizmor workflow that statically analyzes the GitHub Actions workflows for security
+      issues on every push, pull request, and merge group, and uploads findings to the code scanning API
 
 Changed
 #######
@@ -39,6 +42,8 @@ Changed
 - Continuous integration:
     - The 🐧/🍎/🪟 CI, ☂️ Coverage, and 📝 CodeQL workflows, the Clang-Tidy Review workflow, and the Docker
       build now configure via the new CMake presets instead of hand-rolled ``-D`` flag lists
+    - The 🔖 Release Drafter workflow now runs on the smaller ``ubuntu-slim`` runner instead of
+      ``ubuntu-latest``, since it only calls the GitHub API and needs no compiler toolchain
 - Python bindings:
     - Restructured the ``pyfiction`` bindings to use multiple translation units (one ``.cpp`` file per
       binding) for better modularity and faster incremental compilation
