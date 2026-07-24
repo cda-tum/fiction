@@ -34,14 +34,13 @@ on:
       - ".github/workflows/pyfiction-pypi-deployment.yml"
   workflow_dispatch:
   workflow_run:
+    # zizmor: ignore[dangerous-triggers] no step here checks out the completed run's head SHA;
+    # every checkout below always resolves to this workflow's own trigger ref
     workflows: ["pyfiction Docstring Generator"]
     types:
       - completed
 
-permissions:
-  attestations: write
-  contents: read
-  id-token: write
+permissions: {}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
@@ -54,17 +53,20 @@ jobs:
   build_sdist:
     name: 📦 Build Source Distribution
     runs-on: ubuntu-latest
+    permissions:
+      contents: read # required to check out the repository
     steps:
       - name: Clone repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Install the latest version of uv
         uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
         with:
           version: "latest"
-          enable-cache: true
+          enable-cache: false
 
       - name: Build sdist
         run: uv build --sdist
@@ -82,6 +84,8 @@ jobs:
   build_wheels:
     name: 🛞 Wheels for ${{ matrix.runs-on }}
     runs-on: ${{ matrix.runs-on }}
+    permissions:
+      contents: read # required to check out the repository
 
     strategy:
       fail-fast: false
@@ -93,6 +97,7 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Set up MSVC development environment (Windows only)
         uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
@@ -120,7 +125,7 @@ jobs:
         uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
         with:
           version: "latest"
-          enable-cache: true
+          enable-cache: false
 
       - name: Build wheels
         uses: pypa/cibuildwheel@298ed2fb2c105540f5ed055e8a6ad78d82dd3a7e # v3.3
@@ -137,6 +142,9 @@ jobs:
     runs-on: ubuntu-latest
     name: 🚀 Publish to PyPI
     if: github.event_name == 'release' && github.event.action == 'published'
+    permissions:
+      attestations: write # required to publish the build provenance attestation
+      id-token: write # required by actions/attest-build-provenance to mint the attestation
     steps:
       - name: Download the previously stored artifacts
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
@@ -151,6 +159,9 @@ jobs:
           subject-path: "dist/*"
 
       - name: Deploy to PyPI
+        # zizmor: ignore[use-trusted-publishing] switching to OIDC trusted publishing requires
+        # registering this workflow as a trusted publisher on the PyPI project first (external,
+        # not something this repo alone controls); tracked as follow-up, not done here
         uses: pypa/gh-action-pypi-publish@ba38be9e461d3875417946c167d0b5f3d385a247 # release/v1
         with:
           password: ${{ secrets.PYPI_DEPLOY_TOKEN }}
