@@ -44,6 +44,12 @@ Changed
       build now configure via the new CMake presets instead of hand-rolled ``-D`` flag lists
     - The 🔖 Release Drafter workflow now runs on the smaller ``ubuntu-slim`` runner instead of
       ``ubuntu-latest``, since it only calls the GitHub API and needs no compiler toolchain
+    - Hardened every workflow against the findings from the new 🌈 Zizmor workflow: scoped
+      ``permissions`` blocks to the minimum each job needs (instead of relying on the broad default),
+      set ``persist-credentials: false`` on checkouts that don't push, routed matrix/workspace values
+      through ``env`` vars instead of interpolating them directly into shell commands, and disabled
+      the PyPI packaging workflow's build cache to close a cache-poisoning path into published
+      artifacts
 - Python bindings:
     - Restructured the ``pyfiction`` bindings to use multiple translation units (one ``.cpp`` file per
       binding) for better modularity and faster incremental compilation
