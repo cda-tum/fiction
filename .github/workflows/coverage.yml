@@ -104,7 +104,7 @@ jobs:
       - name: Generate Coverage Report
         run: |
           lcov --gcov-tool gcov-13 -t "fiction-coverage" -o lcov.info -c -d build-coverage/ --ignore-errors mismatch --ignore-errors gcov
-          lcov --gcov-tool gcov-13 -e lcov.info "include*" -o lcov_filtered.info
+          lcov --gcov-tool gcov-13 -e lcov.info "$GITHUB_WORKSPACE/include*" -o lcov_filtered.info
           lcov -l lcov_filtered.info
 
       - name: Upload report to Codecov
