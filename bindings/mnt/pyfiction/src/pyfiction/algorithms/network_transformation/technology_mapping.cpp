@@ -26,7 +26,10 @@ void technology_mapping_impl(pybind11::module& m)
 
 void technology_mapping(pybind11::module& m)
 {
-    namespace py = pybind11;
+    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
+
+    // Expose the exception
+    py::register_exception<fiction::missing_required_gates_exception>(m, "missing_required_gates_exception");
 
     py::class_<fiction::technology_mapping_params>(m, "technology_mapping_params",
                                                    DOC(fiction_technology_mapping_params))
@@ -45,6 +48,8 @@ void technology_mapping(pybind11::module& m)
         .def_readwrite("xor2", &fiction::technology_mapping_params::xor2, DOC(fiction_technology_mapping_params_xor2))
         .def_readwrite("xnor2", &fiction::technology_mapping_params::xnor2,
                        DOC(fiction_technology_mapping_params_xnor2))
+
+        .def_readwrite("ha", &fiction::technology_mapping_params::ha, DOC(fiction_technology_mapping_params_ha))
 
         .def_readwrite("and3", &fiction::technology_mapping_params::and3, DOC(fiction_technology_mapping_params_and3))
         .def_readwrite("xor_and", &fiction::technology_mapping_params::xor_and,

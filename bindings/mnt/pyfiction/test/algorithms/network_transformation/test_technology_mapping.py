@@ -55,6 +55,17 @@ class TestTechnologyMapping(unittest.TestCase):
 
             self.assertEqual(equivalence_checking(network, mapped_network), eq_type.STRONG)
 
+    def test_mapping_with_half_adder(self):
+        network = read_technology_network(dir_path + "/../../resources/mux21.v")
+
+        # enabling the half-adder gates on top of the standard 2-input gates must not break the mapping
+        params = all_standard_2_input_functions()
+        params.ha = True
+
+        mapped_network = technology_mapping(network, params)
+
+        self.assertEqual(equivalence_checking(network, mapped_network), eq_type.STRONG)
+
 
 if __name__ == "__main__":
     unittest.main()
