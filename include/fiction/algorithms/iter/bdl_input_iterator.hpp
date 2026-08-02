@@ -10,7 +10,9 @@
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/traits.hpp"
 
+#include <algorithm>
 #include <cassert>
+#include <compare>
 #include <cstdint>
 #include <iterator>
 #include <vector>
@@ -284,54 +286,14 @@ class bdl_input_iterator
         return current_input_index == m;
     }
     /**
-     * Inequality operator. Compares the current input index with the given integer.
+     * Three-way comparison operator. Compares the current input index with the given integer.
      *
      * @param m Integer to compare with.
-     * @return `true` if the current input index is not equal to `m`, `false` otherwise.
+     * @return The ordering between the current input index and `m`.
      */
-    [[nodiscard]] bool operator!=(const uint64_t m) const noexcept
+    [[nodiscard]] std::strong_ordering operator<=>(const uint64_t m) const noexcept
     {
-        return current_input_index != m;
-    }
-    /**
-     * Less-than operator. Compares the current input index with the given integer.
-     *
-     * @param m Integer to compare with.
-     * @return `true` if the current input index is less than `m`, `false` otherwise.
-     */
-    [[nodiscard]] bool operator<(const uint64_t m) const noexcept
-    {
-        return current_input_index < m;
-    }
-    /**
-     * Less-or-equal-than operator. Compares the current input index with the given integer.
-     *
-     * @param m Integer to compare with.
-     * @return `true` if the current input index is less than or equal to `m`, `false` otherwise.
-     */
-    [[nodiscard]] bool operator<=(const uint64_t m) const noexcept
-    {
-        return current_input_index <= m;
-    }
-    /**
-     * Greater-than operator. Compares the current input index with the given integer.
-     *
-     * @param m Integer to compare with.
-     * @return `true` if the current input index is greater than `m`, `false` otherwise.
-     */
-    [[nodiscard]] bool operator>(const uint64_t m) const noexcept
-    {
-        return current_input_index > m;
-    }
-    /**
-     * Greater-or-equal-than operator. Compares the current input index with the given integer.
-     *
-     * @param m Integer to compare with.
-     * @return `true` if the current input index is greater than or equal to `m`, `false` otherwise.
-     */
-    [[nodiscard]] bool operator>=(const uint64_t m) const noexcept
-    {
-        return current_input_index >= m;
+        return current_input_index <=> m;
     }
     /**
      * Returns the total number of input BDL pairs of the given SiDB gate layout.
@@ -398,8 +360,8 @@ class bdl_input_iterator
         for (const auto& wire : input_bdl_wires)
         {
             // Find the first BDL pair in the wire with type INPUT
-            auto start_bdl_it = std::find_if(wire.pairs.cbegin(), wire.pairs.cend(), [](const bdl_pair<cell<Lyt>>& bdl)
-                                             { return bdl.type == sidb_technology::cell_type::INPUT; });
+            auto start_bdl_it = std::ranges::find_if(wire.pairs, [](const bdl_pair<cell<Lyt>>& bdl)
+                                                     { return bdl.type == sidb_technology::cell_type::INPUT; });
 
             // If no INPUT type BDL pair is found, skip this wire
             if (start_bdl_it == wire.pairs.cend())
@@ -411,13 +373,13 @@ class bdl_input_iterator
 
             // Find the BDL pair with the maximum distance from the start BDL pair
             const auto max_bdl_it =
-                std::max_element(wire.pairs.cbegin(), wire.pairs.cend(),
-                                 [&](const bdl_pair<cell<Lyt>>& a, const bdl_pair<cell<Lyt>>& b) -> bool
-                                 {
-                                     double distance_a = sidb_nm_distance(Lyt{}, start_bdl_pair.upper, a.upper);
-                                     double distance_b = sidb_nm_distance(Lyt{}, start_bdl_pair.upper, b.upper);
-                                     return distance_a < distance_b;
-                                 });
+                std::ranges::max_element(wire.pairs,
+                                         [&](const bdl_pair<cell<Lyt>>& a, const bdl_pair<cell<Lyt>>& b) -> bool
+                                         {
+                                             double distance_a = sidb_nm_distance(Lyt{}, start_bdl_pair.upper, a.upper);
+                                             double distance_b = sidb_nm_distance(Lyt{}, start_bdl_pair.upper, b.upper);
+                                             return distance_a < distance_b;
+                                         });
 
             // If a valid BDL pair is found, add it to the end BDLs collection
             if (max_bdl_it != wire.pairs.cend())

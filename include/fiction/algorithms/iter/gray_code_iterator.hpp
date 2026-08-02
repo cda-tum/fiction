@@ -5,6 +5,7 @@
 #ifndef FICTION_GRAY_CODE_ITERATOR_HPP
 #define FICTION_GRAY_CODE_ITERATOR_HPP
 
+#include <compare>
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
@@ -68,34 +69,14 @@ class gray_code_iterator
         return (current_gray_code == other.current_gray_code);
     }
     /**
-     * Inequality comparison operator. Compares the current iterator with another iterator.
+     * Three-way comparison operator. Compares the current iterator with another iterator based on their Gray codes.
      *
      * @param other The iterator to compare with.
-     * @return `true` if the current iterator is not equal to the other iterator, `false` otherwise.
+     * @return The ordering between the current iterator's and the other iterator's Gray codes.
      */
-    [[nodiscard]] constexpr bool operator!=(const gray_code_iterator& other) const noexcept
+    [[nodiscard]] constexpr std::strong_ordering operator<=>(const gray_code_iterator& other) const noexcept
     {
-        return !(*this == other);
-    }
-    /**
-     * Less-than comparison operator. Compares the current iterator with another iterator.
-     *
-     * @param other The iterator to compare with.
-     * @return `true` if the current iterator is less than the other iterator, `false` otherwise.
-     */
-    [[nodiscard]] constexpr bool operator<(const gray_code_iterator& other) const noexcept
-    {
-        return current_gray_code < other.current_gray_code;
-    }
-    /**
-     * Less-than or equal-to comparison operator. Compares the current iterator with another iterator.
-     *
-     * @param other The iterator to compare with.
-     * @return `true` if the current iterator is less than or equal to the other iterator, `false` otherwise.
-     */
-    [[nodiscard]] constexpr bool operator<=(const gray_code_iterator& other) const noexcept
-    {
-        return current_gray_code <= other.current_gray_code;
+        return current_gray_code <=> other.current_gray_code;
     }
     /**
      * Subtraction operator to calculate the difference between two gray_code_iterators.
@@ -246,54 +227,14 @@ class gray_code_iterator
         return current_iteration == m;
     }
     /**
-     * Inequality operator. Compares the current number with the given integer.
+     * Three-way comparison operator. Compares the current number with the given integer.
      *
      * @param m Integer to compare with.
-     * @return `true` if the current number is not equal to `m`, `false` otherwise.
+     * @return The ordering between the current number and `m`.
      */
-    [[nodiscard]] constexpr bool operator!=(const uint64_t m) const noexcept
+    [[nodiscard]] constexpr std::strong_ordering operator<=>(const uint64_t m) const noexcept
     {
-        return current_iteration != m;
-    }
-    /**
-     * Less-than operator. Compares the current number with the given integer.
-     *
-     * @param m Integer to compare with.
-     * @return `true` if the current number is less than `m`, `false` otherwise.
-     */
-    [[nodiscard]] constexpr bool operator<(const uint64_t m) const noexcept
-    {
-        return current_iteration < m;
-    }
-    /**
-     * Less-or-equal-than operator. Compares the current number with the given integer.
-     *
-     * @param m Integer to compare with.
-     * @return `true` if the current number is less than or equal to `m`, `false` otherwise.
-     */
-    [[nodiscard]] constexpr bool operator<=(const uint64_t m) const noexcept
-    {
-        return current_iteration <= m;
-    }
-    /**
-     * Greater-than operator. Compares the current number with the given integer.
-     *
-     * @param m Integer to compare with.
-     * @return `true` if the current number is greater than `m`, `false` otherwise.
-     */
-    [[nodiscard]] constexpr bool operator>(const uint64_t m) const noexcept
-    {
-        return current_iteration > m;
-    }
-    /**
-     * Greater-or-equal-than operator. Compares the current number with the given integer.
-     *
-     * @param m Integer to compare with.
-     * @return `true` if the current number is greater than or equal to `m`, `false` otherwise.
-     */
-    [[nodiscard]] constexpr bool operator>=(const uint64_t m) const noexcept
-    {
-        return current_iteration >= m;
+        return current_iteration <=> m;
     }
 
   private:
