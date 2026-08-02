@@ -814,7 +814,7 @@ class operational_domain_impl
         // calculate the size of each slice
         const auto slice_size = (all_index_combinations.size() + num_threads - 1) / num_threads;
 
-        std::vector<std::thread> threads{};
+        std::vector<std::jthread> threads{};
         threads.reserve(num_threads);
 
         // launch threads, each with its own slice of random step points
@@ -1318,7 +1318,7 @@ class operational_domain_impl
 
         const auto slice_size = (step_points.size() + num_threads - 1) / num_threads;
 
-        std::vector<std::thread> threads{};
+        std::vector<std::jthread> threads{};
         threads.reserve(num_threads);
 
         // launch threads, each with its own slice of random step points

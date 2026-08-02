@@ -169,7 +169,7 @@ quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}) noexcept
                      uint64_t{1});  // If the number of set threads is greater than the number of iterations, the
                                     // number of threads defines how many times QuickSim is repeated
 
-        std::vector<std::thread> threads{};
+        std::vector<std::jthread> threads{};
         threads.reserve(num_threads);
         std::mutex mutex{};  // used to control access to shared resources
 

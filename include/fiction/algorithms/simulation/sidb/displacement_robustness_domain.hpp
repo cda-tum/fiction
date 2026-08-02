@@ -213,7 +213,7 @@ class displacement_robustness_domain_impl
         // calculate the size of each slice
         const auto slice_size = (layouts.size() + num_threads - 1) / num_threads;
 
-        std::vector<std::thread> threads{};
+        std::vector<std::jthread> threads{};
         threads.reserve(num_threads);
 
         // launch threads, each with its own slice of random step points
