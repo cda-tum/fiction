@@ -13,6 +13,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <cstdlib>
+#include <ranges>
 #include <vector>
 
 namespace fiction
@@ -51,9 +52,8 @@ class critical_path_length_and_throughput_impl
                     std::max(signal_delay(static_cast<tile<Lyt>>(po)).length, result.critical_path_length);
             });
 
-        const auto max_diff =
-            std::max_element(delay_cache.cbegin(), delay_cache.cend(),
-                             [](const auto& i1, const auto& i2) { return i1.second.diff < i2.second.diff; });
+        const auto max_diff = std::ranges::max_element(delay_cache, [](const auto& i1, const auto& i2)
+                                                       { return i1.second.diff < i2.second.diff; });
 
         if (max_diff != delay_cache.cend())
         {
@@ -110,8 +110,8 @@ class critical_path_length_and_throughput_impl
         // fetch information about all incoming paths
         std::vector<path_info> infos{};
 
-        std::transform(idf.cbegin(), idf.cend(), std::back_inserter(infos),
-                       [this](const auto& in_tile) { return signal_delay(in_tile); });
+        std::ranges::transform(idf, std::back_inserter(infos),
+                               [this](const auto& in_tile) { return signal_delay(in_tile); });
 
         path_info dominant_path{};
 
@@ -129,7 +129,7 @@ class critical_path_length_and_throughput_impl
         else  // fetch the highest delay and difference
         {
             // sort by path length
-            std::sort(infos.begin(), infos.end(), [](const auto& i1, const auto& i2) { return i1.length < i2.length; });
+            std::ranges::sort(infos, [](const auto& i1, const auto& i2) { return i1.length < i2.length; });
 
             dominant_path.length = infos.back().length;
             dominant_path.delay  = infos.back().delay;

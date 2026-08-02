@@ -13,6 +13,7 @@
 
 #include <algorithm>
 #include <optional>
+#include <ranges>
 #include <vector>
 
 namespace fiction
@@ -126,8 +127,8 @@ template <typename NtkDest, typename NtkSrc1, typename NtkSrc2>
     // create XOR of output pairs
     std::vector<mockturtle::signal<NtkDest>> xor_outputs{};
     xor_outputs.reserve(ntk1.num_pos());
-    std::transform(pos1.begin(), pos1.end(), pos2.begin(), std::back_inserter(xor_outputs),
-                   [&](auto const& o1, auto const& o2) { return dest.create_xor(o1, o2); });
+    std::ranges::transform(pos1, pos2, std::back_inserter(xor_outputs),
+                           [&](auto const& o1, auto const& o2) { return dest.create_xor(o1, o2); });
 
     // create big OR of XOR gates
     dest.create_po(dest.create_nary_or(xor_outputs));
