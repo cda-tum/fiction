@@ -977,27 +977,27 @@ class is_operational_impl
     [[nodiscard]] bool check_existence_of_kinks_in_input_wires(const charge_distribution_surface<Lyt>& ground_state,
                                                                const uint64_t current_input_index) const noexcept
     {
-        return std::any_of(input_bdl_wires.crbegin(), input_bdl_wires.crend(),
-                           [this, &ground_state, &current_input_index, i = 0u](const auto& wire) mutable
-                           {
-                               const auto current_bit_set = (current_input_index & (uint64_t{1ull} << i++)) != 0ull;
-                               return std::ranges::any_of(
-                                   wire.pairs,
-                                   [this, &ground_state, &current_bit_set, &wire](const auto& bdl)
-                                   {
-                                       if (bdl.type == sidb_technology::INPUT)
-                                       {
-                                           return false;  // Skip processing for input type.
-                                       }
+        return std::ranges::any_of(
+            input_bdl_wires.crbegin(), input_bdl_wires.crend(),
+            [this, &ground_state, &current_input_index, i = 0u](const auto& wire) mutable
+            {
+                const auto current_bit_set = (current_input_index & (uint64_t{1ull} << i++)) != 0ull;
+                return std::ranges::any_of(wire.pairs,
+                                           [this, &ground_state, &current_bit_set, &wire](const auto& bdl)
+                                           {
+                                               if (bdl.type == sidb_technology::INPUT)
+                                               {
+                                                   return false;  // Skip processing for input type.
+                                               }
 
-                                       if (current_bit_set)
-                                       {
-                                           return !encodes_bit_one(ground_state, bdl, wire.port);
-                                       }
+                                               if (current_bit_set)
+                                               {
+                                                   return !encodes_bit_one(ground_state, bdl, wire.port);
+                                               }
 
-                                       return !encodes_bit_zero(ground_state, bdl, wire.port);
-                                   });
-                           });
+                                               return !encodes_bit_zero(ground_state, bdl, wire.port);
+                                           });
+            });
     }
 
     /**

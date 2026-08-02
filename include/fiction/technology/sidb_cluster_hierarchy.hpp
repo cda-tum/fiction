@@ -905,8 +905,8 @@ struct potential_projection_order
         }
         else if constexpr (bound == bound_direction::UPPER)
         {
-            return *std::find_if(order.crbegin(), order.crend(),
-                                 [&](const potential_projection& pp) { return pp.multiset != bound_m; });
+            return *std::ranges::find_if(order.crbegin(), order.crend(),
+                                         [&](const potential_projection& pp) { return pp.multiset != bound_m; });
         }
     }
     /**
@@ -928,8 +928,8 @@ struct potential_projection_order
         }
         else if constexpr (bound == bound_direction::UPPER)
         {
-            return *std::prev(std::find_if(order.crbegin(), order.crend(),
-                                           [&](const potential_projection& pp) { return pp.multiset == m_conf; })
+            return *std::prev(std::ranges::find_if(order.crbegin(), order.crend(), [&](const potential_projection& pp)
+                                                   { return pp.multiset == m_conf; })
                                   .base(),
                               1);
         }
