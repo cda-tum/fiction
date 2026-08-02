@@ -222,8 +222,7 @@ class design_sidb_gates_impl
         std::atomic<bool> solution_found = false;
 
         // Shuffle the combinations before dividing them among threads
-        std::shuffle(all_combinations.begin(), all_combinations.end(),
-                     std::default_random_engine(std::random_device{}()));
+        std::ranges::shuffle(all_combinations, std::default_random_engine(std::random_device{}()));
 
         const auto add_combination_to_layout_and_check_operation = [this, &mutex_to_protect_designed_gate_layouts,
                                                                     &designed_gate_layouts,
@@ -841,8 +840,8 @@ template <typename Lyt, typename TT>
 
     assert(!spec.empty());
     // all elements in tts must have the same number of variables
-    assert(std::adjacent_find(spec.begin(), spec.end(),
-                              [](const auto& a, const auto& b) { return a.num_vars() != b.num_vars(); }) == spec.end());
+    assert(std::ranges::adjacent_find(spec, [](const auto& a, const auto& b)
+                                      { return a.num_vars() != b.num_vars(); }) == spec.end());
 
     design_sidb_gates_stats                 st{};
     detail::design_sidb_gates_impl<Lyt, TT> p{skeleton, spec, params, st};
