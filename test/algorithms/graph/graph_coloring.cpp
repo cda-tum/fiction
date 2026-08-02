@@ -74,8 +74,7 @@ template <typename Graph>
 void check_sat_coloring_engine(const Graph& graph, const std::size_t expected_chromatic_number,
                                std::vector<typename Graph::vertex_id_type> clique = {})
 {
-    determine_vertex_coloring_sat_params<Graph> sat_params{};
-    sat_params.cliques = {{clique}};
+    determine_vertex_coloring_sat_params<Graph> sat_params{.cliques = {{clique}}};
 
     SECTION("SAT")
     {
@@ -277,7 +276,7 @@ Graph create_complete_graph(std::vector<typename Graph::vertex_id_type>& vertice
 
     if (vertices.size() >= 2)
     {
-        std::for_each(vertices.cbegin(), vertices.cend(), [&k](const auto& v) { k.insert_vertex(v, {}); });
+        std::ranges::for_each(vertices, [&k](const auto& v) { k.insert_vertex(v, {}); });
         combinations::for_each_combination(vertices.begin(), vertices.begin() + 2, vertices.end(),
                                            [&k](const auto begin, [[maybe_unused]] const auto end)
                                            {

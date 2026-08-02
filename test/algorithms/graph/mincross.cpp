@@ -52,9 +52,8 @@ TEST_CASE("Fixed PIs Check", "[mincross]")
     const auto aig_r = fiction::mutable_rank_view(tec);
 
     mincross_stats  st{};
-    mincross_params p{};
-    p.fixed_pis = false;
-    auto ntk    = mincross(aig_r, p, &st);
+    mincross_params p{.fixed_pis = false};
+    auto            ntk = mincross(aig_r, p, &st);
     CHECK(st.num_crossings == 0);
 
     p.fixed_pis = true;
@@ -81,8 +80,7 @@ TEST_CASE("Planar Network", "[mincross]")
     aig_r.set_ranks(1, rank1);
 
     mincross_stats  st{};
-    mincross_params p{};
-    p.optimize = false;
+    mincross_params p{.optimize = false};
 
     auto ntk = mincross(aig_r, p, &st);  // counts crossings
     CHECK(st.num_crossings == 3);
@@ -111,8 +109,7 @@ TEST_CASE("Majority", "[mincross]")
     tec_r.set_ranks(1, rank1);
 
     mincross_stats  st{};
-    mincross_params p{};
-    p.optimize = false;
+    mincross_params p{.optimize = false};
 
     auto ntk = mincross(tec_r, p, &st);  // counts crossings
     CHECK(st.num_crossings == 2);
@@ -133,8 +130,7 @@ TEST_CASE("Adder", "[mincross]")
     auto tec_r = fiction::mutable_rank_view(tec_topo);
 
     mincross_stats  st{};
-    mincross_params p{};
-    p.optimize = false;
+    mincross_params p{.optimize = false};
 
     auto ntk = mincross(tec_r, p, &st);  // counts crossings
     CHECK(st.num_crossings == 4);

@@ -207,8 +207,8 @@ class sat_coloring_handler
             graph{g},
             ps{p},
             pst{st},
-            largest_clique{std::max_element(ps.cliques.cbegin(), ps.cliques.cend(),
-                                            [](const auto& c1, const auto& c2) { return c1.size() < c2.size(); })},
+            largest_clique{std::ranges::max_element(ps.cliques, [](const auto& c1, const auto& c2)
+                                                    { return c1.size() < c2.size(); })},
             q{largest_clique == ps.cliques.cend() ? 1 : (largest_clique->size() ? largest_clique->size() : 1)}
     {}
 
@@ -297,8 +297,8 @@ class sat_coloring_handler
         std::iota(potential_chromatic_numbers.begin(), potential_chromatic_numbers.end(), h / 2);
 
         // binary search for the chromatic number, i.e., the lower bound of potential ones
-        std::ignore = std::lower_bound(
-            potential_chromatic_numbers.cbegin(), potential_chromatic_numbers.cend(), h,
+        std::ignore = std::ranges::lower_bound(
+            potential_chromatic_numbers, h,
             [this, &most_recent_sat_instance](const auto& k1, [[maybe_unused]] const auto& k2)
             {
                 if (const auto [sat, instance] = check_k_coloring(k1); sat == bill::result::states::satisfiable)
@@ -486,18 +486,19 @@ class sat_coloring_handler
             color_c_in_each_clique.reserve(ps.cliques.size());
 
             // for each clique
-            std::for_each(ps.cliques.cbegin(), ps.cliques.cend(),
-                          [&instance, &c, &color_c_in_each_clique](const auto& clique)
-                          {
-                              std::vector<bill::lit_type> vc{};
-                              vc.reserve(clique.size());
+            std::ranges::for_each(ps.cliques,
+                                  [&instance, &c, &color_c_in_each_clique](const auto& clique)
+                                  {
+                                      std::vector<bill::lit_type> vc{};
+                                      vc.reserve(clique.size());
 
-                              // for each vertex in clique
-                              std::for_each(clique.cbegin(), clique.cend(), [&instance, &c, &vc](const auto& v)
-                                            { vc.push_back({instance->variables[{v, c}], bill::positive_polarity}); });
+                                      // for each vertex in clique
+                                      std::ranges::for_each(
+                                          clique, [&instance, &c, &vc](const auto& v)
+                                          { vc.push_back({instance->variables[{v, c}], bill::positive_polarity}); });
 
-                              color_c_in_each_clique.push_back(bill::add_tseytin_or(instance->solver, vc));
-                          });
+                                      color_c_in_each_clique.push_back(bill::add_tseytin_or(instance->solver, vc));
+                                  });
 
             same_color_in_each_clique.push_back(bill::add_tseytin_and(instance->solver, color_c_in_each_clique));
         }
@@ -567,8 +568,7 @@ class sat_coloring_handler
                       {
                           const auto& v = vp.first;
                           // if vertex v is not yet in the ordering
-                          if (std::find(clique_first_ordering.cbegin(), clique_first_ordering.cend(), v) ==
-                              clique_first_ordering.cend())
+                          if (std::ranges::find(clique_first_ordering, v) == clique_first_ordering.cend())
                           {
                               clique_first_ordering.push_back(v);
                           }
@@ -666,8 +666,8 @@ class sat_coloring_handler
                           }
                       });
 
-        if (const auto it = std::max_element(color_frequency.cbegin(), color_frequency.cend(),
-                                             [](const auto& cf1, const auto& cf2) { return cf1.second < cf2.second; });
+        if (const auto it = std::ranges::max_element(color_frequency, [](const auto& cf1, const auto& cf2)
+                                                     { return cf1.second < cf2.second; });
             it != color_frequency.cend())
         {
             pst.most_frequent_color = it->first;
@@ -883,18 +883,17 @@ class graph_coloring_impl
         // determine the color frequency alongside; index represents the color, value its frequency
         std::vector<Color> color_frequency(pst.chromatic_number, Color{0});
 
-        std::for_each(bc_coloring.cbegin(), bc_coloring.cend(),
-                      [this,  // NOLINT(clang-diagnostic-unused-lambda-capture): false positive
-                       &v_coloring, &color_frequency](const auto& c_pair)
-                      {
-                          // convert color
-                          v_coloring[convert_node_index(c_pair.first)] = static_cast<Color>(c_pair.second);
-                          // increment the color frequency
-                          color_frequency[static_cast<std::size_t>(c_pair.second)]++;
-                      });
+        std::ranges::for_each(bc_coloring,
+                              [this,  // NOLINT(clang-diagnostic-unused-lambda-capture): false positive
+                               &v_coloring, &color_frequency](const auto& c_pair)
+                              {
+                                  // convert color
+                                  v_coloring[convert_node_index(c_pair.first)] = static_cast<Color>(c_pair.second);
+                                  // increment the color frequency
+                                  color_frequency[static_cast<std::size_t>(c_pair.second)]++;
+                              });
 
-        if (const auto it = std::max_element(color_frequency.cbegin(), color_frequency.cend());
-            it != color_frequency.cend())
+        if (const auto it = std::ranges::max_element(color_frequency); it != color_frequency.cend())
         {
             // get index from iterator; index represents the color
             pst.most_frequent_color = static_cast<Color>(it - color_frequency.cbegin());
