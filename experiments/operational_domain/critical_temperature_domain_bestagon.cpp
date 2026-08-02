@@ -39,22 +39,13 @@ int main()  // NOLINT
         "ΔCT"};
 
     // simulation parameters
-    sidb_simulation_parameters sim_params{};
-    sim_params.base     = 2;
-    sim_params.mu_minus = -0.32;
+    sidb_simulation_parameters sim_params{.mu_minus = -0.32, .base = 2};
 
     // operational domain parameters
-    operational_domain_params op_domain_params{};
-    op_domain_params.operational_params.simulation_parameters = sim_params;
-    op_domain_params.operational_params.sim_engine            = sidb_simulation_engine::QUICKEXACT;
-
-    op_domain_params.sweep_dimensions         = {{sweep_parameter::EPSILON_R}, {sweep_parameter::LAMBDA_TF}};
-    op_domain_params.sweep_dimensions[0].min  = 1.0;
-    op_domain_params.sweep_dimensions[0].max  = 10.0;
-    op_domain_params.sweep_dimensions[0].step = 0.01;
-    op_domain_params.sweep_dimensions[1].min  = 1.0;
-    op_domain_params.sweep_dimensions[1].max  = 10.0;
-    op_domain_params.sweep_dimensions[1].step = 0.01;
+    operational_domain_params op_domain_params{
+        .operational_params = {.simulation_parameters = sim_params, .sim_engine = sidb_simulation_engine::QUICKEXACT},
+        .sweep_dimensions   = {{sweep_parameter::EPSILON_R, 1.0, 10.0, 0.01},
+                               {sweep_parameter::LAMBDA_TF, 1.0, 10.0, 0.01}}};
 
     static const std::string folder = fmt::format("{}sidb_gate_libraries/bestagon_gates/", EXPERIMENTS_PATH);
 
