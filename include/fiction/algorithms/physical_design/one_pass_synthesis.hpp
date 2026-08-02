@@ -989,8 +989,8 @@ std::optional<Lyt> one_pass_synthesis(const std::vector<TT>& tts, one_pass_synth
     // tts cannot be empty
     assert(!tts.empty());
     // all elements in tts must have the same number of variables
-    assert(std::adjacent_find(tts.begin(), tts.end(),
-                              [](const auto& a, const auto& b) { return a.num_vars() != b.num_vars(); }) == tts.end());
+    assert(std::ranges::adjacent_find(tts, [](const auto& a, const auto& b) { return a.num_vars() != b.num_vars(); }) ==
+           tts.end());
 
     one_pass_synthesis_stats                 st{};
     detail::one_pass_synthesis_impl<Lyt, TT> p{tts, ps, st};

@@ -362,8 +362,8 @@ TEST_CASE("Skip tiles for PI placement", "[graph-oriented-layout-design]")
                         left_y.push_back(c.y);
                 });
 
-            std::sort(top_x.begin(), top_x.end());
-            std::sort(left_y.begin(), left_y.end());
+            std::ranges::sort(top_x);
+            std::ranges::sort(left_y);
 
             // check gaps between consecutive PIs on each edge
             const auto min_gap = skip + 1;  // after placing a PI, leave `skip` empty tiles before next
