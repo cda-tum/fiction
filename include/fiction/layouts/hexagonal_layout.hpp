@@ -928,20 +928,22 @@ class hexagonal_layout
             {{+1, -1, 0}, {+1, 0, -1}, {0, +1, -1}, {-1, +1, 0}, {-1, 0, +1}, {0, -1, +1}}};
 
         // for each direction
-        std::for_each(cube_directions.cbegin(), cube_directions.cend(),
-                      [this, &c, &fn](const auto& dir)
-                      {
-                          // convert given coordinate to the cube system, add direction, and convert back to offset
-                          auto neighbor = to_offset_coordinate(to_cube_coordinate(c) + dir);
-                          // since cube coordinates don't carry the layer information, it has to be manually added
-                          neighbor.z = c.z;
+        std::ranges::for_each(cube_directions,
+                              [this, &c, &fn](const auto& dir)
+                              {
+                                  // convert given coordinate to the cube system, add direction, and convert back to
+                                  // offset
+                                  auto neighbor = to_offset_coordinate(to_cube_coordinate(c) + dir);
+                                  // since cube coordinates don't carry the layer information, it has to be manually
+                                  // added
+                                  neighbor.z = c.z;
 
-                          // add neighboring coordinate if there was no over-/underflow
-                          if (is_within_bounds(neighbor))
-                          {
-                              std::invoke(std::forward<Fn>(fn), std::move(neighbor));
-                          }
-                      });
+                                  // add neighboring coordinate if there was no over-/underflow
+                                  if (is_within_bounds(neighbor))
+                                  {
+                                      std::invoke(std::forward<Fn>(fn), std::move(neighbor));
+                                  }
+                              });
     }
     /**
      * Returns a container that contains all coordinates pairs of opposing adjacent coordinates with

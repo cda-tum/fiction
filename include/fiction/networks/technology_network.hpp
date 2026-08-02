@@ -7,6 +7,8 @@
 
 #include <mockturtle/networks/klut.hpp>
 
+#include <algorithm>
+
 namespace fiction
 {
 
@@ -57,8 +59,8 @@ class technology_network : public mockturtle::klut_network
      */
     [[nodiscard]] bool is_po(const node& n) const
     {
-        return std::find_if(_storage->outputs.cbegin(), _storage->outputs.cend(), [this, &n](const auto& p)
-                            { return this->get_node(p.index) == n; }) != _storage->outputs.cend();
+        return std::ranges::find_if(_storage->outputs, [this, &n](const auto& p)
+                                    { return this->get_node(p.index) == n; }) != _storage->outputs.cend();
     }
 
 #pragma endregion
@@ -189,7 +191,7 @@ class technology_network : public mockturtle::klut_network
     signal _create_node(const std::vector<signal>& children, uint32_t literal)
     {
         storage::element_type::node_type node_data;
-        std::copy(children.begin(), children.end(), std::back_inserter(node_data.children));
+        std::ranges::copy(children, std::back_inserter(node_data.children));
         node_data.data[1].h1 = literal;
 
         const auto index = _storage->nodes.size();
