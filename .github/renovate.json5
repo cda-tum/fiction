@@ -75,6 +75,37 @@
       depNameTemplate: "leethomason/tinyxml2",
       packageNameTemplate: "https://github.com/leethomason/tinyxml2",
       datasourceTemplate: "github-tags",
+    },
+    {
+      // alice and mockturtle are pinned to a commit SHA that tracks the head
+      // of a branch (rather than a release tag), so these use the git-refs
+      // datasource against that branch instead of github-tags.
+      customType: "regex",
+      description: "Update the alice revision pinned for CMake FetchContent",
+      managerFilePatterns: [
+        "cmake/Dependencies.cmake"
+      ],
+      matchStrings: [
+        "GIT_REPOSITORY https://github\\.com/marcelwa/alice\\.git\\s+GIT_TAG (?<currentDigest>[0-9a-f]{40})"
+      ],
+      depNameTemplate: "marcelwa/alice",
+      packageNameTemplate: "https://github.com/marcelwa/alice",
+      currentValueTemplate: "master",
+      datasourceTemplate: "git-refs",
+    },
+    {
+      customType: "regex",
+      description: "Update the mockturtle revision pinned for CMake FetchContent",
+      managerFilePatterns: [
+        "cmake/Dependencies.cmake"
+      ],
+      matchStrings: [
+        "GIT_REPOSITORY https://github\\.com/marcelwa/mockturtle\\.git\\s+GIT_TAG (?<currentDigest>[0-9a-f]{40})"
+      ],
+      depNameTemplate: "marcelwa/mockturtle",
+      packageNameTemplate: "https://github.com/marcelwa/mockturtle",
+      currentValueTemplate: "mnt",
+      datasourceTemplate: "git-refs",
     }
   ],
   lockFileMaintenance: {
@@ -133,6 +164,10 @@
         "build_system"
       ],
       commitMessagePrefix: "⬆️📦",
+      // `:automergeDigest` (inherited from extends) would otherwise merge the
+      // alice/mockturtle git-refs updates unattended. A bump there changes the
+      // C++ core, so it gets reviewed like the tag-based updates above.
+      automerge: false,
     },
     {
       description: "Sphinx 8.2+ dropped support for Python <3.11, so keep this pin as-is to avoid breaking dependency resolution",
