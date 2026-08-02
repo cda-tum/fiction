@@ -515,15 +515,9 @@ class quickexact_impl
 
         // all pre-assigned negatively charged SiDBs are erased from the
         // all_sidbs_in_lyt_without_negative_preassigned_ones vector.
-        all_sidbs_in_lyt_without_negative_preassigned_ones.erase(
-            std::remove_if(all_sidbs_in_lyt_without_negative_preassigned_ones.begin(),
-                           all_sidbs_in_lyt_without_negative_preassigned_ones.end(),
-                           [this](const auto& n)
-                           {
-                               return std::find(preassigned_negative_sidbs.cbegin(), preassigned_negative_sidbs.cend(),
-                                                n) != preassigned_negative_sidbs.cend();
-                           }),
-            all_sidbs_in_lyt_without_negative_preassigned_ones.cend());
+        std::erase_if(
+            all_sidbs_in_lyt_without_negative_preassigned_ones, [this](const auto& n)
+            { return std::ranges::find(preassigned_negative_sidbs, n) != preassigned_negative_sidbs.cend(); });
     }
 };
 

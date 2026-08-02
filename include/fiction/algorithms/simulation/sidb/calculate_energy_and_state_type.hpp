@@ -17,6 +17,7 @@
 #include <kitty/bit_operations.hpp>
 #include <kitty/traits.hpp>
 
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <cstdint>
@@ -101,8 +102,7 @@ template <typename Lyt, typename TT>
             }
         });
 
-    std::sort(energy_and_state_type.begin(), energy_and_state_type.end(),
-              [](const auto& a, const auto& b) { return a.first < b.first; });
+    std::ranges::sort(energy_and_state_type, [](const auto& a, const auto& b) { return a.first < b.first; });
 
     return energy_and_state_type;
 }

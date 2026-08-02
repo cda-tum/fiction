@@ -12,6 +12,7 @@
 
 #include <kitty/traits.hpp>
 
+#include <algorithm>
 #include <cassert>
 #include <cstdint>
 #include <vector>
@@ -55,8 +56,8 @@ template <typename Lyt, typename TT>
 
     assert(!spec.empty());
     // all elements in tts must have the same number of variables
-    assert(std::adjacent_find(spec.cbegin(), spec.cend(), [](const auto& a, const auto& b)
-                              { return a.num_vars() != b.num_vars(); }) == spec.cend());
+    assert(std::ranges::adjacent_find(spec, [](const auto& a, const auto& b)
+                                      { return a.num_vars() != b.num_vars(); }) == spec.cend());
 
     detail::is_operational_impl<Lyt, TT> p{cds, spec, params, input_wires, output_wires, false};
 

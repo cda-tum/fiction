@@ -26,6 +26,7 @@
 #include <fmt/format.h>
 #include <mockturtle/utils/stopwatch.hpp>
 
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <cstdint>
@@ -237,8 +238,8 @@ class critical_temperature_impl
         if (params.operational_params.sim_engine == sidb_simulation_engine::QUICKEXACT)
         {
             const quickexact_params<cell<Lyt>> qe_params{
-                params.operational_params.simulation_parameters,
-                quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF};
+                .simulation_parameters = params.operational_params.simulation_parameters,
+                .base_number_detection = quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF};
 
             // All physically valid charge configurations are determined for the given layout (`QuickExact` simulation
             // is used to provide 100 % accuracy for the Critical Temperature).
@@ -256,8 +257,9 @@ class critical_temperature_impl
 #endif  // FICTION_ALGLIB_ENABLED
         else if (params.operational_params.sim_engine == sidb_simulation_engine::QUICKSIM)
         {
-            const quicksim_params qs_params{params.operational_params.simulation_parameters, params.iteration_steps,
-                                            params.alpha};
+            const quicksim_params qs_params{.simulation_parameters = params.operational_params.simulation_parameters,
+                                            .iteration_steps       = params.iteration_steps,
+                                            .alpha                 = params.alpha};
 
             // All physically valid charge configurations are determined for the given layout (probabilistic ground
             // state simulation is used).
@@ -449,8 +451,8 @@ class critical_temperature_impl
         {
             // perform QuickExact exact simulation
             const quickexact_params<cell<Lyt>> qe_params{
-                params.operational_params.simulation_parameters,
-                fiction::quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF};
+                .simulation_parameters = params.operational_params.simulation_parameters,
+                .base_number_detection = fiction::quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF};
             return quickexact(*bdl_iterator, qe_params);
         }
 #if (FICTION_ALGLIB_ENABLED)
@@ -466,8 +468,9 @@ class critical_temperature_impl
             assert(params.operational_params.simulation_parameters.base == 2 &&
                    "QuickSim does not support base-3 simulation");
 
-            const quicksim_params qs_params{params.operational_params.simulation_parameters, params.iteration_steps,
-                                            params.alpha};
+            const quicksim_params qs_params{.simulation_parameters = params.operational_params.simulation_parameters,
+                                            .iteration_steps       = params.iteration_steps,
+                                            .alpha                 = params.alpha};
 
             if (const auto result = quicksim<Lyt>(*bdl_iterator, qs_params))
             {
@@ -511,8 +514,8 @@ double critical_temperature_gate_based(const Lyt& lyt, const std::vector<TT>& sp
 
     assert(!spec.empty());
     // all elements in tts must have the same number of variables
-    assert(std::adjacent_find(spec.begin(), spec.end(),
-                              [](const auto& a, const auto& b) { return a.num_vars() != b.num_vars(); }) == spec.end());
+    assert(std::ranges::adjacent_find(spec, [](const auto& a, const auto& b)
+                                      { return a.num_vars() != b.num_vars(); }) == spec.end());
 
     critical_temperature_stats st{};
 

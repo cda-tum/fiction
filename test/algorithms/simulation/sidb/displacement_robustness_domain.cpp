@@ -16,6 +16,7 @@
 #include <fiction/utils/layout_utils.hpp>
 #include <fiction/utils/truth_table_utils.hpp>
 
+#include <algorithm>
 #include <cmath>
 #include <cstdlib>
 #include <limits>
@@ -30,12 +31,12 @@ template <typename Lyt>
 void check_identical_information_of_stats_and_domain(const displacement_robustness_domain<Lyt>&  domain,
                                                      const displacement_robustness_domain_stats& stats)
 {
-    const auto num_operational_layouts = static_cast<std::size_t>(
-        std::count_if(domain.operational_values.begin(), domain.operational_values.end(),
-                      [](const auto& robust) { return robust.second == operational_status::OPERATIONAL; }));
+    const auto num_operational_layouts =
+        static_cast<std::size_t>(std::ranges::count_if(domain.operational_values, [](const auto& robust)
+                                                       { return robust.second == operational_status::OPERATIONAL; }));
     const auto num_non_operational_layouts = static_cast<std::size_t>(
-        std::count_if(domain.operational_values.begin(), domain.operational_values.end(),
-                      [](const auto& robust) { return robust.second == operational_status::NON_OPERATIONAL; }));
+        std::ranges::count_if(domain.operational_values,
+                              [](const auto& robust) { return robust.second == operational_status::NON_OPERATIONAL; }));
 
     CHECK(num_operational_layouts == stats.num_operational_sidb_displacements);
     CHECK(num_non_operational_layouts == stats.num_non_operational_sidb_displacements);

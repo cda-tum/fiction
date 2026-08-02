@@ -141,9 +141,11 @@ class clustercomplete_impl
 
         // run Ground State Space to obtain the complete hierarchical charge space
         const ground_state_space_results& gss_stats = ground_state_space(
-            charge_layout, ground_state_space_params{params.simulation_parameters,
-                                                     params.validity_witness_partitioning_max_cluster_size_gss,
-                                                     params.num_overlapping_witnesses_limit_gss});
+            charge_layout,
+            ground_state_space_params{
+                .simulation_parameters                   = params.simulation_parameters,
+                .witness_partitioning_cluster_size_limit = params.validity_witness_partitioning_max_cluster_size_gss,
+                .num_overlapping_witnesses_limit_gss     = params.num_overlapping_witnesses_limit_gss});
 
         if (!gss_stats.top_cluster)
         {
@@ -967,8 +969,7 @@ class clustercomplete_impl
             }
         }
 
-        std::shuffle(work_from_top_cluster.begin(), work_from_top_cluster.end(),
-                     std::mt19937_64{std::random_device{}()});
+        std::ranges::shuffle(work_from_top_cluster, std::mt19937_64{std::random_device{}()});
 
         return work_from_top_cluster;
     }

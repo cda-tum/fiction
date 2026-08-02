@@ -22,6 +22,7 @@
 #include <fiction/types.hpp>
 #include <fiction/utils/math_utils.hpp>
 
+#include <algorithm>
 #include <cstdint>
 #include <set>
 
@@ -916,9 +917,8 @@ TEMPLATE_TEST_CASE("Seven randomly distributed DBs, test if dependent cell calcu
 
     REQUIRE(simulation_results.charge_distributions.size() == simulation_results_exgs.charge_distributions.size());
 
-    const auto highest_state = std::min_element(
-        simulation_results.charge_distributions.cbegin(), simulation_results.charge_distributions.cend(),
-        [](const auto& lhs, const auto& rhs)
+    const auto highest_state = std::ranges::min_element(
+        simulation_results.charge_distributions, [](const auto& lhs, const auto& rhs)
         { return lhs.get_electrostatic_potential_energy() > rhs.get_electrostatic_potential_energy(); });
 
     CHECK(highest_state->get_charge_state({1, 3, 0}) == sidb_charge_state::NEGATIVE);
@@ -946,9 +946,8 @@ TEMPLATE_TEST_CASE("three DBs next to each other", "[quickexact]", (sidb_100_cel
 
     REQUIRE(simulation_results.charge_distributions.size() == 4);
 
-    const auto ground_state = std::min_element(
-        simulation_results.charge_distributions.cbegin(), simulation_results.charge_distributions.cend(),
-        [](const auto& lhs, const auto& rhs)
+    const auto ground_state = std::ranges::min_element(
+        simulation_results.charge_distributions, [](const auto& lhs, const auto& rhs)
         { return lhs.get_electrostatic_potential_energy() < rhs.get_electrostatic_potential_energy(); });
 
     CHECK(ground_state->get_charge_state({-1, 3, 0}) == sidb_charge_state::NEGATIVE);
@@ -1269,9 +1268,8 @@ TEMPLATE_TEST_CASE("QuickExact simulation of a Y-shaped SiDB OR gate with input 
 
         const auto simulation_results = quickexact<TestType>(lyt, params);
         // find the ground state, which is the charge distribution with the lowest energy
-        const auto ground_state = std::min_element(
-            simulation_results.charge_distributions.cbegin(), simulation_results.charge_distributions.cend(),
-            [](const auto& lhs, const auto& rhs)
+        const auto ground_state = std::ranges::min_element(
+            simulation_results.charge_distributions, [](const auto& lhs, const auto& rhs)
             { return lhs.get_electrostatic_potential_energy() < rhs.get_electrostatic_potential_energy(); });
 
         CHECK(ground_state->num_positive_sidbs() > 0);
@@ -1949,9 +1947,9 @@ TEMPLATE_TEST_CASE("Special test cases", "[quickexact]", sidb_100_cell_clk_lyt_s
             quickexact(lyt, quickexact_params<cell<TestType>>{
                                 params, quickexact_params<cell<TestType>>::automatic_base_number_detection::ON});
 
-        std::sort(qe_res.charge_distributions.begin(), qe_res.charge_distributions.end(),
-                  [](const auto& lhs, const auto& rhs)
-                  { return lhs.get_electrostatic_potential_energy() < rhs.get_electrostatic_potential_energy(); });
+        std::ranges::sort(
+            qe_res.charge_distributions, [](const auto& lhs, const auto& rhs)
+            { return lhs.get_electrostatic_potential_energy() < rhs.get_electrostatic_potential_energy(); });
 
         REQUIRE(qe_res.charge_distributions.size() == 2);
 

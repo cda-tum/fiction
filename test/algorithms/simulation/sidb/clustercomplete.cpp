@@ -92,19 +92,19 @@ template <typename Lyt>
 static bool verify_clustercomplete_result(const charge_distribution_surface<Lyt>&              qe_cds,
                                           const std::vector<charge_distribution_surface<Lyt>>& cc_cdss) noexcept
 {
-    return std::any_of(cc_cdss.cbegin(), cc_cdss.cend(),
-                       [&](const charge_distribution_surface<Lyt>& cc_cds)
-                       {
-                           for (const auto& c : qe_cds.get_sidb_order())
-                           {
-                               if (qe_cds.get_charge_state(c) != cc_cds.get_charge_state(c))
+    return std::ranges::any_of(cc_cdss,
+                               [&](const charge_distribution_surface<Lyt>& cc_cds)
                                {
-                                   return false;
-                               }
-                           }
+                                   for (const auto& c : qe_cds.get_sidb_order())
+                                   {
+                                       if (qe_cds.get_charge_state(c) != cc_cds.get_charge_state(c))
+                                       {
+                                           return false;
+                                       }
+                                   }
 
-                           return true;
-                       });
+                                   return true;
+                               });
 }
 
 template <typename Lyt>
@@ -112,8 +112,8 @@ static bool
 verify_clustercomplete_result_by_charge_indices(const charge_distribution_surface<Lyt>&              qe_cds,
                                                 const std::vector<charge_distribution_surface<Lyt>>& cc_cdss) noexcept
 {
-    return std::any_of(
-        cc_cdss.cbegin(), cc_cdss.cend(), [&](const auto& cc_cds)
+    return std::ranges::any_of(
+        cc_cdss, [&](const auto& cc_cds)
         { return cc_cds.get_charge_index_and_base().first == qe_cds.get_charge_index_and_base().first; });
 }
 
@@ -269,9 +269,8 @@ TEMPLATE_TEST_CASE(
 
         const auto simulation_results = clustercomplete<TestType>(lyt, params);
         // find the ground state, which is the charge distribution with the lowest energy
-        const auto ground_state = std::min_element(
-            simulation_results.charge_distributions.cbegin(), simulation_results.charge_distributions.cend(),
-            [](const auto& lhs, const auto& rhs)
+        const auto ground_state = std::ranges::min_element(
+            simulation_results.charge_distributions, [](const auto& lhs, const auto& rhs)
             { return lhs.get_electrostatic_potential_energy() < rhs.get_electrostatic_potential_energy(); });
 
         CHECK(ground_state->num_positive_sidbs() > 0);
@@ -1263,9 +1262,8 @@ TEMPLATE_TEST_CASE("three DBs next to each other", "[clustercomplete]", (sidb_10
 
     REQUIRE(simulation_results.charge_distributions.size() == 4);
 
-    const auto ground_state = std::min_element(
-        simulation_results.charge_distributions.cbegin(), simulation_results.charge_distributions.cend(),
-        [](const auto& lhs, const auto& rhs)
+    const auto ground_state = std::ranges::min_element(
+        simulation_results.charge_distributions, [](const auto& lhs, const auto& rhs)
         { return lhs.get_electrostatic_potential_energy() < rhs.get_electrostatic_potential_energy(); });
 
     CHECK(ground_state->get_charge_state({-1, 3, 0}) == sidb_charge_state::NEGATIVE);
@@ -1312,9 +1310,8 @@ TEMPLATE_TEST_CASE("four DBs next to each other, small mu-", "[clustercomplete]"
 
     REQUIRE(simulation_results.charge_distributions.size() == 4);
 
-    const auto excited_state = *std::max_element(
-        simulation_results.charge_distributions.cbegin(), simulation_results.charge_distributions.cend(),
-        [](const auto& lhs, const auto& rhs)
+    const auto excited_state = *std::ranges::max_element(
+        simulation_results.charge_distributions, [](const auto& lhs, const auto& rhs)
         { return lhs.get_electrostatic_potential_energy() < rhs.get_electrostatic_potential_energy(); });
     CHECK_THAT(excited_state.get_electrostatic_potential_energy(),
                Catch::Matchers::WithinAbs(0, constants::ERROR_MARGIN));
@@ -1534,9 +1531,8 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of a 3 DB Wire", "[clustercomplet
         REQUIRE(!simulation_results.charge_distributions.empty());
 
         // find the ground state, which is the charge distribution with the lowest energy
-        const auto ground_state = std::min_element(
-            simulation_results.charge_distributions.cbegin(), simulation_results.charge_distributions.cend(),
-            [](const auto& lhs, const auto& rhs)
+        const auto ground_state = std::ranges::min_element(
+            simulation_results.charge_distributions, [](const auto& lhs, const auto& rhs)
             { return lhs.get_electrostatic_potential_energy() < rhs.get_electrostatic_potential_energy(); });
 
         CHECK(ground_state->num_negative_sidbs() == 5);
@@ -1568,9 +1564,8 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of a 3 DB Wire", "[clustercomplet
         REQUIRE(!simulation_results.charge_distributions.empty());
 
         // find the ground state, which is the charge distribution with the lowest energy
-        const auto ground_state = std::min_element(
-            simulation_results.charge_distributions.cbegin(), simulation_results.charge_distributions.cend(),
-            [](const auto& lhs, const auto& rhs)
+        const auto ground_state = std::ranges::min_element(
+            simulation_results.charge_distributions, [](const auto& lhs, const auto& rhs)
             { return lhs.get_electrostatic_potential_energy() < rhs.get_electrostatic_potential_energy(); });
 
         // check charge distribution of the ground state; BDL wire no longer works as intended
@@ -1598,9 +1593,8 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of a 3 DB Wire", "[clustercomplet
         REQUIRE(!simulation_results.charge_distributions.empty());
 
         // find the ground state, which is the charge distribution with the lowest energy
-        const auto ground_state = std::min_element(
-            simulation_results.charge_distributions.cbegin(), simulation_results.charge_distributions.cend(),
-            [](const auto& lhs, const auto& rhs)
+        const auto ground_state = std::ranges::min_element(
+            simulation_results.charge_distributions, [](const auto& lhs, const auto& rhs)
             { return lhs.get_electrostatic_potential_energy() < rhs.get_electrostatic_potential_energy(); });
 
         // Due to the set µ-value, all SiDBs are negatively charged (electrostatic interaction is not strong enough to
@@ -1628,9 +1622,8 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of a 3 DB Wire", "[clustercomplet
 
         REQUIRE(!simulation_results.charge_distributions.empty());
 
-        const auto ground_state = std::min_element(
-            simulation_results.charge_distributions.cbegin(), simulation_results.charge_distributions.cend(),
-            [](const auto& lhs, const auto& rhs)
+        const auto ground_state = std::ranges::min_element(
+            simulation_results.charge_distributions, [](const auto& lhs, const auto& rhs)
             { return lhs.get_electrostatic_potential_energy() < rhs.get_electrostatic_potential_energy(); });
 
         // Due to the small lambda value, the electrostatic interaction is small. Hence, all SiDBs are negatively
@@ -1659,9 +1652,8 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of a 3 DB Wire", "[clustercomplet
         REQUIRE(!simulation_results.charge_distributions.empty());
 
         // find the ground state, which is the charge distribution with the lowest energy
-        const auto ground_state = std::min_element(
-            simulation_results.charge_distributions.cbegin(), simulation_results.charge_distributions.cend(),
-            [](const auto& lhs, const auto& rhs)
+        const auto ground_state = std::ranges::min_element(
+            simulation_results.charge_distributions, [](const auto& lhs, const auto& rhs)
             { return lhs.get_electrostatic_potential_energy() < rhs.get_electrostatic_potential_energy(); });
 
         // check charge distribution of the ground state; BDL wire works as intended
@@ -1688,9 +1680,8 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of a 3 DB Wire", "[clustercomplet
 
         REQUIRE(!simulation_results.charge_distributions.empty());
 
-        const auto ground_state = std::min_element(
-            simulation_results.charge_distributions.cbegin(), simulation_results.charge_distributions.cend(),
-            [](const auto& lhs, const auto& rhs)
+        const auto ground_state = std::ranges::min_element(
+            simulation_results.charge_distributions, [](const auto& lhs, const auto& rhs)
             { return lhs.get_electrostatic_potential_energy() < rhs.get_electrostatic_potential_energy(); });
 
         // The electrostatic interaction is small, due to the large relative permittivity.
@@ -1718,9 +1709,8 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of a 3 DB Wire", "[clustercomplet
 
         REQUIRE(!simulation_results.charge_distributions.empty());
 
-        const auto ground_state = std::min_element(
-            simulation_results.charge_distributions.cbegin(), simulation_results.charge_distributions.cend(),
-            [](const auto& lhs, const auto& rhs)
+        const auto ground_state = std::ranges::min_element(
+            simulation_results.charge_distributions, [](const auto& lhs, const auto& rhs)
             { return lhs.get_electrostatic_potential_energy() < rhs.get_electrostatic_potential_energy(); });
 
         // The electrostatic interaction is strong, due to the small relative permittivity.
@@ -1914,9 +1904,9 @@ TEMPLATE_TEST_CASE("Special test cases", "[clustercomplete]", (sidb_100_cell_clk
 
         sidb_simulation_result<TestType> cc_res = clustercomplete(lyt, clustercomplete_params<cell<TestType>>{params});
 
-        std::sort(cc_res.charge_distributions.begin(), cc_res.charge_distributions.end(),
-                  [](const auto& lhs, const auto& rhs)
-                  { return lhs.get_electrostatic_potential_energy() < rhs.get_electrostatic_potential_energy(); });
+        std::ranges::sort(
+            cc_res.charge_distributions, [](const auto& lhs, const auto& rhs)
+            { return lhs.get_electrostatic_potential_energy() < rhs.get_electrostatic_potential_energy(); });
 
         REQUIRE(cc_res.charge_distributions.size() == 2);
 
@@ -1995,9 +1985,9 @@ TEMPLATE_TEST_CASE("Special test cases", "[clustercomplete]", (sidb_100_cell_clk
 
         sidb_simulation_result<TestType> cc_res = clustercomplete(lyt, clustercomplete_params<cell<TestType>>{params});
 
-        std::sort(cc_res.charge_distributions.begin(), cc_res.charge_distributions.end(),
-                  [](const auto& lhs, const auto& rhs)
-                  { return lhs.get_electrostatic_potential_energy() < rhs.get_electrostatic_potential_energy(); });
+        std::ranges::sort(
+            cc_res.charge_distributions, [](const auto& lhs, const auto& rhs)
+            { return lhs.get_electrostatic_potential_energy() < rhs.get_electrostatic_potential_energy(); });
 
         CHECK(cc_res.charge_distributions.size() == 2);
     }

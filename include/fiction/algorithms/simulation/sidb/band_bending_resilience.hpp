@@ -8,6 +8,7 @@
 #include "fiction/algorithms/iter/bdl_input_iterator.hpp"
 #include "fiction/algorithms/simulation/sidb/physical_population_stability.hpp"
 
+#include <algorithm>
 #include <cassert>
 #include <limits>
 #include <optional>
@@ -59,8 +60,8 @@ band_bending_resilience(const Lyt& lyt, const std::vector<TT>& spec, const band_
 
     assert(!spec.empty());
     // all elements in tts must have the same number of variables
-    assert(std::adjacent_find(spec.begin(), spec.end(),
-                              [](const auto& a, const auto& b) { return a.num_vars() != b.num_vars(); }) == spec.end());
+    assert(std::ranges::adjacent_find(spec, [](const auto& a, const auto& b)
+                                      { return a.num_vars() != b.num_vars(); }) == spec.end());
 
     bdl_input_iterator<Lyt> bii{lyt, params.bdl_iterator_params};
 
