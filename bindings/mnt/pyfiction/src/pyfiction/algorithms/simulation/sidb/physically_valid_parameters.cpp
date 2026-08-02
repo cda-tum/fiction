@@ -5,10 +5,20 @@
 #include <fiction/algorithms/simulation/sidb/physically_valid_parameters.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_domain.hpp>
 
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
-
 #include <cstdint>
+
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/array.h>
+#include <nanobind/stl/function.h>
+#include <nanobind/stl/map.h>
+#include <nanobind/stl/optional.h>
+#include <nanobind/stl/pair.h>
+#include <nanobind/stl/set.h>
+#include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/tuple.h>
+#include <nanobind/stl/unordered_map.h>
+#include <nanobind/stl/unordered_set.h>
+#include <nanobind/stl/vector.h>
 
 namespace pyfiction
 {
@@ -17,9 +27,9 @@ namespace detail
 {
 
 template <typename Lyt>
-void physically_valid_parameters_impl(pybind11::module& m)
+void physically_valid_parameters_impl(nanobind::module_& m)
 {
-    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
+    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     m.def("physically_valid_parameters", &fiction::physically_valid_parameters<Lyt>, py::arg("cds"),
           py::arg("params") = fiction::operational_domain_params{}, DOC(fiction_physically_valid_parameters));
@@ -27,9 +37,9 @@ void physically_valid_parameters_impl(pybind11::module& m)
 
 }  // namespace detail
 
-void physically_valid_parameters(pybind11::module& m)
+void physically_valid_parameters(nanobind::module_& m)
 {
-    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
+    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     py::class_<fiction::sidb_simulation_domain<fiction::parameter_point, uint64_t>>(
         m, "physically_valid_parameters_domain")

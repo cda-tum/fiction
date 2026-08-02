@@ -1,21 +1,32 @@
-#include <pybind11/pybind11.h>
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/array.h>
+#include <nanobind/stl/function.h>
+#include <nanobind/stl/map.h>
+#include <nanobind/stl/optional.h>
+#include <nanobind/stl/pair.h>
+#include <nanobind/stl/set.h>
+#include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/tuple.h>
+#include <nanobind/stl/unordered_map.h>
+#include <nanobind/stl/unordered_set.h>
+#include <nanobind/stl/vector.h>
 
 namespace pyfiction
 {
 
-void cartesian_layout(pybind11::module& m);
-void cell_level_layouts(pybind11::module& m);
-void clocked_layouts(pybind11::module& m);
-void coordinate_utility(pybind11::module& m);
-void cube_coordinate(pybind11::module& m);
-void gate_level_layouts(pybind11::module& m);
-void hexagonal_layout(pybind11::module& m);
-void obstruction_layouts(pybind11::module& m);
-void offset_coordinate(pybind11::module& m);
-void shifted_cartesian_layout(pybind11::module& m);
-void siqad_coordinate(pybind11::module& m);
+void cartesian_layout(nanobind::module_& m);
+void cell_level_layouts(nanobind::module_& m);
+void clocked_layouts(nanobind::module_& m);
+void coordinate_utility(nanobind::module_& m);
+void cube_coordinate(nanobind::module_& m);
+void gate_level_layouts(nanobind::module_& m);
+void hexagonal_layout(nanobind::module_& m);
+void obstruction_layouts(nanobind::module_& m);
+void offset_coordinate(nanobind::module_& m);
+void shifted_cartesian_layout(nanobind::module_& m);
+void siqad_coordinate(nanobind::module_& m);
 
-void register_layouts(pybind11::module& m)
+void register_layouts(nanobind::module_& m)
 {
     offset_coordinate(m);
     cube_coordinate(m);

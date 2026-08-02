@@ -1,33 +1,44 @@
-#include <pybind11/pybind11.h>
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/array.h>
+#include <nanobind/stl/function.h>
+#include <nanobind/stl/map.h>
+#include <nanobind/stl/optional.h>
+#include <nanobind/stl/pair.h>
+#include <nanobind/stl/set.h>
+#include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/tuple.h>
+#include <nanobind/stl/unordered_map.h>
+#include <nanobind/stl/unordered_set.h>
+#include <nanobind/stl/vector.h>
 
 namespace pyfiction
 {
 
-void calculate_energy_and_state_type(pybind11::module& m);
-void can_positive_charges_occur(pybind11::module& m);
-void check_simulation_results_for_equivalence(pybind11::module& m);
-void clustercomplete(pybind11::module& m);
-void critical_temperature(pybind11::module& m);
-void detect_bdl_pairs(pybind11::module& m);
-void detect_bdl_wires(pybind11::module& m);
-void determine_displacement_robustness_domain(pybind11::module& m);
-void energy_distribution(pybind11::module& m);
-void exhaustive_ground_state_simulation(pybind11::module& m);
-void is_ground_state(pybind11::module& m);
-void is_operational(pybind11::module& m);
-void minimum_energy(pybind11::module& m);
-void occupation_probability_of_excited_states(pybind11::module& m);
-void operational_domain(pybind11::module& m);
-void compute_operational_ratio(pybind11::module& m);
-void physical_population_stability(pybind11::module& m);
-void physically_valid_parameters(pybind11::module& m);
-void potential_to_distance_conversion(pybind11::module& m);
-void quickexact(pybind11::module& m);
-void quicksim(pybind11::module& m);
-void random_sidb_layout_generator(pybind11::module& m);
-void time_to_solution(pybind11::module& m);
+void calculate_energy_and_state_type(nanobind::module_& m);
+void can_positive_charges_occur(nanobind::module_& m);
+void check_simulation_results_for_equivalence(nanobind::module_& m);
+void clustercomplete(nanobind::module_& m);
+void critical_temperature(nanobind::module_& m);
+void detect_bdl_pairs(nanobind::module_& m);
+void detect_bdl_wires(nanobind::module_& m);
+void determine_displacement_robustness_domain(nanobind::module_& m);
+void energy_distribution(nanobind::module_& m);
+void exhaustive_ground_state_simulation(nanobind::module_& m);
+void is_ground_state(nanobind::module_& m);
+void is_operational(nanobind::module_& m);
+void minimum_energy(nanobind::module_& m);
+void occupation_probability_of_excited_states(nanobind::module_& m);
+void operational_domain(nanobind::module_& m);
+void compute_operational_ratio(nanobind::module_& m);
+void physical_population_stability(nanobind::module_& m);
+void physically_valid_parameters(nanobind::module_& m);
+void potential_to_distance_conversion(nanobind::module_& m);
+void quickexact(nanobind::module_& m);
+void quicksim(nanobind::module_& m);
+void random_sidb_layout_generator(nanobind::module_& m);
+void time_to_solution(nanobind::module_& m);
 
-void register_sidb_simulation(pybind11::module& m)
+void register_sidb_simulation(nanobind::module_& m)
 {
     calculate_energy_and_state_type(m);
     can_positive_charges_occur(m);

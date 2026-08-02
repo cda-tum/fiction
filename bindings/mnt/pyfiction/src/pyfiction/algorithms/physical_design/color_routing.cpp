@@ -6,11 +6,21 @@
 #include <fiction/traits.hpp>
 #include <fiction/utils/routing_utils.hpp>
 
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
-
 #include <utility>
 #include <vector>
+
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/array.h>
+#include <nanobind/stl/function.h>
+#include <nanobind/stl/map.h>
+#include <nanobind/stl/optional.h>
+#include <nanobind/stl/pair.h>
+#include <nanobind/stl/set.h>
+#include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/tuple.h>
+#include <nanobind/stl/unordered_map.h>
+#include <nanobind/stl/unordered_set.h>
+#include <nanobind/stl/vector.h>
 
 namespace pyfiction
 {
@@ -19,9 +29,9 @@ namespace detail
 {
 
 template <typename Lyt>
-void color_routing_impl(pybind11::module& m)
+void color_routing_impl(nanobind::module_& m)
 {
-    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
+    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     m.def(
         "color_routing",
@@ -44,14 +54,14 @@ void color_routing_impl(pybind11::module& m)
 
 }  // namespace detail
 
-void color_routing(pybind11::module& m)
+void color_routing(nanobind::module_& m)
 {
-    namespace py = pybind11;
+    namespace py = nanobind;
 
     /**
      * Graph coloring engine selector type.
      */
-    pybind11::enum_<fiction::graph_coloring_engine>(m, "graph_coloring_engine", DOC(fiction_graph_coloring_engine))
+    nanobind::enum_<fiction::graph_coloring_engine>(m, "graph_coloring_engine", DOC(fiction_graph_coloring_engine))
         .value("MCS", fiction::graph_coloring_engine::MCS, DOC(fiction_graph_coloring_engine_MCS))
         .value("DSATUR", fiction::graph_coloring_engine::DSATUR, DOC(fiction_graph_coloring_engine_DSATUR))
         .value("LMXRLF", fiction::graph_coloring_engine::LMXRLF, DOC(fiction_graph_coloring_engine_LMXRLF))
@@ -60,15 +70,13 @@ void color_routing(pybind11::module& m)
 
     py::class_<fiction::color_routing_params>(m, "color_routing_params", DOC(fiction_color_routing_params))
         .def(py::init<>(), "Default constructor.")
-        .def_readwrite("conduct_partial_routing", &fiction::color_routing_params::conduct_partial_routing,
-                       DOC(fiction_color_routing_params_conduct_partial_routing))
-        .def_readwrite("crossings", &fiction::color_routing_params::crossings,
-                       DOC(fiction_color_routing_params_crossings))
-        .def_readwrite("path_limit", &fiction::color_routing_params::path_limit,
-                       DOC(fiction_color_routing_params_path_limit))
-        .def_readwrite("engine", &fiction::color_routing_params::engine, DOC(fiction_color_routing_params_engine))
-        .def_readwrite("partial_sat", &fiction::color_routing_params::partial_sat,
-                       DOC(fiction_color_routing_params_partial_sat));
+        .def_rw("conduct_partial_routing", &fiction::color_routing_params::conduct_partial_routing,
+                DOC(fiction_color_routing_params_conduct_partial_routing))
+        .def_rw("crossings", &fiction::color_routing_params::crossings, DOC(fiction_color_routing_params_crossings))
+        .def_rw("path_limit", &fiction::color_routing_params::path_limit, DOC(fiction_color_routing_params_path_limit))
+        .def_rw("engine", &fiction::color_routing_params::engine, DOC(fiction_color_routing_params_engine))
+        .def_rw("partial_sat", &fiction::color_routing_params::partial_sat,
+                DOC(fiction_color_routing_params_partial_sat));
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 

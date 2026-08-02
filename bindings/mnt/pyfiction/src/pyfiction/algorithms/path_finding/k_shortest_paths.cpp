@@ -5,11 +5,21 @@
 #include <fiction/traits.hpp>
 #include <fiction/utils/routing_utils.hpp>
 
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
-
 #include <cstdint>
 #include <vector>
+
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/array.h>
+#include <nanobind/stl/function.h>
+#include <nanobind/stl/map.h>
+#include <nanobind/stl/optional.h>
+#include <nanobind/stl/pair.h>
+#include <nanobind/stl/set.h>
+#include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/tuple.h>
+#include <nanobind/stl/unordered_map.h>
+#include <nanobind/stl/unordered_set.h>
+#include <nanobind/stl/vector.h>
 
 namespace pyfiction
 {
@@ -18,9 +28,9 @@ namespace detail
 {
 
 template <typename Lyt>
-void yen_k_shortest_paths_impl(pybind11::module& m)
+void yen_k_shortest_paths_impl(nanobind::module_& m)
 {
-    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
+    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     m.def(
         "yen_k_shortest_paths",
@@ -46,15 +56,15 @@ void yen_k_shortest_paths_impl(pybind11::module& m)
 
 }  // namespace detail
 
-void yen_k_shortest_paths(pybind11::module& m)
+void yen_k_shortest_paths(nanobind::module_& m)
 {
-    namespace py = pybind11;
+    namespace py = nanobind;
 
     py::class_<fiction::yen_k_shortest_paths_params>(m, "yen_k_shortest_paths_params",
                                                      DOC(fiction_yen_k_shortest_paths_params))
         .def(py::init<>(), "Default constructor.")
-        .def_readwrite("a_star_params", &fiction::yen_k_shortest_paths_params::astar_params,
-                       DOC(fiction_yen_k_shortest_paths_params_astar_params))
+        .def_rw("a_star_params", &fiction::yen_k_shortest_paths_params::astar_params,
+                DOC(fiction_yen_k_shortest_paths_params_astar_params))
 
         ;
 

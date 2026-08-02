@@ -8,12 +8,22 @@
 #include <fiction/traits.hpp>
 #include <fiction/utils/routing_utils.hpp>
 
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
-
 #include <algorithm>
 #include <utility>
 #include <vector>
+
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/array.h>
+#include <nanobind/stl/function.h>
+#include <nanobind/stl/map.h>
+#include <nanobind/stl/optional.h>
+#include <nanobind/stl/pair.h>
+#include <nanobind/stl/set.h>
+#include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/tuple.h>
+#include <nanobind/stl/unordered_map.h>
+#include <nanobind/stl/unordered_set.h>
+#include <nanobind/stl/vector.h>
 
 namespace pyfiction
 {
@@ -22,18 +32,18 @@ namespace detail
 {
 
 template <typename Lyt>
-void is_crossable_wire(pybind11::module& m)
+void is_crossable_wire(nanobind::module_& m)
 {
-    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
+    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     m.def("is_crossable_wire", &fiction::is_crossable_wire<Lyt>, py::arg("lyt"), py::arg("src"), py::arg("successor"),
           DOC(fiction_is_crossable_wire));
 }
 
 template <typename Lyt>
-void route_path(pybind11::module& m)
+void route_path(nanobind::module_& m)
 {
-    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
+    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     m.def(
         "route_path",
@@ -49,9 +59,9 @@ void route_path(pybind11::module& m)
 }
 
 template <typename Lyt>
-void extract_routing_objectives(pybind11::module& m)
+void extract_routing_objectives(nanobind::module_& m)
 {
-    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
+    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     m.def(
         "extract_routing_objectives",
@@ -70,16 +80,16 @@ void extract_routing_objectives(pybind11::module& m)
 }
 
 template <typename Lyt>
-void clear_routing(pybind11::module& m)
+void clear_routing(nanobind::module_& m)
 {
-    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
+    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     m.def("clear_routing", &fiction::clear_routing<Lyt>, py::arg("lyt"), DOC(fiction_clear_routing));
 }
 
 }  // namespace detail
 
-void routing_utils(pybind11::module& m)
+void routing_utils(nanobind::module_& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 

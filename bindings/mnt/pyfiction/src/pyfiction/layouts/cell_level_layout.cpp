@@ -16,8 +16,6 @@
 #include <fiction/utils/layout_utils.hpp>  // NOLINT(misc-include-cleaner): Used in dependent template contexts below.
 
 #include <fmt/format.h>
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
 
 #include <algorithm>
 #include <cctype>
@@ -28,6 +26,20 @@
 #include <utility>
 #include <vector>
 
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/array.h>
+#include <nanobind/stl/function.h>
+#include <nanobind/stl/map.h>
+#include <nanobind/stl/optional.h>
+#include <nanobind/stl/pair.h>
+#include <nanobind/stl/set.h>
+#include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/string.h>
+#include <nanobind/stl/tuple.h>
+#include <nanobind/stl/unordered_map.h>
+#include <nanobind/stl/unordered_set.h>
+#include <nanobind/stl/vector.h>
+
 namespace pyfiction
 {
 
@@ -35,9 +47,9 @@ namespace detail
 {
 
 template <typename Technology>
-void fcn_technology_cell_level_layout(pybind11::module& m)
+void fcn_technology_cell_level_layout(nanobind::module_& m)
 {
-    namespace py = pybind11;
+    namespace py = nanobind;
 
     // fetch technology name
     auto tech_name = std::string{fiction::tech_impl_name<Technology>};
@@ -91,22 +103,23 @@ void fcn_technology_cell_level_layout(pybind11::module& m)
         .def(py::init<>(), DOC(fiction_cell_level_layout_cell_level_layout))
         .def(py::init<const fiction::aspect_ratio<py_cartesian_technology_cell_layout>&>(), py::arg("dimension"),
              DOC(fiction_cell_level_layout_cell_level_layout))
-        .def(py::init(
-                 [](const fiction::aspect_ratio<py_cartesian_technology_cell_layout>& dimension,
-                    const std::string&                                                scheme_name,
-                    const std::string& layout_name) -> py_cartesian_technology_cell_layout
-                 {
-                     if (const auto scheme =
-                             fiction::get_clocking_scheme<py_cartesian_technology_cell_layout>(scheme_name);
-                         scheme.has_value())
-                     {
-                         return py_cartesian_technology_cell_layout{dimension, *scheme, layout_name};
-                     }
+        .def(
+            "__init__",
+            [](py::pointer_and_handle<py_cartesian_technology_cell_layout>       self,
+               const fiction::aspect_ratio<py_cartesian_technology_cell_layout>& dimension,
+               const std::string& scheme_name, const std::string& layout_name)
+            {
+                if (const auto scheme = fiction::get_clocking_scheme<py_cartesian_technology_cell_layout>(scheme_name);
+                    scheme.has_value())
+                {
+                    new (self.p) py_cartesian_technology_cell_layout{dimension, *scheme, layout_name};
+                    return;
+                }
 
-                     throw std::runtime_error("Given name does not refer to a supported clocking scheme");
-                 }),
-             py::arg("dimension"), py::arg("clocking_scheme") = "2DDWave", py::arg("layout_name") = "",
-             DOC(fiction_cell_level_layout_cell_level_layout_2))
+                throw std::runtime_error("Given name does not refer to a supported clocking scheme");
+            },
+            py::arg("dimension"), py::arg("clocking_scheme") = "2DDWave", py::arg("layout_name") = "",
+            DOC(fiction_cell_level_layout_cell_level_layout_2))
 
         .def("assign_cell_type", &py_cartesian_technology_cell_layout::assign_cell_type, py::arg("c"), py::arg("ct"),
              DOC(fiction_cell_level_layout_assign_cell_type))
@@ -193,7 +206,7 @@ void fcn_technology_cell_level_layout(pybind11::module& m)
 
 }  // namespace detail
 
-void cell_level_layouts(pybind11::module& m)
+void cell_level_layouts(nanobind::module_& m)
 {
     detail::fcn_technology_cell_level_layout<fiction::qca_technology>(m);
     detail::fcn_technology_cell_level_layout<fiction::inml_technology>(m);

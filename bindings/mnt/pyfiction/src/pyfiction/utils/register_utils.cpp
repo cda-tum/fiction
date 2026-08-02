@@ -1,17 +1,28 @@
-#include <pybind11/pybind11.h>
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/array.h>
+#include <nanobind/stl/function.h>
+#include <nanobind/stl/map.h>
+#include <nanobind/stl/optional.h>
+#include <nanobind/stl/pair.h>
+#include <nanobind/stl/set.h>
+#include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/tuple.h>
+#include <nanobind/stl/unordered_map.h>
+#include <nanobind/stl/unordered_set.h>
+#include <nanobind/stl/vector.h>
 
 namespace pyfiction
 {
 
-void layout_utils(pybind11::module& m);
-void name_utils(pybind11::module& m);
-void network_utils(pybind11::module& m);
-void placement_utils(pybind11::module& m);
-void routing_utils(pybind11::module& m);
-void truth_table_utils(pybind11::module& m);
-void version_info(pybind11::module& m);
+void layout_utils(nanobind::module_& m);
+void name_utils(nanobind::module_& m);
+void network_utils(nanobind::module_& m);
+void placement_utils(nanobind::module_& m);
+void routing_utils(nanobind::module_& m);
+void truth_table_utils(nanobind::module_& m);
+void version_info(nanobind::module_& m);
 
-void register_utils(pybind11::module& m)
+void register_utils(nanobind::module_& m)
 {
     layout_utils(m);
     routing_utils(m);

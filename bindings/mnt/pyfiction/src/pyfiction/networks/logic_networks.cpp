@@ -9,9 +9,20 @@
 
 #include <fmt/format.h>
 #include <mockturtle/traits.hpp>
-#include <pybind11/pybind11.h>
-#include <pybind11/pytypes.h>
-#include <pybind11/stl.h>
+
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/array.h>
+#include <nanobind/stl/function.h>
+#include <nanobind/stl/map.h>
+#include <nanobind/stl/optional.h>
+#include <nanobind/stl/pair.h>
+#include <nanobind/stl/set.h>
+#include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/string.h>
+#include <nanobind/stl/tuple.h>
+#include <nanobind/stl/unordered_map.h>
+#include <nanobind/stl/unordered_set.h>
+#include <nanobind/stl/vector.h>
 
 // #include <mockturtle/networks/aig.hpp>
 // #include <mockturtle/networks/mig.hpp>
@@ -32,21 +43,13 @@ namespace detail
 {
 
 template <typename Ntk>
-void network(pybind11::module& m, const std::string& network_name)
+void network(nanobind::module_& m, const std::string& network_name)
 {
-    namespace py = pybind11;
+    namespace py = nanobind;
 
-    /**
-     * Network node.
-     */
-    py::class_<mockturtle::node<Ntk>>(m, fmt::format("{}_node", network_name).c_str())
-        .def(
-            "__hash__", [](const mockturtle::node<Ntk>& n) { return std::hash<mockturtle::node<Ntk>>{}(n); },
-            "Returns a hash value of the node.")
-
-        ;
-
-    py::implicitly_convertible<py::int_, mockturtle::node<Ntk>>();
+    // Network node: mockturtle::node<Ntk> is a plain uint64_t, which nanobind already represents
+    // as a Python int via its built-in integer type caster -- no separate class binding needed
+    // (and nanobind disallows binding a type that already has a built-in caster).
 
     /**
      * Network.
@@ -176,7 +179,7 @@ void network(pybind11::module& m, const std::string& network_name)
 
 }  // namespace detail
 
-void logic_networks(pybind11::module& m)
+void logic_networks(nanobind::module_& m)
 {
     /**
      * Logic networks.

@@ -6,9 +6,22 @@
 #include "pyfiction/types.hpp"
 
 #include <fmt/format.h>
-#include <pybind11/pybind11.h>
 
 #include <string>
+
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/array.h>
+#include <nanobind/stl/function.h>
+#include <nanobind/stl/map.h>
+#include <nanobind/stl/optional.h>
+#include <nanobind/stl/pair.h>
+#include <nanobind/stl/set.h>
+#include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/string.h>
+#include <nanobind/stl/tuple.h>
+#include <nanobind/stl/unordered_map.h>
+#include <nanobind/stl/unordered_set.h>
+#include <nanobind/stl/vector.h>
 
 namespace pyfiction
 {
@@ -17,9 +30,9 @@ namespace detail
 {
 
 template <typename LytBase, typename ObstrLyt>
-void obstruction_layout(pybind11::module& m, const std::string& topology)
+void obstruction_layout(nanobind::module_& m, const std::string& topology)
 {
-    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
+    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     py::class_<ObstrLyt, LytBase>(m, fmt::format("{}_obstruction_layout", topology).c_str(),
                                   DOC(fiction_obstruction_layout))
@@ -40,7 +53,7 @@ void obstruction_layout(pybind11::module& m, const std::string& topology)
 
 }  // namespace detail
 
-void obstruction_layouts(pybind11::module& m)
+void obstruction_layouts(nanobind::module_& m)
 {
     /**
      * Cartesian obstruction layout.

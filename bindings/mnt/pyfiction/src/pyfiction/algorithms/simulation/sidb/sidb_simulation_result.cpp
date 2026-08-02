@@ -3,10 +3,6 @@
 
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
 
-#include <pybind11/chrono.h>
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
-
 #include <any>
 #include <cstdint>
 #include <exception>
@@ -14,13 +10,28 @@
 #include <string>
 #include <unordered_map>
 
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/array.h>
+#include <nanobind/stl/chrono.h>
+#include <nanobind/stl/function.h>
+#include <nanobind/stl/map.h>
+#include <nanobind/stl/optional.h>
+#include <nanobind/stl/pair.h>
+#include <nanobind/stl/set.h>
+#include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/string.h>
+#include <nanobind/stl/tuple.h>
+#include <nanobind/stl/unordered_map.h>
+#include <nanobind/stl/unordered_set.h>
+#include <nanobind/stl/vector.h>
+
 namespace pyfiction
 {
 
 namespace detail
 {
 
-namespace py = pybind11;
+namespace py = nanobind;
 
 // Helper function to convert std::any to Python objects
 inline py::object convert_any_to_py(const std::any& value)
@@ -41,7 +52,7 @@ inline py::object convert_any_to_py(const std::any& value)
         }
         if (value.type() == typeid(std::string))
         {
-            return py::str(std::any_cast<std::string>(value));
+            return py::str(std::any_cast<std::string>(value).c_str());
         }
         if (value.type() == typeid(uint64_t))
         {
@@ -58,7 +69,7 @@ inline py::object convert_any_to_py(const std::any& value)
 
 inline py::dict convert_map_to_py(const std::unordered_map<std::string, std::any>& map)
 {
-    pybind11::dict result;
+    nanobind::dict result;
     for (const auto& [key, value] : map)
     {
         try
@@ -74,22 +85,22 @@ inline py::dict convert_map_to_py(const std::unordered_map<std::string, std::any
 }
 
 template <typename Lyt>
-void sidb_simulation_result_impl(pybind11::module& m, const std::string& lattice = "")
+void sidb_simulation_result_impl(nanobind::module_& m, const std::string& lattice = "")
 {
-    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
+    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     py::class_<fiction::sidb_simulation_result<Lyt>>(m, fmt::format("sidb_simulation_result{}", lattice).c_str(),
                                                      DOC(fiction_sidb_simulation_result))
         .def(py::init<>(), "Default constructor.")
-        .def_readwrite("algorithm_name", &fiction::sidb_simulation_result<Lyt>::algorithm_name,
-                       DOC(fiction_sidb_simulation_result_algorithm_name))
-        .def_readwrite("simulation_runtime", &fiction::sidb_simulation_result<Lyt>::simulation_runtime,
-                       DOC(fiction_sidb_simulation_result_simulation_runtime))
-        .def_readwrite("charge_distributions", &fiction::sidb_simulation_result<Lyt>::charge_distributions,
-                       DOC(fiction_sidb_simulation_result_charge_distributions))
-        .def_readwrite("simulation_parameters", &fiction::sidb_simulation_result<Lyt>::simulation_parameters,
-                       DOC(fiction_sidb_simulation_result_simulation_parameters))
-        .def_property_readonly(
+        .def_rw("algorithm_name", &fiction::sidb_simulation_result<Lyt>::algorithm_name,
+                DOC(fiction_sidb_simulation_result_algorithm_name))
+        .def_rw("simulation_runtime", &fiction::sidb_simulation_result<Lyt>::simulation_runtime,
+                DOC(fiction_sidb_simulation_result_simulation_runtime))
+        .def_rw("charge_distributions", &fiction::sidb_simulation_result<Lyt>::charge_distributions,
+                DOC(fiction_sidb_simulation_result_charge_distributions))
+        .def_rw("simulation_parameters", &fiction::sidb_simulation_result<Lyt>::simulation_parameters,
+                DOC(fiction_sidb_simulation_result_simulation_parameters))
+        .def_prop_ro(
             "additional_simulation_parameters", [](const fiction::sidb_simulation_result<Lyt>& self)
             { return convert_map_to_py(self.additional_simulation_parameters); },
             DOC(fiction_sidb_simulation_result_additional_simulation_parameters))
@@ -101,7 +112,7 @@ void sidb_simulation_result_impl(pybind11::module& m, const std::string& lattice
 
 }  // namespace detail
 
-void sidb_simulation_result(pybind11::module& m)
+void sidb_simulation_result(nanobind::module_& m)
 {
     // Define simulation result for specific lattices
     detail::sidb_simulation_result_impl<py_sidb_100_lattice>(m, "_100");

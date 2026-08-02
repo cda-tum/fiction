@@ -3,10 +3,20 @@
 
 #include <fiction/algorithms/simulation/sidb/energy_distribution.hpp>
 
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
-
 #include <cstdint>
+
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/array.h>
+#include <nanobind/stl/function.h>
+#include <nanobind/stl/map.h>
+#include <nanobind/stl/optional.h>
+#include <nanobind/stl/pair.h>
+#include <nanobind/stl/set.h>
+#include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/tuple.h>
+#include <nanobind/stl/unordered_map.h>
+#include <nanobind/stl/unordered_set.h>
+#include <nanobind/stl/vector.h>
 
 namespace pyfiction
 {
@@ -15,9 +25,9 @@ namespace detail
 {
 
 template <typename Lyt>
-void energy_distribution_impl(pybind11::module& m)
+void energy_distribution_impl(nanobind::module_& m)
 {
-    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
+    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     m.def("calculate_energy_distribution", &fiction::calculate_energy_distribution<Lyt>,
           py::arg("charge_distributions"), DOC(fiction_energy_distribution));
@@ -25,16 +35,16 @@ void energy_distribution_impl(pybind11::module& m)
 
 }  // namespace detail
 
-void energy_distribution(pybind11::module& m)
+void energy_distribution(nanobind::module_& m)
 {
-    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
+    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     py::class_<fiction::energy_state>(m, "energy_state")
         .def(py::init<double, uint64_t>(), py::arg("electrostatic_potential_energy"), py::arg("degeneracy"),
              DOC(fiction_energy_state))
-        .def_readwrite("electrostatic_potential_energy", &fiction::energy_state::electrostatic_potential_energy,
-                       DOC(fiction_energy_state_electrostatic_potential_energy))
-        .def_readwrite("degeneracy", &fiction::energy_state::degeneracy, DOC(fiction_energy_state_degeneracy));
+        .def_rw("electrostatic_potential_energy", &fiction::energy_state::electrostatic_potential_energy,
+                DOC(fiction_energy_state_electrostatic_potential_energy))
+        .def_rw("degeneracy", &fiction::energy_state::degeneracy, DOC(fiction_energy_state_degeneracy));
 
     py::class_<fiction::energy_distribution>(m, "energy_distribution")
         .def(py::init<>(), "Default constructor.")

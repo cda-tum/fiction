@@ -7,8 +7,18 @@
 
 #include <fiction/utils/name_utils.hpp>
 
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/array.h>
+#include <nanobind/stl/function.h>
+#include <nanobind/stl/map.h>
+#include <nanobind/stl/optional.h>
+#include <nanobind/stl/pair.h>
+#include <nanobind/stl/set.h>
+#include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/tuple.h>
+#include <nanobind/stl/unordered_map.h>
+#include <nanobind/stl/unordered_set.h>
+#include <nanobind/stl/vector.h>
 
 namespace pyfiction
 {
@@ -17,24 +27,24 @@ namespace detail
 {
 
 template <typename NtkOrLyt>
-void get_name(pybind11::module& m)
+void get_name(nanobind::module_& m)
 {
-    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
+    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     m.def("get_name", &fiction::get_name<NtkOrLyt>, py::arg("ntk_or_lyt"), DOC(fiction_get_name));
 }
 
 template <typename NtkOrLyt>
-void set_name(pybind11::module& m)
+void set_name(nanobind::module_& m)
 {
-    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
+    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     m.def("set_name", &fiction::set_name<NtkOrLyt>, py::arg("ntk_or_lyt"), py::arg("name"), DOC(fiction_set_name));
 }
 
 }  // namespace detail
 
-void name_utils(pybind11::module& m)
+void name_utils(nanobind::module_& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 

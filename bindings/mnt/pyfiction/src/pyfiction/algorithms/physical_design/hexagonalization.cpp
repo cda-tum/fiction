@@ -3,23 +3,33 @@
 
 #include <fiction/algorithms/physical_design/hexagonalization.hpp>
 
-#include <pybind11/chrono.h>
-#include <pybind11/pybind11.h>
-#include <pybind11/pytypes.h>
-#include <pybind11/stl.h>
-
 #include <sstream>
+
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/array.h>
+#include <nanobind/stl/chrono.h>
+#include <nanobind/stl/function.h>
+#include <nanobind/stl/map.h>
+#include <nanobind/stl/optional.h>
+#include <nanobind/stl/pair.h>
+#include <nanobind/stl/set.h>
+#include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/string.h>
+#include <nanobind/stl/tuple.h>
+#include <nanobind/stl/unordered_map.h>
+#include <nanobind/stl/unordered_set.h>
+#include <nanobind/stl/vector.h>
 
 namespace pyfiction
 {
 
-void hexagonalization(pybind11::module& m)
+void hexagonalization(nanobind::module_& m)
 {
-    namespace py = pybind11;
+    namespace py = nanobind;
 
-    py::register_exception<fiction::hexagonalization_io_pin_routing_error>(
+    py::exception<fiction::hexagonalization_io_pin_routing_error>(
         m, "hexagonalization_io_pin_routing_error",
-        PyExc_RuntimeError);  // NOLINT(misc-include-cleaner): Included through pybind11.h
+        PyExc_RuntimeError);  // NOLINT(misc-include-cleaner): Included through nanobind.h
 
     py::enum_<fiction::hexagonalization_params::io_pin_extension_mode>(
         m, "hexagonalization_io_pin_extension_mode", DOC(fiction_hexagonalization_params_io_pin_extension_mode))
@@ -32,10 +42,10 @@ void hexagonalization(pybind11::module& m)
 
     py::class_<fiction::hexagonalization_params>(m, "hexagonalization_params", DOC(fiction_hexagonalization_params))
         .def(py::init<>(), "Default constructor.")
-        .def_readwrite("input_pin_extension", &fiction::hexagonalization_params::input_pin_extension,
-                       DOC(fiction_hexagonalization_params_input_pin_extension))
-        .def_readwrite("output_pin_extension", &fiction::hexagonalization_params::output_pin_extension,
-                       DOC(fiction_hexagonalization_params_output_pin_extension));
+        .def_rw("input_pin_extension", &fiction::hexagonalization_params::input_pin_extension,
+                DOC(fiction_hexagonalization_params_input_pin_extension))
+        .def_rw("output_pin_extension", &fiction::hexagonalization_params::output_pin_extension,
+                DOC(fiction_hexagonalization_params_output_pin_extension));
 
     py::class_<fiction::hexagonalization_stats>(m, "hexagonalization_stats", DOC(fiction_hexagonalization_stats))
         .def(py::init<>(), "Default constructor.")
@@ -48,16 +58,14 @@ void hexagonalization(pybind11::module& m)
                 return stream.str();
             },
             "Returns a string representation of the statistics.")
-        .def_readonly("time_total", &fiction::hexagonalization_stats::time_total,
-                      DOC(fiction_hexagonalization_stats_duration))
-        .def_readonly("x_size", &fiction::hexagonalization_stats::x_size, DOC(fiction_hexagonalization_stats_x_size))
-        .def_readonly("y_size", &fiction::hexagonalization_stats::y_size, DOC(fiction_hexagonalization_stats_y_size))
-        .def_readonly("num_gates", &fiction::hexagonalization_stats::num_gates,
-                      DOC(fiction_hexagonalization_stats_num_gates))
-        .def_readonly("num_wires", &fiction::hexagonalization_stats::num_wires,
-                      DOC(fiction_hexagonalization_stats_num_wires))
-        .def_readonly("num_crossings", &fiction::hexagonalization_stats::num_crossings,
-                      DOC(fiction_hexagonalization_stats_num_crossings));
+        .def_ro("time_total", &fiction::hexagonalization_stats::time_total,
+                DOC(fiction_hexagonalization_stats_duration))
+        .def_ro("x_size", &fiction::hexagonalization_stats::x_size, DOC(fiction_hexagonalization_stats_x_size))
+        .def_ro("y_size", &fiction::hexagonalization_stats::y_size, DOC(fiction_hexagonalization_stats_y_size))
+        .def_ro("num_gates", &fiction::hexagonalization_stats::num_gates, DOC(fiction_hexagonalization_stats_num_gates))
+        .def_ro("num_wires", &fiction::hexagonalization_stats::num_wires, DOC(fiction_hexagonalization_stats_num_wires))
+        .def_ro("num_crossings", &fiction::hexagonalization_stats::num_crossings,
+                DOC(fiction_hexagonalization_stats_num_crossings));
 
     m.def("hexagonalization", &fiction::hexagonalization<py_hexagonal_gate_layout, py_cartesian_gate_layout>,
           py::arg("layout"), py::arg("parameters") = fiction::hexagonalization_params{},

@@ -7,20 +7,32 @@
 
 #include <fiction/io/read_fgl_layout.hpp>
 
-#include <pybind11/pybind11.h>
-
 #include <string_view>
+
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/array.h>
+#include <nanobind/stl/function.h>
+#include <nanobind/stl/map.h>
+#include <nanobind/stl/optional.h>
+#include <nanobind/stl/pair.h>
+#include <nanobind/stl/set.h>
+#include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/string_view.h>
+#include <nanobind/stl/tuple.h>
+#include <nanobind/stl/unordered_map.h>
+#include <nanobind/stl/unordered_set.h>
+#include <nanobind/stl/vector.h>
 
 namespace pyfiction
 {
 
-void read_fgl_layout(pybind11::module& m)
+void read_fgl_layout(nanobind::module_& m)
 {
-    namespace py = pybind11;
+    namespace py = nanobind;
 
-    py::register_exception<fiction::fgl_parsing_error>(
+    py::exception<fiction::fgl_parsing_error>(
         m, "fgl_parsing_error",
-        PyExc_RuntimeError);  // NOLINT(misc-include-cleaner): Included through pybind11.h
+        PyExc_RuntimeError);  // NOLINT(misc-include-cleaner): Included through nanobind.h
 
     // NOLINTNEXTLINE(misc-const-correctness)
     py_cartesian_gate_layout (*const read_cartesian_fgl_layout_function_pointer)(

@@ -5,10 +5,20 @@
 #include <fiction/traits.hpp>
 #include <fiction/utils/routing_utils.hpp>
 
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
-
 #include <vector>
+
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/array.h>
+#include <nanobind/stl/function.h>
+#include <nanobind/stl/map.h>
+#include <nanobind/stl/optional.h>
+#include <nanobind/stl/pair.h>
+#include <nanobind/stl/set.h>
+#include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/tuple.h>
+#include <nanobind/stl/unordered_map.h>
+#include <nanobind/stl/unordered_set.h>
+#include <nanobind/stl/vector.h>
 
 namespace pyfiction
 {
@@ -17,9 +27,9 @@ namespace detail
 {
 
 template <typename Lyt>
-void enumerate_all_paths_impl(pybind11::module& m)
+void enumerate_all_paths_impl(nanobind::module_& m)
 {
-    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
+    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     m.def(
         "enumerate_all_paths",
@@ -45,15 +55,15 @@ void enumerate_all_paths_impl(pybind11::module& m)
 
 }  // namespace detail
 
-void enumerate_all_paths(pybind11::module& m)
+void enumerate_all_paths(nanobind::module_& m)
 {
-    namespace py = pybind11;
+    namespace py = nanobind;
 
     py::class_<fiction::enumerate_all_paths_params>(m, "enumerate_all_paths_params",
                                                     DOC(fiction_enumerate_all_paths_params))
         .def(py::init<>(), "Default constructor.")
-        .def_readwrite("crossings", &fiction::enumerate_all_paths_params::crossings,
-                       DOC(fiction_enumerate_all_paths_params_crossings))
+        .def_rw("crossings", &fiction::enumerate_all_paths_params::crossings,
+                DOC(fiction_enumerate_all_paths_params_crossings))
 
         ;
 

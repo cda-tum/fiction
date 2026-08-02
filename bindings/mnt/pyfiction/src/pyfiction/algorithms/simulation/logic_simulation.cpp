@@ -5,8 +5,6 @@
 #include <fmt/format.h>
 #include <kitty/print.hpp>
 #include <mockturtle/algorithms/simulation.hpp>
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
 
 #include <cassert>
 #include <iostream>
@@ -15,6 +13,20 @@
 #include <unordered_map>
 #include <vector>
 
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/array.h>
+#include <nanobind/stl/function.h>
+#include <nanobind/stl/map.h>
+#include <nanobind/stl/optional.h>
+#include <nanobind/stl/pair.h>
+#include <nanobind/stl/set.h>
+#include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/string.h>
+#include <nanobind/stl/tuple.h>
+#include <nanobind/stl/unordered_map.h>
+#include <nanobind/stl/unordered_set.h>
+#include <nanobind/stl/vector.h>
+
 namespace pyfiction
 {
 
@@ -22,9 +34,9 @@ namespace detail
 {
 
 template <typename NtkOrLyt>
-void logic_simulation_impl(pybind11::module& m, const std::string& type_name)
+void logic_simulation_impl(nanobind::module_& m, const std::string& type_name)
 {
-    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
+    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     m.def(
         "simulate",
@@ -98,7 +110,7 @@ void logic_simulation_impl(pybind11::module& m, const std::string& type_name)
 
 }  // namespace detail
 
-void logic_simulation(pybind11::module& m)
+void logic_simulation(nanobind::module_& m)
 {
     detail::logic_simulation_impl<py_logic_network>(m, "network");
     detail::logic_simulation_impl<py_cartesian_gate_layout>(m, "layout");

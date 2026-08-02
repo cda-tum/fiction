@@ -7,11 +7,24 @@
 
 #include <fiction/io/write_svg_layout.hpp>
 
-#include <pybind11/pybind11.h>
-
 #include <sstream>
 #include <string>
 #include <string_view>
+
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/array.h>
+#include <nanobind/stl/function.h>
+#include <nanobind/stl/map.h>
+#include <nanobind/stl/optional.h>
+#include <nanobind/stl/pair.h>
+#include <nanobind/stl/set.h>
+#include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/string.h>
+#include <nanobind/stl/string_view.h>
+#include <nanobind/stl/tuple.h>
+#include <nanobind/stl/unordered_map.h>
+#include <nanobind/stl/unordered_set.h>
+#include <nanobind/stl/vector.h>
 
 namespace pyfiction
 {
@@ -19,9 +32,9 @@ namespace pyfiction
 namespace detail
 {
 template <typename Lyt>
-void write_sidb_layout_svg_impl(pybind11::module& m)
+void write_sidb_layout_svg_impl(nanobind::module_& m)
 {
-    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
+    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     // Pointers to the original functions
     // NOLINTNEXTLINE(misc-const-correctness)
@@ -46,9 +59,9 @@ void write_sidb_layout_svg_impl(pybind11::module& m)
 }
 
 template <typename Lyt>
-void write_qca_layout_svg_impl(pybind11::module& m)
+void write_qca_layout_svg_impl(nanobind::module_& m)
 {
-    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
+    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     // QCA plot
     // NOLINTNEXTLINE(misc-const-correctness)
@@ -62,9 +75,9 @@ void write_qca_layout_svg_impl(pybind11::module& m)
 
 }  // namespace detail
 
-void write_svg_layout(pybind11::module& m)
+void write_svg_layout(nanobind::module_& m)
 {
-    namespace py = pybind11;
+    namespace py = nanobind;
 
     py::enum_<fiction::write_sidb_layout_svg_params::color_mode>(m, "color_mode",
                                                                  DOC(fiction_write_sidb_layout_svg_params_color_mode))
@@ -83,24 +96,24 @@ void write_svg_layout(pybind11::module& m)
     py::class_<fiction::write_sidb_layout_svg_params>(m, "write_sidb_layout_svg_params",
                                                       DOC(fiction_write_sidb_layout_svg_params))
         .def(py::init<>(), "Default constructor.")
-        .def_readwrite("lattice_point_size", &fiction::write_sidb_layout_svg_params::lattice_point_size,
-                       DOC(fiction_write_sidb_layout_svg_params_lattice_point_size))
-        .def_readwrite("sidb_size", &fiction::write_sidb_layout_svg_params::sidb_size,
-                       DOC(fiction_write_sidb_layout_svg_params_sidb_size))
-        .def_readwrite("sidb_border_width", &fiction::write_sidb_layout_svg_params::sidb_border_width,
-                       DOC(fiction_write_sidb_layout_svg_params_sidb_border_width))
-        .def_readwrite("color_background", &fiction::write_sidb_layout_svg_params::color_background,
-                       DOC(fiction_write_sidb_layout_svg_params_color_background))
-        .def_readwrite("lattice_mode", &fiction::write_sidb_layout_svg_params::lattice_mode,
-                       DOC(fiction_write_sidb_layout_svg_params_lattice_mode))
+        .def_rw("lattice_point_size", &fiction::write_sidb_layout_svg_params::lattice_point_size,
+                DOC(fiction_write_sidb_layout_svg_params_lattice_point_size))
+        .def_rw("sidb_size", &fiction::write_sidb_layout_svg_params::sidb_size,
+                DOC(fiction_write_sidb_layout_svg_params_sidb_size))
+        .def_rw("sidb_border_width", &fiction::write_sidb_layout_svg_params::sidb_border_width,
+                DOC(fiction_write_sidb_layout_svg_params_sidb_border_width))
+        .def_rw("color_background", &fiction::write_sidb_layout_svg_params::color_background,
+                DOC(fiction_write_sidb_layout_svg_params_color_background))
+        .def_rw("lattice_mode", &fiction::write_sidb_layout_svg_params::lattice_mode,
+                DOC(fiction_write_sidb_layout_svg_params_lattice_mode))
 
         ;
 
     py::class_<fiction::write_qca_layout_svg_params>(m, "write_qca_layout_svg_params",
                                                      DOC(fiction_write_qca_layout_svg_params))
         .def(py::init<>(), "Default constructor.")
-        .def_readwrite("simple", &fiction::write_qca_layout_svg_params::simple,
-                       DOC(fiction_write_qca_layout_svg_params_simple));
+        .def_rw("simple", &fiction::write_qca_layout_svg_params::simple,
+                DOC(fiction_write_qca_layout_svg_params_simple));
     ;
 
     detail::write_sidb_layout_svg_impl<py_charge_distribution_surface_111>(m);

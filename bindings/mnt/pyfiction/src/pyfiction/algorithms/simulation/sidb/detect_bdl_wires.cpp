@@ -6,11 +6,23 @@
 #include <fiction/layouts/coordinates.hpp>
 
 #include <fmt/format.h>
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
 
 #include <string>
 #include <vector>
+
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/array.h>
+#include <nanobind/stl/function.h>
+#include <nanobind/stl/map.h>
+#include <nanobind/stl/optional.h>
+#include <nanobind/stl/pair.h>
+#include <nanobind/stl/set.h>
+#include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/string.h>
+#include <nanobind/stl/tuple.h>
+#include <nanobind/stl/unordered_map.h>
+#include <nanobind/stl/unordered_set.h>
+#include <nanobind/stl/vector.h>
 
 namespace pyfiction
 {
@@ -19,9 +31,9 @@ namespace detail
 {
 
 template <typename Lyt>
-void detect_bdl_wires_impl(pybind11::module& m, const std::string& lattice)
+void detect_bdl_wires_impl(nanobind::module_& m, const std::string& lattice)
 {
-    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
+    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     using bdl_wire_t = fiction::bdl_wire<Lyt>;
 
@@ -29,10 +41,10 @@ void detect_bdl_wires_impl(pybind11::module& m, const std::string& lattice)
         .def(py::init<>(), DOC(fiction_bdl_wire_bdl_wire))
         .def(py::init<std::vector<fiction::bdl_pair<fiction::offset::ucoord_t>>>(), py::arg("p"),
              DOC(fiction_bdl_wire_bdl_wire_2))
-        .def_readwrite("pairs", &bdl_wire_t::pairs, DOC(fiction_bdl_wire_pairs))
-        .def_readwrite("direction", &bdl_wire_t::port, DOC(fiction_bdl_wire_port))
-        .def_readwrite("first_bdl_pair", &bdl_wire_t::first_bdl_pair, DOC(fiction_bdl_wire_first_bdl_pair))
-        .def_readwrite("last_bdl_pair", &bdl_wire_t::last_bdl_pair, DOC(fiction_bdl_wire_last_bdl_pair));
+        .def_rw("pairs", &bdl_wire_t::pairs, DOC(fiction_bdl_wire_pairs))
+        .def_rw("direction", &bdl_wire_t::port, DOC(fiction_bdl_wire_port))
+        .def_rw("first_bdl_pair", &bdl_wire_t::first_bdl_pair, DOC(fiction_bdl_wire_first_bdl_pair))
+        .def_rw("last_bdl_pair", &bdl_wire_t::last_bdl_pair, DOC(fiction_bdl_wire_last_bdl_pair));
 
     m.def(fmt::format("detect_bdl_wires_{}", lattice).c_str(), &fiction::detect_bdl_wires<Lyt>, py::arg("lyt"),
           py::arg("params")         = fiction::detect_bdl_wires_params{},
@@ -42,13 +54,13 @@ void detect_bdl_wires_impl(pybind11::module& m, const std::string& lattice)
 }  // namespace detail
 
 /**
- * Registers all `bdl_wire` classes, enums, and related functions with the pybind11 module.
+ * Registers all `bdl_wire` classes, enums, and related functions with the nanobind module.
  *
- * @param m The pybind11 module.
+ * @param m The nanobind module.
  */
-void detect_bdl_wires(pybind11::module& m)
+void detect_bdl_wires(nanobind::module_& m)
 {
-    namespace py = pybind11;
+    namespace py = nanobind;
 
     // Enum for wire selection options
     py::enum_<fiction::bdl_wire_selection>(m, "bdl_wire_selection", DOC(fiction_bdl_wire_selection))
@@ -60,10 +72,10 @@ void detect_bdl_wires(pybind11::module& m)
     // Class for detect_bdl_wires_params
     py::class_<fiction::detect_bdl_wires_params>(m, "detect_bdl_wires_params", DOC(fiction_detect_bdl_wires_params))
         .def(py::init<>(), DOC(fiction_detect_bdl_wires_params))
-        .def_readwrite("threshold_bdl_interdistance", &fiction::detect_bdl_wires_params::threshold_bdl_interdistance,
-                       DOC(fiction_detect_bdl_wires_params_threshold_bdl_interdistance))
-        .def_readwrite("bdl_pairs_params", &fiction::detect_bdl_wires_params::bdl_pairs_params,
-                       DOC(fiction_detect_bdl_wires_params_bdl_pairs_params));
+        .def_rw("threshold_bdl_interdistance", &fiction::detect_bdl_wires_params::threshold_bdl_interdistance,
+                DOC(fiction_detect_bdl_wires_params_threshold_bdl_interdistance))
+        .def_rw("bdl_pairs_params", &fiction::detect_bdl_wires_params::bdl_pairs_params,
+                DOC(fiction_detect_bdl_wires_params_bdl_pairs_params));
 
     // Register different lattice types with appropriate suffixes
     detail::detect_bdl_wires_impl<py_sidb_100_lattice>(m, "100");

@@ -10,12 +10,24 @@
 #include <fiction/traits.hpp>
 
 #include <fmt/format.h>
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
 
 #include <sstream>
 #include <stdexcept>
 #include <string>
+
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/array.h>
+#include <nanobind/stl/function.h>
+#include <nanobind/stl/map.h>
+#include <nanobind/stl/optional.h>
+#include <nanobind/stl/pair.h>
+#include <nanobind/stl/set.h>
+#include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/string.h>
+#include <nanobind/stl/tuple.h>
+#include <nanobind/stl/unordered_map.h>
+#include <nanobind/stl/unordered_set.h>
+#include <nanobind/stl/vector.h>
 
 namespace pyfiction
 {
@@ -24,9 +36,9 @@ namespace detail
 {
 
 template <typename LytBase, typename ClockedLyt>
-void clocked_layout(pybind11::module& m, const std::string& topology)
+void clocked_layout(nanobind::module_& m, const std::string& topology)
 {
-    namespace py = pybind11;
+    namespace py = nanobind;
 
     /**
      * Clocked Cartesian layout.
@@ -35,17 +47,20 @@ void clocked_layout(pybind11::module& m, const std::string& topology)
         .def(py::init<>(), DOC(fiction_clocked_layout_clocked_layout))
         .def(py::init<const fiction::aspect_ratio<ClockedLyt>&>(), py::arg("dimension"),
              DOC(fiction_clocked_layout_clocked_layout))
-        .def(py::init(
-                 [](const fiction::aspect_ratio<ClockedLyt>& dimension, const std::string& scheme_name)
-                 {
-                     if (const auto scheme = fiction::get_clocking_scheme<ClockedLyt>(scheme_name); scheme.has_value())
-                     {
-                         return ClockedLyt{dimension, *scheme};
-                     }
+        .def(
+            "__init__",
+            [](py::pointer_and_handle<ClockedLyt> self, const fiction::aspect_ratio<ClockedLyt>& dimension,
+               const std::string& scheme_name)
+            {
+                if (const auto scheme = fiction::get_clocking_scheme<ClockedLyt>(scheme_name); scheme.has_value())
+                {
+                    new (self.p) ClockedLyt{dimension, *scheme};
+                    return;
+                }
 
-                     throw std::runtime_error("Given name does not refer to a supported clocking scheme");
-                 }),
-             py::arg("dimension"), py::arg("clocking_scheme") = "2DDWave", DOC(fiction_clocked_layout_clocked_layout_2))
+                throw std::runtime_error("Given name does not refer to a supported clocking scheme");
+            },
+            py::arg("dimension"), py::arg("clocking_scheme") = "2DDWave", DOC(fiction_clocked_layout_clocked_layout_2))
 
         .def("assign_clock_number", &ClockedLyt::assign_clock_number, py::arg("cz"), py::arg("cn"),
              DOC(fiction_clocked_layout_assign_clock_number))
@@ -87,7 +102,7 @@ void clocked_layout(pybind11::module& m, const std::string& topology)
 
 }  // namespace detail
 
-void clocked_layouts(pybind11::module& m)
+void clocked_layouts(nanobind::module_& m)
 {
     detail::clocked_layout<py_cartesian_layout, py_cartesian_clocked_layout>(m, "cartesian");
     detail::clocked_layout<py_shifted_cartesian_layout, py_shifted_cartesian_clocked_layout>(m, "shifted_cartesian");

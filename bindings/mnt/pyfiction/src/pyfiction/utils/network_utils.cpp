@@ -7,8 +7,18 @@
 
 #include <fiction/utils/network_utils.hpp>
 
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/array.h>
+#include <nanobind/stl/function.h>
+#include <nanobind/stl/map.h>
+#include <nanobind/stl/optional.h>
+#include <nanobind/stl/pair.h>
+#include <nanobind/stl/set.h>
+#include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/tuple.h>
+#include <nanobind/stl/unordered_map.h>
+#include <nanobind/stl/unordered_set.h>
+#include <nanobind/stl/vector.h>
 
 namespace pyfiction
 {
@@ -17,9 +27,9 @@ namespace detail
 {
 
 template <typename Ntk>
-void has_high_degree_fanin_nodes(pybind11::module& m)
+void has_high_degree_fanin_nodes(nanobind::module_& m)
 {
-    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
+    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     m.def("has_high_degree_fanin_nodes", &fiction::has_high_degree_fanin_nodes<Ntk>, py::arg("ntk"),
           py::arg("threshold") = 2, DOC(fiction_has_high_degree_fanin_nodes));
@@ -27,13 +37,13 @@ void has_high_degree_fanin_nodes(pybind11::module& m)
 
 }  // namespace detail
 
-void network_utils(pybind11::module& m)
+void network_utils(nanobind::module_& m)
 {
-    namespace py = pybind11;
+    namespace py = nanobind;
 
-    py::register_exception<fiction::high_degree_fanin_exception>(
+    py::exception<fiction::high_degree_fanin_exception>(
         m, "high_degree_fanin_exception",
-        PyExc_ValueError);  // NOLINT(misc-include-cleaner): included through pybind11.h
+        PyExc_ValueError);  // NOLINT(misc-include-cleaner): included through nanobind.h
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
