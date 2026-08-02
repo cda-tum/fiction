@@ -418,9 +418,8 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[random-sidb-layout-gene
 
     SECTION("Check if std::nullptr_t is returned when no layout can be designed")
     {
-        generate_random_sidb_layout_params<offset::ucoord_t> params{};
-        params.maximal_attempts_for_multiple_layouts = 5;
-        params.number_of_sidbs                       = 2;
+        const generate_random_sidb_layout_params<offset::ucoord_t> params{.number_of_sidbs                       = 2,
+                                                                          .maximal_attempts_for_multiple_layouts = 5};
 
         const auto result_lyts = generate_multiple_random_sidb_layouts<sidb_cell_clk_lyt>(params);
         CHECK(!result_lyts.has_value());

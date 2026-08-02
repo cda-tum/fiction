@@ -41,10 +41,7 @@ TEST_CASE("BDL wire", "[detect-bdl-pairs]")
     // output perturber
     lyt.assign_cell_type({24, 0, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
 
-    detect_bdl_pairs_params params{};
-
-    params.minimum_distance = 0.2;
-    params.maximum_distance = 2.2;
+    const detect_bdl_pairs_params params{.minimum_distance = 0.2, .maximum_distance = 2.2};
 
     const sidb_100_cell_clk_lyt_siqad lat{lyt};
 

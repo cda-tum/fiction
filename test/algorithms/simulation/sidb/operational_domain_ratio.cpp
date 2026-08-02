@@ -41,22 +41,11 @@ TEST_CASE("BDL wire operational domain computation", "[compute-operational-ratio
 
     const sidb_100_cell_clk_lyt_siqad lat{lyt};
 
-    sidb_simulation_parameters sim_params{};
-    sim_params.base = 2;
+    const sidb_simulation_parameters sim_params{.base = 2};
 
-    operational_domain_params op_domain_params{};
-    op_domain_params.operational_params.simulation_parameters = sim_params;
-    op_domain_params.sweep_dimensions = {{sweep_parameter::EPSILON_R}, {sweep_parameter::LAMBDA_TF}};
-
-    // set x-dimension
-    op_domain_params.sweep_dimensions[0].min  = 5.5;
-    op_domain_params.sweep_dimensions[0].max  = 5.5;
-    op_domain_params.sweep_dimensions[0].step = 0.1;
-
-    // set y-dimension
-    op_domain_params.sweep_dimensions[1].min  = 5.0;
-    op_domain_params.sweep_dimensions[1].max  = 5.0;
-    op_domain_params.sweep_dimensions[1].step = 0.1;
+    operational_domain_params op_domain_params{
+        .operational_params = {.simulation_parameters = sim_params},
+        .sweep_dimensions = {{sweep_parameter::EPSILON_R, 5.5, 5.5, 0.1}, {sweep_parameter::LAMBDA_TF, 5.0, 5.0, 0.1}}};
 
     SECTION("Operational domain with one parameter point")
     {
@@ -98,29 +87,19 @@ TEST_CASE("SiQAD NAND gate", "[compute-operational-ratio]")
 {
     const auto lyt = blueprints::siqad_nand_gate<sidb_100_cell_clk_lyt_siqad>();
 
-    sidb_simulation_parameters sim_params{};
-    sim_params.base     = 2;
-    sim_params.mu_minus = -0.28;
+    const sidb_simulation_parameters sim_params{.mu_minus = -0.28, .base = 2};
 
-    operational_domain_params op_domain_params{};
-    op_domain_params.operational_params.simulation_parameters = sim_params;
-    op_domain_params.operational_params.input_bdl_iterator_params.input_bdl_config =
-        bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED;
-    op_domain_params.sweep_dimensions = {{sweep_parameter::EPSILON_R}, {sweep_parameter::LAMBDA_TF}};
-    op_domain_params.operational_params.strategy_to_analyze_operational_status =
-        is_operational_params::operational_analysis_strategy::FILTER_THEN_SIMULATION;
-    op_domain_params.operational_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
-    op_domain_params.operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance = 1.5;
-
-    // set x-dimension
-    op_domain_params.sweep_dimensions[0].min  = 2.0;
-    op_domain_params.sweep_dimensions[0].max  = 10.0;
-    op_domain_params.sweep_dimensions[0].step = 0.1;
-
-    // set y-dimension
-    op_domain_params.sweep_dimensions[1].min  = 2.0;
-    op_domain_params.sweep_dimensions[1].max  = 10.0;
-    op_domain_params.sweep_dimensions[1].step = 0.1;
+    const operational_domain_params op_domain_params{
+        .operational_params = {.simulation_parameters = sim_params,
+                               .input_bdl_iterator_params =
+                                   {.bdl_wire_params = {.threshold_bdl_interdistance = 1.5},
+                                    .input_bdl_config =
+                                        bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED},
+                               .op_condition = is_operational_params::operational_condition::REJECT_KINKS,
+                               .strategy_to_analyze_operational_status =
+                                   is_operational_params::operational_analysis_strategy::FILTER_THEN_SIMULATION},
+        .sweep_dimensions   = {{sweep_parameter::EPSILON_R, 2.0, 10.0, 0.1},
+                               {sweep_parameter::LAMBDA_TF, 2.0, 10.0, 0.1}}};
 
     operational_domain_ratio_params op_ratio_params{op_domain_params};
 
@@ -147,22 +126,11 @@ TEST_CASE("Bestagon AND gate", "[compute-operational-ratio]")
 {
     const auto lyt = blueprints::bestagon_and_gate<sidb_100_cell_clk_lyt_siqad>();
 
-    sidb_simulation_parameters sim_params{};
-    sim_params.base = 2;
+    const sidb_simulation_parameters sim_params{.base = 2};
 
-    operational_domain_params op_domain_params{};
-    op_domain_params.operational_params.simulation_parameters = sim_params;
-    op_domain_params.sweep_dimensions = {{sweep_parameter::EPSILON_R}, {sweep_parameter::LAMBDA_TF}};
-
-    // set x-dimension
-    op_domain_params.sweep_dimensions[0].min  = 5.0;
-    op_domain_params.sweep_dimensions[0].max  = 6.0;
-    op_domain_params.sweep_dimensions[0].step = 0.1;
-
-    // set y-dimension
-    op_domain_params.sweep_dimensions[1].min  = 5.0;
-    op_domain_params.sweep_dimensions[1].max  = 6.0;
-    op_domain_params.sweep_dimensions[1].step = 0.1;
+    operational_domain_params op_domain_params{
+        .operational_params = {.simulation_parameters = sim_params},
+        .sweep_dimensions = {{sweep_parameter::EPSILON_R, 5.0, 6.0, 0.1}, {sweep_parameter::LAMBDA_TF, 5.0, 6.0, 0.1}}};
 
     const auto z_dimension = operational_domain_value_range{sweep_parameter::MU_MINUS, -0.32, -0.32, 0.01};
 
