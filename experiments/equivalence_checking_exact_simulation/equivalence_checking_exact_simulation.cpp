@@ -91,8 +91,8 @@ int main()  // NOLINT
                     }
 
 #if (FICTION_ALGLIB_ENABLED)
-                    clustercomplete_params<cell<sidb_100_cell_clk_lyt>> cc_params{params};
-                    cc_params.available_threads = 1;
+                    const clustercomplete_params<cell<sidb_100_cell_clk_lyt>> cc_params{.simulation_parameters = params,
+                                                                                        .available_threads     = 1};
 
                     auto result_clustercomplete = clustercomplete(lyt, cc_params);
 
