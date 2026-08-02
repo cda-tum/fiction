@@ -138,6 +138,9 @@ using enum color;
 color c = green;   // instead of color::green
 ```
 
+**Caveat: do not use.** g++-10 (in this project's CI compiler matrix) does not implement `using enum` at
+all — GCC only added support starting with GCC 11 — and rejects it with a hard parse error, not a warning.
+Keep enumerators explicitly qualified (`color::green`) instead.
 <https://en.cppreference.com/w/cpp/language/enum.html#using-enum>
 
 ---
@@ -284,6 +287,14 @@ for (int x : v | std::views::filter(pred) | std::views::transform(f)) { ... }
 
 High-value, low-risk: replace `algo(c.begin(), c.end(), ...)` with `std::ranges::algo(c, ...)`
 wherever a full-container call is being made.
+
+**Caveat**: Clang <16 combined with libstdc++ >=12 (e.g. clang++-14/15 in this project's CI matrix) has a
+known concepts-checking bug that breaks `std::ranges::shuffle`/`rotate`/`find` (and likely other
+constrained algorithms routed through `std::ranges::subrange`) on `std::vector<CustomType>` — fails with
+"no matching function for call to `__begin`" or "constraints not satisfied for alias template
+`sentinel_t`". `std::ranges::sort` and plain-container `std::ranges::find`/`std::ranges::for_each` calls
+have not shown this issue so far. If a new `std::ranges::` call on a vector of a project-defined type
+breaks clang++-14/15 in CI, revert just that call to the classic iterator-pair form.
 <https://en.cppreference.com/w/cpp/ranges.html>, <https://en.cppreference.com/w/cpp/algorithm/ranges.html>
 
 ### `std::format` (`<format>`)
