@@ -11,6 +11,7 @@
 #include <kitty/dynamic_truth_table.hpp>
 #include <kitty/hash.hpp>
 
+#include <algorithm>
 #include <array>
 #include <cstdint>
 #include <exception>
@@ -307,8 +308,7 @@ class fcn_gate_library
     {
         fcn_gate rev_cols = g;
 
-        std::for_each(std::begin(rev_cols), std::end(rev_cols),
-                      [](auto& i) { std::reverse(std::begin(i), std::end(i)); });
+        std::ranges::for_each(rev_cols, [](auto& i) { std::ranges::reverse(i); });
 
         return rev_cols;
     }
@@ -322,7 +322,7 @@ class fcn_gate_library
     {
         fcn_gate rev_rows = g;
 
-        std::reverse(std::begin(rev_rows), std::end(rev_rows));
+        std::ranges::reverse(rev_rows);
 
         return rev_rows;
     }
