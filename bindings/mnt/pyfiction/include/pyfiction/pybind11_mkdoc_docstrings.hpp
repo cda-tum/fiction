@@ -659,26 +659,11 @@ starting pair. The resulting last BDL pairs are stored in
 @note Assumes that `input_bdl_wires` and `last_bdl_for_each_wire` are
 accessible within the scope.)doc";
 
-static const char *__doc_fiction_bdl_input_iterator_get_current_input_index =
-R"doc(Returns the current input index.
-
-Returns:
-    The current input index.)doc";
-
 static const char *__doc_fiction_bdl_input_iterator_input_bdl_wires = R"doc(The detected input BDL wires.)doc";
 
 static const char *__doc_fiction_bdl_input_iterator_input_pairs = R"doc(The detected input BDL pairs.)doc";
 
 static const char *__doc_fiction_bdl_input_iterator_last_bdl_for_each_wire = R"doc(Last BDL pairs for each BDL wire.)doc";
-
-static const char *__doc_fiction_bdl_input_iterator_layout = R"doc(The layout to iterate over.)doc";
-
-static const char *__doc_fiction_bdl_input_iterator_num_input_pairs =
-R"doc(Returns the total number of input BDL pairs of the given SiDB gate
-layout.
-
-Returns:
-    The number of input BDL pairs.)doc";
 
 static const char *__doc_fiction_bdl_input_iterator_num_inputs = R"doc(The amount of input BDL pairs.)doc";
 
@@ -731,28 +716,6 @@ Returns:
     `true` if the current input index is equal to `m`, `false`
     otherwise.)doc";
 
-static const char *__doc_fiction_bdl_input_iterator_operator_ge =
-R"doc(Greater-or-equal-than operator. Compares the current input index with
-the given integer.
-
-Parameter ``m``:
-    Integer to compare with.
-
-Returns:
-    `true` if the current input index is greater than or equal to `m`,
-    `false` otherwise.)doc";
-
-static const char *__doc_fiction_bdl_input_iterator_operator_gt =
-R"doc(Greater-than operator. Compares the current input index with the given
-integer.
-
-Parameter ``m``:
-    Integer to compare with.
-
-Returns:
-    `true` if the current input index is greater than `m`, `false`
-    otherwise.)doc";
-
 static const char *__doc_fiction_bdl_input_iterator_operator_iadd =
 R"doc(Addition assignment operator. Sets a next input state.
 
@@ -783,45 +746,12 @@ Parameter ``m``:
 Returns:
     Reference to `this`.)doc";
 
-static const char *__doc_fiction_bdl_input_iterator_operator_le =
-R"doc(Less-or-equal-than operator. Compares the current input index with the
-given integer.
-
-Parameter ``m``:
-    Integer to compare with.
-
-Returns:
-    `true` if the current input index is less than or equal to `m`,
-    `false` otherwise.)doc";
-
-static const char *__doc_fiction_bdl_input_iterator_operator_lt =
-R"doc(Less-than operator. Compares the current input index with the given
-integer.
-
-Parameter ``m``:
-    Integer to compare with.
-
-Returns:
-    `true` if the current input index is less than `m`, `false`
-    otherwise.)doc";
-
 static const char *__doc_fiction_bdl_input_iterator_operator_mul =
 R"doc(Dereference operator. Returns a reference to the layout with the
 current input state.
 
 Returns:
     Reference to the current layout.)doc";
-
-static const char *__doc_fiction_bdl_input_iterator_operator_ne =
-R"doc(Inequality operator. Compares the current input index with the given
-integer.
-
-Parameter ``m``:
-    Integer to compare with.
-
-Returns:
-    `true` if the current input index is not equal to `m`, `false`
-    otherwise.)doc";
 
 static const char *__doc_fiction_bdl_input_iterator_operator_sub =
 R"doc(Subtraction operator. Computes the input state of the current iterator
@@ -4282,70 +4212,6 @@ Parameter ``other``:
 
 Returns:
     Sum of both coordinates.)doc";
-
-static const char *__doc_fiction_cube_coord_t_operator_eq =
-R"doc(Compares against another coordinate for equality. Respects the dead
-indicator.
-
-Parameter ``other``:
-    Right-hand side coordinate.
-
-Returns:
-    `true` iff both coordinates are identical.)doc";
-
-static const char *__doc_fiction_cube_coord_t_operator_ge =
-R"doc(Determine whether this coordinate is "greater than or equal to"
-another one. This is the case if this one is not "less than" the
-other.
-
-Parameter ``other``:
-    Right-hand side coordinate.
-
-Returns:
-    `true` iff this coordinate is "greater than or equal to" the other
-    coordinate.)doc";
-
-static const char *__doc_fiction_cube_coord_t_operator_gt =
-R"doc(Determine whether this coordinate is "greater than" another one. This
-is the case if the other one is "less than".
-
-Parameter ``other``:
-    Right-hand side coordinate.
-
-Returns:
-    `true` iff this coordinate is "greater than" the other coordinate.)doc";
-
-static const char *__doc_fiction_cube_coord_t_operator_le =
-R"doc(Determine whether this coordinate is "less than or equal to" another
-one. This is the case if this one is not "greater than" the other.
-
-Parameter ``other``:
-    Right-hand side coordinate.
-
-Returns:
-    `true` iff this coordinate is "less than or equal to" the other
-    coordinate.)doc";
-
-static const char *__doc_fiction_cube_coord_t_operator_lt =
-R"doc(Determine whether this coordinate is "less than" another one. This is
-the case if z is smaller, or if z is equal but y is smaller, or if z
-and y are equal but x is smaller.
-
-Parameter ``other``:
-    Right-hand side coordinate.
-
-Returns:
-    `true` iff this coordinate is "less than" the other coordinate.)doc";
-
-static const char *__doc_fiction_cube_coord_t_operator_ne =
-R"doc(Compares against another coordinate for inequality. Respects the dead
-indicator.
-
-Parameter ``other``:
-    Right-hand side coordinate.
-
-Returns:
-    `true` iff both coordinates are not identical.)doc";
 
 static const char *__doc_fiction_cube_coord_t_operator_sub =
 R"doc(Subtracts another coordinate from this one and returns the result.
@@ -9593,33 +9459,6 @@ static const char *__doc_fiction_detail_operational_domain_impl_step_point = R"d
 
 static const char *__doc_fiction_detail_operational_domain_impl_step_point_2 = R"doc(Forward-declare step_point.)doc";
 
-static const char *__doc_fiction_detail_operational_domain_impl_step_point_operator_eq =
-R"doc(Equality operator.
-
-Parameter ``other``:
-    Other step point to compare with.
-
-Returns:
-    `true` iff the step points are equal.)doc";
-
-static const char *__doc_fiction_detail_operational_domain_impl_step_point_operator_lt =
-R"doc(Less than operator.
-
-Parameter ``other``:
-    Other step point to compare with.
-
-Returns:
-    `true` if this step point is less than to the other.)doc";
-
-static const char *__doc_fiction_detail_operational_domain_impl_step_point_operator_ne =
-R"doc(Inequality operator.
-
-Parameter ``other``:
-    Other step point to compare with.
-
-Returns:
-    `true` iff the step points are not equal.)doc";
-
 static const char *__doc_fiction_detail_operational_domain_impl_step_point_step_point = R"doc(Standard default constructor.)doc";
 
 static const char *__doc_fiction_detail_operational_domain_impl_step_point_step_point_2 =
@@ -14505,44 +14344,6 @@ decimal numbers starting from the given `start` number.
 Parameter ``start``:
     The starting decimal number for the iterator.)doc";
 
-static const char *__doc_fiction_gray_code_iterator_operator_add =
-R"doc(Addition operator. Computes the Gray code of the current iterator plus
-the given integer.
-
-Parameter ``m``:
-    The amount of Gray codes to skip.
-
-Returns:
-    Iterator of the current iterator plus the given integer.)doc";
-
-static const char *__doc_fiction_gray_code_iterator_operator_array =
-R"doc(Subscript operator. Returns the Gray code at a specific position in
-the iteration range.
-
-Parameter ``index``:
-    The position in the iteration range.
-
-Returns:
-    The Gray code at the specified position.)doc";
-
-static const char *__doc_fiction_gray_code_iterator_operator_assign =
-R"doc(Assignment operator. Sets the current number to the given integer.
-
-Parameter ``m``:
-    The number to set.)doc";
-
-static const char *__doc_fiction_gray_code_iterator_operator_dec =
-R"doc(Prefix decrement operator. Sets the previous Gray code.
-
-Returns:
-    Reference to `this`.)doc";
-
-static const char *__doc_fiction_gray_code_iterator_operator_dec_2 =
-R"doc(Postfix decrement operator. Sets the previous Gray Code.
-
-Returns:
-    Copy of `this` before decrementing.)doc";
-
 static const char *__doc_fiction_gray_code_iterator_operator_eq =
 R"doc(Equality comparison operator. Compares the current iterator with
 another iterator.
@@ -14554,46 +14355,6 @@ Returns:
     `true` if the current iterator is equal to the other iterator,
     `false` otherwise.)doc";
 
-static const char *__doc_fiction_gray_code_iterator_operator_eq_2 =
-R"doc(Equality operator. Compares the current number with the given integer.
-
-Parameter ``m``:
-    Integer to compare with.
-
-Returns:
-    `true` if the current number is equal to `m`, `false` otherwise.)doc";
-
-static const char *__doc_fiction_gray_code_iterator_operator_ge =
-R"doc(Greater-or-equal-than operator. Compares the current number with the
-given integer.
-
-Parameter ``m``:
-    Integer to compare with.
-
-Returns:
-    `true` if the current number is greater than or equal to `m`,
-    `false` otherwise.)doc";
-
-static const char *__doc_fiction_gray_code_iterator_operator_gt =
-R"doc(Greater-than operator. Compares the current number with the given
-integer.
-
-Parameter ``m``:
-    Integer to compare with.
-
-Returns:
-    `true` if the current number is greater than `m`, `false`
-    otherwise.)doc";
-
-static const char *__doc_fiction_gray_code_iterator_operator_iadd =
-R"doc(Addition assignment operator. Iterator is increased by given number.
-
-Parameter ``m``:
-    The amount of Gray codes to skip.
-
-Returns:
-    Reference to `this`.)doc";
-
 static const char *__doc_fiction_gray_code_iterator_operator_inc =
 R"doc(Prefix increment operator. Sets the number and the corresponding Gray
 code.
@@ -14601,120 +14362,12 @@ code.
 Returns:
     Reference to `this`.)doc";
 
-static const char *__doc_fiction_gray_code_iterator_operator_inc_2 =
-R"doc(Postfix increment operator. Sets the next Gray Code.
-
-Returns:
-    Copy of `this` before incrementing.)doc";
-
-static const char *__doc_fiction_gray_code_iterator_operator_isub =
-R"doc(Subtraction assignment operator. Sets a previous Gray code.
-
-Parameter ``m``:
-    The amount of Gray codes to skip.
-
-Returns:
-    Reference to `this`.)doc";
-
-static const char *__doc_fiction_gray_code_iterator_operator_le =
-R"doc(Less-than or equal-to comparison operator. Compares the current
-iterator with another iterator.
-
-Parameter ``other``:
-    The iterator to compare with.
-
-Returns:
-    `true` if the current iterator is less than or equal to the other
-    iterator, `false` otherwise.)doc";
-
-static const char *__doc_fiction_gray_code_iterator_operator_le_2 =
-R"doc(Less-or-equal-than operator. Compares the current number with the
-given integer.
-
-Parameter ``m``:
-    Integer to compare with.
-
-Returns:
-    `true` if the current number is less than or equal to `m`, `false`
-    otherwise.)doc";
-
-static const char *__doc_fiction_gray_code_iterator_operator_lt =
-R"doc(Less-than comparison operator. Compares the current iterator with
-another iterator.
-
-Parameter ``other``:
-    The iterator to compare with.
-
-Returns:
-    `true` if the current iterator is less than the other iterator,
-    `false` otherwise.)doc";
-
-static const char *__doc_fiction_gray_code_iterator_operator_lt_2 =
-R"doc(Less-than operator. Compares the current number with the given
-integer.
-
-Parameter ``m``:
-    Integer to compare with.
-
-Returns:
-    `true` if the current number is less than `m`, `false` otherwise.)doc";
-
 static const char *__doc_fiction_gray_code_iterator_operator_mul =
 R"doc(Dereference operator. Returns a reference to the Gray code of the
 current iteration.
 
 Returns:
     Reference to the current Gray code.)doc";
-
-static const char *__doc_fiction_gray_code_iterator_operator_ne =
-R"doc(Inequality comparison operator. Compares the current iterator with
-another iterator.
-
-Parameter ``other``:
-    The iterator to compare with.
-
-Returns:
-    `true` if the current iterator is not equal to the other iterator,
-    `false` otherwise.)doc";
-
-static const char *__doc_fiction_gray_code_iterator_operator_ne_2 =
-R"doc(Inequality operator. Compares the current number with the given
-integer.
-
-Parameter ``m``:
-    Integer to compare with.
-
-Returns:
-    `true` if the current number is not equal to `m`, `false`
-    otherwise.)doc";
-
-static const char *__doc_fiction_gray_code_iterator_operator_sub =
-R"doc(Subtraction operator to calculate the difference between two
-gray_code_iterators.
-
-This operator calculates the difference between the current iterator
-and another gray_code_iterator provided as input. The result is
-returned as an int64_t representing the number of positions between
-the iterators.
-
-Parameter ``other``:
-    The gray_code_iterator to subtract from the current iterator.
-
-Returns:
-    The difference between the current iterator and the input iterator
-    as int64_t.)doc";
-
-static const char *__doc_fiction_gray_code_iterator_operator_sub_2 =
-R"doc(Subtraction operator. Computes the Gray code of the current iterator
-minus the given integer.
-
-Parameter ``m``:
-    The amount of Gray codes to skip.
-
-Returns:
-    Iterator of the current iterator minus the given integer.)doc";
-
-static const char *__doc_fiction_gray_code_iterator_start_number = R"doc(Start number of the iteration.)doc";
 
 static const char *__doc_fiction_ground_state_space =
 R"doc(The purely constructive *Ground State Space* algorithm is the key
@@ -18495,24 +18148,6 @@ static const char *__doc_fiction_port_direction_cardinal_WEST = R"doc(West direc
 
 static const char *__doc_fiction_port_direction_dir = R"doc(Direction.)doc";
 
-static const char *__doc_fiction_port_direction_operator_eq =
-R"doc(Comparator for equality tests.
-
-Parameter ``p``:
-    Port to compare to.
-
-Returns:
-    `true` iff this port is equal to given port `p`.)doc";
-
-static const char *__doc_fiction_port_direction_operator_lt =
-R"doc(Comparator for set insertion.
-
-Parameter ``p``:
-    Port to compare to.
-
-Returns:
-    `true` iff this port goes before `p` in set.)doc";
-
 static const char *__doc_fiction_port_direction_pi = R"doc(Primary input port.)doc";
 
 static const char *__doc_fiction_port_direction_po = R"doc(Primary output port.)doc";
@@ -18579,24 +18214,6 @@ static const char *__doc_fiction_port_list_port_list = R"doc(Default constructor
 static const char *__doc_fiction_port_list_port_list_2 = R"doc(Standard constructor.)doc";
 
 static const char *__doc_fiction_port_position = R"doc(A port position is a relative location of a cell within a tile.)doc";
-
-static const char *__doc_fiction_port_position_operator_eq =
-R"doc(Comparator for equality tests.
-
-Parameter ``p``:
-    Port to compare to.
-
-Returns:
-    `true` iff this port is equal to given port `p`.)doc";
-
-static const char *__doc_fiction_port_position_operator_lt =
-R"doc(Comparator for set insertion.
-
-Parameter ``p``:
-    Port to compare to.
-
-Returns:
-    `true` iff this port goes before `p` in set.)doc";
 
 static const char *__doc_fiction_port_position_pi = R"doc(Primary input port.)doc";
 
@@ -20613,14 +20230,6 @@ static const char *__doc_fiction_sidb_defect_operator_eq =
 R"doc(This operator compares two `sidb_defect` instances for equality. It
 checks if the `type`, `charge`, `epsilon_r`, and `lambda_tf` members
 of the two instances are equal.
-
-Parameter ``rhs``:
-    `sidb_defect` instance to compare against.)doc";
-
-static const char *__doc_fiction_sidb_defect_operator_ne =
-R"doc(This operator compares two `sidb_defect` instances for inequality. It
-uses the `operator==` to check if the two instances are equal and
-returns the negation of the result.
 
 Parameter ``rhs``:
     `sidb_defect` instance to compare against.)doc";
@@ -23693,11 +23302,11 @@ static const char *__doc_fmt_formatter_parse = R"doc()doc";
 
 static const char *__doc_fmt_formatter_parse_2 = R"doc()doc";
 
-static const char *__doc_fmt_unnamed_struct_at_include_fiction_layouts_coordinates_hpp_1090_8 = R"doc()doc";
+static const char *__doc_fmt_unnamed_struct_at_include_fiction_layouts_coordinates_hpp_1015_8 = R"doc()doc";
 
-static const char *__doc_fmt_unnamed_struct_at_include_fiction_layouts_coordinates_hpp_1106_8 = R"doc()doc";
+static const char *__doc_fmt_unnamed_struct_at_include_fiction_layouts_coordinates_hpp_1031_8 = R"doc()doc";
 
-static const char *__doc_fmt_unnamed_struct_at_include_fiction_technology_cell_ports_hpp_291_8 = R"doc()doc";
+static const char *__doc_fmt_unnamed_struct_at_include_fiction_technology_cell_ports_hpp_292_8 = R"doc()doc";
 
 static const char *__doc_mockturtle_detail_foreach_element_if_transform = R"doc()doc";
 
@@ -23715,15 +23324,6 @@ Parameter ``other``:
 
 Returns:
     `true` iff both sources and targets match.)doc";
-
-static const char *__doc_mockturtle_edge_operator_ne =
-R"doc(Inequality operator.
-
-Parameter ``other``:
-    Edge to compare to.
-
-Returns:
-    `true` iff this edge is not equal to other.)doc";
 
 static const char *__doc_mockturtle_edge_source = R"doc()doc";
 
